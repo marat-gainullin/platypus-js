@@ -99,6 +99,10 @@
     transition: left 0.5s, top 0.5s;
 }
 
+.window-panel{
+    transition: left 0.5s, top 0.5s;
+}
+
 .toggle-button-selected{
     border: 2px solid gray !important;
     background-color: gray !important;
@@ -496,6 +500,7 @@
 
 .window-content{
     transition: width 0.5s, height 0.5s;
+    background-color: white;
 }
 
 .content-decor{
