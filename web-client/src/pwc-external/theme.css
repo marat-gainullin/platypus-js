@@ -335,16 +335,17 @@
     overflow: hidden;
 }
 
-.grid-focused-cell{
-    background-color: gray;
+.grid-focused-cell {
+    outline: black solid 2px;
+    outline-offset: -2px;
 }
 
-.grid-focused-row{
-    background-color: lightgray;
+.grid-selected-row{
+    background-color: #e5e5e5;
 }
 
 .grid-hovered-row{
-    background-color: #c4e1fc;
+    background-color: #e0f0ff;
 }
 
 .grid-column-footer{

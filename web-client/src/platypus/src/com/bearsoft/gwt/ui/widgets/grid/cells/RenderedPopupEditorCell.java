@@ -65,7 +65,7 @@ public abstract class RenderedPopupEditorCell<T> extends AbstractPopupEditorCell
 	protected EditorCloser onEditorClose;
 
 	public RenderedPopupEditorCell(Widget aEditor) {
-		super(aEditor, BrowserEvents.CLICK, BrowserEvents.KEYDOWN, BrowserEvents.FOCUS, BrowserEvents.BLUR);
+		super(aEditor, BrowserEvents.DBLCLICK, BrowserEvents.KEYDOWN, BrowserEvents.FOCUS, BrowserEvents.BLUR);
 	}
 
 	public EditorCloser getOnEditorClose() {
@@ -113,7 +113,7 @@ public abstract class RenderedPopupEditorCell<T> extends AbstractPopupEditorCell
 							}
 							final Element table1 = table;
 							if (parent.getOwnerDocument() == Document.get()) {
-								startEditing(context, parent, value, viewData.updater, new Runnable() {
+								startEditing(context, parent, table1.getParentElement(), value, viewData.updater, new Runnable() {
 
 									public void run() {
 										if (onEditorClose != null && table1 != null) {
@@ -145,7 +145,7 @@ public abstract class RenderedPopupEditorCell<T> extends AbstractPopupEditorCell
 				String type = event.getType();
 				int keyCode = event.getKeyCode();
 				boolean editToggleKeys = BrowserEvents.KEYDOWN.equals(type) && (keyCode == KeyCodes.KEY_ENTER || keyCode == KeyCodes.KEY_F2);
-				if (BrowserEvents.CLICK.equals(type) || editToggleKeys) {
+				if (BrowserEvents.DBLCLICK.equals(type) || editToggleKeys) {
 					// Switch to edit mode.
 					ViewData<T> viewData = new ViewData<>(Document.get().createUniqueId(), valueUpdater);
 					setViewData(context.getKey(), viewData);

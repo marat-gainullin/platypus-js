@@ -63,6 +63,18 @@ public class GridSection<T> extends CellTable<T> {
 		return columnsPartners;
 	}
 
+	@Override
+	public void setKeyboardSelectedRow(int row, int subrow, boolean stealFocus) {
+		onBlur();// When selecting cells with shift key, focused cell is not cleared without such hack. 
+	    super.setKeyboardSelectedRow(row, subrow, stealFocus);
+	}
+	
+	@Override
+	public void setKeyboardSelectedColumn(int column, boolean stealFocus) {
+		onBlur();// When selecting cells with shift key, focused cell is not cleared without such hack. 
+	    super.setKeyboardSelectedColumn(column, stealFocus);
+	}
+	
 	public void setColumnsPartners(AbstractCellTable<T>[] aPartners) {
 		columnsPartners = aPartners;
 	}
@@ -189,17 +201,17 @@ public class GridSection<T> extends CellTable<T> {
 
 	public TableCellElement getCell(int aRow, int aCol) {
 		NodeList<TableRowElement> rows = getTableBodyElement().getRows();
-		if(aRow >= 0 && aRow < rows.getLength()){
+		if (aRow >= 0 && aRow < rows.getLength()) {
 			TableRowElement row = rows.getItem(aRow);
 			NodeList<TableCellElement> cells = row.getCells();
-			if(aCol >= 0 && aCol < cells.getLength()){
+			if (aCol >= 0 && aCol < cells.getLength()) {
 				return cells.getItem(aCol);
 			}
 		}
 		return null;
 	}
-	
-	public void focusCell(int aRow, int aCol){
+
+	public void focusCell(int aRow, int aCol) {
 		setKeyboardSelectedColumn(aCol);
 		setKeyboardSelectedRow(aRow);
 		setFocus(true);
