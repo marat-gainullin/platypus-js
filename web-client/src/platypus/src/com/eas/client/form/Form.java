@@ -231,7 +231,7 @@ public class Form {
 			window.setMinimizable(minimizable);
 			window.setHeaderVisible(!undecorated);
 			window.setShadow(!undecorated);
-			window.setBorders(!undecorated);
+			window.setBorders(false);//(!undecorated);
 			window.setDraggable(true);
 			window.setResizable(resizable);
 			window.setOnEsc(aModal);
