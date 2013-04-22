@@ -1,0 +1,13 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.bearsoft.org.netbeans.modules.form.bound;
+
+/**
+ *
+ * @author mg
+ */
+public interface ModelControlListener {
+    
+}

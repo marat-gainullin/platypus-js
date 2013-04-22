@@ -1,0 +1,12 @@
+/designer/build/
+/designer/javascript.guards/build/
+/designer/nbproject/private/
+/designer/javascript.guards/nbproject/private/
+/designer/PlatypusApplication/build/
+/designer/PlatypusApplication/nbproject/private/
+/designer/PlatypusConnections/build/
+/designer/PlatypusConnections/nbproject/private/
+/designer/PlatypusModules/build/
+/designer/PlatypusModules/nbproject/private/
+/application/lib/own/
+/application/lib/thirdparty/

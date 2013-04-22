@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE filesystem PUBLIC "-//NetBeans//DTD Filesystem 1.2//EN" "http://www.netbeans.org/dtds/filesystem-1_2.dtd">
+<filesystem>
+    <folder name="Actions">
+        <folder name="File">
+            <file name="com-eas-designer-application-query-actions-WhereUsedAction.instance_hidden"/>
+        </folder>
+    </folder>
+    <folder name="Editors">
+        <folder name="text">
+            <folder name="x-platypus-sql">       
+                <file name="com-eas-designer-application-indexer-FileIndexerFactory.instance"/>
+                <attr name="displayName" bundlevalue="com.eas.designer.application.query.lexer.Bundle#text/x-platypus-sql"/>
+                <folder name="CompletionProviders">
+                    <file name="com-eas-designer-application-query-completion-SqlCompletionProvider.instance"/>
+                </folder>
+                <folder name="FontsColors">
+                    <folder name="NetBeans">
+                        <folder name="Defaults">
+                            <file name="FontsAndColors.xml" url="lexer/FontsAndColors.xml"/>
+                        </folder>
+                    </folder>
+                </folder>
+                <file name="org-netbeans-modules-editor-NbEditorKit.instance"/>
+                <file name="language.instance">
+                    <attr name="instanceCreate" methodvalue="com.eas.designer.application.query.lexer.LexSqlTokenId.language"/>
+                    <attr name="instanceOf" stringvalue="org.netbeans.api.lexer.Language"/>
+                </file>
+            </folder>
+        </folder>
+    </folder>   
+    <folder name="OptionsDialog">
+        <folder name="PreviewExamples">
+            <folder name="text">
+                <file name="x-platypus-sql" url="lexer/PlatypusSqlExample.sql"/>
+            </folder>
+        </folder>
+    </folder>
+    <folder name="Loaders">
+        <folder name="text">
+            <folder name="x-platypus-sql">
+                <folder name="Actions">
+                    <file name="WhereUsedAction.shadow">
+                        <attr name="originalFile" stringvalue="Actions/File/WhereUsedAction.instance"/>
+                        <attr name="position" intvalue="1210"/>
+                    </file>
+                </folder>
+            </folder>
+        </folder>
+    </folder>
+</filesystem>

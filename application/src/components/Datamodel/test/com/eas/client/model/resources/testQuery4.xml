@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<query>
+    <sql>SELECT T_MTD_MDCHNGLOG_2.MDLOG_ID, T_MTD_MDCHNGLOG_2.OPDATE, T_MTD_MDCHNGLOG_2.OPSESSION_USER, T_MTD_MDCHNGLOG_2.OPHOST, T_MTD_MDCHNGLOG_2.OPTERMINAL, T_MTD_MDCHNGLOG_2.OPTYPE, T_MTD_MDCHNGLOG_2.OPOBJTYPE FROM EAS.MTD_MDCHNGLOG T_MTD_MDCHNGLOG_2</sql>
+    <outputFields/>
+    <mainTable>
+        <name>MTD_MDCHNGLOG</name>
+        <schema>EAS</schema>
+    </mainTable>
+    <datamodel>
+        <parametersEntity>
+            <userData Title.String="Parameters" entityHeight.Integer="200" entityIconified.Boolean="false" entityLocationX.Integer="8" entityLocationY.Integer="7" entityWidth.Integer="150"/>
+        </parametersEntity>
+        <entity entityId="124645078104169770" queryId="null" tableDbId="null" tableName="MTD_MDCHNGLOG" tableSchemaName="EAS">
+            <userData Title.String="Журнал изменений метаданных" entityHeight.Integer="301" entityIconified.Boolean="false" entityLocationX.Integer="246" entityLocationY.Integer="9" entityWidth.Integer="340" tableAlias.String="T_MTD_MDCHNGLOG_2"/>
+        </entity>
+    </datamodel>
+</query>

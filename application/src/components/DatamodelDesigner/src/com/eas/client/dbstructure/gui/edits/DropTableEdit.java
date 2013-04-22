@@ -1,0 +1,143 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.eas.client.dbstructure.gui.edits;
+
+import com.bearsoft.rowset.metadata.Fields;
+import com.bearsoft.rowset.metadata.ForeignKeySpec;
+import com.eas.client.Client;
+import com.eas.client.dbstructure.SqlActionsController;
+import com.eas.client.dbstructure.SqlActionsController.CreateConstraintAction;
+import com.eas.client.dbstructure.SqlActionsController.DefineTableAction;
+import com.eas.client.dbstructure.SqlActionsController.DropConstraintAction;
+import com.eas.client.dbstructure.SqlActionsController.DropTableAction;
+import com.eas.client.dbstructure.exceptions.DbActionException;
+import com.eas.client.model.Entity;
+import com.eas.client.model.Relation;
+import com.eas.client.model.dbscheme.FieldsEntity;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+/**
+ *
+ * @author mg
+ */
+public class DropTableEdit extends DbStructureEdit {
+
+    protected Fields fields = null;
+    protected List<ForeignKeySpec> inFks = new ArrayList<>();
+    protected List<ForeignKeySpec> outFks = new ArrayList<>();
+    protected String tableName = null;
+
+    public DropTableEdit(SqlActionsController aSqlController, String aTableName, Fields aFields, FieldsEntity tableEntity) {
+        super(aSqlController);
+        tableName = aTableName;
+        fields = new Fields(aFields);
+        extractInFks(tableEntity);
+        extractOutFks(tableEntity);
+    }
+
+    @Override
+    protected void doUndoWork() throws Exception {
+        createTable();
+        createConstraints(inFks);
+        createConstraints(outFks);
+    }
+
+    @Override
+    protected void doRedoWork() throws Exception {
+        dropConstraints(inFks);
+        dropConstraints(outFks);
+        dropTable();
+    }
+
+    protected void dropTable() throws Exception {
+        DropTableAction laction = sqlController.createDropTableAction(tableName);
+        if (!laction.execute()) {
+            DbActionException ex = new DbActionException(laction.getErrorString());
+            ex.setParam1(tableName);
+            throw ex;
+        }
+    }
+
+    protected void dropConstraints(List<ForeignKeySpec> fks) throws Exception {
+        for (ForeignKeySpec fk : fks) {
+            DropConstraintAction caction = sqlController.createDropConstraintAction(fk);
+            if (!caction.execute()) {
+                DbActionException ex = new DbActionException(caction.getErrorString());
+                ex.setParam1(fk.getCName());
+                throw ex;
+            }
+        }
+    }
+
+    private static void extractFks(Set<Relation<FieldsEntity>> rels, List<ForeignKeySpec> fks, boolean allowSelfReferences) {
+        if (rels != null) {
+            for (Relation<FieldsEntity> r : rels) {
+                if (r != null) {
+                    FieldsEntity lEntity = r.getLeftEntity();
+                    FieldsEntity rEntity = r.getRightEntity();
+                    if(allowSelfReferences || lEntity != rEntity)
+                    {
+                        ForeignKeySpec fkSpec = new ForeignKeySpec(lEntity.getTableSchemaName(), lEntity.getTableName(), r.getLeftField(), r.getFkName(), r.getFkUpdateRule(), r.getFkDeleteRule(), r.isFkDeferrable(), rEntity.getTableSchemaName(), rEntity.getTableName(), r.getRightField(), null);
+                        fks.add(fkSpec);
+                    }
+                }
+            }
+        }
+    }
+
+    private void createConstraints(List<ForeignKeySpec> fks) throws DbActionException {
+        for (ForeignKeySpec fk : fks) {
+            CreateConstraintAction laction = sqlController.createCreateConstraintAction(fk);
+            if (!laction.execute()) {
+                DbActionException ex = new DbActionException(laction.getErrorString());
+                ex.setParam1(fk.getCName());
+                throw ex;
+            }
+        }
+    }
+
+    private void createTable() throws DbActionException {
+        DefineTableAction laction = sqlController.createDefineTableAction(tableName, fields);
+        if (!laction.execute()) {
+            DbActionException ex = new DbActionException(laction.getErrorString());
+            ex.setParam1(tableName);
+            throw ex;
+        }
+    }
+
+    private void extractInFks(FieldsEntity aEntity) {
+        if (aEntity != null) {
+            Set<Relation<FieldsEntity>> rels = aEntity.getInRelations();
+            List<ForeignKeySpec> fks = inFks;
+            extractFks(rels, fks, false);
+        }
+    }
+
+    private void extractOutFks(FieldsEntity aEntity) {
+        if (aEntity != null) {
+            Set<Relation<FieldsEntity>> rels = aEntity.getOutRelations();
+            List<ForeignKeySpec> fks = outFks;
+            extractFks(rels, fks, true);
+        }
+    }
+
+    @Override
+    protected void clearTablesCache() {
+        try {
+            Client client = sqlController.getClient();
+            client.dbTableChanged(sqlController.getDbId(), sqlController.getSchema(), tableName);
+            for(ForeignKeySpec fk:inFks)
+            {
+                client.dbTableChanged(sqlController.getDbId(), sqlController.getSchema(), fk.getTable());
+            }
+        } catch (Exception ex) {
+            Logger.getLogger(DropTableEdit.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+}

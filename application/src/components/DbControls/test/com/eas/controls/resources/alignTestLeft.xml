@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<layout name="Form">
+    <widget name="jButton2" parent="Form" text="jButton2" type="ButtonDesignInfo"/>
+    <widget name="jButton1" parent="Form" text="jButton1" type="ButtonDesignInfo"/>
+    <widget name="jToggleButton1" parent="Form" text="jToggleButton1" type="ToggleButtonDesignInfo"/>
+    <layout type="GroupLayoutDesignInfo">
+        <horizontalGroup childrenAlignment="LEADING" parallel="true" resizeable="true">
+            <subgroup alignment="LEADING" resizeable="true">
+                <subgroup max="-2" min="-2" pref="78"/>
+                <subgroup childrenAlignment="LEADING" parallel="true" resizeable="true">
+                    <subgroup alignment="LEADING" component="jButton2" max="-2" min="-2"/>
+                    <subgroup alignment="LEADING" component="jButton1" max="-2" min="-2"/>
+                    <subgroup alignment="LEADING" component="jToggleButton1" max="-2" min="-2"/>
+                </subgroup>
+                <subgroup max="32767" pref="56" resizeable="true"/>
+            </subgroup>
+        </horizontalGroup>
+        <verticalGroup childrenAlignment="LEADING" parallel="true" resizeable="true">
+            <subgroup alignment="LEADING" resizeable="true">
+                <subgroup max="-2" min="-2" pref="54"/>
+                <subgroup component="jToggleButton1" max="-2" min="-2" pref="55"/>
+                <subgroup max="-2" min="-2" pref="29"/>
+                <subgroup component="jButton1" max="-2" min="-2"/>
+                <subgroup max="-2" min="-2" pref="31"/>
+                <subgroup component="jButton2" max="-2" min="-2" pref="42"/>
+                <subgroup max="32767" pref="56" resizeable="true"/>
+            </subgroup>
+        </verticalGroup>
+    </layout>
+</layout>

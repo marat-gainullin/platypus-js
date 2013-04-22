@@ -1,0 +1,717 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+/*
+ * LoginFrame.java
+ *
+ * Created on Jun 25, 2009, 11:19:43 AM
+ */
+package com.eas.client.login;
+
+import com.eas.client.AppClient;
+import com.eas.client.Client;
+import com.eas.client.ClientConstants;
+import com.eas.client.ClientFactory;
+import com.eas.client.settings.DbConnectionSettings;
+import com.eas.client.settings.EasSettings;
+import com.eas.util.exceptions.ExceptionListenerSupport;
+import com.eas.util.exceptions.ExceptionThrower;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import java.beans.ExceptionListener;
+import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.prefs.BackingStoreException;
+import java.util.prefs.Preferences;
+import javax.security.auth.login.FailedLoginException;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.JOptionPane;
+import javax.swing.KeyStroke;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+
+/**
+ *
+ * @author pk
+ */
+public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower {
+
+    /** A return status code - returned if Cancel button has been pressed */
+    public static final int RET_CANCEL = 0;
+    /** A return status code - returned if OK button has been pressed */
+    public static final int RET_OK = 1;
+    private static final String CANCEL_ACTION_ID = "cancel";
+    private static final String LAST_LOGIN_USERNAME_PREFKEY = "lastLoginUserName";
+    private static final String OK_ACTION_ID = "ok";
+    private int returnStatus = RET_CANCEL;
+    private ExceptionListenerSupport exSupport = new ExceptionListenerSupport();
+    private LoginAction loginAction = new LoginAction();
+    private NewConnectionAction newConnectionAction = new NewConnectionAction();
+    private ModifyConnectionAction modifyConnectionAction = new ModifyConnectionAction();
+    private ToggleConnectionsVisibility toggleConnectionsVisibilityAction = new ToggleConnectionsVisibility();
+    public static final ResourceBundle bundle = ResourceBundle.getBundle("com/eas/client/login/Bundle");
+    private DeleteConnectionAction deleteConnectionAction = new DeleteConnectionAction();
+    private ConnectionsSelectionListener connectionsSelectionListener = new ConnectionsSelectionListener();
+    private ConnectionsListModel connectionsListModel;
+    private int connectionsPanelHeight;
+    private LoginCallback loginCallback;
+    private Client client;
+
+    /** Creates new form LoginFrame
+     * @param parent
+     * @param modal 
+     */
+    public LoginFrame(java.awt.Frame parent, boolean modal, LoginCallback aLoginCallback) throws Exception {
+        super(parent, modal);
+        loginCallback = aLoginCallback;
+        connectionsListModel = new ConnectionsListModel();
+        initComponents();
+        lblForgotPassword.setVisible(false);
+        getRootPane().setDefaultButton(btnOk);
+        tfUserName.setText(Preferences.userNodeForPackage(LoginFrame.class).get(LAST_LOGIN_USERNAME_PREFKEY, ""));
+        if (tfUserName.getText() != null && !tfUserName.getText().isEmpty()) {
+            tfPassword.requestFocus();
+        }
+        Action cancelAction = new AbstractAction() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                btnCancelActionPerformed(e);
+            }
+        };
+        tfUserName.getActionMap().put(OK_ACTION_ID, loginAction);
+        tfUserName.getActionMap().put(CANCEL_ACTION_ID, cancelAction);
+        tfPassword.getActionMap().put(OK_ACTION_ID, loginAction);
+        tfPassword.getActionMap().put(CANCEL_ACTION_ID, cancelAction);
+        tfUserName.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), OK_ACTION_ID);
+        tfUserName.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), CANCEL_ACTION_ID);
+        tfPassword.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), OK_ACTION_ID);
+        tfPassword.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), CANCEL_ACTION_ID);
+        lstConnections.setCellRenderer(connectionsListModel.getCellRenderer());
+        lstConnections.clearSelection();
+        lstConnections.addListSelectionListener(connectionsSelectionListener);
+        //connectionsSelectionListener.valueChanged(new ListSelectionEvent(this, lstConnections.getSelectedIndex(), lstConnections.getSelectedIndex(), false));
+        toggleConnectionsVisibilityAction.actionPerformed(null);
+    }
+
+    private void doClose(int retStatus) {
+        returnStatus = retStatus;
+        setVisible(false);
+        dispose();
+    }
+
+    public Client getClient() {
+        return client;
+    }
+
+    /** This method is called from within the constructor to
+     * initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is
+     * always regenerated by the Form Editor.
+     */
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+
+        pnlLogin = new javax.swing.JPanel();
+        pnlAppLogin = new javax.swing.JPanel();
+        tfUserName = new javax.swing.JTextField();
+        lblUserName = new javax.swing.JLabel();
+        tfPassword = new javax.swing.JPasswordField();
+        lblPassword = new javax.swing.JLabel();
+        checkRememberPassword = new javax.swing.JCheckBox();
+        lblForgotPassword = new javax.swing.JLabel();
+        pnlDbLogin = new javax.swing.JPanel();
+        lblDbUserName = new javax.swing.JLabel();
+        lblDbPassword = new javax.swing.JLabel();
+        tfDbUserName = new javax.swing.JTextField();
+        tfDbPassword = new javax.swing.JPasswordField();
+        checkDbRememberPassword = new javax.swing.JCheckBox();
+        pnlConnectionInfo = new javax.swing.JPanel();
+        lblConnections = new javax.swing.JLabel();
+        scrollConnections = new javax.swing.JScrollPane();
+        lstConnections = new javax.swing.JList();
+        btnNewConnection = new javax.swing.JButton();
+        btnDeleteConnection = new javax.swing.JButton();
+        btnModifyConnection = new javax.swing.JButton();
+        pnlBottom = new javax.swing.JPanel();
+        btnOk = new javax.swing.JButton();
+        btnCancel = new javax.swing.JButton();
+        btnToggleConnections = new javax.swing.JButton();
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle(bundle.getString("LoginDialog.title")); // NOI18N
+        setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        setIconImage(new javax.swing.ImageIcon(getClass().getResource("/com/eas/client/login/key.png")).getImage());
+        setLocationByPlatform(true);
+        setName("loginFrame"); // NOI18N
+        addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                formKeyTyped(evt);
+            }
+        });
+
+        lblUserName.setLabelFor(tfUserName);
+        lblUserName.setText(bundle.getString("LoginDialog.lblUserName.text")); // NOI18N
+
+        lblPassword.setLabelFor(tfPassword);
+        lblPassword.setText(bundle.getString("LoginDialog.lblPassword.text")); // NOI18N
+
+        checkRememberPassword.setText(bundle.getString("checkRememberPassword")); // NOI18N
+
+        lblForgotPassword.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        lblForgotPassword.setText(String.format("<html><u>%s</u>", bundle.getString("fogotPassword")));
+        lblForgotPassword.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        lblForgotPassword.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                lblForgotPasswordMouseClicked(evt);
+            }
+        });
+
+        javax.swing.GroupLayout pnlAppLoginLayout = new javax.swing.GroupLayout(pnlAppLogin);
+        pnlAppLogin.setLayout(pnlAppLoginLayout);
+        pnlAppLoginLayout.setHorizontalGroup(
+            pnlAppLoginLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlAppLoginLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(pnlAppLoginLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(pnlAppLoginLayout.createSequentialGroup()
+                        .addGroup(pnlAppLoginLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(lblPassword, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(lblUserName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(pnlAppLoginLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(tfUserName, javax.swing.GroupLayout.DEFAULT_SIZE, 177, Short.MAX_VALUE)
+                            .addComponent(tfPassword, javax.swing.GroupLayout.DEFAULT_SIZE, 177, Short.MAX_VALUE))
+                        .addContainerGap())
+                    .addGroup(pnlAppLoginLayout.createSequentialGroup()
+                        .addComponent(checkRememberPassword)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblForgotPassword, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGap(17, 17, 17))))
+        );
+        pnlAppLoginLayout.setVerticalGroup(
+            pnlAppLoginLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlAppLoginLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(pnlAppLoginLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblUserName)
+                    .addComponent(tfUserName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(pnlAppLoginLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblPassword)
+                    .addComponent(tfPassword, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(pnlAppLoginLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(lblForgotPassword)
+                    .addComponent(checkRememberPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 16, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(10, 10, 10))
+        );
+
+        lblDbUserName.setLabelFor(tfUserName);
+        lblDbUserName.setText(bundle.getString("LoginDialog.lblDbUserName.text")); // NOI18N
+
+        lblDbPassword.setLabelFor(tfPassword);
+        lblDbPassword.setText(bundle.getString("LoginDialog.lblDbPassword.text")); // NOI18N
+
+        tfDbUserName.setAutoscrolls(false);
+
+        tfDbPassword.setAutoscrolls(false);
+
+        checkDbRememberPassword.setText(bundle.getString("checkDbRememberPassword.text")); // NOI18N
+
+        javax.swing.GroupLayout pnlDbLoginLayout = new javax.swing.GroupLayout(pnlDbLogin);
+        pnlDbLogin.setLayout(pnlDbLoginLayout);
+        pnlDbLoginLayout.setHorizontalGroup(
+            pnlDbLoginLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlDbLoginLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(pnlDbLoginLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(checkDbRememberPassword, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 196, Short.MAX_VALUE)
+                    .addGroup(pnlDbLoginLayout.createSequentialGroup()
+                        .addGroup(pnlDbLoginLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(lblDbUserName, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(lblDbPassword))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(pnlDbLoginLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(tfDbPassword, javax.swing.GroupLayout.DEFAULT_SIZE, 140, Short.MAX_VALUE)
+                            .addComponent(tfDbUserName, javax.swing.GroupLayout.DEFAULT_SIZE, 140, Short.MAX_VALUE))))
+                .addContainerGap())
+        );
+        pnlDbLoginLayout.setVerticalGroup(
+            pnlDbLoginLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlDbLoginLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(pnlDbLoginLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblDbUserName)
+                    .addComponent(tfDbUserName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(pnlDbLoginLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(tfDbPassword, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblDbPassword))
+                .addGap(18, 18, 18)
+                .addComponent(checkDbRememberPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        javax.swing.GroupLayout pnlLoginLayout = new javax.swing.GroupLayout(pnlLogin);
+        pnlLogin.setLayout(pnlLoginLayout);
+        pnlLoginLayout.setHorizontalGroup(
+            pnlLoginLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlLoginLayout.createSequentialGroup()
+                .addComponent(pnlDbLogin, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(pnlAppLogin, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        pnlLoginLayout.setVerticalGroup(
+            pnlLoginLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(pnlAppLogin, javax.swing.GroupLayout.DEFAULT_SIZE, 101, Short.MAX_VALUE)
+            .addComponent(pnlDbLogin, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+
+        getContentPane().add(pnlLogin, java.awt.BorderLayout.NORTH);
+
+        lblConnections.setText(bundle.getString("LoginDialog.lblConnections.text")); // NOI18N
+
+        lstConnections.setModel(connectionsListModel);
+        scrollConnections.setViewportView(lstConnections);
+
+        btnNewConnection.setAction(newConnectionAction);
+        btnNewConnection.setText(bundle.getString("LoginDialog.btnNewConnection.text")); // NOI18N
+        btnNewConnection.setMargin(new java.awt.Insets(2, 2, 2, 2));
+
+        btnDeleteConnection.setAction(deleteConnectionAction);
+        btnDeleteConnection.setText(bundle.getString("LoginDialog.btnDeleteConnection.text")); // NOI18N
+        btnDeleteConnection.setMargin(new java.awt.Insets(2, 2, 2, 2));
+
+        btnModifyConnection.setAction(modifyConnectionAction);
+        btnModifyConnection.setText(bundle.getString("LoginDialog.btnModifyConnection.text")); // NOI18N
+        btnModifyConnection.setMargin(new java.awt.Insets(2, 2, 2, 2));
+
+        javax.swing.GroupLayout pnlConnectionInfoLayout = new javax.swing.GroupLayout(pnlConnectionInfo);
+        pnlConnectionInfo.setLayout(pnlConnectionInfoLayout);
+        pnlConnectionInfoLayout.setHorizontalGroup(
+            pnlConnectionInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlConnectionInfoLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(pnlConnectionInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(lblConnections)
+                    .addComponent(scrollConnections, javax.swing.GroupLayout.DEFAULT_SIZE, 372, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(pnlConnectionInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(btnNewConnection, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnDeleteConnection, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnModifyConnection, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 86, Short.MAX_VALUE))
+                .addContainerGap())
+        );
+        pnlConnectionInfoLayout.setVerticalGroup(
+            pnlConnectionInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlConnectionInfoLayout.createSequentialGroup()
+                .addComponent(lblConnections)
+                .addGroup(pnlConnectionInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(pnlConnectionInfoLayout.createSequentialGroup()
+                        .addGap(2, 2, 2)
+                        .addComponent(btnNewConnection)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnModifyConnection)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnDeleteConnection))
+                    .addGroup(pnlConnectionInfoLayout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(scrollConnections, javax.swing.GroupLayout.DEFAULT_SIZE, 150, Short.MAX_VALUE)))
+                .addContainerGap())
+        );
+
+        getContentPane().add(pnlConnectionInfo, java.awt.BorderLayout.CENTER);
+
+        btnOk.setAction(loginAction);
+        btnOk.setText(bundle.getString("Dialog.OKButton.text")); // NOI18N
+
+        btnCancel.setText(bundle.getString("Dialog.CancelButton.text")); // NOI18N
+        btnCancel.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCancelActionPerformed(evt);
+            }
+        });
+
+        btnToggleConnections.setAction(toggleConnectionsVisibilityAction);
+        btnToggleConnections.setText(">>>");
+
+        javax.swing.GroupLayout pnlBottomLayout = new javax.swing.GroupLayout(pnlBottom);
+        pnlBottom.setLayout(pnlBottomLayout);
+        pnlBottomLayout.setHorizontalGroup(
+            pnlBottomLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlBottomLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(btnToggleConnections, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 227, Short.MAX_VALUE)
+                .addComponent(btnOk, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnCancel, javax.swing.GroupLayout.PREFERRED_SIZE, 89, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+        );
+        pnlBottomLayout.setVerticalGroup(
+            pnlBottomLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlBottomLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(pnlBottomLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnCancel)
+                    .addComponent(btnToggleConnections)
+                    .addComponent(btnOk))
+                .addContainerGap())
+        );
+
+        getContentPane().add(pnlBottom, java.awt.BorderLayout.SOUTH);
+
+        pack();
+    }// </editor-fold>//GEN-END:initComponents
+
+    private void btnCancelActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_btnCancelActionPerformed
+    {//GEN-HEADEREND:event_btnCancelActionPerformed
+        doClose(RET_CANCEL);
+    }//GEN-LAST:event_btnCancelActionPerformed
+
+    private void formKeyTyped(java.awt.event.KeyEvent evt)//GEN-FIRST:event_formKeyTyped
+    {//GEN-HEADEREND:event_formKeyTyped
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
+            loginAction.actionPerformed(new ActionEvent(this, 0, null));
+        }
+        if (evt.getKeyCode() == KeyEvent.VK_ESCAPE) {
+            btnCancelActionPerformed(new ActionEvent(this, 0, null));
+        }
+    }//GEN-LAST:event_formKeyTyped
+
+    private void lblForgotPasswordMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblForgotPasswordMouseClicked
+        String userName = tfUserName.getText();
+        if (userName != null && !userName.isEmpty()) {
+            if (JOptionPane.showConfirmDialog(null, String.format(bundle.getString("tempPasswordWillBeSent"), userName), bundle.getString("fogotPassword"), JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) == JOptionPane.OK_OPTION) {               
+                if (!lstConnections.isSelectionEmpty()) {
+                    EasSettings settings = (EasSettings) lstConnections.getSelectedValue();
+                    if (!(settings instanceof DbConnectionSettings)) {
+                        try {
+                            Client tmpClient = ClientFactory.getInstance(settings);
+                            assert tmpClient instanceof AppClient;
+                            AppClient outHashClient = (AppClient) tmpClient;
+                            outHashClient.askOutHash(userName);
+                            outHashClient.shutdown();
+                            JOptionPane.showConfirmDialog(null, String.format(bundle.getString("tempPasswordHasBeenSent"), userName), bundle.getString("tempPassword"), JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE);
+                        } catch (Exception ex) {
+                            Logger.getLogger(LoginFrame.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
+                }
+            }
+        } else {
+            JOptionPane.showConfirmDialog(null, bundle.getString("enterUsername"), bundle.getString("fogotPassword"), JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE);
+        }
+    }//GEN-LAST:event_lblForgotPasswordMouseClicked
+
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String args[]) {
+        java.awt.EventQueue.invokeLater(new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    LoginFrame loginFrame = new LoginFrame(null, true, null);
+                    loginFrame.setVisible(true);
+                    int retVal = loginFrame.getReturnStatus();
+                    switch (retVal) {
+                        case RET_OK:
+                            System.out.println("OK");
+                            break;
+                        case RET_CANCEL:
+                            System.out.println("Cancel");
+                            break;
+                        default:
+                            System.out.printf("Unknown: %d\n", retVal);
+                            break;
+                    }
+                } catch (Exception ex) {
+                    Logger.getLogger(LoginFrame.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        });
+    }
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnCancel;
+    private javax.swing.JButton btnDeleteConnection;
+    private javax.swing.JButton btnModifyConnection;
+    private javax.swing.JButton btnNewConnection;
+    private javax.swing.JButton btnOk;
+    private javax.swing.JButton btnToggleConnections;
+    private javax.swing.JCheckBox checkDbRememberPassword;
+    private javax.swing.JCheckBox checkRememberPassword;
+    private javax.swing.JLabel lblConnections;
+    private javax.swing.JLabel lblDbPassword;
+    private javax.swing.JLabel lblDbUserName;
+    private javax.swing.JLabel lblForgotPassword;
+    private javax.swing.JLabel lblPassword;
+    private javax.swing.JLabel lblUserName;
+    private javax.swing.JList lstConnections;
+    private javax.swing.JPanel pnlAppLogin;
+    private javax.swing.JPanel pnlBottom;
+    private javax.swing.JPanel pnlConnectionInfo;
+    private javax.swing.JPanel pnlDbLogin;
+    private javax.swing.JPanel pnlLogin;
+    private javax.swing.JScrollPane scrollConnections;
+    private javax.swing.JPasswordField tfDbPassword;
+    private javax.swing.JTextField tfDbUserName;
+    private javax.swing.JPasswordField tfPassword;
+    private javax.swing.JTextField tfUserName;
+    // End of variables declaration//GEN-END:variables
+
+    /**
+     * @return the returnStatus
+     */
+    public int getReturnStatus() {
+        return returnStatus;
+    }
+
+    @Override
+    public void addExceptionListener(ExceptionListener l) {
+        exSupport.addExceptionListener(l);
+    }
+
+    @Override
+    public void removeExceptionListener(ExceptionListener l) {
+        exSupport.removeExceptionListener(l);
+    }
+
+    private boolean login() throws Exception {
+        if (!lstConnections.isSelectionEmpty()) {
+            EasSettings settings = (EasSettings) lstConnections.getSelectedValue();
+            return loginCallback.tryToLogin(settings, tfDbUserName.getText(), tfDbPassword.getPassword(), tfUserName.getText(), tfPassword.getPassword());
+        } else {
+            return false;
+        }
+    }
+
+    private void updatePreferences() {
+        try {
+            Preferences connectionsPref = Preferences.userRoot().node(ClientFactory.CONNECTIONS_SETTINGS_NODE);
+            connectionsPref.removeNode();
+            connectionsPref = Preferences.userRoot().node(ClientFactory.CONNECTIONS_SETTINGS_NODE);
+            for (int i = 0; i < connectionsListModel.getSize(); i++) {
+                EasSettings settings = (EasSettings) connectionsListModel.getElementAt(i);
+                if (settings.isEditable()) {
+                    String strIndex = String.valueOf(i);
+                    connectionsPref.node(strIndex).put(ClientFactory.CONNECTION_TITLE_SETTING, settings.getName() != null ? settings.getName() : "");
+                    connectionsPref.node(strIndex).put(ClientFactory.CONNECTION_URL_SETTING, settings.getUrl() != null ? settings.getUrl() : "");
+                    if (settings.getInfo() != null) {
+                        connectionsPref.node(strIndex).put(ClientFactory.CONNECTION_SCHEMA_SETTING, settings.getInfo().getProperty(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME, ""));
+                        connectionsPref.node(strIndex).put(ClientFactory.CONNECTION_USER_SETTING, settings.getInfo().getProperty(ClientConstants.DB_CONNECTION_USER_PROP_NAME, ""));
+                    }
+                }
+            }
+        } catch (BackingStoreException ex) {
+            exSupport.exceptionThrown(ex);
+        }
+    }
+
+    public void setSelectedConnectionIndex(int aIndex) {
+        lstConnections.setSelectedIndex(aIndex);
+    }
+
+    public int getSelectedConnectionIndex() {
+        return lstConnections.getSelectedIndex();
+    }
+
+    public void setDbPassword(String aPassword) {
+        tfDbPassword.setText(aPassword);
+        checkDbRememberPassword.setSelected(aPassword != null && !aPassword.isEmpty());
+    }
+
+    public void setUserPassword(String aPassword) {
+        tfPassword.setText(aPassword);
+        checkRememberPassword.setSelected(aPassword != null && !aPassword.isEmpty());
+    }
+
+    public String getDbPassword() {
+        if (checkDbRememberPassword.isSelected()) {
+            return new String(tfDbPassword.getPassword());
+        } else {
+            return null;
+        }
+    }
+
+    public String getUserPassword() {
+        if (checkRememberPassword.isSelected()) {
+            return new String(tfPassword.getPassword());
+        } else {
+            return null;
+        }
+    }
+
+    public void selectDefaultSettings() {
+        if (ClientFactory.getDefaultSettings() != null) {
+            lstConnections.setSelectedValue(ClientFactory.getDefaultSettings(), true);
+        }
+    }
+
+    private class LoginAction extends AbstractAction {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            try {
+                if (login()) {
+                    Preferences.userNodeForPackage(LoginFrame.class).put(LAST_LOGIN_USERNAME_PREFKEY, tfUserName.getText());
+                    doClose(RET_OK);
+                }
+            } catch (Exception ex) {
+                if (ex instanceof FailedLoginException) {
+                    Logger.getLogger(LoginFrame.class.getName()).log(Level.SEVERE, bundle.getString("LoginDialog.LoginFailedMessage"));
+                    JOptionPane.showMessageDialog(LoginFrame.this, bundle.getString("LoginDialog.LoginFailedMessage"), bundle.getString("LoginDialog.title"), JOptionPane.ERROR_MESSAGE);
+                } else {
+                    Logger.getLogger(LoginFrame.class.getName()).log(Level.SEVERE, "{0} ({1})", new Object[]{bundle.getString("LoginDialog.CannotLoginMessage"), ex.getLocalizedMessage()});
+                    JOptionPane.showMessageDialog(LoginFrame.this, bundle.getString("LoginDialog.CannotLoginMessage") + String.format(" (%s)", ex.getLocalizedMessage()), bundle.getString("LoginDialog.title"), JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        }
+    }
+
+    private class NewConnectionAction extends AbstractAction {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            try {
+                ConnectionSettingsDialog dlg = new ConnectionSettingsDialog(null, true);
+                dlg.setUrl("platypus://<host>:<port>");
+                dlg.setVisible(true);
+                if (dlg.getReturnStatus() == ConnectionSettingsDialog.RET_OK) {
+                    int saveIndex = lstConnections.getSelectedIndex();
+                    if (saveIndex < 0) {
+                        saveIndex = connectionsListModel.getSize();
+                    }
+                    String url = dlg.getUrl();
+                    String userName = dlg.getUserName();
+                    String name = dlg.getConnectionName();
+                    String schema = dlg.getSchema();
+                    EasSettings s = EasSettings.createInstance(url);
+                    if (s != null) {
+                        s.setUrl(url);
+                        if (name != null && !name.isEmpty()) {
+                            s.setName(name);
+                        }
+                        if (userName != null) {
+                            s.getInfo().setProperty("user", userName);
+                        }
+                        if (schema != null && !schema.isEmpty()) {
+                            s.getInfo().setProperty("schema", schema);
+                        }
+                        connectionsListModel.putElementAt(saveIndex, s);
+                        lstConnections.setSelectedIndex(saveIndex);
+                        updatePreferences();
+                        lstConnections.requestFocus();
+                    } else {
+                        JOptionPane.showMessageDialog(LoginFrame.this, bundle.getString("LoginDialog.NewConnectionFailedMessage"), bundle.getString("LoginDialog.title"), JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            } catch (Throwable t) {
+                assert exSupport != null;
+                exSupport.exceptionThrown(new Exception(t));
+            }
+        }
+    }
+
+    private class ModifyConnectionAction extends AbstractAction {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            try {
+                int selectedIndex = lstConnections.getSelectedIndex();
+                assert selectedIndex >= 0; //we won't be enabled otherwise
+                EasSettings settings = (EasSettings) connectionsListModel.getElementAt(selectedIndex);
+                ConnectionSettingsDialog dlg = new ConnectionSettingsDialog(null, true);
+                dlg.setUrl(settings.getUrl());
+                dlg.setConnectionName(settings.getName());
+                dlg.setUserName(settings.getInfo().getProperty("user"));
+                dlg.setSchema(settings.getInfo().getProperty("schema"));
+                dlg.setVisible(true);
+                int retVal = dlg.getReturnStatus();
+                if (retVal == ConnectionSettingsDialog.RET_OK) {
+                    settings.setUrl(dlg.getUrl());
+                    settings.setName(dlg.getConnectionName());
+                    settings.getInfo().setProperty("user", dlg.getUserName());
+                    settings.getInfo().setProperty("schema", dlg.getSchema());
+                    connectionsListModel.fireContentsChanged(selectedIndex);
+                    updatePreferences();
+                    if (settings instanceof DbConnectionSettings) {
+                        tfDbUserName.setText(dlg.getUserName());
+                    }
+                    lstConnections.requestFocus();
+                }
+            } catch (Throwable t) {
+                exSupport.exceptionThrown(new Exception(t));
+            }
+        }
+    }
+
+    private class DeleteConnectionAction extends AbstractAction {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            try {
+                int selectedIndex = lstConnections.getSelectedIndex();
+                assert selectedIndex >= 0; //we won't be enabled otherwise
+                EasSettings settings = (EasSettings) connectionsListModel.getElementAt(selectedIndex);
+                int choice = JOptionPane.showConfirmDialog(LoginFrame.this, bundle.getString("LoginDialog.ConnectionDeletionConfirmationMessage") + settings.getUrl(), bundle.getString("LoginDialog.ConnectionDeletionConfirmationTitle"), JOptionPane.YES_NO_OPTION);
+                if (choice == JOptionPane.YES_OPTION) {
+                    connectionsListModel.removeElementAt(selectedIndex);
+                    updatePreferences();
+                    lstConnections.setSelectedIndex(selectedIndex);
+                    lstConnections.requestFocus();
+                }
+            } catch (Throwable t) {
+                exSupport.exceptionThrown(new Exception(t));
+            }
+        }
+    }
+
+    private class ConnectionsSelectionListener implements ListSelectionListener {
+
+        @Override
+        public void valueChanged(ListSelectionEvent e) {
+            if (!e.getValueIsAdjusting()) {
+                EasSettings selectedSettings = (EasSettings) lstConnections.getSelectedValue();
+                boolean modificationsEnabled = selectedSettings != null && selectedSettings.isEditable();
+                modifyConnectionAction.setEnabled(modificationsEnabled);
+                deleteConnectionAction.setEnabled(modificationsEnabled);
+                if (selectedSettings instanceof DbConnectionSettings) {
+                    pnlDbLogin.setVisible(true);
+                    DbConnectionSettings dbSettings = (DbConnectionSettings) selectedSettings;
+                    tfDbUserName.setText(dbSettings.getInfo().getProperty(ClientConstants.DB_CONNECTION_USER_PROP_NAME));
+                    tfDbPassword.setText(null);
+                    tfPassword.setText(null);
+                } else {
+                    pnlDbLogin.setVisible(false);
+                }
+            }
+        }
+    }
+
+    private class ToggleConnectionsVisibility extends AbstractAction {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (pnlConnectionInfo.isVisible()) {
+                // make it invisible and shrink frame bounds.
+                connectionsPanelHeight = pnlConnectionInfo.getSize().height;
+                pnlConnectionInfo.setVisible(false);
+                setSize(getSize().width, getSize().height - connectionsPanelHeight);
+                btnToggleConnections.setText(">>>");
+            } else {
+                // make it visible and enlarge frame bounds.
+                pnlConnectionInfo.setVisible(true);
+                setSize(getSize().width, getSize().height + connectionsPanelHeight);
+                btnToggleConnections.setText("<<<");
+            }
+        }
+    }
+}

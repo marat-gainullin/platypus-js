@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+OpenIDE-Module: com.eas.designer.application.query
+OpenIDE-Module-Implementation-Version: 303
+OpenIDE-Module-Layer: com/eas/designer/application/query/layer.xml
+OpenIDE-Module-Localizing-Bundle: com/eas/designer/application/query/Bundle.properties
+OpenIDE-Module-Requires: org.openide.windows.WindowManager
+

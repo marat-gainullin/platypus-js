@@ -1,0 +1,395 @@
+
+<!--
+DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+
+Copyright 1997-2010 Oracle and/or its affiliates. All rights reserved.
+
+Oracle and Java are registered trademarks of Oracle and/or its affiliates.
+Other names may be trademarks of their respective owners.
+
+
+The contents of this file are subject to the terms of either the GNU
+General Public License Version 2 only ("GPL") or the Common
+Development and Distribution License("CDDL") (collectively, the
+"License"). You may not use this file except in compliance with the
+License. You can obtain a copy of the License at
+http://www.netbeans.org/cddl-gplv2.html
+or nbbuild/licenses/CDDL-GPL-2-CP. See the License for the
+specific language governing permissions and limitations under the
+License.  When distributing the software, include this License Header
+Notice in each file and include the License file at
+nbbuild/licenses/CDDL-GPL-2-CP.  Oracle designates this
+particular file as subject to the "Classpath" exception as provided
+by Oracle in the GPL Version 2 section of the License file that
+accompanied this code. If applicable, add the following below the
+License Header, with the fields enclosed by brackets [] replaced by
+your own identifying information:
+"Portions Copyrighted [year] [name of copyright owner]"
+
+Contributor(s):
+
+The Original Software is NetBeans. The Initial Developer of the Original
+Software is Sun Microsystems, Inc. Portions Copyright 1997-2006 Sun
+Microsystems, Inc. All Rights Reserved.
+
+If you wish your version of this file to be governed by only the CDDL
+or only the GPL Version 2, indicate your decision by adding
+"[Contributor] elects to include this software in this distribution
+under the [CDDL or GPL Version 2] license." If you do not indicate a
+single choice of license, a recipient has the option to distribute
+your version of this file under either the CDDL, the GPL Version 2 or
+to extend the choice of license to its licensees as provided above.
+However, if you add GPL Version 2 code and therefore, elected the GPL
+Version 2 license, then the option applies only if the new code is
+made subject to such option by the copyright holder.
+-->
+<!DOCTYPE filesystem PUBLIC "-//NetBeans//DTD Filesystem 1.2//EN" "http://www.netbeans.org/dtds/filesystem-1_2.dtd">
+<filesystem>
+    <folder name="Actions">
+        <folder name="Form">
+            <attr name="displayName" bundlevalue="com.bearsoft.org.netbeans.modules.form.resources.Bundle#Actions/Form"/>
+        </folder>
+    </folder>
+
+    <folder name="Menu">
+        <folder name="Tools">
+            <folder name="PaletteManager">
+            </folder>
+        </folder>
+    </folder>
+
+    <folder name="FormDesignerPalette">
+        <attr name="displayName" bundlevalue="com.bearsoft.org.netbeans.modules.form.resources.Bundle#FormDesignerPalette"/>
+        <folder name="SwingContainers">
+            <attr name="displayName" bundlevalue="com.bearsoft.org.netbeans.modules.form.resources.Bundle#FormDesignerPalette/SwingContainers"/>
+            <attr name="isExpanded" boolvalue="true"/>
+
+            <attr name="position" intvalue="200"/>
+            <file name="JPanel.palette_item" url="palette/JPanel.palette_item">
+                <attr name="position" intvalue="100"/>
+            </file>
+            <file name="JTabbedPane.palette_item" url="palette/JTabbedPane.palette_item">
+                <attr name="position" intvalue="200"/>
+            </file>
+            <file name="JSplitPane.palette_item" url="palette/JSplitPane.palette_item">
+                <attr name="position" intvalue="300"/>
+            </file>
+            <file name="JScrollPane.palette_item" url="palette/JScrollPane.palette_item">
+                <attr name="position" intvalue="400"/>
+            </file>
+            <file name="JToolBar.palette_item" url="palette/JToolBar.palette_item">
+                <attr name="position" intvalue="500"/>
+            </file>
+            <file name="JDesktopPane.palette_item" url="palette/JDesktopPane.palette_item">
+                <attr name="position" intvalue="600"/>
+            </file>
+            <!--
+            <file name="JInternalFrame.palette_item" url="palette/JInternalFrame.palette_item">
+                <attr name="position" intvalue="700"/>
+            </file>
+            -->
+            <file name="JLayeredPane.palette_item" url="palette/JLayeredPane.palette_item">
+                <attr name="position" intvalue="800"/>
+            </file>
+        </folder>
+
+        <folder name="PlatypusControls">
+            <attr name="displayName" bundlevalue="com.bearsoft.org.netbeans.modules.form.resources.Bundle#FormDesignerPalette/PlatypusControls"/>
+            <attr name="isExpanded" boolvalue="true"/>
+
+            <attr name="position" intvalue="150"/>
+            <file name="DbCheck.palette_item" url="palette/DbCheck.palette_item">
+                <attr name="position" intvalue="100"/>
+            </file>
+            <file name="DbCombo.palette_item" url="palette/DbCombo.palette_item">
+                <attr name="position" intvalue="200"/>
+            </file>
+            <file name="DbDate.palette_item" url="palette/DbDate.palette_item">
+                <attr name="position" intvalue="300"/>
+            </file>
+            <file name="DbGrid.palette_item" url="palette/DbGrid.palette_item">
+                <attr name="position" intvalue="400"/>
+            </file>
+            <file name="ModelGridColumn.palette_item" url="palette/ModelGridColumn.palette_item">
+                <attr name="position" intvalue="450"/>
+            </file>
+            <file name="DbImage.palette_item" url="palette/DbImage.palette_item">
+                <attr name="position" intvalue="500"/>
+            </file>
+            <file name="DbLabel.palette_item" url="palette/DbLabel.palette_item">
+                <attr name="position" intvalue="600"/>
+            </file>
+            <file name="DbMap.palette_item" url="palette/DbMap.palette_item">
+                <attr name="position" intvalue="800"/>
+            </file>
+            <file name="ModelMapLayer.palette_item" url="palette/ModelMapLayer.palette_item">
+                <attr name="position" intvalue="850"/>
+            </file>
+            <file name="DbSpin.palette_item" url="palette/DbSpin.palette_item">
+                <attr name="position" intvalue="900"/>
+            </file>
+            <file name="DbText.palette_item" url="palette/DbText.palette_item">
+                <attr name="position" intvalue="1000"/>
+            </file>
+        </folder>
+
+        <folder name="SwingControls">
+            <attr name="displayName" bundlevalue="com.bearsoft.org.netbeans.modules.form.resources.Bundle#FormDesignerPalette/SwingControls"/>
+            <attr name="isExpanded" boolvalue="true"/>
+
+            <attr name="position" intvalue="100"/>
+            <file name="JLabel.palette_item" url="palette/JLabel.palette_item">
+                <attr name="position" intvalue="100"/>
+            </file>
+            <file name="JButton.palette_item" url="palette/JButton.palette_item">
+                <attr name="position" intvalue="200"/>
+            </file>
+            <file name="JToggleButton.palette_item" url="palette/JToggleButton.palette_item">
+                <attr name="position" intvalue="300"/>
+            </file>
+            <file name="JDropDownButton.palette_item" url="palette/JDropDownButton.palette_item">
+                <attr name="position" intvalue="350"/>
+            </file>
+            <file name="JCheckBox.palette_item" url="palette/JCheckBox.palette_item">
+                <attr name="position" intvalue="400"/>
+            </file>
+            <file name="JRadioButton.palette_item" url="palette/JRadioButton.palette_item">
+                <attr name="position" intvalue="500"/>
+            </file>
+            <file name="ButtonGroup.palette_item" url="palette/ButtonGroup.palette_item">
+                <attr name="position" intvalue="600"/>
+            </file>
+            <!--
+            <file name="JComboBox.palette_item" url="palette/JComboBox.palette_item">
+                <attr name="position" intvalue="700"/>
+            </file>
+            <file name="JList.palette_item" url="palette/JList.palette_item">
+                <attr name="position" intvalue="800"/>
+            </file>
+            -->
+            <file name="JTextField.palette_item" url="palette/JTextField.palette_item">
+                <attr name="position" intvalue="900"/>
+            </file>
+            <!--
+            <file name="JTextArea.palette_item" url="palette/JTextArea.palette_item">
+                <attr name="position" intvalue="1000"/>
+            </file>
+            <file name="JScrollBar.palette_item" url="palette/JScrollBar.palette_item">
+                <attr name="position" intvalue="1100"/>
+            </file>
+            -->
+            <file name="JSlider.palette_item" url="palette/JSlider.palette_item">
+                <attr name="position" intvalue="1200"/>
+            </file>
+            <file name="JProgressBar.palette_item" url="palette/JProgressBar.palette_item">
+                <attr name="position" intvalue="1300"/>
+            </file>
+            <file name="JFormattedTextField.palette_item" url="palette/JFormattedTextField.palette_item">
+                <attr name="position" intvalue="1400"/>
+            </file>
+            <file name="JPasswordField.palette_item" url="palette/JPasswordField.palette_item">
+                <attr name="position" intvalue="1500"/>
+            </file>
+            <!--
+            <file name="JSpinner.palette_item" url="palette/JSpinner.palette_item">
+                <attr name="position" intvalue="1600"/>
+            </file>
+            -->
+            <file name="JSeparator.palette_item" url="palette/JSeparator.palette_item">
+                <attr name="position" intvalue="1700"/>
+            </file>
+            <file name="JTextPane.palette_item" url="palette/JTextPane.palette_item">
+                <attr name="position" intvalue="1800"/>
+            </file>
+            <file name="JEditorPane.palette_item" url="palette/JEditorPane.palette_item">
+                <attr name="position" intvalue="1900"/>
+            </file>
+            <!--
+            <file name="JTree.palette_item" url="palette/JTree.palette_item">
+                <attr name="position" intvalue="2000"/>
+            </file>
+            <file name="JTable.palette_item" url="palette/JTable.palette_item">
+                <attr name="position" intvalue="2100"/>
+            </file>
+            -->
+        </folder>
+
+        <folder name="SwingMenus">
+            <attr name="displayName" bundlevalue="com.bearsoft.org.netbeans.modules.form.resources.Bundle#FormDesignerPalette/SwingMenus"/>
+            <attr name="position" intvalue="300"/>
+            <file name="JMenuBar.palette_item" url="palette/JMenuBar.palette_item">
+                <attr name="position" intvalue="100"/>
+            </file>
+            <file name="JMenu.palette_item" url="palette/JMenu.palette_item">
+                <attr name="position" intvalue="200"/>
+            </file>
+            <file name="JMenuItem.palette_item" url="palette/JMenuItem.palette_item">
+                <attr name="position" intvalue="300"/>
+            </file>
+            <file name="JCheckBoxMenuItem.palette_item" url="palette/JCheckBoxMenuItem.palette_item">
+                <attr name="position" intvalue="400"/>
+            </file>
+            <file name="JRadioButtonMenuItem.palette_item" url="palette/JRadioButtonMenuItem.palette_item">
+                <attr name="position" intvalue="500"/>
+            </file>
+            <file name="JPopupMenu.palette_item" url="palette/JPopupMenu.palette_item">
+                <attr name="position" intvalue="600"/>
+            </file>
+            <file name="JSeparator.palette_item" url="palette/JSeparator.palette_item">
+                <attr name="position" intvalue="700"/>
+            </file>
+        </folder>
+
+            <!--
+        <folder name="SwingWindows">
+            <attr name="SystemFileSystem.localizingBundle" stringvalue="com.bearsoft.org.netbeans.modules.form.resources.Bundle"/>
+            <attr name="position" intvalue="400"/>
+            <file name="JDialog.palette_item" url="palette/JDialog.palette_item">
+                <attr name="position" intvalue="100"/>
+            </file>
+            <file name="JFrame.palette_item" url="palette/JFrame.palette_item">
+                <attr name="position" intvalue="200"/>
+            </file>
+            <file name="JColorChooser.palette_item" url="palette/JColorChooser.palette_item">
+                <attr name="position" intvalue="300"/>
+            </file>
+            <file name="JFileChooser.palette_item" url="palette/JFileChooser.palette_item">
+                <attr name="position" intvalue="400"/>
+            </file>
+            <file name="JOptionPane.palette_item" url="palette/JOptionPane.palette_item">
+                <attr name="position" intvalue="500"/>
+            </file>
+        </folder>
+            -->
+
+        <folder name="_Layouts_only_for_internal_use_">
+            <attr name="displayName" bundlevalue="com.bearsoft.org.netbeans.modules.form.resources.Bundle#FormDesignerPalette/_Layouts_only_for_internal_use_"/>
+            <attr name="isNoPaletteCategory" boolvalue="true"/>
+            <attr name="position" intvalue="0"/>
+            
+            <file name="MarginLayout.palette_item" url="palette/MarginLayout.palette_item">
+                <attr name="position" intvalue="100"/>
+            </file>
+            <file name="FlowLayout.palette_item" url="palette/FlowLayout.palette_item">
+                <attr name="position" intvalue="200"/>
+            </file>
+            <file name="BorderLayout.palette_item" url="palette/BorderLayout.palette_item">
+                <attr name="position" intvalue="300"/>
+            </file>
+            <file name="GridLayout.palette_item" url="palette/GridLayout.palette_item">
+                <attr name="position" intvalue="400"/>
+            </file>
+            <file name="GridBagLayout.palette_item" url="palette/GridBagLayout.palette_item">
+                <attr name="position" intvalue="500"/>
+            </file>
+            <file name="CardLayout.palette_item" url="palette/CardLayout.palette_item">
+                <attr name="position" intvalue="600"/>
+            </file>
+            <file name="BoxLayout.palette_item" url="palette/BoxLayout.palette_item">
+                <attr name="position" intvalue="700"/>
+            </file>
+            <file name="AbsoluteLayout.palette_item" url="palette/AbsoluteLayout.palette_item">
+                <attr name="position" intvalue="800"/>
+            </file>
+            <!--
+            <file name="NullLayout.palette_item" url="palette/NullLayout.palette_item">
+                <attr name="position" intvalue="900"/>
+            </file>
+            -->
+        </folder>
+
+        <folder name="Borders">
+            <attr name="displayName" bundlevalue="com.bearsoft.org.netbeans.modules.form.resources.Bundle#FormDesignerPalette/Borders"/>
+            <attr name="isVisible" boolvalue="false"/>
+
+            <attr name="position" intvalue="600"/>
+            <file name="EmptyBorder.palette_item" url="palette/EmptyBorder.palette_item">
+                <attr name="position" intvalue="100"/>
+            </file>
+            <file name="LineBorder.palette_item" url="palette/LineBorder.palette_item">
+                <attr name="position" intvalue="200"/>
+            </file>
+            <file name="MatteBorder.palette_item" url="palette/MatteBorder.palette_item">
+                <attr name="position" intvalue="300"/>
+            </file>
+            <file name="TitledBorder.palette_item" url="palette/TitledBorder.palette_item">
+                <attr name="position" intvalue="400"/>
+            </file>
+            <file name="EtchedBorder.palette_item" url="palette/EtchedBorder.palette_item">
+                <attr name="position" intvalue="500"/>
+            </file>
+            <file name="BevelBorder.palette_item" url="palette/BevelBorder.palette_item">
+                <attr name="position" intvalue="600"/>
+            </file>
+            <file name="SoftBevelBorder.palette_item" url="palette/SoftBevelBorder.palette_item">
+                <attr name="position" intvalue="700"/>
+            </file>
+            <file name="CompoundBorder.palette_item" url="palette/CompoundBorder.palette_item">
+                <attr name="position" intvalue="800"/>
+            </file>
+        </folder>
+
+        <folder name="LookAndFeels">
+            <attr name="displayName" bundlevalue="com.bearsoft.org.netbeans.modules.form.resources.Bundle#FormDesignerPalette/LookAndFeels"/>
+            <attr name="isVisible" boolvalue="false"/>
+            <attr name="isReadonly" boolvalue="true"/>
+            <attr name="position" intvalue="900"/>
+        </folder>                
+    </folder>
+
+    <folder name="Templates">
+        <folder name="Privileged">
+            <file name="PlatypusFormTemplate.shadow">
+                <attr name="originalFile" stringvalue="Templates/Platypus application elements/PlatypusFormTemplate.js"/>
+                <attr name="position" intvalue="400"/>
+            </file>
+        </folder>
+    </folder>
+
+    <!-- default workspaces, frames and their layout defined by core -->
+    <folder name="Windows2">
+        <folder name="Modes">
+            <folder name="navigator">
+                <file name="FormInspector.wstcref" url="windowmanager/inspector/FormInspector.wstcref">
+                    <attr name="position" intvalue="200"/>
+                </file>
+            </folder>
+        </folder>
+
+        <folder name="Components">
+            <file name="FormInspector.settings" url="components/FormInspector.settings"/>
+        </folder>
+
+        <folder name="Groups">
+            <file name="jsform.wsgrp" url="groups/form.wsgrp"/>
+            <folder name="jsform">
+                <file name="FormInspector.wstcgrp" url="groups/form/FormInspector.wstcgrp"/>
+                <file name="properties.wstcgrp" url="groups/form/properties.wstcgrp"/>
+            </folder>
+        </folder>
+
+    </folder>
+
+    <folder name="OptionsDialog">
+        <folder name="Advanced">
+            <file name="FormEditor.instance">
+                <attr name="instanceCreate" methodvalue="org.netbeans.spi.options.AdvancedOption.createSubCategory"/>
+
+                <attr name="displayName" bundlevalue="com.bearsoft.org.netbeans.modules.form.Bundle#Form_Editor"/>
+                <attr name="toolTip" bundlevalue="com.bearsoft.org.netbeans.modules.form.Bundle#Form_Editor_Tooltip"/>
+                <attr name="controller" newvalue="com.bearsoft.org.netbeans.modules.form.FormEditorPanelController"/>
+                <attr name="keywords" bundlevalue="com.bearsoft.org.netbeans.modules.form.Bundle#KW_FormOptions"/>
+                <attr name="keywordsCategory" stringvalue="Advanced/FormEditor"/>
+            </file>
+        </folder>
+    </folder>
+
+    <folder name="OptionsExport">
+        <folder name="Advanced">
+            <file name="Form">
+                <attr name="include" stringvalue="config/FormDesignerPalette/.*|config/Services/formsettings[.]settings"/>
+                <attr name="displayName" bundlevalue="com.bearsoft.org.netbeans.modules.form.Bundle#Form.Options.Export.displayName"/>
+            </file>
+        </folder>
+    </folder>
+</filesystem>

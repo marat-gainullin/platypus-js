@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<datamodel>
+    <parametersEntity Title="Параметры">
+    </parametersEntity>
+    <entity Title="Единицы измерения  по величине 1" entityId="128073231281282" queryId="128049734162523" tableDbId="null" tableName="" tableSchemaName="">
+    </entity>
+    <entity Title="Наименования СИ" entityId="128049764412588" queryId="128049565893763" tableDbId="null" tableName="" tableSchemaName="">
+    </entity>
+    <entity Title="Марки объектов ремонта" entityId="128049574970367" queryId="128049551290614" tableDbId="null" tableName="" tableSchemaName="">
+    </entity>
+    <entity Title="Наименования СИ по величине 1" entityId="128073233404649" queryId="128049732520388" tableDbId="null" tableName="" tableSchemaName="">
+    </entity>
+    <entity Title="Единицы измерения  по величине" entityId="128049746332840" queryId="128049734162523" tableDbId="null" tableName="" tableSchemaName="">
+    </entity>
+    <entity Title="Группа объекта ремонта" entityId="128049573928131" queryId="128049508301511" tableDbId="null" tableName="" tableSchemaName="">
+    </entity>
+    <entity Title="Наименования СИ по величине" entityId="128049750556261" queryId="128049732520388" tableDbId="null" tableName="" tableSchemaName="">
+    </entity>
+    <entity Title="Измеряемые величины" entityId="128049576695369" queryId="128049562734356" tableDbId="null" tableName="" tableSchemaName="">
+    </entity>
+    <entity Title="Единицы оборудования" entityId="128049574495320" queryId="128049547464084" tableDbId="null" tableName="" tableSchemaName="">
+    </entity>
+    <entity Title="Вид объекта ремонта" entityId="128049576096827" queryId="128049558485943" tableDbId="null" tableName="" tableSchemaName="">
+    </entity>
+    <relation leftEntityFieldName="VALUE" leftEntityId="128049764412588" rightEntityFieldName="VALUE" rightEntityId="128049750556261"/>
+    <relation leftEntityFieldName="ID" leftEntityId="128049574970367" rightEntityFieldName="MARK" rightEntityId="128049574495320"/>
+    <relation leftEntityFieldName="VALUE" leftEntityId="128049750556261" rightEntityId="128073233404649" rightEntityParameterName="VALUE"/>
+    <relation leftEntityFieldName="MEASURAND" leftEntityId="128049746332840" rightEntityId="128073231281282" rightEntityParameterName="VALUE"/>
+    <relation leftEntityFieldName="ID" leftEntityId="128049576695369" rightEntityId="128049746332840" rightEntityParameterName="VALUE"/>
+    <relation leftEntityFieldName="ID" leftEntityId="128049576695369" rightEntityId="128049750556261" rightEntityParameterName="VALUE"/>
+</datamodel>

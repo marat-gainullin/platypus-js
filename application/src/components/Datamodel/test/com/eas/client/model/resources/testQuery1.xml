@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<query>
+    <sql>SELECT GOODORDER.ORDER_ID, T1.AMOUNT, CUSTOMER.CUSTOMER_NAME FROM GOODORDER T1 INNER JOIN CUSTOMER ON (GOODORDER.CUSTOMER=CUSTOMER.CUSTOMER_ID) AND (GOODORDER.AMOUNT&gt;CUSTOMER.CUSTOMER_NAME) WHERE AMOUNT=:p1</sql>
+    <datamodel>
+        <parameters>
+            <parameter description="Amount of good" name="p1" nullable="true" precision="0" scale="0" signed="true" size="100" type="2"/>
+        </parameters>
+        <parametersEntity>
+            <userData entityHeight.Integer="200" entityIconified.Boolean="false" entityLocationX.Integer="12" entityLocationY.Integer="12" entityWidth.Integer="150"/>
+        </parametersEntity>
+        <entity entityId="124159258394277081" queryId="null" tableDbId="null" tableName="CUSTOMER">
+            <userData entityHeight.Integer="200" entityIconified.Boolean="false" entityLocationX.Integer="549" entityLocationY.Integer="61" entityWidth.Integer="150" tableFilter.TableFilter="org.hsqldb.TableFilter@3680c1"/>
+        </entity>
+        <entity entityId="124159258394273190" queryId="null" tableDbId="null" tableName="GOODORDER">
+            <userData entityHeight.Integer="200" entityIconified.Boolean="false" entityLocationX.Integer="249" entityLocationY.Integer="49" entityWidth.Integer="150" tableFilter.TableFilter="org.hsqldb.TableFilter@3f1179"/>
+        </entity>
+        <relation leftEntityFieldName="CUSTOMER" leftEntityId="124159258394273190" rightEntityFieldName="CUSTOMER_ID" rightEntityId="124159258394277081"/>
+        <relation leftEntityFieldName="AMOUNT" leftEntityId="124159258394273190" rightEntityFieldName="CUSTOMER_NAME" rightEntityId="124159258394277081"/>
+        <lightRelation leftEntityId="124159258394273190" rightEntityId="124159258394277081"/>
+    </datamodel>
+</query>

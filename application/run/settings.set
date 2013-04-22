@@ -1,0 +1,3 @@
+[Update]
+ URLConfig=http://olympic.altsoft.biz/platypus/client/updates/update.xml
+ URLUpdate=http://olympic.altsoft.biz/platypus/client/updates/application.zip

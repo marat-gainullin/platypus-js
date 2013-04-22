@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<datamodel>
+    <parametersEntity>
+        <userData Title.String="Параметры" entityHeight.Integer="200" entityIconified.Boolean="false" entityLocationX.Integer="17" entityLocationY.Integer="22" entityWidth.Integer="150"/>
+    </parametersEntity>
+    <entity entityId="128032332856229" queryId="128032313214099" tableName="" tableSchemaName="">
+        <userData Title.String="Единицы оборудования" entityHeight.Integer="200" entityIconified.Boolean="false" entityLocationX.Integer="521" entityLocationY.Integer="88" entityWidth.Integer="150" tableAlias.String="T_Q128032313214099_1" tableFilter.TableFilter="org.hsqldb.TableFilter@4ca20b"/>
+    </entity>
+    <entity entityId="128032328451550" queryId="null" tableName="MEASURANDS" tableSchemaName="">
+        <userData Title.String="Измеряемые величины" entityHeight.Integer="200" entityIconified.Boolean="false" entityLocationX.Integer="218" entityLocationY.Integer="47" entityWidth.Integer="150" tableAlias.String="T_MEASURANDS_1" tableFilter.TableFilter="org.hsqldb.TableFilter@1229c06"/>
+    </entity>
+    <lightRelation leftEntityId="128032328451550" rightEntityId="128032332856229"/>
+    <relation leftEntityFieldName="ID" leftEntityId="128032328451550" rightEntityFieldName="MEASURAND" rightEntityId="128032332856229"/>
+</datamodel>

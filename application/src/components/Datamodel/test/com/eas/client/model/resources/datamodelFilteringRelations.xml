@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<datamodel>
+    <parametersEntity Title="Параметры">
+    </parametersEntity>
+    <entity Title="Единицы измерения" entityId="128049575554676" queryId="128049555364003" tableDbId="null" tableName="" tableSchemaName="">
+    </entity>
+    <entity Title="Наименования СИ" entityId="128049577162567" queryId="128049565893763" tableDbId="null" tableName="" tableSchemaName="">
+    </entity>
+    <entity Title="Марки объектов ремонта" entityId="128049574970367" queryId="128049551290614" tableDbId="null" tableName="" tableSchemaName="">
+    </entity>
+    <entity Title="Группа объекта ремонта" entityId="128049573928131" queryId="128049508301511" tableDbId="null" tableName="" tableSchemaName="">
+    </entity>
+    <entity Title="Измеряемые величины" entityId="128049576695369" queryId="128049562734356" tableDbId="null" tableName="" tableSchemaName="">
+    </entity>
+    <entity Title="Единицы оборудования" entityId="128049574495320" queryId="128049547464084" tableDbId="null" tableName="" tableSchemaName="">
+    </entity>
+    <entity Title="Вид объекта ремонта" entityId="128049576096827" queryId="128049558485943" tableDbId="null" tableName="" tableSchemaName="">
+    </entity>
+    <entity Title="Единицы измерения 1" entityId="128072901201589" queryId="128049555364003" tableDbId="null" tableName="" tableSchemaName="">
+    </entity>
+    <relation leftEntityFieldName="ID" leftEntityId="128049575554676" rightEntityFieldName="ID" rightEntityId="128072901201589"/>
+    <relation leftEntityFieldName="ID" leftEntityId="128049576695369" rightEntityFieldName="VALUE" rightEntityId="128049577162567"/>
+    <relation leftEntityFieldName="ID" leftEntityId="128049574970367" rightEntityFieldName="MARK" rightEntityId="128049574495320"/>
+    <relation leftEntityFieldName="ID" leftEntityId="128049576695369" rightEntityFieldName="MEASURAND" rightEntityId="128049575554676"/>
+</datamodel>
