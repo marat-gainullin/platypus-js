@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<layout name="Form" prefHeight="300px" prefWidth="400px">
+<layout type="GroupLayoutDesignInfo">
+<horizontalGroup childrenAlignment="LEADING" parallel="true" resizeable="true">
+<subgroup max="32767" min="0" pref="400" resizeable="true"/>
+</horizontalGroup>
+<verticalGroup childrenAlignment="LEADING" parallel="true" resizeable="true">
+<subgroup max="32767" min="0" pref="300" resizeable="true"/>
+</verticalGroup>
+</layout>
+</layout>

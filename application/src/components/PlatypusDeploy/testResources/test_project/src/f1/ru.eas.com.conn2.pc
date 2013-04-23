@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<dbSettings name="ru.eas.com.conn2" password="&lt;password&gt;" schema="&lt;schema&gt;" url="jdbc:&lt;db&gt;:&lt;subname&gt;:@//&lt;host&gt;:&lt;port&gt;/&lt;dbname&gt;" user="&lt;user&gt;">
+</dbSettings>

@@ -6,12 +6,16 @@ package com.eas.designer.explorer.dbmigrations;
 
 import com.eas.designer.explorer.project.PlatypusProject;
 import java.awt.event.ActionEvent;
+import java.net.URL;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import org.netbeans.api.progress.ProgressHandle;
 import org.netbeans.api.progress.ProgressHandleFactory;
+import org.netbeans.modules.j2ee.deployment.devmodules.api.Deployment;
+import org.netbeans.modules.j2ee.deployment.devmodules.spi.J2eeModuleProvider;
 import org.openide.DialogDisplayer;
 import org.openide.NotifyDescriptor;
+import org.openide.awt.HtmlBrowser;
 import org.openide.awt.StatusDisplayer;
 import org.openide.nodes.Node;
 import org.openide.util.ContextAwareAction;
@@ -50,6 +54,11 @@ public class CleanupMigrationsAction extends AbstractAction implements ContextAw
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     try {
+                        /*
+                        J2eeModuleProvider jmp = project.getLookup().lookup(J2eeModuleProvider.class);
+                        String url = Deployment.getDefault().deploy(jmp, Deployment.Mode.RUN, null, "", false);
+                        HtmlBrowser.URLDisplayer.getDefault().showURL(new URL(url));
+                        /*/
                         NotifyDescriptor d = new NotifyDescriptor.Confirmation(
                                 NbBundle.getMessage(CleanupMigrationsAction.class, "CTL_CleanupMigrationsAction_Dialog_Msg"), // NOI18N
                                 NbBundle.getMessage(CleanupMigrationsAction.class, "CTL_CleanupMigrationsAction_Dialog_Title"), // NOI18N

@@ -1,0 +1,8 @@
+Instruction for installation Platypus on Glassfish Server using Administration Console.
+---------------------------------------------------------------------------------------
+
+1. Create JDBC pool for database: Resources -> JDBC Connection Pools -> New. Provide url, user, schema and password properties.  
+
+2. Add JDBC Resource for the JDBC pool, set the resource pool name to JDBC pool name from step 1: Resources -> : JDBC Resources - > New
+
+3. Provide schema, user, password, dialect and appElement (optional, for default application element id) properties as context parameters.

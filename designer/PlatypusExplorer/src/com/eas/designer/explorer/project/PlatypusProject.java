@@ -17,6 +17,7 @@ import com.eas.deploy.project.PlatypusSettings;
 import com.eas.designer.application.HandlerRegistration;
 import com.eas.designer.application.PlatypusUtils;
 import com.eas.designer.application.indexer.PlatypusPathRecognizer;
+import com.eas.designer.explorer.j2ee.PlatypusWebModule;
 import com.eas.designer.explorer.model.windows.ModelInspector;
 import com.eas.designer.explorer.project.ui.PlatypusProjectCustomizerProvider;
 import com.eas.util.BinaryUtils;
@@ -121,7 +122,8 @@ public class PlatypusProject implements Project {
                 new PlatypusProjectDiskOperations(this),
                 new PlatypusPrivilegedTemplates(),
                 new PlatypusProjectCustomizerProvider(this),
-                new PlatypusFilesEncodingQuery());
+                new PlatypusFilesEncodingQuery(), 
+                new PlatypusWebModule(this));
     }
 
     public boolean isDbConnected() {

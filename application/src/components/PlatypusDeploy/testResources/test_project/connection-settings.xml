@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<platypusProject componentName="testComponent">
+<dbSettings name="f100" password="sa" schema="test" url="jdbc:h2:tcp://localhost/~/h2db/test" user="sa"/>
+</platypusProject>

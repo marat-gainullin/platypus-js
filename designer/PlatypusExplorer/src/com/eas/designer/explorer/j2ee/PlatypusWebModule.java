@@ -6,6 +6,7 @@ package com.eas.designer.explorer.j2ee;
 
 import com.eas.designer.explorer.project.PlatypusProject;
 import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -21,6 +22,7 @@ import org.netbeans.modules.j2ee.deployment.devmodules.spi.J2eeModuleFactory;
 import org.netbeans.modules.j2ee.deployment.devmodules.spi.J2eeModuleImplementation2;
 import org.netbeans.modules.j2ee.deployment.devmodules.spi.J2eeModuleProvider;
 import org.netbeans.modules.j2ee.metadata.model.api.MetadataModel;
+import org.openide.ErrorManager;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 
@@ -28,12 +30,17 @@ import org.openide.filesystems.FileUtil;
  *
  * @author vv
  */
-public class PlatypusWebModule extends J2eeModuleProvider implements J2eeModuleImplementation2, ModuleChangeReporter {
+public class PlatypusWebModule extends J2eeModuleProvider implements J2eeModuleImplementation2,
+        ModuleChangeReporter,
+        EjbChangeDescriptor {
 
-    public static final String MODULE_DEFAULT_URL = "/platypus"; //NOI18N
+    public static final String MODULE_DEFAULT_URL = "/WebApplication3"; //NOI18N
     public static final String WEB_DIRECTORY = "web"; //NOI18N
+    public static final String WEB_INF_DIRECTORY = "WEB-INF"; //NOI18N
+    public static final String META_INF_DIRECTORY = "META-INF"; //NOI18N
     protected final PlatypusProject project;
     private J2eeModule j2eeModule;
+    private PropertyChangeSupport propertyChangeSupport;
 
     public PlatypusWebModule(PlatypusProject aProject) {
         super();
@@ -60,7 +67,7 @@ public class PlatypusWebModule extends J2eeModuleProvider implements J2eeModuleI
 
     @Override
     public String getServerInstanceID() {
-        return project.getSettings().getJ2eeServerId();
+        return "tomcat70:home=/home/vv/apache-tomcat-7.0.39";//project.getSettings().getJ2eeServerId();
     }
 
     @Override
@@ -112,37 +119,84 @@ public class PlatypusWebModule extends J2eeModuleProvider implements J2eeModuleI
 
     @Override
     public <T> MetadataModel<T> getMetadataModel(Class<T> arg0) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return null;
     }
 
     @Override
     public File getResourceDirectory() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return null;
     }
 
     @Override
     public File getDeploymentConfigurationFile(String name) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        try {
+            String webInfRelativePath = formatRelativePath(WEB_INF_DIRECTORY);
+            String metaInfRelativePath = formatRelativePath(META_INF_DIRECTORY);
+            FileObject dir;
+            String path;
+            if (name.startsWith(webInfRelativePath)) {
+                path = name.substring(webInfRelativePath.length());
+                dir = getWebInfDir();
+            } else if (name.startsWith(metaInfRelativePath)) {
+                path = name.substring(webInfRelativePath.length());
+                dir = getMetaInfDir();
+            } else {
+                return null;
+            }
+            return FileUtil.toFile(dir.getFileObject(path));
+        } catch (IOException ex) {
+            ErrorManager.getDefault().notify(ex);         
+        }
+        return null;
+    }
+    
+    private String formatRelativePath(String directoryName) {
+        return directoryName  + "/"; //NOI18
     }
 
     @Override
     public void addPropertyChangeListener(PropertyChangeListener listener) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        getPropertyChangeSupport().addPropertyChangeListener(listener);
     }
 
     @Override
     public void removePropertyChangeListener(PropertyChangeListener listener) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        getPropertyChangeSupport().removePropertyChangeListener(listener);
     }
 
     @Override
     public EjbChangeDescriptor getEjbChanges(long timestamp) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return this;
     }
 
     @Override
     public boolean isManifestChanged(long timestamp) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return false;
+    }
+
+    public FileObject getWebInfDir() throws IOException {
+        return getContentDirectory().getFileObject(WEB_INF_DIRECTORY);
+    }
+
+    public FileObject getMetaInfDir() throws IOException {
+        return getContentDirectory().getFileObject(META_INF_DIRECTORY);
+    }
+
+    private synchronized PropertyChangeSupport getPropertyChangeSupport() {
+        if (propertyChangeSupport == null) {
+            propertyChangeSupport = new PropertyChangeSupport(this);
+        }
+        return propertyChangeSupport;
+    }
+
+    @Override
+    public boolean ejbsChanged() {
+        return false;
+    }
+
+    @Override
+    public String[] getChangedEjbs() {
+        return new String[]{};
     }
 
     private static class IT implements Iterator<J2eeModule.RootedEntry> {

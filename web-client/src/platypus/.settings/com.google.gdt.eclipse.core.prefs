@@ -1,0 +1,5 @@
+eclipse.preferences.version=1
+jarsExcludedFromWebInfLib=
+launchConfigExternalUrlPrefix=http\://localhost/
+warSrcDir=war
+warSrcDirIsOutput=true
