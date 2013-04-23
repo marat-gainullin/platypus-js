@@ -1,4 +1,3 @@
-!*.jar
 *.class
 /designer/build/
 /designer/javascript.guards/build/
