@@ -1,4 +1,3 @@
-*.class
 /designer/build/
 /designer/javascript.guards/build/
 /designer/javascript.guards/nbproject/private/
