@@ -6,14 +6,3 @@ private.properties
 private.xml
 *.xml~
 *.gwt-log
-/designer/build/
-/designer/javascript.guards/build/
-/designer/javascript.guards/nbproject/private/
-/designer/nbproject/private/
-/designer/PlatypusApplication/build/
-/designer/PlatypusApplication/nbproject/private/
-/designer/PlatypusConnections/build/
-/designer/PlatypusConnections/nbproject/private/
-/designer/PlatypusModules/build/
-/designer/PlatypusModules/nbproject/private/
-/application/src/group/nbproject/private/
