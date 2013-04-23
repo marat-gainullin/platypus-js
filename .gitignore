@@ -1,3 +1,4 @@
+*.class
 /designer/build/
 /designer/javascript.guards/build/
 /designer/nbproject/private/
@@ -8,5 +9,4 @@
 /designer/PlatypusConnections/nbproject/private/
 /designer/PlatypusModules/build/
 /designer/PlatypusModules/nbproject/private/
-/application/lib/own/
-/application/lib/thirdparty/
+/application/src/group/nbproject/private/
