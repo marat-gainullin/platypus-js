@@ -2,6 +2,10 @@
 *.war
 *.class
 genfiles.properties
+private.properties
+private.xml
+*.xml~
+*.gwt-log
 /designer/build/
 /designer/javascript.guards/build/
 /designer/javascript.guards/nbproject/private/
