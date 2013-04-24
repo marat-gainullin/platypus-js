@@ -42,32 +42,27 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
         if (appSettings.getRunElement() != null) {
             txtRunPath.setText(projectSettings.getAppSettings().getRunElement());
         }
-        if (appSettings.isDbAppSources() != null) {
-            chDbAppSources.setSelected(appSettings.isDbAppSources());
-        } 
-        if (appSettings.isUseAppServer() != null) {
-            chAppServerMode.setSelected(appSettings.isUseAppServer());
+        chDbAppSources.setSelected(projectSettings.isDbAppSources());
+        chAppServerMode.setSelected(projectSettings.isUseAppServer());
+        
+        if (projectSettings.getRunUser() != null) {
+            txtUserName.setText(projectSettings.getRunUser());
         }
-        if (appSettings.getRunUser() != null) {
-            txtUserName.setText(appSettings.getRunUser());
+        if (projectSettings.getRunPassword() != null) {
+            txtPassword.setText(projectSettings.getRunPassword());
         }
-        if (appSettings.getRunPassword() != null) {
-            txtPassword.setText(appSettings.getRunPassword());
+        if (projectSettings.getRunClientOptions() != null) {
+            txtClientOptions.setText(projectSettings.getRunClientOptions());
         }
-        if (appSettings.getRunClientOptions() != null) {
-            txtClientOptions.setText(appSettings.getRunClientOptions());
+        if (projectSettings.getServerProtocol() != null) {
+            cbProtocol.setSelectedItem(projectSettings.getServerProtocol());
         }
-        if (appSettings.getServerProtocol() != null) {
-            cbProtocol.setSelectedItem(appSettings.getServerProtocol());
+        if (projectSettings.getServerHost() != null) {
+            txtServerHost.setText(projectSettings.getServerHost());
         }
-        if (appSettings.getServerHost() != null) {
-            txtServerHost.setText(appSettings.getServerHost());
-        }
-        if (appSettings.getServerPort() != null) {
-            spServerPort.setValue(appSettings.getServerPort());
-        }
-        if (appSettings.getRunServerOptions() != null) {
-            txtServerOptions.setText(appSettings.getRunServerOptions());
+        spServerPort.setValue(projectSettings.getServerPort()); 
+        if (projectSettings.getRunServerOptions() != null) {
+            txtServerOptions.setText(projectSettings.getRunServerOptions());
         }
         chStartServer.setSelected(projectSettings.isStartServer());
     }
@@ -393,51 +388,51 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
     }//GEN-LAST:event_txtRunPathFocusLost
 
     private void txtClientOptionsFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtClientOptionsFocusLost
-        appSettings.setClientOptions(txtClientOptions.getText());
+        projectSettings.setClientOptions(txtClientOptions.getText());
     }//GEN-LAST:event_txtClientOptionsFocusLost
 
     private void txtClientOptionsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtClientOptionsActionPerformed
-        appSettings.setClientOptions(txtClientOptions.getText());
+        projectSettings.setClientOptions(txtClientOptions.getText());
     }//GEN-LAST:event_txtClientOptionsActionPerformed
 
     private void txtUserNameFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtUserNameFocusLost
-        appSettings.setRunUser(txtUserName.getText());
+        projectSettings.setRunUser(txtUserName.getText());
     }//GEN-LAST:event_txtUserNameFocusLost
 
     private void chDbAppSourcesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chDbAppSourcesActionPerformed
-        appSettings.setDbAppSources(chDbAppSources.isSelected());
+        projectSettings.setDbAppSources(chDbAppSources.isSelected());
     }//GEN-LAST:event_chDbAppSourcesActionPerformed
 
     private void chAppServerModeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chAppServerModeActionPerformed
-        appSettings.setUseAppServer(chAppServerMode.isSelected());
+        projectSettings.setUseAppServer(chAppServerMode.isSelected());
     }//GEN-LAST:event_chAppServerModeActionPerformed
 
     private void txtUserNameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtUserNameActionPerformed
-        appSettings.setRunUser(txtUserName.getText());
+        projectSettings.setRunUser(txtUserName.getText());
     }//GEN-LAST:event_txtUserNameActionPerformed
 
     private void txtPasswordActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtPasswordActionPerformed
-        appSettings.setRunPassword(new String(txtPassword.getPassword()));
+        projectSettings.setRunPassword(new String(txtPassword.getPassword()));
     }//GEN-LAST:event_txtPasswordActionPerformed
 
     private void txtPasswordFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtPasswordFocusLost
-        appSettings.setRunPassword(new String(txtPassword.getPassword()));
+        projectSettings.setRunPassword(new String(txtPassword.getPassword()));
     }//GEN-LAST:event_txtPasswordFocusLost
 
     private void txtServerHostActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtServerHostActionPerformed
-        appSettings.setServerHost(txtServerHost.getText());
+        projectSettings.setServerHost(txtServerHost.getText());
     }//GEN-LAST:event_txtServerHostActionPerformed
 
     private void txtServerHostFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtServerHostFocusLost
-        appSettings.setServerHost(txtServerHost.getText());
+        projectSettings.setServerHost(txtServerHost.getText());
     }//GEN-LAST:event_txtServerHostFocusLost
 
     private void txtServerOptionsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtServerOptionsActionPerformed
-        appSettings.setServerOptions(txtServerOptions.getText());
+        projectSettings.setServerOptions(txtServerOptions.getText());
     }//GEN-LAST:event_txtServerOptionsActionPerformed
 
     private void txtServerOptionsFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtServerOptionsFocusLost
-        appSettings.setServerOptions(txtServerOptions.getText());
+        projectSettings.setServerOptions(txtServerOptions.getText());
     }//GEN-LAST:event_txtServerOptionsFocusLost
 
     private void chStartServerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chStartServerActionPerformed
@@ -445,19 +440,19 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
     }//GEN-LAST:event_chStartServerActionPerformed
 
     private void cbProtocolActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbProtocolActionPerformed
-        appSettings.setServerProtocol(String.valueOf(cbProtocol.getSelectedItem()));
+        projectSettings.setServerProtocol(String.valueOf(cbProtocol.getSelectedItem()));
     }//GEN-LAST:event_cbProtocolActionPerformed
 
     private void cbProtocolFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_cbProtocolFocusLost
-        appSettings.setServerProtocol(String.valueOf(cbProtocol.getSelectedItem()));
+        projectSettings.setServerProtocol(String.valueOf(cbProtocol.getSelectedItem()));
     }//GEN-LAST:event_cbProtocolFocusLost
 
     private void spServerPortFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_spServerPortFocusLost
-        appSettings.setServerPort((Integer)spServerPort.getValue());
+        projectSettings.setServerPort((Integer)spServerPort.getValue());
     }//GEN-LAST:event_spServerPortFocusLost
 
     private void spServerPortStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_spServerPortStateChanged
-        appSettings.setServerPort((Integer)spServerPort.getValue());
+        projectSettings.setServerPort((Integer)spServerPort.getValue());
     }//GEN-LAST:event_spServerPortStateChanged
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
