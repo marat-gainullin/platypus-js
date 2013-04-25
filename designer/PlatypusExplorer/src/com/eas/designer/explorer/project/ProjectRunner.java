@@ -109,7 +109,7 @@ public class ProjectRunner {
         }
         io.getOut().println("Starting Platypus Client..");
         PlatypusProjectSettings pps = project.getSettings();
-        if (pps.isUseAppServer()
+        if (AppServerType.PLATYPUS_SERVER.equals(pps.getRunAppServerType())
                 && project.getSettings().isStartServer()
                 && ServerSupport.isLocalHost(pps.getServerHost())) {
             PlatypusServerInstance serverInstance = PlatypusServerInstanceProvider.getPlatypusDevServer();
@@ -173,7 +173,7 @@ public class ProjectRunner {
         } else {
             io.getOut().println("Application sources: database.");
         }
-        if (pps.isUseAppServer()) {
+        if (AppServerType.PLATYPUS_SERVER.equals(pps.getRunAppServerType())) {
             processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.URL_CMD_SWITCH);
             processBuilder = processBuilder.addArgument(getServerUrl(pps));
             io.getOut().println(String.format("Using application server at URL: %s.", getServerUrl(pps)));

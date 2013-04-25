@@ -38,7 +38,6 @@ public class PlatypusProjectSettings {
     public static final String RUN_CLIENT_OPTIONS_KEY = "runClientOptions"; //NOI18N
     public static final String RUN_SERVER_OPTIONS_KEY = "runServerOptions"; //NOI18N
     public static final String DB_APP_SOURCES_KEY = "dbAppSources"; //NOI18N
-    public static final String APP_SERVER_MODE_KEY = "appServerMode";//NOI18N
     public static final String APP_SERVER_PROTOCOL_KEY = "appServerProtocol";//NOI18N
     public static final String SERVER_PORT_KEY = "serverPort";//NOI18N
     public static final String APP_SERVER_HOST_KEY = "appServerHost";//NOI18N
@@ -214,27 +213,6 @@ public class PlatypusProjectSettings {
         projectProperties.setProperty(DB_APP_SOURCES_KEY, Boolean.valueOf(aValue).toString());
         projectPropertiesIsDirty = true;
         changeSupport.firePropertyChange(DB_APP_SOURCES_KEY, oldValue, aValue);
-    }
-
-    /**
-     * Checks if runtime to use application server.
-     *
-     * @return true to use server
-     */
-    public boolean isUseAppServer() {
-        return Boolean.valueOf(projectProperties.get(APP_SERVER_MODE_KEY));
-    }
-
-    /**
-     * Sets flag for runtime to use application server.
-     *
-     * @param aValue true to use server
-     */
-    public void setUseAppServer(boolean aValue) {
-        boolean oldValue = isUseAppServer();
-        projectProperties.setProperty(APP_SERVER_MODE_KEY, Boolean.valueOf(aValue).toString());
-        projectPropertiesIsDirty = true;
-        changeSupport.firePropertyChange(APP_SERVER_MODE_KEY, oldValue, aValue);
     }
     
     /**
