@@ -46,6 +46,8 @@ public class PlatypusProjectSettings {
     public static final String DEBUG_CLIENT_PORT_KEY = "debugClientPort"; //NOI18N
     public static final String DEBUG_SERVER_PORT_KEY = "debugServerPort"; //NOI18N
     public static final String J2EE_SERVER_ID_KEY = "j2eeServerId"; //NOI18N
+    public static final String CLIENT_TYPE_KEY = "clientType"; //NOI18N
+    public static final String SERVER_TYPE_KEY = "serverType"; //NOI18N
     protected final PlatypusSettings platypusSettings;
     protected final FileObject projectDir;
     protected final PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
@@ -387,8 +389,45 @@ public class PlatypusProjectSettings {
         projectPrivatePropertiesIsDirty = true;
         changeSupport.firePropertyChange(J2EE_SERVER_ID_KEY, aValue, oldValue);
     }
-
-    public void load() {
+    
+    /**
+     * Gets client type to be run.
+     * @return ClientType instance
+     */
+    public ClientType getRunClientType() {
+        ClientType val = ClientType.getById(projectProperties.get(CLIENT_TYPE_KEY));
+        return val != null ? val : ClientType.PLATYPUS_CLIENT;
+    }
+    
+    /**
+     * Sets client type to be run.
+     * @param aValue ClientType instance
+     */
+    public void setRunClientType(ClientType aValue) {
+        ClientType oldValue = getRunClientType();
+        projectProperties.setProperty(CLIENT_TYPE_KEY, aValue.getId());
+        projectPropertiesIsDirty = true;
+        changeSupport.firePropertyChange(CLIENT_TYPE_KEY, aValue, oldValue);
+    }
+    
+    /**
+     * Gets application server type to be run.
+     * @return AppServerType instance
+     */
+    public AppServerType getRunAppServerType() {
+        AppServerType val = AppServerType.getById(projectProperties.get(SERVER_TYPE_KEY));
+        return val != null ? val : AppServerType.NONE;
+    }
+    
+    /**
+     * Sets application server type to be run.
+     * @param aValue AppServerType instance
+     */
+    public void setRunAppServerType(AppServerType aValue) {
+        AppServerType oldValue = getRunAppServerType();
+        projectProperties.setProperty(SERVER_TYPE_KEY, aValue.getId());
+        projectPrivatePropertiesIsDirty = true;
+        changeSupport.firePropertyChange(SERVER_TYPE_KEY, aValue, oldValue);
     }
 
     public void save() throws Exception {
