@@ -13,6 +13,8 @@ package com.eas.designer.explorer.project.ui;
 import com.eas.deploy.project.PlatypusSettings;
 import com.eas.designer.application.indexer.IndexerQuery;
 import com.eas.designer.explorer.FileChooser;
+import com.eas.designer.explorer.project.AppServerType;
+import com.eas.designer.explorer.project.ClientType;
 import com.eas.designer.explorer.project.PlatypusProject;
 import com.eas.designer.explorer.project.PlatypusProjectSettings;
 import java.util.HashSet;
@@ -30,6 +32,7 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
     protected final FileObject appRoot;
     protected final PlatypusProjectSettings projectSettings;
     protected final PlatypusSettings appSettings;
+
     /**
      * Creates new form ProjectRunningCustomizer
      */
@@ -44,7 +47,7 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
         }
         chDbAppSources.setSelected(projectSettings.isDbAppSources());
         //chAppServerMode.setSelected(projectSettings.isUseAppServer());
-        
+
         if (projectSettings.getRunUser() != null) {
             txtUserName.setText(projectSettings.getRunUser());
         }
@@ -60,11 +63,22 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
         if (projectSettings.getServerHost() != null) {
             txtServerHost.setText(projectSettings.getServerHost());
         }
-        spServerPort.setValue(projectSettings.getServerPort()); 
+        spServerPort.setValue(projectSettings.getServerPort());
         if (projectSettings.getRunServerOptions() != null) {
             txtServerOptions.setText(projectSettings.getRunServerOptions());
         }
         chStartServer.setSelected(projectSettings.isStartServer());
+        cbClientType.setSelectedItem(projectSettings.getRunClientType());
+        cbAppServerType.setSelectedItem(projectSettings.getRunAppServerType());
+        checkRunClientServerConfiguration();
+    }
+
+    private void checkRunClientServerConfiguration() {
+        lblClientServerMessage.setVisible(isValidRunClientServerConfiguration());
+    }
+
+    private boolean isValidRunClientServerConfiguration() {
+        return ClientType.WEB_BROWSER.equals(cbClientType.getSelectedItem()) && !AppServerType.J2EE_SERVER.equals(cbAppServerType.getSelectedItem());
     }
 
     /**
@@ -100,10 +114,11 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
         chStartServer = new javax.swing.JCheckBox();
         jPanel2 = new javax.swing.JPanel();
         chDbAppSources = new javax.swing.JCheckBox();
-        jComboBox1 = new javax.swing.JComboBox();
+        cbClientType = new javax.swing.JComboBox();
         lblClientType = new javax.swing.JLabel();
         lblServeType = new javax.swing.JLabel();
-        jComboBox2 = new javax.swing.JComboBox();
+        cbAppServerType = new javax.swing.JComboBox();
+        lblClientServerMessage = new javax.swing.JLabel();
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -207,7 +222,7 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
                 .addGroup(clientPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtClientOptions, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(lblClientOptions))
-                .addContainerGap(50, Short.MAX_VALUE))
+                .addContainerGap(176, Short.MAX_VALUE))
         );
 
         tabbedPane1.addTab(org.openide.util.NbBundle.getMessage(ProjectRunningCustomizer.class, "ProjectRunningCustomizer.clientPanel.TabConstraints.tabTitle"), clientPanel); // NOI18N
@@ -320,7 +335,7 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
                     .addComponent(lblServerOptions))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(chStartServer)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(126, Short.MAX_VALUE))
         );
 
         tabbedPane1.addTab(org.openide.util.NbBundle.getMessage(ProjectRunningCustomizer.class, "ProjectRunningCustomizer.serverPanel.TabConstraints.tabTitle"), serverPanel); // NOI18N
@@ -333,7 +348,7 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 154, Short.MAX_VALUE)
+            .addGap(0, 280, Short.MAX_VALUE)
         );
 
         tabbedPane1.addTab(org.openide.util.NbBundle.getMessage(ProjectRunningCustomizer.class, "ProjectRunningCustomizer.jPanel2.TabConstraints.tabTitle"), jPanel2); // NOI18N
@@ -346,13 +361,26 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
             }
         });
 
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        cbClientType.setModel(new javax.swing.DefaultComboBoxModel(ClientType.values()));
+        cbClientType.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cbClientTypeActionPerformed(evt);
+            }
+        });
 
         lblClientType.setText(org.openide.util.NbBundle.getMessage(ProjectRunningCustomizer.class, "ProjectRunningCustomizer.lblClientType.text")); // NOI18N
 
         lblServeType.setText(org.openide.util.NbBundle.getMessage(ProjectRunningCustomizer.class, "ProjectRunningCustomizer.lblServeType.text")); // NOI18N
 
-        jComboBox2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        cbAppServerType.setModel(new javax.swing.DefaultComboBoxModel(AppServerType.values()));
+        cbAppServerType.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cbAppServerTypeActionPerformed(evt);
+            }
+        });
+
+        lblClientServerMessage.setForeground(new java.awt.Color(255, 0, 0));
+        lblClientServerMessage.setText(org.openide.util.NbBundle.getMessage(ProjectRunningCustomizer.class, "ProjectRunningCustomizer.lblClientServerMessage.text")); // NOI18N
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -365,20 +393,19 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(lblRunPath)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(txtRunPath, javax.swing.GroupLayout.PREFERRED_SIZE, 296, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(btnBrowse, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(chDbAppSources)
-                            .addGroup(layout.createSequentialGroup()
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(lblClientType, javax.swing.GroupLayout.PREFERRED_SIZE, 125, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(lblServeType))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                    .addComponent(lblServeType)
+                                    .addComponent(lblRunPath))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(jComboBox1, 0, 136, Short.MAX_VALUE)
-                                    .addComponent(jComboBox2, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                                    .addComponent(lblClientServerMessage)
+                                    .addComponent(cbClientType, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(txtRunPath)
+                                    .addComponent(cbAppServerType, 0, 305, Short.MAX_VALUE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(btnBrowse))
+                            .addComponent(chDbAppSources))
                         .addContainerGap())))
         );
         layout.setVerticalGroup(
@@ -389,18 +416,20 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
                     .addComponent(txtRunPath, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(lblRunPath)
                     .addComponent(btnBrowse))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(chDbAppSources)
-                .addGap(5, 5, 5)
+                .addGap(12, 12, 12)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(cbClientType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(lblClientType))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblServeType)
-                    .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 14, Short.MAX_VALUE)
-                .addComponent(tabbedPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 183, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(cbAppServerType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblClientServerMessage)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(chDbAppSources)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(tabbedPane1)
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -486,24 +515,40 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
     }//GEN-LAST:event_cbProtocolFocusLost
 
     private void spServerPortFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_spServerPortFocusLost
-        projectSettings.setServerPort((Integer)spServerPort.getValue());
+        projectSettings.setServerPort((Integer) spServerPort.getValue());
     }//GEN-LAST:event_spServerPortFocusLost
 
     private void spServerPortStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_spServerPortStateChanged
-        projectSettings.setServerPort((Integer)spServerPort.getValue());
+        projectSettings.setServerPort((Integer) spServerPort.getValue());
     }//GEN-LAST:event_spServerPortStateChanged
 
+    private void cbClientTypeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbClientTypeActionPerformed
+        projectSettings.setRunClientType((ClientType) cbClientType.getSelectedItem());
+        if (!AppServerType.J2EE_SERVER.equals((AppServerType) cbAppServerType.getSelectedItem()) && ClientType.WEB_BROWSER.equals((ClientType) cbClientType.getSelectedItem())) {
+            cbAppServerType.setSelectedItem(AppServerType.J2EE_SERVER);
+        }
+        checkRunClientServerConfiguration();
+    }//GEN-LAST:event_cbClientTypeActionPerformed
+
+    private void cbAppServerTypeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbAppServerTypeActionPerformed
+        projectSettings.setRunAppServerType((AppServerType) cbAppServerType.getSelectedItem());
+        if (!AppServerType.J2EE_SERVER.equals((AppServerType) cbAppServerType.getSelectedItem()) && ClientType.WEB_BROWSER.equals((ClientType) cbClientType.getSelectedItem())) {
+            cbClientType.setSelectedItem(ClientType.PLATYPUS_CLIENT);
+        }
+        checkRunClientServerConfiguration();
+    }//GEN-LAST:event_cbAppServerTypeActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnBrowse;
+    private javax.swing.JComboBox cbAppServerType;
+    private javax.swing.JComboBox cbClientType;
     private javax.swing.JComboBox cbProtocol;
     private javax.swing.JCheckBox chDbAppSources;
     private javax.swing.JCheckBox chStartServer;
     private javax.swing.JPanel clientPanel;
-    private javax.swing.JComboBox jComboBox1;
-    private javax.swing.JComboBox jComboBox2;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JLabel lblClientOptions;
+    private javax.swing.JLabel lblClientServerMessage;
     private javax.swing.JLabel lblClientType;
     private javax.swing.JLabel lblHost;
     private javax.swing.JLabel lblPassword;
@@ -523,5 +568,4 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
     private javax.swing.JTextField txtServerOptions;
     private javax.swing.JTextField txtUserName;
     // End of variables declaration//GEN-END:variables
-
 }

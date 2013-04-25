@@ -75,11 +75,11 @@ public class PlatypusProjectSettings {
                 changeSupport.firePropertyChange(evt);
             }
         });
-        projectProperties = new EditableProperties(true);
+        projectProperties = new EditableProperties(false);
         try (InputStream is = getProjectSettingsFileObject().getInputStream()) {
             projectProperties.load(is);
         }
-        projectPrivateProperties = new EditableProperties(true);
+        projectPrivateProperties = new EditableProperties(false);
         try (InputStream is = getProjectPrivateSettingsFileObject().getInputStream()) {
             projectPrivateProperties.load(is);
         }

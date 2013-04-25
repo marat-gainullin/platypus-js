@@ -37,11 +37,8 @@ public enum AppServerType {
         return id;
     }
     
-    /**
-     * Localized name.
-     * @return Localized name.
-     */
-    public String getLocalizedName() {
+    @Override
+    public String toString() {
         return NbBundle.getMessage(ClientType.class, resName);
     }
     
