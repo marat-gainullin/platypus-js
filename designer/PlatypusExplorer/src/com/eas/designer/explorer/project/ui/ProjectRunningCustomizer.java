@@ -392,8 +392,8 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
         );
         serverPanelLayout.setVerticalGroup(
             serverPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, serverPanelLayout.createSequentialGroup()
-                .addContainerGap()
+            .addGroup(serverPanelLayout.createSequentialGroup()
+                .addGap(15, 15, 15)
                 .addGroup(serverPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblProtocol)
                     .addComponent(cbProtocol, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -411,7 +411,7 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
                     .addComponent(lblServerOptions))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(chStartServer)
-                .addContainerGap(126, Short.MAX_VALUE))
+                .addContainerGap(117, Short.MAX_VALUE))
         );
 
         tabbedPane1.addTab(org.openide.util.NbBundle.getMessage(ProjectRunningCustomizer.class, "ProjectRunningCustomizer.serverPanel.TabConstraints.tabTitle"), serverPanel); // NOI18N
