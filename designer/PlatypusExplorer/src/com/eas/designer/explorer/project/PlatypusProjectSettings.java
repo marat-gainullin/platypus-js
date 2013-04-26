@@ -45,6 +45,7 @@ public class PlatypusProjectSettings {
     public static final String DEBUG_CLIENT_PORT_KEY = "debugClientPort"; //NOI18N
     public static final String DEBUG_SERVER_PORT_KEY = "debugServerPort"; //NOI18N
     public static final String J2EE_SERVER_ID_KEY = "j2eeServerId"; //NOI18N
+    public static final String SERVER_CONTEXT_NAME_KEY = "context";//NOI18N
     public static final String CLIENT_TYPE_KEY = "clientType"; //NOI18N
     public static final String SERVER_TYPE_KEY = "serverType"; //NOI18N
     protected final PlatypusSettings platypusSettings;
@@ -367,6 +368,28 @@ public class PlatypusProjectSettings {
         projectPrivatePropertiesIsDirty = true;
         changeSupport.firePropertyChange(J2EE_SERVER_ID_KEY, aValue, oldValue);
     }
+    
+    /**
+     * Gets application's context name.
+     *
+     * @return The name of the context string
+     */
+    public String getServerContextName() {
+        return projectProperties.get(SERVER_CONTEXT_NAME_KEY);
+    }
+
+    /**
+     * Sets application's context name.
+     *
+     * @param aValue The name of the context string
+     */
+    public void setServerContext(String aValue) {
+        String oldValue = getServerContextName();
+        projectProperties.setProperty(SERVER_CONTEXT_NAME_KEY, aValue);
+        projectPropertiesIsDirty = true;
+        changeSupport.firePropertyChange(SERVER_CONTEXT_NAME_KEY, oldValue, aValue);
+    }
+    
     
     /**
      * Gets client type to be run.

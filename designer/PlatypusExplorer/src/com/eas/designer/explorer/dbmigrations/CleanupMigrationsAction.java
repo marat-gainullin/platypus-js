@@ -13,8 +13,6 @@ import org.netbeans.api.progress.ProgressHandle;
 import org.netbeans.api.progress.ProgressHandleFactory;
 import org.netbeans.modules.j2ee.deployment.devmodules.api.Deployment;
 import org.netbeans.modules.j2ee.deployment.devmodules.spi.J2eeModuleProvider;
-import org.openide.DialogDisplayer;
-import org.openide.NotifyDescriptor;
 import org.openide.awt.HtmlBrowser;
 import org.openide.awt.StatusDisplayer;
 import org.openide.nodes.Node;
@@ -54,7 +52,6 @@ public class CleanupMigrationsAction extends AbstractAction implements ContextAw
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     try {
-                        
                         J2eeModuleProvider jmp = project.getLookup().lookup(J2eeModuleProvider.class);
                         String url = Deployment.getDefault().deploy(jmp, Deployment.Mode.RUN, null, "", false);
                         HtmlBrowser.URLDisplayer.getDefault().showURL(new URL(url));
