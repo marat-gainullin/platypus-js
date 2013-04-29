@@ -7,7 +7,7 @@ package com.eas.designer.explorer.j2ee;
 import com.eas.designer.explorer.project.PlatypusProject;
 
 /**
- *
+ * Provides concrete web application configurator. 
  * @author vv
  */
 public class WebAppConfiguratorFactory {
@@ -19,10 +19,20 @@ public class WebAppConfiguratorFactory {
     private WebAppConfiguratorFactory() {
     }
     
+    /**
+     * Gets factory instance.
+     * @return WebAppConfiguratorFactory instance
+     */
     public static WebAppConfiguratorFactory getInstance() {
         return instance;
     }
     
+    /**
+     * Creates a new configurator instance.
+     * @param aProject
+     * @param aServerId
+     * @return 
+     */
     public WebAppConfigurator createWebConfigurator(PlatypusProject aProject, String aServerId) {
         WebAppConfigurator webAppConfigurator = null;
         switch (aServerId) {

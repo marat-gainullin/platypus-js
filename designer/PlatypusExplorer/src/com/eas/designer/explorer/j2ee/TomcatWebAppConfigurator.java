@@ -9,7 +9,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
+ * Configures web application for Tomcat 7.
  * @author vv
  */
 public class TomcatWebAppConfigurator implements WebAppConfigurator {
