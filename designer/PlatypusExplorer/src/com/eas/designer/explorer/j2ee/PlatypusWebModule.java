@@ -27,7 +27,7 @@ import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 
 /**
- *
+ * Platypus web application.
  * @author vv
  */
 public class PlatypusWebModule extends J2eeModuleProvider implements J2eeModuleImplementation2,
