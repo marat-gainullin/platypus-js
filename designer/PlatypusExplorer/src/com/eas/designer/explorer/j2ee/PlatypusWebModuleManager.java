@@ -5,7 +5,7 @@
 package com.eas.designer.explorer.j2ee;
 
 /**
- * A tool to prepare and deploy web module.
+ * A tool to prepare and deploy the Platypus web module.
  * @author vv
  */
 public class PlatypusWebModuleManager {
