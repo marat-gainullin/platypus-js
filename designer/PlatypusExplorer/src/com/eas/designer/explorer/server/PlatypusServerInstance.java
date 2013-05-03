@@ -7,6 +7,7 @@ package com.eas.designer.explorer.server;
 import com.eas.client.ClientConstants;
 import com.eas.deploy.project.PlatypusSettings;
 import com.eas.designer.explorer.project.PlatypusProject;
+import com.eas.designer.explorer.project.PlatypusProjectSettings;
 import com.eas.designer.explorer.project.ProjectRunner;
 import com.eas.server.ServerMain;
 import java.io.File;
@@ -134,7 +135,7 @@ public final class PlatypusServerInstance implements ServerInstanceImplementatio
 
         processBuilder = processBuilder.addArgument(ServerMain.class.getName());
 
-        if (ps.isDbAppSources() == null || !ps.isDbAppSources()) {
+        if (!project.getSettings().isDbAppSources()) {
             processBuilder = processBuilder.addArgument(ProjectRunner.OPTION_PREFIX + ServerMain.APP_PATH_PARAM1);
             processBuilder = processBuilder.addArgument(project.getProjectDirectory().getPath());
             io.getOut().println(String.format("Server application sources: %s.", project.getProjectDirectory().getPath()));
@@ -149,27 +150,27 @@ public final class PlatypusServerInstance implements ServerInstanceImplementatio
         processBuilder = processBuilder.addArgument(ProjectRunner.OPTION_PREFIX + ServerMain.APP_DB_SCHEMA_CONF_PARAM);
         processBuilder = processBuilder.addArgument(ps.getDbSettings().getInfo().getProperty(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME));
 
-        if (!ProjectRunner.isSetByOption(ServerMain.IFACE_CONF_PARAM, ps.getRunClientOptions())) {
+        if (!ProjectRunner.isSetByOption(ServerMain.IFACE_CONF_PARAM, project.getSettings().getRunClientOptions())) {
             processBuilder = processBuilder.addArgument(ProjectRunner.OPTION_PREFIX + ServerMain.IFACE_CONF_PARAM);
-            processBuilder = processBuilder.addArgument(getListenInterfaceArgument(ps));
-            io.getOut().println(String.format("Server interface: %s.", getListenInterfaceArgument(ps)));
+            processBuilder = processBuilder.addArgument(getListenInterfaceArgument(project.getSettings()));
+            io.getOut().println(String.format("Server interface: %s.", getListenInterfaceArgument(project.getSettings())));
         }
-        if (!ProjectRunner.isSetByOption(ServerMain.PROTOCOLS_CONF_PARAM, ps.getRunClientOptions())) {
+        if (!ProjectRunner.isSetByOption(ServerMain.PROTOCOLS_CONF_PARAM, project.getSettings().getRunClientOptions())) {
             processBuilder = processBuilder.addArgument(ProjectRunner.OPTION_PREFIX + ServerMain.PROTOCOLS_CONF_PARAM);
-            processBuilder = processBuilder.addArgument(getProtocol(ps));
-            io.getOut().println(String.format("Server protocol: %s.", getProtocol(ps)));
+            processBuilder = processBuilder.addArgument(getProtocol(project.getSettings()));
+            io.getOut().println(String.format("Server protocol: %s.", getProtocol(project.getSettings())));
         }
-        if (ps.getRunClientOptions() != null && !ps.getRunClientOptions().isEmpty()) {
-            String[] optionalArgs = ps.getRunClientOptions().split(" ");// NOI18N
+        if (project.getSettings().getRunClientOptions() != null && !project.getSettings().getRunClientOptions().isEmpty()) {
+            String[] optionalArgs = project.getSettings().getRunClientOptions().split(" ");// NOI18N
             if (optionalArgs.length > 0) {
                 for (int i = 0; i < optionalArgs.length; i++) {
                     processBuilder = processBuilder.addArgument(optionalArgs[i]);
                 }
             }
-            io.getOut().println(String.format("Server options: %s.", ps.getRunClientOptions()));
+            io.getOut().println(String.format("Server options: %s.", project.getSettings().getRunClientOptions()));
         }
         //set default log level if not set explicitly
-        if (!ProjectRunner.isSetByOption(ServerMain.LOGLEVEL_CONF_PARAM, ps.getRunClientOptions())) {
+        if (!ProjectRunner.isSetByOption(ServerMain.LOGLEVEL_CONF_PARAM, project.getSettings().getRunClientOptions())) {
             processBuilder = processBuilder.addArgument(ProjectRunner.OPTION_PREFIX + ServerMain.LOGLEVEL_CONF_PARAM);
             processBuilder = processBuilder.addArgument(Level.INFO.getName());
             io.getOut().println(String.format("Server logging level set to: %s.", Level.INFO.getName()));
@@ -193,11 +194,11 @@ public final class PlatypusServerInstance implements ServerInstanceImplementatio
         return clientAppExecutable.getAbsolutePath();
     }
 
-    private static String getListenInterfaceArgument(PlatypusSettings settings) {
+    private static String getListenInterfaceArgument(PlatypusProjectSettings settings) {
         return ANY_LOCAL_ADRESS + ARGUMENT_SEPARATOR + settings.getServerPort();
     }
 
-    private static String getProtocol(PlatypusSettings settings) {
+    private static String getProtocol(PlatypusProjectSettings settings) {
         return settings.getServerPort() + ARGUMENT_SEPARATOR + settings.getServerProtocol();
     }
 
