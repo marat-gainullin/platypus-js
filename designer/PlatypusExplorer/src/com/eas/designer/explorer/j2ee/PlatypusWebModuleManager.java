@@ -7,13 +7,12 @@ package com.eas.designer.explorer.j2ee;
 import com.eas.designer.explorer.platform.EmptyPlatformHomePathException;
 import com.eas.designer.explorer.platform.PlatypusPlatform;
 import com.eas.designer.explorer.project.PlatypusProject;
-import com.sun.istack.internal.logging.Logger;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.netbeans.modules.j2ee.deployment.devmodules.api.Deployment;
 import org.netbeans.modules.j2ee.deployment.devmodules.api.Deployment.DeploymentException;
 import org.netbeans.modules.j2ee.deployment.devmodules.spi.J2eeModuleProvider;
@@ -57,7 +56,7 @@ public class PlatypusWebModuleManager {
                 configureWebApplication(jmp);
                 String url = Deployment.getDefault().deploy(jmp, Deployment.Mode.RUN, null, "", false);
                 String deployResultMessage = String.format("Web application deployed. URL: %s", url); //NOI18N
-                Logger.getLogger(getClass()).log(Level.INFO, deployResultMessage);
+                Logger.getLogger(PlatypusWebModuleManager.class.getName()).log(Level.INFO, deployResultMessage);
                 project.getOutputWindowIO().getOut().println(deployResultMessage);
                 if (isOpenBrowser) {
                     HtmlBrowser.URLDisplayer.getDefault().showURL(new URL(url));
@@ -126,12 +125,12 @@ public class PlatypusWebModuleManager {
                 webAppConfigurator.configure();
             } else {
                 String errorMessage = String.format("Web application configuration is not supported for application server: %s", aJmp.getServerID()); //NOI18N
-                Logger.getLogger(getClass()).log(Level.WARNING, errorMessage);
+                Logger.getLogger(PlatypusWebModuleManager.class.getName()).log(Level.WARNING, errorMessage);
                 project.getOutputWindowIO().getErr().println(errorMessage);
             }
         } else {
             String errorMessage = "Application server is not set. Check J2EE Server settings at Project's properties"; //NOI18N
-            Logger.getLogger(getClass()).log(Level.WARNING, errorMessage);
+            Logger.getLogger(PlatypusWebModuleManager.class.getName()).log(Level.WARNING, errorMessage);
             project.getOutputWindowIO().getErr().println(errorMessage);
         }
     }
