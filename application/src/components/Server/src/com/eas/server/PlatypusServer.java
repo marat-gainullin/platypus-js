@@ -23,6 +23,7 @@ import java.util.logging.Logger;
 import javax.net.ssl.SSLContext;
 import org.apache.mina.core.service.IoAcceptor;
 import org.apache.mina.core.service.IoHandler;
+import org.apache.mina.core.session.IoEventType;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.apache.mina.filter.executor.ExecutorFilter;
 import org.apache.mina.filter.executor.OrderedThreadPoolExecutor;
@@ -153,7 +154,8 @@ public class PlatypusServer extends PlatypusServerCore {
         final ExecutorService executor = new OrderedThreadPoolExecutor(DEFAULT_EXECUTOR_POOL_SIZE);
 
         final IoAcceptor acceptor = new NioSocketAcceptor();
-        acceptor.getFilterChain().addLast("executor", new ExecutorFilter(executor));
+        acceptor.getFilterChain().addLast("executor", new ExecutorFilter(executor, IoEventType.EXCEPTION_CAUGHT,
+            IoEventType.MESSAGE_RECEIVED, IoEventType.MESSAGE_SENT, IoEventType.SESSION_CLOSED));
         acceptor.getFilterChain().addLast("encryption", sslFilter);
         acceptor.getFilterChain().addLast("platypusRequestCodec", new ProtocolCodecFilter(new ResponseEncoder(), new RequestDecoder()));
         acceptor.setHandler((IoHandler) new PlatypusRequestsHandler(this));
