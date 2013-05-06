@@ -9,18 +9,23 @@ import com.eas.client.application.PlatypusClientApplication;
 import com.eas.deploy.project.PlatypusSettings;
 import com.eas.designer.debugger.DebuggerEnvironment;
 import com.eas.designer.debugger.DebuggerUtils;
+import com.eas.designer.explorer.j2ee.PlatypusWebModuleManager;
 import com.eas.designer.explorer.platform.EmptyPlatformHomePathException;
 import com.eas.designer.explorer.platform.PlatypusPlatform;
 import com.eas.designer.explorer.server.PlatypusServerInstance;
 import com.eas.designer.explorer.server.PlatypusServerInstanceProvider;
 import com.eas.designer.explorer.server.ServerSupport;
 import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 import org.netbeans.api.extexecution.ExecutionDescriptor;
 import org.netbeans.api.extexecution.ExecutionService;
 import org.netbeans.api.extexecution.ExternalProcessBuilder;
 import org.openide.ErrorManager;
+import org.openide.awt.HtmlBrowser;
+import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 import org.openide.util.RequestProcessor;
 import org.openide.windows.IOProvider;
@@ -47,15 +52,13 @@ public class ProjectRunner {
     private static final RequestProcessor RP = new RequestProcessor(ProjectRunner.class.getName());
 
     public static void run(final PlatypusProject project, final String appElementId) throws Exception {
-        /*
+
          RP.post(new Runnable() {
          @Override
          public void run() {
-         */
         start(project, appElementId, false);
-        /*       }
+               }
          });
-         */
     }
 
     public static void debug(final PlatypusProject project, final String appElementId) throws Exception {
@@ -90,7 +93,7 @@ public class ProjectRunner {
 
     private static Future<Integer> start(PlatypusProject project, String appElementId, boolean debug) {
         InputOutput io = IOProvider.getDefault().getIO(project.getDisplayName(), false);
-        File binDir = null;
+        File binDir;
         try {
             binDir = PlatypusPlatform.getPlatformBinDirectory();
         } catch (EmptyPlatformHomePathException | IllegalStateException ex) {
@@ -107,8 +110,9 @@ public class ProjectRunner {
                 }
             }
         }
-        io.getOut().println("Starting Platypus Client..");
+        io.getOut().println("Starting Platypus Application..");
         PlatypusProjectSettings pps = project.getSettings();
+        String webAppUrl = null;
         if (AppServerType.PLATYPUS_SERVER.equals(pps.getRunAppServerType())
                 && project.getSettings().isStartServer()
                 && ServerSupport.isLocalHost(pps.getServerHost())) {
@@ -137,89 +141,117 @@ public class ProjectRunner {
                     io.getErr().println("Platypus Server started for another project: " + serverInstance.getProject().getDisplayName());
                 }
             }
+        } else if (AppServerType.J2EE_SERVER.equals(pps.getRunAppServerType())) {
+            io.getOut().println("Starting J2EE Server..");
+            PlatypusWebModuleManager webManager = project.getLookup().lookup(PlatypusWebModuleManager.class);
+            if (webManager != null) {
+                webAppUrl = webManager.run(debug);
+            } else {
+                throw new IllegalStateException("An instance of PlatypusWebModuleManager is not found in project's lookup.");
+            }
         }
-        ExecutionDescriptor descriptor = new ExecutionDescriptor()
-                .frontWindow(true)
-                .controllable(true);
-        ExternalProcessBuilder processBuilder = new ExternalProcessBuilder(JVM_RUN_COMMAND_NAME);
-        if (debug) {
-            processBuilder = setDebugArguments(processBuilder, project.getSettings().getDebugClientPort());
-        }
+        if (ClientType.PLATYPUS_CLIENT.equals(pps.getRunClientType())) {
+            ExecutionDescriptor descriptor = new ExecutionDescriptor()
+                    .frontWindow(true)
+                    .controllable(true);
+            ExternalProcessBuilder processBuilder = new ExternalProcessBuilder(JVM_RUN_COMMAND_NAME);
+            if (debug) {
+                processBuilder = setDebugArguments(processBuilder, project.getSettings().getDebugClientPort());
+            }
 
-        processBuilder = processBuilder.addArgument(OPTION_PREFIX + CLASSPATH_OPTION_NAME);
-        processBuilder = processBuilder.addArgument(getExtendedClasspath(getExecutablePath(binDir)));
+            processBuilder = processBuilder.addArgument(OPTION_PREFIX + CLASSPATH_OPTION_NAME);
+            processBuilder = processBuilder.addArgument(getExtendedClasspath(getExecutablePath(binDir)));
 
-        processBuilder = processBuilder.addArgument(PlatypusClientApplication.class.getName());
+            processBuilder = processBuilder.addArgument(PlatypusClientApplication.class.getName());
 
-        String runElementId = null;
-        PlatypusSettings ps = pps.getAppSettings();
-        if (appElementId != null && !appElementId.isEmpty()) {
-            runElementId = appElementId;
-        } else if (ps.getRunElement() != null && !ps.getRunElement().isEmpty()) {
-            runElementId = pps.getAppSettings().getRunElement();
-        }
-        if (runElementId != null && !runElementId.isEmpty()) {
-            processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.APPELEMENT_CMD_SWITCH);
-            processBuilder = processBuilder.addArgument(runElementId);
-            io.getOut().println("Start application element: " + runElementId);
-        } else {
-            io.getErr().println("Start application element is not set.");
+            String runElementId = null;
+            PlatypusSettings ps = pps.getAppSettings();
+            if (appElementId != null && !appElementId.isEmpty()) {
+                runElementId = appElementId;
+            } else if (ps.getRunElement() != null && !ps.getRunElement().isEmpty()) {
+                runElementId = pps.getAppSettings().getRunElement();
+            }
+            if (runElementId != null && !runElementId.isEmpty()) {
+                processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.APPELEMENT_CMD_SWITCH);
+                processBuilder = processBuilder.addArgument(runElementId);
+                io.getOut().println("Start application element: " + runElementId);
+            } else {
+                io.getErr().println("Start application element is not set.");
+                return null;
+            }
+            if (!pps.isDbAppSources()) {
+                processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.APP_PATH_CMD_SWITCH1);
+                processBuilder = processBuilder.addArgument(project.getProjectDirectory().getPath());
+                io.getOut().println(String.format("Application sources: %s.", project.getProjectDirectory().getPath()));
+            } else {
+                io.getOut().println("Application sources: database.");
+            }
+            if (AppServerType.PLATYPUS_SERVER.equals(pps.getRunAppServerType())) {
+                processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.URL_CMD_SWITCH);
+                processBuilder = processBuilder.addArgument(getServerUrl(pps));
+                io.getOut().println(String.format("Using application server at URL: %s.", getServerUrl(pps)));
+            } else if (AppServerType.J2EE_SERVER.equals(pps.getRunAppServerType())) {
+                if (webAppUrl != null && webAppUrl.isEmpty()) {
+                   processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.URL_CMD_SWITCH);
+                    processBuilder = processBuilder.addArgument(webAppUrl);
+                    io.getOut().println(String.format("Using application J2EE server at URL: %s.", webAppUrl));
+                }
+            } else if (AppServerType.NONE.equals(pps.getRunAppServerType())) {
+                processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.URL_CMD_SWITCH);
+                processBuilder = processBuilder.addArgument(ps.getDbSettings().getUrl());
+                processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.DBUSER_CMD_SWITCH);
+                processBuilder = processBuilder.addArgument(ps.getDbSettings().getInfo().getProperty(ClientConstants.DB_CONNECTION_USER_PROP_NAME));
+                processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.DBPASSWORD_CMD_SWITCH);
+                processBuilder = processBuilder.addArgument(ps.getDbSettings().getInfo().getProperty(ClientConstants.DB_CONNECTION_PASSWORD_PROP_NAME));
+                processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.DBSCHEMA_CMD_SWITCH);
+                processBuilder = processBuilder.addArgument(ps.getDbSettings().getInfo().getProperty(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME));
+                io.getOut().println("Using direct connection to database.");
+            }
+            if (project.getSettings().getRunUser() != null && !project.getSettings().getRunUser().trim().isEmpty() && project.getSettings().getRunPassword() != null && !project.getSettings().getRunPassword().trim().isEmpty()) {
+                processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.USER_CMD_SWITCH);
+                processBuilder = processBuilder.addArgument(project.getSettings().getRunUser());
+                processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.PASSWORD_CMD_SWITCH);
+                processBuilder = processBuilder.addArgument(project.getSettings().getRunPassword());
+                io.getOut().println("Log in as user: " + project.getSettings().getRunUser());
+            }
+            if (pps.getRunClientOptions() != null && !pps.getRunClientOptions().isEmpty()) {
+                String[] optionalArgs = pps.getRunClientOptions().split(" ");
+                if (optionalArgs.length > 0) {
+                    for (int i = 0; i < optionalArgs.length; i++) {
+                        processBuilder = processBuilder.addArgument(optionalArgs[i]);
+                    }
+                }
+                io.getOut().println(String.format("Options: %s.", pps.getRunClientOptions()));
+            }
+            //set default log level if not set explicitly
+            if (!isSetByOption(PlatypusClientApplication.LOGLEVEL_CMD_SWITCH, pps.getRunClientOptions())) {
+                processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.LOGLEVEL_CMD_SWITCH);
+                processBuilder = processBuilder.addArgument(Level.INFO.getName());
+                io.getOut().println(String.format("Logging level set to: %s.", Level.INFO.getName()));
+            }
+            if (debug) {
+                processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.STOP_BEFORE_RUN_CMD_SWITCH);
+            }
+            ExecutionService service = ExecutionService.newService(processBuilder, descriptor, getServiceDisplayName(project, debug));
+            io.getOut().println("Starting Platypus Client..");
+            Future<Integer> clientTask = service.run();
+            if (clientTask != null) {
+                io.getOut().println("Platypus Client started.");
+                io.getOut().println();
+            }
+            return clientTask;
+        } else if (ClientType.WEB_BROWSER.equals(pps.getRunClientType())) {
+            try {
+                if (webAppUrl != null) {
+                    io.getOut().println(String.format("Starting web browser: %s", webAppUrl));
+                    HtmlBrowser.URLDisplayer.getDefault().showURL(new URL(webAppUrl));
+                }
+            } catch (MalformedURLException ex) {
+                ErrorManager.getDefault().notify(ex);
+            }
             return null;
         }
-        if (!pps.isDbAppSources()) {
-            processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.APP_PATH_CMD_SWITCH1);
-            processBuilder = processBuilder.addArgument(project.getProjectDirectory().getPath());
-            io.getOut().println(String.format("Application sources: %s.", project.getProjectDirectory().getPath()));
-        } else {
-            io.getOut().println("Application sources: database.");
-        }
-        if (AppServerType.PLATYPUS_SERVER.equals(pps.getRunAppServerType())) {
-            processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.URL_CMD_SWITCH);
-            processBuilder = processBuilder.addArgument(getServerUrl(pps));
-            io.getOut().println(String.format("Using application server at URL: %s.", getServerUrl(pps)));
-        } else {
-            processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.URL_CMD_SWITCH);
-            processBuilder = processBuilder.addArgument(ps.getDbSettings().getUrl());
-            processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.DBUSER_CMD_SWITCH);
-            processBuilder = processBuilder.addArgument(ps.getDbSettings().getInfo().getProperty(ClientConstants.DB_CONNECTION_USER_PROP_NAME));
-            processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.DBPASSWORD_CMD_SWITCH);
-            processBuilder = processBuilder.addArgument(ps.getDbSettings().getInfo().getProperty(ClientConstants.DB_CONNECTION_PASSWORD_PROP_NAME));
-            processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.DBSCHEMA_CMD_SWITCH);
-            processBuilder = processBuilder.addArgument(ps.getDbSettings().getInfo().getProperty(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME));
-            io.getOut().println("Using direct connection to database.");
-        }
-        if (project.getSettings().getRunUser() != null && !project.getSettings().getRunUser().trim().isEmpty() && project.getSettings().getRunPassword() != null && !project.getSettings().getRunPassword().trim().isEmpty()) {
-            processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.USER_CMD_SWITCH);
-            processBuilder = processBuilder.addArgument(project.getSettings().getRunUser());
-            processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.PASSWORD_CMD_SWITCH);
-            processBuilder = processBuilder.addArgument(project.getSettings().getRunPassword());
-            io.getOut().println("Log in as user: " + project.getSettings().getRunUser());
-        }
-        if (pps.getRunClientOptions() != null && !pps.getRunClientOptions().isEmpty()) {
-            String[] optionalArgs = pps.getRunClientOptions().split(" ");
-            if (optionalArgs.length > 0) {
-                for (int i = 0; i < optionalArgs.length; i++) {
-                    processBuilder = processBuilder.addArgument(optionalArgs[i]);
-                }
-            }
-            io.getOut().println(String.format("Options: %s.", pps.getRunClientOptions()));
-        }
-        //set default log level if not set explicitly
-        if (!isSetByOption(PlatypusClientApplication.LOGLEVEL_CMD_SWITCH, pps.getRunClientOptions())) {
-            processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.LOGLEVEL_CMD_SWITCH);
-            processBuilder = processBuilder.addArgument(Level.INFO.getName());
-            io.getOut().println(String.format("Logging level set to: %s.", Level.INFO.getName()));
-        }
-        if (debug) {
-            processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.STOP_BEFORE_RUN_CMD_SWITCH);
-        }
-        ExecutionService service = ExecutionService.newService(processBuilder, descriptor, getServiceDisplayName(project, debug));
-        Future<Integer> clientTask = service.run();
-        if (clientTask != null) {
-            io.getOut().println("Platypus Client started.");
-            io.getOut().println();
-        }
-        return clientTask;
+        return null;
     }
 
     public static ExternalProcessBuilder setDebugArguments(ExternalProcessBuilder processBuilder, int port) {

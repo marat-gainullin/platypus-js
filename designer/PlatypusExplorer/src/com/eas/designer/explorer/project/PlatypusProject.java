@@ -13,22 +13,19 @@ import com.eas.client.settings.DbConnectionSettings;
 import com.eas.deploy.BaseDeployer;
 import com.eas.deploy.DbMigrator;
 import com.eas.deploy.Deployer;
-import com.eas.deploy.project.PlatypusSettings;
 import com.eas.designer.application.HandlerRegistration;
 import com.eas.designer.application.PlatypusUtils;
 import com.eas.designer.application.indexer.PlatypusPathRecognizer;
 import com.eas.designer.explorer.j2ee.PlatypusWebModule;
+import com.eas.designer.explorer.j2ee.PlatypusWebModuleManager;
 import com.eas.designer.explorer.model.windows.ModelInspector;
 import com.eas.designer.explorer.project.ui.PlatypusProjectCustomizerProvider;
 import com.eas.util.BinaryUtils;
-import com.eas.xml.dom.Source2XmlDom;
-import com.eas.xml.dom.XmlDom2String;
 import java.awt.Component;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.*;
@@ -66,7 +63,6 @@ import org.openide.util.TaskListener;
 import org.openide.util.lookup.Lookups;
 import org.openide.windows.IOProvider;
 import org.openide.windows.InputOutput;
-import org.w3c.dom.Document;
 
 /**
  *
@@ -123,7 +119,8 @@ public class PlatypusProject implements Project {
                 new PlatypusPrivilegedTemplates(),
                 new PlatypusProjectCustomizerProvider(this),
                 new PlatypusFilesEncodingQuery(), 
-                new PlatypusWebModule(this));
+                new PlatypusWebModule(this),
+                new PlatypusWebModuleManager(this));
     }
 
     public boolean isDbConnected() {

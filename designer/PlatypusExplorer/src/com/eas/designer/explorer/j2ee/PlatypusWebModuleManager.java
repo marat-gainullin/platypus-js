@@ -9,7 +9,6 @@ import com.eas.designer.explorer.platform.PlatypusPlatform;
 import com.eas.designer.explorer.project.PlatypusProject;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.ZipException;
@@ -17,7 +16,6 @@ import org.netbeans.modules.j2ee.deployment.devmodules.api.Deployment;
 import org.netbeans.modules.j2ee.deployment.devmodules.api.Deployment.DeploymentException;
 import org.netbeans.modules.j2ee.deployment.devmodules.spi.J2eeModuleProvider;
 import org.openide.ErrorManager;
-import org.openide.awt.HtmlBrowser;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 
@@ -48,21 +46,24 @@ public class PlatypusWebModuleManager {
      * Runs the web application.
      *
      * @param isDebug true if debug mode to be activated
-     * @param isOpenBrowser true if default browser should be opened after
-     * running the application.
+     * @return URL to open in browser
+     *
      */
-    public void run(boolean isDebug, boolean isOpenBrowser) {
+    public String run(boolean isDebug) {
         J2eeModuleProvider jmp = project.getLookup().lookup(J2eeModuleProvider.class);
+        String webAppRunUrl = null;
         if (jmp != null) {
             try {
-                prepareWebApplication();
-                configureWebApplication(jmp);
-                String url = Deployment.getDefault().deploy(jmp, Deployment.Mode.RUN, null, "", false);
-                String deployResultMessage = String.format("Web application deployed. URL: %s", url); //NOI18N
-                Logger.getLogger(PlatypusWebModuleManager.class.getName()).log(Level.INFO, deployResultMessage);
-                project.getOutputWindowIO().getOut().println(deployResultMessage);
-                if (isOpenBrowser) {
-                    HtmlBrowser.URLDisplayer.getDefault().showURL(new URL(url));
+                String serverID = jmp.getServerID();
+                if (serverID != null && serverID.isEmpty()) {
+                    prepareWebApplication();
+                    configureWebApplication(jmp);
+                    webAppRunUrl = Deployment.getDefault().deploy(jmp, Deployment.Mode.RUN, null, "", false);
+                    String deployResultMessage = String.format("Web application deployed. URL: %s", webAppRunUrl); //NOI18N
+                    Logger.getLogger(PlatypusWebModuleManager.class.getName()).log(Level.INFO, deployResultMessage);
+                    project.getOutputWindowIO().getOut().println(deployResultMessage);
+                } else {
+                    project.getOutputWindowIO().getOut().println("J2EE Server is not configured for the project.");
                 }
             } catch (IOException | EmptyPlatformHomePathException | DeploymentException ex) {
                 ErrorManager.getDefault().notify(ex);
@@ -70,13 +71,14 @@ public class PlatypusWebModuleManager {
         } else {
             throw new IllegalStateException("J2eeModuleProvider instance should be in the project's lookup."); //NOI18N
         }
+        return webAppRunUrl;
     }
 
     /**
      * Creates an web application skeleton if not created yet.
      */
     protected void prepareWebApplication() throws IOException, EmptyPlatformHomePathException {
-        createFolderIfNotExists(projectDir, PlatypusWebModule.WEB_DIRECTORY);
+        webAppDir = createFolderIfNotExists(projectDir, PlatypusWebModule.WEB_DIRECTORY);
         FileObject platformBinDir = FileUtil.toFileObject(PlatypusPlatform.getPlatformBinDirectory());
         FileObject referenceWar = platformBinDir.getFileObject(WAR_FILE_NAME);
         if (referenceWar != null) {
@@ -96,7 +98,7 @@ public class PlatypusWebModuleManager {
      * Recursively copies web application structure from war archive. If
      * destination file exists it isn't overwritten.
      *
-     * @throws IOException if some I/O problem occurred. 
+     * @throws IOException if some I/O problem occurred.
      */
     protected void copyContent(FileObject sourceDir, FileObject targetDir) throws IOException {
         assert sourceDir.isFolder() && targetDir.isFolder();
@@ -105,7 +107,7 @@ public class PlatypusWebModuleManager {
             if (childFile.isFolder()) {
                 targetFile = targetDir.getFileObject(childFile.getName(), childFile.getExt());
                 if (targetFile == null) {
-                    targetFile.createFolder(childFile.getNameExt());
+                    targetFile = targetDir.createFolder(childFile.getNameExt());
                 }
                 assert targetFile.isFolder();
                 copyContent(childFile, targetFile);
@@ -122,7 +124,7 @@ public class PlatypusWebModuleManager {
         }
         return target;
     }
-    
+
     private FileObject createFolderIfNotExists(FileObject dir, String name) throws IOException {
         FileObject fo = dir.getFileObject(name);
         if (fo == null) {
