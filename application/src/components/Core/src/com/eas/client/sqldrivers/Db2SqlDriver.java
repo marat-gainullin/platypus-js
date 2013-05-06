@@ -73,22 +73,22 @@ public class Db2SqlDriver extends SqlDriver {
             + " order by " + ClientConstants.JDBCCOLS_TABLE_NAME;
     protected static final String SQL_COLUMNS = ""
             + "select "
-            + "c.TBCREATOR as " + ClientConstants.JDBCCOLS_TABLE_SCHEM + ", "
-            + "c.TBNAME as " + ClientConstants.JDBCCOLS_TABLE_NAME + ", "
+            + "c.TABLE_SCHEM as " + ClientConstants.JDBCCOLS_TABLE_SCHEM + ", "
+            + "c.TABLE_NAME as " + ClientConstants.JDBCCOLS_TABLE_NAME + ", "
             + "t.REMARKS as " + ClientConstants.JDBCCOLS_TABLE_DESC + ", "
-            + "c.NAME as " + ClientConstants.JDBCCOLS_COLUMN_NAME + ", "
+            + "c.COLUMN_NAME as " + ClientConstants.JDBCCOLS_COLUMN_NAME + ", "
             + "c.REMARKS as " + ClientConstants.JDBCCOLS_REMARKS + ", "
-            + "c.COLTYPE as " + ClientConstants.JDBCCOLS_DATA_TYPE + ", "
-            + "c.COLNO as " + ClientConstants.JDBCIDX_ORDINAL_POSITION + ", "
-            + "c.TYPENAME as " + ClientConstants.JDBCCOLS_TYPE_NAME + ", "
-            + "c.LENGTH as " + ClientConstants.JDBCCOLS_COLUMN_SIZE + ", "
-            + "c.SCALE as " + ClientConstants.JDBCCOLS_DECIMAL_DIGITS + ", "
+            + "c.DATA_TYPE as " + ClientConstants.JDBCCOLS_DATA_TYPE + ", "
+            + "c.ORDINAL_POSITION as " + ClientConstants.JDBCIDX_ORDINAL_POSITION + ", "
+            + "c.TYPE_NAME as " + ClientConstants.JDBCCOLS_TYPE_NAME + ", "
+            + "c.COLUMN_SIZE as " + ClientConstants.JDBCCOLS_COLUMN_SIZE + ", "
+            + "c.DECIMAL_DIGITS as " + ClientConstants.JDBCCOLS_DECIMAL_DIGITS + ", "
             + "10 as " + ClientConstants.JDBCCOLS_NUM_PREC_RADIX + ", "
-            + "decode(c.NULLS, 'Y', 1, 0) as " + ClientConstants.JDBCCOLS_NULLABLE
-            + " from SYSIBM.SYSCOLUMNS as c"
-            + " inner join SYSIBM.SYSTABLES as t on (t.NAME = c.TBNAME and c.TBCREATOR = t.CREATOR)"
-            + " where Upper(c.TBCREATOR) = Upper('%s') and Upper(c.TBNAME) in (%s)"
-            + " order by c.TBNAME, c.COLNO";
+            + "c.NULLABLE as " + ClientConstants.JDBCCOLS_NULLABLE
+            + " from SYSIBM.SQLCOLUMNS as c"
+            + " inner join SYSIBM.SYSTABLES as t on (t.NAME = c.TABLE_NAME and c.TABLE_SCHEM = t.CREATOR)"
+            + " where Upper(c.TABLE_SCHEM) = Upper('%s') and Upper(c.TABLE_NAME) in (%s)"
+            + " order by c.TABLE_NAME, c.ORDINAL_POSITION";
     protected static final String SQL_PRIMARY_KEYS = ""
             + "select "
             + "tpk.TABLE_SCHEM as " + ClientConstants.JDBCPKS_TABLE_SCHEM + ", "
@@ -396,13 +396,16 @@ public class Db2SqlDriver extends SqlDriver {
             tableName = aSchemaName + "." + tableName;
         }
         String modifier = "";
-        if (aIndex.isClustered()) {
-            modifier = "clustered";
-        } else if (aIndex.isUnique()) {
+//        if (aIndex.isClustered()) {
+//            modifier = "clustered";
+//        } else if (aIndex.isUnique()) {
+//            modifier = "unique";
+//        } else if (aIndex.isHashed()) {
+//            modifier = "bitmap";
+//        }
+        if (aIndex.isUnique()) {
             modifier = "unique";
-        } else if (aIndex.isHashed()) {
-            modifier = "bitmap";
-        }
+        } 
         String fieldsList = "";
         for (int i = 0; i < aIndex.getColumns().size(); i++) {
             DbTableIndexColumnSpec column = aIndex.getColumns().get(i);
@@ -678,10 +681,8 @@ public class Db2SqlDriver extends SqlDriver {
                     fkRule += " ON DELETE CASCADE ";
                     break;
                 case NOACTION:
-                    fkRule += " ON DELETE no action ";
-                    break;
                 case SETDEFAULT:
-                    fkRule += " ON DELETE set default ";
+                    fkRule += " ON DELETE no action ";
                     break;
                 case SETNULL:
                     fkRule += " ON DELETE set null ";
@@ -717,7 +718,7 @@ public class Db2SqlDriver extends SqlDriver {
             if (aSchemaName != null && !aSchemaName.isEmpty()) {
                 pkTableName = wrapName(aSchemaName) + "." + pkTableName;
             }
-            return String.format("ALTER TABLE %s ADD CONSTRAINT %s PRIMARY KEY (%s)", pkTableName, (pkName.isEmpty() ? "" : wrapName(pkName)), pkColumnName);
+            return String.format("ALTER TABLE %s ADD %s PRIMARY KEY (%s)", pkTableName, (pkName.isEmpty() ? "" : "CONSTRAINT "+ wrapName(pkName)), pkColumnName);
         }
         return null;
     }

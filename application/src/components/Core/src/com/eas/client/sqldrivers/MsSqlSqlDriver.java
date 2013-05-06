@@ -388,11 +388,17 @@ public class MsSqlSqlDriver extends SqlDriver {
 
     @Override
     public String[] getSql4CreateColumnComment(String aOwnerName, String aTableName, String aFieldName, String aDescription) {
+        if (aDescription == null) {
+            aDescription = "";
+        }
         return new String[]{String.format(ADD_COLUMN_COMMENT_CLAUSE, wrapName(aOwnerName), wrapName(aTableName), wrapName(aFieldName), aDescription, wrapName(aOwnerName), wrapName(aTableName), wrapName(aFieldName))};
     }
 
     @Override
     public String getSql4CreateTableComment(String aOwnerName, String aTableName, String aDescription) {
+        if (aDescription == null) {
+            aDescription = "";
+        }
         return String.format(ADD_TABLE_COMMENT_CLAUSE, aOwnerName, aTableName, aDescription, aOwnerName, aTableName);
     }
 
@@ -542,7 +548,7 @@ public class MsSqlSqlDriver extends SqlDriver {
             if (aSchemaName != null && !aSchemaName.isEmpty()) {
                 pkTableName = wrapName(aSchemaName) + "." + pkTableName;
             }
-            return String.format("ALTER TABLE %s ADD CONSTRAINT %s PRIMARY KEY (%s)", pkTableName, (pkName.isEmpty() ? "" : wrapName(pkName)), pkColumnName);
+            return String.format("ALTER TABLE %s ADD %s PRIMARY KEY (%s)", pkTableName, (pkName.isEmpty() ? "" : "CONSTRAINT "+wrapName(pkName)), pkColumnName);
         }
         return null;
     }
