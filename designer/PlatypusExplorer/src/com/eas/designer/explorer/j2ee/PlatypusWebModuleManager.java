@@ -7,13 +7,13 @@ package com.eas.designer.explorer.j2ee;
 import com.eas.designer.explorer.platform.EmptyPlatformHomePathException;
 import com.eas.designer.explorer.platform.PlatypusPlatform;
 import com.eas.designer.explorer.project.PlatypusProject;
-import com.sun.istack.internal.logging.Logger;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.zip.ZipException;
 import org.netbeans.modules.j2ee.deployment.devmodules.api.Deployment;
 import org.netbeans.modules.j2ee.deployment.devmodules.api.Deployment.DeploymentException;
 import org.netbeans.modules.j2ee.deployment.devmodules.spi.J2eeModuleProvider;
@@ -29,8 +29,11 @@ import org.openide.filesystems.FileUtil;
  */
 public class PlatypusWebModuleManager {
 
-    private static final String WAR_FILE_NAME = "PlatypusServlet.war"; //NOI18N
-    private static final String WEB_DESCRIPTOR_FILE_NAME = "web.xml"; //NOI18N
+    protected static final String WAR_FILE_NAME = "PlatypusServlet.war"; //NOI18N
+    protected static final String WEB_DESCRIPTOR_FILE_NAME = "web.xml"; //NOI18N
+    protected static final String START_PAGE_FILE_NAME = "index.html"; //NOI18N
+    protected static final String LOGIN_PAGE_FILE_NAME = "login.html"; //NOI18N
+    protected static final String LOGIN_FAIL_PAGE_FILE_NAME = "loginFail.html"; //NOI18N
     protected final PlatypusProject project;
     protected final FileObject projectDir;
     protected FileObject webAppDir;
@@ -57,7 +60,7 @@ public class PlatypusWebModuleManager {
                 configureWebApplication(jmp);
                 String url = Deployment.getDefault().deploy(jmp, Deployment.Mode.RUN, null, "", false);
                 String deployResultMessage = String.format("Web application deployed. URL: %s", url); //NOI18N
-                Logger.getLogger(getClass()).log(Level.INFO, deployResultMessage);
+                Logger.getLogger(getClass().getName()).log(Level.INFO, deployResultMessage);
                 project.getOutputWindowIO().getOut().println(deployResultMessage);
                 if (isOpenBrowser) {
                     HtmlBrowser.URLDisplayer.getDefault().showURL(new URL(url));
@@ -74,44 +77,59 @@ public class PlatypusWebModuleManager {
      * Creates an web application skeleton if not created yet.
      */
     protected void prepareWebApplication() throws IOException, EmptyPlatformHomePathException {
-        prepareDirectories();
-        prepareContent();
-    }
-
-    private void prepareDirectories() throws IOException {
-        webAppDir = projectDir.getFileObject(PlatypusWebModule.WEB_DIRECTORY);
-        if (webAppDir == null) {
-            webAppDir = projectDir.createFolder(PlatypusWebModule.WEB_DIRECTORY);
-        }
-        webInfDir = webAppDir.getFileObject(PlatypusWebModule.WEB_INF_DIRECTORY);
-        if (webInfDir == null) {
-            webInfDir = webAppDir.createFolder(PlatypusWebModule.WEB_INF_DIRECTORY);
-        }
-        metaInfDir = webAppDir.getFileObject(PlatypusWebModule.META_INF_DIRECTORY);
-        if (metaInfDir == null) {
-            metaInfDir = webAppDir.createFolder(PlatypusWebModule.META_INF_DIRECTORY);
-        }
-    }
-
-    private void prepareContent() throws IOException, EmptyPlatformHomePathException {
-        File platformBinDir = PlatypusPlatform.getPlatformBinDirectory();
-        File referenceWar = new File(platformBinDir, WAR_FILE_NAME);
-        if (referenceWar.exists()) {
-            FileObject warFileObject = FileUtil.getArchiveRoot(FileUtil.toFileObject(referenceWar));
-            if (FileUtil.isArchiveFile(warFileObject)) {
-                copyIfNotExists(warFileObject.getFileObject(WEB_DESCRIPTOR_FILE_NAME).getFileObject(WEB_DESCRIPTOR_FILE_NAME), webInfDir);
+        createFolderIfNotExists(projectDir, PlatypusWebModule.WEB_DIRECTORY);
+        FileObject platformBinDir = FileUtil.toFileObject(PlatypusPlatform.getPlatformBinDirectory());
+        FileObject referenceWar = platformBinDir.getFileObject(WAR_FILE_NAME);
+        if (referenceWar != null) {
+            FileObject war = FileUtil.getArchiveRoot(referenceWar);
+            if (war != null) {
+                copyContent(war, webAppDir);
+            } else {
+                throw new ZipException("Error reading web application archive."); //NOI18N
             }
         } else {
-            throw new FileNotFoundException();
+            throw new FileNotFoundException("Web application archive is not found at: " + referenceWar.getPath()); //NOI18N
+        }
+        createFolderIfNotExists(webAppDir, PlatypusWebModule.META_INF_DIRECTORY);
+    }
+
+    /**
+     * Recursively copies web application structure from war archive. If
+     * destination file exists it isn't overwritten.
+     *
+     * @throws IOException if some I/O problem occurred. 
+     */
+    protected void copyContent(FileObject sourceDir, FileObject targetDir) throws IOException {
+        assert sourceDir.isFolder() && targetDir.isFolder();
+        FileObject targetFile;
+        for (FileObject childFile : sourceDir.getChildren()) {
+            if (childFile.isFolder()) {
+                targetFile = targetDir.getFileObject(childFile.getName(), childFile.getExt());
+                if (targetFile == null) {
+                    targetFile.createFolder(childFile.getNameExt());
+                }
+                assert targetFile.isFolder();
+                copyContent(childFile, targetFile);
+            } else {
+                copyIfNotExists(targetDir, childFile);
+            }
         }
     }
 
-    private FileObject copyIfNotExists(FileObject file, FileObject dir) throws IOException {
+    private FileObject copyIfNotExists(FileObject dir, FileObject file) throws IOException {
         FileObject target = dir.getFileObject(file.getNameExt());
         if (target == null) {
             target = file.copy(dir, file.getName(), file.getExt());
         }
         return target;
+    }
+    
+    private FileObject createFolderIfNotExists(FileObject dir, String name) throws IOException {
+        FileObject fo = dir.getFileObject(name);
+        if (fo == null) {
+            fo = dir.createFolder(name);
+        }
+        return fo;
     }
 
     /**
@@ -126,12 +144,12 @@ public class PlatypusWebModuleManager {
                 webAppConfigurator.configure();
             } else {
                 String errorMessage = String.format("Web application configuration is not supported for application server: %s", aJmp.getServerID()); //NOI18N
-                Logger.getLogger(getClass()).log(Level.WARNING, errorMessage);
+                Logger.getLogger(getClass().getName()).log(Level.WARNING, errorMessage);
                 project.getOutputWindowIO().getErr().println(errorMessage);
             }
         } else {
             String errorMessage = "Application server is not set. Check J2EE Server settings at Project's properties"; //NOI18N
-            Logger.getLogger(getClass()).log(Level.WARNING, errorMessage);
+            Logger.getLogger(getClass().getName()).log(Level.WARNING, errorMessage);
             project.getOutputWindowIO().getErr().println(errorMessage);
         }
     }
