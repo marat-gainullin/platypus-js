@@ -29,8 +29,10 @@ import com.eas.client.queries.SqlCompiledQuery;
 import com.eas.client.settings.DbConnectionSettings;
 import com.eas.client.settings.EasSettings;
 import com.eas.client.sqldrivers.SqlDriver;
+import com.eas.metadata.testdefine.Db2TestDefine;
 import com.eas.metadata.testdefine.DbTestDefine.Database;
 import com.eas.metadata.testdefine.H2TestDefine;
+import com.eas.metadata.testdefine.MsSqlTestDefine;
 import com.eas.metadata.testdefine.MySqlTestDefine;
 import com.eas.metadata.testdefine.OracleTestDefine;
 import java.io.IOException;
@@ -57,9 +59,7 @@ import org.junit.Test;
 public class MetadataSynchronizerTest {
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!    
 static final Logger logger = Logger.getLogger(MetadataSynchronizerTest.class.getName());    
-{
-    
-}
+
 //private FileHandler fileHandler;
 private String sqlLogName = null;
 private String mdsLogName = null;
@@ -69,15 +69,19 @@ private String mdsLogName = null;
     private SourceDbSetting[] sourceDbSetting = {
 //        new SourceDbSetting(new DbConnection("jdbc:oracle:thin:@asvr:1521/adb", "test1", "test1", "test1"), Database.ORACLE, new OracleTestDefine())
 //        new SourceDbSetting(new DbConnection("jdbc:postgresql://asvr:5432/Trans", "test1", "test1", "test1"), Database.POSTGRESQL, new PostgreTestDefine())
-        new SourceDbSetting(new DbConnection("jdbc:h2:tcp://localhost/~/test", "test1", "test1", "test1"), Database.H2, new H2TestDefine()),
+//        new SourceDbSetting(new DbConnection("jdbc:h2:tcp://localhost/~/test", "test1", "test1", "test1"), Database.H2, new H2TestDefine()),
 //        new SourceDbSetting(new DbConnection("jdbc:mysql://192.168.10.205:3306/test1", "test1", "test1", "test1"), Database.MYSQL, new MySqlTestDefine())
+//        new SourceDbSetting(new DbConnection("jdbc:db2://192.168.10.154:50000/test", "test1", "dba", "masterkey"), Database.DB2, new Db2TestDefine())
+        new SourceDbSetting(new DbConnection("jdbc:jtds:sqlserver://192.168.10.154:1433/test1", "dbo", "test1", "1test1"), Database.MSSQL, new MsSqlTestDefine())
             
     };
     private DestinationDbSetting[] destinationDbSetting = {
 //        new DestinationDbSetting(new DbConnection("jdbc:oracle:thin:@asvr:1521/adb", "test2", "test2", "test2"), Database.ORACLE),
 //        new DestinationDbSetting(new DbConnection("jdbc:postgresql://asvr:5432/Trans", "test2", "test2", "test2"), Database.POSTGRESQL),
 //        new DestinationDbSetting(new DbConnection("jdbc:h2:tcp://localhost/~/test", "test2", "test2", "test2"), Database.H2),
-        new DestinationDbSetting(new DbConnection("jdbc:mysql://192.168.10.205:3306/test2", "test2", "test2", "test2"), Database.MYSQL)
+//        new DestinationDbSetting(new DbConnection("jdbc:mysql://192.168.10.205:3306/test2", "test2", "test2", "test2"), Database.MYSQL)
+//        new DestinationDbSetting(new DbConnection("jdbc:db2://192.168.10.154:50000/test", "test2", "dba", "masterkey"), Database.DB2)
+        new DestinationDbSetting(new DbConnection("jdbc:jtds:sqlserver://192.168.10.154:1433/test2", "dbo", "test2", "2test2"), Database.MSSQL)
     };
 
 
@@ -136,10 +140,10 @@ private String mdsLogName = null;
             printText(cntTabs, "destination: \t(url=",destDbConnection.getUrl()," \tschema=",destDbConnection.getSchema()," \tuser=",destDbConnection.getUser(),")");
 
             clearSchema(aDestinationSetting.getDbConnection());
-//            runAllTestTables(aSourceSetting.getDbConnection(), aDestinationSetting.getDbConnection());
-            runAllTestsFields(aSourceSetting,aDestinationSetting);
-            runAllTestIndexes(aSourceSetting, aDestinationSetting);
-            runAllTestKeys(aSourceSetting, aDestinationSetting);
+            runAllTestTables(aSourceSetting.getDbConnection(), aDestinationSetting.getDbConnection());
+//            runAllTestsFields(aSourceSetting,aDestinationSetting);
+//            runAllTestIndexes(aSourceSetting, aDestinationSetting);
+//            runAllTestKeys(aSourceSetting, aDestinationSetting);
             printText(--cntTabs, "*** end runAllTestsDb ***");
         } finally {
             if (fileHandler != null) {
@@ -207,7 +211,18 @@ private String mdsLogName = null;
         runTestFields("test4",aSourceSetting, aDestinationSetting, "Tbl", "Fld", true, true, true, 0, "Comment", false, false);
         runTestFields("test5",aSourceSetting, aDestinationSetting, "Tbl", "Fld", true, true, true, 0, "", false, false);
         runTestFields("test6",aSourceSetting, aDestinationSetting, "Tbl", "Fld", true, true, true, 0, null, false, false);
-        runTestFields("test7",aSourceSetting, aDestinationSetting, "Tbl", "Fld",true,true,true,0,null,false,true);
+
+        
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!        
+        if (!aDestinationSetting.getDatabase().equals(Database.DB2)) {
+// ПЕРЕДЕЛАТЬ на удаление/создание ???????????        
+//The ALTER TABLE ALTER COLUMN SET DATA TYPE statement allows changing columns of the following data types only:
+//
+//    Character
+//    Numeric
+//    Binary
+            runTestFields("test7",aSourceSetting, aDestinationSetting, "Tbl", "Fld",true,true,true,0,null,false,true);
+        }    
         printText(--cntTabs, "*** end runAllTestsFields ***");
     }
 
@@ -217,6 +232,11 @@ private String mdsLogName = null;
 //SEVERE: ORA-01408: such column list already indexed
 //???????????????????????????????????????
         
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//  db2-кластерный индекс может быть только один
+//      -убрать кластерность??
+//      -oracle organization index
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         
         
         IndexDefine[] state1 = {
@@ -266,6 +286,9 @@ private String mdsLogName = null;
 //Exception=На поле может ссылаться "TEST2.IND3"
 //Column may be referenced by "TEST2.IND3"; SQL statement:
 //alter table test2.TBL drop column F4 [90083-167]
+//!!!!!!!!!! MSSql
+//alter table dbo.Tbl drop column f4;
+//Exception=индекс "Ind3" зависит от столбец "f4".
 //        runTestIndexes("test5",aSourceSetting, aDestinationSetting, state5);
 //        runTestIndexes("test6",aSourceSetting, aDestinationSetting, state6);
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -465,7 +488,7 @@ sqlLogName = "Keys_"+aTestName;
             sql = driver.getSql4CreateTableComment(aDbConnection.getSchema(), tableDefine.getTableName(), tableDefine.getDescription());
             executeSql(client, sql);
         }
-        executeSql(client, "commit");
+//        executeSql(client, "commit");
     }
     private void createFields(SourceDbSetting aSourceSetting, String aTableName, String aFieldName, boolean aNullable, boolean aReadonly, boolean aSigned, int aPrecision, String aDescription, boolean changeSize, boolean changeType) throws Exception {
         printText(cntTabs, "createFields \turl=",aSourceSetting.getDbConnection().getUrl()," \tschema=",aSourceSetting.getDbConnection().getSchema()," \tuser=",aSourceSetting.getDbConnection().getUser());
@@ -500,9 +523,10 @@ sqlLogName = "Keys_"+aTestName;
             String dbType = dbTypes[index];
 //            logText(cntTabs, String.format("table=%s\ttype=%s", tableName, dbType));
 
-            executeSql(client, driver.getSql4EmptyTableCreation(dbConnection.getSchema(), tableName, pkFieldName));
+            String schema = dbConnection.getSchema();
+            executeSql(client, driver.getSql4EmptyTableCreation(schema, tableName, pkFieldName));
             Field field = new Field();
-            field.setSchemaName(dbConnection.getSchema());
+            field.setSchemaName(schema);
             field.setName(fieldName);
             field.setTableName(tableName);
             field.setNullable(aNullable);
@@ -526,13 +550,13 @@ sqlLogName = "Keys_"+aTestName;
             if (dbScale >= 0) {
                 field.setScale(dbScale);
             }
-
-            String sql = String.format(SqlDriver.ADD_FIELD_SQL_PREFIX, tableName) + driver.getSql4FieldDefinition(field);
+            String fullTableName = (schema != null && !schema.isEmpty()? schema+"."+tableName:tableName);
+            String sql = String.format(SqlDriver.ADD_FIELD_SQL_PREFIX, fullTableName) + driver.getSql4FieldDefinition(field);
             executeSql(client, sql);
-            String[] sqls = driver.getSql4CreateColumnComment(dbConnection.getSchema(), tableName, fieldName, description);
+            String[] sqls = driver.getSql4CreateColumnComment(schema, tableName, fieldName, description);
             executeSql(client, sqls);
         }
-        executeSql(client, "commit");
+//        executeSql(client, "commit");
 //        printText(--cntTabs, "*** end createFields ***");
     }
     
@@ -548,12 +572,13 @@ sqlLogName = "Keys_"+aTestName;
         SqlDriver driver = client.getDbMetadataCache(null).getConnectionDriver();
         assertNotNull(driver);
         String pkField = "id";
+        String schema = aDbConnection.getSchema();
         // create table
-        String sql = driver.getSql4EmptyTableCreation(aDbConnection.getSchema(), aTableName, pkField);
+        String sql = driver.getSql4EmptyTableCreation(schema, aTableName, pkField);
         executeSql(client, sql);
         // drop pkey
         String defaultPlatypusPkName = aTableName+"_pk"; 
-        sql = driver.getSql4DropPkConstraint(aDbConnection.getSchema(), new PrimaryKeySpec(aDbConnection.getSchema(), aTableName, pkField, defaultPlatypusPkName));
+        sql = driver.getSql4DropPkConstraint(schema, new PrimaryKeySpec(schema, aTableName, pkField, defaultPlatypusPkName));
         executeSql(client, sql);
         for (IndexDefine indexDefine : aIndexesDefine) {
             IndexColumnDefine[] columnsDefines = indexDefine.getColumns();
@@ -571,20 +596,21 @@ sqlLogName = "Keys_"+aTestName;
                 if (!fields.contains(fieldName.toUpperCase())) {
                     Field field = new Field();
                     field.setName(fieldName);
-                    field.setSchemaName(aDbConnection.getSchema());
+                    field.setSchemaName(schema);
                     field.setTypeInfo(DataTypeInfo.VARCHAR);
                     field.setSize(10);
-                    sql = String.format(SqlDriver.ADD_FIELD_SQL_PREFIX, aTableName) + driver.getSql4FieldDefinition(field);
+                    String fullTableName = (schema != null && !schema.isEmpty()? schema+"."+aTableName:aTableName);
+                    sql = String.format(SqlDriver.ADD_FIELD_SQL_PREFIX, fullTableName) + driver.getSql4FieldDefinition(field);
                     executeSql(client, sql);
                     fields.add(fieldName.toUpperCase());
                 }
                 indexSpec.addColumn(new DbTableIndexColumnSpec(fieldName, columnDefine.isAscending()));
             }
             // create index
-            sql = driver.getSql4CreateIndex(aDbConnection.getSchema(), aTableName, indexSpec);
+            sql = driver.getSql4CreateIndex(schema, aTableName, indexSpec);
             executeSql(client, sql);
         }
-        executeSql(client, "commit");
+//        executeSql(client, "commit");
 //        printText(--cntTabs, "*** end createIndexes ***");
     }
     
@@ -603,16 +629,17 @@ sqlLogName = "Keys_"+aTestName;
         SqlDriver driver = client.getDbMetadataCache(null).getConnectionDriver();
         assertNotNull(driver);
         String pkField = "id";
+        String schema = aDbConnection.getSchema();
 
         logText(cntTabs, "start create primaryKeys");
         for (String tableName: aPKeysDefine.keySet()) {
             String upperTableName = tableName.toUpperCase();
             //create table
-            String sql = driver.getSql4EmptyTableCreation(aDbConnection.getSchema(), tableName, pkField);
+            String sql = driver.getSql4EmptyTableCreation(schema, tableName, pkField);
             executeSql(client, sql);
             // drop pkey
             String defaultPlatypusPkName = tableName+"_pk"; 
-            sql = driver.getSql4DropPkConstraint(aDbConnection.getSchema(), new PrimaryKeySpec(aDbConnection.getSchema(), tableName, pkField, defaultPlatypusPkName));
+            sql = driver.getSql4DropPkConstraint(schema, new PrimaryKeySpec(schema, tableName, pkField, defaultPlatypusPkName));
             executeSql(client, sql);
             String[] fieldsDefine = aPKeysDefine.get(tableName);
             Set<String> tableFields = new HashSet();
@@ -623,23 +650,24 @@ sqlLogName = "Keys_"+aTestName;
                     assertNotNull(fieldName);
                     Field field = new Field();
                     field.setName(fieldName);
-                    field.setSchemaName(aDbConnection.getSchema());
+                    field.setSchemaName(schema);
                     field.setTypeInfo(DataTypeInfo.VARCHAR);
                     field.setSize(10);
                     //field.setNullable(true);
                     field.setNullable(false);
-                    sql = String.format(SqlDriver.ADD_FIELD_SQL_PREFIX, tableName) + driver.getSql4FieldDefinition(field);
+                    String fullTableName = (schema != null && !schema.isEmpty()? schema+"."+tableName:tableName);
+                    sql = String.format(SqlDriver.ADD_FIELD_SQL_PREFIX, fullTableName) + driver.getSql4FieldDefinition(field);
                     executeSql(client, sql);
                     tableFields.add(fieldName.toUpperCase());
                     // create spec
-                    pkSpecs.add(new PrimaryKeySpec(aDbConnection.getSchema(), tableName, fieldName, defaultPlatypusPkName));
+                    pkSpecs.add(new PrimaryKeySpec(schema, tableName, fieldName, defaultPlatypusPkName));
                 }
             }
             fieldsNames.put(upperTableName, tableFields);
             pkeys.put(upperTableName, pkSpecs);
             // create pk
             if (pkSpecs.size() > 0) {
-                sql = driver.getSql4CreatePkConstraint(aDbConnection.getSchema(), pkSpecs);
+                sql = driver.getSql4CreatePkConstraint(schema, pkSpecs);
                 executeSql(client, sql);
             }
         }
@@ -658,7 +686,7 @@ sqlLogName = "Keys_"+aTestName;
                     String tableName = fkeyDefine.getTableName();
 
                     ForeignKeySpec fkSpec = new ForeignKeySpec();
-                    fkSpec.setSchema(aDbConnection.getSchema());
+                    fkSpec.setSchema(schema);
                     fkSpec.setTable(tableName);
                     fkSpec.setCName(fkeyDefine.getName());
                     fkSpec.setField(fieldName);
@@ -672,10 +700,11 @@ sqlLogName = "Keys_"+aTestName;
                     if (!tableFields.contains(fieldName.toUpperCase())) {
                         Field field = new Field();
                         field.setName(fieldName);
-                        field.setSchemaName(aDbConnection.getSchema());
+                        field.setSchemaName(schema);
                         field.setTypeInfo(DataTypeInfo.VARCHAR);
                         field.setSize(10);
-                        String sql = String.format(SqlDriver.ADD_FIELD_SQL_PREFIX, tableName) + driver.getSql4FieldDefinition(field);
+                        String fullTableName = (schema != null && !schema.isEmpty()? schema+"."+tableName:tableName);
+                        String sql = String.format(SqlDriver.ADD_FIELD_SQL_PREFIX, fullTableName) + driver.getSql4FieldDefinition(field);
                         executeSql(client, sql);
                         tableFields.add(fieldName.toUpperCase());
                         fieldsNames.put(tableName.toUpperCase(), tableFields);
@@ -685,16 +714,16 @@ sqlLogName = "Keys_"+aTestName;
                 if (fkSpecs.size() > 0) {
                     // для теста разных методов
                     if (fkSpecs.size() == 1) {
-                        String sql = driver.getSql4CreateFkConstraint(aDbConnection.getSchema(), fkSpecs.get(0));
+                        String sql = driver.getSql4CreateFkConstraint(schema, fkSpecs.get(0));
                         executeSql(client,sql);
                     } else {
-                        String sql = driver.getSql4CreateFkConstraint(aDbConnection.getSchema(), fkSpecs);
+                        String sql = driver.getSql4CreateFkConstraint(schema, fkSpecs);
                         executeSql(client,sql);
                     }
                 }
             }
         }
-        executeSql(client, "commit");
+//        executeSql(client, "commit");
 //        printText(--cntTabs, "*** end createKeys ***");
     }
     

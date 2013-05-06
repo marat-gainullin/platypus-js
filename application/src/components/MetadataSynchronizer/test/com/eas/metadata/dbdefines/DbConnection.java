@@ -18,7 +18,7 @@ package com.eas.metadata.dbdefines;
         public DbConnection(String aUrl, String aSchema, String aUser, String aPassword) {
             url = aUrl;
             schema = aSchema;
-            user = aSchema;
+            user = aUser;
             password = aPassword;
         }
 

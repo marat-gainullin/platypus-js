@@ -19,9 +19,9 @@ public class MsSqlTestDefine extends DbTestDefine {
     
     private static final  String[][] fieldsTypes = {
         // original, Oracle, PostgreSQL, MySql, DB2, H2, MsSql
-        {"image", "", "", "", "", "", "image"},
-        {"text", "", "", "", "", "", "text"},
-        {"ntext", "", "", "", "", "", "text"},
+        {"image", "", "", "", "", "", "BLOB"},
+        {"text", "", "", "", "", "", "CLOB"},
+        {"ntext", "", "", "", "", "", "CLOB"},
         {"uniqueidentifier", "", "", "", "", "", "varchar"},
         {"smallint", "", "", "", "", "", "smallint"},
         {"tinyint", "", "", "", "", "", "tinyint"},
@@ -39,19 +39,19 @@ public class MsSqlTestDefine extends DbTestDefine {
         {"numeric", "", "", "", "", "", "numeric"},
         {"varbinary", "", "", "", "", "", "varbinary"},
         {"varchar", "", "", "", "", "", "varchar"},
-        {"nvarchar", "", "", "", "", "", "varchar"},
+        {"nvarchar", "", "", "", "", "", "nvarchar"},
         {"tinyint identity", "", "", "", "", "", "tinyint"},
         {"bigint identity", "", "", "", "", "", "bigint"},
-        {"binary", "", "", "", "", "", "binary"},
-        {"timestamp", "", "", "", "", "", "binary"},   //?????????????????
+        {"binary", "", "", "", "", "", "varbinary"},
+        {"timestamp", "", "", "", "", "", "varbinary"},   //?????????????????
         {"char", "", "", "", "", "", "char"},
         {"nchar", "", "", "", "", "", "char"},
         {"numeric() identity", "", "", "", "", "", "numeric"},
         {"decimal() identity", "", "", "", "", "", "decimal"},
         {"int identity", "", "", "", "", "", "int"},
         {"smallint identity", "", "", "", "", "", "smallint"},
-        {"sysname", "", "", "", "", "", "varchar"},
-        {"xml", "", "", "", "", "", "text"},
+        {"sysname", "", "", "", "", "", "nvarchar"},
+        {"xml", "", "", "", "", "", "CLOB"},
     };
     
     static {            

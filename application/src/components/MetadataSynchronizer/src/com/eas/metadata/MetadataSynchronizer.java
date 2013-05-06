@@ -315,12 +315,12 @@ public class MetadataSynchronizer {
             }
 
             // re-read structure destination for compare with source
-            client2 = createClient(urlTo, schemaTo, userTo, passwordTo);
-            if (infoLogger != null && client2 != null) {
-                MetadataUtils.printCompareMetadata(srcDBStructure, readDBStructure(client2), infoLogger);
-            }
-            if (client2 != null) {
-                client2.shutdown();
+            if (infoLogger != null) {
+                DbClient client3 = createClient(urlTo, schemaTo, userTo, passwordTo);
+                MetadataUtils.printCompareMetadata(srcDBStructure, readDBStructure(client3), infoLogger);
+                if (client3 != null) {
+                    client3.shutdown();
+                }    
             }
         }
     }
