@@ -145,7 +145,7 @@ public class ProjectRunner {
             io.getOut().println("Starting J2EE Server..");
             PlatypusWebModuleManager webManager = project.getLookup().lookup(PlatypusWebModuleManager.class);
             if (webManager != null) {
-                webAppUrl = webManager.run(debug);
+                webAppUrl = webManager.run(appElementId,debug);
             } else {
                 throw new IllegalStateException("An instance of PlatypusWebModuleManager is not found in project's lookup.");
             }
