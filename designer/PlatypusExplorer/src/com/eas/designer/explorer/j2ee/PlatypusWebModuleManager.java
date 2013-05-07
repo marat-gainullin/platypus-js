@@ -29,7 +29,7 @@ public class PlatypusWebModuleManager {
 
     protected static final String WAR_FILE_NAME = "PlatypusServlet.war"; //NOI18N
     protected static final String WEB_DESCRIPTOR_FILE_NAME = "web.xml"; //NOI18N
-    protected static final String START_PAGE_FILE_NAME = "index.html"; //NOI18N
+    protected static final String START_PAGE_FILE_NAME = "applicationStart.html"; //NOI18N
     protected static final String LOGIN_PAGE_FILE_NAME = "login.html"; //NOI18N
     protected static final String LOGIN_FAIL_PAGE_FILE_NAME = "loginFail.html"; //NOI18N
     protected final PlatypusProject project;
@@ -66,7 +66,7 @@ public class PlatypusWebModuleManager {
             try {
                 prepareWebApplication();
                 configureWebApplication(jmp);
-                webAppRunUrl = Deployment.getDefault().deploy(jmp, Deployment.Mode.RUN, null, null, false);
+                webAppRunUrl = Deployment.getDefault().deploy(jmp, Deployment.Mode.RUN, null, START_PAGE_FILE_NAME, false);
                 String deployResultMessage = String.format("Web application deployed. URL: %s", webAppRunUrl);
                 Logger.getLogger(PlatypusWebModuleManager.class.getName()).log(Level.INFO, deployResultMessage);
                 project.getOutputWindowIO().getOut().println(deployResultMessage);
