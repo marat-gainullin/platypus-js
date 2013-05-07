@@ -10,6 +10,7 @@ import org.mozilla.javascript.Context;
 import org.mozilla.javascript.IdFunctionObject;
 import org.mozilla.javascript.IdScriptableObject;
 import org.mozilla.javascript.Scriptable;
+import org.mozilla.javascript.ScriptableObject;
 
 /**
  *
@@ -18,6 +19,11 @@ import org.mozilla.javascript.Scriptable;
 public class ScriptRunnerPrototype extends IdScriptableObject {
 
     public static final String BAD_SCRIPT_SCOPE_MSG = "Can't find reqired script runner scope!";
+    protected static final int Id_constructor = 1,
+            Id_toString = 2,
+            Id_toLocaleString = 3,
+            Id_toSource = 4,
+            MAX_PROTOTYPE_ID = 4;
     private static final String ID_CONSTRUCTOR = "constructor";
     private static final String ID_TOSOURCE = "toSource";
     private static final String ID_TOSTRING = "toString";
@@ -27,7 +33,7 @@ public class ScriptRunnerPrototype extends IdScriptableObject {
 
     protected static ScriptRunnerPrototype modulePrototype;
 
-    protected static ScriptRunnerPrototype getInstance() {
+    public static ScriptRunnerPrototype getInstance() {
         if (modulePrototype == null) {
             modulePrototype = new ScriptRunnerPrototype();
         }
@@ -35,13 +41,16 @@ public class ScriptRunnerPrototype extends IdScriptableObject {
     }
 
     public static void init(Scriptable scope, boolean sealed) {
-        init(scope, sealed, new ScriptRunnerPrototype());
+        init(scope, sealed, getInstance());
     }
 
     public static void init(Scriptable scope, boolean sealed, ScriptRunnerPrototype obj) {
         obj.exportAsJSClass(MAX_PROTOTYPE_ID, scope, sealed);
         if (obj != getInstance()) {
             obj.setPrototype(getInstance());
+        }
+        if (sealed) {
+            obj.sealObject();
         }
     }
     
@@ -96,11 +105,6 @@ public class ScriptRunnerPrototype extends IdScriptableObject {
                 return 0;
         }
     }
-    protected static final int Id_constructor = 1,
-            Id_toString = 2,
-            Id_toLocaleString = 3,
-            Id_toSource = 4,
-            MAX_PROTOTYPE_ID = 4;
 
     @Override
     public Object execIdCall(IdFunctionObject f, Context cx, Scriptable scope,

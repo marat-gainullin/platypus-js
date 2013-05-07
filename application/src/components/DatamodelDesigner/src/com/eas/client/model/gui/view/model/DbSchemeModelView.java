@@ -255,15 +255,8 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbS
     }
 
     public void resolveRelations() throws Exception {
-        model.removeEditingListener(dmListener);
-        try {
-            model.clearRelations();
-            if (addFkRelations(true, null) > 0) {
-                rerouteConnectors();
-            }
-        } finally {
-            model.addEditingListener(dmListener);
-        }
+        model.clearRelations();
+        addFkRelations(true, null);
     }
 
     @Override
@@ -498,15 +491,26 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbS
         public void actionPerformed(ActionEvent e) {
             undoSupport.beginUpdate();
             try {
-                super.actionPerformed(e);
-                if (justSelected != null) {
-                    for (TableRef tr : justSelected) {
-                        try {
-                            addFkRelations(false, tr.tableName);
-                        } catch (Exception ex) {
-                            Logger.getLogger(DbSchemeModelView.class.getName()).log(Level.SEVERE, null, ex);
+                needRerouteConnectors = false;
+                try {
+                    super.actionPerformed(e);
+                    if (justSelected != null) {
+                        for (TableRef tr : justSelected) {
+                            try {
+                                addFkRelations(false, tr.tableName);
+                            } catch (Exception ex) {
+                                Logger.getLogger(DbSchemeModelView.class.getName()).log(Level.SEVERE, null, ex);
+                            }
                         }
                     }
+                } finally {
+                    SwingUtilities.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            needRerouteConnectors = true;
+                            refreshView();
+                        }
+                    });
                 }
             } finally {
                 undoSupport.endUpdate();
@@ -1043,7 +1047,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbS
         }
 
         private void reportWasNotAddedEntities(List<FieldsEntity> aEntities) {
-            String msg = null;
+            String msg;
             if (!aEntities.isEmpty()) {
                 if (aEntities.size() == 1) {
                     msg = DbStructureUtils.getString("EAS_TABLE_ALREADY_PRESENT", aEntities.get(0).getTableName() + " (" + aEntities.get(0).getTitle() + ")", null);
@@ -1081,7 +1085,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbS
             if (isEnabled()) {
                 Window w = SwingUtilities.getWindowAncestor(DbSchemeModelView.this);
                 if (w instanceof JFrame) {
-                    Relation<FieldsEntity> relation = null;
+                    Relation<FieldsEntity> relation;
                     if (isSelectedRelations() && getSelectedRelations().size() == 1) {
                         relation = getSelectedRelations().iterator().next();
                     } else {
@@ -1231,27 +1235,17 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbS
         }
     }
 
-    @Override
-    protected void refreshView() {
-        if (model != null && viewRefreshable == 0) {
-            /*
-             for (FieldsEntity entity : model.getEntities().values()) {
-             EntityView<FieldsEntity> eView = getEntityView(entity);
-             entity.clearFields();
-             eView.refreshContent();
-             }
-             */
-            super.refreshView();
-        }
-    }
-
     public void entireSynchronizeWithDb() throws Exception {
-        resolveTables();
-        resolveFields();
-        resolveIndexes();
-        resolveRelations();
+        model.removeEditingListener(modelListener);
+        try {
+            resolveTables();
+            resolveFields();
+            resolveIndexes();
+            resolveRelations();
+        } finally {
+            model.addEditingListener(modelListener);
+        }
         refreshView();
-        checkActions();
     }
 
     private boolean isEntityTableExists(FieldsEntity fEntity) {

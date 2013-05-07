@@ -305,8 +305,6 @@ public class RelationsFieldsDragHandler<E extends Entity<?, ?, E>> extends Trans
                                                 if ((modelView.getModel().checkRelationRemovingValid(alreadyInRelation) || modelView.getModel() instanceof QueryModel)
                                                         && modelView.getModel().checkRelationAddingValid(newRel)) {
                                                     editModelField2FieldRelation(undoSupport, ldata, alreadyInRelation, newRel);
-                                                    modelView.rerouteConnectors();
-                                                    modelView.repaint();
                                                 }
                                             }
                                         }

@@ -485,7 +485,7 @@ public class ScriptRunner extends ScriptableObject {
             return func;
         }
     }
-
+/*
     public class ModuleConstructor extends BaseFunction {
 
         public ModuleConstructor(Scriptable scope, Scriptable prototype) {
@@ -497,4 +497,5 @@ public class ScriptRunner extends ScriptableObject {
             return super.construct(cx, scope, args);
         }
     }
+    */ 
 }
