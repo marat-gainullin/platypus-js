@@ -22,8 +22,6 @@
   <resources>
     <res id="shortcutSpec.xml" src="installer_shortcutSpec.xml"/>
     <res id="Unix_shortcutSpec.xml" src="installer_Unix_shortcutSpec.xml"/>
-	<res id="packsLang.xml_rus" src="packsLang_rus.xml"/>
-	<res id="packsLang.xml_eng" src="packsLang_eng.xml"/>
   </resources>
     
   <panels>
