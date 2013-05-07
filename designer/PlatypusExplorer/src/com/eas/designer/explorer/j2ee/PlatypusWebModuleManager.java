@@ -86,10 +86,10 @@ public class PlatypusWebModuleManager {
             if (war != null) {
                 copyContent(war, webAppDir);
             } else {
-                throw new ZipException("Error reading web application archive."); //NOI18N
+                throw new ZipException("Error reading web application archive.");
             }
         } else {
-            throw new FileNotFoundException("Web application archive is not found at: " + referenceWar.getPath()); //NOI18N
+            throw new FileNotFoundException("Web application archive is not found at: " + referenceWar.getPath());
         }
         createFolderIfNotExists(webAppDir, PlatypusWebModule.META_INF_DIRECTORY);
     }
@@ -144,12 +144,12 @@ public class PlatypusWebModuleManager {
             if (webAppConfigurator != null) {
                 webAppConfigurator.configure();
             } else {
-                String errorMessage = String.format("Web application configuration is not supported for application server: %s", aJmp.getServerID()); //NOI18N
+                String errorMessage = String.format("Web application configuration is not supported for application server: %s", aJmp.getServerID());
                 Logger.getLogger(PlatypusWebModuleManager.class.getName()).log(Level.WARNING, errorMessage);
                 project.getOutputWindowIO().getErr().println(errorMessage);
             }
         } else {
-            String errorMessage = "Application server is not set. Check J2EE Server settings at Project's properties"; //NOI18N
+            String errorMessage = "Application server is not set. Check J2EE Server settings at Project's properties";
             Logger.getLogger(PlatypusWebModuleManager.class.getName()).log(Level.WARNING, errorMessage);
             project.getOutputWindowIO().getErr().println(errorMessage);
         }
