@@ -59,7 +59,7 @@ public class PlatypusWebModuleManager {
                     prepareWebApplication();
                     configureWebApplication(jmp);
                     webAppRunUrl = Deployment.getDefault().deploy(jmp, Deployment.Mode.RUN, null, "", false);
-                    String deployResultMessage = String.format("Web application deployed. URL: %s", webAppRunUrl); //NOI18N
+                    String deployResultMessage = String.format("Web application deployed. URL: %s", webAppRunUrl);
                     Logger.getLogger(PlatypusWebModuleManager.class.getName()).log(Level.INFO, deployResultMessage);
                     project.getOutputWindowIO().getOut().println(deployResultMessage);
                 } else {
@@ -69,7 +69,7 @@ public class PlatypusWebModuleManager {
                 ErrorManager.getDefault().notify(ex);
             }
         } else {
-            throw new IllegalStateException("J2eeModuleProvider instance should be in the project's lookup."); //NOI18N
+            throw new IllegalStateException("J2eeModuleProvider instance should be in the project's lookup.");
         }
         return webAppRunUrl;
     }
