@@ -334,18 +334,18 @@
                byline="true"/> 
 	</target>
 	
-	<target name="get.revisions" depends="setversion" description="Get revision number">
+	<!--<target name="get.revisions" depends="setversion" description="Get revision number">
         <exec executable="svn" output="svndump">
-            <arg value="info"/>
+            <arg value="info"/>-->
             <!-- File Updater.java must must be updated in which Updater project commit.-->
-			<arg value="--username=AB"/>
+			<!--<arg value="--username=AB"/>
 			<arg value="--password=Gthtcnhjqrf"/>
             <arg value="http://svn/svn/platform/trunk/application/src/lib/own/Updater/src/com/eas/client/updater/Updater.java"/>
         </exec>
 		<replaceregexp file="svndump" match="Last\s+Changed\s+Rev" replace="LastRev" />
         <loadproperties srcfile="svndump"/>
         <delete file="svndump"/>
-    </target>
+    </target>-->
 	                            <!--
                                     Check file version, to know need Updater or not.
                                 /-->	
