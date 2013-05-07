@@ -10,7 +10,6 @@ import org.mozilla.javascript.Context;
 import org.mozilla.javascript.IdFunctionObject;
 import org.mozilla.javascript.IdScriptableObject;
 import org.mozilla.javascript.Scriptable;
-import org.mozilla.javascript.ScriptableObject;
 
 /**
  *
