@@ -5,10 +5,13 @@
 package com.eas.designer.explorer.j2ee;
 
 import com.eas.designer.explorer.project.PlatypusProject;
+import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.netbeans.modules.j2ee.deployment.devmodules.spi.J2eeModuleImplementation2;
 import org.netbeans.modules.j2ee.deployment.devmodules.spi.J2eeModuleProvider;
+import org.openide.ErrorManager;
+import org.openide.filesystems.FileObject;
 
 /**
  * Configures web application for Tomcat 7.
@@ -16,6 +19,7 @@ import org.netbeans.modules.j2ee.deployment.devmodules.spi.J2eeModuleProvider;
  */
 public class TomcatWebAppConfigurator implements WebAppConfigurator {
 
+    public final String CONTEXT_FILE_NAME = "context.xml"; //NOI18N 
     protected final PlatypusProject project;
     
     public TomcatWebAppConfigurator(PlatypusProject aProject) {
@@ -24,11 +28,17 @@ public class TomcatWebAppConfigurator implements WebAppConfigurator {
     
     @Override
     public void configure() {
-        Logger.getLogger(getClass().getName()).log(Level.INFO, "Starting configuring an application for Tomcat.");
+        try {
+            FileObject contexFileObject = getWebMobdule().getMetaInfDir().getFileObject(CONTEXT_FILE_NAME);
+
+            Logger.getLogger(getClass().getName()).log(Level.INFO, "Starting configuring an application for Tomcat.");
+        } catch (IOException ex) {
+            ErrorManager.getDefault().notify(ex);
+        }
     }
     
-    protected J2eeModuleProvider getWebMobdule() {
-        return project.getLookup().lookup(J2eeModuleProvider.class);
+    protected PlatypusWebModule getWebMobdule() {
+        return project.getLookup().lookup(PlatypusWebModule.class);
     }
     
     protected J2eeModuleImplementation2 getWebMobduleImpl() {

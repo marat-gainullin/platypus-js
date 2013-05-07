@@ -51,22 +51,21 @@ public class PlatypusWebModuleManager {
      *
      */
     public String run(boolean isDebug) {
-        J2eeModuleProvider jmp = project.getLookup().lookup(J2eeModuleProvider.class);
-        J2eeModuleBase mb = project.getLookup().lookup(J2eeModuleBase.class);
+        PlatypusWebModule webModule = project.getLookup().lookup(PlatypusWebModule.class);
         String webAppRunUrl = null;
-        if (jmp != null) {
-            if (jmp.getServerID() == null || jmp.getServerID().isEmpty()) {
+        if (webModule != null) {
+            if (webModule.getServerID() == null || webModule.getServerID().isEmpty()) {
                 project.getOutputWindowIO().getOut().println("Application server is not set. Check J2EE Server settings at Project's properties.");
                 return null;
             }
-            if (mb.getUrl() == null || mb.getUrl().isEmpty()) {
+            if (webModule.getUrl() == null || webModule.getUrl().isEmpty()) {
                 project.getOutputWindowIO().getOut().println("J2EE Server context is not configured for the project.");
                 return null;
             }
             try {
                 prepareWebApplication();
-                configureWebApplication(jmp);
-                webAppRunUrl = Deployment.getDefault().deploy(jmp, Deployment.Mode.RUN, null, START_PAGE_FILE_NAME, false);
+                configureWebApplication(webModule);
+                webAppRunUrl = Deployment.getDefault().deploy(webModule, Deployment.Mode.RUN, null, START_PAGE_FILE_NAME, false);
                 String deployResultMessage = String.format("Web application deployed. URL: %s", webAppRunUrl);
                 Logger.getLogger(PlatypusWebModuleManager.class.getName()).log(Level.INFO, deployResultMessage);
                 project.getOutputWindowIO().getOut().println(deployResultMessage);
