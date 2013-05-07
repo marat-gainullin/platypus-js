@@ -50,7 +50,6 @@ import java.awt.event.*;
 import java.io.IOException;
 import java.util.*;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
@@ -334,10 +333,6 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
         }
     }
 
-    public void cancelDragging(MouseEvent e) {
-        mouseHandler.cancelDragging(e);
-    }
-
     private boolean compareSearchStrings(String dataString, boolean matchCase, String mask, boolean wholeWords) {
         if (dataString != null) {
             if (!matchCase) {
@@ -556,7 +551,9 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
             calcSlots(fslot, lslot, rel, entityViews);
             rdesign.setFirstSlot(fslot);
             rdesign.setLastSlot(lslot);
-            rdesign.setConnector(paths.find(fslot.lastPoint, lslot.lastPoint));
+            if (rdesign.getConnector() == null || !rdesign.getConnector().isManual()) {
+                rdesign.setConnector(paths.find(fslot.lastPoint, lslot.lastPoint));
+            }
             DatamodelDesignUtils.addToQuadTree(connectorsIndex, rdesign.getConnector(), rel);
         }
     }
@@ -1042,6 +1039,12 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
             public void componentMoved(ComponentEvent e) {
                 entitiesIndex.remove(getBounds(), eView);
                 entitiesIndex.insert(eView.getBounds(), eView);
+                for (Relation rel : eView.getEntity().getInOutRelations()) {
+                    RelationDesignInfo rdesign = getRelationDesignInfo(rel);
+                    if (rdesign.getConnector() != null) {
+                        rdesign.getConnector().setManual(false);
+                    }
+                }
                 preparePaths();
                 rerouteConnectors();
             }
@@ -1050,6 +1053,12 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
             public void componentResized(ComponentEvent e) {
                 entitiesIndex.remove(getBounds(), eView);
                 entitiesIndex.insert(eView.getBounds(), eView);
+                for (Relation rel : eView.getEntity().getInOutRelations()) {
+                    RelationDesignInfo rdesign = getRelationDesignInfo(rel);
+                    if (rdesign.getConnector() != null) {
+                        rdesign.getConnector().setManual(false);
+                    }
+                }
                 preparePaths();
                 rerouteConnectors();
             }
@@ -1189,7 +1198,6 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
         @Override
         public void mouseClicked(MouseEvent e) {
             if (e != null) {
-                cancelDragging(e);
                 Point lPt = e.getPoint();
                 Object lo = e.getSource();
                 if (lo != null && lo instanceof Component) {
@@ -1215,19 +1223,16 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
                 }
             }
         }
+        private HittedRelationSegment hittedSegment;
 
         @Override
         public void mousePressed(MouseEvent e) {
-            if (e.getSource() == this || dragging) {
-                cancelDragging(e);
-            }
+            hittedSegment = selectHittedRelationSegment(e.getPoint(), EntityView.HALF_INSET_ZONE);
         }
 
         @Override
         public void mouseReleased(MouseEvent e) {
-            if (e.getSource() == this || dragging) {
-                cancelDragging(e);
-            }
+            hittedSegment = null;
         }
 
         @Override
@@ -1237,27 +1242,18 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
         @Override
         public void mouseExited(MouseEvent e) {
         }
-        private boolean dragging = false;
 
         @Override
         public void mouseDragged(MouseEvent e) {
-            if (e.getSource() == this) {
-                TransferHandler th = getTransferHandler();
-                if (th != null) {
-                    if (!dragging) {
-                        th.exportAsDrag(ModelView.this, e, e.isControlDown() ? TransferHandler.COPY : TransferHandler.MOVE);
-                        dragging = true;
-                    }
-                } else {
-                    cancelDragging(e);
-                }
+            if (hittedSegment != null) {
+                hittedSegment.move(e.getPoint());
+                repaint();
             }
         }
 
         @Override
         public void mouseMoved(MouseEvent e) {
             if (e != null) {
-                cancelDragging(e);
                 Point lPt = e.getPoint();
                 Object lo = e.getSource();
                 if (lo != null && lo instanceof Component) {
@@ -1265,8 +1261,18 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
                         lPt = SwingUtilities.convertPoint((Component) lo, lPt, ModelView.this);
                     }
                     hittedRelations = hittestRelationsConnectors(lPt, EntityView.HALF_INSET_ZONE);
-
-                    setCursor(Cursor.getDefaultCursor());
+                    HittedRelationSegment hittedSegment = selectHittedRelationSegment(lPt, EntityView.HALF_INSET_ZONE);
+                    if (hittedSegment != null) {
+                        if (hittedSegment.isHMovable()) {
+                            setCursor(Cursor.getPredefinedCursor(Cursor.E_RESIZE_CURSOR));
+                        } else if (hittedSegment.isVMovable()) {
+                            setCursor(Cursor.getPredefinedCursor(Cursor.N_RESIZE_CURSOR));
+                        } else {
+                            setCursor(Cursor.getDefaultCursor());
+                        }
+                    } else {
+                        setCursor(Cursor.getDefaultCursor());
+                    }
                     repaint();
                 }
                 if (hittedRelations != null && !hittedRelations.isEmpty()) {
@@ -1274,13 +1280,6 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
                 } else {
                     setToolTipText(null);
                 }
-            }
-        }
-
-        protected void cancelDragging(MouseEvent e) {
-            if (e.getSource() == this) {
-                dragging = false;
-                setCursor(Cursor.getDefaultCursor());
             }
         }
 
@@ -1297,6 +1296,74 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
                 }
             }
             return hitted;
+        }
+
+        private class HittedRelationSegment {
+
+            public Point pressedPoint;
+            public Relation relation;
+            public RelationDesignInfo rdesign;
+            public int segmentNumber = -1;
+
+            public HittedRelationSegment() {
+            }
+
+            public boolean isMovable() {
+                return segmentNumber > 0 && segmentNumber < rdesign.getConnector().getSize() - 2;
+            }
+
+            public boolean isHMovable() {
+                if (isMovable()) {
+                    int x1 = rdesign.getConnector().getX()[segmentNumber];
+                    int x2 = rdesign.getConnector().getX()[segmentNumber + 1];
+                    return x1 == x2;
+                } else {
+                    return false;
+                }
+            }
+
+            public boolean isVMovable() {
+                if (isMovable()) {
+                    int y1 = rdesign.getConnector().getY()[segmentNumber];
+                    int y2 = rdesign.getConnector().getY()[segmentNumber + 1];
+                    return y1 == y2;
+                } else {
+                    return false;
+                }
+            }
+
+            private void move(Point point) {
+                int dx = point.x - pressedPoint.x;
+                int dy = point.y - pressedPoint.y;
+                if (isHMovable()) {
+                    if (dx != 0) {
+                        rdesign.getConnector().getX()[segmentNumber] += dx;
+                        rdesign.getConnector().getX()[segmentNumber + 1] += dx;
+                        rdesign.getConnector().setManual(true);
+                        pressedPoint = point;
+                    }
+                } else if (isVMovable()) {
+                    if (dy != 0) {
+                        rdesign.getConnector().getY()[segmentNumber] += dy;
+                        rdesign.getConnector().getY()[segmentNumber + 1] += dy;
+                        rdesign.getConnector().setManual(true);
+                        pressedPoint = point;
+                    }
+                }
+            }
+        }
+
+        private HittedRelationSegment selectHittedRelationSegment(Point aPoint, int aEpsilon) {
+            if (hittedRelations != null && !hittedRelations.isEmpty()) {
+                HittedRelationSegment res = new HittedRelationSegment();
+                res.pressedPoint = aPoint;
+                res.relation = hittedRelations.iterator().next();
+                res.rdesign = getRelationDesignInfo(res.relation);
+                res.segmentNumber = DatamodelDesignUtils.hittestConnectorSegment(res.rdesign.getConnector(), aPoint, aEpsilon);
+                return res;
+            } else {
+                return null;
+            }
         }
     }
 

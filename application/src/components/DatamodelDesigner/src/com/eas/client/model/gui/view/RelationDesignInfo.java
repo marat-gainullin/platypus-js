@@ -5,8 +5,6 @@
 package com.eas.client.model.gui.view;
 
 import com.bearsoft.routing.Connector;
-import com.bearsoft.routing.QuadTree;
-import com.eas.client.model.Relation;
 import com.eas.client.model.gui.view.model.Segment;
 
 /**

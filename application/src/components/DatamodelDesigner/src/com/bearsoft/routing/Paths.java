@@ -105,7 +105,9 @@ public class Paths {
     private Connector convertPath2Connector(Point aStartPoint, Point aEndPoint, List<Vertex<PathFragment>> aPath) {
         List<Point> points = new ArrayList<>();
         rleAdd(points, aStartPoint);
+        boolean fallback = true;
         if (aPath != null && aPath.size() > 1) {
+            fallback = false;
             Point prevPt = aStartPoint;
             Vertex<PathFragment> prevV = aPath.get(0);
             for (int i = 1; i < aPath.size(); i++) {
@@ -132,7 +134,9 @@ public class Paths {
             rleAdd(points, new Point((aStartPoint.x + aEndPoint.x) / 2, aEndPoint.y));
         }
         rleAdd(points, aEndPoint);
-        return pointsToConnector(points);
+        Connector connector = pointsToConnector(points);
+        connector.setFalled(fallback);
+        return connector;
     }
 
     protected void rleAdd(List<Point> aPoints, Point aPoint) {

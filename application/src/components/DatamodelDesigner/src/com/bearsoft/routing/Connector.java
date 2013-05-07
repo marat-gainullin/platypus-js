@@ -10,6 +10,8 @@ package com.bearsoft.routing;
  */
 public class Connector {
 
+    protected boolean falled;
+    protected boolean manual;
     protected int[] x;
     protected int[] y;
 
@@ -33,5 +35,21 @@ public class Connector {
         } else {
             return 0;
         }
+    }
+
+    public boolean isFalled() {
+        return falled;
+    }
+
+    public void setFalled(boolean falled) {
+        this.falled = falled;
+    }
+
+    public boolean isManual() {
+        return manual;
+    }
+
+    public void setManual(boolean manual) {
+        this.manual = manual;
     }
 }

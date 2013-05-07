@@ -96,10 +96,15 @@ public class DatamodelDesignUtils {
     }
 
     public static <E extends Entity<?, ?, E>> boolean hittestConnector(Connector aConnector, final Point aPoint, final int aEpsilon) {
+        return hittestConnectorSegment(aConnector, aPoint, aEpsilon) > -1;
+    }
+
+    public static <E extends Entity<?, ?, E>> int hittestConnectorSegment(Connector aConnector, final Point aPoint, final int aEpsilon) {
         final Point resCounter = new Point();
         quadTreeOperation(aConnector, new RectanlgeCallback() {
             @Override
             public boolean run(Rectangle aValue) {
+                resCounter.y++;
                 aValue.grow(aEpsilon, aEpsilon);
                 if (aValue.contains(aPoint)) {
                     resCounter.x++;
@@ -108,7 +113,7 @@ public class DatamodelDesignUtils {
                 return true;
             }
         });
-        return resCounter.x > 0;
+        return resCounter.x > 0 ? resCounter.y - 1 : -1;
     }
 
     public static <T extends Entity<?, ?, T>> EntityView<T> lookupEntityView(Component aComp) {

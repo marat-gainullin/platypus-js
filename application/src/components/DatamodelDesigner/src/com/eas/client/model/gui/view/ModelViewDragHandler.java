@@ -7,7 +7,6 @@
  * author.
  * All rights reserved.
  */
-
 package com.eas.client.model.gui.view;
 
 import com.eas.client.model.gui.view.model.ModelView;
@@ -20,12 +19,11 @@ import javax.swing.TransferHandler;
  *
  * @author mg
  */
-public class ModelViewDragHandler extends TransferHandler{
+public class ModelViewDragHandler extends TransferHandler {
 
     protected ModelView<?, ?, ?> mView = null;
-    
-    public ModelViewDragHandler(ModelView<?, ?, ?> aModelView)
-    {
+
+    public ModelViewDragHandler(ModelView<?, ?, ?> aModelView) {
         super();
         mView = aModelView;
     }
@@ -33,7 +31,6 @@ public class ModelViewDragHandler extends TransferHandler{
     @Override
     protected void exportDone(JComponent source, Transferable data, int action) {
         super.exportDone(source, data, action);
-        mView.cancelDragging(new MouseEvent(mView, MouseEvent.MOUSE_RELEASED, System.currentTimeMillis(), 0, 0, 0, 0, false) );
     }
 
     @Override
