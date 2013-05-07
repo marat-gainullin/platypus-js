@@ -14,6 +14,7 @@ import java.util.logging.Logger;
 import java.util.zip.ZipException;
 import org.netbeans.modules.j2ee.deployment.devmodules.api.Deployment;
 import org.netbeans.modules.j2ee.deployment.devmodules.api.Deployment.DeploymentException;
+import org.netbeans.modules.j2ee.deployment.devmodules.spi.J2eeModuleBase;
 import org.netbeans.modules.j2ee.deployment.devmodules.spi.J2eeModuleProvider;
 import org.openide.ErrorManager;
 import org.openide.filesystems.FileObject;
@@ -51,20 +52,25 @@ public class PlatypusWebModuleManager {
      */
     public String run(boolean isDebug) {
         J2eeModuleProvider jmp = project.getLookup().lookup(J2eeModuleProvider.class);
+        J2eeModuleBase mb = project.getLookup().lookup(J2eeModuleBase.class);
         String webAppRunUrl = null;
         if (jmp != null) {
+            if (jmp.getServerID() == null || jmp.getServerID().isEmpty()) {
+                project.getOutputWindowIO().getOut().println("Application server is not set. Check J2EE Server settings at Project's properties.");
+                return null;
+            }
+            if (mb.getUrl() == null || mb.getUrl().isEmpty()) {
+                project.getOutputWindowIO().getOut().println("J2EE Server context is not configured for the project.");
+                return null;
+            }
             try {
-                String serverID = jmp.getServerID();
-                if (serverID != null && serverID.isEmpty()) {
-                    prepareWebApplication();
-                    configureWebApplication(jmp);
-                    webAppRunUrl = Deployment.getDefault().deploy(jmp, Deployment.Mode.RUN, null, "", false);
-                    String deployResultMessage = String.format("Web application deployed. URL: %s", webAppRunUrl);
-                    Logger.getLogger(PlatypusWebModuleManager.class.getName()).log(Level.INFO, deployResultMessage);
-                    project.getOutputWindowIO().getOut().println(deployResultMessage);
-                } else {
-                    project.getOutputWindowIO().getOut().println("J2EE Server is not configured for the project.");
-                }
+                prepareWebApplication();
+                configureWebApplication(jmp);
+                webAppRunUrl = Deployment.getDefault().deploy(jmp, Deployment.Mode.RUN, null, null, false);
+                String deployResultMessage = String.format("Web application deployed. URL: %s", webAppRunUrl);
+                Logger.getLogger(PlatypusWebModuleManager.class.getName()).log(Level.INFO, deployResultMessage);
+                project.getOutputWindowIO().getOut().println(deployResultMessage);
+
             } catch (IOException | EmptyPlatformHomePathException | DeploymentException ex) {
                 ErrorManager.getDefault().notify(ex);
             }
@@ -139,17 +145,11 @@ public class PlatypusWebModuleManager {
      * @param aJmp Web Module
      */
     protected void configureWebApplication(J2eeModuleProvider aJmp) {
-        if (aJmp.getServerInstanceID() != null && !aJmp.getServerInstanceID().isEmpty()) {
-            WebAppConfigurator webAppConfigurator = WebAppConfiguratorFactory.getInstance().createWebConfigurator(project, aJmp.getServerID());
-            if (webAppConfigurator != null) {
-                webAppConfigurator.configure();
-            } else {
-                String errorMessage = String.format("Web application configuration is not supported for application server: %s", aJmp.getServerID());
-                Logger.getLogger(PlatypusWebModuleManager.class.getName()).log(Level.WARNING, errorMessage);
-                project.getOutputWindowIO().getErr().println(errorMessage);
-            }
+        WebAppConfigurator webAppConfigurator = WebAppConfiguratorFactory.getInstance().createWebConfigurator(project, aJmp.getServerID());
+        if (webAppConfigurator != null) {
+            webAppConfigurator.configure();
         } else {
-            String errorMessage = "Application server is not set. Check J2EE Server settings at Project's properties";
+            String errorMessage = String.format("Web application configuration is not supported for application server: %s", aJmp.getServerID());
             Logger.getLogger(PlatypusWebModuleManager.class.getName()).log(Level.WARNING, errorMessage);
             project.getOutputWindowIO().getErr().println(errorMessage);
         }

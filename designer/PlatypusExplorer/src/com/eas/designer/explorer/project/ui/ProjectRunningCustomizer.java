@@ -93,8 +93,8 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
             }
         }
 
-        if (projectSettings.getServerContextName() != null) {
-            txtContext.setText(projectSettings.getServerContextName());
+        if (projectSettings.getServerContext() != null) {
+            txtContext.setText(projectSettings.getServerContext());
         }
         isInit = false;
     }
