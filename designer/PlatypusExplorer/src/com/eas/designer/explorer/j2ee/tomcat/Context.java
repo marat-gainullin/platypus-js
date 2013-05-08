@@ -10,6 +10,7 @@ import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import oracle.net.ano.SupervisorService;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -21,7 +22,7 @@ import org.w3c.dom.NodeList;
  * @author vv
  */
 public class Context {
-    
+
     public static final String CONTEXT_TAG_NAME = "Context";//NOI18N
     public static final String DOC_BASE_ATTR_NAME = "docBase";//NOI18N
     protected static DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -29,11 +30,11 @@ public class Context {
     private Realm realm;
     private List<Resource> resources = new ArrayList<>();
     private String docBase;
-    
+
     public Context() throws ParserConfigurationException {
         builder = factory.newDocumentBuilder();
     }
-    
+
     public Document toDocument() {
         Document doc = builder.newDocument();
         doc.setXmlStandalone(true);
@@ -42,12 +43,15 @@ public class Context {
             contextTag.setAttribute(DOC_BASE_ATTR_NAME, docBase);
         }
         if (realm != null) {
-            contextTag.appendChild(Realm.getElement(realm));
+            contextTag.appendChild(realm.getElement(doc));
+        }
+        for (Resource resource : resources) {
+            contextTag.appendChild(resource.getElement(doc));
         }
         doc.appendChild(contextTag);
         return doc;
     }
-    
+
     public static Context valueOf(Document aDoc) throws Exception {
         Context context = new Context();
         NodeList projectNl = aDoc.getElementsByTagName(CONTEXT_TAG_NAME);
@@ -55,9 +59,9 @@ public class Context {
             Element contextTag = (Element) projectNl.item(0);
             context.docBase = contextTag.getAttribute(DOC_BASE_ATTR_NAME);
             Element realmTag = getElementByName(contextTag, Realm.TAG_NAME);
-            context.realm = Realm.valueOf(realmTag);
+            context.realm = RealmFactory.getRealm(realmTag);
             for (Element resourceTag : getElementsByName(contextTag, Resource.TAG_NAME)) {
-                Resource res = Resource.valueOf(resourceTag);
+                Resource res = ResourceFactory.getRealm(resourceTag);
                 if (res != null) {
                     context.resources.add(res);
                 }
@@ -131,7 +135,7 @@ public class Context {
     public synchronized void deleteResource(Resource aResource) {
         resources.remove(aResource);
     }
-    
+
     private static Element getElementByName(Element aParent, String aName) {
         NodeList nl = aParent.getElementsByTagName(aName);
         if (nl != null && nl.getLength() == 1 && nl.item(0) instanceof Element) {
@@ -140,7 +144,7 @@ public class Context {
             return null;
         }
     }
-    
+
     private static List<Element> getElementsByName(Element aParent, String aName) {
         NodeList nl = aParent.getElementsByTagName(aName);
         if (nl != null && nl.getLength() > 0) {
@@ -153,34 +157,6 @@ public class Context {
             return elements;
         } else {
             return null;
-        }
-    }
-
-    /**
-     * A Realm element represents a "database" of usernames, passwords, and
-     * roles (similar to Unix groups) assigned to those users.
-     */
-    public static class Realm {
-
-        public static final String TAG_NAME = "Realm";//NOI18N
-
-        private static Realm valueOf(Element realmTag) {
-            throw new UnsupportedOperationException("Not yet implemented");
-        }
-
-        private static Node getElement(Realm realm) {
-            throw new UnsupportedOperationException("Not yet implemented");
-        }
-    }
-
-    /**
-     * JNDI resource.
-     */
-    public static class Resource {
-        public static final String TAG_NAME = "Resource";//NOI18N
-
-        private static Resource valueOf(Element resourceTag) {
-            throw new UnsupportedOperationException("Not yet implemented");
         }
     }
 }
