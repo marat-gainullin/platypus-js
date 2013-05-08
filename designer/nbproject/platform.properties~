@@ -24,6 +24,8 @@ disabled.modules=\
     org.eclipse.mylyn.commons.net,\
     org.eclipse.mylyn.commons.xmlrpc,\
     org.eclipse.mylyn.tasks.core,\
+    org.jdesktop.beansbinding,\
+    org.jdesktop.layout,\
     org.netbeans.core.nativeaccess,\
     org.netbeans.core.osgi,\
     org.netbeans.lib.terminalemulator,\
