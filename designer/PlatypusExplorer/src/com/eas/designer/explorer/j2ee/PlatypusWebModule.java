@@ -33,8 +33,7 @@ import org.openide.filesystems.FileUtil;
 public class PlatypusWebModule extends J2eeModuleProvider implements J2eeModuleImplementation2,
         ModuleChangeReporter,
         EjbChangeDescriptor {
-
-    public static final String MODULE_DEFAULT_URL = "/WebApplication3"; //NOI18N
+    
     public static final String WEB_DIRECTORY = "web"; //NOI18N
     public static final String WEB_INF_DIRECTORY = "WEB-INF"; //NOI18N
     public static final String META_INF_DIRECTORY = "META-INF"; //NOI18N
@@ -97,7 +96,7 @@ public class PlatypusWebModule extends J2eeModuleProvider implements J2eeModuleI
 
     @Override
     public String getUrl() {
-        return MODULE_DEFAULT_URL;
+        return project.getSettings().getServerContext();
     }
 
     @Override
