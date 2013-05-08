@@ -2,8 +2,10 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.designer.explorer.j2ee;
+package com.eas.designer.explorer.j2ee.tomcat;
 
+import com.eas.designer.explorer.j2ee.PlatypusWebModule;
+import com.eas.designer.explorer.j2ee.WebAppConfigurator;
 import com.eas.designer.explorer.project.PlatypusProject;
 import java.io.IOException;
 import java.util.logging.Level;

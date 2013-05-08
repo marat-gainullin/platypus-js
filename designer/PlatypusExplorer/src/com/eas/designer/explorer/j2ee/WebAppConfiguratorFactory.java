@@ -4,6 +4,7 @@
  */
 package com.eas.designer.explorer.j2ee;
 
+import com.eas.designer.explorer.j2ee.tomcat.TomcatWebAppConfigurator;
 import com.eas.designer.explorer.project.PlatypusProject;
 
 /**
