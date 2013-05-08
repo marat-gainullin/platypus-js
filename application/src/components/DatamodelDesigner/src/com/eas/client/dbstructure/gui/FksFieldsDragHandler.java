@@ -5,7 +5,6 @@
 package com.eas.client.dbstructure.gui;
 
 import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.ForeignKeySpec;
 import com.eas.client.dbstructure.DbStructureUtils;
 import com.eas.client.dbstructure.SqlActionsController;
@@ -36,13 +35,10 @@ public class FksFieldsDragHandler extends RelationsFieldsDragHandler<FieldsEntit
     @Override
     protected void editModelField2FieldRelation(UndoableEditSupport aUndoSupport, Object aTransferrableData, Relation<FieldsEntity> alreadyInRelation, Relation<FieldsEntity> newRel) throws CannotRedoException {
         if (newRel.getLeftField() != null && newRel.getRightField() != null
-                && (newRel.getLeftEntity() != newRel.getRightEntity() || !newRel.getLeftField().toLowerCase().equals(newRel.getRightField().toLowerCase()))) {
-            FieldsEntity lEntity = newRel.getLeftEntity();
-            EntityView<FieldsEntity> lFrame = modelView.getEntityView(lEntity);
-            Fields fields = lFrame.getFields();
-            Field field = fields.get(newRel.getLeftField());
+                && (newRel.getLeftEntity() != newRel.getRightEntity() || newRel.getLeftField() != newRel.getRightField())) {
+            Field field = newRel.getLeftField();
             ForeignKeySpec fkSpec = DbStructureUtils.constructFkSpecByRelation(newRel);
-            CreateFkEdit cEdit = null;
+            CreateFkEdit cEdit;
             try {
                 cEdit = new CreateFkEdit(sqlActionsController, fkSpec, field);
                 cEdit.redo();
@@ -67,7 +63,6 @@ public class FksFieldsDragHandler extends RelationsFieldsDragHandler<FieldsEntit
                 aUndoSupport.endUpdate();
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(modelView, ex.getLocalizedMessage(), DbStructureUtils.getString("dbSchemeEditor"), JOptionPane.ERROR_MESSAGE);
-                return;
             }
         }
     }

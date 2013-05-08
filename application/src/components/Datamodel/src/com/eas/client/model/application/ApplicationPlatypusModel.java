@@ -34,22 +34,14 @@ public class ApplicationPlatypusModel extends ApplicationModel<ApplicationPlatyp
     }
 
     @Override
-    public boolean isTypeSupported(int aType) throws Exception {
-        return true;
+    public void addEntity(ApplicationPlatypusEntity aEntity) {
+        aEntity.setModel(this);
+        super.addEntity(aEntity);
     }
 
     @Override
-    public void fixupReferences() {
-        if (entities != null) {
-            for (ApplicationPlatypusEntity ent : entities.values()) {
-                if (ent != null) {
-                    ent.setModel(this);
-                }
-            }
-        }
-        if (parametersEntity != null) {
-            parametersEntity.setModel(this);
-        }
+    public boolean isTypeSupported(int aType) throws Exception {
+        return true;
     }
 
     @Override

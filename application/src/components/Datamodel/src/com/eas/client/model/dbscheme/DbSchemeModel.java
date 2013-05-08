@@ -56,22 +56,14 @@ public class DbSchemeModel extends Model<FieldsEntity, FieldsEntity, DbClient, S
     }
 
     @Override
-    public Document toXML() {
-        return DbSchemeModel2XmlDom.transform(this);
+    public void addEntity(FieldsEntity aEntity) {
+        aEntity.setModel(this);
+        super.addEntity(aEntity);
     }
 
     @Override
-    public void fixupReferences() {
-        if (entities != null) {
-            for (FieldsEntity ent : entities.values()) {
-                if (ent != null) {
-                    ent.setModel(this);
-                }
-            }
-        }
-        if (parametersEntity != null) {
-            parametersEntity.setModel(this);
-        }
+    public Document toXML() {
+        return DbSchemeModel2XmlDom.transform(this);
     }
 
     @Override

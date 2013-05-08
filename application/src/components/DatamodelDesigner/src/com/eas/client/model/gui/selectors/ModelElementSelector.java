@@ -4,7 +4,6 @@
  */
 package com.eas.client.model.gui.selectors;
 
-import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Model;
@@ -136,17 +135,11 @@ public class ModelElementSelector {
                             mView.makeVisible(eView, true);
                             if (!ldmRef.isField()) {
                                 if (ldmRef.getField() != null) {
-                                    Parameter paramMd = eView.getParameterByName(ldmRef.getField().getName());
-                                    if (paramMd != null) {
-                                        eView.setSelectedParameter(paramMd);
-                                    }
+                                    eView.setSelectedParameter((Parameter) ldmRef.getField());
                                 }
                             } else {
                                 if (ldmRef.getField() != null) {
-                                    Field fieldMd = eView.getFieldByName(ldmRef.getField().getName());
-                                    if (fieldMd != null) {
-                                        eView.setSelectedField(fieldMd);
-                                    }
+                                    eView.setSelectedField(ldmRef.getField());
                                 }
                             }
                         }

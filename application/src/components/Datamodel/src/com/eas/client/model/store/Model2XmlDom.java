@@ -199,18 +199,20 @@ public abstract class Model2XmlDom<E extends Entity<?, ?, E>> implements ModelVi
         if (relation != null) {
             Element node = doc.createElement(RELATION_TAG_NAME);
             currentNode.appendChild(node);
-            node.setAttribute(LEFT_ENTITY_ID_ATTR_NAME, String.valueOf(relation.getLeftEntityId()));
+            assert relation.getLeftEntity() != null : " A relation without left side detected";
+            node.setAttribute(LEFT_ENTITY_ID_ATTR_NAME, String.valueOf(relation.getLeftEntity().getEntityId()));
             if (relation.isLeftField()) {
-                node.setAttribute(LEFT_ENTITY_FIELD_ATTR_NAME, relation.getLeftField());
+                node.setAttribute(LEFT_ENTITY_FIELD_ATTR_NAME, relation.getLeftField().getName());
             } else {
-                node.setAttribute(LEFT_ENTITY_PARAMETER_ATTR_NAME, relation.getLeftParameter());
+                node.setAttribute(LEFT_ENTITY_PARAMETER_ATTR_NAME, relation.getLeftParameter().getName());
             }
 
-            node.setAttribute(RIGHT_ENTITY_ID_ATTR_NAME, String.valueOf(relation.getRightEntityId()));
+            assert relation.getRightEntity() != null : " A relation without right side detected";
+            node.setAttribute(RIGHT_ENTITY_ID_ATTR_NAME, String.valueOf(relation.getRightEntity().getEntityId()));
             if (relation.isRightField()) {
-                node.setAttribute(RIGHT_ENTITY_FIELD_ATTR_NAME, relation.getRightField());
+                node.setAttribute(RIGHT_ENTITY_FIELD_ATTR_NAME, relation.getRightField().getName());
             } else {
-                node.setAttribute(RIGHT_ENTITY_PARAMETER_ATTR_NAME, relation.getRightParameter());
+                node.setAttribute(RIGHT_ENTITY_PARAMETER_ATTR_NAME, relation.getRightParameter().getName());
             }
         }
     }

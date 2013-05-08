@@ -127,9 +127,9 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
         }
     }
 
-    public String getFieldDisplayLabel(String aFieldName) {
-        if (aFieldName != null && !aFieldName.isEmpty()) {
-            int lidx = fieldsModel.getFieldNameIndex(aFieldName);
+    public String getFieldDisplayLabel(Field aField) {
+        if (aField != null) {
+            int lidx = fieldsModel.getFieldNameIndex(aField.getName());
             if (lidx > -1) {
                 Field lfield = fieldsModel.getElementAt(lidx);
                 Component lcomp = fieldsParamsRenderer.getListCellRendererComponent(fieldsList, lfield, lidx, false, false);
@@ -142,9 +142,9 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
         return null;
     }
 
-    public String getParameterDisplayLabel(String aParameterName) {
-        if (aParameterName != null && !aParameterName.isEmpty()) {
-            int lidx = parametersModel.getFieldNameIndex(aParameterName);
+    public String getParameterDisplayLabel(Field aParameter) {
+        if (aParameter != null) {
+            int lidx = parametersModel.getFieldNameIndex(aParameter.getName());
             if (lidx > -1) {
                 Field lfield = parametersModel.getElementAt(lidx);
                 Component lcomp = fieldsParamsRenderer.getListCellRendererComponent(parametersList, lfield, lidx, false, false);
@@ -153,20 +153,6 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
                     return fRenderer.getText();
                 }
             }
-        }
-        return null;
-    }
-
-    public Field getFieldByName(String aFieldName) {
-        if (entity != null && aFieldName != null) {
-            return entity.getFields().get(aFieldName);
-        }
-        return null;
-    }
-
-    public Parameter getParameterByName(String aParameterName) {
-        if (getParameters() != null) {
-            return getParameters().get(aParameterName);
         }
         return null;
     }
@@ -954,30 +940,11 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
     }
 
     public Long getEntityID() {
-        return entity.getEntityID();
+        return entity.getEntityId();
     }
 
     public E getEntity() {
         return entity;
-    }
-
-    public boolean isKeyField(String aFieldName) {
-        if (entity != null && aFieldName != null) {
-            Fields fields = entity.getFields();
-            if (fields != null) {
-                Field lfield = fields.get(aFieldName);
-                return lfield != null && (lfield.isPk() || lfield.isFk());
-            }
-        }
-        return false;
-    }
-
-    public boolean isKeyParameter(String aFieldName) {
-        if (aFieldName != null && getParameters() != null) {
-            Field lfield = getParameters().get(aFieldName);
-            return lfield != null && (lfield.isPk() || lfield.isFk());
-        }
-        return false;
     }
 
     public void setTooltipRecursivly(JComponent aRoot, String aTooltip) {
@@ -1049,12 +1016,12 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
         return loc;
     }
 
-    public Point getFieldPosition(String aFieldName, boolean isLeft) {
-        return getListItemPosition(aFieldName, isLeft, fieldsList);
+    public Point getFieldPosition(Field aField, boolean isLeft) {
+        return getListItemPosition(aField.getName(), isLeft, fieldsList);
     }
 
-    public Point getParameterPosition(String aParameterName, boolean isLeft) {
-        return getListItemPosition(aParameterName, isLeft, parametersList);
+    public Point getParameterPosition(Parameter aParameter, boolean isLeft) {
+        return getListItemPosition(aParameter.getName(), isLeft, parametersList);
     }
 
     protected class MouseSelectionPropagator extends MouseAdapter {

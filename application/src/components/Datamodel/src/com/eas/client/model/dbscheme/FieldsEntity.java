@@ -134,22 +134,16 @@ public class FieldsEntity extends Entity<DbSchemeModel, SqlQuery, FieldsEntity> 
         Set<Relation<RE>> rels = aEntity.getInRelations();
         if (rels != null) {
             for (Relation<RE> rel : rels) {
-                String rf = rel.getRightField();
-                if (rel.isRightField() && rf.equals(aField.getName())) {
-                    if (!result.contains(rel)) {
-                        result.add(rel);
-                    }
+                if (rel.getRightField() == aField) {
+                    result.add(rel);
                 }
             }
         }
         rels = aEntity.getOutRelations();
         if (rels != null) {
             for (Relation<RE> rel : rels) {
-                String lf = rel.getLeftField();
-                if (rel.isLeftField() && lf.equals(aField.getName())) {
-                    if (!result.contains(rel)) {
-                        result.add(rel);
-                    }
+                if (rel.getLeftField() == aField) {
+                    result.add(rel);
                 }
             }
         }

@@ -25,7 +25,6 @@ import com.eas.client.model.gui.DatamodelDesignUtils;
 import com.eas.client.model.gui.DmAction;
 import com.eas.client.model.gui.IconCache;
 import com.eas.client.model.gui.edits.AccessibleCompoundEdit;
-import com.eas.client.model.gui.edits.ChangeRelationFieldParameterEdit;
 import com.eas.client.model.gui.edits.DeleteRelationEdit;
 import com.eas.client.model.gui.edits.fields.ChangeFieldEdit;
 import com.eas.client.model.gui.edits.fields.DeleteFieldEdit;
@@ -288,88 +287,6 @@ public abstract class FieldsView<E extends Entity<M, ?, E>, M extends Model<E, ?
                 chkRequired.setSelected(false);
             } finally {
                 chkRequired.setAction(action);
-            }
-        }
-    }
-
-    public class FieldsTypesModel implements ComboBoxModel<Integer> {
-
-        private Set<ListDataListener> listeners = new HashSet<>();
-        private Integer[] sqlTypes = null;
-        private Integer selectedItem = null;
-
-        public FieldsTypesModel() {
-            super();
-        }
-
-        @Override
-        public int getSize() {
-            try {
-                if (entity != null) {
-                    if (sqlTypes == null) {
-                        Set<Integer> col = RowsetUtils.typesNames.keySet();
-                        if (col != null) {
-                            List<Integer> tV = new ArrayList<>();
-                            for (Integer t : col) {
-                                if (entity.getModel().isTypeSupported(t)) {
-                                    tV.add(t);
-                                }
-                            }
-                            sqlTypes = tV.toArray(new Integer[]{});
-                        }
-                    }
-                    return sqlTypes.length;
-                } else {
-                    return 0;
-                }
-            } catch (Exception ex) {
-                Logger.getLogger(FieldsView.class.getName()).log(Level.SEVERE, null, ex);
-                return 0;
-            }
-        }
-
-        @Override
-        public Integer getElementAt(int index) {
-            if (index >= 0 && index < sqlTypes.length) {
-                return sqlTypes[index];
-            }
-            return null;
-        }
-
-        @Override
-        public void addListDataListener(ListDataListener l) {
-            if (!listeners.contains(l)) {
-                listeners.add(l);
-            }
-        }
-
-        @Override
-        public void removeListDataListener(ListDataListener l) {
-            listeners.remove(l);
-        }
-
-        @Override
-        public void setSelectedItem(Object anItem) {
-            selectedItem = (Integer) anItem;
-        }
-
-        @Override
-        public Integer getSelectedItem() {
-            if (selectedItem == null) {
-                Object oValue = fieldsList.getSelectedValue();
-                if (oValue != null && oValue instanceof Field) {
-                    Field field = (Field) oValue;
-                    selectedItem = field.getTypeInfo().getSqlType();
-                }
-            }
-            return selectedItem;
-        }
-
-        public void fireDataChanged() {
-            for (ListDataListener l : listeners) {
-                if (l != null) {
-                    l.contentsChanged(new ListDataEvent(FieldsTypesModel.this, ListDataEvent.CONTENTS_CHANGED, 0, getSize() - 1));
-                }
             }
         }
     }
@@ -669,18 +586,9 @@ public abstract class FieldsView<E extends Entity<M, ?, E>, M extends Model<E, ?
         @Override
         protected void editFieldsInDiagram() {
             if (!before.equals(after)) {
-                AccessibleCompoundEdit section = new AccessibleCompoundEdit();
-                Set<Relation<E>> outRels = entity.getOutRelations();
-                for (Relation<E> rel : toProcessRels) {
-                    ChangeRelationFieldParameterEdit<E> crEdit = new ChangeRelationFieldParameterEdit<>(rel, false, outRels.contains(rel), before.getName(), after.getName());
-                    crEdit.redo();
-                    section.addEdit(crEdit);
-                }
                 ChangeFieldEdit<E> edit = new ChangeFieldEdit<>(before, after, field, entity); //o == ftextName ? entity : null);
                 edit.redo();
-                section.addEdit(edit);
-                section.end();
-                undoSupport.postEdit(section);
+                undoSupport.postEdit(edit);
             }
         }
     }
@@ -776,45 +684,31 @@ public abstract class FieldsView<E extends Entity<M, ?, E>, M extends Model<E, ?
         protected void doWork() {
             Set<Relation<E>> rels = FieldsEntity.<E>getInOutRelationsByEntityField(entity, field);
             for (Relation<E> rel : rels) {
-                String leftFieldName = rel.getLeftField();
-                String leftParameterName = rel.getLeftParameter();
-
-                String rightFieldName = rel.getRightField();
-                String rightParameterName = rel.getRightParameter();
-
-                Field lfield = null;
-                Field rfield = null;
+                Field lfield;
+                Field rfield;
                 if (rel.isLeftField()) {
-                    lfield = rel.getLeftEntity().getFields().get(leftFieldName);
+                    lfield = rel.getLeftField();
                     if (rel.getLeftEntity() == entity
-                            && before.getName().equals(leftFieldName)) {
+                            && before.getName().equals(lfield.getName())) {
                         lfield = after;
                     }
                 } else {
-                    try {
-                        lfield = rel.getLeftEntity().getQuery().getParameters().get(leftParameterName);
-                        if (rel.getLeftEntity() == entity && before.getName().equals(leftParameterName)) {
-                            lfield = after;
-                        }
-                    } catch (Exception ex) {
-                        Logger.getLogger(FieldsView.class.getName()).log(Level.SEVERE, null, ex);
+                    lfield = rel.getLeftParameter();
+                    if (rel.getLeftEntity() == entity && before.getName().equals(lfield.getName())) {
+                        lfield = after;
                     }
                 }
 
                 if (rel.isRightField()) {
-                    rfield = rel.getRightEntity().getFields().get(rightFieldName);
+                    rfield = rel.getRightField();
                     if (rel.getRightEntity() == entity
-                            && before.getName().equals(rightFieldName)) {
+                            && before.getName().equals(rfield.getName())) {
                         rfield = after;
                     }
                 } else {
-                    try {
-                        rfield = rel.getRightEntity().getQuery().getParameters().get(rightParameterName);
-                        if (rel.getRightEntity() == entity && before.getName().equals(rightParameterName)) {
-                            rfield = after;
-                        }
-                    } catch (Exception ex) {
-                        Logger.getLogger(FieldsView.class.getName()).log(Level.SEVERE, null, ex);
+                    rfield = rel.getRightParameter();
+                    if (rel.getRightEntity() == entity && before.getName().equals(rfield.getName())) {
+                        rfield = after;
                     }
                 }
 
@@ -1292,7 +1186,6 @@ public abstract class FieldsView<E extends Entity<M, ?, E>, M extends Model<E, ?
                                             section.end();
                                             undoSupport.postEdit(section);
                                         }
-                                        pastedModel.resolveReferences();
                                     }
                                 } else {
                                     JOptionPane.showMessageDialog(FieldsView.this, DatamodelDesignUtils.getLocalizedString("BadClipboardData"), DatamodelDesignUtils.getLocalizedString("datamodel"), JOptionPane.ERROR_MESSAGE);
@@ -1461,12 +1354,12 @@ public abstract class FieldsView<E extends Entity<M, ?, E>, M extends Model<E, ?
         }
     }
     // environment
-    protected E entity = null;
-    protected M model = null;
+    protected E entity;
+    protected M model;
     // selected field
     protected Field field;
     // components
-    private FieldsTypesModel typesModel = new FieldsTypesModel();
+    private FieldsTypesModel typesModel;
     private ParametersKindModel parametersKindModel = new ParametersKindModel();
     private FieldsListModel<Field> fieldsModel;
     // interaction
@@ -1747,7 +1640,7 @@ public abstract class FieldsView<E extends Entity<M, ?, E>, M extends Model<E, ?
             v.getChangeSupport().removePropertyChangeListener(FieldInFieldsListChangesReflector.this);
             fireRelationsChanged();
         }
-        
+
         @Override
         public void reodered(Fields c) {
         }
@@ -1881,6 +1774,7 @@ public abstract class FieldsView<E extends Entity<M, ?, E>, M extends Model<E, ?
             model.removeEditingListener(fieldsChangeListener);
         }
         model = aModel;
+        typesModel = new FieldsTypesModel(model);
         if (model != null) {
             model.addEditingListener(fieldsChangeListener);
         }

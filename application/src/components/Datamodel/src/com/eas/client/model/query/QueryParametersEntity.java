@@ -19,7 +19,7 @@ public class QueryParametersEntity extends QueryEntity {
 
     public QueryParametersEntity() {
         super();
-        entityID = QueryModel.PARAMETERS_ENTITY_ID;
+        entityId = QueryModel.PARAMETERS_ENTITY_ID;
     }
 
     @Override
@@ -75,7 +75,7 @@ public class QueryParametersEntity extends QueryEntity {
     }
 
     @Override
-    public Long getEntityID() {
+    public Long getEntityId() {
         return ApplicationModel.PARAMETERS_ENTITY_ID;
     }
 }

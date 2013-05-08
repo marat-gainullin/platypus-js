@@ -5,7 +5,6 @@
 package com.eas.client.model.gui.view;
 
 import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.utils.RowsetUtils;
 import com.eas.client.model.Entity;
 import java.awt.datatransfer.DataFlavor;
@@ -23,7 +22,6 @@ public class TransferableRelation<E extends Entity<?, ?, E>> implements Transfer
 
     protected E entity = null;
     protected Field field = null;
-    protected Parameter param = null;
     protected DataFlavor[] flavors = new DataFlavor[1];
     protected static DataFlavor defaultDataFlavor = null;
 
@@ -35,11 +33,10 @@ public class TransferableRelation<E extends Entity<?, ?, E>> implements Transfer
         }
     }
 
-    public TransferableRelation(E aEntity, Field aField, Parameter aParam) {
+    public TransferableRelation(E aEntity, Field aField) {
         super();
         entity = aEntity;
         field = aField;
-        param = aParam;
         flavors[0] = defaultDataFlavor;
     }
 
@@ -66,30 +63,13 @@ public class TransferableRelation<E extends Entity<?, ?, E>> implements Transfer
         return entity;
     }
 
-    public String getFieldName() {
-        if (field != null) {
-            return field.getName();
-        }
-        return null;
-    }
-
-    public String getParamName() {
-        if (param != null) {
-            return param.getName();
-        }
-        return null;
+    public Field getField() {
+        return field;
     }
 
     public int getFieldType() {
         if (field != null) {
             return field.getTypeInfo().getSqlType();
-        }
-        return RowsetUtils.INOPERABLE_TYPE_MARKER;
-    }
-
-    public int getParamType() {
-        if (param != null) {
-            return param.getTypeInfo().getSqlType();
         }
         return RowsetUtils.INOPERABLE_TYPE_MARKER;
     }

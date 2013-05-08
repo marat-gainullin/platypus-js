@@ -61,6 +61,12 @@ public class QueryModel extends Model<QueryEntity, QueryParametersEntity, DbClie
     }
 
     @Override
+    public void addEntity(QueryEntity aEntity) {
+        aEntity.setModel(this);
+        super.addEntity(aEntity);
+    }
+
+    @Override
     public Document toXML() {
         return QueryModel2XmlDom.transform(this);
     }
@@ -79,17 +85,6 @@ public class QueryModel extends Model<QueryEntity, QueryParametersEntity, DbClie
                 supportedTypes = driver.getSupportedJdbcDataTypes();
             } catch (Exception ex) {
                 Logger.getLogger(QueryModel.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-    }
-
-    @Override
-    public void fixupReferences() {
-        if (entities != null) {
-            for (QueryEntity ent : entities.values()) {
-                if (ent != null) {
-                    ent.setModel(this);
-                }
             }
         }
     }

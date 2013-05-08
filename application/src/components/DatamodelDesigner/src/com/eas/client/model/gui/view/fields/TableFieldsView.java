@@ -324,7 +324,7 @@ public class TableFieldsView extends FieldsView<FieldsEntity, DbSchemeModel> {
                 Set<Relation<FieldsEntity>> sourceInRels = entity.getInRelations();
                 Set<Relation<FieldsEntity>> inRels = new HashSet<>();
                 for (Relation<FieldsEntity> rel : sourceInRels) {
-                    if (rel.getRightField().toLowerCase().equals(field.getName().toLowerCase())) {
+                    if (rel.getRightField() == field) {
                         inRels.add(rel);
                     }
                 }
@@ -365,9 +365,7 @@ public class TableFieldsView extends FieldsView<FieldsEntity, DbSchemeModel> {
                     // we have to recreate foreign keys in order to them to be compatible with new field names
                     // let's drop the foreign keys
                     for (Relation<FieldsEntity> rel2Del : toProcessRels) {
-                        FieldsEntity lEntity = rel2Del.getLeftEntity();
-                        FieldsEntity rEntity = rel2Del.getRightEntity();
-                        ForeignKeySpec fkSpec = new ForeignKeySpec(lEntity.getTableSchemaName(), lEntity.getTableName(), rel2Del.getLeftField(), rel2Del.getFkName(), rel2Del.getFkUpdateRule(), rel2Del.getFkDeleteRule(), rel2Del.isFkDeferrable(), rEntity.getTableSchemaName(), rEntity.getTableName(), rel2Del.getRightField(), null);
+                        ForeignKeySpec fkSpec = DbStructureUtils.constructFkSpecByRelation(rel2Del);
                         DropFkEdit dEdit = new DropFkEdit(sqlActionsController, fkSpec, field);
                         dEdit.redo();
                         section.addEdit(dEdit);
@@ -378,17 +376,7 @@ public class TableFieldsView extends FieldsView<FieldsEntity, DbSchemeModel> {
                     section.addEdit(dbEdit);
                     // let's create the foreign keys
                     for (Relation<FieldsEntity> rel2Create : toProcessRels) {
-                        FieldsEntity lEntity = rel2Create.getLeftEntity();
-                        FieldsEntity rEntity = rel2Create.getRightEntity();
-                        String leftFieldName = rel2Create.getLeftField();
-                        if (getEntity() == lEntity && leftFieldName.toLowerCase().equals(before.getName().toLowerCase())) {
-                            leftFieldName = after.getName();
-                        }
-                        String rightFieldName = rel2Create.getRightField();
-                        if (getEntity() == rEntity && rightFieldName.toLowerCase().equals(before.getName().toLowerCase())) {
-                            rightFieldName = after.getName();
-                        }
-                        ForeignKeySpec fkSpec = new ForeignKeySpec(lEntity.getTableSchemaName(), lEntity.getTableName(), leftFieldName, rel2Create.getFkName(), rel2Create.getFkUpdateRule(), rel2Create.getFkDeleteRule(), rel2Create.isFkDeferrable(), rEntity.getTableSchemaName(), rEntity.getTableName(), rightFieldName, null);
+                        ForeignKeySpec fkSpec = DbStructureUtils.constructFkSpecByRelation(rel2Create);
                         CreateFkEdit cEdit = new CreateFkEdit(sqlActionsController, fkSpec, field);
                         cEdit.redo();
                         section.addEdit(cEdit);
@@ -533,9 +521,7 @@ public class TableFieldsView extends FieldsView<FieldsEntity, DbSchemeModel> {
                 // we have to remove foreign keys because of types incompatibility
                 if (toProcessRels != null) {
                     for (Relation<FieldsEntity> rel2Del : toProcessRels) {
-                        FieldsEntity lEntity = rel2Del.getLeftEntity();
-                        FieldsEntity rEntity = rel2Del.getRightEntity();
-                        ForeignKeySpec fkSpec = new ForeignKeySpec(lEntity.getTableSchemaName(), lEntity.getTableName(), rel2Del.getLeftField(), rel2Del.getFkName(), rel2Del.getFkUpdateRule(), rel2Del.getFkDeleteRule(), rel2Del.isFkDeferrable(), rEntity.getTableSchemaName(), rEntity.getTableName(), rel2Del.getRightField(), null);
+                        ForeignKeySpec fkSpec = DbStructureUtils.constructFkSpecByRelation(rel2Del);
                         DropFkEdit dEdit = new DropFkEdit(sqlActionsController, fkSpec, field);
                         dEdit.redo();
                         section.addEdit(dEdit);

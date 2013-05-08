@@ -97,8 +97,8 @@ public class ApplicationModelView extends ModelView<ApplicationDbEntity, Applica
 
     @Override
     protected void prepareEntityForPaste(ApplicationDbEntity aEntity) {
-        if (model.getEntityById(aEntity.getEntityID()) != null) {
-            aEntity.regenerateID();
+        if (model.getEntityById(aEntity.getEntityId()) != null) {
+            aEntity.regenerateId();
         }
     }
 

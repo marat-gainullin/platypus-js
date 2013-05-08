@@ -41,20 +41,6 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
         setClient(aClient);
     }
 
-    @Override
-    public void fixupReferences() {
-        if (entities != null) {
-            for (ApplicationDbEntity ent : entities.values()) {
-                if (ent != null) {
-                    ent.setModel(this);
-                }
-            }
-        }
-        if (parametersEntity != null) {
-            parametersEntity.setModel(this);
-        }
-    }
-
     public String getSessionId() {
         return sessionId;
     }
@@ -66,6 +52,12 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
     @Override
     public ApplicationDbEntity newGenericEntity() {
         return new ApplicationDbEntity(this);
+    }
+
+    @Override
+    public void addEntity(ApplicationDbEntity aEntity) {
+        aEntity.setModel(this);
+        super.addEntity(aEntity);
     }
 
     /**

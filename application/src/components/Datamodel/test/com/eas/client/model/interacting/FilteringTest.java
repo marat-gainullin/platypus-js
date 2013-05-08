@@ -102,7 +102,7 @@ public class FilteringTest extends BaseTest {
         public Map<Long, Integer> gatherRowCounts() throws Exception {
             Map<Long, Integer> counts = new HashMap<>();
             for (ApplicationDbEntity entity : model.getEntities().values()) {
-                counts.put(entity.getEntityID(), entity.getRowset().size());
+                counts.put(entity.getEntityId(), entity.getRowset().size());
             }
             return counts;
         }
@@ -286,14 +286,14 @@ public class FilteringTest extends BaseTest {
             Rowset rowset = state.GRUPPA_OBJECTA_REMONTA.getRowset();
             rowset.beforeFirst();
             while (rowset.next()) {
-                state.ensureRowCounts(counts, state.GRUPPA_OBJECTA_REMONTA.getEntityID());
+                state.ensureRowCounts(counts, state.GRUPPA_OBJECTA_REMONTA.getEntityId());
             }
             rowset.first();
 
             rowset = state.VID_OBJECTA_REMONTA.getRowset();
             rowset.beforeFirst();
             while (rowset.next()) {
-                state.ensureRowCounts(counts, state.VID_OBJECTA_REMONTA.getEntityID());
+                state.ensureRowCounts(counts, state.VID_OBJECTA_REMONTA.getEntityId());
             }
             rowset.first();
 

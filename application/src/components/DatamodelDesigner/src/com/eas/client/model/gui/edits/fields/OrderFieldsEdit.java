@@ -14,8 +14,8 @@ import com.eas.client.model.Entity;
  */
 public abstract class OrderFieldsEdit<E extends Entity<?, ?, E>> extends FieldsEdit<E> {
 
-    protected Field field = null;
-    protected int fieldIndex = 0;
+    protected Field field;
+    protected int fieldIndex;
 
     public OrderFieldsEdit(E aEntity, Field aField) {
         super(aEntity);

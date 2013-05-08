@@ -50,7 +50,7 @@ public class ApplicationModel2XmlDom<E extends ApplicationEntity<?, ?, E>> exten
 
             node.setAttribute(Model.DATASOURCE_NAME_TAG_NAME, aEntity.getName());
             node.setAttribute(Model.DATASOURCE_TITLE_TAG_NAME, aEntity.getTitle());
-            node.setAttribute(ENTITY_ID_ATTR_NAME, String.valueOf(aEntity.getEntityID()));
+            node.setAttribute(ENTITY_ID_ATTR_NAME, String.valueOf(aEntity.getEntityId()));
             if (aEntity.getQueryId() != null) {
                 node.setAttribute(QUERY_ID_ATTR_NAME, String.valueOf(aEntity.getQueryId()));
             }

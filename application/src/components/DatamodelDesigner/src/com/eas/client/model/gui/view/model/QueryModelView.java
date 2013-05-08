@@ -66,8 +66,8 @@ public class QueryModelView extends ModelView<QueryEntity, QueryParametersEntity
 
     @Override
     protected void prepareEntityForPaste(QueryEntity aEntity) {
-        if (model.getEntityById(aEntity.getEntityID()) != null) {
-            aEntity.regenerateID();
+        if (model.getEntityById(aEntity.getEntityId()) != null) {
+            aEntity.regenerateId();
         }
         if (aEntity.getTableSchemaName() != null && aEntity.getTableSchemaName().isEmpty()) {
             aEntity.setTableSchemaName(null);

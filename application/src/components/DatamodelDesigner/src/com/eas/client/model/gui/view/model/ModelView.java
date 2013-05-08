@@ -175,7 +175,7 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
         Set<E> oldSelection = new HashSet<>();
         oldSelection.addAll(selectedEntities);
         for (E e : selectedEntities) {
-            EntityView<E> eView = entityViews.get(e.getEntityID());
+            EntityView<E> eView = entityViews.get(e.getEntityId());
             if (viewToRetain != eView) {
                 eView.setEntityViewUnselectedLook();
             }
@@ -280,7 +280,7 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
 
     public EntityView<E> getParametersView() {
         if (entityViews != null && model != null && model.getParametersEntity() != null) {
-            return entityViews.get(model.getParametersEntity().getEntityID());
+            return entityViews.get(model.getParametersEntity().getEntityId());
         } else {
             return null;
         }
@@ -464,8 +464,8 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
     protected boolean calcSlots(Segment fslot, Segment lslot, Relation<E> lrel, Map<Long, EntityView<E>> aViews) {
         boolean isBothOnTheRight = false;
 
-        EntityView<E> lView = aViews.get(lrel.getLeftEntity().getEntityID());
-        EntityView<E> rView = aViews.get(lrel.getRightEntity().getEntityID());
+        EntityView<E> lView = aViews.get(lrel.getLeftEntity().getEntityId());
+        EntityView<E> rView = aViews.get(lrel.getRightEntity().getEntityId());
 
         Point lpt = null;
         Point lpt1 = null;
@@ -531,7 +531,7 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
     }
 
     public EntityView<E> getEntityView(E aEnt) {
-        return entityViews.get(aEnt.getEntityID());
+        return entityViews.get(aEnt.getEntityId());
     }
 
     protected void calcConnectors(Set<Relation<E>> rels) {
@@ -623,8 +623,8 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
                     String leftFieldLabel = null;
                     E lEntity = rel.getLeftEntity();
                     EntityView<E> lView = getEntityView(lEntity);
-                    String lField = rel.getLeftField();
-                    if (lField != null && !lField.isEmpty()) {
+                    Field lField = rel.getLeftField();
+                    if (lField != null) {
                         leftFieldLabel = lView.getFieldDisplayLabel(lField);
                     } else {
                         lField = rel.getLeftParameter();
@@ -641,9 +641,9 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
                     String rightFieldLabel = null;
                     E rEntity = rel.getRightEntity();
                     EntityView<E> rView = getEntityView(rEntity);
-                    String rField = rel.getRightField();
+                    Field rField = rel.getRightField();
                     if (rView != null) {
-                        if (rField != null && !rField.isEmpty()) {
+                        if (rField != null) {
                             rightFieldLabel = rView.getFieldDisplayLabel(rField);
                         } else {
                             rField = rel.getRightParameter();
@@ -975,9 +975,9 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
 
     protected void deleteSelectedFields() {
         if (isSelectedDeletableFields()) {
-            Set<Relation> toConfirm = new HashSet<>();
+            Set<Relation<E>> toConfirm = new HashSet<>();
             for (EntityFieldTuple t : selectedFields) {
-                Set<Relation> toDel = FieldsEntity.getInOutRelationsByEntityField(t.entity, t.field);
+                Set<Relation<E>> toDel = FieldsEntity.getInOutRelationsByEntityField(t.entity, t.field);
                 toConfirm.addAll(toDel);
             }
             if (!toConfirm.isEmpty()) {
@@ -1085,7 +1085,7 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
 
     public void removeEntityView(E aEntity) {
         if (aEntity != null && !isParametersEntity(aEntity)) {
-            Long entityId = aEntity.getEntityID();
+            Long entityId = aEntity.getEntityId();
             EntityView<E> eView = entityViews.get(entityId);
             if (eView != null) {
                 if (isViewSelected(eView)) {
@@ -2236,7 +2236,6 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
                                             undoSupport.endUpdate();
                                         }
                                     }
-                                    model.resolveReferences();
                                 }
                             } else {
                                 JOptionPane.showMessageDialog(ModelView.this, DatamodelDesignUtils.getLocalizedString("BadClipboardData"), DatamodelDesignUtils.getLocalizedString("datamodel"), JOptionPane.ERROR_MESSAGE);

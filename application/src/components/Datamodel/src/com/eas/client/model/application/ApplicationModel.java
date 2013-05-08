@@ -266,7 +266,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
     }
 
     public boolean isEntityRowIndexStateSaved(E entity) {
-        return savedRowIndexEntities.contains(entity.getEntityID());
+        return savedRowIndexEntities.contains(entity.getEntityId());
     }
 
     public void addSavedRowIndex(E aEntity, int aIndex) {
@@ -276,7 +276,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         if (!isEntityRowIndexStateSaved(aEntity)) {
             Entry<E, Integer> entry = new SimpleEntry<>(aEntity, aIndex);
             savedEntitiesRowIndexes.add(entry);
-            savedRowIndexEntities.add(aEntity.getEntityID());
+            savedRowIndexEntities.add(aEntity.getEntityId());
         }
     }
 
@@ -330,7 +330,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         return entity.defineProperties();
     }
 
-    public synchronized Scriptable createQuery(ScriptableRowset<E> aLeftScriptableRowset, Field aLeftField, String aRightQueryId, String aRightFieldName) throws Exception {
+    public synchronized Scriptable createQuery(ScriptableRowset<E> aLeftScriptableRowset, Field aLeftField, String aRightQueryId, Field aRightField) throws Exception {
         if (client == null) {
             throw new NullPointerException("Null client detected while creating a query");
         }
@@ -339,14 +339,14 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         rightEntity.setQueryId(aRightQueryId);
         addEntity(rightEntity);
         // filter relation
-        Relation<E> rel = new Relation<>(aLeftScriptableRowset.getEntity(), true, aLeftField.getName(), rightEntity, true, aRightFieldName);
+        Relation<E> rel = new Relation<>(aLeftScriptableRowset.getEntity(), aLeftField, rightEntity, aRightField);
         addRelation(rel);
         // parameters bypass relations
         Parameters params = aLeftScriptableRowset.getEntity().getQuery().getParameters();
         assert params != null;
         for (int i = 1; i <= params.getParametersCount(); i++) {
             Parameter p = (Parameter) params.get(i);
-            Relation<E> pRel = new Relation<>(aLeftScriptableRowset.getEntity(), false, p.getName(), rightEntity, false, p.getName());
+            Relation<E> pRel = new Relation<>(aLeftScriptableRowset.getEntity(), p, rightEntity, rightEntity.getQuery().getParameters().get(p.getName()));
             addRelation(pRel);
         }
         return rightEntity.defineProperties();

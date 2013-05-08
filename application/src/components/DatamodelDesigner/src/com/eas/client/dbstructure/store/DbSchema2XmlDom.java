@@ -35,7 +35,7 @@ public class DbSchema2XmlDom extends DbSchemeModel2XmlDom {
             Element node = doc.createElement(ENTITY_TAG_NAME);
             currentNode.appendChild(node);
 
-            node.setAttribute(ENTITY_ID_ATTR_NAME, String.valueOf(entity.getEntityID()));
+            node.setAttribute(ENTITY_ID_ATTR_NAME, String.valueOf(entity.getEntityId()));
             node.setAttribute(TABLE_DB_ID_ATTR_NAME, String.valueOf(entity.getTableDbId()));
             node.setAttribute(TABLE_SCHEMA_NAME_ATTR_NAME, entity.getTableSchemaName());
             node.setAttribute(TABLE_NAME_ATTR_NAME, entity.getTableName());
