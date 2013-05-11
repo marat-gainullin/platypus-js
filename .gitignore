@@ -8,3 +8,4 @@ private.xml
 *.gwt-log
 /application/src/lib/thirdparty/JavaScript/nbproject/private/
 /application/src/group/dist/
+/designer/dist/
