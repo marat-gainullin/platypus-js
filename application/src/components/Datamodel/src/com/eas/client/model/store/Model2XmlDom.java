@@ -59,7 +59,7 @@ public abstract class Model2XmlDom<E extends Entity<?, ?, E>> implements ModelVi
     protected Document model2XmlDom(Model<E, ?, ?, ?> aModel) {
         if (aModel != null && builder != null) {
             doc = builder.newDocument();
-	    doc.setXmlStandalone(true);
+            doc.setXmlStandalone(true);
             currentNode = doc;
             aModel.accept(this);
             doc.setXmlStandalone(true);
@@ -186,7 +186,6 @@ public abstract class Model2XmlDom<E extends Entity<?, ?, E>> implements ModelVi
         node.setAttribute(ENTITY_SIZE_HEIGHT, String.valueOf(entity.getHeight()));
         node.setAttribute(ENTITY_ICONIFIED, String.valueOf(entity.isIconified()));
     }
-
     public static final String LEFT_ENTITY_ID_ATTR_NAME = "leftEntityId";
     public static final String LEFT_ENTITY_FIELD_ATTR_NAME = "leftEntityFieldName";
     public static final String LEFT_ENTITY_PARAMETER_ATTR_NAME = "leftEntityParameterName";
@@ -196,7 +195,7 @@ public abstract class Model2XmlDom<E extends Entity<?, ?, E>> implements ModelVi
 
     @Override
     public void visit(Relation<E> relation) {
-        if (relation != null) {
+        if (relation != null && relation.getLeftField() != null && relation.getRightField() != null) {
             Element node = doc.createElement(RELATION_TAG_NAME);
             currentNode.appendChild(node);
             assert relation.getLeftEntity() != null : " A relation without left side detected";
@@ -265,5 +264,4 @@ public abstract class Model2XmlDom<E extends Entity<?, ?, E>> implements ModelVi
      */
     public static final String DATAMODEL_DB_ID = "datamodelDbId";
     public static final String DATAMODEL_DB_SCHEMA_NAME = "datamodelSchemaName";
-
 }

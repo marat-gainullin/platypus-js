@@ -391,7 +391,7 @@ public class FieldsTest {
         Field fkField = read.getFields().getForeinKeys().get(0);
         assertEquals(fkField, f2);
         fkField.getFk().setCName("new fk constraint name");
-        assertFalse(fkField.equals(f2));
+        assertFalse(fkField.isEqual(f2));
     }
 
     /**

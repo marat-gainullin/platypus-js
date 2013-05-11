@@ -67,8 +67,8 @@ public class SqlTextEditsComplementor {
             Map<String, com.eas.client.model.Relation<QueryEntity>> statementRelations = prepareStatementRelations(dataObject.getModel(), statement, modelTables);
             synchronizeRelations(edit, dataObject.getModel(), statementRelations);
         }
-        dataObject.getChangeSupport().firePropertyChange(PlatypusQueryDataObject.PROCEDURE_PROP_NAME, !dataObject.isProcedure(), dataObject.isProcedure());
-        dataObject.getChangeSupport().firePropertyChange(PlatypusQueryDataObject.MANUAL_PROP_NAME, !dataObject.isManual(), dataObject.isManual());
+        dataObject.procedureChanged(!dataObject.isProcedure(), dataObject.isProcedure());
+        dataObject.manualChanged(!dataObject.isManual(), dataObject.isManual());
     }
 
     public String generateSideId(GatherRelationsSubjectsRiddleTask sideSubjectsTask) {
@@ -133,34 +133,30 @@ public class SqlTextEditsComplementor {
             // Relation's left side
             if (leftSideId != null && !leftSideId.isEmpty()) {
                 if (leftSideId.startsWith(PARAMETERS_NAME + ".")) {
-                    modelRel.setLEntity(model.getParametersEntity());
-                    modelRel.setLeftEntityId(model.getParametersEntity().getEntityID());
-                    modelRel.setLeftField(leftSideId.substring(PARAMETERS_NAME.length() + 1));
+                    modelRel.setLeftEntity(model.getParametersEntity());
+                    modelRel.setLeftField(model.getParametersEntity().getFields().get(leftSideId.substring(PARAMETERS_NAME.length() + 1)));
                 } else {
                     int dotIdx = leftSideId.lastIndexOf('.');
                     String tblId = leftSideId.substring(0, dotIdx);
                     QueryEntity lEntity = tables.get(tblId.toLowerCase());
                     if (lEntity != null) {
-                        modelRel.setLEntity(lEntity);
-                        modelRel.setLeftEntityId(lEntity.getEntityID());
-                        modelRel.setLeftField(leftSideId.substring(dotIdx + 1));
+                        modelRel.setLeftEntity(lEntity);
+                        modelRel.setLeftField(lEntity.getFields().get(leftSideId.substring(dotIdx + 1)));
                     }
                 }
             }
             // Relation's right side
             if (rightSideId != null && !rightSideId.isEmpty()) {
                 if (rightSideId.startsWith(PARAMETERS_NAME + ".")) {
-                    modelRel.setREntity(model.getParametersEntity());
-                    modelRel.setRightEntityId(model.getParametersEntity().getEntityID());
-                    modelRel.setRightField(rightSideId.substring(PARAMETERS_NAME.length() + 1));
+                    modelRel.setRightEntity(model.getParametersEntity());
+                    modelRel.setRightField(model.getParametersEntity().getFields().get(rightSideId.substring(PARAMETERS_NAME.length() + 1)));
                 } else {
                     int dotIdx = rightSideId.lastIndexOf('.');
                     String tblId = rightSideId.substring(0, dotIdx);
                     QueryEntity rEntity = tables.get(tblId.toLowerCase());
                     if (rEntity != null) {
-                        modelRel.setREntity(rEntity);
-                        modelRel.setRightEntityId(rEntity.getEntityID());
-                        modelRel.setRightField(rightSideId.substring(dotIdx + 1));
+                        modelRel.setRightEntity(rEntity);
+                        modelRel.setRightField(rEntity.getFields().get(rightSideId.substring(dotIdx + 1)));
                     }
                 }
             }
@@ -223,7 +219,7 @@ public class SqlTextEditsComplementor {
     public Map<String, com.eas.client.model.Relation<QueryEntity>> prepareModelRelations(QueryModel model) {
         Map<String, com.eas.client.model.Relation<QueryEntity>> relsMap = new HashMap<>();
         for (com.eas.client.model.Relation<QueryEntity> relation : model.getRelations()) {
-            if (!relation.isLeftParameter() && !relation.isRightParameter()) {
+            if (relation.isLeftField() || relation.isRightField()) {
                 // Parameter to parameter relations is out of scope
                 // Note! Edited query parameters are treated as fields of 
                 // parameters entity.
@@ -344,10 +340,10 @@ public class SqlTextEditsComplementor {
                 toAdd.setWidth(rect.width);
                 toAdd.setHeight(rect.height);
                 toAdd.setAlias(table.getAlias() != null ? table.getAlias().getName() : "");
-                if (SUBQUERY_LINK_PATTERN.matcher(table.getName()).matches()) {
-                    toAdd.setQueryId(table.getName().substring(1));
-                } else if (dataObject.existsAppQuery(table.getName())) {
+                if (dataObject.existsAppQuery(table.getName())) {
                     toAdd.setQueryId(table.getName());
+                } else if (SUBQUERY_LINK_PATTERN.matcher(table.getName()).matches()) {
+                    toAdd.setQueryId(table.getName().substring(1));
                 } else {
                     toAdd.setTableSchemaName(table.getSchemaName());
                     toAdd.setTableName(table.getName());
@@ -382,7 +378,6 @@ public class SqlTextEditsComplementor {
     }
 
     private boolean validStatementRelation(com.eas.client.model.Relation<QueryEntity> modelRel) {
-        return modelRel.getLeftEntity() != null && modelRel.getRightEntity() != null
-                && modelRel.getLeftEntityId() != null && modelRel.getRightEntityId() != null;
+        return modelRel.getLeftEntity() != null && modelRel.getRightEntity() != null;
     }
 }

@@ -303,14 +303,14 @@ public class EntityFieldsGrid extends JTable implements RowsetListener {
                         DbComboDesignInfo info = new DbComboDesignInfo();
                         infos.put(field.getTableName().toLowerCase(), info);
                         info.setList(true);
-                        info.setValueField(new ModelElementRef(field, true, appEntity.getEntityID()));
+                        info.setValueField(new ModelElementRef(field, true, appEntity.getEntityId()));
                     }
                 }
                 for (int i = 1; i <= qFields.getFieldsCount(); i++) {
                     Field field = qFields.get(i);
                     if (!field.isPk() && String.class.getName().equals(field.getTypeInfo().getJavaClassName())) {
                         DbComboDesignInfo info = infos.get(field.getTableName().toLowerCase());
-                        info.setDisplayField(new ModelElementRef(field, true, appEntity.getEntityID()));
+                        info.setDisplayField(new ModelElementRef(field, true, appEntity.getEntityId()));
                         break;
                     }
                 }
@@ -569,7 +569,7 @@ public class EntityFieldsGrid extends JTable implements RowsetListener {
             for (int i = 0; i < cCount; i++) {
                 Field field = fields.get(i + 1);
                 ModelElementRef ref = new ModelElementRef();
-                ref.setEntityId(entity.getEntityID());
+                ref.setEntityId(entity.getEntityId());
                 ref.setFieldName(field.getName());
                 Class<?>[] compatibleControlsClasses = DbControlsUtils.getCompatibleControls(field.getTypeInfo().getSqlType());
                 if (compatibleControlsClasses != null && compatibleControlsClasses.length > 0) {

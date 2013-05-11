@@ -5,9 +5,9 @@
 package com.eas.client.dbstructure.gui.edits;
 
 import com.bearsoft.rowset.metadata.ForeignKeySpec.ForeignKeyRule;
-import com.eas.client.model.gui.edits.DatamodelEdit;
 import com.eas.client.model.Relation;
 import com.eas.client.model.dbscheme.FieldsEntity;
+import com.eas.client.model.gui.edits.DatamodelEdit;
 
 /**
  *

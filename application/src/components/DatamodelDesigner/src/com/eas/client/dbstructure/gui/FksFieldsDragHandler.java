@@ -9,6 +9,8 @@ import com.bearsoft.rowset.metadata.ForeignKeySpec;
 import com.eas.client.dbstructure.DbStructureUtils;
 import com.eas.client.dbstructure.SqlActionsController;
 import com.eas.client.dbstructure.gui.edits.CreateFkEdit;
+import com.eas.client.dbstructure.gui.edits.DbStructureUndoableEditSupport;
+import com.eas.client.dbstructure.gui.edits.NotSavableDbStructureCompoundEdit;
 import com.eas.client.model.Relation;
 import com.eas.client.model.dbscheme.DbSchemeModel;
 import com.eas.client.model.dbscheme.FieldsEntity;
@@ -17,6 +19,7 @@ import com.eas.client.model.gui.view.entities.EntityView;
 import com.eas.client.model.gui.view.model.ModelView;
 import javax.swing.JOptionPane;
 import javax.swing.undo.CannotRedoException;
+import javax.swing.undo.CompoundEdit;
 import javax.swing.undo.UndoableEditSupport;
 
 /**
@@ -51,24 +54,24 @@ public class FksFieldsDragHandler extends RelationsFieldsDragHandler<FieldsEntit
             newRel.setFkDeferrable(true);
             newRel.setFkName(fkSpec.getCName());
             try {
+                assert aUndoSupport instanceof DbStructureUndoableEditSupport;
+                ((DbStructureUndoableEditSupport) aUndoSupport).notSavable();
                 aUndoSupport.beginUpdate();
-                aUndoSupport.postEdit(cEdit);
-                super.editModelField2FieldRelation(
-                        aUndoSupport,
-                        aTransferrableData,
-                        null/* Application model can't have multiple field's value's sources.
-                         But database structure diagram can refer to the same field multiple times
-                         without any drawbacks.*/,
-                        newRel);
-                aUndoSupport.endUpdate();
+                try {
+                    aUndoSupport.postEdit(cEdit);
+                    super.editModelField2FieldRelation(
+                            aUndoSupport,
+                            aTransferrableData,
+                            null/* Application model can't have multiple field's value's sources.
+                             But database structure diagram can refer to the same field multiple times
+                             without any drawbacks.*/,
+                            newRel);
+                } finally {
+                    aUndoSupport.endUpdate();
+                }
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(modelView, ex.getLocalizedMessage(), DbStructureUtils.getString("dbSchemeEditor"), JOptionPane.ERROR_MESSAGE);
             }
         }
-    }
-
-    @Override
-    protected void editModelEntity2EntityRelation(UndoableEditSupport aUndoSupport, Relation<FieldsEntity> rel) throws CannotRedoException {
-        // not allowed for db diagrams. So, nno op
     }
 }

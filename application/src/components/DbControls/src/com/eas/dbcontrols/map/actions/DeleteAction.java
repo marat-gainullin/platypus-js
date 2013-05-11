@@ -116,14 +116,14 @@ public class DeleteAction extends GeoPaneAction {
                     List<Integer> pkFields = loc.getFields();
                     assert pkFields.size() <= 1 : "Multiple primary key per rowset are not supported";
                     assert pkFields.size() > 0 : "Rowsets without primary keys are not supported";
-                    entitiesLocators.put(entity.getEntityID(), loc);
-                    entitiesPks.put(entity.getEntityID(), loc.getRowset().getFields().get(pkFields.get(0)));
+                    entitiesLocators.put(entity.getEntityId(), loc);
+                    entitiesPks.put(entity.getEntityId(), loc.getRowset().getFields().get(pkFields.get(0)));
                 }
                 try {
                     // removing filtered features
                     for (String gKey : features2Remove) {
                         ApplicationEntity<?, ?, ?> ent = features2Entities.get(gKey);
-                        Locator loc = entitiesLocators.get(ent.getEntityID());
+                        Locator loc = entitiesLocators.get(ent.getEntityId());
                         assert loc != null;
                         if (loc.find(gKey)) {
                             if (loc.first()) {

@@ -120,7 +120,7 @@ public abstract class ScalarModelComponent<D extends DbControlPanel> extends Com
             assert rowsetHost != null && rowsetHost.unwrap() instanceof ScriptableRowset;
             ApplicationEntity<?, ?, ?> entity = ((ScriptableRowset) rowsetHost.unwrap()).getEntity();
             if (entity != null) {
-                return new ModelElementRef(aField, true, entity.getEntityID());
+                return new ModelElementRef(aField, true, entity.getEntityId());
             }
         }
         return null;

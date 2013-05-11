@@ -2657,7 +2657,7 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
 
     public static void fillByEntity(ApplicationEntity<?, ?, ?> aEntity, DbGrid aGrid, int aWidth) throws Exception {
         ModelEntityRef queryEntityRef = new ModelEntityRef();
-        queryEntityRef.setEntityId(aEntity.getEntityID());
+        queryEntityRef.setEntityId(aEntity.getEntityId());
         Rowset rowset = aEntity.getRowset();
         if (rowset == null) {
             throw new Exception("SQL Error (see log)");

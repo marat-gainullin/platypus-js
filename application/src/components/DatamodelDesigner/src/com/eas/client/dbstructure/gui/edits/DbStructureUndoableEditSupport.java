@@ -6,7 +6,6 @@ package com.eas.client.dbstructure.gui.edits;
 
 import com.eas.client.model.gui.edits.NotSavableUndoableEditSupport;
 import javax.swing.undo.CompoundEdit;
-import javax.swing.undo.UndoableEdit;
 
 /**
  *
@@ -23,6 +22,7 @@ public class DbStructureUndoableEditSupport extends NotSavableUndoableEditSuppor
         }   
     }
 
+    /* DbStructureCompoundEdit need to be preserved as is, because of its behaviour, related with database
     @Override
     public synchronized void postEdit(UndoableEdit e) {
         if (compoundEdit != null && e instanceof DbStructureCompoundEdit) {
@@ -35,4 +35,5 @@ public class DbStructureUndoableEditSupport extends NotSavableUndoableEditSuppor
             super.postEdit(e);
         }
     }
+    */ 
 }

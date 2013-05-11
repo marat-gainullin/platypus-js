@@ -55,7 +55,7 @@ public class Fields {
             assert fields.size() == aSource.getFieldsCount();
             String sDesc = aSource.getTableDescription();
             if (sDesc != null) {
-                setTableDescription(new String(sDesc.toCharArray()));
+                setTableDescription(sDesc);
             }
         }
     }

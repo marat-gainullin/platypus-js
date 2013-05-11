@@ -30,7 +30,7 @@ public class QueryRootNode extends ModelNode<QueryEntity, QueryModel> implements
     public QueryRootNode(ModelNodeChildren<QueryEntity, QueryModel> aChildren, PlatypusQueryDataObject aDataObject) throws Exception {
         super(aChildren, aDataObject);
         setIconBaseWithExtension(ICON_PATH);
-        aDataObject.getChangeSupport().addPropertyChangeListener(this);
+        aDataObject.addPropertyChangeListener(this);
     }
 
     @Override

@@ -252,8 +252,8 @@ public class QueryResultsView extends javax.swing.JPanel {
     private void setModelRelations() throws Exception {
         Parameters modelParameters = model.getParameters();
         for (int i = 1; i <= modelParameters.getParametersCount(); i++) {
-            Relation<ApplicationDbEntity> r = new Relation<>(model.getParametersEntity(), true, modelParameters.get(i).getName(),
-                    queryEntity, false, modelParameters.get(i).getName());
+            Relation<ApplicationDbEntity> r = new Relation<>(model.getParametersEntity(), modelParameters.get(i),
+                    queryEntity, modelParameters.get(i));
             model.addRelation(r);
         }
     }

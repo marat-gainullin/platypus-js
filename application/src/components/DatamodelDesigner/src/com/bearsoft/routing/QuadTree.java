@@ -33,7 +33,10 @@ public class QuadTree<E> extends Quadtree {
     }    
     
     public boolean remove(Rectangle aCriteria, E aElement) {
-        return super.remove(new Envelope(aCriteria.x, aCriteria.x + aCriteria.width, aCriteria.y, aCriteria.y + aCriteria.height), aElement);// JTS uses exclusive coordinates in integer domain
+        Envelope env = new Envelope(aCriteria.x, aCriteria.x + aCriteria.width, aCriteria.y, aCriteria.y + aCriteria.height);
+        boolean res = super.remove(env, aElement);// JTS uses exclusive coordinates in integer domain
+        while(super.remove(env, aElement)){}
+        return res;
     }
     
 }

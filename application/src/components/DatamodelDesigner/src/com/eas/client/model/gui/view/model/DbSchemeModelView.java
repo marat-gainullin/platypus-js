@@ -191,7 +191,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbS
                     } else {
                         Field dField = dFields.get(sField.getName());
                         assert dField != null : sField.getName() + " contains but it's not returned by get(iny)'";
-                        if (!dField.equals(sField)) {
+                        if (!dField.isEqual(sField)) {
                             // let's redefine field with same name, but different content
                             ModifyFieldAction laction = sqlController.createModifyFieldAction(dEntity.getTableName(), dField, sField);
                             if (!laction.execute()) {
@@ -295,19 +295,21 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbS
                                                 && (only4Table == null || (only4Table != null && (only4Table.equalsIgnoreCase(refereeTableName) || only4Table.equalsIgnoreCase(leftTableName))))
                                                 && entitiesByTableName.containsKey(refereeTableName.toLowerCase())) {
                                             FieldsEntity refereeEntity = entitiesByTableName.get(refereeTableName.toLowerCase());
-                                            Relation<FieldsEntity> fkRelation = new Relation<>(entity, entity.getFields().get(fkSpec.getField()), refereeEntity, refereeEntity.getFields().get(fkSpec.getReferee().getField()));
-                                            fkRelation.setFkName(fkSpec.getCName());
-                                            fkRelation.setFkUpdateRule(fkSpec.getFkUpdateRule());
-                                            fkRelation.setFkDeleteRule(fkSpec.getFkDeleteRule());
-                                            fkRelation.setFkDeferrable(fkSpec.getFkDeferrable());
-                                            if (directChanging) {
-                                                model.addRelation(fkRelation);
-                                            } else {
-                                                NewRelationEdit<FieldsEntity> edit = new NewRelationEdit<>(fkRelation);
-                                                edit.redo();
-                                                undoSupport.postEdit(edit);
+                                            if (!DatamodelDesignUtils.isRelationAlreadyDefined(entity, entity.getFields().get(fkSpec.getField()), refereeEntity, refereeEntity.getFields().get(fkSpec.getReferee().getField()))) {
+                                                Relation<FieldsEntity> fkRelation = new Relation<>(entity, entity.getFields().get(fkSpec.getField()), refereeEntity, refereeEntity.getFields().get(fkSpec.getReferee().getField()));
+                                                fkRelation.setFkName(fkSpec.getCName());
+                                                fkRelation.setFkUpdateRule(fkSpec.getFkUpdateRule());
+                                                fkRelation.setFkDeleteRule(fkSpec.getFkDeleteRule());
+                                                fkRelation.setFkDeferrable(fkSpec.getFkDeferrable());
+                                                if (directChanging) {
+                                                    model.addRelation(fkRelation);
+                                                } else {
+                                                    NewRelationEdit<FieldsEntity> edit = new NewRelationEdit<>(fkRelation);
+                                                    edit.redo();
+                                                    undoSupport.postEdit(edit);
+                                                }
+                                                added++;
                                             }
-                                            added++;
                                         }
                                     }
                                 }
@@ -393,6 +395,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbS
         if (model.getEntityById(aEntity.getEntityId()) != null) {
             aEntity.regenerateId();
         }
+        findPlaceForEntityPaste(aEntity);
     }
 
     @Override
@@ -567,7 +570,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbS
                 section.addEdit(edit);
                 NewEntityEdit<FieldsEntity, DbSchemeModel> entityEdit = new NewEntityEdit<>(model);
                 try {
-                    Rectangle rect = findAnyFreeSpace(0, 0);
+                    Rectangle rect = findPlaceForEntityAdd(0, 0);
                     FieldsEntity entity = model.newGenericEntity();
                     entity.setModel(model);
                     entity.setX(rect.x);
@@ -740,11 +743,6 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbS
                 } else if (!isSelectedRelations() && isSelectedFieldsOnOneEntity()) { // drop fields
                     dropFields(e);
                 } else { // drop table or delete from this diagram
-                    Object[] options = {
-                        DbStructureUtils.getString("dlgDeleteFromDiagram"),
-                        DbStructureUtils.getString("dlgDropTable"),
-                        DbStructureUtils.getString("dlgCancel")
-                    };
                     int dialogResult = getDeleteTypeOption();
                     switch (dialogResult) {
                         case JOptionPane.YES_OPTION:
@@ -1013,6 +1011,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbS
                                 String lName = toPaste.getTableName();
                                 if (innerModel.getEntityByTableName(lName) == null) {
                                     if (innerModel.checkEntityAddingValid(toPaste)) {
+                                        prepareEntityForPaste(toPaste);
                                         NewEntityEdit<FieldsEntity, DbSchemeModel> edit = new NewEntityEdit<>(model, toPaste);
                                         edit.redo();
                                         undoSupport.postEdit(edit);
@@ -1025,7 +1024,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbS
                         }
                     }
                 } finally {
-                    undoSupport.endUpdate(); 
+                    undoSupport.endUpdate();
                 }
                 reportWasNotAddedEntities(alreadyExistentEntities);
                 if (entities != null) {

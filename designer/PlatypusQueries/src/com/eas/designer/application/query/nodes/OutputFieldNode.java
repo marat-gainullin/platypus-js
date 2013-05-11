@@ -32,6 +32,7 @@ import org.openide.ErrorManager;
 import org.openide.awt.UndoRedo;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
+import org.openide.nodes.Node;
 import org.openide.nodes.PropertySupport;
 import org.openide.nodes.Sheet;
 import org.openide.util.Exceptions;
@@ -75,6 +76,15 @@ public class OutputFieldNode extends AbstractNode implements PropertyChangeListe
     @Override
     public String getName() {
         return field.getName();
+    }
+
+    @Override
+    public String getDisplayName() {
+        if (getDescription() != null && !getDescription().isEmpty()) {
+            return getName() + " [" + getDescription() + "]";
+        } else {
+            return getName();
+        }
     }
 
     public String getDescription() {
@@ -155,24 +165,24 @@ public class OutputFieldNode extends AbstractNode implements PropertyChangeListe
     public void setType(Integer val) {
         try {
             DataTypeInfo newTypeInfo = DataTypeInfo.valueOf(val);
-            QueryDocument.StoredFieldMetadata storedField = getHint();
+            QueryDocument.StoredFieldMetadata addition = getHint();
             UndoableEdit edit;
-            if (storedField != null) {// Change or delete
-                if ((storedField.getDescription() == null || storedField.getDescription().equals(field.getDescription()))
+            if (addition != null) {// Change or delete
+                if ((addition.getDescription() == null || addition.getDescription().equals(field.getDescription()))
                         && (newTypeInfo == null || newTypeInfo.getSqlType() == field.getTypeInfo().getSqlType())) {
-                    edit = new StoredFieldDeleteEdit(dataObject, storedField);
+                    edit = new StoredFieldDeleteEdit(dataObject, addition);
                     edit.redo();
                 } else {
-                    edit = new StoredFieldTypeEdit(dataObject, storedField, storedField.getTypeInfo(), newTypeInfo);
+                    edit = new StoredFieldTypeEdit(dataObject, addition, addition.getTypeInfo(), newTypeInfo);
                     edit.redo();
                 }
             } else {// Add and change
                 // Such approach allow us to reuse events generation
-                storedField = new QueryDocument.StoredFieldMetadata(field.getName());
+                addition = new QueryDocument.StoredFieldMetadata(field.getName());
                 edit = new CompoundEdit();
 
-                StoredFieldAddEdit addEdit = new StoredFieldAddEdit(dataObject, storedField);
-                StoredFieldTypeEdit changeEdit = new StoredFieldTypeEdit(dataObject, storedField, storedField.getTypeInfo(), newTypeInfo);
+                StoredFieldAddEdit addEdit = new StoredFieldAddEdit(dataObject, addition);
+                StoredFieldTypeEdit changeEdit = new StoredFieldTypeEdit(dataObject, addition, addition.getTypeInfo(), newTypeInfo);
 
                 addEdit.redo();
                 changeEdit.redo();
@@ -221,14 +231,16 @@ public class OutputFieldNode extends AbstractNode implements PropertyChangeListe
         return dataObject.getUndoRedoManager();
     }
 
-        @Override
+    @Override
     public void propertyChange(PropertyChangeEvent evt) {
         switch (evt.getPropertyName()) {
-            case FieldNode.DESCRIPTION_PROP_NAME:
-                firePropertyChange(FieldNode.DESCRIPTION_PROP_NAME, evt.getOldValue(), evt.getNewValue());
+            case Field.DESCRIPTION_PROPERTY:
+                firePropertyChange(Field.DESCRIPTION_PROPERTY, evt.getOldValue(), evt.getNewValue());
+                fireDisplayNameChange(null, getDisplayName());
                 break;
-            case FieldNode.TYPE_INFO_PROP_NAME:
+            case Field.TYPE_INFO_PROPERTY:
                 firePropertyChange(FieldNode.TYPE_PROP_NAME, evt.getOldValue(), evt.getNewValue());
+                firePropertyChange(FieldNode.TYPE_NAME_PROP_NAME, evt.getOldValue(), evt.getNewValue());
                 fireIconChange();
                 break;
         }
@@ -242,7 +254,7 @@ public class OutputFieldNode extends AbstractNode implements PropertyChangeListe
 
         @Override
         public String getName() {
-            return FieldNode.DESCRIPTION_PROP_NAME;
+            return Field.DESCRIPTION_PROPERTY;
         }
 
         @Override

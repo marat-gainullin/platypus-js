@@ -6,7 +6,6 @@ package com.eas.client.model.gui.view;
 
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Parameter;
-import com.bearsoft.rowset.utils.RowsetUtils;
 import com.eas.client.SQLUtils;
 import com.eas.client.model.DummyRelation;
 import com.eas.client.model.Entity;
@@ -134,7 +133,7 @@ public class RelationsFieldsDragHandler<E extends Entity<?, ?, E>> extends Trans
                                                 rightField = ((FieldsListModel.FieldsModel) list.getModel()).getElementAt(targetItemIndex);
                                             }
                                             if (leftEntity != null && rightEntity != null && leftField != null && rightField != null
-                                                    && !isRelationAlreadyDefined(leftEntity, leftField, rightEntity, rightField)) {
+                                                    && !DatamodelDesignUtils.<E>isRelationAlreadyDefined(leftEntity, leftField, rightEntity, rightField)) {
                                                 if (modelView.getModel() instanceof DbSchemeModel) {
                                                     if (leftField != null && rightField != null) {
                                                         return leftField.getTypeInfo().getSqlType() == rightField.getTypeInfo().getSqlType() && rightField.isPk() && !leftField.isFk();
@@ -207,7 +206,7 @@ public class RelationsFieldsDragHandler<E extends Entity<?, ?, E>> extends Trans
                                                 E tmpEntity = leftEntity;
                                                 leftEntity = rightEntity;
                                                 rightEntity = tmpEntity;
-                                                
+
                                                 Field tmpField = leftField;
                                                 leftField = rightField;
                                                 rightField = tmpField;
@@ -215,13 +214,11 @@ public class RelationsFieldsDragHandler<E extends Entity<?, ?, E>> extends Trans
                                             if (!(modelView.getModel() instanceof DbSchemeModel) && !(modelView.getModel() instanceof QueryModel) && willFormCycle(leftEntity, rightEntity)) {
                                                 JOptionPane.showMessageDialog(modelView, DatamodelDesignUtils.getLocalizedString("willFormCycle"), DatamodelDesignUtils.getLocalizedString("datamodel"), JOptionPane.WARNING_MESSAGE);
                                             } else {
-                                                UndoableEditSupport undoSupport = modelView.getUndoSupport();
-
                                                 Relation<E> alreadyInRelation = findAlreadyInRelation(rightEntity, rightField);
                                                 Relation<E> newRel = new Relation<>(leftEntity, leftField, rightEntity, rightField);
                                                 if ((modelView.getModel().checkRelationRemovingValid(alreadyInRelation) || modelView.getModel() instanceof QueryModel)
                                                         && modelView.getModel().checkRelationAddingValid(newRel)) {
-                                                    editModelField2FieldRelation(undoSupport, ldata, alreadyInRelation, newRel);
+                                                    editModelField2FieldRelation(modelView.getUndoSupport(), ldata, alreadyInRelation, newRel);
                                                 }
                                             }
                                         }
@@ -238,12 +235,12 @@ public class RelationsFieldsDragHandler<E extends Entity<?, ?, E>> extends Trans
         return super.importData(support);
     }
 
-    protected Relation<E> findAlreadyInRelation(E rightEntity, Field rightFieldName) {
-        if (rightEntity != null && rightFieldName != null) {
+    protected Relation<E> findAlreadyInRelation(E rightEntity, Field rightField) {
+        if (rightEntity != null && rightField != null) {
             Set<Relation<E>> inRels = rightEntity.getInRelations();
             if (inRels != null && !inRels.isEmpty()) {
                 for (Relation<E> rel : inRels) {
-                    if (rightFieldName == rel.getRightField()) {
+                    if (rightField == rel.getRightField()) {
                         return rel;
                     }
                 }
@@ -268,12 +265,6 @@ public class RelationsFieldsDragHandler<E extends Entity<?, ?, E>> extends Trans
         }
     }
 
-    protected void editModelEntity2EntityRelation(UndoableEditSupport aUndoSupport, Relation<E> rel) throws CannotRedoException {
-        NewRelationEdit<E> ledit = new NewRelationEdit<>(rel);
-        ledit.redo();
-        aUndoSupport.postEdit(ledit);
-    }
-
     private int extractDropAction(TransferSupport support) {
         int dropAction = NONE;
         if (support != null) {
@@ -288,28 +279,6 @@ public class RelationsFieldsDragHandler<E extends Entity<?, ?, E>> extends Trans
             }
         }
         return dropAction;
-    }
-
-    private boolean isRelationAlreadyDefined(E leftEntity, Field leftField, E rightEntity, Field rightField) {
-        if (leftEntity != null && rightEntity != null
-                && leftField != null
-                && rightField != null) {
-            Set<Relation<E>> inRels = rightEntity.getInRelations();
-            if (inRels != null) {
-                for (Relation<E> rel : inRels) {
-                    if (rel != null) {
-                        E lEntity = rel.getLeftEntity();
-                        if (lEntity == leftEntity) {
-                            if (leftField == rel.getLeftField()
-                                    && rightField == rel.getRightField()) {
-                                return true;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return false;
     }
 
     /**

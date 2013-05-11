@@ -6,7 +6,6 @@
 package com.eas.client.model.gui.view.entities;
 
 import com.eas.client.model.application.ApplicationDbEntity;
-import com.eas.client.model.application.ApplicationParametersEntity;
 import com.eas.client.model.gui.view.EntityViewsManager;
 
 /**
@@ -21,7 +20,7 @@ public class ApplicationEntityView extends EntityView<ApplicationDbEntity>{
 
     @Override
     protected boolean isEditable() {
-        return entity instanceof ApplicationParametersEntity;
+        return false;
     }
 
     @Override

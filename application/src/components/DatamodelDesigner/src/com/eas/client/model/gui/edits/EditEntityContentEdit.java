@@ -7,26 +7,23 @@
  * author.
  * All rights reserved.
  */
-
 package com.eas.client.model.gui.edits;
 
 /**
  *
- * @author Marat
+ * @author mg
  */
-public class EditEntityContentEdit extends DatamodelEdit
-{
-    public EditEntityContentEdit()
-    {
+public class EditEntityContentEdit extends DatamodelEdit {
+
+    public EditEntityContentEdit() {
         super();
     }
 
     @Override
-    public boolean isNeedConnectors2Reroute()
-    {
+    public boolean isNeedConnectors2Reroute() {
         return true;
     }
-    
+
     @Override
     protected void redoWork() {
     }

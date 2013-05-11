@@ -48,10 +48,10 @@ public class PlatypusQuerySupport extends CloneableOpenSupport implements OpenCo
         DataObjectProvider,
         ModelUndoProvider {
 
-    public Rectangle findAnyFreeSpace(int aInitialX, int aInitialY) {
+    public Rectangle findPlaceForEntityAdd(int aInitialX, int aInitialY) {
         if (!allEditors.isEmpty()) {
             CloneableTopComponent arbitraryEditor = allEditors.getArbitraryComponent();
-            return ((PlatypusQueryView) arbitraryEditor).getModelView().findAnyFreeSpace(aInitialX, aInitialY);
+            return ((PlatypusQueryView) arbitraryEditor).getModelView().findPlaceForEntityAdd(aInitialX, aInitialY);
         } else {
             return null;
         }

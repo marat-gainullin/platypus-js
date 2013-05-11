@@ -33,13 +33,13 @@ public class ModifyFieldEdit extends DbStructureEdit {
         newFieldSpec = aNewFieldSpec;
         tableName = aTableName;
         namesAreDifferent = !oldFieldSpec.getName().toLowerCase().equals(newFieldSpec.getName().toLowerCase());
-        String oldDescription = oldFieldSpec.getDescription() != null?oldFieldSpec.getDescription().toLowerCase():"";
-        String newDescription = newFieldSpec.getDescription() != null?newFieldSpec.getDescription().toLowerCase():"";
+        String oldDescription = oldFieldSpec.getDescription() != null ? oldFieldSpec.getDescription().toLowerCase() : "";
+        String newDescription = newFieldSpec.getDescription() != null ? newFieldSpec.getDescription().toLowerCase() : "";
         commentsAreDifferent = !oldDescription.equals(newDescription);
         Field lNewFieldSpec = new Field(newFieldSpec);
         lNewFieldSpec.setName(oldFieldSpec.getName());
         lNewFieldSpec.setDescription(oldFieldSpec.getDescription());
-        contentsAreDifferent = !oldFieldSpec.equals(lNewFieldSpec);
+        contentsAreDifferent = !oldFieldSpec.isEqual(lNewFieldSpec);
         assert contentsAreDifferent || namesAreDifferent || commentsAreDifferent;
     }
 
@@ -64,8 +64,7 @@ public class ModifyFieldEdit extends DbStructureEdit {
                 throw ex;
             }
         }
-        if(commentsAreDifferent)
-        {
+        if (commentsAreDifferent) {
             DescribeFieldAction sqlAction = sqlController.createDescribeFieldAction(tableName, oldFieldSpec.getName(), oldFieldSpec.getDescription());
             if (!sqlAction.execute()) {
                 DbActionException ex = new DbActionException(sqlAction.getErrorString());
@@ -97,8 +96,7 @@ public class ModifyFieldEdit extends DbStructureEdit {
                 throw ex;
             }
         }
-        if(commentsAreDifferent)
-        {
+        if (commentsAreDifferent) {
             DescribeFieldAction sqlAction = sqlController.createDescribeFieldAction(tableName, newFieldSpec.getName(), newFieldSpec.getDescription());
             if (!sqlAction.execute()) {
                 DbActionException ex = new DbActionException(sqlAction.getErrorString());
@@ -113,6 +111,4 @@ public class ModifyFieldEdit extends DbStructureEdit {
     protected String getChangingTableName() {
         return tableName;
     }
-
-
 }

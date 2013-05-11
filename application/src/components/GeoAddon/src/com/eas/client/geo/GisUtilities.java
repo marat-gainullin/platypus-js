@@ -136,14 +136,14 @@ public class GisUtilities {
                 Geometry section = mPolygon.getGeometryN(g);
                 Coordinate[] coordinates = section.getCoordinates();
                 for (int i = 0; i < coordinates.length; i++) {
-                    SelectionEntry entry = new SelectionEntry(entity.getEntityID(), (Row) oRow, featureID, geometryColIndex, g, i, coordinates[i]);
+                    SelectionEntry entry = new SelectionEntry(entity.getEntityId(), (Row) oRow, featureID, geometryColIndex, g, i, coordinates[i]);
                     aDestination.add(entry);
                 }
             }
         } else {
             Coordinate[] coordinates = geom.getCoordinates();
             for (int i = 0; i < coordinates.length; i++) {
-                SelectionEntry entry = new SelectionEntry(entity.getEntityID(), (Row) oRow, featureID, geometryColIndex, -1, i, coordinates[i]);
+                SelectionEntry entry = new SelectionEntry(entity.getEntityId(), (Row) oRow, featureID, geometryColIndex, -1, i, coordinates[i]);
                 aDestination.add(entry);
             }
         }

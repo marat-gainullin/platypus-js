@@ -59,7 +59,7 @@ public class RowsetFeatureDescriptor extends DesignInfo {
         entity = aEntity;
         assert aRef.entityId != null;
         assert aEntity != null;
-        assert aRef.entityId.equals(aEntity.getEntityID());
+        assert aRef.entityId.equals(aEntity.getEntityId());
     }
 
     public RowsetFeatureDescriptor() {
@@ -220,7 +220,7 @@ public class RowsetFeatureDescriptor extends DesignInfo {
             return this.ref;
         } else if (this.entity != null) {
             this.ref = new ModelEntityRef();
-            this.ref.setEntityId(this.entity.getEntityID());
+            this.ref.setEntityId(this.entity.getEntityId());
             this.ref.setField(false);
             return this.ref;
         } else {

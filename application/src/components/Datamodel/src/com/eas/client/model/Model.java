@@ -11,7 +11,6 @@ package com.eas.client.model;
 
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
-import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.Client;
 import com.eas.client.model.visitors.ModelVisitor;
@@ -59,6 +58,7 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
     protected boolean runtime = false;
     protected boolean commitable = true;
     protected int ajustingCounter = 0;
+    protected Runnable resolver;
     protected GuiCallback guiCallback;
     protected ModelEditingSupport<E> editingSupport = new ModelEditingSupport<>();
     protected PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
@@ -106,12 +106,20 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
         setClient(aClient);
     }
 
+    public void setResolver(Runnable aResolver) {
+        resolver = aResolver;
+    }
+
     public PropertyChangeSupport getChangeSupport() {
         return changeSupport;
     }
 
     public void setClient(C aValue) {
         client = aValue;
+        if (client != null && resolver != null) {
+            resolver.run();
+            resolver = null;
+        }
     }
 
     public void clearRelations() {

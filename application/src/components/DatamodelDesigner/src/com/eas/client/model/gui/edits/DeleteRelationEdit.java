@@ -15,7 +15,7 @@ import com.eas.client.model.Relation;
 
 /**
  *
- * @author Marat
+ * @author mg
  */
 public class DeleteRelationEdit<E extends Entity<?, ?, E>> extends DatamodelEdit {
 

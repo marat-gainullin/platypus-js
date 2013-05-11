@@ -70,8 +70,8 @@ public final class PlatypusModuleDatamodelView extends TopComponent implements M
 
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
-            if (ExplorerManager.PROP_SELECTED_NODES.equals(evt.getPropertyName()) ||
-                    ExplorerManager.PROP_NODE_CHANGE.equals(evt.getPropertyName())) {
+            if (ExplorerManager.PROP_SELECTED_NODES.equals(evt.getPropertyName())
+                    || ExplorerManager.PROP_NODE_CHANGE.equals(evt.getPropertyName())) {
                 if (!processing) {
                     processing = true;
                     try {
@@ -84,12 +84,14 @@ public final class PlatypusModuleDatamodelView extends TopComponent implements M
                                 ev = appModelEditor.getModelView().getEntityView(((EntityNode<ApplicationDbEntity>) node).getEntity());
                                 appModelEditor.getModelView().silentSelectView(ev);
                             } else if (node instanceof FieldNode) {
-                                ev = appModelEditor.getModelView().getEntityView(((EntityNode<ApplicationDbEntity>) node.getParentNode()).getEntity());
-                                FieldNode fieldNode = (FieldNode) node;
-                                if ((fieldNode.getField() instanceof Parameter) && !(ev.getEntity() instanceof ApplicationParametersEntity)) {
-                                    ev.addSelectedParameter((Parameter) fieldNode.getField());
-                                } else {
-                                    ev.addSelectedField(fieldNode.getField());
+                                if (node.getParentNode() != null) {
+                                    ev = appModelEditor.getModelView().getEntityView(((EntityNode<ApplicationDbEntity>) node.getParentNode()).getEntity());
+                                    FieldNode fieldNode = (FieldNode) node;
+                                    if ((fieldNode.getField() instanceof Parameter) && !(ev.getEntity() instanceof ApplicationParametersEntity)) {
+                                        ev.addSelectedParameter((Parameter) fieldNode.getField());
+                                    } else {
+                                        ev.addSelectedField(fieldNode.getField());
+                                    }
                                 }
                             }
                         }

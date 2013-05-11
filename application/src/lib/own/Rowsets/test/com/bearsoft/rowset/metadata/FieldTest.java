@@ -115,7 +115,7 @@ public class FieldTest {
         assertEquals(expResult, result);
         assertEquals(fk.copy(), instance.getFk());
         Field instance1 = instance.copy();
-        assertTrue(instance.equals(instance1));
+        assertTrue(instance.isEqual(instance1));
     }
 
     /**

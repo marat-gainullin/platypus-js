@@ -59,7 +59,7 @@ public class Paths {
                     break;
                 }
                 for (Vertex<PathFragment> ajacent : current.getAjacent()) {
-                    int ajacentPastCost = current.attribute.pastCost + calcDistance(lstart, lend, current, ajacent);
+                    int ajacentPastCost = current.attribute.pastCost + calcDistance(aStart, aEnd, lstart, lend, current, ajacent);
                     if (ajacentPastCost < ajacent.attribute.pastCost) {
                         if (ajacent.attribute.previous != null) {
                             openSet.remove(ajacent);
@@ -118,14 +118,14 @@ public class Paths {
                 boolean vContainsEndPoint = y1 <= aEndPoint.y && aEndPoint.y <= y2;
                 if (prevPt.y >= y1 && prevPt.y <= y2) {
                     Point pt = new Point(hContainsEndPoint ? aEndPoint.x : v.attribute.rect.x + v.attribute.rect.width / 2, prevPt.y);
-                    prevPt = pt;
                     rleAdd(points, pt);
+                    prevPt = pt;
                 } else {
                     Point pt = new Point(hContainsEndPoint ? aEndPoint.x : v.attribute.rect.x + v.attribute.rect.width / 2, vContainsEndPoint ? aEndPoint.y : (y1 + y2) / 2);
                     Point pt0 = new Point(prevPt.x, pt.y);
-                    prevPt = pt;
                     rleAdd(points, pt0);
                     rleAdd(points, pt);
+                    prevPt = pt;
                 }
                 prevV = v;
             }
@@ -172,17 +172,19 @@ public class Paths {
         return new Connector(x, y);
     }
 
-    private int calcDistance(Vertex<PathFragment> aStart, Vertex<PathFragment> aEnd, Vertex<PathFragment> from, Vertex<PathFragment> to) {
+    private int calcDistance(Point aStartPoint, Point aEndPoint, Vertex<PathFragment> aStart, Vertex<PathFragment> aEnd, Vertex<PathFragment> from, Vertex<PathFragment> to) {
         if (from == to) {
             return 0;
         } else {
             if (to != aStart && to != aEnd) {
                 int y1 = Math.max(from.attribute.rect.y, to.attribute.rect.y);
                 int y2 = Math.min(from.attribute.rect.y + from.attribute.rect.height - 1, to.attribute.rect.y + to.attribute.rect.height - 1);
+                boolean hContainsEndPoint = to.attribute.rect.x <= aEndPoint.x && aEndPoint.x <= to.attribute.rect.x + to.attribute.rect.width - 1;
+                boolean vContainsEndPoint = y1 <= aEndPoint.y && aEndPoint.y <= y2;
                 if (from.attribute.point.y >= y1 && from.attribute.point.y <= y2) {
-                    to.attribute.point = new Point(to.attribute.rect.x + to.attribute.rect.width / 2, from.attribute.point.y);
+                    to.attribute.point = new Point(hContainsEndPoint ? aEndPoint.x : to.attribute.rect.x + to.attribute.rect.width / 2, from.attribute.point.y);
                 } else {
-                    to.attribute.point = new Point(to.attribute.rect.x + to.attribute.rect.width / 2, (y1 + y2) / 2);
+                    to.attribute.point = new Point(hContainsEndPoint ? aEndPoint.x : to.attribute.rect.x + to.attribute.rect.width / 2, vContainsEndPoint ? aEndPoint.y : (y1 + y2) / 2);
                 }
             }
             return Math.abs(from.attribute.point.x - to.attribute.point.x) + Math.abs(from.attribute.point.y - to.attribute.point.y);

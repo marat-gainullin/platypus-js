@@ -797,6 +797,7 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
         @Override
         public void added(Fields fields, Field field) {
             field.getChangeSupport().addPropertyChangeListener(fieldsChangesReflector);
+            entitiesManager.invalidateConnectors();
         }
 
         @Override
@@ -809,6 +810,7 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
         @Override
         public void removed(Fields fields, Field field) {
             field.getChangeSupport().removePropertyChangeListener(entityChangesReflector);
+            entitiesManager.invalidateConnectors();
         }
 
         @Override
@@ -816,6 +818,7 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
             for (Field field : fieldsCollection) {
                 field.getChangeSupport().removePropertyChangeListener(fieldsChangesReflector);
             }
+            entitiesManager.invalidateConnectors();
         }
 
         @Override
@@ -986,6 +989,11 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
                 if (lModelIndex > -1) {
                     Rectangle lfieldRect = aList.getCellBounds(lModelIndex, lModelIndex);
                     if (lfieldRect != null) {
+                        if (lfieldRect.height < 0 && lm.getSize() > 0) {
+                            Rectangle lfieldRect1 = aList.getCellBounds(0, 0);
+                            lfieldRect.height = lfieldRect1.height;
+                            lfieldRect.y = lModelIndex * lfieldRect.height;
+                        }
                         Point lResPt = lfieldRect.getLocation();
                         lResPt.y = lfieldRect.y + Math.round(lfieldRect.height / 2.0f);
                         lResPt.x = lfieldRect.x + Math.round(lfieldRect.width / 2.0f);
@@ -1017,11 +1025,11 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
     }
 
     public Point getFieldPosition(Field aField, boolean isLeft) {
-        return getListItemPosition(aField.getName(), isLeft, fieldsList);
+        return getListItemPosition(aField != null ? aField.getName() : null, isLeft, fieldsList);
     }
 
     public Point getParameterPosition(Parameter aParameter, boolean isLeft) {
-        return getListItemPosition(aParameter.getName(), isLeft, parametersList);
+        return getListItemPosition(aParameter != null ? aParameter.getName() : null, isLeft, parametersList);
     }
 
     protected class MouseSelectionPropagator extends MouseAdapter {

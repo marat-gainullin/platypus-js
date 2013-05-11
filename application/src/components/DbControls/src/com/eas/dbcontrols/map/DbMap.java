@@ -390,7 +390,7 @@ public class DbMap extends JPanel implements DbControl, RowsetsDbControl, Proper
         MapLayer layer = null;
         MapContext lightweightMapContext = pane.getLightweightMapContext();
         synchronized (lightweightMapContext) {
-            RowsetFeatureDescriptor newFeatureDescriptor = new RowsetFeatureDescriptor(aLayerTitle, aRowset.getEntity(), new ModelEntityRef(aRowset.getEntity().getEntityID()));
+            RowsetFeatureDescriptor newFeatureDescriptor = new RowsetFeatureDescriptor(aLayerTitle, aRowset.getEntity(), new ModelEntityRef(aRowset.getEntity().getEntityId()));
             newFeatureDescriptor.setActive(true);
             newFeatureDescriptor.setGeometryBindingClass(aGeometryClass);
             newFeatureDescriptor.setCrsWkt(projectedCrs.getBaseCRS().toWKT());

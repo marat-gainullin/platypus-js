@@ -15,7 +15,7 @@ import javax.swing.undo.UndoableEdit;
 
 /**
  *
- * @author Marat
+ * @author mg
  */
 public abstract class DatamodelEdit extends Object implements UndoableEdit {
 
@@ -96,4 +96,3 @@ public abstract class DatamodelEdit extends Object implements UndoableEdit {
         return "";
     }
 }
-

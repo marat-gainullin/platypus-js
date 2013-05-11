@@ -4,6 +4,7 @@
  */
 package com.eas.designer.application.query.editing;
 
+import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.model.QueryDocument.StoredFieldMetadata;
 import com.eas.designer.application.query.PlatypusQueryDataObject;
 import javax.swing.undo.CannotRedoException;
@@ -23,6 +24,10 @@ public class StoredFieldDeleteEdit extends StoredFieldEdit {
     public void undo() throws CannotUndoException {
         try {
             dataObject.getOutputFieldsHints().add(storedField);
+            Field field = dataObject.getOutputFields().get(storedField.getBindedColumn());
+            if (field != null) {
+                field.getChangeSupport().firePropertyChange(Field.TYPE_INFO_PROPERTY, null, field.getTypeInfo());
+            }
         } catch (Exception ex) {
             CannotUndoException lex = new CannotUndoException();
             lex.initCause(ex);
@@ -39,6 +44,10 @@ public class StoredFieldDeleteEdit extends StoredFieldEdit {
     public void redo() throws CannotRedoException {
         try {
             dataObject.getOutputFieldsHints().remove(storedField);
+            Field field = dataObject.getOutputFields().get(storedField.getBindedColumn());
+            if (field != null) {
+                field.getChangeSupport().firePropertyChange(Field.TYPE_INFO_PROPERTY, null, field.getTypeInfo());
+            }
         } catch (Exception ex) {
             CannotUndoException lex = new CannotUndoException();
             lex.initCause(ex);

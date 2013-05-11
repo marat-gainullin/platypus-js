@@ -6,6 +6,7 @@ package com.eas.client.model.gui;
 
 import com.bearsoft.routing.Connector;
 import com.bearsoft.routing.QuadTree;
+import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Relation;
 import com.eas.client.model.gui.view.entities.EntityView;
@@ -14,6 +15,7 @@ import java.awt.Font;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.Action;
@@ -157,6 +159,28 @@ public class DatamodelDesignUtils {
                 action.setEnabled(action.isEnabled());
             }
         }
+    }
+
+    public static <E extends Entity<?, ?, E>> boolean isRelationAlreadyDefined(E leftEntity, Field leftField, E rightEntity, Field rightField) {
+        if (leftEntity != null && rightEntity != null
+                && leftField != null
+                && rightField != null) {
+            Set<Relation<E>> inRels = rightEntity.getInRelations();
+            if (inRels != null) {
+                for (Relation<E> rel : inRels) {
+                    if (rel != null) {
+                        E lEntity = rel.getLeftEntity();
+                        if (lEntity == leftEntity) {
+                            if (leftField == rel.getLeftField()
+                                    && rightField == rel.getRightField()) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     public static boolean isLegalFieldName(String aName) {

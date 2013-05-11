@@ -24,6 +24,7 @@ public class ForeignKeySettingsDialog extends javax.swing.JDialog {
 
     protected class OkAction extends AbstractAction {
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             String constraintName = view.getConstraintName();
             if (constraintName != null && !constraintName.isEmpty()) {
@@ -37,6 +38,7 @@ public class ForeignKeySettingsDialog extends javax.swing.JDialog {
 
     protected class CancelAction extends AbstractAction {
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             okClose = false;
             dispose();

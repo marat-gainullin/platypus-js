@@ -102,15 +102,14 @@ public class Parameter extends Field {
      * @param obj The another object to test the equality.
      * @return If this Parameter is equal to another parameter object.
      */
-    @Override
-    public boolean equals(Object obj) {
+    public boolean isEqual(Object obj) {
         if (obj == null) {
             return false;
         }
         if (obj.getClass() != getClass()) {
             return false;
         }
-        if (!super.equals(obj)) {
+        if (!super.isEqual(obj)) {
             return false;
         }
         Parameter sp = (Parameter) obj;
@@ -140,7 +139,7 @@ public class Parameter extends Field {
         }
         return true;
     }
-
+/*
     @Override
     public int hashCode() {
         int hash = super.hashCode();
@@ -151,7 +150,7 @@ public class Parameter extends Field {
         hash = 67 * hash + (this.modified ? 1 : 0);
         return hash;
     }
-
+*/
     /**
      * Assigning method of field/parameter information.
      *

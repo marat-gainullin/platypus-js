@@ -136,8 +136,20 @@ public abstract class XmlDom2Model<E extends Entity<?, ?, E>> implements ModelVi
                         currentNode = lcurrentNode;
                     }
                 }
-                for (Runnable resolver : relationsResolvers) {
-                    resolver.run();
+                
+                final Runnable[] resolvers = relationsResolvers.toArray(new Runnable[]{});
+                Runnable relationsResolver = new Runnable() {
+                    @Override
+                    public void run() {
+                        for (Runnable resolver : resolvers) {
+                            resolver.run();
+                        }
+                    }
+                };
+                if (currentModel.getClient() != null) {
+                    relationsResolver.run();
+                } else {
+                    currentModel.setResolver(relationsResolver);
                 }
             } finally {
                 relationsResolvers.clear();
@@ -189,13 +201,14 @@ public abstract class XmlDom2Model<E extends Entity<?, ?, E>> implements ModelVi
             final Long rightEntityId = readLongAttribute(Model2XmlDom.RIGHT_ENTITY_ID_ATTR_NAME, null);
             final String rightFieldName = currentNode.getAttribute(Model2XmlDom.RIGHT_ENTITY_FIELD_ATTR_NAME);
             final String rightParameterName = currentNode.getAttribute(Model2XmlDom.RIGHT_ENTITY_PARAMETER_ATTR_NAME);
+            final Model<E, ?, ?, ?> model = currentModel;
             relationsResolvers.add(new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        E lEntity = currentModel.getEntityById(leftEntityId);
+                        E lEntity = model.getEntityById(leftEntityId);
                         if (Model.PARAMETERS_ENTITY_ID == leftEntityId) {
-                            lEntity = currentModel.getParametersEntity();
+                            lEntity = model.getParametersEntity();
                             if (leftParameterName != null && !leftParameterName.isEmpty()) {
                                 relation.setLeftField(lEntity.getFields().get(leftParameterName));
                             } else if (leftFieldName != null && !leftFieldName.isEmpty()) {
@@ -211,9 +224,9 @@ public abstract class XmlDom2Model<E extends Entity<?, ?, E>> implements ModelVi
                         relation.setLeftEntity(lEntity);
                         lEntity.addOutRelation(relation);
 
-                        E rEntity = currentModel.getEntityById(rightEntityId);
+                        E rEntity = model.getEntityById(rightEntityId);
                         if (Model.PARAMETERS_ENTITY_ID == rightEntityId) {
-                            rEntity = currentModel.getParametersEntity();
+                            rEntity = model.getParametersEntity();
                             if (rightParameterName != null && !rightParameterName.isEmpty()) {
                                 relation.setRightField(rEntity.getFields().get(rightParameterName));
                             } else if (rightFieldName != null && !rightFieldName.isEmpty()) {

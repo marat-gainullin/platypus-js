@@ -127,7 +127,7 @@ public class MousePointsAdder extends MapTool {
                     row2Update.setColumnObject(rowsColIndexes.get(featureId2InsertTo), GisUtilities.constructGeometry(gData, closestGeometry.getClass(), closestGeometry.getSRID()));
                     features2Entities.get(featureId2InsertTo).getRowset().setModified(true);
                     map.getSelection().clear();
-                    map.getSelection().getSelection().add(new SelectionEntry(features2Entities.get(featureId2InsertTo).getEntityID(), rows.get(featureId2InsertTo), featureId2InsertTo, rowsColIndexes.get(featureId2InsertTo), closestGeometry.getNumGeometries() > 1 ? gIdx : -1, cIdx, point2Add.getCoordinate()));
+                    map.getSelection().getSelection().add(new SelectionEntry(features2Entities.get(featureId2InsertTo).getEntityId(), rows.get(featureId2InsertTo), featureId2InsertTo, rowsColIndexes.get(featureId2InsertTo), closestGeometry.getNumGeometries() > 1 ? gIdx : -1, cIdx, point2Add.getCoordinate()));
                     map.fireSelectionChanged();
                     // Let's fire feature chaned event to all editabble layers
                     MapLayer[] lightLayers = map.getPane().getLightweightMapContext().getLayers();

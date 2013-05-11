@@ -13,8 +13,12 @@ import com.eas.client.model.gui.selectors.AppElementSelectorCallback;
 import com.eas.client.model.gui.selectors.TablesSelectorCallback;
 import com.eas.client.model.gui.view.AddQueryAction;
 import com.eas.client.model.gui.view.entities.ApplicationEntityView;
+import com.eas.client.model.gui.view.entities.ApplicationParametersEntityView;
 import com.eas.client.model.gui.view.entities.EntityView;
 import com.eas.client.model.store.XmlDom2ApplicationModel;
+import java.awt.Point;
+import java.util.List;
+import java.util.Set;
 import javax.swing.Action;
 import org.w3c.dom.Document;
 
@@ -87,7 +91,7 @@ public class ApplicationModelView extends ModelView<ApplicationDbEntity, Applica
 
     @Override
     protected EntityView<ApplicationDbEntity> createGenericEntityView(ApplicationDbEntity aEntity) {
-        return new ApplicationEntityView(aEntity, entitiesViewsMover);
+        return isParametersEntity(aEntity) ? new ApplicationParametersEntityView((ApplicationDbParametersEntity) aEntity, entitiesViewsMover) : new ApplicationEntityView(aEntity, entitiesViewsMover);
     }
 
     @Override
@@ -100,6 +104,7 @@ public class ApplicationModelView extends ModelView<ApplicationDbEntity, Applica
         if (model.getEntityById(aEntity.getEntityId()) != null) {
             aEntity.regenerateId();
         }
+        findPlaceForEntityPaste(aEntity);
     }
 
     @Override

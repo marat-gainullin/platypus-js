@@ -20,7 +20,9 @@ public class NotSavableUndoableEditSupport extends UndoableEditSupport {
 
     @Override
     public synchronized void endUpdate() {
-        notSavable = false;
         super.endUpdate();
+        if (compoundEdit == null) {// this was last last endupdate call
+            notSavable = false;
+        }
     }
 }

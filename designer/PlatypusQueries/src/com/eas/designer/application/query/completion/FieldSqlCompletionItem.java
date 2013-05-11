@@ -6,7 +6,6 @@ package com.eas.designer.application.query.completion;
 
 import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.SQLUtils;
-import com.eas.designer.application.query.output.FieldTypeRenderer;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import org.openide.util.ImageUtilities;

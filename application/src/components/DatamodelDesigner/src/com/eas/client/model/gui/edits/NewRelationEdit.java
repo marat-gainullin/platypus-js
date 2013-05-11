@@ -16,28 +16,24 @@ import com.eas.client.model.Relation;
  *
  * @author mg
  */
-public class NewRelationEdit<E extends Entity<?, ?, E>> extends DeleteRelationEdit<E>
-{
-    public NewRelationEdit()
-    {
+public class NewRelationEdit<E extends Entity<?, ?, E>> extends DeleteRelationEdit<E> {
+
+    public NewRelationEdit() {
         super();
     }
 
-    public NewRelationEdit(Relation<E> aRel)
-    {
+    public NewRelationEdit(Relation<E> aRel) {
         this();
         setRelation(aRel);
     }
 
     @Override
-    protected void redoWork()
-    {
+    protected void redoWork() {
         super.undoWork();
     }
 
     @Override
-    protected void undoWork()
-    {
+    protected void undoWork() {
         super.redoWork();
     }
 }
