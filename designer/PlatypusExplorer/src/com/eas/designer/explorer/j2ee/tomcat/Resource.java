@@ -80,8 +80,8 @@ public class Resource {
         type = aClassName;
     }
 
-    public void load(Element realmTag) {
-        type = realmTag.getAttribute(TYPE_ATTR_NAME);
+    public void load(Element tag) {
+        type = tag.getAttribute(TYPE_ATTR_NAME);
     }
 
     public Element getElement(Document aDoc) {

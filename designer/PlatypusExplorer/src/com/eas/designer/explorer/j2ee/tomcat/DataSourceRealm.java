@@ -116,9 +116,9 @@ public class DataSourceRealm extends Realm {
     }
 
     @Override
-    public void load(Element realmTag) {
-        super.load(realmTag);
-        allRolesMode = realmTag.getAttribute(ALL_ROLES_MODE_ATTR_NAME);
+    public void load(Element tag) {
+        super.load(tag);
+        allRolesMode = tag.getAttribute(ALL_ROLES_MODE_ATTR_NAME);
     }
 
     @Override

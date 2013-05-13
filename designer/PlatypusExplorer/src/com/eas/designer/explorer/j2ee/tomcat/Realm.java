@@ -28,8 +28,8 @@ public abstract class Realm {
         className = aClassName;
     }
 
-    public void load(Element realmTag) {
-        className = realmTag.getAttribute(CLASS_NAME_ATTR_NAME);
+    public void load(Element tag) {
+        className = tag.getAttribute(CLASS_NAME_ATTR_NAME);
     }
 
     public Element getElement(Document aDoc) {
