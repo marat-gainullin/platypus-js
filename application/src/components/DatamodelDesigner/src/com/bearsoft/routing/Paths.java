@@ -112,6 +112,18 @@ public class Paths {
             Vertex<PathFragment> prevV = aPath.get(0);
             for (int i = 1; i < aPath.size(); i++) {
                 Vertex<PathFragment> v = aPath.get(i);
+                Point pt = new Point();
+                boolean inCorridor = calcNextPoint(aStartPoint, aEndPoint, prevV, v, pt);
+                if(inCorridor){
+                    rleAdd(points, pt);
+                }else{
+                    Point pt0 = new Point(prevPt.x, pt.y);
+                    rleAdd(points, pt0);
+                    rleAdd(points, pt);
+                }
+                prevPt = pt;
+                prevV = v;
+                /*
                 int y1 = Math.max(prevV.attribute.rect.y, v.attribute.rect.y);
                 int y2 = Math.min(prevV.attribute.rect.y + prevV.attribute.rect.height - 1, v.attribute.rect.y + v.attribute.rect.height - 1);
                 boolean hContainsEndPoint = v.attribute.rect.x <= aEndPoint.x && aEndPoint.x <= v.attribute.rect.x + v.attribute.rect.width - 1;
@@ -128,6 +140,7 @@ public class Paths {
                     prevPt = pt;
                 }
                 prevV = v;
+                */ 
             }
         } else {
             rleAdd(points, new Point((aStartPoint.x + aEndPoint.x) / 2, aStartPoint.y));
@@ -177,6 +190,10 @@ public class Paths {
             return 0;
         } else {
             if (to != aStart && to != aEnd) {
+                Point calcedTo = new Point();
+                calcNextPoint(aStartPoint, aEndPoint, from, to, calcedTo);
+                to.attribute.point = calcedTo;
+                /*
                 int y1 = Math.max(from.attribute.rect.y, to.attribute.rect.y);
                 int y2 = Math.min(from.attribute.rect.y + from.attribute.rect.height - 1, to.attribute.rect.y + to.attribute.rect.height - 1);
                 boolean hContainsEndPoint = to.attribute.rect.x <= aEndPoint.x && aEndPoint.x <= to.attribute.rect.x + to.attribute.rect.width - 1;
@@ -186,8 +203,38 @@ public class Paths {
                 } else {
                     to.attribute.point = new Point(hContainsEndPoint ? aEndPoint.x : to.attribute.rect.x + to.attribute.rect.width / 2, vContainsEndPoint ? aEndPoint.y : (y1 + y2) / 2);
                 }
+                */ 
             }
             return Math.abs(from.attribute.point.x - to.attribute.point.x) + Math.abs(from.attribute.point.y - to.attribute.point.y);
+        }
+    }
+
+    /**
+     * Calculates
+     * <code>toPoint</code> values and returns indoor status of
+     * from.attribute.point.y coordinate.
+     *
+     * @param aStartPoint Global start point.
+     * @param aEndPoint Global end point
+     * @param from Current from vertex of visibility graph.
+     * @param to Current to vertex of visibility graph.
+     * @param resPoint Out parameter, the result is placed in.
+     * @return True if of from.attribute.point.y is in free space corridor
+     * between ajacent rectangles
+     */
+    private boolean calcNextPoint(Point aStartPoint, Point aEndPoint, Vertex<PathFragment> from, Vertex<PathFragment> to, Point resPoint) {
+        int y1 = Math.max(from.attribute.rect.y, to.attribute.rect.y);
+        int y2 = Math.min(from.attribute.rect.y + from.attribute.rect.height - 1, to.attribute.rect.y + to.attribute.rect.height - 1);
+        boolean hContainsEndPoint = to.attribute.rect.x <= aEndPoint.x && aEndPoint.x <= to.attribute.rect.x + to.attribute.rect.width - 1;
+        boolean vContainsEndPoint = y1 <= aEndPoint.y && aEndPoint.y <= y2;
+        if (from.attribute.point.y >= y1 && from.attribute.point.y <= y2) {
+            resPoint.x = hContainsEndPoint ? aEndPoint.x : to.attribute.rect.x + to.attribute.rect.width / 2;
+            resPoint.y = from.attribute.point.y;
+            return true;
+        } else {
+            resPoint.x = hContainsEndPoint ? aEndPoint.x : to.attribute.rect.x + to.attribute.rect.width / 2;
+            resPoint.y = vContainsEndPoint ? aEndPoint.y : (y1 + y2) / 2;
+            return false;
         }
     }
 }
