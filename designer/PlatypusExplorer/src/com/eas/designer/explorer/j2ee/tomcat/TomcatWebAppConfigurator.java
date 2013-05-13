@@ -4,6 +4,9 @@
  */
 package com.eas.designer.explorer.j2ee.tomcat;
 
+import com.eas.client.ClientConstants;
+import com.eas.client.resourcepool.GeneralResourceProvider;
+import com.eas.client.settings.DbConnectionSettings;
 import com.eas.designer.application.PlatypusUtils;
 import com.eas.designer.explorer.j2ee.PlatypusWebModule;
 import com.eas.designer.explorer.j2ee.WebAppConfigurator;
@@ -13,13 +16,10 @@ import com.eas.xml.dom.XmlDom2String;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.xml.parsers.ParserConfigurationException;
 import org.netbeans.modules.j2ee.deployment.devmodules.spi.J2eeModuleImplementation2;
-import org.netbeans.modules.j2ee.deployment.devmodules.spi.J2eeModuleProvider;
 import org.openide.ErrorManager;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
-import org.openide.util.Exceptions;
 
 /**
  * Configures web application for Tomcat 7.
@@ -65,17 +65,27 @@ public class TomcatWebAppConfigurator implements WebAppConfigurator {
             ctx = new Context();
             ctx.setRealm(getRealm());
             ctx.addResource(getMainDbConnectionResource());
-        } catch (ParserConfigurationException ex) {
+        } catch (Exception ex) {
             ErrorManager.getDefault().notify(ex);
         }
         return ctx;
     }
 
-    private Resource getMainDbConnectionResource() {
+    private Resource getMainDbConnectionResource() throws Exception {
         DataSourceResource dataSourceResource = new DataSourceResource();
         dataSourceResource.setName(getMainDataSourceName());
         dataSourceResource.setType(DataSourceResource.DATA_SOURCE_RESOURCE_TYPE_NAME);
-        //dataSourceResource.setDriverClassName(get);
+        DbConnectionSettings dbSettings = project.getSettings().getAppSettings().getDbSettings();
+        dataSourceResource.setUrl(dbSettings.getUrl());
+        String dialect = GeneralResourceProvider.constructPropertiesByDbConnectionSettings(dbSettings).getProperty(ClientConstants.DB_CONNECTION_DIALECT_PROP_NAME);
+        if (dialect != null) {
+            String driverClassName = DbConnectionSettings.readDrivers().get(dialect);
+            dataSourceResource.setDriverClassName(driverClassName);
+        } else {
+            Logger.getLogger(getClass().getName()).log(Level.WARNING, "Unsupported JDBC driver or incorrect URL: {0}", dbSettings.getUrl());
+        }
+        dataSourceResource.setUsername(dbSettings.getInfo().getProperty(ClientConstants.DB_CONNECTION_USER_PROP_NAME));
+        dataSourceResource.setPassword(dbSettings.getInfo().getProperty(ClientConstants.DB_CONNECTION_PASSWORD_PROP_NAME));
         return dataSourceResource;
     }
 

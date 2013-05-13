@@ -222,6 +222,7 @@ public class DbConnectionSettings extends EasSettings {
     }
 
     /**
+     * Checks if initialization of the schema is required.
      * @return The initSchema flag
      */
     public boolean isInitSchema() {
@@ -229,7 +230,8 @@ public class DbConnectionSettings extends EasSettings {
     }
 
     /**
-     * @param aValue
+     * Sets if initialization of the schema is required.
+     * @param aValue The initSchema flag
      */
     public void setInitSchema(boolean aValue) {
         initSchema = aValue;

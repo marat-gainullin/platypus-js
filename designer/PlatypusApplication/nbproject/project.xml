@@ -141,6 +141,7 @@
                 <package>com.bearsoft.rowset.events</package>
                 <package>com.bearsoft.rowset.exceptions</package>
                 <package>com.bearsoft.rowset.metadata</package>
+                <package>com.bearsoft.rowset.resourcepool</package>
                 <package>com.bearsoft.rowset.utils</package>
                 <package>com.eas.client</package>
                 <package>com.eas.client.application</package>
@@ -166,11 +167,9 @@
                 <package>com.eas.client.model.gui</package>
                 <package>com.eas.client.model.gui.edits</package>
                 <package>com.eas.client.model.gui.edits.fields</package>
-                <package>com.eas.client.model.gui.edits.properties</package>
                 <package>com.eas.client.model.gui.selectors</package>
                 <package>com.eas.client.model.gui.view</package>
                 <package>com.eas.client.model.gui.view.entities</package>
-                <package>com.eas.client.model.gui.view.fields</package>
                 <package>com.eas.client.model.gui.view.model</package>
                 <package>com.eas.client.model.query</package>
                 <package>com.eas.client.model.script</package>
@@ -178,6 +177,7 @@
                 <package>com.eas.client.model.visitors</package>
                 <package>com.eas.client.queries</package>
                 <package>com.eas.client.reports</package>
+                <package>com.eas.client.resourcepool</package>
                 <package>com.eas.client.scripts</package>
                 <package>com.eas.client.scripts.store</package>
                 <package>com.eas.client.settings</package>
