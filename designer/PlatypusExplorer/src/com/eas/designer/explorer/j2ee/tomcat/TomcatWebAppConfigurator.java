@@ -75,7 +75,7 @@ public class TomcatWebAppConfigurator implements WebAppConfigurator {
         DataSourceResource dataSourceResource = new DataSourceResource();
         dataSourceResource.setName(getMainDataSourceName());
         dataSourceResource.setType(DataSourceResource.DATA_SOURCE_RESOURCE_TYPE_NAME);
-        dataSourceResource.setDriverClassName(get);
+        //dataSourceResource.setDriverClassName(get);
         return dataSourceResource;
     }
 
