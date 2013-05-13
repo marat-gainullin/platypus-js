@@ -9,7 +9,9 @@
  */
 package com.eas.client.model;
 
+import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.ForeignKeySpec.ForeignKeyRule;
+import com.bearsoft.rowset.metadata.Parameter;
 import com.eas.client.model.visitors.ModelVisitor;
 import java.beans.PropertyChangeSupport;
 
@@ -19,13 +21,6 @@ import java.beans.PropertyChangeSupport;
  */
 public class Relation<E extends Entity<?, ?, E>> {
 
-    // persistent properties
-    protected Long leftEntityId = null;
-    protected String leftParameter = null;
-    protected String leftField = null;
-    protected Long rightEntityId = null;
-    protected String rightParameter = null;
-    protected String rightField = null;
     // runtime and persistent properties
     protected String fkName;
     protected ForeignKeyRule fkDeleteRule;
@@ -34,6 +29,8 @@ public class Relation<E extends Entity<?, ?, E>> {
     // runtime properties
     protected E leftEntity = null;
     protected E rightEntity = null;
+    protected Field leftField;
+    protected Field rightField;
     protected PropertyChangeSupport changeSupport;
 
     public Relation() {
@@ -41,22 +38,12 @@ public class Relation<E extends Entity<?, ?, E>> {
         changeSupport = new PropertyChangeSupport(this);
     }
 
-    public Relation(E aLeftEntity, boolean isLeftField, String aLeftField, E aRightEntity, boolean isRightField, String aRightField) {
+    public Relation(E aLeftEntity, Field aLeftField, E aRightEntity, Field aRightField) {
         this();
         leftEntity = aLeftEntity;
-        leftEntityId = leftEntity.getEntityID();
-        if (isLeftField) {
-            leftField = aLeftField;
-        } else {
-            leftParameter = aLeftField;
-        }
+        leftField = aLeftField;
         rightEntity = aRightEntity;
-        rightEntityId = rightEntity.getEntityID();
-        if (isRightField) {
-            rightField = aRightField;
-        } else {
-            rightParameter = aRightField;
-        }
+        rightField = aRightField;
     }
 
     public PropertyChangeSupport getChangeSupport() {
@@ -117,89 +104,49 @@ public class Relation<E extends Entity<?, ?, E>> {
         return rightEntity;
     }
 
-    public Long getLeftEntityId() {
-        return leftEntityId;
-    }
-
-    public void setLeftEntityId(Long aValue) {
-        Long oldValue = leftEntityId;
-        leftEntityId = aValue;
-        changeSupport.firePropertyChange("leftEntityId", oldValue, aValue);
-    }
-
-    public String getLeftField() {
+    public Field getLeftField() {
         return leftField;
     }
 
-    public void setLeftField(String aValue) {
-        String oldValue = leftField;
+    public void setLeftField(Field aValue) {
+        Field oldValue = leftField;
         leftField = aValue;
         changeSupport.firePropertyChange("leftField", oldValue, aValue);
     }
 
-    public String getLeftParameter() {
-        return leftParameter;
-    }
-
-    public void setLeftParameter(String aValue) {
-        String oldValue = leftParameter;
-        leftParameter = aValue;
-        changeSupport.firePropertyChange("leftParameter", oldValue, aValue);
-    }
-
-    public Long getRightEntityId() {
-        return rightEntityId;
-    }
-
-    public void setRightEntityId(Long aValue) {
-        Long oldValue = rightEntityId;
-        rightEntityId = aValue;
-        changeSupport.firePropertyChange("rightEntityId", oldValue, aValue);
-    }
-
-    public String getRightField() {
+    public Field getRightField() {
         return rightField;
     }
 
-    public void setRightField(String aValue) {
-        String oldValue = rightField;
+    public void setRightField(Field aValue) {
+        Field oldValue = rightField;
         rightField = aValue;
         changeSupport.firePropertyChange("rightField", oldValue, aValue);
     }
 
-    public String getRightParameter() {
-        return rightParameter;
-    }
-
-    public void setRightParameter(String aValue) {
-        String oldValue = rightParameter;
-        rightParameter = aValue;
-        changeSupport.firePropertyChange("rightParameter", oldValue, aValue);
-    }
-
     public boolean isLeftParameter() {
-        return !isLeftField();
+        return leftField instanceof Parameter;
     }
 
     public boolean isRightParameter() {
-        return !isRightField();
+        return rightField instanceof Parameter;
     }
 
     public boolean isLeftField() {
-        return (leftField != null && !leftField.isEmpty());
+        return !isLeftParameter();
     }
 
     public boolean isRightField() {
-        return (rightField != null && !rightField.isEmpty());
+        return !isRightParameter();
     }
 
-    public void setLEntity(E aValue) {
+    public void setLeftEntity(E aValue) {
         E oldValue = leftEntity;
         leftEntity = aValue;
         changeSupport.firePropertyChange("leftEntity", oldValue, aValue);
     }
 
-    public void setREntity(E aValue) {
+    public void setRightEntity(E aValue) {
         E oldValue = rightEntity;
         rightEntity = aValue;
         changeSupport.firePropertyChange("rightEntity", oldValue, aValue);
@@ -207,16 +154,30 @@ public class Relation<E extends Entity<?, ?, E>> {
 
     public Relation<E> copy() {
         Relation<E> copied = new Relation<>();
-        copied.setLeftEntityId(leftEntityId);
+        copied.setLeftEntity(leftEntity);
         copied.setLeftField(leftField);
-        copied.setLeftParameter(leftParameter);
-        copied.setRightEntityId(rightEntityId);
+        copied.setRightEntity(rightEntity);
         copied.setRightField(rightField);
-        copied.setRightParameter(rightParameter);
         copied.setFkDeferrable(fkDeferrable);
         copied.setFkDeleteRule(fkDeleteRule);
         copied.setFkUpdateRule(fkUpdateRule);
         copied.setFkName(fkName);
         return copied;
+    }
+
+    public Parameter getLeftParameter() {
+        if (isLeftParameter()) {
+            return (Parameter) leftField;
+        } else {
+            return null;
+        }
+    }
+    
+    public Parameter getRightParameter() {
+        if (isRightParameter()) {
+            return (Parameter) rightField;
+        } else {
+            return null;
+        }
     }
 }

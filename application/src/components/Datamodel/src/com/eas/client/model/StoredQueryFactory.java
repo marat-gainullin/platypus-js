@@ -238,7 +238,7 @@ public class StoredQueryFactory {
                 QueryEntity rightTableEntity = rootModel.newGenericEntity();
                 rightTableEntity.setTableName(rightTableName);
                 rootModel.addEntity(rightTableEntity);
-                Relation<QueryEntity> joinRel = new Relation<>(leftQueryEntity, true, leftFieldName, rightTableEntity, true, rightFieldName);
+                Relation<QueryEntity> joinRel = new Relation<>(leftQueryEntity, leftQueryEntity.getFields().get(leftFieldName), rightTableEntity, rightTableEntity.getFields().get(rightFieldName));
                 rootModel.addRelation(joinRel);
 
                 Parameters rootParams = rootModel.getParameters();
@@ -247,7 +247,7 @@ public class StoredQueryFactory {
                     Parameter rootParam = new Parameter(leftQueryParams.get(i));
                     assert rootParam.getName().equals(leftQueryParams.get(i).getName());
                     rootParams.add(rootParam);
-                    Relation<QueryEntity> rel = new Relation<>(rootModel.getParametersEntity(), true, rootParam.getName(), leftQueryEntity, false, rootParam.getName());
+                    Relation<QueryEntity> rel = new Relation<>(rootModel.getParametersEntity(), rootParam, leftQueryEntity, leftQueryEntity.getQuery().getParameters().get(rootParam.getName()));
                     rootModel.addRelation(rel);
                 }
                 try {
@@ -513,9 +513,9 @@ public class StoredQueryFactory {
 
     private String replaceLinkedParameters(String aSqlText, Set<Relation<QueryEntity>> parametersRelations) {
         for (Relation<QueryEntity> rel : parametersRelations) {
-            if (rel.getLeftField() != null && !rel.getLeftField().isEmpty() && rel.getRightParameter() != null && !rel.getRightParameter().isEmpty()) {
+            if (rel.getLeftField() != null && rel.getRightParameter() != null) {
                 aSqlText = Pattern.compile(COLON + rel.getRightParameter() + "\\b", Pattern.CASE_INSENSITIVE).matcher(aSqlText).replaceAll(COLON + rel.getLeftField());
-            } else if (rel.getLeftParameter() != null && !rel.getLeftParameter().isEmpty() && rel.getRightParameter() != null && !rel.getRightParameter().isEmpty()) {
+            } else if (rel.getLeftParameter() != null && rel.getRightParameter() != null) {
                 aSqlText = Pattern.compile(COLON + rel.getRightParameter() + "\\b", Pattern.CASE_INSENSITIVE).matcher(aSqlText).replaceAll(COLON + rel.getLeftParameter());
             }
         }
@@ -570,10 +570,10 @@ public class StoredQueryFactory {
                     // Absent alias generation is parser's work.
                     //Безымянные поля, получающиеся когда нет алиаса, будут
                     //замещены полями полученными из базы во время исполнения запроса.
-                    
-                    field = new Field(col.getAlias() != null ? col.getAlias().getName() : 
-                            (col.getExpression() instanceof Column ? ((Column)col.getExpression()).getColumnName():""));
-                    
+
+                    field = new Field(col.getAlias() != null ? col.getAlias().getName()
+                            : (col.getExpression() instanceof Column ? ((Column) col.getExpression()).getColumnName() : ""));
+
                     // Such field is absent in database tables and so, field's table is the processed query.
                     field.setTableName(ClientConstants.QUERY_ID_PREFIX + aQuery.getEntityId().toString());
                     /**

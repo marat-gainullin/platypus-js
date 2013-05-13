@@ -36,7 +36,6 @@ import com.eas.designer.explorer.project.PlatypusProject;
 import com.eas.script.JsDoc;
 import com.eas.xml.dom.Source2XmlDom;
 import com.eas.xml.dom.XmlDom2String;
-import java.beans.PropertyChangeSupport;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -105,8 +104,6 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
     protected transient Fields outputFields;
     protected transient NbEditorDocument sqlTextDocument;
     protected transient NbEditorDocument sqlFullTextDocument;
-    // Runtime
-    protected transient PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
 
     public PlatypusQueryDataObject(FileObject aSqlFile, MultiFileLoader loader) throws DataObjectExistsException, IOException {
         super(aSqlFile, loader);
@@ -161,10 +158,6 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
                 ErrorManager.getDefault().notify(ex);
             }
         }
-    }
-
-    public PropertyChangeSupport getChangeSupport() {
-        return changeSupport;
     }
 
     protected void readQuery() throws Exception {
@@ -254,7 +247,7 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         if (model != null) {
             model.setDbId(aValue);
         }
-        changeSupport.firePropertyChange(CONN_PROP_NAME, oldValue, aValue);
+        firePropertyChange(CONN_PROP_NAME, oldValue, aValue);
         if ((oldValue == null && aValue != null) || (oldValue != null && !oldValue.equals(aValue))) {
             refreshOutputFields();
         }
@@ -268,7 +261,7 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         boolean oldValue = publicQuery;
         publicQuery = aValue;
         if (oldValue != publicQuery) {
-            changeSupport.firePropertyChange(PUBLIC_PROP_NAME, oldValue, aValue);
+            firePropertyChange(PUBLIC_PROP_NAME, oldValue, aValue);
             try {
                 String content = sqlTextDocument.getText(0, sqlTextDocument.getLength());
                 String newContent = PlatypusFilesSupport.replaceAnnotationValue(content, PlatypusFiles.PUBLIC_ANNOTATION_NAME, publicQuery ? "" : null);
@@ -278,7 +271,7 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
             }
         }
     }
-    
+
     public boolean isProcedure() {
         return procedure;
     }
@@ -287,7 +280,7 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         boolean oldValue = procedure;
         procedure = aValue;
         if (oldValue != procedure) {
-            changeSupport.firePropertyChange(PROCEDURE_PROP_NAME, oldValue, aValue);
+            procedureChanged(oldValue, aValue);
             try {
                 String content = sqlTextDocument.getText(0, sqlTextDocument.getLength());
                 String newContent = PlatypusFilesSupport.replaceAnnotationValue(content, PlatypusFiles.PROCEDURE_ANNOTATION_NAME, procedure ? "" : null);
@@ -298,6 +291,10 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         }
     }
 
+    public void procedureChanged(boolean aOldValue, boolean aNewValue) {
+        firePropertyChange(PROCEDURE_PROP_NAME, aOldValue, aNewValue);
+    }
+
     public boolean isManual() {
         return manual;
     }
@@ -306,7 +303,7 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         boolean oldValue = manual;
         manual = aValue;
         if (oldValue != manual) {
-            changeSupport.firePropertyChange(MANUAL_PROP_NAME, oldValue, aValue);
+            manualChanged(oldValue, aValue);
             try {
                 String content = sqlTextDocument.getText(0, sqlTextDocument.getLength());
                 String newContent = PlatypusFilesSupport.replaceAnnotationValue(content, PlatypusFiles.MANUAL_ANNOTATION_NAME, manual ? "" : null);
@@ -317,6 +314,10 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         }
     }
 
+    public void manualChanged(boolean aOldValue, boolean aNewValue) {
+        firePropertyChange(MANUAL_PROP_NAME, aOldValue, aNewValue);
+    }
+
     public boolean isReadonly() {
         return readonly;
     }
@@ -325,7 +326,7 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         boolean oldValue = readonly;
         readonly = aValue;
         if (oldValue != readonly) {
-            changeSupport.firePropertyChange(READONLY_PROP_NAME, oldValue, aValue);
+            firePropertyChange(READONLY_PROP_NAME, oldValue, aValue);
             try {
                 String content = sqlTextDocument.getText(0, sqlTextDocument.getLength());
                 String newContent = PlatypusFilesSupport.replaceAnnotationValue(content, JsDoc.Tag.READONLY_TAG, readonly ? "" : null);
@@ -576,8 +577,12 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
             outputFields = null;
         }
         if ((oldValue == null && outputFields != null) || (oldValue != null && !oldValue.equals(outputFields))) {
-            firePropertyChange(OUTPUT_FIELDS, oldValue, outputFields);
+            outputFieldsChanged(oldValue, outputFields);
         }
+    }
+
+    public void outputFieldsChanged(Fields aOldValue, Fields aNewValue) {
+        firePropertyChange(OUTPUT_FIELDS, aOldValue, aNewValue);
     }
 
     public boolean existsAppQuery(String aTablyName) {

@@ -58,6 +58,7 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
     protected boolean runtime = false;
     protected boolean commitable = true;
     protected int ajustingCounter = 0;
+    protected Runnable resolver;
     protected GuiCallback guiCallback;
     protected ModelEditingSupport<E> editingSupport = new ModelEditingSupport<>();
     protected PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
@@ -69,7 +70,14 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
             copied.addEntity((E) entity.copy());
         }
         for (Relation<E> relation : relations) {
-            copied.addRelation(relation.copy());
+            Relation<E> rcopied = relation.copy();
+            if (rcopied.getLeftEntity() != null) {
+                rcopied.setLeftEntity(copied.getEntityById(rcopied.getLeftEntity().getEntityId()));
+            }
+            if (rcopied.getRightEntity() != null) {
+                rcopied.setRightEntity(copied.getEntityById(rcopied.getRightEntity().getEntityId()));
+            }
+            copied.addRelation(rcopied);
         }
         if (parameters != null) {
             copied.setParameters(parameters.copy());
@@ -77,7 +85,6 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
         if (getParametersEntity() != null) {
             copied.setParametersEntity((P) getParametersEntity().copy());
         }
-        copied.resolveReferences();
         return copied;
     }
 
@@ -99,12 +106,20 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
         setClient(aClient);
     }
 
+    public void setResolver(Runnable aResolver) {
+        resolver = aResolver;
+    }
+
     public PropertyChangeSupport getChangeSupport() {
         return changeSupport;
     }
 
     public void setClient(C aValue) {
         client = aValue;
+        if (client != null && resolver != null) {
+            resolver.run();
+            resolver = null;
+        }
     }
 
     public void clearRelations() {
@@ -317,12 +332,12 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
     }
 
     public void addEntity(E aEntity) {
-        entities.put(aEntity.getEntityID(), aEntity);
+        entities.put(aEntity.getEntityId(), aEntity);
         fireEntityAdded(aEntity);
     }
 
     public boolean removeEntity(E aEnt) {
-        return aEnt != null && removeEntity(aEnt.getEntityID()) != null;
+        return aEnt != null && removeEntity(aEnt.getEntityId()) != null;
     }
 
     public E removeEntity(Long aEntId) {
@@ -332,25 +347,6 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
             fireEntityRemoved(lent);
         }
         return lent;
-    }
-
-    public void resolveReferences() {
-        fixupReferences();
-        for (Relation<E> rel : relations) {
-            E lEntity = entities.get(rel.getLeftEntityId());
-            if (lEntity == null && rel.getLeftEntityId() == PARAMETERS_ENTITY_ID) {
-                lEntity = parametersEntity;
-            }
-            rel.setLEntity(lEntity);
-            lEntity.addOutRelation(rel);
-
-            E rEntity = entities.get(rel.getRightEntityId());
-            if (rEntity == null && rel.getRightEntityId() == PARAMETERS_ENTITY_ID) {
-                rEntity = parametersEntity;
-            }
-            rel.setREntity(rEntity);
-            rEntity.addInRelation(rel);
-        }
     }
 
     public Map<Long, E> getEntities() {
@@ -366,7 +362,7 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
         Map<Long, E> allEntities = new HashMap<>();
         allEntities.putAll(entities);
         if (parametersEntity != null) {
-            allEntities.put(parametersEntity.getEntityID(), parametersEntity);
+            allEntities.put(parametersEntity.getEntityId(), parametersEntity);
         }
         return allEntities;
     }
@@ -378,8 +374,6 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
             return entities.get(aId);
         }
     }
-
-    public abstract void fixupReferences();
 
     public void setEntities(Map<Long, E> aValue) {
         entities = aValue;
@@ -400,37 +394,48 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
     public void setRelations(Set<Relation<E>> aRelations) {
         relations = aRelations;
     }
+    /*
+     public boolean isParameterInRelations(E aEntity, Set<Relation<E>> aRelations, Parameter aParameter) {
+     for (Relation<E> lrel : aRelations) {
+     Parameter leftParameter = lrel.getLeftParameter();
+     if (aEntity != null && leftParameter != null
+     && leftParameter == aParameter
+     && aEntity == lrel.getLeftEntity()) {
+     return true;
+     }
 
-    public boolean isParameterNameInRelations(E aEntity, Set<Relation<E>> aRelations, String aParameterName) {
+     Parameter rightParameter = lrel.getRightParameter();
+     if (aEntity != null && rightParameter != null
+     && rightParameter == aParameter
+     && aEntity == lrel.getRightEntity()) {
+     return true;
+     }
+     }
+     return false;
+     }
+
+     public boolean isFieldInRelations(E aEntity, Set<Relation<E>> aRelations, Field aField) {
+     for (Relation<E> lrel : aRelations) {
+     Field leftField = lrel.getLeftField();
+     if (aEntity != null && leftField != null
+     && leftField == aField && aEntity == lrel.getLeftEntity()) {
+     return true;
+     }
+
+     Field rightField = lrel.getRightField();
+     if (aEntity != null && rightField != null
+     && rightField == aField && aEntity == lrel.getRightEntity()) {
+     return true;
+     }
+     }
+     return false;
+     }
+     */
+
+    public boolean isFieldInRelations(E aEntity, Set<Relation<E>> aRelations, Field aField) {
         for (Relation<E> lrel : aRelations) {
-            String leftParameter = lrel.getLeftParameter();
-            if (aEntity != null && leftParameter != null
-                    && leftParameter.equals(aParameterName)
-                    && aEntity == lrel.getLeftEntity()) {
-                return true;
-            }
-
-            String rightParameter = lrel.getRightParameter();
-            if (aEntity != null && rightParameter != null
-                    && rightParameter.equals(aParameterName)
-                    && aEntity == lrel.getRightEntity()) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public boolean isFieldNameInRelations(E aEntity, Set<Relation<E>> aRelations, String aFieldName) {
-        for (Relation<E> lrel : aRelations) {
-            String leftField = lrel.getLeftField();
-            if (aEntity != null && leftField != null
-                    && leftField.equals(aFieldName) && aEntity == lrel.getLeftEntity()) {
-                return true;
-            }
-
-            String rightField = lrel.getRightField();
-            if (aEntity != null && rightField != null
-                    && rightField.equals(aFieldName) && aEntity == lrel.getRightEntity()) {
+            if (lrel.getLeftField() == aField || lrel.getLeftParameter() == aField
+                    || lrel.getRightField() == aField || lrel.getRightParameter() == aField) {
                 return true;
             }
         }

@@ -140,7 +140,7 @@ public class RowsetUtils {
                 return newValue;
             } else if (aValue instanceof String) {
                 String casted = (String) aValue;
-                String newValue = new String(casted.toCharArray());
+                String newValue = casted;
                 return newValue;
             } else if (aValue instanceof URL) {
                 try {

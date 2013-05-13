@@ -13,9 +13,9 @@ import com.eas.client.model.Entity;
  */
 public class ChangeFieldEdit<E extends Entity<?, ?, E>> extends FieldsEdit<E> {
 
-    private Field beforeContent = null;
-    private Field afterContent = null;
-    private Field field = null;
+    private Field beforeContent;
+    private Field afterContent;
+    private Field field;
 
     public ChangeFieldEdit(Field aBeforeContent, Field aAfterContent, Field aField, E aEntity) {
         super(aEntity);

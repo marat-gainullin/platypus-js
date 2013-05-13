@@ -32,19 +32,19 @@ public abstract class Entity<M extends Model<E, ?, ?, Q>, Q extends Query<?>, E 
     protected boolean iconified;
     protected String title;
     protected String name; // datasource name
-    protected Long entityID = IDGenerator.genID();
-    protected String queryId = null;
-    protected String tableDbId = null;
-    protected String tableSchemaName = null;
+    protected Long entityId = IDGenerator.genID();
+    protected String queryId;
+    protected String tableDbId;
+    protected String tableSchemaName;
     protected String tableName = null;
-    protected transient M model = null;
-    protected transient Q query = null;
+    protected transient M model;
+    protected transient Q query;
     protected transient Set<Relation<E>> inRelations = new HashSet<>();
     protected transient Set<Relation<E>> outRelations = new HashSet<>();
     protected Fields fields;
     protected PropertyChangeSupport changeSupport;
     public static final String MODEL_PROPERTY = "model";
-    public static final String ENTITY_ID_PROPERTY = "entityID";
+    public static final String ENTITY_ID_PROPERTY = "entityId";
     public static final String X_PROPERTY = "x";
     public static final String Y_PROPERTY = "y";
     public static final String WIDTH_PROPERTY = "width";
@@ -111,8 +111,8 @@ public abstract class Entity<M extends Model<E, ?, ?, Q>, Q extends Query<?>, E 
         return model;
     }
 
-    public void regenerateID() {
-        entityID = IDGenerator.genID();
+    public void regenerateId() {
+        entityId = IDGenerator.genID();
     }
 
     public void setModel(M aValue) {
@@ -123,13 +123,13 @@ public abstract class Entity<M extends Model<E, ?, ?, Q>, Q extends Query<?>, E 
 
     public abstract void accept(ModelVisitor<E> visitor);
 
-    public Long getEntityID() {
-        return entityID;
+    public Long getEntityId() {
+        return entityId;
     }
 
-    public void setEntityID(Long aValue) {
-        Long oldValue = entityID;
-        entityID = aValue;
+    public void setEntityId(Long aValue) {
+        Long oldValue = entityId;
+        entityId = aValue;
         changeSupport.firePropertyChange(ENTITY_ID_PROPERTY, oldValue, aValue);
     }
 
@@ -353,7 +353,7 @@ public abstract class Entity<M extends Model<E, ?, ?, Q>, Q extends Query<?>, E 
     }
 
     protected void assign(E assignTo) throws Exception {
-        assignTo.setEntityID(entityID);
+        assignTo.setEntityId(entityId);
         assignTo.setQueryId(queryId);
         assignTo.setTableDbId(tableDbId);
         assignTo.setTableName(tableName);

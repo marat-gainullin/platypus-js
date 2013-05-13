@@ -45,7 +45,7 @@ public class XmlDom2DbSchemeModel extends XmlDom2Model<FieldsEntity> implements 
     @Override
     public void visit(FieldsEntity entity) {
         if (entity != null) {
-            entity.setEntityID(readLongAttribute(Model2XmlDom.ENTITY_ID_ATTR_NAME, null));
+            entity.setEntityId(readLongAttribute(Model2XmlDom.ENTITY_ID_ATTR_NAME, null));
             entity.setTableName(currentNode.getAttribute(Model2XmlDom.TABLE_NAME_ATTR_NAME));
             readEntityDesignAttributes(entity);
             readOldUserData(entity);

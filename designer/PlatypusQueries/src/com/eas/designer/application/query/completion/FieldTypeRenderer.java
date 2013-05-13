@@ -2,29 +2,35 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.designer.application.query.output;
+package com.eas.designer.application.query.completion;
 
+import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
+import com.eas.client.SQLUtils;
 import com.eas.client.model.QueryDocument.StoredFieldMetadata;
+import com.eas.client.model.gui.view.FieldsTypeIconsCache;
 import com.eas.designer.application.query.PlatypusQueryDataObject;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Image;
+import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 import org.openide.ErrorManager;
+import org.openide.util.ImageUtilities;
 
 /**
  *
  * @author mg
  */
-public class DescriptionRenderer extends DefaultTableCellRenderer {
+public class FieldTypeRenderer extends DefaultTableCellRenderer {
 
     protected PlatypusQueryDataObject dataObject;
     protected JLabel testLabel = new JLabel("some text");
 
-    public DescriptionRenderer(PlatypusQueryDataObject aDataObject) {
+    public FieldTypeRenderer(PlatypusQueryDataObject aDataObject) {
         super();
         dataObject = aDataObject;
     }
@@ -33,6 +39,7 @@ public class DescriptionRenderer extends DefaultTableCellRenderer {
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         try {
             Component rComp = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+            int sqlType = ((DataTypeInfo) value).getSqlType();
             Color defaultColor = Color.lightGray;
             Color editedColor = testLabel.getForeground();
             Fields fields = dataObject.getOutputFields();
@@ -40,17 +47,41 @@ public class DescriptionRenderer extends DefaultTableCellRenderer {
                 Field field = fields.get(row + 1);
                 StoredFieldMetadata addition = getCorrespondingAddition(field);
                 if (addition != null) {
-                    if (addition.getDescription() != null && !addition.getDescription().equals(field.getDescription())) {
+                    if (addition.getTypeInfo() != null && addition.getTypeInfo().getSqlType() != field.getTypeInfo().getSqlType()) {
                         defaultColor = editedColor;
+                        sqlType = addition.getTypeInfo().getSqlType();
+                    }
+                }
+                rComp.setForeground(defaultColor);
+                if (rComp instanceof JLabel) {
+                    Icon icon = calcFieldIcon(sqlType, field);
+                    ((JLabel) rComp).setIcon(icon);
+                    String typeDisplayName = SQLUtils.getLocalizedTypeName(sqlType);
+                    if (typeDisplayName != null) {
+                        ((JLabel) rComp).setText(typeDisplayName);
                     }
                 }
             }
-            rComp.setForeground(defaultColor);
             return rComp;
         } catch (Exception ex) {
             ErrorManager.getDefault().notify(ex);
             return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
         }
+    }
+
+    public static Icon calcFieldIcon(int sqlType, Field field) {
+        Icon icon = FieldsTypeIconsCache.getIcon16(sqlType);
+        if (field.isPk() || field.isFk()) {
+            Image res = ImageUtilities.icon2Image(icon);
+            if (field.isPk()) {
+                res = ImageUtilities.mergeImages(res, ImageUtilities.icon2Image(FieldsTypeIconsCache.getPkIcon16()), 0, 0);
+            }
+            if (field.isFk()) {
+                res = ImageUtilities.mergeImages(res, ImageUtilities.icon2Image(FieldsTypeIconsCache.getFkIcon16()), 0, 0);
+            }
+            icon = ImageUtilities.image2Icon(res);
+        }
+        return icon;
     }
 
     private StoredFieldMetadata getCorrespondingAddition(Field aField) throws Exception {

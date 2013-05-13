@@ -3,13 +3,13 @@
  * and open the template in the editor.
  */
 
-package com.eas.client.model.gui.view.visibilitygraph;
+package com.eas.client.model.gui.view.model;
 
 import java.awt.Point;
 
 /**
  *
- * @author Gala
+ * @author mg
  */
 public class Segment {
 

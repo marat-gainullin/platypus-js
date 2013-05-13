@@ -36,7 +36,7 @@ public class QueryModel2XmlDom extends Model2XmlDom<QueryEntity> implements Quer
             currentNode.appendChild(node);
 
             node.setAttribute(QueryModel.DATASOURCE_TITLE_TAG_NAME, entity.getTitle());
-            node.setAttribute(ENTITY_ID_ATTR_NAME, String.valueOf(entity.getEntityID()));
+            node.setAttribute(ENTITY_ID_ATTR_NAME, String.valueOf(entity.getEntityId()));
             if (entity.getQueryId() != null) {
                 node.setAttribute(QUERY_ID_ATTR_NAME, String.valueOf(entity.getQueryId()));
             }

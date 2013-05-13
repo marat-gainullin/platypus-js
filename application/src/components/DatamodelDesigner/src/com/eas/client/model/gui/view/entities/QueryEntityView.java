@@ -7,7 +7,6 @@ package com.eas.client.model.gui.view.entities;
 
 import com.eas.client.model.gui.view.EntityViewsManager;
 import com.eas.client.model.query.QueryEntity;
-import com.eas.client.model.query.QueryParametersEntity;
 
 /**
  *
@@ -21,7 +20,7 @@ public class QueryEntityView extends EntityView<QueryEntity>{
 
     @Override
     protected boolean isEditable() {
-        return entity instanceof QueryParametersEntity;
+        return false;
     }
 
     @Override

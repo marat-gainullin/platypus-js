@@ -21,6 +21,7 @@ public class DefaultMtdSelectionValidator implements MtdSelectionValidator {
         allowedTypes = aAllowedTypes;
     }
 
+    @Override
     public boolean isEntityValid(ApplicationElement umdo) {
         if (allowedTypes != null) {
             if (umdo != null) {

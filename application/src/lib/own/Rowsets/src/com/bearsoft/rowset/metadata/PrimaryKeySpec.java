@@ -99,16 +99,16 @@ public class PrimaryKeySpec {
 
     protected void copyPkFromValues(String aSchema, String aTable, String aField, String aCName) {
         if (aSchema != null) {
-            setSchema(new String(aSchema.toCharArray()));
+            setSchema(aSchema);
         }
         if (aTable != null) {
-            setTable(new String(aTable.toCharArray()));
+            setTable(aTable);
         }
         if (aField != null) {
-            setField(new String(aField.toCharArray()));
+            setField(aField);
         }
         if (aCName != null) {
-            setCName(new String(aCName.toCharArray()));
+            setCName(aCName);
         }
     }
 

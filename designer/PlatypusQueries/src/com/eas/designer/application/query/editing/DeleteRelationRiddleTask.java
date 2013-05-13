@@ -72,18 +72,18 @@ public class DeleteRelationRiddleTask implements RiddleTask {
             if (col.getTable() != null && col.getTable().getName() != null) {
                 Table table = tables.get(col.getTable().getName().toLowerCase());
                 if (table != null) {
-                    if (isDerivedFrom(table, lqe) && col.getColumnName().equalsIgnoreCase(toDelete.getLeftField())) {
+                    if (isDerivedFrom(table, lqe) && col.getColumnName().equalsIgnoreCase(toDelete.getLeftField().getName())) {
                         left.add(aExpression);
-                    } else if (isDerivedFrom(table, rqe) && col.getColumnName().equalsIgnoreCase(toDelete.getRightField())) {
+                    } else if (isDerivedFrom(table, rqe) && col.getColumnName().equalsIgnoreCase(toDelete.getRightField().getName())) {
                         right.add(aExpression);
                     }
                 }
             }
         } else if (aExpression instanceof NamedParameter) {
             NamedParameter param = (NamedParameter) aExpression;
-            if (lqe instanceof QueryParametersEntity && param.getName().equalsIgnoreCase(toDelete.getLeftField())) {
+            if (lqe instanceof QueryParametersEntity && param.getName().equalsIgnoreCase(toDelete.getLeftField().getName())) {
                 left.add(aExpression);
-            } else if (rqe instanceof QueryParametersEntity && param.getName().equalsIgnoreCase(toDelete.getRightField())) {
+            } else if (rqe instanceof QueryParametersEntity && param.getName().equalsIgnoreCase(toDelete.getRightField().getName())) {
                 right.add(aExpression);
             }
         } else if (aExpression instanceof BinaryExpression) {

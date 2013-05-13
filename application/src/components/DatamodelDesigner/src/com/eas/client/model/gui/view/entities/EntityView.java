@@ -127,9 +127,9 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
         }
     }
 
-    public String getFieldDisplayLabel(String aFieldName) {
-        if (aFieldName != null && !aFieldName.isEmpty()) {
-            int lidx = fieldsModel.getFieldNameIndex(aFieldName);
+    public String getFieldDisplayLabel(Field aField) {
+        if (aField != null) {
+            int lidx = fieldsModel.getFieldNameIndex(aField.getName());
             if (lidx > -1) {
                 Field lfield = fieldsModel.getElementAt(lidx);
                 Component lcomp = fieldsParamsRenderer.getListCellRendererComponent(fieldsList, lfield, lidx, false, false);
@@ -142,9 +142,9 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
         return null;
     }
 
-    public String getParameterDisplayLabel(String aParameterName) {
-        if (aParameterName != null && !aParameterName.isEmpty()) {
-            int lidx = parametersModel.getFieldNameIndex(aParameterName);
+    public String getParameterDisplayLabel(Field aParameter) {
+        if (aParameter != null) {
+            int lidx = parametersModel.getFieldNameIndex(aParameter.getName());
             if (lidx > -1) {
                 Field lfield = parametersModel.getElementAt(lidx);
                 Component lcomp = fieldsParamsRenderer.getListCellRendererComponent(parametersList, lfield, lidx, false, false);
@@ -153,20 +153,6 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
                     return fRenderer.getText();
                 }
             }
-        }
-        return null;
-    }
-
-    public Field getFieldByName(String aFieldName) {
-        if (entity != null && aFieldName != null) {
-            return entity.getFields().get(aFieldName);
-        }
-        return null;
-    }
-
-    public Parameter getParameterByName(String aParameterName) {
-        if (getParameters() != null) {
-            return getParameters().get(aParameterName);
         }
         return null;
     }
@@ -635,7 +621,6 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
         public void beginDraggingEntityView(EntityView<E> aView) {
             E entity = aView.getEntity();
             moveEdit = new MoveEntityEdit<>(entity, aView.getLocation(), aView.getLocation());
-            entitiesManager.beginMoveSession(aView);
         }
 
         public void endDraggingEntityView(EntityView<E> aView) {
@@ -650,25 +635,17 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
                     undoSupport.postEdit(moveEdit);
                 }
                 moveEdit = null;
-                entitiesManager.endMoveSession(aView);
             }
         }
 
-        protected void dragEntitViewIntern(EntityView<E> aView, int newX, int newY) {
-            aView.setLocation(newX, newY);
-        }
-
         public void dragEntityView(EntityView<E> aView, int newX, int newY) {
-            entitiesManager.beforeMove(aView);
-            dragEntitViewIntern(aView, newX, newY);
-            entitiesManager.afterMove(aView);
+            aView.setLocation(newX, newY);
         }
         protected ResizeEntityEdit<E> resizeEdit = null;
 
         public void beginResizingEntityView(EntityView<E> aView) {
             E entity = aView.getEntity();
             resizeEdit = new ResizeEntityEdit<>(entity, aView.getBounds(), aView.getBounds());
-            entitiesManager.beginMoveSession(aView);
         }
 
         public void endResizingEntityView(EntityView<E> aView) {
@@ -684,29 +661,21 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
                     undoSupport.postEdit(resizeEdit);
                 }
                 resizeEdit = null;
-                entitiesManager.endMoveSession(aView);
-            }
-        }
-
-        protected boolean resizeEntityViewIntern(EntityView<E> aView, int newX, int newY, int newWidth, int newHeight) {
-            Rectangle loldBounds = aView.getBounds();
-            Rectangle lnewBounds = new Rectangle(newX, newY, newWidth, newHeight);
-            if (!lnewBounds.equals(loldBounds)) {
-                aView.setBounds(lnewBounds);
-                aView.invalidate();
-                aView.validate();
-                return true;
-            } else {
-                return false;
             }
         }
 
         public boolean resizeEntityView(EntityView<E> aView, int newX, int newY, int newWidth, int newHeight) {
             if (newHeight >= calcIconifiedHeight() && newWidth >= 100) {
-                entitiesManager.beforeMove(aView);
-                boolean res = resizeEntityViewIntern(aView, newX, newY, newWidth, newHeight);
-                entitiesManager.afterMove(aView);
-                return res;
+                Rectangle loldBounds = aView.getBounds();
+                Rectangle lnewBounds = new Rectangle(newX, newY, newWidth, newHeight);
+                if (!lnewBounds.equals(loldBounds)) {
+                    aView.setBounds(lnewBounds);
+                    aView.invalidate();
+                    aView.validate();
+                    return true;
+                } else {
+                    return false;
+                }
             } else {
                 return false;
             }
@@ -777,28 +746,21 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
                     reLayout();
                     break;
                 default:
-                    entitiesManager.beginMoveSession(EntityView.this);
-                    entitiesManager.beforeMove(EntityView.this);
-                    try {
-                        switch (evt.getPropertyName()) {
-                            case "x":
-                                EntityView.this.setLocation((Integer) evt.getNewValue(), EntityView.this.getLocation().y);
-                                break;
-                            case "y":
-                                EntityView.this.setLocation(EntityView.this.getLocation().x, (Integer) evt.getNewValue());
-                                break;
-                            case "width":
-                                EntityView.this.setSize((Integer) evt.getNewValue(), EntityView.this.getHeight());
-                                break;
-                            case "height":
-                                EntityView.this.setSize(EntityView.this.getWidth(), (Integer) evt.getNewValue());
-                                break;
-                        }
-                        reLayout();
-                    } finally {
-                        entitiesManager.afterMove(EntityView.this);
-                        entitiesManager.endMoveSession(EntityView.this);
+                    switch (evt.getPropertyName()) {
+                        case "x":
+                            EntityView.this.setLocation((Integer) evt.getNewValue(), EntityView.this.getLocation().y);
+                            break;
+                        case "y":
+                            EntityView.this.setLocation(EntityView.this.getLocation().x, (Integer) evt.getNewValue());
+                            break;
+                        case "width":
+                            EntityView.this.setSize((Integer) evt.getNewValue(), EntityView.this.getHeight());
+                            break;
+                        case "height":
+                            EntityView.this.setSize(EntityView.this.getWidth(), (Integer) evt.getNewValue());
+                            break;
                     }
+                    reLayout();
                     break;
             }
         }
@@ -835,6 +797,7 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
         @Override
         public void added(Fields fields, Field field) {
             field.getChangeSupport().addPropertyChangeListener(fieldsChangesReflector);
+            entitiesManager.invalidateConnectors();
         }
 
         @Override
@@ -847,6 +810,7 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
         @Override
         public void removed(Fields fields, Field field) {
             field.getChangeSupport().removePropertyChangeListener(entityChangesReflector);
+            entitiesManager.invalidateConnectors();
         }
 
         @Override
@@ -854,6 +818,7 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
             for (Field field : fieldsCollection) {
                 field.getChangeSupport().removePropertyChangeListener(fieldsChangesReflector);
             }
+            entitiesManager.invalidateConnectors();
         }
 
         @Override
@@ -978,30 +943,11 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
     }
 
     public Long getEntityID() {
-        return entity.getEntityID();
+        return entity.getEntityId();
     }
 
     public E getEntity() {
         return entity;
-    }
-
-    public boolean isKeyField(String aFieldName) {
-        if (entity != null && aFieldName != null) {
-            Fields fields = entity.getFields();
-            if (fields != null) {
-                Field lfield = fields.get(aFieldName);
-                return lfield != null && (lfield.isPk() || lfield.isFk());
-            }
-        }
-        return false;
-    }
-
-    public boolean isKeyParameter(String aFieldName) {
-        if (aFieldName != null && getParameters() != null) {
-            Field lfield = getParameters().get(aFieldName);
-            return lfield != null && (lfield.isPk() || lfield.isFk());
-        }
-        return false;
     }
 
     public void setTooltipRecursivly(JComponent aRoot, String aTooltip) {
@@ -1022,7 +968,7 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
         setTooltipRecursivly(this, aTitle);
     }
 
-    protected Point getListItemPosition(String aFieldName, boolean isLeft, JList<? extends Field> list) {
+    protected Point getListItemPosition(String aFieldName, boolean isLeft, JList<? extends Field> aList) {
         if (/*
                  * entity.isIconified() ||
                  */aFieldName == null || aFieldName.isEmpty()) {
@@ -1036,17 +982,22 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
             }
             return lResPt;
         } else {
-            ListModel<? extends Field> lm = list.getModel();
+            ListModel<? extends Field> lm = aList.getModel();
             if (lm instanceof FieldsListModel<?>) {
                 FieldsListModel<Field> lmm = (FieldsListModel<Field>) lm;
                 int lModelIndex = lmm.getFieldNameIndex(aFieldName);
                 if (lModelIndex > -1) {
-                    Rectangle lfieldRect = list.getCellBounds(lModelIndex, lModelIndex);
+                    Rectangle lfieldRect = aList.getCellBounds(lModelIndex, lModelIndex);
                     if (lfieldRect != null) {
+                        if (lfieldRect.height < 0 && lm.getSize() > 0) {
+                            Rectangle lfieldRect1 = aList.getCellBounds(0, 0);
+                            lfieldRect.height = lfieldRect1.height;
+                            lfieldRect.y = lModelIndex * lfieldRect.height;
+                        }
                         Point lResPt = lfieldRect.getLocation();
                         lResPt.y = lfieldRect.y + Math.round(lfieldRect.height / 2.0f);
                         lResPt.x = lfieldRect.x + Math.round(lfieldRect.width / 2.0f);
-                        lResPt = SwingUtilities.convertPoint(list, lResPt, this);
+                        lResPt = SwingUtilities.convertPoint(aList, lResPt, this);
                         lResPt.x = 0;
                         if (!isLeft) {
                             lResPt.x = getWidth();
@@ -1073,12 +1024,12 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
         return loc;
     }
 
-    public Point getFieldPosition(String aFieldName, boolean isLeft) {
-        return getListItemPosition(aFieldName, isLeft, fieldsList);
+    public Point getFieldPosition(Field aField, boolean isLeft) {
+        return getListItemPosition(aField != null ? aField.getName() : null, isLeft, fieldsList);
     }
 
-    public Point getParameterPosition(String aParameterName, boolean isLeft) {
-        return getListItemPosition(aParameterName, isLeft, parametersList);
+    public Point getParameterPosition(Parameter aParameter, boolean isLeft) {
+        return getListItemPosition(aParameter != null ? aParameter.getName() : null, isLeft, parametersList);
     }
 
     protected class MouseSelectionPropagator extends MouseAdapter {

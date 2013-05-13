@@ -6,7 +6,6 @@ package com.eas.client.model.gui.view;
 
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Parameter;
-import com.bearsoft.rowset.utils.RowsetUtils;
 import com.eas.client.SQLUtils;
 import com.eas.client.model.DummyRelation;
 import com.eas.client.model.Entity;
@@ -77,7 +76,7 @@ public class RelationsFieldsDragHandler<E extends Entity<?, ?, E>> extends Trans
     protected Transferable createTransferable(JComponent c) {
         Field lField = entityView.getSelectedField();
         Parameter lParameter = entityView.getSelectedParameter();
-        return new TransferableRelation<>(entityView.getEntity(), lField, lParameter);
+        return new TransferableRelation<>(entityView.getEntity(), lField != null ? lField : lParameter);
     }
 
     @Override
@@ -103,44 +102,6 @@ public class RelationsFieldsDragHandler<E extends Entity<?, ?, E>> extends Trans
         return lpt;
     }
 
-    protected String extractParameterName(FieldsListModel.ParametersModel aModel, int targetItemIndex) {
-        String parameterName = null;
-        Parameter aItem = aModel.getElementAt(targetItemIndex);
-        if (aItem != null) {
-            parameterName = aItem.getName();
-        }
-        return parameterName;
-    }
-
-    protected int extractParameterType(FieldsListModel.ParametersModel aModel, int targetItemIndex) {
-        int parameterType = RowsetUtils.INOPERABLE_TYPE_MARKER;
-        Parameter aItem = aModel.getElementAt(targetItemIndex);
-        if (aItem != null) {
-            parameterType = aItem.getTypeInfo().getSqlType();
-        }
-        return parameterType;
-    }
-
-    protected String extractFieldName(FieldsListModel<?> lmodel, int targetItemIndex) {
-        String fieldName = null;
-        Object aItem = lmodel.getElementAt(targetItemIndex);
-        if (aItem != null && aItem instanceof Field) {
-            Field lfield = (Field) aItem;
-            fieldName = lfield.getName();
-        }
-        return fieldName;
-    }
-
-    protected int extractFieldType(FieldsListModel<?> lmodel, int targetItemIndex) {
-        int fieldType = RowsetUtils.INOPERABLE_TYPE_MARKER;
-        Object aItem = lmodel.getElementAt(targetItemIndex);
-        if (aItem != null && aItem instanceof Field) {
-            Field lfield = (Field) aItem;
-            fieldType = lfield.getTypeInfo().getSqlType();
-        }
-        return fieldType;
-    }
-
     @Override
     public boolean canImport(TransferSupport support) {
         Transferable tr = support.getTransferable();
@@ -151,10 +112,7 @@ public class RelationsFieldsDragHandler<E extends Entity<?, ?, E>> extends Trans
                     TransferableRelation<E> trRel = (TransferableRelation<E>) ldata;
                     E leftEntity = trRel.getEntity();
                     if (leftEntity != entityView.getEntity() || modelView.getModel() instanceof DbSchemeModel) {
-                        String leftFieldName = trRel.getFieldName();
-                        String leftParameterName = trRel.getParamName();
-                        int leftFieldType = trRel.getFieldType();
-                        int leftParameterType = trRel.getParamType();
+                        Field leftField = trRel.getField();
                         Component lcomp = support.getComponent();
                         if (lcomp != null && lcomp instanceof JList<?>) {
                             JList<? extends Field> list = (JList<? extends Field>) lcomp;
@@ -168,60 +126,25 @@ public class RelationsFieldsDragHandler<E extends Entity<?, ?, E>> extends Trans
                                         ListUI lUi = list.getUI();
                                         int targetItemIndex = lUi.locationToIndex(list, lpt);
                                         if (targetItemIndex > -1) {
-                                            String rightFieldName = null;
-                                            String rightParameterName = null;
+                                            Field rightField = null;
                                             if (list.getModel() instanceof FieldsListModel.ParametersModel) {
-                                                rightParameterName = extractParameterName((EntityView.ParametersMetadataModel) list.getModel(), targetItemIndex);
+                                                rightField = ((EntityView.ParametersMetadataModel) list.getModel()).getElementAt(targetItemIndex);
                                             } else if (list.getModel() instanceof FieldsListModel.FieldsModel) {
-                                                rightFieldName = extractFieldName((FieldsListModel.FieldsModel) list.getModel(), targetItemIndex);
+                                                rightField = ((FieldsListModel.FieldsModel) list.getModel()).getElementAt(targetItemIndex);
                                             }
-                                            if (!isRelationAlreadyDefined(leftEntity, leftFieldName, leftParameterName, rightEntity, rightFieldName, rightParameterName)) {
-                                                int rightFieldType = RowsetUtils.INOPERABLE_TYPE_MARKER;
-                                                int rightParameterType = RowsetUtils.INOPERABLE_TYPE_MARKER;
-                                                if (list.getModel() instanceof EntityView.ParametersMetadataModel) {
-                                                    rightParameterType = extractParameterType((EntityView.ParametersMetadataModel) list.getModel(), targetItemIndex);
-                                                } else if (list.getModel() instanceof FieldsListModel) {
-                                                    rightFieldType = extractFieldType((FieldsListModel) list.getModel(), targetItemIndex);
-                                                }
-
-                                                if (leftEntity != null && rightEntity != null && (leftFieldName != null || leftParameterName != null) && (rightFieldName != null || rightParameterName != null)) {
-                                                    EntityView<E> lView = modelView.getEntityView(leftEntity);
-                                                    EntityView<E> rView = modelView.getEntityView(rightEntity);
-
-                                                    if (!(modelView.getModel() instanceof DbSchemeModel)) {
-                                                        if ((lView.isKeyField(leftFieldName) || lView.isKeyParameter(leftParameterName))
-                                                                && (rView.isKeyField(rightFieldName) || rView.isKeyParameter(rightParameterName))) {
-                                                            Field leftParamField = null;
-                                                            Field rightParamField = null;
-                                                            if (lView.isKeyField(leftFieldName)) {
-                                                                leftParamField = lView.getFieldByName(leftFieldName);
-                                                            } else {
-                                                                leftParamField = lView.getParameterByName(leftParameterName);
-                                                            }
-
-                                                            if (rView.isKeyField(rightFieldName)) {
-                                                                rightParamField = rView.getFieldByName(rightFieldName);
-                                                            } else {
-                                                                rightParamField = rView.getParameterByName(rightParameterName);
-                                                            }
-                                                            //leftParamField = checkWrapedTableKeyField(leftParamField, lView.getEntity());
-                                                            //rightParamField = checkWrapedTableKeyField(rightParamField, rView.getEntity());
-                                                            return SQLUtils.isKeysCompatible(leftParamField, rightParamField);
-                                                        } else {
-                                                            return SQLUtils.isSimpleTypesCompatible((leftFieldName != null) ? leftFieldType : leftParameterType, (rightFieldName != null) ? rightFieldType : rightParameterType);
-                                                        }
-                                                    } else { // dmv.getModel() instanceof DbSchemeModel
-                                                        assert leftFieldName != null;
-                                                        assert rightFieldName != null;
-                                                        Field leftField = lView.getFieldByName(leftFieldName);
-                                                        Field rightField = rView.getFieldByName(rightFieldName);
-                                                        if (leftField != null && rightField != null) {
-                                                            assert leftFieldType == leftField.getTypeInfo().getSqlType();
-                                                            assert rightFieldType == rightField.getTypeInfo().getSqlType();
-                                                            return leftFieldType == rightFieldType && rightField.isPk() && !leftField.isFk();
-                                                        } else {
-                                                            return false;
-                                                        }
+                                            if (leftEntity != null && rightEntity != null && leftField != null && rightField != null
+                                                    && !DatamodelDesignUtils.<E>isRelationAlreadyDefined(leftEntity, leftField, rightEntity, rightField)) {
+                                                if (modelView.getModel() instanceof DbSchemeModel) {
+                                                    if (leftField != null && rightField != null) {
+                                                        return leftField.getTypeInfo().getSqlType() == rightField.getTypeInfo().getSqlType() && rightField.isPk() && !leftField.isFk();
+                                                    } else {
+                                                        return false;
+                                                    }
+                                                } else { // dmv.getModel() instanceof DbSchemeModel
+                                                    if (leftField.isPk() || leftField.isFk() || rightField.isPk() || rightField.isFk()) {
+                                                        return SQLUtils.isKeysCompatible(leftField, rightField);
+                                                    } else {
+                                                        return SQLUtils.isSimpleTypesCompatible(leftField.getTypeInfo().getSqlType(), rightField.getTypeInfo().getSqlType());
                                                     }
                                                 }
                                             }
@@ -258,8 +181,7 @@ public class RelationsFieldsDragHandler<E extends Entity<?, ?, E>> extends Trans
                 if (ldata != null && ldata instanceof TransferableRelation) {
                     TransferableRelation<E> trRel = (TransferableRelation<E>) ldata;
                     E leftEntity = trRel.getEntity();
-                    String leftFieldName = trRel.getFieldName();
-                    String leftParameterName = trRel.getParamName();
+                    Field leftField = trRel.getField();
                     Component lcomp = support.getComponent();
                     if (lcomp != null && lcomp instanceof JList<?>) {
                         JList<? extends Field> list = (JList<? extends Field>) lcomp;
@@ -273,40 +195,30 @@ public class RelationsFieldsDragHandler<E extends Entity<?, ?, E>> extends Trans
                                     ListUI lUi = list.getUI();
                                     int targetItemIndex = lUi.locationToIndex(list, lpt);
                                     if (targetItemIndex > -1) {
-                                        String rightFieldName = null;
-                                        String rightParameterName = null;
+                                        Field rightField = null;
                                         if (list.getModel() instanceof FieldsListModel.ParametersModel) {
-                                            rightParameterName = extractParameterName((FieldsListModel.ParametersModel) list.getModel(), targetItemIndex);
+                                            rightField = ((FieldsListModel.ParametersModel) list.getModel()).getElementAt(targetItemIndex);
                                         } else if (list.getModel() instanceof FieldsListModel.FieldsModel) {
-                                            rightFieldName = extractFieldName((FieldsListModel) list.getModel(), targetItemIndex);
+                                            rightField = ((FieldsListModel.FieldsModel) list.getModel()).getElementAt(targetItemIndex);
                                         }
-                                        if (leftEntity != null && rightEntity != null && (leftFieldName != null || leftParameterName != null) && (rightFieldName != null || rightParameterName != null)) {
-
+                                        if (leftEntity != null && rightEntity != null && leftField != null && rightField != null) {
                                             if (rightEntity instanceof ApplicationParametersEntity || rightEntity instanceof QueryParametersEntity) {
-                                                E tempEntity = leftEntity;
-                                                String tempFieldName = leftFieldName;
-                                                String tempParameterName = leftParameterName;
-
+                                                E tmpEntity = leftEntity;
                                                 leftEntity = rightEntity;
-                                                leftFieldName = rightFieldName;
-                                                leftParameterName = rightParameterName;
+                                                rightEntity = tmpEntity;
 
-                                                rightEntity = tempEntity;
-                                                rightFieldName = tempFieldName;
-                                                rightParameterName = tempParameterName;
+                                                Field tmpField = leftField;
+                                                leftField = rightField;
+                                                rightField = tmpField;
                                             }
                                             if (!(modelView.getModel() instanceof DbSchemeModel) && !(modelView.getModel() instanceof QueryModel) && willFormCycle(leftEntity, rightEntity)) {
                                                 JOptionPane.showMessageDialog(modelView, DatamodelDesignUtils.getLocalizedString("willFormCycle"), DatamodelDesignUtils.getLocalizedString("datamodel"), JOptionPane.WARNING_MESSAGE);
                                             } else {
-                                                UndoableEditSupport undoSupport = modelView.getUndoSupport();
-
-                                                Relation<E> alreadyInRelation = findAlreadyInRelation(rightEntity, rightFieldName, rightParameterName);
-                                                Relation<E> newRel = new Relation<>(leftEntity, (leftFieldName != null), (leftFieldName != null) ? leftFieldName : leftParameterName, rightEntity, (rightFieldName != null), (rightFieldName != null) ? rightFieldName : rightParameterName);
+                                                Relation<E> alreadyInRelation = findAlreadyInRelation(rightEntity, rightField);
+                                                Relation<E> newRel = new Relation<>(leftEntity, leftField, rightEntity, rightField);
                                                 if ((modelView.getModel().checkRelationRemovingValid(alreadyInRelation) || modelView.getModel() instanceof QueryModel)
                                                         && modelView.getModel().checkRelationAddingValid(newRel)) {
-                                                    editModelField2FieldRelation(undoSupport, ldata, alreadyInRelation, newRel);
-                                                    modelView.rerouteConnectors();
-                                                    modelView.repaint();
+                                                    editModelField2FieldRelation(modelView.getUndoSupport(), ldata, alreadyInRelation, newRel);
                                                 }
                                             }
                                         }
@@ -316,22 +228,19 @@ public class RelationsFieldsDragHandler<E extends Entity<?, ?, E>> extends Trans
                         }
                     }
                 }
-            } catch (UnsupportedFlavorException ex) {
-                Logger.getLogger(RelationsFieldsDragHandler.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (IOException ex) {
+            } catch (UnsupportedFlavorException | IOException ex) {
                 Logger.getLogger(RelationsFieldsDragHandler.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
         return super.importData(support);
     }
 
-    protected Relation<E> findAlreadyInRelation(E rightEntity, String rightFieldName, String rightParameterName) {
-        if (rightEntity != null && (rightFieldName != null || rightParameterName != null)) {
+    protected Relation<E> findAlreadyInRelation(E rightEntity, Field rightField) {
+        if (rightEntity != null && rightField != null) {
             Set<Relation<E>> inRels = rightEntity.getInRelations();
             if (inRels != null && !inRels.isEmpty()) {
                 for (Relation<E> rel : inRels) {
-                    if ((rightFieldName != null && rightFieldName.equals(rel.getRightField()))
-                            || (rightParameterName != null && rightParameterName.equals(rel.getRightParameter()))) {
+                    if (rightField == rel.getRightField()) {
                         return rel;
                     }
                 }
@@ -356,12 +265,6 @@ public class RelationsFieldsDragHandler<E extends Entity<?, ?, E>> extends Trans
         }
     }
 
-    protected void editModelEntity2EntityRelation(UndoableEditSupport aUndoSupport, Relation<E> rel) throws CannotRedoException {
-        NewRelationEdit<E> ledit = new NewRelationEdit<>(rel);
-        ledit.redo();
-        aUndoSupport.postEdit(ledit);
-    }
-
     private int extractDropAction(TransferSupport support) {
         int dropAction = NONE;
         if (support != null) {
@@ -376,45 +279,6 @@ public class RelationsFieldsDragHandler<E extends Entity<?, ?, E>> extends Trans
             }
         }
         return dropAction;
-    }
-
-    private boolean isRelationAlreadyDefined(E leftEntity, String leftFieldName, String leftParameterName, E rightEntity, String rightFieldName, String rightParameterName) {
-        if (leftEntity != null && rightEntity != null
-                && (leftFieldName != null || leftParameterName != null)
-                && (rightFieldName != null || rightParameterName != null)) {
-            Set<Relation<E>> inRels = rightEntity.getInRelations();
-            if (inRels != null) {
-                for (Relation<E> rel : inRels) {
-                    if (rel != null) {
-                        E lEntity = rel.getLeftEntity();
-                        if (lEntity == leftEntity) {
-                            String lFieldName = rel.getLeftField();
-                            String lParameterName = rel.getLeftParameter();
-                            String rFieldName = rel.getRightField();
-                            String rParameterName = rel.getRightParameter();
-
-                            boolean lfield1 = leftFieldName != null;
-                            boolean rfield1 = rightFieldName != null;
-                            String lfieldName1 = lfield1 ? leftFieldName : leftParameterName;
-                            String rfieldName1 = rfield1 ? rightFieldName : rightParameterName;
-
-                            boolean lfield2 = lFieldName != null;
-                            boolean rfield2 = rFieldName != null;
-                            String lfieldName2 = lfield2 ? lFieldName : lParameterName;
-                            String rfieldName2 = rfield2 ? rFieldName : rParameterName;
-
-                            if (lfield1 == lfield2
-                                    && rfield1 == rfield2
-                                    && lfieldName1.equals(lfieldName2)
-                                    && rfieldName1.equals(rfieldName2)) {
-                                return true;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return false;
     }
 
     /**
@@ -452,7 +316,7 @@ public class RelationsFieldsDragHandler<E extends Entity<?, ?, E>> extends Trans
         if (modelView != null) {
             Model<E, ?, ?, ?> model = modelView.getModel();
             if (model != null) {
-                Relation<E> dummyRel = new DummyRelation<>(leftEntity, true, "dummyfieldLeft", rightEntity, true, "dummyfieldright");
+                Relation<E> dummyRel = new DummyRelation<>(leftEntity, null, rightEntity, null);
                 try {
                     model.addRelation(dummyRel);
                     Map<Long, E> lets = model.getAllEntities();

@@ -20,7 +20,7 @@ import org.junit.Test;
  *
  * @author mg
  */
-public class RelationsTest extends BaseTest{
+public class RelationsTest extends BaseTest {
 
     @Test
     public void attainabilityTest() throws Exception {
@@ -45,18 +45,18 @@ public class RelationsTest extends BaseTest{
         assertTrue(model.getEntities().isEmpty());// Parameters entity is always present
         assertNotNull(model.getParametersEntity());
 
-        Relation<ApplicationDbEntity> rel11_21 = new Relation<>(entity11, true, "AMOUNT", entity21, false, "amount");
-        Relation<ApplicationDbEntity> rel11_22 = new Relation<>(entity11, true, "AMOUNT", entity22, false, "amount");
+        Relation<ApplicationDbEntity> rel11_21 = new Relation<>(entity11, entity11.getFields().get("AMOUNT"), entity21, entity21.getQuery().getParameters().get("amount"));
+        Relation<ApplicationDbEntity> rel11_22 = new Relation<>(entity11, entity11.getFields().get("AMOUNT"), entity22, entity22.getQuery().getParameters().get("amount"));
 
-        Relation<ApplicationDbEntity> rel21_31 = new Relation<>(entity21, false, "amount", entity31, false, "amount");
-        Relation<ApplicationDbEntity> rel21_33 = new Relation<>(entity21, true, "amount", entity33, false, "amount");
-        Relation<ApplicationDbEntity> rel21_31_ = new Relation<>(entity21, true, "ORDER_ID", entity31, true, "ORDER_ID");
+        Relation<ApplicationDbEntity> rel21_31 = new Relation<>(entity21, entity21.getQuery().getParameters().get("amount"), entity31, entity31.getQuery().getParameters().get("amount"));
+        Relation<ApplicationDbEntity> rel21_33 = new Relation<>(entity21, entity21.getFields().get("amount"), entity33, entity33.getQuery().getParameters().get("amount"));
+        Relation<ApplicationDbEntity> rel21_31_ = new Relation<>(entity21, entity21.getFields().get("ORDER_ID"), entity31, entity31.getFields().get("ORDER_ID"));
 
-        Relation<ApplicationDbEntity> rel22_32 = new Relation<>(entity22, false, "amount", entity32, false, "amount");
-        Relation<ApplicationDbEntity> rel22_33_ = new Relation<>(entity22, true, "ORDER_ID", entity33, true, "ORDER_ID");
+        Relation<ApplicationDbEntity> rel22_32 = new Relation<>(entity22, entity22.getQuery().getParameters().get("amount"), entity32, entity32.getQuery().getParameters().get("amount"));
+        Relation<ApplicationDbEntity> rel22_33_ = new Relation<>(entity22, entity22.getFields().get("ORDER_ID"), entity33, entity33.getFields().get("ORDER_ID"));
 
-        Relation<ApplicationDbEntity> rel11_41 = new Relation<>(entity11, true, "AMOUNT", entity41, false, "amount");
-        Relation<ApplicationDbEntity> rel32_41 = new Relation<>(entity32, true, "AMOUNT", entity41, true, "amount");
+        Relation<ApplicationDbEntity> rel11_41 = new Relation<>(entity11, entity11.getFields().get("AMOUNT"), entity41, entity41.getQuery().getParameters().get("amount"));
+        Relation<ApplicationDbEntity> rel32_41 = new Relation<>(entity32, entity32.getFields().get("AMOUNT"), entity41, entity41.getFields().get("amount"));
 
         model.addEntity(entity11);
         model.addEntity(entity21);

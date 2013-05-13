@@ -425,12 +425,12 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
         if (updatingCounter == 0) {
             Set<Relation<E>> rels = getOutRelations();
             if (rels != null) {
-                String onlyFieldName = getFields().get(aOnlyFieldIndex).getName();
+                Field onlyField = getFields().get(aOnlyFieldIndex);
                 Set<E> toExecute = new HashSet<>();
                 for (Relation<E> outRel : rels) {
                     if (outRel != null) {
                         E ent = outRel.getRightEntity();
-                        if (ent != null && outRel.isLeftField() && outRel.getLeftField().equalsIgnoreCase(onlyFieldName)) {
+                        if (ent != null && outRel.isLeftField() && outRel.getLeftField() == onlyField) {
                             toExecute.add(ent);
                         }
                     }
@@ -571,42 +571,40 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
                                 Rowset leftRowset = leftEntity.getRowset();
                                 if (leftRowset != null && !leftRowset.isEmpty() && !leftRowset.isBeforeFirst() && !leftRowset.isAfterLast()) {
                                     try {
-                                        pValue = leftRowset.getObject(leftRowset.getFields().find(relation.getLeftField()));
+                                        pValue = leftRowset.getObject(leftRowset.getFields().find(relation.getLeftField().getName()));
                                     } catch (InvalidColIndexException | InvalidCursorPositionException ex) {
                                         pValue = RowsetUtils.UNDEFINED_SQL_VALUE;
-                                        Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, "while assigning parameter:" + relation.getRightParameter() + " in entity: " + getTitle() + " [" + String.valueOf(getEntityID()) + "]", ex);
+                                        Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, "while assigning parameter:" + relation.getRightParameter() + " in entity: " + getTitle() + " [" + String.valueOf(getEntityId()) + "]", ex);
                                     }
                                 } else {
                                     pValue = RowsetUtils.UNDEFINED_SQL_VALUE;
                                 }
                             } else {
-                                Q leftQuery = leftEntity.getQuery();
-                                assert leftQuery != null : "Left query must present (Relation points to query, but query is absent)";
-                                Parameters leftParams = leftQuery.getParameters();
-                                assert leftParams != null : "Parameters of left query must present (Relation points to query parameter, but query parameters are absent)";
-                                Parameter leftParameter = leftParams.get(relation.getLeftParameter());
+                                /*
+                                 Query<?> leftQuery = leftEntity.getQuery();
+                                 assert leftQuery != null : "Left query must present (Relation points to query, but query is absent)";
+                                 Parameters leftParams = leftQuery.getParameters();
+                                 assert leftParams != null : "Parameters of left query must present (Relation points to query parameter, but query parameters are absent)";
+                                 */
+                                Parameter leftParameter = relation.getLeftParameter();
                                 if (leftParameter != null) {
                                     pValue = leftParameter.getValue();
                                     if (pValue == null) {
                                         pValue = leftParameter.getDefaultValue();
-
-
                                     }
                                 } else {
-                                    Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, "Parameter of left query must present (Relation points to query parameter {0} in entity: {1} [{2}], but query parameter with specified name is absent)", new Object[]{relation.getRightParameter(), getTitle(), String.valueOf(getEntityID())});
+                                    Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, "Parameter of left query must present (Relation points to query parameter in entity: {0} [{1}], but query parameter is absent)", new Object[]{getTitle(), String.valueOf(getEntityId())});
                                 }
                             }
-                            Parameter selfPm = selfParameters.get(relation.getRightParameter());
+                            Parameter selfPm = relation.getRightParameter();
                             if (selfPm != null) {
                                 Object selfValue = selfPm.getValue();
                                 if (!SQLUtils.isJdbcEqual(selfValue, pValue)) {
                                     selfPm.setValue(pValue);
-
-
                                 }
                             }
                         } else {
-                            Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, "Relation had no left entity");
+                            Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, "Relation with no left entity detected");
                         }
                     }
                 }
@@ -643,7 +641,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
         assert rtInFilterRelations != null;
         assert rowset != null;
         if (rowsetFilter == null && !rtInFilterRelations.isEmpty()) {
-            List<String> constraints = new ArrayList<>();
+            List<Field> constraints = new ArrayList<>();
             // enumerate filtering relations ...
             for (Relation<E> rel : rtInFilterRelations) {
                 assert rel != null && rel.isRightField();
@@ -654,8 +652,9 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
                 rowsetFilter.beginConstrainting();
                 try {
                     Fields rFields = rowset.getFields();
-                    for (String fieldName : constraints) {
-                        rowsetFilter.addConstraint(rFields.find(fieldName));
+                    for (Field field : constraints) {
+                        // entity's and rowset's fields may differ.
+                        rowsetFilter.addConstraint(rFields.find(field.getName()));
                     }
                 } finally {
                     rowsetFilter.endConstrainting();
@@ -693,42 +692,42 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
                             try {
                                 if (!leftRowset.isEmpty()) {
                                     if (!leftRowset.isBeforeFirst() && !leftRowset.isAfterLast()) {
-                                        fValue = leftRowset.getObject(leftRowset.getFields().find(rel.getLeftField()));
+                                        fValue = leftRowset.getObject(leftRowset.getFields().find(rel.getLeftField().getName()));
                                     } else {
                                         fValue = RowsetUtils.UNDEFINED_SQL_VALUE;
-                                        Logger.getLogger(Entity.class.getName()).log(Level.FINE, "Failed to achieve value for filtering field:{0} in entity: {1} [{2}]. The source rowset has bad position (before first or after last).", new Object[]{rel.getRightField(), getTitle(), String.valueOf(getEntityID())});
+                                        Logger.getLogger(Entity.class.getName()).log(Level.FINE, "Failed to achieve value for filtering field:{0} in entity: {1} [{2}]. The source rowset has bad position (before first or after last).", new Object[]{rel.getRightField(), getTitle(), String.valueOf(getEntityId())});
                                     }
                                 } else {
                                     fValue = RowsetUtils.UNDEFINED_SQL_VALUE;
-                                    Logger.getLogger(Entity.class.getName()).log(Level.FINE, "Failed to achieve value for filtering field:{0} in entity: {1} [{2}]. The source rowset has no any rows.", new Object[]{rel.getRightField(), getTitle(), String.valueOf(getEntityID())});
+                                    Logger.getLogger(Entity.class.getName()).log(Level.FINE, "Failed to achieve value for filtering field:{0} in entity: {1} [{2}]. The source rowset has no any rows.", new Object[]{rel.getRightField(), getTitle(), String.valueOf(getEntityId())});
                                 }
                             } catch (InvalidColIndexException | InvalidCursorPositionException ex) {
-                                Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, "while achieving value for filtering field:" + rel.getRightField() + " in entity: " + getTitle() + " [" + String.valueOf(getEntityID()) + "]", ex);
+                                Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, "while achieving value for filtering field:" + rel.getRightField() + " in entity: " + getTitle() + " [" + String.valueOf(getEntityId()) + "]", ex);
                                 throw ex;
                             }
                         } else {
                             fValue = RowsetUtils.UNDEFINED_SQL_VALUE;
-                            Logger.getLogger(Entity.class.getName()).log(Level.FINE, "Failed to achieve value for filtering field:{0} in entity: {1} [{2}]. The source rowset is absent.", new Object[]{rel.getRightField(), getTitle(), String.valueOf(getEntityID())});
+                            Logger.getLogger(Entity.class.getName()).log(Level.FINE, "Failed to achieve value for filtering field:{0} in entity: {1} [{2}]. The source rowset is absent.", new Object[]{rel.getRightField(), getTitle(), String.valueOf(getEntityId())});
                         }
                     } else {
+                        /*
                         Q leftQuery = leftEntity.getQuery();
                         assert leftQuery != null : "Left query must present (Relation points to query, but query is absent)";
                         Parameters leftParams = leftQuery.getParameters();
                         assert leftParams != null : "Parameters of left query must present (Relation points to query parameter, but query parameters are absent)";
-                        Parameter leftParameter = leftParams.get(rel.getLeftParameter());
+                        */ 
+                        Parameter leftParameter = rel.getLeftParameter();
                         if (leftParameter != null) {
                             fValue = leftParameter.getValue();
                             if (fValue == null) {
                                 fValue = leftParameter.getDefaultValue();
-
-
                             }
                         } else {
-                            Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, "Parameter of left query must present (Relation points to query parameter {0}, but query parameter with specified name is absent)", rel.getLeftParameter());
+                            Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, "Parameter of left query must present (Relation points to query parameter, but query parameter with specified name is absent)");
                         }
                     }
                     Converter conv = rowset.getConverter();
-                    Field fieldOfValue = rowset.getFields().get(rel.getRightField());
+                    Field fieldOfValue = rowset.getFields().get(rel.getRightField().getName());
                     filterKeySet.add(conv.convert2RowsetCompatible(fValue, fieldOfValue.getTypeInfo()));
                 }
             }
@@ -825,7 +824,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             Context cx = Context.getCurrentContext();
             boolean wasContext = cx != null;
             if (!wasContext) {
-                cx = ScriptUtils.enterContext();
+                ScriptUtils.enterContext();
             }
             try {
                 // call script method
@@ -905,7 +904,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
                     Context cx = Context.getCurrentContext();
                     boolean wasContext = cx != null;
                     if (!wasContext) {
-                        cx = ScriptUtils.enterContext();
+                        ScriptUtils.enterContext();
                     }
                     try {
                         Object sRes = executeScriptEvent(onBeforeChange, new EntityInstanceChangeEvent(RowHostObject.publishRow(model.getScriptScope(), aEvent.getChangedRow()), field, ScriptUtils.javaToJS(aEvent.getOldValue(), model.getScriptScope()), ScriptUtils.javaToJS(aEvent.getNewValue(), model.getScriptScope())));
@@ -938,7 +937,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
                     Context cx = Context.getCurrentContext();
                     boolean wasContext = cx != null;
                     if (!wasContext) {
-                        cx = ScriptUtils.enterContext();
+                        ScriptUtils.enterContext();
                     }
                     try {
                         enqueueScriptEvent(onAfterChange, new EntityInstanceChangeEvent(RowHostObject.publishRow(model.getScriptScope(), aEvent.getChangedRow()), field, ScriptUtils.javaToJS(aEvent.getOldValue(), model.getScriptScope()), ScriptUtils.javaToJS(aEvent.getNewValue(), model.getScriptScope())));
@@ -979,7 +978,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             Context cx = Context.getCurrentContext();
             boolean wasContext = cx != null;
             if (!wasContext) {
-                cx = ScriptUtils.enterContext();
+                ScriptUtils.enterContext();
             }
             try {
                 Object sRes = executeScriptEvent(onBeforeInsert, new EntityInstanceInsert(sRowsetWrap, RowHostObject.publishRow(model.getScriptScope(), event.getRow())));
@@ -1021,7 +1020,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             Context cx = Context.getCurrentContext();
             boolean wasContext = cx != null;
             if (!wasContext) {
-                cx = ScriptUtils.enterContext();
+                ScriptUtils.enterContext();
             }
             try {
                 Object sRes = executeScriptEvent(onBeforeDelete, new EntityInstanceDelete(sRowsetWrap, RowHostObject.publishRow(model.getScriptScope(), event.getRow())));
@@ -1048,7 +1047,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             Context cx = Context.getCurrentContext();
             boolean wasContext = cx != null;
             if (!wasContext) {
-                cx = ScriptUtils.enterContext();
+                ScriptUtils.enterContext();
             }
             try {
                 enqueueScriptEvent(onAfterInsert, new EntityInstanceInsert(sRowsetWrap, RowHostObject.publishRow(model.getScriptScope(), event.getRow())));
@@ -1073,7 +1072,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             Context cx = Context.getCurrentContext();
             boolean wasContext = cx != null;
             if (!wasContext) {
-                cx = ScriptUtils.enterContext();
+                ScriptUtils.enterContext();
             }
             try {
                 enqueueScriptEvent(onAfterDelete, new EntityInstanceDelete(sRowsetWrap, RowHostObject.publishRow(model.getScriptScope(), event.getRow())));

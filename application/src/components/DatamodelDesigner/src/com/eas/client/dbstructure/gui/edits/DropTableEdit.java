@@ -7,13 +7,13 @@ package com.eas.client.dbstructure.gui.edits;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.ForeignKeySpec;
 import com.eas.client.Client;
+import com.eas.client.dbstructure.DbStructureUtils;
 import com.eas.client.dbstructure.SqlActionsController;
 import com.eas.client.dbstructure.SqlActionsController.CreateConstraintAction;
 import com.eas.client.dbstructure.SqlActionsController.DefineTableAction;
 import com.eas.client.dbstructure.SqlActionsController.DropConstraintAction;
 import com.eas.client.dbstructure.SqlActionsController.DropTableAction;
 import com.eas.client.dbstructure.exceptions.DbActionException;
-import com.eas.client.model.Entity;
 import com.eas.client.model.Relation;
 import com.eas.client.model.dbscheme.FieldsEntity;
 import java.util.ArrayList;
@@ -77,15 +77,9 @@ public class DropTableEdit extends DbStructureEdit {
 
     private static void extractFks(Set<Relation<FieldsEntity>> rels, List<ForeignKeySpec> fks, boolean allowSelfReferences) {
         if (rels != null) {
-            for (Relation<FieldsEntity> r : rels) {
-                if (r != null) {
-                    FieldsEntity lEntity = r.getLeftEntity();
-                    FieldsEntity rEntity = r.getRightEntity();
-                    if(allowSelfReferences || lEntity != rEntity)
-                    {
-                        ForeignKeySpec fkSpec = new ForeignKeySpec(lEntity.getTableSchemaName(), lEntity.getTableName(), r.getLeftField(), r.getFkName(), r.getFkUpdateRule(), r.getFkDeleteRule(), r.isFkDeferrable(), rEntity.getTableSchemaName(), rEntity.getTableName(), r.getRightField(), null);
-                        fks.add(fkSpec);
-                    }
+            for (Relation<FieldsEntity> rel : rels) {
+                if (allowSelfReferences || rel.getLeftEntity() != rel.getRightEntity()) {
+                    fks.add(DbStructureUtils.constructFkSpecByRelation(rel));
                 }
             }
         }
@@ -132,8 +126,7 @@ public class DropTableEdit extends DbStructureEdit {
         try {
             Client client = sqlController.getClient();
             client.dbTableChanged(sqlController.getDbId(), sqlController.getSchema(), tableName);
-            for(ForeignKeySpec fk:inFks)
-            {
+            for (ForeignKeySpec fk : inFks) {
                 client.dbTableChanged(sqlController.getDbId(), sqlController.getSchema(), fk.getTable());
             }
         } catch (Exception ex) {

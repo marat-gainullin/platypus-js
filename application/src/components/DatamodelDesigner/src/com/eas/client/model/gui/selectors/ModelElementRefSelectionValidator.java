@@ -63,7 +63,7 @@ public class ModelElementRefSelectionValidator<E extends Entity<?, ?, E>> implem
                     okAction.setEnabled(true);
                     dmRef.setField(true);
                     dmRef.setField(aFields.get(0).field);
-                    dmRef.setEntityId(aFields.get(0).entity.getEntityID());
+                    dmRef.setEntityId(aFields.get(0).entity.getEntityId());
                 }
                 break;
             case ModelElementSelector.FIELD_SELECTION_SUBJECT:
@@ -71,7 +71,7 @@ public class ModelElementRefSelectionValidator<E extends Entity<?, ?, E>> implem
                     okAction.setEnabled(true);
                     dmRef.setField(aFields != null && !aFields.isEmpty());
                     dmRef.setField(dmRef.isField() ? aFields.get(0).field : aParams.get(0).parameter);
-                    dmRef.setEntityId(dmRef.isField() ? aFields.get(0).entity.getEntityID() : aParams.get(0).entity.getEntityID());
+                    dmRef.setEntityId(dmRef.isField() ? aFields.get(0).entity.getEntityId() : aParams.get(0).entity.getEntityId());
                 }
                 break;
             case ModelElementSelector.STRICT_DATASOURCE_PARAMETER_SELECTION_SUBJECT:
@@ -79,7 +79,7 @@ public class ModelElementRefSelectionValidator<E extends Entity<?, ?, E>> implem
                     okAction.setEnabled(true);
                     dmRef.setField(false);
                     dmRef.setField(aParams.get(0).parameter);
-                    dmRef.setEntityId(aParams.get(0).entity.getEntityID());
+                    dmRef.setEntityId(aParams.get(0).entity.getEntityId());
                 }
                 break;
             case ModelElementSelector.STRICT_DATASOURCE_FIELD_SELECTION_SUBJECT:
@@ -87,7 +87,7 @@ public class ModelElementRefSelectionValidator<E extends Entity<?, ?, E>> implem
                     okAction.setEnabled(true);
                     dmRef.setField(true);
                     dmRef.setField(aFields.get(0).field);
-                    dmRef.setEntityId(aFields.get(0).entity.getEntityID());
+                    dmRef.setEntityId(aFields.get(0).entity.getEntityId());
                 }
                 break;
         }
@@ -107,7 +107,7 @@ public class ModelElementRefSelectionValidator<E extends Entity<?, ?, E>> implem
             E entity = newSelected.iterator().next();
             switch (selectionSubject) {
                 case ModelElementSelector.DATASOURCE_SELECTION_SUBJECT:
-                    dmRef.setEntityId(entity.getEntityID());
+                    dmRef.setEntityId(entity.getEntityId());
                     dmRef.setField(false);
                     dmRef.setField(null);
                     okAction.setEnabled(true);

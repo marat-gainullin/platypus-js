@@ -181,7 +181,7 @@ public class DataTypeInfo {
     }
 
     public DataTypeInfo copy() {
-        return new DataTypeInfo(sqlType, sqlTypeName != null ? new String(sqlTypeName.toCharArray()) : null, javaClassName != null ? new String(javaClassName.toCharArray()) : null);
+        return new DataTypeInfo(sqlType, sqlTypeName, javaClassName);
     }
 
     public int getSqlType() {

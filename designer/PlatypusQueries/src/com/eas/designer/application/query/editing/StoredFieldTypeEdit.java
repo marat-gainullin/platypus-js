@@ -35,7 +35,7 @@ public class StoredFieldTypeEdit extends StoredFieldEdit {
                 Field field = fields.get(storedField.getBindedColumn());
                 DataTypeInfo oldValue = storedField.getTypeInfo();
                 storedField.setTypeInfo(oldTypeInfo);
-                field.getChangeSupport().firePropertyChange("typeInfo", oldValue, storedField.getTypeInfo());
+                field.getChangeSupport().firePropertyChange(Field.TYPE_INFO_PROPERTY, oldValue, storedField.getTypeInfo());
             }
         } catch (Exception ex) {
             CannotUndoException lex = new CannotUndoException();
@@ -52,7 +52,7 @@ public class StoredFieldTypeEdit extends StoredFieldEdit {
                 Field field = fields.get(storedField.getBindedColumn());
                 DataTypeInfo oldValue = storedField.getTypeInfo();
                 storedField.setTypeInfo(newTypeInfo);
-                field.getChangeSupport().firePropertyChange("typeInfo", oldValue, storedField.getTypeInfo());
+                field.getChangeSupport().firePropertyChange(Field.TYPE_INFO_PROPERTY, oldValue, storedField.getTypeInfo());
             }
         } catch (Exception ex) {
             CannotUndoException lex = new CannotUndoException();

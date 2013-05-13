@@ -36,10 +36,15 @@ public class FormRunnerPrototype extends IdScriptableObject {
             }
         }
     }
+    protected static final int Id_constructor = 1,
+            Id_toString = 2,
+            Id_toLocaleString = 3,
+            Id_toSource = 4,
+            MAX_PROTOTYPE_ID = 4;
     private static final String ID_CONSTRUCTOR = "constructor";
-    private static final String ID_TOSOURCE = "toSource";
     private static final String ID_TOSTRING = "toString";
     private static final String ID_TOLOCALESTRING = "toLocaleString";
+    private static final String ID_TOSOURCE = "toSource";
     private static final String ONLY_CONSTRUCTOR_MSG = "Can't call %s(...). Only new %s(...) is allowed.";
     private static final String CONSTRUCTOR_PARAMETER_MISSING = "For new %s(...) constructor, form name/id parameter is required.";
     //private static final String METHOD_PARAMETER_MISSING = "Method parameter missimg.";
@@ -52,20 +57,21 @@ public class FormRunnerPrototype extends IdScriptableObject {
     protected static FormRunnerPrototype getInstance() {
         if (formPrototype == null) {
             formPrototype = new FormRunnerPrototype();
+            formPrototype.setPrototype(ScriptRunnerPrototype.getInstance());
         }
         return formPrototype;
     }
 
     public static void init(Scriptable scope, boolean sealed) {
         init(scope, sealed, getInstance());
+        formPrototype.setPrototype(ScriptRunnerPrototype.getInstance());
     }
 
     public static void init(Scriptable scope, boolean sealed, FormRunnerPrototype obj) {
-        IdFunctionObject ctor = obj.exportAsJSClass(MAX_PROTOTYPE_ID, scope, false);
+        obj.exportAsJSClass(MAX_PROTOTYPE_ID, scope, false);
         if (obj != getInstance()) {
             obj.setPrototype(getInstance());
         }
-        ctor.defineFunctionProperties(new String[]{}, FormRunner.class, ScriptableObject.READONLY);
         if (sealed) {
             obj.sealObject();
         }
@@ -131,11 +137,6 @@ public class FormRunnerPrototype extends IdScriptableObject {
                 return 0;
         }
     }
-    protected static final int Id_constructor = 1,
-            Id_toString = 2,
-            Id_toLocaleString = 3,
-            Id_toSource = 4,
-            MAX_PROTOTYPE_ID = 4;
 
     @Override
     public Object execIdCall(IdFunctionObject f, Context cx, Scriptable scope,

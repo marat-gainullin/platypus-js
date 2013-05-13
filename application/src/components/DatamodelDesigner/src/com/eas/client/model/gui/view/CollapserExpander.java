@@ -9,6 +9,7 @@
  */
 package com.eas.client.model.gui.view;
 
+import com.bearsoft.routing.QuadTree;
 import com.eas.client.model.Entity;
 import com.eas.client.model.gui.edits.MoveEntityEdit;
 import com.eas.client.model.gui.view.entities.EntityView;
@@ -29,37 +30,41 @@ import javax.swing.undo.UndoableEditSupport;
  */
 public class CollapserExpander {
 
-    public static <E extends Entity<?, ?, E>> void expand(PathsFinder<E, EntityView<E>> aPathsFinder, EntityView<E> eView, Rectangle aField, int dy, UndoableEditSupport aUndoSupport) {
-        Set<EntityView<E>> lprocessed = new HashSet<>();
-        List<EntityView<E>> l2Move = new ArrayList<>();
-        l2Move.add(eView);
-        int i = 0;
-        while (i < l2Move.size()) {
-            EntityView<E> lEntityComponent = l2Move.get(i);
-            if (!lprocessed.contains(lEntityComponent)) {
-                Rectangle tilBottom = new Rectangle();
-                Rectangle bounds = lEntityComponent.getBounds();
-                bounds.grow(EntityView.INSET_ZONE, EntityView.INSET_ZONE);
-                tilBottom.x = bounds.x;
-                tilBottom.y = bounds.y + bounds.height;
-                tilBottom.width = bounds.width;
-                tilBottom.height = aField.height - tilBottom.y;
+    public static <E extends Entity<?, ?, E>> void expand(QuadTree<EntityView<E>> aEntitiesIndex, EntityView<E> eView, Rectangle aField, int dy, UndoableEditSupport aUndoSupport) {
+        Rectangle futureBounds = new Rectangle(eView.getBounds());
+        futureBounds.height += dy;
+        List<EntityView<E>> testStops = findIntersecting(aEntitiesIndex, futureBounds);
+        if (testStops != null && !testStops.isEmpty()) {
+            Set<EntityView<E>> lprocessed = new HashSet<>();
+            List<EntityView<E>> l2Move = new ArrayList<>();
+            l2Move.add(eView);
+            int i = 0;
+            while (i < l2Move.size()) {
+                EntityView<E> lEntityComponent = l2Move.get(i);
+                if (!lprocessed.contains(lEntityComponent)) {
+                    Rectangle tilBottom = new Rectangle();
+                    Rectangle bounds = lEntityComponent.getBounds();
+                    tilBottom.x = bounds.x;
+                    tilBottom.y = bounds.y + bounds.height;
+                    tilBottom.width = bounds.width;
+                    tilBottom.height = aField.height - tilBottom.y;
 
-                Set<EntityView<E>> lstops = aPathsFinder.getInsetsIntersecting(tilBottom);
-                lstops.remove(eView);
-                l2Move.addAll(lstops);
+                    List<EntityView<E>> lstops = findIntersecting(aEntitiesIndex, tilBottom);
+                    lstops.remove(eView);
+                    l2Move.addAll(lstops);
 
-                if (lEntityComponent != eView) {
-                    Point llocation = lEntityComponent.getLocation();
-                    Point lnewlocation = new Point(llocation.x, llocation.y + dy);
-                    assert lEntityComponent instanceof EntityView<?>;
-                    MoveEntityEdit<?> ledit = new MoveEntityEdit<>(lEntityComponent.getEntity(), llocation, lnewlocation);
-                    ledit.redo();
-                    aUndoSupport.postEdit(ledit);
+                    if (lEntityComponent != eView) {
+                        Point llocation = lEntityComponent.getLocation();
+                        Point lnewlocation = new Point(llocation.x, llocation.y + dy);
+                        assert lEntityComponent instanceof EntityView<?>;
+                        MoveEntityEdit<?> ledit = new MoveEntityEdit<>(lEntityComponent.getEntity(), llocation, lnewlocation);
+                        ledit.redo();
+                        aUndoSupport.postEdit(ledit);
+                    }
+                    lprocessed.add(lEntityComponent);
                 }
-                lprocessed.add(lEntityComponent);
+                ++i;
             }
-            ++i;
         }
     }
 
@@ -88,7 +93,7 @@ public class CollapserExpander {
         return lres;
     }
 
-    public static <E extends Entity<?, ?, E>> void collapse(PathsFinder<E, EntityView<E>> aPathsFinder, EntityView<E> eView, Rectangle aField, int dy, UndoableEditSupport aUndoSupport) {
+    public static <E extends Entity<?, ?, E>> void collapse(QuadTree<EntityView<E>> aEntitiesIndex, EntityView<E> eView, Rectangle aField, int dy, UndoableEditSupport aUndoSupport) {
         Set<EntityView<E>> lprocessed = new HashSet<>();
         List<EntityView<E>> l2Move = new ArrayList<>();
         l2Move.add(eView);
@@ -98,13 +103,12 @@ public class CollapserExpander {
             if (!lprocessed.contains(lentity)) {
                 Rectangle tilBottom = new Rectangle();
                 Rectangle bounds = lentity.getBounds();
-                bounds.grow(EntityView.INSET_ZONE, EntityView.INSET_ZONE);
                 tilBottom.x = bounds.x;
                 tilBottom.y = bounds.y + bounds.height;
                 tilBottom.width = bounds.width;
                 tilBottom.height = aField.height - tilBottom.y;
 
-                Set<EntityView<E>> lstops = aPathsFinder.getInsetsIntersecting(tilBottom);
+                List<EntityView<E>> lstops = findIntersecting(aEntitiesIndex, tilBottom);
                 l2Move.addAll(lstops);
                 lprocessed.add(lentity);
             }
@@ -116,16 +120,16 @@ public class CollapserExpander {
             EntityView<E> lEntityView = lsorted.get(i);
             if (lEntityView != eView && !lprocessed.contains(lEntityView)) {
                 Rectangle aboveBounds = lEntityView.getBounds();
-                aboveBounds.grow(EntityView.INSET_ZONE, EntityView.INSET_ZONE);
                 aboveBounds.y -= dy;
                 aboveBounds.height = dy;
 
                 boolean linsetsContains = true;
-                aPathsFinder.remove(lEntityView);
+                aEntitiesIndex.remove(lEntityView.getBounds(), lEntityView);
                 try {
-                    linsetsContains = aPathsFinder.insetsContains(aboveBounds);
+                    List<EntityView<E>> res = findIntersecting(aEntitiesIndex, aboveBounds);
+                    linsetsContains = res != null && !res.isEmpty();
                 } finally {
-                    aPathsFinder.put(lEntityView);
+                    aEntitiesIndex.insert(lEntityView.getBounds(), lEntityView);
                 }
                 if (!linsetsContains) {
                     Point llocation = lEntityView.getLocation();
@@ -139,22 +143,13 @@ public class CollapserExpander {
         }
     }
 
-    public static <E extends Entity<?, ?, E>> Point findFreePlaceSquare(PathsFinder<E, EntityView<E>> aPathsFinder, EntityView<E> eView) {
-        Rectangle lBounds = eView.getBounds();
-        lBounds.grow(EntityView.INSET_ZONE, EntityView.INSET_ZONE);
-        lBounds.x = 2 * EntityView.INSET_ZONE;
-        lBounds.y = 2 * EntityView.INSET_ZONE;
-        long lMaxEntitiesPerRow = Math.round(Math.sqrt(eView.getEntity().getModel().getAllEntities().size()));
-        long lEntitiesPerRow = 1;
-        while (aPathsFinder.insetsContains(lBounds)) {
-            lBounds.x += (lBounds.width + 4 * EntityView.INSET_ZONE);
-            lEntitiesPerRow++;
-            if (lEntitiesPerRow > lMaxEntitiesPerRow) {
-                lBounds.x = 2 * EntityView.INSET_ZONE;
-                lBounds.y += (lBounds.height + 2 * EntityView.INSET_ZONE);
-                lEntitiesPerRow = 1;
+    private static <E extends Entity<?, ?, E>> List<EntityView<E>> findIntersecting(QuadTree<EntityView<E>> aEntitiesIndex, Rectangle aCriterion) {
+        List<EntityView<E>> res = aEntitiesIndex.query(aCriterion);
+        for (int i = res.size() - 1; i >= 0; i--) {
+            if (!res.get(i).getBounds().intersects(aCriterion)) {
+                res.remove(i);
             }
         }
-        return lBounds.getLocation();
+        return res;
     }
 }

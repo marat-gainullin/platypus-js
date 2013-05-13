@@ -18,7 +18,7 @@ import org.openide.util.NbBundle;
 public class OutputFieldsNode extends AbstractNode {
     
     public OutputFieldsNode(PlatypusQueryDataObject aDataObject) {
-        super(new OutputFieldsNodeChindren(aDataObject));
+        super(new OutputFieldsNodeChildren(aDataObject));
     }
     
     @Override

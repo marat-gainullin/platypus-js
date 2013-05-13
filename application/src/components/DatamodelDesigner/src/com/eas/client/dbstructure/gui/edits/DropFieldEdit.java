@@ -7,6 +7,7 @@ package com.eas.client.dbstructure.gui.edits;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.ForeignKeySpec;
 import com.eas.client.DbClient;
+import com.eas.client.dbstructure.DbStructureUtils;
 import com.eas.client.dbstructure.SqlActionsController;
 import com.eas.client.dbstructure.SqlActionsController.AddFieldAction;
 import com.eas.client.dbstructure.SqlActionsController.CreateConstraintAction;
@@ -109,16 +110,9 @@ public class DropFieldEdit extends DbStructureEdit {
     private void extractInFks(FieldsEntity aEntity) {
         if (aEntity != null) {
             Set<Relation<FieldsEntity>> rels = aEntity.getInRelations();
-            for (Relation<FieldsEntity> r : rels) {
-                if (r != null) {
-                    FieldsEntity lEntity = r.getLeftEntity();
-                    FieldsEntity rEntity = r.getRightEntity();
-                    assert rEntity == aEntity;
-
-                    if (rEntity != lEntity && r.getRightField().toLowerCase().equals(field.getName().toLowerCase())) {
-                        ForeignKeySpec fkSpec = new ForeignKeySpec(lEntity.getTableSchemaName(), lEntity.getTableName(), r.getLeftField(), r.getFkName(), r.getFkUpdateRule(), r.getFkDeleteRule(), r.isFkDeferrable(), rEntity.getTableSchemaName(), rEntity.getTableName(), r.getRightField(), null);
-                        inFks.add(fkSpec);
-                    }
+            for (Relation<FieldsEntity> rel : rels) {
+                if (rel.getRightField() == field) {
+                    inFks.add(DbStructureUtils.constructFkSpecByRelation(rel));
                 }
             }
         }
@@ -127,15 +121,9 @@ public class DropFieldEdit extends DbStructureEdit {
     private void extractOutFks(FieldsEntity aEntity) {
         if (aEntity != null) {
             Set<Relation<FieldsEntity>> rels = aEntity.getOutRelations();
-            for (Relation<FieldsEntity> r : rels) {
-                if (r != null) {
-                    FieldsEntity lEntity = r.getLeftEntity();
-                    FieldsEntity rEntity = r.getRightEntity();
-                    assert lEntity == aEntity;
-                    if (r.getLeftField().toLowerCase().equals(field.getName().toLowerCase())) {
-                        ForeignKeySpec fkSpec = new ForeignKeySpec(lEntity.getTableSchemaName(), lEntity.getTableName(), r.getLeftField(), r.getFkName(), r.getFkUpdateRule(), r.getFkDeleteRule(), r.isFkDeferrable(), rEntity.getTableSchemaName(), rEntity.getTableName(), r.getRightField(), null);
-                        outFks.add(fkSpec);
-                    }
+            for (Relation<FieldsEntity> rel : rels) {
+                if (rel.getLeftField() == field) {
+                    outFks.add(DbStructureUtils.constructFkSpecByRelation(rel));
                 }
             }
         }

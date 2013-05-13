@@ -11,7 +11,6 @@ package com.bearsoft.rowset.metadata;
 
 import com.eas.script.ScriptFunction;
 import java.beans.PropertyChangeSupport;
-import java.util.Objects;
 
 /**
  * This class is table field representation. It holds information about field
@@ -224,8 +223,7 @@ public class Field {
      * @param obj Object to be tested as equal or n ot equal.
      * @return The equality of this field to another object.
      */
-    @Override
-    public boolean equals(Object obj) {
+    public boolean isEqual(Object obj) {
         if (obj != null && obj instanceof Field) {
             Field rf = (Field) obj;
             String rfDescription = rf.getDescription();
@@ -252,7 +250,7 @@ public class Field {
         }
         return false;
     }
-
+/*
     @Override
     public int hashCode() {
         int hash = 3;
@@ -273,7 +271,7 @@ public class Field {
         hash = 97 * hash + Objects.hashCode(this.schemaName);
         return hash;
     }
-
+*/
     /**
      * Returns the name of the field.
      *

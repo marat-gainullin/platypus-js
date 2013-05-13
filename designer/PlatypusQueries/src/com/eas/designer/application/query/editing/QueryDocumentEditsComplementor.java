@@ -357,8 +357,8 @@ public class QueryDocumentEditsComplementor {
                                 // Таблица из списка from
                                 Table fTable = tables.get(SqlTextEditsComplementor.generateSyntaxicId(qEntity).toLowerCase());
                                 // Для парсера, столбцы во where, не связаны с таблицами из from
-                                condition.setLeftExpression(new NamedParameter(relation.getLeftField()));
-                                condition.setRightExpression(new Column(fTable.getAlias() != null ? new Table(null, fTable.getAlias().getName()) : fTable, relation.getRightField()));
+                                condition.setLeftExpression(new NamedParameter(relation.getLeftField().getName()));
+                                condition.setRightExpression(new Column(fTable.getAlias() != null ? new Table(null, fTable.getAlias().getName()) : fTable, relation.getRightField().getName()));
                                 ps.setWhere(ps.getWhere() != null ? new AndExpression(ps.getWhere(), condition) : condition);
 
                                 anEdit = complementEditWithStatement(statement, edit);
@@ -372,8 +372,8 @@ public class QueryDocumentEditsComplementor {
                             // Таблица из списка from
                             Table fTable = tables.get(rightTabbleSyntaxicId);
                             // Для парсера, столбцы во where, не связаны с таблицами из from
-                            condition.setLeftExpression(new NamedParameter(relation.getLeftField()));
-                            condition.setRightExpression(new Column(fTable.getAlias() != null ? new Table(null, fTable.getAlias().getName()) : fTable, relation.getRightField()));
+                            condition.setLeftExpression(new NamedParameter(relation.getLeftField().getName()));
+                            condition.setRightExpression(new Column(fTable.getAlias() != null ? new Table(null, fTable.getAlias().getName()) : fTable, relation.getRightField().getName()));
                             PlainSelect targetPs = null;
                             // determine what plain select right table from.
                             for (Object oPs : union.getPlainSelects()) {
@@ -405,8 +405,8 @@ public class QueryDocumentEditsComplementor {
                             // Таблица из списка from
                             Table fTable = tables.get(SqlTextEditsComplementor.generateSyntaxicId(qEntity).toLowerCase());
                             // Для парсера, столбцы во where, не связаны с таблицами из from
-                            condition.setLeftExpression(new NamedParameter(relation.getLeftField()));
-                            condition.setRightExpression(new Column(fTable.getAlias() != null ? new Table(null, fTable.getAlias().getName()) : fTable, relation.getRightField()));
+                            condition.setLeftExpression(new NamedParameter(relation.getLeftField().getName()));
+                            condition.setRightExpression(new Column(fTable.getAlias() != null ? new Table(null, fTable.getAlias().getName()) : fTable, relation.getRightField().getName()));
                             delete.setWhere(delete.getWhere() != null ? new AndExpression(delete.getWhere(), condition) : condition);
                             anEdit = complementEditWithStatement(statement, edit);
                         } finally {
@@ -420,8 +420,8 @@ public class QueryDocumentEditsComplementor {
                             // Таблица из списка from
                             Table fTable = tables.get(SqlTextEditsComplementor.generateSyntaxicId(qEntity).toLowerCase());
                             // Для парсера, столбцы во where, не связаны с таблицами из from
-                            condition.setLeftExpression(new NamedParameter(relation.getLeftField()));
-                            condition.setRightExpression(new Column(fTable.getAlias() != null ? new Table(null, fTable.getAlias().getName()) : fTable, relation.getRightField()));
+                            condition.setLeftExpression(new NamedParameter(relation.getLeftField().getName()));
+                            condition.setRightExpression(new Column(fTable.getAlias() != null ? new Table(null, fTable.getAlias().getName()) : fTable, relation.getRightField().getName()));
                             update.setWhere(update.getWhere() != null ? new AndExpression(update.getWhere(), condition) : condition);
                             anEdit = complementEditWithStatement(statement, edit);
                         } finally {
@@ -456,14 +456,14 @@ public class QueryDocumentEditsComplementor {
                                             if (join.getRightItem() == lTable) {
                                                 inverse = true;
                                                 leftTable = rTable;
-                                                leftField = relation.getRightField();
+                                                leftField = relation.getRightField().getName();
                                                 rightTable = lTable;
-                                                rightField = relation.getLeftField();
+                                                rightField = relation.getLeftField().getName();
                                             } else {
                                                 leftTable = lTable;
-                                                leftField = relation.getLeftField();
+                                                leftField = relation.getLeftField().getName();
                                                 rightTable = rTable;
-                                                rightField = relation.getRightField();
+                                                rightField = relation.getRightField().getName();
                                             }
                                             break;
                                         }
@@ -501,7 +501,7 @@ public class QueryDocumentEditsComplementor {
         DeleteRelationEdit<QueryEntity> edit = (DeleteRelationEdit<QueryEntity>) anEdit;
         Relation<QueryEntity> relation = edit.getRelation();
         // Sql grammar has no any place for subquery parameters binding
-        if (!relation.isLeftParameter() && !relation.isRightParameter()) {
+        if (relation.isLeftField() || relation.isRightField()) {
             Statement statement = dataObject.getCommitedStatement();
             if (statement != null) {
                 Map<String, Table> tables = TablesFinder.getTablesMap(TablesFinder.TO_CASE.LOWER, statement, true);

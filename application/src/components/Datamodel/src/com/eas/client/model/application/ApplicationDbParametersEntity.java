@@ -31,7 +31,7 @@ public class ApplicationDbParametersEntity extends ApplicationDbEntity implement
     public ApplicationDbParametersEntity(ApplicationDbModel aModel) {
         super();
         model = aModel;
-        entityID = ApplicationModel.PARAMETERS_ENTITY_ID;
+        entityId = ApplicationModel.PARAMETERS_ENTITY_ID;
         executed = true;
     }
 
@@ -99,7 +99,7 @@ public class ApplicationDbParametersEntity extends ApplicationDbEntity implement
     }
 
     @Override
-    public Long getEntityID() {
+    public Long getEntityId() {
         return ApplicationModel.PARAMETERS_ENTITY_ID;
     }
 

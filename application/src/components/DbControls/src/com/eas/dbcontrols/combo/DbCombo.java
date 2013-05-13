@@ -587,7 +587,7 @@ public class DbCombo extends DbControlPanel implements DbControl {
             } else {
                 if (byValueLocator.find(aKey)) {
                     // display and value rowsets are the same
-                    if (displayRsEntity.getEntityID().equals(valueRsEntity.getEntityID())) {
+                    if (displayRsEntity.getEntityId().equals(valueRsEntity.getEntityId())) {
                         Row br = byValueLocator.getRow(0);
                         return br.getColumnObject(displayColIndex);
                     } else {

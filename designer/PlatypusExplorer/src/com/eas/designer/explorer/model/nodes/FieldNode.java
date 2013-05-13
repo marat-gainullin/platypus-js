@@ -12,11 +12,9 @@ import com.eas.client.model.Entity;
 import com.eas.client.model.Relation;
 import com.eas.client.model.dbscheme.FieldsEntity;
 import com.eas.client.model.gui.edits.AccessibleCompoundEdit;
-import com.eas.client.model.gui.edits.ChangeRelationFieldParameterEdit;
 import com.eas.client.model.gui.edits.DeleteRelationEdit;
 import com.eas.client.model.gui.edits.fields.ChangeFieldEdit;
 import com.eas.client.model.gui.view.FieldsTypeIconsCache;
-import com.eas.client.model.gui.view.fields.FieldsView;
 import com.eas.client.model.query.QueryEntity;
 import com.eas.client.model.query.QueryParametersEntity;
 import com.eas.designer.explorer.ModelUndoProvider;
@@ -33,14 +31,10 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.event.UndoableEditEvent;
 import javax.swing.undo.UndoableEdit;
-import org.openide.DialogDisplayer;
-import org.openide.NotifyDescriptor;
 import org.openide.actions.MoveDownAction;
 import org.openide.actions.MoveUpAction;
 import org.openide.actions.PropertiesAction;
@@ -61,15 +55,15 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
 
     public static final String NAME_PROP_NAME = PROP_NAME;
     public static final String TABLE_NAME_PROP_NAME = "tableName"; //NOI18N
-    public static final String DESCRIPTION_PROP_NAME = "description"; //NOI18N
-    public static final String TYPE_INFO_PROP_NAME = "typeInfo"; //NOI18N
-    public static final String PRECISION_PROP_NAME = "precision"; //NOI18N
-    public static final String NULLABLE_PROP_NAME = "nullable"; //NOI18N
+    //public static final String DESCRIPTION_PROP_NAME = "description"; //NOI18N
+    //public static final String TYPE_INFO_PROP_NAME = "typeInfo"; //NOI18N
+    //public static final String PRECISION_PROP_NAME = "precision"; //NOI18N
+    //public static final String NULLABLE_PROP_NAME = "nullable"; //NOI18N
     public static final String TYPE_PROP_NAME = "type"; //NOI18N
     public static final String TYPE_NAME_PROP_NAME = "typeName"; //NOI18N
-    public static final String SIZE_PROP_NAME = "size"; //NOI18N
-    public static final String SCALE_PROP_NAME = "scale"; //NOI18N
-    public static final String REQUIRED_PROP_NAME = "required"; //NOI18N
+    //public static final String SIZE_PROP_NAME = "size"; //NOI18N
+    //public static final String SCALE_PROP_NAME = "scale"; //NOI18N
+    //public static final String REQUIRED_PROP_NAME = "required"; //NOI18N
     protected Field field;
 
     public FieldNode(Field aField, Lookup aLookup) {
@@ -132,7 +126,7 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
     public boolean canChange() {
         return false;
     }
-    
+
     protected boolean isOrderingSupported() {
         return getLookup().lookup(FieldsOrderSupport.class) != null;
     }
@@ -243,7 +237,7 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
         pSet.put(new TypeNameProperty());
         pSet.put(new SizeProperty());
         pSet.put(new ScaleProperty());
-        pSet.put(new RequiredProperty());
+        pSet.put(new NullableProperty());
         sheet.put(pSet);
         return sheet;
     }
@@ -279,23 +273,24 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
                 fireDisplayNameChange(null, getDisplayName());
                 firePropertyChange(PROP_NAME, evt.getOldValue(), evt.getNewValue());
                 break;
-            case DESCRIPTION_PROP_NAME:
-                firePropertyChange(DESCRIPTION_PROP_NAME, evt.getOldValue(), evt.getNewValue());
+            case Field.DESCRIPTION_PROPERTY:
+                fireDisplayNameChange(null, getDisplayName());
+                firePropertyChange(Field.DESCRIPTION_PROPERTY, evt.getOldValue(), evt.getNewValue());
                 break;
-            case TYPE_INFO_PROP_NAME:
+            case Field.TYPE_INFO_PROPERTY:
                 firePropertyChange(TYPE_PROP_NAME, evt.getOldValue(), evt.getNewValue());
                 firePropertyChange(TYPE_NAME_PROP_NAME, evt.getOldValue(), evt.getNewValue());
                 fireIconChange();
                 break;
-            case SIZE_PROP_NAME:
-            case PRECISION_PROP_NAME:
-                firePropertyChange(SIZE_PROP_NAME, evt.getOldValue(), evt.getNewValue());
+            case Field.SIZE_PROPERTY:
+            case Field.PRECISION_PROPERTY:
+                firePropertyChange(Field.SIZE_PROPERTY, evt.getOldValue(), evt.getNewValue());
                 break;
-            case SCALE_PROP_NAME:
-                firePropertyChange(SCALE_PROP_NAME, evt.getOldValue(), evt.getNewValue());
+            case Field.SCALE_PROPERTY:
+                firePropertyChange(Field.SCALE_PROPERTY, evt.getOldValue(), evt.getNewValue());
                 break;
-            case NULLABLE_PROP_NAME:
-                firePropertyChange(REQUIRED_PROP_NAME, evt.getOldValue(), evt.getNewValue());
+            case Field.NULLABLE_PROPERTY:
+                firePropertyChange(Field.NULLABLE_PROPERTY, evt.getOldValue(), evt.getNewValue());
                 break;
         }
     }
@@ -319,24 +314,14 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
 
     protected UndoableEdit editName(String val) {
         String oldVal = field.getName();
-        AccessibleCompoundEdit section = new AccessibleCompoundEdit();
         if (oldVal != null && !oldVal.equals(val) || oldVal == null && val != null) {
             Entity entity = getLookup().lookup(Entity.class);
-            Set<Relation> outRels = entity.getOutRelations();
-            Set<Relation> toProcessRels = FieldsEntity.getInOutRelationsByEntityField(entity, field);
-            for (Relation rel : toProcessRels) {
-                ChangeRelationFieldParameterEdit crEdit = new ChangeRelationFieldParameterEdit(rel, false, outRels.contains(rel), oldVal, val);
-                crEdit.redo();
-                section.addEdit(crEdit);
-            }
             Parameter oldContent = new Parameter(field);
             Parameter content = new Parameter(field);
             content.setName(val);
             ChangeFieldEdit edit = new ChangeFieldEdit(oldContent, content, field, entity);
             edit.redo();
-            section.addEdit(edit);
-            section.end();
-            return section;
+            return edit;
         }
         return null;
     }
@@ -352,13 +337,13 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
 
     protected UndoableEdit editType(Integer val) {
         Field oldContent = new Field(field);
-        Field content = new Field(field);
-        content.setTypeInfo(DataTypeInfo.valueOf((Integer) val));
-        checkTypedLengthScale(content);
+        Field newContent = new Field(field);
+        newContent.setTypeInfo(DataTypeInfo.valueOf((Integer) val));
+        checkTypedLengthScale(newContent);
         AccessibleCompoundEdit section = new AccessibleCompoundEdit();
         Set<Relation> relationToDelete;
         try {
-            relationToDelete = getIncompatibleRelations(oldContent, content);
+            relationToDelete = getIncompatibleRelations(newContent);
         } catch (CancelException ex) {
             return null;
         }
@@ -367,59 +352,60 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
             drEdit.redo();
             section.addEdit(drEdit);
         }
-        ChangeFieldEdit edit = new ChangeFieldEdit(oldContent, content, field, getEntity());
+        ChangeFieldEdit edit = new ChangeFieldEdit(oldContent, newContent, field, getEntity());
         edit.redo();
         section.addEdit(edit);
         section.end();
         return section;
     }
 
-    protected Set<Relation> getIncompatibleRelations(Field oldFieldContent, Field fieldContent) throws CancelException {
+    protected Set<Relation> getIncompatibleRelations(Field newFieldContent) throws CancelException {
         Set<Relation> toProcessRels = new HashSet<>();
         Set<Relation> rels = FieldsEntity.getInOutRelationsByEntityField(getEntity(), field);
         for (Relation rel : rels) {
-            String leftFieldName = rel.getLeftField();
-            String leftParameterName = rel.getLeftParameter();
-
-            String rightFieldName = rel.getRightField();
-            String rightParameterName = rel.getRightParameter();
-
-            Field lfield = null;
-            Field rfield = null;
-            if (rel.isLeftField()) {
-                lfield = rel.getLeftEntity().getFields().get(leftFieldName);
-                if (rel.getLeftEntity() == getEntity()
-                        && oldFieldContent.getName().equals(leftFieldName)) {
-                    lfield = fieldContent;
-                }
-            } else {
-                try {
-                    lfield = rel.getLeftEntity().getQuery().getParameters().get(leftParameterName);
-                    if (rel.getLeftEntity() == getEntity() && oldFieldContent.getName().equals(leftParameterName)) {
-                        lfield = fieldContent;
-                    }
-                } catch (Exception ex) {
-                    Logger.getLogger(FieldsView.class.getName()).log(Level.SEVERE, null, ex);
-                }
+            Field lfield = rel.getLeftField();
+            Field rfield = rel.getRightField();
+            if (lfield == field) {
+                lfield = newFieldContent;
             }
-
-            if (rel.isRightField()) {
-                rfield = rel.getRightEntity().getFields().get(rightFieldName);
-                if (rel.getRightEntity() == getEntity()
-                        && oldFieldContent.getName().equals(rightFieldName)) {
-                    rfield = fieldContent;
-                }
-            } else {
-                try {
-                    rfield = rel.getRightEntity().getQuery().getParameters().get(rightParameterName);
-                    if (rel.getRightEntity() == getEntity() && oldFieldContent.getName().equals(rightParameterName)) {
-                        rfield = fieldContent;
-                    }
-                } catch (Exception ex) {
-                    Logger.getLogger(FieldsView.class.getName()).log(Level.SEVERE, null, ex);
-                }
+            if (rfield == field) {
+                rfield = newFieldContent;
             }
+            /*
+             if (rel.isLeftField()) {
+             lfield = rel.getLeftEntity().getFields().get(leftFieldName);
+             if (rel.getLeftEntity() == getEntity()
+             && oldFieldContent.getName().equals(leftFieldName)) {
+             lfield = newFieldContent;
+             }
+             } else {
+             try {
+             lfield = rel.getLeftEntity().getQuery().getParameters().get(leftParameterName);
+             if (rel.getLeftEntity() == getEntity() && oldFieldContent.getName().equals(leftParameterName)) {
+             lfield = newFieldContent;
+             }
+             } catch (Exception ex) {
+             Logger.getLogger(FieldNode.class.getName()).log(Level.SEVERE, null, ex);
+             }
+             }
 
+             if (rel.isRightField()) {
+             rfield = rel.getRightEntity().getFields().get(rightFieldName);
+             if (rel.getRightEntity() == getEntity()
+             && oldFieldContent.getName().equals(rightFieldName)) {
+             rfield = newFieldContent;
+             }
+             } else {
+             try {
+             rfield = rel.getRightEntity().getQuery().getParameters().get(rightParameterName);
+             if (rel.getRightEntity() == getEntity() && oldFieldContent.getName().equals(rightParameterName)) {
+             rfield = newFieldContent;
+             }
+             } catch (Exception ex) {
+             Logger.getLogger(FieldNode.class.getName()).log(Level.SEVERE, null, ex);
+             }
+             }
+             */
             if ((lfield.isPk() || lfield.isFk())
                     && (rfield.isPk() || rfield.isFk())) {
                 if (!SQLUtils.isKeysCompatible(lfield, rfield)) {
@@ -429,13 +415,15 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
                 toProcessRels.add(rel);
             }
         }
-        if (!toProcessRels.isEmpty()) {
-            NotifyDescriptor d = new NotifyDescriptor.Confirmation(NbBundle.getMessage(FieldNode.class, "MSG_BadParameterType"), //NOI18N
-                    NbBundle.getMessage(FieldNode.class, "LBL_RelationsCheck"), NotifyDescriptor.OK_CANCEL_OPTION); //NOI18N
-            if (DialogDisplayer.getDefault().notify(d) != NotifyDescriptor.OK_OPTION) {
-                throw new CancelException();
-            }
-        }
+        /*
+         if (!toProcessRels.isEmpty()) {
+         NotifyDescriptor d = new NotifyDescriptor.Confirmation(NbBundle.getMessage(FieldNode.class, "MSG_BadParameterType"), //NOI18N
+         NbBundle.getMessage(FieldNode.class, "LBL_RelationsCheck"), NotifyDescriptor.OK_CANCEL_OPTION); //NOI18N
+         if (DialogDisplayer.getDefault().notify(d) != NotifyDescriptor.OK_OPTION) {
+         throw new CancelException();
+         }
+         }
+         */
         return toProcessRels;
     }
 
@@ -489,7 +477,7 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
 
         @Override
         public String getName() {
-            return DESCRIPTION_PROP_NAME;
+            return Field.DESCRIPTION_PROPERTY;
         }
 
         @Override
@@ -646,7 +634,7 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
 
         @Override
         public String getName() {
-            return SIZE_PROP_NAME;
+            return Field.SIZE_PROPERTY;
         }
 
         @Override
@@ -683,7 +671,7 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
 
         @Override
         public String getName() {
-            return SCALE_PROP_NAME;
+            return Field.SCALE_PROPERTY;
         }
 
         @Override
@@ -712,20 +700,20 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
         }
     }
 
-    protected class RequiredProperty extends Property<Boolean> {
+    protected class NullableProperty extends Property<Boolean> {
 
-        public RequiredProperty() {
+        public NullableProperty() {
             super(Boolean.class);
         }
 
         @Override
         public String getShortDescription() {
-            return NbBundle.getMessage(RequiredProperty.class, "MSG_RequiredPropertyShortDescription"); //NOI18N
+            return NbBundle.getMessage(NullableProperty.class, "MSG_NullablePropertyShortDescription"); //NOI18N
         }
 
         @Override
         public String getName() {
-            return REQUIRED_PROP_NAME;
+            return Field.NULLABLE_PROPERTY;
         }
 
         @Override

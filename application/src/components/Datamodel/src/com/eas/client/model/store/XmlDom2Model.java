@@ -35,9 +35,10 @@ public abstract class XmlDom2Model<E extends Entity<?, ?, E>> implements ModelVi
 
     public static final int DEFAULT_ENTITY_HEIGHT = 200;
     public static final int DEFAULT_ENTITY_WIDTH = 150;
-    protected Document doc = null;
-    protected Element currentNode = null;
-    protected Model<E, ?, ?, ?> currentModel = null;
+    protected Document doc;
+    protected Element currentNode;
+    protected Model<E, ?, ?, ?> currentModel;
+    protected Collection<Runnable> relationsResolvers = new ArrayList<>();
 
     protected XmlDom2Model() {
         super();
@@ -135,8 +136,23 @@ public abstract class XmlDom2Model<E extends Entity<?, ?, E>> implements ModelVi
                         currentNode = lcurrentNode;
                     }
                 }
-                aModel.resolveReferences();
+                
+                final Runnable[] resolvers = relationsResolvers.toArray(new Runnable[]{});
+                Runnable relationsResolver = new Runnable() {
+                    @Override
+                    public void run() {
+                        for (Runnable resolver : resolvers) {
+                            resolver.run();
+                        }
+                    }
+                };
+                if (currentModel.getClient() != null) {
+                    relationsResolver.run();
+                } else {
+                    currentModel.setResolver(relationsResolver);
+                }
             } finally {
+                relationsResolvers.clear();
                 currentModel = null;
             }
         }
@@ -144,7 +160,7 @@ public abstract class XmlDom2Model<E extends Entity<?, ?, E>> implements ModelVi
 
     public void readEntity(E entity) {
         if (entity != null) {
-            entity.setEntityID(readLongAttribute(Model2XmlDom.ENTITY_ID_ATTR_NAME, null));
+            entity.setEntityId(readLongAttribute(Model2XmlDom.ENTITY_ID_ATTR_NAME, null));
             if (currentNode.hasAttribute(Model2XmlDom.QUERY_ID_ATTR_NAME)) {
                 String sQueryId = currentNode.getAttribute(Model2XmlDom.QUERY_ID_ATTR_NAME);
                 if (!sQueryId.equals("null")) {
@@ -177,15 +193,68 @@ public abstract class XmlDom2Model<E extends Entity<?, ?, E>> implements ModelVi
     }
 
     @Override
-    public void visit(Relation<E> relation) {
+    public void visit(final Relation<E> relation) {
         if (relation != null) {
-            relation.setLeftEntityId(readLongAttribute(Model2XmlDom.LEFT_ENTITY_ID_ATTR_NAME, null));
-            relation.setLeftField(currentNode.getAttribute(Model2XmlDom.LEFT_ENTITY_FIELD_ATTR_NAME));
-            relation.setLeftParameter(currentNode.getAttribute(Model2XmlDom.LEFT_ENTITY_PARAMETER_ATTR_NAME));
+            final Long leftEntityId = readLongAttribute(Model2XmlDom.LEFT_ENTITY_ID_ATTR_NAME, null);
+            final String leftFieldName = currentNode.getAttribute(Model2XmlDom.LEFT_ENTITY_FIELD_ATTR_NAME);
+            final String leftParameterName = currentNode.getAttribute(Model2XmlDom.LEFT_ENTITY_PARAMETER_ATTR_NAME);
+            final Long rightEntityId = readLongAttribute(Model2XmlDom.RIGHT_ENTITY_ID_ATTR_NAME, null);
+            final String rightFieldName = currentNode.getAttribute(Model2XmlDom.RIGHT_ENTITY_FIELD_ATTR_NAME);
+            final String rightParameterName = currentNode.getAttribute(Model2XmlDom.RIGHT_ENTITY_PARAMETER_ATTR_NAME);
+            final Model<E, ?, ?, ?> model = currentModel;
+            relationsResolvers.add(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        E lEntity = model.getEntityById(leftEntityId);
+                        if (Model.PARAMETERS_ENTITY_ID == leftEntityId) {
+                            lEntity = model.getParametersEntity();
+                            if (leftParameterName != null && !leftParameterName.isEmpty()) {
+                                relation.setLeftField(lEntity.getFields().get(leftParameterName));
+                            } else if (leftFieldName != null && !leftFieldName.isEmpty()) {
+                                relation.setLeftField(lEntity.getFields().get(leftFieldName));
+                            }
+                        } else if (lEntity != null) {
+                            if (leftParameterName != null && !leftParameterName.isEmpty()) {
+                                relation.setLeftField(lEntity.getQuery().getParameters().get(leftParameterName));
+                            } else if (leftFieldName != null && !leftFieldName.isEmpty()) {
+                                relation.setLeftField(lEntity.getFields().get(leftFieldName));
+                            }
+                        }
+                        relation.setLeftEntity(lEntity);
+                        lEntity.addOutRelation(relation);
 
-            relation.setRightEntityId(readLongAttribute(Model2XmlDom.RIGHT_ENTITY_ID_ATTR_NAME, null));
-            relation.setRightField(currentNode.getAttribute(Model2XmlDom.RIGHT_ENTITY_FIELD_ATTR_NAME));
-            relation.setRightParameter(currentNode.getAttribute(Model2XmlDom.RIGHT_ENTITY_PARAMETER_ATTR_NAME));
+                        E rEntity = model.getEntityById(rightEntityId);
+                        if (Model.PARAMETERS_ENTITY_ID == rightEntityId) {
+                            rEntity = model.getParametersEntity();
+                            if (rightParameterName != null && !rightParameterName.isEmpty()) {
+                                relation.setRightField(rEntity.getFields().get(rightParameterName));
+                            } else if (rightFieldName != null && !rightFieldName.isEmpty()) {
+                                relation.setRightField(rEntity.getFields().get(rightFieldName));
+                            }
+                        } else if (rEntity != null) {
+                            if (rightParameterName != null && !rightParameterName.isEmpty()) {
+                                relation.setRightField(rEntity.getQuery().getParameters().get(rightParameterName));
+                            } else if (rightFieldName != null && !rightFieldName.isEmpty()) {
+                                relation.setRightField(rEntity.getFields().get(rightFieldName));
+                            }
+                        }
+                        relation.setRightEntity(rEntity);
+                        rEntity.addInRelation(relation);
+                    } catch (Exception ex) {
+                        Logger.getLogger(XmlDom2Model.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            });
+            /*
+             relation.setLeftEntityId(readLongAttribute(Model2XmlDom.LEFT_ENTITY_ID_ATTR_NAME, null));
+             relation.setLeftField(currentNode.getAttribute(Model2XmlDom.LEFT_ENTITY_FIELD_ATTR_NAME));
+             relation.setLeftParameter(currentNode.getAttribute(Model2XmlDom.LEFT_ENTITY_PARAMETER_ATTR_NAME));
+
+             relation.setRightEntityId(readLongAttribute(Model2XmlDom.RIGHT_ENTITY_ID_ATTR_NAME, null));
+             relation.setRightField(currentNode.getAttribute(Model2XmlDom.RIGHT_ENTITY_FIELD_ATTR_NAME));
+             relation.setRightParameter(currentNode.getAttribute(Model2XmlDom.RIGHT_ENTITY_PARAMETER_ATTR_NAME));
+             */
         }
     }
 

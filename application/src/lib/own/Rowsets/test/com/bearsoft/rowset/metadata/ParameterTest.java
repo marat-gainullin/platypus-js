@@ -67,10 +67,10 @@ public class ParameterTest {
         Parameter instance = new Parameter("sampleParam");
         Parameter instance1 = new Parameter("sampleParam");
         boolean expResult = true;
-        boolean result = instance.equals(instance1);
+        boolean result = instance.isEqual(instance1);
         assertEquals(expResult, result);
         instance1 = new Parameter("sampleParam1");
-        result = instance.equals(instance1);
+        result = instance.isEqual(instance1);
         expResult = false;
         assertEquals(expResult, result);
 
@@ -105,24 +105,24 @@ public class ParameterTest {
         instance.setMode(2);
         instance1 = new Parameter("sampleParam");
         instance1.setMode(20);
-        assertFalse(instance.equals(instance1));
+        assertFalse(instance.isEqual(instance1));
 
         instance = new Parameter("sampleParam");
         instance.setSelectionForm(876876L);
         instance1 = new Parameter("sampleParam");
         instance1.setSelectionForm(8776L);
-        assertFalse(instance.equals(instance1));
+        assertFalse(instance.isEqual(instance1));
 
         instance = new Parameter("sampleParam");
         instance.setValue(40);
         instance1 = new Parameter("sampleParam");
         instance1.setValue(400);
-        assertFalse(instance.equals(instance1));
+        assertFalse(instance.isEqual(instance1));
 
         instance = new Parameter("sampleParam");
         instance.setDefaultValue(4);
         instance1 = new Parameter("sampleParam");
         instance1.setDefaultValue(40);
-        assertFalse(instance.equals(instance1));
+        assertFalse(instance.isEqual(instance1));
     }
 }

@@ -14,7 +14,6 @@ import com.eas.client.model.gui.view.AddQueryAction;
 import com.eas.client.model.gui.view.ModelSelectionListener;
 import com.eas.client.model.gui.view.ModelViewDragHandler;
 import com.eas.client.model.gui.view.entities.EntityView;
-import com.eas.client.model.gui.view.fields.QueryParametersFieldsView;
 import com.eas.client.model.gui.view.model.ModelView;
 import com.eas.client.model.gui.view.model.QueryModelView;
 import com.eas.client.model.query.QueryEntity;
@@ -159,7 +158,6 @@ public class PlatypusQueryView extends CloneableTopComponent {
     protected transient NodeSelectionListener explorerSelectionListener = new NodeSelectionListener();
     protected transient QueryModelView modelView;
     protected transient TablesSelector tablesSelector;
-    protected transient QueryParametersFieldsView parametersView;
     protected transient JScalableScrollPane querySchemeScroll;
     protected transient JComboBox<String> comboZoom = new JComboBox<>();
     protected transient HandlerRegistration clientChangeListener;
@@ -183,15 +181,12 @@ public class PlatypusQueryView extends CloneableTopComponent {
         setToolTipText(NbBundle.getMessage(PlatypusQueryView.class, "HINT_PlatypusQueryTopComponent", dataObject.getPrimaryFile().getPath()));
         tablesSelector = new TablesSelector(dataObject.getAppRoot(), dataObject.getClient(), false, true, NbBundle.getMessage(PlatypusQueryView.class, "selectQuery"), this);
         
-        parametersView = new QueryParametersFieldsView(tablesSelector);
-        parametersView.setEntity(dataObject.getModel().getParametersEntity());
         undoableEditsAccumulator = new UndoableEditListener() {
             @Override
             public void undoableEditHappened(UndoableEditEvent e) {
                 dataObject.getLookup().lookup(PlatypusQuerySupport.class).getModelUndo().undoableEditHappened(e);
             }
         };
-        parametersView.addUndoableEditListener(undoableEditsAccumulator);
         initComponents();
         
         EditorKit editorKit = CloneableEditorSupport.getEditorKit(SqlLanguageHierarchy.PLATYPUS_SQL_MIME_TYPE_NAME);
@@ -491,7 +486,6 @@ public class PlatypusQueryView extends CloneableTopComponent {
             if (modelView != null) {
                 modelView.setModel(null);
             }
-            parametersView.setModel(null);
             if (clientChangeListener != null) {
                 clientChangeListener.remove();
             }
@@ -518,7 +512,7 @@ public class PlatypusQueryView extends CloneableTopComponent {
     @Override
     protected void componentActivated() {
         try {
-            if (dataObject.isValid()) {
+            if (dataObject.isValid() && getModelView() != null) {
                 ModelInspector.getInstance().setNodesReflector(explorerSelectionListener);
                 ModelInspector.getInstance().setViewData(new ModelInspector.ViewData<>(getModelView(), getUndoRedo(), dataObject.getModelNode()));
                 WindowManager wm = WindowManager.getDefault();

@@ -288,16 +288,11 @@ public class FilesAppCache extends AppElementsCache<Client> {
                 family.addFile(aFile);
                 Integer type2 = family.getAppElementType();
                 String id2 = type2 != null ? family.getAppElementId(type2) : null;
-                if ((id1 == null && id2 != null) || (id1 != null && !id1.equals(id2))) {
-                    path2Id.put(familyPath, id2);// id1 -> id2
-                    if (id2 == null) {
-                        path2Id.remove(familyPath);
-                    }
-                    id2Path.remove(id1);
+                // remove old values
+                id2Path.remove(path2Id.remove(familyPath));
+                if(id2 != null){
+                    path2Id.put(familyPath, id2);
                     id2Path.put(id2, familyPath);
-                    if (id2 == null) {
-                        id2Path.remove(id2);
-                    }
                 }
                 remove(id1);// force the cache to refresh application element's content
             }
@@ -312,12 +307,11 @@ public class FilesAppCache extends AppElementsCache<Client> {
             if (familyPath != null) {
                 AppElementFiles family = families.get(familyPath);
                 if (family != null) {
-                    //String id1 = type1 != null ? family.getAppElementId(type1) : null;
-                    family.removeFile(aFile);
                     String id1 = path2Id.get(familyPath);
+                    family.removeFile(aFile);
                     remove(id1);// force the cache to refresh application element's content
-                    Integer type1 = family.getAppElementType();
-                    if (type1 == null) {
+                    Integer type2 = family.getAppElementType();
+                    if (type2 == null) {
                         path2Id.remove(familyPath);
                         id2Path.remove(id1);
                     }
@@ -340,8 +334,8 @@ public class FilesAppCache extends AppElementsCache<Client> {
         }
         for (String familyPath : families.keySet().toArray(new String[]{})) {
             if (familyPath.startsWith(aPathPrefix)) {
-                String familyId = path2Id.remove(familyPath);
-                id2Path.remove(familyId);
+                String id = path2Id.remove(familyPath);
+                id2Path.remove(id);
                 families.remove(familyPath);
             }
         }

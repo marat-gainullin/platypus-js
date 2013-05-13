@@ -1,14 +1,11 @@
 package com.eas.client.model.gui.view;
 
 import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.Parameter;
 import com.eas.client.SQLUtils;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Relation;
 import com.eas.client.model.StoredQueryFactory;
-import com.eas.client.model.application.ApplicationParametersEntity;
 import com.eas.client.model.gui.DatamodelDesignUtils;
-import com.eas.client.model.query.QueryParametersEntity;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
@@ -54,20 +51,21 @@ public class FieldsParametersListCellRenderer<E extends Entity<?, ?, E>> impleme
         if (entity != null && value != null) {
             Field field = value;
             Font fieldsFont = fieldFont;
-            String fieldName = field.getName();
-            if (fieldName == null) {
-                fieldName = "";
-            }
             Set<Relation<E>> lrelations = entity.getInOutRelations();
+                if (entity.getModel().isFieldInRelations(entity, lrelations, field)) {
+                    fieldsFont = bindedFieldFont;
+                }
+            /*
             if (field instanceof Parameter && !(entity instanceof ApplicationParametersEntity) && !(entity instanceof QueryParametersEntity)) {
-                if (entity.getModel().isParameterNameInRelations(entity, lrelations, fieldName)) {
+                if (entity.getModel().isParameterInRelations(entity, lrelations, (Parameter)field)) {
                     fieldsFont = bindedFieldFont;
                 }
             } else {
-                if (entity.getModel().isFieldNameInRelations(entity, lrelations, fieldName)) {
+                if (entity.getModel().isFieldInRelations(entity, lrelations, field)) {
                     fieldsFont = bindedFieldFont;
                 }
             }
+            */ 
             String fieldDescription = field.getDescription();
             if (StoredQueryFactory.ABSENT_QUERY_MSG.equals(fieldDescription)) {
                 fieldDescription = String.format(DatamodelDesignUtils.localizeString(StoredQueryFactory.ABSENT_QUERY_MSG), entity.getQueryId());
@@ -111,6 +109,10 @@ public class FieldsParametersListCellRenderer<E extends Entity<?, ?, E>> impleme
             }
             iconsRenderer = new IconsListCellRenderer();
             iconsRenderer.getListCellRendererComponent(list, "fff", index, isSelected, cellHasFocus);
+            String fieldName = field.getName();
+            if (fieldName == null) {
+                fieldName = "";
+            }
             prepareIconsRenderer(pkIcon, fkIcon, typeIcon, fieldDescription, fieldName, typeName, iconTextGap, fieldsFont);//, list);
             return iconsRenderer;
         }

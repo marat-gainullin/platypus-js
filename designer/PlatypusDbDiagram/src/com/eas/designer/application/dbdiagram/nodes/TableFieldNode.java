@@ -17,8 +17,10 @@ import com.eas.client.dbstructure.gui.edits.NotSavableDbStructureCompoundEdit;
 import com.eas.client.model.Relation;
 import com.eas.client.model.dbscheme.DbSchemeModel;
 import com.eas.client.model.dbscheme.FieldsEntity;
-import com.eas.client.model.gui.view.fields.TableFieldsView;
+import com.eas.client.model.gui.edits.DeleteRelationEdit;
+import com.eas.client.model.gui.edits.fields.ChangeFieldEdit;
 import com.eas.designer.explorer.model.nodes.FieldNode;
+import java.beans.PropertyChangeEvent;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -35,7 +37,6 @@ import org.openide.util.Lookup;
 public class TableFieldNode extends FieldNode {
 
     protected SqlActionsController sqlActionsController;
-    private static final String DB_SCHEME_EDITOR_NAME = DbStructureUtils.getString("dbSchemeEditor"); //NOI18N
 
     public TableFieldNode(Field aField, Lookup aLookup) throws Exception {
         super(aField, aLookup);
@@ -53,41 +54,34 @@ public class TableFieldNode extends FieldNode {
         if (!oldVal.equalsIgnoreCase(val)) {
             CompoundEdit section = new NotSavableDbStructureCompoundEdit();
             Field oldContent = new Field(field);
-            Field content = new Field(field);
-            content.setName(val);
+            Field newContent = new Field(field);
+            newContent.setName(val);
             Set<Relation> toProcessRels = FieldsEntity.getInOutRelationsByEntityField(getEntity(), field);
-            Logger.getLogger(TableFieldsView.class.getName()).fine(String.format("Changing field from %s to %s\n", oldVal, val)); //NOI18N        
+            Logger.getLogger(TableFieldNode.class.getName()).fine(String.format("Changing field from %s to %s\n", oldVal, val)); //NOI18N        
             try {
                 // we have to recreate foreign keys in order to them to be compatible with new field names
                 // let's drop the foreign keys
                 for (Relation<FieldsEntity> rel2Del : toProcessRels) {
-                    FieldsEntity lEntity = rel2Del.getLeftEntity();
-                    FieldsEntity rEntity = rel2Del.getRightEntity();
-                    ForeignKeySpec fkSpec = new ForeignKeySpec(lEntity.getTableSchemaName(), lEntity.getTableName(), rel2Del.getLeftField(), rel2Del.getFkName(), rel2Del.getFkUpdateRule(), rel2Del.getFkDeleteRule(), rel2Del.isFkDeferrable(), rEntity.getTableSchemaName(), rEntity.getTableName(), rel2Del.getRightField(), null);
+                    ForeignKeySpec fkSpec = DbStructureUtils.constructFkSpecByRelation(rel2Del);
                     DropFkEdit dEdit = new DropFkEdit(sqlActionsController, fkSpec, field);
                     dEdit.redo();
                     section.addEdit(dEdit);
                 }
                 // change the field name
-                ModifyFieldEdit dbEdit = new ModifyFieldEdit(sqlActionsController, getEntity().getTableName(), getEntity().getFields(), oldContent, content);
+                ModifyFieldEdit dbEdit = new ModifyFieldEdit(sqlActionsController, getEntity().getTableName(), getEntity().getFields(), oldContent, newContent);
                 dbEdit.redo();
                 section.addEdit(dbEdit);
-                // let's create the foreign keys
-                for (Relation<FieldsEntity> rel2Create : toProcessRels) {
-                    FieldsEntity lEntity = rel2Create.getLeftEntity();
-                    FieldsEntity rEntity = rel2Create.getRightEntity();
-                    String leftFieldName = rel2Create.getLeftField();
-                    if (getEntity() == lEntity && leftFieldName.toLowerCase().equals(oldContent.getName().toLowerCase())) {
-                        leftFieldName = content.getName();
+                field.setName(val);
+                try {
+                    // let's create the foreign keys
+                    for (Relation<FieldsEntity> rel2Create : toProcessRels) {
+                        ForeignKeySpec fkSpec = DbStructureUtils.constructFkSpecByRelation(rel2Create);
+                        CreateFkEdit cEdit = new CreateFkEdit(sqlActionsController, fkSpec, field);
+                        cEdit.redo();
+                        section.addEdit(cEdit);
                     }
-                    String rightFieldName = rel2Create.getRightField();
-                    if (getEntity() == rEntity && rightFieldName.toLowerCase().equals(oldContent.getName().toLowerCase())) {
-                        rightFieldName = content.getName();
-                    }
-                    ForeignKeySpec fkSpec = new ForeignKeySpec(lEntity.getTableSchemaName(), lEntity.getTableName(), leftFieldName, rel2Create.getFkName(), rel2Create.getFkUpdateRule(), rel2Create.getFkDeleteRule(), rel2Create.isFkDeferrable(), rEntity.getTableSchemaName(), rEntity.getTableName(), rightFieldName, null);
-                    CreateFkEdit cEdit = new CreateFkEdit(sqlActionsController, fkSpec, field);
-                    cEdit.redo();
-                    section.addEdit(cEdit);
+                } finally {
+                    field.setName(oldVal);
                 }
                 UndoableEdit e = super.editName(val);
                 assert e != null;
@@ -95,7 +89,7 @@ public class TableFieldNode extends FieldNode {
                 section.end();
                 return section;
             } catch (Exception ex) {
-                Logger.getLogger(TableFieldsView.class.getName()).log(Level.SEVERE, "Field modification error {0}", ex); //NOI18N
+                Logger.getLogger(TableFieldNode.class.getName()).log(Level.SEVERE, "Field modification error {0}", ex); //NOI18N
                 NotifyDescriptor d = new NotifyDescriptor.Message(ex.getMessage(), NotifyDescriptor.ERROR_MESSAGE);
                 DialogDisplayer.getDefault().notify(d);
                 return null;
@@ -119,7 +113,7 @@ public class TableFieldNode extends FieldNode {
             section.end();
             return section;
         } catch (Exception ex) {
-            Logger.getLogger(TableFieldsView.class.getName()).log(Level.SEVERE, "Field modification error: {0}", ex.getMessage());
+            Logger.getLogger(TableFieldNode.class.getName()).log(Level.SEVERE, "Field modification error: {0}", ex.getMessage());
             NotifyDescriptor d = new NotifyDescriptor.Message(ex.getMessage(), NotifyDescriptor.ERROR_MESSAGE);
             DialogDisplayer.getDefault().notify(d);
             return null;
@@ -129,8 +123,8 @@ public class TableFieldNode extends FieldNode {
     @Override
     protected UndoableEdit editType(Integer val) {
         Field oldContent = new Field(field);
-        Field content = new Field(field);
-        content.setTypeInfo(DataTypeInfo.valueOf(val));
+        Field newContent = new Field(field);
+        newContent.setTypeInfo(DataTypeInfo.valueOf(val));
         CompoundEdit section = new NotSavableDbStructureCompoundEdit();
         Set<Relation> rels = FieldsEntity.getInOutRelationsByEntityField(getEntity(), field);
         int rCount = DbStructureUtils.getRecordsCountByField((FieldsEntity) getEntity(), oldContent.getName());
@@ -138,7 +132,7 @@ public class TableFieldNode extends FieldNode {
         String promtMsg1 = "areYouSureReTypeFieldInRelationsPresent"; //NOI18N
         String promtMsg2 = "areYouSureReTypeFieldDataPresent"; //NOI18N
         String promtMsg3 = "areYouSureReTypeFieldInRelationsDataPresent"; //NOI18N
-        if (SQLUtils.isSameTypeGroup(content.getTypeInfo().getSqlType(), java.sql.Types.BLOB) || SQLUtils.isSameTypeGroup(oldContent.getTypeInfo().getSqlType(), java.sql.Types.BLOB)) {
+        if (SQLUtils.isSameTypeGroup(newContent.getTypeInfo().getSqlType(), java.sql.Types.BLOB) || SQLUtils.isSameTypeGroup(oldContent.getTypeInfo().getSqlType(), java.sql.Types.BLOB)) {
             promtMsg1 = "areYouSureBlobFieldInRelationsPresent"; //NOI18N
             promtMsg2 = "areYouSureBlobFieldDataPresent"; //NOI18N
             promtMsg3 = "areYouSureBlobFieldInRelationsDataPresent"; //NOI18N
@@ -155,29 +149,39 @@ public class TableFieldNode extends FieldNode {
                 // we have to remove foreign keys because of types incompatibility
                 if (rels != null) {
                     for (Relation<FieldsEntity> rel2Del : rels) {
-                        FieldsEntity lEntity = rel2Del.getLeftEntity();
-                        FieldsEntity rEntity = rel2Del.getRightEntity();
-                        ForeignKeySpec fkSpec = new ForeignKeySpec(lEntity.getTableSchemaName(), lEntity.getTableName(), rel2Del.getLeftField(), rel2Del.getFkName(), rel2Del.getFkUpdateRule(), rel2Del.getFkDeleteRule(), rel2Del.isFkDeferrable(), rEntity.getTableSchemaName(), rEntity.getTableName(), rel2Del.getRightField(), null);
+                        ForeignKeySpec fkSpec = DbStructureUtils.constructFkSpecByRelation(rel2Del);
                         DropFkEdit dEdit = new DropFkEdit(sqlActionsController, fkSpec, field);
                         dEdit.redo();
                         section.addEdit(dEdit);
                     }
                 }
+                // change the field type
+                ModifyFieldEdit dbEdit = new ModifyFieldEdit(sqlActionsController, getEntity().getTableName(), getEntity().getFields(), oldContent, newContent);
+                dbEdit.redo();
+                section.addEdit(dbEdit);
+                if (rels != null) {
+                    for (Relation rel : rels) {
+                        DeleteRelationEdit drEdit = new DeleteRelationEdit(rel);
+                        drEdit.redo();
+                        section.addEdit(drEdit);
+                    }
+                }
+                newContent.setFk(null);
+                ChangeFieldEdit diagramEdit = new ChangeFieldEdit(oldContent, newContent, field, getEntity());
+                diagramEdit.redo();
+                section.addEdit(diagramEdit);
+                section.end();
+                try {
+                    getEntity().getModel().getClient().dbTableChanged(getEntity().getTableDbId(), getEntity().getTableSchemaName(), getEntity().getTableName());
+                } catch (Exception ex) {
+                    Logger.getLogger(TableFieldNode.class.getName()).log(Level.SEVERE, null, ex); //NOI18N
+                }
+                return section;
+            } else {
+                return null;
             }
-            // change the field type
-            ModifyFieldEdit dbEdit = new ModifyFieldEdit(sqlActionsController, getEntity().getTableName(), getEntity().getFields(), oldContent, content);
-            dbEdit.redo();
-            section.addEdit(dbEdit);
-            section.addEdit(super.editType(val));
-            section.end();
-            try {
-                getEntity().getModel().getClient().dbTableChanged(getEntity().getTableDbId(), getEntity().getTableSchemaName(), getEntity().getTableName());
-            } catch (Exception ex) {
-                Logger.getLogger(TableFieldsView.class.getName()).log(Level.SEVERE, null, ex); //NOI18N
-            }
-            return section;
         } catch (Exception ex) {
-            Logger.getLogger(TableFieldsView.class.getName()).log(Level.SEVERE, "Field modification error", ex); //NOI18N
+            Logger.getLogger(TableFieldNode.class.getName()).log(Level.SEVERE, "Field modification error", ex); //NOI18N
             NotifyDescriptor d = new NotifyDescriptor.Message(ex.getMessage(), NotifyDescriptor.ERROR_MESSAGE);
             DialogDisplayer.getDefault().notify(d);
             return null;
@@ -203,7 +207,7 @@ public class TableFieldNode extends FieldNode {
             section.end();
             return section;
         } catch (Exception ex) {
-            Logger.getLogger(TableFieldsView.class.getName()).log(Level.SEVERE, "Field modification error: {0}", ex.getMessage()); //NOI18N
+            Logger.getLogger(TableFieldNode.class.getName()).log(Level.SEVERE, "Field modification error: {0}", ex.getMessage()); //NOI18N
             NotifyDescriptor d = new NotifyDescriptor.Message(ex.getMessage(), NotifyDescriptor.ERROR_MESSAGE);
             DialogDisplayer.getDefault().notify(d);
             return null;
@@ -224,7 +228,7 @@ public class TableFieldNode extends FieldNode {
             section.end();
             return section;
         } catch (Exception ex) {
-            Logger.getLogger(TableFieldsView.class.getName()).log(Level.SEVERE, "Field modification error: {0}", ex.getMessage()); //NOI18N
+            Logger.getLogger(TableFieldNode.class.getName()).log(Level.SEVERE, "Field modification error: {0}", ex.getMessage()); //NOI18N
             NotifyDescriptor d = new NotifyDescriptor.Message(ex.getMessage(), NotifyDescriptor.ERROR_MESSAGE);
             DialogDisplayer.getDefault().notify(d);
             return null;
@@ -245,10 +249,19 @@ public class TableFieldNode extends FieldNode {
             section.end();
             return section;
         } catch (Exception ex) {
-            Logger.getLogger(TableFieldsView.class.getName()).log(Level.SEVERE, "Field modification error: {0}", ex.getMessage()); //NOI18N
+            Logger.getLogger(TableFieldNode.class.getName()).log(Level.SEVERE, "Field modification error: {0}", ex.getMessage()); //NOI18N
             NotifyDescriptor d = new NotifyDescriptor.Message(ex.getMessage(), NotifyDescriptor.ERROR_MESSAGE);
             DialogDisplayer.getDefault().notify(d);
             return null;
+        }
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        if (Field.FK_PROPERTY.equals(evt.getPropertyName())) {
+            fireIconChange();
+        } else {
+            super.propertyChange(evt);
         }
     }
 }

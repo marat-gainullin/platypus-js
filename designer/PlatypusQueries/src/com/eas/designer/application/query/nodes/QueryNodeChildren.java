@@ -28,7 +28,8 @@ import org.openide.util.lookup.ProxyLookup;
  */
 public class QueryNodeChildren extends ModelNodeChildren<QueryEntity, QueryModel> {
     
-    PlatypusQueryDataObject dataObject;
+    protected PlatypusQueryDataObject dataObject;
+    protected OutputFieldsNodeKey outputNodeKey = new OutputFieldsNodeKey();
     
     public QueryNodeChildren(PlatypusQueryDataObject aDataObject, QueryModel aModel, UndoRedo.Manager aUndoReciever, Lookup aLookup) {
         super(aModel, aUndoReciever, aLookup);
@@ -38,7 +39,7 @@ public class QueryNodeChildren extends ModelNodeChildren<QueryEntity, QueryModel
     @Override
     protected Collection getKeys() {
         List keys = new ArrayList(model.getAllEntities().values());
-        keys.add(new OutputFieldsNodeKey());
+        keys.add(outputNodeKey);
         return keys;
     }
 

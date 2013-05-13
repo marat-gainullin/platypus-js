@@ -18,22 +18,23 @@ import org.openide.nodes.Node;
  *
  * @author vv
  */
-public class OutputFieldsNodeChindren extends Children.Keys<Field> {
+public class OutputFieldsNodeChildren extends Children.Keys<Field> {
 
     PlatypusQueryDataObject dataObject;
     DataObjectPropertyChangeListener dataObjectPropertyChangeListener = new DataObjectPropertyChangeListener();
 
-    public OutputFieldsNodeChindren(PlatypusQueryDataObject aDataObject) {
+    public OutputFieldsNodeChildren(PlatypusQueryDataObject aDataObject) {
+        super();
         dataObject = aDataObject;
         dataObject.addPropertyChangeListener(dataObjectPropertyChangeListener);
     }
 
     @Override
     protected void addNotify() {
-        setKeysImpl();
+        outputFieldsToKeys();
     }
 
-    private void setKeysImpl() {
+    private void outputFieldsToKeys() {
         Fields fields = getFields();
         if (fields != null) {
             setKeys(fields.toCollection());
@@ -67,7 +68,7 @@ public class OutputFieldsNodeChindren extends Children.Keys<Field> {
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
             if (PlatypusQueryDataObject.OUTPUT_FIELDS.equals(evt.getPropertyName())) {
-                setKeysImpl();
+                outputFieldsToKeys();
             }
         }
     }

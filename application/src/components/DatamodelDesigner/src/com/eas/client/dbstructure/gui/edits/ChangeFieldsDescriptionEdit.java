@@ -4,8 +4,8 @@
  */
 package com.eas.client.dbstructure.gui.edits;
 
-import com.eas.client.model.gui.edits.fields.FieldsEdit;
 import com.eas.client.model.dbscheme.FieldsEntity;
+import com.eas.client.model.gui.edits.fields.FieldsEdit;
 
 /**
  * The diagram edit. It's located in structure designer because of it's work is

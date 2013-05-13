@@ -193,7 +193,7 @@ public class RADModelGrid extends RADVisualComponent<DbGrid> implements Componen
                                 column.setTitle(description);
                             }
                             ModelElementRef fieldRef = new ModelElementRef();
-                            fieldRef.setEntityId(rowsEntity.getEntityID());
+                            fieldRef.setEntityId(rowsEntity.getEntityId());
                             fieldRef.setFieldName(columnField.getName());
                             column.setDatamodelElement(fieldRef);
                             Class<?>[] compatibleControlsClasses = DbControlsUtils.getCompatibleControls(columnField.getTypeInfo().getSqlType());

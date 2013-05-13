@@ -69,7 +69,7 @@ public class DbStructureUtils {
             fkDeleteRule = ForeignKeyRule.CASCADE;
         }
         boolean fkDeferrable = aRel.isFkDeferrable();
-        return new ForeignKeySpec(lEntity.getTableSchemaName(), lEntity.getTableName(), aRel.getLeftField(), fkName, fkUpdateRule, fkDeleteRule, fkDeferrable, rEntity.getTableSchemaName(), rEntity.getTableName(), aRel.getRightField(), null);
+        return new ForeignKeySpec(lEntity.getTableSchemaName(), lEntity.getTableName(), aRel.getLeftField().getName(), fkName, fkUpdateRule, fkDeleteRule, fkDeferrable, rEntity.getTableSchemaName(), rEntity.getTableName(), aRel.getRightField().getName(), null);
     }
 
     public static int getRecordsCountByField(FieldsEntity tableEntity, String aFieldName) {

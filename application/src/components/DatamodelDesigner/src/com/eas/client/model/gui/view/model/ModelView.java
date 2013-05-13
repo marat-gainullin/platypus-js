@@ -5,6 +5,12 @@
  */
 package com.eas.client.model.gui.view.model;
 
+import com.bearsoft.routing.Connector;
+import com.bearsoft.routing.PathFragment;
+import com.bearsoft.routing.Paths;
+import com.bearsoft.routing.QuadTree;
+import com.bearsoft.routing.Sweeper;
+import com.bearsoft.routing.graph.Vertex;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameter;
@@ -29,15 +35,12 @@ import com.eas.client.model.gui.selectors.TablesSelectorCallback;
 import com.eas.client.model.gui.view.CollapserExpander;
 import com.eas.client.model.gui.view.EntityViewDoubleClickListener;
 import com.eas.client.model.gui.view.EntityViewsManager;
-import com.eas.client.model.gui.view.EstimatedArc;
 import com.eas.client.model.gui.view.FieldSelectionListener;
 import com.eas.client.model.gui.view.ModelSelectionListener;
 import com.eas.client.model.gui.view.ModelViewDragHandler;
-import com.eas.client.model.gui.view.PathsFinder;
 import com.eas.client.model.gui.view.RelationDesignInfo;
 import com.eas.client.model.gui.view.RelationsFieldsDragHandler;
 import com.eas.client.model.gui.view.entities.EntityView;
-import com.eas.client.model.gui.view.visibilitygraph.Segment;
 import com.eas.client.utils.scalableui.JScalablePanel;
 import com.eas.xml.dom.Source2XmlDom;
 import com.eas.xml.dom.XmlDom2String;
@@ -50,6 +53,8 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.UndoableEditEvent;
 import javax.swing.event.UndoableEditListener;
 import javax.swing.undo.CompoundEdit;
@@ -65,7 +70,6 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
     // settings
     public final static int slotWidth = 3;
     public final static int connectorWidth = 1;
-    private static final boolean DEBUG_MODE = false;
     protected final static Stroke slotsStroke = new BasicStroke(slotWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
     protected final static Stroke connectorsStroke = new BasicStroke(connectorWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL);
     protected final static Stroke connectorsOuterStroke = new BasicStroke(connectorWidth + 2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL);
@@ -73,7 +77,7 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
     protected final static Stroke selectedConnectorsStroke = new BasicStroke(connectorWidth + 1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL);
     protected final static Stroke hittedConnectorsOuterStroke = new BasicStroke(connectorWidth + 3, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL);
     protected final static Stroke selectedConnectorsOuterStroke = new BasicStroke(connectorWidth + 3, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL);
-    // Style (colors, width etc.)
+    // style (colors, width etc.)
     public Color toParameterConnectorColor = Color.magenta;
     public Color toFieldConnectorColor = (new JButton()).getBackground().darker().darker().darker();//new Color(41, 110, 255);
     // data 
@@ -84,20 +88,20 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
     protected EntityView modelParametersEntityView;
     // processing
     protected ModelViewMouseHandler mouseHandler;
-    protected int viewRefreshable = 0;
-    protected PathsFinder<E, EntityView<E>> pathsFinder = new PathsFinder<>(this);
-    protected FindFrame<E, P, M> finder = null;
-    protected Component dragTarget = null;
-    protected Rectangle oldBounds = null;
+    protected FindFrame<E, P, M> finder;
+    protected Component dragTarget;
+    protected boolean reallyDragged;
     protected boolean needRerouteConnectors = true;
-    protected boolean reallyDragged = false;
+    protected QuadTree<EntityView<E>> entitiesIndex = new QuadTree<>();
+    protected QuadTree<Relation<E>> connectorsIndex = new QuadTree<>();
+    protected Paths paths;
     // selection
     protected Set<Relation<E>> hittedRelations = new HashSet<>();
     protected Set<Relation<E>> selectedRelations = new HashSet<>();
     protected Set<E> selectedEntities = new HashSet<>();
     protected Set<EntityFieldTuple> selectedFields = new HashSet<>();
     // interaction
-    protected ModelChangesReflector dmListener = new ModelChangesReflector();
+    protected ModelChangesReflector modelListener = new ModelChangesReflector();
     protected NotSavableUndoableEditSupport undoSupport;
     protected TablesSelectorCallback tablesSelector;
     // events
@@ -107,14 +111,32 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
     protected Set<ModelSelectionListener<E>> entitySelectionListeners = new HashSet<>();
 
     protected void refreshView() {
-        assert viewRefreshable >= 0;
-        if (viewRefreshable == 0) {
-            recalcViewsBounds();
-            regenerateIndexes();
-            forceRerouteConnectors();
-            checkActions();
-            repaint();
+        entitiesIndex = new QuadTree<>();
+        connectorsIndex = new QuadTree<>();
+        for (EntityView<E> view : entityViews.values()) {
+            entitiesIndex.insert(view.getBounds(), view);
         }
+        preparePaths();
+        rerouteConnectors();
+        checkActions();
+        repaint();
+    }
+
+    @Override
+    public Dimension getPreferredSize() {
+        Dimension size = super.getPreferredSize();
+        if (!isPreferredSizeSet()) {
+            for (Component c : getComponents()) {
+                Rectangle b = c.getBounds();
+                if (b.x + b.width > size.width) {
+                    size.width = b.x + b.width;
+                }
+                if (b.y + b.height > size.height) {
+                    size.height = b.y + b.height;
+                }
+            }
+        }
+        return size;
     }
 
     public void checkActions() {
@@ -170,7 +192,7 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
         Set<E> oldSelection = new HashSet<>();
         oldSelection.addAll(selectedEntities);
         for (E e : selectedEntities) {
-            EntityView<E> eView = entityViews.get(e.getEntityID());
+            EntityView<E> eView = entityViews.get(e.getEntityId());
             if (viewToRetain != eView) {
                 eView.setEntityViewUnselectedLook();
             }
@@ -226,35 +248,57 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
         return entityViews.values();
     }
 
-    public Rectangle findAnyFreeSpace(int aInitialX, int aInitialY) {
-        if (pathsFinder.isValid()) {
-            int xcrat = 0;
-            int ycrat = 0;
-            // find any free space
-            Rectangle suspectedBounds = new Rectangle(10, 10, EntityView.ENTITY_VIEW_DEFAULT_WIDTH, EntityView.ENTITY_VIEW_DEFAULT_HEIGHT);
-            suspectedBounds.grow(EntityView.INSET_ZONE, EntityView.INSET_ZONE);
-            while (pathsFinder.insetsContains(suspectedBounds)) {
-                aInitialX += ALLOCATION_STEP_X;
-                xcrat++;
-                if (xcrat > ALLOCATION_GRANULARITY_X) {
-                    xcrat = 0;
-                    aInitialX -= ALLOCATION_STEP_X * ALLOCATION_GRANULARITY_X;
-                    aInitialY += ALLOCATION_STEP_Y;
-                    ycrat++;
-                    if (ycrat > ALLOCATION_GRANULARITY_Y) {
-                        ycrat = 0;
-                        aInitialX += ALLOCATION_STEP_X * ALLOCATION_GRANULARITY_X;
-                        aInitialY -= ALLOCATION_STEP_Y * ALLOCATION_GRANULARITY_Y;
-                    }
-                }
-                suspectedBounds.x = aInitialX;
-                suspectedBounds.y = aInitialY;
-            }
-            suspectedBounds.grow(-EntityView.INSET_ZONE, -EntityView.INSET_ZONE);
-            return suspectedBounds;
-        } else {
-            return new Rectangle(aInitialX, aInitialY, EntityView.ENTITY_VIEW_DEFAULT_WIDTH, EntityView.ENTITY_VIEW_DEFAULT_HEIGHT);
+    public Rectangle getUnscaledBounds() {
+        Rectangle res = getBounds();
+        if (getParent() != null && getParent().getParent() != null && getParent().getParent() instanceof JScalablePanel) {
+            JScalablePanel sp = (JScalablePanel) getParent().getParent();
+            res.width /= sp.getScale();
+            res.height /= sp.getScale();
         }
+        return res;
+    }
+
+    public Rectangle findPlaceForEntityAdd(int aInitialX, int aInitialY) {
+        Set<EntityView<E>> hitted = hittestEntitiesViews(new Point(aInitialX, aInitialY));
+        while (haveSameLeftTop(hitted, new Point(aInitialX, aInitialY))) {
+            aInitialX += EntityView.INSET_ZONE;
+            aInitialY += EntityView.INSET_ZONE * 3;
+            hitted = hittestEntitiesViews(new Point(aInitialX, aInitialY));
+        }
+        return new Rectangle(aInitialX, aInitialY, EntityView.ENTITY_VIEW_DEFAULT_WIDTH, EntityView.ENTITY_VIEW_DEFAULT_HEIGHT);
+    }
+
+    protected void findPlaceForEntityPaste(E aEntity) {
+        Set<EntityView<E>> hitted = hittestEntitiesViews(new Point(aEntity.getX(), aEntity.getY()));
+        while (haveSameLeftTop(hitted, new Point(aEntity.getX(), aEntity.getY()))) {
+            aEntity.setX(aEntity.getX() + EntityView.INSET_ZONE);
+            aEntity.setY(aEntity.getY() + EntityView.INSET_ZONE * 3);
+            hitted = hittestEntitiesViews(new Point(aEntity.getX(), aEntity.getY()));
+        }
+    }
+
+    private boolean haveSameLeftTop(Set<EntityView<E>> aViews, Point aPoint) {
+        if (aViews != null) {
+            for (EntityView<E> eView : aViews) {
+                if (eView.getLocation().equals(aPoint)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public Set<EntityView<E>> hittestEntitiesViews(Point aPoint) {
+        Set<EntityView<E>> filtered = new HashSet<>();
+        List<EntityView<E>> hitted = entitiesIndex.query(aPoint);
+        for (EntityView<E> eView : hitted) {
+            Rectangle rect = eView.getBounds();
+            if (rect.x <= aPoint.x && aPoint.x <= rect.x + rect.width - 1
+                    && rect.y <= aPoint.y && aPoint.y <= rect.y + rect.height - 1) {
+                filtered.add(eView);
+            }
+        }
+        return filtered;
     }
 
     protected class ModelChangesReflector implements ModelEditingListener<E> {
@@ -262,35 +306,36 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
         @Override
         public void entityAdded(E aEntity) {
             final EntityView<E> eView = createEntityView(aEntity);
-            addEntityView(eView);
-            refreshView();
             eView.reLayout();
-            //fieldsListener.addFields(aEntity.getFields());
+            addEntityView(eView);
         }
 
         @Override
         public void entityRemoved(E removed) {
-            //fieldsListener.removeFields(removed.getFields());
             clearRelationsSelection();
             removeEntityView(removed);
-            refreshView();
         }
 
         @Override
         public void relationAdded(Relation<E> added) {
-            RelationDesignInfo designInfo = relationsDesignInfo.get(added);
-            if (designInfo == null) {
-                designInfo = new RelationDesignInfo();
-                relationsDesignInfo.put(added, designInfo);
+            RelationDesignInfo rdesign = new RelationDesignInfo();
+            relationsDesignInfo.put(added, rdesign);
+            // let's populate relation's design info
+            if (paths != null) {
+                calcConnector(added);
             }
-            refreshView();
+            repaint();
         }
 
         @Override
         public void relationRemoved(Relation<E> removed) {
-            relationsDesignInfo.remove(removed);
-            clearRelationsSelection();
-            refreshView();
+            RelationDesignInfo rdesign = relationsDesignInfo.get(removed);
+            if (rdesign != null) {
+                connectorsIndex.remove(getUnscaledBounds(), removed);
+                relationsDesignInfo.remove(removed);
+                clearRelationsSelection();
+                repaint();
+            }
         }
 
         @Override
@@ -300,7 +345,7 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
 
     public EntityView<E> getParametersView() {
         if (entityViews != null && model != null && model.getParametersEntity() != null) {
-            return entityViews.get(model.getParametersEntity().getEntityID());
+            return entityViews.get(model.getParametersEntity().getEntityId());
         } else {
             return null;
         }
@@ -351,48 +396,6 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
                 Logger.getLogger(ModelView.class.getName()).log(Level.SEVERE, "Exception while firing selection event (fireFieldParamSelected) ", ex);
             }
         }
-    }
-
-    public void reallocateEntitiesInPlain(List<E> vEntities, int lx, int ly) {
-        // let's fix any intersections
-        if (pathsFinder.isValid()) {
-            pathsFinder.clearIndexes();
-        }
-        for (E lent : vEntities) {
-            EntityView<E> eView = getEntityView(lent);
-            if (pathsFinder.isValid()) {
-                int xcrat = 0;
-                int ycrat = 0;
-                // find any free space
-                Rectangle suspectedBounds = eView.getBounds();
-                suspectedBounds.grow(EntityView.INSET_ZONE, EntityView.INSET_ZONE);
-                while (pathsFinder.insetsContains(suspectedBounds)) {
-                    lx += ALLOCATION_STEP_X;
-                    xcrat++;
-                    if (xcrat > ALLOCATION_GRANULARITY_X) {
-                        xcrat = 0;
-                        lx -= ALLOCATION_STEP_X * ALLOCATION_GRANULARITY_X;
-                        ly += ALLOCATION_STEP_Y;
-                        ycrat++;
-                        if (ycrat > ALLOCATION_GRANULARITY_Y) {
-                            ycrat = 0;
-                            lx += ALLOCATION_STEP_X * ALLOCATION_GRANULARITY_X;
-                            ly -= ALLOCATION_STEP_Y * ALLOCATION_GRANULARITY_Y;
-                        }
-                    }
-                    eView.setLocation(lx, ly);
-                    suspectedBounds = eView.getBounds();
-                    suspectedBounds.grow(EntityView.INSET_ZONE, EntityView.INSET_ZONE);
-                }
-                if (pathsFinder.isValid()) {
-                    pathsFinder.put(eView);
-                }
-            }
-        }
-    }
-
-    public void cancelDragging(MouseEvent e) {
-        mouseHandler.cancelDragging(e);
     }
 
     private boolean compareSearchStrings(String dataString, boolean matchCase, String mask, boolean wholeWords) {
@@ -519,18 +522,6 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
         return Collections.unmodifiableSet(selectedFields);
     }
 
-    public void beginUpdate() {
-        viewRefreshable++;
-    }
-
-    public void endUpdate() {
-        assert viewRefreshable > 0;
-        viewRefreshable--;
-        if (viewRefreshable == 0) {
-            refreshView();
-        }
-    }
-
     public UndoableEditSupport getUndoSupport() {
         return undoSupport;
     }
@@ -538,8 +529,8 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
     protected boolean calcSlots(Segment fslot, Segment lslot, Relation<E> lrel, Map<Long, EntityView<E>> aViews) {
         boolean isBothOnTheRight = false;
 
-        EntityView<E> lView = aViews.get(lrel.getLeftEntity().getEntityID());
-        EntityView<E> rView = aViews.get(lrel.getRightEntity().getEntityID());
+        EntityView<E> lView = aViews.get(lrel.getLeftEntity().getEntityId());
+        EntityView<E> rView = aViews.get(lrel.getRightEntity().getEntityId());
 
         Point lpt = null;
         Point lpt1 = null;
@@ -547,9 +538,9 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
         Point rpt1 = null;
 
         Rectangle lViewBounds = lView.getBounds();
-        lViewBounds.grow(EntityView.INSET_ZONE, EntityView.INSET_ZONE);
+        //lViewBounds.grow(EntityView.INSET_ZONE, EntityView.INSET_ZONE);
         Rectangle rViewBounds = rView.getBounds();
-        rViewBounds.grow(EntityView.INSET_ZONE, EntityView.INSET_ZONE);
+        //rViewBounds.grow(EntityView.INSET_ZONE, EntityView.INSET_ZONE);
         if (lViewBounds.x + lViewBounds.width <= rViewBounds.x) {// lfr is left to rfr. 1 right and 2 left
             if (lrel.isLeftField()) {
                 lpt = lView.getFieldPosition(lrel.getLeftField(), false);
@@ -599,98 +590,36 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
         }
         fslot.firstPoint = lpt;
         fslot.lastPoint = lpt1;
-        pathsFinder.addSlot2Occupied(lpt, lpt1);
         lslot.firstPoint = rpt;
         lslot.lastPoint = rpt1;
-        pathsFinder.addSlot2Occupied(rpt, rpt1);
         return isBothOnTheRight;
     }
 
     public EntityView<E> getEntityView(E aEnt) {
-        return entityViews.get(aEnt.getEntityID());
+        return aEnt != null ? entityViews.get(aEnt.getEntityId()) : null;
     }
 
-    protected void calcConnectorsSlots(Set<Relation<E>> rels) {
+    protected void calcConnectors(Set<Relation<E>> rels) {
         if (rels != null) {
             for (Relation<E> rel : rels) {
-                if (rel != null) {
-                    Segment fslot = new Segment();
-                    Segment lslot = new Segment();
-                    calcSlots(fslot, lslot, rel, entityViews);
-                    RelationDesignInfo designInfo = getRelationDesignInfo(rel);
-                    designInfo.setFirstSlot(fslot);
-                    designInfo.setLastSlot(lslot);
-                }
+                calcConnector(rel);
             }
         }
     }
 
-    public void lightRerouteConnectorLines(EntityView<E> aView) {
-        Rectangle lbounds = lightRerouteConnectors(aView.getEntity().getInOutRelations());
-        repaint(lbounds);
-    }
-
-    protected Rectangle lightRerouteConnectors(Set<Relation<E>> aRels) {
-        if (aRels != null && !aRels.isEmpty()) {
-            Rectangle beforeRelsBounds = calcRelationsBounds(aRels);
-            Rectangle relsBounds = new Rectangle(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE);
-            for (Relation<E> rel : aRels) {
-                Segment fslot = new Segment();
-                Segment lslot = new Segment();
-                calcSlots(fslot, lslot, rel, entityViews);
-                RelationDesignInfo designInfo = getRelationDesignInfo(rel);
-                designInfo.setFirstSlot(fslot);
-                designInfo.setLastSlot(lslot);
-                int x[] = new int[4];
-                int y[] = new int[4];
-                Point flPt = fslot.lastPoint;
-                Point llPt = lslot.lastPoint;
-                x[0] = flPt.x;
-                y[0] = flPt.y;
-                x[3] = llPt.x;
-                y[3] = llPt.y;
-
-                y[1] = y[0];
-                y[2] = y[3];
-                x[1] = (flPt.x + llPt.x) / 2;
-                x[2] = x[1];
-
-                designInfo.setConnectorX(x);
-                designInfo.setConnectorY(y);
-                if (flPt.x < relsBounds.x) {
-                    relsBounds.x = flPt.x;
-                }
-                if (llPt.x < relsBounds.x) {
-                    relsBounds.x = llPt.x;
-                }
-                if (flPt.y < relsBounds.y) {
-                    relsBounds.y = flPt.y;
-                }
-                if (llPt.y < relsBounds.y) {
-                    relsBounds.y = llPt.y;
-                }
-                if (flPt.x > relsBounds.width) {
-                    relsBounds.width = flPt.x;
-                }
-                if (llPt.x > relsBounds.x) {
-                    relsBounds.width = llPt.x;
-                }
-                if (flPt.y > relsBounds.height) {
-                    relsBounds.height = flPt.y;
-                }
-                if (llPt.y > relsBounds.y) {
-                    relsBounds.height = llPt.y;
-                }
+    protected void calcConnector(Relation<E> rel) {
+        if (rel != null) {
+            RelationDesignInfo rdesign = getRelationDesignInfo(rel);
+            connectorsIndex.remove(getUnscaledBounds(), rel);
+            Segment fslot = new Segment();
+            Segment lslot = new Segment();
+            calcSlots(fslot, lslot, rel, entityViews);
+            rdesign.setFirstSlot(fslot);
+            rdesign.setLastSlot(lslot);
+            if (rdesign.getConnector() == null || !rdesign.getConnector().isManual()) {
+                rdesign.setConnector(paths.find(fslot.lastPoint, lslot.lastPoint));
             }
-            relsBounds.width = relsBounds.width - relsBounds.x;
-            relsBounds.height = relsBounds.height - relsBounds.y;
-            relsBounds.grow(EntityView.INSET_ZONE, EntityView.INSET_ZONE);
-            if (beforeRelsBounds != null) {
-                return relsBounds.union(beforeRelsBounds);
-            }
-            return relsBounds;
-        } else {
-            return new Rectangle(0, 0, 1, 1);
+            DatamodelDesignUtils.addToQuadTree(connectorsIndex, rdesign.getConnector(), rel);
         }
     }
     protected Map<Relation<E>, RelationDesignInfo> relationsDesignInfo = new HashMap<>();
@@ -702,69 +631,6 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
             relationsDesignInfo.put(aRelation, designInfo);
         }
         return designInfo;
-    }
-
-    protected void prepareCoordinates4Relations(Set<Relation<E>> rels) {
-        if (rels != null && !rels.isEmpty()) {
-            for (Relation<E> rel : rels) {
-                if (rel != null) {
-                    RelationDesignInfo designInfo = getRelationDesignInfo(rel);
-                    List<Point> lconnector = designInfo.getConnector();
-                    List<EstimatedArc> larcs = designInfo.getConnectorEstimatedArcs();
-                    if (lconnector != null) {
-                        if (larcs != null) {
-                            int lInitialSize = lconnector.size();
-                            pathsFinder.addArcs2Connector(lconnector, larcs, lInitialSize);
-                        }
-                        int[] lconnPtsX = new int[lconnector.size()];
-                        int[] lconnPtsY = new int[lconnector.size()];
-                        for (int j = 0; j < lconnector.size(); j++) {
-                            Point lcurrPt = lconnector.get(j);
-                            lconnPtsX[j] = lcurrPt.x;
-                            lconnPtsY[j] = lcurrPt.y;
-                        }
-                        designInfo.setConnectorX(lconnPtsX);
-                        designInfo.setConnectorY(lconnPtsY);
-                        designInfo.setConnector(null);
-                        designInfo.setConnectorEstimatedArcs(null);
-                    }
-                }
-            }
-        }
-    }
-
-    protected Rectangle calcRelationsBounds(Set<Relation<E>> aRels) {
-        if (aRels != null && !aRels.isEmpty()) {
-            Rectangle relsBounds = new Rectangle(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE);
-            for (Relation<E> rel : aRels) {
-                RelationDesignInfo designInfo = getRelationDesignInfo(rel);
-                int[] x = designInfo.getConnectorX();
-                int[] y = designInfo.getConnectorY();
-                if (x != null && y != null) {
-                    if (x.length == y.length) {
-                        for (int i = 0; i < x.length; i++) {
-                            if (x[i] < relsBounds.x) {
-                                relsBounds.x = x[i];
-                            }
-                            if (y[i] < relsBounds.y) {
-                                relsBounds.y = y[i];
-                            }
-                            if (x[i] > relsBounds.width) {
-                                relsBounds.width = x[i];
-                            }
-                            if (y[i] > relsBounds.height) {
-                                relsBounds.height = y[i];
-                            }
-                        }
-                    }
-                }
-            }
-            relsBounds.width = relsBounds.width - relsBounds.x;
-            relsBounds.height = relsBounds.height - relsBounds.y;
-            relsBounds.grow(EntityView.INSET_ZONE, EntityView.INSET_ZONE);
-            return relsBounds;
-        }
-        return null;
     }
 
     /**
@@ -822,8 +688,8 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
                     String leftFieldLabel = null;
                     E lEntity = rel.getLeftEntity();
                     EntityView<E> lView = getEntityView(lEntity);
-                    String lField = rel.getLeftField();
-                    if (lField != null && !lField.isEmpty()) {
+                    Field lField = rel.getLeftField();
+                    if (rel.isLeftField()) {
                         leftFieldLabel = lView.getFieldDisplayLabel(lField);
                     } else {
                         lField = rel.getLeftParameter();
@@ -840,9 +706,9 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
                     String rightFieldLabel = null;
                     E rEntity = rel.getRightEntity();
                     EntityView<E> rView = getEntityView(rEntity);
-                    String rField = rel.getRightField();
+                    Field rField = rel.getRightField();
                     if (rView != null) {
-                        if (rField != null && !rField.isEmpty()) {
+                        if (rel.isRightField()) {
                             rightFieldLabel = rView.getFieldDisplayLabel(rField);
                         } else {
                             rField = rel.getRightParameter();
@@ -913,50 +779,25 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
     protected class EntitiesViewsMovesManager implements EntityViewsManager<E> {
 
         @Override
-        public void beforeMove(EntityView<E> aView) {
-            pathsFinder.remove(aView);
-        }
-
-        @Override
-        public void afterMove(EntityView<E> aView) {
-            pathsFinder.put(aView);
-        }
-
-        @Override
         public void collapseExpand(EntityView<E> aView, int dy) {
-            pathsFinder.remove(aView);
-            try {
-                if (dy > 0) {
-                    CollapserExpander.expand(pathsFinder, aView, aView.getParent().getBounds(), Math.abs(dy), aView.getUndoSupport());
-                } else {
-                    CollapserExpander.collapse(pathsFinder, aView, aView.getParent().getBounds(), Math.abs(dy), aView.getUndoSupport());
+            if (dy != 0) {
+                entitiesIndex.remove(aView.getBounds(), aView);
+                try {
+                    if (dy > 0) {
+                        CollapserExpander.expand(entitiesIndex, aView, aView.getParent().getBounds(), Math.abs(dy), aView.getUndoSupport());
+                    } else if (dy < 0) {
+                        // Nothing can obstruct collapse, so we do nothing
+                        //CollapserExpander.collapse(entitiesIndex, aView, aView.getParent().getBounds(), Math.abs(dy), aView.getUndoSupport());
+                    }
+                } finally {
+                    entitiesIndex.insert(aView.getBounds(), aView);
                 }
-            } finally {
-                pathsFinder.put(aView);
             }
         }
 
         @Override
-        public boolean isLegalBounds(Rectangle aRect) {
-            Rectangle rt = (Rectangle) aRect.clone();
-            rt.grow(EntityView.INSET_ZONE, EntityView.INSET_ZONE);
-            return rt.x >= 0 && rt.y >= 0 && !pathsFinder.insetsContains(rt);
-        }
-
-        @Override
         public void invalidateConnectors() {
-            forceRerouteConnectors();
-            repaint();
-        }
-
-        @Override
-        public void beginMoveSession(EntityView<E> aView) {
-        }
-
-        @Override
-        public void endMoveSession(EntityView<E> aView) {
-            forceRerouteConnectors();
-            checkActions();
+            rerouteConnectors();
             repaint();
         }
 
@@ -986,6 +827,19 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
         setInputMap(WHEN_ANCESTOR_OF_FOCUSED_COMPONENT, im);
         setInputMap(WHEN_FOCUSED, im);
         setBackground(Color.white);
+        addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentMoved(ComponentEvent e) {
+                preparePaths();
+                rerouteConnectors();
+            }
+
+            @Override
+            public void componentResized(ComponentEvent e) {
+                preparePaths();
+                rerouteConnectors();
+            }
+        });
     }
 
     public ModelView(M aModel, TablesSelectorCallback aSelectorCallback) {
@@ -1022,43 +876,13 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
     public void setModel(M aModel) {
         if (aModel != model) {
             if (model != null) {
-                model.removeEditingListener(dmListener);
-//                for (Entity e : model.getAllEntities().values()) {
-//                    fieldsListener.removeFields(e.getFields());
-//                }
+                model.removeEditingListener(modelListener);
             }
             model = aModel;
             recreateEntityViews();
             if (model != null) {
-                model.addEditingListener(dmListener);
-//                for (Entity e : model.getAllEntities().values()) {
-//                    fieldsListener.addFields(e.getFields());
-//                }
+                model.addEditingListener(modelListener);
             }
-        }
-    }
-
-    protected boolean isIdxesInitialized() {
-        return oldBounds != null;
-    }
-
-    protected void forceRegenerateIndexes() {
-        Component loldDragTarget = dragTarget;
-        dragTarget = null;
-        try {
-            regenerateIndexes();
-        } finally {
-            dragTarget = loldDragTarget;
-        }
-    }
-
-    public void regenerateIndexes() {
-        if (isIdxesInitialized() && dragTarget == null) {
-            pathsFinder.clearIndexes();
-            for (EntityView<E> eView : entityViews.values()) {
-                pathsFinder.put(eView);
-            }
-            pathsFinder.wideIndexes();
         }
     }
 
@@ -1079,63 +903,23 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
             }
         }
     }
-    private boolean rerouteChecked = false;
-
-    @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-    }
 
     @Override
     protected void paintChildren(Graphics g) {
         super.paintChildren(g);
         if (g instanceof Graphics2D) {
             Graphics2D g2d = (Graphics2D) g;
-            if (DEBUG_MODE) {
-                paintInsets(g2d);
-                paintGrid(g2d);
-                pathsFinder.paintVisibilityGraph(g2d);
-            }
-            if (!rerouteChecked) {
-                checkConnectorsRerouted(model.getRelations());
-                rerouteChecked = true;
-            }
-
-            /*
-             * Color old2FieldColor = toFieldConnectorColor;
-             * toFieldConnectorColor = toFieldConnectorColor.darker(); Color
-             * old2ParameterColor = toParameterConnectorColor;
-             * toParameterConnectorColor = toParameterConnectorColor.darker();
-             * paintConnectors(g2d, model.getRelations(),
-             * connectorsOuterStroke); toFieldConnectorColor = old2FieldColor;
-             * toParameterConnectorColor = old2ParameterColor;
-             */
             paintConnectors(g2d, model.getRelations(), connectorsStroke);
-
-            //paintConnectors(g2d, selectedRelations, selectedConnectorsOuterStroke);
-            //paintConnectors(g2d, hittedRelations, hittedConnectorsOuterStroke);
             Color old2FieldColor = toFieldConnectorColor;
             toFieldConnectorColor = toFieldConnectorColor.darker();
             Color old2ParameterColor = toParameterConnectorColor;
             toParameterConnectorColor = toParameterConnectorColor.darker();
-            paintConnectors(g2d, selectedRelations, selectedConnectorsStroke);
-            paintConnectors(g2d, hittedRelations, hittedConnectorsStroke);
-            toFieldConnectorColor = old2FieldColor;
-            toParameterConnectorColor = old2ParameterColor;
-        }
-    }
-
-    protected void checkConnectorsRerouted(Set<Relation<E>> aRels) {
-        for (Relation<E> lrel : aRels) {
-            RelationDesignInfo designInfo = getRelationDesignInfo(lrel);
-            Segment fslot = designInfo.getFirstSlot();
-            int[] lconnPointsX = designInfo.getConnectorX();
-            int[] lconnPointsY = designInfo.getConnectorY();
-            Segment lslot = designInfo.getLastSlot();
-            if (fslot == null || lslot == null
-                    || lconnPointsX == null || lconnPointsY == null) {
-                rerouteConnectors();
-                break;
+            try {
+                paintConnectors(g2d, selectedRelations, selectedConnectorsStroke);
+                paintConnectors(g2d, hittedRelations, hittedConnectorsStroke);
+            } finally {
+                toFieldConnectorColor = old2FieldColor;
+                toParameterConnectorColor = old2ParameterColor;
             }
         }
     }
@@ -1165,19 +949,20 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
             g2d.setStroke(aConnectorsStroke);
             try {
                 for (Relation<E> lrel : aRels) {
-                    if (lrel.isRightField()) {
-                        g2d.setColor(toFieldConnectorColor);
-                    } else {
-                        g2d.setColor(toParameterConnectorColor);
+                    if (lrel.getRightEntity() != null && lrel.getRightField() != null) {
+                        if (!lrel.getRightEntity().getFields().contains(lrel.getRightField().getName())) {
+                            g2d.setColor(toParameterConnectorColor);
+                        } else {
+                            g2d.setColor(toFieldConnectorColor);
+                        }
                     }
                     RelationDesignInfo designInfo = getRelationDesignInfo(lrel);
-                    int[] lconnPointsX = designInfo.getConnectorX();
-                    int[] lconnPointsY = designInfo.getConnectorY();
-                    if (lconnPointsX != null && lconnPointsY != null
-                            && lconnPointsX.length == lconnPointsY.length) {
-                        g2d.drawPolyline(lconnPointsX, lconnPointsY, lconnPointsX.length);
+                    if (designInfo.getConnector() != null) {
+                        g2d.drawPolyline(designInfo.getConnector().getX(), designInfo.getConnector().getY(), designInfo.getConnector().getSize());
                     }
-                    paintLastSlot(g2d, designInfo.getLastSlot(), 0);
+                    if (designInfo.getLastSlot() != null) {
+                        paintLastSlot(g2d, designInfo.getLastSlot(), 0);
+                    }
                 }
             } finally {
                 g2d.setStroke(loldStroke);
@@ -1186,14 +971,13 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
         }
     }
 
-    protected void paintLastSlots(Graphics2D g2d, Set<PathsFinder<E, EntityView<E>>.ConnectorSegmentRectangle> aSlots, Stroke aConnectorsStroke, int aWide) {
-        if (aSlots != null && !aSlots.isEmpty()) {
+    protected void paintLastSlots(Graphics2D g2d, Set<Relation<E>> aRels, Stroke aConnectorsStroke, int aWide) {
+        if (aRels != null && !aRels.isEmpty()) {
             Color loldColor = g2d.getColor();
             Stroke loldStroke = g2d.getStroke();
             g2d.setStroke(aConnectorsStroke);
             try {
-                for (PathsFinder<E, EntityView<E>>.ConnectorSegmentRectangle csr : aSlots) {
-                    Relation<E> rel = csr.getRelation();
+                for (Relation<E> rel : aRels) {
                     if (rel.isRightField()) {
                         g2d.setColor(toFieldConnectorColor);
                     } else {
@@ -1243,119 +1027,6 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
         }
     }
 
-    protected void paintGrid(Graphics2D g2d) {
-        Rectangle rt = getBounds();
-        Color cl = g2d.getColor();
-        try {
-            Color lLinesColor = new Color(0, 200, 0);
-            g2d.setColor(lLinesColor);
-            Iterator<PathsFinder<E, EntityView<E>>.AxisElement> xIt = pathsFinder.getXAxis();
-            Iterator<PathsFinder<E, EntityView<E>>.AxisElement> yIt = pathsFinder.getYAxis();
-            if (xIt != null) {
-                while (xIt.hasNext()) {
-                    PathsFinder<E, EntityView<E>>.AxisElement ael = xIt.next();
-                    Integer lx = ael.getCoordinate();
-                    g2d.drawLine(lx, rt.y, lx, rt.y + rt.height);
-                }
-            }
-            if (yIt != null) {
-                while (yIt.hasNext()) {
-                    PathsFinder<E, EntityView<E>>.AxisElement ael = yIt.next();
-                    Integer ly = ael.getCoordinate();
-                    g2d.drawLine(rt.x, ly, rt.x + rt.width, ly);
-                }
-            }
-        } finally {
-            g2d.setColor(cl);
-        }
-    }
-
-    protected void paintInsets(Graphics2D g2d) {
-        Rectangle clip = g2d.getClipBounds();
-        Color col = g2d.getColor();
-        Composite composite = g2d.getComposite();
-        try {
-            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.1f));
-            g2d.setColor(Color.BLUE);
-            for (EntityView<E> eView : entityViews.values()) {
-                Rectangle rt = eView.getBounds();
-                rt.grow(EntityView.INSET_ZONE, EntityView.INSET_ZONE);
-                if (clip.intersects(rt)) {
-                    g2d.fillRect(rt.x, rt.y, rt.width, rt.height);
-                }
-            }
-        } finally {
-            g2d.setComposite(composite);
-            g2d.setColor(col);
-        }
-    }
-
-    public void recalcViewsBounds() {
-        calcViewsBounds();
-        invalidate();
-    }
-
-    protected Dimension calcViewsBounds() {
-        int leps = Integer.MAX_VALUE;
-        Dimension lmin = new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE);
-        Dimension lmax = new Dimension(Integer.MIN_VALUE, Integer.MIN_VALUE);
-        if (entityViews.isEmpty()) {
-            return super.getPreferredSize();
-        } else {
-            for (EntityView<E> eView : entityViews.values()) {
-                Rectangle lrt = eView.getBounds();
-                if (lrt.width < leps) {
-                    leps = lrt.width;
-                }
-                if (lrt.height < leps) {
-                    leps = lrt.height;
-                }
-                lrt.grow(EntityView.INSET_ZONE, EntityView.INSET_ZONE);
-                if (lrt.x < lmin.width) {
-                    lmin.width = lrt.x;
-                }
-                if (lrt.y < lmin.height) {
-                    lmin.height = lrt.y;
-                }
-                if (lrt.x + lrt.width > lmax.width) {
-                    lmax.width = lrt.x + lrt.width;
-                }
-                if (lrt.y + lrt.height > lmax.height) {
-                    lmax.height = lrt.y + lrt.height;
-                }
-            }
-            Rectangle lbounds = new Rectangle(0, 0, lmax.width, lmax.height);
-            if (dragTarget == null || (lbounds.width >= oldBounds.width && lbounds.height >= oldBounds.height)) {
-                if (oldBounds == null || !oldBounds.equals(lbounds)) {
-                    pathsFinder.setupInsetsIndex(lbounds, Math.max(2 * EntityView.INSET_ZONE, leps + 2 * EntityView.INSET_ZONE), entityViews);
-                    forceRegenerateIndexes();
-                    forceRerouteConnectors();
-                }
-                oldBounds = lbounds;
-                if (isPreferredSizeSet()) {
-                    return super.getPreferredSize();
-                } else {
-                    return lmax;
-                }
-            } else {
-                if (isPreferredSizeSet()) {
-                    return super.getPreferredSize();
-                } else {
-                    return new Dimension(oldBounds.width, oldBounds.height);
-                }
-            }
-        }
-    }
-
-    @Override
-    public Dimension getPreferredSize() {
-        if (isPreferredSizeSet()) {
-            return super.getPreferredSize();
-        } else {
-            return calcViewsBounds();
-        }
-    }
-
     protected abstract EntityView<E> createGenericEntityView(E aEntity);
 
     protected abstract boolean isPasteable(E aEntityToPaste);
@@ -1364,19 +1035,21 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
 
     protected void deleteSelectedFields() {
         if (isSelectedDeletableFields()) {
-            Set<Relation> toConfirm = new HashSet<>();
-            for (EntityFieldTuple t : selectedFields) {
-                Set<Relation> toDel = FieldsEntity.getInOutRelationsByEntityField(t.entity, t.field);
-                toConfirm.addAll(toDel);
-            }
-            if (!toConfirm.isEmpty()) {
-                if (JOptionPane.showConfirmDialog(ModelView.this,
-                        DatamodelDesignUtils.getLocalizedString("ifDeleteRelationsReferences"), //NOI18N
-                        DatamodelDesignUtils.getLocalizedString("datamodel"), //NOI18N
-                        JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.CANCEL_OPTION) {
-                    return;
-                }
-            }
+            /*
+             Set<Relation<E>> toConfirm = new HashSet<>();
+             for (EntityFieldTuple t : selectedFields) {
+             Set<Relation<E>> toDel = FieldsEntity.getInOutRelationsByEntityField(t.entity, t.field);
+             toConfirm.addAll(toDel);
+             }
+             if (!toConfirm.isEmpty()) {
+             if (JOptionPane.showConfirmDialog(ModelView.this,
+             DatamodelDesignUtils.getLocalizedString("ifDeleteRelationsReferences"), //NOI18N
+             DatamodelDesignUtils.getLocalizedString("datamodel"), //NOI18N
+             JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.CANCEL_OPTION) {
+             return;
+             }
+             }
+             */
             AccessibleCompoundEdit section = new AccessibleCompoundEdit();
             for (EntityFieldTuple t : new HashSet<>(selectedFields)) {
                 Set<Relation> toDel = FieldsEntity.getInOutRelationsByEntityField(t.entity, t.field);
@@ -1406,29 +1079,82 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
         return eView;
     }
 
-    public void addEntityView(EntityView<E> eView) {
+    public void addEntityView(final EntityView<E> eView) {
         entityViews.put(eView.getEntityID(), eView);
-        if (pathsFinder.isValid()) {
-            pathsFinder.put(eView);
-        }
         eView.addFieldSelectionListener(entityViewPropagator);
         eView.getUndoSupport().addUndoableEditListener(entityViewPropagator);
         eView.addMouseListener(entityViewPropagator);
         if (isParametersEntity(eView.getEntity())) {
             modelParametersEntityView = eView;
         }
-        add(eView);
+        add(eView, 0);
+        entitiesIndex.insert(eView.getBounds(), eView);
+        preparePaths();
+        rerouteConnectors();
+        eView.addComponentListener(new ComponentListener() {
+            @Override
+            public void componentHidden(ComponentEvent e) {
+                entitiesIndex.remove(eView.getBounds(), eView);
+                preparePaths();
+                rerouteConnectors();
+            }
+
+            @Override
+            public void componentMoved(ComponentEvent e) {
+                entitiesIndex.remove(getUnscaledBounds(), eView);
+                entitiesIndex.insert(eView.getBounds(), eView);
+                for (Relation rel : eView.getEntity().getInOutRelations()) {
+                    RelationDesignInfo rdesign = getRelationDesignInfo(rel);
+                    if (rdesign.getConnector() != null) {
+                        rdesign.getConnector().setManual(false);
+                    }
+                }
+                preparePaths();
+                rerouteConnectors();
+            }
+
+            @Override
+            public void componentResized(ComponentEvent e) {
+                entitiesIndex.remove(getUnscaledBounds(), eView);
+                entitiesIndex.insert(eView.getBounds(), eView);
+                for (Relation rel : eView.getEntity().getInOutRelations()) {
+                    RelationDesignInfo rdesign = getRelationDesignInfo(rel);
+                    if (rdesign.getConnector() != null) {
+                        rdesign.getConnector().setManual(false);
+                    }
+                }
+                preparePaths();
+                rerouteConnectors();
+            }
+
+            @Override
+            public void componentShown(ComponentEvent e) {
+                entitiesIndex.insert(eView.getBounds(), eView);
+                preparePaths();
+                rerouteConnectors();
+            }
+        });
+        if (eView.getFieldsList().getParent().getParent() instanceof JViewport) {
+            JViewport viewport = (JViewport) eView.getFieldsList().getParent().getParent();
+            viewport.addChangeListener(new ChangeListener() {
+                @Override
+                public void stateChanged(ChangeEvent e) {
+                    if (paths != null) {
+                        rerouteConnectors();
+                    }
+                }
+            });
+        }
     }
 
     public void removeEntityView(E aEntity) {
         if (aEntity != null && !isParametersEntity(aEntity)) {
-            Long entityId = aEntity.getEntityID();
+            Long entityId = aEntity.getEntityId();
             EntityView<E> eView = entityViews.get(entityId);
             if (eView != null) {
                 if (isViewSelected(eView)) {
                     unselectView(eView);
                 }
-                pathsFinder.remove(eView);
                 entityViews.remove(entityId);
                 eView.removeFieldSelectionListener(entityViewPropagator);
                 eView.getUndoSupport().removeUndoableEditListener(entityViewPropagator);
@@ -1436,12 +1162,15 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
                 eView.getFieldsList().removeMouseListener(entityViewPropagator);
                 eView.getParametersList().removeMouseListener(entityViewPropagator);
                 remove(eView);
+                entitiesIndex.remove(eView.getBounds(), eView);
                 eView.shrink();
+                preparePaths();
             }
         }
     }
 
     public void removeEntityViews() {
+        needRerouteConnectors = false;
         clearSelection();
         if (!entityViews.isEmpty()) {
             EntityView<?>[] toRemove = entityViews.values().toArray(new EntityView<?>[]{});
@@ -1455,12 +1184,7 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
 
     public void recreateEntityViews() {
         if (model != null) {
-            beginUpdate();
-            try {
-                createEntityViews();
-            } finally {
-                endUpdate();
-            }
+            createEntityViews();
         } else {
             removeEntityViews();
         }
@@ -1489,39 +1213,43 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
 
     public void createEntityViews() {
         relationsDesignInfo.clear();
-        if (pathsFinder.isValid()) {
-            pathsFinder.clearIndexes();
-        }
         removeEntityViews();
-        Map<Long, E> entMap = model.getAllEntities();
-        if (entMap != null && !entMap.isEmpty()) {
-            Collection<E> entCol = entMap.values();
-            if (entCol != null) {
-                List<E> entities = new ArrayList<>();
-                entities.addAll(entCol);
-                //int lx = ALLOCATION_STEP_X;
-                //int ly = ALLOCATION_STEP_Y;
-                for (E entity : entities) {
-                    EntityView<E> eView = createEntityView(entity);
-                    addEntityView(eView);
+        needRerouteConnectors = false;
+        try {
+            Map<Long, E> entMap = model.getAllEntities();
+            if (entMap != null && !entMap.isEmpty()) {
+                Collection<E> entCol = entMap.values();
+                if (entCol != null) {
+                    List<E> entities = new ArrayList<>();
+                    entities.addAll(entCol);
+                    for (E entity : entities) {
+                        EntityView<E> eView = createEntityView(entity);
+                        addEntityView(eView);
+                    }
                 }
-                // check any intersections
-                //reallocateEntitiesInPlain(entities, lx, ly);
             }
+        } finally {
+            needRerouteConnectors = true;
+        }
+    }
+
+    protected void preparePaths() {
+        if (needRerouteConnectors) {
+            Set<Rectangle> obstacles = new HashSet<>();
+            for (EntityView<E> eView : entityViews.values()) {
+                obstacles.add(eView.getBounds());
+            }
+            QuadTree<Vertex<PathFragment>> verticesIndex = new QuadTree<>();
+            List<Vertex<PathFragment>> graph = Sweeper.build(getWidth(), getHeight(), obstacles, verticesIndex);
+            paths = new Paths(graph, verticesIndex);
         }
     }
 
     public void rerouteConnectors() {
-        if (isShowing() && needRerouteConnectors) {
-            forceRerouteConnectors();
-        }
-    }
-
-    public void forceRerouteConnectors() {
-        if (model != null) {
+        if (model != null && needRerouteConnectors) {
             Set<Relation<E>> modelRels = model.getRelations();
             Set<Relation<E>> filteredRels = new HashSet<>();
-            if (modelRels != null && !modelRels.isEmpty()) {
+            if (modelRels != null) {
                 for (Relation<E> rel : modelRels) {
                     if (rel != null && getEntityView(rel.getLeftEntity()) != null
                             && getEntityView(rel.getRightEntity()) != null) {
@@ -1529,20 +1257,9 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
                     }
                 }
             }
-            // Clear hash of cells occupied by arced connectors segments
-            pathsFinder.clearOccupiedCells();
-            // Calc slots
-            calcConnectorsSlots(filteredRels);
-            // Build visibility graph
-            pathsFinder.rebuildVisibilityGraph(entityViews);
-            // Calc connectors with visibility graph
-            pathsFinder.calcConnectors(filteredRels);
-            // Bus connectors with occupied
-            pathsFinder.busConnectors(filteredRels);
-            // Arc connectors with occupied
-            //pf.arcConnectors(filteredRels);
-            // Prepare tags for relation
-            prepareCoordinates4Relations(filteredRels);
+            // Calc connectors
+            calcConnectors(filteredRels);
+            repaint();
         }
     }
 
@@ -1550,8 +1267,7 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
 
         @Override
         public void mouseClicked(MouseEvent e) {
-            if (e != null && pathsFinder.isValid()) {
-                cancelDragging(e);
+            if (e != null) {
                 Point lPt = e.getPoint();
                 Object lo = e.getSource();
                 if (lo != null && lo instanceof Component) {
@@ -1560,16 +1276,8 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
                     if (!(lo instanceof ModelView)) {
                         lPt = SwingUtilities.convertPoint((Component) lo, lPt, ModelView.this);
                     }
-                    Rectangle selectedBoundsBefore = calcRelationsBounds(selectedRelations);
-                    Rectangle hittedBoundsBefore = calcRelationsBounds(hittedRelations);
-                    if (selectedBoundsBefore != null && hittedBoundsBefore != null) {
-                        selectedBoundsBefore = selectedBoundsBefore.union(hittedBoundsBefore);
-                    } else if (selectedBoundsBefore == null && hittedBoundsBefore != null) {
-                        selectedBoundsBefore = hittedBoundsBefore;
-                    }
-
                     if (e.isControlDown()) {
-                        Set<Relation<E>> lselectedRelations = pathsFinder.hittestRelationsConnectors(lPt, EntityView.HALF_INSET_ZONE);
+                        Set<Relation<E>> lselectedRelations = hittestRelationsConnectors(lPt, EntityView.HALF_INSET_ZONE);
                         if (selectedRelations != null && lselectedRelations != null) {
                             selectedRelations.addAll(lselectedRelations);
                         } else if (selectedRelations == null && lselectedRelations != null) {
@@ -1577,35 +1285,30 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
                         }
                     } else {
                         clearSelection();
-                        selectedRelations = pathsFinder.hittestRelationsConnectors(lPt, EntityView.HALF_INSET_ZONE);
+                        selectedRelations = hittestRelationsConnectors(lPt, EntityView.HALF_INSET_ZONE);
                     }
                     hittedRelations = selectedRelations;
-
-                    Rectangle selectedBoundsAfter = calcRelationsBounds(hittedRelations);
-                    if (selectedBoundsAfter != null && selectedBoundsBefore != null) {
-                        repaint(selectedBoundsAfter.union(selectedBoundsBefore));
-                    } else if (selectedBoundsBefore != null) {
-                        repaint(selectedBoundsBefore);
-                    } else if (selectedBoundsAfter != null) {
-                        repaint(selectedBoundsAfter);
-                    }
+                    repaint();
                     fireRelationsSelectionChanged(oldSelectedRelations, selectedRelations);
                 }
             }
         }
+        private HittedRelationSegment hittedSegment;
 
         @Override
         public void mousePressed(MouseEvent e) {
-            if (e.getSource() == this || dragging) {
-                cancelDragging(e);
+            hittedSegment = selectHittedRelationSegment(e.getPoint(), EntityView.HALF_INSET_ZONE);
+            if (hittedSegment != null) {
+                connectorsIndex.remove(getUnscaledBounds(), hittedSegment.relation);
             }
         }
 
         @Override
         public void mouseReleased(MouseEvent e) {
-            if (e.getSource() == this || dragging) {
-                cancelDragging(e);
+            if (hittedSegment != null) {
+                DatamodelDesignUtils.addToQuadTree(connectorsIndex, hittedSegment.rdesign.getConnector(), hittedSegment.relation);
             }
+            hittedSegment = null;
         }
 
         @Override
@@ -1615,49 +1318,38 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
         @Override
         public void mouseExited(MouseEvent e) {
         }
-        private boolean dragging = false;
 
         @Override
         public void mouseDragged(MouseEvent e) {
-            if (e.getSource() == this) {
-                TransferHandler th = getTransferHandler();
-                if (th != null) {
-                    if (!dragging) {
-                        th.exportAsDrag(ModelView.this, e, e.isControlDown() ? TransferHandler.COPY : TransferHandler.MOVE);
-                        dragging = true;
-                        if (DEBUG_MODE) {
-                            System.out.println("Dragging started");
-                        }
-                    }
-                } else {
-                    cancelDragging(e);
-                }
+            if (hittedSegment != null) {
+                hittedSegment.move(e.getPoint());
+                repaint();
             }
         }
 
         @Override
         public void mouseMoved(MouseEvent e) {
-            if (e != null && pathsFinder.isValid()) {
-                cancelDragging(e);
+            if (e != null) {
                 Point lPt = e.getPoint();
                 Object lo = e.getSource();
                 if (lo != null && lo instanceof Component) {
                     if (!(lo instanceof ModelView)) {
                         lPt = SwingUtilities.convertPoint((Component) lo, lPt, ModelView.this);
                     }
-                    Rectangle hittedBoundsBefore = calcRelationsBounds(hittedRelations);
-                    hittedRelations = pathsFinder.hittestRelationsConnectors(lPt, EntityView.HALF_INSET_ZONE);
-
-                    Rectangle hittedBoundsAfter = calcRelationsBounds(hittedRelations);
-
-                    if (hittedBoundsAfter != null && hittedBoundsBefore != null) {
-                        repaint(hittedBoundsAfter.union(hittedBoundsBefore));
-                    } else if (hittedBoundsBefore != null) {
-                        repaint(hittedBoundsBefore);
-                    } else if (hittedBoundsAfter != null) {
-                        repaint(hittedBoundsAfter);
+                    hittedRelations = hittestRelationsConnectors(lPt, EntityView.HALF_INSET_ZONE);
+                    HittedRelationSegment hittedSegment = selectHittedRelationSegment(lPt, EntityView.HALF_INSET_ZONE);
+                    if (hittedSegment != null) {
+                        if (hittedSegment.isHMovable()) {
+                            setCursor(Cursor.getPredefinedCursor(Cursor.E_RESIZE_CURSOR));
+                        } else if (hittedSegment.isVMovable()) {
+                            setCursor(Cursor.getPredefinedCursor(Cursor.N_RESIZE_CURSOR));
+                        } else {
+                            setCursor(Cursor.getDefaultCursor());
+                        }
+                    } else {
+                        setCursor(Cursor.getDefaultCursor());
                     }
-                    setCursor(Cursor.getDefaultCursor());
+                    repaint();
                 }
                 if (hittedRelations != null && !hittedRelations.isEmpty()) {
                     setToolTipText(generateHintFromRelations(hittedRelations));
@@ -1667,10 +1359,86 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
             }
         }
 
-        protected void cancelDragging(MouseEvent e) {
-            if (e.getSource() == this) {
-                dragging = false;
-                setCursor(Cursor.getDefaultCursor());
+        private Set<Relation<E>> hittestRelationsConnectors(Point aPoint, int aEpsilon) {
+            Set<Relation<E>> hitted = new HashSet<>();
+            List<Relation<E>> res = connectorsIndex.query(new Rectangle(aPoint.x, aPoint.y, aEpsilon, aEpsilon));
+            for (Relation rel : res) {
+                RelationDesignInfo rdesign = getRelationDesignInfo(rel);
+                if (rdesign != null) {
+                    Connector connector = rdesign.getConnector();
+                    if (DatamodelDesignUtils.hittestConnector(connector, aPoint, aEpsilon)) {
+                        hitted.add(rel);
+                    }
+                }
+            }
+            return hitted;
+        }
+
+        private class HittedRelationSegment {
+
+            public Point pressedPoint;
+            public Relation relation;
+            public RelationDesignInfo rdesign;
+            public int segmentNumber = -1;
+
+            public HittedRelationSegment() {
+            }
+
+            public boolean isMovable() {
+                return segmentNumber > 0 && segmentNumber < rdesign.getConnector().getSize() - 2;
+            }
+
+            public boolean isHMovable() {
+                if (isMovable()) {
+                    int x1 = rdesign.getConnector().getX()[segmentNumber];
+                    int x2 = rdesign.getConnector().getX()[segmentNumber + 1];
+                    return x1 == x2;
+                } else {
+                    return false;
+                }
+            }
+
+            public boolean isVMovable() {
+                if (isMovable()) {
+                    int y1 = rdesign.getConnector().getY()[segmentNumber];
+                    int y2 = rdesign.getConnector().getY()[segmentNumber + 1];
+                    return y1 == y2;
+                } else {
+                    return false;
+                }
+            }
+
+            private void move(Point point) {
+                int dx = point.x - pressedPoint.x;
+                int dy = point.y - pressedPoint.y;
+                if (isHMovable()) {
+                    if (dx != 0) {
+                        rdesign.getConnector().getX()[segmentNumber] += dx;
+                        rdesign.getConnector().getX()[segmentNumber + 1] += dx;
+                        rdesign.getConnector().setManual(true);
+                        pressedPoint = point;
+                    }
+                } else if (isVMovable()) {
+                    if (dy != 0) {
+                        rdesign.getConnector().getY()[segmentNumber] += dy;
+                        rdesign.getConnector().getY()[segmentNumber + 1] += dy;
+                        rdesign.getConnector().setManual(true);
+                        pressedPoint = point;
+                    }
+                }
+            }
+        }
+
+        private HittedRelationSegment selectHittedRelationSegment(Point aPoint, int aEpsilon) {
+            if (hittedRelations != null && !hittedRelations.isEmpty()) {
+                HittedRelationSegment res = new HittedRelationSegment();
+                res.pressedPoint = aPoint;
+                res.relation = hittedRelations.iterator().next();
+                res.rdesign = getRelationDesignInfo(res.relation);
+                res.segmentNumber = DatamodelDesignUtils.hittestConnectorSegment(res.rdesign.getConnector(), aPoint, aEpsilon);
+                return res;
+            } else {
+                return null;
             }
         }
     }
@@ -2153,8 +1921,10 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
                     TableRef oldValue = prepareTableRef4Selection();
                     TableRef[] selected = selectTableRef(oldValue);
                     if (selected != null) {
+                        int x = ALLOCATION_STEP_X;
+                        int y = ALLOCATION_STEP_Y;
                         for (TableRef rSelected : selected) {
-                            Rectangle rect = findAnyFreeSpace(0, 0);
+                            Rectangle rect = findPlaceForEntityAdd(x, y);
                             E entity = model.newGenericEntity();
                             entity.setX(rect.x);
                             entity.setY(rect.y);
@@ -2166,6 +1936,11 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
                             NewEntityEdit<E, M> edit = new NewEntityEdit<>(model, entity);
                             edit.redo();
                             undoSupport.postEdit(edit);
+                            x = rect.x + rect.width + ALLOCATION_STEP_X;
+                            if (x > getWidth() * 2) {
+                                x = ALLOCATION_STEP_X;
+                                y = rect.y + rect.height + ALLOCATION_STEP_Y;
+                            }
                         }
                         justSelected = selected;
                     }
@@ -2203,7 +1978,7 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
 
     public void doAddQuery(String aApplicationElementId) throws Exception {
         if (aApplicationElementId != null && model != null) {
-            Rectangle rect = findAnyFreeSpace(0, 0);
+            Rectangle rect = findPlaceForEntityAdd(0, 0);
             E entity = model.newGenericEntity();
             entity.setX(rect.x);
             entity.setY(rect.y);
@@ -2282,7 +2057,6 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
                                 }
                             } finally {
                                 undoSupport.endUpdate();
-                                rerouteConnectors();
                             }
                         }
                     }
@@ -2517,13 +2291,6 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
                                                         prepareEntityForPaste(toPaste);
                                                         checkPastingName(toPaste);
                                                         if (model.checkEntityAddingValid(toPaste)) {
-                                                            toPaste.setX(Integer.MAX_VALUE);
-                                                            toPaste.setY(Integer.MAX_VALUE);
-                                                            Rectangle rect = findAnyFreeSpace(0, 0);
-                                                            toPaste.setX(rect.x);
-                                                            toPaste.setY(rect.y);
-                                                            toPaste.setWidth(rect.width);
-                                                            toPaste.setHeight(rect.height);
                                                             NewEntityEdit<E, M> edit = new NewEntityEdit<>(model, toPaste);
                                                             edit.redo();
                                                             undoSupport.postEdit(edit);
@@ -2538,7 +2305,6 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
                                             undoSupport.endUpdate();
                                         }
                                     }
-                                    model.resolveReferences();
                                 }
                             } else {
                                 JOptionPane.showMessageDialog(ModelView.this, DatamodelDesignUtils.getLocalizedString("BadClipboardData"), DatamodelDesignUtils.getLocalizedString("datamodel"), JOptionPane.ERROR_MESSAGE);
@@ -2600,7 +2366,7 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
             if (obj != null && obj instanceof EntityFieldTuple) {
                 EntityFieldTuple t = (EntityFieldTuple) obj;
                 return ((entity == null && t.entity == null) || (entity != null && entity.equals(t.entity)))
-                        && ((field == null && t.field == null) || (field != null && field.equals(t.field)));
+                        && ((field == null && t.field == null) || (field != null && field.isEqual(t.field)));
             }
             return false;
         }

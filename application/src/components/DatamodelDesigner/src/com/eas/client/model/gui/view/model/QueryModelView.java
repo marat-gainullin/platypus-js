@@ -10,10 +10,14 @@ import com.eas.client.model.gui.selectors.TablesSelectorCallback;
 import com.eas.client.model.gui.view.AddQueryAction;
 import com.eas.client.model.gui.view.entities.EntityView;
 import com.eas.client.model.gui.view.entities.QueryEntityView;
+import com.eas.client.model.gui.view.entities.QueryParametersEntityView;
 import com.eas.client.model.query.QueryEntity;
 import com.eas.client.model.query.QueryModel;
 import com.eas.client.model.query.QueryParametersEntity;
 import com.eas.client.model.store.XmlDom2QueryModel;
+import java.awt.Point;
+import java.util.List;
+import java.util.Set;
 import javax.swing.Action;
 import org.w3c.dom.Document;
 
@@ -56,19 +60,20 @@ public class QueryModelView extends ModelView<QueryEntity, QueryParametersEntity
 
     @Override
     protected EntityView<QueryEntity> createGenericEntityView(QueryEntity aEntity) {
-        return new QueryEntityView(aEntity, entitiesViewsMover);
+        return isParametersEntity(aEntity) ? new QueryParametersEntityView((QueryParametersEntity) aEntity, entitiesViewsMover) : new QueryEntityView(aEntity, entitiesViewsMover);
     }
 
     @Override
-    protected boolean isPasteable(QueryEntity aEntityToPaste) {
-        return !(aEntityToPaste instanceof QueryParametersEntity);
+    protected boolean isPasteable(QueryEntity aEntity) {
+        return !isParametersEntity(aEntity);
     }
 
     @Override
     protected void prepareEntityForPaste(QueryEntity aEntity) {
-        if (model.getEntityById(aEntity.getEntityID()) != null) {
-            aEntity.regenerateID();
+        if (model.getEntityById(aEntity.getEntityId()) != null) {
+            aEntity.regenerateId();
         }
+        findPlaceForEntityPaste(aEntity);
         if (aEntity.getTableSchemaName() != null && aEntity.getTableSchemaName().isEmpty()) {
             aEntity.setTableSchemaName(null);
         }
