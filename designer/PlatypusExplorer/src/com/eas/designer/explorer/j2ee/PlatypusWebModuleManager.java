@@ -4,6 +4,7 @@
  */
 package com.eas.designer.explorer.j2ee;
 
+import com.eas.designer.application.PlatypusUtils;
 import com.eas.designer.explorer.platform.EmptyPlatformHomePathException;
 import com.eas.designer.explorer.platform.PlatypusPlatform;
 import com.eas.designer.explorer.project.PlatypusProject;
@@ -108,6 +109,7 @@ public class PlatypusWebModuleManager {
         } else {
             throw new FileNotFoundException("Web application archive is not found at: " + referenceWar.getPath());
         }
+        createFolderIfNotExists(webAppDir, PlatypusWebModule.WEB_INF_DIRECTORY); 
         createFolderIfNotExists(webAppDir, PlatypusWebModule.META_INF_DIRECTORY);
     }
 
@@ -172,7 +174,7 @@ public class PlatypusWebModuleManager {
             FileObject startJs = jsDir.getFileObject(START_JS_FILE_NAME);
             if (startJs != null) {
                 String starupScript = String.format(START_JS_FILE_TEMPLATE, appElementId, appElementId); 
-                FileUtils.writeString(FileUtil.toFile(startJs), starupScript, "UTF-8"); //NOI18N
+                FileUtils.writeString(FileUtil.toFile(startJs), starupScript, PlatypusUtils.COMMON_ENCODING_NAME);
             } else {
                 throw new FileNotFoundException(START_JS_FILE_NAME + " file is not found in " + JS_DIRECTORY_NAME);
             }

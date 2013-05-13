@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <jdbc>
-    <driver name="Oracle thin jdbc driver">
+    <driver name="Oracle thin jdbc driver" dialect="Oracle">
         oracle.jdbc.OracleDriver
     </driver>
-    <driver name="Ms Sql jdbc driver">
+    <driver name="Ms Sql jdbc driver" dialect="MsSql">
         net.sourceforge.jtds.jdbc.Driver
     </driver>
-    <driver name="PostgreSql jdbc driver">
+    <driver name="PostgreSql jdbc driver" dialect="PostgreSql">
         org.postgresql.Driver
     </driver>
-    <driver name="MySql jdbc driver">
+    <driver name="MySql jdbc driver" dialect="MySql">
         com.mysql.jdbc.Driver
     </driver>
-    <driver name="DB2 jdbc driver">
+    <driver name="DB2 jdbc driver" dialect="DB2">
         com.ibm.db2.jcc.DB2Driver
     </driver>
-    <driver name="H2 jdbc driver">
+    <driver name="H2 jdbc driver" dialect="H2">
         org.h2.Driver
     </driver>
 </jdbc>
