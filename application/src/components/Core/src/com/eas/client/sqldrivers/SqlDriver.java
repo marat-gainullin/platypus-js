@@ -106,7 +106,7 @@ public abstract class SqlDriver {
      *
      * @param aConnection JDBC connection
      * @param aSchema Schema name
-     * @throws Exception Exception in the case of operation failure
+     * @throws Exception in the case of operation failure
      */
     public abstract void applyContextToConnection(Connection aConnection, String aSchema) throws Exception;
 
@@ -115,7 +115,7 @@ public abstract class SqlDriver {
      *
      * @param aConnection JDBC connection
      * @return Schema name
-     * @throws Exception Exception Exception in the case of operation failure
+     * @throws Exception in the case of operation failure
      */
     public String getConnectionContext(Connection aConnection) throws Exception {
         try (PreparedStatement stmt = aConnection.prepareStatement(getSql4GetConnectionContext())) {
