@@ -23,11 +23,13 @@ public class Context {
 
     public static final String CONTEXT_TAG_NAME = "Context";//NOI18N
     public static final String DOC_BASE_ATTR_NAME = "docBase";//NOI18N
+    public static final String PATH_ATTR_NAME = "path";//NOI18N
     protected static DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     protected DocumentBuilder builder;
     private Realm realm;
     private List<Resource> resources = new ArrayList<>();
     private String docBase;
+    private String path;
 
     public Context() throws ParserConfigurationException {
         builder = factory.newDocumentBuilder();
@@ -39,6 +41,9 @@ public class Context {
         Element contextTag = doc.createElement(CONTEXT_TAG_NAME);
         if (docBase != null) {
             contextTag.setAttribute(DOC_BASE_ATTR_NAME, docBase);
+        }
+        if (path != null) {
+            contextTag.setAttribute(PATH_ATTR_NAME, path);
         }
         if (realm != null) {
             contextTag.appendChild(realm.getElement(doc));
@@ -56,6 +61,7 @@ public class Context {
         if (projectNl != null && projectNl.getLength() == 1 && projectNl.item(0) instanceof Element) {
             Element contextTag = (Element) projectNl.item(0);
             context.docBase = contextTag.getAttribute(DOC_BASE_ATTR_NAME);
+            context.path = contextTag.getAttribute(PATH_ATTR_NAME);
             Element realmTag = getElementByName(contextTag, Realm.TAG_NAME);
             context.realm = RealmFactory.getRealm(realmTag);
             for (Element resourceTag : getElementsByName(contextTag, Resource.TAG_NAME)) {
@@ -87,6 +93,28 @@ public class Context {
      */
     public void setDocBase(String aDocBase) {
         docBase = aDocBase;
+    }
+
+    /**
+     * Gets the context path of this web application, which is matched against the
+     * beginning of each request URI to select the appropriate web application
+     * for processing.
+
+     * @return path 
+     */
+    public String getPath() {
+        return path;
+    }
+
+    /**
+     * Sets the context path of this web application, which is matched against the
+     * beginning of each request URI to select the appropriate web application
+     * for processing.
+     * 
+     * @param aPath path
+     */
+    public void setPath(String aPath) {
+        path = aPath;
     }
 
     /**

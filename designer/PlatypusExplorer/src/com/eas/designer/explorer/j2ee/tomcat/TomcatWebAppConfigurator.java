@@ -64,10 +64,11 @@ public class TomcatWebAppConfigurator implements WebAppConfigurator {
         Context ctx = null;
         try {
             ctx = new Context();
+            ctx.setPath("/" + project.getSettings().getServerContext());//NOI18N
+            ctx.addResource(getMainDbConnectionResource());
             if (project.getSettings().isSecurityRealmEnabled()) {
                 ctx.setRealm(getRealm());
             }
-            ctx.addResource(getMainDbConnectionResource());
         } catch (Exception ex) {
             ErrorManager.getDefault().notify(ex);
         }

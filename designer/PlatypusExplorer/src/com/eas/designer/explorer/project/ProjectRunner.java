@@ -142,7 +142,7 @@ public class ProjectRunner {
                 }
             }
         } else if (AppServerType.J2EE_SERVER.equals(pps.getRunAppServerType())) {
-            io.getOut().println("Starting J2EE Server..");
+            io.getOut().println("Deploying application to J2EE container..");
             PlatypusWebModuleManager webManager = project.getLookup().lookup(PlatypusWebModuleManager.class);
             if (webManager != null) {
                 webAppUrl = webManager.run(appElementId,debug);
@@ -243,7 +243,7 @@ public class ProjectRunner {
         } else if (ClientType.WEB_BROWSER.equals(pps.getRunClientType())) {
             try {
                 if (webAppUrl != null) {
-                    io.getOut().println(String.format("Starting web browser: %s", webAppUrl));
+                    io.getOut().println(String.format("Starting web browser: %s.", webAppUrl));
                     HtmlBrowser.URLDisplayer.getDefault().showURL(new URL(webAppUrl));
                 }
             } catch (MalformedURLException ex) {
