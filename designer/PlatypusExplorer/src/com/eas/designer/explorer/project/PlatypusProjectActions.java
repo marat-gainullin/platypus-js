@@ -75,10 +75,10 @@ public class PlatypusProjectActions implements ActionProvider {
                     DefaultProjectOperations.performDefaultMoveOperation(project);
                     break;
                 case COMMAND_RUN:
-                    ProjectRunner.run(project, null);
+                    ProjectRunner.run(project, project.getSettings().getAppSettings().getRunElement());
                     break;
                 case COMMAND_DEBUG:
-                    ProjectRunner.debug(project, null);
+                    ProjectRunner.debug(project, project.getSettings().getAppSettings().getRunElement());
                     break;
                 case COMMAND_DEPLOY:
                     deploy();
