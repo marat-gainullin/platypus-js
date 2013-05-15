@@ -426,6 +426,11 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
                 cbj2eeServerItemStateChanged(evt);
             }
         });
+        cbj2eeServer.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cbj2eeServerActionPerformed(evt);
+            }
+        });
 
         lblContext.setText(org.openide.util.NbBundle.getMessage(ProjectRunningCustomizer.class, "ProjectRunningCustomizer.lblContext.text")); // NOI18N
 
@@ -698,6 +703,9 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
         projectSettings.setSecurityRealmEnabled(cbEnableSecurityRealm.isSelected());
     }//GEN-LAST:event_cbEnableSecurityRealmActionPerformed
 
+    private void cbj2eeServerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbj2eeServerActionPerformed
+        projectSettings.setJ2eeServerId(((J2eePlatformAdapter) cbj2eeServer.getSelectedItem()).serverInstanceID);
+    }//GEN-LAST:event_cbj2eeServerActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnBrowse;
     private javax.swing.JComboBox cbAppServerType;

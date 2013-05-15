@@ -28,7 +28,7 @@ import org.openide.filesystems.FileUtil;
  */
 public class TomcatWebAppConfigurator implements WebAppConfigurator {
 
-    public final String MAIN_DATASOURCE_NAME = "jdbc/main"; //NOI18N 
+
     public final String CONTEXT_FILE_NAME = "context.xml"; //NOI18N
     public final String DATASOURCE_REALM_CLASS_NAME = "org.apache.catalina.realm.DataSourceRealm";
     protected final PlatypusProject project;
@@ -64,7 +64,7 @@ public class TomcatWebAppConfigurator implements WebAppConfigurator {
         Context ctx = null;
         try {
             ctx = new Context();
-            ctx.setPath("/" + project.getSettings().getServerContext());//NOI18N
+            ctx.setPath("/" + project.getSettings().getServerContext()); //NOI18N
             ctx.addResource(getMainDbConnectionResource());
             if (project.getSettings().isSecurityRealmEnabled()) {
                 ctx.setRealm(getRealm());
@@ -77,7 +77,7 @@ public class TomcatWebAppConfigurator implements WebAppConfigurator {
 
     private Resource getMainDbConnectionResource() throws Exception {
         DataSourceResource dataSourceResource = new DataSourceResource();
-        dataSourceResource.setName(MAIN_DATASOURCE_NAME);
+        dataSourceResource.setName(PlatypusWebModule.MAIN_DATASOURCE_NAME);
         dataSourceResource.setType(DataSourceResource.DATA_SOURCE_RESOURCE_TYPE_NAME);
         DbConnectionSettings dbSettings = project.getSettings().getAppSettings().getDbSettings();
         dataSourceResource.setUrl(dbSettings.getUrl());
@@ -97,7 +97,7 @@ public class TomcatWebAppConfigurator implements WebAppConfigurator {
     private Realm getRealm() {
         DataSourceRealm realm = new DataSourceRealm();
         realm.setClassName(DATASOURCE_REALM_CLASS_NAME);
-        realm.setDataSourceName(MAIN_DATASOURCE_NAME);
+        realm.setDataSourceName(PlatypusWebModule.MAIN_DATASOURCE_NAME);
         realm.setUserTable(ClientConstants.T_MTD_USERS);
         realm.setUserNameCol(ClientConstants.F_USR_NAME);
         realm.setUserCredCol(ClientConstants.F_USR_PASSWD);

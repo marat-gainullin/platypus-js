@@ -231,4 +231,15 @@ public class XmlDomUtils {
         }
         return null;
     }
+ 
+    public static Element getElementByTagName(Element aParent, String aName) {
+        NodeList nl = aParent.getElementsByTagName(aName);
+        if (nl != null && nl.getLength() == 1 && nl.item(0) instanceof Element) {
+            return (Element) nl.item(0);
+        } else {
+            return null;
+        }
+    }
+
+
 }

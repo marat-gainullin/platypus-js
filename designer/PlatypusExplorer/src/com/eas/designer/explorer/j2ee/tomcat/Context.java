@@ -4,6 +4,7 @@
  */
 package com.eas.designer.explorer.j2ee.tomcat;
 
+import com.eas.xml.dom.XmlDomUtils;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -21,7 +22,7 @@ import org.w3c.dom.NodeList;
  */
 public class Context {
 
-    public static final String CONTEXT_TAG_NAME = "Context";//NOI18N
+    public static final String ROOT_TAG_NAME = "Context";//NOI18N
     public static final String DOC_BASE_ATTR_NAME = "docBase";//NOI18N
     public static final String PATH_ATTR_NAME = "path";//NOI18N
     protected static DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -38,7 +39,7 @@ public class Context {
     public Document toDocument() {
         Document doc = builder.newDocument();
         doc.setXmlStandalone(true);
-        Element contextTag = doc.createElement(CONTEXT_TAG_NAME);
+        Element contextTag = doc.createElement(ROOT_TAG_NAME);
         if (docBase != null) {
             contextTag.setAttribute(DOC_BASE_ATTR_NAME, docBase);
         }
@@ -57,14 +58,14 @@ public class Context {
 
     public static Context valueOf(Document aDoc) throws Exception {
         Context context = new Context();
-        NodeList projectNl = aDoc.getElementsByTagName(CONTEXT_TAG_NAME);
+        NodeList projectNl = aDoc.getElementsByTagName(ROOT_TAG_NAME);
         if (projectNl != null && projectNl.getLength() == 1 && projectNl.item(0) instanceof Element) {
             Element contextTag = (Element) projectNl.item(0);
             context.docBase = contextTag.getAttribute(DOC_BASE_ATTR_NAME);
             context.path = contextTag.getAttribute(PATH_ATTR_NAME);
-            Element realmTag = getElementByName(contextTag, Realm.TAG_NAME);
+            Element realmTag = XmlDomUtils.getElementByTagName(contextTag, Realm.TAG_NAME);
             context.realm = RealmFactory.getRealm(realmTag);
-            for (Element resourceTag : getElementsByName(contextTag, Resource.TAG_NAME)) {
+            for (Element resourceTag : XmlDomUtils.elementsByTagName(contextTag, Resource.TAG_NAME)) {
                 Resource res = ResourceFactory.getRealm(resourceTag);
                 if (res != null) {
                     context.resources.add(res);
@@ -160,29 +161,5 @@ public class Context {
      */
     public synchronized void deleteResource(Resource aResource) {
         resources.remove(aResource);
-    }
-
-    private static Element getElementByName(Element aParent, String aName) {
-        NodeList nl = aParent.getElementsByTagName(aName);
-        if (nl != null && nl.getLength() == 1 && nl.item(0) instanceof Element) {
-            return (Element) nl.item(0);
-        } else {
-            return null;
-        }
-    }
-
-    private static List<Element> getElementsByName(Element aParent, String aName) {
-        NodeList nl = aParent.getElementsByTagName(aName);
-        if (nl != null && nl.getLength() > 0) {
-            List<Element> elements = new ArrayList<>();
-            for (int i = 0; i < nl.getLength(); i++) {
-                if (nl.item(i) instanceof Element) {
-                    elements.add((Element) nl.item(i));
-                }
-            }
-            return elements;
-        } else {
-            return null;
-        }
     }
 }
