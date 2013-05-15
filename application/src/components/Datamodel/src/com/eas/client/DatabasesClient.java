@@ -108,7 +108,7 @@ public class DatabasesClient implements DbClient {
         super();
         dbSettings = aSettings;
         if (!inContainer) {
-            DbConnectionSettings.registerDrivers(dbSettings.getDrivers());
+            DbConnectionSettings.registerDrivers(dbSettings.getDrivers().values());
         }
         resourceProvider = new GeneralResourceProvider(dbSettings, this);
         if (aSettings.getApplicationPath() != null && !aSettings.getApplicationPath().isEmpty()) {

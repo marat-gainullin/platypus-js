@@ -46,6 +46,7 @@ public class PlatypusProjectSettings {
     public static final String DEBUG_SERVER_PORT_KEY = "debugServerPort"; //NOI18N
     public static final String J2EE_SERVER_ID_KEY = "j2eeServerId"; //NOI18N
     public static final String SERVER_CONTEXT_KEY = "context";//NOI18N
+    public static final String ENABLE_SECURITY_REALM_KEY = "enableSecurityRealm";//NOI18N
     public static final String CLIENT_TYPE_KEY = "clientType"; //NOI18N
     public static final String SERVER_TYPE_KEY = "serverType"; //NOI18N
     protected final PlatypusSettings platypusSettings;
@@ -388,6 +389,25 @@ public class PlatypusProjectSettings {
         projectProperties.setProperty(SERVER_CONTEXT_KEY, aValue);
         projectPropertiesIsDirty = true;
         changeSupport.firePropertyChange(SERVER_CONTEXT_KEY, oldValue, aValue);
+    }
+    
+    /**
+     * Checks if security realm to be configured on J2EE server startup.
+     * @return true to enable configure security realm 
+     */
+    public boolean isSecurityRealmEnabled() {
+        return Boolean.valueOf(projectProperties.get(ENABLE_SECURITY_REALM_KEY));
+    }
+    
+    /**
+     * Sets if security realm to be configured on J2EE server startup.
+     * @param aValue true to enable configure security realm 
+     */
+    public void setSecurityRealmEnabled(boolean aValue) {
+        boolean oldValue = isSecurityRealmEnabled();
+        projectProperties.setProperty(ENABLE_SECURITY_REALM_KEY, Boolean.valueOf(aValue).toString());
+        projectPropertiesIsDirty = true;
+        changeSupport.firePropertyChange(ENABLE_SECURITY_REALM_KEY, oldValue, aValue);
     }
     
     

@@ -122,6 +122,10 @@ public class ClientConstants {
     public static final String DB_CONNECTION_CURRENT_SCHEMA_PROP_NAME = "currentSchema";
     public static final String DB_CONNECTION_URL_PROP_NAME = "url";
     public static final String DB_CONNECTION_DIALECT_PROP_NAME = "dialect";
+    /*
+     * Database dialects are used as keys to select the Playpus driver or JDBC driver.
+     * Also check com/eas/client/settings/DbDrivers.xml file.
+     */
     public static final String SERVER_PROPERTY_ORACLE_DIALECT = "Oracle";
     public static final String SERVER_PROPERTY_MSSQL_DIALECT = "MsSql";
     public static final String SERVER_PROPERTY_DERBY_DIALECT = "Derby";

@@ -19,17 +19,25 @@ public abstract class Realm {
     public static final String TAG_NAME = "Realm";//NOI18N
     public static final String CLASS_NAME_ATTR_NAME = "className";//NOI18N
     private String className;
-
+    
+    /**
+     * Sets java class name of the implementation to use.
+     * @return a class name
+     */
     public String getClassName() {
         return className;
     }
-
+    
+    /**
+     * Sets java class name of the implementation to use.
+     * @param aClassName a class name
+     */
     public void setClassName(String aClassName) {
         className = aClassName;
     }
 
-    public void load(Element realmTag) {
-        className = realmTag.getAttribute(CLASS_NAME_ATTR_NAME);
+    public void load(Element tag) {
+        className = tag.getAttribute(CLASS_NAME_ATTR_NAME);
     }
 
     public Element getElement(Document aDoc) {

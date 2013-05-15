@@ -302,7 +302,7 @@ public class DbMigrator extends BaseDeployer {
     }
 
     private void applySqlScript(File sqlScriptFile) throws Exception {
-        DbConnectionSettings.registerDrivers(DbConnectionSettings.readDrivers());
+        DbConnectionSettings.registerDrivers(DbConnectionSettings.readDrivers().values());
         try (Connection connection = DriverManager.getConnection(settings.getDbSettings().getUrl(), settings.getDbSettings().getInfo())) {
             SqlDriver.applyScript(FileUtils.readString(sqlScriptFile, PlatypusFiles.DEFAULT_ENCODING), connection);
         }

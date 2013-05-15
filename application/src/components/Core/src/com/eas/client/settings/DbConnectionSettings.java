@@ -19,11 +19,15 @@ import java.io.Reader;
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -35,9 +39,10 @@ public class DbConnectionSettings extends EasSettings {
     // dom constants
 
     public static transient final String DB_DRIVER_TAG_NAME = "driver";
+    public static transient final String DB_DRIVER_DIALECT_ATTR_NAME = "dialect";
     // file constants
     public static transient final String DB_DRIVERS_FILE_NAME = "DbDrivers.xml";
-    protected transient Set<String> drivers = new HashSet<>();
+    protected transient Map<String, String> drivers;
     protected int maxConnections = BearResourcePool.DEFAULT_MAXIMUM_SIZE;
     protected int maxStatements = BearResourcePool.DEFAULT_MAXIMUM_SIZE * 5;
     protected String applicationPath;
@@ -72,7 +77,7 @@ public class DbConnectionSettings extends EasSettings {
         initSchema = aInitSchema;
     }
 
-    public static void registerDrivers(Set<String> aDrivers) throws SQLException {
+    public static void registerDrivers(Collection<String> aDrivers) throws SQLException {
         if (aDrivers != null) {
             for (String driverClassName : aDrivers) {
                 try {
@@ -134,31 +139,38 @@ public class DbConnectionSettings extends EasSettings {
         applicationPath = aPath;
     }
 
-    public Set<String> getDrivers() {
+    public Map<String, String> getDrivers() {
         return drivers;
     }
 
-    public void setDrivers(Set<String> aDrivers) {
+    public void setDrivers(Map<String, String> aDrivers) {
         drivers = aDrivers;
     }
-
-    public static Set<String> readDrivers() throws Exception {
+    
+    /**
+     * Gets information about JDBC drivers supported by Platypus Platform.
+     * @return Dictionary where the key is database dialect and value is JDBC driver class name
+     * @throws Exception if something goes wrong
+     */
+    public static Map<String, String> readDrivers() throws Exception {
         InputStream is = DbConnectionSettings.class.getResourceAsStream(DbConnectionSettings.DB_DRIVERS_FILE_NAME);
-        Set<String> drivers = new HashSet<>();
+        Map<String, String> drivers = new HashMap<>();
         if (is.available() > 0) {
             try {
                 String driversDataString = new String(BinaryUtils.readStream(is, -1), SettingsConstants.COMMON_ENCODING);
                 Document driversDoc = Source2XmlDom.transform(driversDataString);
                 Node jdbcNode = driversDoc.getFirstChild();
-                if (jdbcNode != null && "jdbc".equals(jdbcNode.getNodeName())) {
+                if (jdbcNode != null && "jdbc".equals(jdbcNode.getNodeName())) { //NOI18N
                     NodeList driversNodes = jdbcNode.getChildNodes();
                     drivers.clear();
                     for (int i = 0; i < driversNodes.getLength(); i++) {
                         Node driverNode = driversNodes.item(i);
-                        if (DB_DRIVER_TAG_NAME.equals(driverNode.getNodeName())) {
-                            String driverClassName = driverNode.getTextContent();
-                            if (driverClassName != null && !driverClassName.isEmpty()) {
-                                drivers.add(driverClassName.replaceAll("[\\s\\r\\n\\t]", ""));
+                        if (driverNode instanceof Element && DB_DRIVER_TAG_NAME.equals(driverNode.getNodeName())) {
+                            Element element = (Element)driverNode;
+                            String dialect = element.getAttribute(DB_DRIVER_DIALECT_ATTR_NAME);
+                            String driverClassName = element.getTextContent();
+                            if (dialect != null && !dialect.isEmpty() && driverClassName != null && !driverClassName.isEmpty()) {
+                                drivers.put(dialect, driverClassName.replaceAll("[\\s\\r\\n\\t]", "")); //NOI18N
                             }
                         }
                     }
@@ -210,6 +222,7 @@ public class DbConnectionSettings extends EasSettings {
     }
 
     /**
+     * Checks if initialization of the schema is required.
      * @return The initSchema flag
      */
     public boolean isInitSchema() {
@@ -217,7 +230,8 @@ public class DbConnectionSettings extends EasSettings {
     }
 
     /**
-     * @param aValue
+     * Sets if initialization of the schema is required.
+     * @param aValue The initSchema flag
      */
     public void setInitSchema(boolean aValue) {
         initSchema = aValue;

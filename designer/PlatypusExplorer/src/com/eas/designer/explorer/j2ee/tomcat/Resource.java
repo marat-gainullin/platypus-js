@@ -15,6 +15,7 @@ import org.w3c.dom.Element;
 public class Resource {
 
     public static final String TAG_NAME = "Resource";//NOI18N
+    public static final String NAME_ATTR_NAME = "name";//NOI18N
     public static final String TYPE_ATTR_NAME = "type";//NOI18N
     private String auth;
     private String closeMethod;
@@ -80,12 +81,16 @@ public class Resource {
         type = aClassName;
     }
 
-    public void load(Element realmTag) {
-        type = realmTag.getAttribute(TYPE_ATTR_NAME);
+    public void load(Element tag) {
+        name = tag.getAttribute(NAME_ATTR_NAME);
+        type = tag.getAttribute(TYPE_ATTR_NAME);
     }
 
     public Element getElement(Document aDoc) {
         Element element = aDoc.createElement(TAG_NAME);
+        if (name != null) {
+            element.setAttribute(NAME_ATTR_NAME, name);
+        }
         if (type != null) {
             element.setAttribute(TYPE_ATTR_NAME, type);
         }
