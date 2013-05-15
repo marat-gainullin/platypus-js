@@ -33,6 +33,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import sun.misc.UUDecoder;
+import sun.misc.UUEncoder;
 
 /**
  * Implementation of deploying Platypus application elements from sources to
@@ -42,7 +43,6 @@ import sun.misc.UUDecoder;
  */
 public class Deployer extends BaseDeployer {
 
-    public static final String PLATYPUS_PROJECT_SOURCES_ROOT = "src";
     public static final String ID_PARAMETER_NAME = "id";
     public static final char[] FORBIDDEN_CHARS = {'\\', '/'};
     protected static final String DELETE_ENTITIES_SQL = "DELETE FROM "
@@ -57,7 +57,9 @@ public class Deployer extends BaseDeployer {
     protected static final String WRONG_ROOT_ELEMENT_EXCEPTION_MSG = "Wrong root element: %s for application element id: %s";
     private static DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
     private File sourcesRoot;
+    // used by deploy
     private Map<String, ApplicationElement> appElements;
+    // used by import
     private Map<String, Set<ApplicationElement>> appElementsTree;
 
     public Deployer(String aProjectPath) {
@@ -71,7 +73,7 @@ public class Deployer extends BaseDeployer {
     }
 
     private void init() {
-        sourcesRoot = new File(projectDir, PLATYPUS_PROJECT_SOURCES_ROOT);
+        sourcesRoot = new File(projectDir, PlatypusFiles.PLATYPUS_PROJECT_SOURCES_ROOT);
     }
 
     /**
@@ -111,7 +113,13 @@ public class Deployer extends BaseDeployer {
                 appElementRow.setColumnObject(ri.parentIdColumnIndex, appElement.getParentId());
                 appElementRow.setColumnObject(ri.nameColumnIndex, appElement.getName());
                 appElementRow.setColumnObject(ri.typeColumnIndex, appElement.getType());
-                String txtContent = XmlDom2String.transform(appElement.getContent());
+                String txtContent;
+                if (appElement.getType() == ClientConstants.ET_RESOURCE) {
+                    UUEncoder encoder = new UUEncoder();
+                    txtContent = encoder.encodeBuffer(appElement.getBinaryContent());
+                } else {
+                    txtContent = XmlDom2String.transform(appElement.getContent());
+                }
                 appElementRow.setColumnObject(ri.contentTxtColumnIndex, txtContent);
                 appElementRow.setColumnObject(ri.contentTxtSizeColumnIndex, txtContent.length());
                 appElementRow.setColumnObject(ri.contentTxtCrcColumnIndex, ApplicationElement.calcTxtCrc32(txtContent));
@@ -189,7 +197,6 @@ public class Deployer extends BaseDeployer {
             AppElementRowsetIndexes ri = new AppElementRowsetIndexes(rs);
             for (int i = 1; i <= rs.size(); i++) {
                 Row row = rs.getRow(i);
-                ApplicationElement appElement = new ApplicationElement();
                 Object oId = row.getColumnObject(ri.idColumnIndex);
                 if (oId != null) {
                     oId = oId.toString();// some old projects can have number ids
@@ -198,13 +205,22 @@ public class Deployer extends BaseDeployer {
                 if (oParentId != null) {
                     oParentId = oParentId.toString();// some old projects can have number ids
                 }
+                String parentId = (String) oParentId;
+
+                ApplicationElement appElement = new ApplicationElement();
                 appElement.setId((String) oId);
-                appElement.setParentId((String) oParentId);
+                appElement.setParentId(parentId);
                 appElement.setName((String) row.getColumnObject(ri.nameColumnIndex));
                 appElement.setType(((Number) row.getColumnObject(ri.typeColumnIndex)).intValue());
-                appElement.setTxtContent(stringifyObject(row.getColumnObject(ri.contentTxtColumnIndex)));
+                String txtContent = stringifyObject(row.getColumnObject(ri.contentTxtColumnIndex));
+                if (appElement.getType() == ClientConstants.ET_RESOURCE) {
+                    UUDecoder decoder = new UUDecoder();
+                    appElement.setBinaryContent(decoder.decodeBuffer(txtContent));
+                } else {
+                    appElement.setTxtContent(txtContent);
+                }
                 appElement.setTxtCrc32((row.getColumnObject(ri.contentTxtCrcColumnIndex) != null) ? ((Number) row.getColumnObject(ri.contentTxtCrcColumnIndex)).longValue() : 0l);
-                Set<ApplicationElement> children = appElementsTree.get(appElement.getParentId());
+                Set<ApplicationElement> children = appElementsTree.get(parentId);
                 if (children == null) {
                     children = new HashSet<>();
                     appElementsTree.put(appElement.getParentId(), children);
@@ -251,9 +267,20 @@ public class Deployer extends BaseDeployer {
                         } else {
                             throw new DeployException("Cant' create directory: " + appElement.getName() + " at path: " + parentDirectory.getAbsolutePath()); //NOI18N
                         }
+                    } else if (appElement.getType() == ClientConstants.ET_RESOURCE) {
+                        String path = sourcesRoot.getPath() + File.separator + appElement.getId();
+                        path = path.replace('/', File.separatorChar);
+                        File file = new File(path);
+                        if (file.createNewFile()) {
+                            FileUtils.writeBytes(file, appElement.getBinaryContent());
+                        } else {
+                            throw new DeployException(CREATE_FILE_EXCEPTION_MSG + file.getAbsolutePath());
+                        }
                     } else {
                         createAppElementFiles(parentDirectory, appElement);
                     }
+                } catch (IOException ex) {
+                    Logger.getLogger(Deployer.class.getName()).log(Level.SEVERE, null, ex);
                 } catch (DeployException ex) {
                     Logger.getLogger(Deployer.class.getName()).log(Level.WARNING, getAppElementErrorMessage(appElement, ex.getMessage()), ex); // NOI18N
                     err.println(getAppElementErrorMessage(appElement, ex.getMessage())); // NOI18N
@@ -450,7 +477,7 @@ public class Deployer extends BaseDeployer {
         return name + FileUtils.EXTENSION_SEPARATOR + ext;
     }
 
-    private void traverseSources(File dir, String aParentDirectoryAppElementId) {
+    private void traverseSources(File dir, String aParentDirectoryAppElementId) throws IOException {
         assert dir.isDirectory();
         Map<String, AppElementFiles> appElementsFileGroups = new HashMap<>();
         for (String filename : dir.list()) {
@@ -473,6 +500,9 @@ public class Deployer extends BaseDeployer {
                         appElementsFileGroups.put(groupName, fg);
                     }
                     fg.addFile(child);
+                } else {
+                    ApplicationElement appElement = appElementByFile(child, aParentDirectoryAppElementId);
+                    appElements.put(appElement.getId(), appElement);
                 }
             }
         }
@@ -481,8 +511,29 @@ public class Deployer extends BaseDeployer {
             ApplicationElement appElement = fg.getApplicationElement();
             if (appElement != null) {
                 appElements.put(appElement.getId(), appElement);
+            } else {
+                for (File child : fg.getFiles()) {
+                    appElement = appElementByFile(child, fg.getParentDirectoryAppElementId());
+                    appElements.put(appElement.getId(), appElement);
+                }
             }
         }
+    }
+
+    private ApplicationElement appElementByFile(File child, String aParentDirectoryAppElementId) throws IOException {
+        String path = child.getPath();
+        assert path.startsWith(sourcesRoot.getPath());
+        String resId = path.substring(sourcesRoot.getPath().length()).replace(File.separatorChar, '/');
+        if (resId.startsWith("/")) {
+            resId = resId.substring(1);
+        }
+        ApplicationElement appElement = new ApplicationElement();
+        appElement.setId(resId);
+        appElement.setName(child.getName());
+        appElement.setType(ClientConstants.ET_RESOURCE);
+        appElement.setParentId(aParentDirectoryAppElementId);
+        appElement.setBinaryContent(FileUtils.readBytes(child));
+        return appElement;
     }
 
     private static class AppElementRowsetIndexes {

@@ -5,7 +5,9 @@
 package com.eas.client.cache;
 
 import com.eas.client.Client;
+import com.eas.client.ClientConstants;
 import com.eas.client.metadata.ApplicationElement;
+import com.eas.util.FileUtils;
 import com.sun.nio.file.ExtendedWatchEventModifier;
 import java.io.File;
 import java.io.IOException;
@@ -26,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.zip.CRC32;
 
 /**
  *
@@ -203,9 +206,24 @@ public class FilesAppCache extends AppElementsCache<Client> {
         String familyPath = id2Path.get(aId);
         if (familyPath != null) {
             AppElementFiles family = families.get(familyPath);
-            if (family != null) {
+            if (family != null && family.getAppElementType() != null) {
                 return family.getApplicationElement();
             }
+        }
+        File resFile = new File((srcPathName + File.separatorChar + aId).replace('/', File.separatorChar));
+        if (resFile.exists()) {
+            ApplicationElement appElement = new ApplicationElement();
+            appElement.setId(aId);
+            appElement.setName(resFile.getName());
+            appElement.setType(ClientConstants.ET_RESOURCE);
+            //appElement.setParentId(aParentDirectoryAppElementId);
+            appElement.setBinaryContent(FileUtils.readBytes(resFile));
+            // hack, but it works fine.
+            appElement.setTxtContentLength((long) appElement.getBinaryContent().length);
+            CRC32 crc = new CRC32();
+            crc.update(appElement.getBinaryContent());
+            appElement.setTxtCrc32(crc.getValue());
+            return appElement;
         }
         return null;
     }
@@ -290,7 +308,7 @@ public class FilesAppCache extends AppElementsCache<Client> {
                 String id2 = type2 != null ? family.getAppElementId(type2) : null;
                 // remove old values
                 id2Path.remove(path2Id.remove(familyPath));
-                if(id2 != null){
+                if (id2 != null) {
                     path2Id.put(familyPath, id2);
                     id2Path.put(id2, familyPath);
                 }
@@ -309,7 +327,14 @@ public class FilesAppCache extends AppElementsCache<Client> {
                 if (family != null) {
                     String id1 = path2Id.get(familyPath);
                     family.removeFile(aFile);
-                    remove(id1);// force the cache to refresh application element's content
+                    // force the cache to refresh application element's content                    
+                    if (id1 != null) {
+                        remove(id1);
+                    } else {
+                        String id = aFile.getPath().substring(srcPathName.length() + 1).replace(File.separatorChar, '/');
+                        assert !id.startsWith("/") : "Cahced platypus application element's id can't start with /. Id from absolute path is not caching subject.";
+                        remove(id);
+                    }
                     Integer type2 = family.getAppElementType();
                     if (type2 == null) {
                         path2Id.remove(familyPath);

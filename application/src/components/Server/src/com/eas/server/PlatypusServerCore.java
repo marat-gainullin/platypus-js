@@ -16,6 +16,7 @@ import com.eas.client.scripts.CompiledScriptDocuments;
 import com.eas.client.scripts.CompiledScriptDocumentsHost;
 import com.eas.client.scripts.ScriptResolver;
 import com.eas.client.scripts.ScriptResolverHost;
+import com.eas.client.scripts.ScriptRunner;
 import com.eas.client.scripts.ScriptRunnerPrototype;
 import com.eas.client.scripts.ServerScriptProxyPrototype;
 import com.eas.script.ScriptUtils;

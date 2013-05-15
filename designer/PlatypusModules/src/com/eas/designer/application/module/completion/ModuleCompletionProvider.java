@@ -16,7 +16,7 @@ public class ModuleCompletionProvider extends JsCompletionProvider {
 
     @Override
     protected void fillCompletionPoint(PlatypusModuleDataObject dataObject, CompletionPoint point, CompletionResultSet resultSet, Document doc, int caretOffset) throws Exception {
-        if (dataObject.getProject().isDbConnected()) {
+        if (dataObject != null && dataObject.getProject().isDbConnected()) {
             CompletionContext completionContext = dataObject.getCompletionContext();
             if (point.context != null && point.context.length > 0) {
                 for (int i = 0; i < point.context.length; i++) {

@@ -67,6 +67,12 @@ public class QueryModel extends Model<QueryEntity, QueryParametersEntity, DbClie
     }
 
     @Override
+    public void setParametersEntity(QueryParametersEntity aParamsEntity) {
+        super.setParametersEntity(aParamsEntity);
+        parametersEntity.setModel(this);
+    }
+    
+    @Override
     public Document toXML() {
         return QueryModel2XmlDom.transform(this);
     }

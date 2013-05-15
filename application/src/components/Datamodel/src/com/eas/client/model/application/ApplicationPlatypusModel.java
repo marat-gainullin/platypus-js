@@ -40,6 +40,12 @@ public class ApplicationPlatypusModel extends ApplicationModel<ApplicationPlatyp
     }
 
     @Override
+    public void setParametersEntity(ApplicationPlatypusParametersEntity aParamsEntity) {
+        super.setParametersEntity(aParamsEntity);
+        parametersEntity.setModel(this);
+    }
+
+    @Override
     public boolean isTypeSupported(int aType) throws Exception {
         return true;
     }

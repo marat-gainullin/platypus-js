@@ -7,6 +7,7 @@ package com.eas.client.threetier.binary;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.serial.BinaryRowsetWriter;
+import com.eas.client.ClientConstants;
 import com.eas.client.threetier.ErrorResponse;
 import com.eas.client.threetier.HelloRequest;
 import com.eas.client.threetier.PlatypusRowsetWriter;
@@ -264,7 +265,13 @@ public class PlatypusResponseWriter implements PlatypusResponseVisitor {
             writer.put(RequestsTags.TAG_APP_ELEMENT_ID, rsp.getAppElement().getId());
             writer.put(RequestsTags.TAG_NAME, rsp.getAppElement().getName());
             writer.put(RequestsTags.TAG_TYPE, rsp.getAppElement().getType());
-            writer.put(RequestsTags.TAG_TEXT, XmlDom2String.transform(rsp.getAppElement().getContent()));
+            if (rsp.getAppElement().getType() == ClientConstants.ET_RESOURCE) {
+                if (rsp.getAppElement().getBinaryContent() != null) {
+                    writer.put(RequestsTags.TAG_RESOURCE, rsp.getAppElement().getBinaryContent());
+                }
+            } else {
+                writer.put(RequestsTags.TAG_TEXT, XmlDom2String.transform(rsp.getAppElement().getContent()));
+            }
             writer.put(RequestsTags.TAG_TEXT_LENGTH, rsp.getAppElement().getTxtContentLength());
             writer.put(RequestsTags.TAG_TEXT_CRC32, rsp.getAppElement().getTxtCrc32());
         }

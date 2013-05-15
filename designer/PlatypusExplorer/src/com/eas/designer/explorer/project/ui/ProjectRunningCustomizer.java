@@ -51,7 +51,7 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
     public ProjectRunningCustomizer(PlatypusProject aProject) throws Exception {
         initComponents();
         project = aProject;
-        appRoot = aProject.getApplicationRoot();
+        appRoot = aProject.getSrcRoot();
         projectSettings = aProject.getSettings();
         appSettings = projectSettings.getAppSettings();
         if (appSettings.getRunElement() != null) {

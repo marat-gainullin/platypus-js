@@ -120,4 +120,5 @@ public class RequestsTags extends CoreTags{
     public static final int TAG_TEXT = 65;
     public static final int TAG_TEXT_LENGTH = 66;
     public static final int TAG_TEXT_CRC32 = 67;
+    public static final int TAG_RESOURCE = 68;
 }

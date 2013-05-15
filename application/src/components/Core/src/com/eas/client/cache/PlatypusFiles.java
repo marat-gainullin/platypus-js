@@ -4,6 +4,7 @@
  */
 package com.eas.client.cache;
 
+import com.eas.client.settings.SettingsConstants;
 import com.eas.util.FileUtils;
 import java.io.File;
 import java.util.ArrayList;
@@ -15,13 +16,14 @@ import java.util.List;
  */
 public class PlatypusFiles {
 
+    public static final String PLATYPUS_PROJECT_SOURCES_ROOT = "src";
     public static final String JAVASCRIPT_EXTENSION = "js"; // NOI18N
     public static final String FORM_EXTENSION = "layout"; // NOI18N
     public static final String MODEL_EXTENSION = "model"; // NOI18N
     public static final String OUT_EXTENSION = "out"; // NOI18N
-    public static final String OUT_EMPTY_CONTENT = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" +
-                                                   "<outputFields>\n" +
-                                                   "</outputFields>"; // NOI18N
+    public static final String OUT_EMPTY_CONTENT = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n"
+            + "<outputFields>\n"
+            + "</outputFields>"; // NOI18N
     public static final String SQL_EXTENSION = "sql"; // NOI18N
     public static final String DIALECT_EXTENSION = "dialect"; // NOI18N
     public static final String REPORT_LAYOUT_EXTENSION = "xls"; // NOI18N
@@ -31,9 +33,7 @@ public class PlatypusFiles {
     public static final String PUBLIC_ANNOTATION_NAME = "@public";
     public static final String PROCEDURE_ANNOTATION_NAME = "@procedure";
     public static final String MANUAL_ANNOTATION_NAME = "@manual";
-    
     private static final List<String> PLATYPUS_FILE_EXTENSIONS = new ArrayList<String>() {
-
         {
             add(PlatypusFiles.JAVASCRIPT_EXTENSION);
             add(PlatypusFiles.FORM_EXTENSION);
@@ -46,15 +46,13 @@ public class PlatypusFiles {
             add(PlatypusFiles.CONNECTION_EXTENSION);
         }
     };
-    
-    public static final String DEFAULT_ENCODING = "utf-8"; // NOI18N
-     
+    public static final String DEFAULT_ENCODING = SettingsConstants.COMMON_ENCODING; // NOI18N
+
     public static boolean isPlatypusProjectFile(File file) {
         return PLATYPUS_FILE_EXTENSIONS.contains(FileUtils.getFileExtension(file));
     }
-    
+
     public static boolean isPlatypusProjectFileExt(String ext) {
         return PLATYPUS_FILE_EXTENSIONS.contains(ext);
     }
-   
 }

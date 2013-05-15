@@ -95,7 +95,7 @@ public abstract class PlatypusDataObject extends MultiDataObject {
     public FileObject getAppRoot() throws Exception {
         PlatypusProject project = getProject();
         if (project != null) {
-            return project.getApplicationRoot();
+            return project.getSrcRoot();
         } else {
             return null;
         }

@@ -53,16 +53,28 @@ public class PlatypusQueryDataLoader extends MultiFileLoader {
         if (!fo.isFolder()) {
             String ext = fo.getExt();
             FileObject sqlFile = FileUtil.findBrother(fo, PlatypusFiles.SQL_EXTENSION);
-            if (ext.equals(PlatypusFiles.MODEL_EXTENSION) && sqlFile != null) {
+            FileObject modelFile = FileUtil.findBrother(fo, PlatypusFiles.MODEL_EXTENSION);
+            FileObject dialectFile = FileUtil.findBrother(fo, PlatypusFiles.DIALECT_EXTENSION);
+            FileObject outFile = FileUtil.findBrother(fo, PlatypusFiles.OUT_EXTENSION);
+            if (ext.equals(PlatypusFiles.MODEL_EXTENSION)
+                    && sqlFile != null
+                    && dialectFile != null
+                    && outFile != null) {
                 return sqlFile;
-            } else if (ext.equals(PlatypusFiles.DIALECT_EXTENSION) && sqlFile != null) {
+            } else if (ext.equals(PlatypusFiles.DIALECT_EXTENSION)
+                    && sqlFile != null
+                    && modelFile != null
+                    && outFile != null) {
                 return sqlFile;
-            } else if (ext.equals(PlatypusFiles.OUT_EXTENSION) && sqlFile != null) {
+            } else if (ext.equals(PlatypusFiles.OUT_EXTENSION)
+                    && sqlFile != null
+                    && modelFile != null
+                    && dialectFile != null) {
                 return sqlFile;
             } else if (ext.equals(PlatypusFiles.SQL_EXTENSION)
-                     && FileUtil.findBrother(fo, PlatypusFiles.MODEL_EXTENSION) != null
-                     && FileUtil.findBrother(fo, PlatypusFiles.DIALECT_EXTENSION) != null
-                     && FileUtil.findBrother(fo, PlatypusFiles.OUT_EXTENSION) != null) {
+                     && modelFile != null
+                     && dialectFile != null
+                     && outFile != null) {
                 return fo;
             }
         }

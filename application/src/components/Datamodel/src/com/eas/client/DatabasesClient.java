@@ -23,6 +23,7 @@ import com.bearsoft.rowset.metadata.*;
 import com.eas.client.cache.DatabaseAppCache;
 import com.eas.client.cache.DatabaseMdCache;
 import com.eas.client.cache.FilesAppCache;
+import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.login.DbPlatypusPrincipal;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.login.PrincipalHost;
@@ -113,7 +114,7 @@ public class DatabasesClient implements DbClient {
         if (aSettings.getApplicationPath() != null && !aSettings.getApplicationPath().isEmpty()) {
             File f = new File(aSettings.getApplicationPath());
             if (f.exists() && f.isDirectory()) {
-                FilesAppCache filesAppCache = new FilesAppCache(aSettings.getApplicationPath());
+                FilesAppCache filesAppCache = new FilesAppCache(f.getPath()+File.separator+PlatypusFiles.PLATYPUS_PROJECT_SOURCES_ROOT);
                 filesAppCache.watch();
                 appCache = filesAppCache;
             } else {

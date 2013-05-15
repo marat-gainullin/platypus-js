@@ -350,7 +350,7 @@ AbstractXYDataset = org.jfree.data.xy.AbstractXYDataset;
 XYDataset = org.jfree.data.xy.XYDataset;
 
 // forms API
-Icon = com.eas.resources.images.IconCache;
+Icon = com.eas.client.forms.IconResources;
 Icons = Icon;
 Orientation=com.eas.client.forms.api.Orientation;
 VerticalPosition=com.eas.client.forms.api.VerticalPosition;

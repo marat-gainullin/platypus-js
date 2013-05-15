@@ -43,7 +43,7 @@ public class JsDoc {
         return Collections.unmodifiableList(tags);
     }
 
-    public boolean isModuleLevel() {
+    public boolean containsModuleName() {
         for (String line : lines) {
             if (line.startsWith(Tag.NAME_TAG)) {
                 return true;

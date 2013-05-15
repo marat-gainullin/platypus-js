@@ -54,7 +54,7 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
     protected Map<Long, E> entities = new HashMap<>();
     protected P parametersEntity;
     protected Parameters parameters = new Parameters();
-    protected Scriptable scriptScope = null;
+    protected Scriptable scriptScope;
     protected boolean runtime = false;
     protected boolean commitable = true;
     protected int ajustingCounter = 0;
@@ -69,27 +69,22 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
         for (E entity : entities.values()) {
             copied.addEntity((E) entity.copy());
         }
-        for (Relation<E> relation : relations) {
-            Relation<E> rcopied = relation.copy();
-            if (rcopied.getLeftEntity() != null) {
-                rcopied.setLeftEntity(copied.getEntityById(rcopied.getLeftEntity().getEntityId()));
-            }
-            if (rcopied.getRightEntity() != null) {
-                rcopied.setRightEntity(copied.getEntityById(rcopied.getRightEntity().getEntityId()));
-            }
-            copied.addRelation(rcopied);
-        }
         if (parameters != null) {
             copied.setParameters(parameters.copy());
         }
         if (getParametersEntity() != null) {
             copied.setParametersEntity((P) getParametersEntity().copy());
         }
+        for (Relation<E> relation : relations) {
+            Relation<E> rcopied = relation.copy();
+            resolveCopiedRelation(rcopied, copied);
+            copied.addRelation(rcopied);
+        }
         return copied;
     }
 
     /**
-     * Base datamodel constructor.
+     * Base model constructor.
      */
     protected Model() {
         super();
@@ -394,43 +389,6 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
     public void setRelations(Set<Relation<E>> aRelations) {
         relations = aRelations;
     }
-    /*
-     public boolean isParameterInRelations(E aEntity, Set<Relation<E>> aRelations, Parameter aParameter) {
-     for (Relation<E> lrel : aRelations) {
-     Parameter leftParameter = lrel.getLeftParameter();
-     if (aEntity != null && leftParameter != null
-     && leftParameter == aParameter
-     && aEntity == lrel.getLeftEntity()) {
-     return true;
-     }
-
-     Parameter rightParameter = lrel.getRightParameter();
-     if (aEntity != null && rightParameter != null
-     && rightParameter == aParameter
-     && aEntity == lrel.getRightEntity()) {
-     return true;
-     }
-     }
-     return false;
-     }
-
-     public boolean isFieldInRelations(E aEntity, Set<Relation<E>> aRelations, Field aField) {
-     for (Relation<E> lrel : aRelations) {
-     Field leftField = lrel.getLeftField();
-     if (aEntity != null && leftField != null
-     && leftField == aField && aEntity == lrel.getLeftEntity()) {
-     return true;
-     }
-
-     Field rightField = lrel.getRightField();
-     if (aEntity != null && rightField != null
-     && rightField == aField && aEntity == lrel.getRightEntity()) {
-     return true;
-     }
-     }
-     return false;
-     }
-     */
 
     public boolean isFieldInRelations(E aEntity, Set<Relation<E>> aRelations, Field aField) {
         for (Relation<E> lrel : aRelations) {
@@ -497,6 +455,37 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
                 }
             } catch (Exception ex) {
                 Logger.getLogger(Model.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+
+    protected void resolveCopiedRelation(Relation<E> aRelation, Model<E, P, C, Q> aModel) throws Exception {
+        if (aRelation.getLeftEntity() != null) {
+            aRelation.setLeftEntity(aModel.getEntityById(aRelation.getLeftEntity().getEntityId()));
+        }
+        if (aRelation.getRightEntity() != null) {
+            aRelation.setRightEntity(aModel.getEntityById(aRelation.getRightEntity().getEntityId()));
+        }
+        if (aRelation.getLeftField() != null) {
+            if (aRelation.getLeftEntity() != null) {
+                if (aRelation.isLeftParameter() && aRelation.getLeftEntity().getQueryId() != null) {
+                    aRelation.setLeftField(aRelation.getLeftEntity().getQuery().getParameters().get(aRelation.getLeftField().getName()));
+                } else {
+                    aRelation.setLeftField(aRelation.getLeftEntity().getFields().get(aRelation.getLeftField().getName()));
+                }
+            } else {
+                aRelation.setLeftField(null);
+            }
+        }
+        if (aRelation.getRightField() != null) {
+            if (aRelation.getRightEntity() != null) {
+                if (aRelation.isRightParameter() && aRelation.getRightEntity().getQueryId() != null) {
+                    aRelation.setRightField(aRelation.getRightEntity().getQuery().getParameters().get(aRelation.getRightField().getName()));
+                } else {
+                    aRelation.setRightField(aRelation.getRightEntity().getFields().get(aRelation.getRightField().getName()));
+                }
+            } else {
+                aRelation.setRightField(null);
             }
         }
     }
