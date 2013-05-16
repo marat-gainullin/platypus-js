@@ -29,6 +29,7 @@ public class WebApplication {
     private List<AppListener> appListeners = new ArrayList<>();
     private List<Servlet> servlets = new ArrayList<>();
     private List<ServletMapping> servletMappings = new ArrayList<>();
+    private List<ResourceRef> resourceRefs = new ArrayList<>();
 
     public WebApplication() throws ParserConfigurationException {
         factory.setNamespaceAware(true);
@@ -55,6 +56,9 @@ public class WebApplication {
         }
         for (ServletMapping servletMapping : servletMappings) {
             webApp.appendChild(servletMapping.getElement(doc));
+        }
+        for (ResourceRef resourceRef : resourceRefs) {
+            webApp.appendChild(resourceRef.getElement(doc));
         }
         return doc;
     }
@@ -133,6 +137,26 @@ public class WebApplication {
             while (i.hasNext()) {
                 ServletMapping l = i.next();
                 if (aServletName.equals(l.getServletName())) {
+                    i.remove();
+                }
+            }
+        }
+    }
+    
+    public void addResourceRef(ResourceRef aResourceRef) {
+        resourceRefs.add(aResourceRef);
+    }
+    
+    public List<ResourceRef> getResourceRefs() {
+        return Collections.unmodifiableList(resourceRefs);
+    }
+    
+    public void removeResourceRef(String aResourceName) {
+        if (aResourceName != null) {
+            Iterator<ResourceRef> i = resourceRefs.iterator();
+            while (i.hasNext()) {
+                ResourceRef l = i.next();
+                if (aResourceName.equals(l.getResRefName())) {
                     i.remove();
                 }
             }
