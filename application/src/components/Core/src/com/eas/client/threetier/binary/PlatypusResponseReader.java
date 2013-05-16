@@ -84,7 +84,7 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
             rsp.setAppElementId(dom.getChild(RequestsTags.TAG_APP_ELEMENT_ID).getString());
         }
     }
-    
+
     @Override
     public void visit(RowsetResponse rsp) throws Exception {
         ProtoReader reader = new ProtoReader(new ByteArrayInputStream(bytes));
@@ -257,9 +257,17 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
             appElement.setId(dom.getChild(RequestsTags.TAG_APP_ELEMENT_ID).getString());
             appElement.setType(dom.getChild(RequestsTags.TAG_TYPE).getInt());
             appElement.setName(dom.getChild(RequestsTags.TAG_NAME).getString());
-            appElement.setTxtContent(dom.getChild(RequestsTags.TAG_TEXT).getString());
+            if (dom.containsChild(RequestsTags.TAG_TEXT)) {
+                appElement.setTxtContent(dom.getChild(RequestsTags.TAG_TEXT).getString());
+            }
             appElement.setTxtContentLength(dom.getChild(RequestsTags.TAG_TEXT_LENGTH).getLong());
             appElement.setTxtCrc32(dom.getChild(RequestsTags.TAG_TEXT_CRC32).getLong());
+            if (dom.containsChild(RequestsTags.TAG_RESOURCE)) {
+                ProtoNode resNode = dom.getChild(RequestsTags.TAG_RESOURCE);
+                ByteArrayOutputStream bStream = new ByteArrayOutputStream();
+                bStream.write(resNode.getData(), resNode.getOffset(), resNode.getSize());
+                appElement.setBinaryContent(bStream.toByteArray());
+            }
             rsp.setAppElement(appElement);
         }
     }

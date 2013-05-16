@@ -4,12 +4,14 @@
  */
 package com.eas.client.scripts;
 
+import com.eas.client.AppCache;
 import com.eas.client.Client;
 import com.eas.client.ClientConstants;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.login.PrincipalHost;
 import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.model.application.ApplicationModel;
+import com.eas.client.settings.SettingsConstants;
 import com.eas.debugger.jmx.server.Breakpoints;
 import com.eas.script.JsDoc;
 import com.eas.script.JsDoc.Tag;
@@ -18,6 +20,7 @@ import com.eas.script.ScriptUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URI;
 import java.security.AccessControlException;
 import java.util.*;
 import java.util.logging.Level;
@@ -69,7 +72,7 @@ public class ScriptRunner extends ScriptableObject {
         this(aClient, aScope, aPrincipalHost, aCompiledScriptDocumentsHost, aScriptResolverHost);
         setApplicationElementId(aAppElementId);
     }
-    
+
     public ScriptRunner(Client aClient, Scriptable aScope, PrincipalHost aPrincipalHost, CompiledScriptDocumentsHost aCompiledScriptDocumentsHost, ScriptResolverHost aScriptResolverHost) throws Exception {
         super(aScope, null);
         client = aClient;
@@ -79,7 +82,7 @@ public class ScriptRunner extends ScriptableObject {
         setPrototype(ScriptRunnerPrototype.getInstance());
         scriptResolverHost = aScriptResolverHost;
     }
-    
+
     public boolean hasModuleAnnotation(String aName) {
         return Tag.containsTagWithName(moduleAnnotations, aName);
     }
@@ -106,7 +109,7 @@ public class ScriptRunner extends ScriptableObject {
         prepareModel(scriptDoc);
         prepareScript(scriptDoc);
     }
-    
+
     protected void prepareRoles(ScriptDocument scriptDoc) throws Exception {
         txtContentLength = scriptDoc.getTxtContentLength();
         txtCrc32 = scriptDoc.getTxtCrc32();
@@ -179,11 +182,6 @@ public class ScriptRunner extends ScriptableObject {
     public ApplicationModel<?, ?, ?, ?> getModel() {
         return model;
     }
-    /*
-     public ApplicationElement getAppElement() {
-     return appElement;
-     }
-     */
     private static final String GET_APPICATION_ELEMENT_ID_JSDOC = ""
             + "/**\n"
             + "* Gets application element Id.\n"
@@ -253,24 +251,106 @@ public class ScriptRunner extends ScriptableObject {
         return obj;
     }
 
-    public static Script importScriptLibrary(String libResourceName, String aLibName, Context currentContext, Scriptable aScope) throws IOException {
-        Script platypusLib;
-        InputStream is = null;
-        InputStreamReader isr = null;
-        try {
-            is = ScriptRunner.class.getResourceAsStream(libResourceName);
-            isr = new InputStreamReader(is);
-            platypusLib = currentContext.compileReader(isr, aLibName, 0, null);
-        } finally {
-            if (isr != null) {
-                isr.close();
-            }
-            if (is != null) {
-                is.close();
-            }
+    public static class PlatypusScriptedResource {
+
+        protected static AppCache cache;
+
+        public static void init(AppCache aCache) {
+            assert cache == null : "Platypus application resources may be initialized only once.";
+            cache = aCache;
         }
-        platypusLib.exec(currentContext, aScope);
-        return platypusLib;
+
+        protected static String translateResourcePath(String aPath) throws Exception {
+            /*
+             File test = new File(aPath);
+             if (test.exists()) {
+             // it seems, that id is a real file path
+             return test.getPath();
+             } else {
+             */
+            if (aPath.startsWith("/")) {
+                throw new IllegalStateException("Platypus resource path can't begin with /. Platypus resource paths must point somewhere in application, but not in filesystem.");
+            }
+            if (aPath.startsWith("..") || aPath.startsWith(".")) {
+                /*
+                 EvaluatorException ex = Context.reportRuntimeError("_");
+                 ScriptStackElement[] stack = ex.getScriptStack();
+                 traverse stack to reach non platypusStandardLib script and use it as base path
+                 */
+                throw new IllegalStateException("Platypus resource paths must be application-absolute. \"" + aPath + "\" is not application-absolute");
+            }
+            URI uri = new URI(null, null, aPath, null);
+            return uri.normalize().getPath();
+            //}
+        }
+
+        public static byte[] load(String aResourceId) throws Exception {
+            if (cache == null) {
+                throw new IllegalStateException("Platypus application resources have to be initialized first.");
+            }
+            String resourceId = translateResourcePath(aResourceId);
+            /*
+             File test = new File(resourceId);
+             if (test.exists()) {
+             return FileUtils.readBytes(test);
+             } else {
+             */
+            ApplicationElement appElement = cache.get(resourceId);
+            if (appElement != null && appElement.getType() == ClientConstants.ET_RESOURCE
+                    && !cache.isActual(appElement.getId(), appElement.getTxtContentLength(), appElement.getTxtCrc32())) {
+                cache.remove(appElement.getId());
+                appElement = cache.get(resourceId);
+            }
+            if (appElement != null && appElement.getType() == ClientConstants.ET_RESOURCE) {
+                return appElement.getBinaryContent();
+            } else {
+                return null;
+            }
+            //}
+        }
+
+        public static String loadText(String aResourceId) throws Exception {
+            return loadText(aResourceId, SettingsConstants.COMMON_ENCODING);
+        }
+
+        public static String loadText(String aResourceId, String aEncodingName) throws Exception {
+            byte[] data = load(aResourceId);
+            return data != null ? new String(data, aEncodingName) : null;
+        }
+    }
+    protected static Set<String> executedScriptResources = new HashSet<>();
+
+    public static void executeResource(String aResourceId) throws Exception {
+        String resourceId = PlatypusScriptedResource.translateResourcePath(aResourceId);
+        if (!executedScriptResources.contains(resourceId)) {
+            Context cx = Context.getCurrentContext();
+            boolean wasContext = cx != null;
+            if (!wasContext) {
+                cx = ScriptUtils.enterContext();
+            }
+            try {
+                String source = PlatypusScriptedResource.loadText(resourceId);
+                if (source != null) {
+                    Script lib = cx.compileString(source, resourceId, 0, null);
+                    lib.exec(cx, checkStandardObjects(cx));
+                } else {
+                    throw new IllegalStateException("Script resource not found: " + resourceId);
+                }
+            } finally {
+                if (!wasContext) {
+                    Context.exit();
+                }
+            }
+            executedScriptResources.add(resourceId);
+        }
+    }
+
+    public static Script importScriptLibrary(String libResourceName, String aLibName, Context currentContext, Scriptable aScope) throws IOException {
+        try (InputStream is = ScriptRunner.class.getResourceAsStream(libResourceName); InputStreamReader isr = new InputStreamReader(is)) {
+            Script compiled = currentContext.compileReader(isr, aLibName, 0, null);
+            compiled.exec(currentContext, aScope);
+            return compiled;
+        }
     }
 
     public static Scriptable checkStandardObjects(Context currentContext) {
@@ -485,17 +565,17 @@ public class ScriptRunner extends ScriptableObject {
             return func;
         }
     }
-/*
-    public class ModuleConstructor extends BaseFunction {
+    /*
+     public class ModuleConstructor extends BaseFunction {
 
-        public ModuleConstructor(Scriptable scope, Scriptable prototype) {
-            super(scope, prototype);
-        }
+     public ModuleConstructor(Scriptable scope, Scriptable prototype) {
+     super(scope, prototype);
+     }
 
-        @Override
-        public Scriptable construct(Context cx, Scriptable scope, Object[] args) {
-            return super.construct(cx, scope, args);
-        }
-    }
-    */ 
+     @Override
+     public Scriptable construct(Context cx, Scriptable scope, Object[] args) {
+     return super.construct(cx, scope, args);
+     }
+     }
+     */
 }

@@ -78,8 +78,10 @@ PointSymbol = com.eas.client.geo.PointSymbol;
 ComSession = com.eas.client.scripts.ole.ComSession;
 ComObject = com.eas.client.scripts.ole.ComObject;
 
-function getTreadLocal(aName)
-{
+//Resources
+Resource = com.eas.client.scripts.ScriptRunner.PlatypusScriptedResource;
+
+function getTreadLocal(aName) {
     return com.eas.script.ScriptUtils.getThreadLocal(aName);
 }
 Thread = java.lang.Thread;
@@ -120,9 +122,13 @@ Function.prototype.invokeBackground = function() {
  * This is a stub for dynamically loaded modules, since J2SE client
  * allways loads them dynamically and synchronously.
  */
-function require(deps, aCallback)
-{
-    return aCallback();
+function require(deps, aCallback) {
+    if(deps != null && deps != undefined){
+        for(var i = 0; i < deps.length; i++)
+            com.eas.client.scripts.ScriptRunner.executeResource(deps[i]);
+    }
+    if(aCallback != null && aCallback != undefined)
+        aCallback();    
 }
 
 function readString(aFileName, aEncoding) {

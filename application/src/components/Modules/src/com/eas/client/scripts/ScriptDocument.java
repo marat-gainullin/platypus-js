@@ -133,7 +133,7 @@ public class ScriptDocument {
 
     public void readScriptAnnotations() {
         ast = ScriptUtils.parseJs(scriptSource);
-        readModuleAnnotations();
+        final Set<Comment> functionComments = new HashSet<>();
         ast.visit(new NodeVisitor() {
 
             @Override
@@ -143,13 +143,15 @@ public class ScriptDocument {
                 }
                 if (node instanceof FunctionNode) {
                     readFunctionRoles(((FunctionNode) node).getName(), node.getJsDoc());
+                    functionComments.add(node.getJsDocNode());
                 }
                 return false;
             }
         });
+        readModuleAnnotations(functionComments);
     }
 
-    private void readModuleAnnotations() {
+    private void readModuleAnnotations(Set<Comment> aFunctionComments) {
         assert ast != null;
         moduleAnnotations = new ArrayList<>();
         SortedSet<Comment> comments = ast.getComments();
@@ -157,7 +159,7 @@ public class ScriptDocument {
             for (Comment comment : comments) {
                 if (comment.getCommentType().equals(Token.CommentType.JSDOC)) {
                     JsDoc jsDoc = new JsDoc(comment.getValue());
-                    if (jsDoc.isModuleLevel()) {
+                    if (jsDoc.containsModuleName() || !aFunctionComments.contains(comment)) {
                         jsDoc.parseAnnotations();
                         for (Tag tag : jsDoc.getAnnotations()) {
                             moduleAnnotations.add(tag);
@@ -176,7 +178,7 @@ public class ScriptDocument {
     private void readFunctionRoles(String aFunctionName, String aJsDocBody) {
         if (aJsDocBody != null) {
             JsDoc jsDoc = new JsDoc(aJsDocBody);
-            if (!jsDoc.isModuleLevel()) {
+            if (!jsDoc.containsModuleName()) {
                 jsDoc.parseAnnotations();
                 for (Tag tag : jsDoc.getAnnotations()) {
                     if (tag.getName().equals(JsDoc.Tag.ROLES_ALLOWED_TAG)) {

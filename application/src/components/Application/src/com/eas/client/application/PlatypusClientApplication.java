@@ -107,7 +107,7 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
     protected ScriptsCache scriptsCache;
     protected ScriptResolver scriptResolver;
     protected String appPath;
-    protected String appElementId = null;
+    protected String appElementId;
     protected boolean needInitialBreak;
     // auto login
     protected String url;
@@ -503,6 +503,7 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
             if (appElementId == null) {
                 appElementId = client.getStartAppElement();
             }
+            ScriptRunner.PlatypusScriptedResource.init(appCache);
             ScriptRunnerPrototype.init(ScriptUtils.getScope(), true);
             ServerScriptProxyPrototype.init(ScriptUtils.getScope(), true);
             ServerReportProxyPrototype.init(ScriptUtils.getScope(), true);
@@ -536,6 +537,8 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
                     ScriptRunner script = new ScriptRunner(appElementId, client, ScriptUtils.getScope(), this, this, this);
                     script.execute();
                     exit(0);
+                } else if (appElement.getType() == ClientConstants.ET_RESOURCE) {
+                    ScriptRunner.executeResource(appElement.getId());
                 } else {
                     Logger.getLogger(PlatypusClientApplication.class.getName()).severe(NON_RUNNABLE_APP_ELEMENT_MSG);
                     // no actions, so just exit.

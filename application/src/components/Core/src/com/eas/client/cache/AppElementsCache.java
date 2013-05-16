@@ -9,6 +9,7 @@ import com.eas.client.Client;
 import com.eas.client.ClientConstants;
 import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.threetier.PlatypusNativeClient;
+import com.eas.util.FileUtils;
 import com.eas.xml.dom.XmlDom2String;
 import java.io.*;
 import java.util.logging.Level;
@@ -21,6 +22,9 @@ import java.util.logging.Logger;
 public abstract class AppElementsCache<T extends Client> extends FreqCache<String, ApplicationElement> implements AppCache {
 
     public static final String PROPERTY_REQUIRED_MSG = "Property %s is required";
+    public static final String APP_ELEMENT_PROPERTIES_FILE_NAME = "entity.properties";
+    public static final String APP_ELEMENT_TXT_CONTENT_FILE_NAME = "entity.txt";
+    public static final String APP_ELEMENT_BIN_CONTENT_FILE_NAME = "entity.bin";
     protected T client = null;
     protected String CACHED_ENTITIES_PATH;
 
@@ -68,7 +72,8 @@ public abstract class AppElementsCache<T extends Client> extends FreqCache<Strin
         if (!path.exists()) {
             path.mkdir();
         }
-        pathName += File.separator + String.valueOf(aId);
+        pathName += File.separator + aId;
+        pathName = pathName.replace('/', File.separatorChar);
         return pathName;
     }
 
@@ -126,14 +131,17 @@ public abstract class AppElementsCache<T extends Client> extends FreqCache<Strin
                     removeFromFileCache(entityId);
                     String entityDirectory = generatePath(entityId);
                     File cachedEntityFile = new File(entityDirectory);
-                    File propsFile = new File(entityDirectory + File.separator + "entity.properties");
-                    File txtFile = new File(entityDirectory + File.separator + "entity.txt");
+                    File propsFile = new File(entityDirectory + File.separator + APP_ELEMENT_PROPERTIES_FILE_NAME);
+                    File txtFile = new File(entityDirectory + File.separator + APP_ELEMENT_TXT_CONTENT_FILE_NAME);
+                    File binaryFile = new File(entityDirectory + File.separator + APP_ELEMENT_BIN_CONTENT_FILE_NAME);
                     assert !propsFile.exists();
                     assert !txtFile.exists();
+                    assert !binaryFile.exists();
                     assert !cachedEntityFile.exists();
-                    if (cachedEntityFile.mkdir()
+                    if (cachedEntityFile.mkdirs()
                             && propsFile.createNewFile()
-                            && txtFile.createNewFile()) {
+                            && txtFile.createNewFile()
+                            && binaryFile.createNewFile()) {
                         StringBuilder propsString = new StringBuilder();
                         propsString.append(ClientConstants.F_MDENT_ID);
                         propsString.append("=");
@@ -163,8 +171,12 @@ public abstract class AppElementsCache<T extends Client> extends FreqCache<Strin
 
                         string2File(propsFile, propsString.toString());
 
-                        if (aAppElement.getContent() != null) {
-                            string2File(txtFile, XmlDom2String.transform(aAppElement.getContent()));
+                        if (aAppElement.getType() == ClientConstants.ET_RESOURCE) {
+                            FileUtils.writeBytes(binaryFile, aAppElement.getBinaryContent());
+                        } else {
+                            if (aAppElement.getContent() != null) {
+                                string2File(txtFile, XmlDom2String.transform(aAppElement.getContent()));
+                            }
                         }
                     }
                 } catch (Exception ex) {
@@ -179,24 +191,28 @@ public abstract class AppElementsCache<T extends Client> extends FreqCache<Strin
         if (aId != null) {
             try {
                 String cachedPath = generatePath(aId);
-                File cachedPathFile = new File(cachedPath);
-                File propsFile = new File(cachedPath + File.separator + "entity.properties");
-                File txtFile = new File(cachedPath + File.separator + "entity.txt");
+                File cachedPathDirectory = new File(cachedPath);
+                File propsFile = new File(cachedPath + File.separator + APP_ELEMENT_PROPERTIES_FILE_NAME);
+                File txtFile = new File(cachedPath + File.separator + APP_ELEMENT_TXT_CONTENT_FILE_NAME);
+                File binaryFile = new File(cachedPath + File.separator + APP_ELEMENT_BIN_CONTENT_FILE_NAME);
                 if (txtFile.exists()) {
                     txtFile.delete();
+                }
+                if (binaryFile.exists()) {
+                    binaryFile.delete();
                 }
                 if (propsFile.exists()) {
                     propsFile.delete();
                 }
-                if (cachedPathFile.exists()) {
-                    String[] filesNames = cachedPathFile.list();
+                if (cachedPathDirectory.exists()) {
+                    String[] filesNames = cachedPathDirectory.list();
                     for (String fileName : filesNames) {
                         File file = new File(cachedPath + File.separator + fileName);
                         if (file.exists()) {
                             file.delete();
                         }
                     }
-                    cachedPathFile.delete();
+                    cachedPathDirectory.delete();
                 }
             } catch (Exception ex) {
                 Logger.getLogger(PlatypusNativeClient.class.getName()).log(Level.SEVERE, null, ex);
@@ -217,14 +233,18 @@ public abstract class AppElementsCache<T extends Client> extends FreqCache<Strin
         synchronized (lock) {
             ApplicationElement appElement = null;
             try {
-                String entityDirectory = generatePath(aId);
-                File cachedEntityDirectory = new File(entityDirectory);
-                File propsFile = new File(entityDirectory + File.separator + "entity.properties");
-                File txtFile = new File(entityDirectory + File.separator + "entity.txt");
+                String entityDirectoryPath = generatePath(aId);
+                File cachedEntityDirectory = new File(entityDirectoryPath);
+                File propsFile = new File(entityDirectoryPath + File.separator + APP_ELEMENT_PROPERTIES_FILE_NAME);
+                File txtFile = new File(entityDirectoryPath + File.separator + APP_ELEMENT_TXT_CONTENT_FILE_NAME);
+                File binaryFile = new File(entityDirectoryPath + File.separator + APP_ELEMENT_BIN_CONTENT_FILE_NAME);
                 if (cachedEntityDirectory.exists() && cachedEntityDirectory.isDirectory()
-                        && propsFile.exists() && !propsFile.isDirectory() && txtFile.exists()
-                        && !txtFile.isDirectory() && propsFile.length() <= Integer.MAX_VALUE
-                        && txtFile.length() <= Integer.MAX_VALUE) {
+                        && propsFile.exists() && !propsFile.isDirectory()
+                        && txtFile.exists() && !txtFile.isDirectory()
+                        && binaryFile.exists() && !binaryFile.isDirectory()
+                        && propsFile.length() <= Integer.MAX_VALUE
+                        && txtFile.length() <= Integer.MAX_VALUE
+                        && binaryFile.length() <= Integer.MAX_VALUE) {
                     // properties
                     String propsString = file2String(propsFile);
                     String[] propsStrings = propsString.split("\n");
@@ -274,7 +294,11 @@ public abstract class AppElementsCache<T extends Client> extends FreqCache<Strin
                         }
                     }
                     // content
-                    appElement.setTxtContent(file2String(txtFile));
+                    if (appElement.getType() == ClientConstants.ET_RESOURCE) {
+                        appElement.setBinaryContent(FileUtils.readBytes(binaryFile));
+                    } else {
+                        appElement.setTxtContent(file2String(txtFile));
+                    }
                 }
             } catch (IOException | NumberFormatException | IllegalStateException ex) {
                 appElement = null;

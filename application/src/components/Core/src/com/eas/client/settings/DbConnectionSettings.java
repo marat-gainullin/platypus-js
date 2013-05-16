@@ -157,7 +157,7 @@ public class DbConnectionSettings extends EasSettings {
         Map<String, String> drivers = new HashMap<>();
         if (is.available() > 0) {
             try {
-                String driversDataString = new String(BinaryUtils.readStream(is, -1), "utf-8"); //NOI18N
+                String driversDataString = new String(BinaryUtils.readStream(is, -1), SettingsConstants.COMMON_ENCODING);
                 Document driversDoc = Source2XmlDom.transform(driversDataString);
                 Node jdbcNode = driversDoc.getFirstChild();
                 if (jdbcNode != null && "jdbc".equals(jdbcNode.getNodeName())) { //NOI18N

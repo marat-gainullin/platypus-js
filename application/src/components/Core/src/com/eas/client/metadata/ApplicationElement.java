@@ -22,6 +22,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.CRC32;
 import org.w3c.dom.Document;
+import sun.misc.UUDecoder;
 
 /**
  *
@@ -49,6 +50,7 @@ public class ApplicationElement {
     protected double order;
     protected int type;
     protected Document content;
+    protected byte[] binaryContent;
     protected Long txtCrc32;
     protected Long txtContentLength;
 
@@ -153,6 +155,14 @@ public class ApplicationElement {
         content = aValue;
     }
 
+    public byte[] getBinaryContent() {
+        return binaryContent;
+    }
+
+    public void setBinaryContent(byte[] aValue) {
+        binaryContent = aValue;
+    }
+
     public long getTxtContentLength() {
         return txtContentLength != null ? txtContentLength : 0;
     }
@@ -209,6 +219,8 @@ public class ApplicationElement {
         }
         Fields lmd = aRowset.getFields();
         if (lmd != null) {
+            String txtContent = null;
+            byte[] binaryContent = null;
             for (int f = 1; f <= lmd.getFieldsCount(); f++) {
                 String colName = lmd.get(f).getName();
                 Object colValue = aRowset.getObject(f);
@@ -225,19 +237,25 @@ public class ApplicationElement {
                     aElement.setParentId(aRowset.getString(f));
                 } else if (ClientConstants.F_MDENT_CONTENT_TXT.equalsIgnoreCase(colName)) {
                     if (colValue instanceof String) {
-                        aElement.setTxtContent((String) colValue);
+                        txtContent = (String) colValue;
                     } else if (colValue instanceof Clob) {
                         Clob clob = (Clob) colValue;
-                        aElement.setTxtContent(clob.getSubString(1, (int) clob.length()));
+                        txtContent = clob.getSubString(1, (int) clob.length());
                     } else if (colValue instanceof CompactClob) {
                         CompactClob clob = (CompactClob) colValue;
-                        aElement.setTxtContent(clob.getData());
+                        txtContent = clob.getData();
                     }
                 } else if (ClientConstants.F_MDENT_CONTENT_TXT_SIZE.equalsIgnoreCase(colName)) {
                     aElement.setTxtContentLength(aRowset.getLong(f));
                 } else if (ClientConstants.F_MDENT_CONTENT_TXT_CRC32.equalsIgnoreCase(colName)) {
                     aElement.setTxtCrc32(aRowset.getLong(f));
                 }
+            }
+            if (aElement.getType() == ClientConstants.ET_RESOURCE) {
+                UUDecoder decoder = new UUDecoder();
+                aElement.setBinaryContent(decoder.decodeBuffer(txtContent));
+            } else {
+                aElement.setTxtContent(txtContent);
             }
         }
         return aElement;

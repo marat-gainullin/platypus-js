@@ -60,6 +60,12 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
         super.addEntity(aEntity);
     }
 
+    @Override
+    public void setParametersEntity(ApplicationDbParametersEntity aParamsEntity) {
+        super.setParametersEntity(aParamsEntity);
+        parametersEntity.setModel(this);
+    }
+
     /**
      * Method checks if the type is supported for datamodel's internal usage.
      * The types are fields or parameters types. If the type is reported as

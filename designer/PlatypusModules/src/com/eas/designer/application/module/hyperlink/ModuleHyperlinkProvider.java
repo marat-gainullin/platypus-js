@@ -4,7 +4,6 @@
  */
 package com.eas.designer.application.module.hyperlink;
 
-import com.eas.designer.application.indexer.IndexerQuery;
 import com.eas.designer.application.module.PlatypusModuleDataObject;
 import com.eas.designer.application.module.completion.CompletionContext;
 import com.eas.designer.application.module.completion.ModuleCompletionContext;
@@ -90,7 +89,6 @@ public class ModuleHyperlinkProvider implements HyperlinkProviderExt {
         final AtomicBoolean cancel = new AtomicBoolean();
         String name = NbBundle.getMessage(ModuleHyperlinkProvider.class, "NM_GoToDeclaration");
         ProgressUtils.runOffEventDispatchThread(new Runnable() {
-
             @Override
             public void run() {
                 perform(doc, offset, cancel);
@@ -107,11 +105,15 @@ public class ModuleHyperlinkProvider implements HyperlinkProviderExt {
         FileObject fo = NbEditorUtilities.getFileObject(doc);
         PlatypusModuleDataObject dataObject = null;
         try {
-            dataObject = (PlatypusModuleDataObject) DataObject.find(fo);
+            DataObject dObject = DataObject.find(fo);
+            if (dObject instanceof PlatypusModuleDataObject) {
+                dataObject = (PlatypusModuleDataObject) dObject;
+                return dataObject.getAst();
+            }
         } catch (DataObjectNotFoundException ex) {
             Exceptions.printStackTrace(ex);
         }
-        return dataObject.getAst();
+        return null;
     }
 
     private void perform(final Document doc, final int offset, final AtomicBoolean cancel) {
@@ -145,7 +147,7 @@ public class ModuleHyperlinkProvider implements HyperlinkProviderExt {
             if (typeCompletionContext == null || typeCompletionContext == null || !(typeCompletionContext instanceof ModuleCompletionContext)) {
                 return DeclarationLocation.NONE;
             }
-            appElementDataObject = ((ModuleCompletionContext)typeCompletionContext).getDataObject();
+            appElementDataObject = ((ModuleCompletionContext) typeCompletionContext).getDataObject();
             if (appElementDataObject == null) {
                 return DeclarationLocation.NONE;
             }
@@ -166,7 +168,6 @@ public class ModuleHyperlinkProvider implements HyperlinkProviderExt {
                 identifiersPath.add(((Name) node).getIdentifier());
             } else {
                 node.getParent().visit(new NodeVisitor() {
-
                     @Override
                     public boolean visit(AstNode an) {
                         if (an instanceof Name) {
@@ -243,7 +244,6 @@ public class ModuleHyperlinkProvider implements HyperlinkProviderExt {
         assert dataObject != null;
         if (!SwingUtilities.isEventDispatchThread()) {
             SwingUtilities.invokeLater(new Runnable() {
-
                 public @Override
                 void run() {
                     doOpen(dataObject, offset);

@@ -222,7 +222,7 @@ public class PlatypusProject implements Project {
     private void connect2db() {
         try {
             DbConnectionSettings dbSettings = settings.getAppSettings().getDbSettings();
-            dbSettings.setApplicationPath(getApplicationRoot().getPath());
+            dbSettings.setApplicationPath(getProjectDirectory().getPath());
 
             String dbSchema = dbSettings.getInfo().getProperty(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME);
             if (dbSchema != null && !dbSchema.isEmpty()) {
@@ -337,11 +337,11 @@ public class PlatypusProject implements Project {
         return state;
     }
 
-    public final FileObject getApplicationRoot() throws Exception {
+    public final FileObject getSrcRoot() throws Exception {
         return getDirectory(PlatypusUtils.PLATYPUS_PROJECT_SOURCES_ROOT);
     }
 
-    public FileObject getDbMigrationsDirectory() throws Exception {
+    public FileObject getDbMigrationsRoot() throws Exception {
         return getDirectory(PlatypusUtils.PLATYPUS_PROJECT_DB_MIGRATIONS_DIR);
     }
 
@@ -367,7 +367,7 @@ public class PlatypusProject implements Project {
         protected void projectOpened() {
             try {
                 Logger.getLogger(PlatypusProject.class.getName()).log(Level.INFO, "Project opened");
-                sourceRoot = ClassPath.getClassPath(getApplicationRoot(), PlatypusPathRecognizer.SOURCE_CP);
+                sourceRoot = ClassPath.getClassPath(getSrcRoot(), PlatypusPathRecognizer.SOURCE_CP);
                 GlobalPathRegistry.getDefault().register(PlatypusPathRecognizer.SOURCE_CP, new ClassPath[]{sourceRoot});
                 startConnecting2db();
             } catch (Exception ex) {
@@ -409,7 +409,7 @@ public class PlatypusProject implements Project {
                 if (resources != null) {
                     return resources;
                 }
-                final URL[] urls = {getApplicationRoot().toURL()};
+                final URL[] urls = {getSrcRoot().toURL()};
                 if (resources == null) {
                     PathResourceImpl pri = new PathResourceImpl(urls);
                     resources = Collections.<PathResourceImplementation>singletonList(pri);

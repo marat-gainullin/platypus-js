@@ -106,6 +106,7 @@ public class ClientConstants {
     public static final int ET_DB_SCHEME = 60;
     public static final int ET_FOLDER = 70;
     public static final int ET_FORM = 90;
+    public static final int ET_RESOURCE = 100;
     // Типы элементов метаданных БД
     public static final int DB_MD_TYPE_TABLES = 1;
     public static final int DB_MD_TYPE_SCHEMAS = 2;

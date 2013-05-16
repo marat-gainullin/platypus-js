@@ -293,6 +293,7 @@ public class ServerMain {
         PlatypusServer server = new PlatypusServer(appDbClient, ctx, getListenAddresses(), getPortsProtocols(), tasks, appElement);
         appDbClient.setContextHost(server);
         appDbClient.setPrincipalHost(server);
+        ScriptRunner.PlatypusScriptedResource.init(appDbClient.getAppCache());
         Thread sgc = new Thread(new GarbageSessionsCollector(server));
         sgc.setDaemon(true);
         sgc.start();
@@ -311,7 +312,6 @@ public class ServerMain {
 
     private static void printHelp(String string) {
         System.err.println(string);
-        System.err.println(String.format("Refer to %s sources for help.", ServerMain.class.getName()));
     }
 
     private static InetSocketAddress[] getListenAddresses() {

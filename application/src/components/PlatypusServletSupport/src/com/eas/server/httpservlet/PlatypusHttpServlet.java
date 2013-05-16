@@ -7,6 +7,7 @@ import com.eas.client.DatabasesClient;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.model.script.ScriptableRowset;
 import com.eas.client.queries.Query;
+import com.eas.client.scripts.ScriptRunner;
 import com.eas.client.settings.SettingsConstants;
 import com.eas.client.threetier.ErrorResponse;
 import com.eas.client.threetier.Request;
@@ -88,6 +89,7 @@ public class PlatypusHttpServlet extends HttpServlet {
             logger.setUseParentHandlers(false);
             
             DatabasesClient serverCoreDbClient = new DatabasesClient(scp.getDbSettings(), true);
+            ScriptRunner.PlatypusScriptedResource.init(serverCoreDbClient.getAppCache());
             serverCore = new PlatypusServerCore(serverCoreDbClient, scp.getModuleConfigs(), scp.getAppElementId());
             serverCoreDbClient.setContextHost(serverCore);
             serverCoreDbClient.setPrincipalHost(serverCore);

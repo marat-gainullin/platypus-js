@@ -13,6 +13,7 @@ import com.eas.client.queries.SqlCompiledQuery;
 import com.eas.client.queries.SqlQuery;
 import com.eas.client.scripts.ScriptDocument;
 import com.eas.client.scripts.store.Dom2ScriptDocument;
+import com.eas.client.settings.SettingsConstants;
 import com.eas.client.threetier.Response;
 import com.eas.client.threetier.requests.AppElementRequest;
 import com.eas.server.PlatypusServerCore;
@@ -38,7 +39,8 @@ public class AppElementRequestHandler extends SessionRequestHandler<AppElementRe
     protected Response handle2() throws Exception {
         ApplicationElement appElement = null;
         if (getServerCore().getDatabasesClient().getAppCache() instanceof FilesAppCache) {
-            appElement = getServerCore().getDatabasesClient().getAppCache().get(getRequest().getAppElementId());
+            FilesAppCache filesCache = (FilesAppCache) getServerCore().getDatabasesClient().getAppCache();
+            appElement = filesCache.get(getRequest().getAppElementId());
         } else {
             SqlQuery query = new SqlQuery(getServerCore().getDatabasesClient(), ClientConstants.SQL_SELECT_MD);
             query.putParameter(ClientConstants.APP_ELEMENT_SQL_PARAM_NAME, DataTypeInfo.VARCHAR, getRequest().getAppElementId());
@@ -58,7 +60,8 @@ public class AppElementRequestHandler extends SessionRequestHandler<AppElementRe
     protected ApplicationElement checkResourceKindAndRoles(ApplicationElement appElement) throws Exception {
         if (ClientConstants.ET_COMPONENT == appElement.getType()
                 || ClientConstants.ET_REPORT == appElement.getType()
-                || ClientConstants.ET_FORM == appElement.getType()) {
+                || ClientConstants.ET_FORM == appElement.getType()
+                || ClientConstants.ET_RESOURCE == appElement.getType()) {
             checkResourceRoles(appElement);
         } else {
             // We disallow access of any three-tier client to application
@@ -75,10 +78,19 @@ public class AppElementRequestHandler extends SessionRequestHandler<AppElementRe
     }
 
     private void checkResourceRoles(ApplicationElement aAppElement) throws Exception {
-        Document doc = aAppElement.getContent();
-        ScriptDocument scriptDoc = Dom2ScriptDocument.dom2ScriptDocument(getServerCore().getDatabasesClient(), doc);
-        scriptDoc.readScriptAnnotations();
-        Set<String> rolesAllowed = scriptDoc.getModuleAllowedRoles();
+        Set<String> rolesAllowed = null;
+        if (aAppElement.getType() == ClientConstants.ET_RESOURCE) {
+            if (aAppElement.getName() != null && (aAppElement.getName().endsWith(".js") || aAppElement.getName().endsWith(".json"))) {
+                ScriptDocument scriptDoc = new ScriptDocument(null, new String(aAppElement.getBinaryContent(), SettingsConstants.COMMON_ENCODING));
+                scriptDoc.readScriptAnnotations();
+                rolesAllowed = scriptDoc.getModuleAllowedRoles();
+            }
+        } else {
+            Document doc = aAppElement.getContent();
+            ScriptDocument scriptDoc = Dom2ScriptDocument.dom2ScriptDocument(getServerCore().getDatabasesClient(), doc);
+            scriptDoc.readScriptAnnotations();
+            rolesAllowed = scriptDoc.getModuleAllowedRoles();
+        }
         if (rolesAllowed != null && !getSession().getPrincipal().hasAnyRole(rolesAllowed)) {
             throw new AccessControlException(String.format(ACCESS_DENIED_MSG, aAppElement.getName(), aAppElement.getId(), getSession().getPrincipal().getName()));
         }
