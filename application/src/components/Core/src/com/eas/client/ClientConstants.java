@@ -120,6 +120,8 @@ public class ClientConstants {
     public static final String DB_CONNECTION_SCHEMA_PROP_NAME = "schema";
     public static final String DB_CONNECTION_CURRENT_SCHEMA_PROP_NAME = "currentSchema";
     public static final String DB_CONNECTION_URL_PROP_NAME = "url";
+    public static final String APP_PATH_CMD_PROP_NAME = "applicationpath";
+    public static final String APP_PATH_CMD_PROP_NAME1 = "ap";
     public static final String DB_CONNECTION_DIALECT_PROP_NAME = "dialect";
     /*
      * Database dialects are used as keys to select the Playpus driver or JDBC driver.

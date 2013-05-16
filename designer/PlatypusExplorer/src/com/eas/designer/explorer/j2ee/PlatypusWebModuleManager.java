@@ -4,36 +4,25 @@
  */
 package com.eas.designer.explorer.j2ee;
 
+import com.eas.client.ClientConstants;
+import com.eas.client.resourcepool.GeneralResourceProvider;
+import com.eas.client.settings.DbConnectionSettings;
 import com.eas.designer.application.PlatypusUtils;
 import com.eas.designer.explorer.platform.EmptyPlatformHomePathException;
 import com.eas.designer.explorer.platform.PlatypusPlatform;
 import com.eas.designer.explorer.project.PlatypusProject;
 import com.eas.util.FileUtils;
 import com.eas.xml.dom.XmlDom2String;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.ZipException;
-import javax.xml.parsers.ParserConfigurationException;
-import org.netbeans.modules.j2ee.dd.api.common.NameAlreadyUsedException;
-import org.netbeans.modules.j2ee.dd.api.web.DDProvider;
-import org.netbeans.modules.j2ee.dd.api.web.Servlet;
-import org.netbeans.modules.j2ee.dd.api.web.ServletMapping;
-import org.netbeans.modules.j2ee.dd.api.web.WebApp;
 import org.netbeans.modules.j2ee.deployment.devmodules.api.Deployment;
-import org.netbeans.modules.j2ee.deployment.devmodules.api.Deployment.DeploymentException;
 import org.netbeans.modules.j2ee.deployment.devmodules.spi.J2eeModuleProvider;
 import org.openide.ErrorManager;
-import org.openide.filesystems.FileLock;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
-import org.openide.util.Exceptions;
 
 /**
  * A tool to prepare and deploy the Platypus web module.
@@ -51,7 +40,6 @@ public class PlatypusWebModuleManager {
     protected static final String JS_DIRECTORY_NAME = "js"; //NOI18N
     protected static final String START_JS_FILE_NAME = "start.js"; //NOI18N
     protected static final String WEB_XML_FILE_NAME = "web.xml"; //NOI18N
-    protected static final String WEB_XML_TEMPLATE_NAME = "web-3.0.xml"; //NOI18N
     protected static final String SERVLET_BEAN_NAME = "Servlet"; //NOI18N
     protected static final String MULTIPART_CONFIG_BEAN_NAME = "MultipartConfig"; //NOI18N
     protected static final String SERVLET_MAPPING_BEAN_NAME = "ServletMapping"; //NOI18N
@@ -105,7 +93,7 @@ public class PlatypusWebModuleManager {
                 Logger.getLogger(PlatypusWebModuleManager.class.getName()).log(Level.INFO, deployResultMessage);
                 project.getOutputWindowIO().getOut().println(deployResultMessage);
 
-            } catch (IOException | EmptyPlatformHomePathException | DeploymentException | ParserConfigurationException ex) {
+            } catch (Exception ex) {
                 ErrorManager.getDefault().notify(ex);
             }
         } else {
@@ -129,7 +117,7 @@ public class PlatypusWebModuleManager {
                 throw new ZipException("Error reading web application archive.");
             }
         } else {
-            throw new FileNotFoundException("Web application archive is not found at: " + referenceWar.getPath());
+            throw new FileNotFoundException("Web application archive is not found at: " + PlatypusPlatform.getPlatformBinDirectory());
         }
         webInfDir = createFolderIfNotExists(webAppDir, PlatypusWebModule.WEB_INF_DIRECTORY);
         metaInfDir = createFolderIfNotExists(webAppDir, PlatypusWebModule.META_INF_DIRECTORY);
@@ -180,7 +168,7 @@ public class PlatypusWebModuleManager {
      *
      * @param aJmp Web Module
      */
-    protected void configureWebApplication(J2eeModuleProvider aJmp) throws IOException, ParserConfigurationException {
+    protected void configureWebApplication(J2eeModuleProvider aJmp) throws Exception {
         WebAppConfigurator webAppConfigurator = WebAppConfiguratorFactory.getInstance().createWebConfigurator(project, aJmp.getServerID());
         if (webAppConfigurator != null) {
             webAppConfigurator.configure();
@@ -192,75 +180,24 @@ public class PlatypusWebModuleManager {
         configureDeploymentDescriptor();
     }
     
-    private void configureDeploymentDescriptor() throws IOException, ParserConfigurationException {
+    private void configureDeploymentDescriptor() throws Exception {     
+        WebApplication wa = new WebApplication();
+        wa.addInitParam(new WebApplication.ContextParam(ClientConstants.APP_PATH_CMD_PROP_NAME1, project.getApplicationRoot().getPath()));
+        wa.addInitParam(new WebApplication.ContextParam(ClientConstants.DB_CONNECTION_URL_PROP_NAME, PlatypusWebModule.MAIN_DATASOURCE_NAME));
+        DbConnectionSettings dbSettings = project.getSettings().getAppSettings().getDbSettings();
+        String dbConnectionSchema = dbSettings.getInfo().getProperty(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME);
+        if (dbConnectionSchema != null && !dbConnectionSchema.isEmpty()) {
+            wa.addInitParam(new WebApplication.ContextParam(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME, dbConnectionSchema));
+        }
+        String dialect = GeneralResourceProvider.constructPropertiesByDbConnectionSettings(dbSettings).getProperty(ClientConstants.DB_CONNECTION_DIALECT_PROP_NAME);
+        wa.addInitParam(new WebApplication.ContextParam(ClientConstants.DB_CONNECTION_DIALECT_PROP_NAME, dialect));
         FileObject webXml = webInfDir.getFileObject(WEB_XML_FILE_NAME);
         if (webXml == null) {
             webXml = webInfDir.createData(WEB_XML_FILE_NAME);
-        } 
-        
-        WebApplication wa = new WebApplication();
-        wa.addInitParam(new WebApplication.ContextParam("url", PlatypusWebModule.MAIN_DATASOURCE_NAME));
+        }
         FileUtils.writeString(FileUtil.toFile(webXml), XmlDom2String.transform(wa.toDocument()), PlatypusUtils.COMMON_ENCODING_NAME);
-//        WebApp webApp = DDProvider.getDefault().getDDRoot(webXml);
-//        webApp.setDisplayName(project.getDisplayName());  
-//        configurePlatypusServlet(webApp);
-//        
-//        webApp.write(webXml);
     }
     
-    private void configurePlatypusServlet(WebApp webApp) {
-        try {
-            Servlet platypusServlet = findPlatypusServlet(webApp);
-            if (platypusServlet == null) {
-                try {
-                    platypusServlet = (Servlet) webApp.addBean(SERVLET_BEAN_NAME);     
-                } catch (ClassNotFoundException ex) {
-                    ErrorManager.getDefault().notify(ex); 
-                } 
-            }
-            platypusServlet.setServletName(PLATYPUS_SERVLET_NAME);
-            platypusServlet.setServletClass(PLATYPUS_SERVLET_CLASS);
-            ServletMapping platypusServletMapping = findPlatypusServletMapping(webApp);
-            if (platypusServletMapping == null) {
-                platypusServletMapping = (ServletMapping) webApp.addBean(SERVLET_MAPPING_BEAN_NAME);
-            }
-            platypusServletMapping.setServletName(PLATYPUS_SERVLET_NAME);
-            platypusServletMapping.setUrlPattern(PLATYPUS_SERVLET_URL_PATTERN);
-            
-        } catch (ClassNotFoundException ex) {
-            ErrorManager.getDefault().notify(ex);
-        }
-    }
-    
-    private Servlet findPlatypusServlet(WebApp webApp) {
-        for (Servlet servlet : webApp.getServlet()) {
-            if (PLATYPUS_SERVLET_NAME.equals(servlet.getServletName())) {
-                return servlet;
-            }
-        }
-        return null;
-    }
-    
-    private ServletMapping findPlatypusServletMapping(WebApp webApp) {
-        for (ServletMapping servletMapping : webApp.getServletMapping()) {
-            if (PLATYPUS_SERVLET_NAME.equals(servletMapping.getServletName())) {
-                return servletMapping;
-            }
-        }
-        return null;
-    }
-    
-    
-    private FileObject createWebXml(FileObject dir) throws IOException {
-        MakeFileCopy action = new MakeFileCopy(WEB_XML_TEMPLATE_NAME, dir, WEB_XML_FILE_NAME);
-        FileUtil.runAtomicAction(action);
-        if (action.getException() != null) {
-            throw action.getException();
-        } else {
-            return action.getResult();
-        }
-    }
-
     protected void setStartApplicationElement(String appElementId) throws IOException {
         if (appElementId != null && !appElementId.isEmpty()) {
             FileObject jsDir = webAppDir.getFileObject(JS_DIRECTORY_NAME);
@@ -273,69 +210,6 @@ public class PlatypusWebModuleManager {
             }
         } else {
             throw new IllegalStateException("appElementId is null or empty.");
-        }
-    }
-
-    private static class MakeFileCopy implements Runnable {
-
-        private String fromFile;
-        private FileObject toDir;
-        private String toFile;
-        private IOException exception;
-        private FileObject result;
-
-        MakeFileCopy(String fromFile, FileObject toDir, String toFile) {
-            this.fromFile = fromFile;
-            this.toDir = toDir;
-            this.toFile = toFile;
-        }
-
-        IOException getException() {
-            return exception;
-        }
-
-        FileObject getResult() {
-            return result;
-        }
-
-        @Override
-        public void run() {
-            try {
-                // PENDING : should be easier to define in layer and copy related FileObject (doesn't require systemClassLoader)
-                if (toDir.getFileObject(toFile) != null) {
-                    throw new IllegalStateException("file " + toFile + " already exists in " + toDir);
-                }
-                FileObject xml = FileUtil.createData(toDir, toFile);
-                String content = readResource(PlatypusWebModuleManager.class.getResourceAsStream(fromFile));
-                if (content != null) {
-                    FileLock lock = xml.lock();
-                    try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(xml.getOutputStream(lock)))) {
-                        bw.write(content);
-                    } finally {
-                        lock.releaseLock();
-                    }
-                }
-                result = xml;
-            } catch (IOException e) {
-                exception = e;
-            }
-        }
-
-        private String readResource(InputStream is) throws IOException {
-            StringBuilder sb = new StringBuilder();
-            String lineSep = System.getProperty("line.separator"); // NOI18N
-            BufferedReader br = new BufferedReader(new InputStreamReader(is));
-            try {
-                String line = br.readLine();
-                while (line != null) {
-                    sb.append(line);
-                    sb.append(lineSep);
-                    line = br.readLine();
-                }
-            } finally {
-                br.close();
-            }
-            return sb.toString();
         }
     }
 }

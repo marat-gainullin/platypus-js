@@ -33,8 +33,9 @@ public class XmlDom2String
         try
         {
             transformer = tfactory.newTransformer();
-            transformer.setOutputProperty(OutputKeys.STANDALONE, "yes");
+            //transformer.setOutputProperty(OutputKeys.STANDALONE, "yes");
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+            transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
         }
         catch (TransformerConfigurationException ex)
         {
