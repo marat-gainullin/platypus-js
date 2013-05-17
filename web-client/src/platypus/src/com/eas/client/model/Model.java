@@ -135,9 +135,6 @@ public class Model {// implements Cancellable {
 		for (Entity entity : entities.values()) {
 			copied.addEntity(entity.copy());
 		}
-		for (Relation relation : relations) {
-			copied.addRelation(relation.copy());
-		}
 		if (parameters != null) {
 			copied.setParameters(parameters.copy());
 		}
@@ -146,10 +143,44 @@ public class Model {// implements Cancellable {
 			assert pEntity instanceof ParametersEntity;
 			copied.setParametersEntity((ParametersEntity) pEntity);
 		}
-		copied.resolveReferences();
+	    for (Relation relation : relations) {
+	        Relation rcopied = relation.copy();
+	        resolveCopiedRelation(rcopied, copied);
+	        copied.addRelation(rcopied);
+	    }
 		return copied;
 	}
 
+    protected void resolveCopiedRelation(Relation aRelation, Model aModel) throws Exception {
+        if (aRelation.getLeftEntity() != null) {
+            aRelation.setLeftEntity(aModel.getEntityById(aRelation.getLeftEntity().getEntityId()));
+        }
+        if (aRelation.getRightEntity() != null) {
+            aRelation.setRightEntity(aModel.getEntityById(aRelation.getRightEntity().getEntityId()));
+        }
+        if (aRelation.getLeftField() != null) {
+            if (aRelation.getLeftEntity() != null) {
+                if (aRelation.isLeftParameter() && aRelation.getLeftEntity().getQueryId() != null) {
+                    aRelation.setLeftField(aRelation.getLeftEntity().getQuery().getParameters().get(aRelation.getLeftField().getName()));
+                } else {
+                    aRelation.setLeftField(aRelation.getLeftEntity().getFields().get(aRelation.getLeftField().getName()));
+                }
+            } else {
+                aRelation.setLeftField(null);
+            }
+        }
+        if (aRelation.getRightField() != null) {
+            if (aRelation.getRightEntity() != null) {
+                if (aRelation.isRightParameter() && aRelation.getRightEntity().getQueryId() != null) {
+                    aRelation.setRightField(aRelation.getRightEntity().getQuery().getParameters().get(aRelation.getRightField().getName()));
+                } else {
+                    aRelation.setRightField(aRelation.getRightEntity().getFields().get(aRelation.getRightField().getName()));
+                }
+            } else {
+                aRelation.setRightField(null);
+            }
+        }
+    }
 	/**
 	 * Base model constructor.
 	 */
@@ -370,6 +401,7 @@ public class Model {// implements Cancellable {
 
 	public void addEntity(Entity aEntity) {
 		entities.put(aEntity.getEntityId(), aEntity);
+		aEntity.setModel(this);
 	}
 
 	public boolean removeEntity(Entity aEnt) {
@@ -387,37 +419,12 @@ public class Model {// implements Cancellable {
 		return lent;
 	}
 
-	public void resolveReferences() {
-		for (Entity ent : entities.values()) {
-			ent.setModel(this);
-		}
-		for (Relation rel : relations) {
-			Entity lEntity = entities.get(rel.getLeftEntityId());
-			rel.setLEntity(lEntity);
-			lEntity.addOutRelation(rel);
-
-			Entity rEntity = entities.get(rel.getRightEntityId());
-			rel.setREntity(rEntity);
-			rEntity.addInRelation(rel);
-		}
-	}
-
 	public Map<String, Entity> getEntities() {
 		return entities;
 	}
 
 	public Entity getEntityById(String aId) {
 		return entities.get(aId);
-	}
-
-	public void fixupReferences() {
-		if (entities != null) {
-			for (Entity ent : entities.values()) {
-				if (ent != null) {
-					ent.setModel(this);
-				}
-			}
-		}
 	}
 
 	public void setEntities(Map<String, Entity> aValue) {
@@ -434,12 +441,14 @@ public class Model {// implements Cancellable {
 
 	public void setParametersEntity(ParametersEntity aParamsEntity) {
 		parametersEntity = aParamsEntity;
+		if(parametersEntity != null)
+			parametersEntity.setModel(this);
 	}
 
 	public void setRelations(Set<Relation> aRelations) {
 		relations = aRelations;
 	}
-
+/*
 	public boolean isParameterNameInRelations(Entity aEntity, Set<Relation> aRelations, String aParameterName) {
 		for (Relation lrel : aRelations) {
 			String leftParameter = lrel.getLeftParameter();
@@ -469,7 +478,7 @@ public class Model {// implements Cancellable {
 		}
 		return false;
 	}
-
+*/
 	public boolean isRuntime() {
 		return runtime;
 	}
@@ -634,7 +643,7 @@ public class Model {// implements Cancellable {
 		executeEntities(refresh, toExecute);
 	}
 
-	private void validateQueries() throws Exception {
+	public void validateQueries() throws Exception {
 		for (Entity entity : entities.values()) {
 			entity.validateQuery();
 		}

@@ -19,7 +19,7 @@ import org.mozilla.javascript.Scriptable;
  * Table model, getting and setting data to an arbitrary rowset. Gets data from
  * an arbitrary rowset or from a script.
  *
- * @author Gala
+ * @author mg
  */
 public class RowsetsTableModel extends RowsetsModel implements TableModel {
 

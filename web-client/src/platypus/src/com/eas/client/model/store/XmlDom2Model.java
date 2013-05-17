@@ -10,6 +10,7 @@ import java.sql.Date;
 import java.sql.Time;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -93,6 +94,7 @@ public class XmlDom2Model implements ModelVisitor {
 	protected Element currentTag = null;
 	protected Model model = null;
 	protected List<Runnable> handlersResolvers;
+	protected Collection<Runnable> relationsResolvers = new ArrayList();
 
 	public static Model transform(Document doc, JavaScriptObject aModule) {
 		final List<Runnable> hResolvers = new ArrayList();
@@ -116,7 +118,7 @@ public class XmlDom2Model implements ModelVisitor {
 		handlersResolvers = aHandlersResolvers;
 	}
 
-	protected void readModel(Model aModel) {
+	protected void readModel(Model aModel) throws Exception {
 		Element el = DATAMODEL_TAG_NAME.equals(doc.getDocumentElement().getNodeName()) ? doc.getDocumentElement() : Utils.getElementByTagName(doc.getDocumentElement(), DATAMODEL_TAG_NAME);
 		if (el != null && aModel != null) {
 			model = aModel;
@@ -179,8 +181,12 @@ public class XmlDom2Model implements ModelVisitor {
 						currentTag = lcurrentTag;
 					}
 				}
-				aModel.resolveReferences();
+				model.validateQueries();
+                for (Runnable resolver : relationsResolvers) {
+                    resolver.run();
+                }
 			} finally {
+				relationsResolvers = null;
 				model = null;
 			}
 		}
@@ -273,29 +279,68 @@ public class XmlDom2Model implements ModelVisitor {
 	}
 
 	@Override
-	public void visit(Relation relation) {
+	public void visit(final Relation relation) {
 		if (relation != null && model != null) {
 			NamedNodeMap attrs = currentTag.getAttributes();
-			relation.setLeftEntityId(readAttribute(LEFT_ENTITY_ID_ATTR_NAME, null));
-			Node a = attrs.getNamedItem(LEFT_ENTITY_FIELD_ATTR_NAME);
-			if (a != null) {
-				relation.setLeftField(a.getNodeValue());
-			}
-			a = attrs.getNamedItem(LEFT_ENTITY_PARAMETER_ATTR_NAME);
-			if (a != null) {
-				relation.setLeftParameter(a.getNodeValue());
-			}
+			Node lefna = attrs.getNamedItem(LEFT_ENTITY_FIELD_ATTR_NAME);
+			Node lepna = attrs.getNamedItem(LEFT_ENTITY_PARAMETER_ATTR_NAME);
+			Node refna = attrs.getNamedItem(RIGHT_ENTITY_FIELD_ATTR_NAME);
+			Node repna = attrs.getNamedItem(RIGHT_ENTITY_PARAMETER_ATTR_NAME);
 
-			relation.setRightEntityId(readAttribute(RIGHT_ENTITY_ID_ATTR_NAME, null));
-			a = attrs.getNamedItem(RIGHT_ENTITY_FIELD_ATTR_NAME);
-			if (a != null) {
-				relation.setRightField(a.getNodeValue());
-			}
-			a = attrs.getNamedItem(RIGHT_ENTITY_PARAMETER_ATTR_NAME);
-			if (a != null) {
-				relation.setRightParameter(a.getNodeValue());
-			}
+			final String leftEntityId = readAttribute(LEFT_ENTITY_ID_ATTR_NAME, null);
+			final String leftFieldName = lefna != null ? lefna.getNodeValue() : null;
+			final String leftParameterName = lepna != null ? lepna.getNodeValue() : null;
+			final String rightEntityId = readAttribute(RIGHT_ENTITY_ID_ATTR_NAME, null);
+			final String rightFieldName = refna != null ? refna.getNodeValue() : null;
+			final String rightParameterName = repna != null ? repna.getNodeValue() : null;
+
 			model.addRelation(relation);
+
+			Runnable resolver = new Runnable() {
+				@Override
+				public void run() {
+                    try {
+                        Entity lEntity = model.getEntityById(leftEntityId);
+                        if (ParametersEntity.PARAMETERS_ENTITY_ID.equals(leftEntityId)) {
+                            lEntity = model.getParametersEntity();
+                            if (leftParameterName != null && !leftParameterName.isEmpty()) {
+                                relation.setLeftField(lEntity.getFields().get(leftParameterName));
+                            } else if (leftFieldName != null && !leftFieldName.isEmpty()) {
+                                relation.setLeftField(lEntity.getFields().get(leftFieldName));
+                            }
+                        } else if (lEntity != null) {
+                            if (leftParameterName != null && !leftParameterName.isEmpty()) {
+                                relation.setLeftField(lEntity.getQuery().getParameters().get(leftParameterName));
+                            } else if (leftFieldName != null && !leftFieldName.isEmpty()) {
+                                relation.setLeftField(lEntity.getFields().get(leftFieldName));
+                            }
+                        }
+                        relation.setLeftEntity(lEntity);
+                        lEntity.addOutRelation(relation);
+
+                        Entity rEntity = model.getEntityById(rightEntityId);
+                        if (ParametersEntity.PARAMETERS_ENTITY_ID.equals(rightEntityId)) {
+                            rEntity = model.getParametersEntity();
+                            if (rightParameterName != null && !rightParameterName.isEmpty()) {
+                                relation.setRightField(rEntity.getFields().get(rightParameterName));
+                            } else if (rightFieldName != null && !rightFieldName.isEmpty()) {
+                                relation.setRightField(rEntity.getFields().get(rightFieldName));
+                            }
+                        } else if (rEntity != null) {
+                            if (rightParameterName != null && !rightParameterName.isEmpty()) {
+                                relation.setRightField(rEntity.getQuery().getParameters().get(rightParameterName));
+                            } else if (rightFieldName != null && !rightFieldName.isEmpty()) {
+                                relation.setRightField(rEntity.getFields().get(rightFieldName));
+                            }
+                        }
+                        relation.setRightEntity(rEntity);
+                        rEntity.addInRelation(relation);
+                    } catch (Exception ex) {
+                        Logger.getLogger(XmlDom2Model.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+				}
+			};
+			relationsResolvers.add(resolver);
 		}
 	}
 
@@ -562,6 +607,10 @@ public class XmlDom2Model implements ModelVisitor {
 
 	@Override
 	public void visit(Model aModel) {
-		readModel(aModel);
+		try {
+	        readModel(aModel);
+        } catch (Exception e) {
+	        e.printStackTrace();
+        }
 	}
 }

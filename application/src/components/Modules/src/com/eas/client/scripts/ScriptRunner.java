@@ -17,14 +17,19 @@ import com.eas.script.JsDoc;
 import com.eas.script.JsDoc.Tag;
 import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptUtils;
+import com.eas.util.BinaryUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.IDN;
 import java.net.URI;
+import java.net.URL;
 import java.security.AccessControlException;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.mozilla.javascript.*;
 
 /**
@@ -251,8 +256,27 @@ public class ScriptRunner extends ScriptableObject {
         return obj;
     }
 
+    protected static class NotResourceException extends Exception {
+
+        protected String resourceId;
+
+        public NotResourceException() {
+            super();
+        }
+
+        public NotResourceException(String aResourceId) {
+            super(aResourceId + " is not a platypus resource. Hint: may be it is regular platypus module.");
+            resourceId = aResourceId;
+        }
+
+        public String getResourceId() {
+            return resourceId;
+        }
+    }
+
     public static class PlatypusScriptedResource {
 
+        private static final Pattern pattern = Pattern.compile("https?://.*");
         protected static AppCache cache;
 
         public static void init(AppCache aCache) {
@@ -285,28 +309,54 @@ public class ScriptRunner extends ScriptableObject {
         }
 
         public static byte[] load(String aResourceId) throws Exception {
-            if (cache == null) {
-                throw new IllegalStateException("Platypus application resources have to be initialized first.");
-            }
-            String resourceId = translateResourcePath(aResourceId);
-            /*
-             File test = new File(resourceId);
-             if (test.exists()) {
-             return FileUtils.readBytes(test);
-             } else {
-             */
-            ApplicationElement appElement = cache.get(resourceId);
-            if (appElement != null && appElement.getType() == ClientConstants.ET_RESOURCE
-                    && !cache.isActual(appElement.getId(), appElement.getTxtContentLength(), appElement.getTxtCrc32())) {
-                cache.remove(appElement.getId());
-                appElement = cache.get(resourceId);
-            }
-            if (appElement != null && appElement.getType() == ClientConstants.ET_RESOURCE) {
-                return appElement.getBinaryContent();
+            Matcher htppMatcher = pattern.matcher(aResourceId);
+            if (htppMatcher.matches()) {
+                URL url = new URL(aResourceId);
+                String file = "";
+                if (url.getPath() != null && !url.getPath().isEmpty()) {
+                    file += (new URI(null, null, url.getPath(), null)).toASCIIString();
+                }
+                if (url.getQuery() != null && !url.getQuery().isEmpty()) {
+                    file += "?" + url.getQuery();
+                }
+                if (url.getRef() != null && !url.getRef().isEmpty()) {
+                    file += "#" + url.getRef();
+                }
+                url = new URL(url.getProtocol(), IDN.toASCII(url.getHost()), url.getPort(), file);
+                try (InputStream is = url.openStream()) {
+                    return BinaryUtils.readStream(is, -1);
+                }
             } else {
-                return null;
+                if (cache == null) {
+                    throw new IllegalStateException("Platypus application resources have to be initialized first.");
+                }
+
+                String resourceId = translateResourcePath(aResourceId);
+                /*
+                 File test = new File(resourceId);
+                 if (test.exists()) {
+                 return FileUtils.readBytes(test);
+                 } else {
+                 */
+                ApplicationElement appElement = cache.get(resourceId);
+                if (appElement != null) {
+                    if (appElement.getType() == ClientConstants.ET_RESOURCE) {
+                        // let's check actuality
+                        if (!cache.isActual(appElement.getId(), appElement.getTxtContentLength(), appElement.getTxtCrc32())) {
+                            cache.remove(appElement.getId());
+                            appElement = cache.get(resourceId);
+                        }
+                    } else {
+                        throw new NotResourceException(resourceId);
+                    }
+                }
+                if (appElement != null && appElement.getType() == ClientConstants.ET_RESOURCE) {
+                    return appElement.getBinaryContent();
+                } else {
+                    return null;
+                }
+                //}
             }
-            //}
         }
 
         public static String loadText(String aResourceId) throws Exception {
@@ -329,12 +379,20 @@ public class ScriptRunner extends ScriptableObject {
                 cx = ScriptUtils.enterContext();
             }
             try {
-                String source = PlatypusScriptedResource.loadText(resourceId);
-                if (source != null) {
-                    Script lib = cx.compileString(source, resourceId, 0, null);
-                    lib.exec(cx, checkStandardObjects(cx));
-                } else {
-                    throw new IllegalStateException("Script resource not found: " + resourceId);
+                try {
+                    String source = PlatypusScriptedResource.loadText(resourceId);
+                    if (source != null) {
+                        Script lib = cx.compileString(source, resourceId, 0, null);
+                        lib.exec(cx, checkStandardObjects(cx));
+                    } else {
+                        throw new IllegalArgumentException("Script resource not found: " + resourceId + ". Hint: Regular platypus modules can't be used as resources.");
+                    }
+                } catch (NotResourceException ex) {
+                    // Silently return.
+                    // There are cases, when require is called with regular platypus module id.
+                    // In such case, we have to ignore require call is SE client and server and servlet,
+                    // and perform standard actions in browser html5 client.
+                    return;
                 }
             } finally {
                 if (!wasContext) {

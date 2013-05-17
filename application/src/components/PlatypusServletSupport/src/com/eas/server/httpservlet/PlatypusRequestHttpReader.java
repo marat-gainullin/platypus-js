@@ -59,6 +59,7 @@ public class PlatypusRequestHttpReader implements PlatypusRequestVisitor {
 
     public static final String API_URI = "/api";
     public static final String SCRIPTS_URI = "/scripts";
+    public static final String RESOURCES_URI = "/resources";
     private static final String ARGUMENTS_ARRAY_PARAM_SUFFIX = "[]";
     public static final String MODULE_NAME_PARAMETER_MISSING_MSG = "Module name parameter missing";
     public static final String METHOD_NAME_PARAMETER_MISSING = "Method name parameter missing";
@@ -243,12 +244,14 @@ public class PlatypusRequestHttpReader implements PlatypusRequestVisitor {
     @Override
     public void visit(AppElementRequest rq) throws Exception {
         if (isScriptUri(rqUri)) {
-            rq.setAppElementId(rqUri.substring(rqUri.lastIndexOf('/') + 1, rqUri.length() - 3));
+            rq.setAppElementId(rqUri.substring(SCRIPTS_URI.length() + 1));
+        } else if (isResourceUri(rqUri)) {
+            rq.setAppElementId(rqUri.substring(RESOURCES_URI.length() + 1));
         } else {
             rq.setAppElementId(httpRequest.getParameter(PlatypusHttpRequestParams.ENTITY_ID));
         }
     }
-   
+
     @Override
     public void visit(ExecuteServerReportRequest rq) throws Exception {
         if (isApiUri(rqUri)) {
@@ -303,7 +306,11 @@ public class PlatypusRequestHttpReader implements PlatypusRequestVisitor {
     }
 
     public static boolean isScriptUri(String reqUri) {
-        return reqUri != null && reqUri.startsWith(SCRIPTS_URI) && reqUri.endsWith(".js");
+        return reqUri != null && reqUri.startsWith(SCRIPTS_URI);
+    }
+
+    public static boolean isResourceUri(String reqUri) {
+        return reqUri != null && reqUri.startsWith(RESOURCES_URI);
     }
 
     private static byte[] getRequestContent(HttpServletRequest aRequest) throws IOException {

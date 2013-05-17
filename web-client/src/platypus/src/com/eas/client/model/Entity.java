@@ -1110,7 +1110,7 @@ public class Entity implements RowsetListener {
 	public Fields getFields() {
 		if (fields == null) {
 			try {
-				assert query != null : "Query must present";
+				assert query != null : "Query must present (getFields)";
 				if (query != null) {
 					fields = query.getFields();
 					if (fields == null) {
@@ -1196,7 +1196,7 @@ public class Entity implements RowsetListener {
 	}
 
 	public Query getQuery() throws Exception {
-		assert query != null : "Query must present";
+		assert query != null : "Query must present (getQuery)";
 		return query;
 	}
 
@@ -1543,12 +1543,12 @@ public class Entity implements RowsetListener {
 		if (updatingCounter == 0) {
 			Set<Relation> rels = getOutRelations();
 			if (rels != null) {
-				String onlyFieldName = getFields().get(aOnlyFieldIndex).getName();
+                Field onlyField = getFields().get(aOnlyFieldIndex);
 				Set<Entity> toExecute = new HashSet();
 				for (Relation outRel : rels) {
 					if (outRel != null) {
 						Entity ent = outRel.getRightEntity();
-						if (ent != null && outRel.isLeftField() && outRel.getLeftField().equalsIgnoreCase(onlyFieldName)) {
+                        if (ent != null && outRel.getLeftField() == onlyField) {
 							toExecute.add(ent);
 						}
 					}
@@ -1603,7 +1603,7 @@ public class Entity implements RowsetListener {
 								Rowset leftRowset = leftEntity.getRowset();
 								if (leftRowset != null && !leftRowset.isEmpty() && !leftRowset.isBeforeFirst() && !leftRowset.isAfterLast()) {
 									try {
-										pValue = leftRowset.getObject(leftRowset.getFields().find(relation.getLeftField()));
+										pValue = leftRowset.getObject(leftRowset.getFields().find(relation.getLeftField().getName()));
 									} catch (Exception ex) {
 										pValue = RowsetUtils.UNDEFINED_SQL_VALUE;
 										Logger.getLogger(Entity.class.getName()).log(Level.SEVERE,
@@ -1613,6 +1613,7 @@ public class Entity implements RowsetListener {
 									pValue = RowsetUtils.UNDEFINED_SQL_VALUE;
 								}
 							} else {
+								/*
 								Query leftQuery = leftEntity.getQuery();
 								assert leftQuery != null : "Left query must present (Relation points to query, but query is absent)";
 								Parameters leftParams = leftQuery.getParameters();
@@ -1629,8 +1630,18 @@ public class Entity implements RowsetListener {
 									        "Parameter of left query must present (Relation points to query parameter " + relation.getRightParameter() + " in entity: " + getTitle() + " ["
 									                + String.valueOf(getEntityId()) + "], but query parameter with specified name is absent)");
 								}
+								*/
+                                Parameter leftParameter = relation.getLeftParameter();
+                                if (leftParameter != null) {
+                                    pValue = leftParameter.getValue();
+                                    if (pValue == null) {
+                                        pValue = leftParameter.getDefaultValue();
+                                    }
+                                } else {
+                                    Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, "Parameter of left query must present (Relation points to query parameter in entity: "+getTitle()+" ["+getEntityId()+"], but query parameter is absent)");
+                                }
 							}
-							Parameter selfPm = selfParameters.get(relation.getRightParameter());
+							Parameter selfPm = relation.getRightParameter();
 							if (selfPm != null) {
 								Object selfValue = selfPm.getValue();
 								if ((selfValue == null && pValue != null) || (selfValue != null && !selfValue.equals(pValue))) {
@@ -1675,7 +1686,7 @@ public class Entity implements RowsetListener {
 		assert rtInFilterRelations != null;
 		assert rowset != null;
 		if (filter == null && !rtInFilterRelations.isEmpty()) {
-			List<String> constraints = new ArrayList();
+			List<Field> constraints = new ArrayList();
 			// enumerate filtering relations ...
 			for (Relation rel : rtInFilterRelations) {
 				assert rel != null && rel.isRightField();
@@ -1686,8 +1697,8 @@ public class Entity implements RowsetListener {
 				filter.beginConstrainting();
 				try {
 					Fields rFields = rowset.getFields();
-					for (String fieldName : constraints) {
-						filter.addConstraint(rFields.find(fieldName));
+					for (Field field : constraints) {
+						filter.addConstraint(rFields.find(field.getName()));
 					}
 				} finally {
 					filter.endConstrainting();
@@ -1723,7 +1734,7 @@ public class Entity implements RowsetListener {
 					if (leftRowset != null) {
 						if (!leftRowset.isEmpty()) {
 							if (!leftRowset.isBeforeFirst() && !leftRowset.isAfterLast()) {
-								fValue = leftRowset.getObject(leftRowset.getFields().find(rel.getLeftField()));
+								fValue = leftRowset.getObject(leftRowset.getFields().find(rel.getLeftField().getName()));
 							} else {
 								fValue = RowsetUtils.UNDEFINED_SQL_VALUE;
 								Logger.getLogger(Entity.class.getName()).log(
@@ -1746,6 +1757,7 @@ public class Entity implements RowsetListener {
 						                + "]. The source rowset is absent.");
 					}
 				} else {
+					/*
 					Query leftQuery = leftEntity.getQuery();
 					assert leftQuery != null : "Left query must present (Relation points to query, but query is absent)";
 					Parameters leftParams = leftQuery.getParameters();
@@ -1760,8 +1772,18 @@ public class Entity implements RowsetListener {
 						Logger.getLogger(Entity.class.getName()).log(Level.SEVERE,
 						        "Parameter of left query must present (Relation points to query parameter " + rel.getLeftParameter() + ", but query parameter with specified name is absent)");
 					}
+					*/
+                    Parameter leftParameter = rel.getLeftParameter();
+                    if (leftParameter != null) {
+                        fValue = leftParameter.getValue();
+                        if (fValue == null) {
+                            fValue = leftParameter.getDefaultValue();
+                        }
+                    } else {
+                        Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, "Parameter of left query must present (Relation points to query parameter, but query parameter with specified name is absent)");
+                    }
 				}
-				Field fieldOfValue = rowset.getFields().get(rel.getRightField());
+				Field fieldOfValue = rowset.getFields().get(rel.getRightField().getName());
 				filterKeySet.add(Converter.convert2RowsetCompatible(fValue, fieldOfValue.getTypeInfo()));
 			}
 		}

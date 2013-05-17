@@ -10,45 +10,33 @@
 
 package com.eas.client.model;
 
+import com.bearsoft.rowset.metadata.Field;
+import com.bearsoft.rowset.metadata.Parameter;
+
 /**
  *
- * @author Marat
+ * @author mg
  */
 public class Relation {
 
-    // persistent properties
-    protected String leftEntityId = null;
-    protected String leftParameter = null;
-    protected String leftField = null;    
-    
-    protected String rightEntityId = null;
-    protected String rightParameter = null;
-    protected String rightField = null;
-
     // runtime properties
-    protected Entity leftEntity = null;
-    protected Entity rightEntity = null;
+    protected Entity leftEntity;
+    protected Field leftField;
+    protected Entity rightEntity;
+    protected Field rightField;
 
     public Relation()
     {
         super();
     }
 
-    public Relation(Entity aLeftEntity, boolean isLeftField, String aLeftField, Entity aRightEntity, boolean isRightField, String aRightField)
+    public Relation(Entity aLeftEntity, Field aLeftField, Entity aRightEntity, Field aRightField)
     {
         this();
         leftEntity = aLeftEntity;
-        leftEntityId = leftEntity.getEntityId();
-        if(isLeftField)
             leftField = aLeftField;
-        else
-            leftParameter = aLeftField;
         rightEntity = aRightEntity;
-        rightEntityId = rightEntity.getEntityId();
-        if(isRightField)
             rightField = aRightField;
-        else
-            rightParameter = aRightField;
     }
 
     public void accept(ModelVisitor visitor)
@@ -65,91 +53,68 @@ public class Relation {
         return rightEntity;
     }
     
-    public String getLeftEntityId() {
-        return leftEntityId;
-    }
-
-    public void setLeftEntityId(String aValue) {
-        leftEntityId = aValue;
-    }
-
-    public String getLeftField() {
+    public Field getLeftField() {
         return leftField;
     }
 
-    public void setLeftField(String aValue) {
+    public void setLeftField(Field aValue) {
         leftField = aValue;
     }
 
-    public String getLeftParameter() {
-        return leftParameter;
-    }
-
-    public void setLeftParameter(String aValue) {
-        leftParameter = aValue;
-    }
-
-    public String getRightEntityId() {
-        return rightEntityId;
-    }
-
-    public void setRightEntityId(String aValue) {
-        rightEntityId = aValue;
-    }
-
-    public String getRightField() {
+    public Field getRightField() {
         return rightField;
     }
 
-    public void setRightField(String aValue) {
+    public void setRightField(Field aValue) {
         rightField = aValue;
     }
 
-    public String getRightParameter() {
-        return rightParameter;
+    public boolean isLeftParameter() {
+        return leftField instanceof Parameter;
     }
 
-    public void setRightParameter(String aValue) {
-        rightParameter = aValue;
+    public boolean isRightParameter() {
+        return rightField instanceof Parameter;
     }
 
-    public boolean isLeftParameter()
-    {
-        return !isLeftField();
-    }
-    
-    public boolean isRightParameter()
-    {
-        return !isRightField();
-    }
-    
-    public boolean isLeftField()
-    {
-        return (leftField != null && !leftField.isEmpty());
-    }
-    
-    public boolean isRightField()
-    {
-        return (rightField != null && !rightField.isEmpty());
+    public boolean isLeftField() {
+        return !isLeftParameter();
     }
 
-    public void setLEntity(Entity aValue) {
+    public boolean isRightField() {
+        return !isRightParameter();
+    }
+
+    public void setLeftEntity(Entity aValue) {
         leftEntity = aValue;
     }
 
-    public void setREntity(Entity aValue) {
+    public void setRightEntity(Entity aValue) {
         rightEntity = aValue;
     }
-    
+
     public Relation copy() {
         Relation copied = new Relation();
-        copied.setLeftEntityId(leftEntityId);
+        copied.setLeftEntity(leftEntity);
         copied.setLeftField(leftField);
-        copied.setLeftParameter(leftParameter);
-        copied.setRightEntityId(rightEntityId);
+        copied.setRightEntity(rightEntity);
         copied.setRightField(rightField);
-        copied.setRightParameter(rightParameter);
         return copied;
     }
 
+    public Parameter getLeftParameter() {
+        if (isLeftParameter()) {
+            return (Parameter) leftField;
+        } else {
+            return null;
+        }
+    }
+    
+    public Parameter getRightParameter() {
+        if (isRightParameter()) {
+            return (Parameter) rightField;
+        } else {
+            return null;
+        }
+    }
 }

@@ -19,6 +19,7 @@ import com.google.gwt.user.client.ui.RootPanel;
 
 public class PlatypusImageResource implements ImageResource {
 
+	protected AppClient client;
 	protected String name;
 	protected int width;
 	protected int height;
@@ -26,7 +27,8 @@ public class PlatypusImageResource implements ImageResource {
 	protected List<ImageResourceCallback> javaCallbacks = new ArrayList();
 	protected List<JavaScriptObject> jsCallbacks = new ArrayList();
 
-	public PlatypusImageResource(String aName) {
+	public PlatypusImageResource(AppClient aClient, String aName) {
+		client = aClient;
 		name = aName;
 		final Image im = new Image(getSafeUri());
 		im.addLoadHandler(new LoadHandler() {
@@ -93,7 +95,7 @@ public class PlatypusImageResource implements ImageResource {
 
 	@Override
 	public SafeUri getSafeUri() {
-		return AppClient.getImageUri(name);
+		return client.getResourceUri(name);
 	}
 
 	@Override

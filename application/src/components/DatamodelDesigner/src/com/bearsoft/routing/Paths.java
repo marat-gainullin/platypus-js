@@ -113,7 +113,11 @@ public class Paths {
             for (int i = 1; i < aPath.size(); i++) {
                 Vertex<PathFragment> v = aPath.get(i);
                 Point pt = new Point();
-                boolean inCorridor = calcNextPoint(aStartPoint, aEndPoint, prevV, v, pt);
+                calcNextPoint(aStartPoint, aEndPoint, prevV, v, pt);
+                Point pt0 = new Point(prevPt.x, pt.y);
+                rleAdd(points, pt0);
+                rleAdd(points, pt);
+                /*
                 if(inCorridor){
                     rleAdd(points, pt);
                 }else{
@@ -121,6 +125,7 @@ public class Paths {
                     rleAdd(points, pt0);
                     rleAdd(points, pt);
                 }
+                */ 
                 prevPt = pt;
                 prevV = v;
                 /*

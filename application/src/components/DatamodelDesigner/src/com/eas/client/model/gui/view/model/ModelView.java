@@ -950,7 +950,8 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
             try {
                 for (Relation<E> lrel : aRels) {
                     if (lrel.getRightEntity() != null && lrel.getRightField() != null) {
-                        if (!lrel.getRightEntity().getFields().contains(lrel.getRightField().getName())) {
+                        Field toField = lrel.getRightEntity().getFields().get(lrel.getRightField().getName());
+                        if (toField == null || toField != lrel.getRightField()) {
                             g2d.setColor(toParameterConnectorColor);
                         } else {
                             g2d.setColor(toFieldConnectorColor);

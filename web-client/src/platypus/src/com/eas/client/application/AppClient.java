@@ -70,9 +70,8 @@ public class AppClient {
 
 	//
 	private static final RegExp httpPrefixPattern = RegExp.compile("https?://.*");
-	public static final String ICONS_URI = "/icons";
-	// public static final String CSS_URI = "/css";
 	public static final String APPLICATION_URI = "/application";
+	public static final String RESOURCES_URI = "/resources";
 	public static final String API_URI = "/api";
 	public static final String SCRIPTS_URI = "/scripts";
 	public static final String SELF_NAME = "_platypusModuleSelf";
@@ -117,17 +116,7 @@ public class AppClient {
 		appClient = aClient;
 	}
 
-	/*
-	 * public static void checkStyleSheet(String aStyleSheetName) { if
-	 * (!attachedCss.contains(aStyleSheetName)) {
-	 * attachedCss.add(aStyleSheetName); String cssSrc = AppClient.relativeUri()
-	 * + CSS_URI + "/" + aStyleSheetName + ".css"; LinkElement style =
-	 * Utils.doc.createLinkElement(); style.setAttribute("rel", "stylesheet");
-	 * style.setAttribute("type", "text/css"); style.setAttribute("href",
-	 * cssSrc);
-	 * Utils.doc.getElementsByTagName("head").getItem(0).appendChild(style); } }
-	 */
-	static SafeUri getImageUri(final String imageName) {
+	public SafeUri getResourceUri(final String imageName) {
 		return new SafeUri() {
 
 			@Override
@@ -136,7 +125,7 @@ public class AppClient {
 				if (htppMatch != null) {
 					return imageName;
 				} else
-					return AppClient.relativeUri() + ICONS_URI + "/" + imageName;
+					return resourceUrl(imageName);
 			}
 		};
 	}
@@ -144,10 +133,26 @@ public class AppClient {
 	public PlatypusImageResource getImageResource(final String imageName) {
 		PlatypusImageResource res = iconsCache.get(imageName);
 		if (res == null) {
-			res = new PlatypusImageResource(imageName);
+			res = new PlatypusImageResource(this, imageName);
 			iconsCache.put(imageName, res);
 		}
 		return res;
+	}
+
+	public static void jsLoad(String aResourceName, final JavaScriptObject aCompleteCallback) throws Exception {
+		SafeUri uri =  AppClient.getInstance().getResourceUri(aResourceName);
+		 AppClient.getInstance().startRequest(uri, new Callback<Response>() {
+			@Override
+			public void run(Response aResult) throws Exception {
+				if (aResult.getStatusCode() == Response.SC_OK) {
+					Utils.executeScriptEventVoid(aCompleteCallback, aCompleteCallback, Utils.toJs(aResult.getText()));
+				}
+			}
+
+			@Override
+			public void cancel() {
+			}
+		}, null);
 	}
 
 	public static JavaScriptObject jsUpload(PublishedFile aFile, final JavaScriptObject aCompleteCallback, final JavaScriptObject aProgresssCallback, final JavaScriptObject aErrorCallback) {
@@ -420,6 +425,13 @@ public class AppClient {
 		return startRequest(rb, onSuccess, onFailure);
 	}
 
+	public Cancellable startRequest(SafeUri aUri, final Callback<Response> onSuccess, final Callback<Response> onFailure) throws Exception {
+		RequestBuilder rb = new RequestBuilder(RequestBuilder.GET, aUri.asString());
+		interceptRequest(rb);
+		rb.setHeader("Pragma", "no-cache");
+		return startRequest(rb, onSuccess, onFailure);
+	}
+
 	public Cancellable startRequest(RequestBuilder rb, final Callback<Response> onSuccess, final Callback<Response> onFailure) throws Exception {
 		rb.setCallback(new RequestCallback() {
 
@@ -564,7 +576,7 @@ public class AppClient {
 
 			@Override
 			public void doWork(Response aResponse) throws Exception {
-				Logger.getLogger(AppClient.class.getName()).log(Level.INFO, "Commit succeded"+aResponse.getStatusCode()+" "+aResponse.getStatusText());
+				Logger.getLogger(AppClient.class.getName()).log(Level.INFO, "Commit succeded" + aResponse.getStatusCode() + " " + aResponse.getStatusText());
 				changeLog.clear();
 				for (TransactionListener l : transactionListeners.toArray(new TransactionListener[] {})) {
 					try {
@@ -580,7 +592,7 @@ public class AppClient {
 
 			@Override
 			public void doWork(Response aResponse) throws Exception {
-				Logger.getLogger(AppClient.class.getName()).log(Level.INFO, "Commit failed: "+aResponse.getStatusCode()+" "+aResponse.getStatusText());
+				Logger.getLogger(AppClient.class.getName()).log(Level.INFO, "Commit failed: " + aResponse.getStatusCode() + " " + aResponse.getStatusText());
 				changeLog.clear();
 				for (TransactionListener l : transactionListeners.toArray(new TransactionListener[] {})) {
 					try {
@@ -596,12 +608,16 @@ public class AppClient {
 	}
 
 	public String scriptUrl(String aScriptName) {
-		return baseUrl + SCRIPTS_URI + "/" + aScriptName + ".js";
+		return baseUrl + SCRIPTS_URI + "/" + aScriptName;
+	}
+
+	public String resourceUrl(String aResourceName) {
+		return baseUrl + RESOURCES_URI + "/" + aResourceName;
 	}
 
 	public Cancellable getStartElement(Callback onSuccess) throws Exception {
 		String query = param(PlatypusHttpRequestParams.TYPE, String.valueOf(Requests.rqStartAppElement));
-		return startRequest("", query, "", RequestBuilder.GET, new ResponseCallbackAdapter() {
+		return startRequest(API_URI, query, "", RequestBuilder.GET, new ResponseCallbackAdapter() {
 
 			@Override
 			protected void doWork(Response aResponse) throws Exception {
@@ -627,7 +643,8 @@ public class AppClient {
 				@Override
 				public void doWork(Response aResponse) throws Exception {
 					// Some post processing
-					Document doc = XMLParser.parse(aResponse.getText());
+					String text = aResponse.getText();
+					Document doc = text != null && !text.isEmpty() ? XMLParser.parse(text) : null;
 					appElements.put(appElementName, doc);
 					//
 					onSuccess.run(doc);
@@ -697,21 +714,13 @@ public class AppClient {
 			@com.eas.client.application.AppClient::defineServerModule(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aModule);
 		}
 		$wnd.platypus.executeServerModuleMethod = function(aModuleName, aMethodName, aParams, aCallBack) {
-			return JSON.parse(aClient.@com.eas.client.application.AppClient::executeServerModuleMethod(Ljava/lang/String;Ljava/lang/String;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aMethodName, aParams, aCallBack));
+			return JSON
+					.parse(aClient.@com.eas.client.application.AppClient::executeServerModuleMethod(Ljava/lang/String;Ljava/lang/String;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aMethodName, aParams, aCallBack));
 		}
 		$wnd.platypus.executeServerReport = function(aModuleName, aModule) {
 			aClient.@com.eas.client.application.AppClient::executeServerReport(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aModule);
 		}
 	}-*/;
-	
-	/*
-		$wnd.platypus.getServerModuleProperty = function(aModuleName, aPropertyName) {
-			return aClient.@com.eas.client.application.AppClient::getServerModuleProperty(Ljava/lang/String;Ljava/lang/String;)(aModuleName, aPropertyName);
-		}
-		$wnd.platypus.setServerModuleProperty = function(aModuleName, aPropertyName, aValue) {
-			aClient.@com.eas.client.application.AppClient::setServerModuleProperty(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)(aModuleName, aPropertyName, JSON.stringify(aValue));
-		}
-	 */
 
 	public String executeServerModuleMethod(final String aModuleName, final String aMethodName, final JsArrayString aParams, final JavaScriptObject onSuccess) throws Exception {
 		String[] convertedParams = new String[aParams.length()];
@@ -728,8 +737,8 @@ public class AppClient {
 				}
 
 				private native void callBack(JavaScriptObject onSuccess, String aData) throws Exception /*-{
-					onSuccess(JSON.parse(aData));
-				}-*/;
+		onSuccess(JSON.parse(aData));
+	}-*/;
 
 			}, null);
 			return null;

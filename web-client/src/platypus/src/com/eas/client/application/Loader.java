@@ -27,10 +27,13 @@ import com.google.gwt.core.client.ScriptInjector;
 import com.google.gwt.dom.client.ScriptElement;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.http.client.Response;
+import com.google.gwt.resources.client.DataResource;
+import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.xml.client.Document;
 import com.google.gwt.xml.client.Element;
 import com.google.gwt.xml.client.Node;
 import com.google.gwt.xml.client.NodeList;
+import com.sencha.gxt.widget.core.client.form.FormPanel.Method;
 
 /**
  * 
@@ -124,38 +127,42 @@ public class Loader {
 					Set<String> dependencies = new HashSet();
 					Set<String> queryDependencies = new HashSet();
 					Set<String> serverModuleDependencies = new HashSet();
-					Element rootNode = aDoc.getDocumentElement();
-					NodeList docNodes = rootNode.getChildNodes();
-					for (int i = 0; i < docNodes.getLength(); i++) {
-						Node docNode = docNodes.item(i);
-						// Don't refactor to switch, since GWT2.4
-						// doesn't support it, applied to strings.
-						// In further versions it seems to be, but
-						// unfortunately not yet.
-						if (DEPENDENCY_TAG_NAME.equals(docNode.getNodeName())) {
-							String dependency = docNode.getFirstChild().getNodeValue();
-							if (dependency != null && !dependency.isEmpty() && !touchedAppElements.contains(dependency))
-								dependencies.add(dependency);
-						} else if (SERVER_DEPENDENCY_TAG_NAME.equals(docNode.getNodeName())) {
-							String dependency = docNode.getFirstChild().getNodeValue();
-							if (dependency != null && !dependency.isEmpty() && !touchedAppElements.contains(dependency))
-								serverModuleDependencies.add(dependency);
-						} else if (MODEL_TAG_NAME.equals(docNode.getNodeName())) {
-							assert docNode instanceof Element;
-							Element modelTag = (Element) docNode;
-							NodeList entitiesList = modelTag.getElementsByTagName(ENTITY_TAG_NAME);
-							for (int j = 0; j < entitiesList.getLength(); j++) {
-								Node entityNode = entitiesList.item(j);
-								assert entityNode instanceof Element;
-								Element entityTag = (Element) entityNode;
-								String dependency = entityTag.getAttribute(QUERY_ID_ATTR_NAME);
-								if (dependency != null && !dependency.isEmpty() && !touchedAppElements.contains(dependency)) {
-									queryDependencies.add(dependency);
+					if (aDoc != null)// There are some application element
+									 // without xml-dom (plain scripts for
+									 // example)
+					{
+						Element rootNode = aDoc.getDocumentElement();
+						NodeList docNodes = rootNode.getChildNodes();
+						for (int i = 0; i < docNodes.getLength(); i++) {
+							Node docNode = docNodes.item(i);
+							// Don't refactor to switch, since GWT2.4
+							// doesn't support it, applied to strings.
+							// In further versions it seems to be, but
+							// unfortunately not yet.
+							if (DEPENDENCY_TAG_NAME.equals(docNode.getNodeName())) {
+								String dependency = docNode.getFirstChild().getNodeValue();
+								if (dependency != null && !dependency.isEmpty() && !touchedAppElements.contains(dependency))
+									dependencies.add(dependency);
+							} else if (SERVER_DEPENDENCY_TAG_NAME.equals(docNode.getNodeName())) {
+								String dependency = docNode.getFirstChild().getNodeValue();
+								if (dependency != null && !dependency.isEmpty() && !touchedAppElements.contains(dependency))
+									serverModuleDependencies.add(dependency);
+							} else if (MODEL_TAG_NAME.equals(docNode.getNodeName())) {
+								assert docNode instanceof Element;
+								Element modelTag = (Element) docNode;
+								NodeList entitiesList = modelTag.getElementsByTagName(ENTITY_TAG_NAME);
+								for (int j = 0; j < entitiesList.getLength(); j++) {
+									Node entityNode = entitiesList.item(j);
+									assert entityNode instanceof Element;
+									Element entityTag = (Element) entityNode;
+									String dependency = entityTag.getAttribute(QUERY_ID_ATTR_NAME);
+									if (dependency != null && !dependency.isEmpty() && !touchedAppElements.contains(dependency)) {
+										queryDependencies.add(dependency);
+									}
 								}
 							}
 						}
 					}
-
 					fireLoaded(appElementName);
 					if (!dependencies.isEmpty() || !serverModuleDependencies.isEmpty() || !queryDependencies.isEmpty()) {
 						int accumulate = 0;
@@ -310,6 +317,7 @@ public class Loader {
 
 	/**
 	 * This method is public ONLY because of tests!
+	 * 
 	 * @param aAppElementNames
 	 * @param onSuccess
 	 * @return

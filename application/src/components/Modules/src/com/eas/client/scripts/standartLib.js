@@ -79,7 +79,33 @@ ComSession = com.eas.client.scripts.ole.ComSession;
 ComObject = com.eas.client.scripts.ole.ComObject;
 
 //Resources
-Resource = com.eas.client.scripts.ScriptRunner.PlatypusScriptedResource;
+Resource = {};
+Object.defineProperty(Resource, "load", {get : function(){
+        return function(aResName, aCallback){
+            var loaded = com.eas.client.scripts.ScriptRunner.PlatypusScriptedResource.load(aResName);
+            if(aCallback != undefined)
+                aCallback(loaded);
+            return loaded;
+        };
+}});
+
+Object.defineProperty(Resource, "loadText", {get : function(){
+        return function(aResName, aCallbackOrEncoding, aCallback){
+            if(typeof aCallbackOrEncoding == "function"){
+                var _loaded = com.eas.client.scripts.ScriptRunner.PlatypusScriptedResource.loadText(aResName);
+                aCallbackOrEncoding(_loaded);
+                return _loaded;
+            }else if(typeof aCallback == "function"){
+                var __loaded = com.eas.client.scripts.ScriptRunner.PlatypusScriptedResource.loadText(aResName, aCallbackOrEncoding);
+                aCallback(__loaded);
+                return __loaded;
+            }else if(aCallbackOrEncoding != undefined)
+                return com.eas.client.scripts.ScriptRunner.PlatypusScriptedResource.loadText(aResName, aCallbackOrEncoding);
+            else
+                return com.eas.client.scripts.ScriptRunner.PlatypusScriptedResource.loadText(aResName);
+        };
+}});
+
 
 function getTreadLocal(aName) {
     return com.eas.script.ScriptUtils.getThreadLocal(aName);

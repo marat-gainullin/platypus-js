@@ -15,11 +15,16 @@ import javax.swing.ImageIcon;
 public class IconResources {
 
     public static ImageIcon load(String imageName) throws Exception {
-        byte[] resData = ScriptRunner.PlatypusScriptedResource.load(imageName);
-        if (resData != null) {
-            return new ImageIcon(resData);
+        ImageIcon icon = IconCache.load(imageName);
+        if (icon != null) {
+            return icon;
         } else {
-            return IconCache.load(imageName);
+            byte[] resData = ScriptRunner.PlatypusScriptedResource.load(imageName);
+            if (resData != null) {
+                return new ImageIcon(resData);
+            } else {
+                return null;
+            }
         }
     }
 }

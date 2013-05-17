@@ -185,6 +185,7 @@ public class RelationsTest extends ModelBaseTest {
 			assertEquals(model.getEntities().size(), 1);// Parameters entity is
 			                                            // always present
 
+			/*
 			Relation rel11_21 = new Relation(entity11, true, "AMOUNT", entity21, false, "amount");
 			Relation rel11_22 = new Relation(entity11, true, "AMOUNT", entity22, false, "amount");
 
@@ -197,6 +198,19 @@ public class RelationsTest extends ModelBaseTest {
 
 			Relation rel11_41 = new Relation(entity11, true, "AMOUNT", entity41, false, "amount");
 			Relation rel32_41 = new Relation(entity32, true, "AMOUNT", entity41, true, "amount");
+			*/
+	        Relation rel11_21 = new Relation(entity11, entity11.getFields().get("AMOUNT"), entity21, entity21.getQuery().getParameters().get("amount"));
+	        Relation rel11_22 = new Relation(entity11, entity11.getFields().get("AMOUNT"), entity22, entity22.getQuery().getParameters().get("amount"));
+
+	        Relation rel21_31 = new Relation(entity21, entity21.getQuery().getParameters().get("amount"), entity31, entity31.getQuery().getParameters().get("amount"));
+	        Relation rel21_33 = new Relation(entity21, entity21.getFields().get("amount"), entity33, entity33.getQuery().getParameters().get("amount"));
+	        Relation rel21_31_ = new Relation(entity21, entity21.getFields().get("ORDER_ID"), entity31, entity31.getFields().get("ORDER_ID"));
+
+	        Relation rel22_32 = new Relation(entity22, entity22.getQuery().getParameters().get("amount"), entity32, entity32.getQuery().getParameters().get("amount"));
+	        Relation rel22_33_ = new Relation(entity22, entity22.getFields().get("ORDER_ID"), entity33, entity33.getFields().get("ORDER_ID"));
+
+	        Relation rel11_41 = new Relation(entity11, entity11.getFields().get("AMOUNT"), entity41, entity41.getQuery().getParameters().get("amount"));
+	        Relation rel32_41 = new Relation(entity32, entity32.getFields().get("AMOUNT"), entity41, entity41.getFields().get("amount"));
 
 			model.addEntity(entity11);
 			model.addEntity(entity21);

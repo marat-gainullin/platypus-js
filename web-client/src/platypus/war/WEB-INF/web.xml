@@ -10,7 +10,7 @@
         <servlet-class>com.servlet.proxy.ProxyServlet</servlet-class>
 		<init-param>
             <param-name>target-server</param-name>
-            <param-value>http://localhost:8080</param-value>
+            <param-value>http://localhost</param-value>
         </init-param>
     </servlet>
     <servlet-mapping> 

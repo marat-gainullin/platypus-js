@@ -70,7 +70,7 @@ public class ParametersEntity extends Entity {
 
 	@Override
 	public String getEntityId() {
-		return String.valueOf(PARAMETERS_ENTITY_ID);
+		return PARAMETERS_ENTITY_ID;
 	}
 
 	@Override

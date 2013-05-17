@@ -3,8 +3,10 @@ package com.eas.server.httpservlet;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.Client;
+import com.eas.client.ClientConstants;
 import com.eas.client.DatabasesClient;
 import com.eas.client.login.PlatypusPrincipal;
+import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.model.script.ScriptableRowset;
 import com.eas.client.queries.Query;
 import com.eas.client.scripts.ScriptRunner;
@@ -28,6 +30,7 @@ import com.eas.server.httpservlet.serial.rowset.RowsetJsonWriter;
 import com.eas.util.StringUtils;
 import com.eas.util.logging.PlatypusFormatter;
 import java.io.*;
+import java.net.URLConnection;
 import java.util.Set;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Handler;
@@ -87,7 +90,7 @@ public class PlatypusHttpServlet extends HttpServlet {
             Logger logger = Logger.getLogger(Client.APPLICATION_LOGGER_NAME);
             logger.addHandler(consoleHandler);
             logger.setUseParentHandlers(false);
-            
+
             DatabasesClient serverCoreDbClient = new DatabasesClient(scp.getDbSettings(), true);
             ScriptRunner.PlatypusScriptedResource.init(serverCoreDbClient.getAppCache());
             serverCore = new PlatypusServerCore(serverCoreDbClient, scp.getModuleConfigs(), scp.getAppElementId());
@@ -146,7 +149,7 @@ public class PlatypusHttpServlet extends HttpServlet {
                 }
             }
             if (uploadedLocations.length() > 0) {
-                writeStringResponse(uploadedLocations.toString(), response);
+                writeJsonResponse(uploadedLocations.toString(), response);
                 return true;
             }
         }
@@ -252,7 +255,7 @@ public class PlatypusHttpServlet extends HttpServlet {
             }
             handler.run();
             Response response = handler.getResponse();
-            if (isApiRequest(aHttpRequest) || isScriptRequest(aHttpRequest)) {
+            if (isApiRequest(aHttpRequest) || isScriptRequest(aHttpRequest) || isResourceRequest(aHttpRequest)) {
                 if (response instanceof ErrorResponse) {
                     ErrorResponse er = (ErrorResponse) response;
                     if (er.isAccessControl()) {
@@ -264,11 +267,11 @@ public class PlatypusHttpServlet extends HttpServlet {
                                 if (Character.isDigit(moduleId.charAt(0))) {
                                     String moduleConstructor = AppElementsFilter.checkModuleName("Module", moduleId);
                                     String formConstructor = AppElementsFilter.checkModuleName("Form", moduleId);
-                                    writeStringResponse(
+                                    writeJsonResponse(
                                             String.format(AppElementsFilter.SECURITY_VIOLATION_TEMPLATE, moduleConstructor, moduleId, userName) + "\n"
                                             + String.format(AppElementsFilter.SECURITY_VIOLATION_TEMPLATE, formConstructor, moduleId, userName), aHttpResponse);
                                 } else {
-                                    writeStringResponse(String.format(AppElementsFilter.SECURITY_VIOLATION_TEMPLATE, moduleId, moduleId, userName), aHttpResponse);
+                                    writeJsonResponse(String.format(AppElementsFilter.SECURITY_VIOLATION_TEMPLATE, moduleId, moduleId, userName), aHttpResponse);
                                 }
                             } else {
                                 aHttpResponse.sendError(HttpServletResponse.SC_FORBIDDEN, er.getError());
@@ -283,19 +286,19 @@ public class PlatypusHttpServlet extends HttpServlet {
                     writeJsonRowsetResponse(((RowsetResponse) response).getRowset(), aHttpResponse, aHttpRequest);
                 } else if (response instanceof CreateServerModuleResponse) {
                     CreateServerModuleResponse csmr = (CreateServerModuleResponse) response;
-                    writeStringResponse(moduleResponseToJson(csmr.getFunctionsNames(), csmr.isReport()), aHttpResponse);
+                    writeJsonResponse(moduleResponseToJson(csmr.getFunctionsNames(), csmr.isReport()), aHttpResponse);
                 } else if (response instanceof ExecuteServerModuleMethodRequest.Response) {
                     Object result = ((ExecuteServerModuleMethodRequest.Response) response).getResult();
                     if (result instanceof ScriptableRowset) {
                         writeJsonRowsetResponse(((ScriptableRowset) result).unwrap(), aHttpResponse, aHttpRequest);
                     } else if (result instanceof NativeObject) {
-                        writeStringResponse(ScriptUtils.toJson(result), aHttpResponse);
+                        writeJsonResponse(ScriptUtils.toJson(result), aHttpResponse);
                     } else if (result instanceof XMLObject) {
                         writeStringResponse(ScriptUtils.toXMLString((XMLObject) result), aHttpResponse, HTML_CONTENTTYPE);
                     } else {
                         ScriptUtils.enterContext();
                         try {
-                            writeStringResponse(ScriptUtils.toJson(ScriptUtils.javaToJS(result, ScriptUtils.getScope())), aHttpResponse);
+                            writeJsonResponse(ScriptUtils.toJson(ScriptUtils.javaToJS(result, ScriptUtils.getScope())), aHttpResponse);
                         } finally {
                             Context.exit();
                         }
@@ -305,16 +308,25 @@ public class PlatypusHttpServlet extends HttpServlet {
                     writeQueryResponse(query, aHttpResponse);
                 } else if (response instanceof FilteredAppElementRequest.FilteredResponse) {
                     if (isScriptRequest(aHttpRequest)) {
-                        writeStringResponse(((FilteredAppElementRequest.FilteredResponse) response).getFilteredScript(), aHttpResponse);
+                        writeJsonResponse(((FilteredAppElementRequest.FilteredResponse) response).getFilteredScript(), aHttpResponse);
                     } else {
-                        writeStringResponse(((FilteredAppElementRequest.FilteredResponse) response).getFilteredContent(), aHttpResponse);
+                        writeJsonResponse(((FilteredAppElementRequest.FilteredResponse) response).getFilteredContent(), aHttpResponse);
                     }
                 } else if (response instanceof StartAppElementRequest.Response) {
-                    writeStringResponse(String.valueOf(((StartAppElementRequest.Response) response).getAppElementId()), aHttpResponse);
+                    writeJsonResponse(String.valueOf(((StartAppElementRequest.Response) response).getAppElementId()), aHttpResponse);
                 } else if (response instanceof ExecuteServerReportRequest.Response) {
                     writeExcelResponse(((ExecuteServerReportRequest.Response) response).getResult(), aHttpResponse);
+                } else if (response instanceof AppElementRequest.Response && isResourceRequest(aHttpRequest)) {
+                    if (((AppElementRequest.Response) response).getAppElement().getType() == ClientConstants.ET_RESOURCE) {
+                        ApplicationElement appElement = ((AppElementRequest.Response) response).getAppElement();
+                        String mimeType = URLConnection.getFileNameMap().getContentTypeFor(appElement.getName());
+                        writeBinaryResponse(appElement.getBinaryContent(), aHttpResponse, mimeType);
+                        if (mimeType.contains("text")) {
+                            aHttpResponse.setCharacterEncoding(SettingsConstants.COMMON_ENCODING);
+                        }
+                    }
                 } else {
-                    writeStringResponse(SUCCESS_JSON, aHttpResponse);
+                    writeJsonResponse(SUCCESS_JSON, aHttpResponse);
                 }
             } else {
                 sendPlatypusResponse(response, aHttpResponse);
@@ -351,25 +363,25 @@ public class PlatypusHttpServlet extends HttpServlet {
     private void writeJsonRowsetResponse(Rowset aRowset, HttpServletResponse response, HttpServletRequest request) throws Exception {
         RowsetJsonWriter writer = new RowsetJsonWriter(aRowset);
         String json = writer.write();
-        writeStringResponse(json, response);
+        writeJsonResponse(json, response);
     }
 
     private void writeQueryResponse(Query<?> query, HttpServletResponse aHttpResponse) throws Exception {
         QueryJsonWriter writer = new QueryJsonWriter(query);
-        writeStringResponse(writer.write(), aHttpResponse);
+        writeJsonResponse(writer.write(), aHttpResponse);
     }
 
-    private void writeStringResponse(String aResponseString, HttpServletResponse response, String defaultContentType) throws UnsupportedEncodingException, IOException {
+    private void writeStringResponse(String aResponseString, HttpServletResponse response, String aContentType) throws UnsupportedEncodingException, IOException {
         byte[] bytes = aResponseString.getBytes(SettingsConstants.COMMON_ENCODING);
         response.setCharacterEncoding(SettingsConstants.COMMON_ENCODING);
         if (response.getContentType() == null) {
-            response.setContentType(defaultContentType);
+            response.setContentType(aContentType);
         }
         response.setContentLength(bytes.length);
         response.getOutputStream().write(bytes);
     }
 
-    private void writeStringResponse(String aResponseString, HttpServletResponse response) throws UnsupportedEncodingException, IOException {
+    private void writeJsonResponse(String aResponseString, HttpServletResponse response) throws UnsupportedEncodingException, IOException {
         writeStringResponse(aResponseString, response, RowsetJsonConstants.JSON_CONTENTTYPE);
     }
 
@@ -379,6 +391,12 @@ public class PlatypusHttpServlet extends HttpServlet {
         response.addHeader("Content-Disposition", "attachment; filename=\"report.xls\"");
         response.setContentLength(aResponseData.length);
         response.getOutputStream().write(aResponseData);
+    }
+
+    private void writeBinaryResponse(byte[] aResponseData, HttpServletResponse aResponse, String aContentType) throws UnsupportedEncodingException, IOException {
+        aResponse.setContentType(aContentType);
+        aResponse.setContentLength(aResponseData.length);
+        aResponse.getOutputStream().write(aResponseData);
     }
 
     private void sendPlatypusResponse(Response aPlatypusResponse, HttpServletResponse aResponse) throws Exception {
@@ -439,7 +457,7 @@ public class PlatypusHttpServlet extends HttpServlet {
         if (sType != null) {
             rqType = Integer.valueOf(sType);
         } else {
-            if (isScriptRequest(aRequest)) {
+            if (isScriptRequest(aRequest) || isResourceRequest(aRequest)) {
                 rqType = Requests.rqAppElement;
             } else {
                 Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, REQUEST_PARAMETER_MISSING_MSG, PlatypusHttpRequestParams.TYPE);
@@ -450,7 +468,7 @@ public class PlatypusHttpServlet extends HttpServlet {
         String sId = aRequest.getParameter(PlatypusHttpRequestParams.ID);
         if (sId != null) {
             rqId = Long.valueOf(sId);
-        } else if (!isApiRequest(aRequest) && !isScriptRequest(aRequest)) {
+        } else if (!isApiRequest(aRequest) && !isScriptRequest(aRequest) && !isResourceRequest(aRequest)) {
             Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, REQUEST_PARAMETER_MISSING_MSG, PlatypusHttpRequestParams.ID);
             throw new Exception(REQUEST_NOT_CORRECT_MSG + " -1- ");
         }
@@ -470,11 +488,6 @@ public class PlatypusHttpServlet extends HttpServlet {
     }
 
     private String extractURI(HttpServletRequest aRequest) {
-        /*
-         String ourContext = aRequest.getContextPath() + aRequest.getServletPath();
-         assert aRequest.getRequestURI().startsWith(ourContext);
-         return aRequest.getRequestURI().substring(ourContext.length());
-         */
         return aRequest.getPathInfo();
     }
 
@@ -484,5 +497,9 @@ public class PlatypusHttpServlet extends HttpServlet {
 
     private boolean isScriptRequest(HttpServletRequest aRequest) {
         return PlatypusRequestHttpReader.isScriptUri(extractURI(aRequest));
+    }
+
+    private boolean isResourceRequest(HttpServletRequest aRequest) {
+        return PlatypusRequestHttpReader.isResourceUri(extractURI(aRequest));
     }
 }

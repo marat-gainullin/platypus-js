@@ -430,7 +430,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
                 for (Relation<E> outRel : rels) {
                     if (outRel != null) {
                         E ent = outRel.getRightEntity();
-                        if (ent != null && outRel.isLeftField() && outRel.getLeftField() == onlyField) {
+                        if (ent != null && outRel.getLeftField() == onlyField) {
                             toExecute.add(ent);
                         }
                     }

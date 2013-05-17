@@ -333,6 +333,11 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                     if (dCol.isPlain()) { // Plain
                         Rowset rs = DbControlsUtils.resolveRowset(model, dCol.getDatamodelElement());
                         int fidx = DbControlsUtils.resolveFieldIndex(model, dCol.getDatamodelElement());
+                        if (fidx < 1) {
+                            if (dCol.getDatamodelElement() != null) {
+                                Logger.getLogger(DbGrid.class.getName()).log(Level.SEVERE, "Bad column configuration: " + dCol.getName() + "'s model binding can't be resolved");
+                            }
+                        }
                         // Model column setup
                         FieldModelColumn mCol = new FieldModelColumn(rs, fidx, getHandler(dCol.getCellFunction()), getHandler(dCol.getSelectFunction()), group.isReadonly(), new HasStyle() {
                             @Override

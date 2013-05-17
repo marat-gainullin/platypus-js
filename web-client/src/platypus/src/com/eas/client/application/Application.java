@@ -136,9 +136,28 @@ public class Application {
 			@com.eas.client.gxtcontrols.ControlsUtils::jsSelectFile(Lcom/google/gwt/core/client/JavaScriptObject;)(aCallback);
 		}
 		
-		$wnd.upload = function(aFile, aCompleteCallback, aProgressCallback, aAbortCallback) {
-			return @com.eas.client.application.AppClient::jsUpload(Lcom/eas/client/published/PublishedFile;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aFile, aCompleteCallback, aProgressCallback, aAbortCallback);
-		}
+		$wnd.Resource = {};
+		Object.defineProperty($wnd.Resource, "upload", {get : function(){
+				return function(aFile, aCompleteCallback, aProgressCallback, aAbortCallback) {
+					return @com.eas.client.application.AppClient::jsUpload(Lcom/eas/client/published/PublishedFile;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aFile, aCompleteCallback, aProgressCallback, aAbortCallback);
+				}
+		}});
+		Object.defineProperty($wnd.Resource, "load", {get : function(){
+		        return function(aResName, aCallback){
+		        	if(typeof aCallback != "function")
+		        		throw "load must be called with a callback function";
+	            	@com.eas.client.application.AppClient::jsLoad(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aResName, aCallback);
+		        };
+		}});
+		
+		Object.defineProperty($wnd.Resource, "loadText", {get : function(){
+		        return function(aResName, aCallbackOrEncoding, aCallback){
+		        	var callback = typeof aCallbackOrEncoding == "function"?aCallbackOrEncoding:aCallback;
+		        	if(typeof callback != "function")
+		        		throw "loadText must be called with a callback function";
+	            	@com.eas.client.application.AppClient::jsLoad(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aResName, callback);
+		        };
+		}});
 		
 		$wnd.logout = function(onSuccess) {
 			return @com.eas.client.application.AppClient::jsLogout(Lcom/google/gwt/core/client/JavaScriptObject;)(onSuccess);

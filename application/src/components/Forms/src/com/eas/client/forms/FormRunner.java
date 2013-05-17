@@ -450,6 +450,8 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
                 }
             });
             showingFormsChanged();
+        } else {
+            surface.setVisible(true);
         }
     }
 
@@ -523,6 +525,8 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
             });
             windowHandler.windowOpened(null);
             showingFormsChanged();
+        } else {
+            surface.setVisible(true);
         }
     }
 
