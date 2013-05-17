@@ -100,7 +100,7 @@ public class PlatypusWebModuleManager {
             }
             try {
                 prepareWebApplication();
-                configureWebApplication(webModule);
+                setupWebApplication(webModule);
                 setStartApplicationElement(appElementId);
                 webAppRunUrl = Deployment.getDefault().deploy(webModule, Deployment.Mode.RUN, null, START_PAGE_FILE_NAME, false);
                 String deployResultMessage = "Web application deployed.";
@@ -178,13 +178,14 @@ public class PlatypusWebModuleManager {
     }
 
     /**
-     * Configures an web application.
+     * Sets up an web application.
      *
      * @param aJmp Web Module
      */
-    protected void configureWebApplication(J2eeModuleProvider aJmp) throws Exception {
-        WebAppConfigurator webAppConfigurator = WebAppConfiguratorFactory.getInstance().createWebConfigurator(project, aJmp.getServerID());
+    protected void setupWebApplication(J2eeModuleProvider aJmp) throws Exception {
+        WebAppManager webAppConfigurator = WebAppManagerFactory.getInstance().createWebAppManager(project, aJmp);
         if (webAppConfigurator != null) {
+            webAppConfigurator.deployJdbcDrivers();
             webAppConfigurator.configure();
         } else {
             String errorMessage = String.format("Web application configuration is not supported for application server: %s", aJmp.getServerID());
