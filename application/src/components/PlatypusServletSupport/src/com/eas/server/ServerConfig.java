@@ -17,8 +17,6 @@ import javax.servlet.ServletConfig;
  */
 public class ServerConfig {
 
-    public static final String APP_PATH_CMD_PARAM_NAME = "applicationpath";
-    public static final String APP_PATH_CMD_PARAM_NAME1 = "ap";
     public static final String APPELEMENT_CONF_PARAM_NAME = "appelement";
     public static final String MODULES_PARAM = "modules";
     protected String appElementId = null;
@@ -76,7 +74,7 @@ public class ServerConfig {
                             dbDialect = paramValue;
                         } else if (APPELEMENT_CONF_PARAM_NAME.equalsIgnoreCase(pNames[0])) {
                             appElementId = paramValue;
-                        } else if (APP_PATH_CMD_PARAM_NAME.equalsIgnoreCase(pNames[0]) || APP_PATH_CMD_PARAM_NAME1.equalsIgnoreCase(pNames[0])) {
+                        } else if (ClientConstants.APP_PATH_CMD_PROP_NAME.equalsIgnoreCase(pNames[0]) || ClientConstants. APP_PATH_CMD_PROP_NAME1.equalsIgnoreCase(pNames[0])) {
                             appPath = paramValue;
                         }
                     }

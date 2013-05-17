@@ -34,9 +34,11 @@ public class PlatypusWebModule extends J2eeModuleProvider implements J2eeModuleI
         ModuleChangeReporter,
         EjbChangeDescriptor {
     
+    public static final String MAIN_DATASOURCE_NAME = "jdbc/main"; //NOI18N 
     public static final String WEB_DIRECTORY = "web"; //NOI18N
     public static final String WEB_INF_DIRECTORY = "WEB-INF"; //NOI18N
     public static final String META_INF_DIRECTORY = "META-INF"; //NOI18N
+    public static final String PUBLIC_DIRECTORY = "pub"; //NOI18N
     protected final PlatypusProject project;
     private J2eeModule j2eeModule;
     private PropertyChangeSupport propertyChangeSupport;
@@ -66,7 +68,7 @@ public class PlatypusWebModule extends J2eeModuleProvider implements J2eeModuleI
 
     @Override
     public String getServerInstanceID() {
-        return "tomcat70:home=/home/vv/apache-tomcat-7.0.39";//project.getSettings().getJ2eeServerId();
+        return project.getSettings().getJ2eeServerId();
     }
 
     @Override
