@@ -19,6 +19,7 @@ import com.eas.designer.explorer.project.PlatypusProject;
 import com.eas.designer.explorer.project.PlatypusProjectSettings;
 import java.awt.event.ItemEvent;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -31,6 +32,7 @@ import org.netbeans.modules.j2ee.deployment.devmodules.api.J2eePlatform;
 import org.netbeans.modules.j2ee.deployment.devmodules.api.ServerInstance;
 import org.openide.filesystems.FileObject;
 import org.openide.util.Exceptions;
+import org.openide.util.NbBundle;
 
 /**
  *
@@ -49,11 +51,11 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
      * Creates new form ProjectRunningCustomizer
      */
     public ProjectRunningCustomizer(PlatypusProject aProject) throws Exception {
-        initComponents();
         project = aProject;
         appRoot = aProject.getSrcRoot();
         projectSettings = aProject.getSettings();
         appSettings = projectSettings.getAppSettings();
+        initComponents();
         if (appSettings.getRunElement() != null) {
             txtRunPath.setText(projectSettings.getAppSettings().getRunElement());
         }
@@ -103,6 +105,10 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
     private J2eePlatformAdapter[] getJ2eePlatforms() {
         String[] serverInstanceIDs = Deployment.getDefault().getServerInstanceIDs();
         List<J2eePlatformAdapter> j2eePlatforms = new ArrayList<>();
+        if (projectSettings.getJ2eeServerId() != null
+                && (serverInstanceIDs == null || !Arrays.asList(serverInstanceIDs).contains(projectSettings.getJ2eeServerId()))) {
+            j2eePlatforms.add(new J2eePlatformAdapter(null, projectSettings.getJ2eeServerId()));
+        }
         for (String serverInstance : serverInstanceIDs) {
             try {
                 j2eePlatforms.add(new J2eePlatformAdapter(Deployment.getDefault().getServerInstance(serverInstance).getJ2eePlatform(), serverInstance));
@@ -121,7 +127,7 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
         return ClientType.WEB_BROWSER.equals(cbClientType.getSelectedItem()) && !AppServerType.J2EE_SERVER.equals(cbAppServerType.getSelectedItem());
     }
 
-    private static final class J2eePlatformAdapter implements Comparable {
+    private static final class J2eePlatformAdapter {
 
         private J2eePlatform platform;
         private String serverInstanceID;
@@ -141,16 +147,11 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
 
         @Override
         public String toString() {
-            String s = platform.getDisplayName();
-            if (s == null) {
-                s = ""; // NOI18N
+            if (platform != null) {
+                return platform.getDisplayName() != null ? platform.getDisplayName() : "";// NOI18N
+            } else {
+                return NbBundle.getMessage(ProjectRunningCustomizer.class, "ProjectRunningCustomizer.cbj2eeServer.NoneText");// NOI18N
             }
-            return s;
-        }
-
-        public int compareTo(Object o) {
-            J2eePlatformAdapter oa = (J2eePlatformAdapter) o;
-            return toString().compareTo(oa.toString());
         }
     }
 
@@ -581,7 +582,7 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
         try {
             FileObject selectedFile = null;// TODO Rework app element selector
             Set<String> allowedTypes = new HashSet<>();
-            allowedTypes.add("text/javascript");
+            allowedTypes.add("text/javascript");//NOI18N
             FileObject newSelectedFile = FileChooser.selectFile(appRoot, selectedFile, allowedTypes);
             if (newSelectedFile != null && newSelectedFile != selectedFile) {
                 String appElementId = IndexerQuery.file2AppElementId(newSelectedFile);

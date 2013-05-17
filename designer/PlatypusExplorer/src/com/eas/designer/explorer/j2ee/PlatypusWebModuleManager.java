@@ -197,7 +197,7 @@ public class PlatypusWebModuleManager {
     
     private void configureDeploymentDescriptor() throws Exception {     
         WebApplication wa = new WebApplication();
-        wa.addInitParam(new ContextParam(ClientConstants.APP_PATH_CMD_PROP_NAME1, project.getApplicationRoot().getPath()));
+        wa.addInitParam(new ContextParam(ClientConstants.APP_PATH_CMD_PROP_NAME1, project.getSrcRoot().getPath()));
         wa.addInitParam(new ContextParam(ClientConstants.DB_CONNECTION_URL_PROP_NAME, PlatypusWebModule.MAIN_DATASOURCE_NAME));
         DbConnectionSettings dbSettings = project.getSettings().getAppSettings().getDbSettings();
         String dbConnectionSchema = dbSettings.getInfo().getProperty(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME);
