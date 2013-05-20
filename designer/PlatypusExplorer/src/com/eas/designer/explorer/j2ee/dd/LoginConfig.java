@@ -8,7 +8,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
- *
+ * Configure how the user is authenticated; the realm name that should be used for this application; and the attributes that are needed by the form login mechanism. 
  * @author vv
  */
 public class LoginConfig implements ElementConvertable {
