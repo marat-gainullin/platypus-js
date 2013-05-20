@@ -11,7 +11,7 @@ import org.w3c.dom.Element;
  * Configures element defines a mapping between a servlet and a URL pattern.
  * @author vv
  */
-public class ServletMapping {
+public class ServletMapping implements ElementConvertable {
     public static final String TAG_NAME = "servlet-mapping";//NOI18N
     public static final String SERVLET_NAME_TAG_NAME = "servlet-name";//NOI18N
     public static final String URL_PATTERN_TAG_NAME = "url-pattern";//NOI18N
@@ -39,6 +39,7 @@ public class ServletMapping {
         urlPattern = anUrlPattern;
     }
     
+    @Override
     public Element getElement(Document aDoc) {
         Element element = aDoc.createElement(TAG_NAME);
         Element classNameElement = aDoc.createElement(SERVLET_NAME_TAG_NAME);

@@ -11,7 +11,7 @@ import org.w3c.dom.Element;
  *
  * @author vv
  */
-public class ResourceRef {
+public class ResourceRef implements ElementConvertable {
     public static final String TAG_NAME = "resource-ref"; //NOI18N
     public static final String DESCRIPTION_TAG_NAME = "description"; //NOI18N
     public static final String RES_REF_NAME_TAG_NAME = "res-ref-name"; //NOI18N
@@ -71,6 +71,7 @@ public class ResourceRef {
         description = aDescription;
     }
     
+    @Override
     public Element getElement(Document aDoc) {
         Element element = aDoc.createElement(TAG_NAME);
         if (description != null) {

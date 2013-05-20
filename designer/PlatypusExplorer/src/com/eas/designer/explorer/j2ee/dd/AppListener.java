@@ -11,7 +11,7 @@ import org.w3c.dom.Element;
  * Defines an application listener.
  * @author vv
  */
-public class AppListener {
+public class AppListener implements ElementConvertable {
     public static final String TAG_NAME = "listener"; //NOI18N
     public static final String CLASS_NAME_TAG_NAME = "listener-class"; //NOI18N
     private String className;
@@ -28,6 +28,7 @@ public class AppListener {
         className = aClassName;
     }
     
+    @Override
     public Element getElement(Document aDoc) {
         Element element = aDoc.createElement(TAG_NAME);
         if (className != null) {

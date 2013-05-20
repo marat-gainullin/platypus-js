@@ -11,7 +11,7 @@ import org.w3c.dom.Element;
  *
  * @author vv
  */
-public class MultipartConfig {
+public class MultipartConfig implements ElementConvertable {
     public static final String TAG_NAME = "multipart-config"; //NOI18N
     public static final String LOCATION_TAG_NAME = "location"; //NOI18N
     public static final String MAX_FILE_SIZE_TAG_NAME = "max-file-size"; //NOI18N
@@ -55,6 +55,7 @@ public class MultipartConfig {
         this.fileSizeThreshold = fileSizeThreshold;
     }
     
+    @Override
     public Element getElement(Document aDoc) {
         Element element = aDoc.createElement(TAG_NAME);
         if (location != null) {

@@ -11,7 +11,7 @@ import org.w3c.dom.Element;
  * Web application's parameter.
  * @author vv
  */
-public class ContextParam {
+public class ContextParam implements ElementConvertable {
 
     public static final String TAG_NAME = "context-param";//NOI18N
     public static final String NAME_TAG_NAME = "param-name";//NOI18N
@@ -53,6 +53,7 @@ public class ContextParam {
     }
     public String descriptionTag;
 
+    @Override
     public Element getElement(Document aDoc) {
         Element element = aDoc.createElement(TAG_NAME);
         if (descriptionTag != null) {

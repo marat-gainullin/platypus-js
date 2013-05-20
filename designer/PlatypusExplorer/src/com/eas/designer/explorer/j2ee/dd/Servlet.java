@@ -11,7 +11,7 @@ import org.w3c.dom.Element;
  * Servlet's configuration.
  * @author vv
  */
-public class Servlet {
+public class Servlet implements ElementConvertable {
     
     public static final String TAG_NAME = "servlet";//NOI18N
     public static final String SERVLET_NAME_TAG_NAME = "servlet-name";//NOI18N
@@ -50,6 +50,7 @@ public class Servlet {
         this.multipartConfig = multipartConfig;
     }
     
+    @Override
     public Element getElement(Document aDoc) {
         Element element = aDoc.createElement(TAG_NAME);
         Element servletNameElement = aDoc.createElement(SERVLET_NAME_TAG_NAME);
