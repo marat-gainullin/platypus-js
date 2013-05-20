@@ -12,7 +12,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
- *
+ * Defines the access privileges to a collection of resources.
  * @author vv
  */
 public class SecurityConstraint implements ElementConvertable {
@@ -51,7 +51,14 @@ public class SecurityConstraint implements ElementConvertable {
     
     @Override
     public Element getElement(Document aDoc) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        Element element = aDoc.createElement(TAG_NAME);
+        for (WebResourceCollection wrc : webResourceCollections) {
+            element.appendChild(wrc.getElement(aDoc));
+        }
+        if (authConstraint != null) {
+            element.appendChild(authConstraint.getElement(aDoc));
+        }
+        return element;
     }
     
 }
