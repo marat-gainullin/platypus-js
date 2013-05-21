@@ -27,10 +27,6 @@ public class XMLHttpRequest2 extends XMLHttpRequest {
 		return this.response;
 	}-*/;
 
-	public final native String getResponseType() /*-{
-		return this.responseType;
-	}-*/;
-
 	public final native int getTimeOut() /*-{
 		return this.timeout;
 	}-*/;
@@ -100,19 +96,11 @@ public class XMLHttpRequest2 extends XMLHttpRequest {
 		};
 	}-*/;
 
-	public final native void setResponseType(String responseType) /*-{
-		this.responseType = responseType;
-	}-*/;
-
 	public final native void setTimeOut(int timeout) /*-{
 		this.timeout = timeout;
 	}-*/;
 
 	public final native void setUpload(XmlHttpRequestUpload upload) /*-{
 		this.upload = upload;
-	}-*/;
-
-	public final native void setWithCredentials(boolean withCredentials) /*-{
-		this.withCredentials = withCredentials;
 	}-*/;
 }
