@@ -3,15 +3,15 @@
     <context-param>
         <description>Пул ресурсов (JNDI имя) базы данных приложения</description>
         <param-name>url</param-name>
-        <param-value>jdbc/h2</param-value>
+        <param-value>jdbc/oracle</param-value>
     </context-param>
     <context-param>
         <param-name>schema</param-name>
-        <param-value>TEST</param-value>
+        <param-value>eas</param-value>
     </context-param>
     <context-param>
         <param-name>dialect</param-name>
-        <param-value>h2</param-value>
+        <param-value>oracle</param-value>
     </context-param>
     <context-param>
         <description>Default application element to start work with. Aka index.html for web applications</description>
@@ -21,8 +21,8 @@
     <context-param>
         <description>Каталог внутри War-а, в котором хранится приложение Platypus.</description>
         <param-name>ap</param-name>
-        <param-value>../../../../../../../../Users/mg/Documents/NetBeansProjects/resourcesTests</param-value>
-        </context-param>
+        <param-value>../../../../../../../../projects/transport</param-value>
+    </context-param>
     <listener>
         <listener-class>com.eas.server.httpservlet.PlatypusSessionsSynchonizer</listener-class>
     </listener>
@@ -50,24 +50,56 @@
         </cookie-config>
         <tracking-mode>COOKIE</tracking-mode>
     </session-config>
+    <security-constraint>
+        <display-name>Ограничение1</display-name>
+        <web-resource-collection>
+            <web-resource-name>platypus</web-resource-name>
+            <description/>
+            <url-pattern>/applicationStart.html</url-pattern>
+        </web-resource-collection>
+        <auth-constraint>
+            <description/>
+            <role-name>platypus_default_role</role-name>
+        </auth-constraint>
+    </security-constraint>
     <login-config>
-        <auth-method>BASIC</auth-method>
+        <auth-method>FORM</auth-method>
         <realm-name>databaseRealM</realm-name>
+        <form-login-config>
+            <form-login-page>/login.html</form-login-page>
+            <form-error-page>/loginFail.html</form-error-page>
+        </form-login-config>
     </login-config>
     <security-role>
         <description/>
         <role-name>platypus_default_role</role-name>
     </security-role>
     <security-role>
-        <description/>
-        <role-name>role1</role-name>
+        <description>Наблюдатель за движущимися объектами (АТС, мобильными телефонами и пр.)</description>
+        <role-name>view</role-name>
     </security-role>
     <security-role>
-        <description/>
-        <role-name>role2</role-name>
+        <description>Диспетчер предприятия (путевки)</description>
+        <role-name>disp</role-name>
     </security-role>
     <security-role>
-        <description/>
-        <role-name>role3</role-name>
+        <description>Механик предприятия</description>
+        <role-name>mech</role-name>
+    </security-role>
+    <security-role>
+        <description>Администратор сервиса мониторинга</description>
+        <role-name>admin</role-name>
+    </security-role>
+    <security-role>
+        <description>Представитель транспортного сервиса - партнер ООО "Арма"</description>
+        <role-name>diler</role-name>
+    </security-role>
+    <security-role>
+        <description>Ответственный за ведение справочников (марки, модели и пр.)</description>
+        <role-name>nsi</role-name>
+    </security-role>
+    <security-role>
+        <description>Кадровик (медосмотры, нарушения ПДД и пр.)</description>
+        <role-name>hr</role-name>
     </security-role>
 </web-app>
