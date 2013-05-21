@@ -522,21 +522,21 @@ public class Application {
             return (num << cnt) | (num >>> (32 - cnt));
         }
 
-		$wnd.platypus = {
-			getCached : function(appElementId) {
-				return aClient.@com.eas.client.application.AppClient::getCachedAppElement(Ljava/lang/String;)(appElementId);
-			},
-			readModel : function(appElementDoc, aModule) {
-				var nativeModel = @com.eas.client.model.store.XmlDom2Model::transform(Lcom/google/gwt/xml/client/Document;Lcom/google/gwt/core/client/JavaScriptObject;)(appElementDoc, aModule);
-				nativeModel.@com.eas.client.model.Model::publish(Lcom/google/gwt/core/client/JavaScriptObject;)(aModule);
-				return nativeModel;
-			},
-			readForm : function(appElementDoc, aModule) {
-				var nativeModel = aModule.model.unwrap();
-				var nativeForm = @com.eas.client.form.store.XmlDom2Form::transform(Lcom/google/gwt/xml/client/Document;Lcom/eas/client/model/Model;)(appElementDoc, nativeModel);
-				nativeForm.@com.eas.client.form.Form::publish(Lcom/google/gwt/core/client/JavaScriptObject;)(aModule);
-				return nativeForm;
-			}
+		if(!$wnd.platypus)
+			$wnd.platypus = {};
+		$wnd.platypus.getCached = function(appElementId) {
+			return aClient.@com.eas.client.application.AppClient::getCachedAppElement(Ljava/lang/String;)(appElementId);
+		};
+		$wnd.platypus.readModel = function(appElementDoc, aModule) {
+			var nativeModel = @com.eas.client.model.store.XmlDom2Model::transform(Lcom/google/gwt/xml/client/Document;Lcom/google/gwt/core/client/JavaScriptObject;)(appElementDoc, aModule);
+			nativeModel.@com.eas.client.model.Model::publish(Lcom/google/gwt/core/client/JavaScriptObject;)(aModule);
+			return nativeModel;
+		};
+		$wnd.platypus.readForm = function(appElementDoc, aModule) {
+			var nativeModel = aModule.model.unwrap();
+			var nativeForm = @com.eas.client.form.store.XmlDom2Form::transform(Lcom/google/gwt/xml/client/Document;Lcom/eas/client/model/Model;)(appElementDoc, nativeModel);
+			nativeForm.@com.eas.client.form.Form::publish(Lcom/google/gwt/core/client/JavaScriptObject;)(aModule);
+			return nativeForm;
 		};
 		function _Modules() {
 			var platypusModules = {};
@@ -902,7 +902,13 @@ public class Application {
 		return platypusModules;
 	}
 
+	protected static native void onReady()/*-{
+		if($wnd.platypus.ready)
+			$wnd.platypus.ready();
+	}-*/;
+	
 	protected static Cancellable startAppElements(AppClient client, final Map<String, Element> start) throws Exception {
+		onReady();
 		if (start == null || start.isEmpty()) {
 			return client.getStartElement(new StringCallbackAdapter() {
 
@@ -910,9 +916,11 @@ public class Application {
 
 				@Override
 				protected void doWork(String aResult) throws Exception {
-					Collection<String> results = new ArrayList();
-					results.add(aResult);
-					loadings = loader.load(results, new ExecuteApplicationCallback(results));
+					if(aResult != null && !aResult.isEmpty()){
+						Collection<String> results = new ArrayList();
+						results.add(aResult);
+						loadings = loader.load(results, new ExecuteApplicationCallback(results));
+					}
 				}
 
 				@Override

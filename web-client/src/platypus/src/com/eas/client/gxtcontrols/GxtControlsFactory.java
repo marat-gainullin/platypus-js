@@ -67,6 +67,7 @@ import com.sencha.gxt.widget.core.client.button.SplitButton;
 import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.container.Container;
 import com.sencha.gxt.widget.core.client.container.HBoxLayoutContainer;
+import com.sencha.gxt.widget.core.client.container.HasLayout;
 import com.sencha.gxt.widget.core.client.container.VBoxLayoutContainer;
 import com.sencha.gxt.widget.core.client.form.PasswordField;
 import com.sencha.gxt.widget.core.client.form.ValueBaseField;
@@ -435,6 +436,10 @@ public class GxtControlsFactory {
 				@Override
 				public void run(ImageResource aResource) {
 					btn.setIcon(aResource);
+					if (btn.getParent() instanceof HasLayout) {
+						HasLayout c = (HasLayout) btn.getParent();
+						c.forceLayout();
+					}
 				}
 
 			}));
@@ -627,7 +632,7 @@ public class GxtControlsFactory {
 	private Component createFormattedTextField(Element aTag) throws Exception {
 		String formatPattern = aTag.getAttribute("format");
 		int formatType = Utils.getIntegerAttribute(aTag, "valueType", ObjectFormat.MASK);
-		
+
 		PlatypusFormattedTextField component = new PlatypusFormattedTextField(new ObjectFormat(formatType, formatPattern));
 		processEvents(component, aTag);
 		Publisher.publish(component);
@@ -809,10 +814,10 @@ public class GxtControlsFactory {
 		aComponent.setId("pw-" + (++idCounter));
 
 		boolean visible = Utils.getBooleanAttribute(aTag, "visible", true);
-		if(!visible)
+		if (!visible)
 			aComponent.setVisible(visible);
 		boolean enabled = Utils.getBooleanAttribute(aTag, "enabled", true);
-		if(!enabled)
+		if (!enabled)
 			aComponent.setEnabled(enabled);
 
 		if (aTag.hasAttribute("toolTipText")) {
@@ -854,11 +859,11 @@ public class GxtControlsFactory {
 		}
 		if (aTag.hasAttribute("foregroundColor")) {
 			aPublished.setForeground(ControlsUtils.parseColor(aTag.getAttribute("foregroundColor")));// force
-																							 // value
+			// value
 		}
 		boolean opaque = Utils.getBooleanAttribute(aTag, "opaque", aDefaultOpaque);
 		if (!opaque) // opaque == true is the default value, so we avoid to set
-					 // it, because of speed
+		             // it, because of speed
 			aPublished.setOpaque(opaque);
 		if (!isRoot) {
 			Element fontTag = Utils.getElementByTagName(aTag, "easFont");

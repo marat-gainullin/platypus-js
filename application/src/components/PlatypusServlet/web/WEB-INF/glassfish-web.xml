@@ -7,16 +7,32 @@
     <group-name>default</group-name>
   </security-role-mapping>
   <security-role-mapping>
-    <role-name>role1</role-name>
-    <group-name>role1</group-name>
+    <role-name>admin</role-name>
+    <group-name>admin</group-name>
   </security-role-mapping>
   <security-role-mapping>
-    <role-name>role2</role-name>
-    <group-name>role2</group-name>
+    <role-name>diler</role-name>
+    <group-name>diler</group-name>
   </security-role-mapping>
   <security-role-mapping>
-    <role-name>role3</role-name>
-    <group-name>role3</group-name>
+    <role-name>disp</role-name>
+    <group-name>disp</group-name>
+  </security-role-mapping>
+  <security-role-mapping>
+    <role-name>mech</role-name>
+    <group-name>mech</group-name>
+  </security-role-mapping>
+  <security-role-mapping>
+    <role-name>nsi</role-name>
+    <group-name>nsi</group-name>
+  </security-role-mapping>
+  <security-role-mapping>
+    <role-name>view</role-name>
+    <group-name>view</group-name>
+  </security-role-mapping>
+  <security-role-mapping>
+    <role-name>hr</role-name>
+    <group-name>hr</group-name>
   </security-role-mapping>
   <class-loader delegate="true"/>
   <jsp-config>
