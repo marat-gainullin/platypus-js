@@ -4,6 +4,7 @@
  */
 package com.eas.designer.explorer.j2ee.tomcat;
 
+import com.eas.designer.explorer.j2ee.dd.ElementConvertable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -14,7 +15,7 @@ import org.w3c.dom.Element;
  * @author vv
  */
 
-public abstract class Realm {
+public abstract class Realm implements ElementConvertable {
 
     public static final String TAG_NAME = "Realm";//NOI18N
     public static final String CLASS_NAME_ATTR_NAME = "className";//NOI18N
@@ -39,7 +40,8 @@ public abstract class Realm {
     public void load(Element tag) {
         className = tag.getAttribute(CLASS_NAME_ATTR_NAME);
     }
-
+    
+    @Override
     public Element getElement(Document aDoc) {
         Element element = aDoc.createElement(TAG_NAME);
         if (className != null) {

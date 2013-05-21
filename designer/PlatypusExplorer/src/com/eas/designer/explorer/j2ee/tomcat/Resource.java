@@ -4,6 +4,7 @@
  */
 package com.eas.designer.explorer.j2ee.tomcat;
 
+import com.eas.designer.explorer.j2ee.dd.ElementConvertable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -12,7 +13,7 @@ import org.w3c.dom.Element;
  *
  * @author vv
  */
-public class Resource {
+public class Resource implements ElementConvertable {
 
     public static final String TAG_NAME = "Resource";//NOI18N
     public static final String NAME_ATTR_NAME = "name";//NOI18N

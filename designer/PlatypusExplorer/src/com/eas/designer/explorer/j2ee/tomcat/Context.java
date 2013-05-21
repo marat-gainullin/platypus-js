@@ -27,6 +27,7 @@ public class Context {
     public static final String PATH_ATTR_NAME = "path";//NOI18N
     protected static DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     protected DocumentBuilder builder;
+    private List<Parameter> params = new ArrayList<>();
     private Realm realm;
     private List<Resource> resources = new ArrayList<>();
     private String docBase;
@@ -45,6 +46,9 @@ public class Context {
         }
         if (path != null) {
             contextTag.setAttribute(PATH_ATTR_NAME, path);
+        }
+        for (Parameter param : params) {
+            contextTag.appendChild(param.getElement(doc));
         }
         if (realm != null) {
             contextTag.appendChild(realm.getElement(doc));
@@ -65,6 +69,10 @@ public class Context {
             context.path = contextTag.getAttribute(PATH_ATTR_NAME);
             Element realmTag = XmlDomUtils.getElementByTagName(contextTag, Realm.TAG_NAME);
             context.realm = RealmFactory.getRealm(realmTag);
+            for (Element paramTag : XmlDomUtils.elementsByTagName(contextTag, Parameter.TAG_NAME)) {
+                Parameter param = new Parameter(paramTag.getAttribute(Parameter.NAME_ATTR_NAME), paramTag.getAttribute(Parameter.VALUE_ATTR_NAME));
+                context.params.add(param);     
+            }
             for (Element resourceTag : XmlDomUtils.elementsByTagName(contextTag, Resource.TAG_NAME)) {
                 Resource res = ResourceFactory.getRealm(resourceTag);
                 if (res != null) {
