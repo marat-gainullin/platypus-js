@@ -153,7 +153,7 @@ public class TomcatWebAppManager implements WebAppManager {
             for (Resource res : getDataSources()) {
                 ctx.addResource(res);
             }
-            if (project.getSettings().isSecurityRealmEnabled()) {
+            if (project.getSettings().isWebSecurityEnabled()) {
                 ctx.setRealm(getRealm());
             }
         } catch (Exception ex) {

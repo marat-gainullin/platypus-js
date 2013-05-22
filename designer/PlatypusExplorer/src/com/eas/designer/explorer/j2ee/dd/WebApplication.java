@@ -30,6 +30,9 @@ public class WebApplication {
     private List<Servlet> servlets = new ArrayList<>();
     private List<ServletMapping> servletMappings = new ArrayList<>();
     private List<ResourceRef> resourceRefs = new ArrayList<>();
+    private SecurityConstraint securityConstraint;
+    private LoginConfig loginConfig;
+    private List<SecurityRole> securityRoles = new ArrayList<>();
 
     public WebApplication() throws ParserConfigurationException {
         factory.setNamespaceAware(true);
@@ -59,6 +62,15 @@ public class WebApplication {
         }
         for (ResourceRef resourceRef : resourceRefs) {
             webApp.appendChild(resourceRef.getElement(doc));
+        }
+        if (securityConstraint != null) {
+            webApp.appendChild(securityConstraint.getElement(doc));
+        }
+        if (loginConfig != null) {
+            webApp.appendChild(loginConfig.getElement(doc));
+        }
+        for (SecurityRole role : securityRoles) {
+            webApp.appendChild(role.getElement(doc));
         }
         return doc;
     }
@@ -162,4 +174,42 @@ public class WebApplication {
             }
         }
     }
+
+    public SecurityConstraint getSecurityConstraint() {
+        return securityConstraint;
+    }
+
+    public void setSecurityConstraint(SecurityConstraint aSecurityConstraint) {
+        securityConstraint = aSecurityConstraint;
+    }
+
+    public LoginConfig getLoginConfig() {
+        return loginConfig;
+    }
+
+    public void setLoginConfig(LoginConfig aLoginConfig) {
+        loginConfig = aLoginConfig;
+    }
+    
+    public void addSecurityRole(SecurityRole aSecurityRole) {
+        securityRoles.add(aSecurityRole);
+    }
+    
+    public List<SecurityRole> getSecurityRoles() {
+        return Collections.unmodifiableList(securityRoles);
+    }
+    
+    public void removeSecurityRole(String aSecurityRoleNme) {
+        if (aSecurityRoleNme != null) {
+            Iterator<SecurityRole> i = securityRoles.iterator();
+            while (i.hasNext()) {
+                SecurityRole r = i.next();
+                if (aSecurityRoleNme.equals(r.getRoleName())) {
+                    i.remove();
+                }
+            }
+        }
+    }
+    
+    
 }

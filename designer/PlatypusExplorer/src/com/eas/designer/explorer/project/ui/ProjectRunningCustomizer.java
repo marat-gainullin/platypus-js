@@ -98,7 +98,7 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
         if (projectSettings.getServerContext() != null) {
             txtContext.setText(projectSettings.getServerContext());
         }
-        cbEnableSecurityRealm.setSelected(projectSettings.isSecurityRealmEnabled());
+        cbEnableSecurityRealm.setSelected(projectSettings.isWebSecurityEnabled());
         isInit = false;
     }
 
