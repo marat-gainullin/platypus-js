@@ -395,7 +395,7 @@ public class PlatypusProjectSettings {
      * Checks if security realm to be configured on J2EE server startup.
      * @return true to enable configure security realm 
      */
-    public boolean isSecurityRealmEnabled() {
+    public boolean isWebSecurityEnabled() {
         return Boolean.valueOf(projectProperties.get(ENABLE_SECURITY_REALM_KEY));
     }
     
@@ -404,7 +404,7 @@ public class PlatypusProjectSettings {
      * @param aValue true to enable configure security realm 
      */
     public void setSecurityRealmEnabled(boolean aValue) {
-        boolean oldValue = isSecurityRealmEnabled();
+        boolean oldValue = isWebSecurityEnabled();
         projectProperties.setProperty(ENABLE_SECURITY_REALM_KEY, Boolean.valueOf(aValue).toString());
         projectPropertiesIsDirty = true;
         changeSupport.firePropertyChange(ENABLE_SECURITY_REALM_KEY, oldValue, aValue);

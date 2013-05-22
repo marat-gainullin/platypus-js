@@ -9,12 +9,18 @@ import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.client.settings.DbConnectionSettings;
 import com.eas.designer.application.PlatypusUtils;
 import com.eas.designer.explorer.j2ee.dd.AppListener;
+import com.eas.designer.explorer.j2ee.dd.AuthConstraint;
 import com.eas.designer.explorer.j2ee.dd.ContextParam;
+import com.eas.designer.explorer.j2ee.dd.FormLoginConfig;
+import com.eas.designer.explorer.j2ee.dd.LoginConfig;
 import com.eas.designer.explorer.j2ee.dd.MultipartConfig;
 import com.eas.designer.explorer.j2ee.dd.ResourceRef;
+import com.eas.designer.explorer.j2ee.dd.SecurityConstraint;
+import com.eas.designer.explorer.j2ee.dd.SecurityRole;
 import com.eas.designer.explorer.j2ee.dd.Servlet;
 import com.eas.designer.explorer.j2ee.dd.ServletMapping;
 import com.eas.designer.explorer.j2ee.dd.WebApplication;
+import com.eas.designer.explorer.j2ee.dd.WebResourceCollection;
 import com.eas.designer.explorer.platform.EmptyPlatformHomePathException;
 import com.eas.designer.explorer.platform.PlatypusPlatform;
 import com.eas.designer.explorer.project.PlatypusProject;
@@ -55,6 +61,9 @@ public class PlatypusWebModuleManager {
     public static final String WEB_APP_LISTENER_CLASS = "com.eas.server.httpservlet.PlatypusSessionsSynchonizer";//NOI18N
     public static final String DATASOURCE_CLASS = "javax.sql.DataSource"; //NOI18N
     public static final String CONTAIER_RESOURCE_SECURITY_TYPE = "Container"; //NOI18N
+    public static final String PLATYPUS_WEB_RESOURCE_NAME = "platypus"; //NOI18N
+    public static final String ANY_SIGNED_USER_ROLE = "*"; //NOI18N
+    public static final String FORM_AUTH_METHOD = "FORM"; //NOI18N
     public static final long MULTIPART_MAX_FILE_SIZE = 2097152;
     public static final long MULTIPART_MAX_REQUEST_SIZE = 2165824;
     public static final long MULTIPART_MAX_FILE_THRESHOLD = 1048576;
@@ -201,30 +210,13 @@ public class PlatypusWebModuleManager {
 
     private void configureDeploymentDescriptor() throws Exception {
         WebApplication wa = new WebApplication();
-        if (!project.getSettings().isDbAppSources()) {
-            wa.addInitParam(new ContextParam(ClientConstants.APP_PATH_CMD_PROP_NAME1, project.getSrcRoot().getPath()));
-        }
-        wa.addInitParam(new ContextParam(ClientConstants.DB_CONNECTION_URL_PROP_NAME, PlatypusWebModule.MAIN_DATASOURCE_NAME));
-        DbConnectionSettings dbSettings = project.getSettings().getAppSettings().getDbSettings();
-        String dbConnectionSchema = dbSettings.getInfo().getProperty(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME);
-        if (dbConnectionSchema != null && !dbConnectionSchema.isEmpty()) {
-            wa.addInitParam(new ContextParam(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME, dbConnectionSchema));
-        }
-        String dialect = GeneralResourceProvider.constructPropertiesByDbConnectionSettings(dbSettings).getProperty(ClientConstants.DB_CONNECTION_DIALECT_PROP_NAME);
-        wa.addInitParam(new ContextParam(ClientConstants.DB_CONNECTION_DIALECT_PROP_NAME, dialect));
+        configureParams(wa);
         wa.addAppListener(new AppListener(WEB_APP_LISTENER_CLASS));
-        Servlet platypusServlet = new Servlet(PLATYPUS_SERVLET_NAME, PLATYPUS_SERVLET_CLASS);
-        MultipartConfig multiPartConfig = new MultipartConfig();
-        multiPartConfig.setLocation(publicDir.getPath());
-        multiPartConfig.setMaxFileSize(Long.toString(MULTIPART_MAX_FILE_SIZE));
-        multiPartConfig.setMaxRequestSize(Long.toString(MULTIPART_MAX_REQUEST_SIZE));
-        multiPartConfig.setFileSizeThreshold(Long.toString(MULTIPART_MAX_FILE_THRESHOLD));
-        platypusServlet.setMultipartConfig(multiPartConfig);
-        wa.addServlet(platypusServlet);
-        wa.addServletMapping(new ServletMapping(PLATYPUS_SERVLET_NAME, PLATYPUS_SERVLET_URL_PATTERN));
-        ResourceRef resourceRef = new ResourceRef(PlatypusWebModule.MAIN_DATASOURCE_NAME, DATASOURCE_CLASS, CONTAIER_RESOURCE_SECURITY_TYPE);
-        resourceRef.setDescription("Main database connection"); //NOI18N
-        wa.addResourceRef(resourceRef);
+        configureServlet(wa);
+        configureDatasource(wa);
+        if (project.getSettings().isWebSecurityEnabled()) {
+            configureSecurity(wa);
+        }
         FileObject webXml = webInfDir.getFileObject(WEB_XML_FILE_NAME);
         if (webXml == null) {
             webXml = webInfDir.createData(WEB_XML_FILE_NAME);
@@ -245,5 +237,53 @@ public class PlatypusWebModuleManager {
         } else {
             throw new IllegalStateException("appElementId is null or empty.");
         }
+    }
+
+    private void configureParams(WebApplication wa) throws Exception {
+        if (!project.getSettings().isDbAppSources()) {
+            wa.addInitParam(new ContextParam(ClientConstants.APP_PATH_CMD_PROP_NAME1, project.getProjectDirectory().getPath()));
+        }
+        wa.addInitParam(new ContextParam(ClientConstants.DB_CONNECTION_URL_PROP_NAME, PlatypusWebModule.MAIN_DATASOURCE_NAME));
+        DbConnectionSettings dbSettings = project.getSettings().getAppSettings().getDbSettings();
+        String dbConnectionSchema = dbSettings.getInfo().getProperty(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME);
+        if (dbConnectionSchema != null && !dbConnectionSchema.isEmpty()) {
+            wa.addInitParam(new ContextParam(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME, dbConnectionSchema));
+        }
+        String dialect = GeneralResourceProvider.constructPropertiesByDbConnectionSettings(dbSettings).getProperty(ClientConstants.DB_CONNECTION_DIALECT_PROP_NAME);
+        wa.addInitParam(new ContextParam(ClientConstants.DB_CONNECTION_DIALECT_PROP_NAME, dialect));
+    }
+
+    private void configureServlet(WebApplication wa) {
+        Servlet platypusServlet = new Servlet(PLATYPUS_SERVLET_NAME, PLATYPUS_SERVLET_CLASS);
+        MultipartConfig multiPartConfig = new MultipartConfig();
+        multiPartConfig.setLocation(publicDir.getPath());
+        multiPartConfig.setMaxFileSize(Long.toString(MULTIPART_MAX_FILE_SIZE));
+        multiPartConfig.setMaxRequestSize(Long.toString(MULTIPART_MAX_REQUEST_SIZE));
+        multiPartConfig.setFileSizeThreshold(Long.toString(MULTIPART_MAX_FILE_THRESHOLD));
+        platypusServlet.setMultipartConfig(multiPartConfig);
+        wa.addServlet(platypusServlet);
+        wa.addServletMapping(new ServletMapping(PLATYPUS_SERVLET_NAME, PLATYPUS_SERVLET_URL_PATTERN));
+    }
+
+    private void configureDatasource(WebApplication wa) {
+        ResourceRef resourceRef = new ResourceRef(PlatypusWebModule.MAIN_DATASOURCE_NAME, DATASOURCE_CLASS, CONTAIER_RESOURCE_SECURITY_TYPE);
+        resourceRef.setDescription("Main database connection"); //NOI18N
+        wa.addResourceRef(resourceRef);
+    }
+
+    private void configureSecurity(WebApplication wa) {
+        SecurityConstraint sc = new SecurityConstraint();
+        WebResourceCollection wrc = new WebResourceCollection(PLATYPUS_WEB_RESOURCE_NAME);
+        wrc.setUrlPattern("/" + START_PAGE_FILE_NAME);//NOI18N
+        sc.addWebResourceCollection(wrc);
+        AuthConstraint ac = new AuthConstraint(ANY_SIGNED_USER_ROLE);
+        LoginConfig lc = new LoginConfig();
+        sc.setAuthConstraint(ac);
+        wa.setSecurityConstraint(sc);
+        lc.setAuthMethod(FORM_AUTH_METHOD);
+        lc.setFormLoginConfig(new FormLoginConfig("/" + LOGIN_PAGE_FILE_NAME, "/" + LOGIN_FAIL_PAGE_FILE_NAME));//NOI18N
+        wa.addSecurityRole(new SecurityRole(ANY_SIGNED_USER_ROLE));
+        wa.setLoginConfig(lc);
+        
     }
 }

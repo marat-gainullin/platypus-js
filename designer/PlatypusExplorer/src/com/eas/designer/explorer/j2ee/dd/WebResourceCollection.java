@@ -66,14 +66,17 @@ public class WebResourceCollection implements ElementConvertable {
         nameElement.setTextContent(name);   
         if (description != null) {
             Element descElement = aDoc.createElement(DESCRIPTION_TAG_NAME);
+            descElement.setTextContent(description);
             element.appendChild(descElement);
         }
         if (urlPattern != null) {
             Element urlPatternElement = aDoc.createElement(URL_PATTERN_TAG_NAME);
+            urlPatternElement.setTextContent(urlPattern);
             element.appendChild(urlPatternElement);
         }
         if (httpMethod != null) {
             Element httpMethodElement = aDoc.createElement(HTTP_METHOD_TAG_NAME);
+            httpMethodElement.setTextContent(httpMethod);
             element.appendChild(httpMethodElement);
         }
         return element;
