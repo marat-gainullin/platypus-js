@@ -49,3 +49,6 @@ CREATE OR REPLACE VIEW dummytable AS SELECT character varying(100) '' as dummy
 insert into MTD_USERS (USR_NAME, USR_PASSWD)
     VALUES ('admin', 'abe6db4c9f5484fae8d79f2e868a673c')
 #GO
+insert into MTD_GROUPS (USR_NAME, GROUP_NAME)
+    VALUES ('admin', 'admin')
+#GO
