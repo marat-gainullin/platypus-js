@@ -506,6 +506,10 @@ public class GxtControlsFactory {
 				@Override
 				public void run(ImageResource aResource) {
 					component.setImage(aResource);
+					if (component.getParent() instanceof HasLayout) {
+						HasLayout c = (HasLayout) component.getParent();
+						c.forceLayout();
+					}
 				}
 
 			}));

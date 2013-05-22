@@ -19,8 +19,7 @@ public class RowsetPositionSelectionHandler implements SelectionHandler<Row> {
 
 	@Override
 	public void onSelection(SelectionEvent<Row> event) {
-		if (rowsSource != null)
-		{
+		if (rowsSource != null && event.getSelectedItem() != null) {
 			try {
 				rowsSource.scrollTo(event.getSelectedItem());
 			} catch (Exception e) {

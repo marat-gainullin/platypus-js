@@ -95,7 +95,7 @@ public class ModelCheck extends PlatypusAdapterStandaloneField<Boolean> {
 			}
 		});
 	}-*/;
-	
+
 	public ModelElementRef getModelElement() {
 		return ((PlatypusCheckBoxHandledField) target).getModelElement();
 	}
@@ -141,16 +141,14 @@ public class ModelCheck extends PlatypusAdapterStandaloneField<Boolean> {
 		super.setEditable(aValue);
 	}
 
-	public String getText()
-	{
+	public String getText() {
 		return getTarget().getBoxLabel();
 	}
-	
-	public void setText(String aValue)
-	{
+
+	public void setText(String aValue) {
 		getTarget().setBoxLabel(aValue);
 	}
-	
+
 	@Override
 	public boolean isSelectOnly() {
 		return super.isSelectOnly();
@@ -170,7 +168,7 @@ public class ModelCheck extends PlatypusAdapterStandaloneField<Boolean> {
 	public void setValue(Boolean value) {
 		super.setValue(value);
 	}
-	
+
 	public void setValue(Boolean value, boolean fireEvents) {
 		super.setValue(value, fireEvents);
 	}

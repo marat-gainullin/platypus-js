@@ -11,6 +11,7 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Event;
 import com.sencha.gxt.data.shared.event.StoreClearEvent;
@@ -409,6 +410,7 @@ public class PlatypusCellSelectionModel<M> extends GridSelectionModel<M> impleme
 		List<CellSelection<M>> selected = new ArrayList();
 		selected.addAll(selection.values());
 		fireEvent(new CellSelectionChangedEvent<M>(selected));
+		SelectionEvent.fire(this, getSelectedItem());
 	}
 
 	@Override

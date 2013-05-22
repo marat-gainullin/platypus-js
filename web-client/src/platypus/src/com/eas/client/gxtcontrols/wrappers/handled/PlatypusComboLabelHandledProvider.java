@@ -15,9 +15,8 @@ public class PlatypusComboLabelHandledProvider extends ComboLabelProvider {
 
 	protected PlatypusComboBoxHandledField container;
 	protected JavaScriptObject cellFunction;
-	
-	public PlatypusComboLabelHandledProvider()
-	{
+
+	public PlatypusComboLabelHandledProvider() {
 		super();
 	}
 
@@ -32,17 +31,16 @@ public class PlatypusComboLabelHandledProvider extends ComboLabelProvider {
 	@Override
 	public String getLabel(Object aValue) {
 		String label = super.getLabel(aValue);
-		if (cellFunction != null && targetValueRef != null && targetValueRef.entity.getRowset() != null) {
+		if (cellFunction != null && lookupValueRef != null && lookupValueRef.entity.getRowset() != null) {
 			try {
-				Row currentRow = targetValueRef.entity.getRowset().getCurrentRow();
-				Object currentRowValue = currentRow.getColumnObject(targetValueRef.getColIndex());
-				if ((currentRowValue != null && currentRowValue.equals(aValue)) || (currentRowValue == null && aValue == null)) {
-					JavaScriptObject eventThis = targetValueRef.entity.getModel().getModule();
+				Row found = lookupValueRef.entity.find(lookupValueRef.getColIndex(), aValue);
+				if(found != null){
+					JavaScriptObject eventThis = lookupValueRef.entity.getModel().getModule();
 					if (container != null && container.getParent() != null && container.getParent().getParent() instanceof PlatypusAdapterStandaloneField<?>) {
 						PlatypusAdapterField<?> adapter = (PlatypusAdapterStandaloneField<?>) container.getParent().getParent();
 						eventThis = adapter.getPublishedField();
 					}
-					PublishedCell cellToRender = ControlsUtils.calcStandalonePublishedCell(eventThis, cellFunction, currentRow, label, targetValueRef);
+					PublishedCell cellToRender = ControlsUtils.calcStandalonePublishedCell(eventThis, cellFunction, found, label, lookupValueRef);
 					if (cellToRender != null) {
 						label = cellToRender.getDisplay();
 					}
@@ -56,6 +54,6 @@ public class PlatypusComboLabelHandledProvider extends ComboLabelProvider {
 
 	public void setContainer(PlatypusComboBoxHandledField aHandledField) {
 		container = aHandledField;
-    }
+	}
 
 }

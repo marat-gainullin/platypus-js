@@ -323,6 +323,9 @@ public class Model {// implements Cancellable {
 			revert : function() {
 				aModel.@com.eas.client.model.Model::revert()();
 			},
+			requery : function() {
+				aModel.@com.eas.client.model.Model::requery()();
+			},
 			unwrap : function() {
 				return aModel;
 			}
