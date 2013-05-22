@@ -371,42 +371,9 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
             if (rfield == field) {
                 rfield = newFieldContent;
             }
-            /*
-             if (rel.isLeftField()) {
-             lfield = rel.getLeftEntity().getFields().get(leftFieldName);
-             if (rel.getLeftEntity() == getEntity()
-             && oldFieldContent.getName().equals(leftFieldName)) {
-             lfield = newFieldContent;
-             }
-             } else {
-             try {
-             lfield = rel.getLeftEntity().getQuery().getParameters().get(leftParameterName);
-             if (rel.getLeftEntity() == getEntity() && oldFieldContent.getName().equals(leftParameterName)) {
-             lfield = newFieldContent;
-             }
-             } catch (Exception ex) {
-             Logger.getLogger(FieldNode.class.getName()).log(Level.SEVERE, null, ex);
-             }
-             }
-
-             if (rel.isRightField()) {
-             rfield = rel.getRightEntity().getFields().get(rightFieldName);
-             if (rel.getRightEntity() == getEntity()
-             && oldFieldContent.getName().equals(rightFieldName)) {
-             rfield = newFieldContent;
-             }
-             } else {
-             try {
-             rfield = rel.getRightEntity().getQuery().getParameters().get(rightParameterName);
-             if (rel.getRightEntity() == getEntity() && oldFieldContent.getName().equals(rightParameterName)) {
-             rfield = newFieldContent;
-             }
-             } catch (Exception ex) {
-             Logger.getLogger(FieldNode.class.getName()).log(Level.SEVERE, null, ex);
-             }
-             }
-             */
-            if ((lfield.isPk() || lfield.isFk())
+            if (lfield == null || rfield == null) {
+                toProcessRels.add(rel);
+            } else if ((lfield.isPk() || lfield.isFk())
                     && (rfield.isPk() || rfield.isFk())) {
                 if (!SQLUtils.isKeysCompatible(lfield, rfield)) {
                     toProcessRels.add(rel);
@@ -415,15 +382,6 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
                 toProcessRels.add(rel);
             }
         }
-        /*
-         if (!toProcessRels.isEmpty()) {
-         NotifyDescriptor d = new NotifyDescriptor.Confirmation(NbBundle.getMessage(FieldNode.class, "MSG_BadParameterType"), //NOI18N
-         NbBundle.getMessage(FieldNode.class, "LBL_RelationsCheck"), NotifyDescriptor.OK_CANCEL_OPTION); //NOI18N
-         if (DialogDisplayer.getDefault().notify(d) != NotifyDescriptor.OK_OPTION) {
-         throw new CancelException();
-         }
-         }
-         */
         return toProcessRels;
     }
 
