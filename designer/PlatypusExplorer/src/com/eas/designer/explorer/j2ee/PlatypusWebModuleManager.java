@@ -23,6 +23,7 @@ import com.eas.designer.explorer.j2ee.dd.WebApplication;
 import com.eas.designer.explorer.j2ee.dd.WebResourceCollection;
 import com.eas.designer.explorer.platform.EmptyPlatformHomePathException;
 import com.eas.designer.explorer.platform.PlatypusPlatform;
+import com.eas.designer.explorer.project.ClientType;
 import com.eas.designer.explorer.project.PlatypusProject;
 import com.eas.util.FileUtils;
 import com.eas.xml.dom.XmlDom2String;
@@ -51,7 +52,8 @@ import org.openide.filesystems.FileUtil;
 public class PlatypusWebModuleManager {
 
     public static final String WAR_FILE_NAME = "PlatypusServlet.war"; //NOI18N
-    public static final String PLATYPUS_SERVLET_URL_PATTERN = "/application/*"; //NOI18N
+    public static final String PLATYPUS_SERVLET_URL = "/application"; //NOI18N
+    public static final String PLATYPUS_SERVLET_URL_PATTERN = PLATYPUS_SERVLET_URL + "/*"; //NOI18N
     public static final String WEB_DESCRIPTOR_FILE_NAME = "web.xml"; //NOI18N
     public static final String PLATYPUS_WEB_CLIENT_DIR_NAME = "pwc"; //NOI18N
     public static final String J2EE_RESOURCES_PACKAGE = "/com/eas/designer/explorer/j2ee/resources/"; //NOI18N
@@ -71,6 +73,7 @@ public class PlatypusWebModuleManager {
     public static final String PLATYPUS_WEB_RESOURCE_NAME = "platypus"; //NOI18N
     public static final String ANY_SIGNED_USER_ROLE = "*"; //NOI18N
     public static final String FORM_AUTH_METHOD = "FORM"; //NOI18N
+    public static final String BASIC_AUTH_METHOD = "BASIC"; //NOI18N
     public static final long MULTIPART_MAX_FILE_SIZE = 2097152;
     public static final long MULTIPART_MAX_REQUEST_SIZE = 2165824;
     public static final long MULTIPART_MAX_FILE_THRESHOLD = 1048576;
@@ -303,13 +306,19 @@ public class PlatypusWebModuleManager {
     private void configureSecurity(WebApplication wa) {
         SecurityConstraint sc = new SecurityConstraint();
         WebResourceCollection wrc = new WebResourceCollection(PLATYPUS_WEB_RESOURCE_NAME);
-        wrc.setUrlPattern("/" + START_PAGE_FILE_NAME);//NOI18N
+        
         sc.addWebResourceCollection(wrc);
         AuthConstraint ac = new AuthConstraint(ANY_SIGNED_USER_ROLE);
         LoginConfig lc = new LoginConfig();
         sc.setAuthConstraint(ac);
         wa.setSecurityConstraint(sc);
-        lc.setAuthMethod(FORM_AUTH_METHOD);
+        if (ClientType.PLATYPUS_CLIENT.equals(project.getSettings().getRunClientType())) {
+            wrc.setUrlPattern(PLATYPUS_SERVLET_URL);
+            lc.setAuthMethod(BASIC_AUTH_METHOD);
+        } else {
+            wrc.setUrlPattern("/" + START_PAGE_FILE_NAME); //NOI18N
+            lc.setAuthMethod(FORM_AUTH_METHOD);
+        } 
         lc.setFormLoginConfig(new FormLoginConfig("/" + LOGIN_PAGE_FILE_NAME, "/" + LOGIN_FAIL_PAGE_FILE_NAME));//NOI18N
         wa.addSecurityRole(new SecurityRole(ANY_SIGNED_USER_ROLE));
         wa.setLoginConfig(lc);
