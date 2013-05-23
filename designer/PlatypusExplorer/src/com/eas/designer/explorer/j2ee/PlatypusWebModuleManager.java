@@ -28,6 +28,8 @@ import com.eas.util.FileUtils;
 import com.eas.xml.dom.XmlDom2String;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.ZipException;
@@ -44,12 +46,14 @@ import org.openide.filesystems.FileUtil;
  */
 public class PlatypusWebModuleManager {
 
-    public static final String PLATYPUS_SERVLET_URL_PATTERN = "/application/*"; //NOI18N
     public static final String WAR_FILE_NAME = "PlatypusServlet.war"; //NOI18N
+    public static final String PLATYPUS_SERVLET_URL_PATTERN = "/application/*"; //NOI18N
     public static final String WEB_DESCRIPTOR_FILE_NAME = "web.xml"; //NOI18N
-    public static final String START_PAGE_FILE_NAME = "applicationStart.html"; //NOI18N
+    public static final String PLATYPUS_WEB_CLIENT_DIR_NAME = "pwc"; //NOI18N
+    public static final String J2EE_RESOURCES_PACKAGE = "/com/eas/designer/explorer/j2ee/resources/"; //NOI18N
+    public static final String START_PAGE_FILE_NAME = "application-start.html"; //NOI18N
     public static final String LOGIN_PAGE_FILE_NAME = "login.html"; //NOI18N
-    public static final String LOGIN_FAIL_PAGE_FILE_NAME = "loginFail.html"; //NOI18N
+    public static final String LOGIN_FAIL_PAGE_FILE_NAME = "login-failed.html"; //NOI18N
     public static final String JS_DIRECTORY_NAME = "js"; //NOI18N
     public static final String START_JS_FILE_NAME = "start.js"; //NOI18N
     public static final String WEB_XML_FILE_NAME = "web.xml"; //NOI18N
@@ -134,6 +138,12 @@ public class PlatypusWebModuleManager {
      */
     protected void prepareWebApplication() throws IOException, EmptyPlatformHomePathException {
         webAppDir = createFolderIfNotExists(projectDir, PlatypusWebModule.WEB_DIRECTORY);
+        webInfDir = createFolderIfNotExists(webAppDir, PlatypusWebModule.WEB_INF_DIRECTORY);
+        metaInfDir = createFolderIfNotExists(webAppDir, PlatypusWebModule.META_INF_DIRECTORY);
+        publicDir = createFolderIfNotExists(webAppDir, PlatypusWebModule.PUBLIC_DIRECTORY);
+        prepareJars();
+        preparePlatypusWebClient();
+        prepareHtmlFiles();
         FileObject platformBinDir = FileUtil.toFileObject(PlatypusPlatform.getPlatformBinDirectory());
         FileObject referenceWar = platformBinDir.getFileObject(WAR_FILE_NAME);
         if (referenceWar != null) {
@@ -146,9 +156,30 @@ public class PlatypusWebModuleManager {
         } else {
             throw new FileNotFoundException("Web application archive is not found at: " + PlatypusPlatform.getPlatformBinDirectory());
         }
-        webInfDir = createFolderIfNotExists(webAppDir, PlatypusWebModule.WEB_INF_DIRECTORY);
-        metaInfDir = createFolderIfNotExists(webAppDir, PlatypusWebModule.META_INF_DIRECTORY);
-        publicDir = createFolderIfNotExists(webAppDir, PlatypusWebModule.PUBLIC_DIRECTORY);
+
+    }
+
+    private void prepareJars() {
+    }
+
+    private void preparePlatypusWebClient() {
+    }
+
+    private void prepareHtmlFiles() throws IOException {
+        copyResourceIfNotExists(START_PAGE_FILE_NAME);
+        copyResourceIfNotExists(LOGIN_PAGE_FILE_NAME);
+        copyResourceIfNotExists(LOGIN_FAIL_PAGE_FILE_NAME);
+    }
+    
+    private void copyResourceIfNotExists(String filePath) throws IOException {
+        FileObject fo = webAppDir.getFileObject(filePath);
+        if (fo == null) {
+            fo = webAppDir.createData(filePath);
+            try (InputStream is = PlatypusWebModuleManager.class.getResourceAsStream(J2EE_RESOURCES_PACKAGE + filePath);
+                    OutputStream os = fo.getOutputStream()) {
+                FileUtil.copy(is, os);
+            }
+        }
     }
 
     /**
@@ -284,6 +315,6 @@ public class PlatypusWebModuleManager {
         lc.setFormLoginConfig(new FormLoginConfig("/" + LOGIN_PAGE_FILE_NAME, "/" + LOGIN_FAIL_PAGE_FILE_NAME));//NOI18N
         wa.addSecurityRole(new SecurityRole(ANY_SIGNED_USER_ROLE));
         wa.setLoginConfig(lc);
-        
+
     }
 }
