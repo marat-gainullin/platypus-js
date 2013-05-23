@@ -4,7 +4,6 @@
  */
 package com.eas.designer.explorer.platform;
 
-import com.eas.designer.explorer.project.ProjectRunner;
 import com.eas.util.FileUtils;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -33,10 +32,10 @@ import org.openide.util.NbPreferences;
 public class PlatypusPlatform {
 
     public static final String HOME_DIRECTORY_PATH_KEY = "platypus.platform.home"; //NOI18N
-    private static final String BIN_DIRECTORY_NAME = "bin"; //NOI18N
-    private static final String LIB_DIRECTORY_NAME = "lib"; //NOI18N
-    private static final String JAR_FILE_EXTENSION = "jar"; //NOI18N
-    private static final String THIRDPARTY_LIB_DIRECTORY_NAME = "thirdparty"; //NOI18N
+    public static final String BIN_DIRECTORY_NAME = "bin"; //NOI18N
+    public static final String LIB_DIRECTORY_NAME = "lib"; //NOI18N
+    public static final String JAR_FILE_EXTENSION = "jar"; //NOI18N
+    public static final String THIRDPARTY_LIB_DIRECTORY_NAME = "thirdparty"; //NOI18N
     
     private static Map<String, File> jarsCache = new HashMap<>();
 
@@ -77,18 +76,29 @@ public class PlatypusPlatform {
     }
 
     /**
-     * Platform's lib directory.
+     * Platform's bin directory.
+     *
+     * @return bin directory path
+     * @throws EmptyPlatformHomePathException if platform isn't properly
+     * configured
+     */
+    public static File getPlatformLibDirectory() throws EmptyPlatformHomePathException {
+        File platformLibDir = new File(getPlatformHomeDir(), LIB_DIRECTORY_NAME);
+        if (!platformLibDir.exists() || !platformLibDir.isDirectory()) {
+            throw new IllegalStateException("Platform executables home not exists or not a directory.");
+        }
+        return platformLibDir;
+    }
+    
+    /**
+     * Platform's third party subdirectory.
      *
      * @return lib directory path
      * @throws EmptyPlatformHomePathException if platform isn't properly
      * configured
      */
     public static File getThirdpartyLibDirectory() throws EmptyPlatformHomePathException {
-        File platformLibDir = new File(getPlatformHomeDir(), LIB_DIRECTORY_NAME);
-        if (!platformLibDir.exists() || !platformLibDir.isDirectory()) {
-            throw new IllegalStateException("Platform's libs home not exists or not a directory.");
-        }
-        File tpLibDir = new File(platformLibDir, THIRDPARTY_LIB_DIRECTORY_NAME);
+        File tpLibDir = new File(getPlatformLibDirectory(), THIRDPARTY_LIB_DIRECTORY_NAME);
         if (!tpLibDir.exists() || !tpLibDir.isDirectory()) {
             throw new IllegalStateException("Platform's third party libs home not exists or not a directory.");
         }

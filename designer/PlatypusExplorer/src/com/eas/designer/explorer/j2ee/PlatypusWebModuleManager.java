@@ -26,10 +26,14 @@ import com.eas.designer.explorer.platform.PlatypusPlatform;
 import com.eas.designer.explorer.project.PlatypusProject;
 import com.eas.util.FileUtils;
 import com.eas.xml.dom.XmlDom2String;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.ZipException;
@@ -54,7 +58,6 @@ public class PlatypusWebModuleManager {
     public static final String START_PAGE_FILE_NAME = "application-start.html"; //NOI18N
     public static final String LOGIN_PAGE_FILE_NAME = "login.html"; //NOI18N
     public static final String LOGIN_FAIL_PAGE_FILE_NAME = "login-failed.html"; //NOI18N
-    public static final String JS_DIRECTORY_NAME = "js"; //NOI18N
     public static final String START_JS_FILE_NAME = "start.js"; //NOI18N
     public static final String WEB_XML_FILE_NAME = "web.xml"; //NOI18N
     public static final String SERVLET_BEAN_NAME = "Servlet"; //NOI18N
@@ -136,41 +139,50 @@ public class PlatypusWebModuleManager {
     /**
      * Creates an web application skeleton if not created yet.
      */
-    protected void prepareWebApplication() throws IOException, EmptyPlatformHomePathException {
+    protected void prepareWebApplication() throws Exception {
         webAppDir = createFolderIfNotExists(projectDir, PlatypusWebModule.WEB_DIRECTORY);
         webInfDir = createFolderIfNotExists(webAppDir, PlatypusWebModule.WEB_INF_DIRECTORY);
         metaInfDir = createFolderIfNotExists(webAppDir, PlatypusWebModule.META_INF_DIRECTORY);
         publicDir = createFolderIfNotExists(webAppDir, PlatypusWebModule.PUBLIC_DIRECTORY);
         prepareJars();
         preparePlatypusWebClient();
-        prepareHtmlFiles();
-        FileObject platformBinDir = FileUtil.toFileObject(PlatypusPlatform.getPlatformBinDirectory());
-        FileObject referenceWar = platformBinDir.getFileObject(WAR_FILE_NAME);
-        if (referenceWar != null) {
-            FileObject war = FileUtil.getArchiveRoot(referenceWar);
-            if (war != null) {
-                copyContent(war, webAppDir);
-            } else {
-                throw new ZipException("Error reading web application archive.");
-            }
-        } else {
-            throw new FileNotFoundException("Web application archive is not found at: " + PlatypusPlatform.getPlatformBinDirectory());
+        prepareResources();
+    }
+
+    private void prepareJars() throws Exception {
+        FileObject libsDir = webInfDir.getFileObject(PlatypusWebModule.LIB_DIRECTORY_NAME);
+        if (libsDir == null) {
+            libsDir = webInfDir.createFolder(PlatypusWebModule.LIB_DIRECTORY_NAME);
         }
-
+        if (libsDir.getChildren().length == 0) {
+            copyBinJars(libsDir);
+            copyLibJars(libsDir);
+        }
     }
 
-    private void prepareJars() {
+    private void preparePlatypusWebClient() throws IOException, EmptyPlatformHomePathException {
+        FileObject pwcDir = webAppDir.getFileObject(PLATYPUS_WEB_CLIENT_DIR_NAME);
+        if (pwcDir == null) {
+            pwcDir = webAppDir.createFolder(PLATYPUS_WEB_CLIENT_DIR_NAME);
+        }
+        FileObject pwcSourceDir = FileUtil.toFileObject(PlatypusPlatform.getPlatformBinDirectory()).getFileObject(PLATYPUS_WEB_CLIENT_DIR_NAME);
+        if (pwcSourceDir == null) {
+            throw new IllegalStateException(String.format("Platypus web client is not found at %s.", PlatypusPlatform.getPlatformBinDirectory().getAbsolutePath()));
+        }
+        if (!pwcSourceDir.isFolder()) {
+            throw new IllegalStateException("Platypus web client must be a directory.");
+        }
+        if (pwcDir.getChildren().length == 0) {
+            copyContent(pwcSourceDir, pwcDir);
+        }
     }
 
-    private void preparePlatypusWebClient() {
-    }
-
-    private void prepareHtmlFiles() throws IOException {
+    private void prepareResources() throws IOException {
         copyResourceIfNotExists(START_PAGE_FILE_NAME);
         copyResourceIfNotExists(LOGIN_PAGE_FILE_NAME);
         copyResourceIfNotExists(LOGIN_FAIL_PAGE_FILE_NAME);
     }
-    
+
     private void copyResourceIfNotExists(String filePath) throws IOException {
         FileObject fo = webAppDir.getFileObject(filePath);
         if (fo == null) {
@@ -183,34 +195,22 @@ public class PlatypusWebModuleManager {
     }
 
     /**
-     * Recursively copies web application structure from war archive. If
-     * destination file exists it isn't overwritten.
+     * Recursively copies directory's content.
      *
+     * @param source directory
+     * @param destination directory
      * @throws IOException if some I/O problem occurred.
      */
     protected void copyContent(FileObject sourceDir, FileObject targetDir) throws IOException {
         assert sourceDir.isFolder() && targetDir.isFolder();
-        FileObject targetFile;
         for (FileObject childFile : sourceDir.getChildren()) {
             if (childFile.isFolder()) {
-                targetFile = targetDir.getFileObject(childFile.getName(), childFile.getExt());
-                if (targetFile == null) {
-                    targetFile = targetDir.createFolder(childFile.getNameExt());
-                }
-                assert targetFile.isFolder();
+                FileObject targetFile = targetDir.createFolder(childFile.getNameExt());
                 copyContent(childFile, targetFile);
             } else {
-                copyIfNotExists(targetDir, childFile);
+                childFile.copy(targetDir, childFile.getName(), childFile.getExt());
             }
         }
-    }
-
-    private FileObject copyIfNotExists(FileObject dir, FileObject file) throws IOException {
-        FileObject target = dir.getFileObject(file.getNameExt());
-        if (target == null) {
-            target = file.copy(dir, file.getName(), file.getExt());
-        }
-        return target;
     }
 
     private FileObject createFolderIfNotExists(FileObject dir, String name) throws IOException {
@@ -257,14 +257,13 @@ public class PlatypusWebModuleManager {
 
     protected void setStartApplicationElement(String appElementId) throws IOException {
         if (appElementId != null && !appElementId.isEmpty()) {
-            FileObject jsDir = webAppDir.getFileObject(JS_DIRECTORY_NAME);
-            FileObject startJs = jsDir.getFileObject(START_JS_FILE_NAME);
-            if (startJs != null) {
-                String starupScript = String.format(START_JS_FILE_TEMPLATE, appElementId, appElementId);
-                FileUtils.writeString(FileUtil.toFile(startJs), starupScript, PlatypusUtils.COMMON_ENCODING_NAME);
-            } else {
-                throw new FileNotFoundException(START_JS_FILE_NAME + " file is not found in " + JS_DIRECTORY_NAME);
+            FileObject startJs = webAppDir.getFileObject(START_JS_FILE_NAME);
+            if (startJs == null) {
+                startJs = webAppDir.createData(START_JS_FILE_NAME);
             }
+            String starupScript = String.format(START_JS_FILE_TEMPLATE, appElementId, appElementId);
+            FileUtils.writeString(FileUtil.toFile(startJs), starupScript, PlatypusUtils.COMMON_ENCODING_NAME);
+
         } else {
             throw new IllegalStateException("appElementId is null or empty.");
         }
@@ -316,5 +315,33 @@ public class PlatypusWebModuleManager {
         wa.addSecurityRole(new SecurityRole(ANY_SIGNED_USER_ROLE));
         wa.setLoginConfig(lc);
 
+    }
+
+    private void copyBinJars(FileObject libsDir) throws EmptyPlatformHomePathException, IOException {
+        FileObject platformBinDir = FileUtil.toFileObject(PlatypusPlatform.getPlatformBinDirectory());
+        for (FileObject fo : platformBinDir.getChildren()) {
+            if (fo.isData() && PlatypusPlatform.JAR_FILE_EXTENSION.equalsIgnoreCase(fo.getExt())) {
+                FileUtil.copyFile(fo, libsDir, fo.getName());
+            }
+        }
+    }
+
+    private void copyLibJars(FileObject libsDir) throws Exception, EmptyPlatformHomePathException, IOException {
+        Set<File> jdbcDrivers = new HashSet<>();
+        for (String clazz : DbConnectionSettings.readDrivers().values()) {
+            File jdbcDriver = PlatypusPlatform.findThirdpartyJar(clazz);
+            if (jdbcDriver != null) {
+                jdbcDrivers.add(jdbcDriver);
+            }
+        }
+        FileObject platformLibDir = FileUtil.toFileObject(PlatypusPlatform.getPlatformLibDirectory());
+        Enumeration<? extends FileObject> e = platformLibDir.getChildren(true);
+        while (e.hasMoreElements()) {
+            FileObject fo = e.nextElement();
+            if (PlatypusPlatform.JAR_FILE_EXTENSION.equalsIgnoreCase(fo.getExt())
+                    && !jdbcDrivers.contains(FileUtil.toFile(fo))) {
+                FileUtil.copyFile(fo, libsDir, fo.getName());
+            }
+        }
     }
 }
