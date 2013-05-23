@@ -191,7 +191,7 @@ public class ProjectRunner {
                 processBuilder = processBuilder.addArgument(getServerUrl(pps));
                 io.getOut().println(String.format("Using application server at URL: %s.", getServerUrl(pps)));
             } else if (AppServerType.J2EE_SERVER.equals(pps.getRunAppServerType())) {
-                if (webAppUrl != null && webAppUrl.isEmpty()) {
+                if (webAppUrl != null && !webAppUrl.isEmpty()) {
                    processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.URL_CMD_SWITCH);
                     processBuilder = processBuilder.addArgument(webAppUrl);
                     io.getOut().println(String.format("Using application J2EE server at URL: %s.", webAppUrl));
