@@ -203,7 +203,7 @@ public class HttpScriptContext extends ScriptableObject {
         public String getRequestURI() {
             return httpRequest.getRequestURI();
         }
-        
+
         public String getRequestURL() {
             return httpRequest.getRequestURL().toString();
         }
@@ -248,7 +248,7 @@ public class HttpScriptContext extends ScriptableObject {
 
             r.headers = ResponseHeaders.getInstance(scope, aHttpResponse);
             r.defineProperty(HEADERS_PROP_NAME, HttpScriptContext.Response.class, READONLY);
-            
+
             r.defineProperty(STATUS_PROP_NAME, HttpScriptContext.Response.class, EMPTY);
             r.defineProperty(CONTENT_TYPE_PROP_NAME, HttpScriptContext.Response.class, EMPTY);
             r.defineFunctionProperties(new String[]{
@@ -271,7 +271,7 @@ public class HttpScriptContext extends ScriptableObject {
         public void setStatus(int sc) {
             httpResponse.setStatus(sc);
         }
-        
+
         public String getContentType() {
             return httpResponse.getContentType();
         }
@@ -351,11 +351,13 @@ public class HttpScriptContext extends ScriptableObject {
         public static Cookies getInstance(Scriptable scope, HttpServletRequest httpRequest) {
             Cookies cookies = new Cookies();
             javax.servlet.http.Cookie[] httpCookies = httpRequest.getCookies();
-            for (int i = 0; i < httpCookies.length; i++) {
-                Cookie cookie = new Cookie(httpCookies[i]);
-                ScriptRuntime.setBuiltinProtoAndParent(cookie, scope, TopLevel.Builtins.Object);
-                cookies.defineProperty(httpCookies[i].getName(), cookie, READONLY);
+            if (httpCookies != null) {
+                for (int i = 0; i < httpCookies.length; i++) {
+                    Cookie cookie = new Cookie(httpCookies[i]);
+                    ScriptRuntime.setBuiltinProtoAndParent(cookie, scope, TopLevel.Builtins.Object);
+                    cookies.defineProperty(httpCookies[i].getName(), cookie, READONLY);
 
+                }
             }
             ScriptRuntime.setBuiltinProtoAndParent(cookies, scope, TopLevel.Builtins.Object);
             return cookies;
