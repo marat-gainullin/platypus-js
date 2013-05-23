@@ -52,8 +52,8 @@ import org.openide.filesystems.FileUtil;
 public class PlatypusWebModuleManager {
 
     public static final String WAR_FILE_NAME = "PlatypusServlet.war"; //NOI18N
-    public static final String PLATYPUS_SERVLET_URL = "/application"; //NOI18N
-    public static final String PLATYPUS_SERVLET_URL_PATTERN = PLATYPUS_SERVLET_URL + "/*"; //NOI18N
+    public static final String PLATYPUS_SERVLET_URL = "application"; //NOI18N
+    public static final String PLATYPUS_SERVLET_URL_PATTERN = "/" + PLATYPUS_SERVLET_URL + "/*"; //NOI18N
     public static final String WEB_DESCRIPTOR_FILE_NAME = "web.xml"; //NOI18N
     public static final String PLATYPUS_WEB_CLIENT_DIR_NAME = "pwc"; //NOI18N
     public static final String J2EE_RESOURCES_PACKAGE = "/com/eas/designer/explorer/j2ee/resources/"; //NOI18N
@@ -125,7 +125,11 @@ public class PlatypusWebModuleManager {
                 return null;
             }
             setupWebApplication(webModule);
-            webAppRunUrl = Deployment.getDefault().deploy(webModule, Deployment.Mode.RUN, null, START_PAGE_FILE_NAME, false);
+            webAppRunUrl = Deployment.getDefault().deploy(webModule,
+                    Deployment.Mode.RUN,
+                    null,
+                    ClientType.PLATYPUS_CLIENT.equals(project.getSettings().getRunClientType()) ? PLATYPUS_SERVLET_URL : START_PAGE_FILE_NAME,
+                    false);
             String deployResultMessage = "Web application deployed.";
             Logger.getLogger(PlatypusWebModuleManager.class.getName()).log(Level.INFO, deployResultMessage);
             project.getOutputWindowIO().getOut().println(deployResultMessage);
@@ -247,7 +251,7 @@ public class PlatypusWebModuleManager {
         wa.addAppListener(new AppListener(WEB_APP_LISTENER_CLASS));
         configureServlet(wa);
         configureDatasource(wa);
-        if (project.getSettings().isWebSecurityEnabled()) {
+        if (project.getSettings().isWebSecurityEnabled() || ClientType.PLATYPUS_CLIENT.equals(project.getSettings().getRunClientType())) {
             configureSecurity(wa);
         }
         FileObject webXml = webInfDir.getFileObject(WEB_XML_FILE_NAME);
@@ -306,19 +310,19 @@ public class PlatypusWebModuleManager {
     private void configureSecurity(WebApplication wa) {
         SecurityConstraint sc = new SecurityConstraint();
         WebResourceCollection wrc = new WebResourceCollection(PLATYPUS_WEB_RESOURCE_NAME);
-        
+
         sc.addWebResourceCollection(wrc);
         AuthConstraint ac = new AuthConstraint(ANY_SIGNED_USER_ROLE);
         LoginConfig lc = new LoginConfig();
         sc.setAuthConstraint(ac);
         wa.setSecurityConstraint(sc);
         if (ClientType.PLATYPUS_CLIENT.equals(project.getSettings().getRunClientType())) {
-            wrc.setUrlPattern(PLATYPUS_SERVLET_URL);
+            wrc.setUrlPattern(PLATYPUS_SERVLET_URL_PATTERN);
             lc.setAuthMethod(BASIC_AUTH_METHOD);
         } else {
             wrc.setUrlPattern("/" + START_PAGE_FILE_NAME); //NOI18N
             lc.setAuthMethod(FORM_AUTH_METHOD);
-        } 
+        }
         lc.setFormLoginConfig(new FormLoginConfig("/" + LOGIN_PAGE_FILE_NAME, "/" + LOGIN_FAIL_PAGE_FILE_NAME));//NOI18N
         wa.addSecurityRole(new SecurityRole(ANY_SIGNED_USER_ROLE));
         wa.setLoginConfig(lc);
