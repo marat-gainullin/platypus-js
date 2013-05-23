@@ -304,8 +304,8 @@ public class StoredQueryFactory {
          */
     }
 
-    public void clearCache(String entityId) throws Exception {
-        queriesCache.remove(entityId);
+    public void clearCache(String aAppElementId) throws Exception {
+        queriesCache.remove(aAppElementId);
     }
 
     public void clearCache() throws Exception {

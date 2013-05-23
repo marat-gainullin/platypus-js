@@ -1,5 +1,8 @@
 package com.eas.client.gxtcontrols.wrappers.component;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.eas.client.gxtcontrols.ControlsUtils;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.Scheduler;

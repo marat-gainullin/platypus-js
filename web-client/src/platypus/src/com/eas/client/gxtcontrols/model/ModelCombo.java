@@ -22,7 +22,7 @@ public class ModelCombo extends PlatypusAdapterStandaloneField<Object> {
 		}
 
 	});
-	
+
 	protected boolean list;
 
 	public ModelCombo() {
@@ -253,16 +253,14 @@ public class ModelCombo extends PlatypusAdapterStandaloneField<Object> {
 		}
 	}
 
-	public Object getJsValue() throws Exception
-	{
+	public Object getJsValue() throws Exception {
 		return Utils.toJs(getValue());
 	}
-	
-	public void setJsValue(Object aValue) throws Exception
-	{
-		setValue(Utils.toJava(aValue));
+
+	public void setJsValue(Object aValue) throws Exception {
+		setValue(Utils.toJava(aValue), true);
 	}
-	
+
 	@Override
 	public Object getValue() {
 		return super.getValue();
@@ -272,7 +270,7 @@ public class ModelCombo extends PlatypusAdapterStandaloneField<Object> {
 	public void setValue(Object value) {
 		super.setValue(value);
 	}
-	
+
 	public void setValue(Object value, boolean fireEvents) {
 		super.setValue(value, fireEvents);
 	}

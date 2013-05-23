@@ -1543,12 +1543,12 @@ public class Entity implements RowsetListener {
 		if (updatingCounter == 0) {
 			Set<Relation> rels = getOutRelations();
 			if (rels != null) {
-                Field onlyField = getFields().get(aOnlyFieldIndex);
+				Field onlyField = getFields().get(aOnlyFieldIndex);
 				Set<Entity> toExecute = new HashSet();
 				for (Relation outRel : rels) {
 					if (outRel != null) {
 						Entity ent = outRel.getRightEntity();
-                        if (ent != null && outRel.getLeftField() == onlyField) {
+						if (ent != null && outRel.getLeftField() == onlyField) {
 							toExecute.add(ent);
 						}
 					}
@@ -1614,11 +1614,29 @@ public class Entity implements RowsetListener {
 								}
 							} else {
 								/*
-								Query leftQuery = leftEntity.getQuery();
-								assert leftQuery != null : "Left query must present (Relation points to query, but query is absent)";
-								Parameters leftParams = leftQuery.getParameters();
-								assert leftParams != null : "Parameters of left query must present (Relation points to query parameter, but query parameters are absent)";
-								Parameter leftParameter = leftParams.get(relation.getLeftParameter());
+								 * Query leftQuery = leftEntity.getQuery();
+								 * assert leftQuery != null :
+								 * "Left query must present (Relation points to query, but query is absent)"
+								 * ; Parameters leftParams =
+								 * leftQuery.getParameters(); assert leftParams
+								 * != null :
+								 * "Parameters of left query must present (Relation points to query parameter, but query parameters are absent)"
+								 * ; Parameter leftParameter =
+								 * leftParams.get(relation.getLeftParameter());
+								 * if (leftParameter != null) { pValue =
+								 * leftParameter.getValue(); if (pValue == null)
+								 * { pValue = leftParameter.getDefaultValue(); }
+								 * } else {
+								 * Logger.getLogger(Entity.class.getName()).log(
+								 * Level.SEVERE,
+								 * "Parameter of left query must present (Relation points to query parameter "
+								 * + relation.getRightParameter() +
+								 * " in entity: " + getTitle() + " [" +
+								 * String.valueOf(getEntityId()) +
+								 * "], but query parameter with specified name is absent)"
+								 * ); }
+								 */
+								Parameter leftParameter = relation.getLeftParameter();
 								if (leftParameter != null) {
 									pValue = leftParameter.getValue();
 									if (pValue == null) {
@@ -1627,19 +1645,9 @@ public class Entity implements RowsetListener {
 								} else {
 									Logger.getLogger(Entity.class.getName()).log(
 									        Level.SEVERE,
-									        "Parameter of left query must present (Relation points to query parameter " + relation.getRightParameter() + " in entity: " + getTitle() + " ["
-									                + String.valueOf(getEntityId()) + "], but query parameter with specified name is absent)");
+									        "Parameter of left query must present (Relation points to query parameter in entity: " + getTitle() + " [" + getEntityId()
+									                + "], but query parameter is absent)");
 								}
-								*/
-                                Parameter leftParameter = relation.getLeftParameter();
-                                if (leftParameter != null) {
-                                    pValue = leftParameter.getValue();
-                                    if (pValue == null) {
-                                        pValue = leftParameter.getDefaultValue();
-                                    }
-                                } else {
-                                    Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, "Parameter of left query must present (Relation points to query parameter in entity: "+getTitle()+" ["+getEntityId()+"], but query parameter is absent)");
-                                }
 							}
 							Parameter selfPm = relation.getRightParameter();
 							if (selfPm != null) {
@@ -1758,11 +1766,25 @@ public class Entity implements RowsetListener {
 					}
 				} else {
 					/*
-					Query leftQuery = leftEntity.getQuery();
-					assert leftQuery != null : "Left query must present (Relation points to query, but query is absent)";
-					Parameters leftParams = leftQuery.getParameters();
-					assert leftParams != null : "Parameters of left query must present (Relation points to query parameter, but query parameters are absent)";
-					Parameter leftParameter = leftParams.get(rel.getLeftParameter());
+					 * Query leftQuery = leftEntity.getQuery(); assert leftQuery
+					 * != null :
+					 * "Left query must present (Relation points to query, but query is absent)"
+					 * ; Parameters leftParams = leftQuery.getParameters();
+					 * assert leftParams != null :
+					 * "Parameters of left query must present (Relation points to query parameter, but query parameters are absent)"
+					 * ; Parameter leftParameter =
+					 * leftParams.get(rel.getLeftParameter()); if (leftParameter
+					 * != null) { fValue = leftParameter.getValue(); if (fValue
+					 * == null) { fValue = leftParameter.getDefaultValue(); } }
+					 * else {
+					 * Logger.getLogger(Entity.class.getName()).log(Level.
+					 * SEVERE,
+					 * "Parameter of left query must present (Relation points to query parameter "
+					 * + rel.getLeftParameter() +
+					 * ", but query parameter with specified name is absent)");
+					 * }
+					 */
+					Parameter leftParameter = rel.getLeftParameter();
 					if (leftParameter != null) {
 						fValue = leftParameter.getValue();
 						if (fValue == null) {
@@ -1770,18 +1792,8 @@ public class Entity implements RowsetListener {
 						}
 					} else {
 						Logger.getLogger(Entity.class.getName()).log(Level.SEVERE,
-						        "Parameter of left query must present (Relation points to query parameter " + rel.getLeftParameter() + ", but query parameter with specified name is absent)");
+						        "Parameter of left query must present (Relation points to query parameter, but query parameter with specified name is absent)");
 					}
-					*/
-                    Parameter leftParameter = rel.getLeftParameter();
-                    if (leftParameter != null) {
-                        fValue = leftParameter.getValue();
-                        if (fValue == null) {
-                            fValue = leftParameter.getDefaultValue();
-                        }
-                    } else {
-                        Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, "Parameter of left query must present (Relation points to query parameter, but query parameter with specified name is absent)");
-                    }
 				}
 				Field fieldOfValue = rowset.getFields().get(rel.getRightField().getName());
 				filterKeySet.add(Converter.convert2RowsetCompatible(fValue, fieldOfValue.getTypeInfo()));
@@ -2086,7 +2098,7 @@ public class Entity implements RowsetListener {
 	}
 
 	protected native Row unwrapRow(JavaScriptObject aRowFacade) throws Exception/*-{
-		return aRowFacade.unwrap();
+		return aRowFacade != null ? aRowFacade.unwrap() : null;
 	}-*/;
 
 	public boolean scrollTo(JavaScriptObject aRowFacade) throws Exception {
@@ -2095,7 +2107,7 @@ public class Entity implements RowsetListener {
 	}
 
 	public boolean scrollTo(Row aRow) throws Exception {
-		if (rowset != null) {
+		if (rowset != null && aRow != null) {
 			List<Integer> pkIndices = rowset.getFields().getPrimaryKeysIndicies();
 			if (!pkIndices.isEmpty()) {
 				Locator loc = checkUserLocator(pkIndices);
@@ -2182,6 +2194,21 @@ public class Entity implements RowsetListener {
 			Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, BAD_FIND_AGRUMENTS_MSG);
 		}
 		return arFound;
+	}
+
+	public Row find(int aColIndex, Object aValue) throws Exception {
+		List<Integer> constraints = new ArrayList();
+		List<Object> keyValues = new ArrayList();
+		DataTypeInfo typeInfo = getFields().get(aColIndex).getTypeInfo();
+		// field col index
+		constraints.add(aColIndex);
+		// correponding value
+		keyValues.add(Converter.convert2RowsetCompatible(aValue, typeInfo));
+		Locator loc = checkUserLocator(constraints);
+		if (loc.find(keyValues.toArray()) && loc.getSize() > 0) {
+			return loc.getRow(0);
+		}else
+			return null;
 	}
 
 	public JavaScriptObject createLocator(JavaScriptObject aConstraints) throws Exception {

@@ -21,5 +21,7 @@
 
     <source path=""/>
 	<extend-property name="locale" values="ru_RU"/>
-    <!-- Do not define servlets here, use web.xml -->
+	<!-- Do not define servlets here, use web.xml -->
+	<add-linker name="xsiframe"/>
+	<set-configuration-property name="devModeRedirectEnabled" value="true"/>
 </module>

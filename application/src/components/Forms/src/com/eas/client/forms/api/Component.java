@@ -534,6 +534,11 @@ public abstract class Component<D extends JComponent> {
         delegate.setSize(getWidth(), aValue);
     }
 
+    @ScriptFunction(jsDocText = "Tries to focus this component.")
+    public void focus(){
+        delegate.requestFocus();
+    }
+    
     @Override
     @ScriptFunction(jsDocText = "Returns a string representing the specified object.")
     public String toString() {

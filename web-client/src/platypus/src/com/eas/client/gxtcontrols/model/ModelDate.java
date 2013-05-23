@@ -158,7 +158,7 @@ public class ModelDate extends PlatypusAdapterStandaloneField<Date> {
 	public void setJsValue(Object aValue) throws Exception {
 		Object javaValue = Utils.toJava(aValue);
 		if (javaValue instanceof Date)
-			setValue((Date) javaValue);
+			setValue((Date) javaValue, true);
 		else
 			throw new IllegalArgumentException("A value of type 'Date' expected");
 	}

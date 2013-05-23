@@ -469,22 +469,22 @@ public class JSControls {
 		
 		// **************************************************************************
 		$wnd.Slider = function () {
-			var aOrientation = argumnets.length == 1 || argumnets.length == 4?argumnets[0]:$wnd.Orientation.HORIZONTAL;
+			var aOrientation = arguments.length == 1 || arguments.length == 4?arguments[0]:$wnd.Orientation.HORIZONTAL;
 			var aMinimum = null;
-			if(argumnets.length == 3)
-				aMinimum = argumnets[0];
-			else if(argumnets.length == 4)
-				aMinimum = argumnets[1];
+			if(arguments.length == 3)
+				aMinimum = arguments[0];
+			else if(arguments.length == 4)
+				aMinimum = arguments[1];
 			var aMaximum = null;
-			if(argumnets.length == 3)
-				aMaximum = argumnets[1];
-			else if(argumnets.length == 4)
-				aMaximum = argumnets[2];
+			if(arguments.length == 3)
+				aMaximum = arguments[1];
+			else if(arguments.length == 4)
+				aMaximum = arguments[2];
 			var aValue = null;
-			if(argumnets.length == 3)
-				aValue = argumnets[2];
-			else if(argumnets.length == 4)
-				aValue = argumnets[3];
+			if(arguments.length == 3)
+				aValue = arguments[2];
+			else if(arguments.length == 4)
+				aValue = arguments[3];
 			var aComponent = arguments.length>4?arguments[4]:null;
 			
 			if (!(this instanceof $wnd.Slider)) {
@@ -1101,6 +1101,11 @@ public class JSControls {
 	    Object.defineProperty(aPublished, "name", {
 		    get : function() {
 		    	return comp.@com.sencha.gxt.widget.core.client.Component::getData(Ljava/lang/String;)(@com.eas.client.form.Form::PID_DATA_KEY);
+		    }
+ 	    });
+	    Object.defineProperty(aPublished, "focus", {
+		    get : function() {
+		    	return function(){comp.@com.sencha.gxt.widget.core.client.Component::focus()();}
 		    }
  	    });
         @com.eas.client.gxtcontrols.Publisher::publishExecutor(Lcom/google/gwt/core/client/JavaScriptObject;)(aPublished);

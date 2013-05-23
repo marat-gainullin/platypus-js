@@ -576,7 +576,7 @@ public class AppClient {
 
 			@Override
 			public void doWork(Response aResponse) throws Exception {
-				Logger.getLogger(AppClient.class.getName()).log(Level.INFO, "Commit succeded" + aResponse.getStatusCode() + " " + aResponse.getStatusText());
+				Logger.getLogger(AppClient.class.getName()).log(Level.INFO, "Commit succeded: " + aResponse.getStatusCode() + " " + aResponse.getStatusText());
 				changeLog.clear();
 				for (TransactionListener l : transactionListeners.toArray(new TransactionListener[] {})) {
 					try {
