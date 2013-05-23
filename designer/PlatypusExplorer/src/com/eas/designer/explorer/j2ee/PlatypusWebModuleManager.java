@@ -138,7 +138,7 @@ public class PlatypusWebModuleManager {
      * Creates an web application skeleton if not created yet.
      */
     protected void prepareWebApplication() throws Exception {
-        project.getOutputWindowIO().getOut().println("Preparing web application.");
+        project.getOutputWindowIO().getOut().println("Preparing web application..");
         webAppDir = createFolderIfNotExists(projectDir, PlatypusWebModule.WEB_DIRECTORY);
         webInfDir = createFolderIfNotExists(webAppDir, PlatypusWebModule.WEB_INF_DIRECTORY);
         metaInfDir = createFolderIfNotExists(webAppDir, PlatypusWebModule.META_INF_DIRECTORY);
