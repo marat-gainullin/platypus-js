@@ -109,7 +109,10 @@ public class PlatypusWebModuleManager {
     public String run(String appElementId, boolean isDebug) {
         PlatypusWebModule webModule = project.getLookup().lookup(PlatypusWebModule.class);
         String webAppRunUrl = null;
-        if (webModule != null) {
+        assert webModule != null : "J2eeModuleProvider instance should be in the project's lookup.";
+        try {
+            prepareWebApplication();
+            setStartApplicationElement(appElementId);
             if (webModule.getServerID() == null || webModule.getServerID().isEmpty()) {
                 project.getOutputWindowIO().getOut().println("Application server is not set. Check J2EE Server settings at Project's properties.");
                 return null;
@@ -118,20 +121,15 @@ public class PlatypusWebModuleManager {
                 project.getOutputWindowIO().getOut().println("J2EE Server context is not configured for the project.");
                 return null;
             }
-            try {
-                prepareWebApplication();
-                setupWebApplication(webModule);
-                setStartApplicationElement(appElementId);
-                webAppRunUrl = Deployment.getDefault().deploy(webModule, Deployment.Mode.RUN, null, START_PAGE_FILE_NAME, false);
-                String deployResultMessage = "Web application deployed.";
-                Logger.getLogger(PlatypusWebModuleManager.class.getName()).log(Level.INFO, deployResultMessage);
-                project.getOutputWindowIO().getOut().println(deployResultMessage);
+            setupWebApplication(webModule);
+            webAppRunUrl = Deployment.getDefault().deploy(webModule, Deployment.Mode.RUN, null, START_PAGE_FILE_NAME, false);
+            String deployResultMessage = "Web application deployed.";
+            Logger.getLogger(PlatypusWebModuleManager.class.getName()).log(Level.INFO, deployResultMessage);
+            project.getOutputWindowIO().getOut().println(deployResultMessage);
 
-            } catch (Exception ex) {
-                ErrorManager.getDefault().notify(ex);
-            }
-        } else {
-            throw new IllegalStateException("J2eeModuleProvider instance should be in the project's lookup.");
+        } catch (Exception ex) {
+            project.getOutputWindowIO().getErr().println(ex.getMessage());
+            ErrorManager.getDefault().notify(ex);
         }
         return webAppRunUrl;
     }
@@ -140,6 +138,7 @@ public class PlatypusWebModuleManager {
      * Creates an web application skeleton if not created yet.
      */
     protected void prepareWebApplication() throws Exception {
+        project.getOutputWindowIO().getOut().println("Preparing web application.");
         webAppDir = createFolderIfNotExists(projectDir, PlatypusWebModule.WEB_DIRECTORY);
         webInfDir = createFolderIfNotExists(webAppDir, PlatypusWebModule.WEB_INF_DIRECTORY);
         metaInfDir = createFolderIfNotExists(webAppDir, PlatypusWebModule.META_INF_DIRECTORY);
