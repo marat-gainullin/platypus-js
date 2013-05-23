@@ -135,6 +135,8 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
                     size.height = b.y + b.height;
                 }
             }
+            size.width += EntityView.INSET_ZONE;
+            size.height += EntityView.INSET_ZONE;
         }
         return size;
     }

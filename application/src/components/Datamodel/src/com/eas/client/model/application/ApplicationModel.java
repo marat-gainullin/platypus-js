@@ -34,6 +34,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
@@ -191,10 +192,10 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
     }
 
     @ScriptFunction(jsDocText = "Saves model data changes. "
-            + "If model can't apply the changed, than exception is thrown. "
-            + "In this case, application can call model.save() another time to save the changes. "
-            + "If an application need to abort futher attempts and discard model data changes, "
-            + "than it can call model.revert().")
+    + "If model can't apply the changed, than exception is thrown. "
+    + "In this case, application can call model.save() another time to save the changes. "
+    + "If an application need to abort futher attempts and discard model data changes, "
+    + "than it can call model.revert().")
     public boolean save() throws Exception {
         if (commitable) {
             try {
@@ -210,12 +211,12 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
 
     @ScriptFunction(jsDocText = "Commits model data changes.")
     public abstract int commit() throws Exception;
-    
+
     @ScriptFunction(jsDocText = "Drops model data changes. After this method call, save() method have no "
-            + "any changes to be saved, but still attempts to commit. "
-            + "So, call to model.save() on commitable and unchanged model nevertheless leads to commit.")
+    + "any changes to be saved, but still attempts to commit. "
+    + "So, call to model.save() on commitable and unchanged model nevertheless leads to commit.")
     public abstract void revert() throws Exception;
-    
+
     public abstract void saved() throws Exception;
 
     public abstract void rolledback() throws Exception;
@@ -232,14 +233,52 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         }
     }
 
-    @ScriptFunction(jsDocText = "Requery model data.")
+    @ScriptFunction(jsDocText = "Requeries model data.")
     public void requery() throws Exception {
+        requery(null);
+    }
+
+    @ScriptFunction(jsDocText = "Requeries model data with callback.")
+    public void requery(Function aCallback) throws Exception {
         executeRootEntities(true);
+        if (aCallback != null) {
+            Context cx = Context.getCurrentContext();
+            boolean wasContext = cx != null;
+            if (!wasContext) {
+                cx = ScriptUtils.enterContext();
+            }
+            try {
+                aCallback.call(cx, scriptScope, scriptScope, new Object[]{});
+            } finally {
+                if (!wasContext) {
+                    Context.exit();
+                }
+            }
+        }
     }
 
     @ScriptFunction(jsDocText = "Refreshes model data if any of its parameters has changed.")
     public void execute() throws Exception {
+        execute(null);
+    }
+
+    @ScriptFunction(jsDocText = "Refreshes model data if any of its parameters has changed with callback.")
+    public void execute(Function aCallback) throws Exception {
         executeRootEntities(false);
+        if (aCallback != null) {
+            Context cx = Context.getCurrentContext();
+            boolean wasContext = cx != null;
+            if (!wasContext) {
+                cx = ScriptUtils.enterContext();
+            }
+            try {
+                aCallback.call(cx, scriptScope, scriptScope, new Object[]{});
+            } finally {
+                if (!wasContext) {
+                    Context.exit();
+                }
+            }
+        }
     }
 
     private void executeRootEntities(boolean refresh) throws Exception {
