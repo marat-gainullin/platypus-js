@@ -620,14 +620,14 @@ public class Entity implements RowsetListener {
 						aEntity.@com.eas.client.model.Entity::endUpdate()();
 					},
 					// 
-					execute : function() {
-						aEntity.@com.eas.client.model.Entity::execute(Lcom/eas/client/CancellableCallback;Lcom/eas/client/Callback;)(null, null);
+					execute : function(aCallback) {
+						aEntity.@com.eas.client.model.Entity::execute(Lcom/google/gwt/core/client/JavaScriptObject;)(aCallback);
 					},
 					executeChildrenOnly : function() {
 						aEntity.@com.eas.client.model.Entity::executeChildren()();
 					},
 					requery : function(aCallback) {
-						aEntity.@com.eas.client.model.Entity::refresh(Lcom/eas/client/CancellableCallback;Lcom/eas/client/Callback;)(null, null);
+						aEntity.@com.eas.client.model.Entity::refresh(Lcom/google/gwt/core/client/JavaScriptObject;)(aCallback);
 					},
 					requeryChildrenOnly : function() {
 						aEntity.@com.eas.client.model.Entity::refreshChildren()();
@@ -1415,6 +1415,16 @@ public class Entity implements RowsetListener {
 		return null;
 	}
 
+	public void refresh(final JavaScriptObject onSuccess) throws Exception {
+		refresh(new CancellableCallbackAdapter() {
+			@Override
+			protected void doWork() throws Exception {
+				if (onSuccess != null)
+					Utils.invokeJsFunction(onSuccess);
+			}
+		}, null);
+	}
+
 	public void refresh(final CancellableCallback onSuccess, Callback<String> onFailure) throws Exception {
 		if (model != null && model.isRuntime()) {
 			internalExecute(true, onSuccess, onFailure);
@@ -1425,6 +1435,16 @@ public class Entity implements RowsetListener {
 			 * onSuccess.run(); internalExecuteChildren(true); } });
 			 */
 		}
+	}
+
+	public void execute(final JavaScriptObject onSuccess) throws Exception {
+		execute(new CancellableCallbackAdapter() {
+			@Override
+			protected void doWork() throws Exception {
+				if (onSuccess != null)
+					Utils.invokeJsFunction(onSuccess);
+			}
+		}, null);
 	}
 
 	public void execute(final CancellableCallback onSuccess, Callback<String> onFailure) throws Exception {
@@ -1534,7 +1554,7 @@ public class Entity implements RowsetListener {
 						}
 					}
 				}
-				model.executeEntities(refresh, toExecute);
+				model.executeEntities(refresh, toExecute, null);
 			}
 		}
 	}
@@ -1553,7 +1573,7 @@ public class Entity implements RowsetListener {
 						}
 					}
 				}
-				model.executeEntities(refresh, toExecute);
+				model.executeEntities(refresh, toExecute, null);
 			}
 		}
 	}
@@ -2071,16 +2091,18 @@ public class Entity implements RowsetListener {
 		Locator loc = userLocators.get(constraints);
 		if (loc == null) {
 			Rowset lrowset = getRowset();
-			loc = lrowset.createLocator();
-			loc.beginConstrainting();
-			try {
-				for (int colIdx : constraints) {
-					loc.addConstraint(colIdx);
+			if (lrowset != null) {
+				loc = lrowset.createLocator();
+				loc.beginConstrainting();
+				try {
+					for (int colIdx : constraints) {
+						loc.addConstraint(colIdx);
+					}
+				} finally {
+					loc.endConstrainting();
 				}
-			} finally {
-				loc.endConstrainting();
+				userLocators.put(constraints, loc);
 			}
-			userLocators.put(constraints, loc);
 		}
 		return loc;
 	}
@@ -2140,7 +2162,7 @@ public class Entity implements RowsetListener {
 			Object keyValue = Utils.toJava(aValue);
 			keyValue = Converter.convert2RowsetCompatible(keyValue, getFields().get(pkIndicies.get(0)).getTypeInfo());
 			Locator loc = checkUserLocator(pkIndicies);
-			if (loc.find(new Object[] { keyValue }))
+			if (loc != null && loc.find(new Object[] { keyValue }))
 				return publishRowFacade(loc.getRow(0), this);
 			else
 				return null;
@@ -2207,7 +2229,7 @@ public class Entity implements RowsetListener {
 		Locator loc = checkUserLocator(constraints);
 		if (loc.find(keyValues.toArray()) && loc.getSize() > 0) {
 			return loc.getRow(0);
-		}else
+		} else
 			return null;
 	}
 

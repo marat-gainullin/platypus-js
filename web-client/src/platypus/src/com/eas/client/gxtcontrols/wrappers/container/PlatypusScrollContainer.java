@@ -1,6 +1,5 @@
 package com.eas.client.gxtcontrols.wrappers.container;
 
-import com.eas.client.gxtcontrols.ControlsUtils;
 import com.eas.client.gxtcontrols.Sizer;
 import com.eas.client.gxtcontrols.model.ModelTextArea;
 import com.eas.client.gxtcontrols.wrappers.component.PlatypusHtmlEditor;

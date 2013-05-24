@@ -1,0 +1,17 @@
+/**
+ * Sencha GXT 3.0.1 - Sencha for GWT
+ * Copyright(c) 2007-2012, Sencha, Inc.
+ * licensing@sencha.com
+ *
+ * http://www.sencha.com/products/gxt/license/
+ */
+.menuSep {
+  display: block;
+  font-size: 1px;
+  line-height: 1px;
+  margin: 2px 3px;
+  border-bottom: 1px solid;
+  overflow: hidden;
+  font-size: 1px;
+  line-height: 1px;
+}

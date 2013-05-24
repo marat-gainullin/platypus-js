@@ -1,0 +1,159 @@
+<!--
+
+    Sencha GXT 3.0.1 - Sencha for GWT
+    Copyright(c) 2007-2012, Sencha, Inc.
+    licensing@sencha.com
+
+    http://www.sencha.com/products/gxt/license/
+
+-->
+<module>
+  <inherits name="com.sencha.gxt.widget.core.Core" />
+  <replace-with class="com.sencha.gxt.theme.base.client.info.InfoDefaultAppearance">
+    <when-type-is class="com.sencha.gxt.widget.core.client.info.Info.InfoAppearance" />
+  </replace-with>
+
+  <replace-with class="com.sencha.gxt.theme.base.client.info.DefaultInfoConfigDefaultAppearance">
+    <when-type-is class="com.sencha.gxt.widget.core.client.info.DefaultInfoConfig.DefaultInfoConfigAppearance" />
+  </replace-with>
+  
+  <replace-with class="com.sencha.gxt.theme.base.client.widget.HeaderDefaultAppearance">
+    <when-type-is class="com.sencha.gxt.widget.core.client.Header.HeaderAppearance" />
+  </replace-with>
+
+  <replace-with class="com.sencha.gxt.theme.base.client.button.IconButtonDefaultAppearance">
+    <when-type-is class="com.sencha.gxt.widget.core.client.button.IconButton.IconButtonAppearance" />
+  </replace-with>
+
+  <replace-with class="com.sencha.gxt.theme.base.client.container.MessageBoxDefaultAppearance">
+    <when-type-is class="com.sencha.gxt.widget.core.client.box.MessageBox.MessageBoxAppearance" />
+  </replace-with>
+
+  <replace-with class="com.sencha.gxt.theme.base.client.tips.TipDefaultAppearance">
+    <when-type-is class="com.sencha.gxt.widget.core.client.tips.Tip.TipAppearance" />
+  </replace-with>
+  
+  <replace-with class="com.sencha.gxt.theme.base.client.field.ErrorTipDefaultAppearance">
+    <when-type-is class="com.sencha.gxt.widget.core.client.form.error.SideErrorHandler.SideErrorTooltipAppearance" />
+  </replace-with>
+  
+  <!-- Buttons -->
+  <replace-with class="com.sencha.gxt.theme.base.client.button.ButtonCellDefaultAppearance">
+    <when-type-is class="com.sencha.gxt.cell.core.client.ButtonCell.ButtonCellAppearance" />
+  </replace-with>
+
+  <!-- Fields -->
+  <replace-with class="com.sencha.gxt.theme.base.client.field.HtmlEditorDefaultAppearance">
+    <when-type-is class="com.sencha.gxt.widget.core.client.form.HtmlEditor.HtmlEditorAppearance" />
+  </replace-with>
+  
+  <replace-with class="com.sencha.gxt.theme.base.client.field.DualListFieldDefaultAppearance">
+    <when-type-is class="com.sencha.gxt.widget.core.client.form.DualListField.DualListFieldAppearance" />
+  </replace-with>
+  
+  <replace-with class="com.sencha.gxt.theme.base.client.field.FileUploadDefaultAppearance">
+    <when-type-is class="com.sencha.gxt.widget.core.client.form.FileUploadField.FileUploadFieldAppearance" />
+  </replace-with>
+  
+  <replace-with class="com.sencha.gxt.theme.base.client.field.FieldLabelDefaultAppearance">
+    <when-type-is class="com.sencha.gxt.widget.core.client.form.FieldLabel.FieldLabelAppearance" />
+  </replace-with>
+
+  <replace-with class="com.sencha.gxt.theme.base.client.field.TextFieldDefaultAppearance">
+    <when-type-is class="com.sencha.gxt.cell.core.client.form.TextInputCell.TextFieldAppearance" />
+  </replace-with>
+
+  <replace-with class="com.sencha.gxt.theme.base.client.field.TextAreaDefaultAppearance">
+    <when-type-is class="com.sencha.gxt.cell.core.client.form.TextAreaInputCell.TextAreaAppearance" />
+  </replace-with>
+
+  <replace-with class="com.sencha.gxt.theme.base.client.field.TwinTriggerFieldDefaultAppearance">
+    <when-type-is class="com.sencha.gxt.cell.core.client.form.TwinTriggerFieldCell.TwinTriggerFieldAppearance" />
+  </replace-with>
+
+  <replace-with class="com.sencha.gxt.theme.base.client.field.TriggerFieldDefaultAppearance">
+    <when-type-is class="com.sencha.gxt.cell.core.client.form.TriggerFieldCell.TriggerFieldAppearance" />
+  </replace-with>
+
+  <replace-with class="com.sencha.gxt.theme.base.client.field.DateCellDefaultAppearance">
+    <when-type-is class="com.sencha.gxt.cell.core.client.form.DateCell.DateCellAppearance" />
+  </replace-with>
+
+  <replace-with class="com.sencha.gxt.theme.base.client.field.StoreFilterFieldDefaultAppearance">
+    <when-type-is class="com.sencha.gxt.widget.core.client.form.StoreFilterField.StoreFilterFieldAppearance" />
+  </replace-with>
+
+  <replace-with class="com.sencha.gxt.theme.base.client.field.SpinnerFieldDefaultAppearance">
+    <when-type-is class="com.sencha.gxt.cell.core.client.form.SpinnerFieldCell.SpinnerFieldAppearance" />
+  </replace-with>
+
+  <replace-with class="com.sencha.gxt.theme.base.client.field.RadioDefaultAppearance">
+    <when-type-is class="com.sencha.gxt.cell.core.client.form.RadioCell.RadioAppearance" />
+  </replace-with>
+
+  <replace-with class="com.sencha.gxt.theme.base.client.field.CheckBoxDefaultAppearance">
+    <when-type-is class="com.sencha.gxt.cell.core.client.form.CheckBoxCell.CheckBoxAppearance" />
+  </replace-with>
+
+  <replace-with class="com.sencha.gxt.theme.base.client.toolbar.SeparatorToolItemDefaultAppearance">
+    <when-type-is class="com.sencha.gxt.widget.core.client.toolbar.SeparatorToolItem.SeparatorToolItemAppearance" />
+  </replace-with>
+
+  <replace-with class="com.sencha.gxt.theme.base.client.toolbar.LabelToolItemDefaultAppearance">
+    <when-type-is class="com.sencha.gxt.widget.core.client.toolbar.LabelToolItem.LabelToolItemAppearance" />
+  </replace-with>
+
+  <replace-with class="com.sencha.gxt.theme.base.client.widget.SplitBarDefaultAppearance">
+    <when-type-is class="com.sencha.gxt.widget.core.client.SplitBar.SplitBarAppearance" />
+  </replace-with>
+
+  <replace-with class="com.sencha.gxt.theme.base.client.widget.CollapsePanelDefaultAppearance">
+    <when-type-is class="com.sencha.gxt.widget.core.client.CollapsePanel.CollapsePanelAppearance" />
+  </replace-with>
+
+  <!-- Layout Containers -->
+  <replace-with class="com.sencha.gxt.theme.base.client.container.ViewportDefaultAppearance">
+    <when-type-is class="com.sencha.gxt.widget.core.client.container.Viewport.ViewportAppearance" />
+  </replace-with>
+
+  <replace-with class="com.sencha.gxt.theme.base.client.container.BoxLayoutDefaultAppearance">
+    <when-type-is class="com.sencha.gxt.widget.core.client.container.BoxLayoutContainer.BoxLayoutContainerAppearance" />
+  </replace-with>
+
+  <replace-with class="com.sencha.gxt.theme.base.client.container.CssFloatLayoutDefaultAppearance">
+    <when-type-is class="com.sencha.gxt.widget.core.client.container.CssFloatLayoutContainer.CssFloatLayoutAppearance" />
+  </replace-with>
+  
+  <replace-with class="com.sencha.gxt.theme.base.client.container.PortalLayoutDefaultAppearance">
+    <when-type-is class="com.sencha.gxt.widget.core.client.container.PortalLayoutContainer.PortalLayoutAppearance" />
+  </replace-with>
+  
+  <!-- Grid & TreeGrid -->
+  <replace-with class="com.sencha.gxt.theme.base.client.grid.ColumnHeaderDefaultAppearance">
+    <when-type-assignable class="com.sencha.gxt.widget.core.client.grid.ColumnHeader.ColumnHeaderAppearance" />
+  </replace-with>
+  
+
+  
+  <replace-with class="com.sencha.gxt.theme.base.client.grid.RowExpanderDefaultAppearance">
+    <when-type-assignable class="com.sencha.gxt.widget.core.client.grid.RowExpander.RowExpanderAppearance" />
+  </replace-with>
+  
+  <replace-with class="com.sencha.gxt.theme.base.client.grid.CheckBoxColumnDefaultAppearance">
+    <when-type-assignable class="com.sencha.gxt.widget.core.client.grid.CheckBoxSelectionModel.CheckBoxColumnAppearance" />
+  </replace-with>
+  
+  <replace-with class="com.sencha.gxt.theme.base.client.grid.GroupingViewDefaultAppearance">
+    <when-type-assignable class="com.sencha.gxt.widget.core.client.grid.GroupingView.GroupingViewAppearance" />
+  </replace-with>
+  
+  <replace-with class="com.sencha.gxt.theme.base.client.grid.RowEditorDefaultAppearance">
+    <when-type-is class="com.sencha.gxt.widget.core.client.grid.editing.GridRowEditing.RowEditorAppearance" />
+  </replace-with>
+
+  <!-- Draggable -->
+  <replace-with class="com.sencha.gxt.theme.base.client.draggable.DraggableDefaultAppearance">
+    <when-type-is class="com.sencha.gxt.fx.client.Draggable.DraggableAppearance" />
+  </replace-with>"
+
+</module>

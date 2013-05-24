@@ -1,0 +1,198 @@
+/**
+ * Sencha GXT 3.0.1 - Sencha for GWT
+ * Copyright(c) 2007-2012, Sencha, Inc.
+ * licensing@sencha.com
+ *
+ * http://www.sencha.com/products/gxt/license/
+ */
+@sprite .close {
+  gwt-image: "closeIcon";
+}
+
+@sprite .closeOver {
+  gwt-image: "closeOverIcon"; 
+}
+
+@sprite .collapse {
+  gwt-image: "collapseIcon";
+}
+
+@sprite .collapseOver {
+  gwt-image: "collapseOverIcon"; 
+}
+
+@sprite .doubleDown {
+  gwt-image: "doubleDownIcon";
+}
+
+@sprite .doubleDownOver {
+  gwt-image: "doubleDownOverIcon"; 
+}
+
+@sprite .doubleLeft {
+  gwt-image: "doubleLeftIcon";
+}
+
+@sprite .doubleLeftOver {
+  gwt-image: "doubleLeftOverIcon"; 
+}
+
+@sprite .doubleRight {
+  gwt-image: "doubleRightIcon";
+}
+
+@sprite .doubleRightOver {
+  gwt-image: "doubleRightOverIcon"; 
+}
+
+@sprite .doubleUp {
+  gwt-image: "doubleUpIcon";
+}
+
+@sprite .doubleUpOver {
+  gwt-image: "doubleUpOverIcon"; 
+}
+
+@sprite .down {
+  gwt-image: "downIcon";
+}
+
+@sprite .downOver {
+  gwt-image: "downOverIcon"; 
+}
+
+@sprite .expand {
+  gwt-image: "expandIcon";
+}
+
+@sprite .expandOver {
+  gwt-image: "expandOverIcon"; 
+}
+
+@sprite .gear {
+  gwt-image: "gearIcon";
+}
+
+@sprite .gearOver {
+  gwt-image: "gearOverIcon"; 
+}
+
+@sprite .left {
+  gwt-image: "leftIcon";
+}
+
+@sprite .leftOver {
+  gwt-image: "leftOverIcon"; 
+}
+
+@sprite .maximize {
+  gwt-image: "maximizeIcon";
+}
+
+@sprite .maximizeOver {
+  gwt-image: "maximizeOverIcon"; 
+}
+
+@sprite .minimize {
+  gwt-image: "minimizeIcon";
+}
+
+@sprite .minimizeOver {
+  gwt-image: "minimizeOverIcon"; 
+}
+
+@sprite .minus {
+  gwt-image: "minusIcon";
+}
+
+@sprite .minusOver {
+  gwt-image: "minusOverIcon"; 
+}
+
+@sprite .pin {
+  gwt-image: "pinIcon";
+}
+
+@sprite .pinOver {
+  gwt-image: "pinOverIcon"; 
+}
+
+@sprite .unpin {
+  gwt-image: "unpinIcon";
+}
+
+@sprite .unpinOver {
+  gwt-image: "unpinOverIcon"; 
+}
+
+@sprite .plus {
+  gwt-image: "plusIcon";
+}
+
+@sprite .plusOver {
+  gwt-image: "plusOverIcon"; 
+}
+
+@sprite .print {
+  gwt-image: "printIcon";
+}
+
+@sprite .printOver {
+  gwt-image: "printOverIcon"; 
+}
+
+@sprite .question {
+  gwt-image: "questionIcon";
+}
+
+@sprite .questionOver {
+  gwt-image: "questionOverIcon"; 
+}
+
+@sprite .refresh {
+  gwt-image: "refreshIcon";
+}
+
+@sprite .refreshOver {
+  gwt-image: "refreshOverIcon";
+}
+
+@sprite .restore {
+  gwt-image: "restoreIcon";
+}
+
+@sprite .restoreOver {
+  gwt-image: "restoreOverIcon"; 
+}
+
+@sprite .right {
+  gwt-image: "rightIcon";
+}
+
+@sprite .rightOver {
+  gwt-image: "rightOverIcon"; 
+}
+
+@sprite .save {
+  gwt-image: "saveIcon";
+}
+
+@sprite .saveOver {
+  gwt-image: "saveOverIcon"; 
+}
+
+@sprite .search {
+  gwt-image: "searchIcon";
+}
+
+@sprite .searchOver {
+  gwt-image: "searchOverIcon"; 
+}
+
+@sprite .up {
+  gwt-image: "upIcon";
+}
+
+@sprite .upOver {
+  gwt-image: "upOverIcon"; 
+}

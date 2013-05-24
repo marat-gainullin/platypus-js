@@ -1,0 +1,105 @@
+/**
+ * Sencha GXT 3.0.1 - Sencha for GWT
+ * Copyright(c) 2007-2012, Sencha, Inc.
+ * licensing@sencha.com
+ *
+ * http://www.sencha.com/products/gxt/license/
+ */
+.legend {
+  
+}
+
+.toolWrap {}
+.header {}
+
+.fieldSet {
+  border: 1px solid;
+  padding: 10px;
+  margin-bottom: 10px;
+  display: block;
+}
+
+@if user.agent ie6 ie8 ie9 {
+  .body {
+    zoom: 1;
+  }
+ 
+  .fieldSet legend {
+    margin-bottom: 10px;
+  }
+
+  .fieldSet {
+    padding-top: 0;
+    padding-bottom: 10px;
+  }
+}
+
+.fieldSet legend .toolWrap {
+  margin-right: 3px;
+  margin-left: 0;
+  float: left !important;
+}
+
+.fieldSet legend input {
+  margin-right: 3px;
+  float: left !important;
+  height: 13px;
+  width: 13px;
+}
+
+fieldset.collapsed {
+  padding-bottom: 0 !important;
+  border-width: 1px 1px 0 1px !important;
+  border-left-color: transparent;
+  border-right-color: transparent;
+}
+
+@if user.agent ie6 {
+  fieldset.collapsed {
+    padding-bottom: 0 !important;
+    border-width: 1px 0 0 0 !important;
+    margin-left: 1px;
+    margin-right: 1px;
+  }
+}
+
+fieldset.collapsed .body {
+  visibility: hidden;
+  position: absolute;
+  left: -1000px;
+  top: -1000px;
+}
+
+.noborder {
+  border: 0px none transparent;
+}
+
+.noborder legend {
+  margin-left: -3px;
+}
+
+@if user.agent ie6 ie8 ie9 {
+  .noborder legend {
+    position: relative;
+    margin-bottom: 23px;
+  }
+  
+  .noborder legend span {
+    position: absolute;
+    left: 16px;
+  }
+}
+
+.fieldSet {
+  overflow: hidden;
+}
+
+/* make top of checkbox/tools visible in webkit */
+.header, .fieldSet legend > div {
+  padding-top: 1px;
+}
+
+.body {
+  overflow: hidden;
+  height: 100%;
+}

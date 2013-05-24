@@ -1,0 +1,48 @@
+/**
+ * Sencha GXT 3.0.1 - Sencha for GWT
+ * Copyright(c) 2007-2012, Sencha, Inc.
+ * licensing@sencha.com
+ *
+ * http://www.sencha.com/products/gxt/license/
+ */
+@sprite .trigger {
+  gwt-image: 'triggerArrow';
+  height: 10px;
+}
+
+@sprite .focus .trigger {
+  gwt-image: 'triggerArrowFocus';
+  height: 10px;
+}
+
+@sprite .focus .twinTrigger {
+  gwt-image: 'twinTriggerArrowFocus';
+  height: 10px;
+}
+
+@sprite .twinTrigger {
+  gwt-image: 'twinTriggerArrow';
+  height: 10px;
+  border-bottom: 1px solid;
+  border-bottom-color: #b5b8c8;
+}
+
+@sprite .triggerOver .trigger {
+  gwt-image: 'triggerArrowOver';
+  height: 10px;
+}
+
+@sprite .triggerClick .trigger {
+  gwt-image: 'triggerArrowClick';
+  height: 10px;
+}
+
+@sprite .twinTriggerOver .twinTrigger {
+  gwt-image: 'twinTriggerArrowOver';
+  height: 10px;
+}
+
+@sprite .twinTriggerClick .twinTrigger {
+  gwt-image: 'twinTriggerArrowClick';
+  height: 10px;
+}

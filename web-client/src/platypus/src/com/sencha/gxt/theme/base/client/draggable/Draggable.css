@@ -1,0 +1,31 @@
+/**
+ * Sencha GXT 3.0.1 - Sencha for GWT
+ * Copyright(c) 2007-2012, Sencha, Inc.
+ * licensing@sencha.com
+ *
+ * http://www.sencha.com/products/gxt/license/
+ */
+.cursor {
+  cursor: default !important;
+}
+
+.proxy {
+  border: 1px dashed #3b5a82;
+  background-color: #c3daf9;
+  z-index: 20000;
+  overflow: hidden;
+  position: absolute;
+  left: 0;
+  top: 0;
+  cursor: move;
+}
+
+@if user.agent ie6 ie8 {
+  .proxy {
+    filter: literal("alpha(opacity=50)");
+  }
+} @else {
+  .proxy {
+    opacity: 0.5;
+  }
+}

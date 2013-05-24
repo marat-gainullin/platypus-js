@@ -1,0 +1,100 @@
+/**
+ * Sencha GXT 3.0.1 - Sencha for GWT
+ * Copyright(c) 2007-2012, Sencha, Inc.
+ * licensing@sencha.com
+ *
+ * http://www.sencha.com/products/gxt/license/
+ */
+@def shadowOffset 4;
+
+.shim {
+  position: absolute;
+  visibility: hidden;
+  left: 0;
+  top: 0;
+  overflow: hidden;
+}
+
+.shadow {
+  position: absolute;
+}
+
+.shadow * {
+  overflow: hidden;
+}
+
+.shadow * {
+  padding: 0;
+  border: 0;
+  margin: 0;
+  clear: none;
+}
+
+.topCenter,.bottomCenter {
+  height: 6px;
+  float: left;
+}
+
+.topLeft,.topRight,.bottomLeft,.bottomRight {
+  width: 6px;
+  height: 6px;
+  float: left;
+}
+
+.middle {
+  width: 100%;
+}
+
+.middleLeft,.middleRight {
+  width: 6px;
+  float: left;
+  height: 100%;
+}
+
+.middleCenter {
+  float: left;
+  height: 100%;
+  background: transparent;
+}
+
+.top,.bottom {
+  height: 6px;
+  overflow: hidden;
+  width: 100%;
+}
+
+@sprite .topLeft {
+  gwt-image: "topLeft";
+}
+
+@sprite .topCenter {
+  gwt-image: "topCenter";
+}
+
+@sprite .topRight {
+  gwt-image: "topRight";
+}
+
+@sprite .middleLeft {
+  gwt-image: "middleLeft";
+}
+
+@sprite .middleCenter {
+  gwt-image: "middleCenter";
+}
+
+@sprite .middleRight {
+  gwt-image: "middleRight";
+}
+
+@sprite .bottomLeft {
+  gwt-image: "bottomLeft";
+}
+
+@sprite .bottomCenter {
+  gwt-image: "bottomCenter";
+}
+
+@sprite .bottomRight {
+  gwt-image: "bottomRight";
+}

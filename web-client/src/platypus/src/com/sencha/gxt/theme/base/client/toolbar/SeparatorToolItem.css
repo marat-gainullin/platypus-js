@@ -1,0 +1,19 @@
+/**
+ * Sencha GXT 3.0.1 - Sencha for GWT
+ * Copyright(c) 2007-2012, Sencha, Inc.
+ * licensing@sencha.com
+ *
+ * http://www.sencha.com/products/gxt/license/
+ */
+@sprite .separator {
+  gwt-image: 'background';
+  background-position: center center;
+  background-repeat: no-repeat;
+  border: 0 none;
+  cursor: default;
+  display: block;
+  font-size: 1px;
+  height: 16px;
+  padding: 0px 3px;
+  overflow: hidden;
+}

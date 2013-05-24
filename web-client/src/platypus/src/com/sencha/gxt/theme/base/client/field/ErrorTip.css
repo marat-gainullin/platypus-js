@@ -1,0 +1,31 @@
+/**
+ * Sencha GXT 3.0.1 - Sencha for GWT
+ * Copyright(c) 2007-2012, Sencha, Inc.
+ * licensing@sencha.com
+ *
+ * http://www.sencha.com/products/gxt/license/
+ */
+.heading {
+  font: bold 11px tahoma, arial, helvetica, sans-serif;
+  color: #444;
+}
+
+.text {
+  font: 11px tahoma, arial, helvetica, sans-serif;
+  color: #444;
+  padding-left: 0px;
+}
+
+@sprite .textWrap {
+  gwt-image: 'errorIcon';
+  width: auto;
+  height: auto;
+  background-position: -1 4px;
+  padding-left: 20px; 
+}
+
+@if user.agent ie6 {
+  .textWrap {
+    padding-bottom: 5px;
+  }
+}

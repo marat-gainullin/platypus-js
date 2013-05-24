@@ -1,0 +1,50 @@
+/**
+ * Sencha GXT 3.0.1 - Sencha for GWT
+ * Copyright(c) 2007-2012, Sencha, Inc.
+ * licensing@sencha.com
+ *
+ * http://www.sencha.com/products/gxt/license/
+ */
+.progressWrap {
+  border:1px solid;
+  overflow:hidden;
+  border-color:#6593cf;
+}
+
+.progressInner {
+  height:18px;
+  background:repeat-x;
+  position:relative;
+}
+
+.progressBar {
+  height:18px;
+  width:0;
+  border-top:1px solid;
+  border-bottom:1px solid;
+  border-right:1px solid;
+}
+
+.progressText {
+  padding:1px 5px;
+  overflow:hidden;
+  position:absolute;
+  left:0;
+  text-align:center;
+  font-size:11px;
+  font-weight:bold;
+}
+
+.progressBar .progressText {
+  z-index: 99;
+}
+
+.progressTextBack {
+  z-index: 9 !important;
+}
+
+@if user.agent ie6 ie8 ie9 {
+  .progressTextBack {
+    line-height:15px;
+  }
+}

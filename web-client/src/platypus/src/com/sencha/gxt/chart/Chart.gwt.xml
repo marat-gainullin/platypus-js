@@ -1,0 +1,27 @@
+<!--
+
+    Sencha GXT 3.0.1 - Sencha for GWT
+    Copyright(c) 2007-2012, Sencha, Inc.
+    licensing@sencha.com
+
+    http://www.sencha.com/products/gxt/license/
+
+-->
+<module>
+  <inherits name='com.sencha.gxt.ui.GXT' /> 
+  
+  <stylesheet src="css/chart.css" />
+  
+  <replace-with class='com.sencha.gxt.chart.client.draw.engine.SVG'>
+    <when-type-is class='com.sencha.gxt.chart.client.draw.Surface'/>
+  </replace-with>
+  
+  <replace-with class='com.sencha.gxt.chart.client.draw.engine.VML'>
+    <when-type-is class='com.sencha.gxt.chart.client.draw.Surface'/>
+    <any>
+      <when-property-is name='user.agent' value='ie6'/>
+      <when-property-is name='user.agent' value='ie8'/>
+    </any>
+  </replace-with>
+  
+</module>

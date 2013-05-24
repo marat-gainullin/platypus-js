@@ -55,7 +55,7 @@
         <web-resource-collection>
             <web-resource-name>platypus</web-resource-name>
             <description/>
-            <url-pattern>/applicationStart.html</url-pattern>
+            <url-pattern>/application-start.html</url-pattern>
         </web-resource-collection>
         <auth-constraint>
             <description/>

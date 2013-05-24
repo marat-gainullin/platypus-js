@@ -18,6 +18,7 @@ import com.bearsoft.rowset.sorting.RowsComparator;
 import com.bearsoft.rowset.sorting.SortingCriterion;
 import com.eas.client.AppClient;
 import com.eas.client.DbClient;
+import com.eas.client.events.ScriptSourcedEvent;
 import com.eas.client.model.Relation;
 import com.eas.client.model.RowsetMissingException;
 import com.eas.client.model.application.ApplicationEntity;
@@ -1269,6 +1270,27 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
             }
         }
     }
+    
+    @ScriptFunction(jsDocText = "Refreshes rowset only if any of its parameters has changed with callback.")
+    public void execute(Function aCallback) throws Exception {
+        if (entity != null) {
+            if (entity.getQuery().isManual()) {
+                entity.getQuery().setManual(false);
+                try {
+                    entity.execute();
+                } finally {
+                    entity.getQuery().setManual(true);
+                }
+            } else {
+                entity.execute();
+            }
+            if (aCallback != null) {
+                assert tag instanceof RowsetHostObject;
+                RowsetHostObject<E> rowsetFacade = (RowsetHostObject<E>) tag;
+                entity.executeScriptEvent(aCallback, new ScriptSourcedEvent(rowsetFacade));
+            }
+        }
+    }
 
     @ScriptFunction(jsDocText = "Enqueues rowset's changes.")
     public int enqueueUpdate() throws Exception {
@@ -1313,7 +1335,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     }
 
     // Requery interface
-    @ScriptFunction(jsDocText = "Requeries rowset data.")
+    @ScriptFunction(jsDocText = "Requeries rowset's data.")
     public void requery() throws Exception {
         if (entity != null) {
             if (entity.getQuery().isManual()) {
@@ -1325,6 +1347,27 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
                 }
             } else {
                 entity.refresh();
+            }
+        }
+    }
+
+    @ScriptFunction(jsDocText = "Requeries rowset's data with a callback.")
+    public void requery(Function aCallback) throws Exception {
+        if (entity != null) {
+            if (entity.getQuery().isManual()) {
+                entity.getQuery().setManual(false);
+                try {
+                    entity.refresh();
+                } finally {
+                    entity.getQuery().setManual(true);
+                }
+            } else {
+                entity.refresh();
+            }
+            if (aCallback != null) {
+                assert tag instanceof RowsetHostObject;
+                RowsetHostObject<E> rowsetFacade = (RowsetHostObject<E>) tag;
+                entity.executeScriptEvent(aCallback, new ScriptSourcedEvent(rowsetFacade));
             }
         }
     }

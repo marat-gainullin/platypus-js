@@ -89,10 +89,12 @@ public class ParametersEntity extends Entity {
 
 	@Override
 	protected void internalExecute(boolean refresh, CancellableCallback onSuccess, Callback<String> onFailure) {
-		try {
-			internalExecuteChildren(refresh);
-		} catch (Exception ex) {
-			Logger.getLogger(ParametersEntity.class.getName()).log(Level.SEVERE, ex.getMessage());
+		if (onSuccess != null) {
+			try {
+				onSuccess.run();
+			} catch (Exception e) {
+				Logger.getLogger(ParametersEntity.class.getName()).log(Level.SEVERE, null, e);
+			}
 		}
 	}
 

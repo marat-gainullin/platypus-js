@@ -1,0 +1,72 @@
+/**
+ * Sencha GXT 3.0.1 - Sencha for GWT
+ * Copyright(c) 2007-2012, Sencha, Inc.
+ * licensing@sencha.com
+ *
+ * http://www.sencha.com/products/gxt/license/
+ */
+.top {
+  padding: 2px; 
+}
+
+@if user.agent ie6 {
+  @eval CLEAR com.sencha.gxt.core.client.util.ImageHelper.createModuleBasedUrl("base/images/clear.gif");
+  .content {
+    background-image: CLEAR;
+  }
+}
+
+.contentArea {
+  border-bottom: none !important; 
+}
+
+.top {
+  text-align: center; 
+}
+
+.topLeft, .top, .topRight {
+  height: auto;
+}
+
+.topRight {
+  background-position: top right;
+}
+
+.right {
+  background-repeat: repeat-y;
+  background-position: center right;
+}
+
+.bottom {
+  width: auto; 
+  background-repeat: repeat-x;
+  background-position: center bottom;
+  height: 3px;
+}
+
+.topLeft, .topRight {
+  width: 3px; 
+}
+
+.left, .right {
+  width: 3px; 
+}
+
+.bottomLeft, .bottomRight {
+  height: 3px; 
+  width: 3px;
+}
+
+.bottomLeft, .bottomRight {
+  background-repeat:no-repeat; 
+}
+
+.bottomRight {
+  background-position: right; 
+}
+
+@sprite .noheader .top {
+  gwt-image: 'topNoHeadBorder';
+  height: 2px;
+  width: auto;  
+}

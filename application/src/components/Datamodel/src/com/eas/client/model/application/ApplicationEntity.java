@@ -761,7 +761,8 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
                         cx = ScriptUtils.enterContext();
                     }
                     try {
-                        res = aHandler.call(cx, scope, sRowsetWrap != null ? sRowsetWrap : scope, new Object[]{ScriptUtils.javaToJS(aEvent, scope)});
+                        Object[] args = new Object[]{ScriptUtils.javaToJS(aEvent, scope)};
+                        res = aHandler.call(cx, scope, sRowsetWrap != null ? sRowsetWrap : scope, args);
                     } finally {
                         if (!wasContext) {
                             Context.exit();

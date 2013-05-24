@@ -1,0 +1,17 @@
+<!--
+
+    Sencha GXT 3.0.1 - Sencha for GWT
+    Copyright(c) 2007-2012, Sencha, Inc.
+    licensing@sencha.com
+
+    http://www.sencha.com/products/gxt/license/
+
+-->
+<module>
+  <inherits name="com.sencha.gxt.core.Core" />
+  <inherits name="com.sencha.gxt.data.Data" />
+  <inherits name="com.sencha.gxt.messages.Messages" />
+  <inherits name="com.sencha.gxt.fx.Fx" />
+  <inherits name="com.sencha.gxt.dnd.core.DND" />
+  <inherits name='com.sencha.gxt.cell.core.Core' />
+</module>

@@ -1,0 +1,25 @@
+<!--
+
+    Sencha GXT 3.0.1 - Sencha for GWT
+    Copyright(c) 2007-2012, Sencha, Inc.
+    licensing@sencha.com
+
+    http://www.sencha.com/products/gxt/license/
+
+-->
+<module>
+
+  <inherits name="com.sencha.gxt.data.Data" />
+  <inherits name="com.sencha.gxt.dnd.core.DND" />
+  <inherits name="com.sencha.gxt.state.State" />
+  <inherits name="com.sencha.gxt.widget.core.Core" />
+
+  <!-- Default theme is Blue -->
+  <inherits name="com.sencha.gxt.theme.blue.Blue" />
+
+  <!-- Collect OS, collapse it by default -->
+  <collapse-property name="user.agent.os" values="*" />
+  <collapse-property name="gxt.user.agent" values="air, safari*, chrome" />
+  <collapse-property name="gxt.user.agent" values="ie6, ie7" />
+  <collapse-property name="gxt.user.agent" values="gecko*" />
+</module>

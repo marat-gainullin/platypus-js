@@ -13,10 +13,14 @@ import com.eas.client.gxtcontrols.published.PublishedCell;
 import com.eas.client.gxtcontrols.published.PublishedColor;
 import com.eas.client.gxtcontrols.published.PublishedFont;
 import com.eas.client.gxtcontrols.published.PublishedStyle;
+import com.eas.client.gxtcontrols.wrappers.container.PlatypusFieldSet;
+import com.eas.client.gxtcontrols.wrappers.container.PlatypusMarginLayoutContainer;
+import com.eas.client.gxtcontrols.wrappers.container.PlatypusTabsContainer;
 import com.eas.client.model.Entity;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.dom.client.Style.FontStyle;
 import com.google.gwt.dom.client.Style.FontWeight;
@@ -30,6 +34,7 @@ import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.core.client.dom.XElement;
+import com.sencha.gxt.widget.core.client.Window;
 import com.sencha.gxt.widget.core.client.container.Container;
 import com.sencha.gxt.widget.core.client.form.AdapterField;
 import com.sencha.gxt.widget.core.client.form.FileUploadField;
@@ -173,7 +178,7 @@ public class ControlsUtils {
 		return c != null ? parseColor(c) : null;
 	}
 
-	public static void renderDecorated(SafeHtmlBuilder rendered, PublishedStyle aStyle, SafeHtmlBuilder sb) {		
+	public static void renderDecorated(SafeHtmlBuilder rendered, PublishedStyle aStyle, SafeHtmlBuilder sb) {
 		if (aStyle != null) {
 			StyleIconDecorator.decorate(rendered.toSafeHtml(), aStyle, HasVerticalAlignment.ALIGN_MIDDLE, sb);
 		} else
@@ -238,25 +243,56 @@ public class ControlsUtils {
 		}
 	}
 
+	protected static void walkChildren(Element aRoot, Element aStop, ElementCallback aCallback) {
+		NodeList<Node> children = aRoot.getChildNodes();
+		for (int i = 0; i < children.getLength(); i++) {
+			Node el = children.getItem(i);
+			if (el instanceof Element) {
+				aCallback.run((Element) el);
+				if (el != aStop)
+					walkChildren((Element) el, aStop, aCallback);
+			}
+		}
+	}
+
 	public static void applyBackground(Widget aWidget, final PublishedColor aColor) {
 		applyBackground(aWidget, aColor != null ? aColor.toStyled() : null);
 	}
 
 	public static void applyBackground(Widget aWidget, final String aColorString) {
-		applyStylePart(aWidget, new ElementCallback() {
+		ElementCallback worker = new ElementCallback() {
 
 			@Override
 			public void run(Element aElement) {
-				if (aColorString != null && !aColorString.isEmpty()) {
-					aElement.getStyle().setBackgroundColor(aColorString);
-					aElement.getStyle().setBackgroundImage("none");
-				} else {
-					aElement.getStyle().clearBackgroundColor();
-					aElement.getStyle().clearBackgroundImage();
+				if (aElement != null && aElement.getStyle() != null) {
+					if (aColorString != null && !aColorString.isEmpty()) {
+						aElement.getStyle().setBackgroundColor(aColorString);
+						aElement.getStyle().setBackgroundImage("none");
+					} else {
+						aElement.getStyle().clearBackgroundColor();
+						aElement.getStyle().clearBackgroundImage();
+					}
 				}
 			}
 
-		});
+		};
+		applyStylePart(aWidget, worker);
+		if (aWidget.getParent() instanceof Window) {
+			Window w = (Window) aWidget.getParent();
+			if (w.getWidget() == aWidget) {
+				Element stop = aWidget.getElement();
+				if (aWidget instanceof PlatypusMarginLayoutContainer) {
+					stop = ((PlatypusMarginLayoutContainer) aWidget).getWidget().getElement();
+				}
+				if (aWidget instanceof PlatypusFieldSet) {
+					stop = ((PlatypusFieldSet) aWidget).getWidget().getElement();
+				}
+				if (aWidget instanceof PlatypusTabsContainer) {
+					stop = ((PlatypusTabsContainer) aWidget).getWidget().getElement();
+				}
+				walkChildren(w.getElement(), stop, worker);
+			}
+		}
 	}
 
 	public static void applyForeground(Widget aWidget, final PublishedColor aColor) {

@@ -1,0 +1,105 @@
+/**
+ * Sencha GXT 3.0.1 - Sencha for GWT
+ * Copyright(c) 2007-2012, Sencha, Inc.
+ * licensing@sencha.com
+ *
+ * http://www.sencha.com/products/gxt/license/
+ */
+.datePicker {
+  border-color: #343434;
+  background-color:#FFFFFF;
+}
+
+@sprite .daysWrap td {
+  gwt-image: "footer";
+  height: auto;
+}
+
+.middle, .monthLeft, .monthRight {
+  color:#FFFFFF;
+  font:bold 11px "sans serif", tahoma, verdana, helvetica;
+}
+
+.inner th {
+  background-color:#eaeaea;
+  border-bottom-color:#B6B6B6;
+  font:normal 10px arial, helvetica,tahoma,sans-serif;
+  color:#3A3A3A;
+}
+
+.inner td {
+  border-color:#FFFFFF;
+}
+
+.inner a {
+  font:normal 11px arial, helvetica,tahoma,sans-serif;
+  color:#000000;
+}
+
+.dateActive {
+  color:#000000;
+}
+
+.inner .dateSelected a {
+  background-color:#eaeaea;
+  /* background-image:url(../images/default/shared/glass-bg.gif); */
+  border-color:#d0d0d0;
+}
+
+.dateToday a {
+  border-color:darkred;
+}
+
+.dateSelected span {
+  font-weight:bold;
+}
+
+.inner .datePrevious a,.inner .dateNext a {
+  color:#AAAAAA;
+}
+
+.dateDisabled a {
+  background-color:#EEEEEE;
+  color:#BBBBBB;
+}
+
+.monthPicker {
+  background-color:#FFFFFF;
+}
+
+.monthPicker td {
+  font:normal 11px arial, helvetica,tahoma,sans-serif;
+}
+
+.monthButtons button {
+  background-color:#2F2F2F;
+  color:#FFFFFF;
+  border-color: #626262 #090909 #090909 #626262;
+  font:normal 11px arial, helvetica,tahoma,sans-serif;
+}
+
+.monthButtons {
+  background-color: #eaeaea;
+}
+
+.monthButtons td {
+  border-top-color: #CFCFCF;
+}
+
+.month a, .year a {
+  color:#3C3C3C;
+}
+
+.monthSelected a {
+  background-color: #eaeaea;
+  border-color:#d0d0d0;
+}
+
+.monthSep {
+  border-right-color:#CFCFCF;
+}
+
+.bottom {
+  border-top-color:black;
+}
+

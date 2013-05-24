@@ -1,0 +1,24 @@
+<!--
+
+    Sencha GXT 3.0.1 - Sencha for GWT
+    Copyright(c) 2007-2012, Sencha, Inc.
+    licensing@sencha.com
+
+    http://www.sencha.com/products/gxt/license/
+
+-->
+<module>
+  <inherits name="com.sencha.gxt.core.Core" />
+  <inherits name="com.google.gwt.http.HTTP" />
+  <inherits name="com.google.gwt.xml.XML" />
+  <inherits name="com.google.gwt.json.JSON" />
+  <inherits name='com.google.web.bindery.requestfactory.RequestFactory' />
+  <inherits name="com.google.gwt.user.RemoteService" />
+
+  <generate-with class="com.sencha.gxt.data.rebind.PropertyAccessGenerator">
+    <when-type-assignable class="com.sencha.gxt.data.shared.PropertyAccess" />
+  </generate-with>
+
+  <source path="client" />
+  <source path="shared" />
+</module>

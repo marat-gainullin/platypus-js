@@ -1,0 +1,125 @@
+<!--
+
+    Sencha GXT 3.0.1 - Sencha for GWT
+    Copyright(c) 2007-2012, Sencha, Inc.
+    licensing@sencha.com
+
+    http://www.sencha.com/products/gxt/license/
+
+-->
+<module>
+  <inherits name="com.google.gwt.user.User" />
+  <inherits name="com.google.gwt.logging.LoggingDisabled" />
+  <inherits name="com.google.gwt.i18n.I18N" />
+
+  <define-property name="gxt.logging.enabled" values="true, false" />
+  <set-property name="gxt.logging.enabled" value="false" />
+
+  <generate-with class="com.sencha.gxt.core.rebind.XTemplatesGenerator">
+    <when-type-assignable class="com.sencha.gxt.core.client.XTemplates" />
+  </generate-with>
+
+  <replace-with class="com.sencha.gxt.core.client.dom.impl.ComputedStyleImplIE">
+    <when-type-assignable class="com.sencha.gxt.core.client.dom.impl.ComputedStyleImpl" />
+    <any>
+      <when-property-is name="user.agent" value="ie6" />
+      <when-property-is name="user.agent" value="ie8" />
+      <when-property-is name="user.agent" value="ie9" />
+    </any>
+  </replace-with>
+
+  <replace-with class="com.sencha.gxt.core.client.dom.Mask.MaskDefaultAppearance">
+    <when-type-is class="com.sencha.gxt.core.client.dom.Mask.MaskAppearance" />
+  </replace-with>
+
+  <replace-with class="com.sencha.gxt.core.client.resources.CommonStyles.CommonStylesDefaultAppearance">
+    <when-type-is class="com.sencha.gxt.core.client.resources.CommonStyles.CommonStylesAppearance" />
+  </replace-with>
+
+  <!-- Layer appearance -->
+  <replace-with class="com.sencha.gxt.core.client.dom.Layer.LayerBaseAppearance">
+    <when-type-assignable class="com.sencha.gxt.core.client.dom.Layer.LayerAppearance" />
+  </replace-with>
+
+  <replace-with class="com.sencha.gxt.core.client.dom.Layer.LayerBaseAppearanceIe">
+    <when-type-assignable class="com.sencha.gxt.core.client.dom.Layer.LayerAppearance" />
+    <any>
+      <when-property-is name="user.agent" value="ie6" />
+      <when-property-is name="user.agent" value="ie8" />
+      <when-property-is name="user.agent" value="ie9" />
+    </any>
+  </replace-with>
+
+  <source path="client" />
+  <source path="shared" />
+
+  <!-- build permutations for OS -->
+  <define-property name="user.agent.os" values="mac,linux,windows" />
+  <property-provider name="user.agent.os"><![CDATA[
+    var ua = $wnd.navigator.userAgent.toLowerCase();
+    if (ua.indexOf("macintosh") != -1 || ua.indexOf("mac os x") != -1) {
+      return "mac";
+    }
+    if (ua.indexOf("linux") != -1) {
+      return "linux";
+    }
+    if (ua.indexOf("windows") != -1 || ua.indexOf("win32") != -1) {
+      return "windows";
+    }
+    return "unknown";
+  ]]></property-provider>
+
+  <!-- Add more user agents and redefine how one is selected -->
+  <define-property name="gxt.user.agent" values="ie6" />
+  <extend-property name="gxt.user.agent" values="ie7" />
+  <extend-property name="gxt.user.agent" values="ie8" />
+  <extend-property name="gxt.user.agent" values="ie9" />
+  <extend-property name="gxt.user.agent" values="opera" />
+  <extend-property name="gxt.user.agent" values="gecko1_8" />
+  <extend-property name="gxt.user.agent" values="gecko1_9" />
+
+  <extend-property name="gxt.user.agent" values="safari3" />
+  <extend-property name="gxt.user.agent" values="safari4" />
+  <extend-property name="gxt.user.agent" values="safari5" />
+  <extend-property name="gxt.user.agent" values="chrome" />
+  <extend-property name="gxt.user.agent" values="air" />
+
+  <!-- Decide which GXT user.agent setting to apply -->
+  <property-provider name="gxt.user.agent" generator="com.sencha.gxt.core.rebind.useragent.UserAgentPropertyGenerator" />
+
+  <!-- Restrict the permutation explosion -->
+  <set-property name="user.agent" value="ie6">
+    <any>
+      <when-property-is name="gxt.user.agent" value="ie6" />
+      <when-property-is name="gxt.user.agent" value="ie7" />
+    </any>
+  </set-property>
+  <set-property name="user.agent" value="ie8">
+    <when-property-is name="gxt.user.agent" value="ie8" />
+  </set-property>
+  <set-property name="user.agent" value="ie9">
+    <when-property-is name="gxt.user.agent" value="ie9" />
+  </set-property>
+  <set-property name="user.agent" value="gecko1_8">
+    <any>
+      <when-property-is name="gxt.user.agent" value="gecko1_8" />
+      <when-property-is name="gxt.user.agent" value="gecko1_9" />
+    </any>
+  </set-property>
+  <set-property name="user.agent" value="safari">
+    <any>
+      <when-property-is name="gxt.user.agent" value="safari3" />
+      <when-property-is name="gxt.user.agent" value="safari4" />
+      <when-property-is name="gxt.user.agent" value="safari5" />
+      <when-property-is name="gxt.user.agent" value="air" />
+      <when-property-is name="gxt.user.agent" value="chrome" />
+    </any>
+  </set-property>
+  <set-property name="user.agent" value="opera">
+    <when-property-is name="gxt.user.agent" value="opera" />
+  </set-property>
+
+  <generate-with class="com.sencha.gxt.core.rebind.BindingPropertyGenerator">
+    <when-type-assignable class="com.sencha.gxt.core.client.BindingPropertySet" />
+  </generate-with>
+</module>

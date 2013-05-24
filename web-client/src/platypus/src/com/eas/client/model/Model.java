@@ -25,7 +25,9 @@ import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.Cancellable;
+import com.eas.client.CancellableCallback;
 import com.eas.client.CancellableCallbackAdapter;
+import com.eas.client.CumulativeCallbackAdapter;
 import com.eas.client.Utils;
 import com.eas.client.application.AppClient;
 import com.eas.client.beans.PropertyChangeSupport;
@@ -323,8 +325,8 @@ public class Model {// implements Cancellable {
 			revert : function() {
 				aModel.@com.eas.client.model.Model::revert()();
 			},
-			requery : function() {
-				aModel.@com.eas.client.model.Model::requery()();
+			requery : function(aCallback) {
+				aModel.@com.eas.client.model.Model::requery(Lcom/google/gwt/core/client/JavaScriptObject;)(aCallback);
 			},
 			unwrap : function() {
 				return aModel;
@@ -603,13 +605,33 @@ public class Model {// implements Cancellable {
 	public void rolledback() throws Exception {
 	}
 
-	public void requery() throws Exception {
+	public void requery(final JavaScriptObject onSuccess) throws Exception {
+		requery(new CancellableCallbackAdapter(){
+			@Override
+			protected void doWork() throws Exception {
+				if(onSuccess != null)
+					Utils.invokeJsFunction(onSuccess);
+			}
+		});
+	}
+	
+	public void requery(CancellableCallback onSuccess) throws Exception {
 		changeLog.clear();
-		executeRootEntities(true);
+		executeRootEntities(true, onSuccess);
 	}
 
-	public void execute() throws Exception {
-		executeRootEntities(false);
+	public void execute(final JavaScriptObject onSuccess) throws Exception {
+		execute(new CancellableCallbackAdapter(){
+			@Override
+			protected void doWork() throws Exception {
+				if(onSuccess != null)
+					Utils.invokeJsFunction(onSuccess);
+			}
+		});
+	}
+	
+	public void execute(CancellableCallback onSuccess) throws Exception {
+		executeRootEntities(false, onSuccess);
 	}
 
 	public static Set<Entity> gatherNextLayer(Collection<Entity> aLayer) throws Exception {
@@ -630,20 +652,32 @@ public class Model {// implements Cancellable {
 		return nextLayer;
 	}
 
-	public void executeEntities(boolean refresh, Set<Entity> toExecute) throws Exception {
+	public void executeEntities(boolean refresh, Set<Entity> toExecute, final CancellableCallback onSuccess) throws Exception {
+		CumulativeCallbackAdapter cumulativeSuccess = new CumulativeCallbackAdapter(toExecute.size()){
+			protected void doWork() throws Exception {
+				if(onSuccess != null)
+					onSuccess.run();
+			};
+		}; 
 		for (Entity entity : toExecute) {
-			entity.internalExecute(refresh, null, null);
+			entity.internalExecute(refresh, cumulativeSuccess, null);
 		}
 	}
 
-	private void executeRootEntities(boolean refresh) throws Exception {
+	private void executeRootEntities(boolean refresh, CancellableCallback onSuccess) throws Exception {
 		final Set<Entity> toExecute = new HashSet();
 		for (Entity entity : entities.values()) {
-			if (entity.getInRelations().isEmpty()) {
-				toExecute.add(entity);
-			}
+            Set<Relation> dependanceRels = new HashSet();
+            for (Relation inRel : entity.getInRelations()) {
+                if (!(inRel.getLeftEntity() instanceof ParametersEntity)) {
+                    dependanceRels.add(inRel);
+                }
+            }
+            if (dependanceRels.isEmpty()) {
+                toExecute.add(entity);
+            }
 		}
-		executeEntities(refresh, toExecute);
+		executeEntities(refresh, toExecute, onSuccess);
 	}
 
 	public void validateQueries() throws Exception {
@@ -694,7 +728,7 @@ public class Model {// implements Cancellable {
 		if (!oldValue && runtime) {
 			resolveHandlers();
 			validateQueries();
-			executeRootEntities(false);
+			executeRootEntities(false, null);
 		}
 	}
 

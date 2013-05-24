@@ -808,7 +808,7 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
     }
 
     public Scriptable getSelected() throws Exception {
-        List<RowHostObject> selectedRows = new ArrayList<>();
+        List<Object> selectedRows = new ArrayList<>();
         if (deepModel != null) {// design time is only the case
             for (int i = 0; i < deepModel.getRowCount(); i++) {
                 if (rowsSelectionModel.isSelectedIndex(i)) {
@@ -818,7 +818,7 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                 }
             }
         }
-        return Context.getCurrentContext().newArray(model.getScriptScope(), selectedRows.toArray(new RowHostObject[]{}));
+        return Context.getCurrentContext().newArray(model.getScriptScope(), selectedRows.toArray(new Object[]{}));
     }
 
     /*
@@ -2023,7 +2023,7 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
 
     public Scriptable getColumnsScriptView() {
         if (eventThis != null) {
-            List<Scriptable> columns = new ArrayList<>();
+            List<Object> columns = new ArrayList<>();
             for (ScriptableColumn scrCol : scriptableColumns) {
                 columns.add(scrCol.getPublished());
             }
