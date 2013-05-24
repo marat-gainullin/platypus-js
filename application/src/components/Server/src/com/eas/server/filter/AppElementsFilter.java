@@ -48,10 +48,14 @@ public class AppElementsFilter {
     };
     protected static String[] topLevelFomPropertiesAndMethods = new String[]{
         "model", "principal", "applicationElementId", "view", "form", "formKey", "defaultCloseOperation",
-        "icon", "title", "resizable", "iconifiable", "maximizable", "undecorated", "opacity", "alwaysOnTop",
-        "locationByPlatform", "left", "top", "width", "height", "windowOpened", "windowClosing", "windowClosed",
-        "windowIconified", "windowRestored", "windowMaximized", "windowActivated", "windowDeactivated", "show",
-        "showModal", "showOnPanel", "showInternalFrame", "close", "submit"
+        "icon", "title",
+        "resizable", "minimized", "maximized", "minimizable", "maximizable",
+        "minimize", "maximize", "restore", "toFront",
+        "undecorated", "opacity", "alwaysOnTop",
+        "locationByPlatform", "left", "top", "width", "height", 
+        "onWindowOpened", "onWindowClosing", "onWindowClosed", "onWindowMinimized",
+        "onWindowRestored", "onWindowMaximized", "onWindowActivated", "onWindowDeactivated",
+        "show", "showModal", "showOnPanel", "showInternalFrame", "close"
     };
     public static final String BROWSER_SELF_TEMPLATE = ""
             + "try{"

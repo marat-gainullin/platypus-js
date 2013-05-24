@@ -183,7 +183,7 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
     protected ImageIcon icon;
     protected String title;
     protected boolean resizable;
-    protected boolean iconifiable;
+    protected boolean minimizable;
     protected boolean maximizable;
     protected boolean undecorated;
     protected float opacity;
@@ -1003,21 +1003,21 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
     }
 
     @ScriptFunction
-    public boolean getIconifiable() {
-        return iconifiable;
+    public boolean getMinimizable() {
+        return minimizable;
     }
 
     @ScriptFunction
-    public void setIconifiable(boolean aValue) {
-        iconifiable = aValue;
+    public void setMinimizable(boolean aValue) {
+        minimizable = aValue;
         if (surface instanceof JDialog) {
-            //((JDialog) surface).setIconifiable(iconifiable);
+            //((JDialog) surface).setMinimizable(minimizable);
         }
         if (surface instanceof JInternalFrame) {
-            ((JInternalFrame) surface).setIconifiable(iconifiable);
+            ((JInternalFrame) surface).setIconifiable(minimizable);
         }
         if (surface instanceof JFrame) {
-            //((JFrame) surface).setIconifiable(iconifiable);
+            //((JFrame) surface).setMinimizable(minimizable);
         }
     }
 
@@ -1302,7 +1302,7 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
         defineProperty("height", FormRunner.class, EMPTY);
         defineProperty("minimized", FormRunner.class, READONLY);
         defineProperty("maximized", FormRunner.class, READONLY);
-        defineProperty("iconifiable", FormRunner.class, EMPTY);
+        defineProperty("minimizable", FormRunner.class, EMPTY);
         defineProperty("maximizable", FormRunner.class, EMPTY);
         defineProperty("frameVisible", FormRunner.class, READONLY);
         defineProperty("dialogVisible", FormRunner.class, READONLY);

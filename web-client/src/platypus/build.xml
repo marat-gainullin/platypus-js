@@ -25,7 +25,7 @@
       </classpath>
       <!--add jvmarg -Xss16M or similar if you see a StackOverflowError -->
       <jvmarg value="-Xss128m"/>      
-      <jvmarg value="-Xmx512M"/>
+      <jvmarg value="-Xmx1024m"/>
       <arg line="-war"/>
       <arg value="war"/>
       <!-- Additional arguments like -style PRETTY or -logLevel DEBUG -->
