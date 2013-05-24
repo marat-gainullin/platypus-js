@@ -9,23 +9,25 @@ import org.w3c.dom.Element;
 
 /**
  * Servlet's configuration.
+ *
  * @author vv
  */
 public class Servlet implements ElementConvertable {
-    
+
     public static final String TAG_NAME = "servlet";//NOI18N
     public static final String SERVLET_NAME_TAG_NAME = "servlet-name";//NOI18N
     public static final String SERVLET_CLASS_TAG_NAME = "servlet-class";//NOI18N
-    
+    public static final String LOAD_ON_STARTUP_TAG_NAME = "load-on-startup";//NOI18N
     private String servletName;
     private String servletClass;
+    private String loadOnStartup;
     private MultipartConfig multipartConfig;
 
     public Servlet(String aName, String aClassName) {
         servletName = aName;
         servletClass = aClassName;
     }
-    
+
     public String getName() {
         return servletName;
     }
@@ -41,7 +43,15 @@ public class Servlet implements ElementConvertable {
     public void setClassName(String className) {
         this.servletClass = className;
     }
-    
+
+    public String getLoadOnStartup() {
+        return loadOnStartup;
+    }
+
+    public void setLoadOnStartup(String aLoadOnStartup) {
+        loadOnStartup = aLoadOnStartup;
+    }
+
     public MultipartConfig getMultipartConfig() {
         return multipartConfig;
     }
@@ -49,7 +59,7 @@ public class Servlet implements ElementConvertable {
     public void setMultipartConfig(MultipartConfig multipartConfig) {
         this.multipartConfig = multipartConfig;
     }
-    
+
     @Override
     public Element getElement(Document aDoc) {
         Element element = aDoc.createElement(TAG_NAME);
@@ -59,10 +69,14 @@ public class Servlet implements ElementConvertable {
         Element servletClassElement = aDoc.createElement(SERVLET_CLASS_TAG_NAME);
         servletClassElement.setTextContent(servletClass);
         element.appendChild(servletClassElement);
+        if (loadOnStartup != null) {
+            Element loadOnStartupElement = aDoc.createElement(LOAD_ON_STARTUP_TAG_NAME);
+            loadOnStartupElement.setTextContent(loadOnStartup);
+            element.appendChild(loadOnStartupElement);
+        }
         if (multipartConfig != null) {
             element.appendChild(multipartConfig.getElement(aDoc));
         }
         return element;
     }
-    
 }
