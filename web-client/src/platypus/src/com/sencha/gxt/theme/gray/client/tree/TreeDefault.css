@@ -1,0 +1,23 @@
+/**
+ * Sencha GXT 3.0.1 - Sencha for GWT
+ * Copyright(c) 2007-2012, Sencha, Inc.
+ * licensing@sencha.com
+ *
+ * http://www.sencha.com/products/gxt/license/
+ */
+.over {
+  background-color: #EEEEEE;
+}
+
+.drop {
+  background-color: #EEEEEE;
+}
+
+.selected {
+  background-color: #E5E5E5 !important;
+}
+
+.text {
+  font: normal 11px arial, tahoma, helvetica, sans-serif;
+  color: black;
+}

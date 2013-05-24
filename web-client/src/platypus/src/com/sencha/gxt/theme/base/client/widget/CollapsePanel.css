@@ -1,0 +1,23 @@
+/**
+ * Sencha GXT 3.0.1 - Sencha for GWT
+ * Copyright(c) 2007-2012, Sencha, Inc.
+ * licensing@sencha.com
+ *
+ * http://www.sencha.com/products/gxt/license/
+ */
+.panel {
+  border: 1px solid #99BBE8;
+  padding: 2px;
+}
+
+.north,.south {
+  padding-top: 3px;
+}
+
+.west,.east {
+  padding-top: 4px;
+}
+
+.north .iconWrap, .south .iconWrap {
+  float: right;
+}

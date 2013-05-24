@@ -1,0 +1,68 @@
+/**
+ * Sencha GXT 3.0.1 - Sencha for GWT
+ * Copyright(c) 2007-2012, Sencha, Inc.
+ * licensing@sencha.com
+ *
+ * http://www.sencha.com/products/gxt/license/
+ */
+@if user.agent gecko gecko1_8 {
+  .menuItem {
+    -moz-user-select: none;
+  }
+}
+
+@if user.agent safari {
+  .menuItem {
+    -khtml-user-select: none;
+    -webkit-user-select: ignore
+  }
+}
+
+@if user.agent gecko gecko1_8 {
+  a.menuItem {
+    outline-color: -moz-use-text-color;
+  }
+}
+
+a.menuItem {
+  cursor: pointer;
+  display: block;
+  line-height: 16px;
+  outline-style: none;
+  outline-width: 0;
+  padding: 3px 21px 3px 27px;
+  position: relative;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.menuListItem {
+  white-space: nowrap;
+  display: block;
+  padding: 1px;
+}
+
+.menuItemIcon {
+  border: 0 none;
+  height: 16px;
+  padding: 0;
+  vertical-align: top;
+  width: 16px;
+  position: absolute;
+  left: 3px;
+  top: 3px;
+  margin: 0;
+  background-position: center;
+}
+
+@if gxt.user.agent ie6 {
+  .menuItemIcon {
+    left: -24px;
+  }
+}
+
+@if user.agent ie6 ie8 ie9 {
+  .menuItemIcon {
+    vertical-align: middle;
+  }
+}

@@ -32,7 +32,6 @@ public class PlatypusFieldSet extends FieldSet {
 	}
 
 	public PlatypusFieldSet(int aPadding) {
-
 		super.setWidget(content);
 		getElement().getStyle().setPadding(aPadding, Style.Unit.PX);
 

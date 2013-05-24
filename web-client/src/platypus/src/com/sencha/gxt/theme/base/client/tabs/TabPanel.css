@@ -1,0 +1,335 @@
+/**
+ * Sencha GXT 3.0.1 - Sencha for GWT
+ * Copyright(c) 2007-2012, Sencha, Inc.
+ * licensing@sencha.com
+ *
+ * http://www.sencha.com/products/gxt/license/
+ */
+.tab {
+  overflow: hidden;
+}
+
+@if !user.agent ie6 {
+  /* Don't bother giving rules to browsers that don't support them */
+  .tab {
+    outline: none;
+  }
+}
+
+.tabHeader,.tabFooter {
+  border: 1px solid;
+  overflow: hidden;
+}
+
+@if user.agent ie6 {
+  /* IE6 and IE7 hasLayout workaround */
+  .tabHeader, .tabFooter {
+    zoom: 1;
+  }
+}
+
+.tabHeader {
+  border: 1px solid;
+  padding-bottom: 2px;
+}
+
+.tabFooter {
+  border: 1px solid;
+  padding-top: 2px;
+}
+
+.tabStripWrap {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+@if user.agent ie6 {
+  /* IE6 and IE7 hasLayout workaround */
+  .tabStripWrap {
+    zoom: 1;
+  }
+}
+
+@if !user.agent ie8 {
+  .tabStrip {
+    display: block;
+    /* Make the tab strip much wider than would be reasonably necessary to avoid tab "wrap". Currently allows for about
+     * 8600 tabs. */
+    width: 1000000px;
+  }
+} @else {
+  .tabStrip {
+    display: block;
+    /* widths great than this in ie8 causes north / south resize handles to have white background when tab panel put into window */
+    width: 65520px;
+  }
+} 
+  
+@if user.agent ie6 {
+  /* IE6 and IE7 hasLayout workaround */
+  .tabStrip {
+    zoom: 1;
+  }
+}
+
+.tabStripTop {
+  margin-top: 1px;
+  background: repeat-x bottom;
+  border-bottom: 1px solid;
+}
+
+.tabStripBottom {
+  padding-bottom: 1px;
+  background: repeat-x top;
+  border-top: 1px solid;
+  border-bottom: 0 none;
+}
+
+.tabStrip li {
+  float: left;
+  position: relative;
+  margin-left: 2px;
+}
+
+.tabStrip li.tabEdge {
+  float: left;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 none !important;
+  font-size: 1px !important;
+  line-height: 1px !important;
+  overflow: hidden;
+  background: transparent !important;
+  width: 1px;
+}
+
+@if user.agent ie6 {
+  /* IE6 and IE7 hasLayout workaround */
+  .tabStrip li.tabEdge {
+    zoom: 1;
+  }
+}
+
+.tabStrip a,.tabStrip span,.tabStrip em {
+  display: block;
+}
+
+.tabStrip a {
+  text-decoration: none !important;
+  cursor: pointer;
+}
+
+@if !user.agent ie6 {
+  .tabStrip a {
+    outline: none;
+  }
+}
+
+.tabStripInner {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tabStrip span.tabStripText {
+  white-space: nowrap;
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.tabStripTop .tabWithIcon .tabRight {
+  padding-left: 6px;
+}
+
+.tabStrip .tabWithIcon span.tabStripText {
+  padding-left: 20px;
+  background-position: 0 3px;
+  background-repeat: no-repeat;
+}
+
+.tabStripActive,.tabStripActive a.tabRight {
+  cursor: default;
+}
+
+.tabStripActive span.tabStripText {
+  cursor: default;
+}
+
+.tabStripDisabled .tabsText {
+  cursor: default;
+}
+
+.tabBody {
+  overflow: hidden;
+}
+
+.tabBwrap {
+  overflow: hidden;
+}
+
+@if user.agent ie6 ie8 ie9 {
+  .tabStrip .tabRight {
+    position: relative;
+  }
+}
+
+.tabStripTop .tabStripActive .tabRight {
+  margin-bottom: -1px;
+}
+
+.tabStripTop .tabStripActive .tabRight span.tabStripText {
+  padding-bottom: 5px;
+}
+
+.tabStripBottom .tabStripActive .tabRight {
+  margin-top: -1px;
+}
+
+.tabStripBottom .tabStripActive .tabRight span.tabStripText {
+  padding-top: 5px;
+}
+
+.tabStripBottom .tabLeft {
+  padding: 0 10px;
+}
+
+.tabStripBottom .tabRight {
+  padding: 0;
+}
+
+.tabStrip .tabStripClose {
+  display: none;
+}
+
+.tabStripClosable {
+  position: relative;
+}
+
+.tabStripClosable .tabLeft {
+  padding-right: 19px;
+}
+
+.tabStrip .tabStripClosable a.tabStripClose {
+  background-repeat: no-repeat;
+  display: block;
+  width: 11px;
+  height: 11px;
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  cursor: pointer;
+  z-index: 2;
+}
+
+@if user.agent ie6 ie8 {
+  .tabStrip .tabStripClosable a.tabStripClose {
+    filter: literal("alpha(opacity=60)");
+  }
+} @else {
+  .tabStrip .tabStripClosable a.tabStripClose {
+    opacity: 0.6;
+  }
+}
+
+.tabStrip .tabStripActive a.tabStripClose {
+  opacity: .8;
+}
+
+.tabStrip .tabStripClosable a.tabStripClose:hover {
+  opacity: 1;
+}
+
+.tabBody {
+  border: 1px solid;
+}
+
+.tabBodyTop {
+  border-top: 0 none;
+}
+
+.tabBodyBottom {
+  border-bottom: 0 none;
+}
+
+.tabScrollerLeft {
+  background: transparent no-repeat -18px 0;
+  border-bottom: 1px solid;
+  width: 18px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 10;
+  cursor: pointer;
+}
+
+.tabScrollerLeftDisabled, .tabScrollerRightDisabled {
+  cursor: default;
+}
+
+@if user.agent ie6 ie8 {
+  .tabScrollerLeftDisabled, .tabScrollerRightDisabled {
+    filter: literal("alpha(opacity=50)");
+  }
+} @else {
+  .tabScrollerLeftDisabled, .tabScrollerRightDisabled {
+    opacity: .5;
+  }
+}
+
+.tabScrollerRight {
+  background: transparent no-repeat 0 0;
+  border-bottom: 1px solid;
+  width: 18px;
+  position: absolute;
+  right: 0;
+  top: 0;
+  z-index: 10;
+  cursor: pointer;
+}
+
+.tabScrollingBottom .tabScrollerLeft,.tabScrollingBottom .tabScrollerRight {
+  margin-top: 1px;
+}
+
+.tabScrolling .tabStripWrap {
+  margin-left: 18px;
+  margin-right: 18px;
+}
+
+.tabScrolling {
+  position: relative;
+}
+
+.tabBbar .xToolbar {
+  border: 1px solid;
+  border-top: 0 none;
+  overflow: hidden;
+  padding: 2px;
+}
+
+.tabTbar .xToolbar {
+  border: 1px solid;
+  border-top: 0 none;
+  overflow: hidden;
+  padding: 2px;
+}
+
+.tabStrip li .tabImage {
+  position: absolute;
+}
+
+@if user.agent ie8 {
+  .tabStrip li .tabImage {
+    top: 4px;
+    left: 6px;
+  }
+} @else {
+  .tabStrip li .tabImage {
+    top: 3px;
+    left: 5px;
+  }
+}
+
+.tabStripTop .tabRight {
+  top: 0;
+}

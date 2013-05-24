@@ -1,0 +1,48 @@
+/**
+ * Sencha GXT 3.0.1 - Sencha for GWT
+ * Copyright(c) 2007-2012, Sencha, Inc.
+ * licensing@sencha.com
+ *
+ * http://www.sencha.com/products/gxt/license/
+ */
+@def shadowOffset 4;
+
+.shim {
+  position: absolute;
+  visibility: hidden;
+  left: 0;
+  top: 0;
+  overflow: hidden;
+  filter: literal("alpha(opacity=0)");
+}
+
+@if user.agent ie6 {
+  .shim {
+    margin-left: 5px;
+    margin-top: 3px;
+  }
+}
+
+.shadow * {
+  overflow: hidden;
+}
+
+.shadow * {
+  padding: 0;
+  border: 0;
+  margin: 0;
+  clear: none;
+  zoom: 1;
+}
+
+.shadow {
+  display: none;
+  position: absolute;
+  overflow: hidden;
+  left: 0;
+  top: 0;
+  zoom: 1;
+  background-color: #777;
+  /* No way to use a @def constant in literal(), so two literal() calls used here */
+  filter: literal("progid:DXImageTransform.Microsoft.alpha(opacity=50) progid:DXImageTransform.Microsoft.Blur(pixelradius=") shadowOffset literal(")");
+}

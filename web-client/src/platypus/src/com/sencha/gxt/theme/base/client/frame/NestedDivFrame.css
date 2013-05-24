@@ -1,0 +1,98 @@
+/**
+ * Sencha GXT 3.0.1 - Sencha for GWT
+ * Copyright(c) 2007-2012, Sencha, Inc.
+ * licensing@sencha.com
+ *
+ * http://www.sencha.com/products/gxt/license/
+ */
+.contentArea {
+  position: relative;
+  outline: none;
+}
+
+@sprite .content {
+  gwt-image: 'background';
+  overflow: visible;
+  height: auto;
+  width: auto;
+}
+
+@sprite .topLeft {
+  gwt-image: 'topLeftBorder';
+  padding-left: value('topLeftBorder.getWidth', 'px');
+  zoom:1;
+  width: auto;
+  height: auto;
+}
+
+@sprite .top {
+  gwt-image: 'topBorder';
+  width: auto;
+}
+
+@sprite .topRight {
+  gwt-image: 'topRightBorder';
+  background-repeat: no-repeat;
+  background-position: right 0;
+  zoom:1;
+  padding-right: value('topRightBorder.getWidth', 'px');
+  width: auto;
+}
+
+@sprite .bottomLeft {
+  gwt-image: 'bottomLeftBorder';
+  background-repeat: no-repeat;
+  width: auto;
+  background-position: 0 bottom;
+  padding-left: value('bottomLeftBorder.getWidth', 'px');
+  zoom: 1;
+  line-height: 1px;
+  font-size: 1px;
+}
+
+@sprite .bottom {
+  gwt-image: 'bottomBorder';
+  background-position: 0 bottom;
+  zoom: 1;
+  width: auto;
+  overflow: visible;
+  height: value('bottomBorder.getHeight', 'px');
+  line-height: 1px;
+  font-size: 1px;
+}
+
+@sprite .bottomRight {
+  gwt-image: 'bottomRightBorder';
+  background-repeat: no-repeat;
+  background-position: right bottom;
+  padding-right: value('bottomRightBorder.getWidth', 'px');
+  zoom:1;
+  width: auto;
+  height: auto;
+  line-height: 1px;
+  font-size: 1px;
+}
+
+@sprite .left {
+  gwt-image: 'leftBorder';
+  padding-left: value('bottomLeftBorder.getWidth', 'px');
+  zoom:1;
+  overflow: visible;
+  height: auto;
+  width: auto;
+}
+
+@sprite .right {
+  gwt-image: 'rightBorder';
+  background-repeat: repeat-y;
+  background-position: right 0;
+  padding-right: value('rightBorder.getWidth', 'px');
+  overflow: visible;
+  width: auto;
+  height: auto;
+}
+
+.bodyWrap {}
+.over {}
+.pressed {}
+

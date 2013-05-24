@@ -1,0 +1,21 @@
+/**
+ * Sencha GXT 3.0.1 - Sencha for GWT
+ * Copyright(c) 2007-2012, Sencha, Inc.
+ * licensing@sencha.com
+ *
+ * http://www.sencha.com/products/gxt/license/
+ */
+.dragGhost {
+  color: #000000;
+  font: normal 11px arial, helvetica, sans-serif;
+  border-color: #DDDDDD #BBBBBB #BBBBBB #DDDDDD;
+  background-color: #FFFFFF;
+}
+
+@sprite .dropDisallowed .dropIcon {
+  gwt-image: "dropDisallowed";
+}
+
+@sprite .dropAllowed .dropIcon {
+  gwt-image: "dropAllowed";
+}

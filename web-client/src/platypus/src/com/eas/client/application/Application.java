@@ -24,9 +24,12 @@ import com.eas.client.form.api.ModelJSControls;
 import com.eas.client.queries.Query;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArrayString;
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.logging.client.ConsoleLogHandler;
+import com.google.gwt.safehtml.shared.SafeUri;
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.sencha.gxt.core.client.dom.XElement;
 import com.sencha.gxt.core.shared.event.GroupingHandlerRegistration;
@@ -92,17 +95,21 @@ public class Application {
 		protected void doWork() throws Exception {
 			loaderHandlerRegistration.removeHandler();
 			for (String appElementName : executedAppElements) {
+				Form f = getStartForm(appElementName);
 				RootPanel target = RootPanel.get(appElementName);
 				if (target != null) {
 					target.getElement().<XElement> cast().unmask();
-					Form f = getStartForm(appElementName);
 					if (f != null) {
 						f.showOnPanel(target);
 					} else {
 						target.getElement().setInnerHTML(loader.getAppElementError(appElementName));
 					}
 				} else {
-					JavaScriptObject module = getModule(appElementName);
+					if (f != null) {
+						f.show(false, null, null);
+					} else {
+						JavaScriptObject module = getModule(appElementName);
+					}
 				}
 			}
 		}
@@ -119,6 +126,7 @@ public class Application {
 
 	/**
 	 * This method is publicONLY because of tests!
+	 * 
 	 * @param aClient
 	 * @throws Exception
 	 */
@@ -899,24 +907,26 @@ public class Application {
 				platypusModules.put(div.getId(), div);
 			}
 		}
+		SafeUri uri = UriUtils.fromTrustedString(Document.get().getURL());
+		uri.
 		return platypusModules;
 	}
 
 	protected static native void onReady()/*-{
-		if($wnd.platypus.ready)
+		if ($wnd.platypus.ready)
 			$wnd.platypus.ready();
 	}-*/;
-	
-	protected static Cancellable startAppElements(AppClient client, final Map<String, Element> start) throws Exception {
+
+	protected static Cancellable startAppElements(AppClient client, final Map<String, Element> aMarkupStart) throws Exception {
 		onReady();
-		if (start == null || start.isEmpty()) {
+		if (aMarkupStart == null || aMarkupStart.isEmpty()) {
 			return client.getStartElement(new StringCallbackAdapter() {
 
 				protected Cancellable loadings;
 
 				@Override
 				protected void doWork(String aResult) throws Exception {
-					if(aResult != null && !aResult.isEmpty()){
+					if (aResult != null && !aResult.isEmpty()) {
 						Collection<String> results = new ArrayList();
 						results.add(aResult);
 						loadings = loader.load(results, new ExecuteApplicationCallback(results));
@@ -932,9 +942,11 @@ public class Application {
 				}
 			});
 		} else {
-			Set<String> modulesIds = start.keySet();
+			Set<String> modulesIds = aMarkupStart.keySet();
 			for (final String elId : modulesIds) {
-				Element el = start.get(elId);
+				Element el = aMarkupStart.get(elId);
+				if(el == null)
+					el = Document.get().getBody();
 				if (el != null) {
 					loaderHandlerRegistration.add(loader.addHandler(new ElementMaskLoadHandler(el.<XElement> cast())));
 				}

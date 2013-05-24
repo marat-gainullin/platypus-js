@@ -1,0 +1,76 @@
+/**
+ * Sencha GXT 3.0.1 - Sencha for GWT
+ * Copyright(c) 2007-2012, Sencha, Inc.
+ * licensing@sencha.com
+ *
+ * http://www.sencha.com/products/gxt/license/
+ */
+/* Base mask styles */
+.mask {
+  z-index: 100;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  zoom: 1;
+  position: absolute;
+}
+
+@if user.agent ie6 ie8 {
+  .mask {
+    filter: literal("alpha(opacity = 50)");
+  }
+} @else {
+  .mask {
+    opacity: 0.5;
+  }
+}
+
+/* Blue mask styles */
+.mask {
+  background-color: #ccc;
+}
+
+/* Base box styles */
+.box {
+  z-index: 101;
+  position: absolute;
+  top: 0;
+  left: 0;
+  border: 1px solid;
+  padding: 2px;
+}
+
+/* Blue box styles */
+@sprite .box {
+  gwt-image: "boxBackground";
+  border-color: #6593cf;
+  background-color: #c3daf9;
+}
+
+/* Base text styles */
+.text {
+  padding: 5px 10px 5px 10px;
+  border: 1px solid;
+  cursor: wait;
+}
+
+/* Blue text styles */
+.text {
+  background-color: white;
+  border-color: #a3bad9;
+  color: #222;
+  font: normal 11px tahoma, arial, helvetica, sans-serif;
+}
+
+.positioned {
+  position: relative !important;
+}
+
+.masked {
+  overflow: hidden !important;
+}
+
+.masked select,.masked object,.masked embed {
+  visibility: hidden;
+}

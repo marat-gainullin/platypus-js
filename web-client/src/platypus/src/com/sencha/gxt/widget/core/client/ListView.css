@@ -1,0 +1,56 @@
+/**
+ * Sencha GXT 3.0.1 - Sencha for GWT
+ * Copyright(c) 2007-2012, Sencha, Inc.
+ * licensing@sencha.com
+ *
+ * http://www.sencha.com/products/gxt/license/
+ */
+@eval borderColor com.sencha.gxt.core.client.resources.ThemeStyles.getStyle().borderColor();
+
+.view {
+  background-color: white;
+  border: 1px solid borderColor;
+  -moz-outline: none;
+  outline: 0 none;
+  position: relative;
+}
+
+@if user.agent ie6  {
+  .view {
+    overflow: auto; 
+  }
+} @else {
+  .view {
+    overflow-y: auto; 
+  }
+}
+
+.item {
+  border: 1px solid #FFFFFF;
+  font-family: tahoma, arial, helvetica, sans-serif;
+  font-size: 12px;
+  font-size-adjust: none;
+  font-stretch: normal;
+  font-style: normal;
+  font-variant: normal;
+  font-weight: normal;
+  line-height: normal;
+  overflow: hidden;
+  padding: 2px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+@sprite .over {
+  gwt-image: 'selectedBackground';
+  height: auto;
+  border: 1px dotted #DDDDDD !important;
+  cursor: pointer;
+}
+
+.sel {
+  background: none repeat scroll 0 50% #DFE8F6;
+  border: 1px dotted #A3BAE9 !important;
+  cursor: pointer;
+}
+

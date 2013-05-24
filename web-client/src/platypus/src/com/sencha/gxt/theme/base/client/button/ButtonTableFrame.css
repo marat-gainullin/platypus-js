@@ -1,0 +1,144 @@
+/**
+ * Sencha GXT 3.0.1 - Sencha for GWT
+ * Copyright(c) 2007-2012, Sencha, Inc.
+ * licensing@sencha.com
+ *
+ * http://www.sencha.com/products/gxt/license/
+ */
+@external x-toolbar-mark;
+
+.left div, .right div {
+  width: 3px;
+}
+
+.x-toolbar-mark .left, .x-toolbar-mark .content, .x-toolbar-mark .right {
+  background:none;
+}
+
+.x-toolbar-mark .topLeft, .x-toolbar-mark .top, .x-toolbar-mark .topRight {
+  background-image: none; 
+}
+
+.x-toolbar-mark .bottomLeft, .x-toolbar-mark .bottom, .x-toolbar-mark .bottomRight {
+  background-image: none; 
+}
+
+/* over style */
+
+@sprite .over .content {
+  gwt-image: 'backgroundOverBorder';
+  height: 100%;
+  width: 100%;
+}
+
+@sprite .over .topLeft {
+  gwt-image: 'topLeftOverBorder';
+}
+
+@sprite .over .top {
+  gwt-image: 'topOverBorder';
+}
+
+@sprite .over .topRight {
+  gwt-image: 'topRightOverBorder';
+}
+
+@sprite .over .bottomLeft {
+  gwt-image: 'bottomLeftOverBorder';
+}
+
+@sprite .over .bottom {
+  gwt-image: 'bottomOverBorder';
+}
+
+@sprite .over .right {
+  gwt-image: 'rightOverBorder';
+}
+
+@sprite .over .bottomRight {
+  gwt-image: 'bottomRightOverBorder';
+}
+
+@sprite .over .left {
+  gwt-image: 'leftOverBorder';
+}
+
+/* focus */
+
+@sprite .focus .content {
+  gwt-image: 'backgroundOverBorder';
+  height: 100%;
+  width: 100%;
+}
+
+@sprite .focus .topLeft {
+  gwt-image: 'topLeftOverBorder';
+}
+
+@sprite .focus .top {
+  gwt-image: 'topOverBorder';
+}
+
+@sprite .focus .topRight {
+  gwt-image: 'topRightOverBorder';
+}
+
+@sprite .focus .bottomLeft {
+  gwt-image: 'bottomLeftOverBorder';
+}
+
+@sprite .focus .bottom {
+  gwt-image: 'bottomOverBorder';
+}
+
+@sprite .focus .right {
+  gwt-image: 'rightOverBorder';
+}
+
+@sprite .focus .bottomRight {
+  gwt-image: 'bottomRightOverBorder';
+}
+
+@sprite .focus .left {
+  gwt-image: 'leftOverBorder';
+}
+
+/* pressed style */
+
+@sprite .pressed .content {
+  gwt-image: 'backgroundPressedBorder';
+  height: 100%;
+  width: 100%;
+}
+
+@sprite .pressed .topLeft {
+  gwt-image: 'topLeftPressedBorder';
+}
+
+@sprite .pressed .top {
+  gwt-image: 'topPressedBorder';
+}
+
+@sprite .pressed .topRight {
+  gwt-image: 'topRightPressedBorder';
+}
+
+@sprite .pressed .bottomLeft {
+  gwt-image: 'bottomLeftPressedBorder';
+}
+
+@sprite .pressed .bottom {
+  gwt-image: 'bottomPressedBorder';
+}
+
+@sprite .pressed .right {
+  gwt-image: 'rightPressedBorder';
+}
+
+@sprite .pressed .bottomRight {
+  gwt-image: 'bottomRightPressedBorder';
+}
+
+@sprite .pressed .left {
+  gwt-image: 'leftPressedBorder';
+}

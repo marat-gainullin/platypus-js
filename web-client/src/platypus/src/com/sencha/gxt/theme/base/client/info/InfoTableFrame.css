@@ -1,0 +1,122 @@
+/**
+ * Sencha GXT 3.0.1 - Sencha for GWT
+ * Copyright(c) 2007-2012, Sencha, Inc.
+ * licensing@sencha.com
+ *
+ * http://www.sencha.com/products/gxt/license/
+ */
+@if user.agent ie6 {
+  .content {
+    background-image: none;
+    filter: progid\:DXImageTransform\.Microsoft\.AlphaImageLoader\(src \=\' value('background.getURL') \', sizingMethod \= scale\);
+  }
+} @else {
+  @sprite .content {
+    gwt-image: "background";
+  }
+}
+
+.content {
+  height: 100%;
+  width: 100%;
+}
+
+@if user.agent ie6 {
+  .topLeft {
+    background-image: none;
+    filter: progid\:DXImageTransform\.Microsoft\.AlphaImageLoader\(src \=\' value('topLeftBorder.getURL') \'\);
+    width: value('topLeftBorder.getWidth', 'px');
+    height: value('topLeftBorder.getHeight', 'px');
+  }
+} @else {
+  @sprite .topLeft {
+    gwt-image: "topLeftBorder";
+  }
+}
+
+@if user.agent ie6 {
+  .top {
+    background-image: none;
+    filter: progid\:DXImageTransform\.Microsoft\.AlphaImageLoader\(src \=\' value('topBorder.getURL') \', sizingMethod \= scale\);
+    height: value('topBorder.getHeight', 'px');
+  }
+} @else {
+  @sprite .top {
+    gwt-image: "topBorder";
+  }
+}
+
+@if user.agent ie6 {
+  .topRight {
+    background-image: none;
+    filter: progid\:DXImageTransform\.Microsoft\.AlphaImageLoader\(src \=\' value('topRightBorder.getURL') \'\);
+    width: value('topRightBorder.getWidth', 'px');
+    height: value('topRightBorder.getHeight', 'px');
+  }
+} @else {
+  @sprite .topRight {
+    gwt-image: "topRightBorder";
+  }
+}
+
+@if user.agent ie6 {
+  .bottomLeft {
+    background-image: none;
+    filter: progid\:DXImageTransform\.Microsoft\.AlphaImageLoader\(src \=\' value('bottomLeftBorder.getURL') \'\);
+    width: value('bottomLeftBorder.getWidth', 'px');
+    height: value('bottomLeftBorder.getHeight', 'px');
+  }
+} @else {
+  @sprite .bottomLeft {
+    gwt-image: "bottomLeftBorder"
+  }
+}
+
+@if user.agent ie6 {
+  .bottom {
+    background-image: none;
+    filter: progid\:DXImageTransform\.Microsoft\.AlphaImageLoader\(src \=\' value('bottomBorder.getURL') \', sizingMethod \= scale\);
+    height: value('bottomBorder.getHeight', 'px');
+  }
+} @else {
+  @sprite .bottom {
+    gwt-image: "bottomBorder";
+  }
+}
+
+@if user.agent ie6 {
+  .bottomRight {
+    background-image: none;
+    filter: progid\:DXImageTransform\.Microsoft\.AlphaImageLoader\(src \=\' value('bottomRightBorder.getURL') \'\);
+    width: value('bottomRightBorder.getWidth', 'px');
+    height: value('bottomRightBorder.getHeight', 'px');
+  }
+} @else {
+  @sprite .bottomRight {
+    gwt-image: "bottomRightBorder";
+  }
+}
+
+@if user.agent ie6 {
+  .left {
+    background-image: none;
+    filter: progid\:DXImageTransform\.Microsoft\.AlphaImageLoader\(src \=\' value('leftBorder.getURL') \', sizingMethod \= scale\);
+    width: value('leftBorder.getWidth', 'px');
+  }
+} @else {
+  @sprite .left {
+    gwt-image: "leftBorder";
+  }
+}
+
+@if user.agent ie6 {
+  .right {
+    background-image: none;
+    filter: progid\:DXImageTransform\.Microsoft\.AlphaImageLoader\(src \=\' value('rightBorder.getURL') \', sizingMethod \= scale\);
+    width: value('rightBorder.getWidth', 'px');
+  }
+} @else {
+  @sprite .right {
+    gwt-image: "rightBorder";
+  }
+}

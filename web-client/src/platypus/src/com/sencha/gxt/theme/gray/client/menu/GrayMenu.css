@@ -1,0 +1,44 @@
+/**
+ * Sencha GXT 3.0.1 - Sencha for GWT
+ * Copyright(c) 2007-2012, Sencha, Inc.
+ * licensing@sencha.com
+ *
+ * http://www.sencha.com/products/gxt/license/
+ */
+@sprite .menu {
+  gwt-image: "menu";
+  width: auto; /* override gwt-image behavior */
+  border-color: #888888;
+  background-color: #F0F0F0;
+}
+
+.menuListItem {
+  font: normal 11px tahoma, arial, sans-serif;
+}
+
+@sprite .menuItemActive {
+  gwt-image: "itemOver";
+  width: auto; /* override gwt-image behavior */
+  background-color: #F1F1F1;
+  background-repeat: repeat-x;
+  background-position: left bottom;
+  border: 1px solid #C6C6C6;
+  padding: 0;
+  color: #3A3A3A;
+}
+
+.plain {
+  background-color: #FFFFFF !important;
+}
+
+@sprite .menuScrollerTop {
+  gwt-image: "miniTop";
+}
+
+@sprite .menuScrollerBottom {
+  gwt-image: "miniBottom";
+}
+
+.menuScroller {
+  border-width: 1px 0;
+}

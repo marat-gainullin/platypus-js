@@ -1,0 +1,65 @@
+/**
+ * Sencha GXT 3.0.1 - Sencha for GWT
+ * Copyright(c) 2007-2012, Sencha, Inc.
+ * licensing@sencha.com
+ *
+ * http://www.sencha.com/products/gxt/license/
+ */
+/* Half the width of the thumb */
+@def halfThumb 7px;
+
+@if user.agent ie6 ie8 ie9 {
+  .slider {
+    zoom: 1;
+  }
+}
+
+.slider {
+  outline: 0 none;
+}
+
+.thumb {
+  line-height: 0px;
+  font-size: 0px;
+  position: absolute;
+  background: transparent no-repeat 0 0;
+}
+
+.inner {
+  position: relative;
+  left: 0;
+  top: 0;
+  overflow: visible;
+}
+
+@if user.agent ie6 ie8 ie9 {
+  .inner {
+    zoom: 1;
+  }
+}
+
+.focus {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1px;
+  height: 1px;
+  line-height: 1px;
+  font-size: 1px;
+  outline: 0 none;
+  display: block;
+  overflow: hidden;
+}
+
+@if user.agent safari {
+  .focus {
+    -khtml-user-select: none;
+    -webkit-user-select: ignore;
+  }
+}
+
+@elif user.agent gecko1_8 gecko {
+  .focus {
+    -moz-user-select: none;
+  }
+}

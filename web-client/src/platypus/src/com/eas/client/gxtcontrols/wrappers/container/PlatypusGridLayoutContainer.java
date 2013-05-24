@@ -11,7 +11,6 @@ import java.util.logging.Logger;
 import com.google.gwt.dom.client.Style.Position;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Widget;
-import com.sencha.gxt.core.client.GXTLogConfiguration;
 import com.sencha.gxt.core.client.util.Rectangle;
 import com.sencha.gxt.core.client.util.Size;
 import com.sencha.gxt.widget.core.client.container.ResizeContainer;

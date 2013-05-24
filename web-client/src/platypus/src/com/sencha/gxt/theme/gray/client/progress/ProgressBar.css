@@ -1,0 +1,35 @@
+/**
+ * Sencha GXT 3.0.1 - Sencha for GWT
+ * Copyright(c) 2007-2012, Sencha, Inc.
+ * licensing@sencha.com
+ *
+ * http://www.sencha.com/products/gxt/license/
+ */
+.progressWrap {
+  border-color:#8C8C8C; 
+}
+
+@sprite .progressInner {
+  background-color:#E6E6E6;
+  gwt-image: 'innerBar';
+  height: auto;
+}
+
+@sprite .progressBar {
+  background-color:#B9B9B9;
+  gwt-image: 'bar';
+  background-repeat: repeat-x;
+  background-position: left center;
+  height: 18px;
+  border-top-color:#E1E1E1;
+  border-bottom-color:#A3A3A3;
+  border-right-color:#A3A3A3;
+}
+
+.progressText {
+  color:#FFFFFF;
+}
+
+.progressTextBack {
+  color:#5A5A5A !important;
+}

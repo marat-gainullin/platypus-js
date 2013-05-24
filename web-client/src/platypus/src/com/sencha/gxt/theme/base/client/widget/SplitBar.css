@@ -1,0 +1,97 @@
+/**
+ * Sencha GXT 3.0.1 - Sencha for GWT
+ * Copyright(c) 2007-2012, Sencha, Inc.
+ * licensing@sencha.com
+ *
+ * http://www.sencha.com/products/gxt/license/
+ */
+.bar {
+  position: absolute;
+  z-index: 3;
+}
+
+.horizontalBar {
+  cursor: s-resize;
+  cursor: row-resize;
+  font-size: 1px;
+  line-height: 1px;
+}
+
+.verticalBar {
+  cursor: e-resize;
+  cursor: col-resize;
+}
+
+.proxy {
+  position: absolute;
+  background-color: #929090;
+  font-size: 1px;
+  line-height: 1px;
+  z-index: 200;
+}
+
+.mini {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  width: 5px;
+  height: 35px;
+  cursor: pointer;
+}
+
+@if user.agent ie6 ie8 {
+  .mini {
+    filter: literal("alpha(opacity=50)");
+  }
+} @else {
+  .mini {
+    opacity: .5;
+  }
+}
+
+.miniOver {
+  opacity:1;
+  filter:none;
+}
+
+@if user.agent ie6 ie8 {
+  .miniOver {
+    filter: none;
+  }
+} @else {
+  .miniOver {
+    opacity: 1;
+  }
+}
+
+.miniLeft,.miniRight {
+  border: 0 none;
+  width: 5px !important;
+  padding: 0;
+}
+
+@sprite .miniRight {
+  top: 48%;
+  gwt-image: 'miniRight';
+}
+
+@sprite .miniLeft {
+  top: 48%;
+  gwt-image: 'miniLeft';
+}
+
+@sprite .miniTop {
+  gwt-image: 'miniTop'; 
+}
+
+@sprite .miniBottom {
+  gwt-image: 'miniBottom'; 
+}
+
+.miniTop,.miniBottom {
+  height: 5px;
+  left: 50%;
+  margin-left: -17px;
+  width: 35px;
+}

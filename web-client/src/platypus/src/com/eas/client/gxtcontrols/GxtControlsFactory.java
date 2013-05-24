@@ -135,7 +135,7 @@ public class GxtControlsFactory {
 		isRoot = false;
 
 		NodeList childNodes = tag.getChildNodes();
-		for (int i = 0; i < childNodes.getLength(); i++) {
+		for (int i = childNodes.getLength()-1; i >= 0; i--) {
 			Node item = childNodes.item(i);
 			if (item instanceof Element) {
 				if (item.getNodeName().equalsIgnoreCase(WIDGET_TAG) || item.getNodeName().equalsIgnoreCase(NONVISUAL_TAG)) {
@@ -171,7 +171,7 @@ public class GxtControlsFactory {
 
 		form.setDefaultCloseOperation(Utils.getIntegerAttribute(aTag, "defaultCloseOperation", 2));
 
-		form.setLocationByPlatform(Utils.getBooleanAttribute(aTag, "locationByPlatform", true));
+		form.setLocationByPlatform(Utils.getBooleanAttribute(aTag, "locationByPlatform", false));
 		form.setAlwaysOnTop(Utils.getBooleanAttribute(aTag, "alwaysOnTop", false));
 
 		form.setResizable(Utils.getBooleanAttribute(aTag, "resizable", true));

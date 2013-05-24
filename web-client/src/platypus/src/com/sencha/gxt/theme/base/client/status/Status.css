@@ -1,0 +1,25 @@
+/**
+ * Sencha GXT 3.0.1 - Sencha for GWT
+ * Copyright(c) 2007-2012, Sencha, Inc.
+ * licensing@sencha.com
+ *
+ * http://www.sencha.com/products/gxt/license/
+ */
+.status {
+  height: 21px;
+  line-height: 21px !important;
+  cursor: default;
+}
+
+.status .statusText {
+  padding: 0px 2px;
+  line-height: 21px !important;
+  font: 11px arial,tahoma,helvetica,sans-serif;
+}
+
+.status .statusIcon {
+  display: none;
+  width: 18px;
+  float: left;
+  padding-top: 2px;
+}

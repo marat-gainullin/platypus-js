@@ -1,0 +1,39 @@
+/**
+ * Sencha GXT 3.0.1 - Sencha for GWT
+ * Copyright(c) 2007-2012, Sencha, Inc.
+ * licensing@sencha.com
+ *
+ * http://www.sencha.com/products/gxt/license/
+ */
+.colorPalette {
+  width: 150px;
+  height: 92px;
+  cursor: pointer;
+  outline: 0 none;
+}
+
+.anchor {
+  border: 1px solid;
+  float: left;
+  padding: 2px;
+  text-decoration: none;
+  outline: 0 none;
+  cursor: pointer;
+}
+
+.hover,.selected {
+  border: 1px solid;
+}
+
+.wrapper {
+  display: block;
+  border: 1px solid;
+}
+
+.inner {
+  cursor: pointer;
+  display: block;
+  height: 10px;
+  line-height: 10px;
+  width: 10px;
+}

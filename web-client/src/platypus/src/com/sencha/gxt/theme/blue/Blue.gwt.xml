@@ -1,0 +1,169 @@
+<!--
+
+    Sencha GXT 3.0.1 - Sencha for GWT
+    Copyright(c) 2007-2012, Sencha, Inc.
+    licensing@sencha.com
+
+    http://www.sencha.com/products/gxt/license/
+
+-->
+<module>
+  <inherits name="com.sencha.gxt.theme.base.Base" />
+
+  <replace-with class="com.sencha.gxt.theme.blue.client.BlueThemeAppearance">
+    <when-type-is class="com.sencha.gxt.core.client.resources.ThemeStyles.ThemeAppearance" />
+  </replace-with>
+
+  <!-- Buttons -->
+  <replace-with class="com.sencha.gxt.theme.blue.client.button.BlueButtonGroupAppearance">
+    <when-type-is class="com.sencha.gxt.widget.core.client.button.ButtonGroup.ButtonGroupAppearance" />
+  </replace-with>
+  
+  <replace-with class="com.sencha.gxt.theme.blue.client.grid.BlueGridAppearance">
+    <when-type-is class="com.sencha.gxt.widget.core.client.grid.GridView.GridAppearance" />
+  </replace-with>
+  
+  <replace-with class="com.sencha.gxt.theme.blue.client.toolbar.BlueToolBarButtonAppearance">
+    <when-type-is class="com.sencha.gxt.widget.core.client.toolbar.ToolBarButton.ToolBarButtonAppearance" />
+  </replace-with>
+
+  <replace-with class="com.sencha.gxt.theme.blue.client.progress.BlueProgressBarAppearance">
+    <when-type-is class="com.sencha.gxt.cell.core.client.ProgressBarCell.ProgressBarAppearance" />
+  </replace-with>
+
+  <replace-with class="com.sencha.gxt.theme.blue.client.panel.BlueContentPanelAppearance">
+    <when-type-is class="com.sencha.gxt.widget.core.client.ContentPanel.ContentPanelAppearance" />
+  </replace-with>
+
+  <replace-with class="com.sencha.gxt.theme.blue.client.window.BlueWindowAppearance">
+    <when-type-is class="com.sencha.gxt.widget.core.client.Window.WindowAppearance" />
+  </replace-with>
+
+  <replace-with class="com.sencha.gxt.theme.blue.client.panel.BlueAccordionLayoutAppearance">
+    <when-type-is class="com.sencha.gxt.widget.core.client.container.AccordionLayoutContainer.AccordionLayoutAppearance" />
+  </replace-with>
+
+  <!-- Menu Bar -->
+  <replace-with class="com.sencha.gxt.theme.blue.client.menu.BlueMenuBarAppearance">
+    <when-type-is class="com.sencha.gxt.widget.core.client.menu.MenuBar.MenuBarAppearance" />
+  </replace-with>
+
+  <replace-with class="com.sencha.gxt.theme.blue.client.menu.BlueMenuBarItemAppearance">
+    <when-type-is class="com.sencha.gxt.widget.core.client.menu.MenuBarItem.MenuBarItemAppearance" />
+  </replace-with>
+
+  <replace-with class="com.sencha.gxt.theme.blue.client.widget.BlueDatePickerAppearance">
+    <when-type-is class="com.sencha.gxt.widget.core.client.DatePicker.DatePickerAppearance" />
+  </replace-with>
+
+  <replace-with class="com.sencha.gxt.theme.blue.client.field.BlueFieldSetAppearance">
+    <when-type-is class="com.sencha.gxt.widget.core.client.form.FieldSet.FieldSetAppearance" />
+  </replace-with>
+
+  <replace-with class="com.sencha.gxt.theme.blue.client.tree.BlueTreeAppearance">
+    <when-type-is class="com.sencha.gxt.widget.core.client.tree.Tree.TreeAppearance" />
+  </replace-with>
+
+  <replace-with class="com.sencha.gxt.theme.blue.client.panel.BlueContentPanelAppearance">
+    <when-type-is class="com.sencha.gxt.widget.core.client.ContentPanel.ContentPanelAppearance" />
+  </replace-with>
+
+  <replace-with class="com.sencha.gxt.theme.blue.client.panel.BlueFramedPanelAppearance">
+    <when-type-is class="com.sencha.gxt.widget.core.client.FramedPanel.FramedPanelAppearance" />
+  </replace-with>
+
+  <replace-with class="com.sencha.gxt.theme.blue.client.panel.BluePanelHeaderAppearance">
+    <when-type-is class="com.sencha.gxt.widget.core.client.ContentPanel.PanelHeaderAppearance" />
+  </replace-with>
+
+  <replace-with class="com.sencha.gxt.theme.blue.client.toolbar.BlueToolBarAppearance">
+    <when-type-is class="com.sencha.gxt.widget.core.client.toolbar.ToolBar.ToolBarAppearance" />
+  </replace-with>
+
+  <replace-with class="com.sencha.gxt.theme.blue.client.tools.BlueTools">
+    <when-type-is class="com.sencha.gxt.widget.core.client.button.Tools" />
+  </replace-with>
+
+  <!-- Menu -->
+  <replace-with class="com.sencha.gxt.theme.blue.client.menu.BlueMenuAppearance">
+    <when-type-is class="com.sencha.gxt.widget.core.client.menu.Menu.MenuAppearance" />
+  </replace-with>
+
+  <replace-with class="com.sencha.gxt.theme.blue.client.menu.BlueItemAppearance">
+    <when-type-is class="com.sencha.gxt.widget.core.client.menu.Item.ItemAppearance" />
+  </replace-with>
+
+  <replace-with class="com.sencha.gxt.theme.blue.client.menu.BlueMenuItemAppearance">
+    <when-type-is class="com.sencha.gxt.widget.core.client.menu.MenuItem.MenuItemAppearance" />
+  </replace-with>
+
+  <replace-with class="com.sencha.gxt.theme.blue.client.menu.BlueHeaderMenuItemAppearance">
+    <when-type-is class="com.sencha.gxt.widget.core.client.menu.HeaderMenuItem.HeaderMenuItemAppearance" />
+  </replace-with>
+
+  <replace-with class="com.sencha.gxt.theme.blue.client.menu.BlueSeparatorMenuItemAppearance">
+    <when-type-is class="com.sencha.gxt.widget.core.client.menu.SeparatorMenuItem.SeparatorMenuItemAppearance" />
+  </replace-with>
+
+  <replace-with class="com.sencha.gxt.theme.blue.client.menu.BlueCheckMenuItemAppearance">
+    <when-type-is class="com.sencha.gxt.widget.core.client.menu.CheckMenuItem.CheckMenuItemAppearance" />
+  </replace-with>
+
+  <!-- Status -->
+  <replace-with class="com.sencha.gxt.theme.blue.client.status.BlueStatusAppearance">
+    <when-type-is class="com.sencha.gxt.widget.core.client.Status.StatusAppearance" />
+  </replace-with>
+
+  <replace-with class="com.sencha.gxt.theme.blue.client.status.BlueBoxStatusAppearance">
+    <when-type-is class="com.sencha.gxt.widget.core.client.Status.BoxStatusAppearance" />
+  </replace-with>
+
+  <!-- Tab Panel -->
+  <replace-with class="com.sencha.gxt.theme.blue.client.tabs.BlueTabPanelAppearance">
+    <when-type-is class="com.sencha.gxt.widget.core.client.TabPanel.TabPanelAppearance" />
+  </replace-with>
+
+  <replace-with class="com.sencha.gxt.theme.blue.client.tabs.BlueTabPanelBottomAppearance">
+    <when-type-is class="com.sencha.gxt.widget.core.client.TabPanel.TabPanelBottomAppearance" />
+  </replace-with>
+
+  <replace-with class="com.sencha.gxt.theme.blue.client.tabs.BluePlainTabPanelAppearance">
+    <when-type-is class="com.sencha.gxt.widget.core.client.PlainTabPanel.PlainTabPanelAppearance" />
+  </replace-with>
+
+  <!-- Color Palette -->
+  <replace-with class="com.sencha.gxt.theme.blue.client.colorpalette.BlueColorPaletteAppearance">
+    <when-type-is class="com.sencha.gxt.widget.core.client.ColorPaletteCell.ColorPaletteAppearance" />
+  </replace-with>
+
+  <!-- Slider -->
+  <replace-with class="com.sencha.gxt.theme.blue.client.slider.BlueSliderHorizontalAppearance">
+    <any>
+      <when-type-is class="com.sencha.gxt.cell.core.client.SliderCell.SliderAppearance" />
+      <when-type-is class="com.sencha.gxt.cell.core.client.SliderCell.HorizontalSliderAppearance" />
+    </any>
+  </replace-with>
+  <replace-with class="com.sencha.gxt.theme.blue.client.slider.BlueSliderVerticalAppearance">
+    <when-type-is class="com.sencha.gxt.cell.core.client.SliderCell.VerticalSliderAppearance" />
+  </replace-with>
+
+  <replace-with class="com.sencha.gxt.theme.blue.client.container.BlueBorderLayoutAppearance">
+    <when-type-is class="com.sencha.gxt.widget.core.client.container.BorderLayoutContainer.BorderLayoutAppearance" />
+  </replace-with>
+
+  <!-- Resizable -->
+  <replace-with class="com.sencha.gxt.theme.blue.client.resizable.BlueResizableAppearance">
+    <when-type-is class="com.sencha.gxt.widget.core.client.Resizable.ResizableAppearance" />
+  </replace-with>
+
+  <!-- Status proxy -->
+  <replace-with class="com.sencha.gxt.theme.blue.client.statusproxy.BlueStatusProxyAppearance">
+    <when-type-is class="com.sencha.gxt.dnd.core.client.StatusProxy.StatusProxyAppearance" />
+  </replace-with>
+
+  <!-- Paging tool bar -->
+  <replace-with class="com.sencha.gxt.theme.blue.client.toolbar.BluePagingToolBarAppearance">
+    <when-type-is class="com.sencha.gxt.widget.core.client.toolbar.PagingToolBar.PagingToolBarAppearance" />
+  </replace-with>
+
+</module>

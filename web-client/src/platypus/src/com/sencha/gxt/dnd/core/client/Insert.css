@@ -1,0 +1,28 @@
+/**
+ * Sencha GXT 3.0.1 - Sencha for GWT
+ * Copyright(c) 2007-2012, Sencha, Inc.
+ * licensing@sencha.com
+ *
+ * http://www.sencha.com/products/gxt/license/
+ */
+.bar {
+  position: absolute;
+  z-index: 99999;
+}
+
+.bar td {
+  line-height: 1px;
+  font-size: 1px;
+}
+
+@sprite .left {
+  gwt-image: "left";
+}
+
+@sprite .mid {
+  gwt-image: "mid";
+}
+
+@sprite .right {
+  gwt-image: "right";
+}

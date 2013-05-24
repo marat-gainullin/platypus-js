@@ -1,0 +1,59 @@
+/**
+ * Sencha GXT 3.0.1 - Sencha for GWT
+ * Copyright(c) 2007-2012, Sencha, Inc.
+ * licensing@sencha.com
+ *
+ * http://www.sencha.com/products/gxt/license/
+ */
+@external x-has-width;
+
+.x-has-width .frame {
+  width: 100%; 
+}
+
+.focus {}
+
+.contentArea {
+
+}
+
+@sprite .content {
+  gwt-image: 'background';	
+  height: 100%;
+  width: 100%;
+}
+
+@sprite .topLeft {
+  gwt-image: 'topLeftBorder';
+}
+
+@sprite .top {
+  gwt-image: 'topBorder';
+}
+
+@sprite .topRight {
+  gwt-image: 'topRightBorder';
+}
+
+@sprite .bottomLeft {
+  gwt-image: 'bottomLeftBorder';
+}
+
+@sprite .bottom {
+  gwt-image: 'bottomBorder';
+}
+
+@sprite .bottomRight {
+  gwt-image: 'bottomRightBorder';
+}
+
+@sprite .left {
+  gwt-image: 'leftBorder';
+}
+
+@sprite .right {
+  gwt-image: 'rightBorder';
+}
+
+.over {}
+.pressed {}
