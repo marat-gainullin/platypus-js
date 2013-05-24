@@ -4,17 +4,15 @@
   <property name="gwt.args" value="" /> 
 
   <!-- Configure path to GWT SDK -->
-  <property name="gwt.sdk" location="/home/vv/ext/gwt-2.5.1" />
+  <!--property name="gwt.sdk" location="/home/vv/ext/gwt-2.5.1" /-->
 
   <!-- Destination directory -->
-  <property name="destdir" value="/home/vv/Project5/platypus/application/bin" /> 
+  <!--property name="destdir" value="/home/vv/Project5/platypus/application/bin" /--> 
   
   <path id="project.class.path">
     <pathelement location="${gwt.sdk}/gwt-user.jar"/>
     <fileset dir="${gwt.sdk}" includes="gwt-dev*.jar"/>
     <!-- Add any additional non-server libs (such as JUnit) -->
-    <fileset dir="lib" includes="gxt-3.0.1.jar" />
-    <fileset dir="lib" includes="gxt-chart-3.0.1.jar" />
   </path>
 
   <target name="gwtc" description="GWT compile to JavaScript (production mode)">

@@ -253,13 +253,6 @@
         </antcall>
         <antcall target="-maybe-call-dep">
             <param name="call.built.properties" value="${built-jar.properties}"/>
-            <param location="${project.PlatypusServlet}" name="call.subproject"/>
-            <param location="${project.PlatypusServlet}/build.xml" name="call.script"/>
-            <param name="call.target" value="dist"/>
-            <param name="transfer.built-jar.properties" value="${built-jar.properties}"/>
-        </antcall>
-        <antcall target="-maybe-call-dep">
-            <param name="call.built.properties" value="${built-jar.properties}"/>
             <param location="${project.MetadataSynchronizer}" name="call.subproject"/>
             <param location="${project.MetadataSynchronizer}/build.xml" name="call.script"/>
             <param name="call.target" value="jar"/>
@@ -308,13 +301,6 @@
                                     Clean section
                                 /-->
     <target depends="init,deps-clean,-do-clean,-post-clean" description="Clean build products." name="clean">
-        <antcall target="-maybe-call-dep">
-            <param name="call.built.properties" value="${built-jar.properties}"/>
-            <param location="${project.PlatypusServlet}" name="call.subproject"/>
-            <param location="${project.PlatypusServlet}/build.xml" name="call.script"/>
-            <param name="call.target" value="clean"/>
-            <param name="transfer.built-jar.properties" value="${built-jar.properties}"/>
-        </antcall>    
     </target>   
 	                           <!--
                                     Version section depends="jar"
@@ -358,7 +344,6 @@
             <fileset dir="../../" >
                 <include name="bin/*"/>
 				<exclude name="bin/DatamodelDesigner.jar"/>
-				<exclude name="bin/PlatypusServletImpl.jar"/>
 				<include name="lib/**/*.jar"/>
                 <exclude name="lib/own/Updater.jar"/>
 			</fileset>
