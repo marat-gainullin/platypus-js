@@ -907,8 +907,12 @@ public class Application {
 				platypusModules.put(div.getId(), div);
 			}
 		}
-		SafeUri uri = UriUtils.fromTrustedString(Document.get().getURL());
-		uri.
+		String url = Document.get().getURL();
+		if (url != null) {
+			int pos = url.indexOf('#');
+			if (pos > -1)
+				platypusModules.put(url.substring(pos+1), null);
+		}
 		return platypusModules;
 	}
 
@@ -945,8 +949,6 @@ public class Application {
 			Set<String> modulesIds = aMarkupStart.keySet();
 			for (final String elId : modulesIds) {
 				Element el = aMarkupStart.get(elId);
-				if(el == null)
-					el = Document.get().getBody();
 				if (el != null) {
 					loaderHandlerRegistration.add(loader.addHandler(new ElementMaskLoadHandler(el.<XElement> cast())));
 				}
