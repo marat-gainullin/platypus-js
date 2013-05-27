@@ -47,7 +47,7 @@ public class AppElementsFilter {
         "model", "principal", "applicationElementId"
     };
     protected static String[] topLevelFomPropertiesAndMethods = new String[]{
-        "model", "principal", "applicationElementId", "view", "form", "formKey", "defaultCloseOperation",
+        "model", "principal", "applicationElementId", "view", "formKey", "defaultCloseOperation",
         "icon", "title",
         "resizable", "minimized", "maximized", "minimizable", "maximizable",
         "minimize", "maximize", "restore", "toFront",
