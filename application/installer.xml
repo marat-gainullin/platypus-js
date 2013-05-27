@@ -22,6 +22,8 @@
   <resources>
     <res id="shortcutSpec.xml" src="installer_shortcutSpec.xml"/>
     <res id="Unix_shortcutSpec.xml" src="installer_Unix_shortcutSpec.xml"/>
+	<res id="packsLang.xml_rus" src="packsLang_rus.xml" /> 
+    <res id="packsLang.xml_eng" src="packsLang_eng.xml" />
   </resources>
     
   <panels>
@@ -39,7 +41,7 @@
 
   
   <packs>
-    <pack name="Platypus client" id="client.package" preselected="yes" required="yes">
+    <pack name="Platypus core" id="client.package" preselected="yes" required="yes">
       <description/> 
 	   
 	  <fileset dir="lib" targetdir="$INSTALL_PATH/lib">
@@ -87,6 +89,9 @@
 	    <exclude name="DatamodelDesigner.jar" />
 	    <exclude name="DbControlsDesigner.jar" />
 	    <exclude name="Server.jar" />
+		<exclude name="PlatypusServletSupport.jar"/>
+		<exclude name="MetadataSynchronizer.jar"/>
+		<exclude name="PlatypusDeploy.jar"/>
 	  </fileset>
 	  
 	  <executable targetfile="$INSTALL_PATH/run/startupdate.sh" stage="never" keep="true" condition="izpack.linuxinstall" failure="warn"/>
@@ -108,7 +113,7 @@
           </fileset>
 	  <fileset dir="bin" targetdir="$INSTALL_PATH/bin">
 		<include name="Server.jar"/> 
-		<include name="PlatypusServlet.war"/>
+		<include name="PlatypusServletSupport.jar"/>
 	  </fileset>
 	  <fileset dir="run" targetdir="$INSTALL_PATH/run" condition="izpack.windowsinstall">
 		<include name="Server.bat" />
@@ -127,6 +132,22 @@
 		<include name="OpcDa.jar"/> 
 		<include name="Sensors.jar"/>
 	  </fileset>
+    </pack>
+	
+	<pack name="Platypus HTML5 client" id="html.client.package" preselected="yes" required="no">
+        <description/> 
+	    <fileset dir="bin" targetdir="$INSTALL_PATH/bin">
+	        <include name="pwc/**" />
+			<include name="pwa.js"/>
+      	</fileset>
+    </pack>
+	
+	<pack name="Platypus tools" id="tools.package" preselected="yes" required="no">
+        <description/> 
+	    <fileset dir="bin" targetdir="$INSTALL_PATH/bin">
+	        <include name="MetadataSynchronizer.jar"/>
+		    <include name="PlatypusDeploy.jar"/>
+      	</fileset>
     </pack>
   </packs>
   

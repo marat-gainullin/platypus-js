@@ -18,7 +18,6 @@ import org.w3c.dom.Document;
  */
 public class AppUpdater {
 
-    private String suffix = "-bak";
     private String fNameConfig = "";
     private String configUrl = "";
     private String appFilesUrl = "";
@@ -203,20 +202,6 @@ public class AppUpdater {
         } else {
             return false;
         }
-    }
-    
-    /**
-     * @return the suffix
-     */
-    public String getSuffix() {
-        return suffix;
-    }
-
-    /**
-     * @param aValue the suffix to set
-     */
-    public void setSuffix(String aValue) {
-        suffix = aValue;
     }
 
     /**
