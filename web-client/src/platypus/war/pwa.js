@@ -5,8 +5,8 @@
 if (!window.platypus) {
     window.platypus = {};
 }
-window.platypus.Server = {}
-platypus.API = new API();
+window.platypus.server = {}
+platypus.api = new API();
 
 function API() {
    
@@ -226,14 +226,14 @@ function API() {
  * This API enables call server modules methods in simple manner.
  * 
  * Usage example:
- * platypus.Server.Module.get("ModuleName", function(module) {
+ * platypus.server.module.get("ModuleName", function(module) {
  *      module.testMethod("param1", "param2", function(result) {
  *          console.log(result.prop1);
  *      });
  * });
  * 
  */
-window.platypus.Server.Module = new ServerModule();
+window.platypus.server.module = new ServerModule();
 
 function ServerModule() {
     /**
@@ -241,7 +241,7 @@ function ServerModule() {
      * @param getCallback callback function called on module creation complete
      */
     this.get = function(moduleName, getCallback) {
-        platypus.API.createServerModule(moduleName, function(data) {
+        platypus.api.createServerModule(moduleName, function(data) {
             var sm = {};
             for (var i = 0; i < data.functions.length; i++) {           
                 sm[data.functions[i]] = function (functionName) {
