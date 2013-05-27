@@ -254,7 +254,7 @@ function ServerModule() {
                         for (var j = 0; j < arguments.length - 1; j++) {
                             params[j] = arguments[j];
                         }
-                        platypus.API.executeServerModuleMethod(moduleName, functionName, params, function (data) {
+                        platypus.api.executeServerModuleMethod(moduleName, functionName, params, function (data) {
                             executeCallback(data);
                         });
                     }
@@ -263,14 +263,14 @@ function ServerModule() {
             for (var j = 0; j < data.properties.length; j++) {     
                 (function (aMethodName) { 
                      Object.defineProperty(sm,  aMethodName, { 
-                         set: function(aValue) {return  platypus.API.setServerModuleProperty(moduleName, aMethodName, aValue);},
-                         get: function() { return  platypus.API.getServerModuleProperty(moduleName, aMethodName); }
+                         set: function(aValue) {return  platypus.api.setServerModuleProperty(moduleName, aMethodName, aValue);},
+                         get: function() { return  platypus.api.getServerModuleProperty(moduleName, aMethodName); }
                      });
                 })(data.properties[j]);
             }
             if (data.isReport) {
-                sm.show = function () {platypus.API.executeServerReport(moduleName);};
-                sm.print = function () {platypus.API.executeServerReport(moduleName);};
+                sm.show = function () {platypus.api.executeServerReport(moduleName);};
+                sm.print = function () {platypus.api.executeServerReport(moduleName);};
             }
              getCallback(sm);
         });
