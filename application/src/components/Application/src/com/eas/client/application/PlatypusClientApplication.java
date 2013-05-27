@@ -463,7 +463,11 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
             if (aLogFileName != null && !aLogFileName.isEmpty()) {
                 Handler fHandler = new FileHandler(aLogFileName, 1024 * 1024 * 2, 1, true);
                 fHandler.setEncoding(SettingsConstants.COMMON_ENCODING);
-                fHandler.setFormatter(new SimpleFormatter());
+                if (Client.APPLICATION_LOGGER_NAME.equals(logger.getName())) {
+                    fHandler.setFormatter(new PlatypusFormatter());
+                } else {
+                    fHandler.setFormatter(new SimpleFormatter());
+                }
                 logger.addHandler(fHandler);
             }
             Handler consoleHandler = new ConsoleHandler();
@@ -496,7 +500,7 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
                 registerMBean(Settings.SETTINGS_MBEAN_NAME, new Settings(client));
             }
             appCache = client.getAppCache();
-            Logger.getLogger(PlatypusClientApplication.class.getName()).log(Level.INFO, APPLICATION_ELEMENTS_LOCATION_MSG, appCache instanceof FilesAppCache ? ((FilesAppCache)appCache).getSrcPathName() : client.getSettings().getUrl());
+            Logger.getLogger(PlatypusClientApplication.class.getName()).log(Level.INFO, APPLICATION_ELEMENTS_LOCATION_MSG, appCache instanceof FilesAppCache ? ((FilesAppCache) appCache).getSrcPathName() : client.getSettings().getUrl());
             scriptsCache = new ScriptsCache(this);
             scriptDocuments = new ClientCompiledScriptDocuments(client);
             scriptResolver = new ClientScriptResolver();
