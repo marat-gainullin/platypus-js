@@ -122,4 +122,5 @@
   <generate-with class="com.sencha.gxt.core.rebind.BindingPropertyGenerator">
     <when-type-assignable class="com.sencha.gxt.core.client.BindingPropertySet" />
   </generate-with>
+  <source path=""/>
 </module>
