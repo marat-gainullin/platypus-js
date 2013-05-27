@@ -1,12 +1,12 @@
 /**
  * Platypus web API allows RPC calls from browser's JavaScript code to Platypus application server modules.
- * Check Platypus Development Manual for more information.
+ * 
  **/
-if (!window.Platypus) {
-    window.Platypus = {};
+if (!window.platypus) {
+    window.platypus = {};
 }
-window.Platypus.Server = {}
-Platypus.API = new API();
+window.platypus.server = {}
+platypus.api = new API();
 
 function API() {
    
@@ -23,11 +23,11 @@ function API() {
     this.QUERY_ID = "__queryId";
     this.ID = "__id";
     this.TYPE = "__type";
+    this.MODULE_NAME = "__moduleName";
     this.METHOD_NAME = "__methodName";
     this.PROPERTY_NAME = "__propertyName";
     this.PROPERTY_VALUE = "__propertyValue";
     this.PARAMETER = "__param";
-    this.MODULE_NAME = "__moduleName";
     
     this.rqHello = 1;
     this.rqKeepAlive = 2;
@@ -122,10 +122,10 @@ function API() {
         var date = new Date();
         var rndIDPart = 100;
         var val = date.getTime() * rndIDPart + Math.round(Math.random() * rndIDPart);
-        while (PlatypusAPI.IdGenPrevValue >= val) {
-            val = PlatypusAPI.IdGenPrevValue + 1;
+        while (platypus.API.IdGenPrevValue >= val) {
+            val = platypus.API.IdGenPrevValue + 1;
         }
-        PlatypusAPI.IdGenPrevValue = val;
+        platypus.API.IdGenPrevValue = val;
         return val;
     }
     
@@ -226,15 +226,14 @@ function API() {
  * This API enables call server modules methods in simple manner.
  * 
  * Usage example:
- * Platypus.Server.Module.get("ModuleName", function(module) {
+ * platypus.server.module.get("ModuleName", function(module) {
  *      module.testMethod("param1", "param2", function(result) {
  *          console.log(result.prop1);
  *      });
  * });
  * 
- * Requires Platypus API
  */
-window.Platypus.Server.Module = new ServerModule();
+window.platypus.server.module = new ServerModule();
 
 function ServerModule() {
     /**
@@ -242,7 +241,7 @@ function ServerModule() {
      * @param getCallback callback function called on module creation complete
      */
     this.get = function(moduleName, getCallback) {
-        Platypus.API.createServerModule(moduleName, function(data) {
+        platypus.api.createServerModule(moduleName, function(data) {
             var sm = {};
             for (var i = 0; i < data.functions.length; i++) {           
                 sm[data.functions[i]] = function (functionName) {
@@ -255,7 +254,7 @@ function ServerModule() {
                         for (var j = 0; j < arguments.length - 1; j++) {
                             params[j] = arguments[j];
                         }
-                        Platypus.API.executeServerModuleMethod(moduleName, functionName, params, function (data) {
+                        platypus.api.executeServerModuleMethod(moduleName, functionName, params, function (data) {
                             executeCallback(data);
                         });
                     }
@@ -264,14 +263,14 @@ function ServerModule() {
             for (var j = 0; j < data.properties.length; j++) {     
                 (function (aMethodName) { 
                      Object.defineProperty(sm,  aMethodName, { 
-                         set: function(aValue) {return  Platypus.API.setServerModuleProperty(moduleName, aMethodName, aValue);},
-                         get: function() { return  Platypus.API.getServerModuleProperty(moduleName, aMethodName); }
+                         set: function(aValue) {return  platypus.api.setServerModuleProperty(moduleName, aMethodName, aValue);},
+                         get: function() { return  platypus.api.getServerModuleProperty(moduleName, aMethodName); }
                      });
                 })(data.properties[j]);
             }
             if (data.isReport) {
-                sm.show = function () {Platypus.API.executeServerReport(moduleName);};
-                sm.print = function () {Platypus.API.executeServerReport(moduleName);};
+                sm.show = function () {platypus.api.executeServerReport(moduleName);};
+                sm.print = function () {platypus.api.executeServerReport(moduleName);};
             }
              getCallback(sm);
         });

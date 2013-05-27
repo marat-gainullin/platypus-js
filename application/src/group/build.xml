@@ -320,39 +320,22 @@
                byline="true"/> 
 	</target>
 	
-	<target name="get.revisions" depends="setversion" description="Get revision number">
-    	</target>
-	                            <!--
-                                    Check file version, to know need Updater or not.
-                                /-->	
-    <target name="check.updater.need" depends="get.revisions">		
-	    <condition property="run.updater.task">
-		    <equals arg1="${Revision}" arg2="${LastRev}"/>
-		</condition>
-	</target>
-                                <!--
-                                    Copy Updater.jar if need.
-                                /-->	
-	<target name="copyupdater" depends="check.updater.need" if="run.updater.task">
-	    <copy file="../../lib/own/Updater.jar" tofile="../../lib/own/Updater-new.jar"/>
-    </target> 
-      						    <!--
+	  						    <!--
                                     Make full update file.
                                 /-->
-	<target name="zipsrc" depends="copyupdater">
+	<target name="zipsrc" depends="deps-jar">
 	    <zip destfile="../../updates/application.zip">
             <fileset dir="../../" >
                 <include name="bin/*"/>
 				<exclude name="bin/DatamodelDesigner.jar"/>
 				<include name="lib/**/*.jar"/>
-                <exclude name="lib/own/Updater.jar"/>
 			</fileset>
         </zip>
    </target>
                                 <!--
                                     Make lite update file.
                                 /-->
-   <target name="thinclientzip" depends="copyupdater">
+   <target name="thinclientzip" depends="deps-jar">
         <zip destfile="../../updates/thinclient.zip">
             <fileset dir="../../" >
                 <include name="bin/Application.jar"/>
@@ -371,7 +354,7 @@
 				<include name="lib/own/Grid.jar"/>
 				<include name="lib/own/IconLib.jar"/>
 				<include name="lib/own/Rowsets.jar"/>
-				<include name="lib/own/Updater-new.jar"/>
+				<include name="lib/own/Updater.jar"/>
 				<include name="lib/own/SyntaxPane.jar"/>
 				<include name="lib/own/ScalablePane.jar"/>
 				
@@ -415,13 +398,5 @@
 			</fileset>
         </zip>
    </target>
-                                <!--
-                                    Delete temporary file if it was created.
-                                /-->
-   <target name="deleteupdater" depends="copyupdater, zipsrc, thinclientzip" if="run.updater.task">
-	    <delete file="../../lib/own/Updater-new.jar"/>
-   </target>    
-   
-   <target name="buildupdates" depends="deleteupdater">
-   </target>
+
 </project>
