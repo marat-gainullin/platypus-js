@@ -30,6 +30,8 @@ import com.google.gwt.core.client.JsArrayString;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NodeList;
+import com.google.gwt.logging.client.ConsoleLogHandler;
+import com.google.gwt.logging.client.FirebugLogHandler;
 import com.google.gwt.logging.client.LogConfiguration;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.sencha.gxt.core.client.dom.XElement;
@@ -65,6 +67,7 @@ public class Application {
 		}
 	}
 
+	public static Logger platypusApplicationLogger; 
 	protected static Map<String, Query> appQueries = new HashMap();
 	protected static Loader loader;
 	protected static GroupingHandlerRegistration loaderHandlerRegistration = new GroupingHandlerRegistration();
@@ -683,29 +686,23 @@ public class Application {
 			}
 		};
 		$wnd.Logger = new (function(){
-			var nativeLogger = @java.util.logging.Logger::getLogger(Ljava/lang/String;)("Application");
-			this.severe = function(aMessage)
-			{
+			var nativeLogger = @com.eas.client.application.Application::platypusApplicationLogger;
+			this.severe = function(aMessage){
 				nativeLogger.@java.util.logging.Logger::severe(Ljava/lang/String;)(aMessage!=null?""+aMessage:null);
 			}
-			this.warning = function(aMessage)
-			{
+			this.warning = function(aMessage){
 				nativeLogger.@java.util.logging.Logger::warning(Ljava/lang/String;)(aMessage!=null?""+aMessage:null);
 			}
-			this.info = function(aMessage)
-			{
+			this.info = function(aMessage){
 				nativeLogger.@java.util.logging.Logger::info(Ljava/lang/String;)(aMessage!=null?""+aMessage:null);
 			}
-			this.fine = function(aMessage)
-			{
+			this.fine = function(aMessage){
 				nativeLogger.@java.util.logging.Logger::fine(Ljava/lang/String;)(aMessage!=null?""+aMessage:null);
 			}
-			this.finer = function(aMessage)
-			{
+			this.finer = function(aMessage){
 				nativeLogger.@java.util.logging.Logger::finer(Ljava/lang/String;)(aMessage!=null?""+aMessage:null);
 			}
-			this.finest = function(aMessage)
-			{
+			this.finest = function(aMessage){
 				nativeLogger.@java.util.logging.Logger::finest(Ljava/lang/String;)(aMessage!=null?""+aMessage:null);
 			}
 		})();
@@ -890,11 +887,14 @@ public class Application {
 
 	public static Cancellable run(AppClient client, Map<String, Element> start) throws Exception {
 		if (LogConfiguration.loggingIsEnabled()) {
+			platypusApplicationLogger = Logger.getLogger("Application");
 			Formatter f = new PlatypusLogFormatter();
-			Handler[] handlers = Logger.getLogger("Application").getHandlers();
+			platypusApplicationLogger.addHandler(new ConsoleLogHandler());
+			Handler[] handlers = platypusApplicationLogger.getHandlers();
 			for (Handler h : handlers) {
 				h.setFormatter(f);
 			}
+			platypusApplicationLogger.setUseParentHandlers(false);
 		}
 		JSControls.initControls();
 		JSContainers.initContainers();

@@ -17,7 +17,7 @@ import com.google.gwt.logging.impl.FormatterImpl;
 public class PlatypusLogFormatter extends FormatterImpl {
 
 	// format string for printing the log record
-	private static final DateTimeFormat dateFormat = DateTimeFormat.getFormat("dd.mm.YYYY HH:MM:SS");
+	private static final DateTimeFormat dateFormat = DateTimeFormat.getFormat("dd.MM.yyyy HH:mm:ss");
 
 	@Override
 	public synchronized String format(LogRecord event) {
