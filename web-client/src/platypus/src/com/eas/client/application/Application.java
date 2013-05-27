@@ -10,11 +10,14 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Formatter;
+import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.eas.client.Cancellable;
 import com.eas.client.CancellableCallbackAdapter;
+import com.eas.client.PlatypusLogFormatter;
 import com.eas.client.StringCallbackAdapter;
 import com.eas.client.Utils;
 import com.eas.client.form.Form;
@@ -27,9 +30,7 @@ import com.google.gwt.core.client.JsArrayString;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NodeList;
-import com.google.gwt.logging.client.ConsoleLogHandler;
-import com.google.gwt.safehtml.shared.SafeUri;
-import com.google.gwt.safehtml.shared.UriUtils;
+import com.google.gwt.logging.client.LogConfiguration;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.sencha.gxt.core.client.dom.XElement;
 import com.sencha.gxt.core.shared.event.GroupingHandlerRegistration;
@@ -888,7 +889,13 @@ public class Application {
 	}
 
 	public static Cancellable run(AppClient client, Map<String, Element> start) throws Exception {
-		Logger.getLogger("").addHandler(new ConsoleLogHandler());
+		if (LogConfiguration.loggingIsEnabled()) {
+			Formatter f = new PlatypusLogFormatter();
+			Handler[] handlers = Logger.getLogger("Application").getHandlers();
+			for (Handler h : handlers) {
+				h.setFormatter(f);
+			}
+		}
 		JSControls.initControls();
 		JSContainers.initContainers();
 		ModelJSControls.initModelControls();
@@ -911,7 +918,7 @@ public class Application {
 		if (url != null) {
 			int pos = url.indexOf('#');
 			if (pos > -1)
-				platypusModules.put(url.substring(pos+1), null);
+				platypusModules.put(url.substring(pos + 1), null);
 		}
 		return platypusModules;
 	}

@@ -48,7 +48,6 @@ import com.eas.client.beans.PropertyChangeEvent;
 import com.eas.client.beans.PropertyChangeListener;
 import com.eas.client.beans.PropertyChangeSupport;
 import com.eas.client.beans.VetoableChangeListener;
-import com.google.gwt.core.client.JavaScriptObject;
 
 /**
  * Rowset serves as original and updated rows vectors holder. There are three
