@@ -15,6 +15,7 @@ import com.eas.designer.explorer.platform.PlatypusPlatform;
 import com.eas.designer.explorer.server.PlatypusServerInstance;
 import com.eas.designer.explorer.server.PlatypusServerInstanceProvider;
 import com.eas.designer.explorer.server.ServerSupport;
+import com.eas.server.PlatypusServer;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -53,12 +54,12 @@ public class ProjectRunner {
 
     public static void run(final PlatypusProject project, final String appElementId) throws Exception {
 
-         RP.post(new Runnable() {
-         @Override
-         public void run() {
-        start(project, appElementId, false);
-               }
-         });
+        RP.post(new Runnable() {
+            @Override
+            public void run() {
+                start(project, appElementId, false);
+            }
+        });
     }
 
     public static void debug(final PlatypusProject project, final String appElementId) throws Exception {
@@ -112,42 +113,42 @@ public class ProjectRunner {
         }
         io.getOut().println("Starting Platypus Application..");
         PlatypusProjectSettings pps = project.getSettings();
-        String webAppUrl = null;
-        if (AppServerType.PLATYPUS_SERVER.equals(pps.getRunAppServerType())
-                && project.getSettings().isStartServer()
-                && ServerSupport.isLocalHost(pps.getServerHost())) {
-            PlatypusServerInstance serverInstance = PlatypusServerInstanceProvider.getPlatypusDevServer();
-            if (serverInstance.getServerState() == PlatypusServerInstance.ServerState.STOPPED) {
-                io.getOut().println("Starting Platypus Server..");
-                if (serverInstance.start(project, binDir, debug)) {
-                    io.getOut().println("Platypus Server started.");
-                    try {
-                        io.getOut().println("Waiting for Platypus Server to run..");
-                        ServerSupport.waitForServer(pps.getServerHost(), pps.getServerPort());
-                        PlatypusServerInstanceProvider.getPlatypusDevServer().setServerState(PlatypusServerInstance.ServerState.RUNNING);
-                    } catch (ServerSupport.ServerTimeOutException | InterruptedException ex) {
-                        io.getErr().println(ex.getMessage());
+        String appUrl = null;
+        if (!project.getSettings().isNotStartServer()) {
+            if (AppServerType.PLATYPUS_SERVER.equals(pps.getRunAppServerType())) {
+                PlatypusServerInstance serverInstance = PlatypusServerInstanceProvider.getPlatypusDevServer();
+                if (serverInstance.getServerState() == PlatypusServerInstance.ServerState.STOPPED) {
+                    io.getOut().println("Starting Platypus Server..");
+                    if (serverInstance.start(project, binDir, debug)) {
+                        io.getOut().println("Platypus Server started.");
+                        try {
+                            io.getOut().println("Waiting for Platypus Server to run..");
+                            ServerSupport.waitForServer(LOCAL_HOSTNAME, pps.getServerPort());
+                            PlatypusServerInstanceProvider.getPlatypusDevServer().setServerState(PlatypusServerInstance.ServerState.RUNNING);
+                        } catch (ServerSupport.ServerTimeOutException | InterruptedException ex) {
+                            io.getErr().println(ex.getMessage());
+                            return null;
+                        }
+                    } else {
+                        io.getErr().println("Could not start Platypus Server.");
                         return null;
                     }
                 } else {
-                    io.getErr().println("Could not start Platypus Server.");
-                    return null;
+                    assert serverInstance.getProject() != null;
+                    if (serverInstance.getProject().getProjectDirectory().equals(project.getProjectDirectory())) {
+                        io.getOut().println("Platypus Server already started.");
+                    } else {
+                        io.getErr().println("Platypus Server started for another project: " + serverInstance.getProject().getDisplayName());
+                    }
                 }
-            } else {
-                assert serverInstance.getProject() != null;
-                if (serverInstance.getProject().getProjectDirectory().equals(project.getProjectDirectory())) {
-                    io.getOut().println("Platypus Server already started.");
+            } else if (AppServerType.J2EE_SERVER.equals(pps.getRunAppServerType())) {
+                io.getOut().println("Deploying application to J2EE container..");
+                PlatypusWebModuleManager webManager = project.getLookup().lookup(PlatypusWebModuleManager.class);
+                if (webManager != null) {
+                    appUrl = webManager.run(appElementId, debug);
                 } else {
-                    io.getErr().println("Platypus Server started for another project: " + serverInstance.getProject().getDisplayName());
+                    throw new IllegalStateException("An instance of PlatypusWebModuleManager is not found in project's lookup.");
                 }
-            }
-        } else if (AppServerType.J2EE_SERVER.equals(pps.getRunAppServerType())) {
-            io.getOut().println("Deploying application to J2EE container..");
-            PlatypusWebModuleManager webManager = project.getLookup().lookup(PlatypusWebModuleManager.class);
-            if (webManager != null) {
-                webAppUrl = webManager.run(appElementId,debug);
-            } else {
-                throw new IllegalStateException("An instance of PlatypusWebModuleManager is not found in project's lookup.");
             }
         }
         if (ClientType.PLATYPUS_CLIENT.equals(pps.getRunClientType())) {
@@ -186,17 +187,7 @@ public class ProjectRunner {
             } else {
                 io.getOut().println("Application sources: database.");
             }
-            if (AppServerType.PLATYPUS_SERVER.equals(pps.getRunAppServerType())) {
-                processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.URL_CMD_SWITCH);
-                processBuilder = processBuilder.addArgument(getServerUrl(pps));
-                io.getOut().println(String.format("Using application server at URL: %s.", getServerUrl(pps)));
-            } else if (AppServerType.J2EE_SERVER.equals(pps.getRunAppServerType())) {
-                if (webAppUrl != null && !webAppUrl.isEmpty()) {
-                   processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.URL_CMD_SWITCH);
-                    processBuilder = processBuilder.addArgument(webAppUrl);
-                    io.getOut().println(String.format("Using application J2EE server at URL: %s.", webAppUrl));
-                }
-            } else if (AppServerType.NONE.equals(pps.getRunAppServerType())) {
+            if (AppServerType.NONE.equals(pps.getRunAppServerType())) {
                 processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.URL_CMD_SWITCH);
                 processBuilder = processBuilder.addArgument(ps.getDbSettings().getUrl());
                 processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.DBUSER_CMD_SWITCH);
@@ -206,6 +197,19 @@ public class ProjectRunner {
                 processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.DBSCHEMA_CMD_SWITCH);
                 processBuilder = processBuilder.addArgument(ps.getDbSettings().getInfo().getProperty(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME));
                 io.getOut().println("Using direct connection to database.");
+            } else {
+                if (pps.isNotStartServer()) { 
+                    appUrl = pps.getClientUrl();
+                } else if (AppServerType.PLATYPUS_SERVER.equals(pps.getRunAppServerType())) {
+                    appUrl = getDevPlatypusServerUrl(pps);
+                }
+                if (appUrl != null && !appUrl.isEmpty()) {
+                    processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.URL_CMD_SWITCH);
+                    processBuilder = processBuilder.addArgument(appUrl);
+                    io.getOut().println(String.format("Using application server at URL: %s.", appUrl));
+                } else {
+                    io.getErr().println("Couldn't start Platypus Client.");
+                }
             }
             if (project.getSettings().getRunUser() != null && !project.getSettings().getRunUser().trim().isEmpty() && project.getSettings().getRunPassword() != null && !project.getSettings().getRunPassword().trim().isEmpty()) {
                 processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.USER_CMD_SWITCH);
@@ -242,9 +246,14 @@ public class ProjectRunner {
             return clientTask;
         } else if (ClientType.WEB_BROWSER.equals(pps.getRunClientType())) {
             try {
-                if (webAppUrl != null) {
-                    io.getOut().println(String.format("Starting web browser: %s.", webAppUrl));
-                    HtmlBrowser.URLDisplayer.getDefault().showURL(new URL(webAppUrl));
+                if (pps.isNotStartServer()) {
+                    appUrl = pps.getClientUrl();
+                }
+                if (appUrl != null && !appUrl.isEmpty()) {
+                    io.getOut().println(String.format("Starting web browser: %s.", appUrl));
+                    HtmlBrowser.URLDisplayer.getDefault().showURL(new URL(appUrl));
+                } else {
+                    io.getErr().println("Couldn't start web browser.");
                 }
             } catch (MalformedURLException ex) {
                 ErrorManager.getDefault().notify(ex);
@@ -309,8 +318,8 @@ public class ProjectRunner {
         }
         return clientAppExecutable.getAbsolutePath();
     }
-
-    private static String getServerUrl(PlatypusProjectSettings pps) {
-        return String.format("%s://%s:%s", pps.getServerProtocol(), pps.getServerHost(), pps.getServerPort()); //NOI18N
+    
+    private static String getDevPlatypusServerUrl(PlatypusProjectSettings pps) {
+        return String.format("%s://%s:%s", PlatypusServer.DEFAULT_PROTOCOL, LOCAL_HOSTNAME, pps.getServerPort()); //NOI18N
     }
 }

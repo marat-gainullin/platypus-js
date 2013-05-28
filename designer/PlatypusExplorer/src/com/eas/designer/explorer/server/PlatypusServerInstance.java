@@ -9,6 +9,7 @@ import com.eas.deploy.project.PlatypusSettings;
 import com.eas.designer.explorer.project.PlatypusProject;
 import com.eas.designer.explorer.project.PlatypusProjectSettings;
 import com.eas.designer.explorer.project.ProjectRunner;
+import com.eas.server.PlatypusServer;
 import com.eas.server.ServerMain;
 import java.io.File;
 import java.util.concurrent.Future;
@@ -199,7 +200,7 @@ public final class PlatypusServerInstance implements ServerInstanceImplementatio
     }
 
     private static String getProtocol(PlatypusProjectSettings settings) {
-        return settings.getServerPort() + ARGUMENT_SEPARATOR + settings.getServerProtocol();
+        return settings.getServerPort() + ARGUMENT_SEPARATOR + PlatypusServer.DEFAULT_PROTOCOL;
     }
 
     public static enum ServerState {

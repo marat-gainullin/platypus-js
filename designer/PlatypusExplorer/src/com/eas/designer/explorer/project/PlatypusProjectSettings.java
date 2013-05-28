@@ -38,10 +38,9 @@ public class PlatypusProjectSettings {
     public static final String RUN_CLIENT_OPTIONS_KEY = "runClientOptions"; //NOI18N
     public static final String RUN_SERVER_OPTIONS_KEY = "runServerOptions"; //NOI18N
     public static final String DB_APP_SOURCES_KEY = "dbAppSources"; //NOI18N
-    public static final String APP_SERVER_PROTOCOL_KEY = "appServerProtocol";//NOI18N
     public static final String SERVER_PORT_KEY = "serverPort";//NOI18N
-    public static final String APP_SERVER_HOST_KEY = "appServerHost";//NOI18N
-    public static final String START_SERVER_KEY = "startServer"; //NOI18N
+    public static final String CLIENT_URL_KEY = "clientUrl";//NOI18N
+    public static final String NOT_START_SERVER_KEY = "notStartServer"; //NOI18N
     public static final String DEBUG_CLIENT_PORT_KEY = "debugClientPort"; //NOI18N
     public static final String DEBUG_SERVER_PORT_KEY = "debugServerPort"; //NOI18N
     public static final String J2EE_SERVER_ID_KEY = "j2eeServerId"; //NOI18N
@@ -217,59 +216,39 @@ public class PlatypusProjectSettings {
         changeSupport.firePropertyChange(DB_APP_SOURCES_KEY, oldValue, aValue);
     }
     
-    /**
-     * Gets application server protocol.
-     *
-     * @return communication protocol name
-     */
-    public String getServerProtocol() {
-        return projectProperties.get(APP_SERVER_PROTOCOL_KEY);
-    }
-
-    /**
-     * Sets application server's host.
-     *
-     * @param aValue Url string
-     */
-    public void setServerProtocol(String aValue) {
-        String oldValue = getServerProtocol();
-        projectProperties.setProperty(APP_SERVER_PROTOCOL_KEY, aValue);
-        projectPropertiesIsDirty = true;
-        changeSupport.firePropertyChange(APP_SERVER_PROTOCOL_KEY, oldValue, aValue);
-    }
     
-        /**
+    /**
      * Gets application server's host.
      *
      * @return Url string
      */
-    public String getServerHost() {
-        return projectProperties.get(APP_SERVER_HOST_KEY);
+    public String getClientUrl() {
+        return projectProperties.get(CLIENT_URL_KEY);
     }
 
     /**
-     * Sets application server host.
+     * Sets application's server host.
      *
      * @param aValue Url string
      */
-    public void setServerHost(String aValue) {
-        String oldValue = getServerHost();
-        projectProperties.setProperty(APP_SERVER_HOST_KEY, aValue);
+    public void setClientUrl(String aValue) {
+        String oldValue = getClientUrl();
+        projectProperties.setProperty(CLIENT_URL_KEY, aValue);
         projectPropertiesIsDirty = true;
-        changeSupport.firePropertyChange(APP_SERVER_HOST_KEY, oldValue, aValue);
+        changeSupport.firePropertyChange(CLIENT_URL_KEY, oldValue, aValue);
     }
-    
+        
     /**
-     * Gets application server port.
+     * Gets application's server port.
      *
      * @return server port
      */
     public int getServerPort() {
         return StringUtils.parseInt(projectProperties.get(SERVER_PORT_KEY), DEFAULT_PLATYPUS_SERVER_PORT);
     }
-
+    
     /**
-     * Sets application server port.
+     * Sets application's server port.
      *
      * @param aValue server port
      */
@@ -281,26 +260,26 @@ public class PlatypusProjectSettings {
     }
     
     /**
-     * Checks if to start local development application server on application
+     * Checks if NOT to start local development application server on application
      * run.
      *
-     * @return true to start server
+     * @return true not to start server
      */
-    public boolean isStartServer() {
-        return Boolean.valueOf(projectProperties.get(START_SERVER_KEY));
+    public boolean isNotStartServer() {
+        return Boolean.valueOf(projectProperties.get(NOT_START_SERVER_KEY));
     }
 
     /**
-     * Sets flag to start local development application server on application
+     * Sets flag NOT to start local development application server on application
      * run.
      *
-     * @param aValue true to start server
+     * @param aValue true not to start server
      */
-    public void setStartServer(boolean aValue) {
-        boolean oldValue = isStartServer();
-        projectProperties.setProperty(START_SERVER_KEY, String.valueOf(aValue));
+    public void setNotStartServer(boolean aValue) {
+        boolean oldValue = isNotStartServer();
+        projectProperties.setProperty(NOT_START_SERVER_KEY, String.valueOf(aValue));
         projectPropertiesIsDirty = true;
-        changeSupport.firePropertyChange(START_SERVER_KEY, oldValue, aValue);
+        changeSupport.firePropertyChange(NOT_START_SERVER_KEY, oldValue, aValue);
     }
 
     /**
