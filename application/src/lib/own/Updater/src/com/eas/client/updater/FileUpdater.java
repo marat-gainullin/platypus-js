@@ -116,20 +116,12 @@ public class FileUpdater {
                         ff = new File(curFName);
                         if ((!ff.exists()) && (ff.getParent() != null) && (!ff.getName().contains(UpdaterConstants.UPDATER_FIND_LABEL))) {
                             cnt++;
-                             Logger.getLogger(UpdaterConstants.LOGGER_NAME).log(Level.WARNING, String.format(Updater.res.getString("fileNotFound"), ff.getName())+"|"+curFName);
+                            Logger.getLogger(UpdaterConstants.LOGGER_NAME).log(Level.WARNING, "{0}|{1}", new Object[]{String.format(Updater.res.getString("fileNotFound"), ff.getName()), curFName});
                             continue;
-                            /*curPath = ff.getParent();
-                            fd = new File(curPath);
-                            if (!fd.exists()) {
-                                boolean mkDirs = fd.mkdirs();
-                                if (!mkDirs) {
-                                    Logger.getLogger(UpdaterConstants.LOGGER_NAME).log(Level.WARNING, String.format(Updater.res.getString("couldNotCreateDir"), fd.getName()));
-                                    return false;
-                                }
-                            }*/
                         } else {
                             if ((ff.exists()) && (!ff.canWrite())) {
                                 res = false;
+                                cnt++;
                                 Logger.getLogger(UpdaterConstants.LOGGER_NAME).log(Level.WARNING, String.format(Updater.res.getString("couldNotCreateFile"), ff.getName()));
                                 continue;
                             }

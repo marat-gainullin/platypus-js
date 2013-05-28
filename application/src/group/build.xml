@@ -319,23 +319,30 @@
                replace="&gt;${fullcurversion}&lt;"
                byline="true"/> 
 	</target>
+	                            <!--
+                                    Copy Updater.jar if need.
+                                /-->
+	<target name="copyupdater" depends="deps-jar">
+	    <copy file="../../lib/own/Updater.jar" tofile="../../lib/own/Updater-new.jar"/>
+    </target> 
 	
 	  						    <!--
                                     Make full update file.
                                 /-->
-	<target name="zipsrc" depends="deps-jar">
+	<target name="zipsrc" depends="copyupdater">
 	    <zip destfile="../../updates/application.zip">
             <fileset dir="../../" >
                 <include name="bin/*"/>
 				<exclude name="bin/DatamodelDesigner.jar"/>
 				<include name="lib/**/*.jar"/>
+				<exclude name="lib/own/Updater.jar"/>
 			</fileset>
         </zip>
-   </target>
+    </target>
                                 <!--
                                     Make lite update file.
                                 /-->
-   <target name="thinclientzip" depends="deps-jar">
+    <target name="thinclientzip" depends="copyupdater">
         <zip destfile="../../updates/thinclient.zip">
             <fileset dir="../../" >
                 <include name="bin/Application.jar"/>
@@ -354,7 +361,7 @@
 				<include name="lib/own/Grid.jar"/>
 				<include name="lib/own/IconLib.jar"/>
 				<include name="lib/own/Rowsets.jar"/>
-				<include name="lib/own/Updater.jar"/>
+				<include name="lib/own/Updater-new.jar"/>
 				<include name="lib/own/SyntaxPane.jar"/>
 				<include name="lib/own/ScalablePane.jar"/>
 				
@@ -397,6 +404,10 @@
 				<include name="lib/thirdparty/commons/poi-ooxml-3.8.jar"/>
 			</fileset>
         </zip>
-   </target>
+    </target>
 
+    <target name="deleteupdater" depends="zipsrc, thinclientzip">
+	    <delete file="../../lib/own/Updater-new.jar"/>
+    </target>
+   
 </project>
