@@ -322,7 +322,7 @@
 	                            <!--
                                     Copy Updater.jar if need.
                                 /-->
-	<target name="copyupdater" depends="deps-jar">
+	<target name="copyupdater" depends="setversion">
 	    <copy file="../../lib/own/Updater.jar" tofile="../../lib/own/Updater-new.jar"/>
     </target> 
 	
@@ -409,5 +409,7 @@
     <target name="deleteupdater" depends="zipsrc, thinclientzip">
 	    <delete file="../../lib/own/Updater-new.jar"/>
     </target>
-   
+    
+	<target name="buildupdates" depends="deleteupdater"> 
+    </target>
 </project>
