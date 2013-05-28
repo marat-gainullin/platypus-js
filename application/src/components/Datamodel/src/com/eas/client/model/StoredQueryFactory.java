@@ -538,9 +538,11 @@ public class StoredQueryFactory {
                 assert sItem instanceof SelectExpressionItem;
                 SelectExpressionItem col = (SelectExpressionItem) sItem;
                 Field field = null;
+                /* Если пользоваться этим приемом, то будет введение разработчика в заблуждение
+                 * т.к. в дизайнере и автозавершении кода поле результата будет поименовано
+                 * так же как и поле-агрумент функции, а из скрипта оно будет недоступно.
                 if (col.getExpression() instanceof Function) {
                     Function func = (Function) col.getExpression();
-
                     if (func.getParameters() != null && func.getParameters().getExpressions() != null
                             && func.getParameters().getExpressions().size() == 1) {
                         Expression firstArg = (Expression) func.getParameters().getExpressions().get(0);
@@ -548,7 +550,7 @@ public class StoredQueryFactory {
                             field = resolveFieldByColumn(aQuery, (Column) firstArg, col, tables);
                         }
                     }
-                } else if (col.getExpression() instanceof Column) {
+                } else */if (col.getExpression() instanceof Column) {
                     field = resolveFieldByColumn(aQuery, (Column) col.getExpression(), col, tables);
                 } else // free expression like a ...,'text' as txt,...
                 {

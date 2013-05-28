@@ -1046,8 +1046,9 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                     rowsSelectionModel.addListSelectionListener(generalSelectionChangesReflector);
                 }
                 Row insertedRow = rowsModel.getRowsRowset().getCurrentRow();
-                assert insertedRow.isInserted();
-                makeVisible(insertedRow);
+                if (insertedRow.isInserted()) {
+                    makeVisible(insertedRow);
+                }
             }
         } catch (Exception ex) {
             Logger.getLogger(DbGrid.class.getName()).log(Level.SEVERE, null, ex);
