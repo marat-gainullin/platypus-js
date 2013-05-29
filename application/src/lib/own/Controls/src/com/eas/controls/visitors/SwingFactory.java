@@ -225,7 +225,7 @@ public class SwingFactory implements ControlsDesignInfoVisitor {
             jcomp.setOpaque(aInfo.isOpaque());
             jcomp.setToolTipText(aInfo.getToolTipText());
             if (aInfo.getBorder() != null) {
-                SwingBorderFactory bFactory = new SwingBorderFactory();
+                SwingBorderFactory bFactory = new SwingBorderFactory(this);
                 aInfo.getBorder().accept(bFactory);
                 jcomp.setBorder(bFactory.getBorder());
             }
@@ -806,7 +806,7 @@ public class SwingFactory implements ControlsDesignInfoVisitor {
         }
     }
 
-    public static Icon resolveIcon(String aIconName) {
+    public Icon resolveIcon(String aIconName) {
         return IconCache.getIcon(aIconName);
     }
 

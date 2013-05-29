@@ -309,53 +309,57 @@ public class ScriptRunner extends ScriptableObject {
         }
 
         public static byte[] load(String aResourceId) throws Exception {
-            Matcher htppMatcher = pattern.matcher(aResourceId);
-            if (htppMatcher.matches()) {
-                URL url = new URL(aResourceId);
-                String file = "";
-                if (url.getPath() != null && !url.getPath().isEmpty()) {
-                    file += (new URI(null, null, url.getPath(), null)).toASCIIString();
-                }
-                if (url.getQuery() != null && !url.getQuery().isEmpty()) {
-                    file += "?" + url.getQuery();
-                }
-                if (url.getRef() != null && !url.getRef().isEmpty()) {
-                    file += "#" + url.getRef();
-                }
-                url = new URL(url.getProtocol(), IDN.toASCII(url.getHost()), url.getPort(), file);
-                try (InputStream is = url.openStream()) {
-                    return BinaryUtils.readStream(is, -1);
+            if (aResourceId != null && !aResourceId.isEmpty()) {
+                Matcher htppMatcher = pattern.matcher(aResourceId);
+                if (htppMatcher.matches()) {
+                    URL url = new URL(aResourceId);
+                    String file = "";
+                    if (url.getPath() != null && !url.getPath().isEmpty()) {
+                        file += (new URI(null, null, url.getPath(), null)).toASCIIString();
+                    }
+                    if (url.getQuery() != null && !url.getQuery().isEmpty()) {
+                        file += "?" + url.getQuery();
+                    }
+                    if (url.getRef() != null && !url.getRef().isEmpty()) {
+                        file += "#" + url.getRef();
+                    }
+                    url = new URL(url.getProtocol(), IDN.toASCII(url.getHost()), url.getPort(), file);
+                    try (InputStream is = url.openStream()) {
+                        return BinaryUtils.readStream(is, -1);
+                    }
+                } else {
+                    if (cache == null) {
+                        throw new IllegalStateException("Platypus application resources have to be initialized first.");
+                    }
+
+                    String resourceId = translateResourcePath(aResourceId);
+                    /*
+                     File test = new File(resourceId);
+                     if (test.exists()) {
+                     return FileUtils.readBytes(test);
+                     } else {
+                     */
+                    ApplicationElement appElement = cache.get(resourceId);
+                    if (appElement != null) {
+                        if (appElement.getType() == ClientConstants.ET_RESOURCE) {
+                            // let's check actuality
+                            if (!cache.isActual(appElement.getId(), appElement.getTxtContentLength(), appElement.getTxtCrc32())) {
+                                cache.remove(appElement.getId());
+                                appElement = cache.get(resourceId);
+                            }
+                        } else {
+                            throw new NotResourceException(resourceId);
+                        }
+                    }
+                    if (appElement != null && appElement.getType() == ClientConstants.ET_RESOURCE) {
+                        return appElement.getBinaryContent();
+                    } else {
+                        return null;
+                    }
+                    //}
                 }
             } else {
-                if (cache == null) {
-                    throw new IllegalStateException("Platypus application resources have to be initialized first.");
-                }
-
-                String resourceId = translateResourcePath(aResourceId);
-                /*
-                 File test = new File(resourceId);
-                 if (test.exists()) {
-                 return FileUtils.readBytes(test);
-                 } else {
-                 */
-                ApplicationElement appElement = cache.get(resourceId);
-                if (appElement != null) {
-                    if (appElement.getType() == ClientConstants.ET_RESOURCE) {
-                        // let's check actuality
-                        if (!cache.isActual(appElement.getId(), appElement.getTxtContentLength(), appElement.getTxtCrc32())) {
-                            cache.remove(appElement.getId());
-                            appElement = cache.get(resourceId);
-                        }
-                    } else {
-                        throw new NotResourceException(resourceId);
-                    }
-                }
-                if (appElement != null && appElement.getType() == ClientConstants.ET_RESOURCE) {
-                    return appElement.getBinaryContent();
-                } else {
-                    return null;
-                }
-                //}
+                return null;
             }
         }
 
