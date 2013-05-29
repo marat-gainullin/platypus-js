@@ -1218,7 +1218,7 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
         assert scriptDoc instanceof FormDocument;
         FormDocument formDoc = (FormDocument) scriptDoc;
         defaultCloseOperation = formDoc.getFormDesignInfo().getDefaultCloseOperation();
-        icon = IconCache.getIcon(formDoc.getFormDesignInfo().getIconImage());
+        icon = IconResources.load(formDoc.getFormDesignInfo().getIconImage());
         title = formDoc.getFormDesignInfo().getTitle();
         if (title == null || title.isEmpty()) {
             title = formDoc.getTitle();

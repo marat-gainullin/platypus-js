@@ -43,7 +43,10 @@
  */
 package com.bearsoft.org.netbeans.modules.form.editors;
 
+import com.bearsoft.org.netbeans.modules.form.FormAwareEditor;
+import com.bearsoft.org.netbeans.modules.form.FormModel;
 import com.bearsoft.org.netbeans.modules.form.FormProperty;
+import com.bearsoft.org.netbeans.modules.form.PlatypusFormDataObject;
 import com.eas.resources.images.IconCache;
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -79,10 +82,9 @@ import org.openide.nodes.Node;
  *
  * @author Jan Jancura, Jan Stola, Tomas Pavek
  */
-public class IconEditor extends PropertyEditorSupport
-        implements ExPropertyEditor {
+public class IconEditor extends PropertyEditorSupport implements ExPropertyEditor, FormAwareEditor {
 
-    public static final String RESOURCES_IMAGES_CLASS_PATH = "/com/eas/resources/images/";
+//    public static final String RESOURCES_IMAGES_CLASS_PATH = "/com/eas/resources/images/";
     public static final String RESOURCES_IMAGES_ANCHOR = "thumbs.cp";
     //
     private static String[] currentFiles;
@@ -90,6 +92,12 @@ public class IconEditor extends PropertyEditorSupport
     private static FileObject currentFolder;
     //
     private PropertyEnv env;
+    private PlatypusFormDataObject dataObject;
+
+    @Override
+    public void setContext(FormModel formModel, FormProperty<?> property) {
+        dataObject = formModel.getDataObject();
+    }
 
     protected static class ImageNode extends AbstractNode {
 
@@ -125,7 +133,7 @@ public class IconEditor extends PropertyEditorSupport
         }
     }
 
-    protected static class FileChildren extends Children.Keys<String> {
+    protected class FileChildren extends Children.Keys<String> {
 
         public FileChildren() throws Exception {
             super();
@@ -135,7 +143,7 @@ public class IconEditor extends PropertyEditorSupport
         @Override
         protected Node[] createNodes(String key) {
             try {
-                return new Node[]{new ImageNode(getCurrentFolder().getFileObject(key))};
+                return new Node[]{new ImageNode(getJarResourceFolder().getFileObject(key))};
             } catch (Exception ex) {
                 return new Node[]{};
             }
@@ -240,12 +248,15 @@ public class IconEditor extends PropertyEditorSupport
 
     @Override
     public String[] getTags() {
-        try {
-            return getCurrentFileNames();
-        } catch (Exception ex) {
-            ErrorManager.getDefault().notify(ex);
-            return null;
-        }
+        return null;
+        /*
+         try {
+         return getCurrentFileNames();
+         } catch (Exception ex) {
+         ErrorManager.getDefault().notify(ex);
+         return null;
+         }
+         */
     }
 
     @Override
@@ -270,7 +281,7 @@ public class IconEditor extends PropertyEditorSupport
      *
      * @return the current folder used to pick image files from preferentially
      */
-    public static FileObject getCurrentFolder() throws Exception {
+    public static FileObject getJarResourceFolder() throws Exception {
         if (currentFolder == null) {
             URL url = IconCache.getImageUrl(RESOURCES_IMAGES_ANCHOR);
             FileSystem jfs = new JarFileSystem(FileUtil.archiveOrDirForURL(FileUtil.getArchiveFile(url)));
@@ -279,7 +290,11 @@ public class IconEditor extends PropertyEditorSupport
         return currentFolder;
     }
 
-    private static Node getCurrentRootNode() throws Exception {
+    public static FileObject getProjectSrcFolder(PlatypusFormDataObject dataObject) throws Exception {
+        return dataObject.getProject().getSrcRoot();
+    }
+
+    private Node getCurrentRootNode() throws Exception {
         if (rootNode == null) {
             rootNode = new AbstractNode(new FileChildren());
         }
@@ -289,9 +304,9 @@ public class IconEditor extends PropertyEditorSupport
     /**
      * @return names of files (without path) available in current folder
      */
-    private static String[] getCurrentFileNames() throws Exception {
+    public String[] getCurrentFileNames() throws Exception {
         if (currentFiles == null) {
-            FileObject folder = getCurrentFolder();
+            FileObject folder = getProjectSrcFolder(dataObject);
             assert folder != null;
             List<String> list = new ArrayList<>();
             for (FileObject fo : folder.getChildren()) {
@@ -320,7 +335,7 @@ public class IconEditor extends PropertyEditorSupport
         if (aIconName == null || "".equals(aIconName.trim())) {
             return null;
         }
-        NbImageIcon nbIcon = iconFromResourceName(aIconName);
+        NbImageIcon nbIcon = iconFromResourceName(dataObject, aIconName);
         if (nbIcon != null) {
             return nbIcon;
         }
@@ -328,12 +343,13 @@ public class IconEditor extends PropertyEditorSupport
     }
     private static final Pattern pattern = Pattern.compile("https?://.*");
 
-    public static NbImageIcon iconFromResourceName(String resName) throws Exception {
+    public static NbImageIcon iconFromResourceName(PlatypusFormDataObject dataObject, String resName) throws Exception {
         Matcher htppMatcher = pattern.matcher(resName);
         if (htppMatcher.matches()) {
             return new NbImageIcon(resName, new ImageIcon(new URL(resName)));
         } else {
-            FileObject fo = getCurrentFolder().getFileObject(resName);
+            FileObject fo = getProjectSrcFolder(dataObject).getFileObject(resName);
+            fo = fo != null ? fo : getJarResourceFolder().getFileObject(resName);
             if (fo != null) {
                 try {
                     try {
