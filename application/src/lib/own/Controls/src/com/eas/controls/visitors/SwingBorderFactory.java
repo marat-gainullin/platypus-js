@@ -31,6 +31,12 @@ import javax.swing.border.TitledBorder;
 public class SwingBorderFactory implements BorderDesignInfoVisitor {
 
     protected Border border;
+    protected SwingFactory factory;
+    
+    public SwingBorderFactory(SwingFactory aFactory){
+        super();
+        factory = aFactory;
+    }
 
     public Border getBorder() {
         return border;
@@ -43,11 +49,11 @@ public class SwingBorderFactory implements BorderDesignInfoVisitor {
 
     @Override
     public void visit(CompoundBorderDesignInfo aInfo) {
-        SwingBorderFactory outsideFactory = new SwingBorderFactory();
+        SwingBorderFactory outsideFactory = new SwingBorderFactory(factory);
         if (aInfo.getOutsideBorder() != null) {
             aInfo.getOutsideBorder().accept(outsideFactory);
         }
-        SwingBorderFactory insideFactory = new SwingBorderFactory();
+        SwingBorderFactory insideFactory = new SwingBorderFactory(factory);
         if (aInfo.getInsideBorder() != null) {
             aInfo.getInsideBorder().accept(insideFactory);
         }
@@ -71,7 +77,7 @@ public class SwingBorderFactory implements BorderDesignInfoVisitor {
 
     @Override
     public void visit(MatteBorderDesignInfo aInfo) {
-        Icon tileIcon = SwingFactory.resolveIcon(aInfo.getTileIcon());
+        Icon tileIcon = factory != null ? factory.resolveIcon(aInfo.getTileIcon()) : null;
         if (tileIcon != null) {
             border = new MatteBorder(aInfo.getTop(), aInfo.getLeft(), aInfo.getBottom(), aInfo.getRight(), tileIcon);
         } else {
@@ -86,7 +92,7 @@ public class SwingBorderFactory implements BorderDesignInfoVisitor {
 
     @Override
     public void visit(TitledBorderDesignInfo aInfo) {
-        SwingBorderFactory innerFactory = new SwingBorderFactory();
+        SwingBorderFactory innerFactory = new SwingBorderFactory(factory);
         if (aInfo.getBorder() != null) {
             aInfo.getBorder().accept(innerFactory);
         }

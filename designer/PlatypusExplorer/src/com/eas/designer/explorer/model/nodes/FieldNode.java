@@ -203,12 +203,12 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
         }
     }
 
-    public Boolean isRequired() {
-        return !field.isNullable();
+    public Boolean isNullable() {
+        return field.isNullable();
     }
 
-    public void setRequired(Boolean val) {
-        UndoableEdit e = editRequired(val);
+    public void setNullable(Boolean val) {
+        UndoableEdit e = editNullable(val);
         if (e != null) {
             getUndo().undoableEditHappened(new UndoableEditEvent(this, e));
         }
@@ -415,10 +415,10 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
         return edit;
     }
 
-    protected UndoableEdit editRequired(Boolean val) {
+    protected UndoableEdit editNullable(Boolean val) {
         Field oldContent = new Field(field);
         Field content = new Field(field);
-        content.setNullable(!val);
+        content.setNullable(val);
         ChangeFieldEdit edit = new ChangeFieldEdit(oldContent, content, field, getEntity());
         edit.redo();
         return edit;
@@ -676,12 +676,12 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
 
         @Override
         public Boolean getValue() throws IllegalAccessException, InvocationTargetException {
-            return isRequired();
+            return isNullable();
         }
 
         @Override
         public void setValue(Boolean val) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-            setRequired(val);
+            setNullable(val);
         }
 
         @Override

@@ -112,7 +112,7 @@ public class RadInitializer {
                                     radProp.setValue(new ComponentChooserEditor.ComponentRef<>((String) res, component.getFormModel()));
                                 } else if (javax.swing.Icon.class.isAssignableFrom(radProp.getValueType())) {
                                     String iconName = (String) res;
-                                    radProp.setValue(IconEditor.iconFromResourceName(iconName));
+                                    radProp.setValue(IconEditor.iconFromResourceName(component.getFormModel().getDataObject(), iconName));
                                 }
                             } else if (res instanceof BorderDesignInfo) {
                                 NbBorder converted = convertBorderDesignInfoToNbBorder(radProp, (BorderDesignInfo) res);
@@ -194,7 +194,7 @@ public class RadInitializer {
 
     private NbBorder convertBorderDesignInfoToNbBorder(FormProperty<?> aProp, BorderDesignInfo aInfo) throws Exception {
         if (aInfo != null) {
-            SwingBorderFactory bFactory = new SwingBorderFactory();
+            SwingBorderFactory bFactory = new SwingBorderFactory(null);
             aInfo.accept(bFactory);
             NbBorder nbBorder = new NbBorder(bFactory.getBorder());
             nbBorder.setPropertyContext(new FormPropertyContext.SubProperty(aProp));
@@ -206,7 +206,7 @@ public class RadInitializer {
                 matteColorProperty = nbBorder.<FormProperty<Color>>getPropertyOfName("matteColor");
                 matteIconProperty = nbBorder.<FormProperty<IconEditor.NbImageIcon>>getPropertyOfName("tileIcon");
                 if (mbdi.getTileIcon() != null && !mbdi.getTileIcon().isEmpty()) {
-                    wasMatteIconValue = IconEditor.iconFromResourceName(mbdi.getTileIcon());
+                    wasMatteIconValue = IconEditor.iconFromResourceName(component.getFormModel().getDataObject(), mbdi.getTileIcon());
                 } else {
                     matteColorProperty.setValue(mbdi.getMatteColor());
                 }

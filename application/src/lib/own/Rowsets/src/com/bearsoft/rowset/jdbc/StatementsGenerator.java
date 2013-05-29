@@ -126,7 +126,7 @@ public class StatementsGenerator implements ChangeVisitor {
                     chunk = new InsertChunk();
                     inserts.put(field.getTableName(), chunk);
                     chunk.insert = new StatementsLogEntry(converter);
-                    // Adding here is strongly needed. Because of order in with other and this statememts are added
+                    // Adding here is strongly needed. Because of order in wich other and this statememts are added
                     // to the log and therefore applied into a database during a transaction.
                     logEntries.add(chunk.insert);
                     chunk.dataColumnsNames = new StringBuilder();
@@ -149,10 +149,11 @@ public class StatementsGenerator implements ChangeVisitor {
             // Validness of the insert statement is outlined by inserted columns and key columns existance also
             // because we have to prevent unexpected inserts in any joined table.
             // In this case inserts will be valid only if they include at least one key column per table.
+            // Another case is single table per Insert instance.
             // So, we can avoid unexpected inserts in a transaction.
             // It's considered that keyless inserts are easy to obtain with manual (dml flag) queries.
             // So avoid keys in select columns list for a table to avoid unexpected inserts in that table! 
-            chunk.insert.valid = !chunk.insert.parameters.isEmpty() && !chunk.keysColumnsNames.isEmpty();
+            chunk.insert.valid = !chunk.insert.parameters.isEmpty() && (!chunk.keysColumnsNames.isEmpty() || inserts.size() == 1);
         }
     }
 
@@ -210,8 +211,9 @@ public class StatementsGenerator implements ChangeVisitor {
                 chunk.update.clause = String.format(UPDATE_CLAUSE, tableName, chunk.columnsClause.toString(), generateWhereClause(chunk.keys));
                 chunk.update.parameters.addAll(chunk.data);
                 chunk.update.parameters.addAll(chunk.keys);
-                chunk.update.valid = !chunk.keys.isEmpty();
             }
+            chunk.update.valid = chunk.data != null && !chunk.data.isEmpty()
+                    && chunk.keys != null && !chunk.keys.isEmpty();
         }
     }
 

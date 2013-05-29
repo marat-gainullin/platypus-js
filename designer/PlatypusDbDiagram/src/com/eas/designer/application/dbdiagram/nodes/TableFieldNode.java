@@ -236,15 +236,15 @@ public class TableFieldNode extends FieldNode {
     }
 
     @Override
-    protected UndoableEdit editRequired(Boolean val) {
+    protected UndoableEdit editNullable(Boolean val) {
         Field oldContent = new Field(field);
         Field content = new Field(field);
-        content.setNullable(!val);
+        content.setNullable(val);
         try {
             ModifyFieldEdit dbEdit = new ModifyFieldEdit(sqlActionsController, getEntity().getTableName(), getEntity().getFields(), oldContent, content);
             dbEdit.redo();
             CompoundEdit section = new NotSavableDbStructureCompoundEdit();
-            section.addEdit(super.editRequired(val));
+            section.addEdit(super.editNullable(val));
             section.addEdit(dbEdit);
             section.end();
             return section;

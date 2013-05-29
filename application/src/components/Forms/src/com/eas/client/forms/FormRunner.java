@@ -539,6 +539,39 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
                 protected void processWindowEvent(WindowEvent e) {
                     try {
                         if (e.getID() == WindowEvent.WINDOW_OPENED) {
+                            if (formSize != null) {
+                                surface.setSize(formSize);
+                            } else if (designedViewSize != null) {
+                                Insets decorInsets = surface.getInsets();
+                                windowDecorSize = new Dimension(decorInsets.left + decorInsets.right, decorInsets.top + decorInsets.bottom);
+                                surface.setSize(designedViewSize.width + windowDecorSize.width, designedViewSize.height + windowDecorSize.height);
+                            } else {
+                                ((JDialog) surface).pack();
+                            }
+                            formSize = surface.getSize();
+                            if (formLocation != null && !locationByPlatform) {
+                                surface.setLocation(formLocation);
+                            }
+                            formLocation = surface.getLocation();
+
+                            surface.addComponentListener(new ComponentAdapter() {
+                                @Override
+                                public void componentMoved(ComponentEvent e) {
+                                    formLocation = surface.getLocation();
+                                }
+
+                                @Override
+                                public void componentResized(ComponentEvent e) {
+                                    if (surface != null && surface.isVisible()) {
+                                        formSize = surface.getSize();
+                                    }
+                                }
+                            });
+
+                            synchronized (FormRunner.class) {
+                                showingForms.put(formKey, FormRunner.this);
+                            }
+                            showingFormsChanged();
                         }
                         super.processWindowEvent(e);
                     } catch (ClosedManageException ex) {
@@ -567,39 +600,6 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
             windowHandler.setHandlee(dialog);
             //
             surface = dialog;
-            if (formSize != null) {
-                surface.setSize(formSize);
-            } else if (designedViewSize != null) {
-                Insets decorInsets = surface.getInsets();
-                windowDecorSize = new Dimension(decorInsets.left + decorInsets.right, decorInsets.top + decorInsets.bottom);
-                surface.setSize(designedViewSize.width + windowDecorSize.width, designedViewSize.height + windowDecorSize.height);
-            } else {
-                dialog.pack();
-            }
-            formSize = surface.getSize();
-            if (formLocation != null && !locationByPlatform) {
-                surface.setLocation(formLocation);
-            }
-            formLocation = surface.getLocation();
-
-            surface.addComponentListener(new ComponentAdapter() {
-                @Override
-                public void componentMoved(ComponentEvent e) {
-                    formLocation = surface.getLocation();
-                }
-
-                @Override
-                public void componentResized(ComponentEvent e) {
-                    if (surface != null && surface.isVisible()) {
-                        formSize = surface.getSize();
-                    }
-                }
-            });
-
-            synchronized (FormRunner.class) {
-                showingForms.put(formKey, this);
-            }
-            showingFormsChanged();
             dialog.setVisible(true);
             final Object selected = closeCallbackParameter;
             surface = null;

@@ -259,6 +259,11 @@ public class QueryDocumentEditsComplementor {
         return complementEditWithStatement(statement, anEdit);
     }
 
+    private boolean isParameterToParameterBinding(Relation<QueryEntity> relation) {
+        return !(relation.getLeftEntity() instanceof QueryParametersEntity) && relation.isLeftParameter() &&
+        !(relation.getRightEntity() instanceof QueryParametersEntity) && relation.isRightParameter();
+    }
+
     protected class UndoableEditsAdder implements UndoableEditListener {
 
         protected CompoundEdit compound;
@@ -340,7 +345,7 @@ public class QueryDocumentEditsComplementor {
         NewRelationEdit<QueryEntity> edit = (NewRelationEdit<QueryEntity>) anEdit;
         Relation<QueryEntity> relation = edit.getRelation();
         // Sql grammar has no any place for subquery parameters binding
-        if (!relation.isLeftParameter() && !relation.isRightParameter()) {
+        if (!isParameterToParameterBinding(relation)) {
             Statement statement = dataObject.getCommitedStatement();
             if (statement != null) {
                 Map<String, Table> tables = TablesFinder.getTablesMap(TablesFinder.TO_CASE.LOWER, statement, true);

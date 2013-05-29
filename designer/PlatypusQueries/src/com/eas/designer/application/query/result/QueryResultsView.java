@@ -39,6 +39,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.StringReader;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -57,6 +58,7 @@ import org.netbeans.api.progress.ProgressHandleFactory;
 import org.openide.DialogDescriptor;
 import org.openide.DialogDisplayer;
 import org.openide.ErrorManager;
+import org.openide.NotifyDescriptor;
 import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 import org.openide.util.NbPreferences;
@@ -246,7 +248,12 @@ public class QueryResultsView extends javax.swing.JPanel {
     }
 
     private void showQueryResultsMessage() throws Exception {
-        showInfo(String.format(NbBundle.getMessage(QuerySetupView.class, "QueryResultsView.resultMessage"), queryEntity.getRowset().size()));
+        String message = String.format(NbBundle.getMessage(QuerySetupView.class, "QueryResultsView.resultMessage"), queryEntity.getRowset().size());
+        List<Field> pks = queryEntity.getRowset().getFields().getPrimaryKeys();
+        if (pks == null || pks.isEmpty()) {
+            message += "\n " + String.format(NbBundle.getMessage(QuerySetupView.class, "QueryResultsView.noKeysMessage"), queryEntity.getEntityId());
+        }
+        showInfo(message);
     }
 
     private void setModelRelations() throws Exception {
@@ -382,13 +389,13 @@ public class QueryResultsView extends javax.swing.JPanel {
             .addGroup(footerPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(messageLabel)
-                .addContainerGap(308, Short.MAX_VALUE))
+                .addContainerGap(319, Short.MAX_VALUE))
         );
         footerPanelLayout.setVerticalGroup(
             footerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(footerPanelLayout.createSequentialGroup()
                 .addComponent(messageLabel)
-                .addGap(0, 5, Short.MAX_VALUE))
+                .addGap(0, 6, Short.MAX_VALUE))
         );
 
         resultsPanel.add(footerPanel, java.awt.BorderLayout.SOUTH);
@@ -636,30 +643,84 @@ public class QueryResultsView extends javax.swing.JPanel {
         dbGrid.setModel(model);
         gridPanel.add(dbGrid);
         DbGrid.fillByEntity(queryEntity, dbGrid, 120);
+        List<Field> pks = queryEntity.getRowset().getFields().getPrimaryKeys();
+        dbGrid.setEditable(pks != null && !pks.isEmpty());
+        dbGrid.setDeletable(pks != null && !pks.isEmpty());
+        deleteButton.setEnabled(pks != null && !pks.isEmpty());
+        showInfo(String.format(NbBundle.getMessage(QuerySetupView.class, "QueryResultsView.noKeysMessage"), queryEntity.getEntityId()));
         queryEntity.getRowset().addRowsetListener(new RowsetAdapter() {
             @Override
             public boolean willInsertRow(RowsetInsertEvent event) {
-                Fields fields = event.getRow().getFields();
-                for (int i = 1; i <= fields.getFieldsCount(); i++) {
-                    Field field = fields.get(i);
-                    if (!field.isPk() && !field.isNullable()) {
-                        try {
-                            Object oValue = RowsetUtils.generatePkValueByType(field.getTypeInfo().getSqlType());
-                            if (oValue instanceof String) {
-                                oValue = "\n";
-                            } else if (oValue instanceof Date) {
-                                oValue = new Date(0);
-                            } else if (oValue instanceof Number) {
-                                oValue = 0;
+                try {
+                    int modified = 0;
+                    Fields fields = event.getRow().getFields();
+                    for (int i = 1; i <= fields.getFieldsCount(); i++) {
+                        Field field = fields.get(i);
+                        if (!field.isNullable()) {
+                            Object oValue;
+                            if (field.isFk()) {// ask a user about a fk-field value
+                                String sValue = askFieldValue(field);
+                                if (sValue == null) {
+                                    return false;
+                                } else {
+                                    oValue = sValue;
+                                }
+                            } else {
+                                oValue = generateFieldValue(field);
                             }
                             oValue = event.getRowset().getConverter().convert2RowsetCompatible(oValue, field.getTypeInfo());
                             event.getRow().setColumnObject(i, oValue);
-                        } catch (RowsetException ex) {
-                            ErrorManager.getDefault().notify(ex);
+                            modified++;
                         }
                     }
+                    if (modified == 0 && !fields.isEmpty()) {// ask a user about all fields
+                        for (int i = 1; i <= fields.getFieldsCount(); i++) {
+                            Field field = fields.get(i);
+                            Object oValue;
+                            String sValue = askFieldValue(field);
+                            if (sValue == null) {
+                                return false;
+                            } else {
+                                oValue = sValue;
+                            }
+                            oValue = event.getRowset().getConverter().convert2RowsetCompatible(oValue, field.getTypeInfo());
+                            event.getRow().setColumnObject(i, oValue);
+                        }
+                    }
+                } catch (RowsetException ex) {
+                    ErrorManager.getDefault().notify(ex);
+                    return false;
                 }
                 return true;
+            }
+
+            private Object generateFieldValue(Field field) {
+                Object oValue = RowsetUtils.generatePkValueByType(field.getTypeInfo().getSqlType());
+                if (oValue instanceof String) {
+                    oValue = "\n";
+                } else if (oValue instanceof Date) {
+                    oValue = new Date(0);
+                } else if (oValue instanceof Number) {
+                    oValue = 0;
+                }
+                return oValue;
+            }
+
+            private String askFieldValue(Field field) {
+                NotifyDescriptor.InputLine input = new NotifyDescriptor.InputLine(
+                        field.isFk() ? 
+                        NbBundle.getMessage(QueryResultsView.class, "QueryResultsView.LBL_ForeignKeyValue"):
+                        NbBundle.getMessage(QueryResultsView.class, "QueryResultsView.LBL_FieldValue"), 
+                        field.isFk() ? 
+                        String.format(NbBundle.getMessage(QueryResultsView.class, "QueryResultsView.LBL_CantDetermineRequiredForeignKeyValue"), field.getTableName(), field.getName()):
+                        String.format(NbBundle.getMessage(QueryResultsView.class, "QueryResultsView.LBL_CantDetermineRequiredValue"), field.getTableName(), field.getName()));
+                Object oAnswer = DialogDisplayer.getDefault().notify(input);
+                String sAnswer = input.getInputText();
+                if (oAnswer == NotifyDescriptor.OK_OPTION) {
+                    return sAnswer;
+                } else {
+                    return null;
+                }
             }
         });
     }
