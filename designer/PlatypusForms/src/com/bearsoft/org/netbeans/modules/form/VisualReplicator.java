@@ -268,19 +268,21 @@ public class VisualReplicator {
             Object clone = createClone(radComp);
             if (clone instanceof Component) {
                 RADVisualContainer<?> radCnt = (RADVisualContainer<?>) radComp.getParentComponent();
-                Container cont = (Container) getClonedComponent(radCnt);
-                if (radCnt.isMenuTypeComponent()) {
-                    addToMenu(cont, clone);
-                } else {
-                    LayoutSupportManager laysup = radCnt.getLayoutSupport();
-                    if (laysup != null && cont != null) { // layout support
-                        Container contDelegate = radCnt.getContainerDelegate(cont);
-                        laysup.addComponentsToContainer(
-                                cont,
-                                contDelegate,
-                                new Component[]{(Component) clone},
-                                ((RADVisualComponent<?>) radComp).getComponentIndex());
-                        laysup.arrangeContainer(cont, contDelegate);
+                if (radCnt != null) {
+                    Container cont = (Container) getClonedComponent(radCnt);
+                    if (radCnt.isMenuTypeComponent()) {
+                        addToMenu(cont, clone);
+                    } else {
+                        LayoutSupportManager laysup = radCnt.getLayoutSupport();
+                        if (laysup != null && cont != null) { // layout support
+                            Container contDelegate = radCnt.getContainerDelegate(cont);
+                            laysup.addComponentsToContainer(
+                                    cont,
+                                    contDelegate,
+                                    new Component[]{(Component) clone},
+                                    ((RADVisualComponent<?>) radComp).getComponentIndex());
+                            laysup.arrangeContainer(cont, contDelegate);
+                        }
                     }
                 }
             }

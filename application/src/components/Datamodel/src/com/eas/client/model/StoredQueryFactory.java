@@ -16,6 +16,7 @@ import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.model.QueryDocument.StoredFieldMetadata;
 import com.eas.client.model.query.QueryEntity;
 import com.eas.client.model.query.QueryModel;
+import com.eas.client.model.query.QueryParametersEntity;
 import com.eas.client.model.store.XmlDom2QueryDocument;
 import com.eas.client.queries.SqlQuery;
 import com.eas.script.JsDoc;
@@ -513,10 +514,8 @@ public class StoredQueryFactory {
 
     private String replaceLinkedParameters(String aSqlText, Set<Relation<QueryEntity>> parametersRelations) {
         for (Relation<QueryEntity> rel : parametersRelations) {
-            if (rel.getLeftField() != null && rel.getRightParameter() != null) {
-                aSqlText = Pattern.compile(COLON + rel.getRightParameter() + "\\b", Pattern.CASE_INSENSITIVE).matcher(aSqlText).replaceAll(COLON + rel.getLeftField());
-            } else if (rel.getLeftParameter() != null && rel.getRightParameter() != null) {
-                aSqlText = Pattern.compile(COLON + rel.getRightParameter() + "\\b", Pattern.CASE_INSENSITIVE).matcher(aSqlText).replaceAll(COLON + rel.getLeftParameter());
+            if (rel.getLeftEntity() instanceof QueryParametersEntity && rel.getLeftField() != null && rel.getRightParameter() != null) {
+                aSqlText = Pattern.compile(COLON + rel.getRightParameter().getName() + "\\b", Pattern.CASE_INSENSITIVE).matcher(aSqlText).replaceAll(COLON + rel.getLeftField().getName());
             }
         }
         return aSqlText;

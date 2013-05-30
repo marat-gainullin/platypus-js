@@ -139,31 +139,7 @@ public class QueryDocumentEditsComplementor {
         Statement statement = dataObject.getCommitedStatement();
         if (statement == null) {
             String factText = dataObject.getSqlTextDocument().getText(0, dataObject.getSqlTextDocument().getLength());
-            if (factText != null) {
-                String authorAnnotationValue = PlatypusFilesSupport.getAnnotationValue(factText, "@author");
-                String nameAnnotationValue = PlatypusFilesSupport.getAnnotationValue(factText, PlatypusFilesSupport.APP_ELEMENT_NAME_ANNOTATION);
-                String procedureAnnotationValue = PlatypusFilesSupport.getAnnotationValue(factText, PlatypusFiles.PROCEDURE_ANNOTATION_NAME);
-                String manualAnnotationValue = PlatypusFilesSupport.getAnnotationValue(factText, PlatypusFiles.MANUAL_ANNOTATION_NAME);
-                StringBuilder factTextBuilder = new StringBuilder();
-                factTextBuilder.append("/**\n");
-                factTextBuilder.append(" *\n");
-                if (authorAnnotationValue != null) {
-                    factTextBuilder.append(" * ").append("@author").append(" ").append(authorAnnotationValue).append("\n");
-                }
-                if (nameAnnotationValue != null) {
-                    factTextBuilder.append(" * ").append(PlatypusFilesSupport.APP_ELEMENT_NAME_ANNOTATION).append(" ").append(nameAnnotationValue).append("\n");
-                }
-                if (procedureAnnotationValue != null) {
-                    factTextBuilder.append(" * ").append(PlatypusFiles.PROCEDURE_ANNOTATION_NAME).append(" ").append(procedureAnnotationValue).append("\n");
-                }
-                if (manualAnnotationValue != null) {
-                    factTextBuilder.append(" * ").append(PlatypusFiles.MANUAL_ANNOTATION_NAME).append(" ").append(manualAnnotationValue).append("\n");
-                }
-                factTextBuilder.append(" */\n");
-                factText = factTextBuilder.toString();
-            } else {
-                factText = "";
-            }
+            factText = normalizeFactQueryText(factText);
             CCJSqlParserManager parserManager = new CCJSqlParserManager();
             String aliasName = (edit.getEntity().getQueryId() != null ? QUERY_ALIAS_PREFIX : TABLE_ALIAS_PREFIX) + "1"; //NOI18N
             assert edit.getEntity() instanceof QueryEntity;
@@ -255,13 +231,46 @@ public class QueryDocumentEditsComplementor {
 
     private UndoableEdit complementFieldNameChange(ChangeFieldEdit<QueryEntity> anEdit) throws Exception {
         Statement statement = dataObject.getCommitedStatement();
-        riddleStatement(statement, new ChangeParametersNameRiddleTask(anEdit.getBeforeContent().getName(), anEdit.getAfterContent().getName()));
-        return complementEditWithStatement(statement, anEdit);
+        if (statement == null) {
+            return anEdit;
+        } else {
+            riddleStatement(statement, new ChangeParametersNameRiddleTask(anEdit.getBeforeContent().getName(), anEdit.getAfterContent().getName()));
+            return complementEditWithStatement(statement, anEdit);
+        }
     }
 
     private boolean isParameterToParameterBinding(Relation<QueryEntity> relation) {
-        return !(relation.getLeftEntity() instanceof QueryParametersEntity) && relation.isLeftParameter() &&
-        !(relation.getRightEntity() instanceof QueryParametersEntity) && relation.isRightParameter();
+        return !(relation.getLeftEntity() instanceof QueryParametersEntity) && relation.isLeftParameter()
+                && !(relation.getRightEntity() instanceof QueryParametersEntity) && relation.isRightParameter();
+    }
+
+    private String normalizeFactQueryText(String factText) {
+        if (factText != null) {
+            String authorAnnotationValue = PlatypusFilesSupport.getAnnotationValue(factText, "@author");
+            String nameAnnotationValue = PlatypusFilesSupport.getAnnotationValue(factText, PlatypusFilesSupport.APP_ELEMENT_NAME_ANNOTATION);
+            String procedureAnnotationValue = PlatypusFilesSupport.getAnnotationValue(factText, PlatypusFiles.PROCEDURE_ANNOTATION_NAME);
+            String manualAnnotationValue = PlatypusFilesSupport.getAnnotationValue(factText, PlatypusFiles.MANUAL_ANNOTATION_NAME);
+            StringBuilder factTextBuilder = new StringBuilder();
+            factTextBuilder.append("/**\n");
+            factTextBuilder.append(" *\n");
+            if (authorAnnotationValue != null) {
+                factTextBuilder.append(" * ").append("@author").append(" ").append(authorAnnotationValue).append("\n");
+            }
+            if (nameAnnotationValue != null) {
+                factTextBuilder.append(" * ").append(PlatypusFilesSupport.APP_ELEMENT_NAME_ANNOTATION).append(" ").append(nameAnnotationValue).append("\n");
+            }
+            if (procedureAnnotationValue != null) {
+                factTextBuilder.append(" * ").append(PlatypusFiles.PROCEDURE_ANNOTATION_NAME).append(" ").append(procedureAnnotationValue).append("\n");
+            }
+            if (manualAnnotationValue != null) {
+                factTextBuilder.append(" * ").append(PlatypusFiles.MANUAL_ANNOTATION_NAME).append(" ").append(manualAnnotationValue).append("\n");
+            }
+            factTextBuilder.append(" */\n");
+            factText = factTextBuilder.toString();
+        } else {
+            factText = "";
+        }
+        return factText;
     }
 
     protected class UndoableEditsAdder implements UndoableEditListener {

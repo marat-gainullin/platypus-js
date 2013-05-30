@@ -135,7 +135,7 @@ public class GxtControlsFactory {
 		isRoot = false;
 
 		NodeList childNodes = tag.getChildNodes();
-		for (int i = childNodes.getLength()-1; i >= 0; i--) {
+		for (int i = 0; i < childNodes.getLength(); i++) {
 			Node item = childNodes.item(i);
 			if (item instanceof Element) {
 				if (item.getNodeName().equalsIgnoreCase(WIDGET_TAG) || item.getNodeName().equalsIgnoreCase(NONVISUAL_TAG)) {

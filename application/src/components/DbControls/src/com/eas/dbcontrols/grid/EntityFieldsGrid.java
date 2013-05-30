@@ -17,7 +17,6 @@ import com.bearsoft.rowset.events.RowsetScrollEvent;
 import com.bearsoft.rowset.events.RowsetSortEvent;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
-import com.eas.client.model.Entity;
 import com.eas.client.model.ModelElementRef;
 import com.eas.client.model.application.ApplicationEntity;
 import com.eas.client.model.application.ApplicationModel;
@@ -146,7 +145,7 @@ public class EntityFieldsGrid extends JTable implements RowsetListener {
 
     private Fields filterFields(Fields aFields) {
         Fields resFields = new Fields();
-        for (int i = aFields.getFieldsCount(); i > 0; i--) {
+        for (int i = 1; i <= aFields.getFieldsCount(); i++) {
             Field field = aFields.get(i);
             if ((!filterForeignKeys || !field.isFk())
                     && (!filterPrimaryKeys || !field.isPk())
