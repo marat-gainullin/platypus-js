@@ -80,16 +80,19 @@ ComObject = com.eas.client.scripts.ole.ComObject;
 
 //Resources
 Resource = {};
-Object.defineProperty(Resource, "load", {get : function(){
+Object.defineProperty(Resource, "load", {
+    get : function(){
         return function(aResName, aCallback){
             var loaded = com.eas.client.scripts.ScriptRunner.PlatypusScriptedResource.load(aResName);
             if(aCallback != undefined)
                 aCallback(loaded);
             return loaded;
         };
-}});
+    }
+});
 
-Object.defineProperty(Resource, "loadText", {get : function(){
+Object.defineProperty(Resource, "loadText", {
+    get : function(){
         return function(aResName, aCallbackOrEncoding, aCallback){
             if(typeof aCallbackOrEncoding == "function"){
                 var _loaded = com.eas.client.scripts.ScriptRunner.PlatypusScriptedResource.loadText(aResName);
@@ -104,7 +107,8 @@ Object.defineProperty(Resource, "loadText", {get : function(){
             else
                 return com.eas.client.scripts.ScriptRunner.PlatypusScriptedResource.loadText(aResName);
         };
-}});
+    }
+});
 
 
 function getTreadLocal(aName) {
@@ -149,12 +153,18 @@ Function.prototype.invokeBackground = function() {
  * allways loads them dynamically and synchronously.
  */
 function require(deps, aCallback) {
-    if(deps != null && deps != undefined){
-        for(var i = 0; i < deps.length; i++)
-            com.eas.client.scripts.ScriptRunner.executeResource(deps[i]);
+    if(deps) {
+        if (Array.isArray(deps)) {
+            for(var i = 0; i < deps.length; i++) {
+                com.eas.client.scripts.ScriptRunner.executeResource(deps[i]);
+            }
+        } else {
+            com.eas.client.scripts.ScriptRunner.executeResource(deps);
+        }
     }
-    if(aCallback != null && aCallback != undefined)
-        aCallback();    
+    if(aCallback) {
+        aCallback();   
+    }
 }
 
 function readString(aFileName, aEncoding) {
