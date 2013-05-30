@@ -14,6 +14,7 @@ import org.mozilla.javascript.ast.AstNode;
 import org.mozilla.javascript.ast.AstRoot;
 import org.mozilla.javascript.ast.FunctionCall;
 import org.mozilla.javascript.ast.FunctionNode;
+import org.mozilla.javascript.ast.Name;
 import org.mozilla.javascript.ast.NewExpression;
 import org.mozilla.javascript.ast.NodeVisitor;
 import org.mozilla.javascript.ast.PropertyGet;
@@ -134,7 +135,7 @@ public class ModuleCompletionContext extends CompletionContext {
                                         && variableInitializer.getInitializer() != null) {
                                     if (variableInitializer.getInitializer() instanceof NewExpression) {
                                         NewExpression ne = (NewExpression) variableInitializer.getInitializer();
-                                        if (ne.getTarget() != null) {
+                                        if (ne.getTarget() != null && ne.getTarget() instanceof Name) {
                                             //checks for new Module(moduleName) like expression 
                                             if (isModuleInitializerName(ne.getTarget().getString())
                                                     && ne.getArguments() != null
