@@ -541,7 +541,8 @@ public class PlatypusQueryView extends CloneableTopComponent {
     @Override
     protected void componentHidden() {
         super.componentHidden();
-        if (ModelInspector.getInstance().getViewData().getModelView() == getModelView()) {
+        if (ModelInspector.getInstance().getViewData() != null &&
+            ModelInspector.getInstance().getViewData().getModelView() == getModelView()) {
             ModelInspector.getInstance().setNodesReflector(null);
             ModelInspector.getInstance().setViewData(null);
             WindowManager wm = WindowManager.getDefault();

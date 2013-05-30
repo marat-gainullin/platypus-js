@@ -9,6 +9,7 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sencha.gxt.core.client.dom.XElement;
 import com.sencha.gxt.widget.core.client.Component;
 import com.sencha.gxt.widget.core.client.container.BorderLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.MarginData;
@@ -46,6 +47,7 @@ public class PlatypusMarginLayoutContainer extends SimpleContainer {
 		comp.setData(MARGIN_LAYOUT_DATA, aConstraints);
 		content.add(comp);
 		applyConstraints(comp, aConstraints);
+		content.getElement().insertFirst(content.getElement().getLastChild());
 	}
 
 	protected void applyConstraints(Widget aWidget, MarginConstraints aConstraints) {
