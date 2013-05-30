@@ -595,7 +595,8 @@ public class Application {
 			}
 		});
 		$wnd.require = function (aDeps, aCallback) {
-			@com.eas.client.application.Application::require(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aDeps, aCallback);
+			var deps = Array.isArray(aDeps) ? aDeps : [aDeps];
+			@com.eas.client.application.Application::require(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(deps, aCallback);
 		} 
 		function _Icons() {
 			this.load = function(aIconName) {
