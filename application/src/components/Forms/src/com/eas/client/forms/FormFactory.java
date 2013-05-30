@@ -30,15 +30,11 @@ public class FormFactory extends DbSwingFactory {
 
     @Override
     public Icon resolveIcon(String aIconName) {
-        if (aIconName != null) {
-            try {
-                Icon res = IconResources.load(aIconName);
-                return res != null ? res : super.resolveIcon(aIconName);
-            } catch (Exception ex) {
-                Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, null, ex);
-                return null;
-            }
-        } else {
+        try {
+            Icon res = IconResources.load(aIconName);
+            return res != null ? res : super.resolveIcon(aIconName);
+        } catch (Exception ex) {
+            Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, null, ex);
             return null;
         }
     }
