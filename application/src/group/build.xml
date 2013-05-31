@@ -332,7 +332,7 @@
 	<target name="zipsrc" depends="copyupdater">
 	    <zip destfile="../../updates/application.zip">
             <fileset dir="../../" >
-                <include name="bin/*"/>
+                <include name="bin/**"/>
 				<exclude name="bin/DatamodelDesigner.jar"/>
 				<include name="lib/**/*.jar"/>
 				<exclude name="lib/own/Updater.jar"/>

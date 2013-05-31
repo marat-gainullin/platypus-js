@@ -102,9 +102,11 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
     private J2eePlatformAdapter[] getJ2eePlatforms() {
         String[] serverInstanceIDs = Deployment.getDefault().getServerInstanceIDs();
         List<J2eePlatformAdapter> j2eePlatforms = new ArrayList<>();
-        if (projectSettings.getJ2eeServerId() != null
-                && (serverInstanceIDs == null || !Arrays.asList(serverInstanceIDs).contains(projectSettings.getJ2eeServerId()))) {
-            j2eePlatforms.add(new J2eePlatformAdapter(null, projectSettings.getJ2eeServerId()));
+        if (projectSettings.getJ2eeServerId() == null 
+                || projectSettings.getJ2eeServerId().isEmpty()
+                || serverInstanceIDs == null 
+                || !Arrays.asList(serverInstanceIDs).contains(projectSettings.getJ2eeServerId())) {
+            j2eePlatforms.add(J2eePlatformAdapter.UNKNOWN_PLATFORM_ADAPRER);
         }
         for (String serverInstance : serverInstanceIDs) {
             try {
@@ -130,6 +132,8 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
 
     private static final class J2eePlatformAdapter {
 
+        public static final J2eePlatformAdapter UNKNOWN_PLATFORM_ADAPRER = new J2eePlatformAdapter(null, null);
+        
         private J2eePlatform platform;
         private String serverInstanceID;
 

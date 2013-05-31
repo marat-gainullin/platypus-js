@@ -116,11 +116,11 @@ public class PlatypusWebModuleManager {
             prepareWebApplication();
             setStartApplicationElement(appElementId);
             if (webModule.getServerID() == null || webModule.getServerID().isEmpty()) {
-                project.getOutputWindowIO().getOut().println("Application server is not set. Check J2EE Server settings at Project's properties.");
+                project.getOutputWindowIO().getErr().println("Application server is not set. Check J2EE Server settings at Project's properties.");
                 return null;
             }
             if (webModule.getUrl() == null || webModule.getUrl().isEmpty()) {
-                project.getOutputWindowIO().getOut().println("J2EE Server context is not configured for the project.");
+                project.getOutputWindowIO().getErr().println("J2EE Server context is not configured for the project.");
                 return null;
             }
             setupWebApplication(webModule);
