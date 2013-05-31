@@ -311,6 +311,8 @@ public class PlatypusHttpServlet extends HttpServlet {
                     Object result = ((ExecuteServerModuleMethodRequest.Response) response).getResult();
                     if (result instanceof ScriptableRowset) {
                         writeJsonRowsetResponse(((ScriptableRowset) result).unwrap(), aHttpResponse, aHttpRequest);
+                    } else if (result instanceof String) {
+                        writeStringResponse((String)result, aHttpResponse, HTML_CONTENTTYPE);
                     } else if (result instanceof NativeObject) {
                         writeJsonResponse(ScriptUtils.toJson(result), aHttpResponse);
                     } else if (result instanceof XMLObject) {
