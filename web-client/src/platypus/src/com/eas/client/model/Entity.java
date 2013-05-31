@@ -621,13 +621,25 @@ public class Entity implements RowsetListener {
 					},
 					// 
 					execute : function(aCallback) {
-						aEntity.@com.eas.client.model.Entity::execute(Lcom/google/gwt/core/client/JavaScriptObject;)(aCallback);
+						var oldManual = published.manual;
+						try{
+							published.manual = false;
+							aEntity.@com.eas.client.model.Entity::execute(Lcom/google/gwt/core/client/JavaScriptObject;)(aCallback);
+						}finally{
+							published.manual = oldManual;
+						}
 					},
 					executeChildrenOnly : function() {
 						aEntity.@com.eas.client.model.Entity::executeChildren()();
 					},
 					requery : function(aCallback) {
-						aEntity.@com.eas.client.model.Entity::refresh(Lcom/google/gwt/core/client/JavaScriptObject;)(aCallback);
+						var oldManual = published.manual;
+						try{
+							published.manual = false;
+							aEntity.@com.eas.client.model.Entity::refresh(Lcom/google/gwt/core/client/JavaScriptObject;)(aCallback);
+						}finally{
+							published.manual = oldManual;
+						}
 					},
 					requeryChildrenOnly : function() {
 						aEntity.@com.eas.client.model.Entity::refreshChildren()();
@@ -687,6 +699,7 @@ public class Entity implements RowsetListener {
 				};			
 				// properties
 				Object.defineProperty(published, "queryId",    { get : function(){ return published.getQueryId()}});
+				Object.defineProperty(published, "manual",     { get : function(){ return aEntity.@com.eas.client.model.Entity::isManual()()}, set : function(aValue){ aEntity.@com.eas.client.model.Entity::setManual(Z)(!!aValue)}});
 				Object.defineProperty(published, "modified",   { get : function(){ return published.isModified()}});
 				Object.defineProperty(published, "empty",      { get : function(){ return published.isEmpty()}});
 				Object.defineProperty(published, "inserting",  { get : function(){ return published.isInserting()}});
@@ -1400,6 +1413,16 @@ public class Entity implements RowsetListener {
 		}
 	}
 
+	public boolean isManual() {
+		assert query != null : "Query must present (isManual)";
+		return query.isManual();
+	}
+	
+	public void setManual(boolean aValue){
+		assert query != null : "Query must present (setManual)";
+		query.setManual(aValue);
+	}
+
 	public boolean isPending() {
 		return pending != null;
 	}
@@ -1462,11 +1485,11 @@ public class Entity implements RowsetListener {
 	protected void internalExecute(boolean refresh, final CancellableCallback onSuccess, Callback<String> onFailure) throws Exception {
 		if (model != null && model.isRuntime()) {
 			assert query != null : QUERY_REQUIRED;
-			// try to select any data only within non-dml queries
-			// platypus dml queries are:
+			// try to select any data only within non-manual queries
+			// platypus manual queries are:
 			// - insert, update, delete queries;
 			// - stored procedures, witch changes data.
-			if (!query.isDml()) {
+			if (!query.isManual()) {
 				if (pending != null)
 					pending.cancel();
 				if (refresh) {
