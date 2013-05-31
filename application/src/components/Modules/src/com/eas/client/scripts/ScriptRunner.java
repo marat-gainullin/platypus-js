@@ -22,7 +22,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.IDN;
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.AccessControlException;
 import java.util.*;
@@ -313,19 +315,15 @@ public class ScriptRunner extends ScriptableObject {
                 Matcher htppMatcher = pattern.matcher(aResourceId);
                 if (htppMatcher.matches()) {
                     URL url = new URL(aResourceId);
-                    String file = "";
-                    if (url.getPath() != null && !url.getPath().isEmpty()) {
-                        file += (new URI(null, null, url.getPath(), null)).toASCIIString();
-                    }
-                    if (url.getQuery() != null && !url.getQuery().isEmpty()) {
-                        file += "?" + url.getQuery();
-                    }
-                    if (url.getRef() != null && !url.getRef().isEmpty()) {
-                        file += "#" + url.getRef();
-                    }
-                    url = new URL(url.getProtocol(), IDN.toASCII(url.getHost()), url.getPort(), file);
-                    try (InputStream is = url.openStream()) {
-                        return BinaryUtils.readStream(is, -1);
+                    try {
+                        try (InputStream is = url.openStream()) {
+                            return BinaryUtils.readStream(is, -1);
+                        }
+                    } catch (IOException ex) {
+                        url = encodeUrl(url);
+                        try (InputStream is = url.openStream()) {
+                            return BinaryUtils.readStream(is, -1);
+                        }
                     }
                 } else {
                     if (cache == null) {
@@ -370,6 +368,21 @@ public class ScriptRunner extends ScriptableObject {
         public static String loadText(String aResourceId, String aEncodingName) throws Exception {
             byte[] data = load(aResourceId);
             return data != null ? new String(data, aEncodingName) : null;
+        }
+
+        private static URL encodeUrl(URL url) throws URISyntaxException, MalformedURLException {
+            String file = "";
+            if (url.getPath() != null && !url.getPath().isEmpty()) {
+                file += (new URI(null, null, url.getPath(), null)).toASCIIString();
+            }
+            if (url.getQuery() != null && !url.getQuery().isEmpty()) {
+                file += "?" + url.getQuery();
+            }
+            if (url.getRef() != null && !url.getRef().isEmpty()) {
+                file += "#" + url.getRef();
+            }
+            url = new URL(url.getProtocol(), IDN.toASCII(url.getHost()), url.getPort(), file);
+            return url;
         }
     }
     protected static Set<String> executedScriptResources = new HashSet<>();

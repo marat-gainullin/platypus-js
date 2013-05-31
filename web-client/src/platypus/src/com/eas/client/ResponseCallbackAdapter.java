@@ -4,18 +4,18 @@
  */
 package com.eas.client;
 
-import com.google.gwt.http.client.Response;
+import com.google.gwt.xhr.client.XMLHttpRequest;
 
 /**
  *
  * @author mg
  */
-public abstract class ResponseCallbackAdapter implements Callback<Response> {
+public abstract class ResponseCallbackAdapter implements Callback<XMLHttpRequest> {
 
     protected boolean cancelled;
 
     @Override
-    public void run(Response aResponse) throws Exception {
+    public void run(XMLHttpRequest aResponse) throws Exception {
         if (!cancelled) {
             doWork(aResponse);
         }
@@ -26,5 +26,5 @@ public abstract class ResponseCallbackAdapter implements Callback<Response> {
         cancelled = true;
     }
 
-    protected abstract void doWork(Response aResponse) throws Exception;
+    protected abstract void doWork(XMLHttpRequest aResponse) throws Exception;
 }

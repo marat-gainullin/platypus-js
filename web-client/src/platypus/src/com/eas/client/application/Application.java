@@ -158,7 +158,7 @@ public class Application {
 		        return function(aResName, aCallback){
 		        	if(typeof aCallback != "function")
 		        		throw "load must be called with a callback function";
-	            	@com.eas.client.application.AppClient::jsLoad(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aResName, aCallback);
+	            	@com.eas.client.application.AppClient::jsLoad(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;Z)(aResName, aCallback, false);
 		        };
 		}});
 		
@@ -167,7 +167,7 @@ public class Application {
 		        	var callback = typeof aCallbackOrEncoding == "function"?aCallbackOrEncoding:aCallback;
 		        	if(typeof callback != "function")
 		        		throw "loadText must be called with a callback function";
-	            	@com.eas.client.application.AppClient::jsLoad(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aResName, callback);
+	            	@com.eas.client.application.AppClient::jsLoad(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;Z)(aResName, callback, true);
 		        };
 		}});
 		

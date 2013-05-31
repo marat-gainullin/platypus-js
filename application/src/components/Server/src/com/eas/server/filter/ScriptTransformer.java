@@ -106,6 +106,7 @@ public class ScriptTransformer {
         final List<Runnable> treeMutationTasks = new ArrayList<>();
         sourceRoot.visit(new NodeVisitor() {
             public static final String REQUIRE_FUNCTION_NAME = "require";
+
             @Override
             public boolean visit(final AstNode node) {
                 if (node instanceof VariableDeclaration) {
@@ -262,6 +263,13 @@ public class ScriptTransformer {
                     StringLiteral sl = (StringLiteral) node;
                     FunctionCall call = (FunctionCall) node.getParent().getParent();
                     if (call.getArguments() != null && !call.getArguments().isEmpty() && call.getArguments().get(0) == node.getParent()
+                            && call.getTarget() instanceof Name && REQUIRE_FUNCTION_NAME.equals(((Name) call.getTarget()).getIdentifier())) {
+                        dynamicDependencies.add(sl.getValue());
+                    }
+                } else if (node instanceof StringLiteral && node.getParent() instanceof FunctionCall) {
+                    StringLiteral sl = (StringLiteral) node;
+                    FunctionCall call = (FunctionCall) node.getParent();
+                    if (call.getArguments() != null && !call.getArguments().isEmpty() && call.getArguments().get(0) == node
                             && call.getTarget() instanceof Name && REQUIRE_FUNCTION_NAME.equals(((Name) call.getTarget()).getIdentifier())) {
                         dynamicDependencies.add(sl.getValue());
                     }
