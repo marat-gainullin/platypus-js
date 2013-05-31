@@ -13,6 +13,7 @@ import com.eas.client.application.Base64;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.junit.client.GWTTestCase;
+import com.google.gwt.xhr.client.XMLHttpRequest;
 
 /**
  * 
@@ -45,9 +46,9 @@ public abstract class ModelBaseTest extends GWTTestCase {
 	public static AppClient initDevelopTestClient(String aModuleName) throws Exception {
 		AppClient client = new AppClient(GWT.getModuleBaseURL().replace(aModuleName + ".JUnit/", TEST_URI)) {
 			@Override
-			protected void interceptRequest(RequestBuilder rb) {
+			protected void interceptRequest(XMLHttpRequest req) {
 				String requestAuthSting = "Basic " + Base64.encode("testuser1".concat(":").concat("test"));
-				rb.setHeader("authorization", requestAuthSting);
+				req.setRequestHeader("authorization", requestAuthSting);
 			}
 		};
 		AppClient.setInstance(client);

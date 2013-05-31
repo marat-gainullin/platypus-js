@@ -29,6 +29,7 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.resources.client.DataResource;
 import com.google.gwt.safehtml.shared.SafeUri;
+import com.google.gwt.xhr.client.XMLHttpRequest;
 import com.google.gwt.xml.client.Document;
 import com.google.gwt.xml.client.Element;
 import com.google.gwt.xml.client.Node;
@@ -204,7 +205,7 @@ public class Loader {
 			}, new ResponseCallbackAdapter() {
 
 				@Override
-				protected void doWork(Response aResponse) throws Exception {
+				protected void doWork(XMLHttpRequest aResponse) throws Exception {
 					// Erroneous dependencies and other erroneous application
 					// elements
 					// should be memorized as notifying about the error.
