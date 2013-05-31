@@ -55,6 +55,7 @@ import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.xhr.client.ReadyStateChangeHandler;
 import com.google.gwt.xhr.client.XMLHttpRequest;
+import com.google.gwt.xhr.client.XMLHttpRequest.ResponseType;
 import com.google.gwt.xml.client.Document;
 import com.google.gwt.xml.client.Node;
 import com.google.gwt.xml.client.XMLParser;
@@ -138,11 +139,11 @@ public class AppClient {
 
 	public static void jsLoad(String aResourceName, final JavaScriptObject aCompleteCallback, final boolean text) throws Exception {
 		SafeUri uri = AppClient.getInstance().getResourceUri(aResourceName);
-		AppClient.getInstance().startRequest(uri, new Callback<XMLHttpRequest>() {
+		AppClient.getInstance().startRequest(uri, text ? ResponseType.Default : ResponseType.ArrayBuffer, new Callback<XMLHttpRequest>() {
 			@Override
 			public void run(XMLHttpRequest aResult) throws Exception {
 				if (aResult.getStatus() == Response.SC_OK) {
-					Utils.executeScriptEventVoid(aCompleteCallback, aCompleteCallback, text ? Utils.toJs(aResult.getResponseText()) : aResult.<XMLHttpRequest2>cast().getResponse());
+					Utils.executeScriptEventVoid(aCompleteCallback, aCompleteCallback, text ? Utils.toJs(aResult.getResponseText()) : aResult.<XMLHttpRequest2> cast().getResponse());
 				}
 			}
 
@@ -409,8 +410,8 @@ public class AppClient {
 		return startRequest(API_URI, query, null, RequestBuilder.GET, onSuccess, null);
 	}
 
-	public Cancellable startRequest(String aUrlPrefix, final String aUrlQuery, String aBody, RequestBuilder.Method aMethod, final Callback<XMLHttpRequest> onSuccess, final Callback<XMLHttpRequest> onFailure)
-	        throws Exception {
+	public Cancellable startRequest(String aUrlPrefix, final String aUrlQuery, String aBody, RequestBuilder.Method aMethod, final Callback<XMLHttpRequest> onSuccess,
+	        final Callback<XMLHttpRequest> onFailure) throws Exception {
 		String url = baseUrl + aUrlPrefix + (aUrlQuery != null ? "?" + aUrlQuery : "");
 		final XMLHttpRequest req = XMLHttpRequest.create();
 		req.open(aMethod.toString(), url);
@@ -422,12 +423,18 @@ public class AppClient {
 		return startRequest(req, aBody, onSuccess, onFailure);
 	}
 
-	public Cancellable startRequest(SafeUri aUri, final Callback<XMLHttpRequest> onSuccess, final Callback<XMLHttpRequest> onFailure) throws Exception {
+	public Cancellable startRequest(SafeUri aUri, ResponseType aResponseType, final Callback<XMLHttpRequest> onSuccess, final Callback<XMLHttpRequest> onFailure) throws Exception {
 		final XMLHttpRequest req = XMLHttpRequest.create();
 		req.open(RequestBuilder.GET.toString(), aUri.asString());
 		interceptRequest(req);
+		if (aResponseType != null && aResponseType != ResponseType.Default)
+			req.setResponseType(aResponseType);
 		req.setRequestHeader("Pragma", "no-cache");
 		return startRequest(req, null, onSuccess, onFailure);
+	}
+
+	public Cancellable startRequest(SafeUri aUri, final Callback<XMLHttpRequest> onSuccess, final Callback<XMLHttpRequest> onFailure) throws Exception {
+		return startRequest(aUri, ResponseType.Default, onSuccess, onFailure);
 	}
 
 	public Cancellable startRequest(final XMLHttpRequest req, String requestData, final Callback<XMLHttpRequest> onSuccess, final Callback<XMLHttpRequest> onFailure) throws Exception {
