@@ -197,10 +197,33 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
     + "If an application need to abort futher attempts and discard model data changes, "
     + "than it can call model.revert().")
     public boolean save() throws Exception {
+        return save(null);
+    }
+
+    @ScriptFunction(jsDocText = "Saves model data changes. Calls aCallback when done."
+    + "If model can't apply the changed, than exception is thrown. "
+    + "In this case, application can call model.save() another time to save the changes. "
+    + "If an application need to abort futher attempts and discard model data changes, "
+    + "than it can call model.revert().")
+    public boolean save(Function aCallback) throws Exception {
         if (commitable) {
             try {
                 commit();
                 saved();
+                if (aCallback != null) {
+                    Context cx = Context.getCurrentContext();
+                    boolean wasContext = cx != null;
+                    if (!wasContext) {
+                        cx = ScriptUtils.enterContext();
+                    }
+                    try {
+                        aCallback.call(cx, scriptScope, scriptScope, new Object[]{});
+                    } finally {
+                        if (!wasContext) {
+                            Context.exit();
+                        }
+                    }
+                }
             } catch (Exception ex) {
                 rolledback();
                 throw ex;

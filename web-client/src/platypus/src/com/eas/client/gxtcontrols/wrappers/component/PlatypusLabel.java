@@ -198,8 +198,8 @@ public class PlatypusLabel extends Component implements HasText, HasHTML {
 				contentStyle.setProperty("background", "url(" + image.getSafeUri().asString() + ")" + " no-repeat " + backgroundPosition);
 			}
 			contentStyle.setProperty("width", "auto");
-			if (html)
-				content.setInnerHTML(text);
+			if (html || text == null)
+				content.setInnerHTML(text!=null?text:"&#160;");
 			else
 				content.setInnerText(text);
 			//

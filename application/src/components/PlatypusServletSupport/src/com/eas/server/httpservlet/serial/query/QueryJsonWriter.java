@@ -14,6 +14,7 @@ import com.eas.server.httpservlet.serial.JsonWriter;
 public class QueryJsonWriter extends JsonWriter{
 
     private static final String TITLE_PROP_NAME = "title";
+    private static final String MANUAL_PROP_NAME = "manual";
     private static final String APP_ELEMENT_PROP_NAME = "appelement";
     private static final String PARAMETERS_PROP_NAME = "parameters";
     private static final String FIELDS_PROP_NAME = "fields";
@@ -27,6 +28,7 @@ public class QueryJsonWriter extends JsonWriter{
         StringBuilder sb = new StringBuilder();
         o(sb,
                 TITLE_PROP_NAME, s(query.getTitle()),
+                MANUAL_PROP_NAME, String.valueOf(query.isManual()),
                 APP_ELEMENT_PROP_NAME, s(query.getEntityId().toString()),
                 PARAMETERS_PROP_NAME, fields2a(query.getParameters()),
                 FIELDS_PROP_NAME, fields2a(query.getFields())
