@@ -56,6 +56,7 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.xml.client.Element;
 import com.google.gwt.xml.client.NodeList;
 import com.sencha.gxt.cell.core.client.NumberCell;
@@ -428,6 +429,8 @@ public class GxtGridFactory {
 										toRender = cellToRender.getDisplay();
 								}
 								renderer.render(context, toRender, lsb);
+								if(toRender == null)
+									lsb.append(SafeHtmlUtils.fromTrustedString("&#160;"));
 								styleToRender = modelGrid.complementPublishedStyle(styleToRender);
 								ControlsUtils.renderDecorated(lsb, styleToRender, sb);
 								if (grid.getView() instanceof PlatypusCellsView)
@@ -473,6 +476,8 @@ public class GxtGridFactory {
 										toRender = cellToRender.getDisplay();
 								}
 								super.render(context, toRender, lsb);
+								if(toRender == null)
+									lsb.append(SafeHtmlUtils.fromTrustedString("&#160;"));
 								styleToRender = modelGrid.complementPublishedStyle(styleToRender);
 								ControlsUtils.renderDecorated(lsb, styleToRender, sb);
 								if (grid.getView() instanceof PlatypusCellsView)
@@ -526,6 +531,8 @@ public class GxtGridFactory {
 									if (cellToRender.getDisplay() != null)
 										toRender = cellToRender.getDisplay();
 									renderer.render(context, toRender, lsb);
+									if(toRender == null)
+										lsb.append(SafeHtmlUtils.fromTrustedString("&#160;"));
 								} else
 									super.render(context, value, lsb);
 								styleToRender = modelGrid.complementPublishedStyle(styleToRender);
@@ -594,6 +601,8 @@ public class GxtGridFactory {
 									if (cellToRender.getDisplay() != null)
 										toRender = cellToRender.getDisplay();
 									renderer.render(context, toRender, lsb);
+									if(toRender == null)
+										lsb.append(SafeHtmlUtils.fromTrustedString("&#160;"));
 								} else
 									super.render(context, value, lsb);
 								styleToRender = modelGrid.complementPublishedStyle(styleToRender);
@@ -665,6 +674,8 @@ public class GxtGridFactory {
 										toRender = cellToRender.getDisplay();
 								}
 								renderer.render(context, toRender, lsb);
+								if(toRender == null)
+									lsb.append(SafeHtmlUtils.fromTrustedString("&#160;"));
 								styleToRender = modelGrid.complementPublishedStyle(styleToRender);
 								ControlsUtils.renderDecorated(lsb, styleToRender, sb);
 								if (grid.getView() instanceof PlatypusCellsView)
@@ -726,6 +737,8 @@ public class GxtGridFactory {
 							if (cellToRender.getDisplay() != null)
 								toRender = cellToRender.getDisplay();
 							renderer.render(context, toRender, lsb);
+							if(toRender == null)
+								lsb.append(SafeHtmlUtils.fromTrustedString("&#160;"));
 						} else
 							super.render(context, value, lsb);
 						styleToRender = modelGrid.complementPublishedStyle(styleToRender);

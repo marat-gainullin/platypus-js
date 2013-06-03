@@ -319,8 +319,8 @@ public class Model {// implements Cancellable {
 			createQuery : function(aQueryId) {
 				return aModel.@com.eas.client.model.Model::createQuery(Ljava/lang/String;)(aQueryId);
 			},
-			save : function() {
-				aModel.@com.eas.client.model.Model::save()();
+			save : function(aCallback) {
+				aModel.@com.eas.client.model.Model::save(Lcom/google/gwt/core/client/JavaScriptObject;)(aCallback);
 			},
 			revert : function() {
 				aModel.@com.eas.client.model.Model::revert()();
@@ -560,7 +560,7 @@ public class Model {// implements Cancellable {
 		return false;
 	}
 
-	public Cancellable save() throws Exception {
+	public Cancellable save(final JavaScriptObject onSuccess) throws Exception {
 		client.getChangeLog().addAll(changeLog);
 		if (commitable) {
 			return client.commit(new CancellableCallbackAdapter() {
@@ -568,6 +568,8 @@ public class Model {// implements Cancellable {
 				@Override
 				protected void doWork() throws Exception {
 					saved();
+					if(onSuccess != null)
+						Utils.invokeJsFunction(onSuccess);
 				}
 			}, new CancellableCallbackAdapter() {
 
