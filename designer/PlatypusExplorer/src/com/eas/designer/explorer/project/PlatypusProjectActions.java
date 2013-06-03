@@ -6,9 +6,13 @@ package com.eas.designer.explorer.project;
 
 import com.eas.client.AppCache;
 import com.eas.client.cache.FilesAppCache;
+import com.eas.designer.explorer.j2ee.PlatypusWebModuleManager;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.netbeans.api.progress.ProgressHandle;
 import org.netbeans.api.progress.ProgressHandleFactory;
 import org.netbeans.spi.project.ActionProvider;
@@ -31,6 +35,7 @@ public class PlatypusProjectActions implements ActionProvider {
     public static final String COMMAND_IMPORT = "import"; // NOI18N
     public static final String COMMAND_CONNECT = "connect-to-db"; // NOI18N
     public static final String COMMAND_DISCONNECT = "disconnect-from-db"; // NOI18N
+    public static final String COMMAND_CLEAR_WEB_DIR = "clear-web-dir"; // NOI18N
     /**
      * Some routine global actions for which we can supply a display name. These
      * are IDE-specific.
@@ -45,7 +50,8 @@ public class PlatypusProjectActions implements ActionProvider {
             COMMAND_DEPLOY,
             COMMAND_IMPORT,
             COMMAND_CONNECT,
-            COMMAND_DISCONNECT));
+            COMMAND_DISCONNECT,
+            COMMAND_CLEAR_WEB_DIR));
     protected PlatypusProject project;
 
     public PlatypusProjectActions(PlatypusProject aProject) {
@@ -92,6 +98,9 @@ public class PlatypusProjectActions implements ActionProvider {
                 case COMMAND_DISCONNECT:
                     project.disconnectFormDb();
                     break;
+                case COMMAND_CLEAR_WEB_DIR:
+                    clearWebDir();
+                    break;
             }
         } catch (Exception ex) {
             throw new IllegalArgumentException(ex);
@@ -106,7 +115,11 @@ public class PlatypusProjectActions implements ActionProvider {
             return !project.isDbConnected();
         } else if (COMMAND_DEPLOY.equals(command) || COMMAND_IMPORT.equals(command)) {
             return project.isDbConnected() && !project.getDeployer().isBusy();
-        } else if (COMMON_IDE_GLOBAL_ACTIONS.contains(command)) {
+        } else if (COMMAND_CLEAR_WEB_DIR.equals(command)) {
+            PlatypusWebModuleManager pwmm = project.getLookup().lookup(PlatypusWebModuleManager.class);
+            assert pwmm != null;
+            return pwmm.webDirExists();
+        }else if (COMMON_IDE_GLOBAL_ACTIONS.contains(command)) {
             return true;
         }
         return false;
@@ -172,6 +185,17 @@ public class PlatypusProjectActions implements ActionProvider {
             });
             ph.start();
             importTask.schedule(0);
+        }
+    }
+
+    private void clearWebDir() {
+        PlatypusWebModuleManager pwmm = project.getLookup().lookup(PlatypusWebModuleManager.class);
+        assert pwmm != null;
+        try {
+            pwmm.clearWebDir();
+        } catch (IOException ex) {
+            Logger.getLogger(PlatypusProjectActions.class.getName()).log(Level.SEVERE, "Error clearning web direcory", ex);
+            project.getOutputWindowIO().getErr().println(ex.getMessage());
         }
     }
 }

@@ -141,6 +141,34 @@ public class PlatypusWebModuleManager {
     }
 
     /**
+     * Clears jars and Platypus Web Client in the project's web directory.
+     *
+     * @throws IOException I/O exception if unable to clear.
+     */
+    public void clearWebDir() throws IOException {
+        if (webDirExists()) {
+            webAppDir = projectDir.getFileObject(PlatypusWebModule.WEB_DIRECTORY);
+            if (webAppDir != null && webAppDir.isFolder()) {
+                webInfDir = webAppDir.getFileObject(PlatypusWebModule.WEB_INF_DIRECTORY);
+                if (webInfDir != null && webInfDir.isFolder()) {
+                    FileObject libsDir = webInfDir.getFileObject(PlatypusWebModule.LIB_DIRECTORY_NAME);
+                    if (libsDir != null && libsDir.isFolder()) {
+                        FileUtils.clearDirectory(FileUtil.toFile(libsDir));
+                    }
+                }
+            }
+            FileObject pwcDir = webAppDir.getFileObject(PLATYPUS_WEB_CLIENT_DIR_NAME);
+            if (pwcDir != null && pwcDir.isFolder()) {
+                FileUtils.clearDirectory(FileUtil.toFile(pwcDir));
+            }
+        }
+    }
+
+    public boolean webDirExists() {
+        return projectDir.getFileObject(PlatypusWebModule.WEB_DIRECTORY) != null && projectDir.getFileObject(PlatypusWebModule.WEB_DIRECTORY).isFolder();
+    }
+
+    /**
      * Creates an web application skeleton if not created yet.
      */
     protected void prepareWebApplication() throws Exception {
