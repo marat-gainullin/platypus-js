@@ -57,7 +57,7 @@ public class PlatypusWebModuleManager {
     public static final String J2EE_RESOURCES_PACKAGE = "/com/eas/designer/explorer/j2ee/resources/"; //NOI18N
     public static final String START_PAGE_FILE_NAME = "application-start.html"; //NOI18N
     public static final String LOGIN_PAGE_FILE_NAME = "login.html"; //NOI18N
-    public static final String LOGIN_FAIL_PAGE_FILE_NAME = "login-failed.html"; //NOI18N
+    public static final String LOGIN_FAIL_PAGE_FILE_NAME = "login.html?failed=true"; //NOI18N
     public static final String START_JS_FILE_NAME = "start.js"; //NOI18N
     public static final String WEB_XML_FILE_NAME = "web.xml"; //NOI18N
     public static final String SERVLET_BEAN_NAME = "Servlet"; //NOI18N
