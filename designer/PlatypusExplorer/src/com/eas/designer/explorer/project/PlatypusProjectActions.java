@@ -35,7 +35,7 @@ public class PlatypusProjectActions implements ActionProvider {
     public static final String COMMAND_IMPORT = "import"; // NOI18N
     public static final String COMMAND_CONNECT = "connect-to-db"; // NOI18N
     public static final String COMMAND_DISCONNECT = "disconnect-from-db"; // NOI18N
-    public static final String COMMAND_CLEAR_WEB_DIR = "clear-web-dir"; // NOI18N
+    public static final String COMMAND_CLEAN = "clear"; // NOI18N
     /**
      * Some routine global actions for which we can supply a display name. These
      * are IDE-specific.
@@ -51,7 +51,7 @@ public class PlatypusProjectActions implements ActionProvider {
             COMMAND_IMPORT,
             COMMAND_CONNECT,
             COMMAND_DISCONNECT,
-            COMMAND_CLEAR_WEB_DIR));
+            COMMAND_CLEAN));
     protected PlatypusProject project;
 
     public PlatypusProjectActions(PlatypusProject aProject) {
@@ -98,8 +98,8 @@ public class PlatypusProjectActions implements ActionProvider {
                 case COMMAND_DISCONNECT:
                     project.disconnectFormDb();
                     break;
-                case COMMAND_CLEAR_WEB_DIR:
-                    clearWebDir();
+                case COMMAND_CLEAN:
+                    clean();
                     break;
             }
         } catch (Exception ex) {
@@ -115,7 +115,7 @@ public class PlatypusProjectActions implements ActionProvider {
             return !project.isDbConnected();
         } else if (COMMAND_DEPLOY.equals(command) || COMMAND_IMPORT.equals(command)) {
             return project.isDbConnected() && !project.getDeployer().isBusy();
-        } else if (COMMAND_CLEAR_WEB_DIR.equals(command)) {
+        } else if (COMMAND_CLEAN.equals(command)) {
             PlatypusWebModuleManager pwmm = project.getLookup().lookup(PlatypusWebModuleManager.class);
             assert pwmm != null;
             return pwmm.webDirExists();
@@ -188,7 +188,8 @@ public class PlatypusProjectActions implements ActionProvider {
         }
     }
 
-    private void clearWebDir() {
+    private void clean() {
+        project.getOutputWindowIO().getOut().println("Cleaning web direcory..");
         PlatypusWebModuleManager pwmm = project.getLookup().lookup(PlatypusWebModuleManager.class);
         assert pwmm != null;
         try {
