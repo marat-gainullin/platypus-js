@@ -75,7 +75,7 @@
         </style>
         <script>
             window.onload = function () {             
-                if (window.location.href.indexOf("j_security_check") != -1 || "true" == getURLParam("failed")) {
+                if (window.location.href.indexOf("j_security_check") != -1 || getURLParam("failed") == "true") {
                     document.getElementById("error").setAttribute("style", "display:block");	
                 }
             }
