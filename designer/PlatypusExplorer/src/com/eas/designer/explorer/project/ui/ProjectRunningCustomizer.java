@@ -85,7 +85,7 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
         String serverInstanceId = projectSettings.getJ2eeServerId();
         if (serverInstanceId != null && !serverInstanceId.isEmpty()) {
             for (int i = 0; i < cbj2eeServer.getItemCount(); i++) {
-                if (((J2eePlatformAdapter) cbj2eeServer.getItemAt(i)).getServerInstanceID().equals(serverInstanceId)) {
+                if (serverInstanceId.equals(((J2eePlatformAdapter) cbj2eeServer.getItemAt(i)).getServerInstanceID())) {
                     cbj2eeServer.setSelectedIndex(i);
                 }
             }
