@@ -18,8 +18,11 @@ import java.security.AccessControlException;
  */
 public class FilteredAppElementRequestHandler extends SessionRequestHandler<FilteredAppElementRequest> {
 
+    protected AppElementRequestHandler appElementHandler;
+    
     public FilteredAppElementRequestHandler(PlatypusServerCore aServerCore, Session aSession, FilteredAppElementRequest aRequest) {
         super(aServerCore, aSession, aRequest);
+        appElementHandler = new AppElementRequestHandler(aServerCore, aSession, aRequest);
     }
 
     @Override
@@ -32,7 +35,8 @@ public class FilteredAppElementRequestHandler extends SessionRequestHandler<Filt
                 return new FilteredAppElementRequest.FilteredResponse(filtered);
             }
         } else {
-            throw new IllegalStateException(String.format("Application element [%s] is absent!", getRequest().getAppElementId()));
+            appElementHandler.run();
+            return appElementHandler.getResponse();
         }
     }
 }

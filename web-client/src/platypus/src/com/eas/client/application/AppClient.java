@@ -71,7 +71,6 @@ public class AppClient {
 	public static final String APPLICATION_URI = "/application";
 	public static final String RESOURCES_URI = "/resources";
 	public static final String API_URI = "/api";
-	public static final String SCRIPTS_URI = "/scripts";
 	public static final String SELF_NAME = "_platypusModuleSelf";
 
 	public static final String SERVER_MODULE_BODY = "function %s () {\n" + "    window.platypus.defineServerModule(\"%s\", this);\n" + "}";
@@ -593,10 +592,10 @@ public class AppClient {
 		});
 	}
 
-	public String scriptUrl(String aScriptName) {
-		return baseUrl + SCRIPTS_URI + "/" + aScriptName;
+	public String resourceUri(String aResourceName) {
+		return RESOURCES_URI + "/" + aResourceName;
 	}
-
+	
 	public String resourceUrl(String aResourceName) {
 		return baseUrl + RESOURCES_URI + "/" + aResourceName;
 	}
@@ -623,8 +622,8 @@ public class AppClient {
 				}
 			};
 		} else {
-			String query = params(param(PlatypusHttpRequestParams.TYPE, String.valueOf(Requests.rqAppElement)), param(PlatypusHttpRequestParams.ENTITY_ID, appElementName));
-			return startRequest(API_URI, query, "", RequestBuilder.GET, new ResponseCallbackAdapter() {
+			String query = params(param(PlatypusHttpRequestParams.TYPE, String.valueOf(Requests.rqAppElement)));
+			return startRequest(resourceUri(appElementName), query, "", RequestBuilder.GET, new ResponseCallbackAdapter() {
 
 				@Override
 				public void doWork(XMLHttpRequest aResponse) throws Exception {
@@ -723,8 +722,8 @@ public class AppClient {
 				}
 
 				private native void callBack(JavaScriptObject onSuccess, String aData) throws Exception /*-{
-		onSuccess(JSON.parse(aData));
-	}-*/;
+					onSuccess(JSON.parse(aData));
+				}-*/;
 
 			}, null);
 			return null;

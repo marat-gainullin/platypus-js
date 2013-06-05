@@ -24,7 +24,7 @@ import org.mozilla.javascript.Scriptable;
  */
 public class ReportRunner extends ScriptRunner {
 
-    public static final String BEFORE_RENDER_HANDLER_NAME = "beforeRender"; //NOI18N
+    public static final String BEFORE_RENDER_HANDLER_NAME = "onBeforeRender"; //NOI18N
     protected byte[] template;
     private Function onBeforRender;
     
@@ -59,7 +59,7 @@ public class ReportRunner extends ScriptRunner {
                     "show",
                     "print",
                     "save"}, ReportRunner.class, EMPTY);
-        defineProperty("onBeforeRender", ReportRunner.class, EMPTY);
+        defineProperty(BEFORE_RENDER_HANDLER_NAME, ReportRunner.class, EMPTY);
     }
     private static final String SHOW_JSDOC = ""
             + "/**\n"
