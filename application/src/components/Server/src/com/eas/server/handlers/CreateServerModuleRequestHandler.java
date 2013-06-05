@@ -5,6 +5,8 @@
 package com.eas.server.handlers;
 
 import com.eas.client.model.application.ApplicationDbModel;
+import com.eas.client.reports.ReportDocument;
+import com.eas.client.scripts.ScriptDocument;
 import com.eas.client.threetier.Response;
 import com.eas.client.threetier.requests.CreateServerModuleRequest;
 import com.eas.client.threetier.requests.CreateServerModuleResponse;
@@ -44,14 +46,30 @@ public class CreateServerModuleRequestHandler extends SessionRequestHandler<Crea
     }
 
     public static ServerScriptRunner runModule(PlatypusServerCore aServerCore, Session aSession, String aModuleId) throws Exception {
-        ServerScriptRunner serverModule = new ServerScriptRunner(
-                aServerCore,
-                aSession,
-                new ModuleConfig(false, false, false, null, aModuleId),
-                ScriptUtils.getScope(),
-                aServerCore,
-                aServerCore,
-                aServerCore);
+        ServerScriptRunner serverModule = null;
+        ScriptDocument scriptDoc = aServerCore.getDocuments().compileScriptDocument(aModuleId);
+        if (scriptDoc != null) {
+            if (scriptDoc instanceof ReportDocument) {
+                serverModule = new ServerReportRunner(
+                        aServerCore,
+                        aSession,
+                        new ModuleConfig(false, false, false, null, aModuleId),
+                        ScriptUtils.getScope(),
+                        aServerCore,
+                        aServerCore,
+                        aServerCore);
+            }
+        }
+        if (serverModule == null) {
+            serverModule = new ServerScriptRunner(
+                    aServerCore,
+                    aSession,
+                    new ModuleConfig(false, false, false, null, aModuleId),
+                    ScriptUtils.getScope(),
+                    aServerCore,
+                    aServerCore,
+                    aServerCore);
+        }
         if (!serverModule.hasModuleAnnotation(JsDoc.Tag.PUBLIC_TAG)) {
             throw new AccessControlException(String.format("Public access to module %s is denied.", aModuleId));//NOI18N
         }

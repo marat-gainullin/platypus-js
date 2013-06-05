@@ -5,14 +5,18 @@
 package com.eas.server;
 
 import com.bearsoft.rowset.compacts.CompactBlob;
+import com.eas.client.events.ScriptSourcedEvent;
 import com.eas.client.login.PrincipalHost;
 import com.eas.client.reports.ExcelReport;
 import com.eas.client.reports.ReportDocument;
+import com.eas.client.reports.ReportRunner;
 import com.eas.client.scripts.CompiledScriptDocumentsHost;
 import com.eas.client.scripts.ScriptDocument;
 import com.eas.client.scripts.ScriptResolverHost;
 import com.eas.client.scripts.ScriptRunner;
+import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptUtils;
+import java.rmi.AccessException;
 import java.util.HashSet;
 import java.util.Set;
 import org.mozilla.javascript.*;
@@ -28,7 +32,6 @@ public class ServerScriptRunner extends ScriptRunner {
     private PlatypusServerCore serverCore;
     private Session creationSession;
     protected ModuleConfig config;
-    protected byte[] template;
 
     public ServerScriptRunner(PlatypusServerCore aServerCore, Session aCreationSession, ModuleConfig aConfig, ScriptableObject aScope, PrincipalHost aPrincipalHost, CompiledScriptDocumentsHost aCompiledScriptDocumentsHost, ScriptResolverHost aScriptResolverHost) throws Exception {
         super(aConfig.getModuleId(), aServerCore.getDatabasesClient(), aScope, aPrincipalHost, aCompiledScriptDocumentsHost, aScriptResolverHost);
@@ -50,20 +53,6 @@ public class ServerScriptRunner extends ScriptRunner {
         return serverCore;
     }
 
-    @Override
-    protected void prepare(ScriptDocument scriptDoc) throws Exception {
-        if (scriptDoc instanceof ReportDocument) {
-            template = ((ReportDocument) scriptDoc).getTemplate();
-        }
-        super.prepare(scriptDoc);
-    }
-
-    @Override
-    protected void shrink() throws Exception {
-        template = null;
-        super.shrink();
-    }
-
     public synchronized Object executeMethod(String methodName, Object[] arguments) throws Exception {
         Context context = ScriptUtils.enterContext();
         try {
@@ -81,7 +70,7 @@ public class ServerScriptRunner extends ScriptRunner {
                     }
                     return ScriptUtils.js2Java(f.call(context, this, this, arguments));
                 }
-            } 
+            }
             throw new IllegalArgumentException("Unknown method \"" + methodName + "()\"");
         } finally {
             Context.exit();
@@ -112,21 +101,9 @@ public class ServerScriptRunner extends ScriptRunner {
             Context.exit();
         }
     }
-
+    
     public synchronized byte[] executeReport() throws Exception {
-        ScriptUtils.enterContext();
-        try {
-            if (template != null) {
-                execute();
-                ExcelReport er = new ExcelReport(model, this);
-                er.setTemplate(new CompactBlob(template));
-                return er.create();
-            } else {
-                return null;
-            }
-        } finally {
-            Context.exit();
-        }
+        throw new AccessException("Module is not a \"report\".");
     }
 
     @Override
@@ -158,7 +135,7 @@ public class ServerScriptRunner extends ScriptRunner {
     }
 
     public boolean isReport() {
-        return template != null;
+        return false;
     }
 
     public ModuleConfig getModuleConfig() {
