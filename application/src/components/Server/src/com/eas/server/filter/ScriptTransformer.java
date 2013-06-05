@@ -248,7 +248,16 @@ public class ScriptTransformer {
                                 } else if (node == elGet.getTarget()) {
                                     elGet.setTarget(new PropertyGet(_this, name));
                                 }
-
+                            } else if (node.getParent() instanceof SwitchCase) {
+                                final SwitchCase switchCase = (SwitchCase) node.getParent();
+                                if (node == switchCase.getExpression()) {
+                                    switchCase.setExpression(new PropertyGet(_this, name));
+                                }
+                            } else if (node.getParent() instanceof SwitchStatement) {
+                                final SwitchStatement switchStatement = (SwitchStatement) node.getParent();
+                                if (node == switchStatement.getExpression()) {
+                                    switchStatement.setExpression(new PropertyGet(_this, name));
+                                }
                             }
                         }
                     } else {

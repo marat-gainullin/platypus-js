@@ -14,7 +14,6 @@ public class PlatypusHttpRequestParams {
     public static final String ID = "__id";
     public static final String TYPE = "__type";
     public static final String DATABASE_ID = "__databaseId";
-    public static final String ENTITY_ID = "__entityId";
     public static final String TEXT_CONTENT_SIZE = "__textContentSize";
     public static final String TEXT_CONTENT_CRC32 = "__textContentCRC32";
     public static final String SESSION_ID = "__sessionId";

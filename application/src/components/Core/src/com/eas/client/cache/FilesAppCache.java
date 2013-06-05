@@ -212,18 +212,26 @@ public class FilesAppCache extends AppElementsCache<Client> {
         }
         File resFile = new File((srcPathName + File.separatorChar + aId).replace('/', File.separatorChar));
         if (resFile.exists()) {
-            ApplicationElement appElement = new ApplicationElement();
-            appElement.setId(aId);
-            appElement.setName(resFile.getName());
-            appElement.setType(ClientConstants.ET_RESOURCE);
-            //appElement.setParentId(aParentDirectoryAppElementId);
-            appElement.setBinaryContent(FileUtils.readBytes(resFile));
-            // hack, but it works fine.
-            appElement.setTxtContentLength((long) appElement.getBinaryContent().length);
-            CRC32 crc = new CRC32();
-            crc.update(appElement.getBinaryContent());
-            appElement.setTxtCrc32(crc.getValue());
-            return appElement;
+            String ext = FileUtils.getFileExtension(resFile);
+            String fileName = resFile.getPath();
+            String withoutExt = ext != null && !ext.isEmpty() ? fileName.substring(0, fileName.length() - ext.length() - 1) : fileName;
+            AppElementFiles family = families.get(withoutExt);
+            if (family != null && family.hasExtension(ext) && family.getAppElementType() != null) {
+                return null;// application elements are not allowed to download partially!
+            } else {
+                ApplicationElement appElement = new ApplicationElement();
+                appElement.setId(aId);
+                appElement.setName(resFile.getName());
+                appElement.setType(ClientConstants.ET_RESOURCE);
+                //appElement.setParentId(aParentDirectoryAppElementId);
+                appElement.setBinaryContent(FileUtils.readBytes(resFile));
+                // hack, but it works fine.
+                appElement.setTxtContentLength((long) appElement.getBinaryContent().length);
+                CRC32 crc = new CRC32();
+                crc.update(appElement.getBinaryContent());
+                appElement.setTxtCrc32(crc.getValue());
+                return appElement;
+            }
         }
         return null;
     }

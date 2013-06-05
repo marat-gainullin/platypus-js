@@ -19,6 +19,7 @@ import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -29,6 +30,7 @@ import java.util.logging.Logger;
 public class HttpRequestSender implements PlatypusRequestVisitor {
 
     public static final String RESPONSE_MISSING_MSG = "%s must have a response.";
+    public static final String RESOURCES_URL_PREFIX = "/resources/";
     protected PlatypusHttpConnection conn;
 
     public HttpRequestSender(PlatypusHttpConnection aConnection) {
@@ -254,8 +256,9 @@ public class HttpRequestSender implements PlatypusRequestVisitor {
 
     @Override
     public void visit(IsAppElementActualRequest rq) throws Exception {
+        String encodedAppElementResourcePath = (new URI(null, null, rq.getAppElementId(), null)).toASCIIString();
+        conn.setUrlPrefix(RESOURCES_URL_PREFIX + encodedAppElementResourcePath);
         conn.setMethod(PlatypusHttpConstants.HTTP_METHOD_GET);
-        conn.putParam(PlatypusHttpRequestParams.ENTITY_ID, rq.getAppElementId());
         conn.putParam(PlatypusHttpRequestParams.TEXT_CONTENT_SIZE, rq.getTxtContentSize());
         conn.putParam(PlatypusHttpRequestParams.TEXT_CONTENT_CRC32, rq.getTxtContentCrc32());
         execute(rq);
@@ -264,12 +267,13 @@ public class HttpRequestSender implements PlatypusRequestVisitor {
 
     @Override
     public void visit(AppElementRequest rq) throws Exception {
+        String encodedAppElementResourcePath = (new URI(null, null, rq.getAppElementId(), null)).toASCIIString();
+        conn.setUrlPrefix(RESOURCES_URL_PREFIX + encodedAppElementResourcePath);
         conn.setMethod(PlatypusHttpConstants.HTTP_METHOD_GET);
-        conn.putParam(PlatypusHttpRequestParams.ENTITY_ID, rq.getAppElementId());
         execute(rq);
         assert rq.getResponse() != null : String.format(RESPONSE_MISSING_MSG, rq.getClass().getSimpleName());
     }
-   
+
     @Override
     public void visit(ExecuteServerReportRequest rq) throws Exception {
         conn.setMethod(PlatypusHttpConstants.HTTP_METHOD_POST);
