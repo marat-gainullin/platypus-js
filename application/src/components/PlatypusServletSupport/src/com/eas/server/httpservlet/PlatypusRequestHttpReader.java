@@ -291,7 +291,7 @@ public class PlatypusRequestHttpReader implements PlatypusRequestVisitor {
                 Object convertedParamValue;
                 if (param.getTypeInfo().getSqlType() == Types.DATE || param.getTypeInfo().getSqlType() == Types.TIMESTAMP || param.getTypeInfo().getSqlType() == Types.TIME) {
                     SimpleDateFormat sdf = new SimpleDateFormat(RowsetJsonConstants.DATE_FORMAT);
-                    convertedParamValue = converter.convert2RowsetCompatible(sdf.parse(paramValue), param.getTypeInfo());
+                    convertedParamValue = converter.convert2RowsetCompatible(paramValue != null ? sdf.parse(paramValue) : paramValue, param.getTypeInfo());
                 } else {
                     convertedParamValue = converter.convert2RowsetCompatible(paramValue, param.getTypeInfo());
                 }
