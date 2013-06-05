@@ -311,6 +311,8 @@ public class PlatypusHttpServlet extends HttpServlet {
                     Object result = ((ExecuteServerModuleMethodRequest.Response) response).getResult();
                     if (result instanceof ScriptableRowset) {
                         writeJsonRowsetResponse(((ScriptableRowset) result).unwrap(), aHttpResponse, aHttpRequest);
+                    } else if (result instanceof String) {
+                        writeStringResponse((String)result, aHttpResponse, HTML_CONTENTTYPE);
                     } else if (result instanceof NativeObject) {
                         writeJsonResponse(ScriptUtils.toJson(result), aHttpResponse);
                     } else if (result instanceof XMLObject) {
@@ -337,13 +339,20 @@ public class PlatypusHttpServlet extends HttpServlet {
                 } else if (response instanceof ExecuteServerReportRequest.Response) {
                     writeExcelResponse(((ExecuteServerReportRequest.Response) response).getResult(), aHttpResponse);
                 } else if (response instanceof AppElementRequest.Response && isResourceRequest(aHttpRequest)) {
-                    if (((AppElementRequest.Response) response).getAppElement().getType() == ClientConstants.ET_RESOURCE) {
-                        ApplicationElement appElement = ((AppElementRequest.Response) response).getAppElement();
-                        String mimeType = URLConnection.getFileNameMap().getContentTypeFor(appElement.getName());
-                        writeBinaryResponse(appElement.getBinaryContent(), aHttpResponse, mimeType);
-                        if (mimeType.contains("text")) {
-                            aHttpResponse.setCharacterEncoding(SettingsConstants.COMMON_ENCODING);
+                    AppElementRequest.Response appElementResponse = (AppElementRequest.Response) response;
+                    if (appElementResponse.getAppElement() != null) {
+                        if (appElementResponse.getAppElement().getType() == ClientConstants.ET_RESOURCE) {
+                            ApplicationElement appElement = ((AppElementRequest.Response) response).getAppElement();
+                            String mimeType = URLConnection.getFileNameMap().getContentTypeFor(appElement.getName());
+                            writeBinaryResponse(appElement.getBinaryContent(), aHttpResponse, mimeType);
+                            if (mimeType.contains("text")) {
+                                aHttpResponse.setCharacterEncoding(SettingsConstants.COMMON_ENCODING);
+                            }
+                        } else {
+                            aHttpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, String.format("Application element [%s] sould be platypus application resource, but it is not!", ((AppElementRequest) rq).getAppElementId()));
                         }
+                    } else {
+                        aHttpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, String.format("Application element [%s] is absent!", ((AppElementRequest) rq).getAppElementId()));
                     }
                 } else {
                     writeJsonResponse(SUCCESS_JSON, aHttpResponse);
@@ -529,7 +538,7 @@ public class PlatypusHttpServlet extends HttpServlet {
         ManagementFactory.getPlatformMBeanServer().registerMBean(aBean, new ObjectName(aName));
     }
 
-    private static void unRegisterMBean(String aName) throws MBeanRegistrationException, MalformedObjectNameException  {
+    private static void unRegisterMBean(String aName) throws MBeanRegistrationException, MalformedObjectNameException {
         try {
             ManagementFactory.getPlatformMBeanServer().unregisterMBean(new ObjectName(aName));
         } catch (InstanceNotFoundException ex) {

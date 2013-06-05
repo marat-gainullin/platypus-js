@@ -57,7 +57,7 @@ public class PlatypusWebModuleManager {
     public static final String J2EE_RESOURCES_PACKAGE = "/com/eas/designer/explorer/j2ee/resources/"; //NOI18N
     public static final String START_PAGE_FILE_NAME = "application-start.html"; //NOI18N
     public static final String LOGIN_PAGE_FILE_NAME = "login.html"; //NOI18N
-    public static final String LOGIN_FAIL_PAGE_FILE_NAME = "login-failed.html"; //NOI18N
+    public static final String LOGIN_FAIL_PAGE_FILE_NAME = "login.html?failed=true"; //NOI18N
     public static final String START_JS_FILE_NAME = "start.js"; //NOI18N
     public static final String WEB_XML_FILE_NAME = "web.xml"; //NOI18N
     public static final String SERVLET_BEAN_NAME = "Servlet"; //NOI18N
@@ -116,11 +116,11 @@ public class PlatypusWebModuleManager {
             prepareWebApplication();
             setStartApplicationElement(appElementId);
             if (webModule.getServerID() == null || webModule.getServerID().isEmpty()) {
-                project.getOutputWindowIO().getOut().println("Application server is not set. Check J2EE Server settings at Project's properties.");
+                project.getOutputWindowIO().getErr().println("Application server is not set. Check J2EE Server settings at Project's properties.");
                 return null;
             }
             if (webModule.getUrl() == null || webModule.getUrl().isEmpty()) {
-                project.getOutputWindowIO().getOut().println("J2EE Server context is not configured for the project.");
+                project.getOutputWindowIO().getErr().println("J2EE Server context is not configured for the project.");
                 return null;
             }
             setupWebApplication(webModule);
@@ -138,6 +138,34 @@ public class PlatypusWebModuleManager {
             ErrorManager.getDefault().notify(ex);
         }
         return webAppRunUrl;
+    }
+
+    /**
+     * Clears jars and Platypus Web Client in the project's web directory.
+     *
+     * @throws IOException I/O exception if unable to clear.
+     */
+    public void clearWebDir() throws IOException {
+        if (webDirExists()) {
+            webAppDir = projectDir.getFileObject(PlatypusWebModule.WEB_DIRECTORY);
+            if (webAppDir != null && webAppDir.isFolder()) {
+                webInfDir = webAppDir.getFileObject(PlatypusWebModule.WEB_INF_DIRECTORY);
+                if (webInfDir != null && webInfDir.isFolder()) {
+                    FileObject libsDir = webInfDir.getFileObject(PlatypusWebModule.LIB_DIRECTORY_NAME);
+                    if (libsDir != null && libsDir.isFolder()) {
+                        FileUtils.clearDirectory(FileUtil.toFile(libsDir));
+                    }
+                }
+            }
+            FileObject pwcDir = webAppDir.getFileObject(PLATYPUS_WEB_CLIENT_DIR_NAME);
+            if (pwcDir != null && pwcDir.isFolder()) {
+                FileUtils.clearDirectory(FileUtil.toFile(pwcDir));
+            }
+        }
+    }
+
+    public boolean webDirExists() {
+        return projectDir.getFileObject(PlatypusWebModule.WEB_DIRECTORY) != null && projectDir.getFileObject(PlatypusWebModule.WEB_DIRECTORY).isFolder();
     }
 
     /**

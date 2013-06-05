@@ -45,10 +45,7 @@ import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArrayString;
 import com.google.gwt.dom.client.FormElement;
 import com.google.gwt.dom.client.InputElement;
-import com.google.gwt.http.client.Header;
-import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
-import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.i18n.shared.DateTimeFormat;
@@ -58,6 +55,7 @@ import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.xhr.client.ReadyStateChangeHandler;
 import com.google.gwt.xhr.client.XMLHttpRequest;
+import com.google.gwt.xhr.client.XMLHttpRequest.ResponseType;
 import com.google.gwt.xml.client.Document;
 import com.google.gwt.xml.client.Node;
 import com.google.gwt.xml.client.XMLParser;
@@ -139,13 +137,13 @@ public class AppClient {
 		return res;
 	}
 
-	public static void jsLoad(String aResourceName, final JavaScriptObject aCompleteCallback) throws Exception {
-		SafeUri uri =  AppClient.getInstance().getResourceUri(aResourceName);
-		 AppClient.getInstance().startRequest(uri, new Callback<Response>() {
+	public static void jsLoad(String aResourceName, final JavaScriptObject aCompleteCallback, final boolean text) throws Exception {
+		SafeUri uri = AppClient.getInstance().getResourceUri(aResourceName);
+		AppClient.getInstance().startRequest(uri, text ? ResponseType.Default : ResponseType.ArrayBuffer, new Callback<XMLHttpRequest>() {
 			@Override
-			public void run(Response aResult) throws Exception {
-				if (aResult.getStatusCode() == Response.SC_OK) {
-					Utils.executeScriptEventVoid(aCompleteCallback, aCompleteCallback, Utils.toJs(aResult.getText()));
+			public void run(XMLHttpRequest aResult) throws Exception {
+				if (aResult.getStatus() == Response.SC_OK) {
+					Utils.executeScriptEventVoid(aCompleteCallback, aCompleteCallback, text ? Utils.toJs(aResult.getResponseText()) : aResult.<XMLHttpRequest2> cast().getResponse());
 				}
 			}
 
@@ -390,115 +388,103 @@ public class AppClient {
 	}
 
 	public static JavaScriptObject jsLogout(final JavaScriptObject onSuccess) throws Exception {
-		return Utils.publishCancellable(AppClient.getInstance().logout(new Callback<Response>() {
+		return Utils.publishCancellable(AppClient.getInstance().logout(new Callback<XMLHttpRequest>() {
 			@Override
 			public void cancel() {
 			}
 
 			@Override
-			public void run(Response aResult) throws Exception {
+			public void run(XMLHttpRequest aResult) throws Exception {
 				Utils.executeScriptEventVoid(onSuccess, onSuccess, null);
 			}
 		}));
 	}
 
-	public Cancellable hello(Callback<Response> onSuccess) throws Exception {
+	public Cancellable hello(Callback<XMLHttpRequest> onSuccess) throws Exception {
 		String query = param(PlatypusHttpRequestParams.TYPE, String.valueOf(Requests.rqHello));
 		return startRequest(API_URI, query, null, RequestBuilder.GET, onSuccess, null);
 	}
 
-	public Cancellable logout(Callback<Response> onSuccess) throws Exception {
+	public Cancellable logout(Callback<XMLHttpRequest> onSuccess) throws Exception {
 		String query = param(PlatypusHttpRequestParams.TYPE, String.valueOf(Requests.rqLogout));
 		return startRequest(API_URI, query, null, RequestBuilder.GET, onSuccess, null);
 	}
 
-	public Cancellable startRequest(String aUrlPrefix, final String aUrlQuery, String aBody, RequestBuilder.Method aMethod, final Callback<Response> onSuccess, final Callback<Response> onFailure)
-	        throws Exception {
+	public Cancellable startRequest(String aUrlPrefix, final String aUrlQuery, String aBody, RequestBuilder.Method aMethod, final Callback<XMLHttpRequest> onSuccess,
+	        final Callback<XMLHttpRequest> onFailure) throws Exception {
 		String url = baseUrl + aUrlPrefix + (aUrlQuery != null ? "?" + aUrlQuery : "");
-		RequestBuilder rb = new RequestBuilder(aMethod, url);
+		final XMLHttpRequest req = XMLHttpRequest.create();
+		req.open(aMethod.toString(), url);
 		if (RequestBuilder.POST.equals(aMethod)) {
-			rb.setHeader("Content-Type", "application/json; charset=utf-8");
+			req.setRequestHeader("Content-Type", "application/json; charset=utf-8");
 		}
-		interceptRequest(rb);
-		rb.setHeader("Pragma", "no-cache");
-		rb.setRequestData(aBody);
-		return startRequest(rb, onSuccess, onFailure);
+		interceptRequest(req);
+		req.setRequestHeader("Pragma", "no-cache");
+		return startRequest(req, aBody, onSuccess, onFailure);
 	}
 
-	public Cancellable startRequest(SafeUri aUri, final Callback<Response> onSuccess, final Callback<Response> onFailure) throws Exception {
-		RequestBuilder rb = new RequestBuilder(RequestBuilder.GET, aUri.asString());
-		interceptRequest(rb);
-		rb.setHeader("Pragma", "no-cache");
-		return startRequest(rb, onSuccess, onFailure);
+	public Cancellable startRequest(SafeUri aUri, ResponseType aResponseType, final Callback<XMLHttpRequest> onSuccess, final Callback<XMLHttpRequest> onFailure) throws Exception {
+		final XMLHttpRequest req = XMLHttpRequest.create();
+		req.open(RequestBuilder.GET.toString(), aUri.asString());
+		interceptRequest(req);
+		if (aResponseType != null && aResponseType != ResponseType.Default)
+			req.setResponseType(aResponseType);
+		req.setRequestHeader("Pragma", "no-cache");
+		return startRequest(req, null, onSuccess, onFailure);
 	}
 
-	public Cancellable startRequest(RequestBuilder rb, final Callback<Response> onSuccess, final Callback<Response> onFailure) throws Exception {
-		rb.setCallback(new RequestCallback() {
+	public Cancellable startRequest(SafeUri aUri, final Callback<XMLHttpRequest> onSuccess, final Callback<XMLHttpRequest> onFailure) throws Exception {
+		return startRequest(aUri, ResponseType.Default, onSuccess, onFailure);
+	}
 
-			@Override
-			public void onResponseReceived(Request request, Response response) {
-				try {
-					if (response.getStatusCode() == Response.SC_OK) {
-						if (onSuccess != null)
-							onSuccess.run(response);
+	public Cancellable startRequest(final XMLHttpRequest req, String requestData, final Callback<XMLHttpRequest> onSuccess, final Callback<XMLHttpRequest> onFailure) throws Exception {
+		// Must set the onreadystatechange handler before calling send().
+		req.setOnReadyStateChange(new ReadyStateChangeHandler() {
+			public void onReadyStateChange(XMLHttpRequest xhr) {
+				if (xhr.getReadyState() == XMLHttpRequest.DONE) {
+					xhr.clearOnReadyStateChange();
+					/*
+					 * We cannot use cancel here because it would clear the
+					 * contents of the JavaScript XmlHttpRequest object so we
+					 * manually null out our reference to the JavaScriptObject
+					 */
+					String errorMsg = XMLHttpRequest2.getBrowserSpecificFailure(req);
+					if (errorMsg != null) {
+						Throwable exception = new RuntimeException(errorMsg);
+						Logger.getLogger(AppClient.class.getName()).log(Level.SEVERE, null, exception);
+						try {
+							if (onFailure != null)
+								onFailure.run(xhr);
+						} catch (Exception ex) {
+							Logger.getLogger(AppClient.class.getName()).log(Level.SEVERE, null, ex);
+						}
 					} else {
-						if (onFailure != null)
-							onFailure.run(response);
+						try {
+							if (xhr.getStatus() == Response.SC_OK) {
+								if (onSuccess != null)
+									onSuccess.run(xhr);
+							} else {
+								if (onFailure != null)
+									onFailure.run(xhr);
+							}
+						} catch (Exception ex) {
+							Logger.getLogger(AppClient.class.getName()).log(Level.SEVERE, null, ex);
+						}
 					}
-				} catch (Exception ex) {
-					Logger.getLogger(AppClient.class.getName()).log(Level.SEVERE, null, ex);
-				}
-			}
-
-			@Override
-			public void onError(Request request, final Throwable exception) {
-				Logger.getLogger(AppClient.class.getName()).log(Level.SEVERE, null, exception);
-				try {
-					if (onFailure != null)
-						onFailure.run(new Response() {
-
-							@Override
-							public String getHeader(String header) {
-								return null;
-							}
-
-							@Override
-							public Header[] getHeaders() {
-								return null;
-							}
-
-							@Override
-							public String getHeadersAsString() {
-								return null;
-							}
-
-							@Override
-							public int getStatusCode() {
-								return 500;
-							}
-
-							@Override
-							public String getStatusText() {
-								return exception.getMessage();
-							}
-
-							@Override
-							public String getText() {
-								return exception.getMessage();
-							}
-
-						});
-				} catch (Exception ex) {
-					Logger.getLogger(AppClient.class.getName()).log(Level.SEVERE, null, ex);
 				}
 			}
 		});
-		final Request r = rb.send();
+
+		if (requestData != null)
+			req.send(requestData);
+		else
+			req.send();
 		return new Cancellable() {
 
 			@Override
 			public void cancel() {
-				r.cancel();
+				req.clearOnReadyStateChange();
+				req.abort();
 				if (onSuccess != null) {
 					onSuccess.cancel();
 				}
@@ -566,7 +552,7 @@ public class AppClient {
 		}
 	}-*/;
 
-	protected void interceptRequest(RequestBuilder rb) {
+	protected void interceptRequest(XMLHttpRequest req) {
 		// No-op here. Some implementation is in the tests.
 	}
 
@@ -575,8 +561,8 @@ public class AppClient {
 		return startRequest(API_URI, query, ChangesWriter.writeLog(changeLog), RequestBuilder.POST, new ResponseCallbackAdapter() {
 
 			@Override
-			public void doWork(Response aResponse) throws Exception {
-				Logger.getLogger(AppClient.class.getName()).log(Level.INFO, "Commit succeded: " + aResponse.getStatusCode() + " " + aResponse.getStatusText());
+			public void doWork(XMLHttpRequest aResponse) throws Exception {
+				Logger.getLogger(AppClient.class.getName()).log(Level.INFO, "Commit succeded: " + aResponse.getStatus() + " " + aResponse.getStatusText());
 				changeLog.clear();
 				for (TransactionListener l : transactionListeners.toArray(new TransactionListener[] {})) {
 					try {
@@ -591,8 +577,8 @@ public class AppClient {
 		}, new ResponseCallbackAdapter() {
 
 			@Override
-			public void doWork(Response aResponse) throws Exception {
-				Logger.getLogger(AppClient.class.getName()).log(Level.INFO, "Commit failed: " + aResponse.getStatusCode() + " " + aResponse.getStatusText());
+			public void doWork(XMLHttpRequest aResponse) throws Exception {
+				Logger.getLogger(AppClient.class.getName()).log(Level.INFO, "Commit failed: " + aResponse.getStatus() + " " + aResponse.getStatusText());
 				changeLog.clear();
 				for (TransactionListener l : transactionListeners.toArray(new TransactionListener[] {})) {
 					try {
@@ -620,12 +606,12 @@ public class AppClient {
 		return startRequest(API_URI, query, "", RequestBuilder.GET, new ResponseCallbackAdapter() {
 
 			@Override
-			protected void doWork(Response aResponse) throws Exception {
+			protected void doWork(XMLHttpRequest aResponse) throws Exception {
 			}
 		}, null);
 	}
 
-	public Cancellable getAppElement(final String appElementName, final Callback<Document> onSuccess, final Callback<Response> onFailure) throws Exception {
+	public Cancellable getAppElement(final String appElementName, final Callback<Document> onSuccess, final Callback<XMLHttpRequest> onFailure) throws Exception {
 		Document doc = appElements.get(appElementName);
 		if (doc != null) {
 			onSuccess.run(doc);
@@ -641,9 +627,9 @@ public class AppClient {
 			return startRequest(API_URI, query, "", RequestBuilder.GET, new ResponseCallbackAdapter() {
 
 				@Override
-				public void doWork(Response aResponse) throws Exception {
+				public void doWork(XMLHttpRequest aResponse) throws Exception {
 					// Some post processing
-					String text = aResponse.getText();
+					String text = aResponse.getResponseText();
 					Document doc = text != null && !text.isEmpty() ? XMLParser.parse(text) : null;
 					appElements.put(appElementName, doc);
 					//
@@ -669,10 +655,10 @@ public class AppClient {
 			return startRequest(API_URI, query, "", RequestBuilder.GET, new ResponseCallbackAdapter() {
 
 				@Override
-				public void doWork(Response aResponse) throws Exception {
+				public void doWork(XMLHttpRequest aResponse) throws Exception {
 					// Some post processing
 					String appElementName = aModuleName;
-					addServerModule(appElementName, aResponse.getText());
+					addServerModule(appElementName, aResponse.getResponseText());
 					Document doc = XMLParser.createDocument();
 					Node nd = doc.createElement("script");
 					doc.appendChild(nd);
@@ -686,7 +672,7 @@ public class AppClient {
 				}
 			}, new ResponseCallbackAdapter() {
 				@Override
-				protected void doWork(Response aResponse) throws Exception {
+				protected void doWork(XMLHttpRequest aResponse) throws Exception {
 					if (onFailure != null) {
 						onFailure.run(aResponse.getStatusText());
 					}
@@ -732,13 +718,13 @@ public class AppClient {
 			startRequest(API_URI, query, null, RequestBuilder.GET, new ResponseCallbackAdapter() {
 
 				@Override
-				public void doWork(Response aResponse) throws Exception {
-					callBack(onSuccess, aResponse.getText());
+				public void doWork(XMLHttpRequest aResponse) throws Exception {
+					callBack(onSuccess, aResponse.getResponseText());
 				}
 
 				private native void callBack(JavaScriptObject onSuccess, String aData) throws Exception /*-{
-					onSuccess(JSON.parse(aData));
-				}-*/;
+		onSuccess(JSON.parse(aData));
+	}-*/;
 
 			}, null);
 			return null;
@@ -759,7 +745,7 @@ public class AppClient {
 		return startRequest(API_URI, query, "", RequestBuilder.GET, new ResponseCallbackAdapter() {
 
 			@Override
-			public void doWork(Response aResponse) throws Exception {
+			public void doWork(XMLHttpRequest aResponse) throws Exception {
 				// Some post processing
 				Query query = readQuery(aResponse);
 				query.setClient(AppClient.this);
@@ -767,12 +753,12 @@ public class AppClient {
 				onSuccess.run(query);
 			}
 
-			private Query readQuery(Response aResponse) throws Exception {
-				return QueryReader.read(JSONParser.parseStrict(aResponse.getText()));
+			private Query readQuery(XMLHttpRequest aResponse) throws Exception {
+				return QueryReader.read(JSONParser.parseStrict(aResponse.getResponseText()));
 			}
 		}, new ResponseCallbackAdapter() {
 			@Override
-			protected void doWork(Response aResponse) throws Exception {
+			protected void doWork(XMLHttpRequest aResponse) throws Exception {
 				if (onFailure != null) {
 					onFailure.run(aResponse.getStatusText());
 				}
@@ -785,19 +771,19 @@ public class AppClient {
 		return startRequest(API_URI, query, "", RequestBuilder.GET, new ResponseCallbackAdapter() {
 
 			@Override
-			public void doWork(Response aResponse) throws Exception {
+			public void doWork(XMLHttpRequest aResponse) throws Exception {
 				// Some post processing
 				Rowset rowset = readRowset(aResponse);
 				//
 				onSuccess.run(rowset);
 			}
 
-			private Rowset readRowset(Response aResponse) throws Exception {
-				return RowsetReader.read(JSONParser.parseStrict(aResponse.getText()));
+			private Rowset readRowset(XMLHttpRequest aResponse) throws Exception {
+				return RowsetReader.read(JSONParser.parseStrict(aResponse.getResponseText()));
 			}
 		}, new ResponseCallbackAdapter() {
 			@Override
-			protected void doWork(Response aResponse) throws Exception {
+			protected void doWork(XMLHttpRequest aResponse) throws Exception {
 				if (onFailure != null) {
 					onFailure.run(aResponse.getStatusText());
 				}

@@ -37,7 +37,7 @@ public class Query {
     protected String title = null;
     protected String appElementId;
     protected boolean procedure = false;
-    protected boolean dml = false;
+    protected boolean manual = false;
     protected Set<String> readRoles = new HashSet();
     protected Set<String> writeRoles = new HashSet();
 
@@ -65,7 +65,7 @@ public class Query {
     protected Query(Query aSource) {
         if (aSource != null) {
             procedure = aSource.isProcedure();
-            dml = aSource.isDml();
+            manual = aSource.isManual();
             appElementId = aSource.getEntityId();
             String aTitle = aSource.getTitle();
             if (aTitle != null) {
@@ -199,13 +199,10 @@ public class Query {
     }
 
     /**
-     * Returns whether this query is data manipulation (INSERT, UPDATE, DELETE)
-     * query object or not.
-     *
-     * @return True if this query is data manipulation query.
+     * @return True if model avoid to execute this query automatically.
      */
-    public boolean isDml() {
-        return dml;
+    public boolean isManual() {
+        return manual;
     }
 
     /**
@@ -213,8 +210,8 @@ public class Query {
      *
      * @param aValue
      */
-    public void setDml(boolean aValue) {
-        dml = aValue;
+    public void setManual(boolean aValue) {
+        manual = aValue;
     }
 
     public Fields getFields() {

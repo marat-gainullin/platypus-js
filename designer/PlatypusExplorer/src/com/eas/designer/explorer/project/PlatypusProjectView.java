@@ -240,6 +240,8 @@ public class PlatypusProjectView implements LogicalViewProvider {
                     NbBundle.getMessage(PlatypusProjectView.class, "LBL_ConnectToDbAction_Name"), null)); // NOI18N
             actions.add(ProjectSensitiveActions.projectCommandAction(PlatypusProjectActions.COMMAND_DISCONNECT,
                     NbBundle.getMessage(PlatypusProjectView.class, "LBL_DisconnectFromDbAction_Name"), null)); // NOI18N
+            actions.add(ProjectSensitiveActions.projectCommandAction(PlatypusProjectActions.COMMAND_CLEAN,
+                    NbBundle.getMessage(PlatypusProjectView.class, "LBL_CleanAction_Name"), null)); // NOI18N
             actions.add(null);
             Action[] commonActions = CommonProjectActions.forType("org-netbeans-modules-platypus"); // NOI18N
             actions.addAll(Arrays.asList(commonActions));

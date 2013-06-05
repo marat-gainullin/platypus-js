@@ -398,6 +398,17 @@ public class ScriptTransformerTest {
     }
     
     @Test
+    public void testParseDependencies8() {
+        String va1 = "require(\"ANY_REPORT_NAME\", function(){var report = new ServerReport(\"ANY_REPORT_NAME\"); var report2 = new Report(\"ANY_REPORT_NAME\")});";
+        String va2 = "require(\"ANY_REPORT_NAME\", function() {\n  var report = new ServerReportANY_REPORT_NAME();\n  var report2 = new ServerReportANY_REPORT_NAME();\n});\n";
+        ScriptTransformer transformer = new ScriptTransformer(va1);
+        String va3 = transformer.transform();
+        assertEquals(va3, va2);
+        assertTrue(transformer.getDependencies().isEmpty());
+        assertTrue(transformer.getServerDependencies().isEmpty());
+    }
+    
+    @Test
     public void testExternalVariable() {
         String va1 = "model.save();";
         String va2 = "model.save();\n";
