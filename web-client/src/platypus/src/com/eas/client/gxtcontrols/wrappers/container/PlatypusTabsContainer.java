@@ -12,7 +12,21 @@ import com.sencha.gxt.widget.core.client.container.SimpleContainer;
 
 public class PlatypusTabsContainer extends SimpleContainer implements HasSelectionHandlers<Widget>, SelectionHandler<Widget> {
 
-	protected TabPanel tabs = new TabPanel();
+	protected static class PlatypusTabPanel extends TabPanel {
+		public PlatypusTabPanel() {
+			super();
+		}
+		
+		public void forceTabsLayout(){
+			for(int i=0;i<getWidgetCount();i++){
+				Widget w = getWidget(i);
+				TabItemConfig config = getConfig(w);
+				update(w, config);
+			}
+		}
+	}
+
+	protected PlatypusTabPanel tabs = new PlatypusTabPanel();
 
 	public PlatypusTabsContainer() {
 		super();
@@ -26,12 +40,12 @@ public class PlatypusTabsContainer extends SimpleContainer implements HasSelecti
 
 	@Override
 	public void onSelection(SelectionEvent<Widget> event) {
-		SelectionEvent.fire(this, null); 
+		SelectionEvent.fire(this, null);
 	}
 
 	@Override
 	public HandlerRegistration addSelectionHandler(SelectionHandler<Widget> handler) {
-	    return addHandler(handler, SelectionEvent.getType());
+		return addHandler(handler, SelectionEvent.getType());
 	}
 
 	public void add(Component aComponent, TabItemConfig aConfig) {
@@ -85,5 +99,9 @@ public class PlatypusTabsContainer extends SimpleContainer implements HasSelecti
 		for (int i = tabs.getWidgetCount(); i > 0; i--) {
 			tabs.remove(i - 1);
 		}
+	}
+
+	public void forceTabsLayout() {
+		tabs.forceTabsLayout();
 	}
 }

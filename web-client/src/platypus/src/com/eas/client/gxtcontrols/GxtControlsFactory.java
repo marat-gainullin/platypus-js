@@ -1108,11 +1108,16 @@ public class GxtControlsFactory {
 						// left & right components were processed in
 						// PlatypusSplitContainer's properties' closure.
 					} else if (parentComp instanceof PlatypusTabsContainer) {
-						PlatypusTabsContainer container = (PlatypusTabsContainer) parentComp;
+						final PlatypusTabsContainer container = (PlatypusTabsContainer) parentComp;
 						if (aConstraintsTag != null && aConstraintsTag.hasAttribute(TYPE_ATTRIBUTE)) {
 							String contraintsTypeName = aConstraintsTag.getAttribute(TYPE_ATTRIBUTE);
 							if ("TabsConstraintsDesignInfo".equalsIgnoreCase(contraintsTypeName)) {
-								container.add(top(aComponent), parseTabItemConfig(aConstraintsTag));
+								container.add(top(aComponent), parseTabItemConfig(aConstraintsTag, new ImageResourceCallback(){
+									@Override
+									public void run(ImageResource aResource) {
+										container.forceTabsLayout();
+									}
+								}));
 							} else
 								throw new IllegalStateException(TABS_CONSTRAINTS_TAG_NEEED + ", but not " + contraintsTypeName + " tag.");
 						} else
@@ -1352,7 +1357,7 @@ public class GxtControlsFactory {
 			return "";
 	}
 
-	private static TabItemConfig parseTabItemConfig(Element aTag) {
+	private static TabItemConfig parseTabItemConfig(Element aTag, final ImageResourceCallback aImageLoadedCallback) {
 		final TabItemConfig config = new TabItemConfig();
 		if (aTag.hasAttribute("tabTitle")) {
 			String value = aTag.getAttribute("tabTitle");
@@ -1370,6 +1375,8 @@ public class GxtControlsFactory {
 				@Override
 				public void run(ImageResource aResource) {
 					config.setIcon(aResource);
+					if(aImageLoadedCallback != null)
+						aImageLoadedCallback.run(aResource);
 				}
 			}));
 		}
