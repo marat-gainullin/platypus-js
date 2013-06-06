@@ -126,7 +126,7 @@ public class PlatypusCheckBox extends Field<Boolean> implements HasChangeHandler
 	}
 
 	public void setPlainValue(boolean value) {
-		super.setValue(value);
+		super.setValue(value, true);
 	}
 
 	@Override
