@@ -4,6 +4,7 @@
  */
 package com.eas.client.updater;
 
+import com.eas.util.FileUtils;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -22,13 +23,15 @@ import java.util.zip.ZipFile;
  */
 public class FileUpdater {
 
+    private final String PWC_DIRECTORY = "bin\\pwc\\";
     private String hostToFiles = "";
     private String curDir = "";
-    private UpdProgress updVis;
+    private UpdProgress updVis = null;
 
     /**
      * Creator
-     * @param host 
+     *
+     * @param host
      */
     public FileUpdater(String host) {
         hostToFiles = host;
@@ -37,8 +40,9 @@ public class FileUpdater {
 
     /**
      * Creator
+     *
      * @param host
-     * @param path  
+     * @param path
      */
     public FileUpdater(String host, String path) {
         hostToFiles = host;
@@ -46,7 +50,7 @@ public class FileUpdater {
     }
 
     /**
-     * 
+     *
      * @param in input stream with data
      * @param out output stream to save data to file
      * @throws IOException
@@ -63,30 +67,28 @@ public class FileUpdater {
     }
 
     /**
-     * Fixes the file sperator char for the target platform
-     * using the following replacement.
-     * 
-     * <ul>
-     *  <li> '/' ==>  File.separatorChar
-     *  <li> '\\' ==>  File.separatorChar
+     * Fixes the file sperator char for the target platform using the following
+     * replacement.
+     *
+     * <ul> <li> '/' ==> File.separatorChar <li> '\\' ==> File.separatorChar
      * </ul>
      *
      * @param arg the argument to fix
-     * @return the transformed argument 
+     * @return the transformed argument
      */
     public static String fixFileSeparatorChar(String arg) {
         return arg.replace(UpdaterConstants.SLASH_CHAR, File.separatorChar).replace(UpdaterConstants.BACKSLASH_CHAR, File.separatorChar);
     }
 
     /**
-     * 
+     *
      * @param zfn
      * @return
      */
     public boolean unPackZip(String zfn) {
         ZipFile zf = null;
         try {
-            File f =new File(zfn);  
+            File f = new File(zfn);
             if (f.exists()) {
                 zf = new ZipFile(zfn);
                 boolean res = false;
@@ -108,13 +110,15 @@ public class FileUpdater {
                     updVis.getProgress().setMaximum(cnt);
                 }
                 cnt = 0;
+                String pwcDir = fixFileSeparatorChar(curDir + PWC_DIRECTORY);
                 while (entries.hasMoreElements()) {
                     ZipEntry entry = (ZipEntry) entries.nextElement();
                     curFName = curDir + entry.getName();
                     curFName = fixFileSeparatorChar(curFName);
                     if (!entry.isDirectory()) {
                         ff = new File(curFName);
-                        if ((!ff.exists()) && (ff.getParent() != null) && (!ff.getName().contains(UpdaterConstants.UPDATER_FIND_LABEL))) {
+                        if ((!ff.exists()) && (ff.getParent() != null) && (!ff.getName().contains(UpdaterConstants.UPDATER_FIND_LABEL))
+                                && (!ff.getPath().contains(pwcDir))) {
                             cnt++;
                             Logger.getLogger(UpdaterConstants.LOGGER_NAME).log(Level.WARNING, "{0}|{1}", new Object[]{String.format(Updater.res.getString("fileNotFound"), ff.getName()), curFName});
                             continue;
@@ -126,7 +130,23 @@ public class FileUpdater {
                                 continue;
                             }
                         }
-                        write(zf.getInputStream(entry), new BufferedOutputStream(new FileOutputStream(curFName)));
+                        if (ff.getPath().contains(pwcDir)) {
+                            ff.getParentFile().mkdirs();
+                            if (ff.createNewFile()) {
+                                write(zf.getInputStream(entry), new BufferedOutputStream(new FileOutputStream(curFName)));
+                            } else {
+                                Logger.getLogger(UpdaterConstants.LOGGER_NAME).log(Level.WARNING,  ff.getPath());
+                            }
+                        } else {
+                            write(zf.getInputStream(entry), new BufferedOutputStream(new FileOutputStream(curFName)));
+                        }
+                    } else {
+                        if (curFName.equalsIgnoreCase(pwcDir)) {
+                            ff = new File(curFName);
+                            if (ff.exists()) {
+                                FileUtils.clearDirectory(ff);
+                            }
+                        }
                     }
                     cnt++;
                     if (updVis != null) {
@@ -157,7 +177,7 @@ public class FileUpdater {
     }
 
     /**
-     * 
+     *
      * @param fn file name to download zip file with update files
      * @return
      */
