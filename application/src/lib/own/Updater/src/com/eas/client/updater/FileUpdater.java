@@ -4,7 +4,6 @@
  */
 package com.eas.client.updater;
 
-import com.eas.util.FileUtils;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -80,6 +79,17 @@ public class FileUpdater {
         return arg.replace(UpdaterConstants.SLASH_CHAR, File.separatorChar).replace(UpdaterConstants.BACKSLASH_CHAR, File.separatorChar);
     }
 
+    public static void delete(File f) throws IOException {
+        if (f.isDirectory()) {
+            for (File c : f.listFiles()) {
+                delete(c);
+            }
+        }
+        if (!f.delete()) {
+            throw new IOException("Failed to delete file: " + f); // NOI18N
+        }
+    }
+    
     /**
      *
      * @param zfn
@@ -135,7 +145,7 @@ public class FileUpdater {
                             if (ff.createNewFile()) {
                                 write(zf.getInputStream(entry), new BufferedOutputStream(new FileOutputStream(curFName)));
                             } else {
-                                Logger.getLogger(UpdaterConstants.LOGGER_NAME).log(Level.WARNING,  ff.getPath());
+                                Logger.getLogger(UpdaterConstants.LOGGER_NAME).log(Level.WARNING, ff.getPath());
                             }
                         } else {
                             write(zf.getInputStream(entry), new BufferedOutputStream(new FileOutputStream(curFName)));
@@ -144,7 +154,9 @@ public class FileUpdater {
                         if (curFName.equalsIgnoreCase(pwcDir)) {
                             ff = new File(curFName);
                             if (ff.exists()) {
-                                FileUtils.clearDirectory(ff);
+                                for (File c : ff.listFiles()) {
+                                    delete(c);
+                                }
                             }
                         }
                     }
