@@ -67,42 +67,13 @@
                 font-size:11px;
                 font-weight:bold;
             }
-            #error {
-                color: red;
-                margin-bottom: 17px;
-                display:none;
-            }
         </style>
-        <script>
-            window.onload = function () {             
-                if (window.location.href.indexOf("j_security_check") != -1 || getURLParam("failed") == "true") {
-                    document.getElementById("error").setAttribute("style", "display:block");	
-                }
-            }
-            function getURLParam(name) {
-                var url = window.location.href;
-                var query_string = url.split("?");
-                if (query_string && query_string[1]) {
-                    var params = query_string[1].split("&");
-                    var i = 0;
-                    while (i < params.length) {
-                        var param_item = params[i].split("=");
-                        if (param_item && param_item[0] == name) {
-                            return param_item[1];
-                        }
-                        i++;
-                    }
-                }
-                return "";
-            }
-        </script>
     </head>
     <body>
         <div id="stylized" class="myform">
             <form id="form" name="form" action="j_security_check" method="POST" enctype="application/x-www-form-urlencoded">
                 <h1>Login to Application</h1>
                 <p>Powered by Platypus Platform</p>
-                <div id="error">Incorrect password or username entered.</div>
                 <label>Username
                 </label>
                 <input type="text" name="j_username" id="name" />
