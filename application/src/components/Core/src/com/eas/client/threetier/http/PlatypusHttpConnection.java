@@ -29,6 +29,7 @@ public class PlatypusHttpConnection extends PlatypusConnection {
     private String url;
     private Map<String, Object> params;
     private HttpURLConnection conn;
+    private String urlPrefix;
     private String method;
     protected Map<String, Cookie> cookies = new HashMap<>();
 
@@ -55,6 +56,7 @@ public class PlatypusHttpConnection extends PlatypusConnection {
         HttpRequestSender sender = new HttpRequestSender(this);
         aRequest.accept(sender);
         params.clear();
+        urlPrefix = null;
         if (aRequest.getResponse() instanceof ErrorResponse) {
             handleErrorResponse((ErrorResponse) aRequest.getResponse());
         }
@@ -67,13 +69,14 @@ public class PlatypusHttpConnection extends PlatypusConnection {
             conn = null;
         }
         params.clear();
+        urlPrefix = null;
     }
 
     public void killSession() {
         sessionId = null;
         password = null;
         login = null;
-        if(cookies != null) {
+        if (cookies != null) {
             cookies.clear();
         }
     }
@@ -92,7 +95,7 @@ public class PlatypusHttpConnection extends PlatypusConnection {
             conn.setDoOutput(true);
             conn.setDoInput(true);
             conn.setRequestProperty(PlatypusHttpConstants.HEADER_CONTENTTYPE, PlatypusHttpConstants.CONTENT_TYPE);
-            // Let's tell the truth...  conn.setRequestProperty(PlatypusHttpConstants.HEADER_USER_AGENT, "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/535.11 (KHTML, like Gecko) Chrome/17.0.963.79 Safari/535.11");
+            conn.setRequestProperty(PlatypusHttpConstants.HEADER_USER_AGENT, PlatypusHttpConstants.AGENT_NAME);
         }
         addCookies();
         if (login != null && password != null) {
@@ -103,6 +106,9 @@ public class PlatypusHttpConnection extends PlatypusConnection {
     private String assembleUrl() {
         StringBuilder buf = new StringBuilder();
         buf.append(url);
+        if (urlPrefix != null) {
+            buf.append(urlPrefix);
+        }
         if (params.size() > 0) {
             buf.append("?");
             int paramsCount = 0;
@@ -118,6 +124,10 @@ public class PlatypusHttpConnection extends PlatypusConnection {
 
         }
         return buf.toString();
+    }
+
+    public void setUrlPrefix(String aValue) {
+        urlPrefix = aValue;
     }
 
     public void putParam(String pName, Object pValue) {
@@ -173,10 +183,9 @@ public class PlatypusHttpConnection extends PlatypusConnection {
                 throw new Exception(String.format("Unsupported authorization schema '%s', only basic schema is supported.", authType));
             }
         } else {
-            if (responseCode == HttpURLConnection.HTTP_OK)// Unauthorized access is untypical for platypus application
+            if (responseCode != HttpURLConnection.HTTP_OK)// Unauthorized access is untypical for platypus application, but it is acceptable
             {
-                throw new Exception(String.format("No Platypus application found at %s", url));
-            } else {
+                //throw new Exception(String.format("No Platypus application found at %s", url));
                 throw new Exception(String.format("Error %d . %s", responseCode, responseMessage));
             }
         }

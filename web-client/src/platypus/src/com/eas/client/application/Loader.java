@@ -128,7 +128,7 @@ public class Loader {
 					Set<String> dependencies = new HashSet();
 					Set<String> queryDependencies = new HashSet();
 					Set<String> serverModuleDependencies = new HashSet();
-					if (aDoc != null)// There are some application element
+					if (aDoc != null)// There are some application elements
 									 // without xml-dom (plain scripts for
 									 // example)
 					{
@@ -217,7 +217,7 @@ public class Loader {
 
 			}));
 			//
-			String jsURL = client.scriptUrl(appElementName);
+			String jsURL = client.resourceUrl(appElementName);
 			ScriptElement oldScriptTag = injectedScripts.get(jsURL);
 			if (oldScriptTag != null)
 				oldScriptTag.removeFromParent();

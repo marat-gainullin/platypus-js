@@ -52,7 +52,7 @@ public class AppElementsFilter {
         "resizable", "minimized", "maximized", "minimizable", "maximizable",
         "minimize", "maximize", "restore", "toFront",
         "undecorated", "opacity", "alwaysOnTop",
-        "locationByPlatform", "left", "top", "width", "height", 
+        "locationByPlatform", "left", "top", "width", "height",
         "onWindowOpened", "onWindowClosing", "onWindowClosed", "onWindowMinimized",
         "onWindowRestored", "onWindowMaximized", "onWindowActivated", "onWindowDeactivated",
         "show", "showModal", "showOnPanel", "showInternalFrame", "close"
@@ -148,101 +148,96 @@ public class AppElementsFilter {
     }
 
     protected Filtered filter(ApplicationElement aAppElement) throws Exception {
-        if (aAppElement != null) {
-            if (aAppElement.getType() == ClientConstants.ET_RESOURCE) {
-                String source = new String(aAppElement.getBinaryContent(), SettingsConstants.COMMON_ENCODING);
-                return new Filtered("", source, checkResourceKindAndRoles(aAppElement, new ScriptDocument(null, source)));
-            } else {
-                String probableScript = null;
-                Document doc = aAppElement.getContent();
-                ScriptDocument scriptDoc = Dom2ScriptDocument.dom2ScriptDocument(serverCore.getDatabasesClient(), doc);
-                if (doc != null) {
-                    String moduleId = aAppElement.getId();
-                    Set<String> dependencies = null;
-                    Set<String> serverDependencies = null;
-                    assert doc.getChildNodes().getLength() == 1 : "Platypus application elements must contain only one root tag in xml DOM";
-                    Node rootNode = doc.getChildNodes().item(0);
-                    NodeList docNodes = rootNode.getChildNodes();
-                    for (int i = 0; i < docNodes.getLength(); i++) {
-                        Node docNode = docNodes.item(i);
-                        switch (docNode.getNodeName()) {
-                            case ApplicationElement.SCRIPT_SOURCE_TAG_NAME:
-                                String appSource = docNode.getTextContent();
-                                ScriptTransformer transformer = buildTransformer(appSource, scriptDoc.getModel());
-                                switch (aAppElement.getType()) {
-                                    case ClientConstants.ET_COMPONENT: {
-                                        for (String topLevelVarMethod : topLevelModulePropertiesAndMethods) {
-                                            transformer.addExternalVariable(topLevelVarMethod);
-                                        }
-                                        String constructorName = checkModuleName("Module", moduleId);
-                                        probableScript = String.format(BROWSER_MODULE_TEMPLATE,
-                                                constructorName, moduleId, transformer.transform(), moduleId, constructorName);
+        if (aAppElement != null && (aAppElement.getType() == ClientConstants.ET_FORM || aAppElement.getType() == ClientConstants.ET_COMPONENT || aAppElement.getType() == ClientConstants.ET_REPORT)) {
+            String probableScript = null;
+            Document doc = aAppElement.getContent();
+            ScriptDocument scriptDoc = Dom2ScriptDocument.dom2ScriptDocument(serverCore.getDatabasesClient(), doc);
+            if (doc != null) {
+                String moduleId = aAppElement.getId();
+                Set<String> dependencies = null;
+                Set<String> serverDependencies = null;
+                assert doc.getChildNodes().getLength() == 1 : "Platypus application elements must contain only one root tag in xml DOM";
+                Node rootNode = doc.getChildNodes().item(0);
+                NodeList docNodes = rootNode.getChildNodes();
+                for (int i = 0; i < docNodes.getLength(); i++) {
+                    Node docNode = docNodes.item(i);
+                    switch (docNode.getNodeName()) {
+                        case ApplicationElement.SCRIPT_SOURCE_TAG_NAME:
+                            String appSource = docNode.getTextContent();
+                            ScriptTransformer transformer = buildTransformer(appSource, scriptDoc.getModel());
+                            switch (aAppElement.getType()) {
+                                case ClientConstants.ET_COMPONENT: {
+                                    for (String topLevelVarMethod : topLevelModulePropertiesAndMethods) {
+                                        transformer.addExternalVariable(topLevelVarMethod);
                                     }
-                                    break;
-                                    case ClientConstants.ET_FORM: {
-                                        for (String topLevelVarMethod : topLevelFomPropertiesAndMethods) {
-                                            transformer.addExternalVariable(topLevelVarMethod);
-                                        }
-                                        addAsExternals(doc.getElementsByTagName("widget"), transformer);
-                                        addAsExternals(doc.getElementsByTagName("nonvisual"), transformer);
-                                        String constructorName = checkModuleName("Form", moduleId);
-                                        probableScript = String.format(BROWSER_FORM_TEMPLATE,
-                                                constructorName, moduleId, transformer.transform(), moduleId, constructorName);
-                                    }
-                                    break;
-                                    default:
-                                        throw new Exception("Application element of unexpected type occured. Only Modules, Forms and Reports are allowed be requested by browser.");
-                                }
-                                docNode.getParentNode().removeChild(docNode);
-                                dependencies = transformer.getDependencies();
-                                serverDependencies = transformer.getServerDependencies();
-                                break;
-                            case Model2XmlDom.DATAMODEL_TAG_NAME:
-                                NodeList entitiesNodes = docNode.getChildNodes();
-                                for (int l = 0; l < entitiesNodes.getLength(); l++) {
-                                    Node entityNode = entitiesNodes.item(l);
-                                    NamedNodeMap attrs = entityNode.getAttributes();
-                                    if (attrs != null) {
-                                        String[] attr2Remove = new String[]{
-                                            Model2XmlDom.ENTITY_LOCATION_X, Model2XmlDom.ENTITY_LOCATION_Y,
-                                            Model2XmlDom.ENTITY_SIZE_WIDTH, Model2XmlDom.ENTITY_SIZE_HEIGHT,
-                                            Model2XmlDom.ENTITY_ICONIFIED,
-                                            Model2XmlDom.TABLE_DB_ID_ATTR_NAME, Model2XmlDom.TABLE_NAME_ATTR_NAME, Model2XmlDom.TABLE_SCHEMA_NAME_ATTR_NAME};
-                                        for (String a2Remove : attr2Remove) {
-                                            if (attrs.getNamedItem(a2Remove) != null) {
-                                                attrs.removeNamedItem(a2Remove);
-                                            }
-                                        }
-                                    }
+                                    String constructorName = checkModuleName("Module", moduleId);
+                                    probableScript = String.format(BROWSER_MODULE_TEMPLATE,
+                                            constructorName, moduleId, transformer.transform(), moduleId, constructorName);
                                 }
                                 break;
-                            case "layout": {
-                                String title = ((Element) docNode).getAttribute("title");
-                                if (title == null || title.isEmpty()) {
-                                    ((Element) docNode).setAttribute("title", aAppElement.getName());
+                                case ClientConstants.ET_FORM: {
+                                    for (String topLevelVarMethod : topLevelFomPropertiesAndMethods) {
+                                        transformer.addExternalVariable(topLevelVarMethod);
+                                    }
+                                    addAsExternals(doc.getElementsByTagName("widget"), transformer);
+                                    addAsExternals(doc.getElementsByTagName("nonvisual"), transformer);
+                                    String constructorName = checkModuleName("Form", moduleId);
+                                    probableScript = String.format(BROWSER_FORM_TEMPLATE,
+                                            constructorName, moduleId, transformer.transform(), moduleId, constructorName);
+                                }
+                                break;
+                                default:
+                                    throw new Exception("Application element of unexpected type occured. Only Modules, Forms and Reports are allowed be requested by browser.");
+                            }
+                            docNode.getParentNode().removeChild(docNode);
+                            dependencies = transformer.getDependencies();
+                            serverDependencies = transformer.getServerDependencies();
+                            break;
+                        case Model2XmlDom.DATAMODEL_TAG_NAME:
+                            NodeList entitiesNodes = docNode.getChildNodes();
+                            for (int l = 0; l < entitiesNodes.getLength(); l++) {
+                                Node entityNode = entitiesNodes.item(l);
+                                NamedNodeMap attrs = entityNode.getAttributes();
+                                if (attrs != null) {
+                                    String[] attr2Remove = new String[]{
+                                        Model2XmlDom.ENTITY_LOCATION_X, Model2XmlDom.ENTITY_LOCATION_Y,
+                                        Model2XmlDom.ENTITY_SIZE_WIDTH, Model2XmlDom.ENTITY_SIZE_HEIGHT,
+                                        Model2XmlDom.ENTITY_ICONIFIED,
+                                        Model2XmlDom.TABLE_DB_ID_ATTR_NAME, Model2XmlDom.TABLE_NAME_ATTR_NAME, Model2XmlDom.TABLE_SCHEMA_NAME_ATTR_NAME};
+                                    for (String a2Remove : attr2Remove) {
+                                        if (attrs.getNamedItem(a2Remove) != null) {
+                                            attrs.removeNamedItem(a2Remove);
+                                        }
+                                    }
                                 }
                             }
                             break;
+                        case "layout": {
+                            String title = ((Element) docNode).getAttribute("title");
+                            if (title == null || title.isEmpty()) {
+                                ((Element) docNode).setAttribute("title", aAppElement.getName());
+                            }
                         }
+                        break;
                     }
-                    if (dependencies != null && !dependencies.isEmpty()) {
-                        for (String dependency : dependencies) {
-                            Node depencyNode = doc.createElement(DEPENDENCY_TAG_NAME);
-                            depencyNode.setTextContent(dependency);
-                            rootNode.appendChild(depencyNode);
-                        }
-                    }
-                    if (serverDependencies != null && !serverDependencies.isEmpty()) {
-                        for (String serverDependency : serverDependencies) {
-                            Node depencyNode = doc.createElement(SERVER_DEPENDENCY_TAG_NAME);
-                            depencyNode.setTextContent(serverDependency);
-                            rootNode.appendChild(depencyNode);
-                        }
-                    }
-                    return new Filtered(XmlDom2String.transform(doc), probableScript, checkResourceKindAndRoles(aAppElement, scriptDoc));
-                } else {
-                    return null;
                 }
+                if (dependencies != null && !dependencies.isEmpty()) {
+                    for (String dependency : dependencies) {
+                        Node depencyNode = doc.createElement(DEPENDENCY_TAG_NAME);
+                        depencyNode.setTextContent(dependency);
+                        rootNode.appendChild(depencyNode);
+                    }
+                }
+                if (serverDependencies != null && !serverDependencies.isEmpty()) {
+                    for (String serverDependency : serverDependencies) {
+                        Node depencyNode = doc.createElement(SERVER_DEPENDENCY_TAG_NAME);
+                        depencyNode.setTextContent(serverDependency);
+                        rootNode.appendChild(depencyNode);
+                    }
+                }
+                return new Filtered(XmlDom2String.transform(doc), probableScript, checkResourceKindAndRoles(aAppElement, scriptDoc));
+            } else {
+                return null;
             }
         } else {
             return null;

@@ -101,20 +101,23 @@ public class PlatypusFormDataObject extends PlatypusModuleDataObject {
     @Override
     protected void clientChanged() {
         super.clientChanged();
-        FormModel formModel = getLookup().lookup(PlatypusFormSupport.class).getFormModel();
-        if (formModel != null) {
-            Collection<RADComponent<?>> components = formModel.getAllComponents();
-            for (RADComponent<?> comp : components) {
-                if (comp.getBeanInstance() instanceof DbControl) {
-                    try {
-                        DbControl dbControl = ((DbControl) comp.getBeanInstance());
-                        if (getClient() != null) {
-                            dbControl.setModel(getModel());
-                        } else {
-                            dbControl.setModel(null);
+        PlatypusFormSupport formSupport = getLookup().lookup(PlatypusFormSupport.class);
+        if (formSupport != null) {
+            FormModel formModel = formSupport.getFormModel();
+            if (formModel != null) {
+                Collection<RADComponent<?>> components = formModel.getAllComponents();
+                for (RADComponent<?> comp : components) {
+                    if (comp.getBeanInstance() instanceof DbControl) {
+                        try {
+                            DbControl dbControl = ((DbControl) comp.getBeanInstance());
+                            if (getClient() != null) {
+                                dbControl.setModel(getModel());
+                            } else {
+                                dbControl.setModel(null);
+                            }
+                        } catch (Exception ex) {
+                            ErrorManager.getDefault().notify(ex);
                         }
-                    } catch (Exception ex) {
-                        ErrorManager.getDefault().notify(ex);
                     }
                 }
             }

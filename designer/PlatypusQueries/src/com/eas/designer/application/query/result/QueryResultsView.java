@@ -654,11 +654,12 @@ public class QueryResultsView extends javax.swing.JPanel {
                 try {
                     int modified = 0;
                     Fields fields = event.getRow().getFields();
+                    List<Field> pks = fields.getPrimaryKeys();
                     for (int i = 1; i <= fields.getFieldsCount(); i++) {
                         Field field = fields.get(i);
                         if (!field.isNullable()) {
                             Object oValue;
-                            if (field.isFk()) {// ask a user about a fk-field value
+                            if (field.isFk() || pks.isEmpty()) {// ask a user about a fk-field value and all other fields if primary keys are absent
                                 String sValue = askFieldValue(field);
                                 if (sValue == null) {
                                     return false;

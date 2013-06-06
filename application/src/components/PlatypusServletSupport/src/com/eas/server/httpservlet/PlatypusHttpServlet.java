@@ -246,129 +246,27 @@ public class PlatypusHttpServlet extends HttpServlet {
      * over http" requests.
      *
      * @param aHttpRequest
-     * @param aSession
+     * @param aPlatypusSession
      * @param aHttpResponse
      * @param aHttpSession
      * @throws Exception
      */
-    private void processPlatypusRequest(final HttpServletRequest aHttpRequest, final HttpServletResponse aHttpResponse, Session aSession, HttpSession aHttpSession) throws Exception {
-        Request rq = readPlatypusRequest(aHttpRequest, aHttpResponse, aSession);
+    private void processPlatypusRequest(final HttpServletRequest aHttpRequest, final HttpServletResponse aHttpResponse, Session aPlatypusSession, HttpSession aHttpSession) throws Exception {
+        Request platypusRequest = readPlatypusRequest(aHttpRequest, aHttpResponse, aPlatypusSession);
         try {
-            RequestHandler<?> handler;
-            if (rq instanceof FilteredAppElementRequest) {
-                handler = new FilteredAppElementRequestHandler(serverCore, aSession, (FilteredAppElementRequest) rq);
-            } else {
-                handler = RequestHandlerFactory.getHandler(serverCore, aSession, rq);
-            }
-            if (handler instanceof ExecuteServerModuleMethodRequestHandler) {
-                ((ExecuteServerModuleMethodRequestHandler) handler).setExecuteEventsCallback(new ExecuteServerModuleMethodRequestHandler.ExecuteEventsCallback() {
-                    @Override
-                    public void beforeExecute(ServerScriptRunner ssr) {
-                        ssr.defineProperty(HTTP_HOST_OBJECT_NAME, HttpScriptContext.getInstance(ssr, aHttpRequest, aHttpResponse), ScriptableObject.READONLY);
-                    }
-
-                    @Override
-                    public void afterExecute(ServerScriptRunner ssr) {
-                        ssr.delete(HTTP_HOST_OBJECT_NAME);
-                    }
-                });
-            }
+            RequestHandler<?> handler = findPlatypusHandler(platypusRequest, aPlatypusSession, aHttpRequest, aHttpResponse);
             handler.run();
             Response response = handler.getResponse();
-            if (isApiRequest(aHttpRequest) || isScriptRequest(aHttpRequest) || isResourceRequest(aHttpRequest)) {
-                if (response instanceof ErrorResponse) {
-                    ErrorResponse er = (ErrorResponse) response;
-                    if (er.isAccessControl()) {
-                        if (isScriptRequest(aHttpRequest)) {
-                            assert rq instanceof FilteredAppElementRequest;
-                            String moduleId = ((FilteredAppElementRequest) rq).getAppElementId();
-                            if (moduleId != null && !moduleId.isEmpty()) {
-                                String userName = getPrincipal(aHttpRequest).getName();
-                                if (Character.isDigit(moduleId.charAt(0))) {
-                                    String moduleConstructor = AppElementsFilter.checkModuleName("Module", moduleId);
-                                    String formConstructor = AppElementsFilter.checkModuleName("Form", moduleId);
-                                    writeJsonResponse(
-                                            String.format(AppElementsFilter.SECURITY_VIOLATION_TEMPLATE, moduleConstructor, moduleId, userName) + "\n"
-                                            + String.format(AppElementsFilter.SECURITY_VIOLATION_TEMPLATE, formConstructor, moduleId, userName), aHttpResponse);
-                                } else {
-                                    writeJsonResponse(String.format(AppElementsFilter.SECURITY_VIOLATION_TEMPLATE, moduleId, moduleId, userName), aHttpResponse);
-                                }
-                            } else {
-                                aHttpResponse.sendError(HttpServletResponse.SC_FORBIDDEN, er.getError());
-                            }
-                        } else {
-                            aHttpResponse.sendError(HttpServletResponse.SC_FORBIDDEN, er.getError());
-                        }
-                    } else {
-                        aHttpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, er.getError());
-                    }
-                } else if (response instanceof RowsetResponse) {
-                    writeJsonRowsetResponse(((RowsetResponse) response).getRowset(), aHttpResponse, aHttpRequest);
-                } else if (response instanceof CreateServerModuleResponse) {
-                    CreateServerModuleResponse csmr = (CreateServerModuleResponse) response;
-                    writeJsonResponse(moduleResponseToJson(csmr.getFunctionsNames(), csmr.isReport()), aHttpResponse);
-                } else if (response instanceof ExecuteServerModuleMethodRequest.Response) {
-                    Object result = ((ExecuteServerModuleMethodRequest.Response) response).getResult();
-                    if (result instanceof ScriptableRowset) {
-                        writeJsonRowsetResponse(((ScriptableRowset) result).unwrap(), aHttpResponse, aHttpRequest);
-                    } else if (result instanceof String) {
-                        writeStringResponse((String)result, aHttpResponse, HTML_CONTENTTYPE);
-                    } else if (result instanceof NativeObject) {
-                        writeJsonResponse(ScriptUtils.toJson(result), aHttpResponse);
-                    } else if (result instanceof XMLObject) {
-                        writeStringResponse(ScriptUtils.toXMLString((XMLObject) result), aHttpResponse, HTML_CONTENTTYPE);
-                    } else {
-                        ScriptUtils.enterContext();
-                        try {
-                            writeJsonResponse(ScriptUtils.toJson(ScriptUtils.javaToJS(result, ScriptUtils.getScope())), aHttpResponse);
-                        } finally {
-                            Context.exit();
-                        }
-                    }
-                } else if (response instanceof AppQueryResponse) {
-                    Query<?> query = ((AppQueryResponse) response).getAppQuery();
-                    writeQueryResponse(query, aHttpResponse);
-                } else if (response instanceof FilteredAppElementRequest.FilteredResponse) {
-                    if (isScriptRequest(aHttpRequest)) {
-                        writeJsonResponse(((FilteredAppElementRequest.FilteredResponse) response).getFilteredScript(), aHttpResponse);
-                    } else {
-                        writeJsonResponse(((FilteredAppElementRequest.FilteredResponse) response).getFilteredContent(), aHttpResponse);
-                    }
-                } else if (response instanceof StartAppElementRequest.Response) {
-                    writeJsonResponse(String.valueOf(((StartAppElementRequest.Response) response).getAppElementId()), aHttpResponse);
-                } else if (response instanceof ExecuteServerReportRequest.Response) {
-                    writeExcelResponse(((ExecuteServerReportRequest.Response) response).getResult(), aHttpResponse);
-                } else if (response instanceof AppElementRequest.Response && isResourceRequest(aHttpRequest)) {
-                    AppElementRequest.Response appElementResponse = (AppElementRequest.Response) response;
-                    if (appElementResponse.getAppElement() != null) {
-                        if (appElementResponse.getAppElement().getType() == ClientConstants.ET_RESOURCE) {
-                            ApplicationElement appElement = ((AppElementRequest.Response) response).getAppElement();
-                            String mimeType = URLConnection.getFileNameMap().getContentTypeFor(appElement.getName());
-                            writeBinaryResponse(appElement.getBinaryContent(), aHttpResponse, mimeType);
-                            if (mimeType.contains("text")) {
-                                aHttpResponse.setCharacterEncoding(SettingsConstants.COMMON_ENCODING);
-                            }
-                        } else {
-                            aHttpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, String.format("Application element [%s] sould be platypus application resource, but it is not!", ((AppElementRequest) rq).getAppElementId()));
-                        }
-                    } else {
-                        aHttpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, String.format("Application element [%s] is absent!", ((AppElementRequest) rq).getAppElementId()));
-                    }
-                } else {
-                    writeJsonResponse(SUCCESS_JSON, aHttpResponse);
-                }
-            } else {
-                sendPlatypusResponse(response, aHttpResponse);
-            }
-            if (rq.getType() == Requests.rqLogout) {
+            sendPlatypusResponse(aHttpRequest, platypusRequest, response, aHttpResponse);
+            if (platypusRequest.getType() == Requests.rqLogout) {
                 aHttpRequest.logout();
                 aHttpSession.invalidate();
             }
         } catch (Exception ex) {
             Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, REQUEST_PROCESSSING_ERROR_MSG, ex);
-            ErrorResponse er = new ErrorResponse(rq.getID(), ex.getMessage());
+            ErrorResponse er = new ErrorResponse(platypusRequest.getID(), ex.getMessage());
             try {
-                sendPlatypusResponse(er, aHttpResponse);
+                sendJ2SEResponse(er, aHttpResponse);
             } catch (Exception e) {
                 Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, ERRORRESPONSE_ERROR_MSG, e);
             }
@@ -423,12 +321,14 @@ public class PlatypusHttpServlet extends HttpServlet {
     }
 
     private void writeBinaryResponse(byte[] aResponseData, HttpServletResponse aResponse, String aContentType) throws UnsupportedEncodingException, IOException {
-        aResponse.setContentType(aContentType);
+        if (aContentType != null) {
+            aResponse.setContentType(aContentType);
+        }
         aResponse.setContentLength(aResponseData.length);
         aResponse.getOutputStream().write(aResponseData);
     }
 
-    private void sendPlatypusResponse(Response aPlatypusResponse, HttpServletResponse aResponse) throws Exception {
+    private void sendJ2SEResponse(Response aPlatypusResponse, HttpServletResponse aResponse) throws Exception {
         ByteArrayOutputStream baOut = new ByteArrayOutputStream();
         ProtoWriter pw = new ProtoWriter(baOut);
         PlatypusResponseWriter.write(aPlatypusResponse, pw);
@@ -481,32 +381,26 @@ public class PlatypusHttpServlet extends HttpServlet {
     }// </editor-fold>
 
     protected Request readPlatypusRequest(HttpServletRequest aRequest, HttpServletResponse aResponse, Session aSession) throws Exception {
-        String sType = aRequest.getParameter(PlatypusHttpRequestParams.TYPE);
+        if (!isApiRequest(aRequest) && !isResourceRequest(aRequest) && !isJ2SERequest(aRequest)) {
+            Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, REQUEST_PARAMETER_MISSING_MSG, PlatypusHttpRequestParams.ID);
+            throw new Exception(REQUEST_NOT_CORRECT_MSG + " -1- ");
+        }
         int rqType;
-        if (sType != null) {
-            rqType = Integer.valueOf(sType);
+        if (isResourceRequest(aRequest)) {
+            rqType = Requests.rqAppElement;
         } else {
-            if (isScriptRequest(aRequest) || isResourceRequest(aRequest)) {
-                rqType = Requests.rqAppElement;
+            String sType = aRequest.getParameter(PlatypusHttpRequestParams.TYPE);
+            if (sType != null) {
+                rqType = Integer.valueOf(sType);
             } else {
                 Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, REQUEST_PARAMETER_MISSING_MSG, PlatypusHttpRequestParams.TYPE);
                 throw new Exception(REQUEST_NOT_CORRECT_MSG + " -0- ");
             }
         }
-        long rqId = 0;
-        String sId = aRequest.getParameter(PlatypusHttpRequestParams.ID);
-        if (sId != null) {
-            rqId = Long.valueOf(sId);
-        } else if (!isApiRequest(aRequest) && !isScriptRequest(aRequest) && !isResourceRequest(aRequest)) {
-            Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, REQUEST_PARAMETER_MISSING_MSG, PlatypusHttpRequestParams.ID);
-            throw new Exception(REQUEST_NOT_CORRECT_MSG + " -1- ");
-        }
-        Request rq = PlatypusRequestsFactory.create(rqId, rqType);
-        PlatypusRequestHttpReader reader = new PlatypusRequestHttpReader(serverCore, rqId, aRequest, extractURI(aRequest));
+        Request rq = PlatypusRequestsFactory.create(IDGenerator.genID(), rqType);
+        PlatypusRequestHttpReader reader = new PlatypusRequestHttpReader(serverCore, rq.getID(), aRequest, extractURI(aRequest));
         rq.accept(reader);
-        // Special case of resqest only for browsers.
-        // Because of that we can't place it in core code and we can't generalize it.
-        if ((isApiRequest(aRequest) || isScriptRequest(aRequest)) && rq instanceof AppElementRequest) {
+        if (rq instanceof AppElementRequest && !isJ2SERequest(aRequest)) {
             rq = new FilteredAppElementRequest(((AppElementRequest) rq).getAppElementId());
         }
         if (rq == null) {
@@ -524,12 +418,12 @@ public class PlatypusHttpServlet extends HttpServlet {
         return PlatypusRequestHttpReader.isApiUri(extractURI(aRequest));
     }
 
-    private boolean isScriptRequest(HttpServletRequest aRequest) {
-        return PlatypusRequestHttpReader.isScriptUri(extractURI(aRequest));
-    }
-
     private boolean isResourceRequest(HttpServletRequest aRequest) {
         return PlatypusRequestHttpReader.isResourceUri(extractURI(aRequest));
+    }
+
+    private boolean isJ2SERequest(HttpServletRequest aRequest) {
+        return PlatypusHttpConstants.AGENT_NAME.equals(aRequest.getHeader(PlatypusHttpConstants.HEADER_USER_AGENT));
     }
 
     private static void registerMBean(String aName, Object aBean) throws Exception {
@@ -544,5 +438,120 @@ public class PlatypusHttpServlet extends HttpServlet {
         } catch (InstanceNotFoundException ex) {
             //no-op
         }
+    }
+
+    private void sendPlatypusResponse(final HttpServletRequest aHttpRequest, Request aPlatypusRequest, Response aPlatypusResponse, final HttpServletResponse aHttpResponse) throws Exception {
+        if (isJ2SERequest(aHttpRequest)) {// platypus http client
+            sendJ2SEResponse(aPlatypusResponse, aHttpResponse);
+        } else { // browsers
+            assert isApiRequest(aHttpRequest) || isResourceRequest(aHttpRequest) : "Unknown request uri. Requests uri should be /api or /resources";
+            if (aPlatypusResponse instanceof ErrorResponse) {
+                ErrorResponse er = (ErrorResponse) aPlatypusResponse;
+                if (er.isAccessControl()) {
+                    if (aPlatypusRequest instanceof FilteredAppElementRequest) {
+                        String moduleId = ((FilteredAppElementRequest) aPlatypusRequest).getAppElementId();
+                        if (moduleId != null && !moduleId.isEmpty()) {
+                            String userName = getPrincipal(aHttpRequest).getName();
+                            if (Character.isDigit(moduleId.charAt(0))) {
+                                String moduleConstructor = AppElementsFilter.checkModuleName("Module", moduleId);
+                                String formConstructor = AppElementsFilter.checkModuleName("Form", moduleId);
+                                writeJsonResponse(
+                                        String.format(AppElementsFilter.SECURITY_VIOLATION_TEMPLATE, moduleConstructor, moduleId, userName) + "\n"
+                                        + String.format(AppElementsFilter.SECURITY_VIOLATION_TEMPLATE, formConstructor, moduleId, userName), aHttpResponse);
+                            } else {
+                                writeJsonResponse(String.format(AppElementsFilter.SECURITY_VIOLATION_TEMPLATE, moduleId, moduleId, userName), aHttpResponse);
+                            }
+                        } else {
+                            aHttpResponse.sendError(HttpServletResponse.SC_FORBIDDEN, er.getError());
+                        }
+                    } else {
+                        aHttpResponse.sendError(HttpServletResponse.SC_FORBIDDEN, er.getError());
+                    }
+                } else {
+                    aHttpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, er.getError());
+                }
+            } else if (aPlatypusResponse instanceof RowsetResponse) {
+                writeJsonRowsetResponse(((RowsetResponse) aPlatypusResponse).getRowset(), aHttpResponse, aHttpRequest);
+            } else if (aPlatypusResponse instanceof CreateServerModuleResponse) {
+                CreateServerModuleResponse csmr = (CreateServerModuleResponse) aPlatypusResponse;
+                writeJsonResponse(moduleResponseToJson(csmr.getFunctionsNames(), csmr.isReport()), aHttpResponse);
+            } else if (aPlatypusResponse instanceof ExecuteServerModuleMethodRequest.Response) {
+                Object result = ((ExecuteServerModuleMethodRequest.Response) aPlatypusResponse).getResult();
+                if (result instanceof ScriptableRowset) {
+                    writeJsonRowsetResponse(((ScriptableRowset) result).unwrap(), aHttpResponse, aHttpRequest);
+                } else if (result instanceof String) {
+                    writeStringResponse((String) result, aHttpResponse, HTML_CONTENTTYPE);
+                } else if (result instanceof NativeObject) {
+                    writeJsonResponse(ScriptUtils.toJson(result), aHttpResponse);
+                } else if (result instanceof XMLObject) {
+                    writeStringResponse(ScriptUtils.toXMLString((XMLObject) result), aHttpResponse, HTML_CONTENTTYPE);
+                } else {
+                    ScriptUtils.enterContext();
+                    try {
+                        writeJsonResponse(ScriptUtils.toJson(ScriptUtils.javaToJS(result, ScriptUtils.getScope())), aHttpResponse);
+                    } finally {
+                        Context.exit();
+                    }
+                }
+            } else if (aPlatypusResponse instanceof AppQueryResponse) {
+                Query<?> query = ((AppQueryResponse) aPlatypusResponse).getAppQuery();
+                writeQueryResponse(query, aHttpResponse);
+            } else if (aPlatypusResponse instanceof FilteredAppElementRequest.FilteredResponse) {
+                if (isResourceRequest(aHttpRequest) && aHttpRequest.getParameter(PlatypusHttpRequestParams.TYPE) == null) {// pure resource request
+                    writeJsonResponse(((FilteredAppElementRequest.FilteredResponse) aPlatypusResponse).getFilteredScript(), aHttpResponse);
+                } else {
+                    writeJsonResponse(((FilteredAppElementRequest.FilteredResponse) aPlatypusResponse).getFilteredContent(), aHttpResponse);
+                }
+            } else if (aPlatypusResponse instanceof StartAppElementRequest.Response) {
+                writeJsonResponse(String.valueOf(((StartAppElementRequest.Response) aPlatypusResponse).getAppElementId()), aHttpResponse);
+            } else if (aPlatypusResponse instanceof ExecuteServerReportRequest.Response) {
+                writeExcelResponse(((ExecuteServerReportRequest.Response) aPlatypusResponse).getResult(), aHttpResponse);
+            } else if (aPlatypusResponse instanceof AppElementRequest.Response) {
+                if (isResourceRequest(aHttpRequest) && aHttpRequest.getParameter(PlatypusHttpRequestParams.TYPE) == null) {
+                    AppElementRequest.Response appElementResponse = (AppElementRequest.Response) aPlatypusResponse;
+                    if (appElementResponse.getAppElement() != null) {
+                        if (appElementResponse.getAppElement().getType() == ClientConstants.ET_RESOURCE) {
+                            ApplicationElement appElement = ((AppElementRequest.Response) aPlatypusResponse).getAppElement();
+                            String mimeType = URLConnection.getFileNameMap().getContentTypeFor(appElement.getName());
+                            writeBinaryResponse(appElement.getBinaryContent(), aHttpResponse, mimeType);
+                            if (mimeType != null && mimeType.contains("text")) {
+                                aHttpResponse.setCharacterEncoding(SettingsConstants.COMMON_ENCODING);
+                            }
+                        } else {
+                            aHttpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, String.format("Application element [%s] should be platypus application resource, but it is not!", ((AppElementRequest) aPlatypusRequest).getAppElementId()));
+                        }
+                    } else {
+                        aHttpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, String.format("Application element [%s] is absent!", ((AppElementRequest) aPlatypusRequest).getAppElementId()));
+                    }
+                } else {
+                    writeJsonResponse("", aHttpResponse);// Plain scripts have no model and other related resources
+                }
+            } else {
+                aHttpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, String.format("Unknown response. Don't know how to deal with it. Response class name: %s", aPlatypusResponse != null ? aPlatypusResponse.getClass().getName() : "null"));
+            }
+        }
+    }
+
+    private RequestHandler<?> findPlatypusHandler(Request rq, Session aSession, final HttpServletRequest aHttpRequest, final HttpServletResponse aHttpResponse) throws Exception {
+        RequestHandler<?> handler;
+        if (rq instanceof FilteredAppElementRequest) {
+            handler = new FilteredAppElementRequestHandler(serverCore, aSession, (FilteredAppElementRequest) rq);
+        } else {
+            handler = RequestHandlerFactory.getHandler(serverCore, aSession, rq);
+        }
+        if (handler instanceof ExecuteServerModuleMethodRequestHandler) {
+            ((ExecuteServerModuleMethodRequestHandler) handler).setExecuteEventsCallback(new ExecuteServerModuleMethodRequestHandler.ExecuteEventsCallback() {
+                @Override
+                public void beforeExecute(ServerScriptRunner ssr) {
+                    ssr.defineProperty(HTTP_HOST_OBJECT_NAME, HttpScriptContext.getInstance(ssr, aHttpRequest, aHttpResponse), ScriptableObject.READONLY);
+                }
+
+                @Override
+                public void afterExecute(ServerScriptRunner ssr) {
+                    ssr.delete(HTTP_HOST_OBJECT_NAME);
+                }
+            });
+        }
+        return handler;
     }
 }

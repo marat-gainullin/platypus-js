@@ -58,13 +58,13 @@ import javax.servlet.http.HttpServletRequest;
 public class PlatypusRequestHttpReader implements PlatypusRequestVisitor {
 
     public static final String API_URI = "/api";
-    public static final String SCRIPTS_URI = "/scripts";
     public static final String RESOURCES_URI = "/resources";
     private static final String ARGUMENTS_ARRAY_PARAM_SUFFIX = "[]";
     public static final String MODULE_NAME_PARAMETER_MISSING_MSG = "Module name parameter missing";
     public static final String METHOD_NAME_PARAMETER_MISSING = "Method name parameter missing";
     public static final String PROPERTY_NAME_PARAMETER_MISSING_MSG = "Property name parameter missing";
     public static final String PROPERTY_VALUE_PARAMETER_MISSING_MSG = "Property value parameter missing.";
+    public static final String MUST_BE_RESOURCE_MSG = "Application element requests nust be resource requests.";
     protected PlatypusServerCore serverCore;
     protected long rqId;
     protected String rqUri;
@@ -177,7 +177,7 @@ public class PlatypusRequestHttpReader implements PlatypusRequestVisitor {
     @Override
     public void visit(AppElementChangedRequest rq) throws Exception {
         String sDbId = httpRequest.getParameter(PlatypusHttpRequestParams.DATABASE_ID);
-        String sEntityId = httpRequest.getParameter(PlatypusHttpRequestParams.ENTITY_ID);
+        String sEntityId = httpRequest.getParameter(PlatypusHttpRequestParams.QUERY_ID);
         rq.setDatabaseId(sDbId);
         rq.setEntityId(sEntityId);
     }
@@ -231,25 +231,20 @@ public class PlatypusRequestHttpReader implements PlatypusRequestVisitor {
 
     @Override
     public void visit(IsAppElementActualRequest rq) throws Exception {
-        String sAppElementId = httpRequest.getParameter(PlatypusHttpRequestParams.ENTITY_ID);
         String sTxtSize = httpRequest.getParameter(PlatypusHttpRequestParams.TEXT_CONTENT_SIZE);
         Integer txtSize = Integer.valueOf(sTxtSize);
         String sTxtCrc32 = httpRequest.getParameter(PlatypusHttpRequestParams.TEXT_CONTENT_CRC32);
         Long txtCrc32 = Long.valueOf(sTxtCrc32);
-        rq.setAppElementId(sAppElementId);
+        assert isResourceUri(rqUri): MUST_BE_RESOURCE_MSG;
+        rq.setAppElementId(rqUri.substring(RESOURCES_URI.length() + 1));
         rq.setTxtContentSize(txtSize);
         rq.setTxtContentCrc32(txtCrc32);
     }
 
     @Override
     public void visit(AppElementRequest rq) throws Exception {
-        if (isScriptUri(rqUri)) {
-            rq.setAppElementId(rqUri.substring(SCRIPTS_URI.length() + 1));
-        } else if (isResourceUri(rqUri)) {
-            rq.setAppElementId(rqUri.substring(RESOURCES_URI.length() + 1));
-        } else {
-            rq.setAppElementId(httpRequest.getParameter(PlatypusHttpRequestParams.ENTITY_ID));
-        }
+        assert isResourceUri(rqUri): MUST_BE_RESOURCE_MSG;
+        rq.setAppElementId(rqUri.substring(RESOURCES_URI.length() + 1));
     }
 
     @Override
@@ -303,10 +298,6 @@ public class PlatypusRequestHttpReader implements PlatypusRequestVisitor {
 
     public static boolean isApiUri(String reqUri) {
         return reqUri != null && reqUri.startsWith(API_URI);
-    }
-
-    public static boolean isScriptUri(String reqUri) {
-        return reqUri != null && reqUri.startsWith(SCRIPTS_URI);
     }
 
     public static boolean isResourceUri(String reqUri) {

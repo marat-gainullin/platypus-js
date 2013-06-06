@@ -252,14 +252,15 @@ public class Form {
 			window.setWidget(view);
 			view.setVisible(true);
 			registerWindowListeners(window);
-			if (size != null) {
+			boolean wasSize = size != null;
+			window.show();
+			if (wasSize) {
 				window.setPixelSize(size.getX(), size.getY());
 			} else {
 				int decorHeight = window.getElement().getHeight(false) - window.getBody().getHeight(false);
 				int decorWidth = window.getElement().getWidth(false) - window.getBody().getWidth(false);
 				window.setPixelSize(viewPreferredWidth + decorWidth, viewPreferredHeight + decorHeight);
 			}
-			window.show();
 			if (locationByPlatform) {
 				if (aDesktop != null)
 					window.setPosition(aDesktop.getConsideredPosition().getX(), aDesktop.getConsideredPosition().getY());

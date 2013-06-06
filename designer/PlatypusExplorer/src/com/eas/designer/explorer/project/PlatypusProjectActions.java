@@ -188,15 +188,16 @@ public class PlatypusProjectActions implements ActionProvider {
         }
     }
 
-    private void clean() {
-        project.getOutputWindowIO().getOut().println("Cleaning web direcory..");
+    private void clean() {     
         PlatypusWebModuleManager pwmm = project.getLookup().lookup(PlatypusWebModuleManager.class);
         assert pwmm != null;
         try {
+            project.getOutputWindowIO().getOut().println("Cleaning web directory..");
             pwmm.clearWebDir();
+            project.getOutputWindowIO().getOut().println("Cleaning web directory complete.");
         } catch (IOException ex) {
-            Logger.getLogger(PlatypusProjectActions.class.getName()).log(Level.SEVERE, "Error clearning web direcory", ex);
+            Logger.getLogger(PlatypusProjectActions.class.getName()).log(Level.SEVERE, "Error clearning web directory", ex);
             project.getOutputWindowIO().getErr().println(ex.getMessage());
-        }
+        }   
     }
 }
