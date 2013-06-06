@@ -36,7 +36,7 @@
           <Group type="102" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="tabbedPane1" max="32767" attributes="0"/>
+                  <Component id="tabbedPane" max="32767" attributes="0"/>
                   <Group type="102" attributes="0">
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Group type="102" attributes="0">
@@ -93,7 +93,7 @@
               <EmptySpace max="-2" attributes="0"/>
               <Component id="cbNotStartServer" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="tabbedPane1" max="32767" attributes="0"/>
+              <Component id="tabbedPane" max="32767" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
       </Group>
@@ -123,7 +123,7 @@
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnBrowseActionPerformed"/>
       </Events>
     </Component>
-    <Container class="javax.swing.JTabbedPane" name="tabbedPane1">
+    <Container class="javax.swing.JTabbedPane" name="tabbedPane">
 
       <Layout class="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout"/>
       <SubComponents>
@@ -343,7 +343,7 @@
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Group type="102" alignment="0" attributes="0">
-                              <Component id="cbEnableSecurityRealm" min="-2" max="-2" attributes="0"/>
+                              <Component id="cbEnableSecurity" min="-2" max="-2" attributes="0"/>
                               <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                           </Group>
                           <Group type="102" alignment="0" attributes="0">
@@ -379,7 +379,7 @@
                           <Component id="txtContext" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="cbEnableSecurityRealm" min="-2" max="-2" attributes="0"/>
+                      <Component id="cbEnableSecurity" min="-2" max="-2" attributes="0"/>
                       <EmptySpace pref="168" max="32767" attributes="0"/>
                   </Group>
               </Group>
@@ -417,14 +417,14 @@
                 <EventHandler event="focusLost" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="txtContextFocusLost"/>
               </Events>
             </Component>
-            <Component class="javax.swing.JCheckBox" name="cbEnableSecurityRealm">
+            <Component class="javax.swing.JCheckBox" name="cbEnableSecurity">
               <Properties>
                 <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                  <ResourceString bundle="com/eas/designer/explorer/project/ui/Bundle.properties" key="ProjectRunningCustomizer.cbEnableSecurityRealm.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+                  <ResourceString bundle="com/eas/designer/explorer/project/ui/Bundle.properties" key="ProjectRunningCustomizer.cbEnableSecurity.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
                 </Property>
               </Properties>
               <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cbEnableSecurityRealmActionPerformed"/>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cbEnableSecurityActionPerformed"/>
               </Events>
             </Component>
           </SubComponents>
