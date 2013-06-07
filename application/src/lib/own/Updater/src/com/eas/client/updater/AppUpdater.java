@@ -189,7 +189,6 @@ public class AppUpdater {
                         df.saveDocument(docfrom, fNameConfig);
                     }
                     updVis.dispose();
-                    
                     return uaf;
                 } else {
                     Logger.getLogger(UpdaterConstants.LOGGER_NAME).log(Level.SEVERE, String.format(Updater.res.getString("fileNotLoad"), configUrl));
