@@ -550,8 +550,12 @@ public class GxtControlsFactory {
 			@Override
 			public void run() {
 				ToggleGroup group = toggleGroups.get(groupName);
-				if (group != null)
-					group.add(item);
+				if (group != null) {
+					if (group instanceof PlatypusButtonGroup && item instanceof Component)
+						((PlatypusButtonGroup)group).add((Component) item);
+					else
+						group.add(item);
+				}
 			}
 
 		});
@@ -1112,7 +1116,7 @@ public class GxtControlsFactory {
 						if (aConstraintsTag != null && aConstraintsTag.hasAttribute(TYPE_ATTRIBUTE)) {
 							String contraintsTypeName = aConstraintsTag.getAttribute(TYPE_ATTRIBUTE);
 							if ("TabsConstraintsDesignInfo".equalsIgnoreCase(contraintsTypeName)) {
-								container.add(top(aComponent), parseTabItemConfig(aConstraintsTag, new ImageResourceCallback(){
+								container.add(top(aComponent), parseTabItemConfig(aConstraintsTag, new ImageResourceCallback() {
 									@Override
 									public void run(ImageResource aResource) {
 										container.forceTabsLayout();
@@ -1375,7 +1379,7 @@ public class GxtControlsFactory {
 				@Override
 				public void run(ImageResource aResource) {
 					config.setIcon(aResource);
-					if(aImageLoadedCallback != null)
+					if (aImageLoadedCallback != null)
 						aImageLoadedCallback.run(aResource);
 				}
 			}));
