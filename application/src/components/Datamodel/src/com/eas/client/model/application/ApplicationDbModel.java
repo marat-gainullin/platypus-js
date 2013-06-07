@@ -14,12 +14,14 @@ import com.eas.client.model.RowsetMissingException;
 import com.eas.client.queries.SqlCompiledQuery;
 import com.eas.client.queries.SqlQuery;
 import com.eas.client.sqldrivers.SqlDriver;
+import com.eas.script.ScriptFunction;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.mozilla.javascript.Function;
 import org.mozilla.javascript.Scriptable;
 
 /**
@@ -110,12 +112,17 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
         }
     }
 
+    @ScriptFunction(jsDocText = "Saves model data changes. Calls aCallback when done."
+    + "If model can't apply the changed, than exception is thrown. "
+    + "In this case, application can call model.save() another time to save the changes. "
+    + "If an application need to abort futher attempts and discard model data changes, "
+    + "than it can call model.revert().")
     @Override
-    public boolean save() throws Exception {
+    public boolean save(Function aCallback) throws Exception {
         for (String dbId : changeLogs.keySet()) {
             client.getChangeLog(dbId, sessionId).addAll(changeLogs.get(dbId));
         }
-        return super.save();
+        return super.save(aCallback);
     }
 
     @Override
@@ -147,12 +154,13 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
     public void rolledback() throws Exception {
     }
 
+    @ScriptFunction(jsDocText = "Requeries model data with callback.")
     @Override
-    public void requery() throws Exception {
+    public void requery(Function aCallback) throws Exception {
         for (List<Change> changeLog : changeLogs.values()) {
             changeLog.clear();
         }
-        super.requery();
+        super.requery(aCallback);
     }
 
     public List<Change> getChangeLog(String aDbId) {
