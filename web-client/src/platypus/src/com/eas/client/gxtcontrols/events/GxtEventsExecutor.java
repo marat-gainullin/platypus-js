@@ -6,6 +6,8 @@ import java.util.logging.Logger;
 import com.eas.client.Utils;
 import com.eas.client.form.api.JSEvents;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.DoubleClickEvent;
@@ -33,6 +35,7 @@ import com.google.gwt.event.dom.client.MouseWheelEvent;
 import com.google.gwt.event.dom.client.MouseWheelHandler;
 import com.google.gwt.event.logical.shared.HasResizeHandlers;
 import com.google.gwt.event.logical.shared.HasSelectionHandlers;
+import com.google.gwt.event.dom.client.HasChangeHandlers;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
@@ -67,7 +70,7 @@ import com.sencha.gxt.widget.core.client.event.ShowEvent.ShowHandler;
 import com.sencha.gxt.widget.core.client.menu.MenuItem;
 
 public class GxtEventsExecutor implements SelectHandler, MouseOutHandler, MouseOverHandler, MouseDownHandler, MouseUpHandler, MouseWheelHandler, MouseMoveHandler, KeyDownHandler, KeyUpHandler,
-        KeyPressHandler, FocusHandler, ShowHandler, ResizeHandler, HideHandler, RemoveHandler, MoveHandler, AddHandler, BlurHandler, SelectionHandler<Widget>, ClickHandler, DoubleClickHandler {
+        KeyPressHandler, FocusHandler, ShowHandler, ResizeHandler, HideHandler, RemoveHandler, MoveHandler, AddHandler, BlurHandler, SelectionHandler<Widget>, ClickHandler, DoubleClickHandler, ChangeHandler {
 
 	private JavaScriptObject actionPerformed;
 	private JavaScriptObject mouseExited;
@@ -103,6 +106,9 @@ public class GxtEventsExecutor implements SelectHandler, MouseOutHandler, MouseO
 
 		if (aComponent instanceof HasSelectHandlers)
 			((HasSelectHandlers) aComponent).addSelectHandler(executor);
+		
+		if (aComponent instanceof HasChangeHandlers)
+			((HasChangeHandlers) aComponent).addChangeHandler(executor);
 
 		aComponent.addDomHandler(executor, MouseOverEvent.getType());
 		aComponent.addDomHandler(executor, MouseOutEvent.getType());
@@ -362,6 +368,11 @@ public class GxtEventsExecutor implements SelectHandler, MouseOutHandler, MouseO
 	@Override
 	public void onSelect(SelectEvent event) {
 		executeEvent(eventThis, actionPerformed, JSEvents.publishSelectEvent(event));
+	}
+	
+	@Override
+	public void onChange(ChangeEvent event) {
+		executeEvent(eventThis, actionPerformed, JSEvents.publishChangeEvent(event));
 	}
 
 	@Override
