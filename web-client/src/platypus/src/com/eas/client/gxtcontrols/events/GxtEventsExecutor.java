@@ -5,7 +5,11 @@ import java.util.logging.Logger;
 
 import com.eas.client.Utils;
 import com.eas.client.form.api.JSEvents;
+import com.eas.client.gxtcontrols.wrappers.component.PlatypusButtonGroup;
+import com.eas.client.gxtcontrols.wrappers.component.PlatypusCheckBox;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.DoubleClickEvent;
@@ -33,10 +37,13 @@ import com.google.gwt.event.dom.client.MouseWheelEvent;
 import com.google.gwt.event.dom.client.MouseWheelHandler;
 import com.google.gwt.event.logical.shared.HasResizeHandlers;
 import com.google.gwt.event.logical.shared.HasSelectionHandlers;
+import com.google.gwt.event.dom.client.HasChangeHandlers;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.widget.core.client.Component;
@@ -67,8 +74,9 @@ import com.sencha.gxt.widget.core.client.event.ShowEvent.ShowHandler;
 import com.sencha.gxt.widget.core.client.menu.MenuItem;
 
 public class GxtEventsExecutor implements SelectHandler, MouseOutHandler, MouseOverHandler, MouseDownHandler, MouseUpHandler, MouseWheelHandler, MouseMoveHandler, KeyDownHandler, KeyUpHandler,
-        KeyPressHandler, FocusHandler, ShowHandler, ResizeHandler, HideHandler, RemoveHandler, MoveHandler, AddHandler, BlurHandler, SelectionHandler<Widget>, ClickHandler, DoubleClickHandler {
+        KeyPressHandler, FocusHandler, ShowHandler, ResizeHandler, HideHandler, RemoveHandler, MoveHandler, AddHandler, BlurHandler, SelectionHandler<Widget>, ClickHandler, DoubleClickHandler, ChangeHandler {
 
+	private static final String HANDLER_DATA_NAME = "handler";
 	private JavaScriptObject actionPerformed;
 	private JavaScriptObject mouseExited;
 	private JavaScriptObject mouseClicked;
@@ -97,12 +105,29 @@ public class GxtEventsExecutor implements SelectHandler, MouseOutHandler, MouseO
 		NULL, PRESSED, MOVED, DRAGGED
 	}
 
+	public static GxtEventsExecutor get(Component aComponent) {
+		return aComponent.getData(HANDLER_DATA_NAME);
+	}
+	
 	public static GxtEventsExecutor createExecutor(Component aComponent, JavaScriptObject aEventsThis) throws Exception {
-		GxtEventsExecutor executor = new GxtEventsExecutor(aEventsThis);
-		aComponent.setData("handler", executor);
+		final GxtEventsExecutor executor = new GxtEventsExecutor(aEventsThis);
+		aComponent.setData(HANDLER_DATA_NAME, executor);
 
 		if (aComponent instanceof HasSelectHandlers)
 			((HasSelectHandlers) aComponent).addSelectHandler(executor);
+		
+		if (aComponent instanceof PlatypusCheckBox){
+			final PlatypusCheckBox pcheck = (PlatypusCheckBox)aComponent;
+			pcheck.addValueChangeHandler(new ValueChangeHandler<Boolean>(){
+				@Override
+				public void onValueChange(ValueChangeEvent<Boolean> event) {
+					PlatypusButtonGroup pgroup = pcheck.getButtonGroup();
+					// Check boxes can process actionPerfomed events only when they are standalone within no groups.
+					if(pgroup == null)
+						executor.onSelect(new SurrogateSelectEvent(event.getSource()));
+				}
+			});
+		}
 
 		aComponent.addDomHandler(executor, MouseOverEvent.getType());
 		aComponent.addDomHandler(executor, MouseOutEvent.getType());
@@ -363,6 +388,11 @@ public class GxtEventsExecutor implements SelectHandler, MouseOutHandler, MouseO
 	public void onSelect(SelectEvent event) {
 		executeEvent(eventThis, actionPerformed, JSEvents.publishSelectEvent(event));
 	}
+	
+	@Override
+	public void onChange(ChangeEvent event) {
+		executeEvent(eventThis, actionPerformed, JSEvents.publishChangeEvent(event));
+	}
 
 	@Override
 	public void onMouseOver(MouseOverEvent event) {
@@ -517,7 +547,7 @@ public class GxtEventsExecutor implements SelectHandler, MouseOutHandler, MouseO
 		}
 	}
 
-	protected class SurrogateSelectEvent extends SelectEvent {
+	public static class SurrogateSelectEvent extends SelectEvent {
 
 		public SurrogateSelectEvent(Object aSource) {
 			super();

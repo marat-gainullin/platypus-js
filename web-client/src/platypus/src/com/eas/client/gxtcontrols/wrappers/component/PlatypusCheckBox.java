@@ -59,7 +59,7 @@ public class PlatypusCheckBox extends Field<Boolean> implements HasChangeHandler
 	public HandlerRegistration addChangeHandler(ChangeHandler handler) {
 		return addDomHandler(handler, ChangeEvent.getType());
 	}
-
+	
 	@Override
 	public void clearInvalid() {
 		// do nothing

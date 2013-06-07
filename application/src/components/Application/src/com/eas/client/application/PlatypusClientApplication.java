@@ -26,6 +26,7 @@ import com.eas.debugger.jmx.server.Settings;
 import com.eas.script.ScriptUtils;
 import com.eas.util.StringUtils;
 import com.eas.util.logging.PlatypusFormatter;
+import java.awt.EventQueue;
 import java.beans.ExceptionListener;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -530,8 +531,17 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
             ApplicationElement appElement = client.getAppCache().get(appElementId);
             if (appElement != null) {
                 if (appElement.getType() == ClientConstants.ET_FORM) {
-                    FormRunner form = new FormRunner(appElementId, client, ScriptUtils.getScope(), this, this, this);
-                    form.displayAsFrame();
+                    final FormRunner form = new FormRunner(appElementId, client, ScriptUtils.getScope(), this, this, this);
+                    EventQueue.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                form.displayAsFrame();
+                            } catch (Exception ex) {
+                                Logger.getLogger(PlatypusClientApplication.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                        }
+                    });
                     // When all windows are disposed, java VM exit automatically.
                 } else if (appElement.getType() == ClientConstants.ET_REPORT) {
                     ReportRunner report = new ReportRunner(appElementId, client, ScriptUtils.getScope(), this, this, this);
