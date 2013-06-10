@@ -98,7 +98,7 @@ public class RowsetDistributedTableTest extends GridBaseTest {
             dm.addEntity(colEntity);
             colEntity.setQuery(new DummyTestSqlQuery());
             colEntity.setRowset(colRowset);
-            Relation colRelation = new Relation(rowsEntity, true, rowsRowset.getFields().get(1).getName(), colEntity, true, colRowset.getFields().get(1).getName());
+            Relation colRelation = new Relation(rowsEntity, rowsRowset.getFields().get(1), colEntity, colRowset.getFields().get(1));
             dm.addRelation(colRelation);
 
             FieldModelColumn mCol = new FieldModelColumn(colRowset, i, null, null, false, null, null, null);
@@ -158,7 +158,7 @@ public class RowsetDistributedTableTest extends GridBaseTest {
             dm.addEntity(colEntity);
             colEntity.setQuery(new DummyTestSqlQuery());
             colEntity.setRowset(colRowset);
-            Relation colRelation = new Relation(rowsEntity, true, rowsRowset.getFields().get(1).getName(), colEntity, true, colRowset.getFields().get(1).getName());
+            Relation colRelation = new Relation(rowsEntity, rowsRowset.getFields().get(1), colEntity, colRowset.getFields().get(1));
             dm.addRelation(colRelation);
 
             FieldModelColumn mCol = new FieldModelColumn(colRowset, i, null, null, false, null, null, null);
