@@ -4,16 +4,28 @@
  */
 package com.eas.server.handlers;
 
-import com.bearsoft.rowset.utils.IDGenerator;
-import com.eas.client.threetier.requests.ExecuteServerModuleMethodRequest;
+import com.eas.script.ScriptUtils;
+import com.eas.sensors.positioning.DevicesCommunication;
+import com.eas.sensors.positioning.DevicesCommunication.DeviceRequest;
 import com.eas.sensors.positioning.PacketReciever;
+import com.eas.sensors.positioning.PositioningIoHandler;
 import com.eas.sensors.positioning.PositioningPacket;
+import com.eas.sensors.retranslate.RetranslatePacketFactory;
+import com.eas.server.ModuleConfig;
 import com.eas.server.PlatypusServer;
 import com.eas.server.PositioningPacketStorage;
 import com.eas.server.ServerScriptRunner;
-import com.eas.server.Session;
+import java.net.InetSocketAddress;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import org.apache.mina.core.future.ConnectFuture;
+import org.apache.mina.core.future.WriteFuture;
+import org.apache.mina.core.service.IoConnector;
+import org.apache.mina.core.session.IoSession;
+import org.apache.mina.filter.codec.ProtocolCodecFilter;
+import org.apache.mina.transport.socket.nio.NioSocketConnector;
 
 /**
  *
@@ -21,8 +33,9 @@ import java.util.logging.Logger;
  */
 public class PositioningPacketReciever implements PacketReciever {
 
-    public static final String RECIEVER_METHOD_NAME = "received";
-    public static final String PENDING_METHOD_NAME = "pending";
+    public static final String RECIEVER_METHOD_NAME = "recieved";
+    public static final String SEND_REQUEST_METHOD_NAME = "sendRequest";
+    public static final String GET_RESPONSE_METHOD_NAME = "getResponse";
     protected String moduleName;
     protected PlatypusServer server;
     private PositioningPacketStorage packetStorage = new PositioningPacketStorage();
@@ -35,26 +48,27 @@ public class PositioningPacketReciever implements PacketReciever {
     }
 
     @Override
-    public Object received(final PositioningPacket aPacket) {
+    public Object received(PositioningPacket aPacket) {
         try {
-            if (aPacket != null) {
-                if (aPacket.getValidity()) {
-                    ExecuteServerModuleMethodRequest request = new ExecuteServerModuleMethodRequest(IDGenerator.genID(), moduleName, RECIEVER_METHOD_NAME, new Object[]{null});
-                    request.getArguments()[0] = aPacket;
-                    server.enqueuePlatypusRequest(request, new Runnable() { //onFailure
-                        @Override
-                        public void run() {
-                            packetStorage.put(PositioningPacketStorage.constructKey(aPacket), aPacket);
-                        }
-                    }, new Runnable() { //onSuccess
-                        @Override
-                        public void run() {
-                            packetStorage.saveStorageToBase(PositioningPacketReciever.this);
-                        }
-                    });
-                } else {
-                    packetNotValidStorage.put(PositioningPacketStorage.constructKey(aPacket), aPacket);
-                }
+            ServerScriptRunner module = new ServerScriptRunner(server, server.getSessionManager().getSystemSession(), new ModuleConfig(
+                    false,
+                    false,
+                    false,
+                    null,
+                    moduleName), ScriptUtils.getScope(), server, server, server);
+            module.execute();
+            server.getSessionManager().setCurrentSession(server.getSessionManager().getSystemSession());
+            Object result;
+            try {
+                result = module.executeMethod(RECIEVER_METHOD_NAME, new Object[]{aPacket});
+            } finally {
+                server.getSessionManager().setCurrentSession(null);
+            }
+            if (result != null) {
+                result = ScriptUtils.js2Java(result);
+                assert result instanceof String;
+                ServiceUrl url = new ServiceUrl((String) result);
+                send(aPacket, url.getHost(), url.getPort(), url.getProtocol());
             }
         } catch (Exception ex) {
             Logger.getLogger(PositioningPacketReciever.class.getName()).log(Level.SEVERE, null, ex);
@@ -62,16 +76,54 @@ public class PositioningPacketReciever implements PacketReciever {
         return null;
     }
 
-    @Override
-    public Object pending(Object aDeviceId) {
-        try {
-            Session systemSession = server.getSessionManager().getSystemSession();
-            ServerScriptRunner module = systemSession.getModule(moduleName);
-            return module.executeMethod(PENDING_METHOD_NAME, new Object[]{aDeviceId});
-        } catch (Exception ex) {
-            Logger.getLogger(PositioningPacketReciever.class.getName()).log(Level.SEVERE, null, ex);
+    public Object send(PositioningPacket aPacket, String aHost, Integer aPort, String aProtocolName) {
+        if (aHost != null && !aHost.isEmpty()
+                && aProtocolName != null && !aProtocolName.isEmpty()
+                && aPort != null && aPort > 0 && aPort < 65535
+                && aPacket != null) {
+            if (RetranslatePacketFactory.isServiceSupport(aProtocolName)) {
+                String imei = aPacket.getImei();
+                IoSession ioSession = retranslateSessions.get(imei);
+                if (ioSession == null) {
+                    IoConnector connector = new NioSocketConnector();
+                    connector.getFilterChain().addLast(aProtocolName, new ProtocolCodecFilter(RetranslatePacketFactory.getPacketEncoder(aProtocolName), RetranslatePacketFactory.getPacketDecoder(aProtocolName)));
+                    connector.setHandler(RetranslatePacketFactory.getPacketHandler(aProtocolName, retranslateSessions));
+                    ConnectFuture future = connector.connect(new InetSocketAddress(aHost, aPort));
+                    future.awaitUninterruptibly();
+                    if (future.isConnected()) {
+                        IoSession session = future.getSession();
+                        session.setAttribute(IMEI_ATTRIBUTE, imei);
+                        retranslateSessions.put(imei, session);
+                        WriteFuture write = session.write(aPacket);
+                        write.awaitUninterruptibly(WAIT_SEND_TIMEOUT);
+                    }
+                } else {
+                    WriteFuture write = ioSession.write(aPacket);
+                    write.awaitUninterruptibly(WAIT_SEND_TIMEOUT);
+                }
+            }
         }
         return null;
+    }
+
+    /**
+     *
+     * @param aDeviceID
+     * @return
+     */
+    @Override
+    public DevicesCommunication.DeviceRequest getRequest(String aDeviceID) {
+        return PositioningIoHandler.devicesRequests.getRequest(aDeviceID);
+    }
+
+    @Override
+    public DeviceRequest getWaitingRequest(String aDeviceID) {
+        return PositioningIoHandler.waitingRequests.getRequest(aDeviceID);
+    }
+
+    @Override
+    public void putWaitingRequest(String aDeviceID, DeviceRequest aRequest) {
+        PositioningIoHandler.waitingRequests.putRequest(aDeviceID, aRequest);
     }
 
     /**
@@ -86,5 +138,70 @@ public class PositioningPacketReciever implements PacketReciever {
      */
     public PositioningPacketStorage getPacketNotValidStorage() {
         return packetNotValidStorage;
+    }
+
+    /**
+     *
+     */
+    public static class ServiceUrl {
+
+        private final Pattern URL_PATTERN = Pattern.compile("(?<PROTOCOL>[A-Za-z0-9\\+\\.\\-]+)(://)(?<HOST>[a-zA-Z0-9\\$\\-\\_\\.\\+\\!\\"
+                + "*\\'\\(\\)\\,\\\"]+)(:)(?<PORT>\\d+)");
+        private String protocol;
+        private String host;
+        private int port;
+
+        public ServiceUrl(String aUrl) {
+            if (aUrl != null && !aUrl.isEmpty()) {
+                Matcher matcher = URL_PATTERN.matcher(aUrl);
+                if (matcher.matches()) {
+                    port = Integer.valueOf(matcher.group("PORT"));
+                    host = matcher.group("HOST");
+                    protocol = matcher.group("PROTOCOL");
+                }
+            }
+        }
+
+        /**
+         * @return the protocol
+         */
+        public String getProtocol() {
+            return protocol;
+        }
+
+        /**
+         * @param aProtocol the protocol to set
+         */
+        public void setProtocol(String aProtocol) {
+            protocol = aProtocol;
+        }
+
+        /**
+         * @return the host
+         */
+        public String getHost() {
+            return host;
+        }
+
+        /**
+         * @param aHost the host to set
+         */
+        public void setHost(String aHost) {
+            host = aHost;
+        }
+
+        /**
+         * @return the port
+         */
+        public int getPort() {
+            return port;
+        }
+
+        /**
+         * @param a the port to set
+         */
+        public void setPort(int aPort) {
+            port = aPort;
+        }
     }
 }

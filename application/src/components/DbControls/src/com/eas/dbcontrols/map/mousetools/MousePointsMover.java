@@ -14,6 +14,7 @@ import com.eas.dbcontrols.map.DbMap;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.Polygon;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
@@ -140,24 +141,43 @@ public class MousePointsMover extends MapTool {
             rowsColIndexes.put(sEntry.getFeatureId(), sEntry.getGeometryColIndex());
         }
 
-        Map<String, List<Coordinate[]>> newGeometriesData = new HashMap<>();
+        Map<String, List<Geometry>> newGeometriesData = new HashMap<>();
         for (SelectionEntry sEntry : sEntries2Move) {
             // data for new geometries
-            List<Coordinate[]> g = newGeometriesData.get(sEntry.getFeatureId());
+            List<Geometry> g = newGeometriesData.get(sEntry.getFeatureId());
             if (g == null) {
                 g = new ArrayList<>();
                 newGeometriesData.put(sEntry.getFeatureId(), g);
-                Geometry oldGeometry = oldGeometries.get(sEntry.getFeatureId());
-                for (int i = 0; i < oldGeometry.getNumGeometries(); i++) {
-                    Coordinate[] newCoordinates = oldGeometry.getGeometryN(i).getCoordinates();
-                    g.add(newCoordinates);
+                g.add(oldGeometries.get(sEntry.getFeatureId()));
                 }
-            }
             // new (moved) points
-            if (sEntry.getGeometryOfInterestIndex() < 0) {
-                g.get(0)[sEntry.getCoordinateOfInterestIndex()] = sEntry.getViewShape().getCoordinate();
+            int idx = sEntry.getGeometryOfInterestIndex() < 0 ? 0 : sEntry.getGeometryOfInterestIndex();
+            Geometry geom = g.get(idx);
+            if (geom instanceof Polygon) {
+                Polygon polygon = (Polygon) geom;
+                Polygon shell = GisUtilities.getPolygonShell(polygon);
+                Polygon[] holes = GisUtilities.getPolygonHoles(polygon);
+                Polygon changePolygon;
+                if (sEntry.getHoleOfInterestIndex() < 0) {
+                    changePolygon = shell;
+                } else {
+                    changePolygon = holes[sEntry.getHoleOfInterestIndex()];
+                }
+                Coordinate[] coordinate = changePolygon.getCoordinates();
+                coordinate[sEntry.getCoordinateOfInterestIndex()] = sEntry.getViewShape().getCoordinate();
+                if (sEntry.getCoordinateOfInterestIndex() == 0) {
+                    coordinate[coordinate.length - 1] = sEntry.getViewShape().getCoordinate();
+            }
+                if (sEntry.getHoleOfInterestIndex() < 0) {
+                    shell = (Polygon)GisUtilities.constructGeometry(coordinate, Polygon.class);
+                } else {
+                    holes[sEntry.getHoleOfInterestIndex()] = (Polygon)GisUtilities.constructGeometry(coordinate, Polygon.class);
+                }
+                g.set(idx, GisUtilities.createPolygonWithHoles(shell, holes));
             } else {
-                g.get(sEntry.getGeometryOfInterestIndex())[sEntry.getCoordinateOfInterestIndex()] = sEntry.getViewShape().getCoordinate();
+                Coordinate[] coordinate = geom.getCoordinates();
+                coordinate[sEntry.getCoordinateOfInterestIndex()] = sEntry.getViewShape().getCoordinate();
+                g.set(idx, GisUtilities.constructGeometry(coordinate, geom.getClass()));
             }
         }
         // new geometries construction and assigning

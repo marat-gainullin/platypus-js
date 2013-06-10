@@ -53,7 +53,7 @@ public class DatamodelDataStoreTest extends GeoBaseTest
         datamodel.setRuntime(true);
         map = new HashMap<>();
         ApplicationDbEntity e = new ApplicationDbEntity(datamodel);
-        e.regenerateID();
+        e.regenerateId();
         e.setTableName("COLA_MARKETS");
         datamodel.addEntity(e);
         final Rowset rowset = e.getRowset();

@@ -6,9 +6,9 @@ package com.eas.client.controls.mappane.map;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
 import java.awt.BorderLayout;
@@ -21,12 +21,15 @@ import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import org.geotools.data.collection.ListFeatureCollection;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureCollections;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
@@ -138,8 +141,8 @@ public class MapGraphicTest {
         typeBuilder.add("name", String.class);
         SimpleFeatureType featureType = typeBuilder.buildFeatureType();
 
-        FeatureCollection fcollection = FeatureCollections.newCollection();
-
+        List<SimpleFeature> lst = new ArrayList<>();
+        
         Object[] attrs = new Object[2];
         int lNo = 0;
         for (LineString line : lineStrings) {
@@ -147,9 +150,11 @@ public class MapGraphicTest {
             String lStringId = String.valueOf(lNo++);
             attrs[1] = "line " + lStringId;
             SimpleFeature feature = SimpleFeatureBuilder.build(featureType, attrs, lStringId);
-            fcollection.add(feature);
+            lst.add(feature);
         }
-
+        
+        FeatureCollection fcollection = new ListFeatureCollection(featureType, lst);
+        
         final MapContext mainContext = new DefaultMapContext(projectedCrs);
         mainContext.setAreaOfInterest(aoi);
 

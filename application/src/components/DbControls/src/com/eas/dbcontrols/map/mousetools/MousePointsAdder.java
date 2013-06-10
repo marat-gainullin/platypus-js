@@ -16,6 +16,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.Polygon;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
@@ -37,11 +38,49 @@ import org.opengis.feature.type.FeatureType;
  */
 public class MousePointsAdder extends MapTool {
 
+    private class Distance {
+
+        private double distance;
+        private int center;
+
+        public Distance(double aDistance, int aCenter) {
+            distance = aDistance;
+            center = aCenter;
+        }
+
+        /**
+         * @return the distance
+         */
+        public double getDistance() {
+            return distance;
+        }
+
+        /**
+         * @return the center
+         */
+        public int getCenter() {
+            return center;
+        }
+    }
     protected GeoPaneTool selector;
 
     public MousePointsAdder(DbMap aMap, GeoPaneTool aSelector) {
         super(aMap);
         selector = aSelector;
+    }
+
+    private Distance checkGeomertysDistance(Coordinate[] aCoordinates, Point aPoint) {
+        double distance = Double.MAX_VALUE;
+        int centerIdx = -1;
+        for (int c = 1; c < aCoordinates.length; c++) {
+            LineString ls = GisUtilities.createLineString(GisUtilities.createPoint(aCoordinates[c - 1]), GisUtilities.createPoint(aCoordinates[c]));
+            double ldistance = ls.distance(aPoint);
+            if (ldistance < distance) {
+                distance = ldistance;
+                centerIdx = c;
+            }
+        }
+        return new Distance(distance, centerIdx);
     }
 
     @Override
@@ -74,29 +113,64 @@ public class MousePointsAdder extends MapTool {
                     Geometry closestGeometry = null;
                     int cIdx = -1;
                     int gIdx = -1;
+                    int gHoleIdx = -1;
                     String featureId2InsertTo = null;
                     for (String fKey : oldGeometries.keySet()) {
                         Geometry geom = oldGeometries.get(fKey);
                         for (int i = 0; i < geom.getNumGeometries(); i++) {
-                            Coordinate[] newCoordinates = geom.getGeometryN(i).getCoordinates();
-                            for (int c = 1; c < newCoordinates.length; c++) {
-                                LineString ls = GisUtilities.createLineString(GisUtilities.createPoint(newCoordinates[c - 1]), GisUtilities.createPoint(newCoordinates[c]));
-                                double ldistance = ls.distance(point2Add);
-                                if (ldistance < distance) {
-                                    distance = ldistance;
-                                    closestGeometry = geom;
-                                    gIdx = i;
-                                    cIdx = c;
-                                    featureId2InsertTo = fKey;
+                            Geometry testGeom = geom.getGeometryN(i);
+                            double lDistance = Double.MAX_VALUE;
+                            int centerIdx = -1;
+                            int holeIdx = -1;
+                            if (testGeom instanceof Polygon && ((Polygon) testGeom).getNumInteriorRing() > 0) {
+                                Polygon polygon = ((Polygon) testGeom);
+                                Coordinate[] shellCoord = polygon.getExteriorRing().getCoordinates();
+                                Distance minShellDist = checkGeomertysDistance(shellCoord, point2Add);
+                                if (minShellDist.getDistance() < lDistance) {
+                                    lDistance = minShellDist.getDistance();
+                                    centerIdx = minShellDist.getCenter();
+                                }
+                                for (int j = 0; j < polygon.getNumInteriorRing(); j++) {
+                                    Distance minHoleDist = checkGeomertysDistance(polygon.getInteriorRingN(j).getCoordinates(), point2Add);
+                                    if (minHoleDist.getDistance() < lDistance) {
+                                        lDistance = minHoleDist.getDistance();
+                                        centerIdx = minHoleDist.getCenter();
+                                        holeIdx = j;
+                                    }
+                                }
+                            } else {
+                                Distance lDist = checkGeomertysDistance(geom.getGeometryN(i).getCoordinates(), point2Add);
+                                if (lDist.getDistance() < lDistance) {
+                                    lDistance = lDist.getDistance();
+                                    centerIdx = lDist.getCenter();
                                 }
                             }
+                                if (lDistance < distance) {
+                                    distance = lDistance;
+                                    closestGeometry = geom;
+                                    gIdx = i;
+                                cIdx = centerIdx;
+                                gHoleIdx = holeIdx;
+                                    featureId2InsertTo = fKey;
+                                }
+
                         }
                     }
-                    List<Coordinate[]> gData = new ArrayList<>();
+                    List<Geometry> gData = new ArrayList<>();
                     for (int i = 0; i < closestGeometry.getNumGeometries(); i++) {
                         Geometry innerGeometry = closestGeometry.getGeometryN(i);
-                        Coordinate[] coords = innerGeometry.getCoordinates();
                         if (i == gIdx) {
+                            Coordinate[] coords;
+                            if (innerGeometry instanceof Polygon && ((Polygon) innerGeometry).getNumInteriorRing() > 0) {
+                                if (gHoleIdx > -1) {
+                                    coords = ((Polygon) innerGeometry).getInteriorRingN(gHoleIdx).getCoordinates();
+                                } else {
+                                    coords = ((Polygon) innerGeometry).getExteriorRing().getCoordinates();
+                                }
+                            } else {
+                                coords = innerGeometry.getCoordinates();
+                            }
+
                             Coordinate[] head = Arrays.copyOfRange(coords, 0, cIdx);
                             Coordinate[] tail = Arrays.copyOfRange(coords, cIdx, coords.length);
                             Coordinate[] newCoordinates = new Coordinate[coords.length + 1];
@@ -108,9 +182,24 @@ public class MousePointsAdder extends MapTool {
                             for (int t = 0; t < tail.length; t++) {
                                 newCoordinates[j++] = tail[t];
                             }
-                            gData.add(newCoordinates);
+                            Geometry newGeom;
+                            if (innerGeometry instanceof Polygon && ((Polygon) innerGeometry).getNumInteriorRing() > 0) {
+                                Polygon polygon = ((Polygon) innerGeometry);
+                                Geometry[] holes = GisUtilities.getPolygonHoles(polygon);
+                                Polygon shell;
+                                if (gHoleIdx > -1) {
+                                    holes[gHoleIdx] = GisUtilities.createPolygon(newCoordinates);
+                                    shell = GisUtilities.getPolygonShell(polygon);
+                                } else {
+                                    shell = GisUtilities.createPolygon(newCoordinates);
+                                }
+                                newGeom = GisUtilities.createPolygonWithHoles(shell, holes);
+                            } else {
+                                newGeom = GisUtilities.constructGeometry(newCoordinates, innerGeometry.getClass());
+                            }
+                            gData.add(newGeom);
                         } else {
-                            gData.add(coords);
+                            gData.add(innerGeometry);
                         }
                     }
                     for (SelectionEntry sEntry : sEntries2Edit) {
@@ -127,7 +216,7 @@ public class MousePointsAdder extends MapTool {
                     row2Update.setColumnObject(rowsColIndexes.get(featureId2InsertTo), GisUtilities.constructGeometry(gData, closestGeometry.getClass(), closestGeometry.getSRID()));
                     features2Entities.get(featureId2InsertTo).getRowset().setModified(true);
                     map.getSelection().clear();
-                    map.getSelection().getSelection().add(new SelectionEntry(features2Entities.get(featureId2InsertTo).getEntityId(), rows.get(featureId2InsertTo), featureId2InsertTo, rowsColIndexes.get(featureId2InsertTo), closestGeometry.getNumGeometries() > 1 ? gIdx : -1, cIdx, point2Add.getCoordinate()));
+                    map.getSelection().getSelection().add(new SelectionEntry(features2Entities.get(featureId2InsertTo).getEntityId(), rows.get(featureId2InsertTo), featureId2InsertTo, rowsColIndexes.get(featureId2InsertTo), closestGeometry.getNumGeometries() > 1 ? gIdx : -1, cIdx, gHoleIdx, point2Add.getCoordinate()));
                     map.fireSelectionChanged();
                     // Let's fire feature chaned event to all editabble layers
                     MapLayer[] lightLayers = map.getPane().getLightweightMapContext().getLayers();
