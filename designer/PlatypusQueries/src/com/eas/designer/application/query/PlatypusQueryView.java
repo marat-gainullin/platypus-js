@@ -216,7 +216,7 @@ public class PlatypusQueryView extends CloneableTopComponent {
         pnlFromNWhere.removeAll();
         if (dataObject.getClient() != null) {
             modelView = new QueryModelView(dataObject.getModel(), tablesSelector, new QueriesSelector(dataObject.getAppRoot()));
-            modelView.addEntityViewDoubleClickListener(new QueryDocumentJumper<QueryEntity>());
+            modelView.addEntityViewDoubleClickListener(new QueryDocumentJumper<QueryEntity>(dataObject.getProject()));
             TransferHandler modelViewOriginalTrnadferHandler = modelView.getTransferHandler();
             if (modelViewOriginalTrnadferHandler instanceof ModelViewDragHandler) {
                 modelView.setTransferHandler(new QueriesDragHandler((ModelViewDragHandler) modelViewOriginalTrnadferHandler, modelView));

@@ -1,0 +1,83 @@
+<html>
+    <head>
+        <title>Platypus javascript API</title>
+        <style type="text/css">
+            html, body {width:100%, height:100%}
+        </style>     
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js"></script>
+        <script type="text/javascript" src="/platypus/js/api.js"></script>
+        <script type="text/javascript">
+            $(function () {
+                var moduleId = "134002903893458";
+                Platypus.API.setServerUrl("/application/");       
+                Platypus.Server.Module.get(moduleId, function(sm) {  
+                    
+                    $("#testModuleMethodButton").click(function() {
+                        sm.testFunction( function(data) { 
+                            console.assert(data.toString() == "Hi" ,"testPropertyString value must be \"Hi\"");
+                            console.log("executeServerModuleMethod done data type " + typeof data);
+                        });
+                    });
+                    
+                    $("#testModuleGetPropertyButton").click(function() {
+                        console.assert(sm.testPropertyString == "testValue" ,"testPropertyString value must be \"testValue\"");
+                        console.assert(sm.testPropertyBool == true ,"testPropertyBool value must be true");
+                        console.assert(sm.testPropertyNull == null ,"testPropertyNull value must be null");
+                        console.assert(sm.testPropertyUndefined == undefined ,"testPropertyUndefined value must be undefined");
+                        console.assert(sm.testPropertyInt == 100 ,"testPropertyInt value must be 100");
+                        console.assert(sm.testPropertyFloat == 100.24 ,"testPropertyFloat value must be 100.24");
+                        console.assert(sm.testConst == 100000 ,"testConst value must be 100000");
+                        console.assert(sm.testParam == null ,"testParam value must be null");
+                        console.log("testPropertyString done data type " + typeof sm.testPropertyString);
+                        console.log("testPropertyBool done data type " + typeof sm.testPropertyBool);
+                        console.log("testPropertyNull done data type " + typeof sm.testPropertyNull);
+                        console.log("testPropertyUndefined done data type " + typeof sm.testPropertyUndefined);
+                        console.log("testPropertyInt done data type " + typeof sm.testPropertyInt);
+                        console.log("testPropertyFloat done data type " + typeof sm.testPropertyFloat);
+                        console.log("testConst data type " + typeof sm.testConst);
+                        console.log("testParam data type " + typeof sm.testParam);
+                    });
+                    
+                    $("#testModuleSetPropertyButton").click(function() {
+                        console.assert(sm.setTestValue == undefined ,"setTestValue value must be \"testValue\"");
+                        sm.setTestValue = "testVal";
+                        console.assert(sm.setTestValue == "testVal" ,"setTestValue value must be \"testValue\"");
+                        sm.setTestValue = true
+                        console.assert(sm.setTestValue == true ,"setTestValue value must be true");
+                        sm.setTestValue = null;
+                        console.assert(sm.setTestValue == null ,"setTestValue value must be null");
+                        sm.setTestValue = undefined;
+                        console.assert(sm.setTestValue == undefined ,"setTestValue value must be undefined");
+                        sm.setTestValue = 100;
+                        console.assert(sm.setTestValue == 100 ,"setTestValue value must be 100");
+                        sm.setTestValue = 100.24;
+                        console.assert(sm.setTestValue == 100.24 ,"setTestValue value must be 100.24");
+                        sm.testConst ="Hi";
+                        console.assert(sm.testConst == 100000 ,"testConst value must be 100000");
+                        sm.testParam = "Hello!!!"
+                        console.assert(sm.testParam == "Hello!!!" ,"testParam value must be null");
+                    });
+                });
+            });
+        </script>
+    </head>
+    <body>
+        <p>
+            Invoke server module method.
+            <input id="testModuleMethodButton" type="button"  value="ExecuteModuleMethod"/>
+            <input id="testModuleGetPropertyButton" type="button"  value="GetProperty"/>
+            <input id="testModuleSetPropertyButton" type="button"  value="SetProperty"/>
+        </p>
+        <table border="0" width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+                <td width='50%'>
+                    <div id='left-col'></div>
+                </td>
+                <td width='50%'>
+                    <div id='right-col'></div>
+                </td>
+            </tr>
+        </table>
+
+    </body>
+</html> 

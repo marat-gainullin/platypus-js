@@ -7,6 +7,7 @@ package com.eas.designer.debugger;
 import com.eas.debugger.jmx.server.BreakpointsMBean;
 import com.eas.debugger.jmx.server.DebuggerMBean;
 import java.util.concurrent.Future;
+import org.netbeans.api.project.Project;
 
 /**
  *
@@ -23,4 +24,9 @@ public class DebuggerEnvironment {
     public DebuggerMBean mDebugger;
     public BreakpointsMBean mBreakpoints;
     public MBeanDebuggerListener mDebuggerListener;
+    public Project project;
+
+    public DebuggerEnvironment(Project aProject) {
+        project = aProject;
+    }
 }

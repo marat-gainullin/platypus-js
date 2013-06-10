@@ -21,6 +21,7 @@ import org.mozilla.javascript.ast.PropertyGet;
 import org.mozilla.javascript.ast.ScriptNode;
 import org.mozilla.javascript.ast.VariableDeclaration;
 import org.mozilla.javascript.ast.VariableInitializer;
+import org.netbeans.api.project.Project;
 import org.netbeans.spi.editor.completion.CompletionResultSet;
 import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataObject;
@@ -83,7 +84,8 @@ public class ModuleCompletionContext extends CompletionContext {
             for (;;) {//up to the root node  
                 if (currentNode instanceof ScriptNode) {
                     ScriptNode scriptNode = (ScriptNode) currentNode;
-                    ModuleCompletionContext.FindModuleElementVisitorSupport visitor = new ModuleCompletionContext.FindModuleElementVisitorSupport(scriptNode, fieldName);
+                    ModuleCompletionContext.FindModuleElementVisitorSupport visitor =
+                            new ModuleCompletionContext.FindModuleElementVisitorSupport(appElementDataObject.getProject(), scriptNode, fieldName);
                     CompletionContext ctx = visitor.getModuleInfo();
                     if (ctx != null) {
                         return ctx;
@@ -107,11 +109,13 @@ public class ModuleCompletionContext extends CompletionContext {
 
     private static class FindModuleElementVisitorSupport {
 
+        private Project prj;
         private AstNode node;
         private String fieldName;
         private CompletionContext ctx;
 
-        public FindModuleElementVisitorSupport(AstNode node, String fieldName) {
+        public FindModuleElementVisitorSupport(Project project, AstNode node, String fieldName) {
+            this.prj = project;
             this.node = node;
             this.fieldName = fieldName;
         }
@@ -140,7 +144,7 @@ public class ModuleCompletionContext extends CompletionContext {
                                             if (isModuleInitializerName(ne.getTarget().getString())
                                                     && ne.getArguments() != null
                                                     && ne.getArguments().size() > 0) {
-                                                ctx = getModuleCompletionContext(stripElementId(ne.getArguments().get(0).toSource()));
+                                                ctx = getModuleCompletionContext(prj, stripElementId(ne.getArguments().get(0).toSource()));
                                                 return false;
                                             }
                                             //checks for Platypus API classes
@@ -152,7 +156,7 @@ public class ModuleCompletionContext extends CompletionContext {
                                                 }
                                             }
                                             //checks for new moduleName() expression
-                                            CompletionContext cc = getModuleCompletionContext(stripElementId(ne.getTarget().getString()));
+                                            CompletionContext cc = getModuleCompletionContext(prj, stripElementId(ne.getTarget().getString()));
                                             if (cc != null) {
                                                 ctx = cc;
                                                 return false;
@@ -166,7 +170,7 @@ public class ModuleCompletionContext extends CompletionContext {
                                             if (pg.getLeft().getString().equals(MODULES_OBJECT_NAME)
                                                     && pg.getRight().getString().equals(GET_METHOD_NAME)) {
                                                 if (fc.getArguments() != null && fc.getArguments().size() > 0) {
-                                                    ctx = getModuleCompletionContext(stripElementId(fc.getArguments().get(0).toSource()));
+                                                    ctx = getModuleCompletionContext(prj, stripElementId(fc.getArguments().get(0).toSource()));
                                                     return false;
                                                 }
                                             }
@@ -187,8 +191,8 @@ public class ModuleCompletionContext extends CompletionContext {
             return StringUtils.strip(StringUtils.strip(StringUtils.strip(str, "\""), "'"));//NOI18N
         }
 
-        private CompletionContext getModuleCompletionContext(String appElementId) {
-            FileObject appElementFileObject = IndexerQuery.appElementId2File(appElementId);
+        private CompletionContext getModuleCompletionContext(Project project, String appElementId) {
+            FileObject appElementFileObject = IndexerQuery.appElementId2File(project, appElementId);
             if (appElementFileObject == null) {
                 return null;
             }

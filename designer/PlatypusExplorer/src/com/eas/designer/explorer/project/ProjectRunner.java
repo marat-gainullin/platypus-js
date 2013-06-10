@@ -76,7 +76,7 @@ public class ProjectRunner {
 //                    DebuggerUtils.attachDebugger(serverEnv);
 //                    project.getOutputWindowIO().getOut().println("Application server debug activated.");
 //                }
-                        DebuggerEnvironment env = new DebuggerEnvironment();
+                        DebuggerEnvironment env = new DebuggerEnvironment(project);
                         env.host = LOCAL_HOSTNAME;
                         env.port = project.getSettings().getDebugClientPort();
                         env.runningProgram = runningProgram;

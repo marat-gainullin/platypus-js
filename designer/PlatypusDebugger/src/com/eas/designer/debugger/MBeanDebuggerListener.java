@@ -13,6 +13,7 @@ import javax.management.NotificationListener;
 import org.netbeans.api.debugger.ActionsManager;
 import org.netbeans.api.debugger.DebuggerEngine;
 import org.netbeans.api.debugger.DebuggerManager;
+import org.netbeans.api.project.Project;
 import org.openide.ErrorManager;
 import org.openide.cookies.EditorCookie;
 import org.openide.filesystems.FileObject;
@@ -29,6 +30,11 @@ public class MBeanDebuggerListener implements NotificationListener {
     protected boolean haveBeenRun;
     protected boolean running;
     protected PlatypusRunpointAnnotation annotation = new PlatypusRunpointAnnotation();
+    protected Project project;
+
+    MBeanDebuggerListener(Project aProject) {
+        project = aProject;
+    }
 
     public void die() {
         annotation.detach();
@@ -44,7 +50,7 @@ public class MBeanDebuggerListener implements NotificationListener {
                 Object oNewValue = event.getNewValue();
                 if (oNewValue instanceof String[]) {
                     try {
-                        CodePointInfo cpInfo = CodePointInfo.valueOf((String[]) oNewValue);
+                        CodePointInfo cpInfo = CodePointInfo.valueOf(project, (String[]) oNewValue);
                         breakChangeRecieved(cpInfo);
                     } catch (Exception ex) {
                         ErrorManager.getDefault().notify(ex);
@@ -66,10 +72,9 @@ public class MBeanDebuggerListener implements NotificationListener {
         }
         assert ourEngine != null : "Debugging engine missing";
 
-        if (cpInfo.appElementId != null) {// can't open libraries
-            FileObject fo = IndexerQuery.appElementId2File(cpInfo.appElementId);
-            if (fo != null) {
-                DataObject dataObject = DataObject.find(fo);
+        if (cpInfo.fo != null) {// can't open libraries
+            if (cpInfo.fo != null) {
+                DataObject dataObject = DataObject.find(cpInfo.fo);
                 if (dataObject != null) {
                     EditorCookie ec = dataObject.getLookup().lookup(EditorCookie.class);
                     if (ec != null) {

@@ -16,9 +16,11 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 import javax.swing.JComponent;
+import org.netbeans.api.project.Project;
 import org.netbeans.spi.debugger.ui.AttachType;
 import org.netbeans.spi.debugger.ui.Controller;
 import org.openide.ErrorManager;
+import org.openide.util.Utilities;
 
 /**
  *
@@ -48,7 +50,7 @@ public class PlatypusAttachType extends AttachType {
         public boolean ok() {
             if (isValid()) {
                 try {
-                    DebuggerEnvironment env = new DebuggerEnvironment();
+                    DebuggerEnvironment env = new DebuggerEnvironment(Utilities.actionsGlobalContext().lookup(Project.class));
                     env.host = settings.getHost();
                     env.port = settings.getPort();
                     DebuggerUtils.attachDebugger(env);

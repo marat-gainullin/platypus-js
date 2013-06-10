@@ -40,7 +40,7 @@ public class CallStackModel implements TreeModel, NodeModel,
                 if (cInfo.functionName != null) {
                     fileSData += "." + cInfo.functionName;
                 }
-                fileSData += " : " + String.valueOf(cInfo.lineNo + 1) + " [ " + String.valueOf(cInfo.appElementId) + " ]";
+                fileSData += " : " + String.valueOf(cInfo.lineNo + 1) + " [ " + String.valueOf(cInfo.url) + " ]";
                 return fileSData;
             } else {
                 return NbBundle.getMessage(DebuggerUtils.class, "LBL_file_unavailable");
@@ -70,10 +70,10 @@ public class CallStackModel implements TreeModel, NodeModel,
                 stack = new StackFrameInfo[sStack.length];
                 for (int i = 0; i < stack.length; i++) {
                     StackFrameInfo info = new StackFrameInfo();
-                    info.cInfo = CodePointInfo.valueOf(sStack[i]);
-                    info.file = IndexerQuery.appElementId2File(info.cInfo.appElementId);
+                    info.cInfo = CodePointInfo.valueOf(environment.project, sStack[i]);
+                    info.file = info.cInfo.fo;
                     if (info.file == null) {
-                        Logger.getLogger(CallStackModel.class.getName()).log(Level.WARNING, NbBundle.getMessage(DebuggerUtils.class, "LBL_file_unavailable_for_app_element", info.cInfo.appElementId));
+                        Logger.getLogger(CallStackModel.class.getName()).log(Level.WARNING, NbBundle.getMessage(DebuggerUtils.class, "LBL_file_unavailable_for_app_element", info.cInfo.url));
                     }
                     stack[i] = info;
                 }

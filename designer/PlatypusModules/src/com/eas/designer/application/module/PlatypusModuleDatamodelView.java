@@ -163,7 +163,7 @@ public final class PlatypusModuleDatamodelView extends TopComponent implements M
             TablesSelector tablesSelector = new TablesSelector(dataObject.getAppRoot(), dataObject.getClient(), true, true, NbBundle.getMessage(PlatypusModuleDatamodelView.class, "LBL_PlatypusModule_View_Name"), PlatypusModuleDatamodelView.this);
             QueriesSelector queriesSelector = new QueriesSelector(dataObject.getAppRoot());
             appModelEditor = new ApplicationModelEditorView(tablesSelector, queriesSelector);
-            appModelEditor.getModelView().addEntityViewDoubleClickListener(new QueryDocumentJumper<ApplicationDbEntity>());
+            appModelEditor.getModelView().addEntityViewDoubleClickListener(new QueryDocumentJumper<ApplicationDbEntity>(dataObject.getProject()));
             ApplicationDbModel model = dataObject.getModel();
             appModelEditor.setModel(model);
             appModelEditor.setBorder(new EmptyBorder(0, 0, 0, 0));
