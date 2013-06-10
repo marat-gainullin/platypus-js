@@ -17,6 +17,7 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.dom.client.TableRowElement;
 import com.google.gwt.dom.client.Style.Cursor;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.dom.client.TableCellElement;
@@ -535,27 +536,43 @@ public class ColumnHeader<M> extends Component {
       return;
     }
     cleanCells();
+    
+    int[] rowSpans = new int[cm.getColumnCount()];
+    for(int i = 0; i < rowSpans.length; i++)
+      rowSpans[i] = 1;
+    
     for (int i = 0; i < rows; i++) {
       int columns = table.getCellCount(i);
-      int mark = 0;
-      for (int j = 0; j < columns; j++) {
-        TableCellElement cell = table.getCellFormatter().getElement(i, j).cast();
-        int colspan = cell.getColSpan();
-        int w = 0;
-        for (int k = mark; k < (mark + colspan); k++) {
-          ColumnConfig<M, ?> c = cm.getColumn(k);
-          if (c.isHidden()) {
-            continue;
-          }
-          w += cm.getColumnWidth(k);
-        }
-        mark += colspan;
-
-        cell.getStyle().setPropertyPx("width", w);
-        int adj = cell.<XElement> cast().getFrameWidth(Side.LEFT, Side.RIGHT);
-        XElement inner = cell.getFirstChildElement().cast();
-        inner.setWidth(w - adj, true);
+      int walkedColumns = 0;
+      int spaned = 0;
+      int k = 0;
+      while(k < cm.getColumnCount()) {
+    	if(rowSpans[k] > 1){
+    		rowSpans[k]--;
+    	    spaned++;
+    	    k++;
+    	}else{
+	        TableCellElement cell = table.getCellFormatter().getElement(i, k - spaned).cast();
+	        walkedColumns++;
+	        int w = 0;
+	        int colspan = cell.getColSpan();
+	        for (int l = k; l < (k + colspan); l++) {
+	          ColumnConfig<M, ?> cc = cm.getColumn(l);
+	          if (!cc.isHidden()) {
+		          w += cm.getColumnWidth(l);
+	          }
+	          rowSpans[l] = cell.getRowSpan();
+	        }
+	        k += colspan;
+	        spaned += colspan - 1;
+	        
+	        cell.getStyle().setPropertyPx("width", w);
+	        int adj = cell.<XElement> cast().getFrameWidth(Side.LEFT, Side.RIGHT);
+	        XElement inner = cell.getFirstChildElement().cast();
+	        inner.setWidth(w - adj, true);
+    	}
       }
+      assert walkedColumns == columns;
     }
   }
 
@@ -818,7 +835,8 @@ public class ColumnHeader<M> extends Component {
               16);
         }
       }
-      updateColumnWidth(i, cm.getColumnWidth(i));
+      h.updateWidth(cm.getColumnWidth(i));
+      //updateColumnWidth(i, cm.getColumnWidth(i));
     }
 
     if (container instanceof Grid) {
