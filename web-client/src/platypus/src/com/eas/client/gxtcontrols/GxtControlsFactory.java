@@ -45,9 +45,12 @@ import com.eas.client.gxtcontrols.wrappers.container.PlatypusSplitContainer;
 import com.eas.client.gxtcontrols.wrappers.container.PlatypusTabsContainer;
 import com.eas.client.gxtcontrols.wrappers.container.PlatypusVBoxLayoutContainer;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.ui.HasValue;
+import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.xml.client.Element;
 import com.google.gwt.xml.client.Node;
@@ -56,6 +59,7 @@ import com.sencha.gxt.cell.core.client.ButtonCell.ButtonScale;
 import com.sencha.gxt.cell.core.client.ButtonCell.IconAlign;
 import com.sencha.gxt.cell.core.client.form.RadioCell;
 import com.sencha.gxt.core.client.Style.LayoutRegion;
+import com.sencha.gxt.core.client.dom.XElement;
 import com.sencha.gxt.core.client.util.Size;
 import com.sencha.gxt.core.client.util.ToggleGroup;
 import com.sencha.gxt.core.client.util.Util;
@@ -65,9 +69,11 @@ import com.sencha.gxt.widget.core.client.TabItemConfig;
 import com.sencha.gxt.widget.core.client.button.CellButtonBase;
 import com.sencha.gxt.widget.core.client.button.SplitButton;
 import com.sencha.gxt.widget.core.client.button.TextButton;
+import com.sencha.gxt.widget.core.client.container.BorderLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.Container;
 import com.sencha.gxt.widget.core.client.container.HBoxLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.HasLayout;
+import com.sencha.gxt.widget.core.client.container.ResizeContainer;
 import com.sencha.gxt.widget.core.client.container.VBoxLayoutContainer;
 import com.sencha.gxt.widget.core.client.form.PasswordField;
 import com.sencha.gxt.widget.core.client.form.ValueBaseField;
@@ -429,17 +435,26 @@ public class GxtControlsFactory {
 				break;
 			}
 		}
-
 		btn.setScale(ButtonScale.SMALL);
 		if (aTag.hasAttribute("icon")) {
-			btn.setIcon(AppClient.getInstance().getImageResource(aTag.getAttribute("icon")).addJavaCallback(new ImageResourceCallback() {
+			btn.setIcon(AppClient.getInstance().getImageResource(aTag.getAttribute("icon")).addCallback(new ImageResourceCallback() {
 				@Override
 				public void run(ImageResource aResource) {
 					btn.setIcon(aResource);
-					if (btn.getParent() instanceof HasLayout) {
-						HasLayout c = (HasLayout) btn.getParent();
-						c.forceLayout();
-					}
+					Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+
+						@Override
+						public void execute() {
+							if (btn.getParent() instanceof ResizeContainer) {
+								ResizeContainer c = (ResizeContainer) btn.getParent();
+							    Size s = XElement.as(c.getElement().getParentElement()).getSize(true);
+							    c.setPixelSize(s.getWidth()+1, s.getHeight());
+							    c.setPixelSize(s.getWidth()-1, s.getHeight());
+							}else if(btn.getParent() instanceof HasLayout){
+								((HasLayout)btn.getParent()).forceLayout();
+							}
+						}
+					});
 				}
 
 			}));
@@ -501,14 +516,18 @@ public class GxtControlsFactory {
 		if (aTag.hasAttribute("verticalTextPosition"))
 			component.setVerticalTextPosition(Utils.getIntegerAttribute(aTag, "verticalTextPosition", PlatypusLabel.RIGHT));
 		if (aTag.hasAttribute("icon")) {
-			component.setImage(AppClient.getInstance().getImageResource(aTag.getAttribute("icon")).addJavaCallback(new ImageResourceCallback() {
+			component.setImage(AppClient.getInstance().getImageResource(aTag.getAttribute("icon")).addCallback(new ImageResourceCallback() {
 
 				@Override
 				public void run(ImageResource aResource) {
 					component.setImage(aResource);
-					if (component.getParent() instanceof HasLayout) {
-						HasLayout c = (HasLayout) component.getParent();
-						c.forceLayout();
+					if (component.getParent() instanceof ResizeContainer) {
+						ResizeContainer c = (ResizeContainer) component.getParent();
+					    Size s = XElement.as(c.getElement().getParentElement()).getSize(true);
+					    c.setPixelSize(s.getWidth()+1, s.getHeight());
+					    c.setPixelSize(s.getWidth()-1, s.getHeight());
+					}else if(component.getParent() instanceof HasLayout){
+						((HasLayout)component.getParent()).forceLayout();
 					}
 				}
 
@@ -552,7 +571,7 @@ public class GxtControlsFactory {
 				ToggleGroup group = toggleGroups.get(groupName);
 				if (group != null) {
 					if (group instanceof PlatypusButtonGroup && item instanceof Component)
-						((PlatypusButtonGroup)group).add((Component) item);
+						((PlatypusButtonGroup) group).add((Component) item);
 					else
 						group.add(item);
 				}
@@ -768,7 +787,7 @@ public class GxtControlsFactory {
 		if (aTag.hasAttribute("text"))
 			component.setText(aTag.getAttribute("text"));
 		if (aTag.hasAttribute("icon")) {
-			component.setIcon(AppClient.getInstance().getImageResource(aTag.getAttribute("icon")).addJavaCallback(new ImageResourceCallback() {
+			component.setIcon(AppClient.getInstance().getImageResource(aTag.getAttribute("icon")).addCallback(new ImageResourceCallback() {
 				@Override
 				public void run(ImageResource aResource) {
 					component.setIcon(aResource);
@@ -1375,7 +1394,7 @@ public class GxtControlsFactory {
 		 * config.setText(aTag.getAttribute("tabTooltipText"));
 		 */
 		if (aTag.hasAttribute("icon")) {
-			config.setIcon(AppClient.getInstance().getImageResource(aTag.getAttribute("icon")).addJavaCallback(new ImageResourceCallback() {
+			config.setIcon(AppClient.getInstance().getImageResource(aTag.getAttribute("icon")).addCallback(new ImageResourceCallback() {
 				@Override
 				public void run(ImageResource aResource) {
 					config.setIcon(aResource);
