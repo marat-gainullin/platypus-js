@@ -208,6 +208,11 @@ public class JGeoPane extends JTiledPane {
         @Override
         public void layerDeselected(MapLayerEvent event) {
         }
+
+        @Override
+        public void layerPreDispose(MapLayerEvent mle) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
     }
 
     protected class LayersChangesReflector extends MapLayerListenerAdapter {
