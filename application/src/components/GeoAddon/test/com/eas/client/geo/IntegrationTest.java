@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import org.geotools.data.FeatureSource;
+import org.geotools.feature.FeatureIterator;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.map.DefaultMapContext;
 import org.geotools.map.MapLayer;
@@ -85,7 +86,7 @@ public class IntegrationTest extends GeoBaseTest {
         map = new HashMap<>();
         for (String tableName : DELAWARE_MAP_TABLES) {
             ApplicationDbEntity e = new ApplicationDbEntity(datamodel);
-            e.regenerateID();
+            e.regenerateId();
             e.setTableName(tableName);
             datamodel.addEntity(e);
             final Rowset rowset = e.getRowset();
@@ -135,7 +136,7 @@ public class IntegrationTest extends GeoBaseTest {
             final FeatureSource<? extends FeatureType, ? extends Feature> featureSource = layer.getFeatureSource();
             final String featureTypeName = featureSource.getSchema().getName().getLocalPart();
             // Check individual features inside a layer.
-            for (Iterator<? extends Feature> it = featureSource.getFeatures().iterator(); it.hasNext();) {
+            for (FeatureIterator<? extends Feature> it = featureSource.getFeatures().features(); it.hasNext();) {
                 final Feature feature = it.next();
                 assertFalse(String.format("Feature %s contains point with coordinates (0, 0), though it should not", String.valueOf(feature)),
                         feature.getBounds().contains(0, 0));

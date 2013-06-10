@@ -17,7 +17,7 @@ import com.vividsolutions.jts.geom.Point;
  */
 public class SelectionEntry {
 
-    public static final Class<?> SELECTION_ENTRY_GEOMETRY_BINDING_CLASS = Point.class;
+    public static final Class<? extends Geometry> SELECTION_ENTRY_GEOMETRY_BINDING_CLASS = Point.class;
     public static final Class<?> SELECTION_PHANTOM_GEOMETRY_BINDING_CLASS = Geometry.class;
     public static final String VIEW_SHAPE_ATTR_NAME = "viewShape";
     public static final String ENTITY_ID_ATTR_NAME = "entityId";
@@ -34,10 +34,11 @@ public class SelectionEntry {
     protected Integer geometryColIndex;  // Required field
     protected Integer geometryOfInterestIndex; // Required field
     protected Integer coordinateOfInterestIndex; // Required field
+    private Integer holeOfInterestIndex; // Required field
     // view
     protected Point viewShape;
 
-    public SelectionEntry(long aEntityId, Row aRow, String aFeatureId, int aGeometryColIndex, int aGeometryOfInterestIndex, int aCoordinateOfInterestIndex, Coordinate aCoordinate)
+    public SelectionEntry(long aEntityId, Row aRow, String aFeatureId, int aGeometryColIndex, int aGeometryOfInterestIndex, int aCoordinateOfInterestIndex, int aHoleOfInterest, Coordinate aCoordinate)
     {
         super();
         entityId = aEntityId;
@@ -46,6 +47,7 @@ public class SelectionEntry {
         geometryColIndex = aGeometryColIndex;
         geometryOfInterestIndex = aGeometryOfInterestIndex;
         coordinateOfInterestIndex = aCoordinateOfInterestIndex;
+        holeOfInterestIndex = aHoleOfInterest;
         viewShape = GisUtilities.createPoint(aCoordinate);
     }
 
@@ -83,5 +85,19 @@ public class SelectionEntry {
 
     public void setCoordinateOfInterestIndex(int aIdx) {
         coordinateOfInterestIndex = aIdx;
+    }
+
+    /**
+     * @return the holeOfInterestIndex
+     */
+    public Integer getHoleOfInterestIndex() {
+        return holeOfInterestIndex;
+    }
+
+    /**
+     * @param aHoleOfInterestIndex the holeOfInterestIndex to set
+     */
+    public void setHoleOfInterestIndex(int aHoleOfInterestIndex) {
+        holeOfInterestIndex = aHoleOfInterestIndex;
     }
 }

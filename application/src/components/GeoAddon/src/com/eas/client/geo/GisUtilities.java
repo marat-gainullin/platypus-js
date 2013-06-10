@@ -27,6 +27,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import org.geotools.factory.CommonFactoryFinder;
@@ -64,6 +65,50 @@ public class GisUtilities {
         coordinates[3] = new Coordinate(begPoint.getX(), begPoint.getY());
         CoordinateSequence cSeq = csFactory.create(coordinates);
         return gFactory.createPolygon(new LinearRing(cSeq, gFactory), null);
+    }
+
+    public static Polygon createPolygonWithHoles(Polygon aPolygon, Geometry[] aHoles) {
+        CoordinateSequence polygonSeq = csFactory.create(getPolygonShell(aPolygon).getCoordinates());
+        LinearRing shell = new LinearRing(polygonSeq, gFactory);
+        List<LinearRing> holes = new ArrayList<>();
+        if (aHoles != null) {
+            for (int i = 0; i < aHoles.length; i++) {
+                Coordinate[] coord = aHoles[i].getCoordinates();
+                if (coord.length > 1) {
+                    CoordinateSequence holeSeq = csFactory.create(coord);
+                    holes.add(new LinearRing(holeSeq, gFactory));
+                }
+            }
+        }
+        LinearRing[] arHoles = new LinearRing[0];
+        return gFactory.createPolygon(shell, holes.toArray(arHoles));
+    }
+
+    public static Polygon createPolygonWithHoles(Polygon aPolygon, Geometry[] aHoles, int aSrid) {
+        Polygon polygon = createPolygonWithHoles(aPolygon, aHoles);
+        polygon.setSRID(aSrid);
+        return polygon;
+    }
+
+    public static Polygon getPolygonShell(Polygon aPolygon) {
+        if (aPolygon != null) {
+            return gFactory.createPolygon(aPolygon.getExteriorRing().getCoordinates());
+        }
+        return null;
+    }
+
+    public static Polygon[] getPolygonHoles(Polygon aPolygon) {
+        if (aPolygon != null) {
+            Polygon[] holes = new Polygon[aPolygon.getNumInteriorRing()];
+            for (int i = 0; i < aPolygon.getNumInteriorRing(); i++) {
+                Coordinate[] coord = aPolygon.getInteriorRingN(i).getCoordinates();
+                if (coord.length > 1) {
+                    holes[i] = gFactory.createPolygon(coord);
+                }
+            }
+            return holes;
+        }
+        return null;
     }
 
     public static Polygon addPoint2Polygon(Polygon aPoly, Point point2Add) {
@@ -134,20 +179,34 @@ public class GisUtilities {
             MultiPolygon mPolygon = (MultiPolygon) geom;
             for (int g = 0; g < mPolygon.getNumGeometries(); g++) {
                 Geometry section = mPolygon.getGeometryN(g);
-                Coordinate[] coordinates = section.getCoordinates();
-                for (int i = 0; i < coordinates.length; i++) {
-                    SelectionEntry entry = new SelectionEntry(entity.getEntityId(), (Row) oRow, featureID, geometryColIndex, g, i, coordinates[i]);
-                    aDestination.add(entry);
-                }
+                convertGeometry2SelectionEntries(entity.getEntityId(), (Row) oRow, featureID, geometryColIndex, g, section, aDestination);
             }
         } else {
-            Coordinate[] coordinates = geom.getCoordinates();
+            convertGeometry2SelectionEntries(entity.getEntityId(), (Row) oRow, featureID, geometryColIndex, -1, geom, aDestination);
+        }
+                }
+
+    public static void convertGeometry2SelectionEntries(long aEntityId, Row aRow, String aFeatureId, int aGeometryColIndex, int aNumGeometry, Geometry aGeometry, List<SelectionEntry> aDestination) {
+        if (aGeometry instanceof Polygon && ((Polygon) aGeometry).getNumInteriorRing() > 0) {
+            Polygon polygon = (Polygon) aGeometry;
+            Polygon shell = getPolygonShell(polygon);
+            putGeometry2SelectionEntries(aEntityId, aRow, aFeatureId, aGeometryColIndex, aNumGeometry, -1, shell, aDestination);
+            Polygon[] holes = getPolygonHoles(polygon);
+            for (int i = 0; i < holes.length; i++) {
+                putGeometry2SelectionEntries(aEntityId, aRow, aFeatureId, aGeometryColIndex, aNumGeometry, i, holes[i], aDestination);
+            }
+        } else {
+            putGeometry2SelectionEntries(aEntityId, aRow, aFeatureId, aGeometryColIndex, aNumGeometry, -1, aGeometry, aDestination);
+        }
+    }
+
+    public static void putGeometry2SelectionEntries(long aEntityId, Row aRow, String aFeatureId, int aGeometryColIndex, int aNumGeometry, int aNumHole, Geometry aGeometry, List<SelectionEntry> aDestination) {
+        Coordinate[] coordinates = aGeometry.getCoordinates();
             for (int i = 0; i < coordinates.length; i++) {
-                SelectionEntry entry = new SelectionEntry(entity.getEntityId(), (Row) oRow, featureID, geometryColIndex, -1, i, coordinates[i]);
+            SelectionEntry entry = new SelectionEntry(aEntityId, aRow, aFeatureId, aGeometryColIndex, aNumGeometry, i, aNumHole, coordinates[i]);
                 aDestination.add(entry);
             }
         }
-    }
 
     public static Set<Geometry> convertSelectionEntries2Geometries(List<SelectionEntry> aSelection) throws Exception {
         Set<Geometry> collectedGeometries = new HashSet<>();
@@ -171,27 +230,29 @@ public class GisUtilities {
         return gFactory.createPolygon(new LinearRing(cSeq, gFactory), null);
     }
 
-    public static MultiPoint createMultiPoint(Coordinate[] aCoordinates) {
-        return gFactory.createMultiPoint(aCoordinates);
+    public static MultiPoint createMultiPoint(Point[] aPoints) {
+        return gFactory.createMultiPoint(aPoints);
     }
 
-    public static MultiLineString createMultiLineString(List<Coordinate[]> aData) {
+    public static MultiLineString createMultiLineString(List<Geometry> aData) {
         LineString[] lineStrings = new LineString[aData.size()];
         for (int i = 0; i < lineStrings.length; i++) {
-            lineStrings[i] = createLineString(aData.get(i));
+            assert aData.get(i) instanceof LineString;
+            lineStrings[i] = (LineString) aData.get(i);
         }
         return gFactory.createMultiLineString(lineStrings);
     }
 
-    public static MultiPolygon createMultiPolygon(List<Coordinate[]> aData) {
+    public static MultiPolygon createMultiPolygon(List<Geometry> aData) {
         Polygon[] polygons = new Polygon[aData.size()];
         for (int i = 0; i < polygons.length; i++) {
-            polygons[i] = createPolygon(aData.get(i));
+            assert aData.get(i) instanceof Polygon;
+            polygons[i] = (Polygon) aData.get(i);
         }
         return gFactory.createMultiPolygon(polygons);
     }
 
-    public static boolean isValidGeometryDataSection(Coordinate[] aSection, Class<?> aGeometryClass) {
+    public static boolean isValidGeometryDataSection(Coordinate[] aSection, Class aGeometryClass) {
         if (Point.class.isAssignableFrom(aGeometryClass) || MultiPoint.class.isAssignableFrom(aGeometryClass)) {
             return aSection.length == 1;
         } else if (LineString.class.isAssignableFrom(aGeometryClass) || MultiLineString.class.isAssignableFrom(aGeometryClass)) {
@@ -203,17 +264,17 @@ public class GisUtilities {
         }
     }
 
-    public static boolean isValidGeometryData(List<Coordinate[]> aData, Class<?> aGeometryClass) {
+    public static boolean isValidGeometryData(List<Geometry> aData, Class aGeometryClass) {
         if (Point.class.isAssignableFrom(aGeometryClass)
                 || LineString.class.isAssignableFrom(aGeometryClass)
                 || Polygon.class.isAssignableFrom(aGeometryClass)) {
-            return aData.size() == 1 && isValidGeometryDataSection(aData.get(0), aGeometryClass);
+            return aData.size() == 1 && isValidGeometryDataSection(aData.get(0).getCoordinates(), aGeometryClass);
         } else if (MultiPoint.class.isAssignableFrom(aGeometryClass)
                 || MultiLineString.class.isAssignableFrom(aGeometryClass)
                 || MultiPolygon.class.isAssignableFrom(aGeometryClass)) {
             if (aData.size() >= 1) {
                 for (int i = 0; i < aData.size(); i++) {
-                    if (!isValidGeometryDataSection(aData.get(i), aGeometryClass)) {
+                    if (!isValidGeometryDataSection(aData.get(i).getCoordinates(), aGeometryClass)) {
                         return false;
                     }
                 }
@@ -226,30 +287,23 @@ public class GisUtilities {
         }
     }
 
-    public static Geometry constructGeometry(List<Coordinate[]> aData, Class<?> aGeometryClass, int aSrid) {
+    public static Geometry constructGeometry(List<Geometry> aData, Class aGeometryClass, int aSrid) {
         Geometry g = null;
         if (Point.class.isAssignableFrom(aGeometryClass)) {
             assert aData.size() == 1;
-            assert aData.get(0).length == 1;
-            Point pt = createPoint(aData.get(0)[0]);
-            g = pt;
+            assert aData.get(0).getCoordinates().length == 1;
+            g = aData.get(0);
         } else if (LineString.class.isAssignableFrom(aGeometryClass)) {
             assert aData.size() == 1;
-            LineString ls = createLineString(aData.get(0));
-            g = ls;
+            g = aData.get(0);
         } else if (Polygon.class.isAssignableFrom(aGeometryClass)) {
             assert aData.size() == 1;
-            Coordinate[] coordinates = aData.get(0);
-            coordinates[coordinates.length - 1].x = coordinates[0].x;
-            coordinates[coordinates.length - 1].y = coordinates[0].y;
-            Polygon poly = createPolygon(coordinates);
-            g = poly;
+            g = aData.get(0);
         } else if (MultiPoint.class.isAssignableFrom(aGeometryClass)) {
-            Coordinate[] mpData = new Coordinate[aData.size()];
+            Point[] mpData = new Point[aData.size()];
             for (int i = 0; i < mpData.length; i++) {
-                Coordinate[] pData = aData.get(i);
-                assert pData.length == 1;
-                mpData[i] = pData[0];
+                assert aData.get(i) instanceof Point;
+                mpData[i] = (Point) aData.get(i);
             }
             MultiPoint mp = createMultiPoint(mpData);
             g = mp;
@@ -264,23 +318,38 @@ public class GisUtilities {
         return g;
     }
 
-    public static void packNullsInGeometryData(List<Coordinate[]> aCoordsCloud, Class<?> aGeometryClass) {
-        for (int s = aCoordsCloud.size() - 1; s >= 0; s--) {
-            Coordinate[] sectionWithNulls = aCoordsCloud.get(s);
-            List<Coordinate> alSection = new ArrayList<>();
-            for (int c = 0; c < sectionWithNulls.length; c++) {
-                if (sectionWithNulls[c] != null) {
-                    alSection.add(sectionWithNulls[c]);
-                }
+    public static Geometry constructGeometry(Coordinate[] aCoordinates, Class aGeometryClass) {
+        Geometry g = null;
+        if (isValidGeometryDataSection(aCoordinates, aGeometryClass)) {
+            if (Point.class.isAssignableFrom(aGeometryClass)) {
+                g = gFactory.createPoint(aCoordinates[0]);
+            } else if (LineString.class.isAssignableFrom(aGeometryClass)) {
+                g = gFactory.createLineString(aCoordinates);
+            } else if (Polygon.class.isAssignableFrom(aGeometryClass)) {
+                g = gFactory.createPolygon(aCoordinates);
+            } else if (MultiPoint.class.isAssignableFrom(aGeometryClass)) {
+                g = gFactory.createMultiPoint(aCoordinates);
             }
-            Coordinate[] section = new Coordinate[alSection.size()];
-            alSection.toArray(section);
-            if (!isValidGeometryDataSection(section, aGeometryClass)) {
-                aCoordsCloud.remove(s);
-            } else {
-                aCoordsCloud.set(s, section);
-            }
+            return g;
         }
+        return null;
+                }
+
+    public static Coordinate[] deletePointsFromCoordinates(Geometry aGeometry, List<Integer> aDeleteCoordinates) {
+        if (aGeometry != null && aDeleteCoordinates != null && aDeleteCoordinates.size() > 0) {
+            List<Coordinate> lst = new LinkedList<>(Arrays.asList(aGeometry.getCoordinates()));
+            for (int coordIndex : aDeleteCoordinates) {
+                lst.remove(coordIndex);
+            }
+            if (aGeometry instanceof Polygon) {
+                if (lst.size() > 1 && !lst.get(0).equals(lst.get(lst.size() - 1))) {
+                    lst.add(lst.get(0));
+            }
+            }
+            Coordinate[] section = new Coordinate[lst.size()];
+            return lst.toArray(section);
+        }
+        return null;
     }
 
     public static boolean inject(Style aStyle, Graphic aGraphic) {
@@ -333,6 +402,6 @@ public class GisUtilities {
         styleHelper.setLineColor(Color.black);
         styleHelper.setSize(5.0f);
         styleHelper.setPointSymbol(PointSymbol.SQUARE);
-        return styleHelper.buildStyle(SelectionEntry.SELECTION_ENTRY_GEOMETRY_BINDING_CLASS);
+        return styleHelper.buildStyle(SelectionEntry.SELECTION_ENTRY_GEOMETRY_BINDING_CLASS, null);
     }
 }
