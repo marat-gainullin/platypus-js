@@ -9,8 +9,7 @@ import com.eas.client.gxtcontrols.model.ModelElementRef;
 import com.eas.client.model.Entity;
 import com.sencha.gxt.core.client.ValueProvider;
 
-public class RowRowValueProvider implements ValueProvider<Row, Row>,
-		ChangesHost {
+public class RowRowValueProvider implements ValueProvider<Row, Row>, ChangesHost {
 
 	protected ValueLookup lookup;
 
@@ -20,8 +19,7 @@ public class RowRowValueProvider implements ValueProvider<Row, Row>,
 	protected ModelElementRef lookupValueRef;
 	protected ModelElementRef displayValueRef;
 
-	public RowRowValueProvider(Entity aRowsEntity, ModelElementRef aColumnRef,
-			ModelElementRef aLookupValueRef, ModelElementRef aDisplayValueRef) {
+	public RowRowValueProvider(Entity aRowsEntity, ModelElementRef aColumnRef, ModelElementRef aLookupValueRef, ModelElementRef aDisplayValueRef) {
 		super();
 		rowsEntity = aRowsEntity;
 		columnRef = aColumnRef;
@@ -31,8 +29,7 @@ public class RowRowValueProvider implements ValueProvider<Row, Row>,
 
 	protected void init() {
 		if (lookup == null)
-			lookup = new ValueLookup(columnRef.getColIndex(), lookupValueRef,
-					displayValueRef);
+			lookup = new ValueLookup(columnRef.getColIndex(), lookupValueRef, displayValueRef);
 	}
 
 	public ValueLookup getLookup() {
@@ -40,16 +37,14 @@ public class RowRowValueProvider implements ValueProvider<Row, Row>,
 		return lookup;
 	}
 
-	public boolean tryInit()
-	{
-		if(columnRef.entity.getRowset() != null && lookupValueRef.entity.getRowset() != null && displayValueRef.entity.getRowset() != null)
-		{
+	public boolean tryInit() {
+		if (columnRef.entity.getRowset() != null && lookupValueRef.entity.getRowset() != null && displayValueRef.entity.getRowset() != null) {
 			ValueLookup lookup = getLookup();
 			return lookup != null && lookup.tryInit();
 		}
 		return false;
 	}
-	
+
 	public boolean isChanged(Row aRow) {
 		init();
 		if (columnRef.getColIndex() > 0)
@@ -57,15 +52,13 @@ public class RowRowValueProvider implements ValueProvider<Row, Row>,
 				if (rowsEntity == columnRef.entity) {
 					return aRow.isColumnUpdated(columnRef.getColIndex());
 				} else {
-					if (rowsEntity.scrollTo(aRow)
-							&& columnRef.entity.getRowset() != null) {
+					if (rowsEntity.scrollTo(aRow) && columnRef.entity.getRowset() != null) {
 						Row lRow = columnRef.entity.getRowset().getCurrentRow();
 						return lRow.isColumnUpdated(columnRef.getColIndex());
 					}
 				}
 			} catch (Exception e) {
-				Logger.getLogger(RowValueProvider.class.getName()).log(
-						Level.SEVERE, e.getMessage());
+				Logger.getLogger(RowValueProvider.class.getName()).log(Level.SEVERE, e.getMessage());
 			}
 		return false;
 	}
@@ -78,15 +71,13 @@ public class RowRowValueProvider implements ValueProvider<Row, Row>,
 				if (rowsEntity == columnRef.entity) {
 					return lookup.lookupRow(aRow);
 				} else {
-					if (rowsEntity.scrollTo(aRow)
-							&& columnRef.entity.getRowset() != null) {
+					if (rowsEntity.scrollTo(aRow) && columnRef.entity.getRowset() != null) {
 						Row lRow = columnRef.entity.getRowset().getCurrentRow();
 						return lookup.lookupRow(lRow);
 					}
 				}
 			} catch (Exception e) {
-				Logger.getLogger(RowValueProvider.class.getName()).log(
-						Level.SEVERE, e.getMessage());
+				Logger.getLogger(RowValueProvider.class.getName()).log(Level.SEVERE, e.getMessage());
 			}
 		return null;
 	}
@@ -97,30 +88,24 @@ public class RowRowValueProvider implements ValueProvider<Row, Row>,
 		if (columnRef.getColIndex() > 0)
 			try {
 				if (rowsEntity == columnRef.entity) {
-					Object lookupKeyValue = value != null ? value
-							.getColumnObject(lookup.getLookupValueRef()
-									.getColIndex()) : null;
-					aRow.setColumnObject(columnRef.getColIndex(),
-							lookupKeyValue);
+					Object lookupKeyValue = value != null ? value.getColumnObject(lookup.getLookupValueRef().getColIndex()) : null;
+					aRow.setColumnObject(columnRef.getColIndex(), lookupKeyValue);
 				} else {
-					if (rowsEntity.scrollTo(aRow)
-							&& columnRef.entity.getRowset() != null) {
-						Object lookupKeyValue = value != null ? columnRef.entity
-								.getRowset().getObject(
-										lookup.getLookupValueRef()
-												.getColIndex()) : null;
-						columnRef.entity.getRowset().updateObject(
-								columnRef.getColIndex(), lookupKeyValue);
+					if (rowsEntity.scrollTo(aRow) && columnRef.entity.getRowset() != null) {
+						Object lookupKeyValue = value != null ? columnRef.entity.getRowset().getObject(lookup.getLookupValueRef().getColIndex()) : null;
+						columnRef.entity.getRowset().updateObject(columnRef.getColIndex(), lookupKeyValue);
 					}
 				}
 			} catch (Exception e) {
-				Logger.getLogger(RowValueProvider.class.getName()).log(
-						Level.SEVERE, e.getMessage());
+				Logger.getLogger(RowValueProvider.class.getName()).log(Level.SEVERE, e.getMessage());
 			}
 	}
 
 	@Override
 	public String getPath() {
-		return null;
+		if (columnRef != null && columnRef.entity != null && columnRef.getColIndex() > 0) {
+			return columnRef.entity.getEntityId() + "/" + columnRef.getColIndex();
+		} else
+			return null;
 	}
 }
