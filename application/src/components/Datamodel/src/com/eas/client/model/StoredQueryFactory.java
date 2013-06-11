@@ -139,6 +139,10 @@ public class StoredQueryFactory {
         }
         Logger.getLogger(this.getClass().getName()).finer(String.format(LOADING_QUERY_MSG, aAppElementId));
         ApplicationElement appElement = client.getAppCache().get(aAppElementId);
+        if (appElement == null && SUBQUERY_LINK_PATTERN.matcher(aAppElementId).matches()) {
+            aAppElementId = aAppElementId.substring(1);
+            appElement = client.getAppCache().get(aAppElementId);
+        }        
         if (appElement != null) {// Ordinary queries, stored in application database
             Document queryDom = appElement.getContent();
             if (queryDom != null) {

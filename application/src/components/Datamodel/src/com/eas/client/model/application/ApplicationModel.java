@@ -196,15 +196,10 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
     + "In this case, application can call model.save() another time to save the changes. "
     + "If an application need to abort futher attempts and discard model data changes, "
     + "than it can call model.revert().")
-    public boolean save() throws Exception {
+    public final boolean save() throws Exception {
         return save(null);
     }
 
-    @ScriptFunction(jsDocText = "Saves model data changes. Calls aCallback when done."
-    + "If model can't apply the changed, than exception is thrown. "
-    + "In this case, application can call model.save() another time to save the changes. "
-    + "If an application need to abort futher attempts and discard model data changes, "
-    + "than it can call model.revert().")
     public boolean save(Function aCallback) throws Exception {
         if (commitable) {
             try {
@@ -257,11 +252,10 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
     }
 
     @ScriptFunction(jsDocText = "Requeries model data.")
-    public void requery() throws Exception {
+    public final void requery() throws Exception {
         requery(null);
     }
 
-    @ScriptFunction(jsDocText = "Requeries model data with callback.")
     public void requery(Function aCallback) throws Exception {
         executeRootEntities(true);
         if (aCallback != null) {
@@ -306,7 +300,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
 
     private void executeRootEntities(boolean refresh) throws Exception {
         Set<E> toExecute = new HashSet<>();
-        for (E entity : entities.values()) {
+        for (E entity : entities.values()) {            
             Set<Relation<E>> dependanceRels = new HashSet<>();
             for (Relation<E> inRel : entity.getInRelations()) {
                 if (!(inRel.getLeftEntity() instanceof ApplicationParametersEntity)) {

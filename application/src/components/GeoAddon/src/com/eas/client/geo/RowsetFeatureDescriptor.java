@@ -11,6 +11,7 @@ import com.eas.controls.DesignInfo;
 import com.eas.design.Designable;
 import com.eas.design.Undesignable;
 import com.eas.store.Serial;
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Polygon;
 import java.awt.Color;
 import java.awt.Font;
@@ -194,8 +195,8 @@ public class RowsetFeatureDescriptor extends DesignInfo {
     }
 
     @Undesignable
-    public Class<?> getGeometryBindingClass() throws ClassNotFoundException {
-        return Class.forName(geometryBinding);
+    public Class<? extends Geometry> getGeometryBindingClass() throws ClassNotFoundException {
+        return (Class<? extends Geometry>) Class.forName(geometryBinding);
     }
 
     public void setGeometryBindingClass(Class<?> aValue) {

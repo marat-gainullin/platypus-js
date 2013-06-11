@@ -47,7 +47,7 @@ public class JSControls {
 						aComponent.@com.eas.client.gxtcontrols.wrappers.component.PlatypusLabel::setImage(Lcom/google/gwt/resources/client/ImageResource;)(aValue);
 					};
 					if(aValue != null)
-						aValue.@com.eas.client.application.PlatypusImageResource::addJsCallback(Lcom/google/gwt/core/client/JavaScriptObject;)(setterCallback);
+						aValue.@com.eas.client.application.PlatypusImageResource::addCallback(Lcom/google/gwt/core/client/JavaScriptObject;)(setterCallback);
 					setterCallback();
 				}
 			});
@@ -630,7 +630,7 @@ public class JSControls {
 						aComponent.@com.sencha.gxt.widget.core.client.menu.MenuItem::setIcon(Lcom/google/gwt/resources/client/ImageResource;)(aValue);
 					}
 					if(aValue != null)
-						aValue.@com.eas.client.application.PlatypusImageResource::addJsCallback(Lcom/google/gwt/core/client/JavaScriptObject;)(setterCallback);
+						aValue.@com.eas.client.application.PlatypusImageResource::addCallback(Lcom/google/gwt/core/client/JavaScriptObject;)(setterCallback);
 					setterCallback();
 				}
 			});
@@ -781,7 +781,7 @@ public class JSControls {
 						comp.@com.sencha.gxt.widget.core.client.button.CellButtonBase::setIcon(Lcom/google/gwt/resources/client/ImageResource;)(aValue);
 					}
 					if(aValue != null)
-						aValue.@com.eas.client.application.PlatypusImageResource::addJsCallback(Lcom/google/gwt/core/client/JavaScriptObject;)(setterCallback);
+						aValue.@com.eas.client.application.PlatypusImageResource::addCallback(Lcom/google/gwt/core/client/JavaScriptObject;)(setterCallback);
 					setterCallback();
 				}
 			});

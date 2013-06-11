@@ -14,6 +14,7 @@ import org.geotools.data.FeatureEvent;
 import org.geotools.data.FeatureListener;
 import org.geotools.data.Query;
 import org.geotools.feature.FeatureCollection;
+import org.geotools.feature.FeatureIterator;
 import org.geotools.filter.Filter;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.opengis.feature.simple.SimpleFeature;
@@ -71,7 +72,7 @@ public class SelectionFeatureSource extends AbstractFeatureSource {
     public ReferencedEnvelope getBounds(Query query) throws IOException {
         final ReferencedEnvelope bounds = new ReferencedEnvelope();
         final FeatureCollection<SimpleFeatureType, SimpleFeature> features = getFeatures(query);
-        for (Iterator<SimpleFeature> it = features.iterator(); it.hasNext();) {
+        for (FeatureIterator<SimpleFeature> it = features.features(); it.hasNext();) {
             final SimpleFeature feature = it.next();
             bounds.include(feature.getBounds());
         }

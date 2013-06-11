@@ -45,7 +45,7 @@ public class RowsFeatureReaderTest extends GeoBaseTest
         datamodel.setRuntime(true);
         final Map<String, RowsetFeatureDescriptor> map = new HashMap<>();
         ApplicationDbEntity e = new ApplicationDbEntity(datamodel);
-        e.regenerateID();
+        e.regenerateId();
         e.setTableName("COLA_MARKETS");
         datamodel.addEntity(e);
         map.put(e.getTableName(), new RowsetFeatureDescriptor(e.getTableName(), e));

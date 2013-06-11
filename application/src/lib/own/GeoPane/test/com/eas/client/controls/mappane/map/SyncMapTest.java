@@ -14,12 +14,15 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JFrame;
 import javax.swing.KeyStroke;
+import org.geotools.data.collection.ListFeatureCollection;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureCollections;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
@@ -29,9 +32,9 @@ import org.geotools.map.DefaultMapContext;
 import org.geotools.map.DefaultMapLayer;
 import org.geotools.map.MapContext;
 import org.geotools.map.MapLayer;
+import org.geotools.styling.LineSymbolizer;
 import org.geotools.styling.Style;
 import org.junit.Test;
-import org.geotools.styling.LineSymbolizer;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.referencing.FactoryException;
@@ -52,6 +55,7 @@ public class SyncMapTest extends MapGraphicTest {
             putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0));
         }
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             try {
                 pane.translateGrid(2, 0);
@@ -70,6 +74,7 @@ public class SyncMapTest extends MapGraphicTest {
             putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0));
         }
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             try {
                 pane.translateGrid(-2, 0);
@@ -88,6 +93,7 @@ public class SyncMapTest extends MapGraphicTest {
             putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0));
         }
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             try {
                 pane.translateGrid(0, 2);
@@ -106,6 +112,7 @@ public class SyncMapTest extends MapGraphicTest {
             putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0));
         }
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             try {
                 pane.translateGrid(0, -2);
@@ -147,7 +154,7 @@ public class SyncMapTest extends MapGraphicTest {
         typeBuilder.add("name", String.class);
         SimpleFeatureType featureType = typeBuilder.buildFeatureType();
 
-        FeatureCollection fcollection1 = FeatureCollections.newCollection();
+        List<SimpleFeature> lst = new ArrayList<>();
 
         Object[] attrs = new Object[2];
         int lNo = 0;
@@ -156,22 +163,25 @@ public class SyncMapTest extends MapGraphicTest {
             String lStringId = String.valueOf(lNo++);
             attrs[1] = "line " + lStringId;
             SimpleFeature feature = SimpleFeatureBuilder.build(featureType, attrs, lStringId);
-            fcollection1.add(feature);
+            lst.add(feature);
         }
-
+        
+        FeatureCollection fcollection1 = new ListFeatureCollection(featureType, lst);
+        lst.clear();
         MapLayer layer1 = new DefaultMapLayer(fcollection1, lineStyle, "Main layer");
         mainContext.addLayer(layer1);
 
         final MapContext lightContext = new DefaultMapContext(projectedCrs);
         lightContext.setAreaOfInterest(aoi);
 
-        FeatureCollection fcollection2 = FeatureCollections.newCollection();
         attrs[0] = lightweightLine;
         String lStringId = String.valueOf(lNo++);
         attrs[1] = "line " + lStringId;
         SimpleFeature feature = SimpleFeatureBuilder.build(featureType, attrs, lStringId);
-        fcollection2.add(feature);
+        lst.add(feature);
 
+        FeatureCollection fcollection2 = new ListFeatureCollection(featureType, lst);
+        
         MapLayer layer2 = new DefaultMapLayer(fcollection2, lineStyle1, "Lightweight layer");
         lightContext.addLayer(layer2);
 

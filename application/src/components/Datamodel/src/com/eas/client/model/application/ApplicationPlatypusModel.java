@@ -7,8 +7,10 @@ package com.eas.client.model.application;
 import com.bearsoft.rowset.changes.Change;
 import com.eas.client.AppClient;
 import com.eas.client.queries.PlatypusQuery;
+import com.eas.script.ScriptFunction;
 import java.util.ArrayList;
 import java.util.List;
+import org.mozilla.javascript.Function;
 
 /**
  *
@@ -50,10 +52,15 @@ public class ApplicationPlatypusModel extends ApplicationModel<ApplicationPlatyp
         return true;
     }
 
+    @ScriptFunction(jsDocText = "Saves model data changes. Calls aCallback when done."
+    + "If model can't apply the changed, than exception is thrown. "
+    + "In this case, application can call model.save() another time to save the changes. "
+    + "If an application need to abort futher attempts and discard model data changes, "
+    + "than it can call model.revert().")
     @Override
-    public boolean save() throws Exception {
+    public boolean save(Function aCallback) throws Exception {
         client.getChangeLog().addAll(changeLog);
-        return super.save();
+        return super.save(aCallback);
     }
 
     @Override
@@ -81,10 +88,11 @@ public class ApplicationPlatypusModel extends ApplicationModel<ApplicationPlatyp
     public void rolledback() throws Exception {
     }
 
+    @ScriptFunction(jsDocText = "Requeries model data with callback.")
     @Override
-    public void requery() throws Exception {
+    public void requery(Function aCallback) throws Exception {
         changeLog.clear();
-        super.requery();
+        super.requery(aCallback);
     }
 
     public List<Change> getChangeLog() {

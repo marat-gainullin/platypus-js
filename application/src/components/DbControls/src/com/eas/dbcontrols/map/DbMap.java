@@ -4,6 +4,7 @@
  */
 package com.eas.dbcontrols.map;
 
+import com.bearsoft.rowset.Row;
 import com.eas.client.controls.geopane.JGeoPane;
 import com.eas.client.controls.geopane.actions.DownAction;
 import com.eas.client.controls.geopane.actions.InfoAction;
@@ -27,6 +28,7 @@ import com.eas.client.geo.selectiondatastore.SelectionEntry;
 import com.eas.client.model.ModelEntityRef;
 import com.eas.client.model.application.ApplicationEntity;
 import com.eas.client.model.application.ApplicationModel;
+import com.eas.client.model.script.RowHostObject;
 import com.eas.client.model.script.ScriptableRowset;
 import com.eas.dbcontrols.DbControl;
 import com.eas.dbcontrols.DbControlsUtils;
@@ -69,6 +71,7 @@ import org.geotools.factory.GeoTools;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
 import org.geotools.map.DefaultMapContext;
+import org.geotools.map.Layer;
 import org.geotools.map.MapContext;
 import org.geotools.map.MapLayer;
 import org.geotools.referencing.ReferencingFactoryFinder;
@@ -78,6 +81,7 @@ import org.geotools.styling.Style;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
 import org.mozilla.javascript.Scriptable;
+import org.mozilla.javascript.ScriptableObject;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
@@ -150,6 +154,7 @@ public class DbMap extends JPanel implements DbControl, RowsetsDbControl, Proper
         }
     }
     public static final int DEFAULTHIT_PRECISION = 4;
+    public static final String BEFORE_SHOW_TOOL_TIP_FUNCTION_NAME = "onBeforeToolTipShow";
     protected int hitPrecision = DEFAULTHIT_PRECISION;
     private ApplicationModel<?, ?, ?, ?> model;
     private JGeoPane pane;
@@ -313,7 +318,7 @@ public class DbMap extends JPanel implements DbControl, RowsetsDbControl, Proper
                 }
                 for (RowsetFeatureDescriptor featureDescriptor : features) {
                     logger.fine(String.format("Adding layer for feature %s", featureDescriptor.getTypeName())); //NOI18N
-                    final Style style = featureDescriptor.getStyle().isEmpty() ? null : featureDescriptor.getStyle().buildStyle(featureDescriptor.getGeometryBindingClass());
+                    final Style style = featureDescriptor.getStyle().isEmpty() ? null : featureDescriptor.getStyle().buildStyle(featureDescriptor.getGeometryBindingClass(), projectedCrs.getConversionFromBase().getMathTransform().toWKT());
                     if (featureDescriptor.isActive()) {
                         activeMapContext.addLayer(dataStore.getFeatureSource(featureDescriptor.getTypeName()), style);
                     } else {
@@ -387,7 +392,7 @@ public class DbMap extends JPanel implements DbControl, RowsetsDbControl, Proper
      * @return MapLayer instance, just created.
      */
     public MapLayer addLayer(String aLayerTitle, ScriptableRowset<?> aRowset, Class<?> aGeometryClass, Map<String, Object> aStyleAttributes) throws Exception {
-        MapLayer layer = null;
+        MapLayer layer;
         MapContext lightweightMapContext = pane.getLightweightMapContext();
         synchronized (lightweightMapContext) {
             RowsetFeatureDescriptor newFeatureDescriptor = new RowsetFeatureDescriptor(aLayerTitle, aRowset.getEntity(), new ModelEntityRef(aRowset.getEntity().getEntityId()));
@@ -424,7 +429,7 @@ public class DbMap extends JPanel implements DbControl, RowsetsDbControl, Proper
             if (oPointSymbol instanceof PointSymbol) {
                 newFeatureDescriptor.getStyle().setPointSymbol((PointSymbol) oPointSymbol);
             }
-            Style newStyle = newFeatureDescriptor.getStyle().buildStyle(newFeatureDescriptor.getGeometryBindingClass());
+            Style newStyle = newFeatureDescriptor.getStyle().buildStyle(newFeatureDescriptor.getGeometryBindingClass(), projectedCrs.getConversionFromBase().getMathTransform().toWKT());
             lightweightMapContext.addLayer(newFeatureSource, newStyle);
             layer = lightweightMapContext.getLayer(lightweightMapContext.getLayerCount() - 1);
             layer.addMapLayerListener(pane.getLightChangesReflector());
@@ -435,7 +440,7 @@ public class DbMap extends JPanel implements DbControl, RowsetsDbControl, Proper
     }
 
     public MapLayer removeLayer(String aLayerTitle) throws Exception {
-        MapLayer removed = null;
+        MapLayer removed;
         MapContext lightweightMapContext = pane.getLightweightMapContext();
         synchronized (lightweightMapContext) {
             MapLayer[] lightweightLayers = lightweightMapContext.getLayers();
@@ -453,7 +458,7 @@ public class DbMap extends JPanel implements DbControl, RowsetsDbControl, Proper
     }
 
     public MapLayer[] removeAllLayers() {
-        MapLayer[] lightweightLayers = null;
+        MapLayer[] lightweightLayers;
         MapContext lightweightMapContext = pane.getLightweightMapContext();
         synchronized (lightweightMapContext) {
             lightweightLayers = lightweightMapContext.getLayers();
@@ -469,7 +474,7 @@ public class DbMap extends JPanel implements DbControl, RowsetsDbControl, Proper
 
     public MapLayer getLayer(String aLayerTitle) {
         MapContext generalMapContext = pane.getGeneralMapContext();
-        MapLayer found = null;
+        MapLayer found;
         synchronized (generalMapContext) {// may this is not need to do because changes are made only on lightweight context
             MapLayer[] generalLayers = generalMapContext.getLayers();
             found = findLayer(aLayerTitle, generalLayers);
@@ -609,18 +614,22 @@ public class DbMap extends JPanel implements DbControl, RowsetsDbControl, Proper
     public List<SelectionEntry> hit(Point aHitPoint) throws Exception {
         double bufferZoneWidth = calculateCurrentHitBuffer();
         Polygon hitPoly = GisUtilities.constructRectyPolygon(new Point2D.Double(aHitPoint.getX() - bufferZoneWidth, aHitPoint.getY() - bufferZoneWidth), new Point2D.Double(aHitPoint.getX() + bufferZoneWidth, aHitPoint.getY() + bufferZoneWidth));
-        return hit(hitPoly);
+        return hit(hitPoly, true);
+    }
+    
+    public List<SelectionEntry> nonSelectableHit(Point aHitPoint) throws Exception {
+        double bufferZoneWidth = calculateCurrentHitBuffer();
+        Polygon hitPoly = GisUtilities.constructRectyPolygon(new Point2D.Double(aHitPoint.getX() - bufferZoneWidth, aHitPoint.getY() - bufferZoneWidth), new Point2D.Double(aHitPoint.getX() + bufferZoneWidth, aHitPoint.getY() + bufferZoneWidth));
+        return hit(hitPoly, false);
     }
 
-    public List<SelectionEntry> hit(Polygon aHitPoly) throws Exception {
+    public List<SelectionEntry> hit(Polygon aHitPoly, boolean needSelectable) throws Exception {
         List<SelectionEntry> hitedResults = new ArrayList<>();
         FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(GeoTools.getDefaultHints());
-        for (int i = 0; i < pane.getLightweightMapContext().getLayerCount(); i++) {
-            MapLayer layer = pane.getLightweightMapContext().getLayer(i);
-            if (!layer.isSelected()) {
-                FeatureSource<SimpleFeatureType, SimpleFeature> fs = layer.getFeatureSource();
+        for (Layer layer : pane.getLightweightMapContext().layers()) {
+            FeatureSource fs = layer.getFeatureSource();
                 RowsetFeatureDescriptor featureDescriptor = dataStore.getFeatureDescriptors().get(fs.getName().getLocalPart());
-                if (featureDescriptor.isSelectable()) {
+            if ((needSelectable && featureDescriptor.isSelectable()) || !needSelectable) {
                     Filter filter = ff.intersects(ff.property(fs.getSchema().getGeometryDescriptor().getLocalName()), ff.literal(aHitPoly));
                     FeatureCollection<SimpleFeatureType, SimpleFeature> layerResults = fs.getFeatures(filter);
                     FeatureIterator<SimpleFeature> fIt = layerResults.features();
@@ -630,7 +639,6 @@ public class DbMap extends JPanel implements DbControl, RowsetsDbControl, Proper
                     }
                 }
             }
-        }
         return hitedResults;
     }
 
@@ -770,7 +778,18 @@ public class DbMap extends JPanel implements DbControl, RowsetsDbControl, Proper
                 }
             }
         }
-    }
+    };
+    
+    public String beforeToolTipShow(Row aRow) {
+        Object func = scriptScope.get(BEFORE_SHOW_TOOL_TIP_FUNCTION_NAME, scriptScope);
+        if (func != null && func instanceof Function) {
+            Object result = ScriptUtils.js2Java(ScriptableObject.callMethod(scriptScope, BEFORE_SHOW_TOOL_TIP_FUNCTION_NAME, new Object[]{new RowHostObject(scriptScope, aRow)}));
+            if (result instanceof String) {
+                return (String) result;
+            }
+        }
+        return null;
+     };
 
     @Undesignable
     public Function getOnEvent() {

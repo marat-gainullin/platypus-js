@@ -72,7 +72,7 @@ public class ModelMap extends Component<DbMap> {
 
     @ScriptFunction(jsDoc = "Hits to the specified polygon.")
     public List<SelectionEntry> hit(Polygon aHitPoly) throws Exception {
-        return delegate.hit(aHitPoly);
+        return delegate.hit(aHitPoly, true);
     }
 
     @ScriptFunction(jsDoc = "Hits to the specified point.")

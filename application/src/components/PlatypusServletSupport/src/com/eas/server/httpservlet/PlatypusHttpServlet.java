@@ -12,6 +12,7 @@ import com.eas.client.queries.Query;
 import com.eas.client.scripts.ScriptRunner;
 import com.eas.client.settings.SettingsConstants;
 import com.eas.client.threetier.ErrorResponse;
+import com.eas.client.threetier.HelloRequest;
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.Requests;
 import com.eas.client.threetier.Response;
@@ -526,6 +527,17 @@ public class PlatypusHttpServlet extends HttpServlet {
                 } else {
                     writeJsonResponse("", aHttpResponse);// Plain scripts have no model and other related resources
                 }
+            } else if (aPlatypusResponse instanceof CommitRequest.Response) {
+                // simple OK response is needed
+            } else if (aPlatypusResponse instanceof LogoutRequest.Response) {
+                // logout is processed out of this method
+            } else if (aPlatypusResponse instanceof HelloRequest.Response) {
+                // simple OK response is needed
+            } else if (aPlatypusResponse instanceof DisposeServerModuleRequest.Response) {
+                // simple OK response is needed
+            } else if (aPlatypusResponse instanceof OutHashRequest.Response) {
+                // don't know how to deal with
+                aHttpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, String.format("Out hash is not supported now. Response class name: %s", aPlatypusResponse != null ? aPlatypusResponse.getClass().getName() : "null"));
             } else {
                 aHttpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, String.format("Unknown response. Don't know how to deal with it. Response class name: %s", aPlatypusResponse != null ? aPlatypusResponse.getClass().getName() : "null"));
             }

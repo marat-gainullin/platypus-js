@@ -360,7 +360,7 @@ public class VeerCellsTest extends GridBaseTest {
         dm.addEntity(cells2ValuesEntity);
         cells2ValuesEntity.setQuery(new DummyTestSqlQuery());
         cells2ValuesEntity.setRowset(cells2ValuesRowset);
-        Relation colRelation = new Relation(cells2Entity, true, cells2Rowset.getFields().get(1).getName(), cells2ValuesEntity, true, cells2ValuesRowset.getFields().get(1).getName());
+        Relation colRelation = new Relation(cells2Entity, cells2Rowset.getFields().get(1), cells2ValuesEntity, cells2ValuesRowset.getFields().get(1));
         dm.addRelation(colRelation);
         dm.setRuntime(true);
 

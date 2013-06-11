@@ -22,9 +22,12 @@ import java.awt.Color;
 import java.awt.Container;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.Action;
 import javax.swing.JFrame;
 import javax.swing.KeyStroke;
+import org.geotools.data.collection.ListFeatureCollection;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureCollections;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
@@ -79,8 +82,7 @@ public class ThirdPartyMapTest extends MapGraphicTest{
         typeBuilder.add("graphicRepresentation", LineString.class);
         typeBuilder.add("name", String.class);
         SimpleFeatureType featureType = typeBuilder.buildFeatureType();
-
-        FeatureCollection fcollection1 = FeatureCollections.newCollection();
+        List<SimpleFeature> lst = new ArrayList<>();
 
         Object[] attrs = new Object[2];
         int lNo = 0;
@@ -89,21 +91,22 @@ public class ThirdPartyMapTest extends MapGraphicTest{
             String lStringId = String.valueOf(lNo++);
             attrs[1] = "line " + lStringId;
             SimpleFeature feature = SimpleFeatureBuilder.build(featureType, attrs, lStringId);
-            fcollection1.add(feature);
+            lst.add(feature);
         }
-
+        FeatureCollection fcollection1 = new ListFeatureCollection(featureType, lst);
+        lst.clear();
         MapLayer layer1 = new DefaultMapLayer(fcollection1, lineStyle, "Main layer");
         mainContext.addLayer(layer1);
 
         final MapContext lightContext = new DefaultMapContext(projectedCrs);
         lightContext.setAreaOfInterest(aoi);
-
-        FeatureCollection fcollection2 = FeatureCollections.newCollection();
+        
         attrs[0] = lightweightLine;
         String lStringId = String.valueOf(lNo++);
         attrs[1] = "line " + lStringId;
         SimpleFeature feature = SimpleFeatureBuilder.build(featureType, attrs, lStringId);
-        fcollection2.add(feature);
+        lst.add(feature);
+        FeatureCollection fcollection2 = new ListFeatureCollection(featureType, lst);
 
         MapLayer layer2 = new DefaultMapLayer(fcollection2, lineStyle1, "Lightweight layer");
         lightContext.addLayer(layer2);

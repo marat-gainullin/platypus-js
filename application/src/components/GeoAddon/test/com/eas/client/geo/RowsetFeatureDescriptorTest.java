@@ -30,7 +30,7 @@ public class RowsetFeatureDescriptorTest extends GeoBaseTest
         datamodel = new ApplicationDbModel(dbClient);
         datamodel.setRuntime(true);
         colaMarkets = new ApplicationDbEntity(datamodel);
-        colaMarkets.regenerateID();
+        colaMarkets.regenerateId();
         colaMarkets.setTableName("COLA_MARKETS");
         datamodel.addEntity(colaMarkets);
         final Rowset rowset = colaMarkets.getRowset();

@@ -51,7 +51,7 @@ public class MouseRectSelector extends RectZoomer {
                         Point2D.Double cartesianDest = pane.awtScreen2Cartesian(ptDest);
                         Point2D.Double geoDest = pane.cartesian2Geo(cartesianDest);
                         Polygon selectorPoly = GisUtilities.constructRectyPolygon(geoSource, geoDest);
-                        List<SelectionEntry> hitted = map.hit(selectorPoly);
+                        List<SelectionEntry> hitted = map.hit(selectorPoly, true);
                         Rectangle2D.Double constraintRect = new Rectangle2D.Double(Math.min(geoSource.x, geoDest.x), Math.min(geoSource.y, geoDest.y), Math.abs(geoDest.x - geoSource.x), Math.abs(geoDest.y - geoSource.y));
                         filterHitted(constraintRect, hitted);
                         if (!e.isControlDown()) {

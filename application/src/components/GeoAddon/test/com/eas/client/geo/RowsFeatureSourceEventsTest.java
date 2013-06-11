@@ -127,28 +127,28 @@ public class RowsFeatureSourceEventsTest  extends GeoBaseTest{
         ApplicationDbEntity entity = new ApplicationDbEntity(model);
         entity.setRowset(testRowset);
         // setup feature style
-        styleDescriptor.setLabelField(new ModelElementRef(labelField, true, entity.getEntityID()));
+        styleDescriptor.setLabelField(new ModelElementRef(labelField, true, entity.getEntityId()));
         // setup feature descriptor1
         descriptor1.setEntity(entity);
-        descriptor1.setRef(new ModelEntityRef(entity.getEntityID()));
-        descriptor1.setTypeRef(new ModelElementRef(typeField, true, entity.getEntityID()));
+        descriptor1.setRef(new ModelEntityRef(entity.getEntityId()));
+        descriptor1.setTypeRef(new ModelElementRef(typeField, true, entity.getEntityId()));
         descriptor1.setTypeValue(START_FEATURES_TYPE);
         descriptor1.setStyle(styleDescriptor);
         // setup feature descriptor2
         descriptor2.setEntity(entity);
-        descriptor2.setRef(new ModelEntityRef(entity.getEntityID()));
-        descriptor2.setTypeRef(new ModelElementRef(typeField, true, entity.getEntityID()));
+        descriptor2.setRef(new ModelEntityRef(entity.getEntityId()));
+        descriptor2.setTypeRef(new ModelElementRef(typeField, true, entity.getEntityId()));
         descriptor2.setTypeValue(FURTHER_FEATURES_TYPE);
         descriptor2.setStyle(styleDescriptor);
         // setup feature descriptor3
         descriptor3.setEntity(entity);
-        descriptor3.setRef(new ModelEntityRef(entity.getEntityID()));
-        descriptor3.setTypeRef(new ModelElementRef(typeField, true, entity.getEntityID()));
+        descriptor3.setRef(new ModelEntityRef(entity.getEntityId()));
+        descriptor3.setTypeRef(new ModelElementRef(typeField, true, entity.getEntityId()));
         descriptor3.setTypeValue(null);
         descriptor3.setStyle(styleDescriptor);
         // setup feature descriptor
         descriptor.setEntity(entity);
-        descriptor.setRef(new ModelEntityRef(entity.getEntityID()));
+        descriptor.setRef(new ModelEntityRef(entity.getEntityId()));
         descriptor.setStyle(styleDescriptor);
         // setup feature type
         simpleFeatureTypeBuilder.setName(this.getClass().getName());

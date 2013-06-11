@@ -66,13 +66,13 @@ public class PlatypusImageResource implements ImageResource {
 		RootPanel.get().add(im);
 	}
 
-	public PlatypusImageResource addJavaCallback(ImageResourceCallback aCallback) {
+	public PlatypusImageResource addCallback(ImageResourceCallback aCallback) {
 		if (pending)
 			javaCallbacks.add(aCallback);
 		return this;
 	}
 
-	public PlatypusImageResource addJsCallback(JavaScriptObject aCallback) {
+	public PlatypusImageResource addCallback(JavaScriptObject aCallback) {
 		if (pending)
 			jsCallbacks.add(aCallback);
 		return this;
