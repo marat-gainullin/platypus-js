@@ -145,44 +145,45 @@ public class Model {// implements Cancellable {
 			assert pEntity instanceof ParametersEntity;
 			copied.setParametersEntity((ParametersEntity) pEntity);
 		}
-	    for (Relation relation : relations) {
-	        Relation rcopied = relation.copy();
-	        resolveCopiedRelation(rcopied, copied);
-	        copied.addRelation(rcopied);
-	    }
+		for (Relation relation : relations) {
+			Relation rcopied = relation.copy();
+			resolveCopiedRelation(rcopied, copied);
+			copied.addRelation(rcopied);
+		}
 		return copied;
 	}
 
-    protected void resolveCopiedRelation(Relation aRelation, Model aModel) throws Exception {
-        if (aRelation.getLeftEntity() != null) {
-            aRelation.setLeftEntity(aModel.getEntityById(aRelation.getLeftEntity().getEntityId()));
-        }
-        if (aRelation.getRightEntity() != null) {
-            aRelation.setRightEntity(aModel.getEntityById(aRelation.getRightEntity().getEntityId()));
-        }
-        if (aRelation.getLeftField() != null) {
-            if (aRelation.getLeftEntity() != null) {
-                if (aRelation.isLeftParameter() && aRelation.getLeftEntity().getQueryId() != null) {
-                    aRelation.setLeftField(aRelation.getLeftEntity().getQuery().getParameters().get(aRelation.getLeftField().getName()));
-                } else {
-                    aRelation.setLeftField(aRelation.getLeftEntity().getFields().get(aRelation.getLeftField().getName()));
-                }
-            } else {
-                aRelation.setLeftField(null);
-            }
-        }
-        if (aRelation.getRightField() != null) {
-            if (aRelation.getRightEntity() != null) {
-                if (aRelation.isRightParameter() && aRelation.getRightEntity().getQueryId() != null) {
-                    aRelation.setRightField(aRelation.getRightEntity().getQuery().getParameters().get(aRelation.getRightField().getName()));
-                } else {
-                    aRelation.setRightField(aRelation.getRightEntity().getFields().get(aRelation.getRightField().getName()));
-                }
-            } else {
-                aRelation.setRightField(null);
-            }
-        }
-    }
+	protected void resolveCopiedRelation(Relation aRelation, Model aModel) throws Exception {
+		if (aRelation.getLeftEntity() != null) {
+			aRelation.setLeftEntity(aModel.getEntityById(aRelation.getLeftEntity().getEntityId()));
+		}
+		if (aRelation.getRightEntity() != null) {
+			aRelation.setRightEntity(aModel.getEntityById(aRelation.getRightEntity().getEntityId()));
+		}
+		if (aRelation.getLeftField() != null) {
+			if (aRelation.getLeftEntity() != null) {
+				if (aRelation.isLeftParameter() && aRelation.getLeftEntity().getQueryId() != null) {
+					aRelation.setLeftField(aRelation.getLeftEntity().getQuery().getParameters().get(aRelation.getLeftField().getName()));
+				} else {
+					aRelation.setLeftField(aRelation.getLeftEntity().getFields().get(aRelation.getLeftField().getName()));
+				}
+			} else {
+				aRelation.setLeftField(null);
+			}
+		}
+		if (aRelation.getRightField() != null) {
+			if (aRelation.getRightEntity() != null) {
+				if (aRelation.isRightParameter() && aRelation.getRightEntity().getQueryId() != null) {
+					aRelation.setRightField(aRelation.getRightEntity().getQuery().getParameters().get(aRelation.getRightField().getName()));
+				} else {
+					aRelation.setRightField(aRelation.getRightEntity().getFields().get(aRelation.getRightField().getName()));
+				}
+			} else {
+				aRelation.setRightField(null);
+			}
+		}
+	}
+
 	/**
 	 * Base model constructor.
 	 */
@@ -299,7 +300,7 @@ public class Model {// implements Cancellable {
 			}
 		} finally {
 			entity.setName(oldName);
-		} 
+		}
 		publishTopLevelFacade(aModule, this);
 		publishRowsets();
 	}
@@ -446,44 +447,35 @@ public class Model {// implements Cancellable {
 
 	public void setParametersEntity(ParametersEntity aParamsEntity) {
 		parametersEntity = aParamsEntity;
-		if(parametersEntity != null)
+		if (parametersEntity != null)
 			parametersEntity.setModel(this);
 	}
 
 	public void setRelations(Set<Relation> aRelations) {
 		relations = aRelations;
 	}
-/*
-	public boolean isParameterNameInRelations(Entity aEntity, Set<Relation> aRelations, String aParameterName) {
-		for (Relation lrel : aRelations) {
-			String leftParameter = lrel.getLeftParameter();
-			if (aEntity != null && leftParameter != null && leftParameter.equals(aParameterName) && aEntity == lrel.getLeftEntity()) {
-				return true;
-			}
 
-			String rightParameter = lrel.getRightParameter();
-			if (aEntity != null && rightParameter != null && rightParameter.equals(aParameterName) && aEntity == lrel.getRightEntity()) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	public boolean isFieldNameInRelations(Entity aEntity, Set<Relation> aRelations, String aFieldName) {
-		for (Relation lrel : aRelations) {
-			String leftField = lrel.getLeftField();
-			if (aEntity != null && leftField != null && leftField.equals(aFieldName) && aEntity == lrel.getLeftEntity()) {
-				return true;
-			}
-
-			String rightField = lrel.getRightField();
-			if (aEntity != null && rightField != null && rightField.equals(aFieldName) && aEntity == lrel.getRightEntity()) {
-				return true;
-			}
-		}
-		return false;
-	}
-*/
+	/*
+	 * public boolean isParameterNameInRelations(Entity aEntity, Set<Relation>
+	 * aRelations, String aParameterName) { for (Relation lrel : aRelations) {
+	 * String leftParameter = lrel.getLeftParameter(); if (aEntity != null &&
+	 * leftParameter != null && leftParameter.equals(aParameterName) && aEntity
+	 * == lrel.getLeftEntity()) { return true; }
+	 * 
+	 * String rightParameter = lrel.getRightParameter(); if (aEntity != null &&
+	 * rightParameter != null && rightParameter.equals(aParameterName) &&
+	 * aEntity == lrel.getRightEntity()) { return true; } } return false; }
+	 * 
+	 * public boolean isFieldNameInRelations(Entity aEntity, Set<Relation>
+	 * aRelations, String aFieldName) { for (Relation lrel : aRelations) {
+	 * String leftField = lrel.getLeftField(); if (aEntity != null && leftField
+	 * != null && leftField.equals(aFieldName) && aEntity ==
+	 * lrel.getLeftEntity()) { return true; }
+	 * 
+	 * String rightField = lrel.getRightField(); if (aEntity != null &&
+	 * rightField != null && rightField.equals(aFieldName) && aEntity ==
+	 * lrel.getRightEntity()) { return true; } } return false; }
+	 */
 	public boolean isRuntime() {
 		return runtime;
 	}
@@ -568,7 +560,7 @@ public class Model {// implements Cancellable {
 				@Override
 				protected void doWork() throws Exception {
 					saved();
-					if(onSuccess != null)
+					if (onSuccess != null)
 						Utils.invokeJsFunction(onSuccess);
 				}
 			}, new CancellableCallbackAdapter() {
@@ -603,35 +595,35 @@ public class Model {// implements Cancellable {
 			}
 		}
 	}
-	
+
 	public void rolledback() throws Exception {
 	}
 
 	public void requery(final JavaScriptObject onSuccess) throws Exception {
-		requery(new CancellableCallbackAdapter(){
+		requery(new CancellableCallbackAdapter() {
 			@Override
 			protected void doWork() throws Exception {
-				if(onSuccess != null)
+				if (onSuccess != null)
 					Utils.invokeJsFunction(onSuccess);
 			}
 		});
 	}
-	
+
 	public void requery(CancellableCallback onSuccess) throws Exception {
-		changeLog.clear();
+		revert();
 		executeRootEntities(true, onSuccess);
 	}
 
 	public void execute(final JavaScriptObject onSuccess) throws Exception {
-		execute(new CancellableCallbackAdapter(){
+		execute(new CancellableCallbackAdapter() {
 			@Override
 			protected void doWork() throws Exception {
-				if(onSuccess != null)
+				if (onSuccess != null)
 					Utils.invokeJsFunction(onSuccess);
 			}
 		});
 	}
-	
+
 	public void execute(CancellableCallback onSuccess) throws Exception {
 		executeRootEntities(false, onSuccess);
 	}
@@ -655,12 +647,12 @@ public class Model {// implements Cancellable {
 	}
 
 	public void executeEntities(boolean refresh, Set<Entity> toExecute, final CancellableCallback onSuccess) throws Exception {
-		CumulativeCallbackAdapter cumulativeSuccess = new CumulativeCallbackAdapter(toExecute.size()){
+		CumulativeCallbackAdapter cumulativeSuccess = new CumulativeCallbackAdapter(toExecute.size()) {
 			protected void doWork() throws Exception {
-				if(onSuccess != null)
+				if (onSuccess != null)
 					onSuccess.run();
 			};
-		}; 
+		};
 		for (Entity entity : toExecute) {
 			entity.internalExecute(refresh, cumulativeSuccess, null);
 		}
@@ -669,15 +661,17 @@ public class Model {// implements Cancellable {
 	private void executeRootEntities(boolean refresh, CancellableCallback onSuccess) throws Exception {
 		final Set<Entity> toExecute = new HashSet();
 		for (Entity entity : entities.values()) {
-            Set<Relation> dependanceRels = new HashSet();
-            for (Relation inRel : entity.getInRelations()) {
-                if (!(inRel.getLeftEntity() instanceof ParametersEntity)) {
-                    dependanceRels.add(inRel);
-                }
-            }
-            if (dependanceRels.isEmpty()) {
-                toExecute.add(entity);
-            }
+			if (!(entity instanceof ParametersEntity)) {// ParametersEntity is in the entities, so we have to filter it out 
+				Set<Relation> dependanceRels = new HashSet();
+				for (Relation inRel : entity.getInRelations()) {
+					if (!(inRel.getLeftEntity() instanceof ParametersEntity)) {
+						dependanceRels.add(inRel);
+					}
+				}
+				if (refresh || dependanceRels.isEmpty()) {
+					toExecute.add(entity);
+				}
+			}
 		}
 		executeEntities(refresh, toExecute, onSuccess);
 	}
