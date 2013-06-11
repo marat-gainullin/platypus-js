@@ -240,7 +240,7 @@ public class Form {
 			window.getElement().getStyle().setOpacity(opacity);
 			window.getBody().getStyle().setOpacity(opacity);
 			if (iconImage != null && !iconImage.isEmpty())
-				window.getHeader().setIcon(AppClient.getInstance().getImageResource(iconImage).addJavaCallback(new ImageResourceCallback() {
+				window.getHeader().setIcon(AppClient.getInstance().getImageResource(iconImage).addCallback(new ImageResourceCallback() {
 					@Override
 					public void run(ImageResource aResource) {
 						setIcon(aResource);
@@ -590,7 +590,7 @@ public class Form {
         			aForm.@com.eas.client.form.Form::setIcon(Lcom/google/gwt/resources/client/ImageResource;)(aValue);
 				};
 				if(aValue != null)
-					aValue.@com.eas.client.application.PlatypusImageResource::addJsCallback(Lcom/google/gwt/core/client/JavaScriptObject;)(setterCallback);
+					aValue.@com.eas.client.application.PlatypusImageResource::addCallback(Lcom/google/gwt/core/client/JavaScriptObject;)(setterCallback);
 				setterCallback();
         	}
         });

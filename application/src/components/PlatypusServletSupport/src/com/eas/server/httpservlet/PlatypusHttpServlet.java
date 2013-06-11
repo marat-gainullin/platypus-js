@@ -536,7 +536,7 @@ public class PlatypusHttpServlet extends HttpServlet {
             } else if (aPlatypusResponse instanceof DisposeServerModuleRequest.Response) {
                 // simple OK response is needed
             } else if (aPlatypusResponse instanceof OutHashRequest.Response) {
-                // don't knoe hoe to deal with
+                // don't know how to deal with
                 aHttpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, String.format("Out hash is not supported now. Response class name: %s", aPlatypusResponse != null ? aPlatypusResponse.getClass().getName() : "null"));
             } else {
                 aHttpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, String.format("Unknown response. Don't know how to deal with it. Response class name: %s", aPlatypusResponse != null ? aPlatypusResponse.getClass().getName() : "null"));

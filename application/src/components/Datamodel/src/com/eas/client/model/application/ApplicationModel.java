@@ -300,7 +300,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
 
     private void executeRootEntities(boolean refresh) throws Exception {
         Set<E> toExecute = new HashSet<>();
-        for (E entity : entities.values()) {
+        for (E entity : entities.values()) {            
             Set<Relation<E>> dependanceRels = new HashSet<>();
             for (Relation<E> inRel : entity.getInRelations()) {
                 if (!(inRel.getLeftEntity() instanceof ApplicationParametersEntity)) {
