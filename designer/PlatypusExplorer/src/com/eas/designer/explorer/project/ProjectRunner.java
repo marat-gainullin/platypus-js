@@ -82,7 +82,7 @@ public class ProjectRunner {
                         env.runningProgram = runningProgram;
                         env.runningElement = project.getSettings().getAppSettings().getRunElement();
                         DebuggerUtils.attachDebugger(env);
-                        project.getOutputWindowIO().getOut().println("Client application debug activated.");
+                        project.getOutputWindowIO().getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Client_Debug_Activated"));//NOI18N
                     } catch (Exception ex) {
                         runningProgram.cancel(true);
                         ErrorManager.getDefault().notify(ex);
@@ -106,7 +106,7 @@ public class ProjectRunner {
                     binDir = PlatypusPlatform.getPlatformBinDirectory();
                 } catch (EmptyPlatformHomePathException | IllegalStateException ex1) {
                     io.getErr().println(ex1.getMessage());
-                    io.getOut().println("Specify path to Platypus Platform home directory and restart application.");
+                    io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Specify_Platypus_Platform_Path"));//NOI18N
                     return null;
                 }
             }
@@ -118,11 +118,11 @@ public class ProjectRunner {
             if (AppServerType.PLATYPUS_SERVER.equals(pps.getRunAppServerType())) {
                 PlatypusServerInstance serverInstance = PlatypusServerInstanceProvider.getPlatypusDevServer();
                 if (serverInstance.getServerState() == PlatypusServerInstance.ServerState.STOPPED) {
-                    io.getOut().println("Starting Platypus Server..");
+                    io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Starting_Platypus_Server"));//NOI18N
                     if (serverInstance.start(project, binDir, debug)) {
-                        io.getOut().println("Platypus Server started.");
+                        io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Platypus_Server_Started"));//NOI18N
                         try {
-                            io.getOut().println("Waiting for Platypus Server to run..");
+                            io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Waiting_Platypus_Server"));//NOI18N
                             ServerSupport.waitForServer(LOCAL_HOSTNAME, pps.getServerPort());
                             PlatypusServerInstanceProvider.getPlatypusDevServer().setServerState(PlatypusServerInstance.ServerState.RUNNING);
                         } catch (ServerSupport.ServerTimeOutException | InterruptedException ex) {
@@ -130,19 +130,19 @@ public class ProjectRunner {
                             return null;
                         }
                     } else {
-                        io.getErr().println("Could not start Platypus Server.");
+                        io.getErr().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Cnt_Start_Platypus_Server"));//NOI18N
                         return null;
                     }
                 } else {
                     assert serverInstance.getProject() != null;
                     if (serverInstance.getProject().getProjectDirectory().equals(project.getProjectDirectory())) {
-                        io.getOut().println("Platypus Server already started.");
+                        io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Platypus_Server_Already_Started"));//NOI18N
                     } else {
-                        io.getErr().println("Platypus Server started for another project: " + serverInstance.getProject().getDisplayName());
+                        io.getErr().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Platypus_Server_Started_Another_Project") + serverInstance.getProject().getDisplayName());//NOI18N
                     }
                 }
             } else if (AppServerType.J2EE_SERVER.equals(pps.getRunAppServerType())) {
-                io.getOut().println("Deploying application to J2EE container..");
+                io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Deploying_J2EE_Container"));//NOI18N
                 PlatypusWebModuleManager webManager = project.getLookup().lookup(PlatypusWebModuleManager.class);
                 if (webManager != null) {
                     appUrl = webManager.run(appElementId, debug);
@@ -175,17 +175,17 @@ public class ProjectRunner {
             if (runElementId != null && !runElementId.isEmpty()) {
                 processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.APPELEMENT_CMD_SWITCH);
                 processBuilder = processBuilder.addArgument(runElementId);
-                io.getOut().println("Start application element: " + runElementId);
+                io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Start_App_Element") + runElementId); //NOI18N
             } else {
-                io.getErr().println("Start application element is not set.");
+                io.getErr().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Start_App_Element_Not_Set")); //NOI18N
                 return null;
             }
             if (!pps.isDbAppSources()) {
                 processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.APP_PATH_CMD_SWITCH1);
                 processBuilder = processBuilder.addArgument(project.getProjectDirectory().getPath());
-                io.getOut().println(String.format("Application sources: %s.", project.getProjectDirectory().getPath()));
+                io.getOut().println(String.format(NbBundle.getMessage(ProjectRunner.class, "MSG_App_Sources"), project.getProjectDirectory().getPath()));//NOI18N
             } else {
-                io.getOut().println("Application sources: database.");
+                io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_App_Sources_Database"));//NOI18N
             }
             if (AppServerType.NONE.equals(pps.getRunAppServerType())) {
                 processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.URL_CMD_SWITCH);
@@ -196,7 +196,7 @@ public class ProjectRunner {
                 processBuilder = processBuilder.addArgument(ps.getDbSettings().getInfo().getProperty(ClientConstants.DB_CONNECTION_PASSWORD_PROP_NAME));
                 processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.DBSCHEMA_CMD_SWITCH);
                 processBuilder = processBuilder.addArgument(ps.getDbSettings().getInfo().getProperty(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME));
-                io.getOut().println("Using direct connection to database.");
+                io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Database_Direct"));//NOI18N
             } else {
                 if (pps.isNotStartServer()) { 
                     appUrl = pps.getClientUrl();
@@ -206,9 +206,9 @@ public class ProjectRunner {
                 if (appUrl != null && !appUrl.isEmpty()) {
                     processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.URL_CMD_SWITCH);
                     processBuilder = processBuilder.addArgument(appUrl);
-                    io.getOut().println(String.format("Using application server at URL: %s.", appUrl));
+                    io.getOut().println(String.format(NbBundle.getMessage(ProjectRunner.class, "MSG_App_Server_URL"), appUrl));//NOI18N
                 } else {
-                    io.getErr().println("Couldn't start Platypus Client.");
+                    io.getErr().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Cnt_Start_Platypus_Client"));//NOI18N
                 }
             }
             if (project.getSettings().getRunUser() != null && !project.getSettings().getRunUser().trim().isEmpty() && project.getSettings().getRunPassword() != null && !project.getSettings().getRunPassword().trim().isEmpty()) {
@@ -216,7 +216,7 @@ public class ProjectRunner {
                 processBuilder = processBuilder.addArgument(project.getSettings().getRunUser());
                 processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.PASSWORD_CMD_SWITCH);
                 processBuilder = processBuilder.addArgument(project.getSettings().getRunPassword());
-                io.getOut().println("Log in as user: " + project.getSettings().getRunUser());
+                io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Login_As_User") + project.getSettings().getRunUser());//NOI18N
             }
             if (pps.getRunClientOptions() != null && !pps.getRunClientOptions().isEmpty()) {
                 String[] optionalArgs = pps.getRunClientOptions().split(" ");
@@ -225,22 +225,22 @@ public class ProjectRunner {
                         processBuilder = processBuilder.addArgument(optionalArgs[i]);
                     }
                 }
-                io.getOut().println(String.format("Options: %s.", pps.getRunClientOptions()));
+                io.getOut().println(String.format(NbBundle.getMessage(ProjectRunner.class, "MSG_Run_Options"), pps.getRunClientOptions()));//NOI18N
             }
             //set default log level if not set explicitly
             if (!isSetByOption(PlatypusClientApplication.LOGLEVEL_CMD_SWITCH, pps.getRunClientOptions())) {
                 processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.LOGLEVEL_CMD_SWITCH);
                 processBuilder = processBuilder.addArgument(Level.INFO.getName());
-                io.getOut().println(String.format("Logging level set to: %s.", Level.INFO.getName()));
+                io.getOut().println(String.format(NbBundle.getMessage(ProjectRunner.class, "MSG_Logging_Level"), Level.INFO.getName()));//NOI18N
             }
             if (debug) {
                 processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.STOP_BEFORE_RUN_CMD_SWITCH);
             }
             ExecutionService service = ExecutionService.newService(processBuilder, descriptor, getServiceDisplayName(project, debug));
-            io.getOut().println("Starting Platypus Client..");
+            io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Starting_Platypus_Client"));//NOI18N
             Future<Integer> clientTask = service.run();
             if (clientTask != null) {
-                io.getOut().println("Platypus Client started.");
+                io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Platypus_Client_Started"));//NOI18N
                 io.getOut().println();
             }
             return clientTask;
@@ -250,10 +250,10 @@ public class ProjectRunner {
                     appUrl = pps.getClientUrl();
                 }
                 if (appUrl != null && !appUrl.isEmpty()) {
-                    io.getOut().println(String.format("Starting web browser: %s.", appUrl));
+                    io.getOut().println(String.format(NbBundle.getMessage(ProjectRunner.class, "MSG_Starting_Web_Browser"), appUrl));//NOI18N
                     HtmlBrowser.URLDisplayer.getDefault().showURL(new URL(appUrl));
                 } else {
-                    io.getErr().println("Couldn't start web browser.");
+                    io.getErr().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Cnt_Start_Web_Browser"));//NOI18N
                 }
             } catch (MalformedURLException ex) {
                 ErrorManager.getDefault().notify(ex);
