@@ -784,7 +784,11 @@ public class AppClient {
 			@Override
 			protected void doWork(XMLHttpRequest aResponse) throws Exception {
 				if (onFailure != null) {
-					onFailure.run(aResponse.getStatusText());
+					int status = aResponse.getStatus();
+					String statusText = aResponse.getStatusText();
+					if((statusText == null || statusText.isEmpty()) && status == 0)
+						statusText = "rowset recieving is aborted";
+					onFailure.run(statusText);
 				}
 			}
 		});

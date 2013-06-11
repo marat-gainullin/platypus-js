@@ -102,6 +102,7 @@ public class Entity implements RowsetListener {
 	protected Set<Relation> outRelations = new HashSet();
 	protected Fields fields;
 	protected PropertyChangeSupport changeSupport;
+	protected List<CancellableCallback> abortedCallbacks = new ArrayList();
 
 	public Entity() {
 		super();
@@ -1490,8 +1491,6 @@ public class Entity implements RowsetListener {
 			// - insert, update, delete queries;
 			// - stored procedures, witch changes data.
 			if (!query.isManual()) {
-				if (pending != null)
-					pending.cancel();
 				if (refresh) {
 					uninstallUserFiltering();
 				}
@@ -1512,6 +1511,8 @@ public class Entity implements RowsetListener {
 					// or we are forced to refresh the data.
 					// re-query ...
 					uninstallUserFiltering();
+					if (pending != null)
+						pending.cancel();
 					final Cancellable lexecuting = achieveOrRefreshRowset(new CancellableCallbackAdapter() {
 
 						@Override
@@ -1520,6 +1521,12 @@ public class Entity implements RowsetListener {
 							filterRowset();
 							pending = null;
 							model.pumpEvents();
+							if(!abortedCallbacks.isEmpty()){
+								CancellableCallback[] toCall = abortedCallbacks.toArray(new CancellableCallback[]{});
+								abortedCallbacks.clear();
+								for(CancellableCallback call : toCall)
+									call.run();
+							}
 							if (onSuccess != null)
 								onSuccess.run();
 						}
@@ -1528,22 +1535,21 @@ public class Entity implements RowsetListener {
 
 						@Override
 						public void cancel() {
+							pending = null;
 							for (int i = 1; i <= query.getParameters().getParametersCount(); i++) {
 								Parameter p = query.getParameters().get(i);
 								p.setValue(oldParamValues.get(p.getName()));
 								p.setModified(false);
 							}
 							lexecuting.cancel();
+							if (onSuccess != null)
+								abortedCallbacks.add(onSuccess);
 						}
 					};
-				} else {
+				} else if (pending == null){
 					// There might be a case of only rowset filtering
 					assert rowset != null;
 					filterRowset();
-					if (pending != null) {
-						pending = null;
-						model.pumpEvents();
-					}
 				}
 			}
 		}
