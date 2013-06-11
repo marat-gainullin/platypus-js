@@ -30,7 +30,7 @@ public class DebuggerUtils {
         JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + env.host + ":" + String.valueOf(env.port) + "/jmxrmi");
         ObjectName mBeanDebuggerName = new ObjectName(DebuggerMBean.DEBUGGER_MBEAN_NAME);
         ObjectName mBeanBreakpointsName = new ObjectName(BreakpointsMBean.BREAKPOINTS_MBEAN_NAME);
-        MBeanDebuggerListener listener = new MBeanDebuggerListener();
+        MBeanDebuggerListener listener = new MBeanDebuggerListener(env.project);
 
         JMXConnector jmxc = null;
         MBeanServerConnection jmxConnection = null;

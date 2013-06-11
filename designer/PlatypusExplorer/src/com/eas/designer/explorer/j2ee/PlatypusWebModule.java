@@ -99,7 +99,7 @@ public class PlatypusWebModule extends J2eeModuleProvider implements J2eeModuleI
 
     @Override
     public String getUrl() {
-        return project.getSettings().getServerContext();
+        return project.getSettings().getServerContext() == null ? "" : project.getSettings().getServerContext();//NOI18N
     }
 
     @Override

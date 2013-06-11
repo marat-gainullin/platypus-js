@@ -65,7 +65,7 @@ public class NewDbSchemeWizardIterator extends NewApplicationElementWizardIterat
     }
 
     @Override
-    protected Map<String, String> achieveParameters(WizardDescriptor aWiz) {
+    protected Map<String, String> achieveParameters(Project project, WizardDescriptor aWiz) {
         Map<String, String> parameters = new HashMap<>();
         String dbId = null;
         Object oConnection = aWiz.getProperty(NewDbSchemeWizardSettingsPanel.CONNECTION_PROP_NAME);

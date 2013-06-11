@@ -41,6 +41,7 @@ import org.netbeans.modules.j2ee.deployment.devmodules.spi.J2eeModuleProvider;
 import org.openide.ErrorManager;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
+import org.openide.util.NbBundle;
 
 /**
  * A tool to prepare and deploy the Platypus web module.
@@ -116,11 +117,7 @@ public class PlatypusWebModuleManager {
             prepareWebApplication();
             setStartApplicationElement(appElementId);
             if (webModule.getServerID() == null || webModule.getServerID().isEmpty()) {
-                project.getOutputWindowIO().getErr().println("Application server is not set. Check J2EE Server settings at Project's properties.");
-                return null;
-            }
-            if (webModule.getUrl() == null || webModule.getUrl().isEmpty()) {
-                project.getOutputWindowIO().getErr().println("J2EE Server context is not configured for the project.");
+                project.getOutputWindowIO().getErr().println(NbBundle.getMessage(PlatypusWebModuleManager.class, "MSG_App_Server_Not_Set"));//NOI18N
                 return null;
             }
             setupWebApplication(webModule);
@@ -129,7 +126,7 @@ public class PlatypusWebModuleManager {
                     null,
                     ClientType.PLATYPUS_CLIENT.equals(project.getSettings().getRunClientType()) ? PLATYPUS_SERVLET_URL : START_PAGE_FILE_NAME,
                     false);
-            String deployResultMessage = "Web application deployed.";
+            String deployResultMessage = NbBundle.getMessage(PlatypusWebModuleManager.class, "MSG_Web_App_Deployed");//NOI18N
             Logger.getLogger(PlatypusWebModuleManager.class.getName()).log(Level.INFO, deployResultMessage);
             project.getOutputWindowIO().getOut().println(deployResultMessage);
 
@@ -172,7 +169,7 @@ public class PlatypusWebModuleManager {
      * Creates an web application skeleton if not created yet.
      */
     protected void prepareWebApplication() throws Exception {
-        project.getOutputWindowIO().getOut().println("Preparing web application..");
+        project.getOutputWindowIO().getOut().println(NbBundle.getMessage(PlatypusWebModuleManager.class, "MSG_Preparing_Web_App"));//NOI18N
         webAppDir = createFolderIfNotExists(projectDir, PlatypusWebModule.WEB_DIRECTORY);
         webInfDir = createFolderIfNotExists(webAppDir, PlatypusWebModule.WEB_INF_DIRECTORY);
         metaInfDir = createFolderIfNotExists(webAppDir, PlatypusWebModule.META_INF_DIRECTORY);
@@ -200,10 +197,10 @@ public class PlatypusWebModuleManager {
         }
         FileObject pwcSourceDir = FileUtil.toFileObject(PlatypusPlatform.getPlatformBinDirectory()).getFileObject(PLATYPUS_WEB_CLIENT_DIR_NAME);
         if (pwcSourceDir == null) {
-            throw new IllegalStateException(String.format("Platypus web client is not found at %s.", PlatypusPlatform.getPlatformBinDirectory().getAbsolutePath()));
+            throw new IllegalStateException(String.format(NbBundle.getMessage(PlatypusWebModuleManager.class, "MSG_Platypus_Web_Client_Not_Found"), PlatypusPlatform.getPlatformBinDirectory().getAbsolutePath()));//NOI18N
         }
         if (!pwcSourceDir.isFolder()) {
-            throw new IllegalStateException("Platypus web client must be a directory.");
+            throw new IllegalStateException(NbBundle.getMessage(PlatypusWebModuleManager.class, "MSG_Platypus_Web_Client_Dir"));//NOI18N
         }
         if (pwcDir.getChildren().length == 0) {
             copyContent(pwcSourceDir, pwcDir);
@@ -265,7 +262,7 @@ public class PlatypusWebModuleManager {
             webAppConfigurator.deployJdbcDrivers();
             webAppConfigurator.configure();
         } else {
-            String errorMessage = String.format("Web application configuration is not supported for application server: %s", aJmp.getServerID());
+            String errorMessage = String.format(NbBundle.getMessage(PlatypusWebModuleManager.class, "MSG_Web_App_Config_Not_Supported"), aJmp.getServerID());//NOI18N
             Logger.getLogger(PlatypusWebModuleManager.class.getName()).log(Level.WARNING, errorMessage);
             project.getOutputWindowIO().getErr().println(errorMessage);
         }
@@ -298,7 +295,7 @@ public class PlatypusWebModuleManager {
             FileUtils.writeString(FileUtil.toFile(startJs), starupScript, PlatypusUtils.COMMON_ENCODING_NAME);
 
         } else {
-            throw new IllegalStateException("appElementId is null or empty.");
+            throw new IllegalStateException(NbBundle.getMessage(PlatypusWebModuleManager.class, "MSG_App_Element_ID_Invalid"));//NOI18N
         }
     }
 

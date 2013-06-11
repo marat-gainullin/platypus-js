@@ -64,8 +64,8 @@ public class NewQueryWizardIterator extends NewApplicationElementWizardIterator 
     }
 
     @Override
-    protected Map<String, String> achieveParameters(WizardDescriptor aWiz) {
-        Map<String, String> parameters = super.achieveParameters(aWiz);
+    protected Map<String, String> achieveParameters(Project project, WizardDescriptor aWiz) {
+        Map<String, String> parameters = super.achieveParameters(project, aWiz);
         String dbId = null;
         Object oConnection = aWiz.getProperty(NewQueryWizardSettingsPanel.CONNECTION_PROP_NAME);
         if (oConnection instanceof String) {

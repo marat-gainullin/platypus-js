@@ -6,6 +6,7 @@ package com.eas.designer.debugger;
 
 import com.eas.debugger.jmx.server.DebuggerMBean;
 import com.eas.designer.application.indexer.IndexerQuery;
+import org.netbeans.api.project.Project;
 import org.openide.cookies.EditorCookie;
 import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataObject;
@@ -18,12 +19,15 @@ import org.openide.text.Line;
 public class CodePointInfo {
 
     public String url;
-    public String appElementId;
+    public FileObject fo;
     public int lineNo;
     public String functionName;
     public String threadName;
 
-    public static CodePointInfo valueOf(String[] tags) throws Exception {
+    private CodePointInfo() {
+    }
+    
+    public static CodePointInfo valueOf(Project project, String[] tags) throws Exception {
         CodePointInfo cpInfo = new CodePointInfo();
         cpInfo.url = null;
         cpInfo.lineNo = -1;
@@ -46,16 +50,11 @@ public class CodePointInfo {
                     break;
             }
         }
-        try {
-            cpInfo.appElementId = cpInfo.url;
-        } catch (NumberFormatException ex) {
-            cpInfo.appElementId = null;// Non numbered module name. May be libraries.
-        }
+        cpInfo.fo = IndexerQuery.appElementId2File(project, cpInfo.url);
         return cpInfo;
     }
 
     public void show() throws Exception {
-        FileObject fo = IndexerQuery.appElementId2File(appElementId);
         if (fo != null) {
             DataObject dataObject = DataObject.find(fo);
             if (dataObject != null) {

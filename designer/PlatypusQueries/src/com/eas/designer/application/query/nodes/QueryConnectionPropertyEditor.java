@@ -42,7 +42,7 @@ public class QueryConnectionPropertyEditor extends PropertyEditorSupport {
     public Component getCustomEditor() {
         try {
             String oldConnectionId = getAsText();
-            FileObject oldFile = oldConnectionId != null ? IndexerQuery.appElementId2File(oldConnectionId) : null;
+            FileObject oldFile = oldConnectionId != null ? IndexerQuery.appElementId2File(dataObject.getProject(), oldConnectionId) : null;
             final FileChooser chooser = FileChooser.createInstance(dataObject.getAppRoot(), oldFile, Collections.singleton("text/connection+xml"));
             return chooser.getDialog(dataObject.getName() + " - dbId", new ActionListener() {
                 @Override
