@@ -120,10 +120,6 @@ public class PlatypusWebModuleManager {
                 project.getOutputWindowIO().getErr().println(NbBundle.getMessage(PlatypusWebModuleManager.class, "MSG_App_Server_Not_Set"));//NOI18N
                 return null;
             }
-            if (webModule.getUrl() == null || webModule.getUrl().isEmpty()) {
-                project.getOutputWindowIO().getErr().println(NbBundle.getMessage(PlatypusWebModuleManager.class, "MSG_App_Server_Not_Configured"));//NOI18N
-                return null;
-            }
             setupWebApplication(webModule);
             webAppRunUrl = Deployment.getDefault().deploy(webModule,
                     Deployment.Mode.RUN,
