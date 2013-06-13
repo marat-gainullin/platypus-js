@@ -148,7 +148,7 @@ public class TomcatWebAppManager implements WebAppManager {
         Context ctx = null;
         try {
             ctx = new Context();
-            ctx.setPath("/" + project.getSettings().getServerContext()); //NOI18N
+            ctx.setPath("/" + getWebMobdule().getUrl()); //NOI18N
             for (Resource res : getDataSources()) {
                 ctx.addResource(res);
             }

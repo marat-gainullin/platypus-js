@@ -123,7 +123,7 @@ public class PlatypusWebModuleManager {
             setupWebApplication(webModule);
             webAppRunUrl = Deployment.getDefault().deploy(webModule,
                     Deployment.Mode.RUN,
-                    null,
+                    webModule.getUrl(),
                     ClientType.PLATYPUS_CLIENT.equals(project.getSettings().getRunClientType()) ? PLATYPUS_SERVLET_URL : START_PAGE_FILE_NAME,
                     false);
             String deployResultMessage = NbBundle.getMessage(PlatypusWebModuleManager.class, "MSG_Web_App_Deployed");//NOI18N
