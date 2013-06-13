@@ -209,6 +209,7 @@ public class ProjectRunner {
                     io.getOut().println(String.format(NbBundle.getMessage(ProjectRunner.class, "MSG_App_Server_URL"), appUrl));//NOI18N
                 } else {
                     io.getErr().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Cnt_Start_Platypus_Client"));//NOI18N
+                    return null;
                 }
             }
             if (project.getSettings().getRunUser() != null && !project.getSettings().getRunUser().trim().isEmpty() && project.getSettings().getRunPassword() != null && !project.getSettings().getRunPassword().trim().isEmpty()) {
@@ -254,6 +255,7 @@ public class ProjectRunner {
                     HtmlBrowser.URLDisplayer.getDefault().showURL(new URL(appUrl));
                 } else {
                     io.getErr().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Cnt_Start_Web_Browser"));//NOI18N
+                    return null;
                 }
             } catch (MalformedURLException ex) {
                 ErrorManager.getDefault().notify(ex);
