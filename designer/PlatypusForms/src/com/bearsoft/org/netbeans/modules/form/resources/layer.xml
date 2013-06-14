@@ -87,10 +87,10 @@ made subject to such option by the copyright holder.
             <file name="JInternalFrame.palette_item" url="palette/JInternalFrame.palette_item">
                 <attr name="position" intvalue="700"/>
             </file>
-            -->
             <file name="JLayeredPane.palette_item" url="palette/JLayeredPane.palette_item">
                 <attr name="position" intvalue="800"/>
             </file>
+            -->
         </folder>
 
         <folder name="PlatypusControls">
