@@ -28,7 +28,6 @@ import com.eas.client.gxtcontrols.grid.fillers.ListStoreFiller;
 import com.eas.client.gxtcontrols.grid.fillers.TreeStoreFiller;
 import com.eas.client.gxtcontrols.grid.fillers.TreeStoreLazyFiller;
 import com.eas.client.gxtcontrols.grid.valueproviders.RowValueProvider;
-import com.eas.client.gxtcontrols.grid.wrappers.PlatypusCellsView;
 import com.eas.client.gxtcontrols.grid.wrappers.PlatypusColumnConfig;
 import com.eas.client.gxtcontrols.grid.wrappers.PlatypusGridInlineRowEditing;
 import com.eas.client.gxtcontrols.grid.wrappers.PlatypusGridView;
@@ -45,13 +44,15 @@ import com.eas.client.gxtcontrols.wrappers.component.PlatypusDateField;
 import com.eas.client.gxtcontrols.wrappers.component.PlatypusFormattedTextField;
 import com.eas.client.gxtcontrols.wrappers.component.PlatypusSpinnerField;
 import com.eas.client.gxtcontrols.wrappers.component.PlatypusTextArea;
-import com.eas.client.gxtcontrols.wrappers.component.PlatypusTextField;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Model;
 import com.google.gwt.cell.client.AbstractCell;
+import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.DateCell;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.TableCellElement;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.i18n.client.NumberFormat;
@@ -65,10 +66,10 @@ import com.sencha.gxt.cell.core.client.form.ComboBoxCell;
 import com.sencha.gxt.cell.core.client.form.ComboBoxCell.TriggerAction;
 import com.sencha.gxt.cell.core.client.form.SpinnerFieldCell;
 import com.sencha.gxt.core.client.IdentityValueProvider;
+import com.sencha.gxt.core.client.dom.XElement;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.data.shared.Store;
 import com.sencha.gxt.data.shared.TreeStore;
-import com.sencha.gxt.widget.core.client.form.Field;
 import com.sencha.gxt.widget.core.client.form.NumberPropertyEditor;
 import com.sencha.gxt.widget.core.client.grid.CheckBoxSelectionModel;
 import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
@@ -77,6 +78,7 @@ import com.sencha.gxt.widget.core.client.grid.Grid;
 import com.sencha.gxt.widget.core.client.grid.GridSelectionModel;
 import com.sencha.gxt.widget.core.client.grid.HeaderGroupConfig;
 import com.sencha.gxt.widget.core.client.grid.editing.ClicksToEdit;
+import com.sencha.gxt.widget.core.client.tree.TreeStyle;
 import com.sencha.gxt.widget.core.client.treegrid.TreeGrid;
 
 public class GxtGridFactory {
@@ -386,6 +388,41 @@ public class GxtGridFactory {
 		}
 	}
 
+	private void bindCallback(final Cell<String> aRenderer, final com.google.gwt.cell.client.Cell.Context context, final PublishedCell cellToRender) {
+        cellToRender.setDisplayCallback(new Runnable() {
+        	@Override
+        	public void run() {
+        		final TableCellElement cell = (TableCellElement) grid.getView().getCell(context.getIndex(), context.getColumn());
+        		if (cell != null) {
+        			SafeHtmlBuilder sb = new SafeHtmlBuilder();
+
+        			SafeHtmlBuilder lsb = new SafeHtmlBuilder();
+        			String toRender1 = cellToRender.getDisplay();
+        			aRenderer.render(context, toRender1, lsb);
+        			if (toRender1 == null)
+        				lsb.append(SafeHtmlUtils.fromTrustedString("&#160;"));
+        			PublishedStyle styleToRender = modelGrid.complementPublishedStyle(cellToRender.getStyle());
+        			ControlsUtils.renderDecorated(lsb, styleToRender, sb);
+        			XElement cellInnerElement = null;
+        			if (grid.getView() instanceof PlatypusTreeGridView) {
+        				PlatypusTreeGridView pTreeView = (PlatypusTreeGridView) grid.getView();
+        				String cellInnerClass = pTreeView.getFirstCellTextSelector();
+        				cellInnerElement = cell.<XElement> cast().selectNode(cellInnerClass);// It is already with dot prefix
+        				if (cellInnerElement == null) {
+        					cellInnerClass = grid.getView().getAppearance().styles().cellInner();
+        					cellInnerElement = cell.<XElement> cast().selectNode("." + cellInnerClass);
+        				}
+        			} else {
+        				String cellInnerClass = grid.getView().getAppearance().styles().cellInner();
+        				cellInnerElement = cell.<XElement> cast().selectNode("." + cellInnerClass);
+        			}
+        			if (cellInnerElement != null)
+        				cellInnerElement.setInnerSafeHtml(sb.toSafeHtml());
+        		}
+        	}
+        });
+    }
+	
 	private ColumnConfig<Row, ?> configureColumn(String aName, String aTitle, int aWidth, final ModelElementRef aColModelElement, Element aColumnTag, Element aControlTag) throws Exception {
 		boolean readonly = Utils.getBooleanAttribute(aColumnTag, "readonly", false);
 		final String cellFunctionName = aColumnTag.getAttribute("cellFunction");
@@ -416,7 +453,7 @@ public class GxtGridFactory {
 						protected TextCell renderer = new TextCell();
 
 						@Override
-						public void render(com.google.gwt.cell.client.Cell.Context context, Object value, SafeHtmlBuilder sb) {
+						public void render(final com.google.gwt.cell.client.Cell.Context context, Object value, SafeHtmlBuilder sb) {
 							try {
 								PublishedStyle styleToRender = null;
 								SafeHtmlBuilder lsb = new SafeHtmlBuilder();
@@ -429,12 +466,13 @@ public class GxtGridFactory {
 										toRender = cellToRender.getDisplay();
 								}
 								renderer.render(context, toRender, lsb);
-								if(toRender == null)
+								if (toRender == null)
 									lsb.append(SafeHtmlUtils.fromTrustedString("&#160;"));
 								styleToRender = modelGrid.complementPublishedStyle(styleToRender);
 								ControlsUtils.renderDecorated(lsb, styleToRender, sb);
-								if (grid.getView() instanceof PlatypusCellsView)
-									((PlatypusCellsView) grid.getView()).addCellStyle(context.getIndex(), context.getColumn(), styleToRender);
+								if (cellToRender != null) {
+									bindCallback(renderer, context, cellToRender);
+								}
 							} catch (Exception e) {
 								renderer.render(context, e.getMessage(), sb);
 							}
@@ -462,6 +500,8 @@ public class GxtGridFactory {
 					        sb.toSafeHtml(), readonly);
 					cc.setCell(new TextCell() {
 
+						protected TextCell renderer = new TextCell();
+						
 						@Override
 						public void render(com.google.gwt.cell.client.Cell.Context context, String value, SafeHtmlBuilder sb) {
 							try {
@@ -476,12 +516,13 @@ public class GxtGridFactory {
 										toRender = cellToRender.getDisplay();
 								}
 								super.render(context, toRender, lsb);
-								if(toRender == null)
+								if (toRender == null)
 									lsb.append(SafeHtmlUtils.fromTrustedString("&#160;"));
 								styleToRender = modelGrid.complementPublishedStyle(styleToRender);
 								ControlsUtils.renderDecorated(lsb, styleToRender, sb);
-								if (grid.getView() instanceof PlatypusCellsView)
-									((PlatypusCellsView) grid.getView()).addCellStyle(context.getIndex(), context.getColumn(), styleToRender);
+								if (cellToRender != null) {
+									bindCallback(renderer, context, cellToRender);
+								}
 							} catch (Exception ex) {
 								Logger.getLogger(GxtGridFactory.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
 							}
@@ -531,14 +572,15 @@ public class GxtGridFactory {
 									if (cellToRender.getDisplay() != null)
 										toRender = cellToRender.getDisplay();
 									renderer.render(context, toRender, lsb);
-									if(toRender == null)
+									if (toRender == null)
 										lsb.append(SafeHtmlUtils.fromTrustedString("&#160;"));
 								} else
 									super.render(context, value, lsb);
 								styleToRender = modelGrid.complementPublishedStyle(styleToRender);
 								ControlsUtils.renderDecorated(lsb, styleToRender, sb);
-								if (grid.getView() instanceof PlatypusCellsView)
-									((PlatypusCellsView) grid.getView()).addCellStyle(context.getIndex(), context.getColumn(), styleToRender);
+								if (cellToRender != null) {
+									bindCallback(renderer, context, cellToRender);
+								}
 							} catch (Exception ex) {
 								Logger.getLogger(GxtGridFactory.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
 							}
@@ -584,7 +626,7 @@ public class GxtGridFactory {
 					        sb.toSafeHtml(), readonly);
 					cc.setCell(new NumberCell<Double>() {
 
-						protected TextCell renderer;
+						protected TextCell renderer = new TextCell();
 
 						@Override
 						public void render(com.google.gwt.cell.client.Cell.Context context, Number value, SafeHtmlBuilder sb) {
@@ -596,19 +638,18 @@ public class GxtGridFactory {
 								        column.getCellFunction() != null ? column.getCellFunction() : modelGrid.getGeneralCellFunction(), context, aColModelElement, toRender);
 								if (cellToRender != null) {
 									styleToRender = cellToRender.getStyle();
-									if (renderer == null)
-										renderer = new TextCell();
 									if (cellToRender.getDisplay() != null)
 										toRender = cellToRender.getDisplay();
 									renderer.render(context, toRender, lsb);
-									if(toRender == null)
+									if (toRender == null)
 										lsb.append(SafeHtmlUtils.fromTrustedString("&#160;"));
 								} else
 									super.render(context, value, lsb);
 								styleToRender = modelGrid.complementPublishedStyle(styleToRender);
 								ControlsUtils.renderDecorated(lsb, styleToRender, sb);
-								if (grid.getView() instanceof PlatypusCellsView)
-									((PlatypusCellsView) grid.getView()).addCellStyle(context.getIndex(), context.getColumn(), styleToRender);
+								if (cellToRender != null) {
+									bindCallback(renderer, context, cellToRender);
+								}
 							} catch (Exception ex) {
 								Logger.getLogger(GxtGridFactory.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
 							}
@@ -674,12 +715,13 @@ public class GxtGridFactory {
 										toRender = cellToRender.getDisplay();
 								}
 								renderer.render(context, toRender, lsb);
-								if(toRender == null)
+								if (toRender == null)
 									lsb.append(SafeHtmlUtils.fromTrustedString("&#160;"));
 								styleToRender = modelGrid.complementPublishedStyle(styleToRender);
 								ControlsUtils.renderDecorated(lsb, styleToRender, sb);
-								if (grid.getView() instanceof PlatypusCellsView)
-									((PlatypusCellsView) grid.getView()).addCellStyle(context.getIndex(), context.getColumn(), styleToRender);
+								if (cellToRender != null) {
+									bindCallback(renderer, context, cellToRender);
+								}
 							} catch (Exception e) {
 								renderer.render(context, e.getMessage(), sb);
 							}
@@ -737,14 +779,15 @@ public class GxtGridFactory {
 							if (cellToRender.getDisplay() != null)
 								toRender = cellToRender.getDisplay();
 							renderer.render(context, toRender, lsb);
-							if(toRender == null)
+							if (toRender == null)
 								lsb.append(SafeHtmlUtils.fromTrustedString("&#160;"));
 						} else
 							super.render(context, value, lsb);
 						styleToRender = modelGrid.complementPublishedStyle(styleToRender);
 						ControlsUtils.renderDecorated(lsb, styleToRender, sb);
-						if (grid.getView() instanceof PlatypusCellsView)
-							((PlatypusCellsView) grid.getView()).addCellStyle(context.getIndex(), context.getColumn(), styleToRender);
+						if (cellToRender != null) {
+							bindCallback(renderer, context, cellToRender);
+						}
 					} catch (Exception ex) {
 						Logger.getLogger(GxtGridFactory.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
 					}

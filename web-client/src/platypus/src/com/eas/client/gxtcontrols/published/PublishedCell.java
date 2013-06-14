@@ -19,6 +19,14 @@ public final class PublishedCell extends JavaScriptObject {
 		return this.style;
 	}-*/;
 
+	public final native Runnable getDisplayCallback()/*-{
+		return this.displayCallback;
+	}-*/;
+	
+	public final native void setDisplayCallback(Runnable aCallback)/*-{
+		this.displayCallback = aCallback;
+	}-*/;
+	
 	public final void styleToElement(XElement aElement) {
 		if (aElement != null && getStyle() != null) {
 			Style eStyle = aElement.getStyle();

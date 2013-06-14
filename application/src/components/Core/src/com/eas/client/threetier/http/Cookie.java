@@ -82,7 +82,7 @@ public class Cookie {
     }
 
     public boolean isActual() {
-        return getExpires().getTime() > System.currentTimeMillis();
+        return maxAge == Long.MAX_VALUE ? true : getExpires().getTime() > System.currentTimeMillis();
     }
 
     public static Cookie parse(String aHeaderValue) throws ParseException, NumberFormatException {

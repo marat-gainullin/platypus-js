@@ -143,11 +143,32 @@ public class Publisher {
 	}-*/;
 
 	public native static PublishedCell publishCell(Object aData, String aDisplay)/*-{
-		return {
-					data : $wnd.boxAsJs(aData),
-					display : aDisplay, 
-					style : new $wnd.Style()
+		var published = {
+					data : $wnd.boxAsJs(aData)
 				}
+		var _display = aDisplay;
+		var _style = new $wnd.Style();
+		Object.defineProperty(published, "display", {
+			get: function(){
+				return _display;
+			},
+			set: function(aValue){
+				_display = aValue;
+				if(published.displayCallback != null)
+					published.displayCallback.@java.lang.Runnable::run()();
+			}
+		});
+		Object.defineProperty(published, "style", {
+			get: function(){
+				return _style;
+			},
+			set: function(aValue){
+				_style = aValue;
+				if(published.displayCallback != null)
+					published.displayCallback.@java.lang.Runnable::run()();
+			}
+		});
+		return published;
 	}-*/;
 
 	public native static JavaScriptObject publishColumnEditor(PlatypusTextField aComponent, Resumable aResumable)/*-{
