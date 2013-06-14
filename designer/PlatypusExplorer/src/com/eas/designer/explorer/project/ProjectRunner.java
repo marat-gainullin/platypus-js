@@ -111,7 +111,7 @@ public class ProjectRunner {
                 }
             }
         }
-        io.getOut().println("Starting Platypus Application..");
+        io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Application_Starting"));
         PlatypusProjectSettings pps = project.getSettings();
         String appUrl = null;
         if (!project.getSettings().isNotStartServer()) {
