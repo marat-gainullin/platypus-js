@@ -145,17 +145,11 @@ public class RowsetUtils {
 		return aValue.unwrap();
 	}-*/;
 
-	protected static native boolean isNullInJsArray(
-			JavaScriptObject fieldsValues, int aIndex) throws Exception/*-{
-		return (fieldsValues[aIndex] == null);
+	protected static native Object boxArrayElementAsJava(JavaScriptObject aArray, int aIndex) throws Exception/*-{
+		return $wnd.boxAsJava(aArray[aIndex]);
 	}-*/;
-
-	public static Object extractValueFromJsArray(JsArrayMixed fieldsValues,
-			int aIndex) throws Exception {
-		Object v = null;
-		if (!isNullInJsArray(fieldsValues, aIndex)) {
-			v = Utils.unwrap(fieldsValues.getObject(aIndex));
-		}
-		return v;
+	
+	public static Object extractValueFromJsArray(JsArrayMixed aArray, int aIndex) throws Exception {
+		return Utils.toJava(boxArrayElementAsJava(aArray, aIndex));
 	}
 }
