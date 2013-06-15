@@ -697,24 +697,26 @@ public class QueryResultsView extends javax.swing.JPanel {
 
             private Object generateFieldValue(Field field) {
                 Object oValue = RowsetUtils.generatePkValueByType(field.getTypeInfo().getSqlType());
-                if (oValue instanceof String) {
-                    oValue = "\n";
-                } else if (oValue instanceof Date) {
-                    oValue = new Date(0);
-                } else if (oValue instanceof Number) {
-                    oValue = 0;
+                if (!field.isPk()) {// constant value for primary keys are harmful, because of uniqueness
+                    if (oValue instanceof String) {
+                        oValue = "\n";
+                    } else if (oValue instanceof Date) {
+                        oValue = new Date(0);
+                    } else if (oValue instanceof Number) {
+                        oValue = 0;
+                    }
                 }
                 return oValue;
             }
 
             private String askFieldValue(Field field) {
                 NotifyDescriptor.InputLine input = new NotifyDescriptor.InputLine(
-                        field.isFk() ? 
-                        NbBundle.getMessage(QueryResultsView.class, "QueryResultsView.LBL_ForeignKeyValue"):
-                        NbBundle.getMessage(QueryResultsView.class, "QueryResultsView.LBL_FieldValue"), 
-                        field.isFk() ? 
-                        String.format(NbBundle.getMessage(QueryResultsView.class, "QueryResultsView.LBL_CantDetermineRequiredForeignKeyValue"), field.getTableName(), field.getName()):
-                        String.format(NbBundle.getMessage(QueryResultsView.class, "QueryResultsView.LBL_CantDetermineRequiredValue"), field.getTableName(), field.getName()));
+                        field.isFk()
+                        ? NbBundle.getMessage(QueryResultsView.class, "QueryResultsView.LBL_ForeignKeyValue")
+                        : NbBundle.getMessage(QueryResultsView.class, "QueryResultsView.LBL_FieldValue"),
+                        field.isFk()
+                        ? String.format(NbBundle.getMessage(QueryResultsView.class, "QueryResultsView.LBL_CantDetermineRequiredForeignKeyValue"), field.getTableName(), field.getName())
+                        : String.format(NbBundle.getMessage(QueryResultsView.class, "QueryResultsView.LBL_CantDetermineRequiredValue"), field.getTableName(), field.getName()));
                 Object oAnswer = DialogDisplayer.getDefault().notify(input);
                 String sAnswer = input.getInputText();
                 if (oAnswer == NotifyDescriptor.OK_OPTION) {
