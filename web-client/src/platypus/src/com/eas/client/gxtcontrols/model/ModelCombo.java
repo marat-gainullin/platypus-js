@@ -24,7 +24,7 @@ public class ModelCombo extends PlatypusAdapterStandaloneField<Object> {
 
 	});
 
-	protected boolean list;
+	protected boolean list = true;
 
 	public ModelCombo() {
 		super(new PlatypusComboBoxHandledField());
