@@ -343,7 +343,7 @@ public class PlatypusFormSupport extends PlatypusModuleSupport implements Editor
             saving = false; // workaround for bug 75225
         }
         if (formEditor != null) {
-            formEditor.reportErrors(FormEditor.SAVING);
+            formEditor.reportErrors(FormEditor.FormOperation.SAVING);
         }
 
         if (ioEx != null) {
@@ -464,7 +464,7 @@ public class PlatypusFormSupport extends PlatypusModuleSupport implements Editor
                     // load the form only if its open
                     loadForm();
                     FormEditor formEditor = getFormEditor();
-                    formEditor.reportErrors(FormEditor.LOADING);
+                    formEditor.reportErrors(FormEditor.FormOperation.LOADING);
                     if (!formEditor.isFormLoaded()) { // there was a loading error
                         formDesigner.removeAll();
                     } else {
@@ -496,7 +496,7 @@ public class PlatypusFormSupport extends PlatypusModuleSupport implements Editor
             formEditor.setFormDesigner(formDesigner);
         }
         loadForm();
-        formEditor.reportErrors(FormEditor.LOADING);
+        formEditor.reportErrors(FormEditor.FormOperation.LOADING);
         if (formEditor.isFormLoaded() && formDesigner != null && formDesigner.isShowing()) {
             formDesigner.initialize();
         }

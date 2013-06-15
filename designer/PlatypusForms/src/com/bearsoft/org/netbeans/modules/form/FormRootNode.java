@@ -64,7 +64,6 @@ import org.openide.util.datatransfer.PasteType;
  */
 class FormRootNode extends FormNode {
 
-    private FormProperty<?>[] codeGenProperties;
     private FormProperty<?>[] allProperties;
 
     public FormRootNode(FormModel formModel) {
@@ -113,38 +112,7 @@ class FormRootNode extends FormNode {
         return ((RootChildren) getChildren()).othersNode;
     }
 
-    @Override
-    public Node.PropertySet[] getPropertySets() {
-        Node.PropertySet codeSet = new Node.PropertySet(
-                "codeGeneration", // NOI18N
-                FormUtils.getBundleString("CTL_SyntheticTab"), // NOI18N
-                FormUtils.getBundleString("CTL_SyntheticTabHint")) // NOI18N
-        {
-            @Override
-            public FormProperty<?>[] getProperties() {
-                return getCodeGenProperties();
-            }
-        };
-        return new Node.PropertySet[]{codeSet};
-    }
-
-    FormProperty<?>[] getCodeGenProperties() {
-        if (codeGenProperties == null) {
-            codeGenProperties = createCodeGenProperties();
-        }
-        return codeGenProperties;
-    }
-
-    private FormProperty<?>[] createCodeGenProperties() {
-        return FormEditor.getCodeGenerator(formModel).getSyntheticProperties(null);
-    }
-
     FormProperty<?>[] getAllProperties() {
-        if (allProperties == null) {
-            int codeGenCount = getCodeGenProperties().length;
-            allProperties = new FormProperty<?>[codeGenCount];
-            System.arraycopy(codeGenProperties, 0, allProperties, 0, codeGenCount);
-        }
         return allProperties;
     }
 

@@ -41,7 +41,7 @@
  * Version 2 license, then the option applies only if the new code is
  * made subject to such option by the copyright holder.
  */
-package com.bearsoft.org.netbeans.modules.form.actions;
+package com.bearsoft.org.netbeans.modules.form.actions.menu;
 
 import com.bearsoft.org.netbeans.modules.form.*;
 import org.openide.nodes.Node;
@@ -62,6 +62,7 @@ public class EditFormAction extends NodeAction {
     @Override
     protected boolean enable(Node[] nodes) {
         boolean ret = false;
+        /*
         if (nodes != null && nodes.length == 1) {
             RADComponentCookie radCookie = nodes[0].getLookup().lookup(RADComponentCookie.class);
             RADComponent<?> comp = (radCookie != null) ? radCookie.getRADComponent() : null;
@@ -75,6 +76,7 @@ public class EditFormAction extends NodeAction {
                 }
             }
         }
+        */ 
         return ret;
     }
 
@@ -94,7 +96,7 @@ public class EditFormAction extends NodeAction {
             if (comp != null) {
                 RADComponent<?> topComp = comp.getFormModel().getTopRADComponent();
                 if (topComp != comp && EditContainerAction.isEditableComponent(topComp)) {
-                    PlatypusFormLayoutView designer = getDesigner(topComp);
+                    PlatypusFormLayoutView designer = null;//getDesigner(topComp);
                     if (designer != null && topComp != designer.getTopDesignComponent()) {
                         designer.setTopDesignComponent((RADVisualContainer<?>) topComp, true);
                         designer.requestActive();
@@ -111,11 +113,11 @@ public class EditFormAction extends NodeAction {
             }
         }
     }
-
+/*
     private static PlatypusFormLayoutView getDesigner(RADComponent<?> comp) {
         return FormEditor.getFormDesigner(comp.getFormModel());
     }
-
+*/
     @Override
     protected boolean asynchronous() {
         return false;

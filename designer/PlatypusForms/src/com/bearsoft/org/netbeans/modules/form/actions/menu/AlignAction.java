@@ -41,7 +41,7 @@
  * Version 2 license, then the option applies only if the new code is
  * made subject to such option by the copyright holder.
  */
-package com.bearsoft.org.netbeans.modules.form.actions;
+package com.bearsoft.org.netbeans.modules.form.actions.menu;
 
 import com.bearsoft.org.netbeans.modules.form.*;
 import java.awt.event.ActionEvent;
@@ -169,12 +169,14 @@ public class AlignAction extends NodeAction {
     private void updateState(List<RADVisualComponent<?>> components) {
         if (components != null && components.size() >= 2) {
             RADVisualComponent<?> rc = components.get(0);
-            PlatypusFormLayoutView formDesigner = FormEditor.getFormDesigner(rc.getFormModel());
-            java.util.Collection<Action> col = formDesigner.getAlignActions();
-            assert items.length == 6;
-            Action[] actions = col.toArray(new Action[col.size()]);
-            for (int i = 0; i < col.size(); i++) {
-                items[i].setEnabled(actions[i].isEnabled());
+            PlatypusFormLayoutView designer = null;//FormEditor.getFormDesigner(rc.getFormModel());
+            if (designer != null) {
+                java.util.Collection<Action> col = designer.getAlignActions();
+                assert items.length == 6;
+                Action[] actions = col.toArray(new Action[col.size()]);
+                for (int i = 0; i < col.size(); i++) {
+                    items[i].setEnabled(actions[i].isEnabled());
+                }
             }
         }
     }
@@ -220,8 +222,10 @@ public class AlignAction extends NodeAction {
                 int index = mi.getDirection();
                 RADVisualComponent<?> radC = mi.getRADComponents().get(0);
                 FormModel fm = radC.getFormModel();
-                PlatypusFormLayoutView fd = FormEditor.getFormDesigner(fm);
-                fd.getAlignActions().toArray(new Action[]{})[index].actionPerformed(evt);
+                PlatypusFormLayoutView designer = null;//FormEditor.getFormDesigner(fm);
+                if (designer != null) {
+                    designer.getAlignActions().toArray(new Action[]{})[index].actionPerformed(evt);
+                }
             }
         }
     }

@@ -41,7 +41,7 @@
  * Version 2 license, then the option applies only if the new code is
  * made subject to such option by the copyright holder.
  */
-package com.bearsoft.org.netbeans.modules.form.actions;
+package com.bearsoft.org.netbeans.modules.form.actions.menu;
 
 import com.bearsoft.org.netbeans.modules.form.*;
 import java.awt.event.ActionEvent;
@@ -150,6 +150,7 @@ public class SetResizabilityAction extends NodeAction {
     }
 
     private void updateState(List<RADVisualComponent<?>> components) {
+        /*
         if (components != null && components.size() >= 1) {
             RADComponent<?> rc = components.get(0);
             PlatypusFormLayoutView formDesigner = FormEditor.getFormDesigner(rc.getFormModel());
@@ -159,6 +160,7 @@ public class SetResizabilityAction extends NodeAction {
                 items[i].setSelected(formDesigner.getResizabilityButtons()[i].isSelected());
             }
         }
+        */ 
     }
 
     private ActionListener getMenuItemListener() {
@@ -199,9 +201,11 @@ public class SetResizabilityAction extends NodeAction {
                 if (mi.isEnabled()) {
                     int index = mi.getDirection();
                     RADVisualComponent<?> radC = mi.getRADComponents().get(0);
+                    /*
                     PlatypusFormLayoutView fd = FormEditor.getFormDesigner(radC.getFormModel());
                     fd.getResizabilityButtons()[index].setSelected(!fd.getResizabilityButtons()[index].isSelected());
                     fd.getResizabilityActions().toArray(new Action[]{})[index].actionPerformed(evt);
+                    */ 
                 }
             }
         }

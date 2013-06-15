@@ -41,7 +41,7 @@
  * Version 2 license, then the option applies only if the new code is
  * made subject to such option by the copyright holder.
  */
-package com.bearsoft.org.netbeans.modules.form.actions;
+package com.bearsoft.org.netbeans.modules.form.actions.menu;
 
 import com.bearsoft.org.netbeans.modules.form.*;
 import org.openide.awt.ActionID;
@@ -74,10 +74,9 @@ public class InPlaceEditAction extends NodeAction {
     protected void performAction(Node[] activatedNodes) {
         if (activatedNodes != null && activatedNodes.length == 1) {
             RADComponentCookie radCookie = activatedNodes[0].getLookup().lookup(RADComponentCookie.class);
-            RADComponent<?> radComp = radCookie == null ? null
-                    : radCookie.getRADComponent();
+            RADComponent<?> radComp = radCookie == null ? null : radCookie.getRADComponent();
             if (radComp != null) {
-                PlatypusFormLayoutView designer = FormEditor.getFormDesigner(radComp.getFormModel());
+                PlatypusFormLayoutView designer = null;//FormEditor.getFormDesigner(radComp.getFormModel());
                 if (designer != null) {
                     designer.startInPlaceEditing(radComp);
                 }
@@ -105,7 +104,7 @@ public class InPlaceEditAction extends NodeAction {
             RADComponentCookie radCookie = activatedNodes[0].getLookup().lookup(RADComponentCookie.class);
             RADComponent<?> radComp = radCookie == null ? null : radCookie.getRADComponent();
             if (radComp != null) {
-                PlatypusFormLayoutView designer = FormEditor.getFormDesigner(radComp.getFormModel());
+                PlatypusFormLayoutView designer = null;//FormEditor.getFormDesigner(radComp.getFormModel());
                 if (designer != null) {
                     return designer.isEditableInPlace(radComp); 
                 }

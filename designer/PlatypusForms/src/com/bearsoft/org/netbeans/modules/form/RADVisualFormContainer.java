@@ -219,12 +219,6 @@ public class RADVisualFormContainer extends RADVisualContainer<Container> {
                 old ? Boolean.TRUE : Boolean.FALSE, value ? Boolean.TRUE : Boolean.FALSE);
     }
 
-    // ------------------------------------------------------------------------------
-    // End of form synthetic properties
-    @Override
-    protected FormProperty<?>[] createSyntheticProperties() {
-        return new FormProperty<?>[]{};
-    }
     // ---------
     // providing the difference of the whole frame/dialog size and the size
     // of the content pane

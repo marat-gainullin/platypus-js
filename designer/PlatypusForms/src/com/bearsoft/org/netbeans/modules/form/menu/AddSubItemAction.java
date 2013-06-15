@@ -46,7 +46,7 @@ package com.bearsoft.org.netbeans.modules.form.menu;
 import com.bearsoft.org.netbeans.modules.form.FormInspector;
 import com.bearsoft.org.netbeans.modules.form.RADComponent;
 import com.bearsoft.org.netbeans.modules.form.RADComponentNode;
-import com.bearsoft.org.netbeans.modules.form.actions.AlignAction;
+import com.bearsoft.org.netbeans.modules.form.actions.menu.AlignAction;
 import com.bearsoft.org.netbeans.modules.form.palette.PaletteItem;
 import com.bearsoft.org.netbeans.modules.form.palette.PaletteUtils;
 import java.awt.event.ActionEvent;

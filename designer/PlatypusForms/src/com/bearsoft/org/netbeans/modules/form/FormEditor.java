@@ -43,8 +43,6 @@
  */
 package com.bearsoft.org.netbeans.modules.form;
 
-import com.bearsoft.org.netbeans.modules.form.actions.EditContainerAction;
-import com.bearsoft.org.netbeans.modules.form.actions.EditFormAction;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.*;
@@ -60,7 +58,6 @@ import org.openide.awt.UndoRedo;
 import org.openide.loaders.DataObject;
 import org.openide.nodes.Node;
 import org.openide.util.Mutex;
-import org.openide.util.actions.SystemAction;
 
 /**
  * Form editor.
@@ -69,8 +66,11 @@ import org.openide.util.actions.SystemAction;
  */
 public class FormEditor {
 
-    static final int LOADING = 1;
-    static final int SAVING = 2;
+    public enum FormOperation {
+
+        LOADING,
+        SAVING
+    }
     /**
      * The FormModel instance holding the form itself
      */
@@ -104,7 +104,7 @@ public class FormEditor {
     /**
      * Table of opened FormModel instances (FormModel to FormEditor map)
      */
-    private static Map<FormModel, FormEditor> openForms = new HashMap<>();
+//    private static Map<FormModel, FormEditor> openForms = new HashMap<>();
     /**
      * List of floating windows - must be closed when the form is closed.
      */
@@ -120,11 +120,6 @@ public class FormEditor {
      * List of actions that are tried when a component is double-clicked.
      */
     private List<Action> defaultActions;
-    /**
-     * Indicates that a task has been posted to ask the user about format
-     * upgrade - not to show the confirmation dialog multiple times.
-     */
-    private boolean upgradeCheckPosted;
 
     // -----
     FormEditor(PlatypusFormDataObject aDataObject) {
@@ -199,7 +194,7 @@ public class FormEditor {
         }
         getFormDataObject().getLookup().lookup(PlatypusFormSupport.class).hideOpeningStatus();
         // report errors during loading
-        reportErrors(LOADING);
+        reportErrors(FormOperation.LOADING);
     }
 
     boolean loadForm() {
@@ -244,7 +239,7 @@ public class FormEditor {
             // create and register new FormModel instance
             formModel = new FormModel(formDataObject);
 
-            openForms.put(formModel, this);
+            //openForms.put(formModel, this);
             Logger.getLogger("TIMER").log(Level.FINE, "FormModel", new Object[]{formDataObject.getPrimaryFile(), formModel}); // NOI18N
             // load the form data (FormModel) and report errors
             try {
@@ -259,13 +254,13 @@ public class FormEditor {
                 });
             } catch (PersistenceException ex) { // some fatal error occurred
                 persistenceManager = null;
-                openForms.remove(formModel);
+                //openForms.remove(formModel);
                 formModel = null;
                 throw ex;
             } catch (Exception ex) { // should not happen, but for sure...
                 ErrorManager.getDefault().notify(ex);
                 persistenceManager = null;
-                openForms.remove(formModel);
+                //openForms.remove(formModel);
                 formModel = null;
                 return;
             }
@@ -419,7 +414,7 @@ public class FormEditor {
      *
      * @param operation operation being performed.
      */
-    public void reportErrors(int operation) {
+    public void reportErrors(FormOperation operation) {
         if (!anyPersistenceError()) {
             return; // no errors or warnings logged
         }
@@ -427,7 +422,7 @@ public class FormEditor {
         final PlatypusPersistenceManager persistManager =
                 (PlatypusPersistenceManager) persistenceManager;
 
-        boolean checkLoadingErrors = operation == LOADING && formLoaded;
+        boolean checkLoadingErrors = operation == FormOperation.LOADING && formLoaded;
         boolean anyNonFatalLoadingError = false; // was there a real error?
 
         StringBuilder userErrorMsgs = new StringBuilder();
@@ -567,7 +562,7 @@ public class FormEditor {
         if (formLoaded) {
             formModel.fireFormToBeClosed();
 
-            openForms.remove(formModel);
+            //openForms.remove(formModel);
             formLoaded = false;
 
             // remove nodes hierarchy
@@ -663,7 +658,7 @@ public class FormEditor {
                                     compsToSelect.remove((RADVisualContainer<?>) ev.getContainer());
                                 }
                             }
-                        } else if (type == FormModelEvent.COLUMN_VIEW_EXCHANGED){
+                        } else if (type == FormModelEvent.COLUMN_VIEW_EXCHANGED) {
                             updateNodeChildren(ev.getColumn());
                             nodeToSelect = ev.getColumn().getViewControl().getNodeReference();
                         }
@@ -769,67 +764,61 @@ public class FormEditor {
     /**
      * @param formModel form model.
      * @return PlatypusFormLayoutView for given form
-     */
-    public static PlatypusFormLayoutView getFormDesigner(FormModel formModel) {
-        FormEditor formEditor = openForms.get(formModel);
-        return formEditor != null ? formEditor.getFormDesigner() : null;
-    }
-
-    /**
+     *
+     * public static PlatypusFormLayoutView getFormDesigner(FormModel formModel)
+     * { FormEditor formEditor = openForms.get(formModel); return formEditor !=
+     * null ? formEditor.getFormDesigner() : null; }
+     *
+     * /**
      * Returns code generator for the specified form.
      *
      * @param formModel form model.
      * @return CodeGenerator for given form
-     */
-    public static CodeGenerator getCodeGenerator(FormModel formModel) {
-        FormEditor formEditor = openForms.get(formModel);
-        return formEditor != null ? formEditor.getCodeGenerator() : null;
-    }
-
-    /**
+     *
+     * public static CodeGenerator getCodeGenerator(FormModel formModel) {
+     * FormEditor formEditor = openForms.get(formModel); return formEditor !=
+     * null ? formEditor.getCodeGenerator() : null; }
+     *
+     * /**
      * Returns form editor for the specified form.
      *
      * @param formModel form model.
      * @return FormEditor instance for given form
+     *
+     * public static FormEditor getFormEditor(FormModel formModel) { return
+     * openForms.get(formModel); }
      */
-    public static FormEditor getFormEditor(FormModel formModel) {
-        return openForms.get(formModel);
-    }
-
     UndoRedo.Manager getFormUndoRedoManager() {
         return formModel != null ? formModel.getUndoRedoManager() : null;
     }
+    /*
+     public void registerDefaultComponentAction(Action action) {
+     if (defaultActions == null) {
+     createDefaultComponentActionsList();
+     } else {
+     defaultActions.remove(action);
+     }
+     defaultActions.add(0, action);
+     }
 
-    public void registerDefaultComponentAction(Action action) {
-        if (defaultActions == null) {
-            createDefaultComponentActionsList();
-        } else {
-            defaultActions.remove(action);
-        }
-        defaultActions.add(0, action);
-    }
+     public void unregisterDefaultComponentAction(Action action) {
+     if (defaultActions != null) {
+     defaultActions.remove(action);
+     }
+     }
 
-    public void unregisterDefaultComponentAction(Action action) {
-        if (defaultActions != null) {
-            defaultActions.remove(action);
-        }
-    }
+     private void createDefaultComponentActionsList() {
+     defaultActions = new ArrayList<>();
+     defaultActions.add(SystemAction.get(EditContainerAction.class));
+     defaultActions.add(SystemAction.get(EditFormAction.class));
+     defaultActions.add(SystemAction.get(DefaultRADAction.class));
+     }
 
-    private void createDefaultComponentActionsList() {
-        defaultActions = new ArrayList<>();
-        defaultActions.add(SystemAction.get(EditContainerAction.class));
-        defaultActions.add(SystemAction.get(EditFormAction.class));
-        defaultActions.add(SystemAction.get(DefaultRADAction.class));
-    }
-
-    Collection<Action> getDefaultComponentActions() {
-        if (defaultActions == null) {
-            createDefaultComponentActionsList();
-        }
-        return Collections.unmodifiableList(defaultActions);
-    }
-
-    public static boolean isNonVisualTrayEnabled() {
-        return Boolean.getBoolean("netbeans.form.non_visual_tray"); // NOI18N
-    }
+     Collection<Action> getDefaultComponentActions() {
+     if (defaultActions == null) {
+     createDefaultComponentActionsList();
+     }
+     return Collections.unmodifiableList(defaultActions);
+     }
+     */
 }

@@ -2113,6 +2113,8 @@ public class Entity implements RowsetListener {
 	}
 
 	public Rowset getRowset() {
+		if(rowset == null)
+			Logger.getLogger(Entity.class.getName()).log(Level.WARNING, "Model entity ["+getTitle()+"] using while data not loaded detected.");
 		return rowset;
 	}
 

@@ -112,7 +112,6 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
     private JLayeredPane layeredPane;
     private ComponentLayer componentLayer;
     private HandleLayer handleLayer;
-    private NonVisualTray nonVisualTray;
     private FormToolBar formToolBar;
     // in-place editing
     private InPlaceEditLayer textEditLayer;
@@ -195,15 +194,8 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
 
         componentLayer = new ComponentLayer(formModel);
         handleLayer = new HandleLayer(this);
-        nonVisualTray = FormEditor.isNonVisualTrayEnabled()
-                ? new NonVisualTray(formModel) : null;
-
         JPanel designPanel = new JPanel(new BorderLayout());
         designPanel.add(componentLayer, BorderLayout.CENTER);
-        if (nonVisualTray != null) {
-            designPanel.add(nonVisualTray, BorderLayout.SOUTH);
-        }
-
         layeredPane = new JLayeredPane() {
             // hack: before each paint make sure the dragged components have
             // bounds set out of visible area (as they physically stay in their
@@ -286,7 +278,6 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
         removeAll();
         componentLayer = null;
         handleLayer = null;
-        nonVisualTray = null;
         layeredPane = null;
         if (textEditLayer != null) {
             if (textEditLayer.isVisible()) {
@@ -335,10 +326,6 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
 
     ComponentLayer getComponentLayer() {
         return componentLayer;
-    }
-
-    NonVisualTray getNonVisualTray() {
-        return nonVisualTray;
     }
 
     FormToolBar getFormToolBar() {
@@ -1410,9 +1397,6 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
     void updateVisualSettings() {
         if (componentLayer != null) {
             componentLayer.updateVisualSettings();
-        }
-        if (nonVisualTray != null) {
-            nonVisualTray.updateVisualSettings();
         }
         if (layeredPane != null) {
             layeredPane.revalidate();
