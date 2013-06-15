@@ -31,7 +31,6 @@ import com.eas.dbcontrols.combo.rt.SemiBorderTextField;
 import com.eas.design.Designable;
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.Container;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -66,14 +65,14 @@ public class DbCombo extends DbControlPanel implements DbControl {
         }
     }
     //
-    protected boolean list;
+    protected boolean list = true;
     protected ModelElementRef valueField;
     protected ModelElementRef displayField;
-    protected ApplicationEntity<?, ?, ?> valueRsEntity = null;
+    protected ApplicationEntity<?, ?, ?> valueRsEntity;
     protected int valueColIndex = 0;
     protected String valueParamName = null;
     protected Locator byValueLocator;
-    protected ApplicationEntity<?, ?, ?> displayRsEntity = null;
+    protected ApplicationEntity<?, ?, ?> displayRsEntity;
     protected int displayColIndex = 0;
     protected Map<Object, Object> displayCache = new HashMap<>();
 

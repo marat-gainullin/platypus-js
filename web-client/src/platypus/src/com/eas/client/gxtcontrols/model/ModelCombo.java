@@ -11,6 +11,7 @@ import com.eas.client.model.Entity;
 import com.eas.client.model.Model;
 import com.eas.client.model.ParametersEntity;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.sencha.gxt.widget.core.client.form.TriggerField;
 
 public class ModelCombo extends PlatypusAdapterStandaloneField<Object> {
 
@@ -250,6 +251,8 @@ public class ModelCombo extends PlatypusAdapterStandaloneField<Object> {
 		if (list != aValue) {
 			list = aValue;
 			target.setReadOnly(!editable || selectOnly || !list);
+			assert target instanceof TriggerField;
+			((TriggerField<?>)target).setHideTrigger(!list);
 		}
 	}
 

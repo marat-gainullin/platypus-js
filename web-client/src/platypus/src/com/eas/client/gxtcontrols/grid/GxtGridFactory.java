@@ -689,7 +689,7 @@ public class GxtGridFactory {
 					final ModelElementRef displayRef = new ModelElementRef(Utils.getElementByTagName(aControlTag, "displayField"), model);
 					toEnsureRowset.add(valueRef.entity);
 					toEnsureRowset.add(displayRef.entity);
-					boolean list = Utils.getBooleanAttribute(aControlTag, "list", true);
+					final boolean list = Utils.getBooleanAttribute(aControlTag, "list", true);
 					final ComboLabelProvider labelProvider = new ComboLabelProvider();
 					labelProvider.setTargetValueRef(aColModelElement);
 					labelProvider.setLookupValueRef(valueRef);
@@ -735,6 +735,7 @@ public class GxtGridFactory {
 					final PlatypusComboBox cb = new PlatypusComboBox(new ComboBoxCell<Object>(cbStore, labelProvider));
 					cb.setTypeAhead(true);
 					cb.setTriggerAction(TriggerAction.ALL);
+					cb.getCell().setHideTrigger(!list);
 					PlatypusAdapterCellField<Object> resComp = new PlatypusAdapterCellField<Object>(cb, column);
 					JavaScriptObject published = Publisher.publishColumnEditor(cb, resComp);
 					cb.setData(Form.PUBLISHED_DATA_KEY, published);

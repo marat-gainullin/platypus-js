@@ -24,7 +24,7 @@ public class ValueLookup {
 	protected void init() {
 		if (isValid() && lookupValueRef.isField
 				&& loc == null && lookupValueRef.entity.getRowset() != null) {
-			loc = new Locator(lookupValueRef.entity.getRowset());
+			loc = lookupValueRef.entity.getRowset().createLocator();
 			loc.beginConstrainting();
 			try {
 				loc.addConstraint(lookupValueRef.getColIndex());

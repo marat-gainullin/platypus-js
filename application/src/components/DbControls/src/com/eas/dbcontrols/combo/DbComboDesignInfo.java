@@ -19,9 +19,9 @@ public class DbComboDesignInfo extends DbControlDesignInfo {
     public static final String DISPLAYFIELD = "displayField";
     public static final String LIST = "list";
     public static final String VALUEFIELD = "valueField";
-    protected boolean list = false;
-    protected ModelElementRef valueField = null;
-    protected ModelElementRef displayField = null;
+    protected boolean list = true;
+    protected ModelElementRef valueField;
+    protected ModelElementRef displayField;
 
     public DbComboDesignInfo() {
         super();

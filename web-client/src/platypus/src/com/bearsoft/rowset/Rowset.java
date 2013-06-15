@@ -56,7 +56,7 @@ import com.eas.client.beans.VetoableChangeListener;
  * of sources (database, files and others). - applying and rolling back changes,
  * maded to it's data.
  * 
- * @author Марат
+ * @author mg
  */
 public class Rowset implements PropertyChangeListener, VetoableChangeListener, TransactionListener {
 

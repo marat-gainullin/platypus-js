@@ -230,6 +230,7 @@ public class GxtModelControlsFactory extends GxtControlsFactory {
 
 					ModelCombo mCombo = new ModelCombo();
 					modelElement.setCellComponent(mCombo.getTarget());
+					mCombo.setList(list);
 					mCombo.setModelElement(modelElement);
 					mCombo.setValueElement(valueRef);
 					mCombo.setDisplayElement(displayRef);

@@ -2113,8 +2113,8 @@ public class Entity implements RowsetListener {
 	}
 
 	public Rowset getRowset() {
-		if(rowset == null)
-			Logger.getLogger(Entity.class.getName()).log(Level.WARNING, "Model entity ["+getTitle()+"] using while data not loaded detected.");
+		//if(rowset == null)// leads to messages bloat
+		//	Logger.getLogger(Entity.class.getName()).log(Level.WARNING, "Model entity ["+getTitle()+"] using while data not loaded detected.");
 		return rowset;
 	}
 
@@ -2266,7 +2266,7 @@ public class Entity implements RowsetListener {
 
 	public JavaScriptObject createLocator(JavaScriptObject aConstraints) throws Exception {
 		JsArrayMixed constraints = aConstraints.<JsArrayMixed> cast();
-		Locator loc = new Locator(getRowset());
+		Locator loc = getRowset().createLocator();
 		loc.beginConstrainting();
 		try {
 			for (int i = 0; i < constraints.length(); i++) {

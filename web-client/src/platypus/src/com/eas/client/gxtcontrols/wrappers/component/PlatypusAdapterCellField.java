@@ -53,4 +53,9 @@ public class PlatypusAdapterCellField<T> extends PlatypusAdapterField<T> impleme
 		if (!isAttached() && gridEditing != null && editedCell != null)
 			gridEditing.startEditing(editedCell);
 	}
+	
+	public void commit(){
+		if(gridEditing.isEditing())
+			gridEditing.completeEditing();
+	}
 }
