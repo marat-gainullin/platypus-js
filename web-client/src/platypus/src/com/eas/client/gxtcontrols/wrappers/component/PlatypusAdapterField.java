@@ -71,7 +71,7 @@ public abstract class PlatypusAdapterField<T> extends AdapterField<T> implements
 		complex.add(target, new HorizontalLayoutData(1, 1));
 		reRegisterFocusManager();
 	}
-	
+
 	public Field getJsTarget() {
 		return target;
 	}
@@ -82,6 +82,17 @@ public abstract class PlatypusAdapterField<T> extends AdapterField<T> implements
 
 	public void setPublishedField(JavaScriptObject aValue) {
 		publishedField = aValue;
+	}
+
+	@Override
+	public void setEnabled(boolean aValue) {
+		super.setEnabled(aValue);
+		if (selectButton != null)
+			selectButton.setEnabled(aValue);
+		if (complex != null)
+			complex.setEnabled(aValue);
+		if (target != null)
+			target.setEnabled(aValue);
 	}
 
 	public boolean isEditable() {
@@ -132,14 +143,14 @@ public abstract class PlatypusAdapterField<T> extends AdapterField<T> implements
 					}
 
 				});
-				//complex.forceLayout();
+				// complex.forceLayout();
 			} else {
 				if (selectButton != null) {
 					selectHandlerRegistration.removeHandler();
 					selectHandlerRegistration = null;
 					selectButton.removeFromParent();
 					selectButton = null;
-					//complex.forceLayout();
+					// complex.forceLayout();
 				}
 			}
 			reRegisterFocusManager();
