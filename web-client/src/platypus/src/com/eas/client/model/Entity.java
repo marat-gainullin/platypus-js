@@ -2282,7 +2282,7 @@ public class Entity implements RowsetListener {
 
 	public JavaScriptObject createFilter(JavaScriptObject aConstraints) throws Exception {
 		JsArrayMixed constraints = aConstraints.<JsArrayMixed> cast();
-		Filter filter = new Filter(getRowset());
+		Filter filter = getRowset().createFilter();
 		filter.beginConstrainting();
 		try {
 			for (int i = 0; i < constraints.length(); i++) {
