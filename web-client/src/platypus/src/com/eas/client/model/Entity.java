@@ -1505,7 +1505,7 @@ public class Entity implements RowsetListener {
 					oldParamValues.put(p.getName(), p.getValue());
 				}
 				boolean parametersBinded = bindQueryParameters();
-				if (rowset == null || parametersBinded || refresh) {
+				if ((rowset == null || refresh || parametersBinded) && (pending == null || parametersBinded)) {
 					// if we have no rowset yet or query parameters values have
 					// been changed ...
 					// or we are forced to refresh the data.
