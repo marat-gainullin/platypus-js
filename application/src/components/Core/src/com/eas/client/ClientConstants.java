@@ -75,6 +75,8 @@ public class ClientConstants {
     public static final String JDBCIDX_INDEX_QUALIFIER = "INDEX_QUALIFIER"; //String => index catalog (may be null); null when TYPE is tableIndexStatistic
     public static final String JDBCIDX_INDEX_NAME = "INDEX_NAME";      //String => index name; null when TYPE is tableIndexStatistic
     public static final String JDBCIDX_TYPE = "TYPE";            //short => index type:
+    public static final String JDBCIDX_PRIMARY_KEY = "IS_PKEY";
+    public static final String JDBCIDX_FOREIGN_KEY = "FKEY_NAME";
     //tableIndexStatistic - this identifies table statistics that are returned in conjuction with a table's index descriptions
     //tableIndexClustered - this is a clustered index
     //tableIndexHashed - this is a hashed index

@@ -141,9 +141,11 @@ public class H2SqlDriver extends SqlDriver {
             + "  " + ClientConstants.JDBCIDX_ORDINAL_POSITION + ","
             + "  " + ClientConstants.JDBCIDX_COLUMN_NAME + ","
             + "  " + ClientConstants.JDBCIDX_ASC_OR_DESC + ","
-            + "  CARDINALITY, "
-            + "  PAGES, "
-            + "  FILTER_CONDITION  "
+            + "  CARDINALITY,"
+            + "  PAGES,"
+            + "  FILTER_CONDITION,"
+            + "  " + ClientConstants.JDBCIDX_PRIMARY_KEY + ","
+            + "  " + ClientConstants.JDBCIDX_FOREIGN_KEY + " "
             + "FROM"
             + "("
             + "SELECT"
@@ -154,14 +156,18 @@ public class H2SqlDriver extends SqlDriver {
             + "     THEN 1 ELSE 0 END AS " + ClientConstants.JDBCIDX_NON_UNIQUE + ","
             + "  NULL AS " + ClientConstants.JDBCIDX_INDEX_QUALIFIER + ","
             + "  index_name as " + ClientConstants.JDBCIDX_INDEX_NAME + ","
-            + "  INDEX_TYPE AS " + ClientConstants.JDBCIDX_TYPE + ","
+            + "  CASE WHEN index_type_name = 'HASH INDEX' THEN 2 else index_type end AS " + ClientConstants.JDBCIDX_TYPE + ","
+            //            + "  INDEX_TYPE AS " + ClientConstants.JDBCIDX_TYPE + ","
             + "  ORDINAL_POSITION AS " + ClientConstants.JDBCIDX_ORDINAL_POSITION + ","
             + "  column_name AS " + ClientConstants.JDBCIDX_COLUMN_NAME + ","
             + "  ASC_OR_DESC AS " + ClientConstants.JDBCIDX_ASC_OR_DESC + ","
             + "  cardinality AS CARDINALITY,"
             + "  PAGES,"
-            + "  FILTER_CONDITION "
-            + "FROM INFORMATION_SCHEMA.INDEXES "
+            + "  FILTER_CONDITION,"
+            + "  (case when primary_key = 'TRUE' then 0 else 1 end) AS " + ClientConstants.JDBCIDX_PRIMARY_KEY + ","
+            + "  (select distinct r.FK_NAME from  INFORMATION_SCHEMA.CROSS_REFERENCES r WHERE r.FKTABLE_SCHEMA = i.table_schema"
+            + "        and r.fktable_name = i.table_name and i.index_name like r.FK_NAME||'%%') AS " + ClientConstants.JDBCIDX_FOREIGN_KEY + " "
+            + "FROM INFORMATION_SCHEMA.INDEXES i "
             + "WHERE UPPER(table_schema) = UPPER('%s') AND table_name in (%s) "
             + "ORDER BY non_unique, index_name, ORDINAL_POSITION "
             + ") indexes_alias";
@@ -227,26 +233,16 @@ public class H2SqlDriver extends SqlDriver {
             + "  UPPER(r.pktable_schema)  = UPPER('%s') AND r.pktable_name in (%s) "
             + "ORDER BY r.pktable_catalog, r.pktable_schema, r.pktable_name, r.ordinal_position"
             + ") fkeys_alias";
-    protected static final String SQL_CREATE_EMPTY_TABLE = ""
-            + "CREATE TABLE %s (%s DECIMAL(18,0) NOT NULL PRIMARY KEY)";
-    protected static final String SQL_CREATE_TABLE_COMMENT = ""
-            + "COMMENT ON TABLE %s IS '%s'";
-    protected static final String SQL_CREATE_COLUMN_COMMENT = ""
-            + "COMMENT ON COLUMN %s IS '%s'";
-    protected static final String SQL_DROP_TABLE = ""
-            + "DROP TABLE %s";
-    protected static final String SQL_CREATE_INDEX = ""
-            + "CREATE %s INDEX %s ON %s (%s)";
-    protected static final String SQL_DROP_INDEX = ""
-            + "DROP INDEX %s";
-    protected static final String SQL_ADD_PK = ""
-            + "ALTER TABLE %s ADD %s PRIMARY KEY (%s)";
-    protected static final String SQL_DROP_PK = ""
-            + "ALTER TABLE %s DROP PRIMARY KEY";
-    protected static final String SQL_ADD_FK = ""
-            + "ALTER TABLE %s ADD CONSTRAINT %s FOREIGN KEY (%s) REFERENCES %s (%s) %s";
-    protected static final String SQL_DROP_FK = ""
-            + "ALTER TABLE %s DROP CONSTRAINT %s";
+    protected static final String SQL_CREATE_EMPTY_TABLE = "CREATE TABLE %s (%s DECIMAL(18,0) NOT NULL PRIMARY KEY)";
+    protected static final String SQL_CREATE_TABLE_COMMENT = "COMMENT ON TABLE %s IS '%s'";
+    protected static final String SQL_CREATE_COLUMN_COMMENT = "COMMENT ON COLUMN %s IS '%s'";
+    protected static final String SQL_DROP_TABLE = "DROP TABLE %s";
+    protected static final String SQL_CREATE_INDEX = "CREATE %s INDEX %s ON %s (%s)";
+    protected static final String SQL_DROP_INDEX = "DROP INDEX %s";
+    protected static final String SQL_ADD_PK = "ALTER TABLE %s ADD %s PRIMARY KEY (%s)";
+    protected static final String SQL_DROP_PK = "ALTER TABLE %s DROP PRIMARY KEY";
+    protected static final String SQL_ADD_FK = "ALTER TABLE %s ADD CONSTRAINT %s FOREIGN KEY (%s) REFERENCES %s (%s) %s";
+    protected static final String SQL_DROP_FK = "ALTER TABLE %s DROP CONSTRAINT %s";
     protected static final String SQL_PARENTS_LIST = ""
             + "WITH RECURSIVE parents(mdent_id, mdent_parent_id) AS "
             + "( "
@@ -263,12 +259,9 @@ public class H2SqlDriver extends SqlDriver {
             + "SELECT m2.mdent_id, m2.mdent_name, m2.mdent_parent_id, m2.mdent_type, m2.mdent_content_txt, m2.mdent_content_txt_size, m2.mdent_content_txt_crc32 FROM children c, mtd_entities m2 WHERE c.mdent_id = m2.mdent_parent_id "
             + ") "
             + "SELECT mdent_id, mdent_name, mdent_parent_id, mdent_type, mdent_content_txt, mdent_content_txt_size, mdent_content_txt_crc32 FROM children";
-    protected static final String SQL_RENAME_COLUMN = ""
-            + "ALTER TABLE %s ALTER COLUMN %s RENAME TO %s";
-    protected static final String SQL_CHANGE_COLUMN_TYPE = ""
-            + "ALTER TABLE %s ALTER COLUMN %s %s";
-    protected static final String SQL_CHANGE_COLUMN_NULLABLE = ""
-            + "ALTER TABLE %s ALTER COLUMN %s SET %s NULL";
+    protected static final String SQL_RENAME_COLUMN = "ALTER TABLE %s ALTER COLUMN %s RENAME TO %s";
+    protected static final String SQL_CHANGE_COLUMN_TYPE = "ALTER TABLE %s ALTER COLUMN %s %s";
+    protected static final String SQL_CHANGE_COLUMN_NULLABLE = "ALTER TABLE %s ALTER COLUMN %s SET %s NULL";
 
     public H2SqlDriver() {
         super();
@@ -458,10 +451,7 @@ public class H2SqlDriver extends SqlDriver {
      */
     @Override
     public String getSql4CreateTableComment(String aOwnerName, String aTableName, String aDescription) {
-        String fullName = wrapName(aTableName);
-        if (aOwnerName != null && !aOwnerName.isEmpty()) {
-            fullName = wrapName(aOwnerName) + "." + fullName;
-        }
+        String fullName = makeFullName(aOwnerName, aTableName);
         if (aDescription == null) {
             aDescription = "";
         }
@@ -549,11 +539,8 @@ public class H2SqlDriver extends SqlDriver {
      */
     @Override
     public String getSql4DropIndex(String aSchemaName, String aTableName, String aIndexName) {
-        aIndexName = wrapName(aIndexName);
-        if (aSchemaName != null && !aSchemaName.isEmpty()) {
-            aIndexName = wrapName(aSchemaName) + "." + aIndexName;
-        }
-        return String.format(SQL_DROP_INDEX, wrapName(aIndexName));
+        String indexName = makeFullName(aSchemaName, aIndexName);
+        return String.format(SQL_DROP_INDEX, indexName);
     }
 
     /**
@@ -562,32 +549,29 @@ public class H2SqlDriver extends SqlDriver {
     @Override
     public String getSql4DropFkConstraint(String aSchemaName, ForeignKeySpec aFk) {
         String constraintName = wrapName(aFk.getCName());
-        String leftTableFullName = wrapName(aFk.getTable());
-        if (aSchemaName != null && !aSchemaName.isEmpty()) {
-            leftTableFullName = wrapName(aSchemaName) + "." + leftTableFullName;
-        }
-        return String.format(SQL_DROP_FK, leftTableFullName, constraintName);
+        String tableName = makeFullName(aSchemaName, aFk.getTable());
+        return String.format(SQL_DROP_FK, tableName, constraintName);
     }
 
     /**
      * @inheritDoc
      */
     @Override
-    public String getSql4CreatePkConstraint(String aSchemaName, List<PrimaryKeySpec> listPk) {
+    public String[] getSql4CreatePkConstraint(String aSchemaName, List<PrimaryKeySpec> listPk) {
 
         if (listPk != null && listPk.size() > 0) {
             PrimaryKeySpec pk = listPk.get(0);
-            String pkTableName = wrapName(pk.getTable());
-            String pkName = pk.getCName();
+            String tableName = pk.getTable();
+            String pkTableName = makeFullName(aSchemaName, tableName);
+            String pkName = tableName + PKEY_NAME_SUFFIX;
             String pkColumnName = wrapName(pk.getField());
             for (int i = 1; i < listPk.size(); i++) {
                 pk = listPk.get(i);
                 pkColumnName += ", " + wrapName(pk.getField());
             }
-            if (aSchemaName != null && !aSchemaName.isEmpty()) {
-                pkTableName = wrapName(aSchemaName) + "." + pkTableName;
-            }
-            return String.format(SQL_ADD_PK, pkTableName, (pkName.isEmpty() ? "" : "CONSTRAINT " + wrapName(pkName)), pkColumnName);
+            return new String[]{
+                String.format(SQL_ADD_PK, pkTableName, "CONSTRAINT " + pkName, pkColumnName)
+            };
         }
         return null;
     }
@@ -597,10 +581,7 @@ public class H2SqlDriver extends SqlDriver {
      */
     @Override
     public String getSql4DropPkConstraint(String aSchemaName, PrimaryKeySpec aPk) {
-        String pkTableName = wrapName(aPk.getTable());
-        if (aSchemaName != null && !aSchemaName.isEmpty()) {
-            pkTableName = wrapName(aSchemaName) + "." + pkTableName;
-        }
+        String pkTableName = makeFullName(aSchemaName, aPk.getTable());
         return String.format(SQL_DROP_PK, pkTableName);
     }
 
@@ -621,13 +602,13 @@ public class H2SqlDriver extends SqlDriver {
     public String getSql4CreateFkConstraint(String aSchemaName, List<ForeignKeySpec> listFk) {
         if (listFk != null && listFk.size() > 0) {
             ForeignKeySpec fk = listFk.get(0);
-            String fkTableName = wrapName(fk.getTable());
+            String fkTableName = makeFullName(aSchemaName, fk.getTable());
             String fkName = fk.getCName();
             String fkColumnName = wrapName(fk.getField());
 
             PrimaryKeySpec pk = fk.getReferee();
             String pkSchemaName = pk.getSchema();
-            String pkTableName = wrapName(pk.getTable());
+            String pkTableName = makeFullName(aSchemaName, pk.getTable());
             String pkColumnName = wrapName(pk.getField());
 
             for (int i = 1; i < listFk.size(); i++) {
@@ -643,6 +624,7 @@ public class H2SqlDriver extends SqlDriver {
                     fkRule += " ON UPDATE CASCADE";
                     break;
                 case NOACTION:
+//                case SETDEFAULT:
                     fkRule += " ON UPDATE NO ACTION";
                     break;
                 case SETDEFAULT:
@@ -657,6 +639,7 @@ public class H2SqlDriver extends SqlDriver {
                     fkRule += " ON DELETE CASCADE";
                     break;
                 case NOACTION:
+//                case SETDEFAULT:
                     fkRule += " ON DELETE NO ACTION";
                     break;
                 case SETDEFAULT:
@@ -666,13 +649,6 @@ public class H2SqlDriver extends SqlDriver {
                     fkRule += " ON DELETE SET NULL";
                     break;
             }
-            if (aSchemaName != null && !aSchemaName.isEmpty()) {
-                fkTableName = wrapName(aSchemaName) + "." + fkTableName;
-            }
-            if (pkSchemaName != null && !pkSchemaName.isEmpty()) {
-                pkTableName = wrapName(pkSchemaName) + "." + pkTableName;
-            }
-
             return String.format(SQL_ADD_FK, fkTableName, fkName.isEmpty() ? "" : wrapName(fkName), fkColumnName, pkTableName, pkColumnName, fkRule);
         }
         return null;
@@ -685,10 +661,7 @@ public class H2SqlDriver extends SqlDriver {
     public String getSql4CreateIndex(String aSchemaName, String aTableName, DbTableIndexSpec aIndex) {
         assert aIndex.getColumns().size() > 0 : "index definition must consist of at least 1 column";
 
-        String tableName = wrapName(aTableName);
-        if (aSchemaName != null && !aSchemaName.isEmpty()) {
-            tableName = wrapName(aSchemaName) + "." + tableName;
-        }
+        String tableName = makeFullName(aSchemaName, aTableName);
         String fieldsList = "";
         for (int i = 0; i < aIndex.getColumns().size(); i++) {
             DbTableIndexColumnSpec column = aIndex.getColumns().get(i);
@@ -712,10 +685,7 @@ public class H2SqlDriver extends SqlDriver {
      */
     @Override
     public String getSql4EmptyTableCreation(String aSchemaName, String aTableName, String aPkFieldName) {
-        String fullName = wrapName(aTableName);
-        if (aSchemaName != null && !aSchemaName.isEmpty()) {
-            fullName = wrapName(aSchemaName) + "." + fullName;
-        }
+        String fullName = makeFullName(aSchemaName, aTableName);
         return String.format(SQL_CREATE_EMPTY_TABLE, fullName, wrapName(aPkFieldName));
     }
 
@@ -752,7 +722,6 @@ public class H2SqlDriver extends SqlDriver {
             }
         }
         return typeName;
-
     }
 
     /**
@@ -777,7 +746,7 @@ public class H2SqlDriver extends SqlDriver {
      * @inheritDoc
      */
     @Override
-    public String[] getSqls4ModifyingField(String aTableName, Field aOldFieldMd, Field aNewFieldMd) {
+    public String[] getSqls4ModifyingField(String aSchemaName, String aTableName, Field aOldFieldMd, Field aNewFieldMd) {
         assert aOldFieldMd.getName().toLowerCase().equals(aNewFieldMd.getName().toLowerCase());
         List<String> sql = new ArrayList<>();
 
@@ -790,13 +759,15 @@ public class H2SqlDriver extends SqlDriver {
         if (lNewTypeName == null) {
             lNewTypeName = "";
         }
+
+        String fullTableName = makeFullName(aSchemaName, aTableName);
         if (aOldFieldMd.getTypeInfo().getSqlType() != aNewFieldMd.getTypeInfo().getSqlType()
                 || !lOldTypeName.equalsIgnoreCase(lNewTypeName)
                 || aOldFieldMd.getSize() != aNewFieldMd.getSize()
                 || aOldFieldMd.getScale() != aNewFieldMd.getScale()) {
             sql.add(String.format(
                     SQL_CHANGE_COLUMN_TYPE,
-                    wrapName(aTableName),
+                    wrapName(fullTableName),
                     wrapName(aOldFieldMd.getName()),
                     getFieldTypeDefinition(aNewFieldMd)));
         }
@@ -809,7 +780,7 @@ public class H2SqlDriver extends SqlDriver {
             }
             sql.add(String.format(
                     SQL_CHANGE_COLUMN_NULLABLE,
-                    wrapName(aTableName),
+                    wrapName(fullTableName),
                     wrapName(aOldFieldMd.getName()),
                     not));
         }
@@ -821,8 +792,9 @@ public class H2SqlDriver extends SqlDriver {
      * @inheritDoc
      */
     @Override
-    public String[] getSqls4RenamingField(String aTableName, String aOldFieldName, Field aNewFieldMd) {
-        String renameSQL = String.format(SQL_RENAME_COLUMN, wrapName(aTableName), wrapName(aOldFieldName), wrapName(aNewFieldMd.getName()));
+    public String[] getSqls4RenamingField(String aSchemaName, String aTableName, String aOldFieldName, Field aNewFieldMd) {
+        String fullTableName = makeFullName(aSchemaName, aTableName);
+        String renameSQL = String.format(SQL_RENAME_COLUMN, fullTableName, wrapName(aOldFieldName), wrapName(aNewFieldMd.getName()));
         return new String[]{renameSQL};
     }
 
@@ -832,5 +804,13 @@ public class H2SqlDriver extends SqlDriver {
     @Override
     public Integer getJdbcTypeByRDBMSTypename(String aLowLevelTypeName) {
         return resolver.getJdbcTypeByRDBMSTypename(aLowLevelTypeName);
+    }
+
+    @Override
+    public String[] getSqls4AddingField(String aSchemaName, String aTableName, Field aField) {
+        String fullTableName = makeFullName(aSchemaName, aTableName);
+        return new String[]{
+            String.format(SqlDriver.ADD_FIELD_SQL_PREFIX, fullTableName) + getSql4FieldDefinition(aField)
+        };
     }
 }

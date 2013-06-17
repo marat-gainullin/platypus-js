@@ -15,17 +15,20 @@ import java.util.logging.Logger;
  *
  * @author kl
  */
-public class Db2TypesResolver implements TypesResolver {
+public class Db2TypesResolver extends TypesResolver {
     protected static final Map<Integer, String> jdbcTypes2RdbmsTypes = new HashMap<>();
     protected static final Map<String, Integer> rdbmsTypes2JdbcTypes = new HashMap<>();
     protected static final Set<String> gisTypes = new HashSet<>();
 
     protected static final Set<Integer> jdbcTypesWithSize = new HashSet<>();
     protected static final Set<Integer> jdbcTypesWithScale = new HashSet<>();
-    protected static final Map<Integer, Integer> jdbcTypesDefaultSize = new HashMap<>();
 
     protected static final Map<Integer, String> jdbcTypesLeftPartName = new HashMap<>();
     protected static final Map<Integer, String> jdbcTypesRightPartName = new HashMap<>();
+    private static final Map<Integer, Integer> jdbcTypesMaxSize = new HashMap<>();
+    private static final Map<Integer, Integer> jdbcTypesDefaultSize = new HashMap<>();
+    private static final List<Integer> characterTypesOrder = new ArrayList<>();
+    private static final List<Integer> binaryTypesOrder = new ArrayList<>();
 
     
     static {
@@ -127,12 +130,33 @@ public class Db2TypesResolver implements TypesResolver {
         jdbcTypesWithSize.add(Types.CLOB); // (M)
         jdbcTypesWithSize.add(Types.BLOB); // (M)
         
-
-        // default size for types
+        
+        // max sizes for types
+        jdbcTypesMaxSize.put(Types.CHAR,254);
+        jdbcTypesMaxSize.put(Types.VARCHAR,4000);
+        jdbcTypesMaxSize.put(Types.BINARY,254);
+        jdbcTypesMaxSize.put(Types.VARBINARY,2000);
+//?? зависит от установленного размера страницы       
+//??        jdbcTypesMaxSize.put(Types.VARBINARY,32762);
+        
+        // default sizes for types ??????????????????????????????????????????????
+        jdbcTypesDefaultSize.put(Types.CHAR,1);
+        jdbcTypesDefaultSize.put(Types.VARCHAR,200);
+        jdbcTypesDefaultSize.put(Types.NCHAR,1 );
+        jdbcTypesDefaultSize.put(Types.NVARCHAR,200);
+        jdbcTypesDefaultSize.put(Types.BINARY,1);
+        jdbcTypesDefaultSize.put(Types.VARBINARY,200);
         jdbcTypesDefaultSize.put(Types.CLOB, 2147483647);
         jdbcTypesDefaultSize.put(Types.BLOB, 2147483647);
-        jdbcTypesDefaultSize.put(Types.BINARY, 1);
-        jdbcTypesDefaultSize.put(Types.VARBINARY, 1);
+
+        // порядок замены символьных типов, если требуется размер больше исходного
+        characterTypesOrder.add(Types.CHAR);
+        characterTypesOrder.add(Types.VARCHAR);
+        characterTypesOrder.add(Types.CLOB);
+        
+        binaryTypesOrder.add(Types.BINARY);
+        binaryTypesOrder.add(Types.VARBINARY);
+        binaryTypesOrder.add(Types.BLOB);
     
         // для полей, где размер задается в середине имени типа
         jdbcTypesLeftPartName.put(Types.BINARY,"CHAR");
@@ -141,23 +165,23 @@ public class Db2TypesResolver implements TypesResolver {
         jdbcTypesRightPartName.put(Types.VARBINARY,"FOR BIT DATA");
     }
 
-    @Override
-    public void resolve2RDBMS(Field aField) {
-        DataTypeInfo typeInfo = aField.getTypeInfo();
-        if (typeInfo == null) {
-            typeInfo = DataTypeInfo.VARCHAR;
-            Logger.getLogger(MySqlTypesResolver.class.getName()).log(Level.SEVERE, "sql jdbc type {0} have no mapping to rdbms type. substituting with string type (Varchar)", new Object[]{aField.getTypeInfo().getSqlType()});
-        }
-        DataTypeInfo copyTypeInfo = typeInfo.copy();
-        String sqlTypeName = jdbcTypes2RdbmsTypes.get(typeInfo.getSqlType());
-        if (sqlTypeName != null) {
-            copyTypeInfo.setSqlType(getJdbcTypeByRDBMSTypename(sqlTypeName));
-            copyTypeInfo.setSqlTypeName(sqlTypeName.toUpperCase());
-            copyTypeInfo.setJavaClassName(typeInfo.getJavaClassName());
-        }
-        aField.setTypeInfo(copyTypeInfo);
-    }
-
+//    @Override
+//    public void resolve2RDBMS(Field aField) {
+//        DataTypeInfo typeInfo = aField.getTypeInfo();
+//        if (typeInfo == null) {
+//            typeInfo = DataTypeInfo.VARCHAR;
+//            Logger.getLogger(MySqlTypesResolver.class.getName()).log(Level.SEVERE, "sql jdbc type {0} have no mapping to rdbms type. substituting with string type (Varchar)", new Object[]{aField.getTypeInfo().getSqlType()});
+//        }
+//        DataTypeInfo copyTypeInfo = typeInfo.copy();
+//        String sqlTypeName = jdbcTypes2RdbmsTypes.get(typeInfo.getSqlType());
+//        if (sqlTypeName != null) {
+//            copyTypeInfo.setSqlType(getJdbcTypeByRDBMSTypename(sqlTypeName));
+//            copyTypeInfo.setSqlTypeName(sqlTypeName.toUpperCase());
+//            copyTypeInfo.setJavaClassName(typeInfo.getJavaClassName());
+//        }
+//        aField.setTypeInfo(copyTypeInfo);
+//    }
+//
     @Override
     public void resolve2Application(Field aField) {
         
@@ -232,4 +256,30 @@ public class Db2TypesResolver implements TypesResolver {
     {
         return jdbcTypesRightPartName.get(aSqlType);
     }        
+
+    @Override
+    public Map<Integer, String> getJdbcTypes2RdbmsTypes() {
+        return jdbcTypes2RdbmsTypes;
+    }
+
+    @Override
+    public Map<Integer, Integer> getJdbcTypesMaxSize() {
+        return jdbcTypesMaxSize;
+    }
+
+    @Override
+    public Map<Integer, Integer> getJdbcTypesDefaultSize() {
+        return jdbcTypesDefaultSize;
+    }
+
+    @Override
+    public List<Integer> getCharacterTypesOrder() {
+        return characterTypesOrder;
+    }
+
+    @Override
+    public  List<Integer> getBinaryTypesOrder() {
+        return binaryTypesOrder;
+    }
+    
 }

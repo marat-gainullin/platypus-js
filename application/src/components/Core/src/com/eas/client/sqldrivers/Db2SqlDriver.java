@@ -21,7 +21,6 @@ import com.eas.util.StringUtils;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -40,8 +39,7 @@ public class Db2SqlDriver extends SqlDriver {
     /**
      * Listing of SQLSTATE values
      *
-     * @see
-     * http://publib.boulder.ibm.com/infocenter/iseries/v5r3/index.jsp?topic=%2Frzala%2Frzalaco.htm
+     * @see http://publib.boulder.ibm.com/infocenter/iseries/v5r3/index.jsp?topic=%2Frzala%2Frzalaco.htm
      */
     protected static final int[] db2ErrorCodes = {};
     protected static final String[] platypusErrorMessages = {};
@@ -97,7 +95,7 @@ public class Db2SqlDriver extends SqlDriver {
             + "tpk.PK_NAME as " + ClientConstants.JDBCPKS_CONSTRAINT_NAME
             + " FROM SYSIBM.SQLPRIMARYKEYS as tpk"
             + " where Upper(tpk.TABLE_SCHEM) = Upper('%s') and Upper(tpk.TABLE_NAME) in (%s)"
-            + " order by tpk.TABLE_SCHEM, tpk.TABLE_NAME";
+            + " order by tpk.TABLE_SCHEM, tpk.TABLE_NAME, tpk.KEY_SEQ";
     protected static final String SQL_FOREIGN_KEYS = ""
             + "select "
             + "tfk.FKTABLE_SCHEM as " + ClientConstants.JDBCFKS_FKTABLE_SCHEM + ", "
@@ -112,7 +110,8 @@ public class Db2SqlDriver extends SqlDriver {
             + "tfk.PKCOLUMN_NAME as " + ClientConstants.JDBCFKS_FKPKCOLUMN_NAME + ", "
             + "tfk.PK_NAME as " + ClientConstants.JDBCFKS_FKPK_NAME + " "
             + "from SYSIBM.SQLFOREIGNKEYS as tfk "
-            + "where Upper(tfk.FKTABLE_SCHEM) = Upper('%s') and Upper(tfk.FKTABLE_NAME) in (%s)";
+            + "where Upper(tfk.FKTABLE_SCHEM) = Upper('%s') and Upper(tfk.FKTABLE_NAME) in (%s) "
+            + "order by tfk.FKTABLE_SCHEM, tfk.FKTABLE_NAME, tfk.KEY_SEQ";
     protected static final String SQL_COLUMNS_COMMENTS = ""
             + "select "
             + "c.REMARKS as " + ClientConstants.F_COLUMNS_COMMENTS_COMMENT_FIELD_NAME + ", "
@@ -121,8 +120,6 @@ public class Db2SqlDriver extends SqlDriver {
             + "from SYSIBM.SQLCOLUMNS as c "
             + "where Upper(c.TABLE_SCHEM) = Upper('%s') and Upper(c.TABLE_NAME) in (%s) "
             + "order by c.COLUMN_NAME";
-// *********************************************************************************************************************************    
-//!!!!SYSIBM.SQLSTATISTICS    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     protected static final String SQL_INDEXES = ""
             + "select "
             + "  TABLE_CAT,"
@@ -137,21 +134,14 @@ public class Db2SqlDriver extends SqlDriver {
             + "  " + ClientConstants.JDBCIDX_ASC_OR_DESC + ","
             + "  CARDINALITY,"
             + "  PAGES,"
-            + "  FILTER_CONDITION  "
-            //            + "i.CREATOR as " + ClientConstants.JDBCIDX_TABLE_SCHEM + ", "
-            //            + "i.TBNAME as " + ClientConstants.JDBCIDX_TABLE_NAME + ", "
-            //            + "i.COLNAMES as " + ClientConstants.JDBCIDX_COLUMN_NAME + ", "
-            //            + "decode(i.MADE_UNIQUE, 'N', 0, 1) as " + ClientConstants.JDBCIDX_NON_UNIQUE + ", "
-            //            + "null as " + ClientConstants.JDBCIDX_INDEX_QUALIFIER + ", "
-            //            + "i.NAME as " + ClientConstants.JDBCIDX_INDEX_NAME + ", "
-            //            + "null as " + ClientConstants.JDBCIDX_TYPE + ", "
-            //            + "i.IID as " + ClientConstants.JDBCIDX_ORDINAL_POSITION + ", "
-            //            + "null as " + ClientConstants.JDBCIDX_ASC_OR_DESC + " "
+            + "  FILTER_CONDITION,"
+            + "  (case when (select count(*) FROM SYSIBM.SQLPRIMARYKEYS as tpk where tpk.TABLE_SCHEM = i.TABLE_SCHEM and "
+            + "        tpk.TABLE_NAME = i.TABLE_NAME and tpk.PK_NAME = i.INDEX_NAME) > 0 then 0 else 1 end) " + ClientConstants.JDBCIDX_PRIMARY_KEY + ","
+            + "  null " + ClientConstants.JDBCIDX_FOREIGN_KEY + " "
             + "from SYSIBM.SQLSTATISTICS as i "
             + "where Upper(" + ClientConstants.JDBCIDX_TABLE_SCHEM + ") = Upper('%s') and Upper(" + ClientConstants.JDBCIDX_TABLE_NAME + ") in (%s)"
             + " and column_name is not null "
             + "order by TABLE_CAT,TABLE_NAME,ORDINAL_POSITION ";
-//            + "where Upper(i.CREATOR) = Upper('%s') and Upper(i.TBNAME) in (%s)";
     protected static final String SQL_ALL_TABLES_COMMENTS = ""
             + "select tbl.*, "
             + "tbl.REMARKS as " + ClientConstants.F_TABLE_COMMENTS_COMMENT_FIELD_NAME + " "
@@ -348,32 +338,19 @@ public class Db2SqlDriver extends SqlDriver {
 
     @Override
     public String getSql4DropTable(String aSchemaName, String aTableName) {
-        String dropClause = "drop table ";
-        aTableName = wrapName(aTableName);
-        if (aSchemaName != null && !aSchemaName.isEmpty()) {
-            return dropClause + wrapName(aSchemaName) + "." + aTableName;
-        } else {
-            return dropClause + aTableName;
-        }
+        return "drop table " + makeFullName(aSchemaName, aTableName);
     }
 
     @Override
     public String getSql4DropIndex(String aSchemaName, String aTableName, String aIndexName) {
-        aIndexName = wrapName(aIndexName);
-        if (aSchemaName != null && !aSchemaName.isEmpty()) {
-            aIndexName = wrapName(aSchemaName) + "." + aIndexName;
-        }
-        return "drop index " + aIndexName;
+        return "drop index " + makeFullName(aSchemaName, aIndexName);
     }
 
     @Override
     public String getSql4DropFkConstraint(String aSchemaName, ForeignKeySpec aFk) {
         String constraintName = wrapName(aFk.getCName());
-        String leftTableFullName = wrapName(aFk.getTable());
-        if (aSchemaName != null && !aSchemaName.isEmpty()) {
-            leftTableFullName = wrapName(aSchemaName) + "." + leftTableFullName;
-        }
-        return "alter table " + leftTableFullName + " drop constraint " + constraintName;
+        String tableName = makeFullName(aSchemaName, aFk.getTable());
+        return "alter table " + tableName + " drop constraint " + constraintName;
     }
 
     @Override
@@ -386,26 +363,12 @@ public class Db2SqlDriver extends SqlDriver {
     @Override
     public String getSql4CreateIndex(String aSchemaName, String aTableName, DbTableIndexSpec aIndex) {
         assert aIndex.getColumns().size() > 0 : "index definition must consist of at least 1 column";
-        String indexName = wrapName(aIndex.getName());
-        aSchemaName = wrapName(aSchemaName);
-        if (aSchemaName != null && !aSchemaName.isEmpty()) {
-            indexName = aSchemaName + "." + indexName;
-        }
-        String tableName = wrapName(aTableName);
-        if (aSchemaName != null && !aSchemaName.isEmpty()) {
-            tableName = aSchemaName + "." + tableName;
-        }
+        String indexName = makeFullName(aSchemaName, aIndex.getName());
+        String tableName = makeFullName(aSchemaName, aTableName);
         String modifier = "";
-//        if (aIndex.isClustered()) {
-//            modifier = "clustered";
-//        } else if (aIndex.isUnique()) {
-//            modifier = "unique";
-//        } else if (aIndex.isHashed()) {
-//            modifier = "bitmap";
-//        }
         if (aIndex.isUnique()) {
             modifier = "unique";
-        } 
+        }
         String fieldsList = "";
         for (int i = 0; i < aIndex.getColumns().size(); i++) {
             DbTableIndexColumnSpec column = aIndex.getColumns().get(i);
@@ -419,14 +382,11 @@ public class Db2SqlDriver extends SqlDriver {
 
     @Override
     public String getSql4EmptyTableCreation(String aSchemaName, String aTableName, String aPkFieldName) {
-        String fullName = wrapName(aTableName);
+        String tableName = makeFullName(aSchemaName, aTableName);
         aPkFieldName = wrapName(aPkFieldName);
-        if (aSchemaName != null && !aSchemaName.isEmpty()) {
-            fullName = wrapName(aSchemaName) + "." + fullName;
-        }
-        return "CREATE TABLE " + fullName + " ("
+        return "CREATE TABLE " + tableName + " ("
                 + aPkFieldName + " DECIMAL(18,0) NOT NULL,"
-                + "CONSTRAINT " + wrapName(aTableName + "_PK") + " PRIMARY KEY (" + aPkFieldName + "))";
+                + "CONSTRAINT " + wrapName(aTableName + PKEY_NAME_SUFFIX) + " PRIMARY KEY (" + aPkFieldName + "))";
     }
 
     @Override
@@ -443,37 +403,15 @@ public class Db2SqlDriver extends SqlDriver {
         return ex.getLocalizedMessage();
     }
 
-    @Override
-    public String getSql4FieldDefinition(Field aField) {
+    private String getFieldTypeDefinition(Field aField) {
         resolver.resolve2RDBMS(aField);
-        String fieldName = wrapName(aField.getName());
-        String fieldDefinition = fieldName + " ";
         DataTypeInfo typeInfo = aField.getTypeInfo();
         int sqlType = typeInfo.getSqlType();
-        //        switch (sqlType) {
-        //            case Types.BLOB:
-        //                fieldDefinition += "blob";
-        //                break;
-        //
-        //            case Types.CLOB:
-        //                fieldDefinition += "clob";
-        //                break;
-        //
-        //            case Types.STRUCT:
-        //                // Not supported in this version of the Platypus DB2 driver
-        //                break;
-        //
-        //            case Types.BOOLEAN:
-        //                fieldDefinition += "decimal(1)";
-        //                break;
-        //
-        //            default:
 
         String leftPartNameType = resolver.getLeftPartNameType(sqlType);
         String rightPartNameType = resolver.getRightPartNameType(sqlType);
 
-        //        fieldDefinition += typeInfo.getSqlTypeName();
-        fieldDefinition += leftPartNameType;
+        String typeName = leftPartNameType;
 
         int size = aField.getSize();
         int scale = aField.getScale();
@@ -483,115 +421,96 @@ public class Db2SqlDriver extends SqlDriver {
         }
 
         if ((resolver.isScaled(sqlType)) && (resolver.isSized(sqlType) && size > 0)) {
-            fieldDefinition += "(" + String.valueOf(size) + "," + String.valueOf(scale) + ")";
+            typeName += "(" + String.valueOf(size) + "," + String.valueOf(scale) + ")";
         } else {
             if (resolver.isSized(sqlType) && size > 0) {
-                fieldDefinition += "(" + String.valueOf(size) + ")";
+                typeName += "(" + String.valueOf(size) + ")";
             }
             if (resolver.isScaled(sqlType) && scale > 0) {
-                fieldDefinition += "(" + String.valueOf(scale) + ")";
+                typeName += "(" + String.valueOf(scale) + ")";
             }
         }
         if (rightPartNameType != null) {
-            fieldDefinition += " " + rightPartNameType;
+            typeName += " " + rightPartNameType;
         }
+        return typeName;
+    }
 
-
-//                if (aField.getSize() > 0 && SQLUtils.isSameTypeGroup(aField.getTypeInfo().getSqlType(), Types.VARCHAR)) {
-//                    fieldDefinition += "(" + aField.getSize() + ")";
-//                } else if (aField.getSize() > 0 && SQLUtils.isSameTypeGroup(aField.getTypeInfo().getSqlType(), Types.DECIMAL)) {
-//                    fieldDefinition += "(" + aField.getSize() + ", " + aField.getScale() + ")";
-//                }
-//        }
-
-//        if (!aField.isNullable()) {
-//            fieldDefinition += " not null";
-//        } 
-//        
-        if (aField.isPk()) {
-            fieldDefinition += ", CONSTRAINT " + wrapName(aField.getTableName()) + "_PK PRIMARY KEY (" + fieldName + ")";
-        }
+    @Override
+    public String getSql4FieldDefinition(Field aField) {
+        String fieldDefinition = wrapName(aField.getName()) + " " + getFieldTypeDefinition(aField);
         return fieldDefinition;
     }
 
     @Override
-    public String[] getSqls4ModifyingField(String aTableName, Field aOldFieldMd, Field aNewFieldMd) {
-        List<String> sql = new ArrayList();
-        aTableName = wrapName(aTableName);
-        sql.add(getSql4VolatileTable(aTableName));
+    public String[] getSqls4ModifyingField(String aSchemaName, String aTableName, Field aOldFieldMd, Field aNewFieldMd) {
+        List<String> sqls = new ArrayList();
+        Field newFieldMd = aNewFieldMd.copy();
+        String fullTableName = makeFullName(aSchemaName, aTableName);
+        String updateDefinition = String.format(ALTER_FIELD_SQL_PREFIX, fullTableName) + wrapName(aOldFieldMd.getName()) + " ";
+        String fieldDefination = getFieldTypeDefinition(newFieldMd);
 
-        if (aOldFieldMd.getTypeInfo().getSqlType() != Types.TIME
-                && aOldFieldMd.getTypeInfo().getSqlType() != Types.DATE
-                && aOldFieldMd.getTypeInfo().getSqlType() != Types.TIMESTAMP
-                && aOldFieldMd.getTypeInfo().getSqlType() != Types.BLOB
-                && aOldFieldMd.getTypeInfo().getSqlType() != Types.CLOB
-                && (aNewFieldMd.getTypeInfo().getSqlType() == Types.DATE
-                || aNewFieldMd.getTypeInfo().getSqlType() == Types.TIME
-                || aNewFieldMd.getTypeInfo().getSqlType() == Types.TIMESTAMP)) {
-            String convertToCharSql = String.format(ALTER_FIELD_SQL_PREFIX, aTableName) + aNewFieldMd.getName() + " set data type varchar(200)";
-            sql.add(convertToCharSql);
+        DataTypeInfo newTypeInfo = newFieldMd.getTypeInfo();
+        int newSqlType = newTypeInfo.getSqlType();
+        String newSqlTypeName = newTypeInfo.getSqlTypeName();
+        if (newSqlTypeName == null) {
+            newSqlTypeName = "";
         }
+        int newScale = newFieldMd.getScale();
+        int newSize = newFieldMd.getSize();
+        boolean newNullable = newFieldMd.isNullable();
 
-        if (aOldFieldMd.getTypeInfo().getSqlType() == Types.BLOB
-                || aNewFieldMd.getTypeInfo().getSqlType() == Types.BLOB
-                || aOldFieldMd.getTypeInfo().getSqlType() == Types.CLOB
-                || aNewFieldMd.getTypeInfo().getSqlType() == Types.CLOB) {
-            if ((aOldFieldMd.getTypeInfo().getSqlType() == Types.BLOB
-                    && aNewFieldMd.getTypeInfo().getSqlType() != Types.BLOB)
-                    || (aOldFieldMd.getTypeInfo().getSqlType() == Types.CLOB
-                    && aNewFieldMd.getTypeInfo().getSqlType() != Types.CLOB)) {
-                sql.add(String.format(SqlDriver.DROP_FIELD_SQL_PREFIX, aTableName) + wrapName(aOldFieldMd.getName()));
-                sql.add(String.format(SqlDriver.ADD_FIELD_SQL_PREFIX, aTableName) + getSql4FieldDefinition(aNewFieldMd));
-            } else {
-                String newFieldName = wrapName(aOldFieldMd.getName() + "_PLATYBK");
-                sql.add(String.format(SQL_RENAME_FIELD, aTableName, wrapName(aOldFieldMd.getName()), newFieldName));
-                sql.add(String.format(SqlDriver.ADD_FIELD_SQL_PREFIX, aTableName) + getSql4FieldDefinition(aNewFieldMd));
-                sql.add(String.format(SqlDriver.DROP_FIELD_SQL_PREFIX, aTableName) + newFieldName);
-            }
+        DataTypeInfo oldTypeInfo = aOldFieldMd.getTypeInfo();
+        int oldSqlType = oldTypeInfo.getSqlType();
+        String oldSqlTypeName = oldTypeInfo.getSqlTypeName();
+        if (oldSqlTypeName == null) {
+            oldSqlTypeName = "";
+        }
+        int oldScale = aOldFieldMd.getScale();
+        int oldSize = aOldFieldMd.getSize();
+        boolean oldNullable = aOldFieldMd.isNullable();
+
+        sqls.add(getSql4VolatileTable(fullTableName));
+        if (newSqlType != oldSqlType
+                || (resolver.isSized(newSqlType) && newSize != oldSize)
+                || (resolver.isScaled(newSqlType) && newScale != oldScale)) {
+            sqls.add(updateDefinition + " set data type " + fieldDefination);
+        }
+        if (oldNullable != newNullable) {
+            sqls.add(updateDefinition + (newNullable ? " drop not null" : " set not null"));
+        }
+        if (sqls.size() == 1) {
+            sqls.clear();
         } else {
-            String fieldDef = getSql4FieldDefinition(aNewFieldMd);
-            fieldDef = fieldDef.replace(wrapName(aNewFieldMd.getName()), wrapName(aNewFieldMd.getName()) + " set data type ");
-            String alterFieldSql = String.format(ALTER_FIELD_SQL_PREFIX, aTableName) + fieldDef;
-
-            sql.add(alterFieldSql);
+            sqls.add(getSql4ReorgTable(fullTableName));
         }
 
-        String alterNullSql;
-        if (aOldFieldMd.isNullable() && !aNewFieldMd.isNullable()) {
-            alterNullSql = String.format(ALTER_FIELD_SQL_PREFIX, aTableName) + wrapName(aNewFieldMd.getName()) + " set not null";
-            sql.add(alterNullSql);
-        } else if (aOldFieldMd.isNullable() && !aNewFieldMd.isNullable()) {
-            alterNullSql = String.format(ALTER_FIELD_SQL_PREFIX, aTableName) + wrapName(aNewFieldMd.getName()) + " drop not null";
-            sql.add(alterNullSql);
-        }
-
-        sql.add(getSql4ReorgTable(aTableName));
-        return (String[]) sql.toArray(new String[sql.size()]);
+        return (String[]) sqls.toArray(new String[sqls.size()]);
     }
 
     @Override
-    public String[] getSql4DroppingField(String aTableName, String aFieldName) {
-        aTableName = wrapName(aTableName);
+    public String[] getSql4DroppingField(String aSchemaName, String aTableName, String aFieldName) {
+        String fullTableName = makeFullName(aSchemaName, aTableName);
         return new String[]{
-                    getSql4VolatileTable(aTableName),
-                    String.format(DROP_FIELD_SQL_PREFIX, aTableName) + wrapName(aFieldName),
-                    getSql4ReorgTable(aTableName)
-                };
+            getSql4VolatileTable(fullTableName),
+            String.format(DROP_FIELD_SQL_PREFIX, fullTableName) + wrapName(aFieldName),
+            getSql4ReorgTable(fullTableName)
+        };
     }
 
     /**
      * DB2 9.7 or later
      */
     @Override
-    public String[] getSqls4RenamingField(String aTableName, String aOldFieldName, Field aNewFieldMd) {
-        aTableName = wrapName(aTableName);
+    public String[] getSqls4RenamingField(String aSchemaName, String aTableName, String aOldFieldName, Field aNewFieldMd) {
+        String fullTableName = makeFullName(aSchemaName, aTableName);
         aOldFieldName = wrapName(aOldFieldName);
-        String sqlText = String.format(SQL_RENAME_FIELD, aTableName, aOldFieldName, wrapName(aNewFieldMd.getName()));
+        String sqlText = String.format(SQL_RENAME_FIELD, fullTableName, aOldFieldName, wrapName(aNewFieldMd.getName()));
         return new String[]{
-                    getSql4VolatileTable(aTableName),
-                    sqlText,
-                    getSql4ReorgTable(aTableName)
-                };
+            getSql4VolatileTable(fullTableName),
+            sqlText,
+            getSql4ReorgTable(fullTableName)
+        };
     }
 
     private String getSql4VolatileTable(String aTableName) {
@@ -643,25 +562,20 @@ public class Db2SqlDriver extends SqlDriver {
 
     @Override
     public String getSql4DropPkConstraint(String aSchemaName, PrimaryKeySpec aPk) {
-        String constraintName = wrapName(aPk.getCName());
-        String leftTableFullName = wrapName(aPk.getTable());
-        if (aSchemaName != null && !aSchemaName.isEmpty()) {
-            leftTableFullName = wrapName(aSchemaName) + "." + leftTableFullName;
-        }
-        return "alter table " + leftTableFullName + " drop primary key";
+        return "alter table " + makeFullName(aSchemaName, aPk.getTable()) + " drop primary key";
     }
 
     @Override
     public String getSql4CreateFkConstraint(String aSchemaName, List<ForeignKeySpec> listFk) {
         if (listFk != null && listFk.size() > 0) {
             ForeignKeySpec fk = listFk.get(0);
-            String fkTableName = wrapName(fk.getTable());
+            String fkTableName = makeFullName(aSchemaName, fk.getTable());
             String fkName = fk.getCName();
             String fkColumnName = wrapName(fk.getField());
 
             PrimaryKeySpec pk = fk.getReferee();
             String pkSchemaName = pk.getSchema();
-            String pkTableName = wrapName(pk.getTable());
+            String pkTableName = makeFullName(aSchemaName, pk.getTable());
             String pkColumnName = wrapName(pk.getField());
 
             for (int i = 1; i < listFk.size(); i++) {
@@ -672,8 +586,7 @@ public class Db2SqlDriver extends SqlDriver {
             }
 
             /**
-             * The DB2 system does not allow the "on update cascade" option for
-             * foreign key constraints.
+             * The DB2 system does not allow the "on update cascade" option for foreign key constraints.
              */
             String fkRule = " ON UPDATE NO ACTION";
             switch (fk.getFkDeleteRule()) {
@@ -689,14 +602,6 @@ public class Db2SqlDriver extends SqlDriver {
                     break;
             }
             //fkRule += " NOT ENFORCED";
-
-            if (aSchemaName != null && !aSchemaName.isEmpty()) {
-                fkTableName = wrapName(aSchemaName) + "." + fkTableName;
-            }
-            if (pkSchemaName != null && !pkSchemaName.isEmpty()) {
-                pkTableName = wrapName(pkSchemaName) + "." + pkTableName;
-            }
-
             return String.format("ALTER TABLE %s ADD CONSTRAINT %s"
                     + " FOREIGN KEY (%s) REFERENCES %s (%s) %s", fkTableName, fkName.isEmpty() ? "" : wrapName(fkName), fkColumnName, pkTableName, pkColumnName, fkRule);
         }
@@ -704,21 +609,24 @@ public class Db2SqlDriver extends SqlDriver {
     }
 
     @Override
-    public String getSql4CreatePkConstraint(String aSchemaName, List<PrimaryKeySpec> listPk) {
+    public String[] getSql4CreatePkConstraint(String aSchemaName, List<PrimaryKeySpec> listPk) {
 
         if (listPk != null && listPk.size() > 0) {
             PrimaryKeySpec pk = listPk.get(0);
-            String pkTableName = wrapName(pk.getTable());
-            String pkName = pk.getCName();
+            String tableName = pk.getTable();
+            String pkTableName = makeFullName(aSchemaName, tableName);
+            String pkName = wrapName(tableName + PKEY_NAME_SUFFIX);
             String pkColumnName = wrapName(pk.getField());
             for (int i = 1; i < listPk.size(); i++) {
                 pk = listPk.get(i);
                 pkColumnName += ", " + wrapName(pk.getField());
             }
-            if (aSchemaName != null && !aSchemaName.isEmpty()) {
-                pkTableName = wrapName(aSchemaName) + "." + pkTableName;
-            }
-            return String.format("ALTER TABLE %s ADD %s PRIMARY KEY (%s)", pkTableName, (pkName.isEmpty() ? "" : "CONSTRAINT "+ wrapName(pkName)), pkColumnName);
+            return new String[]{
+                getSql4VolatileTable(pkTableName),
+                //                String.format("ALTER TABLE %s ADD %s PRIMARY KEY (%s)", pkTableName, (pkName.isEmpty() ? "" : "CONSTRAINT "+ wrapName(pkName)), pkColumnName),
+                String.format("ALTER TABLE %s ADD CONSTRAINT %s PRIMARY KEY (%s)", pkTableName, pkName, pkColumnName),
+                getSql4ReorgTable(pkTableName)
+            };
         }
         return null;
     }
@@ -726,5 +634,18 @@ public class Db2SqlDriver extends SqlDriver {
     @Override
     public boolean isConstraintsDeferrable() {
         return false;
+    }
+
+    @Override
+    public String[] getSqls4AddingField(String aSchemaName, String aTableName, Field aField) {
+        List<String> sqls = new ArrayList();
+        String fullTableName = makeFullName(aSchemaName, aTableName);
+        sqls.add(getSql4VolatileTable(fullTableName));
+        sqls.add(String.format(SqlDriver.ADD_FIELD_SQL_PREFIX, fullTableName) + getSql4FieldDefinition(aField));
+        if (!aField.isNullable()) {
+            sqls.add(String.format(ALTER_FIELD_SQL_PREFIX, fullTableName) + wrapName(aField.getName()) + " set not null");
+        }
+        sqls.add(getSql4ReorgTable(fullTableName));
+        return (String[]) sqls.toArray(new String[sqls.size()]);
     }
 }
