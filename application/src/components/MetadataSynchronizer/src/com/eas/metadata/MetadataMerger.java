@@ -4,11 +4,13 @@
  */
 package com.eas.metadata;
 
+import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.ForeignKeySpec;
 import com.bearsoft.rowset.metadata.ForeignKeySpec.ForeignKeyRule;
 import com.bearsoft.rowset.metadata.PrimaryKeySpec;
+import com.eas.client.ClientConstants;
 import com.eas.client.DbClient;
 import com.eas.client.DbMetadataCache;
 import com.eas.client.metadata.DbTableIndexColumnSpec;
@@ -38,14 +40,18 @@ public class MetadataMerger {
     private DbMetadataCache mdCache;
     private SqlDriver driver;
     private String dSchema;
-    private String sqlCommandEndChars = ";";
+    private String sqlCommandEndChars = "";//;";
     private Logger sqlLogger;
     private Logger errorLogger;
     private Map<String, List<ForeignKeySpec>> pKeysMap = new HashMap<>(); // relation for pkey name -> fkey in destination (!! tableName->fkeys)
     private Set<String> removedFKeys = new HashSet<>();  // for removed  Foreign keys
     private String temporaryPKFieldName = "ID";
-    private String suffixPKName = "_PK";
     private long numSql = 1L;
+    private Map<String, Map<String, Set<String>>> indexedColumnsMap = new HashMap<>(); // tableName->columnName->indexName
+    private Set<String> removedIndexes = new HashSet<>();  // for removed indexes
+    private Map<String, Set<String>> changedColumnsMap = new HashMap<>();
+    private Map<String, Set<String>> droppedColumnsMap = new HashMap<>();
+    private List<String> sqlsList = null;
 
     /**
      * merge metadata databases
@@ -71,7 +77,7 @@ public class MetadataMerger {
         if (srcDialect != null && !srcDialect.isEmpty()) {
             oneDialect = srcDialect.equalsIgnoreCase(destDialect);
         }
-        
+
         noExecuteSQL = aNoExecuteSQL;
         noDropTables = aNoDropTables;
         if (aListTables != null) {
@@ -90,26 +96,19 @@ public class MetadataMerger {
 
         TypesResolver dTypesResolver = driver.getTypesResolver();
 
-        // stages for merge:
-        // 0 - prepare: get relation for primary key -> foreign key
-        // 1 - drop all not existed tables (with linked foreign keys )
-        // 2 - create new table with primary key, add new and modify fields and comments for tables and fields
-        // 3 - drop fields (with check linked fkeys), drop and modify indexes, and fkeys from destination 
-        // 4 - create new indexes and fkeys
-
-
-        // pass 0 - prepare all date
-        // get relation for pkey -> fkey
-        Logger.getLogger(MetadataMerger.class.getName()).log(Level.INFO, "Merge metadata: start pass 0 - prepare");
-
-        for (String tableName : destMD.keySet()) {
-            TableStructure dTableStructure = destMD.get(tableName);
+        // step 1 - prepare all data
+        // get relation for pkey -> fkey, table -> field -> index
+        Logger.getLogger(MetadataMerger.class.getName()).log(Level.INFO, "Merge metadata: step 1 of 10 - prepare");
+        for (String tableNameUpper : destMD.keySet()) {
+            TableStructure dTableStructure = destMD.get(tableNameUpper);
+            assert dTableStructure != null;
+            // pkey -> fkey
             Map<String, List<ForeignKeySpec>> dTableFKeySpecs = dTableStructure.getTableFKeySpecs();
             if (dTableFKeySpecs != null) {
                 // each fkey spec
                 for (String fKeyCName : dTableFKeySpecs.keySet()) {
                     for (ForeignKeySpec fkSpec : dTableFKeySpecs.get(fKeyCName)) {
-                        String pkTableName = fkSpec.getReferee().getTable();
+                        String pkTableName = fkSpec.getReferee().getTable().toUpperCase();
                         List<ForeignKeySpec> fks = pKeysMap.get(pkTableName);
                         if (fks == null) {
                             fks = new ArrayList<>();
@@ -119,24 +118,46 @@ public class MetadataMerger {
                     }
                 }
             }
+            // table -> field -> index
+            Map<String, DbTableIndexSpec> tableIndexes = dTableStructure.getTableIndexSpecs();
+            if (tableIndexes != null && !tableIndexes.isEmpty()) {
+                Map<String, Set<String>> tableIndexedColumns = new HashMap<>();
+                // each index
+                for (String indexName : tableIndexes.keySet()) {
+                    DbTableIndexSpec indexSpec = tableIndexes.get(indexName);
+                    String fKeyName = indexSpec.getFKeyName();
+                    if (!indexSpec.isPKey() && (fKeyName == null || fKeyName.isEmpty())) {
+                        for (DbTableIndexColumnSpec column : indexSpec.getColumns()) {
+                            String columnName = column.getColumnName().toUpperCase();
+                            Set<String> indexNames = tableIndexedColumns.get(columnName);
+                            if (indexNames == null) {
+                                indexNames = new HashSet<>();
+                            }
+                            indexNames.add(indexName);
+                            tableIndexedColumns.put(columnName, indexNames);
+                        }
+                    }
+                }
+                indexedColumnsMap.put(tableNameUpper, tableIndexedColumns);
+            }
         }
         temporaryPKFieldName = temporaryPKFieldName.toUpperCase();   // for check on create new table
 
 
-        // pass1 - drop all not existed tables
+        // step 2 - drop all not existed tables
         if (noDropTables == false) {
-            Logger.getLogger(MetadataMerger.class.getName()).log(Level.INFO, "Merge metadata: start pass 1 - drop all not existed tables");
+            Logger.getLogger(MetadataMerger.class.getName()).log(Level.INFO, "Merge metadata: step 2 of 10 - drop all not existed tables");
             for (String tableNameUpper : destMD.keySet()) {
-                int cntErrors = 0;
                 if (listTables.isEmpty() || listTables.contains(tableNameUpper)) {
                     if (!srcMD.containsKey(tableNameUpper)) {
+                        int cntErrors = 0;
                         // table not exists
                         TableStructure dTableStructure = destMD.get(tableNameUpper);
                         List<PrimaryKeySpec> dTablePKeySpecs = dTableStructure.getTablePKeySpecs();
                         if (dTablePKeySpecs != null) {
                             for (int i = 0; i < dTablePKeySpecs.size(); i++) {
                                 String pKeyTableName = dTablePKeySpecs.get(i).getTable();
-                                cntErrors += dropAllLinkedFKeys(pKeyTableName);
+                                cntErrors += dropAllLinkedFKeys(pKeyTableName, "step 2.1 - drop linked keys");
                                 // primary keys === 1
                                 break;
                             }
@@ -144,59 +165,40 @@ public class MetadataMerger {
                         // drop table
                         String tableName = dTableStructure.getTableName();
                         String sql4DropTable = driver.getSql4DropTable(dSchema, tableName);
-                        boolean result = executeSQL(sql4DropTable, "pass 1 - 1");
-                        if (result) {
-                            // mark all foreign keys as deleleted
-                            Map<String, List<ForeignKeySpec>> tableFKeySpecs = dTableStructure.getTableFKeySpecs();
-                            if (tableFKeySpecs != null) {
-                                for (String cFKName : tableFKeySpecs.keySet()) {
-                                    if (!removedFKeys.contains(cFKName)) {
-                                        removedFKeys.add(cFKName);
-                                    }
+                        cntErrors += executeSQL(sql4DropTable, "step 2.2 - drop table");
+                        // mark all foreign keys as deleleted
+                        Map<String, List<ForeignKeySpec>> tableFKeySpecs = dTableStructure.getTableFKeySpecs();
+                        if (tableFKeySpecs != null) {
+                            for (String cFKName : tableFKeySpecs.keySet()) {
+                                String fKeyNameUpper = cFKName.toUpperCase();
+                                if (!removedFKeys.contains(fKeyNameUpper)) {
+                                    removedFKeys.add(fKeyNameUpper);
                                 }
                             }
-                        } else {
-                            cntErrors++;
                         }
+                        printLog(tableNameUpper, cntErrors);
                     }
                 }
-                printLog(tableNameUpper, cntErrors);
             }
         }
-
-        // pass 2 - create new table with primary key, add new and modify fields and comments for tables and fields
-        Logger.getLogger(MetadataMerger.class.getName()).log(Level.INFO, "Merge metadata: start pass 2 - create new table with primary key, add new and modify fields and comments for tables and fields");
+        // step 3 - create new table, add new fields, prepare drop fields
+        Logger.getLogger(MetadataMerger.class.getName()).log(Level.INFO, "Merge metadata: step 3 of 10 - create new table and fields");
         for (String tableNameUpper : srcMD.keySet()) {
-            int cntErrors = 0;
             if (listTables.isEmpty() || listTables.contains(tableNameUpper)) {
+                int cntErrors = 0;
+                boolean processed = false;
                 TableStructure sTableStructure = srcMD.get(tableNameUpper);
+                assert sTableStructure != null;
                 TableStructure dTableStructure = destMD.get(tableNameUpper);
 
-                String tableDescription = sTableStructure.getTableDescription();
-                if (tableDescription == null) {
-                    tableDescription = "";
-                }
-
-                List<PrimaryKeySpec> sTablePKeySpecs = sTableStructure.getTablePKeySpecs();
-                List<PrimaryKeySpec> dTablePKeySpecs = null;
-                if (dTableStructure != null) {
-                    dTablePKeySpecs = dTableStructure.getTablePKeySpecs();
-                }
-
-                Map<String, List<ForeignKeySpec>> sTableFKeySpecs = sTableStructure.getTableFKeySpecs();
-                Map<String, List<ForeignKeySpec>> dTableFKeySpecs = null;
-                if (dTableStructure != null) {
-                    dTableFKeySpecs = dTableStructure.getTableFKeySpecs();
-                }
-
                 Fields sFields = sTableStructure.getTableFields();
+                assert sFields != null;
                 Fields dFields = null;
-
-                String pkFieldNameForDrop = "";
                 String pkFieldName = "";
-
                 String sTableName = sTableStructure.getTableName();
                 String dTableName = sTableName;   // default names are equal
+                Set<String> changedFieldNames = new HashSet<>();
+                Set<String> droppedFieldNames = new HashSet<>();
 
                 if (dTableStructure == null) {
                     // create new table
@@ -208,324 +210,149 @@ public class MetadataMerger {
                         pkFieldName = temporaryPKFieldName + iPK;
                         iPK++;
                     }
-                    // for drop columns with PK
-                    pkFieldNameForDrop = pkFieldName;
-
                     String sql4EmptyTableCreation = driver.getSql4EmptyTableCreation(dSchema, sTableName, pkFieldName);
-                    if (!executeSQL(sql4EmptyTableCreation, "pass 2 - 1")) {
-                        cntErrors++;
-                    }
+                    cntErrors += executeSQL(sql4EmptyTableCreation, "step 3.1 - create table");
                     // drop temporary PKey
-                    cntErrors += dropPKey(dSchema, dTableName, pkFieldNameForDrop, dTableName + suffixPKName);
+                    cntErrors += dropPKey(dSchema, sTableName, pkFieldName, sTableName + SqlDriver.PKEY_NAME_SUFFIX, "step 3.2 - drop temporary primary key");
+                    processed = true;
                 } else {
                     dFields = dTableStructure.getTableFields();
                     dTableName = dTableStructure.getTableName();
-                    // drop primary key
-                    if (dTablePKeySpecs != null && dTablePKeySpecs.size() > 0 && !MetadataUtils.isSamePKeys(dTablePKeySpecs, sTablePKeySpecs, oneDialect)) {
-                        PrimaryKeySpec dTablePKeySpec0 = dTablePKeySpecs.get(0);
-                        // drop all linked fkeys
-                        cntErrors += dropAllLinkedFKeys(dTablePKeySpec0.getTable());
-//                        // drop  PKey
-//                        cntErrors += dropPKey(dSchema, dTableName, dTablePKeySpec0.getField(), dTablePKeySpec0.getCName());
-                        // drop  Keys
-                        cntErrors += dropKeys(dSchema, dTableStructure);
-                    }
                 }
-                boolean droppedPK = false;
-//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!                
-//!!!!!!!!!!! НЕ МЕНЯТЬ ИМЯ PK ??????????????????????????????                        
-String OLDCNAME="";                
-//!!!!!!!!!!! НЕ МЕНЯТЬ ИМЯ PK ??????????????????????????????                        
 
                 // for all fields source
                 for (int i = 1; i <= sFields.getFieldsCount(); i++) {
                     Field sField = sFields.get(i);
                     String sFieldName = sField.getName();
-                    String dFieldName = sFieldName;   // default equal
-
                     String fieldNameUpper = sFieldName.toUpperCase();
 
-                    Field sFieldCopy = sField.copy();
-                    sFieldCopy.setSchemaName(dSchema);
-
                     Field dField = null;
+//                    String dDescription = "";                   
                     if (dFields != null) {
-                        dFieldName = dTableStructure.getOriginalFieldName(fieldNameUpper);
-                        dField = dFields.get(dFieldName);
+                        dField = dFields.get(fieldNameUpper);
                     }
-
                     // field not exist
                     if (dField == null) {
                         // add new field
-                        dField = sFieldCopy.copy();
-                        dField.setDescription("");
-                        dFieldName = dField.getName();
-
+                        sField.setSchemaName(dSchema);
+                        sField.setTableName(dTableName);
+                        sField.setFk(null);
+                        sField.setPk(false);
+                        dField = sField.copy();
                         dField.setNullable(true);
-                        dField.setFk(null);
-                        dField.setPk(false);
-                        String fullTableName = driver.wrapName(dSchema) + "." + driver.wrapName(dTableName);
-                        String addFieldPrefix = String.format(SqlDriver.ADD_FIELD_SQL_PREFIX, fullTableName);
-                        String sql4AddField = addFieldPrefix + driver.getSql4FieldDefinition(dField);
-                        if (!executeSQL(sql4AddField, "pass 2 - 2")) {
-                            cntErrors++;
+
+                        String[] sqls4AddingField = driver.getSqls4AddingField(dSchema, dTableName, dField);
+                        cntErrors += executeSQL(sqls4AddingField, "step 3.3 - add new column");
+                        // set not null
+                        if (!sField.isNullable()) {
+                            String[] sqls4ModifyingField = driver.getSqls4ModifyingField(dSchema, dTableName, dField, sField);
+                            cntErrors += executeSQL(sqls4ModifyingField, "step 3.4 - alter new column: set not null");
+                        }
+                        processed = true;
+                    } else {
+                        // check for modify field
+                        int sqlType = dField.getTypeInfo().getSqlType();
+                        Field sFieldCopy = sField.copy();
+                        dTypesResolver.resolve2RDBMS(sFieldCopy);
+                        if (!MetadataUtils.isSameField(sFieldCopy, dField, dTypesResolver.isSized(sqlType), dTypesResolver.isScaled(sqlType), oneDialect)) {
+                            changedFieldNames.add(fieldNameUpper);
                         }
                     }
-//                    // add comment
-//                    String sDescription = sFieldCopy.getDescription();
-//                    String dDescription = dField.getDescription();
-//                    dField.setDescription(sDescription);
-//                    if (sDescription == null) {
-//                        sDescription = "";
-//                    }
-//                    if (dDescription == null) {
-//                        dDescription = "";
-//                    }
-//                    if (!sDescription.equals(dDescription)) {
-//                        String[] sql4CreateColumnComment = driver.getSql4CreateColumnComment(dSchema, dTableName, dFieldName, sDescription);
-//                        for (String s : sql4CreateColumnComment) {
-//                            if (!executeSQL(s, "pass 2 - 3")) {
-//                                cntErrors++;
-//                            }
-//                        }
-//                    }
-                    Field dFieldCopy = dField.copy();
-                    dField.setPk(sFieldCopy.isPk());
-                    dField.setFk(sFieldCopy.getFk());
-                    dField.setNullable(sFieldCopy.isNullable());
-
-                    int sqlType = dField.getTypeInfo().getSqlType();
-
-
-                    // need modify
-                    if (!MetadataUtils.isSameField(sFieldCopy, dField, dTypesResolver.isSized(sqlType), dTypesResolver.isScaled(sqlType), oneDialect)) {
-                        // drop PK and all linked FK
-                        if (dFieldCopy.isPk()) {
-                            if (dTablePKeySpecs != null && dTablePKeySpecs.size() > 0) {
-                                String cTableName = dTablePKeySpecs.get(0).getTable();
-                                if (!droppedPK) {
-//!!!!!!!!!!! НЕ МЕНЯТЬ ИМЯ PK ??????????????????????????????                        
-OLDCNAME = dTablePKeySpecs.get(0).getCName();                                    
-//!!!!!!!!!!! НЕ МЕНЯТЬ ИМЯ PK ??????????????????????????????                        
-
-//                                    cntErrors += dropPKey(dSchema, cTableName, dFieldName, dTablePKeySpecs.get(0).getCName());
-                                    // drop Keys
-                                    cntErrors += dropKeys(dSchema, dTableStructure);
-                                    droppedPK = true;
-                                }
-                                cntErrors += dropAllLinkedFKeys(cTableName);
-                            }
-                        }
-                        // drop Foreign keys
-                        ForeignKeySpec fkSpec = dFieldCopy.getFk();
-                        if (fkSpec != null) {
-                            String cName = fkSpec.getCName();
-                            if (!removedFKeys.contains(cName)) {
-                                removedFKeys.add(cName);
-                                String sql4DropFkConstraint = driver.getSql4DropFkConstraint(dSchema, fkSpec);
-                                if (!executeSQL(sql4DropFkConstraint, "pass 2 - 4")) {
-                                    cntErrors++;
-                                }
-                            }
-                        }
-                        // modify field - step 1 (all besides Nullable)
-                        if (!sFieldCopy.isPk()) {
-                            sFieldCopy.setNullable(true);
-                        }
-                        sFieldCopy.setPk(false);
-                        String fullTableName = driver.wrapName(dSchema) + "." + driver.wrapName(dTableName);
-                        String[] sqls4ModifyingField = driver.getSqls4ModifyingField(fullTableName, dField, sFieldCopy);
-
-                        dFieldCopy = sFieldCopy;
-                        for (String s : sqls4ModifyingField) {
-                            if (!executeSQL(s, "pass 2 - 5")) {
-                                cntErrors++;
-                            }
-                        }
-                    }
-                    if (!sField.isNullable() && dFieldCopy.isNullable()) {
-                        // modify field - step 2 (set not null)
-                        dField = dFieldCopy.copy();
-                        dField.setNullable(false);
-                        String fullTableName = driver.wrapName(dSchema) + "." + driver.wrapName(dTableName);
-                        String[] sqls4ModifyingField = driver.getSqls4ModifyingField(fullTableName, dFieldCopy, dField);
-
-                        for (String s : sqls4ModifyingField) {
-                            if (!executeSQL(s, "pass 2 - 6")) {
-                                cntErrors++;
-                            }
-                        }
-                    }
-                    // add comment
-                    String sDescription = sFieldCopy.getDescription();
-                    String dDescription = dField.getDescription();
-                    dField.setDescription(sDescription);
-                    if (sDescription == null) {
-                        sDescription = "";
-                    }
-                    if (dDescription == null) {
-                        dDescription = "";
-                    }
-                    if (!sDescription.equals(dDescription)) {
-                        String[] sql4CreateColumnComment = driver.getSql4CreateColumnComment(dSchema, dTableName, dFieldName, sDescription);
-                        for (String s : sql4CreateColumnComment) {
-                            if (!executeSQL(s, "pass 2 - 3")) {
-                                cntErrors++;
-                            }
-                        }
-                    }
-                    
                 }
                 // drop temporary id
-                if (!pkFieldNameForDrop.isEmpty()) {
-                    String fullTableName = driver.wrapName(dSchema) + "." + driver.wrapName(dTableName);
-                    String[] sql4DroppingField = driver.getSql4DroppingField(fullTableName, pkFieldNameForDrop);
-                    for (String s : sql4DroppingField) {
-                        if (!executeSQL(s, "pass 2 - 7")) {
-                            cntErrors++;
-                        }
-                    }
+                if (!pkFieldName.isEmpty()) {
+                    String[] sql4DroppingField = driver.getSql4DroppingField(dSchema, dTableName, pkFieldName);
+                    cntErrors += executeSQL(sql4DroppingField, "step 3.5 - drop temporary pkey column");
                 }
-                // add comment for table
-                String dTableDescription = null;
-                if (dTableStructure != null) {
-                    dTableDescription = dTableStructure.getTableDescription();
-                }
-                if (dTableDescription == null) {
-                    dTableDescription = "";
-                }
-
-                if (!tableDescription.equals(dTableDescription)) {
-                    String sql4CreateTableComment = driver.getSql4CreateTableComment(dSchema, dTableName, tableDescription);
-                    if (!executeSQL(sql4CreateTableComment, "pass 2 - 8")) {
-                        cntErrors++;
-                    }
-                }
-                //recreate PKey 
-                if ((droppedPK || !MetadataUtils.isSamePKeys(sTablePKeySpecs, dTablePKeySpecs, oneDialect)) && sTablePKeySpecs != null && !sTablePKeySpecs.isEmpty()) {
-                    for (int i = 0; i < sTablePKeySpecs.size(); i++) {
-                        PrimaryKeySpec pkSpec = sTablePKeySpecs.get(i);
-                        pkSpec.setSchema(dSchema);
-//!!!!!!!!!!! НЕ МЕНЯТЬ ИМЯ PK ??????????????????????????????                        
-pkSpec.setCName(OLDCNAME);                        
-//!!!!!!!!!!! НЕ МЕНЯТЬ ИМЯ PK ??????????????????????????????                        
-
-                    }
-                    String sql4CreatePkConstraint = driver.getSql4CreatePkConstraint(dSchema, sTablePKeySpecs);
-                    if (!executeSQL(sql4CreatePkConstraint, "pass 2 - 9")) {
-                        cntErrors++;
-                    }
-                }
-            }
-            printLog(tableNameUpper, cntErrors);
-        }
-
-        // pass 3 - drop fields (with check linked fkeys), drop and modify indexes, fkeys from destination 
-        Logger.getLogger(MetadataMerger.class.getName()).log(Level.INFO, "Merge metadata: start pass 3 - drop fields, drop and modify indexes and foreign keys");
-        for (String tableNameUpper : destMD.keySet()) {
-            int cntErrors = 0;
-            if (listTables.isEmpty() || listTables.contains(tableNameUpper)) {
-                TableStructure dTableStructure = destMD.get(tableNameUpper);
-                TableStructure sTableStructure = srcMD.get(tableNameUpper);
-
-                if (sTableStructure != null) {
-
-                    String dTableName = dTableStructure.getTableName();
-
+                //drop fields
+                if (dFields != null) {
                     // for all fields destination
-                    Fields dFields = dTableStructure.getTableFields();
-                    Fields sFields = null;
-                    if (sTableStructure != null) {
-                        sFields = sTableStructure.getTableFields();
-                    }
-
-                    // for each field in destination
                     for (int i = 1; i <= dFields.getFieldsCount(); i++) {
                         Field dField = dFields.get(i);
                         String dFieldName = dField.getName();
-
+                        String fieldNameUpper = dFieldName.toUpperCase();
                         // not exist in source
-                        if (sFields == null || sTableStructure.getOriginalFieldName(dFieldName.toUpperCase()) == null) {
+                        if (sFields.get(fieldNameUpper) == null) {
+                            // drop pkey
                             if (dField.isPk()) {
-                                String pKeyTableName = dTableStructure.getTableName();
+                                String pKeyTableName = dTableStructure.getTableName().toUpperCase();
                                 if (pKeyTableName != null && !pKeyTableName.isEmpty()) {
-                                    cntErrors += dropAllLinkedFKeys(pKeyTableName);
+                                    cntErrors += dropAllLinkedFKeys(pKeyTableName, "step 3.6 - drop linked foreing key for removed column");
+                                    List<PrimaryKeySpec> pKeySpecs = dTableStructure.getTablePKeySpecs();
+                                    if (pKeySpecs != null && !pKeySpecs.isEmpty()) {
+                                        cntErrors += dropPKey(dSchema, dTableName, dFieldName, pKeySpecs.get(0).getCName(), "step 3.7 - drop primary key for removed column");
+                                        dTableStructure.setTablePKeySpecs(null);
+                                    }
                                 }
                             }
-                            ForeignKeySpec dFKSpec = dField.getFk();
-                            if (dFKSpec != null) {
-                                String cName = dFKSpec.getCName();
-                                if (cName != null && !cName.isEmpty()) {
-                                    removedFKeys.add(cName);
+                            // drop fkeys
+                            Map<String, List<ForeignKeySpec>> tableFKeySpecs = dTableStructure.getTableFKeySpecs();
+                            if (tableFKeySpecs != null && !tableFKeySpecs.isEmpty()) {
+                                for (String fkeyName : tableFKeySpecs.keySet()) {
+                                    for (ForeignKeySpec fkeySpec : tableFKeySpecs.get(fkeyName)) {
+                                        if (fieldNameUpper.equalsIgnoreCase(fkeySpec.getField())) {
+                                            removedFKeys.add(fkeyName.toUpperCase());
+                                            //????????????????????? удалить FK ???????
+                                            //  String sql4DropFkConstraint = driver.getSql4DropFkConstraint(dSchema, fkeySpec);
+                                            //  cntErrors += executeSQL(sql4DropFkConstraint, "step 3 - 5.5");
+                                            break;
+                                        }
+                                    }
                                 }
                             }
-
-                            // drop field
-                            String fullTableName = driver.wrapName(dSchema) + "." + driver.wrapName(dTableName);
-                            String[] sql4DroppingField = driver.getSql4DroppingField(fullTableName, dField.getName());
-                            for (String s : sql4DroppingField) {
-                                if (!executeSQL(s, "pass 3 - 1")) {
-                                    cntErrors++;
-                                }
-                            }
+                            droppedFieldNames.add(fieldNameUpper);
                         }
                     }
+                }
+                if (!changedFieldNames.isEmpty()) {
+                    changedColumnsMap.put(tableNameUpper, changedFieldNames);
+                }
+                if (!droppedFieldNames.isEmpty()) {
+                    droppedColumnsMap.put(tableNameUpper, droppedFieldNames);
+                }
 
+                if (processed) {
+                    printLog(tableNameUpper, cntErrors);
+                }
+            }
+        }
+
+        // step 4 - drop foreign keys
+        Logger.getLogger(MetadataMerger.class.getName()).log(Level.INFO, "Merge metadata: step 4 of 10 - drop foreign keys");
+        for (String tableNameUpper : srcMD.keySet()) {
+            if (listTables.isEmpty() || listTables.contains(tableNameUpper)) {
+                int cntErrors = 0;
+                boolean processed = false;
+                TableStructure sTableStructure = srcMD.get(tableNameUpper);
+                assert sTableStructure != null;
+                TableStructure dTableStructure = destMD.get(tableNameUpper);
+                if (dTableStructure != null) {
+                    Set<String> changedColumns = changedColumnsMap.get(tableNameUpper);
                     // drop  fkeys
-                    Map<String, List<ForeignKeySpec>> dTableFKeySpecs = dTableStructure.getTableFKeySpecs();
-                    Map<String, List<ForeignKeySpec>> sTableFKeySpecs = null;
-                    if (sTableStructure != null) {
-                        sTableFKeySpecs = sTableStructure.getTableFKeySpecs();
-                    }
-
-                    if (dTableFKeySpecs != null) {
+                    Map<String, List<ForeignKeySpec>> sFKeySpecs = sTableStructure.getTableFKeySpecs();
+                    Map<String, List<ForeignKeySpec>> dFKeySpecs = dTableStructure.getTableFKeySpecs();
+                    if (dFKeySpecs != null && !dFKeySpecs.isEmpty()) {
                         //for each fkey spec
-                        for (String dFKSpecName : dTableFKeySpecs.keySet()) {
-                            List<ForeignKeySpec> sFKSpecs = null;
-                            if (sTableFKeySpecs != null) {
-                                sFKSpecs = sTableFKeySpecs.get(sTableStructure.getOriginalFKeyName(dFKSpecName.toUpperCase()));
+                        for (String dFKeyName : dFKeySpecs.keySet()) {
+                            List<ForeignKeySpec> dFKeyColumns = dFKeySpecs.get(dFKeyName);
+                            assert dFKeyColumns != null;
+                            assert !dFKeyColumns.isEmpty();
+                            List<ForeignKeySpec> sFKeyColumns = null;
+                            if (sFKeySpecs != null) {
+                                sFKeyColumns = sFKeySpecs.get(sTableStructure.getOriginalFKeyName(dFKeyName.toUpperCase()));
                             }
-                            List<ForeignKeySpec> dFKSpecs = dTableFKeySpecs.get(dFKSpecName);
-                            ForeignKeySpec dFKSpec0 = dFKSpecs.get(0);
-
-                            if (!MetadataUtils.isSameFKeys(sFKSpecs, dFKSpecs, oneDialect)) {
-                                if (!removedFKeys.contains(dFKSpec0.getCName())) {
-                                    String sql4DropFkConstraint = driver.getSql4DropFkConstraint(dSchema, dFKSpec0);
-                                    if (!executeSQL(sql4DropFkConstraint, "pass 3 - 2")) {
-                                        cntErrors++;
-                                    }
-                                }
-
-                            }
-                        }
-                    }
-                    // drop and modify (drop+create) indexes
-                    Map<String, DbTableIndexSpec> dIndexes = dTableStructure.getTableIndexSpecs();
-                    Map<String, DbTableIndexSpec> sIndexes = null;
-                    if (sTableStructure != null) {
-                        sIndexes = sTableStructure.getTableIndexSpecs();
-                    }
-                    if (dIndexes != null) {
-                        // for each index
-                        for (String indexName : dIndexes.keySet()) {
-                            DbTableIndexSpec dIndexSpec = dIndexes.get(indexName);
-                            DbTableIndexSpec sIndexSpec = null;
-                            if (sIndexes != null) {
-                                sIndexSpec = sIndexes.get(sTableStructure.getOriginalIndexName(indexName.toUpperCase()));
-                            }
-                            // no exist in source or need for modify
-                            if (sIndexSpec == null || !MetadataUtils.isSameIndex(sIndexSpec, dIndexSpec, oneDialect)) {
-                                // if not primary key index
-                                if (isPKIndex(dIndexSpec, dTableStructure.getTablePKeySpecs()) == false) {
-                                    String sql4DropIndex = driver.getSql4DropIndex(dSchema, dTableName, dTableStructure.getOriginalIndexName(indexName.toUpperCase()));
-                                    if (!executeSQL(sql4DropIndex, "pass 3 - 4")) {
-                                        cntErrors++;
-                                    }
-                                    // modify = drop+create
-                                    if (sIndexSpec != null) {
-                                        String sql4CreateIndex = driver.getSql4CreateIndex(dSchema, dTableName, sIndexSpec);
-                                        if (!executeSQL(sql4CreateIndex, "pass 3 - 5")) {
-                                            cntErrors++;
+                            if (!MetadataUtils.isSameFKeys(dFKeyColumns, sFKeyColumns, oneDialect)) {
+                                cntErrors += dropFKey(dFKeyColumns.get(0), "step 4.1 - drop foreign key");
+                                processed = true;
+                            } else {
+                                // check for change columns
+                                if (changedColumns != null && !changedColumns.isEmpty()) {
+                                    for (ForeignKeySpec fkey : dFKeyColumns) {
+                                        String fieldName = fkey.getField();
+                                        if (changedColumns.contains(fieldName.toUpperCase())) {
+                                            cntErrors += dropFKey(dFKeyColumns.get(0), "step 4.2 - drop foreign key");
+                                            processed = true;
+                                            break;
                                         }
                                     }
                                 }
@@ -533,20 +360,227 @@ pkSpec.setCName(OLDCNAME);
                         }
                     }
                 }
+                if (processed) {
+                    printLog(tableNameUpper, cntErrors);
+                }
+            }
+        }
+
+        // reread indexes
+        Set<String> tableNames = new HashSet<>();
+        Set<String> tableNamesUpper = new HashSet<>();
+        if (!listTables.isEmpty()) {
+            tableNamesUpper.addAll(listTables);
+        } else {
+            tableNamesUpper.addAll(destMD.keySet());
+        }
+        for (String tableNameUpper : tableNamesUpper) {
+            TableStructure tbl = destMD.get(tableNameUpper);
+            if (tbl != null) {
+                tableNames.add(tbl.getTableName());
+            }
+        }
+        Map<String, Set<String>> newIndexState = readIndexNames(dSchema, tableNames);
+
+        // step 5 - drop  indexes
+        Logger.getLogger(MetadataMerger.class.getName()).log(Level.INFO, "Merge metadata: step 5 of 10 - drop indexes");
+        for (String tableNameUpper : newIndexState.keySet()) {
+            int cntErrors = 0;
+            boolean processed = false;
+            TableStructure sTableStructure = srcMD.get(tableNameUpper);
+            TableStructure dTableStructure = destMD.get(tableNameUpper);
+            assert sTableStructure != null;
+            assert dTableStructure != null;
+            Map<String, DbTableIndexSpec> sIndexSpecs = sTableStructure.getTableIndexSpecs();
+            Map<String, DbTableIndexSpec> dIndexSpecs = dTableStructure.getTableIndexSpecs();
+            assert dIndexSpecs != null;
+            Set<String> changedColumns = changedColumnsMap.get(tableNameUpper);
+            for (String indexNameUpper : newIndexState.get(tableNameUpper)) {
+                DbTableIndexSpec dIndex = dIndexSpecs.get(dTableStructure.getOriginalIndexName(indexNameUpper));
+                DbTableIndexSpec sIndex = null;
+                if (sIndexSpecs != null) {
+                    sIndex = sIndexSpecs.get(sTableStructure.getOriginalIndexName(indexNameUpper));
+                }
+                if (!MetadataUtils.isSameIndex(dIndex, sIndex, oneDialect)) {
+                    cntErrors += dropIndex(dSchema, dTableStructure.getTableName(), dTableStructure.getOriginalIndexName(indexNameUpper), "step 5.1 - drop index");
+                    processed = true;
+                } else {
+                    // check for change columns
+                    if (changedColumns != null && !changedColumns.isEmpty()) {
+                        for (DbTableIndexColumnSpec column : dIndex.getColumns()) {
+                            String columnName = column.getColumnName();
+                            if (changedColumns.contains(columnName.toUpperCase())) {
+                                cntErrors += dropIndex(dSchema, dTableStructure.getTableName(), dTableStructure.getOriginalIndexName(indexNameUpper), "step 5.2 - drop index");
+                                processed = true;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (processed) {
+                printLog(tableNameUpper, cntErrors);
+            }
+        }
+
+        // step 6 - drop  fields
+        Logger.getLogger(MetadataMerger.class.getName()).log(Level.INFO, "Merge metadata: step 6 of 10 - drop columns");
+        for (String tableNameUpper : droppedColumnsMap.keySet()) {
+            int cntErrors = 0;
+            TableStructure dTableStructure = destMD.get(tableNameUpper);
+            assert dTableStructure != null;
+            String tableName = dTableStructure.getTableName();
+            Map<String, Set<String>> indexedColumns = indexedColumnsMap.get(tableNameUpper);
+            for (String columnNameUpper : droppedColumnsMap.get(tableNameUpper)) {
+                // check linked indexes and drop
+                if (indexedColumns != null) {
+                    Set<String> indexes = indexedColumns.get(columnNameUpper);
+                    if (indexes != null) {
+                        for (String indexName : indexes) {
+                            dropIndex(dSchema, tableName, dTableStructure.getOriginalIndexName(indexName.toUpperCase()), "step 6.1 - drop index for removed column");
+                        }
+                    }
+                }
+                // drop field
+                String[] sql4DroppingField = driver.getSql4DroppingField(dSchema, tableName, dTableStructure.getOriginalFieldName(columnNameUpper));
+                cntErrors += executeSQL(sql4DroppingField, "step 6.2 - drop column");
             }
             printLog(tableNameUpper, cntErrors);
         }
 
-        // step 4 - create indexes and fkeys
-        Logger.getLogger(MetadataMerger.class.getName()).log(Level.INFO, "Merge metadata: start pass 4 - create indexes and foreign keys");
+        // step 7 - modify columns, create and modify primary key
+        Logger.getLogger(MetadataMerger.class.getName()).log(Level.INFO, "Merge metadata: step 7 of 10 - modify columns");
         for (String tableNameUpper : srcMD.keySet()) {
-            int cntErrors = 0;
             if (listTables.isEmpty() || listTables.contains(tableNameUpper)) {
+                int cntErrors = 0;
+                boolean processed = false;
                 TableStructure sTableStructure = srcMD.get(tableNameUpper);
                 TableStructure dTableStructure = destMD.get(tableNameUpper);
                 assert sTableStructure != null;
-                String dTableName = sTableStructure.getTableName();//tableNameUpper; // default equal
+                List<PrimaryKeySpec> sPKeySpecs = sTableStructure.getTablePKeySpecs();
+                List<PrimaryKeySpec> dPKeySpecs = null;
+                String dTableName = sTableStructure.getTableName(); // default is equals
+                if (dTableStructure != null) {
+                    dPKeySpecs = dTableStructure.getTablePKeySpecs();
+                    dTableName = dTableStructure.getTableName();
+                    if (changedColumnsMap.containsKey(tableNameUpper)) {
+                        Set<String> changedColumns = changedColumnsMap.get(tableNameUpper);
+                        Fields sFields = sTableStructure.getTableFields();
+                        Fields dFields = dTableStructure.getTableFields();
+                        assert sFields != null;
+                        assert dFields != null;
+                        for (String columnsNameUpper : changedColumns) {
+                            String sFieldName = sTableStructure.getOriginalFieldName(columnsNameUpper);
+                            String dFieldName = dTableStructure.getOriginalFieldName(columnsNameUpper);
+                            Field sField = sFields.get(sFieldName);
+                            Field dField = dFields.get(dFieldName);
+                            assert sField != null;
+                            assert dField != null;
+                            // drop pKey
+                            if (dField.isPk() && dPKeySpecs != null) {
+                                cntErrors += dropAllLinkedFKeys(tableNameUpper, "step 7.1 - drop linked foreign key");
+                                cntErrors += dropPKey(dSchema, dTableName, dFieldName, dPKeySpecs.get(0).getCName(), "step 7.2 - drop primary key");
+                                dPKeySpecs = null;
+                            }
+                            sField.setTableName(dTableName);
+                            sField.setSchemaName(dSchema);
+                            sField.setPk(false);
+                            sField.setFk(null);
+                            String[] sqls4ModifyingField = driver.getSqls4ModifyingField(dSchema, dTableName, dField, sField);
+                            cntErrors += executeSQL(sqls4ModifyingField, "step 7.3 - modify columns ");
 
+                            //!!!!!!!!!!!!!!!!!!!! только в MySQL !!!!!!!!!!!!!!!!!!!!
+                            //!!!!!!!!!!!!!!!!! пока нет default value !!!!!!!!!!!!!!!
+                            if ("MySql".equalsIgnoreCase(destDialect)) {
+                                Field fld = dField.copy();
+                                fld.setDescription("");
+                                dFields.add(dFields.find(dFieldName), fld);
+                            }
+                            processed = true;
+                        }
+                    }
+                    // modify pkey (drop+create)
+                    if (dPKeySpecs != null && !MetadataUtils.isSamePKeys(dPKeySpecs, sPKeySpecs, oneDialect)) {
+                        PrimaryKeySpec dPKey0 = dPKeySpecs.get(0);
+                        assert dPKey0 != null;
+                        cntErrors += dropAllLinkedFKeys(tableNameUpper, "step 7.3 - drop linked foreign key");
+                        cntErrors += dropPKey(dSchema, dTableName, dPKey0.getField(), dPKey0.getCName(), "step 7.4 - drop primary key");
+                        dPKeySpecs = null;
+                        processed = true;
+                    }
+                }
+                // create pkey
+                if (sPKeySpecs != null && dPKeySpecs == null) {
+                    for (PrimaryKeySpec pKey : sPKeySpecs) {
+                        pKey.setSchema(dSchema);
+                        pKey.setTable(dTableName);
+                    }
+                    String[] sql4CreatePkConstraint = driver.getSql4CreatePkConstraint(dSchema, sPKeySpecs);
+                    cntErrors += executeSQL(sql4CreatePkConstraint, "step 7.5 - create primary key");
+                    processed = true;
+                }
+                if (processed) {
+                    printLog(tableNameUpper, cntErrors);
+                }
+            }
+        }
+
+        // step 8 - create indexes and fkeys
+        Logger.getLogger(MetadataMerger.class.getName()).log(Level.INFO, "Merge metadata: step 8 of 10 - create indexes and foreign keys");
+        for (String tableNameUpper : srcMD.keySet()) {
+            if (listTables.isEmpty() || listTables.contains(tableNameUpper)) {
+                int cntErrors = 0;
+                boolean processed = false;
+                TableStructure sTableStructure = srcMD.get(tableNameUpper);
+                TableStructure dTableStructure = destMD.get(tableNameUpper);
+                assert sTableStructure != null;
+                String dTableName = sTableStructure.getTableName(); // default equal
+
+                // fkeys
+                Map<String, List<ForeignKeySpec>> sTableFKeySpecs = sTableStructure.getTableFKeySpecs();
+                Map<String, List<ForeignKeySpec>> dTableFKeySpecs = null;
+                if (dTableStructure != null) {
+                    dTableFKeySpecs = dTableStructure.getTableFKeySpecs();
+                }
+                if (sTableFKeySpecs != null) {
+                    //for each fkey spec
+                    for (String sFKeyName : sTableFKeySpecs.keySet()) {
+                        String fKeyNameUpper = sFKeyName.toUpperCase();
+                        List<ForeignKeySpec> sFKeySpecs = sTableFKeySpecs.get(sFKeyName);
+
+                        List<ForeignKeySpec> dFKeySpecs = null;
+                        if (dTableFKeySpecs != null) {
+                            String initialNameFKey = dTableStructure.getOriginalFKeyName(fKeyNameUpper);
+                            if (initialNameFKey != null) {
+                                dFKeySpecs = dTableFKeySpecs.get(initialNameFKey);
+                            }
+                        }
+
+                        if (sFKeySpecs != null && (dFKeySpecs == null || removedFKeys.contains(sFKeySpecs.get(0).getCName().toUpperCase()))) {
+                            for (int i = 0; i < sFKeySpecs.size(); i++) {
+                                ForeignKeySpec fKeySpec = sFKeySpecs.get(i);
+                                fKeySpec.setSchema(dSchema);
+                                fKeySpec.setTable(dTableName);
+                                PrimaryKeySpec referee = fKeySpec.getReferee();
+                                referee.setSchema(dSchema);
+                                String refereeTableName = referee.getTable();
+                                TableStructure refereeTableStructure = destMD.get(refereeTableName.toUpperCase());
+                                if (refereeTableStructure != null) {
+                                    referee.setTable(refereeTableStructure.getTableName());
+                                }
+                                // !!! in Oracle not exists UpdateRule !!!!!
+                                ForeignKeyRule fkUpdateRule = fKeySpec.getFkUpdateRule();
+                                if (fkUpdateRule == null) {
+                                    fKeySpec.setFkUpdateRule(ForeignKeyRule.NOACTION);
+                                }
+
+                            }
+                            String sql4CreateFkConstraint = driver.getSql4CreateFkConstraint(dSchema, sFKeySpecs);
+                            cntErrors += executeSQL(sql4CreateFkConstraint, "step 8.1 - create foreign key");
+                            processed = true;
+                        }
+                    }
+                }
                 // indexes
                 Map<String, DbTableIndexSpec> sIndexes = sTableStructure.getTableIndexSpecs();
                 Map<String, DbTableIndexSpec> dIndexes = null;
@@ -557,97 +591,121 @@ pkSpec.setCName(OLDCNAME);
 
                 if (sIndexes != null) {
                     for (String indexName : sIndexes.keySet()) {
-                        // only for new indexes
-                        if (dIndexes == null || dTableStructure.getOriginalIndexName(indexName.toUpperCase()) == null) {
-                            DbTableIndexSpec sIndexSpec = sIndexes.get(indexName);
-                            // if not primary key index
-                            if (isPKIndex(sIndexSpec, sTableStructure.getTablePKeySpecs()) == false) {
-                                String sql4CreateIndex = driver.getSql4CreateIndex(dSchema, dTableName, sIndexSpec);
-                                if (!executeSQL(sql4CreateIndex, "pass 4 - 1")) {
-                                    cntErrors++;
-                                }
+                        String indexNameUpper = indexName.toUpperCase();
+                        DbTableIndexSpec sIndex = sIndexes.get(sTableStructure.getOriginalIndexName(indexNameUpper));
+                        assert sIndex != null;
+                        DbTableIndexSpec dIndex = null;
+                        String fKeyName = sIndex.getFKeyName();
+                        if (!sIndex.isPKey() && (fKeyName == null || fKeyName.isEmpty())) {
+                            if (dIndexes != null) {
+                                dIndex = dIndexes.get(dTableStructure.getOriginalIndexName(indexNameUpper));
+                            }
+                            if (dIndex == null || removedIndexes.contains(indexNameUpper)) {
+                                String sql4CreateIndex = driver.getSql4CreateIndex(dSchema, dTableName, sIndex);
+                                cntErrors += executeSQL(sql4CreateIndex, "step 8.2 - create index");
+                                processed = true;
                             }
                         }
                     }
                 }
-
-                // fkeys
-                Map<String, List<ForeignKeySpec>> sTableFKeySpecs = sTableStructure.getTableFKeySpecs();
-                Map<String, List<ForeignKeySpec>> dTableFKeySpecs = null;
-                if (dTableStructure != null) {
-                    dTableFKeySpecs = dTableStructure.getTableFKeySpecs();
+                if (processed) {
+                    printLog(tableNameUpper, cntErrors);
                 }
-                if (sTableFKeySpecs != null) {
-                    //for each fkey spec
-                    for (String sFKSpecName : sTableFKeySpecs.keySet()) {
-                        List<ForeignKeySpec> sFKSpecs = sTableFKeySpecs.get(sFKSpecName);
+            }
+        }
+        // step 9 - set descriptions on tables and fields
+        Logger.getLogger(MetadataMerger.class.getName()).log(Level.INFO, "Merge metadata: step 9 of 10 - set descriptions on tables and columns");
+        for (String tableNameUpper : srcMD.keySet()) {
+            if (listTables.isEmpty() || listTables.contains(tableNameUpper)) {
+                int cntErrors = 0;
+                boolean processed = false;
+                TableStructure sTableStructure = srcMD.get(tableNameUpper);
+                TableStructure dTableStructure = destMD.get(tableNameUpper);
+                assert sTableStructure != null;
+                String sTableName = sTableStructure.getTableName();
+                String dTableName = sTableName;
+                String sTableDescription = sTableStructure.getTableDescription();
+                if (sTableDescription == null) {
+                    sTableDescription = "";
+                }
+                String dTableDescription = "";
+                Fields sFields = sTableStructure.getTableFields();
+                assert sFields != null;
+                Fields dFields = null;
+                if (dTableStructure != null) {
+                    dTableName = dTableStructure.getTableName();
+                    dTableDescription = dTableStructure.getTableDescription();
+                    dFields = dTableStructure.getTableFields();
+                    if (dTableDescription == null) {
+                        dTableDescription = "";
+                    }
+                }
+                if (!sTableDescription.equals(dTableDescription)) {
+                    // set description
+                    String sql4CreateTableComment = driver.getSql4CreateTableComment(dSchema, dTableName, sTableDescription);
+                    cntErrors += executeSQL(sql4CreateTableComment, "step 9.1 - set table description ");
+                    processed = true;
+                }
+                for (int i = 1; i <= sFields.getFieldsCount(); i++) {
+                    Field sField = sFields.get(i);
+                    String sFieldName = sField.getName();
+                    String fieldNameUpper = sFieldName.toUpperCase();
 
-                        List<ForeignKeySpec> dFKSpecs = null;
-                        if (dTableFKeySpecs != null) {
-                            String initialNameFKey = dTableStructure.getOriginalFKeyName(sFKSpecName.toUpperCase());
-                            if (initialNameFKey != null) {
-                                dFKSpecs = dTableFKeySpecs.get(initialNameFKey);
+                    String sFieldDescription = sField.getDescription();
+                    if (sFieldDescription == null) {
+                        sFieldDescription = "";
+                    }
+                    Field dField = null;
+                    String dFieldDescription = "";
+                    if (dFields != null) {
+                        dField = dFields.get(fieldNameUpper);
+                    }
+                    // field not exist
+                    if (dField != null) {
+                        dFieldDescription = dField.getDescription();
+                        if (dFieldDescription == null) {
+                            dFieldDescription = "";
+                        }
+                    }
+                    if (!sFieldDescription.equals(dFieldDescription)) {
+                        // set description
+                        String[] sql4CreateColumnComment = driver.getSql4CreateColumnComment(dSchema, dTableName, fieldNameUpper, sFieldDescription);
+                        cntErrors += executeSQL(sql4CreateColumnComment, "step 9.2 - set column description");
+                        processed = true;
+                    }
+                }
+                if (processed) {
+                    printLog(tableNameUpper, cntErrors);
+                }
+            }
+        }
+        // last step  - restore dropped fkeys
+        Logger.getLogger(MetadataMerger.class.getName()).log(Level.INFO, "Merge metadata: step 10 of 10 - restore dropped fkeys");
+        if (!listTables.isEmpty()) {
+            for (String tableNameUpper : destMD.keySet()) {
+                if (!listTables.contains(tableNameUpper)) {
+                    TableStructure dTableStructure = destMD.get(tableNameUpper);
+                    int cntErrors = 0;
+                    boolean processed = false;
+                    Map<String, List<ForeignKeySpec>> fKeys = dTableStructure.getTableFKeySpecs();
+                    if (fKeys != null && !fKeys.isEmpty()) {
+                        for (String fKeyName : fKeys.keySet()) {
+                            if (removedFKeys.contains(fKeyName.toUpperCase())) {
+                                List<ForeignKeySpec> fkey = fKeys.get(fKeyName);
+                                String sql4CreateFkConstraint = driver.getSql4CreateFkConstraint(dSchema, fkey);
+                                cntErrors += executeSQL(sql4CreateFkConstraint, "step 10.1 - restore fkey");
+                                processed = true;
                             }
                         }
-                        ForeignKeySpec dFKSpec0 = null;
-                        if (dFKSpecs != null && dFKSpecs.size() > 0) {
-                            dFKSpec0 = dFKSpecs.get(0);
-                        } else {
-                            dFKSpecs = new ArrayList<>();
-                        }
+                    }
 
-                        if (sFKSpecs != null
-                                && (!MetadataUtils.isSameFKeys(sFKSpecs, dFKSpecs, oneDialect) || dFKSpec0 == null || removedFKeys.contains(dFKSpec0.getCName()))) {
-                            dFKSpecs.clear();
-                            for (int i = 0; i < sFKSpecs.size(); i++) {
-                                ForeignKeySpec sFkSpec = sFKSpecs.get(i);
-                                ForeignKeySpec fkSpec = (ForeignKeySpec) sFkSpec.copy();
-                                fkSpec.setSchema(dSchema);
-                                fkSpec.getReferee().setSchema(dSchema);
-                                // !!! in Oracle not exists UpdateRule !!!!!
-                                ForeignKeyRule fkUpdateRule = fkSpec.getFkUpdateRule();
-                                if (fkUpdateRule == null) {
-                                    fkSpec.setFkUpdateRule(ForeignKeyRule.NOACTION);
-                                }
-                                dFKSpecs.add(fkSpec);
-                            }
-
-                            String sql4CreateFkConstraint = driver.getSql4CreateFkConstraint(dSchema, dFKSpecs);
-                            if (!executeSQL(sql4CreateFkConstraint, "pass 4 - 2")) {
-                                cntErrors++;
-                            }
-                        }
+                    if (processed) {
+                        printLog(tableNameUpper, cntErrors);
                     }
                 }
             }
-            printLog(tableNameUpper, cntErrors);
         }
         Logger.getLogger(MetadataMerger.class.getName()).log(Level.INFO, "Merge metadata finished");
-
-    }
-
-    /**
-     * check columns index on entry in columns primary key
-     *
-     * @param indexSpec specification for index
-     * @param pkSpecs specifications for primary keys
-     * @return true if index created for primary key
-     */
-    private boolean isPKIndex(DbTableIndexSpec indexSpec, List<PrimaryKeySpec> pkSpecs) {
-        if (indexSpec != null && pkSpecs != null) {
-            List<DbTableIndexColumnSpec> indexColumns = indexSpec.getColumns();
-            int sizeIndex = indexColumns.size();
-            int sizePK = pkSpecs.size();
-            if (sizePK == sizeIndex && sizePK > 0) {
-                for (int i = 0; i < sizePK; i++) {
-                    if (!indexColumns.get(i).getColumnName().equalsIgnoreCase(pkSpecs.get(i).getField())) {
-                        return false;
-                    }
-                }
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
@@ -655,99 +713,54 @@ pkSpec.setCName(OLDCNAME);
      *
      * @param pKeyTableName table name for primary key
      */
-    private int dropAllLinkedFKeys(String pKeyTableName) {
+    private int dropAllLinkedFKeys(String pKeyTableName, String aLogMessage) {
         int cntErrors = 0;
-
         List<ForeignKeySpec> fkSpecList = pKeysMap.get(pKeyTableName);
         if (fkSpecList != null) {
             for (ForeignKeySpec fkSpec : pKeysMap.get(pKeyTableName)) {
-                String cName = fkSpec.getCName();
-
-                if (!removedFKeys.contains(cName)) {
-                    removedFKeys.add(cName);
-                    String sql4DropFkConstraint = driver.getSql4DropFkConstraint(dSchema, fkSpec);
-                    if (!executeSQL(sql4DropFkConstraint, "drop linked constraints")) {
-                        cntErrors++;
-                    }
-                }
+                String cName = fkSpec.getCName().toUpperCase();
+                cntErrors += dropFKey(fkSpec, aLogMessage);
             }
         }
         return cntErrors;
 
+    }
+
+    private int dropFKey(ForeignKeySpec aFKey, String aLogMessage) {
+        int cntErrors = 0;
+
+        if (aFKey != null) {
+            String cName = aFKey.getCName().toUpperCase();
+
+            if (!removedFKeys.contains(cName)) {
+                removedFKeys.add(cName);
+                String sql4DropFkConstraint = driver.getSql4DropFkConstraint(dSchema, aFKey);
+                cntErrors += executeSQL(sql4DropFkConstraint, aLogMessage);
+            }
+        }
+        return cntErrors;
+    }
+
+    private int dropIndex(String aSchemaName, String aTableName, String aIndexName, String aLogMessage) {
+        int cntErrors = 0;
+        String indexNameUpper = aIndexName.toUpperCase();
+        if (!removedIndexes.contains(indexNameUpper)) {
+            String sql4DropIndex = driver.getSql4DropIndex(aSchemaName, aTableName, aIndexName);
+            cntErrors += executeSQL(sql4DropIndex, aLogMessage);
+            removedIndexes.add(indexNameUpper);
+        }
+        return cntErrors;
     }
 
     /**
      * drop primary pey pKeyCName (ONLY FOR TEMPORARY COLUMN ID !!!!!!)
      *
      */
-    private int dropPKey(String aSchemaName, String aTableName, String aFieldName, String aPKeyCName) {
+    private int dropPKey(String aSchemaName, String aTableName, String aFieldName, String aPKeyCName, String aLogMessage) {
         int cntErrors = 0;
-//        assert aTableName != null;
-//        // drop foreign key
-//        if (destMD != null) {
-//            TableStructure tblStructure = destMD.get(aTableName);
-//            if (tblStructure != null) {
-//                Map<String, List<ForeignKeySpec>> tableFKeySpecs = tblStructure.getTableFKeySpecs();
-//                if (tableFKeySpecs != null) {
-//                    for (List<ForeignKeySpec> fkSpecs : tableFKeySpecs.values()) {
-//                        if (fkSpecs != null && fkSpecs.size() > 0) {
-//                            ForeignKeySpec fkSpec = fkSpecs.get(0);
-//                            assert fkSpec != null;
-//                            String cName = fkSpec.getCName();
-//                            if (!removedFKeys.contains(cName)) {
-//                                removedFKeys.add(cName);
-//                                String sql4DropFkConstraint = driver.getSql4DropFkConstraint(dSchema, fkSpec);
-//                                if (!executeSQL(sql4DropFkConstraint, "drop fkey constraints")) {
-//                                    cntErrors++;
-//                                }
-//                            }
-//
-//                        }
-//                    }
-//                }
-//            }
-//        }
         PrimaryKeySpec pkSpec = new PrimaryKeySpec(aSchemaName, aTableName, aFieldName, aPKeyCName);
         String sql4DropPkConstraint = driver.getSql4DropPkConstraint(aSchemaName, pkSpec);
-        if (!executeSQL(sql4DropPkConstraint, "drop temp PKey")) {
-            return cntErrors++;
-        }
-        return cntErrors;
-    }
-
-    /**
-     * drop primary and foreign keys
-     *
-     */
-    private int dropKeys(String aSchemaName,TableStructure aTblStructure) {
-        int cntErrors = 0;
-        assert aTblStructure != null;
-        // drop foreign keys
-        Map<String, List<ForeignKeySpec>> tableFKeySpecs = aTblStructure.getTableFKeySpecs();
-        if (tableFKeySpecs != null) {
-            for (List<ForeignKeySpec> fkSpecs : tableFKeySpecs.values()) {
-                if (fkSpecs != null && fkSpecs.size() > 0) {
-                    ForeignKeySpec fkSpec = fkSpecs.get(0);
-                    assert fkSpec != null;
-                    String cName = fkSpec.getCName();
-                    if (!removedFKeys.contains(cName)) {
-                        removedFKeys.add(cName);
-                        String sql4DropFkConstraint = driver.getSql4DropFkConstraint(dSchema, fkSpec);
-                        if (!executeSQL(sql4DropFkConstraint, "drop fkey constraints")) {
-                            cntErrors++;
-                        }
-                    }
-                }
-            }
-        }
-        List<PrimaryKeySpec> tablePKeySpecs = aTblStructure.getTablePKeySpecs();
-        if (tablePKeySpecs != null && tablePKeySpecs.size() > 0) {
-            String sql4DropPkConstraint = driver.getSql4DropPkConstraint(aSchemaName, tablePKeySpecs.get(0));
-            if (!executeSQL(sql4DropPkConstraint, "drop pkey constraint")) {
-                return cntErrors++;
-            }
-        }
-        return cntErrors;
+        return executeSQL(sql4DropPkConstraint, aLogMessage);
     }
 
     /**
@@ -756,33 +769,49 @@ pkSpec.setCName(OLDCNAME);
      * @param aSql DDL script for execute
      * @param aName name section for debug
      */
-    private boolean executeSQL(String aSql, String aName) {
-        try {
-            SqlCompiledQuery q = new SqlCompiledQuery(client, null, aSql);
-            if (!noExecuteSQL) {
-                q.enqueueUpdate();
-                client.commit(null);
+    private int executeSQL(String aSql, String aName) {
+        if (aSql != null && !aSql.isEmpty()) {
+            try {
+                SqlCompiledQuery q = new SqlCompiledQuery(client, null, aSql);
+                if (sqlsList != null && aSql != null && !aSql.isEmpty()) {
+                    sqlsList.add(aSql);
+                }
+                if (!noExecuteSQL) {
+                    q.enqueueUpdate();
+                    client.commit(null);
+                }
+                if (sqlLogger != null) {
+                    //                sqlLogger.log(Level.CONFIG, new StringBuilder().append(numSql++).append(": (").append(aName).append(")").toString());
+                    sqlLogger.log(Level.CONFIG, new StringBuilder().append(numSql++).append(": ").toString());
+                    sqlLogger.log(Level.FINE, new StringBuilder().append("(").append(aName).append(")").toString());
+                    sqlLogger.log(Level.INFO, new StringBuilder().append(aSql).append(sqlCommandEndChars).toString());
+                }
+                return 0;
+            } catch (Exception ex) {
+                if (!noExecuteSQL) {
+                    client.rollback(null);
+                }
+                if (errorLogger != null) {
+                    //                errorLogger.log(Level.CONFIG, new StringBuilder().append(numSql++).append(": (").append(aName).append(")").toString());
+                    errorLogger.log(Level.CONFIG, new StringBuilder().append(numSql++).append(": ").toString());
+                    errorLogger.log(Level.FINE, new StringBuilder().append("(").append(aName).append(")").toString());
+                    errorLogger.log(Level.INFO, new StringBuilder().append(aSql).append(sqlCommandEndChars).toString());
+                    errorLogger.log(Level.SEVERE, new StringBuilder().append("Exception=").append(ex.getMessage()).append("\n").toString());
+                }
+                return 1;
             }
-            if (sqlLogger != null) {
-//                sqlLogger.log(Level.CONFIG, new StringBuilder().append(numSql++).append(": (").append(aName).append(")").toString());
-                sqlLogger.log(Level.CONFIG, new StringBuilder().append(numSql++).append(": ").toString());
-                sqlLogger.log(Level.FINE, new StringBuilder().append("(").append(aName).append(")").toString());
-                sqlLogger.log(Level.INFO, new StringBuilder().append(aSql).append(sqlCommandEndChars).toString());
-            }
-            return true;
-        } catch (Exception ex) {
-            if (!noExecuteSQL) {
-                client.rollback(null);
-            }
-            if (errorLogger != null) {
-//                errorLogger.log(Level.CONFIG, new StringBuilder().append(numSql++).append(": (").append(aName).append(")").toString());
-                errorLogger.log(Level.CONFIG, new StringBuilder().append(numSql++).append(": ").toString());
-                errorLogger.log(Level.FINE, new StringBuilder().append("(").append(aName).append(")").toString());
-                errorLogger.log(Level.INFO, new StringBuilder().append(aSql).append(sqlCommandEndChars).toString());
-                errorLogger.log(Level.SEVERE, new StringBuilder().append("Exception=").append(ex.getMessage()).append("\n").toString());
-            }
-            return false;
         }
+        return 0;
+    }
+
+    private int executeSQL(String[] aSqls, String aName) {
+        int cntErrors = 0;
+        if (aSqls != null) {
+            for (String sql : aSqls) {
+                cntErrors += executeSQL(sql, aName);
+            }
+        }
+        return cntErrors;
     }
 
     /**
@@ -825,5 +854,67 @@ pkSpec.setCName(OLDCNAME);
      */
     public void setErrorLogger(Logger aLogger) {
         errorLogger = aLogger;
+    }
+
+    private Map<String, Set<String>> readIndexNames(String aSchema, Set<String> aTables) {
+        Map<String, Set<String>> mapIndexes = new HashMap();
+        if (aTables != null && !aTables.isEmpty()) {
+            assert driver != null;
+            String sql4Indexes = driver.getSql4Indexes(aSchema, aTables);
+            SqlCompiledQuery queryIndexes;
+            try {
+                assert client != null;
+                queryIndexes = new SqlCompiledQuery(client, null, sql4Indexes);
+                Rowset rowset = queryIndexes.executeQuery();
+
+                if (rowset.first()) {
+                    Fields fields = rowset.getFields();
+                    int nCol_Idx_TableName = fields.find(ClientConstants.JDBCIDX_TABLE_NAME);
+                    int nCol_Idx_Name = fields.find(ClientConstants.JDBCIDX_INDEX_NAME);
+                    int nCol_Idx_PKey = fields.find(ClientConstants.JDBCIDX_PRIMARY_KEY);
+                    int nCol_Idx_FKey = fields.find(ClientConstants.JDBCIDX_FOREIGN_KEY);
+
+                    do {
+                        String tableName = rowset.getString(nCol_Idx_TableName);
+                        String tableNameUpper = tableName.toUpperCase();
+                        Set<String> indexes = mapIndexes.get(tableNameUpper);
+                        if (indexes == null) {
+                            indexes = new HashSet<>();
+                        }
+
+                        Object oIdxName = rowset.getObject(nCol_Idx_Name);
+                        Object oPKey = rowset.getObject(nCol_Idx_PKey);
+                        Object oFKeyName = rowset.getObject(nCol_Idx_FKey);
+
+                        // if not pkey and not fkey
+                        if ((oPKey == null || (oPKey instanceof Number && ((Number) oPKey).intValue() != 0))
+                                && (oFKeyName == null || (oFKeyName instanceof String && ((String) oFKeyName).isEmpty()))
+                                && oIdxName != null && (oIdxName instanceof String) && !((String) oIdxName).isEmpty()) {
+                            indexes.add(((String) oIdxName).toUpperCase());
+                        }
+                        if (!indexes.isEmpty()) {
+                            mapIndexes.put(tableNameUpper, indexes);
+                        }
+                    } while (rowset.next());
+                }
+            } catch (Exception ex) {
+                Logger.getLogger(MetadataMerger.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        return mapIndexes;
+    }
+
+    /**
+     * @return the sqlsList
+     */
+    public List<String> getSqlsList() {
+        return sqlsList;
+    }
+
+    /**
+     * @param sqlsList the sqlsList to set
+     */
+    public void setSqlsList(List<String> aSqlsList) {
+        sqlsList = aSqlsList;
     }
 }

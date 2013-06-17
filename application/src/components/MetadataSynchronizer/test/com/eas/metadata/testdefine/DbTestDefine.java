@@ -4,7 +4,6 @@
  */
 package com.eas.metadata.testdefine;
 
-import com.bearsoft.rowset.metadata.ForeignKeySpec;
 import com.bearsoft.rowset.metadata.ForeignKeySpec.ForeignKeyRule;
 import java.util.Map;
 
@@ -13,6 +12,7 @@ import java.util.Map;
  * @author vy
  */
 public abstract class DbTestDefine {
+
     private Object fieldsSizes;
 
     public enum Database {
@@ -28,7 +28,6 @@ public abstract class DbTestDefine {
         DB2(4, false, false, false),
         H2(5, false, false, false),
         MSSQL(6, false, false, false);
-        
         private int code;
         private boolean checkIndexClustered;
         private boolean checkIndexHashed;
@@ -66,26 +65,17 @@ public abstract class DbTestDefine {
         }
     }
     static public final int ORIGINALVALUE = 0;
-//    static public final int ORACLE = 1;
-//    static public final int POSTGRESQL = 2;
-//    static public final int MYSQL = 3;
-//    static public final int DB2 = 4;
-//    static public final int H2 = 5;
-//    static public final int MSSQL = 6;
 
-//    public String[] getOriginalTypes();
-//    public int getOriginalSize(String aDataBaseType);
-//    public int getOriginalScale(String aDataBaseType);
-//
-//    public String[] getDBTypes(int aDatabase);
-//    public String getDBType(String aOriginalDataBaseType, int aDatabase);
-//    public int getDBSize(String aOriginalDataBaseType, int aDatabase);
-//    public int getDBScale(String aOriginalDataBaseType, int aDatabase);
     abstract public String[][] getFieldsTypes();
+
     abstract public Map<String, int[]> getFieldsSizes();
+
     abstract public Map<String, int[]> getFieldsScales();
-    abstract public ForeignKeyRule [][] getFKeyDeleteRules();
-    abstract public ForeignKeyRule [][] getFKeyUpdateRules();
+
+    abstract public ForeignKeyRule[][] getFKeyDeleteRules();
+
+    abstract public ForeignKeyRule[][] getFKeyUpdateRules();
+
     abstract public boolean[][] getFKeyDeferrables();
 
     public String[] getDBTypes(int aDatabase) {
@@ -102,10 +92,10 @@ public abstract class DbTestDefine {
     }
 
     public int getDBSize(String aOriginalDataBaseType, int aDatabase) {
-        Map<String, int[]> fieldsSizes = getFieldsSizes();
-        assert fieldsSizes != null;
-        if (fieldsSizes.containsKey(aOriginalDataBaseType)) {
-            int[] sizes = fieldsSizes.get(aOriginalDataBaseType);
+        Map<String, int[]> fldSizes = getFieldsSizes();
+        assert fldSizes != null;
+        if (fldSizes.containsKey(aOriginalDataBaseType)) {
+            int[] sizes = fldSizes.get(aOriginalDataBaseType);
             assert sizes != null;
             assert sizes.length > aDatabase;
             return sizes[aDatabase];
@@ -151,7 +141,7 @@ public abstract class DbTestDefine {
         }
         return null;
     }
-    
+
     public ForeignKeyRule getFKeyDeleteRule(ForeignKeyRule aOriginalRule, int aDatabase) {
         ForeignKeyRule[][] arrRules = getFKeyDeleteRules();
         assert arrRules != null;
@@ -190,5 +180,4 @@ public abstract class DbTestDefine {
         }
         return null;
     }
-    
 }

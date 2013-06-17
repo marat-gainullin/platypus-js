@@ -168,8 +168,7 @@ public class TableStructure {
     }
 
     /**
-     * create decode (uppername -> name) for all names in maps: fields,indexes,
-     * foreign keys
+     * create decode (uppername -> name) for all names in maps: fields,indexes, foreign keys
      */
     public void makeMapNamesToUpper() {
 
