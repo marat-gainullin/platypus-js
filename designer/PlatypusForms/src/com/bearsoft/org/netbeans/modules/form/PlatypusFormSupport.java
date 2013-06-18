@@ -49,8 +49,6 @@ import com.eas.designer.application.module.PlatypusModuleSourceDescription;
 import com.eas.designer.application.module.PlatypusModuleSupport;
 import java.awt.Cursor;
 import java.awt.EventQueue;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
@@ -80,10 +78,6 @@ import org.openide.cookies.CloseCookie;
 import org.openide.cookies.EditorCookie;
 import org.openide.cookies.OpenCookie;
 import org.openide.cookies.PrintCookie;
-import org.openide.filesystems.FileStateInvalidException;
-import org.openide.filesystems.FileStatusEvent;
-import org.openide.filesystems.FileStatusListener;
-import org.openide.filesystems.FileSystem;
 import org.openide.loaders.DataObject;
 import org.openide.nodes.Node;
 import org.openide.text.*;
@@ -101,32 +95,16 @@ public class PlatypusFormSupport extends PlatypusModuleSupport implements Editor
      * ID of the form designer (in the multiview)
      */
     private static final String MV_FORM_ID = "form"; //NOI18N
-    /**
-     * ID of the java editor (in the multiview)
-     */
-    private static final String MV_JS_ID = "js"; // NOI18N
     private static final int JS_ELEMENT_INDEX = 0;
     private static final int FORM_ELEMENT_INDEX = 1;
-    private int elementToOpen = JS_ELEMENT_INDEX; // default element index when multiview TC is created
+    private static final int MODEL_ELEMENT_INDEX = 2;
     /**
      * Icon for the form editor multiview window
      */
     private static final String iconURL =
             "com/bearsoft/org/netbeans/modules/form/resources/form.gif"; // NOI18N
-    /**
-     * The embracing multiview TopComponent (holds the form designer and java
-     * editor) - we remeber the last active TopComponent (not all clones)
-     */
-    private CloneableTopComponent multiviewTC;
-    // listeners
-    private static PropertyChangeListener topcompsListener;
     private UndoRedo.Manager editorUndoManager;
     private FormEditor formEditor;
-    /**
-     * Set of opened PlatypusFormSupport instances (java or form opened)
-     */
-    private static final Set<PlatypusFormSupport> opened = Collections.synchronizedSet(new HashSet<PlatypusFormSupport>());
-    private static Map<FileSystem, FileStatusListener> fsToStatusListener = new HashMap<>();
 
     // --------------
     // constructor
@@ -146,19 +124,14 @@ public class PlatypusFormSupport extends PlatypusModuleSupport implements Editor
      * @see OpenCookie#open
      */
     public void openFormEditor(boolean forceFormElement) {
-        boolean alreadyOpened = opened.contains(this);
-        boolean switchToForm = forceFormElement || !alreadyOpened;
-        if (switchToForm) {
-            elementToOpen = FORM_ELEMENT_INDEX;
-        }
         long ms = System.currentTimeMillis();
         try {
             showOpeningStatus("FMT_PreparingForm"); // NOI18N
 
-            multiviewTC = openCloneableTopComponent();
+            CloneableTopComponent multiviewTC = openCloneableTopComponent();
             multiviewTC.requestActive();
 
-            if (switchToForm) {
+            if (forceFormElement) {
                 MultiViewHandler handler = MultiViews.findMultiViewHandler(multiviewTC);
                 handler.requestActive(handler.getPerspectives()[FORM_ELEMENT_INDEX]);
             }
@@ -190,42 +163,6 @@ public class PlatypusFormSupport extends PlatypusModuleSupport implements Editor
         mainWin.getGlassPane().setCursor(null);
 
         StatusDisplayer.getDefault().setStatusText(""); // NOI18N
-    }
-
-    private void addStatusListener(FileSystem fs) {
-        FileStatusListener fsl = fsToStatusListener.get(fs);
-        if (fsl == null) {
-            fsl = new FileStatusListener() {
-                @Override
-                public void annotationChanged(FileStatusEvent ev) {
-                    synchronized (opened) {
-                        for (PlatypusFormSupport fes : opened) {
-                            if (ev.hasChanged(fes.getFormDataObject().getPrimaryFile()) /*|| ev.hasChanged(fes.getFormDataObject().getFormFile())*/) {
-                                fes.updateTitles();
-                            }
-                        }
-                    }
-                }
-            };
-            fs.addFileStatusListener(fsl);
-            fsToStatusListener.put(fs, fsl);
-        } // else do nothing - the listener is already added
-    }
-
-    private static void detachStatusListeners() {
-        for (Map.Entry<FileSystem, FileStatusListener> entry : fsToStatusListener.entrySet()) {
-            FileSystem fs = entry.getKey();
-            FileStatusListener fsl = entry.getValue();
-            fs.removeFileStatusListener(fsl);
-        }
-        fsToStatusListener.clear();
-    }
-
-    void selectJsEditor() {
-        MultiViewHandler handler = MultiViews.findMultiViewHandler(multiviewTC);
-        if (handler != null) {
-            handler.requestActive(handler.getPerspectives()[JS_ELEMENT_INDEX]);
-        }
     }
 
     @Override
@@ -261,16 +198,7 @@ public class PlatypusFormSupport extends PlatypusModuleSupport implements Editor
             DialogDisplayer.getDefault().notify(new NotifyDescriptor.Message(message));
             return;
         }
-        elementToOpen = JS_ELEMENT_INDEX;
         super.open();
-
-        // This method must be executed in AWT thread because
-        // otherwise multiview is opened in AWT using invokeLater
-        // and we don't have multiviewTC correctly set
-        MultiViewHandler handler = MultiViews.findMultiViewHandler(multiviewTC);
-        if (handler != null) {
-            handler.requestActive(handler.getPerspectives()[JS_ELEMENT_INDEX]);
-        }
     }
 
     /**
@@ -281,8 +209,7 @@ public class PlatypusFormSupport extends PlatypusModuleSupport implements Editor
      */
     @Override
     public void openAt(PositionRef pos) {
-        elementToOpen = JS_ELEMENT_INDEX;
-        openCloneableTopComponent();
+        CloneableTopComponent multiviewTC = openCloneableTopComponent();
 
         MultiViewHandler handler = MultiViews.findMultiViewHandler(multiviewTC);
         handler.requestActive(handler.getPerspectives()[JS_ELEMENT_INDEX]);
@@ -303,10 +230,10 @@ public class PlatypusFormSupport extends PlatypusModuleSupport implements Editor
      *
      * @return whether the form is loaded (true also if it already was)
      */
-    public boolean loadForm() {
+    public void loadForm() throws PersistenceException {
         // Ensure initialization of the formEditor
         getFormEditor(true);
-        return formEditor.loadForm();
+        formEditor.loadForm();
     }
 
     /**
@@ -315,7 +242,6 @@ public class PlatypusFormSupport extends PlatypusModuleSupport implements Editor
     public boolean isOpened() {
         return (formEditor != null) && formEditor.isFormLoaded();
     }
-    private boolean saving; // workaround for bug 75225
 
     /**
      * Save the document in this thread and start reparsing it.
@@ -329,7 +255,6 @@ public class PlatypusFormSupport extends PlatypusModuleSupport implements Editor
             if (formEditor != null) {
                 formEditor.saveFormData();
             }
-            saving = true; // workaround for bug 75225
             super.saveDocument();
         } catch (PersistenceException ex) {
             Throwable t = ex.getOriginalException();
@@ -339,25 +264,17 @@ public class PlatypusFormSupport extends PlatypusModuleSupport implements Editor
                 ioEx = new IOException("Cannot save the form"); // NOI18N
                 ErrorManager.getDefault().annotate(ioEx, t != null ? t : ex);
             }
-        } finally {
-            saving = false; // workaround for bug 75225
         }
         if (formEditor != null) {
             formEditor.reportErrors(FormEditor.FormOperation.SAVING);
         }
-
         if (ioEx != null) {
             throw ioEx;
         }
     }
 
     void saveSourceOnly() throws IOException {
-        try {
-            saving = true; // workaround for bug 75225
-            super.saveDocument();
-        } finally {
-            saving = false; // workaround for bug 75225
-        }
+        super.saveDocument();
     }
 
     // ------------
@@ -408,172 +325,20 @@ public class PlatypusFormSupport extends PlatypusModuleSupport implements Editor
         }
     }
 
-    // ------------
-    // static getters
-    JEditorPane getEditorPane() {
-        return multiviewTC != null
-                ? ((CloneableEditorSupport.Pane) multiviewTC).getEditorPane() : null;
-    }
-
-    // -----------
-    // closing/reloading
-    public void reloadForm() {
-        if (canClose()) {
-            reloadDocument();
-        }
-    }
-
     @Override
-    protected org.openide.util.Task reloadDocument() {
-        if (multiviewTC == null) {
-            return super.reloadDocument();
-        }
-
-        org.openide.util.Task docLoadTask = super.reloadDocument();
-
-        if (saving) // workaround for bug 75225
-        {
-            return docLoadTask;
-        }
-
-        // after reloading is done, open the form editor again
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                PlatypusFormLayoutView formDesigner = getFormEditor(true).getFormDesigner();
-                if (formDesigner == null) {
-                    if (multiviewTC == null) {
-                        return; // Issue 150534
-                    } else {
-                        formDesigner = (PlatypusFormLayoutView) multiviewTC.getClientProperty("formDesigner"); // NOI18N
-                    }
-                }
-                if (formDesigner == null) {
-                    // if formDesigner is null then it haven't been activated yet...
-                    return;
-                }
-
-                // close
-                getFormEditor().closeForm();
-                formEditor = null;
-
-                formDesigner.reset(getFormEditor(true));
-                getFormEditor().setFormDesigner(formDesigner);
-
-                if (formDesigner.isShowing()) {
-                    // load the form only if its open
-                    loadForm();
-                    FormEditor formEditor = getFormEditor();
-                    formEditor.reportErrors(FormEditor.FormOperation.LOADING);
-                    if (!formEditor.isFormLoaded()) { // there was a loading error
-                        formDesigner.removeAll();
-                    } else {
-                        formDesigner.initialize();
-                    }
-                    FormInspector.getInstance().focusForm(formEditor);
-                    formDesigner.revalidate();
-                    formDesigner.repaint();
-                }
-            }
-        });
-
-        return docLoadTask;
-    }
-
-    public FormEditor reloadFormEditor() {
-        if (formEditor == null || !formEditor.isFormLoaded()) {
-            return null;
-        }
-        PlatypusFormLayoutView formDesigner = formEditor.getFormDesigner();
-        if (formDesigner == null) {
-            formDesigner = (PlatypusFormLayoutView) multiviewTC.getClientProperty("formDesigner"); // NOI18N
-        }
-        formEditor.closeForm();
-        formEditor = null;
-        formEditor = getFormEditor(true); // new FormEditor instance
-        if (formDesigner != null) {
-            formDesigner.reset(formEditor);
-            formEditor.setFormDesigner(formDesigner);
-        }
-        loadForm();
-        formEditor.reportErrors(FormEditor.FormOperation.LOADING);
-        if (formEditor.isFormLoaded() && formDesigner != null && formDesigner.isShowing()) {
-            formDesigner.initialize();
-        }
-        return formEditor;
-    }
-
-    public void closeFormEditor() {
-        if (isOpened()) {
-            final PlatypusFormLayoutView formDesigner = formEditor.getFormDesigner();
-            formEditor.closeForm();
-            Runnable run = new Runnable() {
-                @Override
-                public void run() {
-                    if (formDesigner != null) {
-                        formDesigner.reset(formEditor); // might be reused
-                    }
-                    selectJsEditor();
-                }
-            };
-            if (EventQueue.isDispatchThread()) {
-                run.run();
-            } else {
-                try {
-                    java.awt.EventQueue.invokeAndWait(run);
-                } catch (Exception ex) {
-                    ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
-                }
-            }
-        }
-    }
-
-    @Override
-    protected void notifyClosed() {
-        opened.remove(this);
-        if (opened.isEmpty()) {
-            detachTopComponentsListener();
-            detachStatusListeners();
-        }
-
-        super.notifyClosed(); // close java editor
-        if (formEditor != null) {
-            formEditor.closeForm();
-            formEditor = null;
-        }
-        multiviewTC = null;
-//        guardedProvider = null;
-//        guardedEditor = null;
-        elementToOpen = JS_ELEMENT_INDEX;
-    }
-
-    private void multiViewClosed(CloneableTopComponent mvtc) {
-        Enumeration<CloneableTopComponent> en = mvtc.getReference().getComponents();
-        boolean isLast = !en.hasMoreElements();
-        if (multiviewTC == mvtc) {
-            multiviewTC = null;
-            PlatypusFormLayoutView formDesigner = null;
-            // Find another multiviewTC, possibly with loaded formDesigner
-            while (en.hasMoreElements()) {
-                multiviewTC = en.nextElement();
-                PlatypusFormLayoutView designer = (PlatypusFormLayoutView) multiviewTC.getClientProperty("formDesigner"); // NOI18N
-                if (designer != null) {
-                    formDesigner = designer;
-                    break;
-                }
-            }
-            if (!isLast && (formDesigner == null)) {
-                // Only Java elements are opened in the remaining clones
-                if (formEditor != null) {
-                    formEditor.closeForm();
-                    formEditor = null;
-                }
-            }
-        }
-
-        if (isLast) // last view of this form closed
-        {
+    public void shrink() {
+        List<CloneableTopComponent> views = getAllViews();
+        if (views == null || views.isEmpty()) {
             notifyClosed();
+            // Take care of memory consumption.
+            dataObject.shrink();
+            // Shrink has removed all parsed data from the data object.
+            modelUndo.discardAllEdits();
+            if (formEditor != null) {
+                formEditor.closeForm();
+                formEditor = null;
+            }
+            discardEditorUndoableEdits();
         }
     }
 
@@ -588,79 +353,6 @@ public class PlatypusFormSupport extends PlatypusModuleSupport implements Editor
     protected void notifyUnmodified() {
         super.notifyUnmodified();
         updateTitles();
-    }
-
-    private static void attachTopComponentsListener() {
-        if (topcompsListener != null) {
-            return;
-        }
-
-        topcompsListener = new PropertyChangeListener() {
-            @Override
-            public void propertyChange(PropertyChangeEvent ev) {
-                switch (ev.getPropertyName()) {
-                    case TopComponent.Registry.PROP_ACTIVATED: {
-                        // activated TopComponent has changed
-                        TopComponent active = TopComponent.getRegistry().getActivated();
-                        if (getSelectedElementType(active) != -1) { // it is our multiview
-                            PlatypusFormSupport fes = getFormEditor(active);
-                            if (fes != null) {
-                                fes.multiviewTC = (CloneableTopComponent) active;
-                                PlatypusFormLayoutView designer = (PlatypusFormLayoutView) active.getClientProperty("formDesigner"); // NOI18N
-                                if (designer != null) {
-                                    fes.getFormEditor().setFormDesigner(designer);
-                                }
-                            }
-                        }
-                        checkFormGroupVisibility();
-                        break;
-                    }
-                    case TopComponent.Registry.PROP_OPENED: {
-                        // set of opened TopComponents has changed - hasn't some
-                        // of our views been closed?
-                        Set oldSet = (Set) ev.getOldValue();
-                        Set newSet = (Set) ev.getNewValue();
-                        if (newSet.size() < oldSet.size()) {
-                            for (Object o : oldSet) {
-                                if (!newSet.contains(o)) {
-                                    if (o instanceof CloneableTopComponent) {
-                                        CloneableTopComponent closedTC = (CloneableTopComponent) o;
-                                        if (getSelectedElementType(closedTC) != -1) { // it is our multiview
-                                            PlatypusFormSupport fes = getFormEditor(closedTC);
-                                            if (fes != null) {
-                                                fes.multiViewClosed(closedTC);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        TopComponent active = TopComponent.getRegistry().getActivated();
-                        if (active != null && getSelectedElementType(active) != -1) { // it is our multiview
-                            PlatypusFormSupport fes = getFormEditor(active);
-                            if (fes != null) {
-                                fes.updateTitles();
-                            }
-                        }
-                        break;
-                    }
-                }
-            }
-        };
-
-        TopComponent.getRegistry().addPropertyChangeListener(topcompsListener);
-    }
-
-    private static void detachTopComponentsListener() {
-        if (topcompsListener != null) {
-            TopComponent.getRegistry().removePropertyChangeListener(topcompsListener);
-            topcompsListener = null;
-
-            TopComponentGroup group = WindowManager.getDefault().findTopComponentGroup("jsform"); // NOI18N
-            if (group != null) {
-                group.close();
-            }
-        }
     }
 
     // -------
@@ -700,38 +392,24 @@ public class PlatypusFormSupport extends PlatypusModuleSupport implements Editor
     /**
      * Updates tooltip of all multiviews for given form. Replans to even queue
      * thread if necessary.
+     *
+     * void updateMVTCToolTipText() { if
+     * (java.awt.EventQueue.isDispatchThread()) { if (multiviewTC == null) {
+     * return; }
+     *
+     * String tooltip = getMVTCToolTipText((PlatypusFormDataObject) dataObject);
+     * Enumeration<CloneableTopComponent> en =
+     * multiviewTC.getReference().getComponents(); while (en.hasMoreElements())
+     * { TopComponent tc = en.nextElement(); tc.setToolTipText(tooltip); } }
+     * else { java.awt.EventQueue.invokeLater(new Runnable() {
+     *
+     * @Override public void run() { if (multiviewTC == null) { return; }
+     *
+     * String tooltip = getMVTCToolTipText((PlatypusFormDataObject) dataObject);
+     * Enumeration en = multiviewTC.getReference().getComponents(); while
+     * (en.hasMoreElements()) { TopComponent tc = (TopComponent)
+     * en.nextElement(); tc.setToolTipText(tooltip); } } }); } }
      */
-    void updateMVTCToolTipText() {
-        if (java.awt.EventQueue.isDispatchThread()) {
-            if (multiviewTC == null) {
-                return;
-            }
-
-            String tooltip = getMVTCToolTipText((PlatypusFormDataObject) dataObject);
-            Enumeration<CloneableTopComponent> en = multiviewTC.getReference().getComponents();
-            while (en.hasMoreElements()) {
-                TopComponent tc = en.nextElement();
-                tc.setToolTipText(tooltip);
-            }
-        } else {
-            java.awt.EventQueue.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    if (multiviewTC == null) {
-                        return;
-                    }
-
-                    String tooltip = getMVTCToolTipText((PlatypusFormDataObject) dataObject);
-                    Enumeration en = multiviewTC.getReference().getComponents();
-                    while (en.hasMoreElements()) {
-                        TopComponent tc = (TopComponent) en.nextElement();
-                        tc.setToolTipText(tooltip);
-                    }
-                }
-            });
-        }
-    }
-
     static boolean isLastView(TopComponent tc) {
         if (!(tc instanceof CloneableTopComponent)) {
             return false;
@@ -754,22 +432,15 @@ public class PlatypusFormSupport extends PlatypusModuleSupport implements Editor
      * during deserialization and clonig the multiview - i.e. during the
      * operations we have no control over. But anytime a multiview is created,
      * this method gets called.
+     *
+     * void setTopComponent(TopComponent topComp) { multiviewTC =
+     * (CloneableTopComponent) topComp; String[] titles =
+     * getMVTCDisplayName((PlatypusFormDataObject) dataObject);
+     * multiviewTC.setDisplayName(titles[0]);
+     * multiviewTC.setHtmlDisplayName(titles[1]);
+     * multiviewTC.setToolTipText(getMVTCToolTipText((PlatypusFormDataObject)
+     * dataObject)); }
      */
-    void setTopComponent(TopComponent topComp) {
-        multiviewTC = (CloneableTopComponent) topComp;
-        String[] titles = getMVTCDisplayName((PlatypusFormDataObject) dataObject);
-        multiviewTC.setDisplayName(titles[0]);
-        multiviewTC.setHtmlDisplayName(titles[1]);
-        multiviewTC.setToolTipText(getMVTCToolTipText((PlatypusFormDataObject) dataObject));
-        opened.add(this);
-        attachTopComponentsListener();
-        try {
-            addStatusListener(dataObject.getPrimaryFile().getFileSystem());
-        } catch (FileStateInvalidException fsiex) {
-            ErrorManager.getDefault().notify(fsiex);
-        }
-    }
-
     public static PlatypusFormSupport getFormEditor(TopComponent tc) {
         Object dobj = tc.getLookup().lookup(DataObject.class);
         return dobj instanceof PlatypusFormDataObject
@@ -829,11 +500,14 @@ public class PlatypusFormSupport extends PlatypusModuleSupport implements Editor
             MultiViewHandler handler = MultiViews.findMultiViewHandler(tc);
             if (handler != null) {
                 String prefId = handler.getSelectedPerspective().preferredID();
-                if (MV_JS_ID.equals(prefId)) {
+                if (PlatypusModuleSourceDescription.MODULE_SOURCE_VIEW_NAME.equals(prefId)) {
                     return JS_ELEMENT_INDEX; // 0
                 }
                 if (MV_FORM_ID.equals(prefId)) {
                     return FORM_ELEMENT_INDEX; // 1
+                }
+                if(PlatypusModuleDatamodelDescription.MODULE_DATAMODEL_VIEW_NAME.equals(prefId)){
+                    return MODEL_ELEMENT_INDEX; // 2
                 }
             }
         }
@@ -871,48 +545,6 @@ public class PlatypusFormSupport extends PlatypusModuleSupport implements Editor
         }
     }
 
-    /*
-    
-     private FormGEditor guardedEditor;
-     private GuardedSectionsProvider guardedProvider;
-
-     @Override
-     protected void loadFromStreamToKit(StyledDocument doc, InputStream stream, EditorKit kit) throws IOException, BadLocationException {
-     if (guardedEditor == null) {
-     guardedEditor = new FormGEditor();
-     GuardedSectionsFactory gFactory = GuardedSectionsFactory.find(((DataEditorSupport.Env) env).getMimeType());
-     if (gFactory != null) {
-     guardedProvider = gFactory.create(guardedEditor);
-     }
-     }
-
-     doc.putProperty(PlatypusModuleDataObject.DATAOBJECT_DOC_PROPERTY, dataObject);
-
-     if (guardedProvider != null) {
-     guardedEditor.doc = doc;
-     Charset c = Charset.forName(PlatypusUtils.JVM_STRINGS_ENCODING_NAME);
-     try (Reader reader = guardedProvider.createGuardedReader(stream, c)) {
-     doc.addDocumentListener(this);        
-     kit.read(reader, doc, 0);
-     }
-     } else {
-     super.loadFromStreamToKit(doc, stream, kit);
-     }
-     }
-
-     @Override
-     protected void saveFromKitToStream(StyledDocument doc, EditorKit kit, OutputStream stream) throws IOException, BadLocationException {
-     if (guardedProvider != null) {
-     Charset c = Charset.forName(PlatypusUtils.JVM_STRINGS_ENCODING_NAME);
-     try (Writer writer = guardedProvider.createGuardedWriter(stream, c)) {
-     kit.write(writer, doc, 0, doc.getLength());
-     }
-     } else {
-     super.saveFromKitToStream(doc, kit, stream);
-     }
-     }
-     */
-    // --------
     /**
      * A descriptor for the PlatypusFormLayoutView element of multiview. Allows
      * lazy creation of the PlatypusFormLayoutView (and thus form loading).
@@ -1036,7 +668,7 @@ public class PlatypusFormSupport extends PlatypusModuleSupport implements Editor
 
         @Override
         public String preferredID() {
-            return MV_JS_ID;
+            return PlatypusModuleSourceDescription.MODULE_SOURCE_VIEW_NAME;
         }
 
         public void writeExternal(ObjectOutput out) throws IOException {
@@ -1105,14 +737,6 @@ public class PlatypusFormSupport extends PlatypusModuleSupport implements Editor
         @Override
         public void setMultiViewCallback(MultiViewElementCallback callback) {
             multiViewObserver = callback;
-
-            // needed for deserialization...
-            if (((DataEditorSupport) cloneableEditorSupport()).getDataObject() instanceof PlatypusFormDataObject) { // [obj is from EditorSupport.Editor]
-                // this is used (or misused?) to obtain the deserialized
-                // multiview topcomponent and set it to PlatypusFormSupport
-                ((PlatypusFormDataObject) ((DataEditorSupport) cloneableEditorSupport()).getDataObject()).getLookup().lookup(PlatypusFormSupport.class).setTopComponent(
-                        callback.getTopComponent());
-            }
         }
 
         @Override
@@ -1203,7 +827,7 @@ public class PlatypusFormSupport extends PlatypusModuleSupport implements Editor
 
             MultiViewHandler handler = MultiViews.findMultiViewHandler(selected);
             if (handler != null
-                    && MV_JS_ID.equals(handler.getSelectedPerspective().preferredID())) {
+                    && PlatypusModuleSourceDescription.MODULE_SOURCE_VIEW_NAME.equals(handler.getSelectedPerspective().preferredID())) {
                 return true;
             }
 

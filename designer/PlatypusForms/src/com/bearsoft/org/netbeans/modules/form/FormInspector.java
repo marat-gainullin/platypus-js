@@ -81,7 +81,7 @@ public class FormInspector extends TopComponent implements ExplorerManager.Provi
     /**
      * Currently focused form or null if no form is opened/focused
      */
-    private FormEditor focusedForm;
+    private PlatypusFormLayoutView focusedFormView;
     private EmptyInspectorNode emptyInspectorNode;
     private BeanTreeView treeView;
     /**
@@ -185,8 +185,8 @@ public class FormInspector extends TopComponent implements ExplorerManager.Provi
 
     @Override
     public UndoRedo getUndoRedo() {
-        UndoRedo ur = focusedForm != null
-                ? focusedForm.getFormUndoRedoManager() : null;
+        UndoRedo ur = focusedFormView != null
+                ? focusedFormView.getUndoRedo() : null;
         return ur != null ? ur : super.getUndoRedo();
     }
 
@@ -230,8 +230,8 @@ public class FormInspector extends TopComponent implements ExplorerManager.Provi
      *
      * @param form the form to focus on
      */
-    public void focusForm(final FormEditor form) {
-        if (focusedForm != form) {
+    public void focusForm(final PlatypusFormLayoutView form) {
+        if (focusedFormView != form) {
             focusFormInAwtThread(form, 0);
         }
     }
@@ -242,13 +242,13 @@ public class FormInspector extends TopComponent implements ExplorerManager.Provi
      * @param form the form to focus on
      * @param visible true to open inspector, false to close
      */
-    public void focusForm(final FormEditor form, boolean visible) {
-        if (focusedForm != form) {
+    public void focusForm(final PlatypusFormLayoutView form, boolean visible) {
+        if (focusedFormView != form) {
             focusFormInAwtThread(form, visible ? 1 : -1);
         }
     }
 
-    private void focusFormInAwtThread(final FormEditor form,
+    private void focusFormInAwtThread(final PlatypusFormLayoutView form,
             final int visibility) {
         if (java.awt.EventQueue.isDispatchThread()) {
             focusFormImpl(form, visibility);
@@ -262,10 +262,10 @@ public class FormInspector extends TopComponent implements ExplorerManager.Provi
         }
     }
 
-    private void focusFormImpl(FormEditor form, int visibility) {
-        focusedForm = form;
+    private void focusFormImpl(PlatypusFormLayoutView aFormView, int visibility) {
+        focusedFormView = aFormView;
 
-        if ((form == null) || (form.getFormDesigner() == null)) {
+        if (aFormView == null) {
             testAction.setFormDesigner(null);
             PaletteUtils.setContext(null);
 
@@ -276,12 +276,12 @@ public class FormInspector extends TopComponent implements ExplorerManager.Provi
 
             getExplorerManager().setRootContext(emptyInspectorNode);
         } else {
-            Node[] selectedNodes = form.getFormDesigner().getSelectedComponentNodes();
+            Node[] selectedNodes = aFormView.getSelectedComponentNodes();
 
-            testAction.setFormDesigner(form.getFormDesigner());
-            PaletteUtils.setContext(form.getFormDataObject().getPrimaryFile());
+            testAction.setFormDesigner(aFormView);
+            PaletteUtils.setContext(aFormView.getFormModel().getDataObject().getPrimaryFile());
 
-            Node formNode = form.getFormRootNode();
+            Node formNode = aFormView.getFormEditor().getFormRootNode();
             if (formNode == null) { // form not loaded yet, should not happen
                 System.err.println("Warning: FormEditorSupport.getFormRootNode() returns null"); // NOI18N
                 getExplorerManager().setRootContext(emptyInspectorNode);
@@ -302,17 +302,17 @@ public class FormInspector extends TopComponent implements ExplorerManager.Provi
         }
     }
 
-    public FormEditor getFocusedForm() {
-        return focusedForm;
+    public PlatypusFormLayoutView getFocusedForm() {
+        return focusedFormView;
     }
 
     /**
      * Called to synchronize with PlatypusFormLayoutView. Invokes
      * NodeSelectionListener.
      */
-    void setSelectedNodes(Node[] nodes, FormEditor form)
+    void setSelectedNodes(Node[] nodes, PlatypusFormLayoutView form)
             throws PropertyVetoException {
-        if (form == focusedForm) {
+        if (form == focusedFormView) {
             getExplorerManager().setSelectedNodes(nodes);
         }
     }
@@ -389,22 +389,21 @@ public class FormInspector extends TopComponent implements ExplorerManager.Provi
 
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
-            if (ExplorerManager.PROP_SELECTED_NODES.equals(evt.getPropertyName()) && focusedForm != null && focusedForm.getFormDesigner() != null) {
-                PlatypusFormLayoutView designer = focusedForm.getFormDesigner();
+            if (ExplorerManager.PROP_SELECTED_NODES.equals(evt.getPropertyName()) && focusedFormView != null) {
                 Node[] selectedNodes = getExplorerManager().getSelectedNodes();
                 if (evt.getSource() == FormInspector.this.getExplorerManager()) {   // the change comes from FormInspector => synchronize PlatypusFormLayoutView
-                    designer.clearSelectionImpl();
+                    focusedFormView.clearSelectionImpl();
                     for (int i = 0; i < selectedNodes.length; i++) {
                         FormCookie formCookie = selectedNodes[i].getLookup().lookup(FormCookie.class);
                         if (formCookie != null) {
                             FormNode node = formCookie.getOriginalNode();
                             if (node instanceof RADComponentNode) {
-                                designer.addComponentToSelectionImpl(((RADComponentNode) node).getRADComponent());
+                                focusedFormView.addComponentToSelectionImpl(((RADComponentNode) node).getRADComponent());
                             }
                         }
                     }
-                    designer.repaintSelection();
-                    designer.setActivatedNodes(selectedNodes);
+                    focusedFormView.repaintSelection();
+                    focusedFormView.setActivatedNodes(selectedNodes);
                 }
                 setActivatedNodes(selectedNodes);
             }

@@ -21,7 +21,7 @@ import org.openide.windows.TopComponent;
 public class PlatypusModuleSourceDescription implements MultiViewDescription, SourceViewMarker, Serializable {
 
     static final long serialVersionUID = 53142032923497718L;
-    protected static final String MODULE_SOURCE_VIEW_NAME = "module-source";
+    public static final String MODULE_SOURCE_VIEW_NAME = "module-source";
     protected PlatypusModuleDataObject dataObject;
 
     public PlatypusModuleSourceDescription(PlatypusModuleDataObject aDataObject) {

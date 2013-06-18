@@ -48,7 +48,6 @@ import java.beans.PropertyChangeListener;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JEditorPane;
 import org.openide.DialogDisplayer;
@@ -80,12 +79,6 @@ public class FormEditor {
      */
     private FormRootNode formRootNode;
     /**
-     * The designer component - the last active designer of the form (there can
-     * be more clones). May happen to be null if the active designer was closed
-     * and no other designer of given form was activated since then.
-     */
-    private PlatypusFormLayoutView formDesigner;
-    /**
      * The code generator for the form
      */
     private CodeGenerator codeGenerator;
@@ -102,24 +95,10 @@ public class FormEditor {
      */
     private boolean formLoaded = false;
     /**
-     * Table of opened FormModel instances (FormModel to FormEditor map)
-     */
-//    private static Map<FormModel, FormEditor> openForms = new HashMap<>();
-    /**
-     * List of floating windows - must be closed when the form is closed.
-     */
-//    private List<java.awt.Window> floatingWindows;
-    /**
      * The DataObject of the form
      */
     private PlatypusFormDataObject formDataObject;
     private PropertyChangeListener dataObjectListener;
-    // listeners
-    private FormModelListener formListener;
-    /**
-     * List of actions that are tried when a component is double-clicked.
-     */
-    private List<Action> defaultActions;
 
     // -----
     FormEditor(PlatypusFormDataObject aDataObject) {
@@ -164,8 +143,8 @@ public class FormEditor {
      * already has the form recognized and superclass determined (i.e.
      * potentially long java parsing already done).
      */
-    void setPersistenceManager(PersistenceManager pm) {
-        persistenceManager = pm;
+    void setPersistenceManager(PersistenceManager aManager) {
+        persistenceManager = aManager;
     }
 
     boolean isFormLoaded() {
@@ -173,68 +152,15 @@ public class FormEditor {
     }
 
     /**
-     * This methods loads the form, reports errors, creates the
-     * PlatypusFormLayoutView
-     */
-    void loadFormDesigner() {
-        getFormDataObject().getLookup().lookup(PlatypusFormSupport.class).showOpeningStatus("FMT_OpeningForm"); // NOI18N
-        // load form data and report errors
-        try {
-            loadFormData();
-        } catch (PersistenceException ex) { // a fatal loading error happened
-            logPersistenceError(ex, 0);
-            if (!formLoaded) { // loading failed - don't keep empty designer opened
-                java.awt.EventQueue.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        getFormDataObject().getLookup().lookup(PlatypusFormSupport.class).selectJsEditor();
-                    }
-                });
-            }
-        }
-        getFormDataObject().getLookup().lookup(PlatypusFormSupport.class).hideOpeningStatus();
-        // report errors during loading
-        reportErrors(FormOperation.LOADING);
-    }
-
-    boolean loadForm() {
-        if (!formLoaded) {
-            if (java.awt.EventQueue.isDispatchThread()) {
-                try {
-                    loadFormData();
-                } catch (PersistenceException ex) {
-                    logPersistenceError(ex, 0);
-                }
-            } else { // loading must be done in AWT event dispatch thread
-                try {
-                    java.awt.EventQueue.invokeAndWait(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                loadFormData();
-                            } catch (PersistenceException ex) {
-                                logPersistenceError(ex, 0);
-                            }
-                        }
-                    });
-                } catch (Exception ex) {
-                    ErrorManager.getDefault().notify(ex);
-                }
-            }
-        }
-        return formLoaded;
-    }
-
-    /**
      * This method performs the form data loading. All open/load methods go
      * through this one.
      */
-    private void loadFormData() throws PersistenceException {
+    public void loadForm() throws PersistenceException {
         if (!formLoaded) {
             resetPersistenceErrorLog(); // clear log of errors
             // first find PersistenceManager for loading the form
             if (persistenceManager == null) {
-                persistenceManager = recognizeForm(formDataObject);
+                persistenceManager = findPersistenceManager(formDataObject);
             }
             // create and register new FormModel instance
             formModel = new FormModel(formDataObject);
@@ -275,7 +201,6 @@ public class FormEditor {
             formRootNode.getChildren().getNodes();
             formDataObject.getNodeDelegate().getChildren().add(new Node[]{formRootNode});
 
-            attachFormListener();
             attachDataObjectListener();
         }
     }
@@ -331,7 +256,7 @@ public class FormEditor {
     /**
      * Finds PersistenceManager that can load and save the form.
      */
-    private PersistenceManager recognizeForm(PlatypusFormDataObject formDO)
+    private PersistenceManager findPersistenceManager(PlatypusFormDataObject aFormDataObject)
             throws PersistenceException {
         List<PersistenceManager> perisitenceManagers = PersistenceManager.getManagers();
         if (perisitenceManagers.isEmpty()) { // there's no PersistenceManager available
@@ -350,7 +275,7 @@ public class FormEditor {
         for (PersistenceManager pm : perisitenceManagers) {
             synchronized (pm) {
                 try {
-                    if (pm.canLoadForm(formDO)) {
+                    if (pm.canLoadForm(aFormDataObject)) {
                         resetPersistenceErrorLog();
                         return pm;
                     }
@@ -489,21 +414,18 @@ public class FormEditor {
                             setFormReadOnly();
                         } else if (ret == allowEditing) {
                             destroyInvalidComponents();
-                        } else { // close form, switch to source editor
-                            getFormDesigner().reset(FormEditor.this); // might be reused
+                        } else { // close form
                             closeForm();
-                            getFormDataObject().getLookup().lookup(PlatypusFormSupport.class).selectJsEditor();
                         }
                     }
                 }
             });
         }
-
         resetPersistenceErrorLog();
     }
 
     /**
-     * Destroys all components from {@link #formModel} taged as invalid
+     * Destroys all components from {@link #formModel} tageted as invalid
      */
     private void destroyInvalidComponents() {
         Collection<RADComponent<?>> allComps = formModel.getAllComponents();
@@ -532,27 +454,7 @@ public class FormEditor {
      */
     private void setFormReadOnly() {
         formModel.setReadOnly(true);
-        getFormDesigner().getHandleLayer().setViewOnly(true);
-        detachFormListener();
         getFormDataObject().getLookup().lookup(PlatypusFormSupport.class).updateTitles();
-    }
-
-    /**
-     * @return the last activated PlatypusFormLayoutView for this form
-     */
-    PlatypusFormLayoutView getFormDesigner() {
-        if (formLoaded) {
-            return formDesigner;
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * Called by PlatypusFormLayoutView when activated.
-     */
-    void setFormDesigner(PlatypusFormLayoutView designer) {
-        formDesigner = designer;
     }
 
     /**
@@ -580,134 +482,13 @@ public class FormEditor {
             }
 
             // remove listeners
-            detachFormListener();
             detachDataObjectListener();
 
             // reset references
-            formDesigner = null;
             persistenceManager = null;
             persistenceErrors = null;
             formModel = null;
             codeGenerator = null;
-        }
-    }
-
-    private void attachFormListener() {
-        if (formListener == null && !formDataObject.isReadOnly() && !formModel.isReadOnly()) {
-            // this listener ensures necessary updates of nodes according to
-            // changes in containers in form
-            formListener = new FormModelListener() {
-                @Override
-                public void formChanged(FormModelEvent[] events) {
-                    if (events == null) {
-                        return;
-                    }
-
-                    boolean modifying = false;
-                    Set<ComponentContainer> changedContainers = events.length > 0
-                            ? new HashSet<ComponentContainer>() : null;
-                    Set<RADComponent<?>> compsToSelect = null;
-                    FormNode nodeToSelect = null;
-                    for (int i = 0; i < events.length; i++) {
-                        FormModelEvent ev = events[i];
-
-                        if (ev.isModifying()) {
-                            modifying = true;
-                        }
-
-                        int type = ev.getChangeType();
-                        if (type == FormModelEvent.CONTAINER_LAYOUT_EXCHANGED
-                                || type == FormModelEvent.CONTAINER_LAYOUT_CHANGED
-                                || type == FormModelEvent.COMPONENT_ADDED
-                                || type == FormModelEvent.COMPONENT_REMOVED
-                                || type == FormModelEvent.COMPONENTS_REORDERED) {
-                            ComponentContainer cont = ev.getContainer();
-                            if (changedContainers == null
-                                    || !changedContainers.contains(cont)) {
-                                updateNodeChildren(cont);
-                                if (changedContainers != null) {
-                                    changedContainers.add(cont);
-                                }
-                            }
-
-                            if (type == FormModelEvent.COMPONENT_REMOVED) {
-                                FormNode select;
-                                if (cont instanceof RADComponent) {
-                                    select = ((RADComponent) cont).getNodeReference();
-                                } else {
-                                    select = getOthersContainerNode();
-                                }
-
-                                if (!(nodeToSelect instanceof RADComponentNode)) {
-                                    if (nodeToSelect != formRootNode) {
-                                        nodeToSelect = select;
-                                    }
-                                } else if (nodeToSelect != select) {
-                                    nodeToSelect = formRootNode;
-                                }
-                            } else if (type == FormModelEvent.CONTAINER_LAYOUT_EXCHANGED) {
-                                assert cont instanceof RADVisualContainer<?>;
-                                nodeToSelect = ((RADVisualContainer<?>) cont).getLayoutNodeReference();
-                            } else if (type == FormModelEvent.COMPONENT_ADDED
-                                    && ev.getComponent().isInModel()) {
-                                if (compsToSelect == null) {
-                                    compsToSelect = new HashSet<>();
-                                }
-                                compsToSelect.add(ev.getComponent());
-                                if (ev.getContainer() instanceof RADVisualContainer<?>) {
-                                    compsToSelect.remove((RADVisualContainer<?>) ev.getContainer());
-                                }
-                            }
-                        } else if (type == FormModelEvent.COLUMN_VIEW_EXCHANGED) {
-                            updateNodeChildren(ev.getColumn());
-                            nodeToSelect = ev.getColumn().getViewControl().getNodeReference();
-                        }
-                    }
-                    PlatypusFormLayoutView designer = getFormDesigner();
-                    if (designer != null) {
-                        designer.updateVisualSettings();
-                        if (compsToSelect != null) {
-                            designer.clearSelectionImpl();
-                            for (RADComponent<?> comp : compsToSelect) {
-                                designer.addComponentToSelectionImpl(comp);
-                            }
-                            designer.updateNodesSelection();
-                        } else if (nodeToSelect != null) {
-                            designer.setSelectedNode(nodeToSelect);
-                        }
-                    }
-
-                    if (modifying) { // mark the form document modified explicitly
-                        getFormDataObject().getLookup().lookup(PlatypusFormSupport.class).markFormModified();
-                    }
-                }
-            };
-            formModel.addFormModelListener(formListener);
-        }
-    }
-
-    private void detachFormListener() {
-        if (formListener != null) {
-            formModel.removeFormModelListener(formListener);
-            formListener = null;
-        }
-    }
-
-    /**
-     * Updates (sub)nodes of a container (in Component Inspector) after a change
-     * has been made (like component added or removed).
-     */
-    void updateNodeChildren(ComponentContainer radCont) {
-        FormNode node = null;
-
-        if (radCont == null || radCont == formModel.getModelContainer()) {
-            node = (formRootNode != null ? getOthersContainerNode() : null);
-        } else if (radCont instanceof RADComponent) {
-            node = ((RADComponent) radCont).getNodeReference();
-        }
-
-        if (node != null) {
-            node.updateChildren();
         }
     }
 
@@ -738,13 +519,6 @@ public class FormEditor {
         if (dataObjectListener != null) {
             formDataObject.removePropertyChangeListener(dataObjectListener);
             dataObjectListener = null;
-        }
-    }
-
-    void reinstallListener() {
-        if (formListener != null) {
-            formModel.removeFormModelListener(formListener);
-            formModel.addFormModelListener(formListener);
         }
     }
 

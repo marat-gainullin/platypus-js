@@ -25,7 +25,7 @@ public class JsCodeGenerator implements Cookie {
     private static final String EVT_VARIABLE_NAME = "evt"; // NOI18N
     private PlatypusModuleDataObject dataObject;
     private PlatypusModuleSupport editorSupport;
-    private boolean canPosition;
+    private boolean canPosition = true;
 
     public JsCodeGenerator(PlatypusModuleDataObject aDataObject) {
         super();
@@ -88,7 +88,7 @@ public class JsCodeGenerator implements Cookie {
                 buffer.flush();
                 i1 = buffer.getBuffer().length();
                 String bodyText = getDefaultEventBody();
-                buffer.write("\t" + bodyText);
+                buffer.write("    " + bodyText);
                 buffer.flush();
                 i2 = buffer.getBuffer().length();
                 buffer.write("}\n"); // footer with new line // NOI18N
