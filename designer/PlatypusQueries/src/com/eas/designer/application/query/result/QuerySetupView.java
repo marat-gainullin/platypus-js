@@ -112,6 +112,7 @@ public class QuerySetupView extends javax.swing.JPanel {
 
         toolbarRunButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/eas/designer/application/query/result/runsql.png"))); // NOI18N
         toolbarRunButton.setText(org.openide.util.NbBundle.getMessage(QuerySetupView.class, "QuerySetupView.toolbarRunButton.text")); // NOI18N
+        toolbarRunButton.setToolTipText(org.openide.util.NbBundle.getMessage(QuerySetupView.class, "toolbarRunButton.Tooltip")); // NOI18N
         toolbarRunButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         toolbarRunButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         toolbarRunButton.addActionListener(new java.awt.event.ActionListener() {
