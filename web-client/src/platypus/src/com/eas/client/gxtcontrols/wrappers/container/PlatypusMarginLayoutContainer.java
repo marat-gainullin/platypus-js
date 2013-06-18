@@ -1,21 +1,26 @@
 package com.eas.client.gxtcontrols.wrappers.container;
 
 import com.eas.client.gxtcontrols.AbsoluteJSConstraints;
+import com.eas.client.gxtcontrols.ControlsUtils;
 import com.eas.client.gxtcontrols.MarginConstraints;
 import com.eas.client.gxtcontrols.MarginJSConstraints;
+import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.layout.client.Layout.Alignment;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.dom.client.Node;
+import com.sencha.gxt.core.client.dom.XDOM;
 import com.sencha.gxt.core.client.dom.XElement;
 import com.sencha.gxt.widget.core.client.Component;
 import com.sencha.gxt.widget.core.client.container.BorderLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.MarginData;
 import com.sencha.gxt.widget.core.client.container.SimpleContainer;
 
-public class PlatypusMarginLayoutContainer extends SimpleContainer {
+public class PlatypusMarginLayoutContainer extends SimpleContainer implements OrderedContainer {
 
 	protected static String MARGIN_LAYOUT_DATA = "anchorsData";
 
@@ -282,7 +287,49 @@ public class PlatypusMarginLayoutContainer extends SimpleContainer {
 		}
 		return true;
 	}
+    
+	@Override
+	public void toFront(Widget aWidget) {
+		if (aWidget != null) {
+			content.getElement().insertBefore(aWidget.getParent().getElement().getParentNode(), content.getElement().getLastChild()); // exclude last element
+		}			
+	}
 
+	@Override
+	public void toFront(Widget aWidget, int aCount) {
+		if (aWidget != null && aCount > 0) {
+			XElement container =  content.getElement().cast();
+			Element widgetElement = aWidget.getParent().getElement().getParentElement();
+			int index = container.getChildIndex(widgetElement);
+			if (index < 0 || (index + aCount) >= container.getChildCount() - 1) {// exclude last element
+				content.getElement().insertBefore(widgetElement, container.getLastChild());
+			} else {
+			    content.getElement().insertAfter(widgetElement, container.getChild(index + aCount));
+			}
+		}			
+	}
+
+	@Override
+	public void toBack(Widget aWidget) {
+		if (aWidget != null) {
+			content.getElement().insertFirst(aWidget.getParent().getElement().getParentNode());
+		}			
+	}
+	
+	@Override
+	public void toBack(Widget aWidget, int aCount) {
+		if (aWidget != null && aCount > 0) {
+			XElement container =  content.getElement().cast();
+			Element widgetElement = aWidget.getParent().getElement().getParentElement();
+			int index = container.getChildIndex(widgetElement);
+			if (index < 0 || (index - aCount) < 0) {
+				content.getElement().insertFirst(widgetElement);
+			} else {
+			    content.getElement().insertBefore(widgetElement, container.getChild(index - aCount));
+			}
+		}			
+	}
+	
 	@Override
 	public void clear() {
 		if (content != null)

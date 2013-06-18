@@ -70,6 +70,7 @@ import javax.swing.JDesktopPane;
 import javax.swing.JEditorPane;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
+import javax.swing.JLayeredPane;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -237,7 +238,7 @@ public class ControlsWrapper implements DbControlsDesignInfoVisitor {
 
     @Override
     public void visit(LayersDesignInfo ldi) {
-        result = ContainerWrapper.wrap((JPanel) target, target.getLayout());
+        //result = ComponentWrapper.wrap((JLayeredPane) target);
     }
 
     @Override

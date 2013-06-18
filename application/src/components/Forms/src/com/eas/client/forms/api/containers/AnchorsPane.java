@@ -6,6 +6,7 @@ package com.eas.client.forms.api.containers;
 
 import com.eas.client.forms.api.Component;
 import com.eas.client.forms.api.Container;
+import com.eas.client.forms.api.Ordering;
 import com.eas.controls.layouts.constraints.MarginConstraintsDesignInfo;
 import com.eas.controls.layouts.margin.Margin;
 import com.eas.controls.layouts.margin.MarginConstraints;
@@ -76,5 +77,24 @@ public class AnchorsPane extends Container<JPanel> {
         Margin height = MarginConstraintsDesignInfo.parseMargin(oHeight != null ? Context.toString(oHeight) : null);
         Margin bottom = MarginConstraintsDesignInfo.parseMargin(oBottom != null ? Context.toString(oBottom) : null);
         return new MarginConstraints(left, top, right, bottom, width, height);
+    }
+    
+    @ScriptFunction(jsDocText = "Brings the specified component to front on this panel.")
+    public void toFront(Component aComp) {
+        Ordering.toFront(delegate, aComp);
+    }
+
+    @ScriptFunction(jsDocText = "Brings the specified component to back on this panel.")
+    public void toBack(Component aComp) {
+        Ordering.toBack(delegate, aComp);
+    }
+    @ScriptFunction(jsDocText = "")
+    public void toFront(Component aComp, int aCount) {
+        Ordering.toFront(delegate, aComp, aCount);
+    }
+
+    @ScriptFunction(jsDocText = "")
+    public void toBack(Component aComp, int aCount) {
+        Ordering.toBack(delegate, aComp, aCount);
     }
 }

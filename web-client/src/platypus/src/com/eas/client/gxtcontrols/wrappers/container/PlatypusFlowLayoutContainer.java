@@ -34,6 +34,5 @@ public class PlatypusFlowLayoutContainer extends FlowLayoutContainer {
         style.setDisplay(Style.Display.INLINE_BLOCK);                
         style.setVerticalAlign(Style.VerticalAlign.TOP);
 		super.add(aChild, new MarginData(new Margins(topGap, rightGap, bottomGap, leftGap)));
-
 	}
 }
