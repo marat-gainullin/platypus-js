@@ -33,12 +33,11 @@ public class FormEntityNode extends ApplicationEntityNode {
         if (name != null && !name.trim().isEmpty()) {
             try {
                 PlatypusFormSupport support = getLookup().lookup(PlatypusFormSupport.class);
-                if (support.loadForm()) {
-                    FormModel formModel = support.getFormModel();
-                    for (RADComponent<?> rc : formModel.getAllComponents()) {
-                        if (name.equals(rc.getName())) {
-                            return false;
-                        }
+                support.loadForm();
+                FormModel formModel = support.getFormModel();
+                for (RADComponent<?> rc : formModel.getAllComponents()) {
+                    if (name.equals(rc.getName())) {
+                        return false;
                     }
                 }
                 return true;

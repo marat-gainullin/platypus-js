@@ -26,7 +26,6 @@ import org.netbeans.api.extexecution.ExecutionService;
 import org.netbeans.api.extexecution.ExternalProcessBuilder;
 import org.openide.ErrorManager;
 import org.openide.awt.HtmlBrowser;
-import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 import org.openide.util.RequestProcessor;
 import org.openide.windows.IOProvider;
@@ -111,7 +110,7 @@ public class ProjectRunner {
                 }
             }
         }
-        io.getOut().println("Starting Platypus Application..");
+        io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Application_Starting"));
         PlatypusProjectSettings pps = project.getSettings();
         String appUrl = null;
         if (!project.getSettings().isNotStartServer()) {
@@ -156,6 +155,11 @@ public class ProjectRunner {
                     .frontWindow(true)
                     .controllable(true);
             ExternalProcessBuilder processBuilder = new ExternalProcessBuilder(JVM_RUN_COMMAND_NAME);
+            PlatypusSettings ps = pps.getAppSettings();
+            if (pps.getRunClientVmOptions() != null && !pps.getRunClientVmOptions().isEmpty()) {
+                processBuilder = addArguments(processBuilder, pps.getRunClientVmOptions());
+                io.getOut().println(String.format(NbBundle.getMessage(ProjectRunner.class, "MSG_VM_Run_Options"), pps.getRunClientVmOptions()));//NOI18N
+            }
             if (debug) {
                 processBuilder = setDebugArguments(processBuilder, project.getSettings().getDebugClientPort());
             }
@@ -166,7 +170,7 @@ public class ProjectRunner {
             processBuilder = processBuilder.addArgument(PlatypusClientApplication.class.getName());
 
             String runElementId = null;
-            PlatypusSettings ps = pps.getAppSettings();
+
             if (appElementId != null && !appElementId.isEmpty()) {
                 runElementId = appElementId;
             } else if (ps.getRunElement() != null && !ps.getRunElement().isEmpty()) {
@@ -198,7 +202,7 @@ public class ProjectRunner {
                 processBuilder = processBuilder.addArgument(ps.getDbSettings().getInfo().getProperty(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME));
                 io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Database_Direct"));//NOI18N
             } else {
-                if (pps.isNotStartServer()) { 
+                if (pps.isNotStartServer()) {
                     appUrl = pps.getClientUrl();
                 } else if (AppServerType.PLATYPUS_SERVER.equals(pps.getRunAppServerType())) {
                     appUrl = getDevPlatypusServerUrl(pps);
@@ -220,12 +224,7 @@ public class ProjectRunner {
                 io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Login_As_User") + project.getSettings().getRunUser());//NOI18N
             }
             if (pps.getRunClientOptions() != null && !pps.getRunClientOptions().isEmpty()) {
-                String[] optionalArgs = pps.getRunClientOptions().split(" ");
-                if (optionalArgs.length > 0) {
-                    for (int i = 0; i < optionalArgs.length; i++) {
-                        processBuilder = processBuilder.addArgument(optionalArgs[i]);
-                    }
-                }
+                processBuilder = addArguments(processBuilder, pps.getRunClientOptions());
                 io.getOut().println(String.format(NbBundle.getMessage(ProjectRunner.class, "MSG_Run_Options"), pps.getRunClientOptions()));//NOI18N
             }
             //set default log level if not set explicitly
@@ -263,6 +262,16 @@ public class ProjectRunner {
             return null;
         }
         return null;
+    }
+
+    public static ExternalProcessBuilder addArguments(ExternalProcessBuilder processBuilder, String argsStr) {
+        String[] options = argsStr.split(" ");//NOI18N
+        if (options.length > 0) {
+            for (int i = 0; i < options.length; i++) {
+                processBuilder = processBuilder.addArgument(options[i]);
+            }
+        }
+        return processBuilder;
     }
 
     public static ExternalProcessBuilder setDebugArguments(ExternalProcessBuilder processBuilder, int port) {
@@ -320,7 +329,7 @@ public class ProjectRunner {
         }
         return clientAppExecutable.getAbsolutePath();
     }
-    
+
     private static String getDevPlatypusServerUrl(PlatypusProjectSettings pps) {
         return String.format("%s://%s:%s", PlatypusServer.DEFAULT_PROTOCOL, LOCAL_HOSTNAME, pps.getServerPort()); //NOI18N
     }

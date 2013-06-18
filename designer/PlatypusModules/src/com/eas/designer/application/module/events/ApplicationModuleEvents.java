@@ -1,8 +1,10 @@
 package com.eas.designer.application.module.events;
 
 import com.eas.client.model.application.ApplicationDbEntity;
+import com.eas.client.model.application.ApplicationParametersEntity;
 import com.eas.design.Designable;
 import com.eas.designer.application.module.PlatypusModuleDataObject;
+import com.eas.designer.application.module.completion.CompletionContext;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -91,7 +93,11 @@ public class ApplicationModuleEvents implements Cookie {
     public String findFreeHandlerName(ApplicationDbEntity entity, ApplicationEntityEventDesc event) {
         String componentName = entity.getName(); // NOI18N
         if (componentName == null) {
-            componentName = "";
+            if (entity instanceof ApplicationParametersEntity) {
+                componentName = CompletionContext.PARAMS_SCRIPT_NAME;
+            } else {
+                componentName = "";
+            }
         }
         String methodName = event.getListenerMethod().getName();
         Designable designableMethod = event.getListenerMethod().getAnnotation(Designable.class);

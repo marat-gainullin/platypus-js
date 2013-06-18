@@ -189,17 +189,7 @@ public class RADComponentNode extends FormNode
 
     @Override
     public Action getPreferredAction() {
-        FormEditor formEditor = FormEditor.getFormEditor(component.getFormModel());
-        if (formEditor != null) {
-            for (Action action : formEditor.getDefaultComponentActions()) {
-                if (action.isEnabled()) {
-                    return action;
-                }
-            }
-            return null;
-        } else {
-            return null;
-        }
+        return new DefaultRADAction();
     }
 
     @Override
@@ -224,12 +214,12 @@ public class RADComponentNode extends FormNode
 
                 lactions.add(SystemAction.get(CopyAction.class));
             } else {
+                /* If you whant ot uncomment folowing code, you have to refactor
+                 * action to avoid breaking of model-view pattern
                 if (InPlaceEditLayer.supportsEditingFor(component.getBeanClass(), false)) {
                     lactions.add(SystemAction.get(InPlaceEditAction.class));
                 }
-                if (javax.swing.JTable.class.isAssignableFrom(component.getBeanClass())) {
-                    lactions.add(SystemAction.get(CustomizeTableAction.class));
-                }
+                */ 
                 if (component != topComp) {
                     lactions.add(SystemAction.get(ChangeComponentNameAction.class));
                 } else {
@@ -293,9 +283,11 @@ public class RADComponentNode extends FormNode
 
     private void addLayoutActions(List<Action> actions) {
         if (component.getParentComponent() instanceof RADVisualContainer<?>) {
-            actions.add(SystemAction.get(AlignAction.class));
-            actions.add(SystemAction.get(SetAnchoringAction.class));
-            actions.add(SystemAction.get(SetResizabilityAction.class));
+            // To uncomment folowing actions for the menu, you have to refactor theirs
+            // updates (selected state and enabledness)
+            //actions.add(SystemAction.get(AlignAction.class));
+            //actions.add(SystemAction.get(SetAnchoringAction.class));
+            //actions.add(SystemAction.get(SetResizabilityAction.class));
             actions.add(SystemAction.get(EncloseAction.class));
             actions.add(null);
         }
@@ -317,12 +309,14 @@ public class RADComponentNode extends FormNode
             actions.add(null);
             actions.add(SystemAction.get(NewAction.class));
         }
+        /*
         if (EditContainerAction.isEditableComponent(component)) {
             actions.add(SystemAction.get(EditContainerAction.class));
         }
         if (DesignParentAction.isParentEditableComponent(component)) {
             actions.add(SystemAction.get(DesignParentAction.class));
         }
+        */ 
         addSeparator(actions);
     }
 
@@ -671,19 +665,6 @@ public class RADComponentNode extends FormNode
         if (highlight != highlightDisplayName) {
             highlightDisplayName = highlight;
             fireDisplayNameChange(null, getDisplayName());
-        }
-    }
-
-    private static final class CustomizeTableAction extends CustomizeAction {
-
-        @Override
-        public String getName() {
-            return FormUtils.getBundleString("NAME_CustomizeTableAction"); // NOI18N
-        }
-
-        @Override
-        protected boolean enable(Node[] activatedNodes) {
-            return true;
         }
     }
 }

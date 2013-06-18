@@ -123,10 +123,8 @@ public abstract class PersistenceManager {
             try {
                 PersistenceManager manager = (PersistenceManager) classLoader.loadClass(pmClassName).newInstance();
                 getManagersList().add(manager);
-            } catch (Exception ex1) {
+            } catch (Exception | LinkageError ex1) {
                 notifyError(ex1, pmClassName);
-            } catch (LinkageError ex2) {
-                notifyError(ex2, pmClassName);
             }
         }
         getManagersNamesList().clear(); // [is it OK to lose unsuccessful managers?]

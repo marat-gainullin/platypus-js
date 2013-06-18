@@ -33,7 +33,7 @@ public class PlatypusWindow extends Window {
 		form = aForm;
 		setMaximizable(true);
 		setMinimizable(true);
-		setAnimCollapse(false);
+		setAnimCollapse(true);
 	}
 
 	public Form getForm() {

@@ -93,6 +93,17 @@ public class FormModel {
         return assistantModel;
     }
 
+    public FormsJsCodeGenerator getFormsCodeGenerator() {
+        PlatypusFormSupport support = getDataObject().getLookup().lookup(PlatypusFormSupport.class);
+        if (support != null) {
+            CodeGenerator codeGenerator = support.getFormEditor().getCodeGenerator();
+            assert codeGenerator instanceof FormsJsCodeGenerator;
+            return (FormsJsCodeGenerator) codeGenerator;
+        } else {
+            return null;
+        }
+    }
+
     public String findFreeComponentName(Class<?> compClass) {
         return findFreeComponentName(FormUtils.getPlatypusControlClass(compClass).getSimpleName());
     }

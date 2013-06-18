@@ -43,6 +43,7 @@
  */
 package com.bearsoft.org.netbeans.modules.form;
 
+import com.eas.designer.application.module.JsCodeGenerator;
 import java.beans.*;
 import java.util.*;
 import org.openide.*;
@@ -70,7 +71,7 @@ public class EventProperty extends FormProperty<String> {
         if (methodName.startsWith("on")) {
             setDisplayName(methodName);
         } else {
-            setDisplayName("on"+methodName.substring(0, 1).toUpperCase()+methodName.substring(1));
+            setDisplayName("on" + methodName.substring(0, 1).toUpperCase() + methodName.substring(1));
         }
         setShortDescription(aEvent.getEventSetDescriptor().getListenerType().getName());
     }
@@ -230,23 +231,23 @@ public class EventProperty extends FormProperty<String> {
         }
 
         /*
-        if ("postSetAction".equals(key)) // NOI18N
-        {
-            return new javax.swing.AbstractAction() {
-                @Override
-                public void actionPerformed(ActionEvent ev) {
-                    // if Enter was pressed without echange or existing handler
-                    // chosen, switch to editor
-                    if (!somethingChanged && !invalidValueTried && (selectedEventHandler != null)) {
-                        getFormEvents().attachEvent(event,
-                                selectedEventHandler,
-                                null);
-                    }
-                    somethingChanged = false;
-                }
-            };
-        }
-*/
+         if ("postSetAction".equals(key)) // NOI18N
+         {
+         return new javax.swing.AbstractAction() {
+         @Override
+         public void actionPerformed(ActionEvent ev) {
+         // if Enter was pressed without echange or existing handler
+         // chosen, switch to editor
+         if (!somethingChanged && !invalidValueTried && (selectedEventHandler != null)) {
+         getFormEvents().attachEvent(event,
+         selectedEventHandler,
+         null);
+         }
+         somethingChanged = false;
+         }
+         };
+         }
+         */
         return super.getValue(key);
     }
 
@@ -344,7 +345,7 @@ public class EventProperty extends FormProperty<String> {
                         "FMT_MSG_InvalidJavaIdentifier", // NOI18N
                         new Object[]{txt});
                 ErrorManager.getDefault().annotate(
-                        iae, ErrorManager.ERROR, "Not a java identifier", // NOI18N
+                        iae, ErrorManager.ERROR, "Not a JavaScript identifier", // NOI18N
                         annotation, null, null);
                 throw iae;
             }
@@ -356,11 +357,17 @@ public class EventProperty extends FormProperty<String> {
                         "FMT_MSG_InvalidJavaIdentifier", // NOI18N
                         new Object[]{emptyStringTxt});
                 ErrorManager.getDefault().annotate(
-                        iae, ErrorManager.ERROR, "Not a java identifier", // NOI18N
+                        iae, ErrorManager.ERROR, "Not a JavaScript identifier", // NOI18N
                         annotation, null, null);
                 throw iae;
             }
             this.setValue(txt);
+            if (txt != null && txt.equals(EventProperty.this.getValue())) {
+                FormsJsCodeGenerator fGenerator = event.getComponent().getFormModel().getFormsCodeGenerator();
+                if (fGenerator != null) {
+                    fGenerator.gotoEventHandler(txt);
+                }
+            }
         }
 
         @Override

@@ -41,7 +41,7 @@
  * Version 2 license, then the option applies only if the new code is
  * made subject to such option by the copyright holder.
  */
-package com.bearsoft.org.netbeans.modules.form.actions;
+package com.bearsoft.org.netbeans.modules.form.actions.menu;
 
 import com.bearsoft.org.netbeans.modules.form.*;
 import org.openide.awt.ActionID;
@@ -66,7 +66,7 @@ public class EditContainerAction extends NodeAction {
             RADComponentCookie radCookie = activatedNodes[0].getLookup().lookup(RADComponentCookie.class);
             RADComponent<?> radComp = (radCookie != null) ? radCookie.getRADComponent() : null;
             if (isEditableComponent(radComp)) {
-                PlatypusFormLayoutView designer = FormEditor.getFormDesigner(radComp.getFormModel());
+                PlatypusFormLayoutView designer = null;//FormEditor.getFormDesigner(radComp.getFormModel());
                 if (designer != null) {
                     designer.setTopDesignComponent((RADVisualContainer<?>) radComp, true);
                     designer.requestActive();
@@ -91,7 +91,7 @@ public class EditContainerAction extends NodeAction {
             RADComponentCookie radCookie = activatedNodes[0].getLookup().lookup(RADComponentCookie.class);
             RADComponent<?> radComp = (radCookie != null) ? radCookie.getRADComponent() : null;
             if (isEditableComponent(radComp)) {
-                PlatypusFormLayoutView designer = FormEditor.getFormDesigner(radComp.getFormModel());
+                PlatypusFormLayoutView designer = null;//FormEditor.getFormDesigner(radComp.getFormModel());
                 if (designer != null && radComp != designer.getTopDesignComponent()) {
                     return true;
                 }

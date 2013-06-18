@@ -1,12 +1,9 @@
 package com.eas.client.gxtcontrols.grid.wrappers;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import com.bearsoft.rowset.Row;
 import com.eas.client.gxtcontrols.grid.valueproviders.ChangesHost;
-import com.eas.client.gxtcontrols.published.PublishedStyle;
 import com.google.gwt.safecss.shared.SafeStyles;
 import com.google.gwt.safecss.shared.SafeStylesBuilder;
 import com.google.gwt.safecss.shared.SafeStylesUtils;
@@ -18,23 +15,14 @@ import com.sencha.gxt.widget.core.client.grid.ColumnData;
 import com.sencha.gxt.widget.core.client.grid.RowExpander;
 import com.sencha.gxt.widget.core.client.treegrid.TreeGridView;
 
-public class PlatypusTreeGridView extends TreeGridView<Row> implements PlatypusCellsView {
-
-	protected Map<String, PublishedStyle> renderedCellStyles = new HashMap();
+public class PlatypusTreeGridView extends TreeGridView<Row> {
 
 	public PlatypusTreeGridView() {
 		super();
 	}
-
-	@Override
-	public void addCellStyle(int aIndex, int aColumn, PublishedStyle aStyle) {
-		if (aStyle != null)
-			renderedCellStyles.put(aIndex + "_" + aColumn, aStyle);
-	}
-
-	@Override
-	public void clearCellsStyles() {
-		renderedCellStyles.clear();
+	
+	public String getFirstCellTextSelector(){
+		return tree.getTreeAppearance().textSelector();
 	}
 
 	/**
@@ -144,11 +132,6 @@ public class PlatypusTreeGridView extends TreeGridView<Row> implements PlatypusC
 				SafeStylesBuilder cellStyles = new SafeStylesBuilder();
 				cellStyles.append(columnData.getStyles());
 
-				PublishedStyle renderedCellStyle = renderedCellStyles.get(rowIndex + "_" + i);
-				if (renderedCellStyle != null) {
-					cellStyles.appendTrustedString(renderedCellStyle.toStyled());
-				}
-
 				SafeHtml tdContent = null;
 				if (enableRowBody && i == 0) {
 					tdContent = tpls.tdRowSpan(i, cellClasses, cellStyles.toSafeStyles(), super.getRowBodyRowSpan(), rv);
@@ -172,7 +155,6 @@ public class PlatypusTreeGridView extends TreeGridView<Row> implements PlatypusC
 			}
 
 		}
-		renderedCellStyles.clear();
 		// end row loop
 		return buf.toSafeHtml();
 	}

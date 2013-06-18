@@ -122,6 +122,8 @@ public class ListStoreFiller extends RowsetAdapter implements PropertyChangeList
 			if (evt.getOldValue() == null && evt.getNewValue() != null) {
 				rowsetError = (String) evt.getNewValue();
 				checkIfDataError();
+				if(rowset == null)
+					loader.load();
 			}
 		}
 	}

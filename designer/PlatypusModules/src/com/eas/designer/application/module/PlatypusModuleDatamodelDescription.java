@@ -20,7 +20,7 @@ import org.openide.windows.TopComponent;
  */
 public class PlatypusModuleDatamodelDescription implements MultiViewDescription, Serializable {
 
-    protected static final String MODULE_DATAMODEL_VIEW_NAME = "module-datamodel";
+    public static final String MODULE_DATAMODEL_VIEW_NAME = "module-datamodel";
     static final long serialVersionUID = 35114132223497718L;
     protected PlatypusModuleDataObject dataObject;
 

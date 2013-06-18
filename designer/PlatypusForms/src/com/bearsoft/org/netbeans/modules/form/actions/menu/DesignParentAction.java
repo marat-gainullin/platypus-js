@@ -41,7 +41,7 @@
  * Version 2 license, then the option applies only if the new code is
  * made subject to such option by the copyright holder.
  */
-package com.bearsoft.org.netbeans.modules.form.actions;
+package com.bearsoft.org.netbeans.modules.form.actions.menu;
 
 import com.bearsoft.org.netbeans.modules.form.*;
 import java.awt.event.ActionEvent;
@@ -72,7 +72,7 @@ public class DesignParentAction extends NodeAction {
             RADComponentCookie radCookie = nodes[0].getLookup().lookup(RADComponentCookie.class);
             RADComponent<?> comp = (radCookie != null) ? radCookie.getRADComponent() : null;
             if (comp != null && isParentEditableComponent(comp)) {
-                PlatypusFormLayoutView designer = getDesigner(comp);
+                PlatypusFormLayoutView designer = null;//getDesigner(comp);
                 if (designer != null) {
                     RADVisualComponent<?> designed = designer.getTopDesignComponent();
                     if (comp == designed
@@ -182,11 +182,11 @@ public class DesignParentAction extends NodeAction {
         }
         return menuItemListener;
     }
-
+/*
     private static PlatypusFormLayoutView getDesigner(RADComponent<?> comp) {
         return FormEditor.getFormDesigner(comp.getFormModel());
     }
-
+*/
     private static class DesignParentMenuItem extends JMenuItem {
 
         private RADComponent<?> radc = null;
@@ -196,7 +196,7 @@ public class DesignParentAction extends NodeAction {
             setText(top ? NbBundle.getMessage(DesignParentAction.class, "ACT_DesignParentTopMenuItemName") // NOI18N
                     : c.getName());
             addActionListener(l);
-            PlatypusFormLayoutView designer = getDesigner(c);
+            PlatypusFormLayoutView designer = null;//getDesigner(c);
             setEnabled(designer != null && c != designer.getTopDesignComponent());
         }
 
@@ -213,7 +213,7 @@ public class DesignParentAction extends NodeAction {
             if (source != null && source instanceof DesignParentMenuItem) {
                 DesignParentMenuItem mi = (DesignParentMenuItem) source;
                 RADComponent<?> lc = mi.getRADComponent();
-                PlatypusFormLayoutView designer = getDesigner(lc);
+                PlatypusFormLayoutView designer = null;//getDesigner(lc);
                 if (designer != null && lc instanceof RADVisualContainer<?>) {
                     designer.setTopDesignComponent((RADVisualContainer<?>) lc, true);
                     designer.requestActive();

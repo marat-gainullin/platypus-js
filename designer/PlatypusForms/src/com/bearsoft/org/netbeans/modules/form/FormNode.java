@@ -88,33 +88,6 @@ public class FormNode extends AbstractNode {
     @Override
     public Component getCustomizer() {
         return createCustomizer();
-        /*
-         Component customizer = createCustomizer();
-         if (customizer instanceof Window) {
-         // register the customizer window (probably a dialog) to be closed
-         // automatically when the form is closed
-         FormEditor formEditor = FormEditor.getFormEditor(formModel);
-         if (formEditor != null) {
-         Window customizerWindow = (Window) customizer;
-         formEditor.registerFloatingWindow(customizerWindow);
-         // attach a listener to unregister the window when it is closed
-         customizerWindow.addWindowListener(new WindowAdapter() {
-         @Override
-         public void windowClosing(WindowEvent e) {
-         if (e.getSource() instanceof Window) {
-         Window window = (Window) e.getSource();
-         FormEditor formEditor = FormEditor.getFormEditor(formModel);
-         if (formEditor != null) {
-         formEditor.unregisterFloatingWindow(window);
-         }
-         window.removeWindowListener(this);
-         }
-         }
-         });
-         }
-         }
-         return customizer;
-         */
     }
 
     // to be implemented in FormNode descendants (instead of getCustomizer)

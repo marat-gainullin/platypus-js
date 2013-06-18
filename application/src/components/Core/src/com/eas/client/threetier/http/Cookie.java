@@ -78,11 +78,12 @@ public class Cookie {
     }
 
     public Date getExpires() {
-        return new Date(cDate.getTime() + maxAge);
+        long expires = cDate.getTime() + maxAge;
+        return new Date(expires > 0 ? expires : Long.MAX_VALUE);
     }
 
     public boolean isActual() {
-        return getExpires().getTime() > System.currentTimeMillis();
+        return System.currentTimeMillis()-cDate.getTime() < maxAge;
     }
 
     public static Cookie parse(String aHeaderValue) throws ParseException, NumberFormatException {

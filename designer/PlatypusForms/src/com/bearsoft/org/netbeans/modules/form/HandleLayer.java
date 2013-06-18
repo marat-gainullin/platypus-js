@@ -88,11 +88,7 @@ public class HandleLayer extends JPanel {
         public void mouseClicked(MouseEvent e) {
             if (SwingUtilities.isRightMouseButton(e)
                     && !draggingEnded && !endDragging(null)) {
-                if (mouseOnNonVisualTray(e.getPoint())) {
-                    dispatchToNonVisualTray(e);
-                } else {
-                    showContextMenu(e.getPoint());
-                }
+                showContextMenu(e.getPoint());
             }
             highlightPanel(e, true);
             e.consume();
@@ -110,8 +106,6 @@ public class HandleLayer extends JPanel {
                                 && !modifier
                                 && !viewOnly) {   // doubleclick on designer's resizing border
                             setUserDesignerSize();
-                        } else if (mouseOnNonVisualTray(e.getPoint())) {
-                            dispatchToNonVisualTray(e);
                         } else if (prevLeftMousePoint != null
                                 && prevLeftMousePoint.distance(e.getPoint()) <= 3
                                 && !modifier) {   // second click on the same place in a component
@@ -130,8 +124,6 @@ public class HandleLayer extends JPanel {
 
                     prevLeftMousePoint = lastLeftMousePoint;
                     lastLeftMousePoint = null;
-                } else if (mouseOnNonVisualTray(e.getPoint())) {
-                    dispatchToNonVisualTray(e);
                 }
                 e.consume();
             }
@@ -176,9 +168,7 @@ public class HandleLayer extends JPanel {
                         repaint();
                     } else if (!SwingUtilities.isLeftMouseButton(e)) {
                         // no dragging, ensure a component is selected for conext menu
-                        if (mouseOnNonVisualTray(e.getPoint())) {
-                            dispatchToNonVisualTray(e);
-                        } else if (!mouseOnVisual(e.getPoint())) {
+                        if (!mouseOnVisual(e.getPoint())) {
                             selectOtherComponentsNode();
                         } else {
                             // [we used to only select the component if there was nothing selected
@@ -193,24 +183,20 @@ public class HandleLayer extends JPanel {
                     lastLeftMousePoint = e.getPoint();
                     boolean modifier = e.isControlDown() || e.isAltDown() || e.isShiftDown();
                     if (formDesigner.getDesignerMode() == PlatypusFormLayoutView.MODE_SELECT) {
-                        if (mouseOnNonVisualTray(e.getPoint())) {
-                            dispatchToNonVisualTray(e);
-                        } else {
-                            checkResizing(e);
-                            if (!(e.isShiftDown() && e.isAltDown() && e.isControlDown())) {
-                                if (!mouseOnVisual(lastLeftMousePoint)) {
-                                    if ((resizeType == 0) && (selectedComponentAt(lastLeftMousePoint, 0) == null)) {
-                                        selectOtherComponentsNode();
-                                    }
-                                } // Shift+left is reserved for interval or area selection,
-                                // applied on mouse release or mouse dragged; ignore it here.
-                                else if (resizeType == 0 // no resizing
-                                        && (e.getClickCount() != 2 || !processDoubleClick(e)) // no doubleclick
-                                        && (!e.isShiftDown() || e.isAltDown())) {
-                                    RADComponent<?> hitRadComp = selectComponent(e, true);
-                                    if (!modifier) { // plain single click
-                                        processMouseClickInLayoutSupport(hitRadComp, e);
-                                    }
+                        checkResizing(e);
+                        if (!(e.isShiftDown() && e.isAltDown() && e.isControlDown())) {
+                            if (!mouseOnVisual(lastLeftMousePoint)) {
+                                if ((resizeType == 0) && (selectedComponentAt(lastLeftMousePoint, 0) == null)) {
+                                    selectOtherComponentsNode();
+                                }
+                            } // Shift+left is reserved for interval or area selection,
+                            // applied on mouse release or mouse dragged; ignore it here.
+                            else if (resizeType == 0 // no resizing
+                                    && (e.getClickCount() != 2 || !processDoubleClick(e)) // no doubleclick
+                                    && (!e.isShiftDown() || e.isAltDown())) {
+                                RADComponent<?> hitRadComp = selectComponent(e, true);
+                                if (!modifier) { // plain single click
+                                    processMouseClickInLayoutSupport(hitRadComp, e);
                                 }
                             }
                         }
@@ -1239,7 +1225,7 @@ public class HandleLayer extends JPanel {
         Node[] selectedNode = new Node[]{formEditor.getOthersContainerNode()};
 
         try {
-            ci.setSelectedNodes(selectedNode, formEditor);
+            ci.setSelectedNodes(selectedNode, formDesigner);
             formDesigner.clearSelectionImpl();
             formDesigner.repaintSelection();
         } catch (java.beans.PropertyVetoException ex) {
@@ -1831,17 +1817,6 @@ public class HandleLayer extends JPanel {
         return r.contains(p);
     }
 
-    /**
-     * Determines whether the passed point is above the non-visual tray.
-     *
-     * @return <code>true</code> if the point is above the non-visual tray,
-     * returns <code>false</code> otherwise.
-     */
-    boolean mouseOnNonVisualTray(Point p) {
-        Component tray = formDesigner.getNonVisualTray();
-        return tray != null ? tray.getBounds().contains(p) : false;
-    }
-
     // NOTE: does not create a new Point instance
     private Point convertPointFromComponent(Point p, Component sourceComp) {
         return formDesigner.pointFromComponentToHandleLayer(p, sourceComp);
@@ -1895,49 +1870,9 @@ public class HandleLayer extends JPanel {
         return rect;
     }
 
-    /**
-     * Dispatches the mouse event to the non-visual tray.
-     *
-     * @param e the event to dispatch.
-     */
-    private void dispatchToNonVisualTray(final MouseEvent e) {
-        NonVisualTray tray = formDesigner.getNonVisualTray();
-        if (tray == null) {
-            return;
-        }
-        Point point = SwingUtilities.convertPoint(this, e.getPoint(), tray);
-        Component component = SwingUtilities.getDeepestComponentAt(tray, point.x, point.y);
-        point = SwingUtilities.convertPoint(tray, point, component);
-        component.dispatchEvent(new MouseEvent(
-                component,
-                e.getID(),
-                e.getWhen(),
-                e.getModifiers(),
-                point.x,
-                point.y,
-                e.getClickCount(),
-                e.isPopupTrigger()));
-    }
-
     @Override
     public String getToolTipText(MouseEvent e) {
-        if (mouseOnNonVisualTray(e.getPoint())) {
-            NonVisualTray tray = formDesigner.getNonVisualTray();
-            Point point = SwingUtilities.convertPoint(this, e.getPoint(), tray);
-            JComponent component = (JComponent) SwingUtilities.getDeepestComponentAt(tray, point.x, point.y);
-            point = SwingUtilities.convertPoint(tray, point, component);
-            return component.getToolTipText(new MouseEvent(
-                    tray,
-                    e.getID(),
-                    e.getWhen(),
-                    e.getModifiers(),
-                    point.x,
-                    point.y,
-                    e.getClickCount(),
-                    e.isPopupTrigger()));
-        } else {
-            return super.getToolTipText(e);
-        }
+        return super.getToolTipText(e);
     }
 
     // ----------

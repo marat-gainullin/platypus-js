@@ -86,20 +86,6 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
     //
     protected static PlatypusClientApplication app;
     public static final String APPLICATION_ELEMENTS_LOCATION_MSG = "Application elements are located at: {0}";
-
-    private static String calcLogsDirectory() {
-        return StringUtils.join(File.separator, System.getProperty(ClientConstants.USER_HOME_PROP_NAME), ClientConstants.USER_HOME_PLATYPUS_DIRECTORY_NAME, LOGS_PATH);
-    }
-
-    private void checkLogsDirectory() {
-        String path = calcLogsDirectory();
-        if (path != null) {
-            File logsDir = new File(path);
-            if (!logsDir.exists()) {
-                logsDir.mkdirs();
-            }
-        }
-    }
     protected JFrame mainWindow;
     protected Client client;
     protected PlatypusPrincipal principal;
@@ -112,11 +98,11 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
     protected boolean needInitialBreak;
     // auto login
     protected String url;
-    protected String dbuser;
-    protected String dbschema;
-    protected String dbpassword;
+    protected String dbSchema;
+    protected String dbUser;
+    protected char[] dbPassword;
     protected String user;
-    protected String password;
+    protected char[] password;
 
     /**
      * @param args the command line arguments
@@ -128,7 +114,6 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
             app.run();
         } catch (Throwable t) {
             Logger.getLogger(PlatypusClientApplication.class.getName()).log(Level.SEVERE, null, t);
-            //если уж до сюда исключение добралось, то выходим.
             System.exit(255);
         }
     }
@@ -189,69 +174,59 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
             }
             EasSettings settings = EasSettings.createInstance(url);
             if (settings instanceof DbConnectionSettings) {
-                if (dbuser == null || dbuser.isEmpty() || dbpassword == null || dbpassword.isEmpty() || dbschema == null || dbschema.isEmpty()) {
+                if (dbUser == null || dbUser.isEmpty() || dbPassword == null || dbPassword.length == 0 || dbSchema == null || dbSchema.isEmpty()) {
                     throw new Exception(BAD_DB_CREDENTIALS_MSG + " May be bad db connection settings (url, dbuser, dbpassword, dbschema).");
                 }
-                settings.getInfo().put(ClientConstants.DB_CONNECTION_USER_PROP_NAME, dbuser);
-                settings.getInfo().put(ClientConstants.DB_CONNECTION_PASSWORD_PROP_NAME, dbpassword);
-                settings.getInfo().put(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME, dbschema);
+                settings.getInfo().put(ClientConstants.DB_CONNECTION_USER_PROP_NAME, dbUser);
+                settings.getInfo().put(ClientConstants.DB_CONNECTION_PASSWORD_PROP_NAME, dbPassword);
+                settings.getInfo().put(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME, dbSchema);
                 if (appPath != null) {
                     ((DbConnectionSettings) settings).setApplicationPath(appPath);
                 }
             }
-            settings.setUrl(url);
             Client lclient = ClientFactory.getInstance(settings);
             try {
-                return appLogin(lclient, user, password.toCharArray());
+                return appLogin(lclient, user, password);
             } catch (Exception ex) {
                 lclient.shutdown();
                 throw ex;
             }
         } finally {
-            dbuser = null;
-            dbschema = null;
-            dbpassword = null;
+            dbUser = null;
+            dbSchema = null;
+            dbPassword = null;
             user = null;
             password = null;
         }
     }
 
     private boolean guiLogin() throws Exception {
-        LoginFrame frame = new LoginFrame(null, true, new LoginCallback() {
+        LoginFrame frame = new LoginFrame(url, dbSchema, dbUser, dbPassword, user, password, new LoginCallback() {
             @Override
             public boolean tryToLogin(EasSettings aSettings, String aDbUser, char[] aDbPassword, String aUserName, char[] aAppPassword) throws Exception {
+                EasSettings lsettings = aSettings;
+                if (aSettings instanceof DbConnectionSettings) {
+                    if (aDbUser == null || aDbUser.isEmpty() || aDbPassword == null || aDbPassword.length == 0) {
+                        throw new Exception(BAD_DB_CREDENTIALS_MSG);
+                    }
+                    DbConnectionSettings dbSettings = new DbConnectionSettings();
+                    dbSettings.setName(((DbConnectionSettings) aSettings).getName());
+                    dbSettings.setDrivers(((DbConnectionSettings) aSettings).getDrivers());
+                    dbSettings.setUrl(((DbConnectionSettings) aSettings).getUrl());
+                    dbSettings.getInfo().putAll(((DbConnectionSettings) aSettings).getInfo());
+                    dbSettings.getInfo().put(ClientConstants.DB_CONNECTION_USER_PROP_NAME, aDbUser);
+                    dbSettings.getInfo().put(ClientConstants.DB_CONNECTION_PASSWORD_PROP_NAME, new String(aDbPassword));
+                    if (appPath != null) {
+                        dbSettings.setApplicationPath(appPath);
+                    }
+                    lsettings = dbSettings;
+                }
+                Client lclient = ClientFactory.getInstance(lsettings);
                 try {
-                    EasSettings lsettings = aSettings;
-                    if (aSettings instanceof DbConnectionSettings) {
-                        if (aDbUser == null || aDbUser.isEmpty() || aDbPassword == null || aDbPassword.length == 0) {
-                            throw new Exception(BAD_DB_CREDENTIALS_MSG);
-                        }
-                        DbConnectionSettings dbSettings = new DbConnectionSettings();
-                        dbSettings.setName(((DbConnectionSettings) aSettings).getName());
-                        dbSettings.setDrivers(((DbConnectionSettings) aSettings).getDrivers());
-                        dbSettings.setUrl(((DbConnectionSettings) aSettings).getUrl());
-                        dbSettings.getInfo().putAll(((DbConnectionSettings) aSettings).getInfo());
-                        dbSettings.getInfo().put(ClientConstants.DB_CONNECTION_USER_PROP_NAME, aDbUser);
-                        dbSettings.getInfo().put(ClientConstants.DB_CONNECTION_PASSWORD_PROP_NAME, new String(aDbPassword));
-                        if (appPath != null) {
-                            dbSettings.setApplicationPath(appPath);
-                        }
-                        lsettings = dbSettings;
-                    }
-                    Client lclient = ClientFactory.getInstance(lsettings);
-                    try {
-                        return appLogin(lclient, aUserName, aAppPassword);
-                    } catch (Exception ex) {
-                        lclient.shutdown();
-                        throw ex;
-                    }
-                } finally {
-                    for (int i = 0; i < aDbPassword.length; i++) {
-                        aDbPassword[i] = 0;
-                    }
-                    for (int i = 0; i < aAppPassword.length; i++) {
-                        aAppPassword[i] = 0;
-                    }
+                    return appLogin(lclient, aUserName, aAppPassword);
+                } catch (Exception ex) {
+                    lclient.shutdown();
+                    throw ex;
                 }
             }
         });
@@ -308,6 +283,20 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
         return false;
     }
 
+    private static String calcLogsDirectory() {
+        return StringUtils.join(File.separator, System.getProperty(ClientConstants.USER_HOME_PROP_NAME), ClientConstants.USER_HOME_PLATYPUS_DIRECTORY_NAME, LOGS_PATH);
+    }
+
+    private void checkLogsDirectory() {
+        String path = calcLogsDirectory();
+        if (path != null) {
+            File logsDir = new File(path);
+            if (!logsDir.exists()) {
+                logsDir.mkdirs();
+            }
+        }
+    }
+
     public Client getClient() {
         return client;
     }
@@ -347,21 +336,21 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
                 }
             } else if ((CMD_SWITCHS_PREFIX + DBUSER_CMD_SWITCH).equalsIgnoreCase(args[i])) {
                 if (i < args.length - 1) {
-                    dbuser = args[i + 1];
+                    dbUser = args[i + 1];
                     i += 2;
                 } else {
                     throw new IllegalArgumentException("Db user syntax: -dbuser <value>");
                 }
             } else if ((CMD_SWITCHS_PREFIX + DBSCHEMA_CMD_SWITCH).equalsIgnoreCase(args[i])) {
                 if (i < args.length - 1) {
-                    dbschema = args[i + 1];
+                    dbSchema = args[i + 1];
                     i += 2;
                 } else {
                     throw new IllegalArgumentException("Db schema syntax: -dbschema <value>");
                 }
             } else if ((CMD_SWITCHS_PREFIX + DBPASSWORD_CMD_SWITCH).equalsIgnoreCase(args[i])) {
                 if (i < args.length - 1) {
-                    dbpassword = args[i + 1];
+                    dbPassword = args[i + 1].toCharArray();
                     i += 2;
                 } else {
                     throw new IllegalArgumentException("Db password syntax: -dbpassword <value>");
@@ -375,7 +364,7 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
                 }
             } else if ((CMD_SWITCHS_PREFIX + PASSWORD_CMD_SWITCH).equalsIgnoreCase(args[i])) {
                 if (i < args.length - 1) {
-                    password = args[i + 1];
+                    password = args[i + 1].toCharArray();
                     i += 2;
                 } else {
                     throw new IllegalArgumentException("Password syntax: -password <value>");

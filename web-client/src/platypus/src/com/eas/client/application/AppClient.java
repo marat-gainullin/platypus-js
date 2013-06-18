@@ -53,6 +53,7 @@ import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.safehtml.shared.SafeUri;
+import com.google.gwt.user.client.Window.Location;
 import com.google.gwt.xhr.client.ReadyStateChangeHandler;
 import com.google.gwt.xhr.client.XMLHttpRequest;
 import com.google.gwt.xhr.client.XMLHttpRequest.ResponseType;
@@ -395,6 +396,7 @@ public class AppClient {
 			@Override
 			public void run(XMLHttpRequest aResult) throws Exception {
 				Utils.executeScriptEventVoid(onSuccess, onSuccess, null);
+				Location.reload();
 			}
 		}));
 	}
@@ -595,7 +597,7 @@ public class AppClient {
 	public String resourceUri(String aResourceName) {
 		return RESOURCES_URI + "/" + aResourceName;
 	}
-	
+
 	public String resourceUrl(String aResourceName) {
 		return baseUrl + RESOURCES_URI + "/" + aResourceName;
 	}
@@ -718,12 +720,26 @@ public class AppClient {
 
 				@Override
 				public void doWork(XMLHttpRequest aResponse) throws Exception {
-					callBack(onSuccess, aResponse.getResponseText());
+					String responseType = aResponse.getResponseHeader("content-type");
+					if (responseType != null) {
+						responseType = responseType.toLowerCase();
+						if (responseType.contains("text/json") || responseType.contains("text/javascript")) {
+							jsonCallBack(onSuccess, aResponse.getResponseText());
+						} else {
+							textCallBack(onSuccess, aResponse.getResponseText());
+						}
+					} else {
+						textCallBack(onSuccess, aResponse.getResponseText());
+					}
 				}
 
-				private native void callBack(JavaScriptObject onSuccess, String aData) throws Exception /*-{
-					onSuccess(JSON.parse(aData));
-				}-*/;
+				private native void jsonCallBack(JavaScriptObject onSuccess, String aData) throws Exception /*-{
+		onSuccess(JSON.parse(aData));
+	}-*/;
+
+				private native void textCallBack(JavaScriptObject onSuccess, String aData) throws Exception /*-{
+		onSuccess(aData);
+	}-*/;
 
 			}, null);
 			return null;
@@ -786,7 +802,7 @@ public class AppClient {
 				if (onFailure != null) {
 					int status = aResponse.getStatus();
 					String statusText = aResponse.getStatusText();
-					if((statusText == null || statusText.isEmpty()) && status == 0)
+					if ((statusText == null || statusText.isEmpty()) && status == 0)
 						statusText = "rowset recieving is aborted";
 					onFailure.run(statusText);
 				}

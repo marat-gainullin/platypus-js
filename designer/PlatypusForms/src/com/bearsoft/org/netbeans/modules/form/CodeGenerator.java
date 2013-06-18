@@ -43,8 +43,6 @@
  */
 package com.bearsoft.org.netbeans.modules.form;
 
-import org.openide.nodes.Node;
-
 /**
  *
  * @author Ian Formanek

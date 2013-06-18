@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.reflect.Method;
-import java.util.EventObject;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.netbeans.api.editor.guards.GuardedSection;
@@ -19,7 +18,7 @@ import org.netbeans.api.editor.guards.InteriorSection;
  *
  * @author Ian Formanek, Jan Stola, mg
  */
-class FormsJsCodeGenerator extends CodeGenerator {
+public class FormsJsCodeGenerator extends CodeGenerator {
 
     private static final String EVT_SECTION_PREFIX = "event_"; // NOI18N
     private static final String EVT_VARIABLE_NAME = "evt"; // NOI18N
@@ -274,7 +273,7 @@ class FormsJsCodeGenerator extends CodeGenerator {
     /**
      * Focuses the specified event handler in the editor.
      */
-    private void gotoEventHandler(String handlerName) {
+    public void gotoEventHandler(String handlerName) {
         InteriorSection sec = getEventHandlerSection(handlerName);
         if (sec != null && initialized) {
             formEditorSupport.openAt(sec.getCaretPosition());

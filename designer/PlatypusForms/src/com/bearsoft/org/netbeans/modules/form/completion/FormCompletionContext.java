@@ -6,6 +6,7 @@ package com.bearsoft.org.netbeans.modules.form.completion;
 
 import com.bearsoft.org.netbeans.modules.form.FormModel;
 import com.bearsoft.org.netbeans.modules.form.FormUtils;
+import com.bearsoft.org.netbeans.modules.form.PersistenceException;
 import com.bearsoft.org.netbeans.modules.form.PlatypusFormDataObject;
 import com.bearsoft.org.netbeans.modules.form.PlatypusFormSupport;
 import com.bearsoft.org.netbeans.modules.form.RADComponent;
@@ -23,6 +24,7 @@ import com.eas.designer.application.module.completion.JsCompletionProvider;
 import com.eas.designer.application.module.completion.ModuleCompletionContext;
 import java.awt.Container;
 import org.netbeans.spi.editor.completion.CompletionResultSet;
+import org.openide.util.Exceptions;
 
 /**
  *
@@ -80,12 +82,14 @@ public class FormCompletionContext extends ModuleCompletionContext {
     }
 
     private FormModel getFormModel() {
-        PlatypusFormDataObject formDataObject = (PlatypusFormDataObject) dataObject;
-        PlatypusFormSupport support = formDataObject.getLookup().lookup(PlatypusFormSupport.class);
-        if (support.loadForm()) {
+        try {
+            PlatypusFormDataObject formDataObject = (PlatypusFormDataObject) dataObject;
+            PlatypusFormSupport support = formDataObject.getLookup().lookup(PlatypusFormSupport.class);
+            support.loadForm();
             return support.getFormModel();
+        } catch (PersistenceException ex) {
+            throw new IllegalStateException("Form model can't be read");
         }
-        return null;
     }
 
     protected RADComponent<?> getComponentByName(String aName) {

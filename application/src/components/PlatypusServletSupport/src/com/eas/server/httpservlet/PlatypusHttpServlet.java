@@ -44,6 +44,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.activation.MimeType;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanRegistrationException;
 import javax.management.MalformedObjectNameException;
@@ -85,6 +86,7 @@ public class PlatypusHttpServlet extends HttpServlet {
     public static final String HTTP_HOST_OBJECT_NAME = "http";
     public static final String EXCEL_CONTENT_TYPE = "application/xls";
     public static final String HTML_CONTENTTYPE = "text/html";
+    public static final String TEXT_CONTENTTYPE = "text/plain";
     public static final String CREATE_MODULE_RESPONSE_FUNCTIONS_PROP = "functions";
     public static final String CREATE_MODULE_RESPONSE_IS_REPORT_PROP = "isReport";
     private PlatypusServerCore serverCore;
@@ -187,8 +189,7 @@ public class PlatypusHttpServlet extends HttpServlet {
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         currentRequest.set(request);
         try {
             if (!checkUpload(request, response)) {
@@ -243,8 +244,7 @@ public class PlatypusHttpServlet extends HttpServlet {
     }
 
     /**
-     * Precesses request for both PlatypusAPI requests and "Platypus protocol
-     * over http" requests.
+     * Precesses request for both PlatypusAPI requests and "Platypus protocol over http" requests.
      *
      * @param aHttpRequest
      * @param aPlatypusSession
@@ -288,45 +288,45 @@ public class PlatypusHttpServlet extends HttpServlet {
                 .toString();
     }
 
-    private void writeJsonRowsetResponse(Rowset aRowset, HttpServletResponse response, HttpServletRequest request) throws Exception {
+    private void writeResponse(Rowset aRowset, HttpServletResponse response, HttpServletRequest request) throws Exception {
         RowsetJsonWriter writer = new RowsetJsonWriter(aRowset);
         String json = writer.write();
         writeJsonResponse(json, response);
     }
 
-    private void writeQueryResponse(Query<?> query, HttpServletResponse aHttpResponse) throws Exception {
+    private void writeResponse(Query<?> query, HttpServletResponse aHttpResponse) throws Exception {
         QueryJsonWriter writer = new QueryJsonWriter(query);
         writeJsonResponse(writer.write(), aHttpResponse);
     }
 
-    private void writeStringResponse(String aResponseString, HttpServletResponse response, String aContentType) throws UnsupportedEncodingException, IOException {
-        byte[] bytes = aResponseString.getBytes(SettingsConstants.COMMON_ENCODING);
-        response.setCharacterEncoding(SettingsConstants.COMMON_ENCODING);
-        if (response.getContentType() == null) {
-            response.setContentType(aContentType);
+    private void writeResponse(String aResponse, HttpServletResponse aHttpResponse, String aContentType) throws UnsupportedEncodingException, IOException {
+        byte[] bytes = aResponse.getBytes(SettingsConstants.COMMON_ENCODING);
+        aHttpResponse.setCharacterEncoding(SettingsConstants.COMMON_ENCODING);
+        if (aHttpResponse.getContentType() == null) {
+            aHttpResponse.setContentType(aContentType);
         }
-        response.setContentLength(bytes.length);
-        response.getOutputStream().write(bytes);
+        aHttpResponse.setContentLength(bytes.length);
+        aHttpResponse.getOutputStream().write(bytes);
     }
 
-    private void writeJsonResponse(String aResponseString, HttpServletResponse response) throws UnsupportedEncodingException, IOException {
-        writeStringResponse(aResponseString, response, RowsetJsonConstants.JSON_CONTENTTYPE);
+    private void writeJsonResponse(String aResponse, HttpServletResponse response) throws UnsupportedEncodingException, IOException {
+        writeResponse(aResponse, response, RowsetJsonConstants.JSON_CONTENTTYPE);
     }
 
-    private void writeExcelResponse(byte[] aResponseData, HttpServletResponse response) throws UnsupportedEncodingException, IOException {
+    private void writeExcelResponse(byte[] aResponse, HttpServletResponse response) throws UnsupportedEncodingException, IOException {
         response.setCharacterEncoding(SettingsConstants.COMMON_ENCODING);
         response.setContentType(EXCEL_CONTENT_TYPE);
         response.addHeader("Content-Disposition", "attachment; filename=\"report.xls\"");
-        response.setContentLength(aResponseData.length);
-        response.getOutputStream().write(aResponseData);
+        response.setContentLength(aResponse.length);
+        response.getOutputStream().write(aResponse);
     }
 
-    private void writeBinaryResponse(byte[] aResponseData, HttpServletResponse aResponse, String aContentType) throws UnsupportedEncodingException, IOException {
+    private void writeResponse(byte[] aResponse, HttpServletResponse aHttpResponse, String aContentType) throws UnsupportedEncodingException, IOException {
         if (aContentType != null) {
-            aResponse.setContentType(aContentType);
+            aHttpResponse.setContentType(aContentType);
         }
-        aResponse.setContentLength(aResponseData.length);
-        aResponse.getOutputStream().write(aResponseData);
+        aHttpResponse.setContentLength(aResponse.length);
+        aHttpResponse.getOutputStream().write(aResponse);
     }
 
     private void sendJ2SEResponse(Response aPlatypusResponse, HttpServletResponse aResponse) throws Exception {
@@ -472,20 +472,20 @@ public class PlatypusHttpServlet extends HttpServlet {
                     aHttpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, er.getError());
                 }
             } else if (aPlatypusResponse instanceof RowsetResponse) {
-                writeJsonRowsetResponse(((RowsetResponse) aPlatypusResponse).getRowset(), aHttpResponse, aHttpRequest);
+                writeResponse(((RowsetResponse) aPlatypusResponse).getRowset(), aHttpResponse, aHttpRequest);
             } else if (aPlatypusResponse instanceof CreateServerModuleResponse) {
                 CreateServerModuleResponse csmr = (CreateServerModuleResponse) aPlatypusResponse;
                 writeJsonResponse(moduleResponseToJson(csmr.getFunctionsNames(), csmr.isReport()), aHttpResponse);
             } else if (aPlatypusResponse instanceof ExecuteServerModuleMethodRequest.Response) {
                 Object result = ((ExecuteServerModuleMethodRequest.Response) aPlatypusResponse).getResult();
                 if (result instanceof ScriptableRowset) {
-                    writeJsonRowsetResponse(((ScriptableRowset) result).unwrap(), aHttpResponse, aHttpRequest);
+                    writeResponse(((ScriptableRowset) result).unwrap(), aHttpResponse, aHttpRequest);
                 } else if (result instanceof String) {
-                    writeStringResponse((String) result, aHttpResponse, HTML_CONTENTTYPE);
+                    writeResponse((String) result, aHttpResponse, TEXT_CONTENTTYPE);
                 } else if (result instanceof NativeObject) {
                     writeJsonResponse(ScriptUtils.toJson(result), aHttpResponse);
                 } else if (result instanceof XMLObject) {
-                    writeStringResponse(ScriptUtils.toXMLString((XMLObject) result), aHttpResponse, HTML_CONTENTTYPE);
+                    writeResponse(ScriptUtils.toXMLString((XMLObject) result), aHttpResponse, HTML_CONTENTTYPE);
                 } else {
                     ScriptUtils.enterContext();
                     try {
@@ -496,7 +496,7 @@ public class PlatypusHttpServlet extends HttpServlet {
                 }
             } else if (aPlatypusResponse instanceof AppQueryResponse) {
                 Query<?> query = ((AppQueryResponse) aPlatypusResponse).getAppQuery();
-                writeQueryResponse(query, aHttpResponse);
+                writeResponse(query, aHttpResponse);
             } else if (aPlatypusResponse instanceof FilteredAppElementRequest.FilteredResponse) {
                 if (isResourceRequest(aHttpRequest) && aHttpRequest.getParameter(PlatypusHttpRequestParams.TYPE) == null) {// pure resource request
                     writeJsonResponse(((FilteredAppElementRequest.FilteredResponse) aPlatypusResponse).getFilteredScript(), aHttpResponse);
@@ -514,7 +514,7 @@ public class PlatypusHttpServlet extends HttpServlet {
                         if (appElementResponse.getAppElement().getType() == ClientConstants.ET_RESOURCE) {
                             ApplicationElement appElement = ((AppElementRequest.Response) aPlatypusResponse).getAppElement();
                             String mimeType = URLConnection.getFileNameMap().getContentTypeFor(appElement.getName());
-                            writeBinaryResponse(appElement.getBinaryContent(), aHttpResponse, mimeType);
+                            writeResponse(appElement.getBinaryContent(), aHttpResponse, mimeType);
                             if (mimeType != null && mimeType.contains("text")) {
                                 aHttpResponse.setCharacterEncoding(SettingsConstants.COMMON_ENCODING);
                             }

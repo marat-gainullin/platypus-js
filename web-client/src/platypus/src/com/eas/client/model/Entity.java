@@ -1505,7 +1505,7 @@ public class Entity implements RowsetListener {
 					oldParamValues.put(p.getName(), p.getValue());
 				}
 				boolean parametersBinded = bindQueryParameters();
-				if (rowset == null || parametersBinded || refresh) {
+				if ((rowset == null || refresh || parametersBinded) && (pending == null || parametersBinded)) {
 					// if we have no rowset yet or query parameters values have
 					// been changed ...
 					// or we are forced to refresh the data.
@@ -2113,6 +2113,8 @@ public class Entity implements RowsetListener {
 	}
 
 	public Rowset getRowset() {
+		//if(rowset == null)// leads to messages bloat
+		//	Logger.getLogger(Entity.class.getName()).log(Level.WARNING, "Model entity ["+getTitle()+"] using while data not loaded detected.");
 		return rowset;
 	}
 
@@ -2264,7 +2266,7 @@ public class Entity implements RowsetListener {
 
 	public JavaScriptObject createLocator(JavaScriptObject aConstraints) throws Exception {
 		JsArrayMixed constraints = aConstraints.<JsArrayMixed> cast();
-		Locator loc = new Locator(getRowset());
+		Locator loc = getRowset().createLocator();
 		loc.beginConstrainting();
 		try {
 			for (int i = 0; i < constraints.length(); i++) {
@@ -2280,7 +2282,7 @@ public class Entity implements RowsetListener {
 
 	public JavaScriptObject createFilter(JavaScriptObject aConstraints) throws Exception {
 		JsArrayMixed constraints = aConstraints.<JsArrayMixed> cast();
-		Filter filter = new Filter(getRowset());
+		Filter filter = getRowset().createFilter();
 		filter.beginConstrainting();
 		try {
 			for (int i = 0; i < constraints.length(); i++) {

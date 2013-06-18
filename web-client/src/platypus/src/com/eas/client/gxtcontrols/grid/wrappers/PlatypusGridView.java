@@ -18,23 +18,10 @@ import com.sencha.gxt.widget.core.client.grid.ColumnData;
 import com.sencha.gxt.widget.core.client.grid.GridView;
 import com.sencha.gxt.widget.core.client.grid.RowExpander;
 
-public class PlatypusGridView extends GridView<Row> implements PlatypusCellsView {
-
-	protected Map<String, PublishedStyle> renderedCellStyles = new HashMap();
+public class PlatypusGridView extends GridView<Row> {
 
 	public PlatypusGridView() {
 		super();
-	}
-
-	@Override
-	public void addCellStyle(int aIndex, int aColumn, PublishedStyle aStyle) {
-		if (aStyle != null)
-			renderedCellStyles.put(aIndex + "_" + aColumn, aStyle);
-	}
-
-	@Override
-	public void clearCellsStyles() {
-		renderedCellStyles.clear();
 	}
 
 	/**
@@ -145,11 +132,6 @@ public class PlatypusGridView extends GridView<Row> implements PlatypusCellsView
 				SafeStylesBuilder cellStyles = new SafeStylesBuilder();
 				cellStyles.append(columnData.getStyles());
 
-				PublishedStyle renderedCellStyle = renderedCellStyles.get(rowIndex + "_" + i);
-				if (renderedCellStyle != null) {
-					cellStyles.appendTrustedString(renderedCellStyle.toStyled());
-				}
-
 				SafeHtml tdContent = null;
 				if (enableRowBody && i == 0) {
 					tdContent = tpls.tdRowSpan(i, cellClasses, cellStyles.toSafeStyles(), super.getRowBodyRowSpan(), rv);
@@ -173,7 +155,6 @@ public class PlatypusGridView extends GridView<Row> implements PlatypusCellsView
 			}
 
 		}
-		renderedCellStyles.clear();
 		// end row loop
 		return buf.toSafeHtml();
 	}

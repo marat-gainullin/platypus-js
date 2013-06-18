@@ -23,6 +23,7 @@ import org.netbeans.api.extexecution.ExternalProcessBuilder;
 import org.netbeans.spi.server.ServerInstanceImplementation;
 import org.openide.nodes.Node;
 import org.openide.util.ChangeSupport;
+import org.openide.util.NbBundle;
 import org.openide.windows.InputOutput;
 
 /**
@@ -103,7 +104,7 @@ public final class PlatypusServerInstance implements ServerInstanceImplementatio
     public void removeChangeListener(final ChangeListener listener) {
         changeSupport.removeChangeListener(listener);
     }
-    
+
     public boolean start(PlatypusProject aProject, File binDir, boolean debug) {
         project = aProject;
         assert project != null;
@@ -122,11 +123,16 @@ public final class PlatypusServerInstance implements ServerInstanceImplementatio
             public void run() {
                 setServerState(PlatypusServerInstance.ServerState.STOPPED);
                 serverRunTask = null;
-                io.getOut().println("Platypus Server stopped.");
+                io.getOut().println(NbBundle.getMessage(PlatypusServerInstance.class, "MSG_Server_Stopped"));//NOI18N
                 io.getOut().println();
             }
         });
         ExternalProcessBuilder processBuilder = new ExternalProcessBuilder(ProjectRunner.JVM_RUN_COMMAND_NAME);
+        if (project.getSettings().getRunServerVmOptions() != null && !project.getSettings().getRunServerVmOptions().isEmpty()) {
+            processBuilder = ProjectRunner.addArguments(processBuilder, project.getSettings().getRunServerVmOptions());
+            io.getOut().println(String.format(NbBundle.getMessage(PlatypusServerInstance.class, "MSG_VM_Run_Options"),//NOI18N
+                    project.getSettings().getRunServerVmOptions()));
+        }
         if (debug) {
             processBuilder = ProjectRunner.setDebugArguments(processBuilder, project.getSettings().getDebugServerPort());
         }
@@ -139,7 +145,10 @@ public final class PlatypusServerInstance implements ServerInstanceImplementatio
         if (!project.getSettings().isDbAppSources()) {
             processBuilder = processBuilder.addArgument(ProjectRunner.OPTION_PREFIX + ServerMain.APP_PATH_PARAM1);
             processBuilder = processBuilder.addArgument(project.getProjectDirectory().getPath());
-            io.getOut().println(String.format("Server application sources: %s.", project.getProjectDirectory().getPath()));
+            io.getOut().println(String.format(NbBundle.getMessage(PlatypusServerInstance.class, "MSG_App_Sources"),//NOI18N
+                    project.getProjectDirectory().getPath()));
+        } else {
+            io.getOut().println(NbBundle.getMessage(PlatypusServerInstance.class, "MSG_App_Sources_Database"));//NOI18N
         }
 
         processBuilder = processBuilder.addArgument(ProjectRunner.OPTION_PREFIX + ServerMain.APP_DB_URL_CONF_PARAM);
@@ -154,34 +163,31 @@ public final class PlatypusServerInstance implements ServerInstanceImplementatio
         if (!ProjectRunner.isSetByOption(ServerMain.IFACE_CONF_PARAM, project.getSettings().getRunClientOptions())) {
             processBuilder = processBuilder.addArgument(ProjectRunner.OPTION_PREFIX + ServerMain.IFACE_CONF_PARAM);
             processBuilder = processBuilder.addArgument(getListenInterfaceArgument(project.getSettings()));
-            io.getOut().println(String.format("Server interface: %s.", getListenInterfaceArgument(project.getSettings())));
+            io.getOut().println(String.format(NbBundle.getMessage(PlatypusServerInstance.class, "MSG_Server_Interface"),//NOI18N
+                    getListenInterfaceArgument(project.getSettings())));
         }
         if (!ProjectRunner.isSetByOption(ServerMain.PROTOCOLS_CONF_PARAM, project.getSettings().getRunClientOptions())) {
             processBuilder = processBuilder.addArgument(ProjectRunner.OPTION_PREFIX + ServerMain.PROTOCOLS_CONF_PARAM);
             processBuilder = processBuilder.addArgument(getProtocol(project.getSettings()));
-            io.getOut().println(String.format("Server protocol: %s.", getProtocol(project.getSettings())));
+            io.getOut().println(String.format(NbBundle.getMessage(PlatypusServerInstance.class, "MSG_Server_Protocol"), getProtocol(project.getSettings())));//NOI18N
         }
         if (project.getSettings().getRunClientOptions() != null && !project.getSettings().getRunClientOptions().isEmpty()) {
-            String[] optionalArgs = project.getSettings().getRunClientOptions().split(" ");// NOI18N
-            if (optionalArgs.length > 0) {
-                for (int i = 0; i < optionalArgs.length; i++) {
-                    processBuilder = processBuilder.addArgument(optionalArgs[i]);
-                }
-            }
-            io.getOut().println(String.format("Server options: %s.", project.getSettings().getRunClientOptions()));
+            processBuilder = ProjectRunner.addArguments(processBuilder, project.getSettings().getRunClientOptions());
+            io.getOut().println(String.format(NbBundle.getMessage(PlatypusServerInstance.class, "MSG_Run_Options"),//NOI18N
+                    project.getSettings().getRunClientOptions()));
         }
         //set default log level if not set explicitly
         if (!ProjectRunner.isSetByOption(ServerMain.LOGLEVEL_CONF_PARAM, project.getSettings().getRunClientOptions())) {
             processBuilder = processBuilder.addArgument(ProjectRunner.OPTION_PREFIX + ServerMain.LOGLEVEL_CONF_PARAM);
             processBuilder = processBuilder.addArgument(Level.INFO.getName());
-            io.getOut().println(String.format("Server logging level set to: %s.", Level.INFO.getName()));
+            io.getOut().println(String.format(NbBundle.getMessage(PlatypusServerInstance.class, "MSG_Logging_Level"), Level.INFO.getName()));//NOI18N
         }
         ExecutionService service = ExecutionService.newService(processBuilder, descriptor, "Platypus Server");
         Future<Integer> runTask = service.run();
         serverRunTask = runTask;
         return runTask != null;
     }
-    
+
     public void stop() {
         serverRunTask.cancel(true);
         serverRunTask = null;

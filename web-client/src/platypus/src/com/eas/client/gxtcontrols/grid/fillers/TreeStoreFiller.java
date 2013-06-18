@@ -19,14 +19,12 @@ import com.bearsoft.rowset.events.RowsetRequeryEvent;
 import com.bearsoft.rowset.events.RowsetRollbackEvent;
 import com.bearsoft.rowset.events.RowsetSaveEvent;
 import com.bearsoft.rowset.events.RowsetScrollEvent;
-import com.bearsoft.rowset.exceptions.InvalidColIndexException;
 import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.locators.Locator;
 import com.bearsoft.rowset.locators.RowWrap;
 import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.beans.PropertyChangeEvent;
 import com.eas.client.beans.PropertyChangeListener;
-import com.eas.client.gxtcontrols.wrappers.component.FormattedTextField;
 import com.eas.client.model.Entity;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
@@ -166,6 +164,8 @@ public class TreeStoreFiller extends RowsetAdapter implements PropertyChangeList
 			if (evt.getOldValue() == null && evt.getNewValue() != null) {
 				rowsetError = (String) evt.getNewValue();
 				checkIfRootsWithError();
+				if(rowset == null)
+					loader.load();
 			}
 		}
 	}

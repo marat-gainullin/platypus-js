@@ -98,7 +98,6 @@ public abstract class RADComponent<C> {
     private BeanInfo fakeBeanInfo;
     private String missingClassName;
     protected Node.PropertySet[] propertySets;
-    private FormProperty<?>[] syntheticProperties;
     private RADProperty<?>[] beanProperties1;
     private RADProperty<?>[] beanProperties2;
     private Map<String, EventProperty[]> eventProperties;
@@ -493,15 +492,6 @@ public abstract class RADComponent<C> {
         return componentNode;
     }
 
-    // -----------------------------------------------------------------------------
-    // Access to component Properties
-    FormProperty<?>[] getSyntheticProperties() {
-        if (syntheticProperties == null) {
-            syntheticProperties = createSyntheticProperties();
-        }
-        return syntheticProperties;
-    }
-
     RADProperty<?>[] getBeanProperties1() {
         if (beanProperties1 == null) {
             createBeanProperties();
@@ -562,15 +552,6 @@ public abstract class RADComponent<C> {
 
     public final <P> P getRADProperty(String name) {
         return (P) getPropertyByName(name, RADProperty.class, true);
-    }
-
-    public final FormProperty<?> getSyntheticProperty(String name) {
-        for (FormProperty<?> prop : getSyntheticProperties()) {
-            if (prop.getName().equals(name)) {
-                return prop;
-            }
-        }
-        return null;
     }
 
     public RADProperty<?>[] getFakeBeanProperties(String[] propNames, Class<?>[] propertyTypes) {
@@ -770,7 +751,6 @@ public abstract class RADComponent<C> {
             nameToProperty = new HashMap<>();
         }
         propertySets = null;
-        syntheticProperties = null;
         beanProperties1 = null;
         beanProperties2 = null;
         knownBeanProperties = null;
@@ -851,11 +831,6 @@ public abstract class RADComponent<C> {
                 }
             }
         }
-    }
-
-    protected FormProperty<?>[] createSyntheticProperties() {
-        CodeGenerator codeGen = FormEditor.getCodeGenerator(formModel);
-        return codeGen != null ? codeGen.getSyntheticProperties(this) : new FormProperty<?>[]{};
     }
 
     private void createBeanProperties() {

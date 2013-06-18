@@ -679,8 +679,7 @@ public class RADComponentCreator {
                 String bodyText = null;
                 if (sourceComp.getFormModel() != formModel) {
                     // copying to different form -> let's copy also the event handler content
-                    FormsJsCodeGenerator javaCodeGenerator =
-                            ((FormsJsCodeGenerator) FormEditor.getCodeGenerator(sourceComp.getFormModel()));
+                    FormsJsCodeGenerator javaCodeGenerator = sourceComp.getFormModel().getFormsCodeGenerator();
                     bodyText = javaCodeGenerator.getEventHandlerText(oldHandlerName);
                 }
 
