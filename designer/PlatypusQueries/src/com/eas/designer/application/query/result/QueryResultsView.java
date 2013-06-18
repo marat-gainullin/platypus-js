@@ -302,6 +302,7 @@ public class QueryResultsView extends javax.swing.JPanel {
 
         refreshButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/eas/designer/application/query/result/refresh-records-btn.png"))); // NOI18N
         refreshButton.setText(org.openide.util.NbBundle.getMessage(QueryResultsView.class, "QueryResultsView.refreshButton.text")); // NOI18N
+        refreshButton.setToolTipText(org.openide.util.NbBundle.getMessage(QueryResultsView.class, "refreshButton.Tooltip")); // NOI18N
         refreshButton.setFocusable(false);
         refreshButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         refreshButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
@@ -314,6 +315,7 @@ public class QueryResultsView extends javax.swing.JPanel {
 
         nextPageButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/eas/designer/application/query/result/next.png"))); // NOI18N
         nextPageButton.setText(org.openide.util.NbBundle.getMessage(QueryResultsView.class, "QueryResultsView.nextPageButton.text")); // NOI18N
+        nextPageButton.setToolTipText(org.openide.util.NbBundle.getMessage(QueryResultsView.class, "nextPageButton.Tooltip")); // NOI18N
         nextPageButton.setFocusable(false);
         nextPageButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         nextPageButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
@@ -326,6 +328,7 @@ public class QueryResultsView extends javax.swing.JPanel {
 
         addButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/eas/designer/application/query/result/new.png"))); // NOI18N
         addButton.setText(org.openide.util.NbBundle.getMessage(QueryResultsView.class, "QueryResultsView.addButton.text")); // NOI18N
+        addButton.setToolTipText(org.openide.util.NbBundle.getMessage(QueryResultsView.class, "addButton.Tooltip")); // NOI18N
         addButton.setFocusable(false);
         addButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         addButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
@@ -338,6 +341,7 @@ public class QueryResultsView extends javax.swing.JPanel {
 
         deleteButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/eas/designer/application/query/result/delete.png"))); // NOI18N
         deleteButton.setText(org.openide.util.NbBundle.getMessage(QueryResultsView.class, "QueryResultsView.deleteButton.text")); // NOI18N
+        deleteButton.setToolTipText(org.openide.util.NbBundle.getMessage(QueryResultsView.class, "deleteButton.Tooltip")); // NOI18N
         deleteButton.setFocusable(false);
         deleteButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         deleteButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
@@ -362,6 +366,7 @@ public class QueryResultsView extends javax.swing.JPanel {
 
         runButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/eas/designer/application/query/result/runsql.png"))); // NOI18N
         runButton.setText(org.openide.util.NbBundle.getMessage(QueryResultsView.class, "QueryResultsView.runButton.text")); // NOI18N
+        runButton.setToolTipText(org.openide.util.NbBundle.getMessage(QueryResultsView.class, "runButton.Tooltip")); // NOI18N
         runButton.setFocusable(false);
         runButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         runButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
@@ -389,13 +394,13 @@ public class QueryResultsView extends javax.swing.JPanel {
             .addGroup(footerPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(messageLabel)
-                .addContainerGap(319, Short.MAX_VALUE))
+                .addContainerGap(308, Short.MAX_VALUE))
         );
         footerPanelLayout.setVerticalGroup(
             footerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(footerPanelLayout.createSequentialGroup()
                 .addComponent(messageLabel)
-                .addGap(0, 6, Short.MAX_VALUE))
+                .addGap(0, 5, Short.MAX_VALUE))
         );
 
         resultsPanel.add(footerPanel, java.awt.BorderLayout.SOUTH);
