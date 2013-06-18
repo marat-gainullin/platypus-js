@@ -83,9 +83,7 @@
                           </Group>
                           <Group type="102" alignment="0" attributes="0">
                               <Component id="checkRememberPassword" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace max="-2" attributes="0"/>
-                              <Component id="lblForgotPassword" max="32767" attributes="0"/>
-                              <EmptySpace min="-2" pref="17" max="-2" attributes="0"/>
+                              <EmptySpace min="17" pref="97" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                   </Group>
@@ -105,10 +103,7 @@
                           <Component id="tfPassword" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace type="separate" max="-2" attributes="0"/>
-                      <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="lblForgotPassword" min="-2" max="-2" attributes="0"/>
-                          <Component id="checkRememberPassword" alignment="0" min="-2" pref="16" max="-2" attributes="0"/>
-                      </Group>
+                      <Component id="checkRememberPassword" min="-2" pref="16" max="-2" attributes="0"/>
                       <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
                   </Group>
               </Group>
@@ -145,20 +140,6 @@
                   <ResourceString bundle="com/eas/client/login/Bundle.properties" key="checkRememberPassword" replaceFormat="bundle.getString(&quot;{key}&quot;)"/>
                 </Property>
               </Properties>
-            </Component>
-            <Component class="javax.swing.JLabel" name="lblForgotPassword">
-              <Properties>
-                <Property name="horizontalAlignment" type="int" value="4"/>
-                <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                  <Connection code="String.format(&quot;&lt;html&gt;&lt;u&gt;%s&lt;/u&gt;&quot;, bundle.getString(&quot;fogotPassword&quot;))" type="code"/>
-                </Property>
-                <Property name="cursor" type="java.awt.Cursor" editor="org.netbeans.modules.form.editors2.CursorEditor">
-                  <Color id="Hand Cursor"/>
-                </Property>
-              </Properties>
-              <Events>
-                <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="lblForgotPasswordMouseClicked"/>
-              </Events>
             </Component>
           </SubComponents>
         </Container>
@@ -263,7 +244,7 @@
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Component id="lblConnections" min="-2" max="-2" attributes="0"/>
-                      <Component id="scrollConnections" pref="372" max="32767" attributes="0"/>
+                      <Component id="scrollConnections" pref="380" max="32767" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" max="-2" attributes="0">
@@ -290,7 +271,7 @@
                       </Group>
                       <Group type="102" attributes="0">
                           <EmptySpace max="-2" attributes="0"/>
-                          <Component id="scrollConnections" pref="150" max="32767" attributes="3"/>
+                          <Component id="scrollConnections" pref="151" max="32767" attributes="3"/>
                       </Group>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
@@ -376,7 +357,7 @@
               <Group type="102" alignment="1" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="btnToggleConnections" min="-2" pref="68" max="-2" attributes="0"/>
-                  <EmptySpace pref="227" max="32767" attributes="0"/>
+                  <EmptySpace pref="235" max="32767" attributes="0"/>
                   <Component id="btnOk" min="-2" pref="74" max="-2" attributes="0"/>
                   <EmptySpace min="-2" max="-2" attributes="0"/>
                   <Component id="btnCancel" min="-2" pref="89" max="-2" attributes="0"/>

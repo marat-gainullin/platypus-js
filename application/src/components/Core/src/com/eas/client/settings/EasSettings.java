@@ -56,13 +56,25 @@ public abstract class EasSettings {
     }
 
     public static EasSettings createInstance(String connectionString) throws Exception {
-        if (connectionString.startsWith("jdbc:")) {
-            return new DbConnectionSettings();
-        } else if (connectionString.startsWith("platypus") || connectionString.startsWith("http")) {
-            return new PlatypusConnectionSettings();
+        if (isJdbcUrl(connectionString)) {
+            DbConnectionSettings settings = new DbConnectionSettings();
+            settings.setUrl(connectionString);
+            return settings;
+        } else if (isAppServerUrl(connectionString)) {
+            PlatypusConnectionSettings settings = new PlatypusConnectionSettings();
+            settings.setUrl(connectionString);
+            return settings;
         } else {
             return null;
         }
+    }
+    
+    public static boolean isJdbcUrl(String url) {
+        return url.startsWith("jdbc:");//NOI18N
+    }
+    
+    public static boolean isAppServerUrl(String url) {
+        return url.startsWith("platypus") || url.startsWith("http");//NOI18N
     }
 
     public boolean isEditable() {
