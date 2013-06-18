@@ -36,7 +36,9 @@ public class PlatypusProjectSettings {
     public static final String RUN_USER_KEY = "runUser"; //NOI18N
     public static final String RUN_PASSWORD_KEY = "runPassword"; //NOI18N
     public static final String RUN_CLIENT_OPTIONS_KEY = "runClientOptions"; //NOI18N
+    public static final String RUN_CLIENT_VM_OPTIONS_KEY = "runClientVmOptions"; //NOI18N
     public static final String RUN_SERVER_OPTIONS_KEY = "runServerOptions"; //NOI18N
+    public static final String RUN_SERVER_VM_OPTIONS_KEY = "runServerVmOptions"; //NOI18N
     public static final String DB_APP_SOURCES_KEY = "dbAppSources"; //NOI18N
     public static final String SERVER_PORT_KEY = "serverPort";//NOI18N
     public static final String CLIENT_URL_KEY = "clientUrl";//NOI18N
@@ -173,6 +175,27 @@ public class PlatypusProjectSettings {
         projectPrivatePropertiesIsDirty = true;
         changeSupport.firePropertyChange(RUN_CLIENT_OPTIONS_KEY, oldValue, aValue);
     }
+    
+     /**
+     * Gets JVM options provided to Platypus Client.
+     *
+     * @return parameters string
+     */
+    public String getRunClientVmOptions() {
+        return projectPrivateProperties.get(RUN_CLIENT_VM_OPTIONS_KEY);
+    }
+
+    /**
+     * Sets JVM options provided to Platypus Client.
+     *
+     * @param aValue
+     */
+    public void setClientVmOptions(String aValue) {
+        String oldValue = getRunClientVmOptions();
+        projectPrivateProperties.setProperty(RUN_CLIENT_VM_OPTIONS_KEY, aValue);
+        projectPrivatePropertiesIsDirty = true;
+        changeSupport.firePropertyChange(RUN_CLIENT_VM_OPTIONS_KEY, oldValue, aValue);
+    }
 
     /**
      * Gets optional parameters provided to Platypus Application Server.
@@ -194,6 +217,28 @@ public class PlatypusProjectSettings {
         projectPrivatePropertiesIsDirty = true;
         changeSupport.firePropertyChange(RUN_SERVER_OPTIONS_KEY, oldValue, aValue);
     }
+    
+     /**
+     * Gets JVM options provided to Platypus Application Server.
+     *
+     * @return parameters string
+     */
+    public String getRunServerVmOptions() {
+        return projectPrivateProperties.get(RUN_SERVER_VM_OPTIONS_KEY);
+    }
+
+    /**
+     * Sets JVM options provided to Platypus Application Server.
+     *
+     * @param aValue
+     */
+    public void setServerVmOptions(String aValue) {
+        String oldValue = getRunServerVmOptions();
+        projectPrivateProperties.setProperty(RUN_SERVER_VM_OPTIONS_KEY, aValue);
+        projectPrivatePropertiesIsDirty = true;
+        changeSupport.firePropertyChange(RUN_SERVER_VM_OPTIONS_KEY, oldValue, aValue);
+    }
+    
 
     /**
      * Checks if runtime to use application from database.

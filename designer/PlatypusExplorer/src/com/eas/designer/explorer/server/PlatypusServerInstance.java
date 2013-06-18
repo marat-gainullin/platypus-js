@@ -127,6 +127,10 @@ public final class PlatypusServerInstance implements ServerInstanceImplementatio
             }
         });
         ExternalProcessBuilder processBuilder = new ExternalProcessBuilder(ProjectRunner.JVM_RUN_COMMAND_NAME);
+        if (project.getSettings().getRunServerVmOptions() != null && !project.getSettings().getRunServerVmOptions().isEmpty()) {
+            processBuilder = ProjectRunner.addArguments(processBuilder, project.getSettings().getRunServerVmOptions());
+            io.getOut().println(String.format("Server VM options: %s.", project.getSettings().getRunServerVmOptions()));
+        }
         if (debug) {
             processBuilder = ProjectRunner.setDebugArguments(processBuilder, project.getSettings().getDebugServerPort());
         }
@@ -162,12 +166,7 @@ public final class PlatypusServerInstance implements ServerInstanceImplementatio
             io.getOut().println(String.format("Server protocol: %s.", getProtocol(project.getSettings())));
         }
         if (project.getSettings().getRunClientOptions() != null && !project.getSettings().getRunClientOptions().isEmpty()) {
-            String[] optionalArgs = project.getSettings().getRunClientOptions().split(" ");// NOI18N
-            if (optionalArgs.length > 0) {
-                for (int i = 0; i < optionalArgs.length; i++) {
-                    processBuilder = processBuilder.addArgument(optionalArgs[i]);
-                }
-            }
+            processBuilder = ProjectRunner.addArguments(processBuilder, project.getSettings().getRunClientOptions());
             io.getOut().println(String.format("Server options: %s.", project.getSettings().getRunClientOptions()));
         }
         //set default log level if not set explicitly
