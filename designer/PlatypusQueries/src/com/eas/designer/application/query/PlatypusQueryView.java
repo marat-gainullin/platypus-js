@@ -175,7 +175,6 @@ public class PlatypusQueryView extends CloneableTopComponent {
     
     public void setDataObject(PlatypusQueryDataObject aDataObject) throws Exception {
         dataObject = aDataObject;
-        associateLookup(Lookups.fixed(dataObject));
         dataObjectListener = new DataObjectListener();
         setName(dataObject.getPrimaryFile().getName());
         setToolTipText(NbBundle.getMessage(PlatypusQueryView.class, "HINT_PlatypusQueryTopComponent", dataObject.getPrimaryFile().getPath()));
