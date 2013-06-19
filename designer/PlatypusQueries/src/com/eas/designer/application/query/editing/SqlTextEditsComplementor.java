@@ -300,6 +300,7 @@ public class SqlTextEditsComplementor {
         List<UndoableEdit> edits = new ArrayList<>();
         Map<String, QueryEntity> modelTables = prepareModelTables(model);
         // Let's delete unactual tables from model
+        List<Rectangle> recentBounds = new ArrayList<>();
         for (String tablyName : modelTables.keySet()) {
             if (!tables.containsKey(tablyName) || !DeleteRelationRiddleTask.isDerivedFromIgnoreAlias(tables.get(tablyName), modelTables.get(tablyName))) {
                 // Need to delete entity...
@@ -312,6 +313,7 @@ public class SqlTextEditsComplementor {
                     section.addEdit(drEdit);
                 }
                 // Than entity itself.
+                recentBounds.add(new Rectangle(entity.getX(), entity.getY(), entity.getWidth(), entity.getHeight()));
                 DeleteEntityEdit<QueryEntity, QueryModel> deEdit = new DeleteEntityEdit<>(model, entity);
                 edits.add(deEdit);
                 section.addEdit(deEdit);
@@ -333,7 +335,12 @@ public class SqlTextEditsComplementor {
                 toAdd.setY(Integer.MAX_VALUE);
                 newViewX += EntityView.ENTITY_VIEW_DEFAULT_WIDTH + 10;
                 newViewY += EntityView.ENTITY_VIEW_DEFAULT_HEIGHT / 2 + 10;
-                Rectangle rect = new Rectangle(newViewX, newViewY, EntityView.ENTITY_VIEW_DEFAULT_WIDTH, EntityView.ENTITY_VIEW_DEFAULT_HEIGHT);
+                Rectangle rect;
+                if (!recentBounds.isEmpty()) {
+                    rect = recentBounds.remove(0);
+                } else {
+                    rect = new Rectangle(newViewX, newViewY, EntityView.ENTITY_VIEW_DEFAULT_WIDTH, EntityView.ENTITY_VIEW_DEFAULT_HEIGHT);
+                }
                 assert rect != null : "Some opened PlatypusQueryTopComponent must present while sql text changes are processed.";
                 toAdd.setX(rect.x);
                 toAdd.setY(rect.y);
