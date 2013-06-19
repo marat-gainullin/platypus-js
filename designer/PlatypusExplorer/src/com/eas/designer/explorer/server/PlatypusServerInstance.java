@@ -31,7 +31,7 @@ import org.openide.windows.InputOutput;
  *
  * @author vv
  */
-public final class PlatypusServerInstance implements ServerInstanceImplementation {
+public final class PlatypusServerInstance implements Server, ServerInstanceImplementation {
 
     private final String PLATYPUS_SERVER_NAME = "Platypus Server"; // NOI18N
     private final String PLATYPUS_SERVER_INSTANCE_NAME = "Platypus Server"; // NOI18N
@@ -108,6 +108,7 @@ public final class PlatypusServerInstance implements ServerInstanceImplementatio
     public boolean start(PlatypusProject aProject, File binDir, boolean debug) {
         project = aProject;
         assert project != null;
+        setServerState(ServerState.STARTING);
         final InputOutput io = project.getOutputWindowIO();
         ExecutionDescriptor descriptor = new ExecutionDescriptor()
                 .frontWindow(true)
@@ -115,13 +116,12 @@ public final class PlatypusServerInstance implements ServerInstanceImplementatio
                 .preExecution(new Runnable() {
             @Override
             public void run() {
-                setServerState(PlatypusServerInstance.ServerState.STARTING);
             }
         })
                 .postExecution(new Runnable() {
             @Override
             public void run() {
-                setServerState(PlatypusServerInstance.ServerState.STOPPED);
+                setServerState(ServerState.STOPPED);
                 serverRunTask = null;
                 io.getOut().println(NbBundle.getMessage(PlatypusServerInstance.class, "MSG_Server_Stopped"));//NOI18N
                 io.getOut().println();
@@ -207,13 +207,5 @@ public final class PlatypusServerInstance implements ServerInstanceImplementatio
 
     private static String getProtocol(PlatypusProjectSettings settings) {
         return settings.getServerPort() + ARGUMENT_SEPARATOR + PlatypusServer.DEFAULT_PROTOCOL;
-    }
-
-    public static enum ServerState {
-
-        STARTING,
-        RUNNING,
-        STOPPED,
-        UNKNOWN
     }
 }

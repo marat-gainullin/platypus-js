@@ -4,12 +4,10 @@
  */
 package com.eas.designer.explorer.h2;
 
-import com.eas.designer.explorer.h2.H2DbServerInstance.ServerState;
 import com.eas.designer.explorer.server.*;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import org.openide.nodes.Node;
 import org.openide.util.ContextAwareAction;
 import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
