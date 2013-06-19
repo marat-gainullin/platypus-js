@@ -35,28 +35,27 @@ public class FormsCompletionProvider extends JsCompletionProvider {
         if (dataObject instanceof PlatypusFormDataObject) {
             PlatypusFormDataObject formDataObject = (PlatypusFormDataObject) dataObject;
             PlatypusFormSupport support = formDataObject.getLookup().lookup(PlatypusFormSupport.class);
-            if (support.loadForm()) {
-                FormModel fm = support.getFormModel();
-                assert fm != null;
-                if (point.context.length == 0) {
-                    fillTopLevel(fm, point, resultSet);
-                } else if (point.context.length == 1) {
-                    fillFirstLevel(fm, point, resultSet);
-                } else if (point.context.length == 2) {// <gridName>.<colName>.
-                    RADComponent<?> comp = compByName(fm, point.context[0]);
-                    if (comp != null && comp instanceof RADModelGrid) {
-                        DbGrid modelGrid = ((RADModelGrid) comp).getBeanInstance();
-                        List<DbGridColumn> linearColumns = new ArrayList<>();
-                        enumerateColumns(modelGrid.getHeader(), linearColumns);
-                        DbGridColumn targetCol = null;
-                        for (DbGridColumn col : linearColumns) {
-                            if (col.getName() != null && !col.getName().isEmpty() && col.getName().equals(point.context[1])) {
-                                targetCol = col;
-                            }
+            support.loadForm();
+            FormModel fm = support.getFormModel();
+            assert fm != null;
+            if (point.context.length == 0) {
+                fillTopLevel(fm, point, resultSet);
+            } else if (point.context.length == 1) {
+                fillFirstLevel(fm, point, resultSet);
+            } else if (point.context.length == 2) {// <gridName>.<colName>.
+                RADComponent<?> comp = compByName(fm, point.context[0]);
+                if (comp != null && comp instanceof RADModelGrid) {
+                    DbGrid modelGrid = ((RADModelGrid) comp).getBeanInstance();
+                    List<DbGridColumn> linearColumns = new ArrayList<>();
+                    enumerateColumns(modelGrid.getHeader(), linearColumns);
+                    DbGridColumn targetCol = null;
+                    for (DbGridColumn col : linearColumns) {
+                        if (col.getName() != null && !col.getName().isEmpty() && col.getName().equals(point.context[1])) {
+                            targetCol = col;
                         }
-                        if (targetCol != null) {
-                            fillJavaEntities(ScriptableColumn.class, point, resultSet);
-                        }
+                    }
+                    if (targetCol != null) {
+                        fillJavaEntities(ScriptableColumn.class, point, resultSet);
                     }
                 }
             }
@@ -67,7 +66,7 @@ public class FormsCompletionProvider extends JsCompletionProvider {
         // <comp>.
         RADComponent<?> comp = compByName(fm, point.context[0]);
         if (comp != null) {
-            Class<?> platypusControlClass = FormUtils.getPlatypusControlClass(comp.getBeanClass()); 
+            Class<?> platypusControlClass = FormUtils.getPlatypusControlClass(comp.getBeanClass());
             fillJavaEntities(platypusControlClass, point, resultSet);
             if (comp instanceof RADModelGrid) {
                 DbGrid dbGrid = ((RADModelGrid) comp).getBeanInstance();

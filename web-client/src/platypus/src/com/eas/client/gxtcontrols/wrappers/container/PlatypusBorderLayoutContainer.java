@@ -27,8 +27,7 @@ public class PlatypusBorderLayoutContainer extends BorderLayoutContainer {
 		return vGap;
 	}
 
-	public void add(Widget aWidget, LayoutRegion aPlace, double aSize) {
-
+	public void add(Widget aWidget, LayoutRegion aPlace, double aSize) {  
 		if (aPlace == LayoutRegion.NORTH) {
 			setNorthWidget(aWidget, new BorderLayoutData(aSize));
 		} else if (aPlace == LayoutRegion.WEST) {

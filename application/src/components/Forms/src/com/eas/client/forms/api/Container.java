@@ -46,7 +46,7 @@ public abstract class Container<D extends JComponent> extends Component<D> {
     public int getCount() {
         return delegate.getComponentCount();
     }
-
+    
     @Override
     public String toString() {
         return String.format("%s [%s] count:%d", delegate.getName() != null ? delegate.getName() : "", getClass().getSimpleName(), getCount());

@@ -95,7 +95,6 @@ class FormRootNode extends FormNode {
                 l.add(SystemAction.get(ReorderAction.class));
                 l.add(null);
             }
-            l.add(SystemAction.get(ReloadAction.class));
             l.add(null);
             l.addAll(Arrays.asList(super.getActions(context)));
             actions = l.toArray(new Action[l.size()]);

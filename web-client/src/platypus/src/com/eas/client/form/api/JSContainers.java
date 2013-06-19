@@ -7,6 +7,7 @@ public class JSContainers {
 		function publishComponentProperties(aPublished) {
 			@com.eas.client.form.api.JSControls::publishComponentProperties(Lcom/eas/client/gxtcontrols/published/PublishedComponent;)(aPublished);
 		}
+				
 		// ***************************************************
 		$wnd.BorderPane = function(aVGap, aHGap) {
 			var aComponent = arguments.length>2?arguments[2]:null;
@@ -119,6 +120,7 @@ public class JSContainers {
 					}
 				}
 			}
+						
 			return published;
 		};		
 
@@ -143,13 +145,14 @@ public class JSContainers {
 			};
 			publishComponentProperties(published);
 			publishContainer(published);
-
+			
 			published.add = function(toAdd){
 				if(toAdd != undefined && toAdd != null && toAdd.unwrap != undefined)
 				{
 					aComponent.@com.eas.client.gxtcontrols.wrappers.container.PlatypusFlowLayoutContainer::add(Lcom/google/gwt/user/client/ui/Widget;)(toAdd.unwrap());
 				}
 			}
+			
 			return published;
 		};
 		
@@ -167,7 +170,7 @@ public class JSContainers {
 			};
 			publishComponentProperties(published);
 			publishContainer(published);
-
+			
 			published.add = function(toAdd, aRow, aCol){
 				if(toAdd != undefined && toAdd != null && toAdd.unwrap != undefined)
 				{
@@ -210,6 +213,7 @@ public class JSContainers {
 					aComponent.@com.eas.client.gxtcontrols.wrappers.container.PlatypusGridLayoutContainer::setHGap(I)(aHGap);
 				}
 			}
+			
 			return published;
 		};
 		
@@ -275,7 +279,7 @@ public class JSContainers {
 			};
 			publishComponentProperties(published);
 			publishContainer(published);
-
+			
 			published.add = function(toAdd, aCardName){
 				if(toAdd != undefined && toAdd != null && toAdd.unwrap != undefined)
 				{
@@ -295,6 +299,7 @@ public class JSContainers {
 			published.show = function(aCardName) {
 				aComponent.@com.eas.client.gxtcontrols.wrappers.container.PlatypusCardLayoutContainer::show(Ljava/lang/String;)(aCardName);
 			};
+			
 			return published;
 		};		
 
@@ -662,6 +667,8 @@ public class JSContainers {
 				return @com.eas.client.gxtcontrols.Publisher::checkPublishedComponent(Ljava/lang/Object;)(widget);
 			};
 			publishChildren(published);
+			publishChildsOrdering(published);
+						
 			return published;
 		}
 
@@ -703,6 +710,8 @@ public class JSContainers {
 				return @com.eas.client.gxtcontrols.Publisher::checkPublishedComponent(Ljava/lang/Object;)(widget);
 			};
 			publishChildren(published);
+			publishChildsOrdering(published);
+			
 			return published;
 		}
 
@@ -817,6 +826,27 @@ public class JSContainers {
 		} 
 
 		// ***************************************************
+		function publishChildsOrdering(aPublished) {
+			if (aPublished) {
+				var comp = aPublished.unwrap();
+				aPublished.toFront = function(aChild, aCount) {
+					if (arguments.length == 1) {
+					    comp.@com.eas.client.gxtcontrols.wrappers.container.OrderedContainer::toFront(Lcom/google/gwt/user/client/ui/Widget;)(aChild.unwrap());
+					} else {
+					    comp.@com.eas.client.gxtcontrols.wrappers.container.OrderedContainer::toFront(Lcom/google/gwt/user/client/ui/Widget;I)(aChild.unwrap(), aCount);
+					}
+				}
+		
+				aPublished.toBack = function(aChild, aCount) {
+					if (arguments.length == 1) {
+					    comp.@com.eas.client.gxtcontrols.wrappers.container.OrderedContainer::toBack(Lcom/google/gwt/user/client/ui/Widget;)(aChild.unwrap());
+					} else {
+					    comp.@com.eas.client.gxtcontrols.wrappers.container.OrderedContainer::toBack(Lcom/google/gwt/user/client/ui/Widget;I)(aChild.unwrap(), aCount);
+					}
+				}
+			}
+		}
+			
 		function publishContainer(aPublished) {
 			var comp = aPublished.unwrap();
 			Object.defineProperty(aPublished, "count", {

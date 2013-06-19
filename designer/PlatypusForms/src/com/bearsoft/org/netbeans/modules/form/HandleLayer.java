@@ -1225,7 +1225,7 @@ public class HandleLayer extends JPanel {
         Node[] selectedNode = new Node[]{formEditor.getOthersContainerNode()};
 
         try {
-            ci.setSelectedNodes(selectedNode, formEditor);
+            ci.setSelectedNodes(selectedNode, formDesigner);
             formDesigner.clearSelectionImpl();
             formDesigner.repaintSelection();
         } catch (java.beans.PropertyVetoException ex) {
