@@ -19,6 +19,7 @@ import com.eas.client.settings.EasSettings;
 import com.eas.client.settings.PlatypusConnectionSettings;
 import com.eas.util.exceptions.ExceptionListenerSupport;
 import com.eas.util.exceptions.ExceptionThrower;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.beans.ExceptionListener;
@@ -97,7 +98,7 @@ public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower 
         initComponents();
         pnlDbLogin.setVisible(isDbModeLogin() || isFullModeLogin());
         if (!isFullModeLogin()) {
-            removeConnectionUI();
+            hideConnectionUI();
         }
         getRootPane().setDefaultButton(btnOk);
         tfUserName.setText(Preferences.userNodeForPackage(LoginFrame.class).get(LAST_LOGIN_USERNAME_PREFKEY, ""));
@@ -126,10 +127,9 @@ public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower 
         }
     }
 
-    private void removeConnectionUI() {       
-        remove(pnlConnectionInfo);
-        setSize(getSize().width, pnlLogin.getSize().height + pnlBottom.getSize().height);
+    private void hideConnectionUI() {       
         btnToggleConnections.setVisible(false);
+        pnlConnectionInfo.setVisible(false);
     }
 
     private void doClose(int retStatus) {
@@ -246,7 +246,7 @@ public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower 
                         .addContainerGap())
                     .addGroup(pnlAppLoginLayout.createSequentialGroup()
                         .addComponent(checkRememberPassword)
-                        .addGap(17, 97, Short.MAX_VALUE))))
+                        .addGap(17, 113, Short.MAX_VALUE))))
         );
         pnlAppLoginLayout.setVerticalGroup(
             pnlAppLoginLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -352,7 +352,7 @@ public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower 
                 .addContainerGap()
                 .addGroup(pnlConnectionInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(lblConnections)
-                    .addComponent(scrollConnections, javax.swing.GroupLayout.DEFAULT_SIZE, 380, Short.MAX_VALUE))
+                    .addComponent(scrollConnections, javax.swing.GroupLayout.DEFAULT_SIZE, 396, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(pnlConnectionInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(btnNewConnection, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -400,7 +400,7 @@ public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower 
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlBottomLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(btnToggleConnections, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 235, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 251, Short.MAX_VALUE)
                 .addComponent(btnOk, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnCancel, javax.swing.GroupLayout.PREFERRED_SIZE, 89, javax.swing.GroupLayout.PREFERRED_SIZE)

@@ -32,7 +32,7 @@ public class StopServerAction extends AbstractAction implements ContextAwareActi
             return new AbstractAction() {
                 @Override
                 public boolean isEnabled() {
-                    return serverInstance.getServerState() != PlatypusServerInstance.ServerState.STOPPED;
+                    return ServerState.STOPPED != serverInstance.getServerState();
                 }
 
                 @Override

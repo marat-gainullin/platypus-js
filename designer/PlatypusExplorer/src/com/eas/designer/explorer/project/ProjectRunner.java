@@ -14,6 +14,7 @@ import com.eas.designer.explorer.platform.EmptyPlatformHomePathException;
 import com.eas.designer.explorer.platform.PlatypusPlatform;
 import com.eas.designer.explorer.server.PlatypusServerInstance;
 import com.eas.designer.explorer.server.PlatypusServerInstanceProvider;
+import com.eas.designer.explorer.server.ServerState;
 import com.eas.designer.explorer.server.ServerSupport;
 import com.eas.server.PlatypusServer;
 import java.io.File;
@@ -116,15 +117,16 @@ public class ProjectRunner {
         if (!project.getSettings().isNotStartServer()) {
             if (AppServerType.PLATYPUS_SERVER.equals(pps.getRunAppServerType())) {
                 PlatypusServerInstance serverInstance = PlatypusServerInstanceProvider.getPlatypusDevServer();
-                if (serverInstance.getServerState() == PlatypusServerInstance.ServerState.STOPPED) {
+                if (serverInstance.getServerState() == ServerState.STOPPED) {
                     io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Starting_Platypus_Server"));//NOI18N
                     if (serverInstance.start(project, binDir, debug)) {
                         io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Platypus_Server_Started"));//NOI18N
                         try {
                             io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Waiting_Platypus_Server"));//NOI18N
-                            ServerSupport.waitForServer(LOCAL_HOSTNAME, pps.getServerPort());
-                            PlatypusServerInstanceProvider.getPlatypusDevServer().setServerState(PlatypusServerInstance.ServerState.RUNNING);
-                        } catch (ServerSupport.ServerTimeOutException | InterruptedException ex) {
+                            ServerSupport ss = new ServerSupport(serverInstance);
+                            ss.waitForServer(LOCAL_HOSTNAME, pps.getServerPort());
+                            PlatypusServerInstanceProvider.getPlatypusDevServer().setServerState(ServerState.RUNNING);
+                        } catch (ServerSupport.ServerTimeOutException | ServerSupport.ServerStoppedException | InterruptedException ex) {
                             io.getErr().println(ex.getMessage());
                             return null;
                         }

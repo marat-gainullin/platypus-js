@@ -6,27 +6,25 @@ package com.eas.designer.explorer.h2;
 
 import com.eas.designer.explorer.platform.EmptyPlatformHomePathException;
 import com.eas.designer.explorer.platform.PlatypusPlatform;
-import com.eas.designer.explorer.project.PlatypusProjectActions;
 import com.eas.designer.explorer.project.ProjectRunner;
+import com.eas.designer.explorer.server.Server;
+import com.eas.designer.explorer.server.ServerState;
 import com.eas.designer.explorer.server.ServerSupport;
 import java.io.File;
 import java.util.concurrent.Future;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.event.ChangeListener;
 import org.netbeans.api.extexecution.ExecutionDescriptor;
 import org.netbeans.api.extexecution.ExecutionService;
 import org.netbeans.api.extexecution.ExternalProcessBuilder;
 import org.openide.awt.StatusDisplayer;
 import org.openide.util.ChangeSupport;
-import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 
 /**
  *
  * @author vv
  */
-public class H2DbServerInstance {
+public class H2DbServerInstance implements Server {
 
     
     private final String H2_INSTANCE_NAME = "H2"; // NOI18N
@@ -72,7 +70,6 @@ public class H2DbServerInstance {
                 .preExecution(new Runnable() {
             @Override
             public void run() {
-                setServerState(ServerState.STARTING);
             }
         })
                 .postExecution(new Runnable() {
@@ -115,12 +112,14 @@ public class H2DbServerInstance {
         processBuilder = processBuilder.addArgument(H2_TOOL_OPTION);
         
         ExecutionService service = ExecutionService.newService(processBuilder, descriptor, "H2 Database");
+        setServerState(ServerState.STARTING);
         Future<Integer> runTask = service.run();
         serverRunTask = runTask;
         if (serverRunTask != null) {
             try {
-                ServerSupport.waitForServer(ServerSupport.LOCAL_HOST, H2_DEFAULT_PORT);
-            } catch (ServerSupport.ServerTimeOutException | InterruptedException ex) {
+                ServerSupport ss = new ServerSupport(this);
+                ss.waitForServer(ServerSupport.LOCAL_HOST, H2_DEFAULT_PORT);
+            } catch (ServerSupport.ServerTimeOutException | ServerSupport.ServerStoppedException | InterruptedException ex) {
                 stop();
                 setServerState(ServerState.STOPPED);
                 return;
@@ -136,14 +135,6 @@ public class H2DbServerInstance {
 
     private String getClasspath(File dir) {
         return dir.getAbsolutePath() + "/*"; //NOI18N
-    }
-
-    public static enum ServerState {
-
-        STARTING,
-        RUNNING,
-        STOPPED,
-        UNKNOWN
     }
 
     protected String getDisplayName() {
