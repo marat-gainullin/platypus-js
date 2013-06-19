@@ -97,7 +97,7 @@ public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower 
         initComponents();
         pnlDbLogin.setVisible(isDbModeLogin() || isFullModeLogin());
         if (!isFullModeLogin()) {
-            removeConnectionUI();
+            hideConnectionUI();
         }
         getRootPane().setDefaultButton(btnOk);
         tfUserName.setText(Preferences.userNodeForPackage(LoginFrame.class).get(LAST_LOGIN_USERNAME_PREFKEY, ""));
@@ -126,10 +126,10 @@ public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower 
         }
     }
 
-    private void removeConnectionUI() {       
-        remove(pnlConnectionInfo);
-        setSize(getSize().width, pnlLogin.getSize().height + pnlBottom.getSize().height);
+    private void hideConnectionUI() {       
         btnToggleConnections.setVisible(false);
+        pnlConnectionInfo.setVisible(false);
+        setSize(getSize().width, pnlLogin.getSize().height + pnlBottom.getSize().height); 
     }
 
     private void doClose(int retStatus) {
