@@ -235,6 +235,7 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
         frame.selectDefaultSettings();
         frame.setDbPassword(settingsNode.get(ClientFactory.DEFAULT_CONNECTION_DB_PASSWORD, ""));
         frame.setUserPassword(settingsNode.get(ClientFactory.DEFAULT_CONNECTION_USER_PASSWORD, ""));
+        frame.pack();
         frame.setVisible(true);
         int retValue = frame.getReturnStatus();
         frame.dispose();
