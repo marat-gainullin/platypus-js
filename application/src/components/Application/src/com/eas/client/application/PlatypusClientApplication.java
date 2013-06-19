@@ -178,7 +178,7 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
                     throw new Exception(BAD_DB_CREDENTIALS_MSG + " May be bad db connection settings (url, dbuser, dbpassword, dbschema).");
                 }
                 settings.getInfo().put(ClientConstants.DB_CONNECTION_USER_PROP_NAME, dbUser);
-                settings.getInfo().put(ClientConstants.DB_CONNECTION_PASSWORD_PROP_NAME, dbPassword);
+                settings.getInfo().put(ClientConstants.DB_CONNECTION_PASSWORD_PROP_NAME, new String(dbPassword));
                 settings.getInfo().put(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME, dbSchema);
                 if (appPath != null) {
                     ((DbConnectionSettings) settings).setApplicationPath(appPath);
