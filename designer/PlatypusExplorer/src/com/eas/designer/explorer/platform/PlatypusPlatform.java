@@ -70,7 +70,7 @@ public class PlatypusPlatform {
     public static File getPlatformBinDirectory() throws EmptyPlatformHomePathException {
         File platformBinDir = new File(getPlatformHomeDir(), BIN_DIRECTORY_NAME);
         if (!platformBinDir.exists() || !platformBinDir.isDirectory()) {
-            throw new IllegalStateException("Platform executables home not exists or not a directory.");
+            throw new IllegalStateException("Platform executables home does not exist or not a directory.");
         }
         return platformBinDir;
     }
@@ -85,7 +85,7 @@ public class PlatypusPlatform {
     public static File getPlatformLibDirectory() throws EmptyPlatformHomePathException {
         File platformLibDir = new File(getPlatformHomeDir(), LIB_DIRECTORY_NAME);
         if (!platformLibDir.exists() || !platformLibDir.isDirectory()) {
-            throw new IllegalStateException("Platform executables home not exists or not a directory.");
+            throw new IllegalStateException("Platform executables home does not exist or not a directory.");
         }
         return platformLibDir;
     }
