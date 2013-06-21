@@ -16,9 +16,9 @@ import javax.swing.RowSorter.SortKey;
 import javax.swing.SortOrder;
 import javax.swing.table.TableModel;
 
-/** 
- * 
- * @author mg 
+/**
+ *
+ * @author mg
  */
 public class TabularRowsSorter<M extends TableModel> extends RowSorter<M> {
 
@@ -158,8 +158,12 @@ public class TabularRowsSorter<M extends TableModel> extends RowSorter<M> {
 
     @Override
     public int convertRowIndexToModel(int index) {
-        if (isSorted()) {
-            return viewToModel[index];
+        if (viewToModel != null && index >= 0 && index < viewToModel.length) {
+            if (isSorted()) {
+                return viewToModel[index];
+            } else {
+                return index;
+            }
         } else {
             return index;
         }
@@ -167,8 +171,12 @@ public class TabularRowsSorter<M extends TableModel> extends RowSorter<M> {
 
     @Override
     public int convertRowIndexToView(int index) {
-        if (isSorted()) {
-            return modelToView[index];
+        if (modelToView != null && index >= 0 && index < modelToView.length) {
+            if (isSorted()) {
+                return modelToView[index];
+            } else {
+                return index;
+            }
         } else {
             return index;
         }

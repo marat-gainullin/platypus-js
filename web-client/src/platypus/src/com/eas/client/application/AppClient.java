@@ -500,10 +500,8 @@ public class AppClient {
 		com.google.gwt.dom.client.Document doc = com.google.gwt.dom.client.Document.get();
 		FormElement frm = doc.createFormElement();
 		frm.setMethod(aMethod.toString());
-		frm.setAction(APPLICATION_URI + aUrlPrefix);
-		Iterator<Entry<String, String>> itr = aParams.entrySet().iterator();
-		while (itr.hasNext()) {
-			Entry<String, String> ent = itr.next();
+		frm.setAction(baseUrl + aUrlPrefix);
+		for(Entry<String, String> ent : aParams.entrySet()) {
 			InputElement text = doc.createHiddenInputElement();
 			text.setValue(ent.getValue());
 			text.setName(ent.getKey());
