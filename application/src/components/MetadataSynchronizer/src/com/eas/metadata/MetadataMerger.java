@@ -40,7 +40,7 @@ public class MetadataMerger {
     private DbMetadataCache mdCache;
     private SqlDriver driver;
     private String dSchema;
-    private String sqlCommandEndChars = "";//;";
+    private String sqlCommandEndChars = ";";
     private Logger sqlLogger;
     private Logger errorLogger;
     private Map<String, List<ForeignKeySpec>> pKeysMap = new HashMap<>(); // relation for pkey name -> fkey in destination (!! tableName->fkeys)
@@ -227,7 +227,6 @@ public class MetadataMerger {
                     String fieldNameUpper = sFieldName.toUpperCase();
 
                     Field dField = null;
-//                    String dDescription = "";                   
                     if (dFields != null) {
                         dField = dFields.get(fieldNameUpper);
                     }
@@ -781,7 +780,6 @@ public class MetadataMerger {
                     client.commit(null);
                 }
                 if (sqlLogger != null) {
-                    //                sqlLogger.log(Level.CONFIG, new StringBuilder().append(numSql++).append(": (").append(aName).append(")").toString());
                     sqlLogger.log(Level.CONFIG, new StringBuilder().append(numSql++).append(": ").toString());
                     sqlLogger.log(Level.FINE, new StringBuilder().append("(").append(aName).append(")").toString());
                     sqlLogger.log(Level.INFO, new StringBuilder().append(aSql).append(sqlCommandEndChars).toString());
@@ -792,7 +790,6 @@ public class MetadataMerger {
                     client.rollback(null);
                 }
                 if (errorLogger != null) {
-                    //                errorLogger.log(Level.CONFIG, new StringBuilder().append(numSql++).append(": (").append(aName).append(")").toString());
                     errorLogger.log(Level.CONFIG, new StringBuilder().append(numSql++).append(": ").toString());
                     errorLogger.log(Level.FINE, new StringBuilder().append("(").append(aName).append(")").toString());
                     errorLogger.log(Level.INFO, new StringBuilder().append(aSql).append(sqlCommandEndChars).toString());

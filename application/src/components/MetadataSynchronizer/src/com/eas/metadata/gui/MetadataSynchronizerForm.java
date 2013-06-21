@@ -6,6 +6,7 @@ package com.eas.metadata.gui;
 
 import com.eas.metadata.LogFormatter;
 import com.eas.metadata.MetadataSynchronizer;
+import java.awt.EventQueue;
 import java.awt.Rectangle;
 import java.io.File;
 import java.io.FileInputStream;
@@ -705,39 +706,55 @@ public class MetadataSynchronizerForm extends javax.swing.JFrame {
             txtSqlsLog.setText("");
             txtErrorsLog.setText("");
             txtLog.setText("");
+            btnSynchronize.setEnabled(false);
+            btnCompare.setEnabled(false);
+            final Level level = (Level) fldLogLevel.getSelectedItem();
+            final boolean selectedSrcDest = rbSrcDest.isSelected();
+            final boolean selectedSrcXml = rbSrcXml.isSelected();
+            final String srcUrl = fldSrcUrl.getText();
+            final String srcSchema = fldSrcSchema.getText();
+            final String srcUser = fldSrcUser.getText();
+            final String srcPassword = new String(fldSrcPassword.getPassword());
+            final String destUrl = fldDestUrl.getText();
+            final String destSchema = fldDestSchema.getText();
+            final String destUser = fldDestUser.getText();
+            final String destPassword = new String(fldDestPassword.getPassword());
+            final String xml = fldXml.getText();
+            final boolean selectedNoExecute = chkNoExecute.isSelected();
+            final boolean selectedNoDrop = chkNoDrop.isSelected();
+            final String tables = fldTables.getText();
+            final String sqlLogFile = fldSqlLog.getText();
+            final String errorLogFile = fldErrorLog.getText();
             new Thread() {
                 @Override
                 public void run() {
                     MetadataSynchronizer mds = null;
                     try {
-                        btnSynchronize.setEnabled(false);
-                        btnCompare.setEnabled(false);
                         mds = new MetadataSynchronizer();
-                        Level level = (Level) fldLogLevel.getSelectedItem();
                         mds.initDefaultLoggers(new TextAreaHandler(txtLog), level, true);
 
-                        if (rbSrcDest.isSelected()) {
-                            mds.setSourceDatabase(fldSrcUrl.getText(), fldSrcSchema.getText(), fldSrcUser.getText(), new String(fldSrcPassword.getPassword()));
-                            mds.setDestinationDatabase(fldDestUrl.getText(), fldDestSchema.getText(), fldDestUser.getText(), new String(fldDestPassword.getPassword()));
-                        } else if (rbSrcXml.isSelected()) {
-                            mds.setSourceDatabase(fldSrcUrl.getText(), fldSrcSchema.getText(), fldSrcUser.getText(), new String(fldSrcPassword.getPassword()));
-                            mds.setFileXml(fldXml.getText());
+                        if (selectedSrcDest) {
+                            mds.setSourceDatabase(srcUrl, srcSchema, srcUser, srcPassword );
+                            mds.setDestinationDatabase(destUrl, destSchema, destUser, destPassword);
+                        } else if (selectedSrcXml) {
+                            mds.setSourceDatabase(srcUrl, srcSchema, srcUser, srcPassword );
+                            mds.setFileXml(xml);
                         } else {
-                            mds.setFileXml(fldXml.getText());
-                            mds.setDestinationDatabase(fldDestUrl.getText(), fldDestSchema.getText(), fldDestUser.getText(), new String(fldDestPassword.getPassword()));
+                            mds.setFileXml(xml);
+                            mds.setDestinationDatabase(destUrl, destSchema, destUser, destPassword);
                         }
-                        mds.setNoExecute(chkNoExecute.isSelected());
-                        mds.setNoDropTables(chkNoDrop.isSelected());
+                        mds.setNoExecute(selectedNoExecute);
+                        mds.setNoDropTables(selectedNoDrop);
 
-                        mds.parseTablesList(fldTables.getText(), ",");
+                        mds.parseTablesList(tables, ",");
 
                         mds.initSqlLogger(new TextAreaHandler(txtSqlsLog), level, false, null);
-                        if (!fldSqlLog.getText().isEmpty()) {
-                            mds.initSqlLogger(fldSqlLog.getText(), null, level, false, new LogFormatter());
+                        if (!sqlLogFile.isEmpty()) {
+                            mds.initSqlLogger(sqlLogFile, null, level, false, new LogFormatter());
                         }
                         mds.initErrorLogger(new TextAreaHandler(txtErrorsLog), level, false, null);
-                        if (!fldErrorLog.getText().isEmpty()) {
-                            mds.initSqlLogger(fldErrorLog.getText(), null, level, false, new LogFormatter());
+                        if (!errorLogFile.isEmpty()) {
+                            mds.initSqlLogger(errorLogFile, null, level, false, new LogFormatter());
                         }
                         mds.run();
                     } catch (Exception ex) {
@@ -749,8 +766,13 @@ public class MetadataSynchronizerForm extends javax.swing.JFrame {
                             mds.clearInfoLogger();
                             mds.clearDefaultLoggers();
                         }
-                        btnSynchronize.setEnabled(true);
-                        btnCompare.setEnabled(true);
+                        EventQueue.invokeLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                btnSynchronize.setEnabled(true);
+                                btnCompare.setEnabled(true);
+                            }
+                        });
                     }
                 }
             }.start();
@@ -759,19 +781,35 @@ public class MetadataSynchronizerForm extends javax.swing.JFrame {
 
     private void btnCompareActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCompareActionPerformed
         if (validateDatabaseParams()) {
-            MetadataCompareForm compareForm = new MetadataCompareForm();
-            if (rbSrcDest.isSelected()) {
-                compareForm.setSourceDatabase(fldSrcUrl.getText(), fldSrcSchema.getText(), fldSrcUser.getText(), new String(fldSrcPassword.getPassword()));
-                compareForm.setDestinationDatabase(fldDestUrl.getText(), fldDestSchema.getText(), fldDestUser.getText(), new String(fldDestPassword.getPassword()));
-            } else if (rbSrcXml.isSelected()) {
-                compareForm.setSourceDatabase(fldSrcUrl.getText(), fldSrcSchema.getText(), fldSrcUser.getText(), new String(fldSrcPassword.getPassword()));
-                compareForm.setXmlFile(fldXml.getText());
-            } else {
-                compareForm.setXmlFile(fldXml.getText());
-                compareForm.setDestinationDatabase(fldDestUrl.getText(), fldDestSchema.getText(), fldDestUser.getText(), new String(fldDestPassword.getPassword()));
-            }
-            compareForm.initStructure();
-            compareForm.setVisible(true);
+            final boolean selectedSrcDest = rbSrcDest.isSelected();
+            final boolean selectedSrcXml = rbSrcXml.isSelected();
+            final String srcUrl = fldSrcUrl.getText();
+            final String srcSchema = fldSrcSchema.getText();
+            final String srcUser = fldSrcUser.getText();
+            final String srcPassword = new String(fldSrcPassword.getPassword());
+            final String destUrl = fldDestUrl.getText();
+            final String destSchema = fldDestSchema.getText();
+            final String destUser = fldDestUser.getText();
+            final String destPassword = new String(fldDestPassword.getPassword());
+            final String xml = fldXml.getText();
+            EventQueue.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    MetadataCompareForm compareForm = new MetadataCompareForm();
+                    if (selectedSrcDest) {
+                        compareForm.setSourceDatabase(srcUrl, srcSchema, srcUser, srcPassword );
+                        compareForm.setDestinationDatabase(destUrl, destSchema, destUser, destPassword);
+                    } else if (selectedSrcXml) {
+                        compareForm.setSourceDatabase(srcUrl, srcSchema, srcUser, srcPassword );
+                        compareForm.setXmlFile(xml);
+                    } else {
+                        compareForm.setXmlFile(xml);
+                        compareForm.setDestinationDatabase(destUrl, destSchema, destUser, destPassword);
+                    }
+                    compareForm.initStructure();
+                    compareForm.setVisible(true);
+                }
+            });
         }
     }//GEN-LAST:event_btnCompareActionPerformed
 
