@@ -51,7 +51,6 @@ import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.DateCell;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.TableCellElement;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
@@ -78,7 +77,6 @@ import com.sencha.gxt.widget.core.client.grid.Grid;
 import com.sencha.gxt.widget.core.client.grid.GridSelectionModel;
 import com.sencha.gxt.widget.core.client.grid.HeaderGroupConfig;
 import com.sencha.gxt.widget.core.client.grid.editing.ClicksToEdit;
-import com.sencha.gxt.widget.core.client.tree.TreeStyle;
 import com.sencha.gxt.widget.core.client.treegrid.TreeGrid;
 
 public class GxtGridFactory {
@@ -327,6 +325,7 @@ public class GxtGridFactory {
 		int subgroupsCount = 0;
 		List<HeaderGroupConfig> subGroups = new ArrayList();
 		NodeList columnNodes = aTag.getChildNodes();
+		int _currentLeavesCount = 0;
 		for (int c = 0; c < columnNodes.getLength(); c++) {
 			if ("cellDesignInfo".equalsIgnoreCase(columnNodes.item(c).getNodeName()))
 				cellTag = (Element) columnNodes.item(c);
@@ -347,16 +346,12 @@ public class GxtGridFactory {
 			else if ("style".equalsIgnoreCase(columnNodes.item(c).getNodeName()))
 				styleTag = (Element) columnNodes.item(c);
 			else if ("column".equalsIgnoreCase(columnNodes.item(c).getNodeName())) {
+				if(_currentLeavesCount == 0)
+					_currentLeavesCount = currentLeavesCount;
 				childrenCount++;
 				HeaderGroupConfig subGroup = processColumn((Element) columnNodes.item(c), deepness + 1);
 				subGroups.add(subGroup);
-				if (subGroup == null)// leaf
-				{
-					if (childrenCount == 1)// most left leaf
-					{
-						currentLeavesCount = leaves.size();
-					}
-				} else
+				if (subGroup != null)// leaf
 					subgroupsCount++;
 			}
 		}
@@ -365,10 +360,7 @@ public class GxtGridFactory {
 			HeaderGroupConfig group = new HeaderGroupConfig((title != null && !title.isEmpty()) ? title : name);
 			groups.add(group);
 			group.setRow(deepness);
-			if (subgroupsCount > 0)
-				group.setColumn(subGroups.get(0).getColumn());
-			else
-				group.setColumn(currentLeavesCount - 1);
+			group.setColumn(_currentLeavesCount);
 			group.setRowspan(1);
 			int colSpan = 0;
 			for (HeaderGroupConfig subGroup : subGroups) {
@@ -380,6 +372,7 @@ public class GxtGridFactory {
 			group.setColspan(colSpan);
 			return group;
 		} else {
+			currentLeavesCount++;
 			ColumnConfig<Row, ?> cc = configureColumn(name, title, width, modelElement, aTag, controlTag);
 			if (cc != null) {
 				cc.setHidden(!visible);
