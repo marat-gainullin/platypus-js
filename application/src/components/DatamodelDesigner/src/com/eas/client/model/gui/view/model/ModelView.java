@@ -1935,6 +1935,7 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
                             entity.setHeight(rect.height);
                             entity.setTableDbId(rSelected.dbId);
                             entity.setTableSchemaName(rSelected.schema);
+                            entity.setName(getEntiyName(rSelected.tableName, model));
                             entity.setTableName(rSelected.tableName);
                             NewEntityEdit<E, M> edit = new NewEntityEdit<>(model, entity);
                             edit.redo();
@@ -1988,10 +1989,20 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
             entity.setWidth(rect.width);
             entity.setHeight(rect.height);
             entity.setQueryId(aApplicationElementId);
+            entity.setName(getEntiyName(aApplicationElementId, model));
             NewEntityEdit<E, M> edit = new NewEntityEdit<>(model, entity);
             edit.redo();
             undoSupport.postEdit(edit);
         }
+    }
+    
+    private String getEntiyName(String applicationElementId, M model) {
+        String s = applicationElementId;
+        int i = 1;
+        while (model.getEntityByName(s) != null) {
+            s = String.format("%s_%d", applicationElementId, i++); // NOI18N
+        }
+        return s;
     }
 
     protected abstract boolean isAnyDeletableEntities();
