@@ -64,10 +64,10 @@ public class MetadataSynchronizerTest {
     private int cntTabs = 0;
     private final String XML_NAME = "test.xml";
     private SourceDbSetting[] sourceDbSetting = {
-//        new SourceDbSetting(new DbConnection("jdbc:oracle:thin:@research.office.altsoft.biz:1521/DBALT", "test1", "test1", "test1"), Database.ORACLE, new OracleTestDefine()),
-//        new SourceDbSetting(new DbConnection("jdbc:postgresql://192.168.10.1:5432/Trans", "test1", "test1", "test1"), Database.POSTGRESQL, new PostgreTestDefine()),
-//        new SourceDbSetting(new DbConnection("jdbc:mysql://192.168.10.205:3306/test1", "test1", "test1", "test1"), Database.MYSQL, new MySqlTestDefine()),
-//        new SourceDbSetting(new DbConnection("jdbc:db2://192.168.10.154:50000/test", "test1", "dba", "masterkey"), Database.DB2, new Db2TestDefine()),
+        new SourceDbSetting(new DbConnection("jdbc:oracle:thin:@research.office.altsoft.biz:1521/DBALT", "test1", "test1", "test1"), Database.ORACLE, new OracleTestDefine()),
+        new SourceDbSetting(new DbConnection("jdbc:postgresql://192.168.10.1:5432/Trans", "test1", "test1", "test1"), Database.POSTGRESQL, new PostgreTestDefine()),
+        new SourceDbSetting(new DbConnection("jdbc:mysql://192.168.10.205:3306/test1", "test1", "test1", "test1"), Database.MYSQL, new MySqlTestDefine()),
+        new SourceDbSetting(new DbConnection("jdbc:db2://192.168.10.154:50000/test", "test1", "dba", "masterkey"), Database.DB2, new Db2TestDefine()),
         new SourceDbSetting(new DbConnection("jdbc:h2:tcp://localhost/~/test", "test1", "test1", "test1"), Database.H2, new H2TestDefine()),
         new SourceDbSetting(new DbConnection("jdbc:jtds:sqlserver://192.168.10.154:1433/test1", "dbo", "test1", "1test1"), Database.MSSQL, new MsSqlTestDefine())
     };

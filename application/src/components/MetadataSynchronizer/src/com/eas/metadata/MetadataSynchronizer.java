@@ -1523,7 +1523,7 @@ public class MetadataSynchronizer {
             } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
                 java.util.logging.Logger.getLogger(MetadataSynchronizerForm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
             }
-            Locale.setDefault(new Locale("en"));
+            //Locale.setDefault(new Locale("en"));
             MetadataSynchronizerForm mdsForm = new MetadataSynchronizerForm();
             mdsForm.setSourceDatabase(urlFrom, schemaFrom, userFrom, passwordFrom);
             mdsForm.setDestinationDatabase(urlTo, schemaTo, userTo, passwordTo);
