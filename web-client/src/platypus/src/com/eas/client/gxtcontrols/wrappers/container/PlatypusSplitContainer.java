@@ -20,14 +20,18 @@ public class PlatypusSplitContainer extends BorderLayoutContainer {
 	private class Handler implements BeforeCollapseHandler, BeforeExpandHandler {
 		@Override
 		public void onBeforeCollapse(BeforeCollapseEvent event) {
+			/* Some bugs occur in BorderLayoutContainer when uncommented
 			event.setCancelled(true);
 			onCollapse((ContentPanel) event.getSource());
+			*/
 		}
 
 		@Override
 		public void onBeforeExpand(BeforeExpandEvent event) {
+			/* Some bugs occur in BorderLayoutContainer when uncommented
 			event.setCancelled(true);
 			onExpand((ContentPanel) event.getSource());
+			*/
 		}
 
 	}
