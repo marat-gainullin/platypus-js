@@ -16,9 +16,6 @@ import com.eas.client.model.gui.view.entities.ApplicationEntityView;
 import com.eas.client.model.gui.view.entities.ApplicationParametersEntityView;
 import com.eas.client.model.gui.view.entities.EntityView;
 import com.eas.client.model.store.XmlDom2ApplicationModel;
-import java.awt.Point;
-import java.util.List;
-import java.util.Set;
 import javax.swing.Action;
 import org.w3c.dom.Document;
 

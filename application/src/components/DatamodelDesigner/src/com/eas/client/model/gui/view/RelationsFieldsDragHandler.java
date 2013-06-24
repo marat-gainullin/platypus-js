@@ -141,11 +141,14 @@ public class RelationsFieldsDragHandler<E extends Entity<?, ?, E>> extends Trans
                                                         return false;
                                                     }
                                                 } else { // dmv.getModel() instanceof DbSchemeModel
-                                                    if ((leftField.isPk() || leftField.isFk()) && (rightField.isPk() || rightField.isFk())) {
-                                                        return SQLUtils.isKeysCompatible(leftField, rightField);
-                                                    } else {
-                                                        return SQLUtils.isSimpleTypesCompatible(leftField.getTypeInfo().getSqlType(), rightField.getTypeInfo().getSqlType());
-                                                    }
+                                                    return SQLUtils.isSimpleTypesCompatible(leftField.getTypeInfo().getSqlType(), rightField.getTypeInfo().getSqlType());
+                                                    /*
+                                                     if ((leftField.isPk() || leftField.isFk()) && (rightField.isPk() || rightField.isFk())) {
+                                                     return SQLUtils.isKeysCompatible(leftField, rightField);
+                                                     } else {
+                                                     return SQLUtils.isSimpleTypesCompatible(leftField.getTypeInfo().getSqlType(), rightField.getTypeInfo().getSqlType());
+                                                     }
+                                                     */
                                                 }
                                             }
                                         }

@@ -258,7 +258,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbS
     }
 
     @Override
-    public void doAddQuery(String aApplicationElementId) throws Exception {
+    public void doAddQuery(String aApplicationElementId, int aX, int aY) throws Exception {
         // No op. We can't add queries to db-diagram model
     }
 
