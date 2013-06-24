@@ -1655,7 +1655,7 @@ public class MetadataCompareForm extends javax.swing.JFrame {
                         nullableTitle, (equalsNullable ? "" + destNullable : String.format(COLOR_FORMAT, "" + destNullable)),
                         typeTitle, (srcTypeInfo == null ? "" : "("
                         + (equalsSqlType ? "" + destSqlType : String.format(COLOR_FORMAT, "" + destSqlType)) + ","
-                        + (equalsSqlTypeName ? destSqlTypeName : String.format(COLOR_FORMAT, destSqlTypeName)) + ","),
+                        + (equalsSqlTypeName ? destSqlTypeName : String.format(COLOR_FORMAT, destSqlTypeName)) + ")"),
                         //                        + (equalsClassName ? destClassName : String.format(COLOR_FORMAT, destClassName)) + ")"),
                         signedTitle, (equalsSigned ? "" + destSigned : String.format(COLOR_FORMAT, "" + destSigned)),
                         sizeTitle, (equalsSize ? "" + destSize : String.format(COLOR_FORMAT, "" + destSize)),
