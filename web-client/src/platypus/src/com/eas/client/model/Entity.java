@@ -1499,11 +1499,13 @@ public class Entity implements RowsetListener {
 				// so we can't bind query parameters to proper values. In the
 				// such case we initialize
 				// parameters values with RowsetUtils.UNDEFINED_SQL_VALUE
+				/*
 				final Map<String, Object> oldParamValues = new HashMap();
 				for (int i = 1; i <= query.getParameters().getParametersCount(); i++) {
 					Parameter p = query.getParameters().get(i);
 					oldParamValues.put(p.getName(), p.getValue());
 				}
+				*/
 				boolean parametersBinded = bindQueryParameters();
 				if ((rowset == null || refresh || parametersBinded) && (pending == null || parametersBinded)) {
 					// if we have no rowset yet or query parameters values have
@@ -1536,11 +1538,13 @@ public class Entity implements RowsetListener {
 						@Override
 						public void cancel() {
 							pending = null;
+							/*
 							for (int i = 1; i <= query.getParameters().getParametersCount(); i++) {
 								Parameter p = query.getParameters().get(i);
 								p.setValue(oldParamValues.get(p.getName()));
 								p.setModified(false);
 							}
+							*/
 							lexecuting.cancel();
 							if (onSuccess != null)
 								abortedCallbacks.add(onSuccess);
@@ -1712,7 +1716,7 @@ public class Entity implements RowsetListener {
 				}
 			}
 			for (int i = 1; i <= selfParameters.getFieldsCount(); i++) {
-				Parameter param = (Parameter) selfParameters.get(i);
+				Parameter param = selfParameters.get(i);
 				if (param.isModified()) {
 					parametersModified = true;
 					param.setModified(false);

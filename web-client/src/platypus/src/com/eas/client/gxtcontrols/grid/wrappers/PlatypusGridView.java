@@ -1,12 +1,9 @@
 package com.eas.client.gxtcontrols.grid.wrappers;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import com.bearsoft.rowset.Row;
 import com.eas.client.gxtcontrols.grid.valueproviders.ChangesHost;
-import com.eas.client.gxtcontrols.published.PublishedStyle;
 import com.google.gwt.safecss.shared.SafeStyles;
 import com.google.gwt.safecss.shared.SafeStylesBuilder;
 import com.google.gwt.safecss.shared.SafeStylesUtils;
