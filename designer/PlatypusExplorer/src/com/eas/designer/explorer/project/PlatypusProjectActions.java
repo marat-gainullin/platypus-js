@@ -117,21 +117,76 @@ public class PlatypusProjectActions implements ActionProvider {
             PlatypusWebModuleManager pwmm = project.getLookup().lookup(PlatypusWebModuleManager.class);
             assert pwmm != null;
             return pwmm.webDirExists();
-        }else if (COMMON_IDE_GLOBAL_ACTIONS.contains(command)) {
+        } else if (COMMON_IDE_GLOBAL_ACTIONS.contains(command)) {
             return true;
         }
         return false;
     }
 
     private void deploy() {
-        DatabaseDeploySupport.deploy(project);
+        if (project.isDbConnected()) {
+            RequestProcessor.Task deployTask = project.RP.create(new Runnable() {
+                @Override
+                public void run() {
+                    InputOutput io = project.getOutputWindowIO();
+                    project.getDeployer().setOut(io.getOut());
+                    project.getDeployer().setErr(io.getErr());
+                    project.getDeployer().deploy();
+                }
+            });
+            final ProgressHandle ph = ProgressHandleFactory.createHandle(NbBundle.getMessage(PlatypusProjectActions.class, "LBL_Deploy_Progress"), deployTask); // NOI18N  
+            deployTask.addTaskListener(new TaskListener() {
+                @Override
+                public void taskFinished(org.openide.util.Task task) {
+                    ph.finish();
+                    StatusDisplayer.getDefault().setStatusText(NbBundle.getMessage(PlatypusProjectActions.class, "LBL_Deploy_Complete")); // NOI18N
+                }
+            });
+            ph.start();
+            deployTask.schedule(0);
+        }
     }
 
     private void importApplication() {
-        DatabaseDeploySupport.importApplication(project);
+        if (project.isDbConnected()) {
+            RequestProcessor.Task importTask = project.RP.create(new Runnable() {
+                @Override
+                public void run() {
+                    InputOutput io = project.getOutputWindowIO();
+                    project.getDeployer().setOut(io.getOut());
+                    project.getDeployer().setErr(io.getErr());
+
+                    try {
+                        AppCache cache = project.getClient().getAppCache();
+                        if (cache instanceof FilesAppCache) {
+                            ((FilesAppCache) cache).unwatch();
+                        }
+                        try {
+                            project.getDeployer().importApplication();
+                        } finally {
+                            if (cache instanceof FilesAppCache) {
+                                ((FilesAppCache) cache).watch();
+                            }
+                        }
+                    } catch (Exception ex) {
+                        throw new RuntimeException(ex);
+                    }
+                }
+            });
+            final ProgressHandle ph = ProgressHandleFactory.createHandle(NbBundle.getMessage(PlatypusProjectActions.class, "LBL_Import_Progress"), importTask); // NOI18N  
+            importTask.addTaskListener(new TaskListener() {
+                @Override
+                public void taskFinished(org.openide.util.Task task) {
+                    ph.finish();
+                    StatusDisplayer.getDefault().setStatusText(NbBundle.getMessage(PlatypusProjectActions.class, "LBL_Import_Complete")); // NOI18N
+                }
+            });
+            ph.start();
+            importTask.schedule(0);
+        }
     }
 
-    private void clean() {     
+    private void clean() {
         PlatypusWebModuleManager pwmm = project.getLookup().lookup(PlatypusWebModuleManager.class);
         assert pwmm != null;
         try {
@@ -141,6 +196,6 @@ public class PlatypusProjectActions implements ActionProvider {
         } catch (IOException ex) {
             Logger.getLogger(PlatypusProjectActions.class.getName()).log(Level.SEVERE, "Error clearning web directory", ex);
             project.getOutputWindowIO().getErr().println(ex.getMessage());
-        }   
+        }
     }
 }
