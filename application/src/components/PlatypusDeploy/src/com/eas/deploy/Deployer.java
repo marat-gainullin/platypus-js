@@ -90,7 +90,7 @@ public class Deployer extends BaseDeployer {
         }
         try {
             checkDbClient();
-            out.println("Deploy to database started."); // NOI18N
+            out.println("Deploy to database started.."); // NOI18N
             appElements = new LinkedHashMap<>();
 
             //Prepare application elements items
@@ -153,7 +153,7 @@ public class Deployer extends BaseDeployer {
             busy = true;
         }
         try {
-            out.println("Undeploy started."); // NOI18N
+            out.println("Undeploy started.."); // NOI18N
             checkDbClient();
             SqlQuery deleteQuery = new SqlQuery(client, DELETE_ENTITIES_SQL);
             SqlCompiledQuery deleteCompiledQuery = deleteQuery.compile();
@@ -185,7 +185,7 @@ public class Deployer extends BaseDeployer {
             busy = true;
         }
         try {
-            out.println("Import from database started."); // NOI18N
+            out.println("Import from database started.."); // NOI18N
             checkDbClient();
 
             //Get application elements entities 
@@ -352,7 +352,7 @@ public class Deployer extends BaseDeployer {
     private static Element getRootElement(Document appElementDocument) throws DeployException {
         NodeList roots = appElementDocument.getChildNodes();
         if (roots.getLength() != 1) {
-            throw new DeployException("In Platypus documents should be exactly one root tag"); // NOI18N
+            throw new DeployException("In Platypus documents should be exactly one root tag."); // NOI18N
         }
         return (Element) roots.item(0);
     }
