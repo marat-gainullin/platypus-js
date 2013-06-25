@@ -2075,7 +2075,7 @@ public class MetadataCompareForm extends javax.swing.JFrame {
         if (destStructure != null) {
             destIndexes = destStructure.getTableIndexSpecs();
             if (destIndexes != null) {
-                for (String name : srcIndexes.keySet()) {
+                for (String name : destIndexes.keySet()) {
                     indexesNames.add(name.toUpperCase());
                 }
             }
