@@ -121,7 +121,7 @@ public class PlatypusTreeGridView extends TreeGridView<Row> {
 				}
 				assert ((PlatypusColumnConfig) columnConfig).getValueProvider() instanceof ChangesHost;
 				ChangesHost ch = (ChangesHost) ((PlatypusColumnConfig) columnConfig).getValueProvider();
-				if (super.isShowDirtyCells() && r != null && columnConfig instanceof PlatypusColumnConfig && ch.isChanged(r.getModel())) {
+				if (super.isShowDirtyCells() && columnConfig instanceof PlatypusColumnConfig && ch.isChanged(r != null ? r.getModel() : model)) {
 					cellClasses += cellDirty;
 				}
 

@@ -212,12 +212,10 @@ public class Parameter extends Field {
      * @param aValue A value to be set as the parameter's value.
      */
     public void setValue(Object aValue) {
-        Object oldValue = value;
+        //Object oldValue = value;
         if (!readonly) {
-            if (aValue == null || RowsetUtils.isTypeCompatible2JavaClass(typeInfo.getType(), aValue.getClass())) {
-                value = aValue;
-                modified = true;
-            }
+            value = aValue;
+            modified = true;
         }
     }
 

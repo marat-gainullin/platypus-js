@@ -26,7 +26,7 @@ public class Field {
 	public static int UNDEFINED_FILED_INDEX = -1;
 	// Our user-supplied information
 	protected String name = "";
-	protected String description = null;// Such data is read from db, and so may
+	protected String description;// Such data is read from db, and so may
 										// be null
 	protected DataTypeInfo typeInfo = DataTypeInfo.INOPERABLE_TYPE.copy();
 	protected int size = 0;
@@ -34,13 +34,13 @@ public class Field {
 	protected int precision = 0;
 	protected boolean signed = true;
 	protected boolean nullable = true;
-	protected boolean readonly = false;
-	protected boolean pk = false;
+	protected boolean readonly;
+	protected boolean pk;
 	// Data is always inserted
-	protected boolean strong4Insert = false;
-	protected ForeignKeySpec fk = null;
-	protected String tableName = null;
-	protected String schemaName = null;
+	protected boolean strong4Insert;
+	protected ForeignKeySpec fk;
+	protected String tableName;
+	protected String schemaName;
 	protected Fields owner;
 
 	/**

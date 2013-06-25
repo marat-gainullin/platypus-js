@@ -8,7 +8,11 @@ import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.model.gui.view.ModelViewDragHandler;
 import com.eas.client.model.gui.view.model.ModelView;
 import com.eas.designer.application.indexer.IndexerQuery;
+import java.awt.MouseInfo;
+import java.awt.Point;
+import java.awt.Window;
 import java.awt.datatransfer.DataFlavor;
+import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
 import org.openide.ErrorManager;
 import org.openide.loaders.DataObject;
@@ -65,7 +69,13 @@ public class QueriesDragHandler extends TransferHandler {
                 if (isQuery) {
                     String queryId = IndexerQuery.file2AppElementId(dObject.getPrimaryFile());
                     if (queryId != null) {
-                        modelView.doAddQuery(queryId);
+                        Point mouseLoc = MouseInfo.getPointerInfo().getLocation();
+                        Window w = SwingUtilities.getWindowAncestor(modelView);
+                        Point topLocation = w.getLocation();
+                        mouseLoc.x -= topLocation.x;
+                        mouseLoc.y -= topLocation.y;
+                        mouseLoc = SwingUtilities.convertPoint(null, mouseLoc, modelView);
+                        modelView.doAddQuery(queryId, mouseLoc.x, mouseLoc.y);
                         return true;
                     }
                 }

@@ -258,7 +258,7 @@ public class PlatypusHttpServlet extends HttpServlet {
             RequestHandler<?> handler = findPlatypusHandler(platypusRequest, aPlatypusSession, aHttpRequest, aHttpResponse);
             handler.run();
             Response response = handler.getResponse();
-            sendPlatypusResponse(aHttpRequest, platypusRequest, response, aHttpResponse);
+            platypusResponse(aHttpRequest, platypusRequest, response, aHttpResponse);
             if (platypusRequest.getType() == Requests.rqLogout) {
                 aHttpRequest.logout();
                 aHttpSession.invalidate();
@@ -441,7 +441,7 @@ public class PlatypusHttpServlet extends HttpServlet {
         }
     }
 
-    private void sendPlatypusResponse(final HttpServletRequest aHttpRequest, Request aPlatypusRequest, Response aPlatypusResponse, final HttpServletResponse aHttpResponse) throws Exception {
+    private void platypusResponse(final HttpServletRequest aHttpRequest, Request aPlatypusRequest, Response aPlatypusResponse, final HttpServletResponse aHttpResponse) throws Exception {
         if (isJ2SERequest(aHttpRequest)) {// platypus http client
             sendJ2SEResponse(aPlatypusResponse, aHttpResponse);
         } else { // browsers

@@ -1980,9 +1980,9 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
         }
     }
 
-    public void doAddQuery(String aApplicationElementId) throws Exception {
+    public void doAddQuery(String aApplicationElementId, int aX, int aY) throws Exception {
         if (aApplicationElementId != null && model != null) {
-            Rectangle rect = findPlaceForEntityAdd(0, 0);
+            Rectangle rect = findPlaceForEntityAdd(aX, aY);
             E entity = model.newGenericEntity();
             entity.setX(rect.x);
             entity.setY(rect.y);

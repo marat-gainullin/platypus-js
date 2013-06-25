@@ -164,12 +164,12 @@ public abstract class PlatypusGridInlineEditing<M> extends PlatypusAbstractGridE
 	}
 
 	public void startEditing(final GridCell cell) {
-		if (getEditableGrid() != null && getEditableGrid().isAttached() && cell != null) {
+		if (editable && getEditableGrid() != null && getEditableGrid().isAttached() && cell != null) {
 			ColumnConfig<M, ?> c = columnModel.getColumn(cell.getCol());
 
 			M value = getEditableGrid().getStore().get(cell.getRow());
 
-			// editable
+			// editable column
 			if (value != null && getEditor(c) != null) {
 				BeforeStartEditEvent<M> ce = new BeforeStartEditEvent<M>(cell);
 				fireEvent(ce);

@@ -54,17 +54,10 @@ public class ExecuteQueryRequestHandler extends SessionRequestHandler<ExecuteQue
         for (int i = 1; i <= queryParams.getParametersCount(); i++) {
             queryParams.get(i).setValue(getRequest().getParams().get(i).getValue());
         }
-        int updateCount = 0;
         SqlCompiledQuery compiledQuery = aQuery.compile();
-        if (aQuery.isManual()) {
-            compiledQuery.setSessionId(getSession().getId());
-            getServerCore().getDatabasesClient().enqueueUpdate(compiledQuery);
-            return new RowsetResponse(getRequest().getID(), null, updateCount);
-        } else {
-            Rowset rowset = compiledQuery.executeQuery();
-            return new RowsetResponse(getRequest().getID(), rowset, updateCount);
-        }
-        // SqlCompiledQuery.executeUpdate is prohibited here, because no security check is performed in it.
+        // SqlCompiledQuery.executeUpdate/Client.enqueueUpdate is prohibited here, because no security check is performed in it.
+        Rowset rowset = compiledQuery.executeQuery();
+        return new RowsetResponse(getRequest().getID(), rowset, 0);
         // Stored procedures can't be called directly from three-tier clients for security reasons
         // and out parameters can't pass through the network.
         /*
