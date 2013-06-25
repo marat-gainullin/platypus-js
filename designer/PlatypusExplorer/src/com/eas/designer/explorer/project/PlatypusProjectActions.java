@@ -30,12 +30,10 @@ import org.openide.windows.InputOutput;
  */
 public class PlatypusProjectActions implements ActionProvider {
 
-    private final static RequestProcessor RP = new RequestProcessor(PlatypusProjectActions.class.getName(), 1, false);
     public static final String COMMAND_DEPLOY = "deploy"; // NOI18N
     public static final String COMMAND_IMPORT = "import"; // NOI18N
     public static final String COMMAND_CONNECT = "connect-to-db"; // NOI18N
     public static final String COMMAND_DISCONNECT = "disconnect-from-db"; // NOI18N
-    public static final String COMMAND_CLEAN = "clear"; // NOI18N
     /**
      * Some routine global actions for which we can supply a display name. These
      * are IDE-specific.
@@ -126,66 +124,11 @@ public class PlatypusProjectActions implements ActionProvider {
     }
 
     private void deploy() {
-        if (project.isDbConnected()) {
-            RequestProcessor.Task deployTask = RP.create(new Runnable() {
-                @Override
-                public void run() {
-                    InputOutput io = project.getOutputWindowIO();
-                    project.getDeployer().setOut(io.getOut());
-                    project.getDeployer().setErr(io.getErr());
-                    project.getDeployer().deploy();
-                }
-            });
-            final ProgressHandle ph = ProgressHandleFactory.createHandle(NbBundle.getMessage(PlatypusProjectActions.class, "LBL_Deploy_Progress"), deployTask); // NOI18N  
-            deployTask.addTaskListener(new TaskListener() {
-                @Override
-                public void taskFinished(org.openide.util.Task task) {
-                    ph.finish();
-                    StatusDisplayer.getDefault().setStatusText(NbBundle.getMessage(PlatypusProjectActions.class, "LBL_Deploy_Complete")); // NOI18N
-                }
-            });
-            ph.start();
-            deployTask.schedule(0);
-        }
+        DatabaseDeploySupport.deploy(project);
     }
 
     private void importApplication() {
-        if (project.isDbConnected()) {
-            RequestProcessor.Task importTask = RP.create(new Runnable() {
-                @Override
-                public void run() {
-                    InputOutput io = project.getOutputWindowIO();
-                    project.getDeployer().setOut(io.getOut());
-                    project.getDeployer().setErr(io.getErr());
-
-                    try {
-                        AppCache cache = project.getClient().getAppCache();
-                        if (cache instanceof FilesAppCache) {
-                            ((FilesAppCache) cache).unwatch();
-                        }
-                        try {
-                            project.getDeployer().importApplication();
-                        } finally {
-                            if (cache instanceof FilesAppCache) {
-                                ((FilesAppCache) cache).watch();
-                            }
-                        }
-                    } catch (Exception ex) {
-                        throw new RuntimeException(ex);
-                    }
-                }
-            });
-            final ProgressHandle ph = ProgressHandleFactory.createHandle(NbBundle.getMessage(PlatypusProjectActions.class, "LBL_Import_Progress"), importTask); // NOI18N  
-            importTask.addTaskListener(new TaskListener() {
-                @Override
-                public void taskFinished(org.openide.util.Task task) {
-                    ph.finish();
-                    StatusDisplayer.getDefault().setStatusText(NbBundle.getMessage(PlatypusProjectActions.class, "LBL_Import_Complete")); // NOI18N
-                }
-            });
-            ph.start();
-            importTask.schedule(0);
-        }
+        DatabaseDeploySupport.importApplication(project);
     }
 
     private void clean() {     
