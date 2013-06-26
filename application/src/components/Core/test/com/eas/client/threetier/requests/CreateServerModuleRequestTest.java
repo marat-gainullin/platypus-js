@@ -13,7 +13,6 @@ import com.eas.proto.ProtoReader;
 import com.eas.proto.ProtoWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.util.Locale;
 import org.junit.*;
 import static org.junit.Assert.assertEquals;
 

@@ -65,7 +65,6 @@ public class ScriptRunner extends ScriptableObject {
     private PrincipalHost principalHost;
     private CompiledScriptDocumentsHost compiledScriptDocumentsHost;
     protected boolean executed;
-    private ScriptResolverHost scriptResolverHost;
 
     static {
         try {
@@ -75,19 +74,18 @@ public class ScriptRunner extends ScriptableObject {
         }
     }
 
-    public ScriptRunner(String aAppElementId, Client aClient, Scriptable aScope, PrincipalHost aPrincipalHost, CompiledScriptDocumentsHost aCompiledScriptDocumentsHost, ScriptResolverHost aScriptResolverHost) throws Exception {
-        this(aClient, aScope, aPrincipalHost, aCompiledScriptDocumentsHost, aScriptResolverHost);
+    public ScriptRunner(String aAppElementId, Client aClient, Scriptable aScope, PrincipalHost aPrincipalHost, CompiledScriptDocumentsHost aCompiledScriptDocumentsHost) throws Exception {
+        this(aClient, aScope, aPrincipalHost, aCompiledScriptDocumentsHost);
         setApplicationElementId(aAppElementId);
     }
 
-    public ScriptRunner(Client aClient, Scriptable aScope, PrincipalHost aPrincipalHost, CompiledScriptDocumentsHost aCompiledScriptDocumentsHost, ScriptResolverHost aScriptResolverHost) throws Exception {
+    public ScriptRunner(Client aClient, Scriptable aScope, PrincipalHost aPrincipalHost, CompiledScriptDocumentsHost aCompiledScriptDocumentsHost) throws Exception {
         super(aScope, null);
         client = aClient;
         principalHost = aPrincipalHost;
         compiledScriptDocumentsHost = aCompiledScriptDocumentsHost;
         definePropertiesAndMethods();
         setPrototype(ScriptRunnerPrototype.getInstance());
-        scriptResolverHost = aScriptResolverHost;
     }
 
     public boolean hasModuleAnnotation(String aName) {
@@ -459,13 +457,6 @@ public class ScriptRunner extends ScriptableObject {
 
     public PrincipalHost getPrincipalHost() {
         return principalHost;
-    }
-
-    /**
-     * @return the scriptResolverHost
-     */
-    public ScriptResolverHost getScriptResolverHost() {
-        return scriptResolverHost;
     }
 
     public CompiledScriptDocumentsHost getCompiledScriptDocumentsHost() {

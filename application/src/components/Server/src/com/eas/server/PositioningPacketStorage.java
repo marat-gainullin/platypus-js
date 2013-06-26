@@ -5,16 +5,12 @@
 package com.eas.server;
 
 import com.eas.client.ClientConstants;
-import com.eas.sensors.positioning.PacketReciever;
 import com.eas.sensors.positioning.PositioningPacket;
 import com.eas.util.StringUtils;
 import java.io.File;
 import java.util.AbstractMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.xtreemfs.babudb.BabuDBFactory;
@@ -26,12 +22,9 @@ import org.xtreemfs.babudb.api.database.ResultSet;
 import org.xtreemfs.babudb.api.exception.BabuDBException;
 import org.xtreemfs.babudb.config.BabuDBConfig;
 import org.xtreemfs.babudb.log.DiskLogger.SyncMode;
-import org.xtreemfs.babudb.lsmdb.BabuDBInsertGroup;
 
 /**
- * Thread-safety!!!
- *
- * @author AB
+ * @author ab
  */
 public class PositioningPacketStorage {
 
@@ -43,7 +36,6 @@ public class PositioningPacketStorage {
     public final static Object CONTEXT = null;
     private BabuDB currentBase;
     private Database currentStorage;
-    private Lock lck = new ReentrantLock();
 
     public PositioningPacketStorage() {
         this(true);
@@ -55,14 +47,6 @@ public class PositioningPacketStorage {
         } catch (BabuDBException ex) {
             Logger.getLogger(PositioningPacketStorage.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }
-
-    public void lock() {
-        lck.lock();
-    }
-
-    public void unlock() {
-        lck.unlock();
     }
 
     private static String getCasheDirectory(boolean validPackeges) {
@@ -104,84 +88,45 @@ public class PositioningPacketStorage {
         return db;
     }
 
-    public void put(String aKey, PositioningPacket aValue) {
-        lck.lock();
-        try {
-            currentStorage.singleInsert(0, aKey.getBytes(), aValue.writePacket(), CONTEXT);
-        } finally {
-            lck.unlock();
+    public synchronized void put(String aKey, PositioningPacket aValue) {
+        currentStorage.singleInsert(0, aKey.getBytes(), aValue.writePacket(), CONTEXT);
+    }
+
+    public synchronized PositioningPacket get(String aKey) throws Exception {
+        DatabaseRequestResult<byte[]> res = currentStorage.lookup(0, aKey.getBytes(), CONTEXT);
+        if (res != null) {
+            PositioningPacket pos = new PositioningPacket();
+            pos.readPacket(res.get());
+            return pos;
+        } else {
+            throw new Exception(String.format("Key %s does not exist.", aKey));
         }
     }
 
-    public PositioningPacket get(String aKey) throws Exception {
-        lck.lock();
-        try {
-            DatabaseRequestResult<byte[]> res = currentStorage.lookup(0, aKey.getBytes(), CONTEXT);
-            if (res != null) {
-                PositioningPacket pos = new PositioningPacket();
-                pos.readPacket(res.get());
-                return pos;
-            } else {
-                throw new Exception(String.format("Key %s does not exist.", aKey));
-            }
-        } finally {
-            lck.unlock();
+    public synchronized boolean containsKey(String aKey) {
+        DatabaseRequestResult<byte[]> res = currentStorage.lookup(0, aKey.getBytes(), CONTEXT);
+        if (res != null) {
+            return true;
+        } else {
+            return false;
         }
     }
 
-    public boolean containsKey(String aKey) {
-        lck.lock();
-        try {
-            DatabaseRequestResult<byte[]> res = currentStorage.lookup(0, aKey.getBytes(), CONTEXT);
-            if (res != null) {
-                return true;
-            } else {
-                return false;
-            }
-        } finally {
-            lck.unlock();
-        }
+    public synchronized void remove(String aKey) {
+        currentStorage.singleInsert(0, aKey.getBytes(), null, CONTEXT);
     }
 
-    public void remove(String aKey) {
-        lck.lock();
-        try {
-            currentStorage.singleInsert(0, aKey.getBytes(), null, CONTEXT);
-        } finally {
-            lck.unlock();
-        }
-    }
-
-    public boolean isEmpty() {
-        lck.lock();
-        try {
-            DatabaseRequestResult<ResultSet<byte[], byte[]>> res = currentStorage.prefixLookup(0, null, CONTEXT);
-            if (res != null) {
-                try {
-                    return !res.get().hasNext();
-                } catch (BabuDBException ex) {
-                    Logger.getLogger(PositioningPacketStorage.class.getName()).log(Level.SEVERE, null, ex);
-                    return true;
-                }
-            } else {
-                return true;
-            }
-        } finally {
-            lck.unlock();
-        }
-    }
-
-    private Iterator<Map.Entry<String, PositioningPacket>> getIterator() {
+    public synchronized boolean isEmpty() {
         DatabaseRequestResult<ResultSet<byte[], byte[]>> res = currentStorage.prefixLookup(0, null, CONTEXT);
         if (res != null) {
             try {
-                return new StorageRecordIterator(res.get());
+                return !res.get().hasNext();
             } catch (BabuDBException ex) {
                 Logger.getLogger(PositioningPacketStorage.class.getName()).log(Level.SEVERE, null, ex);
-                return null;
+                return true;
             }
         } else {
-            return null;
+            return true;
         }
     }
 
@@ -201,36 +146,48 @@ public class PositioningPacketStorage {
         currentStorage.shutdown();
         currentBase.shutdown();
     }
+    /*
+     private Iterator<Map.Entry<String, PositioningPacket>> getIterator() {
+     DatabaseRequestResult<ResultSet<byte[], byte[]>> res = currentStorage.prefixLookup(0, null, CONTEXT);
+     if (res != null) {
+     try {
+     return new StorageRecordIterator(res.get());
+     } catch (BabuDBException ex) {
+     Logger.getLogger(PositioningPacketStorage.class.getName()).log(Level.SEVERE, null, ex);
+     return null;
+     }
+     } else {
+     return null;
+     }
+     }
 
-    public void saveStorageToBase(PacketReciever aReciver) {
-        if (lck.tryLock()) {
-            try {
-                Iterator<Map.Entry<String, PositioningPacket>> itr = getIterator();
-                if (itr.hasNext() && aReciver != null) {
-                    Entry<String, PositioningPacket> ent;
-                    BabuDBInsertGroup group = (BabuDBInsertGroup) currentStorage.createInsertGroup();
-                    while (itr.hasNext()) {
-                        ent = itr.next();
-                        aReciver.received(ent.getValue());
-                        Logger.getLogger(PositioningPacketStorage.class.getName()).log(Level.INFO, ent.getKey());
-                        group.addDelete(0, ent.getKey().getBytes());
-                    }
-                    currentStorage.insert(group, CONTEXT);
-                }
-            } finally {
-                lck.unlock();
-            }
-        }
-    }
+     public void saveStorageToBase(PacketReciever aReciver) {
+     if (lck.tryLock()) {// Review synchronized methods and this "lck" lock.
+     try {
+     Iterator<Map.Entry<String, PositioningPacket>> itr = getIterator();
+     if (itr.hasNext() && aReciver != null) {
+     Entry<String, PositioningPacket> ent;
+     BabuDBInsertGroup group = (BabuDBInsertGroup) currentStorage.createInsertGroup();
+     while (itr.hasNext()) {
+     ent = itr.next();
+     aReciver.received(ent.getValue());
+     Logger.getLogger(PositioningPacketStorage.class.getName()).log(Level.INFO, ent.getKey());
+     group.addDelete(0, ent.getKey().getBytes());
+     }
+     currentStorage.insert(group, CONTEXT);
+     }
+     } finally {
+     lck.unlock();
+     }
+     }
+     }
+     */
 
-    public void closeStorage() {
-        lck.lock();
+    public synchronized void closeStorage() {
         try {
             destructLocalStorage();
         } catch (BabuDBException ex) {
             Logger.getLogger(PositioningPacketStorage.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            lck.unlock();
         }
     }
 

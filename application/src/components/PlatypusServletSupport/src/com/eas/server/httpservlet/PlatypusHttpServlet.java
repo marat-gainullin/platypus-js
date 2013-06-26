@@ -44,7 +44,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.activation.MimeType;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanRegistrationException;
 import javax.management.MalformedObjectNameException;
@@ -105,7 +104,7 @@ public class PlatypusHttpServlet extends HttpServlet {
 
             DatabasesClient serverCoreDbClient = new DatabasesClient(scp.getDbSettings(), true);
             ScriptRunner.PlatypusScriptedResource.init(serverCoreDbClient.getAppCache());
-            serverCore = new PlatypusServerCore(serverCoreDbClient, scp.getModuleConfigs(), scp.getAppElementId());
+            serverCore = new PlatypusServerCore(serverCoreDbClient, scp.getTasks(), scp.getAppElementId());
             serverCoreDbClient.setContextHost(serverCore);
             serverCoreDbClient.setPrincipalHost(serverCore);
 
@@ -119,6 +118,7 @@ public class PlatypusHttpServlet extends HttpServlet {
                 unRegisterMBean(Settings.SETTINGS_MBEAN_NAME);
                 registerMBean(Settings.SETTINGS_MBEAN_NAME, new Settings(serverCoreDbClient));
             }
+            serverCore.startBackgroundTasks();
         } catch (Exception ex) {
             throw new ServletException(ex);
         }

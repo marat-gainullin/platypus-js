@@ -14,15 +14,13 @@ import com.eas.client.queries.ContextHost;
 import com.eas.client.reports.ReportRunnerPrototype;
 import com.eas.client.scripts.CompiledScriptDocuments;
 import com.eas.client.scripts.CompiledScriptDocumentsHost;
-import com.eas.client.scripts.ScriptResolver;
-import com.eas.client.scripts.ScriptResolverHost;
-import com.eas.client.scripts.ScriptRunner;
+import com.eas.client.scripts.ScriptDocument;
 import com.eas.client.scripts.ScriptRunnerPrototype;
 import com.eas.client.scripts.ServerScriptProxyPrototype;
+import com.eas.script.JsDoc;
 import com.eas.script.ScriptUtils;
 import com.eas.server.filter.AppElementsFilter;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.mozilla.javascript.Context;
@@ -33,7 +31,7 @@ import org.mozilla.javascript.Scriptable;
  *
  * @author mg
  */
-public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledScriptDocumentsHost, ScriptResolverHost {
+public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledScriptDocumentsHost {
 
     static {
         ServerScriptRunnerPrototype.init(ScriptUtils.getScope(), true);
@@ -45,23 +43,17 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
     protected DatabasesClient databasesClient;
     protected ServerScriptsCache scriptsCache;
     protected ServerCompiledScriptDocuments scriptDocuments;
-    private ServerScriptResolver scriptResolver;
     protected AppElementsFilter browsersFilter;
-    protected final Set<ModuleConfig> moduleConfigs;
+    protected final Set<String> tasks;
 
-    public PlatypusServerCore(DatabasesClient aDatabasesClient, Set<ModuleConfig> aModuleConfigs, String aDefaultAppElement) throws Exception {
+    public PlatypusServerCore(DatabasesClient aDatabasesClient, Set<String> aTasks, String aDefaultAppElement) throws Exception {
         databasesClient = aDatabasesClient;
-        moduleConfigs = aModuleConfigs;
         sessionManager = new SessionManager(this);
         scriptsCache = new ServerScriptsCache(this);
         scriptDocuments = new ServerCompiledScriptDocuments(databasesClient);
-        scriptResolver = new ServerScriptResolver(this);
         browsersFilter = new AppElementsFilter(this);
         defaultAppElement = aDefaultAppElement;
-    }
-
-    public Set<ModuleConfig> getModuleConfigs() {
-        return moduleConfigs;
+        tasks = aTasks;
     }
 
     public SessionManager getSessionManager() {
@@ -80,39 +72,59 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
         return scriptsCache;
     }
 
-    /**
-     * Starts a background task, initializing it with supplied configuratin
-     * instance.
-     *
-     * @param config ModuleConfig instance, specifying all needed information to
-     * start the task
-     * @param executor ExecutorService instance to used as actual runner of
-     * startup process. May be null. If it's null, than task will be started in
-     * calling thread.
-     * @return Success status
-     * @see ModuleConfig
-     */
-    public boolean startBackgroundTask(ModuleConfig config, ExecutorService executor) {
-        if (config.isLoadOnStartup()) {
-            final Session systemSession = getSessionManager().getSystemSession();
-            try {
-                ServerScriptRunner module = new ServerScriptRunner(this, systemSession, config, ScriptUtils.getScope(), this, this, this);
-                if (module != null) {
-                    BackgroundTask task = new BackgroundTask(systemSession, module);
-                    if (executor != null) {
-                        executor.execute(task);
-                    } else {
-                        task.run();
-                    }
-                    return true;
-                } else {
-                    Logger.getLogger(PlatypusServerCore.class.getName()).warning(String.format("Background task \"%s\" is illegal (may bad class name). Skipping it.", config.getModuleId()));
-                }
-            } catch (Exception ex) {
-                Logger.getLogger(PlatypusServerCore.class.getName()).severe(String.format("Background task \"%s\" caused an error: %s. Skipping it.", config.getModuleId(), ex.getMessage()));
+    public Set<String> getTasks() {
+        return tasks;
+    }
+
+    public int startBackgroundTasks() throws Exception {
+        int startedTasks = 0;
+        for (String moduleId : tasks) {
+            if (startBackgroundTask(moduleId)) {
+                startedTasks++;
             }
         }
-        return false;
+        return startedTasks;
+    }
+
+    /**
+     * Starts a background task, initializing it with supplied module annotations.
+     *
+     * @param aModuleId Module identifier, specifying a module for the task
+     * @return Success status
+     */
+    public boolean startBackgroundTask(String aModuleId) throws Exception {
+        ScriptDocument sDoc = scriptDocuments.compileScriptDocument(aModuleId);
+        if (sDoc != null) {
+            boolean stateless = false;
+            for (JsDoc.Tag tag : sDoc.getModuleAnnotations()) {
+                if (JsDoc.Tag.STATELESS_TAG.equals(tag.getName())) {
+                    stateless = true;
+                }
+            }
+            if (!stateless) {
+                final Session systemSession = getSessionManager().getSystemSession();
+                try {
+                    ServerScriptRunner module = scriptsCache.get(aModuleId);
+                    if (module != null) {
+                        BackgroundTask task = new BackgroundTask(systemSession, module);
+                        task.run();
+                        return true;
+                    } else {
+                        Logger.getLogger(PlatypusServerCore.class.getName()).warning(String.format("Background task \"%s\" is illegal (may be bad class name). Skipping it.", aModuleId));
+                        return false;
+                    }
+                } catch (Exception ex) {
+                    Logger.getLogger(PlatypusServerCore.class.getName()).severe(String.format("Background task \"%s\" caused an error: %s. Skipping it.", aModuleId, ex.getMessage()));
+                    return false;
+                }
+            } else {
+                Logger.getLogger(PlatypusServerCore.class.getName()).warning(String.format("Module \"%s\" is stateless, skipping it. Hope it will be used as an acceptor for specific protocol.", aModuleId));
+                return false;
+            }
+        } else {
+            Logger.getLogger(PlatypusServerCore.class.getName()).warning(String.format("Background task \"%s\" is illegal (no module). Skipping it.", aModuleId));
+            return false;
+        }
     }
 
     @Override
@@ -183,11 +195,6 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
         return browsersFilter;
     }
 
-    @Override
-    public ScriptResolver getResolver() {
-        return scriptResolver;
-    }
-
     protected class BackgroundTask implements Runnable {
 
         public static final String STARTING_BACKGROUND_TASK_MSG = "Starting background task \"%s\" with class name \"%s\"";
@@ -204,10 +211,10 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
         @Override
         public void run() {
             try {
-                Logger.getLogger(BackgroundTask.class.getName()).info(String.format(STARTING_BACKGROUND_TASK_MSG, module.getModuleConfig().getModuleId(), module.getClass().getName()));
+                Logger.getLogger(BackgroundTask.class.getName()).info(String.format(STARTING_BACKGROUND_TASK_MSG, module.getApplicationElementId(), module.getClass().getName()));
                 module.execute();
                 session.registerModule(module);
-                Logger.getLogger(BackgroundTask.class.getName()).info(String.format(STARTED_BACKGROUND_TASK_MSG, module.getModuleConfig().getModuleId(), module.getClass().getName()));
+                Logger.getLogger(BackgroundTask.class.getName()).info(String.format(STARTED_BACKGROUND_TASK_MSG, module.getApplicationElementId(), module.getClass().getName()));
             } catch (Exception ex) {
                 Logger.getLogger(PlatypusServerCore.class.getName()).log(Level.SEVERE, null, ex);
             }

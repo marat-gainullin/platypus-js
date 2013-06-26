@@ -12,7 +12,6 @@ import com.eas.client.forms.api.components.DesktopPane;
 import com.eas.client.login.PrincipalHost;
 import com.eas.client.scripts.CompiledScriptDocumentsHost;
 import com.eas.client.scripts.ScriptDocument;
-import com.eas.client.scripts.ScriptResolverHost;
 import com.eas.client.scripts.ScriptRunner;
 import com.eas.controls.ControlDesignInfo;
 import com.eas.controls.FormDesignInfo;
@@ -213,8 +212,8 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
         }
     }
 
-    public FormRunner(String aFormId, Client aClient, Scriptable aScope, PrincipalHost aPrincipalHost, CompiledScriptDocumentsHost aCompiledScriptDocumentsHost, ScriptResolverHost aScriptResolverHost) throws Exception {
-        super(aFormId, aClient, aScope, aPrincipalHost, aCompiledScriptDocumentsHost, aScriptResolverHost);
+    public FormRunner(String aFormId, Client aClient, Scriptable aScope, PrincipalHost aPrincipalHost, CompiledScriptDocumentsHost aCompiledScriptDocumentsHost) throws Exception {
+        super(aFormId, aClient, aScope, aPrincipalHost, aCompiledScriptDocumentsHost);
         setPrototype(FormRunnerPrototype.getInstance());
         formKey = aFormId;
     }

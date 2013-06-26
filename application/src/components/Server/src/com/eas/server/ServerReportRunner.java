@@ -12,7 +12,6 @@ import com.eas.client.reports.ReportDocument;
 import com.eas.client.reports.ReportRunner;
 import com.eas.client.scripts.CompiledScriptDocumentsHost;
 import com.eas.client.scripts.ScriptDocument;
-import com.eas.client.scripts.ScriptResolverHost;
 import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptUtils;
 import java.rmi.AccessException;
@@ -20,15 +19,15 @@ import org.mozilla.javascript.*;
 
 /**
  *
- * @author pk, mg
+ * @author pk, mg, ab
  */
 public class ServerReportRunner extends ServerScriptRunner {
 
     private byte[] template;
     private Function onBeforRender;
     
-     public ServerReportRunner(PlatypusServerCore aServerCore, Session aCreationSession, ModuleConfig aConfig, ScriptableObject aScope, PrincipalHost aPrincipalHost, CompiledScriptDocumentsHost aCompiledScriptDocumentsHost, ScriptResolverHost aScriptResolverHost) throws Exception {
-        super(aServerCore, aCreationSession, aConfig, aScope, aPrincipalHost, aCompiledScriptDocumentsHost, aScriptResolverHost);
+     public ServerReportRunner(PlatypusServerCore aServerCore, Session aCreationSession, String aModuleId, ScriptableObject aScope, PrincipalHost aPrincipalHost, CompiledScriptDocumentsHost aCompiledScriptDocumentsHost) throws Exception {
+        super(aServerCore, aCreationSession, aModuleId, aScope, aPrincipalHost, aCompiledScriptDocumentsHost);
         assert aCompiledScriptDocumentsHost != null;
         ScriptDocument scriptDoc = aCompiledScriptDocumentsHost.getDocuments().compileScriptDocument(appElementId);
         if (scriptDoc != null) {
@@ -54,7 +53,6 @@ public class ServerReportRunner extends ServerScriptRunner {
         onBeforRender = aValue;
     }
 
-    @Override
     public synchronized byte[] executeReport() throws Exception {
         Context cx = ScriptUtils.enterContext();
         try {
@@ -79,10 +77,5 @@ public class ServerReportRunner extends ServerScriptRunner {
     protected void definePropertiesAndMethods() {
         super.definePropertiesAndMethods();
         defineProperty(ReportRunner.BEFORE_RENDER_HANDLER_NAME, ServerReportRunner.class, EMPTY);
-    }
-
-    @Override
-    public boolean isReport() {
-        return true;
     }
 }

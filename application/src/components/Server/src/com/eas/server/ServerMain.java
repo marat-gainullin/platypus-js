@@ -27,25 +27,23 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.*;
-import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 import javax.management.ObjectName;
 import javax.net.ssl.*;
 
 /**
  *
- * @author pk
+ * @author pk, mg
  */
 public class ServerMain {
 
     public static final String CMD_SWITCHS_PREFIX = "-";
     // configuration parameters
-    public static final String ACCEPTORTASK_CONF_PARAM = "acceptorTask";
     public static final String APP_DB_PASSWORD_CONF_PARAM = "dbpassword";
     public static final String APP_DB_SCHEMA_CONF_PARAM = "dbschema";
     public static final String APP_DB_URL_CONF_PARAM = "url";
     public static final String APP_DB_USERNAME_CONF_PARAM = "dbuser";
-    public static final String BACKGROUNDTASK_CONF_PARAM = "backgroundTask";
+    public static final String BACKGROUNDTASK_CONF_PARAM = "tasks";
     public static final String IFACE_CONF_PARAM = "iface";
     public static final String PROTOCOLS_CONF_PARAM = "protocols";
     public static final String LOGLEVEL_CONF_PARAM = "loglevel";
@@ -143,7 +141,7 @@ public class ServerMain {
         }
     }
 
-    private static void parseArgs(String[] args, Set<ModuleConfig> aTasks) throws Exception {
+    private static void parseArgs(String[] args, Set<String> aTasksModules) throws Exception {
         for (int i = 0; i < args.length; i++) {
             if ((CMD_SWITCHS_PREFIX + APP_DB_URL_CONF_PARAM).equalsIgnoreCase(args[i])) {
                 if (i + 1 < args.length) {
@@ -169,16 +167,10 @@ public class ServerMain {
                 } else {
                     printHelp(BAD_APP_DB_PASSWORD_MSG);
                 }
-            } else if ((CMD_SWITCHS_PREFIX + BACKGROUNDTASK_CONF_PARAM).equalsIgnoreCase(args[i]) || (CMD_SWITCHS_PREFIX + ACCEPTORTASK_CONF_PARAM).equalsIgnoreCase(args[i])) {
-                boolean acceptor = (CMD_SWITCHS_PREFIX + ACCEPTORTASK_CONF_PARAM).equalsIgnoreCase(args[i]);
+            } else if ((CMD_SWITCHS_PREFIX + BACKGROUNDTASK_CONF_PARAM).equalsIgnoreCase(args[i])) {
                 if (i + 1 < args.length) {
-                    String moduleName = args[i + 1];
-                    try {
-                        ModuleConfig config = new ModuleConfig(true, false, acceptor, null, moduleName);
-                        aTasks.add(config);
-                    } catch (NumberFormatException ex) {
-                        printHelp(BAD_TASK_MSG);
-                    }
+                    String modulesNames = args[i + 1];
+                    aTasksModules.addAll(StringUtils.split(modulesNames, ","));
                 } else {
                     printHelp(BACKGROUND_TASK_WITHOUT_VALUE_MSG);
                 }
@@ -255,10 +247,8 @@ public class ServerMain {
     public static void main(String[] args) throws IOException, Exception {
         checkUserHome();
         checkLogsDirectory();
-        // tasks from configuration
-        Set<ModuleConfig> tasks = new HashSet<>();
-        readModuleConfigs(tasks);
         // tasks from command-line
+        Set<String> tasks = new HashSet<>();
         parseArgs(args, tasks);
         if (url == null) {
             printHelp(NO_URL_SPECIFIED_MSG);
@@ -356,25 +346,6 @@ public class ServerMain {
             protocolsMap.put(PlatypusServer.DEFAULT_PORT, PlatypusServer.DEFAULT_PROTOCOL);
         }
         return protocolsMap;
-    }
-
-    private static void readModuleConfigs(Set<ModuleConfig> contexts) throws Exception {
-        try {
-            Preferences modules = Preferences.systemRoot().node(SERVER_PREFS_PATH + "/modules");
-            if (modules != null) {
-                String[] modulesNames = modules.childrenNames();
-                if (modulesNames != null) {
-                    for (String mName : modulesNames) {
-                        Preferences moduleNode = modules.node(mName);
-                        if (moduleNode != null) {
-                            contexts.add(new ModuleConfig(moduleNode));
-                        }
-                    }
-                }
-            }
-        } catch (BackingStoreException ex) {
-            Logger.getLogger(ServerMain.class.getName()).log(Level.SEVERE, ex.getMessage());
-        }
     }
 
     private static KeyManager[] createKeyManagers() throws NoSuchAlgorithmException, NoSuchProviderException, KeyStoreException, FileNotFoundException, IOException, CertificateException, UnrecoverableKeyException, URISyntaxException {

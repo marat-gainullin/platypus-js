@@ -89,6 +89,12 @@ public class JsDoc {
          */
         public static final String NAME_TAG = "@name";
         /**
+         * Annotation marks a module as a protocol acceptor
+         * Example: @protocol asc6, asc2
+         */
+    public static final String ACCEPTOR_TAG = "@acceptor";
+    public static final String ACCEPTED_PROTOCOL_TAG = "@protocol";
+        /**
          * Annotation marks a module or top level function access restrictions for concrete roles
          * Example: @rolesAllowed admin, manager
          */
@@ -166,7 +172,7 @@ public class JsDoc {
         }
 
         private boolean isParametrized() {
-            return ROLES_ALLOWED_TAG.equals(name) || ROLES_ALLOWED_READ_TAG.equals(name) || ROLES_ALLOWED_WRITE_TAG.equals(name) || READONLY_TAG.equals(name) || WRITABLE_TAG.equals(name);
+            return ROLES_ALLOWED_TAG.equals(name) || ROLES_ALLOWED_READ_TAG.equals(name) || ROLES_ALLOWED_WRITE_TAG.equals(name) || READONLY_TAG.equals(name) || WRITABLE_TAG.equals(name) || ACCEPTED_PROTOCOL_TAG.equals(name);
         }
 
         private List<String> parseParams() {

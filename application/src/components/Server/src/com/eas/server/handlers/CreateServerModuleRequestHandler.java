@@ -19,7 +19,7 @@ import java.util.logging.Logger;
 
 /**
  *
- * @author pk
+ * @author pk, mg, ab
  */
 public class CreateServerModuleRequestHandler extends SessionRequestHandler<CreateServerModuleRequest> {
 
@@ -42,7 +42,7 @@ public class CreateServerModuleRequestHandler extends SessionRequestHandler<Crea
             serverModule = runModule(getServerCore(), getSession(), moduleId);
             Logger.getLogger(CreateServerModuleRequestHandler.class.getName()).log(Level.FINE, "Created server module for script {0} with id {1} on request {2}", new Object[]{getRequest().getModuleName(), serverModule.getModuleId(), getRequest().getID()});
         }
-        return new CreateServerModuleResponse(getRequest().getID(), serverModule.getModuleId(), serverModule.getFunctionsNames(), serverModule.isReport());
+        return new CreateServerModuleResponse(getRequest().getID(), serverModule.getModuleId(), serverModule.getFunctionsNames(), serverModule instanceof ServerReportRunner);
     }
 
     public static ServerScriptRunner runModule(PlatypusServerCore aServerCore, Session aSession, String aModuleId) throws Exception {
@@ -53,22 +53,21 @@ public class CreateServerModuleRequestHandler extends SessionRequestHandler<Crea
                 serverModule = new ServerReportRunner(
                         aServerCore,
                         aSession,
-                        new ModuleConfig(false, false, false, null, aModuleId),
+                        aModuleId,
                         ScriptUtils.getScope(),
                         aServerCore,
+                        aServerCore);
+            } else {
+                serverModule = new ServerScriptRunner(
+                        aServerCore,
+                        aSession,
+                        aModuleId,
+                        ScriptUtils.getScope(),
                         aServerCore,
                         aServerCore);
             }
-        }
-        if (serverModule == null) {
-            serverModule = new ServerScriptRunner(
-                    aServerCore,
-                    aSession,
-                    new ModuleConfig(false, false, false, null, aModuleId),
-                    ScriptUtils.getScope(),
-                    aServerCore,
-                    aServerCore,
-                    aServerCore);
+        } else {
+            throw new IllegalArgumentException(String.format("Can't obtain content of %s", aModuleId));
         }
         if (!serverModule.hasModuleAnnotation(JsDoc.Tag.PUBLIC_TAG)) {
             throw new AccessControlException(String.format("Public access to module %s is denied.", aModuleId));//NOI18N
