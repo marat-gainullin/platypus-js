@@ -118,11 +118,11 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
                     return false;
                 }
             } else {
-                Logger.getLogger(PlatypusServerCore.class.getName()).warning(String.format("Background task \"%s\" is illegal (stateless module can't be specified as a task). Skipping it.", aModuleId));
+                Logger.getLogger(PlatypusServerCore.class.getName()).warning(String.format("Module \"%s\" is stateless, skipping it. Hope it will be used as an acceptor for specific protocol.", aModuleId));
                 return false;
             }
         } else {
-            Logger.getLogger(PlatypusServerCore.class.getName()).warning(String.format("Background task \"%s\" is illegal (absent module). Skipping it.", aModuleId));
+            Logger.getLogger(PlatypusServerCore.class.getName()).warning(String.format("Background task \"%s\" is illegal (no module). Skipping it.", aModuleId));
             return false;
         }
     }

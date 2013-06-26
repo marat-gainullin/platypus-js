@@ -33,7 +33,7 @@ import javax.net.ssl.*;
 
 /**
  *
- * @author pk
+ * @author pk, mg
  */
 public class ServerMain {
 
