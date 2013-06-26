@@ -7,6 +7,7 @@ package com.eas.designer.explorer.project.wizard;
 import com.eas.client.ClientFactory;
 import com.eas.client.settings.DbConnectionSettings;
 import com.eas.client.Client;
+import com.eas.designer.explorer.project.PlatypusProject;
 import com.eas.designer.explorer.project.ui.BuildJdbcUrlPanel;
 import com.eas.designer.explorer.project.ui.ProjectDatabaseCustomizer;
 import javax.swing.JPanel;
@@ -177,7 +178,8 @@ public class DatabaseSetupWizardPanelVisual extends JPanel implements DocumentLi
                 client.shutdown();
                 connectionErrorMsg = null;
             } catch (Exception ex) {
-                connectionErrorMsg = ex.getLocalizedMessage();
+                String rootMessage = getRootException(ex).getLocalizedMessage();
+                connectionErrorMsg = rootMessage != null && !rootMessage.isEmpty() ? rootMessage : NbBundle.getMessage(PlatypusProject.class, "LBL_UnableToConnect"); //NOI18N;
             }
             updateTexts(null);
         } catch (Exception ex) {
@@ -185,6 +187,15 @@ public class DatabaseSetupWizardPanelVisual extends JPanel implements DocumentLi
         }
     }//GEN-LAST:event_btnTestConnectionActionPerformed
 
+    private Throwable getRootException(Throwable ex) {
+        Throwable rootEcxeption = ex;
+        while (rootEcxeption.getCause() != null) {
+            rootEcxeption = rootEcxeption.getCause(); 
+        }
+        return rootEcxeption;
+    }
+    
+    
     private void btnBuildJdbcUrlActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuildJdbcUrlActionPerformed
         BuildJdbcUrlPanel p = new BuildJdbcUrlPanel();
         DialogDescriptor d = new DialogDescriptor(p, p.getTitle());
