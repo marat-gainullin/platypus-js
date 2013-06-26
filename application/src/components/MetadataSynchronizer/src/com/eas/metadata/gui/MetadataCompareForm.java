@@ -794,7 +794,7 @@ public class MetadataCompareForm extends javax.swing.JFrame {
                         if (srcUrl != null && !srcUrl.isEmpty()) {
                             mds.setSourceDatabase(srcUrl, srcSchema, srcUser, srcPassword);
                         } else {
-                            mds.setFileXml(srcSchema);
+                            mds.setFileXml(xml);
                         }
 
                         mds.setNoDropTables(true);
@@ -1234,10 +1234,6 @@ public class MetadataCompareForm extends javax.swing.JFrame {
     // End of variables declaration//GEN-END:variables
 
     public void setSourceDatabase(String aUrl, String aSchema, String aUser, String aPassword) {
-        assert aUrl != null && !aUrl.isEmpty();
-        assert aSchema != null && !aSchema.isEmpty();
-        assert aUser != null && !aUser.isEmpty();
-        assert aPassword != null && !aPassword.isEmpty();
         srcUrl = aUrl;
         srcSchema = aSchema;
         srcUser = aUser;
@@ -1245,10 +1241,6 @@ public class MetadataCompareForm extends javax.swing.JFrame {
     }
 
     public void setDestinationDatabase(String aUrl, String aSchema, String aUser, String aPassword) {
-        assert aUrl != null && !aUrl.isEmpty();
-        assert aSchema != null && !aSchema.isEmpty();
-        assert aUser != null && !aUser.isEmpty();
-        assert aPassword != null && !aPassword.isEmpty();
         destUrl = aUrl;
         destSchema = aSchema;
         destUser = aUser;
@@ -1303,12 +1295,8 @@ public class MetadataCompareForm extends javax.swing.JFrame {
                     String destDialect = destDBStructure.getDatabaseDialect();
                     boolean oneDialect = (srcDialect != null && srcDialect.equalsIgnoreCase(destDialect));
                     SortedSet<String> tablesNames = new TreeSet();
-                    for (String name : srcTables.keySet()) {
-                        tablesNames.add(name.toUpperCase());
-                    }
-                    for (String name : destTables.keySet()) {
-                        tablesNames.add(name.toUpperCase());
-                    }
+                    fillUpperKeys(tablesNames,srcTables);
+                    fillUpperKeys(tablesNames,destTables);
                     for (String tableName : tablesNames) {
                         TableStructure srcTable = srcTables.get(tableName);
                         TableStructure destTable = destTables.get(tableName);
@@ -1339,9 +1327,18 @@ public class MetadataCompareForm extends javax.swing.JFrame {
                     });
                 }
             }
+
         }.start();
     }
 
+    private void fillUpperKeys(Set<String> aNames, Map<String, ?> aMap) {
+        assert aNames != null;
+        if (aMap != null) {
+            for (String name : aMap.keySet()) {
+                aNames.add(name.toUpperCase());
+            }            
+        }
+    }
     private DefaultMutableTreeNode createTableStructureNode(String tableName, TableStructure srcStructure, TableStructure destStructure, boolean oneDialect) {
         String srcTableName = null;
         Fields srcFields = null;
@@ -1816,19 +1813,11 @@ public class MetadataCompareForm extends javax.swing.JFrame {
         SortedSet<String> fKeyNames = new TreeSet<>();
         if (srcStructure != null) {
             srcFKeys = srcStructure.getTableFKeySpecs();
-            if (srcFKeys != null) {
-                for (String name : srcFKeys.keySet()) {
-                    fKeyNames.add(name.toUpperCase());
-                }
-            }
+            fillUpperKeys(fKeyNames, srcFKeys);
         }
         if (destStructure != null) {
             destFKeys = destStructure.getTableFKeySpecs();
-            if (destFKeys != null) {
-                for (String name : destFKeys.keySet()) {
-                    fKeyNames.add(name.toUpperCase());
-                }
-            }
+            fillUpperKeys(fKeyNames, destFKeys);
         }
         if (!fKeyNames.isEmpty()) {
             DefaultMutableTreeNode fKeysNode = new DefaultMutableTreeNode(new DbStructureInfo(String.format(ELEMENTS_FORMAT, fKeysTitle), DbStructureInfo.COMPARE_TYPE.EQUAL));
@@ -2066,19 +2055,11 @@ public class MetadataCompareForm extends javax.swing.JFrame {
         SortedSet<String> indexesNames = new TreeSet<>();
         if (srcStructure != null) {
             srcIndexes = srcStructure.getTableIndexSpecs();
-            if (srcIndexes != null) {
-                for (String name : srcIndexes.keySet()) {
-                    indexesNames.add(name.toUpperCase());
-                }
-            }
+            fillUpperKeys(indexesNames, srcIndexes);
         }
         if (destStructure != null) {
             destIndexes = destStructure.getTableIndexSpecs();
-            if (destIndexes != null) {
-                for (String name : destIndexes.keySet()) {
-                    indexesNames.add(name.toUpperCase());
-                }
-            }
+            fillUpperKeys(indexesNames, destIndexes);
         }
         if (!indexesNames.isEmpty()) {
             DefaultMutableTreeNode indexesNode = new DefaultMutableTreeNode(new DbStructureInfo(String.format(ELEMENTS_FORMAT, indexesTitle), DbStructureInfo.COMPARE_TYPE.EQUAL));
