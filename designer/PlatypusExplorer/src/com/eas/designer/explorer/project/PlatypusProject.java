@@ -70,6 +70,7 @@ import org.openide.windows.InputOutput;
  */
 public class PlatypusProject implements Project {
 
+    public final RequestProcessor RP = new RequestProcessor(PlatypusProject.class);
     public static final String CLIENT_PROPERTY_NAME = "client";
 
     public static class PlatypusFilesEncodingQuery extends FileEncodingQueryImplementation {
@@ -92,8 +93,7 @@ public class PlatypusProject implements Project {
     private DbMigrator migrator;
     private ClassPath sourceRoot;
     private Set<Runnable> clientListeners = new HashSet<>();
-    private static final RequestProcessor RP = new RequestProcessor(PlatypusProject.class);
-
+    
     public PlatypusProject(FileObject aProjectDir, ProjectState aState) throws Exception {
         super();
         DataNode.setShowFileExtensions(false);

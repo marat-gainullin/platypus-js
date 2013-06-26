@@ -50,11 +50,10 @@ public class ProjectRunner {
     private static final String EQUALS_SIGN = "="; //NOI18N
     private static final String FALSE = "false"; //NOI18N
     private static final String LOCAL_HOSTNAME = "localhost"; //NOI18N
-    private static final RequestProcessor RP = new RequestProcessor(ProjectRunner.class.getName());
 
     public static void run(final PlatypusProject project, final String appElementId) throws Exception {
 
-        RP.post(new Runnable() {
+        project.RP.post(new Runnable() {
             @Override
             public void run() {
                 start(project, appElementId, false);
@@ -63,7 +62,7 @@ public class ProjectRunner {
     }
 
     public static void debug(final PlatypusProject project, final String appElementId) throws Exception {
-        RP.post(new Runnable() {
+        project.RP.post(new Runnable() {
             @Override
             public void run() {
                 Future<Integer> runningProgram = start(project, appElementId, true);
@@ -114,7 +113,7 @@ public class ProjectRunner {
         io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Application_Starting"));
         PlatypusProjectSettings pps = project.getSettings();
         String appUrl = null;
-        if (!project.getSettings().isNotStartServer()) {
+        if (!pps.isNotStartServer()) {
             if (AppServerType.PLATYPUS_SERVER.equals(pps.getRunAppServerType())) {
                 PlatypusServerInstance serverInstance = PlatypusServerInstanceProvider.getPlatypusDevServer();
                 if (serverInstance.getServerState() == ServerState.STOPPED) {

@@ -30,12 +30,10 @@ import org.openide.windows.InputOutput;
  */
 public class PlatypusProjectActions implements ActionProvider {
 
-    private final static RequestProcessor RP = new RequestProcessor(PlatypusProjectActions.class.getName(), 1, false);
     public static final String COMMAND_DEPLOY = "deploy"; // NOI18N
     public static final String COMMAND_IMPORT = "import"; // NOI18N
     public static final String COMMAND_CONNECT = "connect-to-db"; // NOI18N
     public static final String COMMAND_DISCONNECT = "disconnect-from-db"; // NOI18N
-    public static final String COMMAND_CLEAN = "clear"; // NOI18N
     /**
      * Some routine global actions for which we can supply a display name. These
      * are IDE-specific.
@@ -119,7 +117,7 @@ public class PlatypusProjectActions implements ActionProvider {
             PlatypusWebModuleManager pwmm = project.getLookup().lookup(PlatypusWebModuleManager.class);
             assert pwmm != null;
             return pwmm.webDirExists();
-        }else if (COMMON_IDE_GLOBAL_ACTIONS.contains(command)) {
+        } else if (COMMON_IDE_GLOBAL_ACTIONS.contains(command)) {
             return true;
         }
         return false;
@@ -127,7 +125,7 @@ public class PlatypusProjectActions implements ActionProvider {
 
     private void deploy() {
         if (project.isDbConnected()) {
-            RequestProcessor.Task deployTask = RP.create(new Runnable() {
+            RequestProcessor.Task deployTask = project.RP.create(new Runnable() {
                 @Override
                 public void run() {
                     InputOutput io = project.getOutputWindowIO();
@@ -151,7 +149,7 @@ public class PlatypusProjectActions implements ActionProvider {
 
     private void importApplication() {
         if (project.isDbConnected()) {
-            RequestProcessor.Task importTask = RP.create(new Runnable() {
+            RequestProcessor.Task importTask = project.RP.create(new Runnable() {
                 @Override
                 public void run() {
                     InputOutput io = project.getOutputWindowIO();
@@ -188,7 +186,7 @@ public class PlatypusProjectActions implements ActionProvider {
         }
     }
 
-    private void clean() {     
+    private void clean() {
         PlatypusWebModuleManager pwmm = project.getLookup().lookup(PlatypusWebModuleManager.class);
         assert pwmm != null;
         try {
@@ -198,6 +196,6 @@ public class PlatypusProjectActions implements ActionProvider {
         } catch (IOException ex) {
             Logger.getLogger(PlatypusProjectActions.class.getName()).log(Level.SEVERE, "Error clearning web directory", ex);
             project.getOutputWindowIO().getErr().println(ex.getMessage());
-        }   
+        }
     }
 }
