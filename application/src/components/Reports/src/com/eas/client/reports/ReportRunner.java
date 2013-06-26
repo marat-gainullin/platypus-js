@@ -10,7 +10,6 @@ import com.eas.client.events.ScriptSourcedEvent;
 import com.eas.client.login.PrincipalHost;
 import com.eas.client.scripts.CompiledScriptDocumentsHost;
 import com.eas.client.scripts.ScriptDocument;
-import com.eas.client.scripts.ScriptResolverHost;
 import com.eas.client.scripts.ScriptRunner;
 import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptUtils;
@@ -29,8 +28,8 @@ public class ReportRunner extends ScriptRunner {
     private Function onBeforRender;
     
 
-    public ReportRunner(String aReportId, Client aClient, Scriptable aScope, PrincipalHost aPrincipalHost, CompiledScriptDocumentsHost aCompiledScriptDocumentsHost, ScriptResolverHost aScriptResolverHost) throws Exception {
-        super(aReportId, aClient, aScope, aPrincipalHost, aCompiledScriptDocumentsHost, aScriptResolverHost);
+    public ReportRunner(String aReportId, Client aClient, Scriptable aScope, PrincipalHost aPrincipalHost, CompiledScriptDocumentsHost aCompiledScriptDocumentsHost) throws Exception {
+        super(aReportId, aClient, aScope, aPrincipalHost, aCompiledScriptDocumentsHost);
         setPrototype(ReportRunnerPrototype.getInstance());
     }
 

@@ -11,8 +11,7 @@ import com.eas.sensors.positioning.PacketReciever;
 import com.eas.sensors.positioning.PositioningIoHandler;
 import com.eas.sensors.positioning.PositioningPacket;
 import com.eas.sensors.retranslate.RetranslatePacketFactory;
-import com.eas.server.ModuleConfig;
-import com.eas.server.PlatypusServer;
+import com.eas.server.PlatypusServerCore;
 import com.eas.server.PositioningPacketStorage;
 import com.eas.server.ServerScriptRunner;
 import java.net.InetSocketAddress;
@@ -36,33 +35,32 @@ public class PositioningPacketReciever implements PacketReciever {
     public static final String RECIEVER_METHOD_NAME = "recieved";
     public static final String SEND_REQUEST_METHOD_NAME = "sendRequest";
     public static final String GET_RESPONSE_METHOD_NAME = "getResponse";
-    protected String moduleName;
-    protected PlatypusServer server;
+    protected String moduleId;
+    protected PlatypusServerCore serverCore;
     private PositioningPacketStorage packetStorage = new PositioningPacketStorage();
     private PositioningPacketStorage packetNotValidStorage = new PositioningPacketStorage(false);
 
-    public PositioningPacketReciever(PlatypusServer aServer, String aModuleName) {
+    public PositioningPacketReciever(PlatypusServerCore aServer, String aModuleId) {
         super();
-        server = aServer;
-        moduleName = aModuleName;
+        serverCore = aServer;
+        moduleId = aModuleId;
     }
 
     @Override
     public Object received(PositioningPacket aPacket) {
         try {
-            ServerScriptRunner module = new ServerScriptRunner(server, server.getSessionManager().getSystemSession(), new ModuleConfig(
-                    false,
-                    false,
-                    false,
-                    null,
-                    moduleName), ScriptUtils.getScope(), server, server, server);
+            ServerScriptRunner module = null;
+            module = serverCore.getSessionManager().getSystemSession().getModule(moduleId);
+            if (module == null) {
+                module = new ServerScriptRunner(serverCore, serverCore.getSessionManager().getSystemSession(), moduleId, ScriptUtils.getScope(), serverCore, serverCore);
+            }
             module.execute();
-            server.getSessionManager().setCurrentSession(server.getSessionManager().getSystemSession());
+            serverCore.getSessionManager().setCurrentSession(serverCore.getSessionManager().getSystemSession());
             Object result;
             try {
                 result = module.executeMethod(RECIEVER_METHOD_NAME, new Object[]{aPacket});
             } finally {
-                server.getSessionManager().setCurrentSession(null);
+                serverCore.getSessionManager().setCurrentSession(null);
             }
             if (result != null) {
                 result = ScriptUtils.js2Java(result);

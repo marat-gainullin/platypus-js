@@ -14,8 +14,6 @@ import com.eas.client.reports.ReportRunnerPrototype;
 import com.eas.client.reports.ServerReportProxyPrototype;
 import com.eas.client.scripts.CompiledScriptDocuments;
 import com.eas.client.scripts.CompiledScriptDocumentsHost;
-import com.eas.client.scripts.ScriptResolver;
-import com.eas.client.scripts.ScriptResolverHost;
 import com.eas.client.scripts.ScriptRunner;
 import com.eas.client.scripts.ScriptRunnerPrototype;
 import com.eas.client.scripts.ServerScriptProxyPrototype;
@@ -24,8 +22,8 @@ import com.eas.client.threetier.PlatypusNativeClient;
 import com.eas.client.threetier.http.PlatypusHttpClient;
 import com.eas.script.ScriptUtils;
 import java.security.AccessControlException;
-import static org.junit.Assert.*;
 import org.junit.*;
+import static org.junit.Assert.*;
 import org.mozilla.javascript.Function;
 
 /**
@@ -63,12 +61,10 @@ public class ScriptRunnerSecurityTest {
     public static final String USER_PASSWORD = "test";
     public static final String UNKNOWN_MODULE_TYPE_MESSAGE = "Unknown module type";
     public static final String UNKNOWN_TEST_TYPE_MESSAGE = "Unknown test type";
-    private static AppClient appClient;
-    private static AppClient httpClient;
+    public static AppClient nativeClient;
+    public static AppClient httpClient;
     private static CompiledScriptDocuments scriptDocuments;
     private static CompiledScriptDocumentsHost scriptDocumentsHost;
-    private static ScriptResolver scriptResolver;
-    private static ScriptResolverHost scriptResolverHost;
     private static ScriptRunner unsecureScriptRunner;
     private static ScriptRunner secureScriptRunner;
     private static ScriptRunner secureFunctionScriptRunner;
@@ -78,37 +74,36 @@ public class ScriptRunnerSecurityTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        PlatypusConnectionSettings nativeSettings = new PlatypusConnectionSettings();
-        nativeSettings.setUrl("platypus://localhost:8500/");
-        nativeSettings.setName("Test native connection");
-        appClient = new PlatypusNativeClient(nativeSettings);
+        initClients();
+    }
 
-        PlatypusConnectionSettings httpSettings = new PlatypusConnectionSettings();
-        httpSettings.setName("Platypus http test connection");
-        httpSettings.setUrl("http://localhost:8080/application/");
-        httpClient = new PlatypusHttpClient(httpSettings);
-        scriptResolverHost = new ScriptResolverHost() {
-            @Override
-            public ScriptResolver getResolver() {
-                return scriptResolver;
-            }
-        };
-        scriptDocumentsHost = new CompiledScriptDocumentsHost() {
-            @Override
-            public CompiledScriptDocuments getDocuments() {
-                return scriptDocuments;
-            }
+    public static void initClients() throws Exception {
+        if (nativeClient == null) {
+            PlatypusConnectionSettings nativeSettings = new PlatypusConnectionSettings();
+            nativeSettings.setUrl("platypus://localhost:8500/");
+            nativeSettings.setName("Test native connection");
+            nativeClient = new PlatypusNativeClient(nativeSettings);
+            PlatypusConnectionSettings httpSettings = new PlatypusConnectionSettings();
+            httpSettings.setName("Platypus http test connection");
+            httpSettings.setUrl("http://localhost:8080/test/application/");
+            httpClient = new PlatypusHttpClient(httpSettings);
+            scriptDocumentsHost = new CompiledScriptDocumentsHost() {
+                @Override
+                public CompiledScriptDocuments getDocuments() {
+                    return scriptDocuments;
+                }
 
-            @Override
-            public void defineJsClass(String aClassName, ApplicationElement aAppElement) {
-                throw new UnsupportedOperationException("Not supported yet.");
-            }
-        };
-        ScriptRunnerPrototype.init(ScriptUtils.getScope(), true);
-        ServerScriptProxyPrototype.init(ScriptUtils.getScope(), true);
-        ServerReportProxyPrototype.init(ScriptUtils.getScope(), true);
-        ReportRunnerPrototype.init(ScriptUtils.getScope(), true);
-        FormRunnerPrototype.init(ScriptUtils.getScope(), true);
+                @Override
+                public void defineJsClass(String aClassName, ApplicationElement aAppElement) {
+                    throw new UnsupportedOperationException("Not supported yet.");
+                }
+            };
+            ScriptRunnerPrototype.init(ScriptUtils.getScope(), true);
+            ServerScriptProxyPrototype.init(ScriptUtils.getScope(), true);
+            ServerReportProxyPrototype.init(ScriptUtils.getScope(), true);
+            ReportRunnerPrototype.init(ScriptUtils.getScope(), true);
+            FormRunnerPrototype.init(ScriptUtils.getScope(), true);
+        }
     }
 
     @AfterClass
@@ -125,8 +120,8 @@ public class ScriptRunnerSecurityTest {
 
     @Test
     public void testSecureExecuteClientComponentMethod() throws Exception {
-        setupModules(ClientConstants.ET_COMPONENT, appClient);
-        testSecureExecuteClientMethod(appClient);
+        setupModules(ClientConstants.ET_COMPONENT, nativeClient);
+        testSecureExecuteClientMethod(nativeClient);
     }
 
     @Test
@@ -137,8 +132,8 @@ public class ScriptRunnerSecurityTest {
 
     @Test
     public void testSecureExecuteClientFormMethod() throws Exception {
-        setupModules(ClientConstants.ET_FORM, appClient);
-        testSecureExecuteClientMethod(appClient);
+        setupModules(ClientConstants.ET_FORM, nativeClient);
+        testSecureExecuteClientMethod(nativeClient);
     }
 
     @Test
@@ -149,8 +144,8 @@ public class ScriptRunnerSecurityTest {
 
     @Test
     public void testSecureExecuteClientReportMethod() throws Exception {
-        setupModules(ClientConstants.ET_REPORT, appClient);
-        testSecureExecuteClientMethod(appClient);
+        setupModules(ClientConstants.ET_REPORT, nativeClient);
+        testSecureExecuteClientMethod(nativeClient);
     }
 
     @Test
@@ -203,12 +198,15 @@ public class ScriptRunnerSecurityTest {
         UNSECURE, SECURE, SECURE_FUNCTION;
     }
 
-    private void setupModules(int moduleType, AppClient client) throws Exception {
+    public static void setupScriptDocuments(AppClient client){
         scriptDocuments = new ClientCompiledScriptDocuments(client);
+    }
+    
+    private void setupModules(int moduleType, AppClient client) throws Exception {
+        setupScriptDocuments(client);
         client.login(USER1_NAME, USER_PASSWORD.toCharArray());//USER1 has permission for every module of these
         try {
             unsecureScriptRunner = getModule(moduleType, SecurityTestType.UNSECURE, client);
-            scriptResolver = new ClientScriptResolver();
             assertNotNull(unsecureScriptRunner);
             secureScriptRunner = getModule(moduleType, SecurityTestType.SECURE, client);
             assertNotNull(secureScriptRunner);
@@ -222,11 +220,11 @@ public class ScriptRunnerSecurityTest {
     private ScriptRunner getModule(int moduleType, SecurityTestType testType, AppClient client) throws Exception {
         switch (moduleType) {
             case ClientConstants.ET_COMPONENT:
-                return new ScriptRunner(getComponentAppElementId(testType), client, ScriptUtils.getScope(), client, scriptDocumentsHost, scriptResolverHost);
+                return new ScriptRunner(getComponentAppElementId(testType), client, ScriptUtils.getScope(), client, scriptDocumentsHost);
             case ClientConstants.ET_FORM:
-                return new FormRunner(getFormAppElementId(testType), client, ScriptUtils.getScope(), client, scriptDocumentsHost, scriptResolverHost);
+                return new FormRunner(getFormAppElementId(testType), client, ScriptUtils.getScope(), client, scriptDocumentsHost);
             case ClientConstants.ET_REPORT:
-                return new ReportRunner(getReportAppelementId(testType), client, ScriptUtils.getScope(), client, scriptDocumentsHost, scriptResolverHost);
+                return new ReportRunner(getReportAppelementId(testType), client, ScriptUtils.getScope(), client, scriptDocumentsHost);
         }
         throw new IllegalArgumentException(UNKNOWN_MODULE_TYPE_MESSAGE);//NOI18N
     }

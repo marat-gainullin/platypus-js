@@ -111,7 +111,7 @@ public class ServerReportProxyPrototype extends IdScriptableObject {
                                     srproxy.setPrototype(this);
                                     return srproxy;
                                 } else {
-                                    ReportRunner rr = new ReportRunner(scriptId, clientWrapper.getClient(), ScriptUtils.getScope(), clientWrapper.getPrincipalHost(), clientWrapper.getCompiledScriptDocumentsHost(), clientWrapper.getScriptResolverHost());
+                                    ReportRunner rr = new ReportRunner(scriptId, clientWrapper.getClient(), ScriptUtils.getScope(), clientWrapper.getPrincipalHost(), clientWrapper.getCompiledScriptDocumentsHost());
                                     rr.setPrototype(this);
                                     return rr;
                                 }

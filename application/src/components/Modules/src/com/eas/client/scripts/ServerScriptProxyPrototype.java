@@ -108,7 +108,7 @@ public class ServerScriptProxyPrototype extends IdScriptableObject {
                                     ssproxy.setPrototype(this);
                                     return ssproxy;
                                 } else {
-                                    ScriptRunner srunner = (ScriptRunner) clientWrapper.getScriptResolverHost().getResolver().getScript(scriptId, clientWrapper.getClient(), ScriptUtils.getScope(), clientWrapper.getPrincipalHost(), clientWrapper.getCompiledScriptDocumentsHost(), clientWrapper.getScriptResolverHost());
+                                    ScriptRunner srunner = new ScriptRunner(scriptId, clientWrapper.getClient(), ScriptUtils.getScope(), clientWrapper.getPrincipalHost(), clientWrapper.getCompiledScriptDocumentsHost());
                                     srunner.setPrototype(this);
                                     return srunner;
                                 }

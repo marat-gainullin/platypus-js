@@ -103,14 +103,12 @@ public class ServerScriptRunnerPrototype extends IdScriptableObject {
                             try {
                                 ServerScriptRunner serverCoreWrapper = lookupScriptRunner(scope);
                                 assert serverCoreWrapper != null : BAD_SCRIPT_SCOPE_MSG;
-                                ModuleConfig config = new ModuleConfig(false, true, false, (String) null, scriptId);
                                 return new ServerScriptRunner(serverCoreWrapper.getServerCore(),
                                         serverCoreWrapper.getCreationSession(),
-                                        config,
+                                        scriptId,
                                         ScriptUtils.getScope(),
                                         serverCoreWrapper.getServerCore(),
-                                        serverCoreWrapper.getServerCore(),
-                                        serverCoreWrapper.getScriptResolverHost());
+                                        serverCoreWrapper.getServerCore());
                             } catch (Exception ex) {
                                 throw new IllegalArgumentException(ex);
                             }

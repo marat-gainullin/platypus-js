@@ -146,7 +146,7 @@ public class Session implements PrincipalHost {
 
     public void registerModule(ServerScriptRunner aModule) {
         synchronized (activeModules) {
-            activeModules.put(aModule.getModuleConfig().getModuleId(), aModule);
+            activeModules.put(aModule.getApplicationElementId(), aModule);
         }
     }
 

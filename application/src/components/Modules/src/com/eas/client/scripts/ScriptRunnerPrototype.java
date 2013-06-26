@@ -121,7 +121,7 @@ public class ScriptRunnerPrototype extends IdScriptableObject {
                             try {
                                 ScriptRunner clientWrapper = lookupScriptRunner(scope);
                                 assert clientWrapper != null : BAD_SCRIPT_SCOPE_MSG;
-                                ScriptRunner scriptRunner = new ScriptRunner(scriptId, clientWrapper.getClient(), ScriptUtils.getScope(), clientWrapper.getPrincipalHost(), clientWrapper.getCompiledScriptDocumentsHost(), clientWrapper.getScriptResolverHost());
+                                ScriptRunner scriptRunner = new ScriptRunner(scriptId, clientWrapper.getClient(), ScriptUtils.getScope(), clientWrapper.getPrincipalHost(), clientWrapper.getCompiledScriptDocumentsHost());
                                 scriptRunner.setPrototype(this);
                                 return scriptRunner;
                             } catch (Exception ex) {

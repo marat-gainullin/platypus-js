@@ -48,7 +48,7 @@ import org.mozilla.javascript.ScriptableObject;
  *
  * @author pk, mg refactoring
  */
-public class PlatypusClientApplication implements ExceptionListener, PrincipalHost, ContextHost, CompiledScriptDocumentsHost, ScriptResolverHost {
+public class PlatypusClientApplication implements ExceptionListener, PrincipalHost, ContextHost, CompiledScriptDocumentsHost {
 
     public static final String CMD_SWITCHS_PREFIX = "-";
     // command line switches
@@ -92,7 +92,6 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
     protected AppCache appCache;
     protected CompiledScriptDocuments scriptDocuments;
     protected ScriptsCache scriptsCache;
-    protected ScriptResolver scriptResolver;
     protected String appPath;
     protected String appElementId;
     protected boolean needInitialBreak;
@@ -494,7 +493,6 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
             Logger.getLogger(PlatypusClientApplication.class.getName()).log(Level.INFO, APPLICATION_ELEMENTS_LOCATION_MSG, appCache instanceof FilesAppCache ? ((FilesAppCache) appCache).getSrcPathName() : client.getSettings().getUrl());
             scriptsCache = new ScriptsCache(this);
             scriptDocuments = new ClientCompiledScriptDocuments(client);
-            scriptResolver = new ClientScriptResolver();
             if (appElementId == null) {
                 appElementId = client.getStartAppElement();
             }
@@ -521,7 +519,7 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
             ApplicationElement appElement = client.getAppCache().get(appElementId);
             if (appElement != null) {
                 if (appElement.getType() == ClientConstants.ET_FORM) {
-                    final FormRunner form = new FormRunner(appElementId, client, ScriptUtils.getScope(), this, this, this);
+                    final FormRunner form = new FormRunner(appElementId, client, ScriptUtils.getScope(), this, this);
                     EventQueue.invokeLater(new Runnable() {
                         @Override
                         public void run() {
@@ -534,11 +532,11 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
                     });
                     // When all windows are disposed, java VM exit automatically.
                 } else if (appElement.getType() == ClientConstants.ET_REPORT) {
-                    ReportRunner report = new ReportRunner(appElementId, client, ScriptUtils.getScope(), this, this, this);
+                    ReportRunner report = new ReportRunner(appElementId, client, ScriptUtils.getScope(), this, this);
                     report.show();
                     exit(0);
                 } else if (appElement.getType() == ClientConstants.ET_COMPONENT) {
-                    ScriptRunner script = new ScriptRunner(appElementId, client, ScriptUtils.getScope(), this, this, this);
+                    ScriptRunner script = new ScriptRunner(appElementId, client, ScriptUtils.getScope(), this, this);
                     script.execute();
                     exit(0);
                 } else if (appElement.getType() == ClientConstants.ET_RESOURCE) {
@@ -715,10 +713,5 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
                 });
                 break;
         }
-    }
-
-    @Override
-    public ScriptResolver getResolver() {
-        return scriptResolver;
     }
 }

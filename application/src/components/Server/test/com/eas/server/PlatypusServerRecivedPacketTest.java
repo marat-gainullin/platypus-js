@@ -52,8 +52,8 @@ public class PlatypusServerRecivedPacketTest {
         Map<Integer, String> ports = new HashMap<>();
         ports.put(TEST_PORT, "platypus");
         ports.put(TEST_PORT+1, "asc6");
-        Set<ModuleConfig> modules = new HashSet<>();
-        modules.add(new ModuleConfig(true, true, true, "asc6", "134148360246876"));
+        Set<String> modules = new HashSet<>();
+        modules.add("134148360246876");//"asc6"
         server = new PlatypusServer(new DatabasesClient(settings), sslContext, addresses, ports, modules, null);
         server.start();
     }
@@ -100,7 +100,7 @@ public class PlatypusServerRecivedPacketTest {
             }
         } catch (Exception ex) {
             Logger.getLogger(PlatypusServerRecivedPacketTest.class.getName()).log(Level.SEVERE, null, ex);
-            assertTrue(false);
+            fail(ex.getMessage());
         }
         try {
             Thread.sleep(3*1000);

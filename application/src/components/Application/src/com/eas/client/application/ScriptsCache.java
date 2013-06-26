@@ -25,14 +25,13 @@ public class ScriptsCache {
 
     public synchronized ScriptRunner get(String aModuleId) throws Exception {        
         ScriptRunner runner = cache.get(aModuleId);
-        if(runner != null && !app.getClient().getAppCache().isActual(runner.getApplicationElementId(), runner.getTxtContentLength(), runner.getTxtCrc32()))
-        {
+        if(runner != null && !app.getClient().getAppCache().isActual(runner.getApplicationElementId(), runner.getTxtContentLength(), runner.getTxtCrc32())){
             runner = null;
             cache.remove(aModuleId);
             app.getClient().getAppCache().remove(aModuleId);
         }
         if (runner == null) {
-            runner = new ScriptRunner(aModuleId, app.getClient(), ScriptUtils.getScope(), app, app, app);
+            runner = new ScriptRunner(aModuleId, app.getClient(), ScriptUtils.getScope(), app, app);
             cache.put(aModuleId, runner);
         }
         return runner;

@@ -4,45 +4,33 @@
  */
 package com.eas.server;
 
-import com.bearsoft.rowset.compacts.CompactBlob;
-import com.eas.client.events.ScriptSourcedEvent;
 import com.eas.client.login.PrincipalHost;
-import com.eas.client.reports.ExcelReport;
-import com.eas.client.reports.ReportDocument;
-import com.eas.client.reports.ReportRunner;
 import com.eas.client.scripts.CompiledScriptDocumentsHost;
-import com.eas.client.scripts.ScriptDocument;
-import com.eas.client.scripts.ScriptResolverHost;
 import com.eas.client.scripts.ScriptRunner;
-import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptUtils;
-import java.rmi.AccessException;
 import java.util.HashSet;
 import java.util.Set;
 import org.mozilla.javascript.*;
 
 /**
  *
- * @author pk, mg
+ * @author pk, mg, ab
  */
 public class ServerScriptRunner extends ScriptRunner {
 
     public static final String MODULES_SCRIPT_NAME = "Modules";
-    public static final String SCRIPT_ID_PARAM_NAME = "script-id";
     private PlatypusServerCore serverCore;
     private Session creationSession;
-    protected ModuleConfig config;
 
-    public ServerScriptRunner(PlatypusServerCore aServerCore, Session aCreationSession, ModuleConfig aConfig, ScriptableObject aScope, PrincipalHost aPrincipalHost, CompiledScriptDocumentsHost aCompiledScriptDocumentsHost, ScriptResolverHost aScriptResolverHost) throws Exception {
-        super(aConfig.getModuleId(), aServerCore.getDatabasesClient(), aScope, aPrincipalHost, aCompiledScriptDocumentsHost, aScriptResolverHost);
+    public ServerScriptRunner(PlatypusServerCore aServerCore, Session aCreationSession, String aModuleId, ScriptableObject aScope, PrincipalHost aPrincipalHost, CompiledScriptDocumentsHost aCompiledScriptDocumentsHost) throws Exception {
+        super(aModuleId, aServerCore.getDatabasesClient(), aScope, aPrincipalHost, aCompiledScriptDocumentsHost);
         serverCore = aServerCore;
         creationSession = aCreationSession;
-        config = aConfig;
         defineProperty(MODULES_SCRIPT_NAME, serverCore.getScriptsCache(), ScriptableObject.READONLY);
     }
 
     public String getModuleId() {
-        return config.getModuleId();
+        return super.getApplicationElementId();
     }
 
     public Session getCreationSession() {
@@ -102,10 +90,6 @@ public class ServerScriptRunner extends ScriptRunner {
         }
     }
     
-    public synchronized byte[] executeReport() throws Exception {
-        throw new AccessException("Module is not a \"report\".");
-    }
-
     @Override
     protected void definePropertiesAndMethods() {
         super.definePropertiesAndMethods();
@@ -132,14 +116,6 @@ public class ServerScriptRunner extends ScriptRunner {
         } finally {
             Context.exit();
         }
-    }
-
-    public boolean isReport() {
-        return false;
-    }
-
-    public ModuleConfig getModuleConfig() {
-        return config;
     }
 
     public void destroy() {

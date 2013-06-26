@@ -14,8 +14,10 @@ import com.eas.client.scripts.CompiledScriptDocumentsHost;
 import com.eas.client.scripts.ScriptDocument;
 import com.eas.script.ScriptUtils;
 import java.io.IOException;
-import static org.junit.Assert.*;
+import java.util.HashSet;
+import java.util.Set;
 import org.junit.*;
+import static org.junit.Assert.*;
 
 /**
  *
@@ -128,14 +130,14 @@ public class SessionTest {
     
     protected static class DummyServerModule extends ServerScriptRunner {
 
-        public DummyServerModule(PlatypusServerCore aServerCore, Session aSession, ModuleConfig aConfig) throws Exception {
-            super(aServerCore, aSession, aConfig, ScriptUtils.getScope(), new PrincipalHost() {
+        public DummyServerModule(PlatypusServerCore aServerCore, Session aSession, String aModuleId) throws Exception {
+            super(aServerCore, aSession, aModuleId, ScriptUtils.getScope(), new PrincipalHost() {
 
                 @Override
                 public PlatypusPrincipal getPrincipal() {
                     return new AppPlatypusPrincipal("dummy", null);
                 }
-            }, new DummyCompiledScriptDocumentsHost(), null);
+            }, new DummyCompiledScriptDocumentsHost());
         }
 
         @Override
@@ -156,15 +158,12 @@ public class SessionTest {
         System.out.println("registerModule");
         Session session = new Session(null, String.valueOf(IDGenerator.genID()), new AppPlatypusPrincipal("su", null));
         String mId = IDGenerator.genID().toString();
+        Set<String> tasks = new HashSet<>(); 
+        tasks.add(mId);
         ServerScriptRunner serverModule = new DummyServerModule(
-                new PlatypusServerCore(null, null, null),
+                new PlatypusServerCore(null, tasks, null),
                 session,
-                new ModuleConfig(
-                false,
-                false,
-                false,
-                null,
-                mId));
+                mId);
 
         session.registerModule(serverModule);
         ServerScriptRunner s = session.getModule(String.valueOf(mId));
@@ -180,15 +179,12 @@ public class SessionTest {
         System.out.println("unregisterModule");
         Session session = new Session(null, String.valueOf(IDGenerator.genID()), new AppPlatypusPrincipal("su", null));
         String mId = IDGenerator.genID().toString();
+        Set<String> tasks = new HashSet<>(); 
+        tasks.add(mId);
         ServerScriptRunner serverModule = new DummyServerModule(
-                new PlatypusServerCore(null, null, null),
-                session,
-                new ModuleConfig(
-                false,
-                false,
-                false,
-                null,
-                mId));
+                new PlatypusServerCore(null, tasks, null),
+                session, 
+                mId);
         session.registerModule(serverModule);
         ServerScriptRunner s = session.getModule(String.valueOf(mId));
         assertSame(s, serverModule);

@@ -6,13 +6,16 @@ package com.eas.server;
 
 import com.eas.client.DatabasesClient;
 import com.eas.client.cache.FilesAppCache;
+import com.eas.client.scripts.ScriptDocument;
 import com.eas.client.threetier.ErrorResponse;
 import com.eas.client.threetier.Request;
+import com.eas.script.JsDoc;
 import com.eas.server.mina.platypus.PlatypusRequestsHandler;
 import com.eas.server.mina.platypus.RequestDecoder;
 import com.eas.server.mina.platypus.ResponseEncoder;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -47,10 +50,9 @@ public class PlatypusServer extends PlatypusServerCore {
     private final ExecutorService bgTasksExecutor;
     private final InetSocketAddress[] listenAddresses;
     private final Map<Integer, String> portsProtocols;
-    private IoAcceptor sensorAcceptor;
-
-    public PlatypusServer(DatabasesClient aDatabasesClient, SSLContext aSslContext, InetSocketAddress[] aAddresses, Map<Integer, String> aPortsProtocols, Set<ModuleConfig> aModuleConfigs, String aDefaultAppElement) throws Exception {
-        super(aDatabasesClient, aModuleConfigs, aDefaultAppElement);
+    
+    public PlatypusServer(DatabasesClient aDatabasesClient, SSLContext aSslContext, InetSocketAddress[] aAddresses, Map<Integer, String> aPortsProtocols, Set<String> aTasks, String aDefaultAppElement) throws Exception {
+        super(aDatabasesClient, aTasks, aDefaultAppElement);
 
         if (aAddresses == null) {
             throw new NullPointerException("listenAddresses");
@@ -64,11 +66,11 @@ public class PlatypusServer extends PlatypusServerCore {
     }
 
     public void start() throws Exception {
+        Logger.getLogger(PlatypusServer.class.getName()).log(Level.INFO, "Application elements are located at: {0}", databasesClient.getAppCache() instanceof FilesAppCache ? ((FilesAppCache) databasesClient.getAppCache()).getSrcPathName() : databasesClient.getSettings().getUrl());
+        startBackgroundTasks();
         for (InetSocketAddress s : listenAddresses) {
             initializeAndBindAcceptor(s);
         }
-        Logger.getLogger(PlatypusServer.class.getName()).log(Level.INFO, "Application elements are located at: {0}", databasesClient.getAppCache() instanceof FilesAppCache ? ((FilesAppCache)databasesClient.getAppCache()).getSrcPathName() : databasesClient.getSettings().getUrl());
-        startBackgroundTasks(bgTasksExecutor);
         assert listenAddresses != null : "listenAddresses != null";
         assert listenAddresses.length > 0 : "listenAddresses.length > 0";
     }
@@ -107,12 +109,41 @@ public class PlatypusServer extends PlatypusServerCore {
         });
     }
 
+    private String findAcceptorModule(String aProtocol) throws Exception {
+        String lastAcceptor = null;
+        for (String taskModuleId : tasks) {
+            ScriptDocument sDoc = scriptDocuments.compileScriptDocument(taskModuleId);
+            if (sDoc != null) {
+                boolean isAcceptor = false;
+                Set<String> protocols = new HashSet<>();
+                for (JsDoc.Tag tag : sDoc.getModuleAnnotations()) {
+                    if (JsDoc.Tag.ACCEPTOR_TAG.equals(tag.getName())) {
+                        isAcceptor = true;
+                    }
+                    if (JsDoc.Tag.ACCEPTED_PROTOCOL_TAG.equals(tag.getName()) && tag.getParams() != null && !tag.getParams().isEmpty()) {
+                        protocols.addAll(tag.getParams());
+                    }
+                }
+                if (isAcceptor) {
+                    if (!protocols.isEmpty()) {// specific protocol acceptor
+                        if (protocols.contains(aProtocol)) {
+                            return taskModuleId;
+                        }
+                    } else {
+                        lastAcceptor = taskModuleId;
+                    }
+                }
+            }
+        }
+        return lastAcceptor;
+    }
+
     private void tryToInitializeAndBindSensorAcceptor(String protocol, InetSocketAddress s) throws IOException, Exception {
         Logger logger = Logger.getLogger(ServerMain.class.getName());
         if (com.eas.sensors.positioning.AcceptorsFactory.isSupported(protocol)) {
-            ModuleConfig acceptorConfig = findAcceptorModule(protocol);
-            if (acceptorConfig != null) {
-                sensorAcceptor = com.eas.sensors.positioning.AcceptorsFactory.create(protocol, new com.eas.server.handlers.PositioningPacketReciever(this, acceptorConfig.getModuleId()));
+            String acceptorModuleId = findAcceptorModule(protocol);
+            if (acceptorModuleId != null) {
+                IoAcceptor sensorAcceptor = com.eas.sensors.positioning.AcceptorsFactory.create(protocol, new com.eas.server.handlers.PositioningPacketReciever(this, acceptorModuleId));
                 if (sensorAcceptor != null) {
                     sensorAcceptor.bind(s);
                     logger.info(String.format("\nListening on %s; protocol: %s\n", s.toString(), protocol));
@@ -123,16 +154,6 @@ public class PlatypusServer extends PlatypusServerCore {
         } else {
             logger.info(String.format("\nProtocol \"%s\" is not supported", protocol));
         }
-    }
-
-    private int startBackgroundTasks(ExecutorService executor) throws Exception {
-        int startedTasks = 0;
-        for (ModuleConfig config : moduleConfigs) {
-            if (startBackgroundTask(config, executor)) {
-                startedTasks++;
-            }
-        }
-        return startedTasks;
     }
 
     private void initializeAndBindAcceptor(InetSocketAddress s) throws IOException, Exception {
@@ -155,7 +176,7 @@ public class PlatypusServer extends PlatypusServerCore {
 
         final IoAcceptor acceptor = new NioSocketAcceptor();
         acceptor.getFilterChain().addLast("executor", new ExecutorFilter(executor, IoEventType.EXCEPTION_CAUGHT,
-            IoEventType.MESSAGE_RECEIVED, IoEventType.MESSAGE_SENT, IoEventType.SESSION_CLOSED));
+                IoEventType.MESSAGE_RECEIVED, IoEventType.MESSAGE_SENT, IoEventType.SESSION_CLOSED));
         acceptor.getFilterChain().addLast("encryption", sslFilter);
         acceptor.getFilterChain().addLast("platypusRequestCodec", new ProtocolCodecFilter(new ResponseEncoder(), new RequestDecoder()));
         acceptor.setHandler((IoHandler) new PlatypusRequestsHandler(this));
@@ -172,39 +193,5 @@ public class PlatypusServer extends PlatypusServerCore {
             sb.append("Enabled protocols: ").append(sslFilter.getEnabledProtocols()).append("\n");
         }
         logger.info(sb.toString());
-    }
-
-    private ModuleConfig findAcceptorModule(String aProtocol) throws Exception {
-        ModuleConfig commonAcceptorConfig = null;
-        ModuleConfig specificAcceptorConfig = null;
-        for (ModuleConfig config : moduleConfigs) {
-            String protocol = config.getAcceptProtocol();
-            if (config.isAcceptor()) {
-                if (protocol == null || protocol.isEmpty()) {
-                    commonAcceptorConfig = config;
-                } else if (protocol.equalsIgnoreCase(aProtocol)) {
-                    specificAcceptorConfig = config;
-                }
-            }
-        }
-        if (specificAcceptorConfig != null) {
-            return specificAcceptorConfig;
-        } else {
-            return commonAcceptorConfig;
-        }
-    }
-
-    /**
-     * @return the sensorAcceptor
-     */
-    public IoAcceptor getSensorAcceptor() {
-        return sensorAcceptor;
-    }
-
-    /**
-     * @param aAcceptor the sensorAcceptor to set
-     */
-    public void setSensorAcceptor(IoAcceptor aAcceptor) {
-        sensorAcceptor = aAcceptor;
     }
 }

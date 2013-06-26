@@ -6,7 +6,6 @@ package com.eas.server.handlers;
 
 import com.eas.client.threetier.requests.AppElementChangedRequest;
 import com.eas.client.threetier.requests.AppElementChangedRequest.Response;
-import com.eas.server.ModuleConfig;
 import com.eas.server.PlatypusServerCore;
 import com.eas.server.Session;
 import com.eas.server.SessionRequestHandler;
@@ -50,6 +49,7 @@ public class AppElementChangedRequestHandler extends SessionRequestHandler<AppEl
         for (Entry<String, Session> sEntry : getSessionManager().entrySet()) {
             sEntry.getValue().unregisterModules();
         }
+        getServerCore().getScriptsCache().clear();
     }
 
     public void handleApplicationElementChanged() throws Exception {
@@ -65,10 +65,10 @@ public class AppElementChangedRequestHandler extends SessionRequestHandler<AppEl
         registerBackgroundModules();
     }
 
-    public void registerBackgroundModules() {
-        for (ModuleConfig config : getServerCore().getModuleConfigs()) {
-            if (config.isLoadOnStartup() && getSessionManager().getSystemSession().getModule(config.getModuleId()) == null) {
-                getServerCore().startBackgroundTask(config, null);
+    public void registerBackgroundModules() throws Exception {
+        for (String moduleId : getServerCore().getTasks()) {
+            if (getSessionManager().getSystemSession().getModule(moduleId) == null) {
+                getServerCore().startBackgroundTask(moduleId);
             }
         }
     }

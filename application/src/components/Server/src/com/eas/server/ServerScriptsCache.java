@@ -32,8 +32,7 @@ public class ServerScriptsCache {
         if (runner == null) {
             runner = new ServerScriptRunner(serverCore,
                     serverCore.getSessionManager().getSystemSession(),
-                    new ModuleConfig(false, true, false, null, aModuleId), ScriptUtils.getScope(),
-                    serverCore,
+                    aModuleId, ScriptUtils.getScope(),
                     serverCore,
                     serverCore);
             cache.put(aModuleId, runner);
