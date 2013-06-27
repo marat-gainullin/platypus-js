@@ -139,14 +139,14 @@
                         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnExpandEqualsActionPerformed"/>
                       </Events>
                     </Component>
-                    <Component class="javax.swing.JButton" name="btnExpandNotEquals">
+                    <Component class="javax.swing.JButton" name="btnExpandSame">
                       <Properties>
                         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                          <ResourceString bundle="com/eas/metadata/gui/Bundle.properties" key="MetadataCompareForm.btnExpandNotEquals.text" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                          <ResourceString bundle="com/eas/metadata/gui/Bundle.properties" key="MetadataCompareForm.btnExpandSame.text" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
                         </Property>
                       </Properties>
                       <Events>
-                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnExpandNotEqualsActionPerformed"/>
+                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnExpandSameActionPerformed"/>
                       </Events>
                     </Component>
                     <Component class="javax.swing.JButton" name="btnExpandNotSame">
@@ -537,6 +537,19 @@
                                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnUnmarkAllTablesActionPerformed"/>
                               </Events>
                             </Component>
+                            <Component class="javax.swing.JButton" name="btnInvertMarkTables">
+                              <Properties>
+                                <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                                  <ResourceString bundle="com/eas/metadata/gui/Bundle.properties" key="MetadataCompareForm.btnInvertMarkTables.text" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                                </Property>
+                                <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                                  <ResourceString bundle="com/eas/metadata/gui/Bundle.properties" key="MetadataCompareForm.btnInvertMarkTables.toolTipText" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                                </Property>
+                              </Properties>
+                              <Events>
+                                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnInvertMarkTablesActionPerformed"/>
+                              </Events>
+                            </Component>
                           </SubComponents>
                         </Container>
                       </SubComponents>
@@ -735,6 +748,19 @@
                                                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnAllClearSqlsActionPerformed"/>
                                               </Events>
                                             </Component>
+                                            <Component class="javax.swing.JButton" name="btnInvertChoiceSqls">
+                                              <Properties>
+                                                <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                                                  <ResourceString bundle="com/eas/metadata/gui/Bundle.properties" key="MetadataCompareForm.btnInvertChoiceSqls.text" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                                                </Property>
+                                                <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                                                  <ResourceString bundle="com/eas/metadata/gui/Bundle.properties" key="MetadataCompareForm.btnInvertChoiceSqls.toolTipText" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                                                </Property>
+                                              </Properties>
+                                              <Events>
+                                                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnInvertChoiceSqlsActionPerformed"/>
+                                              </Events>
+                                            </Component>
                                           </SubComponents>
                                           <LayoutCode>
                                             <CodeStatement>
@@ -828,6 +854,22 @@
                                                   <ExpressionOrigin>
                                                     <ExpressionProvider type="ComponentRef">
                                                       <ComponentRef name="btnAllClearSqls"/>
+                                                    </ExpressionProvider>
+                                                  </ExpressionOrigin>
+                                                </CodeExpression>
+                                              </Parameters>
+                                            </CodeStatement>
+                                            <CodeStatement>
+                                              <CodeExpression id="6_jPanel13"/>
+                                              <StatementProvider type="CodeMethod">
+                                                <CodeMethod name="add" class="java.awt.Container" parameterTypes="java.awt.Component"/>
+                                              </StatementProvider>
+                                              <Parameters>
+                                                <CodeExpression id="9_btnInvertChoiceSqls">
+                                                  <CodeVariable name="btnInvertChoiceSqls" type="8194" declaredType="javax.swing.JButton"/>
+                                                  <ExpressionOrigin>
+                                                    <ExpressionProvider type="ComponentRef">
+                                                      <ComponentRef name="btnInvertChoiceSqls"/>
                                                     </ExpressionProvider>
                                                   </ExpressionOrigin>
                                                 </CodeExpression>

@@ -223,12 +223,21 @@ public class MetadataCompareForm extends javax.swing.JFrame {
                 btnSaveSql.setEnabled(true);
             }
         });
-
+        ImageIcon equalsIcon = new ImageIcon(this.getClass().getResource("/icons/equals.png"));
+        ImageIcon sameIcon = new ImageIcon(this.getClass().getResource("/icons/same.png"));
+        ImageIcon notSameIcon = new ImageIcon(this.getClass().getResource("/icons/notsame.png"));
+        ImageIcon notExistsIcon = new ImageIcon(this.getClass().getResource("/icons/notexists.png"));
+        
+        btnExpandEquals.setIcon(equalsIcon);
+        btnExpandSame.setIcon(sameIcon);
+        btnExpandNotSame.setIcon(notSameIcon);
+        btnExpandNotExists.setIcon(notExistsIcon);
+        
         MetadataTreeCellRenderer renderer = new MetadataTreeCellRenderer();
-        renderer.setEqualsIcon(new ImageIcon(this.getClass().getResource("/icons/equals.png")));
-        renderer.setSameIcon(new ImageIcon(this.getClass().getResource("/icons/same.png")));
-        renderer.setNotSameIcon(new ImageIcon(this.getClass().getResource("/icons/notsame.png")));
-        renderer.setNotExistsIcon(new ImageIcon(this.getClass().getResource("/icons/notexists.png")));
+        renderer.setEqualsIcon(equalsIcon);
+        renderer.setSameIcon(sameIcon);
+        renderer.setNotSameIcon(notSameIcon);
+        renderer.setNotExistsIcon(notExistsIcon);
         tree.setCellRenderer(renderer);
         tree.setCellEditor(new ChoicedTreeCellEditor());
         tree.setEditable(true);
@@ -253,7 +262,7 @@ public class MetadataCompareForm extends javax.swing.JFrame {
         jPanel5 = new javax.swing.JPanel();
         btnExpandAll = new javax.swing.JButton();
         btnExpandEquals = new javax.swing.JButton();
-        btnExpandNotEquals = new javax.swing.JButton();
+        btnExpandSame = new javax.swing.JButton();
         btnExpandNotSame = new javax.swing.JButton();
         btnExpandNotExists = new javax.swing.JButton();
         btnExpandMarked = new javax.swing.JButton();
@@ -286,6 +295,7 @@ public class MetadataCompareForm extends javax.swing.JFrame {
         pnMarkTables = new javax.swing.JPanel();
         btnMarkAllTables = new javax.swing.JButton();
         btnUnmarkAllTables = new javax.swing.JButton();
+        btnInvertMarkTables = new javax.swing.JButton();
         jPanel16 = new javax.swing.JPanel();
         btnSynchronyze = new javax.swing.JButton();
         btnRefresh = new javax.swing.JButton();
@@ -301,6 +311,7 @@ public class MetadataCompareForm extends javax.swing.JFrame {
         jPanel13 = new javax.swing.JPanel();
         btnAllChoiceSqls = new javax.swing.JButton();
         btnAllClearSqls = new javax.swing.JButton();
+        btnInvertChoiceSqls = new javax.swing.JButton();
         jPanel4 = new javax.swing.JPanel();
         btnExecuteSqls = new javax.swing.JButton();
         jPanel10 = new javax.swing.JPanel();
@@ -360,13 +371,13 @@ public class MetadataCompareForm extends javax.swing.JFrame {
         });
         jPanel5.add(btnExpandEquals);
 
-        btnExpandNotEquals.setText(bundle.getString("MetadataCompareForm.btnExpandNotEquals.text")); // NOI18N
-        btnExpandNotEquals.addActionListener(new java.awt.event.ActionListener() {
+        btnExpandSame.setText(bundle.getString("MetadataCompareForm.btnExpandSame.text")); // NOI18N
+        btnExpandSame.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnExpandNotEqualsActionPerformed(evt);
+                btnExpandSameActionPerformed(evt);
             }
         });
-        jPanel5.add(btnExpandNotEquals);
+        jPanel5.add(btnExpandSame);
 
         btnExpandNotSame.setText(bundle.getString("MetadataCompareForm.btnExpandNotSame.text")); // NOI18N
         btnExpandNotSame.addActionListener(new java.awt.event.ActionListener() {
@@ -562,6 +573,15 @@ public class MetadataCompareForm extends javax.swing.JFrame {
         });
         pnMarkTables.add(btnUnmarkAllTables);
 
+        btnInvertMarkTables.setText(bundle.getString("MetadataCompareForm.btnInvertMarkTables.text")); // NOI18N
+        btnInvertMarkTables.setToolTipText(bundle.getString("MetadataCompareForm.btnInvertMarkTables.toolTipText")); // NOI18N
+        btnInvertMarkTables.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnInvertMarkTablesActionPerformed(evt);
+            }
+        });
+        pnMarkTables.add(btnInvertMarkTables);
+
         jPanel17.add(pnMarkTables, java.awt.BorderLayout.SOUTH);
 
         pnTreeTools.add(jPanel17, java.awt.BorderLayout.WEST);
@@ -644,6 +664,15 @@ public class MetadataCompareForm extends javax.swing.JFrame {
             }
         });
         jPanel13.add(btnAllClearSqls);
+
+        btnInvertChoiceSqls.setText(bundle.getString("MetadataCompareForm.btnInvertChoiceSqls.text")); // NOI18N
+        btnInvertChoiceSqls.setToolTipText(bundle.getString("MetadataCompareForm.btnInvertChoiceSqls.toolTipText")); // NOI18N
+        btnInvertChoiceSqls.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnInvertChoiceSqlsActionPerformed(evt);
+            }
+        });
+        jPanel13.add(btnInvertChoiceSqls);
 
         jPanel14.add(jPanel13, java.awt.BorderLayout.SOUTH);
 
@@ -1122,12 +1151,12 @@ public class MetadataCompareForm extends javax.swing.JFrame {
         expandTree(nodes, DbStructureInfo.COMPARE_TYPE.EQUAL);
     }//GEN-LAST:event_btnExpandEqualsActionPerformed
 
-    private void btnExpandNotEqualsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExpandNotEqualsActionPerformed
+    private void btnExpandSameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExpandSameActionPerformed
         Set<DefaultMutableTreeNode> nodes = new HashSet<>();
         nodes.add((DefaultMutableTreeNode) tree.getModel().getRoot());
         collapseTree(nodes, DbStructureInfo.COMPARE_TYPE.NOT_EQUAL);
         expandTree(nodes, DbStructureInfo.COMPARE_TYPE.NOT_EQUAL);
-    }//GEN-LAST:event_btnExpandNotEqualsActionPerformed
+    }//GEN-LAST:event_btnExpandSameActionPerformed
 
     private void btnExpandNotSameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExpandNotSameActionPerformed
         Set<DefaultMutableTreeNode> nodes = new HashSet<>();
@@ -1159,6 +1188,38 @@ public class MetadataCompareForm extends javax.swing.JFrame {
     private void itemCollapseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_itemCollapseActionPerformed
         collapseTree(getSelectedNodes(), null);
     }//GEN-LAST:event_itemCollapseActionPerformed
+
+    private void btnInvertMarkTablesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnInvertMarkTablesActionPerformed
+        TreeModel treeModel = tree.getModel();
+        assert treeModel instanceof DefaultTreeModel;
+        DefaultTreeModel model = (DefaultTreeModel) treeModel;
+        Set<DefaultMutableTreeNode> nodes = getTablesNodes(false);
+        TreePath[] selectionPaths = tree.getSelectionPaths();
+        tree.clearSelection();
+        for (DefaultMutableTreeNode node : nodes) {
+            Object userObject = node.getUserObject();
+            if (userObject instanceof DbTableInfo) {
+                DbTableInfo info = (DbTableInfo) userObject;
+                info.setChoice(!info.isChoice());
+                model.nodeChanged(node);
+            }
+        }
+        tree.setSelectionPaths(selectionPaths);
+    }//GEN-LAST:event_btnInvertMarkTablesActionPerformed
+
+    private void btnInvertChoiceSqlsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnInvertChoiceSqlsActionPerformed
+        assert tblSqls != null;
+        TableModel model = tblSqls.getModel();
+        assert model != null;
+        assert model instanceof SqlsTableModel;
+        SqlsTableModel sqlModel = (SqlsTableModel) model;
+        for (int i = 0; i < sqlModel.getRowCount();i++) {
+            sqlModel.setChoice(i, !sqlModel.getChoice(i));
+        }
+        sqlModel.setAllResults("");
+        tblSqls.repaint();
+    }//GEN-LAST:event_btnInvertChoiceSqlsActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAllChoiceSqls;
     private javax.swing.JButton btnAllClearSqls;
@@ -1167,13 +1228,15 @@ public class MetadataCompareForm extends javax.swing.JFrame {
     private javax.swing.JButton btnExpandAll;
     private javax.swing.JButton btnExpandEquals;
     private javax.swing.JButton btnExpandMarked;
-    private javax.swing.JButton btnExpandNotEquals;
     private javax.swing.JButton btnExpandNotExists;
     private javax.swing.JButton btnExpandNotSame;
+    private javax.swing.JButton btnExpandSame;
     private javax.swing.JToggleButton btnExpandTree;
     private javax.swing.JToggleButton btnFilterTables;
     private javax.swing.JButton btnFindNext;
     private javax.swing.JToggleButton btnFindTables;
+    private javax.swing.JButton btnInvertChoiceSqls;
+    private javax.swing.JButton btnInvertMarkTables;
     private javax.swing.JButton btnMarkAllTables;
     private javax.swing.JButton btnRefresh;
     private javax.swing.JButton btnSaveSql;
