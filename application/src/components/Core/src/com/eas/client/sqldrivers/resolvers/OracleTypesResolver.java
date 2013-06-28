@@ -157,20 +157,9 @@ public class OracleTypesResolver implements TypesResolver {
             }
             if (SQLUtils.isSameTypeGroup(aField.getTypeInfo().getSqlType(), java.sql.Types.BLOB)) {
                 if (aField.getTypeInfo().getSqlType() == java.sql.Types.CLOB || aField.getTypeInfo().getSqlType() == java.sql.Types.NCLOB) {
-                    aField.getTypeInfo().setSqlType(java.sql.Types.CLOB);
-                    aField.getTypeInfo().setJavaClassName(CompactClob.class.getName());
+                    aField.setTypeInfo(DataTypeInfo.CLOB.copy());
                 } else {
-                    if (aField.getTypeInfo().getSqlType() == java.sql.Types.BINARY
-                            || aField.getTypeInfo().getSqlType() == java.sql.Types.VARBINARY) {
-                        aField.getTypeInfo().setSqlType(java.sql.Types.VARBINARY);
-                        aField.getTypeInfo().setJavaClassName(CompactBlob.class.getName());
-                    } else if (aField.getTypeInfo().getSqlType() == java.sql.Types.LONGVARBINARY) {
-                        aField.getTypeInfo().setSqlType(java.sql.Types.LONGVARBINARY);
-                        aField.getTypeInfo().setJavaClassName(CompactBlob.class.getName());
-                    } else {
-                        aField.getTypeInfo().setSqlType(java.sql.Types.BLOB);
-                        aField.getTypeInfo().setJavaClassName(CompactBlob.class.getName());
-                    }
+                    aField.setTypeInfo(DataTypeInfo.BLOB.copy());
                 }
             }
             if (aField.getTypeInfo().getSqlType() == java.sql.Types.OTHER) {

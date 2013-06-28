@@ -640,7 +640,7 @@ public class SQLUtils {
     public static final Map<Integer, Integer> typesCompatible = new HashMap<>();
     public static final Integer NUMBERS_GROUP = new Integer(1);
     public static final Integer LOGICAL_GROUP = new Integer(2);
-    public static final Integer BINARIES_GROUP = new Integer(3);
+    public static final Integer LOBS_GROUP = new Integer(3);
     public static final Integer STRINGS_GROUP = new Integer(4);
     public static final Integer DATES_GROUP = new Integer(5);
     public static final Integer USER_DEFINED_GROUP = new Integer(6);
@@ -673,12 +673,12 @@ public class SQLUtils {
         typesCompatible.put(java.sql.Types.BOOLEAN, LOGICAL_GROUP);
         typesCompatible.put(java.sql.Types.BIT, LOGICAL_GROUP);
         // Binaries
-        typesCompatible.put(java.sql.Types.VARBINARY, BINARIES_GROUP);
-        typesCompatible.put(java.sql.Types.BINARY, BINARIES_GROUP);
-        typesCompatible.put(java.sql.Types.BLOB, BINARIES_GROUP);
-        typesCompatible.put(java.sql.Types.LONGVARBINARY, BINARIES_GROUP);
-        typesCompatible.put(java.sql.Types.CLOB, BINARIES_GROUP);
-        typesCompatible.put(java.sql.Types.NCLOB, BINARIES_GROUP);
+        typesCompatible.put(java.sql.Types.VARBINARY, LOBS_GROUP);
+        typesCompatible.put(java.sql.Types.BINARY, LOBS_GROUP);
+        typesCompatible.put(java.sql.Types.BLOB, LOBS_GROUP);
+        typesCompatible.put(java.sql.Types.LONGVARBINARY, LOBS_GROUP);
+        typesCompatible.put(java.sql.Types.CLOB, LOBS_GROUP);
+        typesCompatible.put(java.sql.Types.NCLOB, LOBS_GROUP);
         // Strings
         typesCompatible.put(java.sql.Types.CHAR, STRINGS_GROUP);
         typesCompatible.put(java.sql.Types.LONGNVARCHAR, STRINGS_GROUP);

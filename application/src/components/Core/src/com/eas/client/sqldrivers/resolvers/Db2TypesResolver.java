@@ -6,6 +6,7 @@ package com.eas.client.sqldrivers.resolvers;
 
 import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.bearsoft.rowset.metadata.Field;
+import com.eas.client.SQLUtils;
 import java.sql.Types;
 import java.util.*;
 import java.util.logging.Level;
@@ -158,6 +159,13 @@ public class Db2TypesResolver implements TypesResolver {
 
     @Override
     public void resolve2Application(Field aField) {
+        if (SQLUtils.isSameTypeGroup(aField.getTypeInfo().getSqlType(), java.sql.Types.BLOB)) {
+            if (aField.getTypeInfo().getSqlType() == java.sql.Types.CLOB || aField.getTypeInfo().getSqlType() == java.sql.Types.NCLOB) {
+                aField.setTypeInfo(DataTypeInfo.CLOB.copy());
+            } else {
+                aField.setTypeInfo(DataTypeInfo.BLOB.copy());
+            }
+        }
     }
 
     @Override
