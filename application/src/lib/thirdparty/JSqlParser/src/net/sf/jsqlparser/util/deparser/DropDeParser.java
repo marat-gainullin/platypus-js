@@ -44,7 +44,7 @@ public class DropDeParser {
             for (int i = 0; i < aDrop.getParameters().size(); i++) {
                   buffer.append(aDrop.getParameters().get(i)).append(" ");
                 if (i < aDrop.getParameters().size() - 1) {
-                    buffer.append(!"".equals(aDrop.getParametrsComment().get(i)) ? " " + aDrop.getParametrsComment().get(i)+ExpressionDeParser.LINE_SEPARATOR : "")
+                    buffer.append(!"".equals(aDrop.getParametersComment().get(i)) ? " " + aDrop.getParametersComment().get(i)+ExpressionDeParser.LINE_SEPARATOR : "")
                           .append(", ");
                 }
             }

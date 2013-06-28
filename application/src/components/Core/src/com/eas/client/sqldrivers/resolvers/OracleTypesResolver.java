@@ -103,7 +103,7 @@ public class OracleTypesResolver implements TypesResolver {
         //typeName(M,D)
         jdbcTypesWithScale.add(Types.DECIMAL);
         jdbcTypesWithScale.add(Types.NUMERIC);
-        
+
         //typeName(M)
         jdbcTypesWithSize.add(Types.FLOAT); //???????!!!!!!!!!!!!
         jdbcTypesWithSize.add(Types.CHAR);
@@ -113,8 +113,8 @@ public class OracleTypesResolver implements TypesResolver {
         jdbcTypesWithSize.add(Types.NUMERIC);
         jdbcTypesWithSize.add(Types.DECIMAL);
         jdbcTypesWithSize.add(Types.VARBINARY);
-        
-        
+
+
     }
 
     @Override
@@ -193,7 +193,7 @@ public class OracleTypesResolver implements TypesResolver {
 
     @Override
     public boolean isGeometryTypeName(String aTypeName) {
-        String sqlTypeName = (aTypeName != null?aTypeName.toUpperCase():null);
+        String sqlTypeName = (aTypeName != null ? aTypeName.toUpperCase() : null);
         for (String gisTypeName : gisTypes) {
             if (sqlTypeName.endsWith(gisTypeName)) {
                 return true;
@@ -204,11 +204,11 @@ public class OracleTypesResolver implements TypesResolver {
 
     @Override
     public int getJdbcTypeByRDBMSTypename(String aTypeName) {
-        String sqlTypeName = (aTypeName != null?aTypeName.toUpperCase():null);
+        String sqlTypeName = (aTypeName != null ? aTypeName.toUpperCase() : null);
         Integer jdbcType = rdbmsTypes2JdbcTypes.get(sqlTypeName);
         if (jdbcType == null) {
             jdbcType = Types.OTHER;
-           
+
             if (isGeometryTypeName(sqlTypeName)) {
                 jdbcType = Types.STRUCT;
             }
@@ -222,17 +222,14 @@ public class OracleTypesResolver implements TypesResolver {
         supportedTypes.addAll(rdbmsTypes2JdbcTypes.values());
         return supportedTypes;
     }
-    
-    @Override
-    public boolean isSized(Integer aSqlType)   
-    {
-        return jdbcTypesWithSize.contains(aSqlType);
-    }        
 
     @Override
-    public boolean isScaled(Integer aSqlType)   
-    {
+    public boolean isSized(Integer aSqlType) {
+        return jdbcTypesWithSize.contains(aSqlType);
+    }
+
+    @Override
+    public boolean isScaled(Integer aSqlType) {
         return jdbcTypesWithScale.contains(aSqlType);
-    }        
-    
+    }
 }

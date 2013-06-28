@@ -4346,7 +4346,7 @@ public class CCJSqlParser implements CCJSqlParserConstants {
     }
                 if (dropArgs.size() > 0) {
                         drop.setParameters(dropArgs);
-                        drop.setParametrsComment(commentArgs);
+                        drop.setParametersComment(commentArgs);
                 }
                 {if (true) return drop;}
     throw new Error("Missing return statement in function");
