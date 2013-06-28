@@ -1086,7 +1086,7 @@ public class MetadataCompareForm extends javax.swing.JFrame {
                     if (client != null) {
                         btnExecuteSqls.setEnabled(false);
                         for (int i = 0; i < size; i++) {
-                            if (sqlModel.getChoice(i) == true) {
+                            if (sqlModel.isChoiced(i)) {
                                 try {
                                     SqlCompiledQuery query = new SqlCompiledQuery(client, null, sqlModel.getSql(i));
                                     query.enqueueUpdate();
@@ -1214,7 +1214,7 @@ public class MetadataCompareForm extends javax.swing.JFrame {
         assert model instanceof SqlsTableModel;
         SqlsTableModel sqlModel = (SqlsTableModel) model;
         for (int i = 0; i < sqlModel.getRowCount();i++) {
-            sqlModel.setChoice(i, !sqlModel.getChoice(i));
+            sqlModel.setChoice(i, !sqlModel.isChoiced(i));
         }
         sqlModel.setAllResults("");
         tblSqls.repaint();

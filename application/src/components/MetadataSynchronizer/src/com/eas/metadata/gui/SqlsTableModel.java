@@ -38,7 +38,7 @@ public class SqlsTableModel extends AbstractTableModel {
     public Object getValueAt(int rowIndex, int columnIndex) {
         switch (columnIndex) {
             case 0:
-                return getChoice(rowIndex);
+                return isChoiced(rowIndex);
             case 1:
                 return getSql(rowIndex);
             case 2:
@@ -97,7 +97,7 @@ public class SqlsTableModel extends AbstractTableModel {
         fireTableStructureChanged();
     }
 
-    synchronized public boolean getChoice(int aIndex) {
+    synchronized public boolean isChoiced(int aIndex) {
         return (choices != null && choices.length > aIndex ? choices[aIndex] : false);
     }
 
