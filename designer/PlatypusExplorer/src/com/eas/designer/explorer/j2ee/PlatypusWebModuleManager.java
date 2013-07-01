@@ -304,13 +304,6 @@ public class PlatypusWebModuleManager {
             wa.addInitParam(new ContextParam(ClientConstants.APP_PATH_CMD_PROP_NAME1, project.getProjectDirectory().getPath()));
         }
         wa.addInitParam(new ContextParam(ClientConstants.DB_CONNECTION_URL_PROP_NAME, PlatypusWebModule.MAIN_DATASOURCE_NAME));
-        DbConnectionSettings dbSettings = project.getSettings().getAppSettings().getDbSettings();
-        String dbConnectionSchema = dbSettings.getInfo().getProperty(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME);
-        if (dbConnectionSchema != null && !dbConnectionSchema.isEmpty()) {
-            wa.addInitParam(new ContextParam(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME, dbConnectionSchema));
-        }
-        String dialect = GeneralResourceProvider.constructPropertiesByDbConnectionSettings(dbSettings).getProperty(ClientConstants.DB_CONNECTION_DIALECT_PROP_NAME);
-        wa.addInitParam(new ContextParam(ClientConstants.DB_CONNECTION_DIALECT_PROP_NAME, dialect));
     }
 
     private void configureServlet(WebApplication wa) {

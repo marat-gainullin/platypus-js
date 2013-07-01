@@ -67,7 +67,6 @@ public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower 
     private LoginCallback loginCallback;
     private Client client;
     protected String url;
-    protected String dbSchema;
     protected String dbUser;
     protected char[] dbPassword;
     protected String user;
@@ -77,7 +76,6 @@ public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower 
      * User's login and connection selection dialog.
      *
      * @param aUrl preset URL
-     * @param aDbSchema preset database schema
      * @param aDbUser preset database user name
      * @param aDbPassword preset database password
      * @param aUser preset application user name
@@ -85,10 +83,9 @@ public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower 
      * @param aLoginCallback callback for login action
      * @throws Exception if login failed
      */
-    public LoginFrame(String aUrl, String aDbSchema, String aDbUser, char[] aDbPassword, String aUser, char[] aPassword, LoginCallback aLoginCallback) throws Exception {
+    public LoginFrame(String aUrl, String aDbUser, char[] aDbPassword, String aUser, char[] aPassword, LoginCallback aLoginCallback) throws Exception {
         super((java.awt.Frame) null, true);
         url = aUrl;
-        dbSchema = aDbSchema;
         dbUser = aDbUser;
         dbPassword = aDbPassword;
         user = aUser;
@@ -134,7 +131,6 @@ public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower 
 
     private void doClose(int retStatus) {
         url = null;
-        dbSchema = null;
         dbUser = null;
         if (dbPassword != null) {
             for (int i = 0; i < dbPassword.length; i++) {
@@ -488,12 +484,10 @@ public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower 
         } else if (isDbShortModeLogin()) {
             EasSettings settings = EasSettings.createInstance(url);
             assert settings instanceof DbConnectionSettings;
-            settings.getInfo().put(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME, dbSchema);
             return loginCallback.tryToLogin(settings, dbUser, dbPassword, tfUserName.getText(), tfPassword.getPassword());
         } else if (isDbModeLogin()) {
             EasSettings settings = EasSettings.createInstance(url);
             assert settings instanceof DbConnectionSettings;
-            settings.getInfo().put(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME, dbSchema);
             return loginCallback.tryToLogin(settings, tfDbUserName.getText(), tfDbPassword.getPassword(), tfUserName.getText(), tfPassword.getPassword());
         } else if (isFullModeLogin() && !lstConnections.isSelectionEmpty()) {
             EasSettings settings = (EasSettings) lstConnections.getSelectedValue();
@@ -602,7 +596,6 @@ public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower 
                     String url = dlg.getUrl();
                     String userName = dlg.getUserName();
                     String name = dlg.getConnectionName();
-                    String schema = dlg.getSchema();
                     EasSettings s = EasSettings.createInstance(url);
                     if (s != null) {
                         s.setUrl(url);
@@ -611,9 +604,6 @@ public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower 
                         }
                         if (userName != null) {
                             s.getInfo().setProperty("user", userName);
-                        }
-                        if (schema != null && !schema.isEmpty()) {
-                            s.getInfo().setProperty("schema", schema);
                         }
                         connectionsListModel.putElementAt(saveIndex, s);
                         lstConnections.setSelectedIndex(saveIndex);
@@ -642,14 +632,12 @@ public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower 
                 dlg.setUrl(settings.getUrl());
                 dlg.setConnectionName(settings.getName());
                 dlg.setUserName(settings.getInfo().getProperty("user"));
-                dlg.setSchema(settings.getInfo().getProperty("schema"));
                 dlg.setVisible(true);
                 int retVal = dlg.getReturnStatus();
                 if (retVal == ConnectionSettingsDialog.RET_OK) {
                     settings.setUrl(dlg.getUrl());
                     settings.setName(dlg.getConnectionName());
                     settings.getInfo().setProperty("user", dlg.getUserName());
-                    settings.getInfo().setProperty("schema", dlg.getSchema());
                     connectionsListModel.fireContentsChanged(selectedIndex);
                     updatePreferences();
                     if (settings instanceof DbConnectionSettings) {

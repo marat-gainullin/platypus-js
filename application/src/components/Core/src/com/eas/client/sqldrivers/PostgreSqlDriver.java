@@ -176,7 +176,7 @@ public class PostgreSqlDriver extends SqlDriver {
     }
 
     @Override
-    protected String getSql4GetConnectionContext() {
+    public String getSql4GetConnectionContext() {
         return GET_SCHEMA_CLAUSE;
     }
 

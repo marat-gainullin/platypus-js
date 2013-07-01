@@ -125,7 +125,7 @@ public abstract class SqlDriver {
         }
     }
 
-    protected abstract String getSql4GetConnectionContext();
+    public abstract String getSql4GetConnectionContext();
 
     /**
      * Returns sql query text, usable for enumerating tables in particular

@@ -49,9 +49,6 @@ public class ProjectDatabaseCustomizer extends javax.swing.JPanel {
         if (dbSettings != null && dbSettings.getInfo() != null && dbSettings.getInfo().getProperty(DatabaseSetupWizardPanelVisual.PROP_PASSWORD) != null) {
             dbUserPasswordTextField.setText(dbSettings.getInfo().getProperty(DatabaseSetupWizardPanelVisual.PROP_PASSWORD));
         }
-        if (dbSettings != null && dbSettings.getInfo() != null && dbSettings.getInfo().getProperty(DatabaseSetupWizardPanelVisual.PROP_SCHEMA) != null) {
-            dbSchemaTextField.setText(dbSettings.getInfo().getProperty(DatabaseSetupWizardPanelVisual.PROP_SCHEMA));
-        }
         setupComponents();
         clientChangeListener = project.addClientChangeListener(new Runnable() {
             @Override
@@ -82,7 +79,6 @@ public class ProjectDatabaseCustomizer extends javax.swing.JPanel {
             DbConnectionSettings dbSettings = new DbConnectionSettings();
             dbSettings.setUrl(jdbcUrlTextField.getText());
             Properties props = new Properties();
-            props.put(DatabaseSetupWizardPanelVisual.PROP_SCHEMA, dbSchemaTextField.getText());
             props.put(DatabaseSetupWizardPanelVisual.PROP_USER, dbUserTextField.getText());
             props.put(DatabaseSetupWizardPanelVisual.PROP_PASSWORD, dbUserPasswordTextField.getText());
             dbSettings.setInfo(props);
@@ -106,8 +102,6 @@ public class ProjectDatabaseCustomizer extends javax.swing.JPanel {
         dbUserLabel = new javax.swing.JLabel();
         dbUserTextField = new javax.swing.JTextField();
         dbUserPasswordLabel = new javax.swing.JLabel();
-        dbSchemaLabel = new javax.swing.JLabel();
-        dbSchemaTextField = new javax.swing.JTextField();
         btnTryConnect = new javax.swing.JButton();
         btnBuildJdbcUrl = new javax.swing.JButton();
         dbUserPasswordTextField = new javax.swing.JPasswordField();
@@ -139,19 +133,6 @@ public class ProjectDatabaseCustomizer extends javax.swing.JPanel {
         });
 
         dbUserPasswordLabel.setText(org.openide.util.NbBundle.getMessage(ProjectDatabaseCustomizer.class, "ProjectDatabaseCustomizer.dbUserPasswordLabel.text")); // NOI18N
-
-        dbSchemaLabel.setText(org.openide.util.NbBundle.getMessage(ProjectDatabaseCustomizer.class, "ProjectDatabaseCustomizer.dbSchemaLabel.text")); // NOI18N
-
-        dbSchemaTextField.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                dbSchemaTextFieldActionPerformed(evt);
-            }
-        });
-        dbSchemaTextField.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusLost(java.awt.event.FocusEvent evt) {
-                dbSchemaTextFieldFocusLost(evt);
-            }
-        });
 
         btnTryConnect.setText(org.openide.util.NbBundle.getMessage(ProjectDatabaseCustomizer.class, "ProjectDatabaseCustomizer.btnTryConnect.text")); // NOI18N
         btnTryConnect.addActionListener(new java.awt.event.ActionListener() {
@@ -186,22 +167,19 @@ public class ProjectDatabaseCustomizer extends javax.swing.JPanel {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(btnTryConnect, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(dbUserLabel)
+                    .addComponent(jdbcUrlLabel)
+                    .addComponent(dbUserPasswordLabel))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(dbUserTextField, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jdbcUrlTextField)
+                    .addComponent(dbUserPasswordTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 277, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(dbUserLabel)
-                            .addComponent(jdbcUrlLabel)
-                            .addComponent(dbSchemaLabel)
-                            .addComponent(dbUserPasswordLabel))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(dbUserTextField, javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(dbSchemaTextField, javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jdbcUrlTextField)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(btnBuildJdbcUrl)
-                                .addGap(0, 0, Short.MAX_VALUE))
-                            .addComponent(dbUserPasswordTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 247, Short.MAX_VALUE))))
+                            .addComponent(btnTryConnect, javax.swing.GroupLayout.PREFERRED_SIZE, 171, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(btnBuildJdbcUrl, javax.swing.GroupLayout.PREFERRED_SIZE, 171, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -211,13 +189,9 @@ public class ProjectDatabaseCustomizer extends javax.swing.JPanel {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jdbcUrlLabel)
                     .addComponent(jdbcUrlTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(5, 5, 5)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnBuildJdbcUrl)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(dbSchemaLabel)
-                    .addComponent(dbSchemaTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(dbUserLabel)
                     .addComponent(dbUserTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -225,9 +199,9 @@ public class ProjectDatabaseCustomizer extends javax.swing.JPanel {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(dbUserPasswordLabel)
                     .addComponent(dbUserPasswordTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 50, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnTryConnect)
-                .addContainerGap())
+                .addContainerGap(17, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -250,14 +224,6 @@ public class ProjectDatabaseCustomizer extends javax.swing.JPanel {
     private void jdbcUrlTextFieldFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jdbcUrlTextFieldFocusLost
         constructConnectionSettings();
     }//GEN-LAST:event_jdbcUrlTextFieldFocusLost
-
-    private void dbSchemaTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_dbSchemaTextFieldActionPerformed
-        constructConnectionSettings();
-    }//GEN-LAST:event_dbSchemaTextFieldActionPerformed
-
-    private void dbSchemaTextFieldFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_dbSchemaTextFieldFocusLost
-        constructConnectionSettings();
-    }//GEN-LAST:event_dbSchemaTextFieldFocusLost
 
     private void dbUserTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_dbUserTextFieldActionPerformed
         constructConnectionSettings();
@@ -287,8 +253,6 @@ public class ProjectDatabaseCustomizer extends javax.swing.JPanel {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnBuildJdbcUrl;
     private javax.swing.JButton btnTryConnect;
-    private javax.swing.JLabel dbSchemaLabel;
-    private javax.swing.JTextField dbSchemaTextField;
     private javax.swing.JLabel dbUserLabel;
     private javax.swing.JLabel dbUserPasswordLabel;
     private javax.swing.JPasswordField dbUserPasswordTextField;

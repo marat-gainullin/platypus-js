@@ -57,7 +57,6 @@ public class DbConnectionSettings extends EasSettings {
         url = anUrl;
         if (aSchema != null) {
             info.put(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME, aSchema);
-            info.put(ClientConstants.DB_CONNECTION_CURRENT_SCHEMA_PROP_NAME, aSchema);
         }
         if (anUser != null) {
             info.put(ClientConstants.DB_CONNECTION_USER_PROP_NAME, anUser);

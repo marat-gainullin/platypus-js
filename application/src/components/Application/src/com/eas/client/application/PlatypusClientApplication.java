@@ -73,7 +73,7 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
     public static final String USER_HOME_ABSENTFILE_MSG = ClientConstants.USER_HOME_PROP_NAME + " property points to non-existent location";
     public static final String USER_HOME_MISSING_MSG = ClientConstants.USER_HOME_PROP_NAME + " property missing. Please specify it with -Dplatypus.home=... java comannd line switch";
     public static final String USER_HOME_NOT_A_DIRECTORY_MSG = ClientConstants.USER_HOME_PROP_NAME + " property points to non-directory";
-    public static final String BAD_DB_CREDENTIALS_MSG = "Bad database credentials.";
+    public static final String BAD_DB_CREDENTIALS_MSG = "Bad database credentials.  May be bad db connection settings (url, dbuser, dbpassword).";
     public static final String BAD_APP_CREDENTIALS_MSG = "Bad application credentials.";
     public static final String APP_ELEMENT_MISSING_MSG = "Application element identifier missing. Nothing to do, so exit.";
     public static final String CLIENT_REQUIRED_AFTER_LOGIN_MSG = "After successfull login there must be a client.";
@@ -178,7 +178,9 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
                 }
                 settings.getInfo().put(ClientConstants.DB_CONNECTION_USER_PROP_NAME, dbUser);
                 settings.getInfo().put(ClientConstants.DB_CONNECTION_PASSWORD_PROP_NAME, new String(dbPassword));
-                settings.getInfo().put(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME, dbSchema);
+                if (dbSchema != null && !dbSchema.isEmpty()) {
+                    settings.getInfo().put(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME, dbSchema);
+                }
                 if (appPath != null) {
                     ((DbConnectionSettings) settings).setApplicationPath(appPath);
                 }
@@ -200,7 +202,7 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
     }
 
     private boolean guiLogin() throws Exception {
-        LoginFrame frame = new LoginFrame(url, dbSchema, dbUser, dbPassword, user, password, new LoginCallback() {
+        LoginFrame frame = new LoginFrame(url, dbUser, dbPassword, user, password, new LoginCallback() {
             @Override
             public boolean tryToLogin(EasSettings aSettings, String aDbUser, char[] aDbPassword, String aUserName, char[] aAppPassword) throws Exception {
                 EasSettings lsettings = aSettings;

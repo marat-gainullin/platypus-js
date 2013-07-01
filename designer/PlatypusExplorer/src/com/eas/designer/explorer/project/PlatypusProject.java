@@ -224,29 +224,6 @@ public class PlatypusProject implements Project {
             DbConnectionSettings dbSettings = settings.getAppSettings().getDbSettings();
             dbSettings.setApplicationPath(getProjectDirectory().getPath());
 
-            String dbSchema = dbSettings.getInfo().getProperty(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME);
-            if (dbSchema != null && !dbSchema.isEmpty()) {
-                String url = dbSettings.getUrl();
-                String dbUserName = dbSettings.getInfo().getProperty(ClientConstants.DB_CONNECTION_USER_PROP_NAME);
-                String dbPassword = dbSettings.getInfo().getProperty(ClientConstants.DB_CONNECTION_PASSWORD_PROP_NAME);
-                List<String> schemas = PlatypusUtils.achieveSchemas(url, dbUserName, dbPassword);
-                List<String> upperCaseSchemas = new ArrayList<>();
-                for (String s : schemas) {
-                    upperCaseSchemas.add(s.toUpperCase());
-                }
-                if (!upperCaseSchemas.contains(dbSchema.toUpperCase())) {
-                    NotifyDescriptor d = new NotifyDescriptor(
-                            String.format(NbBundle.getMessage(PlatypusProject.class, "MSG_Create_New_Schema_Dialog"), dbSchema, dbSchema), //NOI18N
-                            NbBundle.getMessage(PlatypusProject.class, "LBL_Create_New_Schema_Dialog_Title"), //NOI18N
-                            NotifyDescriptor.OK_CANCEL_OPTION,
-                            NotifyDescriptor.QUESTION_MESSAGE,
-                            null,
-                            null);
-                    if (DialogDisplayer.getDefault().notify(d).equals(NotifyDescriptor.OK_OPTION)) {
-                        PlatypusUtils.createSchema(url, dbUserName, dbPassword, dbSchema);
-                    }
-                }
-            }
             final DbClient lclient = (DbClient) ClientFactory.getInstance(dbSettings);
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
