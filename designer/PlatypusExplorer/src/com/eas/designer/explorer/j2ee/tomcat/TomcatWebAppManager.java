@@ -88,8 +88,15 @@ public class TomcatWebAppManager implements WebAppManager {
     private static void deployJdbcDriver(FileObject targetDirectory, String className) throws EmptyPlatformHomePathException, IOException {
         File jarFile = PlatypusPlatform.findThirdpartyJar(className);
         if (jarFile != null) {
-            FileObject jarFo = FileUtil.toFileObject(jarFile);
-            jarFo.copy(targetDirectory, jarFo.getName(), jarFo.getExt());
+            FileObject jdbcDriverFo = FileUtil.toFileObject(jarFile);
+//                Enumeration<? extends FileObject> jdbcDriversEnumeration = jdbcDriverFo.getParent().getChildren(false);
+//                while(jdbcDriversEnumeration.hasMoreElements()) {
+//                    FileObject fo = jdbcDriversEnumeration.nextElement();
+//                    if (PlatypusPlatform.JAR_FILE_EXTENSION.equalsIgnoreCase(fo.getExt())) {
+//                        fo.copy(targetDirectory, fo.getName(), fo.getExt());
+//                    }
+//                }
+            jdbcDriverFo.copy(targetDirectory, jdbcDriverFo.getName(), jdbcDriverFo.getExt());
         } else {
             throw new FileNotFoundException("JDBC driver for " + className + " isn't found.");
         }
