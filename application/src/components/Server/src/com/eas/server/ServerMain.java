@@ -67,7 +67,6 @@ public class ServerMain {
     public static final String BAD_TASK_MSG = "Background task is specified with '-backgroundTask <moduleName>:<moduleId>'";
     public static final String LOG_FILE_WITHOUT_VALUE_MSG = "Log file is not specified.";
     public static final String LOG_LEVEL_WITHOUT_VALUE_MSG = "Log level is not specified.";
-    public static final String NO_SCHEMA_SPECIFIED_MSG = "No schema specified.";
     public static final String NO_URL_SPECIFIED_MSG = "No URL specified.";
     public static final String USER_HOME_ABSENTFILE_MSG = ClientConstants.USER_HOME_PROP_NAME + " property points to non-existent location";
     public static final String USER_HOME_MISSING_MSG = ClientConstants.USER_HOME_PROP_NAME + " property missing. Please specify it with -Duser.home=... java comannd line switch";
@@ -252,10 +251,6 @@ public class ServerMain {
         parseArgs(args, tasks);
         if (url == null) {
             printHelp(NO_URL_SPECIFIED_MSG);
-            System.exit(1);
-        }
-        if (schema == null) {
-            printHelp(NO_SCHEMA_SPECIFIED_MSG);
             System.exit(1);
         }
         if (!url.startsWith("jdbc:")) {

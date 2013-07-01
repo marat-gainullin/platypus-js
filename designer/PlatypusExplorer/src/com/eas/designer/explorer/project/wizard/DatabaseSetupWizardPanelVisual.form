@@ -16,28 +16,24 @@
   <Layout>
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Group type="102" attributes="0">
+          <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="btnTestConnection" alignment="1" min="-2" max="-2" attributes="0"/>
-                  <Group type="102" alignment="0" attributes="0">
+                  <Component id="dbUserLabel" alignment="0" min="-2" max="-2" attributes="0"/>
+                  <Component id="jdbcUrlLabel" alignment="0" min="-2" max="-2" attributes="0"/>
+                  <Component id="dbUserPasswordLabel" alignment="0" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Component id="dbUserTextField" alignment="1" pref="316" max="32767" attributes="0"/>
+                  <Component id="jdbcUrlTextField" alignment="1" pref="316" max="32767" attributes="0"/>
+                  <Component id="dbUserPasswordTextField" max="32767" attributes="0"/>
+                  <Group type="102" attributes="0">
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="dbUserLabel" alignment="0" min="-2" max="-2" attributes="0"/>
-                          <Component id="jdbcUrlLabel" alignment="0" min="-2" max="-2" attributes="0"/>
-                          <Component id="dbSchemaLabel" alignment="0" min="-2" max="-2" attributes="0"/>
-                          <Component id="dbUserPasswordLabel" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="btnTestConnection" min="-2" pref="143" max="-2" attributes="0"/>
+                          <Component id="btnBuildJdbcUrl" min="-2" pref="143" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="dbUserTextField" alignment="1" pref="211" max="32767" attributes="0"/>
-                          <Component id="dbSchemaTextField" alignment="1" pref="211" max="32767" attributes="0"/>
-                          <Component id="jdbcUrlTextField" alignment="1" pref="211" max="32767" attributes="0"/>
-                          <Group type="102" attributes="0">
-                              <Component id="btnBuildJdbcUrl" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
-                          </Group>
-                          <Component id="dbUserPasswordTextField" max="32767" attributes="0"/>
-                      </Group>
+                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                   </Group>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
@@ -54,11 +50,6 @@
               </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="btnBuildJdbcUrl" min="-2" max="-2" attributes="0"/>
-              <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="dbSchemaLabel" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="dbSchemaTextField" alignment="3" min="-2" max="-2" attributes="0"/>
-              </Group>
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="dbUserLabel" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -69,8 +60,9 @@
                   <Component id="dbUserPasswordLabel" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="dbUserPasswordTextField" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace max="32767" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
               <Component id="btnTestConnection" min="-2" max="-2" attributes="0"/>
+              <EmptySpace pref="27" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -115,15 +107,6 @@
           <ResourceString bundle="com/eas/designer/explorer/project/wizard/Bundle.properties" key="DatabaseSetupWizardPanelVisual.createdFolderLabel.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
-    </Component>
-    <Component class="javax.swing.JLabel" name="dbSchemaLabel">
-      <Properties>
-        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="com/eas/designer/explorer/project/wizard/Bundle.properties" key="DatabaseSetupWizardPanelVisual.dbSchemaLabel.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
-        </Property>
-      </Properties>
-    </Component>
-    <Component class="javax.swing.JTextField" name="dbSchemaTextField">
     </Component>
     <Component class="javax.swing.JButton" name="btnTestConnection">
       <Properties>

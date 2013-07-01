@@ -20,6 +20,17 @@
                 <attr name="position" intvalue="625"/>
             </file>
         </folder>
+        <folder name="Tools">
+            <file name="JavaPlatformsCustomizerAction.shadow_hidden"/>
+            <file name="LibrariesCustomizerAction.shadow_hidden"/>
+            <folder name="PaletteManager">
+                <file name="org-netbeans-modules-form-actions-InstallBeanAction.shadow_hidden"/>
+                <file name="org-netbeans-modules-web-core-palette-JspPaletteCustomizerAction.shadow_hidden"/>
+            </folder>
+            <file name="Separator1.instance_hidden"/>
+            <file name="VariablesCustomizerAction.shadow_hidden"/>
+            <file name="org-netbeans-modules-xml-catalog-CatalogAction.shadow_hidden"/>
+        </folder>
         <folder name="Window">
             <folder name="Navigator">
                 <file name="ModelInspectorAction.shadow">
@@ -114,6 +125,13 @@
         </folder>
     </folder>
     <!-- default workspaces, frames and their layout defined by core -->
+    <folder name="Templates">
+        <file name="Classes_hidden"/>
+        <file name="Licenses_hidden"/>
+        <file name="Persistence_hidden"/>
+        <file name="Properties_hidden"/>
+        <file name="XML_hidden"/>
+    </folder>
     <folder name="Windows2">
         <folder name="Components">
             <file name="ModelInspector.settings" url="model/windows/ModelInspectorSettings.xml"/>

@@ -51,17 +51,20 @@ public class XmlDom2ConnectionSettings implements ConnectionSettingsVisitor {
     public void visit(DbConnectionSettings aSettings) {
         NodeList nl = doc.getChildNodes();
         if (nl.getLength() == 1) {
-            Element settingsNode = (Element)nl.item(0);
+            Element settingsNode = (Element) nl.item(0);
             aSettings.setName(settingsNode.getAttribute(ConnectionSettings2XmlDom.NAME_ATTR_NAME));
             aSettings.setUrl(settingsNode.getAttribute(ConnectionSettings2XmlDom.URL_ATTR_NAME));
             Properties props = new Properties();
             props.put(ClientConstants.DB_CONNECTION_USER_PROP_NAME, settingsNode.getAttribute(ConnectionSettings2XmlDom.USER_ATTR_NAME));
-            props.put(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME, settingsNode.getAttribute(ConnectionSettings2XmlDom.SCHEMA_ATTR_NAME));
+            String schema = settingsNode.getAttribute(ConnectionSettings2XmlDom.SCHEMA_ATTR_NAME);
+            if (schema != null && !schema.isEmpty()) {
+                props.put(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME, schema);
+            }
             props.put(ClientConstants.DB_CONNECTION_PASSWORD_PROP_NAME, settingsNode.getAttribute(ConnectionSettings2XmlDom.PASSWORD_ATTR_NAME));
             aSettings.setInfo(props);
             aSettings.setInitSchema(Boolean.valueOf(settingsNode.getAttribute(ConnectionSettings2XmlDom.INIT_SCHEMA_ATTR_NAME)));
             aSettings.setDeferCache(Boolean.valueOf(settingsNode.getAttribute(ConnectionSettings2XmlDom.DEFER_CACHE_ATTR_NAME)));
-            
+
         }
     }
 
@@ -69,7 +72,7 @@ public class XmlDom2ConnectionSettings implements ConnectionSettingsVisitor {
     public void visit(PlatypusConnectionSettings aSettings) {
         NodeList nl = doc.getChildNodes();
         if (nl.getLength() == 1) {
-            Element settingsNode = (Element)nl.item(0);
+            Element settingsNode = (Element) nl.item(0);
             aSettings.setName(settingsNode.getAttribute(ConnectionSettings2XmlDom.NAME_ATTR_NAME));
             aSettings.setUrl(settingsNode.getAttribute(ConnectionSettings2XmlDom.URL_ATTR_NAME));
             Properties props = new Properties();

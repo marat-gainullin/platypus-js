@@ -30,7 +30,7 @@ import javax.sql.rowset.RowSetMetaDataImpl;
 
 /**
  *
- * @author Marat
+ * @author mg
  */
 public class SQLUtils {
 
@@ -230,6 +230,48 @@ public class SQLUtils {
             }
         }
         return null;
+    }
+
+    public static String dialectByUrl(String aJdbcUrl) {
+        String dialect = null;
+        if (aJdbcUrl != null) {
+            aJdbcUrl = aJdbcUrl.toLowerCase();
+            if (aJdbcUrl.indexOf("jdbc:oracle") != -1) { //NOI18N
+                dialect = ClientConstants.SERVER_PROPERTY_ORACLE_DIALECT;
+            } else if (aJdbcUrl.indexOf("jdbc:jtds:sqlserver") != -1) { //NOI18N
+                dialect = ClientConstants.SERVER_PROPERTY_MSSQL_DIALECT;
+            } else if (aJdbcUrl.indexOf("jdbc:postgre") != -1) { //NOI18N
+                dialect = ClientConstants.SERVER_PROPERTY_POSTGRE_DIALECT;
+            } else if (aJdbcUrl.indexOf("jdbc:db2") != -1) { //NOI18N
+                dialect = ClientConstants.SERVER_PROPERTY_DB2_DIALECT;
+            } else if (aJdbcUrl.indexOf("jdbc:mysql") != -1) { //NOI18N
+                dialect = ClientConstants.SERVER_PROPERTY_MYSQL_DIALECT;
+            } else if (aJdbcUrl.indexOf("jdbc:h2") != -1) { //NOI18N
+                dialect = ClientConstants.SERVER_PROPERTY_H2_DIALECT;
+            }
+        }
+        return dialect;
+    }
+
+    public static String dialectByProductName(String aName) {
+        String dialect = null;
+        if (aName != null) {
+            aName = aName.toLowerCase();
+            if (aName.indexOf("oracle") != -1) { //NOI18N
+                dialect = ClientConstants.SERVER_PROPERTY_ORACLE_DIALECT;
+            } else if (aName.indexOf("microsoft") != -1) { //NOI18N
+                dialect = ClientConstants.SERVER_PROPERTY_MSSQL_DIALECT;
+            } else if (aName.indexOf("postgre") != -1) { //NOI18N
+                dialect = ClientConstants.SERVER_PROPERTY_POSTGRE_DIALECT;
+            } else if (aName.indexOf("db2") != -1) { //NOI18N
+                dialect = ClientConstants.SERVER_PROPERTY_DB2_DIALECT;
+            } else if (aName.indexOf("mysql") != -1) { //NOI18N
+                dialect = ClientConstants.SERVER_PROPERTY_MYSQL_DIALECT;
+            } else if (aName.indexOf("h2") != -1) { //NOI18N
+                dialect = ClientConstants.SERVER_PROPERTY_H2_DIALECT;
+            }
+        }
+        return dialect;
     }
 
     public static SqlDriver getSqlDriver(String aDialect) {

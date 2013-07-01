@@ -4,20 +4,20 @@
  */
 package com.eas.designer.explorer.project.wizard;
 
+import com.eas.client.Client;
 import com.eas.client.ClientFactory;
 import com.eas.client.settings.DbConnectionSettings;
-import com.eas.client.Client;
+import com.eas.designer.explorer.project.PlatypusProject;
 import com.eas.designer.explorer.project.ui.BuildJdbcUrlPanel;
-import com.eas.designer.explorer.project.ui.ProjectDatabaseCustomizer;
+import java.util.Properties;
 import javax.swing.JPanel;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import org.openide.DialogDescriptor;
+import org.openide.DialogDisplayer;
 import org.openide.WizardDescriptor;
 import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
-import java.util.Properties;
-import org.openide.DialogDescriptor;
-import org.openide.DialogDisplayer;
 
 public class DatabaseSetupWizardPanelVisual extends JPanel implements DocumentListener {
 
@@ -27,7 +27,6 @@ public class DatabaseSetupWizardPanelVisual extends JPanel implements DocumentLi
     // settings props
     public static final String PROP_USER = "user";
     public static final String PROP_PASSWORD = "password";
-    public static final String PROP_SCHEMA = "schema";
     protected static final String defaultConnectionErrorMsg = NbBundle.getMessage(DatabaseSetupWizardPanelVisual.class, "DatabaseSetupWizardPanelVisual.connectionNotTried");
     protected String connectionErrorMsg = defaultConnectionErrorMsg;
     private DatabaseSetupWizardPanel panel;
@@ -38,7 +37,6 @@ public class DatabaseSetupWizardPanelVisual extends JPanel implements DocumentLi
         // Register listener on the textFields to make the automatic updates
         jdbcUrlTextField.getDocument().addDocumentListener(this);
         dbUserTextField.getDocument().addDocumentListener(this);
-        dbSchemaTextField.getDocument().addDocumentListener(this);
         dbUserPasswordTextField.getDocument().addDocumentListener(this);
     }
 
@@ -54,20 +52,14 @@ public class DatabaseSetupWizardPanelVisual extends JPanel implements DocumentLi
         return dbUserPasswordTextField.getText();
     }
 
-    public String getSchema() {
-        return dbSchemaTextField.getText();
-    }
-
     private DbConnectionSettings constructConnectionSettings() throws Exception {
         String url = getJdbcUrl();
         String user = getUser();
         String password = getPassword();
-        String schema = getSchema();
         DbConnectionSettings dbSettings = new DbConnectionSettings();
         Properties props = new Properties();
         props.put(PROP_USER, user);
         props.put(PROP_PASSWORD, password);
-        props.put(PROP_SCHEMA, schema);
         dbSettings.setUrl(url);
         dbSettings.setInitSchema(false);
         dbSettings.setInfo(props);
@@ -87,8 +79,6 @@ public class DatabaseSetupWizardPanelVisual extends JPanel implements DocumentLi
         dbUserLabel = new javax.swing.JLabel();
         dbUserTextField = new javax.swing.JTextField();
         dbUserPasswordLabel = new javax.swing.JLabel();
-        dbSchemaLabel = new javax.swing.JLabel();
-        dbSchemaTextField = new javax.swing.JTextField();
         btnTestConnection = new javax.swing.JButton();
         btnBuildJdbcUrl = new javax.swing.JButton();
         dbUserPasswordTextField = new javax.swing.JPasswordField();
@@ -101,8 +91,6 @@ public class DatabaseSetupWizardPanelVisual extends JPanel implements DocumentLi
 
         dbUserPasswordLabel.setLabelFor(dbUserPasswordTextField);
         org.openide.awt.Mnemonics.setLocalizedText(dbUserPasswordLabel, org.openide.util.NbBundle.getMessage(DatabaseSetupWizardPanelVisual.class, "DatabaseSetupWizardPanelVisual.createdFolderLabel.text")); // NOI18N
-
-        org.openide.awt.Mnemonics.setLocalizedText(dbSchemaLabel, org.openide.util.NbBundle.getMessage(DatabaseSetupWizardPanelVisual.class, "DatabaseSetupWizardPanelVisual.dbSchemaLabel.text")); // NOI18N
 
         org.openide.awt.Mnemonics.setLocalizedText(btnTestConnection, org.openide.util.NbBundle.getMessage(DatabaseSetupWizardPanelVisual.class, "DatabaseSetupWizardPanelVisual.btnTestConnection.text")); // NOI18N
         btnTestConnection.addActionListener(new java.awt.event.ActionListener() {
@@ -125,22 +113,19 @@ public class DatabaseSetupWizardPanelVisual extends JPanel implements DocumentLi
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(btnTestConnection, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(dbUserLabel)
+                    .addComponent(jdbcUrlLabel)
+                    .addComponent(dbUserPasswordLabel))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(dbUserTextField, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 316, Short.MAX_VALUE)
+                    .addComponent(jdbcUrlTextField, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 316, Short.MAX_VALUE)
+                    .addComponent(dbUserPasswordTextField)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(dbUserLabel)
-                            .addComponent(jdbcUrlLabel)
-                            .addComponent(dbSchemaLabel)
-                            .addComponent(dbUserPasswordLabel))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(dbUserTextField, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 211, Short.MAX_VALUE)
-                            .addComponent(dbSchemaTextField, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 211, Short.MAX_VALUE)
-                            .addComponent(jdbcUrlTextField, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 211, Short.MAX_VALUE)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(btnBuildJdbcUrl)
-                                .addGap(0, 0, Short.MAX_VALUE))
-                            .addComponent(dbUserPasswordTextField))))
+                            .addComponent(btnTestConnection, javax.swing.GroupLayout.PREFERRED_SIZE, 143, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(btnBuildJdbcUrl, javax.swing.GroupLayout.PREFERRED_SIZE, 143, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -152,10 +137,6 @@ public class DatabaseSetupWizardPanelVisual extends JPanel implements DocumentLi
                     .addComponent(jdbcUrlTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnBuildJdbcUrl)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(dbSchemaLabel)
-                    .addComponent(dbSchemaTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(dbUserLabel)
@@ -164,8 +145,9 @@ public class DatabaseSetupWizardPanelVisual extends JPanel implements DocumentLi
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(dbUserPasswordLabel)
                     .addComponent(dbUserPasswordTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(btnTestConnection))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnTestConnection)
+                .addContainerGap(27, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -177,7 +159,8 @@ public class DatabaseSetupWizardPanelVisual extends JPanel implements DocumentLi
                 client.shutdown();
                 connectionErrorMsg = null;
             } catch (Exception ex) {
-                connectionErrorMsg = ex.getLocalizedMessage();
+                String rootMessage = getRootException(ex).getLocalizedMessage();
+                connectionErrorMsg = rootMessage != null && !rootMessage.isEmpty() ? rootMessage : NbBundle.getMessage(PlatypusProject.class, "LBL_UnableToConnect"); //NOI18N;
             }
             updateTexts(null);
         } catch (Exception ex) {
@@ -185,6 +168,15 @@ public class DatabaseSetupWizardPanelVisual extends JPanel implements DocumentLi
         }
     }//GEN-LAST:event_btnTestConnectionActionPerformed
 
+    private Throwable getRootException(Throwable ex) {
+        Throwable rootEcxeption = ex;
+        while (rootEcxeption.getCause() != null) {
+            rootEcxeption = rootEcxeption.getCause(); 
+        }
+        return rootEcxeption;
+    }
+    
+    
     private void btnBuildJdbcUrlActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuildJdbcUrlActionPerformed
         BuildJdbcUrlPanel p = new BuildJdbcUrlPanel();
         DialogDescriptor d = new DialogDescriptor(p, p.getTitle());
@@ -197,8 +189,6 @@ public class DatabaseSetupWizardPanelVisual extends JPanel implements DocumentLi
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnBuildJdbcUrl;
     private javax.swing.JButton btnTestConnection;
-    private javax.swing.JLabel dbSchemaLabel;
-    private javax.swing.JTextField dbSchemaTextField;
     private javax.swing.JLabel dbUserLabel;
     private javax.swing.JLabel dbUserPasswordLabel;
     private javax.swing.JPasswordField dbUserPasswordTextField;
@@ -217,7 +207,6 @@ public class DatabaseSetupWizardPanelVisual extends JPanel implements DocumentLi
         String url = getJdbcUrl();
         String user = getUser();
         String password = getPassword();
-        String schema = getSchema();
         /*
          if (url == null || url.isEmpty()
          || user == null || user.isEmpty()
@@ -245,7 +234,6 @@ public class DatabaseSetupWizardPanelVisual extends JPanel implements DocumentLi
             jdbcUrlTextField.setText(dbSettings.getUrl());
             dbUserTextField.setText(dbSettings.getInfo().getProperty(PROP_USER));
             dbUserPasswordTextField.setText(dbSettings.getInfo().getProperty(PROP_PASSWORD));
-            dbSchemaTextField.setText(dbSettings.getInfo().getProperty(PROP_SCHEMA));
         }
     }
 

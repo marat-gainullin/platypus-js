@@ -16,6 +16,7 @@ import java.beans.PropertyChangeSupport;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.security.InvalidParameterException;
 import org.openide.filesystems.FileObject;
 import org.openide.util.EditableProperties;
 import org.w3c.dom.Document;
@@ -107,6 +108,9 @@ public class PlatypusProjectSettings {
      * @param aValue title for the project
      */
     public void setDisplayName(String aValue) {
+        if (aValue == null) {
+            throw new NullPointerException("The Display name parameter cannot be null."); // NOI18N
+        }
         String oldValue = getDisplayName();
         projectProperties.setProperty(PROJECT_DISPLAY_NAME_KEY, aValue);
         projectPropertiesIsDirty = true;
@@ -129,7 +133,11 @@ public class PlatypusProjectSettings {
      */
     public void setRunUser(String aValue) {
         String oldValue = getRunUser();
-        projectPrivateProperties.setProperty(RUN_USER_KEY, aValue);
+        if (aValue != null) {
+            projectPrivateProperties.setProperty(RUN_USER_KEY, aValue);
+        } else {
+            projectPrivateProperties.remove(RUN_USER_KEY);
+        }
         projectPrivatePropertiesIsDirty = true;
         changeSupport.firePropertyChange(RUN_USER_KEY, oldValue, aValue);
     }
@@ -150,7 +158,11 @@ public class PlatypusProjectSettings {
      */
     public void setRunPassword(String aValue) {
         String oldValue = getRunPassword();
-        projectPrivateProperties.setProperty(RUN_PASSWORD_KEY, aValue);
+        if (aValue != null) {
+            projectPrivateProperties.setProperty(RUN_PASSWORD_KEY, aValue);
+        } else {
+            projectPrivateProperties.remove(RUN_PASSWORD_KEY);
+        }
         projectPrivatePropertiesIsDirty = true;
         changeSupport.firePropertyChange(RUN_PASSWORD_KEY, oldValue, aValue);
     }
@@ -171,12 +183,16 @@ public class PlatypusProjectSettings {
      */
     public void setClientOptions(String aValue) {
         String oldValue = getRunClientOptions();
-        projectPrivateProperties.setProperty(RUN_CLIENT_OPTIONS_KEY, aValue);
+        if (aValue != null) {
+            projectPrivateProperties.setProperty(RUN_CLIENT_OPTIONS_KEY, aValue);
+        } else {
+            projectPrivateProperties.remove(RUN_CLIENT_OPTIONS_KEY);
+        }
         projectPrivatePropertiesIsDirty = true;
         changeSupport.firePropertyChange(RUN_CLIENT_OPTIONS_KEY, oldValue, aValue);
     }
-    
-     /**
+
+    /**
      * Gets JVM options provided to Platypus Client.
      *
      * @return parameters string
@@ -192,7 +208,11 @@ public class PlatypusProjectSettings {
      */
     public void setClientVmOptions(String aValue) {
         String oldValue = getRunClientVmOptions();
-        projectPrivateProperties.setProperty(RUN_CLIENT_VM_OPTIONS_KEY, aValue);
+        if (aValue != null) {
+            projectPrivateProperties.setProperty(RUN_CLIENT_VM_OPTIONS_KEY, aValue);
+        } else {
+            projectPrivateProperties.remove(RUN_CLIENT_VM_OPTIONS_KEY);
+        }
         projectPrivatePropertiesIsDirty = true;
         changeSupport.firePropertyChange(RUN_CLIENT_VM_OPTIONS_KEY, oldValue, aValue);
     }
@@ -213,12 +233,16 @@ public class PlatypusProjectSettings {
      */
     public void setServerOptions(String aValue) {
         String oldValue = getRunServerOptions();
-        projectPrivateProperties.setProperty(RUN_SERVER_OPTIONS_KEY, aValue);
+        if (aValue != null) {
+            projectPrivateProperties.setProperty(RUN_SERVER_OPTIONS_KEY, aValue);
+        } else {
+            projectPrivateProperties.remove(RUN_SERVER_OPTIONS_KEY);
+        }
         projectPrivatePropertiesIsDirty = true;
         changeSupport.firePropertyChange(RUN_SERVER_OPTIONS_KEY, oldValue, aValue);
     }
-    
-     /**
+
+    /**
      * Gets JVM options provided to Platypus Application Server.
      *
      * @return parameters string
@@ -234,11 +258,14 @@ public class PlatypusProjectSettings {
      */
     public void setServerVmOptions(String aValue) {
         String oldValue = getRunServerVmOptions();
-        projectPrivateProperties.setProperty(RUN_SERVER_VM_OPTIONS_KEY, aValue);
+        if (aValue != null) {
+            projectPrivateProperties.setProperty(RUN_SERVER_VM_OPTIONS_KEY, aValue);
+        } else {
+            projectPrivateProperties.remove(RUN_SERVER_VM_OPTIONS_KEY);
+        }
         projectPrivatePropertiesIsDirty = true;
         changeSupport.firePropertyChange(RUN_SERVER_VM_OPTIONS_KEY, oldValue, aValue);
     }
-    
 
     /**
      * Checks if runtime to use application from database.
@@ -260,8 +287,7 @@ public class PlatypusProjectSettings {
         projectPrivatePropertiesIsDirty = true;
         changeSupport.firePropertyChange(DB_APP_SOURCES_KEY, oldValue, aValue);
     }
-    
-    
+
     /**
      * Gets application server's host.
      *
@@ -278,11 +304,15 @@ public class PlatypusProjectSettings {
      */
     public void setClientUrl(String aValue) {
         String oldValue = getClientUrl();
-        projectPrivateProperties.setProperty(CLIENT_URL_KEY, aValue);
+        if (aValue != null) {
+            projectPrivateProperties.setProperty(CLIENT_URL_KEY, aValue);
+        } else {
+            projectPrivateProperties.remove(CLIENT_URL_KEY);
+        }
         projectPrivatePropertiesIsDirty = true;
         changeSupport.firePropertyChange(CLIENT_URL_KEY, oldValue, aValue);
     }
-        
+
     /**
      * Gets application's server port.
      *
@@ -291,7 +321,7 @@ public class PlatypusProjectSettings {
     public int getServerPort() {
         return StringUtils.parseInt(projectPrivateProperties.get(SERVER_PORT_KEY), DEFAULT_PLATYPUS_SERVER_PORT);
     }
-    
+
     /**
      * Sets application's server port.
      *
@@ -303,10 +333,10 @@ public class PlatypusProjectSettings {
         projectPrivatePropertiesIsDirty = true;
         changeSupport.firePropertyChange(SERVER_PORT_KEY, Integer.valueOf(oldValue), Integer.valueOf(aValue));
     }
-    
+
     /**
-     * Checks if NOT to start local development application server on application
-     * run.
+     * Checks if NOT to start local development application server on
+     * application run.
      *
      * @return true not to start server
      */
@@ -315,8 +345,8 @@ public class PlatypusProjectSettings {
     }
 
     /**
-     * Sets flag NOT to start local development application server on application
-     * run.
+     * Sets flag NOT to start local development application server on
+     * application run.
      *
      * @param aValue true not to start server
      */
@@ -389,11 +419,15 @@ public class PlatypusProjectSettings {
      */
     public void setJ2eeServerId(String aValue) {
         String oldValue = getJ2eeServerId();
-        projectPrivateProperties.setProperty(J2EE_SERVER_ID_KEY, aValue);
+        if (aValue != null) {
+            projectPrivateProperties.setProperty(J2EE_SERVER_ID_KEY, aValue);
+        } else {
+            projectPrivateProperties.remove(J2EE_SERVER_ID_KEY);
+        }
         projectPrivatePropertiesIsDirty = true;
         changeSupport.firePropertyChange(J2EE_SERVER_ID_KEY, aValue, oldValue);
     }
-    
+
     /**
      * Gets application's context name.
      *
@@ -410,22 +444,28 @@ public class PlatypusProjectSettings {
      */
     public void setServerContext(String aValue) {
         String oldValue = getServerContext();
-        projectProperties.setProperty(SERVER_CONTEXT_KEY, aValue);
+        if (aValue != null) {
+            projectProperties.setProperty(SERVER_CONTEXT_KEY, aValue);
+        } else {
+            projectProperties.remove(SERVER_CONTEXT_KEY);
+        }
         projectPropertiesIsDirty = true;
         changeSupport.firePropertyChange(SERVER_CONTEXT_KEY, oldValue, aValue);
     }
-    
+
     /**
      * Checks if security realm to be configured on J2EE server startup.
-     * @return true to enable configure security realm 
+     *
+     * @return true to enable configure security realm
      */
     public boolean isWebSecurityEnabled() {
         return Boolean.valueOf(projectPrivateProperties.get(ENABLE_SECURITY_REALM_KEY));
     }
-    
+
     /**
      * Sets if security realm to be configured on J2EE server startup.
-     * @param aValue true to enable configure security realm 
+     *
+     * @param aValue true to enable configure security realm
      */
     public void setSecurityRealmEnabled(boolean aValue) {
         boolean oldValue = isWebSecurityEnabled();
@@ -433,44 +473,55 @@ public class PlatypusProjectSettings {
         projectPrivatePropertiesIsDirty = true;
         changeSupport.firePropertyChange(ENABLE_SECURITY_REALM_KEY, oldValue, aValue);
     }
-    
-    
+
     /**
      * Gets client type to be run.
+     *
      * @return ClientType instance
      */
     public ClientType getRunClientType() {
         ClientType val = ClientType.getById(projectPrivateProperties.get(CLIENT_TYPE_KEY));
         return val != null ? val : ClientType.PLATYPUS_CLIENT;
     }
-    
+
     /**
      * Sets client type to be run.
+     *
      * @param aValue ClientType instance
      */
     public void setRunClientType(ClientType aValue) {
         ClientType oldValue = getRunClientType();
-        projectPrivateProperties.setProperty(CLIENT_TYPE_KEY, aValue.getId());
+        if (aValue != null) {
+            projectPrivateProperties.setProperty(CLIENT_TYPE_KEY, aValue.getId());
+        } else {
+            projectPrivateProperties.remove(CLIENT_TYPE_KEY);
+        }
         projectPrivatePropertiesIsDirty = true;
         changeSupport.firePropertyChange(CLIENT_TYPE_KEY, aValue, oldValue);
     }
-    
+
     /**
      * Gets application server type to be run.
+     *
      * @return AppServerType instance
      */
     public AppServerType getRunAppServerType() {
         AppServerType val = AppServerType.getById(projectPrivateProperties.get(SERVER_TYPE_KEY));
         return val != null ? val : AppServerType.NONE;
     }
-    
+
     /**
      * Sets application server type to be run.
+     *
      * @param aValue AppServerType instance
      */
     public void setRunAppServerType(AppServerType aValue) {
         AppServerType oldValue = getRunAppServerType();
-        projectPrivateProperties.setProperty(SERVER_TYPE_KEY, aValue.getId());
+        if (aValue != null) {
+            projectPrivateProperties.setProperty(SERVER_TYPE_KEY, aValue.getId());
+        } else {
+            projectPrivateProperties.remove(SERVER_TYPE_KEY);
+        }
         projectPrivatePropertiesIsDirty = true;
         changeSupport.firePropertyChange(SERVER_TYPE_KEY, aValue, oldValue);
     }

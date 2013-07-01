@@ -304,13 +304,6 @@ public class PlatypusWebModuleManager {
             wa.addInitParam(new ContextParam(ClientConstants.APP_PATH_CMD_PROP_NAME1, project.getProjectDirectory().getPath()));
         }
         wa.addInitParam(new ContextParam(ClientConstants.DB_CONNECTION_URL_PROP_NAME, PlatypusWebModule.MAIN_DATASOURCE_NAME));
-        DbConnectionSettings dbSettings = project.getSettings().getAppSettings().getDbSettings();
-        String dbConnectionSchema = dbSettings.getInfo().getProperty(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME);
-        if (dbConnectionSchema != null && !dbConnectionSchema.isEmpty()) {
-            wa.addInitParam(new ContextParam(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME, dbConnectionSchema));
-        }
-        String dialect = GeneralResourceProvider.constructPropertiesByDbConnectionSettings(dbSettings).getProperty(ClientConstants.DB_CONNECTION_DIALECT_PROP_NAME);
-        wa.addInitParam(new ContextParam(ClientConstants.DB_CONNECTION_DIALECT_PROP_NAME, dialect));
     }
 
     private void configureServlet(WebApplication wa) {
@@ -364,19 +357,24 @@ public class PlatypusWebModuleManager {
     }
 
     private void copyLibJars(FileObject libsDir) throws Exception, EmptyPlatformHomePathException, IOException {
-        Set<File> jdbcDrivers = new HashSet<>();
+        Set<File> jdbcDriverFiles = new HashSet<>();
         for (String clazz : DbConnectionSettings.readDrivers().values()) {
             File jdbcDriver = PlatypusPlatform.findThirdpartyJar(clazz);
             if (jdbcDriver != null) {
-                jdbcDrivers.add(jdbcDriver);
+                FileObject jdbcDriverFo = FileUtil.toFileObject(jdbcDriver);
+                Enumeration<? extends FileObject> jdbcDriversEnumeration = jdbcDriverFo.getParent().getChildren(false);
+                while(jdbcDriversEnumeration.hasMoreElements()) {
+                    FileObject fo = jdbcDriversEnumeration.nextElement();
+                    jdbcDriverFiles.add(FileUtil.toFile(fo));
+                }
             }
         }
         FileObject platformLibDir = FileUtil.toFileObject(PlatypusPlatform.getPlatformLibDirectory());
-        Enumeration<? extends FileObject> e = platformLibDir.getChildren(true);
-        while (e.hasMoreElements()) {
-            FileObject fo = e.nextElement();
+        Enumeration<? extends FileObject> filesEnumeration = platformLibDir.getChildren(true);
+        while (filesEnumeration.hasMoreElements()) {
+            FileObject fo = filesEnumeration.nextElement();
             if (PlatypusPlatform.JAR_FILE_EXTENSION.equalsIgnoreCase(fo.getExt())
-                    && !jdbcDrivers.contains(FileUtil.toFile(fo))) {
+                    && !jdbcDriverFiles.contains(FileUtil.toFile(fo))) {
                 FileUtil.copyFile(fo, libsDir, fo.getName());
             }
         }

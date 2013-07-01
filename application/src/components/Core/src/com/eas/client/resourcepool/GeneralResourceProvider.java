@@ -12,11 +12,15 @@ import com.eas.client.SQLUtils;
 import com.eas.client.settings.DbConnectionSettings;
 import com.eas.client.sqldrivers.SqlDriver;
 import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
@@ -40,7 +44,7 @@ public class GeneralResourceProvider {
         super();
         client = aClient;
         DataSource lmdSource = constructDataSource(aSettings);
-        testDataSource(lmdSource);
+        testDataSource(lmdSource, aSettings);
         Properties props = constructPropertiesByDbConnectionSettings(aSettings);
         if (aSettings.isInitSchema()) {
             initApplicationSchema(props, lmdSource);
@@ -93,9 +97,37 @@ public class GeneralResourceProvider {
         }
     }
 
-    private void testDataSource(DataSource aSource) throws Exception {
-        Connection lconn = aSource.getConnection();
-        lconn.close();
+    private void testDataSource(DataSource aSource, DbConnectionSettings aSettings) throws Exception {
+        try (Connection lconn = aSource.getConnection()) {
+            String dialect = SQLUtils.dialectByUrl(lconn.getMetaData().getURL());
+            if (dialect == null) {
+                dialect = SQLUtils.dialectByProductName(lconn.getMetaData().getDatabaseProductName());
+            }
+            if (dialect != null) {
+                aSettings.getInfo().put(ClientConstants.DB_CONNECTION_DIALECT_PROP_NAME, dialect);
+                String schemaName = aSettings.getInfo().getProperty(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME);
+                if (schemaName == null) {
+                    SqlDriver driver = SQLUtils.getSqlDriver(dialect);
+                    if (driver != null) {
+                        String getSchemaClause = driver.getSql4GetConnectionContext();
+                        try (Statement stmt = lconn.createStatement()) {
+                            try (ResultSet rs = stmt.executeQuery(getSchemaClause)) {
+                                if (rs.next() && rs.getMetaData().getColumnCount() > 0) {
+                                    schemaName = rs.getString(1);
+                                    if (schemaName != null && !schemaName.isEmpty()) {
+                                        aSettings.getInfo().put(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME, schemaName);
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        Logger.getLogger(GeneralResourceProvider.class.getName()).log(Level.SEVERE, String.format("Can't obtain sql driver for %s", aSettings.getUrl()));
+                    }
+                }
+            } else {
+                Logger.getLogger(GeneralResourceProvider.class.getName()).log(Level.SEVERE, String.format("Can't determine sql dialect for %s. May be it is unsuuported RDBMS.", aSettings.getUrl()));
+            }
+        }
     }
 
     private void initApplicationSchema(Properties props, DataSource aSource) throws Exception {
@@ -139,7 +171,7 @@ public class GeneralResourceProvider {
             DbConnectionSettings lsettings = DbConnectionSettings.read(cache.get(aDbId).getContent());
             if (lsettings != null) {
                 DataSource lPool = constructDataSource(lsettings);
-                testDataSource(lPool);
+                testDataSource(lPool, lsettings);
                 connectionPools.put(aDbId, lPool);
                 connectionPoolsSettings.put(aDbId, lsettings);
                 return lPool;
@@ -160,8 +192,8 @@ public class GeneralResourceProvider {
     public static Properties constructPropertiesByDbConnectionSettings(DbConnectionSettings dbSettings) {
         if (dbSettings != null) {
             Properties props = dbSettings.getInfo();
-            String connectionString = dbSettings.getUrl();
-            if (props != null && connectionString != null) {
+            String jdbcUrl = dbSettings.getUrl();
+            if (props != null && jdbcUrl != null) {
                 Properties serverProps = new Properties();
                 Set<Entry<Object, Object>> entries = props.entrySet();
                 for (Entry<Object, Object> entry : entries) {
@@ -169,22 +201,6 @@ public class GeneralResourceProvider {
                 }
                 serverProps.remove(ClientConstants.DB_CONNECTION_USER_PROP_NAME);
                 serverProps.remove(ClientConstants.DB_CONNECTION_PASSWORD_PROP_NAME);
-                if (connectionString.indexOf("jdbc:oracle") != -1) {
-                    serverProps.put(ClientConstants.DB_CONNECTION_DIALECT_PROP_NAME, ClientConstants.SERVER_PROPERTY_ORACLE_DIALECT);
-                } else if (connectionString.indexOf("jdbc:jtds:sqlserver") != -1) {
-                    serverProps.put(ClientConstants.DB_CONNECTION_DIALECT_PROP_NAME, ClientConstants.SERVER_PROPERTY_MSSQL_DIALECT);
-                } else if (connectionString.indexOf("jdbc:postgre") != -1) {
-                    serverProps.put(ClientConstants.DB_CONNECTION_DIALECT_PROP_NAME, ClientConstants.SERVER_PROPERTY_POSTGRE_DIALECT);
-                } else if (connectionString.indexOf("jdbc:db2") != -1) {
-                    serverProps.put(ClientConstants.DB_CONNECTION_DIALECT_PROP_NAME, ClientConstants.SERVER_PROPERTY_DB2_DIALECT);
-                } else if (connectionString.indexOf("jdbc:mysql") != -1) {
-                    serverProps.put(ClientConstants.DB_CONNECTION_DIALECT_PROP_NAME, ClientConstants.SERVER_PROPERTY_MYSQL_DIALECT);
-                } else if (connectionString.indexOf("jdbc:h2") != -1) {
-                    serverProps.put(ClientConstants.DB_CONNECTION_DIALECT_PROP_NAME, ClientConstants.SERVER_PROPERTY_H2_DIALECT);
-                }
-                //else if (connectionString.indexOf("Derby") != -1)
-                //else if (connectionString.indexOf("mssql") != -1)
-                //...
                 return serverProps;
             }
         }
