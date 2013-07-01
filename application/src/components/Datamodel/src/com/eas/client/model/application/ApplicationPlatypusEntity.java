@@ -39,6 +39,7 @@ public class ApplicationPlatypusEntity extends ApplicationEntity<ApplicationPlat
                 rowset = query.execute();
                 forwardChangeLog();
                 rowset.addRowsetListener(this);
+                changeSupport.firePropertyChange("rowset", null, rowset);
                 rowset.getRowsetChangeSupport().fireRequeriedEvent();
             } else {
                 rowset.refresh(query.getParameters());

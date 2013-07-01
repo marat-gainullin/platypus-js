@@ -4,8 +4,6 @@
  */
 package com.eas.client.sqldrivers.resolvers;
 
-import com.bearsoft.rowset.compacts.CompactBlob;
-import com.bearsoft.rowset.compacts.CompactClob;
 import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.SQLUtils;

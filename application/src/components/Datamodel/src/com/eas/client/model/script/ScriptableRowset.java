@@ -43,8 +43,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     public static final String BAD_FIND_ARGUMENT_MSG = "Argument at index %d must be a rowset's field.";
     public static final String BAD_PRIMARY_KEYS_MSG = "Bad primary keys detected. Required one and only one primary key field, but %d found.";
     public static final String CANT_CONVERT_TO_MSG = "Can't convert to %s, substituting with null.";
-    protected E entity = null;
-    protected ScriptableRowset<E> substitute = null;
+    protected E entity;
     public static Method getValueScriptableFieldMethod = null;
     public static Method setValueScriptableFieldMethod = null;
     protected Map<String, ScriptableRowset<E>.ScriptableField> scriptableFields = null;
@@ -217,36 +216,18 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         }
 
         public Object getValue(Scriptable aDelegate) throws Exception {
-            Rowset rowset = getRowset();
-            if (rowset != null) {
-                if (rowset.size() > 0) {
-                    if ((!rowset.isBeforeFirst() && !rowset.isAfterLast()) || rowset.isInserting()) {
-                        Object lValue = rowset.getObject(rowset.getFields().find(fieldName));
-                        if (lValue == null && substitute != null) {
-                            ScriptableField scField = substitute.getScriptableField(fieldName);
-                            if (scField != null) {
-                                lValue = scField.getValue(aDelegate);
-                            }
-                        }
-                        if (lValue instanceof CompactClob) {
-                            lValue = ((CompactClob) lValue).getData();
-                        }
-                        return ScriptUtils.javaToJS(lValue, aDelegate);
-                    } else {
-                        return Context.getUndefinedValue();
-                    }
-                } else {
-                    if (substitute != null) {
-                        ScriptableField scField = substitute.getScriptableField(fieldName);
-                        if (scField != null) {
-                            return scField.getValue(aDelegate);
-                        }
-                    }
-                    return Context.getUndefinedValue();
-                }
-            } else {
-                return Context.getUndefinedValue();
+            Object lValue = null;
+            Rowset eRowset = getRowset();
+            if (eRowset != null && eRowset.size() > 0 && (!eRowset.isBeforeFirst() && !eRowset.isAfterLast()) || eRowset.isInserting()) {
+                lValue = eRowset.getObject(eRowset.getFields().find(fieldName));
             }
+            if (lValue == null) {
+                lValue = entity.getSubstituteRowsetObject(fieldName);
+            }
+            if (lValue instanceof CompactClob) {
+                lValue = ((CompactClob) lValue).getData();
+            }
+            return ScriptUtils.javaToJS(lValue, aDelegate);
         }
 
         public void setValue(Scriptable aDelegate, Object aValue) throws Exception {
@@ -538,11 +519,16 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         pos(aRowIndex);
     }
 
+    @ScriptFunction
     public void setSubstitute(ScriptableRowset<E> aSRowset) {
-        if (aSRowset != null) {
-            assert substitute != aSRowset;
-            substitute = aSRowset;
+        if (entity != null) {
+            entity.setSubstitute(aSRowset != null ? aSRowset.getEntity() : null);
         }
+    }
+
+    @ScriptFunction
+    public ScriptableRowset<E> getSubstitute() {
+        return entity != null && entity.getSubstitute() != null ? entity.getSubstitute().getRowsetWrap().rowset : null;
     }
 
     @ScriptFunction(jsDocText = "Rowset's size.")
@@ -750,11 +736,15 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
 
     @ScriptFunction(jsDocText = "Joins all elements of an array into a string.")
     public String join(String aSeparator) throws Exception {
+        return join(aSeparator, Integer.MAX_VALUE);
+    }
+
+    protected String join(String aSeparator, int aMaxSize) throws Exception {
         StringBuilder sb = new StringBuilder();
         Rowset rowset = getRowset();
         int size = rowset.size();
         sb.append("[");
-        for (int i = 1; i <= size; i++) {
+        for (int i = 1; i <= Math.min(aMaxSize, size); i++) {
             if (i > 1) {
                 sb.append(", ");
             }
@@ -808,7 +798,28 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     @ScriptFunction(jsDocText = "Returns a string representing the array and its elements.")
     public String toString() {
         try {
-            return join(",\n");
+            if (entity != null) {
+                if (entity.getRowset() != null) {
+                    String res = join(",\n", 100);
+                    if (entity.getRowset().size() > 100) {
+                        res += ",\n...";
+                    }
+                    return res;
+                } else {
+                    String res = entity.getName();
+                    if (res == null || res.isEmpty()) {
+                        res = entity.getTitle();
+                        if (res == null || res.isEmpty()) {
+                            return entity.toString();
+                        }
+                    } else {
+                        res += "[" + entity.getTitle() + "]";
+                    }
+                    return res;
+                }
+            } else {
+                return super.toString();
+            }
         } catch (Exception ex) {
             throw new IllegalStateException(ex);
         }
@@ -1270,7 +1281,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
             }
         }
     }
-    
+
     @ScriptFunction(jsDocText = "Refreshes rowset only if any of its parameters has changed with callback.")
     public void execute(Function aCallback) throws Exception {
         if (entity != null) {
@@ -1305,7 +1316,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         return 0;
     }
 
-    @ScriptFunction(jsDocText = "Applies an sql cause into the database.")
+    @ScriptFunction(jsDocText = "Applies a sql clause into the database.")
     public int executeUpdate() throws Exception {
         if (entity != null) {
             if (entity.getModel().getClient() instanceof AppClient) {

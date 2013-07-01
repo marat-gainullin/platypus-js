@@ -1,7 +1,6 @@
 package com.eas.client.gxtcontrols.wrappers.component;
 
 import com.bearsoft.rowset.metadata.Parameter;
-import com.eas.client.gxtcontrols.ControlsUtils;
 import com.eas.client.gxtcontrols.converters.RowValueConverter;
 import com.eas.client.gxtcontrols.model.LazyControlBounder;
 import com.eas.client.gxtcontrols.model.ModelElementRef;

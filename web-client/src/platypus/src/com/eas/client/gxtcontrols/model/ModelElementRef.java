@@ -13,7 +13,7 @@ public class ModelElementRef {
 	public Entity entity;
 	protected String fieldName;
 	public boolean isField = true;
-	public Field field = null;
+	public Field field;
 	// runtime
 	protected int colIndex;
 

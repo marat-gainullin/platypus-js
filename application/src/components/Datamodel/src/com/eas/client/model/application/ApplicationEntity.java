@@ -68,6 +68,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
     // to preserve relation order
     protected transient List<Relation<E>> rtInFilterRelations;
     protected transient int updatingCounter = 0;
+    protected E substitute;
 
     public ApplicationEntity() {
         super();
@@ -94,6 +95,45 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             if (oHandler instanceof Function) {
                 return (Function) oHandler;
             }
+        }
+        return null;
+    }
+
+    public RowsetHostObject<E> getRowsetWrap() {
+        return sRowsetWrap;
+    }
+
+    /**
+     * Gets cursor substitute.
+     *
+     * @return Cursor substitute entity.
+     */
+    public E getSubstitute() {
+        return substitute;
+    }
+
+    /**
+     * Sets cursor substitute.
+     * Use this function carefully. Circular references may occur
+     * @param aValue Cursor substitute entity to be set.
+     */
+    public void setSubstitute(E aValue) {
+        if (aValue != this) {
+            substitute = aValue;
+        }
+    }
+
+    public Object getSubstituteRowsetObject(String aFieldName) throws Exception {
+        E lsubstitute = substitute;
+        while (lsubstitute != null) {
+            Rowset sRowset = lsubstitute.getRowset();
+            if (sRowset != null && !sRowset.isBeforeFirst() && !sRowset.isAfterLast()) {
+                Object value = sRowset.getObject(sRowset.getFields().find(aFieldName));
+                if (value != null) {
+                    return value;
+                }
+            }
+            lsubstitute = lsubstitute.getSubstitute();
         }
         return null;
     }
@@ -711,11 +751,11 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
                         }
                     } else {
                         /*
-                        Q leftQuery = leftEntity.getQuery();
-                        assert leftQuery != null : "Left query must present (Relation points to query, but query is absent)";
-                        Parameters leftParams = leftQuery.getParameters();
-                        assert leftParams != null : "Parameters of left query must present (Relation points to query parameter, but query parameters are absent)";
-                        */ 
+                         Q leftQuery = leftEntity.getQuery();
+                         assert leftQuery != null : "Left query must present (Relation points to query, but query is absent)";
+                         Parameters leftParams = leftQuery.getParameters();
+                         assert leftParams != null : "Parameters of left query must present (Relation points to query parameter, but query parameters are absent)";
+                         */
                         Parameter leftParameter = rel.getLeftParameter();
                         if (leftParameter != null) {
                             fValue = leftParameter.getValue();

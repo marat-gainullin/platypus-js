@@ -3,6 +3,7 @@ package com.eas.client.gxtcontrols.model;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.events.RowChangeEvent;
 import com.bearsoft.rowset.events.RowsetDeleteEvent;
 import com.bearsoft.rowset.events.RowsetFilterEvent;
@@ -16,6 +17,7 @@ import com.bearsoft.rowset.events.RowsetScrollEvent;
 import com.bearsoft.rowset.events.RowsetSortEvent;
 import com.eas.client.beans.PropertyChangeEvent;
 import com.eas.client.gxtcontrols.converters.RowValueConverter;
+import com.eas.client.model.Entity;
 import com.eas.client.model.Model;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -96,10 +98,16 @@ public class LazyControlBounder<T> extends LazyModelElementRef implements ValueC
 	}
 
 	protected void setValueToControl() {
-		if (cellComponent != null && entity.getRowset() != null) {
+		if (cellComponent != null) {
 			try {
-				if (!entity.getRowset().isBeforeFirst() && !entity.getRowset().isAfterLast()) {
-					Object value = entity.getRowset().getObject(getColIndex());
+				Object value = null;
+				Rowset eRowset = entity.getRowset();
+				if (eRowset != null && !eRowset.isBeforeFirst() && !eRowset.isAfterLast()) {
+					value = eRowset.getObject(getColIndex());
+					cellComponent.setValue(converter.convert(value), false, true);
+				}
+				if(value == null){
+					value = entity.getSubstituteRowsetObject(fieldName);
 					cellComponent.setValue(converter.convert(value), false, true);
 				}
 			} catch (Exception ex) {

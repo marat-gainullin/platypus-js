@@ -527,10 +527,14 @@ public class Entity implements RowsetListener {
 							return rowset.@com.bearsoft.rowset.Rowset::absolute(I)(aRowIndex);
 					},
 					getSubstitute : function() {
-						return aEntity.@com.eas.client.model.Entity::getSubstitute()();
+						var sEntity = aEntity.@com.eas.client.model.Entity::getSubstitute()();
+						if(sEntity != null)
+							return sEntity.@com.eas.client.model.Entity::getPublished()();
+						else
+							return null;
 					},
 					setSubstitute : function(aSubstitute) {
-						aEntity.@com.eas.client.model.Entity::setSubstitute(Lcom/google/gwt/core/client/JavaScriptObject;)(aSubstitute);
+						aEntity.@com.eas.client.model.Entity::setSubstitute(Lcom/eas/client/model/Entity;)(aSubstitute.unwrap());
 					},
 					// cursor interface 
 					scrollTo : function(aRow) {
@@ -655,22 +659,19 @@ public class Entity implements RowsetListener {
 					createSorting : function() {
 						return aEntity.@com.eas.client.model.Entity::createSorting(Lcom/google/gwt/core/client/JavaScriptObject;)(arguments);
 					},
-					// modify interface
+					// data at cursor interface
 					getObject : function(aColIndex) {
+						var rValue = null;
 						var rowset = getRowset();
-						if(rowset != null)
-						{
-							var rValue = $wnd.boxAsJs(rowset.@com.bearsoft.rowset.Rowset::getJsObject(I)(aColIndex));
-							if(rValue == null)
-							{
-								var s = aEntity.@com.eas.client.model.Entity::getSubstitute()();
-								if(s != null)
-									rValue = s.getObject(aColIndex);
-							}
-							return rValue;
-						}else
-							return null;
+						if(rowset != null){
+							rValue = rowset.@com.bearsoft.rowset.Rowset::getJsObject(I)(aColIndex);
+						}
+						if(rValue == null){
+							rValue = aEntity.@com.eas.client.model.Entity::getSubstituteRowsetJsObject(I)(aColIndex);
+						}
+						return $wnd.boxAsJs(rValue);
 					},
+					// modify interface
 					updateObject : function(aColIndex, aValue) {
 						var rowset = getRowset();
 						if(rowset != null)
@@ -2144,16 +2145,44 @@ public class Entity implements RowsetListener {
 
 	// Scriptable rowset interface
 
-	protected JavaScriptObject jsSubstitute;
+	protected Entity substitute;
 
-	public JavaScriptObject getSubstitute() {
-		return jsSubstitute;
+	public Entity getSubstitute() {
+		return substitute;
 	}
 
-	public void setSubstitute(JavaScriptObject aSubstitute) {
-		jsSubstitute = aSubstitute;
+	public void setSubstitute(Entity aSubstitute) {
+		if(aSubstitute != this){
+			substitute = aSubstitute;
+		}
 	}
 
+    public Object getSubstituteRowsetObject(String aFieldName) throws Exception {
+        Entity lsubstitute = substitute;
+        while (lsubstitute != null) {
+            Rowset sRowset = lsubstitute.getRowset();
+            if (sRowset != null && !sRowset.isBeforeFirst() && !sRowset.isAfterLast()) {
+                Object value = sRowset.getObject(sRowset.getFields().find(aFieldName));
+                if (value != null) {
+                    return value;
+                }
+            }
+            lsubstitute = lsubstitute.getSubstitute();
+        }
+        return null;
+    }
+
+    public Object getSubstituteRowsetJsObject(int aColIndex) throws Exception {
+    	if(fields != null){
+    		Field field = fields.get(aColIndex);
+    		if(field != null){
+    			Object value = getSubstituteRowsetObject(field.getName());
+    			return Utils.toJs(value);
+    		}
+    	}
+    	return null;
+    }
+    
 	protected native Row unwrapRow(JavaScriptObject aRowFacade) throws Exception/*-{
 		return aRowFacade != null ? aRowFacade.unwrap() : null;
 	}-*/;
