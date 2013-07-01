@@ -114,6 +114,8 @@ public class Paths {
                 Vertex<PathFragment> v = aPath.get(i);
                 Point pt = new Point();
                 calcNextPoint(aStartPoint, aEndPoint, prevV, v, pt);
+                // Let's correct calcDistance()'s trace
+                v.attribute.point = pt;
                 Point pt0 = new Point(prevPt.x, pt.y);
                 rleAdd(points, pt0);
                 rleAdd(points, pt);

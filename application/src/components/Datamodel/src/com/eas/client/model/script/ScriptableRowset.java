@@ -1305,7 +1305,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         return 0;
     }
 
-    @ScriptFunction(jsDocText = "Applies rowset's changes.")
+    @ScriptFunction(jsDocText = "Applies an sql cause into the database.")
     public int executeUpdate() throws Exception {
         if (entity != null) {
             if (entity.getModel().getClient() instanceof AppClient) {

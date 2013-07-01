@@ -103,7 +103,7 @@ public class OracleTypesResolver implements TypesResolver {
         //typeName(M,D)
         jdbcTypesWithScale.add(Types.DECIMAL);
         jdbcTypesWithScale.add(Types.NUMERIC);
-        
+
         //typeName(M)
         jdbcTypesWithSize.add(Types.FLOAT); //???????!!!!!!!!!!!!
         jdbcTypesWithSize.add(Types.CHAR);
@@ -113,8 +113,8 @@ public class OracleTypesResolver implements TypesResolver {
         jdbcTypesWithSize.add(Types.NUMERIC);
         jdbcTypesWithSize.add(Types.DECIMAL);
         jdbcTypesWithSize.add(Types.VARBINARY);
-        
-        
+
+
     }
 
     @Override
@@ -157,20 +157,9 @@ public class OracleTypesResolver implements TypesResolver {
             }
             if (SQLUtils.isSameTypeGroup(aField.getTypeInfo().getSqlType(), java.sql.Types.BLOB)) {
                 if (aField.getTypeInfo().getSqlType() == java.sql.Types.CLOB || aField.getTypeInfo().getSqlType() == java.sql.Types.NCLOB) {
-                    aField.getTypeInfo().setSqlType(java.sql.Types.CLOB);
-                    aField.getTypeInfo().setJavaClassName(CompactClob.class.getName());
+                    aField.setTypeInfo(DataTypeInfo.CLOB.copy());
                 } else {
-                    if (aField.getTypeInfo().getSqlType() == java.sql.Types.BINARY
-                            || aField.getTypeInfo().getSqlType() == java.sql.Types.VARBINARY) {
-                        aField.getTypeInfo().setSqlType(java.sql.Types.VARBINARY);
-                        aField.getTypeInfo().setJavaClassName(CompactBlob.class.getName());
-                    } else if (aField.getTypeInfo().getSqlType() == java.sql.Types.LONGVARBINARY) {
-                        aField.getTypeInfo().setSqlType(java.sql.Types.LONGVARBINARY);
-                        aField.getTypeInfo().setJavaClassName(CompactBlob.class.getName());
-                    } else {
-                        aField.getTypeInfo().setSqlType(java.sql.Types.BLOB);
-                        aField.getTypeInfo().setJavaClassName(CompactBlob.class.getName());
-                    }
+                    aField.setTypeInfo(DataTypeInfo.BLOB.copy());
                 }
             }
             if (aField.getTypeInfo().getSqlType() == java.sql.Types.OTHER) {
@@ -193,7 +182,7 @@ public class OracleTypesResolver implements TypesResolver {
 
     @Override
     public boolean isGeometryTypeName(String aTypeName) {
-        String sqlTypeName = (aTypeName != null?aTypeName.toUpperCase():null);
+        String sqlTypeName = (aTypeName != null ? aTypeName.toUpperCase() : null);
         for (String gisTypeName : gisTypes) {
             if (sqlTypeName.endsWith(gisTypeName)) {
                 return true;
@@ -204,11 +193,11 @@ public class OracleTypesResolver implements TypesResolver {
 
     @Override
     public int getJdbcTypeByRDBMSTypename(String aTypeName) {
-        String sqlTypeName = (aTypeName != null?aTypeName.toUpperCase():null);
+        String sqlTypeName = (aTypeName != null ? aTypeName.toUpperCase() : null);
         Integer jdbcType = rdbmsTypes2JdbcTypes.get(sqlTypeName);
         if (jdbcType == null) {
             jdbcType = Types.OTHER;
-           
+
             if (isGeometryTypeName(sqlTypeName)) {
                 jdbcType = Types.STRUCT;
             }
@@ -222,17 +211,14 @@ public class OracleTypesResolver implements TypesResolver {
         supportedTypes.addAll(rdbmsTypes2JdbcTypes.values());
         return supportedTypes;
     }
-    
-    @Override
-    public boolean isSized(Integer aSqlType)   
-    {
-        return jdbcTypesWithSize.contains(aSqlType);
-    }        
 
     @Override
-    public boolean isScaled(Integer aSqlType)   
-    {
+    public boolean isSized(Integer aSqlType) {
+        return jdbcTypesWithSize.contains(aSqlType);
+    }
+
+    @Override
+    public boolean isScaled(Integer aSqlType) {
         return jdbcTypesWithScale.contains(aSqlType);
-    }        
-    
+    }
 }

@@ -140,7 +140,7 @@ public class StoredQueryFactory {
         if (appElement == null && SUBQUERY_LINK_PATTERN.matcher(aAppElementId).matches()) {
             aAppElementId = aAppElementId.substring(1);
             appElement = client.getAppCache().get(aAppElementId);
-        }        
+        }
         if (appElement != null) {// Ordinary queries, stored in application database
             Document queryDom = appElement.getContent();
             if (queryDom != null) {
@@ -158,10 +158,14 @@ public class StoredQueryFactory {
                     try {
                         try {
                             String compiledSqlText = compileSubqueries(sqlText, model);
-                            putTableFieldsMetadata(query);
-                            putStoredTableFieldsMetadata(query, additionalFieldsMetadata);
-                            putParametersMetadata(query, model);
-                            query.setSqlText(compiledSqlText);
+                            try {
+                                putParametersMetadata(query, model);
+                                if (putTableFieldsMetadata(query)) {
+                                    putStoredTableFieldsMetadata(query, additionalFieldsMetadata);
+                                }
+                            } finally {
+                                query.setSqlText(compiledSqlText);
+                            }
                         } catch (Exception ex) {
                             Fields fields = new Fields();
                             Field fMd = new Field(DUMMY_FIELD_NAME, ex.getMessage());
@@ -504,14 +508,21 @@ public class StoredQueryFactory {
         }
     }
 
-    public void putTableFieldsMetadata(SqlQuery aQuery) throws Exception {
+    /**
+     * @param aQuery
+     * @return True if query is select query.
+     * @throws Exception
+     */
+    public boolean putTableFieldsMetadata(SqlQuery aQuery) throws Exception {
         CCJSqlParserManager parserManager = new CCJSqlParserManager();
         Statement parsedQuery = parserManager.parse(new StringReader(aQuery.getSqlText()));
         if (parsedQuery instanceof Select) {
             Select select = (Select) parsedQuery;
             Map<String, Table> tables = TablesFinder.getTablesMap(TablesFinder.TO_CASE.LOWER, select, false);
             resolveOutputFieldsFromTables(aQuery, select, tables);
+            return true;
         }
+        return false;
     }
 
     private String replaceLinkedParameters(String aSqlText, Set<Relation<QueryEntity>> parametersRelations) {
@@ -542,16 +553,16 @@ public class StoredQueryFactory {
                 /* Если пользоваться этим приемом, то будет введение разработчика в заблуждение
                  * т.к. в дизайнере и автозавершении кода поле результата будет поименовано
                  * так же как и поле-агрумент функции, а из скрипта оно будет недоступно.
-                if (col.getExpression() instanceof Function) {
-                    Function func = (Function) col.getExpression();
-                    if (func.getParameters() != null && func.getParameters().getExpressions() != null
-                            && func.getParameters().getExpressions().size() == 1) {
-                        Expression firstArg = (Expression) func.getParameters().getExpressions().get(0);
-                        if (firstArg instanceof Column) {
-                            field = resolveFieldByColumn(aQuery, (Column) firstArg, col, tables);
-                        }
-                    }
-                } else */if (col.getExpression() instanceof Column) {
+                 if (col.getExpression() instanceof Function) {
+                 Function func = (Function) col.getExpression();
+                 if (func.getParameters() != null && func.getParameters().getExpressions() != null
+                 && func.getParameters().getExpressions().size() == 1) {
+                 Expression firstArg = (Expression) func.getParameters().getExpressions().get(0);
+                 if (firstArg instanceof Column) {
+                 field = resolveFieldByColumn(aQuery, (Column) firstArg, col, tables);
+                 }
+                 }
+                 } else */ if (col.getExpression() instanceof Column) {
                     field = resolveFieldByColumn(aQuery, (Column) col.getExpression(), col, tables);
                 } else // free expression like a ...,'text' as txt,...
                 {

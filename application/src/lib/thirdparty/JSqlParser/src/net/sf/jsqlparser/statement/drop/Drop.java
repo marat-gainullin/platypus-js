@@ -10,7 +10,7 @@ public class Drop implements Statement {
     private String type;
     private String name;
     private List<String> parameters;
-    private List<String> parametrsComment;
+    private List<String> parametersComment;
     private String comment;
     private String endComment = new String();
     private String typeComment;
@@ -52,7 +52,7 @@ public class Drop implements Statement {
                 + (getNameComment() != null ? getNameComment() + " " : "") + name;
 
         if (parameters != null && parameters.size() > 0) {
-            sql += " " + PlainSelect.getStringListWithComments(parameters, parametrsComment, false, false);
+            sql += " " + PlainSelect.getStringListWithComments(parameters, parametersComment, false, false);
         }
         sql += !"".equals(getEndComment()) ? " " + getEndComment() : "";
         return sql;
@@ -111,16 +111,16 @@ public class Drop implements Statement {
     }
 
     /**
-     * @return the parametrsComment
+     * @return the parametersComment
      */
-    public List<String> getParametrsComment() {
-        return parametrsComment;
+    public List<String> getParametersComment() {
+        return parametersComment;
     }
 
     /**
-     * @param parametrsComment the parametrsComment to set
+     * @param aComments the parametersComment to set
      */
-    public void setParametrsComment(List<String> parametrsComment) {
-        this.parametrsComment = parametrsComment;
+    public void setParametersComment(List<String> aComments) {
+        parametersComment = aComments;
     }
 }

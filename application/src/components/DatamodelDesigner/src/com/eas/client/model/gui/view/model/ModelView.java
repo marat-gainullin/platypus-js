@@ -906,8 +906,47 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
         }
     }
 
+    protected static final Color selectedColor = Color.red.darker();
+    protected static final Color obstaclesColor = Color.gray;
+    protected static final Color spaceColor = Color.orange;
+    protected static final Color edgeColor = Color.blue.darker();
+    protected static boolean routingDebug;
+    
     @Override
     protected void paintChildren(Graphics g) {
+        if(routingDebug){
+            Color oldColor = g.getColor();
+            try {
+                for(EntityView<?> eView : entityViews.values()){
+                    Rectangle o = eView.getBounds();
+                    g.setColor(obstaclesColor);
+                    g.fillRect(o.x, o.y, o.width, o.height);
+                    g.setColor(obstaclesColor.brighter());
+                    g.drawRect(o.x, o.y, o.width, o.height);
+                }
+                if (graph != null) {
+                    // paint vertices
+                    for (Vertex<PathFragment> vertex : graph) {
+                        g.setColor(spaceColor);
+                        g.fillRect(vertex.attribute.rect.x, vertex.attribute.rect.y, vertex.attribute.rect.width, vertex.attribute.rect.height);
+                        g.setColor(spaceColor.brighter().brighter());
+                        g.drawRect(vertex.attribute.rect.x, vertex.attribute.rect.y, vertex.attribute.rect.width, vertex.attribute.rect.height);
+                    }
+                    // paint there's edges
+                    for (Vertex<PathFragment> vertex : graph) {
+                        for (Vertex<PathFragment> ajacent : vertex.getAjacent()) {
+                            g.setColor(edgeColor);
+                            Rectangle startRect = vertex.attribute.rect;
+                            Rectangle endRect = ajacent.attribute.rect;
+                            g.drawLine(startRect.x + startRect.width / 2, startRect.y + startRect.height / 2,
+                                    endRect.x + endRect.width / 2, endRect.y + endRect.height / 2);
+                        }
+                    }
+                }
+            } finally {
+                g.setColor(oldColor);
+            }
+        }
         super.paintChildren(g);
         if (g instanceof Graphics2D) {
             Graphics2D g2d = (Graphics2D) g;
@@ -1236,6 +1275,7 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
         }
     }
 
+    List<Vertex<PathFragment>> graph;
     protected void preparePaths() {
         if (needRerouteConnectors) {
             Set<Rectangle> obstacles = new HashSet<>();
@@ -1243,7 +1283,7 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
                 obstacles.add(eView.getBounds());
             }
             QuadTree<Vertex<PathFragment>> verticesIndex = new QuadTree<>();
-            List<Vertex<PathFragment>> graph = Sweeper.build(getWidth(), getHeight(), obstacles, verticesIndex);
+            graph = Sweeper.build(getWidth(), getHeight(), obstacles, verticesIndex);
             paths = new Paths(graph, verticesIndex);
         }
     }

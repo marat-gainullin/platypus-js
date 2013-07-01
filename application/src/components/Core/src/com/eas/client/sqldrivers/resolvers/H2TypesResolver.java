@@ -6,6 +6,7 @@ package com.eas.client.sqldrivers.resolvers;
 
 import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.bearsoft.rowset.metadata.Field;
+import com.eas.client.SQLUtils;
 import java.sql.Types;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -53,7 +54,7 @@ public class H2TypesResolver implements TypesResolver {
         rdbmsTypes2JdbcTypes.put("ARRAY", Types.ARRAY);
         rdbmsTypes2JdbcTypes.put("BLOB", Types.BLOB);
         rdbmsTypes2JdbcTypes.put("CLOB", Types.CLOB);
-        
+
         // jdbc -> rdbms
         jdbcTypes2RdbmsTypes.put(Types.BIT, "INTEGER");
         jdbcTypes2RdbmsTypes.put(Types.TINYINT, "TINYINT");
@@ -121,6 +122,13 @@ public class H2TypesResolver implements TypesResolver {
 
     @Override
     public void resolve2Application(Field aField) {
+        if (SQLUtils.isSameTypeGroup(aField.getTypeInfo().getSqlType(), java.sql.Types.BLOB)) {
+            if (aField.getTypeInfo().getSqlType() == java.sql.Types.CLOB || aField.getTypeInfo().getSqlType() == java.sql.Types.NCLOB) {
+                aField.setTypeInfo(DataTypeInfo.CLOB.copy());
+            } else {
+                aField.setTypeInfo(DataTypeInfo.BLOB.copy());
+            }
+        }
     }
 
     @Override
