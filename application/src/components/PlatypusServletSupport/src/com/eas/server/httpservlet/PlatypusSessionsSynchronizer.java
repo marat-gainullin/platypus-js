@@ -14,7 +14,7 @@ import javax.servlet.http.HttpSessionListener;
  *
  * @author mg
  */
-public class PlatypusSessionsSynchonizer implements HttpSessionListener {
+public class PlatypusSessionsSynchronizer implements HttpSessionListener {
 
     @Override
     public void sessionCreated(HttpSessionEvent se) {
@@ -28,7 +28,7 @@ public class PlatypusSessionsSynchonizer implements HttpSessionListener {
             PlatypusServerCore serverCore = (PlatypusServerCore) se.getSession().getAttribute(PlatypusHttpServlet.PLATYPUS_SERVER_CORE_ATTR_NAME);
             if (serverCore != null && serverCore.getSessionManager() != null) {
                 serverCore.getSessionManager().remove(platypusSessionId);
-                Logger.getLogger(PlatypusSessionsSynchonizer.class.getName()).log(Level.INFO, "Platypus session closed id: {0}", platypusSessionId);
+                Logger.getLogger(PlatypusSessionsSynchronizer.class.getName()).log(Level.INFO, "Platypus session closed id: {0}", platypusSessionId);
             }
         }
         se.getSession().removeAttribute(PlatypusHttpServlet.PLATYPUS_SESSION_ATTR_NAME);

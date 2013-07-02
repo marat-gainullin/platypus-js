@@ -25,7 +25,7 @@ import com.eas.designer.explorer.platform.PlatypusPlatform;
 import com.eas.designer.explorer.project.ClientType;
 import com.eas.designer.explorer.project.PlatypusProject;
 import com.eas.server.httpservlet.PlatypusHttpServlet;
-import com.eas.server.httpservlet.PlatypusSessionsSynchonizer;
+import com.eas.server.httpservlet.PlatypusSessionsSynchronizer;
 import com.eas.util.FileUtils;
 import com.eas.xml.dom.XmlDom2String;
 import java.io.File;
@@ -271,7 +271,7 @@ public class PlatypusWebModuleManager {
     private void configureDeploymentDescriptor() throws Exception {
         WebApplication wa = new WebApplication();
         configureParams(wa);
-        wa.addAppListener(new AppListener(PlatypusSessionsSynchonizer.class.getName()));
+        wa.addAppListener(new AppListener(PlatypusSessionsSynchronizer.class.getName()));
         configureServlet(wa);
         configureDatasource(wa);
         if (project.getSettings().isWebSecurityEnabled() || ClientType.PLATYPUS_CLIENT.equals(project.getSettings().getRunClientType())) {
