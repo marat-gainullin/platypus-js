@@ -172,11 +172,11 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
 
     @ScriptFunction(jsDocText = "Creates new entity of model, based on passed sql query. This method works only in two tier components of a system.")
     public synchronized Scriptable createEntity(String aSqlText) throws Exception {
-        return createEntity(null, aSqlText);
+        return createEntity(aSqlText, null);
     }
 
     @ScriptFunction(jsDocText = "Creates new entity of model, based on passed datasource name and sql query. This method works only in two tier components of a system.")
-    public synchronized Scriptable createEntity(String aDbId, String aSqlText) throws Exception {
+    public synchronized Scriptable createEntity(String aSqlText, String aDbId) throws Exception {
         if (client == null) {
             throw new NullPointerException("Null client detected while creating a query");
         }
@@ -192,11 +192,11 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
 
     @ScriptFunction(jsDocText = "Executed sql query. This method works only in two tier components of a system.")
     public void executeSql(String aSql) throws Exception {
-        executeSql(null, aSql);
+        executeSql(aSql, null);
     }
 
     @ScriptFunction(jsDocText = "Executed sql query against specific datasource. This method works only in two tier components of a system.")
-    public void executeSql(String aDbId, String aSqlClause) throws Exception {
+    public void executeSql(String aSqlClause, String aDbId) throws Exception {
         if (client == null) {
             throw new NullPointerException("Null client detected while creating a query");
         }

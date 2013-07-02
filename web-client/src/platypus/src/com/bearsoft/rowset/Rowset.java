@@ -1545,8 +1545,9 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
 		}
 	}
 
-	public Object getJsObject(int colIndex) throws Exception {
-		return Utils.toJs(getObject(colIndex));
+	public Object getJsObject(String aFieldName) throws Exception {
+		
+		return Utils.toJs(getObject(fields.find(aFieldName)));
 	}
 
 	/**
@@ -1742,8 +1743,8 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
 		}
 	}
 
-	public void updateJsObject(int colIndex, Object aValue) throws Exception {
-		updateObject(colIndex, Utils.toJava(aValue));
+	public void updateJsObject(String aFieldName, Object aValue) throws Exception {
+		updateObject(fields.find(aFieldName), Utils.toJava(aValue));
 	}
 
 	/**

@@ -534,7 +534,7 @@ public class Entity implements RowsetListener {
 							return null;
 					},
 					setSubstitute : function(aSubstitute) {
-						aEntity.@com.eas.client.model.Entity::setSubstitute(Lcom/eas/client/model/Entity;)(aSubstitute.unwrap());
+						aEntity.@com.eas.client.model.Entity::setSubstitute(Lcom/eas/client/model/Entity;)(aSubstitute != null ? aSubstitute.unwrap() : null);
 					},
 					// cursor interface 
 					scrollTo : function(aRow) {
@@ -664,7 +664,7 @@ public class Entity implements RowsetListener {
 						var rValue = null;
 						var rowset = getRowset();
 						if(rowset != null){
-							rValue = rowset.@com.bearsoft.rowset.Rowset::getJsObject(I)(aColIndex);
+							rValue = rowset.@com.bearsoft.rowset.Rowset::getJsObject(Ljava/lang/String;)(published.md[aColIndex-1].name);
 						}
 						if(rValue == null){
 							rValue = aEntity.@com.eas.client.model.Entity::getSubstituteRowsetJsObject(I)(aColIndex);
@@ -675,7 +675,7 @@ public class Entity implements RowsetListener {
 					updateObject : function(aColIndex, aValue) {
 						var rowset = getRowset();
 						if(rowset != null)
-							rowset.@com.bearsoft.rowset.Rowset::updateJsObject(ILjava/lang/Object;)(aColIndex, $wnd.boxAsJava(aValue));
+							rowset.@com.bearsoft.rowset.Rowset::updateJsObject(Ljava/lang/String;Ljava/lang/Object;)(published.md[aColIndex-1].name, $wnd.boxAsJava(aValue));
 					},
 					insert : function() {
 						aEntity.@com.eas.client.model.Entity::insert(Lcom/google/gwt/core/client/JavaScriptObject;)(arguments);
@@ -711,7 +711,7 @@ public class Entity implements RowsetListener {
 				Object.defineProperty(published, "substitute", { get : function(){ return published.getSubstitute()}, set : function(aValue){ published.setSubstitute(aValue)}});
 				
 				Object.defineProperty(published, "md",         { get : function(){ return @com.eas.client.model.Entity::publishFieldsFacade(Lcom/bearsoft/rowset/metadata/Fields;Lcom/eas/client/model/Entity;)(aEntity.@com.eas.client.model.Entity::getFields()(), aEntity) }});
-				// default row dynamic properties interface
+				// cursor-row dynamic properties interface
 				for(var i=0;i<published.md.length;i++)
 				{
 					(function(){
