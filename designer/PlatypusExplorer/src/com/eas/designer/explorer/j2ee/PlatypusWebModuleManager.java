@@ -5,7 +5,6 @@
 package com.eas.designer.explorer.j2ee;
 
 import com.eas.client.ClientConstants;
-import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.client.settings.DbConnectionSettings;
 import com.eas.designer.application.PlatypusUtils;
 import com.eas.designer.explorer.j2ee.dd.AppListener;
@@ -25,6 +24,8 @@ import com.eas.designer.explorer.platform.EmptyPlatformHomePathException;
 import com.eas.designer.explorer.platform.PlatypusPlatform;
 import com.eas.designer.explorer.project.ClientType;
 import com.eas.designer.explorer.project.PlatypusProject;
+import com.eas.server.httpservlet.PlatypusHttpServlet;
+import com.eas.server.httpservlet.PlatypusSessionsSynchonizer;
 import com.eas.util.FileUtils;
 import com.eas.xml.dom.XmlDom2String;
 import java.io.File;
@@ -36,6 +37,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.sql.DataSource;
 import org.netbeans.modules.j2ee.deployment.devmodules.api.Deployment;
 import org.netbeans.modules.j2ee.deployment.devmodules.spi.J2eeModuleProvider;
 import org.openide.ErrorManager;
@@ -65,9 +67,6 @@ public class PlatypusWebModuleManager {
     public static final String MULTIPART_CONFIG_BEAN_NAME = "MultipartConfig"; //NOI18N
     public static final String SERVLET_MAPPING_BEAN_NAME = "ServletMapping"; //NOI18N
     public static final String PLATYPUS_SERVLET_NAME = "PlatypusServlet"; //NOI18N
-    public static final String PLATYPUS_SERVLET_CLASS = "com.eas.server.httpservlet.PlatypusHttpServlet";//NOI18N
-    public static final String WEB_APP_LISTENER_CLASS = "com.eas.server.httpservlet.PlatypusSessionsSynchonizer";//NOI18N
-    public static final String DATASOURCE_CLASS = "javax.sql.DataSource"; //NOI18N
     public static final String CONTAIER_RESOURCE_SECURITY_TYPE = "Container"; //NOI18N
     public static final String PLATYPUS_WEB_RESOURCE_NAME = "platypus"; //NOI18N
     public static final String ANY_SIGNED_USER_ROLE = "*"; //NOI18N
@@ -272,7 +271,7 @@ public class PlatypusWebModuleManager {
     private void configureDeploymentDescriptor() throws Exception {
         WebApplication wa = new WebApplication();
         configureParams(wa);
-        wa.addAppListener(new AppListener(WEB_APP_LISTENER_CLASS));
+        wa.addAppListener(new AppListener(PlatypusSessionsSynchonizer.class.getName()));
         configureServlet(wa);
         configureDatasource(wa);
         if (project.getSettings().isWebSecurityEnabled() || ClientType.PLATYPUS_CLIENT.equals(project.getSettings().getRunClientType())) {
@@ -307,7 +306,7 @@ public class PlatypusWebModuleManager {
     }
 
     private void configureServlet(WebApplication wa) {
-        Servlet platypusServlet = new Servlet(PLATYPUS_SERVLET_NAME, PLATYPUS_SERVLET_CLASS);
+        Servlet platypusServlet = new Servlet(PLATYPUS_SERVLET_NAME, PlatypusHttpServlet.class.getName());
         MultipartConfig multiPartConfig = new MultipartConfig();
         multiPartConfig.setLocation(publicDir.getPath());
         multiPartConfig.setMaxFileSize(Long.toString(MULTIPART_MAX_FILE_SIZE));
@@ -320,7 +319,7 @@ public class PlatypusWebModuleManager {
     }
 
     private void configureDatasource(WebApplication wa) {
-        ResourceRef resourceRef = new ResourceRef(PlatypusWebModule.MAIN_DATASOURCE_NAME, DATASOURCE_CLASS, CONTAIER_RESOURCE_SECURITY_TYPE);
+        ResourceRef resourceRef = new ResourceRef(PlatypusWebModule.MAIN_DATASOURCE_NAME, DataSource.class.getName(), CONTAIER_RESOURCE_SECURITY_TYPE);
         resourceRef.setDescription("Main database connection"); //NOI18N
         wa.addResourceRef(resourceRef);
     }
