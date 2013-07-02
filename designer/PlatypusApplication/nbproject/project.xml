@@ -215,6 +215,7 @@
                 <package>com.eas.resources.images</package>
                 <package>com.eas.script</package>
                 <package>com.eas.server</package>
+                <package>com.eas.server.httpservlet</package>
                 <package>com.eas.store</package>
                 <package>com.eas.util</package>
                 <package>com.eas.xml.dom</package>
@@ -347,6 +348,10 @@
             <class-path-extension>
                 <runtime-relative-path>ext/commons-beanutils-1.8.2.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/commons-beanutils-1.8.2.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/PlatypusServletSupport.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/PlatypusServletSupport.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/Forms.jar</runtime-relative-path>
