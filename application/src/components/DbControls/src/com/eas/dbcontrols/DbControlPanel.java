@@ -48,7 +48,6 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
     protected JToolBar extraTools = new JToolBar();
     protected Set<CellEditorListener> editorListeners = new HashSet<>();
     protected Object editingValue = null;
-    protected List<ApplicationEntity<?, ?, ?>> substitutes = new ArrayList<>();
     protected int updateCounter = 0;
     protected boolean borderless = true;
     protected int align = SwingConstants.LEFT;
@@ -774,6 +773,8 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
                     }
                     rowsetListener = new DbControlRowsetListener(this);
                     rowset.addRowsetListener(rowsetListener);
+                } else {
+                    entity.getChangeSupport().addPropertyChangeListener(this);
                 }
             }
         }
@@ -803,21 +804,6 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
         if (f != null && prefSizeCalculator != null) {
             prefSizeCalculator.setFont(f);
         }
-    }
-
-    @Override
-    public void addSubstitute(ApplicationEntity<?, ?, ?> aEntity) throws Exception {
-        substitutes.add(aEntity);
-        aEntity.getRowset().addRowsetListener(rowsetListener);
-    }
-
-    @Override
-    public void clearSubstitutes() throws Exception {
-        assert substitutes != null;
-        for (int i = 0; i < substitutes.size(); i++) {
-            substitutes.get(i).getRowset().removeRowsetListener(rowsetListener);
-        }
-        substitutes.clear();
     }
 
     @Override
@@ -867,23 +853,11 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
 
     @Override
     public Object getValueFromRowset() throws Exception {
-        if (rsEntity != null && rsEntity.getRowset() != null
-                && colIndex > 0) {
+        if (rsEntity != null && rsEntity.getRowset() != null && colIndex > 0) {
             if (!rsEntity.getRowset().isBeforeFirst() && !rsEntity.getRowset().isAfterLast()) {
                 Object value = rsEntity.getRowset().getObject(colIndex);
-                if (value == null) {
-                    for (int i = 0; i < substitutes.size(); i++) {
-                        ApplicationEntity<?, ?, ?> substEntity = substitutes.get(i);
-                        if (substEntity != null) {
-                            Rowset substRowset = substEntity.getRowset();
-                            if (substRowset != null && !substRowset.isBeforeFirst() && !substRowset.isAfterLast()) {
-                                value = substEntity.getRowset().getObject(colIndex);
-                                if (value != null) {
-                                    break;
-                                }
-                            }
-                        }
-                    }
+                if (value == null && datamodelElement != null) {
+                    value = rsEntity.getSubstituteRowsetObject(datamodelElement.getFieldName());
                 }
                 return value;
             }
@@ -1226,10 +1200,32 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         try {
-            if (evt != null && evt.getSource() == model
-                    && "runtime".equals(evt.getPropertyName())) {
-                if (Boolean.FALSE.equals(evt.getOldValue())
-                        && Boolean.TRUE.equals(evt.getNewValue())) {
+            if (evt != null) {
+                ApplicationEntity<?, ?, ?> entity = datamodelElement != null && model != null ? model.getEntityById(datamodelElement.getEntityId()) : null;
+                if (evt.getSource() == model
+                        && "runtime".equals(evt.getPropertyName())) {
+                    if (Boolean.FALSE.equals(evt.getOldValue())
+                            && Boolean.TRUE.equals(evt.getNewValue())) {
+                        if (entity.getRowset() != null) {
+                            configure();
+                            beginUpdate();
+                            try {
+                                setEditingValue(getValueFromRowset());
+                            } finally {
+                                endUpdate();
+                            }
+                        } else {
+                            bind();
+                        }
+                    } else if (Boolean.TRUE.equals(evt.getOldValue())
+                            && Boolean.FALSE.equals(evt.getNewValue())) {
+                        cleanup();
+                    }
+                } else if (evt.getSource() == entity
+                        && "rowset".equals(evt.getPropertyName())
+                        && evt.getNewValue() != null && evt.getOldValue() == null) {
+                    entity.getChangeSupport().removePropertyChangeListener(this);
+                    assert entity.getRowset() != null;
                     configure();
                     beginUpdate();
                     try {
@@ -1237,8 +1233,6 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
                     } finally {
                         endUpdate();
                     }
-                } else {
-                    cleanup();
                 }
             }
         } catch (Exception ex) {

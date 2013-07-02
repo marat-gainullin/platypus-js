@@ -4,7 +4,6 @@
  */
 package com.eas.dbcontrols;
 
-import com.eas.client.model.Entity;
 import com.eas.client.model.ModelElementRef;
 import com.eas.client.model.application.ApplicationEntity;
 import com.eas.gui.CascadedStyle;
@@ -95,24 +94,6 @@ public interface ScalarDbControl extends DbControl, TableCellRenderer, TableCell
      * @param aStyle
      */
     public void applyStyle(CascadedStyle aStyle);
-
-    /**
-     * Sets the control's data substitue. If data in primary entity is null,
-     * than controls act with substitue entity data again and again until the
-     * substitues chain ends or non-null data will be found.
-     *
-     * @param aEntity Entity to substitue with.
-     * @throws Exception
-     * @see Entity
-     */
-    public void addSubstitute(ApplicationEntity<?, ?, ?> aEntity) throws Exception;
-
-    /**
-     * Clears all previously added substitutes.
-     *
-     * @throws Exception
-     */
-    public void clearSubstitutes() throws Exception;
 
     public boolean setValue2Rowset(Object aValue) throws Exception;
 

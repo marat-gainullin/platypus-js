@@ -67,7 +67,6 @@ public class EntityFieldsGrid extends JTable implements RowsetListener {
     protected String labelTitle = "Characteristic";
     protected String valueTitle = "Value";
     protected List<ScalarDbControl> controls = new ArrayList<>();
-    protected List<ApplicationEntity<?, ?, ?>> substitutes = new ArrayList<>();
     protected Set<String> hidingFields = new HashSet<>();
     protected boolean filterPrimaryKeys = false;
     protected boolean filterForeignKeys = false;
@@ -96,45 +95,6 @@ public class EntityFieldsGrid extends JTable implements RowsetListener {
 
     public void setBooleanFieldsMask(String aValue) {
         booleanFieldsMask = aValue;
-    }
-
-    public void addSubstitute(ScriptableRowset<?> aSRowset) throws Exception {
-        if (aSRowset != null && aSRowset.getEntity() != null) {
-            for (int i = 0; i < controls.size(); i++) {
-                ScalarDbControl control = controls.get(i);
-                control.addSubstitute(aSRowset.getEntity());
-            }
-            substitutes.add(aSRowset.getEntity());
-            if (entity != null && entity.getRowset() != null) {
-                entity.getRowset().previous();
-                entity.getRowset().next();
-            }
-        }
-    }
-
-    public void clearSubstitutes() throws Exception {
-        for (int i = 0; i < controls.size(); i++) {
-            ScalarDbControl control = controls.get(i);
-            control.clearSubstitutes();
-        }
-        substitutes.clear();
-    }
-
-    protected void propagateSubstitutes() throws Exception {
-        for (int i = 0; i < controls.size(); i++) {
-            ScalarDbControl control = controls.get(i);
-            control.clearSubstitutes();
-            if (!substitutes.isEmpty()) {
-                for (int j = 0; j < substitutes.size(); j++) {
-                    ApplicationEntity<?, ?, ?> lentity = substitutes.get(j);
-                    control.addSubstitute(lentity);
-                }
-            }
-        }
-        if (entity != null && entity.getRowset() != null) {
-            entity.getRowset().previous();
-            entity.getRowset().next();
-        }
     }
 
     private Fields fieldsByEntity(ApplicationEntity<?, ?, ?> entity) {
@@ -556,7 +516,6 @@ public class EntityFieldsGrid extends JTable implements RowsetListener {
         // cleanup
         for (ScalarDbControl control : controls) {
             control.setModel(null);
-            control.clearSubstitutes();
             control.cleanup();
         }
         controls.clear();
@@ -630,7 +589,6 @@ public class EntityFieldsGrid extends JTable implements RowsetListener {
                     }
                 }
             }
-            propagateSubstitutes();
         }
         if (entity != null && entity.getRowset() != null) {
             entity.getRowset().addRowsetListener(this);

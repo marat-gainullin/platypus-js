@@ -50,6 +50,7 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
                     rowset = compiledQuery.executeQuery();
                     forwardChangeLog();
                     rowset.addRowsetListener(this);
+                    changeSupport.firePropertyChange("rowset", null, rowset);
                     rowset.getRowsetChangeSupport().fireRequeriedEvent();
                 } else {
                     rowset.refresh(queryParameters);

@@ -4,13 +4,11 @@
  */
 package com.eas.client.model.application;
 
-import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.changes.Change;
-import com.bearsoft.rowset.metadata.Parameter;
-import com.bearsoft.rowset.metadata.Parameters;
+import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.DbClient;
 import com.eas.client.SQLUtils;
-import com.eas.client.model.RowsetMissingException;
+import com.eas.client.model.StoredQueryFactory;
 import com.eas.client.queries.SqlCompiledQuery;
 import com.eas.client.queries.SqlQuery;
 import com.eas.client.sqldrivers.SqlDriver;
@@ -172,56 +170,37 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
         return changeLog;
     }
 
-    public synchronized Scriptable createQuery(String aDbId, String aSqlText, String aMainTable) throws Exception {
+    @ScriptFunction(jsDocText = "Creates new entity of model, based on passed sql query. This method works only in two tier components of a system.")
+    public synchronized Scriptable createEntity(String aSqlText) throws Exception {
+        return createEntity(aSqlText, null);
+    }
+
+    @ScriptFunction(jsDocText = "Creates new entity of model, based on passed datasource name and sql query. This method works only in two tier components of a system.")
+    public synchronized Scriptable createEntity(String aSqlText, String aDbId) throws Exception {
         if (client == null) {
             throw new NullPointerException("Null client detected while creating a query");
         }
-        ApplicationDbEntity entity = newGenericEntity();
-        entity.setName(USER_DATASOURCE_NAME);
+        ApplicationDbEntity modelEntity = newGenericEntity();
+        modelEntity.setName(USER_DATASOURCE_NAME);
         SqlQuery query = new SqlQuery(client, aDbId, aSqlText);
-        if (aMainTable != null) {
-            query.setEntityId(aMainTable);
-        }
-        if (query.getFields() == null || query.getFields().isEmpty()) {
-            SqlCompiledQuery compiled = query.compileMetadataQuery();
-            try {
-                Rowset rs = compiled.executeQuery();
-                query.setFields(rs.getFields());
-            } catch (Exception ex) {
-                query.setFields(null);
-            }
-        }
-        entity.setQuery(query);
-        addEntity(entity);
-        return entity.defineProperties();
+        query.setEntityId(String.valueOf(IDGenerator.genID()));
+        modelEntity.setQuery(query);
+        StoredQueryFactory factory = new StoredQueryFactory(client, true);
+        factory.putTableFieldsMetadata(query);// only select will be filled with output columns
+        return modelEntity.defineProperties();// .md collection will be empty if query is not a select
     }
 
-    public synchronized Scriptable createQuery(String aDbId, String aSqlText) throws RowsetMissingException, Exception {
-        return createQuery(aDbId, aSqlText, (String) null);
+    @ScriptFunction(jsDocText = "Executed sql query. This method works only in two tier components of a system.")
+    public void executeSql(String aSql) throws Exception {
+        executeSql(aSql, null);
     }
 
-    public synchronized Scriptable createQuery(String aDbId, String aSqlText, Parameters aParams) throws Exception {
+    @ScriptFunction(jsDocText = "Executed sql query against specific datasource. This method works only in two tier components of a system.")
+    public void executeSql(String aSqlClause, String aDbId) throws Exception {
         if (client == null) {
             throw new NullPointerException("Null client detected while creating a query");
         }
-        ApplicationDbEntity entity = newGenericEntity();
-        entity.setName(USER_DATASOURCE_NAME);
-        SqlQuery query = new SqlQuery(client, aDbId, aSqlText);
-        for (int i = 1; i <= aParams.getParametersCount(); i++) {
-            Parameter param = aParams.get(i);
-            query.putParameter(param.getName(), param.getTypeInfo(), param.getValue());
-        }
-        if (query.getFields() == null || query.getFields().isEmpty()) {
-            SqlCompiledQuery compiled = query.compileMetadataQuery();
-            try {
-                Rowset rs = compiled.executeQuery();
-                query.setFields(rs.getFields());
-            } catch (Exception ex) {
-                query.setFields(null);
-            }
-        }
-        entity.setQuery(query);
-        addEntity(entity);
-        return entity.defineProperties();
+        SqlCompiledQuery compiled = new SqlCompiledQuery(client, aDbId, aSqlClause);
+        client.executeUpdate(compiled);
     }
 }
