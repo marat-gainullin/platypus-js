@@ -93,7 +93,7 @@ public class PlatypusProject implements Project {
     private DbMigrator migrator;
     private ClassPath sourceRoot;
     private Set<Runnable> clientListeners = new HashSet<>();
-    
+
     public PlatypusProject(FileObject aProjectDir, ProjectState aState) throws Exception {
         super();
         DataNode.setShowFileExtensions(false);
@@ -118,7 +118,7 @@ public class PlatypusProject implements Project {
                 new PlatypusProjectDiskOperations(this),
                 new PlatypusPrivilegedTemplates(),
                 new PlatypusProjectCustomizerProvider(this),
-                new PlatypusFilesEncodingQuery(), 
+                new PlatypusFilesEncodingQuery(),
                 new PlatypusWebModule(this),
                 new PlatypusWebModuleManager(this));
     }
@@ -195,7 +195,7 @@ public class PlatypusProject implements Project {
         }
     }
 
-    private void fireClientChange() {
+    private synchronized void fireClientChange() {
         for (Runnable onChange : clientListeners) {
             SwingUtilities.invokeLater(onChange);
         }
@@ -243,7 +243,7 @@ public class PlatypusProject implements Project {
             connecting2Db = null;
             Logger.getLogger(PlatypusProject.class.getName()).log(Level.INFO, null, ex);
             String dbUnableToConnectMsg = NbBundle.getMessage(PlatypusProject.class, "LBL_UnableToConnect"); // NOI18N
-            StatusDisplayer.getDefault().setStatusText(dbUnableToConnectMsg);                 
+            StatusDisplayer.getDefault().setStatusText(dbUnableToConnectMsg);
             getOutputWindowIO().getErr().println(dbUnableToConnectMsg);
         }
     }
@@ -266,12 +266,14 @@ public class PlatypusProject implements Project {
         return new JScrollPane(htmlPage);
     }
 
-    public HandlerRegistration addClientChangeListener(final Runnable onChange) {
+    public synchronized HandlerRegistration addClientChangeListener(final Runnable onChange) {
         clientListeners.add(onChange);
         return new HandlerRegistration() {
             @Override
             public void remove() {
-                clientListeners.remove(onChange);
+                synchronized (PlatypusProject.this) {
+                    clientListeners.remove(onChange);
+                }
             }
         };
     }
