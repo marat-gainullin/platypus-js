@@ -35,14 +35,12 @@ import com.eas.metadata.testdefine.H2TestDefine;
 import com.eas.metadata.testdefine.MsSqlTestDefine;
 import com.eas.metadata.testdefine.MySqlTestDefine;
 import com.eas.metadata.testdefine.OracleTestDefine;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.junit.After;
@@ -58,9 +56,6 @@ import org.junit.Test;
  */
 public class MetadataSynchronizerTest {
 
-    static final Logger logger = Logger.getLogger(MetadataSynchronizerTest.class.getName());
-    private String sqlLogName = null;
-    private String mdsLogName = null;
     private int cntTabs = 0;
     private final String XML_NAME = "test.xml";
     private SourceDbSetting[] sourceDbSetting = {
@@ -119,36 +114,26 @@ public class MetadataSynchronizerTest {
         assertNotNull(destDbConnection);
         assertNotNull(srcDatabase);
         assertNotNull(destDatabase);
-        mdsLogName = srcDatabase + "_" + destDatabase;
-        FileHandler fileHandler = null;
+        String logName = srcDatabase + "_" + destDatabase;
+        Logger logger = MetadataSynchronizer.initLogger(MetadataSynchronizerTest.class.getName(), Level.ALL, false);
         try {
-            fileHandler = new FileHandler(mdsLogName + ".log");
-            fileHandler.setFormatter(new LogFormatter());
-            logger.addHandler(fileHandler);
-            logger.setUseParentHandlers(false);
-        } catch (IOException | SecurityException ex) {
-            Logger.getLogger(MetadataSynchronizerTest.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        try {
+            logger.addHandler(MetadataSynchronizer.createFileHandler(logName + ".log", "UTF-8", new LogFormatter()));
             printText(cntTabs++, "*** runAllTestsDb ***");
             printText(cntTabs, "source: \t(url=", srcDbConnection.getUrl(), " \tschema=", srcDbConnection.getSchema(), " \tuser=", srcDbConnection.getUser(), ")");
             printText(cntTabs, "destination: \t(url=", destDbConnection.getUrl(), " \tschema=", destDbConnection.getSchema(), " \tuser=", destDbConnection.getUser(), ")");
 
             clearSchema(aDestinationSetting.getDbConnection());
-            runAllTestTables(aSourceSetting.getDbConnection(), aDestinationSetting.getDbConnection());
-            runAllTestsFields(aSourceSetting, aDestinationSetting);
-            runAllTestIndexes(aSourceSetting, aDestinationSetting);
-            runAllTestKeys(aSourceSetting, aDestinationSetting);
+            runAllTestTables(logName, aSourceSetting.getDbConnection(), aDestinationSetting.getDbConnection());
+            runAllTestsFields(logName, aSourceSetting, aDestinationSetting);
+            runAllTestIndexes(logName, aSourceSetting, aDestinationSetting);
+            runAllTestKeys(logName, aSourceSetting, aDestinationSetting);
             printText(--cntTabs, "*** end runAllTestsDb ***");
         } finally {
-            if (fileHandler != null) {
-                fileHandler.close();
-                logger.removeHandler(fileHandler);
-            }
+            MetadataSynchronizer.closeLogHandlers(logger);
         }
     }
 
-    private void runAllTestTables(DbConnection aSourceConnection, DbConnection aDestinationConnection) throws Exception {
+    private void runAllTestTables(String aLogName, DbConnection aSourceConnection, DbConnection aDestinationConnection) throws Exception {
         printText(cntTabs++, "*** runAllTestTables ***");
         assertNotNull(aSourceConnection);
         assertNotNull(aDestinationConnection);
@@ -189,22 +174,22 @@ public class MetadataSynchronizerTest {
             new TableDefine("tt5", "id5", null),
             new TableDefine("tt7", "id7", "c7")
         };
-        runTestTables("test1", aSourceConnection, aDestinationConnection, stateA, stateA, false, null);
-        runTestTables("test2", aSourceConnection, aDestinationConnection, stateB, stateAB1, true, "tT1,Tt5");
-        runTestTables("test3", aSourceConnection, aDestinationConnection, stateA, stateA, false, null);
-        runTestTables("test4", aSourceConnection, aDestinationConnection, stateB, stateAB2, true, "tT1,tt2,Tt5");
-        runTestTables("test5", aSourceConnection, aDestinationConnection, stateC, stateAB2C, false, "tT7");
+        runTestTables(aLogName, "test1", aSourceConnection, aDestinationConnection, stateA, stateA, false, null);
+        runTestTables(aLogName, "test2", aSourceConnection, aDestinationConnection, stateB, stateAB1, true, "tT1,Tt5");
+        runTestTables(aLogName, "test3", aSourceConnection, aDestinationConnection, stateA, stateA, false, "");
+        runTestTables(aLogName, "test4", aSourceConnection, aDestinationConnection, stateB, stateAB2, true, "tT1,tt2,Tt5");
+        runTestTables(aLogName, "test5", aSourceConnection, aDestinationConnection, stateC, stateAB2C, false, "tT7");
         printText(--cntTabs, "*** end runAllTestTables ***");
     }
 
-    private void runAllTestsFields(SourceDbSetting aSourceSetting, DestinationDbSetting aDestinationSetting) throws Exception {
+    private void runAllTestsFields(String aLogName, SourceDbSetting aSourceSetting, DestinationDbSetting aDestinationSetting) throws Exception {
         printText(cntTabs++, "*** runAllTestsFields ***");
-        runTestFields("test1", aSourceSetting, aDestinationSetting, "Tbl", "Fld", true, true, true, 0, null, false, false);
-        runTestFields("test2", aSourceSetting, aDestinationSetting, "Tbl", "Fld", true, true, true, 0, null, true, false);
-        runTestFields("test3", aSourceSetting, aDestinationSetting, "Tbl", "Fld", false, true, true, 0, null, false, false);
-        runTestFields("test4", aSourceSetting, aDestinationSetting, "Tbl", "Fld", true, true, true, 0, "Comment", false, false);
-        runTestFields("test5", aSourceSetting, aDestinationSetting, "Tbl", "Fld", true, true, true, 0, "", false, false);
-        runTestFields("test6", aSourceSetting, aDestinationSetting, "Tbl", "Fld", true, true, true, 0, null, false, false);
+        runTestFields(aLogName, "test1", aSourceSetting, aDestinationSetting, "Tbl", "Fld", true, true, true, 0, null, false, false);
+        runTestFields(aLogName, "test2", aSourceSetting, aDestinationSetting, "Tbl", "Fld", true, true, true, 0, null, true, false);
+        runTestFields(aLogName, "test3", aSourceSetting, aDestinationSetting, "Tbl", "Fld", false, true, true, 0, null, false, false);
+        runTestFields(aLogName, "test4", aSourceSetting, aDestinationSetting, "Tbl", "Fld", true, true, true, 0, "Comment", false, false);
+        runTestFields(aLogName, "test5", aSourceSetting, aDestinationSetting, "Tbl", "Fld", true, true, true, 0, "", false, false);
+        runTestFields(aLogName, "test6", aSourceSetting, aDestinationSetting, "Tbl", "Fld", true, true, true, 0, null, false, false);
 
 
 ////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!        
@@ -220,7 +205,7 @@ public class MetadataSynchronizerTest {
         printText(--cntTabs, "*** end runAllTestsFields ***");
     }
 
-    private void runAllTestIndexes(SourceDbSetting aSourceSetting, DestinationDbSetting aDestinationSetting) throws Exception {
+    private void runAllTestIndexes(String aLogName, SourceDbSetting aSourceSetting, DestinationDbSetting aDestinationSetting) throws Exception {
         printText(cntTabs++, "*** runAllTestIndexes ***");
         IndexDefine[] state1 = {
             //indexName, isClustered(=false !!!), isHashed, isUnique,arrayColumns            
@@ -254,16 +239,16 @@ public class MetadataSynchronizerTest {
             new IndexDefine("Ind3", false, false, true, new IndexColumnDefine[]{new IndexColumnDefine("f2", true), new IndexColumnDefine("f3", true), new IndexColumnDefine("f1", true)})
         };
         IndexDefine[] state6 = {};
-        runTestIndexes("test1", aSourceSetting, aDestinationSetting, state1);
-        runTestIndexes("test2", aSourceSetting, aDestinationSetting, state2);
-        runTestIndexes("test3", aSourceSetting, aDestinationSetting, state3);
-        runTestIndexes("test4", aSourceSetting, aDestinationSetting, state4);
-        runTestIndexes("test5", aSourceSetting, aDestinationSetting, state5);
-        runTestIndexes("test6", aSourceSetting, aDestinationSetting, state6);
+        runTestIndexes(aLogName, "test1", aSourceSetting, aDestinationSetting, state1);
+        runTestIndexes(aLogName, "test2", aSourceSetting, aDestinationSetting, state2);
+        runTestIndexes(aLogName, "test3", aSourceSetting, aDestinationSetting, state3);
+        runTestIndexes(aLogName, "test4", aSourceSetting, aDestinationSetting, state4);
+        runTestIndexes(aLogName, "test5", aSourceSetting, aDestinationSetting, state5);
+        runTestIndexes(aLogName, "test6", aSourceSetting, aDestinationSetting, state6);
         printText(--cntTabs, "*** end runAllTestIndexes ***");
     }
 
-    private void runAllTestKeys(SourceDbSetting aSourceSetting, DestinationDbSetting aDestinationSetting) throws Exception {
+    private void runAllTestKeys(String aLogName, SourceDbSetting aSourceSetting, DestinationDbSetting aDestinationSetting) throws Exception {
         printText(cntTabs++, "*** runAllTestKeys ***");
         Map<String, String[]> pkeys1 = new HashMap();
         pkeys1.put("Tbl1", new String[]{});
@@ -344,19 +329,19 @@ public class MetadataSynchronizerTest {
             new FKeyDefine("Tbl8", "Tbl8_Fk1", "Tbl3", ForeignKeyRule.NOACTION, ForeignKeyRule.NOACTION, true, new String[]{"f8_11"}),
             new FKeyDefine("Tbl9", "Tbl9_Fk1", "Tbl9", ForeignKeyRule.NOACTION, ForeignKeyRule.NOACTION, true, new String[]{"f9_3d", "f9_4", "f9_5"})
         };
-        runTestKeys("test1", aSourceSetting, aDestinationSetting, pkeys1, fkeys0);
-        runTestKeys("test2", aSourceSetting, aDestinationSetting, pkeys1, fkeys1);
-        runTestKeys("test2_reverse", aSourceSetting, aDestinationSetting, pkeys1_reverse, fkeys1_reverse);
-        runTestKeys("test3", aSourceSetting, aDestinationSetting, pkeys1, fkeys2);
-        runTestKeys("test4", aSourceSetting, aDestinationSetting, pkeys1, fkeys3);
-        runTestKeys("test5", aSourceSetting, aDestinationSetting, pkeys1, fkeys4);
-        runTestKeys("test6", aSourceSetting, aDestinationSetting, pkeys2, fkeys5);
+        runTestKeys(aLogName, "test1", aSourceSetting, aDestinationSetting, pkeys1, fkeys0);
+        runTestKeys(aLogName, "test2", aSourceSetting, aDestinationSetting, pkeys1, fkeys1);
+        runTestKeys(aLogName, "test2_reverse", aSourceSetting, aDestinationSetting, pkeys1_reverse, fkeys1_reverse);
+        runTestKeys(aLogName, "test3", aSourceSetting, aDestinationSetting, pkeys1, fkeys2);
+        runTestKeys(aLogName, "test4", aSourceSetting, aDestinationSetting, pkeys1, fkeys3);
+        runTestKeys(aLogName, "test5", aSourceSetting, aDestinationSetting, pkeys1, fkeys4);
+        runTestKeys(aLogName, "test6", aSourceSetting, aDestinationSetting, pkeys2, fkeys5);
         printText(--cntTabs, "*** end runAllTestKeys ***");
     }
 
-    private void runTestTables(String aTestName, DbConnection aSourceConnection, DbConnection aDestinationConnection, TableDefine[] aSourceTableDefine, TableDefine[] aDestinationTableDefine, boolean aNoDropTables, String aTablesList) throws Exception {
+    private void runTestTables(String aLogName, String aTestName, DbConnection aSourceConnection, DbConnection aDestinationConnection, TableDefine[] aSourceTableDefine, TableDefine[] aDestinationTableDefine, boolean aNoDropTables, String aTablesList) throws Exception {
         printText(cntTabs++, "*** ", "runTestTables ", aTestName, " ***");
-        sqlLogName = "Tables_" + aTestName;
+        String logName = aLogName + "_Tables_" + aTestName;
         assertNotNull(aSourceConnection);
         assertNotNull(aDestinationConnection);
         clearSchema(aSourceConnection);
@@ -364,7 +349,7 @@ public class MetadataSynchronizerTest {
         assertNotNull(aSourceConnection);
         assertNotNull(aSourceTableDefine);
         checkTables(aSourceConnection, aSourceTableDefine);
-        synchronizeDb(aSourceConnection, aDestinationConnection, aNoDropTables, aTablesList);
+        synchronizeDb(logName, aSourceConnection, aDestinationConnection, aNoDropTables, aTablesList);
         assertNotNull(aDestinationConnection);
         assertNotNull(aDestinationTableDefine);
         checkTables(aDestinationConnection, aDestinationTableDefine);
@@ -374,9 +359,9 @@ public class MetadataSynchronizerTest {
         printText(--cntTabs, "*** ", "end runTestTables ", aTestName, " ***");
     }
 
-    private void runTestFields(String aTestName, SourceDbSetting aSourceSetting, DestinationDbSetting aDestinationSetting, String aTableName, String aFieldName, boolean aNullable, boolean aReadonly, boolean aSigned, int aPrecision, String aDescription, boolean changeSize, boolean changeType) throws Exception {
+    private void runTestFields(String aLogName, String aTestName, SourceDbSetting aSourceSetting, DestinationDbSetting aDestinationSetting, String aTableName, String aFieldName, boolean aNullable, boolean aReadonly, boolean aSigned, int aPrecision, String aDescription, boolean changeSize, boolean changeType) throws Exception {
         printText(cntTabs++, "*** ", "runTestFields ", aTestName, " ***");
-        sqlLogName = "Fields_" + aTestName;
+        String logName = aLogName + "_Fields_" + aTestName;
         assertNotNull(aSourceSetting);
         assertNotNull(aDestinationSetting);
         assertNotNull(aSourceSetting.getDbConnection());
@@ -387,16 +372,16 @@ public class MetadataSynchronizerTest {
         clearSchema(aSourceSetting.getDbConnection());
         createFields(aSourceSetting, aTableName, aFieldName, aNullable, aReadonly, aSigned, aPrecision, aDescription, changeSize, changeType);
         checkFields(aSourceSetting.getDbConnection(), aSourceSetting.getDbTestDefine(), aSourceSetting.getDatabase(), aTableName, aFieldName, aNullable, aReadonly, aSigned, aPrecision, aDescription, changeSize, changeType);
-        synchronizeDb(aSourceSetting.getDbConnection(), aDestinationSetting.getDbConnection());
+        synchronizeDb(logName,aSourceSetting.getDbConnection(), aDestinationSetting.getDbConnection());
         checkFields(aDestinationSetting.getDbConnection(), aSourceSetting.getDbTestDefine(), aDestinationSetting.getDatabase(), aTableName, aFieldName, aNullable, aReadonly, aSigned, aPrecision, aDescription, changeSize, changeType);
         assertNotNull(XML_NAME);
         checkFields(XML_NAME, aSourceSetting.getDbTestDefine(), aSourceSetting.getDatabase(), aTableName, aFieldName, aNullable, aReadonly, aSigned, aPrecision, aDescription, changeSize, changeType);
         printText(--cntTabs, "*** ", "end runTestFields ", aTestName, " ***");
     }
 
-    private void runTestIndexes(String aTestName, SourceDbSetting aSourceSetting, DestinationDbSetting aDestinationSetting, IndexDefine[] aIndexesDefine) throws Exception {
+    private void runTestIndexes(String aLogName, String aTestName, SourceDbSetting aSourceSetting, DestinationDbSetting aDestinationSetting, IndexDefine[] aIndexesDefine) throws Exception {
         printText(cntTabs++, "*** ", "runTestIndexes ", aTestName, " ***");
-        sqlLogName = "Indexes_" + aTestName;
+        String logName = aLogName + "_Indexes_" + aTestName;
         assertNotNull(aSourceSetting);
         assertNotNull(aDestinationSetting);
         assertNotNull(aIndexesDefine);
@@ -411,16 +396,16 @@ public class MetadataSynchronizerTest {
         String tableName = "Tbl";
         createIndexes(aSourceSetting.getDbConnection(), tableName, aIndexesDefine);
         checkIndexes(aSourceSetting.getDbConnection(), tableName, aIndexesDefine, srcDatabase.isCheckIndexClustered(), srcDatabase.isCheckIndexHashed(), srcDatabase.isCheckIndexAscending());
-        synchronizeDb(aSourceSetting.getDbConnection(), aDestinationSetting.getDbConnection());
+        synchronizeDb(logName, aSourceSetting.getDbConnection(), aDestinationSetting.getDbConnection());
         checkIndexes(aDestinationSetting.getDbConnection(), tableName, aIndexesDefine, destDatabase.isCheckIndexClustered(), destDatabase.isCheckIndexHashed(), destDatabase.isCheckIndexAscending());
         assertNotNull(XML_NAME);
         checkIndexes(XML_NAME, tableName, aIndexesDefine, srcDatabase.isCheckIndexClustered(), srcDatabase.isCheckIndexHashed(), srcDatabase.isCheckIndexAscending());
         printText(--cntTabs, "*** ", "end runTestIndexes ", aTestName, " ***");
     }
 
-    private void runTestKeys(String aTestName, SourceDbSetting aSourceSetting, DestinationDbSetting aDestinationSetting, Map<String, String[]> aPKeysDefine, FKeyDefine[] aFKeysDefine) throws Exception {
+    private void runTestKeys(String aLogName, String aTestName, SourceDbSetting aSourceSetting, DestinationDbSetting aDestinationSetting, Map<String, String[]> aPKeysDefine, FKeyDefine[] aFKeysDefine) throws Exception {
         printText(cntTabs++, "*** ", "runTestKeys ", aTestName, " ***");
-        sqlLogName = "Keys_" + aTestName;
+        String logName = aLogName + "_Keys_" + aTestName;
         assertNotNull(aSourceSetting);
         assertNotNull(aDestinationSetting);
         assertNotNull(aSourceSetting.getDbConnection());
@@ -434,7 +419,7 @@ public class MetadataSynchronizerTest {
 
         createKeys(aSourceSetting.getDbConnection(), aPKeysDefine, aFKeysDefine);
         checkKeys(aSourceSetting.getDbConnection(), aSourceSetting.getDbTestDefine(), aSourceSetting.getDatabase(), aPKeysDefine, aFKeysDefine);
-        synchronizeDb(aSourceSetting.getDbConnection(), aDestinationSetting.getDbConnection());
+        synchronizeDb(logName, aSourceSetting.getDbConnection(), aDestinationSetting.getDbConnection());
 
         checkKeys(aDestinationSetting.getDbConnection(), aSourceSetting.getDbTestDefine(), aDestinationSetting.getDatabase(), aPKeysDefine, aFKeysDefine);
         assertNotNull(XML_NAME);
@@ -446,14 +431,18 @@ public class MetadataSynchronizerTest {
         printText(cntTabs, "createTables \turl=", aDbConnection.getUrl(), " \tschema=", aDbConnection.getSchema(), " \tuser=", aDbConnection.getUser());
         DbClient client = createClient(aDbConnection);
         assertNotNull(client);
-        SqlDriver driver = client.getDbMetadataCache(null).getConnectionDriver();
-        assertNotNull(driver);
-        for (TableDefine tableDefine : aTableDefine) {
-            String sql = driver.getSql4EmptyTableCreation(aDbConnection.getSchema(), tableDefine.getTableName(), tableDefine.getPkFieldName());
-            executeSql(client, sql);
-            sql = driver.getSql4CreateTableComment(aDbConnection.getSchema(), tableDefine.getTableName(), tableDefine.getDescription());
-            executeSql(client, sql);
-        }
+        try {
+            SqlDriver driver = client.getDbMetadataCache(null).getConnectionDriver();
+            assertNotNull(driver);
+            for (TableDefine tableDefine : aTableDefine) {
+                String sql = driver.getSql4EmptyTableCreation(aDbConnection.getSchema(), tableDefine.getTableName(), tableDefine.getPkFieldName());
+                executeSql(client, sql);
+                sql = driver.getSql4CreateTableComment(aDbConnection.getSchema(), tableDefine.getTableName(), tableDefine.getDescription());
+                executeSql(client, sql);
+            }
+        } finally {
+            client.shutdown();
+        }    
     }
 
     private void createFields(SourceDbSetting aSourceSetting, String aTableName, String aFieldName, boolean aNullable, boolean aReadonly, boolean aSigned, int aPrecision, String aDescription, boolean changeSize, boolean changeType) throws Exception {
@@ -462,60 +451,64 @@ public class MetadataSynchronizerTest {
 
         DbClient client = createClient(dbConnection);
         assertNotNull(client);
-        SqlDriver driver = client.getDbMetadataCache(null).getConnectionDriver();
-        assertNotNull(driver);
-        DbTestDefine dbTestDefine = aSourceSetting.getDbTestDefine();
-        assertNotNull(dbTestDefine);
-        String pkFieldName = "id";
-        String[] dbTypes = dbTestDefine.getOriginalTypes();
-        for (int i = 0; i < dbTypes.length; i++) {
-            String tableName = aTableName + i;
-            String fieldName = aFieldName + i;
-            String description = aDescription;
-            if (description != null && !description.isEmpty()) {
-                description += " -for " + tableName.toUpperCase();
-            }
-            int index = i;
-            if (changeType) {
-                index = i + dbTypes.length / 2;
-                if (index >= dbTypes.length) {
-                    index -= dbTypes.length;
+        try {
+            SqlDriver driver = client.getDbMetadataCache(null).getConnectionDriver();
+            assertNotNull(driver);
+            DbTestDefine dbTestDefine = aSourceSetting.getDbTestDefine();
+            assertNotNull(dbTestDefine);
+            String pkFieldName = "id";
+            String[] dbTypes = dbTestDefine.getOriginalTypes();
+            for (int i = 0; i < dbTypes.length; i++) {
+                String tableName = aTableName + i;
+                String fieldName = aFieldName + i;
+                String description = aDescription;
+                if (description != null && !description.isEmpty()) {
+                    description += " -for " + tableName.toUpperCase();
                 }
-            }
-            String dbType = dbTypes[index];
+                int index = i;
+                if (changeType) {
+                    index = i + dbTypes.length / 2;
+                    if (index >= dbTypes.length) {
+                        index -= dbTypes.length;
+                    }
+                }
+                String dbType = dbTypes[index];
 
-            String schema = dbConnection.getSchema();
-            executeSql(client, driver.getSql4EmptyTableCreation(schema, tableName, pkFieldName));
-            Field field = new Field();
-            field.setSchemaName(schema);
-            field.setName(fieldName);
-            field.setTableName(tableName);
-            field.setNullable(aNullable);
-            field.setReadonly(aReadonly);
-            field.setSigned(aSigned);
-            field.setPrecision(aPrecision);
-            //field.setDescription(description);
+                String schema = dbConnection.getSchema();
+                executeSql(client, driver.getSql4EmptyTableCreation(schema, tableName, pkFieldName));
+                Field field = new Field();
+                field.setSchemaName(schema);
+                field.setName(fieldName);
+                field.setTableName(tableName);
+                field.setNullable(aNullable);
+                field.setReadonly(aReadonly);
+                field.setSigned(aSigned);
+                field.setPrecision(aPrecision);
+                //field.setDescription(description);
 
-            DataTypeInfo typeInfo = new DataTypeInfo();
-            typeInfo.setSqlType(driver.getJdbcTypeByRDBMSTypename(dbType));
-            field.setTypeInfo(typeInfo);
-            int dbSize = dbTestDefine.getOriginalSize(dbType);
-            int dbScale = dbTestDefine.getOriginalScale(dbType);
-            if (changeSize) {
-                dbSize = dbSize * 2;
-                dbScale = dbScale * 2;
+                DataTypeInfo typeInfo = new DataTypeInfo();
+                typeInfo.setSqlType(driver.getJdbcTypeByRDBMSTypename(dbType));
+                field.setTypeInfo(typeInfo);
+                int dbSize = dbTestDefine.getOriginalSize(dbType);
+                int dbScale = dbTestDefine.getOriginalScale(dbType);
+                if (changeSize) {
+                    dbSize = dbSize * 2;
+                    dbScale = dbScale * 2;
+                }
+                if (dbSize >= 0) {
+                    field.setSize(dbSize);
+                }
+                if (dbScale >= 0) {
+                    field.setScale(dbScale);
+                }
+                String[] sqls = driver.getSqls4AddingField(schema, tableName, field);
+                executeSql(client, sqls);
+                sqls = driver.getSql4CreateColumnComment(schema, tableName, fieldName, description);
+                executeSql(client, sqls);
             }
-            if (dbSize >= 0) {
-                field.setSize(dbSize);
-            }
-            if (dbScale >= 0) {
-                field.setScale(dbScale);
-            }
-            String[] sqls = driver.getSqls4AddingField(schema, tableName, field);
-            executeSql(client, sqls);
-            sqls = driver.getSql4CreateColumnComment(schema, tableName, fieldName, description);
-            executeSql(client, sqls);
-        }
+        } finally {
+            client.shutdown();
+        }    
     }
 
     private void createIndexes(DbConnection aDbConnection, String aTableName, IndexDefine[] aIndexesDefine) throws Exception {
@@ -525,46 +518,50 @@ public class MetadataSynchronizerTest {
         Set<String> fields = new HashSet<>();
         DbClient client = createClient(aDbConnection);
         assertNotNull(client);
-        SqlDriver driver = client.getDbMetadataCache(null).getConnectionDriver();
-        assertNotNull(driver);
-        String pkField = "id";
-        String schema = aDbConnection.getSchema();
-        // create table
-        String sql = driver.getSql4EmptyTableCreation(schema, aTableName, pkField);
-        executeSql(client, sql);
-        // drop pkey
-        String defaultPlatypusPkName = aTableName + "_pk";
-        sql = driver.getSql4DropPkConstraint(schema, new PrimaryKeySpec(schema, aTableName, pkField, defaultPlatypusPkName));
-        executeSql(client, sql);
-        for (IndexDefine indexDefine : aIndexesDefine) {
-            IndexColumnDefine[] columnsDefines = indexDefine.getColumns();
-            assertNotNull(columnsDefines);
-            DbTableIndexSpec indexSpec = new DbTableIndexSpec();
-            indexSpec.setName(indexDefine.getIndexName());
-            indexSpec.setClustered(indexDefine.isClustered());
-            indexSpec.setHashed(indexDefine.isHashed());
-            indexSpec.setUnique(indexDefine.isUnique());
-            for (IndexColumnDefine columnDefine : columnsDefines) {
-                assertNotNull(columnDefine);
-                String fieldName = columnDefine.getColumnName();
-                assertNotNull(fieldName);
-                // create fields
-                if (!fields.contains(fieldName.toUpperCase())) {
-                    Field field = new Field();
-                    field.setName(fieldName);
-                    field.setSchemaName(schema);
-                    field.setTypeInfo(DataTypeInfo.VARCHAR);
-                    field.setSize(10);
-                    String[] sqls = driver.getSqls4AddingField(schema, aTableName, field);
-                    executeSql(client, sqls);
-                    fields.add(fieldName.toUpperCase());
-                }
-                indexSpec.addColumn(new DbTableIndexColumnSpec(fieldName, columnDefine.isAscending()));
-            }
-            // create index
-            sql = driver.getSql4CreateIndex(schema, aTableName, indexSpec);
+        try {
+            SqlDriver driver = client.getDbMetadataCache(null).getConnectionDriver();
+            assertNotNull(driver);
+            String pkField = "id";
+            String schema = aDbConnection.getSchema();
+            // create table
+            String sql = driver.getSql4EmptyTableCreation(schema, aTableName, pkField);
             executeSql(client, sql);
-        }
+            // drop pkey
+            String defaultPlatypusPkName = aTableName + "_pk";
+            sql = driver.getSql4DropPkConstraint(schema, new PrimaryKeySpec(schema, aTableName, pkField, defaultPlatypusPkName));
+            executeSql(client, sql);
+            for (IndexDefine indexDefine : aIndexesDefine) {
+                IndexColumnDefine[] columnsDefines = indexDefine.getColumns();
+                assertNotNull(columnsDefines);
+                DbTableIndexSpec indexSpec = new DbTableIndexSpec();
+                indexSpec.setName(indexDefine.getIndexName());
+                indexSpec.setClustered(indexDefine.isClustered());
+                indexSpec.setHashed(indexDefine.isHashed());
+                indexSpec.setUnique(indexDefine.isUnique());
+                for (IndexColumnDefine columnDefine : columnsDefines) {
+                    assertNotNull(columnDefine);
+                    String fieldName = columnDefine.getColumnName();
+                    assertNotNull(fieldName);
+                    // create fields
+                    if (!fields.contains(fieldName.toUpperCase())) {
+                        Field field = new Field();
+                        field.setName(fieldName);
+                        field.setSchemaName(schema);
+                        field.setTypeInfo(DataTypeInfo.VARCHAR);
+                        field.setSize(10);
+                        String[] sqls = driver.getSqls4AddingField(schema, aTableName, field);
+                        executeSql(client, sqls);
+                        fields.add(fieldName.toUpperCase());
+                    }
+                    indexSpec.addColumn(new DbTableIndexColumnSpec(fieldName, columnDefine.isAscending()));
+                }
+                // create index
+                sql = driver.getSql4CreateIndex(schema, aTableName, indexSpec);
+                executeSql(client, sql);
+            }
+        } finally {
+            client.shutdown();
+        }    
     }
 
     private void createKeys(DbConnection aDbConnection, Map<String, String[]> aPKeysDefine, FKeyDefine[] aFKeysDefine) throws Exception {
@@ -577,107 +574,110 @@ public class MetadataSynchronizerTest {
         Map<String, List<PrimaryKeySpec>> pkeys = new HashMap<>();
         DbClient client = createClient(aDbConnection);
         assertNotNull(client);
-        SqlDriver driver = client.getDbMetadataCache(null).getConnectionDriver();
-        assertNotNull(driver);
-        String pkField = "id";
-        String schema = aDbConnection.getSchema();
+        try {
+            SqlDriver driver = client.getDbMetadataCache(null).getConnectionDriver();
+            assertNotNull(driver);
+            String pkField = "id";
+            String schema = aDbConnection.getSchema();
 
-        logText(cntTabs, "start create primaryKeys");
-        for (String tableName : aPKeysDefine.keySet()) {
-            String upperTableName = tableName.toUpperCase();
-            //create table
-            String sql = driver.getSql4EmptyTableCreation(schema, tableName, pkField);
-            executeSql(client, sql);
-            // drop pkey
-            String defaultPlatypusPkName = tableName + "_pk";
-            sql = driver.getSql4DropPkConstraint(schema, new PrimaryKeySpec(schema, tableName, pkField, defaultPlatypusPkName));
-            executeSql(client, sql);
-            String[] fieldsDefine = aPKeysDefine.get(tableName);
-            Set<String> tableFields = new HashSet();
-            List<PrimaryKeySpec> pkSpecs = new ArrayList();
-            if (fieldsDefine != null) {
-                for (String fieldName : fieldsDefine) {
-                    // create field
-                    assertNotNull(fieldName);
-                    Field field = new Field();
-                    field.setName(fieldName);
-                    field.setSchemaName(schema);
-                    field.setTypeInfo(DataTypeInfo.VARCHAR);
-                    field.setSize(10);
-                    //field.setNullable(true);
-                    field.setNullable(false);
-                    String[] sqls = driver.getSqls4AddingField(schema, tableName, field);
-                    executeSql(client, sqls);
-                    tableFields.add(fieldName.toUpperCase());
-                    // create spec
-                    pkSpecs.add(new PrimaryKeySpec(schema, tableName, fieldName, defaultPlatypusPkName));
-                }
-            }
-            fieldsNames.put(upperTableName, tableFields);
-            pkeys.put(upperTableName, pkSpecs);
-            // create pk
-            if (pkSpecs.size() > 0) {
-                String[] sqls = driver.getSql4CreatePkConstraint(schema, pkSpecs);
-                executeSql(client, sqls);
-            }
-        }
-        logText(cntTabs, "start create foreignKeys");
-        for (FKeyDefine fkeyDefine : aFKeysDefine) {
-            assertNotNull(fkeyDefine);
-            if (fkeyDefine.getFieldsNames() != null) {
-                String referTableName = fkeyDefine.getReferTableName();
-                assertNotNull(referTableName);
-                List<PrimaryKeySpec> pkSpecs = pkeys.get(referTableName.toUpperCase());
-                assertNotNull(pkSpecs);
-                assertEquals(pkSpecs.size(), fkeyDefine.getFieldsNames().length);
-                List<ForeignKeySpec> fkSpecs = new ArrayList<>();
-                for (int i = 0; i < fkeyDefine.getFieldsNames().length; i++) {
-                    String fieldName = fkeyDefine.getFieldsNames()[i];
-                    String tableName = fkeyDefine.getTableName();
-
-                    ForeignKeySpec fkSpec = new ForeignKeySpec();
-                    fkSpec.setSchema(schema);
-                    fkSpec.setTable(tableName);
-                    fkSpec.setCName(fkeyDefine.getName());
-                    fkSpec.setField(fieldName);
-                    fkSpec.setReferee(pkSpecs.get(i));
-
-                    fkSpec.setFkDeleteRule(fkeyDefine.getDeleteRule());
-                    fkSpec.setFkUpdateRule(fkeyDefine.getUpdateRule());
-                    fkSpec.setFkDeferrable(fkeyDefine.isDeferrable());
-                    // create field
-                    Set<String> tableFields = fieldsNames.get(tableName.toUpperCase());
-                    if (!tableFields.contains(fieldName.toUpperCase())) {
+            logText(cntTabs, "start create primaryKeys");
+            for (String tableName : aPKeysDefine.keySet()) {
+                String upperTableName = tableName.toUpperCase();
+                //create table
+                String sql = driver.getSql4EmptyTableCreation(schema, tableName, pkField);
+                executeSql(client, sql);
+                // drop pkey
+                String defaultPlatypusPkName = tableName + "_pk";
+                sql = driver.getSql4DropPkConstraint(schema, new PrimaryKeySpec(schema, tableName, pkField, defaultPlatypusPkName));
+                executeSql(client, sql);
+                String[] fieldsDefine = aPKeysDefine.get(tableName);
+                Set<String> tableFields = new HashSet();
+                List<PrimaryKeySpec> pkSpecs = new ArrayList();
+                if (fieldsDefine != null) {
+                    for (String fieldName : fieldsDefine) {
+                        // create field
+                        assertNotNull(fieldName);
                         Field field = new Field();
                         field.setName(fieldName);
                         field.setSchemaName(schema);
                         field.setTypeInfo(DataTypeInfo.VARCHAR);
                         field.setSize(10);
+                        //field.setNullable(true);
+                        field.setNullable(false);
                         String[] sqls = driver.getSqls4AddingField(schema, tableName, field);
                         executeSql(client, sqls);
                         tableFields.add(fieldName.toUpperCase());
-                        fieldsNames.put(tableName.toUpperCase(), tableFields);
+                        // create spec
+                        pkSpecs.add(new PrimaryKeySpec(schema, tableName, fieldName, defaultPlatypusPkName));
                     }
-                    fkSpecs.add(fkSpec);
                 }
-                if (fkSpecs.size() > 0) {
-                    // для теста разных методов
-                    if (fkSpecs.size() == 1) {
-                        String sql = driver.getSql4CreateFkConstraint(schema, fkSpecs.get(0));
-                        executeSql(client, sql);
-                    } else {
-                        String sql = driver.getSql4CreateFkConstraint(schema, fkSpecs);
-                        executeSql(client, sql);
+                fieldsNames.put(upperTableName, tableFields);
+                pkeys.put(upperTableName, pkSpecs);
+                // create pk
+                if (pkSpecs.size() > 0) {
+                    String[] sqls = driver.getSql4CreatePkConstraint(schema, pkSpecs);
+                    executeSql(client, sqls);
+                }
+            }
+            logText(cntTabs, "start create foreignKeys");
+            for (FKeyDefine fkeyDefine : aFKeysDefine) {
+                assertNotNull(fkeyDefine);
+                if (fkeyDefine.getFieldsNames() != null) {
+                    String referTableName = fkeyDefine.getReferTableName();
+                    assertNotNull(referTableName);
+                    List<PrimaryKeySpec> pkSpecs = pkeys.get(referTableName.toUpperCase());
+                    assertNotNull(pkSpecs);
+                    assertEquals(pkSpecs.size(), fkeyDefine.getFieldsNames().length);
+                    List<ForeignKeySpec> fkSpecs = new ArrayList<>();
+                    for (int i = 0; i < fkeyDefine.getFieldsNames().length; i++) {
+                        String fieldName = fkeyDefine.getFieldsNames()[i];
+                        String tableName = fkeyDefine.getTableName();
+
+                        ForeignKeySpec fkSpec = new ForeignKeySpec();
+                        fkSpec.setSchema(schema);
+                        fkSpec.setTable(tableName);
+                        fkSpec.setCName(fkeyDefine.getName());
+                        fkSpec.setField(fieldName);
+                        fkSpec.setReferee(pkSpecs.get(i));
+
+                        fkSpec.setFkDeleteRule(fkeyDefine.getDeleteRule());
+                        fkSpec.setFkUpdateRule(fkeyDefine.getUpdateRule());
+                        fkSpec.setFkDeferrable(fkeyDefine.isDeferrable());
+                        // create field
+                        Set<String> tableFields = fieldsNames.get(tableName.toUpperCase());
+                        if (!tableFields.contains(fieldName.toUpperCase())) {
+                            Field field = new Field();
+                            field.setName(fieldName);
+                            field.setSchemaName(schema);
+                            field.setTypeInfo(DataTypeInfo.VARCHAR);
+                            field.setSize(10);
+                            String[] sqls = driver.getSqls4AddingField(schema, tableName, field);
+                            executeSql(client, sqls);
+                            tableFields.add(fieldName.toUpperCase());
+                            fieldsNames.put(tableName.toUpperCase(), tableFields);
+                        }
+                        fkSpecs.add(fkSpec);
+                    }
+                    if (fkSpecs.size() > 0) {
+                        // для теста разных методов
+                        if (fkSpecs.size() == 1) {
+                            String sql = driver.getSql4CreateFkConstraint(schema, fkSpecs.get(0));
+                            executeSql(client, sql);
+                        } else {
+                            String sql = driver.getSql4CreateFkConstraint(schema, fkSpecs);
+                            executeSql(client, sql);
+                        }
                     }
                 }
             }
-        }
+        } finally {
+            client.shutdown();
+        }    
     }
 
     private void checkTables(DbConnection aDbConnection, TableDefine[] aTablesDefine) throws Exception {
         printText(cntTabs, "checkTables: ", " \t", "url=", aDbConnection.getUrl(), " \tschema=", aDbConnection.getSchema(), " \tuser=", aDbConnection.getUser());
         MetadataSynchronizer mds = new MetadataSynchronizer();
-        mds.initDefaultLoggers(null, Level.ALL, false);
         DBStructure databaseStructure = mds.readDBStructure(aDbConnection.getUrl(), aDbConnection.getSchema(), aDbConnection.getUser(), aDbConnection.getPassword());
         checkTables(databaseStructure, aTablesDefine);
     }
@@ -685,7 +685,6 @@ public class MetadataSynchronizerTest {
     private void checkTables(String aXmlFileName, TableDefine[] aTablesDefine) throws Exception {
         printText(cntTabs, "checkTables: ", " \t", "xml=", aXmlFileName);
         MetadataSynchronizer mds = new MetadataSynchronizer();
-        mds.initDefaultLoggers(null, Level.ALL, false);
         DBStructure databaseStructure = mds.readDBStructureFromFile(aXmlFileName);
         checkTables(databaseStructure, aTablesDefine);
     }
@@ -729,7 +728,6 @@ public class MetadataSynchronizerTest {
         assertNotNull(aDbConnection);
         assertNotNull(aTestDefine);
         MetadataSynchronizer mds = new MetadataSynchronizer();
-        mds.initDefaultLoggers(null, Level.ALL, false);
         DBStructure databaseStructure = mds.readDBStructure(aDbConnection.getUrl(), aDbConnection.getSchema(), aDbConnection.getUser(), aDbConnection.getPassword());
         checkFields(databaseStructure, aTestDefine, aDatabase, aTableName, aFieldName, aNullable, aReadonly, aSigned, aPrecision, aDescription, changeSize, changeType);
     }
@@ -737,7 +735,6 @@ public class MetadataSynchronizerTest {
     private void checkFields(String aXmlFileName, DbTestDefine aTestDefine, Database aDatabase, String aTableName, String aFieldName, boolean aNullable, boolean aReadonly, boolean aSigned, int aPrecision, String aDescription, boolean changeSize, boolean changeType) throws Exception {
         printText(cntTabs, "checkFields: ", " \t", "xml=", aXmlFileName);
         MetadataSynchronizer mds = new MetadataSynchronizer();
-        mds.initDefaultLoggers(null, Level.ALL, false);
         DBStructure databaseStructure = mds.readDBStructureFromFile(aXmlFileName);
         checkFields(databaseStructure, aTestDefine, aDatabase, aTableName, aFieldName, aNullable, aReadonly, aSigned, aPrecision, aDescription, changeSize, changeType);
     }
@@ -817,7 +814,6 @@ public class MetadataSynchronizerTest {
         assertNotNull(aTableName);
         assertNotNull(aIndexesDefine);
         MetadataSynchronizer mds = new MetadataSynchronizer();
-        mds.initDefaultLoggers(null, Level.ALL, false);
         DBStructure databaseStructure = mds.readDBStructure(aDbConnection.getUrl(), aDbConnection.getSchema(), aDbConnection.getUser(), aDbConnection.getPassword());
         checkIndexes(databaseStructure, aTableName, aIndexesDefine, checkClustered, checkHashed, checkAscending);
     }
@@ -827,7 +823,6 @@ public class MetadataSynchronizerTest {
         assertNotNull(aTableName);
         assertNotNull(aIndexesDefine);
         MetadataSynchronizer mds = new MetadataSynchronizer();
-        mds.initDefaultLoggers(null, Level.ALL, false);
         DBStructure databaseStructure = mds.readDBStructureFromFile(aXmlFileName);
         checkIndexes(databaseStructure, aTableName, aIndexesDefine, checkClustered, checkHashed, checkAscending);
     }
@@ -883,7 +878,6 @@ public class MetadataSynchronizerTest {
         assertNotNull(aPKeysDefine);
         assertNotNull(aFKeysDefine);
         MetadataSynchronizer mds = new MetadataSynchronizer();
-        mds.initDefaultLoggers(null, Level.ALL, false);
         DBStructure databaseStructure = mds.readDBStructure(aDbConnection.getUrl(), aDbConnection.getSchema(), aDbConnection.getUser(), aDbConnection.getPassword());
         assertNotNull(databaseStructure);
         checkKeys(databaseStructure, aTestDefine, aDatabase, aPKeysDefine, aFKeysDefine);
@@ -894,7 +888,6 @@ public class MetadataSynchronizerTest {
         assertNotNull(aPKeysDefine);
         assertNotNull(aFKeysDefine);
         MetadataSynchronizer mds = new MetadataSynchronizer();
-        mds.initDefaultLoggers(null, Level.ALL, false);
         DBStructure databaseStructure = mds.readDBStructureFromFile(aXmlFileName);
         assertNotNull(databaseStructure);
         checkKeys(databaseStructure, aTestDefine, aDatabase, aPKeysDefine, aFKeysDefine);
@@ -1021,16 +1014,13 @@ public class MetadataSynchronizerTest {
     }
 
     private void clearSchema(DbConnection aDbConnection) throws Exception {
-        MetadataSynchronizer mds = null;
-        DbClient client = null;
+        MetadataSynchronizer mds = new MetadataSynchronizer();
+        DbClient client = createClient(aDbConnection);
         try {
-            mds = new MetadataSynchronizer();
-            mds.initDefaultLoggers(null, Level.ALL, false);
             DBStructure databaseStructure = mds.readDBStructure(aDbConnection.getUrl(), aDbConnection.getSchema(), aDbConnection.getUser(), aDbConnection.getPassword());
             assertNotNull(databaseStructure);
             Map<String, TableStructure> dbStructure = databaseStructure.getTablesStructure();
             assertNotNull(dbStructure);
-            client = createClient(aDbConnection);
             SqlDriver driver = client.getDbMetadataCache(null).getConnectionDriver();
 
             for (String upperTblName : dbStructure.keySet()) {
@@ -1059,45 +1049,40 @@ public class MetadataSynchronizerTest {
             assertNotNull(dbStructure2);
             assertEquals(dbStructure2.size(), 0);
         } finally {
-            if (client != null) {
-                client.shutdown();
-            }
+            client.shutdown();
         }
     }
 
-    private void synchronizeDb(DbConnection aSourceConnection, DbConnection aDestinationConnection, boolean aNoDropTables, String aTablesList) throws Exception {
+    private void synchronizeDb(String aLogName, DbConnection aSourceConnection, DbConnection aDestinationConnection, boolean aNoDropTables, String aTablesList) throws Exception {
         printText(cntTabs, "synchronizeDb \tnoDropTables=", String.valueOf(aNoDropTables).toUpperCase(), " \ttables=", aTablesList);
         assertNotNull(aSourceConnection);
         assertNotNull(aDestinationConnection);
 
-        MetadataSynchronizer mds = null;
+        String loggerName = MetadataSynchronizerTest.class.getName() + "_" + System.currentTimeMillis();
+        Logger sqlLog = MetadataSynchronizer.initLogger(loggerName + "_sql", Level.ALL, false);
+        Logger errorLog = MetadataSynchronizer.initLogger(loggerName + "_error", Level.ALL, false);
+        String logEncoding = "UTF-8";
         try {
-            mds = new MetadataSynchronizer();
-            mds.initDefaultLoggers(null, Level.ALL, false);
-
+            if (aLogName != null) {
+                sqlLog.addHandler(MetadataSynchronizer.createFileHandler(aLogName + ".log", logEncoding, new LogFormatter()));
+                errorLog.addHandler(MetadataSynchronizer.createFileHandler(aLogName + "_err.log", logEncoding, new LogFormatter()));
+            }    
+            MetadataSynchronizer mds = new MetadataSynchronizer(null, sqlLog, errorLog, null);
+        
             mds.setSourceDatabase(aSourceConnection.getUrl(), aSourceConnection.getSchema(), aSourceConnection.getUser(), aSourceConnection.getPassword());
             mds.setDestinationDatabase(aDestinationConnection.getUrl(), aDestinationConnection.getSchema(), aDestinationConnection.getUser(), aDestinationConnection.getPassword());
             mds.setNoDropTables(aNoDropTables);
             mds.parseTablesList(aTablesList, ",");
             mds.setFileXml(XML_NAME);
-            //!!!!!!!!!!!!   
-            if (mdsLogName != null && sqlLogName != null) {
-                mds.initSqlLogger(mdsLogName + "_" + sqlLogName + ".log", null, Level.ALL, false, new LogFormatter());
-                mds.initErrorLogger(mdsLogName + "_" + sqlLogName + "_err.log", null, Level.ALL, false, new LogFormatter());
-            }
-
             mds.run();
         } finally {
-            if (mds != null && mdsLogName != null && sqlLogName != null) {
-                mds.clearSqlLogger();
-                mds.clearErrorLogger();
-            }
-
+            MetadataSynchronizer.closeLogHandlers(sqlLog);
+            MetadataSynchronizer.closeLogHandlers(errorLog);
         }
     }
 
-    private void synchronizeDb(DbConnection aSourceConnection, DbConnection aDestinationConnection) throws Exception {
-        synchronizeDb(aSourceConnection, aDestinationConnection, false, null);
+    private void synchronizeDb(String aLogName, DbConnection aSourceConnection, DbConnection aDestinationConnection) throws Exception {
+        synchronizeDb(aLogName, aSourceConnection, aDestinationConnection, false, null);
     }
 
     private void executeSql(DbClient aClient, String aSql) throws Exception {
@@ -1108,7 +1093,12 @@ public class MetadataSynchronizerTest {
         assertFalse(aSql.isEmpty());
         SqlCompiledQuery compiledSql = new SqlCompiledQuery(aClient, null, aSql);
         compiledSql.enqueueUpdate();
-        aClient.commit(null);
+        try {
+            aClient.commit(null);
+        } catch (Exception e) {
+            aClient.rollback(null);
+            throw e;
+        }
     }
 
     private void executeSql(DbClient aClient, String[] aSqls) throws Exception {
@@ -1128,9 +1118,7 @@ public class MetadataSynchronizerTest {
             }
         }
         System.out.println(sb.toString());
-        if (logger != null) {
-            Logger.getLogger(MetadataSynchronizerTest.class.getName()).log(Level.INFO, sb.toString());
-        }
+        Logger.getLogger(MetadataSynchronizerTest.class.getName()).log(Level.INFO, sb.toString());
     }
 
     private void logText(int countTabs, String... texts) {
@@ -1143,8 +1131,6 @@ public class MetadataSynchronizerTest {
                 sb.append(text);
             }
         }
-        if (logger != null) {
-            Logger.getLogger(MetadataSynchronizerTest.class.getName()).log(Level.INFO, sb.toString());
-        }
+        Logger.getLogger(MetadataSynchronizerTest.class.getName()).log(Level.INFO, sb.toString());
     }
 }

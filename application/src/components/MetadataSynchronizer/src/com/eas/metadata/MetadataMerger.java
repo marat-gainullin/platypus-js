@@ -41,6 +41,8 @@ public class MetadataMerger {
     private SqlDriver driver;
     private String dSchema;
     private String sqlCommandEndChars = ";";
+    private String sqlCommentChars = "-- ";
+    private Logger systemLogger;
     private Logger sqlLogger;
     private Logger errorLogger;
     private Map<String, List<ForeignKeySpec>> pKeysMap = new HashMap<>(); // relation for pkey name -> fkey in destination (!! tableName->fkeys)
@@ -63,7 +65,7 @@ public class MetadataMerger {
      * @param aNoDropTables if true then no execute drop table
      * @param aListTables list tables for work
      */
-    public MetadataMerger(DbClient aClient, DBStructure srcMetadata, DBStructure destMetadata, boolean aNoExecuteSQL, boolean aNoDropTables, Set<String> aListTables) throws Exception {
+    public MetadataMerger(DbClient aClient, DBStructure srcMetadata, DBStructure destMetadata, boolean aNoExecuteSQL, boolean aNoDropTables, Set<String> aListTables, Logger aSystemLogger, Logger aSqlLogger, Logger aErrorLogger, boolean createSqlsList) throws Exception {
         client = aClient;
         assert client != null;
         if (srcMetadata != null) {
@@ -87,6 +89,14 @@ public class MetadataMerger {
         mdCache = client.getDbMetadataCache(null);
         driver = mdCache.getConnectionDriver();
         dSchema = mdCache.getConnectionSchema();
+        
+        systemLogger = aSystemLogger;
+        sqlLogger = aSqlLogger;
+        errorLogger = aErrorLogger;
+        
+        if (createSqlsList) {
+            sqlsList = new ArrayList<>();
+        }
     }
 
     /**
@@ -98,7 +108,7 @@ public class MetadataMerger {
 
         // step 1 - prepare all data
         // get relation for pkey -> fkey, table -> field -> index
-        Logger.getLogger(MetadataMerger.class.getName()).log(Level.INFO, "Merge metadata: step 1 of 10 - prepare");
+        log(Level.INFO, "Merge metadata: step 1 of 10 - prepare");
         for (String tableNameUpper : destMD.keySet()) {
             TableStructure dTableStructure = destMD.get(tableNameUpper);
             assert dTableStructure != null;
@@ -146,7 +156,7 @@ public class MetadataMerger {
 
         // step 2 - drop all not existed tables
         if (noDropTables == false) {
-            Logger.getLogger(MetadataMerger.class.getName()).log(Level.INFO, "Merge metadata: step 2 of 10 - drop all not existed tables");
+            log(Level.INFO, "Merge metadata: step 2 of 10 - drop all not existed tables");
             for (String tableNameUpper : destMD.keySet()) {
                 if (listTables.isEmpty() || listTables.contains(tableNameUpper)) {
                     if (!srcMD.containsKey(tableNameUpper)) {
@@ -182,7 +192,7 @@ public class MetadataMerger {
             }
         }
         // step 3 - create new table, add new fields, prepare drop fields
-        Logger.getLogger(MetadataMerger.class.getName()).log(Level.INFO, "Merge metadata: step 3 of 10 - create new table and fields");
+        log(Level.INFO, "Merge metadata: step 3 of 10 - create new table and fields");
         for (String tableNameUpper : srcMD.keySet()) {
             if (listTables.isEmpty() || listTables.contains(tableNameUpper)) {
                 int cntErrors = 0;
@@ -317,7 +327,7 @@ public class MetadataMerger {
         }
 
         // step 4 - drop foreign keys
-        Logger.getLogger(MetadataMerger.class.getName()).log(Level.INFO, "Merge metadata: step 4 of 10 - drop foreign keys");
+        log(Level.INFO, "Merge metadata: step 4 of 10 - drop foreign keys");
         for (String tableNameUpper : srcMD.keySet()) {
             if (listTables.isEmpty() || listTables.contains(tableNameUpper)) {
                 int cntErrors = 0;
@@ -382,7 +392,7 @@ public class MetadataMerger {
         Map<String, Set<String>> newIndexState = readIndexNames(dSchema, tableNames);
 
         // step 5 - drop  indexes
-        Logger.getLogger(MetadataMerger.class.getName()).log(Level.INFO, "Merge metadata: step 5 of 10 - drop indexes");
+        log(Level.INFO, "Merge metadata: step 5 of 10 - drop indexes");
         for (String tableNameUpper : newIndexState.keySet()) {
             int cntErrors = 0;
             boolean processed = false;
@@ -423,7 +433,7 @@ public class MetadataMerger {
         }
 
         // step 6 - drop  fields
-        Logger.getLogger(MetadataMerger.class.getName()).log(Level.INFO, "Merge metadata: step 6 of 10 - drop columns");
+        log(Level.INFO, "Merge metadata: step 6 of 10 - drop columns");
         for (String tableNameUpper : droppedColumnsMap.keySet()) {
             int cntErrors = 0;
             TableStructure dTableStructure = destMD.get(tableNameUpper);
@@ -448,7 +458,7 @@ public class MetadataMerger {
         }
 
         // step 7 - modify columns, create and modify primary key
-        Logger.getLogger(MetadataMerger.class.getName()).log(Level.INFO, "Merge metadata: step 7 of 10 - modify columns");
+        log(Level.INFO, "Merge metadata: step 7 of 10 - modify columns");
         for (String tableNameUpper : srcMD.keySet()) {
             if (listTables.isEmpty() || listTables.contains(tableNameUpper)) {
                 int cntErrors = 0;
@@ -486,7 +496,7 @@ public class MetadataMerger {
                             sField.setPk(false);
                             sField.setFk(null);
                             String[] sqls4ModifyingField = driver.getSqls4ModifyingField(dSchema, dTableName, dField, sField);
-                            cntErrors += executeSQL(sqls4ModifyingField, "step 7.3 - modify columns ");
+                            cntErrors += executeSQL(sqls4ModifyingField, "step 7.3 - modify columns");
 
                             //!!!!!!!!!!!!!!!!!!!! только в MySQL !!!!!!!!!!!!!!!!!!!!
                             //!!!!!!!!!!!!!!!!! пока нет default value !!!!!!!!!!!!!!!
@@ -525,7 +535,7 @@ public class MetadataMerger {
         }
 
         // step 8 - create indexes and fkeys
-        Logger.getLogger(MetadataMerger.class.getName()).log(Level.INFO, "Merge metadata: step 8 of 10 - create indexes and foreign keys");
+        log(Level.INFO, "Merge metadata: step 8 of 10 - create indexes and foreign keys");
         for (String tableNameUpper : srcMD.keySet()) {
             if (listTables.isEmpty() || listTables.contains(tableNameUpper)) {
                 int cntErrors = 0;
@@ -613,7 +623,7 @@ public class MetadataMerger {
             }
         }
         // step 9 - set descriptions on tables and fields
-        Logger.getLogger(MetadataMerger.class.getName()).log(Level.INFO, "Merge metadata: step 9 of 10 - set descriptions on tables and columns");
+        log(Level.INFO, "Merge metadata: step 9 of 10 - set descriptions on tables and columns");
         for (String tableNameUpper : srcMD.keySet()) {
             if (listTables.isEmpty() || listTables.contains(tableNameUpper)) {
                 int cntErrors = 0;
@@ -642,7 +652,7 @@ public class MetadataMerger {
                 if (!sTableDescription.equals(dTableDescription)) {
                     // set description
                     String sql4CreateTableComment = driver.getSql4CreateTableComment(dSchema, dTableName, sTableDescription);
-                    cntErrors += executeSQL(sql4CreateTableComment, "step 9.1 - set table description ");
+                    cntErrors += executeSQL(sql4CreateTableComment, "step 9.1 - set table description");
                     processed = true;
                 }
                 for (int i = 1; i <= sFields.getFieldsCount(); i++) {
@@ -679,7 +689,7 @@ public class MetadataMerger {
             }
         }
         // last step  - restore dropped fkeys
-        Logger.getLogger(MetadataMerger.class.getName()).log(Level.INFO, "Merge metadata: step 10 of 10 - restore dropped fkeys");
+        log(Level.INFO, "Merge metadata: step 10 of 10 - restore dropped fkeys");
         if (!listTables.isEmpty()) {
             for (String tableNameUpper : destMD.keySet()) {
                 if (!listTables.contains(tableNameUpper)) {
@@ -704,7 +714,7 @@ public class MetadataMerger {
                 }
             }
         }
-        Logger.getLogger(MetadataMerger.class.getName()).log(Level.INFO, "Merge metadata finished");
+        log(Level.INFO, "Merge metadata finished");
     }
 
     /**
@@ -777,21 +787,23 @@ public class MetadataMerger {
                 }
                 if (!noExecuteSQL) {
                     q.enqueueUpdate();
-                    client.commit(null);
+                    try {
+                        client.commit(null);
+                    } catch (Exception e) {
+                        client.rollback(null);
+                        throw e;
+                    }
                 }
                 if (sqlLogger != null) {
-                    sqlLogger.log(Level.CONFIG, new StringBuilder().append(numSql++).append(": ").toString());
-                    sqlLogger.log(Level.FINE, new StringBuilder().append("(").append(aName).append(")").toString());
+                    sqlLogger.log(Level.CONFIG, new StringBuilder().append(sqlCommentChars).append(numSql++).append(": ").toString());
+                    sqlLogger.log(Level.FINE, new StringBuilder().append(sqlCommentChars).append("(").append(aName).append(")").toString());
                     sqlLogger.log(Level.INFO, new StringBuilder().append(aSql).append(sqlCommandEndChars).toString());
                 }
                 return 0;
             } catch (Exception ex) {
-                if (!noExecuteSQL) {
-                    client.rollback(null);
-                }
                 if (errorLogger != null) {
-                    errorLogger.log(Level.CONFIG, new StringBuilder().append(numSql++).append(": ").toString());
-                    errorLogger.log(Level.FINE, new StringBuilder().append("(").append(aName).append(")").toString());
+                    errorLogger.log(Level.CONFIG, new StringBuilder().append(sqlCommentChars).append(numSql++).append(": ").toString());
+                    errorLogger.log(Level.FINE, new StringBuilder().append(sqlCommentChars).append("(").append(aName).append(")").toString());
                     errorLogger.log(Level.INFO, new StringBuilder().append(aSql).append(sqlCommandEndChars).toString());
                     errorLogger.log(Level.SEVERE, new StringBuilder().append("Exception=").append(ex.getMessage()).append("\n").toString());
                 }
@@ -822,35 +834,7 @@ public class MetadataMerger {
 
     private void printLog(String aTableName, int cntErrors) {
         String s = String.format(" %-50s \t: %s", aTableName, (cntErrors == 0 ? "Ok" : String.format("ERROR ( Total = %d)", cntErrors)));
-        Logger.getLogger(MetadataMerger.class.getName()).log(Level.INFO, s);
-    }
-
-    /**
-     * @return the loggerSQL
-     */
-    public Logger getSqlLogger() {
-        return sqlLogger;
-    }
-
-    /**
-     * @param aLogger the loggerSql to set
-     */
-    public void setSqlLogger(Logger aLogger) {
-        sqlLogger = aLogger;
-    }
-
-    /**
-     * @return the loggerERROR
-     */
-    public Logger getErrorLogger() {
-        return errorLogger;
-    }
-
-    /**
-     * @param aLogger the loggerError to set
-     */
-    public void setErrorLogger(Logger aLogger) {
-        errorLogger = aLogger;
+        log(Level.INFO, s);
     }
 
     private Map<String, Set<String>> readIndexNames(String aSchema, Set<String> aTables) {
@@ -895,7 +879,7 @@ public class MetadataMerger {
                     } while (rowset.next());
                 }
             } catch (Exception ex) {
-                Logger.getLogger(MetadataMerger.class.getName()).log(Level.SEVERE, null, ex);
+                log(Level.SEVERE, null, ex);
             }
         }
         return mapIndexes;
@@ -908,10 +892,15 @@ public class MetadataMerger {
         return sqlsList;
     }
 
-    /**
-     * @param sqlsList the sqlsList to set
-     */
-    public void setSqlsList(List<String> aSqlsList) {
-        sqlsList = aSqlsList;
+    private void log (Level aLogLevel, String aMessage) {
+        if (systemLogger != null) {
+            systemLogger.log(aLogLevel, aMessage);
+        }
+    }
+    
+    private void log (Level aLogLevel, String aMessage, Throwable aThrown) {
+        if (systemLogger != null) {
+            systemLogger.log(aLogLevel, aMessage, aThrown);
+        }
     }
 }

@@ -26,7 +26,6 @@ import java.awt.CardLayout;
 import java.awt.EventQueue;
 import java.awt.LayoutManager;
 import java.awt.Rectangle;
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
@@ -223,16 +222,16 @@ public class MetadataCompareForm extends javax.swing.JFrame {
                 btnSaveSql.setEnabled(true);
             }
         });
-        ImageIcon equalsIcon = new ImageIcon(this.getClass().getResource("/icons/equals.png"));
-        ImageIcon sameIcon = new ImageIcon(this.getClass().getResource("/icons/same.png"));
-        ImageIcon notSameIcon = new ImageIcon(this.getClass().getResource("/icons/notsame.png"));
-        ImageIcon notExistsIcon = new ImageIcon(this.getClass().getResource("/icons/notexists.png"));
-        
+        ImageIcon equalsIcon = new ImageIcon(MetadataCompareForm.class.getResource("/icons/equals.png"));
+        ImageIcon sameIcon = new ImageIcon(MetadataCompareForm.class.getResource("/icons/same.png"));
+        ImageIcon notSameIcon = new ImageIcon(MetadataCompareForm.class.getResource("/icons/notsame.png"));
+        ImageIcon notExistsIcon = new ImageIcon(MetadataCompareForm.class.getResource("/icons/notexists.png"));
+
         btnExpandEquals.setIcon(equalsIcon);
         btnExpandSame.setIcon(sameIcon);
         btnExpandNotSame.setIcon(notSameIcon);
         btnExpandNotExists.setIcon(notExistsIcon);
-        
+
         MetadataTreeCellRenderer renderer = new MetadataTreeCellRenderer();
         renderer.setEqualsIcon(equalsIcon);
         renderer.setSameIcon(sameIcon);
@@ -811,15 +810,14 @@ public class MetadataCompareForm extends javax.swing.JFrame {
             new Thread() {
                 @Override
                 public void run() {
-                    MetadataSynchronizer mds = null;
+                    String loggerName = MetadataCompareForm.class.getName() + "_" + System.currentTimeMillis();
+                    Logger sysLog = MetadataSynchronizer.initLogger(loggerName + "_system", Level.INFO, true);
                     try {
-                        mds = new MetadataSynchronizer();
-                        mds.setTablesList(tablesNames);
-
+                        sysLog.addHandler(new TextAreaHandler(txtLog));
+                        final MetadataSynchronizer mds = new MetadataSynchronizer(true,sysLog,null,null,null);
                         assert destUrl != null;
                         assert !destUrl.isEmpty();
                         mds.setDestinationDatabase(destUrl, destSchema, destUser, destPassword);
-
                         if (srcUrl != null && !srcUrl.isEmpty()) {
                             mds.setSourceDatabase(srcUrl, srcSchema, srcUser, srcPassword);
                         } else {
@@ -828,18 +826,15 @@ public class MetadataCompareForm extends javax.swing.JFrame {
 
                         mds.setNoDropTables(true);
                         mds.setNoExecute(true);
-                        mds.initDefaultLoggers(new TextAreaHandler(txtLog), Level.INFO, true);
-                        final List<String> sqls = new ArrayList<>();
-                        mds.setSqlsList(sqls);
+                        mds.setTablesList(tablesNames);
                         mds.run();
-
                         EventQueue.invokeLater(new Runnable() {
                             @Override
                             public void run() {
                                 TableModel model = tblSqls.getModel();
                                 if (model != null && model instanceof SqlsTableModel) {
                                     SqlsTableModel sqlsModel = (SqlsTableModel) model;
-                                    sqlsModel.setSqls(sqls);
+                                    sqlsModel.setSqls(mds.getSqlsList());
                                 }
                                 btnSaveSql.setEnabled(false);
                                 tblSqls.getColumnModel().getColumn(0).setMaxWidth(100);
@@ -849,14 +844,10 @@ public class MetadataCompareForm extends javax.swing.JFrame {
                             }
                         });
                     } catch (Exception ex) {
-                        Logger.getLogger(MetadataSynchronizer.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(MetadataCompareForm.class.getName()).log(Level.SEVERE, null, ex);
+                        txtLog.append("\nError:" + ex.getMessage());
                     } finally {
-                        if (mds != null) {
-                            mds.clearSqlLogger();
-                            mds.clearErrorLogger();
-                            mds.clearInfoLogger();
-                            mds.clearDefaultLoggers();
-                        }
+                        MetadataSynchronizer.closeLogHandlers(sysLog);
                     }
                 }
             }.start();
@@ -1077,20 +1068,24 @@ public class MetadataCompareForm extends javax.swing.JFrame {
         assert model instanceof SqlsTableModel;
         final SqlsTableModel sqlModel = (SqlsTableModel) model;
         final int size = sqlModel.getRowCount();
+        btnExecuteSqls.setEnabled(false);
         new Thread() {
             @Override
             public void run() {
-                DbClient client = null;
                 try {
-                    client = createClient();
-                    if (client != null) {
-                        btnExecuteSqls.setEnabled(false);
+                    DbClient client = createClient();
+                    try {
                         for (int i = 0; i < size; i++) {
                             if (sqlModel.isChoiced(i)) {
                                 try {
                                     SqlCompiledQuery query = new SqlCompiledQuery(client, null, sqlModel.getSql(i));
                                     query.enqueueUpdate();
-                                    client.commit(null);
+                                    try {
+                                        client.commit(null);
+                                    } catch (Exception ex) {
+                                        client.rollback(null);
+                                        throw ex;
+                                    }
                                     sqlModel.setChoice(i, false);
                                     sqlModel.setResult(i, "Ok");
                                     final int row = i;
@@ -1104,17 +1099,17 @@ public class MetadataCompareForm extends javax.swing.JFrame {
                                     });
                                 } catch (Exception ex) {
                                     sqlModel.setResult(i, "Error: " + ex.getMessage());
-                                    client.rollback(null);
                                     tblSqls.repaint();
                                     break;
                                 }
                             }
                         }
-                    }
-                } finally {
-                    if (client != null) {
+                    } finally {
                         client.shutdown();
                     }
+                } catch (Exception ex) {
+                    Logger.getLogger(MetadataCompareForm.class.getName()).log(Level.SEVERE, null, ex);
+                } finally {
                     EventQueue.invokeLater(new Runnable() {
                         @Override
                         public void run() {
@@ -1213,13 +1208,12 @@ public class MetadataCompareForm extends javax.swing.JFrame {
         assert model != null;
         assert model instanceof SqlsTableModel;
         SqlsTableModel sqlModel = (SqlsTableModel) model;
-        for (int i = 0; i < sqlModel.getRowCount();i++) {
+        for (int i = 0; i < sqlModel.getRowCount(); i++) {
             sqlModel.setChoice(i, !sqlModel.isChoiced(i));
         }
         sqlModel.setAllResults("");
         tblSqls.repaint();
     }//GEN-LAST:event_btnInvertChoiceSqlsActionPerformed
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAllChoiceSqls;
     private javax.swing.JButton btnAllClearSqls;
@@ -1323,11 +1317,12 @@ public class MetadataCompareForm extends javax.swing.JFrame {
         new Thread() {
             @Override
             public void run() {
-                MetadataSynchronizer mds = null;
                 final FilteredTablesNode root = new FilteredTablesNode();
+                String loggerName = MetadataCompareForm.class.getName() + "_" + System.currentTimeMillis();
+                Logger sysLog = MetadataSynchronizer.initLogger(loggerName + "_system", Level.INFO, true);
                 try {
-                    mds = new MetadataSynchronizer();
-                    mds.initDefaultLoggers(new TextAreaHandler(txtLog), Level.INFO, true);
+                    sysLog.addHandler(new TextAreaHandler(txtLog));
+                    final MetadataSynchronizer mds = new MetadataSynchronizer(true,sysLog,null,null,null);
                     if (srcDBStructure == null) {
                         if (srcUrl != null) {
                             srcDBStructure = mds.readDBStructure(srcUrl, srcSchema, srcUser, srcPassword);
@@ -1358,8 +1353,8 @@ public class MetadataCompareForm extends javax.swing.JFrame {
                     String destDialect = destDBStructure.getDatabaseDialect();
                     boolean oneDialect = (srcDialect != null && srcDialect.equalsIgnoreCase(destDialect));
                     SortedSet<String> tablesNames = new TreeSet();
-                    fillUpperKeys(tablesNames,srcTables);
-                    fillUpperKeys(tablesNames,destTables);
+                    fillUpperKeys(tablesNames, srcTables);
+                    fillUpperKeys(tablesNames, destTables);
                     for (String tableName : tablesNames) {
                         TableStructure srcTable = srcTables.get(tableName);
                         TableStructure destTable = destTables.get(tableName);
@@ -1368,13 +1363,11 @@ public class MetadataCompareForm extends javax.swing.JFrame {
                         root.add(tableNode);
                     }
                 } catch (Exception ex) {
-                    Logger.getLogger(MetadataSynchronizer.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(MetadataCompareForm.class.getName()).log(Level.SEVERE, null, ex);
                     txtLog.append("\nError:" + ex.getMessage());
                 } finally {
-                    if (mds != null) {
-                        mds.clearDefaultLoggers();
-                    }
-                    
+                    MetadataSynchronizer.closeLogHandlers(sysLog);
+
                     EventQueue.invokeLater(new Runnable() {
                         @Override
                         public void run() {
@@ -1390,7 +1383,6 @@ public class MetadataCompareForm extends javax.swing.JFrame {
                     });
                 }
             }
-
         }.start();
     }
 
@@ -1399,9 +1391,10 @@ public class MetadataCompareForm extends javax.swing.JFrame {
         if (aMap != null) {
             for (String name : aMap.keySet()) {
                 aNames.add(name.toUpperCase());
-            }            
+            }
         }
     }
+
     private DefaultMutableTreeNode createTableStructureNode(String tableName, TableStructure srcStructure, TableStructure destStructure, boolean oneDialect) {
         String srcTableName = null;
         Fields srcFields = null;
@@ -2335,13 +2328,15 @@ public class MetadataCompareForm extends javax.swing.JFrame {
         cardLayout.show(pnInfo, aCardName);
     }
 
-    private DbClient createClient() {
+    private DbClient createClient() throws Exception {
         try {
             EasSettings settings = EasSettings.createInstance(destUrl);
             if (settings instanceof DbConnectionSettings) {
                 settings.getInfo().put(ClientConstants.DB_CONNECTION_USER_PROP_NAME, destUser);
                 settings.getInfo().put(ClientConstants.DB_CONNECTION_PASSWORD_PROP_NAME, destPassword);
-                settings.getInfo().put(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME, destSchema);
+                if (destSchema != null) {
+                    settings.getInfo().put(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME, destSchema);
+                }
                 ((DbConnectionSettings) settings).setInitSchema(false);
             }
             settings.setUrl(destUrl);
@@ -2350,7 +2345,7 @@ public class MetadataCompareForm extends javax.swing.JFrame {
             return (DbClient) lclient;
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, ex.getMessage(), errorConnectionTitle, JOptionPane.ERROR_MESSAGE);
-            return null;
+            throw ex;
         }
     }
 }

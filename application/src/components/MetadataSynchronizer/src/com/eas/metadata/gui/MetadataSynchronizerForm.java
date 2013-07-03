@@ -80,12 +80,11 @@ public class MetadataSynchronizerForm extends javax.swing.JFrame {
         fldLogLevel.addItem(Level.WARNING);
         fldLogLevel.addItem(Level.SEVERE);
         fldLogLevel.addItem(Level.OFF);
-
         fldLogLevel.setSelectedItem(Level.INFO);
 
         Rectangle screen = java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
-        this.setSize(screen.width, screen.height);
-        this.jSplitPane1.setDividerLocation(0.5d);
+        setSize(screen.width, screen.height);
+        jSplitPane1.setDividerLocation(0.5d);
     }
 
     private void loadDatabasesSettings(String aFileName, Map<String, String[]> aDatabasesSettings, JComboBox aDatabasesNames) {
@@ -725,19 +724,31 @@ public class MetadataSynchronizerForm extends javax.swing.JFrame {
             final String tables = fldTables.getText();
             final String sqlLogFile = fldSqlLog.getText();
             final String errorLogFile = fldErrorLog.getText();
+            final String logEncoding = "UTF-8";
             new Thread() {
                 @Override
                 public void run() {
-                    MetadataSynchronizer mds = null;
-                    try {
-                        mds = new MetadataSynchronizer();
-                        mds.initDefaultLoggers(new TextAreaHandler(txtLog), level, true);
+                    String loggerName = MetadataSynchronizerForm.class.getName() + "_" + System.currentTimeMillis();
+                    Logger sysLog = MetadataSynchronizer.initLogger(loggerName + "_system", level, true);
+                    Logger sqlLog = MetadataSynchronizer.initLogger(loggerName + "_sql", level, false);
+                    Logger errorLog = MetadataSynchronizer.initLogger(loggerName + "_error", level, false);
 
+                    try {
+                        sysLog.addHandler(new TextAreaHandler(txtLog));
+                        sqlLog.addHandler(new TextAreaHandler(txtSqlsLog));
+                        errorLog.addHandler(new TextAreaHandler(txtErrorsLog));
+                        if (!sqlLogFile.isEmpty()) {
+                            sqlLog.addHandler(MetadataSynchronizer.createFileHandler(sqlLogFile, logEncoding, new LogFormatter()));
+                        }
+                        if (!errorLogFile.isEmpty()) {
+                            errorLog.addHandler(MetadataSynchronizer.createFileHandler(errorLogFile, logEncoding, new LogFormatter()));
+                        }    
+                        MetadataSynchronizer mds = new MetadataSynchronizer(sysLog, sqlLog, errorLog, null);
                         if (selectedSrcDest) {
-                            mds.setSourceDatabase(srcUrl, srcSchema, srcUser, srcPassword );
+                            mds.setSourceDatabase(srcUrl, srcSchema, srcUser, srcPassword);
                             mds.setDestinationDatabase(destUrl, destSchema, destUser, destPassword);
                         } else if (selectedSrcXml) {
-                            mds.setSourceDatabase(srcUrl, srcSchema, srcUser, srcPassword );
+                            mds.setSourceDatabase(srcUrl, srcSchema, srcUser, srcPassword);
                             mds.setFileXml(xml);
                         } else {
                             mds.setFileXml(xml);
@@ -745,27 +756,14 @@ public class MetadataSynchronizerForm extends javax.swing.JFrame {
                         }
                         mds.setNoExecute(selectedNoExecute);
                         mds.setNoDropTables(selectedNoDrop);
-
                         mds.parseTablesList(tables, ",");
-
-                        mds.initSqlLogger(new TextAreaHandler(txtSqlsLog), level, false, null);
-                        if (!sqlLogFile.isEmpty()) {
-                            mds.initSqlLogger(sqlLogFile, null, level, false, new LogFormatter());
-                        }
-                        mds.initErrorLogger(new TextAreaHandler(txtErrorsLog), level, false, null);
-                        if (!errorLogFile.isEmpty()) {
-                            mds.initSqlLogger(errorLogFile, null, level, false, new LogFormatter());
-                        }
                         mds.run();
                     } catch (Exception ex) {
-                        Logger.getLogger(MetadataSynchronizer.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(MetadataSynchronizerForm.class.getName()).log(Level.SEVERE, null, ex);
                     } finally {
-                        if (mds != null) {
-                            mds.clearSqlLogger();
-                            mds.clearErrorLogger();
-                            mds.clearInfoLogger();
-                            mds.clearDefaultLoggers();
-                        }
+                        MetadataSynchronizer.closeLogHandlers(sqlLog);
+                        MetadataSynchronizer.closeLogHandlers(errorLog);
+                        MetadataSynchronizer.closeLogHandlers(sysLog);
                         EventQueue.invokeLater(new Runnable() {
                             @Override
                             public void run() {
@@ -797,10 +795,10 @@ public class MetadataSynchronizerForm extends javax.swing.JFrame {
                 public void run() {
                     MetadataCompareForm compareForm = new MetadataCompareForm();
                     if (selectedSrcDest) {
-                        compareForm.setSourceDatabase(srcUrl, srcSchema, srcUser, srcPassword );
+                        compareForm.setSourceDatabase(srcUrl, srcSchema, srcUser, srcPassword);
                         compareForm.setDestinationDatabase(destUrl, destSchema, destUser, destPassword);
                     } else if (selectedSrcXml) {
-                        compareForm.setSourceDatabase(srcUrl, srcSchema, srcUser, srcPassword );
+                        compareForm.setSourceDatabase(srcUrl, srcSchema, srcUser, srcPassword);
                         compareForm.setXmlFile(xml);
                     } else {
                         compareForm.setXmlFile(xml);

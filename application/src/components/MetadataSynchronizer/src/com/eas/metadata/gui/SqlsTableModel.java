@@ -18,7 +18,7 @@ public class SqlsTableModel extends AbstractTableModel {
     private String [] columnNames;
 
     public SqlsTableModel(String [] aColumnNames) {
-        columnNames =aColumnNames;
+        columnNames = aColumnNames;
     }
 
     @Override
@@ -79,7 +79,7 @@ public class SqlsTableModel extends AbstractTableModel {
         return "";
     }
 
-    public List<String> getSqls() {
+    public synchronized List<String> getSqls() {
         return sqls;
     }
 

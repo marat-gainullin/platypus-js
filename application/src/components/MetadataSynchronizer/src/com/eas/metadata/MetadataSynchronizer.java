@@ -28,7 +28,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -83,13 +82,9 @@ public class MetadataSynchronizer {
     private String schemaTo;
     private String passwordTo;
     private String fileXml;
-//    private Level logLevel = Level.INFO;
-    private String logEncoding = "UTF-8";
     private boolean noExecute = false;
     private boolean noDropTables = false;
-    private String logPath = "";
     private Set<String> tablesList = new HashSet<>();
-    private List<String> sqlsList = null;
     private final String messageUsage = "\n\nRequired parameters are not defined!\n"
             + "Usage: \n"
             + "-urlFrom <value> -schemaFrom <value> -nameFrom <value> -passwordFrom <value> "
@@ -148,30 +143,35 @@ public class MetadataSynchronizer {
     public static final String UNIQUE_ATTR_NAME = "unique";
     public static final String PKEY_ATTR_NAME = "isPKey";
     public static final String FKEYNAME_ATTR_NAME = "fKeyName";
-    // all for loggers
-    private static final String SQL_LOGGER_NAME = "sql";
-    private static final String ERROR_LOGGER_NAME = "error";
-    private static final String INFO_LOGGER_NAME = "info";
+    private Logger systemLogger;
     private Logger sqlLogger;
     private Logger errorLogger;
     private Logger infoLogger;
-    private static final Logger mdsLogger = Logger.getLogger(MetadataSynchronizer.class.getName());
-    private static final Logger mergerLogger = Logger.getLogger(MetadataMerger.class.getName());
-    private static Level mdsLoggerLevel;
-    private static Level mergerLoggerLevel;
-    private static Level sqlLoggerLevel;
-    private static Level errorLoggerLevel;
-    private static Level infoLoggerLevel;
-    private static Boolean mdsLoggerUseParentHandlers;
-    private static Boolean mergerLoggerUseParentHandlers;
-    private static Boolean sqlLoggerUseParentHandlers;
-    private static Boolean errorLoggerUseParentHandlers;
-    private static Boolean infoLoggerUseParentHandlers;
+    private boolean needSqlsList = false;
+    private List<String> sqlsList;
+
 
     /**
      * Syncronize metadata between two schemas database
      */
     public MetadataSynchronizer() {
+        this(false, null, null, null, null);
+    }
+
+    public MetadataSynchronizer(boolean createSqlsList) {
+        this(createSqlsList, null, null, null, null);
+    }
+
+    public MetadataSynchronizer(Logger aSystemLogger, Logger aSqlLogger, Logger aErrorLogger, Logger aInfoLogger) {
+        this(false, aSystemLogger, aSqlLogger, aErrorLogger, aInfoLogger);
+    }
+
+    public MetadataSynchronizer(boolean createSqlsList, Logger aSystemLogger, Logger aSqlLogger, Logger aErrorLogger, Logger aInfoLogger) {
+        needSqlsList = createSqlsList;
+        systemLogger = aSystemLogger;
+        sqlLogger = aSqlLogger;
+        errorLogger = aErrorLogger;
+        infoLogger = aInfoLogger;
     }
 
     /**
@@ -183,13 +183,16 @@ public class MetadataSynchronizer {
      * @throws Exception
      */
     public static void readMetadataSnapshot(DbClient aClient, String aFileXmlPath, PrintWriter anOut) throws Exception {
-        MetadataSynchronizer mds = new MetadataSynchronizer();
-        mds.initDefaultLoggers((anOut == null ? null : new PrintWriterHandler(anOut)), Level.INFO, false);
+        Logger sysLog = initLogger(MetadataSynchronizer.class.getName() + "_" + System.currentTimeMillis() + "_system", Level.INFO, false);
         try {
+            if (anOut != null) {
+                sysLog.addHandler(new PrintWriterHandler(anOut));
+            }
+            MetadataSynchronizer mds = new MetadataSynchronizer(sysLog, null, null, null);
             mds.serializeMetadata(mds.readDBStructure(aClient), aFileXmlPath);
-        } finally {
-            mds.clearDefaultLoggers();
-        }
+        } finally {    
+            closeLogHandlers(sysLog);
+        }    
     }
 
     /**
@@ -202,23 +205,32 @@ public class MetadataSynchronizer {
      * @throws Exception
      */
     public static void applyMetadataSnapshot(DbClient aClient, String aFileXmlPath, String aLogPath, PrintWriter anOut) throws Exception {
-        MetadataSynchronizer mds = new MetadataSynchronizer();
-        mds.initDefaultLoggers((anOut == null ? null : new PrintWriterHandler(anOut)), Level.INFO, false);
-        mds.setLogPath(aLogPath);
-
-        mds.initSqlLogger(mds.logPath + "sql.log", mds.getLogEncoding(), Level.INFO, false, new LogFormatter());
-        mds.initErrorLogger(mds.logPath + "error.log", mds.getLogEncoding(), Level.INFO, false, new LogFormatter());
-        Logger.getLogger(MetadataSynchronizer.class.getName()).log(Level.INFO, String.format("logPath is '%s'", mds.logPath));
-
+        String loggerName = MetadataSynchronizer.class.getName() + "_" + System.currentTimeMillis();
+        Logger sysLog = initLogger(loggerName + "_system", Level.INFO, false);
+        Logger sqlLog = initLogger(loggerName + "_sql", Level.INFO, false);
+        Logger errorLog = initLogger(loggerName + "_error", Level.INFO, false);
+        String logPath = (aLogPath == null ? "" : aLogPath);
+        if (!logPath.isEmpty()) {
+            String separator = System.getProperty("file.separator");
+            if (!logPath.endsWith(separator)) {
+                logPath += separator;
+            }
+        }
+        String logEncoding = "UTF-8";
         try {
-            MetadataMerger metadataMerger = new MetadataMerger(aClient, mds.readDBStructureFromFile(aFileXmlPath), mds.readDBStructure(aClient), false, true, new HashSet<String>());
-            metadataMerger.setSqlLogger(mds.sqlLogger);
-            metadataMerger.setErrorLogger(mds.errorLogger);
+            if (anOut != null) {
+                sysLog.addHandler(new PrintWriterHandler(anOut));
+            }
+            sqlLog.addHandler(createFileHandler(logPath + "sqls.log", logEncoding, new LogFormatter()));
+            errorLog.addHandler(createFileHandler(logPath + "errors.log", logEncoding, new LogFormatter()));
+            MetadataSynchronizer mds = new MetadataSynchronizer(sysLog, sqlLog, errorLog, null);
+            mds.log(Level.INFO, String.format("logPath is '%s'", logPath));
+            MetadataMerger metadataMerger = new MetadataMerger(aClient, mds.readDBStructureFromFile(aFileXmlPath), mds.readDBStructure(aClient), false, true, new HashSet<String>(), sysLog, sqlLog, errorLog, false);
             metadataMerger.run();
         } finally {
-            mds.clearSqlLogger();
-            mds.clearErrorLogger();
-            mds.clearDefaultLoggers();
+            closeLogHandlers(sysLog);
+            closeLogHandlers(sqlLog);
+            closeLogHandlers(errorLog);
         }
     }
 
@@ -239,7 +251,7 @@ public class MetadataSynchronizer {
             Transformer t = TransformerFactory.newInstance().newTransformer();
             t.setOutputProperty(OutputKeys.INDENT, "yes");
             t.transform(new DOMSource(doc), new StreamResult(new FileOutputStream(f)));
-            Logger.getLogger(MetadataSynchronizer.class.getName()).log(Level.INFO, String.format("Document saved in '%s'", aFileXml));
+            log(Level.INFO, String.format("Document saved in '%s'", aFileXml));
         }
     }
 
@@ -254,22 +266,24 @@ public class MetadataSynchronizer {
      * @throws Exception
      */
     private DbClient createClient(String aUrl, String aSchema, String aUser, String aPassword) throws Exception {
-        Logger.getLogger(MetadataSynchronizer.class.getName()).log(Level.INFO, String.format("Start creating connection to schema %s", aSchema));
+        log(Level.INFO, String.format("Start creating connection to schema %s", aSchema));
         EasSettings settings = EasSettings.createInstance(aUrl);
         if (settings instanceof DbConnectionSettings) {
-            if (aUser == null || aUser.isEmpty() || aPassword == null || aPassword.isEmpty() || aSchema == null || aSchema.isEmpty()) {
-                throw new Exception(" May be bad db connection settings (url, dbuser, dbpassword, dbschema).");
-            }
+//            if (aUser == null || aUser.isEmpty() || aPassword == null || aPassword.isEmpty() || aSchema == null || aSchema.isEmpty()) {
+//                throw new Exception(" May be bad db connection settings (url, dbuser, dbpassword, dbschema).");
+//            }
             settings.getInfo().put(ClientConstants.DB_CONNECTION_USER_PROP_NAME, aUser);
             settings.getInfo().put(ClientConstants.DB_CONNECTION_PASSWORD_PROP_NAME, aPassword);
-            settings.getInfo().put(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME, aSchema);
+            if (aSchema != null) {
+                settings.getInfo().put(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME, aSchema);
+            }
             ((DbConnectionSettings) settings).setInitSchema(false);
         }
         settings.setUrl(aUrl);
         Client lclient = ClientFactory.getInstance(settings);
         assert lclient instanceof DbClient;
         DbClient client = (DbClient) lclient;
-        Logger.getLogger(MetadataSynchronizer.class.getName()).log(Level.INFO, String.format("Connect to schema %s created", (client == null ? "not " : "")));
+        log(Level.INFO, String.format("Connect to schema %s created", (client == null ? "not " : "")));
         return client;
     }
 
@@ -298,11 +312,12 @@ public class MetadataSynchronizer {
         DBStructure srcDBStructure = null;
         if (!emptyFrom) {
             DbClient client1 = createClient(urlFrom, schemaFrom, userFrom, passwordFrom);
-            srcDBStructure = readDBStructure(client1);
-            if (!emptyXml) {
-                serializeMetadata(srcDBStructure, fileXml);
-            }
-            if (client1 != null) {
+            try {
+                srcDBStructure = readDBStructure(client1);
+                if (!emptyXml) {
+                    serializeMetadata(srcDBStructure, fileXml);
+                }
+            } finally {    
                 client1.shutdown();
             }
         }
@@ -312,22 +327,20 @@ public class MetadataSynchronizer {
 
         if (!emptyTo && srcDBStructure != null) {
             DbClient client2 = createClient(urlTo, schemaTo, userTo, passwordTo);
-            MetadataMerger metadataMerger = new MetadataMerger(client2, srcDBStructure, readDBStructure(client2), isNoExecute(), isNoDropTables(), tablesList);
-            metadataMerger.setSqlLogger(sqlLogger);
-            metadataMerger.setErrorLogger(errorLogger);
-            if (sqlsList != null) {
-                metadataMerger.setSqlsList(sqlsList);
-            }
-            metadataMerger.run();
-            if (client2 != null) {
+            try {
+                MetadataMerger metadataMerger = new MetadataMerger(client2, srcDBStructure, readDBStructure(client2), isNoExecute(), isNoDropTables(), tablesList, systemLogger, sqlLogger, errorLogger, needSqlsList);
+                metadataMerger.run();
+                sqlsList = metadataMerger.getSqlsList();
+            } finally {    
                 client2.shutdown();
             }
 
             // re-read structure destination for compare with source
             if (infoLogger != null) {
                 DbClient client3 = createClient(urlTo, schemaTo, userTo, passwordTo);
-                MetadataUtils.printCompareMetadata(srcDBStructure, readDBStructure(client3), infoLogger);
-                if (client3 != null) {
+                try {
+                    MetadataUtils.printCompareMetadata(srcDBStructure, readDBStructure(client3), infoLogger);
+                } finally { 
                     client3.shutdown();
                 }
             }
@@ -392,7 +405,7 @@ public class MetadataSynchronizer {
         int cntPKs = 0;
         int cntFKs = 0;
 
-        Logger.getLogger(MetadataSynchronizer.class.getName()).log(Level.INFO, "Start reading structure metadata from connection");
+        log(Level.INFO, "Start reading structure metadata from connection");
 
         if (aClient != null) {
             dbDialect = aClient.getConnectionDialect(null);
@@ -508,7 +521,7 @@ public class MetadataSynchronizer {
             sb.append("\n   foreign keys: ").append(cntFKs);
             sb.append("\n");
 
-            Logger.getLogger(MetadataSynchronizer.class.getName()).log(Level.INFO, sb.toString());
+            log(Level.INFO, sb.toString());
         }
         return new DBStructure(mdStructure, dbDialect);
     }
@@ -525,9 +538,12 @@ public class MetadataSynchronizer {
      */
     public DBStructure readDBStructure(String aUrl, String aSchema, String aUser, String aPassword) throws Exception {
         DbClient client = createClient(aUrl, aSchema, aUser, aPassword);
-        DBStructure structure = readDBStructure(client);
-        client.shutdown();
-        return structure;
+        try {
+            DBStructure structure = readDBStructure(client);
+            return structure;
+        } finally {
+            client.shutdown();
+        }    
     }
 
     /**
@@ -550,7 +566,7 @@ public class MetadataSynchronizer {
         int cntPKs = 0;
         int cntFKs = 0;
 
-        Logger.getLogger(MetadataSynchronizer.class.getName()).log(Level.INFO, "Start creating document from metadata");
+        log(Level.INFO, "Start creating document from metadata");
         DocumentBuilder builder = factory.newDocumentBuilder();
         Document doc = builder.newDocument();
         doc.setXmlStandalone(true);
@@ -703,7 +719,7 @@ public class MetadataSynchronizer {
         sb.append("\n   foreign keys = ").append(cntFKs);
         sb.append("\n");
 
-        Logger.getLogger(MetadataSynchronizer.class.getName()).log(Level.INFO, sb.toString());
+        log(Level.INFO, sb.toString());
         return doc;
     }
 
@@ -731,7 +747,7 @@ public class MetadataSynchronizer {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         Document doc = factory.newDocumentBuilder().parse(new File(aFileXml));
 
-        Logger.getLogger(MetadataSynchronizer.class.getName()).log(Level.INFO, String.format("Start creating structure metadata from document '%s'", aFileXml));
+        log(Level.INFO, String.format("Start creating structure metadata from document '%s'", aFileXml));
 
         if (doc != null) {
             Element root = doc.getDocumentElement();
@@ -926,7 +942,7 @@ public class MetadataSynchronizer {
         sb.append("\n   foreign keys = ").append(cntFKs);
         sb.append("\n");
 
-        Logger.getLogger(MetadataSynchronizer.class.getName()).log(Level.INFO, sb.toString());
+        log(Level.INFO, sb.toString());
         return new DBStructure(tables, dialect);
     }
 
@@ -1166,39 +1182,6 @@ public class MetadataSynchronizer {
     }
 
     /**
-     * @return the logPath
-     */
-    public String getLogPath() {
-        return logPath;
-    }
-
-    public void setLogPath(String aLogPath) {
-        if (aLogPath != null) {
-            logPath = aLogPath;
-            if (!logPath.isEmpty()) {
-                String separator = System.getProperty("file.separator");
-                if (!logPath.endsWith(separator)) {
-                    logPath += separator;
-                }
-            }
-        }
-    }
-
-    /**
-     * @return the logEncoding
-     */
-    public String getLogEncoding() {
-        return logEncoding;
-    }
-
-    /**
-     * @param logEncoding the logEncoding to set
-     */
-    public void setLogEncoding(String aLogEncoding) {
-        logEncoding = aLogEncoding;
-    }
-
-    /**
      * @return the noExecute
      */
     public boolean isNoExecute() {
@@ -1263,123 +1246,34 @@ public class MetadataSynchronizer {
         this.noDropTables = noDropTables;
     }
 
-    public void initSqlLogger(Handler aHandler, Level aLevel, boolean isUseParentHandlers, Formatter aFormatter) {
-        sqlLogger = Logger.getLogger(SQL_LOGGER_NAME);
-        if (sqlLoggerLevel == null) {
-            sqlLoggerLevel = sqlLogger.getLevel();
+    public static FileHandler createFileHandler(String aFileName, String aLogEncoding, Formatter aLogFormatter) throws IOException {
+        FileHandler handler = new FileHandler(aFileName);
+        handler.setEncoding(aLogEncoding);
+        if (aLogFormatter != null) {
+            handler.setFormatter(aLogFormatter);
         }
-        if (sqlLoggerUseParentHandlers == null) {
-            sqlLoggerUseParentHandlers = sqlLogger.getUseParentHandlers();
-        }
-        initLogger(sqlLogger, aHandler, aLevel, isUseParentHandlers);
+        return handler;
     }
 
-    public void initSqlLogger(String aFileName, String aEncoding, Level aLevel, boolean isUseParentHandlers, Formatter aFormatter) {
-        initSqlLogger(createFileHandler(aFileName, aEncoding, aFormatter), aLevel, isUseParentHandlers, aFormatter);
-    }
-
-    public void clearSqlLogger() {
-        clearLogger(sqlLogger, sqlLoggerLevel, sqlLoggerUseParentHandlers);
-    }
-
-    public void initErrorLogger(Handler aHandler, Level aLevel, boolean isUseParentHandlers, Formatter aFormatter) {
-        errorLogger = Logger.getLogger(ERROR_LOGGER_NAME);
-        if (errorLoggerLevel == null) {
-            errorLoggerLevel = errorLogger.getLevel();
-        }
-        if (errorLoggerUseParentHandlers == null) {
-            errorLoggerUseParentHandlers = errorLogger.getUseParentHandlers();
-        }
-        initLogger(errorLogger, aHandler, aLevel, isUseParentHandlers);
-    }
-
-    public void initErrorLogger(String aFileName, String aEncoding, Level aLevel, boolean isUseParentHandlers, Formatter aFormatter) {
-        initErrorLogger(createFileHandler(aFileName, aEncoding, aFormatter), aLevel, isUseParentHandlers, aFormatter);
-    }
-
-    public void clearErrorLogger() {
-        clearLogger(errorLogger, errorLoggerLevel, errorLoggerUseParentHandlers);
-    }
-
-    public void initInfoLogger(Handler aHandler, Level aLevel, boolean isUseParentHandlers, Formatter aFormatter) {
-        infoLogger = Logger.getLogger(INFO_LOGGER_NAME);
-        if (infoLoggerLevel == null) {
-            infoLoggerLevel = infoLogger.getLevel();
-        }
-        if (infoLoggerUseParentHandlers == null) {
-            infoLoggerUseParentHandlers = infoLogger.getUseParentHandlers();
-        }
-        initLogger(infoLogger, aHandler, aLevel, isUseParentHandlers);
-    }
-
-    public void initInfoLogger(String aFileName, String aEncoding, Level aLevel, boolean isUseParentHandlers, Formatter aFormatter) {
-        initInfoLogger(createFileHandler(aFileName, aEncoding, aFormatter), aLevel, isUseParentHandlers, aFormatter);
-    }
-
-    public void clearInfoLogger() {
-        clearLogger(infoLogger, infoLoggerLevel, infoLoggerUseParentHandlers);
-    }
-
-    public void initDefaultLoggers(Handler aLogHandler, Level aLevel, boolean isUseParentHandlers) {
-        if (mdsLoggerLevel == null) {
-            mdsLoggerLevel = Logger.getLogger(MetadataSynchronizer.class.getName()).getLevel();
-        }
-        if (mdsLoggerUseParentHandlers == null) {
-            mdsLoggerUseParentHandlers = Logger.getLogger(MetadataSynchronizer.class.getName()).getUseParentHandlers();
-        }
-        initLogger(Logger.getLogger(MetadataSynchronizer.class.getName()), aLogHandler, aLevel, isUseParentHandlers);
-        if (mergerLoggerLevel == null) {
-            mergerLoggerLevel = Logger.getLogger(MetadataMerger.class.getName()).getLevel();
-        }
-        if (mergerLoggerUseParentHandlers == null) {
-            mergerLoggerUseParentHandlers = Logger.getLogger(MetadataMerger.class.getName()).getUseParentHandlers();
-        }
-        initLogger(Logger.getLogger(MetadataMerger.class.getName()), aLogHandler, aLevel, isUseParentHandlers);
-    }
-
-    public void clearDefaultLoggers() {
-        clearLogger(Logger.getLogger(MetadataSynchronizer.class.getName()), mdsLoggerLevel, mdsLoggerUseParentHandlers);
-        clearLogger(Logger.getLogger(MetadataMerger.class.getName()), mergerLoggerLevel, mergerLoggerUseParentHandlers);
-    }
-
-    private void initLogger(Logger aLogger, Handler aHandler, Level aLevel, boolean isUseParentHandlers) {
-        assert aLogger != null;
-        if (aHandler != null) {
-            aLogger.addHandler(aHandler);
-        }
-        if (aLevel != null) {
-            aLogger.setLevel(aLevel);
-        }
-        aLogger.setUseParentHandlers(isUseParentHandlers);
-    }
-
-    private void clearLogger(Logger aLogger, Level aLevel, Boolean isUseParentHandlers) {
+    public static void closeLogHandlers(Logger aLogger) {
         if (aLogger != null) {
             for (Handler handler : aLogger.getHandlers()) {
-                handler.close();
-                aLogger.removeHandler(handler);
-            }
-            if (aLevel != null) {
-                aLogger.setLevel(aLevel);
-            }
-            if (isUseParentHandlers != null) {
-                aLogger.setUseParentHandlers(isUseParentHandlers);
+                try {
+                    handler.close();
+                    aLogger.removeHandler(handler);
+                } catch (SecurityException e) {
+                    //?????????
+                    Logger.getLogger(MetadataSynchronizer.class.getName()).log(Level.SEVERE, null, e);
+                }
             }
         }
     }
 
-    private FileHandler createFileHandler(String aFileName, String aLogEncoding, Formatter aLogFormatter) {
-        try {
-            FileHandler handler = new FileHandler(aFileName);
-            handler.setEncoding(aLogEncoding);
-            if (aLogFormatter != null) {
-                handler.setFormatter(aLogFormatter);
-            }
-            return handler;
-        } catch (IOException | SecurityException ex) {
-            Logger.getLogger(MetadataSynchronizer.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return null;
+    public static Logger initLogger(String aLoggerName, Level aLevel, boolean isUseParentHandlers) {
+        Logger logger = Logger.getLogger(aLoggerName);
+        logger.setLevel(aLevel);
+        logger.setUseParentHandlers(isUseParentHandlers);
+        return logger;
     }
 
     /**
@@ -1512,6 +1406,13 @@ public class MetadataSynchronizer {
             }
             i++;
         }
+        if (!logPath.isEmpty()) {
+            String separator = System.getProperty("file.separator");
+            if (!logPath.endsWith(separator)) {
+                logPath += separator;
+            }
+        }
+
         if (gui) {
             try {
                 for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
@@ -1521,44 +1422,43 @@ public class MetadataSynchronizer {
                     }
                 }
             } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
-                java.util.logging.Logger.getLogger(MetadataSynchronizerForm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+                java.util.logging.Logger.getLogger(MetadataSynchronizerForm.class.getName()).log(Level.SEVERE, null, ex);
             }
             //Locale.setDefault(new Locale("en"));
             MetadataSynchronizerForm mdsForm = new MetadataSynchronizerForm();
             mdsForm.setSourceDatabase(urlFrom, schemaFrom, userFrom, passwordFrom);
             mdsForm.setDestinationDatabase(urlTo, schemaTo, userTo, passwordTo);
             mdsForm.setFileXml(fileXml);
-            //??            mds.setLogEncoding(logEncoding);
-            //??           mds.setLogPath(logPath);
             mdsForm.setTablesList(tables);
             mdsForm.setVisible(true);
         } else {
-            MetadataSynchronizer mds = null;
+            String loggerName = MetadataSynchronizer.class.getName() + "_" + System.currentTimeMillis();
+            Logger sysLog = initLogger(loggerName + "_system", Level.INFO, true);
+            Logger sqlLog = initLogger(loggerName + "_sql", logLevel, false);
+            Logger errorLog = initLogger(loggerName + "_error", logLevel, false);
+            Logger infoLog = initLogger(loggerName + "_info", logLevel, false);
+
             try {
-                mds = new MetadataSynchronizer();
-                mds.initDefaultLoggers(null, Level.INFO, true);
+                sqlLog.addHandler(createFileHandler(logPath + "sqls.log", logEncoding, new LogFormatter()));
+                errorLog.addHandler(createFileHandler(logPath + "errors.log", logEncoding, new LogFormatter()));
+                infoLog.addHandler(createFileHandler(logPath + "info.log", logEncoding, new LogFormatter()));
+
+                MetadataSynchronizer mds = new MetadataSynchronizer(sysLog, sqlLog, errorLog, infoLog);
                 mds.setSourceDatabase(urlFrom, schemaFrom, userFrom, passwordFrom);
                 mds.setDestinationDatabase(urlTo, schemaTo, userTo, passwordTo);
                 mds.setFileXml(fileXml);
-                mds.setLogEncoding(logEncoding);
-                mds.setLogPath(logPath);
                 mds.setNoExecute(noExecute);
                 mds.setNoDropTables(noDropTables);
                 mds.parseTablesList(tables, ",");
-
-                mds.initSqlLogger(mds.getLogPath() + "sql.log", mds.getLogEncoding(), logLevel, false, new LogFormatter());
-                mds.initErrorLogger(mds.getLogPath() + "error.log", mds.getLogEncoding(), logLevel, false, new LogFormatter());
-                mds.initInfoLogger(mds.getLogPath() + "info.log", mds.getLogEncoding(), logLevel, false, new LogFormatter());
                 mds.run();
             } catch (Exception ex) {
                 Logger.getLogger(MetadataSynchronizer.class.getName()).log(Level.SEVERE, null, ex);
+                //?????throw ex;
             } finally {
-                if (mds != null) {
-                    mds.clearSqlLogger();
-                    mds.clearErrorLogger();
-                    mds.clearInfoLogger();
-                    mds.clearDefaultLoggers();
-                }
+                closeLogHandlers(sqlLog);
+                closeLogHandlers(errorLog);
+                closeLogHandlers(infoLog);
+                closeLogHandlers(sysLog);
             }
         }
     }
@@ -1591,10 +1491,15 @@ public class MetadataSynchronizer {
         return sqlsList;
     }
 
-    /**
-     * @param sqlsList the sqlsList to set
-     */
-    public void setSqlsList(List<String> aSqlsList) {
-        sqlsList = aSqlsList;
+    private void log(Level aLogLevel, String aMessage) {
+        if (systemLogger != null) {
+            systemLogger.log(aLogLevel, aMessage);
+        }
+    }
+
+    private void log(Level aLogLevel, String aMessage, Throwable aThrown) {
+        if (systemLogger != null) {
+            systemLogger.log(aLogLevel, aMessage, aThrown);
+        }
     }
 }
