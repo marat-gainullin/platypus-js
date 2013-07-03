@@ -49,7 +49,9 @@ public class H2TestDefine extends DbTestDefine {
 //??????????????????????????
     };
 
-    static {            //type, {original, Oracle, PostgreSQL, MySql, DB2, H2, MsSql}    
+    static {            
+        // отрицательное значение в fieldsSizes и fieldsScales означает, что значение отсутствует  и проверка не производится
+        //type, {original, Oracle, PostgreSQL, MySql, DB2, H2, MsSql}    
         fieldsSizes.put("DECIMAL", new int[]{4, -22, 4, 4, 4, 4, -4});
         fieldsSizes.put("NUMERIC", new int[]{5, -22, 5, 5, 5, 5, -5});
 

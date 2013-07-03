@@ -64,6 +64,7 @@ public class MySqlTestDefine extends DbTestDefine {
         {"set", "CHAR", "bpchar", "char", "CHAR", "CHAR", "char"},};
 
     static {
+        // отрицательное значение в fieldsSizes и fieldsScales означает, что значение отсутствует  и проверка не производится
         //type, {original, Oracle, PostgreSQL, MySql, DB2, H2, MsSql}    
         fieldsSizes.put("float", new int[]{4, -4, -4, 4, -4, -4, -4});
         fieldsSizes.put("real", new int[]{5, -5, -5, 5, -5, -5, -5});

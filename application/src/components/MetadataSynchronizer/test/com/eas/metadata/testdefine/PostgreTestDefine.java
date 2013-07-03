@@ -60,7 +60,9 @@ public class PostgreTestDefine extends DbTestDefine {
 //GIS        {"", "", "", "", "", "", ""},
     };
 
-    static {            //type, {original, Oracle, PostgreSQL, MySql, DB2, H2, MsSql}    
+    static {
+        // отрицательное значение в fieldsSizes и fieldsScales означает, что значение отсутствует  и проверка не производится
+        //type, {original, Oracle, PostgreSQL, MySql, DB2, H2, MsSql}    
         fieldsSizes.put("numeric", new int[]{3, 3, 3, 3, 3, 3, -3});
         fieldsSizes.put("decimal", new int[]{4, 4, 4, 4, 4, 4, -4});
         fieldsSizes.put("char", new int[]{5, 5, 5, 5, 5, 5, -5});

@@ -67,7 +67,8 @@ public class Db2TestDefine extends DbTestDefine {
         {"XML", "BLOB", "bytea", "longblob", "BLOB", "BLOB", "blob"},};
 
     static {
-//        //type, {original, Oracle, PostgreSQL, MySql, DB2, H2, MsSql}    
+        // отрицательное значение в fieldsSizes и fieldsScales означает, что значение отсутствует  и проверка не производится
+        //type, {original, Oracle, PostgreSQL, MySql, DB2, H2, MsSql}    
         fieldsSizes.put("DECIMAL", new int[]{4, -4, 4, 4, 4, 4, -4});
         fieldsSizes.put("DEC", new int[]{5, -5, 5, 5, 5, 5, -5});
         fieldsSizes.put("NUMERIC", new int[]{6, -6, 6, 6, 6, 6, -6});
