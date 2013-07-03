@@ -131,6 +131,12 @@
         <file name="Persistence_hidden"/>
         <file name="Properties_hidden"/>
         <file name="XML_hidden"/>
+        <folder name="Project">
+            <folder name="Platypus">
+                <attr name="displayName" bundlevalue="com.eas.designer.explorer.Bundle#Templates/Project/Platypus" />
+            </folder>
+        </folder>
+         
     </folder>
     <folder name="Windows2">
         <folder name="Components">
