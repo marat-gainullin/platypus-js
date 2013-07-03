@@ -1912,7 +1912,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
             for (int i = 0; i < aRow.getCurrentValues().length; i++) {
                 Field field = aRow.getFields().get(i + 1);
                 Object value = aRow.getCurrentValues()[i];
-                if (value != null || field.isStrong4Insert()) {
+                if (value != null) {
                     data.add(new Change.Value(field.getName(), value, field.getTypeInfo()));
                 }
             }

@@ -13,14 +13,12 @@ import com.eas.client.sqldrivers.resolvers.Db2TypesResolver;
  */
 public class Db2Converter extends PlatypusConverter {
 
-    public Db2Converter()
-    {
+    public Db2Converter() {
         super(new Db2TypesResolver());
     }
-    
+
     @Override
     public boolean isGeometry(DataTypeInfo aTypeInfo) {
-        return false;
+        return super.isGeometry(aTypeInfo);
     }
-    
 }

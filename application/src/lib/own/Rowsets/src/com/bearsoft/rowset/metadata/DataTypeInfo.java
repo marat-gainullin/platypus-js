@@ -57,6 +57,7 @@ public class DataTypeInfo {
     public static DataTypeInfo DATE = new DataTypeInfo(Types.DATE, RowsetUtils.getTypeName(Types.DATE), java.util.Date.class.getName());
     public static DataTypeInfo TIMESTAMP = new DataTypeInfo(Types.TIMESTAMP, RowsetUtils.getTypeName(Types.TIMESTAMP), java.util.Date.class.getName());
     public static DataTypeInfo TIME = new DataTypeInfo(Types.TIME, RowsetUtils.getTypeName(Types.TIME), java.util.Date.class.getName());
+    public static DataTypeInfo GEOMETRY = new DataTypeInfo(Types.OTHER, "JTS_Geometry", java.lang.Object.class.getName());
 
     public static DataTypeInfo valueOf(int aSqlType) {
         switch (aSqlType) {
@@ -207,15 +208,15 @@ public class DataTypeInfo {
         }
     }
 
-    public void setSqlTypeName(String sqlTypeName) {
-        this.sqlTypeName = sqlTypeName;
+    public void setSqlTypeName(String aValue) {
+        sqlTypeName = aValue;
     }
 
     public String getJavaClassName() {
         return javaClassName;
     }
 
-    public void setJavaClassName(String javaClassName) {
-        this.javaClassName = javaClassName;
+    public void setJavaClassName(String aValue) {
+        javaClassName = aValue;
     }
 }

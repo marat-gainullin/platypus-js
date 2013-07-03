@@ -132,14 +132,14 @@ public class PostgreTypesResolver implements TypesResolver {
 
         //typeName(M,D)
         jdbcTypesWithScale.add(Types.DECIMAL);
-        
+
         //typeName(M)
         jdbcTypesWithSize.add(Types.CHAR);
         jdbcTypesWithSize.add(Types.VARCHAR);
         jdbcTypesWithSize.add(Types.NUMERIC);
         jdbcTypesWithSize.add(Types.DECIMAL);
-        
-        
+
+
     }
 
     @Override
@@ -192,6 +192,8 @@ public class PostgreTypesResolver implements TypesResolver {
                 } else {
                     aField.setTypeInfo(DataTypeInfo.BLOB.copy());
                 }
+            } else if (isGeometryTypeName(aField.getTypeInfo().getSqlTypeName())) {
+                aField.setTypeInfo(DataTypeInfo.GEOMETRY.copy());
             } else {
                 aField.setSize(Math.max(0, size));
                 if (scale > 0) {
@@ -209,17 +211,14 @@ public class PostgreTypesResolver implements TypesResolver {
     public boolean isGeometryTypeName(String aTypeName) {
         return (aTypeName != null ? gisTypes.contains(aTypeName.toLowerCase()) : false);
     }
-    
-    @Override
-    public boolean isSized(Integer aSqlType)   
-    {
-        return jdbcTypesWithSize.contains(aSqlType);
-    }        
 
     @Override
-    public boolean isScaled(Integer aSqlType)   
-    {
+    public boolean isSized(Integer aSqlType) {
+        return jdbcTypesWithSize.contains(aSqlType);
+    }
+
+    @Override
+    public boolean isScaled(Integer aSqlType) {
         return jdbcTypesWithScale.contains(aSqlType);
-    }        
-    
+    }
 }

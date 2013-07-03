@@ -169,6 +169,8 @@ public class MySqlTypesResolver implements TypesResolver {
             } else {
                 aField.setTypeInfo(DataTypeInfo.BLOB.copy());
             }
+        } else if (isGeometryTypeName(aField.getTypeInfo().getSqlTypeName())) {
+            aField.setTypeInfo(DataTypeInfo.GEOMETRY.copy());
         }
     }
 

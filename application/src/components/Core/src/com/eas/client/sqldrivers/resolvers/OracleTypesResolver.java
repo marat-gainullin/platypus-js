@@ -7,7 +7,6 @@ package com.eas.client.sqldrivers.resolvers;
 import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.SQLUtils;
-import com.vividsolutions.jts.geom.Geometry;
 import java.math.BigDecimal;
 import java.sql.Types;
 import java.util.HashMap;
@@ -136,31 +135,24 @@ public class OracleTypesResolver implements TypesResolver {
     @Override
     public void resolve2Application(Field aField) {
         if (aField != null) {
-            if (aField.getTypeInfo().getSqlTypeName().contains("SDO_GEOMETRY")) {
-                aField.getTypeInfo().setSqlType(java.sql.Types.STRUCT);
-                aField.getTypeInfo().setSqlTypeName("MDSYS.SDO_GEOMETRY");
-                aField.getTypeInfo().setJavaClassName(Geometry.class.getName());
-            }
-            if (SQLUtils.isSameTypeGroup(aField.getTypeInfo().getSqlType(), java.sql.Types.NUMERIC)) {
+            if (isGeometryTypeName(aField.getTypeInfo().getSqlTypeName())
+                    || aField.getTypeInfo().getSqlTypeName().contains("SDO_GEOMETRY")) {
+                aField.setTypeInfo(DataTypeInfo.GEOMETRY.copy());
+            } else if (SQLUtils.isSameTypeGroup(aField.getTypeInfo().getSqlType(), java.sql.Types.NUMERIC)) {
                 aField.getTypeInfo().setJavaClassName(BigDecimal.class.getName());
-            }
-            if (SQLUtils.isSameTypeGroup(aField.getTypeInfo().getSqlType(), java.sql.Types.VARCHAR)) {
+            } else if (SQLUtils.isSameTypeGroup(aField.getTypeInfo().getSqlType(), java.sql.Types.VARCHAR)) {
                 aField.getTypeInfo().setJavaClassName(String.class.getName());
-            }
-            if (SQLUtils.isSameTypeGroup(aField.getTypeInfo().getSqlType(), java.sql.Types.BOOLEAN)) {
+            } else if (SQLUtils.isSameTypeGroup(aField.getTypeInfo().getSqlType(), java.sql.Types.BOOLEAN)) {
                 aField.getTypeInfo().setJavaClassName(Boolean.class.getName());
-            }
-            if (SQLUtils.isSameTypeGroup(aField.getTypeInfo().getSqlType(), java.sql.Types.DATE)) {
+            } else if (SQLUtils.isSameTypeGroup(aField.getTypeInfo().getSqlType(), java.sql.Types.DATE)) {
                 aField.getTypeInfo().setJavaClassName(java.util.Date.class.getName());
-            }
-            if (SQLUtils.isSameTypeGroup(aField.getTypeInfo().getSqlType(), java.sql.Types.BLOB)) {
+            } else if (SQLUtils.isSameTypeGroup(aField.getTypeInfo().getSqlType(), java.sql.Types.BLOB)) {
                 if (aField.getTypeInfo().getSqlType() == java.sql.Types.CLOB || aField.getTypeInfo().getSqlType() == java.sql.Types.NCLOB) {
                     aField.setTypeInfo(DataTypeInfo.CLOB.copy());
                 } else {
                     aField.setTypeInfo(DataTypeInfo.BLOB.copy());
                 }
-            }
-            if (aField.getTypeInfo().getSqlType() == java.sql.Types.OTHER) {
+            } else if (aField.getTypeInfo().getSqlType() == java.sql.Types.OTHER) {
                 String lTypeName = aField.getTypeInfo().getSqlTypeName();
                 if (lTypeName != null && !lTypeName.isEmpty()) {
                     switch (lTypeName) {

@@ -140,7 +140,7 @@ public class OracleConverter extends PlatypusConverter {
 
     @Override
     public boolean isGeometry(DataTypeInfo aTypeInfo) {
-        return aTypeInfo.getSqlType() == Types.STRUCT && ((OracleTypesResolver)resolver).isGeometryTypeName(aTypeInfo.getSqlTypeName().toUpperCase());
+        return super.isGeometry(aTypeInfo) || (aTypeInfo.getSqlType() == Types.STRUCT && ((OracleTypesResolver)resolver).isGeometryTypeName(aTypeInfo.getSqlTypeName().toUpperCase()));
     }
 
     public Clob createAndAssignClob(Connection conn, Clob sourceClob) throws RowsetException {

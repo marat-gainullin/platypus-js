@@ -114,7 +114,7 @@ public class DatabasesClient implements DbClient {
         if (aSettings.getApplicationPath() != null && !aSettings.getApplicationPath().isEmpty()) {
             File f = new File(aSettings.getApplicationPath());
             if (f.exists() && f.isDirectory()) {
-                FilesAppCache filesAppCache = new FilesAppCache(f.getPath()+File.separator+PlatypusFiles.PLATYPUS_PROJECT_SOURCES_ROOT);
+                FilesAppCache filesAppCache = new FilesAppCache(f.getPath() + File.separator + PlatypusFiles.PLATYPUS_PROJECT_SOURCES_ROOT);
                 filesAppCache.watch();
                 appCache = filesAppCache;
             } else {
@@ -369,81 +369,65 @@ public class DatabasesClient implements DbClient {
                 assert log != null;
                 DataSource dataSource = resourceProvider.getPooledDataSource(dbId);
                 try (Connection connection = dataSource.getConnection()) {
+                    connection.setAutoCommit(false);
                     try {
-                        connection.setAutoCommit(false);
-                        if (contextHost != null && contextHost.preparationContext() != null && !contextHost.preparationContext().isEmpty()) {
-                            driver.applyContextToConnection(connection, contextHost.preparationContext());
-                        }
-                        try {
-                            List<StatementsLogEntry> statements = new ArrayList<>();
-                            // This structure helps us to avoid actuality check for queries while 
-                            // processing each statement in transaction. Thus, we can avoid speed degradation.
-                            // It doesn't break security, because such "unactual" lookup takes place ONLY
-                            // while transaction processing.
-                            final Map<String, SqlQuery> entityQueries = new HashMap<>();
-                            for (Change change : log) {
-                                StatementsGenerator generator = new StatementsGenerator(converter, new EntitiesHost() {
-                                    @Override
-                                    public void checkRights(String aEntityId) throws Exception {
-                                        if (aEntityId != null) {
-                                            SqlQuery query = entityQueries.get(aEntityId);
-                                            if (query == null) {
-                                                query = queries.getQuery(aEntityId, false);
-                                                if (query != null) {
-                                                    entityQueries.put(aEntityId, query);
-                                                }
-                                            }
+                        List<StatementsLogEntry> statements = new ArrayList<>();
+                        // This structure helps us to avoid actuality check for queries while 
+                        // processing each statement in transaction. Thus, we can avoid speed degradation.
+                        // It doesn't break security, because such "unactual" lookup takes place ONLY
+                        // while transaction processing.
+                        final Map<String, SqlQuery> entityQueries = new HashMap<>();
+                        for (Change change : log) {
+                            StatementsGenerator generator = new StatementsGenerator(converter, new EntitiesHost() {
+                                @Override
+                                public void checkRights(String aEntityId) throws Exception {
+                                    if (aEntityId != null) {
+                                        SqlQuery query = entityQueries.get(aEntityId);
+                                        if (query == null) {
+                                            query = queries.getQuery(aEntityId, false);
                                             if (query != null) {
-                                                checkWritePrincipalPermission(query.getWriteRoles());
+                                                entityQueries.put(aEntityId, query);
                                             }
                                         }
+                                        if (query != null) {
+                                            checkWritePrincipalPermission(query.getWriteRoles());
+                                        }
                                     }
+                                }
 
-                                    @Override
-                                    public Field resolveField(String aEntityId, String aFieldName) throws Exception {
-                                        if (aEntityId != null) {
-                                            if (contextHost != null && contextHost.preparationContext() != null && !contextHost.preparationContext().isEmpty() && ClientConstants.F_USR_CONTEXT.equalsIgnoreCase(aFieldName)) {
-                                                return null;
-                                            } else {
-                                                Fields fields;
-                                                SqlQuery query = entityQueries.get(aEntityId);
-                                                if (query == null) {
-                                                    query = queries.getQuery(aEntityId, false);
-                                                    if (query != null) {
-                                                        entityQueries.put(aEntityId, query);
-                                                    }
-                                                }
-                                                if (query != null && query.getEntityId() != null) {
-                                                    fields = query.getFields();
-                                                } else {
-                                                    fields = mdCaches.get(dbId).getTableMetadata(aEntityId);
-                                                }
-                                                Field resolved = fields.get(aFieldName);
-                                                String resolvedTableName = resolved != null ? resolved.getTableName() : null;
-                                                resolvedTableName = resolvedTableName != null ? resolvedTableName.toLowerCase() : "";
-                                                if (query != null && query.getWritable() != null && !query.getWritable().contains(resolvedTableName)) {
-                                                    return null;
-                                                } else {
-                                                    return resolved;
-                                                }
+                                @Override
+                                public Field resolveField(String aEntityId, String aFieldName) throws Exception {
+                                    if (aEntityId != null) {
+                                        Fields fields;
+                                        SqlQuery query = entityQueries.get(aEntityId);
+                                        if (query == null) {
+                                            query = queries.getQuery(aEntityId, false);
+                                            if (query != null) {
+                                                entityQueries.put(aEntityId, query);
                                             }
-                                        } else {
-                                            return null;
                                         }
+                                        if (query != null && query.getEntityId() != null) {
+                                            fields = query.getFields();
+                                        } else {
+                                            fields = mdCaches.get(dbId).getTableMetadata(aEntityId);
+                                        }
+                                        Field resolved = fields.get(aFieldName);
+                                        String resolvedTableName = resolved != null ? resolved.getTableName() : null;
+                                        resolvedTableName = resolvedTableName != null ? resolvedTableName.toLowerCase() : "";
+                                        if (query != null && query.getWritable() != null && !query.getWritable().contains(resolvedTableName)) {
+                                            return null;
+                                        } else {
+                                            return resolved;
+                                        }
+                                    } else {
+                                        return null;
                                     }
-                                });
-                                change.accept(generator);
-                                statements.addAll(generator.getLogEntries());
-                            }
-                            rowsAffected = riddleStatements(statements, connection);
-                        } finally {
-                            // In the folowing condition, _PR_eparation context is checked. It's right, because we need to cancel _PR_eparation
-                            // if it has been made. And so, condition checks a _PR_eparation context, but _UN_preparation context is applied.
-                            // If no preparation has been made, no unpreparation should occur!
-                            if (contextHost != null && contextHost.preparationContext() != null && !contextHost.preparationContext().isEmpty()) {
-                                driver.applyContextToConnection(connection, contextHost.unpreparationContext());
-                            }
+                                }
+                            }, ClientConstants.F_USR_CONTEXT, contextHost != null ? contextHost.preparationContext() : null);
+                            change.accept(generator);
+                            statements.addAll(generator.getLogEntries());
                         }
+                        rowsAffected = riddleStatements(statements, connection);
                         connection.commit();
                     } catch (Exception ex) {
                         connection.rollback();

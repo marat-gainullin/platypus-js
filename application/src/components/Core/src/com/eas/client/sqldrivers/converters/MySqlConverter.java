@@ -20,7 +20,7 @@ public class MySqlConverter extends PlatypusConverter {
 
     @Override
     public boolean isGeometry(DataTypeInfo aTypeInfo) {
-        return aTypeInfo.getSqlType() == Types.BINARY && ((MySqlTypesResolver)resolver).isGeometryTypeName(aTypeInfo.getSqlTypeName().toLowerCase());        
+        return super.isGeometry(aTypeInfo) || (aTypeInfo.getSqlType() == Types.BINARY && ((MySqlTypesResolver)resolver).isGeometryTypeName(aTypeInfo.getSqlTypeName().toLowerCase()));
     }
 
 }

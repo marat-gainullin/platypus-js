@@ -6,6 +6,7 @@ package com.bearsoft.rowset.jdbc;
 
 import com.bearsoft.rowset.Converter;
 import com.bearsoft.rowset.changes.*;
+import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.bearsoft.rowset.metadata.Field;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -27,7 +28,7 @@ import java.util.logging.Logger;
 public class StatementsGenerator implements ChangeVisitor {
 
     /**
-     * Stores short living information about statements , ti be executed while
+     * Stores short living information about statements, ti be executed while
      * jdbc update process. Performs parameterized statements execution.
      */
     public static class StatementsLogEntry {
@@ -67,11 +68,15 @@ public class StatementsGenerator implements ChangeVisitor {
     protected List<StatementsLogEntry> logEntries = new ArrayList<>();
     protected Converter converter;
     protected EntitiesHost entitiesHost;
+    protected String schemaContextFieldName;
+    protected String schemaContext;
 
-    public StatementsGenerator(Converter aConverter, EntitiesHost aEntitiesHost) {
+    public StatementsGenerator(Converter aConverter, EntitiesHost aEntitiesHost, String aSchemaContextFieldName, String aSchemaContext) {
         super();
         converter = aConverter;
         entitiesHost = aEntitiesHost;
+        schemaContextFieldName = aSchemaContextFieldName;
+        schemaContext = aSchemaContext;
     }
 
     public List<StatementsLogEntry> getLogEntries() {
@@ -112,6 +117,7 @@ public class StatementsGenerator implements ChangeVisitor {
         public StatementsLogEntry insert;
         public StringBuilder dataColumnsNames;
         public List<String> keysColumnsNames;
+        public boolean contexted;
     }
 
     @Override
@@ -135,9 +141,22 @@ public class StatementsGenerator implements ChangeVisitor {
                 if (!chunk.insert.parameters.isEmpty()) {
                     chunk.dataColumnsNames.append(", ");
                 }
-                chunk.insert.parameters.add(aChange.data[i]);
                 String dataColumnName = field.getOriginalName() != null ? field.getOriginalName() : field.getName();
                 chunk.dataColumnsNames.append(dataColumnName);
+                //
+                if (schemaContext != null && !schemaContext.isEmpty()
+                        && schemaContextFieldName != null && schemaContextFieldName.isEmpty()
+                        && dataColumnName.equalsIgnoreCase(schemaContextFieldName)) {
+                    chunk.contexted = true;
+                    if (aChange.data[i] == null) {
+                        chunk.insert.parameters.add(new Change.Value(schemaContextFieldName, schemaContext, DataTypeInfo.VARCHAR));
+                    } else {
+                        chunk.insert.parameters.add(aChange.data[i]);
+                    }
+                } else {
+                    //
+                    chunk.insert.parameters.add(aChange.data[i]);
+                }
                 if (field.isPk()) {
                     chunk.keysColumnsNames.add(dataColumnName);
                 }
@@ -145,6 +164,20 @@ public class StatementsGenerator implements ChangeVisitor {
         }
         for (String tableName : inserts.keySet()) {
             InsertChunk chunk = inserts.get(tableName);
+            //
+            if (schemaContext != null && !schemaContext.isEmpty()
+                    && schemaContextFieldName != null && schemaContextFieldName.isEmpty()
+                    && !chunk.contexted) {
+                Field contextField = entitiesHost.resolveField(tableName, schemaContextFieldName);
+                if (contextField != null) {
+                    if (!chunk.insert.parameters.isEmpty()) {
+                        chunk.dataColumnsNames.append(", ");
+                    }
+                    chunk.dataColumnsNames.append(schemaContextFieldName);
+                    chunk.insert.parameters.add(new Change.Value(schemaContextFieldName, schemaContext, DataTypeInfo.VARCHAR));
+                }
+            }
+            //
             chunk.insert.clause = String.format(INSERT_CLAUSE, tableName, chunk.dataColumnsNames.toString(), generatePlaceholders(chunk.insert.parameters.size()));
             // Validness of the insert statement is outlined by inserted columns and key columns existance also
             // because we have to prevent unexpected inserts in any joined table.

@@ -188,6 +188,8 @@ public class MsSqlTypesResolver implements TypesResolver {
         } else if (aField.getTypeInfo().getSqlType() == java.sql.Types.BINARY
                 || aField.getTypeInfo().getSqlType() == java.sql.Types.VARBINARY) {
             aField.setTypeInfo(DataTypeInfo.VARBINARY.copy());
+        } else if (isGeometryTypeName(aField.getTypeInfo().getSqlTypeName())) {
+            aField.setTypeInfo(DataTypeInfo.GEOMETRY.copy());
         }
     }
     

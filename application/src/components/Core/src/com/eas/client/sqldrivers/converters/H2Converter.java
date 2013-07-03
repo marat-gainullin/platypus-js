@@ -24,7 +24,7 @@ public class H2Converter extends PlatypusConverter {
 
     @Override
     public boolean isGeometry(DataTypeInfo aTypeInfo) {
-        return false;
+        return super.isGeometry(aTypeInfo);
     }
 
     @Override
