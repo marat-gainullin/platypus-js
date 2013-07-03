@@ -173,8 +173,8 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
             }
             EasSettings settings = EasSettings.createInstance(url);
             if (settings instanceof DbConnectionSettings) {
-                if (dbUser == null || dbUser.isEmpty() || dbPassword == null || dbPassword.length == 0 || dbSchema == null || dbSchema.isEmpty()) {
-                    throw new Exception(BAD_DB_CREDENTIALS_MSG + " May be bad db connection settings (url, dbuser, dbpassword, dbschema).");
+                if (dbUser == null || dbUser.isEmpty() || dbPassword == null || dbPassword.length == 0) {
+                    throw new Exception(BAD_DB_CREDENTIALS_MSG + " May be bad db connection settings (url, dbuser, dbpassword).");
                 }
                 settings.getInfo().put(ClientConstants.DB_CONNECTION_USER_PROP_NAME, dbUser);
                 settings.getInfo().put(ClientConstants.DB_CONNECTION_PASSWORD_PROP_NAME, new String(dbPassword));
