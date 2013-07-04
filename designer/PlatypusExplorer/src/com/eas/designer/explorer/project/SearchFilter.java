@@ -41,7 +41,7 @@ public final class SearchFilter extends SearchFilterDefinition {
             throw new java.lang.IllegalArgumentException("Folder expected");//NOI18N
         }
         File file = FileUtil.toFile(fo);
-        String relPath = projectPath.relativize(file.toPath()).toString().replace(File.pathSeparator, "/");//NOI18N
+        String relPath = projectPath.relativize(file.toPath()).toString().replace(File.separator, "/");//NOI18N
         return !file.isHidden() && !ignoredPaths.contains(relPath) ? FolderResult.TRAVERSE : FolderResult.DO_NOT_TRAVERSE;
     }
 }
