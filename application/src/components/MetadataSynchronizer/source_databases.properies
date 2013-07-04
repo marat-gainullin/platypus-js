@@ -1,0 +1,32 @@
+#Database parameters
+#Thu Jun 27 12:56:22 MSK 2013
+item5.url=jdbc\:mysql\://192.168.10.205\:3306/test1
+item3.schema=test1
+item1.schema=dbo
+item3.password=test1
+item0.user=test1
+item0.name=Oracle \: research - test1
+item2.url=jdbc\:h2\:tcp\://localhost/~/test
+item1.user=test1
+item1.name=MsSql \: ab - test1
+item1.password=1test1
+item2.user=test1
+item2.name=H2 - test1
+item4.url=jdbc\:db2\://192.168.10.154\:50000/test
+item4.password=masterkey
+item3.user=test1
+item3.name=Postgre \: asrv - test1
+item4.schema=test1
+item2.schema=test1
+item5.schema=test1
+item0.schema=test1
+item1.url=jdbc\:jtds\:sqlserver\://192.168.10.154\:1433/test1
+item4.user=dba
+item4.name=Db2 \: ab - test1
+item2.password=test1
+item5.user=test1
+item5.name=MySql \: research - test1
+item3.url=jdbc\:postgresql\://192.168.10.1\:5432/Trans
+item0.password=test1
+item5.password=test1
+item0.url=jdbc\:oracle\:thin\:@192.168.10.205\:1521/DBALT

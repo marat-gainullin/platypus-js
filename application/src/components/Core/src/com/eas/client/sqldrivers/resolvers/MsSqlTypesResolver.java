@@ -7,18 +7,18 @@ package com.eas.client.sqldrivers.resolvers;
 import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.bearsoft.rowset.metadata.Field;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
  * @author mg
  */
-public class MsSqlTypesResolver implements TypesResolver {
+public class MsSqlTypesResolver extends TypesResolver {
 
     protected static final Map<Integer, DataTypeInfo> jdbcToRDBMS = new HashMap<>();
     protected static final Map<Integer, String> jdbcTypes2RdbmsTypes = new HashMap<>();
@@ -29,6 +29,10 @@ public class MsSqlTypesResolver implements TypesResolver {
     public static final int NON_JDBC_MEDIUM_STRING = 259;
     public static final int NON_JDBC_MEMO_STRING = 260;
     public static final int NON_JDBC_SHORT_STRING = 261;
+    private static final Map<Integer, Integer> jdbcTypesMaxSize = new HashMap<>();
+    private static final Map<Integer, Integer> jdbcTypesDefaultSize = new HashMap<>();
+    private static final List<Integer> characterTypesOrder = new ArrayList<>();
+    private static final List<Integer> binaryTypesOrder = new ArrayList<>();
 
     static {
         // supported types at whole. This is inverse mapping, see EasMsSqlSqlDriver for straight mapping.
@@ -55,6 +59,18 @@ public class MsSqlTypesResolver implements TypesResolver {
         jdbcTypes2RdbmsTypes.put(NON_JDBC_MEMO_STRING, "text");
         jdbcTypes2RdbmsTypes.put(Types.BINARY, "binary");
         jdbcTypes2RdbmsTypes.put(Types.CHAR, "char");
+        
+        
+        jdbcTypes2RdbmsTypes.put(Types.DOUBLE, "float");
+        jdbcTypes2RdbmsTypes.put(Types.LONGVARCHAR, "text");
+        jdbcTypes2RdbmsTypes.put(Types.DATE, "datetime");
+        jdbcTypes2RdbmsTypes.put(Types.TIME, "datetime");
+        jdbcTypes2RdbmsTypes.put(Types.LONGVARBINARY, "image");
+        jdbcTypes2RdbmsTypes.put(Types.BOOLEAN, "int");
+        jdbcTypes2RdbmsTypes.put(Types.LONGNVARCHAR, "text");
+        jdbcTypes2RdbmsTypes.put(Types.NCLOB, "text");
+        jdbcTypes2RdbmsTypes.put(Types.SQLXML, "text");
+        
         
 
         // let's reduce all jdbc types to supported jdbc types for this RDBMS
@@ -152,25 +168,39 @@ public class MsSqlTypesResolver implements TypesResolver {
         jdbcTypesWithSize.add(Types.VARCHAR);
         jdbcTypesWithSize.add(Types.NCHAR);
         jdbcTypesWithSize.add(Types.NVARCHAR);
+        jdbcTypesWithSize.add(Types.BINARY);
+        jdbcTypesWithSize.add(Types.VARBINARY);
 
-    }
-
-    @Override
-    public void resolve2RDBMS(Field aField) {
-        DataTypeInfo typeInfo = jdbcToRDBMS.get(aField.getTypeInfo().getSqlType());
-        if (typeInfo == null) {
-            typeInfo = jdbcToRDBMS.get(DataTypeInfo.VARCHAR.getSqlType());
-            Logger.getLogger(MsSqlTypesResolver.class.getName()).log(Level.SEVERE, "sql jdbc type {0} have no mapping to rdbms type. substituting with string type (Varchar)", new Object[]{aField.getTypeInfo().getSqlType()});
-        }
         
-        DataTypeInfo copyTypeInfo = typeInfo.copy();
-        String sqlTypeName = jdbcTypes2RdbmsTypes.get(typeInfo.getSqlType());
-        if (sqlTypeName != null) {
-            copyTypeInfo.setSqlType(getJdbcTypeByRDBMSTypename(sqlTypeName));
-            copyTypeInfo.setSqlTypeName(sqlTypeName.toLowerCase());
-            copyTypeInfo.setJavaClassName(typeInfo.getJavaClassName());
-        }
-        aField.setTypeInfo(copyTypeInfo);
+        // max sizes for types
+        jdbcTypesMaxSize.put(Types.CHAR,8000);
+        jdbcTypesMaxSize.put(Types.NCHAR,4000);
+        jdbcTypesMaxSize.put(Types.VARCHAR,8000);
+        jdbcTypesMaxSize.put(Types.NVARCHAR,4000);
+        jdbcTypesMaxSize.put(Types.BINARY,8000);
+        jdbcTypesMaxSize.put(Types.VARBINARY,8000);
+        
+        // default sizes for types ??????????????????????????????????????????????
+        jdbcTypesDefaultSize.put(Types.CHAR,1);
+        jdbcTypesDefaultSize.put(Types.NCHAR,1);
+        jdbcTypesDefaultSize.put(Types.VARCHAR,200);
+        jdbcTypesDefaultSize.put(Types.NVARCHAR,200);
+        jdbcTypesDefaultSize.put(Types.BINARY,1);
+        jdbcTypesDefaultSize.put(Types.VARBINARY,200);
+
+        // порядок замены символьных типов, если требуется размер больше исходного
+        characterTypesOrder.add(Types.CHAR);
+        characterTypesOrder.add(Types.NCHAR);
+        characterTypesOrder.add(Types.VARCHAR);
+        characterTypesOrder.add(Types.NVARCHAR);
+        characterTypesOrder.add(Types.CLOB);
+        
+        binaryTypesOrder.add(Types.BINARY);
+        binaryTypesOrder.add(Types.VARBINARY);
+        binaryTypesOrder.add(Types.BLOB);
+        
+        
+        
     }
 
     @Override
@@ -225,4 +255,29 @@ public class MsSqlTypesResolver implements TypesResolver {
         return jdbcTypesWithScale.contains(aSqlType);
     }        
     
+    @Override
+    public Map<Integer, String> getJdbcTypes2RdbmsTypes() {
+        return jdbcTypes2RdbmsTypes;
+    }
+
+    @Override
+    public Map<Integer, Integer> getJdbcTypesMaxSize() {
+        return jdbcTypesMaxSize;
+    }
+
+    @Override
+    public Map<Integer, Integer> getJdbcTypesDefaultSize() {
+        return jdbcTypesDefaultSize;
+    }
+
+    @Override
+    public List<Integer> getCharacterTypesOrder() {
+        return characterTypesOrder;
+    }
+
+    @Override
+    public  List<Integer> getBinaryTypesOrder() {
+        return binaryTypesOrder;
+    }
+
 }

@@ -13,110 +13,114 @@ import java.util.Map;
  * @author vy
  */
 public class Db2TestDefine extends DbTestDefine {
-    
+
     private static final Map<String, int[]> fieldsSizes = new HashMap<>();
     private static final Map<String, int[]> fieldsScales = new HashMap<>();
-    
-    private static final  String[][] fieldsTypes = {
+    private static final String[][] fieldsTypes = {
         // original, Oracle, PostgreSQL, MySql, DB2, H2, MsSql
-        {"SMALLINT", "", "", "", "SMALLINT", "", ""},
-        {"INTEGER", "", "", "", "INTEGER", "", ""},
-        {"INT", "", "", "", "INTEGER", "", ""},
-        {"BIGINT", "", "", "", "BIGINT", "", ""},
-        {"DECIMAL", "", "", "", "DECIMAL", "", ""},
-        {"DEC", "", "", "", "DECIMAL", "", ""},
-        {"NUMERIC", "", "", "", "DECIMAL", "", ""},
-        {"NUM", "", "", "", "DECIMAL", "", ""},
-        {"FLOAT", "", "", "", "FLOAT", "", ""},
-        {"REAL", "", "", "", "FLOAT", "", ""},
-        {"DOUBLE", "", "", "", "DOUBLE", "", ""},
-        {"DOUBLE PRECISION", "", "", "", "DOUBLE", "", ""},
-        {"CHAR", "", "", "", "CHAR", "", ""},
-        {"CHARACTER", "", "", "", "CHAR", "", ""},
-        {"VARCHAR", "", "", "", "VARCHAR", "", ""},
-        {"CHAR VARYING", "", "", "", "VARCHAR", "", ""},
-        {"CHARACTER VARYING", "", "", "", "VARCHAR", "", ""},
-        {"CHAR () FOR BIT DATA", "", "", "", "CHAR () FOR BIT DATA", "", ""},
-        {"CHARACTER () FOR BIT DATA", "", "", "", "CHAR () FOR BIT DATA", "", ""},
-        {"CHAR VARYING () FOR BIT DATA", "", "", "", "CHAR VARYING () FOR BIT DATA", "", ""},
-        {"VARCHAR () FOR BIT DATA", "", "", "", "CHAR VARYING () FOR BIT DATA", "", ""},
-        {"CHARACTER VARYING () FOR BIT DATA", "", "", "", "CHAR VARYING () FOR BIT DATA", "", ""},
-        {"LONG VARCHAR", "", "", "", "LONG VARCHAR", "", ""},
-        {"LONG VARCHAR FOR BIT DATA", "", "", "", "LONG VARCHAR", "", ""},
-        {"CLOB", "", "", "", "CLOB", "", ""},
-        {"CHAR LARGE OBJECT", "", "", "", "CLOB", "", ""},
-        {"CHARACTER LARGE OBJECT", "", "", "", "CLOB", "", ""},
-        {"GRAPHIC", "", "", "", "CHAR", "", ""},
-        {"VARGRAPHIC", "", "", "", "VARCHAR", "", ""},
-        {"LONG VARGRAPHIC", "", "", "", "LONG VARCHAR", "", ""},
-        {"DBCLOB", "", "", "", "CLOB", "", ""},
-        {"NCHAR", "", "", "", "CHAR", "", ""},
-        {"NATIONAL CHAR", "", "", "", "CHAR", "", ""},
-        {"NATIONAL CHARACTER", "", "", "", "CHAR", "", ""},
-        {"NVARCHAR", "", "", "", "VARCHAR", "", ""},
-        {"NATIONAL CHARACTER VARYING", "", "", "", "VARCHAR", "", ""},
-        {"NATIONAL CHAR VARYING", "", "", "", "VARCHAR", "", ""},
-        {"NCHAR VARYING", "", "", "", "VARCHAR", "", ""},
-        {"NCLOB", "", "", "", "CLOB", "", ""},
-        {"NCHAR LARGE OBJECT", "", "", "", "CLOB", "", ""},
-        {"NATIONAL CHARACTER LARGE OBJECT", "", "", "", "CLOB", "", ""},
-        {"BLOB", "", "", "", "BLOB", "", ""},
-        {"BINARY LARGE OBJECT", "", "", "", "BLOB", "", ""},
-        {"DATE", "", "", "", "DATE", "", ""},
-        {"TIME", "", "", "", "DATE", "", ""},
-        {"TIMESTAMP", "", "", "", "TIMESTAMP", "", ""},
-        {"XML", "", "", "", "BLOB", "", ""},
-        
-        
-//????        rdbmsTypes2JdbcTypes.put("DECFLOAT", Types.OTHER);//????? float !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        
-    };
-    
-    static {            
-//        //type, {original, Oracle, PostgreSQL, MySql, DB2, H2, MsSql}    
-//        fieldsSizes.put("DECIMAL",  new int[]{ 4,  4,  4,  4,  4,  4,  4});
-//        fieldsSizes.put("NUMBER",   new int[]{ 5,  5,  5,  5,  5,  5,  5});
-////        fieldsSizes.put("FLOAT",    new int[]{ 6,  6,  6,  6,  6,  6,  6});
-//        fieldsSizes.put("CHAR",     new int[]{ 7,  7,  7,  7,  7,  7,  7});
-//        fieldsSizes.put("VARCHAR2", new int[]{ 8,  8,  8,  8,  8,  8,  8});
-//        fieldsSizes.put("NCHAR",    new int[]{10, 10, 10, 10, 10, 10, 10});
-//        fieldsSizes.put("NVARCHAR2",new int[]{12, 12, 12, 12, 12, 12, 12});
-////!!!!!!!!!!!!!!!!!!!! добавить в драйвер        
-//        fieldsSizes.put("RAW",      new int[]{11, 11, -1, 11, 11, 11, 11}); 
-////??????        
-////        fieldsSizes.put("LONG",new Integer[]{10, 10, 10, 10, 10, 10, 10});
-//        
+        {"SMALLINT", "NUMBER", "int2", "smallint", "SMALLINT", "SMALLINT", "smallint"},
+        {"INTEGER", "NUMBER", "int4", "int", "INTEGER", "INTEGER", "int"},
+        {"INT", "NUMBER", "int4", "int", "INTEGER", "INTEGER", "int"},
+        {"BIGINT", "NUMBER", "int8", "bigint", "BIGINT", "BIGINT", "bigint"},
+        {"DECIMAL", "NUMBER", "numeric", "decimal", "DECIMAL", "DECIMAL", "decimal"},
+        {"DEC", "NUMBER", "numeric", "decimal", "DECIMAL", "DECIMAL", "decimal"},
+        {"NUMERIC", "NUMBER", "numeric", "decimal", "DECIMAL", "DECIMAL", "decimal"},
+        {"NUM", "NUMBER", "numeric", "decimal", "DECIMAL", "DECIMAL", "decimal"},
+        {"FLOAT", "FLOAT", "float4", "float", "REAL", "REAL", "real"},
+        {"REAL", "FLOAT", "float4", "float", "REAL", "REAL", "real"},
+        {"DOUBLE", "FLOAT", "float8", "double", "DOUBLE", "DOUBLE", "float"},
+        {"DOUBLE PRECISION", "FLOAT", "float8", "double", "DOUBLE", "DOUBLE", "float"},
+        {"CHAR", "CHAR", "bpchar", "char", "CHAR", "CHAR", "char"},
+        {"CHARACTER", "CHAR", "bpchar", "char", "CHAR", "CHAR", "char"},
+        {"VARCHAR", "VARCHAR2", "varchar", "varchar", "VARCHAR", "VARCHAR", "varchar"},
+        {"CHAR VARYING", "VARCHAR2", "varchar", "varchar", "VARCHAR", "VARCHAR", "varchar"},
+        {"CHARACTER VARYING", "VARCHAR2", "varchar", "varchar", "VARCHAR", "VARCHAR", "varchar"},
+        {"CHAR () FOR BIT DATA", "VARBINARY", "bytea", "binary", "CHAR () FOR BIT DATA", "VARBINARY", "varbinary"},
+        {"CHARACTER () FOR BIT DATA", "VARBINARY", "bytea", "binary", "CHAR () FOR BIT DATA", "VARBINARY", "varbinary"},
+        {"CHAR VARYING () FOR BIT DATA", "VARBINARY", "bytea", "varbinary", "VARCHAR () FOR BIT DATA", "VARBINARY", "varbinary"},
+        {"VARCHAR () FOR BIT DATA", "VARBINARY", "bytea", "varbinary", "VARCHAR () FOR BIT DATA", "VARBINARY", "varbinary"},
+        {"CHARACTER VARYING () FOR BIT DATA", "VARBINARY", "bytea", "varbinary", "VARCHAR () FOR BIT DATA", "VARBINARY", "varbinary"},
+        {"LONG VARCHAR", "LONG", "text", "longtext", "LONG VARCHAR", "CLOB", "clob"},
+        {"LONG VARCHAR FOR BIT DATA", "LONGVARBINARY", "bytea", "longblob", "LONG VARCHAR FOR BIT DATA", "VARBINARY", "blob"},
+        {"CLOB", "CLOB", "text", "longtext", "CLOB", "CLOB", "clob"},
+        {"CHAR LARGE OBJECT", "CLOB", "text", "longtext", "CLOB", "CLOB", "clob"},
+        {"CHARACTER LARGE OBJECT", "CLOB", "text", "longtext", "CLOB", "CLOB", "clob"},
+        {"GRAPHIC", "CHAR", "bpchar", "char", "CHAR", "CHAR", "char"},
+        {"VARGRAPHIC", "VARCHAR2", "varchar", "varchar", "VARCHAR", "VARCHAR", "varchar"},
+        {"LONG VARGRAPHIC", "LONG", "text", "longtext", "LONG VARCHAR", "CLOB", "clob"},
+        {"DBCLOB", "CLOB", "text", "longtext", "CLOB", "CLOB", "clob"},
+        {"NCHAR", "CHAR", "bpchar", "char", "CHAR", "CHAR", "char"},
+        {"NATIONAL CHAR", "CHAR", "bpchar", "char", "CHAR", "CHAR", "char"},
+        {"NATIONAL CHARACTER", "CHAR", "bpchar", "char", "CHAR", "CHAR", "char"},
+        {"NVARCHAR", "VARCHAR2", "varchar", "varchar", "VARCHAR", "VARCHAR", "varchar"},
+        {"NATIONAL CHARACTER VARYING", "VARCHAR2", "varchar", "varchar", "VARCHAR", "VARCHAR", "varchar"},
+        {"NATIONAL CHAR VARYING", "VARCHAR2", "varchar", "varchar", "VARCHAR", "VARCHAR", "varchar"},
+        {"NCHAR VARYING", "VARCHAR2", "varchar", "varchar", "VARCHAR", "VARCHAR", "varchar"},
+        {"NCLOB", "CLOB", "text", "longtext", "CLOB", "CLOB", "clob"},
+        {"NCHAR LARGE OBJECT", "CLOB", "text", "longtext", "CLOB", "CLOB", "clob"},
+        {"NATIONAL CHARACTER LARGE OBJECT", "CLOB", "text", "longtext", "CLOB", "CLOB", "clob"},
+        {"BLOB", "BLOB", "bytea", "longblob", "BLOB", "BLOB", "blob"},
+        {"BINARY LARGE OBJECT", "BLOB", "bytea", "longblob", "BLOB", "BLOB", "blob"},
+        {"DATE", "DATE", "date", "date", "DATE", "DATE", "datetime"},
+        {"TIME", "DATE", "time", "time", "TIME", "TIME", "datetime"},
+        {"TIMESTAMP", "TIMESTAMP(6)", "timestamp", "timestamp", "TIMESTAMP", "TIMESTAMP", "datetime"},
+        {"XML", "BLOB", "bytea", "longblob", "BLOB", "BLOB", "blob"},};
+
+    static {
+        // отрицательное значение в fieldsSizes и fieldsScales означает, что значение отсутствует  и проверка не производится
+        //type, {original, Oracle, PostgreSQL, MySql, DB2, H2, MsSql}    
+        fieldsSizes.put("DECIMAL", new int[]{4, -4, 4, 4, 4, 4, -4});
+        fieldsSizes.put("DEC", new int[]{5, -5, 5, 5, 5, 5, -5});
+        fieldsSizes.put("NUMERIC", new int[]{6, -6, 6, 6, 6, 6, -6});
+        fieldsSizes.put("CHAR", new int[]{7, 7, 7, 7, 7, 7, 7});
+        fieldsSizes.put("CHARACTER", new int[]{8, 8, 8, 8, 8, 8, 8});
+        fieldsSizes.put("GRAPHIC", new int[]{9, 9, 9, 9, 9, 9, 9});
+        fieldsSizes.put("NCHAR", new int[]{10, 10, 10, 10, 10, 10, 10});
+        fieldsSizes.put("NATIONAL CHAR", new int[]{11, 11, 11, 11, 11, 11, 11});
+        fieldsSizes.put("NATIONAL CHARACTER", new int[]{12, 12, 12, 12, 12, 12, 12});
+
+        fieldsSizes.put("VARCHAR", new int[]{13, 13, 13, 13, 13, 13, 13});
+        fieldsSizes.put("CHAR VARYING", new int[]{14, 14, 14, 14, 14, 14, 14});
+        fieldsSizes.put("CHARACTER VARYING", new int[]{15, 15, 15, 15, 15, 15, 15});
+        fieldsSizes.put("VARGRAPHIC", new int[]{16, 16, 16, 16, 16, 16, 16});
+        fieldsSizes.put("NVARCHAR", new int[]{17, 17, 17, 17, 17, 17, 17});
+        fieldsSizes.put("NCHAR VARYING", new int[]{18, 18, 18, 18, 18, 18, 18});
+        fieldsSizes.put("NATIONAL CHAR VARYING", new int[]{19, 19, 19, 19, 19, 19, 19});
+        fieldsSizes.put("NATIONAL CHARACTER VARYING", new int[]{20, 20, 20, 20, 20, 20, 20});
+
+        fieldsSizes.put("CHAR () FOR BIT DATA", new int[]{21, 21, -21, 21, 21, 21, -21});
+        fieldsSizes.put("CHARACTER () FOR BIT DATA", new int[]{22, 22, -22, 22, 22, 22, -22});
+
+        fieldsSizes.put("CHAR VARYING () FOR BIT DATA", new int[]{23, 23, -23, 23, 23, 23, -23});
+        fieldsSizes.put("VARCHAR () FOR BIT DATA", new int[]{24, 24, -24, 24, 24, 24, -24});
+        fieldsSizes.put("CHARACTER VARYING () FOR BIT DATA", new int[]{25, 25, -25, 25, 25, 25, -25});
+
 //        //originalType, {originalValue, Oracle, PostgreSQL, MySql, DB2, H2, MsSql}    
-//        fieldsScales.put("DECIMAL",  new int[]{2, 2, 2, 2, 2, 2, 2});
-//        fieldsScales.put("NUMBER",   new int[]{3, 3, 3, 3, 3, 3, 3});
+        fieldsScales.put("DECIMAL", new int[]{2, -2, 2, 2, 2, 2, -2});
+        fieldsScales.put("DEC", new int[]{3, -3, 3, 3, 3, 3, -3});
+        fieldsScales.put("NUMERIC", new int[]{4, -4, 4, 4, 4, 4, -4});
     }
-    
-    
-    
-    private static final  ForeignKeyRule [][] fKeyUpdateRules = {
+    private static final ForeignKeyRule[][] fKeyUpdateRules = {
         // original, Oracle, PostgreSQL, MySql, DB2, H2, MsSql
         {ForeignKeyRule.NOACTION, null, ForeignKeyRule.NOACTION, ForeignKeyRule.NOACTION, ForeignKeyRule.NOACTION, ForeignKeyRule.NOACTION, ForeignKeyRule.NOACTION},
-        {ForeignKeyRule.SETNULL, null, ForeignKeyRule.SETNULL,ForeignKeyRule.SETNULL,ForeignKeyRule.SETNULL,ForeignKeyRule.SETNULL,ForeignKeyRule.SETNULL},
-        {ForeignKeyRule.SETDEFAULT,  null, ForeignKeyRule.SETDEFAULT, ForeignKeyRule.SETDEFAULT, ForeignKeyRule.SETDEFAULT, ForeignKeyRule.SETDEFAULT, ForeignKeyRule.SETDEFAULT}, 
-        {ForeignKeyRule.CASCADE, null, ForeignKeyRule.CASCADE, ForeignKeyRule.CASCADE, ForeignKeyRule.CASCADE, ForeignKeyRule.CASCADE, ForeignKeyRule.CASCADE}
-    };        
-    
-    private static final  ForeignKeyRule [][] fKeyDeleteRules = {
+        {ForeignKeyRule.SETNULL, null, ForeignKeyRule.NOACTION, ForeignKeyRule.NOACTION, ForeignKeyRule.NOACTION, ForeignKeyRule.NOACTION, ForeignKeyRule.NOACTION},
+        {ForeignKeyRule.SETDEFAULT, null, ForeignKeyRule.NOACTION, ForeignKeyRule.NOACTION, ForeignKeyRule.NOACTION, ForeignKeyRule.NOACTION, ForeignKeyRule.NOACTION},
+        {ForeignKeyRule.CASCADE, null, ForeignKeyRule.NOACTION, ForeignKeyRule.NOACTION, ForeignKeyRule.NOACTION, ForeignKeyRule.NOACTION, ForeignKeyRule.NOACTION},};
+    private static final ForeignKeyRule[][] fKeyDeleteRules = {
         // original, Oracle, PostgreSQL, MySql, DB2, H2, MsSql
         {ForeignKeyRule.NOACTION, ForeignKeyRule.NOACTION, ForeignKeyRule.NOACTION, ForeignKeyRule.NOACTION, ForeignKeyRule.NOACTION, ForeignKeyRule.NOACTION, ForeignKeyRule.NOACTION},
-        {ForeignKeyRule.SETNULL, ForeignKeyRule.SETNULL, ForeignKeyRule.SETNULL,ForeignKeyRule.SETNULL,ForeignKeyRule.SETNULL,ForeignKeyRule.SETNULL,ForeignKeyRule.SETNULL},
-        {ForeignKeyRule.SETDEFAULT,  ForeignKeyRule.SETDEFAULT, ForeignKeyRule.SETDEFAULT, ForeignKeyRule.SETDEFAULT, ForeignKeyRule.SETDEFAULT, ForeignKeyRule.SETDEFAULT, ForeignKeyRule.SETDEFAULT}, 
+        {ForeignKeyRule.SETNULL, ForeignKeyRule.SETNULL, ForeignKeyRule.SETNULL, ForeignKeyRule.SETNULL, ForeignKeyRule.SETNULL, ForeignKeyRule.SETNULL, ForeignKeyRule.SETNULL},
+        {ForeignKeyRule.SETDEFAULT, ForeignKeyRule.NOACTION, ForeignKeyRule.NOACTION, ForeignKeyRule.NOACTION, ForeignKeyRule.NOACTION, ForeignKeyRule.NOACTION, ForeignKeyRule.NOACTION},
         {ForeignKeyRule.CASCADE, ForeignKeyRule.CASCADE, ForeignKeyRule.CASCADE, ForeignKeyRule.CASCADE, ForeignKeyRule.CASCADE, ForeignKeyRule.CASCADE, ForeignKeyRule.CASCADE}
-    };   
-    
-    private static final boolean [][] fKeyDeferrable = {
+    };
+    private static final boolean[][] fKeyDeferrable = {
         // original, Oracle, PostgreSQL, MySql, DB2, H2, MsSql
         {false, false, false, false, false, false, false},
         {true, true, true, true, true, true, true}
     };
-    
+
     @Override
-    public  Map<String, int[]> getFieldsSizes() {
+    public Map<String, int[]> getFieldsSizes() {
         return fieldsSizes;
     }
 
@@ -126,7 +130,7 @@ public class Db2TestDefine extends DbTestDefine {
     }
 
     @Override
-    public  String[][] getFieldsTypes() {
+    public String[][] getFieldsTypes() {
         return fieldsTypes;
     }
 
@@ -134,7 +138,7 @@ public class Db2TestDefine extends DbTestDefine {
     public ForeignKeyRule[][] getFKeyDeleteRules() {
         return fKeyDeleteRules;
     }
-    
+
     @Override
     public ForeignKeyRule[][] getFKeyUpdateRules() {
         return fKeyUpdateRules;

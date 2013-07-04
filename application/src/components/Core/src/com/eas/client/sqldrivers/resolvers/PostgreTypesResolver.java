@@ -8,24 +8,27 @@ import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.SQLUtils;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
  * @author mg
  */
-public class PostgreTypesResolver implements TypesResolver {
+public class PostgreTypesResolver extends TypesResolver {
 
     protected static final Map<Integer, String> jdbcTypes2RdbmsTypes = new HashMap<>();
     protected static final Map<String, Integer> rdbmsTypes2JdbcTypes = new HashMap<>();
     protected static final Set<String> gisTypes = new HashSet<>();
     protected static final Set<Integer> jdbcTypesWithSize = new HashSet<>();
     protected static final Set<Integer> jdbcTypesWithScale = new HashSet<>();
+    protected static final Map<Integer, Integer> jdbcTypesMaxSize = new HashMap<>();
+    protected static final Map<Integer, Integer> jdbcTypesDefaultSize = new HashMap<>();
+    protected static final List<Integer> characterTypesOrder = new ArrayList<>();
 
     static {
 
@@ -52,7 +55,7 @@ public class PostgreTypesResolver implements TypesResolver {
         rdbmsTypes2JdbcTypes.put("bigserial", Types.BIGINT);
         rdbmsTypes2JdbcTypes.put("oid", Types.BIGINT);
         //-2
-//???        rdbmsTypes2JdbcTypes.put("bytea", Types.BINARY);
+        //???        rdbmsTypes2JdbcTypes.put("bytea", Types.BINARY);
         rdbmsTypes2JdbcTypes.put("bytea", Types.BLOB);   //???? LONGVARBINARY       TEXT-???????!!!!!!
         // 1
         rdbmsTypes2JdbcTypes.put("bpchar", Types.CHAR);
@@ -132,14 +135,27 @@ public class PostgreTypesResolver implements TypesResolver {
 
         //typeName(M,D)
         jdbcTypesWithScale.add(Types.DECIMAL);
-
+        jdbcTypesWithScale.add(Types.NUMERIC);
+        
         //typeName(M)
         jdbcTypesWithSize.add(Types.CHAR);
         jdbcTypesWithSize.add(Types.VARCHAR);
         jdbcTypesWithSize.add(Types.NUMERIC);
         jdbcTypesWithSize.add(Types.DECIMAL);
+        
+        // max sizes for types
+        jdbcTypesMaxSize.put(Types.CHAR,10485760);
+        jdbcTypesMaxSize.put(Types.VARCHAR,10485760);
+        
+        // default sizes for types ??????????????????????????????????????????????
+        jdbcTypesDefaultSize.put(Types.CHAR,1);
+        jdbcTypesDefaultSize.put(Types.VARCHAR,200);
 
-
+        // порядок замены символьных типов, если требуется размер больше исходного
+        characterTypesOrder.add(Types.CHAR);
+        characterTypesOrder.add(Types.VARCHAR);
+        characterTypesOrder.add(Types.CLOB);
+        
     }
 
     @Override
@@ -156,24 +172,6 @@ public class PostgreTypesResolver implements TypesResolver {
         Set<Integer> supportedTypes = new HashSet<>();
         supportedTypes.addAll(rdbmsTypes2JdbcTypes.values());
         return supportedTypes;
-    }
-
-    @Override
-    public void resolve2RDBMS(Field aField) {
-        DataTypeInfo typeInfo = aField.getTypeInfo();
-        if (typeInfo == null) {
-            typeInfo = DataTypeInfo.VARCHAR;
-            Logger.getLogger(PostgreTypesResolver.class.getName()).log(Level.SEVERE, "sql jdbc type {0} have no mapping to rdbms type. substituting with string type (Varchar)", new Object[]{aField.getTypeInfo().getSqlType()});
-        }
-        DataTypeInfo copyTypeInfo = typeInfo.copy();
-        String sqlTypeName = jdbcTypes2RdbmsTypes.get(typeInfo.getSqlType());
-        if (sqlTypeName != null) {
-            String sqlTypeNameLower = sqlTypeName.toLowerCase();
-            copyTypeInfo.setSqlType(getJdbcTypeByRDBMSTypename(sqlTypeName));
-            copyTypeInfo.setSqlTypeName(sqlTypeNameLower);
-            copyTypeInfo.setJavaClassName(typeInfo.getJavaClassName());
-        }
-        aField.setTypeInfo(copyTypeInfo);
     }
 
     @Override
@@ -220,5 +218,31 @@ public class PostgreTypesResolver implements TypesResolver {
     @Override
     public boolean isScaled(Integer aSqlType) {
         return jdbcTypesWithScale.contains(aSqlType);
+    }        
+
+    @Override
+    public Map<Integer, String> getJdbcTypes2RdbmsTypes() {
+        return jdbcTypes2RdbmsTypes;
     }
+
+    @Override
+    public Map<Integer, Integer> getJdbcTypesMaxSize() {
+        return jdbcTypesMaxSize;
+    }
+
+    @Override
+    public Map<Integer, Integer> getJdbcTypesDefaultSize() {
+        return jdbcTypesDefaultSize;
+    }
+
+    @Override
+    public List<Integer> getCharacterTypesOrder() {
+        return characterTypesOrder;
+    }
+
+    @Override
+    public  List<Integer> getBinaryTypesOrder() {
+        return null;
+    }
+
 }

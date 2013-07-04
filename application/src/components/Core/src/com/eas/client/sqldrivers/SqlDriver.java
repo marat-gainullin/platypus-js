@@ -46,6 +46,8 @@ public abstract class SqlDriver {
     public static final String DROP_FIELD_SQL_PREFIX = "alter table %s drop column ";
     public static final String ADD_FIELD_SQL_PREFIX = "alter table %s add ";
 
+    public static final String PKEY_NAME_SUFFIX = "_pk";
+    
     public SqlDriver() {
         super();
     }
@@ -334,7 +336,7 @@ public abstract class SqlDriver {
      * @param listPk Primary key columns specifications list
      * @return Sql text
      */
-    public abstract String getSql4CreatePkConstraint(String aSchemaName, List<PrimaryKeySpec> listPk);
+    public abstract String[] getSql4CreatePkConstraint(String aSchemaName, List<PrimaryKeySpec> listPk);
 
     /**
      * *
@@ -409,16 +411,34 @@ public abstract class SqlDriver {
     public abstract String getSql4FieldDefinition(Field aField);
 
     /**
+     * Generates Sql string to modify a field, according to specific features of
+     * particular database. If it meats any strange type, such
+     * java.sql.Types.OTHER or java.sql.Types.STRUCT, it uses the field's type
+     * name.
+     *
+     * @param aSchemaName Schema name
+     * @param aTableName Name of the table with that field
+     * @param aField A field information 
+     * @return Sql array string for field modification.
+     */
+    public abstract String[] getSqls4AddingField(String aSchemaName, String aTableName, Field aField);
+
+    /**
      * Generates sql texts array for dropping a field. Sql clauses from array
      * will execute consequentially
      *
+     * @param aSchemaName Schema name
      * @param aTableName Name of a table the field to dropped from.
      * @param aFieldName Field name to drop
      * @return Sql string generted.
      */
-    public String[] getSql4DroppingField(String aTableName, String aFieldName) {
+    public String[] getSql4DroppingField(String aSchemaName, String aTableName, String aFieldName) {
+        String fullTableName = wrapName(aTableName);
+        if (aSchemaName != null && !aSchemaName.isEmpty()) {
+            fullTableName = wrapName(aSchemaName) + "." + fullTableName;
+        }
         return new String[]{
-                    String.format(DROP_FIELD_SQL_PREFIX, aTableName) + aFieldName
+                    String.format(DROP_FIELD_SQL_PREFIX, fullTableName) + wrapName(aFieldName)
                 };
     }
 
@@ -428,24 +448,26 @@ public abstract class SqlDriver {
      * java.sql.Types.OTHER or java.sql.Types.STRUCT, it uses the field's type
      * name.
      *
+     * @param aSchemaName Schema name
      * @param aTableName Name of the table with that field
      * @param aOldFieldMd A field information to migrate from.
      * @param aNewFieldMd A field information to migrate to.
      * @return Sql array string for field modification.
      */
-    public abstract String[] getSqls4ModifyingField(String aTableName, Field aOldFieldMd, Field aNewFieldMd);
+    public abstract String[] getSqls4ModifyingField(String aSchemaName, String aTableName, Field aOldFieldMd, Field aNewFieldMd);
 
     /**
      * *
      * Generates Sql string to rename a field, according to specific features of
      * particular database.
      *
+     * @param aSchemaName Schema name
      * @param aTableName Table name
      * @param aOldFieldName Old column name
      * @param aNewFieldMd New field
      * @return Sql array string for field modification.
      */
-    public abstract String[] getSqls4RenamingField(String aTableName, String aOldFieldName, Field aNewFieldMd);
+    public abstract String[] getSqls4RenamingField(String aSchemaName, String aTableName, String aOldFieldName, Field aNewFieldMd);
 
     /**
      * Converts JDBC type to specific database type
@@ -555,5 +577,13 @@ public abstract class SqlDriver {
         leftCharForWrap = aLeftChar;
         rightCharForWrap = aRightChar;
         wrappedChars = aWrappedSpecChars;
+    }
+    
+    public String makeFullName(String aSchemaName, String aName) {
+        String name = wrapName(aName);
+        if (aSchemaName != null && !aSchemaName.isEmpty()) {
+            name = wrapName(aSchemaName) + "." + name;
+        }
+        return name;
     }
 }
