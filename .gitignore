@@ -6,3 +6,5 @@ private.properties
 private.xml
 *.xml~
 *.gwt-log
+nbproject
+dist
