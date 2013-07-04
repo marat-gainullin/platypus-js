@@ -21,5 +21,7 @@ public abstract class PlatypusConverter extends RowsetConverter {
         resolver = aResolver;
     }
 
-    public abstract boolean isGeometry(DataTypeInfo aTypeInfo);
+    public boolean isGeometry(DataTypeInfo aTypeInfo){
+        return DataTypeInfo.GEOMETRY.equals(aTypeInfo);
+    }
 }

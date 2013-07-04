@@ -27,6 +27,9 @@ public class DbTableIndexSpec {
     protected boolean hashed = false;
     protected boolean unique = false;
     protected String name = null;
+    //???
+    protected boolean pKey = false;
+    protected String fKeyName = null;
     protected PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
 
     public DbTableIndexSpec() {
@@ -47,6 +50,9 @@ public class DbTableIndexSpec {
         for (int i = 0; i < sourceColumns.size(); i++) {
             columns.add(sourceColumns.get(i).copy());
         }
+        //???
+        pKey = aSource.isPKey();
+        fKeyName = aSource.getFKeyName();
     }
 
     public PropertyChangeSupport getChangeSupport() {
@@ -81,6 +87,13 @@ public class DbTableIndexSpec {
         if (this.columns != other.columns && (this.columns == null || !this.columns.equals(other.columns))) {
             return false;
         }
+        //???
+        if (this.pKey != other.pKey) {
+            return false;
+        }
+        if (this.fKeyName != other.fKeyName && (this.fKeyName == null || !this.fKeyName.equals(other.fKeyName))) {
+            return false;
+        }
         return true;
 }
 
@@ -96,6 +109,26 @@ public class DbTableIndexSpec {
         boolean oldValue = unique;
         unique = aValue;
         changeSupport.firePropertyChange(UNIQUE_PROPERTY, oldValue, aValue);
+    }
+
+    //???
+    public boolean isPKey() {
+        return pKey;
+    }
+
+    //???
+    public void setPKey(boolean aValue) {
+        pKey = aValue;
+    }
+    
+    //???
+    public String getFKeyName() {
+        return fKeyName;
+    }
+    
+    //???
+    public void setFKeyName(String aValue) {
+        fKeyName = aValue;
     }
 
     public boolean isClustered() {

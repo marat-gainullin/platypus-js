@@ -14,6 +14,7 @@ import com.vividsolutions.jts.io.WKBReader;
 import com.vividsolutions.jts.io.WKBWriter;
 import com.vividsolutions.jts.io.WKTReader;
 import java.sql.*;
+import org.postgresql.util.PGobject;
 
 /**
  *
@@ -25,14 +26,13 @@ public class PostgreConverter extends PlatypusConverter {
     protected WKTReader wktGeometryReader = new WKTReader();
     protected WKBReader wkbGeometryReader = new WKBReader();
 
-    public PostgreConverter()
-    {
+    public PostgreConverter() {
         super(new PostgreTypesResolver());
     }
-    
+
     @Override
     public boolean isGeometry(DataTypeInfo aTypeInfo) {
-        return aTypeInfo.getSqlType() == Types.OTHER && ((PostgreTypesResolver)resolver).isGeometryTypeName(aTypeInfo.getSqlTypeName().toLowerCase());
+        return super.isGeometry(aTypeInfo) || (aTypeInfo.getSqlType() == Types.OTHER && ((PostgreTypesResolver) resolver).isGeometryTypeName(aTypeInfo.getSqlTypeName().toLowerCase()));
     }
 
     @Override
@@ -40,6 +40,8 @@ public class PostgreConverter extends PlatypusConverter {
         try {
             if (isGeometry(aTypeInfo)) {
                 if (aValue instanceof Geometry) {
+                    // The folowing code should be replaced with full-functional converter
+                    // JTS Geometry -> PostGIS geometry
                     byte[] geomBytes = wkbGeometryWriter.write((Geometry) aValue);
                     aStmt.setBytes(aParameterIndex, geomBytes);
                 } else {
@@ -82,7 +84,7 @@ public class PostgreConverter extends PlatypusConverter {
                     || aTypeInfo.getSqlType() == Types.LONGNVARCHAR) {
                 // target type - string
                 Object oConverted = super.convert2JdbcCompatible(aValue, aTypeInfo);
-                String castedString = (String)oConverted;
+                String castedString = (String) oConverted;
                 if (castedString != null) {
                     aStmt.setString(aParameterIndex, castedString);
                 } else {
@@ -108,6 +110,11 @@ public class PostgreConverter extends PlatypusConverter {
                         } else if (value instanceof byte[]) {
                             byte[] bValue = (byte[]) value;
                             return wkbGeometryReader.read(bValue);
+                        } else if (value instanceof PGobject) {
+                            // The folowing code should be replaced with full-functional converter
+                            String sValue = ((PGobject) value).getType() + ((PGobject) value).getValue();
+                            sValue = sValue.replaceAll(",([\\d\\.])", " $1");
+                            return wktGeometryReader.read(sValue);
                         } else {
                             return value;
                         }

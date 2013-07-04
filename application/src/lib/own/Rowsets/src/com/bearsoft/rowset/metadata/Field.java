@@ -42,8 +42,6 @@ public class Field {
     protected boolean nullable = true;
     protected boolean readonly = false;
     protected boolean pk = false;
-    // Data is always inserted
-    protected boolean strong4Insert = false;
     protected ForeignKeySpec fk = null;
     protected String tableName = null;
     protected String schemaName = null;
@@ -156,23 +154,6 @@ public class Field {
     }
 
     /**
-     * Indicates that this field will be allways present in insert statements.
-     *
-     * @return Whether this field is allways present in insert statements.
-     */
-    @ScriptFunction(jsDoc = "Determines that this field will be allways present in insert statements.")
-    public boolean isStrong4Insert() {
-        return strong4Insert;
-    }
-
-    @ScriptFunction
-    public void setStrong4Insert(boolean aValue) {
-        boolean oldValue = strong4Insert;
-        strong4Insert = aValue;
-        changeSupport.firePropertyChange(STRONG4INSERT_PROPERTY, oldValue, aValue);
-    }
-
-    /**
      * Returns foreign key specification of this field if it references to some
      * table.
      *
@@ -236,7 +217,6 @@ public class Field {
                     && signed == rf.isSigned()
                     && pk == rf.isPk()
                     && readonly == rf.isReadonly()
-                    && strong4Insert == rf.isStrong4Insert()
                     && precision == rf.getPrecision()
                     && scale == rf.getScale()
                     && size == rf.getSize()
@@ -567,9 +547,6 @@ public class Field {
             if (isPk() != aSourceField.isPk()) {
                 setPk(aSourceField.isPk());
             }
-            if (isStrong4Insert() != aSourceField.isStrong4Insert()) {
-                setStrong4Insert(aSourceField.isStrong4Insert());
-            }
             if (!equalsOrNulls(getFk(), aSourceField.getFk())) {
                 setFk((ForeignKeySpec) aSourceField.getFk().copy());
             }
@@ -609,9 +586,6 @@ public class Field {
                 sb.append(rf.table).append(".");
             }
             sb.append(rf.field);
-        }
-        if (strong4Insert) {
-            sb.append(", strong4Insert");
         }
         sb.append(", ").append(typeInfo.toString());
         sb.append(", size ").append(size).append(", precision ").append(precision).append(", scale ").append(scale);

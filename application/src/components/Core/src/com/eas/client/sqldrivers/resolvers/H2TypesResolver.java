@@ -8,23 +8,27 @@ import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.SQLUtils;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
  * @author vv
  */
-public class H2TypesResolver implements TypesResolver {
+public class H2TypesResolver extends TypesResolver {
 
     protected static final Map<Integer, String> jdbcTypes2RdbmsTypes = new HashMap<>();
     protected static final Map<String, Integer> rdbmsTypes2JdbcTypes = new HashMap<>();
     protected static final Set<Integer> jdbcTypesWithSize = new HashSet<>();
     protected static final Set<Integer> jdbcTypesWithScale = new HashSet<>();
+    private static final Map<Integer, Integer> jdbcTypesMaxSize = new HashMap<>();
+    private static final Map<Integer, Integer> jdbcTypesDefaultSize = new HashMap<>();
+    private static final List<Integer> characterTypesOrder = new ArrayList<>();
+    private static final List<Integer> binaryTypesOrder = new ArrayList<>();
 
     static {
         // rdbms -> jdbc
@@ -95,29 +99,34 @@ public class H2TypesResolver implements TypesResolver {
         jdbcTypesWithSize.add(Types.LONGNVARCHAR);
         jdbcTypesWithSize.add(Types.CHAR);
         jdbcTypesWithSize.add(Types.VARCHAR);
-        jdbcTypesWithSize.add(Types.NCHAR);
-        jdbcTypesWithSize.add(Types.NVARCHAR);
+//        jdbcTypesWithSize.add(Types.NCHAR);
+//        jdbcTypesWithSize.add(Types.NVARCHAR);
         jdbcTypesWithSize.add(Types.OTHER);
         jdbcTypesWithSize.add(Types.BLOB);
         jdbcTypesWithSize.add(Types.CLOB);
-    }
+        
+        // max sizes for types
+        jdbcTypesMaxSize.put(Types.CHAR,2147483647);
+        jdbcTypesMaxSize.put(Types.VARCHAR,2147483647);
+        jdbcTypesMaxSize.put(Types.BINARY,2147483647);
+        jdbcTypesMaxSize.put(Types.VARBINARY,2147483647);
+        
+        // default sizes for types ??????????????????????????????????????????????
+        jdbcTypesDefaultSize.put(Types.CHAR,1);
+        jdbcTypesDefaultSize.put(Types.VARCHAR,200);
+        jdbcTypesDefaultSize.put(Types.BINARY,1);
+        jdbcTypesDefaultSize.put(Types.VARBINARY,200);
 
-    @Override
-    public void resolve2RDBMS(Field aField) {
-        DataTypeInfo typeInfo = aField.getTypeInfo();
-        if (typeInfo == null) {
-            typeInfo = DataTypeInfo.VARCHAR;
-            Logger.getLogger(H2TypesResolver.class.getName()).log(Level.SEVERE, "SQL JDBC type {0} have no mapping to rdbms type. substituting with string type (Varchar)", new Object[]{aField.getTypeInfo().getSqlType()});
-        }
-        DataTypeInfo copyTypeInfo = typeInfo.copy();
-        String sqlTypeName = jdbcTypes2RdbmsTypes.get(typeInfo.getSqlType());
-        if (sqlTypeName != null) {
-            copyTypeInfo.setSqlType(getJdbcTypeByRDBMSTypename(sqlTypeName));
-            copyTypeInfo.setSqlTypeName(sqlTypeName.toLowerCase());
-            copyTypeInfo.setJavaClassName(typeInfo.getJavaClassName());
-        }
-        aField.setTypeInfo(copyTypeInfo);
-
+        // порядок замены символьных типов, если требуется размер больше исходного
+        characterTypesOrder.add(Types.CHAR);
+        characterTypesOrder.add(Types.VARCHAR);
+        characterTypesOrder.add(Types.CLOB);
+        
+        binaryTypesOrder.add(Types.BINARY);
+        binaryTypesOrder.add(Types.VARBINARY);
+        binaryTypesOrder.add(Types.BLOB);
+        
+        
     }
 
     @Override
@@ -128,6 +137,8 @@ public class H2TypesResolver implements TypesResolver {
             } else {
                 aField.setTypeInfo(DataTypeInfo.BLOB.copy());
             }
+        } else if (isGeometryTypeName(aField.getTypeInfo().getSqlTypeName())) {
+            aField.setTypeInfo(DataTypeInfo.GEOMETRY.copy());
         }
     }
 
@@ -161,4 +172,30 @@ public class H2TypesResolver implements TypesResolver {
     public boolean isScaled(Integer aSqlType) {
         return jdbcTypesWithScale.contains(aSqlType);
     }
+    
+    @Override
+    public Map<Integer, String> getJdbcTypes2RdbmsTypes() {
+        return jdbcTypes2RdbmsTypes;
+    }
+
+    @Override
+    public Map<Integer, Integer> getJdbcTypesMaxSize() {
+        return jdbcTypesMaxSize;
+    }
+
+    @Override
+    public Map<Integer, Integer> getJdbcTypesDefaultSize() {
+        return jdbcTypesDefaultSize;
+    }
+
+    @Override
+    public List<Integer> getCharacterTypesOrder() {
+        return characterTypesOrder;
+    }
+    
+    @Override
+    public  List<Integer> getBinaryTypesOrder() {
+        return binaryTypesOrder;
+    }
+
 }

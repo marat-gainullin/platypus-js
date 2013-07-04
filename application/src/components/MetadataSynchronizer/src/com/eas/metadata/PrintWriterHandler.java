@@ -19,7 +19,7 @@ import java.util.logging.LogRecord;
 public class PrintWriterHandler extends Handler {
 
     private PrintWriter writer = null;
-    
+
     public PrintWriterHandler(PrintWriter aWriter) {
         writer = aWriter;
     }
@@ -28,23 +28,23 @@ public class PrintWriterHandler extends Handler {
         this(aWriter);
         setFormatter(aFormatter);
     }
+
     @Override
     public void publish(LogRecord record) {
         if (!isLoggable(record)) {
             return;
         }
         String msg;
-        
+
         try {
             Formatter formatter = getFormatter();
-            if (formatter!= null) {
-               msg = formatter.format(record);
-            }
-            else {
+            if (formatter != null) {
+                msg = formatter.format(record);
+            } else {
                 //default
                 String message = record.getMessage();
                 Throwable thrown = record.getThrown();
-                msg = String.format("%s%s: %s -> %s %s\n",(record.getLevel().intValue() >= Level.WARNING.intValue() ? "\u001B[31m":""),record.getLevel(), new Date(record.getMillis()), (message == null?"":message),(thrown == null?"":thrown.toString()));
+                msg = String.format("%s%s: %s -> %s %s\n", (record.getLevel().intValue() >= Level.WARNING.intValue() ? "\u001B[31m" : ""), record.getLevel(), new Date(record.getMillis()), (message == null ? "" : message), (thrown == null ? "" : thrown.toString()));
             }
         } catch (Exception ex) {
             reportError(null, ex, ErrorManager.FORMAT_FAILURE);
@@ -62,5 +62,4 @@ public class PrintWriterHandler extends Handler {
     public void close() throws SecurityException {
         writer.close();
     }
-    
 }

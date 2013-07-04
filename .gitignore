@@ -24,3 +24,5 @@ private.xml
 /application/src/components/GeoAddon/nbproject/private/
 /application/src/lib/own/GeoPane/nbproject/private/
 /application/src/lib/own/Sensors/nbproject/private/
+/application/src/components/MetadataSynchronizer/nbproject/private/
+/application/src/components/SqlDriversTester/dist/

@@ -179,6 +179,8 @@ public class MySqlSqlDriver extends SqlDriver {
     //   11 - число уникальных значений в индексе
     //   12 - ??? (не используется)
     //   13 - ??? (не используется)
+    //   14 - создан первичным ключем
+    //   15 - создан внешним ключем
     protected static final String SQL_INDEX_KEYS = ""
             + "SELECT"
             + "  TABLE_CAT,"
@@ -193,7 +195,9 @@ public class MySqlSqlDriver extends SqlDriver {
             + "  " + ClientConstants.JDBCIDX_ASC_OR_DESC + ","
             + "  CARDINALITY,"
             + "  PAGES,"
-            + "  FILTER_CONDITION  "
+            + "  FILTER_CONDITION,"
+            + "  " + ClientConstants.JDBCIDX_PRIMARY_KEY + ","
+            + "  " + ClientConstants.JDBCIDX_FOREIGN_KEY + " "
             + "FROM"
             + "("
             + "SELECT"
@@ -209,8 +213,12 @@ public class MySqlSqlDriver extends SqlDriver {
             + "  collation AS " + ClientConstants.JDBCIDX_ASC_OR_DESC + ","
             + "  cardinality AS CARDINALITY,"
             + "  null AS PAGES,"
-            + "  null AS FILTER_CONDITION  "
-            + "FROM information_schema.statistics "
+            + "  null AS FILTER_CONDITION,"
+            + "  (case when index_name = 'PRIMARY' then 0 else 1 end) AS " + ClientConstants.JDBCIDX_PRIMARY_KEY + ","
+            + " (SELECT distinct r.constraint_name FROM  information_schema.referential_constraints r "
+            + "       WHERE r.constraint_catalog = s.table_catalog AND r.constraint_schema = s.table_schema  AND"
+            + "       r.table_name = s.table_name and r.constraint_name = s.index_name ) AS " + ClientConstants.JDBCIDX_FOREIGN_KEY + " "
+            + "FROM information_schema.statistics s "
             + "WHERE table_schema = '%s' AND table_name in (%s) "
             + "ORDER BY non_unique, index_name, seq_in_index "
             + ") indexes_alias";
@@ -239,7 +247,7 @@ public class MySqlSqlDriver extends SqlDriver {
             + "  c.column_name AS " + ClientConstants.JDBCPKS_COLUMN_NAME + ","
             + "  c.ordinal_position AS KEY_SEQ,"
             + "  NULL AS " + ClientConstants.JDBCPKS_CONSTRAINT_NAME + " "
-//            + "  c.constraint_name AS " + ClientConstants.JDBCPKS_CONSTRAINT_NAME + " "
+            //            + "  c.constraint_name AS " + ClientConstants.JDBCPKS_CONSTRAINT_NAME + " "
             + "FROM  information_schema.table_constraints t, information_schema.key_column_usage c "
             + "WHERE"
             + "  t.constraint_catalog = c.constraint_catalog AND"
@@ -290,7 +298,7 @@ public class MySqlSqlDriver extends SqlDriver {
             + "  pkc.table_schema AS " + ClientConstants.JDBCFKS_FKPKTABLE_SCHEM + ","
             + "  pkc.table_name AS " + ClientConstants.JDBCFKS_FKPKTABLE_NAME + ","
             + "  null AS " + ClientConstants.JDBCFKS_FKPK_NAME + ","
-//            + "  r.unique_constraint_name AS " + ClientConstants.JDBCFKS_FKPK_NAME + ","
+            //            + "  r.unique_constraint_name AS " + ClientConstants.JDBCFKS_FKPK_NAME + ","
             + "  pkc.column_name AS " + ClientConstants.JDBCFKS_FKPKCOLUMN_NAME + ","
             + "  fkc.table_catalog AS FKTABLE_CAT,"
             + "  fkc.table_schema AS " + ClientConstants.JDBCFKS_FKTABLE_SCHEM + ","
@@ -456,10 +464,7 @@ public class MySqlSqlDriver extends SqlDriver {
 
     @Override
     public String getSql4CreateTableComment(String aOwnerName, String aTableName, String aDescription) {
-        String fullName = wrapName(aTableName);
-        if (aOwnerName != null && !aOwnerName.isEmpty()) {
-            fullName = wrapName(aOwnerName) + "." + fullName;
-        }
+        String fullName = makeFullName(aOwnerName, aTableName);
         if (aDescription == null) {
             aDescription = "";
         }
@@ -519,31 +524,19 @@ public class MySqlSqlDriver extends SqlDriver {
 
     @Override
     public String getSql4DropTable(String aSchemaName, String aTableName) {
-        String dropClause = "DROP TABLE ";
-        if (aSchemaName != null && !aSchemaName.isEmpty()) {
-            return dropClause + wrapName(aSchemaName) + "." + wrapName(aTableName);
-        } else {
-            return dropClause + wrapName(aTableName);
-        }
+        return "DROP TABLE " + makeFullName(aSchemaName, aTableName);
     }
 
     @Override
     public String getSql4DropIndex(String aSchemaName, String aTableName, String aIndexName) {
-        String tableName = wrapName(aTableName);
-        if (aSchemaName != null && !aSchemaName.isEmpty()) {
-            tableName = wrapName(aSchemaName) + "." + tableName;
-        }
-        return String.format("DROP INDEX %s ON %s", wrapName(aIndexName), tableName);
+        return String.format("DROP INDEX %s ON %s", wrapName(aIndexName), makeFullName(aSchemaName, aTableName));
     }
 
     @Override
     public String getSql4DropFkConstraint(String aSchemaName, ForeignKeySpec aFk) {
 
-        String fkTableName = wrapName(aFk.getTable());
+        String fkTableName = makeFullName(aSchemaName, aFk.getTable());
         String fkName = aFk.getCName();
-        if (aSchemaName != null && !aSchemaName.isEmpty()) {
-            fkTableName = wrapName(aSchemaName) + "." + fkTableName;
-        }
         return String.format("ALTER TABLE %s DROP FOREIGN KEY %s", fkTableName, wrapName(fkName));
     }
 
@@ -558,13 +551,13 @@ public class MySqlSqlDriver extends SqlDriver {
     public String getSql4CreateFkConstraint(String aSchemaName, List<ForeignKeySpec> listFk) {
         if (listFk != null && listFk.size() > 0) {
             ForeignKeySpec fk = listFk.get(0);
-            String fkTableName = wrapName(fk.getTable());
+            String fkTableName = makeFullName(aSchemaName, fk.getTable());
             String fkName = fk.getCName();
             String fkColumnName = wrapName(fk.getField());
 
             PrimaryKeySpec pk = fk.getReferee();
             String pkSchemaName = pk.getSchema();
-            String pkTableName = wrapName(pk.getTable());
+            String pkTableName = makeFullName(aSchemaName, pk.getTable());
             String pkColumnName = wrapName(pk.getField());
 
             for (int i = 1; i < listFk.size(); i++) {
@@ -584,7 +577,6 @@ public class MySqlSqlDriver extends SqlDriver {
                     break;
                 case SETDEFAULT:
                     // !!! не используется
-                    //fkRule += " ON UPDATE SET DEFAULT";
                     break;
                 case SETNULL:
                     fkRule += " ON UPDATE SET NULL";
@@ -599,19 +591,11 @@ public class MySqlSqlDriver extends SqlDriver {
                     break;
                 case SETDEFAULT:
                     // !!! не используется
-                    //fkRule += " ON DELETE SET DEFAULT";
                     break;
                 case SETNULL:
                     fkRule += " ON DELETE SET NULL";
                     break;
             }
-            if (aSchemaName != null && !aSchemaName.isEmpty()) {
-                fkTableName = wrapName(aSchemaName) + "." + fkTableName;
-            }
-            if (pkSchemaName != null && !pkSchemaName.isEmpty()) {
-                pkTableName = wrapName(pkSchemaName) + "." + pkTableName;
-            }
-
             return String.format("ALTER TABLE %s ADD CONSTRAINT %s"
                     + " FOREIGN KEY (%s) REFERENCES %s (%s) %s", fkTableName, fkName.isEmpty() ? "" : wrapName(fkName), fkColumnName, pkTableName, pkColumnName, fkRule);
 
@@ -624,10 +608,7 @@ public class MySqlSqlDriver extends SqlDriver {
     public String getSql4CreateIndex(String aSchemaName, String aTableName, DbTableIndexSpec aIndex) {
         assert aIndex.getColumns().size() > 0 : "index definition must consist of at least 1 column";
 
-        String tableName = wrapName(aTableName);
-        if (aSchemaName != null && !aSchemaName.isEmpty()) {
-            tableName = wrapName(aSchemaName) + "." + tableName;
-        }
+        String tableName = makeFullName(aSchemaName, aTableName);
         String fieldsList = "";
         for (int i = 0; i < aIndex.getColumns().size(); i++) {
             DbTableIndexColumnSpec column = aIndex.getColumns().get(i);
@@ -646,10 +627,7 @@ public class MySqlSqlDriver extends SqlDriver {
 
     @Override
     public String getSql4EmptyTableCreation(String aSchemaName, String aTableName, String aPkFieldName) {
-        String fullName = wrapName(aTableName);
-        if (aSchemaName != null && !aSchemaName.isEmpty()) {
-            fullName = wrapName(aSchemaName) + "." + fullName;
-        }
+        String fullName = makeFullName(aSchemaName, aTableName);
         return String.format("CREATE TABLE %s (%s DECIMAL(18,0) NOT NULL,"
                 + "CONSTRAINT PRIMARY KEY (%s)) ENGINE=InnoDB", fullName, wrapName(aPkFieldName), wrapName(aPkFieldName));
     }
@@ -698,21 +676,18 @@ public class MySqlSqlDriver extends SqlDriver {
         } else {
             fieldDefinition += " NULL";
         }
-        if (aField.isPk()) {
-            fieldDefinition += " CONSTRAINT PRIMARY KEY ";
-        }
         return fieldDefinition;
     }
 
     @Override
-    public String[] getSqls4ModifyingField(String aTableName, Field aOldFieldMd, Field aNewFieldMd) {
-        return getSqls4RenamingField(aTableName, aOldFieldMd.getName(), aNewFieldMd);
-        //return new String[]{String.format("ALTER TABLE %s MODIFY %s",wrapName(aTableName), getSql4FieldDefinition(aNewFieldMd))};
+    public String[] getSqls4ModifyingField(String aSchemaName, String aTableName, Field aOldFieldMd, Field aNewFieldMd) {
+        return getSqls4RenamingField(aSchemaName, aTableName, aOldFieldMd.getName(), aNewFieldMd);
     }
 
     @Override
-    public String[] getSqls4RenamingField(String aTableName, String aOldFieldName, Field aNewFieldMd) {
-        return new String[]{String.format("ALTER TABLE %s CHANGE %s %s", wrapName(aTableName), wrapName(aOldFieldName), getSql4FieldDefinition(aNewFieldMd))};
+    public String[] getSqls4RenamingField(String aSchemaName, String aTableName, String aOldFieldName, Field aNewFieldMd) {
+        String fullTableName = makeFullName(aSchemaName, aTableName);
+        return new String[]{String.format("ALTER TABLE %s CHANGE %s %s", fullTableName, wrapName(aOldFieldName), getSql4FieldDefinition(aNewFieldMd))};
     }
 
     @Override
@@ -757,37 +732,41 @@ public class MySqlSqlDriver extends SqlDriver {
     }
 
     @Override
-    public String getSql4CreatePkConstraint(String aSchemaName, List<PrimaryKeySpec> listPk) {
+    public String[] getSql4CreatePkConstraint(String aSchemaName, List<PrimaryKeySpec> listPk) {
 
         if (listPk != null && listPk.size() > 0) {
             PrimaryKeySpec pk = listPk.get(0);
-            String pkTableName = wrapName(pk.getTable());
-//            String pkName = pk.getCName();
+            String tableName = pk.getTable();
+            String pkTableName = makeFullName(aSchemaName, tableName);
+            String pkName = wrapName(tableName + PKEY_NAME_SUFFIX);
             String pkColumnName = wrapName(pk.getField());
             for (int i = 1; i < listPk.size(); i++) {
                 pk = listPk.get(i);
                 pkColumnName += ", " + wrapName(pk.getField());
             }
-            if (aSchemaName != null && !aSchemaName.isEmpty()) {
-                pkTableName = wrapName(aSchemaName) + "." + pkTableName;
-            }
-//            return String.format("ALTER TABLE %s ADD CONSTRAINT %s PRIMARY KEY (%s)", pkTableName, (pkName.isEmpty() ? "" : wrapName(pkName)), pkColumnName);
-            return String.format("ALTER TABLE %s ADD CONSTRAINT %s PRIMARY KEY (%s)", pkTableName, "", pkColumnName);
+            return new String[]{
+                String.format("ALTER TABLE %s ADD CONSTRAINT %s PRIMARY KEY (%s)", pkTableName, pkName, pkColumnName)
+            };
         }
         return null;
     }
 
     @Override
     public String getSql4DropPkConstraint(String aSchemaName, PrimaryKeySpec aPk) {
-        String pkTableName = wrapName(aPk.getTable());
-        if (aSchemaName != null && !aSchemaName.isEmpty()) {
-            pkTableName = wrapName(aSchemaName) + "." + pkTableName;
-        }
+        String pkTableName = makeFullName(aSchemaName, aPk.getTable());
         return String.format("ALTER TABLE %s DROP PRIMARY KEY", pkTableName);
     }
 
     @Override
     public boolean isConstraintsDeferrable() {
         return false;
+    }
+
+    @Override
+    public String[] getSqls4AddingField(String aSchemaName, String aTableName, Field aField) {
+        String fullTableName = makeFullName(aSchemaName, aTableName);
+        return new String[]{
+            String.format(SqlDriver.ADD_FIELD_SQL_PREFIX, fullTableName) + getSql4FieldDefinition(aField)
+        };
     }
 }

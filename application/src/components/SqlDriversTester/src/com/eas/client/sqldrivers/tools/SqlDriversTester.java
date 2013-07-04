@@ -1318,7 +1318,7 @@ public class SqlDriversTester extends JFrame {
                     PrimaryKeySpec pkSpec2 = makePkSpec(fldColumn2_pk.getText());
                     pkSpecs.add(pkSpec2);
                 }
-                sqls = new String[]{platypusDriver.getSql4CreatePkConstraint(schemaName, pkSpecs)};
+                sqls = platypusDriver.getSql4CreatePkConstraint(schemaName, pkSpecs);
             }
             if (source == rb_getSql4DropPkConstraint) {
                 PrimaryKeySpec pkSpec = makePkSpec(fldColumn1_pk.getText());
@@ -1338,19 +1338,19 @@ public class SqlDriversTester extends JFrame {
             if (source == rb_getSqls4ModifyingField) {
                 tableName = (String) comboTable_field.getSelectedItem();
                 makeField();
-                sqls = driver.getSqls4ModifyingField(tableName, oldField_field, newField_field);
+                sqls = driver.getSqls4ModifyingField(schemaName, tableName, oldField_field, newField_field);
             }
 
             if (source == rb_getSqls4RenamingField) {
                 tableName = (String) comboTable_field.getSelectedItem();
                 makeField();
                 if (oldField_field != null) {
-                    sqls = driver.getSqls4RenamingField(tableName, oldField_field.getName(), newField_field);
+                    sqls = driver.getSqls4RenamingField(schemaName, tableName, oldField_field.getName(), newField_field);
                 }
             }
             if (source == rb_getSql4DroppingField) {
                 tableName = (String) comboTable_field.getSelectedItem();
-                sqls = driver.getSql4DroppingField(tableName, fldName_field.getText());
+                sqls = driver.getSql4DroppingField(schemaName, tableName, fldName_field.getText());
             }
 
             if (source == rb_getSql4CreateColumnComment) {
@@ -1818,7 +1818,7 @@ public class SqlDriversTester extends JFrame {
             lbNullable_field.setSelected(oldField_field.isNullable());
             lbReadOnly_field.setSelected(oldField_field.isReadonly());
             lbSigned_field.setSelected(oldField_field.isSigned());
-            lbStrong4Insert_field.setSelected(oldField_field.isStrong4Insert());
+//            lbStrong4Insert_field.setSelected(oldField_field.isStrong4Insert());
             lbScale_field.setText("" + oldField_field.getScale());
             String description = oldField_field.getDescription();
             lbDescription_field.setText((description == null ? "" : description));
@@ -1874,7 +1874,7 @@ public class SqlDriversTester extends JFrame {
             newField_field.setPk(fldPk_field.isSelected());
             newField_field.setNullable(fldNullable_field.isSelected());
             newField_field.setReadonly(fldReadOnly_field.isSelected());
-            newField_field.setStrong4Insert(fldStrong4Insert_field.isSelected());
+//            newField_field.setStrong4Insert(fldStrong4Insert_field.isSelected());
             newField_field.setSigned(fldSigned_field.isSelected());
             String txtSize = fldSize_field.getText().trim();
             newField_field.setSize(txtSize.isEmpty() ? 0 : Integer.valueOf(txtSize));
