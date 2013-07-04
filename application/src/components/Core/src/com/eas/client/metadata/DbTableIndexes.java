@@ -99,6 +99,21 @@ public class DbTableIndexes {
                     column.setOrdinalPosition((int)((Number)oPosition).shortValue());
                 }
             }
+            //???
+            Object oPKey = indexesRs.getObject(indexesRs.getFields().find(ClientConstants.JDBCIDX_PRIMARY_KEY));
+            if (oPKey != null) {
+                boolean isPKey = false;
+                if (oPKey instanceof Number) {
+                    isPKey = !(((Number) oPKey).intValue() != 0);
+                }
+                idxSpec.setPKey(isPKey);
+            }
+            //???
+            Object oFKeyName = indexesRs.getObject(indexesRs.getFields().find(ClientConstants.JDBCIDX_FOREIGN_KEY));
+            if (oFKeyName != null && oFKeyName instanceof String) {
+                String fKeyName = (String) oFKeyName;
+                idxSpec.setFKeyName(fKeyName);
+            }
         }
     }
 

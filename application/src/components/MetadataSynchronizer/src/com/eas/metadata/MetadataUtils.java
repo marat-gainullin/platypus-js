@@ -33,11 +33,15 @@ public class MetadataUtils {
     private static final String NOFOUND = " -- ";
     private static final String TITLE = " src" + DLM + " dest" + DLM + DLM + DLM + "Object";
     private static final Set<Integer> CLOB_SAME = new HashSet<>();
+    private static final Set<Integer> DECIMAL_NUMERIC_SAME = new HashSet<>();
 
     static {
         // like CLOB
-        CLOB_SAME.add(java.sql.Types.CLOB);
-        CLOB_SAME.add(java.sql.Types.LONGVARCHAR);
+        CLOB_SAME.add(Types.CLOB);
+        CLOB_SAME.add(Types.LONGVARCHAR);
+        // ????
+        DECIMAL_NUMERIC_SAME.add(Types.DECIMAL);
+        DECIMAL_NUMERIC_SAME.add(Types.NUMERIC);
     }
 
     /**
@@ -50,12 +54,15 @@ public class MetadataUtils {
     public static boolean isSameSqlType(int leftSqlType, int rightSqlType, boolean oneDialect) {
         if (oneDialect) {
             return (leftSqlType == rightSqlType);
-        }    
+        }
         if (CLOB_SAME.contains(leftSqlType) && CLOB_SAME.contains(rightSqlType)) {
             return true;
         }
+        if (DECIMAL_NUMERIC_SAME.contains(leftSqlType) && DECIMAL_NUMERIC_SAME.contains(rightSqlType)) {
+            return true;
+        }
 //???????????        
-            return (leftSqlType == rightSqlType);
+        return (leftSqlType == rightSqlType);
 //        return SQLUtils.isSameTypeGroup(leftSqlType, rightSqlType);
     }
 
@@ -80,7 +87,7 @@ public class MetadataUtils {
         if (leftTypeInfo != null) {
 
             if (rightTypeInfo != null) {
-                if (!isSameSqlType(leftTypeInfo.getSqlType(), rightTypeInfo.getSqlType(),oneDialect)) {
+                if (!isSameSqlType(leftTypeInfo.getSqlType(), rightTypeInfo.getSqlType(), oneDialect)) {
                     return false;
                 }
                 int leftSize = leftField.getSize();
@@ -95,8 +102,12 @@ public class MetadataUtils {
                     }
                 } else {
                     if (sized != null && scaled != null) {
-                        if (sized && leftSize != rightSize && leftSize != 0 && rightSize != 0) return false;
-                        if (scaled && leftScale != rightScale) return false;
+                        if (sized && leftSize != rightSize && leftSize != 0 && rightSize != 0) {
+                            return false;
+                        }
+                        if (scaled && leftScale != rightScale) {
+                            return false;
+                        }
                     } else {
                         if (leftSqlType != Types.TIMESTAMP) {
                             // if one in default(==0)? then no compare
@@ -110,7 +121,7 @@ public class MetadataUtils {
                                 return false;
                             }
                         }
-                    }    
+                    }
                 }
             } else {
                 return false;
@@ -157,19 +168,19 @@ public class MetadataUtils {
         String rightCName = rightFKSpec.getCName();
         String rightFieldName = rightFKSpec.getField();
         String rightTableName = rightFKSpec.getTable();
-        
+
         ForeignKeyRule leftFkUpdateRule = leftFKSpec.getFkUpdateRule();
         ForeignKeyRule rightFkUpdateRule = rightFKSpec.getFkUpdateRule();
 
         return leftFKSpec.getFkDeferrable() == rightFKSpec.getFkDeferrable()
-//                && leftFKSpec.getFkUpdateRule() == rightFKSpec.getFkUpdateRule()
+                //                && leftFKSpec.getFkUpdateRule() == rightFKSpec.getFkUpdateRule()
                 // !!! in Oracle not exists UpdateRule !!!!!
                 && (rightFkUpdateRule == null || leftFkUpdateRule == null || rightFkUpdateRule.equals(leftFkUpdateRule))
                 && leftFKSpec.getFkDeleteRule() == rightFKSpec.getFkDeleteRule()
                 && ((leftTableName == null && rightTableName == null) || (leftTableName != null && leftTableName.equalsIgnoreCase(rightTableName)))
                 && ((leftFieldName == null && rightFieldName == null) || (leftFieldName != null && leftFieldName.equalsIgnoreCase(rightFieldName)))
                 && ((leftCName == null && rightCName == null) || (leftCName != null && leftCName.equalsIgnoreCase(rightCName)))
-                && isSamePKey(leftFKSpec.getReferee(), rightFKSpec.getReferee(),oneDialect);
+                && isSamePKey(leftFKSpec.getReferee(), rightFKSpec.getReferee(), oneDialect);
 
     }
 
@@ -199,7 +210,6 @@ public class MetadataUtils {
 
         return ((leftTableName == null && rightTableName == null) || (leftTableName != null && leftTableName.equalsIgnoreCase(rightTableName)))
                 && ((leftFieldName == null && rightFieldName == null) || (leftFieldName != null && leftFieldName.equalsIgnoreCase(rightFieldName)));
-                //&& ((leftCName == null && rightCName == null) || (leftCName != null && leftCName.equalsIgnoreCase(rightCName)));
     }
 
     /**
@@ -218,7 +228,7 @@ public class MetadataUtils {
         }
 
         for (int i = 0; i < leftPKSpecs.size(); i++) {
-            if (!isSamePKey(leftPKSpecs.get(i), rightPKSpecs.get(i),oneDialect)) {
+            if (!isSamePKey(leftPKSpecs.get(i), rightPKSpecs.get(i), oneDialect)) {
                 return false;
             }
         }
@@ -242,7 +252,7 @@ public class MetadataUtils {
         }
 
         for (int i = 0; i < leftFKSpecs.size(); i++) {
-            if (!isSameFKey(leftFKSpecs.get(i), rightFKSpecs.get(i),oneDialect)) {
+            if (!isSameFKey(leftFKSpecs.get(i), rightFKSpecs.get(i), oneDialect)) {
                 return false;
             }
         }
@@ -271,7 +281,7 @@ public class MetadataUtils {
         return (leftIndexSpec.isHashed() == rightIndexSpec.isHashed()
                 && leftIndexSpec.isUnique() == rightIndexSpec.isUnique()
                 && ((leftName == null && rightName == null) || (leftName != null && leftName.equalsIgnoreCase(rightName)))
-                && isSameIndColumns(leftIndexSpec.getColumns(), rightIndexSpec.getColumns(),oneDialect));
+                && isSameIndColumns(leftIndexSpec.getColumns(), rightIndexSpec.getColumns(), oneDialect));
     }
 
     /**
@@ -324,10 +334,13 @@ public class MetadataUtils {
         if (tableName.equalsIgnoreCase(ClientConstants.T_MTD_USERS)) {
             return true;
         }
-        if (tableName.equalsIgnoreCase(ClientConstants.T_MTD_ENTITIES)){
+        if (tableName.equalsIgnoreCase(ClientConstants.T_MTD_ENTITIES)) {
             return true;
         }
-        if (tableName.equalsIgnoreCase(ClientConstants.T_MTD_GROUPS)){
+        if (tableName.equalsIgnoreCase(ClientConstants.T_MTD_GROUPS)) {
+            return true;
+        }
+        if (tableName.equalsIgnoreCase(ClientConstants.T_MTD_VERSION)) {
             return true;
         }
         return false;
@@ -340,12 +353,12 @@ public class MetadataUtils {
      * @param aStructure table structure
      * @return
      */
-    public static String printTable(String aHeader,TableStructure aStructure) {
+    public static String printTable(String aHeader, TableStructure aStructure) {
         if (aStructure != null) {
 
             StringBuilder sb = new StringBuilder();
             if (aHeader != null) {
-                 sb.append(aHeader).append(DLM);
+                sb.append(aHeader).append(DLM);
             }
             sb.append(aStructure.getTableName()).append("=[");
 
@@ -397,7 +410,7 @@ public class MetadataUtils {
             StringBuilder sb = new StringBuilder();
 
             if (aHeader != null) {
-                 sb.append(aHeader).append(DLM);
+                sb.append(aHeader).append(DLM);
             }
             sb.append(aField.getName()).append("=[");
 
@@ -437,7 +450,7 @@ public class MetadataUtils {
             StringBuilder sb = new StringBuilder();
 
             if (aHeader != null) {
-                 sb.append(aHeader).append(DLM);
+                sb.append(aHeader).append(DLM);
             }
             sb.append(aIndexSpec.getName()).append("=[");
             sb.append("isClustered:").append(aIndexSpec.isClustered()).append(ATTRDLM);
@@ -463,13 +476,12 @@ public class MetadataUtils {
             return aHeader;
         }
     }
-    
+
     /**
      * generate information line with primary key properties
      *
      * @param aHeader line header
-     * @param aPKSpec specification for primary key (list columns in primary
-     * key)
+     * @param aPKSpec specification for primary key (list columns in primary key)
      * @return
      */
     public static String printPKey(String aHeader, List<PrimaryKeySpec> aPKSpec) {
@@ -477,7 +489,7 @@ public class MetadataUtils {
             StringBuilder sb = new StringBuilder();
 
             if (aHeader != null) {
-                 sb.append(aHeader).append(DLM);
+                sb.append(aHeader).append(DLM);
             }
             // get Name from first fields
             sb.append(aPKSpec.get(0).getCName()).append("=[");
@@ -501,8 +513,7 @@ public class MetadataUtils {
      * generate information line with foreign key properties
      *
      * @param aHeader line header
-     * @param aFKSpec specification for foreign key (list columns in foreign
-     * key)
+     * @param aFKSpec specification for foreign key (list columns in foreign key)
      * @return
      */
     public static String printFKey(String aHeader, List<ForeignKeySpec> aFKSpec) {
@@ -510,7 +521,7 @@ public class MetadataUtils {
             StringBuilder sb = new StringBuilder();
 
             if (aHeader != null) {
-                 sb.append(aHeader).append(DLM);
+                sb.append(aHeader).append(DLM);
             }
             // get all from first fields
             ForeignKeySpec fkSpec0 = aFKSpec.get(0);
@@ -549,8 +560,8 @@ public class MetadataUtils {
      */
     public static String printCompareTable(TableStructure srcTblStructure, TableStructure destTblStructure, boolean oneDialect) {
         StringBuilder sb = new StringBuilder();
-        String srcTable = printTable("Table:",srcTblStructure);
-        String destTable = printTable("Table:",destTblStructure);
+        String srcTable = printTable("Table:", srcTblStructure);
+        String destTable = printTable("Table:", destTblStructure);
         if (srcTblStructure != null) {
             sb.append(EQUAL).append(DLM);
             if (destTblStructure != null) {
@@ -652,7 +663,7 @@ public class MetadataUtils {
 
         } else {
             sb.append(NOFOUND).append(DLM).append(EQUAL);
-            sb.append(DLM).append("dest").append(DLM).append(printTable("Table:",destTblStructure)).append("\n");
+            sb.append(DLM).append("dest").append(DLM).append(printTable("Table:", destTblStructure)).append("\n");
         }
         return sb.toString();
     }
@@ -674,12 +685,12 @@ public class MetadataUtils {
                 sb.append(NOFOUND);
             }
 
-            sb.append(DLM).append("src").append(DLM).append(printIndex("Index:",leftIndexSpec)).append("\n");
+            sb.append(DLM).append("src").append(DLM).append(printIndex("Index:", leftIndexSpec)).append("\n");
             sb.append(SPACE).append(DLM).append(SPACE);
         } else {
             sb.append(NOFOUND).append(DLM).append(EQUAL);
         }
-        sb.append(DLM).append("dest").append(DLM).append(printIndex("Index:",rightIndexSpec)).append("\n");
+        sb.append(DLM).append("dest").append(DLM).append(printIndex("Index:", rightIndexSpec)).append("\n");
         return sb.toString();
     }
 
@@ -700,12 +711,12 @@ public class MetadataUtils {
                 sb.append(NOFOUND);
             }
 
-            sb.append(DLM).append("src").append(DLM).append(printField("Field:",leftField)).append("\n");
+            sb.append(DLM).append("src").append(DLM).append(printField("Field:", leftField)).append("\n");
             sb.append(SPACE).append(DLM).append(SPACE);
         } else {
             sb.append(NOFOUND).append(DLM).append(EQUAL);
         }
-        sb.append(DLM).append("dest").append(DLM).append(printField("Field:",rightField)).append("\n");
+        sb.append(DLM).append("dest").append(DLM).append(printField("Field:", rightField)).append("\n");
         return sb.toString();
 
     }
@@ -727,12 +738,12 @@ public class MetadataUtils {
                 sb.append(NOFOUND);
             }
 
-            sb.append(DLM).append("src").append(DLM).append(printPKey("PrimaryKey:",leftPKSpec)).append("\n");
+            sb.append(DLM).append("src").append(DLM).append(printPKey("PrimaryKey:", leftPKSpec)).append("\n");
             sb.append(SPACE).append(DLM).append(SPACE);
         } else {
             sb.append(NOFOUND).append(DLM).append(EQUAL);
         }
-        sb.append(DLM).append("dest").append(DLM).append(printPKey("PrimaryKey:",rightPKSpec)).append("\n");
+        sb.append(DLM).append("dest").append(DLM).append(printPKey("PrimaryKey:", rightPKSpec)).append("\n");
         return sb.toString();
     }
 
@@ -753,12 +764,12 @@ public class MetadataUtils {
                 sb.append(NOFOUND);
             }
 
-            sb.append(DLM).append("src").append(DLM).append(printFKey("ForeignKey:",leftFKSpec)).append("\n");
+            sb.append(DLM).append("src").append(DLM).append(printFKey("ForeignKey:", leftFKSpec)).append("\n");
             sb.append(SPACE).append(DLM).append(SPACE);
         } else {
             sb.append(NOFOUND).append(DLM).append(EQUAL);
         }
-        sb.append(DLM).append("dest").append(DLM).append(printFKey("ForeignKey:",rightFKSpec)).append("\n");
+        sb.append(DLM).append("dest").append(DLM).append(printFKey("ForeignKey:", rightFKSpec)).append("\n");
         return sb.toString();
     }
 
@@ -770,7 +781,7 @@ public class MetadataUtils {
     public static String printTitle() {
         return TITLE;
     }
-    
+
     /**
      * print structure database to log
      *
@@ -803,5 +814,4 @@ public class MetadataUtils {
             }
         }
     }
-    
 }

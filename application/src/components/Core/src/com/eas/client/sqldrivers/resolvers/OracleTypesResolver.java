@@ -9,25 +9,30 @@ import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.SQLUtils;
 import java.math.BigDecimal;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
  * @author mg
  */
-public class OracleTypesResolver implements TypesResolver {
+public class OracleTypesResolver extends TypesResolver {
 
-    protected static final Map<Integer, String> jdbcTypes2RdbmsTypes = new HashMap<>();
+    private static final Map<Integer, String> jdbcTypes2RdbmsTypes = new HashMap<>();
     protected static final Map<String, Integer> rdbmsTypes2JdbcTypes = new HashMap<>();
     protected static final Set<String> gisTypes = new HashSet<>();
     protected static final Set<Integer> jdbcTypesWithSize = new HashSet<>();
     protected static final Set<Integer> jdbcTypesWithScale = new HashSet<>();
 
+    private static final Map<Integer, Integer> jdbcTypesMaxSize = new HashMap<>();
+    private static final Map<Integer, Integer> jdbcTypesDefaultSize = new HashMap<>();
+    private static final List<Integer> characterTypesOrder = new ArrayList<>();
+    private static final List<Integer> binaryTypesOrder = new ArrayList<>();
+    
     static {
 
         // gis types
@@ -102,7 +107,7 @@ public class OracleTypesResolver implements TypesResolver {
         jdbcTypesWithScale.add(Types.NUMERIC);
 
         //typeName(M)
-        jdbcTypesWithSize.add(Types.FLOAT); //???????!!!!!!!!!!!!
+//        jdbcTypesWithSize.add(Types.FLOAT); //???????!!!!!!!!!!!!
         jdbcTypesWithSize.add(Types.CHAR);
         jdbcTypesWithSize.add(Types.VARCHAR);
         jdbcTypesWithSize.add(Types.NCHAR);
@@ -110,26 +115,33 @@ public class OracleTypesResolver implements TypesResolver {
         jdbcTypesWithSize.add(Types.NUMERIC);
         jdbcTypesWithSize.add(Types.DECIMAL);
         jdbcTypesWithSize.add(Types.VARBINARY);
+        
+        // max sizes for types
+        jdbcTypesMaxSize.put(Types.CHAR,255);
+        jdbcTypesMaxSize.put(Types.VARCHAR,4000);
+        jdbcTypesMaxSize.put(Types.NCHAR,255 );
+        jdbcTypesMaxSize.put(Types.NVARCHAR,4000);
+        jdbcTypesMaxSize.put(Types.NUMERIC,38);
+        jdbcTypesMaxSize.put(Types.DECIMAL,38);
+        jdbcTypesMaxSize.put(Types.VARBINARY,2000);
+        
+        // default sizes for types ??????????????????????????????????????????????
+        jdbcTypesDefaultSize.put(Types.CHAR,1);
+        jdbcTypesDefaultSize.put(Types.VARCHAR,200);
+        jdbcTypesDefaultSize.put(Types.NCHAR,1 );
+        jdbcTypesDefaultSize.put(Types.NVARCHAR,200);
+        jdbcTypesDefaultSize.put(Types.VARBINARY,1);
 
-
-    }
-
-    @Override
-    public void resolve2RDBMS(Field aField) {
-        DataTypeInfo typeInfo = aField.getTypeInfo();
-        if (typeInfo == null) {
-            typeInfo = DataTypeInfo.VARCHAR;
-            Logger.getLogger(OracleTypesResolver.class.getName()).log(Level.SEVERE, "sql jdbc type {0} have no mapping to rdbms type. substituting with string type (Varchar)", new Object[]{aField.getTypeInfo().getSqlType()});
-        }
-        DataTypeInfo copyTypeInfo = typeInfo.copy();
-        String sqlTypeName = jdbcTypes2RdbmsTypes.get(typeInfo.getSqlType());
-        if (sqlTypeName != null) {
-            copyTypeInfo.setSqlType(getJdbcTypeByRDBMSTypename(sqlTypeName));
-            copyTypeInfo.setSqlTypeName(sqlTypeName.toUpperCase());
-            copyTypeInfo.setJavaClassName(typeInfo.getJavaClassName());
-        }
-        aField.setTypeInfo(copyTypeInfo);
-
+        // порядок замены символьных типов, если требуется размер больше исходного
+        characterTypesOrder.add(Types.CHAR);
+        characterTypesOrder.add(Types.NCHAR);
+        characterTypesOrder.add(Types.VARCHAR);
+        characterTypesOrder.add(Types.NVARCHAR);
+        characterTypesOrder.add(Types.CLOB);
+        
+        binaryTypesOrder.add(Types.BINARY);
+        binaryTypesOrder.add(Types.VARBINARY);
+        binaryTypesOrder.add(Types.BLOB);
     }
 
     @Override
@@ -210,5 +222,31 @@ public class OracleTypesResolver implements TypesResolver {
     @Override
     public boolean isScaled(Integer aSqlType) {
         return jdbcTypesWithScale.contains(aSqlType);
+    }        
+
+    @Override
+    public Map<Integer, String> getJdbcTypes2RdbmsTypes() {
+        return jdbcTypes2RdbmsTypes;
     }
+
+    @Override
+    public Map<Integer, Integer> getJdbcTypesMaxSize() {
+        return jdbcTypesMaxSize;
+    }
+
+    @Override
+    public Map<Integer, Integer> getJdbcTypesDefaultSize() {
+        return jdbcTypesDefaultSize;
+    }
+
+    @Override
+    public List<Integer> getCharacterTypesOrder() {
+        return characterTypesOrder;
+    }
+    
+    @Override
+    public  List<Integer> getBinaryTypesOrder() {
+        return binaryTypesOrder;
+    }
+
 }

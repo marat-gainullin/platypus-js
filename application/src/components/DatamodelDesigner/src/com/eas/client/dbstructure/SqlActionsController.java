@@ -149,14 +149,6 @@ public class SqlActionsController {
         }
     }
 
-    public String getFullTableName(String aTableName) {
-        String fullName = aTableName;
-        if (schema != null && !schema.isEmpty()) {
-            fullName = schema + "." + fullName;
-        }
-        return fullName;
-    }
-
     public class CreateConstraintAction extends SqlAction {
 
         protected ForeignKeySpec fk = null;
@@ -329,11 +321,11 @@ public class SqlActionsController {
         @Override
         protected void doSqlWork() throws Exception {
             SqlDriver driver = achiveSqlDriver();
-            String fullTableName = getFullTableName(tableName);
-            String addFieldPrefix = String.format(SqlDriver.ADD_FIELD_SQL_PREFIX, fullTableName);
-            String sql4AddField = addFieldPrefix + driver.getSql4FieldDefinition(fieldMd);
-            SqlCompiledQuery q = new SqlCompiledQuery(client, dbId, sql4AddField);
-            q.enqueueUpdate();
+            String[] sqls = driver.getSqls4AddingField(schema, tableName, fieldMd);
+            for (int i = 0; i < sqls.length; i++) {
+                SqlCompiledQuery q = new SqlCompiledQuery(client, dbId, sqls[i]);
+                q.enqueueUpdate();
+            }
             client.commit(dbId);
         }
     }
@@ -347,8 +339,7 @@ public class SqlActionsController {
         @Override
         protected void doSqlWork() throws Exception {
             SqlDriver driver = achiveSqlDriver();
-            String fullTableName = getFullTableName(tableName);
-            String[] sql4DropField = driver.getSql4DroppingField(fullTableName, fieldMd.getName());
+            String[] sql4DropField = driver.getSql4DroppingField(schema, tableName, fieldMd.getName());
             for (String sql : sql4DropField) {
                 SqlCompiledQuery q = new SqlCompiledQuery(client, dbId, sql);
                 q.enqueueUpdate();
@@ -369,8 +360,7 @@ public class SqlActionsController {
         @Override
         protected void doSqlWork() throws Exception {
             SqlDriver driver = achiveSqlDriver();
-            String fullTableName = getFullTableName(tableName);
-            String[] sqls4ModifyField = driver.getSqls4ModifyingField(fullTableName, fieldMd, newFieldMd);
+            String[] sqls4ModifyField = driver.getSqls4ModifyingField(schema, tableName, fieldMd, newFieldMd);
             for (int i = 0; i < sqls4ModifyField.length; i++) {
                 SqlCompiledQuery q = new SqlCompiledQuery(client, dbId, sqls4ModifyField[i]);
                 q.enqueueUpdate();
@@ -395,8 +385,7 @@ public class SqlActionsController {
         @Override
         protected void doSqlWork() throws Exception {
             SqlDriver driver = achiveSqlDriver();
-            String fullTableName = getFullTableName(tableName);
-            String[] sqls4RenamingField = driver.getSqls4RenamingField(fullTableName, oldFieldName, newField);
+            String[] sqls4RenamingField = driver.getSqls4RenamingField(schema, tableName, oldFieldName, newField);
             for (int i = 0; i < sqls4RenamingField.length; i++) {
                 SqlCompiledQuery q = new SqlCompiledQuery(client, dbId, sqls4RenamingField[i]);
                 q.enqueueUpdate();
