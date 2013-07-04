@@ -154,7 +154,7 @@ public class PlatypusProjectView implements LogicalViewProvider {
 
         @SuppressWarnings("LeakingThisInConstructor")
         public PlatypusProjectViewRootNode(PlatypusProject aProject) {
-            super(NodeFactorySupport.createCompositeChildren(aProject, "Projects/org-netbeans-modules-platypus/Nodes"), Lookups.singleton(aProject));
+            super(NodeFactorySupport.createCompositeChildren(aProject, "Projects/org-netbeans-modules-platypus/Nodes"), Lookups.fixed(aProject, aProject.getProjectDirectory(), aProject.getSubTreeSearchOptions()));
             project = aProject;
             info = ProjectUtils.getInformation(aProject);
             info.addPropertyChangeListener(WeakListeners.propertyChange(this, info));

@@ -5,16 +5,27 @@
 package com.eas.designer.explorer.project.ui;
 
 import com.eas.designer.explorer.project.PlatypusProject;
+import com.eas.designer.explorer.project.SearchFilter;
 import java.awt.Image;
 import java.awt.datatransfer.Transferable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import javax.swing.Action;
 import javax.swing.Icon;
+import org.netbeans.spi.search.SearchFilterDefinition;
+import org.netbeans.spi.search.SearchInfoDefinitionFactory;
+import org.netbeans.spi.search.SubTreeSearchOptions;
 import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataFolder;
 import org.openide.nodes.FilterNode;
 import org.openide.nodes.Node;
 import org.openide.util.ImageUtilities;
+import org.openide.util.Lookup;
 import org.openide.util.datatransfer.PasteType;
+import org.openide.util.lookup.Lookups;
+import org.openide.util.lookup.ProxyLookup;
+
 /**
  *
  * @author Gala
@@ -29,8 +40,10 @@ public class CategoryNode extends FilterNode {
     protected String displayName;
     protected PlatypusProject project;
 
-    public CategoryNode(PlatypusProject aProject, Node aDelegate, org.openide.nodes.Children aChildren, Icon aIcon, Icon aOpenIcon, String aName, String aDisplayName) {
-        super(aDelegate, aChildren);
+    public CategoryNode(PlatypusProject aProject, DataFolder aDataFolder, Icon aIcon, Icon aOpenIcon, String aName, String aDisplayName) {
+        super(aDataFolder.getNodeDelegate(),
+                aDataFolder.createNodeChildren(PlatypusProjectNodesList.APPLICATION_TYPES_FILTER),
+                new ProxyLookup(aDataFolder.getLookup(), Lookups.fixed(aProject.getSubTreeSearchOptions())));
         project = aProject;
         name = aName;
         icon = ImageUtilities.icon2Image(aIcon);
@@ -91,7 +104,7 @@ public class CategoryNode extends FilterNode {
     public Image getOpenedIcon(int type) {
         return openIcon;
     }
-
+    
     public FileObject getFolder() {
         return folder;
     }
