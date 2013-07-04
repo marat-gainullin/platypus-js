@@ -4,12 +4,9 @@
  */
 package com.eas.client.sqldrivers.resolvers;
 
-import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.bearsoft.rowset.metadata.Field;
 import java.sql.Types;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -165,23 +162,6 @@ public class Db2TypesResolver extends TypesResolver {
         jdbcTypesRightPartName.put(Types.VARBINARY,"FOR BIT DATA");
     }
 
-//    @Override
-//    public void resolve2RDBMS(Field aField) {
-//        DataTypeInfo typeInfo = aField.getTypeInfo();
-//        if (typeInfo == null) {
-//            typeInfo = DataTypeInfo.VARCHAR;
-//            Logger.getLogger(MySqlTypesResolver.class.getName()).log(Level.SEVERE, "sql jdbc type {0} have no mapping to rdbms type. substituting with string type (Varchar)", new Object[]{aField.getTypeInfo().getSqlType()});
-//        }
-//        DataTypeInfo copyTypeInfo = typeInfo.copy();
-//        String sqlTypeName = jdbcTypes2RdbmsTypes.get(typeInfo.getSqlType());
-//        if (sqlTypeName != null) {
-//            copyTypeInfo.setSqlType(getJdbcTypeByRDBMSTypename(sqlTypeName));
-//            copyTypeInfo.setSqlTypeName(sqlTypeName.toUpperCase());
-//            copyTypeInfo.setJavaClassName(typeInfo.getJavaClassName());
-//        }
-//        aField.setTypeInfo(copyTypeInfo);
-//    }
-//
     @Override
     public void resolve2Application(Field aField) {
         

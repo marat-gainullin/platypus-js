@@ -122,42 +122,4 @@ public abstract class TypesResolver {
     public abstract List<Integer> getCharacterTypesOrder();
     
     
-//    public void resolveJdbcTypeDefaultSize(Field aField) {
-//        DataTypeInfo typeInfo = aField.getTypeInfo();
-//        // проверка на максимальный размер
-//        int sqlType = typeInfo.getSqlType();
-//        int fieldSize = aField.getSize();
-//        Map<Integer, Integer> jdbcTypesMaxSize = getJdbcTypesMaxSize();
-//        List<Integer> characterTypesOrder = getCharacterTypesOrder();
-//        List<Integer> binaryTypesOrder = getBinaryTypesOrder();
-//        Map<Integer, Long> jdbcTypesDefaultSize = getJdbcTypesDefaultSize();
-//        if (jdbcTypesMaxSize.containsKey(sqlType)) {
-//            Long maxSize = jdbcTypesMaxSize.get(sqlType);
-//            if (maxSize != null && maxSize < fieldSize) {
-//                if (characterTypesOrder.contains(sqlType)) {
-//                    for (int i = characterTypesOrder.indexOf(sqlType)+1;i < characterTypesOrder.size(); i++) {
-//                        sqlType = characterTypesOrder.get(i);
-//                        maxSize = jdbcTypesMaxSize.get(sqlType);
-//                        if (maxSize != null && maxSize >= fieldSize) {
-//                            break;
-//                        }
-//                    }
-//                } else if (binaryTypesOrder.contains(sqlType)) {
-//                    for (int i = binaryTypesOrder.indexOf(sqlType)+1;i < binaryTypesOrder.size(); i++) {
-//                        sqlType = binaryTypesOrder.get(i);
-//                        maxSize = jdbcTypesMaxSize.get(sqlType);
-//                        if (maxSize != null && maxSize >= fieldSize) {
-//                            break;
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//        if (jdbcTypesDefaultSize.containsKey(sqlType) && fieldSize <= 0) {
-//            aField.setSize(jdbcTypesDefaultSize.get(sqlType));
-//        }
-//        
-//    } 
-//    
-    
 }

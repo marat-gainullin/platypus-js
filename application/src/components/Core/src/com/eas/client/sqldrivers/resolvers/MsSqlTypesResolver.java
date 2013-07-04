@@ -13,8 +13,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -205,24 +203,6 @@ public class MsSqlTypesResolver extends TypesResolver {
         
     }
 
-//    @Override
-//    public void resolve2RDBMS(Field aField) {
-//        DataTypeInfo typeInfo = jdbcToRDBMS.get(aField.getTypeInfo().getSqlType());
-//        if (typeInfo == null) {
-//            typeInfo = jdbcToRDBMS.get(DataTypeInfo.VARCHAR.getSqlType());
-//            Logger.getLogger(MsSqlTypesResolver.class.getName()).log(Level.SEVERE, "sql jdbc type {0} have no mapping to rdbms type. substituting with string type (Varchar)", new Object[]{aField.getTypeInfo().getSqlType()});
-//        }
-//        
-//        DataTypeInfo copyTypeInfo = typeInfo.copy();
-//        String sqlTypeName = jdbcTypes2RdbmsTypes.get(typeInfo.getSqlType());
-//        if (sqlTypeName != null) {
-//            copyTypeInfo.setSqlType(getJdbcTypeByRDBMSTypename(sqlTypeName));
-//            copyTypeInfo.setSqlTypeName(sqlTypeName.toLowerCase());
-//            copyTypeInfo.setJavaClassName(typeInfo.getJavaClassName());
-//        }
-//        aField.setTypeInfo(copyTypeInfo);
-//    }
-//
     @Override
     public void resolve2Application(Field aField) {
         if (aField.getTypeInfo().getSqlType() == NON_JDBC_LONG_STRING

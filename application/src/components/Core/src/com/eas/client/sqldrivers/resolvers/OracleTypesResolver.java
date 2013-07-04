@@ -6,7 +6,6 @@ package com.eas.client.sqldrivers.resolvers;
 
 import com.bearsoft.rowset.compacts.CompactBlob;
 import com.bearsoft.rowset.compacts.CompactClob;
-import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.SQLUtils;
 import com.vividsolutions.jts.geom.Geometry;
@@ -18,8 +17,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -148,60 +145,6 @@ public class OracleTypesResolver extends TypesResolver {
         binaryTypesOrder.add(Types.VARBINARY);
         binaryTypesOrder.add(Types.BLOB);
     }
-
-
-//    @Override
-//    public void resolve2RDBMS(Field aField) {
-//        DataTypeInfo typeInfo = aField.getTypeInfo();
-//        if (typeInfo == null) {
-//            typeInfo = DataTypeInfo.VARCHAR;
-//            Logger.getLogger(OracleTypesResolver.class.getName()).log(Level.SEVERE, "sql jdbc type {0} have no mapping to rdbms type. substituting with string type (Varchar)", new Object[]{aField.getTypeInfo().getSqlType()});
-//        }
-////        DataTypeInfo copyTypeInfo = typeInfo.copy();
-//        //        String sqlTypeName = jdbcTypes2RdbmsTypes.get(typeInfo.getSqlType());
-//        //        if (sqlTypeName != null) {
-//        //            copyTypeInfo.setSqlType(getJdbcTypeByRDBMSTypename(sqlTypeName));
-//        //            copyTypeInfo.setSqlTypeName(sqlTypeName.toUpperCase());
-//        //            copyTypeInfo.setJavaClassName(typeInfo.getJavaClassName());
-//        //        }
-//        //        aField.setTypeInfo(copyTypeInfo);
-////        // проверка на максимальный размер
-////        int sqlType = typeInfo.getSqlType();
-////        int fieldSize = aField.getSize();
-////        if (jdbcTypesMaxSize.containsKey(sqlType)) {
-////            Integer maxSize = jdbcTypesMaxSize.get(sqlType);
-////            if (maxSize != null && maxSize < fieldSize) {
-////                if (CharacterTypesOrder.contains(sqlType)) {
-////                    for (int i = CharacterTypesOrder.indexOf(sqlType)+1;i < CharacterTypesOrder.size(); i++) {
-////                        sqlType = CharacterTypesOrder.get(i);
-////                        maxSize = jdbcTypesMaxSize.get(sqlType);
-////                        if (maxSize != null && maxSize >= fieldSize) {
-////                            break;
-////                        }
-////                    }
-////                } else if (BinaryTypesOrder.contains(sqlType)) {
-////                    for (int i = BinaryTypesOrder.indexOf(sqlType)+1;i < BinaryTypesOrder.size(); i++) {
-////                        sqlType = BinaryTypesOrder.get(i);
-////                        maxSize = jdbcTypesMaxSize.get(sqlType);
-////                        if (maxSize != null && maxSize >= fieldSize) {
-////                            break;
-////                        }
-////                    }
-////                }
-////            }
-////        }
-////        String sqlTypeName = jdbcTypes2RdbmsTypes.get(sqlType);
-////        if (sqlTypeName != null) {
-////            copyTypeInfo.setSqlType(getJdbcTypeByRDBMSTypename(sqlTypeName));
-////            copyTypeInfo.setSqlTypeName(sqlTypeName.toUpperCase());
-////            copyTypeInfo.setJavaClassName(typeInfo.getJavaClassName());
-////        }
-////        if (jdbcTypesDefaultSize.containsKey(sqlType) && fieldSize <= 0) {
-////            aField.setSize(jdbcTypesDefaultSize.get(sqlType));
-////        }
-////        aField.setTypeInfo(copyTypeInfo);
-//
-//    }
 
     @Override
     public void resolve2Application(Field aField) {

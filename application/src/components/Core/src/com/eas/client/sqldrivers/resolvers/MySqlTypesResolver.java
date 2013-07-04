@@ -176,19 +176,6 @@ public class MySqlTypesResolver extends TypesResolver {
     @Override
     public void resolve2RDBMS(Field aField) {
         super.resolve2RDBMS(aField);
-//        DataTypeInfo typeInfo = aField.getTypeInfo();
-//        if (typeInfo == null) {
-//            typeInfo = DataTypeInfo.VARCHAR;
-//            Logger.getLogger(MySqlTypesResolver.class.getName()).log(Level.SEVERE, "sql jdbc type {0} have no mapping to rdbms type. substituting with string type (Varchar)", new Object[]{aField.getTypeInfo().getSqlType()});
-//        }
-//        DataTypeInfo copyTypeInfo = typeInfo.copy();
-//        String sqlTypeName = jdbcTypes2RdbmsTypes.get(typeInfo.getSqlType());
-//        if (sqlTypeName != null) {
-//            copyTypeInfo.setSqlType(getJdbcTypeByRDBMSTypename(sqlTypeName));
-//            copyTypeInfo.setSqlTypeName(sqlTypeName.toLowerCase());
-//            copyTypeInfo.setJavaClassName(typeInfo.getJavaClassName());
-//        }
-//        aField.setTypeInfo(copyTypeInfo);
         if (aField.getSize() > MAXIMUM_NUMBERS_PRECISION) {// MySql treats size as presion in error messages
             aField.setSize(MAXIMUM_NUMBERS_PRECISION);
         }

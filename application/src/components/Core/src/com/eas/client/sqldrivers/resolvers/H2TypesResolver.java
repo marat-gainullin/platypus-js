@@ -4,7 +4,6 @@
  */
 package com.eas.client.sqldrivers.resolvers;
 
-import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.bearsoft.rowset.metadata.Field;
 import java.sql.Types;
 import java.util.ArrayList;
@@ -13,8 +12,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -130,24 +127,6 @@ public class H2TypesResolver extends TypesResolver {
         
     }
 
-//    @Override
-//    public void resolve2RDBMS(Field aField) {
-//        DataTypeInfo typeInfo = aField.getTypeInfo();
-//        if (typeInfo == null) {
-//            typeInfo = DataTypeInfo.VARCHAR;
-//            Logger.getLogger(H2TypesResolver.class.getName()).log(Level.SEVERE, "SQL JDBC type {0} have no mapping to rdbms type. substituting with string type (Varchar)", new Object[]{aField.getTypeInfo().getSqlType()});
-//        }
-//        DataTypeInfo copyTypeInfo = typeInfo.copy();
-//        String sqlTypeName = jdbcTypes2RdbmsTypes.get(typeInfo.getSqlType());
-//        if (sqlTypeName != null) {
-//            copyTypeInfo.setSqlType(getJdbcTypeByRDBMSTypename(sqlTypeName));
-//            copyTypeInfo.setSqlTypeName(sqlTypeName.toLowerCase());
-//            copyTypeInfo.setJavaClassName(typeInfo.getJavaClassName());
-//        }
-//        aField.setTypeInfo(copyTypeInfo);
-//
-//    }
-//
     @Override
     public void resolve2Application(Field aField) {
     }
