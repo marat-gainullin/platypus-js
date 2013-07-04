@@ -28,8 +28,7 @@ public final class SearchFilter extends SearchFilterDefinition {
     public boolean searchFile(FileObject fo)
             throws IllegalArgumentException {
         if (fo.isFolder()) {
-            throw new java.lang.IllegalArgumentException(
-                    "file (not folder) expected");//NOI18N
+            throw new java.lang.IllegalArgumentException("File (not folder) expected");//NOI18N
         } else {
             return !FileUtil.toFile(fo).isHidden();
         }
@@ -39,11 +38,10 @@ public final class SearchFilter extends SearchFilterDefinition {
     public FolderResult traverseFolder(FileObject fo)
             throws IllegalArgumentException {
         if (!fo.isFolder()) {
-            throw new java.lang.IllegalArgumentException(
-                    "folder expected");//NOI18N
+            throw new java.lang.IllegalArgumentException("Folder expected");//NOI18N
         }
         File file = FileUtil.toFile(fo);
-        String relPath = projectPath.relativize(file.toPath()).toString().replace(File.pathSeparator, "/");
+        String relPath = projectPath.relativize(file.toPath()).toString().replace(File.pathSeparator, "/");//NOI18N
         return !file.isHidden() && !ignoredPaths.contains(relPath) ? FolderResult.TRAVERSE : FolderResult.DO_NOT_TRAVERSE;
     }
 }
