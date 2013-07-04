@@ -1,12 +1,12 @@
 package com.eas.designer.explorer.project;
 
 import java.io.File;
-import org.netbeans.spi.search.SearchFilterDefinition;
-import org.openide.filesystems.FileObject;
-import org.openide.filesystems.FileUtil;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
+import org.netbeans.spi.search.SearchFilterDefinition;
+import org.openide.filesystems.FileObject;
+import org.openide.filesystems.FileUtil;
 
 /**
  * Platypus project's search filter.
