@@ -1,1 +1,0 @@
-alter table test2.ttt add f2 varchar(65) NULL;
