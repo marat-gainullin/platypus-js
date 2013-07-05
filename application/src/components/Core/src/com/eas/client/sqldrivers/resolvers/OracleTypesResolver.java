@@ -6,8 +6,6 @@ package com.eas.client.sqldrivers.resolvers;
 
 import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.bearsoft.rowset.metadata.Field;
-import com.eas.client.SQLUtils;
-import java.math.BigDecimal;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,12 +25,11 @@ public class OracleTypesResolver extends TypesResolver {
     protected static final Set<String> gisTypes = new HashSet<>();
     protected static final Set<Integer> jdbcTypesWithSize = new HashSet<>();
     protected static final Set<Integer> jdbcTypesWithScale = new HashSet<>();
-
     private static final Map<Integer, Integer> jdbcTypesMaxSize = new HashMap<>();
     private static final Map<Integer, Integer> jdbcTypesDefaultSize = new HashMap<>();
     private static final List<Integer> characterTypesOrder = new ArrayList<>();
     private static final List<Integer> binaryTypesOrder = new ArrayList<>();
-    
+
     static {
 
         // gis types
@@ -115,22 +112,22 @@ public class OracleTypesResolver extends TypesResolver {
         jdbcTypesWithSize.add(Types.NUMERIC);
         jdbcTypesWithSize.add(Types.DECIMAL);
         jdbcTypesWithSize.add(Types.VARBINARY);
-        
+
         // max sizes for types
-        jdbcTypesMaxSize.put(Types.CHAR,255);
-        jdbcTypesMaxSize.put(Types.VARCHAR,4000);
-        jdbcTypesMaxSize.put(Types.NCHAR,255 );
-        jdbcTypesMaxSize.put(Types.NVARCHAR,4000);
-        jdbcTypesMaxSize.put(Types.NUMERIC,38);
-        jdbcTypesMaxSize.put(Types.DECIMAL,38);
-        jdbcTypesMaxSize.put(Types.VARBINARY,2000);
-        
+        jdbcTypesMaxSize.put(Types.CHAR, 255);
+        jdbcTypesMaxSize.put(Types.VARCHAR, 4000);
+        jdbcTypesMaxSize.put(Types.NCHAR, 255);
+        jdbcTypesMaxSize.put(Types.NVARCHAR, 4000);
+        jdbcTypesMaxSize.put(Types.NUMERIC, 38);
+        jdbcTypesMaxSize.put(Types.DECIMAL, 38);
+        jdbcTypesMaxSize.put(Types.VARBINARY, 2000);
+
         // default sizes for types ??????????????????????????????????????????????
-        jdbcTypesDefaultSize.put(Types.CHAR,1);
-        jdbcTypesDefaultSize.put(Types.VARCHAR,200);
-        jdbcTypesDefaultSize.put(Types.NCHAR,1 );
-        jdbcTypesDefaultSize.put(Types.NVARCHAR,200);
-        jdbcTypesDefaultSize.put(Types.VARBINARY,1);
+        jdbcTypesDefaultSize.put(Types.CHAR, 1);
+        jdbcTypesDefaultSize.put(Types.VARCHAR, 200);
+        jdbcTypesDefaultSize.put(Types.NCHAR, 1);
+        jdbcTypesDefaultSize.put(Types.NVARCHAR, 200);
+        jdbcTypesDefaultSize.put(Types.VARBINARY, 1);
 
         // порядок замены символьных типов, если требуется размер больше исходного
         characterTypesOrder.add(Types.CHAR);
@@ -138,7 +135,7 @@ public class OracleTypesResolver extends TypesResolver {
         characterTypesOrder.add(Types.VARCHAR);
         characterTypesOrder.add(Types.NVARCHAR);
         characterTypesOrder.add(Types.CLOB);
-        
+
         binaryTypesOrder.add(Types.BINARY);
         binaryTypesOrder.add(Types.VARBINARY);
         binaryTypesOrder.add(Types.BLOB);
@@ -150,20 +147,6 @@ public class OracleTypesResolver extends TypesResolver {
             if (isGeometryTypeName(aField.getTypeInfo().getSqlTypeName())
                     || aField.getTypeInfo().getSqlTypeName().contains("SDO_GEOMETRY")) {
                 aField.setTypeInfo(DataTypeInfo.GEOMETRY.copy());
-            } else if (SQLUtils.isSameTypeGroup(aField.getTypeInfo().getSqlType(), java.sql.Types.NUMERIC)) {
-                aField.getTypeInfo().setJavaClassName(BigDecimal.class.getName());
-            } else if (SQLUtils.isSameTypeGroup(aField.getTypeInfo().getSqlType(), java.sql.Types.VARCHAR)) {
-                aField.getTypeInfo().setJavaClassName(String.class.getName());
-            } else if (SQLUtils.isSameTypeGroup(aField.getTypeInfo().getSqlType(), java.sql.Types.BOOLEAN)) {
-                aField.getTypeInfo().setJavaClassName(Boolean.class.getName());
-            } else if (SQLUtils.isSameTypeGroup(aField.getTypeInfo().getSqlType(), java.sql.Types.DATE)) {
-                aField.getTypeInfo().setJavaClassName(java.util.Date.class.getName());
-            } else if (SQLUtils.isSameTypeGroup(aField.getTypeInfo().getSqlType(), java.sql.Types.BLOB)) {
-                if (aField.getTypeInfo().getSqlType() == java.sql.Types.CLOB || aField.getTypeInfo().getSqlType() == java.sql.Types.NCLOB) {
-                    aField.setTypeInfo(DataTypeInfo.CLOB.copy());
-                } else {
-                    aField.setTypeInfo(DataTypeInfo.BLOB.copy());
-                }
             } else if (aField.getTypeInfo().getSqlType() == java.sql.Types.OTHER) {
                 String lTypeName = aField.getTypeInfo().getSqlTypeName();
                 if (lTypeName != null && !lTypeName.isEmpty()) {
@@ -178,16 +161,20 @@ public class OracleTypesResolver extends TypesResolver {
                             break;
                     }
                 }
+            } else {
+                super.resolve2Application(aField);
             }
         }
     }
 
     @Override
     public boolean isGeometryTypeName(String aTypeName) {
-        String sqlTypeName = (aTypeName != null ? aTypeName.toUpperCase() : null);
-        for (String gisTypeName : gisTypes) {
-            if (sqlTypeName.endsWith(gisTypeName)) {
-                return true;
+        if (aTypeName != null) {
+            String sqlTypeName = aTypeName.toUpperCase();
+            for (String gisTypeName : gisTypes) {
+                if (sqlTypeName.endsWith(gisTypeName)) {
+                    return true;
+                }
             }
         }
         return false;
@@ -222,7 +209,7 @@ public class OracleTypesResolver extends TypesResolver {
     @Override
     public boolean isScaled(Integer aSqlType) {
         return jdbcTypesWithScale.contains(aSqlType);
-    }        
+    }
 
     @Override
     public Map<Integer, String> getJdbcTypes2RdbmsTypes() {
@@ -243,10 +230,9 @@ public class OracleTypesResolver extends TypesResolver {
     public List<Integer> getCharacterTypesOrder() {
         return characterTypesOrder;
     }
-    
+
     @Override
-    public  List<Integer> getBinaryTypesOrder() {
+    public List<Integer> getBinaryTypesOrder() {
         return binaryTypesOrder;
     }
-
 }

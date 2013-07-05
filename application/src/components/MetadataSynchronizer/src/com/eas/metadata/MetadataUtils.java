@@ -116,7 +116,7 @@ public class MetadataUtils {
                             }
                         }
                         // only for number
-                        if (SQLUtils.isSameTypeGroup(java.sql.Types.NUMERIC, leftTypeInfo.getSqlType())) {
+                        if (SQLUtils.getTypeGroup(leftTypeInfo.getSqlType()) == SQLUtils.TypesGroup.NUMBERS) {
                             if (leftField.getScale() != rightField.getScale()) {
                                 return false;
                             }

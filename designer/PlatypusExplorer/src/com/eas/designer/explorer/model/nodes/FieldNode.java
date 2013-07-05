@@ -244,12 +244,12 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
 
     protected void checkTypedLengthScale(Field after) {
         if (after != null) {
-            if (SQLUtils.isSameTypeGroup(after.getTypeInfo().getSqlType(), java.sql.Types.VARCHAR)) {
+            if (SQLUtils.getTypeGroup(after.getTypeInfo().getSqlType()) == SQLUtils.TypesGroup.STRINGS) {
                 if (after.getPrecision() <= 0 || after.getSize() <= 0) {
                     after.setPrecision(1);
                     after.setSize(100);
                 }
-            } else if (SQLUtils.isSameTypeGroup(after.getTypeInfo().getSqlType(), java.sql.Types.NUMERIC)) {
+            } else if (SQLUtils.getTypeGroup(after.getTypeInfo().getSqlType()) == SQLUtils.TypesGroup.NUMBERS) {
                 if (after.getPrecision() <= 0 || after.getSize() <= 0) {
                     after.setPrecision(0);
                     after.setSize(0);
@@ -258,9 +258,9 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
                     after.setPrecision(0);
                     after.setSize(0);
                 }
-            } else if (SQLUtils.isSameTypeGroup(after.getTypeInfo().getSqlType(), java.sql.Types.BOOLEAN)) {//TODO: how to handle these types?
-            } else if (SQLUtils.isSameTypeGroup(after.getTypeInfo().getSqlType(), java.sql.Types.TIME)) {
-            } else if (SQLUtils.isSameTypeGroup(after.getTypeInfo().getSqlType(), java.sql.Types.BLOB)) {
+            } else if (SQLUtils.getTypeGroup(after.getTypeInfo().getSqlType()) == SQLUtils.TypesGroup.LOGICAL) {//TODO: how to handle these types?
+            } else if (SQLUtils.getTypeGroup(after.getTypeInfo().getSqlType()) == SQLUtils.TypesGroup.DATES) {
+            } else if (SQLUtils.getTypeGroup(after.getTypeInfo().getSqlType()) == SQLUtils.TypesGroup.LOBS) {
             }
         }
     }
@@ -612,8 +612,8 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
 
         @Override
         public boolean canWrite() {
-            return canChange() && !SQLUtils.isSameTypeGroup(field.getTypeInfo().getSqlType(), java.sql.Types.BLOB)
-                    && !SQLUtils.isSameTypeGroup(field.getTypeInfo().getSqlType(), java.sql.Types.DATE)
+            return canChange() && SQLUtils.getTypeGroup(field.getTypeInfo().getSqlType()) != SQLUtils.TypesGroup.LOBS
+                    && SQLUtils.getTypeGroup(field.getTypeInfo().getSqlType()) != SQLUtils.TypesGroup.DATES
                     && field.getTypeInfo().getSqlType() != java.sql.Types.STRUCT
                     && field.getTypeInfo().getSqlType() != java.sql.Types.OTHER
                     && field.getTypeInfo().getSqlType() != java.sql.Types.LONGVARCHAR

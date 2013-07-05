@@ -180,19 +180,15 @@ public class PostgreTypesResolver extends TypesResolver {
             int lSize = aField.getSize();
             int size = lSize >> 16;
             int scale = (lSize << 16) >> 16;
-            if (SQLUtils.isSameTypeGroup(aField.getTypeInfo().getSqlType(), java.sql.Types.VARCHAR)) {
+            if (SQLUtils.getTypeGroup(aField.getTypeInfo().getSqlType()) == SQLUtils.TypesGroup.STRINGS) {
+                super.resolve2Application(aField);
                 aField.setSize(Math.max(0, scale));
                 aField.setScale(0);
                 aField.setPrecision(0);
-            } else if (SQLUtils.isSameTypeGroup(aField.getTypeInfo().getSqlType(), java.sql.Types.BLOB)) {
-                if (aField.getTypeInfo().getSqlType() == java.sql.Types.CLOB || aField.getTypeInfo().getSqlType() == java.sql.Types.NCLOB) {
-                    aField.setTypeInfo(DataTypeInfo.CLOB.copy());
-                } else {
-                    aField.setTypeInfo(DataTypeInfo.BLOB.copy());
-                }
             } else if (isGeometryTypeName(aField.getTypeInfo().getSqlTypeName())) {
                 aField.setTypeInfo(DataTypeInfo.GEOMETRY.copy());
             } else {
+                super.resolve2Application(aField);
                 aField.setSize(Math.max(0, size));
                 if (scale > 0) {
                     aField.setScale(scale);

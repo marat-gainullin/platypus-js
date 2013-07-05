@@ -129,7 +129,7 @@ public class DbSchemeModel extends Model<FieldsEntity, FieldsEntity, DbClient, S
      * Method checks if the type is supported for datamodel's internal usage.
      * The types are fields or parameters types. If the type is reported as
      * unsupported by this method, it doesn't mean that the type is unsupported
-     * in our pltypus system at all. It means only that platypus application
+     * in our platypus system at all. It means only that platypus application
      * designer will not be able to add fields or parameters of such types.
      *
      * @param type - the type to check.
@@ -140,14 +140,14 @@ public class DbSchemeModel extends Model<FieldsEntity, FieldsEntity, DbClient, S
         SqlDriver driver = client.getDbMetadataCache(null).getConnectionDriver();
         Set<Integer> supportedTypes = driver.getSupportedJdbcDataTypes();
         if (SQLUtils.isTypeSupported(type)) {
-            if (SQLUtils.isSameTypeGroup(type, Types.NUMERIC)) // numbers
+            if (SQLUtils.getTypeGroup(type) == SQLUtils.TypesGroup.NUMBERS) // numbers
             {
                 return (type == Types.NUMERIC && supportedTypes.contains(Types.NUMERIC))
                         || (type == Types.DECIMAL && supportedTypes.contains(Types.DECIMAL));
-            } else if (SQLUtils.isSameTypeGroup(type, Types.VARCHAR)) // strings
+            } else if (SQLUtils.getTypeGroup(type) == SQLUtils.TypesGroup.STRINGS) // strings
             {
                 return type == Types.VARCHAR && supportedTypes.contains(Types.VARCHAR);
-            } else if (SQLUtils.isSameTypeGroup(type, Types.DATE)) // dates
+            } else if (SQLUtils.getTypeGroup(type) == SQLUtils.TypesGroup.DATES) // dates
             {
                 return (type == Types.DATE && supportedTypes.contains(Types.DATE))
                         || (type == Types.TIMESTAMP && supportedTypes.contains(Types.TIMESTAMP));
