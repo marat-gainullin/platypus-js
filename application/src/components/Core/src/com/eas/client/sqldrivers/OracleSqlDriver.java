@@ -27,7 +27,6 @@ import com.eas.util.StringUtils;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -328,7 +327,7 @@ public class OracleSqlDriver extends SqlDriver {
         int size = aField.getSize();
         int scale = aField.getScale();
 
-        if (SQLUtils.isSameTypeGroup(sqlType, Types.NUMERIC) && size > 38) {
+        if (SQLUtils.getTypeGroup(sqlType) == SQLUtils.TypesGroup.NUMBERS && size > 38) {
             typeName = " FLOAT (" + String.valueOf(size) + ")";
         } else if (resolver.isScaled(sqlType) && resolver.isSized(sqlType) && size > 0) {
             typeName += "(" + String.valueOf(size) + "," + String.valueOf(scale) + ")";

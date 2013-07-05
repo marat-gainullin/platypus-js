@@ -13,14 +13,12 @@ import java.sql.Types;
  */
 public class MySqlConverter extends PlatypusConverter {
 
-    public MySqlConverter()
-    {
+    public MySqlConverter() {
         super(new MySqlTypesResolver());
     }
 
     @Override
     public boolean isGeometry(DataTypeInfo aTypeInfo) {
-        return super.isGeometry(aTypeInfo) || (aTypeInfo.getSqlType() == Types.BINARY && ((MySqlTypesResolver)resolver).isGeometryTypeName(aTypeInfo.getSqlTypeName().toLowerCase()));
+        return super.isGeometry(aTypeInfo) || (aTypeInfo.getSqlType() == Types.BINARY && ((MySqlTypesResolver) resolver).isGeometryTypeName(aTypeInfo.getSqlTypeName().toLowerCase()));
     }
-
 }

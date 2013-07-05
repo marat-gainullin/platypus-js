@@ -132,7 +132,7 @@ public class TableFieldNode extends FieldNode {
         String promtMsg1 = "areYouSureReTypeFieldInRelationsPresent"; //NOI18N
         String promtMsg2 = "areYouSureReTypeFieldDataPresent"; //NOI18N
         String promtMsg3 = "areYouSureReTypeFieldInRelationsDataPresent"; //NOI18N
-        if (SQLUtils.isSameTypeGroup(newContent.getTypeInfo().getSqlType(), java.sql.Types.BLOB) || SQLUtils.isSameTypeGroup(oldContent.getTypeInfo().getSqlType(), java.sql.Types.BLOB)) {
+        if (SQLUtils.getTypeGroup(newContent.getTypeInfo().getSqlType()) == SQLUtils.TypesGroup.LOBS || SQLUtils.getTypeGroup(oldContent.getTypeInfo().getSqlType()) == SQLUtils.TypesGroup.LOBS) {
             promtMsg1 = "areYouSureBlobFieldInRelationsPresent"; //NOI18N
             promtMsg2 = "areYouSureBlobFieldDataPresent"; //NOI18N
             promtMsg3 = "areYouSureBlobFieldInRelationsDataPresent"; //NOI18N

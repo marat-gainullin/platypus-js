@@ -70,7 +70,7 @@ public class NewFieldEdit extends DbStructureEdit {
     private Field createField() {
         com.eas.client.model.gui.edits.fields.NewFieldEdit<FieldsEntity> substEdit = new com.eas.client.model.gui.edits.fields.NewFieldEdit<>(entity);
         Field rsmd = substEdit.getField();
-        if (SQLUtils.isSameTypeGroup(rsmd.getTypeInfo().getSqlType(), java.sql.Types.VARCHAR)
+        if (SQLUtils.getTypeGroup(rsmd.getTypeInfo().getSqlType()) == SQLUtils.TypesGroup.STRINGS
                 && rsmd.getSize() == 0) {
             rsmd.setSize(100);
         }

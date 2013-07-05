@@ -89,7 +89,10 @@ public abstract class TypesResolver {
      * Resovles field's sql type, sql type name and java class name to application friendly form
      * @param aField Field instance data type info to be resolved in.
      */
-    public abstract void resolve2Application(Field aField);
+    public void resolve2Application(Field aField){
+        int jdbcType = getJdbcTypeByRDBMSTypename(aField.getTypeInfo().getSqlTypeName());
+        aField.setTypeInfo(DataTypeInfo.valueOf(jdbcType).copy());
+    }
     
     public abstract boolean isGeometryTypeName(String aTypeName);
 

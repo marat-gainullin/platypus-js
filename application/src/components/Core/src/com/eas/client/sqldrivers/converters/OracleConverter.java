@@ -21,11 +21,10 @@ import org.geotools.data.oracle.sdo.GeometryConverter;
  */
 public class OracleConverter extends PlatypusConverter {
 
-    public OracleConverter()
-    {
+    public OracleConverter() {
         super(new OracleTypesResolver());
     }
-    
+
     @Override
     public void convert2JdbcAndAssign(Object aValue, DataTypeInfo aTypeInfo, Connection aConn, int aParameterIndex, PreparedStatement aStmt) throws RowsetException {
         if (aValue != null) {
@@ -83,15 +82,15 @@ public class OracleConverter extends PlatypusConverter {
                         aStmt.setBytes(aParameterIndex, ((CompactBlob) aValue).getData());
                     }
                     /*
-                    if (aValue instanceof byte[]) {
-                    oracle.sql.RAW raw = new oracle.sql.RAW();
-                    raw.setBytes((byte[]) aValue);
-                    aStmt.setObject(aParameterIndex, raw);
-                    } else if (aValue instanceof CompactBlob) {
-                    oracle.sql.RAW raw = new oracle.sql.RAW();
-                    raw.setBytes(((CompactBlob) aValue).getData());
-                    aStmt.setObject(aParameterIndex, raw);
-                    }
+                     if (aValue instanceof byte[]) {
+                     oracle.sql.RAW raw = new oracle.sql.RAW();
+                     raw.setBytes((byte[]) aValue);
+                     aStmt.setObject(aParameterIndex, raw);
+                     } else if (aValue instanceof CompactBlob) {
+                     oracle.sql.RAW raw = new oracle.sql.RAW();
+                     raw.setBytes(((CompactBlob) aValue).getData());
+                     aStmt.setObject(aParameterIndex, raw);
+                     }
                      */
                 } catch (SQLException ex) {
                     throw new RowsetException(ex);
@@ -140,7 +139,7 @@ public class OracleConverter extends PlatypusConverter {
 
     @Override
     public boolean isGeometry(DataTypeInfo aTypeInfo) {
-        return super.isGeometry(aTypeInfo) || (aTypeInfo.getSqlType() == Types.STRUCT && ((OracleTypesResolver)resolver).isGeometryTypeName(aTypeInfo.getSqlTypeName().toUpperCase()));
+        return super.isGeometry(aTypeInfo) || (aTypeInfo.getSqlType() == Types.STRUCT && ((OracleTypesResolver) resolver).isGeometryTypeName(aTypeInfo.getSqlTypeName().toUpperCase()));
     }
 
     public Clob createAndAssignClob(Connection conn, Clob sourceClob) throws RowsetException {

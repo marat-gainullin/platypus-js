@@ -81,14 +81,14 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
         SqlDriver driver = client.getDbMetadataCache(null).getConnectionDriver();
         Set<Integer> supportedTypes = driver.getSupportedJdbcDataTypes();
         if (SQLUtils.isTypeSupported(type)) {
-            if (SQLUtils.isSameTypeGroup(type, Types.NUMERIC)) // numbers
+            if (SQLUtils.getTypeGroup(type) == SQLUtils.TypesGroup.NUMBERS) // numbers
             {
                 return (type == Types.NUMERIC && supportedTypes.contains(Types.NUMERIC))
                         || (type == Types.DECIMAL && supportedTypes.contains(Types.DECIMAL));
-            } else if (SQLUtils.isSameTypeGroup(type, Types.VARCHAR)) // strings
+            } else if (SQLUtils.getTypeGroup(type) == SQLUtils.TypesGroup.STRINGS) // strings
             {
                 return type == Types.VARCHAR && supportedTypes.contains(Types.VARCHAR);
-            } else if (SQLUtils.isSameTypeGroup(type, Types.DATE)) // dates
+            } else if (SQLUtils.getTypeGroup(type) == SQLUtils.TypesGroup.DATES) // dates
             {
                 return (type == Types.DATE && supportedTypes.contains(Types.DATE))
                         || (type == Types.TIMESTAMP && supportedTypes.contains(Types.TIMESTAMP));

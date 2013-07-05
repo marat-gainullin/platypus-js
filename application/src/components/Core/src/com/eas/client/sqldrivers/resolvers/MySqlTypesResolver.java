@@ -14,8 +14,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -177,22 +175,17 @@ public class MySqlTypesResolver extends TypesResolver {
     @Override
     public void resolve2RDBMS(Field aField) {
         super.resolve2RDBMS(aField);
-        if (aField.getSize() > MAXIMUM_NUMBERS_PRECISION) {// MySql treats size as presion in error messages
+        if (SQLUtils.getTypeGroup(aField.getTypeInfo().getSqlType()) == SQLUtils.TypesGroup.NUMBERS && aField.getSize() > MAXIMUM_NUMBERS_PRECISION) {// MySql treats size as precision in error messages
             aField.setSize(MAXIMUM_NUMBERS_PRECISION);
         }
     }
 
     @Override
     public void resolve2Application(Field aField) {
-        if (SQLUtils.isSameTypeGroup(aField.getTypeInfo().getSqlType(), java.sql.Types.BLOB)) {
-            if (aField.getTypeInfo().getSqlType() == java.sql.Types.CLOB || aField.getTypeInfo().getSqlType() == java.sql.Types.NCLOB) {
-                aField.setTypeInfo(DataTypeInfo.CLOB.copy());
-            } else {
-                aField.setTypeInfo(DataTypeInfo.BLOB.copy());
-            }
-        } else if (isGeometryTypeName(aField.getTypeInfo().getSqlTypeName())) {
+        if (isGeometryTypeName(aField.getTypeInfo().getSqlTypeName())) {
             aField.setTypeInfo(DataTypeInfo.GEOMETRY.copy());
-        }
+        }else
+            super.resolve2Application(aField);
     }
 
     @Override

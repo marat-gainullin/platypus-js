@@ -668,7 +668,7 @@ public class MySqlSqlDriver extends SqlDriver {
     @Override
     public String getSql4FieldDefinition(Field aField) {
         String fieldDefinition = wrapName(aField.getName()) + " " + getFieldTypeDefinition(aField);
-        if (!aField.isSigned() && SQLUtils.isSameTypeGroup(aField.getTypeInfo().getSqlType(), java.sql.Types.NUMERIC)) {
+        if (!aField.isSigned() && SQLUtils.getTypeGroup(aField.getTypeInfo().getSqlType()) == SQLUtils.TypesGroup.NUMBERS) {
             fieldDefinition += " UNSIGNED";
         }
         if (!aField.isNullable()) {

@@ -59,8 +59,8 @@ public class MsSqlTypesResolver extends TypesResolver {
         jdbcTypes2RdbmsTypes.put(NON_JDBC_MEMO_STRING, "text");
         jdbcTypes2RdbmsTypes.put(Types.BINARY, "binary");
         jdbcTypes2RdbmsTypes.put(Types.CHAR, "char");
-        
-        
+
+
         jdbcTypes2RdbmsTypes.put(Types.DOUBLE, "float");
         jdbcTypes2RdbmsTypes.put(Types.LONGVARCHAR, "text");
         jdbcTypes2RdbmsTypes.put(Types.DATE, "datetime");
@@ -70,60 +70,7 @@ public class MsSqlTypesResolver extends TypesResolver {
         jdbcTypes2RdbmsTypes.put(Types.LONGNVARCHAR, "text");
         jdbcTypes2RdbmsTypes.put(Types.NCLOB, "text");
         jdbcTypes2RdbmsTypes.put(Types.SQLXML, "text");
-        
-        
 
-        // let's reduce all jdbc types to supported jdbc types for this RDBMS
-        jdbcToRDBMS.put(Types.SQLXML, DataTypeInfo.VARCHAR.copy());
-        jdbcToRDBMS.put(Types.BLOB, DataTypeInfo.BLOB.copy());
-        jdbcToRDBMS.put(Types.BINARY, DataTypeInfo.BINARY.copy());
-        jdbcToRDBMS.put(Types.VARBINARY, DataTypeInfo.VARBINARY.copy());
-        jdbcToRDBMS.put(Types.LONGVARBINARY, DataTypeInfo.VARBINARY.copy());
-        jdbcToRDBMS.put(Types.CLOB, DataTypeInfo.CLOB.copy());
-        jdbcToRDBMS.put(Types.NCLOB, DataTypeInfo.CLOB.copy());
-        jdbcToRDBMS.put(Types.DECIMAL, DataTypeInfo.DECIMAL.copy());
-        jdbcToRDBMS.put(Types.NUMERIC, DataTypeInfo.NUMERIC.copy());
-        jdbcToRDBMS.put(Types.BIGINT, DataTypeInfo.BIGINT.copy());
-        jdbcToRDBMS.put(Types.SMALLINT, DataTypeInfo.SMALLINT.copy());
-        jdbcToRDBMS.put(Types.TINYINT, DataTypeInfo.TINYINT.copy());
-        jdbcToRDBMS.put(Types.INTEGER, DataTypeInfo.INTEGER.copy());
-        jdbcToRDBMS.put(Types.REAL, DataTypeInfo.REAL.copy());
-        jdbcToRDBMS.put(Types.FLOAT, DataTypeInfo.FLOAT.copy());
-        jdbcToRDBMS.put(Types.DOUBLE, DataTypeInfo.FLOAT.copy());
-        jdbcToRDBMS.put(Types.LONGVARCHAR, DataTypeInfo.CLOB.copy());
-        jdbcToRDBMS.put(Types.LONGNVARCHAR, DataTypeInfo.CLOB.copy());
-        jdbcToRDBMS.put(Types.CHAR, DataTypeInfo.CHAR.copy());
-        jdbcToRDBMS.put(Types.VARCHAR, DataTypeInfo.VARCHAR.copy());
-        jdbcToRDBMS.put(Types.NCHAR, DataTypeInfo.CHAR.copy());
-        jdbcToRDBMS.put(Types.NVARCHAR, DataTypeInfo.NVARCHAR.copy());
-        jdbcToRDBMS.put(Types.BOOLEAN, DataTypeInfo.BIT.copy());
-        jdbcToRDBMS.put(Types.BIT, DataTypeInfo.BIT.copy());
-        
-        jdbcToRDBMS.put(Types.DATE, DataTypeInfo.TIMESTAMP.copy());
-        jdbcToRDBMS.put(Types.TIMESTAMP, DataTypeInfo.TIMESTAMP.copy());
-        jdbcToRDBMS.put(Types.TIME, DataTypeInfo.TIMESTAMP.copy());
-        jdbcToRDBMS.put(Types.OTHER, DataTypeInfo.OTHER.copy());
-        // ms sql specific (non jdbc)
-        jdbcToRDBMS.put(NON_JDBC_LONG_STRING, DataTypeInfo.NVARCHAR.copy());
-        jdbcToRDBMS.put(NON_JDBC_MEDIUM_STRING, DataTypeInfo.NVARCHAR.copy());
-        jdbcToRDBMS.put(NON_JDBC_SHORT_STRING, DataTypeInfo.NVARCHAR.copy());
-        jdbcToRDBMS.put(NON_JDBC_MEMO_STRING, DataTypeInfo.NVARCHAR.copy());
-        // unsupported
-        jdbcToRDBMS.put(Types.ARRAY, DataTypeInfo.ARRAY.copy());
-        jdbcToRDBMS.put(Types.STRUCT, DataTypeInfo.STRUCT.copy());
-        jdbcToRDBMS.put(Types.JAVA_OBJECT, DataTypeInfo.JAVA_OBJECT.copy());
-        jdbcToRDBMS.put(Types.DATALINK, DataTypeInfo.DATALINK.copy());
-        jdbcToRDBMS.put(Types.DISTINCT, DataTypeInfo.DISTINCT.copy());
-        jdbcToRDBMS.put(Types.NULL, DataTypeInfo.NULL.copy());
-        jdbcToRDBMS.put(Types.ROWID, DataTypeInfo.ROWID.copy());
-        jdbcToRDBMS.put(Types.REF, DataTypeInfo.REF.copy());
-
-        // let's assign ms sql names to our DataTypeInfo's.
-        for (DataTypeInfo typeInfo : jdbcToRDBMS.values()) {
-            String dbmsTypeName = jdbcTypes2RdbmsTypes.get(typeInfo.getSqlType());
-            typeInfo.setSqlTypeName(dbmsTypeName);
-        }
-        
         // supported types at whole. see MsSqlTypesResolver for inverse mapping
         rdbmsTypes2JdbcTypes.put("image", Types.BLOB);
         rdbmsTypes2JdbcTypes.put("text", Types.CLOB);
@@ -159,10 +106,10 @@ public class MsSqlTypesResolver extends TypesResolver {
         rdbmsTypes2JdbcTypes.put("smallint identity", Types.SMALLINT);
         rdbmsTypes2JdbcTypes.put("sysname", Types.NVARCHAR);
         rdbmsTypes2JdbcTypes.put("xml", Types.CLOB);
-        
+
         //typeName(M,D)
         //jdbcTypesWithScale.add(Types.DECIMAL);
-        
+
         //typeName(M)
         jdbcTypesWithSize.add(Types.CHAR);
         jdbcTypesWithSize.add(Types.VARCHAR);
@@ -171,22 +118,22 @@ public class MsSqlTypesResolver extends TypesResolver {
         jdbcTypesWithSize.add(Types.BINARY);
         jdbcTypesWithSize.add(Types.VARBINARY);
 
-        
+
         // max sizes for types
-        jdbcTypesMaxSize.put(Types.CHAR,8000);
-        jdbcTypesMaxSize.put(Types.NCHAR,4000);
-        jdbcTypesMaxSize.put(Types.VARCHAR,8000);
-        jdbcTypesMaxSize.put(Types.NVARCHAR,4000);
-        jdbcTypesMaxSize.put(Types.BINARY,8000);
-        jdbcTypesMaxSize.put(Types.VARBINARY,8000);
-        
+        jdbcTypesMaxSize.put(Types.CHAR, 8000);
+        jdbcTypesMaxSize.put(Types.NCHAR, 4000);
+        jdbcTypesMaxSize.put(Types.VARCHAR, 8000);
+        jdbcTypesMaxSize.put(Types.NVARCHAR, 4000);
+        jdbcTypesMaxSize.put(Types.BINARY, 8000);
+        jdbcTypesMaxSize.put(Types.VARBINARY, 8000);
+
         // default sizes for types ??????????????????????????????????????????????
-        jdbcTypesDefaultSize.put(Types.CHAR,1);
-        jdbcTypesDefaultSize.put(Types.NCHAR,1);
-        jdbcTypesDefaultSize.put(Types.VARCHAR,200);
-        jdbcTypesDefaultSize.put(Types.NVARCHAR,200);
-        jdbcTypesDefaultSize.put(Types.BINARY,1);
-        jdbcTypesDefaultSize.put(Types.VARBINARY,200);
+        jdbcTypesDefaultSize.put(Types.CHAR, 1);
+        jdbcTypesDefaultSize.put(Types.NCHAR, 1);
+        jdbcTypesDefaultSize.put(Types.VARCHAR, 200);
+        jdbcTypesDefaultSize.put(Types.NVARCHAR, 200);
+        jdbcTypesDefaultSize.put(Types.BINARY, 1);
+        jdbcTypesDefaultSize.put(Types.VARBINARY, 200);
 
         // порядок замены символьных типов, если требуется размер больше исходного
         characterTypesOrder.add(Types.CHAR);
@@ -194,13 +141,10 @@ public class MsSqlTypesResolver extends TypesResolver {
         characterTypesOrder.add(Types.VARCHAR);
         characterTypesOrder.add(Types.NVARCHAR);
         characterTypesOrder.add(Types.CLOB);
-        
+
         binaryTypesOrder.add(Types.BINARY);
         binaryTypesOrder.add(Types.VARBINARY);
         binaryTypesOrder.add(Types.BLOB);
-        
-        
-        
     }
 
     @Override
@@ -210,28 +154,22 @@ public class MsSqlTypesResolver extends TypesResolver {
                 || aField.getTypeInfo().getSqlType() == NON_JDBC_SHORT_STRING
                 || aField.getTypeInfo().getSqlType() == NON_JDBC_MEMO_STRING) {
             aField.setTypeInfo(DataTypeInfo.NVARCHAR.copy());
-        } else if (aField.getTypeInfo().getSqlType() == java.sql.Types.CLOB
-                || aField.getTypeInfo().getSqlType() == java.sql.Types.NCLOB) {
-            aField.setTypeInfo(DataTypeInfo.CLOB.copy());
-        } else if (aField.getTypeInfo().getSqlType() == java.sql.Types.BLOB) {
-            aField.setTypeInfo(DataTypeInfo.BLOB.copy());
-        } else if (aField.getTypeInfo().getSqlType() == java.sql.Types.BINARY
-                || aField.getTypeInfo().getSqlType() == java.sql.Types.VARBINARY) {
-            aField.setTypeInfo(DataTypeInfo.VARBINARY.copy());
         } else if (isGeometryTypeName(aField.getTypeInfo().getSqlTypeName())) {
             aField.setTypeInfo(DataTypeInfo.GEOMETRY.copy());
+        } else {
+            super.resolve2Application(aField);
         }
     }
-    
+
     @Override
     public int getJdbcTypeByRDBMSTypename(String aTypeName) {
-        Integer jdbcType = (aTypeName != null?rdbmsTypes2JdbcTypes.get(aTypeName.toLowerCase()):null);
+        Integer jdbcType = (aTypeName != null ? rdbmsTypes2JdbcTypes.get(aTypeName.toLowerCase()) : null);
         if (jdbcType == null) {
             jdbcType = Types.OTHER;
         }
         return jdbcType;
     }
-    
+
     @Override
     public Set<Integer> getSupportedJdbcDataTypes() {
         Set<Integer> supportedTypes = new HashSet<>();
@@ -243,18 +181,17 @@ public class MsSqlTypesResolver extends TypesResolver {
     public boolean isGeometryTypeName(String aTypeName) {
         return false;
     }
-    @Override
-    public boolean isSized(Integer aSqlType)   
-    {
-        return jdbcTypesWithSize.contains(aSqlType);
-    }        
 
     @Override
-    public boolean isScaled(Integer aSqlType)   
-    {
+    public boolean isSized(Integer aSqlType) {
+        return jdbcTypesWithSize.contains(aSqlType);
+    }
+
+    @Override
+    public boolean isScaled(Integer aSqlType) {
         return jdbcTypesWithScale.contains(aSqlType);
-    }        
-    
+    }
+
     @Override
     public Map<Integer, String> getJdbcTypes2RdbmsTypes() {
         return jdbcTypes2RdbmsTypes;
@@ -276,8 +213,7 @@ public class MsSqlTypesResolver extends TypesResolver {
     }
 
     @Override
-    public  List<Integer> getBinaryTypesOrder() {
+    public List<Integer> getBinaryTypesOrder() {
         return binaryTypesOrder;
     }
-
 }

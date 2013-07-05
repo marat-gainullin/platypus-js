@@ -679,81 +679,87 @@ public class SQLUtils {
             }
         }
     }
-    public static final Map<Integer, Integer> typesCompatible = new HashMap<>();
-    public static final Integer NUMBERS_GROUP = new Integer(1);
-    public static final Integer LOGICAL_GROUP = new Integer(2);
-    public static final Integer LOBS_GROUP = new Integer(3);
-    public static final Integer STRINGS_GROUP = new Integer(4);
-    public static final Integer DATES_GROUP = new Integer(5);
-    public static final Integer USER_DEFINED_GROUP = new Integer(6);
-    public static final Integer UNSUPPORTED_GROUP = null;
+    public static final Map<Integer, TypesGroup> typesCompatible = new HashMap<>();
+
+    public enum TypesGroup {
+
+        NUMBERS,
+        LOGICAL,
+        LOBS,
+        BINARIES,
+        STRINGS,
+        DATES,
+        USER_DEFINED,
+        UNSUPPORTED
+    }
     public static final ResourceBundle DbLocalizations = ResourceBundle.getBundle("com/eas/client/DbLocalizations");
 
     static {
         // Unknown. Not working with
-        typesCompatible.put(java.sql.Types.ARRAY, UNSUPPORTED_GROUP);
-        typesCompatible.put(java.sql.Types.DATALINK, UNSUPPORTED_GROUP);
-        typesCompatible.put(java.sql.Types.JAVA_OBJECT, UNSUPPORTED_GROUP);
-        typesCompatible.put(java.sql.Types.REF, UNSUPPORTED_GROUP);
-        typesCompatible.put(java.sql.Types.OTHER, UNSUPPORTED_GROUP);
-        typesCompatible.put(java.sql.Types.DISTINCT, UNSUPPORTED_GROUP);
-        typesCompatible.put(java.sql.Types.NULL, UNSUPPORTED_GROUP);
-        typesCompatible.put(java.sql.Types.ROWID, UNSUPPORTED_GROUP);
+        typesCompatible.put(java.sql.Types.ARRAY, TypesGroup.UNSUPPORTED);
+        typesCompatible.put(java.sql.Types.DATALINK, TypesGroup.UNSUPPORTED);
+        typesCompatible.put(java.sql.Types.JAVA_OBJECT, TypesGroup.UNSUPPORTED);
+        typesCompatible.put(java.sql.Types.REF, TypesGroup.UNSUPPORTED);
+        typesCompatible.put(java.sql.Types.OTHER, TypesGroup.UNSUPPORTED);
+        typesCompatible.put(java.sql.Types.DISTINCT, TypesGroup.UNSUPPORTED);
+        typesCompatible.put(java.sql.Types.NULL, TypesGroup.UNSUPPORTED);
+        typesCompatible.put(java.sql.Types.ROWID, TypesGroup.UNSUPPORTED);
         // Aggregated types - those which consist of values of other types.
-        typesCompatible.put(java.sql.Types.STRUCT, USER_DEFINED_GROUP);
+        typesCompatible.put(java.sql.Types.STRUCT, TypesGroup.USER_DEFINED);
         // Numbers
-        typesCompatible.put(java.sql.Types.BIGINT, NUMBERS_GROUP);
-        typesCompatible.put(java.sql.Types.DECIMAL, NUMBERS_GROUP);
-        typesCompatible.put(java.sql.Types.DOUBLE, NUMBERS_GROUP);
-        typesCompatible.put(java.sql.Types.FLOAT, NUMBERS_GROUP);
-        typesCompatible.put(java.sql.Types.INTEGER, NUMBERS_GROUP);
-        typesCompatible.put(java.sql.Types.NUMERIC, NUMBERS_GROUP);
-        typesCompatible.put(java.sql.Types.REAL, NUMBERS_GROUP);
-        typesCompatible.put(java.sql.Types.SMALLINT, NUMBERS_GROUP);
-        typesCompatible.put(java.sql.Types.TINYINT, NUMBERS_GROUP);
+        typesCompatible.put(java.sql.Types.BIGINT, TypesGroup.NUMBERS);
+        typesCompatible.put(java.sql.Types.DECIMAL, TypesGroup.NUMBERS);
+        typesCompatible.put(java.sql.Types.DOUBLE, TypesGroup.NUMBERS);
+        typesCompatible.put(java.sql.Types.FLOAT, TypesGroup.NUMBERS);
+        typesCompatible.put(java.sql.Types.INTEGER, TypesGroup.NUMBERS);
+        typesCompatible.put(java.sql.Types.NUMERIC, TypesGroup.NUMBERS);
+        typesCompatible.put(java.sql.Types.REAL, TypesGroup.NUMBERS);
+        typesCompatible.put(java.sql.Types.SMALLINT, TypesGroup.NUMBERS);
+        typesCompatible.put(java.sql.Types.TINYINT, TypesGroup.NUMBERS);
         // Logical
-        typesCompatible.put(java.sql.Types.BOOLEAN, LOGICAL_GROUP);
-        typesCompatible.put(java.sql.Types.BIT, LOGICAL_GROUP);
+        typesCompatible.put(java.sql.Types.BOOLEAN, TypesGroup.LOGICAL);
+        typesCompatible.put(java.sql.Types.BIT, TypesGroup.LOGICAL);
         // Binaries
-        typesCompatible.put(java.sql.Types.VARBINARY, LOBS_GROUP);
-        typesCompatible.put(java.sql.Types.BINARY, LOBS_GROUP);
-        typesCompatible.put(java.sql.Types.BLOB, LOBS_GROUP);
-        typesCompatible.put(java.sql.Types.LONGVARBINARY, LOBS_GROUP);
-        typesCompatible.put(java.sql.Types.CLOB, LOBS_GROUP);
-        typesCompatible.put(java.sql.Types.NCLOB, LOBS_GROUP);
+        typesCompatible.put(java.sql.Types.VARBINARY, TypesGroup.BINARIES);
+        typesCompatible.put(java.sql.Types.BINARY, TypesGroup.BINARIES);
+        typesCompatible.put(java.sql.Types.LONGVARBINARY, TypesGroup.BINARIES);
+        // Lobs
+        typesCompatible.put(java.sql.Types.BLOB, TypesGroup.LOBS);
+        typesCompatible.put(java.sql.Types.CLOB, TypesGroup.LOBS);
+        typesCompatible.put(java.sql.Types.NCLOB, TypesGroup.LOBS);
         // Strings
-        typesCompatible.put(java.sql.Types.CHAR, STRINGS_GROUP);
-        typesCompatible.put(java.sql.Types.LONGNVARCHAR, STRINGS_GROUP);
-        typesCompatible.put(java.sql.Types.LONGVARCHAR, STRINGS_GROUP);
-        typesCompatible.put(java.sql.Types.NCHAR, STRINGS_GROUP);
-        typesCompatible.put(java.sql.Types.NVARCHAR, STRINGS_GROUP);
-        typesCompatible.put(java.sql.Types.VARCHAR, STRINGS_GROUP);
-        typesCompatible.put(java.sql.Types.SQLXML, STRINGS_GROUP);
+        typesCompatible.put(java.sql.Types.CHAR, TypesGroup.STRINGS);
+        typesCompatible.put(java.sql.Types.LONGNVARCHAR, TypesGroup.STRINGS);
+        typesCompatible.put(java.sql.Types.LONGVARCHAR, TypesGroup.STRINGS);
+        typesCompatible.put(java.sql.Types.NCHAR, TypesGroup.STRINGS);
+        typesCompatible.put(java.sql.Types.NVARCHAR, TypesGroup.STRINGS);
+        typesCompatible.put(java.sql.Types.VARCHAR, TypesGroup.STRINGS);
+        typesCompatible.put(java.sql.Types.SQLXML, TypesGroup.STRINGS);
         // Dates, times
-        typesCompatible.put(java.sql.Types.DATE, DATES_GROUP);
-        typesCompatible.put(java.sql.Types.TIME, DATES_GROUP);
-        typesCompatible.put(java.sql.Types.TIMESTAMP, DATES_GROUP);
+        typesCompatible.put(java.sql.Types.DATE, TypesGroup.DATES);
+        typesCompatible.put(java.sql.Types.TIME, TypesGroup.DATES);
+        typesCompatible.put(java.sql.Types.TIMESTAMP, TypesGroup.DATES);
     }
 
-    public static boolean isTypeSupported(int type) {
-        return typesCompatible.get(type) != UNSUPPORTED_GROUP;
+    public static boolean isTypeSupported(int aType) {
+        return typesCompatible.get(aType) != TypesGroup.UNSUPPORTED;
     }
 
-    public static boolean isSameTypeGroup(int leftType, int rightType) {
-        return typesCompatible.get(leftType) == typesCompatible.get(rightType);
+    public static TypesGroup getTypeGroup(int aType) {
+        return typesCompatible.get(aType);
     }
 
     public static boolean isSimpleTypesCompatible(int leftType, int rightType) {
-        Integer leftTypeGroup = typesCompatible.get(leftType);
-        Integer rightTypeGroup = typesCompatible.get(rightType);
+        TypesGroup leftTypeGroup = typesCompatible.get(leftType);
+        TypesGroup rightTypeGroup = typesCompatible.get(rightType);
         if (leftTypeGroup != null && rightTypeGroup != null) {
-            return (leftTypeGroup.equals(rightTypeGroup)
+            return (leftTypeGroup == rightTypeGroup
                     || // Dates to Strings are allowed
-                    (leftTypeGroup.intValue() == 5 && rightTypeGroup.intValue() == 4)
+                    (leftTypeGroup == TypesGroup.DATES && rightTypeGroup == TypesGroup.STRINGS)
                     || // Numbers to Strings are allowed
-                    (leftTypeGroup.intValue() == 1 && rightTypeGroup.intValue() == 4)
+                    (leftTypeGroup == TypesGroup.NUMBERS && rightTypeGroup == TypesGroup.STRINGS)
                     || // Numbers to Booleans are allowed
-                    (leftTypeGroup.intValue() == 1 && rightTypeGroup.intValue() == 2));
+                    (leftTypeGroup == TypesGroup.NUMBERS && rightTypeGroup == TypesGroup.LOGICAL));
         }
         return false;
     }
