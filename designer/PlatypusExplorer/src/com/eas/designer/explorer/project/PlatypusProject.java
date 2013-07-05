@@ -5,7 +5,6 @@
 package com.eas.designer.explorer.project;
 
 import com.eas.client.AppCache;
-import com.eas.client.ClientConstants;
 import com.eas.client.ClientFactory;
 import com.eas.client.DbClient;
 import com.eas.client.cache.PlatypusFiles;
@@ -50,8 +49,10 @@ import org.netbeans.spi.java.classpath.support.PathResourceBase;
 import org.netbeans.spi.project.ProjectState;
 import org.netbeans.spi.project.ui.ProjectOpenedHook;
 import org.netbeans.spi.queries.FileEncodingQueryImplementation;
-import org.openide.DialogDisplayer;
-import org.openide.NotifyDescriptor;
+import org.netbeans.spi.search.SearchFilterDefinition;
+import org.netbeans.spi.search.SearchInfoDefinition;
+import org.netbeans.spi.search.SearchInfoDefinitionFactory;
+import org.netbeans.spi.search.SubTreeSearchOptions;
 import org.openide.awt.StatusDisplayer;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
@@ -93,6 +94,7 @@ public class PlatypusProject implements Project {
     private DbMigrator migrator;
     private ClassPath sourceRoot;
     private Set<Runnable> clientListeners = new HashSet<>();
+    private SearchFilter searchFilter;
 
     public PlatypusProject(FileObject aProjectDir, ProjectState aState) throws Exception {
         super();
@@ -109,6 +111,7 @@ public class PlatypusProject implements Project {
             }
         });
         info = new PlatypusProjectInformation(this);
+        searchFilter = new SearchFilter(this);
         pLookup = Lookups.fixed(
                 new PlatypusOpenedHook(),
                 new PlatypusClassPathProvider(),
@@ -120,7 +123,8 @@ public class PlatypusProject implements Project {
                 new PlatypusProjectCustomizerProvider(this),
                 new PlatypusFilesEncodingQuery(),
                 new PlatypusWebModule(this),
-                new PlatypusWebModuleManager(this));
+                new PlatypusWebModuleManager(this),
+                getSearchInfoDescription());
     }
 
     public boolean isDbConnected() {
@@ -338,6 +342,23 @@ public class PlatypusProject implements Project {
 
     public PlatypusProjectInformation getProjectInfo() {
         return info;
+    }
+
+    public SubTreeSearchOptions getSubTreeSearchOptions() {
+        return new SubTreeSearchOptions() {
+            @Override
+            public List<SearchFilterDefinition> getFilters() {
+                return Arrays.asList(new SearchFilterDefinition[]{searchFilter});
+            }
+        };
+    }
+
+    private SearchInfoDefinition getSearchInfoDescription() {
+        return SearchInfoDefinitionFactory.createSearchInfo(
+                getProjectDirectory(),
+                new SearchFilterDefinition[]{
+                    searchFilter
+                });
     }
 
     private final class PlatypusOpenedHook extends ProjectOpenedHook {

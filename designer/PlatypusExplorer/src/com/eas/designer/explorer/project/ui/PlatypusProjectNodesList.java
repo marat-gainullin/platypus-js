@@ -23,6 +23,7 @@ import org.openide.loaders.DataObject;
 import org.openide.nodes.Node;
 import org.openide.util.ImageUtilities;
 import org.openide.util.NbBundle;
+import org.openide.util.lookup.Lookups;
 
 /**
  * Nodes list, identified by names as keys.
@@ -46,8 +47,12 @@ public class PlatypusProjectNodesList implements NodeList<String> {
         project = aProject;
         keys.add(PlatypusUtils.ELEMENTS_SOURCES_GROUP);
         DataFolder appRootDataFolder = DataFolder.findFolder(project.getSrcRoot());
-        nodes.add(new CategoryNode(project, appRootDataFolder.getNodeDelegate(),
-                appRootDataFolder.createNodeChildren(APPLICATION_TYPES_FILTER), sourceIcon, sourceIcon, PlatypusUtils.ELEMENTS_SOURCES_GROUP, NbBundle.getMessage(PlatypusProject.class, PlatypusUtils.ELEMENTS_SOURCES_GROUP)));
+        nodes.add(new CategoryNode(project,
+                appRootDataFolder,
+                sourceIcon,
+                sourceIcon,
+                PlatypusUtils.ELEMENTS_SOURCES_GROUP,
+                NbBundle.getMessage(PlatypusProject.class, PlatypusUtils.ELEMENTS_SOURCES_GROUP)));
         keys.add(PlatypusUtils.DB_MIGRATIONS_SOURCES_GROUP);
         DataFolder dbMigrationsDataFolder = DataFolder.findFolder(project.getDbMigrationsRoot());
         nodes.add(new DbMigrationsNode(project, dbMigrationsDataFolder.getNodeDelegate(),

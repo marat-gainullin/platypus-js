@@ -1,5 +1,7 @@
 package com.eas.client.gxtcontrols.wrappers.component;
 
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.sencha.gxt.cell.core.client.form.ComboBoxCell;
 import com.sencha.gxt.widget.core.client.form.ComboBox;
 
@@ -7,6 +9,14 @@ public class PlatypusComboBox extends ComboBox<Object> {
 
 	public PlatypusComboBox(ComboBoxCell<Object> aCell) {
 		super(aCell);
+		addSelectionHandler(new SelectionHandler<Object>(){
+
+			@Override
+            public void onSelection(SelectionEvent<Object> event) {
+				finishEditing();
+            }
+			
+		});
 	}
 
 	// There is a bug in GXT. onBlur handlers call finishEditing, thus commiting

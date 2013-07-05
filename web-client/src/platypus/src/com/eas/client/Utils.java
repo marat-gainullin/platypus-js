@@ -130,7 +130,7 @@ public class Utils {
 		else if (aValue instanceof String || aValue instanceof Boolean)
 			return aValue;
 		else
-			return null;
+			return aValue;
 	}
 
 	public static native Object unwrap(JavaScriptObject aValue) throws Exception/*-{
@@ -145,7 +145,7 @@ public class Utils {
 		else if(!isNaN(aValue)) {
 			return new @java.lang.Double::new(D)((new Number(aValue)) * 1);
 		} else
-			throw "Can't unwrap: " + aValue;
+			return aValue;
 	}-*/;
 
 	public static Object toJava(Object aValue) throws Exception {
