@@ -428,7 +428,7 @@ public class MySqlSqlDriver extends SqlDriver {
                 + "    '(',"
                 + "    '  column_type,'' '',',"
                 + "    '  (CASE is_nullable WHEN ''YES'' THEN ''NULL'' ELSE ''NOT NULL'' END),'' '',',"
-                + "    '  IF(column_default is null,'''',CONCAT(''DEFAULT '',column_default,'' '')),',"
+                + "    '  IF(column_default is null,'''',CONCAT(''DEFAULT \"'',column_default,''\" '')),',"
                 + "    '  IF(extra is null,'''',CONCAT(extra,'' ''))',"
                 + "    ') ',"
                 + "    'INTO @define_column ',"
