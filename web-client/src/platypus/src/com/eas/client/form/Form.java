@@ -802,6 +802,9 @@ public class Form {
 	        aModule.toFront = function(){
 	        	aForm.@com.eas.client.form.Form::toFront()();
 	        };
+	        aModule.restore = function(){
+	        	aForm.@com.eas.client.form.Form::restore()();
+	        };
 	        aModule.close = function() {
 		        if (arguments.length > 0)
 		        	aForm.@com.eas.client.form.Form::close(Ljava/lang/Object;Lcom/google/gwt/core/client/JavaScriptObject;)(arguments[0]==null?null:$wnd.boxAsJava(arguments[0]), closeCallback);
@@ -889,6 +892,11 @@ public class Form {
 	public void toFront(){
 		if(window != null)
 			window.toFront();
+	}
+	
+	public void restore(){
+		if(window != null)
+			window.restore();
 	}
 	
 	public boolean isMaximizable() {

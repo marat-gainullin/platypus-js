@@ -14,7 +14,6 @@ import com.eas.client.model.application.ApplicationModel;
 import com.eas.client.model.store.Model2XmlDom;
 import com.eas.client.scripts.ScriptDocument;
 import com.eas.client.scripts.store.Dom2ScriptDocument;
-import com.eas.client.settings.SettingsConstants;
 import com.eas.server.PlatypusServerCore;
 import com.eas.xml.dom.XmlDom2String;
 import java.util.HashMap;
