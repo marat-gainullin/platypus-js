@@ -92,7 +92,6 @@ public class ServerScriptRunner extends ScriptRunner {
     @Override
     protected void definePropertiesAndMethods() {
         super.definePropertiesAndMethods();
-        defineProperty(MODULES_SCRIPT_NAME, serverCore.getScriptsCache(), ScriptableObject.READONLY);
         defineFunctionProperties(new String[]{
                     "getCreationSession",
                     "getServerCore"
