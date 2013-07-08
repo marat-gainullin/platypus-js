@@ -5,14 +5,11 @@
 package com.eas.client.model.application;
 
 import com.bearsoft.rowset.changes.Change;
-import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.SQLUtils;
 import com.eas.client.queries.SqlCompiledQuery;
 import com.eas.client.queries.SqlQuery;
-import com.eas.client.sqldrivers.SqlDriver;
 import java.sql.ParameterMetaData;
 import java.util.List;
 
@@ -83,15 +80,6 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
                 query = SQLUtils.validateTableSqlQuery(getTableDbId(), getTableName(), getTableSchemaName(), model.getClient());
             } else {
                 assert false;
-            }
-            if (query != null) {
-                Fields queryFields = query.getFields();
-                if (queryFields != null) {
-                    SqlDriver driver = model.getClient().getDbMetadataCache(query.getDbId()).getConnectionDriver();
-                    for (Field field : queryFields.toCollection()) {
-                        driver.getTypesResolver().resolve2Application(field);
-                    }
-                }
             }
         }
     }
