@@ -87,6 +87,8 @@ public class StoredQueryFactory {
         if (fields != null) {
             for (Field field : fields.toCollection()) {
                 Field copied = field.copy();
+                // Fields types abstraction moved here because of metadata processing tasks
+                dbMdCache.getConnectionDriver().getTypesResolver().resolve2Application(copied);
                 /*
                  * if (copied.isPk()) { checkPrimaryKey(aQuery, copied); }
                  */
@@ -107,7 +109,7 @@ public class StoredQueryFactory {
                     /**
                      * Заменять имя оригинальной таблицы нельзя, особенно если
                      * это поле ключевое т.к. при установления связи по этим
-                     * полям будут проблемы. Дизайнеру придется "разматывать"
+                     * полям будут проблемы. ORM-у придется "разматывать"
                      * источник поля до таблицы чтобы проверить совместимость
                      * ключей. } else {
                      * copied.setTableName(ClientConstants.QUERY_ID_PREFIX +
@@ -671,6 +673,8 @@ public class StoredQueryFactory {
              * таблицы из-за её участия в разных запросах.
              */
             Field copied = field.copy();
+            // Fields types abstraction moved here because of metadata processing tasks
+            dbMdCache.getConnectionDriver().getTypesResolver().resolve2Application(copied);
             /**
              * Заменим отметку о первичном ключе из оригинальной таблицы на
              * отметку о внешнем ключе, указывающем на ту же таблицу. Замена
