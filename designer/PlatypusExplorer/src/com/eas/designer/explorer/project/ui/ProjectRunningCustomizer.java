@@ -19,20 +19,26 @@ import com.eas.designer.explorer.project.PlatypusProject;
 import com.eas.designer.explorer.project.PlatypusProjectSettings;
 import java.awt.event.ItemEvent;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.ComboBoxModel;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import org.netbeans.api.server.CommonServerUIs;
 import org.netbeans.modules.j2ee.deployment.devmodules.api.Deployment;
 import org.netbeans.modules.j2ee.deployment.devmodules.api.InstanceRemovedException;
 import org.netbeans.modules.j2ee.deployment.devmodules.api.J2eePlatform;
 import org.netbeans.modules.j2ee.deployment.devmodules.api.ServerInstance;
+import org.netbeans.spi.server.ServerInstanceProvider;
 import org.openide.filesystems.FileObject;
 import org.openide.util.Exceptions;
+import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
+import org.openide.util.lookup.Lookups;
 
 /**
  *
@@ -40,12 +46,15 @@ import org.openide.util.NbBundle;
  */
 public class ProjectRunningCustomizer extends javax.swing.JPanel {
 
+    public static final String SERVERS_PATH = "Servers"; // NOI18N
     protected final PlatypusProject project;
     protected final FileObject appRoot;
     protected final PlatypusProjectSettings projectSettings;
     protected final PlatypusSettings appSettings;
     protected ComboBoxModel<ServerInstance> j2eeServersModel;
     private boolean isInit = true;
+    private DefaultComboBoxModel serversModel;
+    private ServerRegistryChangeListener serverRegistryLister = new ServerRegistryChangeListener();
 
     /**
      * Creates new form ProjectRunningCustomizer
@@ -55,6 +64,7 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
         appRoot = aProject.getSrcRoot();
         projectSettings = aProject.getSettings();
         appSettings = projectSettings.getAppSettings();
+        serversModel = new DefaultComboBoxModel(getJ2eePlatforms());
         initComponents();
         if (appSettings.getRunElement() != null) {
             txtRunPath.setText(projectSettings.getAppSettings().getRunElement());
@@ -87,15 +97,8 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
         enablePlatypusClientCustomSettings();
         cbClientType.setSelectedItem(projectSettings.getRunClientType());
         cbAppServerType.setSelectedItem(projectSettings.getRunAppServerType());
-        
-        String serverInstanceId = projectSettings.getJ2eeServerId();
-        if (serverInstanceId != null && !serverInstanceId.isEmpty()) {
-            for (int i = 0; i < cbj2eeServer.getItemCount(); i++) {
-                if (serverInstanceId.equals(((J2eePlatformAdapter) cbj2eeServer.getItemAt(i)).getServerInstanceID())) {
-                    cbj2eeServer.setSelectedIndex(i);
-                }
-            }
-        }
+
+        selectServerInstance();
 
         if (projectSettings.getServerContext() != null) {
             txtContext.setText(projectSettings.getServerContext());
@@ -103,17 +106,22 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
         cbEnableSecurity.setSelected(projectSettings.isWebSecurityEnabled());
         checkRunClientServerConfiguration();
         isInit = false;
+//        result.addLookupListener(new LookupListener() {
+//            @Override
+//            public void resultChanged(LookupEvent ev) {
+//                serversModel.removeAllElements();
+//                for (J2eePlatformAdapter server : getJ2eePlatforms()) {
+//                    serversModel.addElement(server);
+//                }
+//                selectServerInstance();
+//            }
+//        });
     }
 
     private J2eePlatformAdapter[] getJ2eePlatforms() {
         String[] serverInstanceIDs = Deployment.getDefault().getServerInstanceIDs();
         List<J2eePlatformAdapter> j2eePlatforms = new ArrayList<>();
-        if (projectSettings.getJ2eeServerId() == null 
-                || projectSettings.getJ2eeServerId().isEmpty()
-                || serverInstanceIDs == null 
-                || !Arrays.asList(serverInstanceIDs).contains(projectSettings.getJ2eeServerId())) {
-            j2eePlatforms.add(J2eePlatformAdapter.UNKNOWN_PLATFORM_ADAPRER);
-        }
+        j2eePlatforms.add(J2eePlatformAdapter.UNKNOWN_PLATFORM_ADAPRER);
         for (String serverInstance : serverInstanceIDs) {
             try {
                 j2eePlatforms.add(new J2eePlatformAdapter(Deployment.getDefault().getServerInstance(serverInstance).getJ2eePlatform(), serverInstance));
@@ -122,6 +130,17 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
             }
         }
         return j2eePlatforms.toArray(new J2eePlatformAdapter[0]);
+    }
+
+    private void selectServerInstance() {
+        String serverInstanceId = projectSettings.getJ2eeServerId();
+        if (serverInstanceId != null && !serverInstanceId.isEmpty()) {
+            for (int i = 0; i < cbj2eeServer.getItemCount(); i++) {
+                if (serverInstanceId.equals(((J2eePlatformAdapter) cbj2eeServer.getItemAt(i)).getServerInstanceID())) {
+                    cbj2eeServer.setSelectedIndex(i);
+                }
+            }
+        }
     }
 
     private void checkRunClientServerConfiguration() {
@@ -138,11 +157,11 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
     private boolean isValidRunClientServerConfiguration() {
         return ClientType.WEB_BROWSER.equals(cbClientType.getSelectedItem()) && !AppServerType.J2EE_SERVER.equals(cbAppServerType.getSelectedItem());
     }
-    
+
     private boolean isSecurityForceOn() {
         return ClientType.PLATYPUS_CLIENT.equals(cbClientType.getSelectedItem()) && AppServerType.J2EE_SERVER.equals(cbAppServerType.getSelectedItem());
     }
-    
+
     private void enablePlatypusClientCustomSettings() {
         txtClientUrl.setEnabled(cbNotStartServer.isSelected());
     }
@@ -150,7 +169,6 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
     private static final class J2eePlatformAdapter {
 
         public static final J2eePlatformAdapter UNKNOWN_PLATFORM_ADAPRER = new J2eePlatformAdapter(null, null);
-        
         private J2eePlatform platform;
         private String serverInstanceID;
 
@@ -174,6 +192,18 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
             } else {
                 return NbBundle.getMessage(ProjectRunningCustomizer.class, "ProjectRunningCustomizer.cbj2eeServer.NoneText");// NOI18N
             }
+        }
+    }
+
+    private class ServerRegistryChangeListener implements ChangeListener {
+
+        @Override
+        public void stateChanged(ChangeEvent e) {
+            serversModel.removeAllElements();
+            for (J2eePlatformAdapter server : getJ2eePlatforms()) {
+                serversModel.addElement(server);
+            }
+            selectServerInstance();
         }
     }
 
@@ -215,6 +245,7 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
         lblContext = new javax.swing.JLabel();
         txtContext = new javax.swing.JTextField();
         cbEnableSecurity = new javax.swing.JCheckBox();
+        btnManageServers = new javax.swing.JButton();
         chDbAppSources = new javax.swing.JCheckBox();
         cbClientType = new javax.swing.JComboBox();
         lblClientType = new javax.swing.JLabel();
@@ -449,7 +480,7 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
 
         lblJ2eeServer.setText(org.openide.util.NbBundle.getMessage(ProjectRunningCustomizer.class, "ProjectRunningCustomizer.lblJ2eeServer.text")); // NOI18N
 
-        cbj2eeServer.setModel(new javax.swing.DefaultComboBoxModel(getJ2eePlatforms()));
+        cbj2eeServer.setModel(serversModel);
         cbj2eeServer.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 cbj2eeServerItemStateChanged(evt);
@@ -481,6 +512,13 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
             }
         });
 
+        btnManageServers.setText(org.openide.util.NbBundle.getMessage(ProjectRunningCustomizer.class, "ProjectRunningCustomizer.btnManageServers.text")); // NOI18N
+        btnManageServers.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnManageServersActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout j2eeServerPanelLayout = new javax.swing.GroupLayout(j2eeServerPanel);
         j2eeServerPanel.setLayout(j2eeServerPanelLayout);
         j2eeServerPanelLayout.setHorizontalGroup(
@@ -500,23 +538,26 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
                             .addComponent(txtContext, javax.swing.GroupLayout.DEFAULT_SIZE, 496, Short.MAX_VALUE)
                             .addGroup(j2eeServerPanelLayout.createSequentialGroup()
                                 .addComponent(cbj2eeServer, javax.swing.GroupLayout.PREFERRED_SIZE, 305, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(0, 218, Short.MAX_VALUE)))))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(btnManageServers)
+                                .addGap(0, 83, Short.MAX_VALUE)))))
                 .addContainerGap())
         );
         j2eeServerPanelLayout.setVerticalGroup(
             j2eeServerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(j2eeServerPanelLayout.createSequentialGroup()
-                .addGap(9, 9, 9)
+                .addGap(8, 8, 8)
                 .addGroup(j2eeServerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblJ2eeServer)
-                    .addComponent(cbj2eeServer, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(cbj2eeServer, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnManageServers))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(j2eeServerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblContext)
                     .addComponent(txtContext, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(cbEnableSecurity)
-                .addContainerGap(168, Short.MAX_VALUE))
+                .addContainerGap(167, Short.MAX_VALUE))
         );
 
         tabbedPane.addTab(org.openide.util.NbBundle.getMessage(ProjectRunningCustomizer.class, "ProjectRunningCustomizer.j2eeServerPanel.TabConstraints.tabTitle"), j2eeServerPanel); // NOI18N
@@ -580,7 +621,7 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
                                     .addComponent(txtRunPath)
                                     .addComponent(cbAppServerType, 0, 305, Short.MAX_VALUE))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(btnBrowse))
+                                .addComponent(btnBrowse, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addComponent(chDbAppSources))
                         .addContainerGap())
                     .addGroup(layout.createSequentialGroup()
@@ -737,7 +778,10 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
     }//GEN-LAST:event_cbEnableSecurityActionPerformed
 
     private void cbj2eeServerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbj2eeServerActionPerformed
-        projectSettings.setJ2eeServerId(((J2eePlatformAdapter) cbj2eeServer.getSelectedItem()).serverInstanceID);
+        Object selectedItem = cbj2eeServer.getSelectedItem();
+        if (selectedItem != null) {
+            projectSettings.setJ2eeServerId(((J2eePlatformAdapter) selectedItem).serverInstanceID);
+        }
     }//GEN-LAST:event_cbj2eeServerActionPerformed
 
     private void txtClientVmOptionsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtClientVmOptionsActionPerformed
@@ -756,8 +800,19 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
         projectSettings.setServerVmOptions(txtServerVmOptions.getText());
     }//GEN-LAST:event_txtServerVmOptionsFocusLost
 
+    private void btnManageServersActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnManageServersActionPerformed
+        Lookup.Result<ServerInstanceProvider> result = Lookups.forPath(SERVERS_PATH).lookupResult(ServerInstanceProvider.class);
+        for (ServerInstanceProvider provider : result.allInstances()) {
+            provider.addChangeListener(serverRegistryLister);
+        }
+        CommonServerUIs.showCustomizer(null);
+        for (ServerInstanceProvider provider : result.allInstances()) {
+            provider.removeChangeListener(serverRegistryLister);
+        }
+    }//GEN-LAST:event_btnManageServersActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnBrowse;
+    private javax.swing.JButton btnManageServers;
     private javax.swing.JComboBox cbAppServerType;
     private javax.swing.JComboBox cbClientType;
     private javax.swing.JCheckBox cbEnableSecurity;
