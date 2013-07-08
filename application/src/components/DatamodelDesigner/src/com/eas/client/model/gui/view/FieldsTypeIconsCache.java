@@ -76,6 +76,8 @@ public class FieldsTypeIconsCache {
         icons16.put("CIRCLE", "datatypes/16x16/geometry.png");
         icons16.put("SPHEROID", "datatypes/16x16/geometry.png");
         icons16.put("GEOMETRY", "datatypes/16x16/geometry.png");
+        icons16.put("SDO_GEOMETRY", "datatypes/16x16/geometry.png");
+        icons16.put("MDSYS.SDO_GEOMETRY", "datatypes/16x16/geometry.png");
 
         icons24.put(new Integer(java.sql.Types.ARRAY), "datatypes/24x24/blob.png");
         icons24.put(new Integer(java.sql.Types.BIGINT), "datatypes/24x24/number.png");

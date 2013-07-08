@@ -87,8 +87,6 @@ public class StoredQueryFactory {
         if (fields != null) {
             for (Field field : fields.toCollection()) {
                 Field copied = field.copy();
-                // Fields types abstraction moved here because of metadata processing tasks
-                //dbMdCache.getConnectionDriver().getTypesResolver().resolve2Application(copied);
                 /*
                  * if (copied.isPk()) { checkPrimaryKey(aQuery, copied); }
                  */
@@ -673,8 +671,6 @@ public class StoredQueryFactory {
              * таблицы из-за её участия в разных запросах.
              */
             Field copied = field.copy();
-            // Fields types abstraction moved here because of metadata processing tasks
-            //dbMdCache.getConnectionDriver().getTypesResolver().resolve2Application(copied);
             /**
              * Заменим отметку о первичном ключе из оригинальной таблицы на
              * отметку о внешнем ключе, указывающем на ту же таблицу. Замена
