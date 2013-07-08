@@ -26,7 +26,6 @@ public class ServerScriptRunner extends ScriptRunner {
         super(aModuleId, aServerCore.getDatabasesClient(), aScope, aPrincipalHost, aCompiledScriptDocumentsHost);
         serverCore = aServerCore;
         creationSession = aCreationSession;
-        defineProperty(MODULES_SCRIPT_NAME, serverCore.getScriptsCache(), ScriptableObject.READONLY);
     }
 
     public String getModuleId() {
@@ -93,6 +92,7 @@ public class ServerScriptRunner extends ScriptRunner {
     @Override
     protected void definePropertiesAndMethods() {
         super.definePropertiesAndMethods();
+        defineProperty(MODULES_SCRIPT_NAME, serverCore.getScriptsCache(), ScriptableObject.READONLY);
         defineFunctionProperties(new String[]{
                     "getCreationSession",
                     "getServerCore"
