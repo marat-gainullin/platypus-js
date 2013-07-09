@@ -321,6 +321,7 @@ public class FilesAppCache extends AppElementsCache<Client> {
                     id2Path.put(id2, familyPath);
                 }
                 remove(id1);// force the cache to refresh application element's content
+                remove(id2);// force the cache to refresh application element's content
             }
         } catch (Exception ex) {
             Logger.getLogger(FilesAppCache.class.getName()).log(Level.SEVERE, null, ex);
