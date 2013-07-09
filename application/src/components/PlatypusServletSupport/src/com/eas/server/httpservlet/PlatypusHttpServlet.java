@@ -107,6 +107,7 @@ public class PlatypusHttpServlet extends HttpServlet {
             serverCore = new PlatypusServerCore(serverCoreDbClient, scp.getTasks(), scp.getAppElementId());
             serverCoreDbClient.setContextHost(serverCore);
             serverCoreDbClient.setPrincipalHost(serverCore);
+            ScriptUtils.getScope().defineProperty(ServerScriptRunner.MODULES_SCRIPT_NAME, serverCore.getScriptsCache(), ScriptableObject.READONLY);
 
             if (System.getProperty(ScriptRunner.DEBUG_PROPERTY) != null) {
                 Debugger debugger;

@@ -667,7 +667,7 @@ public class JSContainers {
 				return @com.eas.client.gxtcontrols.Publisher::checkPublishedComponent(Ljava/lang/Object;)(widget);
 			};
 			publishChildren(published);
-			publishChildsOrdering(published);
+			publishChildrenOrdering(published);
 						
 			return published;
 		}
@@ -710,7 +710,7 @@ public class JSContainers {
 				return @com.eas.client.gxtcontrols.Publisher::checkPublishedComponent(Ljava/lang/Object;)(widget);
 			};
 			publishChildren(published);
-			publishChildsOrdering(published);
+			publishChildrenOrdering(published);
 			
 			return published;
 		}
@@ -826,7 +826,7 @@ public class JSContainers {
 		} 
 
 		// ***************************************************
-		function publishChildsOrdering(aPublished) {
+		function publishChildrenOrdering(aPublished) {
 			if (aPublished) {
 				var comp = aPublished.unwrap();
 				aPublished.toFront = function(aChild, aCount) {

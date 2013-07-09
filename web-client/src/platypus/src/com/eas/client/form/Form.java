@@ -105,7 +105,7 @@ public class Form {
 	protected ImageResource icon;
 	protected String title;
 	protected boolean resizable;
-	protected boolean iconifiable = true;
+	protected boolean minimizable = true;
 	protected boolean maximizable = true;
 	protected boolean undecorated;
 	protected float opacity = 1.0f;
@@ -228,7 +228,7 @@ public class Form {
 			});
 			window.setClosable(true);
 			window.setMaximizable(maximizable);
-			window.setMinimizable(iconifiable);
+			window.setMinimizable(minimizable);
 			window.setHeaderVisible(!undecorated);
 			window.setShadow(!undecorated);
 			window.setBorders(!undecorated);
@@ -610,14 +610,19 @@ public class Form {
 	        	aForm.@com.eas.client.form.Form::setResizable(Z)((false != aValue));
 	        } 
         });
-        Object.defineProperty(aModule, "iconifiable", {
+        Object.defineProperty(aModule, "minimizable", {
 	        get:function() {
-	        	return aForm.@com.eas.client.form.Form::isIconifiable()();
+	        	return aForm.@com.eas.client.form.Form::isMinimizable()();
 	        },
 	        set:function(aValue)
 	        {
-	        	aForm.@com.eas.client.form.Form::setIconifiable(Z)((false != aValue));
+	        	aForm.@com.eas.client.form.Form::setMinimizable(Z)((false != aValue));
 	        } 
+        });
+        Object.defineProperty(aModule, "minimized", {
+	        get:function() {
+	        	return aForm.@com.eas.client.form.Form::isMinimized()();
+	        }
         });
         Object.defineProperty(aModule, "maximizable", {
 	        get:function() {
@@ -626,6 +631,11 @@ public class Form {
 	        set:function(aValue) {
 	        	aForm.@com.eas.client.form.Form::setMaximizable(Z)((false != aValue));
 	        } 
+        });
+        Object.defineProperty(aModule, "maximized", {
+	        get:function() {
+	        	return aForm.@com.eas.client.form.Form::isMaximized()();
+	        }
         });
         Object.defineProperty(aModule, "undecorated", {
 	        get:function() {
@@ -783,6 +793,18 @@ public class Form {
 	        aModule.showInternalFrame = function(aPanel) {
 	        	showedWnd = aForm.@com.eas.client.form.Form::show(ZLcom/google/gwt/core/client/JavaScriptObject;Lcom/eas/client/gxtcontrols/wrappers/container/PlatypusDesktopContainer;)(false, null, aPanel != null?aPanel.unwrap():null);
 	        };
+	        aModule.minimize = function(){
+	        	aForm.@com.eas.client.form.Form::minimize()();
+	        };
+	        aModule.maximize = function(){
+	        	aForm.@com.eas.client.form.Form::maximize()();
+	        };
+	        aModule.toFront = function(){
+	        	aForm.@com.eas.client.form.Form::toFront()();
+	        };
+	        aModule.restore = function(){
+	        	aForm.@com.eas.client.form.Form::restore()();
+	        };
 	        aModule.close = function() {
 		        if (arguments.length > 0)
 		        	aForm.@com.eas.client.form.Form::close(Ljava/lang/Object;Lcom/google/gwt/core/client/JavaScriptObject;)(arguments[0]==null?null:$wnd.boxAsJava(arguments[0]), closeCallback);
@@ -843,16 +865,40 @@ public class Form {
 			window.setResizable(resizable);
 	}
 
-	public boolean isIconifiable() {
-		return iconifiable;
+	public boolean isMinimizable() {
+		return minimizable;
 	}
 
-	public void setIconifiable(boolean aValue) {
-		iconifiable = aValue;
+	public void setMinimizable(boolean aValue) {
+		minimizable = aValue;
 		if (window != null && !window.isModal())
-			window.setMinimizable(iconifiable);
+			window.setMinimizable(minimizable);
 	}
 
+	public boolean isMinimized() {
+		return window != null ? window.isCollapsed() : false;
+	}
+
+	public void minimize(){
+		if(window != null)
+			window.minimize();
+	}
+	
+	public void maximize(){
+		if(window != null)
+			window.maximize();
+	}
+	
+	public void toFront(){
+		if(window != null)
+			window.toFront();
+	}
+	
+	public void restore(){
+		if(window != null)
+			window.restore();
+	}
+	
 	public boolean isMaximizable() {
 		return maximizable;
 	}
@@ -861,6 +907,10 @@ public class Form {
 		maximizable = aValue;
 		if (window != null)
 			window.setMaximizable(maximizable);
+	}
+
+	public boolean isMaximized() {
+		return window != null ? window.isMaximized() : false;
 	}
 
 	public boolean isUndecorated() {

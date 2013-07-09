@@ -368,7 +368,11 @@ public class DatabaseMdCache implements DbMetadataCache {
                     }
                     field.setSchemaName(aSchema);
                     field.setTableName(fTableName);
+                    // Fields types abstraction is partly used here,
+                    // because of metadata processing tasks
                     sqlDriver.getTypesResolver().resolve2Application(field);
+                    field.getTypeInfo().setSqlTypeName(rdbmsTypeName);
+                    //
                     fields.add(field);
                 }
             }

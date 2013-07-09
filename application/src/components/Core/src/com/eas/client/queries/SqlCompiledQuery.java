@@ -247,9 +247,7 @@ public class SqlCompiledQuery {
 
     /**
      * Checks if expectedFields property is setted and if it is, applies
-     * information about expected fields to rowset's fields. If it is not, the
-     * main table is checked and if it present, than information about it's
-     * fields is applied to rowset's fields.
+     * information about expected fields to rowset's fields.
      *
      * @param aRowset Rowset, which is to be processed.
      * @throws RowsetException
