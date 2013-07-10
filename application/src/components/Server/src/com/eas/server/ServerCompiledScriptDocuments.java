@@ -19,11 +19,10 @@ import org.w3c.dom.Document;
  */
 public class ServerCompiledScriptDocuments extends CompiledScriptDocuments {
 
-    public ServerCompiledScriptDocuments(Client aClient)
-    {
+    public ServerCompiledScriptDocuments(Client aClient) {
         super(aClient);
     }
-    
+
     @Override
     protected ScriptDocument appElement2Document(ApplicationElement aAppElement) throws Exception {
         Document doc = aAppElement.getContent();

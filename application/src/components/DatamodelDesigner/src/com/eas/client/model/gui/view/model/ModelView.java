@@ -135,8 +135,8 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
                     size.height = b.y + b.height;
                 }
             }
-            size.width += EntityView.INSET_ZONE;
-            size.height += EntityView.INSET_ZONE;
+            size.width += EntityView.INSET_ZONE * 3;
+            size.height += EntityView.INSET_ZONE * 3;
         }
         return size;
     }
@@ -905,19 +905,18 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
             }
         }
     }
-
     protected static final Color selectedColor = Color.red.darker();
     protected static final Color obstaclesColor = Color.gray;
     protected static final Color spaceColor = Color.orange;
     protected static final Color edgeColor = Color.blue.darker();
     protected static boolean routingDebug;
-    
+
     @Override
     protected void paintChildren(Graphics g) {
-        if(routingDebug){
+        if (routingDebug) {
             Color oldColor = g.getColor();
             try {
-                for(EntityView<?> eView : entityViews.values()){
+                for (EntityView<?> eView : entityViews.values()) {
                     Rectangle o = eView.getBounds();
                     g.setColor(obstaclesColor);
                     g.fillRect(o.x, o.y, o.width, o.height);
@@ -1274,8 +1273,8 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
             needRerouteConnectors = true;
         }
     }
-
     List<Vertex<PathFragment>> graph;
+
     protected void preparePaths() {
         if (needRerouteConnectors) {
             Set<Rectangle> obstacles = new HashSet<>();
@@ -2035,7 +2034,7 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
             undoSupport.postEdit(edit);
         }
     }
-    
+
     private String getEntiyName(String applicationElementId, M model) {
         String s = applicationElementId;
         int i = 1;
