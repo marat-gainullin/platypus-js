@@ -14,7 +14,6 @@ import com.eas.client.model.application.ApplicationModel;
 import com.eas.client.model.store.Model2XmlDom;
 import com.eas.client.scripts.ScriptDocument;
 import com.eas.client.scripts.store.Dom2ScriptDocument;
-import com.eas.client.settings.SettingsConstants;
 import com.eas.server.PlatypusServerCore;
 import com.eas.xml.dom.XmlDom2String;
 import java.util.HashMap;
@@ -147,8 +146,16 @@ public class AppElementsFilter {
         }
     }
 
+    /**
+     * Performs some mutations of a xml content dom.
+     * Adds dependencies. Stripes put <source/>tag and so on.
+     * @param aAppElement Appelement, whoose content dom to mutated.
+     * @return
+     * @throws Exception 
+     */
     protected Filtered filter(ApplicationElement aAppElement) throws Exception {
         if (aAppElement != null && (aAppElement.getType() == ClientConstants.ET_FORM || aAppElement.getType() == ClientConstants.ET_COMPONENT || aAppElement.getType() == ClientConstants.ET_REPORT)) {
+            aAppElement = aAppElement.copy();// because of mutations of xml content dom, made by this code.
             String probableScript = null;
             Document doc = aAppElement.getContent();
             ScriptDocument scriptDoc = Dom2ScriptDocument.dom2ScriptDocument(serverCore.getDatabasesClient(), doc);

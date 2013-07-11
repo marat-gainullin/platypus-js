@@ -523,9 +523,6 @@ public class Field {
                 setSchemaName(aSourceField.getSchemaName());
             }
             setTypeInfo(aSourceField.getTypeInfo().copy());
-            if (!equalsOrNulls(getTypeInfo(), aSourceField.getTypeInfo())) {
-                setTypeInfo(aSourceField.getTypeInfo().copy());
-            }
             if (getSize() != aSourceField.getSize()) {
                 setSize(aSourceField.getSize());
             }

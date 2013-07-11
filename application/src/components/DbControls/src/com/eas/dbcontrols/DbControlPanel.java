@@ -24,7 +24,6 @@ import java.awt.event.*;
 import java.beans.PropertyChangeEvent;
 import java.text.ParseException;
 import java.util.*;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
@@ -1206,7 +1205,7 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
                         && "runtime".equals(evt.getPropertyName())) {
                     if (Boolean.FALSE.equals(evt.getOldValue())
                             && Boolean.TRUE.equals(evt.getNewValue())) {
-                        if (entity.getRowset() != null) {
+                        if (entity != null && entity.getRowset() != null) {
                             configure();
                             beginUpdate();
                             try {

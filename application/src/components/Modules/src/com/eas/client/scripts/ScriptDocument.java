@@ -132,6 +132,7 @@ public class ScriptDocument {
     }
 
     public void readScriptAnnotations() {
+        assert scriptSource != null : "Javascript source can't be null";
         ast = ScriptUtils.parseJs(scriptSource);
         final Set<Comment> functionComments = new HashSet<>();
         ast.visit(new NodeVisitor() {

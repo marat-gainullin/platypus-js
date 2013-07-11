@@ -14,6 +14,7 @@ import com.eas.debugger.jmx.server.Breakpoints;
 import com.eas.debugger.jmx.server.Debugger;
 import com.eas.debugger.jmx.server.DebuggerMBean;
 import com.eas.debugger.jmx.server.Settings;
+import com.eas.script.ScriptUtils;
 import com.eas.util.StringUtils;
 import com.eas.util.logging.PlatypusFormatter;
 import java.io.*;
@@ -30,6 +31,7 @@ import java.util.logging.*;
 import java.util.prefs.Preferences;
 import javax.management.ObjectName;
 import javax.net.ssl.*;
+import org.mozilla.javascript.ScriptableObject;
 
 /**
  *
@@ -279,10 +281,11 @@ public class ServerMain {
             // Apply debugging facility
             registerMBean(Settings.SETTINGS_MBEAN_NAME, new Settings(appDbClient));
         }
+        ScriptRunner.PlatypusScriptedResource.init(appDbClient.getAppCache());
         PlatypusServer server = new PlatypusServer(appDbClient, ctx, getListenAddresses(), getPortsProtocols(), tasks, appElement);
         appDbClient.setContextHost(server);
         appDbClient.setPrincipalHost(server);
-        ScriptRunner.PlatypusScriptedResource.init(appDbClient.getAppCache());
+        ScriptUtils.getScope().defineProperty(ServerScriptRunner.MODULES_SCRIPT_NAME, server.getScriptsCache(), ScriptableObject.READONLY);
         Thread sgc = new Thread(new GarbageSessionsCollector(server));
         sgc.setDaemon(true);
         sgc.start();

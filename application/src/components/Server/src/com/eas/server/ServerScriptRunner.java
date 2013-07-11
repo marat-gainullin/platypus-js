@@ -26,7 +26,6 @@ public class ServerScriptRunner extends ScriptRunner {
         super(aModuleId, aServerCore.getDatabasesClient(), aScope, aPrincipalHost, aCompiledScriptDocumentsHost);
         serverCore = aServerCore;
         creationSession = aCreationSession;
-        defineProperty(MODULES_SCRIPT_NAME, serverCore.getScriptsCache(), ScriptableObject.READONLY);
     }
 
     public String getModuleId() {
