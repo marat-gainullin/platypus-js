@@ -42,8 +42,11 @@ import org.openide.awt.UndoRedo;
 import org.openide.explorer.ExplorerManager;
 import org.openide.nodes.Node;
 import org.openide.util.ImageUtilities;
+import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
 import org.openide.util.Utilities;
+import org.openide.util.lookup.Lookups;
+import org.openide.util.lookup.ProxyLookup;
 import org.openide.windows.CloneableTopComponent;
 import org.openide.windows.TopComponent;
 import org.openide.windows.TopComponentGroup;
@@ -116,6 +119,11 @@ public class PlatypusDbDiagramView extends CloneableTopComponent {
         setIcon(ImageUtilities.loadImage(ICON_PATH, true));
     }
 
+    @Override
+    public Lookup getLookup() {
+        return new ProxyLookup(super.getLookup(), Lookups.fixed(getDataObject())); 
+    }
+    
     public PlatypusDbDiagramDataObject getDataObject() {
         return dataObject;
     }

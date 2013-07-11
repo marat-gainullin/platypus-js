@@ -27,8 +27,11 @@ import org.openide.DialogDisplayer;
 import org.openide.ErrorManager;
 import org.openide.nodes.Node;
 import org.openide.util.ImageUtilities;
+import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
 import org.openide.util.Utilities;
+import org.openide.util.lookup.Lookups;
+import org.openide.util.lookup.ProxyLookup;
 import org.openide.windows.CloneableTopComponent;
 import org.openide.windows.TopComponent;
 
@@ -117,7 +120,11 @@ public final class PlatypusConnectionView extends CloneableTopComponent {
             add(dataObject.getProject().generateDbPlaceholder(), BorderLayout.CENTER);
         }
     }
-
+    
+    @Override
+    public Lookup getLookup() {
+        return new ProxyLookup(super.getLookup(), Lookups.fixed(getDataObject())); 
+    }
     public PlatypusConnectionDataObject getDataObject() {
         return dataObject;
     }
