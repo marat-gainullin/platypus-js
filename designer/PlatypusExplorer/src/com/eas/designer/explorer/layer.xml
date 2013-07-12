@@ -127,16 +127,22 @@
     <!-- default workspaces, frames and their layout defined by core -->
     <folder name="Templates">
         <file name="Classes_hidden"/>
+        <file name="ClientSide_hidden"/>
+        <file name="JSP_Servlet_hidden"/>
         <file name="Licenses_hidden"/>
         <file name="Persistence_hidden"/>
         <file name="Properties_hidden"/>
+        <file name="UnitTests_hidden"/>
+        <file name="WebServices_hidden"/>
         <file name="XML_hidden"/>
         <folder name="Project">
             <folder name="Platypus">
-                <attr name="displayName" bundlevalue="com.eas.designer.explorer.Bundle#Templates/Project/Platypus" />
+                <attr name="displayName" bundlevalue="com.eas.designer.explorer.Bundle#Templates/Project/Platypus"/>
             </folder>
+            <file name="Web_hidden"/>
         </folder>
          
+            <file name="js-test-driver_hidden"/>
     </folder>
     <folder name="Windows2">
         <folder name="Components">
