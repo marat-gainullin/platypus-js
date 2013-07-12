@@ -81,7 +81,7 @@ public class PlatypusServerRecivedPacketTest {
 
     @Test
     public void testSimpleConnecting() throws UnknownHostException, IOException {
-        PacketReciever reciever = ((PositioningIoHandler)server.getSensorAcceptor().getHandler()).getReciever();
+        PacketReciever reciever = null;//((PositioningIoHandler)server.getSensorAcceptor().getHandler()).getReciever();
         try {
             Calendar cl = Calendar.getInstance();
             cl.set(2012, 7, 5, 10, 20, 30);

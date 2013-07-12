@@ -51,15 +51,15 @@ public class ScriptTransformer {
     }
 
     private void recursiveScopeSetup(Map<Node, List<Node>> aTree, Node aParent) {
-        List<Node> childs = aTree.get(aParent);
-        if (childs != null && childs.size() > 0) {
+        List<Node> children = aTree.get(aParent);
+        if (children != null && children.size() > 0) {
             if (aParent instanceof Scope && !(aParent instanceof AstRoot)) {
                 Scope scope = (Scope) aParent;
                 scope.setParentScope(scopeStack.peek());
                 scopeStack.push(scope);
             }
             try {
-                for (Node node : childs) {
+                for (Node node : children) {
                     if (node instanceof Name) {
                         node.setScope(scopeStack.peek());
                     }
@@ -257,6 +257,11 @@ public class ScriptTransformer {
                                 final SwitchStatement switchStatement = (SwitchStatement) node.getParent();
                                 if (node == switchStatement.getExpression()) {
                                     switchStatement.setExpression(new PropertyGet(_this, name));
+                                }
+                            } else if (node.getParent() instanceof IfStatement) {
+                                final IfStatement ifStatement = (IfStatement) node.getParent();
+                                if (node == ifStatement.getCondition()) {
+                                    ifStatement.setCondition(new PropertyGet(_this, name));
                                 }
                             }
                         }

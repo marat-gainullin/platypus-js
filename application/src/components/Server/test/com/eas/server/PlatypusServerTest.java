@@ -39,7 +39,7 @@ public class PlatypusServerTest {
         settings.getInfo().setProperty("user", login);
         settings.getInfo().setProperty("password", passwd);
         SSLContext sslContext = ServerMain.createSSLContext();
-        server = new PlatypusServer(new DatabasesClient(settings), sslContext, new InetSocketAddress[]{new InetSocketAddress("localhost", TEST_PORT)}, new HashMap<Integer, String>(), new HashSet<ModuleConfig>(), null);
+        server = new PlatypusServer(new DatabasesClient(settings), sslContext, new InetSocketAddress[]{new InetSocketAddress("localhost", TEST_PORT)}, new HashMap<Integer, String>(), new HashSet<String>(), null);
         server.start();
     }
 
