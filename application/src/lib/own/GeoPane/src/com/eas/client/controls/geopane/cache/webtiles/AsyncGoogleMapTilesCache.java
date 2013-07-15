@@ -31,6 +31,7 @@ public class AsyncGoogleMapTilesCache extends AsyncWebMapTilesCache {
         return "google";
     }
 
+    @Override
     protected void constraintTilesLevel() {
         if (tilesLevel < 0) {
             tilesLevel = 0;
@@ -52,11 +53,13 @@ public class AsyncGoogleMapTilesCache extends AsyncWebMapTilesCache {
         return String.format(Locale.ENGLISH, tilesServerUrl, domainNumber, aTileKey.x, aTileKey.y, aTileKey.z);
     }
 
+    @Override
     public void configureVectorDomains(int aMin, int aMax) {
         minVec = aMin;
         maxVec = aMax;
     }
 
+    @Override
     public void configureSatteliteDomains(int aMin, int aMax) {
         minSat = aMin;
         maxSat = aMax;
