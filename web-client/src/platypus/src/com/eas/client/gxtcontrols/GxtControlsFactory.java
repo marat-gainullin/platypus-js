@@ -393,7 +393,7 @@ public class GxtControlsFactory {
 		return component;
 	}
 
-	private void setIconAndAlign(final CellButtonBase<?> btn, Element aTag) throws Exception {
+	private void setIconAndAlign(final CellButtonBase<?> btn, Element aTag, final PublishedComponent aPublished) throws Exception {
 		btn.setIconAlign(IconAlign.LEFT);// default value
 		if (aTag.hasAttribute("horizontalTextPosition")) {
 			int horizontalTextPosition = Utils.getIntegerAttribute(aTag, "horizontalTextPosition", 11);// TRAILING
@@ -442,16 +442,15 @@ public class GxtControlsFactory {
 				public void run(ImageResource aResource) {
 					btn.setIcon(aResource);
 					Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-
 						@Override
 						public void execute() {
 							if (btn.getParent() instanceof ResizeContainer) {
 								ResizeContainer c = (ResizeContainer) btn.getParent();
-							    Size s = XElement.as(c.getElement().getParentElement()).getSize(true);
-							    c.setPixelSize(s.getWidth()+1, s.getHeight());
-							    c.setPixelSize(s.getWidth()-1, s.getHeight());
-							}else if(btn.getParent() instanceof HasLayout){
-								((HasLayout)btn.getParent()).forceLayout();
+								Size s = XElement.as(c.getElement().getParentElement()).getSize(true);
+								c.setPixelSize(s.getWidth() + 1, s.getHeight());
+								c.setPixelSize(s.getWidth() - 1, s.getHeight());
+							} else if (btn.getParent() instanceof HasLayout) {
+								((HasLayout) btn.getParent()).forceLayout();
 							}
 						}
 					});
@@ -462,23 +461,33 @@ public class GxtControlsFactory {
 	}
 
 	private Component createButton(Element aTag) throws Exception {
-		TextButton component = new TextButton();
+		final TextButton component = new TextButton() {
+			@Override
+			protected void onRedraw() {
+				super.onRedraw();
+				ControlsUtils.reapplyStyle(this);
+			}
+		};
 		processEvents(component, aTag);
-		Publisher.publish(component);
-		setIconAndAlign(component, aTag);
+		PublishedComponent publishedComp = Publisher.publish(component);
 		if (aTag.hasAttribute("text"))
 			component.setText(aTag.getAttribute("text"));
 		checkBorders(component, aTag);
-		PublishedComponent publishedComp = (PublishedComponent) component.getData(Form.PUBLISHED_DATA_KEY);
 		processGeneralProperties(component, aTag, publishedComp);
+		setIconAndAlign(component, aTag, publishedComp);
 		return component;
 	}
 
 	private Component createDropDownButton(Element aTag) throws Exception {
-		final SplitButton component = new SplitButton();
+		final SplitButton component = new SplitButton() {
+			@Override
+			protected void onRedraw() {
+				super.onRedraw();
+				ControlsUtils.reapplyStyle(this);
+			}
+		};
 		processEvents(component, aTag);
-		Publisher.publish(component);
-		setIconAndAlign(component, aTag);
+		PublishedComponent publishedComp = Publisher.publish(component);
 		if (aTag.hasAttribute("text"))
 			component.setText(aTag.getAttribute("text"));
 		if (aTag.hasAttribute("dropDownMenu")) {
@@ -498,8 +507,8 @@ public class GxtControlsFactory {
 			});
 		}
 		checkBorders(component, aTag);
-		PublishedComponent publishedComp = (PublishedComponent) component.getData(Form.PUBLISHED_DATA_KEY);
 		processGeneralProperties(component, aTag, publishedComp);
+		setIconAndAlign(component, aTag, publishedComp);
 		return component;
 	}
 
@@ -523,11 +532,11 @@ public class GxtControlsFactory {
 					component.setImage(aResource);
 					if (component.getParent() instanceof ResizeContainer) {
 						ResizeContainer c = (ResizeContainer) component.getParent();
-					    Size s = XElement.as(c.getElement().getParentElement()).getSize(true);
-					    c.setPixelSize(s.getWidth()+1, s.getHeight());
-					    c.setPixelSize(s.getWidth()-1, s.getHeight());
-					}else if(component.getParent() instanceof HasLayout){
-						((HasLayout)component.getParent()).forceLayout();
+						Size s = XElement.as(c.getElement().getParentElement()).getSize(true);
+						c.setPixelSize(s.getWidth() + 1, s.getHeight());
+						c.setPixelSize(s.getWidth() - 1, s.getHeight());
+					} else if (component.getParent() instanceof HasLayout) {
+						((HasLayout) component.getParent()).forceLayout();
 					}
 				}
 
@@ -605,18 +614,23 @@ public class GxtControlsFactory {
 	}
 
 	private Component createToggleButton(Element aTag) throws Exception {
-		PlatypusToggleButton component = new PlatypusToggleButton();
+		PlatypusToggleButton component = new PlatypusToggleButton() {
+			@Override
+			protected void onRedraw() {
+				super.onRedraw();
+				ControlsUtils.reapplyStyle(this);
+			}
+		};
 		processEvents(component, aTag);
-		Publisher.publish(component);
+		PublishedComponent publishedComp = Publisher.publish(component);
 		if (aTag.hasAttribute("text"))
 			component.setText(aTag.getAttribute("text"));
 		if (aTag.hasAttribute("buttonGroup"))
 			addToToggleGroup(component, aTag.getAttribute("buttonGroup"));
 		component.setValue(Utils.getBooleanAttribute(aTag, "selected", false));
-		setIconAndAlign(component, aTag);
-		checkBorders(component, aTag);
-		PublishedComponent publishedComp = (PublishedComponent) component.getData(Form.PUBLISHED_DATA_KEY);
 		processGeneralProperties(component, aTag, publishedComp);
+		setIconAndAlign(component, aTag, publishedComp);
+		checkBorders(component, aTag);
 		return component;
 	}
 
@@ -906,15 +920,6 @@ public class GxtControlsFactory {
 				int fontStyle = 0;
 				if (fontTag.hasAttribute("style")) {
 					fontStyle = Utils.getIntegerAttribute(fontTag, "style", 0);
-					/*
-					 * switch (fontStyle) { case 0:// 0 - PLAIN
-					 * style.setFontStyle(FontStyle.NORMAL); break; case 1:// 1
-					 * - BOLD style.setFontStyle(FontStyle.NORMAL);
-					 * style.setFontWeight(FontWeight.BOLD); break; case 2:// 2
-					 * - ITALIC style.setFontStyle(FontStyle.ITALIC); break;
-					 * case 3:// 3 - BOLD_ITALIC
-					 * style.setFontStyle(FontStyle.ITALIC); break; }
-					 */
 				}
 				aPublished.setFont(PublishedFont.create(fontFamily, fontStyle, fontSize));
 			}

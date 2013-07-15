@@ -6,11 +6,13 @@ import java.util.logging.Logger;
 import com.bearsoft.rowset.Row;
 import com.eas.client.Callback;
 import com.eas.client.Utils;
+import com.eas.client.form.Form;
 import com.eas.client.form.api.JSEvents;
 import com.eas.client.gxtcontrols.grid.ModelGrid;
 import com.eas.client.gxtcontrols.model.ModelElementRef;
 import com.eas.client.gxtcontrols.published.PublishedCell;
 import com.eas.client.gxtcontrols.published.PublishedColor;
+import com.eas.client.gxtcontrols.published.PublishedComponent;
 import com.eas.client.gxtcontrols.published.PublishedFont;
 import com.eas.client.gxtcontrols.published.PublishedStyle;
 import com.eas.client.gxtcontrols.wrappers.container.PlatypusFieldSet;
@@ -34,7 +36,9 @@ import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.core.client.dom.XElement;
+import com.sencha.gxt.widget.core.client.Component;
 import com.sencha.gxt.widget.core.client.Window;
+import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.container.Container;
 import com.sencha.gxt.widget.core.client.form.AdapterField;
 import com.sencha.gxt.widget.core.client.form.FileUploadField;
@@ -360,4 +364,16 @@ public class ControlsUtils {
 			}
 		}
 	}
+
+	public static void reapplyStyle(Component aComponent) {
+		PublishedComponent published = aComponent.getData(Form.PUBLISHED_DATA_KEY);
+		if (published.isBackgroundSet())
+			ControlsUtils.applyBackground(aComponent, published.getBackground());
+		if (published.isForegroundSet())
+			ControlsUtils.applyForeground(aComponent, published.getForeground());
+		if (published.isFontSet())
+			ControlsUtils.applyFont(aComponent, published.getFont());
+		if (published.isCursorSet())
+			ControlsUtils.applyCursor(aComponent, published.getCursor());
+    }
 }
