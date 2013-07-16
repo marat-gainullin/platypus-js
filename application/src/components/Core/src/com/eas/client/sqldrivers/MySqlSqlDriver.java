@@ -409,6 +409,7 @@ public class MySqlSqlDriver extends SqlDriver {
         if (aDescription == null) {
             aDescription = "";
         }
+        String sql0 = "DROP PROCEDURE IF EXISTS " + schemaClause + "setColumnComment";
         String sql1 = ""
                 + "CREATE PROCEDURE " + schemaClause + "setColumnComment("
                 + "    IN aOwnerName VARCHAR(100), "
@@ -428,7 +429,8 @@ public class MySqlSqlDriver extends SqlDriver {
                 + "    '(',"
                 + "    '  column_type,'' '',',"
                 + "    '  (CASE is_nullable WHEN ''YES'' THEN ''NULL'' ELSE ''NOT NULL'' END),'' '',',"
-                + "    '  IF(column_default is null,'''',CONCAT(''DEFAULT '',column_default,'' '')),',"
+                //+ "    '  IF(column_default is null,'''',CONCAT(''DEFAULT \"'',column_default,''\" '')),',"
+                + "    '  IF(column_default is null,'''',CONCAT(''DEFAULT '',IF(CHARACTER_MAXIMUM_LENGTH > 0, ''\"'', ''''),column_default,IF(CHARACTER_MAXIMUM_LENGTH > 0, ''\"'', ''''),'' '')),',"
                 + "    '  IF(extra is null,'''',CONCAT(extra,'' ''))',"
                 + "    ') ',"
                 + "    'INTO @define_column ',"
@@ -450,7 +452,7 @@ public class MySqlSqlDriver extends SqlDriver {
         String sql2 = "CALL " + schemaClause + "setColumnComment('"
                 + aOwnerName + "','" + aTableName + "','" + aFieldName + "','" + aDescription + "',@a)";
         String sql3 = "DROP PROCEDURE " + schemaClause + "setColumnComment";
-        return new String[]{sql1, sql2, sql3};
+        return new String[]{sql0, sql1, sql2, sql3};
     }
 
     @Override
@@ -648,20 +650,21 @@ public class MySqlSqlDriver extends SqlDriver {
 
     private String getFieldTypeDefinition(Field aField) {
         resolver.resolve2RDBMS(aField);
-        String typeName = aField.getTypeInfo().getSqlTypeName().toLowerCase();
-        int sqlType = aField.getTypeInfo().getSqlType();
+        String typeDefine = "";
+        String sqlTypeName = aField.getTypeInfo().getSqlTypeName().toLowerCase();
+        typeDefine += sqlTypeName;
         // field length
         int size = aField.getSize();
         int scale = aField.getScale();
 
-        if (resolver.isScaled(sqlType) && resolver.isSized(sqlType) && size > 0) {
-            typeName += "(" + String.valueOf(size) + "," + String.valueOf(scale) + ")";
+        if (resolver.isScaled(sqlTypeName) && resolver.isSized(sqlTypeName) && size > 0) {
+            typeDefine += "(" + String.valueOf(size) + "," + String.valueOf(scale) + ")";
         } else {
-            if (resolver.isSized(sqlType) && size > 0) {
-                typeName += "(" + String.valueOf(size) + ")";
+            if (resolver.isSized(sqlTypeName) && size > 0) {
+                typeDefine += "(" + String.valueOf(size) + ")";
             }
         }
-        return typeName;
+        return typeDefine;
 
     }
 

@@ -22,11 +22,11 @@ public class H2TestDefine extends DbTestDefine {
         {"TINYINT", "NUMBER", "int2", "tinyint", "INTEGER", "TINYINT", "tinyint"},
         {"BIGINT", "NUMBER", "int8", "bigint", "BIGINT", "BIGINT", "bigint"},
         {"IDENTITY", "NUMBER", "int8", "bigint", "BIGINT", "BIGINT", "bigint"},
-        {"LONGVARBINARY", "VARBINARY", "bytea", "varbinary", "VARCHAR () FOR BIT DATA", "VARBINARY", "varbinary"},
-        {"VARBINARY", "VARBINARY", "bytea", "varbinary", "VARCHAR () FOR BIT DATA", "VARBINARY", "varbinary"},
-        {"BINARY", "VARBINARY", "bytea", "varbinary", "VARCHAR () FOR BIT DATA", "VARBINARY", "varbinary"},
-        {"UUID", "VARBINARY", "bytea", "varbinary", "VARCHAR () FOR BIT DATA", "VARBINARY", "varbinary"},
-        {"LONGVARCHAR", "CLOB", "text", "longtext", "CLOB", "CLOB", "clob"},
+        {"LONGVARBINARY", "RAW", "bytea", "varbinary", "VARCHAR () FOR BIT DATA", "VARBINARY", "varbinary"},
+        {"VARBINARY", "RAW", "bytea", "varbinary", "VARCHAR () FOR BIT DATA", "VARBINARY", "varbinary"},
+        {"BINARY", "RAW", "bytea", "varbinary", "VARCHAR () FOR BIT DATA", "VARBINARY", "varbinary"},
+        {"UUID", "RAW", "bytea", "binary", "CHAR () FOR BIT DATA", "UUID", "binary"},
+        {"LONGVARCHAR", "CLOB", "text", "longtext", "CLOB", "VARCHAR", "text"},
         {"CHAR", "CHAR", "bpchar", "char", "CHAR", "CHAR", "char"},
         {"NUMERIC", "NUMBER", "numeric", "decimal", "DECIMAL", "DECIMAL", "decimal"},
         {"DECIMAL", "NUMBER", "numeric", "decimal", "DECIMAL", "DECIMAL", "decimal"},
@@ -36,20 +36,20 @@ public class H2TestDefine extends DbTestDefine {
         {"REAL", "FLOAT", "float4", "float", "REAL", "REAL", "real"},
         {"DOUBLE", "FLOAT", "float8", "double", "DOUBLE", "DOUBLE", "float"},
         {"VARCHAR", "VARCHAR2", "varchar", "varchar", "VARCHAR", "VARCHAR", "varchar"},
-        {"VARCHAR_IGNORECASE", "VARCHAR2", "varchar", "varchar", "VARCHAR", "VARCHAR", "varchar"},
-        {"BOOLEAN", "NUMBER", "int4", "int", "INTEGER", "INTEGER", "int"},
+        {"VARCHAR_IGNORECASE", "VARCHAR2", "varchar", "varchar", "VARCHAR", "VARCHAR_IGNORECASE", "varchar"},
+        {"BOOLEAN", "NUMBER", "bool", "int", "INTEGER", "BOOLEAN", "int"},
         {"DATE", "DATE", "date", "date", "DATE", "DATE", "datetime"},
         {"TIME", "DATE", "time", "time", "TIME", "TIME", "datetime"},
         {"TIMESTAMP", "TIMESTAMP(6)", "timestamp", "timestamp", "TIMESTAMP", "TIMESTAMP", "datetime"},
-        {"BLOB", "BLOB", "bytea", "longblob", "BLOB", "BLOB", "blob"},
-        {"CLOB", "CLOB", "text", "longtext", "CLOB", "CLOB", "clob"}
+        {"BLOB", "BLOB", "bytea", "longblob", "BLOB", "BLOB", "image"},
+        {"CLOB", "CLOB", "text", "longtext", "CLOB", "CLOB", "text"}
 //??????????????????????????
 //        {"OTHER", "", "", "", "", "other", ""},
 //        {"ARRAY", "", "", "", "", "array", ""},
 //??????????????????????????
     };
 
-    static {            
+    static {
         // отрицательное значение в fieldsSizes и fieldsScales означает, что значение отсутствует  и проверка не производится
         //type, {original, Oracle, PostgreSQL, MySql, DB2, H2, MsSql}    
         fieldsSizes.put("DECIMAL", new int[]{4, -22, 4, 4, 4, 4, -4});
@@ -120,5 +120,10 @@ public class H2TestDefine extends DbTestDefine {
     @Override
     public boolean[][] getFKeyDeferrables() {
         return fKeyDeferrable;
+    }
+
+    @Override
+    public boolean enabledSetNull(String aFieldName) {
+        return !("IDENTITY".equalsIgnoreCase(aFieldName));
     }
 }

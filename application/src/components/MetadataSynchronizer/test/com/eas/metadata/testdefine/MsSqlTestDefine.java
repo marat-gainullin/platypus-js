@@ -18,39 +18,39 @@ public class MsSqlTestDefine extends DbTestDefine {
     private static final Map<String, int[]> fieldsScales = new HashMap<>();
     private static final String[][] fieldsTypes = {
         // original, Oracle, PostgreSQL, MySql, DB2, H2, MsSql
-        {"image", "BLOB", "bytea", "longblob", "BLOB", "BLOB", "blob"},
-        {"text", "CLOB", "text", "longtext", "CLOB", "CLOB", "clob"},
-        {"ntext", "CLOB", "text", "longtext", "CLOB", "CLOB", "clob"},
-        {"uniqueidentifier", "VARCHAR2", "varchar", "varchar", "VARCHAR", "VARCHAR", "varchar"},
+        {"image", "BLOB", "bytea", "longblob", "BLOB", "BLOB", "image"},
+        {"text", "CLOB", "text", "longtext", "CLOB", "CLOB", "text"},
+        {"ntext", "NCLOB", "text", "longtext", "CLOB", "CLOB", "ntext"},
+        {"uniqueidentifier", "VARCHAR2", "varchar", "varchar", "VARCHAR", "VARCHAR", "uniqueidentifier"},
         {"smallint", "NUMBER", "int2", "smallint", "SMALLINT", "SMALLINT", "smallint"},
         {"tinyint", "NUMBER", "int2", "tinyint", "INTEGER", "TINYINT", "tinyint"},
         {"bigint", "NUMBER", "int8", "bigint", "BIGINT", "BIGINT", "bigint"},
         {"int", "NUMBER", "int4", "int", "INTEGER", "INTEGER", "int"},
-        {"smalldatetime", "TIMESTAMP(6)", "timestamp", "timestamp", "TIMESTAMP", "TIMESTAMP", "datetime"},
+        {"smalldatetime", "TIMESTAMP(6)", "timestamp", "timestamp", "TIMESTAMP", "TIMESTAMP", "smalldatetime"},
         {"real", "FLOAT", "float4", "float", "REAL", "REAL", "real"},
-        {"datetime", "TIMESTAMP(6)", "timestamp", "timestamp", "TIMESTAMP", "TIMESTAMP", "datetime"},
+        {"datetime", "TIMESTAMP(6)", "timestamp", "datetime", "TIMESTAMP", "TIMESTAMP", "datetime"},
         {"float", "FLOAT", "float8", "float", "REAL", "DOUBLE", "float"},
-        {"money", "NUMBER", "numeric", "decimal", "DECIMAL", "DECIMAL", "decimal"},
-        {"smallmoney", "NUMBER", "numeric", "decimal", "DECIMAL", "DECIMAL", "decimal"},
+        {"money", "NUMBER", "numeric", "decimal", "DECIMAL", "DECIMAL", "money"},
+        {"smallmoney", "NUMBER", "numeric", "decimal", "DECIMAL", "DECIMAL", "smallmoney"},
         //???        {"sql_variant", "", "", "", "", "", ""},
         {"bit", "NUMBER", "bit", "bit", "INTEGER", "INTEGER", "bit"},
         {"decimal", "NUMBER", "numeric", "decimal", "DECIMAL", "DECIMAL", "decimal"},
         {"numeric", "NUMBER", "numeric", "decimal", "DECIMAL", "DECIMAL", "numeric"},
-        {"varbinary", "VARBINARY", "bytea", "varbinary", "VARCHAR () FOR BIT DATA", "VARBINARY", "varbinary"},
+        {"varbinary", "RAW", "bytea", "varbinary", "VARCHAR () FOR BIT DATA", "VARBINARY", "varbinary"},
         {"varchar", "VARCHAR2", "varchar", "varchar", "VARCHAR", "VARCHAR", "varchar"},
         {"nvarchar", "NVARCHAR2", "varchar", "varchar", "VARCHAR", "VARCHAR", "nvarchar"},
         {"tinyint identity", "NUMBER", "int2", "tinyint", "INTEGER", "TINYINT", "tinyint"},
         {"bigint identity", "NUMBER", "int8", "bigint", "BIGINT", "BIGINT", "bigint"},
-        {"binary", "VARBINARY", "bytea", "varbinary", "VARCHAR () FOR BIT DATA", "VARBINARY", "varbinary"},
-        {"timestamp", "VARBINARY", "bytea", "varbinary", "VARCHAR () FOR BIT DATA", "VARBINARY", "varbinary"}, //?????????????????
+        {"binary", "RAW", "bytea", "binary", "CHAR () FOR BIT DATA", "VARBINARY", "binary"},
+        //        {"timestamp", "VARBINARY", "bytea", "varbinary", "VARCHAR () FOR BIT DATA", "VARBINARY", "timestamp"}, //?????????????????
         {"char", "CHAR", "bpchar", "char", "CHAR", "CHAR", "char"},
         {"nchar", "NCHAR", "bpchar", "char", "CHAR", "CHAR", "nchar"},
-        {"numeric() identity", "NUMBER", "numeric", "decimal", "DECIMAL", "DECIMAL", "numeric"},
-        {"decimal() identity", "NUMBER", "numeric", "decimal", "DECIMAL", "DECIMAL", "decimal"},
+        {"numeric identity", "NUMBER", "numeric", "decimal", "DECIMAL", "DECIMAL", "numeric"},
+        {"decimal identity", "NUMBER", "numeric", "decimal", "DECIMAL", "DECIMAL", "decimal"},
         {"int identity", "NUMBER", "int4", "int", "INTEGER", "INTEGER", "int"},
         {"smallint identity", "NUMBER", "int2", "smallint", "SMALLINT", "SMALLINT", "smallint"},
-        {"sysname", "NVARCHAR2", "varchar", "varchar", "VARCHAR", "VARCHAR", "nvarchar"},
-        {"xml", "CLOB", "text", "longtext", "CLOB", "CLOB", "clob"},};
+        {"sysname", "NVARCHAR2", "varchar", "varchar", "VARCHAR", "VARCHAR", "sysname"},
+        {"xml", "CLOB", "text", "longtext", "CLOB", "CLOB", "xml"},};
 
     static {
         //type, {original, Oracle, PostgreSQL, MySql, DB2, H2, MsSql}    
@@ -109,5 +109,10 @@ public class MsSqlTestDefine extends DbTestDefine {
     @Override
     public boolean[][] getFKeyDeferrables() {
         return fKeyDeferrable;
+    }
+
+    @Override
+    public boolean enabledSetNull(String aFieldName) {
+        return !(aFieldName.equalsIgnoreCase("uniqueidentifier") || aFieldName.contains(" identity"));
     }
 }

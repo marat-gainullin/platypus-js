@@ -323,7 +323,7 @@ public class DatabaseMdCache implements DbMetadataCache {
                 }
                 int JDBCCOLS_TABLE_INDEX = colIndicies.get(ClientConstants.JDBCCOLS_TABLE_NAME);
                 int JDBCCOLS_COLUMN_INDEX = colIndicies.get(ClientConstants.JDBCCOLS_COLUMN_NAME);
-                int JDBCCOLS_REMARKS_INDEX = colIndicies.get(ClientConstants.JDBCCOLS_REMARKS);
+                //int JDBCCOLS_REMARKS_INDEX = colIndicies.get(ClientConstants.JDBCCOLS_REMARKS);
                 int JDBCCOLS_DATA_TYPE_INDEX = colIndicies.get(ClientConstants.JDBCCOLS_DATA_TYPE);
                 int JDBCCOLS_TYPE_NAME_INDEX = colIndicies.get(ClientConstants.JDBCCOLS_TYPE_NAME);
                 int JDBCCOLS_COLUMN_SIZE_INDEX = colIndicies.get(ClientConstants.JDBCCOLS_COLUMN_SIZE);
@@ -339,8 +339,9 @@ public class DatabaseMdCache implements DbMetadataCache {
                         tabledFields.put(fTableName, fields);
                     }
                     String fName = colsRs.getString(JDBCCOLS_COLUMN_INDEX);
-                    String fDescription = colsRs.getString(JDBCCOLS_REMARKS_INDEX);
-                    Field field = new Field(fName, fDescription);
+                    //String fDescription = colsRs.getString(JDBCCOLS_REMARKS_INDEX);
+                    //Field field = new Field(fName, fDescription);
+                    Field field = new Field(fName);
                     field.setOriginalName(fName);
                     String rdbmsTypeName = colsRs.getString(JDBCCOLS_TYPE_NAME_INDEX);
                     Integer correctType = sqlDriver.getJdbcTypeByRDBMSTypename(rdbmsTypeName);

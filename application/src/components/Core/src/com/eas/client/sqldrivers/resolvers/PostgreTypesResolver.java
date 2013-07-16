@@ -8,7 +8,6 @@ import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.SQLUtils;
 import java.sql.Types;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -24,11 +23,10 @@ public class PostgreTypesResolver extends TypesResolver {
     protected static final Map<Integer, String> jdbcTypes2RdbmsTypes = new HashMap<>();
     protected static final Map<String, Integer> rdbmsTypes2JdbcTypes = new HashMap<>();
     protected static final Set<String> gisTypes = new HashSet<>();
-    protected static final Set<Integer> jdbcTypesWithSize = new HashSet<>();
-    protected static final Set<Integer> jdbcTypesWithScale = new HashSet<>();
-    protected static final Map<Integer, Integer> jdbcTypesMaxSize = new HashMap<>();
-    protected static final Map<Integer, Integer> jdbcTypesDefaultSize = new HashMap<>();
-    protected static final List<Integer> characterTypesOrder = new ArrayList<>();
+    protected static final Set<String> jdbcTypesWithSize = new HashSet<>();
+    protected static final Set<String> jdbcTypesWithScale = new HashSet<>();
+    private static final Map<String, Integer> jdbcTypesMaxSize = new HashMap<>();
+    private static final Map<String, Integer> jdbcTypesDefaultSize = new HashMap<>();
 
     static {
 
@@ -134,28 +132,32 @@ public class PostgreTypesResolver extends TypesResolver {
         jdbcTypes2RdbmsTypes.put(Types.NCLOB, "text");
 
         //typeName(M,D)
-        jdbcTypesWithScale.add(Types.DECIMAL);
-        jdbcTypesWithScale.add(Types.NUMERIC);
-        
-        //typeName(M)
-        jdbcTypesWithSize.add(Types.CHAR);
-        jdbcTypesWithSize.add(Types.VARCHAR);
-        jdbcTypesWithSize.add(Types.NUMERIC);
-        jdbcTypesWithSize.add(Types.DECIMAL);
-        
-        // max sizes for types
-        jdbcTypesMaxSize.put(Types.CHAR,10485760);
-        jdbcTypesMaxSize.put(Types.VARCHAR,10485760);
-        
-        // default sizes for types ??????????????????????????????????????????????
-        jdbcTypesDefaultSize.put(Types.CHAR,1);
-        jdbcTypesDefaultSize.put(Types.VARCHAR,200);
+        jdbcTypesWithScale.add("decimal");
+        jdbcTypesWithScale.add("numeric");
 
-        // порядок замены символьных типов, если требуется размер больше исходного
-        characterTypesOrder.add(Types.CHAR);
-        characterTypesOrder.add(Types.VARCHAR);
-        characterTypesOrder.add(Types.CLOB);
-        
+        //typeName(M)
+        jdbcTypesWithSize.add("decimal");
+        jdbcTypesWithSize.add("numeric");
+        jdbcTypesWithSize.add("bpchar");
+        jdbcTypesWithSize.add("char");
+        jdbcTypesWithSize.add("character");
+        jdbcTypesWithSize.add("varchar");
+        jdbcTypesWithSize.add("character varying");
+
+        // max sizes for types
+        jdbcTypesMaxSize.put("bpchar", 10485760);
+        jdbcTypesMaxSize.put("char", 10485760);
+        jdbcTypesMaxSize.put("character", 10485760);
+        jdbcTypesMaxSize.put("varchar", 10485760);
+        jdbcTypesMaxSize.put("character varying", 10485760);
+        jdbcTypesMaxSize.put("name", 10485760); //????
+
+        // default sizes for types ??????????????????????????????????????????????
+        jdbcTypesDefaultSize.put("bpchar", 1);
+        jdbcTypesDefaultSize.put("char", 1);
+        jdbcTypesDefaultSize.put("character", 1);
+        jdbcTypesDefaultSize.put("varchar", 200);
+        jdbcTypesDefaultSize.put("character varying", 200);
     }
 
     @Override
@@ -177,26 +179,26 @@ public class PostgreTypesResolver extends TypesResolver {
     @Override
     public void resolve2Application(Field aField) {
         if (aField != null) {
-            int lSize = aField.getSize();
-            int size = lSize >> 16;
-            int scale = (lSize << 16) >> 16;
+//            int lSize = aField.getSize();
+//            int size = lSize >> 16;
+//            int scale = (lSize << 16) >> 16;
             if (SQLUtils.getTypeGroup(aField.getTypeInfo().getSqlType()) == SQLUtils.TypesGroup.STRINGS) {
                 super.resolve2Application(aField);
-                aField.setSize(Math.max(0, scale));
-                aField.setScale(0);
-                aField.setPrecision(0);
+//                aField.setSize(Math.max(0, scale));
+//                aField.setScale(0);
+//                aField.setPrecision(0);
             } else if (isGeometryTypeName(aField.getTypeInfo().getSqlTypeName())) {
                 aField.setTypeInfo(DataTypeInfo.GEOMETRY.copy());
             } else {
                 super.resolve2Application(aField);
-                aField.setSize(Math.max(0, size));
-                if (scale > 0) {
-                    aField.setScale(scale);
-                    aField.setPrecision(scale);
-                } else {
-                    aField.setScale(0);
-                    aField.setPrecision(0);
-                }
+//                aField.setSize(Math.max(0, size));
+//                if (scale > 0) {
+//                    aField.setScale(scale);
+//                    aField.setPrecision(scale);
+//                } else {
+//                    aField.setScale(0);
+//                    aField.setPrecision(0);
+//                }
             }
         }
     }
@@ -207,14 +209,16 @@ public class PostgreTypesResolver extends TypesResolver {
     }
 
     @Override
-    public boolean isSized(Integer aSqlType) {
-        return jdbcTypesWithSize.contains(aSqlType);
+    public boolean isSized(String aSqlTypeName) {
+        String sqlTypeName = aSqlTypeName.toLowerCase();
+        return jdbcTypesWithSize.contains(sqlTypeName);
     }
 
     @Override
-    public boolean isScaled(Integer aSqlType) {
-        return jdbcTypesWithScale.contains(aSqlType);
-    }        
+    public boolean isScaled(String aSqlTypeName) {
+        String sqlTypeName = aSqlTypeName.toLowerCase();
+        return jdbcTypesWithScale.contains(sqlTypeName);
+    }
 
     @Override
     public Map<Integer, String> getJdbcTypes2RdbmsTypes() {
@@ -222,23 +226,40 @@ public class PostgreTypesResolver extends TypesResolver {
     }
 
     @Override
-    public Map<Integer, Integer> getJdbcTypesMaxSize() {
-        return jdbcTypesMaxSize;
+    public boolean containsRDBMSTypename(String aTypeName) {
+        assert aTypeName != null;
+        return rdbmsTypes2JdbcTypes.containsKey(aTypeName.toLowerCase());
     }
 
     @Override
-    public Map<Integer, Integer> getJdbcTypesDefaultSize() {
-        return jdbcTypesDefaultSize;
+    public void resolveFieldSize(Field aField) {
+        DataTypeInfo typeInfo = aField.getTypeInfo();
+        int sqlType = typeInfo.getSqlType();
+        String sqlTypeName = typeInfo.getSqlTypeName();
+        sqlTypeName = sqlTypeName.toLowerCase();
+        // check on max size
+        int fieldSize = aField.getSize();
+        Integer maxSize = jdbcTypesMaxSize.get(sqlTypeName);
+        if (maxSize != null && maxSize < fieldSize) {
+            List<Integer> typesOrder = getTypesOrder(sqlType);
+            if (typesOrder != null) {
+                for (int i = typesOrder.indexOf(sqlType); i < typesOrder.size(); i++) {
+                    sqlType = typesOrder.get(i);
+                    sqlTypeName = jdbcTypes2RdbmsTypes.get(sqlType);
+                    maxSize = jdbcTypesMaxSize.get(sqlTypeName);
+                    if (maxSize != null && maxSize >= fieldSize) {
+                        break;
+                    }
+                }
+            }
+            if (maxSize != null && maxSize < fieldSize) {
+                aField.setSize(maxSize);
+            }
+        }
+        aField.setTypeInfo(new DataTypeInfo(sqlType, sqlTypeName, typeInfo.getJavaClassName()));
+        // check on default size
+        if (fieldSize <= 0 && jdbcTypesDefaultSize.containsKey(sqlTypeName)) {
+            aField.setSize(jdbcTypesDefaultSize.get(sqlTypeName));
+        }
     }
-
-    @Override
-    public List<Integer> getCharacterTypesOrder() {
-        return characterTypesOrder;
-    }
-
-    @Override
-    public  List<Integer> getBinaryTypesOrder() {
-        return null;
-    }
-
 }

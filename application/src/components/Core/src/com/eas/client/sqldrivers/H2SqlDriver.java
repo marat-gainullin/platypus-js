@@ -708,20 +708,21 @@ public class H2SqlDriver extends SqlDriver {
 
     private String getFieldTypeDefinition(Field aField) {
         resolver.resolve2RDBMS(aField);
-        String typeName = aField.getTypeInfo().getSqlTypeName().toLowerCase();
-        int sqlType = aField.getTypeInfo().getSqlType();
+        String typeDefine = "";
+        String sqlTypeName = aField.getTypeInfo().getSqlTypeName().toLowerCase();
+        typeDefine += sqlTypeName;
         // field length
         int size = aField.getSize();
         int scale = aField.getScale();
 
-        if (resolver.isScaled(sqlType) && size > 0) {
-            typeName += "(" + String.valueOf(size) + "," + String.valueOf(scale) + ")";
+        if (resolver.isScaled(sqlTypeName) && size > 0) {
+            typeDefine += "(" + String.valueOf(size) + "," + String.valueOf(scale) + ")";
         } else {
-            if (resolver.isSized(sqlType) && size > 0) {
-                typeName += "(" + String.valueOf(size) + ")";
+            if (resolver.isSized(sqlTypeName) && size > 0) {
+                typeDefine += "(" + String.valueOf(size) + ")";
             }
         }
-        return typeName;
+        return typeDefine;
     }
 
     /**

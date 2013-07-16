@@ -14,18 +14,16 @@ import java.util.*;
  * @author kl
  */
 public class Db2TypesResolver extends TypesResolver {
+
     protected static final Map<Integer, String> jdbcTypes2RdbmsTypes = new HashMap<>();
     protected static final Map<String, Integer> rdbmsTypes2JdbcTypes = new HashMap<>();
     protected static final Set<String> gisTypes = new HashSet<>();
-    protected static final Set<Integer> jdbcTypesWithSize = new HashSet<>();
-    protected static final Set<Integer> jdbcTypesWithScale = new HashSet<>();
-
-    protected static final Map<Integer, String> jdbcTypesLeftPartName = new HashMap<>();
-    protected static final Map<Integer, String> jdbcTypesRightPartName = new HashMap<>();
-    private static final Map<Integer, Integer> jdbcTypesMaxSize = new HashMap<>();
-    private static final Map<Integer, Integer> jdbcTypesDefaultSize = new HashMap<>();
-    private static final List<Integer> characterTypesOrder = new ArrayList<>();
-    private static final List<Integer> binaryTypesOrder = new ArrayList<>();
+    protected static final Set<String> jdbcTypesWithSize = new HashSet<>();
+    protected static final Set<String> jdbcTypesWithScale = new HashSet<>();
+    protected static final Map<String, String> jdbcTypesLeftPartName = new HashMap<>();
+    protected static final Map<String, String> jdbcTypesRightPartName = new HashMap<>();
+    private static final Map<String, Integer> jdbcTypesMaxSize = new HashMap<>();
+    private static final Map<String, Integer> jdbcTypesDefaultSize = new HashMap<>();
 
     static {
         // rdbms -> jdbc
@@ -57,20 +55,26 @@ public class Db2TypesResolver extends TypesResolver {
         rdbmsTypes2JdbcTypes.put("CLOB", Types.CLOB);
         rdbmsTypes2JdbcTypes.put("CHAR LARGE OBJECT", Types.CLOB);
         rdbmsTypes2JdbcTypes.put("CHARACTER LARGE OBJECT", Types.CLOB);
-        rdbmsTypes2JdbcTypes.put("GRAPHIC", Types.CHAR);//???varchar
-        rdbmsTypes2JdbcTypes.put("VARGRAPHIC", Types.VARCHAR);
-        rdbmsTypes2JdbcTypes.put("LONG VARGRAPHIC", Types.LONGVARCHAR);
-        rdbmsTypes2JdbcTypes.put("DBCLOB", Types.CLOB);
-        rdbmsTypes2JdbcTypes.put("NCHAR", Types.CHAR);
-        rdbmsTypes2JdbcTypes.put("NATIONAL CHAR", Types.CHAR);
-        rdbmsTypes2JdbcTypes.put("NATIONAL CHARACTER", Types.CHAR);
-        rdbmsTypes2JdbcTypes.put("NVARCHAR", Types.VARCHAR);
-        rdbmsTypes2JdbcTypes.put("NCHAR VARYING", Types.VARCHAR);
-        rdbmsTypes2JdbcTypes.put("NATIONAL CHAR VARYING", Types.VARCHAR);
-        rdbmsTypes2JdbcTypes.put("NATIONAL CHARACTER VARYING", Types.VARCHAR);
-        rdbmsTypes2JdbcTypes.put("NCLOB", Types.CLOB);
-        rdbmsTypes2JdbcTypes.put("NCHAR LARGE OBJECT", Types.CLOB);
-        rdbmsTypes2JdbcTypes.put("NATIONAL CHARACTER LARGE OBJECT", Types.CLOB);
+
+        // !!! not supported for this database !!!
+        //rdbmsTypes2JdbcTypes.put("GRAPHIC", Types.CHAR);//???varchar
+        //rdbmsTypes2JdbcTypes.put("VARGRAPHIC", Types.VARCHAR);
+        //rdbmsTypes2JdbcTypes.put("LONG VARGRAPHIC", Types.LONGVARCHAR);
+        //rdbmsTypes2JdbcTypes.put("DBCLOB", Types.CLOB);
+        // !!! not supported for this database !!!
+
+        // !!! supported only for a Unicode database !!!
+        //rdbmsTypes2JdbcTypes.put("NCHAR", Types.CHAR);
+        //rdbmsTypes2JdbcTypes.put("NATIONAL CHAR", Types.CHAR);
+        //rdbmsTypes2JdbcTypes.put("NATIONAL CHARACTER", Types.CHAR);
+        //rdbmsTypes2JdbcTypes.put("NVARCHAR", Types.VARCHAR);
+        //rdbmsTypes2JdbcTypes.put("NCHAR VARYING", Types.VARCHAR);
+        //rdbmsTypes2JdbcTypes.put("NATIONAL CHAR VARYING", Types.VARCHAR);
+        //rdbmsTypes2JdbcTypes.put("NATIONAL CHARACTER VARYING", Types.VARCHAR);
+        //rdbmsTypes2JdbcTypes.put("NCLOB", Types.CLOB);
+        //rdbmsTypes2JdbcTypes.put("NCHAR LARGE OBJECT", Types.CLOB);
+        //rdbmsTypes2JdbcTypes.put("NATIONAL CHARACTER LARGE OBJECT", Types.CLOB);
+        // !!! supported only for a Unicode database !!!
         rdbmsTypes2JdbcTypes.put("BLOB", Types.BLOB);
         rdbmsTypes2JdbcTypes.put("BINARY LARGE OBJECT", Types.BLOB);
         rdbmsTypes2JdbcTypes.put("DATE", Types.DATE);
@@ -78,8 +82,6 @@ public class Db2TypesResolver extends TypesResolver {
         rdbmsTypes2JdbcTypes.put("TIMESTAMP", Types.TIMESTAMP);
         rdbmsTypes2JdbcTypes.put("XML", Types.BLOB); //?? OTHER  || SQLXML || BLOB
         //??rdbmsTypes2JdbcTypes.put("DATALINK", Types.VARCHAR);
-
-
 
         // jdbc -> rdbms
         jdbcTypes2RdbmsTypes.put(Types.BIT, "INTEGER");
@@ -109,64 +111,137 @@ public class Db2TypesResolver extends TypesResolver {
         jdbcTypes2RdbmsTypes.put(Types.LONGNVARCHAR, "LONG VARCHAR");
         jdbcTypes2RdbmsTypes.put(Types.NCLOB, "CLOB");
 
-
         //typeName(M,D)
-        jdbcTypesWithScale.add(Types.DECIMAL);// (M,D)
-        //--jdbcTypesWithScale.add(Types.REAL);   // (D)
-        //--jdbcTypesWithScale.add(Types.DOUBLE); // (D)
-
+        //Types.DECIMAL (M,D)
+        jdbcTypesWithScale.add("DECIMAL");
+        jdbcTypesWithScale.add("DEC");
+        jdbcTypesWithScale.add("NUMERIC");
+        jdbcTypesWithScale.add("NUM");
 
         //typeName(M)
-        jdbcTypesWithSize.add(Types.DECIMAL); //(M,D)
-        jdbcTypesWithSize.add(Types.CHAR);    // (M)
-        jdbcTypesWithSize.add(Types.VARCHAR); // (M)
+        //Types.DECIMAL (M,D)
+        jdbcTypesWithSize.add("DECIMAL");
+        jdbcTypesWithSize.add("DEC");
+        jdbcTypesWithSize.add("NUMERIC");
+        jdbcTypesWithSize.add("NUM");
+        //Types.CHAR (M)
+        jdbcTypesWithSize.add("CHAR");
+        jdbcTypesWithSize.add("CHARACTER");
+        // jdbcTypesWithSize.add("GRAPHIC");
+        // jdbcTypesWithSize.add("NCHAR");
+        // jdbcTypesWithSize.add("NATIONAL CHAR");
+        // jdbcTypesWithSize.add("NATIONAL CHARACTER");
+        //Types.VARCHAR (M)
+        jdbcTypesWithSize.add("VARCHAR");
+        jdbcTypesWithSize.add("CHAR VARYING");
+        jdbcTypesWithSize.add("CHARACTER VARYING");
+        // jdbcTypesWithSize.add("VARGRAPHIC");
+        // jdbcTypesWithSize.add("NVARCHAR");
+        // jdbcTypesWithSize.add("NCHAR VARYING");
+        // jdbcTypesWithSize.add("NATIONAL CHAR VARYING");
+        // jdbcTypesWithSize.add("NATIONAL CHARACTER VARYING");
+        //Types.BINARY (M)
+        jdbcTypesWithSize.add("CHAR () FOR BIT DATA");
+        jdbcTypesWithSize.add("CHARACTER () FOR BIT DATA");
+        //Types.VARBINARY (M)
+        jdbcTypesWithSize.add("CHAR VARYING () FOR BIT DATA");
+        jdbcTypesWithSize.add("VARCHAR () FOR BIT DATA");
+        jdbcTypesWithSize.add("CHARACTER VARYING () FOR BIT DATA");
+        //Types.CLOB (M)
+        jdbcTypesWithSize.add("CLOB");
+        jdbcTypesWithSize.add("CHAR LARGE OBJECT");
+        jdbcTypesWithSize.add("CHARACTER LARGE OBJECT");
+        // jdbcTypesWithSize.add("DBCLOB");
+        // jdbcTypesWithSize.add("NCLOB");
+        // jdbcTypesWithSize.add("NCHAR LARGE OBJECT");
+        // jdbcTypesWithSize.add("NATIONAL CHARACTER LARGE OBJECT");
+        //Types.BLOB (M)
+        jdbcTypesWithSize.add("BLOB");
+        jdbcTypesWithSize.add("BINARY LARGE OBJECT");
 
-        jdbcTypesWithSize.add(Types.BINARY); // (M)
-        jdbcTypesWithSize.add(Types.VARBINARY); // (M)
-        jdbcTypesWithSize.add(Types.CLOB); // (M)
-        jdbcTypesWithSize.add(Types.BLOB); // (M)
-        
-        
         // max sizes for types
-        jdbcTypesMaxSize.put(Types.CHAR,254);
-        jdbcTypesMaxSize.put(Types.VARCHAR,4000);
-        jdbcTypesMaxSize.put(Types.BINARY,254);
-        jdbcTypesMaxSize.put(Types.VARBINARY,2000);
-//?? зависит от установленного размера страницы       
-//??        jdbcTypesMaxSize.put(Types.VARBINARY,32762);
-        
-        // default sizes for types ??????????????????????????????????????????????
-        jdbcTypesDefaultSize.put(Types.CHAR,1);
-        jdbcTypesDefaultSize.put(Types.VARCHAR,200);
-        jdbcTypesDefaultSize.put(Types.NCHAR,1 );
-        jdbcTypesDefaultSize.put(Types.NVARCHAR,200);
-        jdbcTypesDefaultSize.put(Types.BINARY,1);
-        jdbcTypesDefaultSize.put(Types.VARBINARY,200);
-        jdbcTypesDefaultSize.put(Types.CLOB, 2147483647);
-        jdbcTypesDefaultSize.put(Types.BLOB, 2147483647);
+        //Types.CHAR
+        jdbcTypesMaxSize.put("CHAR", 254);
+        jdbcTypesMaxSize.put("CHARACTER", 254);
+        // jdbcTypesMaxSize.put("GRAPHIC",254);
+        // jdbcTypesMaxSize.put("NCHAR",254);
+        // jdbcTypesMaxSize.put("NATIONAL CHAR",254);
+        // jdbcTypesMaxSize.put("NATIONAL CHARACTER",254);
+        //Types.VARCHAR 
+        jdbcTypesMaxSize.put("VARCHAR", 4000);
+        jdbcTypesMaxSize.put("CHAR VARYING", 4000);
+        jdbcTypesMaxSize.put("CHARACTER VARYING", 4000);
+        // jdbcTypesMaxSize.put("VARGRAPHIC",4000);
+        // jdbcTypesMaxSize.put("NVARCHAR",4000);
+        // jdbcTypesMaxSize.put("NCHAR VARYING",4000);
+        // jdbcTypesMaxSize.put("NATIONAL CHAR VARYING",4000);
+        // jdbcTypesMaxSize.put("NATIONAL CHARACTER VARYING",4000);
+        //Types.BINARY
+        jdbcTypesMaxSize.put("CHAR () FOR BIT DATA", 254);
+        jdbcTypesMaxSize.put("CHARACTER () FOR BIT DATA", 254);
+        //Types.VARBINARY - зависит от установленного размера страницы до 32762 ?
+        jdbcTypesMaxSize.put("CHAR VARYING () FOR BIT DATA", 4000);
+        jdbcTypesMaxSize.put("VARCHAR () FOR BIT DATA", 4000);
+        jdbcTypesMaxSize.put("CHARACTER VARYING () FOR BIT DATA", 4000);
 
-        // порядок замены символьных типов, если требуется размер больше исходного
-        characterTypesOrder.add(Types.CHAR);
-        characterTypesOrder.add(Types.VARCHAR);
-        characterTypesOrder.add(Types.CLOB);
-        
-        binaryTypesOrder.add(Types.BINARY);
-        binaryTypesOrder.add(Types.VARBINARY);
-        binaryTypesOrder.add(Types.BLOB);
-    
+        // default sizes for types ??????????????????????????????????????????????
+        //Types.CHAR
+        jdbcTypesDefaultSize.put("CHAR", 1);
+        jdbcTypesDefaultSize.put("CHARACTER", 1);
+        // jdbcTypesDefaultSize.put("GRAPHIC",1);
+        // jdbcTypesDefaultSize.put("NCHAR",1);
+        // jdbcTypesDefaultSize.put("NATIONAL CHAR",1);
+        // jdbcTypesDefaultSize.put("NATIONAL CHARACTER",1);
+        //Types.VARCHAR 
+        jdbcTypesDefaultSize.put("VARCHAR", 200);
+        jdbcTypesDefaultSize.put("CHAR VARYING", 200);
+        jdbcTypesDefaultSize.put("CHARACTER VARYING", 200);
+        // jdbcTypesDefaultSize.put("VARGRAPHIC",200);
+        // jdbcTypesDefaultSize.put("NVARCHAR",200);
+        // jdbcTypesDefaultSize.put("NCHAR VARYING",200);
+        // jdbcTypesDefaultSize.put("NATIONAL CHAR VARYING",200);
+        // jdbcTypesDefaultSize.put("NATIONAL CHARACTER VARYING",200);
+        //Types.BINARY
+        jdbcTypesDefaultSize.put("CHAR () FOR BIT DATA", 1);
+        jdbcTypesDefaultSize.put("CHARACTER () FOR BIT DATA", 1);
+        //Types.VARBINARY
+        jdbcTypesDefaultSize.put("CHAR VARYING () FOR BIT DATA", 200);
+        jdbcTypesDefaultSize.put("VARCHAR () FOR BIT DATA", 200);
+        jdbcTypesDefaultSize.put("CHARACTER VARYING () FOR BIT DATA", 200);
+        //Types.CLOB (M)
+        jdbcTypesDefaultSize.put("CLOB", 2147483647);
+        jdbcTypesDefaultSize.put("CHAR LARGE OBJECT", 2147483647);
+        jdbcTypesDefaultSize.put("CHARACTER LARGE OBJECT", 2147483647);
+        // jdbcTypesDefaultSize.put("DBCLOB", 2147483647);
+        // jdbcTypesDefaultSize.put("NCLOB", 2147483647);
+        // jdbcTypesDefaultSize.put("NCHAR LARGE OBJECT", 2147483647);
+        // jdbcTypesDefaultSize.put("NATIONAL CHARACTER LARGE OBJECT", 2147483647);
+        //Types.BLOB (M)
+        jdbcTypesDefaultSize.put("BLOB", 2147483647);
+        jdbcTypesDefaultSize.put("BINARY LARGE OBJECT", 2147483647);
+
         // для полей, где размер задается в середине имени типа
-        jdbcTypesLeftPartName.put(Types.BINARY, "CHAR");
-        jdbcTypesLeftPartName.put(Types.VARBINARY, "VARCHAR");
-        jdbcTypesRightPartName.put(Types.BINARY, "FOR BIT DATA");
-        jdbcTypesRightPartName.put(Types.VARBINARY, "FOR BIT DATA");
+        jdbcTypesLeftPartName.put("CHAR () FOR BIT DATA", "CHAR");
+        jdbcTypesLeftPartName.put("CHARACTER () FOR BIT DATA", "CHARACTER");
+        jdbcTypesLeftPartName.put("CHAR VARYING () FOR BIT DATA", "CHAR VARYING");
+        jdbcTypesLeftPartName.put("VARCHAR () FOR BIT DATA", "VARCHAR");
+        jdbcTypesLeftPartName.put("CHARACTER VARYING () FOR BIT DATA", "CHARACTER VARYING");
+
+        jdbcTypesRightPartName.put("CHAR () FOR BIT DATA", "FOR BIT DATA");
+        jdbcTypesRightPartName.put("CHARACTER () FOR BIT DATA", "FOR BIT DATA");
+        jdbcTypesRightPartName.put("CHAR VARYING () FOR BIT DATA", "FOR BIT DATA");
+        jdbcTypesRightPartName.put("VARCHAR () FOR BIT DATA", "FOR BIT DATA");
+        jdbcTypesRightPartName.put("CHARACTER VARYING () FOR BIT DATA", "FOR BIT DATA");
+
     }
 
     @Override
     public void resolve2Application(Field aField) {
         if (isGeometryTypeName(aField.getTypeInfo().getSqlTypeName())) {
             aField.setTypeInfo(DataTypeInfo.GEOMETRY.copy());
-        }else
+        } else {
             super.resolve2Application(aField);
+        }
     }
 
     @Override
@@ -174,9 +249,9 @@ public class Db2TypesResolver extends TypesResolver {
         return false;
     }
 
-    @Override
-    public int getJdbcTypeByRDBMSTypename(String aTypeName) {
-        String sqlTypeName = (aTypeName != null ? aTypeName.toUpperCase() : null);
+    private String parseRDBMSTypename(String aTypeName) {
+        assert aTypeName != null;
+        String sqlTypeName = aTypeName.toUpperCase();
         // убрать (size) из имени типа
         int leftIndex = sqlTypeName.indexOf("(");
         if (leftIndex > 0) {
@@ -193,9 +268,13 @@ public class Db2TypesResolver extends TypesResolver {
                 sb.append(part).append(" ");
             }
         }
-        sqlTypeName = sb.toString().trim();
+        return sb.toString().trim();
+    }
 
-        Integer jdbcType = rdbmsTypes2JdbcTypes.get(sqlTypeName);
+    @Override
+    public int getJdbcTypeByRDBMSTypename(String aTypeName) {
+        String sqlTypeName = (aTypeName != null ? parseRDBMSTypename(aTypeName) : null);
+        Integer jdbcType = (sqlTypeName != null ? rdbmsTypes2JdbcTypes.get(sqlTypeName) : null);
         if (jdbcType == null) {
             jdbcType = Types.OTHER;
             if (isGeometryTypeName(sqlTypeName)) {
@@ -213,31 +292,23 @@ public class Db2TypesResolver extends TypesResolver {
     }
 
     @Override
-    public boolean isSized(Integer aSqlType) {
-        return jdbcTypesWithSize.contains(aSqlType);
+    public boolean isSized(String aSqlTypeName) {
+        return jdbcTypesWithSize.contains(aSqlTypeName.toUpperCase());
     }
 
     @Override
-    public boolean isScaled(Integer aSqlType) {
-        return jdbcTypesWithScale.contains(aSqlType);
+    public boolean isScaled(String aSqlTypeName) {
+        return jdbcTypesWithScale.contains(aSqlTypeName.toUpperCase());
     }
 
-    public int getDefaultSize(Integer aSqlType) {
-        Integer ret = jdbcTypesDefaultSize.get(aSqlType);
-        return (ret != null ? ret : -1);
+    public String getLeftPartNameType(String aSqlTypeName) {
+        String sqlTypeName = aSqlTypeName.toUpperCase();
+        return (jdbcTypesLeftPartName.containsKey(sqlTypeName) ? jdbcTypesLeftPartName.get(sqlTypeName) : sqlTypeName);
     }
 
-    public String getLeftPartNameType(Integer aSqlType) {
-        String partName = jdbcTypesLeftPartName.get(aSqlType);
-        if (partName == null) {
-            partName = jdbcTypes2RdbmsTypes.get(aSqlType);
-        }
-        return partName;
+    public String getRightPartNameType(String aSqlTypeName) {
+        return jdbcTypesRightPartName.get(aSqlTypeName.toUpperCase());
     }
-
-    public String getRightPartNameType(Integer aSqlType) {
-        return jdbcTypesRightPartName.get(aSqlType);
-    }        
 
     @Override
     public Map<Integer, String> getJdbcTypes2RdbmsTypes() {
@@ -245,23 +316,40 @@ public class Db2TypesResolver extends TypesResolver {
     }
 
     @Override
-    public Map<Integer, Integer> getJdbcTypesMaxSize() {
-        return jdbcTypesMaxSize;
+    public boolean containsRDBMSTypename(String aTypeName) {
+        assert aTypeName != null;
+        return rdbmsTypes2JdbcTypes.containsKey(parseRDBMSTypename(aTypeName));
     }
 
     @Override
-    public Map<Integer, Integer> getJdbcTypesDefaultSize() {
-        return jdbcTypesDefaultSize;
+    public void resolveFieldSize(Field aField) {
+        DataTypeInfo typeInfo = aField.getTypeInfo();
+        int sqlType = typeInfo.getSqlType();
+        String sqlTypeName = typeInfo.getSqlTypeName();
+        sqlTypeName = sqlTypeName.toUpperCase();
+        // check on max size
+        int fieldSize = aField.getSize();
+        Integer maxSize = jdbcTypesMaxSize.get(sqlTypeName);
+        if (maxSize != null && maxSize < fieldSize) {
+            List<Integer> typesOrder = getTypesOrder(sqlType);
+            if (typesOrder != null) {
+                for (int i = typesOrder.indexOf(sqlType); i < typesOrder.size(); i++) {
+                    sqlType = typesOrder.get(i);
+                    sqlTypeName = jdbcTypes2RdbmsTypes.get(sqlType);
+                    maxSize = jdbcTypesMaxSize.get(sqlTypeName);
+                    if (maxSize != null && maxSize >= fieldSize) {
+                        break;
+                    }
+                }
+            }
+            if (maxSize != null && maxSize < fieldSize) {
+                aField.setSize(maxSize);
+            }
+        }
+        aField.setTypeInfo(new DataTypeInfo(sqlType, sqlTypeName, typeInfo.getJavaClassName()));
+        // check on default size
+        if (fieldSize <= 0 && jdbcTypesDefaultSize.containsKey(sqlTypeName)) {
+            aField.setSize(jdbcTypesDefaultSize.get(sqlTypeName));
+        }
     }
-
-    @Override
-    public List<Integer> getCharacterTypesOrder() {
-        return characterTypesOrder;
-    }
-
-    @Override
-    public  List<Integer> getBinaryTypesOrder() {
-        return binaryTypesOrder;
-    }
-    
 }

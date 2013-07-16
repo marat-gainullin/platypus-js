@@ -321,20 +321,23 @@ public class OracleSqlDriver extends SqlDriver {
 
     private String getFieldTypeDefinition(Field aField) {
         resolver.resolve2RDBMS(aField);
-        String typeName = aField.getTypeInfo().getSqlTypeName().toLowerCase();
+        String typeDefine = "";
+        String sqlTypeName = aField.getTypeInfo().getSqlTypeName().toUpperCase();
+        typeDefine += sqlTypeName;
         int sqlType = aField.getTypeInfo().getSqlType();
         // field length
         int size = aField.getSize();
-        int scale = aField.getScale();
-
-        if (SQLUtils.getTypeGroup(sqlType) == SQLUtils.TypesGroup.NUMBERS && size > 38) {
-            typeName = " FLOAT (" + String.valueOf(size) + ")";
-        } else if (resolver.isScaled(sqlType) && resolver.isSized(sqlType) && size > 0) {
-            typeName += "(" + String.valueOf(size) + "," + String.valueOf(scale) + ")";
-        } else if (resolver.isSized(sqlType) && size > 0) {
-            typeName += "(" + String.valueOf(size) + ")";
+        if (size > 0) {
+            int scale = aField.getScale();
+            if (SQLUtils.getTypeGroup(sqlType) == SQLUtils.TypesGroup.NUMBERS && size > 38) {
+                typeDefine = " FLOAT (" + String.valueOf(size) + ")";
+            } else if (resolver.isScaled(sqlTypeName) && resolver.isSized(sqlTypeName)) {
+                typeDefine += "(" + String.valueOf(size) + "," + String.valueOf(scale) + ")";
+            } else if (resolver.isSized(sqlTypeName)) {
+                typeDefine += "(" + String.valueOf(size) + ")";
+            }
         }
-        return typeName;
+        return typeDefine;
     }
 
     /**
@@ -411,7 +414,6 @@ public class OracleSqlDriver extends SqlDriver {
         String fieldDefination = getFieldTypeDefinition(newFieldMd);
 
         DataTypeInfo newTypeInfo = newFieldMd.getTypeInfo();
-        int newSqlType = newTypeInfo.getSqlType();
         String newSqlTypeName = newTypeInfo.getSqlTypeName();
         if (newSqlTypeName == null) {
             newSqlTypeName = "";
@@ -421,7 +423,6 @@ public class OracleSqlDriver extends SqlDriver {
         boolean newNullable = newFieldMd.isNullable();
 
         DataTypeInfo oldTypeInfo = aOldFieldMd.getTypeInfo();
-        int oldSqlType = oldTypeInfo.getSqlType();
         String oldSqlTypeName = oldTypeInfo.getSqlTypeName();
         if (oldSqlTypeName == null) {
             oldSqlTypeName = "";
@@ -430,9 +431,9 @@ public class OracleSqlDriver extends SqlDriver {
         int oldSize = aOldFieldMd.getSize();
         boolean oldNullable = aOldFieldMd.isNullable();
 
-        if (newSqlType != oldSqlType
-                || (resolver.isSized(newSqlType) && newSize != oldSize)
-                || (resolver.isScaled(newSqlType) && newScale != oldScale)) {
+        if (!oldSqlTypeName.equalsIgnoreCase(newSqlTypeName)
+                || (resolver.isSized(newSqlTypeName) && newSize != oldSize)
+                || (resolver.isScaled(newSqlTypeName) && newScale != oldScale)) {
             sqls.add(updateDefinition + fieldDefination);
         }
         if (oldNullable != newNullable) {

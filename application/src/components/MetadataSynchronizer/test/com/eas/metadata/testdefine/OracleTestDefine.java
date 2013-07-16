@@ -27,17 +27,17 @@ public class OracleTestDefine extends DbTestDefine {
         {"DATE", "DATE", "date", "date", "DATE", "DATE", "datetime"},
         {"TIMESTAMP", "TIMESTAMP(6)", "timestamp", "timestamp", "TIMESTAMP", "TIMESTAMP", "datetime"},
         {"TIMESTAMP(6)", "TIMESTAMP(6)", "timestamp", "timestamp", "TIMESTAMP", "TIMESTAMP", "datetime"},
-        {"TIMESTAMP WITH TIME ZONE", "TIMESTAMP(6)", "timestamp", "timestamp", "TIMESTAMP", "TIMESTAMP", "datetime"},
-        {"TIMESTAMP WITH LOCAL TIME ZONE", "TIMESTAMP(6)", "timestamp", "timestamp", "TIMESTAMP", "TIMESTAMP", "datetime"},
-        {"TIMESTAMP(6) WITH TIME ZONE", "TIMESTAMP(6)", "timestamp", "timestamp", "TIMESTAMP", "TIMESTAMP", "datetime"},
-        {"TIMESTAMP(6) WITH LOCAL TIME ZONE", "TIMESTAMP(6)", "timestamp", "timestamp", "TIMESTAMP", "TIMESTAMP", "datetime"},
-        {"LONG RAW", "LONGVARBINARY", "bytea", "longblob", "LONG VARCHAR FOR BIT DATA", "VARBINARY", "blob"},
-        {"RAW", "VARBINARY", "bytea", "varbinary", "VARCHAR () FOR BIT DATA", "VARBINARY", "varbinary"},
-        {"LONG", "LONG", "text", "longtext", "LONG VARCHAR", "CLOB", "clob"},
+        {"TIMESTAMP WITH TIME ZONE", "TIMESTAMP(6) WITH TIME ZONE", "timestamp", "timestamp", "TIMESTAMP", "TIMESTAMP", "datetime"},
+        {"TIMESTAMP WITH LOCAL TIME ZONE", "TIMESTAMP(6) WITH LOCAL TIME ZONE", "timestamp", "timestamp", "TIMESTAMP", "TIMESTAMP", "datetime"},
+        {"TIMESTAMP(6) WITH TIME ZONE", "TIMESTAMP(6) WITH TIME ZONE", "timestamp", "timestamp", "TIMESTAMP", "TIMESTAMP", "datetime"},
+        {"TIMESTAMP(6) WITH LOCAL TIME ZONE", "TIMESTAMP(6) WITH LOCAL TIME ZONE", "timestamp", "timestamp", "TIMESTAMP", "TIMESTAMP", "datetime"},
+        {"LONG RAW", "LONG RAW", "bytea", "longblob", "LONG VARCHAR FOR BIT DATA", "VARBINARY", "image"},
+        {"RAW", "RAW", "bytea", "varbinary", "VARCHAR () FOR BIT DATA", "VARBINARY", "varbinary"},
+        {"LONG", "LONG", "text", "longtext", "LONG VARCHAR", "VARCHAR", "text"},
         {"CHAR", "CHAR", "bpchar", "char", "CHAR", "CHAR", "char"},
-        {"BLOB", "BLOB", "bytea", "longblob", "BLOB", "BLOB", "blob"},
-        {"CLOB", "CLOB", "text", "longtext", "CLOB", "CLOB", "clob"},
-        {"NCLOB", "CLOB", "text", "longtext", "CLOB", "CLOB", "clob"},
+        {"BLOB", "BLOB", "bytea", "longblob", "BLOB", "BLOB", "image"},
+        {"CLOB", "CLOB", "text", "longtext", "CLOB", "CLOB", "text"},
+        {"NCLOB", "NCLOB", "text", "longtext", "CLOB", "CLOB", "ntext"},
         {"NVARCHAR2", "NVARCHAR2", "varchar", "varchar", "VARCHAR", "VARCHAR", "varchar"},
         {"NCHAR", "NCHAR", "bpchar", "char", "CHAR", "CHAR", "nchar"}
 //         
@@ -107,5 +107,10 @@ public class OracleTestDefine extends DbTestDefine {
     @Override
     public boolean[][] getFKeyDeferrables() {
         return fKeyDeferrable;
+    }
+
+    @Override
+    public boolean enabledSetNull(String aFieldName) {
+        return true;
     }
 }

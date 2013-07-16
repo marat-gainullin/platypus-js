@@ -473,14 +473,18 @@ public class MetadataSynchronizerTest {
                     }
                 }
                 String dbType = dbTypes[index];
+                boolean nullable = dbTestDefine.enabledSetNull(dbType) && aNullable;
 
                 String schema = dbConnection.getSchema();
                 executeSql(client, driver.getSql4EmptyTableCreation(schema, tableName, pkFieldName));
+
+                executeSql(client, driver.getSql4DropPkConstraint(schema, new PrimaryKeySpec(schema, tableName, pkFieldName, tableName+SqlDriver.PKEY_NAME_SUFFIX)));
+
                 Field field = new Field();
                 field.setSchemaName(schema);
                 field.setName(fieldName);
                 field.setTableName(tableName);
-                field.setNullable(aNullable);
+                field.setNullable(nullable);
                 field.setReadonly(aReadonly);
                 field.setSigned(aSigned);
                 field.setPrecision(aPrecision);
@@ -488,6 +492,7 @@ public class MetadataSynchronizerTest {
 
                 DataTypeInfo typeInfo = new DataTypeInfo();
                 typeInfo.setSqlType(driver.getJdbcTypeByRDBMSTypename(dbType));
+                typeInfo.setSqlTypeName(dbType);
                 field.setTypeInfo(typeInfo);
                 int dbSize = dbTestDefine.getOriginalSize(dbType);
                 int dbScale = dbTestDefine.getOriginalScale(dbType);
@@ -759,6 +764,7 @@ public class MetadataSynchronizerTest {
             String tableName = tableNameUpper + i;
             String fieldName = fieldNameUpper + i;
             String description = aDescription;
+            boolean nullable = aTestDefine.enabledSetNull(originalType) && aNullable;
             if (description != null && !description.isEmpty()) {
                 description += " -for " + tableName;
             }
@@ -801,10 +807,10 @@ public class MetadataSynchronizerTest {
             }
 
             //---            assertEquals(field.getPrecision(),aPrecision);
-            assertEquals(field.isNullable(), aNullable);
+            assertEquals(field.isNullable(), nullable);
             //---            assertEquals(field.isReadonly(),aReadonly);
             //---            assertEquals(field.isSigned(),aSigned);
-            assertEquals(field.isPk(), false);
+            //---            assertEquals(field.isPk(), false);
             assertEquals(field.isFk(), false);
         }
     }

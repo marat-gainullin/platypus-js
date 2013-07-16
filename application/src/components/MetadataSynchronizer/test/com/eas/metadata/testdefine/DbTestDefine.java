@@ -78,6 +78,8 @@ public abstract class DbTestDefine {
 
     abstract public boolean[][] getFKeyDeferrables();
 
+    abstract public boolean enabledSetNull(String aFieldName);
+
     public String[] getDBTypes(int aDatabase) {
         String[][] fieldsTypes = getFieldsTypes();
         assert fieldsTypes != null;
