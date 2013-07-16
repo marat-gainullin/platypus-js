@@ -1,10 +1,10 @@
 package com.eas.client.gxtcontrols.wrappers.component;
 
+import com.eas.client.gxtcontrols.ControlsUtils;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Cursor;
-import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.DOM;
@@ -12,9 +12,7 @@ import com.google.gwt.user.client.ui.HasHTML;
 import com.google.gwt.user.client.ui.HasText;
 import com.sencha.gxt.core.client.dom.XElement;
 import com.sencha.gxt.theme.base.client.button.ButtonCellDefaultAppearance.ButtonCellResources;
-import com.sencha.gxt.theme.base.client.field.FieldLabelDefaultAppearance.FieldLabelResources;
 import com.sencha.gxt.widget.core.client.Component;
-import com.sencha.gxt.widget.core.client.form.FieldLabel.FieldLabelAppearance;
 
 public class PlatypusLabel extends Component implements HasText, HasHTML {
 	public static final String HTML_SWING_PREFIX = "<html>";
@@ -199,25 +197,25 @@ public class PlatypusLabel extends Component implements HasText, HasHTML {
 			}
 			contentStyle.setProperty("width", "auto");
 			if (html || text == null)
-				content.setInnerHTML(text!=null?text:"&#160;");
+				content.setInnerHTML(text != null ? text : "&#160;");
 			else
 				content.setInnerText(text);
 			//
 			switch (verticalAlignment) {
 			case TOP:
 				contentStyle.setTop(0, Unit.PX);
-				//contentStyle.clearBottom();
+				// contentStyle.clearBottom();
 				break;
 			case BOTTOM: {
 				int topValue = getElement().getOffsetHeight() - content.getOffsetHeight();
 				contentStyle.setTop(topValue, Unit.PX);
-				//contentStyle.clearBottom();
+				// contentStyle.clearBottom();
 				break;
 			}
 			case CENTER: {
 				int topValue = (getElement().getOffsetHeight() - content.getOffsetHeight()) / 2;
 				contentStyle.setTop(topValue, Unit.PX);
-				//contentStyle.clearBottom();
+				// contentStyle.clearBottom();
 				break;
 			}
 			}
@@ -254,6 +252,7 @@ public class PlatypusLabel extends Component implements HasText, HasHTML {
 				contentStyle.setProperty("textAlign", "center");
 				break;
 			}
+			ControlsUtils.reapplyStyle(this);
 		}
 	}
 

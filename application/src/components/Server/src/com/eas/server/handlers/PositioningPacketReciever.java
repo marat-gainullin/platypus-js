@@ -38,7 +38,7 @@ public class PositioningPacketReciever implements PacketReciever {
     protected String moduleId;
     protected PlatypusServerCore serverCore;
     private PositioningPacketStorage packetStorage = new PositioningPacketStorage();
-    private PositioningPacketStorage packetNotValidStorage = new PositioningPacketStorage(false);
+    private PositioningPacketStorage invalidPacketStorage = new PositioningPacketStorage(false);
 
     public PositioningPacketReciever(PlatypusServerCore aServer, String aModuleId) {
         super();
@@ -79,13 +79,14 @@ public class PositioningPacketReciever implements PacketReciever {
                 && aProtocolName != null && !aProtocolName.isEmpty()
                 && aPort != null && aPort > 0 && aPort < 65535
                 && aPacket != null) {
-            if (RetranslatePacketFactory.isServiceSupport(aProtocolName)) {
+            if (RetranslatePacketFactory.isProtocolSupported(aProtocolName)) {
                 String imei = aPacket.getImei();
                 IoSession ioSession = retranslateSessions.get(imei);
                 if (ioSession == null) {
                     IoConnector connector = new NioSocketConnector();
                     connector.getFilterChain().addLast(aProtocolName, new ProtocolCodecFilter(RetranslatePacketFactory.getPacketEncoder(aProtocolName), RetranslatePacketFactory.getPacketDecoder(aProtocolName)));
                     connector.setHandler(RetranslatePacketFactory.getPacketHandler(aProtocolName, retranslateSessions));
+                    connector.setConnectTimeoutMillis(WAIT_SEND_TIMEOUT);
                     ConnectFuture future = connector.connect(new InetSocketAddress(aHost, aPort));
                     future.awaitUninterruptibly();
                     if (future.isConnected()) {
@@ -94,7 +95,8 @@ public class PositioningPacketReciever implements PacketReciever {
                         retranslateSessions.put(imei, session);
                         WriteFuture write = session.write(aPacket);
                         write.awaitUninterruptibly(WAIT_SEND_TIMEOUT);
-                    }
+                    }else
+                        connector.dispose();
                 } else {
                     WriteFuture write = ioSession.write(aPacket);
                     write.awaitUninterruptibly(WAIT_SEND_TIMEOUT);
@@ -134,8 +136,8 @@ public class PositioningPacketReciever implements PacketReciever {
     /**
      * @return the packetNotValidStorage
      */
-    public PositioningPacketStorage getPacketNotValidStorage() {
-        return packetNotValidStorage;
+    public PositioningPacketStorage getInvalidPacketStorage() {
+        return invalidPacketStorage;
     }
 
     /**

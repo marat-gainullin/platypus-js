@@ -4,7 +4,10 @@
  */
 package com.eas.server.handlers;
 
+import com.bearsoft.rowset.metadata.Field;
+import com.bearsoft.rowset.metadata.Fields;
 import com.eas.client.queries.SqlQuery;
+import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.client.threetier.Response;
 import com.eas.client.threetier.requests.AppQueryRequest;
 import com.eas.client.threetier.requests.AppQueryResponse;
@@ -41,6 +44,13 @@ public class AppQueryRequestHandler extends SessionRequestHandler<AppQueryReques
             throw new AccessControlException(String.format(ACCESS_DENIED_MSG, query.getEntityId(), getSession().getPrincipal().getName()));
         }
         assert query.getEntityId().equals(getRequest().getQueryId());
+        SqlDriver driver = getServerCore().getDatabasesClient().getDbMetadataCache(query.getDbId()).getConnectionDriver();
+        Fields queryFields = query.getFields();
+        if (queryFields != null) {
+            for (Field field : queryFields.toCollection()) {
+                driver.getTypesResolver().resolve2Application(field);
+            }
+        }
         return new AppQueryResponse(getRequest().getID(), query);
     }
 }

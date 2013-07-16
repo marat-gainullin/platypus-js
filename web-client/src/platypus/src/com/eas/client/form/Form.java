@@ -279,6 +279,10 @@ public class Form {
 	protected HandlerRegistration showedOnPanelBeforeHideReg = null;
 	protected HandlerRegistration showedOnPanelHideReg = null;
 
+	public void showOnPanel(String aElementId) {
+		showOnPanel(RootPanel.get(aElementId));
+	}
+	
 	public void showOnPanel(HasWidgets aPanel) {
 		close(null, null);
 		if (!isOpened()) {
@@ -788,7 +792,10 @@ public class Form {
 		        showedWnd = aForm.@com.eas.client.form.Form::show(ZLcom/google/gwt/core/client/JavaScriptObject;Lcom/eas/client/gxtcontrols/wrappers/container/PlatypusDesktopContainer;)(true, aCallback, null);
 	        };
 	        aModule.showOnPanel = function(aPanel) {
-	        	showedWnd = aForm.@com.eas.client.form.Form::showOnPanel(Lcom/google/gwt/user/client/ui/HasWidgets;)(aPanel.unwrap());
+	        	if(aPanel.unwrap)
+	        		showedWnd = aForm.@com.eas.client.form.Form::showOnPanel(Lcom/google/gwt/user/client/ui/HasWidgets;)(aPanel.unwrap());
+	        	else
+	        		showedWnd = aForm.@com.eas.client.form.Form::showOnPanel(Ljava/lang/String;)(aPanel);
 	        };
 	        aModule.showInternalFrame = function(aPanel) {
 	        	showedWnd = aForm.@com.eas.client.form.Form::show(ZLcom/google/gwt/core/client/JavaScriptObject;Lcom/eas/client/gxtcontrols/wrappers/container/PlatypusDesktopContainer;)(false, null, aPanel != null?aPanel.unwrap():null);

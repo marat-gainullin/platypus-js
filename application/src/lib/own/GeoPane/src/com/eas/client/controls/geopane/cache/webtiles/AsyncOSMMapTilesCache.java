@@ -15,9 +15,10 @@ import org.geotools.map.MapContext;
  * @author mg
  */
 public class AsyncOSMMapTilesCache extends AsyncWebMapTilesCache {
+
     protected Random rnd = new Random(System.currentTimeMillis());
     private String[] domains = new String[]{"a", "b", "c"};
-    
+
     public AsyncOSMMapTilesCache(String aBaseUrl, MapContext aDisplayContext, ReadWriteLock aMapContextLock, AffineTransform aTransform) {
         super(aBaseUrl, aDisplayContext, aMapContextLock, aTransform);
     }
@@ -27,6 +28,7 @@ public class AsyncOSMMapTilesCache extends AsyncWebMapTilesCache {
         return "osm";
     }
 
+    @Override
     protected void constraintTilesLevel() {
         if (tilesLevel < 0) {
             tilesLevel = 0;
@@ -46,7 +48,7 @@ public class AsyncOSMMapTilesCache extends AsyncWebMapTilesCache {
 
     @Override
     protected String formatTileUrl(WebTileKey aTileKey) {
-        
+
         return String.format(Locale.ENGLISH, tilesServerUrl, domains[rnd.nextInt(domains.length)], aTileKey.z, aTileKey.x, aTileKey.y);
     }
 }

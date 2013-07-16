@@ -134,7 +134,7 @@ public class JSControls {
 			}
 
 			var published = this;
-			aComponent = aComponent || @com.sencha.gxt.widget.core.client.button.TextButton::new()();
+			aComponent = aComponent || @com.eas.client.gxtcontrols.wrappers.component.PlatypusTextButton::new()();
 			published.unwrap = function() {
 				return aComponent;
 			};
@@ -164,7 +164,7 @@ public class JSControls {
 			var aComponent = arguments.length > 4 ? arguments[4] : null;
 
 			var published = this;
-			aComponent = aComponent || @com.sencha.gxt.widget.core.client.button.SplitButton::new()();
+			aComponent = aComponent || @com.eas.client.gxtcontrols.wrappers.component.PlatypusSplitButton::new()();
 			published.unwrap = function() {
 				return aComponent;
 			};

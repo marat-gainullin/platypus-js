@@ -11,7 +11,6 @@ import com.eas.client.queries.SqlCompiledQuery;
 import com.eas.client.queries.SqlQuery;
 import com.eas.client.threetier.requests.ExecuteQueryRequest;
 import com.eas.client.threetier.requests.RowsetResponse;
-import com.eas.script.JsDoc;
 import com.eas.server.PlatypusServerCore;
 import com.eas.server.Session;
 import com.eas.server.SessionRequestHandler;
