@@ -77,6 +77,7 @@ import com.sencha.gxt.widget.core.client.container.HBoxLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.HasLayout;
 import com.sencha.gxt.widget.core.client.container.ResizeContainer;
 import com.sencha.gxt.widget.core.client.container.VBoxLayoutContainer;
+import com.sencha.gxt.widget.core.client.form.FieldSet;
 import com.sencha.gxt.widget.core.client.form.PasswordField;
 import com.sencha.gxt.widget.core.client.form.ValueBaseField;
 import com.sencha.gxt.widget.core.client.menu.Menu;
@@ -1463,7 +1464,7 @@ public class GxtControlsFactory {
 			}
 			if (parent instanceof Component) {
 				Object published = ((Component) parent).getData(Form.PUBLISHED_DATA_KEY);
-				if (published != null) {
+				if (published != null && !(parent instanceof FieldSet)) {
 					assert published instanceof JavaScriptObject;
 					return (JavaScriptObject) published;
 				}

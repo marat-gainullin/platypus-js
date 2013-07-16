@@ -1,10 +1,8 @@
 package com.eas.client.gxtcontrols.wrappers.container;
 
 import com.eas.client.gxtcontrols.AbsoluteJSConstraints;
-import com.eas.client.gxtcontrols.ControlsUtils;
 import com.eas.client.gxtcontrols.MarginConstraints;
 import com.eas.client.gxtcontrols.MarginJSConstraints;
-import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.layout.client.Layout.Alignment;
@@ -12,8 +10,6 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.dom.client.Node;
-import com.sencha.gxt.core.client.dom.XDOM;
 import com.sencha.gxt.core.client.dom.XElement;
 import com.sencha.gxt.widget.core.client.Component;
 import com.sencha.gxt.widget.core.client.container.BorderLayoutContainer;
@@ -158,31 +154,49 @@ public class PlatypusMarginLayoutContainer extends SimpleContainer implements Or
 		add(aChild, anchors);
 	}
 
-	public void ajustWidth(Widget aChild, int aValue) {
+	/**
+	 * Takes into account inner structure of MarginLayoutContainer and possible
+	 * FieldSet wrappers.
+	 * 
+	 * @param aChild
+	 * @return
+	 */
+	protected Component lookupLayoutedChild(Widget aChild) {
 		MarginConstraints anchors = (MarginConstraints) ((Component) aChild.getParent()).getData(MARGIN_LAYOUT_DATA);
-		int containerWidth = aChild.getParent().getParent().getOffsetWidth();
+		if (anchors == null)
+			return (Component) aChild.getParent().getParent().getParent();
+		else
+			return (Component) aChild.getParent();
+	}
+
+	public void ajustWidth(Widget aChild, int aValue) {
+		Component layouted = lookupLayoutedChild(aChild);
+		MarginConstraints anchors = layouted.getData(MARGIN_LAYOUT_DATA);
+		int containerWidth = layouted.getParent().getOffsetWidth();
 		if (anchors.getWidth() != null) {
 			anchors.getWidth().setPlainValue(aValue, containerWidth);
 		} else if (anchors.getLeft() != null && anchors.getRight() != null) {
-			anchors.getRight().setPlainValue(containerWidth - DOM.getElementPropertyInt(aChild.getParent().getElement(), "offsetLeft") - aValue, containerWidth);
+			anchors.getRight().setPlainValue(containerWidth - DOM.getElementPropertyInt(layouted.getElement(), "offsetLeft") - aValue, containerWidth);
 		}
-		applyConstraints(aChild.getParent(), anchors);
+		applyConstraints(layouted, anchors);
 	}
 
 	public void ajustHeight(Widget aChild, int aValue) {
-		MarginConstraints anchors = (MarginConstraints) ((Component) aChild.getParent()).getData(MARGIN_LAYOUT_DATA);
-		int containerHeight = aChild.getParent().getParent().getOffsetHeight();
+		Component layouted = lookupLayoutedChild(aChild);
+		MarginConstraints anchors = layouted.getData(MARGIN_LAYOUT_DATA);
+		int containerHeight = layouted.getParent().getOffsetHeight();
 		if (anchors.getHeight() != null) {
 			anchors.getHeight().setPlainValue(aValue, containerHeight);
 		} else if (anchors.getTop() != null && anchors.getBottom() != null) {
-			anchors.getBottom().setPlainValue(containerHeight - DOM.getElementPropertyInt(aChild.getParent().getElement(), "offsetTop") - aValue, containerHeight);
+			anchors.getBottom().setPlainValue(containerHeight - DOM.getElementPropertyInt(layouted.getElement(), "offsetTop") - aValue, containerHeight);
 		}
-		applyConstraints(aChild.getParent(), anchors);
+		applyConstraints(layouted, anchors);
 	}
 
 	public void ajustLeft(Widget aChild, int aValue) {
-		MarginConstraints anchors = (MarginConstraints) ((Component) aChild.getParent()).getData(MARGIN_LAYOUT_DATA);
-		int containerWidth = aChild.getParent().getParent().getOffsetWidth();
+		Component layouted = lookupLayoutedChild(aChild);
+		MarginConstraints anchors = layouted.getData(MARGIN_LAYOUT_DATA);
+		int containerWidth = layouted.getParent().getOffsetWidth();
 		int childWidth = aChild.getParent().getOffsetWidth();
 		if (anchors.getLeft() != null && anchors.getWidth() != null) {
 			anchors.getLeft().setPlainValue(aValue, containerWidth);
@@ -192,13 +206,14 @@ public class PlatypusMarginLayoutContainer extends SimpleContainer implements Or
 			anchors.getLeft().setPlainValue(aValue, containerWidth);
 			anchors.getRight().setPlainValue(containerWidth - aValue - childWidth, containerWidth);
 		}
-		applyConstraints(aChild.getParent(), anchors);
+		applyConstraints(layouted, anchors);
 	}
 
 	public void ajustTop(Widget aChild, int aValue) {
-		MarginConstraints anchors = (MarginConstraints) ((Component) aChild.getParent()).getData(MARGIN_LAYOUT_DATA);
-		int containerHeight = aChild.getParent().getParent().getOffsetHeight();
-		int childHeight = aChild.getParent().getOffsetHeight();
+		Component layouted = lookupLayoutedChild(aChild);
+		MarginConstraints anchors = layouted.getData(MARGIN_LAYOUT_DATA);
+		int containerHeight = layouted.getParent().getOffsetHeight();
+		int childHeight = layouted.getOffsetHeight();
 		if (anchors.getTop() != null && anchors.getHeight() != null) {
 			anchors.getTop().setPlainValue(aValue, containerHeight);
 		} else if (anchors.getHeight() != null && anchors.getBottom() != null) {
@@ -207,7 +222,7 @@ public class PlatypusMarginLayoutContainer extends SimpleContainer implements Or
 			anchors.getTop().setPlainValue(aValue, containerHeight);
 			anchors.getBottom().setPlainValue(containerHeight - aValue - childHeight, containerHeight);
 		}
-		applyConstraints(aChild.getParent(), anchors);
+		applyConstraints(layouted, anchors);
 	}
 
 	@Override
@@ -287,49 +302,53 @@ public class PlatypusMarginLayoutContainer extends SimpleContainer implements Or
 		}
 		return true;
 	}
-    
+
 	@Override
 	public void toFront(Widget aWidget) {
 		if (aWidget != null) {
-			content.getElement().insertBefore(aWidget.getParent().getElement().getParentNode(), content.getElement().getLastChild()); // exclude last element
-		}			
+			content.getElement().insertBefore(aWidget.getParent().getElement().getParentNode(), content.getElement().getLastChild()); // exclude
+																																	  // last
+																																	  // element
+		}
 	}
 
 	@Override
 	public void toFront(Widget aWidget, int aCount) {
 		if (aWidget != null && aCount > 0) {
-			XElement container =  content.getElement().cast();
+			XElement container = content.getElement().cast();
 			Element widgetElement = aWidget.getParent().getElement().getParentElement();
 			int index = container.getChildIndex(widgetElement);
-			if (index < 0 || (index + aCount) >= container.getChildCount() - 1) {// exclude last element
+			if (index < 0 || (index + aCount) >= container.getChildCount() - 1) {// exclude
+																				 // last
+																				 // element
 				content.getElement().insertBefore(widgetElement, container.getLastChild());
 			} else {
-			    content.getElement().insertAfter(widgetElement, container.getChild(index + aCount));
+				content.getElement().insertAfter(widgetElement, container.getChild(index + aCount));
 			}
-		}			
+		}
 	}
 
 	@Override
 	public void toBack(Widget aWidget) {
 		if (aWidget != null) {
 			content.getElement().insertFirst(aWidget.getParent().getElement().getParentNode());
-		}			
+		}
 	}
-	
+
 	@Override
 	public void toBack(Widget aWidget, int aCount) {
 		if (aWidget != null && aCount > 0) {
-			XElement container =  content.getElement().cast();
+			XElement container = content.getElement().cast();
 			Element widgetElement = aWidget.getParent().getElement().getParentElement();
 			int index = container.getChildIndex(widgetElement);
 			if (index < 0 || (index - aCount) < 0) {
 				content.getElement().insertFirst(widgetElement);
 			} else {
-			    content.getElement().insertBefore(widgetElement, container.getChild(index - aCount));
+				content.getElement().insertBefore(widgetElement, container.getChild(index - aCount));
 			}
-		}			
+		}
 	}
-	
+
 	@Override
 	public void clear() {
 		if (content != null)

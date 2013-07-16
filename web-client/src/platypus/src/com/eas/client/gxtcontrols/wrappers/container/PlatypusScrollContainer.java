@@ -165,21 +165,17 @@ public class PlatypusScrollContainer extends FlowLayoutContainer {
 		if (isTextArea(view)) {
 			view.setPixelSize(width, height);
 			setScrollMode(ScrollMode.NONE);
-		} else if(view instanceof PlatypusVBoxLayoutContainer)
-		{
-			((PlatypusVBoxLayoutContainer)view).ajustSize();
-		} else if(view instanceof PlatypusHBoxLayoutContainer)
-		{
-			((PlatypusHBoxLayoutContainer)view).ajustSize();
+		} else if (view instanceof PlatypusVBoxLayoutContainer) {
+			((PlatypusVBoxLayoutContainer) view).ajustSize();
+		} else if (view instanceof PlatypusHBoxLayoutContainer) {
+			((PlatypusHBoxLayoutContainer) view).ajustSize();
 		}
 		applyPolicies();
 	}
 
 	protected boolean isTextArea(Widget aCandidate) {
-		return aCandidate instanceof com.sencha.gxt.widget.core.client.form.TextArea
-			|| aCandidate instanceof com.google.gwt.user.client.ui.TextArea
-			|| aCandidate instanceof PlatypusHtmlEditor
-			|| aCandidate instanceof ModelTextArea;
+		return aCandidate instanceof com.sencha.gxt.widget.core.client.form.TextArea || aCandidate instanceof com.google.gwt.user.client.ui.TextArea || aCandidate instanceof PlatypusHtmlEditor
+		        || aCandidate instanceof ModelTextArea;
 	}
 
 	public void ajustWidth(Widget aChild, int aValue) {

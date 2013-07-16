@@ -37,7 +37,6 @@ import com.google.gwt.event.dom.client.MouseWheelEvent;
 import com.google.gwt.event.dom.client.MouseWheelHandler;
 import com.google.gwt.event.logical.shared.HasResizeHandlers;
 import com.google.gwt.event.logical.shared.HasSelectionHandlers;
-import com.google.gwt.event.dom.client.HasChangeHandlers;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
@@ -74,7 +73,8 @@ import com.sencha.gxt.widget.core.client.event.ShowEvent.ShowHandler;
 import com.sencha.gxt.widget.core.client.menu.MenuItem;
 
 public class GxtEventsExecutor implements SelectHandler, MouseOutHandler, MouseOverHandler, MouseDownHandler, MouseUpHandler, MouseWheelHandler, MouseMoveHandler, KeyDownHandler, KeyUpHandler,
-        KeyPressHandler, FocusHandler, ShowHandler, ResizeHandler, HideHandler, RemoveHandler, MoveHandler, AddHandler, BlurHandler, SelectionHandler<Widget>, ClickHandler, DoubleClickHandler, ChangeHandler {
+        KeyPressHandler, FocusHandler, ShowHandler, ResizeHandler, HideHandler, RemoveHandler, MoveHandler, AddHandler, BlurHandler, SelectionHandler<Widget>, ClickHandler, DoubleClickHandler,
+        ChangeHandler {
 
 	private static final String HANDLER_DATA_NAME = "handler";
 	private JavaScriptObject actionPerformed;
@@ -108,22 +108,23 @@ public class GxtEventsExecutor implements SelectHandler, MouseOutHandler, MouseO
 	public static GxtEventsExecutor get(Component aComponent) {
 		return aComponent.getData(HANDLER_DATA_NAME);
 	}
-	
+
 	public static GxtEventsExecutor createExecutor(Component aComponent, JavaScriptObject aEventsThis) throws Exception {
 		final GxtEventsExecutor executor = new GxtEventsExecutor(aEventsThis);
 		aComponent.setData(HANDLER_DATA_NAME, executor);
 
 		if (aComponent instanceof HasSelectHandlers)
 			((HasSelectHandlers) aComponent).addSelectHandler(executor);
-		
-		if (aComponent instanceof PlatypusCheckBox){
-			final PlatypusCheckBox pcheck = (PlatypusCheckBox)aComponent;
-			pcheck.addValueChangeHandler(new ValueChangeHandler<Boolean>(){
+
+		if (aComponent instanceof PlatypusCheckBox) {
+			final PlatypusCheckBox pcheck = (PlatypusCheckBox) aComponent;
+			pcheck.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
 				@Override
 				public void onValueChange(ValueChangeEvent<Boolean> event) {
 					PlatypusButtonGroup pgroup = pcheck.getButtonGroup();
-					// Check boxes can process actionPerfomed events only when they are standalone within no groups.
-					if(pgroup == null)
+					// Check boxes can process actionPerfomed events only when
+					// they are standalone within no groups.
+					if (pgroup == null)
 						executor.onSelect(new SurrogateSelectEvent(event.getSource()));
 				}
 			});
@@ -388,7 +389,7 @@ public class GxtEventsExecutor implements SelectHandler, MouseOutHandler, MouseO
 	public void onSelect(SelectEvent event) {
 		executeEvent(eventThis, actionPerformed, JSEvents.publishSelectEvent(event));
 	}
-	
+
 	@Override
 	public void onChange(ChangeEvent event) {
 		executeEvent(eventThis, actionPerformed, JSEvents.publishChangeEvent(event));
@@ -422,13 +423,15 @@ public class GxtEventsExecutor implements SelectHandler, MouseOutHandler, MouseO
 
 	@Override
 	public void onMouseMove(MouseMoveEvent event) {
-		event.stopPropagation();
-		if (mouseState == MOUSE.NULL || mouseState == MOUSE.MOVED) {
-			mouseState = MOUSE.MOVED;
-			executeEvent(eventThis, mouseMoved, null);
-		} else if (mouseState == MOUSE.PRESSED || mouseState == MOUSE.DRAGGED) {
-			mouseState = MOUSE.DRAGGED;
-			executeEvent(eventThis, mouseDragged, JSEvents.publishMouseMoveEvent(event));
+		if (mouseMoved != null || mouseDragged != null) {
+			event.stopPropagation();
+			if (mouseState == MOUSE.NULL || mouseState == MOUSE.MOVED) {
+				mouseState = MOUSE.MOVED;
+				executeEvent(eventThis, mouseMoved, null);
+			} else if (mouseState == MOUSE.PRESSED || mouseState == MOUSE.DRAGGED) {
+				mouseState = MOUSE.DRAGGED;
+				executeEvent(eventThis, mouseDragged, JSEvents.publishMouseMoveEvent(event));
+			}
 		}
 	}
 
@@ -556,7 +559,8 @@ public class GxtEventsExecutor implements SelectHandler, MouseOutHandler, MouseO
 	}
 
 	/**
-	 * Intended to implement active tabs change event and to regularize menu items selection.
+	 * Intended to implement active tabs change event and to regularize menu
+	 * items selection.
 	 */
 	@Override
 	public void onSelection(SelectionEvent<Widget> event) {

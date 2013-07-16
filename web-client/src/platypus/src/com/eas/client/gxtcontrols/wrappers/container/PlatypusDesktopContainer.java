@@ -31,72 +31,56 @@ public class PlatypusDesktopContainer extends Container {
 		return manager;
 	}
 
-	public void minimizeAll()
-	{
-		for(Widget wd : manager.getWindows())
-		{
-			if(wd instanceof PlatypusWindow)
-			{
-				PlatypusWindow pw = (PlatypusWindow)wd;
+	public void minimizeAll() {
+		for (Widget wd : manager.getWindows()) {
+			if (wd instanceof PlatypusWindow) {
+				PlatypusWindow pw = (PlatypusWindow) wd;
 				pw.minimize();
 			}
 		}
 	}
-	
-	public void maximizeAll()
-	{
-		for(Widget wd : manager.getWindows())
-		{
-			if(wd instanceof PlatypusWindow)
-			{
-				PlatypusWindow pw = (PlatypusWindow)wd;
+
+	public void maximizeAll() {
+		for (Widget wd : manager.getWindows()) {
+			if (wd instanceof PlatypusWindow) {
+				PlatypusWindow pw = (PlatypusWindow) wd;
 				pw.maximize();
 			}
 		}
 	}
-	
-	public void restoreAll()
-	{
-		for(Widget wd : manager.getWindows())
-		{
-			if(wd instanceof PlatypusWindow)
-			{
-				PlatypusWindow pw = (PlatypusWindow)wd;
+
+	public void restoreAll() {
+		for (Widget wd : manager.getWindows()) {
+			if (wd instanceof PlatypusWindow) {
+				PlatypusWindow pw = (PlatypusWindow) wd;
 				pw.restore();
 			}
 		}
 	}
-	
-	public void closeAll()
-	{
-		for(Widget wd : manager.getWindows().toArray(new Widget[]{}))
-		{
-			if(wd instanceof PlatypusWindow)
-			{
-				PlatypusWindow pw = (PlatypusWindow)wd;
+
+	public void closeAll() {
+		for (Widget wd : manager.getWindows().toArray(new Widget[] {})) {
+			if (wd instanceof PlatypusWindow) {
+				PlatypusWindow pw = (PlatypusWindow) wd;
 				pw.hide();
 			}
 		}
 	}
-	
-	public JavaScriptObject getForms()
-	{
-		JsArray<JavaScriptObject> modules = JavaScriptObject.createArray().cast(); 
-		for(Widget wd : manager.getWindows())
-		{
-			if(wd instanceof PlatypusWindow)
-			{
-				PlatypusWindow pw = (PlatypusWindow)wd;
+
+	public JavaScriptObject getForms() {
+		JsArray<JavaScriptObject> modules = JavaScriptObject.createArray().cast();
+		for (Widget wd : manager.getWindows()) {
+			if (wd instanceof PlatypusWindow) {
+				PlatypusWindow pw = (PlatypusWindow) wd;
 				Form form = pw.getForm();
-				if(form != null)
-				{
+				if (form != null) {
 					modules.push(form.getModule());
 				}
 			}
 		}
 		return modules;
 	}
-	
+
 	public Point getConsideredPosition() {
 		return consideredPosition;
 	}
