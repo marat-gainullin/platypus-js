@@ -27,7 +27,9 @@ import com.eas.client.gxtcontrols.wrappers.component.PlatypusLabel;
 import com.eas.client.gxtcontrols.wrappers.component.PlatypusPasswordField;
 import com.eas.client.gxtcontrols.wrappers.component.PlatypusProgressBar;
 import com.eas.client.gxtcontrols.wrappers.component.PlatypusSlider;
+import com.eas.client.gxtcontrols.wrappers.component.PlatypusSplitButton;
 import com.eas.client.gxtcontrols.wrappers.component.PlatypusTextArea;
+import com.eas.client.gxtcontrols.wrappers.component.PlatypusTextButton;
 import com.eas.client.gxtcontrols.wrappers.component.PlatypusTextField;
 import com.eas.client.gxtcontrols.wrappers.component.PlatypusToggleButton;
 import com.eas.client.gxtcontrols.wrappers.container.PlatypusBorderLayoutContainer;
@@ -461,13 +463,7 @@ public class GxtControlsFactory {
 	}
 
 	private Component createButton(Element aTag) throws Exception {
-		final TextButton component = new TextButton() {
-			@Override
-			protected void onRedraw() {
-				super.onRedraw();
-				ControlsUtils.reapplyStyle(this);
-			}
-		};
+		final TextButton component = new PlatypusTextButton();
 		processEvents(component, aTag);
 		PublishedComponent publishedComp = Publisher.publish(component);
 		if (aTag.hasAttribute("text"))
@@ -479,13 +475,7 @@ public class GxtControlsFactory {
 	}
 
 	private Component createDropDownButton(Element aTag) throws Exception {
-		final SplitButton component = new SplitButton() {
-			@Override
-			protected void onRedraw() {
-				super.onRedraw();
-				ControlsUtils.reapplyStyle(this);
-			}
-		};
+		final SplitButton component = new PlatypusSplitButton();
 		processEvents(component, aTag);
 		PublishedComponent publishedComp = Publisher.publish(component);
 		if (aTag.hasAttribute("text"))
@@ -614,13 +604,7 @@ public class GxtControlsFactory {
 	}
 
 	private Component createToggleButton(Element aTag) throws Exception {
-		PlatypusToggleButton component = new PlatypusToggleButton() {
-			@Override
-			protected void onRedraw() {
-				super.onRedraw();
-				ControlsUtils.reapplyStyle(this);
-			}
-		};
+		PlatypusToggleButton component = new PlatypusToggleButton();
 		processEvents(component, aTag);
 		PublishedComponent publishedComp = Publisher.publish(component);
 		if (aTag.hasAttribute("text"))

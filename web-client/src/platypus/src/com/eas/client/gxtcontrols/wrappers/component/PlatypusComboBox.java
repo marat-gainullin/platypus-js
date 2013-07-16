@@ -41,4 +41,5 @@ public class PlatypusComboBox extends ComboBox<Object> {
 			}
 		}
 	}
+	
 }

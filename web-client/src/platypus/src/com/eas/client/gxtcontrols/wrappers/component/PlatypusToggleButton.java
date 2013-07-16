@@ -1,5 +1,6 @@
 package com.eas.client.gxtcontrols.wrappers.component;
 
+import com.eas.client.gxtcontrols.ControlsUtils;
 import com.sencha.gxt.cell.core.client.form.ToggleButtonCell;
 import com.sencha.gxt.widget.core.client.Component;
 import com.sencha.gxt.widget.core.client.button.ToggleButton;
@@ -32,16 +33,15 @@ public class PlatypusToggleButton extends ToggleButton implements HasGroup {
 
 	@Override
 	public void mutateButtonGroup(PlatypusButtonGroup aGroup) {
-		if(group != aGroup)
-		{
-			if(group != null)
-				group.remove((Component)this);
+		if (group != aGroup) {
+			if (group != null)
+				group.remove((Component) this);
 			group = aGroup;
-			if(group != null)
-				group.add((Component)this);
+			if (group != null)
+				group.add((Component) this);
 		}
 	}
-	
+
 	@Override
 	public Boolean getValue() {
 		return super.getValue();
@@ -87,5 +87,11 @@ public class PlatypusToggleButton extends ToggleButton implements HasGroup {
 
 	public void setPlainValue(boolean aValue) {
 		setValue(aValue);
+	}
+
+	@Override
+	protected void onRedraw() {
+		super.onRedraw();
+		ControlsUtils.reapplyStyle(this);
 	}
 }
