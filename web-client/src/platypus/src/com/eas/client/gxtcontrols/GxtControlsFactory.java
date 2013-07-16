@@ -837,7 +837,11 @@ public class GxtControlsFactory {
 		final String widgetName = aTag.getAttribute(NAME_ATTRIBUTE);
 		if (widgetName != null)
 			aComponent.setData(Form.PID_DATA_KEY, widgetName);
-		aComponent.setId("pw-" + (++idCounter));
+		
+		if(widgetName != null && !widgetName.isEmpty())
+			aComponent.setId(widgetName);
+		else
+			aComponent.setId("pw-" + (++idCounter));
 
 		boolean visible = Utils.getBooleanAttribute(aTag, "visible", true);
 		if (!visible)
