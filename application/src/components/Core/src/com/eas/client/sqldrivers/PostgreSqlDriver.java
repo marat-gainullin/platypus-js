@@ -39,39 +39,128 @@ public class PostgreSqlDriver extends SqlDriver {
     protected static final String DEF_OTHER_TYPE_NAME = "point";
     protected static final String RENAME_FIELD_SQL_PREFIX = "alter table %s rename column %s to %s";
     protected static final String MODIFY_FIELD_SQL_PREFIX = "alter table %s alter ";
+//    public static final String SQL_TABLES = ""
+//            + "select"
+//            + " cl.relam amvalue,"
+//            + " am.amname,"
+//            + " cl.relname TABLE_NAME,"
+//            + " nsp.nspname TABLE_SCHEM,"
+//            + " (case cl.relkind when 'v' then '" + ClientConstants.JDBCPKS_TABLE_TYPE_VIEW + "' else '" + ClientConstants.JDBCPKS_TABLE_TYPE_TABLE + "' end) " + ClientConstants.JDBCPKS_TABLE_TYPE_FIELD_NAME + " "
+//            + "from pg_catalog.pg_namespace nsp"
+//            + " inner join pg_catalog.pg_class cl on (cl.relnamespace = nsp.oid)"
+//            + " left outer join pg_catalog.pg_am am on (cl.relam = am.oid) "
+//            + "where am.amname is null "
+//            + " and cl.relkind in ('v','r') ";
+//    public static final String SQL_SCHEMA_TABLES = ""
+//            + SQL_TABLES
+//            + "and Lower(nsp.nspname) = Lower('%s') "
+//            + "order by " + ClientConstants.JDBCCOLS_TABLE_SCHEM + "," + ClientConstants.JDBCCOLS_TABLE_NAME;
+//    protected static final String SQL_COLUMNS = ""
+//            + "SELECT"
+//            + " n.nspname as " + ClientConstants.JDBCCOLS_TABLE_SCHEM + ","
+//            + " c.relname as " + ClientConstants.JDBCCOLS_TABLE_NAME + ","
+//            + " a.attname as " + ClientConstants.JDBCCOLS_COLUMN_NAME + ","
+//            + " a.atttypid as " + ClientConstants.JDBCCOLS_DATA_TYPE + ","
+//            + " t.typname as " + ClientConstants.JDBCCOLS_TYPE_NAME + ","
+//            + " case a.attnotnull when true then 0 else 1 end as " + ClientConstants.JDBCCOLS_NULLABLE + ","
+//            + " a.atttypmod-4 as " + ClientConstants.JDBCCOLS_COLUMN_SIZE + ","
+//            + " a.attnum as ORDINAL_POSITION,"
+//            + " pg_catalog.pg_get_expr(def.adbin, def.adrelid) as adsrc,"
+//            + " dsc.description as " + ClientConstants.JDBCCOLS_REMARKS + ","
+//            + " t.typbasetype,t.typtype,"
+//            + " NULL as " + ClientConstants.JDBCCOLS_DECIMAL_DIGITS + ","
+//            + " NULL as " + ClientConstants.JDBCCOLS_NUM_PREC_RADIX + " "
+//            + "FROM pg_catalog.pg_namespace n"
+//            + "  JOIN pg_catalog.pg_class c ON (c.relnamespace = n.oid)"
+//            + "  JOIN pg_catalog.pg_attribute a ON (a.attrelid=c.oid)"
+//            + "  JOIN pg_catalog.pg_type t ON (a.atttypid = t.oid)"
+//            + "  LEFT JOIN pg_catalog.pg_attrdef def ON (a.attrelid=def.adrelid AND a.attnum = def.adnum)"
+//            + "  LEFT JOIN pg_catalog.pg_description dsc ON (c.oid=dsc.objoid AND a.attnum = dsc.objsubid)"
+//            + "  LEFT JOIN pg_catalog.pg_class dc ON (dc.oid=dsc.classoid AND dc.relname='pg_class')"
+//            + "  LEFT JOIN pg_catalog.pg_namespace dn ON (dc.relnamespace=dn.oid AND dn.nspname='pg_catalog') "
+//            + "WHERE a.attnum > 0 AND NOT a.attisdropped"
+//            + " AND Lower(n.nspname) = Lower('%s')"
+//            + " AND Lower(c.relname) in (%s) "
+//            + "ORDER BY n.nspname,c.relname,a.attnum";
+//    protected static final String SQL_COLUMNS_COMMENTS = SQL_COLUMNS;
+//    protected static final String SQL_PRIMARY_KEYS = ""
+//            + "SELECT"
+//            + " NULL AS TABLE_CAT,"
+//            + " n.nspname AS " + ClientConstants.JDBCCOLS_TABLE_SCHEM + ","
+//            + " ct.relname AS " + ClientConstants.JDBCCOLS_TABLE_NAME + ","
+//            + " a.attname AS " + ClientConstants.JDBCCOLS_COLUMN_NAME + ","
+//            + " a.attnum AS KEY_SEQ,"
+//            + " ci.relname AS " + ClientConstants.JDBCPKS_CONSTRAINT_NAME + " "
+//            + "FROM pg_catalog.pg_namespace n, pg_catalog.pg_class ct, pg_catalog.pg_class ci, pg_catalog.pg_attribute a, pg_catalog.pg_index i "
+//            + "WHERE ct.oid=i.indrelid AND ci.oid=i.indexrelid  AND a.attrelid=ci.oid AND i.indisprimary"
+//            + " AND ct.relnamespace = n.oid"
+//            + " AND Lower(n.nspname) = Lower('%s')"
+//            + " AND Lower(ct.relname) in (%s) "
+//            + "ORDER BY table_name, pk_name, key_seq";
+//    
+//    protected static final String SQL_FOREIGN_KEYS = "SELECT"
+//            + " NULL::text AS PKTABLE_CAT,"
+//            + " pkn.nspname AS " + ClientConstants.JDBCFKS_FKPKTABLE_SCHEM + ","
+//            + " pkc.relname AS " + ClientConstants.JDBCFKS_FKPKTABLE_NAME + ","
+//            + " pka.attname AS " + ClientConstants.JDBCFKS_FKPKCOLUMN_NAME + ","
+//            + " NULL::text AS FKTABLE_CAT,"
+//            + " fkn.nspname AS " + ClientConstants.JDBCFKS_FKTABLE_SCHEM + ","
+//            + " fkc.relname AS " + ClientConstants.JDBCFKS_FKTABLE_NAME + ","
+//            + " fka.attname AS " + ClientConstants.JDBCFKS_FKCOLUMN_NAME + ","
+//            + " pos.n AS KEY_SEQ,"
+//            + " CASE con.confupdtype WHEN 'c' THEN 0 WHEN 'n' THEN 2 WHEN 'd' THEN 4 WHEN 'r' THEN 1 WHEN 'a' THEN 3 ELSE NULL END AS " + ClientConstants.JDBCFKS_FKUPDATE_RULE + ","
+//            + " CASE con.confdeltype  WHEN 'c' THEN 0 WHEN 'n' THEN 2 WHEN 'd' THEN 4 WHEN 'r' THEN 1 WHEN 'a' THEN 3 ELSE NULL END AS " + ClientConstants.JDBCFKS_FKDELETE_RULE + ","
+//            + " con.conname AS " + ClientConstants.JDBCFKS_FK_NAME + ","
+//            + " pkic.relname AS " + ClientConstants.JDBCFKS_FKPK_NAME + ","
+//            + " CASE  WHEN con.condeferrable AND con.condeferred THEN 5 WHEN con.condeferrable THEN 6 ELSE 7 END AS " + ClientConstants.JDBCFKS_FKDEFERRABILITY + " "
+//            + "FROM  pg_catalog.pg_namespace pkn, pg_catalog.pg_class pkc, pg_catalog.pg_attribute pka,"
+//            + " pg_catalog.pg_namespace fkn, pg_catalog.pg_class fkc, pg_catalog.pg_attribute fka,  pg_catalog.pg_constraint con,"
+//            + " pg_catalog.generate_series(1, 32) pos(n),  pg_catalog.pg_depend dep, pg_catalog.pg_class pkic "
+//            + "WHERE pkn.oid = pkc.relnamespace AND pkc.oid = pka.attrelid AND pka.attnum = con.confkey[pos.n]"
+//            + " AND con.confrelid = pkc.oid  AND fkn.oid = fkc.relnamespace AND fkc.oid = fka.attrelid AND fka.attnum = con.conkey[pos.n]"
+//            + " AND con.conrelid = fkc.oid  AND con.contype = 'f' AND con.oid = dep.objid AND pkic.oid = dep.refobjid"
+//            + " AND pkic.relkind = 'i' AND dep.classid = 'pg_constraint'::regclass::oid AND dep.refclassid = 'pg_class'::regclass::oid"
+//            + " AND Lower(fkn.nspname) = Lower('%s')  AND Lower(fkc.relname) in (%s) "
+//            + "ORDER BY pkn.nspname,pkc.relname,pos.n";
     public static final String SQL_TABLES = ""
-            + "select"
-            + " cl.relam amvalue,"
-            + " am.amname,"
-            + " cl.relname TABLE_NAME,"
-            + " nsp.nspname TABLE_SCHEM,"
-            + " (case cl.relkind when 'v' then '" + ClientConstants.JDBCPKS_TABLE_TYPE_VIEW + "' else '" + ClientConstants.JDBCPKS_TABLE_TYPE_TABLE + "' end) " + ClientConstants.JDBCPKS_TABLE_TYPE_FIELD_NAME + " "
-            + "from pg_catalog.pg_namespace nsp"
-            + " inner join pg_catalog.pg_class cl on (cl.relnamespace = nsp.oid)"
-            + " left outer join pg_catalog.pg_am am on (cl.relam = am.oid) "
-            + "where am.amname is null ";
+            + "SELECT"
+            + " table_catalog,"
+            + " table_schema AS " + ClientConstants.JDBCCOLS_TABLE_SCHEM + ","
+            + " table_name AS " + ClientConstants.JDBCCOLS_TABLE_NAME + ","
+            + " (CASE WHEN table_type = 'BASE TABLE' THEN 'TABLE' ELSE table_type END) AS " + ClientConstants.JDBCPKS_TABLE_TYPE_FIELD_NAME + " "
+            //+ " null' as " + ClientConstants.JDBCCOLS_REMARKS + " "
+            + "FROM information_schema.tables";
     public static final String SQL_SCHEMA_TABLES = ""
             + SQL_TABLES
-            + "and Lower(nsp.nspname) = Lower('%s') "
-            + "order by " + ClientConstants.JDBCCOLS_TABLE_SCHEM + "," + ClientConstants.JDBCCOLS_TABLE_NAME;
+            + " WHERE Lower(table_schema)  = Lower('%s') "
+            + "ORDER BY " + ClientConstants.JDBCCOLS_TABLE_SCHEM + "," + ClientConstants.JDBCCOLS_TABLE_NAME;
     public static final String SQL_SCHEMAS = ""
             + "select nsp.nspname as " + ClientConstants.JDBCCOLS_TABLE_SCHEM + " from pg_catalog.pg_namespace nsp "
             + "order by " + ClientConstants.JDBCCOLS_TABLE_SCHEM;
     protected static final String SQL_COLUMNS = ""
             + "SELECT"
-            + " n.nspname as " + ClientConstants.JDBCCOLS_TABLE_SCHEM + ","
-            + " c.relname as " + ClientConstants.JDBCCOLS_TABLE_NAME + ","
-            + " a.attname as " + ClientConstants.JDBCCOLS_COLUMN_NAME + ","
-            + " a.atttypid as " + ClientConstants.JDBCCOLS_DATA_TYPE + ","
-            + " t.typname as " + ClientConstants.JDBCCOLS_TYPE_NAME + ","
-            + " case a.attnotnull when true then 0 else 1 end as " + ClientConstants.JDBCCOLS_NULLABLE + ","
-            + " a.atttypmod-4 as " + ClientConstants.JDBCCOLS_COLUMN_SIZE + ","
-            + " a.attnum as ORDINAL_POSITION,"
-            + " pg_catalog.pg_get_expr(def.adbin, def.adrelid) as adsrc,"
-            + " dsc.description as " + ClientConstants.JDBCCOLS_REMARKS + ","
-            + " t.typbasetype,t.typtype,"
-            + " NULL as " + ClientConstants.JDBCCOLS_DECIMAL_DIGITS + ","
-            + " NULL as " + ClientConstants.JDBCCOLS_NUM_PREC_RADIX + " "
+            + " table_catalog,"
+            + " table_schema AS " + ClientConstants.JDBCCOLS_TABLE_SCHEM + ","
+            + " table_name AS " + ClientConstants.JDBCCOLS_TABLE_NAME + ","
+            + " column_name AS " + ClientConstants.JDBCCOLS_COLUMN_NAME + ","
+            + " udt_name AS " + ClientConstants.JDBCCOLS_TYPE_NAME + ","
+            + " NULL AS " + ClientConstants.JDBCCOLS_DATA_TYPE + ","
+            + " (CASE WHEN numeric_precision IS NOT NULL THEN numeric_precision ELSE character_maximum_length END) AS " + ClientConstants.JDBCCOLS_COLUMN_SIZE + ","
+            + " (CASE WHEN is_nullable = 'YES' THEN 1 ELSE 0 END) AS " + ClientConstants.JDBCCOLS_NULLABLE + ","
+            + " numeric_scale AS " + ClientConstants.JDBCCOLS_DECIMAL_DIGITS + ","
+            + " 10 AS " + ClientConstants.JDBCCOLS_NUM_PREC_RADIX + ","
+            + " ordinal_position AS " + ClientConstants.JDBCIDX_ORDINAL_POSITION + ","
+            + " column_default "
+            //+ " null as " + ClientConstants.JDBCCOLS_REMARKS + " "
+            + "FROM information_schema.COLUMNS "
+            + "WHERE Lower(table_schema) = Lower('%s') AND Lower(table_name) IN (%s) "
+            + "ORDER BY table_schema, table_name, ordinal_position";
+    protected static final String SQL_COLUMNS_COMMENTS = ""
+            + "SELECT"
+            + " n.nspname AS " + ClientConstants.JDBCCOLS_TABLE_SCHEM + ","
+            + " c.relname AS " + ClientConstants.JDBCCOLS_TABLE_NAME + ","
+            + " a.attname AS " + ClientConstants.JDBCCOLS_COLUMN_NAME + ","
+            + " dsc.description AS " + ClientConstants.JDBCCOLS_REMARKS + " "
             + "FROM pg_catalog.pg_namespace n"
             + "  JOIN pg_catalog.pg_class c ON (c.relnamespace = n.oid)"
             + "  JOIN pg_catalog.pg_attribute a ON (a.attrelid=c.oid)"
@@ -86,42 +175,53 @@ public class PostgreSqlDriver extends SqlDriver {
             + "ORDER BY n.nspname,c.relname,a.attnum";
     protected static final String SQL_PRIMARY_KEYS = ""
             + "SELECT"
-            + " NULL AS TABLE_CAT,"
-            + " n.nspname AS " + ClientConstants.JDBCCOLS_TABLE_SCHEM + ","
-            + " ct.relname AS " + ClientConstants.JDBCCOLS_TABLE_NAME + ","
-            + " a.attname AS " + ClientConstants.JDBCCOLS_COLUMN_NAME + ","
-            + " a.attnum AS KEY_SEQ,"
-            + " ci.relname AS " + ClientConstants.JDBCPKS_CONSTRAINT_NAME + " "
-            + "FROM pg_catalog.pg_namespace n, pg_catalog.pg_class ct, pg_catalog.pg_class ci, pg_catalog.pg_attribute a, pg_catalog.pg_index i "
-            + "WHERE ct.oid=i.indrelid AND ci.oid=i.indexrelid  AND a.attrelid=ci.oid AND i.indisprimary"
-            + " AND ct.relnamespace = n.oid"
-            + " AND Lower(n.nspname) = Lower('%s')"
-            + " AND Lower(ct.relname) in (%s) "
-            + "ORDER BY table_name, pk_name, key_seq";
-    protected static final String SQL_FOREIGN_KEYS = "SELECT"
-            + " NULL::text AS PKTABLE_CAT,"
-            + " pkn.nspname AS " + ClientConstants.JDBCFKS_FKPKTABLE_SCHEM + ","
-            + " pkc.relname AS " + ClientConstants.JDBCFKS_FKPKTABLE_NAME + ","
-            + " pka.attname AS " + ClientConstants.JDBCFKS_FKPKCOLUMN_NAME + ","
-            + " NULL::text AS FKTABLE_CAT,"
-            + " fkn.nspname AS " + ClientConstants.JDBCFKS_FKTABLE_SCHEM + ","
-            + " fkc.relname AS " + ClientConstants.JDBCFKS_FKTABLE_NAME + ","
-            + " fka.attname AS " + ClientConstants.JDBCFKS_FKCOLUMN_NAME + ","
-            + " pos.n AS KEY_SEQ,"
-            + " CASE con.confupdtype WHEN 'c' THEN 0 WHEN 'n' THEN 2 WHEN 'd' THEN 4 WHEN 'r' THEN 1 WHEN 'a' THEN 3 ELSE NULL END AS " + ClientConstants.JDBCFKS_FKUPDATE_RULE + ","
-            + " CASE con.confdeltype  WHEN 'c' THEN 0 WHEN 'n' THEN 2 WHEN 'd' THEN 4 WHEN 'r' THEN 1 WHEN 'a' THEN 3 ELSE NULL END AS " + ClientConstants.JDBCFKS_FKDELETE_RULE + ","
-            + " con.conname AS " + ClientConstants.JDBCFKS_FK_NAME + ","
-            + " pkic.relname AS " + ClientConstants.JDBCFKS_FKPK_NAME + ","
-            + " CASE  WHEN con.condeferrable AND con.condeferred THEN 5 WHEN con.condeferrable THEN 6 ELSE 7 END AS " + ClientConstants.JDBCFKS_FKDEFERRABILITY + " "
-            + "FROM  pg_catalog.pg_namespace pkn, pg_catalog.pg_class pkc, pg_catalog.pg_attribute pka,"
-            + " pg_catalog.pg_namespace fkn, pg_catalog.pg_class fkc, pg_catalog.pg_attribute fka,  pg_catalog.pg_constraint con,"
-            + " pg_catalog.generate_series(1, 32) pos(n),  pg_catalog.pg_depend dep, pg_catalog.pg_class pkic "
-            + "WHERE pkn.oid = pkc.relnamespace AND pkc.oid = pka.attrelid AND pka.attnum = con.confkey[pos.n]"
-            + " AND con.confrelid = pkc.oid  AND fkn.oid = fkc.relnamespace AND fkc.oid = fka.attrelid AND fka.attnum = con.conkey[pos.n]"
-            + " AND con.conrelid = fkc.oid  AND con.contype = 'f' AND con.oid = dep.objid AND pkic.oid = dep.refobjid"
-            + " AND pkic.relkind = 'i' AND dep.classid = 'pg_constraint'::regclass::oid AND dep.refclassid = 'pg_class'::regclass::oid"
-            + " AND Lower(fkn.nspname) = Lower('%s')  AND Lower(fkc.relname) in (%s) "
-            + "ORDER BY pkn.nspname,pkc.relname,pos.n";
+            + " tc.table_catalog,"
+            + " tc.table_schema AS " + ClientConstants.JDBCPKS_TABLE_SCHEM + ","
+            + " tc.table_name AS " + ClientConstants.JDBCPKS_TABLE_NAME + ","
+            + " tcc.column_name AS " + ClientConstants.JDBCPKS_COLUMN_NAME + ","
+            + " tcc.ordinal_position AS KEY_SEQ,"
+            + " tcc.constraint_name AS " + ClientConstants.JDBCPKS_CONSTRAINT_NAME + " "
+            + "FROM information_schema.table_constraints tc"
+            + " INNER JOIN information_schema.key_column_usage tcc"
+            + "   ON tc.table_catalog = tcc.table_catalog"
+            + "   AND tc.table_schema = tcc.table_schema"
+            + "   AND tc.table_name = tcc.table_name"
+            + "   AND tc.constraint_name = tcc.constraint_name "
+            + "WHERE tc.constraint_type = 'PRIMARY KEY' AND Lower(tc.table_schema) = Lower('%s') AND Lower(tc.table_name) IN (%s) "
+            + "ORDER BY tc.table_schema, tcc.constraint_name, tcc.ordinal_position";
+    protected static final String SQL_FOREIGN_KEYS = ""
+            + "SELECT"
+            + " rc.unique_constraint_catalog,"
+            + " rc.unique_constraint_schema AS " + ClientConstants.JDBCFKS_FKPKTABLE_SCHEM + ","
+            + " key_pk.table_name AS " + ClientConstants.JDBCFKS_FKPKTABLE_NAME + ","
+            + " rc.unique_constraint_name AS " + ClientConstants.JDBCFKS_FKPK_NAME + ","
+            + " key_pk.column_name AS " + ClientConstants.JDBCFKS_FKPKCOLUMN_NAME + ","
+            + " rc.constraint_catalog,"
+            + " rc.constraint_schema AS " + ClientConstants.JDBCFKS_FKTABLE_SCHEM + ","
+            + " key_fk.table_name AS " + ClientConstants.JDBCFKS_FKTABLE_NAME + ","
+            + " rc.constraint_name AS " + ClientConstants.JDBCFKS_FK_NAME + ","
+            + " key_fk.column_name AS " + ClientConstants.JDBCFKS_FKCOLUMN_NAME + ","
+            + " key_fk.position_in_unique_constraint AS KEY_SEQ,"
+            + " (CASE WHEN rc.update_rule = 'CASCADE' THEN 0 WHEN rc.update_rule = 'SET NULL' THEN 2 WHEN rc.update_rule = 'NO ACTION' THEN 3 WHEN rc.update_rule = 'SET DEFAULT' THEN 4 ELSE 1 end) AS " + ClientConstants.JDBCFKS_FKUPDATE_RULE + ","
+            + " (CASE WHEN rc.delete_rule = 'CASCADE' THEN 0 WHEN rc.delete_rule = 'SET NULL' THEN 2 WHEN rc.delete_rule = 'NO ACTION' THEN 3  WHEN rc.delete_rule = 'SET DEFAULT' THEN 4 ELSE 1 end) AS " + ClientConstants.JDBCFKS_FKDELETE_RULE + ","
+            + " (CASE WHEN tc.initially_deferred = 'YES' THEN 5 WHEN tc.is_deferrable = 'YES' THEN 6 ELSE 7 END) AS " + ClientConstants.JDBCFKS_FKDEFERRABILITY + " "
+            + "FROM information_schema.referential_constraints rc"
+            + " INNER JOIN information_schema.key_column_usage key_pk"
+            + "  ON rc.unique_constraint_catalog = key_pk.constraint_catalog"
+            + "  AND rc.unique_constraint_schema = key_pk.constraint_schema"
+            + "  AND rc.unique_constraint_name = key_pk.constraint_name"
+            + " INNER JOIN information_schema.key_column_usage key_fk"
+            + "  ON rc.constraint_catalog = key_fk.constraint_catalog"
+            + "  AND rc.constraint_schema = key_fk.constraint_schema"
+            + "  AND rc.constraint_name = key_fk.constraint_name"
+            + "  AND key_fk.position_in_unique_constraint = key_pk.ordinal_position"
+            + " INNER JOIN information_schema.table_constraints tc"
+            + "  ON tc.constraint_catalog = key_fk.constraint_catalog"
+            + "  AND tc.constraint_schema = key_fk.constraint_schema"
+            + "  AND tc.constraint_name = key_fk.constraint_name"
+            + "  AND tc.constraint_type = 'FOREIGN KEY' "
+            + "WHERE Lower(rc.constraint_schema) = Lower('%s')  AND Lower(key_fk.table_name) in (%s) "
+            + "ORDER BY rc.constraint_catalog, rc.constraint_schema, key_fk.table_name, rc.constraint_name, key_fk.position_in_unique_constraint";
     protected static final String SQL_INDEX_KEYS = ""
             + "SELECT"
             + " NULL AS TABLE_CAT,"
@@ -144,7 +244,6 @@ public class PostgreSqlDriver extends SqlDriver {
             + "WHERE ct.oid=i.indrelid AND ci.oid=i.indexrelid AND a.attrelid=ci.oid AND ci.relam=am.oid"
             + " AND n.oid = ct.relnamespace  AND Lower(n.nspname) = Lower('%s') AND Lower(ct.relname) in (%s) "
             + "ORDER BY NON_UNIQUE, TYPE, INDEX_NAME, ORDINAL_POSITION";
-    protected static final String SQL_COLUMNS_COMMENTS = SQL_COLUMNS;
     protected static final String SQL_TABLE_COMMENTS = ""
             + "SELECT"
             + " n.nspname as  " + ClientConstants.JDBCCOLS_TABLE_SCHEM + ","
@@ -404,20 +503,21 @@ public class PostgreSqlDriver extends SqlDriver {
 
     private String getFieldTypeDefinition(Field aField) {
         resolver.resolve2RDBMS(aField);
-        String typeName = aField.getTypeInfo().getSqlTypeName().toLowerCase();
-        int sqlType = aField.getTypeInfo().getSqlType();
+        String typeDefine = "";
+        String sqlTypeName = aField.getTypeInfo().getSqlTypeName().toLowerCase();
         // field length
         int size = aField.getSize();
         int scale = aField.getScale();
 
-        if (resolver.isScaled(sqlType) && resolver.isSized(sqlType) && size > 0) {
-            typeName += "(" + String.valueOf(size) + "," + String.valueOf(scale) + ")";
+        typeDefine += sqlTypeName;
+        if (resolver.isScaled(sqlTypeName) && resolver.isSized(sqlTypeName) && size > 0) {
+            typeDefine += "(" + String.valueOf(size) + "," + String.valueOf(scale) + ")";
         } else {
-            if (resolver.isSized(sqlType) && size > 0) {
-                typeName += "(" + String.valueOf(size) + ")";
+            if (resolver.isSized(sqlTypeName) && size > 0) {
+                typeDefine += "(" + String.valueOf(size) + ")";
             }
         }
-        return typeName;
+        return typeDefine;
     }
 
     /**
@@ -449,7 +549,6 @@ public class PostgreSqlDriver extends SqlDriver {
         String fieldDefination = getFieldTypeDefinition(newFieldMd);
 
         DataTypeInfo newTypeInfo = newFieldMd.getTypeInfo();
-        int newSqlType = newTypeInfo.getSqlType();
         String newSqlTypeName = newTypeInfo.getSqlTypeName();
         if (newSqlTypeName == null) {
             newSqlTypeName = "";
@@ -459,7 +558,6 @@ public class PostgreSqlDriver extends SqlDriver {
         boolean newNullable = newFieldMd.isNullable();
 
         DataTypeInfo oldTypeInfo = aOldFieldMd.getTypeInfo();
-        int oldSqlType = oldTypeInfo.getSqlType();
         String oldSqlTypeName = oldTypeInfo.getSqlTypeName();
         if (oldSqlTypeName == null) {
             oldSqlTypeName = "";
@@ -468,9 +566,9 @@ public class PostgreSqlDriver extends SqlDriver {
         int oldSize = aOldFieldMd.getSize();
         boolean oldNullable = aOldFieldMd.isNullable();
 
-        if (newSqlType != oldSqlType
-                || (resolver.isSized(newSqlType) && newSize != oldSize)
-                || (resolver.isScaled(newSqlType) && newScale != oldScale)) {
+        if (!newSqlTypeName.equalsIgnoreCase(oldSqlTypeName)
+                || (resolver.isSized(newSqlTypeName) && newSize != oldSize)
+                || (resolver.isScaled(newSqlTypeName) && newScale != oldScale)) {
             sqls.add(String.format(COMMIT_DDL_CLAUSE, updateDefinition + " type " + fieldDefination + " using " + fieldName + "::" + newSqlTypeName));
         }
         if (oldNullable != newNullable) {

@@ -23,16 +23,14 @@ public class MsSqlTypesResolver extends TypesResolver {
     protected static final Map<Integer, DataTypeInfo> jdbcToRDBMS = new HashMap<>();
     protected static final Map<Integer, String> jdbcTypes2RdbmsTypes = new HashMap<>();
     protected static final Map<String, Integer> rdbmsTypes2JdbcTypes = new HashMap<>();
-    protected static final Set<Integer> jdbcTypesWithSize = new HashSet<>();
-    protected static final Set<Integer> jdbcTypesWithScale = new HashSet<>();
     public static final int NON_JDBC_LONG_STRING = 258;
     public static final int NON_JDBC_MEDIUM_STRING = 259;
     public static final int NON_JDBC_MEMO_STRING = 260;
     public static final int NON_JDBC_SHORT_STRING = 261;
-    private static final Map<Integer, Integer> jdbcTypesMaxSize = new HashMap<>();
-    private static final Map<Integer, Integer> jdbcTypesDefaultSize = new HashMap<>();
-    private static final List<Integer> characterTypesOrder = new ArrayList<>();
-    private static final List<Integer> binaryTypesOrder = new ArrayList<>();
+    protected static final Set<String> jdbcTypesWithSize = new HashSet<>();
+    protected static final Set<String> jdbcTypesWithScale = new HashSet<>();
+    private static final Map<String, Integer> jdbcTypesMaxSize = new HashMap<>();
+    private static final Map<String, Integer> jdbcTypesDefaultSize = new HashMap<>();
 
     static {
         // supported types at whole. This is inverse mapping, see EasMsSqlSqlDriver for straight mapping.
@@ -68,13 +66,13 @@ public class MsSqlTypesResolver extends TypesResolver {
         jdbcTypes2RdbmsTypes.put(Types.LONGVARBINARY, "image");
         jdbcTypes2RdbmsTypes.put(Types.BOOLEAN, "int");
         jdbcTypes2RdbmsTypes.put(Types.LONGNVARCHAR, "text");
-        jdbcTypes2RdbmsTypes.put(Types.NCLOB, "text");
+        jdbcTypes2RdbmsTypes.put(Types.NCLOB, "ntext");
         jdbcTypes2RdbmsTypes.put(Types.SQLXML, "text");
 
         // supported types at whole. see MsSqlTypesResolver for inverse mapping
         rdbmsTypes2JdbcTypes.put("image", Types.BLOB);
         rdbmsTypes2JdbcTypes.put("text", Types.CLOB);
-        rdbmsTypes2JdbcTypes.put("ntext", Types.CLOB);
+        rdbmsTypes2JdbcTypes.put("ntext", Types.NCLOB);
         rdbmsTypes2JdbcTypes.put("uniqueidentifier", Types.VARCHAR);
         rdbmsTypes2JdbcTypes.put("smallint", Types.SMALLINT);
         rdbmsTypes2JdbcTypes.put("tinyint", Types.TINYINT);
@@ -97,11 +95,11 @@ public class MsSqlTypesResolver extends TypesResolver {
         rdbmsTypes2JdbcTypes.put("tinyint identity", Types.TINYINT);
         rdbmsTypes2JdbcTypes.put("bigint identity", Types.BIGINT);
         rdbmsTypes2JdbcTypes.put("binary", Types.BINARY);
-        rdbmsTypes2JdbcTypes.put("timestamp", Types.BINARY); //????????!!!!!!
+//        rdbmsTypes2JdbcTypes.put("timestamp", Types.BINARY); //????????!!!!!!
         rdbmsTypes2JdbcTypes.put("char", Types.CHAR);
         rdbmsTypes2JdbcTypes.put("nchar", Types.NCHAR);
-        rdbmsTypes2JdbcTypes.put("numeric() identity", Types.NUMERIC);
-        rdbmsTypes2JdbcTypes.put("decimal() identity", Types.DECIMAL);
+        rdbmsTypes2JdbcTypes.put("numeric identity", Types.NUMERIC);
+        rdbmsTypes2JdbcTypes.put("decimal identity", Types.DECIMAL);
         rdbmsTypes2JdbcTypes.put("int identity", Types.INTEGER);
         rdbmsTypes2JdbcTypes.put("smallint identity", Types.SMALLINT);
         rdbmsTypes2JdbcTypes.put("sysname", Types.NVARCHAR);
@@ -111,40 +109,30 @@ public class MsSqlTypesResolver extends TypesResolver {
         //jdbcTypesWithScale.add(Types.DECIMAL);
 
         //typeName(M)
-        jdbcTypesWithSize.add(Types.CHAR);
-        jdbcTypesWithSize.add(Types.VARCHAR);
-        jdbcTypesWithSize.add(Types.NCHAR);
-        jdbcTypesWithSize.add(Types.NVARCHAR);
-        jdbcTypesWithSize.add(Types.BINARY);
-        jdbcTypesWithSize.add(Types.VARBINARY);
+        jdbcTypesWithSize.add("char");
+        jdbcTypesWithSize.add("varchar");
+        jdbcTypesWithSize.add("nchar");
+        jdbcTypesWithSize.add("nvarchar");
+        jdbcTypesWithSize.add("binary");
+        jdbcTypesWithSize.add("varbinary");
 
 
         // max sizes for types
-        jdbcTypesMaxSize.put(Types.CHAR, 8000);
-        jdbcTypesMaxSize.put(Types.NCHAR, 4000);
-        jdbcTypesMaxSize.put(Types.VARCHAR, 8000);
-        jdbcTypesMaxSize.put(Types.NVARCHAR, 4000);
-        jdbcTypesMaxSize.put(Types.BINARY, 8000);
-        jdbcTypesMaxSize.put(Types.VARBINARY, 8000);
+        jdbcTypesMaxSize.put("char", 8000);
+        jdbcTypesMaxSize.put("nchar", 4000);
+        jdbcTypesMaxSize.put("varchar", 8000);
+        jdbcTypesMaxSize.put("nvarchar", 4000);
+        jdbcTypesMaxSize.put("binary", 8000);
+        jdbcTypesMaxSize.put("varbinary", 8000);
 
         // default sizes for types ??????????????????????????????????????????????
-        jdbcTypesDefaultSize.put(Types.CHAR, 1);
-        jdbcTypesDefaultSize.put(Types.NCHAR, 1);
-        jdbcTypesDefaultSize.put(Types.VARCHAR, 200);
-        jdbcTypesDefaultSize.put(Types.NVARCHAR, 200);
-        jdbcTypesDefaultSize.put(Types.BINARY, 1);
-        jdbcTypesDefaultSize.put(Types.VARBINARY, 200);
+        jdbcTypesDefaultSize.put("char", 1);
+        jdbcTypesDefaultSize.put("nchar", 1);
+        jdbcTypesDefaultSize.put("varchar", 200);
+        jdbcTypesDefaultSize.put("nvarchar", 200);
+        jdbcTypesDefaultSize.put("binary", 1);
+        jdbcTypesDefaultSize.put("varbinary", 200);
 
-        // порядок замены символьных типов, если требуется размер больше исходного
-        characterTypesOrder.add(Types.CHAR);
-        characterTypesOrder.add(Types.NCHAR);
-        characterTypesOrder.add(Types.VARCHAR);
-        characterTypesOrder.add(Types.NVARCHAR);
-        characterTypesOrder.add(Types.CLOB);
-
-        binaryTypesOrder.add(Types.BINARY);
-        binaryTypesOrder.add(Types.VARBINARY);
-        binaryTypesOrder.add(Types.BLOB);
     }
 
     @Override
@@ -183,13 +171,15 @@ public class MsSqlTypesResolver extends TypesResolver {
     }
 
     @Override
-    public boolean isSized(Integer aSqlType) {
-        return jdbcTypesWithSize.contains(aSqlType);
+    public boolean isSized(String aSqlTypeName) {
+        String sqlTypeName = aSqlTypeName.toLowerCase();
+        return jdbcTypesWithSize.contains(sqlTypeName);
     }
 
     @Override
-    public boolean isScaled(Integer aSqlType) {
-        return jdbcTypesWithScale.contains(aSqlType);
+    public boolean isScaled(String aSqlTypeName) {
+        String sqlTypeName = aSqlTypeName.toLowerCase();
+        return jdbcTypesWithScale.contains(sqlTypeName);
     }
 
     @Override
@@ -198,22 +188,40 @@ public class MsSqlTypesResolver extends TypesResolver {
     }
 
     @Override
-    public Map<Integer, Integer> getJdbcTypesMaxSize() {
-        return jdbcTypesMaxSize;
+    public boolean containsRDBMSTypename(String aTypeName) {
+        assert aTypeName != null;
+        return rdbmsTypes2JdbcTypes.containsKey(aTypeName.toLowerCase());
     }
 
     @Override
-    public Map<Integer, Integer> getJdbcTypesDefaultSize() {
-        return jdbcTypesDefaultSize;
-    }
-
-    @Override
-    public List<Integer> getCharacterTypesOrder() {
-        return characterTypesOrder;
-    }
-
-    @Override
-    public List<Integer> getBinaryTypesOrder() {
-        return binaryTypesOrder;
+    public void resolveFieldSize(Field aField) {
+        DataTypeInfo typeInfo = aField.getTypeInfo();
+        int sqlType = typeInfo.getSqlType();
+        String sqlTypeName = typeInfo.getSqlTypeName();
+        sqlTypeName = sqlTypeName.toLowerCase();
+        // check on max size
+        int fieldSize = aField.getSize();
+        Integer maxSize = jdbcTypesMaxSize.get(sqlTypeName);
+        if (maxSize != null && maxSize < fieldSize) {
+            List<Integer> typesOrder = getTypesOrder(sqlType);
+            if (typesOrder != null) {
+                for (int i = typesOrder.indexOf(sqlType); i < typesOrder.size(); i++) {
+                    sqlType = typesOrder.get(i);
+                    sqlTypeName = jdbcTypes2RdbmsTypes.get(sqlType);
+                    maxSize = jdbcTypesMaxSize.get(sqlTypeName);
+                    if (maxSize != null && maxSize >= fieldSize) {
+                        break;
+                    }
+                }
+            }
+            if (maxSize != null && maxSize < fieldSize) {
+                aField.setSize(maxSize);
+            }
+        }
+        aField.setTypeInfo(new DataTypeInfo(sqlType, sqlTypeName, typeInfo.getJavaClassName()));
+        // check on default size
+        if (fieldSize <= 0 && jdbcTypesDefaultSize.containsKey(sqlTypeName)) {
+            aField.setSize(jdbcTypesDefaultSize.get(sqlTypeName));
+        }
     }
 }

@@ -89,11 +89,11 @@ public class MetadataMerger {
         mdCache = client.getDbMetadataCache(null);
         driver = mdCache.getConnectionDriver();
         dSchema = mdCache.getConnectionSchema();
-        
+
         systemLogger = aSystemLogger;
         sqlLogger = aSqlLogger;
         errorLogger = aErrorLogger;
-        
+
         if (createSqlsList) {
             sqlsList = new ArrayList<>();
         }
@@ -260,10 +260,10 @@ public class MetadataMerger {
                         processed = true;
                     } else {
                         // check for modify field
-                        int sqlType = dField.getTypeInfo().getSqlType();
+                        String sqlTypeName = dField.getTypeInfo().getSqlTypeName();
                         Field sFieldCopy = sField.copy();
                         dTypesResolver.resolve2RDBMS(sFieldCopy);
-                        if (!MetadataUtils.isSameField(sFieldCopy, dField, dTypesResolver.isSized(sqlType), dTypesResolver.isScaled(sqlType), oneDialect)) {
+                        if (!MetadataUtils.isSameField(sFieldCopy, dField, dTypesResolver.isSized(sqlTypeName), dTypesResolver.isScaled(sqlTypeName), oneDialect)) {
                             changedFieldNames.add(fieldNameUpper);
                         }
                     }
@@ -892,13 +892,13 @@ public class MetadataMerger {
         return sqlsList;
     }
 
-    private void log (Level aLogLevel, String aMessage) {
+    private void log(Level aLogLevel, String aMessage) {
         if (systemLogger != null) {
             systemLogger.log(aLogLevel, aMessage);
         }
     }
-    
-    private void log (Level aLogLevel, String aMessage, Throwable aThrown) {
+
+    private void log(Level aLogLevel, String aMessage, Throwable aThrown) {
         if (systemLogger != null) {
             systemLogger.log(aLogLevel, aMessage, aThrown);
         }

@@ -24,13 +24,11 @@ public class MySqlTypesResolver extends TypesResolver {
     protected static final Map<Integer, String> jdbcTypes2RdbmsTypes = new HashMap<>();
     protected static final Map<String, Integer> rdbmsTypes2JdbcTypes = new HashMap<>();
     protected static final Set<String> gisTypes = new HashSet<>();
-    protected static final Set<Integer> jdbcTypesWithSize = new HashSet<>();
-    protected static final Set<Integer> jdbcTypesWithScale = new HashSet<>();
     protected static final int MAXIMUM_NUMBERS_PRECISION = 65;
-    private static final Map<Integer, Integer> jdbcTypesMaxSize = new HashMap<>();
-    private static final Map<Integer, Integer> jdbcTypesDefaultSize = new HashMap<>();
-    private static final List<Integer> characterTypesOrder = new ArrayList<>();
-    private static final List<Integer> binaryTypesOrder = new ArrayList<>();
+    protected static final Set<String> jdbcTypesWithSize = new HashSet<>();
+    protected static final Set<String> jdbcTypesWithScale = new HashSet<>();
+    private static final Map<String, Integer> jdbcTypesMaxSize = new HashMap<>();
+    private static final Map<String, Integer> jdbcTypesDefaultSize = new HashMap<>();
 
     static {
 
@@ -65,6 +63,7 @@ public class MySqlTypesResolver extends TypesResolver {
         rdbmsTypes2JdbcTypes.put("char", Types.CHAR);
         rdbmsTypes2JdbcTypes.put("varchar", Types.VARCHAR);
         rdbmsTypes2JdbcTypes.put("tinytext", Types.LONGVARCHAR);
+        rdbmsTypes2JdbcTypes.put("long varchar", Types.LONGVARCHAR);
         rdbmsTypes2JdbcTypes.put("text", Types.LONGVARCHAR);
         rdbmsTypes2JdbcTypes.put("mediumtext", Types.LONGVARCHAR);
         rdbmsTypes2JdbcTypes.put("longtext", Types.LONGVARCHAR);
@@ -74,19 +73,20 @@ public class MySqlTypesResolver extends TypesResolver {
         rdbmsTypes2JdbcTypes.put("blob", Types.LONGVARBINARY);
         rdbmsTypes2JdbcTypes.put("mediumblob", Types.LONGVARBINARY);
         rdbmsTypes2JdbcTypes.put("longblob", Types.LONGVARBINARY);
+        rdbmsTypes2JdbcTypes.put("long varbinary", Types.LONGVARBINARY);
         rdbmsTypes2JdbcTypes.put("date", Types.DATE);
         rdbmsTypes2JdbcTypes.put("time", Types.TIME);
         rdbmsTypes2JdbcTypes.put("year", Types.DATE);
         rdbmsTypes2JdbcTypes.put("datetime", Types.TIMESTAMP);
         rdbmsTypes2JdbcTypes.put("timestamp", Types.TIMESTAMP);
-        rdbmsTypes2JdbcTypes.put("point", Types.BINARY);
-        rdbmsTypes2JdbcTypes.put("linestring", Types.BINARY);
-        rdbmsTypes2JdbcTypes.put("polygon", Types.BINARY);
-        rdbmsTypes2JdbcTypes.put("geometry", Types.BINARY);
-        rdbmsTypes2JdbcTypes.put("multipoint", Types.BINARY);
-        rdbmsTypes2JdbcTypes.put("multilinestring", Types.BINARY);
-        rdbmsTypes2JdbcTypes.put("multipolygon", Types.BINARY);
-        rdbmsTypes2JdbcTypes.put("geometrycollection", Types.BINARY);
+        rdbmsTypes2JdbcTypes.put("point", Types.OTHER);
+        rdbmsTypes2JdbcTypes.put("linestring", Types.OTHER);
+        rdbmsTypes2JdbcTypes.put("polygon", Types.OTHER);
+        rdbmsTypes2JdbcTypes.put("geometry", Types.OTHER);
+        rdbmsTypes2JdbcTypes.put("multipoint", Types.OTHER);
+        rdbmsTypes2JdbcTypes.put("multilinestring", Types.OTHER);
+        rdbmsTypes2JdbcTypes.put("multipolygon", Types.OTHER);
+        rdbmsTypes2JdbcTypes.put("geometrycollection", Types.OTHER);
         rdbmsTypes2JdbcTypes.put("enum", Types.CHAR);
         rdbmsTypes2JdbcTypes.put("set", Types.CHAR);
 
@@ -120,56 +120,55 @@ public class MySqlTypesResolver extends TypesResolver {
         jdbcTypes2RdbmsTypes.put(Types.SQLXML, "longtext");
 
         //typeName(M,D)
-        jdbcTypesWithScale.add(Types.FLOAT);
-        jdbcTypesWithScale.add(Types.REAL);
-        jdbcTypesWithScale.add(Types.DOUBLE);
-        jdbcTypesWithScale.add(Types.NUMERIC);
-        jdbcTypesWithScale.add(Types.DECIMAL);
+        jdbcTypesWithScale.add("float");
+        jdbcTypesWithScale.add("real");
+        jdbcTypesWithScale.add("double");
+        jdbcTypesWithScale.add("double precision");
+        jdbcTypesWithScale.add("numeric");
+        jdbcTypesWithScale.add("decimal");
+        jdbcTypesWithScale.add("dec");
 
         //typeName(M)
-        jdbcTypesWithSize.add(Types.FLOAT);
-        jdbcTypesWithSize.add(Types.REAL);
-        jdbcTypesWithSize.add(Types.DOUBLE);
-        jdbcTypesWithSize.add(Types.NUMERIC);
-        jdbcTypesWithSize.add(Types.DECIMAL);
-        jdbcTypesWithSize.add(Types.CHAR);
-        jdbcTypesWithSize.add(Types.VARCHAR);
-        jdbcTypesWithSize.add(Types.NCHAR);
-        jdbcTypesWithSize.add(Types.NVARCHAR);
-        jdbcTypesWithSize.add(Types.VARBINARY);
-        jdbcTypesWithSize.add(Types.BINARY);
+        jdbcTypesWithSize.add("float");
+        jdbcTypesWithSize.add("real");
+        jdbcTypesWithSize.add("double");
+        jdbcTypesWithSize.add("double precision");
+        jdbcTypesWithSize.add("numeric");
+        jdbcTypesWithSize.add("decimal");
+        jdbcTypesWithSize.add("dec");
+        jdbcTypesWithSize.add("char");
+        jdbcTypesWithSize.add("varchar");
+        jdbcTypesWithSize.add("binary");
+        jdbcTypesWithSize.add("varbinary");
 
-        // max sizes for types
-        jdbcTypesMaxSize.put(Types.CHAR,255);
-        jdbcTypesMaxSize.put(Types.NCHAR,255 );
-        jdbcTypesMaxSize.put(Types.VARCHAR,2147483647);
-        jdbcTypesMaxSize.put(Types.NVARCHAR,2147483647);
-        jdbcTypesMaxSize.put(Types.BINARY,255);
-        jdbcTypesMaxSize.put(Types.VARBINARY,2147483647);
+        // max sizes for types // ??? numeric ????
+        jdbcTypesMaxSize.put("char", 255);
+        jdbcTypesMaxSize.put("varchar", 65535);
+        jdbcTypesMaxSize.put("tinytext", 255);
+        jdbcTypesMaxSize.put("text", 65535);
+        jdbcTypesMaxSize.put("mediumtext", 16777215);
+
+        jdbcTypesMaxSize.put("longvarchar", 16777215);
+
+        jdbcTypesMaxSize.put("longtext", 2147483647);
+        jdbcTypesMaxSize.put("binary", 255);
+        jdbcTypesMaxSize.put("varbinary", 255);
+
+        jdbcTypesMaxSize.put("long varbinary", 16777215);
+        jdbcTypesMaxSize.put("tinyblob", 255);
+        jdbcTypesMaxSize.put("blob", 65535);
+        jdbcTypesMaxSize.put("mediumblob", 16777215);
+        jdbcTypesMaxSize.put("longblob", 2147483647);
 //????? изменить Field.setSize(Long)        
 //?????        jdbcTypesMaxSize.put(Types.VARCHAR,4294967295);
 //?????        jdbcTypesMaxSize.put(Types.NVARCHAR,4294967295);
 //?????        jdbcTypesMaxSize.put(Types.VARBINARY,4294967295);
-        
-        // default sizes for types ??????????????????????????????????????????????
-        jdbcTypesDefaultSize.put(Types.CHAR,1);
-        jdbcTypesDefaultSize.put(Types.VARCHAR,200);
-        jdbcTypesDefaultSize.put(Types.NCHAR,1 );
-        jdbcTypesDefaultSize.put(Types.NVARCHAR,200);
-        jdbcTypesDefaultSize.put(Types.BINARY,1);
-        jdbcTypesDefaultSize.put(Types.VARBINARY,200);
 
-        // порядок замены символьных типов, если требуется размер больше исходного
-        characterTypesOrder.add(Types.CHAR);
-        characterTypesOrder.add(Types.NCHAR);
-        characterTypesOrder.add(Types.VARCHAR);
-        characterTypesOrder.add(Types.NVARCHAR);
-        characterTypesOrder.add(Types.CLOB);
-        
-        binaryTypesOrder.add(Types.BINARY);
-        binaryTypesOrder.add(Types.VARBINARY);
-        binaryTypesOrder.add(Types.BLOB);
-        
+        // default sizes for types ??????????????????????????????????????????????
+        jdbcTypesDefaultSize.put("char", 1);
+        jdbcTypesDefaultSize.put("varchar", 200);
+        jdbcTypesDefaultSize.put("binary", 1);
+        jdbcTypesDefaultSize.put("varbinary", 200);
     }
 
     @Override
@@ -184,8 +183,9 @@ public class MySqlTypesResolver extends TypesResolver {
     public void resolve2Application(Field aField) {
         if (isGeometryTypeName(aField.getTypeInfo().getSqlTypeName())) {
             aField.setTypeInfo(DataTypeInfo.GEOMETRY.copy());
-        }else
+        } else {
             super.resolve2Application(aField);
+        }
     }
 
     @Override
@@ -210,37 +210,57 @@ public class MySqlTypesResolver extends TypesResolver {
     }
 
     @Override
-    public boolean isSized(Integer aSqlType) {
-        return jdbcTypesWithSize.contains(aSqlType);
+    public boolean isSized(String aSqlTypeName) {
+        String sqlTypeName = aSqlTypeName.toLowerCase();
+        return jdbcTypesWithSize.contains(sqlTypeName);
     }
 
     @Override
-    public boolean isScaled(Integer aSqlType) {
-        return jdbcTypesWithScale.contains(aSqlType);
+    public boolean isScaled(String aSqlTypeName) {
+        String sqlTypeName = aSqlTypeName.toLowerCase();
+        return jdbcTypesWithScale.contains(sqlTypeName);
     }
+
     @Override
     public Map<Integer, String> getJdbcTypes2RdbmsTypes() {
         return jdbcTypes2RdbmsTypes;
     }
 
     @Override
-    public Map<Integer, Integer> getJdbcTypesMaxSize() {
-        return jdbcTypesMaxSize;
+    public boolean containsRDBMSTypename(String aTypeName) {
+        assert aTypeName != null;
+        return rdbmsTypes2JdbcTypes.containsKey(aTypeName.toLowerCase());
     }
 
     @Override
-    public Map<Integer, Integer> getJdbcTypesDefaultSize() {
-        return jdbcTypesDefaultSize;
+    public void resolveFieldSize(Field aField) {
+        DataTypeInfo typeInfo = aField.getTypeInfo();
+        int sqlType = typeInfo.getSqlType();
+        String sqlTypeName = typeInfo.getSqlTypeName();
+        sqlTypeName = sqlTypeName.toLowerCase();
+        // check on max size
+        int fieldSize = aField.getSize();
+        Integer maxSize = jdbcTypesMaxSize.get(sqlTypeName);
+        if (maxSize != null && maxSize < fieldSize) {
+            List<Integer> typesOrder = getTypesOrder(sqlType);
+            if (typesOrder != null) {
+                for (int i = typesOrder.indexOf(sqlType); i < typesOrder.size(); i++) {
+                    sqlType = typesOrder.get(i);
+                    sqlTypeName = jdbcTypes2RdbmsTypes.get(sqlType);
+                    maxSize = jdbcTypesMaxSize.get(sqlTypeName);
+                    if (maxSize != null && maxSize >= fieldSize) {
+                        break;
+                    }
+                }
+            }
+            if (maxSize != null && maxSize < fieldSize) {
+                aField.setSize(maxSize);
+            }
+        }
+        aField.setTypeInfo(new DataTypeInfo(sqlType, sqlTypeName, typeInfo.getJavaClassName()));
+        // check on default size
+        if (fieldSize <= 0 && jdbcTypesDefaultSize.containsKey(sqlTypeName)) {
+            aField.setSize(jdbcTypesDefaultSize.get(sqlTypeName));
+        }
     }
-
-    @Override
-    public List<Integer> getCharacterTypesOrder() {
-        return characterTypesOrder;
-    }
-    
-    @Override
-    public  List<Integer> getBinaryTypesOrder() {
-        return binaryTypesOrder;
-    }
-
 }

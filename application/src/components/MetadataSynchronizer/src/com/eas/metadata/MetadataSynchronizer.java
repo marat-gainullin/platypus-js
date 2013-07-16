@@ -150,7 +150,6 @@ public class MetadataSynchronizer {
     private boolean needSqlsList = false;
     private List<String> sqlsList;
 
-
     /**
      * Syncronize metadata between two schemas database
      */
@@ -190,9 +189,9 @@ public class MetadataSynchronizer {
             }
             MetadataSynchronizer mds = new MetadataSynchronizer(sysLog, null, null, null);
             mds.serializeMetadata(mds.readDBStructure(aClient), aFileXmlPath);
-        } finally {    
+        } finally {
             closeLogHandlers(sysLog);
-        }    
+        }
     }
 
     /**
@@ -317,7 +316,7 @@ public class MetadataSynchronizer {
                 if (!emptyXml) {
                     serializeMetadata(srcDBStructure, fileXml);
                 }
-            } finally {    
+            } finally {
                 client1.shutdown();
             }
         }
@@ -331,7 +330,7 @@ public class MetadataSynchronizer {
                 MetadataMerger metadataMerger = new MetadataMerger(client2, srcDBStructure, readDBStructure(client2), isNoExecute(), isNoDropTables(), tablesList, systemLogger, sqlLogger, errorLogger, needSqlsList);
                 metadataMerger.run();
                 sqlsList = metadataMerger.getSqlsList();
-            } finally {    
+            } finally {
                 client2.shutdown();
             }
 
@@ -340,7 +339,7 @@ public class MetadataSynchronizer {
                 DbClient client3 = createClient(urlTo, schemaTo, userTo, passwordTo);
                 try {
                     MetadataUtils.printCompareMetadata(srcDBStructure, readDBStructure(client3), infoLogger);
-                } finally { 
+                } finally {
                     client3.shutdown();
                 }
             }
@@ -467,40 +466,42 @@ public class MetadataSynchronizer {
                     tablesSet.addAll(tableNamesList.subList(begPos, endPos));
                     begPos = begPos + MAX_TABLES_IN_SQLS;
 
-                    // indexes
-                    String sql4Indexes = driver.getSql4Indexes(dbSchema, tablesSet);
-                    SqlCompiledQuery queryIndexes = new SqlCompiledQuery(aClient, null, sql4Indexes);
-                    Rowset rowsetIndexes = queryIndexes.executeQuery();
-                    cntIndexesF = cntIndexesF + addIndexFromRowset(mdStructure, rowsetIndexes);
+                    if (!tablesSet.isEmpty()) {
+                        // indexes
+                        String sql4Indexes = driver.getSql4Indexes(dbSchema, tablesSet);
+                        SqlCompiledQuery queryIndexes = new SqlCompiledQuery(aClient, null, sql4Indexes);
+                        Rowset rowsetIndexes = queryIndexes.executeQuery();
+                        cntIndexesF = cntIndexesF + addIndexFromRowset(mdStructure, rowsetIndexes);
 
-                    // sort all columns in index
-                    Iterator<String> names = tablesSet.iterator();
+                        // sort all columns in index
+                        Iterator<String> names = tablesSet.iterator();
 
-                    while (names.hasNext()) {
-                        String name = names.next();
-                        TableStructure tableStructure = mdStructure.get(name.toUpperCase());
-                        Map<String, DbTableIndexSpec> tableIndexSpecs = tableStructure.getTableIndexSpecs();
-                        if (tableIndexSpecs != null) {
-                            for (String nameSpec : tableIndexSpecs.keySet()) {
-                                tableIndexSpecs.get(nameSpec).sortColumns();
-                                cntIndexes++;
+                        while (names.hasNext()) {
+                            String name = names.next();
+                            TableStructure tableStructure = mdStructure.get(name.toUpperCase());
+                            Map<String, DbTableIndexSpec> tableIndexSpecs = tableStructure.getTableIndexSpecs();
+                            if (tableIndexSpecs != null) {
+                                for (String nameSpec : tableIndexSpecs.keySet()) {
+                                    tableIndexSpecs.get(nameSpec).sortColumns();
+                                    cntIndexes++;
+                                }
                             }
                         }
+
+                        //pk
+                        String sqlPK = driver.getSql4TablePrimaryKeys(dbSchema, tablesSet);
+                        SqlCompiledQuery queryPK = new SqlCompiledQuery(aClient, null, sqlPK);
+                        Rowset rowsetPK = queryPK.executeQuery();
+
+                        cntPKs = cntPKs + addPKeysFromRowset(mdStructure, rowsetPK);
+
+                        //fk
+                        String sqlFK = driver.getSql4TableForeignKeys(dbSchema, tablesSet);
+                        SqlCompiledQuery queryFK = new SqlCompiledQuery(aClient, null, sqlFK);
+                        Rowset rowsetFK = queryFK.executeQuery();
+
+                        cntFKs = cntFKs + addFKeysFromRowset(mdStructure, rowsetFK);
                     }
-
-                    //pk
-                    String sqlPK = driver.getSql4TablePrimaryKeys(dbSchema, tablesSet);
-                    SqlCompiledQuery queryPK = new SqlCompiledQuery(aClient, null, sqlPK);
-                    Rowset rowsetPK = queryPK.executeQuery();
-
-                    cntPKs = cntPKs + addPKeysFromRowset(mdStructure, rowsetPK);
-
-                    //fk
-                    String sqlFK = driver.getSql4TableForeignKeys(dbSchema, tablesSet);
-                    SqlCompiledQuery queryFK = new SqlCompiledQuery(aClient, null, sqlFK);
-                    Rowset rowsetFK = queryFK.executeQuery();
-
-                    cntFKs = cntFKs + addFKeysFromRowset(mdStructure, rowsetFK);
                 } while (endPos < maxPos);
             }
 
@@ -543,7 +544,7 @@ public class MetadataSynchronizer {
             return structure;
         } finally {
             client.shutdown();
-        }    
+        }
     }
 
     /**

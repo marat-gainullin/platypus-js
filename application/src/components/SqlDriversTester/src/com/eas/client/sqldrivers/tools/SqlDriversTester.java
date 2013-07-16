@@ -246,12 +246,12 @@ public class SqlDriversTester extends JFrame {
         // 4-пароль БД
         // 5-драйвер platypus для данной БД
         //            n       ,              0                               ,1                                 ,2        ,3       ,4         ,5
-        jdbcSets.put("oracle", new Object[]{"oracle.jdbc.driver.OracleDriver", "jdbc:oracle:thin:@asvr:1521/adb", "wld_to", "wld_to", "wld_to", new OracleSqlDriver()});
-        jdbcSets.put("postgre", new Object[]{"org.postgresql.Driver", "jdbc:postgresql://asvr:5432/Trans", "public", "edro", "edro", new PostgreSqlDriver()});
-        jdbcSets.put("db2", new Object[]{"com.ibm.db2.jcc.DB2Driver", "jdbc:db2://192.168.10.144:50000/SAMPLE", "ab", "dba", "masterkey", new Db2SqlDriver()});
-        jdbcSets.put("mssql", new Object[]{"net.sourceforge.jtds.jdbc.Driver", "jdbc:jtds:sqlserver://192.168.10.144:1433/foodMartSync", "dbo", "root", "1", new MsSqlSqlDriver()});
+        jdbcSets.put("oracle", new Object[]{"oracle.jdbc.driver.OracleDriver", "jdbc:oracle:thin:@research.office.altsoft.biz:1521/DBALT", "test1", "test1", "test1", new OracleSqlDriver()});
+        jdbcSets.put("postgre", new Object[]{"org.postgresql.Driver", "jdbc:postgresql://192.168.10.1:5432/Trans", "test1", "test1", "test1", new PostgreSqlDriver()});
+        jdbcSets.put("db2", new Object[]{"com.ibm.db2.jcc.DB2Driver", "jdbc:db2://192.168.10.154:50000/test", "test1", "dba", "masterkey", new Db2SqlDriver()});
+        jdbcSets.put("mssql", new Object[]{"net.sourceforge.jtds.jdbc.Driver", "jdbc:jtds:sqlserver://192.168.10.154:1433/test1", "dbo", "test1", "1test1", new MsSqlSqlDriver()});
         jdbcSets.put("mysql", new Object[]{"com.mysql.jdbc.Driver", "jdbc:mysql://192.168.10.205:3306/test1", "test1", "test1", "test1", new MySqlSqlDriver()});
-        jdbcSets.put("h2", new Object[]{"org.h2.Driver", "jdbc:h2:~/test", "test1", "test1", "test1", new H2SqlDriver()});
+        jdbcSets.put("h2", new Object[]{"org.h2.Driver", "jdbc:h2:tcp://localhost/~/test", "test1", "test1", "test1", new H2SqlDriver()});
         for (String dbName : jdbcSets.keySet()) {
             comboDB_connect.addItem(dbName);
         }

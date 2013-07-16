@@ -22,13 +22,13 @@ public class MySqlTestDefine extends DbTestDefine {
         {"bool", "NUMBER", "int2", "tinyint", "INTEGER", "TINYINT", "tinyint"},
         {"boolean", "NUMBER", "int2", "tinyint", "INTEGER", "TINYINT", "tinyint"},
         {"smallint", "NUMBER", "int2", "smallint", "SMALLINT", "SMALLINT", "smallint"},
-        {"mediumint", "NUMBER", "int4", "int", "INTEGER", "INTEGER", "int"},
+        {"mediumint", "NUMBER", "int4", "mediumint", "INTEGER", "INTEGER", "int"},
         {"int", "NUMBER", "int4", "int", "INTEGER", "INTEGER", "int"},
         {"integer", "NUMBER", "int4", "int", "INTEGER", "INTEGER", "int"},
         {"bigint", "NUMBER", "int8", "bigint", "BIGINT", "BIGINT", "bigint"},
         {"serial", "NUMBER", "int8", "bigint", "BIGINT", "BIGINT", "bigint"},
         {"bit", "NUMBER", "bit", "bit", "INTEGER", "INTEGER", "bit"},
-        {"float", "FLOAT", "float4", "float", "REAL", "REAL", "real"},
+        {"float", "FLOAT", "float4", "float", "DOUBLE", "REAL", "real"},
         {"real", "FLOAT", "float8", "double", "DOUBLE", "DOUBLE", "float"},
         {"double", "FLOAT", "float8", "double", "DOUBLE", "DOUBLE", "float"},
         {"double precision", "FLOAT", "float8", "double", "DOUBLE", "DOUBLE", "float"},
@@ -37,31 +37,33 @@ public class MySqlTestDefine extends DbTestDefine {
         {"numeric", "NUMBER", "numeric", "decimal", "DECIMAL", "DECIMAL", "decimal"},
         {"char", "CHAR", "bpchar", "char", "CHAR", "CHAR", "char"},
         {"varchar", "VARCHAR2", "varchar", "varchar", "VARCHAR", "VARCHAR", "varchar"},
-        {"tinytext", "LONG", "text", "longtext", "LONG VARCHAR", "CLOB", "clob"},
-        {"text", "LONG", "text", "longtext", "LONG VARCHAR", "CLOB", "clob"},
-        {"mediumtext", "LONG", "text", "longtext", "LONG VARCHAR", "CLOB", "clob"},
-        {"longtext", "LONG", "text", "longtext", "LONG VARCHAR", "CLOB", "clob"},
-        {"binary", "VARBINARY", "bytea", "binary", "CHAR () FOR BIT DATA", "VARBINARY", "varbinary"},
-        {"varbinary", "VARBINARY", "bytea", "varbinary", "VARCHAR () FOR BIT DATA", "VARBINARY", "varbinary"},
-        {"tinyblob", "VARBINARY", "bytea", "varbinary", "VARCHAR () FOR BIT DATA", "VARBINARY", "varbinary"},
-        {"blob", "LONGVARBINARY", "bytea", "longblob", "LONG VARCHAR FOR BIT DATA", "VARBINARY", "blob"},
-        {"mediumblob", "LONGVARBINARY", "bytea", "longblob", "LONG VARCHAR FOR BIT DATA", "VARBINARY", "blob"},
-        {"longblob", "LONGVARBINARY", "bytea", "longblob", "LONG VARCHAR FOR BIT DATA", "VARBINARY", "blob"},
+        {"tinytext", "CLOB", "text", "tinytext", "LONG VARCHAR", "VARCHAR", "text"},
+        {"text", "CLOB", "text", "text", "LONG VARCHAR", "VARCHAR", "text"},
+        {"mediumtext", "CLOB", "text", "mediumtext", "LONG VARCHAR", "VARCHAR", "text"},
+        {"long varchar", "CLOB", "text", "mediumtext", "LONG VARCHAR", "VARCHAR", "text"},
+        {"longtext", "CLOB", "text", "longtext", "LONG VARCHAR", "VARCHAR", "text"},
+        {"binary", "RAW", "bytea", "binary", "CHAR () FOR BIT DATA", "VARBINARY", "binary"},
+        {"varbinary", "RAW", "bytea", "varbinary", "VARCHAR () FOR BIT DATA", "VARBINARY", "varbinary"},
+        {"tinyblob", "RAW", "bytea", "tinyblob", "VARCHAR () FOR BIT DATA", "VARBINARY", "varbinary"},
+        {"blob", "BLOB", "bytea", "blob", "LONG VARCHAR FOR BIT DATA", "VARBINARY", "image"},
+        {"mediumblob", "BLOB", "bytea", "mediumblob", "LONG VARCHAR FOR BIT DATA", "VARBINARY", "image"},
+        {"long varbinary", "BLOB", "bytea", "mediumblob", "LONG VARCHAR FOR BIT DATA", "VARBINARY", "image"},
+        {"longblob", "BLOB", "bytea", "longblob", "LONG VARCHAR FOR BIT DATA", "VARBINARY", "image"},
         {"date", "DATE", "date", "date", "DATE", "DATE", "datetime"},
         {"time", "DATE", "time", "time", "TIME", "TIME", "datetime"},
-        {"year", "DATE", "date", "date", "DATE", "DATE", "datetime"},
-        {"datetime", "TIMESTAMP(6)", "timestamp", "timestamp", "TIMESTAMP", "TIMESTAMP", "datetime"},
-        {"timestamp", "TIMESTAMP(6)", "timestamp", "timestamp", "TIMESTAMP", "TIMESTAMP", "datetime"},
-        {"point", "VARBINARY", "bytea", "binary", "CHAR () FOR BIT DATA", "VARBINARY", "varbinary"},
-        {"linestring", "VARBINARY", "bytea", "binary", "CHAR () FOR BIT DATA", "VARBINARY", "varbinary"},
-        {"polygon", "VARBINARY", "bytea", "binary", "CHAR () FOR BIT DATA", "VARBINARY", "varbinary"},
-        {"geometry", "VARBINARY", "bytea", "binary", "CHAR () FOR BIT DATA", "VARBINARY", "varbinary"},
-        {"multipoint", "VARBINARY", "bytea", "binary", "CHAR () FOR BIT DATA", "VARBINARY", "varbinary"},
-        {"multilinestring", "VARBINARY", "bytea", "binary", "CHAR () FOR BIT DATA", "VARBINARY", "varbinary"},
-        {"multipolygon", "VARBINARY", "bytea", "binary", "CHAR () FOR BIT DATA", "VARBINARY", "varbinary"},
-        {"geometrycollection", "VARBINARY", "bytea", "binary", "CHAR () FOR BIT DATA", "VARBINARY", "varbinary"},
-        {"enum", "CHAR", "bpchar", "char", "CHAR", "CHAR", "char"},
-        {"set", "CHAR", "bpchar", "char", "CHAR", "CHAR", "char"},};
+        {"year", "DATE", "date", "year", "DATE", "DATE", "datetime"},
+        {"datetime", "TIMESTAMP(6)", "timestamp", "datetime", "TIMESTAMP", "TIMESTAMP", "datetime"},
+        {"timestamp", "TIMESTAMP(6)", "timestamp", "timestamp", "TIMESTAMP", "TIMESTAMP", "datetime"}, //        {"point", "VARBINARY", "bytea", "point", "CHAR () FOR BIT DATA", "VARBINARY", "varbinary"},
+    //        {"linestring", "VARBINARY", "bytea", "linestring", "CHAR () FOR BIT DATA", "VARBINARY", "varbinary"},
+    //        {"polygon", "VARBINARY", "bytea", "polygon", "CHAR () FOR BIT DATA", "VARBINARY", "varbinary"},
+    //        {"geometry", "VARBINARY", "bytea", "geometry", "CHAR () FOR BIT DATA", "VARBINARY", "varbinary"},
+    //        {"multipoint", "VARBINARY", "bytea", "multipoint", "CHAR () FOR BIT DATA", "VARBINARY", "varbinary"},
+    //        {"multilinestring", "VARBINARY", "bytea", "multilinestring", "CHAR () FOR BIT DATA", "VARBINARY", "varbinary"},
+    //        {"multipolygon", "VARBINARY", "bytea", "multipolygon", "CHAR () FOR BIT DATA", "VARBINARY", "varbinary"},
+    //        {"geometrycollection", "VARBINARY", "bytea", "geometrycollection", "CHAR () FOR BIT DATA", "VARBINARY", "varbinary"}
+    //        {"enum", "CHAR", "bpchar", "char", "CHAR", "CHAR", "char"},
+    //        {"set", "CHAR", "bpchar", "char", "CHAR", "CHAR", "char"}
+    };
 
     static {
         // отрицательное значение в fieldsSizes и fieldsScales означает, что значение отсутствует  и проверка не производится
@@ -77,17 +79,6 @@ public class MySqlTestDefine extends DbTestDefine {
         fieldsSizes.put("varchar", new int[]{15, 15, 15, 15, 15, 15, 15});
         fieldsSizes.put("binary", new int[]{16, 16, -16, 16, 16, 16, -16});
         fieldsSizes.put("varbinary", new int[]{17, 17, -17, 17, 17, 17, -17});
-        fieldsSizes.put("tinyblob", new int[]{18, 18, -18, 18, 18, 18, -18});
-        fieldsSizes.put("point", new int[]{20, 20, -20, 20, 20, 20, -20});
-        fieldsSizes.put("linestring", new int[]{21, 21, -21, 21, 21, 21, -21});
-        fieldsSizes.put("polygon", new int[]{22, 22, -22, 22, 22, 22, -22});
-        fieldsSizes.put("geometry", new int[]{23, 23, -23, 23, 23, 23, -23});
-        fieldsSizes.put("multipoint", new int[]{24, 24, -24, 24, 24, 24, -24});
-        fieldsSizes.put("multilinestring", new int[]{25, 25, -25, 25, 25, 25, -25});
-        fieldsSizes.put("multipolygon", new int[]{26, 26, -26, 26, 26, 26, -26});
-        fieldsSizes.put("geometrycollection", new int[]{27, 27, -27, 27, 27, 27, -27});
-        fieldsSizes.put("enum", new int[]{28, 28, 28, 28, 28, 28, 28});
-        fieldsSizes.put("set", new int[]{29, 29, 29, 29, 29, 29, 29});
 
         //originalType, {originalValue, Oracle, PostgreSQL, MySql, DB2, H2, MsSql}    
         fieldsScales.put("float", new int[]{2, -2, -2, 2, -2, -2, -2});
@@ -146,5 +137,10 @@ public class MySqlTestDefine extends DbTestDefine {
     @Override
     public boolean[][] getFKeyDeferrables() {
         return fKeyDeferrable;
+    }
+
+    @Override
+    public boolean enabledSetNull(String aFieldName) {
+        return !("serial".equalsIgnoreCase(aFieldName));
     }
 }

@@ -26,7 +26,7 @@ public class Db2TestDefine extends DbTestDefine {
         {"DEC", "NUMBER", "numeric", "decimal", "DECIMAL", "DECIMAL", "decimal"},
         {"NUMERIC", "NUMBER", "numeric", "decimal", "DECIMAL", "DECIMAL", "decimal"},
         {"NUM", "NUMBER", "numeric", "decimal", "DECIMAL", "DECIMAL", "decimal"},
-        {"FLOAT", "FLOAT", "float4", "float", "REAL", "REAL", "real"},
+        {"FLOAT", "FLOAT", "float8", "double", "DOUBLE", "DOUBLE", "float"},
         {"REAL", "FLOAT", "float4", "float", "REAL", "REAL", "real"},
         {"DOUBLE", "FLOAT", "float8", "double", "DOUBLE", "DOUBLE", "float"},
         {"DOUBLE PRECISION", "FLOAT", "float8", "double", "DOUBLE", "DOUBLE", "float"},
@@ -35,36 +35,38 @@ public class Db2TestDefine extends DbTestDefine {
         {"VARCHAR", "VARCHAR2", "varchar", "varchar", "VARCHAR", "VARCHAR", "varchar"},
         {"CHAR VARYING", "VARCHAR2", "varchar", "varchar", "VARCHAR", "VARCHAR", "varchar"},
         {"CHARACTER VARYING", "VARCHAR2", "varchar", "varchar", "VARCHAR", "VARCHAR", "varchar"},
-        {"CHAR () FOR BIT DATA", "VARBINARY", "bytea", "binary", "CHAR () FOR BIT DATA", "VARBINARY", "varbinary"},
-        {"CHARACTER () FOR BIT DATA", "VARBINARY", "bytea", "binary", "CHAR () FOR BIT DATA", "VARBINARY", "varbinary"},
-        {"CHAR VARYING () FOR BIT DATA", "VARBINARY", "bytea", "varbinary", "VARCHAR () FOR BIT DATA", "VARBINARY", "varbinary"},
-        {"VARCHAR () FOR BIT DATA", "VARBINARY", "bytea", "varbinary", "VARCHAR () FOR BIT DATA", "VARBINARY", "varbinary"},
-        {"CHARACTER VARYING () FOR BIT DATA", "VARBINARY", "bytea", "varbinary", "VARCHAR () FOR BIT DATA", "VARBINARY", "varbinary"},
-        {"LONG VARCHAR", "LONG", "text", "longtext", "LONG VARCHAR", "CLOB", "clob"},
-        {"LONG VARCHAR FOR BIT DATA", "LONGVARBINARY", "bytea", "longblob", "LONG VARCHAR FOR BIT DATA", "VARBINARY", "blob"},
-        {"CLOB", "CLOB", "text", "longtext", "CLOB", "CLOB", "clob"},
-        {"CHAR LARGE OBJECT", "CLOB", "text", "longtext", "CLOB", "CLOB", "clob"},
-        {"CHARACTER LARGE OBJECT", "CLOB", "text", "longtext", "CLOB", "CLOB", "clob"},
-        {"GRAPHIC", "CHAR", "bpchar", "char", "CHAR", "CHAR", "char"},
-        {"VARGRAPHIC", "VARCHAR2", "varchar", "varchar", "VARCHAR", "VARCHAR", "varchar"},
-        {"LONG VARGRAPHIC", "LONG", "text", "longtext", "LONG VARCHAR", "CLOB", "clob"},
-        {"DBCLOB", "CLOB", "text", "longtext", "CLOB", "CLOB", "clob"},
-        {"NCHAR", "CHAR", "bpchar", "char", "CHAR", "CHAR", "char"},
-        {"NATIONAL CHAR", "CHAR", "bpchar", "char", "CHAR", "CHAR", "char"},
-        {"NATIONAL CHARACTER", "CHAR", "bpchar", "char", "CHAR", "CHAR", "char"},
-        {"NVARCHAR", "VARCHAR2", "varchar", "varchar", "VARCHAR", "VARCHAR", "varchar"},
-        {"NATIONAL CHARACTER VARYING", "VARCHAR2", "varchar", "varchar", "VARCHAR", "VARCHAR", "varchar"},
-        {"NATIONAL CHAR VARYING", "VARCHAR2", "varchar", "varchar", "VARCHAR", "VARCHAR", "varchar"},
-        {"NCHAR VARYING", "VARCHAR2", "varchar", "varchar", "VARCHAR", "VARCHAR", "varchar"},
-        {"NCLOB", "CLOB", "text", "longtext", "CLOB", "CLOB", "clob"},
-        {"NCHAR LARGE OBJECT", "CLOB", "text", "longtext", "CLOB", "CLOB", "clob"},
-        {"NATIONAL CHARACTER LARGE OBJECT", "CLOB", "text", "longtext", "CLOB", "CLOB", "clob"},
-        {"BLOB", "BLOB", "bytea", "longblob", "BLOB", "BLOB", "blob"},
-        {"BINARY LARGE OBJECT", "BLOB", "bytea", "longblob", "BLOB", "BLOB", "blob"},
+        {"CHAR () FOR BIT DATA", "RAW", "bytea", "binary", "CHAR () FOR BIT DATA", "VARBINARY", "binary"},
+        {"CHARACTER () FOR BIT DATA", "RAW", "bytea", "binary", "CHAR () FOR BIT DATA", "VARBINARY", "binary"},
+        {"CHAR VARYING () FOR BIT DATA", "RAW", "bytea", "varbinary", "VARCHAR () FOR BIT DATA", "VARBINARY", "varbinary"},
+        {"VARCHAR () FOR BIT DATA", "RAW", "bytea", "varbinary", "VARCHAR () FOR BIT DATA", "VARBINARY", "varbinary"},
+        {"CHARACTER VARYING () FOR BIT DATA", "RAW", "bytea", "varbinary", "VARCHAR () FOR BIT DATA", "VARBINARY", "varbinary"},
+        {"LONG VARCHAR", "CLOB", "text", "mediumtext", "LONG VARCHAR", "VARCHAR", "text"},
+        {"LONG VARCHAR FOR BIT DATA", "BLOB", "bytea", "longblob", "LONG VARCHAR FOR BIT DATA", "VARBINARY", "image"},
+        {"CLOB", "CLOB", "text", "longtext", "CLOB", "CLOB", "text"},
+        {"CHAR LARGE OBJECT", "CLOB", "text", "longtext", "CLOB", "CLOB", "text"},
+        {"CHARACTER LARGE OBJECT", "CLOB", "text", "longtext", "CLOB", "CLOB", "text"},
+        // !!! not supported for this database !!!
+        //        {"GRAPHIC", "CHAR", "bpchar", "char", "CHAR", "CHAR", "char"},
+        //        {"VARGRAPHIC", "VARCHAR2", "varchar", "varchar", "VARCHAR", "VARCHAR", "varchar"},
+        //        {"LONG VARGRAPHIC", "LONG", "text", "longtext", "LONG VARCHAR", "CLOB", "clob"},
+        //        {"DBCLOB", "CLOB", "text", "longtext", "CLOB", "CLOB", "clob"},
+        //        {"NCHAR", "CHAR", "bpchar", "char", "CHAR", "CHAR", "char"},
+        //        {"NATIONAL CHAR", "CHAR", "bpchar", "char", "CHAR", "CHAR", "char"},
+        //        {"NATIONAL CHARACTER", "CHAR", "bpchar", "char", "CHAR", "CHAR", "char"},
+        //        {"NVARCHAR", "VARCHAR2", "varchar", "varchar", "VARCHAR", "VARCHAR", "varchar"},
+        //        {"NATIONAL CHARACTER VARYING", "VARCHAR2", "varchar", "varchar", "VARCHAR", "VARCHAR", "varchar"},
+        //        {"NATIONAL CHAR VARYING", "VARCHAR2", "varchar", "varchar", "VARCHAR", "VARCHAR", "varchar"},
+        //        {"NCHAR VARYING", "VARCHAR2", "varchar", "varchar", "VARCHAR", "VARCHAR", "varchar"},
+        //        {"NCLOB", "CLOB", "text", "longtext", "CLOB", "CLOB", "clob"},
+        //        {"NCHAR LARGE OBJECT", "CLOB", "text", "longtext", "CLOB", "CLOB", "clob"},
+        //        {"NATIONAL CHARACTER LARGE OBJECT", "CLOB", "text", "longtext", "CLOB", "CLOB", "clob"},
+        // !!! not supported for this database !!!
+        {"BLOB", "BLOB", "bytea", "longblob", "BLOB", "BLOB", "image"},
+        {"BINARY LARGE OBJECT", "BLOB", "bytea", "longblob", "BLOB", "BLOB", "image"},
         {"DATE", "DATE", "date", "date", "DATE", "DATE", "datetime"},
         {"TIME", "DATE", "time", "time", "TIME", "TIME", "datetime"},
         {"TIMESTAMP", "TIMESTAMP(6)", "timestamp", "timestamp", "TIMESTAMP", "TIMESTAMP", "datetime"},
-        {"XML", "BLOB", "bytea", "longblob", "BLOB", "BLOB", "blob"},};
+        {"XML", "BLOB", "bytea", "longblob", "XML", "BLOB", "image"},};
 
     static {
         // отрицательное значение в fieldsSizes и fieldsScales означает, что значение отсутствует  и проверка не производится
@@ -147,5 +149,10 @@ public class Db2TestDefine extends DbTestDefine {
     @Override
     public boolean[][] getFKeyDeferrables() {
         return fKeyDeferrable;
+    }
+
+    @Override
+    public boolean enabledSetNull(String aFieldName) {
+        return true;
     }
 }

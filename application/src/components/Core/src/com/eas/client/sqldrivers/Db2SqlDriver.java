@@ -406,27 +406,23 @@ public class Db2SqlDriver extends SqlDriver {
     private String getFieldTypeDefinition(Field aField) {
         resolver.resolve2RDBMS(aField);
         DataTypeInfo typeInfo = aField.getTypeInfo();
-        int sqlType = typeInfo.getSqlType();
+        String sqlTypeName = typeInfo.getSqlTypeName();
 
-        String leftPartNameType = resolver.getLeftPartNameType(sqlType);
-        String rightPartNameType = resolver.getRightPartNameType(sqlType);
+        String leftPartNameType = resolver.getLeftPartNameType(sqlTypeName);
+        String rightPartNameType = resolver.getRightPartNameType(sqlTypeName);
 
         String typeName = leftPartNameType;
 
         int size = aField.getSize();
         int scale = aField.getScale();
 
-        if (size < 1) {
-            size = resolver.getDefaultSize(sqlType);
-        }
-
-        if ((resolver.isScaled(sqlType)) && (resolver.isSized(sqlType) && size > 0)) {
+        if ((resolver.isScaled(sqlTypeName)) && (resolver.isSized(sqlTypeName) && size > 0)) {
             typeName += "(" + String.valueOf(size) + "," + String.valueOf(scale) + ")";
         } else {
-            if (resolver.isSized(sqlType) && size > 0) {
+            if (resolver.isSized(sqlTypeName) && size > 0) {
                 typeName += "(" + String.valueOf(size) + ")";
             }
-            if (resolver.isScaled(sqlType) && scale > 0) {
+            if (resolver.isScaled(sqlTypeName) && scale > 0) {
                 typeName += "(" + String.valueOf(scale) + ")";
             }
         }
@@ -451,7 +447,6 @@ public class Db2SqlDriver extends SqlDriver {
         String fieldDefination = getFieldTypeDefinition(newFieldMd);
 
         DataTypeInfo newTypeInfo = newFieldMd.getTypeInfo();
-        int newSqlType = newTypeInfo.getSqlType();
         String newSqlTypeName = newTypeInfo.getSqlTypeName();
         if (newSqlTypeName == null) {
             newSqlTypeName = "";
@@ -461,7 +456,6 @@ public class Db2SqlDriver extends SqlDriver {
         boolean newNullable = newFieldMd.isNullable();
 
         DataTypeInfo oldTypeInfo = aOldFieldMd.getTypeInfo();
-        int oldSqlType = oldTypeInfo.getSqlType();
         String oldSqlTypeName = oldTypeInfo.getSqlTypeName();
         if (oldSqlTypeName == null) {
             oldSqlTypeName = "";
@@ -471,9 +465,9 @@ public class Db2SqlDriver extends SqlDriver {
         boolean oldNullable = aOldFieldMd.isNullable();
 
         sqls.add(getSql4VolatileTable(fullTableName));
-        if (newSqlType != oldSqlType
-                || (resolver.isSized(newSqlType) && newSize != oldSize)
-                || (resolver.isScaled(newSqlType) && newScale != oldScale)) {
+        if (!oldSqlTypeName.equalsIgnoreCase(newSqlTypeName)
+                || (resolver.isSized(newSqlTypeName) && newSize != oldSize)
+                || (resolver.isScaled(newSqlTypeName) && newScale != oldScale)) {
             sqls.add(updateDefinition + " set data type " + fieldDefination);
         }
         if (oldNullable != newNullable) {

@@ -26,8 +26,8 @@ public class PostgreTestDefine extends DbTestDefine {
         {"int8", "NUMBER", "int8", "bigint", "BIGINT", "BIGINT", "bigint"},
         {"bigint", "NUMBER", "int8", "bigint", "BIGINT", "BIGINT", "bigint"},
         {"bigserial", "NUMBER", "int8", "bigint", "BIGINT", "BIGINT", "bigint"},
-        {"oid", "NUMBER", "int8", "bigint", "BIGINT", "BIGINT", "bigint"},
-        {"bytea", "BLOB", "bytea", "longblob", "BLOB", "BLOB", "blob"},
+        {"oid", "NUMBER", "oid", "bigint", "BIGINT", "BIGINT", "bigint"},
+        {"bytea", "BLOB", "bytea", "longblob", "BLOB", "BLOB", "image"},
         {"bpchar", "CHAR", "bpchar", "char", "CHAR", "CHAR", "char"},
         {"char", "CHAR", "bpchar", "char", "CHAR", "CHAR", "char"},
         {"character", "CHAR", "bpchar", "char", "CHAR", "CHAR", "char"},
@@ -43,19 +43,19 @@ public class PostgreTestDefine extends DbTestDefine {
         {"double precision", "FLOAT", "float8", "double", "DOUBLE", "DOUBLE", "float"},
         {"float", "FLOAT", "float8", "double", "DOUBLE", "DOUBLE", "float"},
         {"float8", "FLOAT", "float8", "double", "DOUBLE", "DOUBLE", "float"},
-        {"money", "FLOAT", "float8", "double", "DOUBLE", "DOUBLE", "float"},
+        {"money", "FLOAT", "money", "double", "DOUBLE", "DOUBLE", "float"},
         {"varchar", "VARCHAR2", "varchar", "varchar", "VARCHAR", "VARCHAR", "varchar"},
         {"character varying", "VARCHAR2", "varchar", "varchar", "VARCHAR", "VARCHAR", "varchar"},
-        {"name", "VARCHAR2", "varchar", "varchar", "VARCHAR", "VARCHAR", "varchar"},
-        {"text", "CLOB", "text", "longtext", "CLOB", "CLOB", "clob"},
+        {"name", "VARCHAR2", "name", "varchar", "VARCHAR", "VARCHAR", "varchar"},
+        {"text", "CLOB", "text", "longtext", "CLOB", "CLOB", "text"},
         {"date", "DATE", "date", "date", "DATE", "DATE", "datetime"},
         {"time", "DATE", "time", "time", "TIME", "TIME", "datetime"},
-        {"timetz", "DATE", "time", "time", "TIME", "TIME", "datetime"},
-        {"time with time zone", "DATE", "time", "time", "TIME", "TIME", "datetime"},
+        {"timetz", "DATE", "timetz", "time", "TIME", "TIME", "datetime"},
+        {"time with time zone", "DATE", "timetz", "time", "TIME", "TIME", "datetime"},
         {"time without time zone", "DATE", "time", "time", "TIME", "TIME", "datetime"},
         {"timestamp", "TIMESTAMP(6)", "timestamp", "timestamp", "TIMESTAMP", "TIMESTAMP", "datetime"},
-        {"timestamptz", "TIMESTAMP(6)", "timestamp", "timestamp", "TIMESTAMP", "TIMESTAMP", "datetime"},
-        {"timestamp with time zone", "TIMESTAMP(6)", "timestamp", "timestamp", "TIMESTAMP", "TIMESTAMP", "datetime"},
+        {"timestamptz", "TIMESTAMP(6)", "timestamptz", "timestamp", "TIMESTAMP", "TIMESTAMP", "datetime"},
+        {"timestamp with time zone", "TIMESTAMP(6)", "timestamptz", "timestamp", "TIMESTAMP", "TIMESTAMP", "datetime"},
         {"timestamp without time zone", "TIMESTAMP(6)", "timestamp", "timestamp", "TIMESTAMP", "TIMESTAMP", "datetime"}
 //GIS        {"", "", "", "", "", "", ""},
     };
@@ -68,7 +68,6 @@ public class PostgreTestDefine extends DbTestDefine {
         fieldsSizes.put("char", new int[]{5, 5, 5, 5, 5, 5, -5});
         fieldsSizes.put("varchar", new int[]{7, 7, 7, 7, 7, 7, 7});
         fieldsSizes.put("character varying", new int[]{9, 9, 9, 9, 9, 9, 9});
-        fieldsSizes.put("name", new int[]{9, 9, 9, 9, 9, 9, 9});
 
         //originalType, {originalValue, Oracle, PostgreSQL, MySql, DB2, H2, MsSql}    
         fieldsScales.put("numeric", new int[]{1, 1, 1, 1, 1, 1, -1});
@@ -122,5 +121,10 @@ public class PostgreTestDefine extends DbTestDefine {
     @Override
     public boolean[][] getFKeyDeferrables() {
         return fKeyDeferrable;
+    }
+
+    @Override
+    public boolean enabledSetNull(String aFieldName) {
+        return !("bigserial".equalsIgnoreCase(aFieldName) || "serial".equalsIgnoreCase(aFieldName));
     }
 }
