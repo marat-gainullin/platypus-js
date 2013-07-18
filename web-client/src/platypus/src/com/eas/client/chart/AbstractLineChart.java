@@ -4,9 +4,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.bearsoft.rowset.Row;
-import com.bearsoft.rowset.exceptions.InvalidColIndexException;
+import com.eas.client.Utils;
 import com.eas.client.gxtcontrols.converters.DoubleRowValueConverter;
-import com.eas.client.model.Entity;
+import com.eas.client.gxtcontrols.grid.fillers.ListStoreFiller;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.sencha.gxt.chart.client.chart.axis.NumericAxis;
 import com.sencha.gxt.chart.client.chart.series.LineSeries;
 import com.sencha.gxt.chart.client.chart.series.Primitives;
@@ -19,9 +20,8 @@ public abstract class AbstractLineChart extends AbstractChart {
 	public static int MARKER_RADIUS = 4;
 	public static Sprite[] markers = new Sprite[] { Primitives.diamond(0, 0, MARKER_RADIUS), Primitives.circle(0, 0, MARKER_RADIUS), Primitives.triangle(0, 0, MARKER_RADIUS),
 	        Primitives.square(0, 0, MARKER_RADIUS), Primitives.cross(0, 0, MARKER_RADIUS), Primitives.plus(0, 0, MARKER_RADIUS) };
-	
 
-	protected static class DoubleValueProvider implements ValueProvider<Row, Double> {
+	protected static class DoubleValueProvider implements ValueProvider<Object, Double> {
 		protected DoubleRowValueConverter converter = new DoubleRowValueConverter();
 		protected String fieldName;
 		protected int colIndex = 0;
@@ -32,23 +32,33 @@ public abstract class AbstractLineChart extends AbstractChart {
 		}
 
 		@Override
-		public Double getValue(Row item) {
+		public Double getValue(Object oItem) {
 			try {
-				if (colIndex == 0) {
-					colIndex = item.getFields().find(fieldName);
+				if (oItem instanceof Row) {
+					Row item = (Row) oItem;
+					if (colIndex == 0) {
+						colIndex = item.getFields().find(fieldName);
+					}
+					if (colIndex != 0) {
+						return converter.convert(item.getColumnObject(colIndex));
+					} else
+						return null;
+				} else if (oItem instanceof JavaScriptObject) {
+					JsObject item = ((JavaScriptObject) oItem).cast();
+					Object oValue = Utils.toJava(item.get(fieldName));
+					if (oValue instanceof Number)
+						return ((Number) oValue).doubleValue();
+					else
+						return null;
 				}
-				if (colIndex != 0) {
-					return converter.convert(item.getColumnObject(colIndex));
-				} else
-					return null;
-			} catch (InvalidColIndexException e) {
+			} catch (Exception e) {
 				Logger.getLogger(LineChart.class.getName()).log(Level.SEVERE, e.getMessage());
 			}
 			return null;
 		}
 
 		@Override
-		public void setValue(Row item, Double value) {
+		public void setValue(Object item, Double value) {
 			// nothing to do here
 		}
 
@@ -59,11 +69,11 @@ public abstract class AbstractLineChart extends AbstractChart {
 		}
 	}
 
-	protected NumericAxis<Row> xAxis;
-	protected NumericAxis<Row> yAxis;
+	protected NumericAxis<Object> xAxis;
+	protected NumericAxis<Object> yAxis;
 
-	public AbstractLineChart(String aTitle, String aXLabel, String aYLabel, Entity aEntity) {
-		super(aEntity);
+	public AbstractLineChart(String aTitle, String aXLabel, String aYLabel, ListStoreFiller<Object> aFiller) {
+		super(aFiller);
 		setTitle(aTitle);
 		xAxis = createXAxis(aXLabel);
 		yAxis = createYAxis(aYLabel);
@@ -71,14 +81,14 @@ public abstract class AbstractLineChart extends AbstractChart {
 		addAxis(yAxis);
 	}
 
-	protected abstract NumericAxis<Row> createXAxis(String aTitle);
+	protected abstract NumericAxis<Object> createXAxis(String aTitle);
 
-	protected NumericAxis<Row> createYAxis(String aTitle) {
+	protected NumericAxis<Object> createYAxis(String aTitle) {
 		return createNumericAxis(aTitle, Position.LEFT);
 	}
 
-	public LineSeries<Row> addSeries(final String aXAxisFieldName, final String aYAxisFieldName, String aTitle) {
-		LineSeries<Row> series = new LineSeries<Row>();
+	public LineSeries<Object> addSeries(final String aXAxisFieldName, final String aYAxisFieldName, String aTitle) {
+		LineSeries<Object> series = new LineSeries<Object>();
 		series.setLegendTitle(aTitle);
 		series.setYAxisPosition(Position.LEFT);
 		series.setYField(new DoubleValueProvider(aYAxisFieldName));
@@ -97,8 +107,8 @@ public abstract class AbstractLineChart extends AbstractChart {
 		return series;
 	}
 
-	protected static NumericAxis<Row> createNumericAxis(String aTitle, Position aPosition) {
-		NumericAxis<Row> axis = new NumericAxis<Row>();
+	protected static NumericAxis<Object> createNumericAxis(String aTitle, Position aPosition) {
+		NumericAxis<Object> axis = new NumericAxis<Object>();
 		axis.setPosition(aPosition);
 		TextSprite axisTitle = new TextSprite(aTitle);
 		axisTitle.setFontSize(AXIS_LABEL_FONTSIZE);

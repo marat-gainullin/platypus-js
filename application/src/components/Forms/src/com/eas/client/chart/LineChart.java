@@ -7,6 +7,7 @@ package com.eas.client.chart;
 import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.eas.client.model.script.RowHostObject;
 import com.eas.client.model.script.ScriptableRowset;
+import com.eas.script.ScriptUtils;
 import java.awt.Color;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -17,6 +18,8 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
+import org.mozilla.javascript.NativeArray;
+import org.mozilla.javascript.Scriptable;
 
 /**
  *
@@ -33,9 +36,17 @@ public class LineChart extends AbstractLineChart {
         title = pTitle;
         xLabel = pXLabel;
         yLabel = pYLabel;
-        setDataset(pRowset);
+        setData(pRowset);
     }
 
+    public LineChart(String pTitle, String pXLabel, String pYLabel, NativeArray aArray) {
+        super();
+        title = pTitle;
+        xLabel = pXLabel;
+        yLabel = pYLabel;
+        setData(aArray);
+    }
+    
     @Override
     protected void createChartDataset() {
         xyDataset = new XYSeriesCollection();
@@ -46,14 +57,31 @@ public class LineChart extends AbstractLineChart {
         for (int i = 0; i < getSeries().size(); i++) {
             SeriesProperties curSeries = seriesByIndex(i);
             try {
-                int xFieldIndex = sRowset.getFields().find(curSeries.getXAxisProperty());
-                int yFieldIndex = sRowset.getFields().find(curSeries.getYAxisProperty());
                 XYSeries xySeries = new XYSeries(curSeries.getTitle());
-                for (int j = 0; j < sRowset.unwrap().size(); j++) {
-                    RowHostObject row = sRowset.getRow(j + 1);
-                    Number x = (Number) sRowset.unwrap().getConverter().convert2RowsetCompatible(row.getColumnObject(xFieldIndex), DataTypeInfo.DECIMAL);
-                    Number y = (Number) sRowset.unwrap().getConverter().convert2RowsetCompatible(row.getColumnObject(yFieldIndex), DataTypeInfo.DECIMAL);
-                    xySeries.add(x, y);
+                if (sRowset != null) {
+                    int xFieldIndex = sRowset.getFields().find(curSeries.getXAxisProperty());
+                    int yFieldIndex = sRowset.getFields().find(curSeries.getYAxisProperty());
+                    for (int j = 0; j < sRowset.unwrap().size(); j++) {
+                        RowHostObject row = sRowset.getRow(j + 1);
+                        Number x = (Number) sRowset.unwrap().getConverter().convert2RowsetCompatible(row.getColumnObject(xFieldIndex), DataTypeInfo.DECIMAL);
+                        Number y = (Number) sRowset.unwrap().getConverter().convert2RowsetCompatible(row.getColumnObject(yFieldIndex), DataTypeInfo.DECIMAL);
+                        xySeries.add(x, y);
+                    }
+                } else if (sObject != null) {
+                    Object oLength = sObject.get("length", sObject);
+                    if(oLength instanceof Number){
+                        int length = ((Number)oLength).intValue();
+                        for(int j=0;j<length;j++){
+                            Object oItem = sObject.get(j, sObject);
+                            if(oItem instanceof Scriptable){
+                                Scriptable sItem = (Scriptable)oItem;
+                                Object ox = ScriptUtils.js2Java(sItem.get(curSeries.getXAxisProperty(), sItem));
+                                Object oy = ScriptUtils.js2Java(sItem.get(curSeries.getYAxisProperty(), sItem));
+                                if(ox instanceof Number && oy instanceof Number)
+                                    xySeries.add((Number)ox, (Number)oy);
+                            }
+                        }
+                    }
                 }
                 ((XYSeriesCollection) xyDataset).addSeries(xySeries);
             } catch (Exception ex) {

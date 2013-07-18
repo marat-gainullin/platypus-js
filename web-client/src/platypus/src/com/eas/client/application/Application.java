@@ -31,7 +31,6 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.logging.client.ConsoleLogHandler;
-import com.google.gwt.logging.client.FirebugLogHandler;
 import com.google.gwt.logging.client.LogConfiguration;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.sencha.gxt.core.client.dom.XElement;
@@ -811,51 +810,92 @@ public class Application {
 		    });
 		}
 		$wnd.Style = _Style;
-		function _LineChart(chartTitle, xTitle, yTitle, pDs)
-		{
-        	var nativeChart = @com.eas.client.chart.LineChart::new(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/eas/client/model/Entity;)(chartTitle, xTitle, yTitle, pDs.unwrap());
-			this.addSeries = function(pXAxisField, pYAxisField, pTitle)
-			{
+		function _LineChart(chartTitle, xTitle, yTitle, pDs){
+			var _dataSource = pDs;
+        	var nativeChart = @com.eas.client.chart.LineChart::new(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Object;)(chartTitle, xTitle, yTitle, pDs.unwrap ? pDs.unwrap() : pDs);
+			this.addSeries = function(pXAxisField, pYAxisField, pTitle){
 				nativeChart.@com.eas.client.chart.LineChart::addSeries(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)(pXAxisField, pYAxisField, pTitle);
 			}
-			this.unwrap = function()
-			{
+			this.unwrap = function(){
 				return nativeChart; 
 			}
+			this.dataWillChange = function(){
+				nativeChart.@com.eas.client.chart.LineChart::dataWillChange()();
+			}
+			this.dataChanged = function(){
+				nativeChart.@com.eas.client.chart.LineChart::dataChanged()();
+			}
+			Object.defineProperty(this, "data", {
+				get: function(){
+					return _dataSource;
+				},
+				set: function(aValue){
+					nativeChart.@com.eas.client.chart.LineChart::changeDataSource(Ljava/lang/Object;)(aValue.unwrap ? aValue.unwrap() : aValue);
+					_dataSource = aValue;
+				}
+			});
+			nativeChart.@com.eas.client.chart.AbstractChart::setJsPublished(Lcom/eas/client/gxtcontrols/published/PublishedComponent;)(this);
 			return this; 
 		};
 		$wnd.LineChart = _LineChart;
-		function _TimeSeriesChart(chartTitle, xTitle, yTitle, pDs)
-		{
-        	var nativeChart = @com.eas.client.chart.TimeSeriesChart::new(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/eas/client/model/Entity;)(chartTitle, xTitle, yTitle, pDs.unwrap());
-			this.addSeries = function(pXAxisField, pYAxisField, pTitle)
-			{
+		function _TimeSeriesChart(chartTitle, xTitle, yTitle, pDs){
+			var _dataSource = pDs;
+        	var nativeChart = @com.eas.client.chart.TimeSeriesChart::new(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Object;)(chartTitle, xTitle, yTitle, pDs.unwrap ? pDs.unwrap() : pDs);
+			this.addSeries = function(pXAxisField, pYAxisField, pTitle){
 				nativeChart.@com.eas.client.chart.TimeSeriesChart::addSeries(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)(pXAxisField, pYAxisField, pTitle);
 			}
-			this.unwrap = function()
-			{
+			this.unwrap = function(){
 				return nativeChart; 
 			}
+			this.dataWillChange = function(){
+				nativeChart.@com.eas.client.chart.TimeSeriesChart::dataWillChange()();
+			}
+			this.dataChanged = function(){
+				nativeChart.@com.eas.client.chart.TimeSeriesChart::dataChanged()();
+			}
+			Object.defineProperty(this, "data", {
+				get: function(){
+					return _dataSource;
+				},
+				set: function(aValue){
+					nativeChart.@com.eas.client.chart.TimeSeriesChart::changeDataSource(Ljava/lang/Object;)(aValue.unwrap ? aValue.unwrap() : aValue);
+					_dataSource = aValue;
+				}
+			});
 			Object.defineProperty(this, "XLabelsFormat", {
-				get: function()
-				{
+				get: function(){
 					return nativeChart.@com.eas.client.chart.TimeSeriesChart::getXLabelsFormat();
 				},
-				set: function(aValue)
-				{
+				set: function(aValue){
 					nativeChart.@com.eas.client.chart.TimeSeriesChart::setXLabelsFormat(Ljava/lang/String;)(aValue);
 				}
 			});
+			nativeChart.@com.eas.client.chart.AbstractChart::setJsPublished(Lcom/eas/client/gxtcontrols/published/PublishedComponent;)(this);
 			return this; 
 		};
 		$wnd.TimeSeriesChart = _TimeSeriesChart;
-		function _PieChart(pTitle, pXAxisField, pYAxisField, pDs)
-		{
-        	var nativeChart = @com.eas.client.chart.PieChart::new(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/eas/client/model/Entity;)(pTitle, pXAxisField, pYAxisField, pDs.unwrap());
-			this.unwrap = function()
-			{
+		function _PieChart(pTitle, pXAxisField, pYAxisField, pDs){
+			var _dataSource = pDs;
+        	var nativeChart = @com.eas.client.chart.PieChart::new(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Object;)(pTitle, pXAxisField, pYAxisField, pDs.unwrap ? pDs.unwrap() : pDs);
+			this.unwrap = function(){
 				return nativeChart; 
 			}
+			this.dataWillChange = function(){
+				nativeChart.@com.eas.client.chart.PieChart::dataWillChange()();
+			}
+			this.dataChanged = function(){
+				nativeChart.@com.eas.client.chart.PieChart::dataChanged()();
+			}
+			Object.defineProperty(this, "data", {
+				get: function(){
+					return _dataSource;
+				},
+				set: function(aValue){
+					nativeChart.@com.eas.client.chart.PieChart::changeDataSource(Ljava/lang/Object;)(aValue.unwrap ? aValue.unwrap() : aValue);
+					_dataSource = aValue;
+				}
+			});
+			nativeChart.@com.eas.client.chart.AbstractChart::setJsPublished(Lcom/eas/client/gxtcontrols/published/PublishedComponent;)(this);
 			return this; 
 		};
 		$wnd.PieChart = _PieChart;

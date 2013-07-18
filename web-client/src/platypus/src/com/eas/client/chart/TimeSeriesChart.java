@@ -2,8 +2,6 @@ package com.eas.client.chart;
 
 import java.util.Date;
 
-import com.bearsoft.rowset.Row;
-import com.eas.client.model.Entity;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.sencha.gxt.chart.client.chart.axis.NumericAxis;
 import com.sencha.gxt.data.shared.LabelProvider;
@@ -13,8 +11,8 @@ public class TimeSeriesChart extends AbstractLineChart {
 
 	protected DateTimeFormat xAxisLabelFormat = DateTimeFormat.getFormat(TIMESTAMP_FORMAT);
 	
-	public TimeSeriesChart(String aTitle, String aXLabel, String aYLabel, Entity aEntity) {
-		super(aTitle, aXLabel, aYLabel, aEntity);
+	public TimeSeriesChart(String aTitle, String aXLabel, String aYLabel, Object aData) {
+		super(aTitle, aXLabel, aYLabel, createChartFiller(aData));
 	}
 
 	public String getXLabelsFormat() {
@@ -26,8 +24,8 @@ public class TimeSeriesChart extends AbstractLineChart {
     }
 	
 	@Override
-	protected NumericAxis<Row> createXAxis(String aTitle) {
-		NumericAxis<Row> axis = createNumericAxis(aTitle, Position.BOTTOM);
+	protected NumericAxis<Object> createXAxis(String aTitle) {
+		NumericAxis<Object> axis = createNumericAxis(aTitle, Position.BOTTOM);
 		axis.setLabelProvider(new LabelProvider<Number>() {
 
 			@Override

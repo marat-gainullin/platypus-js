@@ -3,9 +3,9 @@
  * and open the template in the editor.
  */
 
-const FUNC_TYPE_NAME = 'function';
-const APP_LOGGER_NAME = 'Application';
-const DEFAULT_ENCODING = "utf-8";
+var FUNC_TYPE_NAME = 'function';
+var APP_LOGGER_NAME = 'Application';
+var DEFAULT_ENCODING = "utf-8";
 
 // java imports
 Calendar = java.util.Calendar;

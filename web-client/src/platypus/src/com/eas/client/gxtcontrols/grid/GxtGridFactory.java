@@ -24,9 +24,9 @@ import com.eas.client.gxtcontrols.converters.DateRowValueConverter;
 import com.eas.client.gxtcontrols.converters.DoubleRowValueConverter;
 import com.eas.client.gxtcontrols.converters.ObjectRowValueConverter;
 import com.eas.client.gxtcontrols.converters.StringRowValueConverter;
-import com.eas.client.gxtcontrols.grid.fillers.ListStoreFiller;
-import com.eas.client.gxtcontrols.grid.fillers.TreeStoreFiller;
-import com.eas.client.gxtcontrols.grid.fillers.TreeStoreLazyFiller;
+import com.eas.client.gxtcontrols.grid.fillers.RowsListStoreFiller;
+import com.eas.client.gxtcontrols.grid.fillers.RowsTreeStoreFiller;
+import com.eas.client.gxtcontrols.grid.fillers.RowsTreeStoreLazyFiller;
 import com.eas.client.gxtcontrols.grid.valueproviders.RowValueProvider;
 import com.eas.client.gxtcontrols.grid.wrappers.PlatypusColumnConfig;
 import com.eas.client.gxtcontrols.grid.wrappers.PlatypusGridInlineRowEditing;
@@ -220,7 +220,7 @@ public class GxtGridFactory {
 			if (isLazyTreeConfigured()) {
 				grid = new MaskingTreeGrid<Row>((TreeStore<Row>) store, cm, cm.getColumn(0));
 				if (rowsModelElement.isCorrect()) {
-					TreeStoreLazyFiller filler = new TreeStoreLazyFiller((TreeStore<Row>) store, rowsSource, unaryLinkField.field, (Parameter) param2GetChildren.field, paramSourceField.field,
+					RowsTreeStoreLazyFiller filler = new RowsTreeStoreLazyFiller((TreeStore<Row>) store, rowsSource, unaryLinkField.field, (Parameter) param2GetChildren.field, paramSourceField.field,
 					        toEnsureRowset);
 					((TreeGrid<Row>) grid).setTreeLoader(filler.getLoader());
 				}
@@ -228,7 +228,7 @@ public class GxtGridFactory {
 				grid = new MaskingTreeGrid<Row>((TreeStore<Row>) store, cm, cm.getColumn(0));
 				grid.setView(new PlatypusTreeGridView());
 				if (rowsModelElement.isCorrect()) {
-					TreeStoreFiller filler = new TreeStoreFiller((TreeStore<Row>) store, rowsSource, unaryLinkField.field, toEnsureRowset);
+					RowsTreeStoreFiller filler = new RowsTreeStoreFiller((TreeStore<Row>) store, rowsSource, unaryLinkField.field, toEnsureRowset);
 					((TreeGrid<Row>) grid).setTreeLoader(filler.getLoader());
 				}
 			}
@@ -237,7 +237,7 @@ public class GxtGridFactory {
 			store.setAutoCommit(true);
 			grid = new Grid<Row>((ListStore<Row>) store, cm, new PlatypusGridView());
 			if (rowsModelElement.isCorrect()) {
-				ListStoreFiller filler = new ListStoreFiller((ListStore<Row>) store, rowsSource, toEnsureRowset);
+				RowsListStoreFiller filler = new RowsListStoreFiller((ListStore<Row>) store, rowsSource, toEnsureRowset);
 				grid.setLoader(filler.getLoader());
 			}
 		}

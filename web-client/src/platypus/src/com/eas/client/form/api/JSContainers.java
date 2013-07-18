@@ -869,8 +869,7 @@ public class JSContainers {
 			publishChildren(aPublished);
 		}
 
-		function publishChildren(aPublished)
-		{
+		function publishChildren(aPublished){
 			Object.defineProperty(aPublished, "children", {get : function(){
 				var ch = [];
 				for(var i=0;i<aPublished.count;i++)
