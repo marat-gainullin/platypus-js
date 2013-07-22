@@ -3,7 +3,6 @@ package com.eas.client.gxtcontrols.grid.fillers;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.bearsoft.rowset.Row;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
