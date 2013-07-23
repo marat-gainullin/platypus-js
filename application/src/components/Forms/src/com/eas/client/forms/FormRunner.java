@@ -212,8 +212,8 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
         }
     }
 
-    public FormRunner(String aFormId, Client aClient, Scriptable aScope, PrincipalHost aPrincipalHost, CompiledScriptDocumentsHost aCompiledScriptDocumentsHost) throws Exception {
-        super(aFormId, aClient, aScope, aPrincipalHost, aCompiledScriptDocumentsHost);
+    public FormRunner(String aFormId, Client aClient, Scriptable aScope, PrincipalHost aPrincipalHost, CompiledScriptDocumentsHost aCompiledScriptDocumentsHost, Object[] args) throws Exception {
+        super(aFormId, aClient, aScope, aPrincipalHost, aCompiledScriptDocumentsHost, args);
         setPrototype(FormRunnerPrototype.getInstance());
         formKey = aFormId;
     }

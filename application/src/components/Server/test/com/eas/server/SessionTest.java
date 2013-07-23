@@ -137,7 +137,8 @@ public class SessionTest {
                 public PlatypusPrincipal getPrincipal() {
                     return new AppPlatypusPrincipal("dummy", null);
                 }
-            }, new DummyCompiledScriptDocumentsHost());
+            }, new DummyCompiledScriptDocumentsHost(),
+            new Object[]{});
         }
 
         @Override

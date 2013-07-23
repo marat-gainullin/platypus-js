@@ -79,6 +79,8 @@ public class GxtModelControlsFactory extends GxtControlsFactory {
 			mGrid.setPublished(published);
 			checkBorders(mGrid, aTag);
 			processGeneralProperties(mGrid, aTag, published);
+			mGrid.load();
+			/*
 			Scheduler.get().scheduleDeferred(new ScheduledCommand() {
 
 				@Override
@@ -86,6 +88,7 @@ public class GxtModelControlsFactory extends GxtControlsFactory {
 					mGrid.load();
 				}
 			});
+			*/
 			return mGrid;
 		} else {
 			boolean readonly = !Utils.getBooleanAttribute(aTag, "editable", true);

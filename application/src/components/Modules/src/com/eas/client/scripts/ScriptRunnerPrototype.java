@@ -29,7 +29,6 @@ public class ScriptRunnerPrototype extends IdScriptableObject {
     private static final String ID_TOLOCALESTRING = "toLocaleString";
     private static final String ONLY_CONSTRUCTOR_MSG = "Can't call %s(...). Only new %s(...) is allowed.";
     private static final String CONSTRUCTOR_PARAMETER_MISSING = "For new %s(...) constructor, module name/id parameter is required.";
-
     protected static ScriptRunnerPrototype modulePrototype;
 
     public static ScriptRunnerPrototype getInstance() {
@@ -52,7 +51,7 @@ public class ScriptRunnerPrototype extends IdScriptableObject {
             obj.sealObject();
         }
     }
-    
+
     @Override
     public String getClassName() {
         return "Module";
@@ -121,7 +120,7 @@ public class ScriptRunnerPrototype extends IdScriptableObject {
                             try {
                                 ScriptRunner clientWrapper = lookupScriptRunner(scope);
                                 assert clientWrapper != null : BAD_SCRIPT_SCOPE_MSG;
-                                ScriptRunner scriptRunner = new ScriptRunner(scriptId, clientWrapper.getClient(), ScriptUtils.getScope(), clientWrapper.getPrincipalHost(), clientWrapper.getCompiledScriptDocumentsHost());
+                                ScriptRunner scriptRunner = new ScriptRunner(scriptId, clientWrapper.getClient(), ScriptUtils.getScope(), clientWrapper.getPrincipalHost(), clientWrapper.getCompiledScriptDocumentsHost(), (args.length > 1 && args[1] instanceof Object[]) ? (Object[]) args[1] : null);
                                 scriptRunner.setPrototype(this);
                                 return scriptRunner;
                             } catch (Exception ex) {
@@ -170,7 +169,7 @@ public class ScriptRunnerPrototype extends IdScriptableObject {
         }
         return (ScriptRunner) currentScope;
     }
-    
+
     public static RowsetHostObject<?> lookupEntity(Scriptable aScope) {
         Scriptable currentScope = aScope;
         while (currentScope != null && !(currentScope instanceof RowsetHostObject<?>)) {

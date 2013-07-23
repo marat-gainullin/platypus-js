@@ -164,7 +164,7 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
                     @Override
                     public Object execIdCall(IdFunctionObject f, Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
                         if (f.methodId() == Id_constructor && thisObj == null) {
-                            return super.execIdCall(f, cx, scope, thisObj, new Object[]{aClassName});
+                            return super.execIdCall(f, cx, scope, thisObj, new Object[]{aClassName, args});
                         } else {
                             return super.execIdCall(f, cx, scope, thisObj, args);
                         }
@@ -181,7 +181,7 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
                     @Override
                     public Object execIdCall(IdFunctionObject f, Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
                         if (f.methodId() == Id_constructor && thisObj == null) {
-                            return super.execIdCall(f, cx, scope, thisObj, new Object[]{aClassName});
+                            return super.execIdCall(f, cx, scope, thisObj, new Object[]{aClassName, args});
                         } else {
                             return super.execIdCall(f, cx, scope, thisObj, args);
                         }

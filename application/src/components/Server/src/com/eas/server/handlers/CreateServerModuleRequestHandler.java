@@ -56,7 +56,8 @@ public class CreateServerModuleRequestHandler extends SessionRequestHandler<Crea
                         aModuleId,
                         ScriptUtils.getScope(),
                         aServerCore,
-                        aServerCore);
+                        aServerCore,
+                        new Object[]{});
             } else {
                 serverModule = new ServerScriptRunner(
                         aServerCore,
@@ -64,7 +65,8 @@ public class CreateServerModuleRequestHandler extends SessionRequestHandler<Crea
                         aModuleId,
                         ScriptUtils.getScope(),
                         aServerCore,
-                        aServerCore);
+                        aServerCore,
+                        new Object[]{});
             }
         } else {
             throw new IllegalArgumentException(String.format("Can't obtain content of %s", aModuleId));

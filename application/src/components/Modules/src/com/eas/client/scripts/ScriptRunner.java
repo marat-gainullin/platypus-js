@@ -74,12 +74,12 @@ public class ScriptRunner extends ScriptableObject {
         }
     }
 
-    public ScriptRunner(String aAppElementId, Client aClient, Scriptable aScope, PrincipalHost aPrincipalHost, CompiledScriptDocumentsHost aCompiledScriptDocumentsHost) throws Exception {
-        this(aClient, aScope, aPrincipalHost, aCompiledScriptDocumentsHost);
+    public ScriptRunner(String aAppElementId, Client aClient, Scriptable aScope, PrincipalHost aPrincipalHost, CompiledScriptDocumentsHost aCompiledScriptDocumentsHost, Object[] args) throws Exception {
+        this(aClient, aScope, aPrincipalHost, aCompiledScriptDocumentsHost, args);
         setApplicationElementId(aAppElementId);
     }
 
-    public ScriptRunner(Client aClient, Scriptable aScope, PrincipalHost aPrincipalHost, CompiledScriptDocumentsHost aCompiledScriptDocumentsHost) throws Exception {
+    public ScriptRunner(Client aClient, Scriptable aScope, PrincipalHost aPrincipalHost, CompiledScriptDocumentsHost aCompiledScriptDocumentsHost, Object[] args) throws Exception {
         super(aScope, null);
         client = aClient;
         principalHost = aPrincipalHost;

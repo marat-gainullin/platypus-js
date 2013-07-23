@@ -31,7 +31,7 @@ public class ScriptsCache {
             app.getClient().getAppCache().remove(aModuleId);
         }
         if (runner == null) {
-            runner = new ScriptRunner(aModuleId, app.getClient(), ScriptUtils.getScope(), app, app);
+            runner = new ScriptRunner(aModuleId, app.getClient(), ScriptUtils.getScope(), app, app, new Object[]{});
             cache.put(aModuleId, runner);
         }
         return runner;

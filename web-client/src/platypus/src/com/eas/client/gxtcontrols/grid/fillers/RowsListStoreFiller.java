@@ -134,7 +134,7 @@ public class RowsListStoreFiller extends RowsetAdapter implements PropertyChange
 	}
 
 	@SuppressWarnings("serial")
-    protected void checkIfDataLoaded() {
+	protected void checkIfDataLoaded() {
 		if (loadCallback != null && rowset != null && !rowset.isPending() && deferred == 0) {
 			store.clear();
 			loadCallback.onSuccess(new ListLoadResult<Row>() {
@@ -173,24 +173,15 @@ public class RowsListStoreFiller extends RowsetAdapter implements PropertyChange
 
 	@Override
 	public void beforeRequery(RowsetRequeryEvent event) {
-		willLoad();
-	}
-
-	@Override
-	public void rowsetRequeried(RowsetRequeryEvent event) {
-		loaded();
-	}
-	
-	@Override
-	public void willLoad() {
 		try {
 			loader.load();
 		} catch (Exception ex) {
 			Logger.getLogger(RowsListStoreFiller.class.getName()).log(Level.SEVERE, ex.getMessage());
 		}
 	}
-	
-	public void loaded(){
+
+	@Override
+	public void rowsetRequeried(RowsetRequeryEvent event) {
 		try {
 			assert rowset != null && !rowset.isPending();
 			rowsetError = null;
@@ -198,6 +189,10 @@ public class RowsListStoreFiller extends RowsetAdapter implements PropertyChange
 		} catch (Exception ex) {
 			Logger.getLogger(RowsListStoreFiller.class.getName()).log(Level.SEVERE, ex.getMessage());
 		}
+	}
+
+	public void loaded() {
+		// no-op here because of rowset's and self generated events about rowset's data completeness.
 	}
 
 	@Override

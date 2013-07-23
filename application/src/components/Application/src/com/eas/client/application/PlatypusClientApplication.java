@@ -521,7 +521,7 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
             ApplicationElement appElement = client.getAppCache().get(appElementId);
             if (appElement != null) {
                 if (appElement.getType() == ClientConstants.ET_FORM) {
-                    final FormRunner form = new FormRunner(appElementId, client, ScriptUtils.getScope(), this, this);
+                    final FormRunner form = new FormRunner(appElementId, client, ScriptUtils.getScope(), this, this, new Object[]{});
                     EventQueue.invokeLater(new Runnable() {
                         @Override
                         public void run() {
@@ -534,11 +534,11 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
                     });
                     // When all windows are disposed, java VM exit automatically.
                 } else if (appElement.getType() == ClientConstants.ET_REPORT) {
-                    ReportRunner report = new ReportRunner(appElementId, client, ScriptUtils.getScope(), this, this);
+                    ReportRunner report = new ReportRunner(appElementId, client, ScriptUtils.getScope(), this, this, new Object[]{});
                     report.show();
                     exit(0);
                 } else if (appElement.getType() == ClientConstants.ET_COMPONENT) {
-                    ScriptRunner script = new ScriptRunner(appElementId, client, ScriptUtils.getScope(), this, this);
+                    ScriptRunner script = new ScriptRunner(appElementId, client, ScriptUtils.getScope(), this, this, new Object[]{});
                     script.execute();
                     exit(0);
                 } else if (appElement.getType() == ClientConstants.ET_RESOURCE) {
@@ -673,7 +673,7 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
                     @Override
                     public Object execIdCall(IdFunctionObject f, Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
                         if (f.methodId() == Id_constructor && thisObj == null) {
-                            return super.execIdCall(f, cx, scope, thisObj, new Object[]{aClassName});
+                            return super.execIdCall(f, cx, scope, thisObj, new Object[]{aClassName, args});
                         } else {
                             return super.execIdCall(f, cx, scope, thisObj, args);
                         }
@@ -690,7 +690,7 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
                     @Override
                     public Object execIdCall(IdFunctionObject f, Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
                         if (f.methodId() == Id_constructor && thisObj == null) {
-                            return super.execIdCall(f, cx, scope, thisObj, new Object[]{aClassName});
+                            return super.execIdCall(f, cx, scope, thisObj, new Object[]{aClassName, args});
                         } else {
                             return super.execIdCall(f, cx, scope, thisObj, args);
                         }
@@ -707,7 +707,7 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
                     @Override
                     public Object execIdCall(IdFunctionObject f, Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
                         if (f.methodId() == Id_constructor && thisObj == null) {
-                            return super.execIdCall(f, cx, scope, thisObj, new Object[]{aClassName});
+                            return super.execIdCall(f, cx, scope, thisObj, new Object[]{aClassName, args});
                         } else {
                             return super.execIdCall(f, cx, scope, thisObj, args);
                         }

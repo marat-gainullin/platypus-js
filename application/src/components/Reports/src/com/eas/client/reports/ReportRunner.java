@@ -28,8 +28,8 @@ public class ReportRunner extends ScriptRunner {
     private Function onBeforRender;
     
 
-    public ReportRunner(String aReportId, Client aClient, Scriptable aScope, PrincipalHost aPrincipalHost, CompiledScriptDocumentsHost aCompiledScriptDocumentsHost) throws Exception {
-        super(aReportId, aClient, aScope, aPrincipalHost, aCompiledScriptDocumentsHost);
+    public ReportRunner(String aReportId, Client aClient, Scriptable aScope, PrincipalHost aPrincipalHost, CompiledScriptDocumentsHost aCompiledScriptDocumentsHost, Object[] args) throws Exception {
+        super(aReportId, aClient, aScope, aPrincipalHost, aCompiledScriptDocumentsHost, args);
         setPrototype(ReportRunnerPrototype.getInstance());
     }
 
