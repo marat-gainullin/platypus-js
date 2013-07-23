@@ -3,7 +3,6 @@ package com.eas.client.gxtcontrols.grid.fillers;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.bearsoft.rowset.Row;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
@@ -30,18 +29,15 @@ public class JsListStoreFiller implements ListStoreFiller<JavaScriptObject> {
 
 			@Override
 			public void load(ListLoadConfig loadConfig, Callback<ListLoadResult<JavaScriptObject>, Throwable> callback) {
-				if (loadCallbackCounter++ == 0)
+				if (loadCallbackCounter++ == 0){
 					loadCallback = callback;
+				}
 			}
 
 		});
 		loader.addLoadHandler(new LoadResultListStoreBinding<ListLoadConfig, JavaScriptObject, ListLoadResult<JavaScriptObject>>(store));
 	}
 
-	public void willLoad(){
-		loader.load();
-	}
-	
 	public void loaded() {
 		if (loadCallbackCounter > 0 && --loadCallbackCounter == 0) {
 			loadCallback.onSuccess(new ListLoadResult<JavaScriptObject>() {

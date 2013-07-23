@@ -108,7 +108,8 @@ public class ServerReportRunnerPrototype extends IdScriptableObject {
                                         scriptId,
                                         ScriptUtils.getScope(),
                                         serverCoreWrapper.getServerCore(),
-                                        serverCoreWrapper.getServerCore());
+                                        serverCoreWrapper.getServerCore(),
+                                        (args.length > 1 && args[1] instanceof Object[]) ? (Object[]) args[1] : null);
                             } catch (Exception ex) {
                                 throw new IllegalArgumentException(ex);
                             }

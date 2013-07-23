@@ -123,7 +123,7 @@ public class ReportRunnerPrototype extends IdScriptableObject {
                             try {
                                 ScriptRunner clientWrapper = ScriptRunnerPrototype.lookupScriptRunner(scope);
                                 assert clientWrapper != null : ScriptRunnerPrototype.BAD_SCRIPT_SCOPE_MSG;
-                                ReportRunner rr = new ReportRunner(scriptId, clientWrapper.getClient(), ScriptUtils.getScope(), clientWrapper.getPrincipalHost(), clientWrapper.getCompiledScriptDocumentsHost());
+                                ReportRunner rr = new ReportRunner(scriptId, clientWrapper.getClient(), ScriptUtils.getScope(), clientWrapper.getPrincipalHost(), clientWrapper.getCompiledScriptDocumentsHost(), (args.length > 1 && args[1] instanceof Object[]) ? (Object[]) args[1] : null);
                                 rr.setPrototype(this);
                                 return rr;
                             } catch (Exception ex) {

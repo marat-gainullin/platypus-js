@@ -94,30 +94,41 @@ public abstract class AbstractChart extends Chart<Object> {
 		setAnimated(true);
 		setShadow(true);
 		setShadowChart(true);
-		filler = aFiller;
-		bindStore(aFiller.getStore());
-		setLoader(aFiller.getLoader());
 		final Legend<Object> legend = new Legend<Object>();
 		legend.setPosition(Position.RIGHT);
 		legend.setItemHighlighting(true);
 		legend.setItemHiding(true);
 		setLegend(legend);
+
+		filler = aFiller;
+		if (filler != null) {
+			onLoaderLoadException();
+			bindStore(filler.getStore());
+			setLoader(filler.getLoader());
+			getLoader().load();
+			dataChanged();
+		}
 	}
 
 	public void changeDataSource(Object aDataSource) {
 		filler = createChartFiller(aDataSource);
-		bindStore(filler.getStore());
-		setLoader(filler.getLoader());
-		dataWillChange();
-		dataChanged();
+		if (filler != null) {
+			onLoaderLoadException();
+			bindStore(filler.getStore());
+			setLoader(filler.getLoader());
+			getLoader().load();
+			dataChanged();
+		}
 	}
 
 	public void dataWillChange() {
-		filler.willLoad();
+		if (getLoader() != null)
+			getLoader().load();
 	}
 
 	public void dataChanged() {
-		filler.loaded();
+		if (filler != null)
+			filler.loaded();
 	}
 
 	public PublishedComponent getJsPublished() {
@@ -194,15 +205,11 @@ public abstract class AbstractChart extends Chart<Object> {
 		redrawChart();
 	}
 
-	@Override
-	protected void onAttach() {
-		super.onAttach();
-		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-			@Override
-			public void execute() {
-				dataWillChange();
-				dataChanged();
-			}
-		});
-	}
+	/*
+	 * @Override protected void onAttach() { super.onAttach();
+	 * Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+	 * 
+	 * @Override public void execute() { dataWillChange(); dataChanged(); } });
+	 * }
+	 */
 }

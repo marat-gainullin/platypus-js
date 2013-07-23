@@ -830,8 +830,10 @@ public class Application {
 					return _dataSource;
 				},
 				set: function(aValue){
-					nativeChart.@com.eas.client.chart.LineChart::changeDataSource(Ljava/lang/Object;)(aValue.unwrap ? aValue.unwrap() : aValue);
-					_dataSource = aValue;
+					if(_dataSource != aValue){
+					    nativeChart.@com.eas.client.chart.LineChart::changeDataSource(Ljava/lang/Object;)(aValue.unwrap ? aValue.unwrap() : aValue);
+				        _dataSource = aValue;
+					}
 				}
 			});
 			nativeChart.@com.eas.client.chart.AbstractChart::setJsPublished(Lcom/eas/client/gxtcontrols/published/PublishedComponent;)(this);

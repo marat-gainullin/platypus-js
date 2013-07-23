@@ -1,5 +1,6 @@
 package com.eas.client.chart;
 
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -48,7 +49,9 @@ public abstract class AbstractLineChart extends AbstractChart {
 					Object oValue = Utils.toJava(item.get(fieldName));
 					if (oValue instanceof Number)
 						return ((Number) oValue).doubleValue();
-					else
+					else if (oValue instanceof Date){
+						return Long.valueOf(((Date) oValue).getTime()).doubleValue();
+					}else
 						return null;
 				}
 			} catch (Exception e) {
