@@ -142,11 +142,11 @@ public class SessionTest {
         }
 
         @Override
-        protected void setApplicationElementId(String aAppElementId) throws Exception {
+        protected void setApplicationElementId(String aAppElementId, Object[] args) throws Exception {
         }
 
         @Override
-        protected void prepare(ScriptDocument scriptDoc) throws Exception {
+        protected void prepare(ScriptDocument scriptDoc, Object[] args) throws Exception {
         }
     }
 

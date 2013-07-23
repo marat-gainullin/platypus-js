@@ -1205,11 +1205,11 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
     }
 
     @Override
-    protected void prepare(ScriptDocument scriptDoc) throws Exception {
+    protected void prepare(ScriptDocument scriptDoc, Object[] args) throws Exception {
         prepareRoles(scriptDoc);
         prepareModel(scriptDoc);
         Runnable handlersResolver = prepareForm(scriptDoc);
-        prepareScript(scriptDoc);
+        prepareScript(scriptDoc, args);
         handlersResolver.run();
     }
 

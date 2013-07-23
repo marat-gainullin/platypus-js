@@ -34,10 +34,10 @@ public class ReportRunner extends ScriptRunner {
     }
 
     @Override
-    protected void prepare(ScriptDocument scriptDoc) throws Exception {
+    protected void prepare(ScriptDocument scriptDoc, Object[] args) throws Exception {
         assert scriptDoc instanceof ReportDocument;
         template = ((ReportDocument) scriptDoc).getTemplate();
-        super.prepare(scriptDoc);
+        super.prepare(scriptDoc, args);
     }
 
     @Override
