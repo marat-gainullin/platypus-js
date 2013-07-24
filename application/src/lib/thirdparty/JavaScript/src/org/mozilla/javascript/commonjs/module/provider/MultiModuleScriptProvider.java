@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 package org.mozilla.javascript.commonjs.module.provider;
 
 import java.net.URI;
@@ -17,9 +21,9 @@ import org.mozilla.javascript.commonjs.module.ModuleScriptProvider;
 public class MultiModuleScriptProvider implements ModuleScriptProvider
 {
     private final ModuleScriptProvider[] providers;
-    
+
     /**
-     * Creates a new multiplexing module script provider tht gathers the 
+     * Creates a new multiplexing module script provider tht gathers the
      * specified providers
      * @param providers the providers to multiplex.
      */
@@ -30,12 +34,12 @@ public class MultiModuleScriptProvider implements ModuleScriptProvider
         }
         this.providers = l.toArray(new ModuleScriptProvider[l.size()]);
     }
-    
+
     public ModuleScript getModuleScript(Context cx, String moduleId, URI uri,
-                                        Scriptable paths) throws Exception {
+                                        URI base, Scriptable paths) throws Exception {
         for (ModuleScriptProvider provider : providers) {
             final ModuleScript script = provider.getModuleScript(cx, moduleId,
-                    uri, paths);
+                    uri, base, paths);
             if(script != null) {
                 return script;
             }

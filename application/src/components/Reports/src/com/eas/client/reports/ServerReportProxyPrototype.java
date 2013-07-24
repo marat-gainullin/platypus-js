@@ -132,6 +132,20 @@ public class ServerReportProxyPrototype extends IdScriptableObject {
             }
         }
 
+        if (thisObj instanceof ServerReportProxyPrototype) {
+            switch (id) {
+
+                case Id_toString:
+                case Id_toLocaleString: {
+                    // toLocaleString is just an alias for toString for now
+                    return "[platypus server report proxy]";
+                }
+
+                default:
+                    throw new IllegalArgumentException(String.valueOf(id));
+            }
+        }
+
         // The rest of Module.prototype methods require thisObj to be ServerReportProxy or ReportRunner
 
         if (!(thisObj instanceof ServerReportProxy) && !(thisObj instanceof ReportRunner)) {
@@ -142,7 +156,7 @@ public class ServerReportProxyPrototype extends IdScriptableObject {
             case Id_toString:
             case Id_toLocaleString: {
                 // toLocaleString is just an alias for toString for now
-                return String.format("Platypus server report proxy ( %s )", (thisObj instanceof ServerReportProxy) ? ((ServerScriptProxy) thisObj).getScriptName() : String.valueOf(((ReportRunner) thisObj).getApplicationElementId()));
+                return String.format("%s (Platypus server report proxy)", (thisObj instanceof ServerReportProxy) ? ((ServerScriptProxy) thisObj).getScriptName() : String.valueOf(((ReportRunner) thisObj).getApplicationElementId()));
             }
 
             case Id_toSource:
@@ -153,4 +167,3 @@ public class ServerReportProxyPrototype extends IdScriptableObject {
         }
     }
 }
-

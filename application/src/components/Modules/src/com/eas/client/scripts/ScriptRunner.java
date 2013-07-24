@@ -562,32 +562,32 @@ public class ScriptRunner extends ScriptableObject {
 
         @Override
         public Object get(String name, Scriptable start) {
-            return func.get(name, start);
+            return func.get(name, start == this ? func : start);
         }
 
         @Override
         public Object get(int index, Scriptable start) {
-            return func.get(index, start);
+            return func.get(index, start == this ? func : start);
         }
 
         @Override
         public boolean has(String name, Scriptable start) {
-            return func.has(name, start);
+            return func.has(name, start == this ? func : start);
         }
 
         @Override
         public boolean has(int index, Scriptable start) {
-            return func.has(index, start);
+            return func.has(index, start == this ? func : start);
         }
 
         @Override
         public void put(String name, Scriptable start, Object value) {
-            func.put(name, start, value);
+            func.put(name, start == this ? func : start, value);
         }
 
         @Override
         public void put(int index, Scriptable start, Object value) {
-            func.put(index, start, value);
+            func.put(index, start == this ? func : start, value);
         }
 
         @Override

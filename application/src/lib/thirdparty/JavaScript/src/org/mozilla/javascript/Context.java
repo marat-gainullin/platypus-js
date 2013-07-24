@@ -1,40 +1,8 @@
 /* -*- Mode: java; tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 4 -*-
  *
- * ***** BEGIN LICENSE BLOCK *****
- * Version: MPL 1.1/GPL 2.0
- *
- * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- * http://www.mozilla.org/MPL/
- *
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
- * for the specific language governing rights and limitations under the
- * License.
- *
- * The Original Code is Rhino code, released
- * May 6, 1999.
- *
- * The Initial Developer of the Original Code is
- * Netscape Communications Corporation.
- * Portions created by the Initial Developer are Copyright (C) 1997-2000
- * the Initial Developer. All Rights Reserved.
- *
- * Contributor(s):
- *    Bob Jervis
- *
- * Alternatively, the contents of this file may be used under the terms of
- * the GNU General Public License Version 2 or later (the "GPL"), in which
- * case the provisions of the GPL are applicable instead of those above. If
- * you wish to allow use of your version of this file only under the terms of
- * the GPL and not to allow others to use your version of this file under the
- * MPL, indicate your decision by deleting the provisions above and replacing
- * them with the notice and other provisions required by the GPL. If you do
- * not delete the provisions above, a recipient may use your version of this
- * file under either the MPL or the GPL.
- *
- * ***** END LICENSE BLOCK ***** */
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // API class
 
@@ -324,14 +292,14 @@ public class Context
     public static final Object[] emptyArgs = ScriptRuntime.emptyArgs;
 
     /**
-     * Creates a new Context. The context will be associated with the {@link 
+     * Creates a new Context. The context will be associated with the {@link
      * ContextFactory#getGlobal() global context factory}.
      *
      * Note that the Context must be associated with a thread before
      * it can be used to execute a script.
-     * @deprecated this constructor is deprecated because it creates a 
-     * dependency on a static singleton context factory. Use 
-     * {@link ContextFactory#enter()} or 
+     * @deprecated this constructor is deprecated because it creates a
+     * dependency on a static singleton context factory. Use
+     * {@link ContextFactory#enter()} or
      * {@link ContextFactory#call(ContextAction)} instead. If you subclass
      * this class, consider using {@link #Context(ContextFactory)} constructor
      * instead in the subclasses' constructors.
@@ -340,13 +308,13 @@ public class Context
     {
         this(ContextFactory.getGlobal());
     }
-    
+
     /**
      * Creates a new context. Provided as a preferred super constructor for
      * subclasses in place of the deprecated default public constructor.
      * @param factory the context factory associated with this context (most
      * likely, the one that created the context). Can not be null. The context
-     * features are inherited from the factory, and the context will also 
+     * features are inherited from the factory, and the context will also
      * otherwise use its factory's services.
      * @throws IllegalArgumentException if factory parameter is null.
      */
@@ -356,7 +324,7 @@ public class Context
             throw new IllegalArgumentException("factory == null");
         }
         this.factory = factory;
-        setLanguageVersion(VERSION_DEFAULT);
+        version = VERSION_DEFAULT;
         optimizationLevel = codegenClass != null ? 0 : -1;
         maximumInterpreterStackDepth = Integer.MAX_VALUE;
     }
@@ -1144,11 +1112,11 @@ public class Context
             return null;
         }
     }
-    
+
     /**
      * Execute script that may pause execution by capturing a continuation.
      * Caller must be prepared to catch a ContinuationPending exception
-     * and resume execution by calling 
+     * and resume execution by calling
      * {@link #resumeContinuation(Object, Scriptable, Object)}.
      * @param script The script to execute. Script must have been compiled
      *      with interpreted mode (optimization level -1)
@@ -1171,11 +1139,11 @@ public class Context
         return callFunctionWithContinuations((InterpretedFunction) script,
                 scope, ScriptRuntime.emptyArgs);
     }
-    
+
     /**
      * Call function that may pause execution by capturing a continuation.
      * Caller must be prepared to catch a ContinuationPending exception
-     * and resume execution by calling 
+     * and resume execution by calling
      * {@link #resumeContinuation(Object, Scriptable, Object)}.
      * @param function The function to call. The function must have been
      *      compiled with interpreted mode (optimization level -1)
@@ -1203,10 +1171,10 @@ public class Context
         isContinuationsTopCall = true;
         return ScriptRuntime.doTopCall(function, this, scope, scope, args);
     }
-    
+
     /**
      * Capture a continuation from the current execution. The execution must
-     * have been started via a call to 
+     * have been started via a call to
      * {@link #executeScriptWithContinuations(Script, Scriptable)} or
      * {@link #callFunctionWithContinuations(Callable, Scriptable, Object[])}.
      * This implies that the code calling
@@ -1221,7 +1189,7 @@ public class Context
         return new ContinuationPending(
                 Interpreter.captureContinuation(this));
     }
-    
+
     /**
      * Restarts execution of the JavaScript suspended at the call
      * to {@link #captureContinuation()}. Execution of the code will resume
@@ -1230,7 +1198,7 @@ public class Context
      * Execution of the script will either conclude normally and the
      * result returned, another continuation will be captured and
      * thrown, or the script will terminate abnormally and throw an exception.
-     * @param continuation The value returned by 
+     * @param continuation The value returned by
      * {@link ContinuationPending#getContinuation()}
      * @param functionResult This value will appear to the code being resumed
      *      as the result of the function that captured the continuation
@@ -1336,7 +1304,7 @@ public class Context
      *
      * @param source the source string
      * @param sourceName a string describing the source, such as a filename
-     * @param lineno the starting line number for reporting errors. Use 
+     * @param lineno the starting line number for reporting errors. Use
      *        0 if the line number is unknown.
      * @param securityDomain an arbitrary object that specifies security
      *        information about the origin or owner of the script. For
@@ -1984,17 +1952,17 @@ public class Context
         classShutter = shutter;
         hasClassShutter = true;
     }
-    
+
     final synchronized ClassShutter getClassShutter()
     {
         return classShutter;
     }
-    
+
     public interface ClassShutterSetter {
         public void setClassShutter(ClassShutter shutter);
         public ClassShutter getClassShutter();
     }
-    
+
     public final synchronized ClassShutterSetter getClassShutterSetter() {
         if (hasClassShutter)
             return null;
@@ -2056,27 +2024,6 @@ public class Context
         if (threadLocalMap == null)
             return;
         threadLocalMap.remove(key);
-    }
-
-    /**
-     * @deprecated
-     * @see #FEATURE_DYNAMIC_SCOPE
-     * @see #hasFeature(int)
-     */
-    public final boolean hasCompileFunctionsWithDynamicScope()
-    {
-        return compileFunctionsWithDynamicScopeFlag;
-    }
-
-    /**
-     * @deprecated
-     * @see #FEATURE_DYNAMIC_SCOPE
-     * @see #hasFeature(int)
-     */
-    public final void setCompileFunctionsWithDynamicScope(boolean flag)
-    {
-        if (sealed) onSealedMutation();
-        compileFunctionsWithDynamicScopeFlag = flag;
     }
 
     /**
@@ -2197,10 +2144,10 @@ public class Context
      * Returns an object which specifies an E4X implementation to use within
      * this <code>Context</code>. Note that the XMLLib.Factory interface should
      * be considered experimental.
-     * 
+     *
      * The default implementation uses the implementation provided by this
      * <code>Context</code>'s {@link ContextFactory}.
-     * 
+     *
      * @return An XMLLib.Factory. Should not return <code>null</code> if
      *         {@link #FEATURE_E4X} is enabled. See {@link #hasFeature}.
      */
@@ -2635,7 +2582,6 @@ public class Context
     private boolean generatingDebug;
     private boolean generatingDebugChanged;
     private boolean generatingSource=true;
-    boolean compileFunctionsWithDynamicScopeFlag;
     boolean useDynamicScope;
     private int optimizationLevel;
     private int maximumInterpreterStackDepth;

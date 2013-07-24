@@ -127,6 +127,20 @@ public class ServerScriptRunnerPrototype extends IdScriptableObject {
             }
         }
 
+        if (thisObj instanceof ServerScriptRunnerPrototype) {
+            switch (id) {
+
+                case Id_toString:
+                case Id_toLocaleString: {
+                    // toLocaleString is just an alias for toString for now
+                    return "[platypus server module]";
+                }
+
+                default:
+                    throw new IllegalArgumentException(String.valueOf(id));
+            }
+        }
+
         // The rest of Module.prototype methods require thisObj to be ScriptRunner
 
         if (!(thisObj instanceof ServerScriptRunner)) {
@@ -138,7 +152,7 @@ public class ServerScriptRunnerPrototype extends IdScriptableObject {
             case Id_toString:
             case Id_toLocaleString: {
                 // toLocaleString is just an alias for toString for now
-                return String.format("Platypus module ( %s )", thisScriptRunner.getModuleId());
+                return String.format("%s (Platypus server module)", thisScriptRunner.getModuleId());
             }
 
             case Id_toSource:

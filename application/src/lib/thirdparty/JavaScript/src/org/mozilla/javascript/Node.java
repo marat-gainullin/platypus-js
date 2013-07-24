@@ -1,46 +1,12 @@
 /* -*- Mode: java; tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 4 -*-
  *
- * ***** BEGIN LICENSE BLOCK *****
- * Version: MPL 1.1/GPL 2.0
- *
- * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- * http://www.mozilla.org/MPL/
- *
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
- * for the specific language governing rights and limitations under the
- * License.
- *
- * The Original Code is Rhino code, released
- * May 6, 1999.
- *
- * The Initial Developer of the Original Code is
- * Netscape Communications Corporation.
- * Portions created by the Initial Developer are Copyright (C) 1997-1999
- * the Initial Developer. All Rights Reserved.
- *
- * Contributor(s):
- *   Norris Boyd
- *   Roshan James
- *   Roger Lawrence
- *   Mike McCabe
- *
- * Alternatively, the contents of this file may be used under the terms of
- * the GNU General Public License Version 2 or later (the "GPL"), in which
- * case the provisions of the GPL are applicable instead of those above. If
- * you wish to allow use of your version of this file only under the terms of
- * the GPL and not to allow others to use your version of this file under the
- * MPL, indicate your decision by deleting the provisions above and replacing
- * them with the notice and other provisions required by the GPL. If you do
- * not delete the provisions above, a recipient may use your version of this
- * file under either the MPL or the GPL.
- *
- * ***** END LICENSE BLOCK ***** */
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 package org.mozilla.javascript;
 
+import org.mozilla.javascript.ast.Comment;
 import org.mozilla.javascript.ast.FunctionNode;
 import org.mozilla.javascript.ast.Jump;
 import org.mozilla.javascript.ast.Name;
@@ -95,7 +61,7 @@ public class Node implements Iterable<Node>
         DESTRUCTURING_NAMES  = 22,
         DESTRUCTURING_PARAMS = 23,
         JSDOC_PROP           = 24,
-        EXPRESSION_CLOSURE_PROP = 25, // JS 1.8 expression closure pseudo-return 
+        EXPRESSION_CLOSURE_PROP = 25, // JS 1.8 expression closure pseudo-return
         DESTRUCTURING_SHORTHAND = 26, // JS 1.8 destructuring shorthand
         LAST_PROP            = 26;
 
@@ -210,14 +176,27 @@ public class Node implements Iterable<Node>
      *     this node
      */
     public String getJsDoc() {
-        return (String) getProp(JSDOC_PROP);
+        Comment comment = getJsDocNode();
+        if (comment != null) {
+          return comment.getValue();
+        }
+        return null;
+    }
+
+    /**
+     * Gets the JsDoc Comment object attached to this node.
+     * @return the Comment or {@code null} if no JsDoc is attached to
+     *     this node
+     */
+    public Comment getJsDocNode() {
+        return (Comment) getProp(JSDOC_PROP);
     }
 
     /**
      * Sets the JsDoc comment string attached to this node.
      */
-    public void setJsDoc(String jsdoc) {
-        putProp(JSDOC_PROP, jsdoc);
+    public void setJsDocNode(Comment jsdocNode) {
+        putProp(JSDOC_PROP, jsdocNode);
     }
 
     public boolean hasChildren() {
@@ -1027,6 +1006,38 @@ public class Node implements Iterable<Node>
 
           default:
             return false;
+        }
+    }
+
+    /**
+     * Recursively unlabel every TARGET or YIELD node in the tree.
+     *
+     * This is used and should only be used for inlining finally blocks where
+     * jsr instructions used to be. It is somewhat hackish, but implementing
+     * a clone() operation would take much, much more effort.
+     *
+     * This solution works for inlining finally blocks because you should never
+     * be writing any given block to the class file simultaneously. Therefore,
+     * an unlabeling will never occur in the middle of a block.
+     */
+    public void resetTargets()
+    {
+        if (type == Token.FINALLY) {
+            resetTargets_r();
+        } else {
+            Kit.codeBug();
+        }
+    }
+
+    private void resetTargets_r()
+    {
+        if (type == Token.TARGET || type == Token.YIELD) {
+            labelId(-1);
+        }
+        Node child = first;
+        while (child != null) {
+            child.resetTargets_r();
+            child = child.next;
         }
     }
 
