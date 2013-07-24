@@ -141,7 +141,11 @@ public class ScriptRunner extends ScriptableObject {
                     Breakpoints.getInstance().checkPendingBreakpoints();
                 }
                 if (scriptDoc.getScript() instanceof Function) {
-                    ((Function) scriptDoc.getScript()).call(context, this, this, args);
+                    Object[] jsArgs = new Object[args != null ? args.length : 0];
+                    for(int i=0;i<jsArgs.length;i++)
+                        jsArgs[i] = ScriptUtils.javaToJS(args[i], this);
+                    defineProperty("arguments", jsArgs, ScriptableObject.READONLY);
+                    ((Function) scriptDoc.getScript()).call(context, this, this, jsArgs);
                 } else {
                     scriptDoc.getScript().exec(context, this);
                 }
