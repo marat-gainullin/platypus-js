@@ -7,7 +7,6 @@
  * author.
  * All rights reserved.
  */
-
 package com.eas.client.model.gui.edits.fields;
 
 import com.bearsoft.rowset.metadata.Field;
@@ -17,15 +16,13 @@ import com.eas.client.model.Entity;
  *
  * @author mg
  */
-public class NewFieldEdit<E extends Entity<?, ?, E>> extends DeleteFieldEdit<E>{
+public class NewFieldEdit<E extends Entity<?, ?, E>> extends DeleteFieldEdit<E> {
 
-    public NewFieldEdit(E aEntity)
-    {
-        super(aEntity, (Field)null);
+    public NewFieldEdit(E aEntity) {
+        super(aEntity, (Field) null);
     }
-    
-    public NewFieldEdit(E aEntity, Field aField)
-    {
+
+    public NewFieldEdit(E aEntity, Field aField) {
         super(aEntity, aField);
     }
 
@@ -46,5 +43,5 @@ public class NewFieldEdit<E extends Entity<?, ?, E>> extends DeleteFieldEdit<E>{
     @Override
     public Field getField() {
         return field;
-    }   
+    }
 }

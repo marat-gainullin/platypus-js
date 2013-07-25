@@ -5,6 +5,7 @@
 package com.eas.client.dbstructure.gui.edits;
 
 import com.bearsoft.rowset.metadata.Field;
+import com.eas.client.DbClient;
 import com.eas.client.SQLUtils;
 import com.eas.client.dbstructure.SqlActionsController;
 import com.eas.client.dbstructure.SqlActionsController.AddFieldAction;
@@ -12,6 +13,7 @@ import com.eas.client.dbstructure.SqlActionsController.DescribeFieldAction;
 import com.eas.client.dbstructure.SqlActionsController.DropFieldAction;
 import com.eas.client.dbstructure.exceptions.DbActionException;
 import com.eas.client.model.dbscheme.FieldsEntity;
+import com.eas.client.sqldrivers.SqlDriver;
 
 /**
  *
@@ -19,10 +21,10 @@ import com.eas.client.model.dbscheme.FieldsEntity;
  */
 public class NewFieldEdit extends DbStructureEdit {
 
-    protected Field field = null;
-    protected FieldsEntity entity = null;
+    protected Field field;
+    protected FieldsEntity entity;
 
-    public NewFieldEdit(SqlActionsController aSqlController, FieldsEntity aFieldsEntity, Field aField) {
+    public NewFieldEdit(SqlActionsController aSqlController, FieldsEntity aFieldsEntity, Field aField) throws Exception {
         super(aSqlController);
         field = aField;
         entity = aFieldsEntity;
@@ -61,13 +63,17 @@ public class NewFieldEdit extends DbStructureEdit {
         }
     }
 
-    private void createFieldIfNeeded() {
+    public Field getField() {
+        return field;
+    }
+
+    private void createFieldIfNeeded() throws Exception {
         if (field == null) {
             field = createField();
         }
     }
 
-    private Field createField() {
+    private Field createField() throws Exception {
         com.eas.client.model.gui.edits.fields.NewFieldEdit<FieldsEntity> substEdit = new com.eas.client.model.gui.edits.fields.NewFieldEdit<>(entity);
         Field rsmd = substEdit.getField();
         if (SQLUtils.getTypeGroup(rsmd.getTypeInfo().getSqlType()) == SQLUtils.TypesGroup.STRINGS
@@ -75,6 +81,10 @@ public class NewFieldEdit extends DbStructureEdit {
             rsmd.setSize(100);
         }
         rsmd.setTableName(entity.getTableName());
+        DbClient client = entity.getModel().getClient();
+        String dbId = entity.getModel().getDbId();
+        SqlDriver driver = client.getDbMetadataCache(dbId).getConnectionDriver();
+        driver.getTypesResolver().resolve2RDBMS(rsmd);
         return rsmd;
     }
 

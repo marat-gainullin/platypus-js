@@ -7,6 +7,7 @@ package com.eas.designer.application.dbdiagram.nodes;
 import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.ForeignKeySpec;
+import com.eas.client.DbClient;
 import com.eas.client.SQLUtils;
 import com.eas.client.dbstructure.DbStructureUtils;
 import com.eas.client.dbstructure.SqlActionsController;
@@ -19,6 +20,7 @@ import com.eas.client.model.dbscheme.DbSchemeModel;
 import com.eas.client.model.dbscheme.FieldsEntity;
 import com.eas.client.model.gui.edits.DeleteRelationEdit;
 import com.eas.client.model.gui.edits.fields.ChangeFieldEdit;
+import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.designer.explorer.model.nodes.FieldNode;
 import java.beans.PropertyChangeEvent;
 import java.util.Set;
@@ -122,29 +124,36 @@ public class TableFieldNode extends FieldNode {
 
     @Override
     protected UndoableEdit editType(Integer val) {
-        Field oldContent = new Field(field);
-        Field newContent = new Field(field);
-        newContent.setTypeInfo(DataTypeInfo.valueOf(val));
-        CompoundEdit section = new NotSavableDbStructureCompoundEdit();
-        Set<Relation> rels = FieldsEntity.getInOutRelationsByEntityField(getEntity(), field);
-        int rCount = DbStructureUtils.getRecordsCountByField((FieldsEntity) getEntity(), oldContent.getName());
-        String msg = null;
-        String promtMsg1 = "areYouSureReTypeFieldInRelationsPresent"; //NOI18N
-        String promtMsg2 = "areYouSureReTypeFieldDataPresent"; //NOI18N
-        String promtMsg3 = "areYouSureReTypeFieldInRelationsDataPresent"; //NOI18N
-        if (SQLUtils.getTypeGroup(newContent.getTypeInfo().getSqlType()) == SQLUtils.TypesGroup.LOBS || SQLUtils.getTypeGroup(oldContent.getTypeInfo().getSqlType()) == SQLUtils.TypesGroup.LOBS) {
-            promtMsg1 = "areYouSureBlobFieldInRelationsPresent"; //NOI18N
-            promtMsg2 = "areYouSureBlobFieldDataPresent"; //NOI18N
-            promtMsg3 = "areYouSureBlobFieldInRelationsDataPresent"; //NOI18N
-        }
-        if (rCount == 0 && !rels.isEmpty()) {
-            msg = DbStructureUtils.getString(promtMsg1, String.valueOf(rels.size()), null);
-        } else if (rCount > 0 && rels.isEmpty()) {
-            msg = DbStructureUtils.getString(promtMsg2, String.valueOf(rCount), null);
-        } else if (rCount > 0 && !rels.isEmpty()) {
-            msg = DbStructureUtils.getString(promtMsg3, String.valueOf(rels.size()), String.valueOf(rCount));
-        }
         try {
+            Field oldContent = new Field(field);
+            Field newContent = new Field(field);
+            newContent.setTypeInfo(DataTypeInfo.valueOf(val));
+            //
+            DbSchemeModel model = (DbSchemeModel) getEntity().getModel();
+            DbClient client = model.getClient();
+            String dbId = model.getDbId();
+            SqlDriver driver = client.getDbMetadataCache(dbId).getConnectionDriver();
+            driver.getTypesResolver().resolve2RDBMS(newContent);
+
+            CompoundEdit section = new NotSavableDbStructureCompoundEdit();
+            Set<Relation> rels = FieldsEntity.getInOutRelationsByEntityField(getEntity(), field);
+            int rCount = DbStructureUtils.getRecordsCountByField((FieldsEntity) getEntity(), oldContent.getName());
+            String msg = null;
+            String promtMsg1 = "areYouSureReTypeFieldInRelationsPresent"; //NOI18N
+            String promtMsg2 = "areYouSureReTypeFieldDataPresent"; //NOI18N
+            String promtMsg3 = "areYouSureReTypeFieldInRelationsDataPresent"; //NOI18N
+            if (SQLUtils.getTypeGroup(newContent.getTypeInfo().getSqlType()) == SQLUtils.TypesGroup.LOBS || SQLUtils.getTypeGroup(oldContent.getTypeInfo().getSqlType()) == SQLUtils.TypesGroup.LOBS) {
+                promtMsg1 = "areYouSureBlobFieldInRelationsPresent"; //NOI18N
+                promtMsg2 = "areYouSureBlobFieldDataPresent"; //NOI18N
+                promtMsg3 = "areYouSureBlobFieldInRelationsDataPresent"; //NOI18N
+            }
+            if (rCount == 0 && !rels.isEmpty()) {
+                msg = DbStructureUtils.getString(promtMsg1, String.valueOf(rels.size()), null);
+            } else if (rCount > 0 && rels.isEmpty()) {
+                msg = DbStructureUtils.getString(promtMsg2, String.valueOf(rCount), null);
+            } else if (rCount > 0 && !rels.isEmpty()) {
+                msg = DbStructureUtils.getString(promtMsg3, String.valueOf(rels.size()), String.valueOf(rCount));
+            }
             if (msg == null || confirm(msg)) {
                 // we have to remove foreign keys because of types incompatibility
                 if (rels != null) {
@@ -181,7 +190,7 @@ public class TableFieldNode extends FieldNode {
                 return null;
             }
         } catch (Exception ex) {
-            Logger.getLogger(TableFieldNode.class.getName()).log(Level.SEVERE, "Field modification error", ex); //NOI18N
+            Logger.getLogger(TableFieldNode.class.getName()).log(Level.WARNING, "Field modification error", ex); //NOI18N
             NotifyDescriptor d = new NotifyDescriptor.Message(ex.getMessage(), NotifyDescriptor.ERROR_MESSAGE);
             DialogDisplayer.getDefault().notify(d);
             return null;

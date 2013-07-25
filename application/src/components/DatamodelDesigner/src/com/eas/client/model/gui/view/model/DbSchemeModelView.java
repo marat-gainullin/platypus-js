@@ -65,8 +65,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbS
     protected SqlActionsController sqlController = null;
 
     /**
-     * Imports structure from an xml string representing schema information
-     * about database structure
+     * Imports structure from an xml string representing schema information about database structure
      *
      * @param content String, containing xml with structure.
      */
@@ -90,8 +89,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbS
     }
 
     /**
-     * Creates tables and foreign keys, absent in target schema and present in
-     * imported infomation.
+     * Creates tables and foreign keys, absent in target schema and present in imported infomation.
      *
      * @param aSource Imported information container.
      * @see DbSchemeModel
@@ -127,8 +125,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbS
     }
 
     /**
-     * Creates tables and foreign keys, absent in target schema and present in
-     * imported infomation.
+     * Creates tables and foreign keys, absent in target schema and present in imported infomation.
      *
      * @param aSource Imported information container.
      * @see DbSchemeModel
@@ -152,12 +149,9 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbS
     }
 
     /**
-     * Merges all fields in all entities. Creates fields absent in target model
-     * and present in imported information. Deletes fields present in target
-     * model and absent in imported information. Redefines fields present in
-     * target model and in imported information if thay are defferent. Side
-     * effect of this is that some fields become reqired, rather while
-     * importCreations moethod execution
+     * Merges all fields in all entities. Creates fields absent in target model and present in imported information. Deletes fields present in target model and absent in imported information.
+     * Redefines fields present in target model and in imported information if thay are defferent. Side effect of this is that some fields become reqired, rather while importCreations moethod
+     * execution
      *
      * @param aSource Imported information container.
      * @see DbSchemeModel
@@ -460,12 +454,14 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbS
                         JOptionPane.showMessageDialog(DbSchemeModelView.this, ex.getLocalizedMessage(), DbStructureUtils.getString("dbSchemeEditor"), JOptionPane.ERROR_MESSAGE);
                         return;
                     }
-                    assert (fieldEdit != null);
                     undoSupport.notSavable();
                     undoSupport.beginUpdate();
                     try {
                         undoSupport.postEdit(fieldEdit);
-                        super.actionPerformed(e);
+                        com.eas.client.model.gui.edits.fields.NewFieldEdit edit = new com.eas.client.model.gui.edits.fields.NewFieldEdit(entity, fieldEdit.getField());
+                        edit.redo();
+                        undoSupport.postEdit(edit);
+                        checkActions();
                     } catch (Exception ex) {
                         JOptionPane.showMessageDialog(DbSchemeModelView.this, ex.getLocalizedMessage(), DbStructureUtils.getString("dbSchemeEditor"), JOptionPane.ERROR_MESSAGE);
                     } finally {
