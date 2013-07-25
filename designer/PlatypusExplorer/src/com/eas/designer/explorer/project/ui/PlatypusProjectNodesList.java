@@ -23,7 +23,6 @@ import org.openide.loaders.DataObject;
 import org.openide.nodes.Node;
 import org.openide.util.ImageUtilities;
 import org.openide.util.NbBundle;
-import org.openide.util.lookup.Lookups;
 
 /**
  * Nodes list, identified by names as keys.
@@ -32,6 +31,7 @@ import org.openide.util.lookup.Lookups;
  */
 public class PlatypusProjectNodesList implements NodeList<String> {
 
+    private static final String JAVASCRIPT_FILE_EXTENSION = "js";
     private static final String PACKAGE_PREFIX = "com/eas/designer/explorer/project/ui/";
     public static final ImageIcon sourceIcon = ImageUtilities.loadImageIcon(PACKAGE_PREFIX + "elements.png", true);
     public static final ImageIcon migrationsIcon = ImageUtilities.loadImageIcon(PACKAGE_PREFIX + "db.png", true);
@@ -96,7 +96,7 @@ public class PlatypusProjectNodesList implements NodeList<String> {
 
         @Override
         public boolean acceptDataObject(DataObject d) {
-            return d.getPrimaryFile().isFolder() || d instanceof PlatypusDataObject;
+            return d.getPrimaryFile().isFolder() || JAVASCRIPT_FILE_EXTENSION.equals(d.getPrimaryFile().getExt()) || d instanceof PlatypusDataObject;
         }
     }
     
