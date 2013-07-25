@@ -52,7 +52,7 @@ public class PositioningPacketReciever implements PacketReciever {
             ServerScriptRunner module = null;
             module = serverCore.getSessionManager().getSystemSession().getModule(moduleId);
             if (module == null) {
-                module = new ServerScriptRunner(serverCore, serverCore.getSessionManager().getSystemSession(), moduleId, ScriptUtils.getScope(), serverCore, serverCore);
+                module = new ServerScriptRunner(serverCore, serverCore.getSessionManager().getSystemSession(), moduleId, ScriptUtils.getScope(), serverCore, serverCore, new Object[]{});
             }
             module.execute();
             serverCore.getSessionManager().setCurrentSession(serverCore.getSessionManager().getSystemSession());

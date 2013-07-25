@@ -7,6 +7,7 @@ package com.eas.client.chart;
 import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.eas.client.model.script.RowHostObject;
 import com.eas.client.model.script.ScriptableRowset;
+import com.eas.script.ScriptUtils;
 import java.awt.Font;
 import java.awt.Paint;
 import java.util.logging.Level;
@@ -16,6 +17,8 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.plot.DefaultDrawingSupplier;
 import org.jfree.chart.plot.PiePlot;
 import org.jfree.data.general.DefaultPieDataset;
+import org.mozilla.javascript.NativeArray;
+import org.mozilla.javascript.Scriptable;
 
 /**
  *
@@ -33,7 +36,15 @@ public class PieChart extends AbstractChart {
         title = pTitle;
         nameField = pNameField;
         dataField = pDataField;
-        setDataset(pRowset);
+        setData(pRowset);
+    }
+
+    public PieChart(String pTitle, String pNameField, String pDataField, NativeArray aArray) {
+        super();
+        title = pTitle;
+        nameField = pNameField;
+        dataField = pDataField;
+        setData(aArray);
     }
 
     @Override
@@ -44,13 +55,31 @@ public class PieChart extends AbstractChart {
     protected void fillDataset() {
         pieDataset.clear();
         try {
-            int nameFldIndex = sRowset.getFields().find(nameField);
-            int dataFldIndex = sRowset.getFields().find(dataField);
-            for (int i = 0; i < sRowset.unwrap().size(); i++) {
-                RowHostObject row = sRowset.getRow(i + 1);
-                String name = (String) sRowset.unwrap().getConverter().convert2JdbcCompatible(row.getColumnObject(nameFldIndex), DataTypeInfo.VARCHAR);
-                Number value = (Number) sRowset.unwrap().getConverter().convert2JdbcCompatible(row.getColumnObject(dataFldIndex), DataTypeInfo.DECIMAL);
-                pieDataset.setValue(name, value);
+            if (sRowset != null) {
+                int nameFldIndex = sRowset.getFields().find(nameField);
+                int dataFldIndex = sRowset.getFields().find(dataField);
+                for (int i = 0; i < sRowset.unwrap().size(); i++) {
+                    RowHostObject row = sRowset.getRow(i + 1);
+                    String name = (String) sRowset.unwrap().getConverter().convert2JdbcCompatible(row.getColumnObject(nameFldIndex), DataTypeInfo.VARCHAR);
+                    Number value = (Number) sRowset.unwrap().getConverter().convert2JdbcCompatible(row.getColumnObject(dataFldIndex), DataTypeInfo.DECIMAL);
+                    pieDataset.setValue(name, value);
+                }
+            } else if (sObject != null) {
+                Object oLength = sObject.get("length", sObject);
+                if (oLength instanceof Number) {
+                    int length = ((Number) oLength).intValue();
+                    for (int j = 0; j < length; j++) {
+                        Object oItem = sObject.get(j, sObject);
+                        if (oItem instanceof Scriptable) {
+                            Scriptable sItem = (Scriptable) oItem;
+                            Object oName = ScriptUtils.js2Java(sItem.get(nameField, sItem));
+                            Object oData = ScriptUtils.js2Java(sItem.get(dataField, sItem));
+                            if (oName instanceof String && oData instanceof Number) {
+                                pieDataset.setValue((String) oName, (Number) oData);
+                            }
+                        }
+                    }
+                }
             }
         } catch (Exception ex) {
             Logger.getLogger(PieChart.class.getName()).log(Level.SEVERE, null, ex);

@@ -1,42 +1,8 @@
 /* -*- Mode: java; tab-width: 4; indent-tabs-mode: 1; c-basic-offset: 4 -*-
  *
- * ***** BEGIN LICENSE BLOCK *****
- * Version: MPL 1.1/GPL 2.0
- *
- * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- * http://www.mozilla.org/MPL/
- *
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
- * for the specific language governing rights and limitations under the
- * License.
- *
- * The Original Code is Rhino code, released
- * May 6, 1999.
- *
- * The Initial Developer of the Original Code is
- * Netscape Communications Corporation.
- * Portions created by the Initial Developer are Copyright (C) 1997-1999
- * the Initial Developer. All Rights Reserved.
- *
- * Contributor(s):
- *   Norris Boyd
- *   Matthew Crumley
- *   Raphael Speyer
- *
- * Alternatively, the contents of this file may be used under the terms of
- * the GNU General Public License Version 2 or later (the "GPL"), in which
- * case the provisions of the GPL are applicable instead of those above. If
- * you wish to allow use of your version of this file only under the terms of
- * the GPL and not to allow others to use your version of this file under the
- * MPL, indicate your decision by deleting the provisions above and replacing
- * them with the notice and other provisions required by the GPL. If you do
- * not delete the provisions above, a recipient may use your version of this
- * file under either the MPL or the GPL.
- *
- * ***** END LICENSE BLOCK ***** */
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 package org.mozilla.javascript;
 
@@ -54,7 +20,7 @@ import java.util.LinkedList;
  * See ECMA 15.12.
  * @author Matthew Crumley, Raphael Speyer
  */
-final class NativeJSON extends IdScriptableObject
+public final class NativeJSON extends IdScriptableObject
 {
     static final long serialVersionUID = -4567599697595654984L;
 
@@ -144,7 +110,7 @@ final class NativeJSON extends IdScriptableObject
         return new JsonParser(cx, scope).parseValue(jtext);
       } catch (JsonParser.ParseException ex) {
         throw ScriptRuntime.constructError("SyntaxError", ex.getMessage());
-      } 
+      }
     }
 
     public static Object parse(Context cx, Scriptable scope, String jtext,
@@ -179,18 +145,18 @@ final class NativeJSON extends IdScriptableObject
                     }
                 }
             } else {
-                Object[] keys = val.getIds(); 
+                Object[] keys = val.getIds();
                 for (Object p : keys) {
                     Object newElement = walk(cx, scope, reviver, val, p);
                     if (newElement == Undefined.instance) {
-                        if (p instanceof Number) 
+                        if (p instanceof Number)
                           val.delete(((Number) p).intValue());
-                        else 
+                        else
                           val.delete((String) p);
                     } else {
-                        if (p instanceof Number) 
+                        if (p instanceof Number)
                           val.put(((Number) p).intValue(), val, newElement);
-                        else 
+                        else
                           val.put((String) p, val, newElement);
                     }
                 }
@@ -251,7 +217,7 @@ final class NativeJSON extends IdScriptableObject
             if (v instanceof String || v instanceof Number) {
               propertyList.add(v);
             } else if (v instanceof NativeString || v instanceof NativeNumber) {
-              propertyList.add(ScriptRuntime.toString(v)); 
+              propertyList.add(ScriptRuntime.toString(v));
             }
           }
         }
@@ -316,7 +282,7 @@ final class NativeJSON extends IdScriptableObject
             value = ScriptRuntime.toNumber(value);
         } else if (value instanceof NativeString) {
             value = ScriptRuntime.toString(value);
-        } else if (value instanceof NativeBoolean) { 
+        } else if (value instanceof NativeBoolean) {
             value = ((NativeBoolean) value).getDefaultValue(ScriptRuntime.BooleanClass);
         }
 
@@ -324,8 +290,8 @@ final class NativeJSON extends IdScriptableObject
         if (value.equals(Boolean.TRUE)) return "true";
         if (value.equals(Boolean.FALSE)) return "false";
 
-        if (value instanceof String) {
-            return quote((String) value);
+        if (value instanceof CharSequence) {
+            return quote(value.toString());
         }
 
         if (value instanceof Number) {

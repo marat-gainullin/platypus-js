@@ -137,15 +137,16 @@ public class SessionTest {
                 public PlatypusPrincipal getPrincipal() {
                     return new AppPlatypusPrincipal("dummy", null);
                 }
-            }, new DummyCompiledScriptDocumentsHost());
+            }, new DummyCompiledScriptDocumentsHost(),
+            new Object[]{});
         }
 
         @Override
-        protected void setApplicationElementId(String aAppElementId) throws Exception {
+        protected void setApplicationElementId(String aAppElementId, Object[] args) throws Exception {
         }
 
         @Override
-        protected void prepare(ScriptDocument scriptDoc) throws Exception {
+        protected void prepare(ScriptDocument scriptDoc, Object[] args) throws Exception {
         }
     }
 

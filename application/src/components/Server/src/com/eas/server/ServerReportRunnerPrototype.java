@@ -108,7 +108,8 @@ public class ServerReportRunnerPrototype extends IdScriptableObject {
                                         scriptId,
                                         ScriptUtils.getScope(),
                                         serverCoreWrapper.getServerCore(),
-                                        serverCoreWrapper.getServerCore());
+                                        serverCoreWrapper.getServerCore(),
+                                        (args.length > 1 && args[1] instanceof Object[]) ? (Object[]) args[1] : null);
                             } catch (Exception ex) {
                                 throw new IllegalArgumentException(ex);
                             }
@@ -126,6 +127,20 @@ public class ServerReportRunnerPrototype extends IdScriptableObject {
             }
         }
 
+        if (thisObj instanceof ServerReportRunnerPrototype) {
+            switch (id) {
+
+                case Id_toString:
+                case Id_toLocaleString: {
+                    // toLocaleString is just an alias for toString for now
+                    return "[platypus server report]";
+                }
+
+                default:
+                    throw new IllegalArgumentException(String.valueOf(id));
+            }
+        }
+
         // The rest of Module.prototype methods require thisObj to be ScriptRunner
 
         if (!(thisObj instanceof ServerReportRunner)) {
@@ -137,7 +152,7 @@ public class ServerReportRunnerPrototype extends IdScriptableObject {
             case Id_toString:
             case Id_toLocaleString: {
                 // toLocaleString is just an alias for toString for now
-                return String.format("Platypus report ( %s )", thisReportRunner.getModuleId());
+                return String.format("%s (Platypus server report)", thisReportRunner.getModuleId());
             }
 
             case Id_toSource:

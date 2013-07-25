@@ -34,7 +34,8 @@ public class ServerScriptsCache {
                     serverCore.getSessionManager().getSystemSession(),
                     aModuleId, ScriptUtils.getScope(),
                     serverCore,
-                    serverCore);
+                    serverCore,
+                    new Object[]{});
             cache.put(aModuleId, runner);
         }
         return runner;

@@ -29,7 +29,6 @@ public class ReportRunnerPrototype extends IdScriptableObject {
     private static final String ID_TOSOURCE = "toSource";
     private static final String ONLY_CONSTRUCTOR_MSG = "Can't call %s(...). Only new %s(...) is allowed.";
     private static final String CONSTRUCTOR_PARAMETER_MISSING = "For new %s(...) constructor, report name/id parameter is required.";
-
     protected static ReportRunnerPrototype reportPrototype;
 
     protected static ReportRunnerPrototype getInstance() {
@@ -53,7 +52,7 @@ public class ReportRunnerPrototype extends IdScriptableObject {
             obj.sealObject();
         }
     }
-    
+
     @Override
     public String getClassName() {
         return "Report";
@@ -123,7 +122,7 @@ public class ReportRunnerPrototype extends IdScriptableObject {
                             try {
                                 ScriptRunner clientWrapper = ScriptRunnerPrototype.lookupScriptRunner(scope);
                                 assert clientWrapper != null : ScriptRunnerPrototype.BAD_SCRIPT_SCOPE_MSG;
-                                ReportRunner rr = new ReportRunner(scriptId, clientWrapper.getClient(), ScriptUtils.getScope(), clientWrapper.getPrincipalHost(), clientWrapper.getCompiledScriptDocumentsHost());
+                                ReportRunner rr = new ReportRunner(scriptId, clientWrapper.getClient(), ScriptUtils.getScope(), clientWrapper.getPrincipalHost(), clientWrapper.getCompiledScriptDocumentsHost(), (args.length > 1 && args[1] instanceof Object[]) ? (Object[]) args[1] : null);
                                 rr.setPrototype(this);
                                 return rr;
                             } catch (Exception ex) {
@@ -143,6 +142,20 @@ public class ReportRunnerPrototype extends IdScriptableObject {
             }
         }
 
+        if (thisObj instanceof ReportRunnerPrototype) {
+            switch (id) {
+
+                case Id_toString:
+                case Id_toLocaleString: {
+                    // toLocaleString is just an alias for toString for now
+                    return "[platypus report]";
+                }
+
+                default:
+                    throw new IllegalArgumentException(String.valueOf(id));
+            }
+        }
+
         // The rest of Module.prototype methods require thisObj to be ScriptRunner
 
         if (!(thisObj instanceof ReportRunner)) {
@@ -154,7 +167,7 @@ public class ReportRunnerPrototype extends IdScriptableObject {
             case Id_toString:
             case Id_toLocaleString: {
                 // toLocaleString is just an alias for toString for now
-                return String.format("Platypus report ( %s )", thisReportRunner.getApplicationElementId());
+                return String.format("%s (Platypus report)", thisReportRunner.getApplicationElementId());
             }
 
             case Id_toSource:

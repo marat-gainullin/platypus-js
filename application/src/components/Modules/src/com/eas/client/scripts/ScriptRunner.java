@@ -74,12 +74,12 @@ public class ScriptRunner extends ScriptableObject {
         }
     }
 
-    public ScriptRunner(String aAppElementId, Client aClient, Scriptable aScope, PrincipalHost aPrincipalHost, CompiledScriptDocumentsHost aCompiledScriptDocumentsHost) throws Exception {
-        this(aClient, aScope, aPrincipalHost, aCompiledScriptDocumentsHost);
-        setApplicationElementId(aAppElementId);
+    public ScriptRunner(String aAppElementId, Client aClient, Scriptable aScope, PrincipalHost aPrincipalHost, CompiledScriptDocumentsHost aCompiledScriptDocumentsHost, Object[] args) throws Exception {
+        this(aClient, aScope, aPrincipalHost, aCompiledScriptDocumentsHost, args);
+        setApplicationElementId(aAppElementId, args);
     }
 
-    public ScriptRunner(Client aClient, Scriptable aScope, PrincipalHost aPrincipalHost, CompiledScriptDocumentsHost aCompiledScriptDocumentsHost) throws Exception {
+    public ScriptRunner(Client aClient, Scriptable aScope, PrincipalHost aPrincipalHost, CompiledScriptDocumentsHost aCompiledScriptDocumentsHost, Object[] args) throws Exception {
         super(aScope, null);
         client = aClient;
         principalHost = aPrincipalHost;
@@ -109,10 +109,10 @@ public class ScriptRunner extends ScriptableObject {
         defineProperty("principal", ScriptRunner.class, READONLY);
     }
 
-    protected void prepare(ScriptDocument scriptDoc) throws Exception {
+    protected void prepare(ScriptDocument scriptDoc, Object[] args) throws Exception {
         prepareRoles(scriptDoc);
         prepareModel(scriptDoc);
-        prepareScript(scriptDoc);
+        prepareScript(scriptDoc, args);
     }
 
     protected void prepareRoles(ScriptDocument scriptDoc) throws Exception {
@@ -132,7 +132,7 @@ public class ScriptRunner extends ScriptableObject {
         }
     }
 
-    protected void prepareScript(ScriptDocument scriptDoc) throws Exception {
+    protected void prepareScript(ScriptDocument scriptDoc, Object[] args) throws Exception {
         Context context = ScriptUtils.enterContext();
         try {
             model.setScriptScope(this);
@@ -140,7 +140,15 @@ public class ScriptRunner extends ScriptableObject {
                 if (System.getProperty(DEBUG_PROPERTY) != null) {
                     Breakpoints.getInstance().checkPendingBreakpoints();
                 }
-                scriptDoc.getScript().exec(context, this);
+                if (scriptDoc.getScript() instanceof Function) {
+                    Object[] jsArgs = new Object[args != null ? args.length : 0];
+                    for(int i=0;i<jsArgs.length;i++)
+                        jsArgs[i] = ScriptUtils.javaToJS(args[i], this);
+                    defineProperty("arguments", jsArgs, ScriptableObject.READONLY);
+                    ((Function) scriptDoc.getScript()).call(context, this, this, jsArgs);
+                } else {
+                    scriptDoc.getScript().exec(context, this);
+                }
             }
             model.resolveHandlers();
         } finally {
@@ -175,7 +183,7 @@ public class ScriptRunner extends ScriptableObject {
         if (scriptDoc == null) {
             throw new NullPointerException(String.format(APP_ELEMENT_NOT_FOUND_MSG, appElementId));
         }
-        prepare(scriptDoc);
+        prepare(scriptDoc, new Object[]{});
         executed = false;
         execute();
     }
@@ -463,7 +471,7 @@ public class ScriptRunner extends ScriptableObject {
         return compiledScriptDocumentsHost;
     }
 
-    protected void setApplicationElementId(String aAppElementId) throws Exception {
+    protected void setApplicationElementId(String aAppElementId, Object[] args) throws Exception {
         if (appElementId == null ? aAppElementId != null : !appElementId.equals(aAppElementId)) {
             shrink();
             appElementId = aAppElementId;
@@ -472,7 +480,7 @@ public class ScriptRunner extends ScriptableObject {
             if (scriptDoc == null) {
                 throw new NullPointerException(String.format(APP_ELEMENT_NOT_FOUND_MSG, appElementId));
             }
-            prepare(scriptDoc);
+            prepare(scriptDoc, args);
         }
     }
 
@@ -554,32 +562,32 @@ public class ScriptRunner extends ScriptableObject {
 
         @Override
         public Object get(String name, Scriptable start) {
-            return func.get(name, start);
+            return func.get(name, start == this ? func : start);
         }
 
         @Override
         public Object get(int index, Scriptable start) {
-            return func.get(index, start);
+            return func.get(index, start == this ? func : start);
         }
 
         @Override
         public boolean has(String name, Scriptable start) {
-            return func.has(name, start);
+            return func.has(name, start == this ? func : start);
         }
 
         @Override
         public boolean has(int index, Scriptable start) {
-            return func.has(index, start);
+            return func.has(index, start == this ? func : start);
         }
 
         @Override
         public void put(String name, Scriptable start, Object value) {
-            func.put(name, start, value);
+            func.put(name, start == this ? func : start, value);
         }
 
         @Override
         public void put(int index, Scriptable start, Object value) {
-            func.put(index, start, value);
+            func.put(index, start == this ? func : start, value);
         }
 
         @Override

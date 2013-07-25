@@ -35,7 +35,7 @@ import com.sencha.gxt.data.shared.event.StoreUpdateEvent;
 import com.sencha.gxt.data.shared.loader.ChildTreeStoreBinding;
 import com.sencha.gxt.data.shared.loader.TreeLoader;
 
-public class TreeStoreFiller extends RowsetAdapter implements PropertyChangeListener {
+public class RowsTreeStoreFiller extends RowsetAdapter implements PropertyChangeListener {
 
 	protected class RowsTreeLoader extends TreeLoader<Row> {
 		public RowsTreeLoader(RpcProxy<Row, List<Row>> aProxy) {
@@ -80,7 +80,7 @@ public class TreeStoreFiller extends RowsetAdapter implements PropertyChangeList
 	protected int parentColIndex;
 	protected int deferred = 0;
 
-	public TreeStoreFiller(TreeStore<Row> aStore, Entity aRowsetHost, Field aParentField, Set<Entity> toEnsure) throws RowsetException {
+	public RowsTreeStoreFiller(TreeStore<Row> aStore, Entity aRowsetHost, Field aParentField, Set<Entity> toEnsure) throws RowsetException {
 		super();
 		store = aStore;
 		rowsetHost = aRowsetHost;
@@ -105,7 +105,7 @@ public class TreeStoreFiller extends RowsetAdapter implements PropertyChangeList
 			List<Row> children = findChildren(parent);
 			return children != null && !children.isEmpty();
 		} catch (RowsetException ex) {
-			Logger.getLogger(TreeStoreFiller.class.getName()).log(Level.SEVERE, null, ex);
+			Logger.getLogger(RowsTreeStoreFiller.class.getName()).log(Level.SEVERE, null, ex);
 			return false;
 		}
 	}
@@ -150,7 +150,7 @@ public class TreeStoreFiller extends RowsetAdapter implements PropertyChangeList
 			Scheduler.get().scheduleDeferred(new ScheduledCommand() {
 				@Override
 				public void execute() {
-					((Entity) evt.getSource()).getChangeSupport().removePropertyChangeListener(TreeStoreFiller.this);
+					((Entity) evt.getSource()).getChangeSupport().removePropertyChangeListener(RowsTreeStoreFiller.this);
 				}
 			});
 			if (--deferred == 0) {
@@ -225,7 +225,7 @@ public class TreeStoreFiller extends RowsetAdapter implements PropertyChangeList
 				rootsLoadCallback = null;
 				inited = true;
 			} catch (Exception ex) {
-				Logger.getLogger(TreeStoreFiller.class.getName()).log(Level.SEVERE, null, ex);
+				Logger.getLogger(RowsTreeStoreFiller.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
 	}
@@ -250,7 +250,7 @@ public class TreeStoreFiller extends RowsetAdapter implements PropertyChangeList
 				store.add(rowset.getCurrent());
 			}
 		} catch (Exception ex) {
-			Logger.getLogger(TreeStoreFiller.class.getName()).log(Level.SEVERE, ex.getMessage());
+			Logger.getLogger(RowsTreeStoreFiller.class.getName()).log(Level.SEVERE, ex.getMessage());
 		}
 	}
 
@@ -259,7 +259,7 @@ public class TreeStoreFiller extends RowsetAdapter implements PropertyChangeList
 		try {
 			loader.load();
 		} catch (Exception ex) {
-			Logger.getLogger(TreeStoreFiller.class.getName()).log(Level.SEVERE, ex.getMessage());
+			Logger.getLogger(RowsTreeStoreFiller.class.getName()).log(Level.SEVERE, ex.getMessage());
 		}
 	}
 
@@ -270,7 +270,7 @@ public class TreeStoreFiller extends RowsetAdapter implements PropertyChangeList
 			rowsetError = null;
 			checkIfRootsLoaded();
 		} catch (Exception ex) {
-			Logger.getLogger(TreeStoreFiller.class.getName()).log(Level.SEVERE, ex.getMessage());
+			Logger.getLogger(RowsTreeStoreFiller.class.getName()).log(Level.SEVERE, ex.getMessage());
 		}
 	}
 
@@ -280,7 +280,7 @@ public class TreeStoreFiller extends RowsetAdapter implements PropertyChangeList
 			rowsetError = event.getMessage();
 			checkIfRootsWithError();
 		} catch (Exception ex) {
-			Logger.getLogger(TreeStoreFiller.class.getName()).log(Level.SEVERE, ex.getMessage());
+			Logger.getLogger(RowsTreeStoreFiller.class.getName()).log(Level.SEVERE, ex.getMessage());
 		}
 	}
 
@@ -292,7 +292,7 @@ public class TreeStoreFiller extends RowsetAdapter implements PropertyChangeList
 				store.add(rowset.getCurrent());
 			}
 		} catch (Exception ex) {
-			Logger.getLogger(TreeStoreFiller.class.getName()).log(Level.SEVERE, ex.getMessage());
+			Logger.getLogger(RowsTreeStoreFiller.class.getName()).log(Level.SEVERE, ex.getMessage());
 		}
 	}
 
@@ -303,7 +303,7 @@ public class TreeStoreFiller extends RowsetAdapter implements PropertyChangeList
 				store.fireEvent(new StoreUpdateEvent<Row>(store.getAll()));
 			}
 		} catch (Exception ex) {
-			Logger.getLogger(TreeStoreFiller.class.getName()).log(Level.SEVERE, ex.getMessage());
+			Logger.getLogger(RowsTreeStoreFiller.class.getName()).log(Level.SEVERE, ex.getMessage());
 		}
 	}
 
@@ -324,7 +324,7 @@ public class TreeStoreFiller extends RowsetAdapter implements PropertyChangeList
 				}
 			}
 		} catch (Exception ex) {
-			Logger.getLogger(TreeStoreFiller.class.getName()).log(Level.SEVERE, ex.getMessage());
+			Logger.getLogger(RowsTreeStoreFiller.class.getName()).log(Level.SEVERE, ex.getMessage());
 		}
 	}
 
@@ -346,7 +346,7 @@ public class TreeStoreFiller extends RowsetAdapter implements PropertyChangeList
 				store.update(event.getChangedRow());
 			}
 		} catch (Exception ex) {
-			Logger.getLogger(TreeStoreFiller.class.getName()).log(Level.SEVERE, ex.getMessage());
+			Logger.getLogger(RowsTreeStoreFiller.class.getName()).log(Level.SEVERE, ex.getMessage());
 		}
 	}
 
@@ -357,7 +357,7 @@ public class TreeStoreFiller extends RowsetAdapter implements PropertyChangeList
 				store.remove(event.getRow());
 			}
 		} catch (Exception ex) {
-			Logger.getLogger(TreeStoreFiller.class.getName()).log(Level.SEVERE, ex.getMessage());
+			Logger.getLogger(RowsTreeStoreFiller.class.getName()).log(Level.SEVERE, ex.getMessage());
 		}
 	}
 }

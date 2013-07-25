@@ -5,6 +5,7 @@
 package com.eas.client.scripts;
 
 import com.eas.client.AppClient;
+import com.eas.script.ScriptUtils;
 import java.awt.EventQueue;
 import java.util.Arrays;
 import java.util.logging.Level;
@@ -38,8 +39,8 @@ public class ServerScriptProxy extends ScriptableObject {
         platypusClient = aClient;
         moduleName = platypusClient.createServerModule(aModuleName);
         defineFunctionProperties(new String[]{
-                    "dispose"
-                }, ServerScriptProxy.class, EMPTY);
+            "dispose"
+        }, ServerScriptProxy.class, EMPTY);
     }
 
     /**
@@ -62,13 +63,14 @@ public class ServerScriptProxy extends ScriptableObject {
 
     @Override
     public Object get(String name, Scriptable start) {
-         final Object result = super.get(name, start);
+        final Object result = super.get(name, start);
         if (result == null || result instanceof Undefined || UniqueTag.NOT_FOUND.equals(result)) {
             return new StubFunction(name);
         } else {
             return result;
         }
     }
+
     public String getScriptName() {
         return moduleName;
     }
@@ -97,7 +99,18 @@ public class ServerScriptProxy extends ScriptableObject {
                         public void run() {
                             try {
                                 Object result = platypusClient.executeServerModuleMethod(moduleName, methodName, Arrays.copyOf(args, args.length - 1));
-                                callback.call(cx, StubFunction.this, StubFunction.this, new Object[]{result});
+                                Context cx = Context.getCurrentContext();
+                                boolean wasContext = cx != null;
+                                if (!wasContext) {
+                                    cx = ScriptUtils.enterContext();
+                                }
+                                try {
+                                    callback.call(cx, StubFunction.this, StubFunction.this, new Object[]{result});
+                                } finally {
+                                    if (!wasContext) {
+                                        Context.exit();
+                                    }
+                                }
                             } catch (Exception ex) {
                                 Logger.getLogger(ServerScriptProxy.class.getName()).log(Level.SEVERE, null, ex);
                             }

@@ -12,7 +12,7 @@ import org.jfree.data.xy.XYDataset;
  *
  * @author kl
  */
-abstract class AbstractLineChart extends AbstractChart {
+public abstract class AbstractLineChart extends AbstractChart {
 
     protected XYDataset xyDataset;
     private List<SeriesProperties> series = new ArrayList<>();

@@ -153,7 +153,7 @@ public class FormRunnerPrototype extends IdScriptableObject {
                             try {
                                 ScriptRunner clientWrapper = ScriptRunnerPrototype.lookupScriptRunner(scope);
                                 assert clientWrapper != null : ScriptRunnerPrototype.BAD_SCRIPT_SCOPE_MSG;
-                                FormRunner formRunner = new FormRunner(args[0].toString(), clientWrapper.getClient(), ScriptUtils.getScope(), clientWrapper.getPrincipalHost(), clientWrapper.getCompiledScriptDocumentsHost());
+                                FormRunner formRunner = new FormRunner(args[0].toString(), clientWrapper.getClient(), ScriptUtils.getScope(), clientWrapper.getPrincipalHost(), clientWrapper.getCompiledScriptDocumentsHost(), (args.length > 1 && args[1] instanceof Object[]) ? (Object[]) args[1] : null);
                                 formRunner.setPrototype(this);
                                 return formRunner;
                             } catch (Exception ex) {
@@ -172,6 +172,19 @@ public class FormRunnerPrototype extends IdScriptableObject {
                 throw new IllegalArgumentException(String.format(CONSTRUCTOR_PARAMETER_MISSING, getClassName(), getClassName()));
             }
         }
+
+        if (thisObj instanceof FormRunnerPrototype) {
+            switch (id) {
+                case Id_toString:
+                case Id_toLocaleString: {
+                    // toLocaleString is just an alias for toString for now
+                    return "[platypus form]";
+                }
+                default:
+                    throw new IllegalArgumentException(String.valueOf(id));
+            }
+        }
+
         // The rest of Form.prototype methods require thisObj to be FormRunner
 
         if (!(thisObj instanceof FormRunner)) {
@@ -182,7 +195,7 @@ public class FormRunnerPrototype extends IdScriptableObject {
             case Id_toString:
             case Id_toLocaleString: {
                 // toLocaleString is just an alias for toString for now
-                return thisFormRunner.getApplicationElementId();//String.format("Platypus form ( %s )", thisFormRunner.getApplicationElementId());
+                return String.format("%s (Platypus form)", thisFormRunner.getApplicationElementId());
             }
             case Id_toSource:
                 return "function Form(){\n/*compiled code*/\n}";

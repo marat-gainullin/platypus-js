@@ -155,7 +155,7 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
     public void defineJsClass(final String aClassName, ApplicationElement aAppElement) {
         switch (aAppElement.getType()) {
             case ClientConstants.ET_COMPONENT:
-                ScriptRunnerPrototype.init(ScriptUtils.getScope(), true, new ScriptRunnerPrototype() {
+                ScriptRunnerPrototype.init(ScriptUtils.getScope(), false, new ScriptRunnerPrototype() {
                     @Override
                     public String getClassName() {
                         return aClassName;
@@ -164,7 +164,7 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
                     @Override
                     public Object execIdCall(IdFunctionObject f, Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
                         if (f.methodId() == Id_constructor && thisObj == null) {
-                            return super.execIdCall(f, cx, scope, thisObj, new Object[]{aClassName});
+                            return super.execIdCall(f, cx, scope, thisObj, new Object[]{aClassName, args});
                         } else {
                             return super.execIdCall(f, cx, scope, thisObj, args);
                         }
@@ -172,7 +172,7 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
                 });
                 break;
             case ClientConstants.ET_REPORT:
-                ReportRunnerPrototype.init(ScriptUtils.getScope(), true, new ReportRunnerPrototype() {
+                ReportRunnerPrototype.init(ScriptUtils.getScope(), false, new ReportRunnerPrototype() {
                     @Override
                     public String getClassName() {
                         return aClassName;
@@ -181,7 +181,7 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
                     @Override
                     public Object execIdCall(IdFunctionObject f, Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
                         if (f.methodId() == Id_constructor && thisObj == null) {
-                            return super.execIdCall(f, cx, scope, thisObj, new Object[]{aClassName});
+                            return super.execIdCall(f, cx, scope, thisObj, new Object[]{aClassName, args});
                         } else {
                             return super.execIdCall(f, cx, scope, thisObj, args);
                         }

@@ -22,12 +22,12 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sencha.gxt.data.client.loader.RpcProxy;
 import com.sencha.gxt.data.shared.TreeStore;
 
-public class TreeStoreLazyFiller extends TreeStoreFiller {
+public class RowsTreeStoreLazyFiller extends RowsTreeStoreFiller {
 
 	protected Field paramSource;
 	protected Parameter param2GetChildren;
 
-	public TreeStoreLazyFiller(TreeStore<Row> aStore, Entity aRowsetHost, Field aParentField, Parameter aParam2GetChildren, Field aParamSource, Set<Entity> toEnsure) throws RowsetException {
+	public RowsTreeStoreLazyFiller(TreeStore<Row> aStore, Entity aRowsetHost, Field aParentField, Parameter aParam2GetChildren, Field aParamSource, Set<Entity> toEnsure) throws RowsetException {
 		super(aStore, aRowsetHost, aParentField, toEnsure);
 		param2GetChildren = aParam2GetChildren;
 		paramSource = aParamSource;
@@ -130,7 +130,7 @@ public class TreeStoreLazyFiller extends TreeStoreFiller {
 						}
 					}
 				} catch (Exception e) {
-					Logger.getLogger(TreeStoreLazyFiller.class.getName()).log(Level.SEVERE, e.getMessage());
+					Logger.getLogger(RowsTreeStoreLazyFiller.class.getName()).log(Level.SEVERE, e.getMessage());
 				}
 			}
 		};

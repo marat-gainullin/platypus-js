@@ -29,7 +29,6 @@ public class ScriptRunnerPrototype extends IdScriptableObject {
     private static final String ID_TOLOCALESTRING = "toLocaleString";
     private static final String ONLY_CONSTRUCTOR_MSG = "Can't call %s(...). Only new %s(...) is allowed.";
     private static final String CONSTRUCTOR_PARAMETER_MISSING = "For new %s(...) constructor, module name/id parameter is required.";
-
     protected static ScriptRunnerPrototype modulePrototype;
 
     public static ScriptRunnerPrototype getInstance() {
@@ -44,13 +43,18 @@ public class ScriptRunnerPrototype extends IdScriptableObject {
     }
 
     public static void init(Scriptable scope, boolean sealed, ScriptRunnerPrototype obj) {
-        obj.exportAsJSClass(MAX_PROTOTYPE_ID, scope, sealed);
+        IdFunctionObject ctor = obj.exportAsJSClass(MAX_PROTOTYPE_ID, scope, sealed);
         if (obj != getInstance()) {
             obj.setPrototype(getInstance());
         }
         if (sealed) {
             obj.sealObject();
         }
+    }
+
+    @Override
+    public void put(String name, Scriptable start, Object value) {
+        super.put(name, start, value);
     }
     
     @Override
@@ -121,7 +125,7 @@ public class ScriptRunnerPrototype extends IdScriptableObject {
                             try {
                                 ScriptRunner clientWrapper = lookupScriptRunner(scope);
                                 assert clientWrapper != null : BAD_SCRIPT_SCOPE_MSG;
-                                ScriptRunner scriptRunner = new ScriptRunner(scriptId, clientWrapper.getClient(), ScriptUtils.getScope(), clientWrapper.getPrincipalHost(), clientWrapper.getCompiledScriptDocumentsHost());
+                                ScriptRunner scriptRunner = new ScriptRunner(scriptId, clientWrapper.getClient(), ScriptUtils.getScope(), clientWrapper.getPrincipalHost(), clientWrapper.getCompiledScriptDocumentsHost(), (args.length > 1 && args[1] instanceof Object[]) ? (Object[]) args[1] : null);
                                 scriptRunner.setPrototype(this);
                                 return scriptRunner;
                             } catch (Exception ex) {
@@ -141,8 +145,20 @@ public class ScriptRunnerPrototype extends IdScriptableObject {
             }
         }
 
-        // The rest of Module.prototype methods require thisObj to be ScriptRunner
+        if (thisObj instanceof ScriptRunnerPrototype) {
+            switch (id) {
 
+                case Id_toString:
+                case Id_toLocaleString: {
+                    // toLocaleString is just an alias for toString for now
+                    return "[platypus module]";
+                }
+                default:
+                    throw new IllegalArgumentException(String.valueOf(id));
+            }
+        }
+
+        // The rest of Module.prototype methods require thisObj to be ScriptRunner
         if (!(thisObj instanceof ScriptRunner)) {
             throw incompatibleCallError(f);
         }
@@ -152,7 +168,7 @@ public class ScriptRunnerPrototype extends IdScriptableObject {
             case Id_toString:
             case Id_toLocaleString: {
                 // toLocaleString is just an alias for toString for now
-                return String.format("Platypus module ( %s )", thisScriptRunner.getApplicationElementId());
+                return String.format("%s (Platypus module)", thisScriptRunner.getApplicationElementId());
             }
 
             case Id_toSource:
@@ -170,7 +186,7 @@ public class ScriptRunnerPrototype extends IdScriptableObject {
         }
         return (ScriptRunner) currentScope;
     }
-    
+
     public static RowsetHostObject<?> lookupEntity(Scriptable aScope) {
         Scriptable currentScope = aScope;
         while (currentScope != null && !(currentScope instanceof RowsetHostObject<?>)) {
