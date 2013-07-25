@@ -386,15 +386,18 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
     }
 
     protected UndoableEdit editTypeName(String val) {
-        assert DataTypeInfo.OTHER.equals(field.getTypeInfo());
-        DataTypeInfo dti = DataTypeInfo.OTHER;
-        dti.setSqlTypeName(val);
-        Field oldContent = new Field(field);
-        Field content = new Field(field);
-        content.setTypeInfo(dti);
-        ChangeFieldEdit edit = new ChangeFieldEdit(oldContent, content, field, getEntity());
-        edit.redo();
-        return edit;
+        if (DataTypeInfo.OTHER.getSqlType() == field.getTypeInfo().getSqlType() || DataTypeInfo.STRUCT.getSqlType() == field.getTypeInfo().getSqlType()) {
+            DataTypeInfo dti = DataTypeInfo.OTHER.copy();
+            dti.setSqlTypeName(val);
+            Field oldContent = new Field(field);
+            Field content = new Field(field);
+            content.setTypeInfo(dti);
+            ChangeFieldEdit edit = new ChangeFieldEdit(oldContent, content, field, getEntity());
+            edit.redo();
+            return edit;
+        } else {
+            return null;
+        }
     }
 
     protected UndoableEdit editSize(Integer val) {

@@ -43,7 +43,7 @@ public class ScriptRunnerPrototype extends IdScriptableObject {
     }
 
     public static void init(Scriptable scope, boolean sealed, ScriptRunnerPrototype obj) {
-        obj.exportAsJSClass(MAX_PROTOTYPE_ID, scope, sealed);
+        IdFunctionObject ctor = obj.exportAsJSClass(MAX_PROTOTYPE_ID, scope, sealed);
         if (obj != getInstance()) {
             obj.setPrototype(getInstance());
         }
@@ -52,6 +52,11 @@ public class ScriptRunnerPrototype extends IdScriptableObject {
         }
     }
 
+    @Override
+    public void put(String name, Scriptable start, Object value) {
+        super.put(name, start, value);
+    }
+    
     @Override
     public String getClassName() {
         return "Module";
@@ -140,8 +145,20 @@ public class ScriptRunnerPrototype extends IdScriptableObject {
             }
         }
 
-        // The rest of Module.prototype methods require thisObj to be ScriptRunner
+        if (thisObj instanceof ScriptRunnerPrototype) {
+            switch (id) {
 
+                case Id_toString:
+                case Id_toLocaleString: {
+                    // toLocaleString is just an alias for toString for now
+                    return "[platypus module]";
+                }
+                default:
+                    throw new IllegalArgumentException(String.valueOf(id));
+            }
+        }
+
+        // The rest of Module.prototype methods require thisObj to be ScriptRunner
         if (!(thisObj instanceof ScriptRunner)) {
             throw incompatibleCallError(f);
         }
@@ -151,7 +168,7 @@ public class ScriptRunnerPrototype extends IdScriptableObject {
             case Id_toString:
             case Id_toLocaleString: {
                 // toLocaleString is just an alias for toString for now
-                return String.format("Platypus module ( %s )", thisScriptRunner.getApplicationElementId());
+                return String.format("%s (Platypus module)", thisScriptRunner.getApplicationElementId());
             }
 
             case Id_toSource:

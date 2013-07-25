@@ -155,7 +155,7 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
     public void defineJsClass(final String aClassName, ApplicationElement aAppElement) {
         switch (aAppElement.getType()) {
             case ClientConstants.ET_COMPONENT:
-                ScriptRunnerPrototype.init(ScriptUtils.getScope(), true, new ScriptRunnerPrototype() {
+                ScriptRunnerPrototype.init(ScriptUtils.getScope(), false, new ScriptRunnerPrototype() {
                     @Override
                     public String getClassName() {
                         return aClassName;
@@ -172,7 +172,7 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
                 });
                 break;
             case ClientConstants.ET_REPORT:
-                ReportRunnerPrototype.init(ScriptUtils.getScope(), true, new ReportRunnerPrototype() {
+                ReportRunnerPrototype.init(ScriptUtils.getScope(), false, new ReportRunnerPrototype() {
                     @Override
                     public String getClassName() {
                         return aClassName;

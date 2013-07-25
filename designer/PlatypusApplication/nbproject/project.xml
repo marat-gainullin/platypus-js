@@ -191,6 +191,8 @@
                 <package>com.eas.client.scripts.store</package>
                 <package>com.eas.client.settings</package>
                 <package>com.eas.client.sqldrivers</package>
+                <package>com.eas.client.sqldrivers.converters</package>
+                <package>com.eas.client.sqldrivers.resolvers</package>
                 <package>com.eas.client.utils.scalableui</package>
                 <package>com.eas.controls</package>
                 <package>com.eas.controls.borders</package>

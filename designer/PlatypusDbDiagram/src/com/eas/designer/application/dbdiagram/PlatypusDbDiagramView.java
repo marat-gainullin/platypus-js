@@ -11,6 +11,7 @@ import com.eas.client.model.Relation;
 import com.eas.client.model.dbscheme.FieldsEntity;
 import com.eas.client.model.gui.selectors.SelectedField;
 import com.eas.client.model.gui.selectors.SelectedParameter;
+import com.eas.client.model.gui.selectors.TablesSelectorCallback;
 import com.eas.client.model.gui.view.ModelSelectionListener;
 import com.eas.client.model.gui.view.entities.EntityView;
 import com.eas.client.model.gui.view.model.DbSchemeModelView;

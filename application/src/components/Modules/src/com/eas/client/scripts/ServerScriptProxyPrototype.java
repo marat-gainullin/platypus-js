@@ -129,6 +129,18 @@ public class ServerScriptProxyPrototype extends IdScriptableObject {
             }
         }
 
+        if (thisObj instanceof ServerScriptProxyPrototype) {
+            switch (id) {
+
+                case Id_toString:
+                case Id_toLocaleString: {
+                    // toLocaleString is just an alias for toString for now
+                    return "[platypus server module proxy]";
+                }
+                default:
+                    throw new IllegalArgumentException(String.valueOf(id));
+            }
+        }
         // The rest of Module.prototype methods require thisObj to be ServerScriptProxy or ScriptRunner
 
         if (!(thisObj instanceof ServerScriptProxy) && !(thisObj instanceof ScriptRunner)) {
@@ -139,7 +151,7 @@ public class ServerScriptProxyPrototype extends IdScriptableObject {
             case Id_toString:
             case Id_toLocaleString: {
                 // toLocaleString is just an alias for toString for now
-                return String.format("Platypus server module proxy ( %s )", (thisObj instanceof ServerScriptProxy) ? ((ServerScriptProxy) thisObj).getScriptName() : String.valueOf(((ScriptRunner) thisObj).getApplicationElementId()));
+                return String.format("%s (Platypus server module proxy)", (thisObj instanceof ServerScriptProxy) ? ((ServerScriptProxy) thisObj).getScriptName() : String.valueOf(((ScriptRunner) thisObj).getApplicationElementId()));
             }
 
             case Id_toSource:
@@ -151,12 +163,12 @@ public class ServerScriptProxyPrototype extends IdScriptableObject {
     }
 
     /*@Override
-    public Object get(String name, Scriptable start) {
-        return super.get(name, start);
-    }
+     public Object get(String name, Scriptable start) {
+     return super.get(name, start);
+     }
 
-    @Override
-    public void put(String name, Scriptable start, Object value) {
-        super.put(name, start, value);
-    }*/
+     @Override
+     public void put(String name, Scriptable start, Object value) {
+     super.put(name, start, value);
+     }*/
 }

@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 package org.mozilla.javascript.commonjs.module.provider;
 
 import java.io.Serializable;
@@ -15,10 +19,10 @@ public final class ParsedContentType implements Serializable
 
     private final String contentType;
     private final String encoding;
-    
+
     /**
      * Creates a new parsed content type.
-     * @param mimeType the full MIME type; typically the value of the 
+     * @param mimeType the full MIME type; typically the value of the
      * "Content-Type" header of some MIME-compliant message. Can be null.
      */
     public ParsedContentType(String mimeType) {
@@ -49,7 +53,7 @@ public final class ParsedContentType implements Serializable
         this.contentType = contentType;
         this.encoding = encoding;
     }
-    
+
     /**
      * Returns the content type (without charset declaration) of the MIME type.
      * @return the content type (without charset declaration) of the MIME type.
@@ -58,7 +62,7 @@ public final class ParsedContentType implements Serializable
     public String getContentType() {
         return contentType;
     }
-    
+
     /**
      * Returns the character encoding of the MIME type.
      * @return the character encoding of the MIME type. Can be null when it is

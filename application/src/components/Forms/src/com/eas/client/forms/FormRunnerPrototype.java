@@ -172,6 +172,19 @@ public class FormRunnerPrototype extends IdScriptableObject {
                 throw new IllegalArgumentException(String.format(CONSTRUCTOR_PARAMETER_MISSING, getClassName(), getClassName()));
             }
         }
+
+        if (thisObj instanceof FormRunnerPrototype) {
+            switch (id) {
+                case Id_toString:
+                case Id_toLocaleString: {
+                    // toLocaleString is just an alias for toString for now
+                    return "[platypus form]";
+                }
+                default:
+                    throw new IllegalArgumentException(String.valueOf(id));
+            }
+        }
+
         // The rest of Form.prototype methods require thisObj to be FormRunner
 
         if (!(thisObj instanceof FormRunner)) {
@@ -182,7 +195,7 @@ public class FormRunnerPrototype extends IdScriptableObject {
             case Id_toString:
             case Id_toLocaleString: {
                 // toLocaleString is just an alias for toString for now
-                return thisFormRunner.getApplicationElementId();//String.format("Platypus form ( %s )", thisFormRunner.getApplicationElementId());
+                return String.format("%s (Platypus form)", thisFormRunner.getApplicationElementId());
             }
             case Id_toSource:
                 return "function Form(){\n/*compiled code*/\n}";
