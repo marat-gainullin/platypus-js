@@ -281,10 +281,10 @@ public class ServerMain {
             // Apply debugging facility
             registerMBean(Settings.SETTINGS_MBEAN_NAME, new Settings(appDbClient));
         }
-        ScriptRunner.PlatypusScriptedResource.init(appDbClient.getAppCache());
         PlatypusServer server = new PlatypusServer(appDbClient, ctx, getListenAddresses(), getPortsProtocols(), tasks, appElement);
         appDbClient.setContextHost(server);
         appDbClient.setPrincipalHost(server);
+        ScriptRunner.PlatypusScriptedResource.init(appDbClient, server, server);
         ScriptUtils.getScope().defineProperty(ServerScriptRunner.MODULES_SCRIPT_NAME, server.getScriptsCache(), ScriptableObject.READONLY);
         Thread sgc = new Thread(new GarbageSessionsCollector(server));
         sgc.setDaemon(true);

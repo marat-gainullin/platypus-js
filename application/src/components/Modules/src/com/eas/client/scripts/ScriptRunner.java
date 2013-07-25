@@ -69,7 +69,7 @@ public class ScriptRunner extends ScriptableObject {
     static {
         try {
             initializePlatypusStandardLibScope();
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             Logger.getLogger(ScriptRunner.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
@@ -142,8 +142,9 @@ public class ScriptRunner extends ScriptableObject {
                 }
                 if (scriptDoc.getScript() instanceof Function) {
                     Object[] jsArgs = new Object[args != null ? args.length : 0];
-                    for(int i=0;i<jsArgs.length;i++)
+                    for (int i = 0; i < jsArgs.length; i++) {
                         jsArgs[i] = ScriptUtils.javaToJS(args[i], this);
+                    }
                     defineProperty("arguments", jsArgs, ScriptableObject.READONLY);
                     ((Function) scriptDoc.getScript()).call(context, this, this, jsArgs);
                 } else {
@@ -285,11 +286,29 @@ public class ScriptRunner extends ScriptableObject {
     public static class PlatypusScriptedResource {
 
         private static final Pattern pattern = Pattern.compile("https?://.*");
+        protected static Client client;
         protected static AppCache cache;
+        protected static PrincipalHost principalHost;
+        protected static CompiledScriptDocumentsHost scriptDocumentsHost;
 
-        public static void init(AppCache aCache) {
+        public static void init(Client aClient, PrincipalHost aPrincipalHost, CompiledScriptDocumentsHost aScriptDocumentsHost) throws Exception {
             assert cache == null : "Platypus application resources may be initialized only once.";
-            cache = aCache;
+            client = aClient;
+            cache = client.getAppCache();
+            principalHost = aPrincipalHost;
+            scriptDocumentsHost = aScriptDocumentsHost;
+        }
+
+        private static Client getClient() {
+            return client;
+        }
+
+        public static PrincipalHost getPrincipalHost() {
+            return principalHost;
+        }
+
+        public static CompiledScriptDocumentsHost getScriptDocumentsHost() {
+            return scriptDocumentsHost;
         }
 
         protected static String translateResourcePath(String aPath) throws Exception {
@@ -413,8 +432,8 @@ public class ScriptRunner extends ScriptableObject {
                 } catch (NotResourceException ex) {
                     // Silently return.
                     // There are cases, when require is called with regular platypus module id.
-                    // In such case, we have to ignore require call is SE client and server and servlet,
-                    // and perform standard actions in browser html5 client.
+                    // In such case, we have to ignore require call in SE client and server and servlet,
+                    // and perform standard actions for html5 browser client.
                     return;
                 }
             } finally {
@@ -434,16 +453,16 @@ public class ScriptRunner extends ScriptableObject {
         }
     }
 
-    public static Scriptable checkStandardObjects(Context currentContext) {
+    public static Scriptable checkStandardObjects(Context currentContext) throws Exception {
         synchronized (standardObjectsScopeLock) {
             if (standardObjectsScope == null) {
-                standardObjectsScope = ScriptUtils.getScope();
+                standardObjectsScope = new ScriptRunner(PlatypusScriptedResource.getClient(), ScriptUtils.getScope(), PlatypusScriptedResource.getPrincipalHost(), PlatypusScriptedResource.getScriptDocumentsHost(), new Object[]{});
             }
         }
         return standardObjectsScope;
     }
 
-    public static Scriptable initializePlatypusStandardLibScope() throws IOException {
+    public static Scriptable initializePlatypusStandardLibScope() throws Exception {
         synchronized (standardObjectsScopeLock) {
             if (platypusStandardLibScope == null) {
                 Context context = ScriptUtils.enterContext();

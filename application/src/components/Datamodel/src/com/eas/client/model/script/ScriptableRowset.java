@@ -58,8 +58,8 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         if (getValueScriptableFieldMethod == null) {
             try {
                 getValueScriptableFieldMethod = ScriptableRowset.ScriptableField.class.getMethod("getValue", new Class<?>[]{
-                            Scriptable.class
-                        });
+                    Scriptable.class
+                });
             } catch (NoSuchMethodException | SecurityException ex) {
                 Logger.getLogger(ScriptableRowset.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -67,8 +67,8 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         if (setValueScriptableFieldMethod == null) {
             try {
                 setValueScriptableFieldMethod = ScriptableRowset.ScriptableField.class.getMethod("setValue", new Class<?>[]{
-                            Scriptable.class, Object.class
-                        });
+                    Scriptable.class, Object.class
+                });
             } catch (NoSuchMethodException | SecurityException ex) {
                 Logger.getLogger(ScriptableRowset.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -246,11 +246,17 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         entity = aEntity;
     }
 
-    protected void checkRowset() throws Exception {
+    protected void checkModelExecuted() throws Exception {
         if (entity != null) {
             if (!entity.getModel().isRuntime() && !(entity instanceof ApplicationParametersEntity)) {
                 entity.getModel().setRuntime(true);
             }
+        }
+    }
+
+    protected void checkRowset() throws Exception {
+        if (entity != null) {
+            checkModelExecuted();
             Rowset rs = entity.getRowset();
             if (rs == null) {
                 throw new RowsetMissingException();
@@ -694,9 +700,9 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
                                     cFunc.getParentScope(),
                                     entity.getModel().getScriptScope(),
                                     new Object[]{
-                                        RowHostObject.publishRow(cFunc.getParentScope(), r1),
-                                        RowHostObject.publishRow(cFunc.getParentScope(), r2)
-                                    }));
+                                RowHostObject.publishRow(cFunc.getParentScope(), r1),
+                                RowHostObject.publishRow(cFunc.getParentScope(), r2)
+                            }));
                             return compValue instanceof Number ? ((Number) compValue).intValue() : 0;
                         } catch (Exception ex) {
                             throw new IllegalStateException(ex);
@@ -1269,6 +1275,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     @ScriptFunction(jsDocText = "Refreshes rowset only if any of its parameters has changed.")
     public void execute() throws Exception {
         if (entity != null) {
+            checkModelExecuted();
             if (entity.getQuery().isManual()) {
                 entity.getQuery().setManual(false);
                 try {
@@ -1285,6 +1292,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     @ScriptFunction(jsDocText = "Refreshes rowset only if any of its parameters has changed with callback.")
     public void execute(Function aCallback) throws Exception {
         if (entity != null) {
+            checkModelExecuted();
             if (entity.getQuery().isManual()) {
                 entity.getQuery().setManual(false);
                 try {
@@ -1332,6 +1340,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     @ScriptFunction(jsDocText = "Refreshes children entities.")
     public void executeChildrenOnly() throws Exception {
         if (entity != null) {
+            checkModelExecuted();
             Set<Relation<E>> outRels = entity.getOutRelations();
             if (outRels != null) {
                 for (Relation<E> rel : outRels) {
@@ -1349,6 +1358,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     @ScriptFunction(jsDocText = "Requeries rowset's data.")
     public void requery() throws Exception {
         if (entity != null) {
+            checkModelExecuted();
             if (entity.getQuery().isManual()) {
                 entity.getQuery().setManual(false);
                 try {
@@ -1365,6 +1375,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     @ScriptFunction(jsDocText = "Requeries rowset's data with a callback.")
     public void requery(Function aCallback) throws Exception {
         if (entity != null) {
+            checkModelExecuted();
             if (entity.getQuery().isManual()) {
                 entity.getQuery().setManual(false);
                 try {
@@ -1386,6 +1397,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     @ScriptFunction(jsDocText = "Requeries children entities.")
     public void requeryChildrenOnly() throws Exception {
         if (entity != null) {
+            checkModelExecuted();
             Set<Relation<E>> outRels = entity.getOutRelations();
             if (outRels != null) {
                 for (Relation<E> rel : outRels) {

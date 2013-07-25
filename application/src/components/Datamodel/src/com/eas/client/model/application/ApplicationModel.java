@@ -192,10 +192,10 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
     }
 
     @ScriptFunction(jsDocText = "Saves model data changes. "
-    + "If model can't apply the changed, than exception is thrown. "
-    + "In this case, application can call model.save() another time to save the changes. "
-    + "If an application need to abort futher attempts and discard model data changes, "
-    + "than it can call model.revert().")
+            + "If model can't apply the changed, than exception is thrown. "
+            + "In this case, application can call model.save() another time to save the changes. "
+            + "If an application need to abort futher attempts and discard model data changes, "
+            + "than it can call model.revert().")
     public final boolean save() throws Exception {
         return save(null);
     }
@@ -231,8 +231,8 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
     public abstract int commit() throws Exception;
 
     @ScriptFunction(jsDocText = "Drops model data changes. After this method call, save() method have no "
-    + "any changes to be saved, but still attempts to commit. "
-    + "So, call to model.save() on commitable and unchanged model nevertheless leads to commit.")
+            + "any changes to be saved, but still attempts to commit. "
+            + "So, call to model.save() on commitable and unchanged model nevertheless leads to commit.")
     public abstract void revert() throws Exception;
 
     public abstract void saved() throws Exception;
@@ -300,7 +300,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
 
     private void executeRootEntities(boolean refresh) throws Exception {
         Set<E> toExecute = new HashSet<>();
-        for (E entity : entities.values()) {            
+        for (E entity : entities.values()) {
             Set<Relation<E>> dependanceRels = new HashSet<>();
             for (Relation<E> inRel : entity.getInRelations()) {
                 if (!(inRel.getLeftEntity() instanceof ApplicationParametersEntity)) {
@@ -359,17 +359,19 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
 
     @Override
     public void setRuntime(boolean aValue) throws Exception {
-        boolean oldValue = runtime;
-        runtime = aValue;
-        if (!oldValue && runtime) {
-            executeRootEntities(false);
-        }
-        PropertyChangeEvent evt = new PropertyChangeEvent(this, "runtime", oldValue, runtime);
-        for (PropertyChangeListener l : changeSupport.getPropertyChangeListeners()) {
-            try {
-                l.propertyChange(evt);
-            } catch (Exception ex) {
-                Logger.getLogger(ApplicationModel.class.getName()).log(Level.SEVERE, null, ex);
+        if (runtime != aValue) {
+            boolean oldValue = runtime;
+            runtime = aValue;
+            if (!oldValue && runtime) {
+                executeRootEntities(false);
+            }
+            PropertyChangeEvent evt = new PropertyChangeEvent(this, "runtime", oldValue, runtime);
+            for (PropertyChangeListener l : changeSupport.getPropertyChangeListeners()) {
+                try {
+                    l.propertyChange(evt);
+                } catch (Exception ex) {
+                    Logger.getLogger(ApplicationModel.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         }
     }

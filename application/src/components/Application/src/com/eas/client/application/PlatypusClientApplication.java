@@ -498,12 +498,12 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
             if (appElementId == null) {
                 appElementId = client.getStartAppElement();
             }
-            ScriptRunner.PlatypusScriptedResource.init(appCache);
             ScriptRunnerPrototype.init(ScriptUtils.getScope(), true);
             ServerScriptProxyPrototype.init(ScriptUtils.getScope(), true);
             ServerReportProxyPrototype.init(ScriptUtils.getScope(), true);
             ReportRunnerPrototype.init(ScriptUtils.getScope(), true);
             FormRunnerPrototype.init(ScriptUtils.getScope(), true);
+            ScriptRunner.PlatypusScriptedResource.init(client, getInstance(), getInstance());
             ScriptUtils.getScope().defineProperty(MODULES_SCRIPT_NAME, scriptsCache, ScriptableObject.READONLY);
 
             runFirstAction();
@@ -664,7 +664,7 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
     public void defineJsClass(final String aClassName, ApplicationElement aAppElement) {
         switch (aAppElement.getType()) {
             case ClientConstants.ET_COMPONENT:
-                ScriptRunnerPrototype.init(ScriptUtils.getScope(), false, new ScriptRunnerPrototype() {
+                ScriptRunnerPrototype.init(ScriptUtils.getScope(), true, new ScriptRunnerPrototype() {
                     @Override
                     public String getClassName() {
                         return aClassName;
@@ -681,7 +681,7 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
                 });
                 break;
             case ClientConstants.ET_FORM:
-                FormRunnerPrototype.init(ScriptUtils.getScope(), false, new FormRunnerPrototype() {
+                FormRunnerPrototype.init(ScriptUtils.getScope(), true, new FormRunnerPrototype() {
                     @Override
                     public String getClassName() {
                         return aClassName;
@@ -698,7 +698,7 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
                 });
                 break;
             case ClientConstants.ET_REPORT:
-                ReportRunnerPrototype.init(ScriptUtils.getScope(), false, new ReportRunnerPrototype() {
+                ReportRunnerPrototype.init(ScriptUtils.getScope(), true, new ReportRunnerPrototype() {
                     @Override
                     public String getClassName() {
                         return aClassName;

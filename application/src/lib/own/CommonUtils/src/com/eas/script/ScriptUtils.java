@@ -77,7 +77,7 @@ public class ScriptUtils {
     }
 
     /**
-     * Returns a global singleton js top-level scope. This scope is created one
+     * Returns a global singleton js top-level scope. This scope is created once
      * per program.
      *
      * @return An instance of ScriptableObject

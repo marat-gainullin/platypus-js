@@ -103,10 +103,10 @@ public class PlatypusHttpServlet extends HttpServlet {
             logger.setUseParentHandlers(false);
 
             DatabasesClient serverCoreDbClient = new DatabasesClient(scp.getDbSettings(), true);
-            ScriptRunner.PlatypusScriptedResource.init(serverCoreDbClient.getAppCache());
             serverCore = new PlatypusServerCore(serverCoreDbClient, scp.getTasks(), scp.getAppElementId());
             serverCoreDbClient.setContextHost(serverCore);
             serverCoreDbClient.setPrincipalHost(serverCore);
+            ScriptRunner.PlatypusScriptedResource.init(serverCoreDbClient, serverCore, serverCore);
             ScriptUtils.getScope().defineProperty(ServerScriptRunner.MODULES_SCRIPT_NAME, serverCore.getScriptsCache(), ScriptableObject.READONLY);
 
             if (System.getProperty(ScriptRunner.DEBUG_PROPERTY) != null) {
