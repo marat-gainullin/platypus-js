@@ -16,6 +16,7 @@ import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openide.awt.ActionReferences;
 import org.openide.awt.ActionRegistration;
+import org.openide.filesystems.FileUtil;
 import org.openide.loaders.DataObject;
 
 @ActionID(category = "File",
@@ -41,7 +42,7 @@ public final class DebugAction implements ActionListener {
                 PlatypusProject pProject = (PlatypusProject) project;
                 String appElementId = IndexerQuery.file2AppElementId(dataObject.getPrimaryFile());
                 if (appElementId == null) {
-                    appElementId = dataObject.getPrimaryFile().getPath();
+                    appElementId = FileUtil.getRelativePath(pProject.getSrcRoot(), dataObject.getPrimaryFile());
                 }
                 ProjectRunner.debug(pProject, appElementId);
             } catch (Exception ex) {

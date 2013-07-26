@@ -50,6 +50,12 @@ public class ProjectRunner {
     private static final String FALSE = "false"; //NOI18N
     private static final String LOCAL_HOSTNAME = "localhost"; //NOI18N
 
+    /**
+     * Starts an application in run mode. 
+     * @param project Application's project.
+     * @param appElementId Application element's name OR relative path to the executable file.
+     * @throws Exception If something goes wrong.
+     */
     public static void run(final PlatypusProject project, final String appElementId) throws Exception {
 
         project.RP.post(new Runnable() {
@@ -60,6 +66,12 @@ public class ProjectRunner {
         });
     }
 
+    /**
+     * Starts an application in debug mode. 
+     * @param project Application's project.
+     * @param appElementId Application element's name OR relative path to the executable file.
+     * @throws Exception If something goes wrong.
+     */
     public static void debug(final PlatypusProject project, final String appElementId) throws Exception {
         project.RP.post(new Runnable() {
             @Override
