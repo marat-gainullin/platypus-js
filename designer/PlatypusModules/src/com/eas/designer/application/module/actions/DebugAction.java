@@ -5,7 +5,6 @@
 package com.eas.designer.application.module.actions;
 
 import com.eas.designer.application.indexer.IndexerQuery;
-import com.eas.designer.application.module.PlatypusModuleSupport;
 import com.eas.designer.explorer.project.PlatypusProject;
 import com.eas.designer.explorer.project.ProjectRunner;
 import java.awt.event.ActionEvent;
@@ -17,6 +16,7 @@ import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openide.awt.ActionReferences;
 import org.openide.awt.ActionRegistration;
+import org.openide.loaders.DataObject;
 
 @ActionID(category = "File",
 id = "com.eas.designer.application.module.actions.DebugAction")
@@ -26,20 +26,23 @@ id = "com.eas.designer.application.module.actions.DebugAction")
 })
 public final class DebugAction implements ActionListener {
 
-    private final PlatypusModuleSupport context;
+    private final DataObject dataObject;
 
-    public DebugAction(PlatypusModuleSupport aContext) {
+    public DebugAction(DataObject aContext) {
         super();
-        context = aContext;
+        dataObject = aContext;
     }
 
     @Override
     public void actionPerformed(ActionEvent ev) {
-        Project project = FileOwnerQuery.getOwner(context.getDataObject().getPrimaryFile());
+        Project project = FileOwnerQuery.getOwner(dataObject.getPrimaryFile());
         if (project instanceof PlatypusProject) {
             try {
                 PlatypusProject pProject = (PlatypusProject) project;
-                String appElementId = IndexerQuery.file2AppElementId(context.getDataObject().getPrimaryFile());
+                String appElementId = IndexerQuery.file2AppElementId(dataObject.getPrimaryFile());
+                if (appElementId == null) {
+                    appElementId = dataObject.getPrimaryFile().getPath();
+                }
                 ProjectRunner.debug(pProject, appElementId);
             } catch (Exception ex) {
                 ErrorManager.getDefault().notify(ex);
