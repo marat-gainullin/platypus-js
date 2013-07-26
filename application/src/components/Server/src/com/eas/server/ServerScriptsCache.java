@@ -4,7 +4,7 @@
  */
 package com.eas.server;
 
-import com.eas.script.ScriptUtils;
+import com.eas.client.scripts.ScriptRunner;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,7 +32,7 @@ public class ServerScriptsCache {
         if (runner == null) {
             runner = new ServerScriptRunner(serverCore,
                     serverCore.getSessionManager().getSystemSession(),
-                    aModuleId, ScriptUtils.getScope(),
+                    aModuleId, ScriptRunner.initializePlatypusStandardLibScope(),
                     serverCore,
                     serverCore,
                     new Object[]{});

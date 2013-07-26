@@ -4,7 +4,7 @@
  */
 package com.eas.server;
 
-import com.eas.script.ScriptUtils;
+import com.eas.client.scripts.ScriptRunner;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.IdFunctionObject;
 import org.mozilla.javascript.IdScriptableObject;
@@ -106,7 +106,7 @@ public class ServerReportRunnerPrototype extends IdScriptableObject {
                                 return new ServerReportRunner(serverCoreWrapper.getServerCore(),
                                         serverCoreWrapper.getCreationSession(),
                                         scriptId,
-                                        ScriptUtils.getScope(),
+                                        ScriptRunner.initializePlatypusStandardLibScope(),
                                         serverCoreWrapper.getServerCore(),
                                         serverCoreWrapper.getServerCore(),
                                         (args.length > 1 && args[1] instanceof Object[]) ? (Object[]) args[1] : null);

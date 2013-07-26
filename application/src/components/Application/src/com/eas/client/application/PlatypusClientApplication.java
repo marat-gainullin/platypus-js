@@ -521,7 +521,7 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
             ApplicationElement appElement = client.getAppCache().get(appElementId);
             if (appElement != null) {
                 if (appElement.getType() == ClientConstants.ET_FORM) {
-                    final FormRunner form = new FormRunner(appElementId, client, ScriptUtils.getScope(), this, this, new Object[]{});
+                    final FormRunner form = new FormRunner(appElementId, client, FormRunner.initializePlatypusStandardLibScope(), this, this, new Object[]{});
                     EventQueue.invokeLater(new Runnable() {
                         @Override
                         public void run() {
@@ -534,11 +534,11 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
                     });
                     // When all windows are disposed, java VM exit automatically.
                 } else if (appElement.getType() == ClientConstants.ET_REPORT) {
-                    ReportRunner report = new ReportRunner(appElementId, client, ScriptUtils.getScope(), this, this, new Object[]{});
+                    ReportRunner report = new ReportRunner(appElementId, client, ScriptRunner.initializePlatypusStandardLibScope(), this, this, new Object[]{});
                     report.show();
                     exit(0);
                 } else if (appElement.getType() == ClientConstants.ET_COMPONENT) {
-                    ScriptRunner script = new ScriptRunner(appElementId, client, ScriptUtils.getScope(), this, this, new Object[]{});
+                    ScriptRunner script = new ScriptRunner(appElementId, client, ScriptRunner.initializePlatypusStandardLibScope(), this, this, new Object[]{});
                     script.execute();
                     exit(0);
                 } else if (appElement.getType() == ClientConstants.ET_RESOURCE) {

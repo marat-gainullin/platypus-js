@@ -6,7 +6,6 @@ package com.eas.client.reports;
 
 import com.eas.client.scripts.ScriptRunner;
 import com.eas.client.scripts.ScriptRunnerPrototype;
-import com.eas.script.ScriptUtils;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.IdFunctionObject;
 import org.mozilla.javascript.IdScriptableObject;
@@ -122,7 +121,7 @@ public class ReportRunnerPrototype extends IdScriptableObject {
                             try {
                                 ScriptRunner clientWrapper = ScriptRunnerPrototype.lookupScriptRunner(scope);
                                 assert clientWrapper != null : ScriptRunnerPrototype.BAD_SCRIPT_SCOPE_MSG;
-                                ReportRunner rr = new ReportRunner(scriptId, clientWrapper.getClient(), ScriptUtils.getScope(), clientWrapper.getPrincipalHost(), clientWrapper.getCompiledScriptDocumentsHost(), (args.length > 1 && args[1] instanceof Object[]) ? (Object[]) args[1] : null);
+                                ReportRunner rr = new ReportRunner(scriptId, clientWrapper.getClient(), ScriptRunner.initializePlatypusStandardLibScope(), clientWrapper.getPrincipalHost(), clientWrapper.getCompiledScriptDocumentsHost(), (args.length > 1 && args[1] instanceof Object[]) ? (Object[]) args[1] : null);
                                 rr.setPrototype(this);
                                 return rr;
                             } catch (Exception ex) {

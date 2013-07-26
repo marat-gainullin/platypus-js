@@ -153,7 +153,7 @@ public class FormRunnerPrototype extends IdScriptableObject {
                             try {
                                 ScriptRunner clientWrapper = ScriptRunnerPrototype.lookupScriptRunner(scope);
                                 assert clientWrapper != null : ScriptRunnerPrototype.BAD_SCRIPT_SCOPE_MSG;
-                                FormRunner formRunner = new FormRunner(args[0].toString(), clientWrapper.getClient(), ScriptUtils.getScope(), clientWrapper.getPrincipalHost(), clientWrapper.getCompiledScriptDocumentsHost(), (args.length > 1 && args[1] instanceof Object[]) ? (Object[]) args[1] : null);
+                                FormRunner formRunner = new FormRunner(args[0].toString(), clientWrapper.getClient(), ScriptRunner.initializePlatypusStandardLibScope(), clientWrapper.getPrincipalHost(), clientWrapper.getCompiledScriptDocumentsHost(), (args.length > 1 && args[1] instanceof Object[]) ? (Object[]) args[1] : null);
                                 formRunner.setPrototype(this);
                                 return formRunner;
                             } catch (Exception ex) {

@@ -7,11 +7,11 @@ package com.eas.server.handlers;
 import com.eas.client.model.application.ApplicationDbModel;
 import com.eas.client.reports.ReportDocument;
 import com.eas.client.scripts.ScriptDocument;
+import com.eas.client.scripts.ScriptRunner;
 import com.eas.client.threetier.Response;
 import com.eas.client.threetier.requests.CreateServerModuleRequest;
 import com.eas.client.threetier.requests.CreateServerModuleResponse;
 import com.eas.script.JsDoc;
-import com.eas.script.ScriptUtils;
 import com.eas.server.*;
 import java.security.AccessControlException;
 import java.util.logging.Level;
@@ -54,7 +54,7 @@ public class CreateServerModuleRequestHandler extends SessionRequestHandler<Crea
                         aServerCore,
                         aSession,
                         aModuleId,
-                        ScriptUtils.getScope(),
+                        ScriptRunner.initializePlatypusStandardLibScope(),
                         aServerCore,
                         aServerCore,
                         new Object[]{});
@@ -63,7 +63,7 @@ public class CreateServerModuleRequestHandler extends SessionRequestHandler<Crea
                         aServerCore,
                         aSession,
                         aModuleId,
-                        ScriptUtils.getScope(),
+                        ScriptRunner.initializePlatypusStandardLibScope(),
                         aServerCore,
                         aServerCore,
                         new Object[]{});

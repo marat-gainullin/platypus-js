@@ -12,7 +12,7 @@ import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.scripts.CompiledScriptDocuments;
 import com.eas.client.scripts.CompiledScriptDocumentsHost;
 import com.eas.client.scripts.ScriptDocument;
-import com.eas.script.ScriptUtils;
+import com.eas.client.scripts.ScriptRunner;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
@@ -131,7 +131,7 @@ public class SessionTest {
     protected static class DummyServerModule extends ServerScriptRunner {
 
         public DummyServerModule(PlatypusServerCore aServerCore, Session aSession, String aModuleId) throws Exception {
-            super(aServerCore, aSession, aModuleId, ScriptUtils.getScope(), new PrincipalHost() {
+            super(aServerCore, aSession, aModuleId, ScriptRunner.initializePlatypusStandardLibScope(), new PrincipalHost() {
 
                 @Override
                 public PlatypusPrincipal getPrincipal() {
