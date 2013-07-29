@@ -155,6 +155,13 @@
         </antcall>
         <antcall target="-maybe-call-dep">
             <param name="call.built.properties" value="${built-jar.properties}"/>
+            <param location="${project.Routing}" name="call.subproject"/>
+            <param location="${project.Routing}/build.xml" name="call.script"/>
+            <param name="call.target" value="jar"/>
+            <param name="transfer.built-jar.properties" value="${built-jar.properties}"/>
+        </antcall>
+        <antcall target="-maybe-call-dep">
+            <param name="call.built.properties" value="${built-jar.properties}"/>
             <param location="${project.Core}" name="call.subproject"/>
             <param location="${project.Core}/build.xml" name="call.script"/>
             <param name="call.target" value="jar"/>

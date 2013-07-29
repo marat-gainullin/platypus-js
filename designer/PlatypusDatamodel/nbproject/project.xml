@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://www.netbeans.org/ns/project/1">
+    <type>org.netbeans.modules.apisupport.project</type>
+    <configuration>
+        <data xmlns="http://www.netbeans.org/ns/nb-module-project/3">
+            <code-name-base>com.eas.designer.datamodel</code-name-base>
+            <suite-component/>
+            <module-dependencies>
+                <dependency>
+                    <code-name-base>com.eas.designer.application</code-name-base>
+                    <build-prerequisite/>
+                    <compile-dependency/>
+                    <run-dependency>
+                        <release-version>2</release-version>
+                        <specification-version>2.4</specification-version>
+                    </run-dependency>
+                </dependency>
+            </module-dependencies>
+            <test-dependencies>
+                <test-type>
+                    <name>unit</name>
+                    <test-dependency>
+                        <code-name-base>org.netbeans.libs.junit4</code-name-base>
+                        <compile-dependency/>
+                    </test-dependency>
+                </test-type>
+            </test-dependencies>
+            <public-packages>
+                <package>com.eas.client.dbstructure</package>
+                <package>com.eas.client.dbstructure.exceptions</package>
+                <package>com.eas.client.dbstructure.gui</package>
+                <package>com.eas.client.dbstructure.gui.edits</package>
+                <package>com.eas.client.dbstructure.gui.view</package>
+                <package>com.eas.client.dbstructure.store</package>
+                <package>com.eas.client.model.gui</package>
+                <package>com.eas.client.model.gui.edits</package>
+                <package>com.eas.client.model.gui.edits.fields</package>
+                <package>com.eas.client.model.gui.selectors</package>
+                <package>com.eas.client.model.gui.view</package>
+                <package>com.eas.client.model.gui.view.entities</package>
+                <package>com.eas.client.model.gui.view.model</package>
+            </public-packages>
+        </data>
+    </configuration>
+</project>
