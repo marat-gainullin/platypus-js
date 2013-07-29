@@ -164,13 +164,13 @@ directoryDialog.docString = "show a directory dialog box";
 function colorDialog(title, color) {
     var result;
     function _colorDialog() {
-        if (title == undefined) {
+        if (!title) {
             title = "Choose Color";
         }
-        if (color == undefined) {
+        if (!color) {
             color = java.awt.Color.BLACK;
         }
-        var chooser = new javax.swing.JColorChooser();
+        var chooser = javax.swing.JColorChooser;
         var res = chooser.showDialog(window, title, color);
         result = res ? res : null;
     }     
