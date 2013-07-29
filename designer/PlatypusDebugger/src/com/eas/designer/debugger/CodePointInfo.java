@@ -49,8 +49,11 @@ public class CodePointInfo {
                     cpInfo.functionName = tagValue;
                     break;
             }
-        }
+        }        
         cpInfo.fo = IndexerQuery.appElementId2File(project, cpInfo.url);
+        if (cpInfo.fo == null) {
+            cpInfo.fo = DebuggerUtils.getFileObjectByUrl(project, cpInfo.url);
+        }
         return cpInfo;
     }
 

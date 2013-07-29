@@ -6,6 +6,7 @@ package com.eas.designer.debugger;
 
 import com.eas.debugger.jmx.server.BreakpointsMBean;
 import com.eas.designer.application.indexer.IndexerQuery;
+import com.eas.designer.application.indexer.PlatypusPathRecognizer;
 import com.eas.designer.debugger.annotations.PlatypusBreakpointAnnotation;
 import com.eas.designer.debugger.annotations.PlatypusDisabledBreakpointAnnotation;
 import java.util.ArrayList;
@@ -13,8 +14,12 @@ import java.util.List;
 import org.netbeans.api.debugger.Breakpoint;
 import org.netbeans.api.debugger.DebuggerEngine;
 import org.netbeans.api.debugger.DebuggerManager;
+import org.netbeans.api.project.FileOwnerQuery;
+import org.netbeans.api.project.Project;
 import org.netbeans.spi.debugger.ui.BreakpointAnnotation;
+import org.netbeans.spi.java.classpath.ClassPathProvider;
 import org.openide.filesystems.FileObject;
+import org.openide.filesystems.FileUtil;
 import org.openide.text.Line;
 
 /**
@@ -38,6 +43,9 @@ public class PlatypusBreakpoint extends Breakpoint {
             FileObject file = line.getLookup().lookup(FileObject.class);
             if (file != null) {
                 String url = IndexerQuery.file2AppElementId(file);
+                if (url == null) {
+                    url = DebuggerUtils.getUrlAsRelativePath(file);
+                }
                 if (aBreakpoints.isBreakable(url, lineNo)) {
                     aBreakpoints.addBreakpoint(url, lineNo);
                 } else {
@@ -53,6 +61,9 @@ public class PlatypusBreakpoint extends Breakpoint {
             FileObject file = line.getLookup().lookup(FileObject.class);
             if (file != null) {
                 String url = IndexerQuery.file2AppElementId(file);
+                if (url == null) {
+                    url = DebuggerUtils.getUrlAsRelativePath(file);
+                }
                 aBreakpoints.removeBreakpoint(url, lineNo);
             }
         }

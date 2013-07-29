@@ -6,6 +6,7 @@ package com.eas.designer.debugger;
 
 import com.eas.debugger.jmx.server.BreakpointsMBean;
 import com.eas.debugger.jmx.server.DebuggerMBean;
+import com.eas.designer.application.indexer.PlatypusPathRecognizer;
 import java.io.IOException;
 import java.util.concurrent.Future;
 import javax.management.InstanceNotFoundException;
@@ -19,6 +20,11 @@ import org.netbeans.api.debugger.DebuggerEngine;
 import org.netbeans.api.debugger.DebuggerEngine.Destructor;
 import org.netbeans.api.debugger.DebuggerInfo;
 import org.netbeans.api.debugger.DebuggerManager;
+import org.netbeans.api.project.FileOwnerQuery;
+import org.netbeans.api.project.Project;
+import org.netbeans.spi.java.classpath.ClassPathProvider;
+import org.openide.filesystems.FileObject;
+import org.openide.filesystems.FileUtil;
 
 /**
  *
@@ -69,7 +75,6 @@ public class DebuggerUtils {
 
     public static void startProcessWaiting(final Future<Integer> runningProgram, final DebuggerEngine[] dEngines) {
         Thread thread = new Thread(new Runnable() {
-
             @Override
             public void run() {
                 try {
@@ -84,5 +89,30 @@ public class DebuggerUtils {
             }
         });
         thread.start();
+    }
+
+    public static String getUrlAsRelativePath(FileObject sourceFile) {
+        Project p = FileOwnerQuery.getOwner(sourceFile);
+        FileObject rootFileObject = getSourcesRoot(p);
+        assert FileUtil.isParentOf(rootFileObject, sourceFile) : String.format("Source file %s root is not found in project's source roots.", sourceFile.getPath());
+        return FileUtil.getRelativePath(rootFileObject, sourceFile);
+    }
+
+    public static FileObject getFileObjectByUrl(Project project, String url) {
+        FileObject rootFileObject = getSourcesRoot(project);
+        return rootFileObject.getFileObject(url);
+    }
+    
+    private static FileObject getSourcesRoot(Project project) {
+        ClassPathProvider cpp = project.getLookup().lookup(ClassPathProvider.class);
+        if (cpp != null) {
+            FileObject[] roots = cpp.findClassPath(null, PlatypusPathRecognizer.SOURCE_CP).getRoots();
+            if (roots.length != 1) {
+                throw new IllegalStateException("Only one root supported for now.");
+            }
+            return roots[0];
+        } else {
+            throw new IllegalStateException("ClassPathProvider is not found in project's lookup.");
+        }
     }
 }

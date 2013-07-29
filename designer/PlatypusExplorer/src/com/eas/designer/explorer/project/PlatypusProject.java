@@ -388,7 +388,13 @@ public class PlatypusProject implements Project {
     }
 
     private final class PlatypusClassPathProvider implements ClassPathProvider {
-
+      
+        /**
+         * Find some kind of a classpath for a given file or default classpath.
+         * @param file a file somewhere, or a source root, or null for default classpath
+         * @param type a classpath type
+         * @return an appropriate classpath, or null for no answer
+         */
         @Override
         public ClassPath findClassPath(FileObject file, String type) {
             if (PlatypusPathRecognizer.SOURCE_CP.equals(type)) {
@@ -402,7 +408,7 @@ public class PlatypusProject implements Project {
 
         private final PropertyChangeSupport support = new PropertyChangeSupport(this);
         private List<PathResourceImplementation> resources;
-
+        
         @Override
         public synchronized List<? extends PathResourceImplementation> getResources() {
             try {
