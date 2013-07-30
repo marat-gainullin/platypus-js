@@ -4,23 +4,24 @@
  */
 package com.eas.designer.explorer.project;
 
+import com.eas.designer.application.project.PlatypusProject;
+import com.eas.designer.application.project.PlatypusProjectInformation;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import javax.swing.Icon;
 import org.netbeans.api.project.Project;
-import org.netbeans.api.project.ProjectInformation;
 import org.openide.util.ImageUtilities;
 
 /**
  *
  * @author Gala
  */
-public class PlatypusProjectInformation implements ProjectInformation {
+public class PlatypusProjectInformationImpl implements PlatypusProjectInformation {
 
     protected PropertyChangeSupport propertyChangeSupport;
     protected PlatypusProject project;
 
-    public PlatypusProjectInformation(PlatypusProject aProject) {
+    public PlatypusProjectInformationImpl(PlatypusProjectImpl aProject) {
         super();
         project = aProject;
         propertyChangeSupport = new PropertyChangeSupport(this);
@@ -36,6 +37,7 @@ public class PlatypusProjectInformation implements ProjectInformation {
         return project.getDisplayName();
     }
 
+    @Override
     public void setDisplayName(String aName) {
         String oldValue = getDisplayName();
         project.getSettings().setDisplayName(aName);

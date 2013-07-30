@@ -22,14 +22,14 @@ public final class PlatypusProjectFactory implements ProjectFactory {
     public boolean isProject(FileObject fo) {
         return fo.isFolder()
                 && fo.getFileObject(BaseDeployer.PLATYPUS_SETTINGS_FILE) != null
-                && fo.getFileObject(PlatypusProjectSettings.PROJECT_SETTINGS_FILE) != null;
+                && fo.getFileObject(PlatypusProjectSettingsImpl.PROJECT_SETTINGS_FILE) != null;
     }
 
     @Override
     public Project loadProject(FileObject fo, ProjectState ps) throws IOException {
         try {
             if (isProject(fo)) {
-                return new PlatypusProject(fo, ps);
+                return new PlatypusProjectImpl(fo, ps);
             } else {
                 return null;
             }
@@ -41,9 +41,9 @@ public final class PlatypusProjectFactory implements ProjectFactory {
 
     @Override
     public void saveProject(Project aProject) throws IOException, ClassCastException {
-        if (aProject instanceof PlatypusProject) {
+        if (aProject instanceof PlatypusProjectImpl) {
             try {
-                PlatypusProject project = (PlatypusProject) aProject;
+                PlatypusProjectImpl project = (PlatypusProjectImpl) aProject;
                 project.save();
             } catch (Exception ex) {
                 throw new IOException(ex);

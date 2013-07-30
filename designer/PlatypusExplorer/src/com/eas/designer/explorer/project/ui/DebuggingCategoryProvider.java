@@ -4,7 +4,7 @@
  */
 package com.eas.designer.explorer.project.ui;
 
-import com.eas.designer.explorer.project.PlatypusProject;
+import com.eas.designer.explorer.project.PlatypusProjectImpl;
 import javax.swing.JComponent;
 import org.netbeans.spi.project.ui.support.ProjectCustomizer;
 import org.openide.ErrorManager;
@@ -26,7 +26,7 @@ public class DebuggingCategoryProvider implements ProjectCustomizer.CompositeCat
     @Override
     public JComponent createComponent(ProjectCustomizer.Category ctgr, Lookup lkp) {
         try {
-            PlatypusProject project = lkp.lookup(PlatypusProject.class);
+            PlatypusProjectImpl project = lkp.lookup(PlatypusProjectImpl.class);
             return new ProjectDebuggingCustomizer(project);
         } catch (Exception ex) {
             ErrorManager.getDefault().notify(ex);

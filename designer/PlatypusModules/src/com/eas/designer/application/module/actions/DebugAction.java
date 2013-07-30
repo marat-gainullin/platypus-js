@@ -5,7 +5,7 @@
 package com.eas.designer.application.module.actions;
 
 import com.eas.designer.application.indexer.IndexerQuery;
-import com.eas.designer.explorer.project.PlatypusProject;
+import com.eas.designer.explorer.project.PlatypusProjectImpl;
 import com.eas.designer.explorer.project.ProjectRunner;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -37,9 +37,9 @@ public final class DebugAction implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent ev) {
         Project project = FileOwnerQuery.getOwner(dataObject.getPrimaryFile());
-        if (project instanceof PlatypusProject) {
+        if (project instanceof PlatypusProjectImpl) {
             try {
-                PlatypusProject pProject = (PlatypusProject) project;
+                PlatypusProjectImpl pProject = (PlatypusProjectImpl) project;
                 String appElementId = IndexerQuery.file2AppElementId(dataObject.getPrimaryFile());
                 if (appElementId == null) {
                     appElementId = FileUtil.getRelativePath(pProject.getSrcRoot(), dataObject.getPrimaryFile());

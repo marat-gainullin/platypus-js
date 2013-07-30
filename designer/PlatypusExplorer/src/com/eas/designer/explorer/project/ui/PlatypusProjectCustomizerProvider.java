@@ -4,7 +4,8 @@
  */
 package com.eas.designer.explorer.project.ui;
 
-import com.eas.designer.explorer.project.PlatypusProject;
+import com.eas.designer.application.project.PlatypusProject;
+import com.eas.designer.explorer.project.PlatypusProjectImpl;
 import java.awt.Dialog;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;

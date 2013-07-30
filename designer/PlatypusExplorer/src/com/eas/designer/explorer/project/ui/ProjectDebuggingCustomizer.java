@@ -11,8 +11,8 @@
 package com.eas.designer.explorer.project.ui;
 
 import com.eas.deploy.project.PlatypusSettings;
-import com.eas.designer.explorer.project.PlatypusProject;
-import com.eas.designer.explorer.project.PlatypusProjectSettings;
+import com.eas.designer.explorer.project.PlatypusProjectImpl;
+import com.eas.designer.explorer.project.PlatypusProjectSettingsImpl;
 
 /**
  *
@@ -20,12 +20,12 @@ import com.eas.designer.explorer.project.PlatypusProjectSettings;
  */
 public class ProjectDebuggingCustomizer extends javax.swing.JPanel {
 
-    protected PlatypusProjectSettings projectSettings;
+    protected PlatypusProjectSettingsImpl projectSettings;
 
     /**
      * Creates new form ProjectRunningCustomizer
      */
-    public ProjectDebuggingCustomizer(PlatypusProject aProject) throws Exception {
+    public ProjectDebuggingCustomizer(PlatypusProjectImpl aProject) throws Exception {
         initComponents();
         projectSettings = aProject.getSettings();
         spClientDebugPort.setValue(projectSettings.getDebugClientPort());

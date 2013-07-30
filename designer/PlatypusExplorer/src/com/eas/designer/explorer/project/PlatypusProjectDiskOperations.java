@@ -27,9 +27,9 @@ public class PlatypusProjectDiskOperations implements DataFilesProviderImplement
         MoveOperationImplementation,
         MoveOrRenameOperationImplementation {
 
-    protected PlatypusProject project;
+    protected PlatypusProjectImpl project;
 
-    public PlatypusProjectDiskOperations(PlatypusProject aProject) {
+    public PlatypusProjectDiskOperations(PlatypusProjectImpl aProject) {
         super();
         project = aProject;
     }
@@ -92,7 +92,7 @@ public class PlatypusProjectDiskOperations implements DataFilesProviderImplement
             //project - newly, just created project
             //original - old (original) project
             assert original != project;
-            ((PlatypusProject)original).getState().notifyDeleted();
+            ((PlatypusProjectImpl)original).getState().notifyDeleted();
         }
     }
 

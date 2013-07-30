@@ -4,6 +4,9 @@
  */
 package com.eas.designer.explorer.project;
 
+import com.eas.designer.application.project.ClientType;
+import com.eas.designer.application.project.AppServerType;
+import com.eas.designer.application.project.PlatypusProjectSettings;
 import com.eas.deploy.BaseDeployer;
 import com.eas.deploy.project.PlatypusSettings;
 import com.eas.designer.application.PlatypusUtils;
@@ -16,7 +19,6 @@ import java.beans.PropertyChangeSupport;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.security.InvalidParameterException;
 import org.openide.filesystems.FileObject;
 import org.openide.util.EditableProperties;
 import org.w3c.dom.Document;
@@ -26,7 +28,7 @@ import org.w3c.dom.Document;
  *
  * @author vv
  */
-public class PlatypusProjectSettings {
+public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
 
     public static final int DEFAULT_PLATYPUS_SERVER_PORT = 8500;
     public static final int CLIENT_APP_DEFAULT_DEBUG_PORT = 8900;
@@ -60,7 +62,7 @@ public class PlatypusProjectSettings {
     private boolean projectPropertiesIsDirty;
     private boolean projectPrivatePropertiesIsDirty;
 
-    public PlatypusProjectSettings(FileObject aProjectDir) throws Exception {
+    public PlatypusProjectSettingsImpl(FileObject aProjectDir) throws Exception {
         if (aProjectDir == null) {
             throw new IllegalArgumentException("Project directory file object is null."); //NOI18N
         }
@@ -89,6 +91,7 @@ public class PlatypusProjectSettings {
         }
     }
 
+    @Override
     public PlatypusSettings getAppSettings() {
         return platypusSettings;
     }
@@ -98,6 +101,7 @@ public class PlatypusProjectSettings {
      *
      * @return title for the project
      */
+    @Override
     public String getDisplayName() {
         return projectProperties.get(PROJECT_DISPLAY_NAME_KEY);
     }
@@ -107,6 +111,7 @@ public class PlatypusProjectSettings {
      *
      * @param aValue title for the project
      */
+    @Override
     public void setDisplayName(String aValue) {
         if (aValue == null) {
             throw new NullPointerException("The Display name parameter cannot be null."); // NOI18N
@@ -122,6 +127,7 @@ public class PlatypusProjectSettings {
      *
      * @return Platypus user name
      */
+    @Override
     public String getRunUser() {
         return projectPrivateProperties.get(RUN_USER_KEY);
     }
@@ -131,6 +137,7 @@ public class PlatypusProjectSettings {
      *
      * @param aValue Platypus user name
      */
+    @Override
     public void setRunUser(String aValue) {
         String oldValue = getRunUser();
         if (aValue != null) {
@@ -147,6 +154,7 @@ public class PlatypusProjectSettings {
      *
      * @return Platypus user name
      */
+    @Override
     public String getRunPassword() {
         return projectPrivateProperties.get(RUN_PASSWORD_KEY);
     }
@@ -156,6 +164,7 @@ public class PlatypusProjectSettings {
      *
      * @param aValue Platypus user name
      */
+    @Override
     public void setRunPassword(String aValue) {
         String oldValue = getRunPassword();
         if (aValue != null) {
@@ -172,6 +181,7 @@ public class PlatypusProjectSettings {
      *
      * @return parameters string
      */
+    @Override
     public String getRunClientOptions() {
         return projectPrivateProperties.get(RUN_CLIENT_OPTIONS_KEY);
     }
@@ -181,6 +191,7 @@ public class PlatypusProjectSettings {
      *
      * @param aValue
      */
+    @Override
     public void setClientOptions(String aValue) {
         String oldValue = getRunClientOptions();
         if (aValue != null) {
@@ -197,6 +208,7 @@ public class PlatypusProjectSettings {
      *
      * @return parameters string
      */
+    @Override
     public String getRunClientVmOptions() {
         return projectPrivateProperties.get(RUN_CLIENT_VM_OPTIONS_KEY);
     }
@@ -206,6 +218,7 @@ public class PlatypusProjectSettings {
      *
      * @param aValue
      */
+    @Override
     public void setClientVmOptions(String aValue) {
         String oldValue = getRunClientVmOptions();
         if (aValue != null) {
@@ -222,6 +235,7 @@ public class PlatypusProjectSettings {
      *
      * @return parameters string
      */
+    @Override
     public String getRunServerOptions() {
         return projectPrivateProperties.get(RUN_SERVER_OPTIONS_KEY);
     }
@@ -231,6 +245,7 @@ public class PlatypusProjectSettings {
      *
      * @param aValue
      */
+    @Override
     public void setServerOptions(String aValue) {
         String oldValue = getRunServerOptions();
         if (aValue != null) {
@@ -247,6 +262,7 @@ public class PlatypusProjectSettings {
      *
      * @return parameters string
      */
+    @Override
     public String getRunServerVmOptions() {
         return projectPrivateProperties.get(RUN_SERVER_VM_OPTIONS_KEY);
     }
@@ -256,6 +272,7 @@ public class PlatypusProjectSettings {
      *
      * @param aValue
      */
+    @Override
     public void setServerVmOptions(String aValue) {
         String oldValue = getRunServerVmOptions();
         if (aValue != null) {
@@ -272,6 +289,7 @@ public class PlatypusProjectSettings {
      *
      * @return true if run application from database
      */
+    @Override
     public boolean isDbAppSources() {
         return Boolean.valueOf(projectPrivateProperties.get(DB_APP_SOURCES_KEY));
     }
@@ -281,6 +299,7 @@ public class PlatypusProjectSettings {
      *
      * @param aValue true if run application from database
      */
+    @Override
     public void setDbAppSources(boolean aValue) {
         boolean oldValue = isDbAppSources();
         projectPrivateProperties.setProperty(DB_APP_SOURCES_KEY, Boolean.valueOf(aValue).toString());
@@ -293,6 +312,7 @@ public class PlatypusProjectSettings {
      *
      * @return Url string
      */
+    @Override
     public String getClientUrl() {
         return projectPrivateProperties.get(CLIENT_URL_KEY);
     }
@@ -302,6 +322,7 @@ public class PlatypusProjectSettings {
      *
      * @param aValue Url string
      */
+    @Override
     public void setClientUrl(String aValue) {
         String oldValue = getClientUrl();
         if (aValue != null) {
@@ -318,6 +339,7 @@ public class PlatypusProjectSettings {
      *
      * @return server port
      */
+    @Override
     public int getServerPort() {
         return StringUtils.parseInt(projectPrivateProperties.get(SERVER_PORT_KEY), DEFAULT_PLATYPUS_SERVER_PORT);
     }
@@ -327,6 +349,7 @@ public class PlatypusProjectSettings {
      *
      * @param aValue server port
      */
+    @Override
     public void setServerPort(int aValue) {
         int oldValue = getServerPort();
         projectPrivateProperties.setProperty(SERVER_PORT_KEY, String.valueOf(aValue));
@@ -340,6 +363,7 @@ public class PlatypusProjectSettings {
      *
      * @return true not to start server
      */
+    @Override
     public boolean isNotStartServer() {
         return Boolean.valueOf(projectPrivateProperties.get(NOT_START_SERVER_KEY));
     }
@@ -350,6 +374,7 @@ public class PlatypusProjectSettings {
      *
      * @param aValue true not to start server
      */
+    @Override
     public void setNotStartServer(boolean aValue) {
         boolean oldValue = isNotStartServer();
         projectPrivateProperties.setProperty(NOT_START_SERVER_KEY, String.valueOf(aValue));
@@ -363,6 +388,7 @@ public class PlatypusProjectSettings {
      *
      * @return JMX debugging port
      */
+    @Override
     public int getDebugClientPort() {
         return StringUtils.parseInt(projectPrivateProperties.get(DEBUG_CLIENT_PORT_KEY), CLIENT_APP_DEFAULT_DEBUG_PORT);
     }
@@ -373,6 +399,7 @@ public class PlatypusProjectSettings {
      *
      * @param aValue JMX debugging port
      */
+    @Override
     public void setDebugClientPort(int aValue) {
         int oldValue = getDebugClientPort();
         projectPrivateProperties.setProperty(DEBUG_CLIENT_PORT_KEY, String.valueOf(aValue));
@@ -386,6 +413,7 @@ public class PlatypusProjectSettings {
      *
      * @return JMX debugging port
      */
+    @Override
     public int getDebugServerPort() {
         return StringUtils.parseInt(projectPrivateProperties.get(DEBUG_SERVER_PORT_KEY), SERVER_APP_DEFAULT_DEBUG_PORT);
     }
@@ -396,6 +424,7 @@ public class PlatypusProjectSettings {
      *
      * @param aValue JMX debugging port
      */
+    @Override
     public void setDebugServerPort(int aValue) {
         int oldValue = getDebugServerPort();
         projectPrivateProperties.setProperty(DEBUG_SERVER_PORT_KEY, String.valueOf(aValue));
@@ -408,6 +437,7 @@ public class PlatypusProjectSettings {
      *
      * @return J2EE server ID
      */
+    @Override
     public String getJ2eeServerId() {
         return projectPrivateProperties.get(J2EE_SERVER_ID_KEY);
     }
@@ -417,6 +447,7 @@ public class PlatypusProjectSettings {
      *
      * @param aValue J2EE server ID
      */
+    @Override
     public void setJ2eeServerId(String aValue) {
         String oldValue = getJ2eeServerId();
         if (aValue != null) {
@@ -433,6 +464,7 @@ public class PlatypusProjectSettings {
      *
      * @return The name of the context string
      */
+    @Override
     public String getServerContext() {
         return projectProperties.get(SERVER_CONTEXT_KEY);
     }
@@ -442,6 +474,7 @@ public class PlatypusProjectSettings {
      *
      * @param aValue The name of the context string
      */
+    @Override
     public void setServerContext(String aValue) {
         String oldValue = getServerContext();
         if (aValue != null) {
@@ -458,6 +491,7 @@ public class PlatypusProjectSettings {
      *
      * @return true to enable configure security realm
      */
+    @Override
     public boolean isWebSecurityEnabled() {
         return Boolean.valueOf(projectPrivateProperties.get(ENABLE_SECURITY_REALM_KEY));
     }
@@ -467,6 +501,7 @@ public class PlatypusProjectSettings {
      *
      * @param aValue true to enable configure security realm
      */
+    @Override
     public void setSecurityRealmEnabled(boolean aValue) {
         boolean oldValue = isWebSecurityEnabled();
         projectPrivateProperties.setProperty(ENABLE_SECURITY_REALM_KEY, Boolean.valueOf(aValue).toString());
@@ -479,6 +514,7 @@ public class PlatypusProjectSettings {
      *
      * @return ClientType instance
      */
+    @Override
     public ClientType getRunClientType() {
         ClientType val = ClientType.getById(projectPrivateProperties.get(CLIENT_TYPE_KEY));
         return val != null ? val : ClientType.PLATYPUS_CLIENT;
@@ -489,6 +525,7 @@ public class PlatypusProjectSettings {
      *
      * @param aValue ClientType instance
      */
+    @Override
     public void setRunClientType(ClientType aValue) {
         ClientType oldValue = getRunClientType();
         if (aValue != null) {
@@ -505,6 +542,7 @@ public class PlatypusProjectSettings {
      *
      * @return AppServerType instance
      */
+    @Override
     public AppServerType getRunAppServerType() {
         AppServerType val = AppServerType.getById(projectPrivateProperties.get(SERVER_TYPE_KEY));
         return val != null ? val : AppServerType.NONE;
@@ -515,6 +553,7 @@ public class PlatypusProjectSettings {
      *
      * @param aValue AppServerType instance
      */
+    @Override
     public void setRunAppServerType(AppServerType aValue) {
         AppServerType oldValue = getRunAppServerType();
         if (aValue != null) {
@@ -526,6 +565,7 @@ public class PlatypusProjectSettings {
         changeSupport.firePropertyChange(SERVER_TYPE_KEY, aValue, oldValue);
     }
 
+    @Override
     public void save() throws Exception {
         if (platypusSettingsIsDirty) {
             try (OutputStream os = getPlatypusSettingsFileObject().getOutputStream()) {
@@ -548,6 +588,7 @@ public class PlatypusProjectSettings {
         }
     }
 
+    @Override
     public PropertyChangeSupport getChangeSupport() {
         return changeSupport;
     }

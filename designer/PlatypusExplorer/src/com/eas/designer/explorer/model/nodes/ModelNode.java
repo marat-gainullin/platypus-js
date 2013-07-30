@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import javax.swing.plaf.IconUIResource;
+import org.openide.loaders.DataObject;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Node;
 import org.openide.nodes.PropertySupport;
@@ -27,7 +27,7 @@ import org.openide.util.ImageUtilities;
 public class ModelNode<E extends Entity<?, ?, E>, M extends Model<E, ?, DbClient, ?>> extends AbstractNode {
 
     protected static final String DATAMODEL_ICON_NAME = "datamodel16.png"; //NOI18N
-    protected PlatypusDataObject dataObject;
+    protected DataObject dataObject;
 
     public ModelNode(ModelNodeChildren<E, M> aChildren, PlatypusDataObject aDataObject) {
         super(aChildren);
@@ -38,7 +38,7 @@ public class ModelNode<E extends Entity<?, ?, E>, M extends Model<E, ?, DbClient
         return true;
     }
 
-    public PlatypusDataObject getDataObject() {
+    public DataObject getDataObject() {
         return dataObject;
     }
 

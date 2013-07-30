@@ -4,7 +4,7 @@
  */
 package com.eas.designer.explorer.j2ee;
 
-import com.eas.designer.explorer.project.PlatypusProject;
+import com.eas.designer.explorer.project.PlatypusProjectImpl;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.File;
@@ -40,11 +40,11 @@ public class PlatypusWebModule extends J2eeModuleProvider implements J2eeModuleI
     public static final String LIB_DIRECTORY_NAME = "lib"; //NOI18N
     public static final String META_INF_DIRECTORY = "META-INF"; //NOI18N
     public static final String PUBLIC_DIRECTORY = "pub"; //NOI18N
-    protected final PlatypusProject project;
+    protected final PlatypusProjectImpl project;
     private J2eeModule j2eeModule;
     private PropertyChangeSupport propertyChangeSupport;
 
-    public PlatypusWebModule(PlatypusProject aProject) {
+    public PlatypusWebModule(PlatypusProjectImpl aProject) {
         super();
         project = aProject;
     }

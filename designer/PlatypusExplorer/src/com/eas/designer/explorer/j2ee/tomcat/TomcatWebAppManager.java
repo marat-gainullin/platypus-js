@@ -12,7 +12,7 @@ import com.eas.designer.explorer.j2ee.PlatypusWebModule;
 import com.eas.designer.explorer.j2ee.WebAppManager;
 import com.eas.designer.explorer.platform.EmptyPlatformHomePathException;
 import com.eas.designer.explorer.platform.PlatypusPlatform;
-import com.eas.designer.explorer.project.PlatypusProject;
+import com.eas.designer.explorer.project.PlatypusProjectImpl;
 import com.eas.util.FileUtils;
 import com.eas.xml.dom.XmlDom2String;
 import java.io.File;
@@ -47,10 +47,10 @@ public class TomcatWebAppManager implements WebAppManager {
     public static final String TOMCAT_LIB_DIR = "lib"; //NOI18N
     public final String CONTEXT_FILE_NAME = "context.xml"; //NOI18N
     public final String DATASOURCE_REALM_CLASS_NAME = "org.apache.catalina.realm.DataSourceRealm"; //NOI18N
-    protected final PlatypusProject project;
+    protected final PlatypusProjectImpl project;
     private ServerInstance si;
 
-    public TomcatWebAppManager(PlatypusProject aProject, String serverInstanceID) throws InstanceRemovedException {
+    public TomcatWebAppManager(PlatypusProjectImpl aProject, String serverInstanceID) throws InstanceRemovedException {
         project = aProject;
         si = Deployment.getDefault().getServerInstance(serverInstanceID);
     }

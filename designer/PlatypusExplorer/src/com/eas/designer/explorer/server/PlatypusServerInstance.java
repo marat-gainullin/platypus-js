@@ -6,8 +6,10 @@ package com.eas.designer.explorer.server;
 
 import com.eas.client.ClientConstants;
 import com.eas.deploy.project.PlatypusSettings;
-import com.eas.designer.explorer.project.PlatypusProject;
-import com.eas.designer.explorer.project.PlatypusProjectSettings;
+import com.eas.designer.application.project.PlatypusProject;
+import com.eas.designer.application.project.PlatypusProjectSettings;
+import com.eas.designer.explorer.project.PlatypusProjectImpl;
+import com.eas.designer.explorer.project.PlatypusProjectSettingsImpl;
 import com.eas.designer.explorer.project.ProjectRunner;
 import com.eas.server.PlatypusServer;
 import com.eas.server.ServerMain;
