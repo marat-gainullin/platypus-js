@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.designer.application.module.nodes;
+package com.eas.designer.datamodel.nodes;
 
 import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.model.Model;

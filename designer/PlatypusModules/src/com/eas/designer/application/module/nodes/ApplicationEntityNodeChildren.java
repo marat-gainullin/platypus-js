@@ -9,6 +9,7 @@ import com.eas.client.model.Entity;
 import com.eas.client.model.application.ApplicationDbParametersEntity;
 import com.eas.designer.datamodel.nodes.EntityNodeChildren;
 import com.eas.designer.datamodel.nodes.FieldNode;
+import com.eas.designer.datamodel.nodes.ModelParameterNode;
 import com.eas.designer.datamodel.nodes.QueryParameterNode;
 import org.openide.awt.UndoRedo;
 import org.openide.nodes.Node;

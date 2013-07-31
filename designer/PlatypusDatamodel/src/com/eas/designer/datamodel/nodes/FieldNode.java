@@ -34,6 +34,7 @@ import java.util.Set;
 import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.event.UndoableEditEvent;
+import javax.swing.event.UndoableEditListener;
 import javax.swing.undo.UndoableEdit;
 import org.openide.actions.MoveDownAction;
 import org.openide.actions.MoveUpAction;
@@ -218,8 +219,13 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
         return getLookup().lookup(Entity.class);
     }
 
-    protected UndoRedo.Manager getUndo() {
-        return getLookup().lookup(ModelUndoProvider.class).getModelUndo();
+    protected UndoableEditListener getUndo() {
+        ModelUndoProvider mup = getLookup().lookup(ModelUndoProvider.class);
+        if (mup != null) {
+            return getLookup().lookup(ModelUndoProvider.class).getModelUndo();
+        } else {
+            return StubUndoableEditListener.DEFAULT;
+        }
     }
 
     @Override
@@ -696,5 +702,15 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
         public boolean canWrite() {
             return canChange();
         }
+    }
+    
+    protected static class StubUndoableEditListener implements UndoableEditListener {
+
+        public static final UndoableEditListener DEFAULT = new StubUndoableEditListener();
+        
+        @Override
+        public void undoableEditHappened(UndoableEditEvent e) {
+        }
+        
     }
 }
