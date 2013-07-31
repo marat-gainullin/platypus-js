@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE filesystem PUBLIC "-//NetBeans//DTD Filesystem 1.2//EN"
+                            "http://www.netbeans.org/dtds/filesystem-1_2.dtd">
+<filesystem>
+    <folder name="Actions">
+        <folder name="Edit">
+            <file name="com-eas-designer-explorer-model-nodes-ShowEntityAction.instance">
+                <!--com.eas.designer.datamodel.nodes.ShowEntityAction-->
+                <attr
+                    bundlevalue="com.eas.designer.datamodel.nodes.Bundle#CTL_ShowEntityAction" name="displayName"/>
+                <attr name="instanceCreate" newvalue="com.eas.designer.datamodel.nodes.ShowEntityAction"/>
+            </file>
+        </folder>
+    </folder>
+</filesystem>

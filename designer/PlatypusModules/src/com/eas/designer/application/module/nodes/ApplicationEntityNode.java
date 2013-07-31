@@ -9,7 +9,7 @@ import com.eas.designer.application.module.events.ApplicationEntityEventDesc;
 import com.eas.designer.application.module.events.ApplicationEntityEventProperty;
 import com.eas.designer.application.module.events.ApplicationEntityEventsAction;
 import com.eas.designer.application.module.events.ApplicationModuleEvents;
-import com.eas.designer.explorer.model.nodes.EntityNode;
+import com.eas.designer.datamodel.nodes.EntityNode;
 import com.eas.script.ScriptUtils;
 import com.eas.script.StoredFunction;
 import java.beans.PropertyChangeEvent;

@@ -5,7 +5,7 @@
 package com.eas.designer.application.dbdiagram;
 
 import com.eas.client.model.gui.edits.NotSavable;
-import com.eas.designer.explorer.ModelUndoProvider;
+import com.eas.designer.datamodel.ModelUndoProvider;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.beans.VetoableChangeListener;

@@ -5,8 +5,8 @@
 package com.eas.designer.application.module;
 
 import com.eas.designer.application.PlatypusUtils;
+import com.eas.designer.datamodel.ModelUndoProvider;
 import com.eas.designer.explorer.DataObjectProvider;
-import com.eas.designer.explorer.ModelUndoProvider;
 import java.io.CharConversionException;
 import java.io.IOException;
 import java.io.InputStream;

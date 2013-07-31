@@ -5,7 +5,7 @@
 package com.eas.designer.application.query.templates;
 
 import com.eas.client.cache.PlatypusFiles;
-import com.eas.designer.explorer.project.PlatypusProject;
+import com.eas.designer.explorer.project.PlatypusProjectImpl;
 import java.awt.Component;
 import java.util.HashSet;
 import java.util.Set;
@@ -25,11 +25,11 @@ public class NewQueryWizardSettingsPanel implements
         WizardDescriptor.ValidatingPanel<WizardDescriptor>, WizardDescriptor.FinishablePanel<WizardDescriptor> {
 
     public static final String CONNECTION_PROP_NAME = "connectionId";
-    protected PlatypusProject project;
+    protected PlatypusProjectImpl project;
     private WizardDescriptor wizardDescriptor;
     protected QuerySettingsVisualPanel component;
 
-    public NewQueryWizardSettingsPanel(PlatypusProject aProject) {
+    public NewQueryWizardSettingsPanel(PlatypusProjectImpl aProject) {
         super();
         project = aProject;
     }
@@ -116,7 +116,7 @@ public class NewQueryWizardSettingsPanel implements
         return PlatypusFiles.CONNECTION_EXTENSION.equalsIgnoreCase(aFile.getExt());
     }
 
-    public PlatypusProject getProject() {
+    public PlatypusProjectImpl getProject() {
         return project;
     }
 }

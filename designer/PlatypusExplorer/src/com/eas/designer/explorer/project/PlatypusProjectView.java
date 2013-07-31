@@ -4,6 +4,7 @@
  */
 package com.eas.designer.explorer.project;
 
+import com.eas.designer.application.project.PlatypusProject;
 import java.awt.Image;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -38,9 +39,9 @@ import org.openide.util.lookup.Lookups;
  */
 public class PlatypusProjectView implements LogicalViewProvider {
 
-    protected PlatypusProject project;
+    protected PlatypusProjectImpl project;
 
-    public PlatypusProjectView(PlatypusProject aProject) {
+    public PlatypusProjectView(PlatypusProjectImpl aProject) {
         super();
         project = aProject;
     }

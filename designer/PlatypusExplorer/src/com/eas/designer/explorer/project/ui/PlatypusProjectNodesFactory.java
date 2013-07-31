@@ -5,7 +5,7 @@
 
 package com.eas.designer.explorer.project.ui;
 
-import com.eas.designer.explorer.project.PlatypusProject;
+import com.eas.designer.explorer.project.PlatypusProjectImpl;
 import org.netbeans.api.project.Project;
 import org.netbeans.spi.project.ui.support.NodeFactory;
 import org.netbeans.spi.project.ui.support.NodeList;
@@ -21,8 +21,8 @@ public class PlatypusProjectNodesFactory implements NodeFactory{
     @Override
     public NodeList<?> createNodes(Project aProject){
         try {
-            assert aProject instanceof PlatypusProject;
-            PlatypusProject project = (PlatypusProject)aProject;
+            assert aProject instanceof PlatypusProjectImpl;
+            PlatypusProjectImpl project = (PlatypusProjectImpl)aProject;
             return new PlatypusProjectNodesList(project);
         } catch (Exception ex) {
             ErrorManager.getDefault().notify(ex);

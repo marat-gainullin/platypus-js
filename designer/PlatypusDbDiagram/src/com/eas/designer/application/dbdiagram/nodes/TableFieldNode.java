@@ -21,7 +21,7 @@ import com.eas.client.model.dbscheme.FieldsEntity;
 import com.eas.client.model.gui.edits.DeleteRelationEdit;
 import com.eas.client.model.gui.edits.fields.ChangeFieldEdit;
 import com.eas.client.sqldrivers.SqlDriver;
-import com.eas.designer.explorer.model.nodes.FieldNode;
+import com.eas.designer.datamodel.nodes.FieldNode;
 import java.beans.PropertyChangeEvent;
 import java.util.Set;
 import java.util.logging.Level;

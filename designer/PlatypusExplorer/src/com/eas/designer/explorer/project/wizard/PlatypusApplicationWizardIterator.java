@@ -8,7 +8,7 @@ import com.eas.client.settings.DbConnectionSettings;
 import com.eas.deploy.BaseDeployer;
 import com.eas.deploy.project.PlatypusSettings;
 import com.eas.designer.application.PlatypusUtils;
-import com.eas.designer.explorer.project.PlatypusProjectSettings;
+import com.eas.designer.explorer.project.PlatypusProjectSettingsImpl;
 import com.eas.xml.dom.XmlDom2String;
 import java.awt.Component;
 import java.io.File;
@@ -69,7 +69,7 @@ public class PlatypusApplicationWizardIterator implements WizardDescriptor./*Pro
         File projSpecDir = new File(projDir, projName);
         if (projSpecDir.mkdirs()) {
             try {
-                PlatypusProjectSettings settings = new PlatypusProjectSettings(FileUtil.toFileObject(projSpecDir));
+                PlatypusProjectSettingsImpl settings = new PlatypusProjectSettingsImpl(FileUtil.toFileObject(projSpecDir));
                 settings.getAppSettings().setDbSettings(dbSettings);
                 settings.setDisplayName(projTitle);
                 settings.save();

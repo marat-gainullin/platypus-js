@@ -4,7 +4,7 @@
  */
 package com.eas.designer.explorer.project.ui;
 
-import com.eas.designer.explorer.project.PlatypusProject;
+import com.eas.designer.explorer.project.PlatypusProjectImpl;
 import com.eas.designer.explorer.project.SearchFilter;
 import java.awt.Image;
 import java.awt.datatransfer.Transferable;
@@ -38,9 +38,9 @@ public class CategoryNode extends FilterNode {
     protected Image openIcon;
     protected String name;
     protected String displayName;
-    protected PlatypusProject project;
+    protected PlatypusProjectImpl project;
 
-    public CategoryNode(PlatypusProject aProject, DataFolder aDataFolder, Icon aIcon, Icon aOpenIcon, String aName, String aDisplayName) {
+    public CategoryNode(PlatypusProjectImpl aProject, DataFolder aDataFolder, Icon aIcon, Icon aOpenIcon, String aName, String aDisplayName) {
         super(aDataFolder.getNodeDelegate(),
                 aDataFolder.createNodeChildren(PlatypusProjectNodesList.APPLICATION_TYPES_FILTER),
                 new ProxyLookup(aDataFolder.getLookup(), Lookups.fixed(aProject.getSubTreeSearchOptions())));
@@ -71,7 +71,7 @@ public class CategoryNode extends FilterNode {
         return super.getActions(context);
     }
 
-    public PlatypusProject getProject() {
+    public PlatypusProjectImpl getProject() {
         return project;
     }
 

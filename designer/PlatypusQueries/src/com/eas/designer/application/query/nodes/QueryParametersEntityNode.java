@@ -5,7 +5,7 @@
 package com.eas.designer.application.query.nodes;
 
 import com.eas.client.model.query.QueryEntity;
-import com.eas.designer.explorer.model.nodes.EntityNode;
+import com.eas.designer.datamodel.nodes.EntityNode;
 import org.openide.awt.UndoRedo;
 import org.openide.util.Lookup;
 

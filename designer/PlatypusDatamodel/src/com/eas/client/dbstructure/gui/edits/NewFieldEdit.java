@@ -67,29 +67,29 @@ public class NewFieldEdit extends DbStructureEdit {
         return field;
     }
 
-    private void createFieldIfNeeded() throws Exception {
-        if (field == null) {
-            field = createField();
-        }
-    }
-
-    private Field createField() throws Exception {
-        com.eas.client.model.gui.edits.fields.NewFieldEdit<FieldsEntity> substEdit = new com.eas.client.model.gui.edits.fields.NewFieldEdit<>(entity);
+    public static Field createField(FieldsEntity aEntity) throws Exception {
+        com.eas.client.model.gui.edits.fields.NewFieldEdit<FieldsEntity> substEdit = new com.eas.client.model.gui.edits.fields.NewFieldEdit<>(aEntity);
         Field rsmd = substEdit.getField();
         if (SQLUtils.getTypeGroup(rsmd.getTypeInfo().getSqlType()) == SQLUtils.TypesGroup.STRINGS
                 && rsmd.getSize() == 0) {
             rsmd.setSize(100);
         }
-        rsmd.setTableName(entity.getTableName());
-        DbClient client = entity.getModel().getClient();
-        String dbId = entity.getModel().getDbId();
+        rsmd.setTableName(aEntity.getTableName());
+        DbClient client = aEntity.getModel().getClient();
+        String dbId = aEntity.getModel().getDbId();
         SqlDriver driver = client.getDbMetadataCache(dbId).getConnectionDriver();
         driver.getTypesResolver().resolve2RDBMS(rsmd);
         return rsmd;
     }
-
+    
     @Override
     protected String getChangingTableName() {
         return entity.getTableName();
+    }
+    
+    private void createFieldIfNeeded() throws Exception {
+        if (field == null) {
+            field = createField(entity);
+        }
     }
 }

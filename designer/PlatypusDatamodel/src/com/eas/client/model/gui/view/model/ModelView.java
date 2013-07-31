@@ -42,6 +42,8 @@ import com.eas.client.model.gui.view.RelationDesignInfo;
 import com.eas.client.model.gui.view.RelationsFieldsDragHandler;
 import com.eas.client.model.gui.view.entities.EntityView;
 import com.eas.client.utils.scalableui.JScalablePanel;
+import com.eas.designer.datamodel.nodes.FieldNode;
+import com.eas.designer.datamodel.nodes.ModelParameterNode;
 import com.eas.xml.dom.Source2XmlDom;
 import com.eas.xml.dom.XmlDom2String;
 import java.awt.*;
@@ -59,6 +61,12 @@ import javax.swing.event.UndoableEditEvent;
 import javax.swing.event.UndoableEditListener;
 import javax.swing.undo.CompoundEdit;
 import javax.swing.undo.UndoableEditSupport;
+import org.openide.DialogDescriptor;
+import org.openide.DialogDisplayer;
+import org.openide.explorer.propertysheet.PropertySheet;
+import org.openide.nodes.Node;
+import org.openide.util.NbBundle;
+import org.openide.util.lookup.Lookups;
 import org.w3c.dom.Document;
 
 /**
@@ -2154,9 +2162,15 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
         @Override
         public void actionPerformed(ActionEvent e) {
             if (isEnabled()) {
-                NewFieldEdit edit = new NewFieldEdit(getEntity());
-                edit.redo();
-                undoSupport.postEdit(edit);
+                Field field = NewFieldEdit.createField(getEntity());
+                PropertySheet ps = new PropertySheet();
+                ps.setNodes(new Node[]{new ModelParameterNode(field, Lookups.fixed(getEntity()))});
+                DialogDescriptor dd = new DialogDescriptor(ps, NbBundle.getMessage(ModelView.class, "MSG_NewFieldDialogTitle"));
+                if (DialogDescriptor.OK_OPTION.equals(DialogDisplayer.getDefault().notify(dd))) {
+                    NewFieldEdit edit = new NewFieldEdit(getEntity(), field);
+                    edit.redo();
+                    undoSupport.postEdit(edit);
+                }
             }
             checkActions();
         }

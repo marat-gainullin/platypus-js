@@ -4,7 +4,7 @@
  */
 package com.eas.designer.explorer.dbmigrations;
 
-import com.eas.designer.explorer.project.PlatypusProject;
+import com.eas.designer.explorer.project.PlatypusProjectImpl;
 import java.awt.event.ActionEvent;
 import java.net.URL;
 import javax.swing.AbstractAction;
@@ -44,7 +44,7 @@ public class CleanupMigrationsAction extends AbstractAction implements ContextAw
     public Action createContextAwareInstance(Lookup actionContext) {
         Node contextNode = actionContext.lookup(Node.class);
         if (contextNode != null && contextNode.getLookup() != null) {
-            final PlatypusProject project = contextNode.getLookup().lookup(PlatypusProject.class);
+            final PlatypusProjectImpl project = contextNode.getLookup().lookup(PlatypusProjectImpl.class);
             return new AbstractAction() {
                 @Override
                 public boolean isEnabled() {
@@ -80,7 +80,7 @@ public class CleanupMigrationsAction extends AbstractAction implements ContextAw
         }
     }
 
-    private void cleanupMigrations(final PlatypusProject project) {
+    private void cleanupMigrations(final PlatypusProjectImpl project) {
         RequestProcessor.Task cleanupTask = RP.create(new Runnable() {
             @Override
             public void run() {

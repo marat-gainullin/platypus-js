@@ -4,9 +4,13 @@
  */
 package com.eas.designer.explorer.project;
 
+import com.eas.designer.application.project.ClientType;
+import com.eas.designer.application.project.AppServerType;
 import com.eas.client.ClientConstants;
 import com.eas.client.application.PlatypusClientApplication;
 import com.eas.deploy.project.PlatypusSettings;
+import com.eas.designer.application.project.PlatypusProject;
+import com.eas.designer.application.project.PlatypusProjectSettings;
 import com.eas.designer.debugger.DebuggerEnvironment;
 import com.eas.designer.debugger.DebuggerUtils;
 import com.eas.designer.explorer.j2ee.PlatypusWebModuleManager;
@@ -58,7 +62,7 @@ public class ProjectRunner {
      */
     public static void run(final PlatypusProject project, final String appElementId) throws Exception {
 
-        project.RP.post(new Runnable() {
+        project.getRequestProcessor().post(new Runnable() {
             @Override
             public void run() {
                 start(project, appElementId, false);
@@ -73,7 +77,7 @@ public class ProjectRunner {
      * @throws Exception If something goes wrong.
      */
     public static void debug(final PlatypusProject project, final String appElementId) throws Exception {
-        project.RP.post(new Runnable() {
+        project.getRequestProcessor().post(new Runnable() {
             @Override
             public void run() {
                 Future<Integer> runningProgram = start(project, appElementId, true);

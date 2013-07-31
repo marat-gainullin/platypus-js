@@ -6,8 +6,8 @@ package com.eas.designer.application.query;
 
 import com.eas.designer.application.query.editing.QueryDocumentEditsComplementor;
 import com.eas.designer.application.query.editing.SqlTextEditsComplementor;
+import com.eas.designer.datamodel.ModelUndoProvider;
 import com.eas.designer.explorer.DataObjectProvider;
-import com.eas.designer.explorer.ModelUndoProvider;
 import java.awt.Rectangle;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;

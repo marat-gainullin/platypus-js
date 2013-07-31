@@ -12,7 +12,7 @@ import com.eas.client.metadata.DbTableIndexColumnSpec;
 import com.eas.client.metadata.DbTableIndexSpec;
 import com.eas.client.model.dbscheme.FieldsEntity;
 import com.eas.client.model.gui.IconCache;
-import com.eas.designer.explorer.ModelUndoProvider;
+import com.eas.designer.datamodel.ModelUndoProvider;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
@@ -36,7 +36,6 @@ import org.openide.util.Exceptions;
 import org.openide.util.ImageUtilities;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
-import org.openide.util.actions.SystemAction;
 
 /**
  *

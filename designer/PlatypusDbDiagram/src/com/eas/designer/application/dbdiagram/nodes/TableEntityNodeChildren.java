@@ -7,7 +7,7 @@ package com.eas.designer.application.dbdiagram.nodes;
 import com.eas.client.model.Entity;
 import com.eas.client.model.dbscheme.FieldsEntity;
 import com.eas.designer.application.dbdiagram.nodes.TableIndexesNode.TableIndexesKey;
-import com.eas.designer.explorer.model.nodes.EntityNodeChildren;
+import com.eas.designer.datamodel.nodes.EntityNodeChildren;
 import java.util.List;
 import org.openide.ErrorManager;
 import org.openide.awt.UndoRedo;

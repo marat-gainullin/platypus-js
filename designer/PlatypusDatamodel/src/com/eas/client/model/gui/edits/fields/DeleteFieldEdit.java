@@ -38,6 +38,13 @@ public class DeleteFieldEdit<E extends Entity<?, ?, E>> extends FieldsEdit<E> {
         return field;
     }
 
+    public static Field createField(Entity anEntity) {
+        Fields fields = anEntity.getFields();
+        Field lfield = fields.createNewField();
+        lfield.setSize(100);
+        return lfield;
+    }
+    
     @Override
     protected void redoWork() {
         Model<E, ?, ?, ?> model = fieldsEntity.getModel();
@@ -67,14 +74,7 @@ public class DeleteFieldEdit<E extends Entity<?, ?, E>> extends FieldsEdit<E> {
 
     private void createFieldIfNeeded() {
         if (field == null) {
-            field = createField();
+            field = createField(fieldsEntity);
         }
-    }
-
-    private Field createField() {
-        Fields fields = fieldsEntity.getFields();
-        Field lfield = fields.createNewField();
-        lfield.setSize(100);
-        return lfield;
     }
 }

@@ -7,7 +7,7 @@ package com.eas.designer.explorer.actions;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.designer.application.PlatypusUtils;
 import com.eas.designer.application.indexer.IndexerQuery;
-import com.eas.designer.explorer.project.PlatypusProject;
+import com.eas.designer.explorer.project.PlatypusProjectImpl;
 import java.awt.Component;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
@@ -59,13 +59,13 @@ public final class GotoAction implements ActionListener {
             String appElementId = inputLine.getInputText();
             if (appElementId != null && !appElementId.isEmpty()) {
                 Project currentProject = Utilities.actionsGlobalContext().lookup(Project.class);
-                if (currentProject instanceof PlatypusProject) {
-                    if (selectNode((PlatypusProject) currentProject, appElementId)) {
+                if (currentProject instanceof PlatypusProjectImpl) {
+                    if (selectNode((PlatypusProjectImpl) currentProject, appElementId)) {
                         return;
                     }
                 }
                 for (Project p : OpenProjects.getDefault().getOpenProjects()) {
-                    if (p instanceof PlatypusProject && selectNode((PlatypusProject)p, appElementId)) {
+                    if (p instanceof PlatypusProjectImpl && selectNode((PlatypusProjectImpl)p, appElementId)) {
                         break;
                     }
                 }
@@ -130,7 +130,7 @@ public final class GotoAction implements ActionListener {
         }
     }
 
-    private boolean selectNode(PlatypusProject project, String appElementId) throws NodeNotFoundException {
+    private boolean selectNode(PlatypusProjectImpl project, String appElementId) throws NodeNotFoundException {
         FileObject fo = IndexerQuery.appElementId2File(project, appElementId);
         if (fo != null) {
             TopComponent tc = WindowManager.getDefault().findTopComponent(PROJECT_TAB_TC_ID);

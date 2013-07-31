@@ -22,8 +22,8 @@ import com.eas.designer.explorer.j2ee.dd.WebApplication;
 import com.eas.designer.explorer.j2ee.dd.WebResourceCollection;
 import com.eas.designer.explorer.platform.EmptyPlatformHomePathException;
 import com.eas.designer.explorer.platform.PlatypusPlatform;
-import com.eas.designer.explorer.project.ClientType;
-import com.eas.designer.explorer.project.PlatypusProject;
+import com.eas.designer.application.project.ClientType;
+import com.eas.designer.explorer.project.PlatypusProjectImpl;
 import com.eas.server.httpservlet.PlatypusHttpServlet;
 import com.eas.server.httpservlet.PlatypusSessionsSynchronizer;
 import com.eas.util.FileUtils;
@@ -89,14 +89,14 @@ public class PlatypusWebModuleManager {
             + "\t\tf.show()\n"//NOI18N
             + "\t})\n"//NOI18N
             + "}\n";//NOI18N
-    protected final PlatypusProject project;
+    protected final PlatypusProjectImpl project;
     protected final FileObject projectDir;
     protected FileObject webAppDir;
     protected FileObject webInfDir;
     protected FileObject metaInfDir;
     protected FileObject publicDir;
 
-    public PlatypusWebModuleManager(PlatypusProject aProject) {
+    public PlatypusWebModuleManager(PlatypusProjectImpl aProject) {
         project = aProject;
         projectDir = aProject.getProjectDirectory();
     }

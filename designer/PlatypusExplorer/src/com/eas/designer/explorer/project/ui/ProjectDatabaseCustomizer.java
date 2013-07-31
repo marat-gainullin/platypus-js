@@ -12,7 +12,7 @@ package com.eas.designer.explorer.project.ui;
 
 import com.eas.client.settings.DbConnectionSettings;
 import com.eas.designer.application.HandlerRegistration;
-import com.eas.designer.explorer.project.PlatypusProject;
+import com.eas.designer.explorer.project.PlatypusProjectImpl;
 import com.eas.designer.explorer.project.wizard.DatabaseSetupWizardPanelVisual;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
@@ -28,13 +28,13 @@ import org.openide.util.NbBundle;
  */
 public class ProjectDatabaseCustomizer extends javax.swing.JPanel {
 
-    protected PlatypusProject project;
+    protected PlatypusProjectImpl project;
     protected transient HandlerRegistration clientChangeListener;
 
     /**
      * Creates new form ProjectRunningCustomizer
      */
-    public ProjectDatabaseCustomizer(PlatypusProject aProject) throws Exception {
+    public ProjectDatabaseCustomizer(PlatypusProjectImpl aProject) throws Exception {
         super();
         initComponents();
         project = aProject;

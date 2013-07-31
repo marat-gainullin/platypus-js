@@ -13,10 +13,10 @@ package com.eas.designer.explorer.project.ui;
 import com.eas.deploy.project.PlatypusSettings;
 import com.eas.designer.application.indexer.IndexerQuery;
 import com.eas.designer.explorer.FileChooser;
-import com.eas.designer.explorer.project.AppServerType;
-import com.eas.designer.explorer.project.ClientType;
-import com.eas.designer.explorer.project.PlatypusProject;
-import com.eas.designer.explorer.project.PlatypusProjectSettings;
+import com.eas.designer.application.project.AppServerType;
+import com.eas.designer.application.project.ClientType;
+import com.eas.designer.explorer.project.PlatypusProjectImpl;
+import com.eas.designer.explorer.project.PlatypusProjectSettingsImpl;
 import java.awt.event.ItemEvent;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -47,9 +47,9 @@ import org.openide.util.lookup.Lookups;
 public class ProjectRunningCustomizer extends javax.swing.JPanel {
 
     public static final String SERVERS_PATH = "Servers"; // NOI18N
-    protected final PlatypusProject project;
+    protected final PlatypusProjectImpl project;
     protected final FileObject appRoot;
-    protected final PlatypusProjectSettings projectSettings;
+    protected final PlatypusProjectSettingsImpl projectSettings;
     protected final PlatypusSettings appSettings;
     protected ComboBoxModel<ServerInstance> j2eeServersModel;
     private boolean isInit = true;
@@ -59,7 +59,7 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
     /**
      * Creates new form ProjectRunningCustomizer
      */
-    public ProjectRunningCustomizer(PlatypusProject aProject) throws Exception {
+    public ProjectRunningCustomizer(PlatypusProjectImpl aProject) throws Exception {
         project = aProject;
         appRoot = aProject.getSrcRoot();
         projectSettings = aProject.getSettings();
