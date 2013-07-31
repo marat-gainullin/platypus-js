@@ -6,7 +6,7 @@ package com.eas.designer.application.module.nodes;
 
 import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.model.Model;
-import com.eas.designer.explorer.model.nodes.FieldNode;
+import com.eas.designer.datamodel.nodes.FieldNode;
 import com.eas.script.ScriptUtils;
 import javax.swing.undo.UndoableEdit;
 import org.openide.ErrorManager;

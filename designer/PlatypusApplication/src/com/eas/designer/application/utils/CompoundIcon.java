@@ -1,4 +1,4 @@
-package com.eas.designer.explorer.utils;
+package com.eas.designer.application.utils;
 
 import java.awt.*;
 import javax.swing.*;

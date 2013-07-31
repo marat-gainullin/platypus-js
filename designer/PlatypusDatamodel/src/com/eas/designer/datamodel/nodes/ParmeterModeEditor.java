@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.designer.explorer.model.nodes;
+package com.eas.designer.datamodel.nodes;
 
 import com.eas.client.model.gui.DatamodelDesignUtils;
 import java.sql.ParameterMetaData;

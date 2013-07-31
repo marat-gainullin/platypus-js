@@ -5,7 +5,7 @@
 package com.eas.designer.application.module.nodes;
 
 import com.eas.designer.application.module.events.ApplicationEntityEventDesc;
-import com.eas.designer.explorer.model.nodes.EntityNodePropertiesUndoRecorder;
+import com.eas.designer.datamodel.nodes.EntityNodePropertiesUndoRecorder;
 import org.openide.awt.UndoRedo;
 
 /**

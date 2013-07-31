@@ -2,13 +2,12 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.designer.explorer.model.nodes;
+package com.eas.designer.datamodel.nodes;
 
 import com.eas.client.DbClient;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Model;
 import com.eas.client.model.gui.IconCache;
-import com.eas.designer.explorer.PlatypusDataObject;
 import java.awt.Image;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -29,7 +28,7 @@ public class ModelNode<E extends Entity<?, ?, E>, M extends Model<E, ?, DbClient
     protected static final String DATAMODEL_ICON_NAME = "datamodel16.png"; //NOI18N
     protected DataObject dataObject;
 
-    public ModelNode(ModelNodeChildren<E, M> aChildren, PlatypusDataObject aDataObject) {
+    public ModelNode(ModelNodeChildren<E, M> aChildren, DataObject aDataObject) {
         super(aChildren);
         dataObject = aDataObject;
     }

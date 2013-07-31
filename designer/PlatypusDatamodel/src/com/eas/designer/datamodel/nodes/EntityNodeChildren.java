@@ -2,13 +2,13 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.designer.explorer.model.nodes;
+package com.eas.designer.datamodel.nodes;
 
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.utils.CollectionListener;
 import com.eas.client.model.Entity;
-import com.eas.designer.explorer.model.nodes.EntityNodeChildren.EntityFieldKey;
+import com.eas.designer.datamodel.nodes.EntityNodeChildren.EntityFieldKey;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;

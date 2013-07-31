@@ -9,7 +9,7 @@ import com.eas.client.model.gui.view.EntityViewDoubleClickListener;
 import com.eas.client.model.gui.view.entities.EntityView;
 import com.eas.designer.application.indexer.IndexerQuery;
 import com.eas.designer.application.project.PlatypusProject;
-import com.eas.designer.explorer.utils.GuiUtils;
+import com.eas.designer.application.utils.GuiUtils;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.openide.filesystems.FileObject;

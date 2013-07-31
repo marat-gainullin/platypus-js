@@ -9,7 +9,7 @@ import com.eas.client.dbstructure.SqlActionsController.SqlAction;
 import com.eas.client.dbstructure.exceptions.DbActionException;
 import com.eas.client.model.dbscheme.DbSchemeModel;
 import com.eas.client.model.dbscheme.FieldsEntity;
-import com.eas.designer.explorer.model.nodes.EntityNode;
+import com.eas.designer.datamodel.nodes.EntityNode;
 import java.beans.PropertyChangeEvent;
 import org.openide.nodes.Sheet;
 import org.openide.util.Exceptions;

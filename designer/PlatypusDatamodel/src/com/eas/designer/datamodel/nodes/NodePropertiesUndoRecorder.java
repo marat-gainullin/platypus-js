@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.designer.explorer.model.nodes;
+package com.eas.designer.datamodel.nodes;
 
 import org.openide.awt.UndoRedo;
 import org.openide.nodes.NodeEvent;

@@ -17,7 +17,7 @@ import com.eas.designer.application.module.nodes.ApplicationModelNodeChildren;
 import com.eas.designer.application.module.parser.JsParser;
 import com.eas.designer.application.project.PlatypusProject;
 import com.eas.designer.explorer.PlatypusDataObject;
-import com.eas.designer.explorer.model.nodes.ModelNode;
+import com.eas.designer.datamodel.nodes.ModelNode;
 import com.eas.xml.dom.Source2XmlDom;
 import com.eas.xml.dom.XmlDom2String;
 import java.io.IOException;

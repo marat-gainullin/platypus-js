@@ -6,8 +6,8 @@ package com.eas.designer.application.query.nodes;
 
 import com.bearsoft.rowset.metadata.Parameter;
 import com.eas.client.model.Entity;
-import com.eas.designer.explorer.model.nodes.EntityNodeChildren;
-import com.eas.designer.explorer.model.nodes.FieldNode;
+import com.eas.designer.datamodel.nodes.EntityNodeChildren;
+import com.eas.designer.datamodel.nodes.FieldNode;
 import org.openide.awt.UndoRedo;
 import org.openide.nodes.Node;
 import org.openide.util.Lookup;

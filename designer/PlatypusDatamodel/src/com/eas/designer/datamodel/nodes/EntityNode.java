@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.designer.explorer.model.nodes;
+package com.eas.designer.datamodel.nodes;
 
 import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.model.Entity;
@@ -11,7 +11,7 @@ import com.eas.client.model.gui.DatamodelDesignUtils;
 import com.eas.client.model.gui.edits.fields.ReorderFieldsEdit;
 import com.eas.client.model.gui.view.entities.EntityView;
 import com.eas.client.model.query.QueryParametersEntity;
-import com.eas.designer.explorer.ModelUndoProvider;
+import com.eas.designer.datamodel.ModelUndoProvider;
 import java.awt.Image;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
