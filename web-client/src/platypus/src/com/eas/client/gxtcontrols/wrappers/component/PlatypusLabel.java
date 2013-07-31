@@ -198,7 +198,8 @@ public class PlatypusLabel extends Component implements HasText, HasHTML {
 			}
 			contentStyle.setProperty("width", "auto");
 			int height = Sizer.getWidgetHeight(this);
-			contentStyle.setProperty("height", height +"px");
+			if (height > 0)
+				contentStyle.setProperty("height", height + "px");
 			if (html || text == null)
 				content.setInnerHTML(text != null ? text : "&#160;");
 			else
