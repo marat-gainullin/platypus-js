@@ -39,7 +39,6 @@ import javax.swing.undo.UndoableEdit;
 import org.openide.actions.MoveDownAction;
 import org.openide.actions.MoveUpAction;
 import org.openide.actions.PropertiesAction;
-import org.openide.awt.UndoRedo;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 import org.openide.nodes.PropertySupport;
@@ -88,10 +87,19 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
     public Image getIcon(int type) {
         return getIcon(field, type);
     }
-
+    
     public static Image getIcon(Field aField, int aType) {
         List<Icon> icons = new ArrayList<>();
-        icons.add(FieldsTypeIconsCache.getIcon16(aField.getTypeInfo().getSqlType()));
+        Icon icon;
+        if (isStructSqlType(aField)) {
+            icon = FieldsTypeIconsCache.getIcon16(aField.getTypeInfo().getSqlTypeName());
+            if (icon == null) {
+                icon = FieldsTypeIconsCache.getIcon16(DataTypeInfo.OTHER.getSqlType());
+            }
+        } else {
+            icon = FieldsTypeIconsCache.getIcon16(aField.getTypeInfo().getSqlType());
+        }
+        icons.add(icon);
         if (aField.isPk()) {
             icons.add(FieldsTypeIconsCache.getPkIcon16());
         }
@@ -306,6 +314,10 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
         return getTransferable();
     }
 
+    private static boolean isStructSqlType(Field aField) {
+        return DataTypeInfo.STRUCT.getSqlType() == aField.getTypeInfo().getSqlType() || DataTypeInfo.OTHER.getSqlType() == aField.getTypeInfo().getSqlType();
+    }
+    
     private Transferable getTransferable() {
         if (getEntity() instanceof QueryParametersEntity) {
             return new StringSelection(String.format(":%s", field.getName()));//NOI18N
@@ -392,11 +404,11 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
     }
 
     protected UndoableEdit editTypeName(String val) {
-        if (DataTypeInfo.OTHER.getSqlType() == field.getTypeInfo().getSqlType() || DataTypeInfo.STRUCT.getSqlType() == field.getTypeInfo().getSqlType()) {
-            DataTypeInfo dti = DataTypeInfo.OTHER.copy();
-            dti.setSqlTypeName(val);
+        if (isStructSqlType(field)) {
             Field oldContent = new Field(field);
             Field content = new Field(field);
+            DataTypeInfo dti = field.getTypeInfo().copy();
+            dti.setSqlTypeName(val);
             content.setTypeInfo(dti);
             ChangeFieldEdit edit = new ChangeFieldEdit(oldContent, content, field, getEntity());
             edit.redo();
@@ -584,7 +596,7 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
 
         @Override
         public boolean canWrite() {
-            return canChange() && DataTypeInfo.OTHER.equals(field.getTypeInfo());
+            return canChange() && isStructSqlType(field);
         }
     }
 
@@ -703,14 +715,13 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
             return canChange();
         }
     }
-    
+
     protected static class StubUndoableEditListener implements UndoableEditListener {
 
         public static final UndoableEditListener DEFAULT = new StubUndoableEditListener();
-        
+
         @Override
         public void undoableEditHappened(UndoableEditEvent e) {
         }
-        
     }
 }
