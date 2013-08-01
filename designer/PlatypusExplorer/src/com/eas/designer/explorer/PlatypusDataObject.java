@@ -4,7 +4,6 @@
  */
 package com.eas.designer.explorer;
 
-import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.DbClient;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.cache.PlatypusFilesSupport;
