@@ -177,7 +177,7 @@ public class ScriptTransformer {
                 } else if (node instanceof Name) {
                     attemptToParseDependenciesFromNode(node);
                     final Name name = (Name) node;
-                    if (isTopLevel(name)) {
+                    if (isTopLevel(name) && !isObjectLiteralPropName(name)) {
                         if (!(name.getParent() instanceof PropertyGet) || ((PropertyGet) name.getParent()).getProperty() != name) {
                             if (node.getParent() instanceof FunctionNode) {
                                 final FunctionNode oldFuncNode = (FunctionNode) node.getParent();
@@ -407,6 +407,10 @@ public class ScriptTransformer {
         return aName.getScope().getDefiningScope(aName.getIdentifier()) instanceof AstRoot
                 || (aName.getScope().getDefiningScope(aName.getIdentifier()) == null
                 && externalVariables.contains(aName.getIdentifier()));
+    }
+    
+    private boolean isObjectLiteralPropName(Name aName){
+        return aName != null && aName.getParent() instanceof ObjectProperty && ((ObjectProperty)aName.getParent()).getLeft() == aName;
     }
 
     private void putDependence(String entityId) {

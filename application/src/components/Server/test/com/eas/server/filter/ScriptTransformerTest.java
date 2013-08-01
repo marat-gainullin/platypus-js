@@ -234,8 +234,8 @@ public class ScriptTransformerTest {
 
     @Test
     public void testObjectLiteral() {
-        String va1 = "var v4 = null, obj = {p1: 1, p2: 2, p3: 3, p4: v4};";
-        String va2 = "" + ScriptTransformer.SELF_NAME + ".v4 = null;\n" + ScriptTransformer.SELF_NAME + ".obj = {p1: 1, p2: 2, p3: 3, p4: " + ScriptTransformer.SELF_NAME + ".v4};\n";
+        String va1 = "var v4 = null, obj = {p1: 1, v4: 2, p3: 3, p4: v4};";
+        String va2 = "" + ScriptTransformer.SELF_NAME + ".v4 = null;\n" + ScriptTransformer.SELF_NAME + ".obj = {p1: 1, v4: 2, p3: 3, p4: " + ScriptTransformer.SELF_NAME + ".v4};\n";
         String va3 = transform(va1);
         assertEquals(va3, va2);
     }
