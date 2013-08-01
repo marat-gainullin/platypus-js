@@ -11,6 +11,8 @@ import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.login.PrincipalHost;
 import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.model.application.ApplicationModel;
+import com.eas.client.settings.DbConnectionSettings;
+import com.eas.client.settings.EasSettings;
 import com.eas.client.settings.SettingsConstants;
 import com.eas.debugger.jmx.server.Breakpoints;
 import com.eas.script.JsDoc;
@@ -309,6 +311,15 @@ public class ScriptRunner extends ScriptableObject {
 
         public static CompiledScriptDocumentsHost getScriptDocumentsHost() {
             return scriptDocumentsHost;
+        }
+        
+        public static String getApplicationPath() {
+            EasSettings settings = client.getSettings();
+            if (settings instanceof DbConnectionSettings) {
+                return ((DbConnectionSettings)settings).getApplicationPath();
+            } else {
+                return null;
+            }
         }
 
         protected static String translateResourcePath(String aPath) throws Exception {

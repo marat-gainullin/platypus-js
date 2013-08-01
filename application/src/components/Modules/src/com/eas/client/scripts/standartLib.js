@@ -23,11 +23,11 @@ ScriptCalculator = com.eas.client.scripts.ScriptCalculator;
 ScriptTask = com.eas.client.scripts.ScriptTimerTask;
 
 // platypus misc imports
-ExcelReport  = com.eas.client.reports.ExcelReport;
+ExcelReport = com.eas.client.reports.ExcelReport;
 
 var formsPresent = typeof(com.eas.client.forms.FormRunner) == FUNC_TYPE_NAME;
 
-if(formsPresent)
+if (formsPresent)
 {
     FieldsGrid = com.eas.dbcontrols.grid.EntityFieldsGrid;
 }
@@ -49,7 +49,7 @@ CANParser = com.eas.sensors.positioning.utils.can.CANDataParser;
 // platypus GIS imports
 GisUtilities = com.eas.client.geo.GisUtilities;
 
-if(formsPresent)
+if (formsPresent)
 {
     ViewpointChangedEvent = com.eas.client.controls.geopane.events.ViewpointChangedEvent;
     MapClickedEvent = com.eas.client.controls.geopane.events.MapClickedEvent;
@@ -81,10 +81,10 @@ ComObject = com.eas.client.scripts.ole.ComObject;
 //Resources
 Resource = {};
 Object.defineProperty(Resource, "load", {
-    get : function(){
-        return function(aResName, aCallback){
+    get: function() {
+        return function(aResName, aCallback) {
             var loaded = com.eas.client.scripts.ScriptRunner.PlatypusScriptedResource.load(aResName);
-            if(aCallback != undefined)
+            if (aCallback != undefined)
                 aCallback(loaded);
             return loaded;
         };
@@ -92,21 +92,27 @@ Object.defineProperty(Resource, "load", {
 });
 
 Object.defineProperty(Resource, "loadText", {
-    get : function(){
-        return function(aResName, aCallbackOrEncoding, aCallback){
-            if(typeof aCallbackOrEncoding == "function"){
+    get: function() {
+        return function(aResName, aCallbackOrEncoding, aCallback) {
+            if (typeof aCallbackOrEncoding == "function") {
                 var _loaded = com.eas.client.scripts.ScriptRunner.PlatypusScriptedResource.loadText(aResName);
                 aCallbackOrEncoding(_loaded);
                 return _loaded;
-            }else if(typeof aCallback == "function"){
+            } else if (typeof aCallback == "function") {
                 var __loaded = com.eas.client.scripts.ScriptRunner.PlatypusScriptedResource.loadText(aResName, aCallbackOrEncoding);
                 aCallback(__loaded);
                 return __loaded;
-            }else if(aCallbackOrEncoding != undefined)
+            } else if (aCallbackOrEncoding != undefined)
                 return com.eas.client.scripts.ScriptRunner.PlatypusScriptedResource.loadText(aResName, aCallbackOrEncoding);
             else
                 return com.eas.client.scripts.ScriptRunner.PlatypusScriptedResource.loadText(aResName);
         };
+    }
+});
+
+Object.defineProperty(Resource, "applicationPath", {
+    get: function() {
+        return com.eas.client.scripts.ScriptRunner.PlatypusScriptedResource.getApplicationPath();
     }
 });
 
@@ -143,7 +149,7 @@ Function.prototype.invokeBackground = function() {
     if (!FixedThreadPool) {
         FixedThreadPool = java.util.concurrent.Executors.newFixedThreadPool(THREAD_POOL_SIZE, new com.eas.concurrent.DeamonThreadFactory());
     }
-    FixedThreadPool.execute(function() { 
+    FixedThreadPool.execute(function() {
         func.apply(func, args);
     });
 }
@@ -153,17 +159,17 @@ Function.prototype.invokeBackground = function() {
  * allways loads them dynamically and synchronously.
  */
 function require(deps, aCallback) {
-    if(deps) {
+    if (deps) {
         if (Array.isArray(deps)) {
-            for(var i = 0; i < deps.length; i++) {
+            for (var i = 0; i < deps.length; i++) {
                 com.eas.client.scripts.ScriptRunner.executeResource(deps[i]);
             }
         } else {
             com.eas.client.scripts.ScriptRunner.executeResource(deps);
         }
     }
-    if(aCallback) {
-        aCallback();   
+    if (aCallback) {
+        aCallback();
     }
 }
 
