@@ -1,6 +1,7 @@
 package com.eas.client.gxtcontrols.wrappers.component;
 
 import com.eas.client.gxtcontrols.ControlsUtils;
+import com.eas.client.gxtcontrols.Sizer;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
@@ -196,6 +197,9 @@ public class PlatypusLabel extends Component implements HasText, HasHTML {
 				contentStyle.setProperty("background", "url(" + image.getSafeUri().asString() + ")" + " no-repeat " + backgroundPosition);
 			}
 			contentStyle.setProperty("width", "auto");
+			int height = Sizer.getWidgetHeight(this);
+			if (height > 0)
+				contentStyle.setProperty("height", height + "px");
 			if (html || text == null)
 				content.setInnerHTML(text != null ? text : "&#160;");
 			else
