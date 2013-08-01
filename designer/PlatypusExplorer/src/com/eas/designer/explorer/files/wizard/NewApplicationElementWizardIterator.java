@@ -57,18 +57,18 @@ public class NewApplicationElementWizardIterator implements WizardDescriptor.Ins
         return Collections.singleton(createdFile);
     }
 
-    protected Map<String, String> achieveParameters(Project project, WizardDescriptor aWiz) {
-        Map<String, String> parameters = new HashMap<>();
-        parameters.put(
-                PLATYPUS_APP_ELEMENT_NAME_PARAM_NAME,
-                getAppElementNameByFileName(project, Templates.getTargetName(wiz)));
-        return parameters;
-    }
-
-    private static String getAppElementNameByFileName(Project project, String fileName) {
-        assert fileName != null;
-        assert !fileName.isEmpty();
-        String appElementName = StringUtils.replaceUnsupportedSymbols(fileName.trim());
+    /**
+     * Generates new application element's name.
+     * New name will be generated using the provided initial name, unsupported symbols will be replaced 
+     * and it will be ensured that new name is unique.
+     * @param project Application's project
+     * @param str Initial name
+     * @return New name
+     */
+    public static String getNewValidAppElementName(Project project, String str) {
+        assert str != null;
+        assert !str.isEmpty();
+        String appElementName = StringUtils.replaceUnsupportedSymbols(str.trim());
         String s = appElementName;
         int i = 1;
         while (IndexerQuery.appElementId2File(project, s) != null) {
@@ -159,6 +159,14 @@ public class NewApplicationElementWizardIterator implements WizardDescriptor.Ins
 
     @Override
     public final void removeChangeListener(ChangeListener l) {
+    }
+    
+    protected Map<String, String> achieveParameters(Project project, WizardDescriptor aWiz) {
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put(
+                PLATYPUS_APP_ELEMENT_NAME_PARAM_NAME,
+                getNewValidAppElementName(project, Templates.getTargetName(wiz)));
+        return parameters;
     }
 
     protected WizardDescriptor.Panel[] createPanels(WizardDescriptor wiz) {
