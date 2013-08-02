@@ -40,7 +40,7 @@ import com.eas.client.model.store.XmlDom2DbSchemeModel;
 import com.eas.client.queries.SqlCompiledQuery;
 import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.client.sqldrivers.resolvers.TypesResolver;
-import com.eas.designer.datamodel.nodes.ModelParameterNode;
+import com.eas.designer.datamodel.nodes.FieldNode;
 import com.eas.xml.dom.Source2XmlDom;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
@@ -463,7 +463,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbS
                     try {
                         Field field = NewFieldEdit.createField(entity);
                         PropertySheet ps = new PropertySheet();
-                        ps.setNodes(new Node[]{new ModelParameterNode(field, Lookups.fixed(entity))});
+                        ps.setNodes(new Node[]{new FieldNode(field, Lookups.fixed(entity), true)});
                         DialogDescriptor dd = new DialogDescriptor(ps, NbBundle.getMessage(DbSchemeModelView.class, "MSG_NewSchemeFieldDialogTitle"));
                         if (DialogDescriptor.OK_OPTION.equals(DialogDisplayer.getDefault().notify(dd))) {
                             fieldEdit = new NewFieldEdit(sqlController, entity, field);
