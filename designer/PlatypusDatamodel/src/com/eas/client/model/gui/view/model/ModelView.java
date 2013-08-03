@@ -49,6 +49,7 @@ import com.eas.xml.dom.XmlDom2String;
 import java.awt.*;
 import java.awt.datatransfer.*;
 import java.awt.event.*;
+import java.beans.Introspector;
 import java.io.IOException;
 import java.util.*;
 import java.util.List;
@@ -2049,7 +2050,7 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
         while (model.getEntityByName(s) != null) {
             s = String.format("%s_%d", applicationElementId, i++); // NOI18N
         }
-        return s;
+        return Introspector.decapitalize(s);
     }
 
     protected abstract boolean isAnyDeletableEntities();

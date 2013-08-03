@@ -65,7 +65,13 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
     //public static final String SCALE_PROP_NAME = "scale"; //NOI18N
     //public static final String REQUIRED_PROP_NAME = "required"; //NOI18N
     protected Field field;
+    private boolean canChange;
 
+    public FieldNode(Field aField, Lookup aLookup, boolean aCanChange) {
+        this(aField, aLookup);
+        canChange = aCanChange;
+    }
+    
     public FieldNode(Field aField, Lookup aLookup) {
         super(Children.LEAF, aLookup);
         field = aField;
@@ -133,7 +139,7 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
     }
 
     public boolean canChange() {
-        return false;
+        return canChange;
     }
 
     protected boolean isOrderingSupported() {

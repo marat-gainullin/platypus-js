@@ -11,6 +11,8 @@ import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.login.PrincipalHost;
 import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.model.application.ApplicationModel;
+import com.eas.client.settings.DbConnectionSettings;
+import com.eas.client.settings.EasSettings;
 import com.eas.client.settings.SettingsConstants;
 import com.eas.debugger.jmx.server.Breakpoints;
 import com.eas.script.JsDoc;
@@ -290,7 +292,14 @@ public class ScriptRunner extends ScriptableObject {
         protected static AppCache cache;
         protected static PrincipalHost principalHost;
         protected static CompiledScriptDocumentsHost scriptDocumentsHost;
-
+        
+        /**
+         * Initializes a static fields.
+         * @param aClient Client instance
+         * @param aPrincipalHost Login support
+         * @param aScriptDocumentsHost Scripts host 
+         * @throws Exception If something goes wrong
+         */
         public static void init(Client aClient, PrincipalHost aPrincipalHost, CompiledScriptDocumentsHost aScriptDocumentsHost) throws Exception {
             assert cache == null : "Platypus application resources may be initialized only once.";
             client = aClient;
@@ -299,42 +308,41 @@ public class ScriptRunner extends ScriptableObject {
             scriptDocumentsHost = aScriptDocumentsHost;
         }
 
-        private static Client getClient() {
-            return client;
-        }
-
+        /**
+         * Gets an principal provider. 
+         * @return Principal host instance
+         */
         public static PrincipalHost getPrincipalHost() {
             return principalHost;
         }
 
+        /**
+         * Gets script documents host.
+         * @return Script documents host instance
+         */
         public static CompiledScriptDocumentsHost getScriptDocumentsHost() {
             return scriptDocumentsHost;
         }
-
-        protected static String translateResourcePath(String aPath) throws Exception {
-            /*
-             File test = new File(aPath);
-             if (test.exists()) {
-             // it seems, that id is a real file path
-             return test.getPath();
-             } else {
-             */
-            if (aPath.startsWith("/")) {
-                throw new IllegalStateException("Platypus resource path can't begin with /. Platypus resource paths must point somewhere in application, but not in filesystem.");
+        
+        /**
+         * Gets an absolute path to the application's directory.
+         * @return Application's directory full path or null if not path is not avaliable
+         */
+        public static String getApplicationPath() {
+            EasSettings settings = client.getSettings();
+            if (settings instanceof DbConnectionSettings) {
+                return ((DbConnectionSettings)settings).getApplicationPath();
+            } else {
+                return null;
             }
-            if (aPath.startsWith("..") || aPath.startsWith(".")) {
-                /*
-                 EvaluatorException ex = Context.reportRuntimeError("_");
-                 ScriptStackElement[] stack = ex.getScriptStack();
-                 traverse stack to reach non platypusStandardLib script and use it as base path
-                 */
-                throw new IllegalStateException("Platypus resource paths must be application-absolute. \"" + aPath + "\" is not application-absolute");
-            }
-            URI uri = new URI(null, null, aPath, null);
-            return uri.normalize().getPath();
-            //}
         }
 
+        /**
+         * Loads a resource's bytes either from disk or from datatbase.
+         * @param aResourceId An relative path to the resource
+         * @return Bytes for resource
+         * @throws Exception If some error occurs when reading the resource
+         */
         public static byte[] load(String aResourceId) throws Exception {
             if (aResourceId != null && !aResourceId.isEmpty()) {
                 Matcher htppMatcher = pattern.matcher(aResourceId);
@@ -386,15 +394,56 @@ public class ScriptRunner extends ScriptableObject {
             }
         }
 
+        /**
+         * Loads a resource as text for UTF-8 encoding.
+         * @param aResourceId An relative path to the resource
+         * @return Resource's text
+         * @throws Exception If some error occurs when reading the resource
+         */
         public static String loadText(String aResourceId) throws Exception {
             return loadText(aResourceId, SettingsConstants.COMMON_ENCODING);
         }
 
+        /**
+         * Loads a resource as text.
+         * @param aResourceId An relative path to the resource
+         * @param aEncodingName Encoding name
+         * @return Resource's text
+         * @throws Exception If some error occurs when reading the resource
+         */
         public static String loadText(String aResourceId, String aEncodingName) throws Exception {
             byte[] data = load(aResourceId);
             return data != null ? new String(data, aEncodingName) : null;
         }
 
+        protected static String translateResourcePath(String aPath) throws Exception {
+            /*
+             File test = new File(aPath);
+             if (test.exists()) {
+             // it seems, that id is a real file path
+             return test.getPath();
+             } else {
+             */
+            if (aPath.startsWith("/")) {
+                throw new IllegalStateException("Platypus resource path can't begin with /. Platypus resource paths must point somewhere in application, but not in filesystem.");
+            }
+            if (aPath.startsWith("..") || aPath.startsWith(".")) {
+                /*
+                 EvaluatorException ex = Context.reportRuntimeError("_");
+                 ScriptStackElement[] stack = ex.getScriptStack();
+                 traverse stack to reach non platypusStandardLib script and use it as base path
+                 */
+                throw new IllegalStateException("Platypus resource paths must be application-absolute. \"" + aPath + "\" is not application-absolute");
+            }
+            URI uri = new URI(null, null, aPath, null);
+            return uri.normalize().getPath();
+            //}
+        }
+        
+        private static Client getClient() {
+            return client;
+        }
+                
         private static URL encodeUrl(URL url) throws URISyntaxException, MalformedURLException {
             String file = "";
             if (url.getPath() != null && !url.getPath().isEmpty()) {

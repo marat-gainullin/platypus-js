@@ -5,6 +5,7 @@
 package com.eas.client.model.gui.view.model;
 
 import com.eas.client.metadata.TableRef;
+import com.eas.client.model.gui.edits.NewEntityEdit;
 import com.eas.client.model.gui.selectors.AppElementSelectorCallback;
 import com.eas.client.model.gui.selectors.TablesSelectorCallback;
 import com.eas.client.model.gui.view.AddQueryAction;
@@ -16,6 +17,7 @@ import com.eas.client.model.query.QueryModel;
 import com.eas.client.model.query.QueryParametersEntity;
 import com.eas.client.model.store.XmlDom2QueryModel;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.util.List;
 import java.util.Set;
 import javax.swing.Action;
@@ -61,6 +63,22 @@ public class QueryModelView extends ModelView<QueryEntity, QueryParametersEntity
     @Override
     protected EntityView<QueryEntity> createGenericEntityView(QueryEntity aEntity) {
         return isParametersEntity(aEntity) ? new QueryParametersEntityView((QueryParametersEntity) aEntity, entitiesViewsMover) : new QueryEntityView(aEntity, entitiesViewsMover);
+    }
+
+    @Override
+    public void doAddQuery(String aApplicationElementId, int aX, int aY) throws Exception {
+        if (aApplicationElementId != null && model != null) {
+            Rectangle rect = findPlaceForEntityAdd(aX, aY);
+            QueryEntity entity = model.newGenericEntity();
+            entity.setX(rect.x);
+            entity.setY(rect.y);
+            entity.setWidth(rect.width);
+            entity.setHeight(rect.height);
+            entity.setQueryId(aApplicationElementId);
+            NewEntityEdit edit = new NewEntityEdit(model, entity);
+            edit.redo();
+            undoSupport.postEdit(edit);
+        }
     }
 
     @Override

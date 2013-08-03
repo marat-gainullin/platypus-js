@@ -9,8 +9,10 @@ import com.eas.client.model.query.QueryEntity;
 import com.eas.designer.datamodel.nodes.EntityNode;
 import org.openide.ErrorManager;
 import org.openide.awt.UndoRedo;
+import org.openide.nodes.Node;
 import org.openide.nodes.PropertySupport;
 import org.openide.nodes.Sheet;
+import static org.openide.nodes.Sheet.PROPERTIES;
 import org.openide.util.Lookup;
 
 /**
@@ -52,10 +54,11 @@ public class QueryEntityNode extends EntityNode<QueryEntity> {
         try {
             Sheet sheet = super.createSheet();
             nameToProperty.remove(NAME_PROP_NAME);
-            Sheet.Set pSet = sheet.get(Sheet.PROPERTIES);
+            Sheet.Set defaultSet = sheet.get(PROPERTIES);
+            defaultSet.remove(PROP_NAME);
             PropertySupport.Reflection<String> aliasProp = new PropertySupport.Reflection<>(entity, String.class, ALIAS_PROP_NAME);
             aliasProp.setName(ALIAS_PROP_NAME);
-            pSet.put(aliasProp);
+            defaultSet.put(aliasProp);
             nameToProperty.put(ALIAS_PROP_NAME, aliasProp);
             return sheet;
         } catch (NoSuchMethodException ex) {
