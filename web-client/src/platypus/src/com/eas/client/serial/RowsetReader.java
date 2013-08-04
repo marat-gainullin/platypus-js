@@ -9,7 +9,6 @@ import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
 import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.json.client.*;
 
 import java.sql.Types;
@@ -24,19 +23,13 @@ public class RowsetReader extends JsonReader {
 
 	private static DateTimeFormat ISO_DATE_FORMAT = DateTimeFormat.getFormat("yyyy-MM-dd'T'HH:mm:ss");
 	
-    public static Rowset read(JSONValue aValue) throws Exception {
-        JSONObject ro = aValue.isObject();
-        assert ro != null;
-        assert ro.containsKey(PlatypusJsonConstants.FIELDS);
-        assert ro.containsKey(PlatypusJsonConstants.DATA);
-        JSONArray fa = ro.get(PlatypusJsonConstants.FIELDS).isArray();
-        Fields fields = new Fields();
-        readFields(fa, fields);
-        Rowset rowset = new Rowset(fields);
-        JSONArray da = ro.get(PlatypusJsonConstants.DATA).isArray();
+    public static Rowset read(JSONValue aValue, Fields aExpectedFields) throws Exception {
+    	assert aExpectedFields != null;
+        JSONArray da = aValue.isArray();
+        Rowset rowset = new Rowset(aExpectedFields);
         List<Row> rows = new ArrayList();
         for (int i = 0; i < da.size(); i++) {
-            Row row = readRow(da.get(i), fields);
+            Row row = readRow(da.get(i), rowset.getFields());
             rows.add(row);
         }
         rowset.setCurrent(rows);

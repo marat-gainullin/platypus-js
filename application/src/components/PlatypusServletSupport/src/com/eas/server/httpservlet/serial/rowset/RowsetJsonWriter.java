@@ -12,37 +12,18 @@ import java.text.SimpleDateFormat;
 
 /**
  *
- * @author kl
+ * @author kl, mg refactoring
  */
 public class RowsetJsonWriter extends JsonWriter {
 
-    private Rowset rowset = null;
-    private String callback = null;
+    private Rowset rowset;
 
     public RowsetJsonWriter(Rowset aRowset) {
         rowset = aRowset;
     }
 
-    public void setCallback(String aCallback) {
-        callback = aCallback;
-    }
-
     public String write() throws Exception {
-        StringBuilder sb = new StringBuilder();
-        if (callback != null) {
-            sb.append(callback);
-            sb.append("(");
-        }
-        o(sb,
-                RowsetJsonConstants.SUCCESS, String.valueOf(true),
-                RowsetJsonConstants.TOTAL, String.valueOf(rowset.size()),
-                RowsetJsonConstants.DATA, writeRows(),
-                RowsetJsonConstants.FIELDS, QueryJsonWriter.fields2a(rowset.getFields()));
-
-        if (callback != null) {
-            sb.append(")");
-        }
-        return sb.toString();
+        return writeRows();
     }
 
     private String writeRows() throws Exception {

@@ -970,6 +970,28 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
                 toFieldConnectorColor = old2FieldColor;
                 toParameterConnectorColor = old2ParameterColor;
             }
+            paintEntitiesBorders(g2d);
+        }
+    }
+
+    protected void paintEntitiesBorders(Graphics2D g2d) {
+        Rectangle rect = new Rectangle();
+        for (EntityView<E> eView : entityViews.values()) {
+            eView.getBounds(rect);
+            Color oldColor = g2d.getColor();
+            Stroke oldStroke = g2d.getStroke();
+            try {
+                g2d.setStroke(EntityView.allwaysBorderStroke);
+                if (eView.getBorder() == EntityView.ordinaryBorder) {
+                    g2d.setColor(EntityView.borderColor);
+                } else {
+                    g2d.setColor(EntityView.selectedBorderColor);
+                }
+                g2d.drawRect(rect.x, rect.y, rect.width - 1, rect.height - 1);
+            } finally {
+                g2d.setStroke(oldStroke);
+                g2d.setColor(oldColor);
+            }
         }
     }
 

@@ -243,7 +243,7 @@ public class PlatypusRequestReader implements PlatypusRequestVisitor {
     @Override
     public void visit(HelloRequest rq) throws Exception {
     }
-    private static PlatypusRowsetReader customReadersContainer = new PlatypusRowsetReader();
+    private static PlatypusRowsetReader customReadersContainer = new PlatypusRowsetReader(null);
 
     public static Parameter readParameter(ProtoNode node) throws ProtoReaderException {
         Parameter param = new Parameter();

@@ -79,7 +79,7 @@ public class PlatypusResponsesFactory implements PlatypusRequestVisitor{
 
     @Override
     public void visit(ExecuteQueryRequest rq) throws Exception {
-        response = new RowsetResponse(requestId, null, 0);
+        response = new RowsetResponse(requestId, null, 0, rq.getExpectedFields());
     }
 
     @Override

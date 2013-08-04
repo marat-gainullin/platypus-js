@@ -42,7 +42,7 @@ public class PlatypusQuery extends Query<AppClient> {
     public Rowset execute() throws Exception {
         Rowset rs = new Rowset(flow);
         rs.refresh(params);
-        lightMergeFields(rs.getFields(), fields);
+        //lightMergeFields(rs.getFields(), fields);
         return rs;
     }
 
@@ -59,6 +59,7 @@ public class PlatypusQuery extends Query<AppClient> {
      * @param destFields Fields to be merged with etalon fields.
      * @param sourceFields Etalon fields, likely a query fields, got from server.
      */
+    /*
     protected void lightMergeFields(Fields destFields, Fields sourceFields) {
         for (int i = 1; i <= sourceFields.getFieldsCount(); i++) {
             Field srcField = sourceFields.get(i);
@@ -69,6 +70,7 @@ public class PlatypusQuery extends Query<AppClient> {
             }
         }
     }
+    */ 
 
     @Override
     public Query copy() {
@@ -82,7 +84,7 @@ public class PlatypusQuery extends Query<AppClient> {
 
     private void createFlow() {
         if (client != null && entityId != null) {
-            flow = new PlatypusThreeTierFlowProvider(client, entityId);
+            flow = new PlatypusThreeTierFlowProvider(client, entityId, fields);
         }
     }
 

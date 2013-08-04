@@ -131,7 +131,7 @@ public class ExecuteQueryRequestTest extends RequestsBaseTest {
         param.setTypeInfo(DataTypeInfo.INTEGER);
         param.setValue(ClientConstants.ET_DB_SCHEME);
         params.add(param);
-        ExecuteQueryRequest instance = new ExecuteQueryRequest(IDGenerator.genID(), queryId, params);
+        ExecuteQueryRequest instance = new ExecuteQueryRequest(IDGenerator.genID(), queryId, params, null);
         PlatypusRequestWriter bodyWriter = new PlatypusRequestWriter(outStream);
         instance.accept(bodyWriter);
         ProtoNode input = ProtoDOMBuilder.buildDOM(outStream.toByteArray());
@@ -179,7 +179,7 @@ public class ExecuteQueryRequestTest extends RequestsBaseTest {
         param.setTypeInfo(DataTypeInfo.INTEGER);
         param.setValue(ClientConstants.ET_DB_SCHEME);
         params.add(param);
-        ExecuteQueryRequest instance = new ExecuteQueryRequest(IDGenerator.genID(), queryId, params);
+        ExecuteQueryRequest instance = new ExecuteQueryRequest(IDGenerator.genID(), queryId, params, null);
         PlatypusRequestWriter bodyWriter = new PlatypusRequestWriter(outStream);
         instance.accept(bodyWriter);
         ProtoNode input = ProtoDOMBuilder.buildDOM(outStream.toByteArray());
@@ -235,7 +235,7 @@ public class ExecuteQueryRequestTest extends RequestsBaseTest {
         Point pt = gFactory.createPoint(new Coordinate(45, 78));
         param.setValue(pt);
         params.add(param);
-        ExecuteQueryRequest instance = new ExecuteQueryRequest(IDGenerator.genID(), queryId, params);
+        ExecuteQueryRequest instance = new ExecuteQueryRequest(IDGenerator.genID(), queryId, params, null);
         PlatypusRequestWriter bodyWriter = new PlatypusRequestWriter(outStream);
         instance.accept(bodyWriter);
         ProtoNode input = ProtoDOMBuilder.buildDOM(outStream.toByteArray());

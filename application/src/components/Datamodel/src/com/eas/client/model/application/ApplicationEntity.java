@@ -113,8 +113,9 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
     }
 
     /**
-     * Sets cursor substitute.
-     * Use this function carefully. Circular references may occur
+     * Sets cursor substitute. Use this function carefully. Circular references
+     * may occur
+     *
      * @param aValue Cursor substitute entity to be set.
      */
     public void setSubstitute(E aValue) {
@@ -283,15 +284,6 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             }
         }
         return rowset;
-    }
-
-    @Override
-    protected Fields getFactFields() throws Exception {
-        Rowset lRs = getRowset();
-        if (lRs != null) {
-            return lRs.getFields();
-        }
-        return null;
     }
 
     public boolean refresh() throws Exception {
@@ -563,6 +555,22 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
     }
 
     protected abstract void achieveOrRefreshRowset() throws Exception;
+
+    @Override
+    public Fields getFields() {
+        super.getFields();
+        if (fields == null) {
+            try {
+                Rowset rs = getRowset();
+                if (rs != null) {
+                    fields = rs.getFields();
+                }
+            } catch (Exception ex) {
+                Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        return fields;
+    }
 
     public boolean isUserFiltering() {
         return userFiltering;

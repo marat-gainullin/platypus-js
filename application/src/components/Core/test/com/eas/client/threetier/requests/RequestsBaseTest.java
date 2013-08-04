@@ -5,7 +5,6 @@
 
 package com.eas.client.threetier.requests;
 
-import com.bearsoft.rowset.exceptions.AlreadyExistSerializerException;
 import com.eas.client.threetier.PlatypusRowsetReader;
 import com.eas.client.threetier.PlatypusRowsetWriter;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -22,7 +21,7 @@ public class RequestsBaseTest {
 
     protected static final GeometryFactory gFactory = new GeometryFactory();
     protected PlatypusRowsetWriter customWritersContainer = new PlatypusRowsetWriter();
-    protected PlatypusRowsetReader customReadersContainer = new PlatypusRowsetReader();
+    protected PlatypusRowsetReader customReadersContainer = new PlatypusRowsetReader(null);
 
     public RequestsBaseTest() throws IOException
     {

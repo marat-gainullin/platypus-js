@@ -21,12 +21,17 @@ import java.util.List;
 
 /**
  * RowsetReader descendant, implementing rowset binary serialization behavior.
+ *
  * @author mg
  */
 public class BinaryRowsetReader extends RowsetReader {
 
     public BinaryRowsetReader() {
         super();
+    }
+
+    public BinaryRowsetReader(Fields aExpectedFields) {
+        super(aExpectedFields);
     }
 
     public Fields parseFieldsNode(ProtoNode aNode) throws ProtoReaderException {
@@ -184,17 +189,17 @@ public class BinaryRowsetReader extends RowsetReader {
     }
 
     public Rowset parseDom(ProtoNode rowsetNode) throws RowsetException {
-        Rowset rowset = new Rowset();
+        Rowset rowset = expectedFields != null ? new Rowset(expectedFields) : new Rowset();
         try {
             // properties
             /*
-            ProtoNode sessionIdNode = rowsetNode.getChild(BinaryTags.SESSION);
-            if (sessionIdNode != null) {
-                rowset.setSessionId(sessionIdNode.getString());
-            }
-            ProtoNode transactedNode = rowsetNode.getChild(BinaryTags.TRANSACTED);
-            rowset.setTransacted(transactedNode != null);
-            */
+             ProtoNode sessionIdNode = rowsetNode.getChild(BinaryTags.SESSION);
+             if (sessionIdNode != null) {
+             rowset.setSessionId(sessionIdNode.getString());
+             }
+             ProtoNode transactedNode = rowsetNode.getChild(BinaryTags.TRANSACTED);
+             rowset.setTransacted(transactedNode != null);
+             */
 
             int cursorPos = 0;
             ProtoNode cursorPosIdNode = rowsetNode.getChild(BinaryTags.CURSOR_POSITION);
@@ -202,9 +207,11 @@ public class BinaryRowsetReader extends RowsetReader {
                 cursorPos = cursorPosIdNode.getInt();
             }
             // fields
-            ProtoNode metadataNode = rowsetNode.getChild(BinaryTags.METADATA);
-            Fields fields = parseFieldsNode(metadataNode);
-            rowset.setFields(fields);
+            if (expectedFields == null) {
+                ProtoNode metadataNode = rowsetNode.getChild(BinaryTags.METADATA);
+                Fields fields = parseFieldsNode(metadataNode);
+                rowset.setFields(fields);
+            }
             // data
             ProtoNode currentDataNode = rowsetNode.getChild(BinaryTags.DATA);
             readData(rowset, currentDataNode);
@@ -222,6 +229,7 @@ public class BinaryRowsetReader extends RowsetReader {
 
     /**
      * Method reads data in passed rowset, from part of the binary dom.
+     *
      * @param aRowset Rowset, the data to read to.
      * @param dataNode Node of the dom to read data from.
      * @throws ProtoReaderException
@@ -277,8 +285,9 @@ public class BinaryRowsetReader extends RowsetReader {
     }
 
     private static void readRowValues(Fields aFields, List<CustomSerializer> customSerializers, Row row, List<ProtoNode> valuesNodes) throws InvalidColIndexException, RowsetException, ProtoReaderException {
-        if(aFields.getFieldsCount() != valuesNodes.size())
+        if (aFields.getFieldsCount() != valuesNodes.size()) {
             throw new RowsetException("Fields count and data values count must be the same.");
+        }
         for (int j = 1; j <= aFields.getFieldsCount(); j++) {
             Field field = aFields.get(j);
             ProtoNode valueNode = valuesNodes.get(j - 1);

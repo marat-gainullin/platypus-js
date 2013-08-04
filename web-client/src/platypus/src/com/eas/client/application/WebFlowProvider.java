@@ -11,6 +11,7 @@ import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.dataflow.FlowProvider;
 import com.bearsoft.rowset.dataflow.TransactionListener;
 import com.bearsoft.rowset.dataflow.TransactionListener.Registration;
+import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.Callback;
 import com.eas.client.Cancellable;
@@ -22,12 +23,14 @@ import com.eas.client.Cancellable;
 public class WebFlowProvider implements FlowProvider {
 
 	protected String entityId;
+	protected Fields expectedFields;
 	protected AppClient client;
 	protected boolean procedure;
 
-	public WebFlowProvider(AppClient aClient, String aEntityId) {
+	public WebFlowProvider(AppClient aClient, String aEntityId, Fields aExpectedFields) {
 		client = aClient;
 		entityId = aEntityId;
+		expectedFields = aExpectedFields;
 	}
 
 	@Override
@@ -37,7 +40,7 @@ public class WebFlowProvider implements FlowProvider {
 
 	@Override
 	public Cancellable refresh(Parameters aParams, Callback<Rowset> onSuccess, Callback<String> onFailure) throws Exception {
-		return client.pollData(entityId, aParams, onSuccess, onFailure);
+		return client.pollData(entityId, aParams, expectedFields, onSuccess, onFailure);
 	}
 
 	@Override

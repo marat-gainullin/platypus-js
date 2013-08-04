@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -20,6 +19,7 @@ import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.changes.Command;
 import com.bearsoft.rowset.dataflow.TransactionListener;
+import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.bearsoft.rowset.utils.RowsetUtils;
@@ -779,7 +779,7 @@ public class AppClient {
 		});
 	}
 
-	public Cancellable pollData(String aQueryId, Parameters aParams, final Callback<Rowset> onSuccess, final Callback<String> onFailure) throws Exception {
+	public Cancellable pollData(String aQueryId, Parameters aParams, final Fields aExpectedFields, final Callback<Rowset> onSuccess, final Callback<String> onFailure) throws Exception {
 		String query = params(param(PlatypusHttpRequestParams.TYPE, String.valueOf(Requests.rqExecuteQuery)), param(PlatypusHttpRequestParams.QUERY_ID, aQueryId), params(aParams));
 		return startRequest(API_URI, query, "", RequestBuilder.GET, new ResponseCallbackAdapter() {
 
@@ -792,7 +792,7 @@ public class AppClient {
 			}
 
 			private Rowset readRowset(XMLHttpRequest aResponse) throws Exception {
-				return RowsetReader.read(JSONParser.parseStrict(aResponse.getResponseText()));
+				return RowsetReader.read(JSONParser.parseStrict(aResponse.getResponseText()), aExpectedFields);
 			}
 		}, new ResponseCallbackAdapter() {
 			@Override

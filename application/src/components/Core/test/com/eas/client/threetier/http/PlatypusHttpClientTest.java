@@ -151,7 +151,7 @@ public class PlatypusHttpClientTest {
 
     @Test
     public void testExecuteQueryRequest() throws IOException, ProtoReaderException, Exception {
-        ExecuteQueryRequest rq = new ExecuteQueryRequest(IDGenerator.genID(), PlatypusClientTest.TEST_QUERY_ID, new Parameters());
+        ExecuteQueryRequest rq = new ExecuteQueryRequest(IDGenerator.genID(), PlatypusClientTest.TEST_QUERY_ID, new Parameters(), client.getAppQuery(PlatypusClientTest.TEST_QUERY_ID).getFields());
         client.executeRequest(rq);
         assertTrue(rq.getResponse() instanceof RowsetResponse);
         RowsetResponse response = (RowsetResponse) rq.getResponse();

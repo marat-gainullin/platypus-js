@@ -177,7 +177,9 @@ public class DatabaseMdCache implements DbMetadataCache {
                 if (keys != null) {
                     for (Entry<String, PrimaryKeySpec> pkEntry : keys.getPks().entrySet()) {
                         Field f = fields.get(pkEntry.getKey());
-                        f.setPk(f != null);
+                        if (f != null) {
+                            f.setPk(true);
+                        }
                     }
                     for (Entry<String, ForeignKeySpec> fkEntry : keys.getFks().entrySet()) {
                         Field f = fields.get(fkEntry.getKey());
@@ -510,7 +512,7 @@ public class DatabaseMdCache implements DbMetadataCache {
         protected String transformKey(String aKey) {
             return aKey != null ? aKey.toLowerCase() : null;
         }
-        
+
         @Override
         protected DbTableIndexes getNewEntry(String aId) throws Exception {
             if (client != null) {

@@ -10,6 +10,7 @@ import com.bearsoft.rowset.dataflow.FlowProvider;
 import com.bearsoft.rowset.dataflow.TransactionListener;
 import com.bearsoft.rowset.exceptions.FlowProviderFailedException;
 import com.bearsoft.rowset.exceptions.RowsetException;
+import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.AppClient;
@@ -24,13 +25,15 @@ import java.util.List;
 public class PlatypusThreeTierFlowProvider implements FlowProvider {
 
     protected AppClient client;
+    protected Fields expectedFields;
     protected boolean procedure = false;
     protected String entityId;
 
-    public PlatypusThreeTierFlowProvider(AppClient aClient, String aEntityId) {
+    public PlatypusThreeTierFlowProvider(AppClient aClient, String aEntityId, Fields aExpectedFields) {
         super();
         client = aClient;
         entityId = aEntityId;
+        expectedFields = aExpectedFields;
     }
 
     @Override
@@ -51,7 +54,7 @@ public class PlatypusThreeTierFlowProvider implements FlowProvider {
     @Override
     public Rowset refresh(Parameters aParams) throws RowsetException {
         try {
-            ExecuteQueryRequest request = new ExecuteQueryRequest(IDGenerator.genID(), entityId, aParams);
+            ExecuteQueryRequest request = new ExecuteQueryRequest(IDGenerator.genID(), entityId, aParams, expectedFields);
             client.executeRequest(request);
             RowsetResponse response = (RowsetResponse) request.getResponse();
             // let's return parameters

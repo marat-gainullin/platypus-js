@@ -1129,7 +1129,9 @@ public class Entity implements RowsetListener {
 				if (query != null) {
 					fields = query.getFields();
 					if (fields == null) {
-						fields = getFactFields();
+						if (rowset != null) {
+							fields = rowset.getFields();
+						}
 					}
 					assert fields != null;
 				}
@@ -1431,13 +1433,6 @@ public class Entity implements RowsetListener {
 
 	public boolean isRowsetPresent() {
 		return rowset != null;
-	}
-
-	protected Fields getFactFields() throws Exception {
-		if (rowset != null) {
-			return rowset.getFields();
-		}
-		return null;
 	}
 
 	public void refresh(final JavaScriptObject onSuccess) throws Exception {

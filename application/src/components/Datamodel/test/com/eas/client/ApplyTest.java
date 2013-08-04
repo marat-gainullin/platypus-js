@@ -48,7 +48,7 @@ public class ApplyTest extends BaseTest {
             //paramTypes.add(DataTypeInfo.NVARCHAR);
             //paramTypes.add(DataTypeInfo.LONGNVARCHAR);
             
-            FlowProvider flow = client.createFlowProvider(null, null, tableName, selectClause, Collections.<String>emptySet(), Collections.<String>emptySet());
+            FlowProvider flow = client.createFlowProvider(null, null, tableName, selectClause, null, Collections.<String>emptySet(), Collections.<String>emptySet());
 
             for (DataTypeInfo typeInfo : paramTypes) {
                 param1.setTypeInfo(typeInfo);
@@ -148,7 +148,7 @@ public class ApplyTest extends BaseTest {
             //paramTypes.add(DataTypeInfo.NCHAR);
             //paramTypes.add(DataTypeInfo.NVARCHAR);
             //paramTypes.add(DataTypeInfo.LONGNVARCHAR);
-            FlowProvider flow = client.createFlowProvider(null, null, tableName, selectClause, Collections.<String>emptySet(), Collections.<String>emptySet());
+            FlowProvider flow = client.createFlowProvider(null, null, tableName, selectClause, null, Collections.<String>emptySet(), Collections.<String>emptySet());
 
             for (DataTypeInfo typeInfo : paramTypes) {
                 param1.setTypeInfo(typeInfo);

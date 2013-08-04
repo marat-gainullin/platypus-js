@@ -48,7 +48,7 @@ import java.util.logging.Logger;
 import javax.sql.DataSource;
 
 /**
- * Two tier realization of Client interface.
+ * Two tier implementation of Client interface.
  *
  * @author mg
  * @see Client
@@ -215,10 +215,11 @@ public class DatabasesClient implements DbClient {
      * @throws Exception
      */
     @Override
-    public FlowProvider createFlowProvider(String aDbId, String aSessionId, String aEntityId, String aSqlClause, Set<String> aReadRoles, Set<String> aWriteRoles) throws Exception {
-        return new PlatypusJdbcFlowProvider(this, aDbId, aSessionId, aEntityId, resourceProvider.getPooledDataSource(aDbId), getDbMetadataCache(aDbId), aSqlClause, contextHost, aReadRoles, aWriteRoles);
+    public FlowProvider createFlowProvider(String aDbId, String aSessionId, String aEntityId, String aSqlClause, Fields aExpectedFields, Set<String> aReadRoles, Set<String> aWriteRoles) throws Exception {
+        return new PlatypusJdbcFlowProvider(this, aDbId, aSessionId, aEntityId, resourceProvider.getPooledDataSource(aDbId), getDbMetadataCache(aDbId), aSqlClause, aExpectedFields, contextHost, aReadRoles, aWriteRoles);
     }
 
+    /*
     protected void convertPkFields2PkCols(Rowset aRowSet, String[] aPkNames) {
         if (aRowSet != null && aPkNames != null) {
             for (int i = 0; i < aPkNames.length; i++) {
@@ -229,6 +230,7 @@ public class DatabasesClient implements DbClient {
             }
         }
     }
+    */ 
 
     public String getSqlLogMessage(SqlCompiledQuery query) {
         StringBuilder sb = new StringBuilder("Executing SQL: ");

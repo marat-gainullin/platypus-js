@@ -20,6 +20,7 @@ import java.util.Set;
 
 /**
  * RowsetWrinter descendant, implementing rowset binary serialization behavior.
+ *
  * @author mg
  */
 public class BinaryRowsetWriter extends RowsetWriter {
@@ -28,8 +29,14 @@ public class BinaryRowsetWriter extends RowsetWriter {
         super();
     }
 
+    public BinaryRowsetWriter(boolean aWriteFields) {
+        super(aWriteFields);
+    }
+
     /**
-     * Writes rowset's data to byte array. This nethod is wrapper for <code>write(Rowset rowset, OutputStream out)</code>
+     * Writes rowset's data to byte array. This nethod is wrapper for
+     * <code>write(Rowset rowset, OutputStream out)</code>
+     *
      * @param aRowset Rowset instance the data to be written from.
      * @return Byte array, containing written data.
      * @throws IOException
@@ -45,6 +52,7 @@ public class BinaryRowsetWriter extends RowsetWriter {
 
     /**
      * Writes rowset's data to abstract output stream.
+     *
      * @param aRowset Rowset instance the data to be written from.
      * @param out Stream, that will contain written data.
      * @throws IOException
@@ -58,19 +66,21 @@ public class BinaryRowsetWriter extends RowsetWriter {
             ProtoWriter pw = new ProtoWriter(out);
             // properties
             /*
-            if (aRowset.getSessionId() != null) {
-                pw.put(BinaryTags.SESSION, aRowset.getSessionId());
-            }
-            if (aRowset.isTransacted()) {
-                pw.put(BinaryTags.TRANSACTED);
-            }
-            */
+             if (aRowset.getSessionId() != null) {
+             pw.put(BinaryTags.SESSION, aRowset.getSessionId());
+             }
+             if (aRowset.isTransacted()) {
+             pw.put(BinaryTags.TRANSACTED);
+             }
+             */
             pw.put(BinaryTags.CURSOR_POSITION, aRowset.getCursorPos());
             // fields
-            ByteArrayOutputStream metadataOut = new ByteArrayOutputStream();
-            writeFields(aRowset.getFields(), metadataOut);
-            pw.put(BinaryTags.METADATA);
-            pw.put(CoreTags.TAG_STREAM, metadataOut);
+            if (writeFields) {
+                ByteArrayOutputStream metadataOut = new ByteArrayOutputStream();
+                writeFields(aRowset.getFields(), metadataOut);
+                pw.put(BinaryTags.METADATA);
+                pw.put(CoreTags.TAG_STREAM, metadataOut);
+            }
 
             boolean wasBeforeFirst = aRowset.isBeforeFirst();
             boolean wasAfterFirst = aRowset.isAfterLast();
@@ -188,6 +198,7 @@ public class BinaryRowsetWriter extends RowsetWriter {
 
     /**
      * Writes collection of rows to out stream.
+     *
      * @param aRowset
      * @return ByteArrayOutputStream, containing written data.
      * @throws RowsetException

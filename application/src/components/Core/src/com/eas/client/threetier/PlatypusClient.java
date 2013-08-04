@@ -8,6 +8,7 @@ import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.changes.Command;
 import com.bearsoft.rowset.dataflow.FlowProvider;
 import com.bearsoft.rowset.dataflow.TransactionListener;
+import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.bearsoft.rowset.utils.IDGenerator;
@@ -114,8 +115,8 @@ public abstract class PlatypusClient implements AppClient {
     }
 
     @Override
-    public FlowProvider createFlowProvider(String aQueryId) {
-        FlowProvider flowProvider = new PlatypusThreeTierFlowProvider(this, aQueryId);
+    public FlowProvider createFlowProvider(String aQueryId, Fields aExpectedFields) {
+        FlowProvider flowProvider = new PlatypusThreeTierFlowProvider(this, aQueryId, aExpectedFields);
         return flowProvider;
     }
 
