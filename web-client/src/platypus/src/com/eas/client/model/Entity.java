@@ -1421,8 +1421,8 @@ public class Entity implements RowsetListener {
 		assert query != null : "Query must present (isManual)";
 		return query.isManual();
 	}
-	
-	public void setManual(boolean aValue){
+
+	public void setManual(boolean aValue) {
 		assert query != null : "Query must present (setManual)";
 		query.setManual(aValue);
 	}
@@ -1496,12 +1496,11 @@ public class Entity implements RowsetListener {
 				// such case we initialize
 				// parameters values with RowsetUtils.UNDEFINED_SQL_VALUE
 				/*
-				final Map<String, Object> oldParamValues = new HashMap();
-				for (int i = 1; i <= query.getParameters().getParametersCount(); i++) {
-					Parameter p = query.getParameters().get(i);
-					oldParamValues.put(p.getName(), p.getValue());
-				}
-				*/
+				 * final Map<String, Object> oldParamValues = new HashMap(); for
+				 * (int i = 1; i <= query.getParameters().getParametersCount();
+				 * i++) { Parameter p = query.getParameters().get(i);
+				 * oldParamValues.put(p.getName(), p.getValue()); }
+				 */
 				boolean parametersBinded = bindQueryParameters();
 				if ((rowset == null || refresh || parametersBinded) && (pending == null || parametersBinded)) {
 					// if we have no rowset yet or query parameters values have
@@ -1519,10 +1518,10 @@ public class Entity implements RowsetListener {
 							filterRowset();
 							pending = null;
 							model.pumpEvents();
-							if(!abortedCallbacks.isEmpty()){
-								CancellableCallback[] toCall = abortedCallbacks.toArray(new CancellableCallback[]{});
+							if (!abortedCallbacks.isEmpty()) {
+								CancellableCallback[] toCall = abortedCallbacks.toArray(new CancellableCallback[] {});
 								abortedCallbacks.clear();
-								for(CancellableCallback call : toCall)
+								for (CancellableCallback call : toCall)
 									call.run();
 							}
 							if (onSuccess != null)
@@ -1535,18 +1534,18 @@ public class Entity implements RowsetListener {
 						public void cancel() {
 							pending = null;
 							/*
-							for (int i = 1; i <= query.getParameters().getParametersCount(); i++) {
-								Parameter p = query.getParameters().get(i);
-								p.setValue(oldParamValues.get(p.getName()));
-								p.setModified(false);
-							}
-							*/
+							 * for (int i = 1; i <=
+							 * query.getParameters().getParametersCount(); i++)
+							 * { Parameter p = query.getParameters().get(i);
+							 * p.setValue(oldParamValues.get(p.getName()));
+							 * p.setModified(false); }
+							 */
 							lexecuting.cancel();
 							if (onSuccess != null)
 								abortedCallbacks.add(onSuccess);
 						}
 					};
-				} else if (pending == null){
+				} else if (pending == null) {
 					// There might be a case of only rowset filtering
 					assert rowset != null;
 					filterRowset();
@@ -2113,8 +2112,6 @@ public class Entity implements RowsetListener {
 	}
 
 	public Rowset getRowset() {
-		//if(rowset == null)// leads to messages bloat
-		//	Logger.getLogger(Entity.class.getName()).log(Level.WARNING, "Model entity ["+getTitle()+"] using while data not loaded detected.");
 		return rowset;
 	}
 
@@ -2147,37 +2144,37 @@ public class Entity implements RowsetListener {
 	}
 
 	public void setSubstitute(Entity aSubstitute) {
-		if(aSubstitute != this){
+		if (aSubstitute != this) {
 			substitute = aSubstitute;
 		}
 	}
 
-    public Object getSubstituteRowsetObject(String aFieldName) throws Exception {
-        Entity lsubstitute = substitute;
-        while (lsubstitute != null) {
-            Rowset sRowset = lsubstitute.getRowset();
-            if (sRowset != null && !sRowset.isBeforeFirst() && !sRowset.isAfterLast()) {
-                Object value = sRowset.getObject(sRowset.getFields().find(aFieldName));
-                if (value != null) {
-                    return value;
-                }
-            }
-            lsubstitute = lsubstitute.getSubstitute();
-        }
-        return null;
-    }
+	public Object getSubstituteRowsetObject(String aFieldName) throws Exception {
+		Entity lsubstitute = substitute;
+		while (lsubstitute != null) {
+			Rowset sRowset = lsubstitute.getRowset();
+			if (sRowset != null && !sRowset.isBeforeFirst() && !sRowset.isAfterLast()) {
+				Object value = sRowset.getObject(sRowset.getFields().find(aFieldName));
+				if (value != null) {
+					return value;
+				}
+			}
+			lsubstitute = lsubstitute.getSubstitute();
+		}
+		return null;
+	}
 
-    public Object getSubstituteRowsetJsObject(int aColIndex) throws Exception {
-    	if(fields != null){
-    		Field field = fields.get(aColIndex);
-    		if(field != null){
-    			Object value = getSubstituteRowsetObject(field.getName());
-    			return Utils.toJs(value);
-    		}
-    	}
-    	return null;
-    }
-    
+	public Object getSubstituteRowsetJsObject(int aColIndex) throws Exception {
+		if (fields != null) {
+			Field field = fields.get(aColIndex);
+			if (field != null) {
+				Object value = getSubstituteRowsetObject(field.getName());
+				return Utils.toJs(value);
+			}
+		}
+		return null;
+	}
+
 	protected native Row unwrapRow(JavaScriptObject aRowFacade) throws Exception/*-{
 		return aRowFacade != null ? aRowFacade.unwrap() : null;
 	}-*/;
@@ -2294,34 +2291,40 @@ public class Entity implements RowsetListener {
 
 	public JavaScriptObject createLocator(JavaScriptObject aConstraints) throws Exception {
 		JsArrayMixed constraints = aConstraints.<JsArrayMixed> cast();
-		Locator loc = getRowset().createLocator();
-		loc.beginConstrainting();
-		try {
-			for (int i = 0; i < constraints.length(); i++) {
-				JavaScriptObject jsConstraint = constraints.getObject(i);
-				Field field = RowsetUtils.unwrapField(jsConstraint);
-				loc.addConstraint(getFields().find(field.getName()));
+		if (checkRowset()) {
+			Locator loc = getRowset().createLocator();
+			loc.beginConstrainting();
+			try {
+				for (int i = 0; i < constraints.length(); i++) {
+					JavaScriptObject jsConstraint = constraints.getObject(i);
+					Field field = RowsetUtils.unwrapField(jsConstraint);
+					loc.addConstraint(getFields().find(field.getName()));
+				}
+			} finally {
+				loc.endConstrainting();
 			}
-		} finally {
-			loc.endConstrainting();
-		}
-		return publishLocatorFacade(loc, this);
+			return publishLocatorFacade(loc, this);
+		} else
+			return null;
 	}
 
 	public JavaScriptObject createFilter(JavaScriptObject aConstraints) throws Exception {
 		JsArrayMixed constraints = aConstraints.<JsArrayMixed> cast();
-		Filter filter = getRowset().createFilter();
-		filter.beginConstrainting();
-		try {
-			for (int i = 0; i < constraints.length(); i++) {
-				JavaScriptObject jsConstraint = constraints.getObject(i);
-				Field field = RowsetUtils.unwrapField(jsConstraint);
-				filter.addConstraint(getFields().find(field.getName()));
+		if (checkRowset()) {
+			Filter filter = getRowset().createFilter();
+			filter.beginConstrainting();
+			try {
+				for (int i = 0; i < constraints.length(); i++) {
+					JavaScriptObject jsConstraint = constraints.getObject(i);
+					Field field = RowsetUtils.unwrapField(jsConstraint);
+					filter.addConstraint(getFields().find(field.getName()));
+				}
+			} finally {
+				filter.endConstrainting();
 			}
-		} finally {
-			filter.endConstrainting();
-		}
-		return publishFilterFacade(filter, this);
+			return publishFilterFacade(filter, this);
+		}else
+			return null;
 	}
 
 	public RowsComparator createSorting(JavaScriptObject aConstraints) {
@@ -2351,7 +2354,9 @@ public class Entity implements RowsetListener {
 
 	public void sort(RowsComparator aComparator) throws Exception {
 		RowsComparator comparator = (RowsComparator) aComparator;
-		getRowset().sort(comparator);
+		if (checkRowset()) {
+			getRowset().sort(comparator);
+		}
 	}
 
 	public static boolean isParameter(Field aField) {
@@ -2377,7 +2382,8 @@ public class Entity implements RowsetListener {
 			}
 
 		};
-		getRowset().sort(comparator);
+		if (checkRowset())
+			getRowset().sort(comparator);
 	}
 
 	public void insert(JavaScriptObject aValues) throws Exception {
@@ -2394,7 +2400,16 @@ public class Entity implements RowsetListener {
 			// value
 			initingValues[i + 1] = RowsetUtils.extractValueFromJsArray(fieldsValues, i + 1);
 		}
-		getRowset().insert(initingValues);
+		if (checkRowset())
+			getRowset().insert(initingValues);
+	}
+
+	private boolean checkRowset() {
+		if (rowset == null) {
+			Logger.getLogger(Entity.class.getName()).log(Level.WARNING, "Model entity [" + getTitle() + "] using while data is not loaded yet.");
+			return false;
+		} else
+			return true;
 	}
 
 	/**
@@ -2418,7 +2433,8 @@ public class Entity implements RowsetListener {
 				initingValues.add(RowsetUtils.extractValueFromJsArray(fieldsValues, i + 1));
 			}
 		}
-		getRowset().insertAt(aIndex, initingValues.toArray());
+		if (checkRowset())
+			getRowset().insertAt(aIndex, initingValues.toArray());
 	}
 
 	protected JavaScriptObject jsPublished;
