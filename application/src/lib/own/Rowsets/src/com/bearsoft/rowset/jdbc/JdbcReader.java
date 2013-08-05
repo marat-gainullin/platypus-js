@@ -124,7 +124,7 @@ public class JdbcReader {
                     field.setSchemaName(lowLevelJdbcFields.getSchemaName(i));
                     jdbcFields.add(field);
                 }
-                Rowset rowset = new Rowset(expectedFields != null ? expectedFields : jdbcFields);
+                Rowset rowset = new Rowset(expectedFields != null && !expectedFields.isEmpty() ? expectedFields : jdbcFields);
                 List<Row> rows = readRows(rowset.getFields(), jdbcFields, aResultSet, aPageSize, converter);
                 rowset.setCurrent(rows);
                 rowset.currentToOriginal();
