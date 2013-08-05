@@ -175,11 +175,11 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
             ActionMap map = FormInspector.getInstance().setupActionMap(getActionMap());
             explorerManager = new ExplorerManager();
             lookup = new ProxyLookup(new Lookup[]{
-                        ExplorerUtils.createLookup(explorerManager, map),
-                        PaletteUtils.getPaletteLookup(formDataObject.getPrimaryFile()),
-                        formDataObject.getLookup(),
-                        Lookup.EMPTY // placeholder for data node lookup used when no node selected in the form
-                    });
+                ExplorerUtils.createLookup(explorerManager, map),
+                PaletteUtils.getPaletteLookup(formDataObject.getPrimaryFile()),
+                formDataObject.getLookup(),
+                Lookup.EMPTY // placeholder for data node lookup used when no node selected in the form
+            });
             associateLookup(lookup);
             formToolBar = new FormToolBar(this);
         }
@@ -513,41 +513,41 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
             FormLAF.setUsePreviewDefaults(classLoader, previewInfo);
             result = FormLAF.<Container>executeWithLookAndFeel(formModel,
                     new Mutex.ExceptionAction<Container>() {
-                        @Override
-                        public Container run() throws Exception {
-                            VisualReplicator r = new VisualReplicator(false, FormUtils.getViewConverters());
-                            r.setTopRADComponent(radComp);
-                            Container container = (Container) r.createClone();
-                            if (container instanceof RootPaneContainer) {
-                                JRootPane rootPane = ((RootPaneContainer) container).getRootPane();
-                                JLayeredPane newPane = new JLayeredPane() {
-                                    @Override
-                                    public void paint(Graphics g) {
-                                        try {
-                                            FormLAF.setUsePreviewDefaults(classLoader, previewInfo);
-                                            super.paint(g);
-                                        } finally {
-                                            FormLAF.setUsePreviewDefaults(null, null);
-                                        }
-                                    }
-                                };
-                                // Copy components from the original layered pane into our one
-                                JLayeredPane oldPane = rootPane.getLayeredPane();
-                                Component[] comps = oldPane.getComponents();
-                                for (int i = 0; i < comps.length; i++) {
-                                    newPane.add(comps[i], Integer.valueOf(oldPane.getLayer(comps[i])));
+                @Override
+                public Container run() throws Exception {
+                    VisualReplicator r = new VisualReplicator(false, FormUtils.getViewConverters());
+                    r.setTopRADComponent(radComp);
+                    Container container = (Container) r.createClone();
+                    if (container instanceof RootPaneContainer) {
+                        JRootPane rootPane = ((RootPaneContainer) container).getRootPane();
+                        JLayeredPane newPane = new JLayeredPane() {
+                            @Override
+                            public void paint(Graphics g) {
+                                try {
+                                    FormLAF.setUsePreviewDefaults(classLoader, previewInfo);
+                                    super.paint(g);
+                                } finally {
+                                    FormLAF.setUsePreviewDefaults(null, null);
                                 }
-                                // Use our layered pane that knows about LAF switching
-                                rootPane.setLayeredPane(newPane);
-                                // Make the glass pane visible to force repaint of the whole layered pane
-                                rootPane.getGlassPane().setVisible(true);
-                                // Mark it as design preview
-                                rootPane.putClientProperty("designPreview", Boolean.TRUE); // NOI18N
-                            } // else AWT Frame - we don't care that the L&F of the Swing
-                            // components may not look good - it is a strange use case
-                            return container;
+                            }
+                        };
+                        // Copy components from the original layered pane into our one
+                        JLayeredPane oldPane = rootPane.getLayeredPane();
+                        Component[] comps = oldPane.getComponents();
+                        for (int i = 0; i < comps.length; i++) {
+                            newPane.add(comps[i], Integer.valueOf(oldPane.getLayer(comps[i])));
                         }
-                    });
+                        // Use our layered pane that knows about LAF switching
+                        rootPane.setLayeredPane(newPane);
+                        // Make the glass pane visible to force repaint of the whole layered pane
+                        rootPane.getGlassPane().setVisible(true);
+                        // Mark it as design preview
+                        rootPane.putClientProperty("designPreview", Boolean.TRUE); // NOI18N
+                    } // else AWT Frame - we don't care that the L&F of the Swing
+                    // components may not look good - it is a strange use case
+                    return container;
+                }
+            });
         } finally {
             FormLAF.setUsePreviewDefaults(null, null);
         }
@@ -1850,20 +1850,21 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
                     ComponentContainer radContainer = ev.getContainer();
 
                     if (type == FormModelEvent.CONTAINER_LAYOUT_EXCHANGED
+                            || type == FormModelEvent.CONTAINER_LAYOUT_CHANGED
                             || type == FormModelEvent.COMPONENT_LAYOUT_CHANGED) {
-                        if (type == FormModelEvent.CONTAINER_LAYOUT_EXCHANGED) {
+                        if (type == FormModelEvent.CONTAINER_LAYOUT_EXCHANGED || type == FormModelEvent.CONTAINER_LAYOUT_CHANGED) {
                             ComponentContainer cont = ev.getContainer();
                             assert cont instanceof RADVisualContainer<?>;
+                            RADVisualContainer<?> visCont = (RADVisualContainer<?>)cont;
+                            if (type == FormModelEvent.CONTAINER_LAYOUT_EXCHANGED && visCont.shouldHaveLayoutNode()) {
+                                visCont.getNodeReference().fireChildrenChange();
+                            }
                             nodeToSelect = ((RADVisualContainer<?>) cont).getLayoutNodeReference();
                         }
-                        if ((prevType != FormModelEvent.CONTAINER_LAYOUT_EXCHANGED
-                                && prevType != FormModelEvent.COMPONENT_LAYOUT_CHANGED)
-                                || prevContainer != radContainer) {
-                            replicator.updateContainerLayout((RADVisualContainer<?>) radContainer);
-                            updateDone = true;
-                            updateAnchorActions();
-                            updateResizabilityActions();
-                        }
+                        replicator.updateContainerLayout((RADVisualContainer<?>) radContainer);
+                        updateDone = true;
+                        updateAnchorActions();
+                        updateResizabilityActions();
                     } else if (type == FormModelEvent.COMPONENT_ADDED) {
                         if (ev.getComponent().isInModel()) {
                             if (compsToSelect == null) {
