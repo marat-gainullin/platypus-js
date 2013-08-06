@@ -1422,7 +1422,6 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         rowset.insert(requiedFields);
     }
 
-    @ScriptFunction(jsDocText = "Deletes row on cursor position.")
     public boolean delete() throws Exception {
         Rowset rowset = getRowset();
         int oldCount = rowset.size();
@@ -1451,6 +1450,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         return getRowset();
     }
 
+    @ScriptFunction(jsDocText = "Deletes row on cursor position.")
     public boolean deleteRow() throws Exception {
         return delete();
     }

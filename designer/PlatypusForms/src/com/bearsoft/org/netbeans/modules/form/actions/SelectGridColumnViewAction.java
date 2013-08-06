@@ -88,7 +88,7 @@ public final class SelectGridColumnViewAction extends CookieAction {
         PaletteItem[] allItems = PaletteUtils.getAllItems();
         java.util.List<PaletteItem> layoutsList = new ArrayList<>();
         for (int i = 0; i < allItems.length; i++) {
-            if (ScalarDbControl.class.isAssignableFrom(allItems[i].getComponentClass())) {
+            if (allItems[i] != null && allItems[i].getComponentClass() != null && ScalarDbControl.class.isAssignableFrom(allItems[i].getComponentClass())) {
                 assert allItems[i].isVisual();
                 layoutsList.add(allItems[i]);
             }
