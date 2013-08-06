@@ -707,7 +707,7 @@ public class Entity implements RowsetListener {
 				Object.defineProperty(published, "inserting",  { get : function(){ return published.isInserting()}});
 				Object.defineProperty(published, "size",       { get : function(){ return published.getSize()}});
 				Object.defineProperty(published, "length",     { get : function(){ return published.getSize()}});
-				Object.defineProperty(published, "rowIndex",   { get : function(){ return published.getRowIndex()}});
+				Object.defineProperty(published, "rowIndex",   { get : function(){ return published.getRowIndex()}, set : function(aValue){ published.setRowIndex(aValue)}});
 				Object.defineProperty(published, "substitute", { get : function(){ return published.getSubstitute()}, set : function(aValue){ published.setSubstitute(aValue)}});
 				
 				Object.defineProperty(published, "md",         { get : function(){ return @com.eas.client.model.Entity::publishFieldsFacade(Lcom/bearsoft/rowset/metadata/Fields;Lcom/eas/client/model/Entity;)(aEntity.@com.eas.client.model.Entity::getFields()(), aEntity) }});
