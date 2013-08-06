@@ -14,7 +14,6 @@ import javax.swing.JComponent;
 import javax.swing.event.ChangeListener;
 import org.netbeans.api.project.FileOwnerQuery;
 import org.netbeans.api.project.Project;
-import org.netbeans.api.project.ProjectManager;
 import org.netbeans.spi.project.ui.templates.support.Templates;
 import org.openide.WizardDescriptor;
 import org.openide.filesystems.FileObject;
@@ -70,9 +69,9 @@ public class NewApplicationElementWizardIterator implements WizardDescriptor.Ins
         assert !str.isEmpty();
         String appElementName = StringUtils.replaceUnsupportedSymbols(str.trim());
         String s = appElementName;
-        int i = 1;
+        int i = 0;
         while (IndexerQuery.appElementId2File(project, s) != null) {
-            s = String.format("%s_%d", appElementName, i++); // NOI18N
+            s = String.format("%s_%d", appElementName, ++i); // NOI18N
         }
         return s;
     }

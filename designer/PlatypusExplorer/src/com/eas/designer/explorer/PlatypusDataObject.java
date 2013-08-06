@@ -106,19 +106,19 @@ public abstract class PlatypusDataObject extends MultiDataObject {
 
     @Override
     protected DataObject handleCopy(DataFolder df) throws IOException {
-        DataObject dob = super.handleCopy(df);
-        if (needAnnotationRename(dob)) {
-            String content = dob.getPrimaryFile().asText(PlatypusFiles.DEFAULT_ENCODING);
+        DataObject copied = super.handleCopy(df);
+        if (needAnnotationRename(copied)) {
+            String content = copied.getPrimaryFile().asText(PlatypusFiles.DEFAULT_ENCODING);
             String oldPlatypusId = PlatypusFilesSupport.getAnnotationValue(content, PlatypusFilesSupport.APP_ELEMENT_NAME_ANNOTATION);
             String newPlatypusId = NewApplicationElementWizardIterator.getNewValidAppElementName(getProject(), oldPlatypusId);
             content = PlatypusFilesSupport.replaceAnnotationValue(content, PlatypusFilesSupport.APP_ELEMENT_NAME_ANNOTATION, newPlatypusId);
-            try (OutputStream os = dob.getPrimaryFile().getOutputStream()) {
+            try (OutputStream os = copied.getPrimaryFile().getOutputStream()) {
                 os.write(content.getBytes(PlatypusFiles.DEFAULT_ENCODING));
                 os.flush();
             }
         } else {
             Logger.getLogger(PlatypusDataObject.class.getName()).log(Level.WARNING, "Copy error. Couldn't get primary file.");
         }
-        return dob;
+        return copied;
     }
 }
