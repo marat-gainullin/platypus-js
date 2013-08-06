@@ -65,6 +65,9 @@ public class PlatypusSplitContainer extends BorderLayoutContainer {
 			cp.setCollapsible(true);
 			cp.setHideCollapseTool(true);
 			cp.setHeaderVisible(false);
+			cp.setBorders(false);
+			cp.setBodyBorder(false);
+			cp.getBody().getStyle().setBackgroundColor("transparent");
 			cp.addResizeHandler(new ResizeHandler() {
 				@Override
 				public void onResize(ResizeEvent event) {
