@@ -151,6 +151,8 @@
     </pack>
   </packs>
   
+  <uninstaller name="uninstaller.jar" write="yes" path="$INSTALL_PATH/uninstaller"/>
+  
   <native name="ShellLink.dll" type="izpack"/>
   <native name="ShellLink_x64.dll" type="izpack"/>
 </installation>
