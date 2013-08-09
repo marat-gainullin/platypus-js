@@ -257,6 +257,9 @@ public class GxtGridFactory {
 		for (PlatypusColumnConfig<Row, Double> cc : nColumns)
 			if (cc.getEditor() != null)
 				editing.addEditor(cc, cc.getEditor());
+		for (PlatypusColumnConfig<Row, Boolean> cc : bColumns)
+			if (cc.getEditor() != null)
+				editing.addEditor(cc, cc.getEditor());
 		for (PlatypusColumnConfig<Row, Object> cc : oColumns)
 			if (cc.getEditor() != null)
 				editing.addEditor(cc, cc.getEditor());
@@ -606,7 +609,7 @@ public class GxtGridFactory {
 					CheckBoxCell cell = new CheckBoxCell();
 					cell.setReadOnly(readonly);
 					cc.setCell(cell);
-					// cc.setEditor(new PlatypusCheckBox(cell));
+					//cc.setEditor(new PlatypusCheckBox(cell));
 					column.setColumnConfig(cc);
 					leaves.add(cc);
 					bColumns.add(cc);

@@ -110,7 +110,7 @@ public class GxtEventsExecutor implements SelectHandler, MouseOutHandler, MouseO
 	}
 
 	public static GxtEventsExecutor createExecutor(Component aComponent, JavaScriptObject aEventsThis) throws Exception {
-		final GxtEventsExecutor executor = new GxtEventsExecutor(aEventsThis);
+		final GxtEventsExecutor executor = new GxtEventsExecutor(aComponent, aEventsThis);
 		aComponent.setData(HANDLER_DATA_NAME, executor);
 
 		if (aComponent instanceof HasSelectHandlers)
@@ -129,6 +129,17 @@ public class GxtEventsExecutor implements SelectHandler, MouseOutHandler, MouseO
 				}
 			});
 		}
+		/*
+		if (aComponent instanceof Field<?>)
+		{
+			FieldCell<?> fc = ((Field<?>)aComponent).getCell();
+			if(fc instanceof ValueBaseInputCell<?>){
+				ValueBaseInputCell<?> vc = (ValueBaseInputCell<?>)fc;
+				InputElement ie = vc.getInputElement(aComponent.getElement());
+				
+			}
+		}
+		*/
 
 		aComponent.addDomHandler(executor, MouseOverEvent.getType());
 		aComponent.addDomHandler(executor, MouseOutEvent.getType());
@@ -180,10 +191,12 @@ public class GxtEventsExecutor implements SelectHandler, MouseOutHandler, MouseO
 
 	private MOUSE mouseState = MOUSE.NULL;
 
+	private Component component;
 	private JavaScriptObject eventThis;
 
-	public GxtEventsExecutor(JavaScriptObject aEventThis) {
+	public GxtEventsExecutor(Component aComponent, JavaScriptObject aEventThis) {
 		super();
+		component = aComponent;
 		eventThis = aEventThis;
 	}
 

@@ -1,12 +1,16 @@
 package com.eas.client.gxtcontrols.wrappers.component;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.eas.client.gxtcontrols.ControlsUtils;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+import com.google.gwt.event.dom.client.HasAllKeyHandlers;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyDownHandler;
+import com.google.gwt.event.dom.client.KeyPressEvent;
+import com.google.gwt.event.dom.client.KeyPressHandler;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.HasValue;
@@ -15,17 +19,15 @@ import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.container.HorizontalLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.HorizontalLayoutContainer.HorizontalLayoutData;
 import com.sencha.gxt.widget.core.client.event.BlurEvent;
-import com.sencha.gxt.widget.core.client.event.BlurEvent.BlurHandler;
 import com.sencha.gxt.widget.core.client.event.FocusEvent;
-import com.sencha.gxt.widget.core.client.event.FocusEvent.FocusHandler;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
-import com.sencha.gxt.widget.core.client.event.SelectEvent.SelectHandler;
 import com.sencha.gxt.widget.core.client.form.AdapterField;
 import com.sencha.gxt.widget.core.client.form.Field;
 
-public abstract class PlatypusAdapterField<T> extends AdapterField<T> implements HasValue<T> {
+public abstract class PlatypusAdapterField<T> extends AdapterField<T> implements HasValue<T>, HasAllKeyHandlers {
 
-	protected class FocusManager implements FocusHandler, BlurHandler {
+	protected class FocusKeyboardManager implements FocusEvent.FocusHandler, BlurEvent.BlurHandler {
+
 		protected BlurEvent blurring;
 
 		@Override
@@ -34,29 +36,34 @@ public abstract class PlatypusAdapterField<T> extends AdapterField<T> implements
 			Scheduler.get().scheduleDeferred(new ScheduledCommand() {
 				@Override
 				public void execute() {
-					if (blurring == event)
+					if (event == blurring) {
 						PlatypusAdapterField.this.fireEvent(event);
+						cancelBlur();
+					}
 				}
 			});
 		}
 
 		@Override
-		public void onFocus(FocusEvent event) {
-			cancelBlur();
+		public void onFocus(final FocusEvent event) {
+			if (blurring == null) {
+				PlatypusAdapterField.this.fireEvent(event);
+			} else
+				cancelBlur();
 		}
 
-		public void cancelBlur() {
+		protected void cancelBlur() {
 			blurring = null;
 		}
+
 	}
 
 	protected HorizontalLayoutContainer complex;
-	protected GroupingHandlerRegistration focusHandlers = new GroupingHandlerRegistration();
-	protected GroupingHandlerRegistration blurHandlers = new GroupingHandlerRegistration();
 	protected HandlerRegistration selectHandlerRegistration;
 	protected Field<T> target;
 	protected TextButton selectButton;
-	protected FocusManager focusManager = new FocusManager();
+	protected FocusKeyboardManager focusKeyboardManager = new FocusKeyboardManager();
+	protected GroupingHandlerRegistration registered = new GroupingHandlerRegistration();
 	protected JavaScriptObject publishedField;
 	protected JavaScriptObject selectFunction;
 	protected boolean editable = true;
@@ -69,7 +76,7 @@ public abstract class PlatypusAdapterField<T> extends AdapterField<T> implements
 		target.setTabIndex(1);
 		complex = (HorizontalLayoutContainer) getWidget();
 		complex.add(target, new HorizontalLayoutData(1, 1));
-		reRegisterFocusManager();
+		reregisterFocusBlur();
 	}
 
 	public Field getJsTarget() {
@@ -133,7 +140,7 @@ public abstract class PlatypusAdapterField<T> extends AdapterField<T> implements
 				selectButton.setEnabled(editable);
 				selectButton.setTabIndex(2);
 				complex.add(selectButton, new HorizontalLayoutData(-1, 1));
-				selectHandlerRegistration = selectButton.addSelectHandler(new SelectHandler() {
+				selectHandlerRegistration = selectButton.addSelectHandler(new SelectEvent.SelectHandler() {
 
 					@Override
 					public void onSelect(SelectEvent event) {
@@ -153,18 +160,19 @@ public abstract class PlatypusAdapterField<T> extends AdapterField<T> implements
 					// complex.forceLayout();
 				}
 			}
-			reRegisterFocusManager();
+			reregisterFocusBlur();
 		}
 	}
 
-	protected void reRegisterFocusManager() {
-		focusHandlers.removeHandler();
-		blurHandlers.removeHandler();
-		focusHandlers.add(target.addFocusHandler(focusManager));
-		blurHandlers.add(target.addBlurHandler(focusManager));
+	protected void reregisterFocusBlur() {
+		registered.removeHandler();
+		if (target != null) {
+			registered.add(target.addFocusHandler(focusKeyboardManager));
+			registered.add(target.addBlurHandler(focusKeyboardManager));
+		}
 		if (selectButton != null) {
-			focusHandlers.add(selectButton.addFocusHandler(focusManager));
-			blurHandlers.add(selectButton.addBlurHandler(focusManager));
+			registered.add(selectButton.addFocusHandler(focusKeyboardManager));
+			registered.add(selectButton.addBlurHandler(focusKeyboardManager));
 		}
 	}
 
@@ -191,5 +199,20 @@ public abstract class PlatypusAdapterField<T> extends AdapterField<T> implements
 	@Override
 	public void setValue(T value, boolean fireEvents) {
 		target.setValue(value, fireEvents);
+	}
+
+	@Override
+	public HandlerRegistration addKeyDownHandler(KeyDownHandler handler) {
+		return addDomHandler(handler, KeyDownEvent.getType());
+	}
+
+	@Override
+	public HandlerRegistration addKeyPressHandler(KeyPressHandler handler) {
+		return addDomHandler(handler, KeyPressEvent.getType());
+	}
+
+	@Override
+	public HandlerRegistration addKeyUpHandler(KeyUpHandler handler) {
+		return addDomHandler(handler, KeyUpEvent.getType());
 	}
 }

@@ -52,6 +52,7 @@ import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.ui.HasValue;
+import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.xml.client.Element;
 import com.google.gwt.xml.client.Node;
@@ -72,7 +73,6 @@ import com.sencha.gxt.widget.core.client.button.SplitButton;
 import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.container.Container;
 import com.sencha.gxt.widget.core.client.container.HBoxLayoutContainer;
-import com.sencha.gxt.widget.core.client.container.HasLayout;
 import com.sencha.gxt.widget.core.client.container.ResizeContainer;
 import com.sencha.gxt.widget.core.client.container.VBoxLayoutContainer;
 import com.sencha.gxt.widget.core.client.form.FieldSet;
@@ -445,13 +445,15 @@ public class GxtControlsFactory {
 					Scheduler.get().scheduleDeferred(new ScheduledCommand() {
 						@Override
 						public void execute() {
-							if (btn.getParent() instanceof ResizeContainer) {
-								ResizeContainer c = (ResizeContainer) btn.getParent();
-								Size s = XElement.as(c.getElement().getParentElement()).getSize(true);
-								c.setPixelSize(s.getWidth() + 1, s.getHeight());
-								c.setPixelSize(s.getWidth() - 1, s.getHeight());
-							} else if (btn.getParent() instanceof HasLayout) {
-								((HasLayout) btn.getParent()).forceLayout();
+							if (btn.isAttached()) {
+								if (btn.getParent() instanceof ResizeContainer) {// fix for sencha ResizeContainer.onResize bug
+									ResizeContainer c = (ResizeContainer)btn.getParent();
+									Size s = XElement.as(c.getElement()).getSize(false);
+									c.setPixelSize(s.getWidth()-1, s.getHeight());
+									c.setPixelSize(s.getWidth()+1, s.getHeight());
+								} else if (btn.getParent() instanceof RequiresResize) {
+									((RequiresResize) btn.getParent()).onResize();
+								}
 							}
 						}
 					});
@@ -519,13 +521,15 @@ public class GxtControlsFactory {
 				@Override
 				public void run(ImageResource aResource) {
 					component.setImage(aResource);
-					if (component.getParent() instanceof ResizeContainer) {
-						ResizeContainer c = (ResizeContainer) component.getParent();
-						Size s = XElement.as(c.getElement().getParentElement()).getSize(true);
-						c.setPixelSize(s.getWidth() + 1, s.getHeight());
-						c.setPixelSize(s.getWidth() - 1, s.getHeight());
-					} else if (component.getParent() instanceof HasLayout) {
-						((HasLayout) component.getParent()).forceLayout();
+					if (component.isAttached()) {
+						if (component.getParent() instanceof ResizeContainer) {// fix for sencha ResizeContainer.onResize bug
+							ResizeContainer c = (ResizeContainer)component.getParent();
+							Size s = XElement.as(c.getElement()).getSize(false);
+							c.setPixelSize(s.getWidth()-1, s.getHeight());
+							c.setPixelSize(s.getWidth()+1, s.getHeight());
+						} else if (component.getParent() instanceof RequiresResize) {
+							((RequiresResize) component.getParent()).onResize();
+						}
 					}
 				}
 
@@ -835,8 +839,8 @@ public class GxtControlsFactory {
 		final String widgetName = aTag.getAttribute(NAME_ATTRIBUTE);
 		if (widgetName != null)
 			aComponent.setData(Form.PID_DATA_KEY, widgetName);
-		
-		if(widgetName != null && !widgetName.isEmpty())
+
+		if (widgetName != null && !widgetName.isEmpty())
 			aComponent.setId(widgetName);
 		else
 			aComponent.setId("pw-" + (++idCounter));

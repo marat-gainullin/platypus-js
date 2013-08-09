@@ -514,7 +514,8 @@ public class DatabasesClient implements DbClient {
             AppCache cache = getAppCache();
             ApplicationElement appElement = cache.get(aEntityId);
             if (appElement.getType() == ClientConstants.ET_QUERY) {
-                queries.clearCache(aEntityId);
+                //queries.clearCache(aEntityId);// Bad solution. There are may be some queries, using this query and so on.
+                queries.clearCache();// possible overhead, but this is better way than previous.
                 clearDbStatements(null);
             } else if (appElement.getType() == ClientConstants.ET_CONNECTION) {
                 clearDbStatements(aEntityId);
@@ -539,6 +540,7 @@ public class DatabasesClient implements DbClient {
         cache.removeTableMetadata(fullTableName);
         cache.removeTableIndexes(fullTableName);
         clearDbStatements(aDbId);
+        queries.clearCache();
     }
 
     /**

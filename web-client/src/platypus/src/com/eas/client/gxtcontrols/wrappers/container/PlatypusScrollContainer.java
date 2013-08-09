@@ -7,6 +7,7 @@ import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.Widget;
+import com.sencha.gxt.core.client.dom.DefaultScrollSupport;
 import com.sencha.gxt.core.client.dom.ScrollSupport.ScrollMode;
 import com.sencha.gxt.widget.core.client.Component;
 import com.sencha.gxt.widget.core.client.container.FlowLayoutContainer;
@@ -75,19 +76,41 @@ public class PlatypusScrollContainer extends FlowLayoutContainer {
 
 	protected void applyPolicies() {
 		if (isViewGreater() && !isTextArea(view)) {
-			if (horizontalScrollBarPolicy == HORIZONTAL_SCROLLBAR_ALWAYS && verticalScrollBarPolicy == VERTICAL_SCROLLBAR_ALWAYS)
-				setScrollMode(ScrollMode.ALWAYS);
-			else if (horizontalScrollBarPolicy == HORIZONTAL_SCROLLBAR_NEVER && verticalScrollBarPolicy == VERTICAL_SCROLLBAR_NEVER)
-				setScrollMode(ScrollMode.NONE);
-			else if (horizontalScrollBarPolicy == HORIZONTAL_SCROLLBAR_AS_NEEDED && verticalScrollBarPolicy == VERTICAL_SCROLLBAR_AS_NEEDED)
-				setScrollMode(ScrollMode.AUTO);
-			else {
-				if (horizontalScrollBarPolicy == HORIZONTAL_SCROLLBAR_AS_NEEDED)
-					setScrollMode(ScrollMode.AUTOX);
-				if (verticalScrollBarPolicy == VERTICAL_SCROLLBAR_AS_NEEDED)
-					setScrollMode(ScrollMode.AUTOY);
-			}
+			setScrollSupport(new DefaultScrollSupport(getElement()) {
+				@Override
+				public void setScrollMode(ScrollMode scrollMode) {
+					super.setScrollMode(scrollMode);
+					switch (horizontalScrollBarPolicy) {
+					case HORIZONTAL_SCROLLBAR_ALWAYS:
+						getElement().getStyle().setProperty("overflowX", "scroll");
+						break;
+					case HORIZONTAL_SCROLLBAR_AS_NEEDED:
+						getElement().getStyle().setProperty("overflowX", "auto");
+						break;
+					case HORIZONTAL_SCROLLBAR_NEVER:
+						getElement().getStyle().setProperty("overflowX", "hidden");
+						break;
+					default:
+						getElement().getStyle().setProperty("overflowX", "auto");
+					}
+					switch (verticalScrollBarPolicy) {
+					case VERTICAL_SCROLLBAR_ALWAYS:
+						getElement().getStyle().setProperty("overflowY", "scroll");
+						break;
+					case VERTICAL_SCROLLBAR_AS_NEEDED:
+						getElement().getStyle().setProperty("overflowY", "auto");
+						break;
+					case VERTICAL_SCROLLBAR_NEVER:
+						getElement().getStyle().setProperty("overflowY", "hidden");
+						break;
+					default:
+						getElement().getStyle().setProperty("overflowY", "auto");
+					}
+				}
+			});
+			setScrollMode(ScrollMode.AUTO);
 		} else {
+			setScrollSupport(new DefaultScrollSupport(getElement()));
 			setScrollMode(ScrollMode.NONE);
 			if (isTextArea(view)) {
 				// apply scroll policy to textarea (somehow)
