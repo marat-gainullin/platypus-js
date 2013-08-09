@@ -12,6 +12,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.ColumnData;
+import com.sencha.gxt.widget.core.client.grid.ColumnModel;
 import com.sencha.gxt.widget.core.client.grid.GridView;
 import com.sencha.gxt.widget.core.client.grid.RowExpander;
 
@@ -154,5 +155,37 @@ public class PlatypusGridView extends GridView<Row> {
 		}
 		// end row loop
 		return buf.toSafeHtml();
+	}
+
+	public static void fitColumnsToSpace(ColumnModel<Row> cm, int aSpaceWidth) {
+		int colsWidth = cm.getTotalWidth();
+		int freeSpace = aSpaceWidth - colsWidth;
+		int fixedSpace = 0;
+		List<ColumnConfig<Row, ?>> columns = cm.getColumns();
+		for (ColumnConfig<Row, ?> cc : columns) {
+			if (cc.isFixed()) {
+				fixedSpace += cc.getWidth();
+			}
+		}
+		colsWidth -= fixedSpace;
+		for (int i = 0; i < columns.size(); i++) {
+			ColumnConfig<Row, ?> cc = columns.get(i);
+			if (!cc.isFixed()) {
+				float coef = (float) cc.getWidth() / (float) colsWidth;
+				int targetWidth = cc.getWidth() + (int) (coef * (float) freeSpace);
+				if (cc instanceof PlatypusColumnConfig<?, ?>) {
+					PlatypusColumnConfig<?, ?> pcc = (PlatypusColumnConfig<?, ?>) cc;
+					if (targetWidth < pcc.getDesignedWidth())
+						targetWidth = pcc.getDesignedWidth();
+				}
+				cc.setWidth(targetWidth);
+			}
+		}
+	}
+
+	public void fitColumnsToSpace(int aSpaceWidth) {
+		fitColumnsToSpace(cm, aSpaceWidth);
+		updateAllColumnWidths();
+		header.refresh();
 	}
 }

@@ -7,15 +7,18 @@ import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
 
 public class PlatypusColumnConfig<M, N> extends ColumnConfig<M, N> {
 
+	protected int designedWidth;
+	protected boolean fixed;
 	protected boolean readonly;
 	protected IsField<N> editor;
 
 	/**
 	 * Creates a new column config.
-	 */
+	 *
 	public PlatypusColumnConfig(ValueProvider<? super M, N> valueProvider) {
 		super(valueProvider);
 	}
+	*/
 
 	/**
 	 * Creates a new column config.
@@ -27,6 +30,7 @@ public class PlatypusColumnConfig<M, N> extends ColumnConfig<M, N> {
 	 */
 	public PlatypusColumnConfig(ValueProvider<? super M, N> valueProvider, int width) {
 		super(valueProvider, width);
+		designedWidth = width;
 	}
 
 	/**
@@ -41,11 +45,14 @@ public class PlatypusColumnConfig<M, N> extends ColumnConfig<M, N> {
 	 */
 	public PlatypusColumnConfig(ValueProvider<? super M, N> valueProvider, int width, SafeHtml header) {
 		super(valueProvider, width, header);
+		designedWidth = width;
 	}
 
-	public PlatypusColumnConfig(ValueProvider<? super M, N> valueProvider, int width, SafeHtml header, boolean aReadonly) {
+	public PlatypusColumnConfig(ValueProvider<? super M, N> valueProvider, int width, SafeHtml header, boolean aReadonly, boolean aFixed) {
 		this(valueProvider, width, header);
 		readonly = aReadonly;
+		designedWidth = width;
+		setFixed(aFixed);
 	}
 	
 	/**
@@ -60,11 +67,13 @@ public class PlatypusColumnConfig<M, N> extends ColumnConfig<M, N> {
 	 */
 	public PlatypusColumnConfig(ValueProvider<? super M, N> valueProvider, int width, String header) {
 		super(valueProvider, width, header);
+		designedWidth = width;
 	}
 
 	public PlatypusColumnConfig(ValueProvider<? super M, N> valueProvider, int width, String header, boolean aReadonly) {
 		this(valueProvider, width, header);
 		readonly = aReadonly;
+		designedWidth = width;
 	}
 
 	public IsField<N> getEditor() {
@@ -81,5 +90,9 @@ public class PlatypusColumnConfig<M, N> extends ColumnConfig<M, N> {
 	
 	public void setReadonly(boolean aValue) {
 	    readonly = aValue;
+    }
+
+	public int getDesignedWidth() {
+	    return designedWidth;
     }
 }

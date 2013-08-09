@@ -29,8 +29,10 @@ import com.eas.client.model.Entity;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sencha.gxt.core.client.IdentityValueProvider;
 import com.sencha.gxt.data.client.loader.RpcProxy;
 import com.sencha.gxt.data.shared.TreeStore;
+import com.sencha.gxt.data.shared.event.StoreRecordChangeEvent;
 import com.sencha.gxt.data.shared.event.StoreUpdateEvent;
 import com.sencha.gxt.data.shared.loader.ChildTreeStoreBinding;
 import com.sencha.gxt.data.shared.loader.TreeLoader;
@@ -164,7 +166,7 @@ public class RowsTreeStoreFiller extends RowsetAdapter implements PropertyChange
 			if (evt.getOldValue() == null && evt.getNewValue() != null) {
 				rowsetError = (String) evt.getNewValue();
 				checkIfRootsWithError();
-				if(rowset == null)
+				if (rowset == null)
 					loader.load();
 			}
 		}
@@ -305,10 +307,6 @@ public class RowsTreeStoreFiller extends RowsetAdapter implements PropertyChange
 		} catch (Exception ex) {
 			Logger.getLogger(RowsTreeStoreFiller.class.getName()).log(Level.SEVERE, ex.getMessage());
 		}
-	}
-
-	@Override
-	public void rowsetScrolled(RowsetScrollEvent event) {
 	}
 
 	@Override

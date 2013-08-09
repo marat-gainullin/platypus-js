@@ -7,6 +7,7 @@ package com.eas.client.forms.api;
 import com.eas.client.forms.api.containers.BoxPane;
 import com.eas.client.forms.api.containers.FlowPane;
 import com.eas.client.forms.api.menu.PopupMenu;
+import com.eas.client.scripts.ScriptColor;
 import com.eas.controls.events.ControlEventsIProxy;
 import com.eas.controls.layouts.margin.MarginLayout;
 import com.eas.gui.CascadedStyle;
@@ -71,8 +72,8 @@ public abstract class Component<D extends JComponent> {
     }
 
     @ScriptFunction(jsDocText = "The background color of this component.")
-    public Color getBackground() {
-        return delegate.getBackground();
+    public ScriptColor getBackground() {
+        return new ScriptColor(delegate.getBackground());
     }
 
     @ScriptFunction
@@ -82,7 +83,7 @@ public abstract class Component<D extends JComponent> {
 
     @ScriptFunction(jsDocText = "The foreground color of this component.")
     public Color getForeground() {
-        return delegate.getForeground();
+        return new ScriptColor(delegate.getForeground());
     }
 
     @ScriptFunction
