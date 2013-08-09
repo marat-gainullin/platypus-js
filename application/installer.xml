@@ -10,6 +10,7 @@
     </authors>
     <url>http://www.altsoft.biz/</url>
 	<run-privileged uninstaller="no" condition="izpack.windowsinstall"/>
+	<uninstaller name="uninstaller.jar" write="yes" path="$INSTALL_PATH/uninstall"/>
   </info>
 
   <guiprefs width="640" height="480" resizable="no"/>
