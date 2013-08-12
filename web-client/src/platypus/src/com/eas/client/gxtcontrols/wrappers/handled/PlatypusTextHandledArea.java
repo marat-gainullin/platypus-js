@@ -1,7 +1,10 @@
 package com.eas.client.gxtcontrols.wrappers.handled;
 
+import com.eas.client.gxtcontrols.ControlsUtils;
 import com.eas.client.gxtcontrols.model.ModelElementRef;
 import com.eas.client.gxtcontrols.published.PublishedCell;
+import com.eas.client.gxtcontrols.wrappers.component.PlatypusAdapterField;
+import com.eas.client.gxtcontrols.wrappers.component.PlatypusAdapterStandaloneField;
 import com.eas.client.gxtcontrols.wrappers.component.PlatypusTextArea;
 import com.google.gwt.core.client.JavaScriptObject;
 
@@ -47,6 +50,12 @@ public class PlatypusTextHandledArea extends PlatypusTextArea {
 		PublishedCell lastPublishedCell = textCell.consumePublishedCell();
 		if (lastPublishedCell != null) {
 			lastPublishedCell.styleToElement(getInputEl());
+		} else {
+			// TODO: refactor to onTargetRedraw event
+			if (getParent() != null && getParent().getParent() instanceof PlatypusAdapterStandaloneField<?>) {
+				PlatypusAdapterField<?> adapter = (PlatypusAdapterStandaloneField<?>) getParent().getParent();
+				ControlsUtils.reapplyStyle(adapter);
+			}
 		}
 	}
 }

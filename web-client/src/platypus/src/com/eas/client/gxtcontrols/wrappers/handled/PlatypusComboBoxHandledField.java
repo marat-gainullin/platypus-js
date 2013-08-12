@@ -93,15 +93,18 @@ public class PlatypusComboBoxHandledField extends PlatypusComboBox {
 		if (modelElement != null && cellFunction != null && modelElement.entity.getRowset() != null) {
 			try {
 				JavaScriptObject eventThis = modelElement.entity.getModel().getModule();
+				// TODO: refactor to onTargetRedraw event
 				if (getParent() != null && getParent().getParent() instanceof PlatypusAdapterStandaloneField<?>) {
 					PlatypusAdapterField<?> adapter = (PlatypusAdapterStandaloneField<?>) getParent().getParent();
 					eventThis = adapter.getPublishedField();
-				}
-				Row currentRow = modelElement.entity.getRowset().getCurrentRow();
-				Object currentRowValue = currentRow.getColumnObject(modelElement.getColIndex());
-				PublishedCell cellToRender = ControlsUtils.calcStandalonePublishedCell(eventThis, cellFunction, currentRow, labelProvider.getLabel(currentRowValue), modelElement);
-				if (cellToRender != null) {
-					cellToRender.styleToElement(getInputEl());
+					Row currentRow = modelElement.entity.getRowset().getCurrentRow();
+					Object currentRowValue = currentRow.getColumnObject(modelElement.getColIndex());
+					PublishedCell cellToRender = ControlsUtils.calcStandalonePublishedCell(eventThis, cellFunction, currentRow, labelProvider.getLabel(currentRowValue), modelElement);
+					if (cellToRender != null) {
+						cellToRender.styleToElement(getInputEl());
+					} else {
+						ControlsUtils.reapplyStyle(adapter);
+					}
 				}
 			} catch (Exception ex) {
 				Logger.getLogger(PlatypusComboBoxHandledField.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);

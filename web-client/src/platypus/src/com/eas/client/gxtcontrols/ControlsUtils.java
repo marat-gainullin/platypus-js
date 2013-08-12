@@ -149,21 +149,21 @@ public class ControlsUtils {
 			if (aInput.startsWith("#")) {
 				Integer intval = Integer.decode(aInput);
 				int i = intval.intValue();
-				return PublishedColor.create((i >> 16) & 0xFF, (i >> 8) & 0xFF, i & 0xFF, 1);
+				return PublishedColor.create((i >> 16) & 0xFF, (i >> 8) & 0xFF, i & 0xFF, 0xFF);
 			} else {
 				MatchResult m = rgbPattern.exec(aInput);
 				if (m != null) {
 					return PublishedColor.create(Integer.valueOf(m.getGroup(1)), // r
 					        Integer.valueOf(m.getGroup(2)), // g
 					        Integer.valueOf(m.getGroup(3)), // b
-					        1); // a
+					        0xFF); // a
 				} else {
 					MatchResult m1 = rgbaPattern.exec(aInput);
 					if (m1 != null) {
 						return PublishedColor.create(Integer.valueOf(m1.getGroup(1)), // r
 						        Integer.valueOf(m1.getGroup(2)), // g
 						        Integer.valueOf(m1.getGroup(3)), // b
-						        Float.valueOf(m1.getGroup(3))); // a
+						        Math.round(Float.valueOf(m1.getGroup(3))*255)); // a
 					}
 				}
 			}

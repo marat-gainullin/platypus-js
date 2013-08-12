@@ -17,8 +17,9 @@ import com.bearsoft.rowset.events.RowsetScrollEvent;
 import com.bearsoft.rowset.events.RowsetSortEvent;
 import com.eas.client.beans.PropertyChangeEvent;
 import com.eas.client.gxtcontrols.converters.RowValueConverter;
-import com.eas.client.model.Entity;
 import com.eas.client.model.Model;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -89,8 +90,18 @@ public class LazyControlBounder<T> extends LazyModelElementRef implements ValueC
 	public void onValueChange(ValueChangeEvent<T> event) {
 		if (entity.getRowset() != null) {
 			try {
-				if (!entity.getRowset().isBeforeFirst() && !entity.getRowset().isAfterLast())
+				if (!entity.getRowset().isBeforeFirst() && !entity.getRowset().isAfterLast()) {
+					Object prevAlue = entity.getRowset().getObject(getColIndex());
 					entity.getRowset().updateObject(getColIndex(), event.getValue());
+					Object afterValue = entity.getRowset().getObject(getColIndex());
+					if (prevAlue == null ? afterValue == null : prevAlue.equals(afterValue)) {
+						Scheduler.get().scheduleFinally(new ScheduledCommand() {
+							public void execute() {
+								setValueToControl();
+							}
+						});
+					}
+				}
 			} catch (Exception ex) {
 				Logger.getLogger(LazyControlBounder.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
 			}
@@ -106,7 +117,7 @@ public class LazyControlBounder<T> extends LazyModelElementRef implements ValueC
 					value = eRowset.getObject(getColIndex());
 					cellComponent.setValue(converter.convert(value), false, true);
 				}
-				if(value == null){
+				if (value == null) {
 					value = entity.getSubstituteRowsetObject(fieldName);
 					cellComponent.setValue(converter.convert(value), false, true);
 				}

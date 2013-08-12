@@ -17,6 +17,8 @@ import com.bearsoft.rowset.metadata.Parameters;
 import com.bearsoft.rowset.resourcepool.BearDatabaseConnection;
 import com.bearsoft.rowset.utils.RowsetUtils;
 import java.sql.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.sql.DataSource;
 
 /**
@@ -30,6 +32,7 @@ import javax.sql.DataSource;
  */
 public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
 
+    protected static final Logger queriesLogger = Logger.getLogger(JdbcFlowProvider.class.getName());
     protected DataSource dataSource;
     protected Converter converter;
     protected Fields expectedFields;
@@ -179,6 +182,9 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
                                     }
                                 }
 
+                                if (queriesLogger.isLoggable(Level.FINE)) {
+                                    queriesLogger.log(Level.FINE, "Executing sql: {0}, with parameters ({1}).", new Object[]{sqlClause, aParams.getParametersCount()});
+                                }
                                 ResultSet rs = null;
                                 if (procedure) {
                                     assert stmt instanceof CallableStatement;

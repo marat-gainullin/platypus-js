@@ -1,7 +1,6 @@
 package com.eas.client.gxtcontrols.model;
 
 import com.bearsoft.rowset.metadata.Field;
-import com.eas.client.Utils;
 import com.eas.client.gxtcontrols.converters.BooleanRowValueConverter;
 import com.eas.client.gxtcontrols.wrappers.component.PlatypusAdapterStandaloneField;
 import com.eas.client.gxtcontrols.wrappers.handled.PlatypusCheckBoxHandledField;

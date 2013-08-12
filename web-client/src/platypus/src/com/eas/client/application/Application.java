@@ -606,19 +606,26 @@ public class Application {
 		$wnd.Icon = new _Icons();
 		$wnd.Icons = $wnd.Icon;
 		function _Color(aRed, aGreen, aBlue, aAlpha){
-			var _red = 0, _green = 0, _blue = 0, _alpha = 1;
+			var _red = 0, _green = 0, _blue = 0, _alpha = 0xff;
 			if(arguments.length == 1){
 				var _color = @com.eas.client.gxtcontrols.ControlsUtils::parseColor(Ljava/lang/String;)(aRed + '');
-				_red = _color.red;
-				_green = _color.green;
-				_blue = _color.blue;
+				if(_color){
+					_red = _color.red;
+					_green = _color.green;
+					_blue = _color.blue;
+				}else
+					throw "String like \"#cfcfcf\" is expected.";
+			}else if(arguments.length >= 3){
+				if(aRed)
+					_red = aRed;
+				if(aGreen)
+					_green = aGreen;
+				if(aBlue)
+					_blue = aBlue;
+				if(aAlpha)
+					_alpha = aAlpha;
 			}else{
-				if(!aAlpha)
-					aAlpha = 1;
-				_red = aRed;
-				_green = aGreen;
-				_blue = aBlue;
-				_alpha = aAlpha;
+				throw "String like \"#cfcfcf\" or three color components with optional alpha is expected.";
 			}
 			var _self = this;
 			Object.defineProperty(_self, "red", { get:function(){ return _red;} });
@@ -626,7 +633,7 @@ public class Application {
 			Object.defineProperty(_self, "blue", { get:function(){ return _blue;} });
 			Object.defineProperty(_self, "alpha", { get:function(){ return _alpha;} });
 			_self.toStyled = function(){
-				return "rgba("+_self.red+","+_self.green+","+_self.blue+","+_self.alpha+")"; 
+				return "rgba("+_self.red+","+_self.green+","+_self.blue+","+_self.alpha/255.0+")"; 
 			}
 			_self.toString = function(){
 				var sred = (new Number(_self.red)).toString(16);

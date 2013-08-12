@@ -33,7 +33,7 @@ public class StatementsGenerator implements ChangeVisitor {
      */
     public static class StatementsLogEntry {
 
-        protected static Logger queriesLogger = Logger.getLogger(StatementsLogEntry.class.getName());
+        protected static final Logger queriesLogger = Logger.getLogger(StatementsLogEntry.class.getName());
         protected Converter converter;
         public String clause;
         public List<Change.Value> parameters = new ArrayList<>();
@@ -51,8 +51,8 @@ public class StatementsGenerator implements ChangeVisitor {
                         Change.Value v = parameters.get(i - 1);
                         converter.convert2JdbcAndAssign(v.value, v.type, aConnection, i, stmt);
                     }
-                    if (queriesLogger.isLoggable(Level.FINER)) {
-                        queriesLogger.log(Level.FINER, "Executing sql: {0}, with parameters ({1}).", new Object[]{clause, parameters.size()});
+                    if (queriesLogger.isLoggable(Level.FINE)) {
+                        queriesLogger.log(Level.FINE, "Executing sql: {0}, with parameters ({1}).", new Object[]{clause, parameters.size()});
                     }
                     return stmt.executeUpdate();
                 }

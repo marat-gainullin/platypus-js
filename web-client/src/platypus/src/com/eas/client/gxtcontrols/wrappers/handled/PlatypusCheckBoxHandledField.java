@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 import com.eas.client.gxtcontrols.ControlsUtils;
 import com.eas.client.gxtcontrols.model.ModelElementRef;
 import com.eas.client.gxtcontrols.published.PublishedCell;
+import com.eas.client.gxtcontrols.published.PublishedComponent;
 import com.eas.client.gxtcontrols.wrappers.component.PlatypusAdapterField;
 import com.eas.client.gxtcontrols.wrappers.component.PlatypusAdapterStandaloneField;
 import com.eas.client.gxtcontrols.wrappers.component.PlatypusCheckBox;
@@ -52,14 +53,17 @@ public class PlatypusCheckBoxHandledField extends PlatypusCheckBox {
 		super.onRedraw();
 		try {
 			JavaScriptObject eventThis = modelElement != null ? modelElement.entity.getModel().getModule() : null;
+			// TODO: refactor to onTargetRedraw event
 			if (getParent() != null && getParent().getParent() instanceof PlatypusAdapterStandaloneField<?>) {
-				PlatypusAdapterField<?> adapter = (PlatypusAdapterStandaloneField<?>) getParent().getParent();
+				PlatypusAdapterStandaloneField<?> adapter = (PlatypusAdapterStandaloneField<?>) getParent().getParent();
 				eventThis = adapter.getPublishedField();
-			}
-			PublishedCell cellToRender = modelElement != null && cellFunction != null ? ControlsUtils.calcStandalonePublishedCell(eventThis, cellFunction, modelElement.entity.getRowset()
-			        .getCurrentRow(), null, modelElement) : null;
-			if (cellToRender != null) {
-				cellToRender.styleToElement(getElement());
+				PublishedCell cellToRender = modelElement != null && cellFunction != null ? ControlsUtils.calcStandalonePublishedCell(eventThis, cellFunction, modelElement.entity.getRowset()
+				        .getCurrentRow(), null, modelElement) : null;
+				if (cellToRender != null) {
+					cellToRender.styleToElement(getElement());
+				} else {
+					ControlsUtils.reapplyStyle(adapter);
+				}
 			}
 		} catch (Exception ex) {
 			Logger.getLogger(PlatypusCheckBoxHandledField.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);

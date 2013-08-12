@@ -24,7 +24,7 @@ public class LazyModelElementRef extends ModelElementRef implements PropertyChan
 	public LazyModelElementRef(Model aModel, String aEntityId, String aFieldName, boolean aIsField) throws Exception {
 		super(aModel, aEntityId, aFieldName, aIsField);
 	}
-	
+
 	@Override
 	protected void tryResolveField() throws Exception {
 		if (entity instanceof ParametersEntity) {
@@ -33,8 +33,10 @@ public class LazyModelElementRef extends ModelElementRef implements PropertyChan
 			rowsetPresent = true;
 		} else {
 			try {
-				resolveField();
-				entity.getChangeSupport().addPropertyChangeListener(this);
+				if (entity != null) {
+					resolveField();
+					entity.getChangeSupport().addPropertyChangeListener(this);
+				}
 			} catch (Exception e) {
 				Logger.getLogger(LazyControlBounder.class.getName()).log(Level.SEVERE, e.getMessage());
 			}
