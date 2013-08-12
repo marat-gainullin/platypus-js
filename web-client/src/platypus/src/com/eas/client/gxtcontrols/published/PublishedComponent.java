@@ -62,4 +62,13 @@ public class PublishedComponent extends JavaScriptObject {
 	public final native void setOpaque(boolean aValue)/*-{
 		this.opaque = aValue;
 	}-*/;
+	
+	public final native String getError()/*-{
+		return this.error;
+	}-*/;
+
+	public final native void setError(String aValue)/*-{
+		this.error = aValue;
+	}-*/;
+
 }
