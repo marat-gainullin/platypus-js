@@ -606,16 +606,39 @@ public class Application {
 		$wnd.Icon = new _Icons();
 		$wnd.Icons = $wnd.Icon;
 		function _Color(aRed, aGreen, aBlue, aAlpha){
-			if(aAlpha == undefined)
-				aAlpha = 1;
+			var _red = 0, _green = 0, _blue = 0, _alpha = 1;
+			if(arguments.length == 1){
+				var _color = @com.eas.client.gxtcontrols.ControlsUtils::parseColor(Ljava/lang/String;)(aRed + '');
+				_red = _color.red;
+				_green = _color.green;
+				_blue = _color.blue;
+			}else{
+				if(!aAlpha)
+					aAlpha = 1;
+				_red = aRed;
+				_green = aGreen;
+				_blue = aBlue;
+				_alpha = aAlpha;
+			}
 			var _self = this;
-			Object.defineProperty(_self, "red", { get:function(){ return aRed;} });
-			Object.defineProperty(_self, "green", { get:function(){ return aGreen;} });
-			Object.defineProperty(_self, "blue", { get:function(){ return aBlue;} });
-			Object.defineProperty(_self, "alpha", { get:function(){ return aAlpha;} });
-			_self.toStyled = function()
-			{
+			Object.defineProperty(_self, "red", { get:function(){ return _red;} });
+			Object.defineProperty(_self, "green", { get:function(){ return _green;} });
+			Object.defineProperty(_self, "blue", { get:function(){ return _blue;} });
+			Object.defineProperty(_self, "alpha", { get:function(){ return _alpha;} });
+			_self.toStyled = function(){
 				return "rgba("+_self.red+","+_self.green+","+_self.blue+","+_self.alpha+")"; 
+			}
+			_self.toString = function(){
+				var sred = (new Number(_self.red)).toString(16);
+				if(sred.length == 1)
+					sred = "0"+sred;
+				var sgreen = (new Number(_self.green)).toString(16);
+				if(sgreen.length == 1)
+					sgreen = "0"+sgreen;
+				var sblue = (new Number(_self.blue)).toString(16);
+				if(sblue.length == 1)
+					sblue = "0"+sblue;
+				return "#"+sred+sgreen+sblue;
 			}
 		}; 
 		$wnd.Color = _Color;

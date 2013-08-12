@@ -1,5 +1,6 @@
 package com.eas.client.gxtcontrols.grid.fillers;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
@@ -24,7 +25,9 @@ import com.eas.client.model.Entity;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+import com.sencha.gxt.core.client.IdentityValueProvider;
 import com.sencha.gxt.data.shared.ListStore;
+import com.sencha.gxt.data.shared.event.StoreRecordChangeEvent;
 import com.sencha.gxt.data.shared.event.StoreUpdateEvent;
 import com.sencha.gxt.data.shared.loader.DataProxy;
 import com.sencha.gxt.data.shared.loader.ListLoadConfig;
@@ -192,7 +195,8 @@ public class RowsListStoreFiller extends RowsetAdapter implements PropertyChange
 	}
 
 	public void loaded() {
-		// no-op here because of rowset's and self generated events about rowset's data completeness.
+		// no-op here because of rowset's and self generated events about
+		// rowset's data completeness.
 	}
 
 	@Override
@@ -225,10 +229,6 @@ public class RowsListStoreFiller extends RowsetAdapter implements PropertyChange
 		} catch (Exception ex) {
 			Logger.getLogger(RowsListStoreFiller.class.getName()).log(Level.SEVERE, ex.getMessage());
 		}
-	}
-
-	@Override
-	public void rowsetScrolled(RowsetScrollEvent event) {
 	}
 
 	@Override

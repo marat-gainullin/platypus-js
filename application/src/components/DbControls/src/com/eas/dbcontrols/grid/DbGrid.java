@@ -352,6 +352,7 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                         tCol.setMaxWidth(group.getMaxWidth());
                         tCol.setPreferredWidth(dCol.getWidth());
                         tCol.setWidth(dCol.getWidth());
+                        tCol.setResizable(!dCol.isFixed());
                         if (dCol.getControlInfo() != null) {
                             TableCellRenderer cellRenderer = dCol.createCellRenderer();
                             tCol.setCellRenderer(cellRenderer);

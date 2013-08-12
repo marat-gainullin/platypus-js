@@ -7,14 +7,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.eas.client.gxtcontrols.grid.rowmarker.RowMarker;
+import com.google.gwt.cell.client.AbstractCell;
+import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.Event;
+import com.sencha.gxt.core.client.IdentityValueProvider;
 import com.sencha.gxt.data.shared.event.StoreClearEvent;
+import com.sencha.gxt.data.shared.event.StoreRecordChangeEvent;
 import com.sencha.gxt.widget.core.client.event.CellMouseDownEvent;
 import com.sencha.gxt.widget.core.client.event.CellMouseDownEvent.CellMouseDownHandler;
 import com.sencha.gxt.widget.core.client.event.RowClickEvent;
@@ -22,8 +28,11 @@ import com.sencha.gxt.widget.core.client.event.RowMouseDownEvent;
 import com.sencha.gxt.widget.core.client.event.ViewReadyEvent;
 import com.sencha.gxt.widget.core.client.event.ViewReadyEvent.ViewReadyHandler;
 import com.sencha.gxt.widget.core.client.event.XEvent;
+import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.Grid;
 import com.sencha.gxt.widget.core.client.grid.GridSelectionModel;
+import com.sencha.gxt.widget.core.client.grid.RowExpander;
+import com.sencha.gxt.widget.core.client.grid.RowNumberer;
 import com.sencha.gxt.widget.core.client.selection.CellSelection;
 import com.sencha.gxt.widget.core.client.selection.CellSelectionChangedEvent;
 import com.sencha.gxt.widget.core.client.selection.CellSelectionChangedEvent.CellSelectionChangedHandler;
@@ -50,7 +59,7 @@ public class PlatypusCellSelectionModel<M> extends GridSelectionModel<M> impleme
 					// index may change with tree grid on expand / collapse
 					// ask store for current row index
 					int row = listStore.indexOf(cell.getModel());
-					cellSelected(row, cell.getCell());
+					cellSelected(row, cell.getCell(), true);
 				}
 				fireCellsSelectionChanged();
 			}
@@ -64,6 +73,16 @@ public class PlatypusCellSelectionModel<M> extends GridSelectionModel<M> impleme
 	protected int anchorRow;
 	protected int anchorCell;
 	protected boolean updateAnchor = true;
+	protected ColumnConfig<M, M> column;
+
+	public PlatypusCellSelectionModel(ColumnConfig<M, M> aFieldColumn) {
+		super();
+		column = aFieldColumn;
+	}
+
+	public ColumnConfig<M, M> getColumn() {
+		return column;
+	}
 
 	@Override
 	public void bindGrid(Grid<M> grid) {
@@ -75,10 +94,6 @@ public class PlatypusCellSelectionModel<M> extends GridSelectionModel<M> impleme
 	}
 
 	@Override
-	protected void handleRowClick(RowClickEvent event) {
-	}
-
-	@Override
 	protected void handleRowMouseDown(RowMouseDownEvent event) {
 	}
 
@@ -87,37 +102,47 @@ public class PlatypusCellSelectionModel<M> extends GridSelectionModel<M> impleme
 		if (e.getButton() == Event.BUTTON_LEFT && !isLocked()) {
 			int row = event.getRowIndex();
 			int cell = event.getCellIndex();
-			if (e.getCtrlOrMetaKey()) {
-				if (isCellSelected(row, cell)) {
-					deselectCell(row, cell);
-				} else {
-					selectCell(row, cell);
+
+			ColumnConfig<M, ?> c = grid.getColumnModel().getColumn(cell);
+			if (c == column) {
+				final M model = listStore.get(row);
+				if (model != null) {
+					select(model, false);
 				}
 			} else {
-				deselectAll();
-				if (e.getShiftKey()) {
-					int rowStart = Math.min(row, anchorRow);
-					int rowEnd = Math.max(row, anchorRow);
-					int cellStart = Math.min(cell, anchorCell);
-					int cellEnd = Math.max(cell, anchorCell);
-					updateAnchor = false;
-					try {
-						for (int i = rowStart; i <= rowEnd; i++) {
-							for (int j = cellStart; j <= cellEnd; j++) {
-								selectCell(i, j);
-							}
-						}
-					} finally {
-						updateAnchor = true;
+
+				if (e.getCtrlOrMetaKey()) {
+					if (isCellSelected(row, cell)) {
+						deselectCell(row, cell);
+					} else {
+						selectCell(row, cell);
 					}
-				} else
-					selectCell(row, cell);
+				} else {
+					deselectAll();
+					if (e.getShiftKey()) {
+						int rowStart = Math.min(row, anchorRow);
+						int rowEnd = Math.max(row, anchorRow);
+						int cellStart = Math.min(cell, anchorCell);
+						int cellEnd = Math.max(cell, anchorCell);
+						updateAnchor = false;
+						try {
+							for (int i = rowStart; i <= rowEnd; i++) {
+								for (int j = cellStart; j <= cellEnd; j++) {
+									selectCell(i, j);
+								}
+							}
+						} finally {
+							updateAnchor = true;
+						}
+					} else
+						selectCell(row, cell);
+				}
+				if (!e.getShiftKey()) {
+					anchorRow = row;
+					anchorCell = cell;
+				}
+				fireCellsSelectionChanged();
 			}
-			if (!e.getShiftKey()) {
-				anchorRow = row;
-				anchorCell = cell;
-			}
-			fireCellsSelectionChanged();
 		}
 	}
 
@@ -139,7 +164,7 @@ public class PlatypusCellSelectionModel<M> extends GridSelectionModel<M> impleme
 			if (!selection.containsKey(key)) {
 				selection.put(key, lastSelectedCell);
 			}
-			cellSelected(aRow, aCell);
+			cellSelected(aRow, aCell, fireEvent);
 			if (fireEvent) {
 				if (updateAnchor) {
 					anchorRow = aRow;
@@ -163,12 +188,12 @@ public class PlatypusCellSelectionModel<M> extends GridSelectionModel<M> impleme
 		}
 	}
 
-	protected void cellSelected(int aRow, int aCell) {
+	protected void cellSelected(int aRow, int aCell, boolean hscroll) {
 		if (grid.isViewReady()) {
 			Element cell = grid.getView().getCell(aRow, aCell);
 			if (cell != null)
 				grid.getView().getAppearance().onCellSelect(cell, true);
-			grid.getView().focusCell(aRow, aCell, true);
+			grid.getView().focusCell(aRow, aCell, hscroll);
 		}
 	}
 
@@ -195,10 +220,10 @@ public class PlatypusCellSelectionModel<M> extends GridSelectionModel<M> impleme
 		selection.clear();
 	}
 
-	public boolean isSelected(int aRow, int aCell) {
-		return selection.containsKey(aRow + "_" + aCell);
-	}
-
+	/*
+	 * public boolean isSelected(int aRow, int aCell) { return
+	 * selection.containsKey(aRow + "_" + aCell); }
+	 */
 	protected void onKeyLeft(com.google.gwt.dom.client.NativeEvent e) {
 		if (Element.is(e.getEventTarget()) && !grid.getView().isSelectableTarget(Element.as(e.getEventTarget()))) {
 			return;

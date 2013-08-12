@@ -120,11 +120,6 @@ public class DummyTestDbClient implements DbClient{
     }
 
     @Override
-    public FlowProvider createFlowProvider(String string, String string1, String string2, String string3, Set<String> set, Set<String> set1) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
     public List<Change> getChangeLog(String string, String string1) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
@@ -142,5 +137,10 @@ public class DummyTestDbClient implements DbClient{
     @Override
     public void setAppCache(AppCache ac) {
         throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public FlowProvider createFlowProvider(String string, String string1, String string2, String string3, Fields fields, Set<String> set, Set<String> set1) throws Exception {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

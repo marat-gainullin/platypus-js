@@ -55,18 +55,21 @@ public class DbGridColumn extends DesignInfo implements PropertiesSimpleFactory 
     public static final String TITLE = "title";
     public static final String VISIBLE = "visible";
     public static final String WIDTH = "width";
-    protected DbGridColumn parent = null;
+    public static final String FIXED = "fixed";
+    //
+    protected DbGridColumn parent;
     // flag indicating whethier column is plain or fliped
     protected boolean plain = true;
     // plain columns
-    protected ModelElementRef datamodelElement = null;
-    protected DbControlDesignInfo controlInfo = null;
+    protected ModelElementRef datamodelElement;
+    protected DbControlDesignInfo controlInfo;
     protected int width = 50;
-    protected boolean readonly = false;
+    protected boolean readonly;
     protected boolean enabled = true;
     protected boolean visible = true;
-    protected String title = null;
-    protected String name = null;
+    protected String title;
+    protected String name;
+    protected boolean fixed;
     // fliped columns
     protected ModelEntityRef columnsDatasource = new ModelEntityRef();
     protected ModelEntityRef cellsDatasource = new ModelEntityRef();
@@ -186,6 +189,7 @@ public class DbGridColumn extends DesignInfo implements PropertiesSimpleFactory 
             setPlain(aSource.isPlain());
             setSubstitute(aSource.isSubstitute());
             setSelectOnly(aSource.isSelectOnly());
+            setFixed(aSource.isFixed());
             if (aSource.getTitle() != null) {
                 setTitle(new String(aSource.getTitle().toCharArray()));
             } else {
@@ -268,6 +272,9 @@ public class DbGridColumn extends DesignInfo implements PropertiesSimpleFactory 
             return false;
         }
         if (this.selectOnly != other.selectOnly) {
+            return false;
+        }
+        if (this.fixed != other.fixed) {
             return false;
         }
         if ((this.title == null) ? (other.title != null) : !this.title.equals(other.title)) {
@@ -583,6 +590,18 @@ public class DbGridColumn extends DesignInfo implements PropertiesSimpleFactory 
         firePropertyChange(TITLE, old, aValue);
     }
 
+    @Serial
+    public boolean isFixed() {
+        return fixed;
+    }
+
+    @Serial
+    public void setFixed(boolean aValue) {
+        boolean old = fixed;
+        fixed = aValue;
+        firePropertyChange(FIXED, old, aValue);
+    }    
+    
     @Serial
     public String getName() {
         return name;

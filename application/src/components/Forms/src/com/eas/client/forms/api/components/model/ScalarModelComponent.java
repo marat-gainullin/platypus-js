@@ -15,9 +15,13 @@ import com.eas.client.model.script.ScriptableRowset;
 import com.eas.client.scripts.ScriptRunnerPrototype;
 import com.eas.dbcontrols.DbControlPanel;
 import com.eas.script.ScriptFunction;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JPanel;
 import org.mozilla.javascript.Function;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Wrapper;
@@ -112,6 +116,21 @@ public abstract class ScalarModelComponent<D extends DbControlPanel> extends Com
     @ScriptFunction
     public void setValue(Object aValue) throws Exception {
         delegate.setValue(aValue);
+    }
+    protected JPanel errorPanel = new JPanel();
+
+    @Override
+    public void setError(String aValue) {
+        super.setError(aValue);
+        delegate.remove(errorPanel);
+        if (aValue != null) {
+            errorPanel.setBackground(Color.red);
+            errorPanel.setToolTipText(aValue);
+            errorPanel.setPreferredSize(new Dimension(Integer.MAX_VALUE, 2));
+            delegate.add(errorPanel, BorderLayout.SOUTH);
+        }
+        delegate.revalidate();
+        delegate.repaint();
     }
 
     protected ModelElementRef fieldToModelRef(Field aField) throws Exception {

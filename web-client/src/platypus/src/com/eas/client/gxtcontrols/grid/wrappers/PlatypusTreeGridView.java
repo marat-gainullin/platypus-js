@@ -20,8 +20,8 @@ public class PlatypusTreeGridView extends TreeGridView<Row> {
 	public PlatypusTreeGridView() {
 		super();
 	}
-	
-	public String getFirstCellTextSelector(){
+
+	public String getFirstCellTextSelector() {
 		return tree.getTreeAppearance().textSelector();
 	}
 
@@ -119,10 +119,12 @@ public class PlatypusTreeGridView extends TreeGridView<Row> {
 				if (id != null && !id.equals("")) {
 					cellClasses += " x-grid-td-" + id;
 				}
-				assert ((PlatypusColumnConfig) columnConfig).getValueProvider() instanceof ChangesHost;
-				ChangesHost ch = (ChangesHost) ((PlatypusColumnConfig) columnConfig).getValueProvider();
-				if (super.isShowDirtyCells() && columnConfig instanceof PlatypusColumnConfig && ch.isChanged(r != null ? r.getModel() : model)) {
-					cellClasses += cellDirty;
+				if (columnConfig instanceof PlatypusColumnConfig) {
+					assert ((PlatypusColumnConfig) columnConfig).getValueProvider() instanceof ChangesHost;
+					ChangesHost ch = (ChangesHost) ((PlatypusColumnConfig) columnConfig).getValueProvider();
+					if (super.isShowDirtyCells() && columnConfig instanceof PlatypusColumnConfig && ch.isChanged(r != null ? r.getModel() : model)) {
+						cellClasses += cellDirty;
+					}
 				}
 
 				if (viewConfig != null) {
@@ -157,5 +159,11 @@ public class PlatypusTreeGridView extends TreeGridView<Row> {
 		}
 		// end row loop
 		return buf.toSafeHtml();
+	}
+
+	public void fitColumnsToSpace(int aSpaceWidth) {
+		PlatypusGridView.fitColumnsToSpace(cm, aSpaceWidth);
+		updateAllColumnWidths();
+		header.refresh();		
 	}
 }
