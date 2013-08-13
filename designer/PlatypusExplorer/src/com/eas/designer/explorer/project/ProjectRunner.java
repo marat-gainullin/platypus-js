@@ -25,7 +25,6 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.Future;
-import java.util.logging.Level;
 import org.netbeans.api.extexecution.ExecutionDescriptor;
 import org.netbeans.api.extexecution.ExecutionService;
 import org.netbeans.api.extexecution.ExternalProcessBuilder;
@@ -244,8 +243,8 @@ public class ProjectRunner {
             //set default log level if not set explicitly
             if (!isSetByOption(PlatypusClientApplication.LOGLEVEL_CMD_SWITCH, pps.getRunClientOptions())) {
                 processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.LOGLEVEL_CMD_SWITCH);
-                processBuilder = processBuilder.addArgument(Level.INFO.getName());
-                io.getOut().println(String.format(NbBundle.getMessage(ProjectRunner.class, "MSG_Logging_Level"), Level.INFO.getName()));//NOI18N
+                processBuilder = processBuilder.addArgument(pps.getClientLogLevel().getName());
+                io.getOut().println(String.format(NbBundle.getMessage(ProjectRunner.class, "MSG_Logging_Level"), pps.getClientLogLevel().getName()));//NOI18N
             }
             if (debug) {
                 processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.STOP_BEFORE_RUN_CMD_SWITCH);

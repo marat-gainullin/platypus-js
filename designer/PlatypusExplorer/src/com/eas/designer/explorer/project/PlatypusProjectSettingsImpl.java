@@ -19,6 +19,7 @@ import java.beans.PropertyChangeSupport;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.logging.Level;
 import org.openide.filesystems.FileObject;
 import org.openide.util.EditableProperties;
 import org.w3c.dom.Document;
@@ -33,6 +34,7 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
     public static final int DEFAULT_PLATYPUS_SERVER_PORT = 8500;
     public static final int CLIENT_APP_DEFAULT_DEBUG_PORT = 8900;
     public static final int SERVER_APP_DEFAULT_DEBUG_PORT = 8901;
+    public static final Level DEFAULT_LOG_LEVEL = Level.INFO;
     public static final String PROJECT_SETTINGS_FILE = "project.properties"; //NOI18N
     public static final String PROJECT_PRIVATE_SETTINGS_FILE = "private.properties"; //NOI18N
     public static final String PROJECT_DISPLAY_NAME_KEY = "projectDisplayName"; //NOI18N
@@ -48,6 +50,8 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
     public static final String NOT_START_SERVER_KEY = "notStartServer"; //NOI18N
     public static final String DEBUG_CLIENT_PORT_KEY = "debugClientPort"; //NOI18N
     public static final String DEBUG_SERVER_PORT_KEY = "debugServerPort"; //NOI18N
+    public static final String CLIENT_LOG_LEVEL = "clientLogLevel"; //NOI18N
+    public static final String SERVER_LOG_LEVEL = "serverLogLevel"; //NOI18N
     public static final String J2EE_SERVER_ID_KEY = "j2eeServerId"; //NOI18N
     public static final String SERVER_CONTEXT_KEY = "context";//NOI18N
     public static final String ENABLE_SECURITY_REALM_KEY = "enableSecurityRealm";//NOI18N
@@ -615,5 +619,71 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
             fo = projectDir.createData(PROJECT_PRIVATE_SETTINGS_FILE);
         }
         return fo;
+    }
+
+    /**
+     * Gets the log level for Platypus Client.
+     * @return Log level value
+     */
+    @Override
+    public Level getClientLogLevel() {
+        String logLevel = projectPrivateProperties.get(CLIENT_LOG_LEVEL);
+        if (logLevel == null || logLevel.isEmpty()) {
+            return DEFAULT_LOG_LEVEL;
+        }
+        try {
+            return Level.parse(logLevel);
+        } catch (IllegalArgumentException ex) {
+            return DEFAULT_LOG_LEVEL;
+        }
+    }
+
+    /**
+      * Sets a log level for Platypus Client.
+      * @param aValue Log level value
+      */
+    @Override
+    public void setClientLogLevel(Level aValue) {
+        Level oldValue = getClientLogLevel();
+        if (aValue != null) {
+            projectPrivateProperties.setProperty(CLIENT_LOG_LEVEL, aValue.getName());
+        } else {
+            projectPrivateProperties.remove(CLIENT_LOG_LEVEL);
+        }
+        projectPrivatePropertiesIsDirty = true;
+        changeSupport.firePropertyChange(CLIENT_LOG_LEVEL, aValue, oldValue);
+    }
+
+    /**
+     * Gets the log level for Platypus Server.
+     * @return Log level value
+     */
+    @Override
+    public Level getServerLogLevel() {
+        String logLevel = projectPrivateProperties.get(SERVER_LOG_LEVEL);
+        if (logLevel == null || logLevel.isEmpty()) {
+            return DEFAULT_LOG_LEVEL;
+        }
+        try {
+            return Level.parse(logLevel);
+        } catch (IllegalArgumentException ex) {
+            return DEFAULT_LOG_LEVEL;
+        }
+    }
+
+    /**
+      * Sets a log level for Platypus Server.
+      * @param aValue Log level value
+      */
+    @Override
+    public void setServerLogLevel(Level aValue) {
+        Level oldValue = getServerLogLevel();
+        if (aValue != null) {
+            projectPrivateProperties.setProperty(SERVER_LOG_LEVEL, aValue.getName());
+        } else {
+            projectPrivateProperties.remove(SERVER_LOG_LEVEL);
+        }
+        projectPrivatePropertiesIsDirty = true;
+        changeSupport.firePropertyChange(SERVER_LOG_LEVEL, aValue, oldValue);
     }
 }
