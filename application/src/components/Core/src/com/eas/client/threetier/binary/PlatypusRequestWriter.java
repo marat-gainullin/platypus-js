@@ -32,6 +32,7 @@ import com.eas.client.threetier.requests.PlatypusRequestVisitor;
 import com.eas.client.threetier.requests.StartAppElementRequest;
 import com.eas.proto.CoreTags;
 import com.eas.proto.ProtoWriter;
+import com.eas.script.ScriptUtils;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -179,6 +180,9 @@ public class PlatypusRequestWriter implements PlatypusRequestVisitor {
                     break;
                 case STRING:
                     writer.put(valueTag, (String) arg);
+                    break;
+                case OBJECT:
+                    writer.put(valueTag, (String) ScriptUtils.toJson(arg));
                     break;
             }
         }

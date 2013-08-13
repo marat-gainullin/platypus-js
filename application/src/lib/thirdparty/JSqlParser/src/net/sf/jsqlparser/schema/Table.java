@@ -60,16 +60,17 @@ public class Table implements FromItem {
         schemaName = string;
     }
 
+    @Override
     public Alias getAlias() {
         return alias;
     }
 
+    @Override
     public void setAlias(Alias aValue) {
         alias = aValue;
     }
 
     public String getWholeTableName() {
-
         String tableWholeName = null;
         if (name == null) {
             return null;
@@ -84,6 +85,7 @@ public class Table implements FromItem {
 
     }
 
+    @Override
     public void accept(FromItemVisitor fromItemVisitor) {
         fromItemVisitor.visit(this);
     }

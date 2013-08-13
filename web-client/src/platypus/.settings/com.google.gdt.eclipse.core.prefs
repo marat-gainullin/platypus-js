@@ -1,5 +1,5 @@
 eclipse.preferences.version=1
 jarsExcludedFromWebInfLib=
-launchConfigExternalUrlPrefix=http\://localhost\:8080/transport/
+launchConfigExternalUrlPrefix=http\://localhost\:8080/pethotel/
 warSrcDir=war
 warSrcDirIsOutput=true

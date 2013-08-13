@@ -21,6 +21,7 @@ import com.eas.client.threetier.requests.DbTableChangedRequest;
 import com.eas.client.threetier.requests.DisposeServerModuleRequest;
 import com.eas.client.threetier.requests.ExecuteQueryRequest;
 import com.eas.client.threetier.requests.ExecuteServerModuleMethodRequest;
+import static com.eas.client.threetier.requests.ExecuteServerModuleMethodRequest.ArgumentType.STRING;
 import com.eas.client.threetier.requests.ExecuteServerReportRequest;
 import com.eas.client.threetier.requests.IsAppElementActualRequest;
 import com.eas.client.threetier.requests.IsUserInRoleRequest;
@@ -36,6 +37,7 @@ import com.eas.proto.ProtoReader;
 import com.eas.proto.ProtoReaderException;
 import com.eas.proto.dom.ProtoDOMBuilder;
 import com.eas.proto.dom.ProtoNode;
+import com.eas.script.ScriptUtils;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -183,6 +185,8 @@ public class PlatypusRequestReader implements PlatypusRequestVisitor {
                 return ((short) node.getInt());
             case STRING:
                 return (node.getString());
+            case OBJECT:
+                return ScriptUtils.parseJson(node.getString());
             default:
                 throw new IllegalArgumentException();
         }

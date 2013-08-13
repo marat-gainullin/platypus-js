@@ -515,7 +515,7 @@ public class AppClient {
 		frm.removeFromParent();
 	}
 
-	public String syncRequest(String aUrlPrefix, final String aUrlQuery, String aBody, RequestBuilder.Method aMethod) throws Exception {
+	public XMLHttpRequest2 syncRequest(String aUrlPrefix, final String aUrlQuery, String aBody, RequestBuilder.Method aMethod) throws Exception {
 		String url = baseUrl + aUrlPrefix + "?" + aUrlQuery;
 		final XMLHttpRequest2 req = XMLHttpRequest.create().<XMLHttpRequest2> cast();
 		req.open(aMethod.toString(), url, false);
@@ -523,7 +523,7 @@ public class AppClient {
 		req.setRequestHeader("Pragma", "no-cache");
 		req.send(aBody);
 		if (req.getStatus() == Response.SC_OK)
-			return req.getResponseText();
+			return req;
 		else
 			throw new Exception(req.getStatus() + " " + req.getStatusText());
 	}
@@ -699,15 +699,14 @@ public class AppClient {
 			@com.eas.client.application.AppClient::defineServerModule(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aModule);
 		}
 		$wnd.platypus.executeServerModuleMethod = function(aModuleName, aMethodName, aParams, aCallBack) {
-			return JSON
-					.parse(aClient.@com.eas.client.application.AppClient::executeServerModuleMethod(Ljava/lang/String;Ljava/lang/String;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aMethodName, aParams, aCallBack));
+			return $wnd.boxAsJs(aClient.@com.eas.client.application.AppClient::executeServerModuleMethod(Ljava/lang/String;Ljava/lang/String;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aMethodName, aParams, aCallBack));
 		}
 		$wnd.platypus.executeServerReport = function(aModuleName, aModule) {
 			aClient.@com.eas.client.application.AppClient::executeServerReport(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aModule);
 		}
 	}-*/;
 
-	public String executeServerModuleMethod(final String aModuleName, final String aMethodName, final JsArrayString aParams, final JavaScriptObject onSuccess) throws Exception {
+	public Object executeServerModuleMethod(final String aModuleName, final String aMethodName, final JsArrayString aParams, final JavaScriptObject onSuccess) throws Exception {
 		String[] convertedParams = new String[aParams.length()];
 		for (int i = 0; i < aParams.length(); i++)
 			convertedParams[i] = param(PlatypusHttpRequestParams.PARAMS_ARRAY, aParams.get(i));
@@ -722,27 +721,33 @@ public class AppClient {
 					if (responseType != null) {
 						responseType = responseType.toLowerCase();
 						if (responseType.contains("text/json") || responseType.contains("text/javascript")) {
-							jsonCallBack(onSuccess, aResponse.getResponseText());
+							Utils.executeScriptEventVoid(onSuccess, onSuccess, Utils.toJs(Utils.jsonParse(aResponse.getResponseText())));
 						} else {
-							textCallBack(onSuccess, aResponse.getResponseText());
+							Utils.executeScriptEventVoid(onSuccess, onSuccess, Utils.toJs(aResponse.getResponseText()));
 						}
 					} else {
-						textCallBack(onSuccess, aResponse.getResponseText());
+						Utils.executeScriptEventVoid(onSuccess, onSuccess, Utils.toJs(aResponse.getResponseText()));
 					}
 				}
-
-				private native void jsonCallBack(JavaScriptObject onSuccess, String aData) throws Exception /*-{
-		onSuccess(JSON.parse(aData));
-	}-*/;
-
-				private native void textCallBack(JavaScriptObject onSuccess, String aData) throws Exception /*-{
-		onSuccess(aData);
-	}-*/;
-
 			}, null);
 			return null;
 		} else {
-			return syncRequest(API_URI, query, null, RequestBuilder.GET);
+			XMLHttpRequest2 executed = syncRequest(API_URI, query, null, RequestBuilder.GET);
+			if(executed != null){
+				String responseType = executed.getResponseHeader("content-type");
+				if (responseType != null) {
+					responseType = responseType.toLowerCase();
+					if (responseType.contains("text/json") || responseType.contains("text/javascript")) {
+						return Utils.toJs(Utils.jsonParse(executed.getResponseText()));
+					} else {
+						return Utils.toJs(executed.getResponseText());
+					}
+				} else {
+					return Utils.toJs(executed.getResponseText());
+				}
+			}else{
+				return null;
+			}
 		}
 	}
 

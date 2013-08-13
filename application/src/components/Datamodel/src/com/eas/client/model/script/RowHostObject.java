@@ -190,14 +190,18 @@ public class RowHostObject extends ScriptableObject {
             return super.getDefaultValue(aTypeHint);
         }
     }
-    
+
     public static RowHostObject publishRow(Scriptable aScope, Row aRow) throws Exception {
-        Object published = aRow.getTag();
-        if (published == null) {
-            published = new RowHostObject(aScope, aRow);
-            aRow.setTag(published);
+        if (aRow != null) {
+            Object published = aRow.getTag();
+            if (published == null) {
+                published = new RowHostObject(aScope, aRow);
+                aRow.setTag(published);
+            }
+            assert published instanceof RowHostObject;
+            return (RowHostObject) published;
+        } else {
+            return null;
         }
-        assert published instanceof RowHostObject;
-        return (RowHostObject) published;
     }
 }

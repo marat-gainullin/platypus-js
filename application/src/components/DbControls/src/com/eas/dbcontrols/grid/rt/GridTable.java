@@ -269,8 +269,10 @@ public class GridTable extends JTable implements DbControlEditingListener {
                 if (goatCol == null) {
                     goatCol = getColumnModel().getColumn(getColumnModel().getColumnCount() - 1);
                 }
-                int goatColNewWidth = goatCol.getWidth() + ((getWidth() - borderDelta) - getColumnModel().getTotalColumnWidth());
-                silentSetWidth2Column(goatCol, goatColNewWidth);
+                if (goatCol.getResizable()) {
+                    int goatColNewWidth = goatCol.getWidth() + ((getWidth() - borderDelta) - getColumnModel().getTotalColumnWidth());
+                    silentSetWidth2Column(goatCol, goatColNewWidth);
+                }
             }
         }
     }

@@ -20,12 +20,18 @@ public class BearDatabaseConnection implements Connection {
     protected ResourcePool<BearDatabaseConnection> connectionsPool;
     protected Connection delegate;
     protected int maxStatements = Integer.MAX_VALUE;
+    protected int resourceTimeout = BearResourcePool.WAIT_TIMEOUT;
 
     public BearDatabaseConnection(int aMaxStatetments, Connection aDelegate, ResourcePool<BearDatabaseConnection> aPool) throws Exception {
+        this(aMaxStatetments, BearResourcePool.WAIT_TIMEOUT, aDelegate, aPool);
+    }
+    
+    public BearDatabaseConnection(int aMaxStatetments, int aResourceTimeout, Connection aDelegate, ResourcePool<BearDatabaseConnection> aPool) throws Exception {
         super();
         delegate = aDelegate;
         connectionsPool = aPool;
         maxStatements = aMaxStatetments;
+        resourceTimeout = aResourceTimeout;
     }
 
     @Override
@@ -104,7 +110,7 @@ public class BearDatabaseConnection implements Connection {
     public PreparedStatement prepareStatement(String sql) throws SQLException {
         PreparedStatement stmt = tryPrepareStatement(sql);
         while (stmt == null && Thread.currentThread().isAlive()) {
-            waitSome(BearResourcePool.WAIT_TIMEOUT);
+            waitSome(resourceTimeout);
             stmt = tryPrepareStatement(sql);
         }
         return stmt;

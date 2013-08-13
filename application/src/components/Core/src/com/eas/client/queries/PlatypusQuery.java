@@ -6,8 +6,6 @@ package com.eas.client.queries;
 
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.dataflow.FlowProvider;
-import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.Fields;
 import com.eas.client.AppClient;
 import com.eas.client.threetier.PlatypusClient;
 import com.eas.client.threetier.PlatypusThreeTierFlowProvider;

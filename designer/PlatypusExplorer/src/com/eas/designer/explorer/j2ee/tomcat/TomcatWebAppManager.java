@@ -5,6 +5,7 @@
 package com.eas.designer.explorer.j2ee.tomcat;
 
 import com.eas.client.ClientConstants;
+import com.eas.client.SQLUtils;
 import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.client.settings.DbConnectionSettings;
 import com.eas.designer.application.PlatypusUtils;
@@ -178,12 +179,12 @@ public class TomcatWebAppManager implements WebAppManager {
         dataSourceResource.setType(DataSourceResource.DATA_SOURCE_RESOURCE_TYPE_NAME);
         DbConnectionSettings dbSettings = project.getSettings().getAppSettings().getDbSettings();
         dataSourceResource.setUrl(dbSettings.getUrl());
-        String dialect = GeneralResourceProvider.constructPropertiesByDbConnectionSettings(dbSettings).getProperty(ClientConstants.DB_CONNECTION_DIALECT_PROP_NAME);
+        String dialect = SQLUtils.dialectByUrl(dbSettings.getUrl());
         if (dialect != null) {
             String driverClassName = DbConnectionSettings.readDrivers().get(dialect);
             dataSourceResource.setDriverClassName(driverClassName);
         } else {
-            Logger.getLogger(getClass().getName()).log(Level.WARNING, "Unsupported JDBC driver or incorrect URL: {0}", dbSettings.getUrl());
+            throw new IllegalStateException(String.format("Unsupported JDBC driver or incorrect URL: %s", dbSettings.getUrl()));
         }
         dataSourceResource.setUsername(dbSettings.getInfo().getProperty(ClientConstants.DB_CONNECTION_USER_PROP_NAME));
         dataSourceResource.setPassword(dbSettings.getInfo().getProperty(ClientConstants.DB_CONNECTION_PASSWORD_PROP_NAME));

@@ -378,6 +378,7 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                         tCol.setIdentifier(mCol);
                         // groups-view link
                         group.setTableColumn(tCol);
+                        group.setResizeable(tCol.getResizable());
                         groups.put(tCol, group);
                         columnModel.addColumn(tCol);
                         scriptableColumns.add(new ScriptableColumn(dCol, mCol, tCol, columnModel.getColumnCount() - 1, columnModel, rowsModel, groups));

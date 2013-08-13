@@ -43,6 +43,7 @@ public class DbConnectionSettings extends EasSettings {
     protected transient Map<String, String> drivers;
     protected int maxConnections = BearResourcePool.DEFAULT_MAXIMUM_SIZE;
     protected int maxStatements = BearResourcePool.DEFAULT_MAXIMUM_SIZE * 5;
+    protected int resourceTimeout = BearResourcePool.WAIT_TIMEOUT;
     protected String applicationPath;
     private boolean initSchema = true;
     private boolean deferCache;
@@ -92,7 +93,7 @@ public class DbConnectionSettings extends EasSettings {
                         }
                     }
                 } catch (ClassNotFoundException ex) {
-                    Logger.getLogger(DbConnectionSettings.class.getName()).log(Level.WARNING, "JDBC driver class not found: {0}",  driverClassName);
+                    Logger.getLogger(DbConnectionSettings.class.getName()).log(Level.WARNING, "JDBC driver class not found: {0}", driverClassName);
                 }
             }
         }
@@ -122,6 +123,14 @@ public class DbConnectionSettings extends EasSettings {
         maxStatements = aMaxStatements;
     }
 
+    public int getResourceTimeout() {
+        return resourceTimeout;
+    }
+
+    public void setResourceTimeout(int aResourceTimeout) {
+        resourceTimeout = aResourceTimeout;
+    }
+
     public void generateSampleSettings() {
         url = "jdbc:oracle:thin:@<HOST>:<PORT>:<SID>";
         info.put("user", "SomeUser");
@@ -143,17 +152,18 @@ public class DbConnectionSettings extends EasSettings {
     public void setDrivers(Map<String, String> aDrivers) {
         drivers = aDrivers;
     }
-    
+
     /**
      * Gets information about JDBC drivers supported by Platypus Platform.
-     * @return Dictionary where the key is database dialect and value is JDBC driver class name
+     *
+     * @return Dictionary where the key is database dialect and value is JDBC
+     * driver class name
      * @throws Exception if something goes wrong
      */
     public static Map<String, String> readDrivers() throws Exception {
-        InputStream is = DbConnectionSettings.class.getResourceAsStream(DbConnectionSettings.DB_DRIVERS_FILE_NAME);
         Map<String, String> drivers = new HashMap<>();
-        if (is.available() > 0) {
-            try {
+        try (InputStream is = DbConnectionSettings.class.getResourceAsStream(DbConnectionSettings.DB_DRIVERS_FILE_NAME)) {
+            if (is.available() > 0) {
                 String driversDataString = new String(BinaryUtils.readStream(is, -1), SettingsConstants.COMMON_ENCODING);
                 Document driversDoc = Source2XmlDom.transform(driversDataString);
                 Node jdbcNode = driversDoc.getFirstChild();
@@ -163,7 +173,7 @@ public class DbConnectionSettings extends EasSettings {
                     for (int i = 0; i < driversNodes.getLength(); i++) {
                         Node driverNode = driversNodes.item(i);
                         if (driverNode instanceof Element && DB_DRIVER_TAG_NAME.equals(driverNode.getNodeName())) {
-                            Element element = (Element)driverNode;
+                            Element element = (Element) driverNode;
                             String dialect = element.getAttribute(DB_DRIVER_DIALECT_ATTR_NAME);
                             String driverClassName = element.getTextContent();
                             if (dialect != null && !dialect.isEmpty() && driverClassName != null && !driverClassName.isEmpty()) {
@@ -174,14 +184,11 @@ public class DbConnectionSettings extends EasSettings {
                 } else {
                     throw new Exception("jdbc root node expected, but none found");
                 }
-            } finally {
-                is.close();
+            } else {
+                throw new Exception("jdbc drivers description file is empty");
             }
-        } else {
-            is.close();
-            throw new Exception("jdbc drivers description file is empty");
+            return drivers;
         }
-        return drivers;
     }
 
     @Override
@@ -220,6 +227,7 @@ public class DbConnectionSettings extends EasSettings {
 
     /**
      * Checks if initialization of the schema is required.
+     *
      * @return The initSchema flag
      */
     public boolean isInitSchema() {
@@ -228,6 +236,7 @@ public class DbConnectionSettings extends EasSettings {
 
     /**
      * Sets if initialization of the schema is required.
+     *
      * @param aValue The initSchema flag
      */
     public void setInitSchema(boolean aValue) {

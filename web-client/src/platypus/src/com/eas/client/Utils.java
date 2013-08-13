@@ -82,6 +82,10 @@ public class Utils {
 		}
 	}-*/;
 
+	public native static JavaScriptObject jsonParse(String aData) throws Exception /*-{
+		return JSON.parse(aData);
+	}-*/;
+
 	public native static void invokeJsFunction(JavaScriptObject aHandler) /*-{
 		if (aHandler != null) {
 			aHandler();

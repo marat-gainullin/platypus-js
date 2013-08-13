@@ -4,6 +4,7 @@
  */
 package com.eas.server;
 
+import com.bearsoft.rowset.resourcepool.BearResourcePool;
 import com.eas.client.Client;
 import com.eas.client.ClientConstants;
 import com.eas.client.DatabasesClient;
@@ -45,9 +46,15 @@ public class ServerMain {
     public static final String APP_DB_SCHEMA_CONF_PARAM = "dbschema";
     public static final String APP_DB_URL_CONF_PARAM = "url";
     public static final String APP_DB_USERNAME_CONF_PARAM = "dbuser";
+    public static final String APP_DB_MAX_CONNECTIONS_CONF_PARAM = "maxconnections";
+    public static final String APP_DB_MAX_STATEMENTS_CONF_PARAM = "maxstatements";
+    public static final String APP_DB_RESOURCE_TIMEOUT_CONF_PARAM = "resourcetimeout";
     public static final String BACKGROUNDTASK_CONF_PARAM = "tasks";
     public static final String IFACE_CONF_PARAM = "iface";
     public static final String PROTOCOLS_CONF_PARAM = "protocols";
+    public static final String NUM_WORKER_THREADS_CONF_PARAM = "numworkerthreads";
+    public static final String SESSION_IDLE_TIMEOUT_CONF_PARAM = "sessionidletimeout";
+    public static final String SESSION_IDLE_CHECK_INTERVAL_CONF_PARAM = "sessionidlecheckinterval";
     public static final String LOGLEVEL_CONF_PARAM = "loglevel";
     public static final String LOG_CONF_PARAM = "log";
     public static final String APP_ELEMENT_CONF_PARAM = "appelement";
@@ -66,10 +73,13 @@ public class ServerMain {
     public static final String BAD_APP_DB_URL_MSG = "URL not specified.";
     public static final String BAD_APP_DB_USERNAME_MSG = "User name not specified";
     public static final String BAD_APP_SCHEMA_MSG = "Schema not specified";
+    public static final String BAD_DB_MAX_CONNECTIONS_MSG = "Bad maxconnections option";
+    public static final String BAD_DB_MAX_STATEMENTS_MSG = "Bad maxstatements option";
+    public static final String BAD_DB_RESOURCE_TIMEOUT_MSG = "Bad resourcetimeout option";
     public static final String BAD_TASK_MSG = "Background task is specified with '-backgroundTask <moduleName>:<moduleId>'";
     public static final String LOG_FILE_WITHOUT_VALUE_MSG = "Log file is not specified.";
     public static final String LOG_LEVEL_WITHOUT_VALUE_MSG = "Log level is not specified.";
-    public static final String NO_URL_SPECIFIED_MSG = "No URL specified.";
+    public static final String NO_DB_URL_SPECIFIED_MSG = "No Database URL specified.";
     public static final String USER_HOME_ABSENTFILE_MSG = ClientConstants.USER_HOME_PROP_NAME + " property points to non-existent location";
     public static final String USER_HOME_MISSING_MSG = ClientConstants.USER_HOME_PROP_NAME + " property missing. Please specify it with -Duser.home=... java comannd line switch";
     public static final String USER_HOME_NOT_A_DIRECTORY_MSG = ClientConstants.USER_HOME_PROP_NAME + " property points to non-directory";
@@ -90,14 +100,20 @@ public class ServerMain {
     };
     private static String logFileNamePattern = null;
     private static Level logsLevel = Level.OFF;
-    private static String url;
-    private static String schema;
-    private static String username;
-    private static String password;
+    private static String dbUrl;
+    private static String dbSchema;
+    private static String dbUsername;
+    private static String dbPassword;
     private static String iface;
     private static String protocols;
+    private static String numWorkerThreads;
+    private static String sessionIdleTimeout;
+    private static String sessionIdleCheckInterval;
     private static String appElement;
     private static String appPath;
+    private static int maxDbConnections = BearResourcePool.DEFAULT_MAXIMUM_SIZE;
+    private static int maxDbStatements = BearResourcePool.DEFAULT_MAXIMUM_SIZE * 5;
+    private static int resourceTimeout = BearResourcePool.WAIT_TIMEOUT;
 
     private static void checkUserHome() {
         String home = System.getProperty(ClientConstants.USER_HOME_PROP_NAME);
@@ -146,27 +162,45 @@ public class ServerMain {
         for (int i = 0; i < args.length; i++) {
             if ((CMD_SWITCHS_PREFIX + APP_DB_URL_CONF_PARAM).equalsIgnoreCase(args[i])) {
                 if (i + 1 < args.length) {
-                    url = args[i + 1];
+                    dbUrl = args[i + 1];
                 } else {
                     printHelp(BAD_APP_DB_URL_MSG);
                 }
             } else if ((CMD_SWITCHS_PREFIX + APP_DB_SCHEMA_CONF_PARAM).equalsIgnoreCase(args[i])) {
                 if (i + 1 < args.length) {
-                    schema = args[i + 1];
+                    dbSchema = args[i + 1];
                 } else {
                     printHelp(BAD_APP_SCHEMA_MSG);
                 }
             } else if ((CMD_SWITCHS_PREFIX + APP_DB_USERNAME_CONF_PARAM).equalsIgnoreCase(args[i])) {
                 if (i + 1 < args.length) {
-                    username = args[i + 1];
+                    dbUsername = args[i + 1];
                 } else {
                     printHelp(BAD_APP_DB_USERNAME_MSG);
                 }
             } else if ((CMD_SWITCHS_PREFIX + APP_DB_PASSWORD_CONF_PARAM).equalsIgnoreCase(args[i])) {
                 if (i + 1 < args.length) {
-                    password = args[i + 1];
+                    dbPassword = args[i + 1];
                 } else {
                     printHelp(BAD_APP_DB_PASSWORD_MSG);
+                }
+            } else if ((CMD_SWITCHS_PREFIX + APP_DB_MAX_CONNECTIONS_CONF_PARAM).equalsIgnoreCase(args[i])) {
+                if (i + 1 < args.length) {
+                    maxDbConnections = Integer.valueOf(args[i + 1]);
+                } else {
+                    printHelp(BAD_DB_MAX_CONNECTIONS_MSG);
+                }
+            } else if ((CMD_SWITCHS_PREFIX + APP_DB_MAX_STATEMENTS_CONF_PARAM).equalsIgnoreCase(args[i])) {
+                if (i + 1 < args.length) {
+                    maxDbStatements = Integer.valueOf(args[i + 1]);
+                } else {
+                    printHelp(BAD_DB_MAX_STATEMENTS_MSG);
+                }
+            } else if ((CMD_SWITCHS_PREFIX + APP_DB_RESOURCE_TIMEOUT_CONF_PARAM).equalsIgnoreCase(args[i])) {
+                if (i + 1 < args.length) {
+                    resourceTimeout = Integer.valueOf(args[i + 1]);
+                } else {
+                    printHelp(BAD_DB_RESOURCE_TIMEOUT_MSG);
                 }
             } else if ((CMD_SWITCHS_PREFIX + BACKGROUNDTASK_CONF_PARAM).equalsIgnoreCase(args[i])) {
                 if (i + 1 < args.length) {
@@ -184,6 +218,24 @@ public class ServerMain {
             } else if ((CMD_SWITCHS_PREFIX + PROTOCOLS_CONF_PARAM).equalsIgnoreCase(args[i])) {
                 if (i + 1 < args.length) {
                     protocols = args[i + 1];
+                } else {
+                    printHelp(PROTOCOLS_WITHOUT_VALUE_MSG);
+                }
+            } else if ((CMD_SWITCHS_PREFIX + NUM_WORKER_THREADS_CONF_PARAM).equalsIgnoreCase(args[i])) {
+                if (i + 1 < args.length) {
+                    numWorkerThreads = args[i + 1];
+                } else {
+                    printHelp(PROTOCOLS_WITHOUT_VALUE_MSG);
+                }
+            } else if ((CMD_SWITCHS_PREFIX + SESSION_IDLE_TIMEOUT_CONF_PARAM).equalsIgnoreCase(args[i])) {
+                if (i + 1 < args.length) {
+                    sessionIdleTimeout = args[i + 1];
+                } else {
+                    printHelp(PROTOCOLS_WITHOUT_VALUE_MSG);
+                }
+            } else if ((CMD_SWITCHS_PREFIX + SESSION_IDLE_CHECK_INTERVAL_CONF_PARAM).equalsIgnoreCase(args[i])) {
+                if (i + 1 < args.length) {
+                    sessionIdleCheckInterval = args[i + 1];
                 } else {
                     printHelp(PROTOCOLS_WITHOUT_VALUE_MSG);
                 }
@@ -251,22 +303,27 @@ public class ServerMain {
         // tasks from command-line
         Set<String> tasks = new HashSet<>();
         parseArgs(args, tasks);
-        if (url == null) {
-            printHelp(NO_URL_SPECIFIED_MSG);
+        if (dbUrl == null) {
+            printHelp(NO_DB_URL_SPECIFIED_MSG);
             System.exit(1);
         }
-        if (!url.startsWith("jdbc:")) {
-            throw new Exception(String.format("Unsupported URL in connection settings: %s. Only jdbc urls are supported", url));
-        }        
+        if (!dbUrl.startsWith("jdbc:")) {
+            throw new Exception(String.format("Unsupported URL in connection settings: %s. Only jdbc urls are supported", dbUrl));
+        }
         DbConnectionSettings settings = new DbConnectionSettings();
-        settings.setUrl(url);
-        settings.getInfo().setProperty(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME, schema);
-        if (username != null) {
-            settings.getInfo().setProperty(ClientConstants.DB_CONNECTION_USER_PROP_NAME, username);
+        settings.setUrl(dbUrl);
+        if (dbSchema != null) {
+            settings.getInfo().setProperty(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME, dbSchema);
         }
-        if (password != null) {
-            settings.getInfo().setProperty(ClientConstants.DB_CONNECTION_PASSWORD_PROP_NAME, password);
+        if (dbUsername != null) {
+            settings.getInfo().setProperty(ClientConstants.DB_CONNECTION_USER_PROP_NAME, dbUsername);
         }
+        if (dbPassword != null) {
+            settings.getInfo().setProperty(ClientConstants.DB_CONNECTION_PASSWORD_PROP_NAME, dbPassword);
+        }
+        settings.setMaxConnections(maxDbConnections);
+        settings.setMaxStatements(maxDbStatements);
+        settings.setResourceTimeout(resourceTimeout);
         setupLoggers(logsLevel, expandLogFileName(logFileNamePattern));
         SSLContext ctx = createSSLContext();
         if (appPath != null) {
@@ -281,14 +338,11 @@ public class ServerMain {
             // Apply debugging facility
             registerMBean(Settings.SETTINGS_MBEAN_NAME, new Settings(appDbClient));
         }
-        PlatypusServer server = new PlatypusServer(appDbClient, ctx, getListenAddresses(), getPortsProtocols(), tasks, appElement);
+        PlatypusServer server = new PlatypusServer(appDbClient, ctx, getListenAddresses(), getPortsProtocols(), getPortsSessionIdleTimeouts(), getPortsSessionIdleCheckIntervals(), getPortsNumWorkerThreads(), tasks, appElement);
         appDbClient.setContextHost(server);
         appDbClient.setPrincipalHost(server);
         ScriptRunner.PlatypusScriptedResource.init(appDbClient, server, server);
         ScriptUtils.getScope().defineProperty(ServerScriptRunner.MODULES_SCRIPT_NAME, server.getScriptsCache(), ScriptableObject.READONLY);
-        Thread sgc = new Thread(new GarbageSessionsCollector(server));
-        sgc.setDaemon(true);
-        sgc.start();
         server.start();
     }
 
@@ -309,8 +363,8 @@ public class ServerMain {
     private static InetSocketAddress[] getListenAddresses() {
         if (iface == null || iface.isEmpty()) {
             return new InetSocketAddress[]{
-                        new InetSocketAddress(PlatypusServer.DEFAULT_PORT)
-                    };
+                new InetSocketAddress(PlatypusServer.DEFAULT_PORT)
+            };
         } else {
             String[] splittedAddresses = iface.replace(" ", "").split(",");
             InetSocketAddress[] result = new InetSocketAddress[splittedAddresses.length];
@@ -332,9 +386,9 @@ public class ServerMain {
     private static Map<Integer, String> getPortsProtocols() {
         Map<Integer, String> protocolsMap = new HashMap<>();
         if (protocols != null && !protocols.isEmpty()) {
-            String[] splittedPortsProtocols = protocols.replace(" ", "").split(",");
-            for (int i = 0; i < splittedPortsProtocols.length; i++) {
-                String[] protParts = splittedPortsProtocols[i].split(":");
+            String[] splitted = protocols.replace(" ", "").split(",");
+            for (int i = 0; i < splitted.length; i++) {
+                String[] protParts = splitted[i].split(":");
                 if (protParts.length == 2) {
                     protocolsMap.put(Integer.valueOf(protParts[0]), protParts[1]);
                 }
@@ -344,6 +398,48 @@ public class ServerMain {
             protocolsMap.put(PlatypusServer.DEFAULT_PORT, PlatypusServer.DEFAULT_PROTOCOL);
         }
         return protocolsMap;
+    }
+
+    private static Map<Integer, Integer> getPortsNumWorkerThreads() {
+        Map<Integer, Integer> numWorkerThreadsMap = new HashMap<>();
+        if (numWorkerThreads != null && !numWorkerThreads.isEmpty()) {
+            String[] splitted = numWorkerThreads.replace(" ", "").split(",");
+            for (int i = 0; i < splitted.length; i++) {
+                String[] protParts = splitted[i].split(":");
+                if (protParts.length == 2) {
+                    numWorkerThreadsMap.put(Integer.valueOf(protParts[0]), Integer.valueOf(protParts[1]));
+                }
+            }
+        }
+        return numWorkerThreadsMap;
+    }
+
+    private static Map<Integer, Integer> getPortsSessionIdleTimeouts() {
+        Map<Integer, Integer> sessionIdleTimeoutMap = new HashMap<>();
+        if (sessionIdleTimeout != null && !sessionIdleTimeout.isEmpty()) {
+            String[] splitted = sessionIdleTimeout.replace(" ", "").split(",");
+            for (int i = 0; i < splitted.length; i++) {
+                String[] protParts = splitted[i].split(":");
+                if (protParts.length == 2) {
+                    sessionIdleTimeoutMap.put(Integer.valueOf(protParts[0]), Integer.valueOf(protParts[1]));
+                }
+            }
+        }
+        return sessionIdleTimeoutMap;
+    }
+
+    private static Map<Integer, Integer> getPortsSessionIdleCheckIntervals() {
+        Map<Integer, Integer> sessionIdleCheckIntervalsMap = new HashMap<>();
+        if (sessionIdleCheckInterval != null && !sessionIdleCheckInterval.isEmpty()) {
+            String[] splitted = sessionIdleCheckInterval.replace(" ", "").split(",");
+            for (int i = 0; i < splitted.length; i++) {
+                String[] protParts = splitted[i].split(":");
+                if (protParts.length == 2) {
+                    sessionIdleCheckIntervalsMap.put(Integer.valueOf(protParts[0]), Integer.valueOf(protParts[1]));
+                }
+            }
+        }
+        return sessionIdleCheckIntervalsMap;
     }
 
     private static KeyManager[] createKeyManagers() throws NoSuchAlgorithmException, NoSuchProviderException, KeyStoreException, FileNotFoundException, IOException, CertificateException, UnrecoverableKeyException, URISyntaxException {

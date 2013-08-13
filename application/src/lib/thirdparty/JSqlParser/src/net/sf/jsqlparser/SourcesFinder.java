@@ -53,59 +53,44 @@ import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
-import net.sf.jsqlparser.statement.Statement;
-import net.sf.jsqlparser.statement.delete.Delete;
-import net.sf.jsqlparser.statement.insert.Insert;
 import net.sf.jsqlparser.statement.select.Connect;
+import net.sf.jsqlparser.statement.select.FromItem;
 import net.sf.jsqlparser.statement.select.FromItemVisitor;
 import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.PlainSelect;
-import net.sf.jsqlparser.statement.select.Select;
+import net.sf.jsqlparser.statement.select.SelectBody;
 import net.sf.jsqlparser.statement.select.SelectVisitor;
 import net.sf.jsqlparser.statement.select.SubJoin;
 import net.sf.jsqlparser.statement.select.SubSelect;
 import net.sf.jsqlparser.statement.select.Union;
-import net.sf.jsqlparser.statement.update.Update;
 
 /**
  *
  * @author mg
  */
-public class TablesFinder implements SelectVisitor, FromItemVisitor, ExpressionVisitor, ItemsListVisitor {
+public class SourcesFinder implements SelectVisitor, FromItemVisitor, ExpressionVisitor, ItemsListVisitor {
 
     public enum TO_CASE {
-        LOWER, UPPER
-    }
-    
-    private TO_CASE toCase = null;
-    private Map<String, Table> tables = new HashMap<>();
-    private boolean forTables;
 
-    private TablesFinder() {
+        LOWER,
+        UPPER
+    }
+    private TO_CASE toCase = null;
+    private Map<String, FromItem> sources = new HashMap<>();
+
+    private SourcesFinder() {
         super();
     }
 
-    private TablesFinder(TO_CASE aToCase, boolean aForTables) {
+    private SourcesFinder(TO_CASE aToCase) {
         super();
         toCase = aToCase;
-        forTables = aForTables;
     }
 
-    public static Map<String, Table> getTablesMap(TO_CASE toCase, Statement aStatement, boolean aForTables) {
-        TablesFinder instance = new TablesFinder(toCase, aForTables);
-        if (aStatement instanceof Select) {
-            ((Select) aStatement).getSelectBody().accept(instance);
-        } else if (aStatement instanceof Delete) {
-            Table tbl = ((Delete) aStatement).getTable();
-            instance.visit(tbl);
-        } else if (aStatement instanceof Update) {
-            Table tbl = ((Update) aStatement).getTable();
-            instance.visit(tbl);
-        } else if (aStatement instanceof Insert) {
-            Table tbl = ((Insert) aStatement).getTable();
-            instance.visit(tbl);
-        }
-        return instance.tables;
+    public static Map<String, FromItem> getSourcesMap(TO_CASE toCase, SelectBody aSelectBody) {
+        SourcesFinder instance = new SourcesFinder(toCase);
+        aSelectBody.accept(instance);
+        return instance.sources;
     }
 
     @Override
@@ -115,29 +100,18 @@ public class TablesFinder implements SelectVisitor, FromItemVisitor, ExpressionV
         }
 
         if (plainSelect.getJoins() != null) {
-            for (Iterator joinsIt = plainSelect.getJoins().iterator(); joinsIt.hasNext();) {
-                Join join = (Join) joinsIt.next();
+            for (Join join : plainSelect.getJoins()) {
                 join.getRightItem().accept(this);
             }
-        }
-        if (plainSelect.getWhere() != null) {
-            plainSelect.getWhere().accept(this);
         }
     }
 
     @Override
     public void visit(Union union) {
-        if (!forTables) {
-            Iterator iter = union.getPlainSelects().iterator();
-            if (iter.hasNext()) {
-                PlainSelect plainSelect = (PlainSelect) iter.next();
-                visit(plainSelect);
-            }
-        } else {
-            for (Iterator iter = union.getPlainSelects().iterator(); iter.hasNext();) {
-                PlainSelect plainSelect = (PlainSelect) iter.next();
-                visit(plainSelect);
-            }
+        Iterator iter = union.getPlainSelects().iterator();
+        if (iter.hasNext()) {
+            PlainSelect plainSelect = (PlainSelect) iter.next();
+            visit(plainSelect);
         }
     }
 
@@ -157,7 +131,7 @@ public class TablesFinder implements SelectVisitor, FromItemVisitor, ExpressionV
                 } else if (toCase == TO_CASE.UPPER) {
                     nameWithoutSchema = nameWithoutSchema.toUpperCase();
                 }
-                tables.put(nameWithoutSchema, table);
+                sources.put(nameWithoutSchema, table);
             }
         }
         if (toCase == TO_CASE.LOWER) {
@@ -165,12 +139,12 @@ public class TablesFinder implements SelectVisitor, FromItemVisitor, ExpressionV
         } else if (toCase == TO_CASE.UPPER) {
             tableWholeName = tableWholeName.toUpperCase();
         }
-        tables.put(tableWholeName, table);
+        sources.put(tableWholeName, table);
     }
 
     @Override
     public void visit(SubSelect subSelect) {
-        subSelect.getSelectBody().accept(this);
+        sources.put(subSelect.getAliasName(), subSelect);
     }
 
     @Override

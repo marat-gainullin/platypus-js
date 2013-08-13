@@ -172,7 +172,7 @@ function colorDialog(title, color) {
         }
         var chooser = javax.swing.JColorChooser;
         var res = chooser.showDialog(window, title, color);
-        result = res ? res : null;
+        result = res ? new com.eas.client.scripts.ScriptColor(res) : null;
     }     
 
     if (isEventThread()) {

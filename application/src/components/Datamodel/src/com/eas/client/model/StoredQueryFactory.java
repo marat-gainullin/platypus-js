@@ -28,7 +28,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.xml.parsers.ParserConfigurationException;
 import net.sf.jsqlparser.ResultsFinder;
-import net.sf.jsqlparser.TablesFinder;
+import net.sf.jsqlparser.SourcesFinder;
 import net.sf.jsqlparser.parser.*;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
@@ -41,6 +41,14 @@ import org.w3c.dom.Document;
  * @author pk begining. mg full refactoring inside second version.
  */
 public class StoredQueryFactory {
+
+    private Fields processSubQuery(SqlQuery aQuery, SubSelect aSubSelect) throws Exception {
+        SqlQuery subQuery = new SqlQuery(aQuery.getClient(), aQuery.getDbId(), "");
+        subQuery.setEntityId(aSubSelect.getAliasName());
+        resolveOutputFieldsFromTables(subQuery, aSubSelect.getSelectBody());
+        Fields subFields = subQuery.getFields();
+        return subFields;
+    }
 
     protected class StoredQueryCache extends FreqCache<String, ActualCacheEntry<SqlQuery>> {
 
@@ -119,13 +127,13 @@ public class StoredQueryFactory {
         }
     }
 
-    public static Map<String, Table> prepareUniqueTables(Map<String, Table> tables) {
-        Map<String, Table> uniqueTables = new HashMap<>();
-        for (Table table : tables.values()) {
-            if (table.getAlias() != null && !table.getAlias().getName().isEmpty()) {
-                uniqueTables.put(table.getAlias().getName().toLowerCase(), table);
-            } else {
-                uniqueTables.put(table.getWholeTableName().toLowerCase(), table);
+    public static Map<String, FromItem> prepareUniqueTables(Map<String, FromItem> tables) {
+        Map<String, FromItem> uniqueTables = new HashMap<>();
+        for (FromItem fromItem : tables.values()) {
+            if (fromItem.getAlias() != null && !fromItem.getAlias().getName().isEmpty()) {
+                uniqueTables.put(fromItem.getAlias().getName().toLowerCase(), fromItem);
+            } else if (fromItem instanceof Table) {
+                uniqueTables.put(((Table) fromItem).getWholeTableName().toLowerCase(), fromItem);
             }
         }
         return uniqueTables;
@@ -518,8 +526,7 @@ public class StoredQueryFactory {
         Statement parsedQuery = parserManager.parse(new StringReader(aQuery.getSqlText()));
         if (parsedQuery instanceof Select) {
             Select select = (Select) parsedQuery;
-            Map<String, Table> tables = TablesFinder.getTablesMap(TablesFinder.TO_CASE.LOWER, select, false);
-            resolveOutputFieldsFromTables(aQuery, select, tables);
+            resolveOutputFieldsFromTables(aQuery, select.getSelectBody());
             return true;
         }
         return false;
@@ -534,18 +541,35 @@ public class StoredQueryFactory {
         return aSqlText;
     }
 
-    private void resolveOutputFieldsFromTables(SqlQuery aQuery, Select select, Map<String, Table> tables) throws Exception {
-        for (SelectItem sItem : ResultsFinder.getResults(select)) {
+    private void resolveOutputFieldsFromTables(SqlQuery aQuery, SelectBody aSelectBody) throws Exception {
+        Map<String, FromItem> sources = SourcesFinder.getSourcesMap(SourcesFinder.TO_CASE.LOWER, aSelectBody);
+        for (SelectItem sItem : ResultsFinder.getResults(aSelectBody)) {
             if (sItem instanceof AllColumns) {// *
-                Map<String, Table> uniqueTables = prepareUniqueTables(tables);
-                for (Table table : uniqueTables.values()) {
-                    addTableFieldsToSelectResults(aQuery, table);
+                Map<String, FromItem> uniqueTables = prepareUniqueTables(sources);
+                for (FromItem source : uniqueTables.values()) {
+                    if (source instanceof Table) {
+                        addTableFieldsToSelectResults(aQuery, (Table) source);
+                    } else if (source instanceof SubSelect) {
+                        Fields subFields = processSubQuery(aQuery, (SubSelect) source);
+                        Fields destFields = aQuery.getFields();
+                        for (Field field : subFields.toCollection()) {
+                            destFields.add(field);
+                        }
+                    }
                 }
             } else if (sItem instanceof AllTableColumns) {// t.*
                 AllTableColumns cols = (AllTableColumns) sItem;
                 assert cols.getTable() != null : "<table>.* syntax must lead to .getTable() != null";
-                Table fromTable = tables.get(cols.getTable().getWholeTableName().toLowerCase());
-                addTableFieldsToSelectResults(aQuery, fromTable);
+                FromItem source = sources.get(cols.getTable().getWholeTableName().toLowerCase());
+                if (source instanceof Table) {
+                    addTableFieldsToSelectResults(aQuery, (Table) source);
+                } else if (source instanceof SubSelect) {
+                    Fields subFields = processSubQuery(aQuery, (SubSelect) source);
+                    Fields destFields = aQuery.getFields();
+                    for (Field field : subFields.toCollection()) {
+                        destFields.add(field);
+                    }
+                }
             } else {
                 assert sItem instanceof SelectExpressionItem;
                 SelectExpressionItem col = (SelectExpressionItem) sItem;
@@ -562,8 +586,9 @@ public class StoredQueryFactory {
                  field = resolveFieldByColumn(aQuery, (Column) firstArg, col, tables);
                  }
                  }
-                 } else */ if (col.getExpression() instanceof Column) {
-                    field = resolveFieldByColumn(aQuery, (Column) col.getExpression(), col, tables);
+                 } else */
+                if (col.getExpression() instanceof Column) {
+                    field = resolveFieldByColumn(aQuery, (Column) col.getExpression(), col, sources);
                 } else // free expression like a ...,'text' as txt,...
                 {
                     field = null;
@@ -589,7 +614,11 @@ public class StoredQueryFactory {
                             : (col.getExpression() instanceof Column ? ((Column) col.getExpression()).getColumnName() : ""));
 
                     // Such field is absent in database tables and so, field's table is the processed query.
-                    field.setTableName(ClientConstants.QUERY_ID_PREFIX + aQuery.getEntityId().toString());
+                    if (Character.isDigit(aQuery.getEntityId().charAt(0))) {
+                        field.setTableName(ClientConstants.QUERY_ID_PREFIX + aQuery.getEntityId());
+                    } else {
+                        field.setTableName(aQuery.getEntityId());
+                    }
                     /**
                      * There is an unsolved problem about type of the
                      * expression. This might be solved using manually setted up
@@ -634,19 +663,24 @@ public class StoredQueryFactory {
         return getTablyFields(aDbId, aTable.getWholeTableName());
     }
 
-    private Field resolveFieldByColumn(SqlQuery aQuery, Column column, SelectExpressionItem selectItem, Map<String, Table> tables) throws Exception {
-        Table fromTable = null;// Это таблица парсера - источник данных в составе запроса.
+    private Field resolveFieldByColumn(SqlQuery aQuery, Column column, SelectExpressionItem selectItem, Map<String, FromItem> aSources) throws Exception {
+        FromItem source = null;// Это таблица парсера - источник данных в составе запроса.
         Field field = null;
         if (column.getTable() != null && column.getTable().getWholeTableName() != null) {
-            fromTable = tables.get(column.getTable().getWholeTableName().toLowerCase());
-            if (fromTable != null) {
-                /**
-                 * Таблица поля, предоставляемая парсером никак не связана с
-                 * таблицей из списка from. Поэтому мы должны связать их
-                 * самостоятельно. Такая вот особенность парсера.
-                 */
-                Fields fields = getTableFields(aQuery.getDbId(), fromTable);
-                field = fields.get(column.getColumnName());
+            source = aSources.get(column.getTable().getWholeTableName().toLowerCase());
+            if (source != null) {
+                if (source instanceof Table) {
+                    /**
+                     * Таблица поля, предоставляемая парсером никак не связана с
+                     * таблицей из списка from. Поэтому мы должны связать их
+                     * самостоятельно. Такая вот особенность парсера.
+                     */
+                    Fields tableFields = getTableFields(aQuery.getDbId(), (Table) source);
+                    field = tableFields.get(column.getColumnName());
+                } else if (source instanceof SubSelect) {
+                    Fields subFields = processSubQuery(aQuery, (SubSelect) source);
+                    field = subFields.get(column.getColumnName());
+                }
             }
         }
         if (field == null) {
@@ -656,12 +690,19 @@ public class StoredQueryFactory {
              * как и в первой версии поищем первую таблицу, содержащую поле с
              * таким именем.
              */
-            for (Table table : tables.values()) {
-                Fields fields = getTableFields(aQuery.getDbId(), table);
-                field = fields.get(column.getColumnName());
-                if (field != null) {
-                    fromTable = table;
-                    break;
+            for (FromItem anySource : aSources.values()) {
+                Fields fields = null;
+                if (anySource instanceof Table) {
+                    fields = getTableFields(aQuery.getDbId(), (Table) anySource);
+                } else if (anySource instanceof SubSelect) {
+                    fields = processSubQuery(aQuery, (SubSelect) anySource);
+                }
+                if (fields != null) {
+                    field = fields.get(column.getColumnName());
+                    if (field != null) {
+                        source = anySource;
+                        break;
+                    }
                 }
             }
         }
@@ -692,13 +733,13 @@ public class StoredQueryFactory {
              * чтобы в редакторе запросов было хорошо видно откуда взялось поле.
              */
             if (preserveDatasources) {
-                boolean aliasPresent = fromTable.getAlias() != null && !fromTable.getAlias().getName().isEmpty();
+                boolean aliasPresent = source.getAlias() != null && !source.getAlias().getName().isEmpty();
                 if (aliasPresent) {
-                    copied.setTableName(fromTable.getAlias().getName());
+                    copied.setTableName(source.getAlias().getName());
                     copied.setSchemaName(null);
-                } else {
-                    copied.setTableName(fromTable.getName());
-                    copied.setSchemaName(fromTable.getSchemaName());
+                } else if (source instanceof Table) {
+                    copied.setTableName(((Table) source).getName());
+                    copied.setSchemaName(((Table) source).getSchemaName());
                 }
                 /**
                  * Заменять имя оригинальной таблицы нельзя, особенно если это
