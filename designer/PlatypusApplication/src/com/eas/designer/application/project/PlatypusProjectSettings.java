@@ -6,6 +6,7 @@ package com.eas.designer.application.project;
 
 import com.eas.deploy.project.PlatypusSettings;
 import java.beans.PropertyChangeSupport;
+import java.util.logging.Level;
 
 /**
  *
@@ -18,12 +19,36 @@ public interface PlatypusProjectSettings {
     PropertyChangeSupport getChangeSupport();
 
     /**
-     * Gets application server's host.
+     * Gets the application server's host.
      *
      * @return Url string
      */
     String getClientUrl();
 
+    /**
+     * Gets the log level for Platypus Client.
+     * @return Log level value
+     */
+     Level getClientLogLevel();
+     
+     /**
+      * Sets a log level for Platypus Client.
+      * @param aValue Log level value
+      */
+     void setClientLogLevel(Level aValue);
+     
+     /**
+     * Gets the log level for Platypus Server.
+     * @return Log level value
+     */
+     Level getServerLogLevel();
+     
+     /**
+      * Sets a log level for Platypus Server.
+      * @param aValue Log level value
+      */
+     void setServerLogLevel(Level aValue);
+    
     /**
      * Gets JMX debugging port for Platypus Client on local computer on
      * development if null or empty, use default value.
@@ -39,7 +64,7 @@ public interface PlatypusProjectSettings {
      * @return JMX debugging port
      */
     int getDebugServerPort();
-
+    
     /**
      * Gets the project's display name.
      *

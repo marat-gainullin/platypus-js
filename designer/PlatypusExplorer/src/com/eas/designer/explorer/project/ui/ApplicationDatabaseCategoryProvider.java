@@ -15,7 +15,7 @@ import org.openide.util.NbBundle;
  *
  * @author mg
  */
-@ProjectCustomizer.CompositeCategoryProvider.Registration(category = "applicationdatabase", categoryLabel = "#applicationdatabase", projectType = "org-netbeans-modules-platypus", position=10)
+@ProjectCustomizer.CompositeCategoryProvider.Registration(category = "applicationdatabase", categoryLabel = "#applicationdatabase", projectType = "org-netbeans-modules-platypus", position=20)
 public class ApplicationDatabaseCategoryProvider implements ProjectCustomizer.CompositeCategoryProvider {
 
     @Override

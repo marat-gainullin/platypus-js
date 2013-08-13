@@ -15,7 +15,7 @@ import org.openide.util.NbBundle;
  *
  * @author mg
  */
-@ProjectCustomizer.CompositeCategoryProvider.Registration(category = "running", categoryLabel = "#running", projectType = "org-netbeans-modules-platypus", position=20)
+@ProjectCustomizer.CompositeCategoryProvider.Registration(category = "running", categoryLabel = "#running", projectType = "org-netbeans-modules-platypus", position=10)
 public class RunningCategoryProvider implements ProjectCustomizer.CompositeCategoryProvider {
 
     @Override
