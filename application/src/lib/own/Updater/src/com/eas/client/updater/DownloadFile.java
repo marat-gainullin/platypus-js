@@ -38,9 +38,9 @@ public class DownloadFile {
     private boolean showProgress = true;
     private UpdProgress updVis;
 
-    public DownloadFile(String url, String fileName) {
-        link = url;
-        fName = FileUpdater.fixFileSeparatorChar(fileName);
+    public DownloadFile(String aSourceUrl, String aDestFileName) {
+        link = aSourceUrl;
+        fName = FileUpdater.fixFileSeparatorChar(aDestFileName);
     }
 
     /**

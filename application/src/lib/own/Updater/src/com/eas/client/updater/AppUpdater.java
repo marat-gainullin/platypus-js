@@ -69,7 +69,7 @@ public class AppUpdater {
     }
 
     /**
-     * 
+     *
      * @param fNameCfg
      * @param cfgUrl
      * @param appFlsUrl
@@ -81,14 +81,14 @@ public class AppUpdater {
         fileTmpUpdate = "";
         startDir = "";
     }
-   
+
     /**
-     * 
+     *
      * @param fNameCfg
      * @param cfgUrl
      * @param appFlsUrl
      * @param homeDir
-     * @param tmpFileName  
+     * @param tmpFileName
      */
     public AppUpdater(String fNameCfg, String cfgUrl, String appFlsUrl, String homeDir, String tmpFileName) {
         fNameConfig = FileUpdater.fixFileSeparatorChar(fNameCfg);
@@ -99,7 +99,7 @@ public class AppUpdater {
     }
 
     /**
-     * 
+     *
      */
     public AppUpdater() {
         fNameConfig = "";
@@ -108,7 +108,7 @@ public class AppUpdater {
     }
 
     /**
-     * 
+     *
      * @return
      */
     public byte checkNewVersion() {
@@ -154,15 +154,15 @@ public class AppUpdater {
                 return UpdaterConstants.ERROR;
             }
         } else {
-             return UpdaterConstants.ERROR;
+            return UpdaterConstants.ERROR;
         }
         return UpdaterConstants.NOT_NEED_UPDATE;
     }
+
     /**
-     * 
-     * @return True if operation was successfull.
+     *
      */
-    public boolean doUpdateEx() {
+    public void doUpdateEx() {
         if ((!"".equals(fNameConfig)) && (!"".equals(configUrl)) && (!"".equals(appFilesUrl))) {
             try {
                 Document docto = XMLVersion.getDocumentFile(fNameConfig);
@@ -175,7 +175,7 @@ public class AppUpdater {
                     Version vTo = XMLVersion.getDocVersion(docto);
                     Version vFrom = XMLVersion.getDocVersion(docfrom);
                     if ((updVis != null) && (vTo != null) && (vFrom != null)) {
-                        updVis.getVersion().setText(String.format(Updater.res.getString("captionDetail"), vTo.toString(),vFrom.toString()));
+                        updVis.getVersion().setText(String.format(Updater.res.getString("captionDetail"), vTo.toString(), vFrom.toString()));
                         updVis.run();
                     } else {
                         Logger.getLogger(UpdaterConstants.LOGGER_NAME).log(Level.WARNING, "One of version object is null!!!");
@@ -184,22 +184,16 @@ public class AppUpdater {
                     if (updVis != null) {
                         fu.setUpdVis(updVis);
                     }
-                    boolean uaf = fu.updateFile(fileTmpUpdate);
-                    if (uaf) {
+                    if (fu.update(fileTmpUpdate)) {
                         df.saveDocument(docfrom, fNameConfig);
                     }
                     updVis.dispose();
-                    return uaf;
                 } else {
                     Logger.getLogger(UpdaterConstants.LOGGER_NAME).log(Level.SEVERE, String.format(Updater.res.getString("fileNotLoad"), configUrl));
-                    return false;
-                }      
+                }
             } catch (Exception e) {
                 Logger.getLogger(UpdaterConstants.LOGGER_NAME).log(Level.SEVERE, e.getLocalizedMessage(), e);
-                return false;
             }
-        } else {
-            return false;
         }
     }
 

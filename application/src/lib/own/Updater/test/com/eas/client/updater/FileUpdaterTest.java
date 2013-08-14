@@ -15,23 +15,25 @@ import static org.junit.Assert.*;
 public class FileUpdaterTest {
 
     /**
-     * Test of updateFile method, of class FileUpdater.
+     * Test of update method, of class FileUpdater.
      */
     @Test
     public void testUpdateFile_String() {
         System.out.println("Download and unzip files");
-        String link = "http://olympic.altsoft.biz/platypus/client/updates/app.zip";
+        String link = "http://research.office.altsoft.biz/platypus/client/updates/application.zip";
         String fname = "app.zip";
-        boolean repdlg = false;
         DownloadFile df=new DownloadFile(link, fname);
         df.setShowReplaceDlg(false);
         df.setShowProgress(false);
         df.downloadFileHttpLink();
-        FileUpdater instance = new FileUpdater("http://olympic/platypus/client/updates/app.zip","");
+        FileUpdater instance = new FileUpdater(link, "");
         boolean expResult = true;
+        File updater = new File("lib\\own\\Updater-new.jar");
+        updater.mkdirs();
         boolean result = instance.unPackZip(fname);
-        File f=new File("app.txt");
+        File f = new File("app.txt");
         f.delete();
+        updater.delete();
         assertEquals(expResult, result);
     }
 }
