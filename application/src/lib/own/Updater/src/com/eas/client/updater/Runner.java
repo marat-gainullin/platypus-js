@@ -27,10 +27,9 @@ public class Runner {
                 return false;
             }
             try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream(),"Cp866"))) {
-                String s = "";
+                String s;
                 s = bufferedReader.readLine();
                 while (s != null) {
-                    s="";  
                     s = bufferedReader.readLine();
                     //Нужно вычитывать поток для того что бы приложение точно запустилось под Linux
                 }

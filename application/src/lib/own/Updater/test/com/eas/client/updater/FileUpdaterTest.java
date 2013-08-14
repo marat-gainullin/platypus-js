@@ -5,8 +5,8 @@
 package com.eas.client.updater;
 
 import java.io.File;
-import org.junit.Test;
 import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
@@ -28,11 +28,12 @@ public class FileUpdaterTest {
         df.downloadFileHttpLink();
         FileUpdater instance = new FileUpdater(link, "");
         boolean expResult = true;
-        File updater = new File("lib\\own\\Updater-new.jar");
+        File updater = new File("lib\\own");
         updater.mkdirs();
         boolean result = instance.unPackZip(fname);
         File f = new File("app.txt");
         f.delete();
+        updater = new File("lib\\own\\Updater-new.jar");
         updater.delete();
         assertEquals(expResult, result);
     }

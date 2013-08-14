@@ -51,7 +51,7 @@ public class DownloadFile {
         if ("".equals(getLink())) {
             setLink("http://" + getHost() + "/" + getContentName());
         }
-        InputStream in = null;
+        InputStream in;
         try {
             if (getLink().indexOf("http") == -1) {
                 Logger.getLogger(UpdaterConstants.LOGGER_NAME).log(Level.SEVERE, Updater.res.getString("badURL"));
@@ -146,7 +146,7 @@ public class DownloadFile {
                 }
             }
             out = new FileOutputStream(getFName());
-            int cnt = 0;
+            int cnt;
             int val = 0;
             byte[] data = new byte[UpdaterConstants.BUFFER_SIZE]; 
             while ((cnt = in.read(data, 0, data.length)) != -1) {

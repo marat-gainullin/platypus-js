@@ -107,9 +107,7 @@ public class XMLVersion {
             Logger.getLogger(UpdaterConstants.LOGGER_NAME).log(Level.ALL, Updater.res.getString("couldNotGetVersion"));
             return null;
         }
-        String st = "";
-        st = n.getNodeValue();
-        return new Version(st);
+        return new Version(n.getNodeValue());
     }
 
     /**

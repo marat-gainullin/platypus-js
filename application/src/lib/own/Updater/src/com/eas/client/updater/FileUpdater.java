@@ -49,23 +49,6 @@ public class FileUpdater {
     }
 
     /**
-     *
-     * @param in input stream with data
-     * @param out output stream to save data to file
-     * @throws IOException
-     */
-    public static void write(InputStream in, OutputStream out)
-            throws IOException {
-        byte[] buffer = new byte[UpdaterConstants.BUFFER_SIZE];
-        int len = 0;
-        while ((len = in.read(buffer)) >= 0) {
-            out.write(buffer, 0, len);
-        }
-        in.close();
-        out.close();
-    }
-
-    /**
      * Fixes the file sperator char for the target platform using the following
      * replacement.
      *
@@ -92,16 +75,16 @@ public class FileUpdater {
 
     /**
      *
-     * @param zfn
+     * @param aZipFileName
      * @return
      */
-    public boolean unPackZip(String zfn) {
+    public boolean unPackZip(String aZipFileName) {
         try {
-            File f = new File(zfn);
+            File f = new File(aZipFileName);
             if (f.exists()) {
                 boolean res = true;
-                try (ZipFile zf = new ZipFile(zfn)) {
-                    String curFName = "";
+                try (ZipFile zf = new ZipFile(aZipFileName)) {
+                    String curFName;
                     Enumeration entries = zf.entries();
                     int cnt = 0;
                     if (updVis != null) {
@@ -122,31 +105,26 @@ public class FileUpdater {
                         curFName = fixFileSeparatorChar(curFName);
                         if (!entry.isDirectory()) {
                             File ff = new File(curFName);
-                            if ((!ff.exists()) && (ff.getParent() != null) && (!ff.getName().contains(UpdaterConstants.UPDATER_FIND_LABEL))
-                                    && (!ff.getPath().contains(pwcDirName))) {
+                            if ((ff.exists()) && (!ff.canWrite())) {
+                                res = false;
                                 cnt++;
-                                Logger.getLogger(UpdaterConstants.LOGGER_NAME).log(Level.WARNING, "{0}: {1}", new Object[]{String.format(Updater.res.getString("fileNotFound"), ff.getName()), curFName});
+                                Logger.getLogger(UpdaterConstants.LOGGER_NAME).log(Level.WARNING, String.format(Updater.res.getString("couldNotCreateFile"), ff.getName()));
                                 continue;
-                            } else {
-                                if ((ff.exists()) && (!ff.canWrite())) {
-                                    res = false;
-                                    cnt++;
-                                    Logger.getLogger(UpdaterConstants.LOGGER_NAME).log(Level.WARNING, String.format(Updater.res.getString("couldNotCreateFile"), ff.getName()));
-                                    continue;
-                                }
                             }
                             if (ff.getPath().contains(pwcDirName)) {
                                 ff.getParentFile().mkdirs();
                                 if (ff.createNewFile()) {
-                                    write(zf.getInputStream(entry), new BufferedOutputStream(new FileOutputStream(curFName)));
+                                    extractEntry(zf, entry, curFName);
                                 } else {
-                                    Logger.getLogger(UpdaterConstants.LOGGER_NAME).log(Level.WARNING, ff.getPath());
+                                    Logger.getLogger(UpdaterConstants.LOGGER_NAME).log(Level.WARNING, String.format(Updater.res.getString("couldNotCreateFile"), ff.getName()));
                                 }
                             } else {
-                                if (curFName.contains(UpdaterConstants.UPDATER_FIND_LABEL)){
+                                if (curFName.contains(UpdaterConstants.UPDATER_FIND_LABEL)) {
                                     ff.createNewFile();
                                 }
-                                write(zf.getInputStream(entry), new BufferedOutputStream(new FileOutputStream(curFName)));
+                                if (ff.exists()) {
+                                    extractEntry(zf, entry, curFName);
+                                }
                             }
                         } else {
                             if (curFName.equalsIgnoreCase(pwcDirName)) {
@@ -172,7 +150,7 @@ public class FileUpdater {
             Logger.getLogger(UpdaterConstants.LOGGER_NAME).log(Level.SEVERE, e.getLocalizedMessage(), e);
             return false;
         } finally {
-            File f = new File(zfn);
+            File f = new File(aZipFileName);
             if (f.exists()) {
                 f.delete();
             }
@@ -182,9 +160,21 @@ public class FileUpdater {
         }
     }
 
+    private void extractEntry(ZipFile aZipFile, ZipEntry aEntry, String aDestFileName) throws IOException {
+        try (InputStream source = aZipFile.getInputStream(aEntry); OutputStream destination = new BufferedOutputStream(new FileOutputStream(aDestFileName))) {
+            byte[] buffer = new byte[UpdaterConstants.BUFFER_SIZE];
+            int len;
+            while ((len = source.read(buffer)) >= 0) {
+                destination.write(buffer, 0, len);
+            }
+        }
+
+    }
+
     /**
      *
-     * @param aPakageLocalFileName File name to download zip file with update files to.
+     * @param aPakageLocalFileName File name to download zip file with update
+     * files to.
      * @return
      */
     public boolean update(String aPakageLocalFileName) {
