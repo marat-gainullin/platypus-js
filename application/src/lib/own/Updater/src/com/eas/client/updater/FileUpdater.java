@@ -49,23 +49,6 @@ public class FileUpdater {
     }
 
     /**
-     *
-     * @param in input stream with data
-     * @param out output stream to save data to file
-     * @throws IOException
-     */
-    public static void write(InputStream in, OutputStream out)
-            throws IOException {
-        byte[] buffer = new byte[UpdaterConstants.BUFFER_SIZE];
-        int len = 0;
-        while ((len = in.read(buffer)) >= 0) {
-            out.write(buffer, 0, len);
-        }
-        in.close();
-        out.close();
-    }
-
-    /**
      * Fixes the file sperator char for the target platform using the following
      * replacement.
      *
@@ -89,80 +72,74 @@ public class FileUpdater {
             throw new IOException("Failed to delete file: " + f); // NOI18N
         }
     }
-    
+
     /**
      *
-     * @param zfn
+     * @param aZipFileName
      * @return
      */
-    public boolean unPackZip(String zfn) {
-        ZipFile zf = null;
+    public boolean unPackZip(String aZipFileName) {
         try {
-            File f = new File(zfn);
+            File f = new File(aZipFileName);
             if (f.exists()) {
-                zf = new ZipFile(zfn);
-                boolean res = false;
-                String curFName = "";
-                String curPath = "";
-                File ff = null;
-                File fd = null;
-                Enumeration entries = zf.entries();
-                int cnt = 0;
-                res = true;
-                if (updVis != null) {
-                    updVis.getProgress().setValue(0);
-                    updVis.getProgress().setMinimum(0);
-                    Enumeration entr = zf.entries();
-                    while (entr.hasMoreElements()) {
-                        cnt++;
-                        entr.nextElement();
-                    }
-                    updVis.getProgress().setMaximum(cnt);
-                }
-                cnt = 0;
-                String pwcDir = fixFileSeparatorChar(curDir + PWC_DIRECTORY);
-                while (entries.hasMoreElements()) {
-                    ZipEntry entry = (ZipEntry) entries.nextElement();
-                    curFName = curDir + entry.getName();
-                    curFName = fixFileSeparatorChar(curFName);
-                    if (!entry.isDirectory()) {
-                        ff = new File(curFName);
-                        if ((!ff.exists()) && (ff.getParent() != null) && (!ff.getName().contains(UpdaterConstants.UPDATER_FIND_LABEL))
-                                && (!ff.getPath().contains(pwcDir))) {
+                boolean res = true;
+                try (ZipFile zf = new ZipFile(aZipFileName)) {
+                    String curFName;
+                    Enumeration entries = zf.entries();
+                    int cnt = 0;
+                    if (updVis != null) {
+                        updVis.getProgress().setValue(0);
+                        updVis.getProgress().setMinimum(0);
+                        Enumeration entr = zf.entries();
+                        while (entr.hasMoreElements()) {
                             cnt++;
-                            Logger.getLogger(UpdaterConstants.LOGGER_NAME).log(Level.WARNING, "{0}|{1}", new Object[]{String.format(Updater.res.getString("fileNotFound"), ff.getName()), curFName});
-                            continue;
-                        } else {
+                            entr.nextElement();
+                        }
+                        updVis.getProgress().setMaximum(cnt);
+                    }
+                    cnt = 0;
+                    String pwcDirName = fixFileSeparatorChar(curDir + PWC_DIRECTORY);
+                    while (entries.hasMoreElements()) {
+                        ZipEntry entry = (ZipEntry) entries.nextElement();
+                        curFName = curDir + entry.getName();
+                        curFName = fixFileSeparatorChar(curFName);
+                        if (!entry.isDirectory()) {
+                            File ff = new File(curFName);
                             if ((ff.exists()) && (!ff.canWrite())) {
                                 res = false;
                                 cnt++;
                                 Logger.getLogger(UpdaterConstants.LOGGER_NAME).log(Level.WARNING, String.format(Updater.res.getString("couldNotCreateFile"), ff.getName()));
                                 continue;
                             }
-                        }
-                        if (ff.getPath().contains(pwcDir)) {
-                            ff.getParentFile().mkdirs();
-                            if (ff.createNewFile()) {
-                                write(zf.getInputStream(entry), new BufferedOutputStream(new FileOutputStream(curFName)));
+                            if (ff.getPath().contains(pwcDirName)) {
+                                ff.getParentFile().mkdirs();
+                                if (ff.createNewFile()) {
+                                    extractEntry(zf, entry, curFName);
+                                } else {
+                                    Logger.getLogger(UpdaterConstants.LOGGER_NAME).log(Level.WARNING, String.format(Updater.res.getString("couldNotCreateFile"), ff.getName()));
+                                }
                             } else {
-                                Logger.getLogger(UpdaterConstants.LOGGER_NAME).log(Level.WARNING, ff.getPath());
+                                if (curFName.contains(UpdaterConstants.UPDATER_FIND_LABEL)) {
+                                    ff.createNewFile();
+                                }
+                                if (ff.exists()) {
+                                    extractEntry(zf, entry, curFName);
+                                }
                             }
                         } else {
-                            write(zf.getInputStream(entry), new BufferedOutputStream(new FileOutputStream(curFName)));
-                        }
-                    } else {
-                        if (curFName.equalsIgnoreCase(pwcDir)) {
-                            ff = new File(curFName);
-                            if (ff.exists()) {
-                                for (File c : ff.listFiles()) {
-                                    delete(c);
+                            if (curFName.equalsIgnoreCase(pwcDirName)) {
+                                File pwcDir = new File(curFName);
+                                if (pwcDir.exists()) {
+                                    for (File c : pwcDir.listFiles()) {
+                                        delete(c);
+                                    }
                                 }
                             }
                         }
-                    }
-                    cnt++;
-                    if (updVis != null) {
-                        updVis.getProgress().setValue(cnt);
+                        cnt++;
+                        if (updVis != null) {
+                            updVis.getProgress().setValue(cnt);
+                        }
                     }
                 }
                 return res;
@@ -173,52 +150,55 @@ public class FileUpdater {
             Logger.getLogger(UpdaterConstants.LOGGER_NAME).log(Level.SEVERE, e.getLocalizedMessage(), e);
             return false;
         } finally {
-            try {
-                zf.close();
-                File f = new File(zfn);
-                if (f.exists()) {
-                    f.delete();
-                }
-                if (updVis != null) {
-                    updVis.getProgress().setValue(0);
-                }
-            } catch (IOException ex) {
-                Logger.getLogger(UpdaterConstants.LOGGER_NAME).log(Level.SEVERE, ex.getLocalizedMessage(), ex);
+            File f = new File(aZipFileName);
+            if (f.exists()) {
+                f.delete();
+            }
+            if (updVis != null) {
+                updVis.getProgress().setValue(0);
             }
         }
     }
 
+    private void extractEntry(ZipFile aZipFile, ZipEntry aEntry, String aDestFileName) throws IOException {
+        try (InputStream source = aZipFile.getInputStream(aEntry); OutputStream destination = new BufferedOutputStream(new FileOutputStream(aDestFileName))) {
+            byte[] buffer = new byte[UpdaterConstants.BUFFER_SIZE];
+            int len;
+            while ((len = source.read(buffer)) >= 0) {
+                destination.write(buffer, 0, len);
+            }
+        }
+
+    }
+
     /**
      *
-     * @param fn file name to download zip file with update files
+     * @param aPakageLocalFileName File name to download zip file with update
+     * files to.
      * @return
      */
-    public boolean updateFile(String fn) {
+    public boolean update(String aPakageLocalFileName) {
         try {
-            boolean res = false;
-            String str = "";
-            if ("".equals(fn)) {
-                str = UpdaterConstants.TMP_FILE;
-            } else {
-                str = fn;
+            if (aPakageLocalFileName == null || aPakageLocalFileName.isEmpty()) {
+                aPakageLocalFileName = UpdaterConstants.TMP_FILE;
             }
             if (updVis != null) {
                 updVis.getProgress().setString(Updater.res.getString("operationDownload"));
                 updVis.getStep().setText("1/2");
             }
-            DownloadFile df = new DownloadFile(hostToFiles, str);
+            DownloadFile df = new DownloadFile(hostToFiles, aPakageLocalFileName);
             if (updVis != null) {
                 df.setUpdVis(updVis);
             }
             df.setShowReplaceDlg(false);
             df.setShowProgress(true);
-            res = df.downloadFileHttpLink();
+            boolean res = df.downloadFileHttpLink();
             if (res) {
                 if (updVis != null) {
                     updVis.getProgress().setString(Updater.res.getString("operationUnZip"));
                     updVis.getStep().setText("2/2");
                 }
-                return unPackZip(str);
+                return unPackZip(aPakageLocalFileName);
             } else {
                 Logger.getLogger(UpdaterConstants.LOGGER_NAME).log(Level.WARNING, String.format(Updater.res.getString("fileNotLoad"), hostToFiles));
                 return res;
