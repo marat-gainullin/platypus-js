@@ -16,8 +16,6 @@ import com.eas.server.PlatypusServerCore;
 import com.eas.server.PositioningPacketStorage;
 import com.eas.server.ServerScriptRunner;
 import java.net.InetSocketAddress;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.mina.core.future.ConnectFuture;
@@ -48,29 +46,24 @@ public class PositioningPacketReciever implements PacketReciever {
     }
 
     @Override
-    public Object received(PositioningPacket aPacket) {
+    public Object received(PositioningPacket aPacket) throws Exception {
+        ServerScriptRunner module = serverCore.getSessionManager().getSystemSession().getModule(moduleId);
+        if (module == null) {
+            module = new ServerScriptRunner(serverCore, serverCore.getSessionManager().getSystemSession(), moduleId, ScriptRunner.initializePlatypusStandardLibScope(), serverCore, serverCore, new Object[]{});
+        }
+        module.execute();
+        serverCore.getSessionManager().setCurrentSession(serverCore.getSessionManager().getSystemSession());
+        Object result;
         try {
-            ServerScriptRunner module = null;
-            module = serverCore.getSessionManager().getSystemSession().getModule(moduleId);
-            if (module == null) {
-                module = new ServerScriptRunner(serverCore, serverCore.getSessionManager().getSystemSession(), moduleId, ScriptRunner.initializePlatypusStandardLibScope(), serverCore, serverCore, new Object[]{});
-            }
-            module.execute();
-            serverCore.getSessionManager().setCurrentSession(serverCore.getSessionManager().getSystemSession());
-            Object result;
-            try {
-                result = module.executeMethod(RECIEVER_METHOD_NAME, new Object[]{aPacket});
-            } finally {
-                serverCore.getSessionManager().setCurrentSession(null);
-            }
-            if (result != null) {
-                result = ScriptUtils.js2Java(result);
-                assert result instanceof String;
-                ServiceUrl url = new ServiceUrl((String) result);
-                send(aPacket, url.getHost(), url.getPort(), url.getProtocol());
-            }
-        } catch (Exception ex) {
-            Logger.getLogger(PositioningPacketReciever.class.getName()).log(Level.SEVERE, null, ex);
+            result = module.executeMethod(RECIEVER_METHOD_NAME, new Object[]{aPacket});
+        } finally {
+            serverCore.getSessionManager().setCurrentSession(null);
+        }
+        if (result != null) {
+            result = ScriptUtils.js2Java(result);
+            assert result instanceof String;
+            ServiceUrl url = new ServiceUrl((String) result);
+            send(aPacket, url.getHost(), url.getPort(), url.getProtocol());
         }
         return null;
     }
@@ -96,8 +89,9 @@ public class PositioningPacketReciever implements PacketReciever {
                         retranslateSessions.put(imei, session);
                         WriteFuture write = session.write(aPacket);
                         write.awaitUninterruptibly(WAIT_SEND_TIMEOUT);
-                    }else
+                    } else {
                         connector.dispose();
+                    }
                 } else {
                     WriteFuture write = ioSession.write(aPacket);
                     write.awaitUninterruptibly(WAIT_SEND_TIMEOUT);
