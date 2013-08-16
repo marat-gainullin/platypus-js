@@ -58,6 +58,7 @@ public class JsCommentFormatter {
 
     private static final String PARAM_TAG = "@param"; //NOI18N
     private static final String RETURN_TAG = "@return"; //NOI18N
+    private static final String RETURNS_TAG = "@returns"; //NOI18N
     private static final String TYPE_TAG = "@type"; //NOI18N
     private static final String THROWS_TAG = "@throws"; //NOI18N
     private static final String DEPRECATED_TAG = "@deprecated"; //NOI18N
@@ -298,6 +299,8 @@ public class JsCommentFormatter {
         } else if (tag.startsWith(DESCRIPTION_TAG)) {
             String desc = tag.substring(DESCRIPTION_TAG.length()).trim();
             summary.insert(0, desc);
+        } else if (tag.startsWith(RETURNS_TAG)) {
+            returnTag = tag.substring(RETURNS_TAG.length()).trim();
         } else if (tag.startsWith(RETURN_TAG)) {
             returnTag = tag.substring(RETURN_TAG.length()).trim();
         } else if (tag.startsWith(TYPE_TAG)) {
