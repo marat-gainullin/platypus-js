@@ -51,7 +51,7 @@ public class ResultSetMetaDataImplTest {
         assertEquals(f3.getDescription(), "fDesc3");
         assertEquals(f3.getTypeInfo().getSqlType(), java.sql.Types.DECIMAL);
         Field f4 = new Field(f3);
-        assertEquals(f4, f3);
+        assertTrue(f4.isEqual(f3));
         f3.setNullable(false);
         f3.setPrecision(5);
         f3.setReadonly(true);
@@ -74,7 +74,7 @@ public class ResultSetMetaDataImplTest {
         Fields result = instance.clone();
         assertEquals(expResult.getFieldsCount(), result.getFieldsCount());
         for (int i = 0; i < expResult.getFieldsCount(); i++) {
-            assertEquals(expResult.get(i + 1), result.get(i + 1));
+            assertTrue(expResult.get(i + 1).isEqual(result.get(i + 1)));
         }
         fields = new ResultSetMetaDataImpl(instance);
     }

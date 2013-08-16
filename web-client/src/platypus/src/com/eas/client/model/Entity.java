@@ -58,7 +58,6 @@ import com.eas.client.Utils;
 import com.eas.client.application.Application;
 import com.eas.client.beans.PropertyChangeSupport;
 import com.eas.client.form.api.JSEvents;
-import com.eas.client.model.Model.ScriptEvent;
 import com.eas.client.queries.Query;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
@@ -83,26 +82,27 @@ public class Entity implements RowsetListener {
 	protected JavaScriptObject onFiltered;
 	// for runtime
 	protected List<Integer> filterConstraints = new ArrayList();
-	protected Cancellable pending;
-	protected Rowset rowset = null;
-	protected boolean filteredWhileAjusting = false;
-	protected Filter filter = null;
-	protected boolean userFiltering = false;
+	protected Reworkable pending;
+	protected boolean valid;
+	protected Rowset rowset;
+	protected boolean filteredWhileAjusting;
+	protected Filter filter;
+	protected boolean userFiltering;
 	protected Map<List<Integer>, Locator> userLocators = new HashMap();
 	// to preserve relation order
 	protected List<Relation> rtInFilterRelations;
-	protected int updatingCounter = 0;
+	protected int updatingCounter;
 	protected String title;
 	protected String name; // data source name
 	protected String entityId = String.valueOf((long) IDGenerator.genId());
 	protected String queryId;
-	protected Model model = null;
-	protected Query query = null;
+	protected Model model;
+	protected Query query;
 	protected Set<Relation> inRelations = new HashSet();
 	protected Set<Relation> outRelations = new HashSet();
 	protected Fields fields;
 	protected PropertyChangeSupport changeSupport;
-	protected List<CancellableCallback> abortedCallbacks = new ArrayList();
+	protected List<CancellableCallback> reworkedCallbacks = new ArrayList();
 
 	public Entity() {
 		super();
@@ -1447,9 +1447,10 @@ public class Entity implements RowsetListener {
 
 	public void refresh(final CancellableCallback onSuccess, Callback<String> onFailure) throws Exception {
 		if (model != null && model.isRuntime()) {
-			internalExecute(true, onSuccess, onFailure);
+			invalidate();
+			internalExecute(onSuccess, onFailure);
 			/*
-			 * internalExecute(true, new CancellableCallbackAdapter() {
+			 * internalExecute(new CancellableCallbackAdapter() {
 			 * 
 			 * @Override public void doWork() throws Exception {
 			 * onSuccess.run(); internalExecuteChildren(true); } });
@@ -1469,9 +1470,9 @@ public class Entity implements RowsetListener {
 
 	public void execute(final CancellableCallback onSuccess, Callback<String> onFailure) throws Exception {
 		if (model != null && model.isRuntime()) {
-			internalExecute(false, onSuccess, onFailure);
+			internalExecute(onSuccess, onFailure);
 			/*
-			 * internalExecute(false, new CancellableCallbackAdapter() {
+			 * internalExecute(new CancellableCallbackAdapter() {
 			 * 
 			 * @Override public void doWork() throws Exception {
 			 * onSuccess.run(); internalExecuteChildren(false); } });
@@ -1479,75 +1480,87 @@ public class Entity implements RowsetListener {
 		}
 	}
 
-	protected void internalExecute(boolean refresh, final CancellableCallback onSuccess, Callback<String> onFailure) throws Exception {
+	protected void internalExecute(final CancellableCallback onSuccess, final Callback<String> onFailure) throws Exception {
 		if (model != null && model.isRuntime()) {
 			assert query != null : QUERY_REQUIRED;
 			// try to select any data only within non-manual queries
 			// platypus manual queries are:
 			// - insert, update, delete queries;
-			// - stored procedures, witch changes data.
+			// - stored procedures, wich changes data.
 			if (!query.isManual()) {
-				if (refresh) {
-					uninstallUserFiltering();
-				}
 				// There might be entities - parameters values sources, with no
 				// data in theirs rowsets,
 				// so we can't bind query parameters to proper values. In the
 				// such case we initialize
 				// parameters values with RowsetUtils.UNDEFINED_SQL_VALUE
-				/*
-				 * final Map<String, Object> oldParamValues = new HashMap(); for
-				 * (int i = 1; i <= query.getParameters().getParametersCount();
-				 * i++) { Parameter p = query.getParameters().get(i);
-				 * oldParamValues.put(p.getName(), p.getValue()); }
-				 */
 				boolean parametersBinded = bindQueryParameters();
-				if ((rowset == null || refresh || parametersBinded) && (pending == null || parametersBinded)) {
+				if(parametersBinded)
+					invalidate();
+				if(rowset == null)
+					invalidate();
+				if (!isValid()) {
 					// if we have no rowset yet or query parameters values have
 					// been changed ...
 					// or we are forced to refresh the data.
 					// re-query ...
 					uninstallUserFiltering();
 					if (pending != null)
-						pending.cancel();
+						pending.rework();
 					final Cancellable lexecuting = achieveOrRefreshRowset(new CancellableCallbackAdapter() {
 
 						@Override
 						public void doWork() throws Exception {
 							assert rowset != null;
-							filterRowset();
 							pending = null;
-							model.pumpEvents();
-							if (!abortedCallbacks.isEmpty()) {
-								CancellableCallback[] toCall = abortedCallbacks.toArray(new CancellableCallback[] {});
-								abortedCallbacks.clear();
+							valid = true;
+							filterRowset();
+							// model.pumpEvents();
+							if (!reworkedCallbacks.isEmpty()) {
+								CancellableCallback[] toCall = reworkedCallbacks.toArray(new CancellableCallback[] {});
+								reworkedCallbacks.clear();
 								for (CancellableCallback call : toCall)
 									call.run();
 							}
 							if (onSuccess != null)
 								onSuccess.run();
 						}
-					}, onFailure);
-					pending = new Cancellable() {
+					}, new Callback<String>(){
+						@Override
+						public void run(String aMessage) throws Exception {
+							pending = null;
+							reworkedCallbacks.clear();
+							valid = true;
+							if(onFailure != null)
+								onFailure.run(aMessage);
+						}
+
+						@Override
+                        public void cancel() {
+                        }
+					});
+					pending = new Reworkable() {
+
+						@Override
+						public void rework() {
+							pending = null;
+							lexecuting.cancel();
+							if (onSuccess != null)
+								reworkedCallbacks.add(onSuccess);
+							// In this case the entity remains invalid, until any other end of story will come.
+						}
 
 						@Override
 						public void cancel() {
 							pending = null;
-							/*
-							 * for (int i = 1; i <=
-							 * query.getParameters().getParametersCount(); i++)
-							 * { Parameter p = query.getParameters().get(i);
-							 * p.setValue(oldParamValues.get(p.getName()));
-							 * p.setModified(false); }
-							 */
 							lexecuting.cancel();
-							if (onSuccess != null)
-								abortedCallbacks.add(onSuccess);
+							reworkedCallbacks.clear();
+							valid = true;
 						}
 					};
-				} else if (pending == null) {
+				} else {
 					// There might be a case of only rowset filtering
 					assert rowset != null;
+					assert pending == null;
 					filterRowset();
 				}
 			}
@@ -1578,16 +1591,19 @@ public class Entity implements RowsetListener {
 					if (outRel != null) {
 						Entity ent = outRel.getRightEntity();
 						if (ent != null) {
+							if(refresh){
+								ent.invalidate();
+							}
 							toExecute.add(ent);
 						}
 					}
 				}
-				model.executeEntities(refresh, toExecute, null);
+				model.executeEntities(toExecute, null);
 			}
 		}
 	}
 
-	protected void internalExecuteChildren(boolean refresh, int aOnlyFieldIndex) throws Exception {
+	protected void internalExecuteChildren(int aOnlyFieldIndex) throws Exception {
 		if (updatingCounter == 0) {
 			Set<Relation> rels = getOutRelations();
 			if (rels != null) {
@@ -1601,7 +1617,7 @@ public class Entity implements RowsetListener {
 						}
 					}
 				}
-				model.executeEntities(refresh, toExecute, null);
+				model.executeEntities(toExecute, null);
 			}
 		}
 	}
@@ -1877,7 +1893,6 @@ public class Entity implements RowsetListener {
 
 	@Override
 	public void rowsetScrolled(RowsetScrollEvent aEvent) {
-		assert pending == null;
 		Rowset eventRowset = aEvent.getRowset();
 		assert eventRowset == rowset;
 		if (aEvent.getNewRowIndex() >= 0 && aEvent.getNewRowIndex() <= eventRowset.size() + 1) {
@@ -1923,7 +1938,7 @@ public class Entity implements RowsetListener {
 		try {
 			boolean assertres = model.isAjusting();
 			assert !assertres;
-			internalExecuteChildren(false, aEvent.getFieldIndex());
+			internalExecuteChildren(aEvent.getFieldIndex());
 			Fields fmdv = getFields();
 			if (fmdv != null) {
 				Field fmd = fmdv.get(aEvent.getFieldIndex());
@@ -2008,7 +2023,6 @@ public class Entity implements RowsetListener {
 	@Override
 	public void rowsetSorted(RowsetSortEvent event) {
 		try {
-			assert pending == null;
 			internalExecuteChildren(false);
 			// call script method
 			JavaScriptObject publishedEvent = JSEvents.publishScriptSourcedEvent(jsPublished);
@@ -2028,10 +2042,12 @@ public class Entity implements RowsetListener {
 				publishRows(jsPublished);
 			JavaScriptObject publishedEvent = JSEvents.publishScriptSourcedEvent(jsPublished);
 			if (!model.isAjusting()) {
-				if (model.isPending())
-					model.enqueueEvent(new ScriptEvent(jsPublished, this, onRequeried, publishedEvent));
-				else
-					Utils.executeScriptEventVoid(jsPublished, onRequeried, publishedEvent);
+				/*
+				 * if (model.isPending()) model.enqueueEvent(new
+				 * ScriptEvent(jsPublished, this, onRequeried, publishedEvent));
+				 * else
+				 */
+				Utils.executeScriptEventVoid(jsPublished, onRequeried, publishedEvent);
 			}
 			internalExecuteChildren(false);
 		} catch (Exception ex) {
@@ -2053,10 +2069,12 @@ public class Entity implements RowsetListener {
 			// call script method
 			JavaScriptObject publishedEvent = JSEvents.publishScriptSourcedEvent(jsPublished);
 			if (!model.isAjusting()) {
-				if (model.isPending())
-					model.enqueueEvent(new ScriptEvent(jsPublished, this, onFiltered, publishedEvent));
-				else
-					Utils.executeScriptEventVoid(jsPublished, onFiltered, publishedEvent);
+				/*
+				 * if (model.isPending()) model.enqueueEvent(new
+				 * ScriptEvent(jsPublished, this, onFiltered, publishedEvent));
+				 * else
+				 */
+				Utils.executeScriptEventVoid(jsPublished, onFiltered, publishedEvent);
 			}
 		} catch (Exception ex) {
 			Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
@@ -2111,6 +2129,14 @@ public class Entity implements RowsetListener {
 		visitor.visit(this);
 	}
 
+	public boolean isValid(){
+		return valid;
+	}
+	
+	public void invalidate(){
+		valid = false;
+	}
+	
 	public Rowset getRowset() {
 		return rowset;
 	}
@@ -2323,7 +2349,7 @@ public class Entity implements RowsetListener {
 				filter.endConstrainting();
 			}
 			return publishFilterFacade(filter, this);
-		}else
+		} else
 			return null;
 	}
 

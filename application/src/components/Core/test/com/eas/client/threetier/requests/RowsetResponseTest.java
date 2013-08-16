@@ -8,6 +8,7 @@ package com.eas.client.threetier.requests;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.jdbc.JdbcReader;
+import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.serial.BinaryRowsetWriter;
 import com.eas.client.SQLUtils;
 import com.eas.client.threetier.PlatypusRowsetWriter;
@@ -27,7 +28,9 @@ import org.junit.*;
  * @author pk
  */
 public class RowsetResponseTest {
+    
     private Rowset rowset;
+    private Fields expectedFields;
     private byte[] rowsetData;
 
     public RowsetResponseTest() {
@@ -52,6 +55,7 @@ public class RowsetResponseTest {
         JdbcReader rsReader = new JdbcReader();
         rowset = rsReader.readRowset(rs, -1);
         SQLUtils.processFieldsPreClient(rowset.getFields());
+        expectedFields = rowset.getFields();
         ByteArrayOutputStream rowsetDataStream = new ByteArrayOutputStream();
         BinaryRowsetWriter rsWriter = new PlatypusRowsetWriter();
         rsWriter.write(rowset, rowsetDataStream);
@@ -91,7 +95,7 @@ public class RowsetResponseTest {
     public void testReadData() throws Exception
     {
         System.out.println("readData");
-        RowsetResponse instance = new RowsetResponse(1L, null, 10);
+        RowsetResponse instance = new RowsetResponse(1L, null, 10, expectedFields);
         PlatypusResponseReader bodyReader = new PlatypusResponseReader(rowsetData);
         instance.accept(bodyReader);
         assertNotNull(instance.getRowset());

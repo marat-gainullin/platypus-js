@@ -21,6 +21,8 @@ import com.eas.client.form.api.ModelJSControls;
 import com.eas.client.CancellableCallback;
 import com.eas.client.Utils;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 import com.google.gwt.user.client.Timer;
 
 /**
@@ -34,7 +36,11 @@ public class RelationsTest extends ModelBaseTest {
 		}
 
 		public native int getRowsetsCounter() throws Exception/*-{
-			return rowsetsCounter;
+			return this.rowsetsCounter;
+		}-*/;
+		
+		public native void setRowsetsCounter(int aValue) throws Exception/*-{
+			this.rowsetsCounter = aValue;
 		}-*/;
 	}
 
@@ -43,50 +49,34 @@ public class RelationsTest extends ModelBaseTest {
 			rowsetsCounter : 0,
 			entity11_Requeried : function() {
 				publishedModule.rowsetsCounter++;
-				publishedModule.requeried();
 			},
 			entity21_Requeried : function() {
 				publishedModule.rowsetsCounter++;
-				publishedModule.requeried();
 			},
 			entity22_Requeried : function() {
 				publishedModule.rowsetsCounter++;
-				publishedModule.requeried();
 			},
 			entity31_Requeried : function() {
 				publishedModule.rowsetsCounter++;
-				publishedModule.requeried();
+			},
+			entity31_Filtered : function() {
+				publishedModule.rowsetsCounter++;
 			},
 			entity32_Requeried : function() {
 				publishedModule.rowsetsCounter++;
-				publishedModule.requeried();
 			},
 			entity33_Requeried : function() {
+				publishedModule.rowsetsCounter++;
+			},
+			entity33_Filtered : function() {
 				publishedModule.rowsetsCounter++;
 				publishedModule.requeried();
 			},
 			entity41_Requeried : function() {
 				publishedModule.rowsetsCounter++;
-				publishedModule.requeried();
 			},
-
-			requeried : function() {
-				if (publishedModule.rowsetsCounter == 7) {
-					aTest.@com.eas.client.model.RelationsTest::checkPks()();
-					aTest.@com.eas.client.model.RelationsTest::touchData()();
-				} else if (publishedModule.rowsetsCounter == 7 + 6) {
-					aTest.@com.eas.client.model.RelationsTest::scrolledBeforeFirst()();
-				} else if (publishedModule.rowsetsCounter == 7 + 6 + 6) {
-					aTest.@com.eas.client.model.RelationsTest::scrolledNext()();
-				} else if (publishedModule.rowsetsCounter == 7 + 6 + 6 + 6) {
-					aTest.@com.eas.client.model.RelationsTest::scrolledNext()();
-				} else if (publishedModule.rowsetsCounter == 7 + 6 + 6 + 6 + 6) {
-					aTest.@com.eas.client.model.RelationsTest::scrolledNext()();
-				} else if (publishedModule.rowsetsCounter == 7 + 6 + 6 + 6 + 6 + 6) {
-					aTest.@com.eas.client.model.RelationsTest::scrolledAfterLast()();
-				} else if (publishedModule.rowsetsCounter == 7 + 6 + 6 + 6 + 6 + 6 + 6) {
-					aTest.@com.eas.client.model.RelationsTest::scrolledFirst()();
-				}
+			entity41_Filtered : function() {
+				publishedModule.rowsetsCounter++;
 			}
 		}
 		return publishedModule;
@@ -99,9 +89,10 @@ public class RelationsTest extends ModelBaseTest {
 
 	@Override
 	public Collection<String> queries() {
-		return Arrays.asList(new String[] { "133818273961796", "124349292311931632", });
+		return Arrays.asList(new String[] { "133818273961796", "124349292311931632" });
 	}
 
+	protected PublishedModule module;
 	protected Model model;
 	protected Entity entity11;
 	protected Entity entity21;
@@ -157,7 +148,7 @@ public class RelationsTest extends ModelBaseTest {
 		// Set a delay period significantly longer than the
 		// test is expected to take.
 		try {
-			PublishedModule module = publish(this);
+			module = publish(this);
 			AppClient client = initDevelopTestClient();
 			model = new Model(client);
 			entity11 = new Entity(model);
@@ -172,18 +163,32 @@ public class RelationsTest extends ModelBaseTest {
 			entity31 = new Entity(model);
 			entity31.setQueryId("124349292311931632");
 			entity31.setOnRequeried(Utils.lookupProperty(module, "entity31_Requeried"));
+			entity31.setOnFiltered(Utils.lookupProperty(module, "entity31_Filtered"));
 			entity32 = new Entity(model);
 			entity32.setQueryId("124349292311931632");
 			entity32.setOnRequeried(Utils.lookupProperty(module, "entity32_Requeried"));
 			entity33 = new Entity(model);
 			entity33.setQueryId("124349292311931632");
 			entity33.setOnRequeried(Utils.lookupProperty(module, "entity33_Requeried"));
+			entity33.setOnFiltered(Utils.lookupProperty(module, "entity33_Filtered"));
 			entity41 = new Entity(model);
 			entity41.setQueryId("124349292311931632");
 			entity41.setOnRequeried(Utils.lookupProperty(module, "entity41_Requeried"));
+			entity41.setOnFiltered(Utils.lookupProperty(module, "entity41_Filtered"));
 
 			assertEquals(model.getEntities().size(), 1);// Parameters entity is
 			                                            // always present
+			model.addEntity(entity11);
+			model.addEntity(entity21);
+			model.addEntity(entity22);
+			model.addEntity(entity31);
+			model.addEntity(entity32);
+			model.addEntity(entity33);
+			model.addEntity(entity41);
+
+			assertEquals(model.getEntities().size(), 8);// 7 user entities and single
+			                                            // parameters entity
+			model.validateQueries();
 
 			/*
 			Relation rel11_21 = new Relation(entity11, true, "AMOUNT", entity21, false, "amount");
@@ -212,17 +217,6 @@ public class RelationsTest extends ModelBaseTest {
 	        Relation rel11_41 = new Relation(entity11, entity11.getFields().get("AMOUNT"), entity41, entity41.getQuery().getParameters().get("amount"));
 	        Relation rel32_41 = new Relation(entity32, entity32.getFields().get("AMOUNT"), entity41, entity41.getFields().get("amount"));
 
-			model.addEntity(entity11);
-			model.addEntity(entity21);
-			model.addEntity(entity22);
-			model.addEntity(entity31);
-			model.addEntity(entity32);
-			model.addEntity(entity33);
-			model.addEntity(entity41);
-
-			assertEquals(model.getEntities().size(), 8);// 7 user entities and
-			                                            // parameters entity
-
 			model.addRelation(rel11_21);
 			model.addRelation(rel11_22);
 			model.addRelation(rel21_31);
@@ -237,6 +231,20 @@ public class RelationsTest extends ModelBaseTest {
 
 			model.publish(module);
 			model.setRuntime(true);
+			Scheduler.get().scheduleFixedDelay(new RepeatingCommand(){
+
+				@Override
+                public boolean execute() {
+					checkPks();
+					try {
+	                    touchData();
+                    } catch (Exception e) {
+	                    e.printStackTrace();
+                    }
+	                return false;
+                }
+				
+			}, 5);
 		} catch (Exception ex) {
 			fail(ex.getMessage());
 		}
@@ -277,11 +285,35 @@ public class RelationsTest extends ModelBaseTest {
 
 		entity11.getRowset().beforeFirst();
 		callCounter++;
+		Scheduler.get().scheduleFixedDelay(new RepeatingCommand(){
+
+			@Override
+            public boolean execute() {
+				try {
+	                scrolledBeforeFirst();
+                } catch (Exception e) {
+	                e.printStackTrace();
+                }
+				return false;
+			}
+		}, 5);
 	}
 
 	public void scrolledBeforeFirst() throws Exception {
 		assertTrue(entity11.getRowset().next());
 		callCounter++;
+		Scheduler.get().scheduleFixedDelay(new RepeatingCommand(){
+
+			@Override
+            public boolean execute() {
+				try {
+					scrolledNext();
+                } catch (Exception e) {
+	                e.printStackTrace();
+                }
+				return false;
+			}
+		}, 5);
 	}
 
 	public void scrolledNext() throws Exception {
@@ -297,6 +329,8 @@ public class RelationsTest extends ModelBaseTest {
 		assertNotNull(entity32.getRowset());
 		assertNotNull(entity33.getRowset());
 
+		int c = module.getRowsetsCounter();
+		
 		assertTrue(entity31.getRowset().size() > 0);
 		assertTrue(entity32.getRowset().size() > 0);
 		assertTrue(entity33.getRowset().size() > 0);
@@ -306,11 +340,38 @@ public class RelationsTest extends ModelBaseTest {
 		assertTrue(entity41.getRowset().size() > 0);
 		entity11.getRowset().next();
 		callCounter++;
+		Scheduler.get().scheduleFixedDelay(new RepeatingCommand(){
+
+			@Override
+            public boolean execute() {
+				try {
+					if(entity11.getRowset().isAfterLast())
+						scrolledAfterLast();
+					else
+						scrolledNext();
+                } catch (Exception e) {
+	                e.printStackTrace();
+                }
+				return false;
+			}
+		}, 5);
 	}
 
 	public void scrolledAfterLast() throws Exception {
 		entity11.getRowset().first();
 		callCounter++;
+		Scheduler.get().scheduleFixedDelay(new RepeatingCommand(){
+
+			@Override
+            public boolean execute() {
+				try {
+					scrolledFirst();
+                } catch (Exception e) {
+	                e.printStackTrace();
+                }
+				return false;
+			}
+		}, 5);
 	}
 
 	public void scrolledFirst() throws Exception {

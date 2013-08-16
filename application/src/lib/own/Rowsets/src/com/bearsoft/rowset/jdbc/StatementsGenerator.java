@@ -52,7 +52,7 @@ public class StatementsGenerator implements ChangeVisitor {
                         converter.convert2JdbcAndAssign(v.value, v.type, aConnection, i, stmt);
                     }
                     if (queriesLogger.isLoggable(Level.FINE)) {
-                        queriesLogger.log(Level.FINE, "Executing sql: {0}, with parameters ({1}).", new Object[]{clause, parameters.size()});
+                        queriesLogger.log(Level.FINE, "Executing sql with {0} parameters:\n {1}", new Object[]{parameters.size(), clause});
                     }
                     return stmt.executeUpdate();
                 }

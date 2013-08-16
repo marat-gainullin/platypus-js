@@ -143,6 +143,7 @@ public class SessionTest {
 
         @Override
         protected void setApplicationElementId(String aAppElementId, Object[] args) throws Exception {
+            super.appElementId = aAppElementId;
         }
 
         @Override
@@ -167,7 +168,7 @@ public class SessionTest {
                 mId);
 
         session.registerModule(serverModule);
-        ServerScriptRunner s = session.getModule(String.valueOf(mId));
+        ServerScriptRunner s = session.getModule(mId);
         assertSame(s, serverModule);
     }
 
@@ -187,7 +188,7 @@ public class SessionTest {
                 session, 
                 mId);
         session.registerModule(serverModule);
-        ServerScriptRunner s = session.getModule(String.valueOf(mId));
+        ServerScriptRunner s = session.getModule(mId);
         assertSame(s, serverModule);
         session.unregisterModule(String.valueOf(mId));
         s = session.getModule(String.valueOf(mId));

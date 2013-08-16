@@ -612,8 +612,8 @@ public class QueringTest extends BaseTest {
             state.IZMERJAEMIE_VELICHINI.getRowset().addRowsetListener(listenerOf1Layer);
             state.VID_OBJECTA_REMONTA.getRowset().addRowsetListener(listenerOf1Layer);
             state.MARKI_OBJECTOV_REMONTA.getRowset().addRowsetListener(listenerOf1Layer);
+            state.GRUPPA_OBJECTA_REMONTA_PO_RODITELU.getRowset().addRowsetListener(listenerOf1Layer);
             // 2nd layer
-            state.GRUPPA_OBJECTA_REMONTA_PO_RODITELU.getRowset().addRowsetListener(listenerOf2Layer);
             state.EDINICI_IZMERENIJA_PO_VELICHINE.getRowset().addRowsetListener(listenerOf2Layer);
             state.NAIMENOVANIA_SI_PO_VELICHINE.getRowset().addRowsetListener(listenerOf2Layer);
             state.EDINICI_OBORUDOVANIJA_PO_MARKE.getRowset().addRowsetListener(listenerOf2Layer);

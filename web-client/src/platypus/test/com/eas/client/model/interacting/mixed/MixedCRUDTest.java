@@ -7,7 +7,7 @@ import com.eas.client.model.store.XmlDom2Model;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.xml.client.XMLParser;
 
-public class MixedCRUDTest extends MixedTest {
+public class MixedCrudTest extends MixedTest {
 
 	protected ModelState state;
 	protected Rowset izmVelRs;
@@ -24,24 +24,24 @@ public class MixedCRUDTest extends MixedTest {
 		}-*/;
 	}
 
-	public native PublishedModule publish(MixedCRUDTest aTest) throws Exception/*-{
+	public native PublishedModule publish(MixedCrudTest aTest) throws Exception/*-{
 		var publishedModule = {
 			edIzmRequeriedCounter : 0,
 			edIzmRequeried : function() {
 				publishedModule.edIzmRequeriedCounter++;
 				if (publishedModule.edIzmRequeriedCounter == 1) {
-					aTest.@com.eas.client.model.interacting.mixed.MixedCRUDTest::validateMixedCrud()();
+					aTest.@com.eas.client.model.interacting.mixed.MixedCrudTest::validateMixedCrud()();
 				} else if (publishedModule.edIzmRequeriedCounter == 2) {
-					aTest.@com.eas.client.model.interacting.mixed.MixedCRUDTest::velRsBeforeFirstScrolled()();
+					aTest.@com.eas.client.model.interacting.mixed.MixedCrudTest::velRsBeforeFirstScrolled()();
 				} else if (publishedModule.edIzmRequeriedCounter >= 3) {
-					aTest.@com.eas.client.model.interacting.mixed.MixedCRUDTest::velRsNextScrolled()();
+					aTest.@com.eas.client.model.interacting.mixed.MixedCrudTest::velRsNextScrolled()();
 				}
 			},
 			naimSiPoVel1RequeriedCounter : -1000,
 			naimSiPoVel1Requeried : function() {
 				publishedModule.naimSiPoVel1RequeriedCounter++;
 				if (publishedModule.naimSiPoVel1RequeriedCounter == 1) {
-					aTest.@com.eas.client.model.interacting.mixed.MixedCRUDTest::naimSiInsertedUpdated()();
+					aTest.@com.eas.client.model.interacting.mixed.MixedCrudTest::naimSiInsertedUpdated()();
 				}
 			}
 		}

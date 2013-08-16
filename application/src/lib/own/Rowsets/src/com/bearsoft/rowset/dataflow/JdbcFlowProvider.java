@@ -183,7 +183,7 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
                                 }
 
                                 if (queriesLogger.isLoggable(Level.FINE)) {
-                                    queriesLogger.log(Level.FINE, "Executing sql: {0}, with parameters ({1}).", new Object[]{sqlClause, aParams.getParametersCount()});
+                                    queriesLogger.log(Level.FINE, "Executing sql with {0} parameters:\n{1}", new Object[]{aParams.getParametersCount(), sqlClause});
                                 }
                                 ResultSet rs = null;
                                 if (procedure) {

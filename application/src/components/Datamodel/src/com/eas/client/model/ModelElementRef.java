@@ -16,7 +16,7 @@ public class ModelElementRef {
 
     public Long entityId;
     public boolean isField = true;
-    public Field field = null;
+    public Field field;
 
     public ModelElementRef() {
         super();
@@ -62,7 +62,7 @@ public class ModelElementRef {
         if (this.isField != other.isField) {
             return false;
         }
-        if (this.field != other.field && (this.field == null || !this.field.equals(other.field))) {
+        if (this.field != other.field && (this.field == null || !this.field.isEqual(other.field))) {
             return false;
         }
         return true;

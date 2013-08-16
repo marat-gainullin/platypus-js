@@ -35,13 +35,13 @@ import org.opengis.feature.simple.SimpleFeatureType;
 public class DatamodelDataStore extends AbstractDataStore {
 
     public boolean isGeometry(DataTypeInfo aTypeInfo) {
-        return (/*Oracle*/aTypeInfo.getSqlType() == Types.STRUCT && (aTypeInfo.getSqlTypeName().endsWith("GEOMETRY") || aTypeInfo.getSqlTypeName().endsWith("CURVE")
+        return (/*Oracle*/aTypeInfo.getSqlType() == Types.STRUCT || aTypeInfo.getSqlType() == java.sql.Types.OTHER) && (aTypeInfo.getSqlTypeName().endsWith("GEOMETRY") || aTypeInfo.getSqlTypeName().endsWith("CURVE")
                 || aTypeInfo.getSqlTypeName().endsWith("POLYGON") || aTypeInfo.getSqlTypeName().endsWith("LINESTRING") || aTypeInfo.getSqlTypeName().endsWith("POINT")
-                || aTypeInfo.getSqlTypeName().endsWith("SURFACE"))/*/Oracle*/)
-                || (/*PostGIS*/aTypeInfo.getSqlType() == java.sql.Types.OTHER && ("point".equalsIgnoreCase(aTypeInfo.getSqlTypeName()) || "line".equalsIgnoreCase(aTypeInfo.getSqlTypeName())
+                || aTypeInfo.getSqlTypeName().endsWith("SURFACE")/*Oracle*/
+                || /*PostGIS*/ "point".equalsIgnoreCase(aTypeInfo.getSqlTypeName()) || "line".equalsIgnoreCase(aTypeInfo.getSqlTypeName())
                 || "lseg".equalsIgnoreCase(aTypeInfo.getSqlTypeName()) || "box".equalsIgnoreCase(aTypeInfo.getSqlTypeName())
                 || "path".equalsIgnoreCase(aTypeInfo.getSqlTypeName()) || "polygon".equalsIgnoreCase(aTypeInfo.getSqlTypeName())
-                || "circle".equalsIgnoreCase(aTypeInfo.getSqlTypeName()))/*PostGIS*/);
+                || "circle".equalsIgnoreCase(aTypeInfo.getSqlTypeName()))/*PostGIS*/;
     }
 
     protected static class TypeInfoEntry {

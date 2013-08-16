@@ -298,7 +298,6 @@
         <subant buildpath="${project.DbControls}" antfile="build.xml" target="test"/>
         <subant buildpath="${project.Forms}" antfile="build.xml" target="test"/>
         <subant buildpath="${project.Application}" antfile="build.xml" target="test"/>
-        <subant buildpath="${project.DatamodelDesigner}" antfile="build.xml" target="test"/>
         <subant buildpath="${project.Sensors}" antfile="build.xml" target="test"/>
         <subant buildpath="${project.Server}" antfile="build.xml" target="test"/>
         <subant buildpath="${project.PlatypusServletSupport}" antfile="build.xml" target="test"/>

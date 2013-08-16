@@ -49,13 +49,13 @@ public class ParameterTest {
         assertEquals(instance.getDescription(), "fDesc1");
         assertEquals(instance.getTypeInfo(), DataTypeInfo.DECIMAL);
         Parameter instance1 = new Parameter((Field) instance);
-        assertEquals(instance, instance1);
+        assertTrue(instance.isEqual(instance1));
         instance.setMode(10);
         instance.setValue("jdfshksdhf");
         instance.setDefaultValue(null);
         instance.setSelectionForm(487684L);
         instance1 = new Parameter(instance);
-        assertEquals(instance, instance1);
+        assertTrue(instance.isEqual(instance1));
     }
 
     /**
@@ -79,25 +79,25 @@ public class ParameterTest {
         instance.setMode(2);
         instance1 = new Parameter("sampleParam");
         instance1.setMode(2);
-        assertEquals(instance, instance1);
+        assertTrue(instance.isEqual(instance1));
 
         instance = new Parameter("sampleParam");
         instance.setSelectionForm(876876L);
         instance1 = new Parameter("sampleParam");
         instance1.setSelectionForm(876876L);
-        assertEquals(instance, instance1);
+        assertTrue(instance.isEqual(instance1));
 
         instance = new Parameter("sampleParam");
         instance.setValue(40);
         instance1 = new Parameter("sampleParam");
         instance1.setValue(40);
-        assertEquals(instance, instance1);
+        assertTrue(instance.isEqual(instance1));
 
         instance = new Parameter("sampleParam");
         instance.setDefaultValue(4);
         instance1 = new Parameter("sampleParam");
         instance1.setDefaultValue(4);
-        assertEquals(instance, instance1);
+        assertTrue(instance.isEqual(instance1));
 
 
         // different values tests

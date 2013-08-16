@@ -78,8 +78,8 @@ public class ServerModulesTest {
         try {
             Object res = aClient.executeServerModuleMethod(TASK_STATEFULL_MODULE_NAME, TES_METHOD_NAME, 10);
             Object res1 = aClient.executeServerModuleMethod(TASK_STATEFULL_MODULE_NAME, TES_METHOD_NAME, 10);
-            assertEquals(res, new Long(10+aDelta));
-            assertEquals(res1, new Long(20+aDelta));
+            assertEquals(new Long(10+aDelta), res);
+            assertEquals(new Long(20+aDelta), res1);
         } finally {
             aClient.logout();
         }

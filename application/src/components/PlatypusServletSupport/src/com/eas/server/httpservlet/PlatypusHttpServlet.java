@@ -245,7 +245,8 @@ public class PlatypusHttpServlet extends HttpServlet {
     }
 
     /**
-     * Precesses request for both PlatypusAPI requests and "Platypus protocol over http" requests.
+     * Precesses request for both PlatypusAPI requests and "Platypus protocol
+     * over http" requests.
      *
      * @param aHttpRequest
      * @param aPlatypusSession
@@ -388,12 +389,12 @@ public class PlatypusHttpServlet extends HttpServlet {
             throw new Exception(REQUEST_NOT_CORRECT_MSG + " -1- ");
         }
         int rqType;
-        if (isResourceRequest(aRequest)) {
-            rqType = Requests.rqAppElement;
+        String sType = aRequest.getParameter(PlatypusHttpRequestParams.TYPE);
+        if (sType != null) {
+            rqType = Integer.valueOf(sType);
         } else {
-            String sType = aRequest.getParameter(PlatypusHttpRequestParams.TYPE);
-            if (sType != null) {
-                rqType = Integer.valueOf(sType);
+            if (isResourceRequest(aRequest)) {
+                rqType = Requests.rqAppElement;
             } else {
                 Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, REQUEST_PARAMETER_MISSING_MSG, PlatypusHttpRequestParams.TYPE);
                 throw new Exception(REQUEST_NOT_CORRECT_MSG + " -0- ");
