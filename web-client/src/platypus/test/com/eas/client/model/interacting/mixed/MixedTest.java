@@ -65,6 +65,7 @@ public abstract class MixedTest extends ModelBaseTest {
 	public static String ENTITY_IZMERJAEMIE_VELICHINI_ID = "128049576695369";
 	public static String ENTITY_NAIMENOVANIE_SI_ID = "128049764412588";
 	public static String ENTITY_MARKI_OBJECTOV_REMONTA_ID = "128049574970367";
+	
 	// 3rd layer
 	public static String ENTITY_EDINICI_IZMERENIJA_PO_VELICHINE_ID = "128049746332840";
 	public static String ENTITY_NAIMENOVANIA_SI_PO_VELICHINE_ID = "128049750556261";

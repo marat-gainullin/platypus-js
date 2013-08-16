@@ -11,7 +11,6 @@ import java.util.Set;
 import com.eas.client.application.AppClient;
 import com.eas.client.application.Base64;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.junit.client.GWTTestCase;
 import com.google.gwt.xhr.client.XMLHttpRequest;
 

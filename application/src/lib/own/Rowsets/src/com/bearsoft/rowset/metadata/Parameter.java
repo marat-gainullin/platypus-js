@@ -13,7 +13,6 @@ import com.bearsoft.rowset.utils.RowsetUtils;
 import com.eas.script.ScriptFunction;
 import java.math.BigDecimal;
 import java.sql.ParameterMetaData;
-import java.util.Objects;
 
 /**
  * This class is a parameter specification for queries, forms, reports and

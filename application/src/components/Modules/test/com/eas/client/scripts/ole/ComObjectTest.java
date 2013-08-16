@@ -42,6 +42,10 @@ public class ComObjectTest {
     public void tearDown() {
     }
 
+    @Test
+    public void dummyTest() {
+    }
+
     /**
      * Test of get method, of class ComObject.
      */

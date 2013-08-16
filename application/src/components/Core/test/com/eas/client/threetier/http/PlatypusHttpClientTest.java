@@ -202,7 +202,7 @@ public class PlatypusHttpClientTest {
         client.executeRequest(rq);
         assertNotNull(rq.getResponse());
         String startAppElement = ((StartAppElementRequest.Response) rq.getResponse()).getAppElementId();
-        assertEquals(startAppElement, "FormsAPI");
+        assertEquals("FormsAPI", startAppElement);
     }
 
     @Test

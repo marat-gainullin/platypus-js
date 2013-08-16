@@ -1,6 +1,5 @@
 package com.eas.client.gxtcontrols.grid.fillers;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
@@ -17,7 +16,6 @@ import com.bearsoft.rowset.events.RowsetNetErrorEvent;
 import com.bearsoft.rowset.events.RowsetRequeryEvent;
 import com.bearsoft.rowset.events.RowsetRollbackEvent;
 import com.bearsoft.rowset.events.RowsetSaveEvent;
-import com.bearsoft.rowset.events.RowsetScrollEvent;
 import com.bearsoft.rowset.exceptions.RowsetException;
 import com.eas.client.beans.PropertyChangeEvent;
 import com.eas.client.beans.PropertyChangeListener;
@@ -25,9 +23,7 @@ import com.eas.client.model.Entity;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
-import com.sencha.gxt.core.client.IdentityValueProvider;
 import com.sencha.gxt.data.shared.ListStore;
-import com.sencha.gxt.data.shared.event.StoreRecordChangeEvent;
 import com.sencha.gxt.data.shared.event.StoreUpdateEvent;
 import com.sencha.gxt.data.shared.loader.DataProxy;
 import com.sencha.gxt.data.shared.loader.ListLoadConfig;

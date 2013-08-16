@@ -49,7 +49,7 @@ public class FieldTest {
         assertEquals(instance.getDescription(), "fDesc1");
         assertEquals(instance.getTypeInfo(), DataTypeInfo.DECIMAL);
         Field instance1 = new Field(instance);
-        assertEquals(instance, instance1);
+        assertTrue(instance.isEqual(instance1));
     }
 
     /**
@@ -329,6 +329,6 @@ public class FieldTest {
         instance.setTypeInfo(DataTypeInfo.VARBINARY);
 
         Field result = instance.copy();
-        assertEquals(expResult, result);
+        assertTrue(expResult.isEqual(result));
     }
 }

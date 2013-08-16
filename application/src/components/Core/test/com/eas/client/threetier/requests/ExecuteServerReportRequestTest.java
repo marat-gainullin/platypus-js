@@ -40,6 +40,7 @@ public class ExecuteServerReportRequestTest {
 
     @AfterClass
     public static void tearDownClass() throws Exception {
+        assertNotNull(appClient);
         appClient.disposeServerModule(MODULE_NAME);
         appClient.logout();
     }

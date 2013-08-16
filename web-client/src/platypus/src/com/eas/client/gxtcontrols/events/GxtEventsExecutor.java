@@ -14,6 +14,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.DoubleClickEvent;
 import com.google.gwt.event.dom.client.DoubleClickHandler;
+import com.google.gwt.event.dom.client.HasChangeHandlers;
 import com.google.gwt.event.dom.client.HasKeyDownHandlers;
 import com.google.gwt.event.dom.client.HasKeyPressHandlers;
 import com.google.gwt.event.dom.client.HasKeyUpHandlers;
@@ -115,6 +116,8 @@ public class GxtEventsExecutor implements SelectHandler, MouseOutHandler, MouseO
 
 		if (aComponent instanceof HasSelectHandlers)
 			((HasSelectHandlers) aComponent).addSelectHandler(executor);
+		if (aComponent instanceof HasChangeHandlers)
+			((HasChangeHandlers) aComponent).addChangeHandler(executor);
 
 		if (aComponent instanceof PlatypusCheckBox) {
 			final PlatypusCheckBox pcheck = (PlatypusCheckBox) aComponent;
@@ -129,6 +132,7 @@ public class GxtEventsExecutor implements SelectHandler, MouseOutHandler, MouseO
 				}
 			});
 		}
+		
 		/*
 		if (aComponent instanceof Field<?>)
 		{

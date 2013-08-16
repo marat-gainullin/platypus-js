@@ -51,7 +51,7 @@ public class CommitRequestTest {
         CompactClob clob = new CompactClob("data6Value");
         CompactBlob blob = new CompactBlob("data7Value".getBytes("utf-8"));
         Point point = gFactory.createPoint(new Coordinate(52, 27));
-        DataTypeInfo geometryTypeInfo = new DataTypeInfo(Types.STRUCT, "MDSYS.SDO_GEOMETRY", Object.class.getName());
+        DataTypeInfo geometryTypeInfo = DataTypeInfo.GEOMETRY.copy();
         Change.Value data1 = new Change.Value("data1", 56, DataTypeInfo.INTEGER);
         Change.Value data2 = new Change.Value("data2", "data2Value", DataTypeInfo.VARCHAR);
         Change.Value data3 = new Change.Value("data3", true, DataTypeInfo.BOOLEAN);
@@ -77,7 +77,7 @@ public class CommitRequestTest {
         changes.add(u);
         changes.add(d);
         changes.add(c);
-        
+
         CommitRequest rq1 = new CommitRequest(rqId, changes);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         ProtoWriter writer = new ProtoWriter(out);
@@ -98,7 +98,7 @@ public class CommitRequestTest {
         Insert i1 = (Insert) rq2.getChanges().get(0);
         Update u1 = (Update) rq2.getChanges().get(1);
         Delete d1 = (Delete) rq2.getChanges().get(2);
-        Command c1 = (Command)rq2.getChanges().get(3);
+        Command c1 = (Command) rq2.getChanges().get(3);
         assertEquals(i1.entityId, i.entityId);
         assertEquals(u1.entityId, u.entityId);
         assertEquals(d1.entityId, d.entityId);
@@ -136,29 +136,26 @@ public class CommitRequestTest {
         assertEquals(v1.type.getSqlType(), v2.type.getSqlType());
         assertEquals(v1.type.getSqlTypeName(), v2.type.getSqlTypeName());
         assertEquals(v1.type.getJavaClassName(), v2.type.getJavaClassName());
-        if(v1.type.getSqlType() == Types.CLOB || v2.type.getSqlType() == Types.CLOB)
-        {
+        if (v1.type.getSqlType() == Types.CLOB || v2.type.getSqlType() == Types.CLOB) {
             assertTrue(v1.value instanceof CompactClob);
-            CompactClob clob1 = (CompactClob)v1.value;
+            CompactClob clob1 = (CompactClob) v1.value;
             assertTrue(v2.value instanceof CompactClob);
-            CompactClob clob2 = (CompactClob)v2.value;
+            CompactClob clob2 = (CompactClob) v2.value;
             assertEquals(clob1.getData(), clob2.getData());
-        }else if(v1.type.getSqlType() == Types.BLOB || v2.type.getSqlType() == Types.BLOB)
-        {
+        } else if (v1.type.getSqlType() == Types.BLOB || v2.type.getSqlType() == Types.BLOB) {
             assertTrue(v1.value instanceof CompactBlob);
-            CompactBlob blob1 = (CompactBlob)v1.value;
+            CompactBlob blob1 = (CompactBlob) v1.value;
             assertTrue(v2.value instanceof CompactBlob);
-            CompactBlob blob2 = (CompactBlob)v2.value;
+            CompactBlob blob2 = (CompactBlob) v2.value;
             assertArrayEquals(blob1.getData(), blob2.getData());
-        }else if(v1.type.getSqlType() == Types.STRUCT)
-        {
+        } else if (v1.type.getSqlType() == Types.STRUCT) {
             assertTrue(v1.value instanceof Point);
-            Point pt1 = (Point)v1.value;
+            Point pt1 = (Point) v1.value;
             assertTrue(v2.value instanceof Point);
-            Point pt2 = (Point)v2.value;
-            assertTrue((int)pt1.getX() == (int)pt2.getX());
-            assertTrue((int)pt1.getY() == (int)pt2.getY());
-        }else {
+            Point pt2 = (Point) v2.value;
+            assertTrue((int) pt1.getX() == (int) pt2.getX());
+            assertTrue((int) pt1.getY() == (int) pt2.getY());
+        } else {
             assertEquals(v1.value, v2.value);
         }
     }

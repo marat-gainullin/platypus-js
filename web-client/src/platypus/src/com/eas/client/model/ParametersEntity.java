@@ -88,7 +88,7 @@ public class ParametersEntity extends Entity {
 	}
 
 	@Override
-	protected void internalExecute(boolean refresh, CancellableCallback onSuccess, Callback<String> onFailure) {
+	protected void internalExecute(CancellableCallback onSuccess, Callback<String> onFailure) {
 		if (onSuccess != null) {
 			try {
 				onSuccess.run();

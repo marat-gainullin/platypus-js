@@ -135,7 +135,7 @@ public class PlatypusClientTest {
         System.out.println("startAppElement");
         AppClient instance = client;
         String startAppElement = instance.getStartAppElement();
-        assertEquals(startAppElement, TEST_SERVER_MODULE_ID);
+        assertEquals("FormsAPI", startAppElement);
     }
 
     @Test

@@ -236,7 +236,7 @@ public class Model {// implements Cancellable {
 		}
 		return false;
 	}
-
+/*
 	public void enqueueEvent(ScriptEvent aEvent) {
 		if (!pendingEvents.contains(aEvent.toString())) {
 			pendingEvents.add(aEvent.toString());
@@ -260,7 +260,7 @@ public class Model {// implements Cancellable {
 			}
 		}
 	}
-
+*/
 	public ParametersEntity getParametersEntity() {
 		return parametersEntity;
 	}
@@ -646,7 +646,7 @@ public class Model {// implements Cancellable {
 		return nextLayer;
 	}
 
-	public void executeEntities(boolean refresh, Set<Entity> toExecute, final CancellableCallback onSuccess) throws Exception {
+	public void executeEntities(Set<Entity> toExecute, final CancellableCallback onSuccess) throws Exception {
 		CumulativeCallbackAdapter cumulativeSuccess = new CumulativeCallbackAdapter(toExecute.size()) {
 			protected void doWork() throws Exception {
 				if (onSuccess != null)
@@ -654,26 +654,28 @@ public class Model {// implements Cancellable {
 			};
 		};
 		for (Entity entity : toExecute) {
-			entity.internalExecute(refresh, cumulativeSuccess, null);
+			entity.internalExecute(cumulativeSuccess, null);
 		}
 	}
 
 	private void executeRootEntities(boolean refresh, CancellableCallback onSuccess) throws Exception {
 		final Set<Entity> toExecute = new HashSet();
 		for (Entity entity : entities.values()) {
-			if (!(entity instanceof ParametersEntity)) {// ParametersEntity is in the entities, so we have to filter it out 
+			if (!(entity instanceof ParametersEntity)) {// ParametersEntity is in the entities, so we have to filter it out
+				if(refresh)
+					entity.invalidate();
 				Set<Relation> dependanceRels = new HashSet();
 				for (Relation inRel : entity.getInRelations()) {
 					if (!(inRel.getLeftEntity() instanceof ParametersEntity)) {
 						dependanceRels.add(inRel);
 					}
 				}
-				if (refresh || dependanceRels.isEmpty()) {
+				if (dependanceRels.isEmpty()) {
 					toExecute.add(entity);
 				}
 			}
 		}
-		executeEntities(refresh, toExecute, onSuccess);
+		executeEntities(toExecute, onSuccess);
 	}
 
 	public void validateQueries() throws Exception {

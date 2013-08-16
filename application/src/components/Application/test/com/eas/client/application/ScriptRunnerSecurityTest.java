@@ -85,7 +85,7 @@ public class ScriptRunnerSecurityTest {
             nativeClient = new PlatypusNativeClient(nativeSettings);
             PlatypusConnectionSettings httpSettings = new PlatypusConnectionSettings();
             httpSettings.setName("Platypus http test connection");
-            httpSettings.setUrl("http://localhost:8080/test/application/");
+            httpSettings.setUrl("http://localhost:8080/application/");
             httpClient = new PlatypusHttpClient(httpSettings);
             scriptDocumentsHost = new CompiledScriptDocumentsHost() {
                 @Override
