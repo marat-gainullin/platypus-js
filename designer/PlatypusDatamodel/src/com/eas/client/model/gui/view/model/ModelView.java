@@ -60,6 +60,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.UndoableEditEvent;
 import javax.swing.event.UndoableEditListener;
+import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CompoundEdit;
 import javax.swing.undo.UndoableEditSupport;
 import org.openide.DialogDescriptor;
@@ -79,6 +80,7 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
     // settings
     public final static int slotWidth = 3;
     public final static int connectorWidth = 1;
+    protected final static String NAME_PATTERN = "%s_%d";//NOI18N
     protected final static Stroke slotsStroke = new BasicStroke(slotWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
     protected final static Stroke connectorsStroke = new BasicStroke(connectorWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL);
     protected final static Stroke connectorsOuterStroke = new BasicStroke(connectorWidth + 2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL);
@@ -1124,7 +1126,7 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
              */
             AccessibleCompoundEdit section = new AccessibleCompoundEdit();
             for (EntityFieldTuple t : new HashSet<>(selectedFields)) {
-                Set<Relation> toDel = FieldsEntity.getInOutRelationsByEntityField(t.entity, t.field);
+                Set<Relation<E>> toDel = FieldsEntity.getInOutRelationsByEntityField(t.entity, t.field);
                 for (Relation rel : toDel) {
                     DeleteRelationEdit drEdit = new DeleteRelationEdit(rel);
                     drEdit.redo();
@@ -2005,7 +2007,7 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
                             entity.setHeight(rect.height);
                             entity.setTableDbId(rSelected.dbId);
                             entity.setTableSchemaName(rSelected.schema);
-                            entity.setName(getEntiyName(rSelected.tableName, model));
+                            entity.setName(getEntiyName(rSelected.tableName));
                             entity.setTableName(rSelected.tableName);
                             NewEntityEdit<E, M> edit = new NewEntityEdit<>(model, entity);
                             edit.redo();
@@ -2059,22 +2061,26 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
             entity.setWidth(rect.width);
             entity.setHeight(rect.height);
             entity.setQueryId(aApplicationElementId);
-            entity.setName(getEntiyName(aApplicationElementId, model));
+            entity.setName(getEntiyName(aApplicationElementId));
             NewEntityEdit<E, M> edit = new NewEntityEdit<>(model, entity);
             edit.redo();
             undoSupport.postEdit(edit);
         }
     }
 
-    private String getEntiyName(String applicationElementId, M model) {
+    private String getEntiyName(String applicationElementId) {
         String s = applicationElementId;
         int i = 1;
         while (model.getEntityByName(s) != null) {
-            s = String.format("%s_%d", applicationElementId, i++); // NOI18N
+            s = String.format(NAME_PATTERN, applicationElementId, i++);
         }
         return Introspector.decapitalize(s);
     }
 
+    private boolean isParametersCopy() {
+        return isSelectedFieldsOnOneEntity() && isParametersEntity(selectedFields.iterator().next().entity);
+    }
+    
     protected abstract boolean isAnyDeletableEntities();
 
     public class Delete extends DmAction {
@@ -2247,7 +2253,7 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
 
         @Override
         public boolean isEnabled() {
-            return isAnyDeletableEntities();
+            return isParametersCopy() || isAnyDeletableEntities();
         }
 
         @Override
@@ -2283,9 +2289,15 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
                 try {
                     M model = newModelInstance();
                     model.setClient(model.getClient());
-                    for (E ent : selectedEntities) {
-                        if (ent != null && !isParametersEntity(ent)) {
-                            model.addEntity(ent);
+                    if (isParametersCopy()) {
+                        for (EntityFieldTuple ef : selectedFields) {
+                            model.getParameters().add(ef.field);
+                        }
+                    } else {
+                        for (E ent : selectedEntities) {
+                            if (ent != null && !isParametersEntity(ent)) {
+                                model.addEntity(ent);
+                            }
                         }
                     }
                     try {
@@ -2305,7 +2317,7 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
 
         @Override
         public boolean isEnabled() {
-            return selectedEntities != null && !selectedEntities.isEmpty() && (selectedEntities.size() > 1 || !isParametersEntity(selectedEntities.iterator().next()));
+            return isParametersCopy() || (selectedEntities != null && !selectedEntities.isEmpty() && (selectedEntities.size() > 1 || !isParametersEntity(selectedEntities.iterator().next())));
         }
 
         @Override
@@ -2366,35 +2378,11 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
                             if (doc != null) {
                                 M pastedModel = transformDocToModel(doc);
                                 if (pastedModel != null && model != null) {
-                                    Map<Long, E> entities = pastedModel.getEntities();
-                                    boolean isSection = entities != null && !entities.isEmpty();
-                                    if (isSection) {
-                                        undoSupport.beginUpdate();
+                                    if (pastedModel.getParameters() != null && pastedModel.getParameters().getParametersCount() > 0) {
+                                        pasteParameters(pastedModel);
                                     }
-                                    try {
-                                        if (entities != null && !entities.isEmpty()) {
-                                            Set<Map.Entry<Long, E>> entSet = entities.entrySet();
-                                            if (entSet != null) {
-                                                for (Map.Entry<Long, E> entEntry : entSet) {
-                                                    E toPaste = entEntry.getValue();
-                                                    if (isPasteable(toPaste)) {
-                                                        prepareEntityForPaste(toPaste);
-                                                        checkPastingName(toPaste);
-                                                        if (model.checkEntityAddingValid(toPaste)) {
-                                                            NewEntityEdit<E, M> edit = new NewEntityEdit<>(model, toPaste);
-                                                            edit.redo();
-                                                            undoSupport.postEdit(edit);
-                                                            entitiesPasted.add(toPaste);
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    } finally {
-                                        if (isSection) {
-                                            undoSupport.endUpdate();
-                                        }
-                                    }
+                                } else {
+                                    pasteEntities(pastedModel, entitiesPasted);
                                 }
                             } else {
                                 JOptionPane.showMessageDialog(ModelView.this, DatamodelDesignUtils.getLocalizedString("BadClipboardData"), DatamodelDesignUtils.getLocalizedString("datamodel"), JOptionPane.ERROR_MESSAGE);
@@ -2439,21 +2427,71 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
         public KeyStroke getDmActionAccelerator() {
             return KeyStroke.getKeyStroke(KeyEvent.VK_V, KeyEvent.CTRL_DOWN_MASK);
         }
+
+        private void pasteEntities(M pastedModel, List<E> entitiesPasted) throws CannotRedoException {
+            Map<Long, E> entities = pastedModel.getEntities();
+            if (entities != null && !entities.isEmpty()) {
+                undoSupport.beginUpdate();
+                try {
+                    Set<Map.Entry<Long, E>> entSet = entities.entrySet();
+                    if (entSet != null) {
+                        for (Map.Entry<Long, E> entEntry : entSet) {
+                            E toPaste = entEntry.getValue();
+                            if (isPasteable(toPaste)) {
+                                prepareEntityForPaste(toPaste);
+                                checkPastingName(toPaste);
+                                if (model.checkEntityAddingValid(toPaste)) {
+                                    NewEntityEdit<E, M> edit = new NewEntityEdit<>(model, toPaste);
+                                    edit.redo();
+                                    undoSupport.postEdit(edit);
+                                    entitiesPasted.add(toPaste);
+                                }
+                            }
+                        }
+                    }
+                } finally {
+                    undoSupport.endUpdate();
+                }
+            }
+        }
+
+        private void pasteParameters(M pastedModel) {
+            undoSupport.beginUpdate();
+            try {
+                for (Field field : pastedModel.getParameters().toCollection()) {
+                    field.setName(getParameterName(field.getName()));
+                    NewFieldEdit edit = new NewFieldEdit(getParametersView().getEntity(), field);
+                    edit.redo();
+                    undoSupport.postEdit(edit);
+                }
+            } finally {
+                undoSupport.endUpdate();
+            }
+        }
+
+        private String getParameterName(String paramName) {
+            String s = paramName;
+            int i = 1;
+            while (model.getParameters().get(s) != null) {
+                s = String.format(NAME_PATTERN, paramName, i++);
+            }
+            return s;
+        }
     }
 
-    public static class EntityFieldTuple {
+    public class EntityFieldTuple {
 
-        public final Entity entity;
+        public final E entity;
         public final Field field;
 
-        public EntityFieldTuple(Entity anEntity, Field aField) {
+        public EntityFieldTuple(E anEntity, Field aField) {
             entity = anEntity;
             field = aField;
         }
 
         @Override
         public boolean equals(Object obj) {
-            if (obj != null && obj instanceof EntityFieldTuple) {
+            if (obj != null && EntityFieldTuple.class.isAssignableFrom(obj.getClass())) {
                 EntityFieldTuple t = (EntityFieldTuple) obj;
                 return ((entity == null && t.entity == null) || (entity != null && entity.equals(t.entity)))
                         && ((field == null && t.field == null) || (field != null && field.isEqual(t.field)));
