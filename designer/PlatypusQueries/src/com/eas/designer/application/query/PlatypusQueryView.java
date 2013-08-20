@@ -55,6 +55,7 @@ import javax.swing.event.UndoableEditListener;
 import javax.swing.text.EditorKit;
 import org.openide.ErrorManager;
 import org.openide.awt.UndoRedo;
+import org.openide.cookies.SaveCookie;
 import org.openide.explorer.ExplorerManager;
 import org.openide.nodes.Node;
 import org.openide.text.CloneableEditorSupport;
@@ -75,85 +76,16 @@ import org.openide.windows.WindowManager;
  * @author mg
  */
 public class PlatypusQueryView extends CloneableTopComponent {
-    
+
     public static final String SQL_SYNTAX_OK = "Sql - OK";
-    
-    protected class DataObjectListener implements PropertyChangeListener {
-        
-        @Override
-        public void propertyChange(PropertyChangeEvent evt) {
-            if (PlatypusQueryDataObject.PROP_MODIFIED.equals(evt.getPropertyName())) {
-                updateTitle();
-            }
-        }
-    }
-    
-    protected class NodeSelectionListener implements PropertyChangeListener {
-        
-        protected boolean processing;
-        
-        @Override
-        public void propertyChange(PropertyChangeEvent evt) {
-            if (ExplorerManager.PROP_SELECTED_NODES.equals(evt.getPropertyName()) ||
-                    ExplorerManager.PROP_NODE_CHANGE.equals(evt.getPropertyName())) {
-                if (!processing) {
-                    processing = true;
-                    try {
-                        Node[] nodes = ModelInspector.getInstance().getExplorerManager().getSelectedNodes();
-                        getModelView().silentClearSelection();
-                        getModelView().clearEntitiesFieldsSelection();
-                        for (Node node : nodes) {
-                            EntityView<QueryEntity> ev;
-                            if (node instanceof EntityNode<?>) {
-                                ev = getModelView().getEntityView(((EntityNode<QueryEntity>) node).getEntity());
-                                getModelView().silentSelectView(ev);
-                            } else if (node instanceof FieldNode && node.getParentNode() != null) {
-                                ev = getModelView().getEntityView(((EntityNode<QueryEntity>) node.getParentNode()).getEntity());
-                                FieldNode fieldNode = (FieldNode) node;
-                                if ((fieldNode.getField() instanceof Parameter) && !(ev.getEntity() instanceof QueryParametersEntity)) {
-                                    ev.addSelectedParameter((Parameter) fieldNode.getField());
-                                } else {
-                                    ev.addSelectedField(fieldNode.getField());
-                                }
-                            }
-                        }
-                        setActivatedNodes(nodes);
-                    } finally {
-                        processing = false;
-                    }
-                }
-            }
-        }
-    }
-        
-    public class RunQueryAction extends AbstractAction {
-        
-        public RunQueryAction() {
-            super();
-            putValue(Action.NAME, DbStructureUtils.getString(RunQueryAction.class.getSimpleName()));
-            putValue(Action.SHORT_DESCRIPTION, DbStructureUtils.getString(RunQueryAction.class.getSimpleName() + ".hint"));
-            putValue(Action.SMALL_ICON, com.eas.client.model.gui.IconCache.getIcon("runsql.png")); //NOI18N
-        }
-        
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            if (isEnabled()) {
-                QueryResultsAction.runQuery(dataObject);
-            }
-        }
-        
-        @Override
-        public boolean isEnabled() {
-            return dataObject.getClient() != null;
-        }
-    }
-    
     public static final String PLATYPUS_QUERIES_GROUP_NAME = "PlatypusModel";
     static final long serialVersionUID = 1041132023802024L;
     /**
      * path to the icon used by the component and its open action
      */
     private static final String PREFERRED_ID = "PlatypusQueryTopComponent";
+    private static final String SAVE_ACTION_KEY = "save";
+    private static final String CTRL_S_KEY_STROKE = "control S";
     protected static final String[] zoomLevelsData = new String[]{"25%", "50%", "75%", "100%", "150%", "200%", "300%"};
     protected transient DataObjectListener dataObjectListener;
     protected transient UndoableEditListener undoableEditsAccumulator;
@@ -165,28 +97,42 @@ public class PlatypusQueryView extends CloneableTopComponent {
     protected transient HandlerRegistration clientChangeListener;
     protected PlatypusQueryDataObject dataObject;
     protected static final Dimension BTN_DIMENSION = new Dimension(28, 28);
-    
+
     public PlatypusQueryView() throws Exception {
         super();
         setIcon(ImageUtilities.loadImage(QueryRootNode.ICON_PATH, true));
+
+        InputMap iMap = getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        ActionMap aMap = getActionMap();
+        iMap.put(KeyStroke.getKeyStroke(CTRL_S_KEY_STROKE), SAVE_ACTION_KEY);
+        aMap.put(SAVE_ACTION_KEY, new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    dataObject.getLookup().lookup(SaveCookie.class).save();
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        });
     }
-    
+
     public PlatypusQueryDataObject getDataObject() {
         return dataObject;
     }
 
     @Override
     public Lookup getLookup() {
-        return new ProxyLookup(super.getLookup(), Lookups.fixed(getDataObject())); 
+        return new ProxyLookup(super.getLookup(), Lookups.fixed(getDataObject()));
     }
-    
+
     public void setDataObject(PlatypusQueryDataObject aDataObject) throws Exception {
         dataObject = aDataObject;
         dataObjectListener = new DataObjectListener();
         setName(dataObject.getPrimaryFile().getName());
         setToolTipText(NbBundle.getMessage(PlatypusQueryView.class, "HINT_PlatypusQueryTopComponent", dataObject.getPrimaryFile().getPath()));
         tablesSelector = new TablesSelector(dataObject.getAppRoot(), dataObject.getClient(), false, true, NbBundle.getMessage(PlatypusQueryView.class, "selectQuery"), this);
-        
+
         undoableEditsAccumulator = new UndoableEditListener() {
             @Override
             public void undoableEditHappened(UndoableEditEvent e) {
@@ -194,13 +140,13 @@ public class PlatypusQueryView extends CloneableTopComponent {
             }
         };
         initComponents();
-        
+
         EditorKit editorKit = CloneableEditorSupport.getEditorKit(SqlLanguageHierarchy.PLATYPUS_SQL_MIME_TYPE_NAME);
         txtSqlPane.setEditorKit(editorKit);
         txtSqlPane.setDocument(dataObject.getSqlTextDocument());
         Component refinedComponent = initCustomEditor(txtSqlPane);
         pnlSqlSource.add(refinedComponent, BorderLayout.CENTER);
-        
+
         txtSqlDialectPane.setEditorKit(editorKit);
         txtSqlDialectPane.setDocument(dataObject.getSqlFullTextDocument());
         refinedComponent = initCustomEditor(txtSqlDialectPane);
@@ -217,7 +163,7 @@ public class PlatypusQueryView extends CloneableTopComponent {
             }
         });
     }
-    
+
     protected void initDbRelatedViews() throws Exception {
         pnlFromNWhere.removeAll();
         if (dataObject.getClient() != null) {
@@ -233,23 +179,23 @@ public class PlatypusQueryView extends CloneableTopComponent {
                 public void componentAdded(ContainerEvent e) {
                     querySchemeScroll.checkComponents();
                 }
-                
+
                 @Override
                 public void componentRemoved(ContainerEvent e) {
                 }
             });
-            
+
             mnu2Left.setAction(modelView.getActionMap().get(ModelView.GoLeft.class.getSimpleName()));
             mnu2Right.setAction(modelView.getActionMap().get(ModelView.GoRight.class.getSimpleName()));
             mnuDelete.setAction(modelView.getActionMap().get(ModelView.Delete.class.getSimpleName()));
             mnuCut.setAction(modelView.getActionMap().get(ModelView.Cut.class.getSimpleName()));
             mnuCopy.setAction(modelView.getActionMap().get(ModelView.Copy.class.getSimpleName()));
             mnuPaste.setAction(modelView.getActionMap().get(ModelView.Paste.class.getSimpleName()));
-            
+
             querySchemeScroll = new JScalableScrollPane();
             querySchemeScroll.setViewportView(modelView);
             querySchemeScroll.getScalablePanel().getDrawWall().setComponentPopupMenu(popupFromNWhere);
-            
+
             querySchemeScroll.addScaleListener(new ScaleListener() {
                 @Override
                 public void scaleChanged(float oldScale, float newScale) {
@@ -275,7 +221,7 @@ public class PlatypusQueryView extends CloneableTopComponent {
                         ErrorManager.getDefault().notify(ex);
                     }
                 }
-                
+
                 @Override
                 public void selectionChanged(List<SelectedParameter<QueryEntity>> aParameters, List<SelectedField<QueryEntity>> aFields) {
                     try {
@@ -286,12 +232,12 @@ public class PlatypusQueryView extends CloneableTopComponent {
                         ErrorManager.getDefault().notify(ex);
                     }
                 }
-                
+
                 @Override
                 public void selectionChanged(Collection<Relation<QueryEntity>> clctn, Collection<Relation<QueryEntity>> clctn1) {
                 }
             });
-            
+
             componentActivated();
         } else {
             String clientMissingMessage = NbBundle.getMessage(PlatypusQueryView.class, "LBL_Client_Missing");
@@ -305,12 +251,12 @@ public class PlatypusQueryView extends CloneableTopComponent {
             pnlFromNWhere.add(dataObject.getProject().generateDbPlaceholder(), BorderLayout.CENTER);
         }
     }
-    
+
     protected Component initCustomEditor(JEditorPane aPane) {
         if (aPane.getDocument() instanceof NbDocument.CustomEditor) {
             NbDocument.CustomEditor ce = (NbDocument.CustomEditor) aPane.getDocument();
             Component customComponent = ce.createEditor(aPane);
-            
+
             if (customComponent == null) {
                 throw new IllegalStateException(
                         "Document:" + aPane.getDocument() // NOI18N
@@ -322,7 +268,7 @@ public class PlatypusQueryView extends CloneableTopComponent {
         }
         return null;
     }
-    
+
     public static JButton createToolbarButton() {
         JButton aBtn = new JButton();
         aBtn.setFocusable(false);
@@ -334,15 +280,15 @@ public class PlatypusQueryView extends CloneableTopComponent {
         aBtn.setPreferredSize(BTN_DIMENSION);
         return aBtn;
     }
-    
+
     private JMenuItem createMenuItem() {
         JMenuItem aBtn = new JMenuItem();
         return aBtn;
     }
-    
+
     protected void setupDiagramToolbar() {
         JToolBar toolsDbEntities = new JToolBar();
-        
+
         JDropDownButton addBtn = new JDropDownButton();
         addBtn.setFocusable(false);
         addBtn.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -350,9 +296,9 @@ public class PlatypusQueryView extends CloneableTopComponent {
         addBtn.setMaximumSize(BTN_DIMENSION);
         addBtn.setMaximumSize(BTN_DIMENSION);
         addBtn.setPreferredSize(BTN_DIMENSION);
-        
+
         addBtn.setHideActionText(true);
-        
+
         JButton btnAddField = new JButton();
         btnAddField.setAction(modelView.getActionMap().get(ModelView.AddField.class.getSimpleName()));
         btnAddField.setFocusable(false);
@@ -362,7 +308,7 @@ public class PlatypusQueryView extends CloneableTopComponent {
         btnAddField.setMaximumSize(BTN_DIMENSION);
         btnAddField.setPreferredSize(BTN_DIMENSION);
         btnAddField.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        
+
         JButton delBtn = new JButton();
         delBtn.setFocusable(false);
         delBtn.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -371,7 +317,7 @@ public class PlatypusQueryView extends CloneableTopComponent {
         delBtn.setMaximumSize(BTN_DIMENSION);
         delBtn.setPreferredSize(BTN_DIMENSION);
         delBtn.setHideActionText(true);
-        
+
         JPopupMenu addMenu = new JPopupMenu();
         JMenuItem mnuAddTable = createMenuItem();
         JMenuItem mnuAddQuery = createMenuItem();
@@ -379,7 +325,7 @@ public class PlatypusQueryView extends CloneableTopComponent {
         JButton btnZoomIn = createToolbarButton();
         JButton btnZoomOut = createToolbarButton();
         JButton btnFind = createToolbarButton();
-        
+
         JLabel lblZoom = new JLabel();
         lblZoom.setText(DbStructureUtils.getString("lblZoom"));
         JPanel pnlZoom = new JPanel(new BorderLayout());
@@ -389,23 +335,23 @@ public class PlatypusQueryView extends CloneableTopComponent {
         pnlZoom.add(pnlZoom1, BorderLayout.EAST);
         comboZoom.setModel(new DefaultComboBoxModel<>(zoomLevelsData));
         comboZoom.setSelectedItem("100%");
-        
+
         mnuAddTable.setAction(modelView.getActionMap().get(ModelView.AddTable.class.getSimpleName()));
         mnuAddQuery.setAction(modelView.getActionMap().get(AddQueryAction.class.getSimpleName()));
-        
+
         comboZoom.setAction(modelView.getActionMap().get(ModelView.Zoom.class.getSimpleName()));
         bntRunQuery.setAction(new RunQueryAction());
         btnZoomIn.setAction(modelView.getActionMap().get(ModelView.ZoomIn.class.getSimpleName()));
         btnZoomOut.setAction(modelView.getActionMap().get(ModelView.ZoomOut.class.getSimpleName()));
         btnFind.setAction(modelView.getActionMap().get(ModelView.Find.class.getSimpleName()));
-        
+
         addMenu.add(mnuAddTable);
         addMenu.add(mnuAddQuery);
-        
+
         addBtn.setAction(modelView.getActionMap().get(ModelView.AddTable.class.getSimpleName()));
         addBtn.setDropDownMenu(addMenu);
         delBtn.setAction(modelView.getActionMap().get(ModelView.Delete.class.getSimpleName()));
-        
+
         toolsDbEntities.add(addBtn);
         toolsDbEntities.add(btnAddField);
         toolsDbEntities.add(delBtn);
@@ -414,12 +360,12 @@ public class PlatypusQueryView extends CloneableTopComponent {
         toolsDbEntities.add(btnZoomOut);
         toolsDbEntities.add(btnFind);
         toolsDbEntities.add(pnlZoom);
-        
+
         toolsDbEntities.setRollover(true);
         toolsDbEntities.setFloatable(false);
         pnlFromNWhere.add(toolsDbEntities, BorderLayout.NORTH);
     }
-        
+
     @Override
     public void readExternal(ObjectInput oi) throws IOException, ClassNotFoundException {
         try {
@@ -429,13 +375,13 @@ public class PlatypusQueryView extends CloneableTopComponent {
             throw new IOException(ex);
         }
     }
-    
+
     @Override
     public void writeExternal(ObjectOutput oo) throws IOException {
         super.writeExternal(oo);
         oo.writeObject(dataObject);
     }
-    
+
     public void updateTitle() {
         String boldTitleMask = "<html><b>%s</b>";
         String plainTitleMask = "<html>%s";
@@ -455,18 +401,18 @@ public class PlatypusQueryView extends CloneableTopComponent {
             });
         }
     }
-    
+
     @Override
     public UndoRedo getUndoRedo() {
         PlatypusQuerySupport support = dataObject.getLookup().lookup(PlatypusQuerySupport.class);
         return support.getModelUndo();
     }
-    
+
     @Override
     public int getPersistenceType() {
         return TopComponent.PERSISTENCE_ONLY_OPENED;
     }
-    
+
     @Override
     public void componentOpened() {
         try {
@@ -477,7 +423,7 @@ public class PlatypusQueryView extends CloneableTopComponent {
             ErrorManager.getDefault().notify(ex);
         }
     }
-    
+
     @Override
     public boolean canClose() {
         PlatypusQuerySupport support = dataObject.getLookup().lookup(PlatypusQuerySupport.class);
@@ -487,7 +433,7 @@ public class PlatypusQueryView extends CloneableTopComponent {
         }
         return super.canClose();
     }
-    
+
     @Override
     public void componentClosed() {
         try {
@@ -507,11 +453,11 @@ public class PlatypusQueryView extends CloneableTopComponent {
             ErrorManager.getDefault().notify(ex);
         }
     }
-    
+
     protected QueryModelView getModelView() {
         return modelView;
     }
-    
+
     @Override
     public Action[] getActions() {
         List<Action> actions = new ArrayList<>(Arrays.asList(super.getActions()));
@@ -520,7 +466,7 @@ public class PlatypusQueryView extends CloneableTopComponent {
         actions.addAll(Utilities.actionsForPath("Editors/TabActions")); //NOI18N
         return actions.toArray(new Action[actions.size()]);
     }
-    
+
     @Override
     protected void componentActivated() {
         try {
@@ -538,7 +484,7 @@ public class PlatypusQueryView extends CloneableTopComponent {
             ErrorManager.getDefault().notify(ex);
         }
     }
-    
+
     private void setOpenedSqlEditorPane() {
         PlatypusQuerySupport support = dataObject.getLookup().lookup(PlatypusQuerySupport.class);
         if (support != null) {
@@ -549,12 +495,12 @@ public class PlatypusQueryView extends CloneableTopComponent {
             }
         }
     }
-    
+
     @Override
     protected void componentHidden() {
         super.componentHidden();
-        if (ModelInspector.getInstance().getViewData() != null &&
-            ModelInspector.getInstance().getViewData().getModelView() == getModelView()) {
+        if (ModelInspector.getInstance().getViewData() != null
+                && ModelInspector.getInstance().getViewData().getModelView() == getModelView()) {
             ModelInspector.getInstance().setNodesReflector(null);
             ModelInspector.getInstance().setViewData(null);
             WindowManager wm = WindowManager.getDefault();
@@ -564,7 +510,7 @@ public class PlatypusQueryView extends CloneableTopComponent {
             }
         }
     }
-    
+
     @Override
     protected String preferredID() {
         return PREFERRED_ID;
@@ -691,4 +637,74 @@ public class PlatypusQueryView extends CloneableTopComponent {
     private javax.swing.JEditorPane txtSqlDialectPane;
     private javax.swing.JEditorPane txtSqlPane;
     // End of variables declaration//GEN-END:variables
+
+    protected class DataObjectListener implements PropertyChangeListener {
+
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+            if (PlatypusQueryDataObject.PROP_MODIFIED.equals(evt.getPropertyName())) {
+                updateTitle();
+            }
+        }
+    }
+
+    protected class NodeSelectionListener implements PropertyChangeListener {
+
+        protected boolean processing;
+
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+            if (ExplorerManager.PROP_SELECTED_NODES.equals(evt.getPropertyName())
+                    || ExplorerManager.PROP_NODE_CHANGE.equals(evt.getPropertyName())) {
+                if (!processing) {
+                    processing = true;
+                    try {
+                        Node[] nodes = ModelInspector.getInstance().getExplorerManager().getSelectedNodes();
+                        getModelView().silentClearSelection();
+                        getModelView().clearEntitiesFieldsSelection();
+                        for (Node node : nodes) {
+                            EntityView<QueryEntity> ev;
+                            if (node instanceof EntityNode<?>) {
+                                ev = getModelView().getEntityView(((EntityNode<QueryEntity>) node).getEntity());
+                                getModelView().silentSelectView(ev);
+                            } else if (node instanceof FieldNode && node.getParentNode() != null) {
+                                ev = getModelView().getEntityView(((EntityNode<QueryEntity>) node.getParentNode()).getEntity());
+                                FieldNode fieldNode = (FieldNode) node;
+                                if ((fieldNode.getField() instanceof Parameter) && !(ev.getEntity() instanceof QueryParametersEntity)) {
+                                    ev.addSelectedParameter((Parameter) fieldNode.getField());
+                                } else {
+                                    ev.addSelectedField(fieldNode.getField());
+                                }
+                            }
+                        }
+                        setActivatedNodes(nodes);
+                    } finally {
+                        processing = false;
+                    }
+                }
+            }
+        }
+    }
+
+    public class RunQueryAction extends AbstractAction {
+
+        public RunQueryAction() {
+            super();
+            putValue(Action.NAME, DbStructureUtils.getString(RunQueryAction.class.getSimpleName()));
+            putValue(Action.SHORT_DESCRIPTION, DbStructureUtils.getString(RunQueryAction.class.getSimpleName() + ".hint"));
+            putValue(Action.SMALL_ICON, com.eas.client.model.gui.IconCache.getIcon("runsql.png")); //NOI18N
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (isEnabled()) {
+                QueryResultsAction.runQuery(dataObject);
+            }
+        }
+
+        @Override
+        public boolean isEnabled() {
+            return dataObject.getClient() != null;
+        }
+    }
 }
