@@ -231,7 +231,12 @@ public class RowsTreeStoreFiller extends RowsetAdapter implements PropertyChange
 
 	protected void checkIfRootsWithError() {
 		if (rowsetError != null && rootsLoadCallback != null) {
-			rootsLoadCallback.onFailure(new RowsetException(rowsetError));
+			rootsLoadCallback.onFailure(new RowsetException(rowsetError) {
+				@Override
+				public void printStackTrace() {
+					// no op
+				}
+			});
 			rootsLoadCallback = null;
 			rowsetError = null;
 		}

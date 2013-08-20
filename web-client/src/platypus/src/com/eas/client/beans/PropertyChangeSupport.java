@@ -35,7 +35,7 @@ public class PropertyChangeSupport {
 	}
 
 	public void firePropertyChange(PropertyChangeEvent event) {
-		for (PropertyChangeListener l : listeners)
+		for (PropertyChangeListener l : listeners.toArray(new PropertyChangeListener[]{}))
 			l.propertyChange(event);
 	}
 

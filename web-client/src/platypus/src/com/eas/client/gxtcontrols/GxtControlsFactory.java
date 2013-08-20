@@ -253,7 +253,7 @@ public class GxtControlsFactory {
 				PlatypusFieldSet fs = new PlatypusFieldSet();
 				fs.setHeadingText(titledBorderTag.getAttribute("title"));
 				fs.setWidget(aComp);
-				fs.setCollapsible(true);
+				fs.setCollapsible(false);
 
 				JavaScriptObject published = aComp.getData(Form.PUBLISHED_DATA_KEY);
 				fs.setData(Form.PUBLISHED_DATA_KEY, published);

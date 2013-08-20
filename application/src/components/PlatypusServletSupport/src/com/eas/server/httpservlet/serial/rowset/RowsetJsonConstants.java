@@ -4,6 +4,9 @@
  */
 package com.eas.server.httpservlet.serial.rowset;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+
 /**
  *
  * @author kl
@@ -11,5 +14,6 @@ package com.eas.server.httpservlet.serial.rowset;
 public class RowsetJsonConstants {
     
     public static final String JSON_CONTENTTYPE = "text/javascript";
-    public static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
+    private static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
+    public static final DateFormat DATE_FORMATTER = new SimpleDateFormat(DATE_FORMAT);
 }

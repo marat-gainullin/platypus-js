@@ -5,6 +5,8 @@ import com.eas.client.Utils;
 import com.eas.client.model.interacting.filtering.FilteringTest;
 import com.eas.client.model.store.XmlDom2Model;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 import com.google.gwt.xml.client.XMLParser;
 
 public class MixedCrudTest extends MixedTest {
@@ -29,9 +31,9 @@ public class MixedCrudTest extends MixedTest {
 			edIzmRequeriedCounter : 0,
 			edIzmRequeried : function() {
 				publishedModule.edIzmRequeriedCounter++;
-				if (publishedModule.edIzmRequeriedCounter == 1) {
-					aTest.@com.eas.client.model.interacting.mixed.MixedCrudTest::validateMixedCrud()();
-				} else if (publishedModule.edIzmRequeriedCounter == 2) {
+//				if (publishedModule.edIzmRequeriedCounter == 1) {
+//					aTest.@com.eas.client.model.interacting.mixed.MixedCrudTest::validateMixedCrud()();
+				if (publishedModule.edIzmRequeriedCounter == 2) {
 					aTest.@com.eas.client.model.interacting.mixed.MixedCrudTest::velRsBeforeFirstScrolled()();
 				} else if (publishedModule.edIzmRequeriedCounter >= 3) {
 					aTest.@com.eas.client.model.interacting.mixed.MixedCrudTest::velRsNextScrolled()();
@@ -66,6 +68,19 @@ public class MixedCrudTest extends MixedTest {
 				.setOnRequeried(Utils.lookupProperty(module, "naimSiPoVel1Requeried"));
 		model.publish(module);
 		model.setRuntime(true);
+		Scheduler.get().scheduleFixedDelay(new RepeatingCommand(){
+
+			@Override
+            public boolean execute() {
+				try {
+					validateMixedCrud();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return false;
+            }
+			
+		}, 500);
 	}
 
 	public void validateMixedCrud() throws Exception {
@@ -87,22 +102,34 @@ public class MixedCrudTest extends MixedTest {
 			int velPkColIndex = izmVelRs.getFields().find("ID");
 			Long velPk = izmVelRs.getLong(velPkColIndex);
 			if (velPk.equals(FilteringTest.SILA_EL)) {
-				Rowset naimSi = state.NAIMENOVANIE_SI.getRowset();
-				assertNotNull(naimSi);
+				Scheduler.get().scheduleFixedDelay(new RepeatingCommand(){
 
-				module.setNaimSiPoVel1RequeriedCounter(0);
-				// insert will not change any parameters in related entities
-				assertEquals(0, state.NAIMENOVANIA_SI_PO_VELICHINE.getRowset()
-						.size());
-				naimSi.insert();
-				assertEquals(0, state.NAIMENOVANIA_SI_PO_VELICHINE.getRowset()
-						.size());
-				// insert will change any parameters in related entities by further filtering
-				int velColIndex = naimSi.getFields().find("VALUE");
-				naimSi.updateObject(velColIndex, FilteringTest.SILA_EL);
-				// Check filtering relation
-				assertEquals(1, state.NAIMENOVANIA_SI_PO_VELICHINE.getRowset()
-						.size());
+					@Override
+		            public boolean execute() {
+						try {
+							Rowset naimSi = state.NAIMENOVANIE_SI.getRowset();
+							assertNotNull(naimSi);
+
+							module.setNaimSiPoVel1RequeriedCounter(0);
+							// insert will not change any parameters in related entities
+							assertEquals(0, state.NAIMENOVANIA_SI_PO_VELICHINE.getRowset()
+									.size());
+							naimSi.insert();
+							assertEquals(0, state.NAIMENOVANIA_SI_PO_VELICHINE.getRowset()
+									.size());
+							// insert will change any parameters in related entities by further filtering
+							int velColIndex = naimSi.getFields().find("VALUE");
+							naimSi.updateObject(velColIndex, FilteringTest.SILA_EL);
+							// Check filtering relation
+							assertEquals(1, state.NAIMENOVANIA_SI_PO_VELICHINE.getRowset()
+									.size());
+		                } catch (Exception e) {
+		                    e.printStackTrace();
+		                }
+		                return false;
+		            }
+					
+				}, 10);
 				return;
 			}
 			izmVelRs.next();
