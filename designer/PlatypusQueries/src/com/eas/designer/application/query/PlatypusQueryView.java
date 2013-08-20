@@ -242,6 +242,9 @@ public class PlatypusQueryView extends CloneableTopComponent {
             mnu2Left.setAction(modelView.getActionMap().get(ModelView.GoLeft.class.getSimpleName()));
             mnu2Right.setAction(modelView.getActionMap().get(ModelView.GoRight.class.getSimpleName()));
             mnuDelete.setAction(modelView.getActionMap().get(ModelView.Delete.class.getSimpleName()));
+            mnuCut.setAction(modelView.getActionMap().get(ModelView.Cut.class.getSimpleName()));
+            mnuCopy.setAction(modelView.getActionMap().get(ModelView.Copy.class.getSimpleName()));
+            mnuPaste.setAction(modelView.getActionMap().get(ModelView.Paste.class.getSimpleName()));
             
             querySchemeScroll = new JScalableScrollPane();
             querySchemeScroll.setViewportView(modelView);
@@ -295,6 +298,9 @@ public class PlatypusQueryView extends CloneableTopComponent {
             mnu2Left.setText(clientMissingMessage);
             mnu2Right.setText(clientMissingMessage);
             mnuDelete.setText(clientMissingMessage);
+            mnuCut.setText(clientMissingMessage);
+            mnuCopy.setText(clientMissingMessage);
+            mnuPaste.setText(clientMissingMessage);
             tablesSelector.setClient(null);
             pnlFromNWhere.add(dataObject.getProject().generateDbPlaceholder(), BorderLayout.CENTER);
         }
@@ -413,7 +419,7 @@ public class PlatypusQueryView extends CloneableTopComponent {
         toolsDbEntities.setFloatable(false);
         pnlFromNWhere.add(toolsDbEntities, BorderLayout.NORTH);
     }
-    
+        
     @Override
     public void readExternal(ObjectInput oi) throws IOException, ClassNotFoundException {
         try {
@@ -578,6 +584,10 @@ public class PlatypusQueryView extends CloneableTopComponent {
         mnu2Right = new javax.swing.JMenuItem();
         sepNav = new javax.swing.JSeparator();
         mnuDelete = new javax.swing.JMenuItem();
+        sepNav2 = new javax.swing.JPopupMenu.Separator();
+        mnuCut = new javax.swing.JMenuItem();
+        mnuCopy = new javax.swing.JMenuItem();
+        mnuPaste = new javax.swing.JMenuItem();
         pnlDiagram = new javax.swing.JPanel();
         splitMain = new javax.swing.JSplitPane();
         pnlFromNWhere = new javax.swing.JPanel();
@@ -595,6 +605,10 @@ public class PlatypusQueryView extends CloneableTopComponent {
         popupFromNWhere.add(mnu2Right);
         popupFromNWhere.add(sepNav);
         popupFromNWhere.add(mnuDelete);
+        popupFromNWhere.add(sepNav2);
+        popupFromNWhere.add(mnuCut);
+        popupFromNWhere.add(mnuCopy);
+        popupFromNWhere.add(mnuPaste);
 
         setLayout(new java.awt.BorderLayout());
 
@@ -657,7 +671,10 @@ public class PlatypusQueryView extends CloneableTopComponent {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem mnu2Left;
     private javax.swing.JMenuItem mnu2Right;
+    private javax.swing.JMenuItem mnuCopy;
+    private javax.swing.JMenuItem mnuCut;
     private javax.swing.JMenuItem mnuDelete;
+    private javax.swing.JMenuItem mnuPaste;
     private javax.swing.JPanel pnlDiagram;
     private javax.swing.JPanel pnlFromNWhere;
     private javax.swing.JPanel pnlQueryDialectSource;
@@ -668,6 +685,7 @@ public class PlatypusQueryView extends CloneableTopComponent {
     private javax.swing.JScrollPane scrollSqlDialectPane;
     private javax.swing.JScrollPane scrollSqlPane;
     private javax.swing.JSeparator sepNav;
+    private javax.swing.JSeparator sepNav2;
     private javax.swing.JSplitPane splitMain;
     private javax.swing.JTabbedPane tabContent;
     private javax.swing.JEditorPane txtSqlDialectPane;

@@ -338,11 +338,14 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
                         uninstallUserFiltering();
                         achieveOrRefreshRowset();
                         assert rowset != null;
+                        // filtering will be done while processing onRequeried event in ApplicationEntity code
+                    } else {
+                        // if we have no onRequeried event, we call filter manually here.
+                        if (rowset != null) {
+                            filterRowset();
+                            silentFirst();
+                        }
                     }
-                    if (rowset != null) {
-                        filterRowset();
-                    }
-                    silentFirst();
                     res = rowset != null;
                 }
             } finally {
@@ -1172,6 +1175,12 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
     @Override
     public void rowsetRequeried(RowsetRequeryEvent event) {
         try {
+            assert rowset != null;
+            filterRowset();
+            silentFirst();
+            // filtering must go here, because of onRequiried script event is an endpoint of the network process. And it expects the data will be processed already before it will be called.
+            // So, onFiltered script event goes before onRequeired script event.
+
             // call script method
             if (!model.isAjusting()) {
                 enqueueScriptEvent(onRequeried, new ScriptSourcedEvent(sRowsetWrap));

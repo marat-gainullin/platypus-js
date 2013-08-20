@@ -59,6 +59,7 @@ import com.eas.client.application.Application;
 import com.eas.client.beans.PropertyChangeSupport;
 import com.eas.client.form.api.JSEvents;
 import com.eas.client.queries.Query;
+import com.gargoylesoftware.htmlunit.SilentCssErrorHandler;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.core.client.JsArrayMixed;
@@ -1511,9 +1512,6 @@ public class Entity implements RowsetListener {
 						@Override
 						public void doWork() throws Exception {
 							assert rowset != null;
-							pending = null;
-							valid = true;
-							filterRowset();
 							// model.pumpEvents();
 							if (!reworkedCallbacks.isEmpty()) {
 								CancellableCallback[] toCall = reworkedCallbacks.toArray(new CancellableCallback[] {});
@@ -1562,6 +1560,7 @@ public class Entity implements RowsetListener {
 					assert rowset != null;
 					assert pending == null;
 					filterRowset();
+					rowset.silentFirst();
 				}
 			}
 		}
@@ -1864,7 +1863,7 @@ public class Entity implements RowsetListener {
 			}
 		}
 		if (filter != null && !filter.isEmpty() && (filter != rowset.getActiveFilter() || !filter.getKeysetApplied().equals(filterKeySet))) {
-			filter.filterRowset(filterKeySet);
+			filter.filterRowset(filterKeySet);			
 			return true;
 		} else {
 			return false;
@@ -2037,7 +2036,14 @@ public class Entity implements RowsetListener {
 	@Override
 	public void rowsetRequeried(RowsetRequeryEvent event) {
 		try {
+			// network response processing
 			assert pending != null;
+			pending = null;// network response must null the pending state before any other script activities will occur.
+			valid = true;
+			filterRowset();// filtering must go here, because of onRequiried script event is an endpoint of the network process. And it expects the data will be processed already before it will be called.
+			// So onFiltered script event goes before onRequeired script event.
+			rowset.silentFirst();
+			//
 			if (jsPublished != null)
 				publishRows(jsPublished);
 			JavaScriptObject publishedEvent = JSEvents.publishScriptSourcedEvent(jsPublished);

@@ -16,6 +16,14 @@
         </Component>
         <MenuItem class="javax.swing.JMenuItem" name="mnuDelete">
         </MenuItem>
+        <Component class="javax.swing.JPopupMenu$Separator" name="sepNav2">
+        </Component>
+        <MenuItem class="javax.swing.JMenuItem" name="mnuCut">
+        </MenuItem>
+        <MenuItem class="javax.swing.JMenuItem" name="mnuCopy">
+        </MenuItem>
+        <MenuItem class="javax.swing.JMenuItem" name="mnuPaste">
+        </MenuItem>
       </SubComponents>
     </Container>
   </NonVisualComponents>

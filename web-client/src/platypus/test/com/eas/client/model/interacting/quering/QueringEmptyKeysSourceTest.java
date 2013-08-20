@@ -5,6 +5,8 @@ import com.eas.client.Utils;
 import com.eas.client.model.interacting.filtering.FilteringTest;
 import com.eas.client.model.store.XmlDom2Model;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 import com.google.gwt.xml.client.XMLParser;
 
 public class QueringEmptyKeysSourceTest extends QueringTest {
@@ -14,12 +16,12 @@ public class QueringEmptyKeysSourceTest extends QueringTest {
 			imRequeriedCounter : 0,
 			imRequeried : function() {
 				publishedModule.imRequeriedCounter++;
-				if (publishedModule.imRequeriedCounter == 1)
-					aTest.@com.eas.client.model.interacting.quering.QueringEmptyKeysSourceTest::validateQueringEmptyKeysSource()();
-				else if (publishedModule.imRequeriedCounter == 2)
-					aTest.@com.eas.client.model.interacting.quering.QueringEmptyKeysSourceTest::beforeFirstScrolled()();
-				else if (publishedModule.imRequeriedCounter >= 3)
-					aTest.@com.eas.client.model.interacting.quering.QueringEmptyKeysSourceTest::nextScrolled()();
+//				if (publishedModule.imRequeriedCounter == 1)
+//					aTest.@com.eas.client.model.interacting.quering.QueringEmptyKeysSourceTest::validateQueringEmptyKeysSource()();
+//				else if (publishedModule.imRequeriedCounter == 2)
+//					aTest.@com.eas.client.model.interacting.quering.QueringEmptyKeysSourceTest::beforeFirstScrolled()();
+//				else if (publishedModule.imRequeriedCounter >= 3)
+//					aTest.@com.eas.client.model.interacting.quering.QueringEmptyKeysSourceTest::nextScrolled()();
 			}
 		}
 		return publishedModule;
@@ -46,6 +48,19 @@ public class QueringEmptyKeysSourceTest extends QueringTest {
 			model.getEntityById(ENTITY_EDINICI_IZMERENIJA_PO_VELICHINE_ID).setOnRequeried(Utils.lookupProperty(module, "imRequeried"));
 			model.publish(module);
 			model.setRuntime(true);
+			Scheduler.get().scheduleFixedDelay(new RepeatingCommand(){
+
+				@Override
+                public boolean execute() {
+					try {
+						validateQueringEmptyKeysSource();						
+                    } catch (Exception e) {
+	                    e.printStackTrace();
+                    }
+	                return false;
+                }
+				
+			}, 500);
 		} catch (Exception ex) {
 			fail(ex.getMessage());
 			throw ex;
@@ -59,11 +74,37 @@ public class QueringEmptyKeysSourceTest extends QueringTest {
 		pkColIndex = rowset.getFields().find("ID");
 		rowset.beforeFirst();
 		callCounter++;
+		Scheduler.get().scheduleFixedDelay(new RepeatingCommand(){
+
+			@Override
+            public boolean execute() {
+				try {
+					beforeFirstScrolled();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return false;
+            }
+			
+		}, 5);
 	}
 
 	public void beforeFirstScrolled() throws Exception {
 		rowset.next();
 		callCounter++;
+		Scheduler.get().scheduleFixedDelay(new RepeatingCommand(){
+
+			@Override
+            public boolean execute() {
+				try {
+					nextScrolled();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return false;
+            }
+			
+		}, 5);
 	}
 
 	public void nextScrolled() throws Exception {
@@ -82,6 +123,19 @@ public class QueringEmptyKeysSourceTest extends QueringTest {
 				fail("PrimaryKeys must be numbers");
 			}
 			rowset.next();
+			Scheduler.get().scheduleFixedDelay(new RepeatingCommand(){
+
+				@Override
+	            public boolean execute() {
+					try {
+						nextScrolled();
+	                } catch (Exception e) {
+	                    e.printStackTrace();
+	                }
+	                return false;
+	            }
+				
+			}, 5);
 		}
 		callCounter++;
 	}

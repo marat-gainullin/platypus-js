@@ -6,10 +6,7 @@ import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
 import com.eas.server.httpservlet.serial.JsonWriter;
-import com.eas.server.httpservlet.serial.query.QueryJsonWriter;
-import com.eas.util.JSONUtils;
 import java.sql.Types;
-import java.text.SimpleDateFormat;
 
 /**
  *
@@ -61,8 +58,7 @@ public class RowsetJsonWriter extends JsonWriter {
                 case Types.TIME:
                 case Types.DATE:
                 case Types.TIMESTAMP:
-                    SimpleDateFormat sdf = new SimpleDateFormat(RowsetJsonConstants.DATE_FORMAT);
-                    sValue = JSONUtils.s(sdf.format(aValue));
+                    sValue = s(RowsetJsonConstants.DATE_FORMATTER.format(aValue));
                     break;
                 case Types.CHAR:
                 case Types.NCHAR:
@@ -74,11 +70,11 @@ public class RowsetJsonWriter extends JsonWriter {
                 case Types.NCLOB:
                 case Types.OTHER:
                 case Types.STRUCT:
-                    sValue = JSONUtils.s(sValue);
+                    sValue = s(sValue);
                 default:
                     break;
             }
         }
-        JSONUtils.p(sb, aField.getName(), sValue);
+        p(sb, aField.getName(), sValue);
     }
 }

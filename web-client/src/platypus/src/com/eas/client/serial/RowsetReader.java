@@ -21,7 +21,7 @@ import java.util.List;
  */
 public class RowsetReader extends JsonReader {
 
-	private static DateTimeFormat ISO_DATE_FORMAT = DateTimeFormat.getFormat("yyyy-MM-dd'T'HH:mm:ss");
+	public static DateTimeFormat ISO_DATE_FORMAT = DateTimeFormat.getFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 	
     public static Rowset read(JSONValue aValue, Fields aExpectedFields) throws Exception {
     	assert aExpectedFields != null;
