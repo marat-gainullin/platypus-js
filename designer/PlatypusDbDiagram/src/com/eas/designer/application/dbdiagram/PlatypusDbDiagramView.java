@@ -94,6 +94,7 @@ public class PlatypusDbDiagramView extends CloneableTopComponent {
                             if (node instanceof EntityNode) {
                                 ev = getModelView().getEntityView(((EntityNode<FieldsEntity>) node).getEntity());
                                 getModelView().silentSelectView(ev);
+                                editor.checkActions();
                             } else if (node instanceof FieldNode) {
                                 ev = getModelView().getEntityView(((EntityNode<FieldsEntity>) node.getParentNode()).getEntity());
                                 FieldNode fieldNode = (FieldNode) node;

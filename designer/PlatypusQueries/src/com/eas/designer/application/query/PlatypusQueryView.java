@@ -59,6 +59,7 @@ import javax.swing.event.UndoableEditListener;
 import javax.swing.text.EditorKit;
 import org.openide.ErrorManager;
 import org.openide.awt.UndoRedo;
+import org.openide.cookies.SaveCookie;
 import org.openide.explorer.ExplorerManager;
 import org.openide.nodes.Node;
 import org.openide.text.CloneableEditorSupport;
@@ -177,6 +178,8 @@ public class PlatypusQueryView extends CloneableTopComponent {
      * path to the icon used by the component and its open action
      */
     private static final String PREFERRED_ID = "PlatypusQueryTopComponent";
+    private static final String SAVE_ACTION_KEY = "save";
+    private static final String CTRL_S_KEY_STROKE = "control S";
     protected static final String[] zoomLevelsData = new String[]{"25%", "50%", "75%", "100%", "150%", "200%", "300%"};
     protected transient DataObjectListener dataObjectListener;
     protected transient UndoableEditListener undoableEditsAccumulator;
@@ -192,6 +195,20 @@ public class PlatypusQueryView extends CloneableTopComponent {
     public PlatypusQueryView() throws Exception {
         super();
         setIcon(ImageUtilities.loadImage(QueryRootNode.ICON_PATH, true));
+
+        InputMap iMap = getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        ActionMap aMap = getActionMap();
+        iMap.put(KeyStroke.getKeyStroke(CTRL_S_KEY_STROKE), SAVE_ACTION_KEY);
+        aMap.put(SAVE_ACTION_KEY, new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    dataObject.getLookup().lookup(SaveCookie.class).save();
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        });
     }
 
     public PlatypusQueryDataObject getDataObject() {
@@ -714,4 +731,74 @@ public class PlatypusQueryView extends CloneableTopComponent {
     private javax.swing.JEditorPane txtSqlDialectPane;
     private javax.swing.JEditorPane txtSqlPane;
     // End of variables declaration//GEN-END:variables
+
+    protected class DataObjectListener implements PropertyChangeListener {
+
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+            if (PlatypusQueryDataObject.PROP_MODIFIED.equals(evt.getPropertyName())) {
+                updateTitle();
+            }
+        }
+    }
+
+    protected class NodeSelectionListener implements PropertyChangeListener {
+
+        protected boolean processing;
+
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+            if (ExplorerManager.PROP_SELECTED_NODES.equals(evt.getPropertyName())
+                    || ExplorerManager.PROP_NODE_CHANGE.equals(evt.getPropertyName())) {
+                if (!processing) {
+                    processing = true;
+                    try {
+                        Node[] nodes = ModelInspector.getInstance().getExplorerManager().getSelectedNodes();
+                        getModelView().silentClearSelection();
+                        getModelView().clearEntitiesFieldsSelection();
+                        for (Node node : nodes) {
+                            EntityView<QueryEntity> ev;
+                            if (node instanceof EntityNode<?>) {
+                                ev = getModelView().getEntityView(((EntityNode<QueryEntity>) node).getEntity());
+                                getModelView().silentSelectView(ev);
+                            } else if (node instanceof FieldNode && node.getParentNode() != null) {
+                                ev = getModelView().getEntityView(((EntityNode<QueryEntity>) node.getParentNode()).getEntity());
+                                FieldNode fieldNode = (FieldNode) node;
+                                if ((fieldNode.getField() instanceof Parameter) && !(ev.getEntity() instanceof QueryParametersEntity)) {
+                                    ev.addSelectedParameter((Parameter) fieldNode.getField());
+                                } else {
+                                    ev.addSelectedField(fieldNode.getField());
+                                }
+                            }
+                        }
+                        setActivatedNodes(nodes);
+                    } finally {
+                        processing = false;
+                    }
+                }
+            }
+        }
+    }
+
+    public class RunQueryAction extends AbstractAction {
+
+        public RunQueryAction() {
+            super();
+            putValue(Action.NAME, DbStructureUtils.getString(RunQueryAction.class.getSimpleName()));
+            putValue(Action.SHORT_DESCRIPTION, DbStructureUtils.getString(RunQueryAction.class.getSimpleName() + ".hint"));
+            putValue(Action.SMALL_ICON, com.eas.client.model.gui.IconCache.getIcon("runsql.png")); //NOI18N
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (isEnabled()) {
+                QueryResultsAction.runQuery(dataObject);
+            }
+        }
+
+        @Override
+        public boolean isEnabled() {
+            return dataObject.getClient() != null;
+        }
+    }
 }
