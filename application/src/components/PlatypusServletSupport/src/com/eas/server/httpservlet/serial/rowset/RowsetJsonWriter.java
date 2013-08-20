@@ -6,6 +6,7 @@ import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
 import com.eas.server.httpservlet.serial.JsonWriter;
+import com.eas.util.JSONUtils;
 import java.sql.Types;
 
 /**
@@ -58,7 +59,7 @@ public class RowsetJsonWriter extends JsonWriter {
                 case Types.TIME:
                 case Types.DATE:
                 case Types.TIMESTAMP:
-                    sValue = s(RowsetJsonConstants.DATE_FORMATTER.format(aValue));
+                    sValue = JSONUtils.s(RowsetJsonConstants.DATE_FORMATTER.format(aValue));
                     break;
                 case Types.CHAR:
                 case Types.NCHAR:
@@ -70,11 +71,11 @@ public class RowsetJsonWriter extends JsonWriter {
                 case Types.NCLOB:
                 case Types.OTHER:
                 case Types.STRUCT:
-                    sValue = s(sValue);
+                    sValue = JSONUtils.s(sValue);
                 default:
                     break;
             }
         }
-        p(sb, aField.getName(), sValue);
+        JSONUtils.p(sb, aField.getName(), sValue);
     }
 }
