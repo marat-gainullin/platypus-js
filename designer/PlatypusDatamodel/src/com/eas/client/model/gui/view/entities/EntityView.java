@@ -575,46 +575,48 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
         @Override
         public void mouseDragged(MouseEvent e) {
             assert e.getSource() == EntityView.this;
-            Point mousePt = e.getPoint();
-            Point loc = getLocation();
-            if (dMoveInfo.isMove()) {
-                mousePt.x += loc.x - dMousePt.x;
-                mousePt.y += loc.y - dMousePt.y;
-                dragEntityView(EntityView.this, mousePt.x, mousePt.y);
-            } else {
-                mousePt.x = dMousePt.x;
-                mousePt.y += loc.y;
-                Dimension size = getSize();
-                int dx = (dMoveInfo.inLeft || dMoveInfo.inRight) ? mousePt.x - dMousePt.x : 0;
-                int dy = (dMoveInfo.inTop || dMoveInfo.inBottom) ? mousePt.y - dMousePt.y : 0;
-                if (dMoveInfo.inLeft) {
-                    loc.x += dx;
-                    dx = -dx;
-                }
-                if (dMoveInfo.inTop) {
-                    loc.y += dy;
-                    dy = -dy;
-                }
-                if (resizeEntityView(EntityView.this, loc.x, loc.y, size.width + dx, size.height + dy)) {
-                    dMousePt = mousePt;
-                }
-                loc = getLocation();
-                mousePt = e.getPoint();
-                mousePt.x += loc.x;
-                mousePt.y = dMousePt.y;
-                size = getSize();
-                dx = (dMoveInfo.inLeft || dMoveInfo.inRight) ? mousePt.x - dMousePt.x : 0;
-                dy = (dMoveInfo.inTop || dMoveInfo.inBottom) ? mousePt.y - dMousePt.y : 0;
-                if (dMoveInfo.inLeft) {
-                    loc.x += dx;
-                    dx = -dx;
-                }
-                if (dMoveInfo.inTop) {
-                    loc.y += dy;
-                    dy = -dy;
-                }
-                if (resizeEntityView(EntityView.this, loc.x, loc.y, size.width + dx, size.height + dy)) {
-                    dMousePt = mousePt;
+            if (dMoveInfo != null) {
+                Point mousePt = e.getPoint();
+                Point loc = getLocation();
+                if (dMoveInfo.isMove()) {
+                    mousePt.x += loc.x - dMousePt.x;
+                    mousePt.y += loc.y - dMousePt.y;
+                    dragEntityView(EntityView.this, mousePt.x, mousePt.y);
+                } else {
+                    mousePt.x = dMousePt.x;
+                    mousePt.y += loc.y;
+                    Dimension size = getSize();
+                    int dx = (dMoveInfo.inLeft || dMoveInfo.inRight) ? mousePt.x - dMousePt.x : 0;
+                    int dy = (dMoveInfo.inTop || dMoveInfo.inBottom) ? mousePt.y - dMousePt.y : 0;
+                    if (dMoveInfo.inLeft) {
+                        loc.x += dx;
+                        dx = -dx;
+                    }
+                    if (dMoveInfo.inTop) {
+                        loc.y += dy;
+                        dy = -dy;
+                    }
+                    if (resizeEntityView(EntityView.this, loc.x, loc.y, size.width + dx, size.height + dy)) {
+                        dMousePt = mousePt;
+                    }
+                    loc = getLocation();
+                    mousePt = e.getPoint();
+                    mousePt.x += loc.x;
+                    mousePt.y = dMousePt.y;
+                    size = getSize();
+                    dx = (dMoveInfo.inLeft || dMoveInfo.inRight) ? mousePt.x - dMousePt.x : 0;
+                    dy = (dMoveInfo.inTop || dMoveInfo.inBottom) ? mousePt.y - dMousePt.y : 0;
+                    if (dMoveInfo.inLeft) {
+                        loc.x += dx;
+                        dx = -dx;
+                    }
+                    if (dMoveInfo.inTop) {
+                        loc.y += dy;
+                        dy = -dy;
+                    }
+                    if (resizeEntityView(EntityView.this, loc.x, loc.y, size.width + dx, size.height + dy)) {
+                        dMousePt = mousePt;
+                    }
                 }
             }
         }
