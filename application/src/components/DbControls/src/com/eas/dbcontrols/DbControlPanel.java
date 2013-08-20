@@ -725,7 +725,7 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
     }
 
     protected void fireEditingStopped() {
-        for (CellEditorListener l : editorListeners) {
+        for (CellEditorListener l : editorListeners.toArray(new CellEditorListener[]{})) {
             if (l != null) {
                 l.editingStopped(new ChangeEvent(this));
             }
@@ -733,7 +733,7 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
     }
 
     protected void fireEditingCancelled() {
-        for (CellEditorListener l : editorListeners) {
+        for (CellEditorListener l : editorListeners.toArray(new CellEditorListener[]{})) {
             if (l != null) {
                 l.editingCanceled(new ChangeEvent(this));
             }

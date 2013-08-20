@@ -149,7 +149,12 @@ public class RowsListStoreFiller extends RowsetAdapter implements PropertyChange
 
 	protected void checkIfDataError() {
 		if (rowsetError != null && loadCallback != null) {
-			loadCallback.onFailure(new RowsetException(rowsetError));
+			loadCallback.onFailure(new RowsetException(rowsetError) {
+				@Override
+				public void printStackTrace() {
+					// no op
+				}
+			});
 			loadCallback = null;
 			rowsetError = null;
 		}

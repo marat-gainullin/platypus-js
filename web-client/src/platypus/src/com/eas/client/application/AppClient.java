@@ -501,7 +501,7 @@ public class AppClient {
 		FormElement frm = doc.createFormElement();
 		frm.setMethod(aMethod.toString());
 		frm.setAction(baseUrl + aUrlPrefix);
-		for(Entry<String, String> ent : aParams.entrySet()) {
+		for (Entry<String, String> ent : aParams.entrySet()) {
 			InputElement text = doc.createHiddenInputElement();
 			text.setValue(ent.getValue());
 			text.setName(ent.getKey());
@@ -699,7 +699,8 @@ public class AppClient {
 			@com.eas.client.application.AppClient::defineServerModule(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aModule);
 		}
 		$wnd.platypus.executeServerModuleMethod = function(aModuleName, aMethodName, aParams, aCallBack) {
-			return $wnd.boxAsJs(aClient.@com.eas.client.application.AppClient::executeServerModuleMethod(Ljava/lang/String;Ljava/lang/String;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aMethodName, aParams, aCallBack));
+			return $wnd
+					.boxAsJs(aClient.@com.eas.client.application.AppClient::executeServerModuleMethod(Ljava/lang/String;Ljava/lang/String;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aMethodName, aParams, aCallBack));
 		}
 		$wnd.platypus.executeServerReport = function(aModuleName, aModule) {
 			aClient.@com.eas.client.application.AppClient::executeServerReport(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aModule);
@@ -733,7 +734,7 @@ public class AppClient {
 			return null;
 		} else {
 			XMLHttpRequest2 executed = syncRequest(API_URI, query, null, RequestBuilder.GET);
-			if(executed != null){
+			if (executed != null) {
 				String responseType = executed.getResponseHeader("content-type");
 				if (responseType != null) {
 					responseType = responseType.toLowerCase();
@@ -745,7 +746,7 @@ public class AppClient {
 				} else {
 					return Utils.toJs(executed.getResponseText());
 				}
-			}else{
+			} else {
 				return null;
 			}
 		}
@@ -797,7 +798,13 @@ public class AppClient {
 			}
 
 			private Rowset readRowset(XMLHttpRequest aResponse) throws Exception {
-				return RowsetReader.read(JSONParser.parseStrict(aResponse.getResponseText()), aExpectedFields);
+				try {
+					return RowsetReader.read(JSONParser.parseStrict(aResponse.getResponseText()), aExpectedFields);
+				} catch (Exception ex) {
+					String respText = aResponse.getResponseText();
+					Logger.getLogger(AppClient.class.getName()).log(Level.SEVERE, "Rowset response parse error: " + respText + "\n; Status:" + aResponse.getStatus());
+					throw ex;
+				}
 			}
 		}, new ResponseCallbackAdapter() {
 			@Override
