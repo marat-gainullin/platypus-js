@@ -1125,7 +1125,9 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
              }
              */
             AccessibleCompoundEdit section = new AccessibleCompoundEdit();
-            for (EntityFieldTuple t : new HashSet<>(selectedFields)) {
+            Set<EntityFieldTuple> toDelete = new HashSet<>(selectedFields);
+            clearSelection();
+            for (EntityFieldTuple t : toDelete) {
                 Set<Relation<E>> toDel = FieldsEntity.getInOutRelationsByEntityField(t.entity, t.field);
                 for (Relation rel : toDel) {
                     DeleteRelationEdit drEdit = new DeleteRelationEdit(rel);
@@ -1322,6 +1324,8 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
 
     public void rerouteConnectors() {
         if (model != null && needRerouteConnectors) {
+            if(paths == null)
+                preparePaths();
             Set<Relation<E>> modelRels = model.getRelations();
             Set<Relation<E>> filteredRels = new HashSet<>();
             if (modelRels != null) {

@@ -337,6 +337,20 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
         parametersList.setSelectedValue(aValue, true);
     }
 
+    public void addSelectedParameters(Collection<Parameter> aValues) {
+        parametersList.getSelectionModel().setValueIsAdjusting(true);
+        try {
+            for (Parameter param : aValues) {
+                int idx = parametersModel.getFieldNameIndex(param.getName());
+                if (idx != -1) {
+                    parametersList.addSelectionInterval(idx, idx);
+                }
+            }
+        } finally {
+            parametersList.getSelectionModel().setValueIsAdjusting(false);
+        }
+    }
+
     /**
      * Selects parameter in parameters list control.
      *
@@ -356,6 +370,20 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
      */
     public void setSelectedField(Field aValue) {
         fieldsList.setSelectedValue(aValue, true);
+    }
+
+    public void addSelectedFields(Collection<Field> aValues) {
+        fieldsList.getSelectionModel().setValueIsAdjusting(true);
+        try {
+            for (Field field : aValues) {
+                int idx = fieldsModel.getFieldNameIndex(field.getName());
+                if (idx != -1) {
+                    fieldsList.addSelectionInterval(idx, idx);
+                }
+            }
+        } finally {
+            fieldsList.getSelectionModel().setValueIsAdjusting(false);
+        }
     }
 
     /**
@@ -795,12 +823,17 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
         }
     }
 
+    protected interface CancellableRunnable extends Runnable {
+
+        public void cancel();
+    }
+
     protected class FieldsCollectionListener implements CollectionListener<Fields, Field> {
 
         @Override
         public void added(Fields fields, Field field) {
             field.getChangeSupport().addPropertyChangeListener(fieldsChangesReflector);
-            entitiesManager.invalidateConnectors();
+            invalidateConnectors();
         }
 
         @Override
@@ -813,7 +846,7 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
         @Override
         public void removed(Fields fields, Field field) {
             field.getChangeSupport().removePropertyChangeListener(entityChangesReflector);
-            entitiesManager.invalidateConnectors();
+            invalidateConnectors();
         }
 
         @Override
@@ -821,17 +854,42 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
             for (Field field : fieldsCollection) {
                 field.getChangeSupport().removePropertyChangeListener(fieldsChangesReflector);
             }
-            entitiesManager.invalidateConnectors();
+            invalidateConnectors();
         }
 
         @Override
         public void cleared(Fields fields) {
             fieldsChangesReflector.removeFields(fields);
+            invalidateConnectors();
         }
 
         @Override
         public void reodered(Fields aValue) {
-            entitiesManager.invalidateConnectors();
+            invalidateConnectors();
+        }
+        protected CancellableRunnable connectorsTask;
+
+        protected void invalidateConnectors() {
+            if (connectorsTask != null) {
+                connectorsTask.cancel();
+            }
+            connectorsTask = new CancellableRunnable() {
+                protected boolean cancelled;
+
+                @Override
+                public void run() {
+                    if (!cancelled) {
+                        entitiesManager.invalidateConnectors();
+                        connectorsTask = null;
+                    }
+                }
+
+                @Override
+                public void cancel() {
+                    cancelled = true;
+                }
+            };
+            SwingUtilities.invokeLater(connectorsTask);
         }
     }
 
@@ -1105,7 +1163,9 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
 
         @Override
         public void valueChanged(ListSelectionEvent e) {
-            fireFieldSelectionChanged(parametersList.getSelectedValuesList(), fieldsList.getSelectedValuesList());
+            if (!e.getValueIsAdjusting()) {
+                fireFieldSelectionChanged(parametersList.getSelectedValuesList(), fieldsList.getSelectedValuesList());
+            }
         }
     }
 }

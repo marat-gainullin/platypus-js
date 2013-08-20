@@ -4,6 +4,7 @@
  */
 package com.eas.designer.application.dbdiagram;
 
+import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.DbClient;
 import com.eas.client.dbstructure.gui.DbSchemeEditorView;
 import com.eas.client.dbstructure.gui.RunQueryCallback;
@@ -31,7 +32,10 @@ import java.io.ObjectOutput;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import javax.swing.Action;
 import javax.swing.event.UndoableEditEvent;
@@ -74,13 +78,17 @@ public class PlatypusDbDiagramView extends CloneableTopComponent {
 
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
-            if (ExplorerManager.PROP_SELECTED_NODES.equals(evt.getPropertyName())) {
+            if (ExplorerManager.PROP_SELECTED_NODES.equals(evt.getPropertyName()) /*
+                     * if yout whant to uncomment the following line, you should ensure, that ccp
+                     * operation on the nodes will not become slow
+                     || ExplorerManager.PROP_NODE_CHANGE.equals(evt.getPropertyName())*/) {
                 if (!processing) {
                     processing = true;
                     try {
                         Node[] nodes = ModelInspector.getInstance().getExplorerManager().getSelectedNodes();
                         getModelView().silentClearSelection();
                         getModelView().clearEntitiesFieldsSelection();
+                        Map<EntityView<FieldsEntity>, Set<Field>> toSelectFields = new HashMap<>();
                         for (Node node : nodes) {
                             EntityView<FieldsEntity> ev;
                             if (node instanceof EntityNode) {
@@ -89,8 +97,16 @@ public class PlatypusDbDiagramView extends CloneableTopComponent {
                             } else if (node instanceof FieldNode) {
                                 ev = getModelView().getEntityView(((EntityNode<FieldsEntity>) node.getParentNode()).getEntity());
                                 FieldNode fieldNode = (FieldNode) node;
-                                ev.addSelectedField(fieldNode.getField());
+                                if (!toSelectFields.containsKey(ev)) {
+                                    toSelectFields.put(ev, new HashSet<Field>());
+                                }
+                                toSelectFields.get(ev).add(fieldNode.getField());
+                                //ev.addSelectedField(fieldNode.getField());
                             }
+                        }
+                        for (Map.Entry<EntityView<FieldsEntity>, Set<Field>> fEntry : toSelectFields.entrySet()) {
+                            EntityView<FieldsEntity> ev = fEntry.getKey();
+                            ev.addSelectedFields(fEntry.getValue());
                         }
                         setActivatedNodes(nodes);
                     } finally {
@@ -121,9 +137,9 @@ public class PlatypusDbDiagramView extends CloneableTopComponent {
 
     @Override
     public Lookup getLookup() {
-        return new ProxyLookup(super.getLookup(), Lookups.fixed(getDataObject())); 
+        return new ProxyLookup(super.getLookup(), Lookups.fixed(getDataObject()));
     }
-    
+
     public PlatypusDbDiagramDataObject getDataObject() {
         return dataObject;
     }
@@ -190,12 +206,12 @@ public class PlatypusDbDiagramView extends CloneableTopComponent {
                     new TablesSelector(dataObject.getPrimaryFile(), dataObject.getClient(),
                     NbBundle.getMessage(PlatypusDbDiagramView.class, "HINT_PlatypusDbDiagramTopComponent", dataObject.getPrimaryFile().getName()), PlatypusDbDiagramView.this),
                     new UndoManager() {
-                        @Override
-                        public synchronized boolean addEdit(UndoableEdit anEdit) {
-                            ((UndoRedo.Manager) getUndoRedo()).undoableEditHappened(new UndoableEditEvent(this, anEdit));
-                            return true;
-                        }
-                    }, new RunQueryCallback() {
+                @Override
+                public synchronized boolean addEdit(UndoableEdit anEdit) {
+                    ((UndoRedo.Manager) getUndoRedo()).undoableEditHappened(new UndoableEditEvent(this, anEdit));
+                    return true;
+                }
+            }, new RunQueryCallback() {
                 @Override
                 public void runQuery(DbClient aClient, String aDbId, String aSchemaName, String aTableName) {
                     try {
