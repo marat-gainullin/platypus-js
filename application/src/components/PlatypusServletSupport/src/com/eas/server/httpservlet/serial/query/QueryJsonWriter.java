@@ -6,6 +6,7 @@ package com.eas.server.httpservlet.serial.query;
 
 import com.eas.client.queries.Query;
 import com.eas.server.httpservlet.serial.JsonWriter;
+import com.eas.util.JSONUtils;
 
 /**
  *
@@ -26,10 +27,10 @@ public class QueryJsonWriter extends JsonWriter{
 
     public String write() {
         StringBuilder sb = new StringBuilder();
-        o(sb,
-                TITLE_PROP_NAME, s(query.getTitle()),
+        JSONUtils.o(sb,
+                TITLE_PROP_NAME, JSONUtils.s(query.getTitle()),
                 MANUAL_PROP_NAME, String.valueOf(query.isManual()),
-                APP_ELEMENT_PROP_NAME, s(query.getEntityId().toString()),
+                APP_ELEMENT_PROP_NAME, JSONUtils.s(query.getEntityId().toString()),
                 PARAMETERS_PROP_NAME, fields2a(query.getParameters()),
                 FIELDS_PROP_NAME, fields2a(query.getFields())
                 );
