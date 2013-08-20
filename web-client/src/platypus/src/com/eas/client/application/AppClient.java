@@ -79,7 +79,7 @@ public class AppClient {
 	public static final String SERVER_REPORT_FUNCTION_NAME = "ServerReport";
 	protected static Set<String> attachedCss = new HashSet();
 	//
-	private static DateTimeFormat defaultDateFormat = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.ISO_8601);
+	private static DateTimeFormat defaultDateFormat = RowsetReader.ISO_DATE_FORMAT;// DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.ISO_8601);
 	private static AppClient appClient;
 	private String baseUrl;
 	private Map<String, Document> appElements = new HashMap();

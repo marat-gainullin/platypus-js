@@ -10,25 +10,24 @@ import java.util.Collection;
 import com.eas.client.model.Model;
 
 /**
- *
+ * 
  * @author mg
  */
-public class ModelStructureTest extends ModelBaseTest{
+public class ModelStructureTest extends ModelBaseTest {
 
-    public void testParametersEntity()
-    {
-        System.out.println("parametersEntityTest");
-        Model dm = new Model();
-        assertNotNull(dm.getParametersEntity());
-    }
-
-	@Override
-    public void validate() throws Exception {
-    }
+	public void testParametersEntity() {
+		System.out.println("parametersEntityTest");
+		Model model = new Model();
+		assertNotNull(model.getParametersEntity());
+	}
 
 	@Override
-    public Collection<String> queries() {
-	    return null;
-    }
+	public void validate() throws Exception {
+	}
+
+	@Override
+	public Collection<String> queries() {
+		return null;
+	}
 
 }

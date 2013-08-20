@@ -69,7 +69,7 @@ public class RowsetChangeSupport {
         boolean res = true;
         if (rowsetListeners != null && !rowsetListeners.isEmpty() && source.getCursorPos() != aNewRowIndex) {
             RowsetScrollEvent event = new RowsetScrollEvent(source, source.getCursorPos(), aNewRowIndex, RowsetEventMoment.BEFORE);
-            for (RowsetListener l : rowsetListeners) {
+            for (RowsetListener l : rowsetListeners.toArray(new RowsetListener[]{})) {
                 if (l != null) {
                     int oldRowPos = source.getCursorPos();
                     try {
@@ -97,7 +97,7 @@ public class RowsetChangeSupport {
         boolean res = true;
         if (rowsetListeners != null && !rowsetListeners.isEmpty()) {
             RowsetSortEvent event = new RowsetSortEvent(source, RowsetEventMoment.BEFORE);
-            for (RowsetListener l : rowsetListeners) {
+            for (RowsetListener l : rowsetListeners.toArray(new RowsetListener[]{})) {
                 if (l != null) {
                     int oldRowPos = source.getCursorPos();
                     try {
@@ -125,7 +125,7 @@ public class RowsetChangeSupport {
         boolean res = true;
         if (rowsetListeners != null && !rowsetListeners.isEmpty()) {
             RowsetRequeryEvent event = new RowsetRequeryEvent(source, RowsetEventMoment.BEFORE);
-            for (RowsetListener l : rowsetListeners) {
+            for (RowsetListener l : rowsetListeners.toArray(new RowsetListener[]{})) {
                 if (l != null) {
                     int oldRowPos = source.getCursorPos();
                     try {
@@ -153,7 +153,7 @@ public class RowsetChangeSupport {
         boolean res = true;
         if (rowsetListeners != null && !rowsetListeners.isEmpty()) {
             RowsetNextPageEvent event = new RowsetNextPageEvent(source, RowsetEventMoment.BEFORE);
-            for (RowsetListener l : rowsetListeners) {
+            for (RowsetListener l : rowsetListeners.toArray(new RowsetListener[]{})) {
                 if (l != null) {
                     int oldRowPos = source.getCursorPos();
                     try {
@@ -181,7 +181,7 @@ public class RowsetChangeSupport {
         boolean res = true;
         if (rowsetListeners != null && !rowsetListeners.isEmpty()) {
             RowsetFilterEvent event = new RowsetFilterEvent(source, source.getActiveFilter(), RowsetEventMoment.BEFORE);
-            for (RowsetListener l : rowsetListeners) {
+            for (RowsetListener l : rowsetListeners.toArray(new RowsetListener[]{})) {
                 if (l != null) {
                     int oldRowPos = source.getCursorPos();
                     try {
@@ -212,7 +212,7 @@ public class RowsetChangeSupport {
         boolean res = true;
         if (rowsetListeners != null && !rowsetListeners.isEmpty()) {
             RowChangeEvent event = new RowChangeEvent(source, aChangedRow, aFieldIndex, aOldValue, aNewValue, RowsetEventMoment.BEFORE);
-            for (RowsetListener l : rowsetListeners) {
+            for (RowsetListener l : rowsetListeners.toArray(new RowsetListener[]{})) {
                 if (l != null) {
                     int oldRowPos = source.getCursorPos();
                     try {
@@ -254,7 +254,7 @@ public class RowsetChangeSupport {
         boolean res = true;
         if (rowsetListeners != null && !rowsetListeners.isEmpty()) {
             RowsetInsertEvent event = new RowsetInsertEvent(source, aRow, RowsetEventMoment.BEFORE, aAjusting);
-            for (RowsetListener l : rowsetListeners) {
+            for (RowsetListener l : rowsetListeners.toArray(new RowsetListener[]{})) {
                 if (l != null) {
                     int oldRowPos = source.getCursorPos();
                     try {
@@ -311,7 +311,7 @@ public class RowsetChangeSupport {
         boolean res = true;
         if (rowsetListeners != null && !rowsetListeners.isEmpty()) {
             RowsetDeleteEvent event = new RowsetDeleteEvent(source, aRow, RowsetEventMoment.BEFORE, aAjusting);
-            for (RowsetListener l : rowsetListeners) {
+            for (RowsetListener l : rowsetListeners.toArray(new RowsetListener[]{})) {
                 if (l != null) {
                     int oldRowPos = source.getCursorPos();
                     try {
@@ -333,7 +333,7 @@ public class RowsetChangeSupport {
     public void fireRequeriedEvent() {
         if (rowsetListeners != null) {
             RowsetRequeryEvent event = new RowsetRequeryEvent(source, RowsetEventMoment.AFTER);
-            for (RowsetListener l : rowsetListeners) {
+            for (RowsetListener l : rowsetListeners.toArray(new RowsetListener[]{})) {
                 if (l != null) {
                     l.rowsetRequeried(event);
                 }
@@ -347,7 +347,7 @@ public class RowsetChangeSupport {
     public void fireNextPageFetchedEvent() {
         if (rowsetListeners != null) {
             RowsetNextPageEvent event = new RowsetNextPageEvent(source, RowsetEventMoment.AFTER);
-            for (RowsetListener l : rowsetListeners) {
+            for (RowsetListener l : rowsetListeners.toArray(new RowsetListener[]{})) {
                 if (l != null) {
                     l.rowsetNextPageFetched(event);
                 }
@@ -361,7 +361,7 @@ public class RowsetChangeSupport {
     public void fireFilteredEvent() {
         if (rowsetListeners != null) {
             RowsetFilterEvent event = new RowsetFilterEvent(source, source.getActiveFilter(), RowsetEventMoment.AFTER);
-            for (RowsetListener l : rowsetListeners) {
+            for (RowsetListener l : rowsetListeners.toArray(new RowsetListener[]{})) {
                 if (l != null) {
                     l.rowsetFiltered(event);
                 }
@@ -375,7 +375,7 @@ public class RowsetChangeSupport {
     public void fireSavedEvent() {
         if (rowsetListeners != null) {
             RowsetSaveEvent event = new RowsetSaveEvent(source);
-            for (RowsetListener l : rowsetListeners) {
+            for (RowsetListener l : rowsetListeners.toArray(new RowsetListener[]{})) {
                 if (l != null) {
                     l.rowsetSaved(event);
                 }
@@ -389,7 +389,7 @@ public class RowsetChangeSupport {
     public void fireRolledbackEvent() {
         if (rowsetListeners != null) {
             RowsetRollbackEvent event = new RowsetRollbackEvent(source);
-            for (RowsetListener l : rowsetListeners) {
+            for (RowsetListener l : rowsetListeners.toArray(new RowsetListener[]{})) {
                 if (l != null) {
                     l.rowsetRolledback(event);
                 }
@@ -404,7 +404,7 @@ public class RowsetChangeSupport {
     public void fireScrolledEvent(int oldRowIndex) {
         if (rowsetListeners != null) {
             RowsetScrollEvent event = new RowsetScrollEvent(source, oldRowIndex, source.getCursorPos(), RowsetEventMoment.AFTER);
-            for (RowsetListener l : rowsetListeners) {
+            for (RowsetListener l : rowsetListeners.toArray(new RowsetListener[]{})) {
                 if (l != null) {
                     l.rowsetScrolled(event);
                 }
@@ -418,7 +418,7 @@ public class RowsetChangeSupport {
     public void fireSortedEvent() {
         if (rowsetListeners != null) {
             RowsetSortEvent event = new RowsetSortEvent(source, RowsetEventMoment.AFTER);
-            for (RowsetListener l : rowsetListeners) {
+            for (RowsetListener l : rowsetListeners.toArray(new RowsetListener[]{})) {
                 if (l != null) {
                     l.rowsetSorted(event);
                 }
@@ -448,7 +448,7 @@ public class RowsetChangeSupport {
     public void fireRowChangedEvent(Row aChangedRow, int aFieldIndex, Object aOldValue, Object aNewValue) throws InvalidColIndexException, InvalidCursorPositionException {
         if (rowsetListeners != null) {
             RowChangeEvent event = new RowChangeEvent(source, aChangedRow, aFieldIndex, aOldValue, aNewValue, RowsetEventMoment.AFTER);
-            for (RowsetListener l : rowsetListeners) {
+            for (RowsetListener l : rowsetListeners.toArray(new RowsetListener[]{})) {
                 if (l != null) {
                     l.rowChanged(event);
                 }
@@ -472,7 +472,7 @@ public class RowsetChangeSupport {
     public void fireRowInsertedEvent(Row aRow, boolean aAjusting) {
         if (rowsetListeners != null) {
             RowsetInsertEvent event = new RowsetInsertEvent(source, aRow, RowsetEventMoment.AFTER, aAjusting);
-            for (RowsetListener l : rowsetListeners) {
+            for (RowsetListener l : rowsetListeners.toArray(new RowsetListener[]{})) {
                 if (l != null) {
                     l.rowInserted(event);
                 }
@@ -496,7 +496,7 @@ public class RowsetChangeSupport {
     public void fireRowDeletedEvent(Row aRow, boolean aAjusting) {
         if (rowsetListeners != null) {
             RowsetDeleteEvent event = new RowsetDeleteEvent(source, aRow, RowsetEventMoment.AFTER, aAjusting);
-            for (RowsetListener l : rowsetListeners) {
+            for (RowsetListener l : rowsetListeners.toArray(new RowsetListener[]{})) {
                 if (l != null) {
                     l.rowDeleted(event);
                 }
