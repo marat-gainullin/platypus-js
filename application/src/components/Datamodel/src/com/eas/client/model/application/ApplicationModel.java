@@ -253,47 +253,90 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
 
     @ScriptFunction(jsDocText = "Requeries model data.")
     public final void requery() throws Exception {
-        requery(null);
+        requery(null, null);
     }
 
-    public void requery(Function aCallback) throws Exception {
-        executeRootEntities(true);
-        if (aCallback != null) {
-            Context cx = Context.getCurrentContext();
-            boolean wasContext = cx != null;
-            if (!wasContext) {
-                cx = ScriptUtils.enterContext();
-            }
-            try {
-                aCallback.call(cx, scriptScope, scriptScope, new Object[]{});
-            } finally {
+    public void requery(Function aOnSuccess, Function aOnFailure) throws Exception {
+        try {
+            executeRootEntities(true);
+            if (aOnSuccess != null) {
+                Context cx = Context.getCurrentContext();
+                boolean wasContext = cx != null;
                 if (!wasContext) {
-                    Context.exit();
+                    cx = ScriptUtils.enterContext();
                 }
+                try {
+                    aOnSuccess.call(cx, scriptScope, scriptScope, new Object[]{});
+                } finally {
+                    if (!wasContext) {
+                        Context.exit();
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            if (aOnFailure != null) {
+                Context cx = Context.getCurrentContext();
+                boolean wasContext = cx != null;
+                if (!wasContext) {
+                    cx = ScriptUtils.enterContext();
+                }
+                try {
+                    aOnFailure.call(cx, scriptScope, scriptScope, new Object[]{ex.getMessage()});
+                } finally {
+                    if (!wasContext) {
+                        Context.exit();
+                    }
+                }
+            } else {
+                throw ex;
             }
         }
     }
 
     @ScriptFunction(jsDocText = "Refreshes model data if any of its parameters has changed.")
     public void execute() throws Exception {
-        execute(null);
+        execute(null, null);
     }
 
     @ScriptFunction(jsDocText = "Refreshes model data if any of its parameters has changed with callback.")
-    public void execute(Function aCallback) throws Exception {
-        executeRootEntities(false);
-        if (aCallback != null) {
-            Context cx = Context.getCurrentContext();
-            boolean wasContext = cx != null;
-            if (!wasContext) {
-                cx = ScriptUtils.enterContext();
-            }
-            try {
-                aCallback.call(cx, scriptScope, scriptScope, new Object[]{});
-            } finally {
+    public void execute(Function aOnSuccess) throws Exception {
+        execute(aOnSuccess, null);
+    }
+
+    @ScriptFunction(jsDocText = "Refreshes model data if any of its parameters has changed with callback.")
+    public void execute(Function aOnSuccess, Function aOnFailure) throws Exception {
+        try {
+            executeRootEntities(false);
+            if (aOnSuccess != null) {
+                Context cx = Context.getCurrentContext();
+                boolean wasContext = cx != null;
                 if (!wasContext) {
-                    Context.exit();
+                    cx = ScriptUtils.enterContext();
                 }
+                try {
+                    aOnSuccess.call(cx, scriptScope, scriptScope, new Object[]{});
+                } finally {
+                    if (!wasContext) {
+                        Context.exit();
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            if (aOnFailure != null) {
+                Context cx = Context.getCurrentContext();
+                boolean wasContext = cx != null;
+                if (!wasContext) {
+                    cx = ScriptUtils.enterContext();
+                }
+                try {
+                    aOnFailure.call(cx, scriptScope, scriptScope, new Object[]{ex.getMessage()});
+                } finally {
+                    if (!wasContext) {
+                        Context.exit();
+                    }
+                }
+            } else {
+                throw ex;
             }
         }
     }

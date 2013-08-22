@@ -83,7 +83,7 @@ public class ParametersEntity extends Entity {
 
 	@Override
 	public Rowset getRowset() {
-		execute(null, null);
+		execute((CancellableCallback)null, null);
 		return super.getRowset();
 	}
 
