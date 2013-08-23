@@ -2044,7 +2044,6 @@ public class Entity implements RowsetListener {
 			//
 			if (jsPublished != null)
 				publishRows(jsPublished);
-			model.terminateProcess(this, null);
 			JavaScriptObject publishedEvent = JSEvents.publishScriptSourcedEvent(jsPublished);
 			if (!model.isAjusting()) {
 				/*
@@ -2055,6 +2054,7 @@ public class Entity implements RowsetListener {
 				Utils.executeScriptEventVoid(jsPublished, onRequeried, publishedEvent);
 			}
 			internalExecuteChildren(false);
+			model.terminateProcess(this, null);
 		} catch (Exception ex) {
 			Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
 		}

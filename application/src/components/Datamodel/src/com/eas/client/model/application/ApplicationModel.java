@@ -421,13 +421,18 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
     protected static final String USER_DATASOURCE_NAME = "userQuery";
 
     public synchronized Scriptable createQuery(String aQueryId) throws Exception {
+        Logger.getLogger(ApplicationModel.class.getName()).log(Level.WARNING, "createQuery deprecated call detected. Use createEntity instead.");
+        return createEntity(aQueryId);
+    }
+    
+    public synchronized Scriptable createEntity(String aQueryId) throws Exception {
         if (client == null) {
-            throw new NullPointerException("Null client detected while creating a query");
+            throw new NullPointerException("Null client detected while creating an entity");
         }
         E entity = newGenericEntity();
         entity.setName(USER_DATASOURCE_NAME);
         entity.setQueryId(aQueryId);
-        addEntity(entity);
+        //addEntity(entity); To avoid memory leaks you should not add the entity in the model!
         return entity.defineProperties();
     }
 

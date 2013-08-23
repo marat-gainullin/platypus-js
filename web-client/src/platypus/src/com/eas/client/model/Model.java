@@ -28,7 +28,6 @@ import com.eas.client.Callback;
 import com.eas.client.Cancellable;
 import com.eas.client.CancellableCallback;
 import com.eas.client.CancellableCallbackAdapter;
-import com.eas.client.CumulativeCallbackAdapter;
 import com.eas.client.Utils;
 import com.eas.client.application.AppClient;
 import com.eas.client.beans.PropertyChangeSupport;
@@ -355,7 +354,10 @@ public class Model {// implements Cancellable {
 	public native static void publishTopLevelFacade(JavaScriptObject aModule, Model aModel) throws Exception/*-{
 		var publishedModel = {
 			createQuery : function(aQueryId) {
-				return aModel.@com.eas.client.model.Model::createQuery(Ljava/lang/String;)(aQueryId);
+				return aModel.@com.eas.client.model.Model::jsCreateEntity(Ljava/lang/String;)(aQueryId);
+			},
+			createEntity : function(aQueryId) {
+				return aModel.@com.eas.client.model.Model::jsCreateEntity(Ljava/lang/String;)(aQueryId);
 			},
 			save : function(onScuccess, onFailure) {
 				aModel.@com.eas.client.model.Model::save(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(onScuccess, onFailure);
@@ -723,9 +725,6 @@ public class Model {// implements Cancellable {
 	}
 
 	public void executeEntities(Set<Entity> toExecute, CancellableCallback onSuccess, Callback<String> onFailure) throws Exception {
-		if(process != null)
-			process.cancel();
-		process = new NetworkProcess(onSuccess, onFailure);
 		for (Entity entity : toExecute) {
 			entity.internalExecute(null, null);
 		}
@@ -751,7 +750,9 @@ public class Model {// implements Cancellable {
 				}
 			}
 		}
-
+		if(process != null)
+			process.cancel();
+		process = new NetworkProcess(onSuccess, onFailure);
 		executeEntities(toExecute, onSuccess, onFailure);
 	}
 
@@ -816,14 +817,14 @@ public class Model {// implements Cancellable {
 
 	protected static final String USER_DATASOURCE_NAME = "userQuery";
 
-	public synchronized Object createQuery(String aQueryId) throws Exception {
+	public synchronized Object jsCreateEntity(String aQueryId) throws Exception {
 		if (client == null) {
 			throw new NullPointerException("Null client detected while creating a query");
 		}
 		Entity entity = new Entity(this);
 		entity.setName(USER_DATASOURCE_NAME);
 		entity.setQueryId(aQueryId);
-		addEntity(entity);
+		//addEntity(entity); To avoid memory leaks you should not add the entity in the model!
 		return Entity.publishEntityFacade(entity);
 	}
 }
