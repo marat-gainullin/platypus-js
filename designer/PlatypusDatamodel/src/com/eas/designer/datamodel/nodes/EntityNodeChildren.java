@@ -11,10 +11,11 @@ import com.eas.client.model.Entity;
 import com.eas.designer.datamodel.nodes.EntityNodeChildren.EntityFieldKey;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.openide.awt.UndoRedo;
@@ -25,9 +26,10 @@ import org.openide.util.Lookup;
  *
  * @author vv
  */
-public abstract class EntityNodeChildren extends Children.Keys implements PropertyChangeListener {
+public abstract class EntityNodeChildren<T> extends Children.Keys<T> implements PropertyChangeListener {
 
     protected Entity entity;
+    protected Set<T> keys = new HashSet<>();
     private Fields tempFields;
     protected CollectionListener<Fields, Field> fieldsListener = new FieldsToNodesNotifier();
     protected Lookup lookup;
@@ -42,12 +44,14 @@ public abstract class EntityNodeChildren extends Children.Keys implements Proper
         entity.getModel().getChangeSupport().addPropertyChangeListener("client", this);
     }
 
-    protected List getKeys() {
-        List<EntityFieldKey> keys = new ArrayList<>();
+    protected abstract T createKey(Field aField);
+
+    protected Set<T> computeKeys() {
+        keys.clear();
         try {
             if (entity.getQuery() != null) {
                 for (int i = 1; i <= entity.getQuery().getParameters().getParametersCount(); i++) {
-                    keys.add(new EntityFieldKey(entity.getQuery().getParameters().get(i)));
+                    keys.add(createKey(entity.getQuery().getParameters().get(i)));
                 }
             }
         } catch (Exception ex) {
@@ -56,7 +60,7 @@ public abstract class EntityNodeChildren extends Children.Keys implements Proper
         Fields fields = entity.getFields();
         if (fields != null) {
             for (int i = 1; i <= entity.getFields().getFieldsCount(); i++) {
-                keys.add(new EntityFieldKey(entity.getFields().get(i)));
+                keys.add(createKey(entity.getFields().get(i)));
             }
         }
         return keys;
@@ -64,7 +68,7 @@ public abstract class EntityNodeChildren extends Children.Keys implements Proper
 
     @Override
     protected void addNotify() {
-        setKeys(getKeys());
+        setKeys(computeKeys());
     }
 
     @Override
@@ -78,7 +82,7 @@ public abstract class EntityNodeChildren extends Children.Keys implements Proper
     public void propertyChange(PropertyChangeEvent evt) {
         if ("client".equalsIgnoreCase(evt.getPropertyName())) {
             setFields(entity.getFields());
-            setKeys(getKeys());
+            setKeys(computeKeys());
         }
     }
 
@@ -96,36 +100,38 @@ public abstract class EntityNodeChildren extends Children.Keys implements Proper
 
         @Override
         public void added(Fields c, Field v) {
-            setKeys(getKeys());
+            keys.add(createKey(v));
+            setKeys(keys);
         }
 
         @Override
         public void added(Fields c, Collection<Field> clctn) {
-            setKeys(getKeys());
+            setKeys(computeKeys());
         }
 
         @Override
         public void removed(Fields c, Field v) {
-            setKeys(getKeys());
+            keys.remove(createKey(v));
+            setKeys(keys);
         }
 
         @Override
         public void removed(Fields c, Collection<Field> clctn) {
-            setKeys(getKeys());
+            setKeys(computeKeys());
         }
 
         @Override
         public void cleared(Fields c) {
-            setKeys(getKeys());
+            setKeys(computeKeys());
         }
 
         @Override
         public void reodered(Fields c) {
-            setKeys(getKeys());
+            setKeys(computeKeys());
         }
     }
 
-    protected static class EntityFieldKey {
+    public static class EntityFieldKey {
 
         public final Field field;
 

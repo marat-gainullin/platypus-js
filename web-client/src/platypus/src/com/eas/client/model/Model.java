@@ -24,10 +24,10 @@ import com.bearsoft.rowset.dataflow.TransactionListener;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameters;
+import com.eas.client.Callback;
 import com.eas.client.Cancellable;
 import com.eas.client.CancellableCallback;
 import com.eas.client.CancellableCallbackAdapter;
-import com.eas.client.CumulativeCallbackAdapter;
 import com.eas.client.Utils;
 import com.eas.client.application.AppClient;
 import com.eas.client.beans.PropertyChangeSupport;
@@ -69,9 +69,56 @@ public class Model {// implements Cancellable {
 	protected List<ScriptEvent> pendingEventsQueue = new ArrayList();
 	protected Set<String> pendingEvents = new HashSet();
 	//
+	protected NetworkProcess process;
 	protected int ajustingCounter = 0;
 	protected JavaScriptObject module;
 	protected Runnable handlersResolver;
+
+	public static class NetworkProcess {
+		public Map<Entity, String> errors = new HashMap();
+		public CancellableCallback onSuccess;
+		public Callback<String> onFailure;
+
+		public NetworkProcess(CancellableCallback aOnSuccess, Callback<String> aOnFailure) {
+			onSuccess = aOnSuccess;
+			onFailure = aOnFailure;
+		}
+
+		protected String assembleErrors() {
+			if(errors != null && !errors.isEmpty()){
+				StringBuilder sb = new StringBuilder(); 
+				for(Entity entity : errors.keySet()){
+					if(sb.length() > 0)
+						sb.append("\n");
+					sb.append(errors.get(entity)).append(" (").append(entity.getName()).append("[ ").append(entity.getTitle()).append("])");
+				}
+		        return sb.toString();
+			}
+	        return null;
+        }
+		
+		public void cancel() throws Exception{
+			if(onFailure != null)
+				onFailure.run(null);
+		}
+		
+		public void success() throws Exception{
+			if(onSuccess != null)
+				onSuccess.run();
+		}
+		
+		public void failure() throws Exception{
+			if(onFailure != null)
+				onFailure.run(assembleErrors());
+		}
+
+		public void end() throws Exception {
+			if(errors.isEmpty())
+				success();
+			else
+				failure();
+        }
+	}
 
 	public static class ScriptEvent {
 		protected JavaScriptObject module;
@@ -236,31 +283,20 @@ public class Model {// implements Cancellable {
 		}
 		return false;
 	}
-/*
-	public void enqueueEvent(ScriptEvent aEvent) {
-		if (!pendingEvents.contains(aEvent.toString())) {
-			pendingEvents.add(aEvent.toString());
-			pendingEventsQueue.add(aEvent);
-		}
-	}
 
-	protected boolean pumping = false;
-
-	public void pumpEvents() throws Exception {
-		if (!isPending() && !pumping) {
-			pumping = true;
-			try {
-				while (!pendingEventsQueue.isEmpty()) {
-					ScriptEvent pEvent = pendingEventsQueue.remove(0);
-					pendingEvents.remove(pEvent.toString());
-					pEvent.execute();
-				}
-			} finally {
-				pumping = false;
-			}
-		}
-	}
-*/
+	/*
+	 * public void enqueueEvent(ScriptEvent aEvent) { if
+	 * (!pendingEvents.contains(aEvent.toString())) {
+	 * pendingEvents.add(aEvent.toString()); pendingEventsQueue.add(aEvent); } }
+	 * 
+	 * protected boolean pumping = false;
+	 * 
+	 * public void pumpEvents() throws Exception { if (!isPending() && !pumping)
+	 * { pumping = true; try { while (!pendingEventsQueue.isEmpty()) {
+	 * ScriptEvent pEvent = pendingEventsQueue.remove(0);
+	 * pendingEvents.remove(pEvent.toString()); pEvent.execute(); } } finally {
+	 * pumping = false; } } }
+	 */
 	public ParametersEntity getParametersEntity() {
 		return parametersEntity;
 	}
@@ -318,16 +354,19 @@ public class Model {// implements Cancellable {
 	public native static void publishTopLevelFacade(JavaScriptObject aModule, Model aModel) throws Exception/*-{
 		var publishedModel = {
 			createQuery : function(aQueryId) {
-				return aModel.@com.eas.client.model.Model::createQuery(Ljava/lang/String;)(aQueryId);
+				return aModel.@com.eas.client.model.Model::jsCreateEntity(Ljava/lang/String;)(aQueryId);
 			},
-			save : function(aCallback) {
-				aModel.@com.eas.client.model.Model::save(Lcom/google/gwt/core/client/JavaScriptObject;)(aCallback);
+			createEntity : function(aQueryId) {
+				return aModel.@com.eas.client.model.Model::jsCreateEntity(Ljava/lang/String;)(aQueryId);
+			},
+			save : function(onScuccess, onFailure) {
+				aModel.@com.eas.client.model.Model::save(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(onScuccess, onFailure);
 			},
 			revert : function() {
 				aModel.@com.eas.client.model.Model::revert()();
 			},
-			requery : function(aCallback) {
-				aModel.@com.eas.client.model.Model::requery(Lcom/google/gwt/core/client/JavaScriptObject;)(aCallback);
+			requery : function(onSuccess, onFailure) {
+				aModel.@com.eas.client.model.Model::requery(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(onSuccess, onFailure);
 			},
 			unwrap : function() {
 				return aModel;
@@ -488,6 +527,19 @@ public class Model {// implements Cancellable {
 		commitable = aValue;
 	}
 
+	public void terminateProcess(Entity aSource, String aErrorMessage) throws Exception {
+		if(process != null){
+			if(aErrorMessage != null){
+				process.errors.put(aSource, aErrorMessage);
+			}
+			if (!isPending()) {
+				NetworkProcess pr = process;
+				process = null;
+				pr.end();
+			}
+		}
+	}
+
 	public boolean isTypeSupported(int type) throws Exception {
 		return true;
 	}
@@ -552,7 +604,7 @@ public class Model {// implements Cancellable {
 		return false;
 	}
 
-	public Cancellable save(final JavaScriptObject onSuccess) throws Exception {
+	public Cancellable save(final JavaScriptObject onSuccess, final JavaScriptObject onFailure) throws Exception {
 		client.getChangeLog().addAll(changeLog);
 		if (commitable) {
 			return client.commit(new CancellableCallbackAdapter() {
@@ -563,12 +615,18 @@ public class Model {// implements Cancellable {
 					if (onSuccess != null)
 						Utils.invokeJsFunction(onSuccess);
 				}
-			}, new CancellableCallbackAdapter() {
+			}, new Callback<String>() {
 
 				@Override
-				protected void doWork() throws Exception {
+				public void run(String aResult) throws Exception {
 					rolledback();
+					if (onFailure != null)
+						Utils.executeScriptEventVoid(module, onFailure, aResult);
 				}
+
+				@Override
+                public void cancel() {
+                }
 			});
 		} else
 			return null;
@@ -599,33 +657,53 @@ public class Model {// implements Cancellable {
 	public void rolledback() throws Exception {
 	}
 
-	public void requery(final JavaScriptObject onSuccess) throws Exception {
+	public void requery(final JavaScriptObject onSuccess, final JavaScriptObject onFailure) throws Exception {
 		requery(new CancellableCallbackAdapter() {
 			@Override
 			protected void doWork() throws Exception {
 				if (onSuccess != null)
 					Utils.invokeJsFunction(onSuccess);
 			}
+		}, new Callback<String>(){
+			@Override
+			public void run(String aResult) throws Exception {
+				if(onFailure != null)
+					Utils.executeScriptEventVoid(module, onFailure, aResult);
+			}
+
+			@Override
+            public void cancel() {
+            }
 		});
 	}
 
-	public void requery(CancellableCallback onSuccess) throws Exception {
+	public void requery(CancellableCallback onSuccess, Callback<String> onFailure) throws Exception {
 		revert();
-		executeRootEntities(true, onSuccess);
+		executeRootEntities(true, onSuccess, onFailure);
 	}
 
-	public void execute(final JavaScriptObject onSuccess) throws Exception {
+	public void execute(final JavaScriptObject onSuccess, final JavaScriptObject onFailure) throws Exception {
 		execute(new CancellableCallbackAdapter() {
 			@Override
 			protected void doWork() throws Exception {
 				if (onSuccess != null)
 					Utils.invokeJsFunction(onSuccess);
 			}
+		}, new Callback<String>(){
+			@Override
+			public void run(String aResult) throws Exception {
+				if(onFailure != null)
+					Utils.executeScriptEventVoid(module, onFailure, aResult);
+			}
+
+			@Override
+            public void cancel() {
+            }
 		});
 	}
 
-	public void execute(CancellableCallback onSuccess) throws Exception {
-		executeRootEntities(false, onSuccess);
+	public void execute(CancellableCallback onSuccess, Callback<String> onFailure) throws Exception {
+		executeRootEntities(false, onSuccess, onFailure);
 	}
 
 	public static Set<Entity> gatherNextLayer(Collection<Entity> aLayer) throws Exception {
@@ -646,23 +724,20 @@ public class Model {// implements Cancellable {
 		return nextLayer;
 	}
 
-	public void executeEntities(Set<Entity> toExecute, final CancellableCallback onSuccess) throws Exception {
-		CumulativeCallbackAdapter cumulativeSuccess = new CumulativeCallbackAdapter(toExecute.size()) {
-			protected void doWork() throws Exception {
-				if (onSuccess != null)
-					onSuccess.run();
-			};
-		};
+	public void executeEntities(Set<Entity> toExecute, CancellableCallback onSuccess, Callback<String> onFailure) throws Exception {
 		for (Entity entity : toExecute) {
-			entity.internalExecute(cumulativeSuccess, null);
+			entity.internalExecute(null, null);
 		}
 	}
 
-	private void executeRootEntities(boolean refresh, CancellableCallback onSuccess) throws Exception {
+	private void executeRootEntities(boolean refresh, CancellableCallback onSuccess, Callback<String> onFailure) throws Exception {
 		final Set<Entity> toExecute = new HashSet();
 		for (Entity entity : entities.values()) {
-			if (!(entity instanceof ParametersEntity)) {// ParametersEntity is in the entities, so we have to filter it out
-				if(refresh)
+			if (!(entity instanceof ParametersEntity)) {// ParametersEntity is
+														// in the entities, so
+														// we have to filter it
+														// out
+				if (refresh)
 					entity.invalidate();
 				Set<Relation> dependanceRels = new HashSet();
 				for (Relation inRel : entity.getInRelations()) {
@@ -675,7 +750,10 @@ public class Model {// implements Cancellable {
 				}
 			}
 		}
-		executeEntities(toExecute, onSuccess);
+		if(process != null)
+			process.cancel();
+		process = new NetworkProcess(onSuccess, onFailure);
+		executeEntities(toExecute, onSuccess, onFailure);
 	}
 
 	public void validateQueries() throws Exception {
@@ -726,7 +804,7 @@ public class Model {// implements Cancellable {
 		if (!oldValue && runtime) {
 			resolveHandlers();
 			validateQueries();
-			executeRootEntities(false, null);
+			executeRootEntities(false, null, null);
 		}
 	}
 
@@ -739,14 +817,14 @@ public class Model {// implements Cancellable {
 
 	protected static final String USER_DATASOURCE_NAME = "userQuery";
 
-	public synchronized Object createQuery(String aQueryId) throws Exception {
+	public synchronized Object jsCreateEntity(String aQueryId) throws Exception {
 		if (client == null) {
 			throw new NullPointerException("Null client detected while creating a query");
 		}
 		Entity entity = new Entity(this);
 		entity.setName(USER_DATASOURCE_NAME);
 		entity.setQueryId(aQueryId);
-		addEntity(entity);
+		//addEntity(entity); To avoid memory leaks you should not add the entity in the model!
 		return Entity.publishEntityFacade(entity);
 	}
 }

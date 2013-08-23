@@ -4,6 +4,7 @@
  */
 package com.eas.designer.application.module;
 
+import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.eas.client.model.Relation;
 import com.eas.client.model.application.ApplicationDbEntity;
@@ -33,7 +34,10 @@ import java.io.ObjectOutput;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import javax.swing.Action;
 import javax.swing.JComponent;
@@ -70,14 +74,18 @@ public final class PlatypusModuleDatamodelView extends TopComponent implements M
 
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
-            if (ExplorerManager.PROP_SELECTED_NODES.equals(evt.getPropertyName())
-                    || ExplorerManager.PROP_NODE_CHANGE.equals(evt.getPropertyName())) {
+            if (ExplorerManager.PROP_SELECTED_NODES.equals(evt.getPropertyName()) /*
+                     * if yout whant to uncomment the following line, you should ensure, that ccp
+                     * operation on the nodes will not become slow
+                     || ExplorerManager.PROP_NODE_CHANGE.equals(evt.getPropertyName())*/) {
                 if (!processing) {
                     processing = true;
                     try {
                         Node[] nodes = ModelInspector.getInstance().getExplorerManager().getSelectedNodes();
                         appModelEditor.getModelView().silentClearSelection();
                         appModelEditor.getModelView().clearEntitiesFieldsSelection();
+                        Map<EntityView<ApplicationDbEntity>, Set<Field>> toSelectFields = new HashMap<>();
+                        Map<EntityView<ApplicationDbEntity>, Set<Parameter>> toSelectParameters = new HashMap<>();
                         for (Node node : nodes) {
                             EntityView<ApplicationDbEntity> ev;
                             if (node instanceof EntityNode<?>) {
@@ -88,12 +96,28 @@ public final class PlatypusModuleDatamodelView extends TopComponent implements M
                                     ev = appModelEditor.getModelView().getEntityView(((EntityNode<ApplicationDbEntity>) node.getParentNode()).getEntity());
                                     FieldNode fieldNode = (FieldNode) node;
                                     if ((fieldNode.getField() instanceof Parameter) && !(ev.getEntity() instanceof ApplicationParametersEntity)) {
-                                        ev.addSelectedParameter((Parameter) fieldNode.getField());
+                                        if (!toSelectParameters.containsKey(ev)) {
+                                            toSelectParameters.put(ev, new HashSet<Parameter>());
+                                        }
+                                        toSelectParameters.get(ev).add((Parameter) fieldNode.getField());
+                                        //ev.addSelectedParameter((Parameter) fieldNode.getField());
                                     } else {
-                                        ev.addSelectedField(fieldNode.getField());
+                                        if (!toSelectFields.containsKey(ev)) {
+                                            toSelectFields.put(ev, new HashSet<Field>());
+                                        }
+                                        toSelectFields.get(ev).add(fieldNode.getField());
+                                        //ev.addSelectedField(fieldNode.getField());
                                     }
                                 }
                             }
+                        }
+                        for (Map.Entry<EntityView<ApplicationDbEntity>, Set<Parameter>> pEntry : toSelectParameters.entrySet()) {
+                            EntityView<ApplicationDbEntity> ev = pEntry.getKey();
+                            ev.addSelectedParameters(pEntry.getValue());
+                        }
+                        for (Map.Entry<EntityView<ApplicationDbEntity>, Set<Field>> fEntry : toSelectFields.entrySet()) {
+                            EntityView<ApplicationDbEntity> ev = fEntry.getKey();
+                            ev.addSelectedFields(fEntry.getValue());
                         }
                         setActivatedNodes(nodes);
                     } finally {
@@ -129,7 +153,7 @@ public final class PlatypusModuleDatamodelView extends TopComponent implements M
         // to produce satisfactory events.
         explorerManager = new ExplorerManager();
         associateLookup(new ProxyLookup(new Lookup[]{
-                    ExplorerUtils.createLookup(explorerManager, getActionMap()),}));
+            ExplorerUtils.createLookup(explorerManager, getActionMap()),}));
 
         /*
          associateLookup(Lookups.proxy(new Lookup.Provider() {

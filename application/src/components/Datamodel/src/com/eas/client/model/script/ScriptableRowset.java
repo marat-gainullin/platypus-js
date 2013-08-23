@@ -19,7 +19,6 @@ import com.bearsoft.rowset.sorting.SortingCriterion;
 import com.eas.client.AppClient;
 import com.eas.client.DbClient;
 import com.eas.client.events.ScriptSourcedEvent;
-import com.eas.client.model.Relation;
 import com.eas.client.model.RowsetMissingException;
 import com.eas.client.model.application.ApplicationEntity;
 import com.eas.client.model.application.ApplicationParametersEntity;
@@ -1290,23 +1289,47 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     }
 
     @ScriptFunction(jsDocText = "Refreshes rowset only if any of its parameters has changed with callback.")
-    public void execute(Function aCallback) throws Exception {
+    public void execute(Function aOnSuccess) throws Exception {
+        execute(aOnSuccess, null);
+    }
+
+    @ScriptFunction(jsDocText = "Refreshes rowset only if any of its parameters has changed with callback.")
+    public void execute(Function aOnSuccess, Function aOnFailure) throws Exception {
         if (entity != null) {
-            checkModelExecuted();
-            if (entity.getQuery().isManual()) {
-                entity.getQuery().setManual(false);
-                try {
+            assert tag instanceof RowsetHostObject;
+            RowsetHostObject<E> rowsetFacade = (RowsetHostObject<E>) tag;
+            try {
+                checkModelExecuted();
+                if (entity.getQuery().isManual()) {
+                    entity.getQuery().setManual(false);
+                    try {
+                        entity.execute();
+                    } finally {
+                        entity.getQuery().setManual(true);
+                    }
+                } else {
                     entity.execute();
-                } finally {
-                    entity.getQuery().setManual(true);
                 }
-            } else {
-                entity.execute();
-            }
-            if (aCallback != null) {
-                assert tag instanceof RowsetHostObject;
-                RowsetHostObject<E> rowsetFacade = (RowsetHostObject<E>) tag;
-                entity.executeScriptEvent(aCallback, new ScriptSourcedEvent(rowsetFacade));
+                if (aOnSuccess != null) {
+                    entity.executeScriptEvent(aOnSuccess, new ScriptSourcedEvent(rowsetFacade));
+                }
+            } catch (Exception ex) {
+                if (aOnFailure != null) {
+                    Context cx = Context.getCurrentContext();
+                    boolean wasContext = cx != null;
+                    if (!wasContext) {
+                        cx = ScriptUtils.enterContext();
+                    }
+                    try {
+                        aOnFailure.call(cx, rowsetFacade, rowsetFacade, new Object[]{ex.getMessage()});
+                    } finally {
+                        if (!wasContext) {
+                            Context.exit();
+                        }
+                    }
+                } else {
+                    throw ex;
+                }
             }
         }
     }
@@ -1337,23 +1360,24 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         return 0;
     }
 
-    @ScriptFunction(jsDocText = "Refreshes children entities.")
-    public void executeChildrenOnly() throws Exception {
-        if (entity != null) {
-            checkModelExecuted();
-            Set<Relation<E>> outRels = entity.getOutRelations();
-            if (outRels != null) {
-                for (Relation<E> rel : outRels) {
-                    if (rel != null && rel.getRightEntity() != null) {
-                        E rEnt = rel.getRightEntity();
-                        rEnt.execute();
-                    }
-                }
-            }
-        }
+    /*
+     @ScriptFunction(jsDocText = "Refreshes children entities.")
+     public void executeChildrenOnly() throws Exception {
+     if (entity != null) {
+     checkModelExecuted();
+     Set<Relation<E>> outRels = entity.getOutRelations();
+     if (outRels != null) {
+     for (Relation<E> rel : outRels) {
+     if (rel != null && rel.getRightEntity() != null) {
+     E rEnt = rel.getRightEntity();
+     rEnt.execute();
+     }
+     }
+     }
+     }
 
-    }
-
+     }
+     */
     // Requery interface
     @ScriptFunction(jsDocText = "Requeries rowset's data.")
     public void requery() throws Exception {
@@ -1372,44 +1396,69 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         }
     }
 
-    @ScriptFunction(jsDocText = "Requeries rowset's data with a callback.")
-    public void requery(Function aCallback) throws Exception {
-        if (entity != null) {
-            checkModelExecuted();
-            if (entity.getQuery().isManual()) {
-                entity.getQuery().setManual(false);
-                try {
-                    entity.refresh();
-                } finally {
-                    entity.getQuery().setManual(true);
-                }
-            } else {
-                entity.refresh();
-            }
-            if (aCallback != null) {
-                assert tag instanceof RowsetHostObject;
-                RowsetHostObject<E> rowsetFacade = (RowsetHostObject<E>) tag;
-                entity.executeScriptEvent(aCallback, new ScriptSourcedEvent(rowsetFacade));
-            }
-        }
+    @ScriptFunction(jsDocText = "Requeries rowset's data with a callbacks.")
+    public void requery(Function aOnSuccess) throws Exception {
+        requery(aOnSuccess, null);
     }
 
-    @ScriptFunction(jsDocText = "Requeries children entities.")
-    public void requeryChildrenOnly() throws Exception {
+    @ScriptFunction(jsDocText = "Requeries rowset's data with a callbacks.")
+    public void requery(Function aOnSuccess, Function aOnFailure) throws Exception {
         if (entity != null) {
-            checkModelExecuted();
-            Set<Relation<E>> outRels = entity.getOutRelations();
-            if (outRels != null) {
-                for (Relation<E> rel : outRels) {
-                    if (rel != null && rel.getRightEntity() != null) {
-                        E rEnt = rel.getRightEntity();
-                        rEnt.refresh();
+            assert tag instanceof RowsetHostObject;
+            RowsetHostObject<E> rowsetFacade = (RowsetHostObject<E>) tag;
+            try {
+                checkModelExecuted();
+                if (entity.getQuery().isManual()) {
+                    entity.getQuery().setManual(false);
+                    try {
+                        entity.refresh();
+                    } finally {
+                        entity.getQuery().setManual(true);
                     }
+                } else {
+                    entity.refresh();
+                }
+                if (aOnSuccess != null) {
+                    entity.executeScriptEvent(aOnSuccess, new ScriptSourcedEvent(rowsetFacade));
+                }
+            } catch (Exception ex) {
+                if (aOnFailure != null) {
+                    Context cx = Context.getCurrentContext();
+                    boolean wasContext = cx != null;
+                    if (!wasContext) {
+                        cx = ScriptUtils.enterContext();
+                    }
+                    try {
+                        aOnFailure.call(cx, rowsetFacade, rowsetFacade, new Object[]{ex.getMessage()});
+                    } finally {
+                        if (!wasContext) {
+                            Context.exit();
+                        }
+                    }
+                } else {
+                    throw ex;
                 }
             }
         }
     }
 
+    /*
+     @ScriptFunction(jsDocText = "Requeries children entities.")
+     public void requeryChildrenOnly() throws Exception {
+     if (entity != null) {
+     checkModelExecuted();
+     Set<Relation<E>> outRels = entity.getOutRelations();
+     if (outRels != null) {
+     for (Relation<E> rel : outRels) {
+     if (rel != null && rel.getRightEntity() != null) {
+     E rEnt = rel.getRightEntity();
+     rEnt.refresh();
+     }
+     }
+     }
+     }
+     }
+     */
     // modify interface
     @ScriptFunction(jsDocText = "Inserts new row in the rowset and sets cursor on this row.")
     public void insert(Object... requiedFields) throws Exception {

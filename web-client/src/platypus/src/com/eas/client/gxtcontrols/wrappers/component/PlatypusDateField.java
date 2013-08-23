@@ -2,21 +2,26 @@ package com.eas.client.gxtcontrols.wrappers.component;
 
 import java.util.Date;
 
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.sencha.gxt.cell.core.client.form.DateCell;
 import com.sencha.gxt.widget.core.client.form.DateField;
+import com.sencha.gxt.widget.core.client.form.DateTimePropertyEditor;
 
 public class PlatypusDateField extends DateField {
 
-	public PlatypusDateField()
-	{
+	public PlatypusDateField() {
 		super();
 	}
-	
-	public PlatypusDateField(DateCell aCell)
-	{
+
+	public PlatypusDateField(DateCell aCell) {
 		super(aCell);
 	}
-	
+
+	public PlatypusDateField(DateTimeFormat aFormat) {
+		super();
+		setPropertyEditor(new DateTimePropertyEditor(aFormat));
+	}
+
 	@Override
 	public Date getValue() {
 		return super.getValue();
@@ -26,7 +31,7 @@ public class PlatypusDateField extends DateField {
 	public void setValue(Date value, boolean fireEvents) {
 		super.setValue(value, fireEvents);
 	}
-	
+
 	// There is a bug in GXT. onBlur handlers call finishEditing, thus commiting
 	// edited value.
 	// It's OK, but when redraw() calls setInnerHTML(), browser fires onBlur

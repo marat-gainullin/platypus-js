@@ -253,47 +253,90 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
 
     @ScriptFunction(jsDocText = "Requeries model data.")
     public final void requery() throws Exception {
-        requery(null);
+        requery(null, null);
     }
 
-    public void requery(Function aCallback) throws Exception {
-        executeRootEntities(true);
-        if (aCallback != null) {
-            Context cx = Context.getCurrentContext();
-            boolean wasContext = cx != null;
-            if (!wasContext) {
-                cx = ScriptUtils.enterContext();
-            }
-            try {
-                aCallback.call(cx, scriptScope, scriptScope, new Object[]{});
-            } finally {
+    public void requery(Function aOnSuccess, Function aOnFailure) throws Exception {
+        try {
+            executeRootEntities(true);
+            if (aOnSuccess != null) {
+                Context cx = Context.getCurrentContext();
+                boolean wasContext = cx != null;
                 if (!wasContext) {
-                    Context.exit();
+                    cx = ScriptUtils.enterContext();
                 }
+                try {
+                    aOnSuccess.call(cx, scriptScope, scriptScope, new Object[]{});
+                } finally {
+                    if (!wasContext) {
+                        Context.exit();
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            if (aOnFailure != null) {
+                Context cx = Context.getCurrentContext();
+                boolean wasContext = cx != null;
+                if (!wasContext) {
+                    cx = ScriptUtils.enterContext();
+                }
+                try {
+                    aOnFailure.call(cx, scriptScope, scriptScope, new Object[]{ex.getMessage()});
+                } finally {
+                    if (!wasContext) {
+                        Context.exit();
+                    }
+                }
+            } else {
+                throw ex;
             }
         }
     }
 
     @ScriptFunction(jsDocText = "Refreshes model data if any of its parameters has changed.")
     public void execute() throws Exception {
-        execute(null);
+        execute(null, null);
     }
 
     @ScriptFunction(jsDocText = "Refreshes model data if any of its parameters has changed with callback.")
-    public void execute(Function aCallback) throws Exception {
-        executeRootEntities(false);
-        if (aCallback != null) {
-            Context cx = Context.getCurrentContext();
-            boolean wasContext = cx != null;
-            if (!wasContext) {
-                cx = ScriptUtils.enterContext();
-            }
-            try {
-                aCallback.call(cx, scriptScope, scriptScope, new Object[]{});
-            } finally {
+    public void execute(Function aOnSuccess) throws Exception {
+        execute(aOnSuccess, null);
+    }
+
+    @ScriptFunction(jsDocText = "Refreshes model data if any of its parameters has changed with callback.")
+    public void execute(Function aOnSuccess, Function aOnFailure) throws Exception {
+        try {
+            executeRootEntities(false);
+            if (aOnSuccess != null) {
+                Context cx = Context.getCurrentContext();
+                boolean wasContext = cx != null;
                 if (!wasContext) {
-                    Context.exit();
+                    cx = ScriptUtils.enterContext();
                 }
+                try {
+                    aOnSuccess.call(cx, scriptScope, scriptScope, new Object[]{});
+                } finally {
+                    if (!wasContext) {
+                        Context.exit();
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            if (aOnFailure != null) {
+                Context cx = Context.getCurrentContext();
+                boolean wasContext = cx != null;
+                if (!wasContext) {
+                    cx = ScriptUtils.enterContext();
+                }
+                try {
+                    aOnFailure.call(cx, scriptScope, scriptScope, new Object[]{ex.getMessage()});
+                } finally {
+                    if (!wasContext) {
+                        Context.exit();
+                    }
+                }
+            } else {
+                throw ex;
             }
         }
     }
@@ -378,13 +421,18 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
     protected static final String USER_DATASOURCE_NAME = "userQuery";
 
     public synchronized Scriptable createQuery(String aQueryId) throws Exception {
+        Logger.getLogger(ApplicationModel.class.getName()).log(Level.WARNING, "createQuery deprecated call detected. Use createEntity instead.");
+        return createEntity(aQueryId);
+    }
+    
+    public synchronized Scriptable createEntity(String aQueryId) throws Exception {
         if (client == null) {
-            throw new NullPointerException("Null client detected while creating a query");
+            throw new NullPointerException("Null client detected while creating an entity");
         }
         E entity = newGenericEntity();
         entity.setName(USER_DATASOURCE_NAME);
         entity.setQueryId(aQueryId);
-        addEntity(entity);
+        //addEntity(entity); To avoid memory leaks you should not add the entity in the model!
         return entity.defineProperties();
     }
 

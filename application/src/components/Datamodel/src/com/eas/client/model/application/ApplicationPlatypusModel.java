@@ -53,10 +53,10 @@ public class ApplicationPlatypusModel extends ApplicationModel<ApplicationPlatyp
     }
 
     @ScriptFunction(jsDocText = "Saves model data changes. Calls aCallback when done."
-    + "If model can't apply the changed, than exception is thrown. "
-    + "In this case, application can call model.save() another time to save the changes. "
-    + "If an application need to abort futher attempts and discard model data changes, "
-    + "than it can call model.revert().")
+            + "If model can't apply the changed, than exception is thrown. "
+            + "In this case, application can call model.save() another time to save the changes. "
+            + "If an application need to abort futher attempts and discard model data changes, "
+            + "than it can call model.revert().")
     @Override
     public boolean save(Function aCallback) throws Exception {
         client.getChangeLog().addAll(changeLog);
@@ -89,10 +89,15 @@ public class ApplicationPlatypusModel extends ApplicationModel<ApplicationPlatyp
     }
 
     @ScriptFunction(jsDocText = "Requeries model data with callback.")
+    public void requery(Function aOnSuccess) throws Exception {
+        requery(aOnSuccess, null);
+    }
+
+    @ScriptFunction(jsDocText = "Requeries model data with callback.")
     @Override
-    public void requery(Function aCallback) throws Exception {
+    public void requery(Function aOnSuccess, Function aOnFailure) throws Exception {
         changeLog.clear();
-        super.requery(aCallback);
+        super.requery(aOnSuccess, aOnFailure);
     }
 
     public List<Change> getChangeLog() {

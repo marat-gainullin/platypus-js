@@ -153,12 +153,17 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
     }
 
     @ScriptFunction(jsDocText = "Requeries model data with callback.")
+    public void requery(Function aOnSuccess) throws Exception {
+        requery(aOnSuccess, null);
+    }
+    
+    @ScriptFunction(jsDocText = "Requeries model data with callback.")
     @Override
-    public void requery(Function aCallback) throws Exception {
+    public void requery(Function aOnSuccess, Function aOnFailure) throws Exception {
         for (List<Change> changeLog : changeLogs.values()) {
             changeLog.clear();
         }
-        super.requery(aCallback);
+        super.requery(aOnSuccess, aOnFailure);
     }
 
     public List<Change> getChangeLog(String aDbId) {

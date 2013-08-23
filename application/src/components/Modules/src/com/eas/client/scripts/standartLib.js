@@ -82,30 +82,48 @@ ComObject = com.eas.client.scripts.ole.ComObject;
 Resource = {};
 Object.defineProperty(Resource, "load", {
     get: function() {
-        return function(aResName, aCallback) {
-            var loaded = com.eas.client.scripts.ScriptRunner.PlatypusScriptedResource.load(aResName);
-            if (aCallback != undefined)
-                aCallback(loaded);
-            return loaded;
+        return function(aResName, aOnSuccess, aOnFailure) {
+            try{
+                var loaded = com.eas.client.scripts.ScriptRunner.PlatypusScriptedResource.load(aResName);
+                if (aOnSuccess)
+                    aOnSuccess(loaded);
+                return loaded;
+            }catch(e){
+                if(aOnFailure)
+                    aOnFailure(e.message?e.message:e);
+                else
+                    throw e;
+            }
         };
     }
 });
 
 Object.defineProperty(Resource, "loadText", {
     get: function() {
-        return function(aResName, aCallbackOrEncoding, aCallback) {
-            if (typeof aCallbackOrEncoding == "function") {
-                var _loaded = com.eas.client.scripts.ScriptRunner.PlatypusScriptedResource.loadText(aResName);
-                aCallbackOrEncoding(_loaded);
-                return _loaded;
-            } else if (typeof aCallback == "function") {
-                var __loaded = com.eas.client.scripts.ScriptRunner.PlatypusScriptedResource.loadText(aResName, aCallbackOrEncoding);
-                aCallback(__loaded);
-                return __loaded;
-            } else if (aCallbackOrEncoding != undefined)
-                return com.eas.client.scripts.ScriptRunner.PlatypusScriptedResource.loadText(aResName, aCallbackOrEncoding);
-            else
-                return com.eas.client.scripts.ScriptRunner.PlatypusScriptedResource.loadText(aResName);
+        return function(aResName, aOnSuccessOrEncoding, aOnSuccessOrOnFailure, aOnFailure) {
+            var encoding = null;
+            var onSuccess = aOnSuccessOrEncoding;
+            var onFailure = aOnSuccessOrOnFailure;
+            if(typeof onSuccess != "function"){
+                encoding = aOnSuccessOrEncoding;
+                onSuccess = aOnSuccessOrOnFailure;
+                onFailure = aOnFailure;
+            }
+            if(typeof onSuccess != "function")
+                throw "loadText must be called with at leaast success callback function";
+            try{
+                var _loaded = encoding ? com.eas.client.scripts.ScriptRunner.PlatypusScriptedResource.loadText(aResName, encoding) :
+                                         com.eas.client.scripts.ScriptRunner.PlatypusScriptedResource.loadText(aResName);
+                if(onSuccess)
+                    onSuccess(_loaded);
+                else
+                    return _loaded;
+            }catch(e){
+                if(onFailure)
+                    onFailure(e.message?e.message:e);
+                else
+                    throw e;
+            }
         };
     }
 });

@@ -37,6 +37,23 @@ public final class PublishedStyle extends JavaScriptObject {
 		this.font = aValue;
 	}-*/;
 
+	public final native int getAlign()/*-{
+		return this.align ? this.align : $wnd.HorizontalPosition.LEFT;
+	}-*/;
+
+	public final native void setAlign(int aValue)/*-{
+		this.align = aValue;
+	}-*/;
+
+	public final native String getStyledAlign()/*-{
+		if (this.align == $wnd.HorizontalPosition.CENTER)
+			return "center";
+		else if (this.align == $wnd.HorizontalPosition.RIGHT)
+			return "right";
+		else
+			return "left";
+	}-*/;
+
 	public final native ImageResource getIcon()/*-{
 		return this.icon;
 	}-*/;
@@ -49,6 +66,7 @@ public final class PublishedStyle extends JavaScriptObject {
 			styleString += "color: " + getForeground().toStyled() + ";";
 		if (getFont() != null)
 			styleString += getFont().toStyled();
+		styleString += "text-align:" + getStyledAlign() + ";";
 		return styleString;
 	}
 }
