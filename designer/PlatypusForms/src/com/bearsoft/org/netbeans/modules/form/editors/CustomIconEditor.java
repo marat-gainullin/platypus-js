@@ -132,15 +132,26 @@ public class CustomIconEditor extends javax.swing.JPanel {
                 setSelectedFolder(iconFile.getParent());
                 setSelectedFile(iconFile);
                 rbProjectImages.setSelected(true);
+                enableUrlChoose(false);
                 break;
             case IconEditor.TYPE_URL:
                 setSelectedUrl(nbIcon.getName());
                 rbExternalImages.setSelected(true);
+                enableFileChoose(false);
                 break;
         }
         previewLabel.setIcon(nbIcon.getIcon());
     }
 
+    private void enableFileChoose(boolean enable) {
+        cbFile.setEnabled(enable);
+        btnBrowseImage.setEnabled(enable);
+    }
+    
+    private void enableUrlChoose(boolean enable) {
+        txtUrl.setEnabled(enable);
+    }
+    
     private void setSelectedFolder(FileObject folder) {
         if (folder != selectedFolder) {
             selectedFolder = folder;
@@ -543,14 +554,20 @@ public class CustomIconEditor extends javax.swing.JPanel {
     }//GEN-LAST:event_txtUrlActionPerformed
 
     private void rbProjectImagesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rbProjectImagesActionPerformed
+        enableFileChoose(true);
+        enableUrlChoose(false);
         updateValue();
     }//GEN-LAST:event_rbProjectImagesActionPerformed
 
     private void rbExternalImagesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rbExternalImagesActionPerformed
+        enableFileChoose(false);
+        enableUrlChoose(true);
         updateValue();
     }//GEN-LAST:event_rbExternalImagesActionPerformed
 
     private void rbNoImageActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rbNoImageActionPerformed
+        enableFileChoose(false);
+        enableUrlChoose(false);
         updateValue();
     }//GEN-LAST:event_rbNoImageActionPerformed
 
