@@ -359,6 +359,10 @@ public class IconEditor extends PropertyEditorSupport implements ExPropertyEdito
             return icon;
         }
 
+        public Image getImage() {
+            return icon instanceof ImageIcon ? ((ImageIcon)icon).getImage() : null;
+        }
+        
         public NbImageIcon copy(FormProperty<?> formProperty) {
             return new NbImageIcon(type, name, icon);
         }

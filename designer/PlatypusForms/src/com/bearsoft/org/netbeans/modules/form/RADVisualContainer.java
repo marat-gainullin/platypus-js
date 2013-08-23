@@ -131,8 +131,8 @@ public class RADVisualContainer<C extends Container> extends RADVisualComponent<
      * RADVisualComponent
      */
     public JComponent getContainerDelegate(Component container) {
-        if (container instanceof RootPaneContainer
-                && container.getClass().getName().startsWith("javax.swing.")) // NOI18N
+        if (container instanceof RootPaneContainer/*
+                && container.getClass().getName().startsWith("javax.swing.")*/) // NOI18N
         {
             return (JComponent) ((RootPaneContainer) container).getContentPane();
         }

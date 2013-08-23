@@ -206,7 +206,7 @@ public class FormUtils {
         {"com.eas.dbcontrols.RowsetsDbControl", CLASS_AND_SUBCLASSES,
             "scriptScope", PROP_HIDDEN
         },
-        {"java.awt.Window", CLASS_AND_SWING_SUBCLASSES,
+        {"java.awt.Window", CLASS_AND_SUBCLASSES,
             "focusCycleRootAncestor", PROP_HIDDEN,
             "focusOwner", PROP_HIDDEN,
             "active", PROP_HIDDEN,
@@ -228,6 +228,7 @@ public class FormUtils {
             "locationRelativeTo", PROP_HIDDEN,
             "shape", PROP_HIDDEN,
             "modalExclusionType", PROP_HIDDEN,
+            "menuBar", PROP_HIDDEN,
             "type", PROP_HIDDEN},
         {"javax.swing.text.JTextComponent", CLASS_AND_SUBCLASSES,
             "document", PROP_HIDDEN,
