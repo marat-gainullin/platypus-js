@@ -49,6 +49,7 @@ import com.bearsoft.org.netbeans.modules.form.FormProperty;
 import com.bearsoft.org.netbeans.modules.form.PlatypusFormDataObject;
 import com.eas.resources.images.IconCache;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Image;
 import java.beans.*;
@@ -84,7 +85,11 @@ import org.openide.nodes.Node;
  */
 public class IconEditor extends PropertyEditorSupport implements ExPropertyEditor, FormAwareEditor {
 
-//    public static final String RESOURCES_IMAGES_CLASS_PATH = "/com/eas/resources/images/";
+    /** Type constant for icons from URL. */
+    public static final int TYPE_URL = 1;
+    /** Type constant for icons from file. */
+    public static final int TYPE_FILE = 2;
+    
     public static final String RESOURCES_IMAGES_ANCHOR = "thumbs.cp";
     //
     private static String[] currentFiles;
@@ -150,44 +155,6 @@ public class IconEditor extends PropertyEditorSupport implements ExPropertyEdito
         }
     }
 
-    protected class IconCustomEditor extends JPanel implements ExplorerManager.Provider, PropertyChangeListener {
-
-        protected ExplorerManager nodesManager = new ExplorerManager();
-        protected PropertyEnv env = null;
-
-        public IconCustomEditor(PropertyEnv aEnv) throws Exception {
-            super();
-            setLayout(new BorderLayout());
-            ListView lv = new ListView();
-            add(lv, BorderLayout.CENTER);
-            lv.setShowParentNode(false);
-            env = aEnv;
-            env.setState(PropertyEnv.STATE_NEEDS_VALIDATION);
-            env.addPropertyChangeListener(this);
-            nodesManager.setRootContext(getCurrentRootNode());
-            Node toSelect = getCurrentRootNode().getChildren().findChild(getAsText());
-            if (toSelect != null) {
-                nodesManager.setSelectedNodes(new Node[]{toSelect});
-            }
-        }
-
-        @Override
-        public void propertyChange(PropertyChangeEvent evt) {
-            if (PropertyEnv.PROP_STATE.equals(evt.getPropertyName())
-                    && evt.getNewValue() == PropertyEnv.STATE_VALID) {
-                if (nodesManager.getSelectedNodes() != null
-                        && nodesManager.getSelectedNodes().length > 0) {
-                    setAsText(nodesManager.getSelectedNodes()[0].getName());
-                }
-            }
-        }
-
-        @Override
-        public ExplorerManager getExplorerManager() {
-            return nodesManager;
-        }
-    }
-
     @Override
     public void attachEnv(PropertyEnv aEnv) {
         env = aEnv;
@@ -247,19 +214,6 @@ public class IconEditor extends PropertyEditorSupport implements ExPropertyEdito
     }
 
     @Override
-    public String[] getTags() {
-        return null;
-        /*
-         try {
-         return getCurrentFileNames();
-         } catch (Exception ex) {
-         ErrorManager.getDefault().notify(ex);
-         return null;
-         }
-         */
-    }
-
-    @Override
     public boolean supportsCustomEditor() {
         return true;
     }
@@ -267,7 +221,7 @@ public class IconEditor extends PropertyEditorSupport implements ExPropertyEdito
     @Override
     public Component getCustomEditor() {
         try {
-            return new IconCustomEditor(env);
+            return new CustomIconEditor(this);
         } catch (Exception ex) {
             ErrorManager.getDefault().notify(ex);
             return null;
@@ -294,6 +248,10 @@ public class IconEditor extends PropertyEditorSupport implements ExPropertyEdito
         return dataObject.getProject().getSrcRoot();
     }
 
+    public FileObject getProjectSrcFolder() throws Exception {
+        return dataObject.getProject().getSrcRoot();
+    }
+    
     private Node getCurrentRootNode() throws Exception {
         if (rootNode == null) {
             rootNode = new AbstractNode(new FileChildren());
@@ -346,7 +304,7 @@ public class IconEditor extends PropertyEditorSupport implements ExPropertyEdito
     public static NbImageIcon iconFromResourceName(PlatypusFormDataObject dataObject, String resName) throws Exception {
         Matcher htppMatcher = pattern.matcher(resName);
         if (htppMatcher.matches()) {
-            return new NbImageIcon(resName, new ImageIcon(new URL(resName)));
+            return new NbImageIcon(TYPE_URL, resName, new ImageIcon(new URL(resName)));
         } else {
             FileObject fo = getProjectSrcFolder(dataObject).getFileObject(resName);
             fo = fo != null ? fo : getJarResourceFolder().getFileObject(resName);
@@ -355,11 +313,11 @@ public class IconEditor extends PropertyEditorSupport implements ExPropertyEdito
                     try {
                         Image image = ImageIO.read(fo.toURL());
                         if (image != null) { // issue 157546
-                            return new NbImageIcon(resName, new ImageIcon(image));
+                            return new NbImageIcon(TYPE_FILE, resName, new ImageIcon(image));
                         }
-                    } catch (IllegalArgumentException iaex) { // Issue 178906
+                    } catch (IllegalArgumentException iaex) { 
                         Logger.getLogger(IconEditor.class.getName()).log(Level.INFO, null, iaex);
-                        return new NbImageIcon(resName, new ImageIcon(fo.toURL()));
+                        return new NbImageIcon(TYPE_URL, resName, new ImageIcon(fo.toURL()));
                     }
                 } catch (IOException ex) { // should not happen
                     Logger.getLogger(IconEditor.class.getName()).log(Level.WARNING, null, ex);
@@ -371,6 +329,8 @@ public class IconEditor extends PropertyEditorSupport implements ExPropertyEdito
 
     public static class NbImageIcon {
 
+        private int type;
+        
         /**
          * Name of the icon in icon library.
          */
@@ -380,12 +340,17 @@ public class IconEditor extends PropertyEditorSupport implements ExPropertyEdito
          */
         private Icon icon;
 
-        public NbImageIcon(String aName, Icon aIcon) {
+        public NbImageIcon(int aType, String aName, Icon aIcon) {
             super();
+            type = aType;
             name = aName;
             icon = aIcon;
         }
 
+        public int getType() {
+            return type;
+        }
+        
         public String getName() {
             return name;
         }
@@ -395,7 +360,7 @@ public class IconEditor extends PropertyEditorSupport implements ExPropertyEdito
         }
 
         public NbImageIcon copy(FormProperty<?> formProperty) {
-            return new NbImageIcon(name, icon);
+            return new NbImageIcon(type, name, icon);
         }
     }
 }

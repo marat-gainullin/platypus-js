@@ -770,7 +770,7 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
             FileObject selectedFile = null;// TODO Rework app element selector
             Set<String> allowedTypes = new HashSet<>();
             allowedTypes.add("text/javascript");//NOI18N
-            FileObject newSelectedFile = FileChooser.selectFile(appRoot, selectedFile, allowedTypes);
+            FileObject newSelectedFile = FileChooser.selectAppElement(appRoot, selectedFile, allowedTypes);
             if (newSelectedFile != null && newSelectedFile != selectedFile) {
                 String appElementId = IndexerQuery.file2AppElementId(newSelectedFile);
                 projectSettings.getAppSettings().setRunElement(appElementId);

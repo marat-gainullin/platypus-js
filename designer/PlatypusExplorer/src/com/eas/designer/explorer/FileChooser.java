@@ -21,6 +21,7 @@ import org.openide.explorer.ExplorerManager;
 import org.openide.explorer.view.BeanTreeView;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
+import org.openide.loaders.DataFilter;
 import org.openide.loaders.DataFolder;
 import org.openide.loaders.DataObject;
 import org.openide.nodes.FilterNode;
@@ -30,14 +31,16 @@ import org.openide.util.NbBundle;
 import org.openide.util.Utilities;
 
 /**
- * A file chooser allowing to choose a file or folder from the netbeans filesystem.
- * Can be used as a standalone panel, or as a dialog.
- * 
+ * A file chooser allowing to choose a file or folder from the netbeans
+ * filesystem. Can be used as a standalone panel, or as a dialog.
+ *
  * @author Tomas Pavek
  */
 public class FileChooser extends JPanel implements ExplorerManager.Provider {
 
-    private boolean choosingFolder;
+    public static final Filter SELECT_FOLDERS_FILTER = new FolderFilter();
+    private boolean applicationElementMode;
+    private DataFolder rootFolder;
     private ExplorerManager explorerManager;
     private String selectedAppElementName;
     private FileObject selectedFile;
@@ -48,7 +51,7 @@ public class FileChooser extends JPanel implements ExplorerManager.Provider {
     private JButton okButton;
     private JButton cancelButton;
     private JTextField fileNameTextField;
-    private Filter filter;
+    private Filter selectFilter;
     public static final String PROP_SELECTED_FILE = "selectedFile"; // NOI18N
 
     public interface Filter {
@@ -56,37 +59,81 @@ public class FileChooser extends JPanel implements ExplorerManager.Provider {
         boolean accept(FileObject file);
     }
 
-// [TODO: multiselection, separate type of classpath (all vs. project's sources only)
-//  - not needed for now]
+    public static class FolderFilter implements Filter {
+
+        @Override
+        public boolean accept(FileObject file) {
+            return file.isFolder();
+        }
+    }
+
     /**
-     * Creates a new FileChooser. Can be used directly as a panel,
-     * or getDialog can be called to get it wrapped in a Dialog.
+     * Creates a new FileChooser. Can be used directly as a panel, or getDialog
+     * can be called to get it wrapped in a Dialog.
+     *
      * @param fileInProject a source file from project sources (determines the
-     *        project's classpath)
-     * @param aFilter a filter for files to be displayed
-     * @param aChoosingFolder if true, the chooser only allows to select a folder,
-     *        and only source classpath is shown (i.e. not JARs on execution CP)
-     * @param okCancelButtons defines whether the controls buttons should be shown
-     *        (typically true if using as a dialog and false if using as a panel)
+     * project's classpath)
+     * @param aDisplayFilter a filter for files to be displayed
+     * @param anSelectFilter a filter for files to be selected
+     * @param aChoosingFolder if true, the chooser only allows to select a
+     * folder, and only source classpath is shown (i.e. not JARs on execution
+     * CP)
+     * @param okCancelButtons defines whether the controls buttons should be
+     * shown (typically true if using as a dialog and false if using as a panel)
      */
-    public FileChooser(FileObject aRootFile, Filter aFilter, boolean aChoosingFolder, boolean okCancelButtons) {
+    public FileChooser(FileObject aRootFile, final Filter aDisplayFilter, Filter anSelectFilter, boolean okCancelButtons) {
         super();
-        choosingFolder = aChoosingFolder;
-        filter = aFilter;
+        selectFilter = anSelectFilter;
 
-        Listener listener = new Listener();
+        rootFolder = DataFolder.findFolder(aRootFile);
+        explorerManager = new ExplorerManager();
+        explorerManager.setRootContext(new FilterNode(rootFolder.getNodeDelegate(), rootFolder.createNodeChildren(new DataFilter() {
+            @Override
+            public boolean acceptDataObject(DataObject obj) {
+                return aDisplayFilter.accept(obj.getPrimaryFile());
+            }
+        })));
+        init(okCancelButtons);
+    }
 
-        DataFolder rootFolder = DataFolder.findFolder(aRootFile);
+    /**
+     * Creates a new FileChooser for application elements. Can be used directly
+     * as a panel, or getDialog can be called to get it wrapped in a Dialog.
+     *
+     * @param fileInProject a source file from project sources (determines the
+     * project's classpath)
+     * @param anSelectFilter a filter for files to be selected
+     * @param aChoosingFolder if true, the chooser only allows to select a
+     * folder, and only source classpath is shown (i.e. not JARs on execution
+     * CP)
+     * @param okCancelButtons defines whether the controls buttons should be
+     * shown (typically true if using as a dialog and false if using as a panel)
+     */
+    public FileChooser(FileObject aRootFile, Filter anSelectFilter, boolean okCancelButtons) {
+        super();
+        applicationElementMode = true;
+        selectFilter = anSelectFilter;
+
+        rootFolder = DataFolder.findFolder(aRootFile);
         explorerManager = new ExplorerManager();
         explorerManager.setRootContext(new FilterNode(rootFolder.getNodeDelegate(), rootFolder.createNodeChildren(PlatypusProjectNodesList.APPLICATION_TYPES_FILTER)));
+        init(okCancelButtons);
+    }
+
+    private boolean isChooseFolders() {
+        return selectFilter == SELECT_FOLDERS_FILTER;
+    }
+
+    private void init(boolean okCancelButtons) {
+        Listener listener = new Listener();
         try {
-            explorerManager.setSelectedNodes(new Node[]{ rootFolder.getNodeDelegate() });
+            explorerManager.setSelectedNodes(new Node[]{rootFolder.getNodeDelegate()});
         } catch (PropertyVetoException ex) {
             ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
         }
         explorerManager.addPropertyChangeListener(listener);
 
-        if (aChoosingFolder) { // add a button allowing to create a new folder
+        if (isChooseFolders()) { // add a button allowing to create a new folder
             newButton = new JButton();
             Mnemonics.setLocalizedText(newButton, NbBundle.getMessage(FileChooser.class, "CTL_CreateNewButton")); // NOI18N
             newButton.addActionListener(listener);
@@ -111,11 +158,9 @@ public class FileChooser extends JPanel implements ExplorerManager.Provider {
         // label and text field with mnemonic
         JLabel label = new JLabel();
         Mnemonics.setLocalizedText(label, NbBundle.getMessage(FileChooser.class,
-                aChoosingFolder ? "LBL_FolderName" : "LBL_FileName")); // NOI18N
+                isChooseFolders() ? "LBL_FolderName" : applicationElementMode ? "LBL_AppName" : "LBL_FileName")); // NOI18N
         fileNameTextField = new JTextField();
         fileNameTextField.setEditable(false);
-        //fileNameTextField.getDocument().addDocumentListener(listener);
-        //fileNameTextField.addActionListener(listener);
         label.setLabelFor(fileNameTextField);
 
         GroupLayout layout = new GroupLayout(this);
@@ -135,12 +180,14 @@ public class FileChooser extends JPanel implements ExplorerManager.Provider {
             pq.addComponent(newButton);
         }
         layout.setVerticalGroup(layout.createSequentialGroup().addComponent(treeView, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE).addGroup(pq));
+
     }
 
     /**
-     * Creates a modal dialog containing the file chooser with given title.
-     * Use ActionListener to be informed about pressing OK button. Otherwise
-     * call isConfirmed which returns true if OK button was pressed.
+     * Creates a modal dialog containing the file chooser with given title. Use
+     * ActionListener to be informed about pressing OK button. Otherwise call
+     * isConfirmed which returns true if OK button was pressed.
+     *
      * @param title the title of the dialog
      * @param listener ActionListener attached to the OK button (if not null)
      */
@@ -174,8 +221,9 @@ public class FileChooser extends JPanel implements ExplorerManager.Provider {
 
     /**
      * Returns if the user selected some file and confirmed by OK button.
+     *
      * @return true if OK button has been pressed by the user since last call of
-     *         getDialog
+     * getDialog
      */
     public boolean isConfirmed() {
         return confirmed;
@@ -183,14 +231,17 @@ public class FileChooser extends JPanel implements ExplorerManager.Provider {
 
     /**
      * Returns the selected application element name.
+     *
      * @return application element name
      */
     public String getSelectedAppElementName() {
         return selectedAppElementName;
     }
-    
+
     /**
-     * Returns the file selected by the user (or set via setSelectedFile method).
+     * Returns the file selected by the user (or set via setSelectedFile
+     * method).
+     *
      * @return the FileObject selected in the chooser
      */
     public FileObject getSelectedFile() {
@@ -200,6 +251,7 @@ public class FileChooser extends JPanel implements ExplorerManager.Provider {
     /**
      * Sets the selected file in the chooser. The tree view is expanded as
      * needed and the corresponding node selected.
+     *
      * @param file the FileObject to be selected in the chooser
      */
     public void setSelectedFile(FileObject file) {
@@ -228,7 +280,7 @@ public class FileChooser extends JPanel implements ExplorerManager.Provider {
                 } catch (Exception ex) { // report failure (name should be OK from checkFileName)
                     ErrorManager.getDefault().notify(ex);
                 }
-                if (choosingFolder && selectedFile != null) {
+                if (isChooseFolders() && selectedFile != null) {
                     firePropertyChange(PROP_SELECTED_FILE, null, selectedFile);
                 }
             } else if (e.getSource() == fileNameTextField) { // enter pressed in the text field
@@ -249,7 +301,7 @@ public class FileChooser extends JPanel implements ExplorerManager.Provider {
                         return;
                     }
                     if (okButton != null) {
-                        okButton.setEnabled(selectedFile != null && (!selectedFile.isFolder() || choosingFolder) && filter.accept(selectedFile));
+                        okButton.setEnabled(selectedFile != null && selectFilter.accept(selectedFile));
                     }
                     if (newButton != null) {
                         newButton.setEnabled(false);
@@ -269,19 +321,21 @@ public class FileChooser extends JPanel implements ExplorerManager.Provider {
                 if (nodes.length == 1) {
                     FileObject fo = fileFromNode(nodes[0]);
                     if (fo != null) {
-                        if (!fo.isFolder() && !choosingFolder) {
-                           selectedAppElementName = IndexerQuery.file2AppElementId(fo); 
-                           fileNameTextField.setText(selectedAppElementName != null ? selectedAppElementName : ""); // NOI18N
+                        if (applicationElementMode && !fo.isFolder()) {
+                            selectedAppElementName = IndexerQuery.file2AppElementId(fo);
+                            fileNameTextField.setText(selectedAppElementName != null ? selectedAppElementName : ""); // NOI18N
+                        } else if (!applicationElementMode && !fo.isFolder()) {
+                            fileNameTextField.setText(fo.getNameExt());
                         } else {
                             fileNameTextField.setText(""); // NOI18N
                             selectedAppElementName = null;
-                        }            
+                        }
                         selectedFile = fo;
                         selectedFolder = fo.getParent();
                     }
                 }
                 if (okButton != null) {
-                    okButton.setEnabled(selectedFile != null && (!selectedFile.isFolder() || choosingFolder) && filter.accept(selectedFile));
+                    okButton.setEnabled(selectedFile != null && (!selectedFile.isFolder() || isChooseFolders()) && selectFilter.accept(selectedFile));
                 }
                 if (newButton != null) {
                     newButton.setEnabled(false);
@@ -325,34 +379,26 @@ public class FileChooser extends JPanel implements ExplorerManager.Provider {
                 }
             }
             if (okButton != null) {
-                okButton.setEnabled(selectedFile != null && (!selectedFile.isFolder() || choosingFolder));
+                okButton.setEnabled(selectedFile != null && (!selectedFile.isFolder() || isChooseFolders()));
             }
             if (newButton != null) {
-                newButton.setEnabled(selectedFile == null && choosingFolder
+                newButton.setEnabled(selectedFile == null && isChooseFolders()
                         && Utilities.isJavaIdentifier(fileName));
             }
         }
     }
 
     /**
-     * Implementation of ExplorerManager.Provider. Needed for the tree view to work.
+     * Implementation of ExplorerManager.Provider. Needed for the tree view to
+     * work.
      */
     @Override
     public ExplorerManager getExplorerManager() {
         return explorerManager;
     }
-    
-    public static FileChooser createInstance(FileObject aRoot, FileObject aSelectedFile, final Set<String> allowedMimeTypes) {
-        FileChooser chooser = new FileChooser(
-                aRoot,
-                new FileChooser.Filter() {
 
-                    @Override
-                    public boolean accept(FileObject fo) {
-                        return allowedMimeTypes.isEmpty() || allowedMimeTypes.contains(fo.getMIMEType());
-                    }
-                },
-                false, true);
+    public static FileChooser createInstance(FileObject aRoot, FileObject aSelectedFile, Filter aDisplayFilter, Filter aSelectFilter) {
+        FileChooser chooser = new FileChooser(aRoot, aDisplayFilter, aSelectFilter, true);
         try {
             chooser.setSelectedFile(aSelectedFile);
         } catch (IllegalArgumentException iaex) {
@@ -360,10 +406,29 @@ public class FileChooser extends JPanel implements ExplorerManager.Provider {
         }
         return chooser;
     }
-    
-    public static FileObject selectFile(FileObject aRoot, FileObject aSelectedFile, Set<String> allowedMimeTypes) {
-        FileChooser chooser = createInstance(aRoot, aSelectedFile, allowedMimeTypes);    
-        chooser.getDialog(NbBundle.getMessage(FileChooser.class, "CTL_OpenDialogName"), null)// NOI18N
+
+    public static FileChooser createInstance(FileObject aRoot, FileObject aSelectedFile, final Set<String> allowedMimeTypes) {
+        FileChooser chooser = new FileChooser(aRoot, getMimeTypeFilter(allowedMimeTypes), true);
+        try {
+            chooser.setSelectedFile(aSelectedFile);
+        } catch (IllegalArgumentException iaex) {
+            ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, iaex);
+        }
+        return chooser;
+    }
+
+    private static Filter getMimeTypeFilter(final Set<String> allowedMimeTypes) {
+        return new Filter() {
+            @Override
+            public boolean accept(FileObject fo) {
+                return allowedMimeTypes == null || allowedMimeTypes.isEmpty() || allowedMimeTypes.contains(fo.getMIMEType()) || fo.isFolder();
+            }
+        };
+    }
+
+    public static FileObject selectFile(FileObject aRoot, FileObject aSelectedFile, Set<String> aDisplayMimeTypes, Set<String> aSelectMimeTypes) {
+        FileChooser chooser = createInstance(aRoot, aSelectedFile, getMimeTypeFilter(aDisplayMimeTypes), getMimeTypeFilter(aSelectMimeTypes));
+        chooser.getDialog(chooser.getTitle(), null)
                 .setVisible(true);
         if (chooser.isConfirmed()) {
             return chooser.getSelectedFile();
@@ -371,18 +436,26 @@ public class FileChooser extends JPanel implements ExplorerManager.Provider {
             return aSelectedFile;
         }
     }
-    
-    public static String selectAppElement(FileObject aRoot, FileObject aSelectedFile, Set<String> allowedMimeTypes) {
-        FileChooser chooser = createInstance(aRoot, aSelectedFile, allowedMimeTypes);    
-        chooser.getDialog(NbBundle.getMessage(FileChooser.class, "CTL_OpenDialogName"), null)// NOI18N
+
+    public static FileObject selectAppElement(FileObject aRoot, FileObject aSelectedFile, Set<String> allowedMimeTypes) {
+        FileChooser chooser = createInstance(aRoot, aSelectedFile, allowedMimeTypes);
+        chooser.getDialog(chooser.getTitle(), null)
                 .setVisible(true);
         if (chooser.isConfirmed()) {
-            return chooser.getSelectedAppElementName();
+            return chooser.getSelectedFile();
         } else {
             return null;
         }
     }
-    
+
+    private String getTitle() {
+        return NbBundle.getMessage(FileChooser.class,
+                applicationElementMode
+                ? "CTL_OpenAppDialogName" //NOI18N
+                : isChooseFolders()
+                ? "CTL_OpenFolderDialogName" : "CTL_OpenFileDialogName"); //NOI18N
+    }
+
     private static FileObject fileFromNode(Node n) {
         DataObject dobj = n.getLookup().lookup(DataObject.class);
         return dobj != null ? dobj.getPrimaryFile() : null;
@@ -421,9 +494,9 @@ public class FileChooser extends JPanel implements ExplorerManager.Provider {
     }
 
     /**
-     * A mutualy recursive children that ensure propagation of the
-     * filter to deeper levels of hiearachy. That is, it creates
-     * FilteredNodes filtered by the same filter.
+     * A mutualy recursive children that ensure propagation of the filter to
+     * deeper levels of hiearachy. That is, it creates FilteredNodes filtered by
+     * the same filter.
      */
     public static class FilteredChildren extends FilterNode.Children {
 

@@ -5,6 +5,7 @@
 package com.eas.designer.explorer.selectors;
 
 import com.eas.client.model.gui.selectors.AppElementSelectorCallback;
+import com.eas.designer.application.indexer.IndexerQuery;
 import com.eas.designer.explorer.FileChooser;
 import java.io.File;
 import java.util.HashSet;
@@ -33,7 +34,7 @@ public abstract class AppElementSelector implements AppElementSelectorCallback {
         }
         Set<String> allowedMimeTypes = new HashSet<>();
         fillAllowedMimeTypes(allowedMimeTypes);
-        return FileChooser.selectAppElement(appRoot, oldFo, allowedMimeTypes);
+        return IndexerQuery.file2AppElementId(FileChooser.selectAppElement(appRoot, oldFo, allowedMimeTypes));
     }
 
     public abstract void fillAllowedMimeTypes(Set<String> allowedMimeTypes);
