@@ -226,11 +226,8 @@ public class Loader {
 				@Override
 				public void onFailure(Exception reason) {
 					try {
-						assert !loadedAppElements.contains(appElementName);
-						Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, reason.getMessage());
-						// appElementsErrors.put(appElementName,
-						// aResponse.getStatusText());
-						loaded.run();
+						Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, "Script ["+appElementName+"] is not loaded. Cause is: "+reason.getMessage());
+						//loaded.run();
 					} catch (Exception ex) {
 						Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, ex.getMessage());
 					}
