@@ -131,8 +131,8 @@ public class RADVisualContainer<C extends Container> extends RADVisualComponent<
      * RADVisualComponent
      */
     public JComponent getContainerDelegate(Component container) {
-        if (container instanceof RootPaneContainer
-                && container.getClass().getName().startsWith("javax.swing.")) // NOI18N
+        if (container instanceof RootPaneContainer/*
+                && container.getClass().getName().startsWith("javax.swing.")*/) // NOI18N
         {
             return (JComponent) ((RootPaneContainer) container).getContentPane();
         }
@@ -219,10 +219,7 @@ public class RADVisualContainer<C extends Container> extends RADVisualComponent<
                 }
             }
             return false;
-        } else if (canHaveMenu(compClass)) {
-            // visual container that can have a menubar
-            return true;
-        } else if (getMenuType(compClass) != null && !JSeparator.class.isAssignableFrom(compClass)) {
+        } else if (getMenuType(compClass) != null) {
             // otherwise don't accept menu components
             return false;
         } else if (Component.class.isAssignableFrom(compClass)) {

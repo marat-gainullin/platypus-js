@@ -154,24 +154,29 @@ public class Application {
 				}
 		}});
 		Object.defineProperty($wnd.Resource, "load", {get : function(){
-		        return function(aResName, aCallback){
-		        	if(typeof aCallback != "function")
-		        		throw "load must be called with a callback function";
-	            	@com.eas.client.application.AppClient::jsLoad(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;Z)(aResName, aCallback, false);
+		        return function(aResName, onSuccess, onFailure){
+		        	if(typeof onSuccess != "function")
+		        		throw "'load' must be called with at least one success callback function";
+	            	@com.eas.client.application.AppClient::jsLoad(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Z)(aResName, onSuccess, onFailure, false);
 		        };
 		}});
 		
 		Object.defineProperty($wnd.Resource, "loadText", {get : function(){
-		        return function(aResName, aCallbackOrEncoding, aCallback){
-		        	var callback = typeof aCallbackOrEncoding == "function"?aCallbackOrEncoding:aCallback;
-		        	if(typeof callback != "function")
-		        		throw "loadText must be called with a callback function";
-	            	@com.eas.client.application.AppClient::jsLoad(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;Z)(aResName, callback, true);
+		        return function(aResName, aOnSuccessOrEncoding, aOnSuccessOrOnFailure, aOnFailure){
+		        	var onSuccess = aOnSuccessOrEncoding;
+		        	var onFailure = aOnSuccessOrOnFailure;
+		        	if(typeof onSuccess != "function"){
+		        		onSuccess = aOnSuccessOrOnFailure;
+		        		onFailure = aOnFailure;
+		        	}
+		        	if(typeof onSuccess != "function")
+		        		throw "loadText must be called with at leaast success callback function";
+		        	@com.eas.client.application.AppClient::jsLoad(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Z)(aResName, onSuccess, onFailure, true);
 		        };
 		}});
 		
-		$wnd.logout = function(onSuccess) {
-			return @com.eas.client.application.AppClient::jsLogout(Lcom/google/gwt/core/client/JavaScriptObject;)(onSuccess);
+		$wnd.logout = function(onSuccess, onFailure) {
+			return @com.eas.client.application.AppClient::jsLogout(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(onSuccess, onFailure);
 		}
 		
 		$wnd.getElementComputedStyle = function(_elem) {

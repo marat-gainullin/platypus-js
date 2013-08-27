@@ -82,8 +82,8 @@ public class Utils {
 		}
 	}-*/;
 
-	public native static JavaScriptObject jsonParse(String aData) throws Exception /*-{
-		return JSON.parse(aData);
+	public native static Object jsonParse(String aData) throws Exception /*-{
+		return $wnd.boxAsJava(JSON.parse(aData));
 	}-*/;
 
 	public native static void invokeJsFunction(JavaScriptObject aHandler) /*-{

@@ -269,7 +269,7 @@ public class DbSchemeSettingsVisualPanel extends javax.swing.JPanel {
     private void selectNewConnection() throws Exception {
         Set<String> allowedMimeTypes = new HashSet<>();
         allowedMimeTypes.add("text/connection+xml");
-        FileObject fo = FileChooser.selectFile(panel.getProject().getSrcRoot(), connectionFile, allowedMimeTypes);
+        FileObject fo = FileChooser.selectAppElement(panel.getProject().getSrcRoot(), connectionFile, allowedMimeTypes);
         if (fo != connectionFile) {
             // let's test connection capability
             try {

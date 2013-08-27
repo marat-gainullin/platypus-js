@@ -17,7 +17,7 @@ import com.google.gwt.user.client.ui.HasVerticalAlignment.VerticalAlignmentConst
 
 public class StyleIconDecorator {
 
-	interface Template extends SafeHtmlTemplates {
+	interface IconDecoratorTemplate extends SafeHtmlTemplates {
 		@Template("<div style=\"{0}position:relative;zoom:1;\">{1}<div>{2}</div></div>")
 		SafeHtml outerDiv(SafeStyles padding, SafeHtml icon,
 				SafeHtml cellContents);
@@ -43,7 +43,7 @@ public class StyleIconDecorator {
 
 	private final static String direction = LocaleInfo.getCurrentLocale()
 			.isRTL() ? "right" : "left";
-	private static Template template = GWT.create(Template.class);
+	private static IconDecoratorTemplate iconTemplate = GWT.create(IconDecoratorTemplate.class);
 
 	public static void decorate(SafeHtml toDecorate, PublishedStyle aStyle,
 			VerticalAlignmentConstant valign,
@@ -54,7 +54,7 @@ public class StyleIconDecorator {
 				+ (icon != null ? icon.getWidth()+2 : 0) + "px;";
 		SafeStyles outerDivStyle = SafeStylesUtils
 				.fromTrustedString(styleString);
-		sb.append(template.outerDiv(outerDivStyle,
+		sb.append(iconTemplate.outerDiv(outerDivStyle,
 				icon != null ? getImageHtml(icon, valign, false)
 						: getImageHtml(icon, valign, true), toDecorate));
 	}
@@ -86,14 +86,14 @@ public class StyleIconDecorator {
 		SafeStylesBuilder cssStyles = new SafeStylesBuilder()
 				.appendTrustedString(direction + ":0px;");
 		if (HasVerticalAlignment.ALIGN_TOP == valign) {
-			return template.imageWrapperTop(cssStyles.toSafeStyles(), image);
+			return iconTemplate.imageWrapperTop(cssStyles.toSafeStyles(), image);
 		} else if (HasVerticalAlignment.ALIGN_BOTTOM == valign) {
-			return template.imageWrapperBottom(cssStyles.toSafeStyles(), image);
+			return iconTemplate.imageWrapperBottom(cssStyles.toSafeStyles(), image);
 		} else {
 			int halfHeight = res != null ? (int) Math
 					.round(res.getHeight() / 2.0) : 0;
 			cssStyles.appendTrustedString("margin-top:-" + halfHeight + "px;");
-			return template.imageWrapperMiddle(cssStyles.toSafeStyles(), image);
+			return iconTemplate.imageWrapperMiddle(cssStyles.toSafeStyles(), image);
 		}
 	}
 }

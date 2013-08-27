@@ -137,20 +137,35 @@ public class AppClient {
 		return res;
 	}
 
-	public static void jsLoad(String aResourceName, final JavaScriptObject aCompleteCallback, final boolean text) throws Exception {
+	public static void jsLoad(String aResourceName, final JavaScriptObject onSuccess, final JavaScriptObject onFailure, final boolean text) throws Exception {
 		SafeUri uri = AppClient.getInstance().getResourceUri(aResourceName);
 		AppClient.getInstance().startRequest(uri, text ? ResponseType.Default : ResponseType.ArrayBuffer, new Callback<XMLHttpRequest>() {
 			@Override
 			public void run(XMLHttpRequest aResult) throws Exception {
 				if (aResult.getStatus() == Response.SC_OK) {
-					Utils.executeScriptEventVoid(aCompleteCallback, aCompleteCallback, text ? Utils.toJs(aResult.getResponseText()) : aResult.<XMLHttpRequest2> cast().getResponse());
+					if(onSuccess != null)
+						Utils.executeScriptEventVoid(onSuccess, onSuccess, text ? Utils.toJs(aResult.getResponseText()) : aResult.<XMLHttpRequest2> cast().getResponse());
+				} else {
+					if(onFailure != null)
+						Utils.executeScriptEventVoid(onFailure, onFailure, Utils.toJs(aResult.getStatusText()));
 				}
 			}
 
 			@Override
 			public void cancel() {
 			}
-		}, null);
+		}, new Callback<XMLHttpRequest>(){
+
+			@Override
+            public void run(XMLHttpRequest aResult) throws Exception {
+				if(onFailure != null)
+					Utils.executeScriptEventVoid(onFailure, onFailure, Utils.toJs(aResult.getStatusText()));
+            }
+			
+			@Override
+            public void cancel() {
+            }
+		});
 	}
 
 	public static JavaScriptObject jsUpload(PublishedFile aFile, final JavaScriptObject aCompleteCallback, final JavaScriptObject aProgresssCallback, final JavaScriptObject aErrorCallback) {
@@ -387,17 +402,27 @@ public class AppClient {
 		return params(res);
 	}
 
-	public static JavaScriptObject jsLogout(final JavaScriptObject onSuccess) throws Exception {
+	public static JavaScriptObject jsLogout(final JavaScriptObject onSuccess, final JavaScriptObject onFailure) throws Exception {
 		return Utils.publishCancellable(AppClient.getInstance().logout(new Callback<XMLHttpRequest>() {
+			@Override
+			public void run(XMLHttpRequest aResult) throws Exception {
+				Utils.invokeJsFunction(onSuccess);
+				Location.reload();
+			}
 			@Override
 			public void cancel() {
 			}
+		}, new Callback<XMLHttpRequest>(){
 
 			@Override
-			public void run(XMLHttpRequest aResult) throws Exception {
-				Utils.executeScriptEventVoid(onSuccess, onSuccess, null);
-				Location.reload();
-			}
+            public void run(XMLHttpRequest aResult) throws Exception {
+				Utils.executeScriptEventVoid(onFailure, onFailure, Utils.toJs(aResult.getStatusText()));
+            }
+			
+			@Override
+            public void cancel() {
+            }
+			
 		}));
 	}
 
@@ -406,9 +431,9 @@ public class AppClient {
 		return startRequest(API_URI, query, null, RequestBuilder.GET, onSuccess, null);
 	}
 
-	public Cancellable logout(Callback<XMLHttpRequest> onSuccess) throws Exception {
+	public Cancellable logout(Callback<XMLHttpRequest> onSuccess, Callback<XMLHttpRequest> onFailure) throws Exception {
 		String query = param(PlatypusHttpRequestParams.TYPE, String.valueOf(Requests.rqLogout));
-		return startRequest(API_URI, query, null, RequestBuilder.GET, onSuccess, null);
+		return startRequest(API_URI, query, null, RequestBuilder.GET, onSuccess, onFailure);
 	}
 
 	public Cancellable startRequest(String aUrlPrefix, final String aUrlQuery, String aBody, RequestBuilder.Method aMethod, final Callback<XMLHttpRequest> onSuccess,
@@ -501,7 +526,7 @@ public class AppClient {
 		FormElement frm = doc.createFormElement();
 		frm.setMethod(aMethod.toString());
 		frm.setAction(baseUrl + aUrlPrefix);
-		for(Entry<String, String> ent : aParams.entrySet()) {
+		for (Entry<String, String> ent : aParams.entrySet()) {
 			InputElement text = doc.createHiddenInputElement();
 			text.setValue(ent.getValue());
 			text.setName(ent.getKey());
@@ -555,7 +580,7 @@ public class AppClient {
 		// No-op here. Some implementation is in the tests.
 	}
 
-	public Cancellable commit(final CancellableCallback onSuccess, final CancellableCallback onFailure) throws Exception {
+	public Cancellable commit(final CancellableCallback onSuccess, final Callback<String> onFailure) throws Exception {
 		String query = param(PlatypusHttpRequestParams.TYPE, String.valueOf(Requests.rqCommit));
 		return startRequest(API_URI, query, ChangesWriter.writeLog(changeLog), RequestBuilder.POST, new ResponseCallbackAdapter() {
 
@@ -587,7 +612,7 @@ public class AppClient {
 					}
 				}
 				if (onFailure != null)
-					onFailure.run();
+					onFailure.run(aResponse.getStatusText());
 			}
 		});
 	}
@@ -699,7 +724,8 @@ public class AppClient {
 			@com.eas.client.application.AppClient::defineServerModule(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aModule);
 		}
 		$wnd.platypus.executeServerModuleMethod = function(aModuleName, aMethodName, aParams, aCallBack) {
-			return $wnd.boxAsJs(aClient.@com.eas.client.application.AppClient::executeServerModuleMethod(Ljava/lang/String;Ljava/lang/String;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aMethodName, aParams, aCallBack));
+			return $wnd
+					.boxAsJs(aClient.@com.eas.client.application.AppClient::executeServerModuleMethod(Ljava/lang/String;Ljava/lang/String;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aMethodName, aParams, aCallBack));
 		}
 		$wnd.platypus.executeServerReport = function(aModuleName, aModule) {
 			aClient.@com.eas.client.application.AppClient::executeServerReport(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aModule);
@@ -733,7 +759,7 @@ public class AppClient {
 			return null;
 		} else {
 			XMLHttpRequest2 executed = syncRequest(API_URI, query, null, RequestBuilder.GET);
-			if(executed != null){
+			if (executed != null) {
 				String responseType = executed.getResponseHeader("content-type");
 				if (responseType != null) {
 					responseType = responseType.toLowerCase();
@@ -745,7 +771,7 @@ public class AppClient {
 				} else {
 					return Utils.toJs(executed.getResponseText());
 				}
-			}else{
+			} else {
 				return null;
 			}
 		}
@@ -797,7 +823,13 @@ public class AppClient {
 			}
 
 			private Rowset readRowset(XMLHttpRequest aResponse) throws Exception {
-				return RowsetReader.read(JSONParser.parseStrict(aResponse.getResponseText()), aExpectedFields);
+				try {
+					return RowsetReader.read(JSONParser.parseStrict(aResponse.getResponseText()), aExpectedFields);
+				} catch (Exception ex) {
+					String respText = aResponse.getResponseText();
+					Logger.getLogger(AppClient.class.getName()).log(Level.SEVERE, "Rowset response parse error: " + respText + "\n; Status:" + aResponse.getStatus());
+					throw ex;
+				}
 			}
 		}, new ResponseCallbackAdapter() {
 			@Override
@@ -805,8 +837,10 @@ public class AppClient {
 				if (onFailure != null) {
 					int status = aResponse.getStatus();
 					String statusText = aResponse.getStatusText();
-					if ((statusText == null || statusText.isEmpty()) && status == 0)
-						statusText = "rowset recieving is aborted";
+					if(statusText == null || statusText.isEmpty())
+						statusText = null;
+					if (status == 0)
+						Logger.getLogger(AppClient.class.getName()).log(Level.INFO, "rowset recieving is aborted");
 					onFailure.run(statusText);
 				}
 			}

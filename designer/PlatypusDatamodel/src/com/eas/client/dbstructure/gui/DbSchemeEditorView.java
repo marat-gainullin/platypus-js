@@ -310,6 +310,7 @@ public class DbSchemeEditorView extends JPanel implements ContainerListener {
 
         @Override
         public void selectionChanged(List<SelectedParameter<FieldsEntity>> parameters, List<SelectedField<FieldsEntity>> fields) {
+            checkActions();
         }
 
         @Override

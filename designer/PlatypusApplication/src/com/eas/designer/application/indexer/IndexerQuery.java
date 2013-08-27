@@ -20,9 +20,11 @@ import org.openide.filesystems.FileObject;
  * @author vv
  */
 public class IndexerQuery {
-    
+
     /**
-     * Gets FileObject for application element by application element name from index
+     * Gets FileObject for application element by application element name from
+     * index
+     *
      * @param appElementId application element name
      * @return primary file for application element
      */
@@ -40,23 +42,27 @@ public class IndexerQuery {
         }
         return null;
     }
-    
+
     /**
-     * Gets application element name for full path of it's primary file from index
+     * Gets application element name for full path of it's primary file from
+     * index
+     *
      * @param aFile Primary file object.
      * @return application element name
      */
     public static String file2AppElementId(FileObject aFile) {
-        try {
-            final Collection<FileObject> roots = new ArrayList<>(QuerySupport.findRoots((Project) null, null, Collections.<String>emptyList(), Collections.<String>emptyList()));
-            QuerySupport q = QuerySupport.forRoots(FileIndexer.INDEXER_NAME, FileIndexer.INDEXER_VERSION, roots.toArray(new FileObject[roots.size()]));
-            Collection<? extends IndexResult> results = q.query(FileIndexer.FULL_PATH, aFile.getPath(), QuerySupport.Kind.EXACT);
-            if (results.size() == 1) {
-                IndexResult result = results.iterator().next();
-                return result.getValue(FileIndexer.APP_ELEMENT_NAME);
+        if (aFile != null) {
+            try {
+                final Collection<FileObject> roots = new ArrayList<>(QuerySupport.findRoots((Project) null, null, Collections.<String>emptyList(), Collections.<String>emptyList()));
+                QuerySupport q = QuerySupport.forRoots(FileIndexer.INDEXER_NAME, FileIndexer.INDEXER_VERSION, roots.toArray(new FileObject[roots.size()]));
+                Collection<? extends IndexResult> results = q.query(FileIndexer.FULL_PATH, aFile.getPath(), QuerySupport.Kind.EXACT);
+                if (results.size() == 1) {
+                    IndexResult result = results.iterator().next();
+                    return result.getValue(FileIndexer.APP_ELEMENT_NAME);
+                }
+            } catch (IOException ex) {
+                Logger.getLogger(IndexerQuery.class.getName()).log(Level.WARNING, null, ex);
             }
-        } catch (IOException ex) {
-            Logger.getLogger(IndexerQuery.class.getName()).log(Level.WARNING, null, ex);
         }
         return null;
     }

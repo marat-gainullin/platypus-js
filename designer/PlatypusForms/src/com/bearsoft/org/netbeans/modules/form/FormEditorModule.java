@@ -72,6 +72,9 @@ public class FormEditorModule extends ModuleInstall {
                 javax.swing.Icon.class,
                 com.bearsoft.org.netbeans.modules.form.editors.IconEditor.class);
         FormPropertyEditorManager.registerEditor(
+                java.awt.Image.class,
+                com.bearsoft.org.netbeans.modules.form.editors.IconEditor.class);
+        FormPropertyEditorManager.registerEditor(
                 com.bearsoft.org.netbeans.modules.form.editors.IconEditor.NbImageIcon.class,
                 com.bearsoft.org.netbeans.modules.form.editors.IconEditor.class);
         FormPropertyEditorManager.registerEditor(

@@ -22,10 +22,14 @@ import com.eas.controls.menus.MenubarDesignInfo;
 import com.eas.dbcontrols.DbControl;
 import com.eas.dbcontrols.DbControlDesignInfo;
 import com.eas.dbcontrols.grid.DbGridColumn;
+import com.eas.design.Designable;
+import com.eas.design.Undesignable;
 import com.eas.designer.application.PlatypusUtils;
 import com.eas.store.Object2Dom;
 import com.eas.xml.dom.Source2XmlDom;
 import com.eas.xml.dom.XmlDom2String;
+import java.awt.Image;
+import java.awt.MenuBar;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -71,10 +75,24 @@ public class PlatypusPersistenceManager extends PersistenceManager {
         return true;
     }
 
+    public static class PlatypusFrame extends JFrame {
+
+        public PlatypusFrame(){
+            super();
+        }
+        
+        @Override
+        @Designable(displayName = "icon", description = "Window's icon")
+        public Image getIconImage() {
+            return super.getIconImage();
+        }
+         
+    }
+
     @Override
     public void loadForm(PlatypusFormDataObject formObject, FormModel formModel, List<Throwable> nonfatalErrors) throws PersistenceException {
         try {
-            formModel.setFormBaseClass(JFrame.class); //Only for design purposes. At runtime it will be any of swing top-level containers
+            formModel.setFormBaseClass(PlatypusFrame.class); //Only for design purposes. At runtime it will be any of swing top-level containers
             formModel.setName(formObject.getName());
             RADComponent<?> topComp = formModel.getTopRADComponent();
             assert topComp instanceof RADVisualFormContainer;
@@ -153,7 +171,7 @@ public class PlatypusPersistenceManager extends PersistenceManager {
                                 SimpleLayoutFactory lf = new SimpleLayoutFactory();
                                 cdi.getLayout().accept(lf);
                                 formModel.setContainerLayout(radContainer, lf.getResult());
-                                 RadInitializer.initializeProperties(cdi.getLayout(), radContainer.getLayoutSupport().getAllProperties());
+                                RadInitializer.initializeProperties(cdi.getLayout(), radContainer.getLayoutSupport().getAllProperties());
                             }
                         } else {
                             // Hidden layout of the container (scroll, split, toolbar, etc)
