@@ -159,7 +159,15 @@ public class ScriptTransformerTest {
     }
 
     @Test
-    public void testSwitchCase2() {
+    public void testParenthesizedExpression() {
+        String va1 = "var d = 'none';\nvar s = 'name';\nvar k;\nswitch(d){\ncase (s): k = null;\nbreak; case (k):\ns = Math.round(0);}";
+        String va2 = "" + ScriptTransformer.SELF_NAME + ".d = 'none';\n" + ScriptTransformer.SELF_NAME + ".s = 'name';\n" + ScriptTransformer.SELF_NAME + ".k = null;\nswitch (" + ScriptTransformer.SELF_NAME + ".d) {\n  case (" + ScriptTransformer.SELF_NAME + ".s):\n    " + ScriptTransformer.SELF_NAME + ".k = null;\n    break;\n  case (" + ScriptTransformer.SELF_NAME + ".k):\n    " + ScriptTransformer.SELF_NAME + ".s = Math.round(0);\n}\n";
+        String va3 = transform(va1);
+        assertEquals(va3, va2);
+    }
+    
+    @Test
+    public void testSwitchCase3() {
         String va1 = "var d = 'none'; var s = 'name'; var k; switch(s = d.toLowerCase()){case d.toLowerCase(): k = null; break; case d + s:k = Math.round(0);}";
         String va2 = "" + ScriptTransformer.SELF_NAME + ".d = 'none';\n" + ScriptTransformer.SELF_NAME + ".s = 'name';\n" + ScriptTransformer.SELF_NAME + ".k = null;\nswitch (" + ScriptTransformer.SELF_NAME + ".s = " + ScriptTransformer.SELF_NAME + ".d.toLowerCase()) {\n  case " + ScriptTransformer.SELF_NAME + ".d.toLowerCase():\n    " + ScriptTransformer.SELF_NAME + ".k = null;\n    break;\n  case " + ScriptTransformer.SELF_NAME + ".d + " + ScriptTransformer.SELF_NAME + ".s:\n    " + ScriptTransformer.SELF_NAME + ".k = Math.round(0);\n}\n";
         String va3 = transform(va1);

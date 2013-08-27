@@ -263,6 +263,11 @@ public class ScriptTransformer {
                                 if (node == ifStatement.getCondition()) {
                                     ifStatement.setCondition(new PropertyGet(_this, name));
                                 }
+                            } else if (node.getParent() instanceof ParenthesizedExpression) {
+                                final ParenthesizedExpression parenthesizedExpression = (ParenthesizedExpression) node.getParent();
+                                if (node == parenthesizedExpression.getExpression()) {
+                                    parenthesizedExpression.setExpression(new PropertyGet(_this, name));
+                                }
                             }
                         }
                     } else {

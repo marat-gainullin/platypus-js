@@ -8,6 +8,7 @@ import com.eas.client.form.api.JSEvents;
 import com.eas.client.gxtcontrols.wrappers.component.PlatypusButtonGroup;
 import com.eas.client.gxtcontrols.wrappers.component.PlatypusCheckBox;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -132,18 +133,16 @@ public class GxtEventsExecutor implements SelectHandler, MouseOutHandler, MouseO
 				}
 			});
 		}
-		
+
 		/*
-		if (aComponent instanceof Field<?>)
-		{
-			FieldCell<?> fc = ((Field<?>)aComponent).getCell();
-			if(fc instanceof ValueBaseInputCell<?>){
-				ValueBaseInputCell<?> vc = (ValueBaseInputCell<?>)fc;
-				InputElement ie = vc.getInputElement(aComponent.getElement());
-				
-			}
-		}
-		*/
+		 * if (aComponent instanceof Field<?>) { FieldCell<?> fc =
+		 * ((Field<?>)aComponent).getCell(); if(fc instanceof
+		 * ValueBaseInputCell<?>){ ValueBaseInputCell<?> vc =
+		 * (ValueBaseInputCell<?>)fc; InputElement ie =
+		 * vc.getInputElement(aComponent.getElement());
+		 * 
+		 * } }
+		 */
 
 		aComponent.addDomHandler(executor, MouseOverEvent.getType());
 		aComponent.addDomHandler(executor, MouseOutEvent.getType());
@@ -432,7 +431,7 @@ public class GxtEventsExecutor implements SelectHandler, MouseOutHandler, MouseO
 	public void onMouseDown(MouseDownEvent event) {
 		if (mousePressed != null) {
 			event.stopPropagation();
-			Event.setCapture(event.getRelativeElement());
+			//Event.setCapture(event.getRelativeElement());
 			mouseState = MOUSE.PRESSED;
 			executeEvent(eventThis, mousePressed, JSEvents.publishMouseDownEvent(event));
 		}
@@ -454,7 +453,8 @@ public class GxtEventsExecutor implements SelectHandler, MouseOutHandler, MouseO
 
 	@Override
 	public void onMouseUp(MouseUpEvent event) {
-		Event.releaseCapture(event.getRelativeElement());
+		//if (mouseState == MOUSE.PRESSED)
+		//	Event.releaseCapture(event.getRelativeElement());
 		if (mouseReleased != null) {
 			event.stopPropagation();
 			mouseState = MOUSE.NULL;
