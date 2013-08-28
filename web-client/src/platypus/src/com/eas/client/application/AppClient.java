@@ -60,6 +60,7 @@ import com.google.gwt.xhr.client.XMLHttpRequest.ResponseType;
 import com.google.gwt.xml.client.Document;
 import com.google.gwt.xml.client.Node;
 import com.google.gwt.xml.client.XMLParser;
+import com.sencha.gxt.widget.core.client.form.FormPanel.Method;
 
 /**
  * 
@@ -137,35 +138,46 @@ public class AppClient {
 		return res;
 	}
 
-	public static void jsLoad(String aResourceName, final JavaScriptObject onSuccess, final JavaScriptObject onFailure, final boolean text) throws Exception {
+	public static Object jsLoad(String aResourceName, final JavaScriptObject onSuccess, final JavaScriptObject onFailure, final boolean text) throws Exception {
 		SafeUri uri = AppClient.getInstance().getResourceUri(aResourceName);
-		AppClient.getInstance().startRequest(uri, text ? ResponseType.Default : ResponseType.ArrayBuffer, new Callback<XMLHttpRequest>() {
-			@Override
-			public void run(XMLHttpRequest aResult) throws Exception {
-				if (aResult.getStatus() == Response.SC_OK) {
-					if(onSuccess != null)
-						Utils.executeScriptEventVoid(onSuccess, onSuccess, text ? Utils.toJs(aResult.getResponseText()) : aResult.<XMLHttpRequest2> cast().getResponse());
-				} else {
-					if(onFailure != null)
+		if (onSuccess != null) {
+			AppClient.getInstance().startRequest(uri, text ? ResponseType.Default : ResponseType.ArrayBuffer, new Callback<XMLHttpRequest>() {
+				@Override
+				public void run(XMLHttpRequest aResult) throws Exception {
+					if (aResult.getStatus() == Response.SC_OK) {
+						if (onSuccess != null)
+							Utils.executeScriptEventVoid(onSuccess, onSuccess, text ? Utils.toJs(aResult.getResponseText()) : aResult.<XMLHttpRequest2> cast().getResponse());
+					} else {
+						if (onFailure != null)
+							Utils.executeScriptEventVoid(onFailure, onFailure, Utils.toJs(aResult.getStatusText()));
+					}
+				}
+
+				@Override
+				public void cancel() {
+				}
+			}, new Callback<XMLHttpRequest>() {
+
+				@Override
+				public void run(XMLHttpRequest aResult) throws Exception {
+					if (onFailure != null)
 						Utils.executeScriptEventVoid(onFailure, onFailure, Utils.toJs(aResult.getStatusText()));
 				}
-			}
 
-			@Override
-			public void cancel() {
+				@Override
+				public void cancel() {
+				}
+			});
+		} else {
+			XMLHttpRequest2 executed = AppClient.getInstance().syncRequest(uri.asString(), text ? ResponseType.Default : ResponseType.ArrayBuffer);
+			if (executed != null) {
+				if (executed.getStatus() == Response.SC_OK)
+					return text ? Utils.toJs(executed.getResponseText()) : executed.<XMLHttpRequest2> cast().getResponse();
+				else
+					throw new Exception(executed.getStatusText());
 			}
-		}, new Callback<XMLHttpRequest>(){
-
-			@Override
-            public void run(XMLHttpRequest aResult) throws Exception {
-				if(onFailure != null)
-					Utils.executeScriptEventVoid(onFailure, onFailure, Utils.toJs(aResult.getStatusText()));
-            }
-			
-			@Override
-            public void cancel() {
-            }
-		});
+		}
+		return null;
 	}
 
 	public static JavaScriptObject jsUpload(PublishedFile aFile, final JavaScriptObject aCompleteCallback, final JavaScriptObject aProgresssCallback, final JavaScriptObject aErrorCallback) {
@@ -409,20 +421,21 @@ public class AppClient {
 				Utils.invokeJsFunction(onSuccess);
 				Location.reload();
 			}
+
 			@Override
 			public void cancel() {
 			}
-		}, new Callback<XMLHttpRequest>(){
+		}, new Callback<XMLHttpRequest>() {
 
 			@Override
-            public void run(XMLHttpRequest aResult) throws Exception {
+			public void run(XMLHttpRequest aResult) throws Exception {
 				Utils.executeScriptEventVoid(onFailure, onFailure, Utils.toJs(aResult.getStatusText()));
-            }
-			
+			}
+
 			@Override
-            public void cancel() {
-            }
-			
+			public void cancel() {
+			}
+
 		}));
 	}
 
@@ -540,13 +553,34 @@ public class AppClient {
 		frm.removeFromParent();
 	}
 
-	public XMLHttpRequest2 syncRequest(String aUrlPrefix, final String aUrlQuery, String aBody, RequestBuilder.Method aMethod) throws Exception {
+	public XMLHttpRequest2 syncRequest(String aUrl, ResponseType aResponseType) throws Exception {
+		final XMLHttpRequest2 req = syncRequest(aUrl, aResponseType, null, RequestBuilder.GET);
+		if (req.getStatus() == Response.SC_OK)
+			return req;
+		else
+			throw new Exception(req.getStatus() + " " + req.getStatusText());
+	}
+
+	public XMLHttpRequest2 syncRequest(String aUrlPrefix, final String aUrlQuery, ResponseType aResponseType) throws Exception {
 		String url = baseUrl + aUrlPrefix + "?" + aUrlQuery;
+		final XMLHttpRequest2 req = syncRequest(url, aResponseType, null, RequestBuilder.GET);
+		if (req.getStatus() == Response.SC_OK)
+			return req;
+		else
+			throw new Exception(req.getStatus() + " " + req.getStatusText());
+	}
+
+	public XMLHttpRequest2 syncRequest(String aUrl, ResponseType aResponseType, String aBody, RequestBuilder.Method aMethod) throws Exception {
 		final XMLHttpRequest2 req = XMLHttpRequest.create().<XMLHttpRequest2> cast();
-		req.open(aMethod.toString(), url, false);
-		req.setRequestHeader("Content-type", "application/json; charset=utf-8");
+		req.open(aMethod.toString(), aUrl, false);
+		interceptRequest(req);
+		if (aResponseType != null && aResponseType != ResponseType.Default)
+			req.setResponseType(aResponseType);
 		req.setRequestHeader("Pragma", "no-cache");
-		req.send(aBody);
+		if (aBody != null)
+			req.send(aBody);
+		else
+			req.send();
 		if (req.getStatus() == Response.SC_OK)
 			return req;
 		else
@@ -758,19 +792,22 @@ public class AppClient {
 			}, null);
 			return null;
 		} else {
-			XMLHttpRequest2 executed = syncRequest(API_URI, query, null, RequestBuilder.GET);
+			XMLHttpRequest2 executed = syncRequest(API_URI, query, ResponseType.Default);
 			if (executed != null) {
-				String responseType = executed.getResponseHeader("content-type");
-				if (responseType != null) {
-					responseType = responseType.toLowerCase();
-					if (responseType.contains("text/json") || responseType.contains("text/javascript")) {
-						return Utils.toJs(Utils.jsonParse(executed.getResponseText()));
+				if (executed.getStatus() == Response.SC_OK) {
+					String responseType = executed.getResponseHeader("content-type");
+					if (responseType != null) {
+						responseType = responseType.toLowerCase();
+						if (responseType.contains("text/json") || responseType.contains("text/javascript")) {
+							return Utils.toJs(Utils.jsonParse(executed.getResponseText()));
+						} else {
+							return Utils.toJs(executed.getResponseText());
+						}
 					} else {
 						return Utils.toJs(executed.getResponseText());
 					}
-				} else {
-					return Utils.toJs(executed.getResponseText());
-				}
+				} else
+					throw new Exception(executed.getStatusText());
 			} else {
 				return null;
 			}
@@ -837,7 +874,7 @@ public class AppClient {
 				if (onFailure != null) {
 					int status = aResponse.getStatus();
 					String statusText = aResponse.getStatusText();
-					if(statusText == null || statusText.isEmpty())
+					if (statusText == null || statusText.isEmpty())
 						statusText = null;
 					if (status == 0)
 						Logger.getLogger(AppClient.class.getName()).log(Level.INFO, "rowset recieving is aborted");
