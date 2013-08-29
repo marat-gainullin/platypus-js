@@ -90,35 +90,65 @@ public class ServerScriptProxy extends ScriptableObject {
         }
 
         @Override
-        public Object call(final Context cx, Scriptable scope, Scriptable thisObj, final Object[] args) {
+        public Object call(final Context cx, Scriptable scope, Scriptable thisObj, final Object[] arguments) {
             try {
-                if (args != null && args.length > 0 && args[args.length - 1] instanceof Function) {
-                    final Function callback = (Function) args[args.length - 1];
+                Function onSuccess = null;
+                Function onFailure = null;
+                int argsLength = arguments != null ? arguments.length : 0;
+                if (arguments != null) {
+                    if (arguments.length > 1 && arguments[arguments.length - 1] instanceof Function && arguments[arguments.length - 2] instanceof Function) {
+                        onSuccess = (Function) arguments[arguments.length - 2];
+                        onFailure = (Function) arguments[arguments.length - 1];
+                        argsLength -= 2;
+                    } else if (arguments.length > 0 && arguments[arguments.length - 1] instanceof Function) {
+                        onSuccess = (Function) arguments[arguments.length - 1];
+                        argsLength -= 1;
+                    }
+                }
+
+                if (onSuccess != null) {
+                    final Function successCallback = onSuccess;
+                    final Function failureCallback = onFailure;
+                    final Object[] args = Arrays.copyOf(arguments, argsLength);
                     EventQueue.invokeLater(new Runnable() {
                         @Override
                         public void run() {
                             try {
-                                Object result = platypusClient.executeServerModuleMethod(moduleName, methodName, Arrays.copyOf(args, args.length - 1));
+                                Object result = platypusClient.executeServerModuleMethod(moduleName, methodName, args);
                                 Context cx = Context.getCurrentContext();
                                 boolean wasContext = cx != null;
                                 if (!wasContext) {
                                     cx = ScriptUtils.enterContext();
                                 }
                                 try {
-                                    callback.call(cx, StubFunction.this, StubFunction.this, new Object[]{result});
+                                    successCallback.call(cx, StubFunction.this, StubFunction.this, new Object[]{result});
                                 } finally {
                                     if (!wasContext) {
                                         Context.exit();
                                     }
                                 }
                             } catch (Exception ex) {
+                                if (failureCallback != null) {
+                                    Context cx = Context.getCurrentContext();
+                                    boolean wasContext = cx != null;
+                                    if (!wasContext) {
+                                        cx = ScriptUtils.enterContext();
+                                    }
+                                    try {
+                                        failureCallback.call(cx, StubFunction.this, StubFunction.this, new Object[]{ex.getMessage()});
+                                    } finally {
+                                        if (!wasContext) {
+                                            Context.exit();
+                                        }
+                                    }
+                                }
                                 Logger.getLogger(ServerScriptProxy.class.getName()).log(Level.SEVERE, null, ex);
                             }
                         }
                     });
                     return Context.getUndefinedValue();
                 } else {
-                    return platypusClient.executeServerModuleMethod(moduleName, methodName, args);
+                    return platypusClient.executeServerModuleMethod(moduleName, methodName, arguments);
                 }
             } catch (Exception ex) {
                 throw new RuntimeException(ex);

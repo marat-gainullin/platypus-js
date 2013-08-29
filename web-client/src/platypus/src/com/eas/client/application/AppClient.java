@@ -60,6 +60,7 @@ import com.google.gwt.xhr.client.XMLHttpRequest.ResponseType;
 import com.google.gwt.xml.client.Document;
 import com.google.gwt.xml.client.Node;
 import com.google.gwt.xml.client.XMLParser;
+import com.sencha.gxt.widget.core.client.form.FormPanel.Method;
 
 /**
  * 
@@ -137,35 +138,46 @@ public class AppClient {
 		return res;
 	}
 
-	public static void jsLoad(String aResourceName, final JavaScriptObject onSuccess, final JavaScriptObject onFailure, final boolean text) throws Exception {
+	public static Object jsLoad(String aResourceName, final JavaScriptObject onSuccess, final JavaScriptObject onFailure, final boolean text) throws Exception {
 		SafeUri uri = AppClient.getInstance().getResourceUri(aResourceName);
-		AppClient.getInstance().startRequest(uri, text ? ResponseType.Default : ResponseType.ArrayBuffer, new Callback<XMLHttpRequest>() {
-			@Override
-			public void run(XMLHttpRequest aResult) throws Exception {
-				if (aResult.getStatus() == Response.SC_OK) {
-					if(onSuccess != null)
-						Utils.executeScriptEventVoid(onSuccess, onSuccess, text ? Utils.toJs(aResult.getResponseText()) : aResult.<XMLHttpRequest2> cast().getResponse());
-				} else {
-					if(onFailure != null)
-						Utils.executeScriptEventVoid(onFailure, onFailure, Utils.toJs(aResult.getStatusText()));
+		if (onSuccess != null) {
+			AppClient.getInstance().startRequest(uri, text ? ResponseType.Default : ResponseType.ArrayBuffer, new Callback<XMLHttpRequest>() {
+				@Override
+				public void run(XMLHttpRequest aResult) throws Exception {
+					if (aResult.getStatus() == Response.SC_OK) {
+						if (onSuccess != null)
+							Utils.executeScriptEventVoid(onSuccess, onSuccess, text ? Utils.toJs(aResult.getResponseText()) : aResult.<XMLHttpRequest2> cast().getResponse());
+					} else {
+						if (onFailure != null)
+							Utils.executeScriptEventVoid(onFailure, onFailure, Utils.toJs(aResult.getStatusText()));
+					}
 				}
-			}
 
-			@Override
-			public void cancel() {
-			}
-		}, new Callback<XMLHttpRequest>(){
+				@Override
+				public void cancel() {
+				}
+			}, new Callback<XMLHttpRequest>() {
 
-			@Override
-            public void run(XMLHttpRequest aResult) throws Exception {
-				if(onFailure != null)
-					Utils.executeScriptEventVoid(onFailure, onFailure, Utils.toJs(aResult.getStatusText()));
-            }
-			
-			@Override
-            public void cancel() {
-            }
-		});
+				@Override
+				public void run(XMLHttpRequest aResult) throws Exception {
+					if (onFailure != null)
+						Utils.executeScriptEventVoid(onFailure, onFailure, Utils.toJs(aResult.getStatus() != 0 ? aResult.getStatusText() : "Request has been cancelled. See browser's console."));
+				}
+
+				@Override
+				public void cancel() {
+				}
+			});
+		} else {
+			XMLHttpRequest2 executed = AppClient.getInstance().syncRequest(uri.asString(), text ? ResponseType.Default : ResponseType.ArrayBuffer);
+			if (executed != null) {
+				if (executed.getStatus() == Response.SC_OK)
+					return text ? Utils.toJs(executed.getResponseText()) : executed.<XMLHttpRequest2> cast().getResponse();
+				else
+					throw new Exception(executed.getStatusText());
+			}
+		}
+		return null;
 	}
 
 	public static JavaScriptObject jsUpload(PublishedFile aFile, final JavaScriptObject aCompleteCallback, final JavaScriptObject aProgresssCallback, final JavaScriptObject aErrorCallback) {
@@ -409,20 +421,21 @@ public class AppClient {
 				Utils.invokeJsFunction(onSuccess);
 				Location.reload();
 			}
+
 			@Override
 			public void cancel() {
 			}
-		}, new Callback<XMLHttpRequest>(){
+		}, new Callback<XMLHttpRequest>() {
 
 			@Override
-            public void run(XMLHttpRequest aResult) throws Exception {
+			public void run(XMLHttpRequest aResult) throws Exception {
 				Utils.executeScriptEventVoid(onFailure, onFailure, Utils.toJs(aResult.getStatusText()));
-            }
-			
+			}
+
 			@Override
-            public void cancel() {
-            }
-			
+			public void cancel() {
+			}
+
 		}));
 	}
 
@@ -540,13 +553,36 @@ public class AppClient {
 		frm.removeFromParent();
 	}
 
-	public XMLHttpRequest2 syncRequest(String aUrlPrefix, final String aUrlQuery, String aBody, RequestBuilder.Method aMethod) throws Exception {
+	public XMLHttpRequest2 syncRequest(String aUrl, ResponseType aResponseType) throws Exception {
+		final XMLHttpRequest2 req = syncRequest(aUrl, aResponseType, null, RequestBuilder.GET);
+		if (req.getStatus() == Response.SC_OK)
+			return req;
+		else
+			throw new Exception(req.getStatus() + " " + req.getStatusText());
+	}
+
+	public XMLHttpRequest2 syncRequest(String aUrlPrefix, final String aUrlQuery, ResponseType aResponseType) throws Exception {
 		String url = baseUrl + aUrlPrefix + "?" + aUrlQuery;
+		final XMLHttpRequest2 req = syncRequest(url, aResponseType, null, RequestBuilder.GET);
+		if (req.getStatus() == Response.SC_OK)
+			return req;
+		else
+			throw new Exception(req.getStatus() + " " + req.getStatusText());
+	}
+
+	public XMLHttpRequest2 syncRequest(String aUrl, ResponseType aResponseType, String aBody, RequestBuilder.Method aMethod) throws Exception {
 		final XMLHttpRequest2 req = XMLHttpRequest.create().<XMLHttpRequest2> cast();
-		req.open(aMethod.toString(), url, false);
-		req.setRequestHeader("Content-type", "application/json; charset=utf-8");
+		req.open(aMethod.toString(), aUrl, false);
+		interceptRequest(req);
+		/* Since W3C standard about sync XmlHttpRequest and response type.
+		if (aResponseType != null && aResponseType != ResponseType.Default)
+			req.setResponseType(aResponseType);
+		*/	
 		req.setRequestHeader("Pragma", "no-cache");
-		req.send(aBody);
+		if (aBody != null)
+			req.send(aBody);
+		else
+			req.send();
 		if (req.getStatus() == Response.SC_OK)
 			return req;
 		else
@@ -558,13 +594,22 @@ public class AppClient {
 		for ( var i = 0; i < moduleData.functions.length; i++) {
 			aModule[moduleData.functions[i]] = function(functionName) {
 				return function() {
-					var executeCallback = arguments.length > 0 && typeof (arguments[arguments.length - 1]) === "function" ? arguments[arguments.length - 1] : null;
+					var onSuccess = null;
+					var onFailure = null;
+					var argsLength = arguments.length;
+					if(arguments.length > 1 && typeof arguments[arguments.length-1] == "function" && typeof arguments[arguments.length-2] == "function"){
+						onSuccess = arguments[arguments.length-2];
+						onFailure = arguments[arguments.length-1];
+						argsLength -= 2;
+					}else if(arguments.length > 0 && typeof arguments[arguments.length-1] == "function"){
+						onSuccess = arguments[arguments.length-1];
+						argsLength -= 1;
+					}
 					var params = [];
-					var argsLength = executeCallback == null ? arguments.length : arguments.length - 1;
 					for ( var j = 0; j < argsLength; j++) {
 						params[j] = JSON.stringify(arguments[j]);
 					}
-					return $wnd.platypus.executeServerModuleMethod(aModuleName, functionName, params, executeCallback);
+					return $wnd.platypus.executeServerModuleMethod(aModuleName, functionName, params, onSuccess, onFailure);
 				}
 			}(moduleData.functions[i]);
 		}
@@ -723,16 +768,16 @@ public class AppClient {
 		$wnd.platypus.defineServerModule = function(aModuleName, aModule) {
 			@com.eas.client.application.AppClient::defineServerModule(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aModule);
 		}
-		$wnd.platypus.executeServerModuleMethod = function(aModuleName, aMethodName, aParams, aCallBack) {
+		$wnd.platypus.executeServerModuleMethod = function(aModuleName, aMethodName, aParams, aOnSuccess, aOnFailure) {
 			return $wnd
-					.boxAsJs(aClient.@com.eas.client.application.AppClient::executeServerModuleMethod(Ljava/lang/String;Ljava/lang/String;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aMethodName, aParams, aCallBack));
+					.boxAsJs(aClient.@com.eas.client.application.AppClient::executeServerModuleMethod(Ljava/lang/String;Ljava/lang/String;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aMethodName, aParams, aOnSuccess, aOnFailure));
 		}
 		$wnd.platypus.executeServerReport = function(aModuleName, aModule) {
 			aClient.@com.eas.client.application.AppClient::executeServerReport(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aModule);
 		}
 	}-*/;
 
-	public Object executeServerModuleMethod(final String aModuleName, final String aMethodName, final JsArrayString aParams, final JavaScriptObject onSuccess) throws Exception {
+	public Object executeServerModuleMethod(final String aModuleName, final String aMethodName, final JsArrayString aParams, final JavaScriptObject onSuccess, final JavaScriptObject onFailure) throws Exception {
 		String[] convertedParams = new String[aParams.length()];
 		for (int i = 0; i < aParams.length(); i++)
 			convertedParams[i] = param(PlatypusHttpRequestParams.PARAMS_ARRAY, aParams.get(i));
@@ -755,22 +800,33 @@ public class AppClient {
 						Utils.executeScriptEventVoid(onSuccess, onSuccess, Utils.toJs(aResponse.getResponseText()));
 					}
 				}
-			}, null);
+			}, new ResponseCallbackAdapter() {
+
+				@Override
+                protected void doWork(XMLHttpRequest aResponse) throws Exception {
+					if(onFailure != null)
+						Utils.executeScriptEventVoid(onSuccess, onFailure, Utils.toJs(aResponse.getStatusText()));
+                }
+				
+			});
 			return null;
 		} else {
-			XMLHttpRequest2 executed = syncRequest(API_URI, query, null, RequestBuilder.GET);
+			XMLHttpRequest2 executed = syncRequest(API_URI, query, ResponseType.Default);
 			if (executed != null) {
-				String responseType = executed.getResponseHeader("content-type");
-				if (responseType != null) {
-					responseType = responseType.toLowerCase();
-					if (responseType.contains("text/json") || responseType.contains("text/javascript")) {
-						return Utils.toJs(Utils.jsonParse(executed.getResponseText()));
+				if (executed.getStatus() == Response.SC_OK) {
+					String responseType = executed.getResponseHeader("content-type");
+					if (responseType != null) {
+						responseType = responseType.toLowerCase();
+						if (responseType.contains("text/json") || responseType.contains("text/javascript")) {
+							return Utils.toJs(Utils.jsonParse(executed.getResponseText()));
+						} else {
+							return Utils.toJs(executed.getResponseText());
+						}
 					} else {
 						return Utils.toJs(executed.getResponseText());
 					}
-				} else {
-					return Utils.toJs(executed.getResponseText());
-				}
+				} else
+					throw new Exception(executed.getStatusText());
 			} else {
 				return null;
 			}
@@ -837,7 +893,7 @@ public class AppClient {
 				if (onFailure != null) {
 					int status = aResponse.getStatus();
 					String statusText = aResponse.getStatusText();
-					if(statusText == null || statusText.isEmpty())
+					if (statusText == null || statusText.isEmpty())
 						statusText = null;
 					if (status == 0)
 						Logger.getLogger(AppClient.class.getName()).log(Level.INFO, "rowset recieving is aborted");

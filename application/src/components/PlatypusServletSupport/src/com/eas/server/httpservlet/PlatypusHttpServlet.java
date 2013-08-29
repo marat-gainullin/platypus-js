@@ -30,8 +30,8 @@ import com.eas.server.*;
 import com.eas.server.filter.AppElementsFilter;
 import com.eas.server.handlers.ExecuteServerModuleMethodRequestHandler;
 import com.eas.server.httpservlet.serial.query.QueryJsonWriter;
-import com.eas.server.httpservlet.serial.rowset.RowsetJsonConstants;
-import com.eas.server.httpservlet.serial.rowset.RowsetJsonWriter;
+import com.eas.client.threetier.RowsetJsonConstants;
+import com.eas.client.threetier.RowsetJsonWriter;
 import com.eas.util.StringUtils;
 import com.eas.util.logging.PlatypusFormatter;
 import java.io.*;
@@ -480,8 +480,8 @@ public class PlatypusHttpServlet extends HttpServlet {
                 writeJsonResponse(moduleResponseToJson(csmr.getFunctionsNames(), csmr.isReport()), aHttpResponse);
             } else if (aPlatypusResponse instanceof ExecuteServerModuleMethodRequest.Response) {
                 Object result = ((ExecuteServerModuleMethodRequest.Response) aPlatypusResponse).getResult();
-                if (result instanceof ScriptableRowset) {
-                    writeResponse(((ScriptableRowset) result).unwrap(), aHttpResponse, aHttpRequest);
+                if (result instanceof Rowset) {
+                    writeResponse((Rowset) result, aHttpResponse, aHttpRequest);
                 } else if (result instanceof String) {
                     writeResponse((String) result, aHttpResponse, TEXT_CONTENTTYPE);
                 } else if (result instanceof NativeObject) {

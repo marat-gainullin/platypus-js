@@ -26,15 +26,11 @@ import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.ScriptInjector;
 import com.google.gwt.dom.client.ScriptElement;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.http.client.Response;
-import com.google.gwt.resources.client.DataResource;
-import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.xhr.client.XMLHttpRequest;
 import com.google.gwt.xml.client.Document;
 import com.google.gwt.xml.client.Element;
 import com.google.gwt.xml.client.Node;
 import com.google.gwt.xml.client.NodeList;
-import com.sencha.gxt.widget.core.client.form.FormPanel.Method;
 
 /**
  * 

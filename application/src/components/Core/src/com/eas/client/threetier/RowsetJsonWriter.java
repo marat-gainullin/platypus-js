@@ -1,11 +1,10 @@
-package com.eas.server.httpservlet.serial.rowset;
+package com.eas.client.threetier;
 
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
-import com.eas.server.httpservlet.serial.JsonWriter;
 import com.eas.util.JSONUtils;
 import java.sql.Types;
 
@@ -13,7 +12,7 @@ import java.sql.Types;
  *
  * @author kl, mg refactoring
  */
-public class RowsetJsonWriter extends JsonWriter {
+public class RowsetJsonWriter {
 
     private Rowset rowset;
 

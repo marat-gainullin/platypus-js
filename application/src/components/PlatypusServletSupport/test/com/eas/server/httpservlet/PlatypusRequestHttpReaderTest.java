@@ -13,7 +13,7 @@ import com.bearsoft.rowset.changes.Update;
 import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.bearsoft.rowset.metadata.Field;
 import com.eas.server.httpservlet.serial.ChangeJsonReader;
-import com.eas.server.httpservlet.serial.rowset.RowsetJsonConstants;
+import com.eas.client.threetier.RowsetJsonConstants;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.List;

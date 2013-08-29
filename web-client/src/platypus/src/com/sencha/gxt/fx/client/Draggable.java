@@ -534,7 +534,12 @@ public class Draggable implements HasDragStartHandlers, HasDragEndHandlers, HasD
     // elem.getClassName throwing GWT exception when dragged widget is over
     // SVG / VML
     if (hasAttribute(elem, "class")) {
-      String cls = ((Element) event.getEventTarget().cast()).getClassName();
+      String cls = null;
+      try{
+    	  cls = elem.getClassName();
+      }catch(Exception ex){
+    	  cls = elem.getAttribute("class");
+      }
       if (cls != null && cls.contains("x-insert")) {
         return;
       }
