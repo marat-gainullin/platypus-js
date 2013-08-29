@@ -1527,8 +1527,14 @@ public class Entity implements RowsetListener {
 					// re-query ...
 					uninstallUserFiltering();
 					if (pending != null){
-						pending.cancel();
-						invalidate();
+						Model.NetworkProcess lprocess = model.getProcess();
+						model.setProcess(null);
+						try{
+							pending.cancel();
+							invalidate();
+						}finally{
+							model.setProcess(lprocess);
+						}
 					}
 					pending = achieveOrRefreshRowset(new CancellableCallbackAdapter() {
 

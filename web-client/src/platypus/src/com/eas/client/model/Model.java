@@ -527,6 +527,14 @@ public class Model {// implements Cancellable {
 		commitable = aValue;
 	}
 
+	public NetworkProcess getProcess(){
+		return process;
+	}
+	
+	public void setProcess(NetworkProcess aValue) {
+	    process = aValue;
+    }
+	
 	public void terminateProcess(Entity aSource, String aErrorMessage) throws Exception {
 		if(process != null){
 			if(aErrorMessage != null){
