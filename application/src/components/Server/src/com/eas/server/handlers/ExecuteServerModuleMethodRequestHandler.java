@@ -4,6 +4,7 @@
  */
 package com.eas.server.handlers;
 
+import com.eas.client.model.script.ScriptableRowset;
 import com.eas.client.threetier.Response;
 import com.eas.client.threetier.requests.ExecuteServerModuleMethodRequest;
 import com.eas.script.JsDoc;
@@ -81,6 +82,9 @@ public class ExecuteServerModuleMethodRequestHandler extends SessionRequestHandl
                 if (moduleSession != systemSession
                         && runner.hasModuleAnnotation(JsDoc.Tag.STATELESS_TAG)) {
                     moduleSession.unregisterModule(moduleName);
+                }
+                if (result instanceof ScriptableRowset) {
+                    result = ((ScriptableRowset) result).unwrap();
                 }
                 return new ExecuteServerModuleMethodRequest.Response(getRequest().getID(), result);
             }

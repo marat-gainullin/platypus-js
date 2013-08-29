@@ -109,8 +109,6 @@ Object.defineProperty(Resource, "loadText", {
                 onSuccess = aOnSuccessOrOnFailure;
                 onFailure = aOnFailure;
             }
-            if(typeof onSuccess != "function")
-                throw "loadText must be called with at leaast success callback function";
             try{
                 var _loaded = encoding ? com.eas.client.scripts.ScriptRunner.PlatypusScriptedResource.loadText(aResName, encoding) :
                                          com.eas.client.scripts.ScriptRunner.PlatypusScriptedResource.loadText(aResName);

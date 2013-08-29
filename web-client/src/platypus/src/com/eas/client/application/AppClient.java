@@ -161,7 +161,7 @@ public class AppClient {
 				@Override
 				public void run(XMLHttpRequest aResult) throws Exception {
 					if (onFailure != null)
-						Utils.executeScriptEventVoid(onFailure, onFailure, Utils.toJs(aResult.getStatusText()));
+						Utils.executeScriptEventVoid(onFailure, onFailure, Utils.toJs(aResult.getStatus() != 0 ? aResult.getStatusText() : "Request has been cancelled. See browser's console."));
 				}
 
 				@Override
@@ -574,8 +574,10 @@ public class AppClient {
 		final XMLHttpRequest2 req = XMLHttpRequest.create().<XMLHttpRequest2> cast();
 		req.open(aMethod.toString(), aUrl, false);
 		interceptRequest(req);
+		/* Since W3C standard about sync XmlHttpRequest and response type.
 		if (aResponseType != null && aResponseType != ResponseType.Default)
 			req.setResponseType(aResponseType);
+		*/	
 		req.setRequestHeader("Pragma", "no-cache");
 		if (aBody != null)
 			req.send(aBody);
@@ -592,13 +594,22 @@ public class AppClient {
 		for ( var i = 0; i < moduleData.functions.length; i++) {
 			aModule[moduleData.functions[i]] = function(functionName) {
 				return function() {
-					var executeCallback = arguments.length > 0 && typeof (arguments[arguments.length - 1]) === "function" ? arguments[arguments.length - 1] : null;
+					var onSuccess = null;
+					var onFailure = null;
+					var argsLength = arguments.length;
+					if(arguments.length > 1 && typeof arguments[arguments.length-1] == "function" && typeof arguments[arguments.length-2] == "function"){
+						onSuccess = arguments[arguments.length-2];
+						onFailure = arguments[arguments.length-1];
+						argsLength -= 2;
+					}else if(arguments.length > 0 && typeof arguments[arguments.length-1] == "function"){
+						onSuccess = arguments[arguments.length-1];
+						argsLength -= 1;
+					}
 					var params = [];
-					var argsLength = executeCallback == null ? arguments.length : arguments.length - 1;
 					for ( var j = 0; j < argsLength; j++) {
 						params[j] = JSON.stringify(arguments[j]);
 					}
-					return $wnd.platypus.executeServerModuleMethod(aModuleName, functionName, params, executeCallback);
+					return $wnd.platypus.executeServerModuleMethod(aModuleName, functionName, params, onSuccess, onFailure);
 				}
 			}(moduleData.functions[i]);
 		}
@@ -757,16 +768,16 @@ public class AppClient {
 		$wnd.platypus.defineServerModule = function(aModuleName, aModule) {
 			@com.eas.client.application.AppClient::defineServerModule(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aModule);
 		}
-		$wnd.platypus.executeServerModuleMethod = function(aModuleName, aMethodName, aParams, aCallBack) {
+		$wnd.platypus.executeServerModuleMethod = function(aModuleName, aMethodName, aParams, aOnSuccess, aOnFailure) {
 			return $wnd
-					.boxAsJs(aClient.@com.eas.client.application.AppClient::executeServerModuleMethod(Ljava/lang/String;Ljava/lang/String;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aMethodName, aParams, aCallBack));
+					.boxAsJs(aClient.@com.eas.client.application.AppClient::executeServerModuleMethod(Ljava/lang/String;Ljava/lang/String;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aMethodName, aParams, aOnSuccess, aOnFailure));
 		}
 		$wnd.platypus.executeServerReport = function(aModuleName, aModule) {
 			aClient.@com.eas.client.application.AppClient::executeServerReport(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aModule);
 		}
 	}-*/;
 
-	public Object executeServerModuleMethod(final String aModuleName, final String aMethodName, final JsArrayString aParams, final JavaScriptObject onSuccess) throws Exception {
+	public Object executeServerModuleMethod(final String aModuleName, final String aMethodName, final JsArrayString aParams, final JavaScriptObject onSuccess, final JavaScriptObject onFailure) throws Exception {
 		String[] convertedParams = new String[aParams.length()];
 		for (int i = 0; i < aParams.length(); i++)
 			convertedParams[i] = param(PlatypusHttpRequestParams.PARAMS_ARRAY, aParams.get(i));
@@ -789,7 +800,15 @@ public class AppClient {
 						Utils.executeScriptEventVoid(onSuccess, onSuccess, Utils.toJs(aResponse.getResponseText()));
 					}
 				}
-			}, null);
+			}, new ResponseCallbackAdapter() {
+
+				@Override
+                protected void doWork(XMLHttpRequest aResponse) throws Exception {
+					if(onFailure != null)
+						Utils.executeScriptEventVoid(onSuccess, onFailure, Utils.toJs(aResponse.getStatusText()));
+                }
+				
+			});
 			return null;
 		} else {
 			XMLHttpRequest2 executed = syncRequest(API_URI, query, ResponseType.Default);

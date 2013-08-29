@@ -15,7 +15,7 @@ import com.bearsoft.rowset.changes.Insert;
 import com.bearsoft.rowset.changes.Update;
 import com.bearsoft.rowset.metadata.Field;
 import com.eas.script.ScriptUtils;
-import com.eas.server.httpservlet.serial.rowset.RowsetJsonConstants;
+import com.eas.client.threetier.RowsetJsonConstants;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
