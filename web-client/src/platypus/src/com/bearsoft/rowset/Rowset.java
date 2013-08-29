@@ -427,6 +427,8 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
 				}, new Callback<String>() {
 					public void run(String aResult) throws Exception {
 						pending = false;
+						if(aResult == null)
+							aResult = "Unknown network error. May be cancelled.";
 						rowsetChangeSupport.fireNetErrorEvent(aResult);
 						if(onFailure != null)
 							onFailure.run(aResult);

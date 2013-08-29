@@ -2032,20 +2032,20 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
     }
 
     private String[][] getGridView(boolean selectedOnly, boolean isData) {
-        TableModel view = getDeepModel();
-        if (view != null) {
+        TableModel cellsModel = getDeepModel();
+        if (cellsModel != null) {
             int minRow = 0;
-            int maxRow = view.getRowCount();
-            int columnCount = view.getColumnCount();
+            int maxRow = cellsModel.getRowCount();
+            int columnCount = cellsModel.getColumnCount();
             String[][] res = new String[maxRow][columnCount];
             ListSelectionModel rowSelecter = getRowsSelectionModel();
-            for (int row = minRow; row < maxRow; row++) {
+            for (int viewRow = minRow; viewRow < maxRow; viewRow++) {
                 if (selectedOnly) {
-                    if (rowSelecter.isSelectedIndex(row)) {
-                        res[row] = transformRow(row, selectedOnly, isData);
+                    if (rowSelecter.isSelectedIndex(viewRow)) {
+                        res[viewRow] = transformRow(rowSorter.convertRowIndexToModel(viewRow), selectedOnly, isData);
                     }
                 } else {
-                    res[row] = transformRow(row, selectedOnly, isData);
+                    res[viewRow] = transformRow(rowSorter.convertRowIndexToModel(viewRow), selectedOnly, isData);
                 }
             }
             return res;

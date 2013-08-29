@@ -282,6 +282,7 @@ public class RowsTreeStoreFiller extends RowsetAdapter implements PropertyChange
 	public void rowsetNetError(RowsetNetErrorEvent event) {
 		try {
 			rowsetError = event.getMessage();
+			assert rowsetError != null;
 			checkIfRootsWithError();
 		} catch (Exception ex) {
 			Logger.getLogger(RowsTreeStoreFiller.class.getName()).log(Level.SEVERE, ex.getMessage());

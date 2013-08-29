@@ -896,7 +896,7 @@ public class AppClient {
 					if (statusText == null || statusText.isEmpty())
 						statusText = null;
 					if (status == 0)
-						Logger.getLogger(AppClient.class.getName()).log(Level.INFO, "rowset recieving is aborted");
+						Logger.getLogger(AppClient.class.getName()).log(Level.WARNING, "rowset recieving is aborted");
 					onFailure.run(statusText);
 				}
 			}
