@@ -572,10 +572,10 @@ public class Application {
 		$wnd.Module = function(aModuleId)
 		{
 			var mc = $wnd.platypusModulesConstructors[aModuleId];
-			if (mc != null && mc != undefined)
-				return new mc();
-			else
-				return null;
+			if (mc != null && mc != undefined){
+				mc();
+			} else
+				throw 'No module constructor to module: ' + aModuleId;
 		};
 		$wnd.Form = $wnd.Module;
 		$wnd.Form.getShownForm = function(aFormKey){
