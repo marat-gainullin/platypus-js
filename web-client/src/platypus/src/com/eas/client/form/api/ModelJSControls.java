@@ -41,7 +41,11 @@ public class ModelJSControls {
 			published.clearSelection = function() {
 				aComponent.@com.eas.client.gxtcontrols.grid.ModelGrid::clearSelection()();
 			};
+			published.find = function(){
+				aComponent.@com.eas.client.gxtcontrols.grid.ModelGrid::find()();
+			};
 			published.findSomething = function() {
+				published.find();
 			};
 			published.makeVisible = function(aRow, needToSelect) {
 				var need2Select = true;
