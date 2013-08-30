@@ -572,8 +572,8 @@ public class Application {
 		$wnd.Module = function(aModuleId)
 		{
 			var mc = $wnd.platypusModulesConstructors[aModuleId];
-			if (mc != null && mc != undefined){
-				mc();
+			if (mc){
+				mc.call(this);
 			} else
 				throw 'No module constructor to module: ' + aModuleId;
 		};
