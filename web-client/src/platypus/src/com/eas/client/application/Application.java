@@ -976,16 +976,44 @@ public class Application {
 		publish(client);
 		AppClient.publishApi(client);
 		loader = new Loader(client);
+		Set<Element> indicators = extractPlatypusProgressIndicators();
+		for(Element el : indicators)
+			loaderHandlerRegistration.add(loader.addHandler(new ElementMaskLoadHandler(el.<XElement> cast()){
+				public void loaded(String anItemName) {
+					xDiv.unmask();
+				};
+			}));
 		return startAppElements(client, start);
 	}
 
+	private static Set<Element> extractPlatypusProgressIndicators() {
+		Set<Element> platypusIndicators = new HashSet();
+		XElement xBody = Utils.doc.getBody().cast();
+		String platypusModuleClass = "platypusIndicator";
+		if(platypusModuleClass.equals(xBody.getClassName()))
+			platypusIndicators.add(xBody);
+			
+		NodeList<Element> divs = xBody.select("."+platypusModuleClass);//Utils.doc.getElementsByTagName("div");
+		if(divs != null){
+			for (int i = 0; i < divs.getLength(); i++) {
+				Element div = divs.getItem(i);
+				platypusIndicators.add(div);
+			}
+		}
+		return platypusIndicators;
+	}
+	
 	private static Map<String, Element> extractPlatypusModules() {
 		Map<String, Element> platypusModules = new HashMap();
-		NodeList<Element> divs = Utils.doc.getElementsByTagName("div");
-		for (int i = 0; i < divs.getLength(); i++) {
-			Element div = divs.getItem(i);
-			if ("platypusModule".equalsIgnoreCase(div.getClassName()) && div.getId() != null && !div.getId().isEmpty()) {
-				platypusModules.put(div.getId(), div);
+		XElement xBody = Utils.doc.getBody().cast();
+		String platypusModuleClass = "platypusModule";
+		NodeList<Element> divs = xBody.select("."+platypusModuleClass);//Utils.doc.getElementsByTagName("div");
+		if(divs != null){
+			for (int i = 0; i < divs.getLength(); i++) {
+				Element div = divs.getItem(i);
+				if (div.getId() != null && !div.getId().isEmpty()) {
+					platypusModules.put(div.getId(), div);
+				}
 			}
 		}
 		String url = Document.get().getURL();
