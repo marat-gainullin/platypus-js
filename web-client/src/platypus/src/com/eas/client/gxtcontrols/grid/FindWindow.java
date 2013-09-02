@@ -49,7 +49,7 @@ public class FindWindow extends Window {
 		setBorders(false);
 
 		setResizable(false);
-		setPixelSize(400, 145);
+		setPixelSize(400, 135);
 	}
 
 	private void initComponents() {
@@ -182,6 +182,7 @@ public class FindWindow extends Window {
 	private void selectCell(int aRow, int aCol) {
 		if(grid.getSelectionModel() instanceof PlatypusCellSelectionModel<?>){
 			PlatypusCellSelectionModel<Row> cellsSelection = (PlatypusCellSelectionModel<Row>)grid.getSelectionModel();
+			cellsSelection.deselectAll();
 			cellsSelection.selectCell(aRow, aCol, true);
 		}else{
 			grid.getSelectionModel().select(aRow, false);
