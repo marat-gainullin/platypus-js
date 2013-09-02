@@ -252,8 +252,8 @@ public class Form {
 			window.setWidget(view);
 			view.setVisible(true);
 			registerWindowListeners(window);
-			boolean wasSize = size != null;
 			window.show();
+			boolean wasSize = size != null;
 			if (wasSize) {
 				window.setPixelSize(size.getX(), size.getY());
 			} else {

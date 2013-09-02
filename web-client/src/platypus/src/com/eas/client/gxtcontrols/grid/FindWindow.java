@@ -9,6 +9,7 @@ import com.google.gwt.dom.client.Node;
 import com.google.gwt.user.client.ui.Label;
 import com.sencha.gxt.core.client.util.Margins;
 import com.sencha.gxt.core.client.util.Padding;
+import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.data.shared.Store;
 import com.sencha.gxt.widget.core.client.Window;
 import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
@@ -111,7 +112,7 @@ public class FindWindow extends Window {
 	}
 
 	private boolean findNext() {
-		Store<Row> store = grid.getStore();
+		ListStore<Row> store = grid.getStore();
 		boolean caseSensitive = checkCase.getValue();
 		boolean wholeString = checkWhole.getValue();
 		String findText = field.getText();
@@ -121,8 +122,7 @@ public class FindWindow extends Window {
 		if (!caseSensitive) {
 			findText = findText.toLowerCase();
 		}
-		List<Row> allVisibleItems = store.getAll();
-		if (row >= allVisibleItems.size()) {
+		if (row >= store.size()) {
 			row = 0;
 			col = 0;
 		} else {
@@ -137,7 +137,7 @@ public class FindWindow extends Window {
 			}
 		}
 
-		for (; row < allVisibleItems.size(); row++) {
+		for (; row < store.size(); row++) {
 			for (; col < grid.getColumnModel().getColumnCount(); col++) {
 				if (findInnerText(grid.getView().getCell(row, col), findText, caseSensitive, wholeString)) {
 					selectCell(row, col);
