@@ -162,11 +162,9 @@ public class PlatypusMarginLayoutContainer extends SimpleContainer implements Or
 	 * @return
 	 */
 	protected Component lookupLayoutedChild(Widget aChild) {
-		MarginConstraints anchors = (MarginConstraints) ((Component) aChild.getParent()).getData(MARGIN_LAYOUT_DATA);
-		if (anchors == null)
-			return (Component) aChild.getParent().getParent().getParent();
-		else
-			return (Component) aChild.getParent();
+		if(aChild.getParent() instanceof PlatypusFieldSet)
+			aChild = aChild.getParent(); 
+		return (Component) aChild.getParent();
 	}
 
 	public void ajustWidth(Widget aChild, int aValue) {

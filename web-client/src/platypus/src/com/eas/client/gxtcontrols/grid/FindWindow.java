@@ -9,7 +9,6 @@ import com.google.gwt.dom.client.Node;
 import com.google.gwt.user.client.ui.Label;
 import com.sencha.gxt.core.client.util.Margins;
 import com.sencha.gxt.core.client.util.Padding;
-import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.data.shared.Store;
 import com.sencha.gxt.widget.core.client.Window;
 import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
@@ -180,9 +179,13 @@ public class FindWindow extends Window {
 		return false;
 	}
 
-	// !!! --- ИЗМЕНИТЬ --- !!!
 	private void selectCell(int aRow, int aCol) {
-		grid.getSelectionModel().select(aRow, false);
+		if(grid.getSelectionModel() instanceof PlatypusCellSelectionModel<?>){
+			PlatypusCellSelectionModel<Row> cellsSelection = (PlatypusCellSelectionModel<Row>)grid.getSelectionModel();
+			cellsSelection.selectCell(aRow, aCol, true);
+		}else{
+			grid.getSelectionModel().select(aRow, false);
+		}
 	}
 
 }
