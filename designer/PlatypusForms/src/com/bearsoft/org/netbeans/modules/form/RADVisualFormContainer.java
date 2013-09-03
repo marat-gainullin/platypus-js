@@ -146,7 +146,7 @@ public class RADVisualFormContainer extends RADVisualContainer<Container> {
         }
         setDesignerSizeImpl(ldesignerSize);
         getFormModel().fireSyntheticPropertyChanged(this, PROP_FORM_SIZE, old, value);
-        getFormModel().fireSyntheticPropertyChanged(this, PlatypusFormLayoutView.PROP_DESIGNER_SIZE, null, null);
+        getFormModel().fireSyntheticPropertyChanged(this, FormModelEvent.PROP_DESIGNER_SIZE, null, null);
     }
 
     private Dimension setFormSizeImpl(Dimension value) {
@@ -174,14 +174,14 @@ public class RADVisualFormContainer extends RADVisualContainer<Container> {
             lformSize = value;
         }
         setFormSizeImpl(lformSize);
-        getFormModel().fireSyntheticPropertyChanged(this, PlatypusFormLayoutView.PROP_DESIGNER_SIZE, old, value);
+        getFormModel().fireSyntheticPropertyChanged(this, FormModelEvent.PROP_DESIGNER_SIZE, old, value);
     }
 
     Dimension setDesignerSizeImpl(Dimension value) {
         Dimension old = designerSize;
         designerSize = value;
         if (getNodeReference() != null) { // propagate the change to node
-            getNodeReference().firePropertyChangeHelper(PlatypusFormLayoutView.PROP_DESIGNER_SIZE, old, value);
+            getNodeReference().firePropertyChangeHelper(FormModelEvent.PROP_DESIGNER_SIZE, old, value);
         }
         return old;
     }

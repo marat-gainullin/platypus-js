@@ -66,16 +66,13 @@ public class EditContainerAction extends NodeAction {
             RADComponentCookie radCookie = activatedNodes[0].getLookup().lookup(RADComponentCookie.class);
             RADComponent<?> radComp = (radCookie != null) ? radCookie.getRADComponent() : null;
             if (isEditableComponent(radComp)) {
-                PlatypusFormLayoutView designer = null;//FormEditor.getFormDesigner(radComp.getFormModel());
-                if (designer != null) {
-                    designer.setTopDesignComponent((RADVisualContainer<?>) radComp, true);
-                    designer.requestActive();
-
+                    //designer.setTopDesignComponent((RADVisualContainer<?>) radComp, true);
+                    assert radComp != null && radComp.getFormModel() != null;
+                    radComp.getFormModel().setTopDesignComponent((RADVisualContainer<?>)radComp);
                     // same node keeps selected, but the state changed
                     reenable0(activatedNodes);
                     DesignParentAction.reenable(activatedNodes);
                     EditFormAction.reenable(activatedNodes);
-                }
             }
         }
     }
@@ -91,8 +88,9 @@ public class EditContainerAction extends NodeAction {
             RADComponentCookie radCookie = activatedNodes[0].getLookup().lookup(RADComponentCookie.class);
             RADComponent<?> radComp = (radCookie != null) ? radCookie.getRADComponent() : null;
             if (isEditableComponent(radComp)) {
-                PlatypusFormLayoutView designer = null;//FormEditor.getFormDesigner(radComp.getFormModel());
-                if (designer != null && radComp != designer.getTopDesignComponent()) {
+                assert radComp != null && radComp.getFormModel() != null;
+                RADVisualContainer currentTopComp = radComp.getFormModel().getTopDesignComponent();
+                if (currentTopComp != null && radComp != currentTopComp) {
                     return true;
                 }
             }

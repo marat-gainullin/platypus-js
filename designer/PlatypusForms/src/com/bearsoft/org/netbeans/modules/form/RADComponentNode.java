@@ -44,6 +44,8 @@
 package com.bearsoft.org.netbeans.modules.form;
 
 import com.bearsoft.org.netbeans.modules.form.actions.*;
+import com.bearsoft.org.netbeans.modules.form.actions.menu.DesignParentAction;
+import com.bearsoft.org.netbeans.modules.form.actions.menu.EditContainerAction;
 import com.bearsoft.org.netbeans.modules.form.bound.RADModelGridColumn;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.*;
 import com.bearsoft.org.netbeans.modules.form.menu.AddSubItemAction;
@@ -309,14 +311,12 @@ public class RADComponentNode extends FormNode
             actions.add(null);
             actions.add(SystemAction.get(NewAction.class));
         }
-        /*
         if (EditContainerAction.isEditableComponent(component)) {
             actions.add(SystemAction.get(EditContainerAction.class));
         }
         if (DesignParentAction.isParentEditableComponent(component)) {
             actions.add(SystemAction.get(DesignParentAction.class));
         }
-        */ 
         addSeparator(actions);
     }
 
