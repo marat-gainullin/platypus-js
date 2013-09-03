@@ -99,7 +99,7 @@ public class Model {// implements Cancellable {
 		
 		public void cancel() throws Exception{
 			if(onFailure != null)
-				onFailure.run(null);
+				onFailure.run("Canceled");
 		}
 		
 		public void success() throws Exception{

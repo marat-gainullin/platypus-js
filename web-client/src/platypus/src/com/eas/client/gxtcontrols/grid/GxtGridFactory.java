@@ -197,14 +197,17 @@ public class GxtGridFactory {
 			sm = new CheckBoxSelectionModel<Row>(new IdentityValueProvider<Row>());
 			firstBlankColumn = ((CheckBoxSelectionModel<Row>) sm).getColumn();
 			leaves.add(0, firstBlankColumn);
+			currentLeavesCount = 1;
 		} else if (rowsHeaderType == ROWS_HEADER_TYPE_RADIOBUTTON) {
 			sm = new RadioBoxSelectionModel<Row>(new IdentityValueProvider<Row>());
 			firstBlankColumn = ((RadioBoxSelectionModel<Row>) sm).getColumn();
 			leaves.add(0, firstBlankColumn);
+			currentLeavesCount = 1;
 		} else if (rowsHeaderType == ROWS_HEADER_TYPE_USUAL) {
 			sm = new PlatypusCellSelectionModel<Row>(new RowMarker(rowsSource, new IdentityValueProvider<Row>()));
 			firstBlankColumn = ((PlatypusCellSelectionModel<Row>) sm).getColumn();
 			leaves.add(0, firstBlankColumn);
+			currentLeavesCount = 1;
 		} else
 			sm = new PlatypusCellSelectionModel<Row>(null);
 
