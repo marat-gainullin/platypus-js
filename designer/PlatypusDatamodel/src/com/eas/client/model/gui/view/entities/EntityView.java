@@ -16,11 +16,13 @@ import com.bearsoft.rowset.metadata.Parameters;
 import com.bearsoft.rowset.utils.CollectionListener;
 import com.eas.client.SQLUtils;
 import com.eas.client.model.Entity;
+import com.eas.client.model.Relation;
 import com.eas.client.model.application.ApplicationParametersEntity;
 import com.eas.client.model.gui.DatamodelDesignUtils;
 import com.eas.client.model.gui.IconCache;
 import com.eas.client.model.gui.edits.HideEntityFieldsEdit;
 import com.eas.client.model.gui.edits.MoveEntityEdit;
+import com.eas.client.model.gui.edits.RelationPolylineEdit;
 import com.eas.client.model.gui.edits.ResizeEntityEdit;
 import com.eas.client.model.gui.edits.ShowEntityFieldsEdit;
 import com.eas.client.model.gui.view.EntityViewsManager;
@@ -652,6 +654,13 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
         public void beginDraggingEntityView(EntityView<E> aView) {
             E entity = aView.getEntity();
             moveEdit = new MoveEntityEdit<>(entity, aView.getLocation(), aView.getLocation());
+            for (Relation rel : aView.getEntity().getInOutRelations()) {
+                if (rel.isManual()) {
+                    RelationPolylineEdit edit = new RelationPolylineEdit(rel, rel.getXs(), rel.getYs(), null, null);
+                    edit.redo();
+                    relationsPolylinesEdits.add(edit);
+                }
+            }
         }
 
         public void endDraggingEntityView(EntityView<E> aView) {
@@ -663,9 +672,18 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
                     assert entity != null;
                     entity.setX(location.x);
                     entity.setY(location.y);
-                    undoSupport.postEdit(moveEdit);
+                    undoSupport.beginUpdate();
+                    try {
+                        undoSupport.postEdit(moveEdit);
+                        for (RelationPolylineEdit edit : relationsPolylinesEdits) {
+                            undoSupport.postEdit(edit);
+                        }
+                    } finally {
+                        undoSupport.endUpdate();
+                    }
                 }
                 moveEdit = null;
+                relationsPolylinesEdits.clear();
             }
         }
 
@@ -673,10 +691,18 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
             aView.setLocation(newX, newY);
         }
         protected ResizeEntityEdit<E> resizeEdit = null;
+        protected Set<RelationPolylineEdit> relationsPolylinesEdits = new HashSet<>();
 
         public void beginResizingEntityView(EntityView<E> aView) {
             E entity = aView.getEntity();
             resizeEdit = new ResizeEntityEdit<>(entity, aView.getBounds(), aView.getBounds());
+            for (Relation rel : aView.getEntity().getInOutRelations()) {
+                if (rel.isManual()) {
+                    RelationPolylineEdit edit = new RelationPolylineEdit(rel, rel.getXs(), rel.getYs(), null, null);
+                    edit.redo();
+                    relationsPolylinesEdits.add(edit);
+                }
+            }
         }
 
         public void endResizingEntityView(EntityView<E> aView) {
@@ -689,9 +715,18 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
                     entity.setY(afterRect.y);
                     entity.setWidth(afterRect.width);
                     entity.setHeight(afterRect.height);
-                    undoSupport.postEdit(resizeEdit);
+                    undoSupport.beginUpdate();
+                    try {
+                        undoSupport.postEdit(resizeEdit);
+                        for (RelationPolylineEdit edit : relationsPolylinesEdits) {
+                            undoSupport.postEdit(edit);
+                        }
+                    } finally {
+                        undoSupport.endUpdate();
+                    }
                 }
                 resizeEdit = null;
+                relationsPolylinesEdits.clear();
             }
         }
 
