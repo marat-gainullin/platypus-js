@@ -26,3 +26,10 @@ private.xml
 /application/src/lib/own/Sensors/nbproject/private/
 /application/src/components/MetadataSynchronizer/nbproject/private/
 /application/src/components/SqlDriversTester/dist/
+/application/src/lib/own/Grid/nbproject/private/
+/application/src/lib/own/SyntaxPane/nbproject/private/
+/application/src/lib/own/ScalablePane/nbproject/private/
+/application/src/lib/thirdparty/JCalendar/nbproject/private/
+/application/src/lib/own/OpcDa/nbproject/private/
+/application/src/lib/thirdparty/JSqlParser/nbproject/private/
+/application/src/lib/own/Routing/build/
