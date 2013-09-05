@@ -4,12 +4,9 @@ import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.Client;
 import com.eas.client.ClientConstants;
-import com.eas.client.DatabasesClient;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.metadata.ApplicationElement;
-import com.eas.client.model.script.ScriptableRowset;
 import com.eas.client.queries.Query;
-import com.eas.client.scripts.ScriptRunner;
 import com.eas.client.settings.SettingsConstants;
 import com.eas.client.threetier.ErrorResponse;
 import com.eas.client.threetier.HelloRequest;
@@ -20,10 +17,6 @@ import com.eas.client.threetier.binary.PlatypusResponseWriter;
 import com.eas.client.threetier.http.PlatypusHttpConstants;
 import com.eas.client.threetier.http.PlatypusHttpRequestParams;
 import com.eas.client.threetier.requests.*;
-import com.eas.debugger.jmx.server.Breakpoints;
-import com.eas.debugger.jmx.server.Debugger;
-import com.eas.debugger.jmx.server.DebuggerMBean;
-import com.eas.debugger.jmx.server.Settings;
 import com.eas.proto.ProtoWriter;
 import com.eas.script.ScriptUtils;
 import com.eas.server.*;
@@ -35,7 +28,6 @@ import com.eas.client.threetier.RowsetJsonWriter;
 import com.eas.util.StringUtils;
 import com.eas.util.logging.PlatypusFormatter;
 import java.io.*;
-import java.lang.management.ManagementFactory;
 import java.net.URLConnection;
 import java.util.Set;
 import java.util.logging.ConsoleHandler;
@@ -44,10 +36,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanRegistrationException;
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -95,31 +83,16 @@ public class PlatypusHttpServlet extends HttpServlet {
     public void init(ServletConfig config) throws ServletException {
         try {
             super.init(config);
-            ServerConfig scp = ServerConfig.parse(config);
+            // TODO: remove loggers configuration code to be able to use standard way to cofigure
+            //java.util.logging package through command-line switches ( -Dxxx ) or configuration file.
             Handler consoleHandler = new ConsoleHandler();
             consoleHandler.setFormatter(new PlatypusFormatter());
             Logger logger = Logger.getLogger(Client.APPLICATION_LOGGER_NAME);
             logger.addHandler(consoleHandler);
             logger.setUseParentHandlers(false);
-
-            DatabasesClient serverCoreDbClient = new DatabasesClient(scp.getDbSettings(), true);
-            serverCore = new PlatypusServerCore(serverCoreDbClient, scp.getTasks(), scp.getAppElementId());
-            serverCoreDbClient.setContextHost(serverCore);
-            serverCoreDbClient.setPrincipalHost(serverCore);
-            ScriptRunner.PlatypusScriptedResource.init(serverCoreDbClient, serverCore, serverCore);
-            ScriptUtils.getScope().defineProperty(ServerScriptRunner.MODULES_SCRIPT_NAME, serverCore.getScriptsCache(), ScriptableObject.READONLY);
-
-            if (System.getProperty(ScriptRunner.DEBUG_PROPERTY) != null) {
-                Debugger debugger;
-                debugger = Debugger.initialize(false);
-                unRegisterMBean(DebuggerMBean.DEBUGGER_MBEAN_NAME);
-                registerMBean(DebuggerMBean.DEBUGGER_MBEAN_NAME, debugger);
-                unRegisterMBean(Breakpoints.BREAKPOINTS_MBEAN_NAME);
-                registerMBean(Breakpoints.BREAKPOINTS_MBEAN_NAME, Breakpoints.getInstance());
-                unRegisterMBean(Settings.SETTINGS_MBEAN_NAME);
-                registerMBean(Settings.SETTINGS_MBEAN_NAME, new Settings(serverCoreDbClient));
-            }
-            serverCore.startBackgroundTasks();
+            // end of logging configuration code
+            ServerConfig scp = ServerConfig.parse(config);
+            serverCore = PlatypusServerCore.getInstance(scp.getDbSettings(), scp.getTasks(), scp.getAppElementId());
         } catch (Exception ex) {
             throw new ServletException(ex);
         }
@@ -238,6 +211,10 @@ public class PlatypusHttpServlet extends HttpServlet {
         } else {
             return new AnonymousPlatypusPrincipal(aRequest.getSession().getId());
         }
+    }
+
+    public PlatypusServerCore getServerCore() {
+        return serverCore;
     }
 
     public HttpServletRequest getCurrentRequest() {
@@ -427,20 +404,6 @@ public class PlatypusHttpServlet extends HttpServlet {
 
     private boolean isJ2SERequest(HttpServletRequest aRequest) {
         return PlatypusHttpConstants.AGENT_NAME.equals(aRequest.getHeader(PlatypusHttpConstants.HEADER_USER_AGENT));
-    }
-
-    private static void registerMBean(String aName, Object aBean) throws Exception {
-        // Get the platform MBeanServer
-        // Uniquely identify the MBeans and register them with the platform MBeanServer
-        ManagementFactory.getPlatformMBeanServer().registerMBean(aBean, new ObjectName(aName));
-    }
-
-    private static void unRegisterMBean(String aName) throws MBeanRegistrationException, MalformedObjectNameException {
-        try {
-            ManagementFactory.getPlatformMBeanServer().unregisterMBean(new ObjectName(aName));
-        } catch (InstanceNotFoundException ex) {
-            //no-op
-        }
     }
 
     private void platypusResponse(final HttpServletRequest aHttpRequest, Request aPlatypusRequest, Response aPlatypusResponse, final HttpServletResponse aHttpResponse) throws Exception {
