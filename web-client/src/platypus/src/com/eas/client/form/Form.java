@@ -878,7 +878,7 @@ public class Form {
 
 	public void setMinimizable(boolean aValue) {
 		minimizable = aValue;
-		if (window != null && !window.isModal())
+		if (window != null)
 			window.setMinimizable(minimizable);
 	}
 
