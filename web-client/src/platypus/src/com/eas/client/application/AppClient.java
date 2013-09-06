@@ -518,7 +518,7 @@ public class AppClient {
 			}
 		});
 
-		if (requestData != null)
+		if (requestData != null && !requestData.isEmpty())
 			req.send(requestData);
 		else
 			req.send();

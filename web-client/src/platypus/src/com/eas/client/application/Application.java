@@ -66,8 +66,8 @@ public class Application {
 		}
 	}
 
-	public static Logger platypusApplicationLogger; 
-	protected static Map<String, Query> appQueries = new HashMap();
+	public static Logger platypusApplicationLogger;
+	protected static Map<String, Query> appQueries = new HashMap<String, Query>();
 	protected static Loader loader;
 	protected static GroupingHandlerRegistration loaderHandlerRegistration = new GroupingHandlerRegistration();
 
@@ -594,9 +594,9 @@ public class Application {
 				@com.eas.client.form.Form::setOnChange(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
 			}
 		});
-		$wnd.require = function (aDeps, aCallback) {
+		$wnd.require = function (aDeps, aOnSuccess, aOnFailure) {
 			var deps = Array.isArray(aDeps) ? aDeps : [aDeps];
-			@com.eas.client.application.Application::require(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(deps, aCallback);
+			@com.eas.client.application.Application::require(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(deps, aOnSuccess, aOnFailure);
 		} 
 		function _Icons() {
 			this.load = function(aIconName) {
@@ -977,8 +977,8 @@ public class Application {
 		AppClient.publishApi(client);
 		loader = new Loader(client);
 		Set<Element> indicators = extractPlatypusProgressIndicators();
-		for(Element el : indicators)
-			loaderHandlerRegistration.add(loader.addHandler(new ElementMaskLoadHandler(el.<XElement> cast()){
+		for (Element el : indicators)
+			loaderHandlerRegistration.add(loader.addHandler(new ElementMaskLoadHandler(el.<XElement> cast()) {
 				public void loaded(String anItemName) {
 					xDiv.unmask();
 				};
@@ -987,14 +987,14 @@ public class Application {
 	}
 
 	private static Set<Element> extractPlatypusProgressIndicators() {
-		Set<Element> platypusIndicators = new HashSet();
+		Set<Element> platypusIndicators = new HashSet<Element>();
 		XElement xBody = Utils.doc.getBody().cast();
 		String platypusModuleClass = "platypusIndicator";
-		if(platypusModuleClass.equals(xBody.getClassName()))
+		if (platypusModuleClass.equals(xBody.getClassName()))
 			platypusIndicators.add(xBody);
-			
-		NodeList<Element> divs = xBody.select("."+platypusModuleClass);//Utils.doc.getElementsByTagName("div");
-		if(divs != null){
+
+		NodeList<Element> divs = xBody.select("." + platypusModuleClass);// Utils.doc.getElementsByTagName("div");
+		if (divs != null) {
 			for (int i = 0; i < divs.getLength(); i++) {
 				Element div = divs.getItem(i);
 				platypusIndicators.add(div);
@@ -1002,13 +1002,13 @@ public class Application {
 		}
 		return platypusIndicators;
 	}
-	
+
 	private static Map<String, Element> extractPlatypusModules() {
-		Map<String, Element> platypusModules = new HashMap();
+		Map<String, Element> platypusModules = new HashMap<String, Element>();
 		XElement xBody = Utils.doc.getBody().cast();
 		String platypusModuleClass = "platypusModule";
-		NodeList<Element> divs = xBody.select("."+platypusModuleClass);//Utils.doc.getElementsByTagName("div");
-		if(divs != null){
+		NodeList<Element> divs = xBody.select("." + platypusModuleClass);// Utils.doc.getElementsByTagName("div");
+		if (divs != null) {
 			for (int i = 0; i < divs.getLength(); i++) {
 				Element div = divs.getItem(i);
 				if (div.getId() != null && !div.getId().isEmpty()) {
@@ -1040,7 +1040,7 @@ public class Application {
 				@Override
 				protected void doWork(String aResult) throws Exception {
 					if (aResult != null && !aResult.isEmpty()) {
-						Collection<String> results = new ArrayList();
+						Collection<String> results = new ArrayList<String>();
 						results.add(aResult);
 						loadings = loader.load(results, new ExecuteApplicationCallback(results));
 					}
@@ -1066,8 +1066,8 @@ public class Application {
 		}
 	}
 
-	public static void require(JavaScriptObject aDeps, final JavaScriptObject aCallback) {
-		Set<String> deps = new HashSet();
+	public static void require(JavaScriptObject aDeps, final JavaScriptObject aOnSuccess, final JavaScriptObject aOnFailure) {
+		final Set<String> deps = new HashSet<String>();
 		JsArrayString depsValues = aDeps.<JsArrayString> cast();
 		for (int i = 0; i < depsValues.length(); i++) {
 			String dep = depsValues.get(i);
@@ -1081,13 +1081,17 @@ public class Application {
 
 					@Override
 					protected void doWork() throws Exception {
-						Utils.invokeJsFunction(aCallback);
+						if (loader.isLoaded(deps)) {
+							Utils.invokeJsFunction(aOnSuccess);
+						} else {
+							Utils.invokeJsFunction(aOnFailure);
+						}
 					}
 				});
 			} catch (Exception ex) {
 				Logger.getLogger(Application.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		} else
-			Utils.invokeJsFunction(aCallback);
+			Utils.invokeJsFunction(aOnSuccess);
 	}
 }

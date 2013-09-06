@@ -98,7 +98,7 @@ public class Utils {
 	}-*/;
 
 	public native static void invokeJsFunction(JavaScriptObject aHandler) /*-{
-		if (aHandler != null) {
+		if (aHandler) {
 			aHandler();
 		}
 	}-*/;

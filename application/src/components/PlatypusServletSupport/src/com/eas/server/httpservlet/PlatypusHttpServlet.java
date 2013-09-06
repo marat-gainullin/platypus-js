@@ -413,8 +413,8 @@ public class PlatypusHttpServlet extends HttpServlet {
             assert isApiRequest(aHttpRequest) || isResourceRequest(aHttpRequest) : "Unknown request uri. Requests uri should be /api or /resources";
             if (aPlatypusResponse instanceof ErrorResponse) {
                 ErrorResponse er = (ErrorResponse) aPlatypusResponse;
-                if (er.isAccessControl()) {
-                    if (aPlatypusRequest instanceof FilteredAppElementRequest) {
+                if (er.isAccessControl()) {                    
+                    if (aPlatypusRequest instanceof FilteredAppElementRequest && isResourceRequest(aHttpRequest) && aHttpRequest.getParameter(PlatypusHttpRequestParams.TYPE) == null) {// pure resource request
                         String moduleId = ((FilteredAppElementRequest) aPlatypusRequest).getAppElementId();
                         if (moduleId != null && !moduleId.isEmpty()) {
                             String userName = getPrincipal(aHttpRequest).getName();

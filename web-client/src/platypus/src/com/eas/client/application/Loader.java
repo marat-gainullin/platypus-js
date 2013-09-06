@@ -54,11 +54,11 @@ public class Loader {
 	public static final String TYPE_JAVASCRIPT = "text/javascript";
 	protected static final com.google.gwt.dom.client.Document htmlDom = com.google.gwt.dom.client.Document.get();
 	protected AppClient client;
-	protected Set<String> touchedAppElements = new HashSet();
-	protected Set<String> loadedAppElements = new HashSet();
-	protected Map<String, String> appElementsErrors = new HashMap();
-	protected Map<String, ScriptElement> injectedScripts = new HashMap();
-	protected Set<LoadHandler> handlers = new HashSet();
+	protected Set<String> touchedAppElements = new HashSet<String>();
+	protected Set<String> loadedAppElements = new HashSet<String>();
+	protected Map<String, String> appElementsErrors = new HashMap<String, String>();
+	protected Map<String, ScriptElement> injectedScripts = new HashMap<String, ScriptElement>();
+	protected Set<LoadHandler> handlers = new HashSet<LoadHandler>();
 
 	public Loader(AppClient aClient) {
 		client = aClient;
@@ -94,11 +94,12 @@ public class Loader {
 	}
 
 	public Cancellable load(final Collection<String> aAppElementNames, final CancellableCallback onSuccess) throws Exception {
-		final Collection<Cancellable> loadingsStarted = new ArrayList();
+		final Collection<Cancellable> loadingsStarted = new ArrayList<Cancellable>();
 		List<String> appElementNames = new ArrayList<String>();
 		for (String appElementName : aAppElementNames) {
-			if (!isTouched(appElementName))
+			if (!isTouched(appElementName)){
 				appElementNames.add(appElementName);
+			}
 		}
 		final CancellableCallback loaded = new CumulativeCallbackAdapter(appElementNames.size() * 2) {
 
@@ -115,18 +116,31 @@ public class Loader {
 		};
 
 		for (final String appElementName : appElementNames) {
+			
+			final CancellableCallback fireLoaded = new CumulativeCallbackAdapter(2) {
+
+				@Override
+				protected void doWork() throws Exception {
+					fireLoaded(appElementName);
+				}
+
+				@Override
+				public void cancel() {
+				}
+			};
+			
 			loadingsStarted.add(client.getAppElement(appElementName, new DocumentCallbackAdapter() {
 
-				Set<Cancellable> loadings = new HashSet();
+				Set<Cancellable> loadings = new HashSet<Cancellable>();
 
 				@Override
 				protected void doWork(Document aDoc) throws Exception {
-					Set<String> dependencies = new HashSet();
-					Set<String> queryDependencies = new HashSet();
-					Set<String> serverModuleDependencies = new HashSet();
+					Set<String> dependencies = new HashSet<String>();
+					Set<String> queryDependencies = new HashSet<String>();
+					Set<String> serverModuleDependencies = new HashSet<String>();
 					if (aDoc != null)// There are some application elements
-									 // without xml-dom (plain scripts for
-									 // example)
+					                 // without xml-dom (plain scripts for
+					                 // example)
 					{
 						Element rootNode = aDoc.getDocumentElement();
 						NodeList docNodes = rootNode.getChildNodes();
@@ -160,7 +174,7 @@ public class Loader {
 							}
 						}
 					}
-					fireLoaded(appElementName);
+					fireLoaded.run();
 					if (!dependencies.isEmpty() || !serverModuleDependencies.isEmpty() || !queryDependencies.isEmpty()) {
 						int accumulate = 0;
 						if (!dependencies.isEmpty())
@@ -202,12 +216,13 @@ public class Loader {
 
 				@Override
 				protected void doWork(XMLHttpRequest aResponse) throws Exception {
-					// Erroneous dependencies and other erroneous application
-					// elements
-					// should be memorized as notifying about the error.
-					assert !loadedAppElements.contains(appElementName);
-					appElementsErrors.put(appElementName, aResponse.getStatusText());
 					Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, aResponse.getStatusText());
+					assert !loadedAppElements.contains(appElementName);
+					// Erroneous dependencies and other erroneous application
+					// elements should be memorized as notifying about the
+					// error.
+					if(!appElementsErrors.containsKey(appElementName))
+						appElementsErrors.put(appElementName, aResponse.getStatusText());
 					loaded.run();
 				}
 
@@ -220,23 +235,30 @@ public class Loader {
 			ScriptElement scriptTag = ScriptInjector.fromUrl(jsURL).setCallback(new Callback<Void, Exception>() {
 
 				@Override
-				public void onFailure(Exception reason) {
-					try {
-						Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, "Script ["+appElementName+"] is not loaded. Cause is: "+reason.getMessage());
-						//loaded.run();
-					} catch (Exception ex) {
-						Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, ex.getMessage());
-					}
-				}
-
-				@Override
 				public void onSuccess(Void result) {
 					try {
+						fireLoaded.run();
 						loaded.run();
 					} catch (Exception ex) {
 						Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, null, ex);
 					}
 				}
+				
+				@Override
+				public void onFailure(Exception reason) {
+					try {
+						Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, "Script [" + appElementName + "] is not loaded. Cause is: " + reason.getMessage());
+						assert !loadedAppElements.contains(appElementName);
+						// Erroneous dependencies and other erroneous application
+						// elements should be memorized as notifying about the
+						// error.
+						appElementsErrors.put(appElementName, reason.getMessage());
+						loaded.run();
+					} catch (Exception ex) {
+						Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, ex.getMessage());
+					}
+				}
+
 			}).setWindow(ScriptInjector.TOP_WINDOW).inject().cast();
 			scriptTag.addClassName(INJECTED_SCRIPT_CLASS_NAME);
 			injectedScripts.put(jsURL, scriptTag);
@@ -252,7 +274,7 @@ public class Loader {
 			if (!isTouched(appElementName))
 				appElementNames.add(appElementName);
 		}
-		final Collection<Cancellable> startLoadings = new ArrayList();
+		final Collection<Cancellable> startLoadings = new ArrayList<Cancellable>();
 		final CancellableCallback loaded = new CumulativeCallbackAdapter(appElementNames.size()) {
 
 			@Override
@@ -268,6 +290,7 @@ public class Loader {
 		};
 
 		for (final String appElementName : appElementNames) {
+			
 			startLoadings.add(client.createServerModule(appElementName, new DocumentCallbackAdapter() {
 
 				@Override
@@ -323,7 +346,7 @@ public class Loader {
 			if (!isTouched(appElementName))
 				appElementNames.add(appElementName);
 		}
-		final Collection<Cancellable> startLoadings = new ArrayList();
+		final Collection<Cancellable> startLoadings = new ArrayList<Cancellable>();
 		final CancellableCallback loaded = new CumulativeCallbackAdapter(appElementNames.size()) {
 
 			@Override
@@ -365,6 +388,10 @@ public class Loader {
 		return touchedAppElements.contains(aAppElementId);
 	}
 
+	public boolean isLoaded(Set<String> aAppElementsIds) {
+		return loadedAppElements.containsAll(aAppElementsIds);
+	}
+	
 	public boolean isLoaded(String aAppElementId) {
 		return loadedAppElements.contains(aAppElementId);
 	}
