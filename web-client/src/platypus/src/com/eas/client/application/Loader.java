@@ -93,7 +93,7 @@ public class Loader {
 		};
 	}
 
-	public Cancellable load(final Collection<String> aAppElementNames, final CancellableCallback onSuccess) throws Exception {
+	public Cancellable load(final Collection<String> aAppElementNames, final CancellableCallback onEnd) throws Exception {
 		final Collection<Cancellable> loadingsStarted = new ArrayList<Cancellable>();
 		List<String> appElementNames = new ArrayList<String>();
 		for (String appElementName : aAppElementNames) {
@@ -105,7 +105,7 @@ public class Loader {
 
 			@Override
 			protected void doWork() throws Exception {
-				onSuccess.run();
+				onEnd.run();
 			}
 
 			@Override
@@ -268,7 +268,7 @@ public class Loader {
 		return loaded;
 	}
 
-	private Cancellable loadServerModules(Collection<String> aAppElementNames, final CancellableCallback onSuccess) throws Exception {
+	private Cancellable loadServerModules(Collection<String> aAppElementNames, final CancellableCallback onEnd) throws Exception {
 		List<String> appElementNames = new ArrayList<String>();
 		for (String appElementName : aAppElementNames) {
 			if (!isTouched(appElementName))
@@ -279,7 +279,7 @@ public class Loader {
 
 			@Override
 			protected void doWork() throws Exception {
-				onSuccess.run();
+				onEnd.run();
 			}
 
 			@Override
