@@ -158,7 +158,7 @@ public class HttpScriptContext extends ScriptableObject {
             if (Charset.isSupported(encoding)) {
                 try (InputStream is = httpRequest.getInputStream()) {
                     byte[] data = BinaryUtils.readStream(is, -1);
-                    return new String(data, httpRequest.getCharacterEncoding());
+                    return new String(data, encoding);
                 }
             } else {
                 throw new IOException(String.format("Character encoding %s is not supported.", encoding));
