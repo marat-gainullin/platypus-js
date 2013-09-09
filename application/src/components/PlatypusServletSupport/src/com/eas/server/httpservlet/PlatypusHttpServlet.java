@@ -378,14 +378,14 @@ public class PlatypusHttpServlet extends HttpServlet {
             }
         }
         Request rq = PlatypusRequestsFactory.create(IDGenerator.genID(), rqType);
+        if (rq == null) {
+            Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, String.format(UNKNOWN_REQUEST_MSG, rqType));
+            throw new Exception(REQUEST_NOT_CORRECT_MSG + " -3- ");
+        }
         PlatypusRequestHttpReader reader = new PlatypusRequestHttpReader(serverCore, rq.getID(), aRequest, extractURI(aRequest));
         rq.accept(reader);
         if (rq instanceof AppElementRequest && !isJ2SERequest(aRequest)) {
             rq = new FilteredAppElementRequest(((AppElementRequest) rq).getAppElementId());
-        }
-        if (rq == null) {
-            Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, String.format(UNKNOWN_REQUEST_MSG, rqType));
-            throw new Exception(REQUEST_NOT_CORRECT_MSG + " -3- ");
         }
         return rq;
     }
