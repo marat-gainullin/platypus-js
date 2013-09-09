@@ -94,7 +94,6 @@ public class HttpScriptContext extends ScriptableObject {
         public static Request getInstance(Scriptable scope, HttpServletRequest aHttpRequest) {
             Request r = new Request();
             r.httpRequest = aHttpRequest;
-            r.httpRequest = aHttpRequest;
             r.defineProperty(AUTH_TYPE_PROP_NAME, HttpScriptContext.Request.class, READONLY);
             r.defineProperty(CHARACTER_ENCODING_PROP_NAME, HttpScriptContext.Request.class, READONLY);
             r.defineProperty(CONTENT_LENGTH_PROP_NAME, HttpScriptContext.Request.class, READONLY);

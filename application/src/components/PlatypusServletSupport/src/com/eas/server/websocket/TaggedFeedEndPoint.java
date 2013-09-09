@@ -38,6 +38,10 @@ public class TaggedFeedEndPoint {
         }
     }
 
+    public TaggedFeedEndPoint(){
+        super();
+    }
+    
     @OnMessage
     public void addPeer(Session aPeer, String aData) {
         synchronized (peersByTag) {
