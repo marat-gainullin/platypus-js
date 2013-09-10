@@ -58,6 +58,7 @@ public class Updater {
                     }
                     case UpdaterConstants.COMMAND_DO_UPDATE: {
                         upd = new UpdProgress();
+                        upd.setTitle(res.getString("title"));
                         upd.getCaption().setText(res.getString("caption"));
                         au.setUpdVis(upd);
                         au.doUpdateEx();
