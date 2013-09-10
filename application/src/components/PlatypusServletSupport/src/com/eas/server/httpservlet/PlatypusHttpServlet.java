@@ -85,12 +85,17 @@ public class PlatypusHttpServlet extends HttpServlet {
             super.init(config);
             // TODO: remove loggers configuration code to be able to use standard way to cofigure
             //java.util.logging package through command-line switches ( -Dxxx ) or configuration file.
-            Handler consoleHandler = new ConsoleHandler();
-            consoleHandler.setFormatter(new PlatypusFormatter());
-            Logger logger = Logger.getLogger(Client.APPLICATION_LOGGER_NAME);
-            logger.addHandler(consoleHandler);
-            logger.setUseParentHandlers(false);
-            // end of logging configuration code
+            /*
+             Handler consoleHandler = new ConsoleHandler();
+             consoleHandler.setFormatter(new PlatypusFormatter());
+             Logger logger = Logger.getLogger(Client.APPLICATION_LOGGER_NAME);
+             logger.addHandler(consoleHandler);
+             logger.setUseParentHandlers(false);
+             // end of logging configuration code
+             */
+            for (Handler h : Logger.getAnonymousLogger().getHandlers()) {
+                h.setFormatter(new PlatypusFormatter(Client.APPLICATION_LOGGER_NAME, h.getFormatter()));
+            }
             ServerConfig scp = ServerConfig.parse(config);
             serverCore = PlatypusServerCore.getInstance(scp.getDbSettings(), scp.getTasks(), scp.getAppElementId());
         } catch (Exception ex) {
@@ -413,7 +418,7 @@ public class PlatypusHttpServlet extends HttpServlet {
             assert isApiRequest(aHttpRequest) || isResourceRequest(aHttpRequest) : "Unknown request uri. Requests uri should be /api or /resources";
             if (aPlatypusResponse instanceof ErrorResponse) {
                 ErrorResponse er = (ErrorResponse) aPlatypusResponse;
-                if (er.isAccessControl()) {                    
+                if (er.isAccessControl()) {
                     if (aPlatypusRequest instanceof FilteredAppElementRequest && isResourceRequest(aHttpRequest) && aHttpRequest.getParameter(PlatypusHttpRequestParams.TYPE) == null) {// pure resource request
                         String moduleId = ((FilteredAppElementRequest) aPlatypusRequest).getAppElementId();
                         if (moduleId != null && !moduleId.isEmpty()) {

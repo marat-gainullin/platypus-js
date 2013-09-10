@@ -10,7 +10,6 @@ import com.eas.client.ClientConstants;
 import com.eas.client.DatabasesClient;
 import com.eas.client.scripts.ScriptRunner;
 import com.eas.client.settings.DbConnectionSettings;
-import com.eas.client.settings.SettingsConstants;
 import com.eas.debugger.jmx.server.Breakpoints;
 import com.eas.debugger.jmx.server.Debugger;
 import com.eas.debugger.jmx.server.DebuggerMBean;
@@ -90,7 +89,7 @@ public class ServerMain {
     public static final String BAD_APPLICATION_PATH_MSG = "Application path must follow applicationpath (ap) parameter";
     public static final String APPLICATION_PATH_NOT_EXISTS_MSG = "Application path does not exist.";
     public static final String APPLICATION_PATH_NOT_DIRECTORY_MSG = "Application path must point to a directory.";
-    //
+    /*
     private static Logger[] loggers = {
         Logger.getLogger("com.eas"),
         Logger.getLogger("sun.reflect"),
@@ -98,8 +97,9 @@ public class ServerMain {
         Logger.getLogger("org.mozilla.javascript"),
         Logger.getLogger(Client.APPLICATION_LOGGER_NAME)
     };
-    private static String logFileNamePattern = null;
+    private static String logFileNamePattern;
     private static Level logsLevel = Level.OFF;
+    */ 
     private static String dbUrl;
     private static String dbSchema;
     private static String dbUsername;
@@ -130,7 +130,7 @@ public class ServerMain {
             System.exit(1);
         }
     }
-
+/*
     private static void setupLoggers(Level aLevel, String aLogFileName) throws Exception {
         for (Logger logger : loggers) {
             logger.setLevel(aLevel);
@@ -157,7 +157,7 @@ public class ServerMain {
             }
         }
     }
-
+*/
     private static void parseArgs(String[] args, Set<String> aTasksModules) throws Exception {
         for (int i = 0; i < args.length; i++) {
             if ((CMD_SWITCHS_PREFIX + APP_DB_URL_CONF_PARAM).equalsIgnoreCase(args[i])) {
@@ -239,12 +239,6 @@ public class ServerMain {
                 } else {
                     printHelp(PROTOCOLS_WITHOUT_VALUE_MSG);
                 }
-            } else if ((CMD_SWITCHS_PREFIX + LOG_CONF_PARAM).equalsIgnoreCase(args[i])) {
-                if (i + 1 < args.length) {
-                    logFileNamePattern = args[i + 1];
-                } else {
-                    printHelp(LOG_FILE_WITHOUT_VALUE_MSG);
-                }
             } else if ((CMD_SWITCHS_PREFIX + APP_ELEMENT_CONF_PARAM).equalsIgnoreCase(args[i])) {
                 if (i + 1 < args.length) {
                     appElement = args[i + 1];
@@ -266,16 +260,26 @@ public class ServerMain {
                 } else {
                     printHelp(BAD_APPLICATION_PATH_MSG);
                 }
+              
+                /*
+            } else if ((CMD_SWITCHS_PREFIX + LOG_CONF_PARAM).equalsIgnoreCase(args[i])) {
+                if (i + 1 < args.length) {
+                    logFileNamePattern = args[i + 1];
+                } else {
+                    printHelp(LOG_FILE_WITHOUT_VALUE_MSG);
+                }
             } else if ((CMD_SWITCHS_PREFIX + LOGLEVEL_CONF_PARAM).equalsIgnoreCase(args[i])) {
                 if (i + 1 < args.length) {
                     logsLevel = Level.parse(args[i + 1]);
                 } else {
                     printHelp(LOG_LEVEL_WITHOUT_VALUE_MSG);
                 }
+                */ 
             }
         }
     }
-
+    
+/*
     private static void checkLogsDirectory() {
         String path = System.getProperty(ClientConstants.USER_HOME_PROP_NAME);
         if (path != null) {
@@ -285,6 +289,7 @@ public class ServerMain {
             }
         }
     }
+    */ 
 
     protected static void registerMBean(String aName, Object aBean) throws Exception {
         // Get the platform MBeanServer
@@ -299,7 +304,7 @@ public class ServerMain {
      */
     public static void main(String[] args) throws IOException, Exception {
         checkUserHome();
-        checkLogsDirectory();
+        //checkLogsDirectory();
         // tasks from command-line
         Set<String> tasks = new HashSet<>();
         parseArgs(args, tasks);
@@ -324,15 +329,17 @@ public class ServerMain {
         settings.setMaxConnections(maxDbConnections);
         settings.setMaxStatements(maxDbStatements);
         settings.setResourceTimeout(resourceTimeout);
-        setupLoggers(logsLevel, expandLogFileName(logFileNamePattern));
+        for(Handler h : Logger.getAnonymousLogger().getHandlers()){
+            h.setFormatter(new PlatypusFormatter(Client.APPLICATION_LOGGER_NAME, h.getFormatter()));
+        }
+        //setupLoggers(logsLevel, expandLogFileName(logFileNamePattern));
         SSLContext ctx = createSSLContext();
         if (appPath != null) {
             settings.setApplicationPath(appPath);
         }
         DatabasesClient appDbClient = new DatabasesClient(settings);
-        Debugger debugger = null;
         if (System.getProperty(ScriptRunner.DEBUG_PROPERTY) != null) {
-            debugger = Debugger.initialize(false);
+            Debugger debugger = Debugger.initialize(false);
             registerMBean(DebuggerMBean.DEBUGGER_MBEAN_NAME, debugger);
             registerMBean(Breakpoints.BREAKPOINTS_MBEAN_NAME, Breakpoints.getInstance());
             // Apply debugging facility
@@ -346,6 +353,7 @@ public class ServerMain {
         server.start();
     }
 
+    /*
     private static String expandLogFileName(String logFileName) throws FileNotFoundException {
         if (logFileName != null) {
             String path = System.getProperty(ClientConstants.USER_HOME_PROP_NAME);
@@ -355,6 +363,7 @@ public class ServerMain {
         }
         return null;
     }
+    */ 
 
     private static void printHelp(String string) {
         System.err.println(string);

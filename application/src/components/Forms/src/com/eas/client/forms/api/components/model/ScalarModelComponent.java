@@ -133,6 +133,11 @@ public abstract class ScalarModelComponent<D extends DbControlPanel> extends Com
         delegate.repaint();
     }
 
+    public void redraw(){
+        delegate.revalidate();
+        delegate.repaint();
+    }
+    
     protected ModelElementRef fieldToModelRef(Field aField) throws Exception {
         if (aField != null) {
             RowsetHostObject<?> rowsetHost = ScriptRunnerPrototype.lookupEntity((Scriptable) aField.getTag());

@@ -17,19 +17,16 @@ import com.eas.client.reports.ServerReportProxyPrototype;
 import com.eas.client.scripts.*;
 import com.eas.client.settings.DbConnectionSettings;
 import com.eas.client.settings.EasSettings;
-import com.eas.client.settings.SettingsConstants;
 import com.eas.client.threetier.PlatypusClient;
 import com.eas.debugger.jmx.server.Breakpoints;
 import com.eas.debugger.jmx.server.Debugger;
 import com.eas.debugger.jmx.server.DebuggerMBean;
 import com.eas.debugger.jmx.server.Settings;
 import com.eas.script.ScriptUtils;
-import com.eas.util.StringUtils;
 import com.eas.util.logging.PlatypusFormatter;
 import java.awt.EventQueue;
 import java.beans.ExceptionListener;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.lang.management.ManagementFactory;
 import java.util.Locale;
 import java.util.logging.*;
@@ -117,6 +114,7 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
         }
     }
 
+    /*
     public static String expandLogFileName(String logFileName) throws FileNotFoundException {
         if (logFileName != null) {
             String path = calcLogsDirectory();
@@ -126,6 +124,7 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
         }
         return null;
     }
+    */ 
 
     public static PlatypusClientApplication getInstance() {
         assert app != null;
@@ -140,7 +139,7 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
         super();
         // turn off bold fonts
         UIManager.put("swing.boldMetal", Boolean.FALSE);
-        checkLogsDirectory();
+        //checkLogsDirectory();
         parseArgs(args);
         System.setProperty("java.awt.Window.locationByPlatform", "true");
     }
@@ -284,7 +283,7 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
         }
         return false;
     }
-
+/*
     private static String calcLogsDirectory() {
         return StringUtils.join(File.separator, System.getProperty(ClientConstants.USER_HOME_PROP_NAME), ClientConstants.USER_HOME_PLATYPUS_DIRECTORY_NAME, LOGS_PATH);
     }
@@ -298,7 +297,7 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
             }
         }
     }
-
+*/
     public Client getClient() {
         return client;
     }
@@ -325,8 +324,8 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
     }
 
     private void parseArgs(String[] args) throws Exception {
-        String logFileName = null;
-        String logLevel = Preferences.userRoot().node(ClientFactory.SETTINGS_NODE).get("logLevel", "WARNING");
+        //String logFileName = null;
+        //String logLevel = Preferences.userRoot().node(ClientFactory.SETTINGS_NODE).get("logLevel", "WARNING");
         int i = 0;
         while (i < args.length) {
             if ((CMD_SWITCHS_PREFIX + URL_CMD_SWITCH).equalsIgnoreCase(args[i])) {
@@ -381,6 +380,7 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
                 } else {
                     throw new IllegalArgumentException("syntax: -laf <LaF class name>");
                 }
+            /*    
             } else if ((CMD_SWITCHS_PREFIX + LOGLEVEL_CMD_SWITCH).equalsIgnoreCase(args[i])) {
                 if (i < args.length - 1) {
                     logLevel = args[i + 1];
@@ -395,6 +395,7 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
                 } else {
                     throw new IllegalArgumentException("syntax: -log <log file base name>");
                 }
+            */ 
             } else if ((CMD_SWITCHS_PREFIX + APPELEMENT_CMD_SWITCH).equalsIgnoreCase(args[i])) {
                 if (i < args.length - 1) {
                     try {
@@ -429,8 +430,12 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
                 throw new IllegalArgumentException("unknown argument: " + args[i]);
             }
         }
-        setupLoggers(Level.parse(logLevel), expandLogFileName(logFileName));
+        for(Handler h : Logger.getAnonymousLogger().getHandlers()){
+            h.setFormatter(new PlatypusFormatter(Client.APPLICATION_LOGGER_NAME, h.getFormatter()));
+        }
+        //setupLoggers(Level.parse(logLevel), expandLogFileName(logFileName));
     }
+    /*
     private static Logger[] loggers = {
         Logger.getLogger("com.eas"),
         Logger.getLogger("sun.reflect"),
@@ -475,10 +480,10 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
             }
         }
     }
-
+*/
     protected void run() throws Exception {
         checkUserHome();
-        checkLogsDirectory();
+//        checkLogsDirectory();
         if (System.getProperty(ScriptRunner.DEBUG_PROPERTY) != null) {
             Debugger debugger = Debugger.initialize(needInitialBreak);
             registerMBean(DebuggerMBean.DEBUGGER_MBEAN_NAME, debugger);
