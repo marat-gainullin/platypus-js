@@ -31,6 +31,7 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.logging.client.ConsoleLogHandler;
+import com.google.gwt.logging.client.FirebugLogHandler;
 import com.google.gwt.logging.client.LogConfiguration;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.sencha.gxt.core.client.dom.XElement;
@@ -52,7 +53,7 @@ public class Application {
 		@Override
 		public void started(String anItemName) {
 			final String message = "Loading... " + anItemName;
-			Logger.getLogger(Application.class.getName()).log(Level.INFO, message);
+			platypusApplicationLogger.log(Level.INFO, message);
 			xDiv.unmask();
 			xDiv.mask(message);
 		}
@@ -60,7 +61,7 @@ public class Application {
 		@Override
 		public void loaded(String anItemName) {
 			final String message = "Loaded " + anItemName;
-			Logger.getLogger(Application.class.getName()).log(Level.INFO, message);
+			platypusApplicationLogger.log(Level.INFO, message);
 			xDiv.unmask();
 			xDiv.mask(message);
 		}
@@ -961,14 +962,12 @@ public class Application {
 
 	public static Cancellable run(AppClient client, Map<String, Element> start) throws Exception {
 		if (LogConfiguration.loggingIsEnabled()) {
-			platypusApplicationLogger = Logger.getLogger("Application");
-			Formatter f = new PlatypusLogFormatter();
-			platypusApplicationLogger.addHandler(new ConsoleLogHandler());
-			Handler[] handlers = platypusApplicationLogger.getHandlers();
+			platypusApplicationLogger = Logger.getLogger("platypusApplication");
+			Formatter f = new PlatypusLogFormatter(true);
+			Handler[] handlers = Logger.getLogger("").getHandlers();
 			for (Handler h : handlers) {
 				h.setFormatter(f);
 			}
-			platypusApplicationLogger.setUseParentHandlers(false);
 		}
 		JSControls.initControls();
 		JSContainers.initContainers();
