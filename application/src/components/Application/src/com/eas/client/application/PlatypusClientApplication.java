@@ -51,7 +51,7 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
     // command line switches
     public static final String LAF_CMD_SWITCH = "laf";
     public static final String LOGLEVEL_CMD_SWITCH = "loglevel";
-    public static final String LOG_CMD_SWITCH = "log";
+//    public static final String LOG_CMD_SWITCH = "log";
     public static final String MODULES_SCRIPT_NAME = "Modules";
     public static final String RUSSIAN_LOCALE_CMD_SWITCH = "russian";
     public static final String APPELEMENT_CMD_SWITCH = "appElement";
@@ -92,6 +92,7 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
     protected String appPath;
     protected String appElementId;
     protected boolean needInitialBreak;
+    protected Level logLevel = Level.INFO;
     // auto login
     protected String url;
     protected String dbSchema;
@@ -380,14 +381,14 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
                 } else {
                     throw new IllegalArgumentException("syntax: -laf <LaF class name>");
                 }
-            /*    
             } else if ((CMD_SWITCHS_PREFIX + LOGLEVEL_CMD_SWITCH).equalsIgnoreCase(args[i])) {
                 if (i < args.length - 1) {
-                    logLevel = args[i + 1];
+                    logLevel = Level.parse(args[i + 1]);
                     i += 2;
                 } else {
                     throw new IllegalArgumentException("syntax: -loglevel <log level>");
                 }
+            /*    
             } else if ((CMD_SWITCHS_PREFIX + LOG_CMD_SWITCH).equalsIgnoreCase(args[i])) {
                 if (i < args.length - 1) {
                     logFileName = args[i + 1];
@@ -432,6 +433,7 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
         }
         for(Handler h : Logger.getAnonymousLogger().getHandlers()){
             h.setFormatter(new PlatypusFormatter(Client.APPLICATION_LOGGER_NAME, h.getFormatter()));
+            h.setLevel(logLevel);
         }
         //setupLoggers(Level.parse(logLevel), expandLogFileName(logFileName));
     }

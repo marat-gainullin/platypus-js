@@ -55,7 +55,7 @@ public class ServerMain {
     public static final String SESSION_IDLE_TIMEOUT_CONF_PARAM = "sessionidletimeout";
     public static final String SESSION_IDLE_CHECK_INTERVAL_CONF_PARAM = "sessionidlecheckinterval";
     public static final String LOGLEVEL_CONF_PARAM = "loglevel";
-    public static final String LOG_CONF_PARAM = "log";
+    //public static final String LOG_CONF_PARAM = "log";
     public static final String APP_ELEMENT_CONF_PARAM = "appelement";
     public static final String APP_PATH_PARAM = "applicationpath";
     public static final String APP_PATH_PARAM1 = "ap";
@@ -98,8 +98,8 @@ public class ServerMain {
         Logger.getLogger(Client.APPLICATION_LOGGER_NAME)
     };
     private static String logFileNamePattern;
-    private static Level logsLevel = Level.OFF;
     */ 
+    private static Level logLevel = Level.INFO;
     private static String dbUrl;
     private static String dbSchema;
     private static String dbUsername;
@@ -260,19 +260,18 @@ public class ServerMain {
                 } else {
                     printHelp(BAD_APPLICATION_PATH_MSG);
                 }
-              
+            } else if ((CMD_SWITCHS_PREFIX + LOGLEVEL_CONF_PARAM).equalsIgnoreCase(args[i])) {
+                if (i + 1 < args.length) {
+                    logLevel = Level.parse(args[i + 1]);
+                } else {
+                    printHelp(LOG_LEVEL_WITHOUT_VALUE_MSG);
+                }
                 /*
             } else if ((CMD_SWITCHS_PREFIX + LOG_CONF_PARAM).equalsIgnoreCase(args[i])) {
                 if (i + 1 < args.length) {
                     logFileNamePattern = args[i + 1];
                 } else {
                     printHelp(LOG_FILE_WITHOUT_VALUE_MSG);
-                }
-            } else if ((CMD_SWITCHS_PREFIX + LOGLEVEL_CONF_PARAM).equalsIgnoreCase(args[i])) {
-                if (i + 1 < args.length) {
-                    logsLevel = Level.parse(args[i + 1]);
-                } else {
-                    printHelp(LOG_LEVEL_WITHOUT_VALUE_MSG);
                 }
                 */ 
             }
@@ -331,6 +330,7 @@ public class ServerMain {
         settings.setResourceTimeout(resourceTimeout);
         for(Handler h : Logger.getAnonymousLogger().getHandlers()){
             h.setFormatter(new PlatypusFormatter(Client.APPLICATION_LOGGER_NAME, h.getFormatter()));
+            h.setLevel(logLevel);
         }
         //setupLoggers(logsLevel, expandLogFileName(logFileNamePattern));
         SSLContext ctx = createSSLContext();
