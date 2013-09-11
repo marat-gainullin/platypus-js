@@ -85,7 +85,9 @@ public class MaskingTreeGrid<M> extends TreeGrid<M> {
 		}
 	}
 	
+	@Override
 	protected void onDataChange(M parent) {
+		super.onDataChange(parent);
 		getStore().fireEvent(new StoreDataChangeEvent<M>());
 	};
 }
