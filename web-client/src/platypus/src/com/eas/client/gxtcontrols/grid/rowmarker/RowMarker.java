@@ -7,18 +7,12 @@ import com.eas.client.beans.PropertyChangeEvent;
 import com.eas.client.beans.PropertyChangeListener;
 import com.eas.client.model.Entity;
 import com.google.gwt.cell.client.AbstractCell;
-import com.google.gwt.cell.client.Cell.Context;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.safecss.shared.SafeStyles;
-import com.google.gwt.safecss.shared.SafeStylesBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.safehtml.shared.SafeUri;
 import com.sencha.gxt.core.client.IdentityValueProvider;
 import com.sencha.gxt.core.client.dom.XElement;
-import com.sencha.gxt.core.client.util.DelayedTask;
 import com.sencha.gxt.data.shared.ModelKeyProvider;
 import com.sencha.gxt.widget.core.client.ComponentPlugin;
 import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
@@ -86,6 +80,7 @@ public class RowMarker extends ColumnConfig<Row, Row> implements ComponentPlugin
 		setSortable(false);
 		setResizable(false);
 		setFixed(true);
+		setHideable(false);
 		setMenuDisabled(true);
 
 		setCell(new AbstractCell<Row>() {
