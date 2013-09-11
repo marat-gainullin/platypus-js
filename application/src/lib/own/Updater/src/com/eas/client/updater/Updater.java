@@ -40,7 +40,7 @@ public class Updater {
             }
 
             String userHome = System.getProperty("user.home");
-            String pathHome = FileUpdater.fixFileSeparatorChar(userHome + "\\.platypus\\logs\\Updater_log.log");
+            String pathHome = FileUpdater.fixFileSeparatorChar(userHome + "/.platypus/logs/Updater_log.log");
             FileHandler h = new FileHandler(pathHome);
             h.setFormatter(new SimpleFormatter());
             log.addHandler(h);

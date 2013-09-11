@@ -2,7 +2,6 @@ package com.eas.server.httpservlet;
 
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.utils.IDGenerator;
-import com.eas.client.Client;
 import com.eas.client.ClientConstants;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.metadata.ApplicationElement;
@@ -26,12 +25,9 @@ import com.eas.server.httpservlet.serial.query.QueryJsonWriter;
 import com.eas.client.threetier.RowsetJsonConstants;
 import com.eas.client.threetier.RowsetJsonWriter;
 import com.eas.util.StringUtils;
-import com.eas.util.logging.PlatypusFormatter;
 import java.io.*;
 import java.net.URLConnection;
 import java.util.Set;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -93,9 +89,6 @@ public class PlatypusHttpServlet extends HttpServlet {
              logger.setUseParentHandlers(false);
              // end of logging configuration code
              */
-            for (Handler h : Logger.getAnonymousLogger().getHandlers()) {
-                h.setFormatter(new PlatypusFormatter(Client.APPLICATION_LOGGER_NAME, h.getFormatter()));
-            }
             ServerConfig scp = ServerConfig.parse(config);
             serverCore = PlatypusServerCore.getInstance(scp.getDbSettings(), scp.getTasks(), scp.getAppElementId());
         } catch (Exception ex) {

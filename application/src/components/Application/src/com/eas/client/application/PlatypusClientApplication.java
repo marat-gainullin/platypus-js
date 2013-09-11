@@ -23,7 +23,6 @@ import com.eas.debugger.jmx.server.Debugger;
 import com.eas.debugger.jmx.server.DebuggerMBean;
 import com.eas.debugger.jmx.server.Settings;
 import com.eas.script.ScriptUtils;
-import com.eas.util.logging.PlatypusFormatter;
 import java.awt.EventQueue;
 import java.beans.ExceptionListener;
 import java.io.File;
@@ -430,9 +429,6 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
             } else {
                 throw new IllegalArgumentException("unknown argument: " + args[i]);
             }
-        }
-        for (Handler h : Logger.getAnonymousLogger().getHandlers()) {
-            h.setFormatter(new PlatypusFormatter(Client.APPLICATION_LOGGER_NAME, h.getFormatter()));
         }
         //setupLoggers(Level.parse(logLevel), expandLogFileName(logFileName));
     }

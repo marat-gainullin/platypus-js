@@ -5,7 +5,6 @@
 package com.eas.server;
 
 import com.bearsoft.rowset.resourcepool.BearResourcePool;
-import com.eas.client.Client;
 import com.eas.client.ClientConstants;
 import com.eas.client.DatabasesClient;
 import com.eas.client.scripts.ScriptRunner;
@@ -16,7 +15,6 @@ import com.eas.debugger.jmx.server.DebuggerMBean;
 import com.eas.debugger.jmx.server.Settings;
 import com.eas.script.ScriptUtils;
 import com.eas.util.StringUtils;
-import com.eas.util.logging.PlatypusFormatter;
 import java.io.*;
 import java.lang.management.ManagementFactory;
 import java.net.InetSocketAddress;
@@ -27,7 +25,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.*;
 import java.util.prefs.Preferences;
 import javax.management.ObjectName;
 import javax.net.ssl.*;
@@ -328,9 +325,6 @@ public class ServerMain {
         settings.setMaxConnections(maxDbConnections);
         settings.setMaxStatements(maxDbStatements);
         settings.setResourceTimeout(resourceTimeout);
-        for(Handler h : Logger.getAnonymousLogger().getHandlers()){
-            h.setFormatter(new PlatypusFormatter(Client.APPLICATION_LOGGER_NAME, h.getFormatter()));
-        }
         //setupLoggers(logsLevel, expandLogFileName(logFileNamePattern));
         SSLContext ctx = createSSLContext();
         if (appPath != null) {

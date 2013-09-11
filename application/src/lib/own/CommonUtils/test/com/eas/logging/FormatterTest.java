@@ -22,7 +22,7 @@ public class FormatterTest {
 
     @Before
     public void setup() {
-        PlatypusFormatter formatter = new PlatypusFormatter(TEST_LOGGER_NAME, null);
+        PlatypusFormatter formatter = new PlatypusFormatter();
         Handler h = new ConsoleHandler();
         h.setFormatter(formatter);
         Logger l = Logger.getLogger(TEST_LOGGER_NAME);
