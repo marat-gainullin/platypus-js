@@ -179,11 +179,13 @@ public final class PlatypusServerInstance implements Server, ServerInstanceImple
                     project.getSettings().getRunClientOptions()));
         }
         //set default log level if not set explicitly
+        /* TODO: Take into account, that loglevel and other logging options are configured as system properties
         if (!ProjectRunner.isSetByOption(ServerMain.LOGLEVEL_CONF_PARAM, project.getSettings().getRunClientOptions())) {
             processBuilder = processBuilder.addArgument(ProjectRunner.OPTION_PREFIX + ServerMain.LOGLEVEL_CONF_PARAM);
             processBuilder = processBuilder.addArgument(project.getSettings().getServerLogLevel().getName());
             io.getOut().println(String.format(NbBundle.getMessage(PlatypusServerInstance.class, "MSG_Logging_Level"), project.getSettings().getServerLogLevel().getName()));//NOI18N
         }
+        */ 
         ExecutionService service = ExecutionService.newService(processBuilder, descriptor, "Platypus Server");
         Future<Integer> runTask = service.run();
         serverRunTask = runTask;

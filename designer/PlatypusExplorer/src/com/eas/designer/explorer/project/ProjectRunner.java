@@ -241,11 +241,13 @@ public class ProjectRunner {
                 io.getOut().println(String.format(NbBundle.getMessage(ProjectRunner.class, "MSG_Run_Options"), pps.getRunClientOptions()));//NOI18N
             }
             //set default log level if not set explicitly
+            /* TODO: Take into account, that loglevel and other logging options are configured as system properties
             if (!isSetByOption(PlatypusClientApplication.LOGLEVEL_CMD_SWITCH, pps.getRunClientOptions())) {
                 processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.LOGLEVEL_CMD_SWITCH);
                 processBuilder = processBuilder.addArgument(pps.getClientLogLevel().getName());
                 io.getOut().println(String.format(NbBundle.getMessage(ProjectRunner.class, "MSG_Logging_Level"), pps.getClientLogLevel().getName()));//NOI18N
             }
+            */ 
             if (debug) {
                 processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.STOP_BEFORE_RUN_CMD_SWITCH);
             }
