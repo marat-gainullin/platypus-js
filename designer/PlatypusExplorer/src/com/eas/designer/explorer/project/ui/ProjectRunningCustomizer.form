@@ -147,8 +147,8 @@
                           <Group type="102" alignment="0" attributes="0">
                               <Component id="lblClientDebugPort" min="-2" max="-2" attributes="0"/>
                               <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                              <Component id="spClientDebugPort" min="-2" pref="80" max="-2" attributes="0"/>
-                              <EmptySpace max="32767" attributes="0"/>
+                              <Component id="spClientDebugPort" min="-2" pref="90" max="-2" attributes="0"/>
+                              <EmptySpace min="0" pref="403" max="32767" attributes="0"/>
                           </Group>
                           <Group type="102" alignment="0" attributes="0">
                               <Group type="103" groupAlignment="0" attributes="0">
@@ -161,23 +161,21 @@
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
-                                  <Group type="102" attributes="0">
+                                  <Component id="cbClientLogLevel" max="32767" attributes="0"/>
+                                  <Group type="102" alignment="0" attributes="0">
+                                      <EmptySpace min="-2" pref="3" max="-2" attributes="0"/>
                                       <Group type="103" groupAlignment="0" attributes="0">
+                                          <Component id="txtClientUrl" alignment="1" max="32767" attributes="0"/>
+                                          <Component id="txtUserName" alignment="1" max="32767" attributes="0"/>
+                                          <Component id="txtPassword" alignment="1" max="32767" attributes="0"/>
+                                          <Component id="txtClientOptions" alignment="1" max="32767" attributes="0"/>
                                           <Component id="txtClientVmOptions" max="32767" attributes="0"/>
-                                          <Component id="txtClientUrl" alignment="0" max="32767" attributes="0"/>
-                                          <Component id="txtUserName" alignment="0" max="32767" attributes="0"/>
-                                          <Component id="txtPassword" alignment="0" pref="484" max="32767" attributes="0"/>
-                                          <Component id="txtClientOptions" alignment="0" max="32767" attributes="0"/>
                                       </Group>
-                                      <EmptySpace min="-2" pref="18" max="-2" attributes="0"/>
-                                  </Group>
-                                  <Group type="102" attributes="0">
-                                      <Component id="cbClientLogLevel" min="-2" pref="305" max="-2" attributes="0"/>
-                                      <EmptySpace max="32767" attributes="0"/>
                                   </Group>
                               </Group>
                           </Group>
                       </Group>
+                      <EmptySpace max="-2" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -187,7 +185,7 @@
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
                           <Component id="lblClientUrl" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="txtClientUrl" alignment="3" min="-2" pref="27" max="-2" attributes="0"/>
+                          <Component id="txtClientUrl" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
@@ -211,15 +209,15 @@
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
+                          <Component id="lblClientDebugPort" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="spClientDebugPort" alignment="3" min="-2" pref="21" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace min="-2" pref="14" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="3" attributes="0">
                           <Component id="cbClientLogLevel" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="lblClientLogLevel" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Group type="103" groupAlignment="3" attributes="0">
-                          <Component id="lblClientDebugPort" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="spClientDebugPort" alignment="3" min="-2" pref="28" max="-2" attributes="0"/>
-                      </Group>
-                      <EmptySpace pref="46" max="32767" attributes="0"/>
+                      <EmptySpace pref="70" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -344,39 +342,33 @@
           <Layout>
             <DimensionLayout dim="0">
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Group type="102" attributes="0">
-                      <EmptySpace max="-2" attributes="0"/>
+                  <Group type="102" alignment="0" attributes="0">
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Group type="102" attributes="0">
+                          <Group type="102" alignment="0" attributes="0">
+                              <EmptySpace max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
                                   <Component id="lblServerPort" alignment="0" min="-2" max="-2" attributes="0"/>
                                   <Component id="lblServerOptions" alignment="0" min="-2" max="-2" attributes="0"/>
                                   <Component id="lblServerVmOptions" alignment="0" min="-2" max="-2" attributes="0"/>
-                              </Group>
-                              <EmptySpace max="-2" attributes="0"/>
-                              <Group type="103" groupAlignment="0" attributes="0">
-                                  <Component id="txtServerVmOptions" max="32767" attributes="0"/>
-                                  <Component id="txtServerOptions" alignment="1" pref="496" max="32767" attributes="0"/>
-                                  <Group type="102" alignment="0" attributes="0">
-                                      <Component id="spServerPort" min="-2" pref="80" max="-2" attributes="0"/>
-                                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
-                                  </Group>
+                                  <Component id="lblServerDebugPort" alignment="0" min="-2" max="-2" attributes="0"/>
                               </Group>
                           </Group>
+                          <Group type="102" alignment="0" attributes="0">
+                              <EmptySpace min="10" pref="10" max="-2" attributes="0"/>
+                              <Component id="lblServerLogLevel" min="-2" max="-2" attributes="0"/>
+                          </Group>
+                      </Group>
+                      <EmptySpace type="separate" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="txtServerVmOptions" alignment="0" max="32767" attributes="0"/>
+                          <Component id="txtServerOptions" alignment="1" max="32767" attributes="0"/>
                           <Group type="102" attributes="0">
                               <Group type="103" groupAlignment="0" attributes="0">
-                                  <Group type="102" attributes="0">
-                                      <Component id="lblServerDebugPort" min="-2" max="-2" attributes="0"/>
-                                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                                      <Component id="spServerDebugPort" min="-2" pref="80" max="-2" attributes="0"/>
-                                  </Group>
-                                  <Group type="102" alignment="0" attributes="0">
-                                      <Component id="lblServerLogLevel" min="-2" max="-2" attributes="0"/>
-                                      <EmptySpace min="-2" pref="27" max="-2" attributes="0"/>
-                                      <Component id="cbServerLogLevel" min="-2" pref="305" max="-2" attributes="0"/>
-                                  </Group>
+                                  <Component id="cbServerLogLevel" alignment="0" min="-2" pref="299" max="-2" attributes="0"/>
+                                  <Component id="spServerPort" alignment="0" min="-2" pref="70" max="-2" attributes="0"/>
+                                  <Component id="spServerDebugPort" alignment="0" min="-2" pref="72" max="-2" attributes="0"/>
                               </Group>
-                              <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                              <EmptySpace min="0" pref="183" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
@@ -402,16 +394,16 @@
                           <Component id="lblServerVmOptions" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                          <Component id="lblServerDebugPort" min="-2" max="-2" attributes="0"/>
+                          <Component id="spServerDebugPort" pref="19" max="32767" attributes="0"/>
+                      </Group>
+                      <EmptySpace min="-2" pref="49" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
                           <Component id="lblServerLogLevel" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="cbServerLogLevel" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Group type="103" groupAlignment="3" attributes="0">
-                          <Component id="lblServerDebugPort" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="spServerDebugPort" alignment="3" min="-2" max="-2" attributes="0"/>
-                      </Group>
-                      <EmptySpace pref="115" max="32767" attributes="0"/>
+                      <EmptySpace pref="89" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -527,12 +519,12 @@
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
-                                  <Component id="txtContext" pref="496" max="32767" attributes="0"/>
+                                  <Component id="txtContext" pref="514" max="32767" attributes="0"/>
                                   <Group type="102" attributes="0">
                                       <Component id="cbj2eeServer" min="-2" pref="305" max="-2" attributes="0"/>
                                       <EmptySpace max="-2" attributes="0"/>
                                       <Component id="btnManageServers" min="-2" max="-2" attributes="0"/>
-                                      <EmptySpace min="0" pref="83" max="32767" attributes="0"/>
+                                      <EmptySpace min="0" pref="92" max="32767" attributes="0"/>
                                   </Group>
                               </Group>
                           </Group>

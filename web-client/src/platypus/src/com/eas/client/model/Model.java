@@ -99,7 +99,7 @@ public class Model {// implements Cancellable {
 		
 		public void cancel() throws Exception{
 			if(onFailure != null)
-				onFailure.run(null);
+				onFailure.run("Canceled");
 		}
 		
 		public void success() throws Exception{
@@ -392,6 +392,11 @@ public class Model {// implements Cancellable {
 				aModel.@com.eas.client.model.Model::setCommitable(Z)(aValue);
 			}
 		});
+		Object.defineProperty(publishedModel, "pending", {
+			get : function() {
+				return aModel.@com.eas.client.model.Model::isPending()();
+			}
+		});
 		Object.defineProperty(aModule, "model", {
 			get : function() {
 				return publishedModel;
@@ -527,6 +532,14 @@ public class Model {// implements Cancellable {
 		commitable = aValue;
 	}
 
+	public NetworkProcess getProcess(){
+		return process;
+	}
+	
+	public void setProcess(NetworkProcess aValue) {
+	    process = aValue;
+    }
+	
 	public void terminateProcess(Entity aSource, String aErrorMessage) throws Exception {
 		if(process != null){
 			if(aErrorMessage != null){

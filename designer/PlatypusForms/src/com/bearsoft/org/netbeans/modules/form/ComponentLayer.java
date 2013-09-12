@@ -148,13 +148,19 @@ class ComponentLayer extends JPanel {
 
     protected void ensureBackgroundOpaque(JComponent aComponent) {
         if (aComponent instanceof JRootPane) {
-            componentContainer.setBackground(((JRootPane) aComponent).getBackground());
+            if(((JRootPane) aComponent).isBackgroundSet())
+                componentContainer.setBackground(((JRootPane) aComponent).getBackground());
+            else
+                componentContainer.setBackground(FormLoaderSettings.getInstance().getFormDesignerBackgroundColor());
             ((JRootPane) aComponent).setOpaque(false);
             ((JComponent) ((JRootPane) aComponent).getContentPane()).setOpaque(false);
             ((JRootPane) aComponent).setBackground(BLACK_TRANSPARENT_COLOR);
             ((JComponent) ((JRootPane) aComponent).getContentPane()).setBackground(BLACK_TRANSPARENT_COLOR);
         } else {
-            componentContainer.setBackground(aComponent.getBackground());
+            if(aComponent.isBackgroundSet())
+                componentContainer.setBackground(aComponent.getBackground());
+            else
+                componentContainer.setBackground(FormLoaderSettings.getInstance().getFormDesignerBackgroundColor());
             aComponent.setOpaque(false);
             aComponent.setBackground(BLACK_TRANSPARENT_COLOR);
         }
@@ -164,7 +170,7 @@ class ComponentLayer extends JPanel {
 
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
-            if (!processing && (evt == null || (evt != null && ("opaque".equals(evt.getPropertyName()) || "background".equals(evt.getPropertyName())))) && componentContainer.getComponentCount() > 0 && componentContainer.getComponent(0) instanceof JComponent) {
+            if (!processing && (evt == null || ("opaque".equals(evt.getPropertyName()) || "background".equals(evt.getPropertyName()))) && componentContainer.getComponentCount() > 0 && componentContainer.getComponent(0) instanceof JComponent) {
                 processing = true;
                 try {
                     JComponent topChild = (JComponent) componentContainer.getComponent(0);

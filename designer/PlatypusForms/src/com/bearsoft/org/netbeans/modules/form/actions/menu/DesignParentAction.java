@@ -72,9 +72,7 @@ public class DesignParentAction extends NodeAction {
             RADComponentCookie radCookie = nodes[0].getLookup().lookup(RADComponentCookie.class);
             RADComponent<?> comp = (radCookie != null) ? radCookie.getRADComponent() : null;
             if (comp != null && isParentEditableComponent(comp)) {
-                PlatypusFormLayoutView designer = null;//getDesigner(comp);
-                if (designer != null) {
-                    RADVisualComponent<?> designed = designer.getTopDesignComponent();
+                    RADVisualComponent<?> designed = comp.getFormModel().getTopDesignComponent();
                     if (comp == designed
                             || (designed != null && designed.isParentComponent(comp)
                             && isParentEditableComponent(comp.getParentComponent()))) {
@@ -82,7 +80,6 @@ public class DesignParentAction extends NodeAction {
                         // the component must be in the designed tree and have
                         // some designable parent that is not designed at this moment
                     }
-                }
             }
         }
         return ret;
@@ -189,19 +186,19 @@ public class DesignParentAction extends NodeAction {
 */
     private static class DesignParentMenuItem extends JMenuItem {
 
-        private RADComponent<?> radc = null;
+        private RADComponent<?> radc;
 
         public DesignParentMenuItem(RADComponent<?> c, boolean top, ActionListener l) {
+            super();
             radc = c;
             setText(top ? NbBundle.getMessage(DesignParentAction.class, "ACT_DesignParentTopMenuItemName") // NOI18N
                     : c.getName());
             addActionListener(l);
-            PlatypusFormLayoutView designer = null;//getDesigner(c);
-            setEnabled(designer != null && c != designer.getTopDesignComponent());
+            setEnabled(radc != null && radc != radc.getFormModel().getTopDesignComponent());
         }
 
         public RADComponent<?> getRADComponent() {
-            return this.radc;
+            return radc;
         }
     }
 
@@ -213,11 +210,8 @@ public class DesignParentAction extends NodeAction {
             if (source != null && source instanceof DesignParentMenuItem) {
                 DesignParentMenuItem mi = (DesignParentMenuItem) source;
                 RADComponent<?> lc = mi.getRADComponent();
-                PlatypusFormLayoutView designer = null;//getDesigner(lc);
-                if (designer != null && lc instanceof RADVisualContainer<?>) {
-                    designer.setTopDesignComponent((RADVisualContainer<?>) lc, true);
-                    designer.requestActive();
-
+                if (lc instanceof RADVisualContainer<?>) {
+                    lc.getFormModel().setTopDesignComponent((RADVisualContainer<?>) lc);
                     // NodeAction is quite unreliable in enabling, do it ourselves for sure
                     Node[] n = new Node[]{lc.getNodeReference()};
                     if (n[0] != null) {

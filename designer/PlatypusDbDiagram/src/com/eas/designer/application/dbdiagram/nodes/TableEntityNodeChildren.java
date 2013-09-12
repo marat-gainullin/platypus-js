@@ -8,7 +8,7 @@ import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.model.Entity;
 import com.eas.client.model.dbscheme.FieldsEntity;
 import com.eas.designer.datamodel.nodes.EntityNodeChildren;
-import java.util.Set;
+import java.util.List;
 import org.openide.ErrorManager;
 import org.openide.awt.UndoRedo;
 import org.openide.nodes.Node;
@@ -30,8 +30,8 @@ public class TableEntityNodeChildren extends EntityNodeChildren<Object> {
     }
 
     @Override
-    protected Set<Object> computeKeys() {
-        Set<Object> fieldsKeys = super.computeKeys();
+    protected List<Object> computeKeys() {
+        List<Object> fieldsKeys = super.computeKeys();
         fieldsKeys.add(new TableIndexesNode.TableIndexesKey());
         return fieldsKeys;
     }

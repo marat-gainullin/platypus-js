@@ -145,8 +145,13 @@ public class ModelGrid extends Component<DbGrid> {
         delegate.unselect(aRow);
     }
 
-    @ScriptFunction(jsDoc = "/**\n * Shows find dialog.\n */")
+    @ScriptFunction(jsDoc = "/**\n * Shows find dialog.\n @deprecated Use find() instead.*/")
     public void findSomething() {
+        delegate.findSomething();
+    }
+
+    @ScriptFunction(jsDoc = "/**\n * Shows find dialog.\n */")
+    public void find() {
         delegate.findSomething();
     }
 

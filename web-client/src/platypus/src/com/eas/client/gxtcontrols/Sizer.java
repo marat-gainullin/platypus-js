@@ -8,17 +8,15 @@ import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.core.client.util.Size;
 import com.sencha.gxt.widget.core.client.container.BorderLayoutContainer;
-import com.sencha.gxt.widget.core.client.container.SimpleContainer;
 import com.sencha.gxt.widget.core.client.form.FieldSet;
 
 public class Sizer {
 
 	public static int getWidgetLeft(Widget aWidget) {
 		Element element = aWidget.getElement();
-		if (aWidget.getParent() instanceof SimpleContainer && aWidget.getParent().getParent() instanceof FieldSet) {
-			aWidget = aWidget.getParent().getParent();// FieldSet trick
-		}
-		if (aWidget.getParent() instanceof BorderLayoutContainer && aWidget.getParent().getParent() instanceof LayoutPanel) {
+		if (aWidget.getParent() instanceof FieldSet) {
+			element = aWidget.getParent().getElement();// FieldSet trick
+		} else if (aWidget.getParent() instanceof BorderLayoutContainer && aWidget.getParent().getParent() instanceof LayoutPanel) {
 			element = aWidget.getParent().getElement().getParentElement();// LayoutPanel
 			                                                              // trick
 		}
@@ -27,10 +25,9 @@ public class Sizer {
 
 	public static int getWidgetTop(Widget aWidget) {
 		Element element = aWidget.getElement();
-		if (aWidget.getParent() instanceof SimpleContainer && aWidget.getParent().getParent() instanceof FieldSet) {
-			aWidget = aWidget.getParent().getParent();// FieldSet trick
-		}
-		if (aWidget.getParent() instanceof BorderLayoutContainer && aWidget.getParent().getParent() instanceof LayoutPanel) {
+		if (aWidget.getParent() instanceof FieldSet) {
+			element = aWidget.getParent().getElement();// FieldSet trick
+		} else if (aWidget.getParent() instanceof BorderLayoutContainer && aWidget.getParent().getParent() instanceof LayoutPanel) {
 			element = aWidget.getParent().getElement().getParentElement();// LayoutPanel
 			                                                              // trick
 		}
@@ -39,22 +36,20 @@ public class Sizer {
 
 	public static int getWidgetWidth(Widget aWidget) {
 		Element element = aWidget.getElement();
-		if (aWidget.getParent() instanceof SimpleContainer && aWidget.getParent().getParent() instanceof FieldSet) {
-			aWidget = aWidget.getParent().getParent();// FieldSet trick
-		}
-		if (aWidget.getParent() instanceof BorderLayoutContainer && aWidget.getParent().getParent() instanceof LayoutPanel) {
+		if (aWidget.getParent() instanceof FieldSet) {
+			element = aWidget.getParent().getElement();// FieldSet trick
+		} else if (aWidget.getParent() instanceof BorderLayoutContainer && aWidget.getParent().getParent() instanceof LayoutPanel) {
 			element = aWidget.getParent().getElement().getParentElement();// LayoutPanel
-																		  // trick
+			                                                              // trick
 		}
 		return element.getOffsetWidth();
 	}
 
 	public static int getWidgetHeight(Widget aWidget) {
 		Element element = aWidget.getElement();
-		if (aWidget.getParent() instanceof SimpleContainer && aWidget.getParent().getParent() instanceof FieldSet) {
-			aWidget = aWidget.getParent().getParent();// FieldSet trick
-		}
-		if (aWidget.getParent() instanceof BorderLayoutContainer && aWidget.getParent().getParent() instanceof LayoutPanel) {
+		if (aWidget.getParent() instanceof FieldSet) {
+			element = aWidget.getParent().getElement();// FieldSet trick
+		} else if (aWidget.getParent() instanceof BorderLayoutContainer && aWidget.getParent().getParent() instanceof LayoutPanel) {
 			element = aWidget.getParent().getElement().getParentElement();// LayoutPanel
 			                                                              // trick
 		}

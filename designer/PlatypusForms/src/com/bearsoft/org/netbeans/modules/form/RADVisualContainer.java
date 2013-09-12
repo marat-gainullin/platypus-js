@@ -219,7 +219,7 @@ public class RADVisualContainer<C extends Container> extends RADVisualComponent<
                 }
             }
             return false;
-        } else if (getMenuType(compClass) != null) {
+        } else if (getMenuType(compClass) != null && !JMenuBar.class.isAssignableFrom(getBeanClass())) {
             // otherwise don't accept menu components
             return false;
         } else if (Component.class.isAssignableFrom(compClass)) {

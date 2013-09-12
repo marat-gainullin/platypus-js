@@ -204,6 +204,7 @@ public class RowsListStoreFiller extends RowsetAdapter implements PropertyChange
 	public void rowsetNetError(RowsetNetErrorEvent event) {
 		try {
 			rowsetError = event.getMessage();
+			assert rowsetError != null;
 			checkIfDataError();
 		} catch (Exception ex) {
 			Logger.getLogger(RowsListStoreFiller.class.getName()).log(Level.SEVERE, ex.getMessage());

@@ -109,8 +109,6 @@ Object.defineProperty(Resource, "loadText", {
                 onSuccess = aOnSuccessOrOnFailure;
                 onFailure = aOnFailure;
             }
-            if(typeof onSuccess != "function")
-                throw "loadText must be called with at leaast success callback function";
             try{
                 var _loaded = encoding ? com.eas.client.scripts.ScriptRunner.PlatypusScriptedResource.loadText(aResName, encoding) :
                                          com.eas.client.scripts.ScriptRunner.PlatypusScriptedResource.loadText(aResName);
@@ -176,18 +174,25 @@ Function.prototype.invokeBackground = function() {
  * This is a stub for dynamically loaded modules, since J2SE client
  * allways loads them dynamically and synchronously.
  */
-function require(deps, aCallback) {
-    if (deps) {
-        if (Array.isArray(deps)) {
-            for (var i = 0; i < deps.length; i++) {
-                com.eas.client.scripts.ScriptRunner.executeResource(deps[i]);
+function require(deps, aOnSuccess, aOnFailure) {
+    try{
+        if (deps) {
+            if (Array.isArray(deps)) {
+                for (var i = 0; i < deps.length; i++) {
+                    com.eas.client.scripts.ScriptRunner.executeResource(deps[i]);
+                }
+            } else {
+                com.eas.client.scripts.ScriptRunner.executeResource(deps);
             }
-        } else {
-            com.eas.client.scripts.ScriptRunner.executeResource(deps);
         }
-    }
-    if (aCallback) {
-        aCallback();
+        if (aOnSuccess) {
+            aOnSuccess();
+        }
+    }catch(e){
+        if(aOnFailure)
+            aOnFailure(e);
+        else
+            throw e;
     }
 }
 

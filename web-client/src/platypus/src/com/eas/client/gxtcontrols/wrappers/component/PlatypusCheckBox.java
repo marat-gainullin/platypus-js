@@ -31,6 +31,7 @@ public class PlatypusCheckBox extends Field<Boolean> implements HasChangeHandler
 
 	public PlatypusCheckBox(CheckBoxCell aCell) {
 		super(aCell);
+		setValue(false);
 	}
 
 	@Override

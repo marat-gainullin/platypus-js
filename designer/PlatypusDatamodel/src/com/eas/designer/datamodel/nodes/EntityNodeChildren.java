@@ -11,11 +11,10 @@ import com.eas.client.model.Entity;
 import com.eas.designer.datamodel.nodes.EntityNodeChildren.EntityFieldKey;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.openide.awt.UndoRedo;
@@ -29,7 +28,7 @@ import org.openide.util.Lookup;
 public abstract class EntityNodeChildren<T> extends Children.Keys<T> implements PropertyChangeListener {
 
     protected Entity entity;
-    protected Set<T> keys = new HashSet<>();
+    protected List<T> keys = new ArrayList<>();
     private Fields tempFields;
     protected CollectionListener<Fields, Field> fieldsListener = new FieldsToNodesNotifier();
     protected Lookup lookup;
@@ -46,7 +45,7 @@ public abstract class EntityNodeChildren<T> extends Children.Keys<T> implements 
 
     protected abstract T createKey(Field aField);
 
-    protected Set<T> computeKeys() {
+    protected List<T> computeKeys() {
         keys.clear();
         try {
             if (entity.getQuery() != null) {

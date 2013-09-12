@@ -2,14 +2,10 @@ package com.eas.server.httpservlet;
 
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.utils.IDGenerator;
-import com.eas.client.Client;
 import com.eas.client.ClientConstants;
-import com.eas.client.DatabasesClient;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.metadata.ApplicationElement;
-import com.eas.client.model.script.ScriptableRowset;
 import com.eas.client.queries.Query;
-import com.eas.client.scripts.ScriptRunner;
 import com.eas.client.settings.SettingsConstants;
 import com.eas.client.threetier.ErrorResponse;
 import com.eas.client.threetier.HelloRequest;
@@ -20,34 +16,22 @@ import com.eas.client.threetier.binary.PlatypusResponseWriter;
 import com.eas.client.threetier.http.PlatypusHttpConstants;
 import com.eas.client.threetier.http.PlatypusHttpRequestParams;
 import com.eas.client.threetier.requests.*;
-import com.eas.debugger.jmx.server.Breakpoints;
-import com.eas.debugger.jmx.server.Debugger;
-import com.eas.debugger.jmx.server.DebuggerMBean;
-import com.eas.debugger.jmx.server.Settings;
 import com.eas.proto.ProtoWriter;
 import com.eas.script.ScriptUtils;
 import com.eas.server.*;
 import com.eas.server.filter.AppElementsFilter;
 import com.eas.server.handlers.ExecuteServerModuleMethodRequestHandler;
 import com.eas.server.httpservlet.serial.query.QueryJsonWriter;
-import com.eas.server.httpservlet.serial.rowset.RowsetJsonConstants;
-import com.eas.server.httpservlet.serial.rowset.RowsetJsonWriter;
+import com.eas.client.threetier.RowsetJsonConstants;
+import com.eas.client.threetier.RowsetJsonWriter;
 import com.eas.util.StringUtils;
-import com.eas.util.logging.PlatypusFormatter;
 import java.io.*;
-import java.lang.management.ManagementFactory;
 import java.net.URLConnection;
 import java.util.Set;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanRegistrationException;
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -95,31 +79,18 @@ public class PlatypusHttpServlet extends HttpServlet {
     public void init(ServletConfig config) throws ServletException {
         try {
             super.init(config);
+            // TODO: remove loggers configuration code to be able to use standard way to cofigure
+            //java.util.logging package through command-line switches ( -Dxxx ) or configuration file.
+            /*
+             Handler consoleHandler = new ConsoleHandler();
+             consoleHandler.setFormatter(new PlatypusFormatter());
+             Logger logger = Logger.getLogger(Client.APPLICATION_LOGGER_NAME);
+             logger.addHandler(consoleHandler);
+             logger.setUseParentHandlers(false);
+             // end of logging configuration code
+             */
             ServerConfig scp = ServerConfig.parse(config);
-            Handler consoleHandler = new ConsoleHandler();
-            consoleHandler.setFormatter(new PlatypusFormatter());
-            Logger logger = Logger.getLogger(Client.APPLICATION_LOGGER_NAME);
-            logger.addHandler(consoleHandler);
-            logger.setUseParentHandlers(false);
-
-            DatabasesClient serverCoreDbClient = new DatabasesClient(scp.getDbSettings(), true);
-            serverCore = new PlatypusServerCore(serverCoreDbClient, scp.getTasks(), scp.getAppElementId());
-            serverCoreDbClient.setContextHost(serverCore);
-            serverCoreDbClient.setPrincipalHost(serverCore);
-            ScriptRunner.PlatypusScriptedResource.init(serverCoreDbClient, serverCore, serverCore);
-            ScriptUtils.getScope().defineProperty(ServerScriptRunner.MODULES_SCRIPT_NAME, serverCore.getScriptsCache(), ScriptableObject.READONLY);
-
-            if (System.getProperty(ScriptRunner.DEBUG_PROPERTY) != null) {
-                Debugger debugger;
-                debugger = Debugger.initialize(false);
-                unRegisterMBean(DebuggerMBean.DEBUGGER_MBEAN_NAME);
-                registerMBean(DebuggerMBean.DEBUGGER_MBEAN_NAME, debugger);
-                unRegisterMBean(Breakpoints.BREAKPOINTS_MBEAN_NAME);
-                registerMBean(Breakpoints.BREAKPOINTS_MBEAN_NAME, Breakpoints.getInstance());
-                unRegisterMBean(Settings.SETTINGS_MBEAN_NAME);
-                registerMBean(Settings.SETTINGS_MBEAN_NAME, new Settings(serverCoreDbClient));
-            }
-            serverCore.startBackgroundTasks();
+            serverCore = PlatypusServerCore.getInstance(scp.getDbSettings(), scp.getTasks(), scp.getAppElementId());
         } catch (Exception ex) {
             throw new ServletException(ex);
         }
@@ -238,6 +209,10 @@ public class PlatypusHttpServlet extends HttpServlet {
         } else {
             return new AnonymousPlatypusPrincipal(aRequest.getSession().getId());
         }
+    }
+
+    public PlatypusServerCore getServerCore() {
+        return serverCore;
     }
 
     public HttpServletRequest getCurrentRequest() {
@@ -401,14 +376,14 @@ public class PlatypusHttpServlet extends HttpServlet {
             }
         }
         Request rq = PlatypusRequestsFactory.create(IDGenerator.genID(), rqType);
+        if (rq == null) {
+            Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, String.format(UNKNOWN_REQUEST_MSG, rqType));
+            throw new Exception(REQUEST_NOT_CORRECT_MSG + " -3- ");
+        }
         PlatypusRequestHttpReader reader = new PlatypusRequestHttpReader(serverCore, rq.getID(), aRequest, extractURI(aRequest));
         rq.accept(reader);
         if (rq instanceof AppElementRequest && !isJ2SERequest(aRequest)) {
             rq = new FilteredAppElementRequest(((AppElementRequest) rq).getAppElementId());
-        }
-        if (rq == null) {
-            Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, String.format(UNKNOWN_REQUEST_MSG, rqType));
-            throw new Exception(REQUEST_NOT_CORRECT_MSG + " -3- ");
         }
         return rq;
     }
@@ -429,20 +404,6 @@ public class PlatypusHttpServlet extends HttpServlet {
         return PlatypusHttpConstants.AGENT_NAME.equals(aRequest.getHeader(PlatypusHttpConstants.HEADER_USER_AGENT));
     }
 
-    private static void registerMBean(String aName, Object aBean) throws Exception {
-        // Get the platform MBeanServer
-        // Uniquely identify the MBeans and register them with the platform MBeanServer
-        ManagementFactory.getPlatformMBeanServer().registerMBean(aBean, new ObjectName(aName));
-    }
-
-    private static void unRegisterMBean(String aName) throws MBeanRegistrationException, MalformedObjectNameException {
-        try {
-            ManagementFactory.getPlatformMBeanServer().unregisterMBean(new ObjectName(aName));
-        } catch (InstanceNotFoundException ex) {
-            //no-op
-        }
-    }
-
     private void platypusResponse(final HttpServletRequest aHttpRequest, Request aPlatypusRequest, Response aPlatypusResponse, final HttpServletResponse aHttpResponse) throws Exception {
         if (isJ2SERequest(aHttpRequest)) {// platypus http client
             sendJ2SEResponse(aPlatypusResponse, aHttpResponse);
@@ -451,7 +412,7 @@ public class PlatypusHttpServlet extends HttpServlet {
             if (aPlatypusResponse instanceof ErrorResponse) {
                 ErrorResponse er = (ErrorResponse) aPlatypusResponse;
                 if (er.isAccessControl()) {
-                    if (aPlatypusRequest instanceof FilteredAppElementRequest) {
+                    if (aPlatypusRequest instanceof FilteredAppElementRequest && isResourceRequest(aHttpRequest) && aHttpRequest.getParameter(PlatypusHttpRequestParams.TYPE) == null) {// pure resource request
                         String moduleId = ((FilteredAppElementRequest) aPlatypusRequest).getAppElementId();
                         if (moduleId != null && !moduleId.isEmpty()) {
                             String userName = getPrincipal(aHttpRequest).getName();
@@ -480,8 +441,8 @@ public class PlatypusHttpServlet extends HttpServlet {
                 writeJsonResponse(moduleResponseToJson(csmr.getFunctionsNames(), csmr.isReport()), aHttpResponse);
             } else if (aPlatypusResponse instanceof ExecuteServerModuleMethodRequest.Response) {
                 Object result = ((ExecuteServerModuleMethodRequest.Response) aPlatypusResponse).getResult();
-                if (result instanceof ScriptableRowset) {
-                    writeResponse(((ScriptableRowset) result).unwrap(), aHttpResponse, aHttpRequest);
+                if (result instanceof Rowset) {
+                    writeResponse((Rowset) result, aHttpResponse, aHttpRequest);
                 } else if (result instanceof String) {
                     writeResponse((String) result, aHttpResponse, TEXT_CONTENTTYPE);
                 } else if (result instanceof NativeObject) {

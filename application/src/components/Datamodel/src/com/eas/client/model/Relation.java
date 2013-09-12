@@ -32,6 +32,9 @@ public class Relation<E extends Entity<?, ?, E>> {
     protected Field leftField;
     protected Field rightField;
     protected PropertyChangeSupport changeSupport;
+    // design properties
+    protected int[] xs;
+    protected int[] ys;
 
     public Relation() {
         super();
@@ -46,6 +49,25 @@ public class Relation<E extends Entity<?, ?, E>> {
         rightField = aRightField;
     }
 
+    public int[] getXs() {
+        return xs;
+    }
+
+    public int[] getYs() {
+        return ys;
+    }
+
+    public void setXYs(int[] aXs, int[] aYs) {
+        Object[] oldValue = new Object[]{xs, ys};
+        xs = aXs;
+        ys = aYs;
+        changeSupport.firePropertyChange("polyline", oldValue, new Object[]{xs, ys});
+    }
+
+    public boolean isManual(){
+        return xs != null && ys != null && xs.length == ys.length;
+    }
+    
     public PropertyChangeSupport getChangeSupport() {
         return changeSupport;
     }

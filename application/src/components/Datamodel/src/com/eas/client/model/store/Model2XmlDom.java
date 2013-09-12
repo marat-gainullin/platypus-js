@@ -192,6 +192,7 @@ public abstract class Model2XmlDom<E extends Entity<?, ?, E>> implements ModelVi
     public static final String RIGHT_ENTITY_ID_ATTR_NAME = "rightEntityId";
     public static final String RIGHT_ENTITY_FIELD_ATTR_NAME = "rightEntityFieldName";
     public static final String RIGHT_ENTITY_PARAMETER_ATTR_NAME = "rightEntityParameterName";
+    public static final String POLYLINE_ATTR_NAME = "polyline";
 
     @Override
     public void visit(Relation<E> relation) {
@@ -213,6 +214,26 @@ public abstract class Model2XmlDom<E extends Entity<?, ?, E>> implements ModelVi
             } else {
                 node.setAttribute(RIGHT_ENTITY_PARAMETER_ATTR_NAME, relation.getRightParameter().getName());
             }
+            if (relation.getXs() != null && relation.getYs() != null && relation.getXs().length == relation.getYs().length) {
+                node.setAttribute(POLYLINE_ATTR_NAME, polylineToString(relation));
+            }
+        }
+    }
+
+    private String polylineToString(Relation relation) {
+        if (relation.getXs() != null && relation.getYs() != null && relation.getXs().length == relation.getYs().length) {
+            StringBuilder sb = new StringBuilder();
+            int[] xs = relation.getXs();
+            int[] ys = relation.getYs();
+            for (int i = 0; i < xs.length; i++) {
+                if (i > 0) {
+                    sb.append(" ");
+                }
+                sb.append(xs[i]).append(";").append(ys[i]);
+            }
+            return sb.toString();
+        } else {
+            return null;
         }
     }
 

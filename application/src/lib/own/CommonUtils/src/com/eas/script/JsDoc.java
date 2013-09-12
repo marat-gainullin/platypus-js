@@ -89,37 +89,46 @@ public class JsDoc {
          */
         public static final String NAME_TAG = "@name";
         /**
-         * Annotation marks a module as a protocol acceptor
-         * Example: @protocol asc6, asc2
+         * Annotation marks a module as a protocol acceptor Example:
+         *
+         * @protocol asc6, asc2
          */
-    public static final String ACCEPTOR_TAG = "@acceptor";
-    public static final String ACCEPTED_PROTOCOL_TAG = "@protocol";
+        public static final String ACCEPTOR_TAG = "@acceptor";
+        public static final String ACCEPTED_PROTOCOL_TAG = "@protocol";
         /**
-         * Annotation marks a module or top level function access restrictions for concrete roles
-         * Example: @rolesAllowed admin, manager
+         * Annotation marks a module as en extra rols mapper
+         */
+        public static final String AUTHORIZER_TAG = "@authorizer";
+        /**
+         * Annotation marks a module or top level function access restrictions
+         * for concrete roles Example:
+         *
+         * @rolesAllowed admin, manager
          */
         public static final String ROLES_ALLOWED_TAG = "@rolesAllowed";
         public static final String ROLES_ALLOWED_READ_TAG = "@rolesAllowedRead";
         public static final String ROLES_ALLOWED_WRITE_TAG = "@rolesAllowedWrite";
         /**
-         * Annotation marks query entity undelying table readonly for changes made on entity.
+         * Annotation marks query entity undelying table readonly for changes
+         * made on entity.
          */
         public static final String READONLY_TAG = "@readonly";
         /**
-         * Annotation marks query entity undelying tables writable for changes made on entity.
+         * Annotation marks query entity undelying tables writable for changes
+         * made on entity.
          */
         public static final String WRITABLE_TAG = "@writable";
         public static final String MANUAL_TAG = "@manual";
         public static final String PROCEDURE_TAG = "@procedure";
         /**
-         * Annotation marks module accessible for external execution (for example using HTTP).
+         * Annotation marks module accessible for external execution (for
+         * example using HTTP).
          */
         public static final String PUBLIC_TAG = "@public";
         /**
          * Annotation marks module as stateless.
          */
         public static final String STATELESS_TAG = "@stateless";
-        
         private String name;
         private String text;
         private List<String> params;
@@ -147,9 +156,10 @@ public class JsDoc {
                 return null;
             }
         }
-        
+
         /**
          * Utility method for checking if a tag with some name is in the list.
+         *
          * @param aTags Tags list
          * @param aTagName Tag's name
          * @return True if there is a tag with provided name

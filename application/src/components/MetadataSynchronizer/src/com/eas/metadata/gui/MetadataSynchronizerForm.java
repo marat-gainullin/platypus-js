@@ -4,7 +4,7 @@
  */
 package com.eas.metadata.gui;
 
-import com.eas.metadata.LogFormatter;
+import com.eas.metadata.LineLogFormatter;
 import com.eas.metadata.MetadataSynchronizer;
 import java.awt.EventQueue;
 import java.awt.Rectangle;
@@ -738,10 +738,10 @@ public class MetadataSynchronizerForm extends javax.swing.JFrame {
                         sqlLog.addHandler(new TextAreaHandler(txtSqlsLog));
                         errorLog.addHandler(new TextAreaHandler(txtErrorsLog));
                         if (!sqlLogFile.isEmpty()) {
-                            sqlLog.addHandler(MetadataSynchronizer.createFileHandler(sqlLogFile, logEncoding, new LogFormatter()));
+                            sqlLog.addHandler(MetadataSynchronizer.createFileHandler(sqlLogFile, logEncoding, new LineLogFormatter()));
                         }
                         if (!errorLogFile.isEmpty()) {
-                            errorLog.addHandler(MetadataSynchronizer.createFileHandler(errorLogFile, logEncoding, new LogFormatter()));
+                            errorLog.addHandler(MetadataSynchronizer.createFileHandler(errorLogFile, logEncoding, new LineLogFormatter()));
                         }    
                         MetadataSynchronizer mds = new MetadataSynchronizer(sysLog, sqlLog, errorLog, null);
                         if (selectedSrcDest) {

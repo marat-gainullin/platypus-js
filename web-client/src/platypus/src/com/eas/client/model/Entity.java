@@ -1527,8 +1527,14 @@ public class Entity implements RowsetListener {
 					// re-query ...
 					uninstallUserFiltering();
 					if (pending != null){
-						pending.cancel();
-						invalidate();
+						Model.NetworkProcess lprocess = model.getProcess();
+						model.setProcess(null);
+						try{
+							pending.cancel();
+							invalidate();
+						}finally{
+							model.setProcess(lprocess);
+						}
 					}
 					pending = achieveOrRefreshRowset(new CancellableCallbackAdapter() {
 
@@ -2437,7 +2443,7 @@ public class Entity implements RowsetListener {
 
 	private boolean checkRowset() {
 		if (rowset == null) {
-			Logger.getLogger(Entity.class.getName()).log(Level.WARNING, "Model entity [" + getTitle() + "] using while data is not loaded yet.");
+			Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, "Model entity [" + getTitle() + "] using while data is not loaded yet.");
 			return false;
 		} else
 			return true;

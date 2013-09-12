@@ -136,7 +136,7 @@ public abstract class XmlDom2Model<E extends Entity<?, ?, E>> implements ModelVi
                         currentNode = lcurrentNode;
                     }
                 }
-                
+
                 final Runnable[] resolvers = relationsResolvers.toArray(new Runnable[]{});
                 Runnable relationsResolver = new Runnable() {
                     @Override
@@ -201,6 +201,12 @@ public abstract class XmlDom2Model<E extends Entity<?, ?, E>> implements ModelVi
             final Long rightEntityId = readLongAttribute(Model2XmlDom.RIGHT_ENTITY_ID_ATTR_NAME, null);
             final String rightFieldName = currentNode.getAttribute(Model2XmlDom.RIGHT_ENTITY_FIELD_ATTR_NAME);
             final String rightParameterName = currentNode.getAttribute(Model2XmlDom.RIGHT_ENTITY_PARAMETER_ATTR_NAME);
+            if (currentNode.hasAttribute(Model2XmlDom.POLYLINE_ATTR_NAME)) {
+                final String polyline = currentNode.getAttribute(Model2XmlDom.POLYLINE_ATTR_NAME);
+                if (polyline != null && !polyline.isEmpty()) {
+                    readPolyline(polyline, relation);
+                }
+            }
             final Model<E, ?, ?, ?> model = currentModel;
             relationsResolvers.add(new Runnable() {
                 @Override
@@ -246,15 +252,20 @@ public abstract class XmlDom2Model<E extends Entity<?, ?, E>> implements ModelVi
                     }
                 }
             });
-            /*
-             relation.setLeftEntityId(readLongAttribute(Model2XmlDom.LEFT_ENTITY_ID_ATTR_NAME, null));
-             relation.setLeftField(currentNode.getAttribute(Model2XmlDom.LEFT_ENTITY_FIELD_ATTR_NAME));
-             relation.setLeftParameter(currentNode.getAttribute(Model2XmlDom.LEFT_ENTITY_PARAMETER_ATTR_NAME));
+        }
+    }
 
-             relation.setRightEntityId(readLongAttribute(Model2XmlDom.RIGHT_ENTITY_ID_ATTR_NAME, null));
-             relation.setRightField(currentNode.getAttribute(Model2XmlDom.RIGHT_ENTITY_FIELD_ATTR_NAME));
-             relation.setRightParameter(currentNode.getAttribute(Model2XmlDom.RIGHT_ENTITY_PARAMETER_ATTR_NAME));
-             */
+    private void readPolyline(String aPolyline, Relation aRelation) {
+        String[] points = aPolyline.split(" ");
+        if (points != null && points.length > 0) {
+            int[] xs = new int[points.length];
+            int[] ys = new int[points.length];
+            for (int i = 0; i < points.length; i++) {
+                String[] xy = points[i].split(";");
+                xs[i] = Integer.valueOf(xy[0]);
+                ys[i] = Integer.valueOf(xy[1]);
+            }
+            aRelation.setXYs(xs, ys);
         }
     }
 

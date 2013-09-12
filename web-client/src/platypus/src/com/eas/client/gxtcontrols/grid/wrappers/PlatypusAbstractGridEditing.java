@@ -23,7 +23,10 @@ import com.sencha.gxt.core.client.GXT;
 import com.sencha.gxt.core.client.util.KeyNav;
 import com.sencha.gxt.core.shared.event.GroupingHandlerRegistration;
 import com.sencha.gxt.data.shared.Converter;
+import com.sencha.gxt.data.shared.event.StoreDataChangeEvent;
+import com.sencha.gxt.data.shared.event.StoreDataChangeEvent.StoreDataChangeHandler;
 import com.sencha.gxt.widget.core.client.event.BeforeCollapseItemEvent;
+import com.sencha.gxt.widget.core.client.event.RefreshEvent;
 import com.sencha.gxt.widget.core.client.event.BeforeCollapseItemEvent.BeforeCollapseItemHandler;
 import com.sencha.gxt.widget.core.client.event.BeforeCollapseItemEvent.HasBeforeCollapseItemHandlers;
 import com.sencha.gxt.widget.core.client.event.BeforeExpandItemEvent;
@@ -43,6 +46,7 @@ import com.sencha.gxt.widget.core.client.event.HeaderMouseDownEvent;
 import com.sencha.gxt.widget.core.client.event.HeaderMouseDownEvent.HeaderMouseDownHandler;
 import com.sencha.gxt.widget.core.client.event.ReconfigureEvent;
 import com.sencha.gxt.widget.core.client.event.ReconfigureEvent.ReconfigureHandler;
+import com.sencha.gxt.widget.core.client.event.RefreshEvent.RefreshHandler;
 import com.sencha.gxt.widget.core.client.event.StartEditEvent;
 import com.sencha.gxt.widget.core.client.event.StartEditEvent.StartEditHandler;
 import com.sencha.gxt.widget.core.client.form.IsField;
@@ -90,7 +94,7 @@ public abstract class PlatypusAbstractGridEditing<M> implements PlatypusGridEdit
 	}
 
 	protected class Handler implements AttachEvent.Handler, ScrollHandler, ClickHandler, DoubleClickHandler, MouseDownHandler, MouseUpHandler, BeforeExpandItemHandler<M>,
-	        BeforeCollapseItemHandler<M>, HeaderMouseDownHandler, ReconfigureHandler, ColumnWidthChangeHandler {
+	        BeforeCollapseItemHandler<M>, HeaderMouseDownHandler, ReconfigureHandler, ColumnWidthChangeHandler, RefreshHandler {
 
 		@Override
 		public void onAttachOrDetach(AttachEvent event) {
@@ -145,6 +149,11 @@ public abstract class PlatypusAbstractGridEditing<M> implements PlatypusGridEdit
 		@Override
 		public void onScroll(ScrollEvent event) {
 			PlatypusAbstractGridEditing.this.onScroll(event);
+		}
+		
+		@Override
+		public void onRefresh(RefreshEvent event) {
+			PlatypusAbstractGridEditing.this.onRefresh(event);
 		}
 
 	}
@@ -326,6 +335,15 @@ public abstract class PlatypusAbstractGridEditing<M> implements PlatypusGridEdit
 				HasBeforeCollapseItemHandlers<M> hasHandlers = (HasBeforeCollapseItemHandlers) editableGrid;
 				reg.add(hasHandlers.addBeforeCollapseHandler(ensureInternHandler()));
 			}
+			reg.add(editableGrid.addRefreshHandler(ensureInternHandler()));
+			reg.add(editableGrid.getStore().addStoreDataChangeHandler(new StoreDataChangeHandler<M>(){
+
+				@Override
+                public void onDataChange(StoreDataChangeEvent<M> event) {
+					cancelEditing();
+                }
+				
+			}));
 			groupRegistration = reg;
 		}
 	}
@@ -438,6 +456,10 @@ public abstract class PlatypusAbstractGridEditing<M> implements PlatypusGridEdit
 		cancelEditing();
 	}
 
+	protected void onRefresh(RefreshEvent event) {
+		cancelEditing();
+	}
+	
 	protected GridCell findCell(Element target) {
 		if (editableGrid != null) {
 			if (editableGrid.getView().isSelectableTarget(target) && editableGrid.getView().getBody().isOrHasChild(target)) {

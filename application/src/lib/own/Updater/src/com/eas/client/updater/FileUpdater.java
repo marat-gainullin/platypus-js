@@ -22,7 +22,7 @@ import java.util.zip.ZipFile;
  */
 public class FileUpdater {
 
-    private final String PWC_DIRECTORY = "bin\\pwc\\";
+    private final String PWC_DIRECTORY = "bin/pwc/";
     private String hostToFiles = "";
     private String curDir = "";
     private UpdProgress updVis = null;

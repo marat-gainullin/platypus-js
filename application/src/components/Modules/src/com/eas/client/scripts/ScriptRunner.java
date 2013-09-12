@@ -385,7 +385,7 @@ public class ScriptRunner extends ScriptableObject {
                     if (appElement != null && appElement.getType() == ClientConstants.ET_RESOURCE) {
                         return appElement.getBinaryContent();
                     } else {
-                        return null;
+                        throw new IllegalArgumentException(String.format("Resource %s not found", aResourceId));
                     }
                     //}
                 }

@@ -4,8 +4,14 @@
  */
 package com.eas.server.httpservlet;
 
+import com.eas.util.BinaryUtils;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.Enumeration;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.mozilla.javascript.Context;
@@ -56,6 +62,8 @@ public class HttpScriptContext extends ScriptableObject {
         private final static String CHARACTER_ENCODING_PROP_NAME = "characterEncoding";//NOI18N
         private final static String CONTENT_LENGTH_PROP_NAME = "contentLength";//NOI18N
         private final static String CONTENT_TYPE_PROP_NAME = "contentType";//NOI18N
+        private final static String BODY_PROP_NAME = "body";//NOI18N
+        private final static String BODY_BUFFER_PROP_NAME = "bodyBuffer";//NOI18N
         private final static String CONTEXT_PATH_PROP_NAME = "contextPath";//NOI18N
         private final static String COOKIES_PROP_NAME = "cookies";//NOI18N
         private final static String HEADERS_PROP_NAME = "headers";//NOI18N
@@ -86,11 +94,12 @@ public class HttpScriptContext extends ScriptableObject {
         public static Request getInstance(Scriptable scope, HttpServletRequest aHttpRequest) {
             Request r = new Request();
             r.httpRequest = aHttpRequest;
-            r.httpRequest = aHttpRequest;
             r.defineProperty(AUTH_TYPE_PROP_NAME, HttpScriptContext.Request.class, READONLY);
             r.defineProperty(CHARACTER_ENCODING_PROP_NAME, HttpScriptContext.Request.class, READONLY);
             r.defineProperty(CONTENT_LENGTH_PROP_NAME, HttpScriptContext.Request.class, READONLY);
             r.defineProperty(CONTENT_TYPE_PROP_NAME, HttpScriptContext.Request.class, READONLY);
+            r.defineProperty(BODY_PROP_NAME, HttpScriptContext.Request.class, READONLY);
+            r.defineProperty(BODY_BUFFER_PROP_NAME, HttpScriptContext.Request.class, READONLY);
             r.defineProperty(CONTEXT_PATH_PROP_NAME, HttpScriptContext.Request.class, READONLY);
 
             r.cookies = Cookies.getInstance(scope, r.httpRequest);
@@ -138,6 +147,28 @@ public class HttpScriptContext extends ScriptableObject {
 
         public String getContentType() {
             return httpRequest.getContentType();
+        }
+
+        public String getBody() throws IOException {
+            String encoding = httpRequest.getCharacterEncoding();
+            if (encoding == null || encoding.isEmpty()) {
+                Logger.getLogger(HttpScriptContext.class.getName()).log(Level.WARNING, "Missing character encoding. Falling back to utf-8.");
+                encoding = "utf-8";
+            }
+            if (Charset.isSupported(encoding)) {
+                try (InputStream is = httpRequest.getInputStream()) {
+                    byte[] data = BinaryUtils.readStream(is, -1);
+                    return new String(data, encoding);
+                }
+            } else {
+                throw new IOException(String.format("Character encoding %s is not supported.", encoding));
+            }
+        }
+
+        public byte[] getBodyBuffer() throws IOException {
+            try (InputStream is = httpRequest.getInputStream()) {
+                return BinaryUtils.readStream(is, -1);
+            }
         }
 
         public String getContextPath() {
@@ -252,9 +283,9 @@ public class HttpScriptContext extends ScriptableObject {
             r.defineProperty(STATUS_PROP_NAME, HttpScriptContext.Response.class, EMPTY);
             r.defineProperty(CONTENT_TYPE_PROP_NAME, HttpScriptContext.Response.class, EMPTY);
             r.defineFunctionProperties(new String[]{
-                        ADD_HEADER_METHOD_NAME,
-                        SET_HEADER_METHOD_NAME,
-                        ADD_COOKIE_METHOD_NAME}, Response.class, EMPTY);
+                ADD_HEADER_METHOD_NAME,
+                SET_HEADER_METHOD_NAME,
+                ADD_COOKIE_METHOD_NAME}, Response.class, EMPTY);
             ScriptRuntime.setBuiltinProtoAndParent(r, scope, TopLevel.Builtins.Object);
             return r;
         }

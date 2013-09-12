@@ -4,7 +4,6 @@
  */
 package com.eas.server.handlers;
 
-import com.eas.client.scripts.ScriptRunner;
 import com.eas.script.ScriptUtils;
 import com.eas.sensors.positioning.DevicesCommunication;
 import com.eas.sensors.positioning.DevicesCommunication.DeviceRequest;
@@ -15,8 +14,6 @@ import com.eas.sensors.retranslate.RetranslatePacketFactory;
 import com.eas.sensors.retranslate.http.HttpPushEncoder;
 import com.eas.server.PlatypusServerCore;
 import com.eas.server.PositioningPacketStorage;
-import com.eas.server.ServerScriptRunner;
-import java.net.IDN;
 import java.net.InetSocketAddress;
 import java.security.cert.X509Certificate;
 import java.util.regex.Matcher;
@@ -40,8 +37,6 @@ import org.apache.mina.transport.socket.nio.NioSocketConnector;
 public class PositioningPacketReciever implements PacketReciever {
 
     public static final String RECIEVER_METHOD_NAME = "recieved";
-    public static final String SEND_REQUEST_METHOD_NAME = "sendRequest";
-    public static final String GET_RESPONSE_METHOD_NAME = "getResponse";
     public static final Pattern URL_PATTERN = Pattern.compile("(?:(?<SCHEMA>[a-z0-9\\+\\.\\-]+):)?(?://)?(?:(?<USER>[a-zA-Z0-9\\$\\-\\_\\.\\+\\!\\*\\'\\(\\)\\,\\\"]+):(?<PASS>[a-zA-Z0-9\\$\\-\\_\\.\\+\\!\\*\\'\\(\\)\\,\\\"]*)@)?(?<URL>[a-zA-Z0-9\\$\\-\\_\\.\\+\\!\\*\\'\\(\\)\\,\\\"]+):?(?<PORT>\\d+)?(?<PATH>/[a-zA-Z0-9\\$\\-\\_\\.\\+\\!\\*\\'\\(\\)\\,\\\"]+)*(?<FILE>/[a-zA-Z0-9\\$\\-\\_\\.\\+\\!\\*\\'\\(\\)\\,\\\"]+)?(?<QUERY>\\?[a-zA-Z0-9\\$\\-\\_\\.\\+\\!\\*\\'\\(\\)\\,\\\"\\;\\/\\?\\:\\@\\=\\&]+)?");
     protected String moduleId;
     protected PlatypusServerCore serverCore;
@@ -56,31 +51,20 @@ public class PositioningPacketReciever implements PacketReciever {
 
     @Override
     public Object received(PositioningPacket aPacket) throws Exception {
-        ServerScriptRunner module = serverCore.getSessionManager().getSystemSession().getModule(moduleId);
-        if (module == null) {
-            module = new ServerScriptRunner(serverCore, serverCore.getSessionManager().getSystemSession(), moduleId, ScriptRunner.initializePlatypusStandardLibScope(), serverCore, serverCore, new Object[]{});
-        }
-        module.execute();
-        serverCore.getSessionManager().setCurrentSession(serverCore.getSessionManager().getSystemSession());
-        Object result;
-        try {
-            result = module.executeMethod(RECIEVER_METHOD_NAME, new Object[]{aPacket});
-        } finally {
-            serverCore.getSessionManager().setCurrentSession(null);
-        }
+        Object result = serverCore.executeServerModuleMethod(moduleId, RECIEVER_METHOD_NAME, new Object[]{aPacket});
         if (result != null) {
             result = ScriptUtils.js2Java(result);
             assert result instanceof String;
             Matcher m = URL_PATTERN.matcher((String) result);
             while (m.find()) {
-                send(aPacket, IDN.toASCII(m.group("URL").toLowerCase()), Integer.parseInt(m.group("PORT")), m.group("SCHEMA").toLowerCase(),
+                send(aPacket, m.group("URL").toLowerCase(), Integer.parseInt(m.group("PORT")), m.group("SCHEMA").toLowerCase(),
                         m.group("USER"), m.group("PASS"), m.group("PATH"));
             }
         }
         return null;
     }
 
-    public Object send(PositioningPacket aPacket, String aHost, Integer aPort, String aProtocolName, String aUser, String aPassword, String aPath) throws Exception{
+    public Object send(PositioningPacket aPacket, String aHost, Integer aPort, String aProtocolName, String aUser, String aPassword, String aPath) throws Exception {
         if (aHost != null && !aHost.isEmpty()
                 && aProtocolName != null && !aProtocolName.isEmpty()
                 && aPort != null && aPort > 0 && aPort < 65535
@@ -95,7 +79,6 @@ public class PositioningPacketReciever implements PacketReciever {
                     if (aProtocolName.equals(RetranslatePacketFactory.HTTPS_PROTOCOL_NAME)) {
                         TrustManager[] trustAllCerts = new TrustManager[]{
                             new X509TrustManager() {
-
                                 @Override
                                 public X509Certificate[] getAcceptedIssuers() {
                                     return null;

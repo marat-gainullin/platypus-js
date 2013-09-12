@@ -106,7 +106,6 @@ import org.openide.windows.TopComponent;
  */
 public class PlatypusFormLayoutView extends TopComponent implements MultiViewElement {
 
-    static final String PROP_DESIGNER_SIZE = "designerSize"; // NOI18N
     // UI components composition
     private JLayeredPane layeredPane;
     private ComponentLayer componentLayer;
@@ -741,7 +740,7 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
                 if (formModel.isCompoundEditInProgress()) {
                     FormModelEvent ev = new FormModelEvent(formModel, FormModelEvent.SYNTHETIC_PROPERTY_CHANGED);
                     ev.setComponentAndContainer(topDesignComponent, null);
-                    ev.setProperty(PROP_DESIGNER_SIZE, getDesignerSize(), designerSize);
+                    ev.setProperty(FormModelEvent.PROP_DESIGNER_SIZE, getDesignerSize(), designerSize);
                     formModel.addUndoableEdit(ev.getUndoableEdit());
                 }
                 componentLayer.setDesignerSize(designerSize);
@@ -1833,7 +1832,6 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
                 int prevType = 0;
                 ComponentContainer prevContainer = null;
                 boolean updateDone = false;
-                boolean deriveDesignerSize = false;
 
                 Set<RADComponent<?>> compsToSelect = null;
                 FormNode nodeToSelect = null;
@@ -1920,16 +1918,19 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
                         RADProperty<?> eventProperty = ev.getComponentProperty();
                         replicator.updateComponentProperty(eventProperty);
                         updateDone = true;
+                    } else if (type == FormModelEvent.TOP_DESIGN_COMPONENT_CHANGED) {
+                        setTopDesignComponent((RADVisualContainer<?>) ev.getComponent(), true);
                     } else if (type == FormModelEvent.SYNTHETIC_PROPERTY_CHANGED) {
                         switch (ev.getPropertyName()) {
-                            case PROP_DESIGNER_SIZE:
-                                Dimension size = (Dimension) ev.getNewPropertyValue();
-                                if (size != null) {
+                            case FormModelEvent.PROP_DESIGNER_SIZE:
+                                //Dimension oldSize = (Dimension) ev.getOldPropertyValue();
+                                if (ev.getComponent() == topDesignComponent) {
+                                    Dimension size = (Dimension) ev.getNewPropertyValue();
                                     componentLayer.setDesignerSize(size);
-                                    deriveDesignerSize = false;
-                                    updateDone = true;
-                                } else { // null size to compute designer size based on content (from resetDesignerSize)
-                                    deriveDesignerSize = true;
+                                    componentLayer.revalidate();
+                                    if (topDesignComponent instanceof RADVisualFormContainer) {
+                                        storeDesignerSize(size);
+                                    }
                                     updateDone = true;
                                 }
                                 break;
@@ -1964,11 +1965,8 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
                 }
 
                 if (updateDone) {
-                    if (deriveDesignerSize) { // compute from preferred size
-                        setupDesignerSize();
-                    } else { // check if not smaller than minimum size
-                        checkDesignerSize();
-                    }
+                    // check if not smaller than minimum size
+                    checkDesignerSize();
                 }
             }
         }

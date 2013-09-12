@@ -25,7 +25,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.net.ssl.SSLContext;
 import org.apache.mina.core.service.IoAcceptor;
-import org.apache.mina.core.service.IoHandler;
 import org.apache.mina.core.session.IoEventType;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.apache.mina.filter.executor.ExecutorFilter;

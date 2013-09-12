@@ -7,6 +7,7 @@ package com.eas.server;
 import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.login.MD5Generator;
 import com.eas.client.login.PlatypusPrincipal;
+import com.eas.client.login.SystemPlatypusPrincipal;
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
@@ -62,19 +63,17 @@ public class SessionManager {
 
     public synchronized Session getOrCreateSession(PlatypusPrincipal aPrincipal, String sessionId) {
         assert sessionId != null;
-        Session result = null;
         if (!sessions.containsKey(sessionId)) {
-            result = createSession(aPrincipal, sessionId);
+            return createSession(aPrincipal, sessionId);
         } else {
-            result = sessions.get(sessionId);
+            return sessions.get(sessionId);
         }
-        return result;
     }
 
     public synchronized Session getSystemSession() {
         Session result = sessions.get(null);
         if (result == null) {
-            result = new Session(serverCore, null, null);
+            result = new Session(serverCore, null, new SystemPlatypusPrincipal());
             sessions.put(null, result);
         }
         return result;

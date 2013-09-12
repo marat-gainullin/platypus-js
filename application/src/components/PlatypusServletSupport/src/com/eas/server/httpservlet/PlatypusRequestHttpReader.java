@@ -37,7 +37,7 @@ import com.eas.client.threetier.requests.StartAppElementRequest;
 import com.eas.script.ScriptUtils;
 import com.eas.server.PlatypusServerCore;
 import com.eas.server.httpservlet.serial.ChangeJsonReader;
-import com.eas.server.httpservlet.serial.rowset.RowsetJsonConstants;
+import com.eas.client.threetier.RowsetJsonConstants;
 import com.eas.util.BinaryUtils;
 import java.io.IOException;
 import java.io.InputStream;

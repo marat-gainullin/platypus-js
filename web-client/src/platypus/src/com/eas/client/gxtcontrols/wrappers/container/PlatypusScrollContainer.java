@@ -202,12 +202,20 @@ public class PlatypusScrollContainer extends FlowLayoutContainer {
 	}
 
 	public void ajustWidth(Widget aChild, int aValue) {
-		if (aChild != null && !isTextArea(aChild))
-			aChild.setPixelSize(aValue, Sizer.getWidgetHeight(aChild));
+		if (aChild != null && !isTextArea(aChild)){
+			if(aChild.getParent() instanceof PlatypusFieldSet)
+				aChild.getParent().setPixelSize(aValue, Sizer.getWidgetHeight(aChild));
+			else
+				aChild.setPixelSize(aValue, Sizer.getWidgetHeight(aChild));
+		}
 	}
 
 	public void ajustHeight(Widget aChild, int aValue) {
-		if (aChild != null && !isTextArea(aChild))
-			aChild.setPixelSize(Sizer.getWidgetWidth(aChild), aValue);
+		if (aChild != null && !isTextArea(aChild)){
+			if(aChild.getParent() instanceof PlatypusFieldSet)
+				aChild.getParent().setPixelSize(Sizer.getWidgetWidth(aChild), aValue);
+			else
+				aChild.setPixelSize(Sizer.getWidgetWidth(aChild), aValue);
+		}
 	}
 }

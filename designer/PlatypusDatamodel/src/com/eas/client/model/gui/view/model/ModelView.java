@@ -27,6 +27,7 @@ import com.eas.client.model.gui.edits.DeleteEntityEdit;
 import com.eas.client.model.gui.edits.DeleteRelationEdit;
 import com.eas.client.model.gui.edits.NewEntityEdit;
 import com.eas.client.model.gui.edits.NotSavableUndoableEditSupport;
+import com.eas.client.model.gui.edits.RelationPolylineEdit;
 import com.eas.client.model.gui.edits.fields.DeleteFieldEdit;
 import com.eas.client.model.gui.edits.fields.NewFieldEdit;
 import com.eas.client.model.gui.selectors.SelectedField;
@@ -50,6 +51,8 @@ import java.awt.*;
 import java.awt.datatransfer.*;
 import java.awt.event.*;
 import java.beans.Introspector;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.util.*;
 import java.util.List;
@@ -92,7 +95,7 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
     public Color toParameterConnectorColor = Color.magenta;
     public Color toFieldConnectorColor = (new JButton()).getBackground().darker().darker().darker();//new Color(41, 110, 255);
     // data 
-    protected M model = null;
+    protected M model;
     // view
     protected Map<Long, EntityView<E>> entityViews = new HashMap<>();
     // model's parameters entity view
@@ -313,6 +316,15 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
         }
         return filtered;
     }
+    protected PropertyChangeListener relationPolylinePropagator = new PropertyChangeListener() {
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+            if ("polyline".equals(evt.getPropertyName()) && evt.getSource() instanceof Relation<?>) {
+                calcConnector((Relation<E>) evt.getSource());
+                repaint();
+            }
+        }
+    };
 
     protected class ModelChangesReflector implements ModelEditingListener<E> {
 
@@ -337,11 +349,13 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
             if (paths != null) {
                 calcConnector(added);
             }
+            added.getChangeSupport().addPropertyChangeListener(relationPolylinePropagator);
             repaint();
         }
 
         @Override
         public void relationRemoved(Relation<E> removed) {
+            removed.getChangeSupport().addPropertyChangeListener(relationPolylinePropagator);
             RelationDesignInfo rdesign = relationsDesignInfo.get(removed);
             if (rdesign != null) {
                 connectorsIndex.remove(getUnscaledBounds(), removed);
@@ -629,7 +643,9 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
             calcSlots(fslot, lslot, rel, entityViews);
             rdesign.setFirstSlot(fslot);
             rdesign.setLastSlot(lslot);
-            if (rdesign.getConnector() == null || !rdesign.getConnector().isManual()) {
+            if (rel.isManual()) {
+                rdesign.setConnector(new Connector(rel.getXs(), rel.getYs()));
+            } else {
                 rdesign.setConnector(paths.find(fslot.lastPoint, lslot.lastPoint));
             }
             DatamodelDesignUtils.addToQuadTree(connectorsIndex, rdesign.getConnector(), rel);
@@ -895,6 +911,9 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
             recreateEntityViews();
             if (model != null) {
                 model.addEditingListener(modelListener);
+                for (Relation<E> rel : model.getRelations()) {
+                    rel.getChangeSupport().addPropertyChangeListener(relationPolylinePropagator);
+                }
             }
         }
     }
@@ -1179,12 +1198,6 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
             public void componentMoved(ComponentEvent e) {
                 entitiesIndex.remove(getUnscaledBounds(), eView);
                 entitiesIndex.insert(eView.getBounds(), eView);
-                for (Relation rel : eView.getEntity().getInOutRelations()) {
-                    RelationDesignInfo rdesign = getRelationDesignInfo(rel);
-                    if (rdesign.getConnector() != null) {
-                        rdesign.getConnector().setManual(false);
-                    }
-                }
                 preparePaths();
                 rerouteConnectors();
             }
@@ -1193,12 +1206,6 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
             public void componentResized(ComponentEvent e) {
                 entitiesIndex.remove(getUnscaledBounds(), eView);
                 entitiesIndex.insert(eView.getBounds(), eView);
-                for (Relation rel : eView.getEntity().getInOutRelations()) {
-                    RelationDesignInfo rdesign = getRelationDesignInfo(rel);
-                    if (rdesign.getConnector() != null) {
-                        rdesign.getConnector().setManual(false);
-                    }
-                }
                 preparePaths();
                 rerouteConnectors();
             }
@@ -1324,8 +1331,9 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
 
     public void rerouteConnectors() {
         if (model != null && needRerouteConnectors) {
-            if(paths == null)
+            if (paths == null) {
                 preparePaths();
+            }
             Set<Relation<E>> modelRels = model.getRelations();
             Set<Relation<E>> filteredRels = new HashSet<>();
             if (modelRels != null) {
@@ -1379,12 +1387,14 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
             hittedSegment = selectHittedRelationSegment(e.getPoint(), EntityView.HALF_INSET_ZONE);
             if (hittedSegment != null) {
                 connectorsIndex.remove(getUnscaledBounds(), hittedSegment.relation);
+                hittedSegment.moveStart();
             }
         }
 
         @Override
         public void mouseReleased(MouseEvent e) {
             if (hittedSegment != null) {
+                hittedSegment.moveEnd(e.getPoint());
                 DatamodelDesignUtils.addToQuadTree(connectorsIndex, hittedSegment.rdesign.getConnector(), hittedSegment.relation);
             }
             hittedSegment = null;
@@ -1416,11 +1426,11 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
                         lPt = SwingUtilities.convertPoint((Component) lo, lPt, ModelView.this);
                     }
                     hittedRelations = hittestRelationsConnectors(lPt, EntityView.HALF_INSET_ZONE);
-                    HittedRelationSegment hittedSegment = selectHittedRelationSegment(lPt, EntityView.HALF_INSET_ZONE);
-                    if (hittedSegment != null) {
-                        if (hittedSegment.isHMovable()) {
+                    HittedRelationSegment lhittedSegment = selectHittedRelationSegment(lPt, EntityView.HALF_INSET_ZONE);
+                    if (lhittedSegment != null) {
+                        if (lhittedSegment.isHMovable()) {
                             setCursor(Cursor.getPredefinedCursor(Cursor.E_RESIZE_CURSOR));
-                        } else if (hittedSegment.isVMovable()) {
+                        } else if (lhittedSegment.isVMovable()) {
                             setCursor(Cursor.getPredefinedCursor(Cursor.N_RESIZE_CURSOR));
                         } else {
                             setCursor(Cursor.getDefaultCursor());
@@ -1458,6 +1468,7 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
             public Point pressedPoint;
             public Relation relation;
             public RelationDesignInfo rdesign;
+            public RelationPolylineEdit edit;
             public int segmentNumber = -1;
 
             public HittedRelationSegment() {
@@ -1487,21 +1498,33 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
                 }
             }
 
-            private void move(Point point) {
+            public void moveStart(){
+                edit = new RelationPolylineEdit(relation, relation.getXs(), relation.getYs(), relation.getXs(), relation.getYs());
+            }
+            
+            public void moveEnd(Point point) {
+                move(point);
+                edit.redo();
+                undoSupport.postEdit(edit);
+            }
+
+            public void move(Point point) {
                 int dx = point.x - pressedPoint.x;
                 int dy = point.y - pressedPoint.y;
                 if (isHMovable()) {
                     if (dx != 0) {
                         rdesign.getConnector().getX()[segmentNumber] += dx;
                         rdesign.getConnector().getX()[segmentNumber + 1] += dx;
-                        rdesign.getConnector().setManual(true);
+                        edit.setNewXs(rdesign.getConnector().getX());
+                        edit.setNewYs(rdesign.getConnector().getY());
                         pressedPoint = point;
                     }
                 } else if (isVMovable()) {
                     if (dy != 0) {
                         rdesign.getConnector().getY()[segmentNumber] += dy;
                         rdesign.getConnector().getY()[segmentNumber + 1] += dy;
-                        rdesign.getConnector().setManual(true);
+                        edit.setNewXs(rdesign.getConnector().getX());
+                        edit.setNewYs(rdesign.getConnector().getY());
                         pressedPoint = point;
                     }
                 }
@@ -2084,7 +2107,7 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
     private boolean isParametersCopy() {
         return isSelectedFieldsOnOneEntity() && isParametersEntity(selectedFields.iterator().next().entity);
     }
-    
+
     protected abstract boolean isAnyDeletableEntities();
 
     public class Delete extends DmAction {

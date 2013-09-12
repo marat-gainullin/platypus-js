@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.sencha.gxt.data.shared.TreeStore;
+import com.sencha.gxt.data.shared.event.StoreDataChangeEvent;
 import com.sencha.gxt.data.shared.loader.BeforeLoadEvent;
 import com.sencha.gxt.data.shared.loader.LoadEvent;
 import com.sencha.gxt.data.shared.loader.LoadExceptionEvent;
@@ -83,4 +84,10 @@ public class MaskingTreeGrid<M> extends TreeGrid<M> {
 			loaderRegistration = loader.addLoaderHandler(loadHandler);
 		}
 	}
+	
+	@Override
+	protected void onDataChange(M parent) {
+		super.onDataChange(parent);
+		getStore().fireEvent(new StoreDataChangeEvent<M>());
+	};
 }

@@ -74,10 +74,9 @@ public class AppElementsFilter {
             + ScriptTransformer.SELF_NAME + ".model.runtime = true;\n"
             + "} catch(e) {\n"
             + "    if(window.console && e != null){\n"
+            + "        window.console.log(e.toString());\n"
             + "        if(e.stack)\n"
             + "            window.console.log(e.stack);\n"
-            + "        else\n"
-            + "            window.console.log(e.toString());\n"
             + "    }\n"
             + "}"
             + "}\n"
@@ -147,11 +146,12 @@ public class AppElementsFilter {
     }
 
     /**
-     * Performs some mutations of a xml content dom.
-     * Adds dependencies. Stripes put <source/>tag and so on.
+     * Performs some mutations of a xml content dom. Adds dependencies. Stripes
+     * put <source/>tag and so on.
+     *
      * @param aAppElement Appelement, whoose content dom to mutated.
      * @return
-     * @throws Exception 
+     * @throws Exception
      */
     protected Filtered filter(ApplicationElement aAppElement) throws Exception {
         if (aAppElement != null && (aAppElement.getType() == ClientConstants.ET_FORM || aAppElement.getType() == ClientConstants.ET_COMPONENT || aAppElement.getType() == ClientConstants.ET_REPORT)) {
@@ -166,7 +166,7 @@ public class AppElementsFilter {
                 assert doc.getChildNodes().getLength() == 1 : "Platypus application elements must contain only one root tag in xml DOM";
                 Node rootNode = doc.getChildNodes().item(0);
                 NodeList docNodes = rootNode.getChildNodes();
-                for (int i = 0; i < docNodes.getLength(); i++) {
+                for (int i = docNodes.getLength() - 1; i >= 0; i--) {
                     Node docNode = docNodes.item(i);
                     switch (docNode.getNodeName()) {
                         case ApplicationElement.SCRIPT_SOURCE_TAG_NAME:

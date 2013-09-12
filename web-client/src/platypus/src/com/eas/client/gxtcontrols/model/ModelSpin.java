@@ -5,6 +5,8 @@ import com.eas.client.gxtcontrols.converters.DoubleRowValueConverter;
 import com.eas.client.gxtcontrols.wrappers.component.PlatypusAdapterStandaloneField;
 import com.eas.client.gxtcontrols.wrappers.handled.PlatypusSpinnerHandledField;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.sencha.gxt.cell.core.client.form.SpinnerFieldCell;
 import com.sencha.gxt.widget.core.client.form.NumberPropertyEditor;
 
@@ -12,6 +14,14 @@ public class ModelSpin extends PlatypusAdapterStandaloneField<Double> {
 
 	public ModelSpin() {
 		super(new PlatypusSpinnerHandledField(new SpinnerFieldCell<Double>(new NumberPropertyEditor.DoublePropertyEditor())));
+		getTarget().addSelectionHandler(new SelectionHandler<Double>(){
+
+			@Override
+            public void onSelection(SelectionEvent<Double> event) {
+				setValue(event.getSelectedItem(), true);
+            }
+			
+		});
 	}
 
 	public void setPublishedField(JavaScriptObject aValue) {
