@@ -2443,7 +2443,7 @@ public class Entity implements RowsetListener {
 
 	private boolean checkRowset() {
 		if (rowset == null) {
-			Logger.getLogger(Entity.class.getName()).log(Level.WARNING, "Model entity [" + getTitle() + "] using while data is not loaded yet.");
+			Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, "Model entity [" + getTitle() + "] using while data is not loaded yet.");
 			return false;
 		} else
 			return true;

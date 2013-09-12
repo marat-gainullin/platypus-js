@@ -392,6 +392,11 @@ public class Model {// implements Cancellable {
 				aModel.@com.eas.client.model.Model::setCommitable(Z)(aValue);
 			}
 		});
+		Object.defineProperty(publishedModel, "pending", {
+			get : function() {
+				return aModel.@com.eas.client.model.Model::isPending()();
+			}
+		});
 		Object.defineProperty(aModule, "model", {
 			get : function() {
 				return publishedModel;

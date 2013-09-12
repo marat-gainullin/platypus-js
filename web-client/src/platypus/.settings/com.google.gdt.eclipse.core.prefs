@@ -1,5 +1,5 @@
 eclipse.preferences.version=1
 jarsExcludedFromWebInfLib=
-launchConfigExternalUrlPrefix=http\://192.168.10.172\:8080/rsp
+launchConfigExternalUrlPrefix=http\://192.168.10.172\:8080/transport/
 warSrcDir=war
 warSrcDirIsOutput=true

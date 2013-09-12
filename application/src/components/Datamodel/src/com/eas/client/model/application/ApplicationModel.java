@@ -190,6 +190,14 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         }
         return false;
     }
+    
+    /**
+     * Stub for compliance with asynchronous model within browser client.
+     * @return Allways false. Because of it is a stub.
+     */
+    public boolean isPending(){
+        return false;
+    }
 
     @ScriptFunction(jsDocText = "Saves model data changes. "
             + "If model can't apply the changed, than exception is thrown. "
