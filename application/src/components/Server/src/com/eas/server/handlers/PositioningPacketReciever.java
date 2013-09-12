@@ -14,6 +14,7 @@ import com.eas.sensors.retranslate.RetranslatePacketFactory;
 import com.eas.sensors.retranslate.http.HttpPushEncoder;
 import com.eas.server.PlatypusServerCore;
 import com.eas.server.PositioningPacketStorage;
+import java.net.IDN;
 import java.net.InetSocketAddress;
 import java.security.cert.X509Certificate;
 import java.util.regex.Matcher;
@@ -57,7 +58,7 @@ public class PositioningPacketReciever implements PacketReciever {
             assert result instanceof String;
             Matcher m = URL_PATTERN.matcher((String) result);
             while (m.find()) {
-                send(aPacket, m.group("URL").toLowerCase(), Integer.parseInt(m.group("PORT")), m.group("SCHEMA").toLowerCase(),
+                send(aPacket, IDN.toASCII(m.group("URL").toLowerCase()), Integer.parseInt(m.group("PORT")), m.group("SCHEMA").toLowerCase(),
                         m.group("USER"), m.group("PASS"), m.group("PATH"));
             }
         }
