@@ -135,6 +135,14 @@ public abstract class PlatypusAdapterField<T> extends AdapterField<T> implements
 	public void setOnSelect(JavaScriptObject aSelectFunction) {
 		if (selectFunction != aSelectFunction) {
 			selectFunction = aSelectFunction;
+			boolean needLayout = false;
+			if (selectButton != null) {
+				selectHandlerRegistration.removeHandler();
+				selectHandlerRegistration = null;
+				selectButton.removeFromParent();
+				selectButton = null;
+				needLayout = true;
+			}
 			if (selectFunction != null && getPublishedField() != null) {
 				selectButton = new TextButton("...");
 				selectButton.setEnabled(editable);
@@ -150,17 +158,11 @@ public abstract class PlatypusAdapterField<T> extends AdapterField<T> implements
 					}
 
 				});
-				// complex.forceLayout();
-			} else {
-				if (selectButton != null) {
-					selectHandlerRegistration.removeHandler();
-					selectHandlerRegistration = null;
-					selectButton.removeFromParent();
-					selectButton = null;
-					// complex.forceLayout();
-				}
+				needLayout = true;
 			}
 			reregisterFocusBlur();
+			if(needLayout)
+				complex.forceLayout();
 		}
 	}
 

@@ -80,8 +80,12 @@ public class DbSwingFactory extends SwingFactory implements DbControlsDesignInfo
             handlersResolvers.add(new Runnable() {
                 @Override
                 public void run() {
-                    control.setOnRender(eventsExecutor.getHandler(aInfo.getHandleFunction()));
-                    control.setOnSelect(eventsExecutor.getHandler(aInfo.getSelectFunction()));
+                    try {
+                        control.setOnRender(eventsExecutor.getHandler(aInfo.getHandleFunction()));
+                        control.setOnSelect(eventsExecutor.getHandler(aInfo.getSelectFunction()));
+                    } catch (Exception ex) {
+                        Logger.getLogger(DbSwingFactory.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
             });
         }

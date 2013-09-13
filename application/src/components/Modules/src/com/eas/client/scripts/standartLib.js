@@ -133,6 +133,12 @@ Object.defineProperty(Resource, "applicationPath", {
 });
 
 
+platypus = {};
+platypus.HTML5 = "Html5 client";
+platypus.J2SE = "Java SE client";
+platypus.agent = platypus.J2SE; 
+
+
 function getTreadLocal(aName) {
     return com.eas.script.ScriptUtils.getThreadLocal(aName);
 }

@@ -95,6 +95,8 @@ public abstract class ScalarModelComponent<D extends DbControlPanel> extends Com
     @ScriptFunction
     public void setOnSelect(Function aValue) throws Exception {
         delegate.setOnSelect(aValue);
+        delegate.revalidate();
+        delegate.repaint();
     }
 
     @ScriptFunction(jsDoc = "Component's on render event handler.")

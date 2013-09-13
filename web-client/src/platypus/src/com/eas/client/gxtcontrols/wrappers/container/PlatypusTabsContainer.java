@@ -15,6 +15,8 @@ public class PlatypusTabsContainer extends SimpleContainer implements HasSelecti
 	protected static class PlatypusTabPanel extends TabPanel {
 		public PlatypusTabPanel() {
 			super();
+			getElement().getStyle().setBackgroundColor("transparent");
+			appearance.getBody(getElement()).getStyle().setBackgroundColor("transparent");
 		}
 		
 		public void forceTabsLayout(){

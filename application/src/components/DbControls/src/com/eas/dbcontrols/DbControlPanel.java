@@ -1182,8 +1182,9 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
     }
 
     @Override
-    public void setOnSelect(Function aHandler) {
+    public void setOnSelect(Function aHandler) throws Exception {
         selectFunction = aHandler;
+        createFieldExtraEditingControls();
     }
 
     @Override

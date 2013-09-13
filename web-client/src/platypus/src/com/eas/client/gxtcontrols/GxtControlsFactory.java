@@ -1145,11 +1145,19 @@ public class GxtControlsFactory {
 						ToolBar container = (ToolBar) parentComp;
 						container.add(top(aComponent));
 					} else if (parentComp instanceof PlatypusHBoxLayoutContainer) {
+						Component target = top(aComponent);
+						Size prefSize = componentsPreferredSize.get((String) aComponent.getData(Form.PID_DATA_KEY));
+						if (prefSize != null)
+							target.setPixelSize(prefSize.getWidth(), prefSize.getHeight());
 						PlatypusHBoxLayoutContainer container = (PlatypusHBoxLayoutContainer) parentComp;
-						container.add(top(aComponent));
+						container.add(target);
 					} else if (parentComp instanceof PlatypusVBoxLayoutContainer) {
+						Component target = top(aComponent);
+						Size prefSize = componentsPreferredSize.get((String) aComponent.getData(Form.PID_DATA_KEY));
+						if (prefSize != null)
+							target.setPixelSize(prefSize.getWidth(), prefSize.getHeight());
 						PlatypusVBoxLayoutContainer container = (PlatypusVBoxLayoutContainer) parentComp;
-						container.add(top(aComponent));
+						container.add(target);
 					} else if (parentComp instanceof MenuBar) {
 						MenuBar container = (MenuBar) parentComp;
 						Component top = top(aComponent);
