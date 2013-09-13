@@ -12,6 +12,7 @@ import com.eas.client.model.Entity;
 import com.eas.client.model.Model;
 import com.eas.client.model.Relation;
 import com.eas.client.model.application.ApplicationParametersEntity;
+import com.eas.client.model.application.ReferenceRelation;
 import com.eas.client.model.dbscheme.DbSchemeModel;
 import com.eas.client.model.gui.DatamodelDesignUtils;
 import com.eas.client.model.gui.edits.DeleteRelationEdit;
@@ -243,7 +244,7 @@ public class RelationsFieldsDragHandler<E extends Entity<?, ?, E>> extends Trans
             Set<Relation<E>> inRels = rightEntity.getInRelations();
             if (inRels != null && !inRels.isEmpty()) {
                 for (Relation<E> rel : inRels) {
-                    if (rightField == rel.getRightField()) {
+                    if (!(rel instanceof ReferenceRelation<?>) && rightField == rel.getRightField()) {
                         return rel;
                     }
                 }
@@ -256,9 +257,11 @@ public class RelationsFieldsDragHandler<E extends Entity<?, ?, E>> extends Trans
         aUndoSupport.beginUpdate();
         try {
             if (alreadyInRelation != null && !(modelView.getModel() instanceof QueryModel)) {
-                DeleteRelationEdit<E> dre = new DeleteRelationEdit<>(alreadyInRelation);
-                dre.redo();
-                aUndoSupport.postEdit(dre);
+                if (!(alreadyInRelation instanceof ReferenceRelation<?>)) {
+                    DeleteRelationEdit<E> dre = new DeleteRelationEdit<>(alreadyInRelation);
+                    dre.redo();
+                    aUndoSupport.postEdit(dre);
+                }
             }
             NewRelationEdit<E> ledit = new NewRelationEdit<>(newRel);
             ledit.redo();

@@ -19,7 +19,7 @@ import com.eas.client.model.Relation;
  */
 public class DeleteRelationEdit<E extends Entity<?, ?, E>> extends DatamodelEdit {
 
-    private Relation<E> relation = null;
+    private Relation<E> relation;
 
     public DeleteRelationEdit() {
         super();

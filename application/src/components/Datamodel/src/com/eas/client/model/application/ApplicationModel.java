@@ -12,6 +12,7 @@ import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.Client;
 import com.eas.client.events.ScriptSourcedEvent;
+import com.eas.client.model.Entity;
 import com.eas.client.model.Model;
 import com.eas.client.model.ModelScriptEventsListener;
 import com.eas.client.model.ModelScriptEventsSupport;
@@ -28,8 +29,10 @@ import java.beans.PropertyChangeListener;
 import java.io.*;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Level;
@@ -190,12 +193,13 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         }
         return false;
     }
-    
+
     /**
      * Stub for compliance with asynchronous model within browser client.
+     *
      * @return Allways false. Because of it is a stub.
      */
-    public boolean isPending(){
+    public boolean isPending() {
         return false;
     }
 
@@ -432,7 +436,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         Logger.getLogger(ApplicationModel.class.getName()).log(Level.WARNING, "createQuery deprecated call detected. Use createEntity instead.");
         return createEntity(aQueryId);
     }
-    
+
     public synchronized Scriptable createEntity(String aQueryId) throws Exception {
         if (client == null) {
             throw new NullPointerException("Null client detected while creating an entity");
@@ -477,6 +481,43 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
                 }
             }
             removeEntity((E) entity2Delete);
+        }
+    }
+
+    public static interface ForeignKeyBindingTask<E extends Entity<?, ?, E>> {
+
+        public void run(ReferenceRelation<E> aRelation);
+    }
+
+    /**
+     * Start of ORM implementation. Finds all primary keys and binds them with
+     * foreign keys. Binding process is different for runtime and design and so,
+     * binding task parameter is accepted.
+     */
+    public void processKeys(ForeignKeyBindingTask aTask) {
+        Map<String, Set<EntityFieldRef<E>>> pksByTable = new HashMap<>();
+        for (E entity : entities.values()) {
+            for (Field field : entity.getFields().getPrimaryKeys()) {
+                Set<EntityFieldRef<E>> pks = pksByTable.get(field.getTableName());
+                if (pks == null) {
+                    pks = new HashSet<>();
+                    pksByTable.put(field.getTableName(), pks);
+                }
+                pks.add(new EntityFieldRef(entity, field));
+            }
+        }
+        for (E entity : entities.values()) {
+            for (Field field : entity.getFields().getForeinKeys()) {
+                assert field.getFk() != null;
+                String tableName = field.getFk().getReferee().getTable();
+                Set<EntityFieldRef<E>> pks = pksByTable.get(tableName);
+                if (pks != null) {
+                    for (EntityFieldRef<E> pk : pks) {
+                        ReferenceRelation<E> relation = new ReferenceRelation<>(entity, field, pk.entity, pk.field);
+                        aTask.run(relation);
+                    }
+                }
+            }
         }
     }
 

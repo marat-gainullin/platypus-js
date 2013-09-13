@@ -21,15 +21,17 @@ import com.sencha.gxt.widget.core.client.container.HBoxLayoutContainer.HBoxLayou
 import com.sencha.gxt.widget.core.client.container.VBoxLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.VBoxLayoutContainer.VBoxLayoutAlign;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
+import com.sencha.gxt.widget.core.client.event.ShowEvent;
 import com.sencha.gxt.widget.core.client.event.SelectEvent.SelectHandler;
+import com.sencha.gxt.widget.core.client.event.ShowEvent.ShowHandler;
 import com.sencha.gxt.widget.core.client.form.CheckBox;
 import com.sencha.gxt.widget.core.client.form.TextField;
 import com.sencha.gxt.widget.core.client.grid.Grid;
 
 public class FindWindow extends Window {
-	
+
 	protected static GridMessages messages = GWT.create(GridMessages.class);
-	
+
 	private Label label;
 	private TextField field;
 	private CheckBox checkCase;
@@ -51,6 +53,12 @@ public class FindWindow extends Window {
 
 		setResizable(false);
 		setPixelSize(400, 135);
+		addShowHandler(new ShowHandler() {
+			@Override
+			public void onShow(ShowEvent event) {
+				setPixelSize(400, 135);
+			}
+		});
 	}
 
 	private void initComponents() {
@@ -180,11 +188,11 @@ public class FindWindow extends Window {
 	}
 
 	private void selectCell(int aRow, int aCol) {
-		if(grid.getSelectionModel() instanceof PlatypusCellSelectionModel<?>){
-			PlatypusCellSelectionModel<Row> cellsSelection = (PlatypusCellSelectionModel<Row>)grid.getSelectionModel();
+		if (grid.getSelectionModel() instanceof PlatypusCellSelectionModel<?>) {
+			PlatypusCellSelectionModel<Row> cellsSelection = (PlatypusCellSelectionModel<Row>) grid.getSelectionModel();
 			cellsSelection.deselectAll();
 			cellsSelection.selectCell(aRow, aCol, true);
-		}else{
+		} else {
 			grid.getSelectionModel().select(aRow, false);
 		}
 	}
