@@ -1516,8 +1516,10 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
 
             public void moveEnd(Point point) {
                 move(point);
-                edit.redo();
-                undoSupport.postEdit(edit);
+                if(edit.getNewxs() != null && edit.getNewys() != null){
+                    edit.redo();
+                    undoSupport.postEdit(edit);
+                }
             }
 
             public void move(Point point) {

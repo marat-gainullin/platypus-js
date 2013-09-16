@@ -27,6 +27,14 @@ public class RelationPolylineEdit extends DatamodelEdit {
         newys = aNewys;
     }
 
+    public int[] getNewxs() {
+        return newxs;
+    }
+
+    public int[] getNewys() {
+        return newys;
+    }
+
     @Override
     protected void redoWork() {
         relation.setXYs(newxs, newys);
@@ -44,5 +52,5 @@ public class RelationPolylineEdit extends DatamodelEdit {
     public void setNewYs(int[] newys) {
         this.newys = newys;
     }
-    
+
 }
