@@ -1019,6 +1019,10 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
         public RowHostObject getInserted() {
             return inserted;
         }
+        
+        public RowHostObject getObject() {
+            return inserted;
+        }
     }
 
     @Override

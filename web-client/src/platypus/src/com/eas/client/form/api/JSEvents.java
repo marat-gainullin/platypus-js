@@ -132,6 +132,11 @@ public class JSEvents {
 				return aPublishedRow;
 			}
 		});
+		Object.defineProperty(published, "object", {
+			get : function(){
+				return aPublishedRow;
+			}
+		});
 		return published;
 	}-*/;
 
