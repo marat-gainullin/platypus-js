@@ -2175,7 +2175,7 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
                         if (rels.size() == 1) {
                             Relation<E> relToDel = rels.iterator().next();
                             if (!(relToDel instanceof ReferenceRelation<?>)) {
-                                DeleteRelationEdit<E> drEdit = new DeleteRelationEdit<>();
+                                DeleteRelationEdit<E> drEdit = new DeleteRelationEdit<>(relToDel);
                                 drEdit.redo();
                                 undoSupport.postEdit(drEdit);
                             }
