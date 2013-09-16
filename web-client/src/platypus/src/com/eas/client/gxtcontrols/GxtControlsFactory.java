@@ -396,34 +396,25 @@ public class GxtControlsFactory {
 
 	private void setIconAndAlign(final CellButtonBase<?> btn, Element aTag, final PublishedComponent aPublished) throws Exception {
 		btn.setIconAlign(IconAlign.LEFT);// default value
+		int horizontalTextPosition = 11;// TRAILING
 		if (aTag.hasAttribute("horizontalTextPosition")) {
-			int horizontalTextPosition = Utils.getIntegerAttribute(aTag, "horizontalTextPosition", 11);// TRAILING
-			switch (horizontalTextPosition) {
-			case 4:// text RIGHT, so icon is to the LEFT
-				btn.setIconAlign(IconAlign.LEFT);
-				break;
-			case 2:// LEFT
-				btn.setIconAlign(IconAlign.RIGHT);
-				break;
-			case 0:// CENTER
-				btn.setIconAlign(IconAlign.LEFT);
-				break;
-			case 10:// LEADING
-				btn.setIconAlign(IconAlign.RIGHT);
-				break;
-			case 11:// TRAILING
-				btn.setIconAlign(IconAlign.LEFT);
-				break;
-			default:
-				btn.setIconAlign(IconAlign.LEFT);
-				break;
-			}
+			horizontalTextPosition = Utils.getIntegerAttribute(aTag, "horizontalTextPosition", 11);// TRAILING
 		}
+		int verticalTextPosition = 0;// CENTER
 		if (aTag.hasAttribute("verticalTextPosition")) {
-			int verticalTextPosition = Utils.getIntegerAttribute(aTag, "verticalTextPosition", 0);// CENTER
+			verticalTextPosition = Utils.getIntegerAttribute(aTag, "verticalTextPosition", 0);// CENTER
+		}
+		switch (horizontalTextPosition) {
+		case 4:// text RIGHT, so icon is to the LEFT
+			btn.setIconAlign(IconAlign.LEFT);
+			break;
+		case 2:// LEFT
+			btn.setIconAlign(IconAlign.RIGHT);
+			break;
+		case 0:// CENTER
 			switch (verticalTextPosition) {
 			case 0:// CENTER
-				btn.setIconAlign(IconAlign.LEFT);
+				btn.setIconAlign(IconAlign.TOP);
 				break;
 			case 1:// TOP
 				btn.setIconAlign(IconAlign.BOTTOM);
@@ -432,10 +423,21 @@ public class GxtControlsFactory {
 				btn.setIconAlign(IconAlign.TOP);
 				break;
 			default:
-				btn.setIconAlign(IconAlign.LEFT);
+				btn.setIconAlign(IconAlign.TOP);
 				break;
 			}
+			break;
+		case 10:// LEADING
+			btn.setIconAlign(IconAlign.RIGHT);
+			break;
+		case 11:// TRAILING
+			btn.setIconAlign(IconAlign.LEFT);
+			break;
+		default:
+			btn.setIconAlign(IconAlign.LEFT);
+			break;
 		}
+		
 		btn.setScale(ButtonScale.SMALL);
 		if (aTag.hasAttribute("icon")) {
 			btn.setIcon(AppClient.getInstance().getImageResource(aTag.getAttribute("icon")).addCallback(new ImageResourceCallback() {
