@@ -25,9 +25,9 @@ id = "com.eas.designer.application.module.actions.RunAction")
 @ActionReferences({
     @ActionReference(path = "Loaders/text/javascript/Actions", position = 150, separatorBefore = 125, separatorAfter = 175)
 })
-public final class RunAction implements ActionListener {
+public class RunAction implements ActionListener {
 
-    private final DataObject dataObject;
+    protected final DataObject dataObject;
 
     public RunAction(DataObject aContext) {
         super();
