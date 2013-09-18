@@ -244,7 +244,8 @@ public class RelationsFieldsDragHandler<E extends Entity<?, ?, E>> extends Trans
             Set<Relation<E>> inRels = rightEntity.getInRelations();
             if (inRels != null && !inRels.isEmpty()) {
                 for (Relation<E> rel : inRels) {
-                    if (!(rel instanceof ReferenceRelation<?>) && rightField == rel.getRightField()) {
+                    assert !(rel instanceof ReferenceRelation<?>);
+                    if (rightField == rel.getRightField()) {
                         return rel;
                     }
                 }
@@ -256,12 +257,11 @@ public class RelationsFieldsDragHandler<E extends Entity<?, ?, E>> extends Trans
     protected void editModelField2FieldRelation(UndoableEditSupport aUndoSupport, Object aTransferrableData, Relation<E> alreadyInRelation, Relation<E> newRel) throws CannotRedoException {
         aUndoSupport.beginUpdate();
         try {
+            assert !(alreadyInRelation instanceof ReferenceRelation<?>);
             if (alreadyInRelation != null && !(modelView.getModel() instanceof QueryModel)) {
-                if (!(alreadyInRelation instanceof ReferenceRelation<?>)) {
-                    DeleteRelationEdit<E> dre = new DeleteRelationEdit<>(alreadyInRelation);
-                    dre.redo();
-                    aUndoSupport.postEdit(dre);
-                }
+                DeleteRelationEdit<E> dre = new DeleteRelationEdit<>(alreadyInRelation);
+                dre.redo();
+                aUndoSupport.postEdit(dre);
             }
             NewRelationEdit<E> ledit = new NewRelationEdit<>(newRel);
             ledit.redo();

@@ -9,8 +9,11 @@ import com.eas.client.model.Relation;
 import com.eas.client.model.application.ApplicationEntity;
 import com.eas.client.model.application.ApplicationModel;
 import com.eas.client.model.application.ApplicationParametersEntity;
+import com.eas.client.model.application.ReferenceRelation;
 import com.eas.client.model.visitors.ApplicationModelVisitor;
 import com.eas.script.StoredFunction;
+import com.eas.xml.dom.XmlDomUtils;
+import java.util.List;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -67,10 +70,40 @@ public class XmlDom2ApplicationModel<E extends ApplicationEntity<?, ?, E>> exten
     }
 
     @Override
+    protected void readRelations() {
+        super.readRelations();
+        List<Element> nl = XmlDomUtils.elementsByTagName(currentNode, ApplicationModel2XmlDom.REFERENCE_RELATION_TAG_NAME);
+        if (nl != null) {
+            Element lcurrentNode = currentNode;
+            try {
+                for (int i = 0; i < nl.size(); i++) {
+                    currentNode = nl.get(i);
+                    ReferenceRelation<E> relation = new ReferenceRelation<>();
+                    relation.accept(this);
+                }
+            } finally {
+                currentNode = lcurrentNode;
+            }
+        }
+    }
+    
+    @Override
     public void visit(Relation<E> relation) {
         super.visit(relation);
         if (currentModel != null) {
             currentModel.addRelation(relation);
+        }
+    }
+
+    @Override
+    public void visit(ReferenceRelation<E> aRelation) {
+        super.visit(aRelation);
+        final String scalarPropertyName = currentNode.getAttribute(ApplicationModel2XmlDom.SCALAR_PROP_NAME_ATTR_NAME);
+        final String collectionPropertyName = currentNode.getAttribute(ApplicationModel2XmlDom.COLLECTION_PROP_NAME_ATTR_NAME);
+        aRelation.setScalarPropertyName(scalarPropertyName);
+        aRelation.setCollectionPropertyName(collectionPropertyName);
+        if (currentModel != null) {
+            ((ApplicationModel<E, ?, ?, ?>)currentModel).getReferenceRelations().add(aRelation);
         }
     }
 

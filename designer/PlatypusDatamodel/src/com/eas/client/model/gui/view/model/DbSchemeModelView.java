@@ -20,7 +20,7 @@ import com.eas.client.dbstructure.SqlActionsController.DropFieldAction;
 import com.eas.client.dbstructure.SqlActionsController.ModifyFieldAction;
 import com.eas.client.dbstructure.exceptions.DbActionException;
 import com.eas.client.dbstructure.gui.edits.*;
-import com.eas.client.dbstructure.gui.view.ForeignKeySettingsDialog;
+import com.eas.client.model.gui.SettingsDialog;
 import com.eas.client.dbstructure.gui.view.ForeignKeySettingsView;
 import com.eas.client.dbstructure.store.XmlDom2DbSchema;
 import com.eas.client.metadata.DbTableIndexSpec;
@@ -585,7 +585,6 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbS
                     return;
                 }
                 section.addEdit(edit);
-                NewEntityEdit<FieldsEntity, DbSchemeModel> entityEdit = new NewEntityEdit<>(model);
                 try {
                     Rectangle rect = findPlaceForEntityAdd(0, 0);
                     FieldsEntity entity = model.newGenericEntity();
@@ -595,15 +594,15 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbS
                     entity.setWidth(rect.width);
                     entity.setHeight(rect.height);
                     entity.setTableName(tableName);
-                    entityEdit.setEntity(entity);
+                    NewEntityEdit<FieldsEntity, DbSchemeModel> entityEdit = new NewEntityEdit<>(model, entity);
                     entityEdit.redo();
+                    section.addEdit(entityEdit);
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(DbSchemeModelView.this, ex.getLocalizedMessage(), DbStructureUtils.getString("dbSchemeEditor"), JOptionPane.ERROR_MESSAGE);
-                    return;
+                } finally {
+                    section.end();
+                    undoSupport.postEdit(section);
                 }
-                section.addEdit(entityEdit);
-                section.end();
-                undoSupport.postEdit(section);
             }
         }
     }
@@ -1107,13 +1106,26 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbS
     }
 
     public void askForeignKeyProperties(JFrame aPrentFrame, Relation<FieldsEntity> aRelation) {
-        ForeignKeySettingsView fkView = new ForeignKeySettingsView();
+        final ForeignKeySettingsView fkView = new ForeignKeySettingsView();
         fkView.setUpdateRule(aRelation.getFkUpdateRule());
         fkView.setDeleteRule(aRelation.getFkDeleteRule());
         fkView.setDeferred(aRelation.isFkDeferrable());
         fkView.setConstraintName(aRelation.getFkName());
-        ForeignKeySettingsDialog dlg = new ForeignKeySettingsDialog(aPrentFrame, fkView, true);
+
+        SettingsDialog dlg = new SettingsDialog(aPrentFrame, fkView, true, new SettingsDialog.Checker() {
+            @Override
+            public boolean check() {
+                String constraintName = fkView.getConstraintName();
+                if (constraintName != null && !constraintName.isEmpty()) {
+                    return true;
+                } else {
+                    fkView.focusConstraintName();
+                    return false;
+                }
+            }
+        });
         Dimension size = new Dimension(450, 200);
+        dlg.setTitle(DbStructureUtils.getString("ForeignKeySettingsDialogTitle"));
         dlg.setSize(size);
         dlg.setMinimumSize(size);
         dlg.setVisible(true);

@@ -9,9 +9,12 @@ import com.bearsoft.rowset.compacts.CompactClob;
 import com.bearsoft.rowset.exceptions.InvalidColIndexException;
 import com.bearsoft.rowset.exceptions.RowsetException;
 import com.eas.client.model.Model;
+import com.eas.client.model.application.ApplicationEntity;
 import com.eas.script.ScriptUtils;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.mozilla.javascript.Context;
 import org.mozilla.javascript.EvaluatorException;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
@@ -22,12 +25,18 @@ import org.mozilla.javascript.ScriptableObject;
  */
 public class RowHostObject extends ScriptableObject {
 
-    protected Row row = null;
+    protected Row row;
+    protected ApplicationEntity<?, ?, ?> entity;
 
-    public RowHostObject(Scriptable aScope, Row aRow) {
+    public RowHostObject(Scriptable aScope, Row aRow, ApplicationEntity<?, ?, ?> aEntity) {
         super(aScope, null);
         row = aRow;
+        entity = aEntity;
+        assert entity != null;
         defineFunctionProperties(new String[]{"unwrap", "getColumnObject", "getLength", "toString"}, RowHostObject.class, EMPTY);
+        for(Entry<String, ScriptableObject> entry : entity.getOrmDefinitions().entrySet()){
+            defineOwnProperty(Context.getCurrentContext(), entry.getKey(), entry.getValue());
+        }
     }
 
     @Override
@@ -191,11 +200,11 @@ public class RowHostObject extends ScriptableObject {
         }
     }
 
-    public static RowHostObject publishRow(Scriptable aScope, Row aRow) throws Exception {
+    public static RowHostObject publishRow(Scriptable aScope, Row aRow, ApplicationEntity<?, ?, ?> aEntity) throws Exception {
         if (aRow != null) {
             Object published = aRow.getTag();
             if (published == null) {
-                published = new RowHostObject(aScope, aRow);
+                published = new RowHostObject(aScope, aRow, aEntity);
                 aRow.setTag(published);
             }
             assert published instanceof RowHostObject;

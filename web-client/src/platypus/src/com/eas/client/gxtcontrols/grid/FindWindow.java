@@ -1,7 +1,5 @@
 package com.eas.client.gxtcontrols.grid;
 
-import java.util.List;
-
 import com.bearsoft.rowset.Row;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Element;
@@ -10,7 +8,6 @@ import com.google.gwt.user.client.ui.Label;
 import com.sencha.gxt.core.client.util.Margins;
 import com.sencha.gxt.core.client.util.Padding;
 import com.sencha.gxt.data.shared.ListStore;
-import com.sencha.gxt.data.shared.Store;
 import com.sencha.gxt.widget.core.client.Window;
 import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
 import com.sencha.gxt.widget.core.client.button.TextButton;
@@ -21,8 +18,8 @@ import com.sencha.gxt.widget.core.client.container.HBoxLayoutContainer.HBoxLayou
 import com.sencha.gxt.widget.core.client.container.VBoxLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.VBoxLayoutContainer.VBoxLayoutAlign;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
-import com.sencha.gxt.widget.core.client.event.ShowEvent;
 import com.sencha.gxt.widget.core.client.event.SelectEvent.SelectHandler;
+import com.sencha.gxt.widget.core.client.event.ShowEvent;
 import com.sencha.gxt.widget.core.client.event.ShowEvent.ShowHandler;
 import com.sencha.gxt.widget.core.client.form.CheckBox;
 import com.sencha.gxt.widget.core.client.form.TextField;
@@ -154,7 +151,7 @@ public class FindWindow extends Window {
 			}
 			col = 0;
 		}
-		AlertMessageBox alert = new AlertMessageBox(messages.grid(), messages.endSearch());
+		AlertMessageBox alert = new AlertMessageBox(messages.heading(), messages.endSearch());
 		alert.show();
 		return false;
 	}

@@ -15,6 +15,6 @@ import com.eas.client.model.Relation;
 public interface ModelVisitor<E extends Entity<?, ?, E>> {
 
     public void visit(Relation<E> aRelation);
-
+    
     public void visit(Field aField);
 }

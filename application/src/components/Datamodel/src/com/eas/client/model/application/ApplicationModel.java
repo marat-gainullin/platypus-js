@@ -4,6 +4,7 @@
  */
 package com.eas.client.model.application;
 
+import com.eas.client.model.store.ApplicationModel2XmlDom;
 import com.bearsoft.rowset.compacts.CompactBlob;
 import com.bearsoft.rowset.compacts.CompactClob;
 import com.bearsoft.rowset.dataflow.TransactionListener;
@@ -12,7 +13,6 @@ import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.Client;
 import com.eas.client.events.ScriptSourcedEvent;
-import com.eas.client.model.Entity;
 import com.eas.client.model.Model;
 import com.eas.client.model.ModelScriptEventsListener;
 import com.eas.client.model.ModelScriptEventsSupport;
@@ -29,10 +29,8 @@ import java.beans.PropertyChangeListener;
 import java.io.*;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Level;
@@ -50,6 +48,7 @@ import org.w3c.dom.Document;
 public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P extends E, C extends Client, Q extends Query<C>> extends Model<E, P, C, Q> {
 
     public static final String SCRIPT_MODEL_NAME = "model";
+    protected Set<ReferenceRelation<E>> referenceRelations = new HashSet<>();
     protected Set<Long> savedRowIndexEntities = new HashSet<>();
     protected List<Entry<E, Integer>> savedEntitiesRowIndexes = new ArrayList<>();
     protected List<ScriptEvent<E>> scriptEventsQueue = new ArrayList<>();
@@ -80,6 +79,34 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
             if (parametersEntity != null) {
                 parametersEntity.defineProperties();
             }
+            //
+            for (ReferenceRelation<E> aRelation : referenceRelations) {
+                String scalarPropertyName = aRelation.getScalarPropertyName();                
+                if (scalarPropertyName == null || scalarPropertyName.isEmpty()) {
+                    scalarPropertyName = aRelation.getRightEntity().getName();
+                }
+                if (scalarPropertyName != null && !scalarPropertyName.isEmpty()) {
+                    aRelation.getLeftEntity().putOrmDefinition(
+                            scalarPropertyName,
+                            ScriptUtils.scalarPropertyDefinition(
+                            aRelation.getRightEntity().getRowsetWrap(),
+                            aRelation.getRightField().getName(),
+                            aRelation.getLeftField().getName()));
+                }
+                String collectionPropertyName = aRelation.getCollectionPropertyName();
+                if (collectionPropertyName == null || collectionPropertyName.isEmpty()) {
+                    collectionPropertyName = aRelation.getLeftEntity().getName();
+                }
+                if (collectionPropertyName != null && !collectionPropertyName.isEmpty()) {
+                    aRelation.getRightEntity().putOrmDefinition(
+                            collectionPropertyName,
+                            ScriptUtils.collectionPropertyDefinition(
+                            aRelation.getLeftEntity().getRowsetWrap(),
+                            aRelation.getRightField().getName(),
+                            aRelation.getLeftField().getName()));
+                }
+            }
+            //////////////////
             ((ScriptableObject) scriptScope).defineProperty(SCRIPT_MODEL_NAME, ScriptUtils.javaToJS(this, aScriptScope), ScriptableObject.READONLY);
         }
         changeSupport.firePropertyChange("scriptScope", oldValue, scriptScope);
@@ -98,6 +125,21 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
             for (ScriptEvent event : scriptEventsQueue) {
                 event.resolveHandler();
             }
+        }
+    }
+
+    @Override
+    public void checkRelationsIntegrity() {
+        super.checkRelationsIntegrity();
+        List<ReferenceRelation<E>> toDel = new ArrayList<>();
+        for (ReferenceRelation<E> rel : referenceRelations) {
+            if (rel.getLeftEntity() == null || (rel.getLeftField() == null && rel.getLeftParameter() == null)
+                    || rel.getRightEntity() == null || (rel.getRightField() == null && rel.getRightParameter() == null)) {
+                toDel.add(rel);
+            }
+        }
+        for (ReferenceRelation<E> rel : toDel) {
+            referenceRelations.remove(rel);
         }
     }
 
@@ -484,41 +526,28 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         }
     }
 
-    public static interface ForeignKeyBindingTask<E extends Entity<?, ?, E>> {
-
-        public void run(ReferenceRelation<E> aRelation);
+    public void addReferenceRelation(ReferenceRelation<E> aRelation) {
+        referenceRelations.add(aRelation);
+        fireRelationAdded(aRelation);
     }
 
-    /**
-     * Start of ORM implementation. Finds all primary keys and binds them with
-     * foreign keys. Binding process is different for runtime and design and so,
-     * binding task parameter is accepted.
-     */
-    public void processKeys(ForeignKeyBindingTask aTask) {
-        Map<String, Set<EntityFieldRef<E>>> pksByTable = new HashMap<>();
-        for (E entity : entities.values()) {
-            for (Field field : entity.getFields().getPrimaryKeys()) {
-                Set<EntityFieldRef<E>> pks = pksByTable.get(field.getTableName());
-                if (pks == null) {
-                    pks = new HashSet<>();
-                    pksByTable.put(field.getTableName(), pks);
-                }
-                pks.add(new EntityFieldRef(entity, field));
+    public void removeReferenceRelation(ReferenceRelation<E> aRelation) {
+        referenceRelations.remove(aRelation);
+        fireRelationRemoved(aRelation);
+    }
+
+    public Set<ReferenceRelation<E>> getReferenceRelations() {
+        return referenceRelations;
+    }
+
+    public Set<ReferenceRelation<E>> getReferenceRelationsByEntity(E aEntity) {
+        Set<ReferenceRelation<E>> res = new HashSet<>();
+        for (ReferenceRelation<E> rel : referenceRelations) {
+            if (rel.getLeftEntity() == aEntity || rel.getRightEntity() == aEntity) {
+                res.add(rel);
             }
         }
-        for (E entity : entities.values()) {
-            for (Field field : entity.getFields().getForeinKeys()) {
-                assert field.getFk() != null;
-                String tableName = field.getFk().getReferee().getTable();
-                Set<EntityFieldRef<E>> pks = pksByTable.get(tableName);
-                if (pks != null) {
-                    for (EntityFieldRef<E> pk : pks) {
-                        ReferenceRelation<E> relation = new ReferenceRelation<>(entity, field, pk.entity, pk.field);
-                        aTask.run(relation);
-                    }
-                }
-            }
-        }
+        return res;
     }
 
     public CompactBlob loadBlobFromFile(File aFile) throws IOException {

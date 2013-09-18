@@ -90,7 +90,7 @@ public class RowsetDistributedTableTest extends GridBaseTest {
         rowsEntity.setRowset(rowsRowset);
         dm.addEntity(rowsEntity);
         TableColumnModel columnModel = new DefaultTableColumnModel();
-        RowsetsTableModel model = new RowsetsTableModel(rowsRowset, null, null);
+        RowsetsTableModel model = new RowsetsTableModel(null, rowsRowset, null, null);
         TableRowSorter sorter = new TableRowSorter(model);
         for (int i = 1; i <= rowsRowset.getFields().getFieldsCount(); i++) {
             Rowset colRowset = initRowset();
@@ -150,7 +150,7 @@ public class RowsetDistributedTableTest extends GridBaseTest {
         rowsEntity.setRowset(rowsRowset);
         dm.addEntity(rowsEntity);
         TableColumnModel columnModel = new DefaultTableColumnModel();
-        RowsetsTableModel model = new RowsetsTableModel(rowsRowset, null, null);
+        RowsetsTableModel model = new RowsetsTableModel(null, rowsRowset, null, null);
         TableRowSorter sorter = new TableRowSorter(model);
         for (int i = 1; i <= rowsRowset.getFields().getFieldsCount(); i++) {
             Rowset colRowset = initRowset();

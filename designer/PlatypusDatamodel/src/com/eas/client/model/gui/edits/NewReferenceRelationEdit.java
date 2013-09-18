@@ -9,17 +9,17 @@
  */
 package com.eas.client.model.gui.edits;
 
-import com.eas.client.model.Entity;
-import com.eas.client.model.Model;
+import com.eas.client.model.application.ApplicationEntity;
+import com.eas.client.model.application.ReferenceRelation;
 
 /**
  *
  * @author mg
  */
-public class NewEntityEdit<E extends Entity<?, ?, E>, M extends Model<E, ?, ?, ?>> extends DeleteEntityEdit<E, M> {
+public class NewReferenceRelationEdit<E extends ApplicationEntity<?, ?, E>> extends DeleteReferenceRelationEdit<E> {
 
-    public NewEntityEdit(M aModel, E aEntity) {
-        super(aModel, aEntity);
+    public NewReferenceRelationEdit(ReferenceRelation<E> aRel) {
+        super(aRel);
     }
 
     @Override

@@ -5,6 +5,7 @@
 package com.eas.client.model.gui.edits;
 
 import com.eas.client.model.Relation;
+import com.eas.client.model.application.ApplicationDbEntity;
 
 /**
  *
@@ -12,13 +13,13 @@ import com.eas.client.model.Relation;
  */
 public class RelationPolylineEdit extends DatamodelEdit {
 
-    protected Relation relation;
+    protected Relation<ApplicationDbEntity> relation;
     protected int[] oldxs;
     protected int[] oldys;
     protected int[] newxs;
     protected int[] newys;
 
-    public RelationPolylineEdit(Relation aRelation, int[] aOldxs, int[] aOldys, int[] aNewxs, int[] aNewys) {
+    public RelationPolylineEdit(Relation<ApplicationDbEntity> aRelation, int[] aOldxs, int[] aOldys, int[] aNewxs, int[] aNewys) {
         super();
         relation = aRelation;
         oldxs = aOldxs;

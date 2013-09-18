@@ -781,6 +781,7 @@ public class GxtGridFactory {
 					cb.setTypeAhead(true);
 					cb.setTriggerAction(TriggerAction.ALL);
 					cb.getCell().setHideTrigger(!list);
+					cb.setEditable(false);
 					PlatypusAdapterCellField<Object> resComp = new PlatypusAdapterCellField<Object>(cb, column);
 					JavaScriptObject published = Publisher.publishColumnEditor(cb, resComp);
 					cb.setData(Form.PUBLISHED_DATA_KEY, published);

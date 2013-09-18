@@ -60,6 +60,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
     protected Function onRequeried;
     protected Function onFiltered;
     protected RowsetHostObject<E> sRowsetWrap;
+    protected Map<String, ScriptableObject> ormDefinitions;
     protected transient List<Integer> filterConstraints = new ArrayList<>();
     protected transient Rowset rowset = null;
     protected transient boolean filteredWhileAjusting = false;
@@ -80,6 +81,19 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
 
     public ApplicationEntity(String aQueryId) {
         super(aQueryId);
+    }
+
+    public void putOrmDefinition(String aName, ScriptableObject aDefinition) {
+        if (aName != null && !aName.isEmpty() && aDefinition != null) {
+            if (!ormDefinitions.containsKey(aName)) {
+                ormDefinitions.put(aName, aDefinition);
+            }else
+                Logger.getLogger(ApplicationEntity.class.getName()).log(Level.WARNING, String.format("ORM property %s redefinition attempt on entity %s %s.", aName, name != null && !name.isEmpty() ? name : "", title != null && !title.isEmpty() ? "{" + title + "]" : ""));
+        }
+    }
+
+    public Map<String, ScriptableObject> getOrmDefinitions() {
+        return Collections.unmodifiableMap(ormDefinitions);
     }
 
     @Override
@@ -959,7 +973,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
                         ScriptUtils.enterContext();
                     }
                     try {
-                        Object sRes = executeScriptEvent(onBeforeChange, new EntityInstanceChangeEvent(RowHostObject.publishRow(model.getScriptScope(), aEvent.getChangedRow()), field, ScriptUtils.javaToJS(aEvent.getOldValue(), model.getScriptScope()), ScriptUtils.javaToJS(aEvent.getNewValue(), model.getScriptScope())));
+                        Object sRes = executeScriptEvent(onBeforeChange, new EntityInstanceChangeEvent(RowHostObject.publishRow(model.getScriptScope(), aEvent.getChangedRow(), this), field, ScriptUtils.javaToJS(aEvent.getOldValue(), model.getScriptScope()), ScriptUtils.javaToJS(aEvent.getNewValue(), model.getScriptScope())));
                         if (sRes != null && sRes instanceof Boolean) {
                             return (Boolean) sRes;
                         }
@@ -992,7 +1006,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
                         ScriptUtils.enterContext();
                     }
                     try {
-                        enqueueScriptEvent(onAfterChange, new EntityInstanceChangeEvent(RowHostObject.publishRow(model.getScriptScope(), aEvent.getChangedRow()), field, ScriptUtils.javaToJS(aEvent.getOldValue(), model.getScriptScope()), ScriptUtils.javaToJS(aEvent.getNewValue(), model.getScriptScope())));
+                        enqueueScriptEvent(onAfterChange, new EntityInstanceChangeEvent(RowHostObject.publishRow(model.getScriptScope(), aEvent.getChangedRow(), this), field, ScriptUtils.javaToJS(aEvent.getOldValue(), model.getScriptScope()), ScriptUtils.javaToJS(aEvent.getNewValue(), model.getScriptScope())));
                     } finally {
                         if (!wasContext) {
                             Context.exit();
@@ -1019,7 +1033,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
         public RowHostObject getInserted() {
             return inserted;
         }
-        
+
         public RowHostObject getObject() {
             return inserted;
         }
@@ -1037,7 +1051,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
                 ScriptUtils.enterContext();
             }
             try {
-                Object sRes = executeScriptEvent(onBeforeInsert, new EntityInstanceInsert(sRowsetWrap, RowHostObject.publishRow(model.getScriptScope(), event.getRow())));
+                Object sRes = executeScriptEvent(onBeforeInsert, new EntityInstanceInsert(sRowsetWrap, RowHostObject.publishRow(model.getScriptScope(), event.getRow(), this)));
                 if (sRes != null && sRes instanceof Boolean) {
                     return (Boolean) sRes;
                 }
@@ -1079,7 +1093,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
                 ScriptUtils.enterContext();
             }
             try {
-                Object sRes = executeScriptEvent(onBeforeDelete, new EntityInstanceDelete(sRowsetWrap, RowHostObject.publishRow(model.getScriptScope(), event.getRow())));
+                Object sRes = executeScriptEvent(onBeforeDelete, new EntityInstanceDelete(sRowsetWrap, RowHostObject.publishRow(model.getScriptScope(), event.getRow(), this)));
                 if (sRes != null && sRes instanceof Boolean) {
                     return (Boolean) sRes;
                 }
@@ -1106,7 +1120,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
                 ScriptUtils.enterContext();
             }
             try {
-                enqueueScriptEvent(onAfterInsert, new EntityInstanceInsert(sRowsetWrap, RowHostObject.publishRow(model.getScriptScope(), event.getRow())));
+                enqueueScriptEvent(onAfterInsert, new EntityInstanceInsert(sRowsetWrap, RowHostObject.publishRow(model.getScriptScope(), event.getRow(), this)));
             } finally {
                 if (!wasContext) {
                     Context.exit();
@@ -1131,7 +1145,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
                 ScriptUtils.enterContext();
             }
             try {
-                enqueueScriptEvent(onAfterDelete, new EntityInstanceDelete(sRowsetWrap, RowHostObject.publishRow(model.getScriptScope(), event.getRow())));
+                enqueueScriptEvent(onAfterDelete, new EntityInstanceDelete(sRowsetWrap, RowHostObject.publishRow(model.getScriptScope(), event.getRow(), this)));
             } finally {
                 if (!wasContext) {
                     Context.exit();
@@ -1255,6 +1269,24 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
         appTarget.setOnBeforeDelete(onBeforeDelete);
         appTarget.setOnBeforeInsert(onBeforeInsert);
         appTarget.setOnBeforeScroll(onBeforeScroll);
+    }
+
+    @Override
+    public boolean addInRelation(Relation<E> aRelation) {
+        if (aRelation instanceof ReferenceRelation<?>) {
+            return false;
+        } else {
+            return super.addInRelation(aRelation);
+        }
+    }
+
+    @Override
+    public boolean addOutRelation(Relation<E> aRelation) {
+        if (aRelation instanceof ReferenceRelation<?>) {
+            return false;
+        } else {
+            return super.addOutRelation(aRelation);
+        }
     }
 
     protected void resolveHandlers() {

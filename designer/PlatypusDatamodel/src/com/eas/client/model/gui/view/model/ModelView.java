@@ -326,6 +326,21 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
         }
     };
 
+    protected void paintRelations(Graphics2D g2d) {
+        paintConnectors(g2d, modelRelationsToBeRerouted(), connectorsStroke);
+        Color old2FieldColor = toFieldConnectorColor;
+        toFieldConnectorColor = toFieldConnectorColor.darker();
+        Color old2ParameterColor = toParameterConnectorColor;
+        toParameterConnectorColor = toParameterConnectorColor.darker();
+        try {
+            paintConnectors(g2d, selectedRelations, selectedConnectorsStroke);
+            paintConnectors(g2d, hittedRelations, hittedConnectorsStroke);
+        } finally {
+            toFieldConnectorColor = old2FieldColor;
+            toParameterConnectorColor = old2ParameterColor;
+        }
+    }
+
     protected class ModelChangesReflector implements ModelEditingListener<E> {
 
         @Override
@@ -355,7 +370,7 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
 
         @Override
         public void relationRemoved(Relation<E> removed) {
-            removed.getChangeSupport().addPropertyChangeListener(relationPolylinePropagator);
+            removed.getChangeSupport().removePropertyChangeListener(relationPolylinePropagator);
             RelationDesignInfo rdesign = relationsDesignInfo.get(removed);
             if (rdesign != null) {
                 connectorsIndex.remove(getUnscaledBounds(), removed);
@@ -520,6 +535,10 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
 
     public boolean isSelectedRelations() {
         return selectedRelations != null && !selectedRelations.isEmpty();
+    }
+
+    public boolean isSelectedDeletableRelations() {
+        return isSelectedRelations();
     }
 
     public boolean isSelectedFieldsOnOneEntity() {
@@ -928,9 +947,8 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
         if (aView != null) {
             if (getParent() != null && getParent().getParent() != null && getParent().getParent() instanceof JScalablePanel) {
                 JScalablePanel sp = (JScalablePanel) getParent().getParent();
-                Rectangle rect2Fit = null;
                 //Container cp = aView.getParent();
-                rect2Fit = aView.getBounds();
+                 Rectangle rect2Fit = aView.getBounds();
                 //rect2Fit.height -= cp.getHeight();
                 sp.makeVisible(rect2Fit);
                 if (needToSelect) {
@@ -985,18 +1003,7 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
         super.paintChildren(g);
         if (g instanceof Graphics2D) {
             Graphics2D g2d = (Graphics2D) g;
-            paintConnectors(g2d, model.getRelations(), connectorsStroke);
-            Color old2FieldColor = toFieldConnectorColor;
-            toFieldConnectorColor = toFieldConnectorColor.darker();
-            Color old2ParameterColor = toParameterConnectorColor;
-            toParameterConnectorColor = toParameterConnectorColor.darker();
-            try {
-                paintConnectors(g2d, selectedRelations, selectedConnectorsStroke);
-                paintConnectors(g2d, hittedRelations, hittedConnectorsStroke);
-            } finally {
-                toFieldConnectorColor = old2FieldColor;
-                toParameterConnectorColor = old2ParameterColor;
-            }
+            paintRelations(g2d);
             paintEntitiesBorders(g2d);
         }
     }
@@ -1159,11 +1166,10 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
             for (EntityFieldTuple t : toDelete) {
                 Set<Relation<E>> toDel = FieldsEntity.getInOutRelationsByEntityField(t.entity, t.field);
                 for (Relation rel : toDel) {
-                    if (!(rel instanceof ReferenceRelation)) {
-                        DeleteRelationEdit drEdit = new DeleteRelationEdit(rel);
-                        drEdit.redo();
-                        section.addEdit(drEdit);
-                    }
+                    assert !(rel instanceof ReferenceRelation);
+                    DeleteRelationEdit drEdit = new DeleteRelationEdit(rel);
+                    drEdit.redo();
+                    section.addEdit(drEdit);
                 }
                 DeleteFieldEdit edit = new DeleteFieldEdit(t.entity, t.field);
                 edit.redo();
@@ -1341,12 +1347,16 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
         }
     }
 
+    protected Set<Relation<E>> modelRelationsToBeRerouted() {
+        return model.getRelations();
+    }
+
     public void rerouteConnectors() {
         if (model != null && needRerouteConnectors) {
             if (paths == null) {
                 preparePaths();
             }
-            Set<Relation<E>> modelRels = model.getRelations();
+            Set<Relation<E>> modelRels = modelRelationsToBeRerouted();
             Set<Relation<E>> filteredRels = new HashSet<>();
             if (modelRels != null) {
                 for (Relation<E> rel : modelRels) {
@@ -1396,20 +1406,22 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
 
         @Override
         public void mousePressed(MouseEvent e) {
-            hittedSegment = selectHittedRelationSegment(e.getPoint(), EntityView.HALF_INSET_ZONE);
-            if (hittedSegment != null) {
-                connectorsIndex.remove(getUnscaledBounds(), hittedSegment.relation);
-                hittedSegment.moveStart();
+            if (SwingUtilities.isLeftMouseButton(e)) {
+                hittedSegment = selectHittedRelationSegment(e.getPoint(), EntityView.HALF_INSET_ZONE);
+                if (hittedSegment != null) {
+                    hittedSegment.moveStart();
+                }
             }
         }
 
         @Override
         public void mouseReleased(MouseEvent e) {
-            if (hittedSegment != null) {
-                hittedSegment.moveEnd(e.getPoint());
-                DatamodelDesignUtils.addToQuadTree(connectorsIndex, hittedSegment.rdesign.getConnector(), hittedSegment.relation);
+            if (SwingUtilities.isLeftMouseButton(e)) {
+                if (hittedSegment != null) {
+                    hittedSegment.moveEnd(e.getPoint());
+                }
+                hittedSegment = null;
             }
-            hittedSegment = null;
         }
 
         @Override
@@ -1516,7 +1528,7 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
 
             public void moveEnd(Point point) {
                 move(point);
-                if(edit.getNewxs() != null && edit.getNewys() != null){
+                if (edit.getNewxs() != null && edit.getNewys() != null) {
                     edit.redo();
                     undoSupport.postEdit(edit);
                 }
@@ -1527,19 +1539,25 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
                 int dy = point.y - pressedPoint.y;
                 if (isHMovable()) {
                     if (dx != 0) {
-                        rdesign.getConnector().getX()[segmentNumber] += dx;
-                        rdesign.getConnector().getX()[segmentNumber + 1] += dx;
-                        edit.setNewXs(rdesign.getConnector().getX());
+                        connectorsIndex.remove(getUnscaledBounds(), relation);
+                        int[] xs = rdesign.getConnector().getX();
+                        xs[segmentNumber] += dx;
+                        xs[segmentNumber + 1] += dx;
+                        edit.setNewXs(xs);
                         edit.setNewYs(rdesign.getConnector().getY());
                         pressedPoint = point;
+                        DatamodelDesignUtils.addToQuadTree(connectorsIndex, rdesign.getConnector(), relation);
                     }
                 } else if (isVMovable()) {
                     if (dy != 0) {
-                        rdesign.getConnector().getY()[segmentNumber] += dy;
-                        rdesign.getConnector().getY()[segmentNumber + 1] += dy;
+                        connectorsIndex.remove(getUnscaledBounds(), relation);
+                        int[] ys = rdesign.getConnector().getY();
+                        ys[segmentNumber] += dy;
+                        ys[segmentNumber + 1] += dy;
                         edit.setNewXs(rdesign.getConnector().getX());
-                        edit.setNewYs(rdesign.getConnector().getY());
+                        edit.setNewYs(ys);
                         pressedPoint = point;
+                        DatamodelDesignUtils.addToQuadTree(connectorsIndex, rdesign.getConnector(), relation);
                     }
                 }
             }
@@ -2039,25 +2057,18 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
                     if (selected != null) {
                         int x = ALLOCATION_STEP_X;
                         int y = ALLOCATION_STEP_Y;
-                        for (TableRef rSelected : selected) {
-                            Rectangle rect = findPlaceForEntityAdd(x, y);
-                            E entity = model.newGenericEntity();
-                            entity.setX(rect.x);
-                            entity.setY(rect.y);
-                            entity.setWidth(rect.width);
-                            entity.setHeight(rect.height);
-                            entity.setTableDbId(rSelected.dbId);
-                            entity.setTableSchemaName(rSelected.schema);
-                            entity.setName(getEntiyName(rSelected.tableName));
-                            entity.setTableName(rSelected.tableName);
-                            NewEntityEdit<E, M> edit = new NewEntityEdit<>(model, entity);
-                            edit.redo();
-                            undoSupport.postEdit(edit);
-                            x = rect.x + rect.width + ALLOCATION_STEP_X;
-                            if (x > getWidth() * 2) {
-                                x = ALLOCATION_STEP_X;
-                                y = rect.y + rect.height + ALLOCATION_STEP_Y;
+                        undoSupport.beginUpdate();
+                        try {
+                            for (TableRef rSelected : selected) {
+                                Rectangle rect = doAddTable(rSelected, x, y);
+                                x = rect.x + rect.width + ALLOCATION_STEP_X;
+                                if (x > getWidth() * 2) {
+                                    x = ALLOCATION_STEP_X;
+                                    y = rect.y + rect.height + ALLOCATION_STEP_Y;
+                                }
                             }
+                        } finally {
+                            undoSupport.endUpdate();
                         }
                         justSelected = selected;
                     }
@@ -2093,6 +2104,35 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
         }
     }
 
+    protected void doDeleteEntity(E entity) {
+        Set<Relation<E>> lbinded = model.collectRelationsByEntity(entity);
+        for (Relation<E> lrel : lbinded) {
+            DeleteRelationEdit<E> ldredit = new DeleteRelationEdit<>(lrel);
+            ldredit.redo();
+            undoSupport.postEdit(ldredit);
+        }
+        DeleteEntityEdit<E, M> ledit = new DeleteEntityEdit<>(model, entity);
+        ledit.redo();
+        undoSupport.postEdit(ledit);
+    }
+
+    public Rectangle doAddTable(TableRef rSelected, int aX, int aY) {
+        Rectangle rect = findPlaceForEntityAdd(aX, aY);
+        E entity = model.newGenericEntity();
+        entity.setX(rect.x);
+        entity.setY(rect.y);
+        entity.setWidth(rect.width);
+        entity.setHeight(rect.height);
+        entity.setTableDbId(rSelected.dbId);
+        entity.setTableSchemaName(rSelected.schema);
+        entity.setName(getEntiyName(rSelected.tableName));
+        entity.setTableName(rSelected.tableName);
+        NewEntityEdit<E, M> edit = new NewEntityEdit<>(model, entity);
+        edit.redo();
+        undoSupport.postEdit(edit);
+        return rect;
+    }
+
     public void doAddQuery(String aApplicationElementId, int aX, int aY) throws Exception {
         if (aApplicationElementId != null && model != null) {
             Rectangle rect = findPlaceForEntityAdd(aX, aY);
@@ -2107,6 +2147,12 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
             edit.redo();
             undoSupport.postEdit(edit);
         }
+    }
+
+    public void doPasteEntity(E aEntity) {
+        NewEntityEdit<E, M> edit = new NewEntityEdit<>(model, aEntity);
+        edit.redo();
+        undoSupport.postEdit(edit);
     }
 
     private String getEntiyName(String applicationElementId) {
@@ -2134,35 +2180,19 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
         public void actionPerformed(ActionEvent e) {
             if (isEnabled()) {
                 if (isAnySelectedEntities()) {
-                    List<Object> selected = Arrays.asList(selectedEntities.toArray());
-                    for (Object oEntity : selected) {
-                        if (!isParametersEntity((E) oEntity)) {
-                            E entity = (E) oEntity;
-                            if (((M) entity.getModel()).checkEntityRemovingValid(entity)) {
-                                Set<Relation<E>> lbinded = model.collectRelationsByEntity(entity);
-                                if (lbinded.isEmpty()) {
-                                    DeleteEntityEdit<E, M> ledit = new DeleteEntityEdit<>(model, entity);
-                                    ledit.redo();
-                                    undoSupport.postEdit(ledit);
-                                } else {
-                                    undoSupport.beginUpdate();
-                                    try {
-                                        for (Relation<E> lrel : lbinded) {
-                                            if (!(lrel instanceof ReferenceRelation<?>)) {
-                                                DeleteRelationEdit<E> ldredit = new DeleteRelationEdit<>(lrel);
-                                                ldredit.redo();
-                                                undoSupport.postEdit(ldredit);
-                                            }
-                                        }
-                                        DeleteEntityEdit<E, M> ledit = new DeleteEntityEdit<>(model, entity);
-                                        ledit.redo();
-                                        undoSupport.postEdit(ledit);
-                                    } finally {
-                                        undoSupport.endUpdate();
-                                    }
+                    undoSupport.beginUpdate();
+                    try {
+                        List<Object> selected = Arrays.asList(selectedEntities.toArray());
+                        for (Object oEntity : selected) {
+                            if (!isParametersEntity((E) oEntity)) {
+                                E entity = (E) oEntity;
+                                if (((M) entity.getModel()).checkEntityRemovingValid(entity)) {
+                                    doDeleteEntity(entity);
                                 }
                             }
                         }
+                    } finally {
+                        undoSupport.endUpdate();
                     }
                 } else if (isSelectedRelations()) {
                     Set<Relation<E>> rels = getSelectedRelations();
@@ -2207,7 +2237,7 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
 
         @Override
         public boolean isEnabled() {
-            return isShowing() && (isAnyDeletableEntities() ^ isSelectedRelations() ^ isSelectedDeletableFields());
+            return isShowing() && (isAnyDeletableEntities() ^ isSelectedDeletableRelations() ^ isSelectedDeletableFields());
         }
 
         @Override
@@ -2490,9 +2520,7 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
                                 prepareEntityForPaste(toPaste);
                                 checkPastingName(toPaste);
                                 if (model.checkEntityAddingValid(toPaste)) {
-                                    NewEntityEdit<E, M> edit = new NewEntityEdit<>(model, toPaste);
-                                    edit.redo();
-                                    undoSupport.postEdit(edit);
+                                    doPasteEntity(toPaste);
                                     entitiesPasted.add(toPaste);
                                 }
                             }

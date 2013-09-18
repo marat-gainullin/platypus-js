@@ -9,19 +9,20 @@
  */
 package com.eas.client.model.gui.edits;
 
-import com.eas.client.model.Entity;
-import com.eas.client.model.Model;
 import com.eas.client.model.Relation;
+import com.eas.client.model.application.ApplicationEntity;
+import com.eas.client.model.application.ApplicationModel;
+import com.eas.client.model.application.ReferenceRelation;
 
 /**
  *
  * @author mg
  */
-public class DeleteRelationEdit<E extends Entity<?, ?, E>> extends DatamodelEdit {
+public class DeleteReferenceRelationEdit<E extends ApplicationEntity<?, ?, E>> extends DatamodelEdit {
 
-    private Relation<E> relation;
+    private ReferenceRelation<E> relation;
 
-    public DeleteRelationEdit(Relation<E> aRel) {
+    public DeleteReferenceRelationEdit(ReferenceRelation<E> aRel) {
         super();
         relation = aRel;
     }
@@ -33,17 +34,17 @@ public class DeleteRelationEdit<E extends Entity<?, ?, E>> extends DatamodelEdit
 
     @Override
     protected void redoWork() {
-        Model<E, ?, ?, ?> model = relation.getLeftEntity().getModel();
+        ApplicationModel<E, ?, ?, ?> model = relation.getLeftEntity().getModel();
         if (model != null) {
-            model.removeRelation(relation);
+            model.removeReferenceRelation(relation);
         }
     }
 
     @Override
     protected void undoWork() {
-        Model<E, ?, ?, ?> model = relation.getLeftEntity().getModel();
+        ApplicationModel<E, ?, ?, ?> model = relation.getLeftEntity().getModel();
         if (model != null) {
-            model.addRelation(getRelation());
+            model.addReferenceRelation(relation);
         }
     }
 
@@ -57,7 +58,7 @@ public class DeleteRelationEdit<E extends Entity<?, ?, E>> extends DatamodelEdit
     /**
      * @param aValue the relation to set
      */
-    public void setRelation(Relation<E> aValue) {
+    public void setRelation(ReferenceRelation<E> aValue) {
         relation = aValue;
     }
 }

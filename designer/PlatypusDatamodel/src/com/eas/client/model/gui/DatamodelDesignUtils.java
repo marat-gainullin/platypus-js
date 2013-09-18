@@ -169,7 +169,8 @@ public class DatamodelDesignUtils {
             Set<Relation<E>> inRels = rightEntity.getInRelations();
             if (inRels != null) {
                 for (Relation<E> rel : inRels) {
-                    if (rel != null && !(rel instanceof ReferenceRelation<?>)) {
+                    if (rel != null) {
+                        assert !(rel instanceof ReferenceRelation<?>);
                         E lEntity = rel.getLeftEntity();
                         if (lEntity == leftEntity) {
                             if (leftField == rel.getLeftField()

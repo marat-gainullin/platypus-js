@@ -5,12 +5,8 @@
 package com.eas.designer.application.module;
 
 import com.eas.client.cache.PlatypusFiles;
-import com.eas.client.model.ModelEditingListener;
-import com.eas.client.model.Relation;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
-import com.eas.client.model.application.ApplicationModel;
-import com.eas.client.model.application.ReferenceRelation;
 import com.eas.client.model.store.XmlDom2ApplicationModel;
 import com.eas.client.scripts.ScriptRunner;
 import com.eas.designer.application.PlatypusUtils;
@@ -44,13 +40,6 @@ import org.openide.util.Lookup;
 public class PlatypusModuleDataObject extends PlatypusDataObject implements AstProvider {
 
     public final static Object DATAOBJECT_DOC_PROPERTY = "dataObject";
-    protected transient ModelEditingListener<ApplicationDbEntity> keysReResolver;
-    protected transient ApplicationModel.ForeignKeyBindingTask referenceRelationAdder = new ApplicationModel.ForeignKeyBindingTask() {
-        @Override
-        public void run(ReferenceRelation rr) {
-            model.addRelation(rr);
-        }
-    };
     protected transient Entry modelEntry;
     protected transient ApplicationDbModel model;
     protected transient ModelNode<ApplicationDbEntity, ApplicationDbModel> modelNode;
@@ -67,41 +56,6 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
             cookies.add(service);
         }
         codeGenerator = new JsCodeGenerator(this);
-        keysReResolver = new ModelEditingListener<ApplicationDbEntity>() {
-            
-            protected void recalc(){
-                if (model != null) {
-                    for (Relation rel : model.getRelations().toArray(new Relation[]{})) {
-                        if (rel instanceof ReferenceRelation<?>) {
-                            model.removeRelation(rel);
-                        }
-                    }
-                    model.processKeys(referenceRelationAdder);
-                }
-            }
-            
-            @Override
-            public void entityAdded(ApplicationDbEntity e) {
-                recalc();
-            }
-
-            @Override
-            public void entityRemoved(ApplicationDbEntity e) {
-                recalc();
-            }
-
-            @Override
-            public void relationAdded(Relation<ApplicationDbEntity> rltn) {
-            }
-
-            @Override
-            public void relationRemoved(Relation<ApplicationDbEntity> rltn) {
-            }
-
-            @Override
-            public void entityIndexesChanged(ApplicationDbEntity e) {
-            }
-        };
     }
 
     @Override
@@ -161,9 +115,6 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
     }
 
     public void shrink() {
-        if (model != null) {
-            model.removeEditingListener(keysReResolver);
-        }
         model = null;
         modelNode = null;
         astIsValid = false;
@@ -203,8 +154,6 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
         if (model == null) {
             model = readModel();
             modelNode = createModelNode();
-            model.processKeys(referenceRelationAdder);
-            model.addEditingListener(keysReResolver);
         }
     }
 

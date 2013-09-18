@@ -2,10 +2,14 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.client.model.application;
+package com.eas.client.model.store;
 
 import com.eas.client.model.Model;
-import com.eas.client.model.store.Model2XmlDom;
+import com.eas.client.model.Relation;
+import com.eas.client.model.application.ApplicationEntity;
+import com.eas.client.model.application.ApplicationModel;
+import com.eas.client.model.application.ApplicationParametersEntity;
+import com.eas.client.model.application.ReferenceRelation;
 import com.eas.client.model.visitors.ApplicationModelVisitor;
 import com.eas.script.StoredFunction;
 import org.w3c.dom.Document;
@@ -15,9 +19,13 @@ import org.w3c.dom.Element;
  *
  * @author mg
  */
-public class ApplicationModel2XmlDom<E extends ApplicationEntity<?, ?, E>> extends Model2XmlDom<E> implements ApplicationModelVisitor<E>{
-    
-    static <E extends ApplicationEntity<?, ?, E>> Document transform(ApplicationModel<E, ?, ?, ?> aModel) {
+public class ApplicationModel2XmlDom<E extends ApplicationEntity<?, ?, E>> extends Model2XmlDom<E> implements ApplicationModelVisitor<E> {
+
+    protected static final String REFERENCE_RELATION_TAG_NAME = "referenceRelation";
+    protected static final String SCALAR_PROP_NAME_ATTR_NAME = "scalarPropertyName";
+    protected static final String COLLECTION_PROP_NAME_ATTR_NAME = "collectionPropertyName";
+
+    public static <E extends ApplicationEntity<?, ?, E>> Document transform(ApplicationModel<E, ?, ?, ?> aModel) {
         ApplicationModel2XmlDom<E> transformer = new ApplicationModel2XmlDom<>();
         return transformer.model2XmlDom(aModel);
     }
@@ -26,7 +34,17 @@ public class ApplicationModel2XmlDom<E extends ApplicationEntity<?, ?, E>> exten
     public void visit(ApplicationModel<E, ?, ?, ?> aModel) {
         writeModel(aModel);
     }
-    
+
+    @Override
+    public void writeModel(Model<E, ?, ?, ?> aModel) {
+        super.writeModel(aModel);
+        if (aModel != null && ((ApplicationModel<E, ?, ?, ?>) aModel).getReferenceRelations() != null) {
+            for (ReferenceRelation<E> relation : ((ApplicationModel<E, ?, ?, ?>) aModel).getReferenceRelations()) {
+                relation.accept(this);
+            }
+        }
+    }
+
     @Override
     public void visit(ApplicationParametersEntity entity) {
         Element node = doc.createElement(PARAMETERS_ENTITY_TAG_NAME);
@@ -109,4 +127,15 @@ public class ApplicationModel2XmlDom<E extends ApplicationEntity<?, ?, E>> exten
         }
     }
 
+    @Override
+    public void visit(ReferenceRelation<E> aRelation) {
+        Element el = doc.createElement(REFERENCE_RELATION_TAG_NAME);
+        writeRelation(aRelation, el);
+        if (aRelation.getScalarPropertyName() != null && !aRelation.getScalarPropertyName().isEmpty()) {
+            el.setAttribute(SCALAR_PROP_NAME_ATTR_NAME, aRelation.getScalarPropertyName());
+        }
+        if (aRelation.getCollectionPropertyName() != null && !aRelation.getCollectionPropertyName().isEmpty()) {
+            el.setAttribute(COLLECTION_PROP_NAME_ATTR_NAME, aRelation.getCollectionPropertyName());
+        }
+    }
 }

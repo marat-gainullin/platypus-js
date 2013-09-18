@@ -38,7 +38,7 @@ public class FieldsHostObject extends NativeJavaHostObject {
             }
         }
     }
-    
+
     @Override
     public Object[] getIds() {
         try {
@@ -52,7 +52,7 @@ public class FieldsHostObject extends NativeJavaHostObject {
             return super.getIds();
         }
     }
-    
+
     @Override
     public boolean has(int aIndex, Scriptable aStart) {
         try {
@@ -76,16 +76,13 @@ public class FieldsHostObject extends NativeJavaHostObject {
             return NOT_FOUND;
         }
     }
-    
-    public static FieldsHostObject publishFields(Fields aFields, Scriptable aScope) throws Exception
-    {
-        FieldsHostObject published = (FieldsHostObject)aFields.getTag();
-        if(published == null)
-        {
+
+    public static FieldsHostObject publishFields(Fields aFields, Scriptable aScope) throws Exception {
+        FieldsHostObject published = (FieldsHostObject) aFields.getTag();
+        if (published == null) {
             published = new FieldsHostObject(aFields, aScope);
             aFields.setTag(published);
         }
         return published;
     }
-
 }

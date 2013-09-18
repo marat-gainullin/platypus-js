@@ -7,6 +7,7 @@ package com.eas.client.geo.selectiondatastore;
 
 import com.bearsoft.rowset.Row;
 import com.eas.client.geo.GisUtilities;
+import com.eas.client.model.application.ApplicationEntity;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
@@ -26,7 +27,7 @@ public class SelectionEntry {
     public static final String COORDINATE_INDEX_ATTR_NAME = "coordinateOfInterestIndex";
     public static final String THIS_ENTRY_ATTR_NAME = "this";
     // data
-    protected Long entityId; // Required field
+    protected ApplicationEntity<?, ?, ?> entity; // Required field
     protected Row row; // Required field
     protected String featureId; // Required field
     // geometry column index
@@ -38,10 +39,10 @@ public class SelectionEntry {
     // view
     protected Point viewShape;
 
-    public SelectionEntry(long aEntityId, Row aRow, String aFeatureId, int aGeometryColIndex, int aGeometryOfInterestIndex, int aCoordinateOfInterestIndex, int aHoleOfInterest, Coordinate aCoordinate)
+    public SelectionEntry(ApplicationEntity<?, ?, ?> aEntity, Row aRow, String aFeatureId, int aGeometryColIndex, int aGeometryOfInterestIndex, int aCoordinateOfInterestIndex, int aHoleOfInterest, Coordinate aCoordinate)
     {
         super();
-        entityId = aEntityId;
+        entity = aEntity;
         row = aRow;
         featureId = aFeatureId;
         geometryColIndex = aGeometryColIndex;
@@ -79,8 +80,8 @@ public class SelectionEntry {
         viewShape = aViewShape;
     }
 
-    public Long getEntityId() {
-        return entityId;
+    public ApplicationEntity<?, ?, ?> getEntity() {
+        return entity;
     }
 
     public void setCoordinateOfInterestIndex(int aIdx) {

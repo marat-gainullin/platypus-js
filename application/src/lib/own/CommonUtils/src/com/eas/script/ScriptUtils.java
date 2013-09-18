@@ -40,10 +40,36 @@ public class ScriptUtils {
     protected static final String toXMLStringFuncSource = ""
             + "function toXMLString(aObj){ return aObj.toXMLString(); }"
             + "";
+    protected static final String scalarDefFuncSource = ""
+            + "function(targetEntity, targetFieldName, sourceFieldName){"
+            + "    var _self = this;"
+            + "    _self.enumerable = true;"
+            + "    _self.configurable = false;"
+            + "    _self.get = function(){"
+            + "        var found = targetEntity.find(targetEntity.md[targetFieldName], this[sourceFieldName]);"
+            + "        return found.length == 0 ? null : (found.length == 1 ? found[0] : found);"
+            + "    };"
+            + "    _self.set = function(aValue){"
+            + "        this[sourceFieldName] = aValue[targetFieldName];"
+            + "    };"
+            + "}"
+            + "";
+    protected static final String collectionDefFuncSource = ""
+            + "function(sourceEntity, targetFieldName, sourceFieldName){"
+            + "    var _self = this;"
+            + "    _self.enumerable = true;"
+            + "    _self.configurable = false;"
+            + "    _self.get = function(){"
+            + "        return sourceEntity.find(sourceEntity.md[sourceFieldName], this[targetFieldName]);"
+            + "    };"
+            + "}"
+            + "";
     protected static Function toDateFunc;
     protected static Function parseJsonFunc;
     protected static Function writeJsonFunc;
     protected static Function toXMLStringFunc;
+    protected static Function scalarDefFunc;
+    protected static Function collectionDefFunc;
     protected static ScriptableObject topLevelScope;
 
     private static void init() {
@@ -59,6 +85,8 @@ public class ScriptUtils {
                 parseJsonFunc = ctx.compileFunction(topLevelScope, parseJsonFuncSource, "parseJsonFunc", 0, null);
                 writeJsonFunc = ctx.compileFunction(topLevelScope, writeJsonFuncSource, "writeJsonFunc", 0, null);
                 toXMLStringFunc = ctx.compileFunction(topLevelScope, toXMLStringFuncSource, "toXMLStringFunc", 0, null);
+                scalarDefFunc = ctx.compileFunction(topLevelScope, scalarDefFuncSource, "scalarDefFunc", 0, null);
+                collectionDefFunc = ctx.compileFunction(topLevelScope, collectionDefFuncSource, "collectionDefFunc", 0, null);
             } finally {
                 if (!wasContext) {
                     Context.exit();
@@ -163,6 +191,26 @@ public class ScriptUtils {
         Context cx = Context.enter();
         try {
             return (String) toXMLStringFunc.call(cx, topLevelScope, null, new Object[]{aObj});
+        } finally {
+            Context.exit();
+        }
+    }
+
+    public static ScriptableObject scalarPropertyDefinition(Scriptable targetEntity, String targetFieldName, String sourceFieldName) {
+        init();
+        Context cx = Context.enter();
+        try {
+            return (ScriptableObject)scalarDefFunc.construct(cx, topLevelScope, new Object[]{targetEntity, targetFieldName, sourceFieldName});
+        } finally {
+            Context.exit();
+        }
+    }
+
+    public static ScriptableObject collectionPropertyDefinition(Scriptable sourceEntity, String targetFieldName, String sourceFieldName) {
+        init();
+        Context cx = Context.enter();
+        try {
+            return (ScriptableObject)collectionDefFunc.construct(cx, topLevelScope, new Object[]{sourceEntity, targetFieldName, sourceFieldName});
         } finally {
             Context.exit();
         }

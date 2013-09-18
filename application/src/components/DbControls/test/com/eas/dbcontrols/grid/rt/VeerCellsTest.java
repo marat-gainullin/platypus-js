@@ -153,7 +153,7 @@ public class VeerCellsTest extends GridBaseTest {
     public void cellsPlainTest() throws Exception {
         Rowset rowset = initRowset();
         TableColumnModel columns = new DefaultTableColumnModel();
-        RowsetsTableModel data = new RowsetsTableModel(rowset, null, null);
+        RowsetsTableModel data = new RowsetsTableModel(null, rowset, null, null);
 
         for (int i = 1; i <= rowset.getFields().getFieldsCount(); i++) {
             FieldModelColumn mCol = new FieldModelColumn(rowset, i, null, null, false, null, null, null);
@@ -300,7 +300,7 @@ public class VeerCellsTest extends GridBaseTest {
     public void cellsDistributedTest() throws Exception {
         Rowset rowset = initRowset();
         TableColumnModel columns = new DefaultTableColumnModel();
-        RowsetsTableModel data = new RowsetsTableModel(rowset, null, null);
+        RowsetsTableModel data = new RowsetsTableModel(null, rowset, null, null);
 
         for (int i = 1; i <= rowset.getFields().getFieldsCount(); i++) {
             FieldModelColumn mCol = new FieldModelColumn(rowset, i, null, null, false, null, null, null);

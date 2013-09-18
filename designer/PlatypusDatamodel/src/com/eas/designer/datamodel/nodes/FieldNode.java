@@ -373,11 +373,10 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
             return null;
         }
         for (Relation rel : relationsToDelete) {
-            if (!(rel instanceof ReferenceRelation<?>)) {
-                DeleteRelationEdit drEdit = new DeleteRelationEdit(rel);
-                drEdit.redo();
-                section.addEdit(drEdit);
-            }
+            assert !(rel instanceof ReferenceRelation<?>);
+            DeleteRelationEdit drEdit = new DeleteRelationEdit(rel);
+            drEdit.redo();
+            section.addEdit(drEdit);
         }
         ChangeFieldEdit edit = new ChangeFieldEdit(oldContent, newContent, field, getEntity());
         edit.redo();

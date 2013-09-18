@@ -195,9 +195,12 @@ public abstract class Model2XmlDom<E extends Entity<?, ?, E>> implements ModelVi
     public static final String POLYLINE_ATTR_NAME = "polyline";
 
     @Override
-    public void visit(Relation<E> relation) {
+    public void visit(Relation<E> aRelation) {
+        writeRelation(aRelation, doc.createElement(RELATION_TAG_NAME));
+    }
+
+    protected void writeRelation(Relation<E> relation, Element node) {
         if (relation != null && relation.getLeftField() != null && relation.getRightField() != null) {
-            Element node = doc.createElement(RELATION_TAG_NAME);
             currentNode.appendChild(node);
             assert relation.getLeftEntity() != null : " A relation without left side detected";
             node.setAttribute(LEFT_ENTITY_ID_ATTR_NAME, String.valueOf(relation.getLeftEntity().getEntityId()));

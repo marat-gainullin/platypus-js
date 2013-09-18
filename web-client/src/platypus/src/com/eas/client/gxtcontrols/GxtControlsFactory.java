@@ -466,14 +466,17 @@ public class GxtControlsFactory {
 	}
 
 	private Component createButton(Element aTag) throws Exception {
-		final TextButton component = new PlatypusTextButton();
+		final PlatypusTextButton component = new PlatypusTextButton();
 		processEvents(component, aTag);
 		PublishedComponent publishedComp = Publisher.publish(component);
 		if (aTag.hasAttribute("text"))
 			component.setText(aTag.getAttribute("text"));
+		if (aTag.hasAttribute("iconTextGap"))
+			component.setIconTextGap(Utils.getIntegerAttribute(aTag, "iconTextGap", 4));
 		checkBorders(component, aTag);
 		processGeneralProperties(component, aTag, publishedComp);
 		setIconAndAlign(component, aTag, publishedComp);
+		
 		return component;
 	}
 

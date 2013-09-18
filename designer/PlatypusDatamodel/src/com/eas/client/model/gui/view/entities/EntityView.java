@@ -430,6 +430,14 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
         }
     }
 
+    /**
+     * Differs from entity.getInOutRelations(). It may return additional relations in descendants.
+     * @return Set of relations
+     */
+    public Set<Relation<E>> getInOutRelations() {
+        return getEntity().getInOutRelations();
+    }
+
     protected class MinimizeRestoreAction extends AbstractAction {
 
         public MinimizeRestoreAction() {
@@ -654,7 +662,7 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
         public void beginDraggingEntityView(EntityView<E> aView) {
             E entity = aView.getEntity();
             moveEdit = new MoveEntityEdit<>(entity, aView.getLocation(), aView.getLocation());
-            for (Relation rel : aView.getEntity().getInOutRelations()) {
+            for (Relation rel : aView.getInOutRelations()) {
                 if (rel.isManual()) {
                     RelationPolylineEdit edit = new RelationPolylineEdit(rel, rel.getXs(), rel.getYs(), null, null);
                     edit.redo();
@@ -696,7 +704,7 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
         public void beginResizingEntityView(EntityView<E> aView) {
             E entity = aView.getEntity();
             resizeEdit = new ResizeEntityEdit<>(entity, aView.getBounds(), aView.getBounds());
-            for (Relation rel : aView.getEntity().getInOutRelations()) {
+            for (Relation rel : aView.getInOutRelations()) {
                 if (rel.isManual()) {
                     RelationPolylineEdit edit = new RelationPolylineEdit(rel, rel.getXs(), rel.getYs(), null, null);
                     edit.redo();

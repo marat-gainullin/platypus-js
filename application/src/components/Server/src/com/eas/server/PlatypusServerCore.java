@@ -75,6 +75,11 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
         }
         return instance;
     }
+
+    public static PlatypusServerCore getInstance() throws Exception {
+        return instance;
+    }
+
     public static void registerMBean(String aName, Object aBean) throws Exception {
         // Get the platform MBeanServer
         // Uniquely identify the MBeans and register them with the platform MBeanServer
@@ -88,7 +93,6 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
             //no-op
         }
     }
-
     protected String defaultAppElement = null;
     protected SessionManager sessionManager;
     protected DatabasesClient databasesClient;
