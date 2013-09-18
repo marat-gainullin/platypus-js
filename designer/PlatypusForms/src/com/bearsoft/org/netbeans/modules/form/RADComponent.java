@@ -1164,7 +1164,9 @@ public abstract class RADComponent<C> {
             }
         }
         // hack for buttons - add fake property for ButtonGroup
-        if (getBeanInstance() instanceof javax.swing.AbstractButton) {
+        if ((getBeanInstance() instanceof javax.swing.JToggleButton && !(getBeanInstance() instanceof javax.swing.JCheckBox))||
+                getBeanInstance() instanceof javax.swing.JRadioButton ||
+                getBeanInstance() instanceof javax.swing.JRadioButtonMenuItem) {
             try {
                 ButtonGroupProperty prop = new ButtonGroupProperty(this);
                 setPropertyListener(prop);
