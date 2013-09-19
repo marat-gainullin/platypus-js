@@ -83,10 +83,10 @@ public class Filter extends HashOrderer {
     public boolean add(Row aRow) throws RowsetException {
         KeySet ks = makeKeySet(aRow, fieldsIndicies);
         if (ks != null) {
-            List<RowWrap> subset = ordered.get(ks);
+            TaggedList<RowWrap> subset = ordered.get(ks);
             // add to structure
             if (subset == null) {
-                subset = new ArrayList<>();
+                subset = new TaggedList<>();
                 ordered.put(ks, subset);
             }
             return subset.add(new RowWrap(aRow, -1));

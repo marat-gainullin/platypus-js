@@ -60,7 +60,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
     protected Function onRequeried;
     protected Function onFiltered;
     protected RowsetHostObject<E> sRowsetWrap;
-    protected Map<String, ScriptableObject> ormDefinitions;
+    protected Map<String, ScriptableObject> ormDefinitions = new HashMap<>();
     protected transient List<Integer> filterConstraints = new ArrayList<>();
     protected transient Rowset rowset = null;
     protected transient boolean filteredWhileAjusting = false;

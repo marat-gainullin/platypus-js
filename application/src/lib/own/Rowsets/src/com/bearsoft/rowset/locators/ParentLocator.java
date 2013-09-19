@@ -7,10 +7,8 @@ package com.bearsoft.rowset.locators;
 import com.bearsoft.rowset.utils.KeySet;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.exceptions.RowsetException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.List;
 
 /**
  * Locator with specific capability. It doesn't distinguish null and absent rows in underlying rowset.
@@ -21,7 +19,7 @@ public class ParentLocator extends Locator {
 
     protected int parentColIndex = 0;
     protected Locator byPkLocator = null;
-    protected List<RowWrap> parentless = new ArrayList<>();
+    protected TaggedList<RowWrap> parentless = new TaggedList<>();
 
     /**
      * <code>ParentLocator</code> constructor.

@@ -5,7 +5,6 @@
 package com.eas.client.model.store;
 
 import com.eas.client.model.Model;
-import com.eas.client.model.Relation;
 import com.eas.client.model.application.ApplicationEntity;
 import com.eas.client.model.application.ApplicationModel;
 import com.eas.client.model.application.ApplicationParametersEntity;

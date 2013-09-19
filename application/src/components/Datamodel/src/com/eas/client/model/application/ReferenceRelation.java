@@ -5,7 +5,6 @@
 package com.eas.client.model.application;
 
 import com.bearsoft.rowset.metadata.Field;
-import com.eas.client.model.Entity;
 import com.eas.client.model.Relation;
 import com.eas.client.model.visitors.ApplicationModelVisitor;
 import com.eas.client.model.visitors.ModelVisitor;
@@ -53,4 +52,19 @@ public class ReferenceRelation<E extends ApplicationEntity<?, ?, E>> extends Rel
         collectionPropertyName = aValue;
         changeSupport.firePropertyChange("collectionPropertyName", oldValue, collectionPropertyName);
     }
+
+    @Override
+    public Relation<E> copy() {
+        ReferenceRelation<E> copied = new ReferenceRelation<>();
+        assign(copied);
+        return copied;
+    }
+    
+    @Override
+    protected void assign(Relation<E> target) {
+        super.assign(target);
+        ((ReferenceRelation<E>)target).setScalarPropertyName(scalarPropertyName);
+        ((ReferenceRelation<E>)target).setCollectionPropertyName(collectionPropertyName);
+    }
+    
 }

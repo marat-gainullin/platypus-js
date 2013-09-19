@@ -129,6 +129,17 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
     }
 
     @Override
+    public Model<E, P, C, Q> copy() throws Exception {
+        Model<E, P, C, Q>  copied = super.copy();
+        for (ReferenceRelation<E> relation : referenceRelations) {
+            ReferenceRelation<E> rcopied = (ReferenceRelation<E>)relation.copy();
+            resolveCopiedRelation(rcopied, copied);
+            ((ApplicationModel<E, P, C, Q>)copied).getReferenceRelations().add(rcopied);
+        }
+        return copied;
+    }
+
+    @Override
     public void checkRelationsIntegrity() {
         super.checkRelationsIntegrity();
         List<ReferenceRelation<E>> toDel = new ArrayList<>();

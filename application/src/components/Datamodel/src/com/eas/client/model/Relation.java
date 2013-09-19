@@ -176,14 +176,7 @@ public class Relation<E extends Entity<?, ?, E>> {
 
     public Relation<E> copy() {
         Relation<E> copied = new Relation<>();
-        copied.setLeftEntity(leftEntity);
-        copied.setLeftField(leftField);
-        copied.setRightEntity(rightEntity);
-        copied.setRightField(rightField);
-        copied.setFkDeferrable(fkDeferrable);
-        copied.setFkDeleteRule(fkDeleteRule);
-        copied.setFkUpdateRule(fkUpdateRule);
-        copied.setFkName(fkName);
+        assign(copied);
         return copied;
     }
 
@@ -201,5 +194,16 @@ public class Relation<E extends Entity<?, ?, E>> {
         } else {
             return null;
         }
+    }
+
+    protected void assign(Relation<E> target) {
+        target.setLeftEntity(leftEntity);
+        target.setLeftField(leftField);
+        target.setRightEntity(rightEntity);
+        target.setRightField(rightField);
+        target.setFkDeferrable(fkDeferrable);
+        target.setFkDeleteRule(fkDeleteRule);
+        target.setFkUpdateRule(fkUpdateRule);
+        target.setFkName(fkName);
     }
 }

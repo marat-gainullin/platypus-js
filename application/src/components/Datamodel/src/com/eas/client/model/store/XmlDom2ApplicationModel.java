@@ -100,8 +100,8 @@ public class XmlDom2ApplicationModel<E extends ApplicationEntity<?, ?, E>> exten
         super.visit(aRelation);
         final String scalarPropertyName = currentNode.getAttribute(ApplicationModel2XmlDom.SCALAR_PROP_NAME_ATTR_NAME);
         final String collectionPropertyName = currentNode.getAttribute(ApplicationModel2XmlDom.COLLECTION_PROP_NAME_ATTR_NAME);
-        aRelation.setScalarPropertyName(scalarPropertyName);
-        aRelation.setCollectionPropertyName(collectionPropertyName);
+        aRelation.setScalarPropertyName(scalarPropertyName != null ? scalarPropertyName.trim() : null);
+        aRelation.setCollectionPropertyName(collectionPropertyName != null ? collectionPropertyName.trim() : null);
         if (currentModel != null) {
             ((ApplicationModel<E, ?, ?, ?>)currentModel).getReferenceRelations().add(aRelation);
         }
