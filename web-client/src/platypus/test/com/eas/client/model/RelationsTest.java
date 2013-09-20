@@ -19,7 +19,7 @@ import com.eas.client.form.api.JSContainers;
 import com.eas.client.form.api.JSControls;
 import com.eas.client.form.api.ModelJSControls;
 import com.eas.client.CancellableCallback;
-import com.eas.client.Utils;
+import com.eas.client.Utils.JsObject;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.RepeatingCommand;
@@ -153,28 +153,28 @@ public class RelationsTest extends ModelBaseTest {
 			model = new Model(client);
 			entity11 = new Entity(model);
 			entity11.setQueryId("133818273961796");
-			entity11.setOnRequeried(Utils.lookupProperty(module, "entity11_Requeried"));
+			entity11.setOnRequeried(module.<JsObject>cast().getJs("entity11_Requeried"));
 			entity21 = new Entity(model);
 			entity21.setQueryId("124349292311931632");
-			entity21.setOnRequeried(Utils.lookupProperty(module, "entity21_Requeried"));
+			entity21.setOnRequeried(module.<JsObject>cast().getJs("entity21_Requeried"));
 			entity22 = new Entity(model);
 			entity22.setQueryId("124349292311931632");
-			entity22.setOnRequeried(Utils.lookupProperty(module, "entity22_Requeried"));
+			entity22.setOnRequeried(module.<JsObject>cast().getJs("entity22_Requeried"));
 			entity31 = new Entity(model);
 			entity31.setQueryId("124349292311931632");
-			entity31.setOnRequeried(Utils.lookupProperty(module, "entity31_Requeried"));
-			entity31.setOnFiltered(Utils.lookupProperty(module, "entity31_Filtered"));
+			entity31.setOnRequeried(module.<JsObject>cast().getJs("entity31_Requeried"));
+			entity31.setOnFiltered(module.<JsObject>cast().getJs("entity31_Filtered"));
 			entity32 = new Entity(model);
 			entity32.setQueryId("124349292311931632");
-			entity32.setOnRequeried(Utils.lookupProperty(module, "entity32_Requeried"));
+			entity32.setOnRequeried(module.<JsObject>cast().getJs("entity32_Requeried"));
 			entity33 = new Entity(model);
 			entity33.setQueryId("124349292311931632");
-			entity33.setOnRequeried(Utils.lookupProperty(module, "entity33_Requeried"));
-			entity33.setOnFiltered(Utils.lookupProperty(module, "entity33_Filtered"));
+			entity33.setOnRequeried(module.<JsObject>cast().getJs("entity33_Requeried"));
+			entity33.setOnFiltered(module.<JsObject>cast().getJs("entity33_Filtered"));
 			entity41 = new Entity(model);
 			entity41.setQueryId("124349292311931632");
-			entity41.setOnRequeried(Utils.lookupProperty(module, "entity41_Requeried"));
-			entity41.setOnFiltered(Utils.lookupProperty(module, "entity41_Filtered"));
+			entity41.setOnRequeried(module.<JsObject>cast().getJs("entity41_Requeried"));
+			entity41.setOnFiltered(module.<JsObject>cast().getJs("entity41_Filtered"));
 
 			assertEquals(model.getEntities().size(), 1);// Parameters entity is
 			                                            // always present

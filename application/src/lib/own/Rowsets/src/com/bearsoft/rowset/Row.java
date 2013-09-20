@@ -12,7 +12,7 @@ import java.util.*;
 /**
  * This class serves as the values holder.
  *
- * @author Марат
+ * @author mg
  */
 public class Row extends Object {
 

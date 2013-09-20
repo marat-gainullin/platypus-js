@@ -20,8 +20,8 @@ import com.google.gwt.xhr.client.XMLHttpRequest;
  */
 public abstract class ModelBaseTest extends GWTTestCase {
 
-	public static final Set<String> eventsBeforeNames = new HashSet();
-	public static final Set<String> eventsAfterNames = new HashSet();
+	public static final Set<String> eventsBeforeNames = new HashSet<String>();
+	public static final Set<String> eventsAfterNames = new HashSet<String>();
 
 	static {
 		eventsBeforeNames.add(Model.DATASOURCE_BEFORE_SCROLL_EVENT_TAG_NAME);

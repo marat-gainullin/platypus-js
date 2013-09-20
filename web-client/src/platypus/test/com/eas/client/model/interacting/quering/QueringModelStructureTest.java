@@ -2,6 +2,7 @@ package com.eas.client.model.interacting.quering;
 
 import com.bearsoft.rowset.Rowset;
 import com.eas.client.Utils;
+import com.eas.client.Utils.JsObject;
 import com.eas.client.model.EntityDataListener;
 import com.eas.client.model.interacting.filtering.FilteringTest;
 import com.eas.client.model.store.XmlDom2Model;
@@ -84,9 +85,9 @@ public class QueringModelStructureTest extends QueringTest {
 			module = publish(this);
 			
 			model = XmlDom2Model.transform(XMLParser.parse(DATAMODEL_QUERING_RELATIONS), module);
-			model.getEntityById(ENTITY_IZMERJAEMIE_VELICHINI_ID).setOnRequeried(Utils.lookupProperty(module, "izmVelRequeried"));
-			model.getEntityById(ENTITY_EDINICI_IZMERENIJA_PO_VELICHINE_ID).setOnRequeried(Utils.lookupProperty(module, "edIzmPoVelRequeried"));
-			model.getEntityById(ENTITY_EDINICI_IZMERENIJA_PO_VELICHINE_1_ID).setOnRequeried(Utils.lookupProperty(module, "edIzmPoVel1Requeried"));
+			model.getEntityById(ENTITY_IZMERJAEMIE_VELICHINI_ID).setOnRequeried(module.<JsObject>cast().getJs("izmVelRequeried"));
+			model.getEntityById(ENTITY_EDINICI_IZMERENIJA_PO_VELICHINE_ID).setOnRequeried(module.<JsObject>cast().getJs("edIzmPoVelRequeried"));
+			model.getEntityById(ENTITY_EDINICI_IZMERENIJA_PO_VELICHINE_1_ID).setOnRequeried(module.<JsObject>cast().getJs("edIzmPoVel1Requeried"));
 			model.publish(module);
 			model.setRuntime(true);
 			Scheduler.get().scheduleFixedDelay(new RepeatingCommand(){

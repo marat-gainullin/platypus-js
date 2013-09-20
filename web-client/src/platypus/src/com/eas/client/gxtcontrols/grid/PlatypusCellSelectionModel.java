@@ -7,23 +7,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.eas.client.gxtcontrols.grid.rowmarker.RowMarker;
-import com.google.gwt.cell.client.AbstractCell;
-import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.Event;
-import com.sencha.gxt.core.client.IdentityValueProvider;
 import com.sencha.gxt.data.shared.event.StoreClearEvent;
-import com.sencha.gxt.data.shared.event.StoreRecordChangeEvent;
 import com.sencha.gxt.widget.core.client.event.CellMouseDownEvent;
 import com.sencha.gxt.widget.core.client.event.CellMouseDownEvent.CellMouseDownHandler;
-import com.sencha.gxt.widget.core.client.event.RowClickEvent;
 import com.sencha.gxt.widget.core.client.event.RowMouseDownEvent;
 import com.sencha.gxt.widget.core.client.event.ViewReadyEvent;
 import com.sencha.gxt.widget.core.client.event.ViewReadyEvent.ViewReadyHandler;
@@ -31,8 +24,6 @@ import com.sencha.gxt.widget.core.client.event.XEvent;
 import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.Grid;
 import com.sencha.gxt.widget.core.client.grid.GridSelectionModel;
-import com.sencha.gxt.widget.core.client.grid.RowExpander;
-import com.sencha.gxt.widget.core.client.grid.RowNumberer;
 import com.sencha.gxt.widget.core.client.selection.CellSelection;
 import com.sencha.gxt.widget.core.client.selection.CellSelectionChangedEvent;
 import com.sencha.gxt.widget.core.client.selection.CellSelectionChangedEvent.CellSelectionChangedHandler;
@@ -66,9 +57,9 @@ public class PlatypusCellSelectionModel<M> extends GridSelectionModel<M> impleme
 		}
 	}
 
-	private SelectionModelCallback callback = new SelectionModelCallback(this);
+	//private SelectionModelCallback callback = new SelectionModelCallback(this);
 	private Handler handler = new Handler();
-	protected Map<String, CellSelection<M>> selection = new HashMap();
+	protected Map<String, CellSelection<M>> selection = new HashMap<String, CellSelection<M>>();
 	protected CellSelection<M> lastSelectedCell;// lead
 	protected int anchorRow;
 	protected int anchorCell;
@@ -424,7 +415,7 @@ public class PlatypusCellSelectionModel<M> extends GridSelectionModel<M> impleme
 
 	@Override
 	public List<M> getSelectedItems() {
-		Set<M> selected = new HashSet();
+		Set<M> selected = new HashSet<M>();
 		for (CellSelection<M> ss : selection.values()) {
 			selected.add(ss.getModel());
 		}
@@ -432,7 +423,7 @@ public class PlatypusCellSelectionModel<M> extends GridSelectionModel<M> impleme
 	}
 
 	protected void fireCellsSelectionChanged() {
-		List<CellSelection<M>> selected = new ArrayList();
+		List<CellSelection<M>> selected = new ArrayList<CellSelection<M>>();
 		selected.addAll(selection.values());
 		fireEvent(new CellSelectionChangedEvent<M>(selected));
 		SelectionEvent.fire(this, getSelectedItem());

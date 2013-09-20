@@ -5,6 +5,7 @@ import java.util.logging.Logger;
 
 import com.bearsoft.rowset.Row;
 import com.eas.client.Utils;
+import com.eas.client.Utils.JsObject;
 import com.eas.client.gxtcontrols.converters.DoubleRowValueConverter;
 import com.eas.client.gxtcontrols.converters.StringRowValueConverter;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -41,7 +42,7 @@ public class PieChart extends AbstractChart {
 						return null;
 				} else if (oItem instanceof JavaScriptObject) {
 					JsObject item = ((JavaScriptObject) oItem).cast();
-					Object oValue = Utils.toJava(item.get(labelFieldName));
+					Object oValue = Utils.toJava(item.getJava(labelFieldName));
 					if (oValue instanceof String)
 						return (String) oValue;
 					else
@@ -87,7 +88,7 @@ public class PieChart extends AbstractChart {
 							return null;
 					} else if (oItem instanceof JavaScriptObject) {
 						JsObject item = ((JavaScriptObject) oItem).cast();
-						Object oValue = Utils.toJava(item.get(dataFieldName));
+						Object oValue = Utils.toJava(item.getJava(dataFieldName));
 						if (oValue instanceof Number)
 							return ((Number) oValue).doubleValue();
 						else

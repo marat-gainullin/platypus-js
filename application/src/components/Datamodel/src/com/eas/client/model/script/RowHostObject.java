@@ -173,7 +173,7 @@ public class RowHostObject extends ScriptableObject {
                     if (l > 1) {
                         sb.append(", ");
                     }
-                    sb.append(row.getFields().get(l).getName()).append(":").append(row.getColumnObject(l));
+                    sb.append(row.getFields().get(l).getName()).append(": ").append(row.getColumnObject(l));
                 }
                 sb.append("}");
                 return sb.toString();

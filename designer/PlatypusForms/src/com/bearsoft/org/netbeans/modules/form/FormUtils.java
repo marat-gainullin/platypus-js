@@ -139,6 +139,8 @@ public class FormUtils {
             "alignmentY", PROP_HIDDEN,
             "minimumSize", PROP_HIDDEN,
             "maximumSize", PROP_HIDDEN,
+            "margin", PROP_HIDDEN,
+            "nextFocusableComponent", PROP_HIDDEN,
             "preferredSize", PROP_HIDDEN,
             "locationOnScreen", PROP_HIDDEN,
             "inheritsPopupMenu", PROP_HIDDEN,

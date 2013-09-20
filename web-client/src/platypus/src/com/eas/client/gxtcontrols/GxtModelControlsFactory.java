@@ -3,6 +3,7 @@ package com.eas.client.gxtcontrols;
 import java.util.Date;
 
 import com.eas.client.Utils;
+import com.eas.client.Utils.JsObject;
 import com.eas.client.gxtcontrols.converters.BooleanRowValueConverter;
 import com.eas.client.gxtcontrols.converters.DateRowValueConverter;
 import com.eas.client.gxtcontrols.converters.DoubleRowValueConverter;
@@ -24,8 +25,6 @@ import com.eas.client.gxtcontrols.wrappers.component.ObjectFormat;
 import com.eas.client.gxtcontrols.wrappers.component.PlatypusAdapterStandaloneField;
 import com.eas.client.model.Model;
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.xml.client.Element;
 import com.sencha.gxt.widget.core.client.Component;
 
@@ -48,8 +47,8 @@ public class GxtModelControlsFactory extends GxtControlsFactory {
 
 		@Override
 		public void run() {
-			JavaScriptObject cellFunction = Utils.lookupProperty(module, cellFunctionName);
-			JavaScriptObject selectFunction = Utils.lookupProperty(module, selectFunctionName);
+			JavaScriptObject cellFunction = module.<JsObject>cast().getJs(cellFunctionName);
+			JavaScriptObject selectFunction = module.<JsObject>cast().getJs(selectFunctionName);
 
 			field.setOnRender(cellFunction);
 			field.setOnSelect(selectFunction);

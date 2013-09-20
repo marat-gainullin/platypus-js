@@ -88,7 +88,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             if (!ormDefinitions.containsKey(aName)) {
                 ormDefinitions.put(aName, aDefinition);
             }else
-                Logger.getLogger(ApplicationEntity.class.getName()).log(Level.WARNING, String.format("ORM property %s redefinition attempt on entity %s %s.", aName, name != null && !name.isEmpty() ? name : "", title != null && !title.isEmpty() ? "{" + title + "]" : ""));
+                Logger.getLogger(ApplicationEntity.class.getName()).log(Level.WARNING, String.format("ORM property %s redefinition attempt on entity %s %s.", aName, name != null && !name.isEmpty() ? name : "", title != null && !title.isEmpty() ? "[" + title + "]" : ""));
         }
     }
 

@@ -11,6 +11,23 @@ import com.google.gwt.xml.client.NodeList;
 
 public class Utils {
 
+	public static class JsObject extends JavaScriptObject {
+		protected JsObject() {
+		}
+
+		public final native Object getJava(String aName)/*-{
+			return $wnd.boxAsJava(this[aName]);
+		}-*/;
+		
+		public final native JavaScriptObject getJs(String aName)/*-{
+			return this[aName];
+		}-*/;
+		
+		public final native void defineProperty(String aName, JavaScriptObject aDefinition)/*-{
+			Object.defineProperty(this, aName, aDefinition);
+		}-*/;
+	}
+
 	public static native JavaScriptObject publishCancellable(Cancellable aValue)/*-{
 		return {
 			abort : function() {
@@ -101,13 +118,6 @@ public class Utils {
 		if (aHandler) {
 			aHandler();
 		}
-	}-*/;
-
-	public native static JavaScriptObject lookupProperty(JavaScriptObject aObject, String aPropertyName) /*-{
-		if (aObject[aPropertyName] != undefined)
-			return aObject[aPropertyName];
-		else
-			return null;
 	}-*/;
 
 	public static boolean isNumber(Object aValue) {

@@ -23,11 +23,13 @@ import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.bearsoft.rowset.metadata.PrimaryKeySpec;
 import com.eas.client.Utils;
+import com.eas.client.Utils.JsObject;
 import com.eas.client.application.AppClient;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Model;
 import com.eas.client.model.ModelVisitor;
 import com.eas.client.model.ParametersEntity;
+import com.eas.client.model.ReferenceRelation;
 import com.eas.client.model.Relation;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.xml.client.Document;
@@ -52,6 +54,9 @@ public class XmlDom2Model implements ModelVisitor {
 	public static final String PARAMETERS_ENTITY_TAG_NAME = "parametersEntity";
 	public static final String RELATION_TAG_NAME = "relation";
 	public static final String LIGHT_RELATION_TAG_NAME = "lightRelation";
+	public static final String REFERENCE_RELATION_TAG_NAME = "referenceRelation";
+	public static final String SCALAR_PROP_NAME_ATTR_NAME = "scalarPropertyName";
+	public static final String COLLECTION_PROP_NAME_ATTR_NAME = "collectionPropertyName";
 	public static final String PRIMARY_KEYS_TAG_NAME = "primaryKeys";
 	public static final String FOREIGN_KEYS_TAG_NAME = "foreignKeys";
 	public static final String PRIMARY_KEY_TAG_NAME = "primaryKey";
@@ -94,10 +99,10 @@ public class XmlDom2Model implements ModelVisitor {
 	protected Element currentTag = null;
 	protected Model model = null;
 	protected List<Runnable> handlersResolvers;
-	protected Collection<Runnable> relationsResolvers = new ArrayList();
+	protected Collection<Runnable> relationsResolvers = new ArrayList<Runnable>();
 
 	public static Model transform(Document doc, JavaScriptObject aModule) {
-		final List<Runnable> hResolvers = new ArrayList();
+		final List<Runnable> hResolvers = new ArrayList<Runnable>();
 		Model model = new Model(AppClient.getInstance(), new Runnable() {
 			@Override
 			public void run() {
@@ -131,7 +136,7 @@ public class XmlDom2Model implements ModelVisitor {
 					if (pnl != null && parameters != null) {
 						Element lcurrentTag = currentTag;
 						try {
-							Set<String> names = new HashSet();
+							Set<String> names = new HashSet<String>();
 							for (int i = 0; i < pnl.getLength(); i++) {
 								if (PARAMETER_TAG_NAME.equals(pnl.item(i).getNodeName())) {
 									currentTag = (Element) pnl.item(i);
@@ -174,6 +179,10 @@ public class XmlDom2Model implements ModelVisitor {
 							} else if (RELATION_TAG_NAME.equals(nl.item(i).getNodeName())) {
 								currentTag = (Element) nl.item(i);
 								Relation relation = new Relation();
+								relation.accept(this);
+							} else if (REFERENCE_RELATION_TAG_NAME.equals(nl.item(i).getNodeName())) {
+								currentTag = (Element) nl.item(i);
+								Relation relation = new ReferenceRelation();
 								relation.accept(this);
 							}
 						}
@@ -220,43 +229,43 @@ public class XmlDom2Model implements ModelVisitor {
 			public void run() {
 				Node a = attrs.getNamedItem(Model.DATASOURCE_AFTER_CHANGE_EVENT_TAG_NAME);
 				if (a != null) {
-					entity.setOnAfterChange(Utils.lookupProperty(module, a.getNodeValue()));
+					entity.setOnAfterChange(module.<JsObject>cast().getJs(a.getNodeValue()));
 				}
 				a = attrs.getNamedItem(Model.DATASOURCE_AFTER_DELETE_EVENT_TAG_NAME);
 				if (a != null) {
-					entity.setOnAfterDelete(Utils.lookupProperty(module, a.getNodeValue()));
+					entity.setOnAfterDelete(module.<JsObject>cast().getJs(a.getNodeValue()));
 				}
 				a = attrs.getNamedItem(Model.DATASOURCE_AFTER_INSERT_EVENT_TAG_NAME);
 				if (a != null) {
-					entity.setOnAfterInsert(Utils.lookupProperty(module, a.getNodeValue()));
+					entity.setOnAfterInsert(module.<JsObject>cast().getJs(a.getNodeValue()));
 				}
 				a = attrs.getNamedItem(Model.DATASOURCE_AFTER_SCROLL_EVENT_TAG_NAME);
 				if (a != null) {
-					entity.setOnAfterScroll(Utils.lookupProperty(module, a.getNodeValue()));
+					entity.setOnAfterScroll(module.<JsObject>cast().getJs(a.getNodeValue()));
 				}
 				a = attrs.getNamedItem(Model.DATASOURCE_AFTER_FILTER_EVENT_TAG_NAME);
 				if (a != null) {
-					entity.setOnFiltered(Utils.lookupProperty(module, a.getNodeValue()));
+					entity.setOnFiltered(module.<JsObject>cast().getJs(a.getNodeValue()));
 				}
 				a = attrs.getNamedItem(Model.DATASOURCE_AFTER_REQUERY_EVENT_TAG_NAME);
 				if (a != null) {
-					entity.setOnRequeried(Utils.lookupProperty(module, a.getNodeValue()));
+					entity.setOnRequeried(module.<JsObject>cast().getJs(a.getNodeValue()));
 				}
 				a = attrs.getNamedItem(Model.DATASOURCE_BEFORE_CHANGE_EVENT_TAG_NAME);
 				if (a != null) {
-					entity.setOnBeforeChange(Utils.lookupProperty(module, a.getNodeValue()));
+					entity.setOnBeforeChange(module.<JsObject>cast().getJs(a.getNodeValue()));
 				}
 				a = attrs.getNamedItem(Model.DATASOURCE_BEFORE_DELETE_EVENT_TAG_NAME);
 				if (a != null) {
-					entity.setOnBeforeDelete(Utils.lookupProperty(module, a.getNodeValue()));
+					entity.setOnBeforeDelete(module.<JsObject>cast().getJs(a.getNodeValue()));
 				}
 				a = attrs.getNamedItem(Model.DATASOURCE_BEFORE_INSERT_EVENT_TAG_NAME);
 				if (a != null) {
-					entity.setOnBeforeInsert(Utils.lookupProperty(module, a.getNodeValue()));
+					entity.setOnBeforeInsert(module.<JsObject>cast().getJs(a.getNodeValue()));
 				}
 				a = attrs.getNamedItem(Model.DATASOURCE_BEFORE_SCROLL_EVENT_TAG_NAME);
 				if (a != null) {
-					entity.setOnBeforeScroll(Utils.lookupProperty(module, a.getNodeValue()));
+					entity.setOnBeforeScroll(module.<JsObject>cast().getJs(a.getNodeValue()));
 				}
 			}
 
@@ -344,6 +353,19 @@ public class XmlDom2Model implements ModelVisitor {
 		}
 	}
 
+	@Override
+	public void visit(final ReferenceRelation relation) {
+		visit((Relation) relation);
+		NamedNodeMap attrs = currentTag.getAttributes();
+		Node scalarna = attrs.getNamedItem(SCALAR_PROP_NAME_ATTR_NAME);
+		Node collectionna = attrs.getNamedItem(COLLECTION_PROP_NAME_ATTR_NAME);
+		
+        String scalarPropertyName = scalarna != null ? scalarna.getNodeValue() : null;;
+        String collectionPropertyName = collectionna != null ? collectionna.getNodeValue() : null;;
+        relation.setScalarPropertyName(scalarPropertyName != null ? scalarPropertyName.trim() : null);
+        relation.setCollectionPropertyName(collectionPropertyName != null ? collectionPropertyName.trim() : null);
+	}
+	
 	@Override
 	public void visit(ParametersEntity entity) {
 		readEntityEventsAttributes(currentTag, entity);
