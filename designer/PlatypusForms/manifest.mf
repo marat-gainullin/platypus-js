@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 OpenIDE-Module: com.bearsoft.org.netbeans.modules.form
 OpenIDE-Module-Localizing-Bundle: com/bearsoft/org/netbeans/modules/form/Bundle.properties
-OpenIDE-Module-Implementation-Version: 327
+OpenIDE-Module-Implementation-Version: 328
 OpenIDE-Module-Install: com/bearsoft/org/netbeans/modules/form/FormEditorModule.class
 OpenIDE-Module-Package-Dependencies: [javax.swing.JComponentBeanInfo]
 OpenIDE-Module-Requires: org.netbeans.api.editor.guards.Javascript

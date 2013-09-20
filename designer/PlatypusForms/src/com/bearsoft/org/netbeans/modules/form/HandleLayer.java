@@ -642,15 +642,17 @@ public class HandleLayer extends JPanel {
                 && formDesigner.isInDesigner((RADVisualComponent<?>) radComp)) {
             if (AbstractButton.class.isAssignableFrom(radComp.getBeanClass())) {
                 FormProperty<ComponentReference<ButtonGroup>> prop = radComp.<FormProperty<ComponentReference<ButtonGroup>>>getProperty("buttonGroup"); // NOI18N
-                try {
-                    ComponentReference<ButtonGroup> value = prop.getValue();
-                    if (value != null && value.getComponent() != null) {
-                        return value.getComponent().getBeanInstance();
-                    } else {
-                        return null;
+                if (prop != null) {
+                    try {
+                        ComponentReference<ButtonGroup> value = prop.getValue();
+                        if (value != null && value.getComponent() != null) {
+                            return value.getComponent().getBeanInstance();
+                        } else {
+                            return null;
+                        }
+                    } catch (Exception ex) {
+                        ErrorManager.getDefault().notify(ex);
                     }
-                } catch (Exception ex) {
-                    ErrorManager.getDefault().notify(ex);
                 }
             }
         }
