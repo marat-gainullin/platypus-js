@@ -60,7 +60,7 @@ public abstract class XmlDom2Model<E extends Entity<?, ?, E>> implements ModelVi
         return null;
     }
 
-    public void readModel(Model<E, ?, ?, ?> aModel) {
+    public void readModel(final Model<E, ?, ?, ?> aModel) {
         Element el = getElementByTagName(doc, Model2XmlDom.DATAMODEL_TAG_NAME);
         if (el != null && aModel != null) {
             currentModel = aModel;
@@ -132,7 +132,7 @@ public abstract class XmlDom2Model<E extends Entity<?, ?, E>> implements ModelVi
                             resolver.run();
                         }
                         // Let's check relations in our model for integrity
-                        currentModel.checkRelationsIntegrity();
+                        aModel.checkRelationsIntegrity();
                     }
                 };
                 if (currentModel.getClient() != null) {
