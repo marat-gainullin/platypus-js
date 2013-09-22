@@ -8,6 +8,7 @@ import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.compacts.CompactClob;
 import com.bearsoft.rowset.exceptions.InvalidColIndexException;
 import com.bearsoft.rowset.exceptions.RowsetException;
+import com.bearsoft.rowset.metadata.Fields;
 import com.eas.client.model.Model;
 import com.eas.client.model.application.ApplicationEntity;
 import com.eas.script.ScriptUtils;
@@ -34,7 +35,7 @@ public class RowHostObject extends ScriptableObject {
         entity = aEntity;
         assert entity != null;
         defineFunctionProperties(new String[]{"unwrap", "getColumnObject", "getLength", "toString"}, RowHostObject.class, EMPTY);
-        for(Entry<String, ScriptableObject> entry : entity.getOrmDefinitions().entrySet()){
+        for (Entry<String, ScriptableObject> entry : entity.getOrmDefinitions().entrySet()) {
             defineOwnProperty(Context.getCurrentContext(), entry.getKey(), entry.getValue());
         }
     }
@@ -42,9 +43,10 @@ public class RowHostObject extends ScriptableObject {
     @Override
     public Object[] getIds() {
         try {
-            Integer[] indexes = new Integer[row.getColumnCount()];
+            Fields fields = row.getFields();// Rows should enum properties as ordinary js objects
+            String[] indexes = new String[fields.getFieldsCount()];
             for (int i = 0; i < indexes.length; i++) {
-                indexes[i] = i;
+                indexes[i] = fields.get(i + 1).getName();
             }
             return indexes;
         } catch (Exception ex) {

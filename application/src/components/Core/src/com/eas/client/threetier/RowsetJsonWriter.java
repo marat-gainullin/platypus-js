@@ -71,6 +71,11 @@ public class RowsetJsonWriter {
                 case Types.OTHER:
                 case Types.STRUCT:
                     sValue = JSONUtils.s(sValue);
+                    break;
+                case Types.BIT:
+                case Types.BOOLEAN:
+                    sValue = String.valueOf(aValue);
+                    break;
                 default:
                     break;
             }

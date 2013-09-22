@@ -54,10 +54,6 @@ public class TaggedFeedEndPoint {
             if (core == null) {
                 throw new IllegalStateException("Platypus server core is not initialized");
             }
-            Principal principal = aPeer.getUserPrincipal();
-            if (principal == null) {
-                throw new AccessControlException("Anonymous users are not allowed to sign on tagged feed");
-            }
             delete(aPeer);
             String[] tagsOfInterest = aData.split("\n");
             if (tagsOfInterest != null) {
@@ -65,7 +61,8 @@ public class TaggedFeedEndPoint {
                     if (tag != null) {
                         tag = tag.trim();
                         if (!tag.isEmpty()) {
-                            if (core.isUserInApplicationRole(principal.getName(), tag)) {
+                            Principal principal = aPeer.getUserPrincipal();
+                            if (core.isUserInApplicationRole(principal != null ? principal.getName() : null, tag)) {
                                 Set<Session> taggedPeers = peersByTag.get(tag);
                                 if (taggedPeers == null) {
                                     taggedPeers = new HashSet<>();
@@ -80,7 +77,7 @@ public class TaggedFeedEndPoint {
                                 }
                                 tags.add(tag);
                             } else {
-                                Logger.getLogger(TaggedFeedEndPoint.class.getName()).log(Level.SEVERE, String.format("User %s is not allowed to sign on tag %s", principal.getName(), tag));
+                                Logger.getLogger(TaggedFeedEndPoint.class.getName()).log(Level.SEVERE, String.format("User %s is not allowed to sign on tag %s", principal != null ? principal.getName() : String.valueOf(null), tag));
                             }
                         }
                     }
