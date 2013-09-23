@@ -12,6 +12,7 @@ import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.events.RowsetListener;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.eas.client.Utils;
+import com.eas.client.Utils.JsObject;
 import com.eas.client.form.Form;
 import com.eas.client.form.api.JSEvents;
 import com.eas.client.gxtcontrols.ControlsUtils;
@@ -97,8 +98,8 @@ public class GxtGridFactory {
 
 		@Override
 		public void run() {
-			JavaScriptObject cellFunction = Utils.lookupProperty(module, cellFunctionName);
-			JavaScriptObject selectFunction = Utils.lookupProperty(module, selectFunctionName);
+			JavaScriptObject cellFunction = module.<JsObject>cast().getJs(cellFunctionName);
+			JavaScriptObject selectFunction = module.<JsObject>cast().getJs(selectFunctionName);
 
 			column.setCellFunction(cellFunction);
 			column.setSelectFunction(selectFunction);
@@ -124,25 +125,25 @@ public class GxtGridFactory {
 	protected Model model;
 	protected Entity rowsSource;
 	// protected String generalCellFunctionName;
-	protected List<ColumnConfig<Row, ?>> leaves = new ArrayList();
-	protected List<HeaderGroupConfig> groups = new ArrayList();
+	protected List<ColumnConfig<Row, ?>> leaves = new ArrayList<ColumnConfig<Row, ?>>();
+	protected List<HeaderGroupConfig> groups = new ArrayList<HeaderGroupConfig>();
 	protected int currentLeavesCount;
 	protected RowsetListener rowsFiller;
 	protected Store<Row> store;
 	protected Grid<Row> grid;
 	protected ModelGrid modelGrid;
 	protected PlatypusGridInlineRowEditing editing;
-	protected List<PlatypusColumnConfig<Row, String>> sColumns = new ArrayList();
-	protected List<PlatypusColumnConfig<Row, Date>> dColumns = new ArrayList();
-	protected List<PlatypusColumnConfig<Row, Double>> nColumns = new ArrayList();
-	protected List<PlatypusColumnConfig<Row, Boolean>> bColumns = new ArrayList();
-	protected List<PlatypusColumnConfig<Row, Object>> oColumns = new ArrayList();// lookup
+	protected List<PlatypusColumnConfig<Row, String>> sColumns = new ArrayList<PlatypusColumnConfig<Row, String>>();
+	protected List<PlatypusColumnConfig<Row, Date>> dColumns = new ArrayList<PlatypusColumnConfig<Row, Date>>();
+	protected List<PlatypusColumnConfig<Row, Double>> nColumns = new ArrayList<PlatypusColumnConfig<Row, Double>>();
+	protected List<PlatypusColumnConfig<Row, Boolean>> bColumns = new ArrayList<PlatypusColumnConfig<Row, Boolean>>();
+	protected List<PlatypusColumnConfig<Row, Object>> oColumns = new ArrayList<PlatypusColumnConfig<Row, Object>>();// lookup
 	                                                                             // columns
-	protected List<ComboLabelProvider> comboLabelProviders = new ArrayList();
-	protected List<ModelGridColumn<?>> publishedColumns = new ArrayList();
+	protected List<ComboLabelProvider> comboLabelProviders = new ArrayList<ComboLabelProvider>();
+	protected List<ModelGridColumn<?>> publishedColumns = new ArrayList<ModelGridColumn<?>>();
 
 	protected Set<Entity> toEnsureRowset = new HashSet<Entity>();
-	protected List<Runnable> handlersResolvers = new ArrayList();
+	protected List<Runnable> handlersResolvers = new ArrayList<Runnable>();
 
 	public GxtGridFactory(Element aTag, Model aModel) {
 		super();
@@ -197,18 +198,21 @@ public class GxtGridFactory {
 			sm = new CheckBoxSelectionModel<Row>(new IdentityValueProvider<Row>());
 			firstBlankColumn = ((CheckBoxSelectionModel<Row>) sm).getColumn();
 			leaves.add(0, firstBlankColumn);
+			currentLeavesCount = 1;
 		} else if (rowsHeaderType == ROWS_HEADER_TYPE_RADIOBUTTON) {
 			sm = new RadioBoxSelectionModel<Row>(new IdentityValueProvider<Row>());
 			firstBlankColumn = ((RadioBoxSelectionModel<Row>) sm).getColumn();
 			leaves.add(0, firstBlankColumn);
+			currentLeavesCount = 1;
 		} else if (rowsHeaderType == ROWS_HEADER_TYPE_USUAL) {
 			sm = new PlatypusCellSelectionModel<Row>(new RowMarker(rowsSource, new IdentityValueProvider<Row>()));
 			firstBlankColumn = ((PlatypusCellSelectionModel<Row>) sm).getColumn();
 			leaves.add(0, firstBlankColumn);
+			currentLeavesCount = 1;
 		} else
 			sm = new PlatypusCellSelectionModel<Row>(null);
 
-		List<HeaderGroupConfig> topLevelGroups = new ArrayList();
+		List<HeaderGroupConfig> topLevelGroups = new ArrayList<HeaderGroupConfig>();
 		NodeList nodesWithColumns = gridTag.getChildNodes();
 		for (int i = 0; i < nodesWithColumns.getLength(); i++) {
 			if ("column".equalsIgnoreCase(nodesWithColumns.item(i).getNodeName())) {
@@ -289,7 +293,7 @@ public class GxtGridFactory {
 		handlersResolvers.add(new Runnable() {
 			@Override
 			public void run() {
-				modelGrid.setGeneralCellFunction(Utils.lookupProperty(model.getModule(), generalCellFunctionName));
+				modelGrid.setGeneralCellFunction(model.getModule().<JsObject>cast().getJs(generalCellFunctionName));
 			}
 		});
 		for (ModelGridColumn<?> column : publishedColumns)
@@ -336,7 +340,7 @@ public class GxtGridFactory {
 		Element styleTag = null;
 		int childrenCount = 0;
 		int subgroupsCount = 0;
-		List<HeaderGroupConfig> subGroups = new ArrayList();
+		List<HeaderGroupConfig> subGroups = new ArrayList<HeaderGroupConfig>();
 		NodeList columnNodes = aTag.getChildNodes();
 		int _currentLeavesCount = 0;
 		for (int c = 0; c < columnNodes.getLength(); c++) {
@@ -778,6 +782,7 @@ public class GxtGridFactory {
 					cb.setTypeAhead(true);
 					cb.setTriggerAction(TriggerAction.ALL);
 					cb.getCell().setHideTrigger(!list);
+					cb.setEditable(false);
 					PlatypusAdapterCellField<Object> resComp = new PlatypusAdapterCellField<Object>(cb, column);
 					JavaScriptObject published = Publisher.publishColumnEditor(cb, resComp);
 					cb.setData(Form.PUBLISHED_DATA_KEY, published);

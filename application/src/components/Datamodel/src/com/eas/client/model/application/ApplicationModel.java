@@ -4,6 +4,7 @@
  */
 package com.eas.client.model.application;
 
+import com.eas.client.model.store.ApplicationModel2XmlDom;
 import com.bearsoft.rowset.compacts.CompactBlob;
 import com.bearsoft.rowset.compacts.CompactClob;
 import com.bearsoft.rowset.dataflow.TransactionListener;
@@ -47,6 +48,7 @@ import org.w3c.dom.Document;
 public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P extends E, C extends Client, Q extends Query<C>> extends Model<E, P, C, Q> {
 
     public static final String SCRIPT_MODEL_NAME = "model";
+    protected Set<ReferenceRelation<E>> referenceRelations = new HashSet<>();
     protected Set<Long> savedRowIndexEntities = new HashSet<>();
     protected List<Entry<E, Integer>> savedEntitiesRowIndexes = new ArrayList<>();
     protected List<ScriptEvent<E>> scriptEventsQueue = new ArrayList<>();
@@ -77,6 +79,34 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
             if (parametersEntity != null) {
                 parametersEntity.defineProperties();
             }
+            //
+            for (ReferenceRelation<E> aRelation : referenceRelations) {
+                String scalarPropertyName = aRelation.getScalarPropertyName();                
+                if (scalarPropertyName == null || scalarPropertyName.isEmpty()) {
+                    scalarPropertyName = aRelation.getRightEntity().getName();
+                }
+                if (scalarPropertyName != null && !scalarPropertyName.isEmpty()) {
+                    aRelation.getLeftEntity().putOrmDefinition(
+                            scalarPropertyName,
+                            ScriptUtils.scalarPropertyDefinition(
+                            aRelation.getRightEntity().getRowsetWrap(),
+                            aRelation.getRightField().getName(),
+                            aRelation.getLeftField().getName()));
+                }
+                String collectionPropertyName = aRelation.getCollectionPropertyName();
+                if (collectionPropertyName == null || collectionPropertyName.isEmpty()) {
+                    collectionPropertyName = aRelation.getLeftEntity().getName();
+                }
+                if (collectionPropertyName != null && !collectionPropertyName.isEmpty()) {
+                    aRelation.getRightEntity().putOrmDefinition(
+                            collectionPropertyName,
+                            ScriptUtils.collectionPropertyDefinition(
+                            aRelation.getLeftEntity().getRowsetWrap(),
+                            aRelation.getRightField().getName(),
+                            aRelation.getLeftField().getName()));
+                }
+            }
+            //////////////////
             ((ScriptableObject) scriptScope).defineProperty(SCRIPT_MODEL_NAME, ScriptUtils.javaToJS(this, aScriptScope), ScriptableObject.READONLY);
         }
         changeSupport.firePropertyChange("scriptScope", oldValue, scriptScope);
@@ -95,6 +125,32 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
             for (ScriptEvent event : scriptEventsQueue) {
                 event.resolveHandler();
             }
+        }
+    }
+
+    @Override
+    public Model<E, P, C, Q> copy() throws Exception {
+        Model<E, P, C, Q>  copied = super.copy();
+        for (ReferenceRelation<E> relation : referenceRelations) {
+            ReferenceRelation<E> rcopied = (ReferenceRelation<E>)relation.copy();
+            resolveCopiedRelation(rcopied, copied);
+            ((ApplicationModel<E, P, C, Q>)copied).getReferenceRelations().add(rcopied);
+        }
+        return copied;
+    }
+
+    @Override
+    public void checkRelationsIntegrity() {
+        super.checkRelationsIntegrity();
+        List<ReferenceRelation<E>> toDel = new ArrayList<>();
+        for (ReferenceRelation<E> rel : referenceRelations) {
+            if (rel.getLeftEntity() == null || (rel.getLeftField() == null && rel.getLeftParameter() == null)
+                    || rel.getRightEntity() == null || (rel.getRightField() == null && rel.getRightParameter() == null)) {
+                toDel.add(rel);
+            }
+        }
+        for (ReferenceRelation<E> rel : toDel) {
+            referenceRelations.remove(rel);
         }
     }
 
@@ -188,6 +244,15 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
                 }
             }
         }
+        return false;
+    }
+
+    /**
+     * Stub for compliance with asynchronous model within browser client.
+     *
+     * @return Allways false. Because of it is a stub.
+     */
+    public boolean isPending() {
         return false;
     }
 
@@ -424,7 +489,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         Logger.getLogger(ApplicationModel.class.getName()).log(Level.WARNING, "createQuery deprecated call detected. Use createEntity instead.");
         return createEntity(aQueryId);
     }
-    
+
     public synchronized Scriptable createEntity(String aQueryId) throws Exception {
         if (client == null) {
             throw new NullPointerException("Null client detected while creating an entity");
@@ -470,6 +535,30 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
             }
             removeEntity((E) entity2Delete);
         }
+    }
+
+    public void addReferenceRelation(ReferenceRelation<E> aRelation) {
+        referenceRelations.add(aRelation);
+        fireRelationAdded(aRelation);
+    }
+
+    public void removeReferenceRelation(ReferenceRelation<E> aRelation) {
+        referenceRelations.remove(aRelation);
+        fireRelationRemoved(aRelation);
+    }
+
+    public Set<ReferenceRelation<E>> getReferenceRelations() {
+        return referenceRelations;
+    }
+
+    public Set<ReferenceRelation<E>> getReferenceRelationsByEntity(E aEntity) {
+        Set<ReferenceRelation<E>> res = new HashSet<>();
+        for (ReferenceRelation<E> rel : referenceRelations) {
+            if (rel.getLeftEntity() == aEntity || rel.getRightEntity() == aEntity) {
+                res.add(rel);
+            }
+        }
+        return res;
     }
 
     public CompactBlob loadBlobFromFile(File aFile) throws IOException {

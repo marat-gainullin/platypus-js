@@ -15,17 +15,30 @@ import com.eas.client.reports.ReportRunnerPrototype;
 import com.eas.client.scripts.CompiledScriptDocuments;
 import com.eas.client.scripts.CompiledScriptDocumentsHost;
 import com.eas.client.scripts.ScriptDocument;
+import com.eas.client.scripts.ScriptRunner;
 import com.eas.client.scripts.ScriptRunnerPrototype;
 import com.eas.client.scripts.ServerScriptProxyPrototype;
+import com.eas.client.settings.DbConnectionSettings;
+import com.eas.debugger.jmx.server.Breakpoints;
+import com.eas.debugger.jmx.server.Debugger;
+import com.eas.debugger.jmx.server.DebuggerMBean;
+import com.eas.debugger.jmx.server.Settings;
 import com.eas.script.JsDoc;
 import com.eas.script.ScriptUtils;
 import com.eas.server.filter.AppElementsFilter;
+import java.lang.management.ManagementFactory;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.management.InstanceNotFoundException;
+import javax.management.MBeanRegistrationException;
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.IdFunctionObject;
 import org.mozilla.javascript.Scriptable;
+import org.mozilla.javascript.ScriptableObject;
 
 /**
  *
@@ -38,6 +51,48 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
         ReportRunnerPrototype.init(ScriptUtils.getScope(), true);
         ServerScriptProxyPrototype.init(ScriptUtils.getScope(), true);
     }
+    protected static PlatypusServerCore instance;
+
+    public static PlatypusServerCore getInstance(DbConnectionSettings aDbSettings, Set<String> aTasks, String aStartAppElementId) throws Exception {
+        if (instance == null) {
+            DatabasesClient serverCoreDbClient = new DatabasesClient(aDbSettings, true);
+            instance = new PlatypusServerCore(serverCoreDbClient, aTasks, aStartAppElementId);
+            serverCoreDbClient.setContextHost(instance);
+            serverCoreDbClient.setPrincipalHost(instance);
+            ScriptRunner.PlatypusScriptedResource.init(serverCoreDbClient, instance, instance);
+            ScriptUtils.getScope().defineProperty(ServerScriptRunner.MODULES_SCRIPT_NAME, instance.getScriptsCache(), ScriptableObject.READONLY);
+
+            if (System.getProperty(ScriptRunner.DEBUG_PROPERTY) != null) {
+                Debugger debugger = Debugger.initialize(false);
+                unRegisterMBean(DebuggerMBean.DEBUGGER_MBEAN_NAME);
+                registerMBean(DebuggerMBean.DEBUGGER_MBEAN_NAME, debugger);
+                unRegisterMBean(Breakpoints.BREAKPOINTS_MBEAN_NAME);
+                registerMBean(Breakpoints.BREAKPOINTS_MBEAN_NAME, Breakpoints.getInstance());
+                unRegisterMBean(Settings.SETTINGS_MBEAN_NAME);
+                registerMBean(Settings.SETTINGS_MBEAN_NAME, new Settings(serverCoreDbClient));
+            }
+            instance.startBackgroundTasks();
+        }
+        return instance;
+    }
+
+    public static PlatypusServerCore getInstance() throws Exception {
+        return instance;
+    }
+
+    public static void registerMBean(String aName, Object aBean) throws Exception {
+        // Get the platform MBeanServer
+        // Uniquely identify the MBeans and register them with the platform MBeanServer
+        ManagementFactory.getPlatformMBeanServer().registerMBean(aBean, new ObjectName(aName));
+    }
+
+    public static void unRegisterMBean(String aName) throws MBeanRegistrationException, MalformedObjectNameException {
+        try {
+            ManagementFactory.getPlatformMBeanServer().unregisterMBean(new ObjectName(aName));
+        } catch (InstanceNotFoundException ex) {
+            //no-op
+        }
+    }
     protected String defaultAppElement = null;
     protected SessionManager sessionManager;
     protected DatabasesClient databasesClient;
@@ -45,6 +100,7 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
     protected ServerCompiledScriptDocuments scriptDocuments;
     protected AppElementsFilter browsersFilter;
     protected final Set<String> tasks;
+    protected final Set<String> extraAuthenticators = new HashSet<>();
 
     public PlatypusServerCore(DatabasesClient aDatabasesClient, Set<String> aTasks, String aDefaultAppElement) throws Exception {
         databasesClient = aDatabasesClient;
@@ -72,6 +128,30 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
         return scriptsCache;
     }
 
+    public boolean isUserInApplicationRole(String aUser, String aRole) throws Exception {
+        for (String moduleName : extraAuthenticators) {
+            Object result = executeServerModuleMethod(moduleName, "isUserInRole", new Object[]{aUser, aRole});
+            if (Boolean.TRUE.equals(result)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public Object executeServerModuleMethod(String aModuleName, String aMethodName, Object[] aArgs) throws Exception {
+        ServerScriptRunner module = getSessionManager().getSystemSession().getModule(aModuleName);
+        if (module == null) {
+            module = new ServerScriptRunner(this, getSessionManager().getSystemSession(), aModuleName, ScriptRunner.initializePlatypusStandardLibScope(), this, this, new Object[]{});
+        }
+        module.execute();
+        getSessionManager().setCurrentSession(getSessionManager().getSystemSession());
+        try {
+            return module.executeMethod(aMethodName, aArgs);
+        } finally {
+            getSessionManager().setCurrentSession(null);
+        }
+    }
+
     public Set<String> getTasks() {
         return tasks;
     }
@@ -87,7 +167,8 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
     }
 
     /**
-     * Starts a background task, initializing it with supplied module annotations.
+     * Starts a background task, initializing it with supplied module
+     * annotations.
      *
      * @param aModuleId Module identifier, specifying a module for the task
      * @return Success status
@@ -97,8 +178,13 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
         if (sDoc != null) {
             boolean stateless = false;
             for (JsDoc.Tag tag : sDoc.getModuleAnnotations()) {
-                if (JsDoc.Tag.STATELESS_TAG.equals(tag.getName())) {
-                    stateless = true;
+                switch (tag.getName()) {
+                    case JsDoc.Tag.STATELESS_TAG:
+                        stateless = true;
+                        break;
+                    case JsDoc.Tag.AUTHORIZER_TAG:
+                        extraAuthenticators.add(aModuleId);
+                        break;
                 }
             }
             if (!stateless) {

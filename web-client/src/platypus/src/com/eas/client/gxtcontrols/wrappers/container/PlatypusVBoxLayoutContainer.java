@@ -65,7 +65,10 @@ public class PlatypusVBoxLayoutContainer extends VBoxLayoutContainer {
 
 	public void ajustHeight(Widget aChild, int aValue) {
 		if (aChild != null) {
-			aChild.setPixelSize(Sizer.getWidgetWidth(aChild), aValue);
+			if(aChild.getParent() instanceof PlatypusFieldSet)
+				aChild.getParent().setPixelSize(Sizer.getWidgetWidth(aChild), aValue);
+			else
+				aChild.setPixelSize(Sizer.getWidgetWidth(aChild), aValue);
 			ajustSize();
 		}
 	}

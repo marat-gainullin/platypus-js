@@ -132,7 +132,7 @@ public class Deployer extends BaseDeployer {
         } catch (Exception ex) {
             client.rollback(null);
             Logger.getLogger(Deployer.class.getName()).log(Level.SEVERE, null, ex);
-            err.println("Error deploy application: " + ex.getMessage()); // NOI18N
+            err.println("Application deploying error: " + ex.getMessage()); // NOI18N
         } finally {
             synchronized (this) {
                 busy = false;

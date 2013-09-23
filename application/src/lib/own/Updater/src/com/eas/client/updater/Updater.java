@@ -40,7 +40,7 @@ public class Updater {
             }
 
             String userHome = System.getProperty("user.home");
-            String pathHome = FileUpdater.fixFileSeparatorChar(userHome + "\\.platypus\\logs\\Updater_log.log");
+            String pathHome = FileUpdater.fixFileSeparatorChar(userHome + "/.platypus/logs/Updater_log.log");
             FileHandler h = new FileHandler(pathHome);
             h.setFormatter(new SimpleFormatter());
             log.addHandler(h);
@@ -58,6 +58,7 @@ public class Updater {
                     }
                     case UpdaterConstants.COMMAND_DO_UPDATE: {
                         upd = new UpdProgress();
+                        upd.setTitle(res.getString("title"));
                         upd.getCaption().setText(res.getString("caption"));
                         au.setUpdVis(upd);
                         au.doUpdateEx();

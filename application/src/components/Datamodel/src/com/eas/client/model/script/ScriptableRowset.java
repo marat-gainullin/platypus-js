@@ -11,9 +11,11 @@ import com.bearsoft.rowset.compacts.CompactClob;
 import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.filters.Filter;
 import com.bearsoft.rowset.locators.Locator;
+import com.bearsoft.rowset.locators.RowWrap;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameters;
+import com.bearsoft.rowset.ordering.HashOrderer.TaggedList;
 import com.bearsoft.rowset.sorting.RowsComparator;
 import com.bearsoft.rowset.sorting.SortingCriterion;
 import com.eas.client.AppClient;
@@ -189,7 +191,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         }
 
         public RowHostObject getRow(int aIndex) throws Exception {
-            return RowHostObject.publishRow(entity.getModel().getScriptScope(), loc.getRow(aIndex));
+            return RowHostObject.publishRow(entity.getModel().getScriptScope(), loc.getRow(aIndex), entity);
         }
 
         public int getSize() {
@@ -374,8 +376,8 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     }
 
     // Find and positioning interface
-    protected Object[] findImpl(Object... values) throws Exception {
-        List<RowHostObject> found = new ArrayList<>();
+    @ScriptFunction(jsDocText = "Finds rows using field - field value pairs.")
+    public Scriptable find(Object... values) throws Exception {
         Rowset rs = getRowset();
         if (rs != null && values != null && values.length > 0 && values.length % 2 == 0) {
             Fields fields = rs.getFields();
@@ -408,38 +410,43 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
             if (!constraints.isEmpty() && constraints.size() == keyValues.size()) {
                 Locator loc = checkUserLocator(constraints, rs);
                 if (loc.find(keyValues.toArray())) {
-                    for (int i = 0; i < loc.getSize(); i++) {
-                        found.add(RowHostObject.publishRow(entity.getModel().getScriptScope(), loc.getRow(i)));
+                    TaggedList<RowWrap> subSet = loc.getSubSet();
+                    if (subSet.tag == null) {
+                        List<RowHostObject> found = new ArrayList<>();
+                        for (RowWrap rw : subSet) {
+                            found.add(RowHostObject.publishRow(entity.getModel().getScriptScope(), rw.getRow(), entity));
+                        }
+                        subSet.tag = wrapArray(found.toArray());
                     }
-
+                    assert subSet.tag instanceof Scriptable;
+                    return (Scriptable) subSet.tag;
                 }
             }
         } else {
             Logger.getLogger(ScriptableRowset.class.getName()).log(Level.SEVERE, BAD_FIND_AGRUMENTS_MSG);
         }
-        return found.toArray();
+        return wrapArray(new Object[]{});
     }
 
     protected Scriptable wrapArray(Object[] elements) {
         return Context.getCurrentContext().newArray(entity.getModel().getScriptScope(), elements);
     }
 
-    @ScriptFunction(jsDocText = "Finds rows using field - field value pairs.")
-    public Scriptable find(Object... values) throws Exception {
-        return wrapArray(findImpl(values));
-    }
-
-    @ScriptFunction(jsDocText = "Finds row by its ID.")
+    @ScriptFunction(jsDocText = "Finds row by its key. Key must a single property.")
     public RowHostObject findById(Object aValue) throws Exception {
         Rowset rs = getRowset();
         Fields fields = rs.getFields();
         List<Field> pks = fields.getPrimaryKeys();
         if (pks.size() == 1) {
-            Object[] found = findImpl(pks.get(0), aValue);
-            if (found.length > 0) {
-                assert found[0] instanceof RowHostObject;
-                return (RowHostObject) found[0];
-            }
+            Scriptable found = find(pks.get(0), aValue);
+            assert found instanceof NativeArray;
+            long length = ((NativeArray) found).getLength();
+            if (length == 1) {
+                assert ((NativeArray) found).get(0) instanceof RowHostObject;
+                return (RowHostObject) ((NativeArray) found).get(0);
+            } else if (length > 1) {
+                Logger.getLogger(ScriptableRowset.class.getName()).log(Level.SEVERE, String.format("More than one object found with such ids. Use find() to get correct results."));
+            }//else nothing found (length == 0)
         } else {
             Logger.getLogger(ScriptableRowset.class.getName()).log(Level.SEVERE, String.format(BAD_PRIMARY_KEYS_MSG, pks.size()));
         }
@@ -510,7 +517,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
 
     @ScriptFunction(jsDocText = "Gets the row at specified index.")
     public RowHostObject getRow(int aIndex) throws Exception {
-        return RowHostObject.publishRow(entity.getModel().getScriptScope(), getRowset().getRow(aIndex));
+        return RowHostObject.publishRow(entity.getModel().getScriptScope(), getRowset().getRow(aIndex), entity);
     }
 
     @ScriptFunction(jsDocText = "The current cursor position.")
@@ -576,7 +583,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
             Row r = rowset.getRow(rowset.size());
             toDel.add(r);
             rowset.delete(toDel);
-            return RowHostObject.publishRow(entity.getModel().getScriptScope(), r);
+            return RowHostObject.publishRow(entity.getModel().getScriptScope(), r, entity);
         } else {
             return Context.getUndefinedValue();
         }
@@ -590,7 +597,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
             Set<Row> toDel = new HashSet<>();
             toDel.add(r);
             rowset.delete(toDel);
-            return RowHostObject.publishRow(entity.getModel().getScriptScope(), r);
+            return RowHostObject.publishRow(entity.getModel().getScriptScope(), r, entity);
         } else {
             return Context.getUndefinedValue();
         }
@@ -667,7 +674,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
             while (startAt < size && removed.size() < howMany) {
                 Row deleted = rowset.getRow(startAt + 1);
                 rowset.deleteAt(startAt + 1);
-                RowHostObject deletedFacade = RowHostObject.publishRow(entity.getModel().getScriptScope(), deleted);
+                RowHostObject deletedFacade = RowHostObject.publishRow(entity.getModel().getScriptScope(), deleted, entity);
                 removed.add(deletedFacade);
                 size = rowset.size();
             }
@@ -699,8 +706,8 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
                                     cFunc.getParentScope(),
                                     entity.getModel().getScriptScope(),
                                     new Object[]{
-                                RowHostObject.publishRow(cFunc.getParentScope(), r1),
-                                RowHostObject.publishRow(cFunc.getParentScope(), r2)
+                                RowHostObject.publishRow(cFunc.getParentScope(), r1, entity),
+                                RowHostObject.publishRow(cFunc.getParentScope(), r2, entity)
                             }));
                             return compValue instanceof Number ? ((Number) compValue).intValue() : 0;
                         } catch (Exception ex) {
@@ -724,7 +731,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         int size = rowset.size();
         for (int i = 0; i < size; i++) {
             Row row = rowset.getRow(i + 1);
-            RowHostObject rowFacade = RowHostObject.publishRow(entity.getModel().getScriptScope(), row);
+            RowHostObject rowFacade = RowHostObject.publishRow(entity.getModel().getScriptScope(), row, entity);
             concated.add(rowFacade);
         }
         for (int i = 0; i < arguments.length; i++) {
@@ -754,7 +761,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
                 sb.append(", ");
             }
             Row row = rowset.getRow(i);
-            RowHostObject rowFacade = RowHostObject.publishRow(entity.getModel().getScriptScope(), row);
+            RowHostObject rowFacade = RowHostObject.publishRow(entity.getModel().getScriptScope(), row, entity);
             sb.append(rowFacade.toString());
         }
         sb.append("]");
@@ -790,7 +797,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
 
             for (int i = startAt; i <= endAt; i++) {
                 Row row = rowset.getRow(i + 1);
-                RowHostObject rowFacade = RowHostObject.publishRow(entity.getModel().getScriptScope(), row);
+                RowHostObject rowFacade = RowHostObject.publishRow(entity.getModel().getScriptScope(), row, entity);
                 sliced.add(rowFacade);
             }
             return wrapArray(sliced.toArray());
@@ -836,7 +843,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         int size = rowset.size();
         for (int i = 0; i < size; i++) {
             Row row = rowset.getRow(i + 1);
-            RowHostObject rowFacade = RowHostObject.publishRow(entity.getModel().getScriptScope(), row);
+            RowHostObject rowFacade = RowHostObject.publishRow(entity.getModel().getScriptScope(), row, entity);
             if (rowFacade == aObj) {
                 return i;
             }
@@ -850,7 +857,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         int size = rowset.size();
         for (int i = size - 1; i >= 0; i--) {
             Row row = rowset.getRow(i + 1);
-            RowHostObject rowFacade = RowHostObject.publishRow(entity.getModel().getScriptScope(), row);
+            RowHostObject rowFacade = RowHostObject.publishRow(entity.getModel().getScriptScope(), row, entity);
             if (rowFacade == aObj) {
                 return i;
             }
@@ -879,7 +886,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
                 int size = rowset.size();
                 for (int i = 0; i < size; i++) {
                     Row row = rowset.getRow(i + 1);
-                    RowHostObject rowFacade = RowHostObject.publishRow(entity.getModel().getScriptScope(), row);
+                    RowHostObject rowFacade = RowHostObject.publishRow(entity.getModel().getScriptScope(), row, entity);
                     Object res = callback.call(Context.getCurrentContext(), entity.getModel().getScriptScope(), thisObj, new Object[]{rowFacade, i, rowsetFacade});
                     if (Boolean.TRUE.equals(res)) {
                         filtered.add(rowFacade);
@@ -913,7 +920,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
                 int size = rowset.size();
                 for (int i = 0; i < size; i++) {
                     Row row = rowset.getRow(i + 1);
-                    RowHostObject rowFacade = RowHostObject.publishRow(entity.getModel().getScriptScope(), row);
+                    RowHostObject rowFacade = RowHostObject.publishRow(entity.getModel().getScriptScope(), row, entity);
                     callback.call(Context.getCurrentContext(), entity.getModel().getScriptScope(), thisObj, new Object[]{rowFacade, i, rowsetFacade});
                 }
             } else {
@@ -943,7 +950,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
                 int size = rowset.size();
                 for (int i = 0; i < size; i++) {
                     Row row = rowset.getRow(i + 1);
-                    RowHostObject rowFacade = RowHostObject.publishRow(entity.getModel().getScriptScope(), row);
+                    RowHostObject rowFacade = RowHostObject.publishRow(entity.getModel().getScriptScope(), row, entity);
                     Object res = callback.call(Context.getCurrentContext(), entity.getModel().getScriptScope(), thisObj, new Object[]{rowFacade, i, rowsetFacade});
                     if (Boolean.FALSE.equals(res)) {
                         return false;
@@ -978,7 +985,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
                 int size = rowset.size();
                 for (int i = 0; i < size; i++) {
                     Row row = rowset.getRow(i + 1);
-                    RowHostObject rowFacade = RowHostObject.publishRow(entity.getModel().getScriptScope(), row);
+                    RowHostObject rowFacade = RowHostObject.publishRow(entity.getModel().getScriptScope(), row, entity);
                     Object res = callback.call(Context.getCurrentContext(), entity.getModel().getScriptScope(), thisObj, new Object[]{rowFacade, i, rowsetFacade});
                     mapped.add(res);
                 }
@@ -1010,7 +1017,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
                 int size = rowset.size();
                 for (int i = 0; i < size; i++) {
                     Row row = rowset.getRow(i + 1);
-                    RowHostObject rowFacade = RowHostObject.publishRow(entity.getModel().getScriptScope(), row);
+                    RowHostObject rowFacade = RowHostObject.publishRow(entity.getModel().getScriptScope(), row, entity);
                     Object res = callback.call(Context.getCurrentContext(), entity.getModel().getScriptScope(), thisObj, new Object[]{rowFacade, i, rowsetFacade});
                     if (Boolean.TRUE.equals(res)) {
                         return true;
@@ -1039,7 +1046,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
                 if (arguments.length == 1) {
                     startAt = 1;
                     Row _row = rowset.getRow(1);
-                    previousValue = RowHostObject.publishRow(entity.getModel().getScriptScope(), _row);
+                    previousValue = RowHostObject.publishRow(entity.getModel().getScriptScope(), _row, entity);
 
                 } else {
                     startAt = 0;
@@ -1047,7 +1054,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
                 }
                 for (int i = startAt; i < size; i++) {
                     Row row1 = rowset.getRow(i + 1);
-                    RowHostObject rowFacade1 = RowHostObject.publishRow(entity.getModel().getScriptScope(), row1);
+                    RowHostObject rowFacade1 = RowHostObject.publishRow(entity.getModel().getScriptScope(), row1, entity);
                     previousValue = callback.call(Context.getCurrentContext(), entity.getModel().getScriptScope(), null, new Object[]{previousValue, rowFacade1, i, rowsetFacade});
                 }
                 return previousValue;
@@ -1073,7 +1080,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
                 if (arguments.length == 1) {
                     startAt = size - 2;
                     Row _row = rowset.getRow(1);
-                    previousValue = RowHostObject.publishRow(entity.getModel().getScriptScope(), _row);
+                    previousValue = RowHostObject.publishRow(entity.getModel().getScriptScope(), _row, entity);
 
                 } else {
                     startAt = size - 1;
@@ -1081,7 +1088,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
                 }
                 for (int i = startAt; i >= 0; i--) {
                     Row row1 = rowset.getRow(i + 1);
-                    RowHostObject rowFacade1 = RowHostObject.publishRow(entity.getModel().getScriptScope(), row1);
+                    RowHostObject rowFacade1 = RowHostObject.publishRow(entity.getModel().getScriptScope(), row1, entity);
                     previousValue = callback.call(Context.getCurrentContext(), entity.getModel().getScriptScope(), null, new Object[]{previousValue, rowFacade1, i, rowsetFacade});
                 }
                 return previousValue;

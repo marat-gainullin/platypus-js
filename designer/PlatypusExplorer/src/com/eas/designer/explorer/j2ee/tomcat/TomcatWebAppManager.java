@@ -6,7 +6,6 @@ package com.eas.designer.explorer.j2ee.tomcat;
 
 import com.eas.client.ClientConstants;
 import com.eas.client.SQLUtils;
-import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.client.settings.DbConnectionSettings;
 import com.eas.designer.application.PlatypusUtils;
 import com.eas.designer.explorer.j2ee.PlatypusWebModule;
@@ -123,8 +122,7 @@ public class TomcatWebAppManager implements WebAppManager {
         String classFilePath = className.replace('.', '/') + ".class"; // NOI18N
         for (File file : classpath) {
             if (file.isFile()) {
-                JarFile jf = new JarFile(file);
-                try {
+                try (JarFile jf = new JarFile(file)) {
                     Enumeration entries = jf.entries();
                     while (entries.hasMoreElements()) {
                         JarEntry entry = (JarEntry) entries.nextElement();
@@ -132,8 +130,6 @@ public class TomcatWebAppManager implements WebAppManager {
                             return true;
                         }
                     }
-                } finally {
-                    jf.close();
                 }
             } else {
                 if (new File(file, classFilePath).exists()) {

@@ -24,6 +24,6 @@ public class WebPlatypusPrincipal extends PlatypusPrincipal {
     public boolean hasRole(String aRole) throws Exception {
         HttpServletRequest currentRequest = servlet.getCurrentRequest();
         assert currentRequest != null : "Current request is null"; //NOI18N
-        return currentRequest.isUserInRole(aRole);
+        return currentRequest.isUserInRole(aRole) || servlet.getServerCore().isUserInApplicationRole(getName(), aRole);
     }
 }

@@ -10,6 +10,7 @@ import com.eas.client.model.Relation;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
 import com.eas.client.model.application.ApplicationParametersEntity;
+import com.eas.client.model.application.ReferenceRelation;
 import com.eas.client.model.gui.ApplicationModelEditorView;
 import com.eas.client.model.gui.selectors.SelectedField;
 import com.eas.client.model.gui.selectors.SelectedParameter;
@@ -256,6 +257,13 @@ public final class PlatypusModuleDatamodelView extends TopComponent implements M
                 }
             });
             explorerManager.setRootContext(dataObject.getModelNode());
+            appModelEditor.getModelView().complementReferenceRelationsByKeys(new ApplicationModelView.ForeignKeyBindingTask() {
+
+                @Override
+                public void run(ReferenceRelation<ApplicationDbEntity> aRelation) {
+                    appModelEditor.getModelView().getModel().addReferenceRelation(aRelation);
+                }
+            });
             componentActivated();
         } else {
             explorerManager.setRootContext(dataObject.getNodeDelegate());

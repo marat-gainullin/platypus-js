@@ -14,6 +14,7 @@ import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.locators.Locator;
 import com.bearsoft.rowset.metadata.Fields;
+import com.eas.client.model.application.ApplicationEntity;
 import com.eas.dbcontrols.grid.rt.columns.model.ModelColumn;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -38,8 +39,8 @@ public class RowsetsTreedModel extends RowsetsModel implements TreedModel<Row> {
     protected int parentFieldIndex;
     protected TreedRowsRowsetListener rowsRowsetListener;
 
-    public RowsetsTreedModel(Rowset aRowsRowset, int aParentFieldIndex, Scriptable aScriptScope, Function aCellsHandler) {
-        super(aRowsRowset, aScriptScope, aCellsHandler);
+    public RowsetsTreedModel(ApplicationEntity<?, ?, ?> aRowsEntity, Rowset aRowsRowset, int aParentFieldIndex, Scriptable aScriptScope, Function aCellsHandler) {
+        super(aRowsEntity, aRowsRowset, aScriptScope, aCellsHandler);
         parentFieldIndex = aParentFieldIndex;
         parentLocator = rowsRowset.createParentLocator(parentFieldIndex, pkLocator);
         parentLocator.beginConstrainting();

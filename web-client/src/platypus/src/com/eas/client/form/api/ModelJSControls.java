@@ -8,10 +8,15 @@ public class ModelJSControls {
 			@com.eas.client.form.api.JSControls::publishComponentProperties(Lcom/eas/client/gxtcontrols/published/PublishedComponent;)(aPublished);
 		}
 		
-		function publishEditorError(aPublished) {
+		function publishModelComponentProperties(aPublished) {
 			var adapter = aPublished.unwrap();
 			var field = adapter.@com.eas.client.gxtcontrols.wrappers.component.PlatypusAdapterStandaloneField::getJsTarget()();
 			@com.eas.client.form.api.JSControls::publishEditorError(Lcom/sencha/gxt/widget/core/client/form/Field;Lcom/eas/client/gxtcontrols/published/PublishedComponent;)(field, aPublished);
+			Object.defineProperty(aPublished, "redraw", {
+				get : function(){
+					return function(){field.@com.sencha.gxt.widget.core.client.form.Field::redraw()()};
+				}
+			});
 		}
 		
 		// **************************************************************************
@@ -41,7 +46,11 @@ public class ModelJSControls {
 			published.clearSelection = function() {
 				aComponent.@com.eas.client.gxtcontrols.grid.ModelGrid::clearSelection()();
 			};
+			published.find = function(){
+				aComponent.@com.eas.client.gxtcontrols.grid.ModelGrid::find()();
+			};
 			published.findSomething = function() {
+				published.find();
 			};
 			published.makeVisible = function(aRow, needToSelect) {
 				var need2Select = true;
@@ -142,7 +151,7 @@ public class ModelJSControls {
 				return aComponent;
 			};
 			publishComponentProperties(published);
-			publishEditorError(published);
+			publishModelComponentProperties(published);
 
 			if(!injected) {
 				aComponent.@com.eas.client.gxtcontrols.model.ModelFormattedField::setPublishedField(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
@@ -165,7 +174,7 @@ public class ModelJSControls {
 				return aComponent;
 			};
 			publishComponentProperties(published);
-			publishEditorError(published);
+			publishModelComponentProperties(published);
 
 			if(!injected) {
 				aComponent.@com.eas.client.gxtcontrols.model.ModelTextArea::setPublishedField(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
@@ -188,7 +197,7 @@ public class ModelJSControls {
 				return aComponent;
 			};
 			publishComponentProperties(published);
-			publishEditorError(published);
+			publishModelComponentProperties(published);
 
 			if(!injected) {
 				aComponent.@com.eas.client.gxtcontrols.model.ModelDate::setPublishedField(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
@@ -211,7 +220,7 @@ public class ModelJSControls {
 				return aComponent;
 			};
 			publishComponentProperties(published);
-			publishEditorError(published);
+			publishModelComponentProperties(published);
 
 			if(!injected) {
 				aComponent.@com.eas.client.gxtcontrols.model.ModelDate::setPublishedField(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
@@ -234,7 +243,7 @@ public class ModelJSControls {
 				return aComponent;
 			};
 			publishComponentProperties(published);
-			publishEditorError(published);
+			publishModelComponentProperties(published);
 
 			if(!injected) {
 				aComponent.@com.eas.client.gxtcontrols.model.ModelCombo::setPublishedField(Lcom/google/gwt/core/client/JavaScriptObject;)(published);

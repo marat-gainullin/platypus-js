@@ -82,7 +82,7 @@ public class MousePointsMover extends MapTool {
                     map.fireSelectionChanged();
                     // Let's mark all involved rowsets as modified in order to preserve geometries changes
                     for (SelectionEntry entry : sEntries2Move) {
-                        ApplicationEntity<?, ?, ?> entitiy = map.getModel().getEntityById(entry.getEntityId());
+                        ApplicationEntity<?, ?, ?> entitiy = entry.getEntity();
                         assert entitiy != null;
                         entitiy.getRowset().setModified(true);
                     }

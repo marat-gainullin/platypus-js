@@ -95,6 +95,8 @@ public abstract class ScalarModelComponent<D extends DbControlPanel> extends Com
     @ScriptFunction
     public void setOnSelect(Function aValue) throws Exception {
         delegate.setOnSelect(aValue);
+        delegate.revalidate();
+        delegate.repaint();
     }
 
     @ScriptFunction(jsDoc = "Component's on render event handler.")
@@ -133,6 +135,11 @@ public abstract class ScalarModelComponent<D extends DbControlPanel> extends Com
         delegate.repaint();
     }
 
+    public void redraw(){
+        delegate.revalidate();
+        delegate.repaint();
+    }
+    
     protected ModelElementRef fieldToModelRef(Field aField) throws Exception {
         if (aField != null) {
             RowsetHostObject<?> rowsetHost = ScriptRunnerPrototype.lookupEntity((Scriptable) aField.getTag());

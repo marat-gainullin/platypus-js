@@ -42,9 +42,10 @@ public class ModelGrid extends ContentPanel {
 	protected Entity rowsSource;
 	protected JavaScriptObject generalCellFunction;
 	protected PublishedComponent published;
-	protected List<ModelGridColumn<?>> publishedColumns = new ArrayList();
+	protected List<ModelGridColumn<?>> publishedColumns = new ArrayList<ModelGridColumn<?>>();
 	protected Runnable crossUpdaterAction;
 	protected CrossUpdater crossUpdater;
+	protected FindWindow finder;
 
 	/**
 	 * Standalone constructor, assuming further configuration.
@@ -53,9 +54,10 @@ public class ModelGrid extends ContentPanel {
 		super();
 		ListStore<Row> store = new ListStore<Row>(new RowKeyProvider());
 		store.setAutoCommit(true);
-		List<ColumnConfig<Row, ?>> columns = new ArrayList();
+		List<ColumnConfig<Row, ?>> columns = new ArrayList<ColumnConfig<Row, ?>>();
 		ColumnModel<Row> cm = new ColumnModel<Row>(columns);
 		grid = new Grid<Row>((ListStore<Row>) store, cm, new PlatypusGridView());
+		finder = new FindWindow(grid);
 		editing = new PlatypusGridInlineRowEditing(grid, null);
 		grid.getView().setTrackMouseOver(true);
 		grid.getView().setShowDirtyCells(true);
@@ -81,6 +83,7 @@ public class ModelGrid extends ContentPanel {
 	public ModelGrid(Grid<Row> aGrid, PlatypusGridInlineRowEditing aEditing) {
 		super();
 		grid = aGrid;
+		finder = new FindWindow(grid);
 		editing = aEditing;
 		rowsSource = editing.getRowsSource();
 		crossUpdaterAction = new GridCrossUpdaterAction(grid);
@@ -224,6 +227,17 @@ public class ModelGrid extends ContentPanel {
 				return false;
 		} else
 			return false;
+	}
+
+	public void find() {
+		finder.show();
+		finder.toFront();
+	}
+
+	@Override
+	protected void onDetach() {
+		super.onDetach();
+		finder.hide();
 	}
 
 	public void addPublishedColumn(ModelGridColumn<?> aColumn) {

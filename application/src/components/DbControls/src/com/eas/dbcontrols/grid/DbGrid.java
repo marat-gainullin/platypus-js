@@ -450,7 +450,7 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                 }
                 assert tCol != null;
                 tCol.setCellRenderer(new InsettedTreeRenderer<Row>(tCol.getCellRenderer(), new TreeColumnLeadingComponent<>(deepModel, style, false)));
-                tCol.setCellEditor(new InsettedTreeEditor(tCol.getCellEditor(), new TreeColumnLeadingComponent<>(deepModel, style, true)));
+                tCol.setCellEditor(new InsettedTreeEditor<Row>(tCol.getCellEditor(), new TreeColumnLeadingComponent<>(deepModel, style, true)));
             }
         }
     }
@@ -815,7 +815,7 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
             for (int i = 0; i < deepModel.getRowCount(); i++) {
                 if (rowsSelectionModel.isSelectedIndex(i)) {
                     Row row = index2Row(rowSorter.convertRowIndexToModel(i));
-                    RowHostObject rowFacade = RowHostObject.publishRow(model.getScriptScope(), row);
+                    RowHostObject rowFacade = RowHostObject.publishRow(model.getScriptScope(), row, rowsEntity);
                     selectedRows.add(rowFacade);
                 }
             }
@@ -1238,7 +1238,7 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                     final int paramSourceFieldIndex = DbControlsUtils.resolveFieldIndex(model, paramSourceField);
 
                     int parentColIndex = rowsRowset.getFields().find(unaryLinkField.getFieldName());
-                    rowsModel = new RowsetsTreedModel(rowsRowset, parentColIndex, eventThis != null ? eventThis : scriptScope, generalRowFunction) {
+                    rowsModel = new RowsetsTreedModel(rowsEntity, rowsRowset, parentColIndex, eventThis != null ? eventThis : scriptScope, generalRowFunction) {
                         @Override
                         public boolean isLeaf(Row anElement) {
                             if (param != null && paramSourceFieldIndex != 0)// lazy tree
@@ -1257,7 +1257,7 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                     }
                     rowSorter = new TreedRowsSorter<>((TableFront2TreedModel<Row>) deepModel, rowsSelectionModel);
                 } else {
-                    rowsModel = new RowsetsTableModel(rowsRowset, eventThis != null ? eventThis : scriptScope, generalRowFunction);
+                    rowsModel = new RowsetsTableModel(rowsEntity, rowsRowset, eventThis != null ? eventThis : scriptScope, generalRowFunction);
                     deepModel = (TableModel) rowsModel;
                     rowSorter = new TabularRowsSorter<>((RowsetsTableModel) deepModel, rowsSelectionModel);
                 }
@@ -1513,7 +1513,7 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                         }
                     };
                     Rowset rowsRowset = new ParametersRowset(new com.bearsoft.rowset.metadata.Parameters());
-                    rowsModel = new RowsetsTableModel(rowsRowset, null, null) {
+                    rowsModel = new RowsetsTableModel(null, rowsRowset, null, null) {
                         @Override
                         public int getRowCount() {
                             return 10;

@@ -1,7 +1,7 @@
 package com.eas.client.model.interacting.mixed;
 
 import com.bearsoft.rowset.Rowset;
-import com.eas.client.Utils;
+import com.eas.client.Utils.JsObject;
 import com.eas.client.model.EntityDataListener;
 import com.eas.client.model.store.XmlDom2Model;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -55,8 +55,8 @@ public class MixedModelStructureTest extends MixedTest {
 		JavaScriptObject module = publish(this);
 
 		model = XmlDom2Model.transform(XMLParser.parse(DATAMODEL_MIXED_RELATIONS), module);
-		model.getEntityById(ENTITY_EDINICI_IZMERENIJA_PO_VELICHINE_ID).setOnRequeried(Utils.lookupProperty(module, "edIzmRequeried"));
-		model.getEntityById(ENTITY_NAIMENOVANIA_SI_PO_VELICHINE_1_ID).setOnRequeried(Utils.lookupProperty(module, "naimSiPoVel1Requeried"));
+		model.getEntityById(ENTITY_EDINICI_IZMERENIJA_PO_VELICHINE_ID).setOnRequeried(module.<JsObject>cast().getJs("edIzmRequeried"));
+		model.getEntityById(ENTITY_NAIMENOVANIA_SI_PO_VELICHINE_1_ID).setOnRequeried(module.<JsObject>cast().getJs("naimSiPoVel1Requeried"));
 		model.publish(module);
 		model.setRuntime(true);
 		Scheduler.get().scheduleFixedDelay(new RepeatingCommand(){

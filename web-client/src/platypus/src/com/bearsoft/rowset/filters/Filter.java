@@ -106,10 +106,10 @@ public class Filter extends HashOrderer {
 	public boolean add(Row aRow) throws RowsetException {
 		KeySet ks = makeKeySet(aRow, fieldsIndicies);
 		if (ks != null) {
-			List<RowWrap> subset = ordered.get(ks);
+			TaggedList<RowWrap> subset = ordered.get(ks);
 			// add to structure
 			if (subset == null) {
-				subset = new ArrayList();
+				subset = new TaggedList<RowWrap>();
 				ordered.put(ks, subset);
 			}
 			return subset.add(new RowWrap(aRow, -1));
@@ -203,7 +203,7 @@ public class Filter extends HashOrderer {
 							if (!filterApplied) {
 								boolean wasBeforeFirst = rowset.isBeforeFirst();
 								boolean wasAfterLast = rowset.isAfterLast();
-								List<Row> subSetRows = new ArrayList();
+								List<Row> subSetRows = new ArrayList<Row>();
 								List<RowWrap> subSet = ordered.get(values);
 								if (subSet != null) {
 									int i = 0;

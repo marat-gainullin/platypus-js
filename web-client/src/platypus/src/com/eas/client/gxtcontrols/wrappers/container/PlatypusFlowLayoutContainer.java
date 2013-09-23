@@ -40,13 +40,19 @@ public class PlatypusFlowLayoutContainer extends FlowLayoutContainer {
 	
 	public void ajustHeight(Widget aChild, int aValue){
 		if (aChild != null) {
-			aChild.setPixelSize(Sizer.getWidgetWidth(aChild), aValue);
+			if(aChild.getParent() instanceof PlatypusFieldSet)
+				aChild.getParent().setPixelSize(Sizer.getWidgetWidth(aChild), aValue);
+			else
+				aChild.setPixelSize(Sizer.getWidgetWidth(aChild), aValue);
 		}
 	}
 	
 	public void ajustWidth(Widget aChild, int aValue){
 		if (aChild != null) {
-			aChild.setPixelSize(aValue, Sizer.getWidgetHeight(aChild));
+			if(aChild.getParent() instanceof PlatypusFieldSet)				
+				aChild.getParent().setPixelSize(aValue, Sizer.getWidgetHeight(aChild));
+			else
+				aChild.setPixelSize(aValue, Sizer.getWidgetHeight(aChild));
 		}
 	}
 }

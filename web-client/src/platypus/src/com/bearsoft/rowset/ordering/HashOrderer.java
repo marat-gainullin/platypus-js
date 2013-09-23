@@ -31,13 +31,18 @@ public abstract class HashOrderer extends Object {
     public static final String FILTER_ALREADY_APPLIED = "can\'t apply already applied filter";
     public static final String ORIGINAL_ROWS_IS_MISSING = "original rows is missing!";
     public static final String ROWSET_MISSING = "rowset missing";
-    protected Rowset rowset = null;
-    protected Fields fields = null;
-    protected List<Integer> fieldsIndicies = new ArrayList();
-    protected boolean constrainting = false;
-    protected Map<KeySet, List<RowWrap>> ordered = new HashMap();
+    
+    public static class TaggedList<E> extends ArrayList<E>{
+    	public Object tag;
+    }
+    
+    protected Rowset rowset;
+    protected Fields fields;
+    protected List<Integer> fieldsIndicies = new ArrayList<Integer>();
+    protected boolean constrainting;
+    protected Map<KeySet, TaggedList<RowWrap>> ordered = new HashMap<KeySet, TaggedList<RowWrap>>();
     protected boolean caseSensitive = true;
-    protected boolean valid = false;
+    protected boolean valid;
 
     /**
      * Filter constructor.

@@ -11,6 +11,23 @@ import com.google.gwt.xml.client.NodeList;
 
 public class Utils {
 
+	public static class JsObject extends JavaScriptObject {
+		protected JsObject() {
+		}
+
+		public final native Object getJava(String aName)/*-{
+			return $wnd.boxAsJava(this[aName]);
+		}-*/;
+		
+		public final native JavaScriptObject getJs(String aName)/*-{
+			return this[aName];
+		}-*/;
+		
+		public final native void defineProperty(String aName, JavaScriptObject aDefinition)/*-{
+			Object.defineProperty(this, aName, aDefinition);
+		}-*/;
+	}
+
 	public static native JavaScriptObject publishCancellable(Cancellable aValue)/*-{
 		return {
 			abort : function() {
@@ -18,7 +35,18 @@ public class Utils {
 			}
 		};
 	}-*/;
-
+	
+	public static native JavaScriptObject stringToArrayBuffer(String aValue) throws Exception/*-{
+		if(aValue){
+			var buffer = new ArrayBuffer(aValue.length);
+			var bufferView = new Uint8Array(buffer);
+			for(var i = 0; i < aValue.length; i++)
+				bufferView[i] = aValue.charCodeAt(i);
+			return buffer;
+		}else
+			return null;
+	}-*/;
+	
 	public static String format(final String format, final String... args) {
 		String[] split = format.split("%s");
 		final StringBuffer msg = new StringBuffer();
@@ -87,16 +115,9 @@ public class Utils {
 	}-*/;
 
 	public native static void invokeJsFunction(JavaScriptObject aHandler) /*-{
-		if (aHandler != null) {
+		if (aHandler) {
 			aHandler();
 		}
-	}-*/;
-
-	public native static JavaScriptObject lookupProperty(JavaScriptObject aObject, String aPropertyName) /*-{
-		if (aObject[aPropertyName] != undefined)
-			return aObject[aPropertyName];
-		else
-			return null;
 	}-*/;
 
 	public static boolean isNumber(Object aValue) {

@@ -642,15 +642,17 @@ public class HandleLayer extends JPanel {
                 && formDesigner.isInDesigner((RADVisualComponent<?>) radComp)) {
             if (AbstractButton.class.isAssignableFrom(radComp.getBeanClass())) {
                 FormProperty<ComponentReference<ButtonGroup>> prop = radComp.<FormProperty<ComponentReference<ButtonGroup>>>getProperty("buttonGroup"); // NOI18N
-                try {
-                    ComponentReference<ButtonGroup> value = prop.getValue();
-                    if (value != null && value.getComponent() != null) {
-                        return value.getComponent().getBeanInstance();
-                    } else {
-                        return null;
+                if (prop != null) {
+                    try {
+                        ComponentReference<ButtonGroup> value = prop.getValue();
+                        if (value != null && value.getComponent() != null) {
+                            return value.getComponent().getBeanInstance();
+                        } else {
+                            return null;
+                        }
+                    } catch (Exception ex) {
+                        ErrorManager.getDefault().notify(ex);
                     }
-                } catch (Exception ex) {
-                    ErrorManager.getDefault().notify(ex);
                 }
             }
         }
@@ -1530,7 +1532,7 @@ public class HandleLayer extends JPanel {
          * The folowong condition is related to component dragging, when
          * resizing top design component.
          */
-        if (formDesigner.getTopDesignComponent() != null && formDesigner.getTopDesignComponent().getParentComponent() == null) {
+        if (formDesigner.getTopDesignComponent() != null/* && formDesigner.getTopDesignComponent().getParentComponent() == null*/) {
             int resizing = checkComponentsResizing(e);
             if (resizing == 0) {
                 resizing = checkDesignerResizing(e);
@@ -1558,7 +1560,7 @@ public class HandleLayer extends JPanel {
 
                     String hint = mf.format(
                             new Object[]{new Integer(size.width),
-                                new Integer(size.height)});
+                        new Integer(size.height)});
                     setToolTipText(hint);
                     ToolTipManager.sharedInstance().mouseEntered(e);
                 }
@@ -2432,10 +2434,14 @@ public class HandleLayer extends JPanel {
                  formDesigner.getComponentLayer().revalidate();
                  }
                  */
-                if (isTopComponent() && formDesigner.getTopDesignComponent() instanceof RADVisualFormContainer) {
+                if (isTopComponent()) {
                     Dimension newSize = new Dimension(movingBounds[0].width, movingBounds[0].height);
-                    formDesigner.setDesignerSize(newSize, originalSize);
-                    formDesigner.getComponentLayer().revalidate();
+                    if (formDesigner.getTopDesignComponent() instanceof RADVisualFormContainer) {
+                        formDesigner.setDesignerSize(newSize, originalSize);
+                    } else {
+                        formDesigner.getComponentLayer().setDesignerSize(newSize);
+                        getFormModel().fireSyntheticPropertyChanged(formDesigner.getTopDesignComponent(), FormModelEvent.PROP_DESIGNER_SIZE, originalSize, newSize);
+                    }
                 }
             } else { // resizing canceled
                 if (isTopComponent()) {
@@ -2480,7 +2486,7 @@ public class HandleLayer extends JPanel {
                  * of replicants/real components in the form will be clear.
                  * Also, we have to invectigate undo/redo functioning.
                  */
-                if (formDesigner.getTopDesignComponent() instanceof RADVisualFormContainer) {
+                if (isTopComponent()/* && formDesigner.getTopDesignComponent() instanceof RADVisualFormContainer*/) {
                     Dimension size = new Dimension(movingBounds[0].width, movingBounds[0].height);
                     formDesigner.getComponentLayer().setDesignerSize(size);
                     formDesigner.getComponentLayer().revalidate();

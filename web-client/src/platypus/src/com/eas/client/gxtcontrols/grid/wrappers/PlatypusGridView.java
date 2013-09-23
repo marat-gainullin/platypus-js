@@ -1,6 +1,8 @@
 package com.eas.client.gxtcontrols.grid.wrappers;
 
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.bearsoft.rowset.Row;
 import com.eas.client.gxtcontrols.grid.valueproviders.ChangesHost;
@@ -9,17 +11,72 @@ import com.google.gwt.safecss.shared.SafeStylesBuilder;
 import com.google.gwt.safecss.shared.SafeStylesUtils;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.client.Event;
 import com.sencha.gxt.data.shared.ListStore;
+import com.sencha.gxt.widget.core.client.grid.CellSelectionModel;
 import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.ColumnData;
+import com.sencha.gxt.widget.core.client.grid.ColumnHeader;
 import com.sencha.gxt.widget.core.client.grid.ColumnModel;
 import com.sencha.gxt.widget.core.client.grid.GridView;
 import com.sencha.gxt.widget.core.client.grid.RowExpander;
+import com.sencha.gxt.widget.core.client.menu.Menu;
 
 public class PlatypusGridView extends GridView<Row> {
 
 	public PlatypusGridView() {
 		super();
+	}
+
+	@Override
+	protected void initColumnHeader() {
+		// super.initColumnHeader();
+		// This is dirty hack, but we have no any other outgo from Sencha's bug
+		// when hiding
+		// a column in multi-row header
+		header = new ColumnHeader<Row>(grid, cm) {
+
+			@Override
+			protected Menu getContextMenu(int column) {
+				return createContextMenu(column);
+			}
+
+			@Override
+			protected void onColumnSplitterMoved(int colIndex, int width) {
+				super.onColumnSplitterMoved(colIndex, width);
+				PlatypusGridView.this.onColumnSplitterMoved(colIndex, width);
+			}
+
+			@Override
+			protected void onHeaderClick(Event ce, int column) {
+				super.onHeaderClick(ce, column);
+				PlatypusGridView.this.onHeaderClick(column);
+			}
+
+			@Override
+			protected void onKeyDown(Event ce, int index) {
+				ce.stopPropagation();
+				// auto select on key down
+				if (grid.getSelectionModel() instanceof CellSelectionModel<?>) {
+					CellSelectionModel<?> csm = (CellSelectionModel<?>) grid.getSelectionModel();
+					csm.selectCell(0, index);
+				} else {
+					grid.getSelectionModel().select(0, false);
+				}
+			}
+
+			@Override
+			public void updateColumnHidden(int index, boolean hidden) {
+				try {
+					super.updateColumnHidden(index, hidden);
+				} catch (Exception ex) {
+					Logger.getLogger(PlatypusGridView.class.getName()).log(Level.SEVERE, "Sencha bug while hiding columns in multi row grid header: IndexOutOfBounds" + ex.getMessage());
+				}
+			}
+
+		};
+		header.setSplitterWidth(splitterWidth);
+		header.setMinColumnWidth(grid.getMinColumnWidth());
 	}
 
 	/**

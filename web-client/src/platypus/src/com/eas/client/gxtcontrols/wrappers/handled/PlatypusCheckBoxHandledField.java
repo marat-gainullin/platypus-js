@@ -6,8 +6,6 @@ import java.util.logging.Logger;
 import com.eas.client.gxtcontrols.ControlsUtils;
 import com.eas.client.gxtcontrols.model.ModelElementRef;
 import com.eas.client.gxtcontrols.published.PublishedCell;
-import com.eas.client.gxtcontrols.published.PublishedComponent;
-import com.eas.client.gxtcontrols.wrappers.component.PlatypusAdapterField;
 import com.eas.client.gxtcontrols.wrappers.component.PlatypusAdapterStandaloneField;
 import com.eas.client.gxtcontrols.wrappers.component.PlatypusCheckBox;
 import com.google.gwt.core.client.JavaScriptObject;

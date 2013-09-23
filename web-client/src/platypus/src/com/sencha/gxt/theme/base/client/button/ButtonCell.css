@@ -33,11 +33,11 @@
 }
 
 .iconWrap {
-  padding: 0px 2px;
+  padding: 0px 0px;/* padding: 0px 2px;*/
 }
 
 .text {
-  padding: 0px 2px;
+  padding: 0px 0px;/* padding: 0px 2px;*/
   font-family: Tahoma, Arial, Verdana, sans-serif;
   font-size: 11px;
   font-weight: normal;

@@ -309,7 +309,7 @@
                 <package>com.eas.designer.explorer</package>
                 <package>com.eas.designer.explorer.actions</package>
                 <package>com.eas.designer.explorer.files.wizard</package>
-                <package>com.eas.designer.explorer.model.nodes</package>
+                <package>com.eas.designer.explorer.j2ee</package>
                 <package>com.eas.designer.explorer.model.windows</package>
                 <package>com.eas.designer.explorer.project</package>
                 <package>com.eas.designer.explorer.selectors</package>

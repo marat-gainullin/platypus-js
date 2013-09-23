@@ -43,7 +43,7 @@ public class ExecuteServerModuleMethodRequestHandler extends SessionRequestHandl
         String moduleName = getRequest().getModuleName();
         ServerScriptRunner runner = getSession().getModule(moduleName);
         if (runner == null) {
-            // It's seems client wants background module.
+            // It's seems client wants a background module.
             // Let's try to look up it in system session.
             runner = systemSession.getModule(getRequest().getModuleName());
             if (runner != null) {

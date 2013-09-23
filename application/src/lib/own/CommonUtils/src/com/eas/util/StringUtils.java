@@ -56,10 +56,10 @@ public class StringUtils {
         if (aSource != null) {
             String[] splitted = aSource.split(aDelimiter);
             if (splitted != null) {
-                for (String role : splitted) {
-                    role = role.trim();
-                    if (!role.isEmpty()) {
-                        res.add(role);
+                for (String element : splitted) {
+                    element = element.trim();
+                    if (!element.isEmpty()) {
+                        res.add(element);
                     }
                 }
             }

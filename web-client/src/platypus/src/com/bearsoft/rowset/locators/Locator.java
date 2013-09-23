@@ -30,7 +30,8 @@ public class Locator extends HashOrderer {
     public static final String LOCATOR_IS_INVALID = "locator is invalid! Rowset was edited but locator havn\'t been rebuild.";
     public static final String INDEX_IS_INVALID = "index is out of bounds";
     public static final String WRONG_POSITION_MARKER = "invalid position in locator's subset";
-    protected List<RowWrap> subSet;
+    
+    protected TaggedList<RowWrap> subset;
     protected int subSetPos = -1;
 
     /**
@@ -47,11 +48,11 @@ public class Locator extends HashOrderer {
      * @return A <code>Row</code> object.
      */
     public Row getRow(int aIndex) throws IllegalStateException {
-        if (subSet != null && !subSet.isEmpty()) {
+        if (subset != null && !subset.isEmpty()) {
             if (rowset != null) {
                 if (valid) {
-                    if (aIndex >= 0 && aIndex < subSet.size()) {
-                        return subSet.get(aIndex).getRow();
+                    if (aIndex >= 0 && aIndex < subset.size()) {
+                        return subset.get(aIndex).getRow();
                     } else {
                         throw new IllegalStateException(INDEX_IS_INVALID);
                     }
@@ -72,11 +73,11 @@ public class Locator extends HashOrderer {
      * @throws IllegalStateException
      */
     public int indexOf(Row aRow) throws IllegalStateException {
-        if (subSet != null && !subSet.isEmpty()) {
+        if (subset != null && !subset.isEmpty()) {
             if (rowset != null) {
                 if (valid) {
-                    for (int i = 0; i < subSet.size(); i++) {
-                        RowWrap rw = subSet.get(i);
+                    for (int i = 0; i < subset.size(); i++) {
+                        RowWrap rw = subset.get(i);
                         if (rw != null && rw.getRow() == aRow) {
                             return i;
                         }
@@ -99,22 +100,22 @@ public class Locator extends HashOrderer {
      * @throws ArrayIndexOutOfBoundsException
      */
     public Row changeRowPosition(Row aRow, int aIndex) throws ArrayIndexOutOfBoundsException {
-        if (subSet != null && !subSet.isEmpty()) {
+        if (subset != null && !subset.isEmpty()) {
             if (rowset != null) {
                 if (valid) {
                     int lIndex = -1;
                     RowWrap rw = null;
-                    for (int i = 0; i < subSet.size(); i++) {
-                        if (subSet.get(i).getRow() == aRow) {
+                    for (int i = 0; i < subset.size(); i++) {
+                        if (subset.get(i).getRow() == aRow) {
                             lIndex = i;
-                            rw = subSet.get(i);
+                            rw = subset.get(i);
                             break;
                         }
                     }
                     if (lIndex != -1) {
                         if (aIndex != lIndex) {
-                            subSet.remove(lIndex);
-                            subSet.add(aIndex, rw);
+                            subset.remove(lIndex);
+                            subset.add(aIndex, rw);
                         }
                         return rw.getRow();
                     }
@@ -161,9 +162,9 @@ public class Locator extends HashOrderer {
                 validate();
             }
             if (valid) {
-                subSet = ordered.get(values);
+                subset = ordered.get(values);
                 subSetPos = -1;
-                return (subSet != null && !subSet.isEmpty());
+                return (subset != null && !subset.isEmpty());
             } else {
                 throw new IllegalStateException(LOCATOR_IS_INVALID);
             }
@@ -178,10 +179,10 @@ public class Locator extends HashOrderer {
      * @throws IllegalStateException
      */
     public int getSize() throws IllegalStateException {
-        if (subSet != null && !subSet.isEmpty()) {
+        if (subset != null && !subset.isEmpty()) {
             if (rowset != null) {
                 if (valid) {
-                    return subSet.size();
+                    return subset.size();
                 } else {
                     throw new IllegalStateException(LOCATOR_IS_INVALID);
                 }
@@ -200,11 +201,11 @@ public class Locator extends HashOrderer {
      * @throws IllegalStateException
      */
     public int getRowsetPos(int aSubsetPos) throws IllegalStateException {
-        if (subSet != null && !subSet.isEmpty()) {
+        if (subset != null && !subset.isEmpty()) {
             if (rowset != null) {
                 if (valid) {
-                    if (aSubsetPos >= 1 && aSubsetPos <= subSet.size()) {
-                        RowWrap rw = subSet.get(aSubsetPos - 1);
+                    if (aSubsetPos >= 1 && aSubsetPos <= subset.size()) {
+                        RowWrap rw = subset.get(aSubsetPos - 1);
                         if (rw != null) {
                             return rw.getIndex();
                         }
@@ -234,8 +235,8 @@ public class Locator extends HashOrderer {
      * It acts like rowset's method <code>afterLast()</code>
      */
     public void afterLast() {
-        if (subSet != null) {
-            subSetPos = subSet.size();
+        if (subset != null) {
+            subSetPos = subset.size();
         }
     }
 
@@ -245,11 +246,11 @@ public class Locator extends HashOrderer {
      * @throws IllegalStateException
      */
     public boolean first() throws IllegalStateException, InvalidCursorPositionException {
-        if (subSet != null && !subSet.isEmpty()) {
+        if (subset != null && !subset.isEmpty()) {
             if (rowset != null) {
                 if (valid) {
                     subSetPos = 0;
-                    RowWrap rw = subSet.get(subSetPos);
+                    RowWrap rw = subset.get(subSetPos);
                     if (rw != null) {
                         boolean res = rowset.absolute(rw.getIndex());
                         assert !res || rowset.getCurrentRow() == rw.getRow();
@@ -271,12 +272,12 @@ public class Locator extends HashOrderer {
      * @throws IllegalStateException
      */
     public boolean next() throws IllegalStateException, InvalidCursorPositionException {
-        if (subSet != null && !subSet.isEmpty() && !isAfterLast()) {
+        if (subset != null && !subset.isEmpty() && !isAfterLast()) {
             if (rowset != null) {
                 if (valid) {
                     subSetPos++;
-                    if (subSetPos >= 0 && subSetPos < subSet.size()) {
-                        RowWrap rw = subSet.get(subSetPos);
+                    if (subSetPos >= 0 && subSetPos < subset.size()) {
+                        RowWrap rw = subset.get(subSetPos);
                         if (rw != null) {
                             boolean res = rowset.absolute(rw.getIndex());
                             assert !res || rowset.getCurrentRow() == rw.getRow();
@@ -300,12 +301,12 @@ public class Locator extends HashOrderer {
      * @throws IllegalStateException
      */
     public boolean absolute(int index) throws IllegalStateException, InvalidCursorPositionException {
-        if (subSet != null && !subSet.isEmpty() && !isAfterLast()) {
+        if (subset != null && !subset.isEmpty() && !isAfterLast()) {
             if (rowset != null) {
                 if (valid) {
-                    if (index >= 0 && index < subSet.size()) {
+                    if (index >= 0 && index < subset.size()) {
                         subSetPos = index;
-                        RowWrap rw = subSet.get(subSetPos);
+                        RowWrap rw = subset.get(subSetPos);
                         if (rw != null) {
                             boolean res = rowset.absolute(rw.getIndex());
                             assert !res || rowset.getCurrentRow() == rw.getRow();
@@ -328,12 +329,12 @@ public class Locator extends HashOrderer {
      * @throws IllegalStateException
      */
     public boolean previous() throws IllegalStateException, InvalidCursorPositionException {
-        if (subSet != null && !subSet.isEmpty() && !isBeforeFirst()) {
+        if (subset != null && !subset.isEmpty() && !isBeforeFirst()) {
             if (rowset != null) {
                 if (valid) {
                     subSetPos--;
-                    if (subSetPos >= 0 && subSetPos < subSet.size()) {
-                        RowWrap rw = subSet.get(subSetPos);
+                    if (subSetPos >= 0 && subSetPos < subset.size()) {
+                        RowWrap rw = subset.get(subSetPos);
                         if (rw != null) {
                             boolean res = rowset.absolute(rw.getIndex());
                             assert !res || rowset.getCurrentRow() == rw.getRow();
@@ -356,11 +357,11 @@ public class Locator extends HashOrderer {
      * @throws IllegalStateException
      */
     public boolean last() throws IllegalStateException, InvalidCursorPositionException {
-        if (subSet != null && !subSet.isEmpty()) {
+        if (subset != null && !subset.isEmpty()) {
             if (rowset != null) {
                 if (valid) {
-                    subSetPos = subSet.size() - 1;
-                    RowWrap rw = subSet.get(subSetPos);
+                    subSetPos = subset.size() - 1;
+                    RowWrap rw = subset.get(subSetPos);
                     if (rw != null) {
                         boolean res = rowset.absolute(rw.getIndex());
                         assert !res || rowset.getCurrentRow() == rw.getRow();
@@ -381,7 +382,7 @@ public class Locator extends HashOrderer {
      * @return Whether subset's position is before first.
      */
     public boolean isBeforeFirst() {
-        return rowset == null || subSet == null || subSet.isEmpty() || subSetPos < 0;
+        return rowset == null || subset == null || subset.isEmpty() || subSetPos < 0;
     }
 
     /**
@@ -389,7 +390,7 @@ public class Locator extends HashOrderer {
      * @return Whether subset's position is after last.
      */
     public boolean isAfterLast() {
-        return rowset == null || subSet == null || subSet.isEmpty() || subSetPos >= subSet.size();
+        return rowset == null || subset == null || subset.isEmpty() || subSetPos >= subset.size();
     }
 
     /**
@@ -424,10 +425,10 @@ public class Locator extends HashOrderer {
     public void add(Row aRow, int aIndex) throws RowsetException {
         KeySet ks = makeKeySet(aRow, fieldsIndicies);
         if (ks != null) {
-            List<RowWrap> subset = ordered.get(ks);
+            TaggedList<RowWrap> subset = ordered.get(ks);
             // add to structure
             if (subset == null) {
-                subset = new ArrayList();
+                subset = new TaggedList<RowWrap>();
                 ordered.put(ks, subset);
             }
             subset.add(new RowWrap(aRow, aIndex));
@@ -476,7 +477,7 @@ public class Locator extends HashOrderer {
      * @return Vector of rows gathered from all subsets in ordered structure.
      */
     public List<Row> getAllRowsVector() {
-        List<Row> rows = new ArrayList();
+        List<Row> rows = new ArrayList<Row>();
         for (List<RowWrap> lsubSet : ordered.values()) {
             assert lsubSet != null;
             for (RowWrap rw : lsubSet) {
@@ -487,8 +488,8 @@ public class Locator extends HashOrderer {
         return rows;
     }
 
-    public List<RowWrap> getSubSet() {
-        return subSet;
+    public TaggedList<RowWrap> getSubSet() {
+        return subset;
     }
 
     /**
@@ -498,7 +499,7 @@ public class Locator extends HashOrderer {
     public void invalidate() {
         super.invalidate();
         ordered.clear();
-        subSet = null;
+        subset = null;
     }
 
     /**
@@ -507,7 +508,7 @@ public class Locator extends HashOrderer {
     @Override
     public void die() {
         super.die();
-        subSet = null;
+        subset = null;
         valid = false;
     }
 

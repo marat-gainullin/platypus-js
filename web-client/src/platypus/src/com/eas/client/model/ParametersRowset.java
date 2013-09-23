@@ -136,7 +136,7 @@ public class ParametersRowset extends Rowset {
 
 	@Override
 	public List<Row> getCurrent() {
-		List<Row> rows = new ArrayList();
+		List<Row> rows = new ArrayList<Row>();
 		rows.add(paramRow);
 		return rows;
 	}

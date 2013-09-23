@@ -35,6 +35,7 @@ public class PlatypusProjectActions implements ActionProvider {
     public static final String COMMAND_IMPORT = "import"; // NOI18N
     public static final String COMMAND_CONNECT = "connect-to-db"; // NOI18N
     public static final String COMMAND_DISCONNECT = "disconnect-from-db"; // NOI18N
+    public static final String COMMAND_CLEAN_AND_RUN = "clean-web-and-run"; // NOI18N
     /**
      * Some routine global actions for which we can supply a display name. These
      * are IDE-specific.
@@ -50,6 +51,7 @@ public class PlatypusProjectActions implements ActionProvider {
             COMMAND_IMPORT,
             COMMAND_CONNECT,
             COMMAND_DISCONNECT,
+            COMMAND_CLEAN_AND_RUN,
             COMMAND_CLEAN));
     protected PlatypusProject project;
 
@@ -80,6 +82,10 @@ public class PlatypusProjectActions implements ActionProvider {
                     DefaultProjectOperations.performDefaultMoveOperation(project);
                     break;
                 case COMMAND_RUN:
+                    ProjectRunner.run(project, project.getSettings().getAppSettings().getRunElement());
+                    break;
+                case COMMAND_CLEAN_AND_RUN:
+                    clean();
                     ProjectRunner.run(project, project.getSettings().getAppSettings().getRunElement());
                     break;
                 case COMMAND_DEBUG:

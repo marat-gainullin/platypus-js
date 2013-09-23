@@ -33,3 +33,6 @@ private.xml
 /application/src/lib/own/OpcDa/nbproject/private/
 /application/src/lib/thirdparty/JSqlParser/nbproject/private/
 /application/src/lib/own/Routing/build/
+/application/src/group/build.num
+/application/src/components/DbControlsDesigner/nbproject/private/
+/application/src/components/SqlDriversTester/nbproject/private/

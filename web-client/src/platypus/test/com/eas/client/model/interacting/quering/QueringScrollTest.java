@@ -4,6 +4,7 @@ import java.util.Map;
 
 import com.bearsoft.rowset.Rowset;
 import com.eas.client.Utils;
+import com.eas.client.Utils.JsObject;
 import com.eas.client.model.interacting.filtering.FilteringTest;
 import com.eas.client.model.store.XmlDom2Model;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -74,10 +75,10 @@ public class QueringScrollTest extends QueringTest {
 			JavaScriptObject module = publish(this);
 
 			model = XmlDom2Model.transform(XMLParser.parse(DATAMODEL_QUERING_RELATIONS), module);
-			model.getEntityById(ENTITY_EDINICI_IZMERENIJA_PO_VELICHINE_ID).setOnRequeried(Utils.lookupProperty(module, "imRequeried"));
-			model.getEntityById(ENTITY_GRUPPA_OBJECTA_REMONTA_PO_RODITELU_ID).setOnRequeried(Utils.lookupProperty(module, "grObRemRequeried"));
-			model.getEntityById(ENTITY_EDINICI_IZMERENIJA_PO_VELICHINE_1_ID).setOnRequeried(Utils.lookupProperty(module, "edIzm1Requeried"));
-			model.getEntityById(ENTITY_EDINICI_OBORUDOVANIJA_PO_MARKE_ID).setOnRequeried(Utils.lookupProperty(module, "edOborPoMarkeRequeried"));
+			model.getEntityById(ENTITY_EDINICI_IZMERENIJA_PO_VELICHINE_ID).setOnRequeried(module.<JsObject>cast().getJs("imRequeried"));
+			model.getEntityById(ENTITY_GRUPPA_OBJECTA_REMONTA_PO_RODITELU_ID).setOnRequeried(module.<JsObject>cast().getJs("grObRemRequeried"));
+			model.getEntityById(ENTITY_EDINICI_IZMERENIJA_PO_VELICHINE_1_ID).setOnRequeried(module.<JsObject>cast().getJs("edIzm1Requeried"));
+			model.getEntityById(ENTITY_EDINICI_OBORUDOVANIJA_PO_MARKE_ID).setOnRequeried(module.<JsObject>cast().getJs("edOborPoMarkeRequeried"));
 			model.publish(module);
 			model.setRuntime(true);
 			Scheduler.get().scheduleFixedDelay(new RepeatingCommand() {

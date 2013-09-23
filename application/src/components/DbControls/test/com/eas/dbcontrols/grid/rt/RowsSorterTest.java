@@ -146,8 +146,9 @@ public class RowsSorterTest extends GridBaseTest {
             verifyTableData((TableModel) model);
         }
 
+        @Override
         protected void createModelAndSorter() {
-            model = new RowsetsTableModel(rowset, null, null);
+            model = new RowsetsTableModel(null, rowset, null, null);
             sorter = new TabularRowsSorter((TableModel) model, null);
         }
 
@@ -167,7 +168,7 @@ public class RowsSorterTest extends GridBaseTest {
 
         @Override
         protected void createModelAndSorter() {
-            model = new RowsetsTreedModel(rowset, rowset.getFields().getFieldsCount(), null, null);
+            model = new RowsetsTreedModel(null, rowset, rowset.getFields().getFieldsCount(), null, null);
             front = new TableFront2TreedModel<>((TreedModel<Row>) model);
             sorter = new TreedRowsSorter<>(front, null);
         }

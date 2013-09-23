@@ -68,7 +68,7 @@ public class MouseCursorer extends MapTool {
                 com.vividsolutions.jts.geom.Point pt = GisUtilities.createPoint(goePt);
                 List<SelectionEntry> geoms = map.nonSelectableHit(pt);
                 if (geoms != null && geoms.size() > 0) {
-                    String hintText = map.beforeToolTipShow(geoms.get(0).getRow());
+                    String hintText = map.beforeToolTipShow(geoms.get(0).getRow(), geoms.get(0).getEntity());
                     if (hintText != null && !hintText.isEmpty()) {
                         hint.setToolTipText(hintText);
                         map.getPane().add(hint, pt, 0);

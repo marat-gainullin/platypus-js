@@ -30,7 +30,6 @@ import com.google.gwt.core.client.JsArrayString;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NodeList;
-import com.google.gwt.logging.client.ConsoleLogHandler;
 import com.google.gwt.logging.client.LogConfiguration;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.sencha.gxt.core.client.dom.XElement;
@@ -52,7 +51,7 @@ public class Application {
 		@Override
 		public void started(String anItemName) {
 			final String message = "Loading... " + anItemName;
-			Logger.getLogger(Application.class.getName()).log(Level.INFO, message);
+			platypusApplicationLogger.log(Level.INFO, message);
 			xDiv.unmask();
 			xDiv.mask(message);
 		}
@@ -60,14 +59,14 @@ public class Application {
 		@Override
 		public void loaded(String anItemName) {
 			final String message = "Loaded " + anItemName;
-			Logger.getLogger(Application.class.getName()).log(Level.INFO, message);
+			platypusApplicationLogger.log(Level.INFO, message);
 			xDiv.unmask();
 			xDiv.mask(message);
 		}
 	}
 
-	public static Logger platypusApplicationLogger; 
-	protected static Map<String, Query> appQueries = new HashMap();
+	public static Logger platypusApplicationLogger;
+	protected static Map<String, Query> appQueries = new HashMap<String, Query>();
 	protected static Loader loader;
 	protected static GroupingHandlerRegistration loaderHandlerRegistration = new GroupingHandlerRegistration();
 
@@ -550,6 +549,9 @@ public class Application {
 			nativeForm.@com.eas.client.form.Form::publish(Lcom/google/gwt/core/client/JavaScriptObject;)(aModule);
 			return nativeForm;
 		};
+		$wnd.platypus.HTML5 = "Html5 client";
+		$wnd.platypus.J2SE = "Java SE client";
+		$wnd.platypus.agent = $wnd.platypus.HTML5; 
 		function _Modules() {
 			var platypusModules = {};
 			this.get = function(aModuleId) {
@@ -572,10 +574,10 @@ public class Application {
 		$wnd.Module = function(aModuleId)
 		{
 			var mc = $wnd.platypusModulesConstructors[aModuleId];
-			if (mc != null && mc != undefined)
-				return new mc();
-			else
-				return null;
+			if (mc){
+				mc.call(this);
+			} else
+				throw 'No module constructor to module: ' + aModuleId;
 		};
 		$wnd.Form = $wnd.Module;
 		$wnd.Form.getShownForm = function(aFormKey){
@@ -594,9 +596,9 @@ public class Application {
 				@com.eas.client.form.Form::setOnChange(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
 			}
 		});
-		$wnd.require = function (aDeps, aCallback) {
+		$wnd.require = function (aDeps, aOnSuccess, aOnFailure) {
 			var deps = Array.isArray(aDeps) ? aDeps : [aDeps];
-			@com.eas.client.application.Application::require(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(deps, aCallback);
+			@com.eas.client.application.Application::require(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(deps, aOnSuccess, aOnFailure);
 		} 
 		function _Icons() {
 			this.load = function(aIconName) {
@@ -961,14 +963,12 @@ public class Application {
 
 	public static Cancellable run(AppClient client, Map<String, Element> start) throws Exception {
 		if (LogConfiguration.loggingIsEnabled()) {
-			platypusApplicationLogger = Logger.getLogger("Application");
-			Formatter f = new PlatypusLogFormatter();
-			platypusApplicationLogger.addHandler(new ConsoleLogHandler());
-			Handler[] handlers = platypusApplicationLogger.getHandlers();
+			platypusApplicationLogger = Logger.getLogger("platypusApplication");
+			Formatter f = new PlatypusLogFormatter(true);
+			Handler[] handlers = Logger.getLogger("").getHandlers();
 			for (Handler h : handlers) {
 				h.setFormatter(f);
 			}
-			platypusApplicationLogger.setUseParentHandlers(false);
 		}
 		JSControls.initControls();
 		JSContainers.initContainers();
@@ -976,16 +976,44 @@ public class Application {
 		publish(client);
 		AppClient.publishApi(client);
 		loader = new Loader(client);
+		Set<Element> indicators = extractPlatypusProgressIndicators();
+		for (Element el : indicators)
+			loaderHandlerRegistration.add(loader.addHandler(new ElementMaskLoadHandler(el.<XElement> cast()) {
+				public void loaded(String anItemName) {
+					xDiv.unmask();
+				};
+			}));
 		return startAppElements(client, start);
 	}
 
+	private static Set<Element> extractPlatypusProgressIndicators() {
+		Set<Element> platypusIndicators = new HashSet<Element>();
+		XElement xBody = Utils.doc.getBody().cast();
+		String platypusModuleClass = "platypusIndicator";
+		if (platypusModuleClass.equals(xBody.getClassName()))
+			platypusIndicators.add(xBody);
+
+		NodeList<Element> divs = xBody.select("." + platypusModuleClass);// Utils.doc.getElementsByTagName("div");
+		if (divs != null) {
+			for (int i = 0; i < divs.getLength(); i++) {
+				Element div = divs.getItem(i);
+				platypusIndicators.add(div);
+			}
+		}
+		return platypusIndicators;
+	}
+
 	private static Map<String, Element> extractPlatypusModules() {
-		Map<String, Element> platypusModules = new HashMap();
-		NodeList<Element> divs = Utils.doc.getElementsByTagName("div");
-		for (int i = 0; i < divs.getLength(); i++) {
-			Element div = divs.getItem(i);
-			if ("platypusModule".equalsIgnoreCase(div.getClassName()) && div.getId() != null && !div.getId().isEmpty()) {
-				platypusModules.put(div.getId(), div);
+		Map<String, Element> platypusModules = new HashMap<String, Element>();
+		XElement xBody = Utils.doc.getBody().cast();
+		String platypusModuleClass = "platypusModule";
+		NodeList<Element> divs = xBody.select("." + platypusModuleClass);// Utils.doc.getElementsByTagName("div");
+		if (divs != null) {
+			for (int i = 0; i < divs.getLength(); i++) {
+				Element div = divs.getItem(i);
+				if (div.getId() != null && !div.getId().isEmpty()) {
+					platypusModules.put(div.getId(), div);
+				}
 			}
 		}
 		String url = Document.get().getURL();
@@ -1012,7 +1040,7 @@ public class Application {
 				@Override
 				protected void doWork(String aResult) throws Exception {
 					if (aResult != null && !aResult.isEmpty()) {
-						Collection<String> results = new ArrayList();
+						Collection<String> results = new ArrayList<String>();
 						results.add(aResult);
 						loadings = loader.load(results, new ExecuteApplicationCallback(results));
 					}
@@ -1038,8 +1066,8 @@ public class Application {
 		}
 	}
 
-	public static void require(JavaScriptObject aDeps, final JavaScriptObject aCallback) {
-		Set<String> deps = new HashSet();
+	public static void require(JavaScriptObject aDeps, final JavaScriptObject aOnSuccess, final JavaScriptObject aOnFailure) {
+		final Set<String> deps = new HashSet<String>();
 		JsArrayString depsValues = aDeps.<JsArrayString> cast();
 		for (int i = 0; i < depsValues.length(); i++) {
 			String dep = depsValues.get(i);
@@ -1053,13 +1081,17 @@ public class Application {
 
 					@Override
 					protected void doWork() throws Exception {
-						Utils.invokeJsFunction(aCallback);
+						if (loader.isLoaded(deps)) {
+							Utils.invokeJsFunction(aOnSuccess);
+						} else {
+							Utils.invokeJsFunction(aOnFailure);
+						}
 					}
 				});
 			} catch (Exception ex) {
 				Logger.getLogger(Application.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		} else
-			Utils.invokeJsFunction(aCallback);
+			Utils.invokeJsFunction(aOnSuccess);
 	}
 }

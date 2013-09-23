@@ -141,6 +141,7 @@ public class AppElementFiles {
                     if (isAllowedFileExtension(appElementType, ext)) {
                         switch (ext) {
                             case PlatypusFiles.JAVASCRIPT_EXTENSION: {
+                                assert rootTag != null;
                                 Element jsSourceTag = appElementDom.createElement(ApplicationElement.SCRIPT_SOURCE_TAG_NAME);
                                 String contentPart = FileUtils.readString(file, PlatypusFiles.DEFAULT_ENCODING);
                                 accumulator.append(contentPart);
@@ -149,6 +150,7 @@ public class AppElementFiles {
                                 break;
                             }
                             case PlatypusFiles.MODEL_EXTENSION: {
+                                assert rootTag != null;
                                 String contentPart = FileUtils.readString(file, PlatypusFiles.DEFAULT_ENCODING);
                                 accumulator.append(contentPart);
                                 Document modelDocument = Source2XmlDom.transform(contentPart);
@@ -157,6 +159,7 @@ public class AppElementFiles {
                                 break;
                             }
                             case PlatypusFiles.FORM_EXTENSION: {
+                                assert rootTag != null;
                                 String contentPart = FileUtils.readString(file, PlatypusFiles.DEFAULT_ENCODING);
                                 accumulator.append(contentPart);
                                 Document layoutDocument = Source2XmlDom.transform(contentPart);
@@ -165,6 +168,7 @@ public class AppElementFiles {
                                 break;
                             }
                             case PlatypusFiles.REPORT_LAYOUT_EXTENSION: {
+                                assert rootTag != null;
                                 Element reportLayoutTag = appElementDom.createElement(ApplicationElement.XLS_LAYOUT_TAG_NAME);
                                 UUEncoder encoder = new UUEncoder();
                                 String contentPart = encoder.encodeBuffer(FileUtils.readBytes(file));
@@ -174,6 +178,7 @@ public class AppElementFiles {
                                 break;
                             }
                             case PlatypusFiles.SQL_EXTENSION: {
+                                assert rootTag != null;
                                 Element sqlSourceTag = appElementDom.createElement(ApplicationElement.SQL_TAG_NAME);
                                 String contentPart = FileUtils.readString(file, PlatypusFiles.DEFAULT_ENCODING);
                                 accumulator.append(contentPart);
@@ -182,6 +187,7 @@ public class AppElementFiles {
                                 break;
                             }
                             case PlatypusFiles.DIALECT_EXTENSION: {
+                                assert rootTag != null;
                                 Element sqlDialectSourceTag = appElementDom.createElement(ApplicationElement.FULL_SQL_TAG_NAME);
                                 String contentPart = FileUtils.readString(file, PlatypusFiles.DEFAULT_ENCODING);
                                 accumulator.append(contentPart);
@@ -190,6 +196,7 @@ public class AppElementFiles {
                                 break;
                             }
                             case PlatypusFiles.OUT_EXTENSION: {
+                                assert rootTag != null;
                                 String contentPart = FileUtils.readString(file, PlatypusFiles.DEFAULT_ENCODING);
                                 accumulator.append(contentPart);
                                 if (contentPart != null && !contentPart.isEmpty()) {

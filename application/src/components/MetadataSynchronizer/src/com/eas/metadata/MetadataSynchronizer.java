@@ -220,8 +220,8 @@ public class MetadataSynchronizer {
             if (anOut != null) {
                 sysLog.addHandler(new PrintWriterHandler(anOut));
             }
-            sqlLog.addHandler(createFileHandler(logPath + "sqls.log", logEncoding, new LogFormatter()));
-            errorLog.addHandler(createFileHandler(logPath + "errors.log", logEncoding, new LogFormatter()));
+            sqlLog.addHandler(createFileHandler(logPath + "sqls.log", logEncoding, new LineLogFormatter()));
+            errorLog.addHandler(createFileHandler(logPath + "errors.log", logEncoding, new LineLogFormatter()));
             MetadataSynchronizer mds = new MetadataSynchronizer(sysLog, sqlLog, errorLog, null);
             mds.log(Level.INFO, String.format("logPath is '%s'", logPath));
             MetadataMerger metadataMerger = new MetadataMerger(aClient, mds.readDBStructureFromFile(aFileXmlPath), mds.readDBStructure(aClient), false, true, new HashSet<String>(), sysLog, sqlLog, errorLog, false);
@@ -1440,9 +1440,9 @@ public class MetadataSynchronizer {
             Logger infoLog = initLogger(loggerName + "_info", logLevel, false);
 
             try {
-                sqlLog.addHandler(createFileHandler(logPath + "sqls.log", logEncoding, new LogFormatter()));
-                errorLog.addHandler(createFileHandler(logPath + "errors.log", logEncoding, new LogFormatter()));
-                infoLog.addHandler(createFileHandler(logPath + "info.log", logEncoding, new LogFormatter()));
+                sqlLog.addHandler(createFileHandler(logPath + "sqls.log", logEncoding, new LineLogFormatter()));
+                errorLog.addHandler(createFileHandler(logPath + "errors.log", logEncoding, new LineLogFormatter()));
+                infoLog.addHandler(createFileHandler(logPath + "info.log", logEncoding, new LineLogFormatter()));
 
                 MetadataSynchronizer mds = new MetadataSynchronizer(sysLog, sqlLog, errorLog, infoLog);
                 mds.setSourceDatabase(urlFrom, schemaFrom, userFrom, passwordFrom);

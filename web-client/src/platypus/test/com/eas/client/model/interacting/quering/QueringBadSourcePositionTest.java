@@ -1,7 +1,7 @@
 package com.eas.client.model.interacting.quering;
 
 import com.bearsoft.rowset.Rowset;
-import com.eas.client.Utils;
+import com.eas.client.Utils.JsObject;
 import com.eas.client.model.interacting.filtering.FilteringTest;
 import com.eas.client.model.store.XmlDom2Model;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -55,8 +55,8 @@ public class QueringBadSourcePositionTest extends QueringTest {
 	protected void setupModel() throws Exception {
 		try {
 			model = XmlDom2Model.transform(XMLParser.parse(DATAMODEL_QUERING_RELATIONS), module = publish(this));
-			model.getEntityById(ENTITY_EDINICI_IZMERENIJA_PO_VELICHINE_ID).setOnRequeried(Utils.lookupProperty(module, "imRequeried"));
-			model.getEntityById(ENTITY_EDINICI_IZMERENIJA_PO_VELICHINE_1_ID).setOnRequeried(Utils.lookupProperty(module, "im1Requeried"));
+			model.getEntityById(ENTITY_EDINICI_IZMERENIJA_PO_VELICHINE_ID).setOnRequeried(module.<JsObject>cast().getJs("imRequeried"));
+			model.getEntityById(ENTITY_EDINICI_IZMERENIJA_PO_VELICHINE_1_ID).setOnRequeried(module.<JsObject>cast().getJs("im1Requeried"));
 			model.publish(module);
 			model.setRuntime(true);
 			Scheduler.get().scheduleFixedDelay(new RepeatingCommand(){

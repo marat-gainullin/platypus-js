@@ -179,31 +179,31 @@ public class GisUtilities {
             MultiPolygon mPolygon = (MultiPolygon) geom;
             for (int g = 0; g < mPolygon.getNumGeometries(); g++) {
                 Geometry section = mPolygon.getGeometryN(g);
-                convertGeometry2SelectionEntries(entity.getEntityId(), (Row) oRow, featureID, geometryColIndex, g, section, aDestination);
+                convertGeometry2SelectionEntries(entity, (Row) oRow, featureID, geometryColIndex, g, section, aDestination);
             }
         } else {
-            convertGeometry2SelectionEntries(entity.getEntityId(), (Row) oRow, featureID, geometryColIndex, -1, geom, aDestination);
+            convertGeometry2SelectionEntries(entity, (Row) oRow, featureID, geometryColIndex, -1, geom, aDestination);
         }
                 }
 
-    public static void convertGeometry2SelectionEntries(long aEntityId, Row aRow, String aFeatureId, int aGeometryColIndex, int aNumGeometry, Geometry aGeometry, List<SelectionEntry> aDestination) {
+    public static void convertGeometry2SelectionEntries(ApplicationEntity<?, ?, ?> aEntity, Row aRow, String aFeatureId, int aGeometryColIndex, int aNumGeometry, Geometry aGeometry, List<SelectionEntry> aDestination) {
         if (aGeometry instanceof Polygon && ((Polygon) aGeometry).getNumInteriorRing() > 0) {
             Polygon polygon = (Polygon) aGeometry;
             Polygon shell = getPolygonShell(polygon);
-            putGeometry2SelectionEntries(aEntityId, aRow, aFeatureId, aGeometryColIndex, aNumGeometry, -1, shell, aDestination);
+            putGeometry2SelectionEntries(aEntity, aRow, aFeatureId, aGeometryColIndex, aNumGeometry, -1, shell, aDestination);
             Polygon[] holes = getPolygonHoles(polygon);
             for (int i = 0; i < holes.length; i++) {
-                putGeometry2SelectionEntries(aEntityId, aRow, aFeatureId, aGeometryColIndex, aNumGeometry, i, holes[i], aDestination);
+                putGeometry2SelectionEntries(aEntity, aRow, aFeatureId, aGeometryColIndex, aNumGeometry, i, holes[i], aDestination);
             }
         } else {
-            putGeometry2SelectionEntries(aEntityId, aRow, aFeatureId, aGeometryColIndex, aNumGeometry, -1, aGeometry, aDestination);
+            putGeometry2SelectionEntries(aEntity, aRow, aFeatureId, aGeometryColIndex, aNumGeometry, -1, aGeometry, aDestination);
         }
     }
 
-    public static void putGeometry2SelectionEntries(long aEntityId, Row aRow, String aFeatureId, int aGeometryColIndex, int aNumGeometry, int aNumHole, Geometry aGeometry, List<SelectionEntry> aDestination) {
+    public static void putGeometry2SelectionEntries(ApplicationEntity<?, ?, ?> aEntity, Row aRow, String aFeatureId, int aGeometryColIndex, int aNumGeometry, int aNumHole, Geometry aGeometry, List<SelectionEntry> aDestination) {
         Coordinate[] coordinates = aGeometry.getCoordinates();
             for (int i = 0; i < coordinates.length; i++) {
-            SelectionEntry entry = new SelectionEntry(aEntityId, aRow, aFeatureId, aGeometryColIndex, aNumGeometry, i, aNumHole, coordinates[i]);
+            SelectionEntry entry = new SelectionEntry(aEntity, aRow, aFeatureId, aGeometryColIndex, aNumGeometry, i, aNumHole, coordinates[i]);
                 aDestination.add(entry);
             }
         }

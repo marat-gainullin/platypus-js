@@ -65,7 +65,10 @@ public class PlatypusHBoxLayoutContainer extends HBoxLayoutContainer {
 
 	public void ajustWidth(Widget aChild, int aValue) {
 		if (aChild != null) {
-			aChild.setPixelSize(aValue, Sizer.getWidgetHeight(aChild));
+			if(aChild.getParent() instanceof PlatypusFieldSet)
+				aChild.getParent().setPixelSize(aValue, Sizer.getWidgetHeight(aChild));
+			else
+				aChild.setPixelSize(aValue, Sizer.getWidgetHeight(aChild));
 			ajustSize();
 		}
 	}

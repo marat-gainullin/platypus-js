@@ -172,7 +172,11 @@ public class AppClient {
 			XMLHttpRequest2 executed = AppClient.getInstance().syncRequest(uri.asString(), text ? ResponseType.Default : ResponseType.ArrayBuffer);
 			if (executed != null) {
 				if (executed.getStatus() == Response.SC_OK)
-					return text ? Utils.toJs(executed.getResponseText()) : executed.<XMLHttpRequest2> cast().getResponse();
+					if(text)
+						return Utils.toJs(executed.getResponseText());
+					else{
+						return Utils.stringToArrayBuffer(executed.getResponseText());
+					}
 				else
 					throw new Exception(executed.getStatusText());
 			}
@@ -514,7 +518,7 @@ public class AppClient {
 			}
 		});
 
-		if (requestData != null)
+		if (requestData != null && !requestData.isEmpty())
 			req.send(requestData);
 		else
 			req.send();

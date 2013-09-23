@@ -156,12 +156,12 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
             modelNode = createModelNode();
         }
     }
-    
+
     protected ModelNode createModelNode() {
         return new ModelNode<>(new ApplicationModelNodeChildren(model,
-                    getLookup().lookup(ApplicationModuleEvents.class),
-                    getLookup().lookup(PlatypusModuleSupport.class).getModelUndo(),
-                    getLookup()), this);
+                getLookup().lookup(ApplicationModuleEvents.class),
+                getLookup().lookup(PlatypusModuleSupport.class).getModelUndo(),
+                getLookup()), this);
     }
 
     public ModelNode<ApplicationDbEntity, ApplicationDbModel> getModelNode() throws Exception {

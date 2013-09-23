@@ -32,6 +32,9 @@ public class Relation<E extends Entity<?, ?, E>> {
     protected Field leftField;
     protected Field rightField;
     protected PropertyChangeSupport changeSupport;
+    // design properties
+    protected int[] xs;
+    protected int[] ys;
 
     public Relation() {
         super();
@@ -46,6 +49,25 @@ public class Relation<E extends Entity<?, ?, E>> {
         rightField = aRightField;
     }
 
+    public int[] getXs() {
+        return xs;
+    }
+
+    public int[] getYs() {
+        return ys;
+    }
+
+    public void setXYs(int[] aXs, int[] aYs) {
+        Object[] oldValue = new Object[]{xs, ys};
+        xs = aXs;
+        ys = aYs;
+        changeSupport.firePropertyChange("polyline", oldValue, new Object[]{xs, ys});
+    }
+
+    public boolean isManual(){
+        return xs != null && ys != null && xs.length == ys.length;
+    }
+    
     public PropertyChangeSupport getChangeSupport() {
         return changeSupport;
     }
@@ -154,14 +176,7 @@ public class Relation<E extends Entity<?, ?, E>> {
 
     public Relation<E> copy() {
         Relation<E> copied = new Relation<>();
-        copied.setLeftEntity(leftEntity);
-        copied.setLeftField(leftField);
-        copied.setRightEntity(rightEntity);
-        copied.setRightField(rightField);
-        copied.setFkDeferrable(fkDeferrable);
-        copied.setFkDeleteRule(fkDeleteRule);
-        copied.setFkUpdateRule(fkUpdateRule);
-        copied.setFkName(fkName);
+        assign(copied);
         return copied;
     }
 
@@ -179,5 +194,16 @@ public class Relation<E extends Entity<?, ?, E>> {
         } else {
             return null;
         }
+    }
+
+    protected void assign(Relation<E> target) {
+        target.setLeftEntity(leftEntity);
+        target.setLeftField(leftField);
+        target.setRightEntity(rightEntity);
+        target.setRightField(rightField);
+        target.setFkDeferrable(fkDeferrable);
+        target.setFkDeleteRule(fkDeleteRule);
+        target.setFkUpdateRule(fkUpdateRule);
+        target.setFkName(fkName);
     }
 }

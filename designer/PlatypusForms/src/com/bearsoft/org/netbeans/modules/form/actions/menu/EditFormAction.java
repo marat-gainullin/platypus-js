@@ -62,21 +62,15 @@ public class EditFormAction extends NodeAction {
     @Override
     protected boolean enable(Node[] nodes) {
         boolean ret = false;
-        /*
         if (nodes != null && nodes.length == 1) {
             RADComponentCookie radCookie = nodes[0].getLookup().lookup(RADComponentCookie.class);
             RADComponent<?> comp = (radCookie != null) ? radCookie.getRADComponent() : null;
             if (comp != null) {
-                RADComponent<?> topComp = comp.getFormModel().getTopRADComponent();
-                if (comp != topComp && EditContainerAction.isEditableComponent(topComp)) {
-                    PlatypusFormLayoutView designer = getDesigner(comp);
-                    if (designer != null && comp == designer.getTopDesignComponent()) {
-                        ret = true;
-                    }
-                }
+                RADComponent<?> topModelComp = comp.getFormModel().getTopRADComponent();
+                RADComponent<?> topDesignComp = comp.getFormModel().getTopDesignComponent();
+                return topModelComp != topDesignComp;
             }
         }
-        */ 
         return ret;
     }
 
@@ -95,29 +89,20 @@ public class EditFormAction extends NodeAction {
             RADComponent<?> comp = (radCookie != null) ? radCookie.getRADComponent() : null;
             if (comp != null) {
                 RADComponent<?> topComp = comp.getFormModel().getTopRADComponent();
-                if (topComp != comp && EditContainerAction.isEditableComponent(topComp)) {
-                    PlatypusFormLayoutView designer = null;//getDesigner(topComp);
-                    if (designer != null && topComp != designer.getTopDesignComponent()) {
-                        designer.setTopDesignComponent((RADVisualContainer<?>) topComp, true);
-                        designer.requestActive();
-
-                        // NodeAction is quite unreliable in enabling, do it ourselves for sure
-                        Node[] n = new Node[]{topComp.getNodeReference()};
-                        if (n[0] != null) {
-                            EditContainerAction.reenable(n);
-                            DesignParentAction.reenable(n);
-                            EditFormAction.reenable(n);
-                        }
+                if (EditContainerAction.isEditableComponent(topComp)) {
+                    topComp.getFormModel().setTopDesignComponent((RADVisualContainer<?>) topComp);
+                    // NodeAction is quite unreliable in enabling, do it ourselves for sure
+                    Node[] n = new Node[]{topComp.getNodeReference()};
+                    if (n[0] != null) {
+                        EditContainerAction.reenable(n);
+                        DesignParentAction.reenable(n);
+                        EditFormAction.reenable(n);
                     }
                 }
             }
         }
     }
-/*
-    private static PlatypusFormLayoutView getDesigner(RADComponent<?> comp) {
-        return FormEditor.getFormDesigner(comp.getFormModel());
-    }
-*/
+
     @Override
     protected boolean asynchronous() {
         return false;
