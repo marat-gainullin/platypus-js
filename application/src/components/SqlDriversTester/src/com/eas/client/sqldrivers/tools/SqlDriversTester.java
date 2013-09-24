@@ -1059,26 +1059,35 @@ public class SqlDriversTester extends JFrame {
 
         if (sqls != null && sqls.length > 0) {
             Statement statementJDBC = null;
+            ResultSet rsJDBC = null;
             try {
                 textLog.setText(textLog.getText() + sqls[0] + "\nexecuteQuery: ");
+                long time= System.currentTimeMillis();
                 statementJDBC = connectJDBC.createStatement();
-                ResultSet rsJDBC = statementJDBC.executeQuery(sqls[0]);
+                rsJDBC = statementJDBC.executeQuery(sqls[0]);
                 table.setModel(new JDBCModel(rsJDBC));
-                textLog.setText(textLog.getText() + "Ok!!!\n");
-                try {
-                    rsJDBC.close();
-                } catch (SQLException ex2) {
-                    textLog.setText(textLog.getText() + "Error !!!\nException: " + ex2 + "\n\n");
-                } 
+                textLog.append("Ok!!!");
+                textLog.append("  Time: "+((double)(System.currentTimeMillis()-time))/1000+" s  Rows: "+table.getRowCount()+"\n");
             } catch (SQLException ex) {
-                textLog.setText(textLog.getText() + "Error !!!\nException: " + ex + "\n\n");
+                textLog.append("Error !!!\nException: " + ex + "\n\n");
                 Logger.getLogger(SqlDriversTester.class.getName()).log(Level.SEVERE, null, ex);
             } finally {
-                try {
-                    statementJDBC.close();
-                } catch (SQLException ex) {
-                    Logger.getLogger(SqlDriversTester.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                if (rsJDBC != null) {
+                    try {
+                        rsJDBC.close();
+                    } catch (SQLException ex) {
+                        textLog.append("Error !!!\nException: " + ex + "\n\n");
+                        Logger.getLogger(SqlDriversTester.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }  
+                if (statementJDBC != null) {
+                    try {
+                        statementJDBC.close();
+                    } catch (SQLException ex) {
+                        textLog.append( "Error !!!\nException: " + ex + "\n\n");
+                        Logger.getLogger(SqlDriversTester.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }    
             }
 
         }
@@ -1132,7 +1141,9 @@ public class SqlDriversTester extends JFrame {
         if (sqls != null && sqls.length > 0) {
             try {
                 for (String s : sqls) {
-                    textLog.setText(textLog.getText() + s + "\nExecute: ");
+                    textLog.append(s);
+                    textLog.append("\nExecute: ");
+                    long time= System.currentTimeMillis();
                     if (tabIndex == 4) {
                         SqlCompiledQuery q = new SqlCompiledQuery(client, null, s);
                         q.enqueueUpdate();
@@ -1142,10 +1153,11 @@ public class SqlDriversTester extends JFrame {
                             statementJDBC.execute(s);
                         }
                     }
-                    textLog.setText(textLog.getText() + "Ok!!!\n");
+                    textLog.append("Ok!!!");
+                    textLog.append("  Time: "+((double)(System.currentTimeMillis()-time))/1000+" s\n");
                 }
             } catch (Exception ex) {
-                textLog.setText(textLog.getText() + "Error !!!\nException: " + ex + "\n\n");
+                textLog.append("Error !!!\nException: " + ex + "\n\n");
                 Logger.getLogger(SqlDriversTester.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
