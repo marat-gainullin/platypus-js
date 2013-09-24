@@ -5,7 +5,7 @@
 package com.eas.designer.explorer.j2ee;
 
 import com.eas.designer.explorer.j2ee.tomcat.TomcatWebAppManager;
-import com.eas.designer.explorer.project.PlatypusProject;
+import com.eas.designer.explorer.project.PlatypusProjectImpl;
 import org.netbeans.modules.j2ee.deployment.devmodules.api.InstanceRemovedException;
 import org.netbeans.modules.j2ee.deployment.devmodules.spi.J2eeModuleProvider;
 
@@ -34,7 +34,7 @@ public class WebAppManagerFactory {
      * @param aServerId
      * @return 
      */
-    public WebAppManager createWebAppManager(PlatypusProject aProject, J2eeModuleProvider aJmp) throws InstanceRemovedException {
+    public WebAppManager createWebAppManager(PlatypusProjectImpl aProject, J2eeModuleProvider aJmp) throws InstanceRemovedException {
         WebAppManager webAppConfigurator = null;
         switch (aJmp.getServerID()) {
             case TomcatWebAppManager.TOMCAT_SERVER_ID :

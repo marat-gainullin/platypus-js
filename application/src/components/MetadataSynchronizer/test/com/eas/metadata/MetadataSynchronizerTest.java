@@ -117,7 +117,7 @@ public class MetadataSynchronizerTest {
         String logName = srcDatabase + "_" + destDatabase;
         Logger logger = MetadataSynchronizer.initLogger(MetadataSynchronizerTest.class.getName(), Level.ALL, false);
         try {
-            logger.addHandler(MetadataSynchronizer.createFileHandler(logName + ".log", "UTF-8", new LogFormatter()));
+            logger.addHandler(MetadataSynchronizer.createFileHandler(logName + ".log", "UTF-8", new LineLogFormatter()));
             printText(cntTabs++, "*** runAllTestsDb ***");
             printText(cntTabs, "source: \t(url=", srcDbConnection.getUrl(), " \tschema=", srcDbConnection.getSchema(), " \tuser=", srcDbConnection.getUser(), ")");
             printText(cntTabs, "destination: \t(url=", destDbConnection.getUrl(), " \tschema=", destDbConnection.getSchema(), " \tuser=", destDbConnection.getUser(), ")");
@@ -1070,8 +1070,8 @@ public class MetadataSynchronizerTest {
         String logEncoding = "UTF-8";
         try {
             if (aLogName != null) {
-                sqlLog.addHandler(MetadataSynchronizer.createFileHandler(aLogName + ".log", logEncoding, new LogFormatter()));
-                errorLog.addHandler(MetadataSynchronizer.createFileHandler(aLogName + "_err.log", logEncoding, new LogFormatter()));
+                sqlLog.addHandler(MetadataSynchronizer.createFileHandler(aLogName + ".log", logEncoding, new LineLogFormatter()));
+                errorLog.addHandler(MetadataSynchronizer.createFileHandler(aLogName + "_err.log", logEncoding, new LineLogFormatter()));
             }    
             MetadataSynchronizer mds = new MetadataSynchronizer(null, sqlLog, errorLog, null);
         

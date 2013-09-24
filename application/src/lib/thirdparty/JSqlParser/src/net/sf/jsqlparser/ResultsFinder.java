@@ -9,7 +9,7 @@ import java.util.List;
 import net.sf.jsqlparser.statement.select.AllColumns;
 import net.sf.jsqlparser.statement.select.AllTableColumns;
 import net.sf.jsqlparser.statement.select.PlainSelect;
-import net.sf.jsqlparser.statement.select.Select;
+import net.sf.jsqlparser.statement.select.SelectBody;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SelectItem;
 import net.sf.jsqlparser.statement.select.SelectItemVisitor;
@@ -24,24 +24,28 @@ public class ResultsFinder implements SelectVisitor, SelectItemVisitor {
 
     private List<SelectItem> results = new ArrayList<>();
 
-    public static List<SelectItem> getResults(Select aSelect) {
+    public static List<SelectItem> getResults(SelectBody aSelectBody) {
         ResultsFinder instance = new ResultsFinder();
-        aSelect.getSelectBody().accept(instance);
+        aSelectBody.accept(instance);
         return instance.results;
     }
 
+    @Override
     public void visit(AllColumns allColumns) {
         results.add(allColumns);
     }
 
+    @Override
     public void visit(AllTableColumns allTableColumns) {
         results.add(allTableColumns);
     }
 
+    @Override
     public void visit(SelectExpressionItem selectExpressionItem) {
         results.add(selectExpressionItem);
     }
 
+    @Override
     public void visit(PlainSelect plainSelect) {
         for (Object oItem : plainSelect.getSelectItems()) {
             SelectItem item = (SelectItem) oItem;
@@ -49,6 +53,7 @@ public class ResultsFinder implements SelectVisitor, SelectItemVisitor {
         }
     }
 
+    @Override
     public void visit(Union union) {
         List selects = union.getPlainSelects();
         if (selects != null && !selects.isEmpty()) {

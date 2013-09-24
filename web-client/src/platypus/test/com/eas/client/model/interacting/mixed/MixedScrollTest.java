@@ -3,10 +3,12 @@ package com.eas.client.model.interacting.mixed;
 import java.util.Map;
 
 import com.bearsoft.rowset.Rowset;
-import com.eas.client.Utils;
+import com.eas.client.Utils.JsObject;
 import com.eas.client.model.interacting.filtering.FilteringTest;
 import com.eas.client.model.store.XmlDom2Model;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 import com.google.gwt.xml.client.XMLParser;
 
 public class MixedScrollTest extends MixedTest {
@@ -16,13 +18,13 @@ public class MixedScrollTest extends MixedTest {
 			edIzmRequeriedCounter : 0,
 			edIzmRequeried : function() {
 				publishedModule.edIzmRequeriedCounter++;
-				if (publishedModule.edIzmRequeriedCounter == 1) {
-					aTest.@com.eas.client.model.interacting.mixed.MixedScrollTest::validateMixedScroll()();
-				} else if (publishedModule.edIzmRequeriedCounter == 2) {
-					aTest.@com.eas.client.model.interacting.mixed.MixedScrollTest::izmVelBeforeFirstScrolled()();
-				} else if (publishedModule.edIzmRequeriedCounter >= 3) {
-					aTest.@com.eas.client.model.interacting.mixed.MixedScrollTest::izmVelNextScrolled()();
-				}
+//				if (publishedModule.edIzmRequeriedCounter == 1) {
+//					aTest.@com.eas.client.model.interacting.mixed.MixedScrollTest::validateMixedScroll()();
+//				} else if (publishedModule.edIzmRequeriedCounter == 2) {
+//					aTest.@com.eas.client.model.interacting.mixed.MixedScrollTest::izmVelBeforeFirstScrolled()();
+//				} else if (publishedModule.edIzmRequeriedCounter >= 3) {
+//					aTest.@com.eas.client.model.interacting.mixed.MixedScrollTest::izmVelNextScrolled()();
+//				}
 			},
 			naimSiPoVel1Requeried : function() {
 				aTest.@com.eas.client.model.interacting.mixed.MixedScrollTest::naimSiPoVel1Requeried()();
@@ -30,11 +32,11 @@ public class MixedScrollTest extends MixedTest {
 			edOborRequeriedCounter : 0,
 			edOborRequeried : function() {
 				publishedModule.edOborRequeriedCounter++;
-				if (publishedModule.edOborRequeriedCounter == 2) {
-					aTest.@com.eas.client.model.interacting.mixed.MixedScrollTest::markiObjRemBeforeFirstScrolled()();
-				} else if (publishedModule.edOborRequeriedCounter >= 3) {
-					aTest.@com.eas.client.model.interacting.mixed.MixedScrollTest::markiObjRemNextScrolled()();
-				}
+//				if (publishedModule.edOborRequeriedCounter == 2) {
+//					aTest.@com.eas.client.model.interacting.mixed.MixedScrollTest::markiObjRemBeforeFirstScrolled()();
+//				} else if (publishedModule.edOborRequeriedCounter >= 3) {
+//					aTest.@com.eas.client.model.interacting.mixed.MixedScrollTest::markiObjRemNextScrolled()();
+//				}
 			}
 		}
 		return publishedModule;
@@ -45,8 +47,13 @@ public class MixedScrollTest extends MixedTest {
 	protected int callCounter;
 
 	@Override
+	protected int getTimeout() {
+	    return super.getTimeout();// * 60 * 60;
+	}
+	
+	@Override
 	public void validate() throws Exception {
-		assertEquals(18, callCounter);
+		assertEquals(30, callCounter);
 		assertEquals(5, siCounter);
 	}
 
@@ -57,11 +64,24 @@ public class MixedScrollTest extends MixedTest {
 		JavaScriptObject module = publish(this);
 
 		model = XmlDom2Model.transform(XMLParser.parse(DATAMODEL_MIXED_RELATIONS), module);
-		model.getEntityById(ENTITY_EDINICI_IZMERENIJA_PO_VELICHINE_ID).setOnRequeried(Utils.lookupProperty(module, "edIzmRequeried"));
-		model.getEntityById(ENTITY_NAIMENOVANIA_SI_PO_VELICHINE_1_ID).setOnRequeried(Utils.lookupProperty(module, "naimSiPoVel1Requeried"));
-		model.getEntityById(ENTITY_EDINICI_OBORUDOVANIJA_ID).setOnRequeried(Utils.lookupProperty(module, "edOborRequeried"));
+		model.getEntityById(ENTITY_EDINICI_IZMERENIJA_PO_VELICHINE_ID).setOnRequeried(module.<JsObject>cast().getJs("edIzmRequeried"));
+		model.getEntityById(ENTITY_NAIMENOVANIA_SI_PO_VELICHINE_1_ID).setOnRequeried(module.<JsObject>cast().getJs("naimSiPoVel1Requeried"));
+		model.getEntityById(ENTITY_EDINICI_OBORUDOVANIJA_ID).setOnRequeried(module.<JsObject>cast().getJs("edOborRequeried"));
 		model.publish(module);
 		model.setRuntime(true);
+		Scheduler.get().scheduleFixedDelay(new RepeatingCommand(){
+
+			@Override
+            public boolean execute() {
+				try {
+					validateMixedScroll();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return false;
+            }
+			
+		}, 500);
 	}
 
 	public void validateMixedScroll() throws Exception {
@@ -92,12 +112,39 @@ public class MixedScrollTest extends MixedTest {
 		izmVel.beforeFirst();
 		markiObRem.beforeFirst();
 		callCounter++;
+		Scheduler.get().scheduleFixedDelay(new RepeatingCommand(){
+
+			@Override
+            public boolean execute() {
+				try {
+					izmVelBeforeFirstScrolled();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return false;
+            }
+			
+		}, 5);
+		markiObjRemBeforeFirstScrolled();
 	}
 
 	public void izmVelBeforeFirstScrolled() throws Exception {
 		Rowset izmVel = state.IZMERJAEMIE_VELICHINI.getRowset();
 		izmVel.next();
 		callCounter++;
+		Scheduler.get().scheduleFixedDelay(new RepeatingCommand(){
+
+			@Override
+            public boolean execute() {
+				try {
+					izmVelNextScrolled();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return false;
+            }
+			
+		}, 5);
 	}
 
 	public void izmVelNextScrolled() throws Exception {
@@ -180,6 +227,19 @@ public class MixedScrollTest extends MixedTest {
 				fail("Primary keys must be numbers.");
 			}
 			izmVel.next();
+			Scheduler.get().scheduleFixedDelay(new RepeatingCommand(){
+
+				@Override
+	            public boolean execute() {
+					try {
+						izmVelNextScrolled();
+	                } catch (Exception e) {
+	                    e.printStackTrace();
+	                }
+	                return false;
+	            }
+				
+			}, 5);
 		}
 		callCounter++;
 	}
@@ -206,6 +266,19 @@ public class MixedScrollTest extends MixedTest {
 						if (1 == naimSiPoVel1.size()) {
 							siCounter++;
 							izmVel.next();
+							Scheduler.get().scheduleFixedDelay(new RepeatingCommand(){
+
+								@Override
+					            public boolean execute() {
+									try {
+										izmVelNextScrolled();
+					                } catch (Exception e) {
+					                    e.printStackTrace();
+					                }
+					                return false;
+					            }
+								
+							}, 5);
 						}
 					}
 				} else if (velPk.equals(FilteringTest.DAVL)) {
@@ -213,6 +286,19 @@ public class MixedScrollTest extends MixedTest {
 						if (1 == naimSiPoVel1.size()) {
 							siCounter++;
 							izmVel.next();
+							Scheduler.get().scheduleFixedDelay(new RepeatingCommand(){
+
+								@Override
+					            public boolean execute() {
+									try {
+										izmVelNextScrolled();
+					                } catch (Exception e) {
+					                    e.printStackTrace();
+					                }
+					                return false;
+					            }
+								
+							}, 5);
 						}
 					}
 				} else if (velPk.equals(FilteringTest.MOSHN)) {
@@ -220,6 +306,19 @@ public class MixedScrollTest extends MixedTest {
 						if (1 == naimSiPoVel1.size()) {
 							siCounter++;
 							izmVel.next();
+							Scheduler.get().scheduleFixedDelay(new RepeatingCommand(){
+
+								@Override
+					            public boolean execute() {
+									try {
+										izmVelNextScrolled();
+					                } catch (Exception e) {
+					                    e.printStackTrace();
+					                }
+					                return false;
+					            }
+								
+							}, 5);
 						}
 					}
 				} else if (velPk.equals(FilteringTest.NAPRJAZH)) {
@@ -227,6 +326,19 @@ public class MixedScrollTest extends MixedTest {
 						if (1 == naimSiPoVel1.size()) {
 							siCounter++;
 							izmVel.next();
+							Scheduler.get().scheduleFixedDelay(new RepeatingCommand(){
+
+								@Override
+					            public boolean execute() {
+									try {
+										izmVelNextScrolled();
+					                } catch (Exception e) {
+					                    e.printStackTrace();
+					                }
+					                return false;
+					            }
+								
+							}, 5);
 						}
 					}
 				}
@@ -240,6 +352,7 @@ public class MixedScrollTest extends MixedTest {
 		Rowset rowset = state.MARKI_OBJECTOV_REMONTA.getRowset();
 		rowset.next();
 		callCounter++;
+		markiObjRemNextScrolled();
 	}
 
 	public void markiObjRemNextScrolled() throws Exception {
@@ -277,6 +390,7 @@ public class MixedScrollTest extends MixedTest {
 				fail("Primary keys must be a numbers.");
 			}
 			rowset.next();
+			markiObjRemNextScrolled();
 		} else {
 			rowset.first();
 		}

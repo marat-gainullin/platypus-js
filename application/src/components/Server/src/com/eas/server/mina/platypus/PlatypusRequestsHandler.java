@@ -28,23 +28,42 @@ public class PlatypusRequestsHandler extends IoHandlerAdapter {
     public static final String BAD_SESSION_ID_MSG = "Bad session id, login first.";
     public static final String GOT_SIGNATURE_MSG = "Got signature from client.";
     public static final String SESSION_ID = "sessionID";
+    public static final int IDLE_TIME_EVENT = 5 * 60; // 5 minutes
+    public static final int SESSION_TIME_OUT = 60 * 60; // 1 hour
+    protected int sessionIdleCheckInterval = IDLE_TIME_EVENT;
+    protected int sessionIdleTime = SESSION_TIME_OUT;
     private final PlatypusServerCore server;
 
     public PlatypusRequestsHandler(PlatypusServerCore aServer) {
         server = aServer;
     }
 
+    public int getSessionIdleCheckInterval() {
+        return sessionIdleCheckInterval;
+    }
+
+    public void setSessionIdleCheckInterval(int aValue) {
+        sessionIdleCheckInterval = aValue;
+    }
+
+    public int getSessionIdleTime() {
+        return sessionIdleTime;
+    }
+
+    public void setSessionIdleTime(int aValue) {
+        sessionIdleTime = aValue;
+    }
+    
     @Override
     public void sessionCreated(IoSession session) throws Exception {
         super.sessionCreated(session);
-        session.getConfig().setBothIdleTime(60 * 5);// 5 minuntes
+        session.getConfig().setBothIdleTime(sessionIdleCheckInterval);
     }
 
     @Override
     public void sessionIdle(IoSession ioSession, IdleStatus status) throws Exception {
         super.sessionIdle(ioSession, status);
-        if (ioSession.getBothIdleCount() > 12)// 1 hour
-        {
+        if (ioSession.getBothIdleCount() * sessionIdleCheckInterval >= sessionIdleTime) {
             ioSession.close(false);
             String sessionId = (String) ioSession.getAttribute(SESSION_ID);
             if (sessionId != null) {

@@ -16,10 +16,10 @@ import org.openide.filesystems.FileUtil;
 public final class SearchFilter extends SearchFilterDefinition {
 
     private static final List<String> ignoredPaths = Arrays.asList(new String[] {"web/pwc", "web/pub", "web/META-INF", "web/WEB-INF/lib"});//NOI18N
-    private final PlatypusProject project;
+    private final PlatypusProjectImpl project;
     private final Path projectPath;
 
-    public SearchFilter(PlatypusProject aProject) {
+    public SearchFilter(PlatypusProjectImpl aProject) {
         project = aProject;
         projectPath = FileUtil.toFile(project.getProjectDirectory()).toPath();
     }

@@ -14,7 +14,6 @@ import javax.swing.JComponent;
 import javax.swing.event.ChangeListener;
 import org.netbeans.api.project.FileOwnerQuery;
 import org.netbeans.api.project.Project;
-import org.netbeans.api.project.ProjectManager;
 import org.netbeans.spi.project.ui.templates.support.Templates;
 import org.openide.WizardDescriptor;
 import org.openide.filesystems.FileObject;
@@ -57,22 +56,22 @@ public class NewApplicationElementWizardIterator implements WizardDescriptor.Ins
         return Collections.singleton(createdFile);
     }
 
-    protected Map<String, String> achieveParameters(Project project, WizardDescriptor aWiz) {
-        Map<String, String> parameters = new HashMap<>();
-        parameters.put(
-                PLATYPUS_APP_ELEMENT_NAME_PARAM_NAME,
-                getAppElementNameByFileName(project, Templates.getTargetName(wiz)));
-        return parameters;
-    }
-
-    private static String getAppElementNameByFileName(Project project, String fileName) {
-        assert fileName != null;
-        assert !fileName.isEmpty();
-        String appElementName = StringUtils.replaceUnsupportedSymbols(fileName.trim());
+    /**
+     * Generates new application element's name.
+     * New name will be generated using the provided initial name, unsupported symbols will be replaced 
+     * and it will be ensured that new name is unique.
+     * @param project Application's project
+     * @param str Initial name
+     * @return New name
+     */
+    public static String getNewValidAppElementName(Project project, String str) {
+        assert str != null;
+        assert !str.isEmpty();
+        String appElementName = StringUtils.replaceUnsupportedSymbols(str.trim());
         String s = appElementName;
-        int i = 1;
+        int i = 0;
         while (IndexerQuery.appElementId2File(project, s) != null) {
-            s = String.format("%s_%d", appElementName, i++); // NOI18N
+            s = String.format("%s_%d", appElementName, ++i); // NOI18N
         }
         return s;
     }
@@ -159,6 +158,14 @@ public class NewApplicationElementWizardIterator implements WizardDescriptor.Ins
 
     @Override
     public final void removeChangeListener(ChangeListener l) {
+    }
+    
+    protected Map<String, String> achieveParameters(Project project, WizardDescriptor aWiz) {
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put(
+                PLATYPUS_APP_ELEMENT_NAME_PARAM_NAME,
+                getNewValidAppElementName(project, Templates.getTargetName(wiz)));
+        return parameters;
     }
 
     protected WizardDescriptor.Panel[] createPanels(WizardDescriptor wiz) {

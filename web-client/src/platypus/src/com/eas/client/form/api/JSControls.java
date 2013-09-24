@@ -1055,6 +1055,8 @@ public class JSControls {
 		    		aPublished.parent.unwrap().@com.eas.client.gxtcontrols.wrappers.container.PlatypusMarginLayoutContainer::ajustWidth(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), aValue);
 		    	else if(aPublished.parent instanceof $wnd.ScrollPane)
 		    		aPublished.parent.unwrap().@com.eas.client.gxtcontrols.wrappers.container.PlatypusScrollContainer::ajustWidth(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), aValue);
+		    	else if(aPublished.parent instanceof $wnd.FlowPane)
+		    		aPublished.parent.unwrap().@com.eas.client.gxtcontrols.wrappers.container.PlatypusFlowLayoutContainer::ajustWidth(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), aValue);
 		    	else if(aPublished.parent instanceof $wnd.BoxPane)
 		    	{
 		    		if(aPublished.parent.orientation == $wnd.Orientation.HORIZONTAL)
@@ -1071,6 +1073,8 @@ public class JSControls {
 		    		aPublished.parent.unwrap().@com.eas.client.gxtcontrols.wrappers.container.PlatypusMarginLayoutContainer::ajustHeight(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), aValue);
 		    	else if(aPublished.parent instanceof $wnd.ScrollPane)
 		    		aPublished.parent.unwrap().@com.eas.client.gxtcontrols.wrappers.container.PlatypusScrollContainer::ajustHeight(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), aValue);
+		    	else if(aPublished.parent instanceof $wnd.FlowPane)
+		    		aPublished.parent.unwrap().@com.eas.client.gxtcontrols.wrappers.container.PlatypusFlowLayoutContainer::ajustHeight(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), aValue);
 		    	else if(aPublished.parent instanceof $wnd.BoxPane)
 		    	{
 		    		if(aPublished.parent.orientation == $wnd.Orientation.VERTICAL)

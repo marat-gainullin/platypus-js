@@ -5,6 +5,7 @@
 package com.eas.client.threetier.requests;
 
 import com.bearsoft.rowset.Rowset;
+import com.bearsoft.rowset.metadata.Fields;
 import com.eas.client.threetier.Response;
 
 /**
@@ -14,6 +15,7 @@ import com.eas.client.threetier.Response;
 public class RowsetResponse extends Response {
 
     private Rowset rowset;
+    private Fields expectedFields;
     private int updateCount;
 
     public RowsetResponse(long requestId, Rowset aRowset, int aUpdateCount) {
@@ -22,12 +24,25 @@ public class RowsetResponse extends Response {
         updateCount = aUpdateCount;
     }
 
+    public RowsetResponse(long requestId, Rowset aRowset, int aUpdateCount, Fields aExpectedFields) {
+        this(requestId, aRowset, aUpdateCount);
+        expectedFields = aExpectedFields;
+    }
+
     public Rowset getRowset() {
         return rowset;
     }
 
     public void setRowset(Rowset aValue) {
         rowset = aValue;
+    }
+
+    public Fields getExpectedFields() {
+        return expectedFields;
+    }
+
+    public void setExpectedFields(Fields aFields) {
+        expectedFields = aFields;
     }
 
     /**
@@ -45,5 +60,4 @@ public class RowsetResponse extends Response {
     public void accept(PlatypusResponseVisitor aVisitor) throws Exception {
         aVisitor.visit(this);
     }
-
 }

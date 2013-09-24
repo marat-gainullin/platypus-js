@@ -16,6 +16,7 @@ public abstract class BearResourcePool<T> implements ResourcePool<T> {
     public static final int WAIT_TIMEOUT = 15;
     public static final int DEFAULT_MAXIMUM_SIZE = 5;
     protected int maximumSize = DEFAULT_MAXIMUM_SIZE;
+    protected int resourceTimeout = WAIT_TIMEOUT;
     protected int size;
     protected final Set<T> resources = new HashSet<>();
 
@@ -24,13 +25,19 @@ public abstract class BearResourcePool<T> implements ResourcePool<T> {
         maximumSize = aMaximumSize;
     }
 
+    public BearResourcePool(int aMaximumSize, int aResourceTimeout) {
+        super();
+        maximumSize = aMaximumSize;
+        resourceTimeout = aResourceTimeout;
+    }
+
     protected abstract T createResource() throws Exception;
 
     @Override
     public T achieveResource() throws Exception {
         T res = tryAchieveResource();
         while (res == null && Thread.currentThread().isAlive()) {
-            Thread.sleep(WAIT_TIMEOUT);
+            Thread.sleep(resourceTimeout);
             res = tryAchieveResource();
         }
         return res;

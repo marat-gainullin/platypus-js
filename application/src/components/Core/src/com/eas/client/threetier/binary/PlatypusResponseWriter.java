@@ -131,7 +131,7 @@ public class PlatypusResponseWriter implements PlatypusResponseVisitor {
         writer.put(RequestsTags.TAG_UPDATE_COUNT, rsp.getUpdateCount());
         if (rsp.getRowset() != null) {
             ByteArrayOutputStream rowsetStream = new ByteArrayOutputStream();
-            BinaryRowsetWriter rsWriter = new PlatypusRowsetWriter(true);
+            BinaryRowsetWriter rsWriter = new PlatypusRowsetWriter();
             rsWriter.write(rsp.getRowset(), rowsetStream);
             writer.put(RequestsTags.TAG_ROWSET);
             writer.put(CoreTags.TAG_STREAM, rowsetStream);
@@ -234,7 +234,7 @@ public class PlatypusResponseWriter implements PlatypusResponseVisitor {
     public void visit(AppQueryResponse rsp) throws Exception {
         ProtoWriter writer = new ProtoWriter(out);
         ByteArrayOutputStream fieldsStream = new ByteArrayOutputStream();
-        PlatypusRowsetWriter rsWriter = new PlatypusRowsetWriter(true);
+        PlatypusRowsetWriter rsWriter = new PlatypusRowsetWriter();
         rsWriter.writeFields(rsp.getAppQuery().getFields(), fieldsStream);
         writer.put(RequestsTags.TAG_QUERY_ID, rsp.getAppQuery().getEntityId());
         writer.put(RequestsTags.TAG_DML, rsp.getAppQuery().isManual() ? 1 : 0);

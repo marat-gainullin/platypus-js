@@ -4,8 +4,8 @@
  */
 package com.eas.designer.application.query.nodes;
 
-import com.eas.designer.explorer.model.nodes.NodePropertiesUndoRecorder;
-import com.eas.designer.explorer.model.nodes.NodePropertyUndoableEdit;
+import com.eas.designer.datamodel.nodes.NodePropertiesUndoRecorder;
+import com.eas.designer.datamodel.nodes.NodePropertyUndoableEdit;
 import java.beans.PropertyChangeEvent;
 import javax.swing.event.UndoableEditEvent;
 import org.openide.ErrorManager;

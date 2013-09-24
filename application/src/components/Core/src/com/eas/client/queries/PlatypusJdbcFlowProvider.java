@@ -8,6 +8,7 @@ import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.dataflow.JdbcFlowProvider;
 import com.bearsoft.rowset.dataflow.TransactionListener;
+import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.DbClient;
 import com.eas.client.DbMetadataCache;
@@ -36,8 +37,8 @@ public class PlatypusJdbcFlowProvider extends JdbcFlowProvider<String> {
     protected Set<String> readRoles = new HashSet<>();
     protected Set<String> writeRoles = new HashSet<>();
 
-    public PlatypusJdbcFlowProvider(DbClient aClient, String aJdbcSourceId, String aSessionId, String aEntityId, DataSource aDataSource, DbMetadataCache aCache, String aClause, ContextHost aContextHost, Set<String> aReadRoles, Set<String> aWriteRoles) throws Exception {
-        super(aJdbcSourceId, aSessionId, aDataSource, aCache.getConnectionDriver().getConverter(), aClause);
+    public PlatypusJdbcFlowProvider(DbClient aClient, String aJdbcSourceId, String aSessionId, String aEntityId, DataSource aDataSource, DbMetadataCache aCache, String aClause, Fields aExpectedFields, ContextHost aContextHost, Set<String> aReadRoles, Set<String> aWriteRoles) throws Exception {
+        super(aJdbcSourceId, aSessionId, aDataSource, aCache.getConnectionDriver().getConverter(), aClause, aExpectedFields);
         entityId = aEntityId;
         client = aClient;
         cache = aCache;

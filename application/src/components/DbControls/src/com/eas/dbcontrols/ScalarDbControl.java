@@ -107,7 +107,7 @@ public interface ScalarDbControl extends DbControl, TableCellRenderer, TableCell
 
     public Function getOnSelect();
 
-    public void setOnSelect(Function aValue);
+    public void setOnSelect(Function aValue) throws Exception;
 
     public Function getOnRender();
 

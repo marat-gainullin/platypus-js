@@ -4,12 +4,13 @@
 
   <info>
     <appname>Platypus</appname>
-    <appversion>2.0.266</appversion>
+    <appversion>3.0.9</appversion>
     <authors>
       <author name="Alternative-Soft" email="info@altsoft.biz"/>
     </authors>
     <url>http://www.altsoft.biz/</url>
 	<run-privileged uninstaller="no" condition="izpack.windowsinstall"/>
+	<uninstaller name="uninstaller.jar" write="yes" path="$INSTALL_PATH/uninstall"/>
   </info>
 
   <guiprefs width="640" height="480" resizable="no"/>
@@ -78,10 +79,10 @@
 		<include name="uninstall.js" />	
 	  </fileset>
 	  
-  	  <file src="run/Platypus.sh" targetdir="$INSTALL_PATH/run" override="true" condition="izpack.linuxinstall" />
-	  <file src="run/app.png" targetdir="$INSTALL_PATH/run" override="true" condition="izpack.linuxinstall" />
-	  <file src="run/startupdate.sh" targetdir="$INSTALL_PATH/run" override="true" condition="izpack.linuxinstall" />
-	  <file src="run/uninstall.sh" targetdir="$INSTALL_PATH/run" override="true" condition="izpack.linuxinstall" />
+  	  <file src="run/Platypus.sh" targetdir="$INSTALL_PATH/run" override="true" condition="izpack.linuxinstall|izpack.macinstall" />
+	  <file src="run/app.png" targetdir="$INSTALL_PATH/run" override="true" condition="izpack.linuxinstall|izpack.macinstall" />
+	  <file src="run/startupdate.sh" targetdir="$INSTALL_PATH/run" override="true" condition="izpack.linuxinstall|izpack.macinstall" />
+	  <file src="run/uninstall.sh" targetdir="$INSTALL_PATH/run" override="true" condition="izpack.linuxinstall|izpack.macinstall" />
 	  <file src="run/update.xml" targetdir="$INSTALL_PATH/run" override="true" />
 
 	  <fileset dir="bin" targetdir="$INSTALL_PATH/bin">

@@ -19,18 +19,16 @@ import org.w3c.dom.Document;
  * @author mg
  */
 public class ClientCompiledScriptDocuments extends CompiledScriptDocuments {
-    
-    public ClientCompiledScriptDocuments(Client aClient)
-    {
+
+    public ClientCompiledScriptDocuments(Client aClient) {
         super(aClient);
     }
-    
+
     @Override
     protected ScriptDocument appElement2Document(ApplicationElement aAppElement) throws Exception {
         Document doc = aAppElement.getContent();
         ScriptDocument scriptDoc = null;
-        switch(aAppElement.getType())
-        {
+        switch (aAppElement.getType()) {
             case ClientConstants.ET_COMPONENT:
                 scriptDoc = Dom2ScriptDocument.dom2ScriptDocument(client, doc);
                 break;
@@ -51,5 +49,4 @@ public class ClientCompiledScriptDocuments extends CompiledScriptDocuments {
         scriptDoc.readScriptAnnotations();
         return scriptDoc;
     }
-    
 }

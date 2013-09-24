@@ -245,7 +245,8 @@ public class GridTable extends JTable implements DbControlEditingListener {
         for (int i = rightColumns.size() - 1; i >= 0; i--) {
             TableColumn tCol = rightColumns.get(i);
             rightWidth += tCol.getWidth();
-            if (tCol instanceof RowHeaderTableColumn || tCol instanceof AnchorTableColumn) {
+            if (tCol instanceof RowHeaderTableColumn || tCol instanceof AnchorTableColumn
+                    || !tCol.getResizable()) {
                 rightColumns.remove(i);
                 rightWidthRemoved += tCol.getWidth();
             }
@@ -257,13 +258,10 @@ public class GridTable extends JTable implements DbControlEditingListener {
         int borderDelta = 0;//getBorder() == null ? 0 : getBorder().getBorderInsets(this).left + getBorder().getBorderInsets(this).right;
         int delta = (getWidth() - borderDelta) - (leftWidth + rightWidth);
         if (delta != 0) {
-            float[] coefs = new float[rightColumns.size()];
-            for (int i = 0; i < rightColumns.size(); i++) {
-                coefs[i] = (float) rightColumns.get(i).getWidth() / (float) (rightWidth - rightWidthRemoved);
-            }
             for (int i = 0; i < rightColumns.size(); i++) {
                 TableColumn tCol = rightColumns.get(i);
-                int newWidth = tCol.getWidth() + Math.round(delta * coefs[i]);
+                float coef = (float) tCol.getWidth() / (float) (rightWidth - rightWidthRemoved);
+                int newWidth = tCol.getWidth() + Math.round(delta * coef);
                 silentSetWidth2Column(tCol, newWidth);
             }
             if ((getWidth() - borderDelta) != getColumnModel().getTotalColumnWidth() && getColumnModel().getColumnCount() > 0) {
@@ -271,8 +269,10 @@ public class GridTable extends JTable implements DbControlEditingListener {
                 if (goatCol == null) {
                     goatCol = getColumnModel().getColumn(getColumnModel().getColumnCount() - 1);
                 }
-                int goatColNewWidth = goatCol.getWidth() + ((getWidth() - borderDelta) - getColumnModel().getTotalColumnWidth());
-                silentSetWidth2Column(goatCol, goatColNewWidth);
+                if (goatCol.getResizable()) {
+                    int goatColNewWidth = goatCol.getWidth() + ((getWidth() - borderDelta) - getColumnModel().getTotalColumnWidth());
+                    silentSetWidth2Column(goatCol, goatColNewWidth);
+                }
             }
         }
     }

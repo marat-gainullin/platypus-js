@@ -4,9 +4,12 @@ import java.util.Map;
 
 import com.bearsoft.rowset.Rowset;
 import com.eas.client.Utils;
+import com.eas.client.Utils.JsObject;
 import com.eas.client.model.interacting.filtering.FilteringTest;
 import com.eas.client.model.store.XmlDom2Model;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 import com.google.gwt.xml.client.XMLParser;
 
 public class QueringScrollTest extends QueringTest {
@@ -16,39 +19,39 @@ public class QueringScrollTest extends QueringTest {
 			imRequeriedCounter : 0,
 			imRequeried : function() {
 				publishedModule.imRequeriedCounter++;
-				if (publishedModule.imRequeriedCounter == 1) {
-					aTest.@com.eas.client.model.interacting.quering.QueringScrollTest::validateQueringScroll()();
-				} else if (publishedModule.imRequeriedCounter == 2) {
-					aTest.@com.eas.client.model.interacting.quering.QueringScrollTest::izmRsBeforeFirstScrolled()();
-				} else if (publishedModule.imRequeriedCounter >= 3 && publishedModule.imRequeriedCounter <= 16) {
-					aTest.@com.eas.client.model.interacting.quering.QueringScrollTest::izmRsNextScrolled()();
-				} else if (publishedModule.imRequeriedCounter == 17) {
-					aTest.@com.eas.client.model.interacting.quering.QueringScrollTest::izmRsFirstScrolled()();
-				}
+				//				if (publishedModule.imRequeriedCounter == 1) {
+				//					aTest.@com.eas.client.model.interacting.quering.QueringScrollTest::validateQueringScroll()();
+				//				} else if (publishedModule.imRequeriedCounter == 2) {
+				//					aTest.@com.eas.client.model.interacting.quering.QueringScrollTest::izmRsBeforeFirstScrolled()();
+				//				} else if (publishedModule.imRequeriedCounter >= 3 && publishedModule.imRequeriedCounter <= 16) {
+				//					aTest.@com.eas.client.model.interacting.quering.QueringScrollTest::izmRsNextScrolled()();
+				//				} else if (publishedModule.imRequeriedCounter == 17) {
+				//					aTest.@com.eas.client.model.interacting.quering.QueringScrollTest::izmRsFirstScrolled()();
+				//				}
 			},
 			grObRemRequeriedCounter : 0,
 			grObRemRequeried : function() {
 				publishedModule.grObRemRequeriedCounter++;
-				if (publishedModule.grObRemRequeriedCounter == 2)
-					aTest.@com.eas.client.model.interacting.quering.QueringScrollTest::grObRemParamChanged()();
+				//				if (publishedModule.grObRemRequeriedCounter == 2)
+				//					aTest.@com.eas.client.model.interacting.quering.QueringScrollTest::grObRemParamChanged()();
 			},
 			edIzm1RequeriedCounter : 0,
 			edIzm1Requeried : function() {
 				publishedModule.edIzm1RequeriedCounter++;
-				if (publishedModule.edIzm1RequeriedCounter == 3) {
-					aTest.@com.eas.client.model.interacting.quering.QueringScrollTest::dlinaRowsetBeforeFirstScrolled()();
-				} else if (publishedModule.edIzm1RequeriedCounter >= 4 && publishedModule.edIzm1RequeriedCounter <= 8) {
-					aTest.@com.eas.client.model.interacting.quering.QueringScrollTest::dlinaRowsetNextScrolled()();
-				}
+				//				if (publishedModule.edIzm1RequeriedCounter == 3) {
+				//					aTest.@com.eas.client.model.interacting.quering.QueringScrollTest::dlinaRowsetBeforeFirstScrolled()();
+				//				} else if (publishedModule.edIzm1RequeriedCounter >= 4 && publishedModule.edIzm1RequeriedCounter <= 8) {
+				//					aTest.@com.eas.client.model.interacting.quering.QueringScrollTest::dlinaRowsetNextScrolled()();
+				//				}
 			},
 			edOborPoMarkeRequeriedCounter : 0,
 			edOborPoMarkeRequeried : function() {
 				publishedModule.edOborPoMarkeRequeriedCounter++;
-				if (publishedModule.edOborPoMarkeRequeriedCounter == 2) {
-					aTest.@com.eas.client.model.interacting.quering.QueringScrollTest::marksRsBeforeFirstScrolled()();
-				} else if (publishedModule.edOborPoMarkeRequeriedCounter >= 3 && publishedModule.edOborPoMarkeRequeriedCounter <= 13) {
-					aTest.@com.eas.client.model.interacting.quering.QueringScrollTest::marksRsNextScrolled()();
-				}
+				//				if (publishedModule.edOborPoMarkeRequeriedCounter == 2) {
+				//					aTest.@com.eas.client.model.interacting.quering.QueringScrollTest::marksRsBeforeFirstScrolled()();
+				//				} else if (publishedModule.edOborPoMarkeRequeriedCounter >= 3 && publishedModule.edOborPoMarkeRequeriedCounter <= 13) {
+				//					aTest.@com.eas.client.model.interacting.quering.QueringScrollTest::marksRsNextScrolled()();
+				//				}
 			}
 		}
 		return publishedModule;
@@ -62,7 +65,7 @@ public class QueringScrollTest extends QueringTest {
 	public void validate() throws Exception {
 		assertEquals(35, callCounter);
 	}
-	
+
 	public void testQueringScroll() throws Exception {
 	}
 
@@ -72,12 +75,25 @@ public class QueringScrollTest extends QueringTest {
 			JavaScriptObject module = publish(this);
 
 			model = XmlDom2Model.transform(XMLParser.parse(DATAMODEL_QUERING_RELATIONS), module);
-			model.getEntityById(ENTITY_EDINICI_IZMERENIJA_PO_VELICHINE_ID).setOnRequeried(Utils.lookupProperty(module, "imRequeried"));
-			model.getEntityById(ENTITY_GRUPPA_OBJECTA_REMONTA_PO_RODITELU_ID).setOnRequeried(Utils.lookupProperty(module, "grObRemRequeried"));
-			model.getEntityById(ENTITY_EDINICI_IZMERENIJA_PO_VELICHINE_1_ID).setOnRequeried(Utils.lookupProperty(module, "edIzm1Requeried"));
-			model.getEntityById(ENTITY_EDINICI_OBORUDOVANIJA_PO_MARKE_ID).setOnRequeried(Utils.lookupProperty(module, "edOborPoMarkeRequeried"));
+			model.getEntityById(ENTITY_EDINICI_IZMERENIJA_PO_VELICHINE_ID).setOnRequeried(module.<JsObject>cast().getJs("imRequeried"));
+			model.getEntityById(ENTITY_GRUPPA_OBJECTA_REMONTA_PO_RODITELU_ID).setOnRequeried(module.<JsObject>cast().getJs("grObRemRequeried"));
+			model.getEntityById(ENTITY_EDINICI_IZMERENIJA_PO_VELICHINE_1_ID).setOnRequeried(module.<JsObject>cast().getJs("edIzm1Requeried"));
+			model.getEntityById(ENTITY_EDINICI_OBORUDOVANIJA_PO_MARKE_ID).setOnRequeried(module.<JsObject>cast().getJs("edOborPoMarkeRequeried"));
 			model.publish(module);
 			model.setRuntime(true);
+			Scheduler.get().scheduleFixedDelay(new RepeatingCommand() {
+
+				@Override
+				public boolean execute() {
+					try {
+						validateQueringScroll();
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					return false;
+				}
+
+			}, 500);
 		} catch (Exception ex) {
 			fail(ex.getMessage());
 			throw ex;
@@ -90,6 +106,19 @@ public class QueringScrollTest extends QueringTest {
 		int parIndex = model.getParametersEntity().getRowset().getFields().find("P_ID");
 		model.getParametersEntity().getRowset().updateObject(parIndex, PROIZVODSTVENNIE_OS);
 		callCounter++;
+		Scheduler.get().scheduleFixedDelay(new RepeatingCommand() {
+
+			@Override
+			public boolean execute() {
+				try {
+					grObRemParamChanged();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				return false;
+			}
+
+		}, 5);
 	}
 
 	public void grObRemParamChanged() throws Exception {
@@ -119,12 +148,38 @@ public class QueringScrollTest extends QueringTest {
 		assertNotNull(izmRs);
 		izmRs.beforeFirst();
 		callCounter++;
+		Scheduler.get().scheduleFixedDelay(new RepeatingCommand() {
+
+			@Override
+			public boolean execute() {
+				try {
+					izmRsBeforeFirstScrolled();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				return false;
+			}
+
+		}, 5);
 	}
 
 	public void izmRsBeforeFirstScrolled() throws Exception {
 		Rowset izmRs = state.IZMERJAEMIE_VELICHINI.getRowset();
 		izmRs.next();
 		callCounter++;
+		Scheduler.get().scheduleFixedDelay(new RepeatingCommand() {
+
+			@Override
+			public boolean execute() {
+				try {
+					izmRsNextScrolled();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				return false;
+			}
+
+		}, 5);
 	}
 
 	public void izmRsNextScrolled() throws Exception {
@@ -141,6 +196,19 @@ public class QueringScrollTest extends QueringTest {
 					assertEquals(0, state.NAIMENOVANIA_SI_PO_VELICHINE.getRowset().size());
 					Rowset dlinaRowset = state.EDINICI_IZMERENIJA_PO_VELICHINE.getRowset();
 					dlinaRowset.beforeFirst();
+					Scheduler.get().scheduleFixedDelay(new RepeatingCommand() {
+
+						@Override
+						public boolean execute() {
+							try {
+								dlinaRowsetBeforeFirstScrolled();
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+							return false;
+						}
+
+					}, 5);
 					return;
 				} else if (lPk.equals(FilteringTest.SILA_EL)) {
 					assertEquals(1, state.EDINICI_IZMERENIJA_PO_VELICHINE.getRowset().size());
@@ -171,8 +239,35 @@ public class QueringScrollTest extends QueringTest {
 				fail("Primary keys fields for tests must be numbers.");
 			}
 			izmRs.next();
-		} else
+			Scheduler.get().scheduleFixedDelay(new RepeatingCommand() {
+
+				@Override
+				public boolean execute() {
+					try {
+						izmRsNextScrolled();
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					return false;
+				}
+
+			}, 5);
+		} else {
 			izmRs.first();
+			Scheduler.get().scheduleFixedDelay(new RepeatingCommand() {
+
+				@Override
+				public boolean execute() {
+					try {
+						izmRsFirstScrolled();
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					return false;
+				}
+
+			}, 5);
+		}
 		callCounter++;
 	}
 
@@ -180,6 +275,19 @@ public class QueringScrollTest extends QueringTest {
 		Rowset dlinaRowset = state.EDINICI_IZMERENIJA_PO_VELICHINE.getRowset();
 		dlinaRowset.next();
 		callCounter++;
+		Scheduler.get().scheduleFixedDelay(new RepeatingCommand() {
+
+			@Override
+			public boolean execute() {
+				try {
+					dlinaRowsetNextScrolled();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				return false;
+			}
+
+		}, 5);
 	}
 
 	public void dlinaRowsetNextScrolled() throws Exception {
@@ -192,9 +300,35 @@ public class QueringScrollTest extends QueringTest {
 			if (!dlinaRowset.isAfterLast()) {
 				state.EDINICI_IZMERENIJA_PO_VELICHINE.refreshChildren();
 			}
+			Scheduler.get().scheduleFixedDelay(new RepeatingCommand() {
+
+				@Override
+				public boolean execute() {
+					try {
+						dlinaRowsetNextScrolled();
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					return false;
+				}
+
+			}, 5);
 		} else {
 			Rowset izmRs = state.IZMERJAEMIE_VELICHINI.getRowset();
 			assertTrue(izmRs.next());
+			Scheduler.get().scheduleFixedDelay(new RepeatingCommand() {
+
+				@Override
+				public boolean execute() {
+					try {
+						izmRsNextScrolled();
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					return false;
+				}
+
+			}, 5);
 		}
 		callCounter++;
 	}
@@ -203,12 +337,38 @@ public class QueringScrollTest extends QueringTest {
 		Rowset marksRs = state.MARKI_OBJECTOV_REMONTA.getRowset();
 		marksRs.beforeFirst();
 		callCounter++;
+		Scheduler.get().scheduleFixedDelay(new RepeatingCommand() {
+
+			@Override
+			public boolean execute() {
+				try {
+					marksRsBeforeFirstScrolled();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				return false;
+			}
+
+		}, 5);
 	}
 
 	public void marksRsBeforeFirstScrolled() throws Exception {
 		Rowset marksRs = state.MARKI_OBJECTOV_REMONTA.getRowset();
 		marksRs.next();
 		callCounter++;
+		Scheduler.get().scheduleFixedDelay(new RepeatingCommand() {
+
+			@Override
+			public boolean execute() {
+				try {
+					marksRsNextScrolled();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				return false;
+			}
+
+		}, 5);
 	}
 
 	public void marksRsNextScrolled() throws Exception {
@@ -244,8 +404,22 @@ public class QueringScrollTest extends QueringTest {
 				assertTrue(false);
 			}
 			marksRs.next();
-		} else
+			Scheduler.get().scheduleFixedDelay(new RepeatingCommand() {
+
+				@Override
+				public boolean execute() {
+					try {
+						marksRsNextScrolled();
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					return false;
+				}
+
+			}, 5);
+		} else {
 			marksRs.first();
+		}
 		callCounter++;
 	}
 }

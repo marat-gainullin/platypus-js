@@ -72,8 +72,6 @@ public class AppQueryResponseTest {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         PlatypusResponseWriter bodyWriter = new PlatypusResponseWriter(out);
         resp.accept(bodyWriter);
-
-        
         
         resp = new AppQueryResponse(IDGenerator.genID(), null);
         PlatypusResponseReader bodyReader = new PlatypusResponseReader(out.toByteArray());
@@ -82,9 +80,9 @@ public class AppQueryResponseTest {
         assertEquals(entityId, resp.getAppQuery().getEntityId());
         assertEquals(query.getFields().getFieldsCount(), resp.getAppQuery().getFields().getFieldsCount());
         for(int i=1;i<=query.getFields().getFieldsCount();i++)
-            assertEquals(query.getFields().get(i), resp.getAppQuery().getFields().get(i));
+            assertTrue(query.getFields().get(i).isEqual(resp.getAppQuery().getFields().get(i)));
         assertEquals(query.getParameters().getFieldsCount(), resp.getAppQuery().getParameters().getFieldsCount());
         for(int i=1;i<=query.getParameters().getFieldsCount();i++)
-            assertEquals(query.getParameters().get(i), resp.getAppQuery().getParameters().get(i));
+            assertTrue(query.getParameters().get(i).isEqual(resp.getAppQuery().getParameters().get(i)));
     }
 }

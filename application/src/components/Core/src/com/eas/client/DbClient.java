@@ -7,6 +7,7 @@ package com.eas.client;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.dataflow.FlowProvider;
+import com.bearsoft.rowset.metadata.Fields;
 import com.eas.client.login.PrincipalHost;
 import com.eas.client.queries.SqlCompiledQuery;
 import com.eas.client.queries.SqlQuery;
@@ -46,12 +47,13 @@ public interface DbClient extends Client {
      * @param aDatabaseId Connection identifier. May be null for metabase.
      * @param aSessionId Session identifier. May be null for system session.
      * @param aEntityId Data entity identifier. Table name or query identifier. Table name is allowed in two-tier mode only.
-     * @param aSqlClause query for execute as select.
+     * @param aSqlClause Query text for execute as select.
+     * @param aExpectedFields Fields instance to be used as rowset's fields. If it is null, than database driven fields will be used as rowset's fields.
      * @param aReadRoles A set of roles allowed to select data with this provider.
      * @param aWriteRoles A set of roles allowed to update data with this provider.
      * @return Data flow provider instance created.
      */
-    public FlowProvider createFlowProvider(String aDatabaseId, String aSessionId, String aEntityId, String aSqlClause, Set<String> aReadRoles, Set<String> aWriteRoles) throws Exception;
+    public FlowProvider createFlowProvider(String aDatabaseId, String aSessionId, String aEntityId, String aSqlClause, Fields aExpectedFields, Set<String> aReadRoles, Set<String> aWriteRoles) throws Exception;
 
     public List<Change> getChangeLog(String aDatabaseId, String aSessionId);
     

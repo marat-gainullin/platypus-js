@@ -627,7 +627,7 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
                 if (row != null) {
                     rowIds = row.getPKValues();
                 }
-                Object retValue = handleFunction.call(cx, eventThis != null ? eventThis : scriptScope, eventThis != null ? eventThis : scriptScope, new Object[]{new CellRenderEvent(eventThis != null ? eventThis : scriptScope, rowIds != null && rowIds.length > 0 ? (rowIds.length > 1 ? rowIds : rowIds[0]) : null, null, cd, row != null ? RowHostObject.publishRow(scriptScope, row) : null)});
+                Object retValue = handleFunction.call(cx, eventThis != null ? eventThis : scriptScope, eventThis != null ? eventThis : scriptScope, new Object[]{new CellRenderEvent(eventThis != null ? eventThis : scriptScope, rowIds != null && rowIds.length > 0 ? (rowIds.length > 1 ? rowIds : rowIds[0]) : null, null, cd, row != null ? RowHostObject.publishRow(scriptScope, row, rsEntity) : null)});
                 if (Boolean.TRUE.equals(retValue)) {
                     try {
                         cd.data = ScriptUtils.js2Java(cd.data);
@@ -725,7 +725,7 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
     }
 
     protected void fireEditingStopped() {
-        for (CellEditorListener l : editorListeners) {
+        for (CellEditorListener l : editorListeners.toArray(new CellEditorListener[]{})) {
             if (l != null) {
                 l.editingStopped(new ChangeEvent(this));
             }
@@ -733,7 +733,7 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
     }
 
     protected void fireEditingCancelled() {
-        for (CellEditorListener l : editorListeners) {
+        for (CellEditorListener l : editorListeners.toArray(new CellEditorListener[]{})) {
             if (l != null) {
                 l.editingCanceled(new ChangeEvent(this));
             }
@@ -1182,8 +1182,9 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
     }
 
     @Override
-    public void setOnSelect(Function aHandler) {
+    public void setOnSelect(Function aHandler) throws Exception {
         selectFunction = aHandler;
+        createFieldExtraEditingControls();
     }
 
     @Override

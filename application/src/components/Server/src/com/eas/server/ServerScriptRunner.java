@@ -22,7 +22,7 @@ public class ServerScriptRunner extends ScriptRunner {
     private PlatypusServerCore serverCore;
     private Session creationSession;
 
-    public ServerScriptRunner(PlatypusServerCore aServerCore, Session aCreationSession, String aModuleId, ScriptableObject aScope, PrincipalHost aPrincipalHost, CompiledScriptDocumentsHost aCompiledScriptDocumentsHost, Object[] args) throws Exception {
+    public ServerScriptRunner(PlatypusServerCore aServerCore, Session aCreationSession, String aModuleId, Scriptable aScope, PrincipalHost aPrincipalHost, CompiledScriptDocumentsHost aCompiledScriptDocumentsHost, Object[] args) throws Exception {
         super(aModuleId, aServerCore.getDatabasesClient(), aScope, aPrincipalHost, aCompiledScriptDocumentsHost, args);
         serverCore = aServerCore;
         creationSession = aCreationSession;

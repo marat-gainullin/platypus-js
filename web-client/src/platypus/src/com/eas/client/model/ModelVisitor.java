@@ -20,6 +20,8 @@ public interface ModelVisitor {
     public void visit(ParametersEntity entity);
 
     public void visit(Relation relation);
+    
+    public void visit(ReferenceRelation relation);    
 
     public void visit(Field aField);
 }

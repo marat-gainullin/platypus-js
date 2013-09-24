@@ -2,10 +2,13 @@ package com.eas.client.model.interacting.quering;
 
 import com.bearsoft.rowset.Rowset;
 import com.eas.client.Utils;
+import com.eas.client.Utils.JsObject;
 import com.eas.client.model.EntityDataListener;
 import com.eas.client.model.interacting.filtering.FilteringTest;
 import com.eas.client.model.store.XmlDom2Model;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 import com.google.gwt.xml.client.XMLParser;
 
 public class QueringModelStructureTest extends QueringTest {
@@ -36,33 +39,33 @@ public class QueringModelStructureTest extends QueringTest {
 			izmVelRequeriedCounter : 0,
 			izmVelRequeried : function() {
 				publishedModule.izmVelRequeriedCounter++;
-				if (publishedModule.izmVelRequeriedCounter == 1) {
-					aTest.@com.eas.client.model.interacting.quering.QueringModelStructureTest::validateQueringModelStructure()();
-				}
+//				if (publishedModule.izmVelRequeriedCounter == 1) {
+//					aTest.@com.eas.client.model.interacting.quering.QueringModelStructureTest::validateQueringModelStructure()();
+//				}
 			},
 			edIzmPoVelRequeriedCounter : 0,
 			edIzmPoVelRequeried : function() {
 				publishedModule.edIzmPoVelRequeriedCounter++;
-				if (publishedModule.edIzmPoVelRequeriedCounter == 2) {
-					aTest.@com.eas.client.model.interacting.quering.QueringModelStructureTest::izmVelBeforeFirstScrolled()();
-				} else if (publishedModule.edIzmPoVelRequeriedCounter >= 3 && publishedModule.edIzmPoVelRequeriedCounter <= 16) {
-					aTest.@com.eas.client.model.interacting.quering.QueringModelStructureTest::izmVelNextScrolled()();
-				} else if (publishedModule.edIzmPoVelRequeriedCounter == 17) {
-					aTest.@com.eas.client.model.interacting.quering.QueringModelStructureTest::izmVelFirstScrolled()();
-				} else if (publishedModule.edIzmPoVelRequeriedCounter == 18) {
-					aTest.@com.eas.client.model.interacting.quering.QueringModelStructureTest::izmVelBeforeFirstScrolled1()();
-				} else if (publishedModule.edIzmPoVelRequeriedCounter >= 19 && publishedModule.edIzmPoVelRequeriedCounter <= 32) {
-					aTest.@com.eas.client.model.interacting.quering.QueringModelStructureTest::izmVelNextScrolled1()();
-				}
+//				if (publishedModule.edIzmPoVelRequeriedCounter == 2) {
+//					aTest.@com.eas.client.model.interacting.quering.QueringModelStructureTest::izmVelBeforeFirstScrolled()();
+//				} else if (publishedModule.edIzmPoVelRequeriedCounter >= 3 && publishedModule.edIzmPoVelRequeriedCounter <= 16) {
+//					aTest.@com.eas.client.model.interacting.quering.QueringModelStructureTest::izmVelNextScrolled()();
+//				} else if (publishedModule.edIzmPoVelRequeriedCounter == 17) {
+//					aTest.@com.eas.client.model.interacting.quering.QueringModelStructureTest::izmVelFirstScrolled()();
+//				} else if (publishedModule.edIzmPoVelRequeriedCounter == 18) {
+//					aTest.@com.eas.client.model.interacting.quering.QueringModelStructureTest::izmVelBeforeFirstScrolled1()();
+//				} else if (publishedModule.edIzmPoVelRequeriedCounter >= 19 && publishedModule.edIzmPoVelRequeriedCounter <= 32) {
+//					aTest.@com.eas.client.model.interacting.quering.QueringModelStructureTest::izmVelNextScrolled1()();
+//				}
 			},
 			edIzmPoVel1RequeriedCounter : -10000,
 			edIzmPoVel1Requeried : function() {
 				publishedModule.edIzmPoVel1RequeriedCounter++;
-				if (publishedModule.edIzmPoVel1RequeriedCounter == 2) {
-					aTest.@com.eas.client.model.interacting.quering.QueringModelStructureTest::edIzmPoVelBeforeFirstScrolled()();
-				} else if (publishedModule.edIzmPoVel1RequeriedCounter >= 3) {
-					aTest.@com.eas.client.model.interacting.quering.QueringModelStructureTest::edIzmPoVelNextScrolled()();
-				}
+//				if (publishedModule.edIzmPoVel1RequeriedCounter == 2) {
+//					aTest.@com.eas.client.model.interacting.quering.QueringModelStructureTest::edIzmPoVelBeforeFirstScrolled()();
+//				} else if (publishedModule.edIzmPoVel1RequeriedCounter >= 3) {
+//					aTest.@com.eas.client.model.interacting.quering.QueringModelStructureTest::edIzmPoVelNextScrolled()();
+//				}
 			}
 		};
 		return publishedModule;
@@ -82,11 +85,24 @@ public class QueringModelStructureTest extends QueringTest {
 			module = publish(this);
 			
 			model = XmlDom2Model.transform(XMLParser.parse(DATAMODEL_QUERING_RELATIONS), module);
-			model.getEntityById(ENTITY_IZMERJAEMIE_VELICHINI_ID).setOnRequeried(Utils.lookupProperty(module, "izmVelRequeried"));
-			model.getEntityById(ENTITY_EDINICI_IZMERENIJA_PO_VELICHINE_ID).setOnRequeried(Utils.lookupProperty(module, "edIzmPoVelRequeried"));
-			model.getEntityById(ENTITY_EDINICI_IZMERENIJA_PO_VELICHINE_1_ID).setOnRequeried(Utils.lookupProperty(module, "edIzmPoVel1Requeried"));
+			model.getEntityById(ENTITY_IZMERJAEMIE_VELICHINI_ID).setOnRequeried(module.<JsObject>cast().getJs("izmVelRequeried"));
+			model.getEntityById(ENTITY_EDINICI_IZMERENIJA_PO_VELICHINE_ID).setOnRequeried(module.<JsObject>cast().getJs("edIzmPoVelRequeried"));
+			model.getEntityById(ENTITY_EDINICI_IZMERENIJA_PO_VELICHINE_1_ID).setOnRequeried(module.<JsObject>cast().getJs("edIzmPoVel1Requeried"));
 			model.publish(module);
 			model.setRuntime(true);
+			Scheduler.get().scheduleFixedDelay(new RepeatingCommand(){
+
+				@Override
+                public boolean execute() {
+					try {
+						validateQueringModelStructure();						
+                    } catch (Exception e) {
+	                    e.printStackTrace();
+                    }
+	                return false;
+                }
+				
+			}, 500);
 		} catch (Exception ex) {
 			fail(ex.getMessage());
 			throw ex;
@@ -114,6 +130,19 @@ public class QueringModelStructureTest extends QueringTest {
 		dataListener2.reset();
 		izmVelRowset.beforeFirst();
 		callCounter++;
+		Scheduler.get().scheduleFixedDelay(new RepeatingCommand(){
+
+			@Override
+            public boolean execute() {
+				try {
+					izmVelBeforeFirstScrolled();						
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return false;
+            }
+			
+		}, 5);
 	}
 
 	public void izmVelBeforeFirstScrolled() throws Exception {
@@ -122,6 +151,19 @@ public class QueringModelStructureTest extends QueringTest {
 		dataListener2.reset();
 		izmVelRowset.next();
 		callCounter++;
+		Scheduler.get().scheduleFixedDelay(new RepeatingCommand(){
+
+			@Override
+            public boolean execute() {
+				try {
+					izmVelNextScrolled();						
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return false;
+            }
+			
+		}, 5);
 	}
 
 	public void izmVelNextScrolled() throws Exception {
@@ -141,11 +183,37 @@ public class QueringModelStructureTest extends QueringTest {
 			dataListener1.reset();
 			dataListener2.reset();
 			izmVelRowset.next();
+			Scheduler.get().scheduleFixedDelay(new RepeatingCommand(){
+
+				@Override
+	            public boolean execute() {
+					try {
+						izmVelNextScrolled();						
+	                } catch (Exception e) {
+	                    e.printStackTrace();
+	                }
+	                return false;
+	            }
+				
+			}, 5);
 		} else {
 			dataListener.reset();
 			dataListener1.reset();
 			dataListener2.reset();
 			izmVelRowset.first();
+			Scheduler.get().scheduleFixedDelay(new RepeatingCommand(){
+
+				@Override
+	            public boolean execute() {
+					try {
+						izmVelFirstScrolled();						
+	                } catch (Exception e) {
+	                    e.printStackTrace();
+	                }
+	                return false;
+	            }
+				
+			}, 5);
 		}
 		callCounter++;
 	}
@@ -157,6 +225,19 @@ public class QueringModelStructureTest extends QueringTest {
 		dataListener2.reset();
 		izmVelRowset.beforeFirst();
 		callCounter++;
+		Scheduler.get().scheduleFixedDelay(new RepeatingCommand(){
+
+			@Override
+            public boolean execute() {
+				try {
+					izmVelBeforeFirstScrolled1();						
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return false;
+            }
+			
+		}, 5);
 	}
 
 	public void izmVelBeforeFirstScrolled1() throws Exception {
@@ -164,6 +245,19 @@ public class QueringModelStructureTest extends QueringTest {
 		dataListener2.reset();
 		izmVelRowset.next();
 		callCounter++;
+		Scheduler.get().scheduleFixedDelay(new RepeatingCommand(){
+
+			@Override
+            public boolean execute() {
+				try {
+					izmVelNextScrolled1();						
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return false;
+            }
+			
+		}, 5);
 	}
 
 	public void izmVelNextScrolled1() throws Exception {
@@ -179,12 +273,38 @@ public class QueringModelStructureTest extends QueringTest {
 					dataListener2.reset();
 					edRowset.beforeFirst();
 					module.setEdIzmPoVel1RequeriedCounter(0);
+					Scheduler.get().scheduleFixedDelay(new RepeatingCommand(){
+
+						@Override
+			            public boolean execute() {
+							try {
+								edIzmPoVelBeforeFirstScrolled();						
+			                } catch (Exception e) {
+			                    e.printStackTrace();
+			                }
+			                return false;
+			            }
+						
+					}, 5);
 					return;
 				}
 			}
 			dataListener1.reset();
 			dataListener2.reset();
 			izmVelRowset.next();
+			Scheduler.get().scheduleFixedDelay(new RepeatingCommand(){
+
+				@Override
+	            public boolean execute() {
+					try {
+						izmVelNextScrolled1();						
+	                } catch (Exception e) {
+	                    e.printStackTrace();
+	                }
+	                return false;
+	            }
+				
+			}, 5);
 		} else {
 			dataListener1.reset();
 			dataListener2.reset();
@@ -199,6 +319,19 @@ public class QueringModelStructureTest extends QueringTest {
 		dataListener2.reset();
 		edRowset.next();
 		callCounter++;
+		Scheduler.get().scheduleFixedDelay(new RepeatingCommand(){
+
+			@Override
+            public boolean execute() {
+				try {
+					edIzmPoVelNextScrolled();						
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return false;
+            }
+			
+		}, 5);
 	}
 
 	public void edIzmPoVelNextScrolled() throws Exception {
@@ -222,14 +355,37 @@ public class QueringModelStructureTest extends QueringTest {
 				// re-query.
 				state.EDINICI_IZMERENIJA_PO_VELICHINE.refreshChildren();
 			}
+			Scheduler.get().scheduleFixedDelay(new RepeatingCommand(){
+
+				@Override
+	            public boolean execute() {
+					try {
+						edIzmPoVelNextScrolled();						
+	                } catch (Exception e) {
+	                    e.printStackTrace();
+	                }
+	                return false;
+	            }
+				
+			}, 5);
 		} else {
 			module.setEdIzmPoVel1RequeriedCounter(-10000);
 			dataListener1.reset();
 			dataListener2.reset();
-			edRowset.first();
-			dataListener1.reset();
-			dataListener2.reset();
 			izmVelRowset.next();
+			Scheduler.get().scheduleFixedDelay(new RepeatingCommand(){
+
+				@Override
+	            public boolean execute() {
+					try {
+						izmVelNextScrolled1();
+	                } catch (Exception e) {
+	                    e.printStackTrace();
+	                }
+	                return false;
+	            }
+				
+			}, 5);
 		}
 		callCounter++;
 	}

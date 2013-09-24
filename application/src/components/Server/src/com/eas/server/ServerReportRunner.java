@@ -26,7 +26,7 @@ public class ServerReportRunner extends ServerScriptRunner {
     private byte[] template;
     private Function onBeforRender;
     
-     public ServerReportRunner(PlatypusServerCore aServerCore, Session aCreationSession, String aModuleId, ScriptableObject aScope, PrincipalHost aPrincipalHost, CompiledScriptDocumentsHost aCompiledScriptDocumentsHost, Object[] args) throws Exception {
+     public ServerReportRunner(PlatypusServerCore aServerCore, Session aCreationSession, String aModuleId, Scriptable aScope, PrincipalHost aPrincipalHost, CompiledScriptDocumentsHost aCompiledScriptDocumentsHost, Object[] args) throws Exception {
         super(aServerCore, aCreationSession, aModuleId, aScope, aPrincipalHost, aCompiledScriptDocumentsHost, args);
         assert aCompiledScriptDocumentsHost != null;
         ScriptDocument scriptDoc = aCompiledScriptDocumentsHost.getDocuments().compileScriptDocument(appElementId);

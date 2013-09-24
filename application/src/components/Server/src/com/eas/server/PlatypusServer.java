@@ -25,7 +25,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.net.ssl.SSLContext;
 import org.apache.mina.core.service.IoAcceptor;
-import org.apache.mina.core.service.IoHandler;
 import org.apache.mina.core.session.IoEventType;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.apache.mina.filter.executor.ExecutorFilter;
@@ -41,8 +40,8 @@ public class PlatypusServer extends PlatypusServerCore {
 
     public final static int DEFAULT_PORT = 8500;
     public final static String DEFAULT_PROTOCOL = "platypus";
-    public final static int DEFAULT_CLIENT_THREADS = 3;
-    public final static int DEFAULT_WORKER_THREADS = 3;
+    //public final static int DEFAULT_CLIENT_THREADS = 3;
+    //public final static int DEFAULT_WORKER_THREADS = 3;
     protected SSLContext sslContext;
     public final static String HTTP_PROTOCOL = "http";
     public final static String HTTPS_PROTOCOL = "https";
@@ -50,8 +49,11 @@ public class PlatypusServer extends PlatypusServerCore {
     private final ExecutorService bgTasksExecutor;
     private final InetSocketAddress[] listenAddresses;
     private final Map<Integer, String> portsProtocols;
-    
-    public PlatypusServer(DatabasesClient aDatabasesClient, SSLContext aSslContext, InetSocketAddress[] aAddresses, Map<Integer, String> aPortsProtocols, Set<String> aTasks, String aDefaultAppElement) throws Exception {
+    private final Map<Integer, Integer> portsSessionIdleTimeouts;
+    private final Map<Integer, Integer> portsSessionIdleCheckIntervals;
+    private final Map<Integer, Integer> portsNumWorkerThreads;
+
+    public PlatypusServer(DatabasesClient aDatabasesClient, SSLContext aSslContext, InetSocketAddress[] aAddresses, Map<Integer, String> aPortsProtocols, Map<Integer, Integer> aPortsSessionIdleTimeouts, Map<Integer, Integer> aPortsSessionIdleCheckInterval, Map<Integer, Integer> aPortsNumWorkerThreads, Set<String> aTasks, String aDefaultAppElement) throws Exception {
         super(aDatabasesClient, aTasks, aDefaultAppElement);
 
         if (aAddresses == null) {
@@ -62,6 +64,9 @@ public class PlatypusServer extends PlatypusServerCore {
         bgTasksExecutor = Executors.newCachedThreadPool();
         listenAddresses = aAddresses;
         portsProtocols = aPortsProtocols;
+        portsSessionIdleTimeouts = aPortsSessionIdleTimeouts;
+        portsSessionIdleCheckIntervals = aPortsSessionIdleCheckInterval;
+        portsNumWorkerThreads = aPortsNumWorkerThreads;
         sslContext = aSslContext;
     }
 
@@ -143,7 +148,20 @@ public class PlatypusServer extends PlatypusServerCore {
         if (com.eas.sensors.positioning.AcceptorsFactory.isSupported(protocol)) {
             String acceptorModuleId = findAcceptorModule(protocol);
             if (acceptorModuleId != null) {
-                IoAcceptor sensorAcceptor = com.eas.sensors.positioning.AcceptorsFactory.create(protocol, new com.eas.server.handlers.PositioningPacketReciever(this, acceptorModuleId));
+                Integer numWorkerThreads = portsNumWorkerThreads != null ? portsNumWorkerThreads.get(s.getPort()) : null;
+                if (numWorkerThreads == null || numWorkerThreads == 0) {
+                    numWorkerThreads = DEFAULT_EXECUTOR_POOL_SIZE;
+                }
+                Integer sessionIdleTime = portsSessionIdleTimeouts != null ? portsSessionIdleTimeouts.get(s.getPort()) : null;
+                if (sessionIdleTime == null || sessionIdleTime == 0) {
+                    sessionIdleTime = 360;
+                }
+                Integer sessionIdleCheckInterval = portsSessionIdleCheckIntervals != null ? portsSessionIdleCheckIntervals.get(s.getPort()) : null;
+                if (sessionIdleCheckInterval == null || sessionIdleCheckInterval == 0) {
+                    sessionIdleCheckInterval = 360;
+                }
+
+                IoAcceptor sensorAcceptor = com.eas.sensors.positioning.AcceptorsFactory.create(protocol, numWorkerThreads, sessionIdleTime, sessionIdleCheckInterval, new com.eas.server.handlers.PositioningPacketReciever(this, acceptorModuleId));
                 if (sensorAcceptor != null) {
                     sensorAcceptor.bind(s);
                     logger.info(String.format("\nListening on %s; protocol: %s\n", s.toString(), protocol));
@@ -172,14 +190,33 @@ public class PlatypusServer extends PlatypusServerCore {
 
     private void initializeAndBindPlatypusAcceptor(InetSocketAddress s) throws IOException, Exception {
         final SslFilter sslFilter = new SslFilter(sslContext);
-        final ExecutorService executor = new OrderedThreadPoolExecutor(DEFAULT_EXECUTOR_POOL_SIZE);
+        
+        Integer numWorkerThreads = portsNumWorkerThreads != null ? portsNumWorkerThreads.get(s.getPort()) : null;
+        if (numWorkerThreads == null || numWorkerThreads == 0) {
+            numWorkerThreads = DEFAULT_EXECUTOR_POOL_SIZE;
+        }
+        
+        final ExecutorService executor = new OrderedThreadPoolExecutor(numWorkerThreads);
 
         final IoAcceptor acceptor = new NioSocketAcceptor();
         acceptor.getFilterChain().addLast("executor", new ExecutorFilter(executor, IoEventType.EXCEPTION_CAUGHT,
                 IoEventType.MESSAGE_RECEIVED, IoEventType.MESSAGE_SENT, IoEventType.SESSION_CLOSED));
         acceptor.getFilterChain().addLast("encryption", sslFilter);
         acceptor.getFilterChain().addLast("platypusRequestCodec", new ProtocolCodecFilter(new ResponseEncoder(), new RequestDecoder()));
-        acceptor.setHandler((IoHandler) new PlatypusRequestsHandler(this));
+        PlatypusRequestsHandler handler = new PlatypusRequestsHandler(this);
+        acceptor.setHandler(handler);
+
+        Integer sessionIdleTime = portsSessionIdleTimeouts != null ? portsSessionIdleTimeouts.get(s.getPort()) : null;
+        if (sessionIdleTime == null || sessionIdleTime == 0) {
+            sessionIdleTime = PlatypusRequestsHandler.SESSION_TIME_OUT;
+        }
+        Integer sessionIdleCheckInterval = portsSessionIdleCheckIntervals != null ? portsSessionIdleCheckIntervals.get(s.getPort()) : null;
+        if (sessionIdleCheckInterval == null || sessionIdleCheckInterval == 0) {
+            sessionIdleCheckInterval = PlatypusRequestsHandler.IDLE_TIME_EVENT;
+        }
+
+        handler.setSessionIdleCheckInterval(sessionIdleCheckInterval);
+        handler.setSessionIdleTime(sessionIdleTime);
 
         acceptor.bind(s);
 

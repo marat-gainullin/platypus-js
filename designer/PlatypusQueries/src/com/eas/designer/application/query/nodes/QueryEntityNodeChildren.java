@@ -4,10 +4,11 @@
  */
 package com.eas.designer.application.query.nodes;
 
+import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.eas.client.model.Entity;
-import com.eas.designer.explorer.model.nodes.EntityNodeChildren;
-import com.eas.designer.explorer.model.nodes.FieldNode;
+import com.eas.designer.datamodel.nodes.EntityNodeChildren;
+import com.eas.designer.datamodel.nodes.FieldNode;
 import org.openide.awt.UndoRedo;
 import org.openide.nodes.Node;
 import org.openide.util.Lookup;
@@ -16,26 +17,26 @@ import org.openide.util.Lookup;
  *
  * @author vv
  */
-public class QueryEntityNodeChildren extends EntityNodeChildren {
+public class QueryEntityNodeChildren extends EntityNodeChildren<EntityNodeChildren.EntityFieldKey> {
 
     public QueryEntityNodeChildren(Entity anEnity, UndoRedo.Manager aUndoReciever, Lookup aLookup) {
         super(anEnity, aUndoReciever, aLookup);
     }
 
     @Override
-    protected Node[] createNodes(Object key) {
-        if (key instanceof EntityFieldKey) {
-            EntityFieldKey efk = (EntityFieldKey) key;
-            Node node;
-            if (efk.field instanceof Parameter) {
-                node = new QueryModelParametersNode((Parameter) efk.field, lookup);
-            } else {
-                node = new FieldNode(efk.field, lookup);
-            }
-            return new Node[]{node};
+    protected Node[] createNodes(EntityFieldKey key) {
+        Node node;
+        if (key.field instanceof Parameter) {
+            node = new QueryModelParametersNode((Parameter) key.field, lookup);
         } else {
-            return null;
+            node = new FieldNode(key.field, lookup);
         }
-
+        return new Node[]{node};
     }
+
+    @Override
+    protected EntityFieldKey createKey(Field aField) {
+        return new EntityFieldKey(aField);
+    }
+
 }

@@ -6,6 +6,7 @@ package com.eas.designer.explorer.project;
 
 import com.eas.client.AppCache;
 import com.eas.client.cache.FilesAppCache;
+import com.eas.designer.application.project.PlatypusProject;
 import com.eas.designer.explorer.j2ee.PlatypusWebModuleManager;
 import java.io.IOException;
 import java.util.Arrays;
@@ -34,6 +35,7 @@ public class PlatypusProjectActions implements ActionProvider {
     public static final String COMMAND_IMPORT = "import"; // NOI18N
     public static final String COMMAND_CONNECT = "connect-to-db"; // NOI18N
     public static final String COMMAND_DISCONNECT = "disconnect-from-db"; // NOI18N
+    public static final String COMMAND_CLEAN_AND_RUN = "clean-web-and-run"; // NOI18N
     /**
      * Some routine global actions for which we can supply a display name. These
      * are IDE-specific.
@@ -49,10 +51,11 @@ public class PlatypusProjectActions implements ActionProvider {
             COMMAND_IMPORT,
             COMMAND_CONNECT,
             COMMAND_DISCONNECT,
+            COMMAND_CLEAN_AND_RUN,
             COMMAND_CLEAN));
     protected PlatypusProject project;
 
-    public PlatypusProjectActions(PlatypusProject aProject) {
+    public PlatypusProjectActions(PlatypusProjectImpl aProject) {
         super();
         project = aProject;
     }
@@ -79,6 +82,10 @@ public class PlatypusProjectActions implements ActionProvider {
                     DefaultProjectOperations.performDefaultMoveOperation(project);
                     break;
                 case COMMAND_RUN:
+                    ProjectRunner.run(project, project.getSettings().getAppSettings().getRunElement());
+                    break;
+                case COMMAND_CLEAN_AND_RUN:
+                    clean();
                     ProjectRunner.run(project, project.getSettings().getAppSettings().getRunElement());
                     break;
                 case COMMAND_DEBUG:
@@ -125,7 +132,7 @@ public class PlatypusProjectActions implements ActionProvider {
 
     private void deploy() {
         if (project.isDbConnected()) {
-            RequestProcessor.Task deployTask = project.RP.create(new Runnable() {
+            RequestProcessor.Task deployTask = project.getRequestProcessor().create(new Runnable() {
                 @Override
                 public void run() {
                     InputOutput io = project.getOutputWindowIO();
@@ -149,7 +156,7 @@ public class PlatypusProjectActions implements ActionProvider {
 
     private void importApplication() {
         if (project.isDbConnected()) {
-            RequestProcessor.Task importTask = project.RP.create(new Runnable() {
+            RequestProcessor.Task importTask = project.getRequestProcessor().create(new Runnable() {
                 @Override
                 public void run() {
                     InputOutput io = project.getOutputWindowIO();

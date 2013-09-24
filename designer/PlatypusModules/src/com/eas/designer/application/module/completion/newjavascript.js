@@ -13,7 +13,7 @@ function f(newNode, refNode) { }
 f();
 
 var m1 = new Module(3546546546554);
-const sm1 = new ServerModule(3546546546554);
+var sm1 = new ServerModule(3546546546554);
 var f1 = new Form(3546546546554);
 var r1 = new Report(3546546546554);
 

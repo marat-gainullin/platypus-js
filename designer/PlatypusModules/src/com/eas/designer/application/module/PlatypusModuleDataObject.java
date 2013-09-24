@@ -15,9 +15,9 @@ import com.eas.designer.application.module.completion.ModuleCompletionContext;
 import com.eas.designer.application.module.events.ApplicationModuleEvents;
 import com.eas.designer.application.module.nodes.ApplicationModelNodeChildren;
 import com.eas.designer.application.module.parser.JsParser;
+import com.eas.designer.application.project.PlatypusProject;
 import com.eas.designer.explorer.PlatypusDataObject;
-import com.eas.designer.explorer.model.nodes.ModelNode;
-import com.eas.designer.explorer.project.PlatypusProject;
+import com.eas.designer.datamodel.nodes.ModelNode;
 import com.eas.xml.dom.Source2XmlDom;
 import com.eas.xml.dom.XmlDom2String;
 import java.io.IOException;
@@ -156,12 +156,12 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
             modelNode = createModelNode();
         }
     }
-    
+
     protected ModelNode createModelNode() {
         return new ModelNode<>(new ApplicationModelNodeChildren(model,
-                    getLookup().lookup(ApplicationModuleEvents.class),
-                    getLookup().lookup(PlatypusModuleSupport.class).getModelUndo(),
-                    getLookup()), this);
+                getLookup().lookup(ApplicationModuleEvents.class),
+                getLookup().lookup(PlatypusModuleSupport.class).getModelUndo(),
+                getLookup()), this);
     }
 
     public ModelNode<ApplicationDbEntity, ApplicationDbModel> getModelNode() throws Exception {

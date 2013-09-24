@@ -22,7 +22,7 @@ import org.mozilla.javascript.Scriptable;
 
 /**
  *
- * @author kl
+ * @author kl, mg
  */
 public class PieChart extends AbstractChart {
 

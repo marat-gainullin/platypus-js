@@ -24,8 +24,10 @@ import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.CRC32;
@@ -114,7 +116,7 @@ public class FilesAppCache extends AppElementsCache<Client> {
     protected String srcPathName;
     protected Thread watchDog;
     protected Map<WatchKey, Path> watchKey2Directory = new HashMap<>();
-    protected Map<String, String> id2Path = new HashMap<>();
+    protected Map<String, Set<String>> id2Paths = new HashMap<>();
     protected Map<String, String> path2Id = new HashMap<>();
     protected Map<String, AppElementFiles> families = new HashMap<>();
     protected WatchService service;
@@ -203,7 +205,8 @@ public class FilesAppCache extends AppElementsCache<Client> {
 
     @Override
     protected synchronized ApplicationElement achieveAppElement(String aId) throws Exception {
-        String familyPath = id2Path.get(aId);
+        Set<String> familyPaths = id2Paths.get(aId);
+        String familyPath = familyPaths != null && !familyPaths.isEmpty() ? familyPaths.iterator().next() : null;
         if (familyPath != null) {
             AppElementFiles family = families.get(familyPath);
             if (family != null && family.getAppElementType() != null) {
@@ -315,10 +318,22 @@ public class FilesAppCache extends AppElementsCache<Client> {
                 Integer type2 = family.getAppElementType();
                 String id2 = type2 != null ? family.getAppElementId(type2) : null;
                 // remove old values
-                id2Path.remove(path2Id.remove(familyPath));
+                String familyId = path2Id.remove(familyPath);
+                Set<String> paths = id2Paths.get(familyId);
+                if (paths != null) {
+                    paths.remove(familyPath);
+                    if (paths.isEmpty()) {
+                        id2Paths.remove(familyId);
+                    }
+                }
                 if (id2 != null) {
                     path2Id.put(familyPath, id2);
-                    id2Path.put(id2, familyPath);
+                    Set<String> newPaths = id2Paths.get(id2);
+                    if (newPaths == null) {
+                        newPaths = new HashSet<>();
+                        id2Paths.put(id2, newPaths);
+                    }
+                    newPaths.add(familyPath);
                 }
                 remove(id1);// force the cache to refresh application element's content
                 remove(id2);// force the cache to refresh application element's content
@@ -341,13 +356,19 @@ public class FilesAppCache extends AppElementsCache<Client> {
                         remove(id1);
                     } else {
                         String id = aFile.getPath().substring(srcPathName.length() + 1).replace(File.separatorChar, '/');
-                        assert !id.startsWith("/") : "Cahced platypus application element's id can't start with /. Id from absolute path is not caching subject.";
+                        assert !id.startsWith("/") : "Cached platypus application element's id can't start with /. Id from absolute path is not caching subject.";
                         remove(id);
                     }
                     Integer type2 = family.getAppElementType();
                     if (type2 == null) {
-                        path2Id.remove(familyPath);
-                        id2Path.remove(id1);
+                        String familyId = path2Id.remove(familyPath);
+                        Set<String> paths = id2Paths.get(familyId);
+                        if (paths != null) {
+                            paths.remove(familyPath);
+                            if (paths.isEmpty()) {
+                                id2Paths.remove(familyId);
+                            }
+                        }
                     }
                     if (family.isEmpty()) {
                         families.remove(familyPath);
@@ -369,7 +390,7 @@ public class FilesAppCache extends AppElementsCache<Client> {
         for (String familyPath : families.keySet().toArray(new String[]{})) {
             if (familyPath.startsWith(aPathPrefix)) {
                 String id = path2Id.remove(familyPath);
-                id2Path.remove(id);
+                id2Paths.remove(id);
                 families.remove(familyPath);
             }
         }

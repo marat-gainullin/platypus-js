@@ -16,7 +16,7 @@ import com.eas.client.model.Entity;
 import com.eas.client.model.ModelEditingListener;
 import com.eas.client.model.Relation;
 import com.eas.client.model.dbscheme.FieldsEntity;
-import com.eas.designer.explorer.ModelUndoProvider;
+import com.eas.designer.datamodel.ModelUndoProvider;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.util.List;

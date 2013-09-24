@@ -10,6 +10,7 @@
 package com.eas.client.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -40,11 +41,13 @@ import com.bearsoft.rowset.events.RowsetSortEvent;
 import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.filters.Filter;
 import com.bearsoft.rowset.locators.Locator;
+import com.bearsoft.rowset.locators.RowWrap;
 import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
+import com.bearsoft.rowset.ordering.HashOrderer;
 import com.bearsoft.rowset.sorting.RowsComparator;
 import com.bearsoft.rowset.sorting.SortingCriterion;
 import com.bearsoft.rowset.utils.IDGenerator;
@@ -55,10 +58,10 @@ import com.eas.client.Cancellable;
 import com.eas.client.CancellableCallback;
 import com.eas.client.CancellableCallbackAdapter;
 import com.eas.client.Utils;
+import com.eas.client.Utils.JsObject;
 import com.eas.client.application.Application;
 import com.eas.client.beans.PropertyChangeSupport;
 import com.eas.client.form.api.JSEvents;
-import com.eas.client.model.Model.ScriptEvent;
 import com.eas.client.queries.Query;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
@@ -81,28 +84,30 @@ public class Entity implements RowsetListener {
 	protected JavaScriptObject onAfterDelete;
 	protected JavaScriptObject onRequeried;
 	protected JavaScriptObject onFiltered;
+	protected JavaScriptObject jsPublished;
 	// for runtime
-	protected List<Integer> filterConstraints = new ArrayList();
+	protected List<Integer> filterConstraints = new ArrayList<Integer>();
 	protected Cancellable pending;
-	protected Rowset rowset = null;
-	protected boolean filteredWhileAjusting = false;
-	protected Filter filter = null;
-	protected boolean userFiltering = false;
-	protected Map<List<Integer>, Locator> userLocators = new HashMap();
+	protected boolean valid;
+	protected Rowset rowset;
+	protected boolean filteredWhileAjusting;
+	protected Filter filter;
+	protected boolean userFiltering;
+	protected Map<List<Integer>, Locator> userLocators = new HashMap<List<Integer>, Locator>();
 	// to preserve relation order
 	protected List<Relation> rtInFilterRelations;
-	protected int updatingCounter = 0;
+	protected int updatingCounter;
 	protected String title;
 	protected String name; // data source name
 	protected String entityId = String.valueOf((long) IDGenerator.genId());
 	protected String queryId;
-	protected Model model = null;
-	protected Query query = null;
-	protected Set<Relation> inRelations = new HashSet();
-	protected Set<Relation> outRelations = new HashSet();
+	protected Model model;
+	protected Query query;
+	protected Set<Relation> inRelations = new HashSet<Relation>();
+	protected Set<Relation> outRelations = new HashSet<Relation>();
 	protected Fields fields;
 	protected PropertyChangeSupport changeSupport;
-	protected List<CancellableCallback> abortedCallbacks = new ArrayList();
+	protected Map<String, JavaScriptObject> ormDefinitions = new HashMap<String, JavaScriptObject>();
 
 	public Entity() {
 		super();
@@ -118,6 +123,19 @@ public class Entity implements RowsetListener {
 		this();
 		queryId = aQueryId;
 	}
+
+    public void putOrmDefinition(String aName, JavaScriptObject aDefinition) {
+        if (aName != null && !aName.isEmpty() && aDefinition != null) {
+            if (!ormDefinitions.containsKey(aName)) {
+                ormDefinitions.put(aName, aDefinition);
+            }else
+                Logger.getLogger(Entity.class.getName()).log(Level.WARNING, "ORM property "+aName+" redefinition attempt on entity "+(name != null && !name.isEmpty() ? name : "")+" "+(title != null && !title.isEmpty() ? "[" + title + "]" : "")+".");
+        }
+    }
+
+    public Map<String, JavaScriptObject> getOrmDefinitions() {
+        return Collections.unmodifiableMap(ormDefinitions);
+    }
 
 	public static native void publish(JavaScriptObject aModule, Entity aEntity) throws Exception/*-{
 		var dsName = aEntity.@com.eas.client.model.Entity::getName()();
@@ -625,30 +643,30 @@ public class Entity implements RowsetListener {
 						aEntity.@com.eas.client.model.Entity::endUpdate()();
 					},
 					// 
-					execute : function(aCallback) {
+					execute : function(onSuccess, onFailure) {
 						var oldManual = published.manual;
 						try{
 							published.manual = false;
-							aEntity.@com.eas.client.model.Entity::execute(Lcom/google/gwt/core/client/JavaScriptObject;)(aCallback);
+							aEntity.@com.eas.client.model.Entity::execute(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(onSuccess, onFailure);
 						}finally{
 							published.manual = oldManual;
 						}
 					},
-					executeChildrenOnly : function() {
-						aEntity.@com.eas.client.model.Entity::executeChildren()();
-					},
-					requery : function(aCallback) {
+//					executeChildrenOnly : function() {
+//						aEntity.@com.eas.client.model.Entity::executeChildren()();
+//					},
+					requery : function(onSuccess, onFailure) {
 						var oldManual = published.manual;
 						try{
 							published.manual = false;
-							aEntity.@com.eas.client.model.Entity::refresh(Lcom/google/gwt/core/client/JavaScriptObject;)(aCallback);
+							aEntity.@com.eas.client.model.Entity::refresh(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(onSuccess, onFailure);
 						}finally{
 							published.manual = oldManual;
 						}
 					},
-					requeryChildrenOnly : function() {
-						aEntity.@com.eas.client.model.Entity::refreshChildren()();
-					},
+//					requeryChildrenOnly : function() {
+//						aEntity.@com.eas.client.model.Entity::refreshChildren()();
+//					},
 					// processing interface
 					createLocator : function() {
 						return aEntity.@com.eas.client.model.Entity::createLocator(Lcom/google/gwt/core/client/JavaScriptObject;)(arguments);
@@ -707,7 +725,7 @@ public class Entity implements RowsetListener {
 				Object.defineProperty(published, "inserting",  { get : function(){ return published.isInserting()}});
 				Object.defineProperty(published, "size",       { get : function(){ return published.getSize()}});
 				Object.defineProperty(published, "length",     { get : function(){ return published.getSize()}});
-				Object.defineProperty(published, "rowIndex",   { get : function(){ return published.getRowIndex()}});
+				Object.defineProperty(published, "rowIndex",   { get : function(){ return published.getRowIndex()}, set : function(aValue){ published.setRowIndex(aValue)}});
 				Object.defineProperty(published, "substitute", { get : function(){ return published.getSubstitute()}, set : function(aValue){ published.setSubstitute(aValue)}});
 				
 				Object.defineProperty(published, "md",         { get : function(){ return @com.eas.client.model.Entity::publishFieldsFacade(Lcom/bearsoft/rowset/metadata/Fields;Lcom/eas/client/model/Entity;)(aEntity.@com.eas.client.model.Entity::getFields()(), aEntity) }});
@@ -896,12 +914,19 @@ public class Entity implements RowsetListener {
 					})();
 				}
 				aRow.@com.bearsoft.rowset.Row::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+				aEntity.@com.eas.client.model.Entity::publishOrmProps(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
 			}
 			return published;
 		}else
 			return null;
 	}-*/;
 
+	public void publishOrmProps(JavaScriptObject aTarget){
+		for(Map.Entry<String, JavaScriptObject> entry : ormDefinitions.entrySet()){
+			aTarget.<JsObject>cast().defineProperty(entry.getKey(), entry.getValue());
+		}
+	}
+	
 	public static native JavaScriptObject publishFieldsFacade(Fields aFields, Entity aEntity) throws Exception/*-{
 		if(aFields != null)
 		{
@@ -1129,7 +1154,9 @@ public class Entity implements RowsetListener {
 				if (query != null) {
 					fields = query.getFields();
 					if (fields == null) {
-						fields = getFactFields();
+						if (rowset != null) {
+							fields = rowset.getFields();
+						}
 					}
 					assert fields != null;
 				}
@@ -1232,11 +1259,17 @@ public class Entity implements RowsetListener {
 	}
 
 	public boolean addOutRelation(Relation aRelation) {
-		return outRelations.add(aRelation);
+		if(!(aRelation instanceof ReferenceRelation))
+			return outRelations.add(aRelation);
+		else
+			return false;
 	}
 
 	public boolean addInRelation(Relation aRelation) {
-		return inRelations.add(aRelation);
+		if(!(aRelation instanceof ReferenceRelation))
+			return inRelations.add(aRelation);
+		else
+			return false;
 	}
 
 	public Set<Relation> getInRelations() {
@@ -1248,7 +1281,7 @@ public class Entity implements RowsetListener {
 	}
 
 	public Set<Relation> getInOutRelations() {
-		Set<Relation> lInOutRelations = new HashSet();
+		Set<Relation> lInOutRelations = new HashSet<Relation>();
 		lInOutRelations.addAll(inRelations);
 		lInOutRelations.addAll(outRelations);
 		return lInOutRelations;
@@ -1419,8 +1452,8 @@ public class Entity implements RowsetListener {
 		assert query != null : "Query must present (isManual)";
 		return query.isManual();
 	}
-	
-	public void setManual(boolean aValue){
+
+	public void setManual(boolean aValue) {
 		assert query != null : "Query must present (setManual)";
 		query.setManual(aValue);
 	}
@@ -1433,28 +1466,33 @@ public class Entity implements RowsetListener {
 		return rowset != null;
 	}
 
-	protected Fields getFactFields() throws Exception {
-		if (rowset != null) {
-			return rowset.getFields();
-		}
-		return null;
-	}
-
-	public void refresh(final JavaScriptObject onSuccess) throws Exception {
+	public void refresh(final JavaScriptObject onSuccess, final JavaScriptObject onFailure) throws Exception {
 		refresh(new CancellableCallbackAdapter() {
 			@Override
 			protected void doWork() throws Exception {
 				if (onSuccess != null)
 					Utils.invokeJsFunction(onSuccess);
 			}
-		}, null);
+		}, new Callback<String>(){
+
+			@Override
+            public void run(String aResult) throws Exception {
+				if(onFailure != null)
+					Utils.executeScriptEventVoid(jsPublished, onFailure, aResult);
+            }
+			
+			@Override
+            public void cancel() {
+            }
+		});
 	}
 
 	public void refresh(final CancellableCallback onSuccess, Callback<String> onFailure) throws Exception {
 		if (model != null && model.isRuntime()) {
-			internalExecute(true, onSuccess, onFailure);
+			invalidate();
+			internalExecute(onSuccess, onFailure);
 			/*
-			 * internalExecute(true, new CancellableCallbackAdapter() {
+			 * internalExecute(new CancellableCallbackAdapter() {
 			 * 
 			 * @Override public void doWork() throws Exception {
 			 * onSuccess.run(); internalExecuteChildren(true); } });
@@ -1462,21 +1500,32 @@ public class Entity implements RowsetListener {
 		}
 	}
 
-	public void execute(final JavaScriptObject onSuccess) throws Exception {
+	public void execute(final JavaScriptObject onSuccess, final JavaScriptObject onFailure) throws Exception {
 		execute(new CancellableCallbackAdapter() {
 			@Override
 			protected void doWork() throws Exception {
 				if (onSuccess != null)
 					Utils.invokeJsFunction(onSuccess);
 			}
-		}, null);
+		}, new Callback<String>(){
+
+			@Override
+            public void run(String aResult) throws Exception {
+				if(onFailure != null)
+					Utils.executeScriptEventVoid(jsPublished, onFailure, aResult);
+            }
+			
+			@Override
+            public void cancel() {
+            }
+		});
 	}
 
 	public void execute(final CancellableCallback onSuccess, Callback<String> onFailure) throws Exception {
 		if (model != null && model.isRuntime()) {
-			internalExecute(false, onSuccess, onFailure);
+			internalExecute(onSuccess, onFailure);
 			/*
-			 * internalExecute(false, new CancellableCallbackAdapter() {
+			 * internalExecute(new CancellableCallbackAdapter() {
 			 * 
 			 * @Override public void doWork() throws Exception {
 			 * onSuccess.run(); internalExecuteChildren(false); } });
@@ -1484,77 +1533,69 @@ public class Entity implements RowsetListener {
 		}
 	}
 
-	protected void internalExecute(boolean refresh, final CancellableCallback onSuccess, Callback<String> onFailure) throws Exception {
+	protected void internalExecute(final CancellableCallback onSuccess, final Callback<String> onFailure) throws Exception {
 		if (model != null && model.isRuntime()) {
 			assert query != null : QUERY_REQUIRED;
 			// try to select any data only within non-manual queries
 			// platypus manual queries are:
 			// - insert, update, delete queries;
-			// - stored procedures, witch changes data.
+			// - stored procedures, wich changes data.
 			if (!query.isManual()) {
-				if (refresh) {
-					uninstallUserFiltering();
-				}
 				// There might be entities - parameters values sources, with no
 				// data in theirs rowsets,
 				// so we can't bind query parameters to proper values. In the
 				// such case we initialize
 				// parameters values with RowsetUtils.UNDEFINED_SQL_VALUE
-				/*
-				final Map<String, Object> oldParamValues = new HashMap();
-				for (int i = 1; i <= query.getParameters().getParametersCount(); i++) {
-					Parameter p = query.getParameters().get(i);
-					oldParamValues.put(p.getName(), p.getValue());
-				}
-				*/
 				boolean parametersBinded = bindQueryParameters();
-				if ((rowset == null || refresh || parametersBinded) && (pending == null || parametersBinded)) {
+				if(parametersBinded)
+					invalidate();
+				if(rowset == null)
+					invalidate();
+				if (!isValid()) {
 					// if we have no rowset yet or query parameters values have
 					// been changed ...
 					// or we are forced to refresh the data.
 					// re-query ...
 					uninstallUserFiltering();
-					if (pending != null)
-						pending.cancel();
-					final Cancellable lexecuting = achieveOrRefreshRowset(new CancellableCallbackAdapter() {
+					if (pending != null){
+						Model.NetworkProcess lprocess = model.getProcess();
+						model.setProcess(null);
+						try{
+							pending.cancel();
+							invalidate();
+						}finally{
+							model.setProcess(lprocess);
+						}
+					}
+					pending = achieveOrRefreshRowset(new CancellableCallbackAdapter() {
 
 						@Override
 						public void doWork() throws Exception {
-							assert rowset != null;
-							filterRowset();
-							pending = null;
-							model.pumpEvents();
-							if(!abortedCallbacks.isEmpty()){
-								CancellableCallback[] toCall = abortedCallbacks.toArray(new CancellableCallback[]{});
-								abortedCallbacks.clear();
-								for(CancellableCallback call : toCall)
-									call.run();
-							}
+							assert rowset != null;// pending nulling is done in onRequeried event handler
 							if (onSuccess != null)
 								onSuccess.run();
 						}
-					}, onFailure);
-					pending = new Cancellable() {
+					}, new Callback<String>(){
+						@Override
+						public void run(String aMessage) throws Exception {
+							assert pending != null;
+							pending = null;
+							valid = true;
+							model.terminateProcess(Entity.this, aMessage);
+							if(onFailure != null)
+								onFailure.run(aMessage);
+						}
 
 						@Override
-						public void cancel() {
-							pending = null;
-							/*
-							for (int i = 1; i <= query.getParameters().getParametersCount(); i++) {
-								Parameter p = query.getParameters().get(i);
-								p.setValue(oldParamValues.get(p.getName()));
-								p.setModified(false);
-							}
-							*/
-							lexecuting.cancel();
-							if (onSuccess != null)
-								abortedCallbacks.add(onSuccess);
-						}
-					};
-				} else if (pending == null){
+                        public void cancel() {
+                        }
+					});
+				} else {
 					// There might be a case of only rowset filtering
 					assert rowset != null;
+					assert pending == null;
 					filterRowset();
+					rowset.silentFirst();
 				}
 			}
 		}
@@ -1579,26 +1620,29 @@ public class Entity implements RowsetListener {
 		if (updatingCounter == 0) {
 			Set<Relation> rels = getOutRelations();
 			if (rels != null) {
-				Set<Entity> toExecute = new HashSet();
+				Set<Entity> toExecute = new HashSet<Entity>();
 				for (Relation outRel : rels) {
 					if (outRel != null) {
 						Entity ent = outRel.getRightEntity();
 						if (ent != null) {
+							if(refresh){
+								ent.invalidate();
+							}
 							toExecute.add(ent);
 						}
 					}
 				}
-				model.executeEntities(refresh, toExecute, null);
+				model.executeEntities(toExecute, null, null);
 			}
 		}
 	}
 
-	protected void internalExecuteChildren(boolean refresh, int aOnlyFieldIndex) throws Exception {
+	protected void internalExecuteChildren(int aOnlyFieldIndex) throws Exception {
 		if (updatingCounter == 0) {
 			Set<Relation> rels = getOutRelations();
 			if (rels != null) {
 				Field onlyField = getFields().get(aOnlyFieldIndex);
-				Set<Entity> toExecute = new HashSet();
+				Set<Entity> toExecute = new HashSet<Entity>();
 				for (Relation outRel : rels) {
 					if (outRel != null) {
 						Entity ent = outRel.getRightEntity();
@@ -1607,7 +1651,7 @@ public class Entity implements RowsetListener {
 						}
 					}
 				}
-				model.executeEntities(refresh, toExecute, null);
+				model.executeEntities(toExecute, null, null);
 			}
 		}
 	}
@@ -1731,7 +1775,7 @@ public class Entity implements RowsetListener {
 	protected void validateInFilterRelations() {
 		// never build yet, so build it ...
 		if (rtInFilterRelations == null) {
-			rtInFilterRelations = new ArrayList();
+			rtInFilterRelations = new ArrayList<Relation>();
 			assert rowset != null;
 			Set<Relation> inRels = getInRelations();
 			if (inRels != null) {
@@ -1748,7 +1792,7 @@ public class Entity implements RowsetListener {
 		assert rtInFilterRelations != null;
 		assert rowset != null;
 		if (filter == null && !rtInFilterRelations.isEmpty()) {
-			List<Field> constraints = new ArrayList();
+			List<Field> constraints = new ArrayList<Field>();
 			// enumerate filtering relations ...
 			for (Relation rel : rtInFilterRelations) {
 				assert rel != null && rel.isRightField();
@@ -1854,7 +1898,7 @@ public class Entity implements RowsetListener {
 			}
 		}
 		if (filter != null && !filter.isEmpty() && (filter != rowset.getActiveFilter() || !filter.getKeysetApplied().equals(filterKeySet))) {
-			filter.filterRowset(filterKeySet);
+			filter.filterRowset(filterKeySet);			
 			return true;
 		} else {
 			return false;
@@ -1883,7 +1927,6 @@ public class Entity implements RowsetListener {
 
 	@Override
 	public void rowsetScrolled(RowsetScrollEvent aEvent) {
-		assert pending == null;
 		Rowset eventRowset = aEvent.getRowset();
 		assert eventRowset == rowset;
 		if (aEvent.getNewRowIndex() >= 0 && aEvent.getNewRowIndex() <= eventRowset.size() + 1) {
@@ -1929,7 +1972,7 @@ public class Entity implements RowsetListener {
 		try {
 			boolean assertres = model.isAjusting();
 			assert !assertres;
-			internalExecuteChildren(false, aEvent.getFieldIndex());
+			internalExecuteChildren(aEvent.getFieldIndex());
 			Fields fmdv = getFields();
 			if (fmdv != null) {
 				Field fmd = fmdv.get(aEvent.getFieldIndex());
@@ -2014,7 +2057,6 @@ public class Entity implements RowsetListener {
 	@Override
 	public void rowsetSorted(RowsetSortEvent event) {
 		try {
-			assert pending == null;
 			internalExecuteChildren(false);
 			// call script method
 			JavaScriptObject publishedEvent = JSEvents.publishScriptSourcedEvent(jsPublished);
@@ -2029,17 +2071,27 @@ public class Entity implements RowsetListener {
 	@Override
 	public void rowsetRequeried(RowsetRequeryEvent event) {
 		try {
+			// network response processing
 			assert pending != null;
+			pending = null;// network response must null the pending state before any other script activities will occur.
+			valid = true;
+			filterRowset();// filtering must go here, because of onRequiried script event is an endpoint of the network process. And it expects the data will be processed already before it will be called.
+			// So onFiltered script event goes before onRequeired script event.
+			rowset.silentFirst();
+			//
 			if (jsPublished != null)
 				publishRows(jsPublished);
 			JavaScriptObject publishedEvent = JSEvents.publishScriptSourcedEvent(jsPublished);
 			if (!model.isAjusting()) {
-				if (model.isPending())
-					model.enqueueEvent(new ScriptEvent(jsPublished, this, onRequeried, publishedEvent));
-				else
-					Utils.executeScriptEventVoid(jsPublished, onRequeried, publishedEvent);
+				/*
+				 * if (model.isPending()) model.enqueueEvent(new
+				 * ScriptEvent(jsPublished, this, onRequeried, publishedEvent));
+				 * else
+				 */
+				Utils.executeScriptEventVoid(jsPublished, onRequeried, publishedEvent);
 			}
 			internalExecuteChildren(false);
+			model.terminateProcess(this, null);
 		} catch (Exception ex) {
 			Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
 		}
@@ -2059,10 +2111,12 @@ public class Entity implements RowsetListener {
 			// call script method
 			JavaScriptObject publishedEvent = JSEvents.publishScriptSourcedEvent(jsPublished);
 			if (!model.isAjusting()) {
-				if (model.isPending())
-					model.enqueueEvent(new ScriptEvent(jsPublished, this, onFiltered, publishedEvent));
-				else
-					Utils.executeScriptEventVoid(jsPublished, onFiltered, publishedEvent);
+				/*
+				 * if (model.isPending()) model.enqueueEvent(new
+				 * ScriptEvent(jsPublished, this, onFiltered, publishedEvent));
+				 * else
+				 */
+				Utils.executeScriptEventVoid(jsPublished, onFiltered, publishedEvent);
 			}
 		} catch (Exception ex) {
 			Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
@@ -2117,9 +2171,15 @@ public class Entity implements RowsetListener {
 		visitor.visit(this);
 	}
 
+	public boolean isValid(){
+		return valid;
+	}
+	
+	public void invalidate(){
+		valid = false;
+	}
+	
 	public Rowset getRowset() {
-		//if(rowset == null)// leads to messages bloat
-		//	Logger.getLogger(Entity.class.getName()).log(Level.WARNING, "Model entity ["+getTitle()+"] using while data not loaded detected.");
 		return rowset;
 	}
 
@@ -2152,37 +2212,37 @@ public class Entity implements RowsetListener {
 	}
 
 	public void setSubstitute(Entity aSubstitute) {
-		if(aSubstitute != this){
+		if (aSubstitute != this) {
 			substitute = aSubstitute;
 		}
 	}
 
-    public Object getSubstituteRowsetObject(String aFieldName) throws Exception {
-        Entity lsubstitute = substitute;
-        while (lsubstitute != null) {
-            Rowset sRowset = lsubstitute.getRowset();
-            if (sRowset != null && !sRowset.isBeforeFirst() && !sRowset.isAfterLast()) {
-                Object value = sRowset.getObject(sRowset.getFields().find(aFieldName));
-                if (value != null) {
-                    return value;
-                }
-            }
-            lsubstitute = lsubstitute.getSubstitute();
-        }
-        return null;
-    }
+	public Object getSubstituteRowsetObject(String aFieldName) throws Exception {
+		Entity lsubstitute = substitute;
+		while (lsubstitute != null) {
+			Rowset sRowset = lsubstitute.getRowset();
+			if (sRowset != null && !sRowset.isBeforeFirst() && !sRowset.isAfterLast()) {
+				Object value = sRowset.getObject(sRowset.getFields().find(aFieldName));
+				if (value != null) {
+					return value;
+				}
+			}
+			lsubstitute = lsubstitute.getSubstitute();
+		}
+		return null;
+	}
 
-    public Object getSubstituteRowsetJsObject(int aColIndex) throws Exception {
-    	if(fields != null){
-    		Field field = fields.get(aColIndex);
-    		if(field != null){
-    			Object value = getSubstituteRowsetObject(field.getName());
-    			return Utils.toJs(value);
-    		}
-    	}
-    	return null;
-    }
-    
+	public Object getSubstituteRowsetJsObject(int aColIndex) throws Exception {
+		if (fields != null) {
+			Field field = fields.get(aColIndex);
+			if (field != null) {
+				Object value = getSubstituteRowsetObject(field.getName());
+				return Utils.toJs(value);
+			}
+		}
+		return null;
+	}
+
 	protected native Row unwrapRow(JavaScriptObject aRowFacade) throws Exception/*-{
 		return aRowFacade != null ? aRowFacade.unwrap() : null;
 	}-*/;
@@ -2248,10 +2308,9 @@ public class Entity implements RowsetListener {
 	 */
 	public JavaScriptObject find(JavaScriptObject aValues) throws Exception {
 		JsArrayMixed values = aValues.<JsArrayMixed> cast();
-		JsArray<JavaScriptObject> arFound = JavaScriptObject.createArray().<JsArray<JavaScriptObject>> cast();
 		if (values.length() > 0 && values.length() % 2 == 0) {
-			List<Integer> constraints = new ArrayList();
-			List<Object> keyValues = new ArrayList();
+			List<Integer> constraints = new ArrayList<Integer>();
+			List<Object> keyValues = new ArrayList<Object>();
 			for (int i = 0; i < values.length(); i += 2) {
 				int colIndex = 0;
 				DataTypeInfo typeInfo = null;
@@ -2272,19 +2331,27 @@ public class Entity implements RowsetListener {
 			}
 			Locator loc = checkUserLocator(constraints);
 			if (loc.find(keyValues.toArray())) {
-				for (int i = 0; i < loc.getSize(); i++) {
-					arFound.push(publishRowFacade(loc.getRow(i), this));
-				}
+                HashOrderer.TaggedList<RowWrap> subset = loc.getSubSet();
+                if (subset.tag == null) {
+            		JsArray<JavaScriptObject> arFound = JavaScriptObject.createArray().<JsArray<JavaScriptObject>> cast();
+    				for (RowWrap rw : subset) {
+    					arFound.push(publishRowFacade(rw.getRow(), this));
+    				}
+                    subset.tag = arFound; 
+                }
+                assert subset.tag instanceof JavaScriptObject;
+                return (JavaScriptObject) subset.tag;
+				
 			}
 		} else {
 			Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, BAD_FIND_AGRUMENTS_MSG);
 		}
-		return arFound;
+		return JavaScriptObject.createArray();
 	}
 
 	public Row find(int aColIndex, Object aValue) throws Exception {
-		List<Integer> constraints = new ArrayList();
-		List<Object> keyValues = new ArrayList();
+		List<Integer> constraints = new ArrayList<Integer>();
+		List<Object> keyValues = new ArrayList<Object>();
 		DataTypeInfo typeInfo = getFields().get(aColIndex).getTypeInfo();
 		// field col index
 		constraints.add(aColIndex);
@@ -2299,39 +2366,45 @@ public class Entity implements RowsetListener {
 
 	public JavaScriptObject createLocator(JavaScriptObject aConstraints) throws Exception {
 		JsArrayMixed constraints = aConstraints.<JsArrayMixed> cast();
-		Locator loc = getRowset().createLocator();
-		loc.beginConstrainting();
-		try {
-			for (int i = 0; i < constraints.length(); i++) {
-				JavaScriptObject jsConstraint = constraints.getObject(i);
-				Field field = RowsetUtils.unwrapField(jsConstraint);
-				loc.addConstraint(getFields().find(field.getName()));
+		if (checkRowset()) {
+			Locator loc = getRowset().createLocator();
+			loc.beginConstrainting();
+			try {
+				for (int i = 0; i < constraints.length(); i++) {
+					JavaScriptObject jsConstraint = constraints.getObject(i);
+					Field field = RowsetUtils.unwrapField(jsConstraint);
+					loc.addConstraint(getFields().find(field.getName()));
+				}
+			} finally {
+				loc.endConstrainting();
 			}
-		} finally {
-			loc.endConstrainting();
-		}
-		return publishLocatorFacade(loc, this);
+			return publishLocatorFacade(loc, this);
+		} else
+			return null;
 	}
 
 	public JavaScriptObject createFilter(JavaScriptObject aConstraints) throws Exception {
 		JsArrayMixed constraints = aConstraints.<JsArrayMixed> cast();
-		Filter filter = getRowset().createFilter();
-		filter.beginConstrainting();
-		try {
-			for (int i = 0; i < constraints.length(); i++) {
-				JavaScriptObject jsConstraint = constraints.getObject(i);
-				Field field = RowsetUtils.unwrapField(jsConstraint);
-				filter.addConstraint(getFields().find(field.getName()));
+		if (checkRowset()) {
+			Filter filter = getRowset().createFilter();
+			filter.beginConstrainting();
+			try {
+				for (int i = 0; i < constraints.length(); i++) {
+					JavaScriptObject jsConstraint = constraints.getObject(i);
+					Field field = RowsetUtils.unwrapField(jsConstraint);
+					filter.addConstraint(getFields().find(field.getName()));
+				}
+			} finally {
+				filter.endConstrainting();
 			}
-		} finally {
-			filter.endConstrainting();
-		}
-		return publishFilterFacade(filter, this);
+			return publishFilterFacade(filter, this);
+		} else
+			return null;
 	}
 
 	public RowsComparator createSorting(JavaScriptObject aConstraints) {
 		JsArrayMixed constraints = aConstraints.<JsArrayMixed> cast();
-		List<SortingCriterion> criteria = new ArrayList();
+		List<SortingCriterion> criteria = new ArrayList<SortingCriterion>();
 		for (int i = 0; i < constraints.length(); i += 2) {
 			JavaScriptObject fieldValue = constraints.getObject(i);
 			int colIndex = 0;
@@ -2356,7 +2429,9 @@ public class Entity implements RowsetListener {
 
 	public void sort(RowsComparator aComparator) throws Exception {
 		RowsComparator comparator = (RowsComparator) aComparator;
-		getRowset().sort(comparator);
+		if (checkRowset()) {
+			getRowset().sort(comparator);
+		}
 	}
 
 	public static boolean isParameter(Field aField) {
@@ -2382,7 +2457,8 @@ public class Entity implements RowsetListener {
 			}
 
 		};
-		getRowset().sort(comparator);
+		if (checkRowset())
+			getRowset().sort(comparator);
 	}
 
 	public void insert(JavaScriptObject aValues) throws Exception {
@@ -2399,7 +2475,16 @@ public class Entity implements RowsetListener {
 			// value
 			initingValues[i + 1] = RowsetUtils.extractValueFromJsArray(fieldsValues, i + 1);
 		}
-		getRowset().insert(initingValues);
+		if (checkRowset())
+			getRowset().insert(initingValues);
+	}
+
+	private boolean checkRowset() {
+		if (rowset == null) {
+			Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, "Model entity [" + getTitle() + "] using while data is not loaded yet.");
+			return false;
+		} else
+			return true;
 	}
 
 	/**
@@ -2412,7 +2497,7 @@ public class Entity implements RowsetListener {
 	 */
 	public void insertAt(int aIndex, JavaScriptObject aValues) throws Exception {
 		JsArrayMixed fieldsValues = aValues.<JsArrayMixed> cast();
-		List<Object> initingValues = new ArrayList();
+		List<Object> initingValues = new ArrayList<Object>();
 		for (int i = 0; i < fieldsValues.length(); i += 2) {
 			// field
 			String fieldName = fieldsValues.getString(i);
@@ -2423,10 +2508,9 @@ public class Entity implements RowsetListener {
 				initingValues.add(RowsetUtils.extractValueFromJsArray(fieldsValues, i + 1));
 			}
 		}
-		getRowset().insertAt(aIndex, initingValues.toArray());
+		if (checkRowset())
+			getRowset().insertAt(aIndex, initingValues.toArray());
 	}
-
-	protected JavaScriptObject jsPublished;
 
 	public void setPublished(JavaScriptObject aPublished) {
 		jsPublished = aPublished;

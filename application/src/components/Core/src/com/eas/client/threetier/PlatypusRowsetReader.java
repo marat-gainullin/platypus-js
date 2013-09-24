@@ -2,11 +2,11 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package com.eas.client.threetier;
 
 import com.bearsoft.rowset.exceptions.AlreadyExistSerializerException;
 import com.bearsoft.rowset.metadata.DataTypeInfo;
+import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.serial.BinaryRowsetReader;
 import com.bearsoft.rowset.serial.custom.CompactLobsSerializer;
 import java.util.logging.Level;
@@ -16,10 +16,10 @@ import java.util.logging.Logger;
  *
  * @author mg
  */
-public class PlatypusRowsetReader extends BinaryRowsetReader{
+public class PlatypusRowsetReader extends BinaryRowsetReader {
 
-    public PlatypusRowsetReader()
-    {
+    public PlatypusRowsetReader(Fields aExpectedFields) {
+        super(aExpectedFields);
         try {
             CompactLobsSerializer lobsSerializer = new CompactLobsSerializer();
             addSerializer(DataTypeInfo.CLOB, lobsSerializer);

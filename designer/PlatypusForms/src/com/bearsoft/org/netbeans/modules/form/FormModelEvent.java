@@ -62,6 +62,7 @@ import org.openide.ErrorManager;
 public class FormModelEvent extends EventObject {
     // possible types of changes
 
+    public static final String PROP_DESIGNER_SIZE = "designerSize"; // NOI18N
     public static final int FORM_LOADED = 1;
     public static final int FORM_TO_BE_SAVED = 2;
     public static final int FORM_TO_BE_CLOSED = 3;
@@ -77,7 +78,8 @@ public class FormModelEvent extends EventObject {
     public static final int EVENT_HANDLER_REMOVED = 13;
     public static final int EVENT_HANDLER_RENAMED = 14;
     public static final int COLUMN_VIEW_EXCHANGED = 15;
-    public static final int OTHER_CHANGE = 16;
+    public static final int TOP_DESIGN_COMPONENT_CHANGED = 16;
+    public static final int OTHER_CHANGE = 17;
     // data about the change
     private int changeType;
     private boolean createdDeleted;
@@ -127,7 +129,7 @@ public class FormModelEvent extends EventObject {
         oldPropertyValue = oldLayoutSupp;
         newPropertyValue = newLayoutSupp;
     }
-    
+
     void setColumnView(
             RADModelGridColumn aRadColumn,
             RADColumnView<? super DbControlPanel> oldView,
@@ -137,7 +139,7 @@ public class FormModelEvent extends EventObject {
         oldPropertyValue = oldView;
         newPropertyValue = newView;
     }
-    
+
     void setReordering(int[] perm) {
         reordering = perm;
     }
@@ -245,9 +247,9 @@ public class FormModelEvent extends EventObject {
     }
 
     public final RADModelGridColumn getColumn() {
-        return (RADModelGridColumn)component;
+        return (RADModelGridColumn) component;
     }
- 
+
     public final LayoutConstraints<?> getComponentLayoutConstraints() {
         return constraints;
     }
@@ -376,6 +378,7 @@ public class FormModelEvent extends EventObject {
     // ----------
     // methods for events interested in additional events occured
     // (used for undo/redo processing of event handlers)
+    
     private static void addToInterestList(FormModelEvent ev) {
         if (interestList == null) {
             interestList = new ArrayList<>();
@@ -462,12 +465,14 @@ public class FormModelEvent extends EventObject {
                     FormModel.t("UNDO: event handler renaming"); // NOI18N
                     undoEventHandlerRenaming();
                     break;
-                /*
-                 case BINDING_PROPERTY_CHANGED:
-                 FormModel.t("UNDO: binding property change"); // NOI18N
-                 undoBindingPropertyChange();
-                 break;
-                 */
+                case TOP_DESIGN_COMPONENT_CHANGED:
+                    FormModel.t("UNDO: top design component changed"); // NOI18N
+                    getFormModel().setTopDesignComponent((RADVisualContainer<?>)oldPropertyValue);
+                    break;
+                case SYNTHETIC_PROPERTY_CHANGED:
+                    FormModel.t("UNDO: synthetic proprty change"); // NOI18N
+                    undoSyntheticPropertyChange();
+                    break;
                 default:
                     FormModel.t("UNDO: " + changeType); // NOI18N
                     break;
@@ -533,6 +538,14 @@ public class FormModelEvent extends EventObject {
                 case EVENT_HANDLER_RENAMED:
                     FormModel.t("REDO: event handler renaming"); // NOI18N
                     redoEventHandlerRenaming();
+                    break;
+                case TOP_DESIGN_COMPONENT_CHANGED:
+                    FormModel.t("REDO: top design component changed"); // NOI18N
+                    getFormModel().setTopDesignComponent((RADVisualContainer<?>)newPropertyValue);
+                    break;
+                case SYNTHETIC_PROPERTY_CHANGED:
+                    FormModel.t("REDO: synthetic proprty change"); // NOI18N
+                    redoSyntheticPropertyChange();
                     break;
                 default:
                     FormModel.t("REDO: " + changeType); // NOI18N
@@ -672,7 +685,7 @@ public class FormModelEvent extends EventObject {
                 ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
             }
         }
-        
+
         private void undoComponentAddition() {
             removeComponent();
         }
@@ -778,6 +791,18 @@ public class FormModelEvent extends EventObject {
                 } catch (Exception ex) { // should not happen
                     Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
                 }
+            }
+        }
+
+        private void undoSyntheticPropertyChange() {
+            if (PROP_DESIGNER_SIZE.equals(propertyName)) {
+                getFormModel().fireSyntheticPropertyChanged(component, FormModelEvent.PROP_DESIGNER_SIZE, newPropertyValue, oldPropertyValue);
+            }
+        }
+
+        private void redoSyntheticPropertyChange() {
+            if (PROP_DESIGNER_SIZE.equals(propertyName)) {
+                getFormModel().fireSyntheticPropertyChanged(component, FormModelEvent.PROP_DESIGNER_SIZE, oldPropertyValue, newPropertyValue);
             }
         }
 

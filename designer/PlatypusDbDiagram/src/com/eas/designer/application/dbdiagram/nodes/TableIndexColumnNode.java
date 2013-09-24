@@ -8,7 +8,7 @@ import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.metadata.DbTableIndexColumnSpec;
 import com.eas.client.metadata.DbTableIndexSpec;
 import com.eas.client.model.dbscheme.FieldsEntity;
-import com.eas.designer.explorer.model.nodes.FieldNode;
+import com.eas.designer.datamodel.nodes.FieldNode;
 import java.awt.Image;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;

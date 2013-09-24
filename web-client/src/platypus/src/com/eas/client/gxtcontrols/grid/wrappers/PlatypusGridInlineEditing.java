@@ -18,6 +18,7 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.HasValue;
+import com.sencha.gxt.cell.core.client.form.CheckBoxCell;
 import com.sencha.gxt.core.client.GXTLogConfiguration;
 import com.sencha.gxt.core.client.ValueProvider;
 import com.sencha.gxt.core.client.util.KeyNav;
@@ -86,6 +87,14 @@ public abstract class PlatypusGridInlineEditing<M> extends PlatypusAbstractGridE
 
 	public void setEditable(boolean aValue) {
 		editable = aValue;
+		if (columnModel != null)
+			for (ColumnConfig<?, ?> cc : columnModel.getColumns()) {
+				if (cc instanceof PlatypusColumnConfig<?, ?> && cc.getCell() instanceof CheckBoxCell) {
+					PlatypusColumnConfig<?, ?> pcc = (PlatypusColumnConfig<?, ?>) cc;
+					CheckBoxCell ccc = (CheckBoxCell) pcc.getCell();
+					ccc.setReadOnly(pcc.isReadonly() || !editable);
+				}
+			}
 	}
 
 	public boolean isDeletable() {
@@ -348,27 +357,23 @@ public abstract class PlatypusGridInlineEditing<M> extends PlatypusAbstractGridE
 
 									@Override
 									public void onValueChange(ValueChangeEvent<O> event) {
-
-										/*
-										 * if
-										 * (GXTLogConfiguration.loggingIsEnabled
-										 * ()) { logger.finest(
-										 * "doStartEditing onValueChanged"); }
-										 * 
-										 * // if enter key cause value change we
-										 * // want to ignore the next // enter
-										 * key otherwise // new edit will start
-										 * by onEnter ignoreNextEnter = true;
-										 * 
-										 * Timer t = new Timer() {
-										 * 
-										 * @Override public void run() {
-										 * ignoreNextEnter = false; } };
-										 * 
-										 * completeEditing();
-										 * 
-										 * t.schedule(100);
-										 */
+										  if(GXTLogConfiguration.loggingIsEnabled()) {
+											  logger.finest("doStartEditing onValueChanged"); }
+										  
+										  // if enter key cause value change we
+										  // want to ignore the next // enter
+										  //key otherwise // new edit will start
+										  //by onEnter 
+										  ignoreNextEnter = true;
+										  
+										  Timer t = new Timer() {
+										  
+										  @Override public void run() {
+										  ignoreNextEnter = false; } };
+										  
+										  completeEditing();
+										  
+										  t.schedule(100);
 									}
 								}));
 

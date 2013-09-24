@@ -7,12 +7,9 @@ package com.eas.client.queries;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.dataflow.FlowProvider;
 import com.bearsoft.rowset.exceptions.RowsetException;
-import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.DbClient;
-import com.eas.client.DbMetadataCache;
-import com.eas.client.sqldrivers.SqlDriver;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -142,6 +139,7 @@ public class SqlCompiledQuery {
      * @param destFields поля полученные из базы данных.
      * @param sourceFields поля предсказанные Platypus.
      */
+    /*
     protected void mergeFields(Fields destFields, Fields sourceFields) {
         if (sourceFields != null && destFields != null) {
             for (int i = 1; i <= sourceFields.getFieldsCount(); i++) {
@@ -153,13 +151,13 @@ public class SqlCompiledQuery {
             }
         }
     }
+    */ 
 
     private void createFlow() throws Exception {
         if (client != null) {
-            flow = client.createFlowProvider(databaseId, sessionId, entityId, sqlClause, readRoles, writeRoles);
+            flow = client.createFlowProvider(databaseId, sessionId, entityId, sqlClause, expectedFields, readRoles, writeRoles);
             flow.setPageSize(pageSize);
             flow.setProcedure(procedure);
-            
         }
     }
 
@@ -173,7 +171,10 @@ public class SqlCompiledQuery {
     public Rowset executeQuery() throws Exception {
         Rowset rs = new Rowset(flow);
         rs.refresh(parameters);
-        refineFields(rs);
+        /*
+        if(expectedFields != rs.getFields())
+            refineFields(rs);
+            */ 
         return rs;
     }
 
@@ -252,6 +253,7 @@ public class SqlCompiledQuery {
      * @param aRowset Rowset, which is to be processed.
      * @throws RowsetException
      */
+    /*
     protected void refineFields(Rowset aRowset) throws RowsetException {
         try {
             assert aRowset != null;
@@ -266,4 +268,5 @@ public class SqlCompiledQuery {
             throw new RowsetException(ex);
         }
     }
+    */ 
 }

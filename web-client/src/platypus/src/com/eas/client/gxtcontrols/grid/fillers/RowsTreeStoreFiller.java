@@ -18,7 +18,6 @@ import com.bearsoft.rowset.events.RowsetNetErrorEvent;
 import com.bearsoft.rowset.events.RowsetRequeryEvent;
 import com.bearsoft.rowset.events.RowsetRollbackEvent;
 import com.bearsoft.rowset.events.RowsetSaveEvent;
-import com.bearsoft.rowset.events.RowsetScrollEvent;
 import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.locators.Locator;
 import com.bearsoft.rowset.locators.RowWrap;
@@ -164,7 +163,7 @@ public class RowsTreeStoreFiller extends RowsetAdapter implements PropertyChange
 			if (evt.getOldValue() == null && evt.getNewValue() != null) {
 				rowsetError = (String) evt.getNewValue();
 				checkIfRootsWithError();
-				if(rowset == null)
+				if (rowset == null)
 					loader.load();
 			}
 		}
@@ -232,7 +231,12 @@ public class RowsTreeStoreFiller extends RowsetAdapter implements PropertyChange
 
 	protected void checkIfRootsWithError() {
 		if (rowsetError != null && rootsLoadCallback != null) {
-			rootsLoadCallback.onFailure(new RowsetException(rowsetError));
+			rootsLoadCallback.onFailure(new RowsetException(rowsetError) {
+				@Override
+				public void printStackTrace() {
+					// no op
+				}
+			});
 			rootsLoadCallback = null;
 			rowsetError = null;
 		}
@@ -278,6 +282,7 @@ public class RowsTreeStoreFiller extends RowsetAdapter implements PropertyChange
 	public void rowsetNetError(RowsetNetErrorEvent event) {
 		try {
 			rowsetError = event.getMessage();
+			assert rowsetError != null;
 			checkIfRootsWithError();
 		} catch (Exception ex) {
 			Logger.getLogger(RowsTreeStoreFiller.class.getName()).log(Level.SEVERE, ex.getMessage());
@@ -305,10 +310,6 @@ public class RowsTreeStoreFiller extends RowsetAdapter implements PropertyChange
 		} catch (Exception ex) {
 			Logger.getLogger(RowsTreeStoreFiller.class.getName()).log(Level.SEVERE, ex.getMessage());
 		}
-	}
-
-	@Override
-	public void rowsetScrolled(RowsetScrollEvent event) {
 	}
 
 	@Override

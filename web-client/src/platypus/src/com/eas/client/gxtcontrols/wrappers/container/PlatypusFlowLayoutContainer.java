@@ -1,6 +1,8 @@
 package com.eas.client.gxtcontrols.wrappers.container;
 
+import com.eas.client.gxtcontrols.Sizer;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.core.client.util.Margins;
 import com.sencha.gxt.widget.core.client.Component;
 import com.sencha.gxt.widget.core.client.container.FlowLayoutContainer;
@@ -34,5 +36,23 @@ public class PlatypusFlowLayoutContainer extends FlowLayoutContainer {
         style.setDisplay(Style.Display.INLINE_BLOCK);                
         style.setVerticalAlign(Style.VerticalAlign.TOP);
 		super.add(aChild, new MarginData(new Margins(topGap, rightGap, bottomGap, leftGap)));
+	}
+	
+	public void ajustHeight(Widget aChild, int aValue){
+		if (aChild != null) {
+			if(aChild.getParent() instanceof PlatypusFieldSet)
+				aChild.getParent().setPixelSize(Sizer.getWidgetWidth(aChild), aValue);
+			else
+				aChild.setPixelSize(Sizer.getWidgetWidth(aChild), aValue);
+		}
+	}
+	
+	public void ajustWidth(Widget aChild, int aValue){
+		if (aChild != null) {
+			if(aChild.getParent() instanceof PlatypusFieldSet)				
+				aChild.getParent().setPixelSize(aValue, Sizer.getWidgetHeight(aChild));
+			else
+				aChild.setPixelSize(aValue, Sizer.getWidgetHeight(aChild));
+		}
 	}
 }

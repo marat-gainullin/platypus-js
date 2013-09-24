@@ -12,8 +12,6 @@ import com.eas.client.gxtcontrols.published.PublishedComponent;
 import com.eas.client.model.Entity;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.sencha.gxt.chart.client.chart.Chart;
 import com.sencha.gxt.chart.client.chart.Legend;
@@ -30,15 +28,6 @@ import com.sencha.gxt.data.shared.loader.LoaderHandler;
 import com.sencha.gxt.messages.client.DefaultMessages;
 
 public abstract class AbstractChart extends Chart<Object> {
-
-	protected static class JsObject extends JavaScriptObject {
-		protected JsObject() {
-		}
-
-		public final native Object get(String aName)/*-{
-			return $wnd.boxAsJava(this[aName]);
-		}-*/;
-	}
 
 	public static Color[] seriesColors = new Color[] { new RGB(194, 0, 36), new RGB(240, 165, 10), new RGB(32, 68, 186) };
 	public static final int AXIS_LABEL_FONTSIZE = 14;

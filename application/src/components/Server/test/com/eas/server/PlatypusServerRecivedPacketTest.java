@@ -7,9 +7,7 @@ package com.eas.server;
 import com.eas.client.DatabasesClient;
 import com.eas.client.settings.DbConnectionSettings;
 import com.eas.sensors.positioning.PacketReciever;
-import com.eas.sensors.positioning.PositioningIoHandler;
 import com.eas.sensors.positioning.PositioningPacket;
-import com.eas.server.handlers.PositioningPacketReciever;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
@@ -54,7 +52,7 @@ public class PlatypusServerRecivedPacketTest {
         ports.put(TEST_PORT+1, "asc6");
         Set<String> modules = new HashSet<>();
         modules.add("134148360246876");//"asc6"
-        server = new PlatypusServer(new DatabasesClient(settings), sslContext, addresses, ports, modules, null);
+        server = new PlatypusServer(new DatabasesClient(settings), sslContext, addresses, ports, null, null, null, modules, null);
         server.start();
     }
 
@@ -81,7 +79,7 @@ public class PlatypusServerRecivedPacketTest {
 
     @Test
     public void testSimpleConnecting() throws UnknownHostException, IOException {
-        PacketReciever reciever = null;//((PositioningIoHandler)server.getSensorAcceptor().getHandler()).getReciever();
+        PacketReciever reciever = new com.eas.server.handlers.PositioningPacketReciever(server, "134148360246876");
         try {
             Calendar cl = Calendar.getInstance();
             cl.set(2012, 7, 5, 10, 20, 30);
@@ -107,6 +105,5 @@ public class PlatypusServerRecivedPacketTest {
         } catch (InterruptedException ex) {
             Logger.getLogger(PlatypusServerRecivedPacketTest.class.getName()).log(Level.SEVERE, null, ex);
         }
-        assertTrue(((PositioningPacketReciever)reciever).getPacketStorage().isEmpty());
     }
 }

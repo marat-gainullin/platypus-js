@@ -4,6 +4,7 @@
  */
 package com.eas.client.threetier.binary;
 
+import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.changes.serial.ChangesWriter;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Parameter;
@@ -12,6 +13,7 @@ import com.bearsoft.rowset.utils.RowsetUtils;
 import com.eas.client.threetier.HelloRequest;
 import com.eas.client.threetier.PlatypusRowsetWriter;
 import com.eas.client.threetier.Request;
+import com.eas.client.threetier.RowsetJsonWriter;
 import com.eas.client.threetier.requests.AppElementChangedRequest;
 import com.eas.client.threetier.requests.AppElementRequest;
 import com.eas.client.threetier.requests.AppQueryRequest;
@@ -32,6 +34,7 @@ import com.eas.client.threetier.requests.PlatypusRequestVisitor;
 import com.eas.client.threetier.requests.StartAppElementRequest;
 import com.eas.proto.CoreTags;
 import com.eas.proto.ProtoWriter;
+import com.eas.script.ScriptUtils;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -127,7 +130,7 @@ public class PlatypusRequestWriter implements PlatypusRequestVisitor {
         writer.flush();
     }
 
-    public static void putValue(ProtoWriter writer, int nullValueTag, int undefinedValueTag, int functionValueTag, int typeTag, int nameTag, String aArgumentName, int valueTag, Object arg) throws IOException {
+    public static void putValue(ProtoWriter writer, int nullValueTag, int undefinedValueTag, int functionValueTag, int typeTag, int nameTag, String aArgumentName, int valueTag, Object arg) throws IOException, Exception {
         if (arg == null) {
             writer.put(nullValueTag);
         } else if (arg instanceof Undefined) {
@@ -179,6 +182,14 @@ public class PlatypusRequestWriter implements PlatypusRequestVisitor {
                     break;
                 case STRING:
                     writer.put(valueTag, (String) arg);
+                    break;
+                case OBJECT:
+                    if (arg instanceof Rowset) {
+                        RowsetJsonWriter jsonWriter = new RowsetJsonWriter((Rowset)arg);
+                        writer.put(valueTag, jsonWriter.write());
+                    } else {
+                        writer.put(valueTag, (String) ScriptUtils.toJson(arg));
+                    }
                     break;
             }
         }

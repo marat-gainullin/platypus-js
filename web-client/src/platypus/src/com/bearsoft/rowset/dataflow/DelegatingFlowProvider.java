@@ -9,34 +9,33 @@ import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.Callback;
 import com.eas.client.Cancellable;
 
-public class DelegatingFlowProvider implements FlowProvider{
+public class DelegatingFlowProvider implements FlowProvider {
 
 	protected FlowProvider delegate;
-	
-	public DelegatingFlowProvider(FlowProvider aDelegate)
-	{
+
+	public DelegatingFlowProvider(FlowProvider aDelegate) {
 		super();
 		delegate = aDelegate;
 	}
-	
-	@Override
-    public String getEntityId() {
-	    return delegate.getEntityId();
-    }
 
 	@Override
-    public Cancellable refresh(Parameters aParams, Callback<Rowset> onSuccess, Callback<String> onFailure) throws Exception {
-	    return delegate.refresh(aParams, onSuccess, onFailure);
-    }
+	public String getEntityId() {
+		return delegate.getEntityId();
+	}
 
 	@Override
-    public List<Change> getChangeLog() {
-	    return delegate.getChangeLog();
-    }
+	public Cancellable refresh(Parameters aParams, Callback<Rowset> onSuccess, Callback<String> onFailure) throws Exception {
+		return delegate.refresh(aParams, onSuccess, onFailure);
+	}
 
 	@Override
-    public Registration addTransactionListener(TransactionListener aListener) {
-	    return delegate.addTransactionListener(aListener);
-    }
+	public List<Change> getChangeLog() {
+		return delegate.getChangeLog();
+	}
+
+	@Override
+	public Registration addTransactionListener(TransactionListener aListener) {
+		return delegate.addTransactionListener(aListener);
+	}
 
 }

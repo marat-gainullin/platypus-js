@@ -5,13 +5,9 @@
 package com.eas.client.threetier;
 
 import com.bearsoft.rowset.utils.IDGenerator;
-import com.eas.client.threetier.PlatypusNativeConnection;
-import com.eas.client.threetier.Request;
-import com.eas.client.threetier.RequestsSender;
 import com.eas.client.threetier.binary.PlatypusRequestReader;
 import com.eas.client.threetier.binary.RequestsTags;
 import com.eas.client.threetier.requests.LoginRequest;
-import com.eas.proto.CoreTags;
 import com.eas.proto.ProtoReader;
 import com.eas.proto.ProtoReaderException;
 import java.io.ByteArrayInputStream;

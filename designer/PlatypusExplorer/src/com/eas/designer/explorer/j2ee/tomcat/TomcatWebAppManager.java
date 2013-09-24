@@ -5,14 +5,14 @@
 package com.eas.designer.explorer.j2ee.tomcat;
 
 import com.eas.client.ClientConstants;
-import com.eas.client.resourcepool.GeneralResourceProvider;
+import com.eas.client.SQLUtils;
 import com.eas.client.settings.DbConnectionSettings;
 import com.eas.designer.application.PlatypusUtils;
 import com.eas.designer.explorer.j2ee.PlatypusWebModule;
 import com.eas.designer.explorer.j2ee.WebAppManager;
 import com.eas.designer.explorer.platform.EmptyPlatformHomePathException;
 import com.eas.designer.explorer.platform.PlatypusPlatform;
-import com.eas.designer.explorer.project.PlatypusProject;
+import com.eas.designer.explorer.project.PlatypusProjectImpl;
 import com.eas.util.FileUtils;
 import com.eas.xml.dom.XmlDom2String;
 import java.io.File;
@@ -47,10 +47,10 @@ public class TomcatWebAppManager implements WebAppManager {
     public static final String TOMCAT_LIB_DIR = "lib"; //NOI18N
     public final String CONTEXT_FILE_NAME = "context.xml"; //NOI18N
     public final String DATASOURCE_REALM_CLASS_NAME = "org.apache.catalina.realm.DataSourceRealm"; //NOI18N
-    protected final PlatypusProject project;
+    protected final PlatypusProjectImpl project;
     private ServerInstance si;
 
-    public TomcatWebAppManager(PlatypusProject aProject, String serverInstanceID) throws InstanceRemovedException {
+    public TomcatWebAppManager(PlatypusProjectImpl aProject, String serverInstanceID) throws InstanceRemovedException {
         project = aProject;
         si = Deployment.getDefault().getServerInstance(serverInstanceID);
     }
@@ -122,8 +122,7 @@ public class TomcatWebAppManager implements WebAppManager {
         String classFilePath = className.replace('.', '/') + ".class"; // NOI18N
         for (File file : classpath) {
             if (file.isFile()) {
-                JarFile jf = new JarFile(file);
-                try {
+                try (JarFile jf = new JarFile(file)) {
                     Enumeration entries = jf.entries();
                     while (entries.hasMoreElements()) {
                         JarEntry entry = (JarEntry) entries.nextElement();
@@ -131,8 +130,6 @@ public class TomcatWebAppManager implements WebAppManager {
                             return true;
                         }
                     }
-                } finally {
-                    jf.close();
                 }
             } else {
                 if (new File(file, classFilePath).exists()) {
@@ -178,12 +175,12 @@ public class TomcatWebAppManager implements WebAppManager {
         dataSourceResource.setType(DataSourceResource.DATA_SOURCE_RESOURCE_TYPE_NAME);
         DbConnectionSettings dbSettings = project.getSettings().getAppSettings().getDbSettings();
         dataSourceResource.setUrl(dbSettings.getUrl());
-        String dialect = GeneralResourceProvider.constructPropertiesByDbConnectionSettings(dbSettings).getProperty(ClientConstants.DB_CONNECTION_DIALECT_PROP_NAME);
+        String dialect = SQLUtils.dialectByUrl(dbSettings.getUrl());
         if (dialect != null) {
             String driverClassName = DbConnectionSettings.readDrivers().get(dialect);
             dataSourceResource.setDriverClassName(driverClassName);
         } else {
-            Logger.getLogger(getClass().getName()).log(Level.WARNING, "Unsupported JDBC driver or incorrect URL: {0}", dbSettings.getUrl());
+            throw new IllegalStateException(String.format("Unsupported JDBC driver or incorrect URL: %s", dbSettings.getUrl()));
         }
         dataSourceResource.setUsername(dbSettings.getInfo().getProperty(ClientConstants.DB_CONNECTION_USER_PROP_NAME));
         dataSourceResource.setPassword(dbSettings.getInfo().getProperty(ClientConstants.DB_CONNECTION_PASSWORD_PROP_NAME));

@@ -68,7 +68,7 @@ public class PlatypusLabel extends Component implements HasText, HasHTML {
 		ButtonCellResources buttonResources = GWT.create(ButtonCellResources.class);
 		xElement.addClassName(buttonResources.style().text());
 		xElement.getStyle().setCursor(Cursor.DEFAULT);
-		content.<XElement> cast().makePositionable();
+		content.<XElement> cast().makePositionable(true);
 		getElement().insertFirst(content);
 	}
 
@@ -182,6 +182,8 @@ public class PlatypusLabel extends Component implements HasText, HasHTML {
 					contentStyle.setPaddingLeft(iconTextGap + image.getWidth(), Style.Unit.PX);
 				} else {
 					backgroundPosition = "center";
+					contentStyle.setPaddingLeft(image.getWidth()/2, Style.Unit.PX);
+					contentStyle.setPaddingRight(image.getWidth()/2, Style.Unit.PX);
 				}
 				backgroundPosition += " ";
 				if (verticalTextPosition == TOP || verticalTextPosition == LEADING) {
@@ -191,65 +193,55 @@ public class PlatypusLabel extends Component implements HasText, HasHTML {
 					backgroundPosition += "top";
 					contentStyle.setPaddingTop(iconTextGap + image.getHeight(), Style.Unit.PX);
 				} else {
+					contentStyle.setPaddingTop(image.getHeight()/2, Style.Unit.PX);
+					contentStyle.setPaddingBottom(image.getHeight()/2, Style.Unit.PX);
 					backgroundPosition += "center";
 				}
 				contentStyle.setProperty("background", "url(" + image.getSafeUri().asString() + ")" + " no-repeat " + backgroundPosition);
 			}
 			contentStyle.setProperty("width", "auto");
+			contentStyle.setProperty("height", "auto");
 			if (html || text == null)
 				content.setInnerHTML(text != null ? text : "&#160;");
 			else
 				content.setInnerText(text);
-			//
 			switch (verticalAlignment) {
 			case TOP:
 				contentStyle.setTop(0, Unit.PX);
-				// contentStyle.clearBottom();
+				contentStyle.clearBottom();
+				//contentStyle.setVerticalAlign(VerticalAlign.TOP);
 				break;
 			case BOTTOM: {
-				int topValue = getElement().getOffsetHeight() - content.getOffsetHeight();
-				contentStyle.setTop(topValue, Unit.PX);
-				// contentStyle.clearBottom();
+				contentStyle.setBottom(0, Unit.PX);
+				contentStyle.clearTop();
 				break;
 			}
 			case CENTER: {
-				int topValue = (getElement().getOffsetHeight() - content.getOffsetHeight()) / 2;
+				int topValue = (getElement().getOffsetHeight() - content.getOffsetHeight())/2;
 				contentStyle.setTop(topValue, Unit.PX);
-				// contentStyle.clearBottom();
 				break;
 			}
 			}
 			switch (horizontalAlignment) {
 			case LEFT:
-				/*
-				 * contentStyle.setLeft(0, Unit.PX); contentStyle.clearRight();
-				 */
-				contentStyle.setProperty("textAlign", "left");
+				contentStyle.setLeft(0, Unit.PX);
+				contentStyle.clearRight();
 				break;
 			case LEADING:
-				/*
-				 * contentStyle.setLeft(0, Unit.PX); contentStyle.clearRight();
-				 */
-				contentStyle.setProperty("textAlign", "start");
+				contentStyle.setLeft(0, Unit.PX);
+				contentStyle.clearRight();
 				break;
 			case RIGHT:
-				/*
-				 * contentStyle.setRight(0, Unit.PX); contentStyle.clearLeft();
-				 */
-				contentStyle.setProperty("textAlign", "right");
+				contentStyle.setRight(0, Unit.PX);
+				contentStyle.clearLeft();
 				break;
 			case TRAILING:
-				/*
-				 * contentStyle.setRight(0, Unit.PX); contentStyle.clearLeft();
-				 */
-				contentStyle.setProperty("textAlign", "end");
+				contentStyle.setRight(0, Unit.PX);
+				contentStyle.clearLeft();
 				break;
 			case CENTER:
-				/*
-				 * contentStyle.setLeft(0, Unit.PX); contentStyle.setRight(0,
-				 * Unit.PX);
-				 */
-				contentStyle.setProperty("textAlign", "center");
+				contentStyle.setLeft(0, Unit.PX);
+				contentStyle.setRight(0, Unit.PX);
 				break;
 			}
 			ControlsUtils.reapplyStyle(this);

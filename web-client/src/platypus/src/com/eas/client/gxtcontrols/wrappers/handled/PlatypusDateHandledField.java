@@ -55,14 +55,17 @@ public class PlatypusDateHandledField extends PlatypusDateField {
 		super.onRedraw();
 		try {
 			JavaScriptObject eventThis = modelElement != null ? modelElement.entity.getModel().getModule() : null;
+			// TODO: refactor to onTargetRedraw event
 			if (getParent() != null && getParent().getParent() instanceof PlatypusAdapterStandaloneField<?>) {
 				PlatypusAdapterField<?> adapter = (PlatypusAdapterStandaloneField<?>) getParent().getParent();
 				eventThis = adapter.getPublishedField();
-			}
-			PublishedCell cellToRender = modelElement != null && cellFunction != null ? ControlsUtils.calcStandalonePublishedCell(eventThis, cellFunction,
-			        modelElement.entity.getRowset().getCurrentRow(), null, modelElement) : null;
-			if (cellToRender != null) {
-				cellToRender.styleToElement(getInputEl());
+				PublishedCell cellToRender = modelElement != null && cellFunction != null ? ControlsUtils.calcStandalonePublishedCell(eventThis, cellFunction, modelElement.entity.getRowset()
+				        .getCurrentRow(), null, modelElement) : null;
+				if (cellToRender != null) {
+					cellToRender.styleToElement(getInputEl());
+				} else {
+					ControlsUtils.reapplyStyle(adapter);
+				}
 			}
 		} catch (Exception ex) {
 			Logger.getLogger(PlatypusDateHandledField.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);

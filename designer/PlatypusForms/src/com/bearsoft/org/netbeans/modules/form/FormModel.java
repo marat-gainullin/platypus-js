@@ -75,6 +75,7 @@ public class FormModel {
     // name of the form is name of the DataObject
 
     private PlatypusFormDataObject dataObject;
+    private RADVisualContainer<?> topDesignComponent;
     private AssistantModel assistantModel = new AssistantModel();
     private String formName;
     private boolean readOnly = false;
@@ -91,6 +92,16 @@ public class FormModel {
 
     public AssistantModel getAssistantModel() {
         return assistantModel;
+    }
+
+    public RADVisualContainer<?> getTopDesignComponent() {
+        return topDesignComponent;
+    }
+
+    public void setTopDesignComponent(RADVisualContainer<?> aComponent) {
+        RADVisualContainer<?> oldValue = topDesignComponent;
+        topDesignComponent = aComponent;
+        fireTopDesignComponentChanged(oldValue, topDesignComponent);
     }
 
     public FormsJsCodeGenerator getFormsCodeGenerator() {
@@ -159,6 +170,7 @@ public class FormModel {
         if (FormUtils.isVisualizableClass(formClass) && FormUtils.isContainer(formClass)) {
             RADVisualContainer<?> topComp = new RADVisualFormContainer();
             topRADComponent = topComp;
+            topDesignComponent = topRADComponent;
             topComp.initialize(this);
             topComp.initInstance(formClass);
             ((RADVisualFormContainer) topComp).setLayoutSupportDelegate(new MarginLayoutSupport());
@@ -998,6 +1010,27 @@ public class FormModel {
         return ev;
     }
 
+    /**
+     * Fires an event informing about renaming an event handler. An undoable
+     * edit is created and registered automatically.
+     *
+     * @return event that has been fired.
+     */
+    public FormModelEvent fireTopDesignComponentChanged(RADVisualContainer aOldComponent, RADVisualContainer aNewComponent) {
+        t("top design component changed: " + aOldComponent.getName() + " to " + aNewComponent.getName()); // NOI18N
+
+        FormModelEvent ev = new FormModelEvent(this, FormModelEvent.TOP_DESIGN_COMPONENT_CHANGED);
+        ev.setComponentAndContainer(aNewComponent, topRADComponent);
+        ev.setProperty("topDesignComponent", aOldComponent, aNewComponent);
+        sendEvent(ev);
+
+        if (undoRedoRecording && aOldComponent != aNewComponent) {
+            addUndoableEdit(ev.getUndoableEdit());
+        }
+
+        return ev;
+    }
+    
     /**
      * Fires an event informing about general form change.
      *

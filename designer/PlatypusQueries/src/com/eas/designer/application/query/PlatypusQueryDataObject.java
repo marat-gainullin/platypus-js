@@ -24,15 +24,16 @@ import com.eas.client.queries.SqlCompiledQuery;
 import com.eas.client.queries.SqlQuery;
 import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.designer.application.PlatypusUtils;
+import com.eas.designer.application.indexer.IndexerQuery;
+import com.eas.designer.application.project.PlatypusProject;
 import com.eas.designer.application.query.editing.DocumentTextCompiler;
 import com.eas.designer.application.query.lexer.SqlErrorAnnotation;
 import com.eas.designer.application.query.lexer.SqlLanguageHierarchy;
 import com.eas.designer.application.query.nodes.QueryNodeChildren;
 import com.eas.designer.application.query.nodes.QueryRootNode;
 import com.eas.designer.application.query.nodes.QueryRootNodePropertiesUndoRecorder;
+import com.eas.designer.datamodel.nodes.ModelNode;
 import com.eas.designer.explorer.PlatypusDataObject;
-import com.eas.designer.explorer.model.nodes.ModelNode;
-import com.eas.designer.explorer.project.PlatypusProject;
 import com.eas.script.JsDoc;
 import com.eas.xml.dom.Source2XmlDom;
 import com.eas.xml.dom.XmlDom2String;
@@ -444,6 +445,9 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         write2File(modelEntry.getFile(), XmlDom2String.transform(modelDocument));
         Document outHintsDocument = QueryDocument2XmlDom.transformOutHints(outputFieldsHints, outputFields);
         write2File(outEntry.getFile(), XmlDom2String.transform(outHintsDocument));
+        if (getClient() != null) {
+            getClient().appEntityChanged(IndexerQuery.file2AppElementId(getPrimaryFile()));
+        }
     }
 
     private void write2File(FileObject aFile, String aContent) throws Exception {

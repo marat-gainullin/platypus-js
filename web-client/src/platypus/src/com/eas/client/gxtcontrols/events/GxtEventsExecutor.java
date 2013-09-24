@@ -14,6 +14,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.DoubleClickEvent;
 import com.google.gwt.event.dom.client.DoubleClickHandler;
+import com.google.gwt.event.dom.client.HasChangeHandlers;
 import com.google.gwt.event.dom.client.HasKeyDownHandlers;
 import com.google.gwt.event.dom.client.HasKeyPressHandlers;
 import com.google.gwt.event.dom.client.HasKeyUpHandlers;
@@ -43,7 +44,6 @@ import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.widget.core.client.Component;
 import com.sencha.gxt.widget.core.client.event.AddEvent;
@@ -110,11 +110,13 @@ public class GxtEventsExecutor implements SelectHandler, MouseOutHandler, MouseO
 	}
 
 	public static GxtEventsExecutor createExecutor(Component aComponent, JavaScriptObject aEventsThis) throws Exception {
-		final GxtEventsExecutor executor = new GxtEventsExecutor(aEventsThis);
+		final GxtEventsExecutor executor = new GxtEventsExecutor(aComponent, aEventsThis);
 		aComponent.setData(HANDLER_DATA_NAME, executor);
 
 		if (aComponent instanceof HasSelectHandlers)
 			((HasSelectHandlers) aComponent).addSelectHandler(executor);
+		if (aComponent instanceof HasChangeHandlers)
+			((HasChangeHandlers) aComponent).addChangeHandler(executor);
 
 		if (aComponent instanceof PlatypusCheckBox) {
 			final PlatypusCheckBox pcheck = (PlatypusCheckBox) aComponent;
@@ -129,6 +131,16 @@ public class GxtEventsExecutor implements SelectHandler, MouseOutHandler, MouseO
 				}
 			});
 		}
+
+		/*
+		 * if (aComponent instanceof Field<?>) { FieldCell<?> fc =
+		 * ((Field<?>)aComponent).getCell(); if(fc instanceof
+		 * ValueBaseInputCell<?>){ ValueBaseInputCell<?> vc =
+		 * (ValueBaseInputCell<?>)fc; InputElement ie =
+		 * vc.getInputElement(aComponent.getElement());
+		 * 
+		 * } }
+		 */
 
 		aComponent.addDomHandler(executor, MouseOverEvent.getType());
 		aComponent.addDomHandler(executor, MouseOutEvent.getType());
@@ -180,10 +192,12 @@ public class GxtEventsExecutor implements SelectHandler, MouseOutHandler, MouseO
 
 	private MOUSE mouseState = MOUSE.NULL;
 
+	private Component component;
 	private JavaScriptObject eventThis;
 
-	public GxtEventsExecutor(JavaScriptObject aEventThis) {
+	public GxtEventsExecutor(Component aComponent, JavaScriptObject aEventThis) {
 		super();
+		component = aComponent;
 		eventThis = aEventThis;
 	}
 
@@ -415,7 +429,7 @@ public class GxtEventsExecutor implements SelectHandler, MouseOutHandler, MouseO
 	public void onMouseDown(MouseDownEvent event) {
 		if (mousePressed != null) {
 			event.stopPropagation();
-			Event.setCapture(event.getRelativeElement());
+			//Event.setCapture(event.getRelativeElement());
 			mouseState = MOUSE.PRESSED;
 			executeEvent(eventThis, mousePressed, JSEvents.publishMouseDownEvent(event));
 		}
@@ -437,7 +451,8 @@ public class GxtEventsExecutor implements SelectHandler, MouseOutHandler, MouseO
 
 	@Override
 	public void onMouseUp(MouseUpEvent event) {
-		Event.releaseCapture(event.getRelativeElement());
+		//if (mouseState == MOUSE.PRESSED)
+		//	Event.releaseCapture(event.getRelativeElement());
 		if (mouseReleased != null) {
 			event.stopPropagation();
 			mouseState = MOUSE.NULL;

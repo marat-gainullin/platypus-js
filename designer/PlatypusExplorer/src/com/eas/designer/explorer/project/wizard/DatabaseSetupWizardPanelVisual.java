@@ -7,7 +7,7 @@ package com.eas.designer.explorer.project.wizard;
 import com.eas.client.Client;
 import com.eas.client.ClientFactory;
 import com.eas.client.settings.DbConnectionSettings;
-import com.eas.designer.explorer.project.PlatypusProject;
+import com.eas.designer.explorer.project.PlatypusProjectImpl;
 import com.eas.designer.explorer.project.ui.BuildJdbcUrlPanel;
 import java.util.Properties;
 import javax.swing.JPanel;
@@ -160,7 +160,7 @@ public class DatabaseSetupWizardPanelVisual extends JPanel implements DocumentLi
                 connectionErrorMsg = null;
             } catch (Exception ex) {
                 String rootMessage = getRootException(ex).getLocalizedMessage();
-                connectionErrorMsg = rootMessage != null && !rootMessage.isEmpty() ? rootMessage : NbBundle.getMessage(PlatypusProject.class, "LBL_UnableToConnect"); //NOI18N;
+                connectionErrorMsg = rootMessage != null && !rootMessage.isEmpty() ? rootMessage : NbBundle.getMessage(PlatypusProjectImpl.class, "LBL_UnableToConnect"); //NOI18N;
             }
             updateTexts(null);
         } catch (Exception ex) {

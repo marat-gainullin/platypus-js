@@ -79,20 +79,12 @@ public abstract class Entity<M extends Model<E, ?, ?, Q>, Q extends Query<?>, E 
 
     public abstract void validateQuery() throws Exception;
 
-    protected Fields getFactFields() throws Exception {
-        return null; // this method should be abstract.
-    }
-
     public Fields getFields() {
         if (fields == null && model != null && model.getClient() != null) {
             try {
                 validateQuery();
                 if (query != null) {
                     fields = query.getFields();
-                    if (fields == null) {
-                        fields = getFactFields();
-                    }
-                    assert fields != null;
                 }
             } catch (Exception ex) {
                 fields = null;

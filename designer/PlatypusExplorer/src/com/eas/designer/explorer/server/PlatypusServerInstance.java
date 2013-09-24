@@ -6,8 +6,10 @@ package com.eas.designer.explorer.server;
 
 import com.eas.client.ClientConstants;
 import com.eas.deploy.project.PlatypusSettings;
-import com.eas.designer.explorer.project.PlatypusProject;
-import com.eas.designer.explorer.project.PlatypusProjectSettings;
+import com.eas.designer.application.project.PlatypusProject;
+import com.eas.designer.application.project.PlatypusProjectSettings;
+import com.eas.designer.explorer.project.PlatypusProjectImpl;
+import com.eas.designer.explorer.project.PlatypusProjectSettingsImpl;
 import com.eas.designer.explorer.project.ProjectRunner;
 import com.eas.server.PlatypusServer;
 import com.eas.server.ServerMain;
@@ -177,11 +179,13 @@ public final class PlatypusServerInstance implements Server, ServerInstanceImple
                     project.getSettings().getRunClientOptions()));
         }
         //set default log level if not set explicitly
+        /* TODO: Take into account, that loglevel and other logging options are configured as system properties
         if (!ProjectRunner.isSetByOption(ServerMain.LOGLEVEL_CONF_PARAM, project.getSettings().getRunClientOptions())) {
             processBuilder = processBuilder.addArgument(ProjectRunner.OPTION_PREFIX + ServerMain.LOGLEVEL_CONF_PARAM);
-            processBuilder = processBuilder.addArgument(Level.INFO.getName());
-            io.getOut().println(String.format(NbBundle.getMessage(PlatypusServerInstance.class, "MSG_Logging_Level"), Level.INFO.getName()));//NOI18N
+            processBuilder = processBuilder.addArgument(project.getSettings().getServerLogLevel().getName());
+            io.getOut().println(String.format(NbBundle.getMessage(PlatypusServerInstance.class, "MSG_Logging_Level"), project.getSettings().getServerLogLevel().getName()));//NOI18N
         }
+        */ 
         ExecutionService service = ExecutionService.newService(processBuilder, descriptor, "Platypus Server");
         Future<Integer> runTask = service.run();
         serverRunTask = runTask;

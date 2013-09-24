@@ -17,6 +17,8 @@ import com.bearsoft.rowset.metadata.Parameters;
 import com.bearsoft.rowset.resourcepool.BearDatabaseConnection;
 import com.bearsoft.rowset.utils.RowsetUtils;
 import java.sql.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.sql.DataSource;
 
 /**
@@ -30,8 +32,10 @@ import javax.sql.DataSource;
  */
 public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
 
+    protected static final Logger queriesLogger = Logger.getLogger(JdbcFlowProvider.class.getName());
     protected DataSource dataSource;
     protected Converter converter;
+    protected Fields expectedFields;
     protected ResultSet lowLevelResults = null;
     protected Connection lowLevelConnection = null;
     protected PreparedStatement lowLevelStatement = null;
@@ -56,10 +60,11 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
      * to only one table, so you must choose.
      * @see DataSource
      */
-    public JdbcFlowProvider(JKT aJdbcSourceTag, String aSessionId, DataSource aDataSource, Converter aConverter, String aClause) {
+    public JdbcFlowProvider(JKT aJdbcSourceTag, String aSessionId, DataSource aDataSource, Converter aConverter, String aClause, Fields aExpectedFields) {
         super(aJdbcSourceTag, aSessionId, aClause);
         dataSource = aDataSource;
         converter = aConverter;
+        expectedFields = aExpectedFields;
         assert dataSource != null : "Flow provider can't exist without a data source";
         assert clause != null : "Flow provider can't exist without a selecting sql clause";
     }
@@ -84,7 +89,7 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
         } else if (converter != null) {
             try {
                 try {
-                    JdbcReader reader = new JdbcReader(converter);
+                    JdbcReader reader = new JdbcReader(converter, expectedFields);
                     return reader.readRowset(lowLevelResults, pageSize);
                 } finally {
                     if (lowLevelResults.isAfterLast()) {
@@ -177,6 +182,9 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
                                     }
                                 }
 
+                                if (queriesLogger.isLoggable(Level.FINE)) {
+                                    queriesLogger.log(Level.FINE, "Executing sql with {0} parameters:\n{1}", new Object[]{aParams.getParametersCount(), sqlClause});
+                                }
                                 ResultSet rs = null;
                                 if (procedure) {
                                     assert stmt instanceof CallableStatement;
@@ -198,7 +206,7 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
                                 }
                                 if (rs != null) {
                                     try {
-                                        JdbcReader reader = new JdbcReader(converter);
+                                        JdbcReader reader = new JdbcReader(converter, expectedFields);
                                         return reader.readRowset(rs, pageSize);
                                     } finally {
                                         if (isPaged()) {

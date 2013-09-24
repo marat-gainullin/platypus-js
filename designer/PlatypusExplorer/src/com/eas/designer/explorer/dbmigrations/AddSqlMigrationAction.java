@@ -4,7 +4,7 @@
  */
 package com.eas.designer.explorer.dbmigrations;
 
-import com.eas.designer.explorer.project.PlatypusProject;
+import com.eas.designer.explorer.project.PlatypusProjectImpl;
 import com.eas.designer.explorer.project.PlatypusProjectActions;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
@@ -40,7 +40,7 @@ public class AddSqlMigrationAction extends AbstractAction implements ContextAwar
     public Action createContextAwareInstance(Lookup actionContext) {
         Node contextNode = actionContext.lookup(Node.class);
         if (contextNode != null && contextNode.getLookup() != null) {
-            final PlatypusProject project = contextNode.getLookup().lookup(PlatypusProject.class);
+            final PlatypusProjectImpl project = contextNode.getLookup().lookup(PlatypusProjectImpl.class);
             return new AbstractAction() {
                 @Override
                 public boolean isEnabled() {
@@ -70,7 +70,7 @@ public class AddSqlMigrationAction extends AbstractAction implements ContextAwar
         }
     }
 
-    private void createSqlMigration(final PlatypusProject project) {
+    private void createSqlMigration(final PlatypusProjectImpl project) {
         RequestProcessor.Task createMigrationTask = RP.create(new Runnable() {
             @Override
             public void run() {

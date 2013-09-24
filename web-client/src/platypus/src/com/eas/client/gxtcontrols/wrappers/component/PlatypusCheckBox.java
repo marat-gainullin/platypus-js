@@ -2,11 +2,16 @@ package com.eas.client.gxtcontrols.wrappers.component;
 
 import java.util.List;
 
+import com.google.gwt.dom.client.NodeList;
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.dom.client.Style.VerticalAlign;
 import com.google.gwt.editor.client.EditorError;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.HasChangeHandlers;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.dom.client.Element;
 import com.sencha.gxt.cell.core.client.form.CheckBoxCell;
 import com.sencha.gxt.core.client.dom.XElement;
 import com.sencha.gxt.core.client.util.DelayedTask;
@@ -31,6 +36,7 @@ public class PlatypusCheckBox extends Field<Boolean> implements HasChangeHandler
 
 	public PlatypusCheckBox(CheckBoxCell aCell) {
 		super(aCell);
+		setValue(false);
 	}
 
 	@Override
@@ -45,21 +51,20 @@ public class PlatypusCheckBox extends Field<Boolean> implements HasChangeHandler
 
 	@Override
 	public void mutateButtonGroup(PlatypusButtonGroup aGroup) {
-		if(group != aGroup)
-		{
-			if(group != null)
-				group.remove((Component)this);
+		if (group != aGroup) {
+			if (group != null)
+				group.remove((Component) this);
 			group = aGroup;
-			if(group != null)
-				group.add((Component)this);
+			if (group != null)
+				group.add((Component) this);
 		}
 	}
-	
+
 	@Override
 	public HandlerRegistration addChangeHandler(ChangeHandler handler) {
 		return addDomHandler(handler, ChangeEvent.getType());
 	}
-	
+
 	@Override
 	public void clearInvalid() {
 		// do nothing
@@ -107,8 +112,28 @@ public class PlatypusCheckBox extends Field<Boolean> implements HasChangeHandler
 	}
 
 	protected void alignElements() {
-		if (getBoxLabel() == null) {
-			getCell().getInputElement(getElement()).<XElement> cast().center(getElement());
+		CheckBoxCell cell = getCell();
+		if (cell != null) {
+			Element inputEl = cell.getInputElement(getElement());
+			if (inputEl != null) {
+				if (getBoxLabel() == null) {
+					inputEl.<XElement> cast().center(getElement());
+				} else {
+					Style style = inputEl.getStyle();
+					style.setMarginTop(1, Unit.PX);
+					style.setVerticalAlign(VerticalAlign.MIDDLE);
+					Element inputParent = inputEl.getParentElement();
+					if (inputParent != null) {
+						NodeList<Element> labels = inputParent.getElementsByTagName("label");
+						if (labels != null) {
+							for (int i = 0; i < labels.getLength(); i++) {
+								Element l = labels.getItem(i);
+								l.getStyle().setVerticalAlign(VerticalAlign.MIDDLE);
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 
@@ -138,11 +163,13 @@ public class PlatypusCheckBox extends Field<Boolean> implements HasChangeHandler
 	public void setValue(Boolean value) {
 		setValue(value, false);
 		// IE6 is losing state when detached and attached
-		redraw();		
+		redraw();
 	}
-	
-	// There is a bug in GXT. onBlur handlers call finishEditing, thus commiting edited value.
-	// It's OK, but when redraw() calls setInnerHTML(), browser fires onBlur event against old 
+
+	// There is a bug in GXT. onBlur handlers call finishEditing, thus commiting
+	// edited value.
+	// It's OK, but when redraw() calls setInnerHTML(), browser fires onBlur
+	// event against old
 	// "input" element with old raw value.
 	// Such old value is applied by GXT onBlur handler in standard way.
 	// This leads to unexpected cancelling of new value.

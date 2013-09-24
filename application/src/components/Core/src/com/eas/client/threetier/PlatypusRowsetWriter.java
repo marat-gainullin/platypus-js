@@ -9,11 +9,8 @@ import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.exceptions.AlreadyExistSerializerException;
 import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.metadata.DataTypeInfo;
-import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.serial.BinaryRowsetWriter;
 import com.bearsoft.rowset.serial.custom.CompactLobsSerializer;
-import com.eas.client.SQLUtils;
-import com.vividsolutions.jts.geom.Geometry;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -25,13 +22,11 @@ import java.util.logging.Logger;
  */
 public class PlatypusRowsetWriter extends BinaryRowsetWriter {
 
-    protected boolean preProcessFields;
     protected boolean writeOnlyChanged;
 
-    public PlatypusRowsetWriter(boolean aPreProcessFields, boolean aWriteOnlyChanged) {
-        super();
+    protected PlatypusRowsetWriter(boolean aWriteOnlyChanged, boolean aWriteFields) {
+        super(aWriteFields);
         try {
-            preProcessFields = aPreProcessFields;
             writeOnlyChanged = aWriteOnlyChanged;
             CompactLobsSerializer lobsSerializer = new CompactLobsSerializer();
             addSerializer(DataTypeInfo.CLOB, lobsSerializer);
@@ -46,14 +41,11 @@ public class PlatypusRowsetWriter extends BinaryRowsetWriter {
         }
     }
 
-    public PlatypusRowsetWriter(boolean aPreProcessFields) {
-        this(aPreProcessFields, false);
-    }
-
-    public PlatypusRowsetWriter(){
+    public PlatypusRowsetWriter() {
         this(false, false);
     }
 
+    /*
     @Override
     public void writeFields(Fields aFields, ByteArrayOutputStream aOut) throws IOException {
         if (preProcessFields) {
@@ -62,7 +54,7 @@ public class PlatypusRowsetWriter extends BinaryRowsetWriter {
         }
         super.writeFields(aFields, aOut);
     }
-
+*/
     @Override
     protected ByteArrayOutputStream writeData(Rowset aRowset) throws RowsetException, IOException {
         return super.writeData(aRowset);

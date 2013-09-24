@@ -52,7 +52,7 @@ public class ParameterMetaDataImplTest {
         assertEquals(f3.getDescription(), "fDesc3");
         assertEquals(f3.getTypeInfo(), DataTypeInfo.DECIMAL);
         Parameter f4 = new Parameter(f3);
-        assertEquals(f4, f3);
+        assertTrue(f4.isEqual(f3));
         f3.setNullable(false);
         f3.setPrecision(5);
         f3.setReadonly(true);
@@ -74,7 +74,7 @@ public class ParameterMetaDataImplTest {
         Fields result = instance.clone();
         assertEquals(expResult.getFieldsCount(), result.getFieldsCount());
         for (int i = 0; i < expResult.getFieldsCount(); i++) {
-            assertEquals(expResult.get(i + 1), result.get(i + 1));
+            assertTrue(expResult.get(i + 1).isEqual(result.get(i + 1)));
         }
         parameters = new ParameterMetaDataImpl(instance);
     }

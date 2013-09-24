@@ -780,10 +780,10 @@ public class DbMap extends JPanel implements DbControl, RowsetsDbControl, Proper
         }
     };
     
-    public String beforeToolTipShow(Row aRow) {
+    public String beforeToolTipShow(Row aRow, ApplicationEntity<?, ?, ?> aEntity) throws Exception {
         Object func = scriptScope.get(BEFORE_SHOW_TOOL_TIP_FUNCTION_NAME, scriptScope);
         if (func != null && func instanceof Function) {
-            Object result = ScriptUtils.js2Java(ScriptableObject.callMethod(scriptScope, BEFORE_SHOW_TOOL_TIP_FUNCTION_NAME, new Object[]{new RowHostObject(scriptScope, aRow)}));
+            Object result = ScriptUtils.js2Java(ScriptableObject.callMethod(scriptScope, BEFORE_SHOW_TOOL_TIP_FUNCTION_NAME, new Object[]{RowHostObject.publishRow(scriptScope, aRow, aEntity)}));
             if (result instanceof String) {
                 return (String) result;
             }

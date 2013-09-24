@@ -4,7 +4,7 @@
  */
 package com.eas.designer.explorer.project.ui;
 
-import com.eas.designer.explorer.project.PlatypusProject;
+import com.eas.designer.explorer.project.PlatypusProjectImpl;
 import javax.swing.JComponent;
 import org.netbeans.spi.project.ui.support.ProjectCustomizer;
 import org.openide.ErrorManager;
@@ -15,7 +15,7 @@ import org.openide.util.NbBundle;
  *
  * @author mg
  */
-@ProjectCustomizer.CompositeCategoryProvider.Registration(category = "running", categoryLabel = "#running", projectType = "org-netbeans-modules-platypus", position=20)
+@ProjectCustomizer.CompositeCategoryProvider.Registration(category = "running", categoryLabel = "#running", projectType = "org-netbeans-modules-platypus", position=10)
 public class RunningCategoryProvider implements ProjectCustomizer.CompositeCategoryProvider {
 
     @Override
@@ -26,7 +26,7 @@ public class RunningCategoryProvider implements ProjectCustomizer.CompositeCateg
     @Override
     public JComponent createComponent(ProjectCustomizer.Category ctgr, Lookup lkp) {
         try {
-            PlatypusProject project = lkp.lookup(PlatypusProject.class);
+            PlatypusProjectImpl project = lkp.lookup(PlatypusProjectImpl.class);
             return new ProjectRunningCustomizer(project);
         } catch (Exception ex) {
             ErrorManager.getDefault().notify(ex);

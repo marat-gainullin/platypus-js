@@ -343,7 +343,7 @@ public class FieldsTest {
         assertEquals(f3.getDescription(), "fDesc1");
         assertEquals(f3.getTypeInfo(), DataTypeInfo.DECIMAL);
         Field f4 = new Field(f3);
-        assertEquals(f4, f3);
+        assertTrue(f4.isEqual(f3));
 
         instance.add(f1);
         instance.add(f2);
@@ -353,7 +353,7 @@ public class FieldsTest {
         Fields result = instance.clone();
         assertEquals(expResult.getFieldsCount(), result.getFieldsCount());
         for (int i = 0; i < expResult.getFieldsCount(); i++) {
-            assertEquals(expResult.get(i + 1), result.get(i + 1));
+            assertTrue(expResult.get(i + 1).isEqual(result.get(i + 1)));
         }
     }
 
@@ -374,7 +374,7 @@ public class FieldsTest {
         assertEquals(f3.getDescription(), "fDesc1");
         assertEquals(f3.getTypeInfo(), DataTypeInfo.DECIMAL);
         Field f4 = new Field(f3);
-        assertEquals(f4, f3);
+        assertTrue(f4.isEqual(f3));
 
         fields.add(f1);
         fields.add(f2);
@@ -389,7 +389,7 @@ public class FieldsTest {
         Rowset read = reader.read(serialized);
         assertEquals(1, read.getFields().getForeinKeys().size());
         Field fkField = read.getFields().getForeinKeys().get(0);
-        assertEquals(fkField, f2);
+        assertTrue(fkField.isEqual(f2));
         fkField.getFk().setCName("new fk constraint name");
         assertFalse(fkField.isEqual(f2));
     }

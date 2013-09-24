@@ -12,6 +12,7 @@ import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.events.RowsetListener;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.eas.client.Utils;
+import com.eas.client.Utils.JsObject;
 import com.eas.client.form.Form;
 import com.eas.client.form.api.JSEvents;
 import com.eas.client.gxtcontrols.ControlsUtils;
@@ -27,6 +28,7 @@ import com.eas.client.gxtcontrols.converters.StringRowValueConverter;
 import com.eas.client.gxtcontrols.grid.fillers.RowsListStoreFiller;
 import com.eas.client.gxtcontrols.grid.fillers.RowsTreeStoreFiller;
 import com.eas.client.gxtcontrols.grid.fillers.RowsTreeStoreLazyFiller;
+import com.eas.client.gxtcontrols.grid.rowmarker.RowMarker;
 import com.eas.client.gxtcontrols.grid.valueproviders.RowValueProvider;
 import com.eas.client.gxtcontrols.grid.wrappers.PlatypusColumnConfig;
 import com.eas.client.gxtcontrols.grid.wrappers.PlatypusGridInlineRowEditing;
@@ -47,9 +49,6 @@ import com.eas.client.gxtcontrols.wrappers.component.PlatypusTextArea;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Model;
 import com.google.gwt.cell.client.AbstractCell;
-import com.google.gwt.cell.client.Cell;
-import com.google.gwt.cell.client.DateCell;
-import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.TableCellElement;
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -64,11 +63,14 @@ import com.sencha.gxt.cell.core.client.form.CheckBoxCell;
 import com.sencha.gxt.cell.core.client.form.ComboBoxCell;
 import com.sencha.gxt.cell.core.client.form.ComboBoxCell.TriggerAction;
 import com.sencha.gxt.cell.core.client.form.SpinnerFieldCell;
+import com.sencha.gxt.core.client.GXT;
 import com.sencha.gxt.core.client.IdentityValueProvider;
+import com.sencha.gxt.core.client.dom.XDOM;
 import com.sencha.gxt.core.client.dom.XElement;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.data.shared.Store;
 import com.sencha.gxt.data.shared.TreeStore;
+import com.sencha.gxt.widget.core.client.ComponentPlugin;
 import com.sencha.gxt.widget.core.client.form.NumberPropertyEditor;
 import com.sencha.gxt.widget.core.client.grid.CheckBoxSelectionModel;
 import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
@@ -96,8 +98,8 @@ public class GxtGridFactory {
 
 		@Override
 		public void run() {
-			JavaScriptObject cellFunction = Utils.lookupProperty(module, cellFunctionName);
-			JavaScriptObject selectFunction = Utils.lookupProperty(module, selectFunctionName);
+			JavaScriptObject cellFunction = module.<JsObject>cast().getJs(cellFunctionName);
+			JavaScriptObject selectFunction = module.<JsObject>cast().getJs(selectFunctionName);
 
 			column.setCellFunction(cellFunction);
 			column.setSelectFunction(selectFunction);
@@ -123,25 +125,25 @@ public class GxtGridFactory {
 	protected Model model;
 	protected Entity rowsSource;
 	// protected String generalCellFunctionName;
-	protected List<ColumnConfig<Row, ?>> leaves = new ArrayList();
-	protected List<HeaderGroupConfig> groups = new ArrayList();
+	protected List<ColumnConfig<Row, ?>> leaves = new ArrayList<ColumnConfig<Row, ?>>();
+	protected List<HeaderGroupConfig> groups = new ArrayList<HeaderGroupConfig>();
 	protected int currentLeavesCount;
 	protected RowsetListener rowsFiller;
 	protected Store<Row> store;
 	protected Grid<Row> grid;
 	protected ModelGrid modelGrid;
 	protected PlatypusGridInlineRowEditing editing;
-	protected List<PlatypusColumnConfig<Row, String>> sColumns = new ArrayList();
-	protected List<PlatypusColumnConfig<Row, Date>> dColumns = new ArrayList();
-	protected List<PlatypusColumnConfig<Row, Double>> nColumns = new ArrayList();
-	protected List<PlatypusColumnConfig<Row, Boolean>> bColumns = new ArrayList();
-	protected List<PlatypusColumnConfig<Row, Object>> oColumns = new ArrayList();// lookup
+	protected List<PlatypusColumnConfig<Row, String>> sColumns = new ArrayList<PlatypusColumnConfig<Row, String>>();
+	protected List<PlatypusColumnConfig<Row, Date>> dColumns = new ArrayList<PlatypusColumnConfig<Row, Date>>();
+	protected List<PlatypusColumnConfig<Row, Double>> nColumns = new ArrayList<PlatypusColumnConfig<Row, Double>>();
+	protected List<PlatypusColumnConfig<Row, Boolean>> bColumns = new ArrayList<PlatypusColumnConfig<Row, Boolean>>();
+	protected List<PlatypusColumnConfig<Row, Object>> oColumns = new ArrayList<PlatypusColumnConfig<Row, Object>>();// lookup
 	                                                                             // columns
-	protected List<ComboLabelProvider> comboLabelProviders = new ArrayList();
-	protected List<ModelGridColumn<?>> publishedColumns = new ArrayList();
+	protected List<ComboLabelProvider> comboLabelProviders = new ArrayList<ComboLabelProvider>();
+	protected List<ModelGridColumn<?>> publishedColumns = new ArrayList<ModelGridColumn<?>>();
 
 	protected Set<Entity> toEnsureRowset = new HashSet<Entity>();
-	protected List<Runnable> handlersResolvers = new ArrayList();
+	protected List<Runnable> handlersResolvers = new ArrayList<Runnable>();
 
 	public GxtGridFactory(Element aTag, Model aModel) {
 		super();
@@ -191,16 +193,26 @@ public class GxtGridFactory {
 		paramSourceField = new ModelElementRef(Utils.getElementByTagName(treeTag, "paramSourceField"), model);
 
 		GridSelectionModel<Row> sm = null;
+		ColumnConfig<Row, Row> firstBlankColumn = null;
 		if (rowsHeaderType == ROWS_HEADER_TYPE_CHECKBOX) {
 			sm = new CheckBoxSelectionModel<Row>(new IdentityValueProvider<Row>());
-			leaves.add(0, ((CheckBoxSelectionModel<Row>) sm).getColumn());
+			firstBlankColumn = ((CheckBoxSelectionModel<Row>) sm).getColumn();
+			leaves.add(0, firstBlankColumn);
+			currentLeavesCount = 1;
 		} else if (rowsHeaderType == ROWS_HEADER_TYPE_RADIOBUTTON) {
 			sm = new RadioBoxSelectionModel<Row>(new IdentityValueProvider<Row>());
-			leaves.add(0, ((RadioBoxSelectionModel<Row>) sm).getColumn());
+			firstBlankColumn = ((RadioBoxSelectionModel<Row>) sm).getColumn();
+			leaves.add(0, firstBlankColumn);
+			currentLeavesCount = 1;
+		} else if (rowsHeaderType == ROWS_HEADER_TYPE_USUAL) {
+			sm = new PlatypusCellSelectionModel<Row>(new RowMarker(rowsSource, new IdentityValueProvider<Row>()));
+			firstBlankColumn = ((PlatypusCellSelectionModel<Row>) sm).getColumn();
+			leaves.add(0, firstBlankColumn);
+			currentLeavesCount = 1;
 		} else
-			sm = new PlatypusCellSelectionModel<Row>();
+			sm = new PlatypusCellSelectionModel<Row>(null);
 
-		List<HeaderGroupConfig> topLevelGroups = new ArrayList();
+		List<HeaderGroupConfig> topLevelGroups = new ArrayList<HeaderGroupConfig>();
 		NodeList nodesWithColumns = gridTag.getChildNodes();
 		for (int i = 0; i < nodesWithColumns.getLength(); i++) {
 			if ("column".equalsIgnoreCase(nodesWithColumns.item(i).getNodeName())) {
@@ -217,21 +229,18 @@ public class GxtGridFactory {
 		if (isTreeConfigured()) {
 			store = new TreeStore<Row>(new RowKeyProvider());
 			store.setAutoCommit(true);
-			if (isLazyTreeConfigured()) {
-				grid = new MaskingTreeGrid<Row>((TreeStore<Row>) store, cm, cm.getColumn(0));
-				if (rowsModelElement.isCorrect()) {
-					RowsTreeStoreLazyFiller filler = new RowsTreeStoreLazyFiller((TreeStore<Row>) store, rowsSource, unaryLinkField.field, (Parameter) param2GetChildren.field, paramSourceField.field,
-					        toEnsureRowset);
-					((TreeGrid<Row>) grid).setTreeLoader(filler.getLoader());
+			grid = new MaskingTreeGrid<Row>((TreeStore<Row>) store, cm, firstBlankColumn != null && cm.getColumnCount() > 1 ? cm.getColumn(1) : cm.getColumn(0));
+			grid.setView(new PlatypusTreeGridView());
+			if (rowsModelElement.isCorrect()) {
+				RowsTreeStoreFiller filler = null;
+				if (isLazyTreeConfigured()) {
+					filler = new RowsTreeStoreLazyFiller((TreeStore<Row>) store, rowsSource, unaryLinkField.field, (Parameter) param2GetChildren.field, paramSourceField.field, toEnsureRowset);
+				} else {
+					filler = new RowsTreeStoreFiller((TreeStore<Row>) store, rowsSource, unaryLinkField.field, toEnsureRowset);
 				}
-			} else {
-				grid = new MaskingTreeGrid<Row>((TreeStore<Row>) store, cm, cm.getColumn(0));
-				grid.setView(new PlatypusTreeGridView());
-				if (rowsModelElement.isCorrect()) {
-					RowsTreeStoreFiller filler = new RowsTreeStoreFiller((TreeStore<Row>) store, rowsSource, unaryLinkField.field, toEnsureRowset);
-					((TreeGrid<Row>) grid).setTreeLoader(filler.getLoader());
-				}
+				((TreeGrid<Row>) grid).setTreeLoader(filler.getLoader());
 			}
+
 		} else {
 			store = new ListStore<Row>(new RowKeyProvider());
 			store.setAutoCommit(true);
@@ -240,6 +249,10 @@ public class GxtGridFactory {
 				RowsListStoreFiller filler = new RowsListStoreFiller((ListStore<Row>) store, rowsSource, toEnsureRowset);
 				grid.setLoader(filler.getLoader());
 			}
+
+		}
+		if (firstBlankColumn instanceof ComponentPlugin<?>) {
+			((ComponentPlugin<Grid<Row>>) firstBlankColumn).initPlugin(grid);
 		}
 		grid.setLoadMask(true);
 
@@ -257,6 +270,9 @@ public class GxtGridFactory {
 		for (PlatypusColumnConfig<Row, Double> cc : nColumns)
 			if (cc.getEditor() != null)
 				editing.addEditor(cc, cc.getEditor());
+		for (PlatypusColumnConfig<Row, Boolean> cc : bColumns)
+			if (cc.getEditor() != null)
+				editing.addEditor(cc, cc.getEditor());
 		for (PlatypusColumnConfig<Row, Object> cc : oColumns)
 			if (cc.getEditor() != null)
 				editing.addEditor(cc, cc.getEditor());
@@ -270,13 +286,14 @@ public class GxtGridFactory {
 		grid.setColumnReordering(true);
 		grid.setColumnResize(true);
 		grid.getSelectionModel().addSelectionHandler(new RowsetPositionSelectionHandler(rowsSource));
+		//grid.getColumnModel().addColumnWidthChangeHandler(new ResizableCellsColumnResizer<Row, Object>(grid));
 
 		modelGrid = new ModelGrid(grid, editing);
 
 		handlersResolvers.add(new Runnable() {
 			@Override
 			public void run() {
-				modelGrid.setGeneralCellFunction(Utils.lookupProperty(model.getModule(), generalCellFunctionName));
+				modelGrid.setGeneralCellFunction(model.getModule().<JsObject>cast().getJs(generalCellFunctionName));
 			}
 		});
 		for (ModelGridColumn<?> column : publishedColumns)
@@ -323,7 +340,7 @@ public class GxtGridFactory {
 		Element styleTag = null;
 		int childrenCount = 0;
 		int subgroupsCount = 0;
-		List<HeaderGroupConfig> subGroups = new ArrayList();
+		List<HeaderGroupConfig> subGroups = new ArrayList<HeaderGroupConfig>();
 		NodeList columnNodes = aTag.getChildNodes();
 		int _currentLeavesCount = 0;
 		for (int c = 0; c < columnNodes.getLength(); c++) {
@@ -346,7 +363,7 @@ public class GxtGridFactory {
 			else if ("style".equalsIgnoreCase(columnNodes.item(c).getNodeName()))
 				styleTag = (Element) columnNodes.item(c);
 			else if ("column".equalsIgnoreCase(columnNodes.item(c).getNodeName())) {
-				if(_currentLeavesCount == 0)
+				if (_currentLeavesCount == 0)
 					_currentLeavesCount = currentLeavesCount;
 				childrenCount++;
 				HeaderGroupConfig subGroup = processColumn((Element) columnNodes.item(c), deepness + 1);
@@ -381,46 +398,50 @@ public class GxtGridFactory {
 		}
 	}
 
-	private void bindCallback(final Cell<String> aRenderer, final com.google.gwt.cell.client.Cell.Context context, final PublishedCell cellToRender) {
-        cellToRender.setDisplayCallback(new Runnable() {
-        	@Override
-        	public void run() {
-        		final TableCellElement cell = (TableCellElement) grid.getView().getCell(context.getIndex(), context.getColumn());
-        		if (cell != null) {
-        			SafeHtmlBuilder sb = new SafeHtmlBuilder();
+	private void bindCallback(final com.google.gwt.cell.client.Cell.Context context, final PublishedCell cellToRender) {
+		cellToRender.setDisplayCallback(new Runnable() {
+			@Override
+			public void run() {
+				final TableCellElement parent = (TableCellElement) grid.getView().getCell(context.getIndex(), context.getColumn());
+				if (parent != null) {
+					// rendering
+					SafeHtmlBuilder sb = new SafeHtmlBuilder();
+					SafeHtmlBuilder lsb = new SafeHtmlBuilder();
+					String toRender1 = cellToRender.getDisplay();
+					if (toRender1 == null)
+						lsb.append(SafeHtmlUtils.fromTrustedString("&#160;"));
+					else
+						lsb.append(SafeHtmlUtils.fromString(toRender1));
+					PublishedStyle styleToRender = modelGrid.complementPublishedStyle(cellToRender.getStyle());
+					ControlsUtils.renderDecorated(lsb, styleToRender, sb);
+					// detemine where to apply rendered html
+					XElement cellInnerElement = null;
+					if (grid.getView() instanceof PlatypusTreeGridView) {
+						PlatypusTreeGridView pTreeView = (PlatypusTreeGridView) grid.getView();
+						String cellInnerClass = pTreeView.getFirstCellTextSelector();
+						// The cellInnerClass is already with dot prefix
+						cellInnerElement = parent.<XElement> cast().selectNode(cellInnerClass);
+						if (cellInnerElement == null) {
+							cellInnerClass = grid.getView().getAppearance().styles().cellInner();
+							cellInnerElement = parent.<XElement> cast().selectNode("." + cellInnerClass);
+						}
+					} else {
+						String cellInnerClass = grid.getView().getAppearance().styles().cellInner();
+						cellInnerElement = parent.<XElement> cast().selectNode("." + cellInnerClass);
+					}
+					if (cellInnerElement != null)
+						cellInnerElement.setInnerSafeHtml(sb.toSafeHtml());
+				}
+			}
+		});
+	}
 
-        			SafeHtmlBuilder lsb = new SafeHtmlBuilder();
-        			String toRender1 = cellToRender.getDisplay();
-        			aRenderer.render(context, toRender1, lsb);
-        			if (toRender1 == null)
-        				lsb.append(SafeHtmlUtils.fromTrustedString("&#160;"));
-        			PublishedStyle styleToRender = modelGrid.complementPublishedStyle(cellToRender.getStyle());
-        			ControlsUtils.renderDecorated(lsb, styleToRender, sb);
-        			XElement cellInnerElement = null;
-        			if (grid.getView() instanceof PlatypusTreeGridView) {
-        				PlatypusTreeGridView pTreeView = (PlatypusTreeGridView) grid.getView();
-        				String cellInnerClass = pTreeView.getFirstCellTextSelector();
-        				cellInnerElement = cell.<XElement> cast().selectNode(cellInnerClass);// It is already with dot prefix
-        				if (cellInnerElement == null) {
-        					cellInnerClass = grid.getView().getAppearance().styles().cellInner();
-        					cellInnerElement = cell.<XElement> cast().selectNode("." + cellInnerClass);
-        				}
-        			} else {
-        				String cellInnerClass = grid.getView().getAppearance().styles().cellInner();
-        				cellInnerElement = cell.<XElement> cast().selectNode("." + cellInnerClass);
-        			}
-        			if (cellInnerElement != null)
-        				cellInnerElement.setInnerSafeHtml(sb.toSafeHtml());
-        		}
-        	}
-        });
-    }
-	
 	private ColumnConfig<Row, ?> configureColumn(String aName, String aTitle, int aWidth, final ModelElementRef aColModelElement, Element aColumnTag, Element aControlTag) throws Exception {
 		boolean readonly = Utils.getBooleanAttribute(aColumnTag, "readonly", false);
 		final String cellFunctionName = aColumnTag.getAttribute("cellFunction");
 		final String selectFunctionName = aColumnTag.getAttribute("selectFunction");
 		boolean selectOnly = Utils.getBooleanAttribute(aColumnTag, "selectOnly", false);
+		boolean fixed = Utils.getBooleanAttribute(aColumnTag, "fixed", false);
 
 		if (aColModelElement != null && aColModelElement.isCorrect()) {
 			if (aColModelElement.entity != rowsSource)
@@ -440,10 +461,8 @@ public class GxtGridFactory {
 					publishedColumns.add(column);
 					handlersResolvers.add(new ColumnHandlersResolver(model.getModule(), cellFunctionName, selectFunctionName, column));
 					PlatypusColumnConfig<Row, Object> cc = new PlatypusColumnConfig<Row, Object>(new RowValueProvider<Object>(rowsSource, aColModelElement, new ObjectRowValueConverter()), aWidth,
-					        sb.toSafeHtml(), readonly);
+					        sb.toSafeHtml(), readonly, fixed);
 					cc.setCell(new AbstractCell<Object>() {
-
-						protected TextCell renderer = new TextCell();
 
 						@Override
 						public void render(final com.google.gwt.cell.client.Cell.Context context, Object value, SafeHtmlBuilder sb) {
@@ -458,16 +477,17 @@ public class GxtGridFactory {
 									if (cellToRender.getDisplay() != null)
 										toRender = cellToRender.getDisplay();
 								}
-								renderer.render(context, toRender, lsb);
 								if (toRender == null)
 									lsb.append(SafeHtmlUtils.fromTrustedString("&#160;"));
+								else
+									lsb.append(SafeHtmlUtils.fromString(toRender));
 								styleToRender = modelGrid.complementPublishedStyle(styleToRender);
 								ControlsUtils.renderDecorated(lsb, styleToRender, sb);
 								if (cellToRender != null) {
-									bindCallback(renderer, context, cellToRender);
+									bindCallback(context, cellToRender);
 								}
 							} catch (Exception e) {
-								renderer.render(context, e.getMessage(), sb);
+								sb.append(SafeHtmlUtils.fromString(e.getMessage()));
 							}
 						}
 					});
@@ -490,11 +510,9 @@ public class GxtGridFactory {
 					publishedColumns.add(column);
 					handlersResolvers.add(new ColumnHandlersResolver(model.getModule(), cellFunctionName, selectFunctionName, column));
 					PlatypusColumnConfig<Row, String> cc = new PlatypusColumnConfig<Row, String>(new RowValueProvider<String>(rowsSource, aColModelElement, new StringRowValueConverter()), aWidth,
-					        sb.toSafeHtml(), readonly);
-					cc.setCell(new TextCell() {
+					        sb.toSafeHtml(), readonly, fixed);
+					cc.setCell(new AbstractCell<String>() {
 
-						protected TextCell renderer = new TextCell();
-						
 						@Override
 						public void render(com.google.gwt.cell.client.Cell.Context context, String value, SafeHtmlBuilder sb) {
 							try {
@@ -508,13 +526,14 @@ public class GxtGridFactory {
 									if (cellToRender.getDisplay() != null)
 										toRender = cellToRender.getDisplay();
 								}
-								super.render(context, toRender, lsb);
 								if (toRender == null)
 									lsb.append(SafeHtmlUtils.fromTrustedString("&#160;"));
+								else
+									lsb.append(SafeHtmlUtils.fromString(toRender));
 								styleToRender = modelGrid.complementPublishedStyle(styleToRender);
 								ControlsUtils.renderDecorated(lsb, styleToRender, sb);
 								if (cellToRender != null) {
-									bindCallback(renderer, context, cellToRender);
+									bindCallback(context, cellToRender);
 								}
 							} catch (Exception ex) {
 								Logger.getLogger(GxtGridFactory.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
@@ -539,16 +558,13 @@ public class GxtGridFactory {
 					final ModelGridDateColumn column = new ModelGridDateColumn(aName);
 					publishedColumns.add(column);
 					handlersResolvers.add(new ColumnHandlersResolver(model.getModule(), cellFunctionName, selectFunctionName, column));
-
 					PlatypusColumnConfig<Row, Date> cc = new PlatypusColumnConfig<Row, Date>(new RowValueProvider<Date>(rowsSource, aColModelElement, new DateRowValueConverter()), aWidth,
-					        sb.toSafeHtml(), readonly);
+					        sb.toSafeHtml(), readonly, fixed);
 					String dateFormat = aControlTag.getAttribute("dateFormat");
 					if (dateFormat != null)
 						dateFormat = ControlsUtils.convertDateFormatString(dateFormat);
 					final DateTimeFormat dtFormat = dateFormat != null ? DateTimeFormat.getFormat(dateFormat) : DateTimeFormat.getFormat(PredefinedFormat.DATE_FULL);
-					cc.setCell(new DateCell(dtFormat) {
-
-						protected TextCell renderer;
+					cc.setCell(new AbstractCell<Date>() {
 
 						@Override
 						public void render(com.google.gwt.cell.client.Cell.Context context, Date value, SafeHtmlBuilder sb) {
@@ -560,26 +576,24 @@ public class GxtGridFactory {
 								        column.getCellFunction() != null ? column.getCellFunction() : modelGrid.getGeneralCellFunction(), context, aColModelElement, toRender);
 								if (cellToRender != null) {
 									styleToRender = cellToRender.getStyle();
-									if (renderer == null)
-										renderer = new TextCell();
 									if (cellToRender.getDisplay() != null)
 										toRender = cellToRender.getDisplay();
-									renderer.render(context, toRender, lsb);
-									if (toRender == null)
-										lsb.append(SafeHtmlUtils.fromTrustedString("&#160;"));
-								} else
-									super.render(context, value, lsb);
+								}
+								if (toRender == null)
+									lsb.append(SafeHtmlUtils.fromTrustedString("&#160;"));
+								else
+									lsb.append(SafeHtmlUtils.fromString(toRender));
 								styleToRender = modelGrid.complementPublishedStyle(styleToRender);
 								ControlsUtils.renderDecorated(lsb, styleToRender, sb);
 								if (cellToRender != null) {
-									bindCallback(renderer, context, cellToRender);
+									bindCallback(context, cellToRender);
 								}
 							} catch (Exception ex) {
 								Logger.getLogger(GxtGridFactory.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
 							}
 						}
 					});
-					final PlatypusDateField df = new PlatypusDateField();
+					final PlatypusDateField df = new PlatypusDateField(dtFormat);
 					PlatypusAdapterCellField<Date> resComp = new PlatypusAdapterCellField<Date>(df, column);
 					JavaScriptObject published = Publisher.publishColumnEditor(df, resComp);
 					df.setData(Form.PUBLISHED_DATA_KEY, published);
@@ -594,19 +608,61 @@ public class GxtGridFactory {
 					return cc;
 				} else if ("DbImageDesignInfo".equalsIgnoreCase(controlInfoName)) {
 				} else if ("DbCheckDesignInfo".equalsIgnoreCase(controlInfoName)) {
-					ModelGridCheckColumn column = new ModelGridCheckColumn(aName);
+					final ModelGridCheckColumn column = new ModelGridCheckColumn(aName);
 					publishedColumns.add(column);
 					handlersResolvers.add(new ColumnHandlersResolver(model.getModule(), cellFunctionName, selectFunctionName, column));
 					PlatypusColumnConfig<Row, Boolean> cc = new PlatypusColumnConfig<Row, Boolean>(new RowValueProvider<Boolean>(rowsSource, aColModelElement, new BooleanRowValueConverter()), aWidth,
-					        sb.toSafeHtml(), readonly);
+					        sb.toSafeHtml(), readonly, fixed);
 					// There are some nightmare with null values and script
 					// boolean value(NOT Boolean !).
 					// If you want use published version of the editor, you
 					// should solve this problem.
-					CheckBoxCell cell = new CheckBoxCell();
+					CheckBoxCell cell = new CheckBoxCell() {
+
+						@Override
+						public void render(com.google.gwt.cell.client.Cell.Context context, Boolean value, SafeHtmlBuilder sb) {
+							try {
+								PublishedStyle styleToRender = null;
+								SafeHtmlBuilder lsb = new SafeHtmlBuilder();
+								PublishedCell cellToRender = calcContextPublishedCell(column.getEventsThis(),
+								        column.getCellFunction() != null ? column.getCellFunction() : modelGrid.getGeneralCellFunction(), context, aColModelElement, null);
+								if (cellToRender != null) {
+									styleToRender = cellToRender.getStyle();
+								}
+								CheckBoxCellOptions options = new CheckBoxCellOptions();
+								options.setName(name);
+
+								// radios must have a name for ie6 and ie7
+								if (name == null && (GXT.isIE6() || GXT.isIE7())) {
+									name = XDOM.getUniqueId();
+								}
+
+								options.setReadonly(isReadOnly());
+								options.setDisabled(isDisabled());
+								options.setBoxLabel(getBoxLabel());
+								String checkBoxId = XDOM.getUniqueId();
+
+								String nameParam = options.getName() != null ? " name='" + options.getName() + "' " : "";
+								String disabledParam = options.isDisabled() ? " disabled=true" : "";
+								String readOnlyParam = options.isReadonly() ? " readonly" : "";
+								String idParam = " id=" + checkBoxId;
+								String typeParam = " type=checkbox";
+								String checkedParam = value != null && value ? " checked" : "";
+
+								lsb.appendHtmlConstant("<input " + typeParam + nameParam + disabledParam + readOnlyParam + idParam + checkedParam + " />");
+								styleToRender = modelGrid.complementPublishedStyle(styleToRender);
+								ControlsUtils.renderDecorated(lsb, styleToRender, sb);
+								if (cellToRender != null) {
+									bindCallback(context, cellToRender);
+								}								
+							} catch (Exception ex) {
+								Logger.getLogger(GxtGridFactory.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+							}
+						}
+					};
 					cell.setReadOnly(readonly);
+					cell.setWidth(cc.getWidth());
 					cc.setCell(cell);
-					// cc.setEditor(new PlatypusCheckBox(cell));
 					column.setColumnConfig(cc);
 					leaves.add(cc);
 					bColumns.add(cc);
@@ -616,10 +672,8 @@ public class GxtGridFactory {
 					publishedColumns.add(column);
 					handlersResolvers.add(new ColumnHandlersResolver(model.getModule(), cellFunctionName, selectFunctionName, column));
 					PlatypusColumnConfig<Row, Double> cc = new PlatypusColumnConfig<Row, Double>(new RowValueProvider<Double>(rowsSource, aColModelElement, new DoubleRowValueConverter()), aWidth,
-					        sb.toSafeHtml(), readonly);
+					        sb.toSafeHtml(), readonly, fixed);
 					cc.setCell(new NumberCell<Double>() {
-
-						protected TextCell renderer = new TextCell();
 
 						@Override
 						public void render(com.google.gwt.cell.client.Cell.Context context, Number value, SafeHtmlBuilder sb) {
@@ -633,15 +687,15 @@ public class GxtGridFactory {
 									styleToRender = cellToRender.getStyle();
 									if (cellToRender.getDisplay() != null)
 										toRender = cellToRender.getDisplay();
-									renderer.render(context, toRender, lsb);
-									if (toRender == null)
-										lsb.append(SafeHtmlUtils.fromTrustedString("&#160;"));
-								} else
-									super.render(context, value, lsb);
+								}
+								if (toRender == null)
+									lsb.append(SafeHtmlUtils.fromTrustedString("&#160;"));
+								else
+									lsb.append(SafeHtmlUtils.fromString(toRender));
 								styleToRender = modelGrid.complementPublishedStyle(styleToRender);
 								ControlsUtils.renderDecorated(lsb, styleToRender, sb);
 								if (cellToRender != null) {
-									bindCallback(renderer, context, cellToRender);
+									bindCallback(context, cellToRender);
 								}
 							} catch (Exception ex) {
 								Logger.getLogger(GxtGridFactory.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
@@ -689,10 +743,8 @@ public class GxtGridFactory {
 					labelProvider.setDisplayValueRef(displayRef);
 					comboLabelProviders.add(labelProvider);
 					PlatypusColumnConfig<Row, Object> cc = new PlatypusColumnConfig<Row, Object>(new RowValueProvider<Object>(rowsSource, aColModelElement, new ObjectRowValueConverter()), aWidth,
-					        sb.toSafeHtml(), readonly);
+					        sb.toSafeHtml(), readonly, fixed);
 					cc.setCell(new AbstractCell<Object>() {
-
-						protected TextCell renderer = new TextCell();
 
 						@Override
 						public void render(com.google.gwt.cell.client.Cell.Context context, Object value, SafeHtmlBuilder sb) {
@@ -707,16 +759,17 @@ public class GxtGridFactory {
 									if (cellToRender.getDisplay() != null)
 										toRender = cellToRender.getDisplay();
 								}
-								renderer.render(context, toRender, lsb);
 								if (toRender == null)
 									lsb.append(SafeHtmlUtils.fromTrustedString("&#160;"));
+								else
+									lsb.append(SafeHtmlUtils.fromString(toRender));
 								styleToRender = modelGrid.complementPublishedStyle(styleToRender);
 								ControlsUtils.renderDecorated(lsb, styleToRender, sb);
 								if (cellToRender != null) {
-									bindCallback(renderer, context, cellToRender);
+									bindCallback(context, cellToRender);
 								}
 							} catch (Exception e) {
-								renderer.render(context, e.getMessage(), sb);
+								sb.append(SafeHtmlUtils.fromString(e.getMessage()));
 							}
 						}
 					});
@@ -729,6 +782,7 @@ public class GxtGridFactory {
 					cb.setTypeAhead(true);
 					cb.setTriggerAction(TriggerAction.ALL);
 					cb.getCell().setHideTrigger(!list);
+					cb.setEditable(false);
 					PlatypusAdapterCellField<Object> resComp = new PlatypusAdapterCellField<Object>(cb, column);
 					JavaScriptObject published = Publisher.publishColumnEditor(cb, resComp);
 					cb.setData(Form.PUBLISHED_DATA_KEY, published);
@@ -753,34 +807,30 @@ public class GxtGridFactory {
 			SafeHtmlBuilder sb = new SafeHtmlBuilder();
 			sb.appendHtmlConstant((aTitle != null && !aTitle.isEmpty()) ? aTitle : aName);
 			PlatypusColumnConfig<Row, String> cc = new PlatypusColumnConfig<Row, String>(new RowValueProvider<String>(rowsSource, aColModelElement, new StringRowValueConverter()), aWidth,
-			        sb.toSafeHtml(), readonly);
-			cc.setCell(new TextCell() {
-
-				protected TextCell renderer;
+			        sb.toSafeHtml(), readonly, fixed);
+			cc.setCell(new AbstractCell<String>() {
 
 				@Override
 				public void render(com.google.gwt.cell.client.Cell.Context context, String value, SafeHtmlBuilder sb) {
 					try {
+						String toRender = value;
 						PublishedStyle styleToRender = null;
 						SafeHtmlBuilder lsb = new SafeHtmlBuilder();
 						PublishedCell cellToRender = calcContextPublishedCell(column.getEventsThis(), column.getCellFunction() != null ? column.getCellFunction() : modelGrid.getGeneralCellFunction(),
 						        context, aColModelElement, value);
 						if (cellToRender != null) {
 							styleToRender = cellToRender.getStyle();
-							if (renderer == null)
-								renderer = new TextCell();
-							String toRender = value;
 							if (cellToRender.getDisplay() != null)
 								toRender = cellToRender.getDisplay();
-							renderer.render(context, toRender, lsb);
-							if (toRender == null)
-								lsb.append(SafeHtmlUtils.fromTrustedString("&#160;"));
-						} else
-							super.render(context, value, lsb);
+						}
+						if (toRender == null)
+							lsb.append(SafeHtmlUtils.fromTrustedString("&#160;"));
+						else
+							lsb.append(SafeHtmlUtils.fromString(toRender));
 						styleToRender = modelGrid.complementPublishedStyle(styleToRender);
 						ControlsUtils.renderDecorated(lsb, styleToRender, sb);
 						if (cellToRender != null) {
-							bindCallback(renderer, context, cellToRender);
+							bindCallback(context, cellToRender);
 						}
 					} catch (Exception ex) {
 						Logger.getLogger(GxtGridFactory.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);

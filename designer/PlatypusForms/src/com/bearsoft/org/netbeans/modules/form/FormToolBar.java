@@ -52,6 +52,7 @@ import java.util.*;
 import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.event.*;
+import org.openide.awt.ToolbarWithOverflow;
 import org.openide.nodes.*;
 import org.openide.util.HelpCtx;
 import org.openide.util.actions.SystemAction;
@@ -63,7 +64,7 @@ import org.openide.util.actions.SystemAction;
  *
  * @author Tomas Pavek
  */
-class FormToolBar extends JToolBar {
+class FormToolBar extends ToolbarWithOverflow {
 
     private PlatypusFormLayoutView formDesigner;
     private JToggleButton selectionButton;

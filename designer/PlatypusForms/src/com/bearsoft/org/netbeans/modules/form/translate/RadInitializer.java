@@ -110,7 +110,7 @@ public class RadInitializer {
                                 if (Component.class.isAssignableFrom(radProp.getValueType())
                                         || ButtonGroup.class.isAssignableFrom(radProp.getValueType())) {
                                     radProp.setValue(new ComponentChooserEditor.ComponentRef<>((String) res, component.getFormModel()));
-                                } else if (javax.swing.Icon.class.isAssignableFrom(radProp.getValueType())) {
+                                } else if (javax.swing.Icon.class.isAssignableFrom(radProp.getValueType()) || java.awt.Image.class.isAssignableFrom(radProp.getValueType())) {
                                     String iconName = (String) res;
                                     radProp.setValue(IconEditor.iconFromResourceName(component.getFormModel().getDataObject(), iconName));
                                 }

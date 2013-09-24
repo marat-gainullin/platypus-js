@@ -4,6 +4,7 @@
  */
 package com.eas.client.model.application;
 
+import com.eas.client.model.store.ApplicationModel2XmlDom;
 import com.bearsoft.rowset.compacts.CompactBlob;
 import com.bearsoft.rowset.compacts.CompactClob;
 import com.bearsoft.rowset.dataflow.TransactionListener;
@@ -47,6 +48,7 @@ import org.w3c.dom.Document;
 public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P extends E, C extends Client, Q extends Query<C>> extends Model<E, P, C, Q> {
 
     public static final String SCRIPT_MODEL_NAME = "model";
+    protected Set<ReferenceRelation<E>> referenceRelations = new HashSet<>();
     protected Set<Long> savedRowIndexEntities = new HashSet<>();
     protected List<Entry<E, Integer>> savedEntitiesRowIndexes = new ArrayList<>();
     protected List<ScriptEvent<E>> scriptEventsQueue = new ArrayList<>();
@@ -77,6 +79,34 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
             if (parametersEntity != null) {
                 parametersEntity.defineProperties();
             }
+            //
+            for (ReferenceRelation<E> aRelation : referenceRelations) {
+                String scalarPropertyName = aRelation.getScalarPropertyName();                
+                if (scalarPropertyName == null || scalarPropertyName.isEmpty()) {
+                    scalarPropertyName = aRelation.getRightEntity().getName();
+                }
+                if (scalarPropertyName != null && !scalarPropertyName.isEmpty()) {
+                    aRelation.getLeftEntity().putOrmDefinition(
+                            scalarPropertyName,
+                            ScriptUtils.scalarPropertyDefinition(
+                            aRelation.getRightEntity().getRowsetWrap(),
+                            aRelation.getRightField().getName(),
+                            aRelation.getLeftField().getName()));
+                }
+                String collectionPropertyName = aRelation.getCollectionPropertyName();
+                if (collectionPropertyName == null || collectionPropertyName.isEmpty()) {
+                    collectionPropertyName = aRelation.getLeftEntity().getName();
+                }
+                if (collectionPropertyName != null && !collectionPropertyName.isEmpty()) {
+                    aRelation.getRightEntity().putOrmDefinition(
+                            collectionPropertyName,
+                            ScriptUtils.collectionPropertyDefinition(
+                            aRelation.getLeftEntity().getRowsetWrap(),
+                            aRelation.getRightField().getName(),
+                            aRelation.getLeftField().getName()));
+                }
+            }
+            //////////////////
             ((ScriptableObject) scriptScope).defineProperty(SCRIPT_MODEL_NAME, ScriptUtils.javaToJS(this, aScriptScope), ScriptableObject.READONLY);
         }
         changeSupport.firePropertyChange("scriptScope", oldValue, scriptScope);
@@ -95,6 +125,32 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
             for (ScriptEvent event : scriptEventsQueue) {
                 event.resolveHandler();
             }
+        }
+    }
+
+    @Override
+    public Model<E, P, C, Q> copy() throws Exception {
+        Model<E, P, C, Q>  copied = super.copy();
+        for (ReferenceRelation<E> relation : referenceRelations) {
+            ReferenceRelation<E> rcopied = (ReferenceRelation<E>)relation.copy();
+            resolveCopiedRelation(rcopied, copied);
+            ((ApplicationModel<E, P, C, Q>)copied).getReferenceRelations().add(rcopied);
+        }
+        return copied;
+    }
+
+    @Override
+    public void checkRelationsIntegrity() {
+        super.checkRelationsIntegrity();
+        List<ReferenceRelation<E>> toDel = new ArrayList<>();
+        for (ReferenceRelation<E> rel : referenceRelations) {
+            if (rel.getLeftEntity() == null || (rel.getLeftField() == null && rel.getLeftParameter() == null)
+                    || rel.getRightEntity() == null || (rel.getRightField() == null && rel.getRightParameter() == null)) {
+                toDel.add(rel);
+            }
+        }
+        for (ReferenceRelation<E> rel : toDel) {
+            referenceRelations.remove(rel);
         }
     }
 
@@ -191,11 +247,20 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         return false;
     }
 
+    /**
+     * Stub for compliance with asynchronous model within browser client.
+     *
+     * @return Allways false. Because of it is a stub.
+     */
+    public boolean isPending() {
+        return false;
+    }
+
     @ScriptFunction(jsDocText = "Saves model data changes. "
-    + "If model can't apply the changed, than exception is thrown. "
-    + "In this case, application can call model.save() another time to save the changes. "
-    + "If an application need to abort futher attempts and discard model data changes, "
-    + "than it can call model.revert().")
+            + "If model can't apply the changed, than exception is thrown. "
+            + "In this case, application can call model.save() another time to save the changes. "
+            + "If an application need to abort futher attempts and discard model data changes, "
+            + "than it can call model.revert().")
     public final boolean save() throws Exception {
         return save(null);
     }
@@ -231,8 +296,8 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
     public abstract int commit() throws Exception;
 
     @ScriptFunction(jsDocText = "Drops model data changes. After this method call, save() method have no "
-    + "any changes to be saved, but still attempts to commit. "
-    + "So, call to model.save() on commitable and unchanged model nevertheless leads to commit.")
+            + "any changes to be saved, but still attempts to commit. "
+            + "So, call to model.save() on commitable and unchanged model nevertheless leads to commit.")
     public abstract void revert() throws Exception;
 
     public abstract void saved() throws Exception;
@@ -253,54 +318,97 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
 
     @ScriptFunction(jsDocText = "Requeries model data.")
     public final void requery() throws Exception {
-        requery(null);
+        requery(null, null);
     }
 
-    public void requery(Function aCallback) throws Exception {
-        executeRootEntities(true);
-        if (aCallback != null) {
-            Context cx = Context.getCurrentContext();
-            boolean wasContext = cx != null;
-            if (!wasContext) {
-                cx = ScriptUtils.enterContext();
-            }
-            try {
-                aCallback.call(cx, scriptScope, scriptScope, new Object[]{});
-            } finally {
+    public void requery(Function aOnSuccess, Function aOnFailure) throws Exception {
+        try {
+            executeRootEntities(true);
+            if (aOnSuccess != null) {
+                Context cx = Context.getCurrentContext();
+                boolean wasContext = cx != null;
                 if (!wasContext) {
-                    Context.exit();
+                    cx = ScriptUtils.enterContext();
                 }
+                try {
+                    aOnSuccess.call(cx, scriptScope, scriptScope, new Object[]{});
+                } finally {
+                    if (!wasContext) {
+                        Context.exit();
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            if (aOnFailure != null) {
+                Context cx = Context.getCurrentContext();
+                boolean wasContext = cx != null;
+                if (!wasContext) {
+                    cx = ScriptUtils.enterContext();
+                }
+                try {
+                    aOnFailure.call(cx, scriptScope, scriptScope, new Object[]{ex.getMessage()});
+                } finally {
+                    if (!wasContext) {
+                        Context.exit();
+                    }
+                }
+            } else {
+                throw ex;
             }
         }
     }
 
     @ScriptFunction(jsDocText = "Refreshes model data if any of its parameters has changed.")
     public void execute() throws Exception {
-        execute(null);
+        execute(null, null);
     }
 
     @ScriptFunction(jsDocText = "Refreshes model data if any of its parameters has changed with callback.")
-    public void execute(Function aCallback) throws Exception {
-        executeRootEntities(false);
-        if (aCallback != null) {
-            Context cx = Context.getCurrentContext();
-            boolean wasContext = cx != null;
-            if (!wasContext) {
-                cx = ScriptUtils.enterContext();
-            }
-            try {
-                aCallback.call(cx, scriptScope, scriptScope, new Object[]{});
-            } finally {
+    public void execute(Function aOnSuccess) throws Exception {
+        execute(aOnSuccess, null);
+    }
+
+    @ScriptFunction(jsDocText = "Refreshes model data if any of its parameters has changed with callback.")
+    public void execute(Function aOnSuccess, Function aOnFailure) throws Exception {
+        try {
+            executeRootEntities(false);
+            if (aOnSuccess != null) {
+                Context cx = Context.getCurrentContext();
+                boolean wasContext = cx != null;
                 if (!wasContext) {
-                    Context.exit();
+                    cx = ScriptUtils.enterContext();
                 }
+                try {
+                    aOnSuccess.call(cx, scriptScope, scriptScope, new Object[]{});
+                } finally {
+                    if (!wasContext) {
+                        Context.exit();
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            if (aOnFailure != null) {
+                Context cx = Context.getCurrentContext();
+                boolean wasContext = cx != null;
+                if (!wasContext) {
+                    cx = ScriptUtils.enterContext();
+                }
+                try {
+                    aOnFailure.call(cx, scriptScope, scriptScope, new Object[]{ex.getMessage()});
+                } finally {
+                    if (!wasContext) {
+                        Context.exit();
+                    }
+                }
+            } else {
+                throw ex;
             }
         }
     }
 
     private void executeRootEntities(boolean refresh) throws Exception {
         Set<E> toExecute = new HashSet<>();
-        for (E entity : entities.values()) {            
+        for (E entity : entities.values()) {
             Set<Relation<E>> dependanceRels = new HashSet<>();
             for (Relation<E> inRel : entity.getInRelations()) {
                 if (!(inRel.getLeftEntity() instanceof ApplicationParametersEntity)) {
@@ -359,30 +467,37 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
 
     @Override
     public void setRuntime(boolean aValue) throws Exception {
-        boolean oldValue = runtime;
-        runtime = aValue;
-        if (!oldValue && runtime) {
-            executeRootEntities(false);
-        }
-        PropertyChangeEvent evt = new PropertyChangeEvent(this, "runtime", oldValue, runtime);
-        for (PropertyChangeListener l : changeSupport.getPropertyChangeListeners()) {
-            try {
-                l.propertyChange(evt);
-            } catch (Exception ex) {
-                Logger.getLogger(ApplicationModel.class.getName()).log(Level.SEVERE, null, ex);
+        if (runtime != aValue) {
+            boolean oldValue = runtime;
+            runtime = aValue;
+            if (!oldValue && runtime) {
+                executeRootEntities(false);
+            }
+            PropertyChangeEvent evt = new PropertyChangeEvent(this, "runtime", oldValue, runtime);
+            for (PropertyChangeListener l : changeSupport.getPropertyChangeListeners()) {
+                try {
+                    l.propertyChange(evt);
+                } catch (Exception ex) {
+                    Logger.getLogger(ApplicationModel.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         }
     }
     protected static final String USER_DATASOURCE_NAME = "userQuery";
 
     public synchronized Scriptable createQuery(String aQueryId) throws Exception {
+        Logger.getLogger(ApplicationModel.class.getName()).log(Level.WARNING, "createQuery deprecated call detected. Use createEntity instead.");
+        return createEntity(aQueryId);
+    }
+
+    public synchronized Scriptable createEntity(String aQueryId) throws Exception {
         if (client == null) {
-            throw new NullPointerException("Null client detected while creating a query");
+            throw new NullPointerException("Null client detected while creating an entity");
         }
         E entity = newGenericEntity();
         entity.setName(USER_DATASOURCE_NAME);
         entity.setQueryId(aQueryId);
-        addEntity(entity);
+        //addEntity(entity); To avoid memory leaks you should not add the entity in the model!
         return entity.defineProperties();
     }
 
@@ -420,6 +535,30 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
             }
             removeEntity((E) entity2Delete);
         }
+    }
+
+    public void addReferenceRelation(ReferenceRelation<E> aRelation) {
+        referenceRelations.add(aRelation);
+        fireRelationAdded(aRelation);
+    }
+
+    public void removeReferenceRelation(ReferenceRelation<E> aRelation) {
+        referenceRelations.remove(aRelation);
+        fireRelationRemoved(aRelation);
+    }
+
+    public Set<ReferenceRelation<E>> getReferenceRelations() {
+        return referenceRelations;
+    }
+
+    public Set<ReferenceRelation<E>> getReferenceRelationsByEntity(E aEntity) {
+        Set<ReferenceRelation<E>> res = new HashSet<>();
+        for (ReferenceRelation<E> rel : referenceRelations) {
+            if (rel.getLeftEntity() == aEntity || rel.getRightEntity() == aEntity) {
+                res.add(rel);
+            }
+        }
+        return res;
     }
 
     public CompactBlob loadBlobFromFile(File aFile) throws IOException {

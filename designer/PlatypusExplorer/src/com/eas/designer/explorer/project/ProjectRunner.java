@@ -4,9 +4,13 @@
  */
 package com.eas.designer.explorer.project;
 
+import com.eas.designer.application.project.ClientType;
+import com.eas.designer.application.project.AppServerType;
 import com.eas.client.ClientConstants;
 import com.eas.client.application.PlatypusClientApplication;
 import com.eas.deploy.project.PlatypusSettings;
+import com.eas.designer.application.project.PlatypusProject;
+import com.eas.designer.application.project.PlatypusProjectSettings;
 import com.eas.designer.debugger.DebuggerEnvironment;
 import com.eas.designer.debugger.DebuggerUtils;
 import com.eas.designer.explorer.j2ee.PlatypusWebModuleManager;
@@ -21,7 +25,6 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.Future;
-import java.util.logging.Level;
 import org.netbeans.api.extexecution.ExecutionDescriptor;
 import org.netbeans.api.extexecution.ExecutionService;
 import org.netbeans.api.extexecution.ExternalProcessBuilder;
@@ -50,9 +53,15 @@ public class ProjectRunner {
     private static final String FALSE = "false"; //NOI18N
     private static final String LOCAL_HOSTNAME = "localhost"; //NOI18N
 
+    /**
+     * Starts an application in run mode. 
+     * @param project Application's project.
+     * @param appElementId Application element's name OR relative path to the executable file.
+     * @throws Exception If something goes wrong.
+     */
     public static void run(final PlatypusProject project, final String appElementId) throws Exception {
 
-        project.RP.post(new Runnable() {
+        project.getRequestProcessor().post(new Runnable() {
             @Override
             public void run() {
                 start(project, appElementId, false);
@@ -60,8 +69,14 @@ public class ProjectRunner {
         });
     }
 
+    /**
+     * Starts an application in debug mode. 
+     * @param project Application's project.
+     * @param appElementId Application element's name OR relative path to the executable file.
+     * @throws Exception If something goes wrong.
+     */
     public static void debug(final PlatypusProject project, final String appElementId) throws Exception {
-        project.RP.post(new Runnable() {
+        project.getRequestProcessor().post(new Runnable() {
             @Override
             public void run() {
                 Future<Integer> runningProgram = start(project, appElementId, true);
@@ -226,11 +241,13 @@ public class ProjectRunner {
                 io.getOut().println(String.format(NbBundle.getMessage(ProjectRunner.class, "MSG_Run_Options"), pps.getRunClientOptions()));//NOI18N
             }
             //set default log level if not set explicitly
+            /* TODO: Take into account, that loglevel and other logging options are configured as system properties
             if (!isSetByOption(PlatypusClientApplication.LOGLEVEL_CMD_SWITCH, pps.getRunClientOptions())) {
                 processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.LOGLEVEL_CMD_SWITCH);
-                processBuilder = processBuilder.addArgument(Level.INFO.getName());
-                io.getOut().println(String.format(NbBundle.getMessage(ProjectRunner.class, "MSG_Logging_Level"), Level.INFO.getName()));//NOI18N
+                processBuilder = processBuilder.addArgument(pps.getClientLogLevel().getName());
+                io.getOut().println(String.format(NbBundle.getMessage(ProjectRunner.class, "MSG_Logging_Level"), pps.getClientLogLevel().getName()));//NOI18N
             }
+            */ 
             if (debug) {
                 processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.STOP_BEFORE_RUN_CMD_SWITCH);
             }

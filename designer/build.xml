@@ -4,50 +4,5 @@
 <!-- If you delete this file and reopen the project it will be recreated. -->
 <project name="designer" basedir=".">
     <description>Builds the module suite designer.</description>
-    <import file="nbproject/build-impl.xml"/>    
-    
-    <target name="build-zip" depends="build,build-launchers" description="Builds a ZIP distribution of the suite, launchers, and selected modules from the platform.">
-        <mkdir dir="${dist.dir}"/>
-        <!-- pathfileset does not support 'prefix' and 'filemode' parameters,
-             we have to copy them to temp location -->
-        <tempfile property="temp.dir.nbexec" destdir="${suite.build.dir}" deleteonexit="true" prefix="nbexec"/>
-        <tempfile property="temp.dir.rest" destdir="${suite.build.dir}" deleteonexit="delete" prefix="rest"/>
-        <subant genericantfile="${harness.dir}/suite.xml" target="copy-cluster" inheritrefs="true">
-            <property name="dest.dir" value="${temp.dir.rest}"/>
-            <property name="nbexec.dir" value="${temp.dir.nbexec}"/>
-            <property name="build.dir" value="${suite.build.dir}"/>
-            <resources refid="zip.platform.clusters"/>
-        </subant>
-        <zip destfile="${dist.dir}/${app.name}.zip">
-            <zipfileset dir="${build.launcher.dir}/bin/" filemode="755" prefix="${app.name}/bin"/>
-            <zipfileset dir="${build.launcher.dir}/etc/" prefix="${app.name}/etc"/>
-            <zipfileset dir="${temp.dir.nbexec}" filemode="755" prefix="${app.name}"/>
-            <zipfileset dir="${temp.dir.rest}" prefix="${app.name}"/>
-
-            <!-- Yes, the doubled app.name is a bit ugly, but better than the alternative; cf. #66441: -->
-            <zipfileset dir="${cluster}" prefix="${app.name}/${app.name}">
-                <exclude name="config/Modules/*.xml_hidden"/>
-            </zipfileset>
-            <zipfileset dir="${nbplatform.active.dir}/platform/" prefix="${app.name}/platform">
-                <filename name = "\*\*locale/\*.jar"/>
-            </zipfileset>
-            <zipfileset dir="${nbplatform.active.dir}/ide/" prefix="${app.name}/ide">
-                <filename name = "\*\*locale/\*.jar"/>
-            </zipfileset>
-        </zip>
-    </target>
-    <target name="clean" depends="-init,testuserdir-delete" description="Clean everything.">
-        <delete failonerror="false" includeemptydirs="true">
-            <fileset dir="${suite.build.dir}">
-                <exclude name="testuserdir/"/>
-            </fileset>
-        </delete>
-        <subant target="clean" buildpath="${modules.sorted}" inheritrefs="false" inheritall="false">
-            <property name="cluster.path.evaluated" value="${cluster.path.evaluated}"/> <!-- Just for speed of pre-7.0 projects -->
-        </subant>
-        <delete dir="${dist.dir}"/>
-    </target>
+    <import file="nbproject/build-impl.xml"/>
 </project>
-
-
-

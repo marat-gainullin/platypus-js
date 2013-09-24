@@ -4,7 +4,7 @@
  */
 package com.eas.designer.explorer.files.wizard;
 
-import com.eas.designer.explorer.project.PlatypusProject;
+import com.eas.designer.explorer.project.PlatypusProjectImpl;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
@@ -62,9 +62,9 @@ public final class NewApplicationElementVisualNamePanel extends JPanel implement
         txtApplicationElementName.setText(targetName);
         txtApplicationElementName.selectAll();
         Project project = Templates.getProject(wd);
-        assert project instanceof PlatypusProject;
+        assert project instanceof PlatypusProjectImpl;
         targetFolder = Templates.getTargetFolder(wd);
-        txtProject.setText(((PlatypusProject) project).getProjectInfo().getDisplayName());
+        txtProject.setText(((PlatypusProjectImpl) project).getProjectInfo().getDisplayName());
         txtCreatedFile.setText(targetFolder.getPath() + "/" + targetName);
         SwingUtilities.invokeLater(new Runnable() {
 

@@ -207,7 +207,7 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
             assert standardObjectsScope != null;
             assert platypusStandardLibScope != null;
             initializePlatypusGuiLibScope();
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             Logger.getLogger(ScriptRunner.class.getName()).log(Level.SEVERE, null, ex);
         }
     }

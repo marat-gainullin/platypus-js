@@ -6,6 +6,7 @@ package com.eas.dbcontrols.grid.rt.models;
 
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
+import com.eas.client.model.application.ApplicationEntity;
 import com.eas.dbcontrols.grid.rt.columns.model.ModelColumn;
 import java.util.HashSet;
 import java.util.Set;
@@ -31,8 +32,8 @@ public class RowsetsTableModel extends RowsetsModel implements TableModel {
      *
      * @param aRowsRowset Rowset, serves as rows source.
      */
-    public RowsetsTableModel(Rowset aRowsRowset, Scriptable aScriptScope, Function aCellsHandler) {
-        super(aRowsRowset, aScriptScope, aCellsHandler);
+    public RowsetsTableModel(ApplicationEntity<?, ?, ?> aRowsEntity, Rowset aRowsRowset, Scriptable aScriptScope, Function aCellsHandler) {
+        super(aRowsEntity, aRowsRowset, aScriptScope, aCellsHandler);
         rowsRowsetListener = new TabularRowsRowsetListener(this);
         rowsRowset.addRowsetListener(rowsRowsetListener);
     }

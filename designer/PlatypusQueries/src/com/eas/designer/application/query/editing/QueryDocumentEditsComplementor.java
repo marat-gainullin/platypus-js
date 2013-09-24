@@ -24,7 +24,7 @@ import com.eas.designer.application.query.PlatypusQueryDataObject;
 import com.eas.designer.application.query.editing.riddle.RiddleTask;
 import com.eas.designer.application.query.editing.riddle.StatementRiddler;
 import com.eas.designer.application.query.nodes.QueryEntityNode;
-import com.eas.designer.explorer.model.nodes.NodePropertyUndoableEdit;
+import com.eas.designer.datamodel.nodes.NodePropertyUndoableEdit;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashSet;

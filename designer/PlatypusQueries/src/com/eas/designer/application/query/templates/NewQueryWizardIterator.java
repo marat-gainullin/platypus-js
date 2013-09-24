@@ -7,7 +7,7 @@ package com.eas.designer.application.query.templates;
 import com.eas.designer.application.indexer.IndexerQuery;
 import com.eas.designer.explorer.files.wizard.NewApplicationElementWizardIterator;
 import com.eas.designer.explorer.files.wizard.NewApplicationElementWizardNamePanel;
-import com.eas.designer.explorer.project.PlatypusProject;
+import com.eas.designer.explorer.project.PlatypusProjectImpl;
 import java.util.Map;
 import org.netbeans.api.project.Project;
 import org.netbeans.api.templates.TemplateRegistration;
@@ -45,8 +45,8 @@ public class NewQueryWizardIterator extends NewApplicationElementWizardIterator 
     protected WizardDescriptor.Panel<WizardDescriptor>[] createPanels(WizardDescriptor wiz) {
         try {
             Project project = Templates.getProject(wiz);
-            assert project instanceof PlatypusProject;
-            PlatypusProject pProject = (PlatypusProject) project;
+            assert project instanceof PlatypusProjectImpl;
+            PlatypusProjectImpl pProject = (PlatypusProjectImpl) project;
             return new WizardDescriptor.Panel[]{new NewQueryWizardSettingsPanel(pProject), new NewApplicationElementWizardNamePanel()};
         } catch (Exception ex) {
             ErrorManager.getDefault().notify(ex);

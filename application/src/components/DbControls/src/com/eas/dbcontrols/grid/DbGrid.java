@@ -335,7 +335,7 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                         int fidx = DbControlsUtils.resolveFieldIndex(model, dCol.getDatamodelElement());
                         if (fidx < 1) {
                             if (dCol.getDatamodelElement() != null) {
-                                Logger.getLogger(DbGrid.class.getName()).log(Level.SEVERE, "Bad column configuration: " + dCol.getName() + "'s model binding can't be resolved");
+                                Logger.getLogger(DbGrid.class.getName()).log(Level.SEVERE, "Bad column configuration: {0}''s model binding can''t be resolved", dCol.getName());
                             }
                         }
                         // Model column setup
@@ -352,6 +352,7 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                         tCol.setMaxWidth(group.getMaxWidth());
                         tCol.setPreferredWidth(dCol.getWidth());
                         tCol.setWidth(dCol.getWidth());
+                        tCol.setResizable(!dCol.isFixed());
                         if (dCol.getControlInfo() != null) {
                             TableCellRenderer cellRenderer = dCol.createCellRenderer();
                             tCol.setCellRenderer(cellRenderer);
@@ -364,7 +365,7 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                             if (cellEditor instanceof ScalarDbControl) {
                                 Field field = DbControlsUtils.resolveField(model, dCol.getDatamodelElement());
                                 ((ScalarDbControl) cellEditor).setModel(model);
-                                ((ScalarDbControl) cellEditor).extraCellControls(getHandler(dCol != null ? dCol.getSelectFunction() : null), field != null ? field.isNullable() : false);
+                                ((ScalarDbControl) cellEditor).extraCellControls(getHandler(dCol.getSelectFunction()), field != null ? field.isNullable() : false);
                                 mCol.setEditor((ScalarDbControl) cellEditor);
                             }
                         }
@@ -377,6 +378,7 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                         tCol.setIdentifier(mCol);
                         // groups-view link
                         group.setTableColumn(tCol);
+                        group.setResizeable(tCol.getResizable());
                         groups.put(tCol, group);
                         columnModel.addColumn(tCol);
                         scriptableColumns.add(new ScriptableColumn(dCol, mCol, tCol, columnModel.getColumnCount() - 1, columnModel, rowsModel, groups));
@@ -448,7 +450,7 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                 }
                 assert tCol != null;
                 tCol.setCellRenderer(new InsettedTreeRenderer<Row>(tCol.getCellRenderer(), new TreeColumnLeadingComponent<>(deepModel, style, false)));
-                tCol.setCellEditor(new InsettedTreeEditor(tCol.getCellEditor(), new TreeColumnLeadingComponent<>(deepModel, style, true)));
+                tCol.setCellEditor(new InsettedTreeEditor<Row>(tCol.getCellEditor(), new TreeColumnLeadingComponent<>(deepModel, style, true)));
             }
         }
     }
@@ -813,7 +815,7 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
             for (int i = 0; i < deepModel.getRowCount(); i++) {
                 if (rowsSelectionModel.isSelectedIndex(i)) {
                     Row row = index2Row(rowSorter.convertRowIndexToModel(i));
-                    RowHostObject rowFacade = RowHostObject.publishRow(model.getScriptScope(), row);
+                    RowHostObject rowFacade = RowHostObject.publishRow(model.getScriptScope(), row, rowsEntity);
                     selectedRows.add(rowFacade);
                 }
             }
@@ -1236,7 +1238,7 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                     final int paramSourceFieldIndex = DbControlsUtils.resolveFieldIndex(model, paramSourceField);
 
                     int parentColIndex = rowsRowset.getFields().find(unaryLinkField.getFieldName());
-                    rowsModel = new RowsetsTreedModel(rowsRowset, parentColIndex, eventThis != null ? eventThis : scriptScope, generalRowFunction) {
+                    rowsModel = new RowsetsTreedModel(rowsEntity, rowsRowset, parentColIndex, eventThis != null ? eventThis : scriptScope, generalRowFunction) {
                         @Override
                         public boolean isLeaf(Row anElement) {
                             if (param != null && paramSourceFieldIndex != 0)// lazy tree
@@ -1255,7 +1257,7 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                     }
                     rowSorter = new TreedRowsSorter<>((TableFront2TreedModel<Row>) deepModel, rowsSelectionModel);
                 } else {
-                    rowsModel = new RowsetsTableModel(rowsRowset, eventThis != null ? eventThis : scriptScope, generalRowFunction);
+                    rowsModel = new RowsetsTableModel(rowsEntity, rowsRowset, eventThis != null ? eventThis : scriptScope, generalRowFunction);
                     deepModel = (TableModel) rowsModel;
                     rowSorter = new TabularRowsSorter<>((RowsetsTableModel) deepModel, rowsSelectionModel);
                 }
@@ -1511,7 +1513,7 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                         }
                     };
                     Rowset rowsRowset = new ParametersRowset(new com.bearsoft.rowset.metadata.Parameters());
-                    rowsModel = new RowsetsTableModel(rowsRowset, null, null) {
+                    rowsModel = new RowsetsTableModel(null, rowsRowset, null, null) {
                         @Override
                         public int getRowCount() {
                             return 10;
@@ -1946,33 +1948,29 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                 if (aValue instanceof CellData) {
                     CellData cd = (CellData) aValue;
                     value = cd.getData();
-                }
-                if (value != null) {
-                    return value.toString();
+                } else {
+                    value = aValue;
                 }
             } else {
                 TableColumn tc = getColumnModel().getColumn(aCol);
                 TableCellRenderer renderer = tc.getCellRenderer();
                 if (renderer instanceof DbCombo) {
                     try {
-                        if (aValue instanceof CellData) {
-                            value = ((DbCombo) renderer).achiveDisplayValue(((CellData) aValue).getData());
-                        }
-                        if (value == null) {
-                            value = "";
-                        }
+                        value = ((DbCombo) renderer).achiveDisplayValue(aValue instanceof CellData ? ((CellData) aValue).getData() : aValue);
                     } catch (Exception ex) {
                         Logger.getLogger(DbGrid.class.getName()).log(Level.SEVERE, "Could not get cell value", ex);
                     }
+                } else {
+                    if (aValue instanceof CellData) {
+                        CellData cd = (CellData) aValue;
+                        value = cd.getDisplay() != null ? cd.getDisplay() : cd.getData();
+                    } else {
+                        value = aValue;
+                    }
                 }
-
-                if (value == null && aValue instanceof CellData) {
-                    CellData cd = (CellData) aValue;
-                    value = cd.getDisplay() != null ? cd.getDisplay() : cd.getData();
-                }
-                if (value != null) {
-                    return value.toString();
-                }
+            }
+            if (value != null) {
+                return value.toString();
             }
         }
         return "";
@@ -2034,20 +2032,20 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
     }
 
     private String[][] getGridView(boolean selectedOnly, boolean isData) {
-        TableModel view = getDeepModel();
-        if (view != null) {
+        TableModel cellsModel = getDeepModel();
+        if (cellsModel != null) {
             int minRow = 0;
-            int maxRow = view.getRowCount();
-            int columnCount = view.getColumnCount();
+            int maxRow = cellsModel.getRowCount();
+            int columnCount = cellsModel.getColumnCount();
             String[][] res = new String[maxRow][columnCount];
             ListSelectionModel rowSelecter = getRowsSelectionModel();
-            for (int row = minRow; row < maxRow; row++) {
+            for (int viewRow = minRow; viewRow < maxRow; viewRow++) {
                 if (selectedOnly) {
-                    if (rowSelecter.isSelectedIndex(row)) {
-                        res[row] = transformRow(row, selectedOnly, isData);
+                    if (rowSelecter.isSelectedIndex(viewRow)) {
+                        res[viewRow] = transformRow(rowSorter.convertRowIndexToModel(viewRow), selectedOnly, isData);
                     }
                 } else {
-                    res[row] = transformRow(row, selectedOnly, isData);
+                    res[viewRow] = transformRow(rowSorter.convertRowIndexToModel(viewRow), selectedOnly, isData);
                 }
             }
             return res;
@@ -2498,23 +2496,28 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            StringBuilder sb = new StringBuilder();
-            String[][] cells = getGridView(false, false);
+            StringBuilder sbCells = new StringBuilder();
+            String[][] cells = getGridView(true, false);
             for (int i = 0; i < cells.length; i++) {
-                if (i != 0) {
-                    sb.append("\n");
-                }
+                StringBuilder sbRow = new StringBuilder();
                 String[] row = cells[i];
                 for (int j = 0; j < row.length; j++) {
-                    if (j != 0) {
-                        sb.append("\t");
-                    }
                     String value = row[j];
-                    sb.append(value);
+                    if (value != null) {
+                        if (sbRow.length() > 0) {
+                            sbRow.append("\t");
+                        }
+                        sbRow.append(value);
+                    }
                 }
-
+                if (sbRow.length() > 0) {
+                    if (sbCells.length() > 0) {
+                        sbCells.append("\n");
+                    }
+                    sbCells.append(sbRow);
+                }
             }
-            StringSelection ss = new StringSelection(sb.toString());
+            StringSelection ss = new StringSelection(sbCells.toString());
             Toolkit.getDefaultToolkit().getSystemClipboard().setContents(ss, ss);
         }
     }

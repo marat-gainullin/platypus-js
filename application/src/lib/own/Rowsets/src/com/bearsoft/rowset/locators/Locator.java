@@ -24,7 +24,7 @@ public class Locator extends HashOrderer {
     public static final String LOCATOR_IS_INVALID = "locator is invalid! Rowset was edited but locator havn\'t been rebuild.";
     public static final String INDEX_IS_INVALID = "index is out of bounds";
     public static final String WRONG_POSITION_MARKER = "invalid position in locator's subset";
-    protected List<RowWrap> subSet;
+    protected TaggedList<RowWrap> subSet;
     protected int subSetPos = -1;
 
     /**
@@ -418,10 +418,10 @@ public class Locator extends HashOrderer {
     public void add(Row aRow, int aIndex) throws RowsetException {
         KeySet ks = makeKeySet(aRow, fieldsIndicies);
         if (ks != null) {
-            List<RowWrap> subset = ordered.get(ks);
+            TaggedList<RowWrap> subset = ordered.get(ks);
             // add to structure
             if (subset == null) {
-                subset = new ArrayList<>();
+                subset = new TaggedList<>();
                 ordered.put(ks, subset);
             }
             subset.add(new RowWrap(aRow, aIndex));
@@ -481,7 +481,7 @@ public class Locator extends HashOrderer {
         return rows;
     }
 
-    public List<RowWrap> getSubSet() {
+    public TaggedList<RowWrap> getSubSet() {
         return subSet;
     }
 

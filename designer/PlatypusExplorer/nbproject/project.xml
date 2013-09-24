@@ -16,6 +16,15 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
+                    <code-name-base>com.eas.designer.datamodel</code-name-base>
+                    <build-prerequisite/>
+                    <compile-dependency/>
+                    <run-dependency>
+                        <release-version>2</release-version>
+                        <specification-version>2.4</specification-version>
+                    </run-dependency>
+                </dependency>
+                <dependency>
                     <code-name-base>com.eas.designer.debugger</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
@@ -300,7 +309,7 @@
                 <package>com.eas.designer.explorer</package>
                 <package>com.eas.designer.explorer.actions</package>
                 <package>com.eas.designer.explorer.files.wizard</package>
-                <package>com.eas.designer.explorer.model.nodes</package>
+                <package>com.eas.designer.explorer.j2ee</package>
                 <package>com.eas.designer.explorer.model.windows</package>
                 <package>com.eas.designer.explorer.project</package>
                 <package>com.eas.designer.explorer.selectors</package>

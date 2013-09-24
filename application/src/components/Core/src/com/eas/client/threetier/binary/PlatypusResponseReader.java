@@ -91,7 +91,7 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
         do {
             switch (reader.getNextTag()) {
                 case RequestsTags.TAG_ROWSET:
-                    BinaryRowsetReader rsReader = new PlatypusRowsetReader();
+                    BinaryRowsetReader rsReader = new PlatypusRowsetReader(rsp.getExpectedFields());
                     Rowset rowset = rsReader.read(reader.getSubStream());
                     rowset.beforeFirst();
                     rsp.setRowset(rowset);
@@ -221,7 +221,8 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
             throw new ProtoReaderException("Query fields are not specified");
         }
         appQuery.setEntityId(dom.getChild(RequestsTags.TAG_QUERY_ID).getString());
-        appQuery.setManual(dom.getChild(RequestsTags.TAG_DML).getInt() == 1);
+        if(dom.containsChild(RequestsTags.TAG_DML))
+            appQuery.setManual(dom.getChild(RequestsTags.TAG_DML).getInt() == 1);
         ProtoNode titleNode = dom.getChild(RequestsTags.TAG_TITLE);
         if (titleNode != null) {
             appQuery.setTitle(titleNode.getString());

@@ -83,12 +83,12 @@ public class ParametersEntity extends Entity {
 
 	@Override
 	public Rowset getRowset() {
-		execute(null, null);
+		execute((CancellableCallback)null, null);
 		return super.getRowset();
 	}
 
 	@Override
-	protected void internalExecute(boolean refresh, CancellableCallback onSuccess, Callback<String> onFailure) {
+	protected void internalExecute(CancellableCallback onSuccess, Callback<String> onFailure) {
 		if (onSuccess != null) {
 			try {
 				onSuccess.run();

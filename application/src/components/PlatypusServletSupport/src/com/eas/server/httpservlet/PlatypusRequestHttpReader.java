@@ -37,13 +37,12 @@ import com.eas.client.threetier.requests.StartAppElementRequest;
 import com.eas.script.ScriptUtils;
 import com.eas.server.PlatypusServerCore;
 import com.eas.server.httpservlet.serial.ChangeJsonReader;
-import com.eas.server.httpservlet.serial.rowset.RowsetJsonConstants;
+import com.eas.client.threetier.RowsetJsonConstants;
 import com.eas.util.BinaryUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.sql.Types;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
@@ -285,8 +284,7 @@ public class PlatypusRequestHttpReader implements PlatypusRequestVisitor {
                 }
                 Object convertedParamValue;
                 if (param.getTypeInfo().getSqlType() == Types.DATE || param.getTypeInfo().getSqlType() == Types.TIMESTAMP || param.getTypeInfo().getSqlType() == Types.TIME) {
-                    SimpleDateFormat sdf = new SimpleDateFormat(RowsetJsonConstants.DATE_FORMAT);
-                    convertedParamValue = converter.convert2RowsetCompatible(paramValue != null ? sdf.parse(paramValue) : paramValue, param.getTypeInfo());
+                    convertedParamValue = converter.convert2RowsetCompatible(paramValue != null ? RowsetJsonConstants.DATE_FORMATTER.parse(paramValue) : paramValue, param.getTypeInfo());
                 } else {
                     convertedParamValue = converter.convert2RowsetCompatible(paramValue, param.getTypeInfo());
                 }

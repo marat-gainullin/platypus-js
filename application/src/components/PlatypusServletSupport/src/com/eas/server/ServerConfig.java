@@ -24,7 +24,6 @@ public class ServerConfig {
     protected String appElementId;
     protected String appPath;
     protected Set<String> tasks = new HashSet<>();
-    ;
     protected DbConnectionSettings dbSettings;
 
     public static ServerConfig parse(ServletConfig aConfig) throws Exception {

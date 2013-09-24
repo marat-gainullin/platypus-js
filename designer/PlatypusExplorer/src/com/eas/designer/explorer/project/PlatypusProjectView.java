@@ -4,6 +4,7 @@
  */
 package com.eas.designer.explorer.project;
 
+import com.eas.designer.application.project.PlatypusProject;
 import java.awt.Image;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -38,9 +39,9 @@ import org.openide.util.lookup.Lookups;
  */
 public class PlatypusProjectView implements LogicalViewProvider {
 
-    protected PlatypusProject project;
+    protected PlatypusProjectImpl project;
 
-    public PlatypusProjectView(PlatypusProject aProject) {
+    public PlatypusProjectView(PlatypusProjectImpl aProject) {
         super();
         project = aProject;
     }
@@ -228,7 +229,8 @@ public class PlatypusProjectView implements LogicalViewProvider {
         private void fillActions() {
             actions.add(ProjectSensitiveActions.projectCommandAction(ActionProvider.COMMAND_RUN,
                     NbBundle.getMessage(PlatypusProjectView.class, "LBL_RunAction_Name"), null)); // NOI18N
-
+            actions.add(ProjectSensitiveActions.projectCommandAction(PlatypusProjectActions.COMMAND_CLEAN_AND_RUN,
+                    NbBundle.getMessage(PlatypusProjectView.class, "LBL_CleanRunAction_Name"), null)); // NOI18N
             actions.add(ProjectSensitiveActions.projectCommandAction(ActionProvider.COMMAND_DEBUG,
                     NbBundle.getMessage(PlatypusProjectView.class, "LBL_DebugAction_Name"), null)); // NOI18N
             actions.add(null);

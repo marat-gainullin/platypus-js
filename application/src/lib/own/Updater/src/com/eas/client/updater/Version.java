@@ -34,7 +34,7 @@ public class Version {
                     break;
                 }
                 default: {
-                    String nextToken = st.nextToken();
+                    st.nextToken();
                 }
             }
             cnt++;

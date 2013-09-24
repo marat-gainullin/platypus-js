@@ -415,13 +415,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
 							setCurrent(rows);
 							currentToOriginal();
 							invalidateFilters();
-							Set<RowsetListener> l = rowsetChangeSupport.getRowsetListeners();
-							rowsetChangeSupport.setRowsetListeners(null);
-							try {
-								first();
-							} finally {
-								rowsetChangeSupport.setRowsetListeners(l);
-							}
+							silentFirst();
 							pending = false;
 							rowsetChangeSupport.fireRequeriedEvent();
 							onSuccess.run();
@@ -429,9 +423,12 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
 							throw new FlowProviderFailedException(BAD_FLOW_PROVIDER_RESULT_MSG);
 						}
 					}
+
 				}, new Callback<String>() {
 					public void run(String aResult) throws Exception {
 						pending = false;
+						if(aResult == null)
+							aResult = "Unknown network error. May be cancelled.";
 						rowsetChangeSupport.fireNetErrorEvent(aResult);
 						if(onFailure != null)
 							onFailure.run(aResult);
@@ -447,6 +444,16 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
 		}
 	}
 
+	public void silentFirst() throws InvalidCursorPositionException {
+        Set<RowsetListener> l = rowsetChangeSupport.getRowsetListeners();
+        rowsetChangeSupport.setRowsetListeners(null);
+        try {
+        	first();
+        } finally {
+        	rowsetChangeSupport.setRowsetListeners(l);
+        }
+    }
+	
 	/**
 	 * Returns current rows vector. Used with filtering classes.
 	 * 

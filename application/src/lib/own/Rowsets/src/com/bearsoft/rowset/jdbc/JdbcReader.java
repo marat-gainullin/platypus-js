@@ -20,19 +20,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Reader for jdbc result sets sources.
- * Performs reading of a whole rowset and particular subset of rows for the rowset.
- * Reading utilizes converters to produce application-specific data while reading.
+ * Reader for jdbc result sets sources. Performs reading of a whole rowset and
+ * particular subset of rows for the rowset. Reading utilizes converters to
+ * produce application-specific data while reading.
+ *
  * @see Converter
  * @author mg
  */
 public class JdbcReader {
 
     protected static final String ROWSET_MISSING_EXCEPTION_MSG = "aResultSet argument must be non null";
-    protected Converter converter = null;
+    protected Converter converter;
+    protected Fields expectedFields;
 
     /**
      * Default constructor. Uses RowsetConverter as a converter.
+     *
      * @see RowsetConverter
      */
     public JdbcReader() {
@@ -42,6 +45,7 @@ public class JdbcReader {
 
     /**
      * Constructs a reader for rowset, using specified converter.
+     *
      * @param aConverter A converter to be used in the reading process.
      * @see Converter
      */
@@ -51,7 +55,21 @@ public class JdbcReader {
     }
 
     /**
+     * Constructs a reader for rowset, using specified converter.
+     *
+     * @param aConverter A converter to be used in the reading process.
+     * @param aExpectedFields Fields expexted to be in read rowset
+     * @see Converter
+     */
+    public JdbcReader(Converter aConverter, Fields aExpectedFields) {
+        super();
+        converter = aConverter;
+        expectedFields = aExpectedFields;
+    }
+
+    /**
      * Returns the converter, used by this reader.
+     *
      * @return Converter, used by this reader.
      */
     public Converter getConverter() {
@@ -60,6 +78,7 @@ public class JdbcReader {
 
     /**
      * Sets the converter, used by this reader.
+     *
      * @param aConverter Converter to use while reading.
      */
     public void setConverter(Converter aConverter) {
@@ -67,9 +86,11 @@ public class JdbcReader {
     }
 
     /**
-     * Reads data from ResultSet object and creates new Rowset based on the data.
-     * Warning! The rowset returned doesn't log it's changes.
-     * @param aPageSize Page size of reading process. May be less then zero to indicate that whole data should be fetched.
+     * Reads data from ResultSet object and creates new Rowset based on the
+     * data. Warning! The rowset returned doesn't log it's changes.
+     *
+     * @param aPageSize Page size of reading process. May be less then zero to
+     * indicate that whole data should be fetched.
      * @param aResultSet
      * @return New Rowset object created.
      * @throws SQLException
@@ -79,32 +100,34 @@ public class JdbcReader {
     public Rowset readRowset(ResultSet aResultSet, int aPageSize) throws SQLException {
         try {
             if (aResultSet != null) {
-                ResultSetMetaData jdbcFields = aResultSet.getMetaData();
-                Fields fields = new Fields();
-                for (int i = 1; i <= jdbcFields.getColumnCount(); i++) {
+                ResultSetMetaData lowLevelJdbcFields = aResultSet.getMetaData();
+                Fields jdbcFields = new Fields();
+                for (int i = 1; i <= lowLevelJdbcFields.getColumnCount(); i++) {
                     Field field = new Field();
-                    field.setName(jdbcFields.getColumnName(i));
-                    field.setDescription(jdbcFields.getColumnLabel(i));
+                    String columnLabel = lowLevelJdbcFields.getColumnLabel(i);// Column label in jdbc is the name of platypus property
+                    String columnName = lowLevelJdbcFields.getColumnName(i);
+                    field.setName(columnLabel != null && !columnLabel.isEmpty() ? columnLabel : columnName);
+                    field.setOriginalName(columnName);
 
-                    field.setNullable(jdbcFields.isNullable(i) == ResultSetMetaData.columnNullable);
+                    field.setNullable(lowLevelJdbcFields.isNullable(i) == ResultSetMetaData.columnNullable);
 
                     DataTypeInfo typeInfo = new DataTypeInfo();
-                    typeInfo.setSqlType(jdbcFields.getColumnType(i));
-                    typeInfo.setSqlTypeName(jdbcFields.getColumnTypeName(i));
-                    typeInfo.setJavaClassName(jdbcFields.getColumnClassName(i));
+                    typeInfo.setSqlType(lowLevelJdbcFields.getColumnType(i));
+                    typeInfo.setSqlTypeName(lowLevelJdbcFields.getColumnTypeName(i));
+                    typeInfo.setJavaClassName(lowLevelJdbcFields.getColumnClassName(i));
                     field.setTypeInfo(typeInfo);
 
-                    field.setSize(jdbcFields.getColumnDisplaySize(i));
-                    field.setPrecision(jdbcFields.getPrecision(i));
-                    field.setScale(jdbcFields.getScale(i));
-                    field.setSigned(jdbcFields.isSigned(i));
+                    field.setSize(lowLevelJdbcFields.getColumnDisplaySize(i));
+                    field.setPrecision(lowLevelJdbcFields.getPrecision(i));
+                    field.setScale(lowLevelJdbcFields.getScale(i));
+                    field.setSigned(lowLevelJdbcFields.isSigned(i));
 
-                    field.setTableName(jdbcFields.getTableName(i));
-                    field.setSchemaName(jdbcFields.getSchemaName(i));
-                    fields.add(field);
+                    field.setTableName(lowLevelJdbcFields.getTableName(i));
+                    field.setSchemaName(lowLevelJdbcFields.getSchemaName(i));
+                    jdbcFields.add(field);
                 }
-                Rowset rowset = new Rowset(fields);
-                List<Row> rows = readRows(fields, aResultSet, aPageSize);
+                Rowset rowset = new Rowset(expectedFields != null && !expectedFields.isEmpty() ? expectedFields : jdbcFields);
+                List<Row> rows = readRows(rowset.getFields(), jdbcFields, aResultSet, aPageSize, converter);
                 rowset.setCurrent(rows);
                 rowset.currentToOriginal();
                 return rowset;
@@ -121,22 +144,25 @@ public class JdbcReader {
     }
 
     /**
-     * Reads all rows from result set, returning them as an ArrayList collection.
-     * @param aFields Fields instance to be used as rowset's metadata.
+     * Reads all rows from result set, returning them as an ArrayList
+     * collection.
+     *
+     * @param aJdbcFields Fields instance to be used as rowset's metadata.
      * @param aResultSet A result set to read from.
-     * @param aPageSize Page size of reading process. May be less then zero to indicate that whole data should be fetched.
+     * @param aPageSize Page size of reading process. May be less then zero to
+     * indicate that whole data should be fetched.
      * @return List of rows hd been read.
      * @throws SQLException
      * @throws InvalidColIndexException
      * @throws RowsetException
      * @see List
      */
-    public List<Row> readRows(Fields aFields, ResultSet aResultSet, int aPageSize) throws SQLException {
+    public static List<Row> readRows(Fields aExpectedFields, Fields aJdbcFields, ResultSet aResultSet, int aPageSize, Converter aConverter) throws SQLException {
         try {
             if (aResultSet != null) {
                 List<Row> rows = new ArrayList<>();
                 while ((aPageSize <= 0 || rows.size() < aPageSize) && aResultSet.next()) {
-                    Row row = readRow(aFields, aResultSet);
+                    Row row = readRow(aExpectedFields, aJdbcFields, aResultSet, aConverter);
                     rows.add(row);
                 }
                 return rows;
@@ -154,23 +180,26 @@ public class JdbcReader {
 
     /**
      * Reads single row from result set, returning it as a result.
+     *
      * @param aResultSet Result set to read from.
      * @return The row had been read.
      * @throws SQLException
      * @throws InvalidColIndexException
      * @throws RowsetException
      */
-    protected Row readRow(Fields aFields, ResultSet aResultSet) throws SQLException, InvalidColIndexException, RowsetException {
+    protected static Row readRow(Fields aExpectedFields, Fields aJdbcFields, ResultSet aResultSet, Converter aConverter) throws SQLException, InvalidColIndexException, RowsetException {
         if (aResultSet != null) {
-            Row row = new Row(aFields);
-            for (int i = 1; i <= aFields.getFieldsCount(); i++) {
-                Object jdbcObject = null;
-                if (converter != null) {
-                    jdbcObject = converter.getFromJdbcAndConvert2RowsetCompatible(aResultSet, i, aFields.get(i).getTypeInfo());
+            assert aExpectedFields != null;
+            Row row = new Row(aExpectedFields);
+            for (int i = 1; i <= aJdbcFields.getFieldsCount(); i++) {
+                Field jdbcField = aJdbcFields.get(i);
+                Object appObject;
+                if (aConverter != null) {
+                    appObject = aConverter.getFromJdbcAndConvert2RowsetCompatible(aResultSet, i, jdbcField.getTypeInfo());
                 } else {
-                    jdbcObject = aResultSet.getObject(i);
+                    appObject = aResultSet.getObject(i);
                 }
-                row.setColumnObject(i, jdbcObject);
+                row.setColumnObject(aExpectedFields.find(jdbcField.getName()), appObject);
             }
             return row;
         }

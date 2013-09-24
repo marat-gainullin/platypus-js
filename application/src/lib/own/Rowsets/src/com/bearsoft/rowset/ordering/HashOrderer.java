@@ -17,6 +17,7 @@ import java.util.Map;
 
 /**
  * The base class for rowset's filters, locators and sorters.
+ *
  * @author mg
  */
 public abstract class HashOrderer extends Object {
@@ -31,16 +32,22 @@ public abstract class HashOrderer extends Object {
     public static final String FILTER_ALREADY_APPLIED = "can\'t apply already applied filter";
     public static final String ORIGINAL_ROWS_IS_MISSING = "original rows is missing!";
     public static final String ROWSET_MISSING = "rowset missing";
+
+    public static class TaggedList<T> extends ArrayList<T> {
+
+        public Object tag;
+    }
     protected Rowset rowset = null;
     protected Fields fields = null;
     protected List<Integer> fieldsIndicies = new ArrayList<>();
     protected boolean constrainting = false;
-    protected Map<KeySet, List<RowWrap>> ordered = new HashMap<>();
+    protected Map<KeySet, TaggedList<RowWrap>> ordered = new HashMap<>();
     protected boolean caseSensitive = true;
     protected boolean valid = false;
 
     /**
      * Filter constructor.
+     *
      * @param aRowset The rowset this filter to be applied on.
      */
     public HashOrderer(Rowset aRowset) {
@@ -51,6 +58,7 @@ public abstract class HashOrderer extends Object {
 
     /**
      * Returns the underlying rowset object.
+     *
      * @return Underlying rowset object.
      */
     public Rowset getRowset() {
@@ -59,6 +67,7 @@ public abstract class HashOrderer extends Object {
 
     /**
      * Returns whether this filter is case sensitive.
+     *
      * @return Whether this filter is case sensitive or not.
      */
     public boolean isCaseSensitive() {
@@ -67,6 +76,7 @@ public abstract class HashOrderer extends Object {
 
     /**
      * Sets case sensivity of this rowset's filter.
+     *
      * @param caseSensitive The case sensivity flag to be setted tothe filter.
      */
     public void setCaseSensitive(boolean caseSensitive) {
@@ -74,8 +84,9 @@ public abstract class HashOrderer extends Object {
     }
 
     /**
-     * Returns fields (columns) ordinal numbers vector. Theese fields (columns) are used to perform the filtering.
-     * The indices are 1-based.
+     * Returns fields (columns) ordinal numbers vector. Theese fields (columns)
+     * are used to perform the filtering. The indices are 1-based.
+     *
      * @return Fields (columns) ordinal numbers vector.
      */
     public List<Integer> getFields() {
@@ -83,8 +94,9 @@ public abstract class HashOrderer extends Object {
     }
 
     /**
-     * Sets fields (columns) ordinal numbers vector. Theese fields (columns) are used to perform the filtering.
-     * The indices are 1-based.
+     * Sets fields (columns) ordinal numbers vector. Theese fields (columns) are
+     * used to perform the filtering. The indices are 1-based.
+     *
      * @param fields Fields (columns) ordinal numbers vector.
      */
     public void setFields(List<Integer> fields) {
@@ -93,6 +105,7 @@ public abstract class HashOrderer extends Object {
 
     /**
      * Begins filtering fields (columns) vector building.
+     *
      * @throws IllegalStateException
      * @see #isConstrainting()
      * @see #addConstraint(int aFieldIndex)
@@ -110,6 +123,7 @@ public abstract class HashOrderer extends Object {
 
     /**
      * Adds field (column) index to filtering fields (columns) vector
+     *
      * @param aFieldIndex A field (column) index to be added.
      * @throws IllegalStateException
      * @see #beginConstrainting()
@@ -128,6 +142,7 @@ public abstract class HashOrderer extends Object {
 
     /**
      * Removes field (column) index from filtering fields (columns) vector
+     *
      * @param aFieldIndex A field (column) index to be deleted.
      * @throws IllegalStateException
      * @see #beginConstrainting()
@@ -146,6 +161,7 @@ public abstract class HashOrderer extends Object {
 
     /**
      * Ends the process of filtering fields vector constructing.
+     *
      * @throws IllegalStateException
      * @see #beginConstrainting()
      * @see #isConstrainting()
@@ -163,6 +179,7 @@ public abstract class HashOrderer extends Object {
 
     /**
      * Returns whether filtering fields (columns) vector building is in process.
+     *
      * @return Whether filtering fields (columns) vector building is in process.
      * @see #beginConstrainting()
      * @see #addConstraint(int aFieldIndex)
@@ -175,9 +192,12 @@ public abstract class HashOrderer extends Object {
     }
 
     /**
-     * Returns whether a <code>aFieldIndex</code> is in filtering conditions vector.
+     * Returns whether a
+     * <code>aFieldIndex</code> is in filtering conditions vector.
+     *
      * @param aFieldIndex Fields index to check.
-     * @return Whether a <code>aFieldIndex</code> is in filtering conditions vector.
+     * @return Whether a <code>aFieldIndex</code> is in filtering conditions
+     * vector.
      * @see beginConstrainting()
      * @see isConstrainting()
      * @see addConstraint(int aFieldIndex)
@@ -191,6 +211,7 @@ public abstract class HashOrderer extends Object {
 
     /**
      * Returns whether filtering fields vector is empty.
+     *
      * @return Whether filtering fields vector is empty.
      * @see #beginConstrainting()
      * @see #isConstrainting()
@@ -213,13 +234,16 @@ public abstract class HashOrderer extends Object {
     }
 
     /**
-     * Builds a hash-ordered structure of the rowset's rows by multi fielded key set.
+     * Builds a hash-ordered structure of the rowset's rows by multi fielded key
+     * set.
+     *
      * @throws RowsetException
      */
     public abstract void build() throws RowsetException;
 
     /**
      * Returns index of rows-related wrap in the hash-ordered structure.
+     *
      * @param aSubSet Subset of rows wraps in the hash-ordered structure.
      * @param aRow Row index of wich is to be returned.
      * @return
@@ -237,6 +261,7 @@ public abstract class HashOrderer extends Object {
 
     /**
      * Removes a row from hash-ordered structure of row wraps.
+     *
      * @param aRow Row is to be removed.
      * @return True if deletion actually happend, False otherwise.
      * @throws RowsetException
@@ -259,6 +284,7 @@ public abstract class HashOrderer extends Object {
 
     /**
      * Makes key set from a row by fields indicies.
+     *
      * @param aRow The source row of the key set values.
      * @param fieldsIndicies Fields indicies to build key set by.
      * @return Key set been maded.
@@ -283,6 +309,7 @@ public abstract class HashOrderer extends Object {
 
     /**
      * Returns the rowset's current, probably filtered rows vector.
+     *
      * @return The rowset's current, probably filtered rows vector.
      */
     protected List<Row> getRowsetRows() {
@@ -291,6 +318,7 @@ public abstract class HashOrderer extends Object {
 
     /**
      * Returns whether any filter is applied on the underlying rowset.
+     *
      * @return Whether any filter is applied on the underlying rowset.
      */
     protected boolean isAnyFilterInstalled() {
@@ -306,6 +334,7 @@ public abstract class HashOrderer extends Object {
 
     /**
      * Returns whether orderer is valid.
+     *
      * @return Whether orderer is valid.
      */
     public boolean isValid() {
@@ -314,6 +343,7 @@ public abstract class HashOrderer extends Object {
 
     /**
      * Validates the orderer, building ordered structure of rows.
+     *
      * @throws RowsetException
      */
     public void validate() throws RowsetException {

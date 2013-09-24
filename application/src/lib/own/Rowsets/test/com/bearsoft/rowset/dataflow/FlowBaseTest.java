@@ -62,7 +62,7 @@ public class FlowBaseTest {
         protected Set<TransactionListener> listeners = new HashSet<>();
         
         public JdbcFlowProviderAdapter(JKT aJdbcSourceTag, DataSource aDataSource, Converter aConverter, String aClause) {
-            super(aJdbcSourceTag, null, aDataSource, aConverter, aClause);
+            super(aJdbcSourceTag, null, aDataSource, aConverter, aClause, null);
         }
 
         @Override

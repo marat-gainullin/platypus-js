@@ -1086,7 +1086,7 @@ public abstract class RADComponent<C> {
                     prop = new ComponentProperty(this, desc);
                 } else if (javax.swing.border.Border.class.isAssignableFrom(desc.getPropertyType())) {
                     prop = new BorderProperty(this, desc);
-                } else if (javax.swing.Icon.class.isAssignableFrom(desc.getPropertyType())) {
+                } else if (javax.swing.Icon.class.isAssignableFrom(desc.getPropertyType()) || java.awt.Image.class.isAssignableFrom(desc.getPropertyType())) {
                     prop = new IconProperty(this, desc);
                 } else if (javax.swing.JFormattedTextField.AbstractFormatterFactory.class.isAssignableFrom(desc.getPropertyType())) {
                     prop = new FormatterFactoryProperty(this, desc);
@@ -1164,7 +1164,9 @@ public abstract class RADComponent<C> {
             }
         }
         // hack for buttons - add fake property for ButtonGroup
-        if (getBeanInstance() instanceof javax.swing.AbstractButton) {
+        if ((getBeanInstance() instanceof javax.swing.JToggleButton && !(getBeanInstance() instanceof javax.swing.JCheckBox))||
+                getBeanInstance() instanceof javax.swing.JRadioButton ||
+                getBeanInstance() instanceof javax.swing.JRadioButtonMenuItem) {
             try {
                 ButtonGroupProperty prop = new ButtonGroupProperty(this);
                 setPropertyListener(prop);
@@ -1298,7 +1300,7 @@ public abstract class RADComponent<C> {
 
     public static class FormatterFactoryProperty extends RADProperty<AbstractFormatterFactoryEditor.FormFormatter> {
 
-        public static final String FORMATTER_FACTORY_PROP_NAME = "formatterFactory";        
+        public static final String FORMATTER_FACTORY_PROP_NAME = "formatterFactory";
         protected AbstractFormatterFactoryEditor.FormFormatter value;
 
         FormatterFactoryProperty(RADComponent<?> comp, PropertyDescriptor aDesc) throws IllegalAccessException, InvocationTargetException {
@@ -1371,8 +1373,12 @@ public abstract class RADComponent<C> {
             if (oldValue != value) {
                 setChanged(value != getDefaultValue());
                 Object innerValue = null;
-                if (value != null && value.getIcon() != null && canWrite()) {
-                    innerValue = value.getIcon();
+                if (value != null && (value.getIcon() != null || value.getImage() != null) && canWrite()) {
+                    if (java.awt.Image.class.isAssignableFrom(getPropertyDescriptor().getPropertyType())) {
+                        innerValue = value.getImage();
+                    } else {
+                        innerValue = value.getIcon();
+                    }
                 }
                 getPropertyDescriptor().getWriteMethod().invoke(getComponent().getBeanInstance(), new Object[]{innerValue});
                 propertyValueChanged(oldValue, value);

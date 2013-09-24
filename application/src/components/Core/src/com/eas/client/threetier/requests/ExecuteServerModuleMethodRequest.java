@@ -4,12 +4,14 @@
  */
 package com.eas.client.threetier.requests;
 
+import com.bearsoft.rowset.Rowset;
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.Requests;
 import com.eas.script.ScriptUtils;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Date;
+import org.mozilla.javascript.Scriptable;
 
 /**
  *
@@ -24,7 +26,7 @@ public class ExecuteServerModuleMethodRequest extends Request {
     public ExecuteServerModuleMethodRequest(long aRequestId) {
         super(aRequestId, Requests.rqExecuteServerModuleMethod);
     }
-    
+
     public ExecuteServerModuleMethodRequest(long aRequestId, String aModuleName, String aMethodName, Object[] aArguments) {
         this(aRequestId);
         moduleName = aModuleName;
@@ -73,7 +75,8 @@ public class ExecuteServerModuleMethodRequest extends Request {
         INTEGER(4, Integer.class), LONG(5, Long.class), FLOAT(6, Float.class),
         DOUBLE(7, Double.class), BIG_DECIMAL(8, BigDecimal.class),
         BIG_INTEGER(9, BigInteger.class), BOOLEAN(10, Boolean.class),
-        CHARACTER(11, Character.class), DATE(12, Date.class);
+        CHARACTER(11, Character.class), DATE(12, Date.class),
+        OBJECT(13, String.class);
         private int typeID;
         private Class clazz;
 
@@ -100,12 +103,16 @@ public class ExecuteServerModuleMethodRequest extends Request {
         }
 
         public static ArgumentType getArgumentType(Object value) {
-            for (ArgumentType at : values()) {
-                if (at.getClazz().isInstance(value)) {
-                    return at;
+            if (value instanceof Scriptable || value instanceof Rowset) {
+                return ArgumentType.OBJECT;
+            } else {
+                for (ArgumentType at : values()) {
+                    if (at.getClazz().isInstance(value)) {
+                        return at;
+                    }
                 }
+                return null;
             }
-            return null;
         }
     }
 

@@ -11,6 +11,8 @@ import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.login.PrincipalHost;
 import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.model.application.ApplicationModel;
+import com.eas.client.settings.DbConnectionSettings;
+import com.eas.client.settings.EasSettings;
 import com.eas.client.settings.SettingsConstants;
 import com.eas.debugger.jmx.server.Breakpoints;
 import com.eas.script.JsDoc;
@@ -69,7 +71,7 @@ public class ScriptRunner extends ScriptableObject {
     static {
         try {
             initializePlatypusStandardLibScope();
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             Logger.getLogger(ScriptRunner.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
@@ -142,8 +144,9 @@ public class ScriptRunner extends ScriptableObject {
                 }
                 if (scriptDoc.getScript() instanceof Function) {
                     Object[] jsArgs = new Object[args != null ? args.length : 0];
-                    for(int i=0;i<jsArgs.length;i++)
+                    for (int i = 0; i < jsArgs.length; i++) {
                         jsArgs[i] = ScriptUtils.javaToJS(args[i], this);
+                    }
                     defineProperty("arguments", jsArgs, ScriptableObject.READONLY);
                     ((Function) scriptDoc.getScript()).call(context, this, this, jsArgs);
                 } else {
@@ -285,37 +288,61 @@ public class ScriptRunner extends ScriptableObject {
     public static class PlatypusScriptedResource {
 
         private static final Pattern pattern = Pattern.compile("https?://.*");
+        protected static Client client;
         protected static AppCache cache;
-
-        public static void init(AppCache aCache) {
+        protected static PrincipalHost principalHost;
+        protected static CompiledScriptDocumentsHost scriptDocumentsHost;
+        
+        /**
+         * Initializes a static fields.
+         * @param aClient Client instance
+         * @param aPrincipalHost Login support
+         * @param aScriptDocumentsHost Scripts host 
+         * @throws Exception If something goes wrong
+         */
+        public static void init(Client aClient, PrincipalHost aPrincipalHost, CompiledScriptDocumentsHost aScriptDocumentsHost) throws Exception {
             assert cache == null : "Platypus application resources may be initialized only once.";
-            cache = aCache;
+            client = aClient;
+            cache = client.getAppCache();
+            principalHost = aPrincipalHost;
+            scriptDocumentsHost = aScriptDocumentsHost;
         }
 
-        protected static String translateResourcePath(String aPath) throws Exception {
-            /*
-             File test = new File(aPath);
-             if (test.exists()) {
-             // it seems, that id is a real file path
-             return test.getPath();
-             } else {
-             */
-            if (aPath.startsWith("/")) {
-                throw new IllegalStateException("Platypus resource path can't begin with /. Platypus resource paths must point somewhere in application, but not in filesystem.");
-            }
-            if (aPath.startsWith("..") || aPath.startsWith(".")) {
-                /*
-                 EvaluatorException ex = Context.reportRuntimeError("_");
-                 ScriptStackElement[] stack = ex.getScriptStack();
-                 traverse stack to reach non platypusStandardLib script and use it as base path
-                 */
-                throw new IllegalStateException("Platypus resource paths must be application-absolute. \"" + aPath + "\" is not application-absolute");
-            }
-            URI uri = new URI(null, null, aPath, null);
-            return uri.normalize().getPath();
-            //}
+        /**
+         * Gets an principal provider. 
+         * @return Principal host instance
+         */
+        public static PrincipalHost getPrincipalHost() {
+            return principalHost;
         }
 
+        /**
+         * Gets script documents host.
+         * @return Script documents host instance
+         */
+        public static CompiledScriptDocumentsHost getScriptDocumentsHost() {
+            return scriptDocumentsHost;
+        }
+        
+        /**
+         * Gets an absolute path to the application's directory.
+         * @return Application's directory full path or null if not path is not avaliable
+         */
+        public static String getApplicationPath() {
+            EasSettings settings = client.getSettings();
+            if (settings instanceof DbConnectionSettings) {
+                return ((DbConnectionSettings)settings).getApplicationPath();
+            } else {
+                return null;
+            }
+        }
+
+        /**
+         * Loads a resource's bytes either from disk or from datatbase.
+         * @param aResourceId An relative path to the resource
+         * @return Bytes for resource
+         * @throws Exception If some error occurs when reading the resource
+         */
         public static byte[] load(String aResourceId) throws Exception {
             if (aResourceId != null && !aResourceId.isEmpty()) {
                 Matcher htppMatcher = pattern.matcher(aResourceId);
@@ -358,7 +385,7 @@ public class ScriptRunner extends ScriptableObject {
                     if (appElement != null && appElement.getType() == ClientConstants.ET_RESOURCE) {
                         return appElement.getBinaryContent();
                     } else {
-                        return null;
+                        throw new IllegalArgumentException(String.format("Resource %s not found", aResourceId));
                     }
                     //}
                 }
@@ -367,15 +394,56 @@ public class ScriptRunner extends ScriptableObject {
             }
         }
 
+        /**
+         * Loads a resource as text for UTF-8 encoding.
+         * @param aResourceId An relative path to the resource
+         * @return Resource's text
+         * @throws Exception If some error occurs when reading the resource
+         */
         public static String loadText(String aResourceId) throws Exception {
             return loadText(aResourceId, SettingsConstants.COMMON_ENCODING);
         }
 
+        /**
+         * Loads a resource as text.
+         * @param aResourceId An relative path to the resource
+         * @param aEncodingName Encoding name
+         * @return Resource's text
+         * @throws Exception If some error occurs when reading the resource
+         */
         public static String loadText(String aResourceId, String aEncodingName) throws Exception {
             byte[] data = load(aResourceId);
             return data != null ? new String(data, aEncodingName) : null;
         }
 
+        protected static String translateResourcePath(String aPath) throws Exception {
+            /*
+             File test = new File(aPath);
+             if (test.exists()) {
+             // it seems, that id is a real file path
+             return test.getPath();
+             } else {
+             */
+            if (aPath.startsWith("/")) {
+                throw new IllegalStateException("Platypus resource path can't begin with /. Platypus resource paths must point somewhere in application, but not in filesystem.");
+            }
+            if (aPath.startsWith("..") || aPath.startsWith(".")) {
+                /*
+                 EvaluatorException ex = Context.reportRuntimeError("_");
+                 ScriptStackElement[] stack = ex.getScriptStack();
+                 traverse stack to reach non platypusStandardLib script and use it as base path
+                 */
+                throw new IllegalStateException("Platypus resource paths must be application-absolute. \"" + aPath + "\" is not application-absolute");
+            }
+            URI uri = new URI(null, null, aPath, null);
+            return uri.normalize().getPath();
+            //}
+        }
+        
+        private static Client getClient() {
+            return client;
+        }
+                
         private static URL encodeUrl(URL url) throws URISyntaxException, MalformedURLException {
             String file = "";
             if (url.getPath() != null && !url.getPath().isEmpty()) {
@@ -413,8 +481,8 @@ public class ScriptRunner extends ScriptableObject {
                 } catch (NotResourceException ex) {
                     // Silently return.
                     // There are cases, when require is called with regular platypus module id.
-                    // In such case, we have to ignore require call is SE client and server and servlet,
-                    // and perform standard actions in browser html5 client.
+                    // In such case, we have to ignore require call in SE client and server and servlet,
+                    // and perform standard actions for html5 browser client.
                     return;
                 }
             } finally {
@@ -434,16 +502,16 @@ public class ScriptRunner extends ScriptableObject {
         }
     }
 
-    public static Scriptable checkStandardObjects(Context currentContext) {
+    public static Scriptable checkStandardObjects(Context currentContext) throws Exception {
         synchronized (standardObjectsScopeLock) {
             if (standardObjectsScope == null) {
-                standardObjectsScope = ScriptUtils.getScope();
+                standardObjectsScope = new ScriptRunner(PlatypusScriptedResource.getClient(), ScriptUtils.getScope(), PlatypusScriptedResource.getPrincipalHost(), PlatypusScriptedResource.getScriptDocumentsHost(), new Object[]{});
             }
         }
         return standardObjectsScope;
     }
 
-    public static Scriptable initializePlatypusStandardLibScope() throws IOException {
+    public static Scriptable initializePlatypusStandardLibScope() throws Exception {
         synchronized (standardObjectsScopeLock) {
             if (platypusStandardLibScope == null) {
                 Context context = ScriptUtils.enterContext();

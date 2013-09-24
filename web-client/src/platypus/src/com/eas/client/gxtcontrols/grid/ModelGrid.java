@@ -10,10 +10,13 @@ import com.eas.client.gxtcontrols.CrossUpdater;
 import com.eas.client.gxtcontrols.RowKeyProvider;
 import com.eas.client.gxtcontrols.grid.wrappers.PlatypusGridInlineRowEditing;
 import com.eas.client.gxtcontrols.grid.wrappers.PlatypusGridView;
+import com.eas.client.gxtcontrols.grid.wrappers.PlatypusTreeGridView;
 import com.eas.client.gxtcontrols.published.PublishedComponent;
 import com.eas.client.gxtcontrols.published.PublishedStyle;
 import com.eas.client.model.Entity;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.sencha.gxt.core.client.util.Point;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.widget.core.client.ContentPanel;
@@ -22,7 +25,9 @@ import com.sencha.gxt.widget.core.client.event.ViewReadyEvent.ViewReadyHandler;
 import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.ColumnModel;
 import com.sencha.gxt.widget.core.client.grid.Grid;
+import com.sencha.gxt.widget.core.client.grid.GridView;
 import com.sencha.gxt.widget.core.client.treegrid.TreeGrid;
+import com.sencha.gxt.widget.core.client.treegrid.TreeGridView;
 
 /**
  * Class intended to wrap a grid or tree grid. It also contains grid API.
@@ -37,9 +42,10 @@ public class ModelGrid extends ContentPanel {
 	protected Entity rowsSource;
 	protected JavaScriptObject generalCellFunction;
 	protected PublishedComponent published;
-	protected List<ModelGridColumn<?>> publishedColumns = new ArrayList();
+	protected List<ModelGridColumn<?>> publishedColumns = new ArrayList<ModelGridColumn<?>>();
 	protected Runnable crossUpdaterAction;
 	protected CrossUpdater crossUpdater;
+	protected FindWindow finder;
 
 	/**
 	 * Standalone constructor, assuming further configuration.
@@ -48,9 +54,10 @@ public class ModelGrid extends ContentPanel {
 		super();
 		ListStore<Row> store = new ListStore<Row>(new RowKeyProvider());
 		store.setAutoCommit(true);
-		List<ColumnConfig<Row, ?>> columns = new ArrayList();
+		List<ColumnConfig<Row, ?>> columns = new ArrayList<ColumnConfig<Row, ?>>();
 		ColumnModel<Row> cm = new ColumnModel<Row>(columns);
 		grid = new Grid<Row>((ListStore<Row>) store, cm, new PlatypusGridView());
+		finder = new FindWindow(grid);
 		editing = new PlatypusGridInlineRowEditing(grid, null);
 		grid.getView().setTrackMouseOver(true);
 		grid.getView().setShowDirtyCells(true);
@@ -76,6 +83,7 @@ public class ModelGrid extends ContentPanel {
 	public ModelGrid(Grid<Row> aGrid, PlatypusGridInlineRowEditing aEditing) {
 		super();
 		grid = aGrid;
+		finder = new FindWindow(grid);
 		editing = aEditing;
 		rowsSource = editing.getRowsSource();
 		crossUpdaterAction = new GridCrossUpdaterAction(grid);
@@ -221,6 +229,17 @@ public class ModelGrid extends ContentPanel {
 			return false;
 	}
 
+	public void find() {
+		finder.show();
+		finder.toFront();
+	}
+
+	@Override
+	protected void onDetach() {
+		super.onDetach();
+		finder.hide();
+	}
+
 	public void addPublishedColumn(ModelGridColumn<?> aColumn) {
 		aColumn.setGrid(this);
 		publishedColumns.add(aColumn);
@@ -236,20 +255,46 @@ public class ModelGrid extends ContentPanel {
 	public PublishedStyle complementPublishedStyle(PublishedStyle aStyle) {
 		PublishedStyle complemented = aStyle;
 		if (published.isBackgroundSet()) {
-			if(complemented == null)
+			if (complemented == null)
 				complemented = PublishedStyle.create();
 			complemented.setBackground(published.getBackground());
 		}
 		if (published.isForegroundSet()) {
-			if(complemented == null)
+			if (complemented == null)
 				complemented = PublishedStyle.create();
 			complemented.setForeground(published.getForeground());
 		}
 		if (published.isFontSet()) {
-			if(complemented == null)
+			if (complemented == null)
 				complemented = PublishedStyle.create();
 			complemented.setFont(published.getFont());
 		}
 		return complemented;
 	}
+
+	@Override
+	protected void onResize(int width, int height) {
+		super.onResize(width, height);
+		if (isAttached()) {
+			Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+				@Override
+				public void execute() {
+					if (grid instanceof TreeGrid<?>) {
+						TreeGridView<?> tgv = ((TreeGrid<?>) grid).getTreeView();
+						if (tgv instanceof PlatypusTreeGridView) {
+							PlatypusTreeGridView ptgv = (PlatypusTreeGridView) tgv;
+							ptgv.fitColumnsToSpace(grid.getElement().getScrollWidth());
+						}
+					} else {
+						GridView<?> gv = grid.getView();
+						if (gv instanceof PlatypusGridView) {
+							PlatypusGridView pgv = (PlatypusGridView) gv;
+							pgv.fitColumnsToSpace(grid.getElement().getScrollWidth());
+						}
+					}
+				}
+			});
+		}
+	}
+
 }

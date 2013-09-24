@@ -132,6 +132,11 @@ public class JSEvents {
 				return aPublishedRow;
 			}
 		});
+		Object.defineProperty(published, "object", {
+			get : function(){
+				return aPublishedRow;
+			}
+		});
 		return published;
 	}-*/;
 
@@ -171,7 +176,11 @@ public class JSEvents {
 				return aEvent;
 			}
 		};
-		@com.eas.client.form.api.JSEvents::publishEvent(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+		Object.defineProperty(published, "source", {
+			get : function() {
+				return aPublishedForm;
+			}
+		});
 		return published;
 	}-*/;
 

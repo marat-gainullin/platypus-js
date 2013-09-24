@@ -12,7 +12,7 @@ import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.scripts.CompiledScriptDocuments;
 import com.eas.client.scripts.CompiledScriptDocumentsHost;
 import com.eas.client.scripts.ScriptDocument;
-import com.eas.script.ScriptUtils;
+import com.eas.client.scripts.ScriptRunner;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
@@ -131,7 +131,7 @@ public class SessionTest {
     protected static class DummyServerModule extends ServerScriptRunner {
 
         public DummyServerModule(PlatypusServerCore aServerCore, Session aSession, String aModuleId) throws Exception {
-            super(aServerCore, aSession, aModuleId, ScriptUtils.getScope(), new PrincipalHost() {
+            super(aServerCore, aSession, aModuleId, ScriptRunner.initializePlatypusStandardLibScope(), new PrincipalHost() {
 
                 @Override
                 public PlatypusPrincipal getPrincipal() {
@@ -143,6 +143,7 @@ public class SessionTest {
 
         @Override
         protected void setApplicationElementId(String aAppElementId, Object[] args) throws Exception {
+            super.appElementId = aAppElementId;
         }
 
         @Override
@@ -167,7 +168,7 @@ public class SessionTest {
                 mId);
 
         session.registerModule(serverModule);
-        ServerScriptRunner s = session.getModule(String.valueOf(mId));
+        ServerScriptRunner s = session.getModule(mId);
         assertSame(s, serverModule);
     }
 
@@ -187,7 +188,7 @@ public class SessionTest {
                 session, 
                 mId);
         session.registerModule(serverModule);
-        ServerScriptRunner s = session.getModule(String.valueOf(mId));
+        ServerScriptRunner s = session.getModule(mId);
         assertSame(s, serverModule);
         session.unregisterModule(String.valueOf(mId));
         s = session.getModule(String.valueOf(mId));

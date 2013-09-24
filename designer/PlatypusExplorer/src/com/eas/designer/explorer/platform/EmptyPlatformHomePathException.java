@@ -4,6 +4,8 @@
  */
 package com.eas.designer.explorer.platform;
 
+import org.openide.util.NbBundle;
+
 /**
  * Exception means what platform path isn't properly configured.
  * 
@@ -12,6 +14,6 @@ package com.eas.designer.explorer.platform;
 public class EmptyPlatformHomePathException extends Exception {
 
     public EmptyPlatformHomePathException() {
-        super("Platform home path is not set.");
+        super(NbBundle.getMessage(EmptyPlatformHomePathException.class, "LBL_Platform_Home_Not_Set"));
     }
 }

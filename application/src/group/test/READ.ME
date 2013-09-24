@@ -1,0 +1,112 @@
+web.xml: 
+
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="3.0" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
+  <context-param>
+    <param-name>ap</param-name>
+    <param-value>C:/projects/platypus-tests</param-value>
+  </context-param>
+  <context-param>
+    <param-name>appelement</param-name>
+    <param-value>FormsAPI</param-value>
+  </context-param>
+  <context-param>
+    <param-name>tasks</param-name>
+    <param-value>TestServerTaskModule</param-value>
+  </context-param>
+  <context-param>
+    <param-name>url</param-name>
+    <param-value>jdbc/main</param-value>
+  </context-param>
+  <listener>
+    <listener-class>com.eas.server.httpservlet.PlatypusSessionsSynchronizer</listener-class>
+  </listener>
+  <servlet>
+    <servlet-name>PlatypusServlet</servlet-name>
+    <servlet-class>com.eas.server.httpservlet.PlatypusHttpServlet</servlet-class>
+    <load-on-startup>1</load-on-startup>
+    <multipart-config>
+      <location>C:/projects/platypus-tests/web/pub</location>
+      <max-file-size>2097152</max-file-size>
+      <max-request-size>2165824</max-request-size>
+      <file-size-threshold>1048576</file-size-threshold>
+    </multipart-config>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>PlatypusServlet</servlet-name>
+    <url-pattern>/application/*</url-pattern>
+  </servlet-mapping>
+  <resource-ref>
+    <description>Main database connection</description>
+    <res-ref-name>jdbc/main</res-ref-name>
+    <res-type>javax.sql.DataSource</res-type>
+    <res-auth>Container</res-auth>
+  </resource-ref>
+  <security-constraint>
+    <web-resource-collection>
+      <url-pattern>/application/*</url-pattern>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>*</role-name>
+    </auth-constraint>
+  </security-constraint>
+  <login-config>
+    <auth-method>BASIC</auth-method>
+    <form-login-config>
+      <form-login-page>/login.html</form-login-page>
+      <form-error-page>/login-failed.html</form-error-page>
+    </form-login-config>
+  </login-config>
+  <security-role>
+    <role-name>*</role-name>
+  </security-role>
+</web-app>
+
+context.xml:
+
+<?xml version="1.0" encoding="UTF-8"?>
+<Context path="/">
+  <Realm className="org.apache.catalina.realm.DataSourceRealm" dataSourceName="jdbc/main" digest="MD5" localDataSource="true" roleNameCol="GROUP_NAME" userCredCol="USR_PASSWD" userNameCol="USR_NAME" userRoleTable="MTD_GROUPS" userTable="MTD_USERS"/>
+  <Resource driverClassName="oracle.jdbc.OracleDriver" name="jdbc/main" password="eas" type="javax.sql.DataSource" url="jdbc:oracle:thin:@asvr:1521/adb" username="eas"/>
+</Context>
+
+private.properties:
+
+j2eeServerId=tomcat70:home=C:\\apache-tomcat-7.0.40
+clientType=platypus
+serverType=j2ee
+enableSecurityRealm=true
+debugClientPort=8900
+debugServerPort=8901
+runUser=testuser1
+runPassword=test
+dbAppSources=false
+clientLogLevel=INFO
+serverLogLevel=INFO
+
+project.properties:
+
+projectDisplayName=platypus tests
+context=
+
+platypus.xml:
+
+<?xml version="1.0" encoding="UTF-8"?>
+<context>
+  <run/>
+  <dbSettings name="" password="eas" url="jdbc:oracle:thin:@asvr:1521/adb" user="eas"/>
+</context>
+
+
+Standalone server command line:
+
+-url jdbc:oracle:thin:@asvr:1521/adb -dbuser eas -dbpassword eas -dbschema eas -loglevel FINE -tasks TestServerTaskModule
+
+Standalone server JVM arguments:
+
+-ea
+
+Known issues:
+
+-For statefull modules testing one should relaunch both J2EE and standalone servers before testing
+-Fisrt one should run J2SE tests and then GWT tests

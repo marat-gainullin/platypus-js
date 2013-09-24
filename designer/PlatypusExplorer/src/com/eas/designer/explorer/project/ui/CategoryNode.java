@@ -4,24 +4,18 @@
  */
 package com.eas.designer.explorer.project.ui;
 
-import com.eas.designer.explorer.project.PlatypusProject;
-import com.eas.designer.explorer.project.SearchFilter;
+import com.eas.designer.explorer.project.PlatypusProjectImpl;
 import java.awt.Image;
 import java.awt.datatransfer.Transferable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import javax.swing.Action;
 import javax.swing.Icon;
-import org.netbeans.spi.search.SearchFilterDefinition;
-import org.netbeans.spi.search.SearchInfoDefinitionFactory;
-import org.netbeans.spi.search.SubTreeSearchOptions;
 import org.openide.filesystems.FileObject;
+import org.openide.filesystems.FileUtil;
+import org.openide.loaders.DataFilter;
 import org.openide.loaders.DataFolder;
+import org.openide.loaders.DataObject;
 import org.openide.nodes.FilterNode;
-import org.openide.nodes.Node;
 import org.openide.util.ImageUtilities;
-import org.openide.util.Lookup;
 import org.openide.util.datatransfer.PasteType;
 import org.openide.util.lookup.Lookups;
 import org.openide.util.lookup.ProxyLookup;
@@ -32,17 +26,18 @@ import org.openide.util.lookup.ProxyLookup;
  */
 public class CategoryNode extends FilterNode {
 
+    public static final DataFilter PROJECT_FILES_DATA_FILTER = new ProjectFilesDataFilter();
     protected DataFolder dataFolder;
     protected FileObject folder;
     protected Image icon;
     protected Image openIcon;
     protected String name;
     protected String displayName;
-    protected PlatypusProject project;
+    protected PlatypusProjectImpl project;
 
-    public CategoryNode(PlatypusProject aProject, DataFolder aDataFolder, Icon aIcon, Icon aOpenIcon, String aName, String aDisplayName) {
+    public CategoryNode(PlatypusProjectImpl aProject, DataFolder aDataFolder, Icon aIcon, Icon aOpenIcon, String aName, String aDisplayName) {
         super(aDataFolder.getNodeDelegate(),
-                aDataFolder.createNodeChildren(PlatypusProjectNodesList.APPLICATION_TYPES_FILTER),
+                aDataFolder.createNodeChildren(PROJECT_FILES_DATA_FILTER),
                 new ProxyLookup(aDataFolder.getLookup(), Lookups.fixed(aProject.getSubTreeSearchOptions())));
         project = aProject;
         name = aName;
@@ -71,7 +66,7 @@ public class CategoryNode extends FilterNode {
         return super.getActions(context);
     }
 
-    public PlatypusProject getProject() {
+    public PlatypusProjectImpl getProject() {
         return project;
     }
 
@@ -104,8 +99,17 @@ public class CategoryNode extends FilterNode {
     public Image getOpenedIcon(int type) {
         return openIcon;
     }
-    
+
     public FileObject getFolder() {
         return folder;
+    }
+    
+    protected static class ProjectFilesDataFilter implements DataFilter {
+
+        @Override
+        public boolean acceptDataObject(DataObject obj) {
+            return !FileUtil.toFile(obj.getPrimaryFile()).isHidden();
+        }
+        
     }
 }

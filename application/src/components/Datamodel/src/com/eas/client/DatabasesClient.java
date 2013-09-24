@@ -48,7 +48,7 @@ import java.util.logging.Logger;
 import javax.sql.DataSource;
 
 /**
- * Two tier realization of Client interface.
+ * Two tier implementation of Client interface.
  *
  * @author mg
  * @see Client
@@ -215,21 +215,22 @@ public class DatabasesClient implements DbClient {
      * @throws Exception
      */
     @Override
-    public FlowProvider createFlowProvider(String aDbId, String aSessionId, String aEntityId, String aSqlClause, Set<String> aReadRoles, Set<String> aWriteRoles) throws Exception {
-        return new PlatypusJdbcFlowProvider(this, aDbId, aSessionId, aEntityId, resourceProvider.getPooledDataSource(aDbId), getDbMetadataCache(aDbId), aSqlClause, contextHost, aReadRoles, aWriteRoles);
+    public FlowProvider createFlowProvider(String aDbId, String aSessionId, String aEntityId, String aSqlClause, Fields aExpectedFields, Set<String> aReadRoles, Set<String> aWriteRoles) throws Exception {
+        return new PlatypusJdbcFlowProvider(this, aDbId, aSessionId, aEntityId, resourceProvider.getPooledDataSource(aDbId), getDbMetadataCache(aDbId), aSqlClause, aExpectedFields, contextHost, aReadRoles, aWriteRoles);
     }
 
-    protected void convertPkFields2PkCols(Rowset aRowSet, String[] aPkNames) {
-        if (aRowSet != null && aPkNames != null) {
-            for (int i = 0; i < aPkNames.length; i++) {
-                int colIndex = aRowSet.getFields().find(aPkNames[i]);
-                if (colIndex > 0) {
-                    aRowSet.getFields().get(colIndex).setPk(true);
-                }
-            }
-        }
-    }
-
+    /*
+     protected void convertPkFields2PkCols(Rowset aRowSet, String[] aPkNames) {
+     if (aRowSet != null && aPkNames != null) {
+     for (int i = 0; i < aPkNames.length; i++) {
+     int colIndex = aRowSet.getFields().find(aPkNames[i]);
+     if (colIndex > 0) {
+     aRowSet.getFields().get(colIndex).setPk(true);
+     }
+     }
+     }
+     }
+     */
     public String getSqlLogMessage(SqlCompiledQuery query) {
         StringBuilder sb = new StringBuilder("Executing SQL: ");
         sb.append(query.getSqlClause());
@@ -511,14 +512,17 @@ public class DatabasesClient implements DbClient {
         if (aEntityId != null) {
             AppCache cache = getAppCache();
             ApplicationElement appElement = cache.get(aEntityId);
-            if (appElement.getType() == ClientConstants.ET_QUERY) {
-                queries.clearCache(aEntityId);
-                clearDbStatements(null);
-            } else if (appElement.getType() == ClientConstants.ET_CONNECTION) {
-                clearDbStatements(aEntityId);
-                DbMetadataCache dbMdCache = getDbMetadataCache(aEntityId);
-                if (dbMdCache != null) {
-                    dbMdCache.clear();
+            if (appElement != null) {
+                if (appElement.getType() == ClientConstants.ET_QUERY) {
+                    //queries.clearCache(aEntityId);// Bad solution. There are may be some queries, using this query and so on.
+                    queries.clearCache();// possible overhead, but this is better way than previous.
+                    clearDbStatements(null);
+                } else if (appElement.getType() == ClientConstants.ET_CONNECTION) {
+                    clearDbStatements(aEntityId);
+                    DbMetadataCache dbMdCache = getDbMetadataCache(aEntityId);
+                    if (dbMdCache != null) {
+                        dbMdCache.clear();
+                    }
                 }
             }
             cache.remove(aEntityId);
@@ -537,6 +541,7 @@ public class DatabasesClient implements DbClient {
         cache.removeTableMetadata(fullTableName);
         cache.removeTableIndexes(fullTableName);
         clearDbStatements(aDbId);
+        queries.clearCache();
     }
 
     /**

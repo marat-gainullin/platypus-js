@@ -155,6 +155,13 @@
         </antcall>
         <antcall target="-maybe-call-dep">
             <param name="call.built.properties" value="${built-jar.properties}"/>
+            <param location="${project.Routing}" name="call.subproject"/>
+            <param location="${project.Routing}/build.xml" name="call.script"/>
+            <param name="call.target" value="jar"/>
+            <param name="transfer.built-jar.properties" value="${built-jar.properties}"/>
+        </antcall>
+        <antcall target="-maybe-call-dep">
+            <param name="call.built.properties" value="${built-jar.properties}"/>
             <param location="${project.Core}" name="call.subproject"/>
             <param location="${project.Core}/build.xml" name="call.script"/>
             <param name="call.target" value="jar"/>
@@ -291,7 +298,6 @@
         <subant buildpath="${project.DbControls}" antfile="build.xml" target="test"/>
         <subant buildpath="${project.Forms}" antfile="build.xml" target="test"/>
         <subant buildpath="${project.Application}" antfile="build.xml" target="test"/>
-        <subant buildpath="${project.DatamodelDesigner}" antfile="build.xml" target="test"/>
         <subant buildpath="${project.Sensors}" antfile="build.xml" target="test"/>
         <subant buildpath="${project.Server}" antfile="build.xml" target="test"/>
         <subant buildpath="${project.PlatypusServletSupport}" antfile="build.xml" target="test"/>
@@ -307,17 +313,29 @@
                                 /-->
 	<target description="Create update file" name="setversion">
 	    <buildnumber file="build.num"/>
-		<property name="curver" value="3.0."/> 
-        <property name="fullcurversion" value="${curver}${build.number}"/>
-		<property location="../../updates/update.xml" name="locatcopy"/>
-		<delete file="${locatcopy}"/>
-        <copy file="update_template.xml" tofile="${locatcopy}"/>
-		<replace file="${locatcopy}" token="#ver" value="${fullcurversion}"/>
-		<replace file="../../run/update.xml" token="#ver" value="${fullcurversion}"/>
-	    <replaceregexp file="../../installer.xml"
-               match="&gt;\d+\.\d+\.\d+&lt;"
-               replace="&gt;${fullcurversion}&lt;"
-               byline="true"/> 
+            <property name="curver" value="3.0."/> 
+            <property name="fullcurversion" value="${curver}${build.number}"/>
+	
+            <replaceregexp file="../../updates/update.xml"
+                   match="&lt;Version version=&quot;\d+\.\d+\.\d+&quot;/&gt;"
+                   replace="&lt;Version version=&quot;${fullcurversion}&quot;/&gt;"
+                   byline="true"/> 
+            <replaceregexp file="../../run/update.xml"
+                   match="&lt;Version version=&quot;\d+\.\d+\.\d+&quot;/&gt;"
+                   replace="&lt;Version version=&quot;${fullcurversion}&quot;/&gt;"
+                   byline="true"/>        
+            <replaceregexp file="../../installer.xml"
+                   match="&gt;\d+\.\d+\.\d+&lt;"
+                   replace="&gt;${fullcurversion}&lt;"
+                   byline="true"/> 
+            <replaceregexp file="../../macClientInstaller.xml"
+                   match="&lt;property name=&quot;version&quot; value=&quot;\d+\.\d+\.\d+&quot;/&gt;"
+                   replace="&lt;property name=&quot;version&quot; value=&quot;${fullcurversion}&quot;/&gt;"
+                   byline="true"/> 
+            <replaceregexp file="../../macClientInstaller.xml"
+                   match="&lt;property name=&quot;buildnumber&quot; value=&quot;\d+&quot;/&gt;"
+                   replace="&lt;property name=&quot;buildnumber&quot; value=&quot;${build.number}&quot;/&gt;"
+                   byline="true"/>        
 	</target>
 	                            <!--
                                     Copy Updater.jar if need.
@@ -378,22 +396,22 @@
 				
 				<include name="lib/thirdparty/misc/jh.jar"/>
 				
-				<include name="lib/thirdparty/geotools/geoapi-2.3-M1.jar"/>
-				<include name="lib/thirdparty/geotools/geoapi-pending-2.3-M1.jar"/>
-				<include name="lib/thirdparty/geotools/gt-api-2.7.0.jar"/>
-				<include name="lib/thirdparty/geotools/gt-coverage-2.7.0.jar"/>
-				<include name="lib/thirdparty/geotools/gt-cql-2.7.0.jar"/>
-				<include name="lib/thirdparty/geotools/gt-data-2.7.0.jar"/>
-				<include name="lib/thirdparty/geotools/gt-epsg-wkt-2.6.4.jar"/>
-				<include name="lib/thirdparty/geotools/gt-main-2.7.0.jar"/>
-				<include name="lib/thirdparty/geotools/gt-metadata-2.7.0.jar"/>
-				<include name="lib/thirdparty/geotools/gt-referencing-2.7.0.jar"/>
-				<include name="lib/thirdparty/geotools/gt-render-2.7.0.jar"/>
-				<include name="lib/thirdparty/geotools/gt-wms-2.7.0.jar"/>
-				<include name="lib/thirdparty/geotools/jai_core-1.1.3.jar"/>
-				<include name="lib/thirdparty/geotools/jsr-275-1.0-beta-2.jar"/>
-				<include name="lib/thirdparty/geotools/jts-1.11.jar"/>
-				<include name="lib/thirdparty/geotools/vecmath-1.3.2.jar"/>
+                                <include name="lib/thirdparty/geotools/geoapi-2.3-M1.jar"/>
+                                <include name="lib/thirdparty/geotools/geoapi-pending-2.3-M1.jar"/>
+                                <include name="lib/thirdparty/geotools/gt-api-9.0-beta1.jar"/>
+                                <include name="lib/thirdparty/geotools/gt-coverage-9.0-beta1.jar"/>
+                                <include name="lib/thirdparty/geotools/gt-cql-9.0-beta1.jar"/>
+                                <include name="lib/thirdparty/geotools/gt-data-9.0-beta1.jar"/>
+                                <include name="lib/thirdparty/geotools/gt-epsg-wkt-9.0-beta1.jar"/>
+                                <include name="lib/thirdparty/geotools/gt-main-9.0-beta1.jar"/>
+                                <include name="lib/thirdparty/geotools/gt-metadata-9.0-beta1.jar"/>
+                                <include name="lib/thirdparty/geotools/gt-referencing-9.0-beta1.jar"/>
+                                <include name="lib/thirdparty/geotools/gt-render-9.0-beta1.jar"/>
+                                <include name="lib/thirdparty/geotools/gt-wms-9.0-beta1.jar"/>
+                                <include name="lib/thirdparty/geotools/jai_core-1.1.3.jar"/>
+                                <include name="lib/thirdparty/geotools/jsr-275-1.0-beta-2.jar"/>
+                                <include name="lib/thirdparty/geotools/jts-1.13.jar"/>
+                                <include name="lib/thirdparty/geotools/vecmath-1.3.2.jar"/>
                 
 				<include name="lib/thirdparty/commons/commons-beanutils-1.8.2.jar"/>
 				<include name="lib/thirdparty/commons/commons-collections-3.2.1.jar"/>

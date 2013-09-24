@@ -8,10 +8,14 @@ import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.compacts.CompactClob;
 import com.bearsoft.rowset.exceptions.InvalidColIndexException;
 import com.bearsoft.rowset.exceptions.RowsetException;
+import com.bearsoft.rowset.metadata.Fields;
 import com.eas.client.model.Model;
+import com.eas.client.model.application.ApplicationEntity;
 import com.eas.script.ScriptUtils;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.mozilla.javascript.Context;
 import org.mozilla.javascript.EvaluatorException;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
@@ -22,20 +26,27 @@ import org.mozilla.javascript.ScriptableObject;
  */
 public class RowHostObject extends ScriptableObject {
 
-    protected Row row = null;
+    protected Row row;
+    protected ApplicationEntity<?, ?, ?> entity;
 
-    public RowHostObject(Scriptable aScope, Row aRow) {
+    public RowHostObject(Scriptable aScope, Row aRow, ApplicationEntity<?, ?, ?> aEntity) {
         super(aScope, null);
         row = aRow;
+        entity = aEntity;
+        assert entity != null;
         defineFunctionProperties(new String[]{"unwrap", "getColumnObject", "getLength", "toString"}, RowHostObject.class, EMPTY);
+        for (Entry<String, ScriptableObject> entry : entity.getOrmDefinitions().entrySet()) {
+            defineOwnProperty(Context.getCurrentContext(), entry.getKey(), entry.getValue());
+        }
     }
 
     @Override
     public Object[] getIds() {
         try {
-            Integer[] indexes = new Integer[row.getColumnCount()];
+            Fields fields = row.getFields();// Rows should enum properties as ordinary js objects
+            String[] indexes = new String[fields.getFieldsCount()];
             for (int i = 0; i < indexes.length; i++) {
-                indexes[i] = i;
+                indexes[i] = fields.get(i + 1).getName();
             }
             return indexes;
         } catch (Exception ex) {
@@ -164,7 +175,7 @@ public class RowHostObject extends ScriptableObject {
                     if (l > 1) {
                         sb.append(", ");
                     }
-                    sb.append(row.getFields().get(l).getName()).append(":").append(row.getColumnObject(l));
+                    sb.append(row.getFields().get(l).getName()).append(": ").append(row.getColumnObject(l));
                 }
                 sb.append("}");
                 return sb.toString();
@@ -190,14 +201,18 @@ public class RowHostObject extends ScriptableObject {
             return super.getDefaultValue(aTypeHint);
         }
     }
-    
-    public static RowHostObject publishRow(Scriptable aScope, Row aRow) throws Exception {
-        Object published = aRow.getTag();
-        if (published == null) {
-            published = new RowHostObject(aScope, aRow);
-            aRow.setTag(published);
+
+    public static RowHostObject publishRow(Scriptable aScope, Row aRow, ApplicationEntity<?, ?, ?> aEntity) throws Exception {
+        if (aRow != null) {
+            Object published = aRow.getTag();
+            if (published == null) {
+                published = new RowHostObject(aScope, aRow, aEntity);
+                aRow.setTag(published);
+            }
+            assert published instanceof RowHostObject;
+            return (RowHostObject) published;
+        } else {
+            return null;
         }
-        assert published instanceof RowHostObject;
-        return (RowHostObject) published;
     }
 }

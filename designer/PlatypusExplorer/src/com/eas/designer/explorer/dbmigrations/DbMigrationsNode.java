@@ -4,7 +4,7 @@
  */
 package com.eas.designer.explorer.dbmigrations;
 
-import com.eas.designer.explorer.project.PlatypusProject;
+import com.eas.designer.explorer.project.PlatypusProjectImpl;
 import java.awt.Image;
 import java.awt.datatransfer.Transferable;
 import java.util.ArrayList;
@@ -32,14 +32,14 @@ public class DbMigrationsNode extends FilterNode {
     protected Image openIcon;
     protected String name;
     protected String displayName;
-    protected PlatypusProject project;
+    protected PlatypusProjectImpl project;
     protected static final Action ADD_DB_METADATA_MIGRATION_ACTION = new AddDdMetadataMigrationAction();
     protected static final Action ADD_SQL_MIGRATION_ACTION = new AddSqlMigrationAction();
     protected static final Action APPLY_MIGRATIONS_ACTION = new ApplyMigrationsAction();
     protected static final Action CLEANUP_MIGRATIONS_ACTION = new CleanupMigrationsAction();
     protected static final Action SET_DB_VERSION_ACTION = new SetDbVersionAction();
     
-    public DbMigrationsNode(PlatypusProject aProject, Node aDelegate, org.openide.nodes.Children aChildren, Icon aIcon, Icon aOpenIcon, String aName, String aDisplayName) {
+    public DbMigrationsNode(PlatypusProjectImpl aProject, Node aDelegate, org.openide.nodes.Children aChildren, Icon aIcon, Icon aOpenIcon, String aName, String aDisplayName) {
         super(aDelegate, aChildren, Lookups.singleton(aProject));
         project = aProject;
         name = aName;
@@ -48,7 +48,7 @@ public class DbMigrationsNode extends FilterNode {
         displayName = aDisplayName;
     }
 
-    public PlatypusProject getProject() {
+    public PlatypusProjectImpl getProject() {
         return project;
     }
 

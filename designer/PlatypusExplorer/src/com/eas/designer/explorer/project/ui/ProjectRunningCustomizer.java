@@ -13,10 +13,10 @@ package com.eas.designer.explorer.project.ui;
 import com.eas.deploy.project.PlatypusSettings;
 import com.eas.designer.application.indexer.IndexerQuery;
 import com.eas.designer.explorer.FileChooser;
-import com.eas.designer.explorer.project.AppServerType;
-import com.eas.designer.explorer.project.ClientType;
-import com.eas.designer.explorer.project.PlatypusProject;
-import com.eas.designer.explorer.project.PlatypusProjectSettings;
+import com.eas.designer.application.project.AppServerType;
+import com.eas.designer.application.project.ClientType;
+import com.eas.designer.explorer.project.PlatypusProjectImpl;
+import com.eas.designer.explorer.project.PlatypusProjectSettingsImpl;
 import java.awt.event.ItemEvent;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -47,9 +47,9 @@ import org.openide.util.lookup.Lookups;
 public class ProjectRunningCustomizer extends javax.swing.JPanel {
 
     public static final String SERVERS_PATH = "Servers"; // NOI18N
-    protected final PlatypusProject project;
+    protected final PlatypusProjectImpl project;
     protected final FileObject appRoot;
-    protected final PlatypusProjectSettings projectSettings;
+    protected final PlatypusProjectSettingsImpl projectSettings;
     protected final PlatypusSettings appSettings;
     protected ComboBoxModel<ServerInstance> j2eeServersModel;
     private boolean isInit = true;
@@ -59,13 +59,14 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
     /**
      * Creates new form ProjectRunningCustomizer
      */
-    public ProjectRunningCustomizer(PlatypusProject aProject) throws Exception {
+    public ProjectRunningCustomizer(PlatypusProjectImpl aProject) throws Exception {
         project = aProject;
         appRoot = aProject.getSrcRoot();
         projectSettings = aProject.getSettings();
         appSettings = projectSettings.getAppSettings();
         serversModel = new DefaultComboBoxModel(getJ2eePlatforms());
         initComponents();
+        
         if (appSettings.getRunElement() != null) {
             txtRunPath.setText(projectSettings.getAppSettings().getRunElement());
         }
@@ -97,13 +98,20 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
         enablePlatypusClientCustomSettings();
         cbClientType.setSelectedItem(projectSettings.getRunClientType());
         cbAppServerType.setSelectedItem(projectSettings.getRunAppServerType());
-
+        cbClientLogLevel.setVisible(false);
+        cbServerLogLevel.setVisible(false);
+        /*
+        cbClientLogLevel.setSelectedItem(projectSettings.getClientLogLevel());
+        cbServerLogLevel.setSelectedItem(projectSettings.getServerLogLevel());
+        */ 
         selectServerInstance();
 
         if (projectSettings.getServerContext() != null) {
             txtContext.setText(projectSettings.getServerContext());
         }
         cbEnableSecurity.setSelected(projectSettings.isWebSecurityEnabled());
+        spClientDebugPort.setValue(projectSettings.getDebugClientPort());
+        spServerDebugPort.setValue(projectSettings.getDebugServerPort()); 
         checkRunClientServerConfiguration();
         isInit = false;
 //        result.addLookupListener(new LookupListener() {
@@ -130,6 +138,10 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
             }
         }
         return j2eePlatforms.toArray(new J2eePlatformAdapter[0]);
+    }
+    
+    private Level[] getLogLevels() {
+        return new Level[] {Level.SEVERE, Level.WARNING, Level.INFO, Level.CONFIG, Level.FINE, Level.FINER, Level.FINEST};
     }
 
     private void selectServerInstance() {
@@ -232,6 +244,10 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
         lblClientUrl = new javax.swing.JLabel();
         lblClientVmOptions = new javax.swing.JLabel();
         txtClientVmOptions = new javax.swing.JTextField();
+        lblClientDebugPort = new javax.swing.JLabel();
+        spClientDebugPort = new javax.swing.JSpinner();
+        lblClientLogLevel = new javax.swing.JLabel();
+        cbClientLogLevel = new javax.swing.JComboBox();
         serverPanel = new javax.swing.JPanel();
         lblServerOptions = new javax.swing.JLabel();
         txtServerOptions = new javax.swing.JTextField();
@@ -239,6 +255,10 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
         spServerPort = new javax.swing.JSpinner();
         lblServerVmOptions = new javax.swing.JLabel();
         txtServerVmOptions = new javax.swing.JTextField();
+        lblServerDebugPort = new javax.swing.JLabel();
+        spServerDebugPort = new javax.swing.JSpinner();
+        lblServerLogLevel = new javax.swing.JLabel();
+        cbServerLogLevel = new javax.swing.JComboBox();
         j2eeServerPanel = new javax.swing.JPanel();
         lblJ2eeServer = new javax.swing.JLabel();
         cbj2eeServer = new javax.swing.JComboBox();
@@ -350,6 +370,30 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
             }
         });
 
+        lblClientDebugPort.setText(org.openide.util.NbBundle.getMessage(ProjectRunningCustomizer.class, "ProjectRunningCustomizer.lblClientDebugPort.text")); // NOI18N
+
+        spClientDebugPort.setMinimumSize(new java.awt.Dimension(36, 26));
+        spClientDebugPort.setPreferredSize(new java.awt.Dimension(36, 26));
+        spClientDebugPort.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                spClientDebugPortStateChanged(evt);
+            }
+        });
+        spClientDebugPort.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                spClientDebugPortFocusLost(evt);
+            }
+        });
+
+        lblClientLogLevel.setText(org.openide.util.NbBundle.getMessage(ProjectRunningCustomizer.class, "ProjectRunningCustomizer.lblClientLogLevel.text")); // NOI18N
+
+        cbClientLogLevel.setModel(new javax.swing.DefaultComboBoxModel(getLogLevels()));
+        cbClientLogLevel.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                cbClientLogLevelItemStateChanged(evt);
+            }
+        });
+
         javax.swing.GroupLayout clientPanelLayout = new javax.swing.GroupLayout(clientPanel);
         clientPanel.setLayout(clientPanelLayout);
         clientPanelLayout.setHorizontalGroup(
@@ -357,19 +401,31 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
             .addGroup(clientPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(clientPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(lblPassword)
-                    .addComponent(lblClientOptions)
-                    .addComponent(lblUserName)
-                    .addComponent(lblClientUrl)
-                    .addComponent(lblClientVmOptions))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(clientPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtClientVmOptions)
-                    .addComponent(txtClientUrl)
-                    .addComponent(txtUserName)
-                    .addComponent(txtPassword, javax.swing.GroupLayout.DEFAULT_SIZE, 484, Short.MAX_VALUE)
-                    .addComponent(txtClientOptions))
-                .addGap(18, 18, 18))
+                    .addGroup(clientPanelLayout.createSequentialGroup()
+                        .addComponent(lblClientDebugPort)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(spClientDebugPort, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 403, Short.MAX_VALUE))
+                    .addGroup(clientPanelLayout.createSequentialGroup()
+                        .addGroup(clientPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(lblPassword)
+                            .addComponent(lblClientOptions)
+                            .addComponent(lblUserName)
+                            .addComponent(lblClientUrl)
+                            .addComponent(lblClientVmOptions)
+                            .addComponent(lblClientLogLevel))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(clientPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(cbClientLogLevel, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(clientPanelLayout.createSequentialGroup()
+                                .addGap(3, 3, 3)
+                                .addGroup(clientPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(txtClientUrl, javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(txtUserName, javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(txtPassword, javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(txtClientOptions, javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(txtClientVmOptions))))))
+                .addContainerGap())
         );
         clientPanelLayout.setVerticalGroup(
             clientPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -377,7 +433,7 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
                 .addContainerGap()
                 .addGroup(clientPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblClientUrl)
-                    .addComponent(txtClientUrl, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtClientUrl, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(clientPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtUserName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -394,7 +450,15 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
                 .addGroup(clientPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtClientVmOptions, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(lblClientVmOptions))
-                .addContainerGap(94, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(clientPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblClientDebugPort)
+                    .addComponent(spClientDebugPort, javax.swing.GroupLayout.PREFERRED_SIZE, 21, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(14, 14, 14)
+                .addGroup(clientPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(cbClientLogLevel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblClientLogLevel))
+                .addContainerGap(70, Short.MAX_VALUE))
         );
 
         tabbedPane.addTab(org.openide.util.NbBundle.getMessage(ProjectRunningCustomizer.class, "ProjectRunningCustomizer.clientPanel.TabConstraints.tabTitle"), clientPanel); // NOI18N
@@ -439,23 +503,56 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
             }
         });
 
+        lblServerDebugPort.setText(org.openide.util.NbBundle.getMessage(ProjectRunningCustomizer.class, "ProjectRunningCustomizer.lblServerDebugPort.text")); // NOI18N
+
+        spServerDebugPort.setMinimumSize(new java.awt.Dimension(36, 26));
+        spServerDebugPort.setPreferredSize(new java.awt.Dimension(36, 26));
+        spServerDebugPort.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                spServerDebugPortStateChanged(evt);
+            }
+        });
+        spServerDebugPort.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                spServerDebugPortFocusLost(evt);
+            }
+        });
+
+        lblServerLogLevel.setText(org.openide.util.NbBundle.getMessage(ProjectRunningCustomizer.class, "ProjectRunningCustomizer.lblServerLogLevel.text")); // NOI18N
+
+        cbServerLogLevel.setModel(new javax.swing.DefaultComboBoxModel(getLogLevels()));
+        cbServerLogLevel.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                cbServerLogLevelItemStateChanged(evt);
+            }
+        });
+
         javax.swing.GroupLayout serverPanelLayout = new javax.swing.GroupLayout(serverPanel);
         serverPanel.setLayout(serverPanelLayout);
         serverPanelLayout.setHorizontalGroup(
             serverPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(serverPanelLayout.createSequentialGroup()
-                .addContainerGap()
                 .addGroup(serverPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(lblServerPort)
-                    .addComponent(lblServerOptions)
-                    .addComponent(lblServerVmOptions))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                    .addGroup(serverPanelLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(serverPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(lblServerPort)
+                            .addComponent(lblServerOptions)
+                            .addComponent(lblServerVmOptions)
+                            .addComponent(lblServerDebugPort)))
+                    .addGroup(serverPanelLayout.createSequentialGroup()
+                        .addGap(10, 10, 10)
+                        .addComponent(lblServerLogLevel)))
+                .addGap(18, 18, 18)
                 .addGroup(serverPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtServerVmOptions)
-                    .addComponent(txtServerOptions, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 496, Short.MAX_VALUE)
+                    .addComponent(txtServerOptions, javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(serverPanelLayout.createSequentialGroup()
-                        .addComponent(spServerPort, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 416, Short.MAX_VALUE)))
+                        .addGroup(serverPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(cbServerLogLevel, javax.swing.GroupLayout.PREFERRED_SIZE, 299, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(spServerPort, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(spServerDebugPort, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(0, 183, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         serverPanelLayout.setVerticalGroup(
@@ -464,7 +561,7 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
                 .addContainerGap()
                 .addGroup(serverPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblServerPort)
-                    .addComponent(spServerPort, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(spServerPort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(serverPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtServerOptions, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -473,7 +570,15 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
                 .addGroup(serverPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtServerVmOptions, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(lblServerVmOptions))
-                .addContainerGap(159, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(serverPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(lblServerDebugPort)
+                    .addComponent(spServerDebugPort, javax.swing.GroupLayout.PREFERRED_SIZE, 19, Short.MAX_VALUE))
+                .addGap(49, 49, 49)
+                .addGroup(serverPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblServerLogLevel)
+                    .addComponent(cbServerLogLevel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(89, Short.MAX_VALUE))
         );
 
         tabbedPane.addTab(org.openide.util.NbBundle.getMessage(ProjectRunningCustomizer.class, "ProjectRunningCustomizer.serverPanel.TabConstraints.tabTitle"), serverPanel); // NOI18N
@@ -535,12 +640,12 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
                             .addComponent(lblContext))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(j2eeServerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtContext, javax.swing.GroupLayout.DEFAULT_SIZE, 496, Short.MAX_VALUE)
+                            .addComponent(txtContext, javax.swing.GroupLayout.DEFAULT_SIZE, 514, Short.MAX_VALUE)
                             .addGroup(j2eeServerPanelLayout.createSequentialGroup()
                                 .addComponent(cbj2eeServer, javax.swing.GroupLayout.PREFERRED_SIZE, 305, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(btnManageServers)
-                                .addGap(0, 83, Short.MAX_VALUE)))))
+                                .addGap(0, 92, Short.MAX_VALUE)))))
                 .addContainerGap())
         );
         j2eeServerPanelLayout.setVerticalGroup(
@@ -557,7 +662,7 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
                     .addComponent(txtContext, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(cbEnableSecurity)
-                .addContainerGap(167, Short.MAX_VALUE))
+                .addContainerGap(184, Short.MAX_VALUE))
         );
 
         tabbedPane.addTab(org.openide.util.NbBundle.getMessage(ProjectRunningCustomizer.class, "ProjectRunningCustomizer.j2eeServerPanel.TabConstraints.tabTitle"), j2eeServerPanel); // NOI18N
@@ -623,7 +728,7 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(btnBrowse, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addComponent(chDbAppSources))
-                        .addContainerGap())
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(cbNotStartServer)
                         .addGap(0, 0, Short.MAX_VALUE))))
@@ -665,7 +770,7 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
             FileObject selectedFile = null;// TODO Rework app element selector
             Set<String> allowedTypes = new HashSet<>();
             allowedTypes.add("text/javascript");//NOI18N
-            FileObject newSelectedFile = FileChooser.selectFile(appRoot, selectedFile, allowedTypes);
+            FileObject newSelectedFile = FileChooser.selectAppElement(appRoot, selectedFile, allowedTypes);
             if (newSelectedFile != null && newSelectedFile != selectedFile) {
                 String appElementId = IndexerQuery.file2AppElementId(newSelectedFile);
                 projectSettings.getAppSettings().setRunElement(appElementId);
@@ -810,18 +915,47 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
             provider.removeChangeListener(serverRegistryLister);
         }
     }//GEN-LAST:event_btnManageServersActionPerformed
+
+    private void spClientDebugPortStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_spClientDebugPortStateChanged
+        projectSettings.setDebugClientPort((int)spClientDebugPort.getValue());
+    }//GEN-LAST:event_spClientDebugPortStateChanged
+
+    private void spClientDebugPortFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_spClientDebugPortFocusLost
+        projectSettings.setDebugClientPort((int)spClientDebugPort.getValue());
+    }//GEN-LAST:event_spClientDebugPortFocusLost
+
+    private void spServerDebugPortFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_spServerDebugPortFocusLost
+        projectSettings.setDebugServerPort((int)spServerDebugPort.getValue());
+    }//GEN-LAST:event_spServerDebugPortFocusLost
+
+    private void spServerDebugPortStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_spServerDebugPortStateChanged
+        projectSettings.setDebugServerPort((int)spServerDebugPort.getValue());
+    }//GEN-LAST:event_spServerDebugPortStateChanged
+
+    private void cbClientLogLevelItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cbClientLogLevelItemStateChanged
+        projectSettings.setClientLogLevel((Level)cbClientLogLevel.getSelectedItem());
+    }//GEN-LAST:event_cbClientLogLevelItemStateChanged
+
+    private void cbServerLogLevelItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cbServerLogLevelItemStateChanged
+        projectSettings.setServerLogLevel((Level)cbServerLogLevel.getSelectedItem());
+    }//GEN-LAST:event_cbServerLogLevelItemStateChanged
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnBrowse;
     private javax.swing.JButton btnManageServers;
     private javax.swing.JComboBox cbAppServerType;
+    private javax.swing.JComboBox cbClientLogLevel;
     private javax.swing.JComboBox cbClientType;
     private javax.swing.JCheckBox cbEnableSecurity;
     private javax.swing.JCheckBox cbNotStartServer;
+    private javax.swing.JComboBox cbServerLogLevel;
     private javax.swing.JComboBox cbj2eeServer;
     private javax.swing.JCheckBox chDbAppSources;
     private javax.swing.JPanel clientPanel;
     private javax.swing.JPanel j2eeServerPanel;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JLabel lblClientDebugPort;
+    private javax.swing.JLabel lblClientLogLevel;
     private javax.swing.JLabel lblClientOptions;
     private javax.swing.JLabel lblClientServerMessage;
     private javax.swing.JLabel lblClientType;
@@ -832,11 +966,15 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
     private javax.swing.JLabel lblPassword;
     private javax.swing.JLabel lblRunPath;
     private javax.swing.JLabel lblServeType;
+    private javax.swing.JLabel lblServerDebugPort;
+    private javax.swing.JLabel lblServerLogLevel;
     private javax.swing.JLabel lblServerOptions;
     private javax.swing.JLabel lblServerPort;
     private javax.swing.JLabel lblServerVmOptions;
     private javax.swing.JLabel lblUserName;
     private javax.swing.JPanel serverPanel;
+    private javax.swing.JSpinner spClientDebugPort;
+    private javax.swing.JSpinner spServerDebugPort;
     private javax.swing.JSpinner spServerPort;
     private javax.swing.JTabbedPane tabbedPane;
     private javax.swing.JTextField txtClientOptions;

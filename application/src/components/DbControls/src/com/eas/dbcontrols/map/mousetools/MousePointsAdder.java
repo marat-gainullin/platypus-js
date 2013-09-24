@@ -107,7 +107,7 @@ public class MousePointsAdder extends MapTool {
                         rows.put(sEntry.getFeatureId(), row);
                         oldGeometries.put(sEntry.getFeatureId(), geometry);
                         rowsColIndexes.put(sEntry.getFeatureId(), sEntry.getGeometryColIndex());
-                        features2Entities.put(sEntry.getFeatureId(), map.getModel().getEntityById(sEntry.getEntityId()));
+                        features2Entities.put(sEntry.getFeatureId(), sEntry.getEntity());
                     }
                     double distance = Double.MAX_VALUE;
                     Geometry closestGeometry = null;
@@ -216,7 +216,7 @@ public class MousePointsAdder extends MapTool {
                     row2Update.setColumnObject(rowsColIndexes.get(featureId2InsertTo), GisUtilities.constructGeometry(gData, closestGeometry.getClass(), closestGeometry.getSRID()));
                     features2Entities.get(featureId2InsertTo).getRowset().setModified(true);
                     map.getSelection().clear();
-                    map.getSelection().getSelection().add(new SelectionEntry(features2Entities.get(featureId2InsertTo).getEntityId(), rows.get(featureId2InsertTo), featureId2InsertTo, rowsColIndexes.get(featureId2InsertTo), closestGeometry.getNumGeometries() > 1 ? gIdx : -1, cIdx, gHoleIdx, point2Add.getCoordinate()));
+                    map.getSelection().getSelection().add(new SelectionEntry(features2Entities.get(featureId2InsertTo), rows.get(featureId2InsertTo), featureId2InsertTo, rowsColIndexes.get(featureId2InsertTo), closestGeometry.getNumGeometries() > 1 ? gIdx : -1, cIdx, gHoleIdx, point2Add.getCoordinate()));
                     map.fireSelectionChanged();
                     // Let's fire feature chaned event to all editabble layers
                     MapLayer[] lightLayers = map.getPane().getLightweightMapContext().getLayers();

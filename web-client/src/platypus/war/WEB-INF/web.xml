@@ -3,14 +3,14 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
 	<welcome-file-list>
-		<welcome-file>/start/applicationStart.html</welcome-file>
+		<welcome-file>/applicationStart.html</welcome-file>
 	</welcome-file-list>
     <servlet>
         <servlet-name>proxy</servlet-name>
         <servlet-class>com.servlet.proxy.ProxyServlet</servlet-class>
 		<init-param>
             <param-name>target-server</param-name>
-            <param-value>http://localhost</param-value>
+            <param-value>http://localhost:8080</param-value>
         </init-param>
     </servlet>
     <servlet-mapping> 

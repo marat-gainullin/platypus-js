@@ -85,7 +85,7 @@ public class ScriptRunnerSecurityTest {
             nativeClient = new PlatypusNativeClient(nativeSettings);
             PlatypusConnectionSettings httpSettings = new PlatypusConnectionSettings();
             httpSettings.setName("Platypus http test connection");
-            httpSettings.setUrl("http://localhost:8080/test/application/");
+            httpSettings.setUrl("http://localhost:8080/application/");
             httpClient = new PlatypusHttpClient(httpSettings);
             scriptDocumentsHost = new CompiledScriptDocumentsHost() {
                 @Override
@@ -220,11 +220,11 @@ public class ScriptRunnerSecurityTest {
     private ScriptRunner getModule(int moduleType, SecurityTestType testType, AppClient client) throws Exception {
         switch (moduleType) {
             case ClientConstants.ET_COMPONENT:
-                return new ScriptRunner(getComponentAppElementId(testType), client, ScriptUtils.getScope(), client, scriptDocumentsHost, new Object[]{});
+                return new ScriptRunner(getComponentAppElementId(testType), client, ScriptRunner.initializePlatypusStandardLibScope(), client, scriptDocumentsHost, new Object[]{});
             case ClientConstants.ET_FORM:
-                return new FormRunner(getFormAppElementId(testType), client, ScriptUtils.getScope(), client, scriptDocumentsHost, new Object[]{});
+                return new FormRunner(getFormAppElementId(testType), client, ScriptRunner.initializePlatypusStandardLibScope(), client, scriptDocumentsHost, new Object[]{});
             case ClientConstants.ET_REPORT:
-                return new ReportRunner(getReportAppelementId(testType), client, ScriptUtils.getScope(), client, scriptDocumentsHost, new Object[]{});
+                return new ReportRunner(getReportAppelementId(testType), client, ScriptRunner.initializePlatypusStandardLibScope(), client, scriptDocumentsHost, new Object[]{});
         }
         throw new IllegalArgumentException(UNKNOWN_MODULE_TYPE_MESSAGE);//NOI18N
     }

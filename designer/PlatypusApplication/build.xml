@@ -10,9 +10,7 @@
         <property name="rt_dir" value="../../application/bin" />
         <property name="lib_own" value="../../application/lib/own" />
         <property name="lib_tp" value="../../application/lib/thirdparty" />
-        
-        <copy file="${rt_dir}/DatamodelDesigner.jar" todir="${dest_dir}" overwrite="true" />
-        
+                
         <copy file="${rt_dir}/Application.jar" todir="${dest_dir}" overwrite="true" />
         <copy file="${rt_dir}/Forms.jar" todir="${dest_dir}" overwrite="true" />
          
@@ -35,6 +33,7 @@
         <copy file="${lib_own}/Rowsets.jar" todir="${dest_dir}" overwrite="true" />
         <copy file="${lib_own}/ScalablePane.jar" todir="${dest_dir}" overwrite="true" />
         <copy file="${lib_own}/SyntaxPane.jar" todir="${dest_dir}" overwrite="true" />
+        <copy file="${lib_own}/Routing.jar" todir="${dest_dir}" overwrite="true" />
         
         <copy file="${lib_tp}/JCalendar.jar" todir="${dest_dir}" overwrite="true" />
         <copy file="${lib_tp}/SqlParser.jar" todir="${dest_dir}" overwrite="true" />

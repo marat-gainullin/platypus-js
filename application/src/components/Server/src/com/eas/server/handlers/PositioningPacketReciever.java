@@ -11,19 +11,24 @@ import com.eas.sensors.positioning.PacketReciever;
 import com.eas.sensors.positioning.PositioningIoHandler;
 import com.eas.sensors.positioning.PositioningPacket;
 import com.eas.sensors.retranslate.RetranslatePacketFactory;
+import com.eas.sensors.retranslate.http.HttpPushEncoder;
 import com.eas.server.PlatypusServerCore;
 import com.eas.server.PositioningPacketStorage;
-import com.eas.server.ServerScriptRunner;
+import java.net.IDN;
 import java.net.InetSocketAddress;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.security.cert.X509Certificate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import org.apache.mina.core.future.ConnectFuture;
 import org.apache.mina.core.future.WriteFuture;
 import org.apache.mina.core.service.IoConnector;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
+import org.apache.mina.filter.codec.ProtocolEncoder;
+import org.apache.mina.filter.ssl.SslFilter;
 import org.apache.mina.transport.socket.nio.NioSocketConnector;
 
 /**
@@ -33,8 +38,7 @@ import org.apache.mina.transport.socket.nio.NioSocketConnector;
 public class PositioningPacketReciever implements PacketReciever {
 
     public static final String RECIEVER_METHOD_NAME = "recieved";
-    public static final String SEND_REQUEST_METHOD_NAME = "sendRequest";
-    public static final String GET_RESPONSE_METHOD_NAME = "getResponse";
+    public static final Pattern URL_PATTERN = Pattern.compile("(?:(?<SCHEMA>[a-z0-9\\+\\.\\-]+):)?(?://)?(?:(?<USER>[a-zA-Z0-9\\$\\-\\_\\.\\+\\!\\*\\'\\(\\)\\,\\\"]+):(?<PASS>[a-zA-Z0-9\\$\\-\\_\\.\\+\\!\\*\\'\\(\\)\\,\\\"]*)@)?(?<URL>[a-zA-Z0-9\\$\\-\\_\\.\\+\\!\\*\\'\\(\\)\\,\\\"]+):?(?<PORT>\\d+)?(?<PATH>/[a-zA-Z0-9\\$\\-\\_\\.\\+\\!\\*\\'\\(\\)\\,\\\"]+)*(?<FILE>/[a-zA-Z0-9\\$\\-\\_\\.\\+\\!\\*\\'\\(\\)\\,\\\"]+)?(?<QUERY>\\?[a-zA-Z0-9\\$\\-\\_\\.\\+\\!\\*\\'\\(\\)\\,\\\"\\;\\/\\?\\:\\@\\=\\&]+)?");
     protected String moduleId;
     protected PlatypusServerCore serverCore;
     private PositioningPacketStorage packetStorage = new PositioningPacketStorage();
@@ -47,63 +51,88 @@ public class PositioningPacketReciever implements PacketReciever {
     }
 
     @Override
-    public Object received(PositioningPacket aPacket) {
-        try {
-            ServerScriptRunner module = null;
-            module = serverCore.getSessionManager().getSystemSession().getModule(moduleId);
-            if (module == null) {
-                module = new ServerScriptRunner(serverCore, serverCore.getSessionManager().getSystemSession(), moduleId, ScriptUtils.getScope(), serverCore, serverCore, new Object[]{});
+    public Object received(PositioningPacket aPacket) throws Exception {
+        Object result = serverCore.executeServerModuleMethod(moduleId, RECIEVER_METHOD_NAME, new Object[]{aPacket});
+        if (result != null) {
+            result = ScriptUtils.js2Java(result);
+            assert result instanceof String;
+            Matcher m = URL_PATTERN.matcher((String) result);
+            while (m.find()) {
+                send(aPacket, IDN.toASCII(m.group("URL").toLowerCase()), Integer.parseInt(m.group("PORT")), m.group("SCHEMA").toLowerCase(),
+                        m.group("USER"), m.group("PASS"), m.group("PATH"));
             }
-            module.execute();
-            serverCore.getSessionManager().setCurrentSession(serverCore.getSessionManager().getSystemSession());
-            Object result;
-            try {
-                result = module.executeMethod(RECIEVER_METHOD_NAME, new Object[]{aPacket});
-            } finally {
-                serverCore.getSessionManager().setCurrentSession(null);
-            }
-            if (result != null) {
-                result = ScriptUtils.js2Java(result);
-                assert result instanceof String;
-                ServiceUrl url = new ServiceUrl((String) result);
-                send(aPacket, url.getHost(), url.getPort(), url.getProtocol());
-            }
-        } catch (Exception ex) {
-            Logger.getLogger(PositioningPacketReciever.class.getName()).log(Level.SEVERE, null, ex);
         }
         return null;
     }
 
-    public Object send(PositioningPacket aPacket, String aHost, Integer aPort, String aProtocolName) {
+    public Object send(PositioningPacket aPacket, String aHost, Integer aPort, String aProtocolName, String aUser, String aPassword, String aPath) throws Exception {
         if (aHost != null && !aHost.isEmpty()
                 && aProtocolName != null && !aProtocolName.isEmpty()
                 && aPort != null && aPort > 0 && aPort < 65535
                 && aPacket != null) {
             if (RetranslatePacketFactory.isProtocolSupported(aProtocolName)) {
-                String imei = aPacket.getImei();
-                IoSession ioSession = retranslateSessions.get(imei);
+                StringBuilder sId = new StringBuilder();
+                sId.append(aPacket.getImei()).append(aProtocolName).append(aHost).append(aPort);
+                String id = sId.toString();
+                IoSession ioSession = retranslateSessions.get(id);
                 if (ioSession == null) {
                     IoConnector connector = new NioSocketConnector();
-                    connector.getFilterChain().addLast(aProtocolName, new ProtocolCodecFilter(RetranslatePacketFactory.getPacketEncoder(aProtocolName), RetranslatePacketFactory.getPacketDecoder(aProtocolName)));
+                    if (aProtocolName.equals(RetranslatePacketFactory.HTTPS_PROTOCOL_NAME)) {
+                        TrustManager[] trustAllCerts = new TrustManager[]{
+                            new X509TrustManager() {
+                                @Override
+                                public X509Certificate[] getAcceptedIssuers() {
+                                    return null;
+                                }
+
+                                @Override
+                                public void checkClientTrusted(X509Certificate[] certs, String authType) {
+                                }
+
+                                @Override
+                                public void checkServerTrusted(X509Certificate[] certs, String authType) {
+                                }
+                            }
+                        };
+                        SSLContext sc = SSLContext.getInstance("TLS");
+                        sc.init(null, trustAllCerts, new java.security.SecureRandom());
+                        SslFilter filter = new SslFilter(sc);
+                        filter.setUseClientMode(true);
+                        filter.setNeedClientAuth(false);
+                        connector.getFilterChain().addLast("ssl", filter);
+                    }
+                    ProtocolEncoder encoder = RetranslatePacketFactory.getPacketEncoder(aProtocolName);
+                    if (encoder instanceof HttpPushEncoder) {
+                        HttpPushEncoder encod = (HttpPushEncoder) encoder;
+                        encod.setHost(aHost);
+                        encod.setPath(aPath);
+                        encod.setUser(aUser);
+                        encod.setPassword(aPassword);
+                    }
+                    connector.getFilterChain().addLast(aProtocolName, new ProtocolCodecFilter(encoder, RetranslatePacketFactory.getPacketDecoder(aProtocolName)));
                     connector.setHandler(RetranslatePacketFactory.getPacketHandler(aProtocolName, retranslateSessions));
                     connector.setConnectTimeoutMillis(WAIT_SEND_TIMEOUT);
                     ConnectFuture future = connector.connect(new InetSocketAddress(aHost, aPort));
                     future.awaitUninterruptibly();
                     if (future.isConnected()) {
-                        IoSession session = future.getSession();
-                        session.setAttribute(IMEI_ATTRIBUTE, imei);
-                        retranslateSessions.put(imei, session);
-                        WriteFuture write = session.write(aPacket);
+                        ioSession = future.getSession();
+                        ioSession.getConfig().setUseReadOperation(true);
+                        ioSession.setAttribute(ATTRIBUTE_SESSION_ID, id);
+                        retranslateSessions.put(id, ioSession);
+                        WriteFuture write = ioSession.write(aPacket);
                         write.awaitUninterruptibly(WAIT_SEND_TIMEOUT);
-                    }else
+                    } else {
                         connector.dispose();
+                    }
                 } else {
                     WriteFuture write = ioSession.write(aPacket);
                     write.awaitUninterruptibly(WAIT_SEND_TIMEOUT);
                 }
+                return ioSession;
             }
         }
         return null;
+
     }
 
     /**
@@ -138,70 +167,5 @@ public class PositioningPacketReciever implements PacketReciever {
      */
     public PositioningPacketStorage getInvalidPacketStorage() {
         return invalidPacketStorage;
-    }
-
-    /**
-     *
-     */
-    public static class ServiceUrl {
-
-        private final Pattern URL_PATTERN = Pattern.compile("(?<PROTOCOL>[A-Za-z0-9\\+\\.\\-]+)(://)(?<HOST>[a-zA-Z0-9\\$\\-\\_\\.\\+\\!\\"
-                + "*\\'\\(\\)\\,\\\"]+)(:)(?<PORT>\\d+)");
-        private String protocol;
-        private String host;
-        private int port;
-
-        public ServiceUrl(String aUrl) {
-            if (aUrl != null && !aUrl.isEmpty()) {
-                Matcher matcher = URL_PATTERN.matcher(aUrl);
-                if (matcher.matches()) {
-                    port = Integer.valueOf(matcher.group("PORT"));
-                    host = matcher.group("HOST");
-                    protocol = matcher.group("PROTOCOL");
-                }
-            }
-        }
-
-        /**
-         * @return the protocol
-         */
-        public String getProtocol() {
-            return protocol;
-        }
-
-        /**
-         * @param aProtocol the protocol to set
-         */
-        public void setProtocol(String aProtocol) {
-            protocol = aProtocol;
-        }
-
-        /**
-         * @return the host
-         */
-        public String getHost() {
-            return host;
-        }
-
-        /**
-         * @param aHost the host to set
-         */
-        public void setHost(String aHost) {
-            host = aHost;
-        }
-
-        /**
-         * @return the port
-         */
-        public int getPort() {
-            return port;
-        }
-
-        /**
-         * @param a the port to set
-         */
-        public void setPort(int aPort) {
-            port = aPort;
-        }
     }
 }

@@ -6,15 +6,12 @@ package com.eas.designer.application;
 
 import com.eas.client.ClientConstants;
 import com.eas.client.SQLUtils;
-import com.eas.client.resourcepool.GeneralResourceProvider;
-import com.eas.client.settings.DbConnectionSettings;
 import com.eas.client.sqldrivers.SqlDriver;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 /**
  *
@@ -30,8 +27,8 @@ public class PlatypusUtils {
     public static final String PLATYPUS_PROJECT_DB_MIGRATIONS_DIR = "db";
 
     public static List<String> achieveSchemas(String aUrl, String aUser, String aPassword) throws Exception {
-        Properties props = GeneralResourceProvider.constructPropertiesByDbConnectionSettings(new DbConnectionSettings(aUrl, null, aUser, aPassword, null));
-        SqlDriver driver = SQLUtils.getSqlDriver(props.getProperty(ClientConstants.DB_CONNECTION_DIALECT_PROP_NAME));
+        String dialect = SQLUtils.dialectByUrl(aUrl);
+        SqlDriver driver = SQLUtils.getSqlDriver(dialect);
         List<String> schemas = new ArrayList<>();
         try (java.sql.Connection conn = DriverManager.getConnection(aUrl, aUser, aPassword)) {
             try (Statement stmt = conn.createStatement()) {
@@ -49,8 +46,8 @@ public class PlatypusUtils {
     }
     
     public static void createSchema(String aUrl, String aUser, String aPassword, String aSchema) throws Exception {
-        Properties props = GeneralResourceProvider.constructPropertiesByDbConnectionSettings(new DbConnectionSettings(aUrl, null, aUser, aPassword, null));
-        SqlDriver driver = SQLUtils.getSqlDriver(props.getProperty(ClientConstants.DB_CONNECTION_DIALECT_PROP_NAME));
+        String dialect = SQLUtils.dialectByUrl(aUrl);
+        SqlDriver driver = SQLUtils.getSqlDriver(dialect);
         try (java.sql.Connection conn = DriverManager.getConnection(aUrl, aUser, aPassword)) {
             try (Statement stmt = conn.createStatement()) {
                 stmt.execute(driver.getSql4CreateSchema(aSchema, null));

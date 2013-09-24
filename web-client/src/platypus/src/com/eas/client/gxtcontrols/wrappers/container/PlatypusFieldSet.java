@@ -1,65 +1,88 @@
 package com.eas.client.gxtcontrols.wrappers.container;
 
-import com.google.gwt.dom.client.Element;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.ui.IsWidget;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.ui.Widget;
+import com.sencha.gxt.core.client.Style.Side;
 import com.sencha.gxt.core.client.dom.XElement;
-import com.sencha.gxt.widget.core.client.container.MarginData;
-import com.sencha.gxt.widget.core.client.container.SimpleContainer;
+import com.sencha.gxt.core.shared.event.GroupingHandlerRegistration;
+import com.sencha.gxt.widget.core.client.Component;
+import com.sencha.gxt.widget.core.client.event.DisableEvent;
+import com.sencha.gxt.widget.core.client.event.DisableEvent.DisableHandler;
+import com.sencha.gxt.widget.core.client.event.EnableEvent;
+import com.sencha.gxt.widget.core.client.event.EnableEvent.EnableHandler;
+import com.sencha.gxt.widget.core.client.event.HideEvent;
+import com.sencha.gxt.widget.core.client.event.HideEvent.HideHandler;
+import com.sencha.gxt.widget.core.client.event.ShowEvent;
+import com.sencha.gxt.widget.core.client.event.ShowEvent.ShowHandler;
 import com.sencha.gxt.widget.core.client.form.FieldSet;
 
 public class PlatypusFieldSet extends FieldSet {
 
-	// ??????????????????????????????????
-	private int CONTENT_SHIFT_HEIGHT = 16;
-
-	private int leftPadding = 1;
-	private int topPadding = 1;
-	private int rightPadding = 1;
-	private int bottomPadding = 1;
-
-	private SimpleContainer content = new SimpleContainer();
-
-	private XElement legend = null;
-	private Style legendStyle = null;
+	private XElement legend;
+	private Style legendStyle;
 
 	private int legendWidth = 0;
+	private GroupingHandlerRegistration handlers = new GroupingHandlerRegistration();
 
 	public PlatypusFieldSet() {
-		this(1);
+		this(GWT.<FieldSetAppearance> create(FieldSetAppearance.class));
 	}
 
-	public PlatypusFieldSet(int aPadding) {
-		super.setWidget(content);
-		getElement().getStyle().setPadding(aPadding, Style.Unit.PX);
-
-		leftPadding = aPadding;
-		topPadding = aPadding;
-		rightPadding = aPadding;
-		bottomPadding = aPadding;
-
+	public PlatypusFieldSet(FieldSetAppearance appearance) {
+		super(appearance);
 		legend = getElement().child("legend");
-		XElement legendSpan = legend.child("span");
-		XElement legendDiv = legend.child("div");
-
-		legend.removeChildren();
-
-		Element div = DOM.createDiv();
-		div.appendChild(legendDiv);
-		div.appendChild(legendSpan);
-
-		Style divstyle = div.getStyle();
-		divstyle.setProperty("whiteSpace", "nowrap");
-		divstyle.setProperty("overflow", "hidden");
-
-		legend.appendChild(div);
 		legendStyle = legend.getStyle();
-		getElement().getStyle().setMargin(0, Style.Unit.PX);
+		// legendStyle.setProperty("whiteSpace", "nowrap");
+		// legendStyle.setProperty("overflow", "hidden");
+		XElement content = appearance.getContainerTarget(getElement());
+		content.makePositionable(true);
+		content.getStyle().setTop(0, Unit.PX);
+		// getElement().getStyle().setMargin(0, Style.Unit.PX);
 	}
 
-	private void setLegendWidth() {
+	@Override
+	public void setWidget(Widget w) {
+		handlers.removeHandler();
+		super.setWidget(w);
+		if (w instanceof Component) {
+			handlers.add(((Component) w).addHideHandler(new HideHandler() {
+
+				@Override
+				public void onHide(HideEvent event) {
+					PlatypusFieldSet.this.hide();
+				}
+
+			}));
+			handlers.add(((Component) w).addShowHandler(new ShowHandler() {
+
+				@Override
+				public void onShow(ShowEvent event) {
+					PlatypusFieldSet.this.show();
+				}
+
+			}));
+			handlers.add(((Component) w).addEnableHandler(new EnableHandler() {
+
+				@Override
+				public void onEnable(EnableEvent event) {
+					PlatypusFieldSet.this.enable();
+				}
+
+			}));
+			handlers.add(((Component) w).addDisableHandler(new DisableHandler() {
+
+				@Override
+				public void onDisable(DisableEvent event) {
+					PlatypusFieldSet.this.disable();
+				}
+
+			}));
+		}
+	}
+
+	private void applyLegendWidth() {
 		if (isAttached()) {
 			legendStyle.clearWidth();
 			if (legend.getWidth(false) > legendWidth) {
@@ -70,89 +93,16 @@ public class PlatypusFieldSet extends FieldSet {
 
 	@Override
 	protected void onResize(int width, int height) {
-		int dW = getElement().getWidth(false) - getElement().getWidth(true);
-		int dH = getElement().getHeight(false) - getElement().getHeight(true);
 		super.onResize(width, height);
-		content.setPixelSize(width - leftPadding - rightPadding, height - dH / 2 - topPadding - CONTENT_SHIFT_HEIGHT);
-		legendWidth = width - dW - dW;
-		setLegendWidth();
+	    getContainerTarget().setHeight(height, true);
+		int dW = getElement().getWidth(false) - getElement().getWidth(true);
+		legendWidth = width - 2 * dW;
+		applyLegendWidth();
 	}
 
 	@Override
 	public void setHeadingText(String heading) {
 		super.setHeadingText(heading);
-		setLegendWidth();
-	}
-
-	@Override
-	public void setWidget(Widget aWidget) {
-		content.setWidget(aWidget);
-	}
-
-	@Override
-	public void setWidget(IsWidget isWidget) {
-		setWidget(asWidgetOrNull(isWidget));
-	}
-
-	@Override
-	public void add(Widget aWidget) {
-		setWidget(aWidget);
-	}
-
-	@Override
-	public void add(Widget aWidget, MarginData aLayoutData) {
-		content.add(aWidget, aLayoutData);
-	}
-
-	@Override
-	public void add(IsWidget isWidget) {
-		setWidget(asWidgetOrNull(isWidget));
-	}
-
-	@Override
-	public Widget getWidget() {
-		return content.getWidget();
-	}
-
-	@Override
-	public Widget getWidget(int index) {
-		if (index == 0)
-			return getWidget();
-		return null;
-	}
-
-	@Override
-	public int getWidgetCount() {
-		return content.getWidgetCount();
-	}
-
-	@Override
-	public int getWidgetIndex(Widget aWidget) {
-		return content.getWidgetIndex(aWidget);
-	}
-
-	@Override
-	public int getWidgetIndex(IsWidget isWidget) {
-		return getWidgetIndex(asWidgetOrNull(isWidget));
-	}
-
-	// @Override
-	public void clear() {
-		content.clear();
-	}
-
-	@Override
-	public boolean remove(int index) {
-		return content.remove(index);
-	}
-
-	@Override
-	public boolean remove(Widget child) {
-		return content.remove(child);
-	}
-
-	@Override
-	public boolean remove(IsWidget child) {
-		return remove(asWidgetOrNull(child));
+		applyLegendWidth();
 	}
 }

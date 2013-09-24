@@ -5,7 +5,7 @@
 package com.eas.designer.application.dbdiagram.templates;
 
 import com.eas.client.cache.PlatypusFiles;
-import com.eas.designer.explorer.project.PlatypusProject;
+import com.eas.designer.explorer.project.PlatypusProjectImpl;
 import java.awt.Component;
 import java.util.HashSet;
 import java.util.Set;
@@ -26,11 +26,11 @@ public class NewDbSchemeWizardSettingsPanel implements WizardDescriptor.Panel,
 
     public static final String CONNECTION_PROP_NAME = "connectionId";
     public static final String SCHEMA_PROP_NAME = "schema";
-    protected PlatypusProject project;
+    protected PlatypusProjectImpl project;
     private WizardDescriptor wizardDescriptor;
     protected DbSchemeSettingsVisualPanel component;
 
-    public NewDbSchemeWizardSettingsPanel(PlatypusProject aProject) {
+    public NewDbSchemeWizardSettingsPanel(PlatypusProjectImpl aProject) {
         super();
         project = aProject;
     }
@@ -118,7 +118,7 @@ public class NewDbSchemeWizardSettingsPanel implements WizardDescriptor.Panel,
         return PlatypusFiles.CONNECTION_EXTENSION.equalsIgnoreCase(aFile.getExt());
     }
 
-    public PlatypusProject getProject() {
+    public PlatypusProjectImpl getProject() {
         return project;
     }
 }

@@ -31,19 +31,18 @@ public class PlatypusComboLabelHandledProvider extends ComboLabelProvider {
 	@Override
 	public String getLabel(Object aValue) {
 		String label = super.getLabel(aValue);
-		if (cellFunction != null && lookupValueRef != null && lookupValueRef.entity.getRowset() != null) {
+		if (cellFunction != null) {
 			try {
-				Row found = lookupValueRef.entity.find(lookupValueRef.getColIndex(), aValue);
-				if(found != null){
-					JavaScriptObject eventThis = lookupValueRef.entity.getModel().getModule();
-					if (container != null && container.getParent() != null && container.getParent().getParent() instanceof PlatypusAdapterStandaloneField<?>) {
-						PlatypusAdapterField<?> adapter = (PlatypusAdapterStandaloneField<?>) container.getParent().getParent();
-						eventThis = adapter.getPublishedField();
-					}
-					PublishedCell cellToRender = ControlsUtils.calcStandalonePublishedCell(eventThis, cellFunction, found, label, lookupValueRef);
-					if (cellToRender != null) {
-						label = cellToRender.getDisplay();
-					}
+				Row foundInLookup = lookupValueRef != null && lookupValueRef.entity != null && lookupValueRef.entity.getRowset() != null ? lookupValueRef.entity.find(lookupValueRef.getColIndex(), aValue) : null;
+				Row foundInTarget = targetValueRef != null && targetValueRef.entity != null && targetValueRef.entity.getRowset() != null ? targetValueRef.entity.getRowset().getCurrentRow() : null;
+				JavaScriptObject eventThis = targetValueRef.entity.getModel().getModule();
+				if (container != null && container.getParent() != null && container.getParent().getParent() instanceof PlatypusAdapterStandaloneField<?>) {
+					PlatypusAdapterField<?> adapter = (PlatypusAdapterStandaloneField<?>) container.getParent().getParent();
+					eventThis = adapter.getPublishedField();
+				}
+				PublishedCell cellToRender = ControlsUtils.calcStandalonePublishedCell(eventThis, cellFunction, foundInLookup != null ? foundInLookup : foundInTarget, label, foundInLookup != null ? lookupValueRef : targetValueRef);
+				if (cellToRender != null) {
+					label = cellToRender.getDisplay();
 				}
 			} catch (Exception ex) {
 				Logger.getLogger(PlatypusComboLabelHandledProvider.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);

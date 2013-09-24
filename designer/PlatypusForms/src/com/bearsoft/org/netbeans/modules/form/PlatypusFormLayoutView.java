@@ -106,7 +106,6 @@ import org.openide.windows.TopComponent;
  */
 public class PlatypusFormLayoutView extends TopComponent implements MultiViewElement {
 
-    static final String PROP_DESIGNER_SIZE = "designerSize"; // NOI18N
     // UI components composition
     private JLayeredPane layeredPane;
     private ComponentLayer componentLayer;
@@ -175,11 +174,11 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
             ActionMap map = FormInspector.getInstance().setupActionMap(getActionMap());
             explorerManager = new ExplorerManager();
             lookup = new ProxyLookup(new Lookup[]{
-                        ExplorerUtils.createLookup(explorerManager, map),
-                        PaletteUtils.getPaletteLookup(formDataObject.getPrimaryFile()),
-                        formDataObject.getLookup(),
-                        Lookup.EMPTY // placeholder for data node lookup used when no node selected in the form
-                    });
+                ExplorerUtils.createLookup(explorerManager, map),
+                PaletteUtils.getPaletteLookup(formDataObject.getPrimaryFile()),
+                formDataObject.getLookup(),
+                Lookup.EMPTY // placeholder for data node lookup used when no node selected in the form
+            });
             associateLookup(lookup);
             formToolBar = new FormToolBar(this);
         }
@@ -187,67 +186,71 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
     }
 
     void initialize() {
-        initialized = true;
-        removeAll();
+        if (!initialized) {
+            initialized = true;
+            removeAll();
 
-        formModel = formEditor.getFormModel();
+            formModel = formEditor.getFormModel();
 
-        componentLayer = new ComponentLayer(formModel);
-        handleLayer = new HandleLayer(this);
-        JPanel designPanel = new JPanel(new BorderLayout());
-        designPanel.add(componentLayer, BorderLayout.CENTER);
-        layeredPane = new JLayeredPane() {
-            // hack: before each paint make sure the dragged components have
-            // bounds set out of visible area (as they physically stay in their
-            // container and the layout manager may lay them back if some
-            // validation occurs)
-            @Override
-            protected void paintChildren(Graphics g) {
-                handleLayer.maskDraggingComponents();
-                super.paintChildren(g);
+            componentLayer = new ComponentLayer(formModel);
+            handleLayer = new HandleLayer(this);
+            JPanel designPanel = new JPanel(new BorderLayout());
+            designPanel.add(componentLayer, BorderLayout.CENTER);
+            layeredPane = new JLayeredPane() {
+                // hack: before each paint make sure the dragged components have
+                // bounds set out of visible area (as they physically stay in their
+                // container and the layout manager may lay them back if some
+                // validation occurs)
+                @Override
+                protected void paintChildren(Graphics g) {
+                    handleLayer.maskDraggingComponents();
+                    super.paintChildren(g);
+                }
+            };
+            layeredPane.setLayout(new OverlayLayout(layeredPane));
+            layeredPane.add(designPanel, new Integer(1000));
+            layeredPane.add(handleLayer, new Integer(1001));
+            updateAssistant();
+            JScrollPane scrollPane = new JScrollPane(layeredPane);
+            scrollPane.setBorder(null); // disable border, winsys will handle borders itself
+            scrollPane.setViewportBorder(null); // disable also GTK L&F viewport border 
+            scrollPane.getVerticalScrollBar().setUnitIncrement(5); // Issue 50054
+            scrollPane.getHorizontalScrollBar().setUnitIncrement(5);
+            add(scrollPane, BorderLayout.CENTER);
+            explorerManager.setRootContext(formEditor.getFormRootNode());
+            if (formModelListener == null) {
+                formModelListener = new FormListener();
             }
-        };
-        layeredPane.setLayout(new OverlayLayout(layeredPane));
-        layeredPane.add(designPanel, new Integer(1000));
-        layeredPane.add(handleLayer, new Integer(1001));
-        updateAssistant();
-        JScrollPane scrollPane = new JScrollPane(layeredPane);
-        scrollPane.setBorder(null); // disable border, winsys will handle borders itself
-        scrollPane.setViewportBorder(null); // disable also GTK L&F viewport border 
-        scrollPane.getVerticalScrollBar().setUnitIncrement(5); // Issue 50054
-        scrollPane.getHorizontalScrollBar().setUnitIncrement(5);
-        add(scrollPane, BorderLayout.CENTER);
-        explorerManager.setRootContext(formEditor.getFormRootNode());
-        if (formModelListener == null) {
-            formModelListener = new FormListener();
-        }
-        formModel.addFormModelListener(formModelListener);
+            formModel.addFormModelListener(formModelListener);
 
-        replicator = new VisualReplicator(true, FormUtils.getViewConverters());
+            replicator = new VisualReplicator(true, FormUtils.getViewConverters());
 
-        resetTopDesignComponent(false);
-        handleLayer.setViewOnly(formModel.isReadOnly());
+            resetTopDesignComponent(false);
+            handleLayer.setViewOnly(formModel.isReadOnly());
 
-        updateWholeDesigner();
-        //force the menu edit layer to be created
-        getMenuEditLayer();
+            updateWholeDesigner();
+            //force the menu edit layer to be created
+            getMenuEditLayer();
+            //force the text edit layer to be created
+            getInPlaceEditLayer();
 
-        // vlv: print
-        designPanel.putClientProperty("print.printable", Boolean.TRUE); // NOI18N
-        attachSettingsListener();
-        attachPaletteListener();
+            // vlv: print
+            designPanel.putClientProperty("print.printable", Boolean.TRUE); // NOI18N
+            attachSettingsListener();
+            attachPaletteListener();
 
-        FormInspector inspector = FormInspector.getInstance();
-        inspector.focusForm(this);
-        // Issue 137741
-        RADVisualComponent<?> topRadComp = formModel.getTopRADComponent();
-        if (topRadComp == null) {
-            try {
-                inspector.setSelectedNodes(new Node[]{formEditor.getFormRootNode()}, this);
-            } catch (PropertyVetoException pvex) {
+            FormInspector inspector = FormInspector.getInstance();
+            inspector.focusForm(this);
+            // Issue 137741
+            RADVisualComponent<?> topRadComp = formModel.getTopRADComponent();
+            if (topRadComp == null) {
+                try {
+                    inspector.setSelectedNodes(new Node[]{formEditor.getFormRootNode()}, this);
+                } catch (PropertyVetoException pvex) {
+                }
+            } else {
+                setSelectedComponent(topRadComp);
             }
-        } else {
-            setSelectedComponent(topRadComp);
         }
     }
 
@@ -269,7 +272,7 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
             if (textEditLayer.isVisible()) {
                 textEditLayer.finishEditing(false);
             }
-            textEditLayer.removeFinishListener(getFinnishListener());
+            textEditLayer.removeFinishListener(getFinishListener());
             textEditLayer = null;
         }
         if (formModel != null) {
@@ -513,41 +516,41 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
             FormLAF.setUsePreviewDefaults(classLoader, previewInfo);
             result = FormLAF.<Container>executeWithLookAndFeel(formModel,
                     new Mutex.ExceptionAction<Container>() {
-                        @Override
-                        public Container run() throws Exception {
-                            VisualReplicator r = new VisualReplicator(false, FormUtils.getViewConverters());
-                            r.setTopRADComponent(radComp);
-                            Container container = (Container) r.createClone();
-                            if (container instanceof RootPaneContainer) {
-                                JRootPane rootPane = ((RootPaneContainer) container).getRootPane();
-                                JLayeredPane newPane = new JLayeredPane() {
-                                    @Override
-                                    public void paint(Graphics g) {
-                                        try {
-                                            FormLAF.setUsePreviewDefaults(classLoader, previewInfo);
-                                            super.paint(g);
-                                        } finally {
-                                            FormLAF.setUsePreviewDefaults(null, null);
-                                        }
-                                    }
-                                };
-                                // Copy components from the original layered pane into our one
-                                JLayeredPane oldPane = rootPane.getLayeredPane();
-                                Component[] comps = oldPane.getComponents();
-                                for (int i = 0; i < comps.length; i++) {
-                                    newPane.add(comps[i], Integer.valueOf(oldPane.getLayer(comps[i])));
+                @Override
+                public Container run() throws Exception {
+                    VisualReplicator r = new VisualReplicator(false, FormUtils.getViewConverters());
+                    r.setTopRADComponent(radComp);
+                    Container container = (Container) r.createClone();
+                    if (container instanceof RootPaneContainer) {
+                        JRootPane rootPane = ((RootPaneContainer) container).getRootPane();
+                        JLayeredPane newPane = new JLayeredPane() {
+                            @Override
+                            public void paint(Graphics g) {
+                                try {
+                                    FormLAF.setUsePreviewDefaults(classLoader, previewInfo);
+                                    super.paint(g);
+                                } finally {
+                                    FormLAF.setUsePreviewDefaults(null, null);
                                 }
-                                // Use our layered pane that knows about LAF switching
-                                rootPane.setLayeredPane(newPane);
-                                // Make the glass pane visible to force repaint of the whole layered pane
-                                rootPane.getGlassPane().setVisible(true);
-                                // Mark it as design preview
-                                rootPane.putClientProperty("designPreview", Boolean.TRUE); // NOI18N
-                            } // else AWT Frame - we don't care that the L&F of the Swing
-                            // components may not look good - it is a strange use case
-                            return container;
+                            }
+                        };
+                        // Copy components from the original layered pane into our one
+                        JLayeredPane oldPane = rootPane.getLayeredPane();
+                        Component[] comps = oldPane.getComponents();
+                        for (int i = 0; i < comps.length; i++) {
+                            newPane.add(comps[i], Integer.valueOf(oldPane.getLayer(comps[i])));
                         }
-                    });
+                        // Use our layered pane that knows about LAF switching
+                        rootPane.setLayeredPane(newPane);
+                        // Make the glass pane visible to force repaint of the whole layered pane
+                        rootPane.getGlassPane().setVisible(true);
+                        // Mark it as design preview
+                        rootPane.putClientProperty("designPreview", Boolean.TRUE); // NOI18N
+                    } // else AWT Frame - we don't care that the L&F of the Swing
+                    // components may not look good - it is a strange use case
+                    return container;
+                }
+            });
         } finally {
             FormLAF.setUsePreviewDefaults(null, null);
         }
@@ -737,7 +740,7 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
                 if (formModel.isCompoundEditInProgress()) {
                     FormModelEvent ev = new FormModelEvent(formModel, FormModelEvent.SYNTHETIC_PROPERTY_CHANGED);
                     ev.setComponentAndContainer(topDesignComponent, null);
-                    ev.setProperty(PROP_DESIGNER_SIZE, getDesignerSize(), designerSize);
+                    ev.setProperty(FormModelEvent.PROP_DESIGNER_SIZE, getDesignerSize(), designerSize);
                     formModel.addUndoableEdit(ev.getUndoableEdit());
                 }
                 componentLayer.setDesignerSize(designerSize);
@@ -1415,68 +1418,61 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
     // -----------------
     // in-place editing
     public void startInPlaceEditing(RADComponent<?> radComp) {
-        if (formModel.isReadOnly()) {
-            return;
-        }
-        if (textEditLayer != null && textEditLayer.isVisible()) {
-            return;
-        }
-        if (!isEditableInPlace(radComp)) // check for sure
-        {
-            return;
-        }
-        Component comp = getComponent(radComp);
-        if (comp == null) { // component is not visible
-            notifyCannotEditInPlace();
-            return;
-        }
-        FormProperty<String> property = null;
-        if (JTabbedPane.class.isAssignableFrom(radComp.getBeanClass())) {
-            JTabbedPane tabbedPane = (JTabbedPane) comp;
-            int index = tabbedPane.getSelectedIndex();
-            RADVisualContainer<?> radCont = (RADVisualContainer<?>) radComp;
-            RADVisualComponent<?> tabComp = radCont.getSubComponent(index);
-            FormProperty<?>[] props = tabComp.getConstraintsProperties();
-            for (int i = 0; i < props.length; i++) {
-                if (props[i].getName().equals("TabConstraints.tabTitle")) { // NOI18N
-                    property = (FormProperty<String>) props[i];
-                    break;
-                }
-            }
-            if (property == null) {
+        if (!formModel.isReadOnly() && isEditableInPlace(radComp)
+                && (textEditLayer == null || !textEditLayer.isVisible())) {
+            Component comp = getComponent(radComp);
+            if (comp == null) { // component is not visible
+                notifyCannotEditInPlace();
                 return;
             }
-        } else {
-            property = radComp.<FormProperty<String>>getRADProperty("text"); // NOI18N
-            if (property == null) {
-                return; // should not happen
+            FormProperty<String> property = null;
+            if (JTabbedPane.class.isAssignableFrom(radComp.getBeanClass())) {
+                JTabbedPane tabbedPane = (JTabbedPane) comp;
+                int index = tabbedPane.getSelectedIndex();
+                RADVisualContainer<?> radCont = (RADVisualContainer<?>) radComp;
+                RADVisualComponent<?> tabComp = radCont.getSubComponent(index);
+                FormProperty<?>[] props = tabComp.getConstraintsProperties();
+                for (int i = 0; i < props.length; i++) {
+                    if (props[i].getName().equals("TabConstraints.tabTitle")) { // NOI18N
+                        property = (FormProperty<String>) props[i];
+                        break;
+                    }
+                }
+                if (property == null) {
+                    return;
+                }
+            } else {
+                property = radComp.<FormProperty<String>>getRADProperty("text"); // NOI18N
+                if (property == null) {
+                    return; // should not happen
+                }
             }
+
+            String editText;
+            try {
+                editText = property.getValue();
+            } catch (Exception ex) { // should not happen
+                Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
+                return;
+            }
+
+            editedProperty = property;
+
+            getInPlaceEditLayer();
+            try {
+                textEditLayer.setEditedComponent(comp, editText);
+            } catch (IllegalArgumentException ex) {
+                notifyCannotEditInPlace();
+                return;
+            }
+
+            textEditLayer.setVisible(true);
+            handleLayer.setVisible(false);
+            textEditLayer.requestFocus();
         }
-
-        String editText;
-        try {
-            editText = property.getValue();
-        } catch (Exception ex) { // should not happen
-            Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
-            return;
-        }
-
-        editedProperty = property;
-
-        getInPlaceEditLayer();
-        try {
-            textEditLayer.setEditedComponent(comp, editText);
-        } catch (IllegalArgumentException ex) {
-            notifyCannotEditInPlace();
-            return;
-        }
-
-        textEditLayer.setVisible(true);
-        handleLayer.setVisible(false);
-        textEditLayer.requestFocus();
     }
 
-    private InPlaceEditLayer.FinishListener getFinnishListener() {
+    private InPlaceEditLayer.FinishListener getFinishListener() {
         if (finnishListener == null) {
             finnishListener = new InPlaceEditLayer.FinishListener() {
                 @Override
@@ -1713,7 +1709,7 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
         if (textEditLayer == null) {
             textEditLayer = new InPlaceEditLayer();
             textEditLayer.setVisible(false);
-            textEditLayer.addFinishListener(getFinnishListener());
+            textEditLayer.addFinishListener(getFinishListener());
             layeredPane.add(textEditLayer, new Integer(2001));
         }
         return textEditLayer;
@@ -1836,7 +1832,6 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
                 int prevType = 0;
                 ComponentContainer prevContainer = null;
                 boolean updateDone = false;
-                boolean deriveDesignerSize = false;
 
                 Set<RADComponent<?>> compsToSelect = null;
                 FormNode nodeToSelect = null;
@@ -1850,20 +1845,21 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
                     ComponentContainer radContainer = ev.getContainer();
 
                     if (type == FormModelEvent.CONTAINER_LAYOUT_EXCHANGED
+                            || type == FormModelEvent.CONTAINER_LAYOUT_CHANGED
                             || type == FormModelEvent.COMPONENT_LAYOUT_CHANGED) {
-                        if (type == FormModelEvent.CONTAINER_LAYOUT_EXCHANGED) {
+                        if (type == FormModelEvent.CONTAINER_LAYOUT_EXCHANGED || type == FormModelEvent.CONTAINER_LAYOUT_CHANGED) {
                             ComponentContainer cont = ev.getContainer();
                             assert cont instanceof RADVisualContainer<?>;
+                            RADVisualContainer<?> visCont = (RADVisualContainer<?>) cont;
+                            if (type == FormModelEvent.CONTAINER_LAYOUT_EXCHANGED && visCont.shouldHaveLayoutNode()) {
+                                visCont.getNodeReference().fireChildrenChange();
+                            }
                             nodeToSelect = ((RADVisualContainer<?>) cont).getLayoutNodeReference();
                         }
-                        if ((prevType != FormModelEvent.CONTAINER_LAYOUT_EXCHANGED
-                                && prevType != FormModelEvent.COMPONENT_LAYOUT_CHANGED)
-                                || prevContainer != radContainer) {
-                            replicator.updateContainerLayout((RADVisualContainer<?>) radContainer);
-                            updateDone = true;
-                            updateAnchorActions();
-                            updateResizabilityActions();
-                        }
+                        replicator.updateContainerLayout((RADVisualContainer<?>) radContainer);
+                        updateDone = true;
+                        updateAnchorActions();
+                        updateResizabilityActions();
                     } else if (type == FormModelEvent.COMPONENT_ADDED) {
                         if (ev.getComponent().isInModel()) {
                             if (compsToSelect == null) {
@@ -1922,16 +1918,19 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
                         RADProperty<?> eventProperty = ev.getComponentProperty();
                         replicator.updateComponentProperty(eventProperty);
                         updateDone = true;
+                    } else if (type == FormModelEvent.TOP_DESIGN_COMPONENT_CHANGED) {
+                        setTopDesignComponent((RADVisualContainer<?>) ev.getComponent(), true);
                     } else if (type == FormModelEvent.SYNTHETIC_PROPERTY_CHANGED) {
                         switch (ev.getPropertyName()) {
-                            case PROP_DESIGNER_SIZE:
-                                Dimension size = (Dimension) ev.getNewPropertyValue();
-                                if (size != null) {
+                            case FormModelEvent.PROP_DESIGNER_SIZE:
+                                //Dimension oldSize = (Dimension) ev.getOldPropertyValue();
+                                if (ev.getComponent() == topDesignComponent) {
+                                    Dimension size = (Dimension) ev.getNewPropertyValue();
                                     componentLayer.setDesignerSize(size);
-                                    deriveDesignerSize = false;
-                                    updateDone = true;
-                                } else { // null size to compute designer size based on content (from resetDesignerSize)
-                                    deriveDesignerSize = true;
+                                    componentLayer.revalidate();
+                                    if (topDesignComponent instanceof RADVisualFormContainer) {
+                                        storeDesignerSize(size);
+                                    }
                                     updateDone = true;
                                 }
                                 break;
@@ -1966,11 +1965,8 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
                 }
 
                 if (updateDone) {
-                    if (deriveDesignerSize) { // compute from preferred size
-                        setupDesignerSize();
-                    } else { // check if not smaller than minimum size
-                        checkDesignerSize();
-                    }
+                    // check if not smaller than minimum size
+                    checkDesignerSize();
                 }
             }
         }

@@ -1,2 +1,5 @@
 eclipse.preferences.version=1
+encoding//src/com/eas/client/gxtcontrols/grid/GridMessages.properties=UTF-8
+encoding//src/com/eas/client/gxtcontrols/grid/GridMessages_ru.properties=UTF-8
+encoding//src/com/sencha/gxt/messages/client/XMessages_ru.properties=UTF-8
 encoding/<project>=UTF-8

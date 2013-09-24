@@ -4,19 +4,17 @@
  */
 package com.eas.client.model;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 import com.bearsoft.rowset.Converter;
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.exceptions.InvalidColIndexException;
 import com.bearsoft.rowset.exceptions.RowsetException;
-import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
-import com.eas.client.beans.PropertyChangeEvent;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
 /**
  * 
@@ -53,10 +51,20 @@ public class ParametersRowset extends Rowset {
 		public Object[] getCurrentValues() {
 			return getOriginalValues();
 		}
-		
+
 		@Override
 		public int getColumnCount() {
-		    return params.getFieldsCount();
+			return params.getFieldsCount();
+		}
+
+		@Override
+		public boolean isUpdated() {
+			for (int i = 1; i <= params.getParametersCount(); i++) {
+				Parameter p = params.get(i);
+				if (p.isModified())
+					return true;
+			}
+			return false;
 		}
 	}
 
@@ -128,7 +136,7 @@ public class ParametersRowset extends Rowset {
 
 	@Override
 	public List<Row> getCurrent() {
-		List<Row> rows = new ArrayList();
+		List<Row> rows = new ArrayList<Row>();
 		rows.add(paramRow);
 		return rows;
 	}

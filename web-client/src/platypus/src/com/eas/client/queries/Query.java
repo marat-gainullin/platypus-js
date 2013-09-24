@@ -133,7 +133,6 @@ public class Query {
             public void doWork(Rowset aRowset) throws Exception {
                 aRowset.setTransacted(true);
                 aRowset.setFlowProvider(flow);
-                lightMergeFields(aRowset.getFields(), fields);
                 onSuccess.run(aRowset);
             }
         }, onFailure);
@@ -154,6 +153,7 @@ public class Query {
      * @param sourceFields Etalon fields, likely a query fields, got from
      * server.
      */
+    /*
     protected void lightMergeFields(Fields destFields, Fields sourceFields) {
         for (int i = 1; i <= sourceFields.getFieldsCount(); i++) {
             Field srcField = sourceFields.get(i);
@@ -164,10 +164,11 @@ public class Query {
             }
         }
     }
+    */
 
     private void createFlow() {
         if (client != null) {
-            flow = new WebFlowProvider(client, appElementId);
+            flow = new WebFlowProvider(client, appElementId, fields);
         }
     }
 

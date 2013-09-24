@@ -71,6 +71,7 @@ public class RowHeaderCellEditor extends JPanel implements TableCellEditor, Acti
         }
     }
 
+    @Override
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int rowIndex, int column) {
         try {
             editingTable = table;
@@ -105,10 +106,12 @@ public class RowHeaderCellEditor extends JPanel implements TableCellEditor, Acti
         }
     }
 
+    @Override
     public Object getCellEditorValue() {
         return null;
     }
 
+    @Override
     public boolean isCellEditable(EventObject anEvent) {
         if (anEvent instanceof MouseEvent) {
             return true;
@@ -116,10 +119,13 @@ public class RowHeaderCellEditor extends JPanel implements TableCellEditor, Acti
         return false;
     }
 
+    @Override
     public boolean shouldSelectCell(EventObject anEvent) {
+        invokeRowHeaderAction();
         return false;
     }
 
+    @Override
     public boolean stopCellEditing() {
         ChangeEvent event = new ChangeEvent(this);
         for (CellEditorListener l : listenenrs.toArray(new CellEditorListener[0])) {
@@ -128,6 +134,7 @@ public class RowHeaderCellEditor extends JPanel implements TableCellEditor, Acti
         return true;
     }
 
+    @Override
     public void cancelCellEditing() {
         ChangeEvent event = new ChangeEvent(this);
         for (CellEditorListener l : listenenrs.toArray(new CellEditorListener[0])) {
@@ -135,15 +142,22 @@ public class RowHeaderCellEditor extends JPanel implements TableCellEditor, Acti
         }
     }
 
+    @Override
     public void addCellEditorListener(CellEditorListener l) {
         listenenrs.add(l);
     }
 
+    @Override
     public void removeCellEditorListener(CellEditorListener l) {
         listenenrs.remove(l);
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
+        invokeRowHeaderAction();
+    }
+
+    protected void invokeRowHeaderAction() {
         TableColumnModel tcm = editingTable.getColumnModel();
         if (tcm instanceof ConstrainedColumnModel
                 && tcm.getSelectionModel() instanceof ConstrainedListSelectionModel) {
@@ -156,12 +170,14 @@ public class RowHeaderCellEditor extends JPanel implements TableCellEditor, Acti
             } else {
                 editingTable.removeRowSelectionInterval(editingRow, editingRow);
             }
-        } else {
+        } else if (check instanceof JCheckBox) {
             if (check.isSelected()) {
                 editingTable.addRowSelectionInterval(editingRow, editingRow);
             } else {
                 editingTable.removeRowSelectionInterval(editingRow, editingRow);
             }
+        } else {
+            editingTable.setRowSelectionInterval(editingRow, editingRow);
         }
     }
 }

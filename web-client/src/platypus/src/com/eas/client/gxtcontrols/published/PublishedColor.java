@@ -27,7 +27,7 @@ public class PublishedColor extends JavaScriptObject {
 		return this.toStyled();
 	}-*/;
 	
-	public static native PublishedColor create(int aR, int aG, int aB, float aA)/*-{
+	public static native PublishedColor create(int aR, int aG, int aB, int aA)/*-{
 		return new $wnd.Color(aR, aG, aB, aA);
 	}-*/;
 }

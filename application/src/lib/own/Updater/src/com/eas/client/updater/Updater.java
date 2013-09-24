@@ -4,8 +4,6 @@
  */
 package com.eas.client.updater;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
@@ -22,20 +20,19 @@ public class Updater {
 
     public static final ResourceBundle res = ResourceBundle.getBundle(Updater.class.getPackage().getName() + ".updatermessages");
     public static UpdProgress upd = null;
-    static String cFUrl = "http://olympic.altsoft.biz/platypus/client/updates/update.xml";
-    static String cFName = "update.xml";
-    static String dsUrl = "http://olympic.altsoft.biz/platypus/client/updates/application.zip";
-    static String tmpFile = "updpl.zip";
-    static String curPath = "../../../../";
-    static String whatRun = "";
-    static String command = "";
+    private static String cFUrl = "http://olympic.altsoft.biz/platypus/client/updates/update.xml";
+    private static String cFName = "update.xml";
+    private static String dsUrl = "http://olympic.altsoft.biz/platypus/client/updates/application.zip";
+    private static String tmpFile = "updpl.zip";
+    private static String curPath = "../../../../";
+    private static String whatRun = "";
+    private static String command = "";
 
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
         Logger log = Logger.getLogger(UpdaterConstants.LOGGER_NAME);
-        List<String> runs = null;
         UIManager.put("swing.boldMetal", Boolean.FALSE);
         try {
             if (args.length < 13) {
@@ -43,13 +40,13 @@ public class Updater {
             }
 
             String userHome = System.getProperty("user.home");
-            String pathHome = FileUpdater.fixFileSeparatorChar(userHome + "\\.platypus\\logs\\Updater_log.log");
+            String pathHome = FileUpdater.fixFileSeparatorChar(userHome + "/.platypus/logs/Updater_log.log");
             FileHandler h = new FileHandler(pathHome);
             h.setFormatter(new SimpleFormatter());
             log.addHandler(h);
             log.setLevel(Level.ALL);
             try {
-                runs = parseArgs(args);
+                parseArgs(args);
             } catch (IllegalArgumentException e) {
                 log.log(Level.SEVERE, e.getLocalizedMessage(), e);
             }
@@ -61,9 +58,10 @@ public class Updater {
                     }
                     case UpdaterConstants.COMMAND_DO_UPDATE: {
                         upd = new UpdProgress();
+                        upd.setTitle(res.getString("title"));
                         upd.getCaption().setText(res.getString("caption"));
                         au.setUpdVis(upd);
-                        boolean DoUpdate = au.doUpdateEx();
+                        au.doUpdateEx();
                     }
                 }
             } else {
@@ -74,9 +72,8 @@ public class Updater {
         }
     }
 
-    private static List<String> parseArgs(String[] args) throws Exception {
+    private static void parseArgs(String[] args) throws Exception {
         int i = 0;
-        List<String> lRes = new ArrayList<>();
         while (i < args.length) {
             if (UpdaterConstants.COMMAND_CHECK_NEW_VERSION.equalsIgnoreCase(args[i])) {
                 command = UpdaterConstants.COMMAND_CHECK_NEW_VERSION;
@@ -149,10 +146,8 @@ public class Updater {
                     }
                 }
             } else {
-                lRes.add(args[i]);
                 i++;
             }
         }
-        return lRes;
     }
 }
