@@ -206,7 +206,7 @@ public class ApplicationModelView extends ModelView<ApplicationDbEntity, Applica
     public boolean isSelectedDeletableRelations() {
         if (super.isSelectedDeletableRelations()) {
             for (Relation<ApplicationDbEntity> rel : selectedRelations) {
-                if (rel instanceof ReferenceRelation<?>) {
+                if (!(rel instanceof ReferenceRelation<?>)) {
                     return true;
                 }
             }

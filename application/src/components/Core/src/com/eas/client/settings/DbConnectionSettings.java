@@ -9,7 +9,6 @@
 package com.eas.client.settings;
 
 import com.bearsoft.rowset.resourcepool.BearResourcePool;
-import com.eas.client.ClientConstants;
 import com.eas.client.ConnectionSettingsVisitor;
 import com.eas.util.BinaryUtils;
 import com.eas.xml.dom.Source2XmlDom;
@@ -40,10 +39,12 @@ public class DbConnectionSettings extends EasSettings {
     public static transient final String DB_DRIVER_DIALECT_ATTR_NAME = "dialect";
     // file constants
     public static transient final String DB_DRIVERS_FILE_NAME = "DbDrivers.xml";
+    
     protected transient Map<String, String> drivers;
     protected int maxConnections = BearResourcePool.DEFAULT_MAXIMUM_SIZE;
     protected int maxStatements = BearResourcePool.DEFAULT_MAXIMUM_SIZE * 5;
     protected int resourceTimeout = BearResourcePool.WAIT_TIMEOUT;
+    protected String schema;
     protected String applicationPath;
     private boolean initSchema = true;
     private boolean deferCache;
@@ -56,23 +57,22 @@ public class DbConnectionSettings extends EasSettings {
     public DbConnectionSettings(String anUrl, String aSchema, String anUser, String aPsw, String aDialect) throws Exception {
         this();
         url = anUrl;
-        if (aSchema != null) {
-            info.put(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME, aSchema);
-        }
-        if (anUser != null) {
-            info.put(ClientConstants.DB_CONNECTION_USER_PROP_NAME, anUser);
-        }
-        if (aPsw != null) {
-            info.put(ClientConstants.DB_CONNECTION_PASSWORD_PROP_NAME, aPsw);
-        }
-        if (aDialect != null) {
-            info.put(ClientConstants.DB_CONNECTION_DIALECT_PROP_NAME, aDialect);
-        }
+        schema = aSchema;
+        user = anUser;
+        password = aPsw;
     }
 
     public DbConnectionSettings(String anUrl, String aSchema, String anUser, String aPsw, String aDialect, boolean aInitSchema) throws Exception {
         this(anUrl, aSchema, anUser, aPsw, aDialect);
         initSchema = aInitSchema;
+    }
+
+    public String getSchema() {
+        return schema;
+    }
+
+    public void setSchema(String schema) {
+        this.schema = schema;
     }
 
     public static void registerDrivers(Collection<String> aDrivers) throws SQLException {
@@ -133,8 +133,8 @@ public class DbConnectionSettings extends EasSettings {
 
     public void generateSampleSettings() {
         url = "jdbc:oracle:thin:@<HOST>:<PORT>:<SID>";
-        info.put("user", "SomeUser");
-        info.put("schema", "SomeSchema");
+        user = "SomeUser";
+        schema = "SomeSchema";
     }
 
     public String getApplicationPath() {

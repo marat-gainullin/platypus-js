@@ -7,7 +7,6 @@ package com.eas.client.resourcepool;
 import com.bearsoft.rowset.exceptions.ResourceUnavalableException;
 import com.eas.client.AppCache;
 import com.eas.client.Client;
-import com.eas.client.ClientConstants;
 import com.eas.client.SQLUtils;
 import com.eas.client.settings.DbConnectionSettings;
 import com.eas.client.sqldrivers.SqlDriver;
@@ -16,9 +15,6 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Properties;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.naming.Context;
@@ -45,9 +41,8 @@ public class GeneralResourceProvider {
         client = aClient;
         DataSource lmdSource = constructDataSource(aSettings);
         testDataSource(lmdSource, aSettings);
-        Properties props = constructPropertiesByDbConnectionSettings(aSettings);
         if (aSettings.isInitSchema()) {
-            initApplicationSchema(props, lmdSource);
+            initApplicationSchema(aSettings.getUrl(), lmdSource);
         }
         connectionPools.put(null, lmdSource);
         connectionPoolsSettings.put(null, aSettings);
@@ -67,7 +62,7 @@ public class GeneralResourceProvider {
             }
             return ds;
         } catch (Exception ex) {
-            return new PlatypusNativeDataSource(aSettings.getMaxConnections(), aSettings.getMaxStatements(), aSettings.getResourceTimeout(), aSettings.getUrl(), aSettings.getInfo());
+            return new PlatypusNativeDataSource(aSettings.getMaxConnections(), aSettings.getMaxStatements(), aSettings.getResourceTimeout(), aSettings.getUrl(), aSettings.getUser(), aSettings.getPassword(), aSettings.getSchema());
         }
     }
 
@@ -104,8 +99,8 @@ public class GeneralResourceProvider {
                 dialect = SQLUtils.dialectByProductName(lconn.getMetaData().getDatabaseProductName());
             }
             if (dialect != null) {
-                aSettings.getInfo().put(ClientConstants.DB_CONNECTION_DIALECT_PROP_NAME, dialect);
-                String schemaName = aSettings.getInfo().getProperty(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME);
+                //aSettings.getInfo().put(ClientConstants._DB_CONNECTION_DIALECT_PROP_NAME, dialect);
+                String schemaName = aSettings.getSchema();
                 if (schemaName == null) {
                     SqlDriver driver = SQLUtils.getSqlDriver(dialect);
                     if (driver != null) {
@@ -115,7 +110,7 @@ public class GeneralResourceProvider {
                                 if (rs.next() && rs.getMetaData().getColumnCount() > 0) {
                                     schemaName = rs.getString(1);
                                     if (schemaName != null && !schemaName.isEmpty()) {
-                                        aSettings.getInfo().put(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME, schemaName);
+                                        aSettings.setSchema(schemaName);
                                     }
                                 }
                             }
@@ -130,39 +125,32 @@ public class GeneralResourceProvider {
         }
     }
 
-    private void initApplicationSchema(Properties props, DataSource aSource) throws Exception {
+    private void initApplicationSchema(String aUrl, DataSource aSource) throws Exception {
         try (Connection lconn = aSource.getConnection()) {
             lconn.setAutoCommit(false);
-            SqlDriver driver = SQLUtils.getSqlDriver(props.getProperty(ClientConstants.DB_CONNECTION_DIALECT_PROP_NAME));
+            SqlDriver driver = SQLUtils.getSqlDriver(SQLUtils.dialectByUrl(aUrl));
             driver.initializeApplicationSchema(lconn);
         }
     }
 
-    /**
-     * Returns pool properties, cutted due to security reasons
-     *
-     * @param aDbId
-     * @return
-     * @throws Exception
-     */
-    public synchronized Properties getPoolProperties(String aDbId) throws Exception {
+    public synchronized String getPoolSchema(String aDbId) throws Exception {
         getPooledDataSource(aDbId);
         DbConnectionSettings settings = connectionPoolsSettings.get(aDbId);
         if (settings != null) {
-            return constructPropertiesByDbConnectionSettings(settings);
+            return settings.getSchema();
+        } else {
+            return null;
         }
-        return null;
     }
-
-    public synchronized String getPoolProperty(String aDbId, String aPropName) throws Exception {
-        if (!ClientConstants.DB_CONNECTION_USER_PROP_NAME.equalsIgnoreCase(aPropName)
-                && !ClientConstants.DB_CONNECTION_PASSWORD_PROP_NAME.equalsIgnoreCase(aPropName)) {
-            getPooledDataSource(aDbId);
-            DbConnectionSettings settings = connectionPoolsSettings.get(aDbId);
-            Properties props = constructPropertiesByDbConnectionSettings(settings);
-            return props.getProperty(aPropName);
+    
+    public synchronized String getPoolDialect(String aDbId) throws Exception {
+        getPooledDataSource(aDbId);
+        DbConnectionSettings settings = connectionPoolsSettings.get(aDbId);
+        if (settings != null) {
+            return SQLUtils.dialectByUrl(settings.getUrl());
+        } else {
+            return null;
         }
-        return null;
     }
 
     private DataSource try2CreatePool(String aDbId) throws Exception {
@@ -189,6 +177,7 @@ public class GeneralResourceProvider {
         connectionPools.clear();
     }
 
+    /*
     public static Properties constructPropertiesByDbConnectionSettings(DbConnectionSettings dbSettings) {
         if (dbSettings != null) {
             Properties props = dbSettings.getInfo();
@@ -206,4 +195,5 @@ public class GeneralResourceProvider {
         }
         return null;
     }
+    */ 
 }

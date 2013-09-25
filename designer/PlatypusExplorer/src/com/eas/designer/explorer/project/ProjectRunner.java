@@ -210,9 +210,9 @@ public class ProjectRunner {
                 processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.URL_CMD_SWITCH);
                 processBuilder = processBuilder.addArgument(ps.getDbSettings().getUrl());
                 processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.DBUSER_CMD_SWITCH);
-                processBuilder = processBuilder.addArgument(ps.getDbSettings().getInfo().getProperty(ClientConstants.DB_CONNECTION_USER_PROP_NAME));
+                processBuilder = processBuilder.addArgument(ps.getDbSettings().getUser());
                 processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.DBPASSWORD_CMD_SWITCH);
-                processBuilder = processBuilder.addArgument(ps.getDbSettings().getInfo().getProperty(ClientConstants.DB_CONNECTION_PASSWORD_PROP_NAME));
+                processBuilder = processBuilder.addArgument(ps.getDbSettings().getPassword());
                 io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Database_Direct"));//NOI18N
             } else {
                 if (pps.isNotStartServer()) {

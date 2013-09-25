@@ -10,16 +10,13 @@
  */
 package com.eas.client.login;
 
-import com.eas.client.AppClient;
 import com.eas.client.Client;
-import com.eas.client.ClientConstants;
 import com.eas.client.ClientFactory;
 import com.eas.client.settings.DbConnectionSettings;
 import com.eas.client.settings.EasSettings;
 import com.eas.client.settings.PlatypusConnectionSettings;
 import com.eas.util.exceptions.ExceptionListenerSupport;
 import com.eas.util.exceptions.ExceptionThrower;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.beans.ExceptionListener;
@@ -508,9 +505,12 @@ public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower 
                     String strIndex = String.valueOf(i);
                     connectionsPref.node(strIndex).put(ClientFactory.CONNECTION_TITLE_SETTING, settings.getName() != null ? settings.getName() : "");
                     connectionsPref.node(strIndex).put(ClientFactory.CONNECTION_URL_SETTING, settings.getUrl() != null ? settings.getUrl() : "");
-                    if (settings.getInfo() != null) {
-                        connectionsPref.node(strIndex).put(ClientFactory.CONNECTION_SCHEMA_SETTING, settings.getInfo().getProperty(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME, ""));
-                        connectionsPref.node(strIndex).put(ClientFactory.CONNECTION_USER_SETTING, settings.getInfo().getProperty(ClientConstants.DB_CONNECTION_USER_PROP_NAME, ""));
+                    connectionsPref.node(strIndex).put(ClientFactory.CONNECTION_USER_SETTING, settings.getUser() != null ? settings.getUser() : "");
+                    if (settings instanceof DbConnectionSettings) {
+                        String schema = ((DbConnectionSettings)settings).getSchema();
+                        if(schema == null)
+                            schema = "";
+                        connectionsPref.node(strIndex).put(ClientFactory.CONNECTION_SCHEMA_SETTING, schema);
                     }
                 }
             }
@@ -603,7 +603,7 @@ public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower 
                             s.setName(name);
                         }
                         if (userName != null) {
-                            s.getInfo().setProperty("user", userName);
+                            s.setUser(userName);
                         }
                         connectionsListModel.putElementAt(saveIndex, s);
                         lstConnections.setSelectedIndex(saveIndex);
@@ -631,13 +631,13 @@ public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower 
                 ConnectionSettingsDialog dlg = new ConnectionSettingsDialog(null, true);
                 dlg.setUrl(settings.getUrl());
                 dlg.setConnectionName(settings.getName());
-                dlg.setUserName(settings.getInfo().getProperty("user"));
+                dlg.setUserName(settings.getUser());
                 dlg.setVisible(true);
                 int retVal = dlg.getReturnStatus();
                 if (retVal == ConnectionSettingsDialog.RET_OK) {
                     settings.setUrl(dlg.getUrl());
                     settings.setName(dlg.getConnectionName());
-                    settings.getInfo().setProperty("user", dlg.getUserName());
+                    settings.setUser(dlg.getUserName());
                     connectionsListModel.fireContentsChanged(selectedIndex);
                     updatePreferences();
                     if (settings instanceof DbConnectionSettings) {
@@ -684,7 +684,7 @@ public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower 
                 if (selectedSettings instanceof DbConnectionSettings) {
                     pnlDbLogin.setVisible(true);
                     DbConnectionSettings dbSettings = (DbConnectionSettings) selectedSettings;
-                    tfDbUserName.setText(dbSettings.getInfo().getProperty(ClientConstants.DB_CONNECTION_USER_PROP_NAME));
+                    tfDbUserName.setText(dbSettings.getUser());
                     tfDbPassword.setText(null);
                     tfPassword.setText(null);
                 } else {

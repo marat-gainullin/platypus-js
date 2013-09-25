@@ -10,7 +10,6 @@
  */
 package com.eas.designer.application.dbdiagram.templates;
 
-import com.eas.client.ClientConstants;
 import com.eas.client.settings.DbConnectionSettings;
 import com.eas.client.settings.EasSettings;
 import com.eas.client.settings.XmlDom2ConnectionSettings;
@@ -20,6 +19,7 @@ import com.eas.xml.dom.Source2XmlDom;
 import java.sql.DriverManager;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 import javax.swing.DefaultComboBoxModel;
 import org.openide.DialogDescriptor;
@@ -49,7 +49,7 @@ public class DbSchemeSettingsVisualPanel extends javax.swing.JPanel {
 
     public String getDefaultSchema() throws Exception {
         DbConnectionSettings settings = connectionFile != null ? readSettings(connectionFile) : panel.getProject().getSettings().getAppSettings().getDbSettings();
-        return settings.getInfo().getProperty(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME);
+        return settings.getSchema();
     }
 
     protected DbConnectionSettings readSettings(FileObject aFile) throws Exception {
@@ -76,7 +76,7 @@ public class DbSchemeSettingsVisualPanel extends javax.swing.JPanel {
 
     public void refreshControls(String schema) throws Exception {
         DbConnectionSettings settings = connectionFile != null ? readSettings(connectionFile) : panel.getProject().getSettings().getAppSettings().getDbSettings();
-        List<String> schemas = PlatypusUtils.achieveSchemas(settings.getUrl(), settings.getInfo().getProperty(ClientConstants.DB_CONNECTION_USER_PROP_NAME), settings.getInfo().getProperty(ClientConstants.DB_CONNECTION_PASSWORD_PROP_NAME));
+        List<String> schemas = PlatypusUtils.achieveSchemas(settings.getUrl(), settings.getUser(), settings.getPassword());
         schemasModel = new DefaultComboBoxModel(schemas.toArray(new String[0]));
         comboSchema.setModel(schemasModel);
         int schemaIndx = locateSchema(schema);
@@ -274,7 +274,11 @@ public class DbSchemeSettingsVisualPanel extends javax.swing.JPanel {
             // let's test connection capability
             try {
                 DbConnectionSettings settings = readSettings(connectionFile);
-                java.sql.Connection conn = DriverManager.getConnection(settings.getUrl(), settings.getInfo());
+                Properties props = new Properties();
+                props.put("user", settings.getUser());
+                props.put("password", settings.getPassword());
+                props.put("schema", settings.getSchema());
+                java.sql.Connection conn = DriverManager.getConnection(settings.getUrl(), props);
                 conn.close();
             } catch (Exception ex) {
                 refreshButtons();

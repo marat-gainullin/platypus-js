@@ -271,10 +271,10 @@ public class MetadataSynchronizer {
 //            if (aUser == null || aUser.isEmpty() || aPassword == null || aPassword.isEmpty() || aSchema == null || aSchema.isEmpty()) {
 //                throw new Exception(" May be bad db connection settings (url, dbuser, dbpassword, dbschema).");
 //            }
-            settings.getInfo().put(ClientConstants.DB_CONNECTION_USER_PROP_NAME, aUser);
-            settings.getInfo().put(ClientConstants.DB_CONNECTION_PASSWORD_PROP_NAME, aPassword);
+            settings.setUser(aUser);
+            settings.setPassword(aPassword);
             if (aSchema != null) {
-                settings.getInfo().put(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME, aSchema);
+                ((DbConnectionSettings)settings).setSchema(aSchema);
             }
             ((DbConnectionSettings) settings).setInitSchema(false);
         }

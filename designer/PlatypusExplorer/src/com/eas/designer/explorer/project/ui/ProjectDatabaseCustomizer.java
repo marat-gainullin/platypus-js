@@ -13,8 +13,6 @@ package com.eas.designer.explorer.project.ui;
 import com.eas.client.settings.DbConnectionSettings;
 import com.eas.designer.application.HandlerRegistration;
 import com.eas.designer.explorer.project.PlatypusProjectImpl;
-import com.eas.designer.explorer.project.wizard.DatabaseSetupWizardPanelVisual;
-import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -43,11 +41,11 @@ public class ProjectDatabaseCustomizer extends javax.swing.JPanel {
         if (dbSettings != null && dbSettings.getUrl() != null) {
             jdbcUrlTextField.setText(dbSettings.getUrl());
         }
-        if (dbSettings != null && dbSettings.getInfo() != null && dbSettings.getInfo().getProperty(DatabaseSetupWizardPanelVisual.PROP_USER) != null) {
-            dbUserTextField.setText(dbSettings.getInfo().getProperty(DatabaseSetupWizardPanelVisual.PROP_USER));
+        if (dbSettings != null && dbSettings.getUser() != null) {
+            dbUserTextField.setText(dbSettings.getUser());
         }
-        if (dbSettings != null && dbSettings.getInfo() != null && dbSettings.getInfo().getProperty(DatabaseSetupWizardPanelVisual.PROP_PASSWORD) != null) {
-            dbUserPasswordTextField.setText(dbSettings.getInfo().getProperty(DatabaseSetupWizardPanelVisual.PROP_PASSWORD));
+        if (dbSettings != null && dbSettings.getPassword() != null) {
+            dbUserPasswordTextField.setText(dbSettings.getPassword());
         }
         setupComponents();
         clientChangeListener = project.addClientChangeListener(new Runnable() {
@@ -78,10 +76,8 @@ public class ProjectDatabaseCustomizer extends javax.swing.JPanel {
         try {
             DbConnectionSettings dbSettings = new DbConnectionSettings();
             dbSettings.setUrl(jdbcUrlTextField.getText());
-            Properties props = new Properties();
-            props.put(DatabaseSetupWizardPanelVisual.PROP_USER, dbUserTextField.getText());
-            props.put(DatabaseSetupWizardPanelVisual.PROP_PASSWORD, dbUserPasswordTextField.getText());
-            dbSettings.setInfo(props);
+            dbSettings.setUser(dbUserTextField.getText());
+            dbSettings.setPassword(new String(dbUserPasswordTextField.getPassword()));
             project.getSettings().getAppSettings().setDbSettings(dbSettings);
         } catch (Exception ex) {
             Logger.getLogger(ProjectDatabaseCustomizer.class.getName()).log(Level.WARNING, null, ex);

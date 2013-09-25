@@ -5,7 +5,6 @@
 package com.eas.deploy;
 
 import com.eas.client.Client;
-import com.eas.client.ClientConstants;
 import com.eas.client.ClientFactory;
 import com.eas.client.DbClient;
 import com.eas.client.settings.DbConnectionSettings;
@@ -70,7 +69,7 @@ public class DeployApplication {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        DeployApplication da = new DeployApplication();        
+        DeployApplication da = new DeployApplication();
         da.platypusAppDir = new File("."); // NOI18N
         da.parseArgs(args);
         da.doWork();
@@ -229,10 +228,10 @@ public class DeployApplication {
 
     private DbClient getClient() throws Exception {
         EasSettings settings = EasSettings.createInstance(url);
+        settings.setUser(dbuser);
+        settings.setPassword(dbpassword);
         if (settings instanceof DbConnectionSettings) {
-            settings.getInfo().put(ClientConstants.DB_CONNECTION_USER_PROP_NAME, dbuser);
-            settings.getInfo().put(ClientConstants.DB_CONNECTION_PASSWORD_PROP_NAME, dbpassword);
-            settings.getInfo().put(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME, dbschema);
+            ((DbConnectionSettings) settings).setSchema(dbschema);
         }
         settings.setUrl(url);
         Client client = ClientFactory.getInstance(settings);
