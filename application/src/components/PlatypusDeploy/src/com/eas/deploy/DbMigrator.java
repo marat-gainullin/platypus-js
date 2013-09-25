@@ -21,6 +21,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -303,7 +304,11 @@ public class DbMigrator extends BaseDeployer {
 
     private void applySqlScript(File sqlScriptFile) throws Exception {
         DbConnectionSettings.registerDrivers(DbConnectionSettings.readDrivers().values());
-        try (Connection connection = DriverManager.getConnection(settings.getDbSettings().getUrl(), settings.getDbSettings().getInfo())) {
+        Properties props = new Properties();
+        props.put("user", settings.getDbSettings().getUser());
+        props.put("password", settings.getDbSettings().getPassword());
+        props.put("schema", settings.getDbSettings().getSchema());
+        try (Connection connection = DriverManager.getConnection(settings.getDbSettings().getUrl(), props)) {
             SqlDriver.applyScript(FileUtils.readString(sqlScriptFile, PlatypusFiles.DEFAULT_ENCODING), connection);
         }
     }

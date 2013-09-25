@@ -9,7 +9,6 @@ import com.eas.client.ClientFactory;
 import com.eas.client.settings.DbConnectionSettings;
 import com.eas.designer.explorer.project.PlatypusProjectImpl;
 import com.eas.designer.explorer.project.ui.BuildJdbcUrlPanel;
-import java.util.Properties;
 import javax.swing.JPanel;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -57,12 +56,10 @@ public class DatabaseSetupWizardPanelVisual extends JPanel implements DocumentLi
         String user = getUser();
         String password = getPassword();
         DbConnectionSettings dbSettings = new DbConnectionSettings();
-        Properties props = new Properties();
-        props.put(PROP_USER, user);
-        props.put(PROP_PASSWORD, password);
+        dbSettings.setUser(user);
+        dbSettings.setPassword(password);
         dbSettings.setUrl(url);
         dbSettings.setInitSchema(false);
-        dbSettings.setInfo(props);
         return dbSettings;
     }
 
@@ -232,8 +229,8 @@ public class DatabaseSetupWizardPanelVisual extends JPanel implements DocumentLi
         DbConnectionSettings dbSettings = (DbConnectionSettings) wd.getProperty(PROP_SETTINGS);
         if (dbSettings != null) {
             jdbcUrlTextField.setText(dbSettings.getUrl());
-            dbUserTextField.setText(dbSettings.getInfo().getProperty(PROP_USER));
-            dbUserPasswordTextField.setText(dbSettings.getInfo().getProperty(PROP_PASSWORD));
+            dbUserTextField.setText(dbSettings.getUser());
+            dbUserPasswordTextField.setText(dbSettings.getPassword());
         }
     }
 

@@ -182,8 +182,8 @@ public class TomcatWebAppManager implements WebAppManager {
         } else {
             throw new IllegalStateException(String.format("Unsupported JDBC driver or incorrect URL: %s", dbSettings.getUrl()));
         }
-        dataSourceResource.setUsername(dbSettings.getInfo().getProperty(ClientConstants.DB_CONNECTION_USER_PROP_NAME));
-        dataSourceResource.setPassword(dbSettings.getInfo().getProperty(ClientConstants.DB_CONNECTION_PASSWORD_PROP_NAME));
+        dataSourceResource.setUsername(dbSettings.getUser());
+        dataSourceResource.setPassword(dbSettings.getPassword());
         return dataSourceResource;
     }
 

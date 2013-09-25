@@ -4,7 +4,6 @@
  */
 package com.eas.client.settings;
 
-import com.eas.client.ClientConstants;
 import com.eas.client.ConnectionSettingsVisitor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -65,12 +64,12 @@ public class ConnectionSettings2XmlDom implements ConnectionSettingsVisitor {
         Element settingsNode = doc.createElement(DB_SETTINGS_TAG_NAME);
         settingsNode.setAttribute(NAME_ATTR_NAME, aSettings.getName());
         settingsNode.setAttribute(URL_ATTR_NAME, aSettings.getUrl());
-        String schema = (String) aSettings.getInfo().get(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME);
+        String schema = (String) aSettings.getSchema();
         if (schema != null && !schema.isEmpty()) {
             settingsNode.setAttribute(SCHEMA_ATTR_NAME, schema);
         }
-        settingsNode.setAttribute(USER_ATTR_NAME, (String) aSettings.getInfo().get(ClientConstants.DB_CONNECTION_USER_PROP_NAME));
-        settingsNode.setAttribute(PASSWORD_ATTR_NAME, (String) aSettings.getInfo().get(ClientConstants.DB_CONNECTION_PASSWORD_PROP_NAME));
+        settingsNode.setAttribute(USER_ATTR_NAME, (String) aSettings.getUser());
+        settingsNode.setAttribute(PASSWORD_ATTR_NAME, (String) aSettings.getPassword());
 
         doc.appendChild(settingsNode);
     }
@@ -81,8 +80,8 @@ public class ConnectionSettings2XmlDom implements ConnectionSettingsVisitor {
 
         settingsNode.setAttribute(NAME_ATTR_NAME, aSettings.getName());
         settingsNode.setAttribute(URL_ATTR_NAME, aSettings.getUrl());
-        settingsNode.setAttribute(USER_ATTR_NAME, (String) aSettings.getInfo().get(ClientConstants.DB_CONNECTION_USER_PROP_NAME));
-        //settingsNode.setAttribute(PASSWORD_ATTR_NAME, (String)aSettings.getInfo().get(ClientConstants.DB_CONNECTION_PASSWORD_PROP_NAME));
+        settingsNode.setAttribute(USER_ATTR_NAME, (String) aSettings.getUser());
+        //settingsNode.setAttribute(PASSWORD_ATTR_NAME, (String)aSettings.getPassword());
 
         doc.appendChild(settingsNode);
     }

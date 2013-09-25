@@ -57,7 +57,7 @@ public class Loader {
 	protected Set<String> touchedAppElements = new HashSet<String>();
 	protected Set<String> loadedAppElements = new HashSet<String>();
 	protected Map<String, String> appElementsErrors = new HashMap<String, String>();
-	protected Map<String, ScriptElement> injectedScripts = new HashMap<String, ScriptElement>();
+	//protected Map<String, ScriptElement> injectedScripts = new HashMap<String, ScriptElement>();
 	protected Set<LoadHandler> handlers = new HashSet<LoadHandler>();
 
 	public Loader(AppClient aClient) {
@@ -229,10 +229,14 @@ public class Loader {
 			}));
 			//
 			String jsURL = client.resourceUrl(appElementName);
+			/*
 			ScriptElement oldScriptTag = injectedScripts.get(jsURL);
 			if (oldScriptTag != null)
 				oldScriptTag.removeFromParent();
-			ScriptElement scriptTag = ScriptInjector.fromUrl(jsURL).setCallback(new Callback<Void, Exception>() {
+			ScriptElement scriptTag = 
+			*/	
+			ScriptInjector.fromUrl(jsURL)
+			.setCallback(new Callback<Void, Exception>() {
 
 				@Override
 				public void onSuccess(Void result) {
@@ -259,10 +263,14 @@ public class Loader {
 					}
 				}
 
-			}).setWindow(ScriptInjector.TOP_WINDOW).inject().cast();
+			})
+			.setWindow(ScriptInjector.TOP_WINDOW)
+			.setRemoveTag(false)
+			.inject();
+			/*
 			scriptTag.addClassName(INJECTED_SCRIPT_CLASS_NAME);
 			injectedScripts.put(jsURL, scriptTag);
-			//
+			*/
 			fireStarted(appElementName);
 		}
 		return loaded;

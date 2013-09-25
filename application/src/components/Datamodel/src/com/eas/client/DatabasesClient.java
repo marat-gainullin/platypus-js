@@ -350,10 +350,6 @@ public class DatabasesClient implements DbClient {
         return mdCaches.get(aDbId);
     }
 
-    public String getConnectionProperty(String aDbId, String aPropName) throws Exception {
-        return resourceProvider.getPoolProperty(aDbId, aPropName);
-    }
-
     @Override
     public int commit(String aSessionId) throws Exception {
         synchronized (transacted) {
@@ -572,14 +568,12 @@ public class DatabasesClient implements DbClient {
 
     @Override
     public String getConnectionSchema(String aDbId) throws Exception {
-        Properties props = resourceProvider.getPoolProperties(aDbId);
-        return props.getProperty(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME);
+        return resourceProvider.getPoolSchema(aDbId);
     }
 
     @Override
     public String getConnectionDialect(String aDbId) throws Exception {
-        Properties props = resourceProvider.getPoolProperties(aDbId);
-        return props.getProperty(ClientConstants.DB_CONNECTION_DIALECT_PROP_NAME);
+        return resourceProvider.getPoolDialect(aDbId);
     }
 
     protected static Set<String> getUserRoles(DbClient aClient, String aUserName) throws Exception {

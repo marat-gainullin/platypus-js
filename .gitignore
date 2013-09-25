@@ -27,5 +27,6 @@ private.xml
 /application/src/components/MetadataSynchronizer/nbproject/private/
 /application/src/components/SqlDriversTester/dist/
 /application/src/group/build.num
-/application/src/components/DbControlsDesigner/nbproject/private/
+application.zip
+thinclient.zip/application/src/components/DbControlsDesigner/nbproject/private/
 /application/src/components/SqlDriversTester/nbproject/private/

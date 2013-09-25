@@ -4,18 +4,14 @@
  */
 package com.eas.designer.explorer.server;
 
-import com.eas.client.ClientConstants;
 import com.eas.deploy.project.PlatypusSettings;
 import com.eas.designer.application.project.PlatypusProject;
 import com.eas.designer.application.project.PlatypusProjectSettings;
-import com.eas.designer.explorer.project.PlatypusProjectImpl;
-import com.eas.designer.explorer.project.PlatypusProjectSettingsImpl;
 import com.eas.designer.explorer.project.ProjectRunner;
 import com.eas.server.PlatypusServer;
 import com.eas.server.ServerMain;
 import java.io.File;
 import java.util.concurrent.Future;
-import java.util.logging.Level;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.event.ChangeListener;
@@ -90,10 +86,12 @@ public final class PlatypusServerInstance implements Server, ServerInstanceImple
         return project;
     }
 
+    @Override
     public ServerState getServerState() {
         return serverState;
     }
 
+    @Override
     public void setServerState(ServerState aServerState) {
         serverState = aServerState;
         changeSupport.fireChange();
@@ -156,11 +154,11 @@ public final class PlatypusServerInstance implements Server, ServerInstanceImple
         processBuilder = processBuilder.addArgument(ProjectRunner.OPTION_PREFIX + ServerMain.APP_DB_URL_CONF_PARAM);
         processBuilder = processBuilder.addArgument(ps.getDbSettings().getUrl());
         processBuilder = processBuilder.addArgument(ProjectRunner.OPTION_PREFIX + ServerMain.APP_DB_USERNAME_CONF_PARAM);
-        processBuilder = processBuilder.addArgument(ps.getDbSettings().getInfo().getProperty(ClientConstants.DB_CONNECTION_USER_PROP_NAME));
+        processBuilder = processBuilder.addArgument(ps.getDbSettings().getUser());
         processBuilder = processBuilder.addArgument(ProjectRunner.OPTION_PREFIX + ServerMain.APP_DB_PASSWORD_CONF_PARAM);
-        processBuilder = processBuilder.addArgument(ps.getDbSettings().getInfo().getProperty(ClientConstants.DB_CONNECTION_PASSWORD_PROP_NAME));
+        processBuilder = processBuilder.addArgument(ps.getDbSettings().getPassword());
         processBuilder = processBuilder.addArgument(ProjectRunner.OPTION_PREFIX + ServerMain.APP_DB_SCHEMA_CONF_PARAM);
-        processBuilder = processBuilder.addArgument(ps.getDbSettings().getInfo().getProperty(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME));
+        processBuilder = processBuilder.addArgument(ps.getDbSettings().getSchema());
 
         if (!ProjectRunner.isSetByOption(ServerMain.IFACE_CONF_PARAM, project.getSettings().getRunClientOptions())) {
             processBuilder = processBuilder.addArgument(ProjectRunner.OPTION_PREFIX + ServerMain.IFACE_CONF_PARAM);

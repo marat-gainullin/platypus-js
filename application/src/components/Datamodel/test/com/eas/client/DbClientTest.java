@@ -16,14 +16,12 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 import java.util.Random;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static org.junit.Assert.*;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -54,11 +52,9 @@ public class DbClientTest {
         settings.setMaxConnections(2);
         settings.setMaxStatements(4);
         settings.setUrl("jdbc:oracle:thin:@asvr:1521:adb");
-        Properties info = new Properties();
-        info.put("schema", "eas");
-        info.put("user", "eas");
-        info.put("password", "eas");
-        settings.setInfo(info);
+        settings.setSchema("eas");
+        settings.setUser("eas");
+        settings.setPassword("eas");
         settings.setName("Test connection");
     }
 
