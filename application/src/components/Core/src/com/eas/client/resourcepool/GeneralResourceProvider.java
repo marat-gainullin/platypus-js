@@ -12,6 +12,7 @@ import com.eas.client.settings.DbConnectionSettings;
 import com.eas.client.sqldrivers.SqlDriver;
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
@@ -42,7 +43,7 @@ public class GeneralResourceProvider {
         DataSource lmdSource = constructDataSource(aSettings);
         testDataSource(lmdSource, aSettings);
         if (aSettings.isInitSchema()) {
-            initApplicationSchema(aSettings.getUrl(), lmdSource);
+            initApplicationSchema(lmdSource);
         }
         connectionPools.put(null, lmdSource);
         connectionPoolsSettings.put(null, aSettings);
@@ -94,12 +95,9 @@ public class GeneralResourceProvider {
 
     private void testDataSource(DataSource aSource, DbConnectionSettings aSettings) throws Exception {
         try (Connection lconn = aSource.getConnection()) {
-            String dialect = SQLUtils.dialectByUrl(lconn.getMetaData().getURL());
-            if (dialect == null) {
-                dialect = SQLUtils.dialectByProductName(lconn.getMetaData().getDatabaseProductName());
-            }
+            String dialect = dialectByConnection(lconn);
             if (dialect != null) {
-                //aSettings.getInfo().put(ClientConstants._DB_CONNECTION_DIALECT_PROP_NAME, dialect);
+                aSettings.setDialect(dialect);
                 String schemaName = aSettings.getSchema();
                 if (schemaName == null) {
                     SqlDriver driver = SQLUtils.getSqlDriver(dialect);
@@ -125,10 +123,11 @@ public class GeneralResourceProvider {
         }
     }
 
-    private void initApplicationSchema(String aUrl, DataSource aSource) throws Exception {
+    private void initApplicationSchema(DataSource aSource) throws Exception {
         try (Connection lconn = aSource.getConnection()) {
-            lconn.setAutoCommit(false);
-            SqlDriver driver = SQLUtils.getSqlDriver(SQLUtils.dialectByUrl(aUrl));
+            lconn.setAutoCommit(false);            
+            String dialect = dialectByConnection(lconn);
+            SqlDriver driver = SQLUtils.getSqlDriver(dialect);
             driver.initializeApplicationSchema(lconn);
         }
     }
@@ -147,7 +146,7 @@ public class GeneralResourceProvider {
         getPooledDataSource(aDbId);
         DbConnectionSettings settings = connectionPoolsSettings.get(aDbId);
         if (settings != null) {
-            return SQLUtils.dialectByUrl(settings.getUrl());
+            return settings.getDialect();
         } else {
             return null;
         }
@@ -196,4 +195,12 @@ public class GeneralResourceProvider {
         return null;
     }
     */ 
+
+    private String dialectByConnection(Connection aConnection) throws SQLException {
+        String dialect = SQLUtils.dialectByUrl(aConnection.getMetaData().getURL());
+        if (dialect == null) {
+            dialect = SQLUtils.dialectByProductName(aConnection.getMetaData().getDatabaseProductName());
+        }
+        return dialect;
+    }
 }

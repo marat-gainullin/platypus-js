@@ -46,6 +46,7 @@ public class DbConnectionSettings extends EasSettings {
     protected int resourceTimeout = BearResourcePool.WAIT_TIMEOUT;
     protected String schema;
     protected String applicationPath;
+    protected String dialect;
     private boolean initSchema = true;
     private boolean deferCache;
 
@@ -73,6 +74,14 @@ public class DbConnectionSettings extends EasSettings {
 
     public void setSchema(String schema) {
         this.schema = schema;
+    }
+
+    public String getDialect() {
+        return dialect;
+    }
+
+    public void setDialect(String dialect) {
+        this.dialect = dialect;
     }
 
     public static void registerDrivers(Collection<String> aDrivers) throws SQLException {

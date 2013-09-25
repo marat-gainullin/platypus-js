@@ -14,7 +14,6 @@ import com.eas.client.scripts.CompiledScriptDocuments;
 import com.eas.client.scripts.CompiledScriptDocumentsHost;
 import com.eas.client.scripts.ScriptRunner;
 import com.eas.client.settings.DbConnectionSettings;
-import java.util.Properties;
 import org.junit.Test;
 
 /**
@@ -26,11 +25,9 @@ public class ORMTest {
     public static DbClient initDevelopTestClient() throws Exception {
         DbConnectionSettings settings = new DbConnectionSettings();
         settings.setUrl("jdbc:oracle:thin:@asvr/adb");
-        Properties info = new Properties();
-        info.put("schema", "eas");
-        info.put("user", "eas");
-        info.put("password", "eas");
-        settings.setInfo(info);
+        settings.setUser("eas");
+        settings.setPassword("eas");
+        settings.setSchema("eas");
         settings.setMaxStatements(1);
         return new DatabasesClient(settings);
     }

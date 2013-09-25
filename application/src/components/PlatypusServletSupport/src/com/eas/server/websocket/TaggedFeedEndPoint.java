@@ -5,7 +5,6 @@
 package com.eas.server.websocket;
 
 import com.eas.server.PlatypusServerCore;
-import java.security.AccessControlException;
 import java.security.Principal;
 import java.util.HashMap;
 import java.util.HashSet;
