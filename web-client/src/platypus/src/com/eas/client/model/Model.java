@@ -11,6 +11,7 @@ package com.eas.client.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -20,6 +21,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.dataflow.TransactionListener;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
@@ -36,7 +38,7 @@ import com.google.gwt.core.client.JavaScriptObject;
 /**
  * @author mg
  */
-public class Model {// implements Cancellable {
+public class Model {
 
 	public static final String SCRIPT_MODEL_NAME = "model";
 	public static final String PARAMETERS_SCRIPT_NAME = "params";
@@ -53,21 +55,19 @@ public class Model {// implements Cancellable {
 	public static final String DATASOURCE_AFTER_DELETE_EVENT_TAG_NAME = "onAfterDelete";
 	public static final String DATASOURCE_AFTER_REQUERY_EVENT_TAG_NAME = "onRequeried";
 	public static final String DATASOURCE_AFTER_FILTER_EVENT_TAG_NAME = "onFiltered";
-	protected Set<String> savedRowIndexEntities = new HashSet();
-	protected List<Entry<Entity, Integer>> savedEntitiesRowIndexes = new ArrayList();
+	protected Set<String> savedRowIndexEntities = new HashSet<String>();
+	protected List<Entry<Entity, Integer>> savedEntitiesRowIndexes = new ArrayList<Entry<Entity, Integer>>();
 	protected AppClient client = null;
-	protected Set<Relation> relations = new HashSet();
-	protected Map<String, Entity> entities = new HashMap();
+	protected Set<Relation> relations = new HashSet<Relation>();
+    protected Set<ReferenceRelation> referenceRelations = new HashSet<ReferenceRelation>();
+	protected Map<String, Entity> entities = new HashMap<String, Entity>();
 	protected ParametersEntity parametersEntity;
 	protected Parameters parameters = new Parameters();
 	protected PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
 	protected boolean runtime = false;
 	protected boolean commitable = true;
-	protected List<com.bearsoft.rowset.changes.Change> changeLog = new ArrayList();
-	protected Set<TransactionListener> transactionListeners = new HashSet();
-	// script events
-	protected List<ScriptEvent> pendingEventsQueue = new ArrayList();
-	protected Set<String> pendingEvents = new HashSet();
+	protected List<Change> changeLog = new ArrayList<Change>();
+	protected Set<TransactionListener> transactionListeners = new HashSet<TransactionListener>();
 	//
 	protected NetworkProcess process;
 	protected int ajustingCounter = 0;
@@ -75,7 +75,7 @@ public class Model {// implements Cancellable {
 	protected Runnable handlersResolver;
 
 	public static class NetworkProcess {
-		public Map<Entity, String> errors = new HashMap();
+		public Map<Entity, String> errors = new HashMap<Entity, String>();
 		public CancellableCallback onSuccess;
 		public Callback<String> onFailure;
 
@@ -118,36 +118,6 @@ public class Model {// implements Cancellable {
 			else
 				failure();
         }
-	}
-
-	public static class ScriptEvent {
-		protected JavaScriptObject module;
-		public Entity target;
-		public JavaScriptObject handler;
-		public JavaScriptObject event;
-
-		public ScriptEvent(JavaScriptObject aModule, Entity aTarget, JavaScriptObject aHandler, JavaScriptObject aEvent) {
-			module = aModule;
-			target = aTarget;
-			handler = aHandler;
-			event = aEvent;
-		}
-
-		public void execute() throws Exception {
-			if (handler != null) {
-				try {
-					String res = Utils.executeScriptEventString(module, handler, event);
-					res = null;
-				} catch (Exception ex) {
-					throw ex;
-				}
-			}
-		}
-
-		@Override
-		public String toString() {
-			return target.getEntityId() + (handler != null ? "_" + handler.toString() : "");
-		}
 	}
 
 	public static class SimpleEntry implements Entry<Entity, Integer> {
@@ -197,6 +167,11 @@ public class Model {// implements Cancellable {
 			resolveCopiedRelation(rcopied, copied);
 			copied.addRelation(rcopied);
 		}
+        for (ReferenceRelation relation : referenceRelations) {
+            ReferenceRelation rcopied = (ReferenceRelation)relation.copy();
+            resolveCopiedRelation(rcopied, copied);
+            copied.addRelation(rcopied);
+        }
 		return copied;
 	}
 
@@ -270,12 +245,10 @@ public class Model {// implements Cancellable {
 		client = aValue;
 	}
 
-	public void clearRelations() {
-		if (relations != null) {
-			relations.clear();
-		}
-	}
-
+    public Set<ReferenceRelation> getReferenceRelations() {
+        return Collections.unmodifiableSet(referenceRelations);
+    }
+    
 	public boolean isPending() {
 		for (Entity entity : entities.values()) {
 			if (entity.isPending())
@@ -284,19 +257,6 @@ public class Model {// implements Cancellable {
 		return false;
 	}
 
-	/*
-	 * public void enqueueEvent(ScriptEvent aEvent) { if
-	 * (!pendingEvents.contains(aEvent.toString())) {
-	 * pendingEvents.add(aEvent.toString()); pendingEventsQueue.add(aEvent); } }
-	 * 
-	 * protected boolean pumping = false;
-	 * 
-	 * public void pumpEvents() throws Exception { if (!isPending() && !pumping)
-	 * { pumping = true; try { while (!pendingEventsQueue.isEmpty()) {
-	 * ScriptEvent pEvent = pendingEventsQueue.remove(0);
-	 * pendingEvents.remove(pEvent.toString()); pEvent.execute(); } } finally {
-	 * pumping = false; } } }
-	 */
 	public ParametersEntity getParametersEntity() {
 		return parametersEntity;
 	}
@@ -306,12 +266,16 @@ public class Model {// implements Cancellable {
 	}
 
 	public void addRelation(Relation aRel) {
-		relations.add(aRel);
-		Entity lEntity = aRel.getLeftEntity();
-		Entity rEntity = aRel.getRightEntity();
-		if (lEntity != null && rEntity != null) {
-			lEntity.addOutRelation(aRel);
-			rEntity.addInRelation(aRel);
+		if(aRel instanceof ReferenceRelation){
+			referenceRelations.add((ReferenceRelation)aRel);
+		}else{
+			relations.add(aRel);
+			Entity lEntity = aRel.getLeftEntity();
+			Entity rEntity = aRel.getRightEntity();
+			if (lEntity != null && rEntity != null) {
+				lEntity.addOutRelation(aRel);
+				rEntity.addInRelation(aRel);
+			}
 		}
 	}
 
@@ -349,8 +313,90 @@ public class Model {// implements Cancellable {
 				Entity.publish(module, entity);
 			}
 		}
+        //
+        for (ReferenceRelation aRelation : referenceRelations) {
+            String scalarPropertyName = aRelation.getScalarPropertyName();                
+            if (scalarPropertyName == null || scalarPropertyName.isEmpty()) {
+                scalarPropertyName = aRelation.getRightEntity().getName();
+            }
+            if (scalarPropertyName != null && !scalarPropertyName.isEmpty()) {
+                aRelation.getLeftEntity().putOrmDefinition(
+                        scalarPropertyName,
+                        ormPropertiedDefiner.scalar(
+	                        aRelation.getRightEntity().getPublished(),
+	                        aRelation.getRightField().getName(),
+	                        aRelation.getLeftField().getName()));
+            }
+            String collectionPropertyName = aRelation.getCollectionPropertyName();
+            if (collectionPropertyName == null || collectionPropertyName.isEmpty()) {
+                collectionPropertyName = aRelation.getLeftEntity().getName();
+            }
+            if (collectionPropertyName != null && !collectionPropertyName.isEmpty()) {
+                aRelation.getRightEntity().putOrmDefinition(
+                        collectionPropertyName,
+                        ormPropertiedDefiner.collection(
+	                        aRelation.getLeftEntity().getPublished(),
+	                        aRelation.getRightField().getName(),
+	                        aRelation.getLeftField().getName()));
+            }
+        }
+        //////////////////
 	}
 
+	private static DefinitionsContainer ormPropertiedDefiner = DefinitionsContainer.init(); 
+	
+	private static final class DefinitionsContainer extends JavaScriptObject{
+		
+		protected DefinitionsContainer(){
+		}
+		
+		public native static DefinitionsContainer init()/*-{
+			return {
+				scalarDef : function(targetEntity, targetFieldName, sourceFieldName){
+	                var _self = this;
+	                _self.enumerable = true;
+	                _self.configurable = false;
+	                _self.get = function(){
+	                    var found = targetEntity.find(targetEntity.md[targetFieldName], this[sourceFieldName]);
+	                    return found.length == 0 ? null : (found.length == 1 ? found[0] : found);
+	                };
+	                _self.set = function(aValue){
+	                    this[sourceFieldName] = aValue ? aValue[targetFieldName] : null;
+	                };
+				},
+				collectionDef : function(sourceEntity, targetFieldName, sourceFieldName){
+	                var _self = this;
+	                _self.enumerable = true;
+	                _self.configurable = false;
+	                _self.get = function(){
+	                    var res = sourceEntity.find(sourceEntity.md[sourceFieldName], this[targetFieldName]);
+	                    if(res && res.length > 0){
+	                        return res;
+	                    }else{
+	                        var emptyCollectionPropName = '-x-empty-collection-'+sourceFieldName;
+	                        var emptyCollection = this[emptyCollectionPropName];
+	                        if(!emptyCollection){
+	                            emptyCollection = [];
+	                            this[emptyCollectionPropName] = emptyCollection;
+	                        }
+	                        return emptyCollection;
+	                    }
+	                };
+				}
+			}
+		}-*/;
+		
+		public native JavaScriptObject scalar(JavaScriptObject targetEntity, String targetFieldName, String sourceFieldName)/*-{
+			var constr = this.scalarDef;
+			return new constr(targetEntity, targetFieldName, sourceFieldName);
+		}-*/;
+		
+		public native JavaScriptObject collection(JavaScriptObject sourceEntity, String targetFieldName, String sourceFieldName)/*-{
+			var constr = this.collectionDef;
+			return new constr(sourceEntity, targetFieldName, sourceFieldName);
+		}-*/;
+	}
+	
 	public native static void publishTopLevelFacade(JavaScriptObject aModule, Model aModel) throws Exception/*-{
 		var publishedModel = {
 			createQuery : function(aQueryId) {
@@ -499,27 +545,6 @@ public class Model {// implements Cancellable {
 		relations = aRelations;
 	}
 
-	/*
-	 * public boolean isParameterNameInRelations(Entity aEntity, Set<Relation>
-	 * aRelations, String aParameterName) { for (Relation lrel : aRelations) {
-	 * String leftParameter = lrel.getLeftParameter(); if (aEntity != null &&
-	 * leftParameter != null && leftParameter.equals(aParameterName) && aEntity
-	 * == lrel.getLeftEntity()) { return true; }
-	 * 
-	 * String rightParameter = lrel.getRightParameter(); if (aEntity != null &&
-	 * rightParameter != null && rightParameter.equals(aParameterName) &&
-	 * aEntity == lrel.getRightEntity()) { return true; } } return false; }
-	 * 
-	 * public boolean isFieldNameInRelations(Entity aEntity, Set<Relation>
-	 * aRelations, String aFieldName) { for (Relation lrel : aRelations) {
-	 * String leftField = lrel.getLeftField(); if (aEntity != null && leftField
-	 * != null && leftField.equals(aFieldName) && aEntity ==
-	 * lrel.getLeftEntity()) { return true; }
-	 * 
-	 * String rightField = lrel.getRightField(); if (aEntity != null &&
-	 * rightField != null && rightField.equals(aFieldName) && aEntity ==
-	 * lrel.getRightEntity()) { return true; } } return false; }
-	 */
 	public boolean isRuntime() {
 		return runtime;
 	}
@@ -720,7 +745,7 @@ public class Model {// implements Cancellable {
 	}
 
 	public static Set<Entity> gatherNextLayer(Collection<Entity> aLayer) throws Exception {
-		Set<Entity> nextLayer = new HashSet();
+		Set<Entity> nextLayer = new HashSet<Entity>();
 		for (Entity entity : aLayer) {
 			Set<Relation> rels = entity.getOutRelations();
 			if (rels != null) {
@@ -744,7 +769,7 @@ public class Model {// implements Cancellable {
 	}
 
 	private void executeRootEntities(boolean refresh, CancellableCallback onSuccess, Callback<String> onFailure) throws Exception {
-		final Set<Entity> toExecute = new HashSet();
+		final Set<Entity> toExecute = new HashSet<Entity>();
 		for (Entity entity : entities.values()) {
 			if (!(entity instanceof ParametersEntity)) {// ParametersEntity is
 														// in the entities, so
@@ -752,7 +777,7 @@ public class Model {// implements Cancellable {
 														// out
 				if (refresh)
 					entity.invalidate();
-				Set<Relation> dependanceRels = new HashSet();
+				Set<Relation> dependanceRels = new HashSet<Relation>();
 				for (Relation inRel : entity.getInRelations()) {
 					if (!(inRel.getLeftEntity() instanceof ParametersEntity)) {
 						dependanceRels.add(inRel);

@@ -11,6 +11,7 @@ import com.bearsoft.rowset.exceptions.InvalidColIndexException;
 import com.bearsoft.rowset.exceptions.InvalidCursorPositionException;
 import com.bearsoft.rowset.locators.Locator;
 import com.bearsoft.rowset.metadata.Field;
+import com.eas.client.model.application.ApplicationEntity;
 import com.eas.client.model.script.RowHostObject;
 import com.eas.dbcontrols.CellRenderEvent;
 import com.eas.dbcontrols.grid.rt.columns.model.FieldModelColumn;
@@ -42,13 +43,15 @@ public abstract class RowsetsModel {
     protected List<ModelColumn> columns = new ArrayList<>();
     private Map<ModelColumn, Integer> columnsIndicies;
     private Map<Integer, FieldModelColumn> rowsRowsetFields2ColumnsIndicies;
+    protected ApplicationEntity<?, ?, ?> rowsEntity;
     protected Rowset rowsRowset;
     protected Locator pkLocator;
     protected Scriptable scriptScope;
     protected Function generalCellsHandler;
 
-    public RowsetsModel(Rowset aRowsRowset, Scriptable aScriptScope, Function aGeneralCellsHandler) {
+    public RowsetsModel(ApplicationEntity<?, ?, ?> aRowsEntity, Rowset aRowsRowset, Scriptable aScriptScope, Function aGeneralCellsHandler) {
         super();
+        rowsEntity = aRowsEntity;
         rowsRowset = aRowsRowset;
         pkLocator = createPkLocator();
         scriptScope = aScriptScope;
@@ -496,7 +499,7 @@ public abstract class RowsetsModel {
                     colPkValue = getRowPkValue4Script(rmc.getRow());
                 }
                 Scriptable calcedThis = aColumn.getEventsThis() != null ? aColumn.getEventsThis() : scriptScope;
-                handler.call(cx, scriptScope, calcedThis, new Object[]{new CellRenderEvent(calcedThis, rowPkValue, colPkValue, cellData, RowHostObject.publishRow(scriptScope, aRow))});
+                handler.call(cx, scriptScope, calcedThis, new Object[]{new CellRenderEvent(calcedThis, rowPkValue, colPkValue, cellData, RowHostObject.publishRow(scriptScope, aRow, rowsEntity))});
             } finally {
                 if (!wasContext) {
                     Context.exit();

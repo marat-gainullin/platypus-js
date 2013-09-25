@@ -18,13 +18,8 @@ import com.eas.client.model.Relation;
  */
 public class NewRelationEdit<E extends Entity<?, ?, E>> extends DeleteRelationEdit<E> {
 
-    public NewRelationEdit() {
-        super();
-    }
-
     public NewRelationEdit(Relation<E> aRel) {
-        this();
-        setRelation(aRel);
+        super(aRel);
     }
 
     @Override

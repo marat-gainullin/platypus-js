@@ -357,27 +357,23 @@ public abstract class PlatypusGridInlineEditing<M> extends PlatypusAbstractGridE
 
 									@Override
 									public void onValueChange(ValueChangeEvent<O> event) {
-
-										/*
-										 * if
-										 * (GXTLogConfiguration.loggingIsEnabled
-										 * ()) { logger.finest(
-										 * "doStartEditing onValueChanged"); }
-										 * 
-										 * // if enter key cause value change we
-										 * // want to ignore the next // enter
-										 * key otherwise // new edit will start
-										 * by onEnter ignoreNextEnter = true;
-										 * 
-										 * Timer t = new Timer() {
-										 * 
-										 * @Override public void run() {
-										 * ignoreNextEnter = false; } };
-										 * 
-										 * completeEditing();
-										 * 
-										 * t.schedule(100);
-										 */
+										  if(GXTLogConfiguration.loggingIsEnabled()) {
+											  logger.finest("doStartEditing onValueChanged"); }
+										  
+										  // if enter key cause value change we
+										  // want to ignore the next // enter
+										  //key otherwise // new edit will start
+										  //by onEnter 
+										  ignoreNextEnter = true;
+										  
+										  Timer t = new Timer() {
+										  
+										  @Override public void run() {
+										  ignoreNextEnter = false; } };
+										  
+										  completeEditing();
+										  
+										  t.schedule(100);
 									}
 								}));
 

@@ -60,7 +60,7 @@ public abstract class XmlDom2Model<E extends Entity<?, ?, E>> implements ModelVi
         return null;
     }
 
-    public void readModel(Model<E, ?, ?, ?> aModel) {
+    public void readModel(final Model<E, ?, ?, ?> aModel) {
         Element el = getElementByTagName(doc, Model2XmlDom.DATAMODEL_TAG_NAME);
         if (el != null && aModel != null) {
             currentModel = aModel;
@@ -123,20 +123,7 @@ public abstract class XmlDom2Model<E extends Entity<?, ?, E>> implements ModelVi
                         currentNode = lcurrentNode;
                     }
                 }
-                nl = XmlDomUtils.elementsByTagName(currentNode, Model2XmlDom.RELATION_TAG_NAME);
-                if (nl != null) {
-                    Element lcurrentNode = currentNode;
-                    try {
-                        for (int i = 0; i < nl.size(); i++) {
-                            currentNode = nl.get(i);
-                            Relation<E> relation = new Relation<>();
-                            relation.accept(this);
-                        }
-                    } finally {
-                        currentNode = lcurrentNode;
-                    }
-                }
-
+                readRelations();
                 final Runnable[] resolvers = relationsResolvers.toArray(new Runnable[]{});
                 Runnable relationsResolver = new Runnable() {
                     @Override
@@ -144,6 +131,8 @@ public abstract class XmlDom2Model<E extends Entity<?, ?, E>> implements ModelVi
                         for (Runnable resolver : resolvers) {
                             resolver.run();
                         }
+                        // Let's check relations in our model for integrity
+                        aModel.checkRelationsIntegrity();
                     }
                 };
                 if (currentModel.getClient() != null) {
@@ -227,8 +216,10 @@ public abstract class XmlDom2Model<E extends Entity<?, ?, E>> implements ModelVi
                                 relation.setLeftField(lEntity.getFields().get(leftFieldName));
                             }
                         }
-                        relation.setLeftEntity(lEntity);
-                        lEntity.addOutRelation(relation);
+                        if (lEntity != null) {
+                            relation.setLeftEntity(lEntity);
+                            lEntity.addOutRelation(relation);
+                        }
 
                         E rEntity = model.getEntityById(rightEntityId);
                         if (Model.PARAMETERS_ENTITY_ID == rightEntityId) {
@@ -245,8 +236,10 @@ public abstract class XmlDom2Model<E extends Entity<?, ?, E>> implements ModelVi
                                 relation.setRightField(rEntity.getFields().get(rightFieldName));
                             }
                         }
-                        relation.setRightEntity(rEntity);
-                        rEntity.addInRelation(relation);
+                        if (rEntity != null) {
+                            relation.setRightEntity(rEntity);
+                            rEntity.addInRelation(relation);
+                        }
                     } catch (Exception ex) {
                         Logger.getLogger(XmlDom2Model.class.getName()).log(Level.SEVERE, null, ex);
                     }
@@ -572,6 +565,22 @@ public abstract class XmlDom2Model<E extends Entity<?, ?, E>> implements ModelVi
         }
         if (entity.getHeight() == 0) {
             entity.setHeight(DEFAULT_ENTITY_HEIGHT);
+        }
+    }
+
+    protected void readRelations() {
+        List<Element> nl = XmlDomUtils.elementsByTagName(currentNode, Model2XmlDom.RELATION_TAG_NAME);
+        if (nl != null) {
+            Element lcurrentNode = currentNode;
+            try {
+                for (int i = 0; i < nl.size(); i++) {
+                    currentNode = nl.get(i);
+                    Relation<E> relation = new Relation<>();
+                    relation.accept(this);
+                }
+            } finally {
+                currentNode = lcurrentNode;
+            }
         }
     }
 }

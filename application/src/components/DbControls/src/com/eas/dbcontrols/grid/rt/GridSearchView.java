@@ -52,6 +52,7 @@ public class GridSearchView extends javax.swing.JPanel implements ListSelectionL
     protected boolean caseSensitive = false;
     protected boolean wholeMatch = false;
 
+    @Override
     public void valueChanged(ListSelectionEvent e) {
         cell2LookAt = null;
     }
@@ -226,6 +227,7 @@ public class GridSearchView extends javax.swing.JPanel implements ListSelectionL
 
     protected class SurrogateFindAction extends AbstractAction {
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             findAction.actionPerformed(e);
         }
@@ -249,6 +251,7 @@ public class GridSearchView extends javax.swing.JPanel implements ListSelectionL
                     && !txtText2Find.getText().isEmpty();
         }
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             if (isEnabled()) {
                 if (cell2LookAt == null) {
@@ -303,14 +306,17 @@ public class GridSearchView extends javax.swing.JPanel implements ListSelectionL
 
     protected class SearchViewDocumentListener implements DocumentListener {
 
+        @Override
         public void insertUpdate(DocumentEvent e) {
             checkActions();
         }
 
+        @Override
         public void removeUpdate(DocumentEvent e) {
             checkActions();
         }
 
+        @Override
         public void changedUpdate(DocumentEvent e) {
             checkActions();
         }

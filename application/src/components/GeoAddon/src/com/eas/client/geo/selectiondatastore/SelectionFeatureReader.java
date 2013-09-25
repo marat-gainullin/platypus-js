@@ -31,10 +31,12 @@ public class SelectionFeatureReader implements FeatureReader<SimpleFeatureType, 
         selection = aSelection;
     }
 
+    @Override
     public SimpleFeatureType getFeatureType() {
         return featureType;
     }
 
+    @Override
     public SimpleFeature next() throws IOException, IllegalArgumentException, NoSuchElementException {
         if (closed) {
             throw new IOException("Reader is closed!");
@@ -52,7 +54,7 @@ public class SelectionFeatureReader implements FeatureReader<SimpleFeatureType, 
 
         SelectionEntry sEntry = selection.get(listIndex++);
         featureBuilder.set(0, sEntry.getViewShape());
-        featureBuilder.set(1, sEntry.getEntityId());
+        featureBuilder.set(1, sEntry.getEntity());
         featureBuilder.set(2, sEntry.getGeometryColIndex());
         featureBuilder.set(3, sEntry.getGeometryOfInterestIndex());
         featureBuilder.set(4, sEntry.getCoordinateOfInterestIndex());
@@ -61,10 +63,12 @@ public class SelectionFeatureReader implements FeatureReader<SimpleFeatureType, 
         return res;
     }
 
+    @Override
     public boolean hasNext() throws IOException {
         return listIndex < selection.size();
     }
 
+    @Override
     public void close() throws IOException {
         closed = true;
     }

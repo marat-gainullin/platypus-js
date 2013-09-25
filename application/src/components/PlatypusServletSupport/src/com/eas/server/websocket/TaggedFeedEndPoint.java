@@ -4,10 +4,15 @@
  */
 package com.eas.server.websocket;
 
+import com.eas.server.PlatypusServerCore;
+import java.security.AccessControlException;
+import java.security.Principal;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.websocket.CloseReason;
 import javax.websocket.OnClose;
 import javax.websocket.OnMessage;
@@ -38,13 +43,17 @@ public class TaggedFeedEndPoint {
         }
     }
 
-    public TaggedFeedEndPoint(){
+    public TaggedFeedEndPoint() {
         super();
     }
-    
+
     @OnMessage
-    public void addPeer(Session aPeer, String aData) {
+    public void addPeer(Session aPeer, String aData) throws Exception {
         synchronized (peersByTag) {
+            PlatypusServerCore core = PlatypusServerCore.getInstance();
+            if (core == null) {
+                throw new IllegalStateException("Platypus server core is not initialized");
+            }
             delete(aPeer);
             String[] tagsOfInterest = aData.split("\n");
             if (tagsOfInterest != null) {
@@ -52,19 +61,24 @@ public class TaggedFeedEndPoint {
                     if (tag != null) {
                         tag = tag.trim();
                         if (!tag.isEmpty()) {
-                            Set<Session> taggedPeers = peersByTag.get(tag);
-                            if (taggedPeers == null) {
-                                taggedPeers = new HashSet<>();
-                                peersByTag.put(tag, taggedPeers);
-                            }
-                            taggedPeers.add(aPeer);
+                            Principal principal = aPeer.getUserPrincipal();
+                            if (core.isUserInApplicationRole(principal != null ? principal.getName() : null, tag)) {
+                                Set<Session> taggedPeers = peersByTag.get(tag);
+                                if (taggedPeers == null) {
+                                    taggedPeers = new HashSet<>();
+                                    peersByTag.put(tag, taggedPeers);
+                                }
+                                taggedPeers.add(aPeer);
 
-                            Set<String> tags = tagsByPeer.get(aPeer.getId());
-                            if (tags == null) {
-                                tags = new HashSet<>();
-                                tagsByPeer.put(aPeer.getId(), tags);
+                                Set<String> tags = tagsByPeer.get(aPeer.getId());
+                                if (tags == null) {
+                                    tags = new HashSet<>();
+                                    tagsByPeer.put(aPeer.getId(), tags);
+                                }
+                                tags.add(tag);
+                            } else {
+                                Logger.getLogger(TaggedFeedEndPoint.class.getName()).log(Level.SEVERE, String.format("User %s is not allowed to sign on tag %s", principal != null ? principal.getName() : String.valueOf(null), tag));
                             }
-                            tags.add(tag);
                         }
                     }
                 }

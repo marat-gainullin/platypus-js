@@ -1,7 +1,5 @@
 package com.eas.client.gxtcontrols.grid;
 
-import java.util.List;
-
 import com.bearsoft.rowset.Row;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Element;
@@ -10,7 +8,6 @@ import com.google.gwt.user.client.ui.Label;
 import com.sencha.gxt.core.client.util.Margins;
 import com.sencha.gxt.core.client.util.Padding;
 import com.sencha.gxt.data.shared.ListStore;
-import com.sencha.gxt.data.shared.Store;
 import com.sencha.gxt.widget.core.client.Window;
 import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
 import com.sencha.gxt.widget.core.client.button.TextButton;
@@ -22,14 +19,16 @@ import com.sencha.gxt.widget.core.client.container.VBoxLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.VBoxLayoutContainer.VBoxLayoutAlign;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.event.SelectEvent.SelectHandler;
+import com.sencha.gxt.widget.core.client.event.ShowEvent;
+import com.sencha.gxt.widget.core.client.event.ShowEvent.ShowHandler;
 import com.sencha.gxt.widget.core.client.form.CheckBox;
 import com.sencha.gxt.widget.core.client.form.TextField;
 import com.sencha.gxt.widget.core.client.grid.Grid;
 
 public class FindWindow extends Window {
-	
+
 	protected static GridMessages messages = GWT.create(GridMessages.class);
-	
+
 	private Label label;
 	private TextField field;
 	private CheckBox checkCase;
@@ -51,6 +50,12 @@ public class FindWindow extends Window {
 
 		setResizable(false);
 		setPixelSize(400, 135);
+		addShowHandler(new ShowHandler() {
+			@Override
+			public void onShow(ShowEvent event) {
+				setPixelSize(400, 135);
+			}
+		});
 	}
 
 	private void initComponents() {
@@ -146,7 +151,7 @@ public class FindWindow extends Window {
 			}
 			col = 0;
 		}
-		AlertMessageBox alert = new AlertMessageBox(messages.grid(), messages.endSearch());
+		AlertMessageBox alert = new AlertMessageBox(messages.heading(), messages.endSearch());
 		alert.show();
 		return false;
 	}
@@ -180,11 +185,11 @@ public class FindWindow extends Window {
 	}
 
 	private void selectCell(int aRow, int aCol) {
-		if(grid.getSelectionModel() instanceof PlatypusCellSelectionModel<?>){
-			PlatypusCellSelectionModel<Row> cellsSelection = (PlatypusCellSelectionModel<Row>)grid.getSelectionModel();
+		if (grid.getSelectionModel() instanceof PlatypusCellSelectionModel<?>) {
+			PlatypusCellSelectionModel<Row> cellsSelection = (PlatypusCellSelectionModel<Row>) grid.getSelectionModel();
 			cellsSelection.deselectAll();
 			cellsSelection.selectCell(aRow, aCol, true);
-		}else{
+		} else {
 			grid.getSelectionModel().select(aRow, false);
 		}
 	}

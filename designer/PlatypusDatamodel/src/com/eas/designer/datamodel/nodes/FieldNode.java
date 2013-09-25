@@ -10,6 +10,7 @@ import com.bearsoft.rowset.metadata.Parameter;
 import com.eas.client.SQLUtils;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Relation;
+import com.eas.client.model.application.ReferenceRelation;
 import com.eas.client.model.dbscheme.FieldsEntity;
 import com.eas.client.model.gui.edits.AccessibleCompoundEdit;
 import com.eas.client.model.gui.edits.DeleteRelationEdit;
@@ -71,7 +72,7 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
         this(aField, aLookup);
         canChange = aCanChange;
     }
-    
+
     public FieldNode(Field aField, Lookup aLookup) {
         super(Children.LEAF, aLookup);
         field = aField;
@@ -93,7 +94,7 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
     public Image getIcon(int type) {
         return getIcon(field, type);
     }
-    
+
     public static Image getIcon(Field aField, int aType) {
         List<Icon> icons = new ArrayList<>();
         Icon icon;
@@ -323,7 +324,7 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
     private static boolean isStructSqlType(Field aField) {
         return DataTypeInfo.STRUCT.getSqlType() == aField.getTypeInfo().getSqlType() || DataTypeInfo.OTHER.getSqlType() == aField.getTypeInfo().getSqlType();
     }
-    
+
     private Transferable getTransferable() {
         if (getEntity() instanceof QueryParametersEntity) {
             return new StringSelection(String.format(":%s", field.getName()));//NOI18N
@@ -365,13 +366,14 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
         newContent.setTypeInfo(DataTypeInfo.valueOf((Integer) val));
         checkTypedLengthScale(newContent);
         AccessibleCompoundEdit section = new AccessibleCompoundEdit();
-        Set<Relation> relationToDelete;
+        Set<Relation> relationsToDelete;
         try {
-            relationToDelete = getIncompatibleRelations(newContent);
+            relationsToDelete = getIncompatibleRelations(newContent);
         } catch (CancelException ex) {
             return null;
         }
-        for (Relation rel : relationToDelete) {
+        for (Relation rel : relationsToDelete) {
+            assert !(rel instanceof ReferenceRelation<?>);
             DeleteRelationEdit drEdit = new DeleteRelationEdit(rel);
             drEdit.redo();
             section.addEdit(drEdit);

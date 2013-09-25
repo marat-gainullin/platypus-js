@@ -9,6 +9,7 @@ import com.bearsoft.routing.QuadTree;
 import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Relation;
+import com.eas.client.model.application.ReferenceRelation;
 import com.eas.client.model.gui.view.entities.EntityView;
 import java.awt.Component;
 import java.awt.Font;
@@ -169,6 +170,7 @@ public class DatamodelDesignUtils {
             if (inRels != null) {
                 for (Relation<E> rel : inRels) {
                     if (rel != null) {
+                        assert !(rel instanceof ReferenceRelation<?>);
                         E lEntity = rel.getLeftEntity();
                         if (lEntity == leftEntity) {
                             if (leftField == rel.getLeftField()

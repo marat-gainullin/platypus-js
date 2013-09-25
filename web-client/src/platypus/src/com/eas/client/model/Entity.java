@@ -10,6 +10,7 @@
 package com.eas.client.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -40,11 +41,13 @@ import com.bearsoft.rowset.events.RowsetSortEvent;
 import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.filters.Filter;
 import com.bearsoft.rowset.locators.Locator;
+import com.bearsoft.rowset.locators.RowWrap;
 import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
+import com.bearsoft.rowset.ordering.HashOrderer;
 import com.bearsoft.rowset.sorting.RowsComparator;
 import com.bearsoft.rowset.sorting.SortingCriterion;
 import com.bearsoft.rowset.utils.IDGenerator;
@@ -55,11 +58,11 @@ import com.eas.client.Cancellable;
 import com.eas.client.CancellableCallback;
 import com.eas.client.CancellableCallbackAdapter;
 import com.eas.client.Utils;
+import com.eas.client.Utils.JsObject;
 import com.eas.client.application.Application;
 import com.eas.client.beans.PropertyChangeSupport;
 import com.eas.client.form.api.JSEvents;
 import com.eas.client.queries.Query;
-import com.gargoylesoftware.htmlunit.SilentCssErrorHandler;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.core.client.JsArrayMixed;
@@ -81,15 +84,16 @@ public class Entity implements RowsetListener {
 	protected JavaScriptObject onAfterDelete;
 	protected JavaScriptObject onRequeried;
 	protected JavaScriptObject onFiltered;
+	protected JavaScriptObject jsPublished;
 	// for runtime
-	protected List<Integer> filterConstraints = new ArrayList();
+	protected List<Integer> filterConstraints = new ArrayList<Integer>();
 	protected Cancellable pending;
 	protected boolean valid;
 	protected Rowset rowset;
 	protected boolean filteredWhileAjusting;
 	protected Filter filter;
 	protected boolean userFiltering;
-	protected Map<List<Integer>, Locator> userLocators = new HashMap();
+	protected Map<List<Integer>, Locator> userLocators = new HashMap<List<Integer>, Locator>();
 	// to preserve relation order
 	protected List<Relation> rtInFilterRelations;
 	protected int updatingCounter;
@@ -99,10 +103,11 @@ public class Entity implements RowsetListener {
 	protected String queryId;
 	protected Model model;
 	protected Query query;
-	protected Set<Relation> inRelations = new HashSet();
-	protected Set<Relation> outRelations = new HashSet();
+	protected Set<Relation> inRelations = new HashSet<Relation>();
+	protected Set<Relation> outRelations = new HashSet<Relation>();
 	protected Fields fields;
 	protected PropertyChangeSupport changeSupport;
+	protected Map<String, JavaScriptObject> ormDefinitions = new HashMap<String, JavaScriptObject>();
 
 	public Entity() {
 		super();
@@ -118,6 +123,19 @@ public class Entity implements RowsetListener {
 		this();
 		queryId = aQueryId;
 	}
+
+    public void putOrmDefinition(String aName, JavaScriptObject aDefinition) {
+        if (aName != null && !aName.isEmpty() && aDefinition != null) {
+            if (!ormDefinitions.containsKey(aName)) {
+                ormDefinitions.put(aName, aDefinition);
+            }else
+                Logger.getLogger(Entity.class.getName()).log(Level.WARNING, "ORM property "+aName+" redefinition attempt on entity "+(name != null && !name.isEmpty() ? name : "")+" "+(title != null && !title.isEmpty() ? "[" + title + "]" : "")+".");
+        }
+    }
+
+    public Map<String, JavaScriptObject> getOrmDefinitions() {
+        return Collections.unmodifiableMap(ormDefinitions);
+    }
 
 	public static native void publish(JavaScriptObject aModule, Entity aEntity) throws Exception/*-{
 		var dsName = aEntity.@com.eas.client.model.Entity::getName()();
@@ -896,12 +914,19 @@ public class Entity implements RowsetListener {
 					})();
 				}
 				aRow.@com.bearsoft.rowset.Row::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+				aEntity.@com.eas.client.model.Entity::publishOrmProps(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
 			}
 			return published;
 		}else
 			return null;
 	}-*/;
 
+	public void publishOrmProps(JavaScriptObject aTarget){
+		for(Map.Entry<String, JavaScriptObject> entry : ormDefinitions.entrySet()){
+			aTarget.<JsObject>cast().defineProperty(entry.getKey(), entry.getValue());
+		}
+	}
+	
 	public static native JavaScriptObject publishFieldsFacade(Fields aFields, Entity aEntity) throws Exception/*-{
 		if(aFields != null)
 		{
@@ -1234,11 +1259,17 @@ public class Entity implements RowsetListener {
 	}
 
 	public boolean addOutRelation(Relation aRelation) {
-		return outRelations.add(aRelation);
+		if(!(aRelation instanceof ReferenceRelation))
+			return outRelations.add(aRelation);
+		else
+			return false;
 	}
 
 	public boolean addInRelation(Relation aRelation) {
-		return inRelations.add(aRelation);
+		if(!(aRelation instanceof ReferenceRelation))
+			return inRelations.add(aRelation);
+		else
+			return false;
 	}
 
 	public Set<Relation> getInRelations() {
@@ -1250,7 +1281,7 @@ public class Entity implements RowsetListener {
 	}
 
 	public Set<Relation> getInOutRelations() {
-		Set<Relation> lInOutRelations = new HashSet();
+		Set<Relation> lInOutRelations = new HashSet<Relation>();
 		lInOutRelations.addAll(inRelations);
 		lInOutRelations.addAll(outRelations);
 		return lInOutRelations;
@@ -1589,7 +1620,7 @@ public class Entity implements RowsetListener {
 		if (updatingCounter == 0) {
 			Set<Relation> rels = getOutRelations();
 			if (rels != null) {
-				Set<Entity> toExecute = new HashSet();
+				Set<Entity> toExecute = new HashSet<Entity>();
 				for (Relation outRel : rels) {
 					if (outRel != null) {
 						Entity ent = outRel.getRightEntity();
@@ -1611,7 +1642,7 @@ public class Entity implements RowsetListener {
 			Set<Relation> rels = getOutRelations();
 			if (rels != null) {
 				Field onlyField = getFields().get(aOnlyFieldIndex);
-				Set<Entity> toExecute = new HashSet();
+				Set<Entity> toExecute = new HashSet<Entity>();
 				for (Relation outRel : rels) {
 					if (outRel != null) {
 						Entity ent = outRel.getRightEntity();
@@ -1744,7 +1775,7 @@ public class Entity implements RowsetListener {
 	protected void validateInFilterRelations() {
 		// never build yet, so build it ...
 		if (rtInFilterRelations == null) {
-			rtInFilterRelations = new ArrayList();
+			rtInFilterRelations = new ArrayList<Relation>();
 			assert rowset != null;
 			Set<Relation> inRels = getInRelations();
 			if (inRels != null) {
@@ -1761,7 +1792,7 @@ public class Entity implements RowsetListener {
 		assert rtInFilterRelations != null;
 		assert rowset != null;
 		if (filter == null && !rtInFilterRelations.isEmpty()) {
-			List<Field> constraints = new ArrayList();
+			List<Field> constraints = new ArrayList<Field>();
 			// enumerate filtering relations ...
 			for (Relation rel : rtInFilterRelations) {
 				assert rel != null && rel.isRightField();
@@ -2277,10 +2308,9 @@ public class Entity implements RowsetListener {
 	 */
 	public JavaScriptObject find(JavaScriptObject aValues) throws Exception {
 		JsArrayMixed values = aValues.<JsArrayMixed> cast();
-		JsArray<JavaScriptObject> arFound = JavaScriptObject.createArray().<JsArray<JavaScriptObject>> cast();
 		if (values.length() > 0 && values.length() % 2 == 0) {
-			List<Integer> constraints = new ArrayList();
-			List<Object> keyValues = new ArrayList();
+			List<Integer> constraints = new ArrayList<Integer>();
+			List<Object> keyValues = new ArrayList<Object>();
 			for (int i = 0; i < values.length(); i += 2) {
 				int colIndex = 0;
 				DataTypeInfo typeInfo = null;
@@ -2301,19 +2331,27 @@ public class Entity implements RowsetListener {
 			}
 			Locator loc = checkUserLocator(constraints);
 			if (loc.find(keyValues.toArray())) {
-				for (int i = 0; i < loc.getSize(); i++) {
-					arFound.push(publishRowFacade(loc.getRow(i), this));
-				}
+                HashOrderer.TaggedList<RowWrap> subset = loc.getSubSet();
+                if (subset.tag == null) {
+            		JsArray<JavaScriptObject> arFound = JavaScriptObject.createArray().<JsArray<JavaScriptObject>> cast();
+    				for (RowWrap rw : subset) {
+    					arFound.push(publishRowFacade(rw.getRow(), this));
+    				}
+                    subset.tag = arFound; 
+                }
+                assert subset.tag instanceof JavaScriptObject;
+                return (JavaScriptObject) subset.tag;
+				
 			}
 		} else {
 			Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, BAD_FIND_AGRUMENTS_MSG);
 		}
-		return arFound;
+		return JavaScriptObject.createArray();
 	}
 
 	public Row find(int aColIndex, Object aValue) throws Exception {
-		List<Integer> constraints = new ArrayList();
-		List<Object> keyValues = new ArrayList();
+		List<Integer> constraints = new ArrayList<Integer>();
+		List<Object> keyValues = new ArrayList<Object>();
 		DataTypeInfo typeInfo = getFields().get(aColIndex).getTypeInfo();
 		// field col index
 		constraints.add(aColIndex);
@@ -2366,7 +2404,7 @@ public class Entity implements RowsetListener {
 
 	public RowsComparator createSorting(JavaScriptObject aConstraints) {
 		JsArrayMixed constraints = aConstraints.<JsArrayMixed> cast();
-		List<SortingCriterion> criteria = new ArrayList();
+		List<SortingCriterion> criteria = new ArrayList<SortingCriterion>();
 		for (int i = 0; i < constraints.length(); i += 2) {
 			JavaScriptObject fieldValue = constraints.getObject(i);
 			int colIndex = 0;
@@ -2459,7 +2497,7 @@ public class Entity implements RowsetListener {
 	 */
 	public void insertAt(int aIndex, JavaScriptObject aValues) throws Exception {
 		JsArrayMixed fieldsValues = aValues.<JsArrayMixed> cast();
-		List<Object> initingValues = new ArrayList();
+		List<Object> initingValues = new ArrayList<Object>();
 		for (int i = 0; i < fieldsValues.length(); i += 2) {
 			// field
 			String fieldName = fieldsValues.getString(i);
@@ -2473,8 +2511,6 @@ public class Entity implements RowsetListener {
 		if (checkRowset())
 			getRowset().insertAt(aIndex, initingValues.toArray());
 	}
-
-	protected JavaScriptObject jsPublished;
 
 	public void setPublished(JavaScriptObject aPublished) {
 		jsPublished = aPublished;

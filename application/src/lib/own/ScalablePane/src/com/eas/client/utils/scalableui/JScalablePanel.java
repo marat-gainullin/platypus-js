@@ -68,22 +68,22 @@ import javax.swing.tree.TreePath;
  */
 public class JScalablePanel extends JPanel implements MouseListener, MouseMotionListener, MouseWheelListener, KeyListener, DropTargetListener {
 
-    protected AutoScrollTimerTask autoscrollingTask = null;
-    protected Timer autoscrollingTimer = null;
+    protected AutoScrollTimerTask autoscrollingTask;
+    protected Timer autoscrollingTimer;
     protected DefaultDesktopManager dummyDesktopManager = new DefaultDesktopManager();
-    protected EventsTargetPanel eventsTarget = null;
-    protected DrawWallPanel drawWall = null;
+    protected EventsTargetPanel eventsTarget;
+    protected DrawWallPanel drawWall;
     protected CardLayout cl = new CardLayout();
-    protected Component dragTarget = null;
-    protected Point innerDropTargetPoint = null;
-    protected Component innerDropTargetComponent = null;
+    protected Component dragTarget;
+    protected Point innerDropTargetPoint;
+    protected Component innerDropTargetComponent;
     protected int enterSelectedIndex = -1;
-    protected TreePath enterSelectedPath = null;
-    protected JScrollPane autoscrollingPane = null;
-    protected Point autoscrollingDirection = null;
-    protected Component oldInnerDropTarget = null;
-    protected Point prevMouseXY = null;
-    protected boolean forceHidePopups = false;
+    protected TreePath enterSelectedPath;
+    protected JScrollPane autoscrollingPane;
+    protected Point autoscrollingDirection;
+    protected Component oldInnerDropTarget;
+    protected Point prevMouseXY;
+    protected boolean forceHidePopups;
     protected Set<ScaleListener> scaleListeners = new HashSet<>();
     protected Set<JTextComponent> editingTexts = new HashSet<>();
     protected static final float FLOAT_TOLERANCE = 1e-10f;
@@ -667,7 +667,8 @@ public class JScalablePanel extends JPanel implements MouseListener, MouseMotion
         Component lc = findComponentAt(eventsTarget, e.getPoint());
         if (lc != null) {
             componentPressed = lc;
-            dragTarget = lc;
+            if(SwingUtilities.isLeftMouseButton(e))
+                dragTarget = lc;
             Point lpt = convertPoint(e.getPoint(), lc);
             dragTargetInnerPt = lpt;
             MouseListener[] mlisteners = lc.getMouseListeners();

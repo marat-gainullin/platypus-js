@@ -4,14 +4,12 @@
  */
 package com.bearsoft.rowset.locators;
 
-import com.bearsoft.rowset.Converter;
+import java.util.Collections;
+import java.util.Comparator;
+
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.utils.KeySet;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 
 /**
  * Locator with specific capability. It doesn't distinguish null and absent rows in underlying rowset.
@@ -22,7 +20,7 @@ public class ParentLocator extends Locator {
 
     protected int parentColIndex = 0;
     protected Locator byPkLocator = null;
-    protected List<RowWrap> parentless = new ArrayList();
+    protected TaggedList<RowWrap> parentless = new TaggedList<RowWrap>();
 
     /**
      * <code>ParentLocator</code> constructor.
@@ -86,9 +84,9 @@ public class ParentLocator extends Locator {
                     validate();
                 }
                 if (valid) {
-                    subSet = parentless;
+                    subset = parentless;
                     subSetPos = -1;
-                    return (subSet != null && !subSet.isEmpty());
+                    return (subset != null && !subset.isEmpty());
                 } else {
                     throw new IllegalStateException(LOCATOR_IS_INVALID);
                 }

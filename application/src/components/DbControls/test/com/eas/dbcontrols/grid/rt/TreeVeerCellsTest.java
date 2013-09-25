@@ -181,7 +181,7 @@ public class TreeVeerCellsTest extends GridBaseTest {
 
         public TreeTestState() throws Exception {
             rowsRowset = initRowset();
-            model = new RowsetsTreedModel(rowsRowset, 9, null, null);
+            model = new RowsetsTreedModel(null, rowsRowset, 9, null, null);
             front = new TableFront2TreedModel(model);
             TableColumnModel columns = new DefaultTableColumnModel();
             tbl = new JTable(new CachingTableModel(front), columns) {
@@ -478,7 +478,7 @@ public class TreeVeerCellsTest extends GridBaseTest {
     public void cellsPlainTest() throws Exception {
         Rowset rowset = initRowset();
         TableColumnModel columns = new DefaultTableColumnModel();
-        RowsetsTreedModel data = new RowsetsTreedModel(rowset, 9, null, null);
+        RowsetsTreedModel data = new RowsetsTreedModel(null, rowset, 9, null, null);
 
         for (int i = 1; i <= rowset.getFields().getFieldsCount(); i++) {
             FieldModelColumn mCol = new FieldModelColumn(rowset, i, null, null, false, null, null, null);
@@ -618,7 +618,7 @@ public class TreeVeerCellsTest extends GridBaseTest {
     public void cellsDistributedTest() throws Exception {
         Rowset rowset = initRowset();
         TableColumnModel columns = new DefaultTableColumnModel();
-        RowsetsTableModel data = new RowsetsTableModel(rowset, null, null);
+        RowsetsTableModel data = new RowsetsTableModel(null, rowset, null, null);
 
         for (int i = 1; i <= rowset.getFields().getFieldsCount(); i++) {
             FieldModelColumn mCol = new FieldModelColumn(rowset, i, null, null, false, null, null, null);

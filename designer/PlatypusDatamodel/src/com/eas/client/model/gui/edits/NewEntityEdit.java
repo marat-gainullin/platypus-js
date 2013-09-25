@@ -18,10 +18,6 @@ import com.eas.client.model.Model;
  */
 public class NewEntityEdit<E extends Entity<?, ?, E>, M extends Model<E, ?, ?, ?>> extends DeleteEntityEdit<E, M> {
 
-    public NewEntityEdit(M aModel) {
-        super(aModel, null);
-    }
-
     public NewEntityEdit(M aModel, E aEntity) {
         super(aModel, aEntity);
     }

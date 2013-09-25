@@ -104,8 +104,10 @@ public class JdbcReader {
                 Fields jdbcFields = new Fields();
                 for (int i = 1; i <= lowLevelJdbcFields.getColumnCount(); i++) {
                     Field field = new Field();
-                    field.setName(lowLevelJdbcFields.getColumnName(i));
-                    field.setDescription(lowLevelJdbcFields.getColumnLabel(i));
+                    String columnLabel = lowLevelJdbcFields.getColumnLabel(i);// Column label in jdbc is the name of platypus property
+                    String columnName = lowLevelJdbcFields.getColumnName(i);
+                    field.setName(columnLabel != null && !columnLabel.isEmpty() ? columnLabel : columnName);
+                    field.setOriginalName(columnName);
 
                     field.setNullable(lowLevelJdbcFields.isNullable(i) == ResultSetMetaData.columnNullable);
 

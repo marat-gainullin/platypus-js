@@ -29,7 +29,7 @@
     <entry-point class="com.eas.client.application.MainEntryPoint"/>
 
     <source path=""/>
-	<extend-property name="locale" values="ru_RU"/>
+	<extend-property name="locale" values="ru"/>
 	<!-- Do not define servlets here, use web.xml -->
 	<add-linker name="xsiframe"/>
 	<set-configuration-property name="devModeRedirectEnabled" value="true"/>

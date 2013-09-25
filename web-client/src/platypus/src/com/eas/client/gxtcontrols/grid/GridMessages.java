@@ -15,7 +15,5 @@ public interface GridMessages extends Messages {
 
 	public String close();
 
-	public String grid();
-	
 	public String endSearch();
 }

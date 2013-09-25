@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 
 import com.bearsoft.rowset.Row;
 import com.eas.client.Utils;
+import com.eas.client.Utils.JsObject;
 import com.eas.client.gxtcontrols.converters.DoubleRowValueConverter;
 import com.eas.client.gxtcontrols.grid.fillers.ListStoreFiller;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -46,7 +47,7 @@ public abstract class AbstractLineChart extends AbstractChart {
 						return null;
 				} else if (oItem instanceof JavaScriptObject) {
 					JsObject item = ((JavaScriptObject) oItem).cast();
-					Object oValue = Utils.toJava(item.get(fieldName));
+					Object oValue = Utils.toJava(item.getJava(fieldName));
 					if (oValue instanceof Number)
 						return ((Number) oValue).doubleValue();
 					else if (oValue instanceof Date){

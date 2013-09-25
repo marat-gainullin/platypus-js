@@ -309,6 +309,7 @@ public class ApplicationModelEditorView extends JPanel implements Customizer {
     private void initComponents() {
 
         popupModel = new javax.swing.JPopupMenu();
+        mnuRelationPropsNames = new javax.swing.JMenuItem();
         mnuGo2LeftEntity = new javax.swing.JMenuItem();
         mnuGo2RightEntity = new javax.swing.JMenuItem();
         mnuSepRels2Entities = new javax.swing.JSeparator();
@@ -327,6 +328,9 @@ public class ApplicationModelEditorView extends JPanel implements Customizer {
         btnZoomIn = new javax.swing.JButton();
         btnZoomOut = new javax.swing.JButton();
         btnFind = new javax.swing.JButton();
+
+        mnuRelationPropsNames.setAction(modelView.getActionMap().get(com.eas.client.model.gui.view.model.ApplicationModelView.PropertiesNamesAction.class.getSimpleName()));
+        popupModel.add(mnuRelationPropsNames);
 
         mnuGo2LeftEntity.setAction(modelView.getActionMap().get(com.eas.client.model.gui.view.model.ModelView.GoLeft.class.getSimpleName()));
         popupModel.add(mnuGo2LeftEntity);
@@ -436,6 +440,7 @@ public class ApplicationModelEditorView extends JPanel implements Customizer {
     private javax.swing.JMenuItem mnuGo2LeftEntity;
     private javax.swing.JMenuItem mnuGo2RightEntity;
     private javax.swing.JMenuItem mnuPasteEntity;
+    private javax.swing.JMenuItem mnuRelationPropsNames;
     private javax.swing.JSeparator mnuSepBuffer;
     private javax.swing.JSeparator mnuSepRels2Entities;
     private javax.swing.JPopupMenu popupModel;
@@ -544,4 +549,5 @@ public class ApplicationModelEditorView extends JPanel implements Customizer {
             return null;
         }
     }
+    
 }

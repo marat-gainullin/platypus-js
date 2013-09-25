@@ -30,8 +30,6 @@ import com.google.gwt.core.client.JsArrayString;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NodeList;
-import com.google.gwt.logging.client.ConsoleLogHandler;
-import com.google.gwt.logging.client.FirebugLogHandler;
 import com.google.gwt.logging.client.LogConfiguration;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.sencha.gxt.core.client.dom.XElement;
@@ -551,6 +549,9 @@ public class Application {
 			nativeForm.@com.eas.client.form.Form::publish(Lcom/google/gwt/core/client/JavaScriptObject;)(aModule);
 			return nativeForm;
 		};
+		$wnd.platypus.HTML5 = "Html5 client";
+		$wnd.platypus.J2SE = "Java SE client";
+		$wnd.platypus.agent = $wnd.platypus.HTML5; 
 		function _Modules() {
 			var platypusModules = {};
 			this.get = function(aModuleId) {

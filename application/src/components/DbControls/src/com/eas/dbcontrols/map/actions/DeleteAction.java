@@ -167,7 +167,7 @@ public class DeleteAction extends GeoPaneAction {
                 rows.put(sEntry.getFeatureId(), row);
                 oldGeometries.put(sEntry.getFeatureId(), geometry);
                 rowsColIndexes.put(sEntry.getFeatureId(), sEntry.getGeometryColIndex());
-                features2Entities.put(sEntry.getFeatureId(), map.getModel().getEntityById(sEntry.getEntityId()));
+                features2Entities.put(sEntry.getFeatureId(), sEntry.getEntity());
             }
 
             // data from old geometries

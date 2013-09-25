@@ -489,4 +489,17 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
             }
         }
     }
+
+    public void checkRelationsIntegrity() {
+        List<Relation<E>> toDel = new ArrayList<>();
+        for (Relation<E> rel : relations) {
+            if (rel.getLeftEntity() == null || (rel.getLeftField() == null && rel.getLeftParameter() == null)
+                    || rel.getRightEntity() == null || (rel.getRightField() == null && rel.getRightParameter() == null)) {
+                toDel.add(rel);
+            }
+        }
+        for (Relation<E> rel : toDel) {
+            removeRelation(rel);
+        }
+    }
 }

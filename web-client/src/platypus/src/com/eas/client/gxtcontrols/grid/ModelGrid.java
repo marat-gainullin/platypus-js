@@ -42,7 +42,7 @@ public class ModelGrid extends ContentPanel {
 	protected Entity rowsSource;
 	protected JavaScriptObject generalCellFunction;
 	protected PublishedComponent published;
-	protected List<ModelGridColumn<?>> publishedColumns = new ArrayList();
+	protected List<ModelGridColumn<?>> publishedColumns = new ArrayList<ModelGridColumn<?>>();
 	protected Runnable crossUpdaterAction;
 	protected CrossUpdater crossUpdater;
 	protected FindWindow finder;
@@ -54,7 +54,7 @@ public class ModelGrid extends ContentPanel {
 		super();
 		ListStore<Row> store = new ListStore<Row>(new RowKeyProvider());
 		store.setAutoCommit(true);
-		List<ColumnConfig<Row, ?>> columns = new ArrayList();
+		List<ColumnConfig<Row, ?>> columns = new ArrayList<ColumnConfig<Row, ?>>();
 		ColumnModel<Row> cm = new ColumnModel<Row>(columns);
 		grid = new Grid<Row>((ListStore<Row>) store, cm, new PlatypusGridView());
 		finder = new FindWindow(grid);
