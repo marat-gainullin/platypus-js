@@ -1335,7 +1335,7 @@ public class MetadataCompareForm extends javax.swing.JFrame {
                             sourceLegend = String.format(LEGEND_FILE_FORMAT, sourceTitle, xml);
                         }
                     }
-                    DBStructure destDBStructure = null;
+                    DBStructure destDBStructure;
                     if (destUrl != null) {
                         destDBStructure = mds.readDBStructure(destUrl, destSchema, destUser, destPassword);
                         destinationLegend = String.format(LEGEND_DATABASE_FORMAT, destinationTitle, destUrl, destSchema);
@@ -1399,10 +1399,10 @@ public class MetadataCompareForm extends javax.swing.JFrame {
 
     private DefaultMutableTreeNode createTableStructureNode(String tableName, TableStructure srcStructure, TableStructure destStructure, boolean oneDialect) {
         String srcTableName = null;
-        Fields srcFields = null;
-        Map<String, DbTableIndexSpec> srcIndexes = null;
-        List<PrimaryKeySpec> srcPKey = null;
-        Map<String, List<ForeignKeySpec>> srcFKeys = null;
+        Fields srcFields;
+        Map<String, DbTableIndexSpec> srcIndexes;
+        List<PrimaryKeySpec> srcPKey;
+        Map<String, List<ForeignKeySpec>> srcFKeys;
         String srcDescription = null;
         int srcFldCount = 0;
         int srcIndCount = 0;
@@ -1429,10 +1429,10 @@ public class MetadataCompareForm extends javax.swing.JFrame {
         }
 
         String destTableName = null;
-        Fields destFields = null;
-        Map<String, DbTableIndexSpec> destIndexes = null;
-        List<PrimaryKeySpec> destPKey = null;
-        Map<String, List<ForeignKeySpec>> destFKeys = null;
+        Fields destFields;
+        Map<String, DbTableIndexSpec> destIndexes;
+        List<PrimaryKeySpec> destPKey;
+        Map<String, List<ForeignKeySpec>> destFKeys;
         String destDescription = "";
         int destFldCount = 0;
         int destIndCount = 0;
@@ -1538,6 +1538,7 @@ public class MetadataCompareForm extends javax.swing.JFrame {
                 Field destField = null;
                 String upperName = srcField.getName().toUpperCase();
                 if (destFields != null) {
+                    assert destStructure != null;
                     destField = destFields.get(destStructure.getOriginalFieldName(upperName));
                 }
 
@@ -1555,6 +1556,7 @@ public class MetadataCompareForm extends javax.swing.JFrame {
                 Field srcField = null;
                 String upperName = destField.getName().toUpperCase();
                 if (srcFields != null) {
+                    assert srcStructure != null;
                     srcField = srcFields.get(srcStructure.getOriginalFieldName(upperName));
                 }
                 // only if not exists in source
@@ -1593,7 +1595,7 @@ public class MetadataCompareForm extends javax.swing.JFrame {
         DataTypeInfo srcTypeInfo = null;
         int srcSqlType = 0;
         String srcSqlTypeName = "";
-        String srcClassName = "";
+        //String srcClassName = "";
         boolean srcSigned = false;
         int srcSize = 0;
         int srcScale = 0;
@@ -1608,7 +1610,7 @@ public class MetadataCompareForm extends javax.swing.JFrame {
             srcTypeInfo = srcField.getTypeInfo();
             srcSqlType = srcTypeInfo.getSqlType();
             srcSqlTypeName = srcTypeInfo.getSqlTypeName();
-            srcClassName = srcTypeInfo.getJavaClassName();
+            //srcClassName = srcTypeInfo.getJavaClassName();
             srcSigned = srcField.isSigned();
             srcSize = srcField.getSize();
             srcScale = srcField.getScale();
@@ -1620,9 +1622,9 @@ public class MetadataCompareForm extends javax.swing.JFrame {
             if (srcSqlTypeName == null) {
                 srcSqlTypeName = "";
             }
-            if (srcClassName == null) {
-                srcClassName = "";
-            }
+            //if (srcClassName == null) {
+            //    srcClassName = "";
+            //}
             if (srcDescription == null) {
                 srcDescription = "";
             }
@@ -1635,7 +1637,7 @@ public class MetadataCompareForm extends javax.swing.JFrame {
         DataTypeInfo destTypeInfo = null;
         int destSqlType = 0;
         String destSqlTypeName = "";
-        String destClassName = "";
+        //String destClassName = "";
         boolean destSigned = false;
         int destSize = 0;
         int destScale = 0;
@@ -1650,7 +1652,7 @@ public class MetadataCompareForm extends javax.swing.JFrame {
             destTypeInfo = destField.getTypeInfo();
             destSqlType = destTypeInfo.getSqlType();
             destSqlTypeName = destTypeInfo.getSqlTypeName();
-            destClassName = destTypeInfo.getJavaClassName();
+            //destClassName = destTypeInfo.getJavaClassName();
             destSigned = destField.isSigned();
             destSize = destField.getSize();
             destScale = destField.getScale();
@@ -1662,9 +1664,9 @@ public class MetadataCompareForm extends javax.swing.JFrame {
             if (destSqlTypeName == null) {
                 destSqlTypeName = "";
             }
-            if (destClassName == null) {
-                destClassName = "";
-            }
+            //if (destClassName == null) {
+            //    destClassName = "";
+            //}
             if (destDescription == null) {
                 destDescription = "";
             }
@@ -1805,6 +1807,7 @@ public class MetadataCompareForm extends javax.swing.JFrame {
                     String srcField = srcPKey.getField();
                     String destField = "";
                     if (destPKeysSize > i) {
+                        assert destPKeys != null;
                         PrimaryKeySpec destPKey = destPKeys.get(i);
                         assert destPKey != null;
                         destField = destPKey.getField();
@@ -1820,14 +1823,16 @@ public class MetadataCompareForm extends javax.swing.JFrame {
                     dlm = ", ";
                 }
             }
-            for (int i = srcPKeysSize; i < destPKeysSize; i++) {
-                PrimaryKeySpec destPKey = destPKeys.get(i);
-                assert destPKey != null;
-                String destField = destPKey.getField();
-                assert destField != null;
-                destFields += dlm + (srcPKeysSize == 0 ? destField : String.format(COLOR_FORMAT, destField));
-                nodeType = DbStructureInfo.COMPARE_TYPE.NOT_EQUAL;
-            }
+            if (destPKeys != null) {
+                for (int i = srcPKeysSize; i < destPKeysSize; i++) {
+                    PrimaryKeySpec destPKey = destPKeys.get(i);
+                    assert destPKey != null;
+                    String destField = destPKey.getField();
+                    assert destField != null;
+                    destFields += dlm + (srcPKeysSize == 0 ? destField : String.format(COLOR_FORMAT, destField));
+                    nodeType = DbStructureInfo.COMPARE_TYPE.NOT_EQUAL;
+                }
+            }    
             String srcRow;
             String destRow;
             boolean equals = (srcPKeysSize == 0 || destPKeysSize == 0 || srcPkeyName.equalsIgnoreCase(destPkeyName));
@@ -1885,10 +1890,12 @@ public class MetadataCompareForm extends javax.swing.JFrame {
                 String srcFKeyName = "";
                 String destFKeyName = "";
                 if (srcFKeys != null) {
+                    assert srcStructure != null;
                     srcFKeyName = srcStructure.getOriginalFKeyName(fKeyName);
                     srcFKey = srcFKeys.get(srcFKeyName);
                 }
                 if (destFKeys != null) {
+                    assert destStructure != null;
                     destFKeyName = destStructure.getOriginalFKeyName(fKeyName);
                     destFKey = destFKeys.get(destFKeyName);
                 }
@@ -1943,89 +1950,94 @@ public class MetadataCompareForm extends javax.swing.JFrame {
         String destRefereeCName = "";
         String dlm = "";
 
-        for (int i = 0; i < srcSize; i++) {
-            ForeignKeySpec srcKey = srcFKey.get(i);
-            assert srcKey != null;
-            String srcField = srcKey.getField();
-            PrimaryKeySpec srcReferee = srcKey.getReferee();
-            assert srcReferee != null;
-            String srcRefereeField = srcReferee.getField();
+        if (srcFKey != null) {
+            for (int i = 0; i < srcSize; i++) {
+                ForeignKeySpec srcKey = srcFKey.get(i);
+                assert srcKey != null;
+                String srcField = srcKey.getField();
+                PrimaryKeySpec srcReferee = srcKey.getReferee();
+                assert srcReferee != null;
+                String srcRefereeField = srcReferee.getField();
 
-            ForeignKeySpec destKey = null;
-            String destField = "";
-            PrimaryKeySpec destReferee = null;
-            String destRefereeField = "";
+                ForeignKeySpec destKey = null;
+                String destField = "";
+                PrimaryKeySpec destReferee = null;
+                String destRefereeField = "";
 
-            if (destSize > i) {
-                destKey = destFKey.get(i);
-                assert destKey != null;
-                destReferee = destKey.getReferee();
-                assert destReferee != null;
-                destField = destKey.getField();
-                destRefereeField = destReferee.getField();
-            }
-            if (i == 0) {
-                srcRefereeTable = srcReferee.getTable();
-                srcRefereeCName = srcReferee.getCName();
-                srcDeferrable = srcKey.getFkDeferrable();
-                srcDeleteRule = srcKey.getFkDeleteRule();
-                srcUpdateRule = srcKey.getFkUpdateRule();
-                if (destKey != null) {
+                if (destSize > i) {
+                    assert destFKey != null;
+                    destKey = destFKey.get(i);
+                    assert destKey != null;
+                    destReferee = destKey.getReferee();
                     assert destReferee != null;
+                    destField = destKey.getField();
+                    destRefereeField = destReferee.getField();
+                }
+                if (i == 0) {
+                    srcRefereeTable = srcReferee.getTable();
+                    srcRefereeCName = srcReferee.getCName();
+                    srcDeferrable = srcKey.getFkDeferrable();
+                    srcDeleteRule = srcKey.getFkDeleteRule();
+                    srcUpdateRule = srcKey.getFkUpdateRule();
+                    if (destKey != null) {
+                        assert destReferee != null;
+                        destRefereeTable = destReferee.getTable();
+                        destRefereeCName = destReferee.getCName();
+                        destDeferrable = destKey.getFkDeferrable();
+                        destDeleteRule = destKey.getFkDeleteRule();
+                        destUpdateRule = destKey.getFkUpdateRule();
+                    }
+                }
+
+                if (srcField == null) {
+                    srcField = "";
+                }
+                if (srcRefereeField == null) {
+                    srcRefereeField = "";
+                }
+                if (destField == null) {
+                    destField = "";
+                }
+                if (destRefereeField == null) {
+                    destRefereeField = "";
+                }
+
+                boolean equalsField = (srcSize == 0 || destSize == 0 || srcField.equalsIgnoreCase(destField));
+                boolean equalsRefereeField = (srcSize == 0 || destSize == 0 || srcRefereeField.equalsIgnoreCase(destRefereeField));
+
+                srcFields += dlm + (equalsField ? srcField : String.format(COLOR_FORMAT, srcField));
+                srcFields += refereeTitle + (equalsRefereeField ? srcRefereeField : String.format(COLOR_FORMAT, srcRefereeField));
+                destFields += (destField.isEmpty() ? "" : dlm) + (equalsField ? destField : String.format(COLOR_FORMAT, destField));
+                destFields += (destRefereeField.isEmpty() ? "" : refereeTitle) + (equalsRefereeField ? destRefereeField : String.format(COLOR_FORMAT, destRefereeField));
+                if (!equalsField || !equalsRefereeField) {
+                    nodeType = DbStructureInfo.COMPARE_TYPE.NOT_EQUAL;
+                }
+                dlm = ", ";
+            }
+        }
+
+        if (destFKey != null) {
+            for (int i = srcSize; i < destSize; i++) {
+                ForeignKeySpec destKey = destFKey.get(i);
+                assert destKey != null;
+                String destField = destKey.getField();
+                PrimaryKeySpec destReferee = destKey.getReferee();
+                assert destReferee != null;
+                String destRefereeField = destReferee.getField();
+
+                if (i == 0) {
                     destRefereeTable = destReferee.getTable();
                     destRefereeCName = destReferee.getCName();
                     destDeferrable = destKey.getFkDeferrable();
                     destDeleteRule = destKey.getFkDeleteRule();
                     destUpdateRule = destKey.getFkUpdateRule();
                 }
-            }
 
-            if (srcField == null) {
-                srcField = "";
-            }
-            if (srcRefereeField == null) {
-                srcRefereeField = "";
-            }
-            if (destField == null) {
-                destField = "";
-            }
-            if (destRefereeField == null) {
-                destRefereeField = "";
-            }
-
-            boolean equalsField = (srcSize == 0 || destSize == 0 || srcField.equalsIgnoreCase(destField));
-            boolean equalsRefereeField = (srcSize == 0 || destSize == 0 || srcRefereeField.equalsIgnoreCase(destRefereeField));
-
-            srcFields += dlm + (equalsField ? srcField : String.format(COLOR_FORMAT, srcField));
-            srcFields += refereeTitle + (equalsRefereeField ? srcRefereeField : String.format(COLOR_FORMAT, srcRefereeField));
-            destFields += (destField.isEmpty() ? "" : dlm) + (equalsField ? destField : String.format(COLOR_FORMAT, destField));
-            destFields += (destRefereeField.isEmpty() ? "" : refereeTitle) + (equalsRefereeField ? destRefereeField : String.format(COLOR_FORMAT, destRefereeField));
-            if (!equalsField || !equalsRefereeField) {
+                destFields += (destField.isEmpty() ? "" : dlm + (srcSize == 0 ? destField : String.format(COLOR_FORMAT, destField)));
+                destFields += (destRefereeField.isEmpty() ? "" : refereeTitle + (srcSize == 0 ? destRefereeField : String.format(COLOR_FORMAT, destRefereeField)));
                 nodeType = DbStructureInfo.COMPARE_TYPE.NOT_EQUAL;
+                dlm = ", ";
             }
-            dlm = ", ";
-        }
-
-        for (int i = srcSize; i < destSize; i++) {
-            ForeignKeySpec destKey = destFKey.get(i);
-            assert destKey != null;
-            String destField = destKey.getField();
-            PrimaryKeySpec destReferee = destKey.getReferee();
-            assert destReferee != null;
-            String destRefereeField = destReferee.getField();
-
-            if (i == 0) {
-                destRefereeTable = destReferee.getTable();
-                destRefereeCName = destReferee.getCName();
-                destDeferrable = destKey.getFkDeferrable();
-                destDeleteRule = destKey.getFkDeleteRule();
-                destUpdateRule = destKey.getFkUpdateRule();
-            }
-
-            destFields += (destField.isEmpty() ? "" : dlm + (srcSize == 0 ? destField : String.format(COLOR_FORMAT, destField)));
-            destFields += (destRefereeField.isEmpty() ? "" : refereeTitle + (srcSize == 0 ? destRefereeField : String.format(COLOR_FORMAT, destRefereeField)));
-            nodeType = DbStructureInfo.COMPARE_TYPE.NOT_EQUAL;
-            dlm = ", ";
         }
 
         if (srcFKeyName == null) {
@@ -2128,10 +2140,12 @@ public class MetadataCompareForm extends javax.swing.JFrame {
                 String srcIndexName = "";
                 String destIndexName = "";
                 if (srcIndexes != null) {
+                    assert srcStructure != null;
                     srcIndexName = srcStructure.getOriginalIndexName(indexName);
                     srcIndex = srcIndexes.get(srcIndexName);
                 }
                 if (destIndexes != null) {
+                    assert destStructure != null;
                     destIndexName = destStructure.getOriginalIndexName(indexName);
                     destIndex = destIndexes.get(destIndexName);
                 }
@@ -2197,65 +2211,70 @@ public class MetadataCompareForm extends javax.swing.JFrame {
         }
         String dlm = "";
         String desc = " desc";
-        for (int i = 0; i < srcColumnCount; i++) {
-            DbTableIndexColumnSpec srcColumn = srcColumns.get(i);
-            assert srcColumn != null;
-            int srcPos = srcColumn.getOrdinalPosition();
-            String srcField = srcColumn.getColumnName();
-            boolean srcAsc = srcColumn.isAscending();
+        if (srcColumns != null) {
+            for (int i = 0; i < srcColumnCount; i++) {
+                DbTableIndexColumnSpec srcColumn = srcColumns.get(i);
+                assert srcColumn != null;
+                int srcPos = srcColumn.getOrdinalPosition();
+                String srcField = srcColumn.getColumnName();
+                boolean srcAsc = srcColumn.isAscending();
 
-            String destField = "";
-            int destPos = 0;
-            boolean destAsc = true;
-            if (destColumnCount > i) {
+                String destField = "";
+                int destPos = 0;
+                boolean destAsc = true;
+                if (destColumnCount > i) {
+                    assert destColumns != null;
+                    DbTableIndexColumnSpec destColumn = destColumns.get(i);
+                    assert destColumn != null;
+                    destField = destColumn.getColumnName();
+                    destPos = destColumn.getOrdinalPosition();
+                    destAsc = destColumn.isAscending();
+                }
+                if (srcField == null) {
+                    srcField = "";
+                }
+                if (destField == null) {
+                    destField = "";
+                }
+
+                boolean equalsPos = (srcColumnCount == 0 || destColumnCount == 0 || srcPos == destPos);
+                boolean equalsField = (srcColumnCount == 0 || destColumnCount == 0 || srcField.equalsIgnoreCase(destField));
+                boolean equalsAsc = (srcColumnCount == 0 || destColumnCount == 0 || srcAsc == destAsc);
+
+                srcFields += dlm + (equalsPos ? "" + srcPos : String.format(COLOR_FORMAT, "" + srcPos));
+                srcFields += "-" + (equalsField ? srcField : String.format(COLOR_FORMAT, srcField));
+                if (!srcAsc) {
+                    srcFields += (equalsAsc ? desc : String.format(COLOR_FORMAT, desc));
+                }
+                destFields += (destField.isEmpty() ? "" : dlm) + (equalsPos ? "" + destPos : String.format(COLOR_FORMAT, "" + destPos));
+                destFields += (destField.isEmpty() ? "" : "-") + (equalsField ? destField : String.format(COLOR_FORMAT, destField));
+                if (!destAsc) {
+                    destFields += (equalsAsc ? desc : String.format(COLOR_FORMAT, desc));
+                }
+                if (!equalsField || !equalsAsc) {
+                    nodeType = DbStructureInfo.COMPARE_TYPE.NOT_EQUAL;
+                }
+                dlm = ", ";
+            }
+        }
+        if (destColumns != null) {
+            for (int i = srcColumnCount; i < destColumnCount; i++) {
                 DbTableIndexColumnSpec destColumn = destColumns.get(i);
                 assert destColumn != null;
-                destField = destColumn.getColumnName();
-                destPos = destColumn.getOrdinalPosition();
-                destAsc = destColumn.isAscending();
-            }
-            if (srcField == null) {
-                srcField = "";
-            }
-            if (destField == null) {
-                destField = "";
-            }
+                String destField = destColumn.getColumnName();
+                int destPos = destColumn.getOrdinalPosition();
+                boolean destAsc = destColumn.isAscending();
+                if (destField == null) {
+                    destField = "";
+                }
 
-            boolean equalsPos = (srcColumnCount == 0 || destColumnCount == 0 || srcPos == destPos);
-            boolean equalsField = (srcColumnCount == 0 || destColumnCount == 0 || srcField.equalsIgnoreCase(destField));
-            boolean equalsAsc = (srcColumnCount == 0 || destColumnCount == 0 || srcAsc == destAsc);
-
-            srcFields += dlm + (equalsPos ? "" + srcPos : String.format(COLOR_FORMAT, "" + srcPos));
-            srcFields += "-" + (equalsField ? srcField : String.format(COLOR_FORMAT, srcField));
-            if (!srcAsc) {
-                srcFields += (equalsAsc ? desc : String.format(COLOR_FORMAT, desc));
-            }
-            destFields += (destField.isEmpty() ? "" : dlm) + (equalsPos ? "" + destPos : String.format(COLOR_FORMAT, "" + destPos));
-            destFields += (destField.isEmpty() ? "" : "-") + (equalsField ? destField : String.format(COLOR_FORMAT, destField));
-            if (!destAsc) {
-                destFields += (equalsAsc ? desc : String.format(COLOR_FORMAT, desc));
-            }
-            if (!equalsField || !equalsAsc) {
+                destFields += (destField.isEmpty() ? "" : dlm + destPos + "-" + (srcColumnCount == 0 ? destField : String.format(COLOR_FORMAT, destField)));
+                if (!destAsc) {
+                    destFields += (srcColumnCount == 0 ? desc : String.format(COLOR_FORMAT, desc));
+                }
                 nodeType = DbStructureInfo.COMPARE_TYPE.NOT_EQUAL;
+                dlm = ", ";
             }
-            dlm = ", ";
-        }
-        for (int i = srcColumnCount; i < destColumnCount; i++) {
-            DbTableIndexColumnSpec destColumn = destColumns.get(i);
-            assert destColumn != null;
-            String destField = destColumn.getColumnName();
-            int destPos = destColumn.getOrdinalPosition();
-            boolean destAsc = destColumn.isAscending();
-            if (destField == null) {
-                destField = "";
-            }
-
-            destFields += (destField.isEmpty() ? "" : dlm + destPos + "-" + (srcColumnCount == 0 ? destField : String.format(COLOR_FORMAT, destField)));
-            if (!destAsc) {
-                destFields += (srcColumnCount == 0 ? desc : String.format(COLOR_FORMAT, desc));
-            }
-            nodeType = DbStructureInfo.COMPARE_TYPE.NOT_EQUAL;
-            dlm = ", ";
         }
 
         if (srcFKeyName == null) {

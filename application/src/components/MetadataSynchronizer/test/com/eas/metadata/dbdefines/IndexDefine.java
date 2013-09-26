@@ -4,8 +4,6 @@
  */
 package com.eas.metadata.dbdefines;
 
-import com.eas.metadata.dbdefines.IndexColumnDefine;
-
 /**
  *
  * @author vy
