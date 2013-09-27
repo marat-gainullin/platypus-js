@@ -307,7 +307,6 @@ public class DbMigrator extends BaseDeployer {
         Properties props = new Properties();
         props.put("user", settings.getDbSettings().getUser());
         props.put("password", settings.getDbSettings().getPassword());
-        props.put("schema", settings.getDbSettings().getSchema());
         try (Connection connection = DriverManager.getConnection(settings.getDbSettings().getUrl(), props)) {
             SqlDriver.applyScript(FileUtils.readString(sqlScriptFile, PlatypusFiles.DEFAULT_ENCODING), connection);
         }

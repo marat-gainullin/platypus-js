@@ -22,7 +22,6 @@ public class PlatypusNetBeansTestUtilities {
         settings.setUrl("jdbc:oracle:thin:@asvr:1521:adb");
         Properties p = new Properties();
         p.put("user", "eas");
-        p.put("schema", "eas");
         p.put("password", "eas");
         settings.setInfo(p);
         settings.setName("Develop test client two-tier connection settings");

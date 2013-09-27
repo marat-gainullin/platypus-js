@@ -63,7 +63,7 @@ public class GeneralResourceProvider {
             }
             return ds;
         } catch (Exception ex) {
-            return new PlatypusNativeDataSource(aSettings.getMaxConnections(), aSettings.getMaxStatements(), aSettings.getResourceTimeout(), aSettings.getUrl(), aSettings.getUser(), aSettings.getPassword(), aSettings.getSchema());
+            return new PlatypusNativeDataSource(aSettings.getMaxConnections(), aSettings.getMaxStatements(), aSettings.getResourceTimeout(), aSettings.getUrl(), aSettings.getUser(), aSettings.getPassword());
         }
     }
 

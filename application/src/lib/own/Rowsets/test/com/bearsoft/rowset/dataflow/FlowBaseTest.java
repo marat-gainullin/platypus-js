@@ -46,7 +46,6 @@ public class FlowBaseTest {
 
     public static String makeTestConnectionDescription(Properties props) throws SQLException {
         String url = "jdbc:oracle:thin:@asvr:1521:adb";
-        props.put("schema", "eas");
         props.put("user", "eas");
         props.put("password", "eas");
         return url;

@@ -28,14 +28,13 @@ public class PlatypusNativeDataSource extends BearResourcePool<BearDatabaseConne
     protected PrintWriter printWriter;
     protected int loginTimeout;
 
-    public PlatypusNativeDataSource(int aMaxConnections, int aMaxStatements, int aResourceTimeout, String aUrl, String aUser, String aPassword, String aSchema) throws Exception {
+    public PlatypusNativeDataSource(int aMaxConnections, int aMaxStatements, int aResourceTimeout, String aUrl, String aUser, String aPassword) throws Exception {
         super(aMaxConnections, aResourceTimeout);
         url = aUrl;
         maxStatements = aMaxStatements;
         resourceTimeout = aResourceTimeout;
         props.put("user", aUser);
         props.put("password", aPassword);
-        props.put("schema", aSchema);
     }
 
     @Override
