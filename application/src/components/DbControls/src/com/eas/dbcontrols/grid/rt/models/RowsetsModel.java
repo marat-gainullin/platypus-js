@@ -286,6 +286,14 @@ public abstract class RowsetsModel {
         if (cRow != null && rRow != null && cellsLocator != null) {
             Object[] rKeys = rRow.getPKValues();
             Object[] cKeys = cRow.getPKValues();
+            if(rKeys.length == 0)
+                throw new IllegalStateException("Row key is not found for "+rowsEntity.getFormattedNameAndTitle());
+            if(rKeys.length > 1)
+                throw new IllegalStateException("Row key is ambigous for "+rowsEntity.getFormattedNameAndTitle());
+            if(cKeys.length == 0)
+                throw new IllegalStateException("Column key is not found for "+rowsEntity.getFormattedNameAndTitle());
+            if(cKeys.length > 1)
+                throw new IllegalStateException("Column key is ambigous for "+rowsEntity.getFormattedNameAndTitle());
             Object[] cellsKeys = new Object[rKeys.length + cKeys.length];
             System.arraycopy(rKeys, 0, cellsKeys, 0, rKeys.length);
             System.arraycopy(cKeys, 0, cellsKeys, rKeys.length, cKeys.length);

@@ -237,10 +237,16 @@ public abstract class Entity<M extends Model<E, ?, ?, Q>, Q extends Query<?>, E 
 
     public String getFormattedTableNameAndTitle() {
         String lTableName = getTableName();
-        String tableTitle = getTitle();
-        return (lTableName != null ? lTableName : "") + (tableTitle != null && !"".equals(tableTitle) ? " (" + tableTitle + ")" : ""); //NO18IN
+        String lTitle = getTitle();
+        return (lTableName != null ? lTableName : "") + (lTitle != null && !"".equals(lTitle) ? " (" + lTitle + ")" : ""); //NO18IN
     }
 
+    public String getFormattedNameAndTitle() {
+        String lName = getName();
+        String lTitle = getTitle();
+        return (lName != null ? lName : "") + (lTitle != null && !"".equals(lTitle) ? " (" + lTitle + ")" : ""); //NO18IN
+    }
+    
     public String getQueryId() {
         return queryId;
     }

@@ -330,7 +330,7 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                     groups.put(tCol, group);
                     columnModel.addColumn(tCol);
                 } else {
-                    if (dCol.isPlain()) { // Plain
+                    if (dCol.isPlain() || !isRuntime()) { // Plain
                         Rowset rs = DbControlsUtils.resolveRowset(model, dCol.getDatamodelElement());
                         int fidx = DbControlsUtils.resolveFieldIndex(model, dCol.getDatamodelElement());
                         if (fidx < 1) {
