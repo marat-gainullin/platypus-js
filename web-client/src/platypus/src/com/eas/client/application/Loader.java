@@ -20,9 +20,11 @@ import com.eas.client.CumulativeCallbackAdapter;
 import com.eas.client.DocumentCallbackAdapter;
 import com.eas.client.ResponseCallbackAdapter;
 import com.eas.client.StringCallbackAdapter;
+import com.eas.client.Utils;
 import com.eas.client.queries.Query;
 import com.eas.client.queries.QueryCallbackAdapter;
 import com.google.gwt.core.client.Callback;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.ScriptInjector;
 import com.google.gwt.dom.client.ScriptElement;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -93,6 +95,12 @@ public class Loader {
 		};
 	}
 
+	protected static native void injectPlaypusModuleCallback(String aAppElementName, JavaScriptObject aCallback)/*-{
+		if(!$wnd.platypusModulesOnLoad)
+			$wnd.platypusModulesOnLoad = {};
+		$wnd.platypusModulesOnLoad[aAppElementName] = aCallback;
+	}-*/;
+	
 	public Cancellable load(final Collection<String> aAppElementNames, final CancellableCallback onEnd) throws Exception {
 		final Collection<Cancellable> loadingsStarted = new ArrayList<Cancellable>();
 		List<String> appElementNames = new ArrayList<String>();
@@ -229,6 +237,20 @@ public class Loader {
 			}));
 			//
 			String jsURL = client.resourceUrl(appElementName);
+			injectPlaypusModuleCallback(appElementName, Utils.publishRunnable(new Runnable(){
+
+				@Override
+                public void run() {
+					try {
+						injectPlaypusModuleCallback(appElementName, null);
+						fireLoaded.run();
+						loaded.run();
+					} catch (Exception ex) {
+						Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, null, ex);
+					}
+                }
+				
+			}));
 			/*
 			ScriptElement oldScriptTag = injectedScripts.get(jsURL);
 			if (oldScriptTag != null)
@@ -240,17 +262,13 @@ public class Loader {
 
 				@Override
 				public void onSuccess(Void result) {
-					try {
-						fireLoaded.run();
-						loaded.run();
-					} catch (Exception ex) {
-						Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, null, ex);
-					}
+					// app element script-calling callback is used
 				}
 				
 				@Override
 				public void onFailure(Exception reason) {
 					try {
+						injectPlaypusModuleCallback(appElementName, null);
 						Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, "Script [" + appElementName + "] is not loaded. Cause is: " + reason.getMessage());
 						assert !loadedAppElements.contains(appElementName);
 						// Erroneous dependencies and other erroneous application

@@ -36,6 +36,12 @@ public class Utils {
 		};
 	}-*/;
 	
+	public static native JavaScriptObject publishRunnable(Runnable aValue)/*-{
+		return (function() {
+				aValue.@java.lang.Runnable::run()();
+				});
+	}-*/;
+	
 	public static native JavaScriptObject stringToArrayBuffer(String aValue) throws Exception/*-{
 		if(aValue){
 			var buffer = new ArrayBuffer(aValue.length);
