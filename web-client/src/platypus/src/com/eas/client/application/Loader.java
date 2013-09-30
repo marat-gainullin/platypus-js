@@ -14,6 +14,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.Cancellable;
 import com.eas.client.CancellableCallback;
 import com.eas.client.CumulativeCallbackAdapter;
@@ -236,7 +237,7 @@ public class Loader {
 
 			}));
 			//
-			String jsURL = client.resourceUrl(appElementName);
+			String jsURL = client.resourceUrl(appElementName) + "?cb=" + IDGenerator.genId();
 			injectPlaypusModuleCallback(appElementName, Utils.publishRunnable(new Runnable(){
 
 				@Override
