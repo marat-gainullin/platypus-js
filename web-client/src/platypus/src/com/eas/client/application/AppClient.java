@@ -22,6 +22,7 @@ import com.bearsoft.rowset.dataflow.TransactionListener;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
+import com.bearsoft.rowset.utils.IDGenerator;
 import com.bearsoft.rowset.utils.RowsetUtils;
 import com.eas.client.Callback;
 import com.eas.client.Cancellable;
@@ -696,7 +697,7 @@ public class AppClient {
 				}
 			};
 		} else {
-			String query = params(param(PlatypusHttpRequestParams.TYPE, String.valueOf(Requests.rqAppElement)));
+			String query = params(param(PlatypusHttpRequestParams.TYPE, String.valueOf(Requests.rqAppElement)), param("cb", String.valueOf(IDGenerator.genId())));
 			return startRequest(resourceUri(appElementName), query, "", RequestBuilder.GET, new ResponseCallbackAdapter() {
 
 				@Override
