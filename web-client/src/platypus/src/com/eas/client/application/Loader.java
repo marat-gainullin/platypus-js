@@ -277,7 +277,7 @@ public class Loader {
 						appElementsErrors.put(appElementName, reason.getMessage());
 						loaded.run();
 					} catch (Exception ex) {
-						Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, ex.getMessage());
+						Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, null, ex);
 					}
 				}
 
