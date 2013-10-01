@@ -68,7 +68,7 @@ public class AppElementChangedRequestHandler extends SessionRequestHandler<AppEl
     public void registerBackgroundModules() throws Exception {
         for (String moduleId : getServerCore().getTasks()) {
             if (getSessionManager().getSystemSession().getModule(moduleId) == null) {
-                getServerCore().startBackgroundTask(moduleId);
+                getServerCore().startServerTask(moduleId);
             }
         }
     }

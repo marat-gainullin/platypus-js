@@ -306,6 +306,12 @@ public class PlatypusHttpServlet extends HttpServlet {
         aHttpResponse.getOutputStream().write(aResponse);
     }
 
+    private void makeResponseNotCacheable(HttpServletResponse aPesponse) {
+        aPesponse.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); // HTTP 1.1.
+        aPesponse.setHeader("Pragma", "no-cache"); // HTTP 1.0.
+        aPesponse.setDateHeader("Expires", 0);// Proxies
+    }
+
     private void sendJ2SEResponse(Response aPlatypusResponse, HttpServletResponse aResponse) throws Exception {
         ByteArrayOutputStream baOut = new ByteArrayOutputStream();
         ProtoWriter pw = new ProtoWriter(baOut);
@@ -436,9 +442,11 @@ public class PlatypusHttpServlet extends HttpServlet {
                 }
             } else if (aPlatypusResponse instanceof RowsetResponse) {
                 writeResponse(((RowsetResponse) aPlatypusResponse).getRowset(), aHttpResponse, aHttpRequest);
+                makeResponseNotCacheable(aHttpResponse);
             } else if (aPlatypusResponse instanceof CreateServerModuleResponse) {
                 CreateServerModuleResponse csmr = (CreateServerModuleResponse) aPlatypusResponse;
                 writeJsonResponse(moduleResponseToJson(csmr.getFunctionsNames(), csmr.isReport()), aHttpResponse);
+                makeResponseNotCacheable(aHttpResponse);
             } else if (aPlatypusResponse instanceof ExecuteServerModuleMethodRequest.Response) {
                 Object result = ((ExecuteServerModuleMethodRequest.Response) aPlatypusResponse).getResult();
                 if (result instanceof Rowset) {
@@ -457,15 +465,18 @@ public class PlatypusHttpServlet extends HttpServlet {
                         Context.exit();
                     }
                 }
+                makeResponseNotCacheable(aHttpResponse);
             } else if (aPlatypusResponse instanceof AppQueryResponse) {
                 Query<?> query = ((AppQueryResponse) aPlatypusResponse).getAppQuery();
                 writeResponse(query, aHttpResponse);
+                makeResponseNotCacheable(aHttpResponse);
             } else if (aPlatypusResponse instanceof FilteredAppElementRequest.FilteredResponse) {
                 if (isResourceRequest(aHttpRequest) && aHttpRequest.getParameter(PlatypusHttpRequestParams.TYPE) == null) {// pure resource request
                     writeJsonResponse(((FilteredAppElementRequest.FilteredResponse) aPlatypusResponse).getFilteredScript(), aHttpResponse);
                 } else {
                     writeJsonResponse(((FilteredAppElementRequest.FilteredResponse) aPlatypusResponse).getFilteredContent(), aHttpResponse);
                 }
+                makeResponseNotCacheable(aHttpResponse);
             } else if (aPlatypusResponse instanceof StartAppElementRequest.Response) {
                 writeJsonResponse(String.valueOf(((StartAppElementRequest.Response) aPlatypusResponse).getAppElementId()), aHttpResponse);
             } else if (aPlatypusResponse instanceof ExecuteServerReportRequest.Response) {
@@ -481,6 +492,7 @@ public class PlatypusHttpServlet extends HttpServlet {
                             if (mimeType != null && mimeType.contains("text")) {
                                 aHttpResponse.setCharacterEncoding(SettingsConstants.COMMON_ENCODING);
                             }
+                            makeResponseNotCacheable(aHttpResponse);
                         } else {
                             aHttpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, String.format("Application element [%s] should be platypus application resource, but it is not!", ((AppElementRequest) aPlatypusRequest).getAppElementId()));
                         }
@@ -489,6 +501,7 @@ public class PlatypusHttpServlet extends HttpServlet {
                     }
                 } else {
                     writeJsonResponse("", aHttpResponse);// Plain scripts have no model and other related resources
+                    makeResponseNotCacheable(aHttpResponse);
                 }
             } else if (aPlatypusResponse instanceof CommitRequest.Response) {
                 // simple OK response is needed

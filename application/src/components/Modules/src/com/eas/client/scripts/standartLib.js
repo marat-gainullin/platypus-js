@@ -12,7 +12,6 @@ Calendar = java.util.Calendar;
 Vector = java.util.Vector;
 ArrayList = java.util.ArrayList;
 Logger = java.util.logging.Logger.getLogger(APP_LOGGER_NAME);
-Timer = com.eas.concurrent.DeamonTimer;
 Lock = java.util.concurrent.locks.ReentrantLock;
 TreeMap = java.util.TreeMap;
 
@@ -20,7 +19,6 @@ TreeMap = java.util.TreeMap;
 Color = com.eas.client.scripts.ScriptColor;
 Colors = java.awt.Color;
 ScriptCalculator = com.eas.client.scripts.ScriptCalculator;
-ScriptTask = com.eas.client.scripts.ScriptTimerTask;
 
 // platypus misc imports
 ExcelReport = com.eas.client.reports.ExcelReport;
@@ -174,7 +172,7 @@ Function.prototype.invokeBackground = function() {
     FixedThreadPool.execute(function() {
         func.apply(func, args);
     });
-}
+};
 
 /**
  * This is a stub for dynamically loaded modules, since J2SE client
