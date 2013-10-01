@@ -25,6 +25,7 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.Future;
+import java.util.logging.Level;
 import org.netbeans.api.extexecution.ExecutionDescriptor;
 import org.netbeans.api.extexecution.ExecutionService;
 import org.netbeans.api.extexecution.ExternalProcessBuilder;
@@ -49,6 +50,13 @@ public class ProjectRunner {
     private static final String JMX_SSL_OPTION_NAME = "Dcom.sun.management.jmxremote.ssl"; //NOI18N
     private static final String JMX_REMOTE_OPTION_NAME = "Dcom.sun.management.jmxremote"; //NOI18N
     private static final String JMX_REMOTE_OPTION_PORT_NAME = "Dcom.sun.management.jmxremote.port"; //NOI18N
+    
+    private static final String LOG_LEVEL_OPTION_NAME = "D.level"; //NOI18N
+    private static final String LOG_HANDLERS_OPTION_NAME = "Dhandlers"; //NOI18N
+    private static final String CONSOLE_LOG_HANDLER_NAME = "java.util.logging.ConsoleHandler"; //NOI18N
+    private static final String CONSOLE_LOG_FORMATTER_OPTION_NAME = "Djava.util.logging.ConsoleHandler.formatter"; //NOI18N
+    private static final String LOG_CONFIG_CLASS_OPTION_NAME = "Djava.util.logging.config.class"; //NOI18N
+    
     private static final String EQUALS_SIGN = "="; //NOI18N
     private static final String FALSE = "false"; //NOI18N
     private static final String LOCAL_HOSTNAME = "localhost"; //NOI18N
@@ -178,7 +186,10 @@ public class ProjectRunner {
             if (debug) {
                 processBuilder = setDebugArguments(processBuilder, project.getSettings().getDebugClientPort());
             }
-
+            
+            io.getOut().println(String.format(NbBundle.getMessage(ProjectRunner.class, "MSG_Logging_Level"), project.getSettings().getClientLogLevel()));//NOI18N
+            processBuilder = setLogging(processBuilder, project.getSettings().getClientLogLevel());
+            
             processBuilder = processBuilder.addArgument(OPTION_PREFIX + CLASSPATH_OPTION_NAME);
             processBuilder = processBuilder.addArgument(getExtendedClasspath(getExecutablePath(binDir)));
 
@@ -289,6 +300,26 @@ public class ProjectRunner {
         return processBuilder;
     }
 
+    public static ExternalProcessBuilder setLogging(ExternalProcessBuilder processBuilder, Level logLevel) {
+        processBuilder = processBuilder.addArgument(OPTION_PREFIX
+                + LOG_LEVEL_OPTION_NAME
+                + EQUALS_SIGN
+                + logLevel.getName());
+        processBuilder = processBuilder.addArgument(OPTION_PREFIX
+                + LOG_HANDLERS_OPTION_NAME
+                + EQUALS_SIGN
+                + CONSOLE_LOG_HANDLER_NAME);
+        processBuilder = processBuilder.addArgument(OPTION_PREFIX
+                + CONSOLE_LOG_FORMATTER_OPTION_NAME
+                + EQUALS_SIGN
+                + com.eas.util.logging.PlatypusFormatter.class.getName());
+        processBuilder = processBuilder.addArgument(OPTION_PREFIX
+                + LOG_CONFIG_CLASS_OPTION_NAME
+                + EQUALS_SIGN
+                + com.eas.util.logging.LoggersConfig.class.getName());
+        return processBuilder;
+    }
+    
     public static ExternalProcessBuilder setDebugArguments(ExternalProcessBuilder processBuilder, int port) {
         processBuilder = processBuilder.addArgument(OPTION_PREFIX
                 + JMX_AUTHENTICATE_OPTION_NAME

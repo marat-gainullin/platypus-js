@@ -58,9 +58,9 @@ public class PlatypusDebuggerActionsProvider extends ActionsProvider {
                 DebuggerEngine engine = DebuggerManager.getDebuggerManager().getCurrentEngine();
                 DebuggerEnvironment env = engine.lookupFirst(DebuggerConstants.DEBUGGER_SERVICERS_PATH, DebuggerEnvironment.class);
                 if (ActionsManager.ACTION_START.equals(action)) {
-                    startDebugging(env);
+                    DebuggerUtils.startDebugging(env);
                 } else if (ActionsManager.ACTION_KILL.equals(action)) {
-                    killEngine(engine);
+                    DebuggerUtils.killEngine(engine);
                 } else if (ActionsManager.ACTION_TOGGLE_BREAKPOINT.equals(action)) {
                     ToggleBreakpointAction.toggleBreakpoint();
                 } else {
@@ -81,31 +81,6 @@ public class PlatypusDebuggerActionsProvider extends ActionsProvider {
                 ErrorManager.getDefault().notify(ex);
             }
             fireActionsStateChanged();
-        }
-    }
-
-    public void startDebugging(DebuggerEnvironment env) throws Exception {
-        FileObject file = env.mDebuggerListener.getCurrentAppFile();
-        int lineNumber = env.mDebuggerListener.getCurrentLineNumber();
-        boolean haveBreakpoint = false;
-        Breakpoint[] breaks = DebuggerManager.getDebuggerManager().getBreakpoints();
-        for (Breakpoint breakPoint : breaks) {
-            if (breakPoint instanceof PlatypusBreakpoint) {
-                PlatypusBreakpoint pBreak = (PlatypusBreakpoint) breakPoint;
-                Line line = pBreak.getLine();
-                FileObject bFile = line.getLookup().lookup(FileObject.class);
-                if (lineNumber == line.getLineNumber()
-                        && bFile == file) {
-                    haveBreakpoint = true;
-                    break;
-                }
-                pBreak.remoteAdd(env.mBreakpoints);
-            }
-        }
-        // if the debugger has stopped the program, but breakpoint is absent, we have to run program.
-        if (env.runningProgram != null && !env.mDebuggerListener.isRunning() && !haveBreakpoint) {
-            env.mDebuggerListener.cancelStoppedAnnotation();
-            env.mDebugger.continueRun();
         }
     }
 
@@ -148,23 +123,6 @@ public class PlatypusDebuggerActionsProvider extends ActionsProvider {
     @Override
     public void removeActionsProviderListener(ActionsProviderListener l) {
         listeners.remove(l);
-    }
-
-    private void killEngine(DebuggerEngine engine) throws Exception {
-        DebuggerEnvironment env = engine.lookupFirst(DebuggerConstants.DEBUGGER_SERVICERS_PATH, DebuggerEnvironment.class);
-        if (env.runningProgram == null) {// Debugger was attached to external program
-            if (!env.mDebuggerListener.positionedOnSource()) {
-                for (Breakpoint breakpoint : DebuggerManager.getDebuggerManager().getBreakpoints()) {
-                    if (breakpoint instanceof PlatypusBreakpoint) {
-                        PlatypusBreakpoint pbreak = (PlatypusBreakpoint) breakpoint;
-                        pbreak.remoteRemove(env.mBreakpoints);
-                    }
-                }
-                env.mDebugger.continueRun();
-            }
-        }
-        Destructor d = engine.new Destructor();
-        d.killEngine();
     }
 
     public void fireActionsStateChanged() {
