@@ -238,7 +238,7 @@ public class Loader {
 
 			}));
 			//
-			String jsURL = client.resourceUrl(appElementName) + "?"+PlatypusHttpRequestParams.CACHE_BUSTER+"=" + IDGenerator.genId();
+			String jsURL = client.resourceUrl(appElementName);// + "?"+PlatypusHttpRequestParams.CACHE_BUSTER+"=" + IDGenerator.genId();
 			injectPlaypusModuleCallback(appElementName, Utils.publishRunnable(new Runnable(){
 
 				@Override

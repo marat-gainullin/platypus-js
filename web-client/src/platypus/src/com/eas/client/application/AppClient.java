@@ -698,7 +698,7 @@ public class AppClient {
 				}
 			};
 		} else {
-			String query = params(param(PlatypusHttpRequestParams.TYPE, String.valueOf(Requests.rqAppElement)), param(PlatypusHttpRequestParams.CACHE_BUSTER, String.valueOf(IDGenerator.genId())));
+			String query = params(param(PlatypusHttpRequestParams.TYPE, String.valueOf(Requests.rqAppElement))/*, param(PlatypusHttpRequestParams.CACHE_BUSTER, String.valueOf(IDGenerator.genId()))*/);
 			return startRequest(resourceUri(appElementName), query, "", RequestBuilder.GET, new ResponseCallbackAdapter() {
 
 				@Override
