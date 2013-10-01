@@ -100,6 +100,10 @@ public class JsDoc {
          */
         public static final String AUTHORIZER_TAG = "@authorizer";
         /**
+         * Annotation marks a module as resident server task of system session
+         */
+        public static final String RESIDENT_TAG = "@resident";
+        /**
          * Annotation marks a module or top level function access restrictions
          * for concrete roles Example:
          *

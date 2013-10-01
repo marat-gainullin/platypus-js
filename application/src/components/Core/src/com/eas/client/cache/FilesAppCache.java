@@ -38,6 +38,11 @@ import java.util.zip.CRC32;
  */
 public class FilesAppCache extends AppElementsCache<Client> {
 
+    public interface ScanCallback {
+
+        public void fileScanned(String aAppElementId, File aFile);
+    }
+    
     protected class FilesWatchDog implements Runnable {
 
         public FilesWatchDog() {
@@ -120,11 +125,17 @@ public class FilesAppCache extends AppElementsCache<Client> {
     protected Map<String, String> path2Id = new HashMap<>();
     protected Map<String, AppElementFiles> families = new HashMap<>();
     protected WatchService service;
+    protected ScanCallback scanCallback;
 
     public FilesAppCache(String aSrcPathName) throws Exception {
+        this(aSrcPathName, null);
+    }
+    
+    public FilesAppCache(String aSrcPathName, ScanCallback aScanCallback) throws Exception {
         super(null);
         srcPathName = aSrcPathName;
         File srcDirectory = checkRootDirectory();
+        scanCallback = aScanCallback;
         scanSource(srcDirectory);
     }
 
@@ -337,6 +348,10 @@ public class FilesAppCache extends AppElementsCache<Client> {
                 }
                 remove(id1);// force the cache to refresh application element's content
                 remove(id2);// force the cache to refresh application element's content
+                if(scanCallback != null && id2 != null)
+                    for(File f : family.getFiles()){
+                        scanCallback.fileScanned(id2, f);
+                    }
             }
         } catch (Exception ex) {
             Logger.getLogger(FilesAppCache.class.getName()).log(Level.SEVERE, null, ex);

@@ -61,7 +61,6 @@ import com.google.gwt.xhr.client.XMLHttpRequest.ResponseType;
 import com.google.gwt.xml.client.Document;
 import com.google.gwt.xml.client.Node;
 import com.google.gwt.xml.client.XMLParser;
-import com.sencha.gxt.widget.core.client.form.FormPanel.Method;
 
 /**
  * 
@@ -79,22 +78,22 @@ public class AppClient {
 	public static final String SERVER_MODULE_BODY = "function %s () {\n" + "    window.platypus.defineServerModule(\"%s\", this);\n" + "}";
 	public static final String SERVER_MODULE_FUNCTION_NAME = "ServerModule";
 	public static final String SERVER_REPORT_FUNCTION_NAME = "ServerReport";
-	protected static Set<String> attachedCss = new HashSet();
+	protected static Set<String> attachedCss = new HashSet<String>();
 	//
 	private static DateTimeFormat defaultDateFormat = RowsetReader.ISO_DATE_FORMAT;// DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.ISO_8601);
 	private static AppClient appClient;
 	private String baseUrl;
-	private Map<String, Document> appElements = new HashMap();
-	private Map<String, PlatypusImageResource> iconsCache = new HashMap();
-	protected List<Change> changeLog = new ArrayList();
-	protected Set<TransactionListener> transactionListeners = new HashSet();
+	private Map<String, Document> appElements = new HashMap<String, Document>();
+	private Map<String, PlatypusImageResource> iconsCache = new HashMap<String, PlatypusImageResource>();
+	protected List<Change> changeLog = new ArrayList<Change>();
+	protected Set<TransactionListener> transactionListeners = new HashSet<TransactionListener>();
 
 	public static String relativeUri() {
 		String pageUrl = GWT.getHostPageBaseURL();
 		return pageUrl.substring(0, pageUrl.length() - 1);
 	}
 
-	private Map<String, Document> serverElements = new HashMap();
+	private Map<String, Document> serverElements = new HashMap<String, Document>();
 
 	public static void init() {
 		if (appClient == null) {
@@ -675,12 +674,14 @@ public class AppClient {
 		return baseUrl + RESOURCES_URI + "/" + aResourceName;
 	}
 
-	public Cancellable getStartElement(Callback onSuccess) throws Exception {
+	public Cancellable getStartElement(final Callback<String> onSuccess) throws Exception {
 		String query = param(PlatypusHttpRequestParams.TYPE, String.valueOf(Requests.rqStartAppElement));
 		return startRequest(API_URI, query, "", RequestBuilder.GET, new ResponseCallbackAdapter() {
 
 			@Override
 			protected void doWork(XMLHttpRequest aResponse) throws Exception {
+				if(onSuccess != null)
+					onSuccess.run(aResponse.getResponseText());
 			}
 		}, null);
 	}
@@ -697,7 +698,7 @@ public class AppClient {
 				}
 			};
 		} else {
-			String query = params(param(PlatypusHttpRequestParams.TYPE, String.valueOf(Requests.rqAppElement)), param("cb", String.valueOf(IDGenerator.genId())));
+			String query = params(param(PlatypusHttpRequestParams.TYPE, String.valueOf(Requests.rqAppElement)), param(PlatypusHttpRequestParams.CACHE_BUSTER, String.valueOf(IDGenerator.genId())));
 			return startRequest(resourceUri(appElementName), query, "", RequestBuilder.GET, new ResponseCallbackAdapter() {
 
 				@Override

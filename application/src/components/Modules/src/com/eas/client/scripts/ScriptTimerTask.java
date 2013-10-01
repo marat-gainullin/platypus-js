@@ -4,23 +4,25 @@
  */
 package com.eas.client.scripts;
 
-import java.util.TimerTask;
+import com.eas.concurrent.DeamonThreadFactory;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  *
  * @author mg
  */
-public class ScriptTimerTask extends TimerTask {
+public class ScriptTimerTask {
 
-    protected Runnable delegate;
+    private static final ScheduledThreadPoolExecutor e = new ScheduledThreadPoolExecutor(10, new DeamonThreadFactory());
 
-    public ScriptTimerTask(Runnable aDelegate) {
-        super();
-        delegate = aDelegate;
+    static {
+        e.setKeepAliveTime(100, TimeUnit.MILLISECONDS);
+        e.allowCoreThreadTimeOut(true);
     }
 
-    @Override
-    public void run() {
-        delegate.run();
+    public static ScheduledFuture<?> schedule(final Runnable aDelegate, long aDelay) {
+        return e.schedule(aDelegate, aDelay, TimeUnit.MILLISECONDS);
     }
 }

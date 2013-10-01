@@ -137,9 +137,27 @@ public class Application {
 		$wnd.Function.prototype.invokeLater = function() {
 			var _func = this;
 			var _arguments = arguments;
-			setTimeout(function(){
-				_func.apply(this, _arguments);
-			}, 0);
+			@com.eas.client.Utils::invokeLater(Lcom/google/gwt/core/client/JavaScriptObject;)(function(){
+				_func.apply(_func, _arguments);
+			});
+		}
+		
+		$wnd.Function.prototype.invokeDelayed = function() {
+			var _func = this;
+			var _arguments = arguments;
+		    if (!_arguments || !_arguments.length || _arguments.length < 1)
+		        throw "schedule needs at least 1 argument - timeout value.";
+		    var userArgs = [];
+		    for (var i = 1; i < _arguments.length; i++) {
+		        userArgs.push(_arguments[i]);
+		    }
+			@com.eas.client.Utils::invokeScheduled(ILcom/google/gwt/core/client/JavaScriptObject;)(_arguments[0], function(){
+				try{
+					_func.apply(_func, userArgs);
+				}catch(e){
+					$wnd.Logger.severe(e);
+				}
+			});
 		}
 		
 		$wnd.selectFile = function(aCallback) {

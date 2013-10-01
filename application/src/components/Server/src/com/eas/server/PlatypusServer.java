@@ -72,7 +72,7 @@ public class PlatypusServer extends PlatypusServerCore {
 
     public void start() throws Exception {
         Logger.getLogger(PlatypusServer.class.getName()).log(Level.INFO, "Application elements are located at: {0}", databasesClient.getAppCache() instanceof FilesAppCache ? ((FilesAppCache) databasesClient.getAppCache()).getSrcPathName() : databasesClient.getSettings().getUrl());
-        startBackgroundTasks();
+        startServerTasks();
         for (InetSocketAddress s : listenAddresses) {
             initializeAndBindAcceptor(s);
         }

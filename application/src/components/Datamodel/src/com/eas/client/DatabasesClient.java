@@ -23,6 +23,7 @@ import com.bearsoft.rowset.metadata.*;
 import com.eas.client.cache.DatabaseAppCache;
 import com.eas.client.cache.DatabaseMdCache;
 import com.eas.client.cache.FilesAppCache;
+import com.eas.client.cache.FilesAppCache.ScanCallback;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.login.DbPlatypusPrincipal;
 import com.eas.client.login.PlatypusPrincipal;
@@ -105,6 +106,10 @@ public class DatabasesClient implements DbClient {
      * @see ConnectionPrepender
      */
     public DatabasesClient(DbConnectionSettings aSettings, boolean inContainer) throws Exception {
+        this(aSettings, inContainer, null);
+    }
+    
+    public DatabasesClient(DbConnectionSettings aSettings, boolean inContainer, ScanCallback aScanCallback) throws Exception {
         super();
         dbSettings = aSettings;
         if (!inContainer) {
@@ -114,7 +119,7 @@ public class DatabasesClient implements DbClient {
         if (aSettings.getApplicationPath() != null && !aSettings.getApplicationPath().isEmpty()) {
             File f = new File(aSettings.getApplicationPath());
             if (f.exists() && f.isDirectory()) {
-                FilesAppCache filesAppCache = new FilesAppCache(f.getPath() + File.separator + PlatypusFiles.PLATYPUS_PROJECT_SOURCES_ROOT);
+                FilesAppCache filesAppCache = new FilesAppCache(f.getPath() + File.separator + PlatypusFiles.PLATYPUS_PROJECT_SOURCES_ROOT, aScanCallback);
                 filesAppCache.watch();
                 appCache = filesAppCache;
             } else {

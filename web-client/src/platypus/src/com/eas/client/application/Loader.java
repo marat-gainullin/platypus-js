@@ -19,6 +19,7 @@ import com.eas.client.Cancellable;
 import com.eas.client.CancellableCallback;
 import com.eas.client.CumulativeCallbackAdapter;
 import com.eas.client.DocumentCallbackAdapter;
+import com.eas.client.PlatypusHttpRequestParams;
 import com.eas.client.ResponseCallbackAdapter;
 import com.eas.client.StringCallbackAdapter;
 import com.eas.client.Utils;
@@ -237,7 +238,7 @@ public class Loader {
 
 			}));
 			//
-			String jsURL = client.resourceUrl(appElementName) + "?cb=" + IDGenerator.genId();
+			String jsURL = client.resourceUrl(appElementName) + "?"+PlatypusHttpRequestParams.CACHE_BUSTER+"=" + IDGenerator.genId();
 			injectPlaypusModuleCallback(appElementName, Utils.publishRunnable(new Runnable(){
 
 				@Override
