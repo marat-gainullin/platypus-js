@@ -16,6 +16,8 @@ import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
+import org.netbeans.api.debugger.ActionsManager;
+import org.netbeans.api.debugger.Breakpoint;
 import org.netbeans.api.debugger.DebuggerEngine;
 import org.netbeans.api.debugger.DebuggerEngine.Destructor;
 import org.netbeans.api.debugger.DebuggerInfo;
@@ -25,6 +27,7 @@ import org.netbeans.api.project.Project;
 import org.netbeans.spi.java.classpath.ClassPathProvider;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
+import org.openide.text.Line;
 
 /**
  *
@@ -70,9 +73,54 @@ public class DebuggerUtils {
         DebuggerEngine[] dEngines = DebuggerManager.getDebuggerManager().startDebugging(di);
         if (env.runningProgram != null) {
             startProcessWaiting(env.runningProgram, dEngines);
+        } else {
+            startDebugging(env);
+            listener.debuggingStarted = true;
         }
     }
 
+    public static void startDebugging(DebuggerEnvironment env) throws Exception {
+        FileObject file = env.mDebuggerListener.getCurrentAppFile();
+        int lineNumber = env.mDebuggerListener.getCurrentLineNumber();
+        boolean haveBreakpoint = false;
+        Breakpoint[] breaks = DebuggerManager.getDebuggerManager().getBreakpoints();
+        for (Breakpoint breakPoint : breaks) {
+            if (breakPoint instanceof PlatypusBreakpoint) {
+                PlatypusBreakpoint pBreak = (PlatypusBreakpoint) breakPoint;
+                Line line = pBreak.getLine();
+                FileObject bFile = line.getLookup().lookup(FileObject.class);
+                if (lineNumber == line.getLineNumber()
+                        && bFile == file) {
+                    haveBreakpoint = true;
+                    break;
+                }
+                pBreak.remoteAdd(env.mBreakpoints);
+            }
+        }
+        // if the debugger has stopped the program, but breakpoint is absent, we have to run program.
+        if (env.runningProgram != null && !env.mDebuggerListener.isRunning() && !haveBreakpoint) {
+            env.mDebuggerListener.cancelStoppedAnnotation();
+            env.mDebugger.continueRun();
+        }
+    }
+    
+    public static void killEngine(DebuggerEngine engine) throws Exception {
+        DebuggerEnvironment env = engine.lookupFirst(DebuggerConstants.DEBUGGER_SERVICERS_PATH, DebuggerEnvironment.class);
+        if (env.runningProgram == null) {// Debugger was attached to external program
+            if (!env.mDebuggerListener.positionedOnSource()) {
+                for (Breakpoint breakpoint : DebuggerManager.getDebuggerManager().getBreakpoints()) {
+                    if (breakpoint instanceof PlatypusBreakpoint) {
+                        PlatypusBreakpoint pbreak = (PlatypusBreakpoint) breakpoint;
+                        pbreak.remoteRemove(env.mBreakpoints);
+                    }
+                }
+                env.mDebugger.continueRun();
+            }
+        }
+        Destructor d = engine.new Destructor();
+        d.killEngine();
+    }
+    
     public static void startProcessWaiting(final Future<Integer> runningProgram, final DebuggerEngine[] dEngines) {
         Thread thread = new Thread(new Runnable() {
             @Override
