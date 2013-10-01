@@ -8,6 +8,7 @@ import com.eas.deploy.project.PlatypusSettings;
 import com.eas.designer.application.project.PlatypusProject;
 import com.eas.designer.application.project.PlatypusProjectSettings;
 import com.eas.designer.explorer.project.ProjectRunner;
+import static com.eas.designer.explorer.project.ProjectRunner.setLogging;
 import com.eas.server.PlatypusServer;
 import com.eas.server.ServerMain;
 import java.io.File;
@@ -136,6 +137,10 @@ public final class PlatypusServerInstance implements Server, ServerInstanceImple
         if (debug) {
             processBuilder = ProjectRunner.setDebugArguments(processBuilder, project.getSettings().getDebugServerPort());
         }
+        
+        io.getOut().println(String.format(NbBundle.getMessage(ProjectRunner.class, "MSG_Logging_Level"), project.getSettings().getClientLogLevel()));//NOI18N
+        processBuilder = setLogging(processBuilder, project.getSettings().getServerLogLevel());
+        
         PlatypusSettings ps = project.getSettings().getAppSettings();
         processBuilder = processBuilder.addArgument(ProjectRunner.OPTION_PREFIX + ProjectRunner.CLASSPATH_OPTION_NAME);
         processBuilder = processBuilder.addArgument(ProjectRunner.getExtendedClasspath(getExecutablePath(binDir)));

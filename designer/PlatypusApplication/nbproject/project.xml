@@ -238,6 +238,7 @@
                 <package>com.eas.server.httpservlet</package>
                 <package>com.eas.store</package>
                 <package>com.eas.util</package>
+                <package>com.eas.util.logging</package>
                 <package>com.eas.xml.dom</package>
                 <package>com.ibm.db2.jcc</package>
                 <package>com.ibm.db2.jcc.a</package>
