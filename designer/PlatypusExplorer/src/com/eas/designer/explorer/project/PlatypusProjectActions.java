@@ -119,7 +119,7 @@ public class PlatypusProjectActions implements ActionProvider {
         } else if (COMMAND_CONNECT.equals(command)) {
             return !project.isDbConnected();
         } else if (COMMAND_DEPLOY.equals(command) || COMMAND_IMPORT.equals(command)) {
-            return project.isDbConnected() && !project.getDeployer().isBusy();
+            return project.getSettings().isDbAppSources() && project.isDbConnected() && !project.getDeployer().isBusy();
         } else if (COMMAND_CLEAN.equals(command)) {
             PlatypusWebModuleManager pwmm = project.getLookup().lookup(PlatypusWebModuleManager.class);
             assert pwmm != null;
