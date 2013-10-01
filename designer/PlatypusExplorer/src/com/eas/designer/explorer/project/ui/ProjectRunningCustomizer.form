@@ -93,7 +93,7 @@
               <EmptySpace max="-2" attributes="0"/>
               <Component id="cbNotStartServer" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="tabbedPane" max="32767" attributes="0"/>
+              <Component id="tabbedPane" pref="330" max="32767" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
       </Group>
@@ -148,7 +148,7 @@
                               <Component id="lblClientDebugPort" min="-2" max="-2" attributes="0"/>
                               <EmptySpace type="unrelated" max="-2" attributes="0"/>
                               <Component id="spClientDebugPort" min="-2" pref="90" max="-2" attributes="0"/>
-                              <EmptySpace min="0" pref="403" max="32767" attributes="0"/>
+                              <EmptySpace min="0" pref="413" max="32767" attributes="0"/>
                           </Group>
                           <Group type="102" alignment="0" attributes="0">
                               <Group type="103" groupAlignment="0" attributes="0">
@@ -157,21 +157,14 @@
                                   <Component id="lblUserName" alignment="0" min="-2" max="-2" attributes="0"/>
                                   <Component id="lblClientUrl" alignment="0" min="-2" max="-2" attributes="0"/>
                                   <Component id="lblClientVmOptions" alignment="0" min="-2" max="-2" attributes="0"/>
-                                  <Component id="lblClientLogLevel" alignment="0" min="-2" max="-2" attributes="0"/>
                               </Group>
-                              <EmptySpace max="-2" attributes="0"/>
+                              <EmptySpace min="-2" pref="9" max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
-                                  <Component id="cbClientLogLevel" max="32767" attributes="0"/>
-                                  <Group type="102" alignment="0" attributes="0">
-                                      <EmptySpace min="-2" pref="3" max="-2" attributes="0"/>
-                                      <Group type="103" groupAlignment="0" attributes="0">
-                                          <Component id="txtClientUrl" alignment="1" max="32767" attributes="0"/>
-                                          <Component id="txtUserName" alignment="1" max="32767" attributes="0"/>
-                                          <Component id="txtPassword" alignment="1" max="32767" attributes="0"/>
-                                          <Component id="txtClientOptions" alignment="1" max="32767" attributes="0"/>
-                                          <Component id="txtClientVmOptions" max="32767" attributes="0"/>
-                                      </Group>
-                                  </Group>
+                                  <Component id="txtClientUrl" alignment="1" max="32767" attributes="0"/>
+                                  <Component id="txtUserName" alignment="1" max="32767" attributes="0"/>
+                                  <Component id="txtPassword" alignment="1" max="32767" attributes="0"/>
+                                  <Component id="txtClientOptions" alignment="1" max="32767" attributes="0"/>
+                                  <Component id="txtClientVmOptions" max="32767" attributes="0"/>
                               </Group>
                           </Group>
                       </Group>
@@ -210,14 +203,9 @@
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
                           <Component id="lblClientDebugPort" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="spClientDebugPort" alignment="3" min="-2" pref="21" max="-2" attributes="0"/>
+                          <Component id="spClientDebugPort" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace min="-2" pref="14" max="-2" attributes="0"/>
-                      <Group type="103" groupAlignment="3" attributes="0">
-                          <Component id="cbClientLogLevel" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="lblClientLogLevel" alignment="3" min="-2" max="-2" attributes="0"/>
-                      </Group>
-                      <EmptySpace pref="70" max="32767" attributes="0"/>
+                      <EmptySpace pref="104" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -309,23 +297,6 @@
                 <EventHandler event="focusLost" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="spClientDebugPortFocusLost"/>
               </Events>
             </Component>
-            <Component class="javax.swing.JLabel" name="lblClientLogLevel">
-              <Properties>
-                <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                  <ResourceString bundle="com/eas/designer/explorer/project/ui/Bundle.properties" key="ProjectRunningCustomizer.lblClientLogLevel.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
-                </Property>
-              </Properties>
-            </Component>
-            <Component class="javax.swing.JComboBox" name="cbClientLogLevel">
-              <Properties>
-                <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                  <Connection code="new javax.swing.DefaultComboBoxModel(getLogLevels())" type="code"/>
-                </Property>
-              </Properties>
-              <Events>
-                <EventHandler event="itemStateChanged" listener="java.awt.event.ItemListener" parameters="java.awt.event.ItemEvent" handler="cbClientLogLevelItemStateChanged"/>
-              </Events>
-            </Component>
           </SubComponents>
         </Container>
         <Container class="javax.swing.JPanel" name="serverPanel">
@@ -343,20 +314,12 @@
             <DimensionLayout dim="0">
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
+                      <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Group type="102" alignment="0" attributes="0">
-                              <EmptySpace max="-2" attributes="0"/>
-                              <Group type="103" groupAlignment="0" attributes="0">
-                                  <Component id="lblServerPort" alignment="0" min="-2" max="-2" attributes="0"/>
-                                  <Component id="lblServerOptions" alignment="0" min="-2" max="-2" attributes="0"/>
-                                  <Component id="lblServerVmOptions" alignment="0" min="-2" max="-2" attributes="0"/>
-                                  <Component id="lblServerDebugPort" alignment="0" min="-2" max="-2" attributes="0"/>
-                              </Group>
-                          </Group>
-                          <Group type="102" alignment="0" attributes="0">
-                              <EmptySpace min="10" pref="10" max="-2" attributes="0"/>
-                              <Component id="lblServerLogLevel" min="-2" max="-2" attributes="0"/>
-                          </Group>
+                          <Component id="lblServerPort" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="lblServerOptions" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="lblServerVmOptions" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="lblServerDebugPort" alignment="0" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace type="separate" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
@@ -364,11 +327,10 @@
                           <Component id="txtServerOptions" alignment="1" max="32767" attributes="0"/>
                           <Group type="102" attributes="0">
                               <Group type="103" groupAlignment="0" attributes="0">
-                                  <Component id="cbServerLogLevel" alignment="0" min="-2" pref="299" max="-2" attributes="0"/>
                                   <Component id="spServerPort" alignment="0" min="-2" pref="70" max="-2" attributes="0"/>
                                   <Component id="spServerDebugPort" alignment="0" min="-2" pref="72" max="-2" attributes="0"/>
                               </Group>
-                              <EmptySpace min="0" pref="183" max="32767" attributes="0"/>
+                              <EmptySpace min="0" pref="421" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
@@ -394,16 +356,11 @@
                           <Component id="lblServerVmOptions" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                          <Component id="lblServerDebugPort" min="-2" max="-2" attributes="0"/>
-                          <Component id="spServerDebugPort" pref="19" max="32767" attributes="0"/>
-                      </Group>
-                      <EmptySpace min="-2" pref="49" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
-                          <Component id="lblServerLogLevel" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="cbServerLogLevel" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="spServerDebugPort" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="lblServerDebugPort" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace pref="89" max="32767" attributes="0"/>
+                      <EmptySpace pref="171" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -472,23 +429,6 @@
                 <EventHandler event="focusLost" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="spServerDebugPortFocusLost"/>
               </Events>
             </Component>
-            <Component class="javax.swing.JLabel" name="lblServerLogLevel">
-              <Properties>
-                <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                  <ResourceString bundle="com/eas/designer/explorer/project/ui/Bundle.properties" key="ProjectRunningCustomizer.lblServerLogLevel.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
-                </Property>
-              </Properties>
-            </Component>
-            <Component class="javax.swing.JComboBox" name="cbServerLogLevel">
-              <Properties>
-                <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                  <Connection code="new javax.swing.DefaultComboBoxModel(getLogLevels())" type="code"/>
-                </Property>
-              </Properties>
-              <Events>
-                <EventHandler event="itemStateChanged" listener="java.awt.event.ItemListener" parameters="java.awt.event.ItemEvent" handler="cbServerLogLevelItemStateChanged"/>
-              </Events>
-            </Component>
           </SubComponents>
         </Container>
         <Container class="javax.swing.JPanel" name="j2eeServerPanel">
@@ -549,7 +489,7 @@
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="cbEnableSecurity" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace pref="184" max="32767" attributes="0"/>
+                      <EmptySpace pref="209" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>

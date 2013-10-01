@@ -4,7 +4,7 @@
  */
 package com.eas.designer.explorer.project.ui;
 
-import com.eas.designer.explorer.utils.JdbcUrl;
+import com.eas.designer.explorer.utils.DatabaseServerType;
 import javax.swing.DefaultComboBoxModel;
 import org.openide.util.NbBundle;
 
@@ -17,7 +17,7 @@ public class BuildJdbcUrlPanel extends javax.swing.JPanel {
     private static final String LOCAL_HOSTNAME = "localhost"; //NOI18N
     
     public String getJdbcUrl() {
-        return ((JdbcUrl)cbServer.getSelectedItem()).buildUrl(txtHost.getText(), (int)spPort.getValue(), txtDatabaseName.getText());
+        return getCurrentServerType().buildUrl(txtHost.getText(), (int)spPort.getValue(), txtDatabaseName.getText());
     }
     
     /**
@@ -26,11 +26,17 @@ public class BuildJdbcUrlPanel extends javax.swing.JPanel {
     public BuildJdbcUrlPanel() {
         initComponents();
         txtHost.setText(LOCAL_HOSTNAME);
-        setDefaultPort();
+        setupControls();
     }
     
-    private void setDefaultPort() {
-        spPort.setValue(((JdbcUrl)cbServer.getSelectedItem()).defaultPort);
+    private void setupControls() {
+        spPort.setValue(getCurrentServerType().defaultPort);
+        txtDatabaseName.setText(getCurrentServerType().databaseTemplate);
+        lblInfo.setText(getCurrentServerType().info);
+    }
+    
+    private DatabaseServerType getCurrentServerType() {
+        return (DatabaseServerType)cbServer.getSelectedItem();
     }
     
     public String getTitle() {
@@ -54,8 +60,9 @@ public class BuildJdbcUrlPanel extends javax.swing.JPanel {
         spPort = new javax.swing.JSpinner();
         lblDatabaseName = new javax.swing.JLabel();
         txtDatabaseName = new javax.swing.JTextField();
+        lblInfo = new javax.swing.JLabel();
 
-        cbServer.setModel(new DefaultComboBoxModel(JdbcUrl.values()));
+        cbServer.setModel(new DefaultComboBoxModel(com.eas.designer.explorer.utils.DatabaseServerType.values()));
         cbServer.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cbServerActionPerformed(evt);
@@ -68,9 +75,9 @@ public class BuildJdbcUrlPanel extends javax.swing.JPanel {
 
         org.openide.awt.Mnemonics.setLocalizedText(lblPort, org.openide.util.NbBundle.getMessage(BuildJdbcUrlPanel.class, "BuildJdbcUrlPanel.lblPort.text")); // NOI18N
 
-        spPort.setPreferredSize(new java.awt.Dimension(36, 28));
-
         org.openide.awt.Mnemonics.setLocalizedText(lblDatabaseName, org.openide.util.NbBundle.getMessage(BuildJdbcUrlPanel.class, "BuildJdbcUrlPanel.lblDatabaseName.text")); // NOI18N
+
+        org.openide.awt.Mnemonics.setLocalizedText(lblInfo, org.openide.util.NbBundle.getMessage(BuildJdbcUrlPanel.class, "BuildJdbcUrlPanel.lblInfo.text")); // NOI18N
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -79,19 +86,24 @@ public class BuildJdbcUrlPanel extends javax.swing.JPanel {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(lblServer)
-                    .addComponent(lblHost)
-                    .addComponent(lblPort)
-                    .addComponent(lblDatabaseName))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtHost)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(cbServer, javax.swing.GroupLayout.PREFERRED_SIZE, 141, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(spPort, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(0, 176, Short.MAX_VALUE))
-                    .addComponent(txtDatabaseName))
+                            .addComponent(lblServer)
+                            .addComponent(lblHost)
+                            .addComponent(lblPort)
+                            .addComponent(lblDatabaseName))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txtHost)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(cbServer, javax.swing.GroupLayout.PREFERRED_SIZE, 141, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(spPort, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(0, 176, Short.MAX_VALUE))
+                            .addComponent(txtDatabaseName)))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(lblInfo)
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -108,23 +120,26 @@ public class BuildJdbcUrlPanel extends javax.swing.JPanel {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(lblPort)
-                    .addComponent(spPort, javax.swing.GroupLayout.PREFERRED_SIZE, 18, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(spPort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtDatabaseName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(lblDatabaseName))
-                .addContainerGap(21, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblInfo)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
     private void cbServerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbServerActionPerformed
-        setDefaultPort();
+        setupControls();
     }//GEN-LAST:event_cbServerActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox cbServer;
     private javax.swing.JLabel lblDatabaseName;
     private javax.swing.JLabel lblHost;
+    private javax.swing.JLabel lblInfo;
     private javax.swing.JLabel lblPort;
     private javax.swing.JLabel lblServer;
     private javax.swing.JSpinner spPort;
