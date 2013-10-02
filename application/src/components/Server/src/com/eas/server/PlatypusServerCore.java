@@ -207,7 +207,7 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
                     return false;
                 }
             } else {
-                Logger.getLogger(PlatypusServerCore.class.getName()).warning(String.format("Module \"%s\" is stateless, skipping it. Hope it will be used as an acceptor for specific protocol.", aModuleId));
+                Logger.getLogger(PlatypusServerCore.class.getName()).warning(String.format("Module \"%s\" is stateless, skipping it. Hope it will be used as an authorizer or as an acceptor.", aModuleId));
                 return false;
             }
         } else {

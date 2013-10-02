@@ -480,7 +480,8 @@ public class PlatypusHttpServlet extends HttpServlet {
                     writeJsonResponse(((FilteredAppElementRequest.FilteredResponse) aPlatypusResponse).getFilteredContent(), aHttpResponse);
                 }
             } else if (aPlatypusResponse instanceof StartAppElementRequest.Response) {
-                writeJsonResponse(String.valueOf(((StartAppElementRequest.Response) aPlatypusResponse).getAppElementId()), aHttpResponse);
+                String appElementIdToSend = ((StartAppElementRequest.Response) aPlatypusResponse).getAppElementId();
+                writeJsonResponse(appElementIdToSend != null ? ("\"" + appElementIdToSend + "\"") : "null", aHttpResponse);
             } else if (aPlatypusResponse instanceof ExecuteServerReportRequest.Response) {
                 writeExcelResponse(((ExecuteServerReportRequest.Response) aPlatypusResponse).getResult(), aHttpResponse);
             } else if (aPlatypusResponse instanceof AppElementRequest.Response) {
