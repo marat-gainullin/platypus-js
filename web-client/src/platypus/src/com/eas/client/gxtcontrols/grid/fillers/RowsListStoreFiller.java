@@ -74,7 +74,7 @@ public class RowsListStoreFiller extends RowsetAdapter implements PropertyChange
 	protected Entity rowsetHost;
 	protected Rowset rowset;
 	protected String rowsetError;
-	protected int deferred = 0;
+	protected int deferred;
 
 	public RowsListStoreFiller(ListStore<Row> aStore, Entity aRowsetHost, Set<Entity> toEnsure) {
 		super();

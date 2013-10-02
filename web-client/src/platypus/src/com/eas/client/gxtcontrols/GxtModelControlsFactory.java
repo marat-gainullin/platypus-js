@@ -47,11 +47,14 @@ public class GxtModelControlsFactory extends GxtControlsFactory {
 
 		@Override
 		public void run() {
-			JavaScriptObject cellFunction = module.<JsObject>cast().getJs(cellFunctionName);
-			JavaScriptObject selectFunction = module.<JsObject>cast().getJs(selectFunctionName);
-
-			field.setOnRender(cellFunction);
-			field.setOnSelect(selectFunction);
+			if (cellFunctionName != null && !cellFunctionName.isEmpty()) {
+				JavaScriptObject cellFunction = module.<JsObject> cast().getJs(cellFunctionName);
+				field.setOnRender(cellFunction);
+			}
+			if (selectFunctionName != null && !selectFunctionName.isEmpty()) {
+				JavaScriptObject selectFunction = module.<JsObject> cast().getJs(selectFunctionName);
+				field.setOnSelect(selectFunction);
+			}
 		}
 	}
 
@@ -80,14 +83,10 @@ public class GxtModelControlsFactory extends GxtControlsFactory {
 			processGeneralProperties(mGrid, aTag, published);
 			mGrid.load();
 			/*
-			Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-
-				@Override
-				public void execute() {
-					mGrid.load();
-				}
-			});
-			*/
+			 * Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+			 * 
+			 * @Override public void execute() { mGrid.load(); } });
+			 */
 			return mGrid;
 		} else {
 			boolean readonly = !Utils.getBooleanAttribute(aTag, "editable", true);
@@ -118,26 +117,26 @@ public class GxtModelControlsFactory extends GxtControlsFactory {
 					return mText;
 				} else
 					return createStubLabel(aTag, MODEL_ELEMENT_MISSING);
-			}else if ("DbTextDesignInfo".equalsIgnoreCase(designInfoTypeName)) {
-					final LazyControlBounder<String> modelElement = modelElementTag != null ? new LazyControlBounder<String>(modelElementTag, model, new StringRowValueConverter()) : null;
-					if (modelElement != null) {
-						ModelTextArea mTextArea = new ModelTextArea();
-						modelElement.setCellComponent(mTextArea.getTarget());
-						mTextArea.setModelElement(modelElement);
+			} else if ("DbTextDesignInfo".equalsIgnoreCase(designInfoTypeName)) {
+				final LazyControlBounder<String> modelElement = modelElementTag != null ? new LazyControlBounder<String>(modelElementTag, model, new StringRowValueConverter()) : null;
+				if (modelElement != null) {
+					ModelTextArea mTextArea = new ModelTextArea();
+					modelElement.setCellComponent(mTextArea.getTarget());
+					mTextArea.setModelElement(modelElement);
 
-						handlersResolvers.add(new StandaloneHandlersResolver(module, cellFunctionName, selectFunctionName, mTextArea));
+					handlersResolvers.add(new StandaloneHandlersResolver(module, cellFunctionName, selectFunctionName, mTextArea));
 
-						processEvents(mTextArea, aTag);
-						PublishedComponent published = Publisher.publish(mTextArea);
-						mTextArea.setPublishedField(published);
-						mTextArea.setEditable(!readonly);
-						mTextArea.setSelectOnly(selectOnly);
+					processEvents(mTextArea, aTag);
+					PublishedComponent published = Publisher.publish(mTextArea);
+					mTextArea.setPublishedField(published);
+					mTextArea.setEditable(!readonly);
+					mTextArea.setSelectOnly(selectOnly);
 
-						checkBorders(mTextArea, aTag);
-						processGeneralProperties(mTextArea, aTag, published);
-						return mTextArea;
-					} else
-						return createStubLabel(aTag, MODEL_ELEMENT_MISSING);
+					checkBorders(mTextArea, aTag);
+					processGeneralProperties(mTextArea, aTag, published);
+					return mTextArea;
+				} else
+					return createStubLabel(aTag, MODEL_ELEMENT_MISSING);
 			} else if ("DbDateDesignInfo".equalsIgnoreCase(designInfoTypeName)) {
 				final LazyControlBounder<Date> modelElement = modelElementTag != null ? new LazyControlBounder<Date>(modelElementTag, model, new DateRowValueConverter()) : null;
 				if (modelElement != null) {

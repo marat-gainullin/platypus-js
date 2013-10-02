@@ -45,23 +45,38 @@ public class PlatypusTextAreaHandledInputCell extends TextAreaInputCell {
 		modelElement = aValue;
 	}
 
-	public PublishedCell consumePublishedCell() {
-		PublishedCell consumed = cellToRender;
-		cellToRender = null;
-		return consumed;
+	public PublishedCell getPublishedCell() {
+		return cellToRender;
 	}
 
 	@Override
 	public void render(com.google.gwt.cell.client.Cell.Context context, String value, SafeHtmlBuilder sb) {
 		try {
-			JavaScriptObject eventThis = modelElement != null ? modelElement.entity.getModel().getModule() : null;
+			JavaScriptObject eventThis = modelElement != null && modelElement.entity != null && modelElement.entity.getModel() != null ? modelElement.entity.getModel().getModule() : null;
 			if (container != null && container.getParent() != null && container.getParent().getParent() instanceof PlatypusAdapterStandaloneField<?>) {
 				PlatypusAdapterField<?> adapter = (PlatypusAdapterStandaloneField<?>) container.getParent().getParent();
 				eventThis = adapter.getPublishedField();
 			}
-			cellToRender = modelElement != null && modelElement.entity.getRowset() != null ? ControlsUtils.calcStandalonePublishedCell(eventThis, cellFunction,
-			        modelElement.entity.getRowset().getCurrentRow(), value, modelElement) : null;
+			if(cellFunction != null && modelElement != null && modelElement.entity != null && modelElement.entity.getRowset() != null){
+				cellToRender = ControlsUtils.calcStandalonePublishedCell(eventThis, cellFunction,
+				        modelElement.entity.getRowset().getCurrentRow(), value, modelElement, cellToRender);
+			}
 			if (cellToRender != null) {
+				if(cellToRender.getDisplayCallback() == null){
+					cellToRender.setDisplayCallback(new Runnable(){
+						@Override
+						public void run() {
+							JavaScriptObject oldCellFunction = cellFunction;
+							cellFunction = null;
+							try{
+								if(container != null)
+									container.redraw();
+							}finally{
+								cellFunction = oldCellFunction;
+							}
+						}
+					});
+				}
 				String toRender = value;
 				if (cellToRender.getDisplay() != null)
 					toRender = cellToRender.getDisplay();
