@@ -226,7 +226,7 @@ public class Loader {
 
 				@Override
 				protected void doWork(XMLHttpRequest aResponse) throws Exception {
-					Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, aResponse.getStatusText());
+					Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, appElementName + " loading response is: " + aResponse.getStatus() + "(" + aResponse.getStatusText() + ")");
 					assert !loadedAppElements.contains(appElementName);
 					// Erroneous dependencies and other erroneous application
 					// elements should be memorized as notifying about the

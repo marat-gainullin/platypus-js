@@ -284,18 +284,20 @@ public class PlatypusHttpServlet extends HttpServlet {
         }
         aHttpResponse.setContentLength(bytes.length);
         aHttpResponse.getOutputStream().write(bytes);
+        aHttpResponse.getOutputStream().flush();
     }
 
-    private void writeJsonResponse(String aResponse, HttpServletResponse response) throws UnsupportedEncodingException, IOException {
-        writeResponse(aResponse, response, RowsetJsonConstants.JSON_CONTENTTYPE);
+    private void writeJsonResponse(String aResponse, HttpServletResponse aHttpResponse) throws UnsupportedEncodingException, IOException {
+        writeResponse(aResponse, aHttpResponse, RowsetJsonConstants.JSON_CONTENTTYPE);
     }
 
-    private void writeExcelResponse(byte[] aResponse, HttpServletResponse response) throws UnsupportedEncodingException, IOException {
-        response.setCharacterEncoding(SettingsConstants.COMMON_ENCODING);
-        response.setContentType(EXCEL_CONTENT_TYPE);
-        response.addHeader("Content-Disposition", "attachment; filename=\"report.xls\"");
-        response.setContentLength(aResponse.length);
-        response.getOutputStream().write(aResponse);
+    private void writeExcelResponse(byte[] aResponse, HttpServletResponse aHttpResponse) throws UnsupportedEncodingException, IOException {
+        aHttpResponse.setCharacterEncoding(SettingsConstants.COMMON_ENCODING);
+        aHttpResponse.setContentType(EXCEL_CONTENT_TYPE);
+        aHttpResponse.addHeader("Content-Disposition", "attachment; filename=\"report.xls\"");
+        aHttpResponse.setContentLength(aResponse.length);
+        aHttpResponse.getOutputStream().write(aResponse);
+        aHttpResponse.getOutputStream().flush();
     }
 
     private void writeResponse(byte[] aResponse, HttpServletResponse aHttpResponse, String aContentType) throws UnsupportedEncodingException, IOException {
@@ -306,21 +308,21 @@ public class PlatypusHttpServlet extends HttpServlet {
         aHttpResponse.getOutputStream().write(aResponse);
     }
 
-    private void makeResponseNotCacheable(HttpServletResponse aPesponse) {
-        aPesponse.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); // HTTP 1.1.
-        aPesponse.setHeader("Pragma", "no-cache"); // HTTP 1.0.
-        aPesponse.setDateHeader("Expires", 0);// Proxies
+    private void makeResponseNotCacheable(HttpServletResponse aHttpResponse) {
+        aHttpResponse.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); // HTTP 1.1.
+        aHttpResponse.setHeader("Pragma", "no-cache"); // HTTP 1.0.
+        aHttpResponse.setDateHeader("Expires", 0);// Proxies
     }
 
-    private void sendJ2SEResponse(Response aPlatypusResponse, HttpServletResponse aResponse) throws Exception {
+    private void sendJ2SEResponse(Response aPlatypusResponse, HttpServletResponse aHttpResponse) throws Exception {
         ByteArrayOutputStream baOut = new ByteArrayOutputStream();
         ProtoWriter pw = new ProtoWriter(baOut);
         PlatypusResponseWriter.write(aPlatypusResponse, pw);
         pw.flush();
         byte[] rsData = baOut.toByteArray();
-        aResponse.setContentType(PlatypusHttpConstants.CONTENT_TYPE);
-        aResponse.setContentLength(rsData.length);
-        aResponse.getOutputStream().write(rsData);
+        aHttpResponse.setContentType(PlatypusHttpConstants.CONTENT_TYPE);
+        aHttpResponse.setContentLength(rsData.length);
+        aHttpResponse.getOutputStream().write(rsData);
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
@@ -441,14 +443,15 @@ public class PlatypusHttpServlet extends HttpServlet {
                     aHttpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, er.getError());
                 }
             } else if (aPlatypusResponse instanceof RowsetResponse) {
-                writeResponse(((RowsetResponse) aPlatypusResponse).getRowset(), aHttpResponse, aHttpRequest);
                 makeResponseNotCacheable(aHttpResponse);
+                writeResponse(((RowsetResponse) aPlatypusResponse).getRowset(), aHttpResponse, aHttpRequest);
             } else if (aPlatypusResponse instanceof CreateServerModuleResponse) {
                 CreateServerModuleResponse csmr = (CreateServerModuleResponse) aPlatypusResponse;
-                writeJsonResponse(moduleResponseToJson(csmr.getFunctionsNames(), csmr.isReport()), aHttpResponse);
                 makeResponseNotCacheable(aHttpResponse);
+                writeJsonResponse(moduleResponseToJson(csmr.getFunctionsNames(), csmr.isReport()), aHttpResponse);
             } else if (aPlatypusResponse instanceof ExecuteServerModuleMethodRequest.Response) {
                 Object result = ((ExecuteServerModuleMethodRequest.Response) aPlatypusResponse).getResult();
+                makeResponseNotCacheable(aHttpResponse);
                 if (result instanceof Rowset) {
                     writeResponse((Rowset) result, aHttpResponse, aHttpRequest);
                 } else if (result instanceof String) {
@@ -465,18 +468,17 @@ public class PlatypusHttpServlet extends HttpServlet {
                         Context.exit();
                     }
                 }
-                makeResponseNotCacheable(aHttpResponse);
             } else if (aPlatypusResponse instanceof AppQueryResponse) {
                 Query<?> query = ((AppQueryResponse) aPlatypusResponse).getAppQuery();
-                writeResponse(query, aHttpResponse);
                 makeResponseNotCacheable(aHttpResponse);
+                writeResponse(query, aHttpResponse);
             } else if (aPlatypusResponse instanceof FilteredAppElementRequest.FilteredResponse) {
+                makeResponseNotCacheable(aHttpResponse);
                 if (isResourceRequest(aHttpRequest) && aHttpRequest.getParameter(PlatypusHttpRequestParams.TYPE) == null) {// pure resource request
                     writeJsonResponse(((FilteredAppElementRequest.FilteredResponse) aPlatypusResponse).getFilteredScript(), aHttpResponse);
                 } else {
                     writeJsonResponse(((FilteredAppElementRequest.FilteredResponse) aPlatypusResponse).getFilteredContent(), aHttpResponse);
                 }
-                makeResponseNotCacheable(aHttpResponse);
             } else if (aPlatypusResponse instanceof StartAppElementRequest.Response) {
                 writeJsonResponse(String.valueOf(((StartAppElementRequest.Response) aPlatypusResponse).getAppElementId()), aHttpResponse);
             } else if (aPlatypusResponse instanceof ExecuteServerReportRequest.Response) {
@@ -488,11 +490,11 @@ public class PlatypusHttpServlet extends HttpServlet {
                         if (appElementResponse.getAppElement().getType() == ClientConstants.ET_RESOURCE) {
                             ApplicationElement appElement = ((AppElementRequest.Response) aPlatypusResponse).getAppElement();
                             String mimeType = URLConnection.getFileNameMap().getContentTypeFor(appElement.getName());
+                            makeResponseNotCacheable(aHttpResponse);
                             writeResponse(appElement.getBinaryContent(), aHttpResponse, mimeType);
                             if (mimeType != null && mimeType.contains("text")) {
                                 aHttpResponse.setCharacterEncoding(SettingsConstants.COMMON_ENCODING);
                             }
-                            makeResponseNotCacheable(aHttpResponse);
                         } else {
                             aHttpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, String.format("Application element [%s] should be platypus application resource, but it is not!", ((AppElementRequest) aPlatypusRequest).getAppElementId()));
                         }
@@ -500,8 +502,8 @@ public class PlatypusHttpServlet extends HttpServlet {
                         aHttpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, String.format("Application element [%s] is absent!", ((AppElementRequest) aPlatypusRequest).getAppElementId()));
                     }
                 } else {
-                    writeJsonResponse("", aHttpResponse);// Plain scripts have no model and other related resources
                     makeResponseNotCacheable(aHttpResponse);
+                    writeJsonResponse("", aHttpResponse);// Plain scripts have no model and other related resources
                 }
             } else if (aPlatypusResponse instanceof CommitRequest.Response) {
                 // simple OK response is needed
