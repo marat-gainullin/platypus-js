@@ -79,23 +79,27 @@ public class PositioningPacketRecieverTest {
         packet.setSOS(false);
         packet.setLatitude(40.99f);
         packet.setLongtitude(57.01f);
-        Object session = reciever.send(packet, "localhost", 8181, "https", "", "", "/testHttpPushServlet/testHttpPushServlet");
-        assert session instanceof IoSession;
+        Object session = reciever.send(packet, "localhost", 8443, "https", "testuser1", "test", "/application/api?__type=1");
+        assertNotNull(session);
+        assertTrue(session instanceof IoSession);
         IoSession ioSession = (IoSession) session;
         ReadFuture read = ioSession.read();
         if (read.awaitUninterruptibly(10000)) {
             Integer statusCode = (Integer)ioSession.getAttribute("status");
-            assertEquals(statusCode.intValue(), 200);
+            assertNotNull(statusCode);
+            assertEquals(200, statusCode.intValue());
         } else {
             fail("No data for read in session.");
         }
-        session = reciever.send(packet, "localhost", 8080, "http", "", "", "/testHttpPushServlet/testHttpPushServlet");
-        assert session instanceof IoSession;
+        session = reciever.send(packet, "localhost", 8080, "http", "testuser1", "test", "/application/api?__type=1");
+        assertNotNull(session);
+        assertTrue(session instanceof IoSession);
         ioSession = (IoSession) session;
         read = ioSession.read();
         if (read.awaitUninterruptibly(10000)) {
             Integer statusCode = (Integer)ioSession.getAttribute("status");
-            assertEquals(statusCode.intValue(), 200);
+            assertNotNull(statusCode);
+            assertEquals(200, statusCode.intValue());
         } else {
             fail("No data for read in session.");
         }
