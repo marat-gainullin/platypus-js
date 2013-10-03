@@ -44,7 +44,6 @@ import com.eas.client.xhr.XMLHttpRequest2;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArrayString;
-import com.google.gwt.dom.client.BRElement;
 import com.google.gwt.dom.client.FormElement;
 import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.http.client.RequestBuilder;
@@ -542,7 +541,6 @@ public class AppClient {
 
 	public void startDownloadRequest(String aUrlPrefix, final int aRequestType, Map<String, String> aParams, RequestBuilder.Method aMethod) throws Exception {
 		com.google.gwt.dom.client.Document doc = com.google.gwt.dom.client.Document.get();
-		BRElement br = doc.createBRElement();
 		FormElement frm = doc.createFormElement();
 		frm.setMethod(aMethod.toString());
 		frm.setAction(baseUrl + aUrlPrefix);
