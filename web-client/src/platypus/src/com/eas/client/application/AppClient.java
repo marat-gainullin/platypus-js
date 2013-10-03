@@ -692,7 +692,7 @@ public class AppClient {
 		}, null);
 	}
 
-	public Cancellable getAppElementXmlDom(final String appElementName, final Callback<Document> onSuccess, final Callback<XMLHttpRequest> onFailure) throws Exception {
+	public Cancellable getAppElementXml(final String appElementName, final Callback<Document> onSuccess, final Callback<XMLHttpRequest> onFailure) throws Exception {
 		if (appElements.containsKey(appElementName)) {
 			Document doc = appElements.get(appElementName);
 			// doc may be null, because of application elements without a xml-dom, plain scripts for example.
