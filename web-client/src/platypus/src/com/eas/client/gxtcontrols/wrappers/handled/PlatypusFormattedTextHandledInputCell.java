@@ -47,23 +47,37 @@ public class PlatypusFormattedTextHandledInputCell extends FormattedTextInputCel
 		modelElement = aValue;
 	}
 
-	public PublishedCell consumePublishedCell() {
-		PublishedCell consumed = cellToRender;
-		cellToRender = null;
-		return consumed;
+	public PublishedCell getPublishedCell() {
+		return cellToRender;
 	}
 
 	@Override
 	public void render(com.google.gwt.cell.client.Cell.Context context, Object value, SafeHtmlBuilder sb) {
 		try {
-			JavaScriptObject eventThis = modelElement != null ? modelElement.entity.getModel().getModule() : null;
+			JavaScriptObject eventThis = modelElement != null && modelElement.entity != null && modelElement.entity.getModel() != null ? modelElement.entity.getModel().getModule() : null;
 			if (container != null && container.getParent() != null && container.getParent().getParent() instanceof PlatypusAdapterStandaloneField<?>) {
 				PlatypusAdapterField<?> adapter = (PlatypusAdapterStandaloneField<?>) container.getParent().getParent();
 				eventThis = adapter.getPublishedField();
 			}
-			cellToRender = modelElement != null && modelElement.entity.getRowset() != null ? ControlsUtils.calcStandalonePublishedCell(eventThis, cellFunction,
-			        modelElement.entity.getRowset().getCurrentRow(), getPropertyEditor().render(value), modelElement) : null;
+			if(cellFunction != null && modelElement != null && modelElement.entity != null && modelElement.entity.getRowset() != null){
+				cellToRender = ControlsUtils.calcStandalonePublishedCell(eventThis, cellFunction,
+				        modelElement.entity.getRowset().getCurrentRow(), getPropertyEditor().render(value), modelElement, cellToRender);
+			}
 			if (cellToRender != null) {
+				if(cellToRender.getDisplayCallback() == null){
+					cellToRender.setDisplayCallback(new Runnable(){
+						@Override
+						public void run() {
+							JavaScriptObject oldCellFunction = cellFunction;
+							cellFunction = null;
+							try{
+								container.redraw();
+							}finally{
+								cellFunction = oldCellFunction;
+							}
+						}
+					});
+				}
 				String toRender = getPropertyEditor().render(value);
 				if (cellToRender.getDisplay() != null)
 					toRender = cellToRender.getDisplay();
@@ -71,7 +85,7 @@ public class PlatypusFormattedTextHandledInputCell extends FormattedTextInputCel
 			} else
 				super.render(context, value, sb);
 		} catch (Exception ex) {
-			Logger.getLogger(PlatypusTextHandledInputCell.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+			Logger.getLogger(PlatypusFormattedTextHandledInputCell.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
 		}
 	}
 

@@ -4,6 +4,9 @@ import java.util.Date;
 import java.util.Map;
 
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.RepeatingCommand;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.xml.client.Element;
 import com.google.gwt.xml.client.Node;
@@ -36,6 +39,12 @@ public class Utils {
 		};
 	}-*/;
 	
+	public static native JavaScriptObject publishRunnable(Runnable aValue)/*-{
+		return (function() {
+				aValue.@java.lang.Runnable::run()();
+				});
+	}-*/;
+	
 	public static native JavaScriptObject stringToArrayBuffer(String aValue) throws Exception/*-{
 		if(aValue){
 			var buffer = new ArrayBuffer(aValue.length);
@@ -46,6 +55,29 @@ public class Utils {
 		}else
 			return null;
 	}-*/;
+	
+	public static void invokeLater(final JavaScriptObject aTarget){
+		Scheduler.get().scheduleDeferred(new ScheduledCommand(){
+			@Override
+			public void execute() {
+				invokeJsFunction(aTarget);
+			}
+		});
+	}
+	
+	public static void invokeScheduled(int aTimeout, final JavaScriptObject aTarget){
+		Scheduler.get().scheduleFixedDelay(new RepeatingCommand(){
+			
+			@Override
+			public boolean execute() {
+				try{
+					invokeJsFunction(aTarget);
+				}finally{
+					return false;
+				}
+			}
+		}, aTimeout);
+	}
 	
 	public static String format(final String format, final String... args) {
 		String[] split = format.split("%s");

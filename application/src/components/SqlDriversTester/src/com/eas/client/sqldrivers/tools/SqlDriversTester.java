@@ -16,6 +16,7 @@ import com.eas.client.ClientConstants;
 import com.eas.client.ClientFactory;
 import com.eas.client.DbClient;
 import com.eas.client.DbMetadataCache;
+import com.eas.client.SQLUtils;
 import com.eas.client.metadata.DbTableIndexColumnSpec;
 import com.eas.client.metadata.DbTableIndexSpec;
 import com.eas.client.queries.SqlCompiledQuery;
@@ -266,15 +267,15 @@ public class SqlDriversTester extends JFrame {
         setSize(1200, 900);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
             public void windowClosing(java.awt.event.WindowEvent evt) {
                 logout();
             }
         });
-        
         try {
             jbInit();
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception ex) {
+            Logger.getLogger(SqlDriversTester.class.getName()).log(Level.SEVERE, null, ex);
         }
         setVisible(true);
     }
@@ -1048,37 +1049,50 @@ public class SqlDriversTester extends JFrame {
                 } catch (SQLException ex) {
                     Logger.getLogger(SqlDriversTester.class.getName()).log(Level.SEVERE, null, ex);
                 } finally {
-                    try {
-                        st.close();
-                    } catch (SQLException ex) {
-                        Logger.getLogger(SqlDriversTester.class.getName()).log(Level.SEVERE, null, ex);
+                    if (st != null) {
+                        try {
+                            st.close();
+                        } catch (SQLException ex) {
+                            Logger.getLogger(SqlDriversTester.class.getName()).log(Level.SEVERE, null, ex);
+                        }
                     }
                 }
                 break;
         }
+        assert textLog != null;
+        assert table != null;
 
         if (sqls != null && sqls.length > 0) {
             Statement statementJDBC = null;
+            ResultSet rsJDBC = null;
             try {
-                textLog.setText(textLog.getText() + sqls[0] + "\nexecuteQuery: ");
+                textLog.append(sqls[0] + "\nexecuteQuery: ");
+                long time= System.currentTimeMillis();
                 statementJDBC = connectJDBC.createStatement();
-                ResultSet rsJDBC = statementJDBC.executeQuery(sqls[0]);
+                rsJDBC = statementJDBC.executeQuery(sqls[0]);
                 table.setModel(new JDBCModel(rsJDBC));
-                textLog.setText(textLog.getText() + "Ok!!!\n");
-                try {
-                    rsJDBC.close();
-                } catch (SQLException ex2) {
-                    textLog.setText(textLog.getText() + "Error !!!\nException: " + ex2 + "\n\n");
-                } 
+                textLog.append("Ok!!!");
+                textLog.append("  Time: "+((double)(System.currentTimeMillis()-time))/1000+" s  Rows: "+table.getRowCount()+"\n");
             } catch (SQLException ex) {
-                textLog.setText(textLog.getText() + "Error !!!\nException: " + ex + "\n\n");
+                textLog.append("Error !!!\nException: " + ex + "\n\n");
                 Logger.getLogger(SqlDriversTester.class.getName()).log(Level.SEVERE, null, ex);
             } finally {
-                try {
-                    statementJDBC.close();
-                } catch (SQLException ex) {
-                    Logger.getLogger(SqlDriversTester.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                if (rsJDBC != null) {
+                    try {
+                        rsJDBC.close();
+                    } catch (SQLException ex) {
+                        textLog.append("Error !!!\nException: " + ex + "\n\n");
+                        Logger.getLogger(SqlDriversTester.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }  
+                if (statementJDBC != null) {
+                    try {
+                        statementJDBC.close();
+                    } catch (SQLException ex) {
+                        textLog.append( "Error !!!\nException: " + ex + "\n\n");
+                        Logger.getLogger(SqlDriversTester.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }    
             }
 
         }
@@ -1130,9 +1144,12 @@ public class SqlDriversTester extends JFrame {
 
         }
         if (sqls != null && sqls.length > 0) {
+            assert textLog != null;
             try {
                 for (String s : sqls) {
-                    textLog.setText(textLog.getText() + s + "\nExecute: ");
+                    textLog.append(s);
+                    textLog.append("\nExecute: ");
+                    long time= System.currentTimeMillis();
                     if (tabIndex == 4) {
                         SqlCompiledQuery q = new SqlCompiledQuery(client, null, s);
                         q.enqueueUpdate();
@@ -1142,10 +1159,11 @@ public class SqlDriversTester extends JFrame {
                             statementJDBC.execute(s);
                         }
                     }
-                    textLog.setText(textLog.getText() + "Ok!!!\n");
+                    textLog.append("Ok!!!");
+                    textLog.append("  Time: "+((double)(System.currentTimeMillis()-time))/1000+" s\n");
                 }
             } catch (Exception ex) {
-                textLog.setText(textLog.getText() + "Error !!!\nException: " + ex + "\n\n");
+                textLog.append("Error !!!\nException: " + ex + "\n\n");
                 Logger.getLogger(SqlDriversTester.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
@@ -1442,27 +1460,22 @@ public class SqlDriversTester extends JFrame {
      */
     private DbClient createPlatypusClient(String aUrl, String aSchema, String aUser, String aPassword, boolean createSysTables) throws Exception {
         Logger.getLogger(SqlDriversTester.class.getName()).log(Level.INFO, "Start creating connection to schema {0}", aSchema);
-        EasSettings settings = EasSettings.createInstance(aUrl);
-        if (settings instanceof DbConnectionSettings) {
-            if (aUser == null || aUser.isEmpty() || aPassword == null || aSchema == null || aSchema.isEmpty()) {
-                throw new Exception(" May be bad db connection settings (url, dbuser,  dbpassword, dbschema).");
-            }
-            settings.getInfo().put(ClientConstants.DB_CONNECTION_USER_PROP_NAME, aUser);
-            settings.getInfo().put(ClientConstants.DB_CONNECTION_PASSWORD_PROP_NAME, aPassword);
-            settings.getInfo().put(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME, aSchema);
-            ((DbConnectionSettings) settings).setInitSchema(createSysTables);
+        try {
+            EasSettings settings = new DbConnectionSettings(aUrl, aSchema, aUser, aPassword, SQLUtils.dialectByUrl(aUrl), createSysTables);
+            Client lclient = ClientFactory.getInstance(settings);
+            assert lclient instanceof DbClient;
+            Logger.getLogger(SqlDriversTester.class.getName()).log(Level.INFO, "Connect to schema %s created", aSchema);
+            return (DbClient) lclient;
+        } catch (Exception ex) {
+            Logger.getLogger(SqlDriversTester.class.getName()).log(Level.INFO, "Connect to schema %s not created", aSchema);
+            throw ex;
         }
-        settings.setUrl(aUrl);
-        Client lclient = ClientFactory.getInstance(settings);
-        assert lclient instanceof DbClient;
-        DbClient client = (DbClient) lclient;
-        Logger.getLogger(SqlDriversTester.class.getName()).log(Level.INFO, "Connect to schema {0}created", (client == null ? "not " : ""));
-        return client;
     }
     /**
      * обработка событий
      */
     ActionListener clickAction = new ActionListener() {
+        @Override
         public void actionPerformed(ActionEvent e) {
 
             int tabIndex = tabbedPane.getSelectedIndex();
@@ -1489,12 +1502,12 @@ public class SqlDriversTester extends JFrame {
                 String schemaName = fldSchema_setschema.getText();
                 if (connectJDBC != null) {
                     try {
-                        textLog.setText(textLog.getText() + "задать текущую схему =  \"" + schemaName + "\": ");
+                        textLog.append("задать текущую схему =  \"" + schemaName + "\": ");
 
                         platypusDriver.applyContextToConnection(connectJDBC, schemaName);
-                        textLog.setText(textLog.getText() + "Ok !!!\n");
+                        textLog.append("Ok !!!\n");
                     } catch (Exception ex) {
-                        textLog.setText(textLog.getText() + "ERROR !!!\nException: " + ex + "\n\n");
+                        textLog.append("ERROR !!!\nException: " + ex + "\n\n");
                         Logger.getLogger(SqlDriversTester.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
@@ -1507,7 +1520,7 @@ public class SqlDriversTester extends JFrame {
                         String currentSchema = platypusDriver.getConnectionContext(connectJDBC);
                         textLog.setText(String.format("Current schema: %s\n", currentSchema));
                     } catch (Exception ex) {
-                        textLog.setText(textLog.getText() + "ERROR !!!\nException: " + ex + "\n\n");
+                        textLog.append("ERROR !!!\nException: " + ex + "\n\n");
                         Logger.getLogger(SqlDriversTester.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
@@ -1553,14 +1566,14 @@ public class SqlDriversTester extends JFrame {
                     try {
                         SqlCompiledQuery q = new SqlCompiledQuery(client, null, sqls_commentsDS[0]);
                         Rowset rs = q.executeQuery();
-                        textLog_commentDS.setText(textLog_commentDS.getText() + "count records=" + rs.size() + "\n");
+                        textLog_commentDS.append("count records=" + rs.size() + "\n");
                         rs.next();
                         String res = driver.getColumnCommentFromCommentsDs(rs);
                         res = (res != null ? "'" + res + "'" : res);
-                        textLog_commentDS.setText(textLog_commentDS.getText() + "first result=" + res + "\n");
+                        textLog_commentDS.append("first result=" + res + "\n");
 
                     } catch (Exception ex) {
-                        textLog_commentDS.setText(textLog_commentDS.getText() + "ERROR !!!\nException: " + ex + "\n\n");
+                        textLog_commentDS.append("ERROR !!!\nException: " + ex + "\n\n");
                         Logger.getLogger(SqlDriversTester.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
@@ -1568,14 +1581,14 @@ public class SqlDriversTester extends JFrame {
                     try {
                         SqlCompiledQuery q = new SqlCompiledQuery(client, null, sqls_commentsDS[0]);
                         Rowset rs = q.executeQuery();
-                        textLog_commentDS.setText(textLog_commentDS.getText() + "count records=" + rs.size() + "\n");
+                        textLog_commentDS.append("count records=" + rs.size() + "\n");
                         rs.next();
                         String res = driver.getColumnNameFromCommentsDs(rs);
                         res = (res != null ? "'" + res + "'" : res);
-                        textLog_commentDS.setText(textLog_commentDS.getText() + "first result=" + res + "\n");
+                        textLog_commentDS.append("first result=" + res + "\n");
 
                     } catch (Exception ex) {
-                        textLog_commentDS.setText(textLog_commentDS.getText() + "ERROR !!!\nException: " + ex + "\n\n");
+                        textLog_commentDS.append("ERROR !!!\nException: " + ex + "\n\n");
                         Logger.getLogger(SqlDriversTester.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
@@ -1583,14 +1596,14 @@ public class SqlDriversTester extends JFrame {
                     try {
                         SqlCompiledQuery q = new SqlCompiledQuery(client, null, sqls_commentsDS[0]);
                         Rowset rs = q.executeQuery();
-                        textLog_commentDS.setText(textLog_commentDS.getText() + "count records=" + rs.size() + "\n");
+                        textLog_commentDS.append("count records=" + rs.size() + "\n");
                         rs.next();
                         String res = driver.getTableCommentFromCommentsDs(rs);
                         res = (res != null ? "'" + res + "'" : res);
-                        textLog_commentDS.setText(textLog_commentDS.getText() + "first result=" + res + "\n");
+                        textLog_commentDS.append("first result=" + res + "\n");
 
                     } catch (Exception ex) {
-                        textLog_commentDS.setText(textLog_commentDS.getText() + "ERROR !!!\nException: " + ex + "\n\n");
+                        textLog_commentDS.append("ERROR !!!\nException: " + ex + "\n\n");
                         Logger.getLogger(SqlDriversTester.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
@@ -1598,14 +1611,14 @@ public class SqlDriversTester extends JFrame {
                     try {
                         SqlCompiledQuery q = new SqlCompiledQuery(client, null, sqls_commentsDS[0]);
                         Rowset rs = q.executeQuery();
-                        textLog_commentDS.setText(textLog_commentDS.getText() + "count records=" + rs.size() + "\n");
+                        textLog_commentDS.append("count records=" + rs.size() + "\n");
                         rs.next();
                         String res = driver.getTableNameFromCommentsDs(rs);
                         res = (res != null ? "'" + res + "'" : res);
-                        textLog_commentDS.setText(textLog_commentDS.getText() + "first result=" + res + "\n");
+                        textLog_commentDS.append("first result=" + res + "\n");
 
                     } catch (Exception ex) {
-                        textLog_commentDS.setText(textLog_commentDS.getText() + "ERROR !!!\nException: " + ex + "\n\n");
+                        textLog_commentDS.append("ERROR !!!\nException: " + ex + "\n\n");
                         Logger.getLogger(SqlDriversTester.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
@@ -1675,22 +1688,22 @@ public class SqlDriversTester extends JFrame {
     private void dbConnect() {
         try {
             String driverName = fldDriver_connect.getText();
-            textLog_connect.setText(textLog_connect.getText() + "<< JDBC клиент >>\n");
-            textLog_connect.setText(textLog_connect.getText() + "регистрация \"" + driverName + "\": ");
+            textLog_connect.append("<< JDBC клиент >>\n");
+            textLog_connect.append("регистрация \"" + driverName + "\": ");
             Class.forName(driverName);
-            textLog_connect.setText(textLog_connect.getText() + "Ok !!!\n");
+            textLog_connect.append("Ok !!!\n");
             try {
-                textLog_connect.setText(textLog_connect.getText() + "подключение: ");
+                textLog_connect.append("подключение: ");
                 connectJDBC = DriverManager.getConnection(fldUrl_connect.getText(), fldUser_connect.getText(), fldPassword_connect.getText());
                 connectJDBC.setAutoCommit(false);
-                textLog_connect.setText(textLog_connect.getText() + "Ok !!!\n");
+                textLog_connect.append("Ok !!!\n");
                 setSchemasNames();
             } catch (SQLException ex) {
-                textLog_connect.setText(textLog_connect.getText() + "ERROR !!!\nException: " + ex + "\n\n");
+                textLog_connect.append("ERROR !!!\nException: " + ex + "\n\n");
                 Logger.getLogger(SqlDriversTester.class.getName()).log(Level.SEVERE, null, ex);
             }
         } catch (ClassNotFoundException ex) {
-            textLog_connect.setText(textLog_connect.getText() + "ERROR !!!\nException: " + ex + "\n\n");
+            textLog_connect.append("ERROR !!!\nException: " + ex + "\n\n");
             Logger.getLogger(SqlDriversTester.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
@@ -1701,9 +1714,9 @@ public class SqlDriversTester extends JFrame {
     private void platypusConnect() {
         String text = fldSchema_connect.getText();
         try {
-            textLog_connect.setText(textLog_connect.getText() + "<< Platypus клиент >>\n Create connection: ");
-            client = createPlatypusClient(fldUrl_connect.getText(), fldSchema_connect.getText(), fldUser_connect.getText(), fldPassword_connect.getText(), chkCreatePlatypusTables_connect.isSelected());
-            textLog_connect.setText(textLog_connect.getText() + "Ok !!!\n");
+            textLog_connect.append("<< Platypus клиент >>\n Create connection: ");
+            client = createPlatypusClient(fldUrl_connect.getText(), fldSchema_connect.getText(), fldUser_connect.getText(), new String(fldPassword_connect.getPassword()), chkCreatePlatypusTables_connect.isSelected());
+            textLog_connect.append("Ok !!!\n");
 
             DbMetadataCache mdCache = client.getDbMetadataCache(null);
             driver = mdCache.getConnectionDriver();
@@ -1711,7 +1724,7 @@ public class SqlDriversTester extends JFrame {
 
         } catch (Exception ex) {
             Logger.getLogger(SqlDriversTester.class.getName()).log(Level.SEVERE, null, ex);
-            textLog_connect.setText(textLog_connect.getText() + "ERROR !!!\nException: " + ex + "\n\n");
+            textLog_connect.append("ERROR !!!\nException: " + ex + "\n\n");
         }
 
     }
@@ -1726,12 +1739,12 @@ public class SqlDriversTester extends JFrame {
 
         comboTable_field.removeAllItems();
         JTextArea textLog = textLog_field;
-        textLog.setText(textLog.getText() + "\n<< Установить список таблиц >>");
+        textLog.append("\n<< Установить список таблиц >>");
         if (driver != null) {
 
             try {
                 String sql = driver.getSql4TablesEnumeration(schemaName);
-                textLog.setText(textLog.getText() + sql + "\nexecuteQuery: ");
+                textLog.append(sql + "\nexecuteQuery: ");
                 SqlCompiledQuery query = new SqlCompiledQuery(client, null, sql);
                 Rowset rowsetTablesList = query.executeQuery();
                 Fields fieldsTable = rowsetTablesList.getFields();
@@ -1753,15 +1766,15 @@ public class SqlDriversTester extends JFrame {
                             cnt++;
                         }
                     } while (rowsetTablesList.next());
-                    textLog.setText(textLog.getText() + "Ok!!!     Rows count: " + cnt + "\n");
+                    textLog.append("Ok!!!     Rows count: " + cnt + "\n");
                 }
 
             } catch (Exception ex) {
-                textLog.setText(textLog.getText() + "Error !!!\nException: " + ex + "\n\n");
+                textLog.append("Error !!!\nException: " + ex + "\n\n");
                 Logger.getLogger(SqlDriversTester.class.getName()).log(Level.SEVERE, null, ex);
             }
         } else {
-            textLog.setText(textLog.getText() + "\nError !!! Нет Platypus-клиента\n\n");
+            textLog.append("\nError !!! Нет Platypus-клиента\n\n");
         }
 
 
@@ -1776,7 +1789,7 @@ public class SqlDriversTester extends JFrame {
         JTextArea textLog = textLog_field;
 
         comboField_field.removeAllItems();
-        textLog.setText(textLog.getText() + "\n<< Установить список полей DbMetadataCache >>");
+        textLog.append("\n<< Установить список полей DbMetadataCache >>");
         if (client != null) {
             try {
                 DbMetadataCache mdCache = client.getDbMetadataCache(null);
@@ -1784,13 +1797,13 @@ public class SqlDriversTester extends JFrame {
                 for (Field f : fields.toCollection()) {
                     comboField_field.addItem(f.getName());
                 }
-                textLog.setText(textLog.getText() + "Ok!!!     Fields count: " + fields.getFieldsCount() + "\n");
+                textLog.append("Ok!!!     Fields count: " + fields.getFieldsCount() + "\n");
             } catch (Exception ex) {
-                textLog.setText(textLog.getText() + "Error !!!\nException: " + ex + "\n\n");
+                textLog.append("Error !!!\nException: " + ex + "\n\n");
                 Logger.getLogger(SqlDriversTester.class.getName()).log(Level.SEVERE, null, ex);
             }
         } else {
-            textLog.setText(textLog.getText() + "\nError !!! Нет Platypus-клиента\n\n");
+            textLog.append("\nError !!! Нет Platypus-клиента\n\n");
         }
     }
 
@@ -1890,7 +1903,7 @@ public class SqlDriversTester extends JFrame {
             newField_field.setTypeInfo(typeInfo);
             return newField_field;
         } catch (Exception e) {
-            textLog.setText(textLog.getText() + "\nОшибка при создании описания новой колонки!!!\nException:" + e + "\n\n");
+            textLog.append("\nОшибка при создании описания новой колонки!!!\nException:" + e + "\n\n");
         }
         return null;
 
@@ -1920,7 +1933,7 @@ public class SqlDriversTester extends JFrame {
             }
             return index;
         } catch (Exception e) {
-            textLog.setText(textLog.getText() + "\nОшибка при создании спецификации индекса!!!\nException:" + e + "\n\n");
+            textLog.append("\nОшибка при создании спецификации индекса!!!\nException:" + e + "\n\n");
         }
         return null;
     }
@@ -1940,7 +1953,7 @@ public class SqlDriversTester extends JFrame {
             pk.setField(aColumnName);
             return pk;
         } catch (Exception e) {
-            textLog.setText(textLog.getText() + "\nОшибка при создании спецификации первичного ключа!!!\nException:" + e + "\n\n");
+            textLog.append("\nОшибка при создании спецификации первичного ключа!!!\nException:" + e + "\n\n");
         }
         return null;
     }
@@ -1969,7 +1982,7 @@ public class SqlDriversTester extends JFrame {
             fk.setReferee(pk);
             return fk;
         } catch (Exception e) {
-            textLog.setText(textLog.getText() + "\nОшибка при создании спецификации внешнего ключа!!!\nException:" + e + "\n\n");
+            textLog.append("\nОшибка при создании спецификации внешнего ключа!!!\nException:" + e + "\n\n");
         }
         return null;
     }

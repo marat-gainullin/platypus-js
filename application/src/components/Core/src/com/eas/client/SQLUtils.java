@@ -446,6 +446,7 @@ public class SQLUtils {
         return RowsetUtils.makeQueryMetadataQuery(makeQueryByTableName(aTableName));
     }
 
+    /*
     public static String extractConnectionSchema(Properties aProps) {
         if (aProps != null) {
             String schema = aProps.getProperty(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME);
@@ -456,6 +457,7 @@ public class SQLUtils {
         }
         return null;
     }
+    */ 
     // Not doing anything yet. Just return SQl passed
 
     public static String resolveSQL_n_BindParameters(String sql, AppCache aCache) {

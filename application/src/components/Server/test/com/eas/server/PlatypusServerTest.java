@@ -36,8 +36,8 @@ public class PlatypusServerTest {
         }
         DbConnectionSettings settings = new DbConnectionSettings();
         settings.setUrl(url);
-        settings.getInfo().setProperty("user", login);
-        settings.getInfo().setProperty("password", passwd);
+        settings.setUser(login);
+        settings.setPassword(passwd);
         SSLContext sslContext = ServerMain.createSSLContext();
         server = new PlatypusServer(new DatabasesClient(settings), sslContext, new InetSocketAddress[]{new InetSocketAddress("localhost", TEST_PORT)}, new HashMap<Integer, String>(), null, null, null, new HashSet<String>(), null);
         server.start();

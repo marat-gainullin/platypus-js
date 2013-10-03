@@ -12,7 +12,6 @@ import com.eas.client.threetier.http.PlatypusHttpClient;
 import com.eas.client.threetier.http.PlatypusHttpConstants;
 import com.eas.client.threetier.http.PlatypusHttpsClient;
 import java.util.Map;
-import java.util.Properties;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -130,10 +129,10 @@ public class ClientFactory {
                 settingsMap.put(settingsNodesNames[i], connectionsettings);
                 connectionsettings.setUrl(connUrl);
                 connectionsettings.setName(connectionPrefs.get(ClientFactory.CONNECTION_TITLE_SETTING, ""));
-                Properties props = new Properties();
-                props.put(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME, connectionPrefs.get(ClientFactory.CONNECTION_SCHEMA_SETTING, ""));
-                props.put(ClientConstants.DB_CONNECTION_USER_PROP_NAME, connectionPrefs.get(ClientFactory.CONNECTION_USER_SETTING, ""));
-                connectionsettings.setInfo(props);
+                connectionsettings.setUser(connectionPrefs.get(ClientFactory.CONNECTION_USER_SETTING, ""));
+                if (connectionsettings instanceof DbConnectionSettings) {
+                    ((DbConnectionSettings) connectionsettings).setSchema(connectionPrefs.get(ClientFactory.CONNECTION_SCHEMA_SETTING, ""));
+                }
                 connectionsettings.setEditable(aEditable);
             } else {
                 Logger.getLogger(ClientFactory.class.getName()).log(Level.SEVERE, "Invalid connection url: {0}", connUrl);
@@ -143,7 +142,9 @@ public class ClientFactory {
 
     /**
      * Reads default settings from backing store.
-     * @return EasSettings instance as part of settings array, that have been read previously.
+     *
+     * @return EasSettings instance as part of settings array, that have been
+     * read previously.
      */
     public static EasSettings readDefaultSettings() throws Exception {
         int defaultConnectionIndex = Preferences.userRoot().node(SETTINGS_NODE).getInt(DEFAULT_CONNECTION_INDEX_SETTING, 0);

@@ -69,7 +69,7 @@ import org.w3c.dom.Document;
  */
 public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbSchemeModel> {
 
-    protected SqlActionsController sqlController = null;
+    protected SqlActionsController sqlController;
 
     /**
      * Imports structure from an xml string representing schema information

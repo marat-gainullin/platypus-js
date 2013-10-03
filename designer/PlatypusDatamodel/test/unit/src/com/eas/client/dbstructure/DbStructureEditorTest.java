@@ -66,7 +66,6 @@ public class DbStructureEditorTest {
         Properties props = new Properties();
         props.put("user", "eas");
         props.put("password", "eas");
-        props.put("schema", "eas");
         settings.setInfo(props);
         //String platHome = System.getProperty(ClientConstants.PLATYPUS_HOME_PROP_NAME);
         Client lclient = ClientFactory.getInstance(settings);

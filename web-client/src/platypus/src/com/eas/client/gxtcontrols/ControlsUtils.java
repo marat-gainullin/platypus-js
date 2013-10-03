@@ -212,10 +212,10 @@ public class ControlsUtils {
 	 * @return
 	 * @throws Exception
 	 */
-	public static PublishedCell calcStandalonePublishedCell(JavaScriptObject aEventThis, JavaScriptObject cellFunction, Row aRow, String aDisplay, ModelElementRef aModelElement) throws Exception {
+	public static PublishedCell calcStandalonePublishedCell(JavaScriptObject aEventThis, JavaScriptObject cellFunction, Row aRow, String aDisplay, ModelElementRef aModelElement, PublishedCell aAlreadyCell) throws Exception {
 		if (aEventThis != null && aModelElement != null && cellFunction != null) {
 			if (aRow != null) {
-				PublishedCell cell = Publisher.publishCell(Utils.toJs(aRow.getColumnObject(aModelElement.getColIndex())), aDisplay);
+				PublishedCell cell = aAlreadyCell != null ? aAlreadyCell : Publisher.publishCell(Utils.toJs(aRow.getColumnObject(aModelElement.getColIndex())), aDisplay);
 				Object[] rowIds = aRow.getPKValues();
 				if (rowIds != null) {
 					for (int i = 0; i < rowIds.length; i++)

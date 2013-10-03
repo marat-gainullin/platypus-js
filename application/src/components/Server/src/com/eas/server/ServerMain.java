@@ -314,13 +314,13 @@ public class ServerMain {
         DbConnectionSettings settings = new DbConnectionSettings();
         settings.setUrl(dbUrl);
         if (dbSchema != null) {
-            settings.getInfo().setProperty(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME, dbSchema);
+            settings.setSchema(dbSchema);
         }
         if (dbUsername != null) {
-            settings.getInfo().setProperty(ClientConstants.DB_CONNECTION_USER_PROP_NAME, dbUsername);
+            settings.setUser(dbUsername);
         }
         if (dbPassword != null) {
-            settings.getInfo().setProperty(ClientConstants.DB_CONNECTION_PASSWORD_PROP_NAME, dbPassword);
+            settings.setPassword(dbPassword);
         }
         settings.setMaxConnections(maxDbConnections);
         settings.setMaxStatements(maxDbStatements);
@@ -330,7 +330,7 @@ public class ServerMain {
         if (appPath != null) {
             settings.setApplicationPath(appPath);
         }
-        DatabasesClient appDbClient = new DatabasesClient(settings);
+        DatabasesClient appDbClient = new DatabasesClient(settings, false, new ServerTasksScanner(tasks));
         if (System.getProperty(ScriptRunner.DEBUG_PROPERTY) != null) {
             Debugger debugger = Debugger.initialize(false);
             registerMBean(DebuggerMBean.DEBUGGER_MBEAN_NAME, debugger);

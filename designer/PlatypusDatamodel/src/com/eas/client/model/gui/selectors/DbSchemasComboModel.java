@@ -23,8 +23,8 @@ public class DbSchemasComboModel implements ComboBoxModel<String> {
 
     protected DbClient client;
     protected String dbId;
-    protected String[] schemas;
-    protected DbTablesListModel tablesModel = null;
+    protected String[] schemas = new String[]{};
+    protected DbTablesListModel tablesModel;
     protected Set<ListDataListener> listeners = new HashSet<>();
 
     public DbSchemasComboModel(DbClient aClient, String aDbId, DbTablesListModel aTablesModel) {

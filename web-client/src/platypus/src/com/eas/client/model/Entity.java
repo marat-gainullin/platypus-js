@@ -178,79 +178,97 @@ public class Entity implements RowsetListener {
 					pop : function()
 					{
 						var rowset = getRowset();
-						var size = rowset.@com.bearsoft.rowset.Rowset::size()();
-						var deleted = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(size);
-						rowset.@com.bearsoft.rowset.Rowset::deleteAt(I)(size);
-						return @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(deleted, aEntity);
+						if(rowset != null){
+							var size = rowset.@com.bearsoft.rowset.Rowset::size()();
+							var deleted = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(size);
+							rowset.@com.bearsoft.rowset.Rowset::deleteAt(I)(size);
+							return @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(deleted, aEntity);
+						}else{
+							return undefined;
+						}
 					},
 					shift : function()
 					{
 						var rowset = getRowset();
-						var deleted = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(1);
-						rowset.@com.bearsoft.rowset.Rowset::deleteAt(I)(1);
-						return @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(deleted, aEntity);
+						if(rowset != null){
+							var deleted = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(1);
+							rowset.@com.bearsoft.rowset.Rowset::deleteAt(I)(1);
+							return @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(deleted, aEntity);
+						}else{
+							return undefined;
+						}
 					},
 					push : function()
 					{
 						var rowset = getRowset();
-						for(var i=0;i<arguments.length;i++)
-						{
-							var cSize = rowset.@com.bearsoft.rowset.Rowset::size()();
-							var propsAsArray = propsToArray(arguments[i]);
-							aEntity.@com.eas.client.model.Entity::insertAt(ILcom/google/gwt/core/client/JavaScriptObject;)(cSize+1, propsAsArray);
+						if(rowset != null){
+							for(var i=0;i<arguments.length;i++){
+								var cSize = rowset.@com.bearsoft.rowset.Rowset::size()();
+								var propsAsArray = propsToArray(arguments[i]);
+								aEntity.@com.eas.client.model.Entity::insertAt(ILcom/google/gwt/core/client/JavaScriptObject;)(cSize+1, propsAsArray);
+							}
+							return rowset.@com.bearsoft.rowset.Rowset::size()();
+						}else{
+							return 0;
 						}
-						return rowset.@com.bearsoft.rowset.Rowset::size()();
 					},
 					unshift : function()
 					{
 						var rowset = getRowset();
-						for(var i=arguments.length-1;i>=0;i--)
-						{
-							var propsAsArray = propsToArray(arguments[i]);
-							aEntity.@com.eas.client.model.Entity::insertAt(ILcom/google/gwt/core/client/JavaScriptObject;)(1, propsAsArray);
-						}
-						return rowset.@com.bearsoft.rowset.Rowset::size()();
+						if(rowset != null){
+							for(var i=arguments.length-1;i>=0;i--)
+							{
+								var propsAsArray = propsToArray(arguments[i]);
+								aEntity.@com.eas.client.model.Entity::insertAt(ILcom/google/gwt/core/client/JavaScriptObject;)(1, propsAsArray);
+							}
+							return rowset.@com.bearsoft.rowset.Rowset::size()();
+						}else
+							return 0;
 					},
 					reverse : function()
 					{
 						var rowset = getRowset();
-						rowset.@com.bearsoft.rowset.Rowset::reverse()();
+						if(rowset != null){
+							rowset.@com.bearsoft.rowset.Rowset::reverse()();
+						}
 					},
 					splice : function()
 					{
-						if(arguments.length > 0)
-						{
+						if(arguments.length > 0){
 							var rowset = getRowset();
-							var size = rowset.@com.bearsoft.rowset.Rowset::size()();
-							var startAt = arguments[0];
-							if(startAt < 0)
-								startAt = size+startAt;
-							if(startAt < 0)
-								throw "Bad first argument 'index'. It should be less than or equal array's length by absolute value"; 
-							var howMany = arguments.length > 1 ? arguments[1] : size;
-							if(howMany < 0)
-								throw "Bad second argument 'howMany'. It should greater or equal to zero"; 
-							var toAdd = [];
-							if(arguments.length > 2)
-							{
-								for(var ai=2; ai<arguments.length; ai++)
-									toAdd.push(arguments[ai]);
-							}
-							var removed = [];
-							while(startAt < size && removed.length < howMany)
-							{
-								var deleted = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(startAt+1);
-								rowset.@com.bearsoft.rowset.Rowset::deleteAt(I)(startAt+1);
-								var deletedFacade = @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(deleted, aEntity);
-								removed.push(deletedFacade);
-								size = rowset.@com.bearsoft.rowset.Rowset::size()();
-							}
-							for(var l=arguments.length-1;l>=2;l--)
-							{						
-								var propsAsArray = propsToArray(arguments[l]);
-								aEntity.@com.eas.client.model.Entity::insertAt(ILcom/google/gwt/core/client/JavaScriptObject;)(startAt+1, propsAsArray);
-							}
-							return removed;
+							if(rowset != null){
+								var size = rowset.@com.bearsoft.rowset.Rowset::size()();
+								var startAt = arguments[0];
+								if(startAt < 0)
+									startAt = size+startAt;
+								if(startAt < 0)
+									throw "Bad first argument 'index'. It should be less than or equal array's length by absolute value"; 
+								var howMany = arguments.length > 1 ? arguments[1] : size;
+								if(howMany < 0)
+									throw "Bad second argument 'howMany'. It should greater or equal to zero"; 
+								var toAdd = [];
+								if(arguments.length > 2)
+								{
+									for(var ai=2; ai<arguments.length; ai++)
+										toAdd.push(arguments[ai]);
+								}
+								var removed = [];
+								while(startAt < size && removed.length < howMany)
+								{
+									var deleted = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(startAt+1);
+									rowset.@com.bearsoft.rowset.Rowset::deleteAt(I)(startAt+1);
+									var deletedFacade = @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(deleted, aEntity);
+									removed.push(deletedFacade);
+									size = rowset.@com.bearsoft.rowset.Rowset::size()();
+								}
+								for(var l=arguments.length-1;l>=2;l--)
+								{						
+									var propsAsArray = propsToArray(arguments[l]);
+									aEntity.@com.eas.client.model.Entity::insertAt(ILcom/google/gwt/core/client/JavaScriptObject;)(startAt+1, propsAsArray);
+								}
+								return removed;
+							}else
+								return [];
 						}else
 							throw "Bad arguments. There are must at least one argument";
 					},
@@ -271,70 +289,77 @@ public class Entity implements RowsetListener {
 				    	var i;
 				    	var concated = [];
 						var rowset = getRowset();
-						var size = rowset.@com.bearsoft.rowset.Rowset::size()();
-						for(i=0;i<size;i++)
-						{
-							var row = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(i+1);
-							var rowFacade = @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(row, aEntity);
-			    			concated.push(rowFacade);
+						if(rowset != null){
+							var size = rowset.@com.bearsoft.rowset.Rowset::size()();
+							for(i=0;i<size;i++)
+							{
+								var row = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(i+1);
+								var rowFacade = @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(row, aEntity);
+				    			concated.push(rowFacade);
+							}
+					    	for(i=0;i<arguments.length;i++)
+					    	{
+					    		if(Array.isArray(arguments[i]))
+					    		{
+					    			for(var l=0;l<arguments[i].length;l++)
+					    			{
+					    				concated.push(arguments[i][l]);
+					    			}
+					    		}else
+					    		{ 
+					    			concated.push(arguments[i]);
+					    		}
+					    	}
 						}
-				    	for(i=0;i<arguments.length;i++)
-				    	{
-				    		if(Array.isArray(arguments[i]))
-				    		{
-				    			for(var l=0;l<arguments[i].length;l++)
-				    			{
-				    				concated.push(arguments[i][l]);
-				    			}
-				    		}else
-				    		{ 
-				    			concated.push(arguments[i]);
-				    		}
-				    	}
-				    	return concated;
+					    return concated;
 				    },
 				    join : function(aSeparator)
 				    {
 				    	var joined = [];
 						var rowset = getRowset();
-						var size = rowset.@com.bearsoft.rowset.Rowset::size()();
-						for(var i=0;i<size;i++)
-						{
-							var row = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(i+1);
-							var rowFacade = @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(row, aEntity);
-							var sElement = "{";
-							for(var l=0;l<rowFacade.length;l++)
+						if(rowset != null){
+							var size = rowset.@com.bearsoft.rowset.Rowset::size()();
+							for(var i=0;i<size;i++)
 							{
-								if(l > 0)
-									sElement += ", ";
-								sElement += rowFacade.md[l].name + ":" + rowFacade[l];
-							} 
-							sElement += "}";
-			    			joined.push(sElement);
-						}
-						return joined.join(aSeparator);
+								var row = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(i+1);
+								var rowFacade = @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(row, aEntity);
+								var sElement = "{";
+								for(var l=0;l<rowFacade.length;l++)
+								{
+									if(l > 0)
+										sElement += ", ";
+									sElement += rowFacade.md[l].name + ":" + rowFacade[l];
+								} 
+								sElement += "}";
+				    			joined.push(sElement);
+							}
+							return joined.join(aSeparator);
+						}else
+							return "";
 				    },
 				    slice : function(startAt, endAt)
 				    {
 				    	var sliced = [];
 						var rowset = getRowset();
-						var size = rowset.@com.bearsoft.rowset.Rowset::size()();
-						if(startAt < 0)
-							startAt = size+startAt;
-						if(startAt < 0)
-							throw "Bad first argument 'begin'. It should be less than or equal array's length by absolute value";
-					 	if(endAt == undefined)
-					 		endAt = size-1; 
-						if(endAt < 0)
-							endAt = size+endAt;
-						if(endAt < 0)
-							throw "Bad second argument 'end'. It should be less than or equal array's length by absolute value";
-					 		
-						for(var i=startAt;i<=endAt;i++)
-						{
-							var row = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(i+1);
-							var rowFacade = @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(row, aEntity);
-							sliced.push(rowFacade);
+						if(rowset != null){
+							var size = rowset.@com.bearsoft.rowset.Rowset::size()();
+							if(startAt < 0)
+								startAt = size+startAt;
+							if(startAt < 0)
+								throw "Bad first argument 'begin'. It should be less than or equal array's length by absolute value";
+						 	if(endAt == undefined)
+						 		endAt = size-1; 
+							if(endAt < 0)
+								endAt = size+endAt;
+							if(endAt < 0)
+								throw "Bad second argument 'end'. It should be less than or equal array's length by absolute value";
+						 		
+							for(var i=startAt;i<=endAt;i++)
+							{
+								var row = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(i+1);
+								var rowFacade = @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(row, aEntity);
+								sliced.push(rowFacade);
+							}
 						}
 						return sliced;
 				    },
@@ -342,163 +367,186 @@ public class Entity implements RowsetListener {
 				    {
 				    	var joined = [];
 						var rowset = getRowset();
-						var size = rowset.@com.bearsoft.rowset.Rowset::size()();
-						for(var i=0;i<size;i++)
-						{
-							var row = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(i+1);
-							var rowFacade = @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(row, aEntity);
-							var sElement = "{";
-							for(var l=0;l<rowFacade.length;l++)
+						if(rowset != null){
+							var size = rowset.@com.bearsoft.rowset.Rowset::size()();
+							for(var i=0;i<size;i++)
 							{
-								if(l > 0)
-									sElement += ", ";
-								sElement += rowFacade.md[l].name + ":" + rowFacade[l];
-							} 
-							sElement += "}";
-			    			joined.push(sElement);
-						}
-						return "["+joined.join(",\n")+"]";
+								var row = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(i+1);
+								var rowFacade = @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(row, aEntity);
+								var sElement = "{";
+								for(var l=0;l<rowFacade.length;l++)
+								{
+									if(l > 0)
+										sElement += ", ";
+									sElement += rowFacade.md[l].name + ":" + rowFacade[l];
+								} 
+								sElement += "}";
+				    			joined.push(sElement);
+							}
+							return "["+joined.join(",\n")+"]";
+						}else
+							return "";
 				    },
 				    indexOf : function(aObj)
 				    {
 						var rowset = getRowset();
-						var size = rowset.@com.bearsoft.rowset.Rowset::size()();
-				    	for(var i=0;i<size;i++)
-				    	{
-							var row = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(i+1);
-							var rowFacade = @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(row, aEntity);
-				    		if(rowFacade == aObj)
-				    			return i; 
-				    	}
+						if(rowset != null){
+							var size = rowset.@com.bearsoft.rowset.Rowset::size()();
+					    	for(var i=0;i<size;i++)
+					    	{
+								var row = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(i+1);
+								var rowFacade = @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(row, aEntity);
+					    		if(rowFacade == aObj)
+					    			return i; 
+					    	}
+						}
 				    	return -1;
 				    },
 				    lastIndexOf : function(aObj)
 				    {
 						var rowset = getRowset();
-						var size = rowset.@com.bearsoft.rowset.Rowset::size()();
-				    	for(var i=size-1;i>=0;i--)
-				    	{
-							var row = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(i+1);
-							var rowFacade = @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(row, aEntity);
-				    		if(rowFacade == aObj)
-				    			return i; 
-				    	}
+						if(rowset != null){
+							var size = rowset.@com.bearsoft.rowset.Rowset::size()();
+					    	for(var i=size-1;i>=0;i--)
+					    	{
+								var row = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(i+1);
+								var rowFacade = @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(row, aEntity);
+					    		if(rowFacade == aObj)
+					    			return i; 
+					    	}
+						}
 				    	return -1;
 				    },
 				    // array iteration methods
 				    filter : function(callback, thisObj){
 				    	var filtered = [];
 						var rowset = getRowset();
-						var rowsetFacade = @com.eas.client.model.Entity::publishEntityFacade(Lcom/eas/client/model/Entity;)(aEntity);
-						var size = rowset.@com.bearsoft.rowset.Rowset::size()();
-				    	for(var i=0;i<size;i++)
-				    	{
-							var row = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(i+1);
-							var rowFacade = @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(row, aEntity);
-							if(callback.call(thisObj, rowFacade, i, rowsetFacade))
-								filtered.push(rowFacade);
-				    	}
+						if(rowset != null){
+							var rowsetFacade = @com.eas.client.model.Entity::publishEntityFacade(Lcom/eas/client/model/Entity;)(aEntity);
+							var size = rowset.@com.bearsoft.rowset.Rowset::size()();
+					    	for(var i=0;i<size;i++)
+					    	{
+								var row = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(i+1);
+								var rowFacade = @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(row, aEntity);
+								if(callback.call(thisObj, rowFacade, i, rowsetFacade))
+									filtered.push(rowFacade);
+					    	}
+						}
 				    	return filtered;
 				    },
 				    forEach : function(callback, thisObj){
 						var rowset = getRowset();
-						var rowsetFacade = @com.eas.client.model.Entity::publishEntityFacade(Lcom/eas/client/model/Entity;)(aEntity);
-						var size = rowset.@com.bearsoft.rowset.Rowset::size()();
-				    	for(var i=0;i<size;i++)
-				    	{
-							var row = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(i+1);
-							var rowFacade = @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(row, aEntity);
-							callback.call(thisObj, rowFacade, i, rowsetFacade);
-				    	}
+						if(rowset != null){
+							var rowsetFacade = @com.eas.client.model.Entity::publishEntityFacade(Lcom/eas/client/model/Entity;)(aEntity);
+							var size = rowset.@com.bearsoft.rowset.Rowset::size()();
+					    	for(var i=0;i<size;i++)
+					    	{
+								var row = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(i+1);
+								var rowFacade = @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(row, aEntity);
+								callback.call(thisObj, rowFacade, i, rowsetFacade);
+					    	}
+						}
 				    },
 				    every : function(callback, thisObj){
 						var rowset = getRowset();
-						var rowsetFacade = @com.eas.client.model.Entity::publishEntityFacade(Lcom/eas/client/model/Entity;)(aEntity);
-						var size = rowsetFacade.length;
-				    	for(var i=0;i<size;i++)
-				    	{
-							var row = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(i+1);
-							var rowFacade = @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(row, aEntity);
-							if(!callback.call(thisObj, rowFacade, i, rowsetFacade))
-								return false;
-				    	}
-				    	return true;
+						if(rowset != null){
+							var rowsetFacade = @com.eas.client.model.Entity::publishEntityFacade(Lcom/eas/client/model/Entity;)(aEntity);
+							var size = rowsetFacade.length;
+					    	for(var i=0;i<size;i++)
+					    	{
+								var row = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(i+1);
+								var rowFacade = @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(row, aEntity);
+								if(!callback.call(thisObj, rowFacade, i, rowsetFacade))
+									return false;
+					    	}
+						}
+			    		return true;
 				    },
 				    map : function(callback, thisObj){
 				    	var mapped = [];
 						var rowset = getRowset();
-						var rowsetFacade = @com.eas.client.model.Entity::publishEntityFacade(Lcom/eas/client/model/Entity;)(aEntity);
-						var size = rowset.@com.bearsoft.rowset.Rowset::size()();
-				    	for(var i=0;i<size;i++)
-				    	{
-							var row = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(i+1);
-							var rowFacade = @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(row, aEntity);
-							mapped.push(callback.call(thisObj, rowFacade, i, rowsetFacade));
-				    	}
+						if(rowset != null){
+							var rowsetFacade = @com.eas.client.model.Entity::publishEntityFacade(Lcom/eas/client/model/Entity;)(aEntity);
+							var size = rowset.@com.bearsoft.rowset.Rowset::size()();
+					    	for(var i=0;i<size;i++)
+					    	{
+								var row = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(i+1);
+								var rowFacade = @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(row, aEntity);
+								mapped.push(callback.call(thisObj, rowFacade, i, rowsetFacade));
+					    	}
+						}
 				    	return mapped;
 				    },
 				    some : function(callback, thisObj){
 						var rowset = getRowset();
-						var rowsetFacade = @com.eas.client.model.Entity::publishEntityFacade(Lcom/eas/client/model/Entity;)(aEntity);
-						var size = rowset.@com.bearsoft.rowset.Rowset::size()();
-				    	for(var i=0;i<size;i++)
-				    	{
-							var row = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(i+1);
-							var rowFacade = @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(row, aEntity);
-							if(callback.call(thisObj, rowFacade, i, rowsetFacade))
-								return true;
-				    	}
+						if(rowset != null){
+							var rowsetFacade = @com.eas.client.model.Entity::publishEntityFacade(Lcom/eas/client/model/Entity;)(aEntity);
+							var size = rowset.@com.bearsoft.rowset.Rowset::size()();
+					    	for(var i=0;i<size;i++)
+					    	{
+								var row = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(i+1);
+								var rowFacade = @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(row, aEntity);
+								if(callback.call(thisObj, rowFacade, i, rowsetFacade))
+									return true;
+					    	}
+						}
 				    	return false;
 				    },
 				    reduce : function(callback, initialValue){
 						var rowset = getRowset();
-						var rowsetFacade = @com.eas.client.model.Entity::publishEntityFacade(Lcom/eas/client/model/Entity;)(aEntity);
-						var size = rowset.@com.bearsoft.rowset.Rowset::size()();
-						var startAt;
-						var previousValue;
-						if(initialValue == undefined)
-						{
-							startAt = 1;
-							var _row = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(1);
-							previousValue = @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(_row, aEntity);
-							
+						if(rowset != null){
+							var rowsetFacade = @com.eas.client.model.Entity::publishEntityFacade(Lcom/eas/client/model/Entity;)(aEntity);
+							var size = rowset.@com.bearsoft.rowset.Rowset::size()();
+							var startAt;
+							var previousValue;
+							if(initialValue == undefined)
+							{
+								startAt = 1;
+								var _row = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(1);
+								previousValue = @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(_row, aEntity);
+								
+							}else
+							{
+								startAt = 0;
+								previousValue = initialValue;
+							}
+					    	for(var i=startAt;i<size;i++)
+					    	{
+								var row1 = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(i+1);
+								var rowFacade1 = @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(row1, aEntity);
+								previousValue = callback.call(null, previousValue, rowFacade1, i, rowsetFacade);
+					    	}
+					    	return previousValue;
 						}else
-						{
-							startAt = 0;
-							previousValue = initialValue;
-						}
-				    	for(var i=startAt;i<size;i++)
-				    	{
-							var row1 = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(i+1);
-							var rowFacade1 = @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(row1, aEntity);
-							previousValue = callback.call(null, previousValue, rowFacade1, i, rowsetFacade);
-				    	}
-				    	return previousValue;
+							return initialValue;
 				    },
 				    reduceRight : function(callback, initialValue){
 						var rowset = getRowset();
-						var rowsetFacade = @com.eas.client.model.Entity::publishEntityFacade(Lcom/eas/client/model/Entity;)(aEntity);
-						var size = rowset.@com.bearsoft.rowset.Rowset::size()();
-						var startAt;
-						var previousValue;
-						if(initialValue == undefined)
-						{
-							startAt = size-2;
-							var _row = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(size);
-							previousValue = @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(_row, aEntity);
-							
+						if(rowset != null){
+							var rowsetFacade = @com.eas.client.model.Entity::publishEntityFacade(Lcom/eas/client/model/Entity;)(aEntity);
+							var size = rowset.@com.bearsoft.rowset.Rowset::size()();
+							var startAt;
+							var previousValue;
+							if(initialValue == undefined)
+							{
+								startAt = size-2;
+								var _row = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(size);
+								previousValue = @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(_row, aEntity);
+								
+							}else
+							{
+								startAt = size-1;
+								previousValue = initialValue;
+							}
+					    	for(var i=startAt;i>=0;i--)
+					    	{
+								var row1 = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(i+1);
+								var rowFacade1 = @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(row1, aEntity);
+								previousValue = callback.call(null, previousValue, rowFacade1, i, rowsetFacade);
+					    	}
+					    	return previousValue;
 						}else
-						{
-							startAt = size-1;
-							previousValue = initialValue;
-						}
-				    	for(var i=startAt;i>=0;i--)
-				    	{
-							var row1 = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(i+1);
-							var rowFacade1 = @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(row1, aEntity);
-							previousValue = callback.call(null, previousValue, rowFacade1, i, rowsetFacade);
-				    	}
-				    	return previousValue;
+							return initialValue;
 				    },
 					// properties
 					getQueryId : function() {

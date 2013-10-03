@@ -118,13 +118,12 @@ public class ClientConstants {
     public static final String NO_SETTINGS_FILE = "No or bad settings file: ";
     public static final String NO_JAVA_PROPERTY = "No java property: ";
     public static final String QUERY_ID_PREFIX = "q";
-    public static final String DB_CONNECTION_USER_PROP_NAME = "user";
-    public static final String DB_CONNECTION_PASSWORD_PROP_NAME = "password";
-    public static final String DB_CONNECTION_SCHEMA_PROP_NAME = "schema";
+    //public static final String DB_CONNECTION_USER_PROP_NAME = "user";
+    //public static final String DB_CONNECTION_PASSWORD_PROP_NAME = "password";
+    //public static final String DB_CONNECTION_SCHEMA_PROP_NAME = "schema";
     public static final String DB_CONNECTION_URL_PROP_NAME = "url";
     public static final String APP_PATH_CMD_PROP_NAME = "applicationpath";
     public static final String APP_PATH_CMD_PROP_NAME1 = "ap";
-    public static final String DB_CONNECTION_DIALECT_PROP_NAME = "dialect";
     /*
      * Database dialects are used as keys to select the Playpus driver or JDBC driver.
      * Also check com/eas/client/settings/DbDrivers.xml file.

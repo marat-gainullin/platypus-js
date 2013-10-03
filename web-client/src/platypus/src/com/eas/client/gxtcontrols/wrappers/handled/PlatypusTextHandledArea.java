@@ -47,7 +47,7 @@ public class PlatypusTextHandledArea extends PlatypusTextArea {
 	@Override
 	protected void onRedraw() {
 		super.onRedraw();
-		PublishedCell lastPublishedCell = textCell.consumePublishedCell();
+		PublishedCell lastPublishedCell = textCell.getPublishedCell();
 		if (lastPublishedCell != null) {
 			lastPublishedCell.styleToElement(getInputEl());
 		} else {

@@ -5,7 +5,6 @@
 package com.eas.metadata.dbdefines;
 
 import com.eas.metadata.testdefine.DbTestDefine;
-import com.eas.metadata.dbdefines.DbConnection;
 
 /**
  *

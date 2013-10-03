@@ -27,7 +27,7 @@ import org.openide.text.Line;
  */
 public class MBeanDebuggerListener implements NotificationListener {
 
-    protected boolean haveBeenRun;
+    protected boolean debuggingStarted;
     protected boolean running;
     protected PlatypusRunpointAnnotation annotation = new PlatypusRunpointAnnotation();
     protected Project project;
@@ -102,8 +102,8 @@ public class MBeanDebuggerListener implements NotificationListener {
                 }
             }
         }
-        if (!haveBeenRun) {
-            haveBeenRun = true;
+        if (!debuggingStarted) {
+            debuggingStarted = true;
             ourEngine.getActionsManager().doAction(ActionsManager.ACTION_START);
         }
         ourEngine.getActionsManager().doAction(DebuggerConstants.ACTION_ENABLED_CHANGED);
@@ -121,7 +121,7 @@ public class MBeanDebuggerListener implements NotificationListener {
     }
 
     public boolean isHaveBeenRun() {
-        return haveBeenRun;
+        return debuggingStarted;
     }
 
     public int getCurrentLineNumber() {

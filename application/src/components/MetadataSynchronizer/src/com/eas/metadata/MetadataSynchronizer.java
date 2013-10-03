@@ -266,24 +266,16 @@ public class MetadataSynchronizer {
      */
     private DbClient createClient(String aUrl, String aSchema, String aUser, String aPassword) throws Exception {
         log(Level.INFO, String.format("Start creating connection to schema %s", aSchema));
-        EasSettings settings = EasSettings.createInstance(aUrl);
-        if (settings instanceof DbConnectionSettings) {
-//            if (aUser == null || aUser.isEmpty() || aPassword == null || aPassword.isEmpty() || aSchema == null || aSchema.isEmpty()) {
-//                throw new Exception(" May be bad db connection settings (url, dbuser, dbpassword, dbschema).");
-//            }
-            settings.getInfo().put(ClientConstants.DB_CONNECTION_USER_PROP_NAME, aUser);
-            settings.getInfo().put(ClientConstants.DB_CONNECTION_PASSWORD_PROP_NAME, aPassword);
-            if (aSchema != null) {
-                settings.getInfo().put(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME, aSchema);
-            }
-            ((DbConnectionSettings) settings).setInitSchema(false);
+        try {
+            EasSettings settings = new DbConnectionSettings(aUrl, aSchema, aUser, aPassword, SQLUtils.dialectByUrl(aUrl), false);
+            Client client = ClientFactory.getInstance(settings);
+            assert client instanceof DbClient;
+            log(Level.INFO, String.format("Connect to schema %s created", aSchema));
+            return (DbClient) client;
+        } catch (Exception ex) {
+            log(Level.INFO, String.format("Connect to schema %s not created", aSchema));
+            throw ex;
         }
-        settings.setUrl(aUrl);
-        Client lclient = ClientFactory.getInstance(settings);
-        assert lclient instanceof DbClient;
-        DbClient client = (DbClient) lclient;
-        log(Level.INFO, String.format("Connect to schema %s created", (client == null ? "not " : "")));
-        return client;
     }
 
     /**
@@ -397,7 +389,6 @@ public class MetadataSynchronizer {
         DbMetadataCache mdCache;
 
         // for default logger       
-        int cntTables = 0;
         int cntFields = 0;
         int cntIndexes = 0;
         int cntIndexesF = 0;
@@ -511,7 +502,7 @@ public class MetadataSynchronizer {
                 tablesStructure.next().makeMapNamesToUpper();
             }
 
-            cntTables = mdStructure.size();
+            int cntTables = mdStructure.size();
             StringBuilder sb = new StringBuilder();
             sb.append("Read structure from schema ").append(dbSchema);
             sb.append("\n   tables: ").append(cntTables);
@@ -991,6 +982,7 @@ public class MetadataSynchronizer {
                         idxSpec.setName(idxName);
                     }
                 }
+                assert idxSpec != null;
 
                 Object oNonUnique = aRowset.getObject(nCol_Idx_Non_Uni);
                 if (oNonUnique != null) {

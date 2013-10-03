@@ -42,8 +42,8 @@ public class PlatypusServerRecivedPacketTest {
         String passwd = "eas";
         DbConnectionSettings settings = new DbConnectionSettings();
         settings.setUrl(url);
-        settings.getInfo().setProperty("user", login);
-        settings.getInfo().setProperty("password", passwd);
+        settings.setUser(login);
+        settings.setPassword(passwd);
         SSLContext sslContext = ServerMain.createSSLContext();
         InetSocketAddress[] addresses = new InetSocketAddress[]{new InetSocketAddress("localhost", TEST_PORT), 
                                                                 new InetSocketAddress("localhost", TEST_PORT+1)};

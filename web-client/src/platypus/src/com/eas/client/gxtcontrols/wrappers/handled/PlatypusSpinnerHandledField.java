@@ -47,6 +47,8 @@ public class PlatypusSpinnerHandledField extends PlatypusSpinnerField {
 			redraw();
 	}
 
+	protected PublishedCell cellToRender;
+	
 	@Override
 	protected void onRedraw() {
 		super.onRedraw();
@@ -56,12 +58,27 @@ public class PlatypusSpinnerHandledField extends PlatypusSpinnerField {
 			if (getParent() != null && getParent().getParent() instanceof PlatypusAdapterStandaloneField<?>) {
 				PlatypusAdapterField<?> adapter = (PlatypusAdapterStandaloneField<?>) getParent().getParent();
 				eventThis = adapter.getPublishedField();
-				PublishedCell cellToRender = modelElement != null && cellFunction != null ? ControlsUtils.calcStandalonePublishedCell(eventThis, cellFunction, modelElement.entity.getRowset()
-				        .getCurrentRow(), null, modelElement) : null;
+				if(cellFunction != null && modelElement != null && modelElement.entity != null && modelElement.entity.getRowset() != null){
+					cellToRender = ControlsUtils.calcStandalonePublishedCell(eventThis, cellFunction, modelElement.entity.getRowset()
+					        .getCurrentRow(), null, modelElement, cellToRender);
+				}
+				if(cellToRender != null && cellToRender.getDisplayCallback() == null){
+					cellToRender.setDisplayCallback(new Runnable(){
+						@Override
+						public void run() {
+							JavaScriptObject oldCellFunction = cellFunction;
+							cellFunction = null;
+							try{
+								redraw(true);
+							}finally{
+								cellFunction = oldCellFunction;
+							}
+						}
+					});
+				}
+				ControlsUtils.reapplyStyle(adapter);
 				if (cellToRender != null) {
 					cellToRender.styleToElement(getInputEl());
-				} else {
-					ControlsUtils.reapplyStyle(adapter);
 				}
 			}
 		} catch (Exception ex) {

@@ -145,7 +145,7 @@ public class Publisher {
 	public native static PublishedCell publishCell(Object aData, String aDisplay)/*-{
 		var published = {
 					data : $wnd.boxAsJs(aData)
-				}
+		};
 		var _display = aDisplay;
 		var _style = new $wnd.Style();
 		Object.defineProperty(published, "display", {
