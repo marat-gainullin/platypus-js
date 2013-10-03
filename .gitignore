@@ -30,3 +30,7 @@ private.xml
 application.zip
 thinclient.zip/application/src/components/DbControlsDesigner/nbproject/private/
 /application/src/components/SqlDriversTester/nbproject/private/
+/application/src/lib/own/Routing/build/
+com.google.gdt.eclipse.core.prefs
+.metadata
+*.zip
