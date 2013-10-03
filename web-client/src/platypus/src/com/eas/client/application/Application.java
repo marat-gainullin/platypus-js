@@ -114,6 +114,7 @@ public class Application {
 					}
 				}
 			}
+			onReady();
 		}
 	}
 
@@ -1049,7 +1050,6 @@ public class Application {
 	}-*/;
 
 	protected static Cancellable startAppElements(AppClient client, final Map<String, Element> aMarkupStart) throws Exception {
-		onReady();
 		if (aMarkupStart == null || aMarkupStart.isEmpty()) {
 			return client.getStartElement(new StringCallbackAdapter() {
 
@@ -1061,6 +1061,8 @@ public class Application {
 						Collection<String> results = new ArrayList<String>();
 						results.add(aResult);
 						loadings = loader.load(results, new ExecuteApplicationCallback(results));
+					}else{
+						onReady();
 					}
 				}
 

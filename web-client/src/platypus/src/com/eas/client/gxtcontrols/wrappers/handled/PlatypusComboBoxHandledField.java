@@ -75,7 +75,6 @@ public class PlatypusComboBoxHandledField extends PlatypusComboBox {
 		if (aValue != cellFunction) {
 			cellFunction = aValue;
 			labelProvider.setCellFunction(cellFunction);
-			cellFunction = aValue;
 			redraw();
 		}
 	}
@@ -87,28 +86,44 @@ public class PlatypusComboBoxHandledField extends PlatypusComboBox {
 			redraw();
 	}
 
+	protected PublishedCell cellToRender;
+
 	@Override
 	protected void onRedraw() {
 		super.onRedraw();
-		if (modelElement != null && cellFunction != null && modelElement.entity.getRowset() != null) {
-			try {
-				JavaScriptObject eventThis = modelElement.entity.getModel().getModule();
-				// TODO: refactor to onTargetRedraw event
-				if (getParent() != null && getParent().getParent() instanceof PlatypusAdapterStandaloneField<?>) {
-					PlatypusAdapterField<?> adapter = (PlatypusAdapterStandaloneField<?>) getParent().getParent();
-					eventThis = adapter.getPublishedField();
+		try {
+			JavaScriptObject eventThis = modelElement != null && modelElement.entity != null && modelElement.entity.getModel() != null ? modelElement.entity.getModel().getModule() : null;
+			// TODO: refactor to onTargetRedraw event
+			if (getParent() != null && getParent().getParent() instanceof PlatypusAdapterStandaloneField<?>) {
+				PlatypusAdapterField<?> adapter = (PlatypusAdapterStandaloneField<?>) getParent().getParent();
+				ControlsUtils.reapplyStyle(adapter);
+				eventThis = adapter.getPublishedField();
+
+				if (cellFunction != null && modelElement != null && modelElement.entity != null && modelElement.entity.getRowset() != null) {
 					Row currentRow = modelElement.entity.getRowset().getCurrentRow();
 					Object currentRowValue = currentRow.getColumnObject(modelElement.getColIndex());
-					PublishedCell cellToRender = ControlsUtils.calcStandalonePublishedCell(eventThis, cellFunction, currentRow, labelProvider.getLabel(currentRowValue), modelElement);
-					if (cellToRender != null) {
-						cellToRender.styleToElement(getInputEl());
-					} else {
-						ControlsUtils.reapplyStyle(adapter);
-					}
+					cellToRender = ControlsUtils.calcStandalonePublishedCell(eventThis, cellFunction, currentRow, labelProvider.getLabel(currentRowValue), modelElement, cellToRender);
 				}
-			} catch (Exception ex) {
-				Logger.getLogger(PlatypusComboBoxHandledField.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+				if (cellToRender != null) {
+					if (cellToRender.getDisplayCallback() == null) {
+						cellToRender.setDisplayCallback(new Runnable() {
+							@Override
+							public void run() {
+								JavaScriptObject oldCellFunction = cellFunction;
+								cellFunction = null;
+								try {
+									redraw(true);
+								} finally {
+									cellFunction = oldCellFunction;
+								}
+							}
+						});
+					}
+					cellToRender.styleToElement(getInputEl());
+				}
 			}
+		} catch (Exception ex) {
+			Logger.getLogger(PlatypusComboBoxHandledField.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
 		}
 	}
 

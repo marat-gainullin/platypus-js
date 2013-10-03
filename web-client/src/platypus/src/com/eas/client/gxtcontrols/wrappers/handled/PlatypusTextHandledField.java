@@ -47,15 +47,14 @@ public class PlatypusTextHandledField extends PlatypusTextField {
 	@Override
 	protected void onRedraw() {
 		super.onRedraw();
-		PublishedCell lastPublishedCell = textCell.consumePublishedCell();
-		if (lastPublishedCell != null) {
-			lastPublishedCell.styleToElement(getInputEl());
-		} else {
-			// TODO: refactor to onTargetRedraw event
-			if (getParent() != null && getParent().getParent() instanceof PlatypusAdapterStandaloneField<?>) {
-				PlatypusAdapterField<?> adapter = (PlatypusAdapterStandaloneField<?>) getParent().getParent();
-				ControlsUtils.reapplyStyle(adapter);
-			}
+		// TODO: refactor to onTargetRedraw event
+		if (getParent() != null && getParent().getParent() instanceof PlatypusAdapterStandaloneField<?>) {
+			PlatypusAdapterField<?> adapter = (PlatypusAdapterStandaloneField<?>) getParent().getParent();
+			ControlsUtils.reapplyStyle(adapter);
+		}
+		PublishedCell calcedPublishedCell = textCell.getPublishedCell();
+		if (calcedPublishedCell != null) {
+			calcedPublishedCell.styleToElement(getInputEl());
 		}
 	}
 }

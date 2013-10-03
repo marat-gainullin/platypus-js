@@ -61,6 +61,7 @@ import com.google.gwt.xhr.client.XMLHttpRequest.ResponseType;
 import com.google.gwt.xml.client.Document;
 import com.google.gwt.xml.client.Node;
 import com.google.gwt.xml.client.XMLParser;
+import com.sencha.gxt.core.client.GXT;
 
 /**
  * 
@@ -680,15 +681,20 @@ public class AppClient {
 
 			@Override
 			protected void doWork(XMLHttpRequest aResponse) throws Exception {
-				if(onSuccess != null)
-					onSuccess.run(aResponse.getResponseText());
+				if(onSuccess != null){
+					String respText = aResponse.getResponseText();
+					Object oResult = respText != null && !respText.isEmpty() ? Utils.toJava(Utils.jsonParse(respText)) : null;
+					assert oResult == null || oResult instanceof String : "getStartElement request expects null or string value as a response.";
+					onSuccess.run((String)oResult);
+				}
 			}
 		}, null);
 	}
 
-	public Cancellable getAppElement(final String appElementName, final Callback<Document> onSuccess, final Callback<XMLHttpRequest> onFailure) throws Exception {
-		Document doc = appElements.get(appElementName);
-		if (doc != null) {
+	public Cancellable getAppElementXmlDom(final String appElementName, final Callback<Document> onSuccess, final Callback<XMLHttpRequest> onFailure) throws Exception {
+		if (appElements.containsKey(appElementName)) {
+			Document doc = appElements.get(appElementName);
+			// doc may be null, because of application elements without a xml-dom, plain scripts for example.
 			onSuccess.run(doc);
 			return new Cancellable() {
 
@@ -698,7 +704,9 @@ public class AppClient {
 				}
 			};
 		} else {
-			String query = params(param(PlatypusHttpRequestParams.TYPE, String.valueOf(Requests.rqAppElement))/*, param(PlatypusHttpRequestParams.CACHE_BUSTER, String.valueOf(IDGenerator.genId()))*/);
+			String query = params(param(PlatypusHttpRequestParams.TYPE, String.valueOf(Requests.rqAppElement)));
+			if(GXT.isChrome())// remove if chrome bug 266971 is fixed
+				query = params(param(PlatypusHttpRequestParams.TYPE, String.valueOf(Requests.rqAppElement)), param(PlatypusHttpRequestParams.CACHE_BUSTER, String.valueOf(IDGenerator.genId())));
 			return startRequest(resourceUri(appElementName), query, "", RequestBuilder.GET, new ResponseCallbackAdapter() {
 
 				@Override

@@ -28,25 +28,41 @@ public class PlatypusComboLabelHandledProvider extends ComboLabelProvider {
 		cellFunction = aValue;
 	}
 
+	protected PublishedCell cellToRender;
+	
 	@Override
 	public String getLabel(Object aValue) {
 		String label = super.getLabel(aValue);
-		if (cellFunction != null) {
-			try {
-				Row foundInLookup = lookupValueRef != null && lookupValueRef.entity != null && lookupValueRef.entity.getRowset() != null ? lookupValueRef.entity.find(lookupValueRef.getColIndex(), aValue) : null;
-				Row foundInTarget = targetValueRef != null && targetValueRef.entity != null && targetValueRef.entity.getRowset() != null ? targetValueRef.entity.getRowset().getCurrentRow() : null;
-				JavaScriptObject eventThis = targetValueRef.entity.getModel().getModule();
-				if (container != null && container.getParent() != null && container.getParent().getParent() instanceof PlatypusAdapterStandaloneField<?>) {
-					PlatypusAdapterField<?> adapter = (PlatypusAdapterStandaloneField<?>) container.getParent().getParent();
-					eventThis = adapter.getPublishedField();
-				}
-				PublishedCell cellToRender = ControlsUtils.calcStandalonePublishedCell(eventThis, cellFunction, foundInLookup != null ? foundInLookup : foundInTarget, label, foundInLookup != null ? lookupValueRef : targetValueRef);
-				if (cellToRender != null) {
-					label = cellToRender.getDisplay();
-				}
-			} catch (Exception ex) {
-				Logger.getLogger(PlatypusComboLabelHandledProvider.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+		try {
+			Row foundInLookup = lookupValueRef != null && lookupValueRef.entity != null && lookupValueRef.entity.getRowset() != null ? lookupValueRef.entity.find(lookupValueRef.getColIndex(), aValue) : null;
+			Row foundInTarget = targetValueRef != null && targetValueRef.entity != null && targetValueRef.entity.getRowset() != null ? targetValueRef.entity.getRowset().getCurrentRow() : null;
+			JavaScriptObject eventThis = targetValueRef.entity.getModel().getModule();
+			if (container != null && container.getParent() != null && container.getParent().getParent() instanceof PlatypusAdapterStandaloneField<?>) {
+				PlatypusAdapterField<?> adapter = (PlatypusAdapterStandaloneField<?>) container.getParent().getParent();
+				eventThis = adapter.getPublishedField();
 			}
+			if(cellFunction != null){
+				cellToRender = ControlsUtils.calcStandalonePublishedCell(eventThis, cellFunction, foundInLookup != null ? foundInLookup : foundInTarget, label, foundInLookup != null ? lookupValueRef : targetValueRef, cellToRender);
+			}
+			if (cellToRender != null) {
+				if (cellToRender.getDisplayCallback() == null) {
+					cellToRender.setDisplayCallback(new Runnable() {
+						@Override
+						public void run() {
+							JavaScriptObject oldCellFunction = cellFunction;
+							cellFunction = null;
+							try {
+								container.redraw();
+							} finally {
+								cellFunction = oldCellFunction;
+							}
+						}
+					});
+				}
+				label = cellToRender.getDisplay();
+			}
+		} catch (Exception ex) {
+			Logger.getLogger(PlatypusComboLabelHandledProvider.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
 		}
 		return label;
 	}

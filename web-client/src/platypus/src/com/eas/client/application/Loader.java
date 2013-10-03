@@ -35,6 +35,7 @@ import com.google.gwt.xml.client.Document;
 import com.google.gwt.xml.client.Element;
 import com.google.gwt.xml.client.Node;
 import com.google.gwt.xml.client.NodeList;
+import com.sencha.gxt.core.client.GXT;
 
 /**
  * 
@@ -106,6 +107,7 @@ public class Loader {
 	public Cancellable load(final Collection<String> aAppElementNames, final CancellableCallback onEnd) throws Exception {
 		final Collection<Cancellable> loadingsStarted = new ArrayList<Cancellable>();
 		List<String> appElementNames = new ArrayList<String>();
+		// Recursion handling
 		for (String appElementName : aAppElementNames) {
 			if (!isTouched(appElementName)){
 				appElementNames.add(appElementName);
@@ -139,7 +141,7 @@ public class Loader {
 				}
 			};
 			
-			loadingsStarted.add(client.getAppElement(appElementName, new DocumentCallbackAdapter() {
+			loadingsStarted.add(client.getAppElementXmlDom(appElementName, new DocumentCallbackAdapter() {
 
 				Set<Cancellable> loadings = new HashSet<Cancellable>();
 
@@ -226,7 +228,7 @@ public class Loader {
 
 				@Override
 				protected void doWork(XMLHttpRequest aResponse) throws Exception {
-					Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, appElementName + " loading response is: " + aResponse.getStatus() + "(" + aResponse.getStatusText() + ")");
+					Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, appElementName + " loading response is: " + aResponse.getStatus() + " (" + aResponse.getStatusText() + ")");
 					assert !loadedAppElements.contains(appElementName);
 					// Erroneous dependencies and other erroneous application
 					// elements should be memorized as notifying about the
@@ -238,7 +240,9 @@ public class Loader {
 
 			}));
 			//
-			String jsURL = client.resourceUrl(appElementName);// + "?"+PlatypusHttpRequestParams.CACHE_BUSTER+"=" + IDGenerator.genId();
+			String jsURL = client.resourceUrl(appElementName);
+			if(GXT.isChrome())// remove if chrome bug 266971 is fixed
+				jsURL += "?" + PlatypusHttpRequestParams.CACHE_BUSTER + "=" + IDGenerator.genId(); 
 			injectPlaypusModuleCallback(appElementName, Utils.publishRunnable(new Runnable(){
 
 				@Override
@@ -253,12 +257,6 @@ public class Loader {
                 }
 				
 			}));
-			/*
-			ScriptElement oldScriptTag = injectedScripts.get(jsURL);
-			if (oldScriptTag != null)
-				oldScriptTag.removeFromParent();
-			ScriptElement scriptTag = 
-			*/	
 			ScriptInjector.fromUrl(jsURL)
 			.setCallback(new Callback<Void, Exception>() {
 
@@ -287,10 +285,6 @@ public class Loader {
 			.setWindow(ScriptInjector.TOP_WINDOW)
 			.setRemoveTag(false)
 			.inject();
-			/*
-			scriptTag.addClassName(INJECTED_SCRIPT_CLASS_NAME);
-			injectedScripts.put(jsURL, scriptTag);
-			*/
 			fireStarted(appElementName);
 		}
 		return loaded;
