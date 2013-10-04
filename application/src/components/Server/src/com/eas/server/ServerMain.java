@@ -25,7 +25,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.prefs.Preferences;
 import javax.management.ObjectName;
 import javax.net.ssl.*;
 import org.mozilla.javascript.ScriptableObject;
@@ -445,16 +444,15 @@ public class ServerMain {
     }
 
     private static KeyManager[] createKeyManagers() throws NoSuchAlgorithmException, NoSuchProviderException, KeyStoreException, FileNotFoundException, IOException, CertificateException, UnrecoverableKeyException, URISyntaxException {
-        KeyStore ks = KeyStore.getInstance(Preferences.systemRoot().node(SSL_PREFS_PATH).get("keyStoreType", "JKS"));
+        KeyStore ks = KeyStore.getInstance("JKS");
         // get user password and file input stream
-        char[] sslPassword = Preferences.systemRoot().node(SSL_PREFS_PATH).get("keyStorePassword", "keyword").toCharArray();
+        char[] sslPassword = "keyword".toCharArray();
         File keyStore = new File(StringUtils.join(File.separator, System.getProperty(ClientConstants.USER_HOME_PROP_NAME), ClientConstants.USER_HOME_PLATYPUS_DIRECTORY_NAME, SECURITY_SUBDIRECTORY, "keystore"));
         if (keyStore.exists()) {
             try (InputStream is = new FileInputStream(keyStore)) {
                 ks.load(is, sslPassword);
             }
-            final KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(
-                    Preferences.systemRoot().node(SSL_PREFS_PATH).get("keyManagerAlgorithm", "SunX509"));
+            final KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance("SunX509");
             keyManagerFactory.init(ks, sslPassword);
             return keyManagerFactory.getKeyManagers();
         } else {
@@ -463,15 +461,14 @@ public class ServerMain {
     }
 
     private static TrustManager[] createTrustManagers() throws NoSuchAlgorithmException, NoSuchProviderException, KeyStoreException, FileNotFoundException, IOException, CertificateException, URISyntaxException {
-        KeyStore ks = KeyStore.getInstance(Preferences.userRoot().node(SSL_PREFS_PATH).get("trustStoreType", "JKS"));
-        char[] ksPassword = Preferences.userRoot().node(SSL_PREFS_PATH).get("trustStorePassword", "trustword").toCharArray();
+        KeyStore ks = KeyStore.getInstance("JKS");
+        char[] ksPassword = "trustword".toCharArray();
         File trustStore = new File(StringUtils.join(File.separator, System.getProperty(ClientConstants.USER_HOME_PROP_NAME), ClientConstants.USER_HOME_PLATYPUS_DIRECTORY_NAME, SECURITY_SUBDIRECTORY, "truststore"));
         if (trustStore.exists()) {
             try (InputStream is = new FileInputStream(trustStore)) {
                 ks.load(is, ksPassword);
             }
-            final TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(
-                    Preferences.userRoot().node(SSL_PREFS_PATH).get("trustManagerAlgorithm", "PKIX"));
+            final TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance("PKIX");
             trustManagerFactory.init(ks);
             return trustManagerFactory.getTrustManagers();
         } else {
@@ -480,8 +477,8 @@ public class ServerMain {
     }
 
     public static SSLContext createSSLContext() throws NoSuchAlgorithmException, KeyManagementException, NoSuchProviderException, KeyStoreException, FileNotFoundException, IOException, CertificateException, UnrecoverableKeyException, URISyntaxException {
-        SSLContext context = SSLContext.getInstance(Preferences.systemRoot().node(SSL_PREFS_PATH).get("protocol", "TLS"));
-        context.init(createKeyManagers(), createTrustManagers(), SecureRandom.getInstance(Preferences.systemRoot().node(SSL_PREFS_PATH).get("secureRandomAlgorithm", "SHA1PRNG")));
+        SSLContext context = SSLContext.getInstance("TLS");
+        context.init(createKeyManagers(), createTrustManagers(), SecureRandom.getInstance("SHA1PRNG"));
         return context;
     }
 }

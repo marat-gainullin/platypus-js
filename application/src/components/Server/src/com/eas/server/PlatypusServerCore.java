@@ -286,8 +286,8 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
 
     protected class ServerTask implements Runnable {
 
-        public static final String STARTING_BACKGROUND_TASK_MSG = "Starting background task \"%s\" with class name \"%s\"";
-        public static final String STARTED_BACKGROUND_TASK_MSG = "Background task \"%s\" with class name \"%s\" started successfully";
+        public static final String STARTING_BACKGROUND_TASK_MSG = "Starting background task \"%s\"";
+        public static final String STARTED_BACKGROUND_TASK_MSG = "Background task \"%s\" started successfully";
         private final Session session;
         private ServerScriptRunner module;
 
@@ -300,10 +300,10 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
         @Override
         public void run() {
             try {
-                Logger.getLogger(ServerTask.class.getName()).info(String.format(STARTING_BACKGROUND_TASK_MSG, module.getApplicationElementId(), module.getClass().getName()));
+                Logger.getLogger(ServerTask.class.getName()).info(String.format(STARTING_BACKGROUND_TASK_MSG, module.getApplicationElementId()));
                 module.execute();
                 session.registerModule(module);
-                Logger.getLogger(ServerTask.class.getName()).info(String.format(STARTED_BACKGROUND_TASK_MSG, module.getApplicationElementId(), module.getClass().getName()));
+                Logger.getLogger(ServerTask.class.getName()).info(String.format(STARTED_BACKGROUND_TASK_MSG, module.getApplicationElementId()));
             } catch (Exception ex) {
                 Logger.getLogger(PlatypusServerCore.class.getName()).log(Level.SEVERE, null, ex);
             }
