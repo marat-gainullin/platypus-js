@@ -10,9 +10,9 @@ import com.google.gwt.core.client.JavaScriptObject;
 
 public class PlatypusTextHandledArea extends PlatypusTextArea {
 
-	protected PlatypusTextAreaHandledInputCell textCell;
+	protected PlatypusTextHandledAreaInputCell textCell;
 
-	public PlatypusTextHandledArea(PlatypusTextAreaHandledInputCell aCell) {
+	public PlatypusTextHandledArea(PlatypusTextHandledAreaInputCell aCell) {
 		super(aCell);
 		textCell = aCell;
 		textCell.setContainer(this);

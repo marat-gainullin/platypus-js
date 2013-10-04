@@ -101,7 +101,7 @@ public class PlatypusComboBoxHandledField extends PlatypusComboBox {
 
 				if (cellFunction != null && modelElement != null && modelElement.entity != null && modelElement.entity.getRowset() != null) {
 					Row currentRow = modelElement.entity.getRowset().getCurrentRow();
-					Object currentRowValue = currentRow.getColumnObject(modelElement.getColIndex());
+					Object currentRowValue = currentRow != null ? currentRow.getColumnObject(modelElement.getColIndex()) : null;
 					cellToRender = ControlsUtils.calcStandalonePublishedCell(eventThis, cellFunction, currentRow, labelProvider.getLabel(currentRowValue), modelElement, cellToRender);
 				}
 				if (cellToRender != null) {

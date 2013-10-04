@@ -12,18 +12,18 @@ import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.sencha.gxt.cell.core.client.form.TextAreaInputCell;
 
-public class PlatypusTextAreaHandledInputCell extends TextAreaInputCell {
+public class PlatypusTextHandledAreaInputCell extends TextAreaInputCell {
 
 	protected PlatypusTextHandledArea container;
 	protected ModelElementRef modelElement;
 	protected JavaScriptObject cellFunction;
 	protected PublishedCell cellToRender;
 
-	public PlatypusTextAreaHandledInputCell() {
+	public PlatypusTextHandledAreaInputCell() {
 		this(null, null);
 	}
 
-	public PlatypusTextAreaHandledInputCell(ModelElementRef aModelElement, JavaScriptObject aCellFunction) {
+	public PlatypusTextHandledAreaInputCell(ModelElementRef aModelElement, JavaScriptObject aCellFunction) {
 		super();
 		modelElement = aModelElement;
 		cellFunction = aCellFunction;
@@ -84,7 +84,7 @@ public class PlatypusTextAreaHandledInputCell extends TextAreaInputCell {
 			} else
 				super.render(context, value, sb);
 		} catch (Exception ex) {
-			Logger.getLogger(PlatypusTextAreaHandledInputCell.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+			Logger.getLogger(PlatypusTextHandledAreaInputCell.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
 		}
 	}
 
