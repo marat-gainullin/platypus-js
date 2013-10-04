@@ -141,7 +141,7 @@ public class Loader {
 				}
 			};
 			
-			loadingsStarted.add(client.getAppElementXmlDom(appElementName, new DocumentCallbackAdapter() {
+			loadingsStarted.add(client.getAppElementXml(appElementName, new DocumentCallbackAdapter() {
 
 				Set<Cancellable> loadings = new HashSet<Cancellable>();
 
@@ -283,7 +283,7 @@ public class Loader {
 
 			})
 			.setWindow(ScriptInjector.TOP_WINDOW)
-			.setRemoveTag(false)
+			.setRemoveTag(true)// Another attempts may occur. So, we have to remove the tag.
 			.inject();
 			fireStarted(appElementName);
 		}

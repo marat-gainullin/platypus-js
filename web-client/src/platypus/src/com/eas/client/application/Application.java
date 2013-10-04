@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Formatter;
@@ -1086,6 +1087,22 @@ public class Application {
 		}
 	}
 
+	protected static boolean requiring;
+	
+	protected static class RequireProcess{
+		public JavaScriptObject deps;
+		public JavaScriptObject onSuccess;
+		public JavaScriptObject onFailure;
+		
+		public RequireProcess(JavaScriptObject aDeps, final JavaScriptObject aOnSuccess, final JavaScriptObject aOnFailure){
+			deps = aDeps;
+			onSuccess = aOnSuccess;
+			onFailure = aOnFailure;
+		}
+	}
+	
+	protected static List<RequireProcess> requireProcesses = new ArrayList<RequireProcess>();
+	
 	public static void require(JavaScriptObject aDeps, final JavaScriptObject aOnSuccess, final JavaScriptObject aOnFailure) {
 		final Set<String> deps = new HashSet<String>();
 		JsArrayString depsValues = aDeps.<JsArrayString> cast();
@@ -1095,23 +1112,40 @@ public class Application {
 				deps.add(dep);
 		}
 		if (!deps.isEmpty()) {
-			try {
-				loader.prepareOptimistic();
-				loader.load(deps, new CancellableCallbackAdapter() {
-
-					@Override
-					protected void doWork() throws Exception {
-						if (loader.isLoaded(deps)) {
-							Utils.invokeJsFunction(aOnSuccess);
-						} else {
-							Utils.invokeJsFunction(aOnFailure);
+			if(!requiring){
+				requiring = true;
+				try {
+					loader.prepareOptimistic();
+					loader.load(deps, new CancellableCallbackAdapter() {
+	
+						@Override
+						protected void doWork() throws Exception {
+							if (loader.isLoaded(deps)) {
+								Utils.invokeJsFunction(aOnSuccess);
+							} else {
+								Utils.invokeJsFunction(aOnFailure);
+							}
+							requiring = false;
+							if(!requireProcesses.isEmpty()){
+								RequireProcess p = requireProcesses.remove(0);
+								assert p != null;
+								require(p.deps, p.onSuccess, p.onFailure);
+							}
 						}
-					}
-				});
-			} catch (Exception ex) {
-				Logger.getLogger(Application.class.getName()).log(Level.SEVERE, null, ex);
+					});
+				} catch (Exception ex) {
+					Logger.getLogger(Application.class.getName()).log(Level.SEVERE, null, ex);
+				}
+			}else{
+				requireProcesses.add(new RequireProcess(aDeps, aOnSuccess, aOnFailure));
 			}
-		} else
+		} else{
 			Utils.invokeJsFunction(aOnSuccess);
+			if(!requireProcesses.isEmpty()){
+				RequireProcess p = requireProcesses.remove(0);
+				assert p != null;
+				require(p.deps, p.onSuccess, p.onFailure);
+			}
+		}
 	}
 }

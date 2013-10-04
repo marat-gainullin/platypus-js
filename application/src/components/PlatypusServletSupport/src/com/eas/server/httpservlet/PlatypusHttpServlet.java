@@ -79,16 +79,6 @@ public class PlatypusHttpServlet extends HttpServlet {
     public void init(ServletConfig config) throws ServletException {
         try {
             super.init(config);
-            // TODO: remove loggers configuration code to be able to use standard way to cofigure
-            //java.util.logging package through command-line switches ( -Dxxx ) or configuration file.
-            /*
-             Handler consoleHandler = new ConsoleHandler();
-             consoleHandler.setFormatter(new PlatypusFormatter());
-             Logger logger = Logger.getLogger(Client.APPLICATION_LOGGER_NAME);
-             logger.addHandler(consoleHandler);
-             logger.setUseParentHandlers(false);
-             // end of logging configuration code
-             */
             ServerConfig scp = ServerConfig.parse(config);
             serverCore = PlatypusServerCore.getInstance(scp.getDbSettings(), scp.getTasks(), scp.getAppElementId());
         } catch (Exception ex) {
