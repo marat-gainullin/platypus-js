@@ -54,6 +54,7 @@ public class ProjectRunner {
     private static final String LOG_LEVEL_OPTION_NAME = "D.level"; //NOI18N
     private static final String LOG_HANDLERS_OPTION_NAME = "Dhandlers"; //NOI18N
     private static final String CONSOLE_LOG_HANDLER_NAME = "java.util.logging.ConsoleHandler"; //NOI18N
+    private static final String CONSOLE_LOG_HANDLER_LEVEL_OPION_NAME = "Djava.util.logging.ConsoleHandler.level"; //NOI18N
     private static final String CONSOLE_LOG_FORMATTER_OPTION_NAME = "Djava.util.logging.ConsoleHandler.formatter"; //NOI18N
     private static final String LOG_CONFIG_CLASS_OPTION_NAME = "Djava.util.logging.config.class"; //NOI18N
     
@@ -309,6 +310,10 @@ public class ProjectRunner {
                 + LOG_HANDLERS_OPTION_NAME
                 + EQUALS_SIGN
                 + CONSOLE_LOG_HANDLER_NAME);
+        processBuilder = processBuilder.addArgument(OPTION_PREFIX
+                + CONSOLE_LOG_HANDLER_LEVEL_OPION_NAME
+                + EQUALS_SIGN
+                + logLevel.getName());
         processBuilder = processBuilder.addArgument(OPTION_PREFIX
                 + CONSOLE_LOG_FORMATTER_OPTION_NAME
                 + EQUALS_SIGN
