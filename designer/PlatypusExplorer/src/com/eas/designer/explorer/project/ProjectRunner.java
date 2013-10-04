@@ -57,6 +57,7 @@ public class ProjectRunner {
     private static final String CONSOLE_LOG_HANDLER_LEVEL_OPION_NAME = "Djava.util.logging.ConsoleHandler.level"; //NOI18N
     private static final String CONSOLE_LOG_FORMATTER_OPTION_NAME = "Djava.util.logging.ConsoleHandler.formatter"; //NOI18N
     private static final String LOG_CONFIG_CLASS_OPTION_NAME = "Djava.util.logging.config.class"; //NOI18N
+    private static final String JS_APPLICATION_LOG_LEVEL_OPTION_NAME = "DApplication.level"; //NOI18N
     
     private static final String EQUALS_SIGN = "="; //NOI18N
     private static final String FALSE = "false"; //NOI18N
@@ -305,7 +306,7 @@ public class ProjectRunner {
         processBuilder = processBuilder.addArgument(OPTION_PREFIX
                 + LOG_LEVEL_OPTION_NAME
                 + EQUALS_SIGN
-                + "SEVERE");
+                + Level.SEVERE.getName());
         processBuilder = processBuilder.addArgument(OPTION_PREFIX
                 + LOG_HANDLERS_OPTION_NAME
                 + EQUALS_SIGN
@@ -315,7 +316,7 @@ public class ProjectRunner {
                 + EQUALS_SIGN
                 + logLevel.getName());
         processBuilder = processBuilder.addArgument(OPTION_PREFIX
-                + "DApplication.level"
+                + JS_APPLICATION_LOG_LEVEL_OPTION_NAME
                 + EQUALS_SIGN
                 + logLevel.getName());
         processBuilder = processBuilder.addArgument(OPTION_PREFIX
