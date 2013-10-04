@@ -305,13 +305,17 @@ public class ProjectRunner {
         processBuilder = processBuilder.addArgument(OPTION_PREFIX
                 + LOG_LEVEL_OPTION_NAME
                 + EQUALS_SIGN
-                + logLevel.getName());
+                + "SEVERE");
         processBuilder = processBuilder.addArgument(OPTION_PREFIX
                 + LOG_HANDLERS_OPTION_NAME
                 + EQUALS_SIGN
                 + CONSOLE_LOG_HANDLER_NAME);
         processBuilder = processBuilder.addArgument(OPTION_PREFIX
                 + CONSOLE_LOG_HANDLER_LEVEL_OPION_NAME
+                + EQUALS_SIGN
+                + logLevel.getName());
+        processBuilder = processBuilder.addArgument(OPTION_PREFIX
+                + "DApplication.level"
                 + EQUALS_SIGN
                 + logLevel.getName());
         processBuilder = processBuilder.addArgument(OPTION_PREFIX
