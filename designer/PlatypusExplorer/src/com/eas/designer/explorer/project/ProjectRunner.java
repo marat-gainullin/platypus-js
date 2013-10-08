@@ -265,8 +265,7 @@ public class ProjectRunner {
             }
             ExecutionService service = ExecutionService.newService(processBuilder, descriptor, getServiceDisplayName(project, debug));
             io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Starting_Platypus_Client"));//NOI18N
-            io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Command_Line"));//NOI18N
-            io.getOut().println(getCommandLineStr(arguments));
+            io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Command_Line") + getCommandLineStr(arguments));//NOI18N
             Future<Integer> clientTask = service.run();
             if (clientTask != null) {
                 io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Platypus_Client_Started"));//NOI18N

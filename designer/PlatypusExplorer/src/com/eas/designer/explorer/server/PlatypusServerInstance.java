@@ -190,8 +190,7 @@ public final class PlatypusServerInstance implements Server, ServerInstanceImple
             processBuilder = processBuilder.addArgument(argument);
         }
         ExecutionService service = ExecutionService.newService(processBuilder, descriptor, "Platypus Server");
-        io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Command_Line"));//NOI18N
-        io.getOut().println(getCommandLineStr(arguments));
+        io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Command_Line") + getCommandLineStr(arguments));//NOI18N
         Future<Integer> runTask = service.run();
         serverRunTask = runTask;
         return runTask != null;
