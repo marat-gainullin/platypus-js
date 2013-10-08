@@ -18,6 +18,7 @@ import com.eas.client.model.gui.view.ModelSelectionListener;
 import com.eas.client.model.gui.view.ModelViewDragHandler;
 import com.eas.client.model.gui.view.entities.EntityView;
 import com.eas.client.model.gui.view.model.ApplicationModelView;
+import com.eas.client.model.gui.view.model.ApplicationModelView.ForeignKeyBindingTask;
 import com.eas.designer.application.HandlerRegistration;
 import com.eas.designer.datamodel.nodes.EntityNode;
 import com.eas.designer.datamodel.nodes.FieldNode;
@@ -40,6 +41,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.Action;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
@@ -258,7 +261,6 @@ public final class PlatypusModuleDatamodelView extends TopComponent implements M
             });
             explorerManager.setRootContext(dataObject.getModelNode());
             appModelEditor.getModelView().complementReferenceRelationsByKeys(new ApplicationModelView.ForeignKeyBindingTask() {
-
                 @Override
                 public void run(ReferenceRelation<ApplicationDbEntity> aRelation) {
                     appModelEditor.getModelView().getModel().addReferenceRelation(aRelation);
@@ -354,6 +356,22 @@ public final class PlatypusModuleDatamodelView extends TopComponent implements M
     public void componentActivated() {
         try {
             if (dataObject.isValid() && dataObject.getClient() != null) {
+                if (dataObject.getModel().validate()) {
+                    getModelView().complementReferenceRelationsByKeys(new ForeignKeyBindingTask() {
+                        @Override
+                        public void run(ReferenceRelation<ApplicationDbEntity> aRelation) {
+                            try {
+                                dataObject.getModel().addReferenceRelation(aRelation);
+                            } catch (Exception ex) {
+                                Logger.getLogger(PlatypusModuleDatamodelView.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+                            }
+                        }
+                    });
+                    UndoRedo ur = getUndoRedo();
+                    if (ur instanceof UndoRedo.Manager) {
+                        ((UndoRedo.Manager) ur).discardAllEdits();
+                    }
+                }
                 ModelInspector.getInstance().setNodesReflector(exlorerSelectionListener);
                 ModelInspector.getInstance().setViewData(new ModelInspector.ViewData<>(getModelView(), getUndoRedo(), dataObject.getModelNode()));
                 WindowManager wm = WindowManager.getDefault();

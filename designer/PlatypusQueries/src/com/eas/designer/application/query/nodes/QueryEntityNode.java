@@ -9,7 +9,6 @@ import com.eas.client.model.query.QueryEntity;
 import com.eas.designer.datamodel.nodes.EntityNode;
 import org.openide.ErrorManager;
 import org.openide.awt.UndoRedo;
-import org.openide.nodes.Node;
 import org.openide.nodes.PropertySupport;
 import org.openide.nodes.Sheet;
 import static org.openide.nodes.Sheet.PROPERTIES;

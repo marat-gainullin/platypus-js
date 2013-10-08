@@ -18,7 +18,7 @@ import javax.swing.undo.UndoableEdit;
  */
 public abstract class DbStructureEdit implements UndoableEdit {
 
-    protected SqlActionsController sqlController = null;
+    protected SqlActionsController sqlController;
 
     protected void clearTablesCache() {
         try {

@@ -313,6 +313,13 @@ public class PlatypusDbDiagramView extends CloneableTopComponent {
     protected void componentActivated() {
         try {
             if (dataObject.isValid() && dataObject.getClient() != null) {
+                if (dataObject.getModel().validate()) {
+                    getModelView().resolveRelations();
+                    UndoRedo ur = getUndoRedo();
+                    if (ur instanceof UndoRedo.Manager) {
+                        ((UndoRedo.Manager) ur).discardAllEdits();
+                    }
+                }
                 ModelInspector.getInstance().setNodesReflector(exlorerSelectionListener);
                 ModelInspector.getInstance().setViewData(new ModelInspector.ViewData<>(getModelView(), getUndoRedo(), dataObject.getModelNode()));
                 WindowManager wm = WindowManager.getDefault();

@@ -565,6 +565,12 @@ public class PlatypusQueryView extends CloneableTopComponent {
     protected void componentActivated() {
         try {
             if (dataObject.isValid() && getModelView() != null) {
+                if (dataObject.getModel().validate()) {
+                    UndoRedo ur = getUndoRedo();
+                    if (ur instanceof UndoRedo.Manager) {
+                        ((UndoRedo.Manager) ur).discardAllEdits();
+                    }
+                }
                 ModelInspector.getInstance().setNodesReflector(explorerSelectionListener);
                 ModelInspector.getInstance().setViewData(new ModelInspector.ViewData<>(getModelView(), getUndoRedo(), dataObject.getModelNode()));
                 WindowManager wm = WindowManager.getDefault();

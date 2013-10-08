@@ -431,7 +431,9 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
     }
 
     /**
-     * Differs from entity.getInOutRelations(). It may return additional relations in descendants.
+     * Differs from entity.getInOutRelations(). It may return additional
+     * relations in descendants.
+     *
      * @return Set of relations
      */
     public Set<Relation<E>> getInOutRelations() {
@@ -818,6 +820,14 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
                     titleLabel.setText(getCheckedEntityTitle());
                     titleLabel.invalidate();
                     reLayout();
+                    break;
+                case "query":
+                    if (isParameterized()) {
+                        parametersModel.setFields(entity.getFields());
+                        parametersModel.fireDataChanged();
+                    }
+                    fieldsModel.setFields(entity.getFields());
+                    fieldsModel.fireDataChanged();
                     break;
                 default:
                     switch (evt.getPropertyName()) {
