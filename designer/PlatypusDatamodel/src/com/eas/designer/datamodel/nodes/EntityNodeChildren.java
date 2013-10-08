@@ -41,6 +41,7 @@ public abstract class EntityNodeChildren<T> extends Children.Keys<T> implements 
         undoRedo = aUndoReciever;
         setFields(entity.getFields());
         entity.getModel().getChangeSupport().addPropertyChangeListener("client", this);
+        entity.getChangeSupport().addPropertyChangeListener("query", this);
     }
 
     protected abstract T createKey(Field aField);
@@ -79,7 +80,7 @@ public abstract class EntityNodeChildren<T> extends Children.Keys<T> implements 
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        if ("client".equalsIgnoreCase(evt.getPropertyName())) {
+        if ("client".equalsIgnoreCase(evt.getPropertyName()) || Entity.QUERY_PROPERTY.equalsIgnoreCase(evt.getPropertyName())) {
             setFields(entity.getFields());
             setKeys(computeKeys());
         }

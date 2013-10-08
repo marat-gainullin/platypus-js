@@ -29,8 +29,8 @@ import java.util.logging.Logger;
  */
 public class DropFieldEdit extends DbStructureEdit {
 
-    protected String tableName = null;
-    protected Field field = null;
+    protected String tableName;
+    protected Field field;
     protected List<ForeignKeySpec> inFks = new ArrayList<>();
     protected List<ForeignKeySpec> outFks = new ArrayList<>();
 

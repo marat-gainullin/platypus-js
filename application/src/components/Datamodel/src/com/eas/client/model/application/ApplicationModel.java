@@ -112,6 +112,17 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         changeSupport.firePropertyChange("scriptScope", oldValue, scriptScope);
     }
 
+    @Override
+    public boolean validate() throws Exception{
+        boolean res = super.validate();
+        if(res){
+            for(Relation<E> rel : referenceRelations)
+                resolveCopiedRelation(rel, this);
+            checkReferenceRelationsIntegrity();
+        }
+        return res;
+    }
+    
     public void resolveHandlers() {
         if (scriptScope != null) {
             for (E ent : entities.values()) {
@@ -142,6 +153,10 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
     @Override
     public void checkRelationsIntegrity() {
         super.checkRelationsIntegrity();
+        checkReferenceRelationsIntegrity();
+    }
+    
+    protected void checkReferenceRelationsIntegrity() {
         List<ReferenceRelation<E>> toDel = new ArrayList<>();
         for (ReferenceRelation<E> rel : referenceRelations) {
             if (rel.getLeftEntity() == null || (rel.getLeftField() == null && rel.getLeftParameter() == null)

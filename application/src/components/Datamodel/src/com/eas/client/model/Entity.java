@@ -10,6 +10,7 @@
 package com.eas.client.model;
 
 import com.bearsoft.rowset.metadata.Fields;
+import com.bearsoft.rowset.metadata.Parameters;
 import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.queries.Query;
@@ -92,6 +93,33 @@ public abstract class Entity<M extends Model<E, ?, ?, Q>, Q extends Query<?>, E 
             }
         }
         return fields;
+    }
+
+    public boolean validate() throws Exception {
+        boolean res = false;
+        Q oldQuery = getQuery();
+        Fields oldFields = getFields();
+        Parameters oldParams = oldQuery != null ? oldQuery.getParameters() : null;
+        clearFields();
+        validateQuery();
+        Q newQuery = getQuery();
+        Fields newFields = getFields();
+        Parameters newParams = newQuery != null ? newQuery.getParameters() : null;
+        if (newFields == null ? oldFields != null : !newFields.isEqual(oldFields)) {
+            res = true;
+        }
+        if (newParams == null ? oldParams != null : !newParams.isEqual(oldParams)) {
+            res = true;
+        }
+        if (!res) {
+            query = oldQuery;
+            fields = oldFields;
+        }else{
+            // Let's fire an event about query change
+            query = null;
+            setQuery(newQuery);
+        }
+        return res;
     }
 
     public void clearFields() {
@@ -246,7 +274,7 @@ public abstract class Entity<M extends Model<E, ?, ?, Q>, Q extends Query<?>, E 
         String lTitle = getTitle();
         return (lName != null ? lName : "") + (lTitle != null && !"".equals(lTitle) ? " (" + lTitle + ")" : ""); //NO18IN
     }
-    
+
     public String getQueryId() {
         return queryId;
     }

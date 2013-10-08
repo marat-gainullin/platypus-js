@@ -120,9 +120,31 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
     public void clearRelations() {
         if (relations != null) {
             relations.clear();
+            for(E e : entities.values()){
+                e.getInRelations().clear();
+                e.getOutRelations().clear();
+            }
         }
     }
 
+    /**
+     * Tests if entities' internal data is actual, updating it if necessary.
+     * @return True if any change occur and false is all is actual.
+     */
+    public boolean validate() throws Exception{
+        boolean res = false;
+        for(E e : entities.values()){
+            if(e.validate())
+                res = true;
+        }
+        if(res){
+            for(Relation<E> rel : relations)
+                resolveCopiedRelation(rel, this);
+            checkRelationsIntegrity();
+        }
+        return res;
+    }
+    
     public GuiCallback getGuiCallback() {
         return guiCallback;
     }

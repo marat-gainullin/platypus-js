@@ -230,7 +230,7 @@ public class H2SqlDriver extends SqlDriver {
             + "FROM"
             + "  INFORMATION_SCHEMA.CROSS_REFERENCES  r "
             + "WHERE"
-            + "  UPPER(r.pktable_schema)  = UPPER('%s') AND r.pktable_name in (%s) "
+            + "  UPPER(r.pktable_schema)  = UPPER('%s') AND r.fktable_name in (%s) "
             + "ORDER BY r.pktable_catalog, r.pktable_schema, r.pktable_name, r.ordinal_position"
             + ") fkeys_alias";
     protected static final String SQL_CREATE_EMPTY_TABLE = "CREATE TABLE %s (%s DECIMAL(18,0) NOT NULL PRIMARY KEY)";
