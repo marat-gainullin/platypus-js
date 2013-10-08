@@ -5,20 +5,22 @@
 if (!window.platypus) {
     window.platypus = {};
 }
-window.platypus.server = {}
-platypus.api = new API();
+
+platypus.server = new API();
 
 function API() {
-   
-    this.KEEP_ALIVE_TIMEOUT = 300000; 
-    this.SERVER_URL = "";
+
+    this.serverUrl = "";
+
     this.API_PATH = "/api";
     this.HTTP_METHOD_GET = "GET";
     this.HTTP_METHOD_POST = "POST";
+    this.CONTENT_TYPE_HEADER_NAME = "Content-Type";
     this.JSON_CONTENT_TYPE = "application/json; charset=utf-8";
     this.FORM_URLENCODED_CONTENT_TYPE = "application/x-www-form-urlencoded";
+
     this.URL_NOT_DEFINED_ERROR = "Server url is not defined";
-    
+
     //parameters
     this.QUERY_ID = "__queryId";
     this.ID = "__id";
@@ -28,94 +30,95 @@ function API() {
     this.PROPERTY_NAME = "__propertyName";
     this.PROPERTY_VALUE = "__propertyValue";
     this.PARAMETER = "__param";
-    
-    this.rqHello = 1;
-    this.rqKeepAlive = 2;
-    this.rqOutHash = 3;
-    this.rqLogin = 4;
-    this.rqStartAppElement = 5;
-    this.rqAppQuery = 6;
-    this.rqExecuteQuery = 7;
-    this.rqCommit = 8;
-    this.rqRollback = 9;
-    this.rqIsAppElementActual = 10;
-    this.rqAppElement = 11;
-    this.rqCreateServerModule = 12;
-    this.rqDisposeServerModule = 13;
-    this.rqExecuteServerModuleMethod = 14;
-    this.rqAppElementChanged = 15;
-    this.rqDbTableChanged = 16;
-    this.rqIsUserInRole = 17;
-    this.rqLogout = 18;
-    this.rqExecuteReport = 19;
-    this.rqGetServerModuleProperty = 20;
-    this.rqSetServerModuleProperty = 21;
-    
+
+    //Platypus request ids
+    this.RQ_HELLO = 1;
+    this.RQ_KEEP_ALIVE = 2;
+    this.RQ_OUT_HASH = 3;
+    this.RQ_LOGIN = 4;
+    this.RQ_START_APP_ELEMENT = 5;
+    this.RQ_APP_QUERY = 6;
+    this.RQ_EXECUTE_QUERY = 7;
+    this.RQ_COMMIT = 8;
+    this.RQ_ROLLBACK = 9;
+    this.RQ_IS_APP_ELEMENT_ACTUAL = 10;
+    this.RQ_APP_ELEMENT = 11;
+    this.RQ_CREATE_SERVER_MODUlE = 12;
+    this.RQ_DISPOSE_SERVER_MODULE = 13;
+    this.RQ_EXECUTE_SERVER_MODULE_METHOD = 14;
+    this.RQ_APP_ELEMENT_CHANGED = 15;
+    this.RQ_DB_TABLE_CHANGED = 16;
+    this.RQ_IS_USER_IN_ROLE = 17;
+    this.RQ_LOGOUT = 18;
+    this.RQ_EXECUTE_REPORT = 19;
+    this.RQ_GET_SERVER_MODULE_PROPERTY = 20;
+    this.RQ_SET_SERVER_MODULE_PROPERTY = 21;
+
     this.setServerUrl = function(aUrl) {
-        this.SERVER_URL = aUrl;
-    }
+        this.serverUrl = aUrl;
+    };
 
     this.login = function(callback) {
         this.hello(callback);
-    }
+    };
 
     this.logout = function(callback) {
-        sendPlatypusRequest(this.HTTP_METHOD_GET, this.rqLogout, null, callback);
-    }
+        sendPlatypusRequest(this.HTTP_METHOD_GET, this.RQ_LOGOUT, null, callback);
+    };
 
     this.hello = function(callback) {
-        sendPlatypusRequest(this.HTTP_METHOD_GET, this.rqHello, null, callback);
-    }
+        sendPlatypusRequest(this.HTTP_METHOD_GET, this.RQ_HELLO, null, callback);
+    };
 
     this.disposeServerModule = function(moduleName, callback) {
         var params = {};
         params[this.MODULE_NAME] = moduleName;
-        sendPlatypusRequest(this.HTTP_METHOD_GET, this.rqDisposeServerModule, params, callback);
-    }
+        sendPlatypusRequest(this.HTTP_METHOD_GET, this.RQ_DISPOSE_SERVER_MODULE, params, callback);
+    };
 
     this.createServerModule = function(moduleName, callback) {
         var params = {};
         params[this.MODULE_NAME] = moduleName;
-        sendPlatypusRequest(this.HTTP_METHOD_GET, this.rqCreateServerModule, params, callback);
-    }
-    
+        sendPlatypusRequest(this.HTTP_METHOD_GET, this.RQ_CREATE_SERVER_MODUlE, params, callback);
+    };
+
     this.executeServerModuleMethod = function(aModuleName, aMethodName, aMethodParams, callback) {
         var params = {};
         params[this.MODULE_NAME] = aModuleName;
-        params[this.METHOD_NAME] = aMethodName;   
+        params[this.METHOD_NAME] = aMethodName;
         var jsonMethodParams = [];
         for (var i = 0; i < aMethodParams.length; i++) {
             jsonMethodParams.push(JSON.stringify(aMethodParams[i]));
         }
         params[this.PARAMETER] = jsonMethodParams;
-        sendPlatypusRequest(this.HTTP_METHOD_POST, this.rqExecuteServerModuleMethod, params, callback);
-    }
+        sendPlatypusRequest(this.HTTP_METHOD_POST, this.RQ_EXECUTE_SERVER_MODULE_METHOD, params, callback);
+    };
 
     this.keepAlive = function(callback) {
-        sendPlatypusRequest(this.HTTP_METHOD_GET, this.rqKeepAlive, null, callback);
-    }
-    
+        sendPlatypusRequest(this.HTTP_METHOD_GET, this.RQ_KEEP_ALIVE, null, callback);
+    };
+
     this.executeServerReport = function(aModuleName) {
         var params = {};
         params[this.MODULE_NAME] = aModuleName;
-        sendPlatypusDownloadRequest(this.HTTP_METHOD_POST, this.rqExecuteReport, params, null);
-    }
-    
+        sendPlatypusDownloadRequest(this.HTTP_METHOD_POST, this.RQ_EXECUTE_REPORT, params, null);
+    };
+
     this.getServerModuleProperty = function(aModuleName, aPropertyName) {
         var params = {};
         params[this.MODULE_NAME] = aModuleName;
         params[this.PROPERTY_NAME] = aPropertyName;
-        return sendPlatypusSyncRequest(this.HTTP_METHOD_POST, this.rqGetServerModuleProperty, params, null);
-    }
+        return sendPlatypusSyncRequest(this.HTTP_METHOD_POST, this.RQ_GET_SERVER_MODULE_PROPERTY, params, null);
+    };
 
     this.setServerModuleProperty = function(aModuleName, aPropertyName, aValue) {
         var params = {};
         params[this.MODULE_NAME] = aModuleName;
         params[this.PROPERTY_NAME] = aPropertyName;
         params[this.PROPERTY_VALUE] = JSON.stringify(aValue);
-        return sendPlatypusSyncRequest(this.HTTP_METHOD_POST, this.rqSetServerModuleProperty, params);
-    }
-    
+        return sendPlatypusSyncRequest(this.HTTP_METHOD_POST, this.RQ_SET_SERVER_MODULE_PROPERTY, params);
+    };
+
     this.IdGenPrevValue = 0;
 
     this.genID = function() {
@@ -128,153 +131,197 @@ function API() {
         platypus.API.IdGenPrevValue = val;
         return val;
     }
-    
+
     var self = this;
-    
+
+    function executeHttpRequestAsync(urlStr, httpMethod, data, contentType, successCallback, errorCallback) {
+        var xhr = new XMLHttpRequest();
+        xhr.open(httpMethod, urlStr, true);
+        if (contentType) {
+            xhr.setRequestHeader(self.CONTENT_TYPE_HEADER_NAME, self.FORM_URLENCODED_CONTENT_TYPE);
+        }
+        xhr.onload = function() {
+            successCallback(xhr.responseText);
+        };
+        xhr.onerror = xhr.onabort = xhr.ontimeout = errorCallback;
+        xhr.send(data);
+    }
+
+    function executeHttpRequestSync(urlStr, httpMethod, data, contentType) {
+        var xhr = new XMLHttpRequest();
+        xhr.open(httpMethod, urlStr, false);
+        if (contentType) {
+            xhr.setRequestHeader(self.CONTENT_TYPE_HEADER_NAME, self.FORM_URLENCODED_CONTENT_TYPE);
+        }
+        xhr.send(data);
+        return xhr.responseText;
+    }
+
     function sendPlatypusRequest(httpMethod, rqId, params, successCallback, errorCallback) {
-        if(self.SERVER_URL == null) {
+        if (!self.serverUrl) {
             throw self.URL_NOT_DEFINED_ERROR;
         } else {
-            var uri;    
-            uri = removeEndSlash(self.SERVER_URL) + self.API_PATH  + "?" +  self.TYPE + "=" + rqId;
-            $.ajax(uri, {
-                type: httpMethod,
-                contentType: self.FORM_URLENCODED_CONTENT_TYPE,
-                dataType: "json",
-                cache: false,
-                data: params,
-                success: function(data, textStatus, jqXHR){
-                    successCallback(data, textStatus);
-                }, 
-                error: function(jqXHR, textStatus, errorThrown){
-                    if (errorCallback) {
-                        errorCallback(jqXHR.status, jqXHR.responseText);
-                    } else {
-                        throw new Error("Platypus ajax request error: " + jqXHR.status + " " + jqXHR.responseText )
-                    }
-                }
-            });
+            var urlStr = null;
+            var sendData = null;
+            if (httpMethod === self.HTTP_METHOD_POST) {
+                urlStr = getFullUrl(rqId);
+                sendData = serializeUrlEncoded(params);
+            } else {
+                urlStr = appendParams(getFullUrl(rqId), params);
+            }
+            executeHttpRequestAsync(urlStr,
+                    httpMethod,
+                    sendData,
+                    self.FORM_URLENCODED_CONTENT_TYPE,
+                    function(recievedData) {
+                        successCallback(unserialize(recievedData));
+                    },
+                    errorCallback);
         }
     }
-    
+
+    function sendPlatypusSyncRequest(httpMethod, rqId, params) {
+        if (!self.serverUrl) {
+            throw self.URL_NOT_DEFINED_ERROR;
+        } else {
+            var urlStr = null;
+            var sendData = null;
+            if (httpMethod === self.HTTP_METHOD_POST) {
+                urlStr = getFullUrl(rqId);
+                sendData = serializeUrlEncoded(params);
+            } else {
+                urlStr = appendParams(getFullUrl(rqId), params);
+            }
+            return unserialize(executeHttpRequestSync(urlStr,
+                    httpMethod,
+                    sendData,
+                    self.FORM_URLENCODED_CONTENT_TYPE));
+        }
+    }
+
     function sendPlatypusDownloadRequest(httpMethod, rqId, params) {
-        if(self.SERVER_URL == null) {
+        if (!self.serverUrl) {
             throw self.URL_NOT_DEFINED_ERROR;
         } else {
-            var uri;
-            var p="";      
-            uri = removeEndSlash(self.SERVER_URL) + self.API_PATH;
-            p += '<input type="hidden" name="' + self.TYPE  + '" value="'+rqId +'" />';
-            for (var i in params) {
-                if (i) {
-                    p += '<input type="hidden" name="' + i + '" value="' + params[i] + '" />';
+            var uri = removeEndSlash(self.serverUrl) + self.API_PATH;
+            var form = document.createElement("form");
+            form.setAttribute("method", httpMethod);
+            form.setAttribute("action", uri);
+
+            appendHiddenField(form, self.TYPE, rqId);
+            for (var key in params) {
+                if (params.hasOwnProperty(key)) {
+                    appendHiddenField(form, key, params[key]);
                 }
             }
-            $('<form action="'+ uri+'" method="' + httpMethod + '">' + p + '</form>')
-		.appendTo('body').submit().remove();
+            document.body.appendChild(form);
+            form.submit();
+            document.body.removeChild(form);
         }
     }
-    
-     function sendPlatypusSyncRequest(httpMethod, rqId, params) {
-        if(self.SERVER_URL == null) {
-            throw self.URL_NOT_DEFINED_ERROR;
-        } else {
-            var uri;
-            var contentType;
-            var res;     
-            uri = removeEndSlash(self.SERVER_URL) + self.API_PATH + "?" + self.TYPE + "=" + rqId;
-            contentType = self.JSON_CONTENT_TYPE;
-            $.ajax(uri, {
-                type: httpMethod,
-                async:false,
-                contentType: contentType,
-                dataType: "json",
-                cache: false,
-                data: params
-            }).done(function (data, type, cfg) {
-                        if (!data && cfg.responseText == "") {
-                            res = undefined;
-                        } else {
-                            res = data
-                        }
-                    });
-            return res;
-        }
+
+    function appendParams(urlStr, params) {
+        return params ? urlStr + "&" + serializeUrlEncoded(params) : urlStr;
     }
-    
-    function getParamsQueryString(params) {
-        var q = "";
-        for (var p in params) {
-            if (params.hasOwnProperty(p)) {
-                q += "&" + p + "=" + params[p];
-            }
-        }
-        return q;
+
+    function appendHiddenField(form, name, value) {
+        var hiddenFieldType = document.createElement("input");
+        hiddenFieldType.setAttribute("type", "hidden");
+        hiddenFieldType.setAttribute("name", name);
+        hiddenFieldType.setAttribute("value", value);
+        form.appendChild(hiddenFieldType);
     }
-    
+
+    function getFullUrl(rqId) {
+        return removeEndSlash(self.serverUrl) + self.API_PATH + "?" + self.TYPE + "=" + rqId;
+    }
+
     function removeEndSlash(target) {
         var l = target.length - 1;
-        if(target.lastIndexOf('/') === l) {
+        if (target.lastIndexOf('/') === l) {
             target = target.substring(0, l);
         }
         return target;
     }
-}
 
-/* 
- * Platypus Server modules proxy object.
- * This API enables call server modules methods in simple manner.
- * 
- * Usage example:
- * platypus.server.module.get("ModuleName", function(module) {
- *      module.testMethod("param1", "param2", function(result) {
- *          console.log(result.prop1);
- *      });
- * });
- * 
- */
-window.platypus.server.module = new ServerModule();
+    function serializeUrlEncoded(obj, prefix) {
+        var str = [];
+        for (var p in obj) {
+            var k = prefix ? prefix + "[]" : p, v = obj[p];
+            str.push(typeof v === "object" ?
+                    serializeUrlEncoded(v, k) :
+                    encodeURIComponent(k) + "=" + encodeURIComponent(v));
+        }
+        return str.join("&");
+    }
 
-function ServerModule() {
-    /**
-     * @param moduleName Server Module name or ID
-     * @param getCallback callback function called on module creation complete
+    function unserialize(str) {
+        var obj;
+        try {
+            obj = JSON.parse(str);
+        } catch (ex) {
+            obj = str;
+        }
+        return obj;
+    }
+
+    /** 
+     * Platypus Server's modules proxy object.
+     * This API enables call server modules methods in simple manner.
+     * 
+     * Usage example:
+     * platypus.server.getModule("ModuleName", function(module) {
+     *      module.testMethod("param1", "param2", function(result) {
+     *          console.log(result.prop1);
+     *      });
+     * });
+     * 
      */
-    this.get = function(moduleName, getCallback) {
-        platypus.api.createServerModule(moduleName, function(data) {
+    this.getModule = function(moduleName, getCallback) {
+        platypus.server.createServerModule(moduleName, function(data) {
             var sm = {};
-            for (var i = 0; i < data.functions.length; i++) {           
-                sm[data.functions[i]] = function (functionName) {
-                    return function () {
-                        var executeCallback = arguments[arguments.length - 1];
-                        if (!executeCallback && !(executeCallback instanceof "function")) {
-                            throw "Callback function is required.";
+            if (data.functions) {
+                for (var i = 0; i < data.functions.length; i++) {
+                    sm[data.functions[i]] = function(functionName) {
+                        return function() {
+                            var executeCallback = arguments[arguments.length - 1];
+                            if (!executeCallback && !(executeCallback instanceof "function")) {
+                                throw "Callback function is required.";
+                            }
+                            var params = [];
+                            for (var j = 0; j < arguments.length - 1; j++) {
+                                params[j] = arguments[j];
+                            }
+                            platypus.server.executeServerModuleMethod(moduleName, functionName, params, function(data) {
+                                executeCallback(data);
+                            });
                         }
-                        var params = [];
-                        for (var j = 0; j < arguments.length - 1; j++) {
-                            params[j] = arguments[j];
-                        }
-                        platypus.api.executeServerModuleMethod(moduleName, functionName, params, function (data) {
-                            executeCallback(data);
-                        });
-                    }
-                }(data.functions[i]);
+                    }(data.functions[i]);
+                }
             }
-            for (var j = 0; j < data.properties.length; j++) {     
-                (function (aMethodName) { 
-                     Object.defineProperty(sm,  aMethodName, { 
-                         set: function(aValue) {return  platypus.api.setServerModuleProperty(moduleName, aMethodName, aValue);},
-                         get: function() { return  platypus.api.getServerModuleProperty(moduleName, aMethodName); }
-                     });
-                })(data.properties[j]);
+            if (data.properties) {
+                for (var j = 0; j < data.properties.length; j++) {
+                    (function(aMethodName) {
+                        Object.defineProperty(sm, aMethodName, {
+                            set: function(aValue) {
+                                return  platypus.server.setServerModuleProperty(moduleName, aMethodName, aValue);
+                            },
+                            get: function() {
+                                return  platypus.server.getServerModuleProperty(moduleName, aMethodName);
+                            }
+                        });
+                    })(data.properties[j]);
+                }
             }
             if (data.isReport) {
-                sm.show = function () {platypus.api.executeServerReport(moduleName);};
-                sm.print = function () {platypus.api.executeServerReport(moduleName);};
+                sm.show = function() {
+                    platypus.api.executeServerReport(moduleName);
+                };
+                sm.print = function() {
+                    platypus.api.executeServerReport(moduleName);
+                };
             }
-             getCallback(sm);
+            getCallback(sm);
         });
-    } 
+    };
 }
-
-
