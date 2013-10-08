@@ -83,7 +83,7 @@ public class LoggersConfig {
             } else if (aPropName.equals("handlers") || aPropName.endsWith(".handlers")) {
                 String[] handlersNames = aPropValue.split(",");
                 for (String handlerName : handlersNames) {
-                    if (handlerName != null && handlerName.isEmpty()) {
+                    if (handlerName != null && !handlerName.isEmpty()) {
                         try {
                             Class cls = Class.forName(handlerName.trim());
                         } catch (Exception ex) {

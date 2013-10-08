@@ -262,7 +262,6 @@ public class SqlTextEditsComplementor {
                 DeleteFieldEdit<QueryEntity> edit = new DeleteFieldEdit<QueryEntity>(model.getParametersEntity(), param);
                 edits.add(edit);
                 section.addEdit(edit);
-
             }
         }
         paramNames.clear();
