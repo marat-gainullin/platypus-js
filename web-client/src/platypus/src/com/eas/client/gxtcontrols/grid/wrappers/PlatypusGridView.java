@@ -73,6 +73,15 @@ public class PlatypusGridView extends GridView<Row> {
 					Logger.getLogger(PlatypusGridView.class.getName()).log(Level.SEVERE, "Sencha's bug while hiding columns in multi row grid header: " + ex.getMessage());
 				}
 			}
+			
+			@Override
+			public void refresh() {
+				try {
+					super.refresh();
+				} catch (Exception ex) {
+					Logger.getLogger(PlatypusGridView.class.getName()).log(Level.SEVERE, "Sencha's bug while refreshing columns in multi row grid header: " + ex.getMessage());
+				}
+			}
 
 		};
 		header.setSplitterWidth(splitterWidth);
