@@ -54,9 +54,21 @@ public class PlatypusDbDiagramDataObject extends PlatypusDataObject {
     }
 
     @Override
+    protected void signOnQueries() {
+        // no op, since db diagrams doesn't contains queries.
+    }
+
+    @Override
     protected void clientChanged() {
         if (model != null) {
             model.setClient(getClient());
+        }
+    }
+
+    @Override
+    protected void validateModel() throws Exception {
+        if (getModel() != null) {
+            getModel().validate();
         }
     }
 
@@ -76,7 +88,7 @@ public class PlatypusDbDiagramDataObject extends PlatypusDataObject {
             }, this);
         }
     }
-    
+
     private UndoRedo.Manager getUndoRedo() {
         return getLookup().lookup(PlatypusDbDiagramSupport.class).getModelUndo();
     }

@@ -115,6 +115,11 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
             resolver.run();
             resolver = null;
         }
+        if(client == null){
+            for(E e : entities.values()){
+                e.clearFields();
+            }
+        }
     }
 
     public void clearRelations() {
