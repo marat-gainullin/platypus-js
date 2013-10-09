@@ -281,6 +281,18 @@ public class PlatypusProjectImpl implements PlatypusProject {
     }
 
     @Override
+    public Component generateDbValidatePlaceholder() throws Exception {
+        byte[] htmlData = BinaryUtils.readStream(PlatypusProjectImpl.class.getResourceAsStream(NbBundle.getMessage(PlatypusProjectImpl.class, "dbValidatePlaceholder")), -1);  // NOI18N 
+        String html = new String(htmlData, PlatypusUtils.COMMON_ENCODING_NAME);
+        URL urlBase = PlatypusProjectImpl.class.getResource("");
+        html = html.replaceAll("dbValidateBaseHref", urlBase.toString());
+        JEditorPane htmlPage = new JEditorPane("text/html", html);
+        htmlPage.setEditable(false);
+        
+        return new JScrollPane(htmlPage);
+    }
+    
+    @Override
     public synchronized HandlerRegistration addClientChangeListener(final Runnable onChange) {
         clientListeners.add(onChange);
         return new HandlerRegistration() {

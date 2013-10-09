@@ -409,6 +409,13 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         return sqlFullTextDocument;
     }
 
+    @Override
+    protected void validateModel() throws Exception {
+        if (getModel() != null) {
+            getModel().validate();
+        }
+    }
+
     public void shrink() {
         modelNode = null;
         statement = null;

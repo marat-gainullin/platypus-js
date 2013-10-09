@@ -8,6 +8,7 @@ import com.eas.client.settings.ConnectionSettings2XmlDom;
 import com.eas.client.settings.DbConnectionSettings;
 import com.eas.client.settings.EasSettings;
 import com.eas.client.settings.XmlDom2ConnectionSettings;
+import com.eas.designer.application.HandlerRegistration;
 import com.eas.designer.application.PlatypusUtils;
 import com.eas.designer.explorer.PlatypusDataObject;
 import com.eas.xml.dom.Source2XmlDom;
@@ -53,6 +54,11 @@ public class PlatypusConnectionDataObject extends PlatypusDataObject {
     protected void clientChanged() {
     }
 
+    @Override
+    protected void validateModel() throws Exception {
+        // no op
+    }
+        
     public String getUrl() throws Exception {
         DbConnectionSettings lsettings = getSettings();
         return lsettings.getUrl();

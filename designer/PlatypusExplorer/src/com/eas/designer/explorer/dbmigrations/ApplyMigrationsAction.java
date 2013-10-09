@@ -21,7 +21,6 @@ import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
 import org.openide.util.RequestProcessor;
 import org.openide.util.TaskListener;
-import org.openide.windows.IOProvider;
 import org.openide.windows.InputOutput;
 
 /**

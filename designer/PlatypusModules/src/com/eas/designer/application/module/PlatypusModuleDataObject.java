@@ -184,6 +184,13 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
         }
     }
 
+    @Override
+    protected void validateModel() throws Exception {
+        if (getModel() != null) {
+            getModel().validate();
+        }
+    }
+
     public void saveModel() throws IOException {
         if (model != null) {
             org.w3c.dom.Document doc = model.toXML();

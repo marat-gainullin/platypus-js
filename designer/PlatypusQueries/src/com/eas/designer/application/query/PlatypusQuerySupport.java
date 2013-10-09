@@ -285,6 +285,7 @@ public class PlatypusQuerySupport extends CloneableOpenSupport implements OpenCo
         openedEditorPane = aOpenedEditorPane;
     }
 
+    @Override
     public UndoRedo.Manager getModelUndo() {
         return modelUndo;
     }

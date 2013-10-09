@@ -114,10 +114,6 @@ public abstract class Entity<M extends Model<E, ?, ?, Q>, Q extends Query<?>, E 
         if (!res) {
             query = oldQuery;
             fields = oldFields;
-        }else{
-            // Let's fire an event about query change
-            query = null;
-            setQuery(newQuery);
         }
         return res;
     }

@@ -504,7 +504,7 @@ public final class ModelInspector extends TopComponent implements ExplorerManage
         }
 
         private Node[] getSelectedNodes() {
-            return rootNode.entitiesToNodes(modelView.getSelectedEntities());
+            return rootNode != null && modelView != null ? rootNode.entitiesToNodes(modelView.getSelectedEntities()) : new Node[]{};
         }
     }
 
