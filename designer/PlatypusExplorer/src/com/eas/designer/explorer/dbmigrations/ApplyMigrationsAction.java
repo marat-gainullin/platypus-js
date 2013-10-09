@@ -6,6 +6,9 @@ package com.eas.designer.explorer.dbmigrations;
 
 import com.eas.designer.explorer.project.PlatypusProjectImpl;
 import java.awt.event.ActionEvent;
+import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import org.netbeans.api.progress.ProgressHandle;
@@ -77,14 +80,21 @@ public class ApplyMigrationsAction extends AbstractAction implements ContextAwar
                 project.getDbMigrator().setOut(io.getOut());
                 project.getDbMigrator().setErr(io.getErr());
                 project.getDbMigrator().applyMigrations();
+                try {
+                    project.disconnectFormDb();
+                } catch (InterruptedException | ExecutionException ex) {
+                    Logger.getLogger(ApplyMigrationsAction.class.getName()).log(Level.SEVERE, "Error when disconnecting from database after the apply migration action.", ex);//NOI18N
+                    throw new RuntimeException(ex);
+                }
+                project.startConnecting2db();
             }
         });
-        final ProgressHandle ph = ProgressHandleFactory.createHandle(NbBundle.getMessage(ApplyMigrationsAction.class, "LBL_Apply_Migrations_Progress"), applyTask); // NOI18N  
+        final ProgressHandle ph = ProgressHandleFactory.createHandle(NbBundle.getMessage(ApplyMigrationsAction.class, "LBL_Apply_Migrations_Progress"), applyTask);//NOI18N  
         applyTask.addTaskListener(new TaskListener() {
             @Override
             public void taskFinished(org.openide.util.Task task) {
                 ph.finish();
-                StatusDisplayer.getDefault().setStatusText(NbBundle.getMessage(ApplyMigrationsAction.class, "LBL_Apply_Migrations_Complete")); // NOI18N
+                StatusDisplayer.getDefault().setStatusText(NbBundle.getMessage(ApplyMigrationsAction.class, "LBL_Apply_Migrations_Complete"));//NOI18N
             }
         });
         ph.start();

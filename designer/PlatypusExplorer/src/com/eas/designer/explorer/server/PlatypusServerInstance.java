@@ -8,10 +8,13 @@ import com.eas.deploy.project.PlatypusSettings;
 import com.eas.designer.application.project.PlatypusProject;
 import com.eas.designer.application.project.PlatypusProjectSettings;
 import com.eas.designer.explorer.project.ProjectRunner;
+import static com.eas.designer.explorer.project.ProjectRunner.getCommandLineStr;
 import static com.eas.designer.explorer.project.ProjectRunner.setLogging;
 import com.eas.server.PlatypusServer;
 import com.eas.server.ServerMain;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Future;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
@@ -128,68 +131,66 @@ public final class PlatypusServerInstance implements Server, ServerInstanceImple
                 io.getOut().println();
             }
         });
-        ExternalProcessBuilder processBuilder = new ExternalProcessBuilder(ProjectRunner.JVM_RUN_COMMAND_NAME);
+        //ExternalProcessBuilder processBuilder = new ExternalProcessBuilder(ProjectRunner.JVM_RUN_COMMAND_NAME);
+        List<String> arguments = new ArrayList<>();
         if (project.getSettings().getRunServerVmOptions() != null && !project.getSettings().getRunServerVmOptions().isEmpty()) {
-            processBuilder = ProjectRunner.addArguments(processBuilder, project.getSettings().getRunServerVmOptions());
+            ProjectRunner.addArguments(arguments, project.getSettings().getRunServerVmOptions());
             io.getOut().println(String.format(NbBundle.getMessage(PlatypusServerInstance.class, "MSG_VM_Run_Options"),//NOI18N
                     project.getSettings().getRunServerVmOptions()));
         }
         if (debug) {
-            processBuilder = ProjectRunner.setDebugArguments(processBuilder, project.getSettings().getDebugServerPort());
+            ProjectRunner.setDebugArguments(arguments, project.getSettings().getDebugServerPort());
         }
-        
-        io.getOut().println(String.format(NbBundle.getMessage(ProjectRunner.class, "MSG_Logging_Level"), project.getSettings().getClientLogLevel()));//NOI18N
-        processBuilder = setLogging(processBuilder, project.getSettings().getServerLogLevel());
-        
-        PlatypusSettings ps = project.getSettings().getAppSettings();
-        processBuilder = processBuilder.addArgument(ProjectRunner.OPTION_PREFIX + ProjectRunner.CLASSPATH_OPTION_NAME);
-        processBuilder = processBuilder.addArgument(ProjectRunner.getExtendedClasspath(getExecutablePath(binDir)));
 
-        processBuilder = processBuilder.addArgument(ServerMain.class.getName());
+        io.getOut().println(String.format(NbBundle.getMessage(ProjectRunner.class, "MSG_Logging_Level"), project.getSettings().getClientLogLevel()));//NOI18N
+        setLogging(arguments, project.getSettings().getServerLogLevel());
+
+        PlatypusSettings ps = project.getSettings().getAppSettings();
+        arguments.add(ProjectRunner.OPTION_PREFIX + ProjectRunner.CLASSPATH_OPTION_NAME);
+        arguments.add(ProjectRunner.getExtendedClasspath(getExecutablePath(binDir)));
+
+        arguments.add(ServerMain.class.getName());
 
         if (!project.getSettings().isDbAppSources()) {
-            processBuilder = processBuilder.addArgument(ProjectRunner.OPTION_PREFIX + ServerMain.APP_PATH_PARAM1);
-            processBuilder = processBuilder.addArgument(project.getProjectDirectory().getPath());
+            arguments.add(ProjectRunner.OPTION_PREFIX + ServerMain.APP_PATH_PARAM1);
+            arguments.add(project.getProjectDirectory().getPath());
             io.getOut().println(String.format(NbBundle.getMessage(PlatypusServerInstance.class, "MSG_App_Sources"),//NOI18N
                     project.getProjectDirectory().getPath()));
         } else {
             io.getOut().println(NbBundle.getMessage(PlatypusServerInstance.class, "MSG_App_Sources_Database"));//NOI18N
         }
 
-        processBuilder = processBuilder.addArgument(ProjectRunner.OPTION_PREFIX + ServerMain.APP_DB_URL_CONF_PARAM);
-        processBuilder = processBuilder.addArgument(ps.getDbSettings().getUrl());
-        processBuilder = processBuilder.addArgument(ProjectRunner.OPTION_PREFIX + ServerMain.APP_DB_USERNAME_CONF_PARAM);
-        processBuilder = processBuilder.addArgument(ps.getDbSettings().getUser());
-        processBuilder = processBuilder.addArgument(ProjectRunner.OPTION_PREFIX + ServerMain.APP_DB_PASSWORD_CONF_PARAM);
-        processBuilder = processBuilder.addArgument(ps.getDbSettings().getPassword());
-        processBuilder = processBuilder.addArgument(ProjectRunner.OPTION_PREFIX + ServerMain.APP_DB_SCHEMA_CONF_PARAM);
-        processBuilder = processBuilder.addArgument(ps.getDbSettings().getSchema());
+        arguments.add(ProjectRunner.OPTION_PREFIX + ServerMain.APP_DB_URL_CONF_PARAM);
+        arguments.add(ps.getDbSettings().getUrl());
+        arguments.add(ProjectRunner.OPTION_PREFIX + ServerMain.APP_DB_USERNAME_CONF_PARAM);
+        arguments.add(ps.getDbSettings().getUser());
+        arguments.add(ProjectRunner.OPTION_PREFIX + ServerMain.APP_DB_PASSWORD_CONF_PARAM);
+        arguments.add(ps.getDbSettings().getPassword());
+        arguments.add(ProjectRunner.OPTION_PREFIX + ServerMain.APP_DB_SCHEMA_CONF_PARAM);
+        arguments.add(ps.getDbSettings().getSchema());
 
         if (!ProjectRunner.isSetByOption(ServerMain.IFACE_CONF_PARAM, project.getSettings().getRunClientOptions())) {
-            processBuilder = processBuilder.addArgument(ProjectRunner.OPTION_PREFIX + ServerMain.IFACE_CONF_PARAM);
-            processBuilder = processBuilder.addArgument(getListenInterfaceArgument(project.getSettings()));
+            arguments.add(ProjectRunner.OPTION_PREFIX + ServerMain.IFACE_CONF_PARAM);
+            arguments.add(getListenInterfaceArgument(project.getSettings()));
             io.getOut().println(String.format(NbBundle.getMessage(PlatypusServerInstance.class, "MSG_Server_Interface"),//NOI18N
                     getListenInterfaceArgument(project.getSettings())));
         }
         if (!ProjectRunner.isSetByOption(ServerMain.PROTOCOLS_CONF_PARAM, project.getSettings().getRunClientOptions())) {
-            processBuilder = processBuilder.addArgument(ProjectRunner.OPTION_PREFIX + ServerMain.PROTOCOLS_CONF_PARAM);
-            processBuilder = processBuilder.addArgument(getProtocol(project.getSettings()));
+            arguments.add(ProjectRunner.OPTION_PREFIX + ServerMain.PROTOCOLS_CONF_PARAM);
+            arguments.add(getProtocol(project.getSettings()));
             io.getOut().println(String.format(NbBundle.getMessage(PlatypusServerInstance.class, "MSG_Server_Protocol"), getProtocol(project.getSettings())));//NOI18N
         }
         if (project.getSettings().getRunClientOptions() != null && !project.getSettings().getRunClientOptions().isEmpty()) {
-            processBuilder = ProjectRunner.addArguments(processBuilder, project.getSettings().getRunClientOptions());
+            ProjectRunner.addArguments(arguments, project.getSettings().getRunClientOptions());
             io.getOut().println(String.format(NbBundle.getMessage(PlatypusServerInstance.class, "MSG_Run_Options"),//NOI18N
                     project.getSettings().getRunClientOptions()));
         }
-        //set default log level if not set explicitly
-        /* TODO: Take into account, that loglevel and other logging options are configured as system properties
-        if (!ProjectRunner.isSetByOption(ServerMain.LOGLEVEL_CONF_PARAM, project.getSettings().getRunClientOptions())) {
-            processBuilder = processBuilder.addArgument(ProjectRunner.OPTION_PREFIX + ServerMain.LOGLEVEL_CONF_PARAM);
-            processBuilder = processBuilder.addArgument(project.getSettings().getServerLogLevel().getName());
-            io.getOut().println(String.format(NbBundle.getMessage(PlatypusServerInstance.class, "MSG_Logging_Level"), project.getSettings().getServerLogLevel().getName()));//NOI18N
+        ExternalProcessBuilder processBuilder = new ExternalProcessBuilder(ProjectRunner.JVM_RUN_COMMAND_NAME);
+        for (String argument : arguments) {
+            processBuilder = processBuilder.addArgument(argument);
         }
-        */ 
         ExecutionService service = ExecutionService.newService(processBuilder, descriptor, "Platypus Server");
+        io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Command_Line") + getCommandLineStr(arguments));//NOI18N
         Future<Integer> runTask = service.run();
         serverRunTask = runTask;
         return runTask != null;
