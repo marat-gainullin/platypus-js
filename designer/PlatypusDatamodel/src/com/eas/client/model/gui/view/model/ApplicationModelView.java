@@ -6,6 +6,7 @@ package com.eas.client.model.gui.view.model;
 
 import com.bearsoft.routing.Connector;
 import com.bearsoft.rowset.metadata.Field;
+import com.bearsoft.rowset.metadata.Fields;
 import com.eas.client.metadata.TableRef;
 import com.eas.client.model.Relation;
 import com.eas.client.model.application.ApplicationDbEntity;
@@ -123,7 +124,7 @@ public class ApplicationModelView extends ModelView<ApplicationDbEntity, Applica
     }
 
     @Override
-    protected EntityView<ApplicationDbEntity> createGenericEntityView(ApplicationDbEntity aEntity) {
+    protected EntityView<ApplicationDbEntity> createGenericEntityView(ApplicationDbEntity aEntity) throws Exception {
         return isParametersEntity(aEntity) ? new ApplicationParametersEntityView((ApplicationDbParametersEntity) aEntity, entitiesViewsMover) : new ApplicationEntityView(aEntity, entitiesViewsMover);
     }
 
@@ -166,27 +167,33 @@ public class ApplicationModelView extends ModelView<ApplicationDbEntity, Applica
         }
         Map<String, Set<EntityFieldRef<ApplicationDbEntity>>> pksByTable = new HashMap<>();
         for (ApplicationDbEntity entity : model.getEntities().values()) {
-            for (Field field : entity.getFields().getPrimaryKeys()) {
-                Set<EntityFieldRef<ApplicationDbEntity>> pks = pksByTable.get(field.getTableName());
-                if (pks == null) {
-                    pks = new HashSet<>();
-                    pksByTable.put(field.getTableName(), pks);
+            Fields fields = entity.getFields();
+            if (fields != null) {
+                for (Field field : fields.getPrimaryKeys()) {
+                    Set<EntityFieldRef<ApplicationDbEntity>> pks = pksByTable.get(field.getTableName());
+                    if (pks == null) {
+                        pks = new HashSet<>();
+                        pksByTable.put(field.getTableName(), pks);
+                    }
+                    pks.add(new EntityFieldRef(entity, field));
                 }
-                pks.add(new EntityFieldRef(entity, field));
             }
         }
         for (ApplicationDbEntity entity : model.getEntities().values()) {
-            for (Field field : entity.getFields().getForeinKeys()) {
-                assert field.getFk() != null;
-                String tableName = field.getFk().getReferee().getTable();
-                Set<EntityFieldRef<ApplicationDbEntity>> pks = pksByTable.get(tableName);
-                if (pks != null) {
-                    for (EntityFieldRef<ApplicationDbEntity> pk : pks) {
-                        ReferenceRelation<ApplicationDbEntity> relation = new ReferenceRelation<>(entity, field, pk.entity, pk.field);
-                        String relId = generateRelationId(relation);
-                        if (!alreadyRels.contains(relId)) {
-                            alreadyRels.add(relId);
-                            aTask.run(relation);
+            Fields fields = entity.getFields();
+            if (fields != null) {
+                for (Field field : fields.getForeinKeys()) {
+                    assert field.getFk() != null;
+                    String tableName = field.getFk().getReferee().getTable();
+                    Set<EntityFieldRef<ApplicationDbEntity>> pks = pksByTable.get(tableName);
+                    if (pks != null) {
+                        for (EntityFieldRef<ApplicationDbEntity> pk : pks) {
+                            ReferenceRelation<ApplicationDbEntity> relation = new ReferenceRelation<>(entity, field, pk.entity, pk.field);
+                            String relId = generateRelationId(relation);
+                            if (!alreadyRels.contains(relId)) {
+                                alreadyRels.add(relId);
+                                aTask.run(relation);
+                            }
                         }
                     }
                 }
@@ -355,12 +362,12 @@ public class ApplicationModelView extends ModelView<ApplicationDbEntity, Applica
                                 || (oldCollectionName == null ? newCollectionName != null : !oldCollectionName.equals(newCollectionName))) {
                             undoSupport.beginUpdate();
                             try {
-                                if(oldScalarName == null ? newScalarName != null : !oldScalarName.equals(newScalarName)){
+                                if (oldScalarName == null ? newScalarName != null : !oldScalarName.equals(newScalarName)) {
                                     ScalarPropertyNameEdit edit = new ScalarPropertyNameEdit(relation, oldScalarName, newScalarName);
                                     edit.redo();
                                     undoSupport.postEdit(edit);
                                 }
-                                if(oldCollectionName == null ? newCollectionName != null : !oldCollectionName.equals(newCollectionName)){
+                                if (oldCollectionName == null ? newCollectionName != null : !oldCollectionName.equals(newCollectionName)) {
                                     CollectionPropertyNameEdit edit = new CollectionPropertyNameEdit(relation, oldCollectionName, newCollectionName);
                                     edit.redo();
                                     undoSupport.postEdit(edit);

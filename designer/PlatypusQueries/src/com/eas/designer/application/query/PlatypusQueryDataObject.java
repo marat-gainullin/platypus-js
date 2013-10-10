@@ -465,6 +465,19 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         }
     }
 
+    @Override
+    protected void handleDelete() throws IOException {
+        String oldId = IndexerQuery.file2AppElementId(getPrimaryFile());
+        super.handleDelete();
+        if (getClient() != null) {
+            try {
+                getClient().appEntityChanged(oldId);
+            } catch (Exception ex) {
+                throw new IOException(ex);
+            }
+        }
+    }
+
     public Statement getCommitedStatement() {
         return commitedStatement;
     }

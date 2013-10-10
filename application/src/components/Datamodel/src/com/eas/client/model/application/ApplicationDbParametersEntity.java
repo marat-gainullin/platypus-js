@@ -51,6 +51,11 @@ public class ApplicationDbParametersEntity extends ApplicationDbEntity implement
     }
 
     @Override
+    public void validateQuery() throws Exception {
+        // no op for parameters entity
+    }
+
+    @Override
     protected boolean isTagValid(String aTagName) {
         return true;
     }
@@ -157,8 +162,4 @@ public class ApplicationDbParametersEntity extends ApplicationDbEntity implement
         // no op
     }
 
-    @Override
-    public void validateQuery() throws Exception {
-        // no op
-    }
 }

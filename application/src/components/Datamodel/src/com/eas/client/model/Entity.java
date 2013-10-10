@@ -58,6 +58,7 @@ public abstract class Entity<M extends Model<E, ?, ?, Q>, Q extends Query<?>, E 
     public static final String TABLE_NAME_PROPERTY = "tableName";
     public static final String TABLE_SCHEMA_NAME_PROPERTY = "tableSchemaName";
     public static final String QUERY_PROPERTY = "query";
+    public static final String QUERY_VALID_PROPERTY = "queryValid";
 
     public Entity() {
         super();
@@ -101,7 +102,6 @@ public abstract class Entity<M extends Model<E, ?, ?, Q>, Q extends Query<?>, E 
         Fields oldFields = getFields();
         Parameters oldParams = oldQuery != null ? oldQuery.getParameters() : null;
         clearFields();
-        validateQuery();
         Q newQuery = getQuery();
         Fields newFields = getFields();
         Parameters newParams = newQuery != null ? newQuery.getParameters() : null;
@@ -203,14 +203,8 @@ public abstract class Entity<M extends Model<E, ?, ?, Q>, Q extends Query<?>, E 
         String ltitle = title;
         if (ltitle == null || ltitle.isEmpty()) {
             if (queryId != null) {
-                try {
-                    Q lquery = getQuery();
-                    ltitle = lquery.getTitle();
-                } catch (Exception ex) {
-                    Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
-                    ltitle = "";
-                }
-                title = ltitle;
+                Q lquery = getQuery();
+                title = lquery != null ? lquery.getTitle() : "";
             } else if (tableName != null) {
                 Fields lfields = getFields();
                 if (lfields != null) {
@@ -311,13 +305,12 @@ public abstract class Entity<M extends Model<E, ?, ?, Q>, Q extends Query<?>, E 
         changeSupport.firePropertyChange(TABLE_SCHEMA_NAME_PROPERTY, oldValue, aValue);
     }
 
-    public Q getQuery() throws Exception {
+    public Q getQuery() {
         try {
             validateQuery();
         } catch (Exception ex) {
             Logger.getLogger(Entity.class.getName()).log(Level.WARNING, null, ex);
             query = null;
-            throw ex;
         }
         return query;
     }

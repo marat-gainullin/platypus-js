@@ -8,6 +8,7 @@ import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.utils.CollectionListener;
 import com.eas.client.model.Entity;
+import com.eas.client.queries.Query;
 import com.eas.designer.datamodel.nodes.EntityNodeChildren.EntityFieldKey;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -15,8 +16,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.openide.awt.UndoRedo;
 import org.openide.nodes.Children;
 import org.openide.util.Lookup;
@@ -41,21 +40,18 @@ public abstract class EntityNodeChildren<T> extends Children.Keys<T> implements 
         undoRedo = aUndoReciever;
         setFields(entity.getFields());
         entity.getModel().getChangeSupport().addPropertyChangeListener("client", this);
-        entity.getChangeSupport().addPropertyChangeListener("query", this);
+        entity.getChangeSupport().addPropertyChangeListener(Entity.QUERY_VALID_PROPERTY, this);
     }
 
     protected abstract T createKey(Field aField);
 
     protected List<T> computeKeys() {
         keys.clear();
-        try {
-            if (entity.getQuery() != null) {
-                for (int i = 1; i <= entity.getQuery().getParameters().getParametersCount(); i++) {
-                    keys.add(createKey(entity.getQuery().getParameters().get(i)));
-                }
+        Query query = entity.getQuery();
+        if (query != null) {
+            for (int i = 1; i <= query.getParameters().getParametersCount(); i++) {
+                keys.add(createKey(query.getParameters().get(i)));
             }
-        } catch (Exception ex) {
-            Logger.getLogger(EntityNodeChildren.class.getName()).log(Level.SEVERE, "Error getting Query.", ex);
         }
         Fields fields = entity.getFields();
         if (fields != null) {
@@ -80,7 +76,7 @@ public abstract class EntityNodeChildren<T> extends Children.Keys<T> implements 
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        if ("client".equalsIgnoreCase(evt.getPropertyName()) || Entity.QUERY_PROPERTY.equalsIgnoreCase(evt.getPropertyName())) {
+        if ("client".equalsIgnoreCase(evt.getPropertyName()) || Entity.QUERY_VALID_PROPERTY.equalsIgnoreCase(evt.getPropertyName())) {
             setFields(entity.getFields());
             setKeys(computeKeys());
         }

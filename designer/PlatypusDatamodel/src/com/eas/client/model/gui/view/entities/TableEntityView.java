@@ -13,7 +13,7 @@ import com.eas.client.model.gui.view.EntityViewsManager;
  */
 public class TableEntityView extends EntityView<FieldsEntity> {
 
-    public TableEntityView(FieldsEntity aEntity, EntityViewsManager<FieldsEntity> aMovesManager) {
+    public TableEntityView(FieldsEntity aEntity, EntityViewsManager<FieldsEntity> aMovesManager) throws Exception {
         super(aEntity, aMovesManager);
     }
 

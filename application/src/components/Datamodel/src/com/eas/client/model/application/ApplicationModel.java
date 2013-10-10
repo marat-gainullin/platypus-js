@@ -117,7 +117,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         boolean res = super.validate();
         if(res){
             for(Relation<E> rel : referenceRelations)
-                resolveCopiedRelation(rel, this);
+                resolveRelation(rel, this);
             checkReferenceRelationsIntegrity();
         }
         return res;
@@ -144,7 +144,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         Model<E, P, C, Q>  copied = super.copy();
         for (ReferenceRelation<E> relation : referenceRelations) {
             ReferenceRelation<E> rcopied = (ReferenceRelation<E>)relation.copy();
-            resolveCopiedRelation(rcopied, copied);
+            resolveRelation(rcopied, copied);
             ((ApplicationModel<E, P, C, Q>)copied).getReferenceRelations().add(rcopied);
         }
         return copied;
@@ -165,7 +165,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
             }
         }
         for (ReferenceRelation<E> rel : toDel) {
-            referenceRelations.remove(rel);
+            removeReferenceRelation(rel);
         }
     }
 

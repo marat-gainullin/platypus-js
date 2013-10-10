@@ -51,6 +51,11 @@ public class ApplicationPlatypusParametersEntity extends ApplicationPlatypusEnti
     }
 
     @Override
+    public void validateQuery() throws Exception {
+        // no op for parameters entity
+    }
+
+    @Override
     protected boolean isTagValid(String aTagName) {
         return true;
     }
@@ -158,8 +163,4 @@ public class ApplicationPlatypusParametersEntity extends ApplicationPlatypusEnti
         // no op
     }
 
-    @Override
-    public void validateQuery() throws Exception {
-        // no op
-    }
 }

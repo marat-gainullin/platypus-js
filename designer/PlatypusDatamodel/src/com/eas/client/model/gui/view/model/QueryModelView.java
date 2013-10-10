@@ -16,11 +16,7 @@ import com.eas.client.model.query.QueryEntity;
 import com.eas.client.model.query.QueryModel;
 import com.eas.client.model.query.QueryParametersEntity;
 import com.eas.client.model.store.XmlDom2QueryModel;
-import java.awt.Point;
 import java.awt.Rectangle;
-import java.util.List;
-import java.util.Set;
-import javax.swing.Action;
 import org.w3c.dom.Document;
 
 /**
@@ -61,7 +57,7 @@ public class QueryModelView extends ModelView<QueryEntity, QueryParametersEntity
     }
 
     @Override
-    protected EntityView<QueryEntity> createGenericEntityView(QueryEntity aEntity) {
+    protected EntityView<QueryEntity> createGenericEntityView(QueryEntity aEntity) throws Exception {
         return isParametersEntity(aEntity) ? new QueryParametersEntityView((QueryParametersEntity) aEntity, entitiesViewsMover) : new QueryEntityView(aEntity, entitiesViewsMover);
     }
 

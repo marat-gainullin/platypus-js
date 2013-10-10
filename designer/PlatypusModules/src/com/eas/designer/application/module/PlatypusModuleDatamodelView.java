@@ -285,7 +285,7 @@ public final class PlatypusModuleDatamodelView extends TopComponent implements M
                 if (ur instanceof UndoRedo.Manager) {
                     ((UndoRedo.Manager) ur).discardAllEdits();
                 }
-                PlatypusDataObject.fireAllQueriedChanged(dataObject.getModel());
+                dataObject.getModel().fireAllQueriesChanged();
                 componentActivated();
             } else {
                 explorerManager.setRootContext(dataObject.getNodeDelegate());

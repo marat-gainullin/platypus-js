@@ -340,7 +340,7 @@ public class PlatypusQueryView extends CloneableTopComponent {
                 if (ur instanceof UndoRedo.Manager) {
                     ((UndoRedo.Manager) ur).discardAllEdits();
                 }
-                PlatypusDataObject.fireAllQueriedChanged(dataObject.getModel());
+                dataObject.getModel().fireAllQueriesChanged();
                 componentActivated();
             } else {
                 String dbValidatingMissingMessage = NbBundle.getMessage(PlatypusQueryView.class, "LBL_Db_Validating");
