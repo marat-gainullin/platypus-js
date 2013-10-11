@@ -132,15 +132,7 @@ public class CompletionContext {
             }
         }
     }
-    
-    protected void fillModuleJsEntities(PlatypusModuleDataObject dataObject, int offset, JsCompletionProvider.CompletionPoint point, CompletionResultSet resultSet) {
-        JsCompletionSupport cs = new JsCompletionSupport();
-        Collection<JsCompletionItem> items = cs.getCompletionItems(dataObject, "", offset, point);
-        for (JsCompletionItem item : items) {
-            addItem(resultSet, point.filter, item);
-        }
-    }
-    
+        
     private static boolean isNumberClass(Class<?> clazz) {
         return Number.class.isAssignableFrom(clazz)
                 || Byte.TYPE.equals(clazz)

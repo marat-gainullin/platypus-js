@@ -23,7 +23,7 @@ public class JsFieldCompletionItem extends JsCompletionItem {
     
     @Override
     public String getInfomationText() {
-        JsCommentFormatter formatter = new JsCommentFormatter(JsCompletionSupport.getComments(informationText));
+        JsCommentFormatter formatter = new JsCommentFormatter(CompletionSupport.getComments(informationText));
         return formatter.toHtml();
     }
     

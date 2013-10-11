@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.netbeans.api.project.Project;
@@ -25,6 +26,7 @@ public class IndexerQuery {
      * Gets FileObject for application element by application element name from
      * index
      *
+     * @param project a project the application element belongs
      * @param appElementId application element name
      * @return primary file for application element
      */
@@ -65,5 +67,32 @@ public class IndexerQuery {
             }
         }
         return null;
+    }
+
+    /**
+     * Finds application elements files by its identifier prefix
+     *
+     * @param project project a project the application element belongs
+     * @param prefix application element prefix
+     * @return application elements primary files collection
+     */
+    public static Collection<AppElementInfo> filesByAppElementIdPrefix(Project project, String prefix) {
+        if (prefix != null) {
+            try {
+                final Collection<FileObject> roots = new ArrayList<>(QuerySupport.findRoots(project, null, Collections.<String>emptyList(), Collections.<String>emptyList()));
+                QuerySupport q = QuerySupport.forRoots(FileIndexer.INDEXER_NAME, FileIndexer.INDEXER_VERSION, roots.toArray(new FileObject[roots.size()]));
+                Collection<? extends IndexResult> queryResults = q.query(FileIndexer.APP_ELEMENT_NAME, prefix, QuerySupport.Kind.CASE_INSENSITIVE_PREFIX);
+                List<AppElementInfo> results = new ArrayList<>();
+                for (IndexResult queryResult : queryResults) {
+                    results.add(new AppElementInfo(queryResult.getValue(FileIndexer.APP_ELEMENT_NAME), queryResult.getFile()));
+                }
+                return results;
+            } catch (IOException ex) {
+                Logger.getLogger(IndexerQuery.class.getName()).log(Level.WARNING, null, ex);
+            }
+            return null;
+        } else {
+            return Collections.EMPTY_LIST;
+        }
     }
 }

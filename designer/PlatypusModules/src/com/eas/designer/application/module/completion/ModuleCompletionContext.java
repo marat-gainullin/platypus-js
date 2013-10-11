@@ -7,9 +7,17 @@ package com.eas.designer.application.module.completion;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.scripts.ScriptRunner;
 import com.eas.designer.application.indexer.IndexerQuery;
+import com.eas.designer.application.module.AstProvider;
 import com.eas.designer.application.module.PlatypusModuleDataObject;
 import com.eas.designer.application.module.parser.AstUtlities;
 import com.eas.designer.explorer.utils.StringUtils;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
+import org.mozilla.javascript.Token;
 import org.mozilla.javascript.ast.AstNode;
 import org.mozilla.javascript.ast.AstRoot;
 import org.mozilla.javascript.ast.FunctionCall;
@@ -19,6 +27,7 @@ import org.mozilla.javascript.ast.NewExpression;
 import org.mozilla.javascript.ast.NodeVisitor;
 import org.mozilla.javascript.ast.PropertyGet;
 import org.mozilla.javascript.ast.ScriptNode;
+import org.mozilla.javascript.ast.Symbol;
 import org.mozilla.javascript.ast.VariableDeclaration;
 import org.mozilla.javascript.ast.VariableInitializer;
 import org.netbeans.api.project.Project;
@@ -52,7 +61,7 @@ public class ModuleCompletionContext extends CompletionContext {
         addItem(resultSet, point.filter, new BeanCompletionItem(dataObject.getModel().getClass(), MODEL_SCRIPT_NAME, null, point.caretBeginWordOffset, point.caretEndWordOffset));
         addItem(resultSet, point.filter, new BeanCompletionItem(dataObject.getModel().getParametersEntity().getRowset().getClass(), PARAMS_SCRIPT_NAME, null, point.caretBeginWordOffset, point.caretEndWordOffset));
         fillJavaCompletionItems(point, resultSet);
-        fillModuleJsEntities(dataObject, offset, point, resultSet);
+        fillJsEntities(dataObject, offset, point, resultSet);
     }
 
     @Override
@@ -76,6 +85,14 @@ public class ModuleCompletionContext extends CompletionContext {
         return null;
     }
 
+    protected void fillJsEntities(PlatypusModuleDataObject dataObject, int offset, JsCompletionProvider.CompletionPoint point, CompletionResultSet resultSet) {
+        JsCompletonItemsSupport cs = new JsCompletonItemsSupport();
+        Collection<JsCompletionItem> items = cs.getCompletionItems(dataObject, "", offset, point);
+        for (JsCompletionItem item : items) {
+            addItem(resultSet, point.filter, item);
+        }
+    }
+
     public static CompletionContext findModuleCompletionContext(String fieldName, int offset, PlatypusModuleDataObject appElementDataObject) {
         AstRoot ast = appElementDataObject.getAst();
         if (ast != null) {
@@ -84,8 +101,8 @@ public class ModuleCompletionContext extends CompletionContext {
             for (;;) {//up to the root node  
                 if (currentNode instanceof ScriptNode) {
                     ScriptNode scriptNode = (ScriptNode) currentNode;
-                    ModuleCompletionContext.FindModuleElementVisitorSupport visitor =
-                            new ModuleCompletionContext.FindModuleElementVisitorSupport(appElementDataObject.getProject(), scriptNode, fieldName);
+                    ModuleCompletionContext.FindModuleElementSupport visitor =
+                            new ModuleCompletionContext.FindModuleElementSupport(appElementDataObject.getProject(), scriptNode, fieldName);
                     CompletionContext ctx = visitor.getModuleInfo();
                     if (ctx != null) {
                         return ctx;
@@ -107,14 +124,104 @@ public class ModuleCompletionContext extends CompletionContext {
                 || name.equals(REPORT_MODULE_NAME);
     }
 
-    private static class FindModuleElementVisitorSupport {
+    public static class JsCompletonItemsSupport {
+
+        private Map<String, JsCompletionItem> functionsMap;
+        private Map<String, JsCompletionItem> fieldsMap;
+        private AstNode currentNode;
+
+        public Collection<JsCompletionItem> getCompletionItems(AstProvider astProvider, String rightText, int offset, JsCompletionProvider.CompletionPoint point) {
+            functionsMap = new HashMap<>();
+            fieldsMap = new HashMap<>();
+            AstRoot tree = astProvider.getAst();
+            if (tree != null) {
+                AstNode offsetNode = AstUtlities.getOffsetNode(tree, offset);
+                Logger.getGlobal().info(new Boolean(isInNewExpression(offsetNode, point.filter)).toString());
+                if (isInNewExpression(offsetNode, point.filter)) {
+                } else {
+                    if (offsetNode == null) {
+                        offsetNode = tree;
+                    }
+                    scanSymbolsPath(offsetNode, rightText, point);
+                }
+
+            }
+            List<JsCompletionItem> items = new ArrayList<>(functionsMap.values());
+            items.addAll(new ArrayList<>(fieldsMap.values()));
+            return items;
+        }
+
+        private boolean isInNewExpression(AstNode aNode, String txt) {
+            return (aNode != null) && ((aNode instanceof NewExpression && (txt == null || txt.isEmpty()))
+                    || (aNode instanceof Name && aNode.getParent() instanceof NewExpression));
+        }
+
+        private void scanSymbolsPath(AstNode node, final String rightText, final JsCompletionProvider.CompletionPoint point) {
+            currentNode = node;
+            for (;;) {//up to the root node  
+                if (currentNode instanceof ScriptNode) {
+                    ScriptNode scriptNode = (ScriptNode) currentNode;
+                    //scan for variables and functions because we need more data about them
+                    scriptNode.visit(new NodeVisitor() {
+                        @Override
+                        public boolean visit(AstNode an) {
+                            if (an == currentNode) {
+                                return true;
+                            }
+                            if (an instanceof FunctionNode) {
+                                FunctionNode functionNode = (FunctionNode) an;
+                                List<String> params = new ArrayList<>();
+                                if (functionNode.getSymbols() != null) {
+                                    for (Symbol symbol : functionNode.getSymbols()) { // get function parameters
+                                        if (symbol.getDeclType() == Token.LP) {
+                                            params.add(symbol.getName());
+                                        }
+                                    }
+                                }
+                                functionsMap.put(functionNode.getName(),
+                                        new JsFunctionCompletionItem(functionNode.getName(), rightText, params, functionNode.getJsDoc(), point.caretBeginWordOffset, point.caretEndWordOffset));
+                                return false;
+                            }
+                            if (an instanceof VariableDeclaration) {
+                                VariableDeclaration variableDeclaration = (VariableDeclaration) an;
+                                if (variableDeclaration.getVariables() != null) {
+                                    for (VariableInitializer variableInitializer : variableDeclaration.getVariables()) {
+                                        fieldsMap.put(variableInitializer.getTarget().getString(),
+                                                new JsFieldCompletionItem(variableInitializer.getTarget().getString(), rightText, variableDeclaration.getJsDoc(), point.caretBeginWordOffset, point.caretEndWordOffset));
+                                    }
+                                }
+                                return false;
+                            }
+                            return true;
+                        }
+                    });
+
+                    // get parameters in the scope
+                    for (Symbol symbol : scriptNode.getSymbols()) {
+                        switch (symbol.getDeclType()) {
+                            case Token.LP:
+                                fieldsMap.put(symbol.getName(), new JsFieldCompletionItem(symbol.getName(), "", null, point.caretBeginWordOffset, point.caretEndWordOffset));//NOI18N
+                                break;
+
+                        }
+                    }
+                }
+                currentNode = currentNode.getParent();
+                if (currentNode == null) {
+                    break;
+                }
+            }
+        }
+    }
+
+    private static class FindModuleElementSupport {
 
         private Project prj;
         private AstNode node;
         private String fieldName;
         private CompletionContext ctx;
 
-        public FindModuleElementVisitorSupport(Project project, AstNode node, String fieldName) {
+        public FindModuleElementSupport(Project project, AstNode node, String fieldName) {
             this.prj = project;
             this.node = node;
             this.fieldName = fieldName;
