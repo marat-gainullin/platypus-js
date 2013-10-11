@@ -12,7 +12,7 @@ function API() {
 
     this.serverUrl = "";
 
-    this.API_PATH = "/api";
+    this.API_PATH = "/application/api";
     this.HTTP_METHOD_GET = "GET";
     this.HTTP_METHOD_POST = "POST";
     this.CONTENT_TYPE_HEADER_NAME = "Content-Type";
@@ -53,6 +53,10 @@ function API() {
     this.RQ_EXECUTE_REPORT = 19;
     this.RQ_GET_SERVER_MODULE_PROPERTY = 20;
     this.RQ_SET_SERVER_MODULE_PROPERTY = 21;
+
+    this.getServerUrl = function(aUrl) {
+        return this.serverUrl;
+    };
 
     this.setServerUrl = function(aUrl) {
         this.serverUrl = aUrl;

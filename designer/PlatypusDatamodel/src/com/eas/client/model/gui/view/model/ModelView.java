@@ -345,9 +345,13 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
 
         @Override
         public void entityAdded(E aEntity) {
-            final EntityView<E> eView = createEntityView(aEntity);
-            eView.reLayout();
-            addEntityView(eView);
+            try {
+                final EntityView<E> eView = createEntityView(aEntity);
+                eView.reLayout();
+                addEntityView(eView);
+            } catch (Exception ex) {
+                Logger.getLogger(ModelView.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+            }
         }
 
         @Override
@@ -929,16 +933,20 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
 
     public void setModel(M aModel) {
         if (aModel != model) {
-            if (model != null) {
-                model.removeEditingListener(modelListener);
-            }
-            model = aModel;
-            recreateEntityViews();
-            if (model != null) {
-                model.addEditingListener(modelListener);
-                for (Relation<E> rel : model.getRelations()) {
-                    rel.getChangeSupport().addPropertyChangeListener(relationPolylinePropagator);
+            try {
+                if (model != null) {
+                    model.removeEditingListener(modelListener);
                 }
+                model = aModel;
+                recreateEntityViews();
+                if (model != null) {
+                    model.addEditingListener(modelListener);
+                    for (Relation<E> rel : model.getRelations()) {
+                        rel.getChangeSupport().addPropertyChangeListener(relationPolylinePropagator);
+                    }
+                }
+            } catch (Exception ex) {
+                Logger.getLogger(ModelView.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
             }
         }
     }
@@ -948,7 +956,7 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
             if (getParent() != null && getParent().getParent() != null && getParent().getParent() instanceof JScalablePanel) {
                 JScalablePanel sp = (JScalablePanel) getParent().getParent();
                 //Container cp = aView.getParent();
-                 Rectangle rect2Fit = aView.getBounds();
+                Rectangle rect2Fit = aView.getBounds();
                 //rect2Fit.height -= cp.getHeight();
                 sp.makeVisible(rect2Fit);
                 if (needToSelect) {
@@ -1055,9 +1063,14 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
             try {
                 for (Relation<E> lrel : aRels) {
                     if (lrel.getRightEntity() != null && lrel.getRightField() != null) {
-                        Field toField = lrel.getRightEntity().getFields().get(lrel.getRightField().getName());
-                        if (toField == null || toField != lrel.getRightField()) {
-                            g2d.setColor(toParameterConnectorColor);
+                        Fields rFields = lrel.getRightEntity().getFields();
+                        if (rFields != null) {
+                            Field toField = rFields.get(lrel.getRightField().getName());
+                            if (toField == null || toField != lrel.getRightField()) {
+                                g2d.setColor(toParameterConnectorColor);
+                            } else {
+                                g2d.setColor(toFieldConnectorColor);
+                            }
                         } else {
                             g2d.setColor(toFieldConnectorColor);
                         }
@@ -1137,7 +1150,7 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
         }
     }
 
-    protected abstract EntityView<E> createGenericEntityView(E aEntity);
+    protected abstract EntityView<E> createGenericEntityView(E aEntity) throws Exception;
 
     protected abstract boolean isPasteable(E aEntityToPaste);
 
@@ -1180,7 +1193,7 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
         }
     }
 
-    public EntityView<E> createEntityView(E aEntity) {
+    public EntityView<E> createEntityView(E aEntity) throws Exception {
         EntityView<E> eView = createGenericEntityView(aEntity);
         RelationsFieldsDragHandler<E> dragHandler = new RelationsFieldsDragHandler<>(this, eView);
         eView.getFieldsList().setTransferHandler(dragHandler);
@@ -1283,7 +1296,7 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
         removeAll();
     }
 
-    public void recreateEntityViews() {
+    public void recreateEntityViews() throws Exception {
         if (model != null) {
             createEntityViews();
         } else {
@@ -1312,7 +1325,7 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
     public static final int ALLOCATION_STEP_X = 10;
     public static final int ALLOCATION_STEP_Y = 20;
 
-    public void createEntityViews() {
+    public void createEntityViews() throws Exception {
         relationsDesignInfo.clear();
         removeEntityViews();
         needRerouteConnectors = false;

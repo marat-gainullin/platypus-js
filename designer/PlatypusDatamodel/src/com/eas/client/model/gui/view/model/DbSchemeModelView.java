@@ -369,7 +369,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbS
     }
 
     @Override
-    protected EntityView<FieldsEntity> createGenericEntityView(FieldsEntity aEntity) {
+    protected EntityView<FieldsEntity> createGenericEntityView(FieldsEntity aEntity) throws Exception {
         return new TableEntityView(aEntity, entitiesViewsMover);
     }
 

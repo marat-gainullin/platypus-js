@@ -42,6 +42,8 @@ public interface PlatypusProject extends Project {
     
     Component generateDbPlaceholder() throws Exception;
     
+    Component generateDbValidatePlaceholder() throws Exception;
+    
     HandlerRegistration addClientChangeListener(final Runnable onChange);
     
     FileObject getLocalProjectFile();

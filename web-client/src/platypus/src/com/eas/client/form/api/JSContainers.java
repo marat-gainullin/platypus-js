@@ -91,11 +91,12 @@ public class JSContainers {
 				}
 			});
 			published.add = function(toAdd, region, aSize) {
-				if(toAdd != undefined && toAdd != null && toAdd.unwrap != undefined)
-				{
+				if(toAdd != undefined && toAdd != null && toAdd.unwrap != undefined){
 					if (aSize == undefined || aSize == null) {
 						aSize = 32;
 					}
+					if(!region)
+						region = $wnd.VerticalPosition.CENTER;
 					switch (region) {
 						case $wnd.VerticalPosition.CENTER:
 						 	var place = @com.sencha.gxt.core.client.Style.LayoutRegion::CENTER; 

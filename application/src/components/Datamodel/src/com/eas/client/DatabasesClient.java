@@ -80,6 +80,7 @@ public class DatabasesClient implements DbClient {
     // Map<String - session id, Map<String - database id, ...
     protected final Map<String, Map<String, List<Change>>> transacted = new HashMap<>();
     protected Set<TransactionListener> transactionListeners = new HashSet<>();
+    protected Set<QueriesListener> queriesListeners = new HashSet<>();
 
     /**
      * Constructs
@@ -108,7 +109,7 @@ public class DatabasesClient implements DbClient {
     public DatabasesClient(DbConnectionSettings aSettings, boolean inContainer) throws Exception {
         this(aSettings, inContainer, null);
     }
-    
+
     public DatabasesClient(DbConnectionSettings aSettings, boolean inContainer, ScanCallback aScanCallback) throws Exception {
         super();
         dbSettings = aSettings;
@@ -146,6 +147,22 @@ public class DatabasesClient implements DbClient {
                 transactionListeners.remove(aListener);
             }
         };
+    }
+
+    public QueriesListener.Registration addQueriesListener(final QueriesListener aListener) {
+        queriesListeners.add(aListener);
+        return new QueriesListener.Registration() {
+            @Override
+            public void remove() {
+                queriesListeners.remove(aListener);
+            }
+        };
+    }
+
+    protected void fireQueriesCleared() {
+        for (QueriesListener l : queriesListeners.toArray(new QueriesListener[]{})) {
+            l.cleared();
+        }
     }
 
     @Override
@@ -506,6 +523,7 @@ public class DatabasesClient implements DbClient {
         appCache.clear();
         queries.clearCache();
         clearDbStatements(null);
+        fireQueriesCleared();
     }
 
     @Override
@@ -516,20 +534,27 @@ public class DatabasesClient implements DbClient {
             if (appElement != null) {
                 if (appElement.getType() == ClientConstants.ET_QUERY) {
                     //queries.clearCache(aEntityId);// Bad solution. There are may be some queries, using this query and so on.
-                    queries.clearCache();// possible overhead, but this is better way than previous.
-                    clearDbStatements(null);
+                    clearQueries(null);// possible overhead, but this is better way than previous.
                 } else if (appElement.getType() == ClientConstants.ET_CONNECTION) {
-                    clearDbStatements(aEntityId);
                     DbMetadataCache dbMdCache = getDbMetadataCache(aEntityId);
                     if (dbMdCache != null) {
                         dbMdCache.clear();
                     }
+                    clearQueries(null);// possible overhead, but this is better way than previous.
                 }
+            } else {
+                clearQueries(null);// possible overhead, but this is better way than previous.
             }
             cache.remove(aEntityId);
         } else {
             clearCaches();
         }
+    }
+
+    protected void clearQueries(String aDbId) throws Exception {
+        clearDbStatements(null);
+        queries.clearCache();
+        fireQueriesCleared();
     }
 
     @Override
@@ -541,8 +566,7 @@ public class DatabasesClient implements DbClient {
         }
         cache.removeTableMetadata(fullTableName);
         cache.removeTableIndexes(fullTableName);
-        clearDbStatements(aDbId);
-        queries.clearCache();
+        clearQueries(aDbId);
     }
 
     /**

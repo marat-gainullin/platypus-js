@@ -17,7 +17,7 @@ import java.awt.Point;
  */
 public class QueryParametersEntityView extends QueryEntityView {
 
-    public QueryParametersEntityView(QueryParametersEntity aEntity, EntityViewsManager<QueryEntity> aMovesManager) {
+    public QueryParametersEntityView(QueryParametersEntity aEntity, EntityViewsManager<QueryEntity> aMovesManager) throws Exception {
         super(aEntity, aMovesManager);
     }
 

@@ -50,6 +50,7 @@ import javax.swing.border.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.undo.UndoableEditSupport;
+import org.openide.util.Exceptions;
 
 /**
  *
@@ -81,6 +82,8 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
     protected JLabel titleLabel;
     protected JPanel toolbarPanel;
     protected JPanel paramsFieldsPanel;
+    protected JScrollPane paramsFieldsScroll;
+    protected JLabel absentQueryLabel = new JLabel();
     protected JList<Field> fieldsList = new JList() {
         @Override
         public void setSelectionInterval(int anchor, int lead) {
@@ -208,7 +211,7 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
         return icoHeight;
     }
 
-    private void initComponents() {
+    private void initComponents() throws Exception {
         paramsFieldsPanel = new JPanel(new BorderLayout());
         fieldsParamsRenderer = new FieldsParametersListCellRenderer<>(DatamodelDesignUtils.getFieldsFont(), DatamodelDesignUtils.getBindedFieldsFont(), entity);
         setDoubleBuffered(true);
@@ -267,11 +270,10 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
         toolbarPanel.add(titleToolbar, BorderLayout.CENTER);
         toolbarPanel.add(toolsToolbar, BorderLayout.EAST);
         add(toolbarPanel, BorderLayout.NORTH);
-        JScrollPane scroll = new JScrollPane(paramsFieldsPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        scroll.setBorder(new EmptyBorder(0, 0, 0, 0));
-        add(scroll, BorderLayout.CENTER);
+        paramsFieldsScroll = new JScrollPane(paramsFieldsPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        paramsFieldsScroll.setBorder(new EmptyBorder(0, 0, 0, 0));
+
         if (isParameterized()) {
-            parametersModel.setFields(entity.getFields());
             parametersList.setModel(parametersModel);
             parametersList.setCellRenderer(fieldsParamsRenderer);
             parametersList.setBorder(new MatteBorder(0, 0, 1, 0, getForeground()));
@@ -280,7 +282,6 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
             parametersList.addMouseListener(new FieldsParamsDoubleClickPropagator());
             paramsFieldsPanel.add(parametersList, BorderLayout.NORTH);
         }
-        fieldsModel.setFields(entity.getFields());
         fieldsList.setModel(fieldsModel);
         fieldsList.setCellRenderer(fieldsParamsRenderer);
         fieldsList.addListSelectionListener(selelctionPropagator);
@@ -290,8 +291,41 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
 
         paramsFieldsPanel.add(fieldsList, BorderLayout.CENTER);
         paramsFieldsPanel.setBorder(new EmptyBorder(0, 0, 0, 0));
+
+        initAbsentLabel();
+
+        Fields entitiyFields = entity.getFields();
+        if (entitiyFields != null) {
+            if (isParameterized()) {
+                parametersModel.setFields(entitiyFields);
+            }
+            fieldsModel.setFields(entitiyFields);
+            add(paramsFieldsScroll, BorderLayout.CENTER);
+        } else {
+            add(absentQueryLabel, BorderLayout.CENTER);
+        }
         setBorder(ordinaryBorder);
         setOpaque(false);
+    }
+
+    protected void initAbsentLabel() {
+        if (entity != null && entity.getQueryId() != null) {
+            absentQueryLabel.setText(String.format(DatamodelDesignUtils.getLocalizedString("absentQuery"), entity.getQueryId()));
+        } else {
+            String fullTableName = entity.getTableName();
+            if (fullTableName == null) {
+                fullTableName = "";
+            }
+            String schemaName = entity.getTableSchemaName();
+            if (schemaName != null && !schemaName.isEmpty()) {
+                fullTableName = schemaName + "." + fullTableName;
+            }
+            absentQueryLabel.setText(String.format(DatamodelDesignUtils.getLocalizedString("absentTable"), fullTableName));
+        }
+        absentQueryLabel.setToolTipText(absentQueryLabel.getText());
+        absentQueryLabel.setIcon(IconCache.getIcon("datamodel32.png"));
+        absentQueryLabel.setHorizontalTextPosition(SwingConstants.CENTER);
+        absentQueryLabel.setVerticalTextPosition(SwingConstants.BOTTOM);
     }
 
     protected abstract boolean isEditable();
@@ -807,7 +841,7 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
             switch (evt.getPropertyName()) {
-                case "iconified":
+                case Entity.ICONIFIED_PROPERTY:
                     int newHeight = calcLightIconifiedChange((Boolean) evt.getNewValue());
                     if (evt.getSource() == entity) {
                         int dy = newHeight - entity.getHeight();
@@ -815,19 +849,29 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
                     }
                     entity.setHeight(newHeight);
                     break;
-                case "name":
-                case "title":
+                case Entity.NAME_PROPERTY:
+                case Entity.TITLE_PROPERTY:
                     titleLabel.setText(getCheckedEntityTitle());
                     titleLabel.invalidate();
                     reLayout();
                     break;
-                case "query":
-                    if (isParameterized()) {
-                        parametersModel.setFields(entity.getFields());
-                        parametersModel.fireDataChanged();
+                case Entity.QUERY_VALID_PROPERTY:
+                    remove(paramsFieldsScroll);
+                    remove(absentQueryLabel);
+                    Fields entityFields = entity.getFields();
+                    if (entityFields != null) {
+                        add(paramsFieldsScroll, BorderLayout.CENTER);
+                        if (isParameterized()) {
+                            parametersModel.setFields(entityFields);
+                            parametersModel.fireDataChanged();
+                        }
+                        fieldsModel.setFields(entityFields);
+                        fieldsModel.fireDataChanged();
+                    } else {
+                        add(absentQueryLabel, BorderLayout.CENTER);
                     }
-                    fieldsModel.setFields(entity.getFields());
-                    fieldsModel.fireDataChanged();
+                    revalidate();
+                    repaint();
                     break;
                 default:
                     switch (evt.getPropertyName()) {
@@ -1014,7 +1058,7 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
         }
     }
 
-    public EntityView(E aEntity, EntityViewsManager<E> aMovesManager) {
+    public EntityView(E aEntity, EntityViewsManager<E> aMovesManager) throws Exception {
         super(new BorderLayout());
         entity = aEntity;
         minimizeRestoreAction = new MinimizeRestoreAction();

@@ -14,7 +14,7 @@ import com.eas.client.model.query.QueryEntity;
  */
 public class QueryEntityView extends EntityView<QueryEntity>{
 
-    public QueryEntityView(QueryEntity aEntity, EntityViewsManager<QueryEntity> aMovesManager) {
+    public QueryEntityView(QueryEntity aEntity, EntityViewsManager<QueryEntity> aMovesManager) throws Exception {
         super(aEntity, aMovesManager);
     }
 

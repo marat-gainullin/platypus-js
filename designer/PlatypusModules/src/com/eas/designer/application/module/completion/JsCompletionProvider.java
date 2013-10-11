@@ -82,13 +82,7 @@ public abstract class JsCompletionProvider implements CompletionProvider {
 
     @Override
     public CompletionTask createTask(int queryType, JTextComponent component) {
-        if (queryType == CompletionProvider.COMPLETION_QUERY_TYPE
-                || queryType == CompletionProvider.TOOLTIP_QUERY_TYPE
-                || queryType == CompletionProvider.DOCUMENTATION_QUERY_TYPE) {
             return createCompletionTask(component);
-        } else {
-            return null;
-        }
     }
 
     public CompletionTask createCompletionTask(JTextComponent component) {
