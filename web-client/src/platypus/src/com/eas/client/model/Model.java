@@ -400,10 +400,11 @@ public class Model {
 	public native static void publishTopLevelFacade(JavaScriptObject aModule, Model aModel) throws Exception/*-{
 		var publishedModel = {
 			createQuery : function(aQueryId) {
-				return aModel.@com.eas.client.model.Model::jsCreateEntity(Ljava/lang/String;)(aQueryId);
+				$wnd.Logger.warning("createQuery deprecated call detected. Use loadEntity() instead.");
+				return aModel.@com.eas.client.model.Model::jsLoadEntity(Ljava/lang/String;)(aQueryId);
 			},
-			createEntity : function(aQueryId) {
-				return aModel.@com.eas.client.model.Model::jsCreateEntity(Ljava/lang/String;)(aQueryId);
+			loadEntity : function(aQueryId) {
+				return aModel.@com.eas.client.model.Model::jsLoadEntity(Ljava/lang/String;)(aQueryId);
 			},
 			save : function(onScuccess, onFailure) {
 				aModel.@com.eas.client.model.Model::save(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(onScuccess, onFailure);
@@ -855,7 +856,7 @@ public class Model {
 
 	protected static final String USER_DATASOURCE_NAME = "userQuery";
 
-	public synchronized Object jsCreateEntity(String aQueryId) throws Exception {
+	public synchronized Object jsLoadEntity(String aQueryId) throws Exception {
 		if (client == null) {
 			throw new NullPointerException("Null client detected while creating a query");
 		}

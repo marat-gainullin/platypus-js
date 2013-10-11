@@ -7,8 +7,6 @@ package com.eas.designer.explorer;
 import com.eas.client.DbClient;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.cache.PlatypusFilesSupport;
-import com.eas.client.model.Entity;
-import com.eas.client.model.Model;
 import com.eas.designer.application.HandlerRegistration;
 import com.eas.designer.application.project.PlatypusProject;
 import com.eas.designer.explorer.files.wizard.NewApplicationElementWizardIterator;
@@ -27,7 +25,6 @@ import org.openide.loaders.DataObject;
 import org.openide.loaders.DataObjectExistsException;
 import org.openide.loaders.MultiDataObject;
 import org.openide.loaders.MultiFileLoader;
-import org.openide.util.Exceptions;
 import org.openide.util.RequestProcessor;
 
 /**
@@ -37,6 +34,7 @@ import org.openide.util.RequestProcessor;
  */
 public abstract class PlatypusDataObject extends MultiDataObject {
 
+    private static RequestProcessor RP = new RequestProcessor(PlatypusDataObject.class.getName(), 10);
     private Set<Runnable> clientListeners = new HashSet<>();
     protected HandlerRegistration projectClientListener;
     protected DbClient.QueriesListener.Registration projectClientQueriesListener;
@@ -53,12 +51,6 @@ public abstract class PlatypusDataObject extends MultiDataObject {
                 }
             });
             signOnQueries();
-        }
-    }
-
-    public static void fireAllQueriedChanged(Model<?, ?, ?, ?> aModel) throws Exception {
-        for (Entity<?, ?, ?> e : aModel.getEntities().values()) {
-            e.getChangeSupport().firePropertyChange(Entity.QUERY_PROPERTY, null, e.getQuery());
         }
     }
 
@@ -83,22 +75,26 @@ public abstract class PlatypusDataObject extends MultiDataObject {
             });
         }
     }
+    protected boolean validationStarted;
 
     protected void startModelValidating() {
-        if (!isModelValid()) {
-            RequestProcessor.getDefault().execute(new Runnable() {
+        if (!isModelValid() && !validationStarted) {
+            validationStarted = true;
+            RP.execute(new Runnable() {
                 @Override
                 public void run() {
                     try {
                         validateModel();
+                    } catch (Exception ex) {
+                        Logger.getLogger(PlatypusDataObject.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+                    } finally {
                         EventQueue.invokeLater(new Runnable() {
                             @Override
                             public void run() {
+                                validationStarted = false;
                                 setModelValid(true);
                             }
                         });
-                    } catch (Exception ex) {
-                        Exceptions.printStackTrace(ex);
                     }
                 }
             });
@@ -108,12 +104,20 @@ public abstract class PlatypusDataObject extends MultiDataObject {
     protected abstract void clientChanged();
 
     @Override
+    protected void handleDelete() throws IOException {
+        dispose();
+        super.handleDelete();
+    }
+
+    @Override
     protected void dispose() {
         if (projectClientListener != null) {
             projectClientListener.remove();
+            projectClientListener = null;
         }
         if (projectClientQueriesListener != null) {
             projectClientQueriesListener.remove();
+            projectClientQueriesListener = null;
         }
         super.dispose();
     }

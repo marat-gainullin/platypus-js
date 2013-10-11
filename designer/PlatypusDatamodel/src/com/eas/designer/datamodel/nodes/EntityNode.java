@@ -21,6 +21,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.Action;
 import javax.swing.event.UndoableEditEvent;
 import org.openide.actions.CopyAction;
@@ -35,7 +37,6 @@ import org.openide.nodes.Children;
 import org.openide.nodes.Node;
 import org.openide.nodes.PropertySupport;
 import org.openide.nodes.Sheet;
-import org.openide.util.Exceptions;
 import org.openide.util.ImageUtilities;
 import org.openide.util.Lookup;
 import org.openide.util.actions.SystemAction;
@@ -203,11 +204,7 @@ public class EntityNode<E extends Entity<?, ?, E>> extends AbstractNode implemen
             Sheet sheet = new Sheet();
             Sheet.Set pSet = Sheet.createPropertiesSet();
             pSet.setValue(PROPS_EVENTS_TAB_NAME, pSet.getDisplayName());
-            Sheet.Set peSet = Sheet.createExpertSet();
-            peSet.setValue(PROPS_EVENTS_TAB_NAME, pSet.getDisplayName());
             sheet.put(pSet);
-            sheet.put(peSet);
-
             if (!isParametersEntity()) {
                 PropertySupport.Name nameProp = new PropertySupport.Name(this, NAME_PROP_NAME, "");
                 pSet.put(nameProp);
@@ -219,11 +216,11 @@ public class EntityNode<E extends Entity<?, ?, E>> extends AbstractNode implemen
             }
             return sheet;
         } catch (NoSuchMethodException ex) {
-            Exceptions.printStackTrace(ex);
+            Logger.getLogger(EntityNode.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
             return super.createSheet();
         }
     }
-    
+
     public void reorder(int[] order) {
         ReorderFieldsEdit<E> edit = new ReorderFieldsEdit<>(entity, order);
         edit.redo();
@@ -233,7 +230,7 @@ public class EntityNode<E extends Entity<?, ?, E>> extends AbstractNode implemen
     public Property<String> getPropertyByName(String name) {
         return nameToProperty.get(name);
     }
-    
+
     protected UndoRedo.Manager getUndo() {
         return getLookup().lookup(ModelUndoProvider.class).getModelUndo();
     }

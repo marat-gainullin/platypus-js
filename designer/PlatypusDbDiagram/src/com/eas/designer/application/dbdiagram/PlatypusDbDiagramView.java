@@ -268,7 +268,7 @@ public class PlatypusDbDiagramView extends CloneableTopComponent {
                 if (ur instanceof UndoRedo.Manager) {
                     ((UndoRedo.Manager) ur).discardAllEdits();
                 }
-                PlatypusDataObject.fireAllQueriedChanged(dataObject.getModel());
+                dataObject.getModel().fireAllQueriesChanged();
                 componentActivated();
             } else {
                 add(dataObject.getProject().generateDbValidatePlaceholder(), BorderLayout.CENTER);

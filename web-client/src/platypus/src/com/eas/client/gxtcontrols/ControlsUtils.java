@@ -320,8 +320,12 @@ public class ControlsUtils {
 				aElement.getStyle().setProperty("fontFamily", aFont != null ? aFont.getFamily() : "");
 				if (aFont != null) {
 					aElement.getStyle().setFontSize(aFont.getSize(), Unit.PT);
-					aElement.getStyle().setFontWeight(aFont.isBold() ? FontWeight.BOLD : FontWeight.NORMAL);
-					aElement.getStyle().setFontStyle(aFont.isItalic() ? FontStyle.ITALIC : FontStyle.NORMAL);
+					if(aFont.isBold())
+						aElement.getStyle().setFontWeight(FontWeight.BOLD);
+					//aElement.getStyle().setFontWeight(aFont.isBold() ? FontWeight.BOLD : FontWeight.NORMAL);
+					if(aFont.isItalic())
+						aElement.getStyle().setFontStyle(FontStyle.ITALIC);
+					//aElement.getStyle().setFontStyle(aFont.isItalic() ? FontStyle.ITALIC : FontStyle.NORMAL);
 				} else {
 					aElement.getStyle().clearFontSize();
 					aElement.getStyle().clearFontWeight();

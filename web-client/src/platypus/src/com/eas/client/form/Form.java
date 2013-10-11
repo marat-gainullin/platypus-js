@@ -13,6 +13,7 @@ import com.eas.client.application.AppClient;
 import com.eas.client.form.api.JSEvents;
 import com.eas.client.gxtcontrols.MarginConstraints;
 import com.eas.client.gxtcontrols.MarginConstraints.Margin;
+import com.eas.client.gxtcontrols.WrapingPanel;
 import com.eas.client.gxtcontrols.wrappers.container.PlatypusBorderLayoutContainer;
 import com.eas.client.gxtcontrols.wrappers.container.PlatypusDesktopContainer;
 import com.eas.client.gxtcontrols.wrappers.container.PlatypusMarginLayoutContainer;
@@ -27,6 +28,7 @@ import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -281,6 +283,10 @@ public class Form {
 
 	public void showOnPanel(String aElementId) {
 		showOnPanel(RootPanel.get(aElementId));
+	}
+
+	public void showOnPanel(Element aElement) {
+		showOnPanel(new WrapingPanel(aElement));
 	}
 	
 	public void showOnPanel(HasWidgets aPanel) {
@@ -794,7 +800,9 @@ public class Form {
 	        aModule.showOnPanel = function(aPanel) {
 	        	if(aPanel.unwrap)
 	        		showedWnd = aForm.@com.eas.client.form.Form::showOnPanel(Lcom/google/gwt/user/client/ui/HasWidgets;)(aPanel.unwrap());
-	        	else
+	        	else if ("tagName" in aPanel) 
+	        		showedWnd = aForm.@com.eas.client.form.Form::showOnPanel(Lcom/google/gwt/user/client/Element;)(aPanel);	
+	        	else 
 	        		showedWnd = aForm.@com.eas.client.form.Form::showOnPanel(Ljava/lang/String;)(aPanel);
 	        };
 	        aModule.showInternalFrame = function(aPanel) {

@@ -11,6 +11,7 @@ import com.eas.client.model.Relation;
 import com.eas.client.model.application.ApplicationEntity;
 import com.eas.client.model.query.QueryEntity;
 import com.eas.client.model.visitors.ModelVisitor;
+import com.eas.client.queries.Query;
 import com.eas.script.StoredFunction;
 import com.eas.xml.dom.XmlDomUtils;
 import java.math.BigDecimal;
@@ -205,15 +206,27 @@ public abstract class XmlDom2Model<E extends Entity<?, ?, E>> implements ModelVi
                         if (Model.PARAMETERS_ENTITY_ID == leftEntityId) {
                             lEntity = model.getParametersEntity();
                             if (leftParameterName != null && !leftParameterName.isEmpty()) {
-                                relation.setLeftField(lEntity.getFields().get(leftParameterName));
+                                Fields fields = lEntity.getFields();
+                                if (fields != null) {
+                                    relation.setLeftField(fields.get(leftParameterName));
+                                }
                             } else if (leftFieldName != null && !leftFieldName.isEmpty()) {
-                                relation.setLeftField(lEntity.getFields().get(leftFieldName));
+                                Fields fields = lEntity.getFields();
+                                if (fields != null) {
+                                    relation.setLeftField(fields.get(leftFieldName));
+                                }
                             }
                         } else if (lEntity != null) {
                             if (leftParameterName != null && !leftParameterName.isEmpty()) {
-                                relation.setLeftField(lEntity.getQuery().getParameters().get(leftParameterName));
+                                Query query = lEntity.getQuery();
+                                if (query != null) {
+                                    relation.setLeftField(query.getParameters().get(leftParameterName));
+                                }
                             } else if (leftFieldName != null && !leftFieldName.isEmpty()) {
-                                relation.setLeftField(lEntity.getFields().get(leftFieldName));
+                                Fields fields = lEntity.getFields();
+                                if (fields != null) {
+                                    relation.setLeftField(fields.get(leftFieldName));
+                                }
                             }
                         }
                         if (lEntity != null) {
@@ -225,15 +238,27 @@ public abstract class XmlDom2Model<E extends Entity<?, ?, E>> implements ModelVi
                         if (Model.PARAMETERS_ENTITY_ID == rightEntityId) {
                             rEntity = model.getParametersEntity();
                             if (rightParameterName != null && !rightParameterName.isEmpty()) {
-                                relation.setRightField(rEntity.getFields().get(rightParameterName));
+                                Fields fields = rEntity.getFields();
+                                if (fields != null) {
+                                    relation.setRightField(fields.get(rightParameterName));
+                                }
                             } else if (rightFieldName != null && !rightFieldName.isEmpty()) {
-                                relation.setRightField(rEntity.getFields().get(rightFieldName));
+                                Fields fields = rEntity.getFields();
+                                if (fields != null) {
+                                    relation.setRightField(fields.get(rightFieldName));
+                                }
                             }
                         } else if (rEntity != null) {
                             if (rightParameterName != null && !rightParameterName.isEmpty()) {
-                                relation.setRightField(rEntity.getQuery().getParameters().get(rightParameterName));
+                                Query query = rEntity.getQuery();
+                                if (query != null) {
+                                    relation.setRightField(query.getParameters().get(rightParameterName));
+                                }
                             } else if (rightFieldName != null && !rightFieldName.isEmpty()) {
-                                relation.setRightField(rEntity.getFields().get(rightFieldName));
+                                Fields fields = rEntity.getFields();
+                                if (fields != null) {
+                                    relation.setRightField(fields.get(rightFieldName));
+                                }
                             }
                         }
                         if (rEntity != null) {
@@ -241,7 +266,7 @@ public abstract class XmlDom2Model<E extends Entity<?, ?, E>> implements ModelVi
                             rEntity.addInRelation(relation);
                         }
                     } catch (Exception ex) {
-                        Logger.getLogger(XmlDom2Model.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(XmlDom2Model.class.getName()).log(Level.WARNING, null, ex);
                     }
                 }
             });

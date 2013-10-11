@@ -148,7 +148,7 @@ public class DatabasesClient implements DbClient {
             }
         };
     }
-    
+
     public QueriesListener.Registration addQueriesListener(final QueriesListener aListener) {
         queriesListeners.add(aListener);
         return new QueriesListener.Registration() {
@@ -158,9 +158,9 @@ public class DatabasesClient implements DbClient {
             }
         };
     }
-    
-    protected void fireQueriesCleared(){
-        for(QueriesListener l : queriesListeners.toArray(new QueriesListener[]{})){
+
+    protected void fireQueriesCleared() {
+        for (QueriesListener l : queriesListeners.toArray(new QueriesListener[]{})) {
             l.cleared();
         }
     }
@@ -534,24 +534,27 @@ public class DatabasesClient implements DbClient {
             if (appElement != null) {
                 if (appElement.getType() == ClientConstants.ET_QUERY) {
                     //queries.clearCache(aEntityId);// Bad solution. There are may be some queries, using this query and so on.
-                    queries.clearCache();// possible overhead, but this is better way than previous.
-                    clearDbStatements(null);
-                    fireQueriesCleared();
+                    clearQueries(null);// possible overhead, but this is better way than previous.
                 } else if (appElement.getType() == ClientConstants.ET_CONNECTION) {
-                    clearDbStatements(aEntityId);
                     DbMetadataCache dbMdCache = getDbMetadataCache(aEntityId);
                     if (dbMdCache != null) {
                         dbMdCache.clear();
                     }
-                    queries.clearCache();// possible overhead, but this is better way than previous.
-                    clearDbStatements(null);
-                    fireQueriesCleared();
+                    clearQueries(null);// possible overhead, but this is better way than previous.
                 }
+            } else {
+                clearQueries(null);// possible overhead, but this is better way than previous.
             }
             cache.remove(aEntityId);
         } else {
             clearCaches();
         }
+    }
+
+    protected void clearQueries(String aDbId) throws Exception {
+        clearDbStatements(null);
+        queries.clearCache();
+        fireQueriesCleared();
     }
 
     @Override
@@ -563,9 +566,7 @@ public class DatabasesClient implements DbClient {
         }
         cache.removeTableMetadata(fullTableName);
         cache.removeTableIndexes(fullTableName);
-        clearDbStatements(aDbId);
-        queries.clearCache();
-        fireQueriesCleared();
+        clearQueries(aDbId);
     }
 
     /**
