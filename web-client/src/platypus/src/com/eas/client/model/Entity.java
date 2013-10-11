@@ -273,59 +273,45 @@ public class Entity implements RowsetListener {
 							throw "Bad arguments. There are must at least one argument";
 					},
 					sort : function(aComparator) {
-						if(aComparator != null && aComparator != undefined)
-						{
-							if(aComparator.call != undefined)
-							{
-								aEntity.@com.eas.client.model.Entity::sort(Lcom/google/gwt/core/client/JavaScriptObject;)(aComparator);
-							}else
-								aEntity.@com.eas.client.model.Entity::sort(Lcom/bearsoft/rowset/sorting/RowsComparator;)(aComparator);
+						if(aComparator){
+							aEntity.@com.eas.client.model.Entity::sort(Ljava/lang/Object;)(aComparator);
 						}else
 							throw "A comparing function or comparator object must be specified."; 
 					},
 				    // array accessor methods
-				    concat : function()
-				    {
+				    concat : function(){
 				    	var i;
 				    	var concated = [];
 						var rowset = getRowset();
 						if(rowset != null){
 							var size = rowset.@com.bearsoft.rowset.Rowset::size()();
-							for(i=0;i<size;i++)
-							{
+							for(i=0;i<size;i++){
 								var row = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(i+1);
 								var rowFacade = @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(row, aEntity);
 				    			concated.push(rowFacade);
 							}
-					    	for(i=0;i<arguments.length;i++)
-					    	{
-					    		if(Array.isArray(arguments[i]))
-					    		{
-					    			for(var l=0;l<arguments[i].length;l++)
-					    			{
+					    	for(i=0;i<arguments.length;i++){
+					    		if(Array.isArray(arguments[i])){
+					    			for(var l=0;l<arguments[i].length;l++){
 					    				concated.push(arguments[i][l]);
 					    			}
-					    		}else
-					    		{ 
+					    		}else{ 
 					    			concated.push(arguments[i]);
 					    		}
 					    	}
 						}
 					    return concated;
 				    },
-				    join : function(aSeparator)
-				    {
+				    join : function(aSeparator){
 				    	var joined = [];
 						var rowset = getRowset();
 						if(rowset != null){
 							var size = rowset.@com.bearsoft.rowset.Rowset::size()();
-							for(var i=0;i<size;i++)
-							{
+							for(var i=0;i<size;i++){
 								var row = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(i+1);
 								var rowFacade = @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(row, aEntity);
 								var sElement = "{";
-								for(var l=0;l<rowFacade.length;l++)
-								{
+								for(var l=0;l<rowFacade.length;l++){
 									if(l > 0)
 										sElement += ", ";
 									sElement += rowFacade.md[l].name + ":" + rowFacade[l];
@@ -2490,6 +2476,15 @@ public class Entity implements RowsetListener {
 		return aComparatorFun(row1, row2);
 	}-*/;
 
+	public void sort(Object aComparator) throws Exception {
+		if(aComparator instanceof RowsComparator){
+			sort((RowsComparator)aComparator);
+		}else{
+			assert aComparator instanceof JavaScriptObject; 
+			sort((JavaScriptObject)aComparator);
+		}		
+	}
+	
 	public void sort(final JavaScriptObject aComparatorFunc) throws Exception {
 		Comparator<Row> comparator = new Comparator<Row>() {
 
