@@ -50,6 +50,7 @@ public class Loader {
 	}
 
 	public static final String INJECTED_SCRIPT_CLASS_NAME = "platypus-injected-script";
+	public static final String SERVER_MODULE_TOUCHED_NAME = "-platypus-server-modeule-proxy";
 	public static final String DEPENDENCY_TAG_NAME = "dependency";
 	public static final String SERVER_DEPENDENCY_TAG_NAME = "serverDependency";
 	public static final String MODEL_TAG_NAME = "datamodel";
@@ -293,7 +294,7 @@ public class Loader {
 	private Cancellable loadServerModules(Collection<String> aAppElementNames, final CancellableCallback onEnd) throws Exception {
 		List<String> appElementNames = new ArrayList<String>();
 		for (String appElementName : aAppElementNames) {
-			if (!isTouched(appElementName))
+			if (!isTouched(SERVER_MODULE_TOUCHED_NAME+appElementName))
 				appElementNames.add(appElementName);
 		}
 		final Collection<Cancellable> startLoadings = new ArrayList<Cancellable>();
@@ -310,9 +311,7 @@ public class Loader {
 					toCancel.cancel();
 			}
 		};
-
-		for (final String appElementName : appElementNames) {
-			
+		for (final String appElementName : appElementNames) {			
 			startLoadings.add(client.createServerModule(appElementName, new DocumentCallbackAdapter() {
 
 				@Override
@@ -336,7 +335,7 @@ public class Loader {
 						scriptElement.setType(TYPE_JAVASCRIPT);
 						htmlDom.getBody().appendChild(scriptElement);
 					}
-					fireLoaded(appElementName);
+					fireLoaded(SERVER_MODULE_TOUCHED_NAME+appElementName);
 					loaded.run();
 				}
 
@@ -349,7 +348,7 @@ public class Loader {
 					Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, aResult);
 				}
 			}));
-			fireStarted(appElementName);
+			fireStarted(SERVER_MODULE_TOUCHED_NAME+appElementName);
 		}
 		return loaded;
 	}

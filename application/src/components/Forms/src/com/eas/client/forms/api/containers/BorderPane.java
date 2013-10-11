@@ -75,6 +75,11 @@ public class BorderPane extends Container<JPanel> {
         add(aComp, aPlace);
     }
 
+    @ScriptFunction(jsDocText = "Appends the specified component to this container in it's center.")
+    public void add(Component<?> aComp) {
+        add(aComp, HorizontalPosition.CENTER);
+    }
+    
     @ScriptFunction(jsDocText = "The component that was added using HorizontalPosition.LEFT constraint.")
     public Component<?> getLeftComponent() {
         BorderLayout layout = (BorderLayout) delegate.getLayout();
