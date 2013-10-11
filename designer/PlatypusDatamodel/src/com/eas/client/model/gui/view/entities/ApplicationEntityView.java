@@ -16,7 +16,7 @@ import java.util.Set;
  */
 public class ApplicationEntityView extends EntityView<ApplicationDbEntity> {
 
-    public ApplicationEntityView(ApplicationDbEntity aEntity, EntityViewsManager<ApplicationDbEntity> aMovesManager) {
+    public ApplicationEntityView(ApplicationDbEntity aEntity, EntityViewsManager<ApplicationDbEntity> aMovesManager) throws Exception {
         super(aEntity, aMovesManager);
     }
 

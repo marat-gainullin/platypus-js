@@ -21,7 +21,7 @@ import java.util.*;
 public class Fields {
 
     private static final String DEFAULT_PARAM_NAME_PREFIX = "Field";
-    protected String tableDescription = null;
+    protected String tableDescription;
     protected List<Field> fields = new ArrayList<>();
     // Map of field name to it's index (0-based)
     protected Map<String, Integer> fieldsHash;
@@ -89,6 +89,24 @@ public class Fields {
      */
     public void invalidateFieldsHash() {
         fieldsHash = null;
+    }
+
+    public boolean isEqual(Fields other) {
+        if (other == null) {
+            return false;
+        }
+        if (tableDescription == null ? other.getTableDescription() != null : !tableDescription.equals(other.getTableDescription())) {
+            return false;
+        }
+        if (fields.size() != other.getFieldsCount()) {
+            return false;
+        }
+        for (int i = 0; i < fields.size(); i++) {
+            if (!fields.get(i).isEqual(other.get(i + 1))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -395,7 +413,7 @@ public class Fields {
         if (!orderNumbers.isEmpty()) {
             throw new IllegalArgumentException("Order argument is not correct - some values are out of range."); //NOI18N
         }
-        
+
         List<Field> oldFields = new ArrayList<>();
         for (Field f : fields) {
             oldFields.add(f);

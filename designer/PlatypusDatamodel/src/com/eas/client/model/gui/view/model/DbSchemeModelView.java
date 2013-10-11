@@ -69,7 +69,7 @@ import org.w3c.dom.Document;
  */
 public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbSchemeModel> {
 
-    protected SqlActionsController sqlController = null;
+    protected SqlActionsController sqlController;
 
     /**
      * Imports structure from an xml string representing schema information
@@ -369,7 +369,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbS
     }
 
     @Override
-    protected EntityView<FieldsEntity> createGenericEntityView(FieldsEntity aEntity) {
+    protected EntityView<FieldsEntity> createGenericEntityView(FieldsEntity aEntity) throws Exception {
         return new TableEntityView(aEntity, entitiesViewsMover);
     }
 
@@ -806,6 +806,22 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbS
                     }
                 }
                 CompoundEdit section = new DbStructureCompoundEdit();
+                for (EntityFieldTuple etf : getSelectedFields()) {
+                    if (etf.field.isFk()) {
+                        try {
+                            DropFkEdit edit = new DropFkEdit(sqlController, etf.field.getFk(), etf.field);
+                            edit.redo();
+                            section.addEdit(edit);
+                        } catch (CannotRedoException ex) {
+                            section.end();
+                            if (section.isSignificant()) {
+                                undoSupport.postEdit(section);
+                            }
+                            JOptionPane.showMessageDialog(DbSchemeModelView.this, ex.getLocalizedMessage(), DbStructureUtils.getString("dbSchemeEditor"), JOptionPane.ERROR_MESSAGE);
+                            return;
+                        }
+                    }
+                }
                 // act with indexes
                 List<DbTableIndexSpec> indexes = entity.getIndexes();
                 if (indexes != null) {
@@ -829,12 +845,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbS
                             diEdit.redo();
                             section.addEdit(diEdit);
                         } catch (CannotRedoException ex) {
-                            section.end();
-                            if (section.isSignificant()) {
-                                undoSupport.postEdit(section);
-                            }
-                            JOptionPane.showMessageDialog(DbSchemeModelView.this, ex.getLocalizedMessage(), DbStructureUtils.getString("dbSchemeEditor"), JOptionPane.ERROR_MESSAGE);
-                            return;
+                            Logger.getLogger(DbSchemeModelView.class.getName()).log(Level.WARNING, ex.getMessage(), ex);
                         }
                     }
                 }

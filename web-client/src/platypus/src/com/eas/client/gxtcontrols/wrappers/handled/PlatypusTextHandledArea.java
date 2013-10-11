@@ -10,9 +10,9 @@ import com.google.gwt.core.client.JavaScriptObject;
 
 public class PlatypusTextHandledArea extends PlatypusTextArea {
 
-	protected PlatypusTextAreaHandledInputCell textCell;
+	protected PlatypusTextHandledAreaInputCell textCell;
 
-	public PlatypusTextHandledArea(PlatypusTextAreaHandledInputCell aCell) {
+	public PlatypusTextHandledArea(PlatypusTextHandledAreaInputCell aCell) {
 		super(aCell);
 		textCell = aCell;
 		textCell.setContainer(this);
@@ -47,7 +47,7 @@ public class PlatypusTextHandledArea extends PlatypusTextArea {
 	@Override
 	protected void onRedraw() {
 		super.onRedraw();
-		PublishedCell lastPublishedCell = textCell.consumePublishedCell();
+		PublishedCell lastPublishedCell = textCell.getPublishedCell();
 		if (lastPublishedCell != null) {
 			lastPublishedCell.styleToElement(getInputEl());
 		} else {

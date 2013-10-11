@@ -28,6 +28,11 @@ public class QueryParametersEntity extends QueryEntity {
     }
 
     @Override
+    public void validateQuery() throws Exception {
+        // no op for parameters entity
+    }
+
+    @Override
     protected boolean isTagValid(String aTagName) {
         return true;
     }

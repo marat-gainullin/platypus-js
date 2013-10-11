@@ -23,18 +23,18 @@ public class PlatypusNativeDataSource extends BearResourcePool<BearDatabaseConne
 
     protected String url;
     // connection properties, including user name and password
-    protected Properties props;
+    protected Properties props = new Properties();
     protected int maxStatements = DEFAULT_MAXIMUM_SIZE;
-    protected int resourceTimeout = BearResourcePool.WAIT_TIMEOUT;
     protected PrintWriter printWriter;
     protected int loginTimeout;
 
-    public PlatypusNativeDataSource(int aMaxConnections, int aMaxStatements, int aResourceTimeout, String aUrl, Properties aProperties) throws Exception {
+    public PlatypusNativeDataSource(int aMaxConnections, int aMaxStatements, int aResourceTimeout, String aUrl, String aUser, String aPassword) throws Exception {
         super(aMaxConnections, aResourceTimeout);
         url = aUrl;
-        props = aProperties;
         maxStatements = aMaxStatements;
         resourceTimeout = aResourceTimeout;
+        props.put("user", aUser);
+        props.put("password", aPassword);
     }
 
     @Override

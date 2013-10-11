@@ -10,6 +10,7 @@
 package com.eas.client.model;
 
 import com.bearsoft.rowset.metadata.Fields;
+import com.bearsoft.rowset.metadata.Parameters;
 import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.queries.Query;
@@ -57,6 +58,7 @@ public abstract class Entity<M extends Model<E, ?, ?, Q>, Q extends Query<?>, E 
     public static final String TABLE_NAME_PROPERTY = "tableName";
     public static final String TABLE_SCHEMA_NAME_PROPERTY = "tableSchemaName";
     public static final String QUERY_PROPERTY = "query";
+    public static final String QUERY_VALID_PROPERTY = "queryValid";
 
     public Entity() {
         super();
@@ -92,6 +94,28 @@ public abstract class Entity<M extends Model<E, ?, ?, Q>, Q extends Query<?>, E 
             }
         }
         return fields;
+    }
+
+    public boolean validate() throws Exception {
+        boolean res = false;
+        Q oldQuery = getQuery();
+        Fields oldFields = getFields();
+        Parameters oldParams = oldQuery != null ? oldQuery.getParameters() : null;
+        clearFields();
+        Q newQuery = getQuery();
+        Fields newFields = getFields();
+        Parameters newParams = newQuery != null ? newQuery.getParameters() : null;
+        if (newFields == null ? oldFields != null : !newFields.isEqual(oldFields)) {
+            res = true;
+        }
+        if (newParams == null ? oldParams != null : !newParams.isEqual(oldParams)) {
+            res = true;
+        }
+        if (!res) {
+            query = oldQuery;
+            fields = oldFields;
+        }
+        return res;
     }
 
     public void clearFields() {
@@ -179,14 +203,8 @@ public abstract class Entity<M extends Model<E, ?, ?, Q>, Q extends Query<?>, E 
         String ltitle = title;
         if (ltitle == null || ltitle.isEmpty()) {
             if (queryId != null) {
-                try {
-                    Q lquery = getQuery();
-                    ltitle = lquery.getTitle();
-                } catch (Exception ex) {
-                    Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
-                    ltitle = "";
-                }
-                title = ltitle;
+                Q lquery = getQuery();
+                title = lquery != null ? lquery.getTitle() : "";
             } else if (tableName != null) {
                 Fields lfields = getFields();
                 if (lfields != null) {
@@ -237,8 +255,14 @@ public abstract class Entity<M extends Model<E, ?, ?, Q>, Q extends Query<?>, E 
 
     public String getFormattedTableNameAndTitle() {
         String lTableName = getTableName();
-        String tableTitle = getTitle();
-        return (lTableName != null ? lTableName : "") + (tableTitle != null && !"".equals(tableTitle) ? " (" + tableTitle + ")" : ""); //NO18IN
+        String lTitle = getTitle();
+        return (lTableName != null ? lTableName : "") + (lTitle != null && !"".equals(lTitle) ? " (" + lTitle + ")" : ""); //NO18IN
+    }
+
+    public String getFormattedNameAndTitle() {
+        String lName = getName();
+        String lTitle = getTitle();
+        return (lName != null ? lName : "") + (lTitle != null && !"".equals(lTitle) ? " (" + lTitle + ")" : ""); //NO18IN
     }
 
     public String getQueryId() {
@@ -281,13 +305,12 @@ public abstract class Entity<M extends Model<E, ?, ?, Q>, Q extends Query<?>, E 
         changeSupport.firePropertyChange(TABLE_SCHEMA_NAME_PROPERTY, oldValue, aValue);
     }
 
-    public Q getQuery() throws Exception {
+    public Q getQuery() {
         try {
             validateQuery();
         } catch (Exception ex) {
             Logger.getLogger(Entity.class.getName()).log(Level.WARNING, null, ex);
             query = null;
-            throw ex;
         }
         return query;
     }

@@ -80,9 +80,14 @@ public class AppElementsFilter {
             + "    }\n"
             + "}"
             + "}\n"
-            + "if(!window.platypusModulesConstructors)\n"
-            + "    window.platypusModulesConstructors = {};\n"
-            + "window.platypusModulesConstructors['%s'] = %s;\n";
+            + "(function(){\n"
+            + "    var appElement = '%s';\n"
+            + "    if(!window.platypusModulesConstructors)\n"
+            + "        window.platypusModulesConstructors = {};\n"
+            + "    window.platypusModulesConstructors[appElement] = %s;\n"
+            + "    if(window.platypusModulesOnLoad && window.platypusModulesOnLoad[appElement])\n"
+            + "        window.platypusModulesOnLoad[appElement]();\n"
+            + "})();";
     public static final String BROWSER_MODULE_TEMPLATE = ""
             + "function %s()\n"// Module name
             + "{\n"

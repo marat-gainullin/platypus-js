@@ -112,6 +112,17 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         changeSupport.firePropertyChange("scriptScope", oldValue, scriptScope);
     }
 
+    @Override
+    public boolean validate() throws Exception{
+        boolean res = super.validate();
+        if(res){
+            for(Relation<E> rel : referenceRelations)
+                resolveRelation(rel, this);
+            checkReferenceRelationsIntegrity();
+        }
+        return res;
+    }
+    
     public void resolveHandlers() {
         if (scriptScope != null) {
             for (E ent : entities.values()) {
@@ -133,7 +144,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         Model<E, P, C, Q>  copied = super.copy();
         for (ReferenceRelation<E> relation : referenceRelations) {
             ReferenceRelation<E> rcopied = (ReferenceRelation<E>)relation.copy();
-            resolveCopiedRelation(rcopied, copied);
+            resolveRelation(rcopied, copied);
             ((ApplicationModel<E, P, C, Q>)copied).getReferenceRelations().add(rcopied);
         }
         return copied;
@@ -142,6 +153,10 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
     @Override
     public void checkRelationsIntegrity() {
         super.checkRelationsIntegrity();
+        checkReferenceRelationsIntegrity();
+    }
+    
+    protected void checkReferenceRelationsIntegrity() {
         List<ReferenceRelation<E>> toDel = new ArrayList<>();
         for (ReferenceRelation<E> rel : referenceRelations) {
             if (rel.getLeftEntity() == null || (rel.getLeftField() == null && rel.getLeftParameter() == null)
@@ -150,7 +165,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
             }
         }
         for (ReferenceRelation<E> rel : toDel) {
-            referenceRelations.remove(rel);
+            removeReferenceRelation(rel);
         }
     }
 
@@ -486,11 +501,12 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
     protected static final String USER_DATASOURCE_NAME = "userQuery";
 
     public synchronized Scriptable createQuery(String aQueryId) throws Exception {
-        Logger.getLogger(ApplicationModel.class.getName()).log(Level.WARNING, "createQuery deprecated call detected. Use createEntity instead.");
-        return createEntity(aQueryId);
+        Logger.getLogger(ApplicationModel.class.getName()).log(Level.WARNING, "createQuery deprecated call detected. Use loadEntity() instead.");
+        return loadEntity(aQueryId);
     }
 
-    public synchronized Scriptable createEntity(String aQueryId) throws Exception {
+    @ScriptFunction(jsDocText = "Creates new entity of model, based on application query.")
+    public synchronized Scriptable loadEntity(String aQueryId) throws Exception {
         if (client == null) {
             throw new NullPointerException("Null client detected while creating an entity");
         }

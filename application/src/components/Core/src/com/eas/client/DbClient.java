@@ -20,6 +20,15 @@ import java.util.Set;
  */
 public interface DbClient extends Client {
     
+    public interface QueriesListener {
+
+        public interface Registration {
+
+            public void remove();
+        }
+
+        public void cleared();
+    }
     /**
      * Returns conection schema name.
      * @param aDbId Identifier of database connection. Null means application database connection.
@@ -42,7 +51,8 @@ public interface DbClient extends Client {
     @Override
     public SqlQuery getAppQuery(String aQueryId) throws Exception;
     
-    /**
+    public QueriesListener.Registration addQueriesListener(QueriesListener aListener);
+        /**
      * Creates and returns new data flow provider, setted up with settings passed through parameters
      * @param aDatabaseId Connection identifier. May be null for metabase.
      * @param aSessionId Session identifier. May be null for system session.

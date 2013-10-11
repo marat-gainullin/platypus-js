@@ -97,16 +97,27 @@ platypus.xml:
   <dbSettings name="" password="eas" url="jdbc:oracle:thin:@asvr:1521/adb" user="eas"/>
 </context>
 
+server.xml for Tomcat SSL:
+
+    <Connector port="8443" protocol="org.apache.coyote.http11.Http11NioProtocol"
+               SSLEnabled="true"
+               maxThreads="150" scheme="https" secure="true"
+               keystoreFile="${user.home}/.keystore"
+               keystorePass="tomcat" 
+               keyAlias="tomcat"
+               clientAuth="false" sslProtocol="TLS" />
+
+
 
 Standalone server command line:
 
--url jdbc:oracle:thin:@asvr:1521/adb -dbuser eas -dbpassword eas -dbschema eas -loglevel FINE -tasks TestServerTaskModule
+-url jdbc:oracle:thin:@asvr:1521/adb -dbuser eas -dbpassword eas -dbschema eas -tasks TestServerTaskModule
 
 Standalone server JVM arguments:
 
--ea
+-ea -D.level=INFO -Djava.util.logging.FileHandler.limit=300 -Djava.util.logging.FileHandler.count=1000 -Dhandlers=java.util.logging.ConsoleHandler,java.util.logging.FileHandler -Djava.util.logging.FileHandler.formatter=com.eas.util.logging.PlatypusFormatter -Djava.util.logging.ConsoleHandler.formatter=com.eas.util.logging.PlatypusFormatter -Djava.util.logging.FileHandler.pattern=%h/.platypus/logs/server%g.xls -Djava.util.logging.config.class=com.eas.util.logging.LoggersConfig
 
 Known issues:
-
--For statefull modules testing one should relaunch both J2EE and standalone servers before testing
--Fisrt one should run J2SE tests and then GWT tests
+-After platypus-tests application starts, one need to replace web.xml and context.xml and than restart J2EE server.
+-For statefull modules testing, one should relaunch both J2EE and standalone servers before testing
+-One should run J2SE tests and then GWT tests

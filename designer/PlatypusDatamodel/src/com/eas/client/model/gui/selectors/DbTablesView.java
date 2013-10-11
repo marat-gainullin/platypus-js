@@ -10,7 +10,6 @@
  */
 package com.eas.client.model.gui.selectors;
 
-import com.eas.client.ClientConstants;
 import com.eas.client.DbClient;
 import com.eas.client.dbstructure.DbStructureUtils;
 import com.eas.client.metadata.ApplicationElement;
@@ -64,7 +63,7 @@ public class DbTablesView extends JPanel {
         }
         String schema = aSchema;
         if (schema == null || schema.isEmpty()) {
-            schema = settings.getInfo().getProperty(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME);
+            schema = settings.getSchema();
         }
         int schemaIndx = locateSchema(schema);
         if (schemaIndx != -1) {
@@ -75,7 +74,7 @@ public class DbTablesView extends JPanel {
 
     public String getDefaultSchema() throws Exception {
         DbConnectionSettings settings = readSettings();
-        return settings.getInfo().getProperty(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME);
+        return settings.getSchema();
     }
 
     public int locateSchema(String aSchema) {

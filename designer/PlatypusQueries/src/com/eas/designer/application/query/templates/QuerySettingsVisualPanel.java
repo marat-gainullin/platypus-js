@@ -19,6 +19,7 @@ import com.eas.designer.explorer.FileChooser;
 import com.eas.xml.dom.Source2XmlDom;
 import java.sql.DriverManager;
 import java.util.HashSet;
+import java.util.Properties;
 import java.util.Set;
 import javax.swing.DefaultComboBoxModel;
 import org.openide.DialogDescriptor;
@@ -193,7 +194,11 @@ public class QuerySettingsVisualPanel extends javax.swing.JPanel {
             // let's test connection capability
             try {
                 DbConnectionSettings settings = readSettings(connectionFile);
-                java.sql.Connection conn = DriverManager.getConnection(settings.getUrl(), settings.getInfo());
+                Properties props = new Properties();
+                props.put("user", settings.getUser());
+                props.put("password", settings.getPassword());
+                props.put("schema", settings.getSchema());
+                java.sql.Connection conn = DriverManager.getConnection(settings.getUrl(), props);
                 conn.close();
             } catch (Exception ex) {
                 refreshButtons();

@@ -174,10 +174,10 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
                 if (dbUser == null || dbUser.isEmpty() || dbPassword == null || dbPassword.length == 0) {
                     throw new Exception(BAD_DB_CREDENTIALS_MSG + " May be bad db connection settings (url, dbuser, dbpassword).");
                 }
-                settings.getInfo().put(ClientConstants.DB_CONNECTION_USER_PROP_NAME, dbUser);
-                settings.getInfo().put(ClientConstants.DB_CONNECTION_PASSWORD_PROP_NAME, new String(dbPassword));
+                settings.setUser(dbUser);
+                settings.setPassword(new String(dbPassword));
                 if (dbSchema != null && !dbSchema.isEmpty()) {
-                    settings.getInfo().put(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME, dbSchema);
+                    ((DbConnectionSettings)settings).setSchema(dbSchema);
                 }
                 if (appPath != null) {
                     ((DbConnectionSettings) settings).setApplicationPath(appPath);
@@ -202,7 +202,7 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
     private boolean guiLogin() throws Exception {
         LoginFrame frame = new LoginFrame(url, dbUser, dbPassword, user, password, new LoginCallback() {
             @Override
-            public boolean tryToLogin(EasSettings aSettings, String aDbUser, char[] aDbPassword, String aUserName, char[] aAppPassword) throws Exception {
+            public boolean tryToLogin(EasSettings aSettings, String aDbUser, char[] aDbPassword, String aAppUserName, char[] aAppPassword) throws Exception {
                 EasSettings lsettings = aSettings;
                 if (aSettings instanceof DbConnectionSettings) {
                     if (aDbUser == null || aDbUser.isEmpty() || aDbPassword == null || aDbPassword.length == 0) {
@@ -212,9 +212,14 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
                     dbSettings.setName(((DbConnectionSettings) aSettings).getName());
                     dbSettings.setDrivers(((DbConnectionSettings) aSettings).getDrivers());
                     dbSettings.setUrl(((DbConnectionSettings) aSettings).getUrl());
-                    dbSettings.getInfo().putAll(((DbConnectionSettings) aSettings).getInfo());
-                    dbSettings.getInfo().put(ClientConstants.DB_CONNECTION_USER_PROP_NAME, aDbUser);
-                    dbSettings.getInfo().put(ClientConstants.DB_CONNECTION_PASSWORD_PROP_NAME, new String(aDbPassword));
+                    dbSettings.setSchema(((DbConnectionSettings) aSettings).getSchema());
+                    dbSettings.setDeferCache(((DbConnectionSettings) aSettings).isDeferCache());
+                    dbSettings.setInitSchema(((DbConnectionSettings) aSettings).isInitSchema());
+                    dbSettings.setMaxConnections(((DbConnectionSettings) aSettings).getMaxConnections());
+                    dbSettings.setMaxStatements(((DbConnectionSettings) aSettings).getMaxStatements());
+                    dbSettings.setResourceTimeout(((DbConnectionSettings) aSettings).getResourceTimeout());
+                    dbSettings.setUser(aDbUser);
+                    dbSettings.setPassword(new String(aDbPassword));
                     if (appPath != null) {
                         dbSettings.setApplicationPath(appPath);
                     }
@@ -222,7 +227,7 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
                 }
                 Client lclient = ClientFactory.getInstance(lsettings);
                 try {
-                    return appLogin(lclient, aUserName, aAppPassword);
+                    return appLogin(lclient, aAppUserName, aAppPassword);
                 } catch (Exception ex) {
                     lclient.shutdown();
                     throw ex;

@@ -77,7 +77,7 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
         }
         for (Relation<E> relation : relations) {
             Relation<E> rcopied = relation.copy();
-            resolveCopiedRelation(rcopied, copied);
+            resolveRelation(rcopied, copied);
             copied.addRelation(rcopied);
         }
         return copied;
@@ -115,11 +115,53 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
             resolver.run();
             resolver = null;
         }
+        if (client == null) {
+            for (E e : entities.values()) {
+                e.clearFields();
+            }
+        }
     }
 
     public void clearRelations() {
         if (relations != null) {
             relations.clear();
+            for (E e : entities.values()) {
+                e.getInRelations().clear();
+                e.getOutRelations().clear();
+            }
+        }
+    }
+
+    /**
+     * Tests if entities' internal data is actual, updating it if necessary.
+     *
+     * @return True if any change occur and false is all is actual.
+     */
+    public synchronized boolean validate() throws Exception {
+        boolean res = false;
+        for (E e : entities.values()) {
+            if (e.validate()) {
+                res = true;
+            }
+        }
+        if (res) {
+            for (Relation<E> rel : relations) {
+                resolveRelation(rel, this);
+            }
+            checkRelationsIntegrity();
+        }
+        return res;
+    }
+
+    public void fireAllQueriesChanged() throws Exception {
+        for (E e : getEntities().values()) {
+            boolean queryExists;
+            try {
+                queryExists = e.getQuery() != null;
+            } catch (Exception ex) {
+                queryExists = false;
+            }
+            e.getChangeSupport().firePropertyChange(Entity.QUERY_VALID_PROPERTY, !queryExists, queryExists);
         }
     }
 
@@ -459,7 +501,7 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
         }
     }
 
-    protected void resolveCopiedRelation(Relation<E> aRelation, Model<E, P, C, Q> aModel) throws Exception {
+    protected void resolveRelation(Relation<E> aRelation, Model<E, P, C, Q> aModel) throws Exception {
         if (aRelation.getLeftEntity() != null) {
             aRelation.setLeftEntity(aModel.getEntityById(aRelation.getLeftEntity().getEntityId()));
         }
@@ -469,9 +511,19 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
         if (aRelation.getLeftField() != null) {
             if (aRelation.getLeftEntity() != null) {
                 if (aRelation.isLeftParameter() && aRelation.getLeftEntity().getQueryId() != null) {
-                    aRelation.setLeftField(aRelation.getLeftEntity().getQuery().getParameters().get(aRelation.getLeftField().getName()));
+                    Q lQuery = aRelation.getLeftEntity().getQuery();
+                    if (lQuery != null) {
+                        aRelation.setLeftField(lQuery.getParameters().get(aRelation.getLeftField().getName()));
+                    } else {
+                        aRelation.setLeftField(null);
+                    }
                 } else {
-                    aRelation.setLeftField(aRelation.getLeftEntity().getFields().get(aRelation.getLeftField().getName()));
+                    Fields lFields = aRelation.getLeftEntity().getFields();
+                    if (lFields != null) {
+                        aRelation.setLeftField(lFields.get(aRelation.getLeftField().getName()));
+                    } else {
+                        aRelation.setLeftField(null);
+                    }
                 }
             } else {
                 aRelation.setLeftField(null);
@@ -480,9 +532,19 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
         if (aRelation.getRightField() != null) {
             if (aRelation.getRightEntity() != null) {
                 if (aRelation.isRightParameter() && aRelation.getRightEntity().getQueryId() != null) {
-                    aRelation.setRightField(aRelation.getRightEntity().getQuery().getParameters().get(aRelation.getRightField().getName()));
+                    Q rQuery = aRelation.getRightEntity().getQuery();
+                    if (rQuery != null) {
+                        aRelation.setRightField(rQuery.getParameters().get(aRelation.getRightField().getName()));
+                    } else {
+                        aRelation.setRightField(null);
+                    }
                 } else {
-                    aRelation.setRightField(aRelation.getRightEntity().getFields().get(aRelation.getRightField().getName()));
+                    Fields rFields = aRelation.getRightEntity().getFields();
+                    if (rFields != null) {
+                        aRelation.setRightField(rFields.get(aRelation.getRightField().getName()));
+                    } else {
+                        aRelation.setRightField(null);
+                    }
                 }
             } else {
                 aRelation.setRightField(null);

@@ -17,6 +17,7 @@ import com.bearsoft.rowset.metadata.Field;
 import com.eas.script.ScriptUtils;
 import com.eas.client.threetier.RowsetJsonConstants;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -59,7 +60,7 @@ public class ChangeJsonReader implements ChangeVisitor {
                     if (field != null) {
                         if (oValueValue instanceof String && (field.getTypeInfo().getSqlType() == java.sql.Types.DATE || field.getTypeInfo().getSqlType() == java.sql.Types.TIME || field.getTypeInfo().getSqlType() == java.sql.Types.TIMESTAMP)) {
                             try {
-                                oValueValue = RowsetJsonConstants.DATE_FORMATTER.parse((String) oValueValue);
+                                oValueValue = (new SimpleDateFormat(RowsetJsonConstants.DATE_FORMAT)).parse((String) oValueValue);
                             } catch (ParseException pex) {
                                 if (((String) oValueValue).matches("\\d+")) {
                                     oValueValue = Long.valueOf((String) oValueValue);

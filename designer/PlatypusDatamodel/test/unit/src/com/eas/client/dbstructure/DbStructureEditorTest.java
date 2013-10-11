@@ -32,7 +32,6 @@ import com.eas.client.queries.SqlCompiledQuery;
 import com.eas.client.settings.DbConnectionSettings;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
-import java.util.Properties;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -63,11 +62,8 @@ public class DbStructureEditorTest {
     public void setUp() throws Exception {
         DbConnectionSettings settings = new DbConnectionSettings();
         settings.setUrl("jdbc:oracle:thin:@//asvr:1521/adb");
-        Properties props = new Properties();
-        props.put("user", "eas");
-        props.put("password", "eas");
-        props.put("schema", "eas");
-        settings.setInfo(props);
+        settings.setUser("eas");
+        settings.setPassword("eas");
         //String platHome = System.getProperty(ClientConstants.PLATYPUS_HOME_PROP_NAME);
         Client lclient = ClientFactory.getInstance(settings);
         assertTrue(lclient instanceof DbClient);

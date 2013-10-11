@@ -46,21 +46,37 @@ public class PlatypusCheckBoxHandledField extends PlatypusCheckBox {
 			redraw();
 	}
 
+	protected PublishedCell cellToRender;
+
 	@Override
 	protected void onRedraw() {
 		super.onRedraw();
 		try {
-			JavaScriptObject eventThis = modelElement != null ? modelElement.entity.getModel().getModule() : null;
+			JavaScriptObject eventThis = modelElement != null && modelElement.entity != null && modelElement.entity.getModel() != null ? modelElement.entity.getModel().getModule() : null;
 			// TODO: refactor to onTargetRedraw event
 			if (getParent() != null && getParent().getParent() instanceof PlatypusAdapterStandaloneField<?>) {
 				PlatypusAdapterStandaloneField<?> adapter = (PlatypusAdapterStandaloneField<?>) getParent().getParent();
+				ControlsUtils.reapplyStyle(adapter);
 				eventThis = adapter.getPublishedField();
-				PublishedCell cellToRender = modelElement != null && cellFunction != null ? ControlsUtils.calcStandalonePublishedCell(eventThis, cellFunction, modelElement.entity.getRowset()
-				        .getCurrentRow(), null, modelElement) : null;
+				if (cellFunction != null && modelElement != null && modelElement.entity != null && modelElement.entity.getRowset() != null) {
+					cellToRender = ControlsUtils.calcStandalonePublishedCell(eventThis, cellFunction, modelElement.entity.getRowset().getCurrentRow(), null, modelElement, cellToRender);
+				}
 				if (cellToRender != null) {
+					if (cellToRender.getDisplayCallback() == null) {
+						cellToRender.setDisplayCallback(new Runnable() {
+							@Override
+							public void run() {
+								JavaScriptObject oldCellFunction = cellFunction;
+								cellFunction = null;
+								try {
+									redraw(true);
+								} finally {
+									cellFunction = oldCellFunction;
+								}
+							}
+						});
+					}
 					cellToRender.styleToElement(getElement());
-				} else {
-					ControlsUtils.reapplyStyle(adapter);
 				}
 			}
 		} catch (Exception ex) {

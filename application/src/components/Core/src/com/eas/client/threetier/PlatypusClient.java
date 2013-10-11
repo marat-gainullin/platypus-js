@@ -32,7 +32,6 @@ import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.prefs.Preferences;
 import javax.net.ssl.*;
 import javax.swing.JOptionPane;
 
@@ -69,7 +68,7 @@ public abstract class PlatypusClient implements AppClient {
     public static final ResourceBundle clientLocalizations = ResourceBundle.getBundle("com/eas/client/threetier/clientlocalizations");
 
     private static char[] getTrustStorePassword() {
-        char[] password = Preferences.userRoot().node(SSL_PREFS_PATH).get("trustStorePassword", DEFAULT_TRUSTSTORE_PASSWORD).toCharArray();
+        char[] password = DEFAULT_TRUSTSTORE_PASSWORD.toCharArray();
         return password;
     }
     private AppElementsCache appCache;
@@ -217,25 +216,24 @@ public abstract class PlatypusClient implements AppClient {
     }
 
     protected static KeyManager[] createKeyManagers() throws NoSuchAlgorithmException, NoSuchProviderException, KeyStoreException, FileNotFoundException, IOException, CertificateException, UnrecoverableKeyException, URISyntaxException {
-        KeyStore ks = KeyStore.getInstance(Preferences.systemRoot().node(SSL_PREFS_PATH).get("keyStoreType", DEFAULT_CETRS_STORE_TYPE));
+        KeyStore ks = KeyStore.getInstance(DEFAULT_CETRS_STORE_TYPE);
         // get user password and file input stream
-        char[] password = Preferences.systemRoot().node(SSL_PREFS_PATH).get("keyStorePassword", DEFAULT_KEYSTORE_PASSWORD).toCharArray();
-        File keyStore = new File(StringUtils.join(File.separator, System.getProperty(ClientConstants.USER_HOME_PROP_NAME), ClientConstants.USER_HOME_PLATYPUS_DIRECTORY_NAME, SECURITY_SUBDIRECTORY, "keystore"));
-        if (!keyStore.exists()) {
+        char[] password = DEFAULT_KEYSTORE_PASSWORD.toCharArray();
+        File keyStoreFile = new File(StringUtils.join(File.separator, System.getProperty(ClientConstants.USER_HOME_PROP_NAME), ClientConstants.USER_HOME_PLATYPUS_DIRECTORY_NAME, SECURITY_SUBDIRECTORY, "keystore"));
+        if (!keyStoreFile.exists()) {
             File keyPath = new File(StringUtils.join(File.separator, System.getProperty(ClientConstants.USER_HOME_PROP_NAME), ClientConstants.USER_HOME_PLATYPUS_DIRECTORY_NAME, SECURITY_SUBDIRECTORY));
             keyPath.mkdirs();
-            keyStore.createNewFile();
-            try (OutputStream keyOut = new FileOutputStream(keyStore); InputStream keyIn = PlatypusClient.class.getResourceAsStream("emptyKeystore")) {
+            keyStoreFile.createNewFile();
+            try (OutputStream keyOut = new FileOutputStream(keyStoreFile); InputStream keyIn = PlatypusClient.class.getResourceAsStream("emptyKeystore")) {
                 byte[] resData = BinaryUtils.readStream(keyIn, -1);
                 keyOut.write(resData);
             }
         }
-        if (keyStore.exists()) {
-            try (InputStream is = new FileInputStream(keyStore)) {
+        if (keyStoreFile.exists()) {
+            try (InputStream is = new FileInputStream(keyStoreFile)) {
                 ks.load(is, password);
             }
-            final KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(
-                    Preferences.systemRoot().node(SSL_PREFS_PATH).get("keyManagerAlgorithm", "SunX509"));
+            final KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance("SunX509");
             keyManagerFactory.init(ks, password);
             return keyManagerFactory.getKeyManagers();
         } else {
@@ -244,7 +242,7 @@ public abstract class PlatypusClient implements AppClient {
     }
 
     protected static TrustManager[] createTrustManagers() throws NoSuchAlgorithmException, NoSuchProviderException, KeyStoreException, FileNotFoundException, IOException, CertificateException, URISyntaxException {
-        KeyStore ks = KeyStore.getInstance(Preferences.userRoot().node(SSL_PREFS_PATH).get("trustStoreType", DEFAULT_CETRS_STORE_TYPE));
+        KeyStore ks = KeyStore.getInstance(DEFAULT_CETRS_STORE_TYPE);
         char[] password = getTrustStorePassword();
         File trustStore = new File(StringUtils.join(File.separator, System.getProperty(ClientConstants.USER_HOME_PROP_NAME), ClientConstants.USER_HOME_PLATYPUS_DIRECTORY_NAME, SECURITY_SUBDIRECTORY, "truststore"));
         if (!trustStore.exists()) {
@@ -260,8 +258,7 @@ public abstract class PlatypusClient implements AppClient {
             try (InputStream is = new FileInputStream(trustStore)) {
                 ks.load(is, password);
             }
-            String trustManagerAlgorithm = Preferences.userRoot().node(SSL_PREFS_PATH).get("trustManagerAlgorithm", DEFAULT_TRUST_ALGORITHM);
-            final TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(trustManagerAlgorithm);
+            final TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(DEFAULT_TRUST_ALGORITHM);
             trustManagerFactory.init(ks);
             return wrapTrustManagers(ks, trustManagerFactory.getTrustManagers());
         } else {
@@ -270,8 +267,8 @@ public abstract class PlatypusClient implements AppClient {
     }
 
     protected static SSLContext createSSLContext() throws NoSuchAlgorithmException, KeyManagementException, NoSuchProviderException, KeyStoreException, FileNotFoundException, IOException, CertificateException, UnrecoverableKeyException, URISyntaxException {
-        SSLContext context = SSLContext.getInstance(Preferences.userRoot().node(SSL_PREFS_PATH).get("protocol", DEFAULT_SSL_PROTOCOL));
-        context.init(createKeyManagers(), createTrustManagers(), SecureRandom.getInstance(Preferences.userRoot().node(SSL_PREFS_PATH).get("secureRandomAlgorithm", DEFAULT_SECURE_RANDOM_ALGORITHM)));
+        SSLContext context = SSLContext.getInstance(DEFAULT_SSL_PROTOCOL);
+        context.init(createKeyManagers(), createTrustManagers(), SecureRandom.getInstance(DEFAULT_SECURE_RANDOM_ALGORITHM));
         return context;
     }
 

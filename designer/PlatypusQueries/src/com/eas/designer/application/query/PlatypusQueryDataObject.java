@@ -409,6 +409,13 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         return sqlFullTextDocument;
     }
 
+    @Override
+    protected void validateModel() throws Exception {
+        if (getModel() != null) {
+            getModel().validate();
+        }
+    }
+
     public void shrink() {
         modelNode = null;
         statement = null;
@@ -455,6 +462,19 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
             byte[] data = aContent.getBytes(PlatypusUtils.COMMON_ENCODING_NAME);
             out.write(data);
             out.flush();
+        }
+    }
+
+    @Override
+    protected void handleDelete() throws IOException {
+        String oldId = IndexerQuery.file2AppElementId(getPrimaryFile());
+        super.handleDelete();
+        if (getClient() != null) {
+            try {
+                getClient().appEntityChanged(oldId);
+            } catch (Exception ex) {
+                throw new IOException(ex);
+            }
         }
     }
 

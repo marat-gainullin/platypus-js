@@ -4,21 +4,26 @@
  */
 package com.eas.designer.application.module.nodes;
 
+import com.eas.client.model.Entity;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.designer.application.module.events.ApplicationEntityEventDesc;
 import com.eas.designer.application.module.events.ApplicationEntityEventProperty;
 import com.eas.designer.application.module.events.ApplicationEntityEventsAction;
 import com.eas.designer.application.module.events.ApplicationModuleEvents;
 import com.eas.designer.datamodel.nodes.EntityNode;
+import static com.eas.designer.datamodel.nodes.EntityNode.PROPS_EVENTS_TAB_NAME;
 import com.eas.script.ScriptUtils;
 import com.eas.script.StoredFunction;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.Action;
 import org.openide.ErrorManager;
 import org.openide.awt.UndoRedo;
 import org.openide.nodes.Node.Property;
+import org.openide.nodes.PropertySupport;
 import org.openide.nodes.Sheet;
 import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
@@ -55,9 +60,9 @@ public class ApplicationEntityNode extends EntityNode<ApplicationDbEntity> {
     protected boolean isValidName(String name) {
         try {
             entity.getModel().getParameters().invalidateFieldsHash();
-            return !name.isEmpty() 
-                    && entity.getModel().getParameters().get(name) == null 
-                    && (entity.getModel().getEntityByName(name) == null || getName().equalsIgnoreCase(name)) 
+            return !name.isEmpty()
+                    && entity.getModel().getParameters().get(name) == null
+                    && (entity.getModel().getEntityByName(name) == null || getName().equalsIgnoreCase(name))
                     && ScriptUtils.isValidJsIdentifier(name);
         } catch (Exception ex) {
             ErrorManager.getDefault().notify(ex);
@@ -82,6 +87,14 @@ public class ApplicationEntityNode extends EntityNode<ApplicationDbEntity> {
                 eventChanged((ApplicationEntityEventProperty) prop, nodeEvent);
             } catch (Exception ex) {
                 ErrorManager.getDefault().notify(ex);
+            }
+        }
+        if (Entity.QUERY_ID_PROPERTY.equals(nodeEvent.getPropertyName())) {
+            try {
+                entity.getModel().validate();
+                entity.getModel().fireAllQueriesChanged();
+            } catch (Exception ex) {
+                Logger.getLogger(EntityNode.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
             }
         }
         super.processNodePropertyChange(nodeEvent);
@@ -109,19 +122,33 @@ public class ApplicationEntityNode extends EntityNode<ApplicationDbEntity> {
     @Override
     protected Sheet createSheet() {
         Sheet sheet = super.createSheet();
-        Sheet.Set eSet = new Sheet.Set();
-        eSet.setDisplayName(NbBundle.getMessage(ApplicationEntityNode.class, "CTL_Events"));
-        eSet.setShortDescription(NbBundle.getMessage(ApplicationEntityNode.class, "HINT_Events"));
-        eSet.setName("events");
-        eSet.setValue(PROPS_EVENTS_TAB_NAME, eSet.getDisplayName());
-        ApplicationEntityEventDesc[] events = ApplicationEntityEventDesc.getApplicableEvents();
-        for (ApplicationEntityEventDesc event : events) {
-            ApplicationEntityEventProperty eventProp = new ApplicationEntityEventProperty(moduleEvents, entity, event);
-            eSet.put(eventProp);
-            nameToProperty.put(event.getName(), eventProp);
+        try {
+            if (!isParametersEntity()) {
+                Sheet.Set pSet = sheet.get(Sheet.PROPERTIES);
+                PropertySupport.Reflection<String> queryIdProp = new PropertySupport.Reflection<>(entity, String.class, Entity.QUERY_ID_PROPERTY);
+                queryIdProp.setName(Entity.QUERY_ID_PROPERTY);
+                queryIdProp.setDisplayName("queryName");
+                nameToProperty.put(Entity.QUERY_ID_PROPERTY, queryIdProp);
+                pSet.put(queryIdProp);
+                sheet.put(pSet);
+            }
+            Sheet.Set eSet = new Sheet.Set();
+            eSet.setDisplayName(NbBundle.getMessage(ApplicationEntityNode.class, "CTL_Events"));
+            eSet.setShortDescription(NbBundle.getMessage(ApplicationEntityNode.class, "HINT_Events"));
+            eSet.setName("events");
+            eSet.setValue(PROPS_EVENTS_TAB_NAME, eSet.getDisplayName());
+            ApplicationEntityEventDesc[] events = ApplicationEntityEventDesc.getApplicableEvents();
+            for (ApplicationEntityEventDesc event : events) {
+                ApplicationEntityEventProperty eventProp = new ApplicationEntityEventProperty(moduleEvents, entity, event);
+                eSet.put(eventProp);
+                nameToProperty.put(event.getName(), eventProp);
+            }
+            sheet.put(eSet);
+            return sheet;
+        } catch (NoSuchMethodException ex) {
+            Logger.getLogger(EntityNode.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+            return sheet;
         }
-        sheet.put(eSet);
-        return sheet;
     }
 
     protected void eventChanged(ApplicationEntityEventProperty eProp, PropertyChangeEvent evt) throws Exception {

@@ -77,10 +77,10 @@ public class StoredQueryFactory {
         }
     }
     public static final String INNER_JOIN_CONSTRUCTION = "select %s from %s %s inner join %s on (%s.%s = %s.%s)";
-    public static final String ABSENT_QUERY_MSG = "absentQuery";
+    public static final String ABSENT_QUERY_MSG = "Query %s is not found";
     public static final String CANT_LOAD_NULL_MSG = "Query ID is null.";
     public static final String COLON = ":";
-    public static final String CONTENT_EMPTY_MSG = "emptyContent";
+    public static final String CONTENT_EMPTY_MSG = "Content of %s is empty";
     public static final String DUMMY_FIELD_NAME = "dummy";
     public static final String INEER_JOIN_CONSTRUCTING_MSG = "Constructing query with left Query %s and right table %s";
     public static final String LOADING_QUERY_MSG = "Loading stored query %s";
@@ -164,24 +164,14 @@ public class StoredQueryFactory {
                         sqlText = query.getFullSqlText();
                     }
                     try {
+                        String compiledSqlText = compileSubqueries(sqlText, model);
                         try {
-                            String compiledSqlText = compileSubqueries(sqlText, model);
-                            try {
-                                putParametersMetadata(query, model);
-                                if (putTableFieldsMetadata(query)) {
-                                    putStoredTableFieldsMetadata(query, additionalFieldsMetadata);
-                                }
-                            } finally {
-                                query.setSqlText(compiledSqlText);
+                            putParametersMetadata(query, model);
+                            if (putTableFieldsMetadata(query)) {
+                                putStoredTableFieldsMetadata(query, additionalFieldsMetadata);
                             }
-                        } catch (Exception ex) {
-                            Fields fields = new Fields();
-                            Field fMd = new Field(DUMMY_FIELD_NAME, ex.getMessage());
-                            fields.add(fMd);
-                            query.setFields(fields);
-                            //throw ex; If uncomment this line, no ActualCacheEntry instance will be created and returned
-                            // If so, than this code is absolutely useless.
-                            // So, client code should be edited if issues will occur.
+                        } finally {
+                            query.setSqlText(compiledSqlText);
                         }
                     } finally {
                         query.setTitle(appElement.getName());
@@ -190,23 +180,10 @@ public class StoredQueryFactory {
                 }
                 return new ActualCacheEntry<>(query, appElement.getTxtContentLength(), appElement.getTxtCrc32());
             } else {
-                SqlQuery result = new SqlQuery(client);
-                Fields fields = new Fields();
-                Field fMd = new Field(DUMMY_FIELD_NAME, CONTENT_EMPTY_MSG);
-                fields.add(fMd);
-                result.setFields(fields);
-                return new ActualCacheEntry<>(result, 0, 0);
+                throw new IllegalArgumentException(String.format(CONTENT_EMPTY_MSG, aAppElementId));
             }
         } else {
-            SqlQuery result = dynamicQueries.get(aAppElementId);
-            if (result == null) {
-                result = new SqlQuery(client);
-                Fields fields = new Fields();
-                Field fMd = new Field(DUMMY_FIELD_NAME, ABSENT_QUERY_MSG);
-                fields.add(fMd);
-                result.setFields(fields);
-            }
-            return new ActualCacheEntry<>(result, 0, 0);
+            throw new IllegalArgumentException(String.format(ABSENT_QUERY_MSG, aAppElementId));
         }
     }
     /**
@@ -265,18 +242,10 @@ public class StoredQueryFactory {
                     Relation<QueryEntity> rel = new Relation<>(rootModel.getParametersEntity(), rootParam, leftQueryEntity, leftQueryEntity.getQuery().getParameters().get(rootParam.getName()));
                     rootModel.addRelation(rel);
                 }
-                try {
-                    result.setSqlText(compileSubqueries(sqlText, rootModel));
-                    //result.setMainTable(rightTableName);
-                    result.setFields(rightTableEntity.getFields());
-                    putParametersMetadata(result, rootModel);
-                } catch (Exception ex) {
-                    Fields fields = new Fields();
-                    Field fMd = new Field(DUMMY_FIELD_NAME, "<???>");
-                    fields.add(fMd);
-                    result.setFields(fields);
-                    throw ex;
-                }
+                result.setSqlText(compileSubqueries(sqlText, rootModel));
+                //result.setMainTable(rightTableName);
+                result.setFields(rightTableEntity.getFields());
+                putParametersMetadata(result, rootModel);
                 result.setEntityId(newQueryId);
                 dynamicQueries.put(newQueryId, result);
             }

@@ -4,9 +4,7 @@
  */
 package com.eas.client.settings;
 
-import com.eas.client.ClientConstants;
 import com.eas.client.ConnectionSettingsVisitor;
-import java.util.Properties;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -54,14 +52,12 @@ public class XmlDom2ConnectionSettings implements ConnectionSettingsVisitor {
             Element settingsNode = (Element) nl.item(0);
             aSettings.setName(settingsNode.getAttribute(ConnectionSettings2XmlDom.NAME_ATTR_NAME));
             aSettings.setUrl(settingsNode.getAttribute(ConnectionSettings2XmlDom.URL_ATTR_NAME));
-            Properties props = new Properties();
-            props.put(ClientConstants.DB_CONNECTION_USER_PROP_NAME, settingsNode.getAttribute(ConnectionSettings2XmlDom.USER_ATTR_NAME));
+            aSettings.setUser(settingsNode.getAttribute(ConnectionSettings2XmlDom.USER_ATTR_NAME));
             String schema = settingsNode.getAttribute(ConnectionSettings2XmlDom.SCHEMA_ATTR_NAME);
             if (schema != null && !schema.isEmpty()) {
-                props.put(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME, schema);
+                aSettings.setSchema(schema);
             }
-            props.put(ClientConstants.DB_CONNECTION_PASSWORD_PROP_NAME, settingsNode.getAttribute(ConnectionSettings2XmlDom.PASSWORD_ATTR_NAME));
-            aSettings.setInfo(props);
+            aSettings.setPassword(settingsNode.getAttribute(ConnectionSettings2XmlDom.PASSWORD_ATTR_NAME));
             aSettings.setInitSchema(Boolean.valueOf(settingsNode.getAttribute(ConnectionSettings2XmlDom.INIT_SCHEMA_ATTR_NAME)));
             aSettings.setDeferCache(Boolean.valueOf(settingsNode.getAttribute(ConnectionSettings2XmlDom.DEFER_CACHE_ATTR_NAME)));
 
@@ -75,10 +71,8 @@ public class XmlDom2ConnectionSettings implements ConnectionSettingsVisitor {
             Element settingsNode = (Element) nl.item(0);
             aSettings.setName(settingsNode.getAttribute(ConnectionSettings2XmlDom.NAME_ATTR_NAME));
             aSettings.setUrl(settingsNode.getAttribute(ConnectionSettings2XmlDom.URL_ATTR_NAME));
-            Properties props = new Properties();
-            props.put(ClientConstants.DB_CONNECTION_USER_PROP_NAME, settingsNode.getAttribute(ConnectionSettings2XmlDom.URL_ATTR_NAME));
-            props.put(ClientConstants.DB_CONNECTION_PASSWORD_PROP_NAME, settingsNode.getAttribute(ConnectionSettings2XmlDom.URL_ATTR_NAME));
-            aSettings.setInfo(props);
+            aSettings.setUser(settingsNode.getAttribute(ConnectionSettings2XmlDom.USER_ATTR_NAME));
+            aSettings.setPassword(settingsNode.getAttribute(ConnectionSettings2XmlDom.PASSWORD_ATTR_NAME));
         }
     }
 }

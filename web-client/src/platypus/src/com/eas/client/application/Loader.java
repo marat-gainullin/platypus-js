@@ -14,15 +14,19 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.Cancellable;
 import com.eas.client.CancellableCallback;
 import com.eas.client.CumulativeCallbackAdapter;
 import com.eas.client.DocumentCallbackAdapter;
+import com.eas.client.PlatypusHttpRequestParams;
 import com.eas.client.ResponseCallbackAdapter;
 import com.eas.client.StringCallbackAdapter;
+import com.eas.client.Utils;
 import com.eas.client.queries.Query;
 import com.eas.client.queries.QueryCallbackAdapter;
 import com.google.gwt.core.client.Callback;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.ScriptInjector;
 import com.google.gwt.dom.client.ScriptElement;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -31,6 +35,7 @@ import com.google.gwt.xml.client.Document;
 import com.google.gwt.xml.client.Element;
 import com.google.gwt.xml.client.Node;
 import com.google.gwt.xml.client.NodeList;
+import com.sencha.gxt.core.client.GXT;
 
 /**
  * 
@@ -45,6 +50,7 @@ public class Loader {
 	}
 
 	public static final String INJECTED_SCRIPT_CLASS_NAME = "platypus-injected-script";
+	public static final String SERVER_MODULE_TOUCHED_NAME = "-platypus-server-modeule-proxy";
 	public static final String DEPENDENCY_TAG_NAME = "dependency";
 	public static final String SERVER_DEPENDENCY_TAG_NAME = "serverDependency";
 	public static final String MODEL_TAG_NAME = "datamodel";
@@ -57,7 +63,7 @@ public class Loader {
 	protected Set<String> touchedAppElements = new HashSet<String>();
 	protected Set<String> loadedAppElements = new HashSet<String>();
 	protected Map<String, String> appElementsErrors = new HashMap<String, String>();
-	protected Map<String, ScriptElement> injectedScripts = new HashMap<String, ScriptElement>();
+	//protected Map<String, ScriptElement> injectedScripts = new HashMap<String, ScriptElement>();
 	protected Set<LoadHandler> handlers = new HashSet<LoadHandler>();
 
 	public Loader(AppClient aClient) {
@@ -93,9 +99,16 @@ public class Loader {
 		};
 	}
 
+	protected static native void injectPlaypusModuleCallback(String aAppElementName, JavaScriptObject aCallback)/*-{
+		if(!$wnd.platypusModulesOnLoad)
+			$wnd.platypusModulesOnLoad = {};
+		$wnd.platypusModulesOnLoad[aAppElementName] = aCallback;
+	}-*/;
+	
 	public Cancellable load(final Collection<String> aAppElementNames, final CancellableCallback onEnd) throws Exception {
 		final Collection<Cancellable> loadingsStarted = new ArrayList<Cancellable>();
 		List<String> appElementNames = new ArrayList<String>();
+		// Recursion handling
 		for (String appElementName : aAppElementNames) {
 			if (!isTouched(appElementName)){
 				appElementNames.add(appElementName);
@@ -129,7 +142,7 @@ public class Loader {
 				}
 			};
 			
-			loadingsStarted.add(client.getAppElement(appElementName, new DocumentCallbackAdapter() {
+			loadingsStarted.add(client.getAppElementXml(appElementName, new DocumentCallbackAdapter() {
 
 				Set<Cancellable> loadings = new HashSet<Cancellable>();
 
@@ -216,7 +229,7 @@ public class Loader {
 
 				@Override
 				protected void doWork(XMLHttpRequest aResponse) throws Exception {
-					Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, aResponse.getStatusText());
+					Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, appElementName + " loading response is: " + aResponse.getStatus() + " (" + aResponse.getStatusText() + ")");
 					assert !loadedAppElements.contains(appElementName);
 					// Erroneous dependencies and other erroneous application
 					// elements should be memorized as notifying about the
@@ -229,24 +242,34 @@ public class Loader {
 			}));
 			//
 			String jsURL = client.resourceUrl(appElementName);
-			ScriptElement oldScriptTag = injectedScripts.get(jsURL);
-			if (oldScriptTag != null)
-				oldScriptTag.removeFromParent();
-			ScriptElement scriptTag = ScriptInjector.fromUrl(jsURL).setCallback(new Callback<Void, Exception>() {
+			if(GXT.isChrome())// remove if chrome bug 266971 is fixed
+				jsURL += "?" + PlatypusHttpRequestParams.CACHE_BUSTER + "=" + IDGenerator.genId(); 
+			injectPlaypusModuleCallback(appElementName, Utils.publishRunnable(new Runnable(){
 
 				@Override
-				public void onSuccess(Void result) {
+                public void run() {
 					try {
+						injectPlaypusModuleCallback(appElementName, null);
 						fireLoaded.run();
 						loaded.run();
 					} catch (Exception ex) {
 						Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, null, ex);
 					}
+                }
+				
+			}));
+			ScriptInjector.fromUrl(jsURL)
+			.setCallback(new Callback<Void, Exception>() {
+
+				@Override
+				public void onSuccess(Void result) {
+					// app element script-calling callback is used
 				}
 				
 				@Override
 				public void onFailure(Exception reason) {
 					try {
+						injectPlaypusModuleCallback(appElementName, null);
 						Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, "Script [" + appElementName + "] is not loaded. Cause is: " + reason.getMessage());
 						assert !loadedAppElements.contains(appElementName);
 						// Erroneous dependencies and other erroneous application
@@ -255,14 +278,14 @@ public class Loader {
 						appElementsErrors.put(appElementName, reason.getMessage());
 						loaded.run();
 					} catch (Exception ex) {
-						Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, ex.getMessage());
+						Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, null, ex);
 					}
 				}
 
-			}).setWindow(ScriptInjector.TOP_WINDOW).inject().cast();
-			scriptTag.addClassName(INJECTED_SCRIPT_CLASS_NAME);
-			injectedScripts.put(jsURL, scriptTag);
-			//
+			})
+			.setWindow(ScriptInjector.TOP_WINDOW)
+			.setRemoveTag(true)// Another attempts may occur. So, we have to remove the tag.
+			.inject();
 			fireStarted(appElementName);
 		}
 		return loaded;
@@ -271,7 +294,7 @@ public class Loader {
 	private Cancellable loadServerModules(Collection<String> aAppElementNames, final CancellableCallback onEnd) throws Exception {
 		List<String> appElementNames = new ArrayList<String>();
 		for (String appElementName : aAppElementNames) {
-			if (!isTouched(appElementName))
+			if (!isTouched(SERVER_MODULE_TOUCHED_NAME+appElementName))
 				appElementNames.add(appElementName);
 		}
 		final Collection<Cancellable> startLoadings = new ArrayList<Cancellable>();
@@ -288,9 +311,7 @@ public class Loader {
 					toCancel.cancel();
 			}
 		};
-
-		for (final String appElementName : appElementNames) {
-			
+		for (final String appElementName : appElementNames) {			
 			startLoadings.add(client.createServerModule(appElementName, new DocumentCallbackAdapter() {
 
 				@Override
@@ -314,7 +335,7 @@ public class Loader {
 						scriptElement.setType(TYPE_JAVASCRIPT);
 						htmlDom.getBody().appendChild(scriptElement);
 					}
-					fireLoaded(appElementName);
+					fireLoaded(SERVER_MODULE_TOUCHED_NAME+appElementName);
 					loaded.run();
 				}
 
@@ -327,7 +348,7 @@ public class Loader {
 					Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, aResult);
 				}
 			}));
-			fireStarted(appElementName);
+			fireStarted(SERVER_MODULE_TOUCHED_NAME+appElementName);
 		}
 		return loaded;
 	}

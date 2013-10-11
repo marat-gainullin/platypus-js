@@ -20,6 +20,7 @@ import com.eas.designer.application.query.result.QueryResultTopComponent;
 import com.eas.designer.application.query.result.QueryResultsView;
 import com.eas.designer.datamodel.nodes.EntityNode;
 import com.eas.designer.datamodel.nodes.FieldNode;
+import com.eas.designer.explorer.PlatypusDataObject;
 import com.eas.designer.explorer.model.windows.ModelInspector;
 import com.eas.designer.explorer.selectors.TablesSelector;
 import java.awt.BorderLayout;
@@ -130,6 +131,7 @@ public class PlatypusDbDiagramView extends CloneableTopComponent {
     protected transient DataObjectListener dataObjectListener;
     protected transient NodeSelectionListener exlorerSelectionListener = new NodeSelectionListener();
     protected transient HandlerRegistration clientChangeListener;
+    protected transient HandlerRegistration modelValidChangeListener;
 
     public PlatypusDbDiagramView() throws Exception {
         super();
@@ -151,7 +153,7 @@ public class PlatypusDbDiagramView extends CloneableTopComponent {
         setName(dataObject.getPrimaryFile().getName());
         setToolTipText(NbBundle.getMessage(PlatypusDbDiagramView.class, "HINT_PlatypusDbDiagramTopComponent", dataObject.getPrimaryFile().getPath()));
         initComponents();
-        clientChangeListener = dataObject.addClientChangeListener(new Runnable() {
+        Runnable componentsIniter = new Runnable() {
             @Override
             public void run() {
                 try {
@@ -160,7 +162,9 @@ public class PlatypusDbDiagramView extends CloneableTopComponent {
                     ErrorManager.getDefault().notify(ex);
                 }
             }
-        });
+        };
+        clientChangeListener = dataObject.addClientChangeListener(componentsIniter);
+        modelValidChangeListener = dataObject.addModelValidChangeListener(componentsIniter);
     }
 
     @Override
@@ -203,65 +207,77 @@ public class PlatypusDbDiagramView extends CloneableTopComponent {
         removeAll();
         setLayout(new BorderLayout());
         if (dataObject.getProject().getClient() != null) {
-            editor = new DbSchemeEditorView(dataObject.getModel(),
-                    new TablesSelector(dataObject.getPrimaryFile(), dataObject.getClient(),
-                    NbBundle.getMessage(PlatypusDbDiagramView.class, "HINT_PlatypusDbDiagramTopComponent", dataObject.getPrimaryFile().getName()), PlatypusDbDiagramView.this),
-                    new UndoManager() {
-                @Override
-                public synchronized boolean addEdit(UndoableEdit anEdit) {
-                    ((UndoRedo.Manager) getUndoRedo()).undoableEditHappened(new UndoableEditEvent(this, anEdit));
-                    return true;
-                }
-            }, new RunQueryCallback() {
-                @Override
-                public void runQuery(DbClient aClient, String aDbId, String aSchemaName, String aTableName) {
-                    try {
-                        QueryResultsView resultsView = new QueryResultsView(aClient, aDbId, aSchemaName, aTableName);
-                        QueryResultTopComponent window = (QueryResultTopComponent) WindowManager.getDefault().findTopComponent(QUERY_RESULT_TOPCOMPONENT_PREFFERED_ID);
-                        window.openAtTabPosition(0);
-                        window.addResultsView(resultsView);
-                        window.requestActive();
-                    } catch (Exception ex) {
-                        ErrorManager.getDefault().notify(ex);
+            if (dataObject.isModelValid()) {
+                editor = new DbSchemeEditorView(dataObject.getModel(),
+                        new TablesSelector(dataObject.getPrimaryFile(), dataObject.getClient(),
+                        NbBundle.getMessage(PlatypusDbDiagramView.class, "HINT_PlatypusDbDiagramTopComponent", dataObject.getPrimaryFile().getName()), PlatypusDbDiagramView.this),
+                        new UndoManager() {
+                    @Override
+                    public synchronized boolean addEdit(UndoableEdit anEdit) {
+                        ((UndoRedo.Manager) getUndoRedo()).undoableEditHappened(new UndoableEditEvent(this, anEdit));
+                        return true;
                     }
-                }
-            });
-            add(editor, BorderLayout.CENTER);
-            updateTitle();
-            dataObject.addPropertyChangeListener(dataObjectListener);
-            getModelView().resolveTables();
-            getModelView().resolveRelations();
-            getModelView().addModelSelectionListener(new ModelSelectionListener<FieldsEntity>() {
-                @Override
-                public void selectionChanged(Set<FieldsEntity> oldSelected, Set<FieldsEntity> newSelected) {
-                    try {
-                        Node[] oldNodes = getActivatedNodes();
-                        Node[] newNodes = ModelInspector.convertSelectedToNodes(dataObject.getModelNode(), oldNodes, oldSelected, newSelected);
-                        setActivatedNodes(newNodes);
-                    } catch (Exception ex) {
-                        ErrorManager.getDefault().notify(ex);
+                }, new RunQueryCallback() {
+                    @Override
+                    public void runQuery(DbClient aClient, String aDbId, String aSchemaName, String aTableName) {
+                        try {
+                            QueryResultsView resultsView = new QueryResultsView(aClient, aDbId, aSchemaName, aTableName);
+                            QueryResultTopComponent window = (QueryResultTopComponent) WindowManager.getDefault().findTopComponent(QUERY_RESULT_TOPCOMPONENT_PREFFERED_ID);
+                            window.openAtTabPosition(0);
+                            window.addResultsView(resultsView);
+                            window.requestActive();
+                        } catch (Exception ex) {
+                            ErrorManager.getDefault().notify(ex);
+                        }
                     }
-                }
+                });
+                add(editor, BorderLayout.CENTER);
+                updateTitle();
+                dataObject.addPropertyChangeListener(dataObjectListener);
+                getModelView().resolveTables();
+                getModelView().resolveRelations();
+                getModelView().addModelSelectionListener(new ModelSelectionListener<FieldsEntity>() {
+                    @Override
+                    public void selectionChanged(Set<FieldsEntity> oldSelected, Set<FieldsEntity> newSelected) {
+                        try {
+                            Node[] oldNodes = getActivatedNodes();
+                            Node[] newNodes = ModelInspector.convertSelectedToNodes(dataObject.getModelNode(), oldNodes, oldSelected, newSelected);
+                            setActivatedNodes(newNodes);
+                        } catch (Exception ex) {
+                            ErrorManager.getDefault().notify(ex);
+                        }
+                    }
 
-                @Override
-                public void selectionChanged(List<SelectedParameter<FieldsEntity>> aParameters, List<SelectedField<FieldsEntity>> aFields) {
-                    try {
-                        Node[] oldNodes = getActivatedNodes();
-                        Node[] newNodes = ModelInspector.convertSelectedToNodes(dataObject.getModelNode(), oldNodes, aParameters, aFields);
-                        setActivatedNodes(newNodes);
-                    } catch (Exception ex) {
-                        ErrorManager.getDefault().notify(ex);
+                    @Override
+                    public void selectionChanged(List<SelectedParameter<FieldsEntity>> aParameters, List<SelectedField<FieldsEntity>> aFields) {
+                        try {
+                            Node[] oldNodes = getActivatedNodes();
+                            Node[] newNodes = ModelInspector.convertSelectedToNodes(dataObject.getModelNode(), oldNodes, aParameters, aFields);
+                            setActivatedNodes(newNodes);
+                        } catch (Exception ex) {
+                            ErrorManager.getDefault().notify(ex);
+                        }
                     }
-                }
 
-                @Override
-                public void selectionChanged(Collection<Relation<FieldsEntity>> clctn, Collection<Relation<FieldsEntity>> clctn1) {
+                    @Override
+                    public void selectionChanged(Collection<Relation<FieldsEntity>> clctn, Collection<Relation<FieldsEntity>> clctn1) {
+                    }
+                });
+                getModelView().resolveRelations();
+                UndoRedo ur = getUndoRedo();
+                if (ur instanceof UndoRedo.Manager) {
+                    ((UndoRedo.Manager) ur).discardAllEdits();
                 }
-            });
-            componentActivated();
+                dataObject.getModel().fireAllQueriesChanged();
+                componentActivated();
+            } else {
+                add(dataObject.getProject().generateDbValidatePlaceholder(), BorderLayout.CENTER);
+            }
         } else {
             add(dataObject.getProject().generateDbPlaceholder(), BorderLayout.CENTER);
         }
+        revalidate();
+        repaint();
     }
 
     @Override
@@ -299,6 +315,9 @@ public class PlatypusDbDiagramView extends CloneableTopComponent {
             support.shrink();
             if (clientChangeListener != null) {
                 clientChangeListener.remove();
+            }
+            if (modelValidChangeListener != null) {
+                modelValidChangeListener.remove();
             }
         } catch (Exception ex) {
             ErrorManager.getDefault().notify(ex);

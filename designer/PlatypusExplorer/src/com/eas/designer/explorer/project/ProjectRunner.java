@@ -6,7 +6,6 @@ package com.eas.designer.explorer.project;
 
 import com.eas.designer.application.project.ClientType;
 import com.eas.designer.application.project.AppServerType;
-import com.eas.client.ClientConstants;
 import com.eas.client.application.PlatypusClientApplication;
 import com.eas.deploy.project.PlatypusSettings;
 import com.eas.designer.application.project.PlatypusProject;
@@ -24,7 +23,10 @@ import com.eas.server.PlatypusServer;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Future;
+import java.util.logging.Level;
 import org.netbeans.api.extexecution.ExecutionDescriptor;
 import org.netbeans.api.extexecution.ExecutionService;
 import org.netbeans.api.extexecution.ExternalProcessBuilder;
@@ -49,14 +51,23 @@ public class ProjectRunner {
     private static final String JMX_SSL_OPTION_NAME = "Dcom.sun.management.jmxremote.ssl"; //NOI18N
     private static final String JMX_REMOTE_OPTION_NAME = "Dcom.sun.management.jmxremote"; //NOI18N
     private static final String JMX_REMOTE_OPTION_PORT_NAME = "Dcom.sun.management.jmxremote.port"; //NOI18N
+    private static final String LOG_LEVEL_OPTION_NAME = "D.level"; //NOI18N
+    private static final String LOG_HANDLERS_OPTION_NAME = "Dhandlers"; //NOI18N
+    private static final String CONSOLE_LOG_HANDLER_NAME = "java.util.logging.ConsoleHandler"; //NOI18N
+    private static final String CONSOLE_LOG_HANDLER_LEVEL_OPION_NAME = "Djava.util.logging.ConsoleHandler.level"; //NOI18N
+    private static final String CONSOLE_LOG_FORMATTER_OPTION_NAME = "Djava.util.logging.ConsoleHandler.formatter"; //NOI18N
+    private static final String LOG_CONFIG_CLASS_OPTION_NAME = "Djava.util.logging.config.class"; //NOI18N
+    private static final String JS_APPLICATION_LOG_LEVEL_OPTION_NAME = "DApplication.level"; //NOI18N
     private static final String EQUALS_SIGN = "="; //NOI18N
     private static final String FALSE = "false"; //NOI18N
     private static final String LOCAL_HOSTNAME = "localhost"; //NOI18N
 
     /**
-     * Starts an application in run mode. 
+     * Starts an application in run mode.
+     *
      * @param project Application's project.
-     * @param appElementId Application element's name OR relative path to the executable file.
+     * @param appElementId Application element's name OR relative path to the
+     * executable file.
      * @throws Exception If something goes wrong.
      */
     public static void run(final PlatypusProject project, final String appElementId) throws Exception {
@@ -70,9 +81,11 @@ public class ProjectRunner {
     }
 
     /**
-     * Starts an application in debug mode. 
+     * Starts an application in debug mode.
+     *
      * @param project Application's project.
-     * @param appElementId Application element's name OR relative path to the executable file.
+     * @param appElementId Application element's name OR relative path to the
+     * executable file.
      * @throws Exception If something goes wrong.
      */
     public static void debug(final PlatypusProject project, final String appElementId) throws Exception {
@@ -169,20 +182,23 @@ public class ProjectRunner {
             ExecutionDescriptor descriptor = new ExecutionDescriptor()
                     .frontWindow(true)
                     .controllable(true);
-            ExternalProcessBuilder processBuilder = new ExternalProcessBuilder(JVM_RUN_COMMAND_NAME);
+            List<String> arguments = new ArrayList<>();
             PlatypusSettings ps = pps.getAppSettings();
             if (pps.getRunClientVmOptions() != null && !pps.getRunClientVmOptions().isEmpty()) {
-                processBuilder = addArguments(processBuilder, pps.getRunClientVmOptions());
+                addArguments(arguments, pps.getRunClientVmOptions());
                 io.getOut().println(String.format(NbBundle.getMessage(ProjectRunner.class, "MSG_VM_Run_Options"), pps.getRunClientVmOptions()));//NOI18N
             }
             if (debug) {
-                processBuilder = setDebugArguments(processBuilder, project.getSettings().getDebugClientPort());
+                setDebugArguments(arguments, project.getSettings().getDebugClientPort());
             }
 
-            processBuilder = processBuilder.addArgument(OPTION_PREFIX + CLASSPATH_OPTION_NAME);
-            processBuilder = processBuilder.addArgument(getExtendedClasspath(getExecutablePath(binDir)));
+            io.getOut().println(String.format(NbBundle.getMessage(ProjectRunner.class, "MSG_Logging_Level"), project.getSettings().getClientLogLevel()));//NOI18N
+            setLogging(arguments, project.getSettings().getClientLogLevel());
 
-            processBuilder = processBuilder.addArgument(PlatypusClientApplication.class.getName());
+            arguments.add(OPTION_PREFIX + CLASSPATH_OPTION_NAME);
+            arguments.add(getExtendedClasspath(getExecutablePath(binDir)));
+
+            arguments.add(PlatypusClientApplication.class.getName());
 
             String runElementId = null;
 
@@ -192,27 +208,27 @@ public class ProjectRunner {
                 runElementId = pps.getAppSettings().getRunElement();
             }
             if (runElementId != null && !runElementId.isEmpty()) {
-                processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.APPELEMENT_CMD_SWITCH);
-                processBuilder = processBuilder.addArgument(runElementId);
+                arguments.add(OPTION_PREFIX + PlatypusClientApplication.APPELEMENT_CMD_SWITCH);
+                arguments.add(runElementId);
                 io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Start_App_Element") + runElementId); //NOI18N
             } else {
                 io.getErr().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Start_App_Element_Not_Set")); //NOI18N
                 return null;
             }
             if (!pps.isDbAppSources()) {
-                processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.APP_PATH_CMD_SWITCH1);
-                processBuilder = processBuilder.addArgument(project.getProjectDirectory().getPath());
+                arguments.add(OPTION_PREFIX + PlatypusClientApplication.APP_PATH_CMD_SWITCH1);
+                arguments.add(project.getProjectDirectory().getPath());
                 io.getOut().println(String.format(NbBundle.getMessage(ProjectRunner.class, "MSG_App_Sources"), project.getProjectDirectory().getPath()));//NOI18N
             } else {
                 io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_App_Sources_Database"));//NOI18N
             }
             if (AppServerType.NONE.equals(pps.getRunAppServerType())) {
-                processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.URL_CMD_SWITCH);
-                processBuilder = processBuilder.addArgument(ps.getDbSettings().getUrl());
-                processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.DBUSER_CMD_SWITCH);
-                processBuilder = processBuilder.addArgument(ps.getDbSettings().getInfo().getProperty(ClientConstants.DB_CONNECTION_USER_PROP_NAME));
-                processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.DBPASSWORD_CMD_SWITCH);
-                processBuilder = processBuilder.addArgument(ps.getDbSettings().getInfo().getProperty(ClientConstants.DB_CONNECTION_PASSWORD_PROP_NAME));
+                arguments.add(OPTION_PREFIX + PlatypusClientApplication.URL_CMD_SWITCH);
+                arguments.add(ps.getDbSettings().getUrl());
+                arguments.add(OPTION_PREFIX + PlatypusClientApplication.DBUSER_CMD_SWITCH);
+                arguments.add(ps.getDbSettings().getUser());
+                arguments.add(OPTION_PREFIX + PlatypusClientApplication.DBPASSWORD_CMD_SWITCH);
+                arguments.add(ps.getDbSettings().getPassword());
                 io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Database_Direct"));//NOI18N
             } else {
                 if (pps.isNotStartServer()) {
@@ -221,8 +237,8 @@ public class ProjectRunner {
                     appUrl = getDevPlatypusServerUrl(pps);
                 }
                 if (appUrl != null && !appUrl.isEmpty()) {
-                    processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.URL_CMD_SWITCH);
-                    processBuilder = processBuilder.addArgument(appUrl);
+                    arguments.add(OPTION_PREFIX + PlatypusClientApplication.URL_CMD_SWITCH);
+                    arguments.add(appUrl);
                     io.getOut().println(String.format(NbBundle.getMessage(ProjectRunner.class, "MSG_App_Server_URL"), appUrl));//NOI18N
                 } else {
                     io.getErr().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Cnt_Start_Platypus_Client"));//NOI18N
@@ -230,29 +246,26 @@ public class ProjectRunner {
                 }
             }
             if (project.getSettings().getRunUser() != null && !project.getSettings().getRunUser().trim().isEmpty() && project.getSettings().getRunPassword() != null && !project.getSettings().getRunPassword().trim().isEmpty()) {
-                processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.USER_CMD_SWITCH);
-                processBuilder = processBuilder.addArgument(project.getSettings().getRunUser());
-                processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.PASSWORD_CMD_SWITCH);
-                processBuilder = processBuilder.addArgument(project.getSettings().getRunPassword());
+                arguments.add(OPTION_PREFIX + PlatypusClientApplication.USER_CMD_SWITCH);
+                arguments.add(project.getSettings().getRunUser());
+                arguments.add(OPTION_PREFIX + PlatypusClientApplication.PASSWORD_CMD_SWITCH);
+                arguments.add(project.getSettings().getRunPassword());
                 io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Login_As_User") + project.getSettings().getRunUser());//NOI18N
             }
             if (pps.getRunClientOptions() != null && !pps.getRunClientOptions().isEmpty()) {
-                processBuilder = addArguments(processBuilder, pps.getRunClientOptions());
+                addArguments(arguments, pps.getRunClientOptions());
                 io.getOut().println(String.format(NbBundle.getMessage(ProjectRunner.class, "MSG_Run_Options"), pps.getRunClientOptions()));//NOI18N
             }
-            //set default log level if not set explicitly
-            /* TODO: Take into account, that loglevel and other logging options are configured as system properties
-            if (!isSetByOption(PlatypusClientApplication.LOGLEVEL_CMD_SWITCH, pps.getRunClientOptions())) {
-                processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.LOGLEVEL_CMD_SWITCH);
-                processBuilder = processBuilder.addArgument(pps.getClientLogLevel().getName());
-                io.getOut().println(String.format(NbBundle.getMessage(ProjectRunner.class, "MSG_Logging_Level"), pps.getClientLogLevel().getName()));//NOI18N
-            }
-            */ 
             if (debug) {
-                processBuilder = processBuilder.addArgument(OPTION_PREFIX + PlatypusClientApplication.STOP_BEFORE_RUN_CMD_SWITCH);
+                arguments.add(OPTION_PREFIX + PlatypusClientApplication.STOP_BEFORE_RUN_CMD_SWITCH);
+            }
+            ExternalProcessBuilder processBuilder = new ExternalProcessBuilder(JVM_RUN_COMMAND_NAME);
+            for (String argument : arguments) {
+                processBuilder = processBuilder.addArgument(argument);
             }
             ExecutionService service = ExecutionService.newService(processBuilder, descriptor, getServiceDisplayName(project, debug));
             io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Starting_Platypus_Client"));//NOI18N
+            io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Command_Line") + getCommandLineStr(arguments));//NOI18N
             Future<Integer> clientTask = service.run();
             if (clientTask != null) {
                 io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Platypus_Client_Started"));//NOI18N
@@ -279,32 +292,66 @@ public class ProjectRunner {
         return null;
     }
 
-    public static ExternalProcessBuilder addArguments(ExternalProcessBuilder processBuilder, String argsStr) {
+    public static void addArguments(List<String> arguments, String argsStr) {
         String[] options = argsStr.split(" ");//NOI18N
         if (options.length > 0) {
             for (int i = 0; i < options.length; i++) {
-                processBuilder = processBuilder.addArgument(options[i]);
+                arguments.add(options[i]);
             }
         }
-        return processBuilder;
     }
 
-    public static ExternalProcessBuilder setDebugArguments(ExternalProcessBuilder processBuilder, int port) {
-        processBuilder = processBuilder.addArgument(OPTION_PREFIX
+    public static String getCommandLineStr(List<String> arguments) {
+        StringBuilder sb = new StringBuilder(JVM_RUN_COMMAND_NAME);
+        for (String argument : arguments) {
+            sb.append(" "); //NOI18N
+            sb.append(argument);
+        }
+        return sb.toString();
+    }
+
+    public static void setLogging(List<String> arguments, Level logLevel) {
+        arguments.add(OPTION_PREFIX
+                + LOG_LEVEL_OPTION_NAME
+                + EQUALS_SIGN
+                + Level.SEVERE.getName());
+        arguments.add(OPTION_PREFIX
+                + LOG_HANDLERS_OPTION_NAME
+                + EQUALS_SIGN
+                + CONSOLE_LOG_HANDLER_NAME);
+        arguments.add(OPTION_PREFIX
+                + CONSOLE_LOG_HANDLER_LEVEL_OPION_NAME
+                + EQUALS_SIGN
+                + logLevel.getName());
+        arguments.add(OPTION_PREFIX
+                + JS_APPLICATION_LOG_LEVEL_OPTION_NAME
+                + EQUALS_SIGN
+                + logLevel.getName());
+        arguments.add(OPTION_PREFIX
+                + CONSOLE_LOG_FORMATTER_OPTION_NAME
+                + EQUALS_SIGN
+                + com.eas.util.logging.PlatypusFormatter.class.getName());
+        arguments.add(OPTION_PREFIX
+                + LOG_CONFIG_CLASS_OPTION_NAME
+                + EQUALS_SIGN
+                + com.eas.util.logging.LoggersConfig.class.getName());
+    }
+
+    public static void setDebugArguments(List<String> arguments, int port) {
+        arguments.add(OPTION_PREFIX
                 + JMX_AUTHENTICATE_OPTION_NAME
                 + EQUALS_SIGN
                 + FALSE);
-        processBuilder = processBuilder.addArgument(OPTION_PREFIX
+        arguments.add(OPTION_PREFIX
                 + JMX_SSL_OPTION_NAME
                 + EQUALS_SIGN
                 + FALSE);
-        processBuilder = processBuilder.addArgument(OPTION_PREFIX
+        arguments.add(OPTION_PREFIX
                 + JMX_REMOTE_OPTION_NAME);
-        processBuilder = processBuilder.addArgument(OPTION_PREFIX
+        arguments.add(OPTION_PREFIX
                 + JMX_REMOTE_OPTION_PORT_NAME
                 + EQUALS_SIGN
                 + port);
-        return processBuilder;
     }
 
     public static String getExtendedClasspath(String executablePath) {

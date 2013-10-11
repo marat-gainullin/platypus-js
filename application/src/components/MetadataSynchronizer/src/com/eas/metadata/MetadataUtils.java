@@ -591,14 +591,16 @@ public class MetadataUtils {
 
                 }
                 // for all fields destination
-                for (int i = 1; i <= dFields.getFieldsCount(); i++) {
-                    Field dField = dFields.get(i);
-                    Field sField = sFields.get(srcTblStructure.getOriginalFieldName(dField.getName().toUpperCase()));
-                    // only if not exists in source
-                    if (sField == null) {
-                        sb.append(printCompareField(null, dField, oneDialect));
+                if (dFields != null) {
+                    for (int i = 1; i <= dFields.getFieldsCount(); i++) {
+                        Field dField = dFields.get(i);
+                        Field sField = sFields.get(srcTblStructure.getOriginalFieldName(dField.getName().toUpperCase()));
+                        // only if not exists in source
+                        if (sField == null) {
+                            sb.append(printCompareField(null, dField, oneDialect));
+                        }
                     }
-                }
+                }    
 
                 // each indexes
                 Map<String, DbTableIndexSpec> sIndexes = srcTblStructure.getTableIndexSpecs();
@@ -649,13 +651,15 @@ public class MetadataUtils {
                         sb.append(printCompareFKeys(sFKeys, dFKeys, oneDialect));
                     }
                     // for each fkeysSpec in destination
-                    for (String name : dFKeySpecs.keySet()) {
-                        List<ForeignKeySpec> dFKeys = dFKeySpecs.get(name);
-                        //List<ForeignKeySpec> sFKeys = null;
-                        if (sFKeySpecs == null || sFKeySpecs.get(srcTblStructure.getOriginalFKeyName(name.toUpperCase())) == null) {
-                            sb.append(printCompareFKeys(null, dFKeys, oneDialect));
+                    if (dFKeySpecs != null) {
+                        for (String name : dFKeySpecs.keySet()) {
+                            List<ForeignKeySpec> dFKeys = dFKeySpecs.get(name);
+                            //List<ForeignKeySpec> sFKeys = null;
+                            if (sFKeySpecs.get(srcTblStructure.getOriginalFKeyName(name.toUpperCase())) == null) {
+                                sb.append(printCompareFKeys(null, dFKeys, oneDialect));
+                            }
                         }
-                    }
+                    }    
                 }
             }
 

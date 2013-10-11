@@ -55,8 +55,11 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
 
     public static PlatypusServerCore getInstance(DbConnectionSettings aDbSettings, Set<String> aTasks, String aStartAppElementId) throws Exception {
         if (instance == null) {
-            DatabasesClient serverCoreDbClient = new DatabasesClient(aDbSettings, true);
-            instance = new PlatypusServerCore(serverCoreDbClient, aTasks, aStartAppElementId);
+            final Set<String> tasks = new HashSet<>();
+            if(aTasks != null)
+                tasks.addAll(aTasks);
+            DatabasesClient serverCoreDbClient = new DatabasesClient(aDbSettings, true, new ServerTasksScanner(tasks));
+            instance = new PlatypusServerCore(serverCoreDbClient, tasks, aStartAppElementId);
             serverCoreDbClient.setContextHost(instance);
             serverCoreDbClient.setPrincipalHost(instance);
             ScriptRunner.PlatypusScriptedResource.init(serverCoreDbClient, instance, instance);
@@ -71,7 +74,7 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
                 unRegisterMBean(Settings.SETTINGS_MBEAN_NAME);
                 registerMBean(Settings.SETTINGS_MBEAN_NAME, new Settings(serverCoreDbClient));
             }
-            instance.startBackgroundTasks();
+            instance.startServerTasks();
         }
         return instance;
     }
@@ -93,14 +96,14 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
             //no-op
         }
     }
-    protected String defaultAppElement = null;
+    protected String defaultAppElement;
     protected SessionManager sessionManager;
     protected DatabasesClient databasesClient;
     protected ServerScriptsCache scriptsCache;
     protected ServerCompiledScriptDocuments scriptDocuments;
     protected AppElementsFilter browsersFilter;
     protected final Set<String> tasks;
-    protected final Set<String> extraAuthenticators = new HashSet<>();
+    protected final Set<String> extraAuthorizers = new HashSet<>();
 
     public PlatypusServerCore(DatabasesClient aDatabasesClient, Set<String> aTasks, String aDefaultAppElement) throws Exception {
         databasesClient = aDatabasesClient;
@@ -129,7 +132,7 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
     }
 
     public boolean isUserInApplicationRole(String aUser, String aRole) throws Exception {
-        for (String moduleName : extraAuthenticators) {
+        for (String moduleName : extraAuthorizers) {
             Object result = executeServerModuleMethod(moduleName, "isUserInRole", new Object[]{aUser, aRole});
             if (Boolean.TRUE.equals(result)) {
                 return true;
@@ -156,10 +159,10 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
         return tasks;
     }
 
-    public int startBackgroundTasks() throws Exception {
+    public int startServerTasks() throws Exception {
         int startedTasks = 0;
         for (String moduleId : tasks) {
-            if (startBackgroundTask(moduleId)) {
+            if (startServerTask(moduleId)) {
                 startedTasks++;
             }
         }
@@ -167,13 +170,13 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
     }
 
     /**
-     * Starts a background task, initializing it with supplied module
+     * Starts a server task, initializing it with supplied module
      * annotations.
      *
      * @param aModuleId Module identifier, specifying a module for the task
      * @return Success status
      */
-    public boolean startBackgroundTask(String aModuleId) throws Exception {
+    public boolean startServerTask(String aModuleId) throws Exception {
         ScriptDocument sDoc = scriptDocuments.compileScriptDocument(aModuleId);
         if (sDoc != null) {
             boolean stateless = false;
@@ -183,7 +186,7 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
                         stateless = true;
                         break;
                     case JsDoc.Tag.AUTHORIZER_TAG:
-                        extraAuthenticators.add(aModuleId);
+                        extraAuthorizers.add(aModuleId);
                         break;
                 }
             }
@@ -192,7 +195,7 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
                 try {
                     ServerScriptRunner module = scriptsCache.get(aModuleId);
                     if (module != null) {
-                        BackgroundTask task = new BackgroundTask(systemSession, module);
+                        ServerTask task = new ServerTask(systemSession, module);
                         task.run();
                         return true;
                     } else {
@@ -204,7 +207,7 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
                     return false;
                 }
             } else {
-                Logger.getLogger(PlatypusServerCore.class.getName()).warning(String.format("Module \"%s\" is stateless, skipping it. Hope it will be used as an acceptor for specific protocol.", aModuleId));
+                Logger.getLogger(PlatypusServerCore.class.getName()).warning(String.format("Module \"%s\" is stateless, skipping it. Hope it will be used as an authorizer or as an acceptor.", aModuleId));
                 return false;
             }
         } else {
@@ -281,14 +284,14 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
         return browsersFilter;
     }
 
-    protected class BackgroundTask implements Runnable {
+    protected class ServerTask implements Runnable {
 
-        public static final String STARTING_BACKGROUND_TASK_MSG = "Starting background task \"%s\" with class name \"%s\"";
-        public static final String STARTED_BACKGROUND_TASK_MSG = "Background task \"%s\" with class name \"%s\" started successfully";
+        public static final String STARTING_BACKGROUND_TASK_MSG = "Starting background task \"%s\"";
+        public static final String STARTED_BACKGROUND_TASK_MSG = "Background task \"%s\" started successfully";
         private final Session session;
         private ServerScriptRunner module;
 
-        public BackgroundTask(Session aSession, ServerScriptRunner aModule) {
+        public ServerTask(Session aSession, ServerScriptRunner aModule) {
             super();
             module = aModule;
             session = aSession;
@@ -297,10 +300,10 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
         @Override
         public void run() {
             try {
-                Logger.getLogger(BackgroundTask.class.getName()).info(String.format(STARTING_BACKGROUND_TASK_MSG, module.getApplicationElementId(), module.getClass().getName()));
+                Logger.getLogger(ServerTask.class.getName()).info(String.format(STARTING_BACKGROUND_TASK_MSG, module.getApplicationElementId()));
                 module.execute();
                 session.registerModule(module);
-                Logger.getLogger(BackgroundTask.class.getName()).info(String.format(STARTED_BACKGROUND_TASK_MSG, module.getApplicationElementId(), module.getClass().getName()));
+                Logger.getLogger(ServerTask.class.getName()).info(String.format(STARTED_BACKGROUND_TASK_MSG, module.getApplicationElementId()));
             } catch (Exception ex) {
                 Logger.getLogger(PlatypusServerCore.class.getName()).log(Level.SEVERE, null, ex);
             }

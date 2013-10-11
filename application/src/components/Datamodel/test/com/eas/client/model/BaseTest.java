@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.util.HashSet;
-import java.util.Properties;
 import java.util.Set;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -68,11 +67,9 @@ public class BaseTest {
     public static DbClient initDevelopTestClient() throws Exception {
         DbConnectionSettings settings = new DbConnectionSettings();
         settings.setUrl("jdbc:oracle:thin:@asvr/adb");
-        Properties info = new Properties();
-        info.put("schema", "eas");
-        info.put("user", "eas");
-        info.put("password", "eas");
-        settings.setInfo(info);
+        settings.setSchema("eas");
+        settings.setUser("eas");
+        settings.setPassword("eas");
         settings.setMaxStatements(1);
         return new DatabasesClient(settings);
     }

@@ -56,7 +56,7 @@ import com.sencha.gxt.widget.core.client.event.ShowEvent.ShowHandler;
 import com.sencha.gxt.widget.core.client.form.Field;
 
 public class Form {
-	protected static final Map<String, Form> showingForms = new HashMap();
+	protected static final Map<String, Form> showingForms = new HashMap<String, Form>();
 
 	public static JavaScriptObject getShownForms() {
 		JsArray<JavaScriptObject> jsArray = JsArray.createArray().cast();

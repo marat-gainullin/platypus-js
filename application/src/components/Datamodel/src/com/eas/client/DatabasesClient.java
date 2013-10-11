@@ -23,6 +23,7 @@ import com.bearsoft.rowset.metadata.*;
 import com.eas.client.cache.DatabaseAppCache;
 import com.eas.client.cache.DatabaseMdCache;
 import com.eas.client.cache.FilesAppCache;
+import com.eas.client.cache.FilesAppCache.ScanCallback;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.login.DbPlatypusPrincipal;
 import com.eas.client.login.PlatypusPrincipal;
@@ -79,6 +80,7 @@ public class DatabasesClient implements DbClient {
     // Map<String - session id, Map<String - database id, ...
     protected final Map<String, Map<String, List<Change>>> transacted = new HashMap<>();
     protected Set<TransactionListener> transactionListeners = new HashSet<>();
+    protected Set<QueriesListener> queriesListeners = new HashSet<>();
 
     /**
      * Constructs
@@ -105,6 +107,10 @@ public class DatabasesClient implements DbClient {
      * @see ConnectionPrepender
      */
     public DatabasesClient(DbConnectionSettings aSettings, boolean inContainer) throws Exception {
+        this(aSettings, inContainer, null);
+    }
+
+    public DatabasesClient(DbConnectionSettings aSettings, boolean inContainer, ScanCallback aScanCallback) throws Exception {
         super();
         dbSettings = aSettings;
         if (!inContainer) {
@@ -114,7 +120,7 @@ public class DatabasesClient implements DbClient {
         if (aSettings.getApplicationPath() != null && !aSettings.getApplicationPath().isEmpty()) {
             File f = new File(aSettings.getApplicationPath());
             if (f.exists() && f.isDirectory()) {
-                FilesAppCache filesAppCache = new FilesAppCache(f.getPath() + File.separator + PlatypusFiles.PLATYPUS_PROJECT_SOURCES_ROOT);
+                FilesAppCache filesAppCache = new FilesAppCache(f.getPath() + File.separator + PlatypusFiles.PLATYPUS_PROJECT_SOURCES_ROOT, aScanCallback);
                 filesAppCache.watch();
                 appCache = filesAppCache;
             } else {
@@ -141,6 +147,22 @@ public class DatabasesClient implements DbClient {
                 transactionListeners.remove(aListener);
             }
         };
+    }
+
+    public QueriesListener.Registration addQueriesListener(final QueriesListener aListener) {
+        queriesListeners.add(aListener);
+        return new QueriesListener.Registration() {
+            @Override
+            public void remove() {
+                queriesListeners.remove(aListener);
+            }
+        };
+    }
+
+    protected void fireQueriesCleared() {
+        for (QueriesListener l : queriesListeners.toArray(new QueriesListener[]{})) {
+            l.cleared();
+        }
     }
 
     @Override
@@ -350,10 +372,6 @@ public class DatabasesClient implements DbClient {
         return mdCaches.get(aDbId);
     }
 
-    public String getConnectionProperty(String aDbId, String aPropName) throws Exception {
-        return resourceProvider.getPoolProperty(aDbId, aPropName);
-    }
-
     @Override
     public int commit(String aSessionId) throws Exception {
         synchronized (transacted) {
@@ -505,6 +523,7 @@ public class DatabasesClient implements DbClient {
         appCache.clear();
         queries.clearCache();
         clearDbStatements(null);
+        fireQueriesCleared();
     }
 
     @Override
@@ -515,20 +534,27 @@ public class DatabasesClient implements DbClient {
             if (appElement != null) {
                 if (appElement.getType() == ClientConstants.ET_QUERY) {
                     //queries.clearCache(aEntityId);// Bad solution. There are may be some queries, using this query and so on.
-                    queries.clearCache();// possible overhead, but this is better way than previous.
-                    clearDbStatements(null);
+                    clearQueries(null);// possible overhead, but this is better way than previous.
                 } else if (appElement.getType() == ClientConstants.ET_CONNECTION) {
-                    clearDbStatements(aEntityId);
                     DbMetadataCache dbMdCache = getDbMetadataCache(aEntityId);
                     if (dbMdCache != null) {
                         dbMdCache.clear();
                     }
+                    clearQueries(null);// possible overhead, but this is better way than previous.
                 }
+            } else {
+                clearQueries(null);// possible overhead, but this is better way than previous.
             }
             cache.remove(aEntityId);
         } else {
             clearCaches();
         }
+    }
+
+    protected void clearQueries(String aDbId) throws Exception {
+        clearDbStatements(null);
+        queries.clearCache();
+        fireQueriesCleared();
     }
 
     @Override
@@ -540,8 +566,7 @@ public class DatabasesClient implements DbClient {
         }
         cache.removeTableMetadata(fullTableName);
         cache.removeTableIndexes(fullTableName);
-        clearDbStatements(aDbId);
-        queries.clearCache();
+        clearQueries(aDbId);
     }
 
     /**
@@ -572,14 +597,12 @@ public class DatabasesClient implements DbClient {
 
     @Override
     public String getConnectionSchema(String aDbId) throws Exception {
-        Properties props = resourceProvider.getPoolProperties(aDbId);
-        return props.getProperty(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME);
+        return resourceProvider.getPoolSchema(aDbId);
     }
 
     @Override
     public String getConnectionDialect(String aDbId) throws Exception {
-        Properties props = resourceProvider.getPoolProperties(aDbId);
-        return props.getProperty(ClientConstants.DB_CONNECTION_DIALECT_PROP_NAME);
+        return resourceProvider.getPoolDialect(aDbId);
     }
 
     protected static Set<String> getUserRoles(DbClient aClient, String aUserName) throws Exception {

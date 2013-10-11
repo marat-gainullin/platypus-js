@@ -17,8 +17,8 @@ import com.eas.client.dbstructure.exceptions.DbActionException;
  */
 public class CreateFkEdit extends DbStructureEdit {
 
-    protected ForeignKeySpec fk = null;
-    protected Field fmd = null;
+    protected ForeignKeySpec fk;
+    protected Field fmd;
 
     public CreateFkEdit(SqlActionsController aSqlController, ForeignKeySpec aFk, Field aFmd) {
         super(aSqlController);

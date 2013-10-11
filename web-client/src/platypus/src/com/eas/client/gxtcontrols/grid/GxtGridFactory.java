@@ -98,11 +98,14 @@ public class GxtGridFactory {
 
 		@Override
 		public void run() {
-			JavaScriptObject cellFunction = module.<JsObject>cast().getJs(cellFunctionName);
-			JavaScriptObject selectFunction = module.<JsObject>cast().getJs(selectFunctionName);
-
-			column.setCellFunction(cellFunction);
-			column.setSelectFunction(selectFunction);
+			if (cellFunctionName != null && !cellFunctionName.isEmpty()) {
+				JavaScriptObject cellFunction = module.<JsObject> cast().getJs(cellFunctionName);
+				column.setCellFunction(cellFunction);
+			}
+			if (selectFunctionName != null && !selectFunctionName.isEmpty()) {
+				JavaScriptObject selectFunction = module.<JsObject> cast().getJs(selectFunctionName);
+				column.setSelectFunction(selectFunction);
+			}
 		}
 	}
 
@@ -138,7 +141,7 @@ public class GxtGridFactory {
 	protected List<PlatypusColumnConfig<Row, Double>> nColumns = new ArrayList<PlatypusColumnConfig<Row, Double>>();
 	protected List<PlatypusColumnConfig<Row, Boolean>> bColumns = new ArrayList<PlatypusColumnConfig<Row, Boolean>>();
 	protected List<PlatypusColumnConfig<Row, Object>> oColumns = new ArrayList<PlatypusColumnConfig<Row, Object>>();// lookup
-	                                                                             // columns
+	// columns
 	protected List<ComboLabelProvider> comboLabelProviders = new ArrayList<ComboLabelProvider>();
 	protected List<ModelGridColumn<?>> publishedColumns = new ArrayList<ModelGridColumn<?>>();
 
@@ -286,14 +289,15 @@ public class GxtGridFactory {
 		grid.setColumnReordering(true);
 		grid.setColumnResize(true);
 		grid.getSelectionModel().addSelectionHandler(new RowsetPositionSelectionHandler(rowsSource));
-		//grid.getColumnModel().addColumnWidthChangeHandler(new ResizableCellsColumnResizer<Row, Object>(grid));
+		// grid.getColumnModel().addColumnWidthChangeHandler(new
+		// ResizableCellsColumnResizer<Row, Object>(grid));
 
 		modelGrid = new ModelGrid(grid, editing);
 
 		handlersResolvers.add(new Runnable() {
 			@Override
 			public void run() {
-				modelGrid.setGeneralCellFunction(model.getModule().<JsObject>cast().getJs(generalCellFunctionName));
+				modelGrid.setGeneralCellFunction(model.getModule().<JsObject> cast().getJs(generalCellFunctionName));
 			}
 		});
 		for (ModelGridColumn<?> column : publishedColumns)
@@ -342,7 +346,7 @@ public class GxtGridFactory {
 		int subgroupsCount = 0;
 		List<HeaderGroupConfig> subGroups = new ArrayList<HeaderGroupConfig>();
 		NodeList columnNodes = aTag.getChildNodes();
-		int _currentLeavesCount = 0;
+		Integer _currentLeavesCount = null;
 		for (int c = 0; c < columnNodes.getLength(); c++) {
 			if ("cellDesignInfo".equalsIgnoreCase(columnNodes.item(c).getNodeName()))
 				cellTag = (Element) columnNodes.item(c);
@@ -363,7 +367,7 @@ public class GxtGridFactory {
 			else if ("style".equalsIgnoreCase(columnNodes.item(c).getNodeName()))
 				styleTag = (Element) columnNodes.item(c);
 			else if ("column".equalsIgnoreCase(columnNodes.item(c).getNodeName())) {
-				if (_currentLeavesCount == 0)
+				if (_currentLeavesCount == null)
 					_currentLeavesCount = currentLeavesCount;
 				childrenCount++;
 				HeaderGroupConfig subGroup = processColumn((Element) columnNodes.item(c), deepness + 1);
@@ -374,6 +378,7 @@ public class GxtGridFactory {
 		}
 
 		if (childrenCount > 0) {
+			assert _currentLeavesCount != null;
 			HeaderGroupConfig group = new HeaderGroupConfig((title != null && !title.isEmpty()) ? title : name);
 			groups.add(group);
 			group.setRow(deepness);
@@ -654,7 +659,7 @@ public class GxtGridFactory {
 								ControlsUtils.renderDecorated(lsb, styleToRender, sb);
 								if (cellToRender != null) {
 									bindCallback(context, cellToRender);
-								}								
+								}
 							} catch (Exception ex) {
 								Logger.getLogger(GxtGridFactory.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
 							}

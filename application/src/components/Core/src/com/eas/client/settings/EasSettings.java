@@ -9,7 +9,6 @@
 package com.eas.client.settings;
 
 import com.eas.client.ConnectionSettingsVisitor;
-import java.util.Properties;
 
 /**
  *
@@ -18,21 +17,14 @@ import java.util.Properties;
 public abstract class EasSettings {
 
     public static transient final String EAS_SETTINGS_FILE_NAME = "EasSettings.xml";
-    protected Properties info = new Properties();
     protected String url = "";
     protected String name;
+    protected String user;
+    protected String password;
     protected boolean editable = true;
 
     protected EasSettings() {
         super();
-    }
-
-    public Properties getInfo() {
-        return info;
-    }
-
-    public void setInfo(Properties aValue) {
-        info = aValue;
     }
 
     public String getUrl() {
@@ -53,6 +45,22 @@ public abstract class EasSettings {
 
     public void setName(String aValue) {
         name = aValue;
+    }
+
+    public String getUser() {
+        return user;
+    }
+
+    public void setUser(String user) {
+        this.user = user;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public static EasSettings createInstance(String connectionString) throws Exception {

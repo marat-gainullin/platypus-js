@@ -212,10 +212,10 @@ public class ControlsUtils {
 	 * @return
 	 * @throws Exception
 	 */
-	public static PublishedCell calcStandalonePublishedCell(JavaScriptObject aEventThis, JavaScriptObject cellFunction, Row aRow, String aDisplay, ModelElementRef aModelElement) throws Exception {
+	public static PublishedCell calcStandalonePublishedCell(JavaScriptObject aEventThis, JavaScriptObject cellFunction, Row aRow, String aDisplay, ModelElementRef aModelElement, PublishedCell aAlreadyCell) throws Exception {
 		if (aEventThis != null && aModelElement != null && cellFunction != null) {
 			if (aRow != null) {
-				PublishedCell cell = Publisher.publishCell(Utils.toJs(aRow.getColumnObject(aModelElement.getColIndex())), aDisplay);
+				PublishedCell cell = aAlreadyCell != null ? aAlreadyCell : Publisher.publishCell(Utils.toJs(aRow.getColumnObject(aModelElement.getColIndex())), aDisplay);
 				Object[] rowIds = aRow.getPKValues();
 				if (rowIds != null) {
 					for (int i = 0; i < rowIds.length; i++)
@@ -320,8 +320,12 @@ public class ControlsUtils {
 				aElement.getStyle().setProperty("fontFamily", aFont != null ? aFont.getFamily() : "");
 				if (aFont != null) {
 					aElement.getStyle().setFontSize(aFont.getSize(), Unit.PT);
-					aElement.getStyle().setFontWeight(aFont.isBold() ? FontWeight.BOLD : FontWeight.NORMAL);
-					aElement.getStyle().setFontStyle(aFont.isItalic() ? FontStyle.ITALIC : FontStyle.NORMAL);
+					if(aFont.isBold())
+						aElement.getStyle().setFontWeight(FontWeight.BOLD);
+					//aElement.getStyle().setFontWeight(aFont.isBold() ? FontWeight.BOLD : FontWeight.NORMAL);
+					if(aFont.isItalic())
+						aElement.getStyle().setFontStyle(FontStyle.ITALIC);
+					//aElement.getStyle().setFontStyle(aFont.isItalic() ? FontStyle.ITALIC : FontStyle.NORMAL);
 				} else {
 					aElement.getStyle().clearFontSize();
 					aElement.getStyle().clearFontWeight();

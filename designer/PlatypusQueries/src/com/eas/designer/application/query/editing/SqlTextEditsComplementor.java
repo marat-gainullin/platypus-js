@@ -262,7 +262,6 @@ public class SqlTextEditsComplementor {
                 DeleteFieldEdit<QueryEntity> edit = new DeleteFieldEdit<QueryEntity>(model.getParametersEntity(), param);
                 edits.add(edit);
                 section.addEdit(edit);
-
             }
         }
         paramNames.clear();
@@ -370,16 +369,24 @@ public class SqlTextEditsComplementor {
         StringBuilder sb = new StringBuilder();
         if (left2Right) {
             sb.append(generateSyntaxicId(relation.getLeftEntity()));
-            sb.append(".").append(relation.getLeftField().getName());
+            if (relation.getLeftField() != null) {
+                sb.append(".").append(relation.getLeftField().getName());
+            }
             sb.append(">>>");
             sb.append(generateSyntaxicId(relation.getRightEntity()));
-            sb.append(".").append(relation.getRightField().getName());
+            if (relation.getRightField() != null) {
+                sb.append(".").append(relation.getRightField().getName());
+            }
         } else {
             sb.append(generateSyntaxicId(relation.getRightEntity()));
-            sb.append(".").append(relation.getRightField().getName());
+            if (relation.getRightField() != null) {
+                sb.append(".").append(relation.getRightField().getName());
+            }
             sb.append(">>>");
             sb.append(generateSyntaxicId(relation.getLeftEntity()));
-            sb.append(".").append(relation.getLeftField().getName());
+            if (relation.getLeftField() != null) {
+                sb.append(".").append(relation.getLeftField().getName());
+            }
         }
         return sb.toString();
     }

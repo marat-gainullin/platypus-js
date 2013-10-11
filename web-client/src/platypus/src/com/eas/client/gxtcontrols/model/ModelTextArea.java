@@ -4,13 +4,13 @@ import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.gxtcontrols.converters.StringRowValueConverter;
 import com.eas.client.gxtcontrols.wrappers.component.PlatypusAdapterStandaloneField;
 import com.eas.client.gxtcontrols.wrappers.handled.PlatypusTextHandledArea;
-import com.eas.client.gxtcontrols.wrappers.handled.PlatypusTextAreaHandledInputCell;
+import com.eas.client.gxtcontrols.wrappers.handled.PlatypusTextHandledAreaInputCell;
 import com.google.gwt.core.client.JavaScriptObject;
 
 public class ModelTextArea extends PlatypusAdapterStandaloneField<String> {
 
 	public ModelTextArea() {
-		super(new PlatypusTextHandledArea(new PlatypusTextAreaHandledInputCell()));
+		super(new PlatypusTextHandledArea(new PlatypusTextHandledAreaInputCell()));
 	}
 
 	public void setPublishedField(JavaScriptObject aValue) {
@@ -90,14 +90,14 @@ public class ModelTextArea extends PlatypusAdapterStandaloneField<String> {
 	}
 
 	public JavaScriptObject getOnRender() {
-		assert target.getCell() instanceof PlatypusTextAreaHandledInputCell;
-		PlatypusTextAreaHandledInputCell cell = (PlatypusTextAreaHandledInputCell) target.getCell();
+		assert target.getCell() instanceof PlatypusTextHandledAreaInputCell;
+		PlatypusTextHandledAreaInputCell cell = (PlatypusTextHandledAreaInputCell) target.getCell();
 		return cell.getCellFunction();
 	}
 
 	public void setOnRender(JavaScriptObject aValue) {
-		assert target.getCell() instanceof PlatypusTextAreaHandledInputCell;
-		PlatypusTextAreaHandledInputCell cell = (PlatypusTextAreaHandledInputCell) target.getCell();
+		assert target.getCell() instanceof PlatypusTextHandledAreaInputCell;
+		PlatypusTextHandledAreaInputCell cell = (PlatypusTextHandledAreaInputCell) target.getCell();
 		cell.setCellFunction(aValue);
 	}
 

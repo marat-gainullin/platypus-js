@@ -18,7 +18,7 @@ import java.awt.Point;
  */
 public class ApplicationParametersEntityView extends ApplicationEntityView{
 
-    public ApplicationParametersEntityView(ApplicationDbParametersEntity aEntity, EntityViewsManager<ApplicationDbEntity> aMovesManager) {
+    public ApplicationParametersEntityView(ApplicationDbParametersEntity aEntity, EntityViewsManager<ApplicationDbEntity> aMovesManager) throws Exception {
         super(aEntity, aMovesManager);
     }
 

@@ -5,9 +5,10 @@
 package com.eas.designer.datamodel.nodes;
 
 import java.beans.PropertyChangeEvent;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.event.UndoableEditEvent;
 import org.openide.awt.UndoRedo;
-import org.openide.util.Exceptions;
 
 /**
  *
@@ -27,9 +28,8 @@ public class EntityNodePropertiesUndoRecorder extends NodePropertiesUndoRecorder
                 NodePropertyUndoableEdit edit = new NodePropertyUndoableEdit(this, node.getEntity(), convertNodePropNameToEntityPropName(evt.getPropertyName()), evt.getOldValue(), evt.getNewValue());
                 undoReciever.undoableEditHappened(new UndoableEditEvent(node.getEntity(), edit));
             } catch (Exception ex) {
-                Exceptions.printStackTrace(ex);
+                Logger.getLogger(EntityNodePropertiesUndoRecorder.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
             }
         }
     }
-
 }

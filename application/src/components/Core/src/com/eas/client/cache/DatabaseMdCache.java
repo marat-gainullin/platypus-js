@@ -39,12 +39,12 @@ public class DatabaseMdCache implements DbMetadataCache {
     protected String dbId;
     protected DbClient client;
     // Named tables cache
-    protected TablesFieldsCache tablesFields = null;
+    protected TablesFieldsCache tablesFields;
     // Named tables indexes cache
-    protected IndexesCache tablesIndexes = null;
-    protected String connectionSchema = null;
-    protected SqlDriver connectionDriver = null;
-    protected Rowset dbmsSupportedTypes = null;
+    protected IndexesCache tablesIndexes;
+    protected String connectionSchema;
+    protected SqlDriver connectionDriver;
+    protected Rowset dbmsSupportedTypes;
 
     public DatabaseMdCache(DbClient aClient, String aDbId) throws Exception {
         super();

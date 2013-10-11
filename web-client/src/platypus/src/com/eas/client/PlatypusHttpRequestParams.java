@@ -9,6 +9,7 @@ package com.eas.client;
  * @author kl, mg
  */
 public class PlatypusHttpRequestParams {
+    public static final String CACHE_BUSTER = "__cb";
     public static final String QUERY_ID = "__queryId";
     public static final String TYPE = "__type";
     public static final String ENTITY_ID = "__entityId";

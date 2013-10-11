@@ -32,4 +32,5 @@ public class MainEntryPoint implements EntryPoint {
             Logger.getLogger(MainEntryPoint.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+    
 }

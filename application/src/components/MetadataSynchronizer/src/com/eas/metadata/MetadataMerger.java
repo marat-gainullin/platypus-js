@@ -275,6 +275,7 @@ public class MetadataMerger {
                 }
                 //drop fields
                 if (dFields != null) {
+                    assert dTableStructure != null;
                     // for all fields destination
                     for (int i = 1; i <= dFields.getFieldsCount(); i++) {
                         Field dField = dFields.get(i);
@@ -559,6 +560,7 @@ public class MetadataMerger {
 
                         List<ForeignKeySpec> dFKeySpecs = null;
                         if (dTableFKeySpecs != null) {
+                            assert dTableStructure != null;
                             String initialNameFKey = dTableStructure.getOriginalFKeyName(fKeyNameUpper);
                             if (initialNameFKey != null) {
                                 dFKeySpecs = dTableFKeySpecs.get(initialNameFKey);
@@ -607,6 +609,7 @@ public class MetadataMerger {
                         String fKeyName = sIndex.getFKeyName();
                         if (!sIndex.isPKey() && (fKeyName == null || fKeyName.isEmpty())) {
                             if (dIndexes != null) {
+                                assert dTableStructure != null;
                                 dIndex = dIndexes.get(dTableStructure.getOriginalIndexName(indexNameUpper));
                             }
                             if (dIndex == null || removedIndexes.contains(indexNameUpper)) {
@@ -782,7 +785,7 @@ public class MetadataMerger {
         if (aSql != null && !aSql.isEmpty()) {
             try {
                 SqlCompiledQuery q = new SqlCompiledQuery(client, null, aSql);
-                if (sqlsList != null && aSql != null && !aSql.isEmpty()) {
+                if (sqlsList != null && !aSql.isEmpty()) {
                     sqlsList.add(aSql);
                 }
                 if (!noExecuteSQL) {
