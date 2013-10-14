@@ -57,11 +57,11 @@ public class ModuleCompletionContext extends CompletionContext {
     @Override
     public void applyCompletionItems(JsCompletionProvider.CompletionPoint point, int offset, CompletionResultSet resultSet) throws Exception {
         fillFieldsValues(dataObject.getModel().getParametersEntity().getFields(), point, resultSet);
-        fillEntities(dataObject, resultSet, point);
+        fillEntities(dataObject.getModel().getEntities().values(), resultSet, point);
         addItem(resultSet, point.filter, new BeanCompletionItem(dataObject.getModel().getClass(), MODEL_SCRIPT_NAME, null, point.caretBeginWordOffset, point.caretEndWordOffset));
         addItem(resultSet, point.filter, new BeanCompletionItem(dataObject.getModel().getParametersEntity().getRowset().getClass(), PARAMS_SCRIPT_NAME, null, point.caretBeginWordOffset, point.caretEndWordOffset));
         fillJavaCompletionItems(point, resultSet);
-        fillJsEntities(dataObject, offset, point, resultSet);
+        fillJsEntities(offset, point, resultSet);
     }
 
     @Override
@@ -84,8 +84,8 @@ public class ModuleCompletionContext extends CompletionContext {
         }
         return null;
     }
-
-    protected void fillJsEntities(PlatypusModuleDataObject dataObject, int offset, JsCompletionProvider.CompletionPoint point, CompletionResultSet resultSet) {
+    
+    protected void fillJsEntities(int offset, JsCompletionProvider.CompletionPoint point, CompletionResultSet resultSet) {
         JsCompletonItemsSupport cs = new JsCompletonItemsSupport();
         Collection<JsCompletionItem> items = cs.getCompletionItems(dataObject, "", offset, point);
         for (JsCompletionItem item : items) {
@@ -136,7 +136,6 @@ public class ModuleCompletionContext extends CompletionContext {
             AstRoot tree = astProvider.getAst();
             if (tree != null) {
                 AstNode offsetNode = AstUtlities.getOffsetNode(tree, offset);
-                Logger.getGlobal().info(new Boolean(isInNewExpression(offsetNode, point.filter)).toString());
                 if (isInNewExpression(offsetNode, point.filter)) {
                 } else {
                     if (offsetNode == null) {
