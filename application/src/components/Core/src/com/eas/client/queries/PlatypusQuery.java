@@ -43,6 +43,10 @@ public class PlatypusQuery extends Query<AppClient> {
         //lightMergeFields(rs.getFields(), fields);
         return rs;
     }
+    
+    public Rowset prepareRowset(){
+        return new Rowset(flow);
+    }
 
     @Override
     public void enqueueUpdate() throws Exception {

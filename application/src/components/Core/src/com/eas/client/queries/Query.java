@@ -277,7 +277,7 @@ public abstract class Query<T extends Client> {
     }
 
     public abstract Rowset execute() throws Exception;
-
+    
     public abstract void enqueueUpdate() throws Exception;
     
     /**

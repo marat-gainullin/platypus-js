@@ -177,6 +177,10 @@ public class SqlCompiledQuery {
             */ 
         return rs;
     }
+    
+    public Rowset prepareRowset() throws Exception {
+        return new Rowset(flow);
+    }
 
     /**
      * Executes or enqueue an update to database or platypus server. Enqueueing

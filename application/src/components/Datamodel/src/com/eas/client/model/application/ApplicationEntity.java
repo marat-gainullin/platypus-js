@@ -62,10 +62,10 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
     protected RowsetHostObject<E> sRowsetWrap;
     protected Map<String, ScriptableObject> ormDefinitions = new HashMap<>();
     protected transient List<Integer> filterConstraints = new ArrayList<>();
-    protected transient Rowset rowset = null;
-    protected transient boolean filteredWhileAjusting = false;
-    protected transient Filter rowsetFilter = null;
-    protected transient boolean userFiltering = false;
+    protected transient Rowset rowset;
+    protected transient boolean filteredWhileAjusting;
+    protected transient Filter rowsetFilter;
+    protected transient boolean userFiltering;
     // to preserve relation order
     protected transient List<Relation<E>> rtInFilterRelations;
     protected transient int updatingCounter = 0;
@@ -87,8 +87,9 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
         if (aName != null && !aName.isEmpty() && aDefinition != null) {
             if (!ormDefinitions.containsKey(aName)) {
                 ormDefinitions.put(aName, aDefinition);
-            }else
+            } else {
                 Logger.getLogger(ApplicationEntity.class.getName()).log(Level.WARNING, String.format("ORM property %s redefinition attempt on entity %s %s.", aName, name != null && !name.isEmpty() ? name : "", title != null && !title.isEmpty() ? "[" + title + "]" : ""));
+            }
         }
     }
 
@@ -350,7 +351,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
                         // or we are forced to refresh the data.
                         // requery ...
                         uninstallUserFiltering();
-                        achieveOrRefreshRowset();
+                        refreshRowset();
                         assert rowset != null;
                         // filtering will be done while processing onRequeried event in ApplicationEntity code
                     } else {
@@ -368,6 +369,13 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             executed = true;
         }
         return res;
+    }
+
+    protected void unforwardChangeLog() {
+        if (rowset != null && rowset.getFlowProvider() instanceof DelegatingFlowProvider) {
+            DelegatingFlowProvider dfp = (DelegatingFlowProvider) rowset.getFlowProvider();
+            rowset.setFlowProvider(dfp.getDelegate());
+        }
     }
 
     protected void forwardChangeLog() {
@@ -571,7 +579,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
         rowset = aRowset;
     }
 
-    protected abstract void achieveOrRefreshRowset() throws Exception;
+    protected abstract void refreshRowset() throws Exception;
 
     @Override
     public Fields getFields() {

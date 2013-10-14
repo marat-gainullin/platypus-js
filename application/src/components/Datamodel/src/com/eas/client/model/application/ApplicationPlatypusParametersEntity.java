@@ -159,7 +159,7 @@ public class ApplicationPlatypusParametersEntity extends ApplicationPlatypusEnti
     }
 
     @Override
-    protected void achieveOrRefreshRowset() throws Exception {
+    protected void refreshRowset() throws Exception {
         // no op
     }
 

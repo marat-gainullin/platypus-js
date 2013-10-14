@@ -4,6 +4,7 @@
  */
 package com.eas.client.model.application;
 
+import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
@@ -18,6 +19,8 @@ import java.util.List;
  * @author mg
  */
 public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, SqlQuery, ApplicationDbEntity> {
+
+    protected transient Parameters rowsetParams;
 
     public ApplicationDbEntity() {
         super();
@@ -39,25 +42,13 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
     }
 
     @Override
-    protected void achieveOrRefreshRowset() throws Exception {
+    protected void refreshRowset() throws Exception {
         if (query != null) {
-            SqlCompiledQuery compiledQuery = query.compile();
-            compiledQuery.setSessionId(model.getSessionId());
-            Parameters queryParameters = compiledQuery.getParameters();
-            if (queryParameters != null) {
-                if (rowset == null) {
-                    // The first time we obtain a rowset...
-                    rowset = compiledQuery.executeQuery();
-                    forwardChangeLog();
-                    rowset.addRowsetListener(this);
-                    changeSupport.firePropertyChange("rowset", null, rowset);
-                    rowset.getRowsetChangeSupport().fireRequeriedEvent();
-                } else {
-                    rowset.refresh(queryParameters);
-                }
+            if (rowsetParams != null) {
+                rowset.refresh(rowsetParams);
                 if (query.isProcedure()) {
-                    for (int i = 1; i <= queryParameters.getParametersCount(); i++) {
-                        Parameter param = queryParameters.get(i);
+                    for (int i = 1; i <= rowsetParams.getParametersCount(); i++) {
+                        Parameter param = rowsetParams.get(i);
                         if (param.getMode() == ParameterMetaData.parameterModeOut
                                 || param.getMode() == ParameterMetaData.parameterModeInOut) {
                             Parameter innerParam = query.getParameters().get(param.getName());
@@ -81,6 +72,19 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
             } else {
                 assert false;
             }
+            Rowset oldRowset = rowset;
+            if (rowset != null) {
+                rowset.removeRowsetListener(this);
+                unforwardChangeLog();
+            }
+            // The first time we obtain a rowset...
+            SqlCompiledQuery compiled = query.compile();
+            compiled.setSessionId(model.getSessionId());
+            rowsetParams = compiled.getParameters();
+            rowset = compiled.prepareRowset();
+            forwardChangeLog();
+            rowset.addRowsetListener(this);
+            changeSupport.firePropertyChange("rowset", oldRowset, rowset);
         }
     }
 }

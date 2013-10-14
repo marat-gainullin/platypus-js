@@ -158,7 +158,7 @@ public class ApplicationDbParametersEntity extends ApplicationDbEntity implement
     }
 
     @Override
-    protected void achieveOrRefreshRowset() throws Exception {
+    protected void refreshRowset() throws Exception {
         // no op
     }
 
