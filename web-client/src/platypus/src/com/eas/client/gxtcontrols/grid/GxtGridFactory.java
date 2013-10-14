@@ -9,6 +9,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.bearsoft.rowset.Row;
+import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.events.RowsetListener;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.eas.client.Utils;
@@ -145,7 +146,7 @@ public class GxtGridFactory {
 	protected List<ComboLabelProvider> comboLabelProviders = new ArrayList<ComboLabelProvider>();
 	protected List<ModelGridColumn<?>> publishedColumns = new ArrayList<ModelGridColumn<?>>();
 
-	protected Set<Entity> toEnsureRowset = new HashSet<Entity>();
+	protected Set<Entity> rowsetsOfInterestHosts = new HashSet<Entity>();
 	protected List<Runnable> handlersResolvers = new ArrayList<Runnable>();
 
 	public GxtGridFactory(Element aTag, Model aModel) {
@@ -187,7 +188,7 @@ public class GxtGridFactory {
 		final String generalCellFunctionName = rowsColumnsTag.getAttribute("generalRowFunction");
 		ModelElementRef rowsModelElement = new ModelElementRef(Utils.getElementByTagName(rowsColumnsTag, "rowsDatasource"), model);
 		rowsSource = rowsModelElement.entity;
-		toEnsureRowset.add(rowsSource);
+		rowsetsOfInterestHosts.add(rowsSource);
 
 		Element treeTag = Utils.getElementByTagName(gridTag, "treeDesignInfo");
 		unaryLinkField = new ModelElementRef(Utils.getElementByTagName(treeTag, "unaryLinkField"), model);
@@ -237,9 +238,9 @@ public class GxtGridFactory {
 			if (rowsModelElement.isCorrect()) {
 				RowsTreeStoreFiller filler = null;
 				if (isLazyTreeConfigured()) {
-					filler = new RowsTreeStoreLazyFiller((TreeStore<Row>) store, rowsSource, unaryLinkField.field, (Parameter) param2GetChildren.field, paramSourceField.field, toEnsureRowset);
+					filler = new RowsTreeStoreLazyFiller((TreeStore<Row>) store, rowsSource, unaryLinkField.field, (Parameter) param2GetChildren.field, paramSourceField.field);
 				} else {
-					filler = new RowsTreeStoreFiller((TreeStore<Row>) store, rowsSource, unaryLinkField.field, toEnsureRowset);
+					filler = new RowsTreeStoreFiller((TreeStore<Row>) store, rowsSource, unaryLinkField.field);
 				}
 				((TreeGrid<Row>) grid).setTreeLoader(filler.getLoader());
 			}
@@ -249,7 +250,7 @@ public class GxtGridFactory {
 			store.setAutoCommit(true);
 			grid = new Grid<Row>((ListStore<Row>) store, cm, new PlatypusGridView());
 			if (rowsModelElement.isCorrect()) {
-				RowsListStoreFiller filler = new RowsListStoreFiller((ListStore<Row>) store, rowsSource, toEnsureRowset);
+				RowsListStoreFiller filler = new RowsListStoreFiller((ListStore<Row>) store, rowsSource);
 				grid.setLoader(filler.getLoader());
 			}
 
@@ -302,7 +303,7 @@ public class GxtGridFactory {
 		});
 		for (ModelGridColumn<?> column : publishedColumns)
 			modelGrid.addPublishedColumn(column);
-		for (Entity entity : toEnsureRowset) {
+		for (Entity entity : rowsetsOfInterestHosts) {
 			modelGrid.addUpdatingTriggerEntity(entity);
 		}
 		for (ComboLabelProvider labelProvider : comboLabelProviders) {
@@ -450,7 +451,7 @@ public class GxtGridFactory {
 
 		if (aColModelElement != null && aColModelElement.isCorrect()) {
 			if (aColModelElement.entity != rowsSource)
-				toEnsureRowset.add(aColModelElement.entity);
+				rowsetsOfInterestHosts.add(aColModelElement.entity);
 			SafeHtmlBuilder sb = new SafeHtmlBuilder();
 			sb.appendHtmlConstant((aTitle != null && !aTitle.isEmpty()) ? aTitle : aName);
 			String controlInfoName = aControlTag.getAttribute("classHint");
@@ -739,8 +740,8 @@ public class GxtGridFactory {
 
 					final ModelElementRef valueRef = new ModelElementRef(Utils.getElementByTagName(aControlTag, "valueField"), model);
 					final ModelElementRef displayRef = new ModelElementRef(Utils.getElementByTagName(aControlTag, "displayField"), model);
-					toEnsureRowset.add(valueRef.entity);
-					toEnsureRowset.add(displayRef.entity);
+					rowsetsOfInterestHosts.add(valueRef.entity);
+					rowsetsOfInterestHosts.add(displayRef.entity);
 					final boolean list = Utils.getBooleanAttribute(aControlTag, "list", true);
 					final ComboLabelProvider labelProvider = new ComboLabelProvider();
 					labelProvider.setTargetValueRef(aColModelElement);
@@ -780,8 +781,14 @@ public class GxtGridFactory {
 					});
 					ListStore<Object> cbStore = new ListStore<Object>(new ObjectKeyProvider());
 					ListStorePkFiller filler = new ListStorePkFiller(cbStore);
-					filler.setValuesRowsetHost(valueRef.entity);
-					filler.ensureRowset(displayRef.entity);
+					if(valueRef.entity != null){
+						filler.setValuesRowset(valueRef.entity.getRowset());
+					}
+					if(displayRef.entity != null){
+						Rowset displayRowset = displayRef.entity.getRowset();
+						if(displayRowset != null)
+							displayRowset.addRowsetListener(filler);
+					}
 
 					final PlatypusComboBox cb = new PlatypusComboBox(new ComboBoxCell<Object>(cbStore, labelProvider));
 					cb.setTypeAhead(true);

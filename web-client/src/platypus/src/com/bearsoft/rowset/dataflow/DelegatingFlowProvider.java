@@ -5,6 +5,7 @@ import java.util.List;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.dataflow.TransactionListener.Registration;
+import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.Callback;
 import com.eas.client.Cancellable;
@@ -18,9 +19,18 @@ public class DelegatingFlowProvider implements FlowProvider {
 		delegate = aDelegate;
 	}
 
+	public FlowProvider getDelegate() {
+		return delegate;
+	}
+
 	@Override
 	public String getEntityId() {
 		return delegate.getEntityId();
+	}
+
+	@Override
+	public Fields getExpectedFields() {
+		return delegate.getExpectedFields();
 	}
 
 	@Override

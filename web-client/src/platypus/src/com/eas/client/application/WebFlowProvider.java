@@ -39,6 +39,11 @@ public class WebFlowProvider implements FlowProvider {
 	}
 
 	@Override
+	public Fields getExpectedFields() {
+		return expectedFields;
+	}
+
+	@Override
 	public Cancellable refresh(Parameters aParams, Callback<Rowset> onSuccess, Callback<String> onFailure) throws Exception {
 		return client.pollData(entityId, aParams, expectedFields, onSuccess, onFailure);
 	}
