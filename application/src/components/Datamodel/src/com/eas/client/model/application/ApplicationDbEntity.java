@@ -20,8 +20,6 @@ import java.util.List;
  */
 public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, SqlQuery, ApplicationDbEntity> {
 
-    protected transient Parameters rowsetParams;
-
     public ApplicationDbEntity() {
         super();
     }
@@ -44,6 +42,9 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
     @Override
     protected void refreshRowset() throws Exception {
         if (query != null) {
+            SqlCompiledQuery compiled = query.compile();
+            compiled.setSessionId(model.getSessionId());
+            Parameters rowsetParams = compiled.getParameters();
             if (rowsetParams != null) {
                 rowset.refresh(rowsetParams);
                 if (query.isProcedure()) {
@@ -80,7 +81,6 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
             // The first time we obtain a rowset...
             SqlCompiledQuery compiled = query.compile();
             compiled.setSessionId(model.getSessionId());
-            rowsetParams = compiled.getParameters();
             rowset = compiled.prepareRowset();
             forwardChangeLog();
             rowset.addRowsetListener(this);

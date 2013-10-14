@@ -179,7 +179,9 @@ public class SqlCompiledQuery {
     }
     
     public Rowset prepareRowset() throws Exception {
-        return new Rowset(flow);
+        Rowset rowset = new Rowset(flow);
+        rowset.setFields(expectedFields);
+        return rowset;
     }
 
     /**

@@ -289,15 +289,17 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
     }
 
     public Rowset getRowset() throws Exception {
-        if (rowset == null) {
-            try {
-                execute();
-            } catch (Exception ex) {
-                rowset = null;
-                rowsetFilter = null;
-                throw ex;
-            }
-        }
+        /*
+         if (rowset == null) {
+         try {
+         execute();
+         } catch (Exception ex) {
+         rowset = null;
+         rowsetFilter = null;
+         throw ex;
+         }
+         }
+         */
         return rowset;
     }
 
@@ -346,7 +348,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
                     // so we can't bind query parameters to proper values. In the such case we initialize
                     // parameters values with RowsetUtils.UNDEFINED_SQL_VALUE
                     boolean parametersBinded = bindQueryParameters();
-                    if (rowset == null || parametersBinded || refresh) {
+                    if (parametersBinded || refresh) {
                         // if we have no rowset yet or query parameters values have been changed ...
                         // or we are forced to refresh the data.
                         // requery ...
@@ -621,77 +623,73 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
     }
 
     public boolean bindQueryParameters() throws Exception {
-        Q selfQuery = getQuery();
-        if (selfQuery != null) {
-            Parameters selfParameters = selfQuery.getParameters();
-            // Let's correct javascript evil!!!
-            for (int i = 1; i <= selfParameters.getFieldsCount(); i++) {
-                Parameter p = selfParameters.get(i);
-                boolean oldModified = p.isModified();
-                p.setValue(ScriptUtils.js2Java(p.getValue()));
-                p.setModified(oldModified);
-            }
-            //
-            boolean parametersModified = false;
-            Set<Relation<E>> inRels = getInRelations();
-            if (inRels != null && !inRels.isEmpty()) {
-                for (Relation<E> relation : inRels) {
-                    if (relation != null && relation.isRightParameter()) {
-                        E leftEntity = relation.getLeftEntity();
-                        if (leftEntity != null) {
-                            Object pValue = null;
-                            if (relation.isLeftField()) {
-                                Rowset leftRowset = leftEntity.getRowset();
-                                if (leftRowset != null && !leftRowset.isEmpty() && !leftRowset.isBeforeFirst() && !leftRowset.isAfterLast()) {
-                                    try {
-                                        pValue = leftRowset.getObject(leftRowset.getFields().find(relation.getLeftField().getName()));
-                                    } catch (InvalidColIndexException | InvalidCursorPositionException ex) {
-                                        pValue = RowsetUtils.UNDEFINED_SQL_VALUE;
-                                        Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, "while assigning parameter:" + relation.getRightParameter() + " in entity: " + getTitle() + " [" + String.valueOf(getEntityId()) + "]", ex);
-                                    }
-                                } else {
+        Parameters selfParameters = getQuery().getParameters();
+        // Let's correct javascript evil!!!
+        for (int i = 1; i <= selfParameters.getFieldsCount(); i++) {
+            Parameter p = selfParameters.get(i);
+            boolean oldModified = p.isModified();
+            p.setValue(ScriptUtils.js2Java(p.getValue()));
+            p.setModified(oldModified);
+        }
+        //
+        boolean parametersModified = false;
+        Set<Relation<E>> inRels = getInRelations();
+        if (inRels != null && !inRels.isEmpty()) {
+            for (Relation<E> relation : inRels) {
+                if (relation != null && relation.isRightParameter()) {
+                    E leftEntity = relation.getLeftEntity();
+                    if (leftEntity != null) {
+                        Object pValue = null;
+                        if (relation.isLeftField()) {
+                            Rowset leftRowset = leftEntity.getRowset();
+                            if (leftRowset != null && !leftRowset.isEmpty() && !leftRowset.isBeforeFirst() && !leftRowset.isAfterLast()) {
+                                try {
+                                    pValue = leftRowset.getObject(leftRowset.getFields().find(relation.getLeftField().getName()));
+                                } catch (InvalidColIndexException | InvalidCursorPositionException ex) {
                                     pValue = RowsetUtils.UNDEFINED_SQL_VALUE;
+                                    Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, "while assigning parameter:" + relation.getRightParameter() + " in entity: " + getTitle() + " [" + String.valueOf(getEntityId()) + "]", ex);
                                 }
                             } else {
-                                /*
-                                 Query<?> leftQuery = leftEntity.getQuery();
-                                 assert leftQuery != null : "Left query must present (Relation points to query, but query is absent)";
-                                 Parameters leftParams = leftQuery.getParameters();
-                                 assert leftParams != null : "Parameters of left query must present (Relation points to query parameter, but query parameters are absent)";
-                                 */
-                                Parameter leftParameter = relation.getLeftParameter();
-                                if (leftParameter != null) {
-                                    pValue = leftParameter.getValue();
-                                    if (pValue == null) {
-                                        pValue = leftParameter.getDefaultValue();
-                                    }
-                                } else {
-                                    Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, "Parameter of left query must present (Relation points to query parameter in entity: {0} [{1}], but query parameter is absent)", new Object[]{getTitle(), String.valueOf(getEntityId())});
-                                }
-                            }
-                            Parameter selfPm = relation.getRightParameter();
-                            if (selfPm != null) {
-                                Object selfValue = selfPm.getValue();
-                                if (!SQLUtils.isJdbcEqual(selfValue, pValue)) {
-                                    selfPm.setValue(pValue);
-                                }
+                                pValue = RowsetUtils.UNDEFINED_SQL_VALUE;
                             }
                         } else {
-                            Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, "Relation with no left entity detected");
+                            /*
+                             Query<?> leftQuery = leftEntity.getQuery();
+                             assert leftQuery != null : "Left query must present (Relation points to query, but query is absent)";
+                             Parameters leftParams = leftQuery.getParameters();
+                             assert leftParams != null : "Parameters of left query must present (Relation points to query parameter, but query parameters are absent)";
+                             */
+                            Parameter leftParameter = relation.getLeftParameter();
+                            if (leftParameter != null) {
+                                pValue = leftParameter.getValue();
+                                if (pValue == null) {
+                                    pValue = leftParameter.getDefaultValue();
+                                }
+                            } else {
+                                Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, "Parameter of left query must present (Relation points to query parameter in entity: {0} [{1}], but query parameter is absent)", new Object[]{getTitle(), String.valueOf(getEntityId())});
+                            }
                         }
+                        Parameter selfPm = relation.getRightParameter();
+                        if (selfPm != null) {
+                            Object selfValue = selfPm.getValue();
+                            if (!SQLUtils.isJdbcEqual(selfValue, pValue)) {
+                                selfPm.setValue(pValue);
+                            }
+                        }
+                    } else {
+                        Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, "Relation with no left entity detected");
                     }
                 }
             }
-            for (int i = 1; i <= selfParameters.getFieldsCount(); i++) {
-                Parameter param = (Parameter) selfParameters.get(i);
-                if (param.isModified()) {
-                    parametersModified = true;
-                    param.setModified(false);
-                }
-            }
-            return parametersModified;
         }
-        return false;
+        for (int i = 1; i <= selfParameters.getFieldsCount(); i++) {
+            Parameter param = (Parameter) selfParameters.get(i);
+            if (param.isModified()) {
+                parametersModified = true;
+                param.setModified(false);
+            }
+        }
+        return parametersModified;
     }
 
     protected void validateInFilterRelations() {

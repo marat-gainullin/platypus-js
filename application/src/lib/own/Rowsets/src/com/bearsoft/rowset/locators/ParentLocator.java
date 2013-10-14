@@ -17,8 +17,8 @@ import java.util.Comparator;
  */
 public class ParentLocator extends Locator {
 
-    protected int parentColIndex = 0;
-    protected Locator byPkLocator = null;
+    protected int parentColIndex;
+    protected Locator byPkLocator;
     protected TaggedList<RowWrap> parentless = new TaggedList<>();
 
     /**

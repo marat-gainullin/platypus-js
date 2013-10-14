@@ -6,6 +6,7 @@ package com.eas.client.model.application;
 
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.changes.Change;
+import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.queries.PlatypusQuery;
 import java.util.List;
 
