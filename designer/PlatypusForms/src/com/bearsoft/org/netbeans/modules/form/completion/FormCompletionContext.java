@@ -24,7 +24,6 @@ import com.eas.designer.application.module.completion.JsCompletionProvider;
 import com.eas.designer.application.module.completion.ModuleCompletionContext;
 import java.awt.Container;
 import org.netbeans.spi.editor.completion.CompletionResultSet;
-import org.openide.util.Exceptions;
 
 /**
  *
@@ -39,8 +38,11 @@ public class FormCompletionContext extends ModuleCompletionContext {
     @Override
     public void applyCompletionItems(JsCompletionProvider.CompletionPoint point, int offset, CompletionResultSet resultSet) throws Exception {
         super.applyCompletionItems(point, offset, resultSet);
-        addItem(resultSet, point.filter, new BeanCompletionItem(Container.class, FormRunner.VIEW_SCRIPT_NAME, null, point.caretBeginWordOffset, point.caretEndWordOffset)); //NOI18N
-        fillComponents(point, resultSet);
+        JsCodeCompletionScopeInfo completionScopeInfo = getCompletionScopeInfo(offset, point.filter);
+        if (completionScopeInfo.mode == CompletionMode.VARIABLES_AND_FUNCTIONS) {
+            addItem(resultSet, point.filter, new BeanCompletionItem(Container.class, FormRunner.VIEW_SCRIPT_NAME, null, point.caretBeginWordOffset, point.caretEndWordOffset)); //NOI18N
+            fillComponents(point, resultSet);
+        }
     }
 
     @Override

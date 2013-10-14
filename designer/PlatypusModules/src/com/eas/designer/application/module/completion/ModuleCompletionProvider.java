@@ -27,8 +27,6 @@ public class ModuleCompletionProvider extends JsCompletionProvider {
                     }
                     caretOffset = 0;
                 }
-            } else {
-                fillJsKeywords(point, resultSet);
             }
             completionContext.applyCompletionItems(point, caretOffset, resultSet);
         }

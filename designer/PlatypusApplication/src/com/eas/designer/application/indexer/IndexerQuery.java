@@ -76,7 +76,7 @@ public class IndexerQuery {
      * @param prefix application element prefix
      * @return application elements primary files collection
      */
-    public static Collection<AppElementInfo> filesByAppElementIdPrefix(Project project, String prefix) {
+    public static Collection<AppElementInfo> appElementsByPrefix(Project project, String prefix) {
         if (prefix != null) {
             try {
                 final Collection<FileObject> roots = new ArrayList<>(QuerySupport.findRoots(project, null, Collections.<String>emptyList(), Collections.<String>emptyList()));

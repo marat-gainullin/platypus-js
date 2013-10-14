@@ -6,6 +6,7 @@ package com.eas.designer.application.module.completion;
 
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
+import com.eas.client.model.Entity;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
 import com.eas.client.model.script.ScriptableRowset;
@@ -71,8 +72,8 @@ public class CompletionContext {
         }
     }
     
-    protected void fillEntities(PlatypusModuleDataObject dataObject, CompletionResultSet resultSet, JsCompletionProvider.CompletionPoint point) throws Exception {
-        for (ApplicationDbEntity appEntity : dataObject.getModel().getEntities().values()) {
+    protected void fillEntities(Collection<? extends Entity> entities, CompletionResultSet resultSet, JsCompletionProvider.CompletionPoint point) throws Exception {
+        for (Entity appEntity : entities) {
             if (appEntity.getName() != null && !appEntity.getName().isEmpty()) {
                 addItem(resultSet, point.filter, new BeanCompletionItem(ScriptableRowset.class, appEntity.getName(), null, point.caretBeginWordOffset, point.caretEndWordOffset));
             }
