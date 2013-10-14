@@ -4,14 +4,19 @@
  */
 package com.eas.designer.application.module.completion;
 
+import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.scripts.ScriptRunner;
+import com.eas.designer.application.indexer.AppElementInfo;
 import com.eas.designer.application.indexer.IndexerQuery;
 import com.eas.designer.application.module.PlatypusModuleDataObject;
+import static com.eas.designer.application.module.completion.CompletionContext.MODEL_SCRIPT_NAME;
 import com.eas.designer.application.module.parser.AstUtlities;
 import com.eas.designer.explorer.utils.StringUtils;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,7 +46,7 @@ import org.openide.util.Lookup;
  */
 public class ModuleCompletionContext extends CompletionContext {
 
-        private static final String[] jsKeywords = {
+    private static final String[] JS_KEYWORDS = {
         "break",
         "case",
         "catch",
@@ -92,6 +97,14 @@ public class ModuleCompletionContext extends CompletionContext {
             fillJavaCompletionItems(point, resultSet);
             if (point.context.length == 0) {
                 fillJsKeywords(point, resultSet);
+            }
+        } else if (completionScopeInfo.mode == CompletionMode.CONSTRUCTORS) {
+            addItem(resultSet, point.filter, new ConstructorCompletionItem("Module", "", Arrays.<String>asList(new String[]{"\"\""}), "jsdoc", point.caretBeginWordOffset, point.caretEndWordOffset));
+            addItem(resultSet, point.filter, new ConstructorCompletionItem("ServerModule", "", Arrays.<String>asList(new String[]{"\"\""}), "jsdoc", point.caretBeginWordOffset, point.caretEndWordOffset));
+            for (AppElementInfo appElementInfo : IndexerQuery.appElementsByPrefix(dataObject.getProject(), point.filter != null ? point.filter : "")) { //NOI18N
+                if (PlatypusFiles.JAVASCRIPT_EXTENSION.equals(appElementInfo.primaryFileObject.getExt())) {
+                    addItem(resultSet, point.filter, new ConstructorCompletionItem(appElementInfo.appElementId, "", Collections.<String>emptyList(), "jsdoc", point.caretBeginWordOffset, point.caretEndWordOffset));
+                }
             }
         }
     }
@@ -168,12 +181,12 @@ public class ModuleCompletionContext extends CompletionContext {
                 || name.equals(REPORT_MODULE_NAME);
     }
 
-    protected void fillJsKeywords( JsCompletionProvider.CompletionPoint point, CompletionResultSet resultSet) {
-        for (String keyword : jsKeywords) {
+    protected void fillJsKeywords(JsCompletionProvider.CompletionPoint point, CompletionResultSet resultSet) {
+        for (String keyword : JS_KEYWORDS) {
             addItem(resultSet, point.filter, new JsKeywordCompletionItem(keyword, point.caretBeginWordOffset, point.caretEndWordOffset));
         }
     }
-    
+
     public enum CompletionMode {
 
         VARIABLES_AND_FUNCTIONS, CONSTRUCTORS

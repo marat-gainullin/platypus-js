@@ -45,6 +45,10 @@ public class JsCompletionItem implements CompletionItem {
         endOffset = aEndOffset;
     }
 
+    public ImageIcon getIcon() {
+        return icon;
+    }
+    
     @Override
     public void defaultAction(JTextComponent component) {
         try {
@@ -68,7 +72,7 @@ public class JsCompletionItem implements CompletionItem {
 
     @Override
     public void render(Graphics g, Font defaultFont, Color defaultColor, Color backgroundColor, int width, int height, boolean selected) {
-        CompletionUtilities.renderHtml(icon, text, rightText, g, defaultFont,
+        CompletionUtilities.renderHtml(getIcon(), text, rightText, g, defaultFont,
                 (selected ? Color.white : defaultColor), width, height, selected);
     }
 
