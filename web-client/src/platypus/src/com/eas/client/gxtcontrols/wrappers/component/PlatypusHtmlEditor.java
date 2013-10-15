@@ -93,7 +93,7 @@ public class PlatypusHtmlEditor extends HtmlEditor implements HasAllKeyHandlers 
 		try {// to fix GXT's bug
 			super.onEnable();
 		} catch (Exception ex) {
-			Logger.getLogger(PlatypusHtmlEditor.class.getName()).log(Level.SEVERE, ex.getMessage());
+			Logger.getLogger(PlatypusHtmlEditor.class.getName()).log(Level.SEVERE, "Sencha's bug in HtmlEditor: "+ex.getMessage());
 		}
 	}
 
@@ -102,7 +102,7 @@ public class PlatypusHtmlEditor extends HtmlEditor implements HasAllKeyHandlers 
 		try {// to fix GXT's bug
 			super.onDisable();
 		} catch (Exception ex) {
-			Logger.getLogger(PlatypusHtmlEditor.class.getName()).log(Level.SEVERE, ex.getMessage());
+			Logger.getLogger(PlatypusHtmlEditor.class.getName()).log(Level.SEVERE, "Sencha's bug in HtmlEditor: "+ex.getMessage());
 		}
 	}
 
