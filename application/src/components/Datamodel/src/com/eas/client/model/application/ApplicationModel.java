@@ -486,7 +486,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
             boolean oldValue = runtime;
             runtime = aValue;
             if (!oldValue && runtime) {
-                executeRootEntities(false);
+                executeRootEntities(true);
             }
             PropertyChangeEvent evt = new PropertyChangeEvent(this, "runtime", oldValue, runtime);
             for (PropertyChangeListener l : changeSupport.getPropertyChangeListeners()) {

@@ -3,7 +3,6 @@ package com.eas.client.gxtcontrols.grid.fillers;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -22,8 +21,6 @@ import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.locators.Locator;
 import com.bearsoft.rowset.locators.RowWrap;
 import com.bearsoft.rowset.metadata.Field;
-import com.eas.client.beans.PropertyChangeEvent;
-import com.eas.client.beans.PropertyChangeListener;
 import com.eas.client.model.Entity;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
@@ -34,7 +31,7 @@ import com.sencha.gxt.data.shared.event.StoreUpdateEvent;
 import com.sencha.gxt.data.shared.loader.ChildTreeStoreBinding;
 import com.sencha.gxt.data.shared.loader.TreeLoader;
 
-public class RowsTreeStoreFiller extends RowsetAdapter implements PropertyChangeListener {
+public class RowsTreeStoreFiller extends RowsetAdapter {
 
 	protected class RowsTreeLoader extends TreeLoader<Row> {
 		public RowsTreeLoader(RpcProxy<Row, List<Row>> aProxy) {
@@ -77,20 +74,13 @@ public class RowsTreeStoreFiller extends RowsetAdapter implements PropertyChange
 	protected Locator parentLocator;
 	protected List<Integer> pkColIndicies;
 	protected int parentColIndex;
-	protected int deferred = 0;
 
-	public RowsTreeStoreFiller(TreeStore<Row> aStore, Entity aRowsetHost, Field aParentField, Set<Entity> toEnsure) throws RowsetException {
+	public RowsTreeStoreFiller(TreeStore<Row> aStore, Entity aRowsetHost, Field aParentField) throws RowsetException {
 		super();
 		store = aStore;
 		rowsetHost = aRowsetHost;
 		parentField = aParentField;
-		for (Entity e : toEnsure) {
-			if (e != null && e.getRowset() == null) {
-				e.getChangeSupport().addPropertyChangeListener(this);
-				++deferred;
-			}
-		}
-		if (rowsetHost != null && deferred == 0) {
+		if (rowsetHost != null) {
 			rowset = rowsetHost.getRowset();
 			constructLocator();
 			rowset.addRowsetListener(this);
@@ -141,34 +131,6 @@ public class RowsTreeStoreFiller extends RowsetAdapter implements PropertyChange
 		};
 	}
 
-	@Override
-	public void propertyChange(final PropertyChangeEvent evt) {
-		if ("rowset".equals(evt.getPropertyName()) && evt.getOldValue() == null && evt.getNewValue() != null) {
-			assert evt.getNewValue() instanceof Rowset;
-			assert evt.getSource() instanceof Entity;
-			Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-				@Override
-				public void execute() {
-					((Entity) evt.getSource()).getChangeSupport().removePropertyChangeListener(RowsTreeStoreFiller.this);
-				}
-			});
-			if (--deferred == 0) {
-				rowsetError = null;
-				rowset = rowsetHost.getRowset();
-				constructLocator();
-				rowset.addRowsetListener(this);
-				checkIfRootsLoaded();
-			}
-		} else if ("rowsetError".equals(evt.getPropertyName())) {
-			if (evt.getOldValue() == null && evt.getNewValue() != null) {
-				rowsetError = (String) evt.getNewValue();
-				checkIfRootsWithError();
-				if (rowset == null)
-					loader.load();
-			}
-		}
-	}
-
 	protected void constructLocator() {
 		assert pkLocator == null;
 		pkLocator = rowset.createLocator();
@@ -216,7 +178,7 @@ public class RowsTreeStoreFiller extends RowsetAdapter implements PropertyChange
 	}
 
 	protected void checkIfRootsLoaded() {
-		if (rootsLoadCallback != null && rowset != null && !rowset.isPending() && deferred == 0) {
+		if (rootsLoadCallback != null && rowset != null && !rowset.isPending()) {
 			try {
 				store.clear();
 				List<Row> children = findChildren(null);

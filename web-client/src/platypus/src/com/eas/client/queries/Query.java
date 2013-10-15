@@ -137,6 +137,14 @@ public class Query {
             }
         }, onFailure);
     }
+
+    public Rowset prepareRowset(){
+    	assert flow != null : "Flow provider is expected to be.";
+    	Rowset rowset = new Rowset(flow.getExpectedFields());
+        rowset.setTransacted(true);
+        rowset.setFlowProvider(flow);
+        return rowset;
+    }
     
     public void enqueueUpdate() throws Exception {
         client.enqueueUpdate(appElementId, params);

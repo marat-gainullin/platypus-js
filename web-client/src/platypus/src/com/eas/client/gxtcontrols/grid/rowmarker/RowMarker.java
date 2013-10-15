@@ -3,12 +3,8 @@ package com.eas.client.gxtcontrols.grid.rowmarker;
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.events.RowsetAdapter;
 import com.bearsoft.rowset.events.RowsetScrollEvent;
-import com.eas.client.beans.PropertyChangeEvent;
-import com.eas.client.beans.PropertyChangeListener;
 import com.eas.client.model.Entity;
 import com.google.gwt.cell.client.AbstractCell;
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.sencha.gxt.core.client.IdentityValueProvider;
@@ -51,27 +47,7 @@ public class RowMarker extends ColumnConfig<Row, Row> implements ComponentPlugin
 	public RowMarker(Entity aRowsSource, IdentityValueProvider<Row> valueProvider) {
 		super(valueProvider);
 		rowsSource = aRowsSource;
-		if (rowsSource.getRowset() == null) {
-			rowsSource.getChangeSupport().addPropertyChangeListener(new PropertyChangeListener() {
-				@Override
-				public void propertyChange(PropertyChangeEvent evt) {
-					if ("rowset".equals(evt.getPropertyName()) && evt.getNewValue() != null && evt.getOldValue() == null) {
-						assert rowsSource.getRowset() != null;
-						rowsSource.getRowset().addRowsetListener(handler);
-						final PropertyChangeListener toRemove = this;
-						Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-
-							@Override
-							public void execute() {
-								rowsSource.getChangeSupport().removePropertyChangeListener(toRemove);
-							}
-
-						});
-					}
-				}
-			});
-		} else
-			rowsSource.getRowset().addRowsetListener(handler);
+		rowsSource.getRowset().addRowsetListener(handler);
 
 		setHeader("");
 		setWidth(23);

@@ -27,8 +27,8 @@ public class RowsTreeStoreLazyFiller extends RowsTreeStoreFiller {
 	protected Field paramSource;
 	protected Parameter param2GetChildren;
 
-	public RowsTreeStoreLazyFiller(TreeStore<Row> aStore, Entity aRowsetHost, Field aParentField, Parameter aParam2GetChildren, Field aParamSource, Set<Entity> toEnsure) throws RowsetException {
-		super(aStore, aRowsetHost, aParentField, toEnsure);
+	public RowsTreeStoreLazyFiller(TreeStore<Row> aStore, Entity aRowsetHost, Field aParentField, Parameter aParam2GetChildren, Field aParamSource) throws RowsetException {
+		super(aStore, aRowsetHost, aParentField);
 		param2GetChildren = aParam2GetChildren;
 		paramSource = aParamSource;
 	}

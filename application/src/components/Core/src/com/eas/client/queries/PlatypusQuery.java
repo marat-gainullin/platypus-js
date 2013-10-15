@@ -6,6 +6,7 @@ package com.eas.client.queries;
 
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.dataflow.FlowProvider;
+import com.bearsoft.rowset.exceptions.InvalidFieldsExceptionException;
 import com.eas.client.AppClient;
 import com.eas.client.threetier.PlatypusClient;
 import com.eas.client.threetier.PlatypusThreeTierFlowProvider;
@@ -42,6 +43,12 @@ public class PlatypusQuery extends Query<AppClient> {
         rs.refresh(params);
         //lightMergeFields(rs.getFields(), fields);
         return rs;
+    }
+    
+    public Rowset prepareRowset() throws InvalidFieldsExceptionException{
+        Rowset rowset = new Rowset(flow);
+        rowset.setFields(fields);
+        return rowset;
     }
 
     @Override

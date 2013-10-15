@@ -15,7 +15,6 @@ import com.bearsoft.rowset.events.RowsetRollbackEvent;
 import com.bearsoft.rowset.events.RowsetSaveEvent;
 import com.bearsoft.rowset.events.RowsetScrollEvent;
 import com.bearsoft.rowset.events.RowsetSortEvent;
-import com.eas.client.beans.PropertyChangeEvent;
 import com.eas.client.gxtcontrols.converters.RowValueConverter;
 import com.eas.client.model.Model;
 import com.google.gwt.core.client.Scheduler;
@@ -43,29 +42,19 @@ public class LazyControlBounder<T> extends LazyModelElementRef implements ValueC
 	}
 
 	protected void registerOnRowsetEvents() {
-		if (rowsetPresent) {
-			assert entity.getRowset() != null;
-			entity.getRowset().addRowsetListener(this);
-			rowsetRequeried(null);
-		}
+		assert entity.getRowset() != null;
+		entity.getRowset().addRowsetListener(this);
+		rowsetRequeried(null);
 	}
 
 	public void unregisterFromRowsetEvents() {
-		if (rowsetPresent) {
-			assert entity.getRowset() != null;
-			entity.getRowset().removeRowsetListener(this);
-		}
+		assert entity.getRowset() != null;
+		entity.getRowset().removeRowsetListener(this);
 	}
 
 	@Override
 	protected void tryResolveField() throws Exception {
 		super.tryResolveField();
-		registerOnRowsetEvents();
-	}
-
-	@Override
-	public void propertyChange(PropertyChangeEvent evt) {
-		super.propertyChange(evt);
 		registerOnRowsetEvents();
 	}
 

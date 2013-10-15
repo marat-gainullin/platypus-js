@@ -23,6 +23,10 @@ public class DelegatingFlowProvider implements FlowProvider {
         delegate = aDelegate;
     }
 
+    public FlowProvider getDelegate() {
+        return delegate;
+    }
+
     @Override
     public String getEntityId() {
         return delegate.getEntityId();
