@@ -453,7 +453,12 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         Document outHintsDocument = QueryDocument2XmlDom.transformOutHints(outputFieldsHints, outputFields);
         write2File(outEntry.getFile(), XmlDom2String.transform(outHintsDocument));
         if (getClient() != null) {
-            getClient().appEntityChanged(IndexerQuery.file2AppElementId(getPrimaryFile()));
+            unsignFromQueries();
+            try {
+                getClient().appEntityChanged(IndexerQuery.file2AppElementId(getPrimaryFile()));
+            } finally {
+                signOnQueries();
+            }
         }
     }
 
