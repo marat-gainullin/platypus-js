@@ -78,7 +78,7 @@ public class JsCompletionItem implements CompletionItem {
 
     @Override
     public CompletionTask createDocumentationTask() {
-        if (informationText != null && !informationText.isEmpty()) {
+        if (getInfomationText() != null && !getInfomationText().isEmpty()) {
             return new AsyncCompletionTask(new AsyncCompletionQuery() {
 
                 @Override

@@ -6,6 +6,7 @@ package com.eas.designer.application.indexer;
 
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.cache.PlatypusFilesSupport;
+import com.eas.util.FileUtils;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -29,9 +30,9 @@ public class FileIndexer extends CustomIndexer {
     public static final String INDEXER_NAME = "platypusCustomIndexer"; //NOI18N
     public static final int INDEXER_VERSION = 1;
     public static final String FIELD_NAME = "file-name"; //NOI18N
+    public static final String PUBLIC_FIELD_NAME = "is-public"; //NOI18N
     public static final String FULL_PATH = "full-path"; //NOI18N
     public static final String APP_ELEMENT_NAME = "app-element-name"; //NOI18N
-    public static final String APP_ELEMENT_NAME_ANNOTATION = "@name"; //NOI18N
 
     @Override
     protected void index(Iterable<? extends Indexable> files, Context context) {
@@ -55,11 +56,19 @@ public class FileIndexer extends CustomIndexer {
                     // By default look for application element name in annotation
                     File f = FileUtil.toFile(fo);
                     if (f != null) {
-                        String appElementName = !nameExt.endsWith(PlatypusFiles.CONNECTION_EXTENSION)
-                                ? PlatypusFilesSupport.getAppElementIdByAnnotation(f) : PlatypusFilesSupport.getAppElementIdForConnectionAppElement(f);
+                        String appElementName = null;
+                        boolean isPublic = false;
+                        if (!nameExt.endsWith(PlatypusFiles.CONNECTION_EXTENSION)) {
+                            String fileContent = FileUtils.readString(f, PlatypusFiles.DEFAULT_ENCODING);
+                            appElementName = PlatypusFilesSupport.getAnnotationValue(fileContent, PlatypusFilesSupport.APP_ELEMENT_NAME_ANNOTATION);
+                            isPublic = PlatypusFilesSupport.getAnnotationValue(fileContent, PlatypusFilesSupport.PUBLIC_ANNOTATION) != null;
+                        } else {
+                            appElementName = PlatypusFilesSupport.getAppElementIdForConnectionAppElement(f);
+                        }
                         if (appElementName != null) {
                             d.addPair(APP_ELEMENT_NAME, appElementName, true, true);
                         }
+                        d.addPair(PUBLIC_FIELD_NAME, Boolean.toString(isPublic), true, true);
                         d.addPair(FIELD_NAME, nameExt, true, true);
                         d.addPair(FULL_PATH, fo.getPath(), true, true);
                         is.addDocument(d);

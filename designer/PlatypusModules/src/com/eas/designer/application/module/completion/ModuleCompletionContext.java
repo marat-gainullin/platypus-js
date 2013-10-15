@@ -9,6 +9,7 @@ import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.scripts.ScriptRunner;
 import com.eas.designer.application.indexer.AppElementInfo;
 import com.eas.designer.application.indexer.IndexerQuery;
+import com.eas.designer.application.module.PlatypusModuleDataLoader;
 import com.eas.designer.application.module.PlatypusModuleDataObject;
 import static com.eas.designer.application.module.completion.CompletionContext.MODEL_SCRIPT_NAME;
 import com.eas.designer.application.module.parser.AstUtlities;
@@ -47,33 +48,44 @@ import org.openide.util.Lookup;
 public class ModuleCompletionContext extends CompletionContext {
 
     private static final String[] JS_KEYWORDS = {
-        "break",
-        "case",
-        "catch",
-        "continue",
-        "debugger",
-        "default",
-        "delete",
-        "do",
-        "else",
-        "finally",
-        "for",
-        "function",
-        "if",
-        "in",
-        "instanceof",
-        "new",
-        "return",
-        "switch",
-        "this",
-        "throw",
-        "try",
-        "typeof",
-        "var",
-        "void",
-        "while",
-        "with"
+        "break",//NOI18N
+        "case",//NOI18N
+        "catch",//NOI18N
+        "continue",//NOI18N
+        "debugger",//NOI18N
+        "default",//NOI18N
+        "delete",//NOI18N
+        "do",//NOI18N
+        "else",//NOI18N
+        "finally",//NOI18N
+        "for",//NOI18N
+        "function",//NOI18N
+        "if",//NOI18N
+        "in",//NOI18N
+        "instanceof",//NOI18N
+        "new",//NOI18N
+        "return",//NOI18N
+        "switch",//NOI18N
+        "this",//NOI18N
+        "throw",//NOI18N
+        "try",//NOI18N
+        "typeof",//NOI18N
+        "var",//NOI18N
+        "void",//NOI18N
+        "while",//NOI18N
+        "with"//NOI18N
     };
+    private static final String DOUBLE_QUOTES = "\"\"";//NOI18N
+    private static final String MODULE_CONSTRUCTOR_NAME = "Module";//NOI18N
+    private static final String SERVER_MODULE_CONSTRUCTOR_NAME = "ServerModule";//NOI18N
+    private static final String MODULE_CONSTRUCTOR_JSDOC = "/**\n"
+            + "* Creates new Platypus application element instance.\n"//NOI18N
+            + "* @param appElementName Application element name\n"//NOI18N
+            + "*/";//NOI18N
+    private static final String SERVER_MODULE_CONSTRUCTOR_JSDOC = "/**\n"
+            + "* Creates new proxy to a Platypus application element instance on the server.\n"//NOI18N
+            + "* @param appElementName Server application element name\n"//NOI18N
+            + "*/";//NOI18N
     protected PlatypusModuleDataObject dataObject;
 
     public ModuleCompletionContext(PlatypusModuleDataObject aDataObject, Class<? extends ScriptRunner> aClass) {
@@ -90,21 +102,34 @@ public class ModuleCompletionContext extends CompletionContext {
         JsCodeCompletionScopeInfo completionScopeInfo = getCompletionScopeInfo(offset, point.filter);
         fillJsEntities(completionScopeInfo, point, resultSet);
         if (completionScopeInfo.mode == CompletionMode.VARIABLES_AND_FUNCTIONS) {
-            fillFieldsValues(dataObject.getModel().getParametersEntity().getFields(), point, resultSet);
-            fillEntities(dataObject.getModel().getEntities().values(), resultSet, point);
-            addItem(resultSet, point.filter, new BeanCompletionItem(dataObject.getModel().getClass(), MODEL_SCRIPT_NAME, null, point.caretBeginWordOffset, point.caretEndWordOffset));
-            addItem(resultSet, point.filter, new BeanCompletionItem(dataObject.getModel().getParametersEntity().getRowset().getClass(), PARAMS_SCRIPT_NAME, null, point.caretBeginWordOffset, point.caretEndWordOffset));
-            fillJavaCompletionItems(point, resultSet);
-            if (point.context.length == 0) {
-                fillJsKeywords(point, resultSet);
-            }
+            fillVariablesAndFunctions(point, resultSet);
         } else if (completionScopeInfo.mode == CompletionMode.CONSTRUCTORS) {
-            addItem(resultSet, point.filter, new ConstructorCompletionItem("Module", "", Arrays.<String>asList(new String[]{"\"\""}), "jsdoc", point.caretBeginWordOffset, point.caretEndWordOffset));
-            addItem(resultSet, point.filter, new ConstructorCompletionItem("ServerModule", "", Arrays.<String>asList(new String[]{"\"\""}), "jsdoc", point.caretBeginWordOffset, point.caretEndWordOffset));
-            for (AppElementInfo appElementInfo : IndexerQuery.appElementsByPrefix(dataObject.getProject(), point.filter != null ? point.filter : "")) { //NOI18N
-                if (PlatypusFiles.JAVASCRIPT_EXTENSION.equals(appElementInfo.primaryFileObject.getExt())) {
-                    addItem(resultSet, point.filter, new ConstructorCompletionItem(appElementInfo.appElementId, "", Collections.<String>emptyList(), "jsdoc", point.caretBeginWordOffset, point.caretEndWordOffset));
-                }
+            fillSystemConstructors(point, resultSet);
+            fillApplicatonElementsConstructors(IndexerQuery.appElementsByPrefix(dataObject.getProject(), point.filter != null ? point.filter : ""), point, resultSet);//NOI18N
+        }
+    }
+
+    protected void fillVariablesAndFunctions(JsCompletionProvider.CompletionPoint point, CompletionResultSet resultSet) throws Exception {
+        fillFieldsValues(dataObject.getModel().getParametersEntity().getFields(), point, resultSet);
+        fillEntities(dataObject.getModel().getEntities().values(), resultSet, point);
+        addItem(resultSet, point.filter, new BeanCompletionItem(dataObject.getModel().getClass(), MODEL_SCRIPT_NAME, null, point.caretBeginWordOffset, point.caretEndWordOffset));
+        addItem(resultSet, point.filter, new BeanCompletionItem(dataObject.getModel().getParametersEntity().getRowset().getClass(), PARAMS_SCRIPT_NAME, null, point.caretBeginWordOffset, point.caretEndWordOffset));
+        fillJavaCompletionItems(point, resultSet);
+        if (point.context.length == 0) {
+            fillJsKeywords(point, resultSet);
+        }
+    }
+
+    protected void fillSystemConstructors(JsCompletionProvider.CompletionPoint point, CompletionResultSet resultSet) {
+        addItem(resultSet, point.filter, new SystemConstructorCompletionItem(MODULE_CONSTRUCTOR_NAME, "", Arrays.<String>asList(new String[]{DOUBLE_QUOTES}), MODULE_CONSTRUCTOR_JSDOC, point.caretBeginWordOffset, point.caretEndWordOffset));
+        addItem(resultSet, point.filter, new SystemConstructorCompletionItem(SERVER_MODULE_CONSTRUCTOR_NAME, "", Arrays.<String>asList(new String[]{DOUBLE_QUOTES}), SERVER_MODULE_CONSTRUCTOR_JSDOC, point.caretBeginWordOffset, point.caretEndWordOffset));
+    }
+
+    protected void fillApplicatonElementsConstructors(Collection<AppElementInfo> appElements, JsCompletionProvider.CompletionPoint point, CompletionResultSet resultSet) {
+        for (AppElementInfo appElementInfo : appElements) {
+            if (PlatypusFiles.JAVASCRIPT_EXTENSION.equals(appElementInfo.primaryFileObject.getExt()) 
+                    && appElementInfo.primaryFileObject.equals(PlatypusModuleDataLoader.findPrimaryFileImpl(appElementInfo.primaryFileObject))) {
+                addItem(resultSet, point.filter, new AppElementConstructorCompletionItem(appElementInfo.appElementId, "", Collections.<String>emptyList(), appElementInfo.primaryFileObject, point.caretBeginWordOffset, point.caretEndWordOffset));
             }
         }
     }
