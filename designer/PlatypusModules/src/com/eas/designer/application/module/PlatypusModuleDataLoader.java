@@ -47,6 +47,10 @@ public class PlatypusModuleDataLoader extends MultiFileLoader {
      */
     @Override
     protected FileObject findPrimaryFile(FileObject fo) {
+        return findPrimaryFileImpl(fo); 
+    }
+
+    public static FileObject findPrimaryFileImpl(FileObject fo) {
         // never recognize folders.
         if (!fo.isFolder()
                 && FileUtil.findBrother(fo, PlatypusFiles.FORM_EXTENSION) == null
@@ -61,7 +65,7 @@ public class PlatypusModuleDataLoader extends MultiFileLoader {
         }
         return null;
     }
-
+    
     /**
      * Creates the right data object for given primary file. It is guaranteed
      * that the provided file is realy primary file returned from the method

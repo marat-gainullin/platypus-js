@@ -81,10 +81,14 @@ public class IndexerQuery {
             try {
                 final Collection<FileObject> roots = new ArrayList<>(QuerySupport.findRoots(project, null, Collections.<String>emptyList(), Collections.<String>emptyList()));
                 QuerySupport q = QuerySupport.forRoots(FileIndexer.INDEXER_NAME, FileIndexer.INDEXER_VERSION, roots.toArray(new FileObject[roots.size()]));
-                Collection<? extends IndexResult> queryResults = q.query(FileIndexer.APP_ELEMENT_NAME, prefix, QuerySupport.Kind.CASE_INSENSITIVE_PREFIX);
+                //Hack! I could not make case insensitive prefix query work, at this moment I've decided to retrieve all elements to filter them later
+                Collection<? extends IndexResult> queryResults = q.query(FileIndexer.APP_ELEMENT_NAME, "", QuerySupport.Kind.CASE_INSENSITIVE_PREFIX);//NOI18N
                 List<AppElementInfo> results = new ArrayList<>();
                 for (IndexResult queryResult : queryResults) {
-                    results.add(new AppElementInfo(queryResult.getValue(FileIndexer.APP_ELEMENT_NAME), queryResult.getFile()));
+                    String appElementName = queryResult.getValue(FileIndexer.APP_ELEMENT_NAME);
+                    if (appElementName != null && appElementName.toLowerCase().startsWith(prefix.toLowerCase())) {
+                        results.add(new AppElementInfo(appElementName, queryResult.getFile()));
+                    }
                 }
                 return results;
             } catch (IOException ex) {
