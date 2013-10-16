@@ -73,18 +73,21 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
             } else {
                 assert false;
             }
-            Rowset oldRowset = rowset;
-            if (rowset != null) {
-                rowset.removeRowsetListener(this);
-                unforwardChangeLog();
-            }
-            // The first time we obtain a rowset...
-            SqlCompiledQuery compiled = query.compile();
-            compiled.setSessionId(model.getSessionId());
-            rowset = compiled.prepareRowset();
-            forwardChangeLog();
-            rowset.addRowsetListener(this);
-            changeSupport.firePropertyChange("rowset", oldRowset, rowset);
+            prepareRowsetByQuery();
         }
+    }
+
+    public void prepareRowsetByQuery() throws Exception {
+        Rowset oldRowset = rowset;
+        if (rowset != null) {
+            rowset.removeRowsetListener(this);
+            unforwardChangeLog();
+        }
+        SqlCompiledQuery compiled = query.compile();
+        compiled.setSessionId(model.getSessionId());
+        rowset = compiled.prepareRowset();
+        forwardChangeLog();
+        rowset.addRowsetListener(this);
+        changeSupport.firePropertyChange("rowset", oldRowset, rowset);
     }
 }
