@@ -49,6 +49,10 @@ public class PlatypusReportDataLoader extends MultiFileLoader {
      */
     @Override
     protected FileObject findPrimaryFile(FileObject fo) {
+        return findPrimaryFileImpl(fo);
+    }
+
+    public static FileObject findPrimaryFileImpl(FileObject fo) {
         // never recognize folders.
         if (!fo.isFolder()) {
             String ext = fo.getExt();

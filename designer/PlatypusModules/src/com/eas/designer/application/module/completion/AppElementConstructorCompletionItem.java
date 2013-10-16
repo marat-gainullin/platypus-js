@@ -22,7 +22,7 @@ import org.openide.filesystems.FileUtil;
  */
 public class AppElementConstructorCompletionItem extends JsFunctionCompletionItem {
 
-    protected static final ImageIcon CONSTRUCTOR_ICON = new ImageIcon(PlatypusModuleDataObject.class.getResource("module.png")); //NOI18N
+    private static final ImageIcon CONSTRUCTOR_ICON = new ImageIcon(PlatypusModuleDataObject.class.getResource("module.png")); //NOI18N
     private FileObject fileObject;
     private static final int SORT_PRIORITY = 10;
 

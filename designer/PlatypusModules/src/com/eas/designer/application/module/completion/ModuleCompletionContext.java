@@ -75,17 +75,6 @@ public class ModuleCompletionContext extends CompletionContext {
         "while",//NOI18N
         "with"//NOI18N
     };
-    private static final String DOUBLE_QUOTES = "\"\"";//NOI18N
-    private static final String MODULE_CONSTRUCTOR_NAME = "Module";//NOI18N
-    private static final String SERVER_MODULE_CONSTRUCTOR_NAME = "ServerModule";//NOI18N
-    private static final String MODULE_CONSTRUCTOR_JSDOC = "/**\n"
-            + "* Creates new Platypus application element instance.\n"//NOI18N
-            + "* @param appElementName Application element name\n"//NOI18N
-            + "*/";//NOI18N
-    private static final String SERVER_MODULE_CONSTRUCTOR_JSDOC = "/**\n"
-            + "* Creates new proxy to a Platypus application element instance on the server.\n"//NOI18N
-            + "* @param appElementName Server application element name\n"//NOI18N
-            + "*/";//NOI18N
     protected PlatypusModuleDataObject dataObject;
 
     public ModuleCompletionContext(PlatypusModuleDataObject aDataObject, Class<? extends ScriptRunner> aClass) {
@@ -121,15 +110,23 @@ public class ModuleCompletionContext extends CompletionContext {
     }
 
     protected void fillSystemConstructors(JsCompletionProvider.CompletionPoint point, CompletionResultSet resultSet) {
-        addItem(resultSet, point.filter, new SystemConstructorCompletionItem(MODULE_CONSTRUCTOR_NAME, "", Arrays.<String>asList(new String[]{DOUBLE_QUOTES}), MODULE_CONSTRUCTOR_JSDOC, point.caretBeginWordOffset, point.caretEndWordOffset));
-        addItem(resultSet, point.filter, new SystemConstructorCompletionItem(SERVER_MODULE_CONSTRUCTOR_NAME, "", Arrays.<String>asList(new String[]{DOUBLE_QUOTES}), SERVER_MODULE_CONSTRUCTOR_JSDOC, point.caretBeginWordOffset, point.caretEndWordOffset));
+        for (CompletionSupportService scp : Lookup.getDefault().lookupAll(CompletionSupportService.class)) {
+            Collection<SystemConstructorCompletionItem> items = scp.getSystemConstructors(point);
+            if (items != null) {
+                for (SystemConstructorCompletionItem item : items) {
+                    addItem(resultSet, point.filter, item);
+                }
+            }
+        }
     }
 
     protected void fillApplicatonElementsConstructors(Collection<AppElementInfo> appElements, JsCompletionProvider.CompletionPoint point, CompletionResultSet resultSet) {
-        for (AppElementInfo appElementInfo : appElements) {
-            if (PlatypusFiles.JAVASCRIPT_EXTENSION.equals(appElementInfo.primaryFileObject.getExt()) 
-                    && appElementInfo.primaryFileObject.equals(PlatypusModuleDataLoader.findPrimaryFileImpl(appElementInfo.primaryFileObject))) {
-                addItem(resultSet, point.filter, new AppElementConstructorCompletionItem(appElementInfo.appElementId, "", Collections.<String>emptyList(), appElementInfo.primaryFileObject, point.caretBeginWordOffset, point.caretEndWordOffset));
+        for (CompletionSupportService scp : Lookup.getDefault().lookupAll(CompletionSupportService.class)) {
+            Collection<AppElementConstructorCompletionItem> items = scp.getAppElementsConstructors(appElements, point);
+            if (items != null) {
+                for (AppElementConstructorCompletionItem item : items) {
+                    addItem(resultSet, point.filter, item);
+                }
             }
         }
     }
@@ -343,7 +340,7 @@ public class ModuleCompletionContext extends CompletionContext {
                                                 return false;
                                             }
                                             //checks for Platypus API classes
-                                            for (ScriptClassProvider scp : Lookup.getDefault().lookupAll(ScriptClassProvider.class)) {
+                                            for (CompletionSupportService scp : Lookup.getDefault().lookupAll(CompletionSupportService.class)) {
                                                 Class clazz = scp.getClassByName(ne.getTarget().getString());
                                                 if (clazz != null) {
                                                     ctx = new CompletionContext(clazz);
