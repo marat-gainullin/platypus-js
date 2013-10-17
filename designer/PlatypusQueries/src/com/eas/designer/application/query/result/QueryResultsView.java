@@ -189,8 +189,7 @@ public class QueryResultsView extends javax.swing.JPanel {
         SqlQuery query = new SqlQuery(client, queryText);
         query.setDbId(dbId);
         query.setEntityId(entityId);
-        query.setPageSize(pageSize);
-        query.setEntityId(entityId);
+        query.setPageSize(pageSize);        
         try {
             StoredQueryFactory factory = new StoredQueryFactory(client, false);
             factory.putTableFieldsMetadata(query);
@@ -204,6 +203,7 @@ public class QueryResultsView extends javax.swing.JPanel {
             query.getParameters().add(p.copy());
         }
         queryEntity.setQuery(query);
+        queryEntity.prepareRowsetByQuery();
         model.addEntity(queryEntity);
     }
 
