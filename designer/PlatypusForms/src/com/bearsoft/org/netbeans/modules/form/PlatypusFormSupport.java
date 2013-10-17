@@ -101,7 +101,7 @@ public class PlatypusFormSupport extends PlatypusModuleSupport implements Editor
     /**
      * Icon for the form editor multiview window
      */
-    private static final String iconURL =
+    public static final String iconURL =
             "com/bearsoft/org/netbeans/modules/form/resources/form.gif"; // NOI18N
     private UndoRedo.Manager editorUndoManager;
     private FormEditor formEditor;

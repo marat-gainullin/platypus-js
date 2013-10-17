@@ -31,7 +31,7 @@ public class PasswordField extends Component<JPasswordField>{
         this((String)null);
     }
     
-    @ScriptFunction(jsDocText="The text contained in this component.")
+    @ScriptFunction(jsDoc="The text contained in this component.")
     public String getText()
     {
         return new String(delegate.getPassword());

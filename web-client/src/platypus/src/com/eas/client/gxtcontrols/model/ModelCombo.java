@@ -19,7 +19,9 @@ public class ModelCombo extends PlatypusAdapterStandaloneField<Object> {
 
 		@Override
 		public void run() {
-			getTarget().redraw();
+			PlatypusComboBoxHandledField target = getTarget();
+			if(target.isAttached())
+				target.redraw();
 		}
 
 	});

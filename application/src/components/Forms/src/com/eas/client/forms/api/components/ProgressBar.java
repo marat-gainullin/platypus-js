@@ -30,7 +30,7 @@ public class ProgressBar extends Component<JProgressBar> {
         this(0, 0);
     }
     
-    @ScriptFunction(jsDocText="The progress bar's minimum value.")
+    @ScriptFunction(jsDoc="The progress bar's minimum value.")
     public int getMinimum()
     {
         return delegate.getMinimum();
@@ -42,7 +42,7 @@ public class ProgressBar extends Component<JProgressBar> {
         delegate.setMinimum(aValue);
     }
     
-    @ScriptFunction(jsDocText="The progress bar's maximum value.")
+    @ScriptFunction(jsDoc="The progress bar's maximum value.")
     public int getMaximum()
     {
         return delegate.getMaximum();
@@ -54,7 +54,7 @@ public class ProgressBar extends Component<JProgressBar> {
         delegate.setMaximum(aValue);
     }
     
-    @ScriptFunction(jsDocText="The current value of the progress bar.")
+    @ScriptFunction(jsDoc="The current value of the progress bar.")
     public int getValue()
     {
         return delegate.getValue();
@@ -66,7 +66,7 @@ public class ProgressBar extends Component<JProgressBar> {
         delegate.setValue(aValue);
     }
     
-    @ScriptFunction(jsDocText="String representation of the current progress.")
+    @ScriptFunction(jsDoc="String representation of the current progress.")
     public String getText()
     {
         return delegate.getString();

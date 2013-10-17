@@ -4,6 +4,7 @@
  */
 package com.eas.client.model.application;
 
+import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
@@ -46,13 +47,19 @@ public class ApplicationPlatypusParametersEntity extends ApplicationPlatypusEnti
     }
 
     @Override
+    public Rowset getRowset() throws Exception {
+        execute();
+        return super.getRowset();
+    }
+
+    @Override
     public Fields getFields() {
         return model.getParameters();
     }
 
     @Override
     public void validateQuery() throws Exception {
-        // no op for parameters entity
+        execute();
     }
 
     @Override
@@ -159,7 +166,7 @@ public class ApplicationPlatypusParametersEntity extends ApplicationPlatypusEnti
     }
 
     @Override
-    protected void achieveOrRefreshRowset() throws Exception {
+    protected void refreshRowset() throws Exception {
         // no op
     }
 

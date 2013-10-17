@@ -110,7 +110,7 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
         }
     }
 
-    @ScriptFunction(jsDocText = "Saves model data changes. Calls aCallback when done."
+    @ScriptFunction(jsDoc = "Saves model data changes. Calls aCallback when done."
     + "If model can't apply the changed, than exception is thrown. "
     + "In this case, application can call model.save() another time to save the changes. "
     + "If an application need to abort futher attempts and discard model data changes, "
@@ -152,12 +152,12 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
     public void rolledback() throws Exception {
     }
 
-    @ScriptFunction(jsDocText = "Requeries model data with callback.")
+    @ScriptFunction(jsDoc = "Requeries model data with callback.")
     public void requery(Function aOnSuccess) throws Exception {
         requery(aOnSuccess, null);
     }
     
-    @ScriptFunction(jsDocText = "Requeries model data with callback.")
+    @ScriptFunction(jsDoc = "Requeries model data with callback.")
     @Override
     public void requery(Function aOnSuccess, Function aOnFailure) throws Exception {
         for (List<Change> changeLog : changeLogs.values()) {
@@ -175,12 +175,12 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
         return changeLog;
     }
 
-    @ScriptFunction(jsDocText = "Creates new entity of model, based on passed sql query. This method works only in two tier components of a system.")
+    @ScriptFunction(jsDoc = "Creates new entity of model, based on passed sql query. This method works only in two tier components of a system.")
     public synchronized Scriptable createEntity(String aSqlText) throws Exception {
         return createEntity(aSqlText, null);
     }
 
-    @ScriptFunction(jsDocText = "Creates new entity of model, based on passed datasource name and sql query. This method works only in two tier components of a system.")
+    @ScriptFunction(jsDoc = "Creates new entity of model, based on passed datasource name and sql query. This method works only in two tier components of a system.")
     public synchronized Scriptable createEntity(String aSqlText, String aDbId) throws Exception {
         if (client == null) {
             throw new NullPointerException("Null client detected while creating a query");
@@ -195,12 +195,12 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
         return modelEntity.defineProperties();// .md collection will be empty if query is not a select
     }
 
-    @ScriptFunction(jsDocText = "Executed sql query. This method works only in two tier components of a system.")
+    @ScriptFunction(jsDoc = "Executed sql query. This method works only in two tier components of a system.")
     public void executeSql(String aSql) throws Exception {
         executeSql(aSql, null);
     }
 
-    @ScriptFunction(jsDocText = "Executed sql query against specific datasource. This method works only in two tier components of a system.")
+    @ScriptFunction(jsDoc = "Executed sql query against specific datasource. This method works only in two tier components of a system.")
     public void executeSql(String aSqlClause, String aDbId) throws Exception {
         if (client == null) {
             throw new NullPointerException("Null client detected while creating a query");

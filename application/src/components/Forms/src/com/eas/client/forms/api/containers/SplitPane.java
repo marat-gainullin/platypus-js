@@ -36,7 +36,7 @@ public class SplitPane extends Container<JSplitPane> {
         }
     }
 
-    @ScriptFunction(jsDocText = "The orientation of the container.")
+    @ScriptFunction(jsDoc = "The orientation of the container.")
     public int getOrientation() {
         if (delegate.getOrientation() == JSplitPane.HORIZONTAL_SPLIT) {
             return Orientation.HORIZONTAL;
@@ -56,7 +56,7 @@ public class SplitPane extends Container<JSplitPane> {
         }
     }
 
-    @ScriptFunction(jsDocText = "The split pane divider's location in pixels")
+    @ScriptFunction(jsDoc = "The split pane divider's location in pixels")
     public int getDividerLocation() {
         return delegate.getDividerLocation();
     }
@@ -76,7 +76,7 @@ public class SplitPane extends Container<JSplitPane> {
         delegate.setOneTouchExpandable(aValue);
     }
 
-    @ScriptFunction(jsDocText = "The first component of the container.")
+    @ScriptFunction(jsDoc = "The first component of the container.")
     public Component<?> getFirstComponent() {
         return getComponentWrapper(delegate.getLeftComponent());
     }
@@ -88,7 +88,7 @@ public class SplitPane extends Container<JSplitPane> {
         delegate.repaint();
     }
 
-    @ScriptFunction(jsDocText = "The second component of the container.")
+    @ScriptFunction(jsDoc = "The second component of the container.")
     public Component<?> getSecondComponent() {
         return getComponentWrapper(delegate.getRightComponent());
     }
@@ -100,7 +100,7 @@ public class SplitPane extends Container<JSplitPane> {
         delegate.repaint();
     }
 
-    @ScriptFunction(jsDocText = "Appends the specified component to the end of this container.")
+    @ScriptFunction(jsDoc = "Appends the specified component to the end of this container.")
     public void add(Component<?> aComponent) {
         if (getFirstComponent() == null) {
             setFirstComponent(aComponent);

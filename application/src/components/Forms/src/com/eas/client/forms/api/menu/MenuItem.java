@@ -51,7 +51,7 @@ public class MenuItem extends Component<JMenuItem> {
         return parent;
     }
 
-    @ScriptFunction(jsDocText="Text on the menu item.")
+    @ScriptFunction(jsDoc="Text on the menu item.")
     public String getText() {
         return delegate.getText();
     }
@@ -61,7 +61,7 @@ public class MenuItem extends Component<JMenuItem> {
         delegate.setText(aValue);
     }
 
-    @ScriptFunction(jsDocText="Image picture for the menu item.")
+    @ScriptFunction(jsDoc="Image picture for the menu item.")
     public Icon getIcon() {
         return delegate.getIcon();
     }

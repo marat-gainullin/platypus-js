@@ -376,7 +376,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     }
 
     // Find and positioning interface
-    @ScriptFunction(jsDocText = "Finds rows using field - field value pairs.")
+    @ScriptFunction(jsDoc = "Finds rows using field - field value pairs.")
     public Scriptable find(Object... values) throws Exception {
         Rowset rs = getRowset();
         if (rs != null && values != null && values.length > 0 && values.length % 2 == 0) {
@@ -432,7 +432,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         return Context.getCurrentContext().newArray(entity.getModel().getScriptScope(), elements);
     }
 
-    @ScriptFunction(jsDocText = "Finds row by its key. Key must a single property.")
+    @ScriptFunction(jsDoc = "Finds row by its key. Key must a single property.")
     public RowHostObject findById(Object aValue) throws Exception {
         Rowset rs = getRowset();
         Fields fields = rs.getFields();
@@ -453,7 +453,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         return null;
     }
 
-    @ScriptFunction(jsDocText = "Sets rowset cursor to specified row.")
+    @ScriptFunction(jsDoc = "Sets rowset cursor to specified row.")
     public boolean scrollTo(RowHostObject aRow) throws Exception {
         if (aRow != null) {
             Rowset rs = getRowset();
@@ -470,57 +470,57 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     }
 
     // Rowset scroll interface
-    @ScriptFunction(jsDocText = "Moves cursor to the position before the first row.")
+    @ScriptFunction(jsDoc = "Moves cursor to the position before the first row.")
     public void beforeFirst() throws Exception {
         getRowset().beforeFirst();
     }
 
-    @ScriptFunction(jsDocText = "Moves cursor to the position after the last row.")
+    @ScriptFunction(jsDoc = "Moves cursor to the position after the last row.")
     public void afterLast() throws Exception {
         getRowset().afterLast();
     }
 
-    @ScriptFunction(jsDocText = "Returns true if cursor in the position before the first row.")
+    @ScriptFunction(jsDoc = "Returns true if cursor in the position before the first row.")
     public boolean bof() throws Exception {
         return getRowset().isBeforeFirst();
     }
 
-    @ScriptFunction(jsDocText = "Returns true if cursor in the position before the first row.")
+    @ScriptFunction(jsDoc = "Returns true if cursor in the position before the first row.")
     public boolean eof() throws Exception {
         return getRowset().isAfterLast();
     }
 
-    @ScriptFunction(jsDocText = "Moves cursor to the first row.")
+    @ScriptFunction(jsDoc = "Moves cursor to the first row.")
     public boolean first() throws Exception {
         return getRowset().first();
     }
 
-    @ScriptFunction(jsDocText = "Moves cursor to the next row.")
+    @ScriptFunction(jsDoc = "Moves cursor to the next row.")
     public boolean next() throws Exception {
         return getRowset().next();
     }
 
-    @ScriptFunction(jsDocText = "Moves cursor to the previous row.")
+    @ScriptFunction(jsDoc = "Moves cursor to the previous row.")
     public boolean prev() throws Exception {
         return getRowset().previous();
     }
 
-    @ScriptFunction(jsDocText = "Moves cursor to the last row.")
+    @ScriptFunction(jsDoc = "Moves cursor to the last row.")
     public boolean last() throws Exception {
         return getRowset().last();
     }
 
-    @ScriptFunction(jsDocText = "Returns true if cursor is on the specified index.")
+    @ScriptFunction(jsDoc = "Returns true if cursor is on the specified index.")
     public boolean pos(int recordIndex) throws Exception {
         return getRowset().absolute(recordIndex);
     }
 
-    @ScriptFunction(jsDocText = "Gets the row at specified index.")
+    @ScriptFunction(jsDoc = "Gets the row at specified index.")
     public RowHostObject getRow(int aIndex) throws Exception {
         return RowHostObject.publishRow(entity.getModel().getScriptScope(), getRowset().getRow(aIndex), entity);
     }
 
-    @ScriptFunction(jsDocText = "The current cursor position.")
+    @ScriptFunction(jsDoc = "The current cursor position.")
     public int getRowIndex() throws Exception {
         Rowset rowset = getRowset();
         return rowset.getCursorPos();
@@ -543,12 +543,12 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         return entity != null && entity.getSubstitute() != null ? entity.getSubstitute().getRowsetWrap().rowset : null;
     }
 
-    @ScriptFunction(jsDocText = "Rowset's size.")
+    @ScriptFunction(jsDoc = "Rowset's size.")
     public int getLength() throws Exception {
         return getSize();
     }
 
-    @ScriptFunction(jsDocText = "Rowset's size.")
+    @ScriptFunction(jsDoc = "Rowset's size.")
     public int getSize() throws Exception {
         Rowset rowset = getRowset();
         return rowset.size();
@@ -575,7 +575,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     }
 
     // Array mutator methods
-    @ScriptFunction(jsDocText = "Removes the last element from an array and returns that element.")
+    @ScriptFunction(jsDoc = "Removes the last element from an array and returns that element.")
     public Object pop() throws Exception {
         Rowset rowset = getRowset();
         if (!rowset.isEmpty()) {
@@ -589,7 +589,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         }
     }
 
-    @ScriptFunction(jsDocText = "Removes the first element from an array and returns that element.")
+    @ScriptFunction(jsDoc = "Removes the first element from an array and returns that element.")
     public Object shift() throws Exception {
         Rowset rowset = getRowset();
         if (!rowset.isEmpty()) {
@@ -618,7 +618,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         return duplets.toArray();
     }
 
-    @ScriptFunction(jsDocText = "Adds one or more elements to the end of an array and returns the new length of the array.")
+    @ScriptFunction(jsDoc = "Adds one or more elements to the end of an array and returns the new length of the array.")
     public void push(Object... aArguments) throws Exception {
         Rowset rowset = getRowset();
         for (int i = 0; i < aArguments.length; i++) {
@@ -630,7 +630,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         }
     }
 
-    @ScriptFunction(jsDocText = "Adds one or more elements to the front of an array and returns the new length of the array.")
+    @ScriptFunction(jsDoc = "Adds one or more elements to the front of an array and returns the new length of the array.")
     public void unshift(Object... aArguments) throws Exception {
         Rowset rowset = getRowset();
         for (int i = aArguments.length - 1; i >= 0; i--) {
@@ -642,13 +642,13 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         }
     }
 
-    @ScriptFunction(jsDocText = "Reverses the order of the elements of an array - the first becomes the last, and the last becomes the first.")
+    @ScriptFunction(jsDoc = "Reverses the order of the elements of an array - the first becomes the last, and the last becomes the first.")
     public void reverse() throws Exception {
         Rowset rowset = getRowset();
         rowset.reverse();
     }
 
-    @ScriptFunction(jsDocText = "Adds and/or removes elements from an array.")
+    @ScriptFunction(jsDoc = "Adds and/or removes elements from an array.")
     public Scriptable splice(Object... arguments) throws Exception {
         if (arguments.length > 0) {
             Rowset rowset = getRowset();
@@ -688,7 +688,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         }
     }
 
-    @ScriptFunction(jsDocText = "Sorts the elements of an array.")
+    @ScriptFunction(jsDoc = "Sorts the elements of an array.")
     public void sort(Object aComparator) throws Exception {
         if (aComparator != null) {
             if (aComparator instanceof RowsComparator) {
@@ -724,7 +724,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     }
 
     // Array accessor methods
-    @ScriptFunction(jsDocText = "Returns a new array comprised of this array joined with other array(s) and/or value(s).")
+    @ScriptFunction(jsDoc = "Returns a new array comprised of this array joined with other array(s) and/or value(s).")
     public Scriptable concat(Object... arguments) throws Exception {
         List<Object> concated = new ArrayList<>();
         Rowset rowset = getRowset();
@@ -746,7 +746,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         return wrapArray(concated.toArray());
     }
 
-    @ScriptFunction(jsDocText = "Joins all elements of an array into a string.")
+    @ScriptFunction(jsDoc = "Joins all elements of an array into a string.")
     public String join(String aSeparator) throws Exception {
         return join(aSeparator, Integer.MAX_VALUE);
     }
@@ -768,7 +768,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         return sb.toString();
     }
 
-    @ScriptFunction(jsDocText = "Extracts a section of an array and returns a new array.")
+    @ScriptFunction(jsDoc = "Extracts a section of an array and returns a new array.")
     public Scriptable slice(Integer... arguments) throws Exception {
         if (arguments != null && arguments.length <= 2) {
             Rowset rowset = getRowset();
@@ -807,7 +807,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     }
 
     @Override
-    @ScriptFunction(jsDocText = "Returns a string representing the array and its elements.")
+    @ScriptFunction(jsDoc = "Returns a string representing the array and its elements.")
     public String toString() {
         try {
             if (entity != null) {
@@ -837,7 +837,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         }
     }
 
-    @ScriptFunction(jsDocText = "Returns the first (least) index of an element within the array equal to the specified value, or -1 if none is found.")
+    @ScriptFunction(jsDoc = "Returns the first (least) index of an element within the array equal to the specified value, or -1 if none is found.")
     public int indexOf(Object aObj) throws Exception {
         Rowset rowset = getRowset();
         int size = rowset.size();
@@ -851,7 +851,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         return -1;
     }
 
-    @ScriptFunction(jsDocText = "Returns the last (greatest) index of an element within the array equal to the specified value, or -1 if none is found.")
+    @ScriptFunction(jsDoc = "Returns the last (greatest) index of an element within the array equal to the specified value, or -1 if none is found.")
     public int lastIndexOf(Object aObj) throws Exception {
         Rowset rowset = getRowset();
         int size = rowset.size();
@@ -866,7 +866,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     }
 
     // Array iteration methods
-    @ScriptFunction(jsDocText = "Creates a new array with all of the elements of this array for which the provided filtering function returns true.")
+    @ScriptFunction(jsDoc = "Creates a new array with all of the elements of this array for which the provided filtering function returns true.")
     public Scriptable filter(Object... arguments) throws Exception {
         if (arguments != null && arguments.length <= 2) {
             if (arguments[0] instanceof Function) {
@@ -901,7 +901,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         }
     }
 
-    @ScriptFunction(jsDocText = "Calls a function for each element in the array.")
+    @ScriptFunction(jsDoc = "Calls a function for each element in the array.")
     public void forEach(Object... arguments) throws Exception {
         if (arguments != null && arguments.length <= 2) {
             if (arguments[0] instanceof Function) {
@@ -931,7 +931,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         }
     }
 
-    @ScriptFunction(jsDocText = "Returns true if every element in this array satisfies the provided testing function.")
+    @ScriptFunction(jsDoc = "Returns true if every element in this array satisfies the provided testing function.")
     public boolean every(Object... arguments) throws Exception {
         if (arguments != null && arguments.length <= 2) {
             if (arguments[0] instanceof Function) {
@@ -965,7 +965,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         }
     }
 
-    @ScriptFunction(jsDocText = "Creates a new array with the results of calling a provided function on every element in this array.")
+    @ScriptFunction(jsDoc = "Creates a new array with the results of calling a provided function on every element in this array.")
     public Scriptable map(Object... arguments) throws Exception {
         if (arguments != null && arguments.length <= 2) {
             if (arguments[0] instanceof Function) {
@@ -998,7 +998,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         }
     }
 
-    @ScriptFunction(jsDocText = "Returns true if at least one element in this array satisfies the provided testing function.")
+    @ScriptFunction(jsDoc = "Returns true if at least one element in this array satisfies the provided testing function.")
     public boolean some(Object... arguments) throws Exception {
         if (arguments != null && arguments.length <= 2) {
             if (arguments[0] instanceof Function) {
@@ -1032,7 +1032,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         }
     }
 
-    @ScriptFunction(jsDocText = "Apply a function simultaneously against two values of the array (from left-to-right) as to reduce it to a single value.")
+    @ScriptFunction(jsDoc = "Apply a function simultaneously against two values of the array (from left-to-right) as to reduce it to a single value.")
     public Object reduce(Object... arguments) throws Exception {
         if (arguments != null && arguments.length <= 2) {
             if (arguments[0] instanceof Function) {
@@ -1066,7 +1066,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         }
     }
 
-    @ScriptFunction(jsDocText = "Apply a function simultaneously against two values of the array (from right-to-left) as to reduce it to a single value.")
+    @ScriptFunction(jsDoc = "Apply a function simultaneously against two values of the array (from right-to-left) as to reduce it to a single value.")
     public Object reduceRight(Object... arguments) throws Exception {
         if (arguments != null && arguments.length <= 2) {
             if (arguments[0] instanceof Function) {
@@ -1101,7 +1101,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     }
 
     // Table-pattern API
-    @ScriptFunction(jsDocText = "Creates an instace of Locator object using specified constraints objects.")
+    @ScriptFunction(jsDoc = "Creates an instace of Locator object using specified constraints objects.")
     public ScriptableLocator createLocator(Object... constraints) throws Exception {
         if (constraints != null && constraints.length > 0) {
             Rowset rowset = getRowset();
@@ -1145,7 +1145,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         return null;
     }
 
-    @ScriptFunction(jsDocText = "Creates an instace of Filter object using specified constraints objects.")
+    @ScriptFunction(jsDoc = "Creates an instace of Filter object using specified constraints objects.")
     public ScriptableFilter createFilter(Object... constraints) throws Exception {
         if (constraints != null && constraints.length > 0) {
             Rowset rowset = getRowset();
@@ -1196,7 +1196,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         return null;
     }
 
-    @ScriptFunction(jsDocText = "Creates an instace of comparator object using specified constraints objects.")
+    @ScriptFunction(jsDoc = "Creates an instace of comparator object using specified constraints objects.")
     public RowsComparator createSorting(Object... constraints) throws Exception {
         if (constraints != null && constraints.length > 0) {
             Rowset rowset = getRowset();
@@ -1245,7 +1245,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         return null;
     }
 
-    @ScriptFunction(jsDocText = "Gets active Filter object.")
+    @ScriptFunction(jsDoc = "Gets active Filter object.")
     public Filter getActiveFilter() throws Exception {
         Rowset rowset = getRowset();
         return rowset.getActiveFilter();
@@ -1264,21 +1264,21 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         entity.filterRowset();
     }
 
-    @ScriptFunction(jsDocText = "Disables automatic model update on parameters change.")
+    @ScriptFunction(jsDoc = "Disables automatic model update on parameters change.")
     public void beginUpdate() {
         if (entity != null) {
             entity.beginUpdate();
         }
     }
 
-    @ScriptFunction(jsDocText = "Enables automatic model update on parameters change.")
+    @ScriptFunction(jsDoc = "Enables automatic model update on parameters change.")
     public void endUpdate() throws Exception {
         if (entity != null) {
             entity.endUpdate();
         }
     }
 
-    @ScriptFunction(jsDocText = "Refreshes rowset only if any of its parameters has changed.")
+    @ScriptFunction(jsDoc = "Refreshes rowset only if any of its parameters has changed.")
     public void execute() throws Exception {
         if (entity != null) {
             checkModelExecuted();
@@ -1295,12 +1295,12 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         }
     }
 
-    @ScriptFunction(jsDocText = "Refreshes rowset only if any of its parameters has changed with callback.")
+    @ScriptFunction(jsDoc = "Refreshes rowset only if any of its parameters has changed with callback.")
     public void execute(Function aOnSuccess) throws Exception {
         execute(aOnSuccess, null);
     }
 
-    @ScriptFunction(jsDocText = "Refreshes rowset only if any of its parameters has changed with callback.")
+    @ScriptFunction(jsDoc = "Refreshes rowset only if any of its parameters has changed with callback.")
     public void execute(Function aOnSuccess, Function aOnFailure) throws Exception {
         if (entity != null) {
             assert tag instanceof RowsetHostObject;
@@ -1341,7 +1341,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         }
     }
 
-    @ScriptFunction(jsDocText = "Enqueues rowset's changes.")
+    @ScriptFunction(jsDoc = "Enqueues rowset's changes.")
     public int enqueueUpdate() throws Exception {
         if (entity != null) {
             if (entity.getModel().getClient() instanceof AppClient) {
@@ -1354,7 +1354,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         return 0;
     }
 
-    @ScriptFunction(jsDocText = "Applies a sql clause into the database.")
+    @ScriptFunction(jsDoc = "Applies a sql clause into the database.")
     public int executeUpdate() throws Exception {
         if (entity != null) {
             if (entity.getModel().getClient() instanceof AppClient) {
@@ -1368,7 +1368,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     }
 
     /*
-     @ScriptFunction(jsDocText = "Refreshes children entities.")
+     @ScriptFunction(jsDoc = "Refreshes children entities.")
      public void executeChildrenOnly() throws Exception {
      if (entity != null) {
      checkModelExecuted();
@@ -1386,7 +1386,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
      }
      */
     // Requery interface
-    @ScriptFunction(jsDocText = "Requeries rowset's data.")
+    @ScriptFunction(jsDoc = "Requeries rowset's data.")
     public void requery() throws Exception {
         if (entity != null) {
             checkModelExecuted();
@@ -1403,12 +1403,12 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         }
     }
 
-    @ScriptFunction(jsDocText = "Requeries rowset's data with a callbacks.")
+    @ScriptFunction(jsDoc = "Requeries rowset's data with a callbacks.")
     public void requery(Function aOnSuccess) throws Exception {
         requery(aOnSuccess, null);
     }
 
-    @ScriptFunction(jsDocText = "Requeries rowset's data with a callbacks.")
+    @ScriptFunction(jsDoc = "Requeries rowset's data with a callbacks.")
     public void requery(Function aOnSuccess, Function aOnFailure) throws Exception {
         if (entity != null) {
             assert tag instanceof RowsetHostObject;
@@ -1450,7 +1450,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     }
 
     /*
-     @ScriptFunction(jsDocText = "Requeries children entities.")
+     @ScriptFunction(jsDoc = "Requeries children entities.")
      public void requeryChildrenOnly() throws Exception {
      if (entity != null) {
      checkModelExecuted();
@@ -1467,7 +1467,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
      }
      */
     // modify interface
-    @ScriptFunction(jsDocText = "Inserts new row in the rowset and sets cursor on this row.")
+    @ScriptFunction(jsDoc = "Inserts new row in the rowset and sets cursor on this row.")
     public void insert(Object... requiedFields) throws Exception {
         Rowset rowset = getRowset();
         if (requiedFields != null) {
@@ -1487,7 +1487,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         return oldCount != rowset.size();
     }
 
-    @ScriptFunction(jsDocText = "Deletes all rows in rowset.")
+    @ScriptFunction(jsDoc = "Deletes all rows in rowset.")
     public boolean deleteAll() throws Exception {
         Rowset rowset = getRowset();
         rowset.deleteAll();
@@ -1506,7 +1506,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         return getRowset();
     }
 
-    @ScriptFunction(jsDocText = "Deletes row on cursor position.")
+    @ScriptFunction(jsDoc = "Deletes row on cursor position.")
     public boolean deleteRow() throws Exception {
         return delete();
     }
@@ -1526,7 +1526,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         insert(requiedFields);
     }
 
-    @ScriptFunction(jsDocText = "After object data change event.")
+    @ScriptFunction(jsDoc = "After object data change event.")
     public Function getOnChanged() {
         return entity.getOnAfterChange();
     }
@@ -1536,7 +1536,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         entity.setOnAfterChange(aValue);
     }
 
-    @ScriptFunction(jsDocText = "After delete object event.")
+    @ScriptFunction(jsDoc = "After delete object event.")
     public Function getOnDeleted() {
         return entity.getOnAfterDelete();
     }
@@ -1546,7 +1546,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         entity.setOnAfterDelete(aValue);
     }
 
-    @ScriptFunction(jsDocText = "After insert object event.")
+    @ScriptFunction(jsDoc = "After insert object event.")
     public Function getOnInserted() {
         return entity.getOnAfterInsert();
     }
@@ -1556,7 +1556,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         entity.setOnAfterInsert(aValue);
     }
 
-    @ScriptFunction(jsDocText = "After cursor position change event.")
+    @ScriptFunction(jsDoc = "After cursor position change event.")
     public Function getOnScrolled() {
         return entity.getOnAfterScroll();
     }
@@ -1566,7 +1566,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         entity.setOnAfterScroll(aValue);
     }
 
-    @ScriptFunction(jsDocText = "Before object data change event.")
+    @ScriptFunction(jsDoc = "Before object data change event.")
     public Function getWillChange() {
         return entity.getOnBeforeChange();
     }
@@ -1576,7 +1576,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         entity.setOnBeforeChange(aValue);
     }
 
-    @ScriptFunction(jsDocText = "Before delete object event.")
+    @ScriptFunction(jsDoc = "Before delete object event.")
     public Function getWillDelete() {
         return entity.getOnBeforeDelete();
     }
@@ -1586,7 +1586,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         entity.setOnBeforeDelete(aValue);
     }
 
-    @ScriptFunction(jsDocText = "Before insert object event.")
+    @ScriptFunction(jsDoc = "Before insert object event.")
     public Function getWillInsert() {
         return entity.getOnBeforeInsert();
     }
@@ -1596,7 +1596,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         entity.setOnBeforeInsert(aValue);
     }
 
-    @ScriptFunction(jsDocText = "Before cursor position change event.")
+    @ScriptFunction(jsDoc = "Before cursor position change event.")
     public Function getWillScroll() {
         return entity.getOnBeforeScroll();
     }
@@ -1606,7 +1606,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         entity.setOnBeforeScroll(aValue);
     }
 
-    @ScriptFunction(jsDocText = "After filter event.")
+    @ScriptFunction(jsDoc = "After filter event.")
     public Function getOnFiltered() {
         return entity.getOnFiltered();
     }
@@ -1616,7 +1616,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         entity.setOnFiltered(aValue);
     }
 
-    @ScriptFunction(jsDocText = "After requery event.")
+    @ScriptFunction(jsDoc = "After requery event.")
     public Function getOnRequeried() {
         return entity.getOnRequeried();
     }

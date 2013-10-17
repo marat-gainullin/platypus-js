@@ -32,7 +32,7 @@ public class Menu extends Container<JMenu> {
     }
 
     @Override
-    @ScriptFunction(jsDocText="Gets the parent container.")
+    @ScriptFunction(jsDoc="Gets the parent container.")
     public Container<?> getParent() {
         Container<?> parent = super.getParent();
         if (parent == null && delegate.getParent() instanceof JPopupMenu && ((JPopupMenu) delegate.getParent()).getInvoker() instanceof JMenu) {
@@ -42,12 +42,12 @@ public class Menu extends Container<JMenu> {
     }
 
     @Override
-    @ScriptFunction(jsDocText="Gets the child item whith specified index.")
+    @ScriptFunction(jsDoc="Gets the child item whith specified index.")
     public Component<?> child(int aIndex) {
         return getComponentWrapper(delegate.getMenuComponent(aIndex));
     }
 
-    @ScriptFunction(jsDocText="The text of the menu.")
+    @ScriptFunction(jsDoc="The text of the menu.")
     public String getText() {
         return delegate.getText();
     }
@@ -57,13 +57,13 @@ public class Menu extends Container<JMenu> {
         delegate.setText(aValue);
     }
 
-    @ScriptFunction(jsDocText="Adds the item to the menu.")
+    @ScriptFunction(jsDoc="Adds the item to the menu.")
     public void add(Component<?> aComp) {
         delegate.add(unwrap(aComp));
     }
 
     @Override
-    @ScriptFunction(jsDocText="Gets the count of the menu items.")
+    @ScriptFunction(jsDoc="Gets the count of the menu items.")
     public int getCount() {
         return delegate.getMenuComponentCount();
     }

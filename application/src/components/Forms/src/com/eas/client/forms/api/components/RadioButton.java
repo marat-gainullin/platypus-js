@@ -39,7 +39,7 @@ public class RadioButton extends Component<JRadioButton> {
         this(null, false);
     }
     
-    @ScriptFunction(jsDocText="The button's text.")
+    @ScriptFunction(jsDoc="The button's text.")
     public String getText() {
         return delegate.getText();
     }
@@ -49,7 +49,7 @@ public class RadioButton extends Component<JRadioButton> {
         delegate.setText(aValue);
     }
 
-    @ScriptFunction(jsDocText="The default icon.")
+    @ScriptFunction(jsDoc="The default icon.")
     public Icon getIcon() {
         return delegate.getIcon();
     }
@@ -59,7 +59,7 @@ public class RadioButton extends Component<JRadioButton> {
         delegate.setIcon(aValue);
     }
 
-    @ScriptFunction(jsDocText="The state of the button.")
+    @ScriptFunction(jsDoc="The state of the button.")
     public boolean isSelected() {
         return delegate.isSelected();
     }

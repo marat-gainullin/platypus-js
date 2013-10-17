@@ -8,6 +8,7 @@ import java.util.List;
 
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.changes.Change;
+import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.Callback;
 import com.eas.client.Cancellable;
@@ -25,6 +26,8 @@ public interface FlowProvider {
      * @throws Exception 
      */
     public String getEntityId();
+    
+    public Fields getExpectedFields();
     
     /**
      * Queries some source for data, according to the supplied parameters values.

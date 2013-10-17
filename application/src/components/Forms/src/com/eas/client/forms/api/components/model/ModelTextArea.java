@@ -23,7 +23,7 @@ public class ModelTextArea extends ScalarModelComponent<DbText> {
         setDelegate(new DbText());
     }
 
-    @ScriptFunction(jsDocText = "Determines if component is editable.")
+    @ScriptFunction(jsDoc = "Determines if component is editable.")
     public boolean isEditable() {
         return delegate.isEditable();
     }

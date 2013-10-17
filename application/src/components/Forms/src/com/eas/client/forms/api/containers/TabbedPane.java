@@ -28,14 +28,14 @@ public class TabbedPane extends Container<JTabbedPane> {
         setDelegate(new JTabbedPane());
     }
 
-    @ScriptFunction(jsDocText = "Appends the component whith specified text to the end of this container.")
+    @ScriptFunction(jsDoc = "Appends the component whith specified text to the end of this container.")
     public void add(Component<?> aComp, String aText) {
         delegate.addTab(aText, unwrap(aComp));
         delegate.revalidate();
         delegate.repaint();
     }
 
-    @ScriptFunction(jsDocText = "Appends the component whith specified text and Icon to the end of this container.")
+    @ScriptFunction(jsDoc = "Appends the component whith specified text and Icon to the end of this container.")
     public void add(Component<?> aComp, String aText, Icon aIcon) {
         if (aComp != null) {
             delegate.addTab(aText, aIcon, unwrap(aComp));
@@ -44,7 +44,7 @@ public class TabbedPane extends Container<JTabbedPane> {
         }
     }
 
-    @ScriptFunction(jsDocText = "The selected component.")
+    @ScriptFunction(jsDoc = "The selected component.")
     public Component<?> getSelectedComponent() {
         return getComponentWrapper(delegate.getSelectedComponent());
     }
@@ -58,7 +58,7 @@ public class TabbedPane extends Container<JTabbedPane> {
         }
     }
 
-    @ScriptFunction(jsDocText = "The selected component's index.")
+    @ScriptFunction(jsDoc = "The selected component's index.")
     public int getSelectedIndex() {
         return delegate.getSelectedIndex();
     }
@@ -68,7 +68,7 @@ public class TabbedPane extends Container<JTabbedPane> {
         delegate.setSelectedIndex(aIndex);
     }
 
-    @ScriptFunction(jsDocText = "Selected tab change event.")
+    @ScriptFunction(jsDoc = "Selected tab change event.")
     public Function getOnStateChanged() {
         ControlEventsIProxy proxy = getEventsProxy(delegate);
         return proxy != null ? proxy.getHandlers().get(ControlEventsIProxy.stateChanged) : null;

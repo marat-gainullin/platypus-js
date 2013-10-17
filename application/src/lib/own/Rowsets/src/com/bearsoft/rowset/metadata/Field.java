@@ -230,28 +230,29 @@ public class Field {
         }
         return false;
     }
-/*
-    @Override
-    public int hashCode() {
-        int hash = 3;
-        hash = 97 * hash + Objects.hashCode(this.name);
-        hash = 97 * hash + Objects.hashCode(this.originalName);
-        hash = 97 * hash + Objects.hashCode(this.description);
-        hash = 97 * hash + Objects.hashCode(this.typeInfo);
-        hash = 97 * hash + this.size;
-        hash = 97 * hash + this.scale;
-        hash = 97 * hash + this.precision;
-        hash = 97 * hash + (this.signed ? 1 : 0);
-        hash = 97 * hash + (this.nullable ? 1 : 0);
-        hash = 97 * hash + (this.readonly ? 1 : 0);
-        hash = 97 * hash + (this.pk ? 1 : 0);
-        hash = 97 * hash + (this.strong4Insert ? 1 : 0);
-        hash = 97 * hash + Objects.hashCode(this.fk);
-        hash = 97 * hash + Objects.hashCode(this.tableName);
-        hash = 97 * hash + Objects.hashCode(this.schemaName);
-        return hash;
-    }
-*/
+    /*
+     @Override
+     public int hashCode() {
+     int hash = 3;
+     hash = 97 * hash + Objects.hashCode(this.name);
+     hash = 97 * hash + Objects.hashCode(this.originalName);
+     hash = 97 * hash + Objects.hashCode(this.description);
+     hash = 97 * hash + Objects.hashCode(this.typeInfo);
+     hash = 97 * hash + this.size;
+     hash = 97 * hash + this.scale;
+     hash = 97 * hash + this.precision;
+     hash = 97 * hash + (this.signed ? 1 : 0);
+     hash = 97 * hash + (this.nullable ? 1 : 0);
+     hash = 97 * hash + (this.readonly ? 1 : 0);
+     hash = 97 * hash + (this.pk ? 1 : 0);
+     hash = 97 * hash + (this.strong4Insert ? 1 : 0);
+     hash = 97 * hash + Objects.hashCode(this.fk);
+     hash = 97 * hash + Objects.hashCode(this.tableName);
+     hash = 97 * hash + Objects.hashCode(this.schemaName);
+     return hash;
+     }
+     */
+
     /**
      * Returns the name of the field.
      *
@@ -275,8 +276,8 @@ public class Field {
     }
 
     @ScriptFunction(jsDoc = "The original name of the field. "
-    + "In queries, such as select t1.f1 as f11, t2.f1 as f21 to preserve output fields' names unique, "
-    + "but be able to generate right update sql clauses for multiple tables.")
+            + "In queries, such as select t1.f1 as f11, t2.f1 as f21 to preserve output fields' names unique, "
+            + "but be able to generate right update sql clauses for multiple tables.")
     public String getOriginalName() {
         return originalName;
     }
@@ -566,7 +567,11 @@ public class Field {
         if (tableName != null && !tableName.isEmpty()) {
             sb.append(tableName).append(".");
         }
-        sb.append(originalName != null ? originalName : name);
+        if (originalName != null && !originalName.isEmpty()) {
+            sb.append(originalName);
+        } else {
+            sb.append(name);
+        }
         if (description != null && !description.isEmpty()) {
             sb.append(" (").append(description).append(")");
         }
@@ -586,13 +591,13 @@ public class Field {
         }
         sb.append(", ").append(typeInfo.toString());
         sb.append(", size ").append(size).append(", precision ").append(precision).append(", scale ").append(scale);
-        if (this.signed) {
+        if (signed) {
             sb.append(", signed");
         }
-        if (this.nullable) {
+        if (nullable) {
             sb.append(", nullable");
         }
-        if (this.readonly) {
+        if (readonly) {
             sb.append(", readonly");
         }
         return sb.toString();
