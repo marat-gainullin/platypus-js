@@ -13,6 +13,8 @@ import com.eas.designer.application.module.completion.CompletionSupportService;
 import com.eas.designer.application.module.completion.JsCompletionProvider;
 import com.eas.designer.application.module.completion.ModuleCompletionSupportService;
 import com.eas.designer.application.module.completion.SystemConstructorCompletionItem;
+import com.eas.script.ScriptFunction;
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;

@@ -1377,6 +1377,10 @@ public class FormUtils {
         return scriptNames2PlatypusApiClasses.get(name);
     }
 
+    public static Class[] getPlatypusApiClasses() {
+        return apiClasses;
+    }
+    
     public static Class<?> getPlatypusControlClass(Class<?> aBeanClass) {
         if (swingClasses2PlatypusApiClasses.containsKey(aBeanClass)) {
             return swingClasses2PlatypusApiClasses.get(aBeanClass);

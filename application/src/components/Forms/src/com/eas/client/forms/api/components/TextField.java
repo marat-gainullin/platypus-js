@@ -31,7 +31,7 @@ public class TextField extends Component<JTextField>{
         this((String)null);
     }
     
-    @ScriptFunction(jsDocText = "The text contained in this component.")
+    @ScriptFunction(jsDoc = "The text contained in this component.")
     public String getText()
     {
         return delegate.getText();

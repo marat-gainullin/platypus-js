@@ -38,7 +38,7 @@ public class BorderPane extends Container<JPanel> {
         setDelegate(new JPanel(new BorderLayout(hgap, vgap)));
     }
 
-    @ScriptFunction(jsDocText = "Appends the specified component to this container on the specified place: "
+    @ScriptFunction(jsDoc = "Appends the specified component to this container on the specified place: "
     + "HorizontalPosition.LEFT, HorizontalPosition.CENTER, HorizontalPosition.RIGHT, VerticalPosition.TOP, VerticalPosition.BOTTOM.")
     public void add(Component<?> aComp, int aPlace) {
         if (aComp != null) {
@@ -69,18 +69,18 @@ public class BorderPane extends Container<JPanel> {
         }
     }
 
-    @ScriptFunction(jsDocText = "Appends the specified component to this container on the specified place: "
+    @ScriptFunction(jsDoc = "Appends the specified component to this container on the specified place: "
     + "HorizontalPosition.LEFT, HorizontalPosition.CENTER, HorizontalPosition.RIGHT, VerticalPosition.TOP, VerticalPosition.BOTTOM.")
     public void add(Component<?> aComp, int aPlace, int aSize) {
         add(aComp, aPlace);
     }
 
-    @ScriptFunction(jsDocText = "Appends the specified component to this container in it's center.")
+    @ScriptFunction(jsDoc = "Appends the specified component to this container in it's center.")
     public void add(Component<?> aComp) {
         add(aComp, HorizontalPosition.CENTER);
     }
     
-    @ScriptFunction(jsDocText = "The component that was added using HorizontalPosition.LEFT constraint.")
+    @ScriptFunction(jsDoc = "The component that was added using HorizontalPosition.LEFT constraint.")
     public Component<?> getLeftComponent() {
         BorderLayout layout = (BorderLayout) delegate.getLayout();
         java.awt.Component target = layout.getLayoutComponent(BorderLayout.WEST);
@@ -105,7 +105,7 @@ public class BorderPane extends Container<JPanel> {
         add(aComp, HorizontalPosition.LEFT);
     }
 
-    @ScriptFunction(jsDocText = "The component that was added using VerticalPosition.TOP constraint.")
+    @ScriptFunction(jsDoc = "The component that was added using VerticalPosition.TOP constraint.")
     public Component<?> getTopComponent() {
         BorderLayout layout = (BorderLayout) delegate.getLayout();
         java.awt.Component target = layout.getLayoutComponent(BorderLayout.NORTH);
@@ -129,7 +129,7 @@ public class BorderPane extends Container<JPanel> {
         add(aComp, VerticalPosition.TOP);
     }
 
-    @ScriptFunction(jsDocText = "The component that was added using HorizontalPosition.RIGHT constraint.")
+    @ScriptFunction(jsDoc = "The component that was added using HorizontalPosition.RIGHT constraint.")
     public Component<?> getRightComponent() {
         BorderLayout layout = (BorderLayout) delegate.getLayout();
         java.awt.Component target = layout.getLayoutComponent(BorderLayout.EAST);
@@ -154,7 +154,7 @@ public class BorderPane extends Container<JPanel> {
         add(aComp, HorizontalPosition.RIGHT);
     }
 
-    @ScriptFunction(jsDocText = "The component that was added using VerticalPosition.BOTTOM constraint.")
+    @ScriptFunction(jsDoc = "The component that was added using VerticalPosition.BOTTOM constraint.")
     public Component<?> getBottomComponent() {
         BorderLayout layout = (BorderLayout) delegate.getLayout();
         java.awt.Component target = layout.getLayoutComponent(BorderLayout.SOUTH);
@@ -179,7 +179,7 @@ public class BorderPane extends Container<JPanel> {
         add(aComp, VerticalPosition.BOTTOM);
     }
 
-    @ScriptFunction(jsDocText = "The component that was added using HorizontalPosition.CENTER constraint.")
+    @ScriptFunction(jsDoc = "The component that was added using HorizontalPosition.CENTER constraint.")
     public Component<?> getCenterComponent() {
         BorderLayout layout = (BorderLayout) delegate.getLayout();
         return getComponentWrapper(layout.getLayoutComponent(BorderLayout.CENTER));

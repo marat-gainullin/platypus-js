@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.designer.applicaiton.report.completion;
+package com.eas.designer.application.report.completion;
 
 import com.eas.designer.application.module.completion.AppElementConstructorCompletionItem;
 import com.eas.designer.application.report.PlatypusReportDataObject;

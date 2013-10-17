@@ -15,7 +15,7 @@ import javax.swing.JComponent;
  */
 public abstract class Container<D extends JComponent> extends Component<D> {
 
-    @ScriptFunction(jsDocText = "Gets the nth component in this container.")
+    @ScriptFunction(jsDoc = "Gets the nth component in this container.")
     public Component<?> child(int aIndex) {
         return getComponentWrapper(delegate.getComponent(aIndex));
     }
@@ -28,21 +28,21 @@ public abstract class Container<D extends JComponent> extends Component<D> {
         return ch.toArray(new Component<?>[]{});
     }
 
-    @ScriptFunction(jsDocText = "Removes the specified component from this container.")
+    @ScriptFunction(jsDoc = "Removes the specified component from this container.")
     public void remove(Component<?> aComp) {
         delegate.remove(unwrap(aComp));
         delegate.revalidate();
         delegate.repaint();
     }
 
-    @ScriptFunction(jsDocText = "Removes all the components from this container.")
+    @ScriptFunction(jsDoc = "Removes all the components from this container.")
     public void clear() {
         delegate.removeAll();
         delegate.revalidate();
         delegate.repaint();
     }
 
-    @ScriptFunction(jsDocText = "Gets the number of components in this panel.")
+    @ScriptFunction(jsDoc = "Gets the number of components in this panel.")
     public int getCount() {
         return delegate.getComponentCount();
     }

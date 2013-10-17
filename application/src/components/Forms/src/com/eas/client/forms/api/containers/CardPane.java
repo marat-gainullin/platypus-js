@@ -37,7 +37,7 @@ public class CardPane extends Container<JPanel> {
         setDelegate(new JPanel(new PlatypusCardLayout(hgap, vgap)));
     }
 
-    @ScriptFunction(jsDocText = "Appends the component to this container with the specified name.")
+    @ScriptFunction(jsDoc = "Appends the component to this container with the specified name.")
     public void add(Component<?> aComp, String aCardName) {
         if (aComp != null) {
             delegate.add(unwrap(aComp), aCardName);
@@ -46,13 +46,13 @@ public class CardPane extends Container<JPanel> {
         }
     }
 
-    @ScriptFunction(jsDocText = "Gets the component with the specified name from the container.")
+    @ScriptFunction(jsDoc = "Gets the component with the specified name from the container.")
     public Component<?> child(String aCardName) {
         PlatypusCardLayout layout = (PlatypusCardLayout) delegate.getLayout();
         return getComponentWrapper(layout.getComponent(aCardName));
     }
 
-    @ScriptFunction(jsDocText = "Flips to the component that was added to this layout with the specified name.")
+    @ScriptFunction(jsDoc = "Flips to the component that was added to this layout with the specified name.")
     public void show(String aCardName) {
         PlatypusCardLayout layout = (PlatypusCardLayout) delegate.getLayout();
         layout.show(delegate, aCardName);

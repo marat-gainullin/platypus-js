@@ -19,12 +19,11 @@ import org.mozilla.javascript.Function;
  */
 public class Button extends Component<JButton> {
 
-    protected Button(JButton aDelegate)
-    {
+    protected Button(JButton aDelegate) {
         super();
         setDelegate(aDelegate);
     }
-    
+
     public Button(String aText, Icon aIcon, int aIconTextGap) {
         this(aText, aIcon, aIconTextGap, null);
     }
@@ -32,7 +31,16 @@ public class Button extends Component<JButton> {
     public Button(String aText, Icon aIcon) {
         this(aText, aIcon, 4);
     }
+    
+    private static final String BUTTON_CONSTRUCTOR_JSDOC = "/**\n"
+            + "* Simple button.\n"
+            + "* @param text Button's text\n"
+            + "* @param icon Button's icon (optional)\n"
+            + "* @param iconTextGap Text gap (optional)\n"
+            + "* @param actionHandler On clicked actions function (optional)\n"
+            + "*/";
 
+    @ScriptFunction(jsDoc = BUTTON_CONSTRUCTOR_JSDOC, params = {"text", "icon", "iconTextGap", "actionHandler"})
     public Button(String aText, Icon aIcon, int aIconTextGap, Function aActionPerformedHandler) {
         super();
         setDelegate(new JButton(aText, aIcon));
@@ -43,46 +51,46 @@ public class Button extends Component<JButton> {
     public Button(String aText, Icon aIcon, Function aActionPerformedHandler) {
         this(aText, aIcon, 4, aActionPerformedHandler);
     }
-    
+
     public Button(String aText) {
         this(aText, null, 4);
     }
-    
+
     public Button() {
         this(null, null, 4);
     }
-    
-    @ScriptFunction(jsDocText="Text on the button.")
+
+    @ScriptFunction(jsDoc = "Text on the button.")
     public String getText() {
         return delegate.getText();
     }
-    
+
     @ScriptFunction
     public void setText(String aValue) {
         delegate.setText(aValue);
     }
-    
-    @ScriptFunction(jsDocText="Image picture for the button.")
+
+    @ScriptFunction(jsDoc = "Image picture for the button.")
     public Icon getIcon() {
         return delegate.getIcon();
     }
-    
+
     @ScriptFunction
     public void setIcon(Icon aValue) {
         delegate.setIcon(aValue);
     }
-    
-    @ScriptFunction(jsDocText="The amount of space between the text and the icon displayed in this button.")
+
+    @ScriptFunction(jsDoc = "The amount of space between the text and the icon displayed in this button.")
     public int getIconTextGap() {
         return delegate.getIconTextGap();
     }
-    
+
     @ScriptFunction
     public void setIconTextGap(int aValue) {
         delegate.setIconTextGap(aValue);
     }
-    
-    @ScriptFunction(jsDocText="Horizontal position of the text relative to the icon.")
+
+    @ScriptFunction(jsDoc = "Horizontal position of the text relative to the icon.")
     public int getHorizontalTextPosition() {
         switch (delegate.getHorizontalTextPosition()) {
             case JLabel.LEFT:
@@ -95,7 +103,7 @@ public class Button extends Component<JButton> {
                 return HorizontalPosition.LEFT;
         }
     }
-    
+
     @ScriptFunction
     public void setHorizontalTextPosition(int aValue) {
         switch (aValue) {
@@ -113,8 +121,8 @@ public class Button extends Component<JButton> {
                 break;
         }
     }
-    
-    @ScriptFunction(jsDocText="Vertical position of the text relative to the icon.")
+
+    @ScriptFunction(jsDoc = "Vertical position of the text relative to the icon.")
     public int getVerticalTextPosition() {
         switch (delegate.getVerticalTextPosition()) {
             case JLabel.TOP:
@@ -127,7 +135,7 @@ public class Button extends Component<JButton> {
                 return VerticalPosition.CENTER;
         }
     }
-    
+
     @ScriptFunction
     public void setVerticalTextPosition(int aValue) {
         switch (aValue) {

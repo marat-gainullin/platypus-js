@@ -22,7 +22,13 @@ import com.eas.designer.application.module.completion.BeanCompletionItem;
 import com.eas.designer.application.module.completion.CompletionContext;
 import com.eas.designer.application.module.completion.JsCompletionProvider;
 import com.eas.designer.application.module.completion.ModuleCompletionContext;
+import com.eas.designer.application.module.completion.ModuleCompletionSupportService;
+import com.eas.designer.application.module.completion.SystemConstructorCompletionItem;
+import com.eas.script.ScriptFunction;
 import java.awt.Container;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.util.Arrays;
 import org.netbeans.spi.editor.completion.CompletionResultSet;
 
 /**
@@ -42,6 +48,27 @@ public class FormCompletionContext extends ModuleCompletionContext {
         if (completionScopeInfo.mode == CompletionMode.VARIABLES_AND_FUNCTIONS) {
             addItem(resultSet, point.filter, new BeanCompletionItem(Container.class, FormRunner.VIEW_SCRIPT_NAME, null, point.caretBeginWordOffset, point.caretEndWordOffset)); //NOI18N
             fillComponents(point, resultSet);
+        }
+    }
+
+    @Override
+    protected void fillSystemConstructors(JsCompletionProvider.CompletionPoint point, CompletionResultSet resultSet) {
+        super.fillSystemConstructors(point, resultSet);
+        for (Class<?> clazz : FormUtils.getPlatypusApiClasses()) {
+            for (Constructor<?> constructor : clazz.getConstructors()) {
+                if (constructor.isAnnotationPresent(ScriptFunction.class)) {
+                    ScriptFunction annotation = constructor.getAnnotation(ScriptFunction.class);
+                    addItem(resultSet,
+                            point.filter,
+                            new SystemConstructorCompletionItem(clazz.getSimpleName(),
+                            "",//NOI18N
+                            Arrays.<String>asList(annotation.params()),
+                            annotation.jsDoc(),
+                            point.caretBeginWordOffset,
+                            point.caretEndWordOffset));
+                    break;
+                }
+            }
         }
     }
 

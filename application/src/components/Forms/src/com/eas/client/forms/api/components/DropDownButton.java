@@ -56,7 +56,7 @@ public class DropDownButton extends Component<JDropDownButton> {
         this(null, null, 4);
     }
     
-    @ScriptFunction(jsDocText="PopupMenu for the component.")
+    @ScriptFunction(jsDoc="PopupMenu for the component.")
     public PopupMenu getDropDownMenu() {
         Container<?> cMenu = getContainerWrapper(delegate.getDropDownMenu());
         return cMenu instanceof PopupMenu ? (PopupMenu) cMenu : null;
@@ -68,7 +68,7 @@ public class DropDownButton extends Component<JDropDownButton> {
         delegate.setDropDownMenu(jPopupMenu instanceof JPopupMenu ? (JPopupMenu) jPopupMenu : null);
     }
 
-    @ScriptFunction(jsDocText="Text on the button.")
+    @ScriptFunction(jsDoc="Text on the button.")
     public String getText() {
         return delegate.getText();
     }
@@ -78,7 +78,7 @@ public class DropDownButton extends Component<JDropDownButton> {
         delegate.setText(aValue);
     }
 
-    @ScriptFunction(jsDocText="Image picture for the button.")
+    @ScriptFunction(jsDoc="Image picture for the button.")
     public Icon getIcon() {
         return delegate.getIcon();
     }
@@ -88,7 +88,7 @@ public class DropDownButton extends Component<JDropDownButton> {
         delegate.setIcon(aValue);
     }
 
-    @ScriptFunction(jsDocText="The amount of space between the text and the icon displayed in this button.")
+    @ScriptFunction(jsDoc="The amount of space between the text and the icon displayed in this button.")
     public int getIconTextGap() {
         return delegate.getIconTextGap();
     }
@@ -98,7 +98,7 @@ public class DropDownButton extends Component<JDropDownButton> {
         delegate.setIconTextGap(aValue);
     }
 
-    @ScriptFunction(jsDocText="Horizontal position of the text relative to the icon.")
+    @ScriptFunction(jsDoc="Horizontal position of the text relative to the icon.")
     public int getHorizontalTextPosition() {
         switch (delegate.getHorizontalTextPosition()) {
             case JLabel.LEFT:
@@ -130,7 +130,7 @@ public class DropDownButton extends Component<JDropDownButton> {
         }
     }
     
-    @ScriptFunction(jsDocText="Vertical position of the text relative to the icon.")
+    @ScriptFunction(jsDoc="Vertical position of the text relative to the icon.")
     public int getVerticalTextPosition() {
         switch (delegate.getHorizontalTextPosition()) {
             case JLabel.TOP:

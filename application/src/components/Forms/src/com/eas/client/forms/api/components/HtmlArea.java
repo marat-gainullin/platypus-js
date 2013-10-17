@@ -31,7 +31,7 @@ public class HtmlArea extends Component<JEditorPane>{
         this((String) null);
     }
 
-    @ScriptFunction(jsDocText = "The text contained in this component.")
+    @ScriptFunction(jsDoc = "The text contained in this component.")
     public String getText() {
         return delegate.getText();
     }

@@ -32,12 +32,12 @@ public class FormattedField extends Component<JFormattedTextField> {
         this((Object) null);
     }
     
-    @ScriptFunction(jsDocText = "Gets text of this component.")
+    @ScriptFunction(jsDoc = "Gets text of this component.")
     public String getText() {
         return delegate.getText();
     }
     
-    @ScriptFunction(jsDocText = "The value of this component.")
+    @ScriptFunction(jsDoc = "The value of this component.")
     public Object getValue() {
         return ScriptUtils.javaToJS(delegate.getValue(), jsWrapper);
     }

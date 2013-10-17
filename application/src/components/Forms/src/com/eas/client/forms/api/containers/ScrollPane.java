@@ -8,8 +8,6 @@ import com.eas.client.forms.api.Component;
 import com.eas.client.forms.api.Container;
 import com.eas.client.forms.api.ControlsWrapper;
 import com.eas.script.ScriptFunction;
-import java.awt.event.ContainerAdapter;
-import java.awt.event.ContainerEvent;
 import javax.swing.JScrollPane;
 
 /**
@@ -32,7 +30,7 @@ public class ScrollPane extends Container<JScrollPane> {
         this((Component<?>) null);
     }
 
-    @ScriptFunction(jsDocText = "Appends the specified component to the end of this container.")
+    @ScriptFunction(jsDoc = "Appends the specified component to the end of this container.")
     public void add(Component<?> aComp) {
         if (aComp != null) {
             delegate.setViewportView(unwrap(aComp));
@@ -41,7 +39,7 @@ public class ScrollPane extends Container<JScrollPane> {
         }
     }
 
-    @ScriptFunction(jsDocText = "Sets the specified component as the scroll pane view.")
+    @ScriptFunction(jsDoc = "Sets the specified component as the scroll pane view.")
     public Component<?> getView() {
         return getComponentWrapper(delegate.getViewport().getView());
     }

@@ -52,7 +52,7 @@ public class ApplicationPlatypusModel extends ApplicationModel<ApplicationPlatyp
         return true;
     }
 
-    @ScriptFunction(jsDocText = "Saves model data changes. Calls aCallback when done."
+    @ScriptFunction(jsDoc = "Saves model data changes. Calls aCallback when done."
             + "If model can't apply the changed, than exception is thrown. "
             + "In this case, application can call model.save() another time to save the changes. "
             + "If an application need to abort futher attempts and discard model data changes, "
@@ -88,12 +88,12 @@ public class ApplicationPlatypusModel extends ApplicationModel<ApplicationPlatyp
     public void rolledback() throws Exception {
     }
 
-    @ScriptFunction(jsDocText = "Requeries model data with callback.")
+    @ScriptFunction(jsDoc = "Requeries model data with callback.")
     public void requery(Function aOnSuccess) throws Exception {
         requery(aOnSuccess, null);
     }
 
-    @ScriptFunction(jsDocText = "Requeries model data with callback.")
+    @ScriptFunction(jsDoc = "Requeries model data with callback.")
     @Override
     public void requery(Function aOnSuccess, Function aOnFailure) throws Exception {
         changeLog.clear();
