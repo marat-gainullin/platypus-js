@@ -26,11 +26,11 @@ public class ModuleCompletionSupportService implements CompletionSupportService 
     private static final String SERVER_MODULE_CONSTRUCTOR_NAME = "ServerModule";//NOI18N
     private static final String MODULE_CONSTRUCTOR_JSDOC = "/**\n"
             + "* Creates new Platypus application element instance.\n"//NOI18N
-            + "* @param appElementName Application element name\n"//NOI18N
+            + "* @param name Application element name\n"//NOI18N
             + "*/";//NOI18N
     private static final String SERVER_MODULE_CONSTRUCTOR_JSDOC = "/**\n"
             + "* Creates new proxy to a Platypus application element instance on the server.\n"//NOI18N
-            + "* @param appElementName Server application element name\n"//NOI18N
+            + "* @param name Server application element name\n"//NOI18N
             + "*/";//NOI18N
 
     @Override

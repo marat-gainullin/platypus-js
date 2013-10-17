@@ -29,7 +29,7 @@ public class ReportCompletionSupportService implements CompletionSupportService 
     private static final String REPORT_CONSTRUCTOR_NAME = "Report";//NOI18N
     private static final String REPORT_CONSTRUCTOR_JSDOC = "/**\n"
             + "* Creates new Platypus Report application element instance.\n"//NOI18N
-            + "* @param appElementName Report application element name\n"//NOI18N
+            + "* @param name Report application element name\n"//NOI18N
             + "*/";//NOI18N
 
     @Override

@@ -32,7 +32,7 @@ public class FormCompletionSupportService implements CompletionSupportService {
     private static final String FORM_CONSTRUCTOR_NAME = "Form";//NOI18N
     private static final String FORM_CONSTRUCTOR_JSDOC = "/**\n"
             + "* Creates new Platypus Form application element instance.\n"//NOI18N
-            + "* @param appElementName Form application element name\n"//NOI18N
+            + "* @param name Form application element name\n"//NOI18N
             + "*/";//NOI18N
 
     @Override

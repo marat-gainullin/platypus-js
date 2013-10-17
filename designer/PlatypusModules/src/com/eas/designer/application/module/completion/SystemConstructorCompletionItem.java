@@ -13,7 +13,7 @@ import javax.swing.ImageIcon;
  */
 public class SystemConstructorCompletionItem extends JsFunctionCompletionItem {
 
-    protected static final ImageIcon CONSTRUCTOR_ICON = new ImageIcon(SystemConstructorCompletionItem.class.getResource("class_16.png")); //NOI18N
+    private static final ImageIcon CONSTRUCTOR_ICON = new ImageIcon(SystemConstructorCompletionItem.class.getResource("class_16.png")); //NOI18N
     private static final int SORT_PRIORITY = 40;
     
     public SystemConstructorCompletionItem(String name, String rightText, List<String> params, String jsDoc, int aStartOffset, int aEndOffset) {
