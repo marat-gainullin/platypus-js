@@ -16,27 +16,35 @@ import org.mozilla.javascript.Function;
  */
 public class RadioButton extends Component<JRadioButton> {
 
-    protected RadioButton(JRadioButton aDelegate) {
-        super();
-        setDelegate(aDelegate);
-    }
+    private static final String CONSTRUCTOR_JSDOC = "/**\n"
+            + "* Radio button component.\n"
+            + "* @param text Component's text (optional)\n"
+            + "* @param selected true if component is selected (optional)\n"
+            + "* @param actionPerformed On action performed function (optional)\n"
+            + "*/";
 
-    public RadioButton(String aText, boolean aSelected) {
-        this(aText, aSelected, null);
-    }
-
+    @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text", "selected", "actionPerformed"})
     public RadioButton(String aText, boolean aSelected, Function aActionPerformedHandler) {
         super();
         setDelegate(new JRadioButton(aText, aSelected));
         setOnActionPerformed(aActionPerformedHandler);
     }
 
+    public RadioButton(String aText, boolean aSelected) {
+        this(aText, aSelected, null);
+    }
+    
     public RadioButton(String aText) {
         this(aText, false);
     }
 
     public RadioButton() {
         this(null, false);
+    }
+    
+    protected RadioButton(JRadioButton aDelegate) {
+        super();
+        setDelegate(aDelegate);
     }
     
     @ScriptFunction(jsDoc="The button's text.")

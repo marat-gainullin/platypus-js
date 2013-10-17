@@ -32,15 +32,15 @@ public class Button extends Component<JButton> {
         this(aText, aIcon, 4);
     }
     
-    private static final String BUTTON_CONSTRUCTOR_JSDOC = "/**\n"
-            + "* Simple button.\n"
-            + "* @param text Button's text\n"
-            + "* @param icon Button's icon (optional)\n"
+    private static final String CONSTRUCTOR_JSDOC = "/**\n"
+            + "* Simple button component.\n"
+            + "* @param text Component's text (optional)\n"
+            + "* @param icon Component's icon (optional)\n"
             + "* @param iconTextGap Text gap (optional)\n"
-            + "* @param actionHandler On clicked actions function (optional)\n"
+            + "* @param actionPerformed On action performed function (optional)\n"
             + "*/";
 
-    @ScriptFunction(jsDoc = BUTTON_CONSTRUCTOR_JSDOC, params = {"text", "icon", "iconTextGap", "actionHandler"})
+    @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text", "icon", "iconTextGap", "actionPerformed"})
     public Button(String aText, Icon aIcon, int aIconTextGap, Function aActionPerformedHandler) {
         super();
         setDelegate(new JButton(aText, aIcon));

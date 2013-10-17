@@ -13,13 +13,13 @@ import javax.swing.JTextField;
  * @author mg
  */
 public class TextField extends Component<JTextField>{
-    
-    protected TextField(JTextField aDelegate)
-    {
-        super();
-        setDelegate(aDelegate);
-    }
-    
+        
+    private static final String CONSTRUCTOR_JSDOC = "/**\n"
+            + "* Text field component. \n"
+            + "* @param text Text field initial text (optional)\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text"})
     public TextField(String aText)
     {
         super();
@@ -29,6 +29,12 @@ public class TextField extends Component<JTextField>{
     public TextField()
     {
         this((String)null);
+    }
+    
+    protected TextField(JTextField aDelegate)
+    {
+        super();
+        setDelegate(aDelegate);
     }
     
     @ScriptFunction(jsDoc = "The text contained in this component.")

@@ -14,11 +14,12 @@ import javax.swing.JTextPane;
  */
 public class TextArea extends Component<JTextPane> {
 
-    protected TextArea(JTextPane aDelegate) {
-        super();
-        setDelegate(aDelegate);
-    }
+    private static final String CONSTRUCTOR_JSDOC = "/**\n"
+            + "* Text area component. \n"
+            + "* @param text Text area initial text (optional)\n"
+            + "*/";
 
+    @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text"})
     public TextArea(String aText) {
         super();
         JTextPane pane = new JTextPane();
@@ -30,6 +31,11 @@ public class TextArea extends Component<JTextPane> {
         this((String) null);
     }
 
+    protected TextArea(JTextPane aDelegate) {
+        super();
+        setDelegate(aDelegate);
+    }
+    
     @ScriptFunction(jsDoc = "The text contained in this component.")
     public String getText() {
         return delegate.getText();
