@@ -89,8 +89,10 @@ public class PlatypusSplitContainer extends BorderLayoutContainer {
 			leftComponent.getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
 			cp.setWidget(leftComponent);
 		}
-		if (isAttached())
-			forceLayout();
+		if (isAttached()){
+			clearSizeCache();// otherwise setSize() will have no effect
+			setSize(width, height);
+		}
 	}
 
 	protected void organizeRight() {
@@ -101,8 +103,9 @@ public class PlatypusSplitContainer extends BorderLayoutContainer {
 			c.add(rightComponent, new MarginData(0, 0, 0, 0));
 			setCenterWidget(c, new MarginData(0, 0, 0, 0));
 		}
-		if (isAttached()) {
-			forceLayout();
+		if (isAttached()){
+			clearSizeCache();// otherwise setSize() will have no effect
+			setSize(width, height);
 		}
 	}
 

@@ -451,8 +451,8 @@ public class GxtControlsFactory {
 								if (btn.getParent() instanceof ResizeContainer) {// fix for sencha ResizeContainer.onResize bug
 									ResizeContainer c = (ResizeContainer)btn.getParent();
 									Size s = XElement.as(c.getElement()).getSize(false);
-									c.setPixelSize(s.getWidth()-1, s.getHeight());
-									c.setPixelSize(s.getWidth()+1, s.getHeight());
+									c.clearSizeCache();
+									c.setPixelSize(s.getWidth(), s.getHeight());
 								} else if (btn.getParent() instanceof RequiresResize) {
 									((RequiresResize) btn.getParent()).onResize();
 								}
@@ -530,8 +530,8 @@ public class GxtControlsFactory {
 						if (component.getParent() instanceof ResizeContainer) {// fix for sencha ResizeContainer.onResize bug
 							ResizeContainer c = (ResizeContainer)component.getParent();
 							Size s = XElement.as(c.getElement()).getSize(false);
-							c.setPixelSize(s.getWidth()-1, s.getHeight());
-							c.setPixelSize(s.getWidth()+1, s.getHeight());
+							c.clearSizeCache();
+							c.setPixelSize(s.getWidth(), s.getHeight());
 						} else if (component.getParent() instanceof RequiresResize) {
 							((RequiresResize) component.getParent()).onResize();
 						}

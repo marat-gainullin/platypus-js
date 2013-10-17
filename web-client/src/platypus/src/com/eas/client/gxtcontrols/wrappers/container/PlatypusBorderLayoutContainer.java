@@ -39,6 +39,7 @@ public class PlatypusBorderLayoutContainer extends BorderLayoutContainer {
 		} else if (aPlace == LayoutRegion.SOUTH) {
 			setSouthWidget(aWidget, new BorderLayoutData(aSize));
 		}
+		// TODO: may be replace with lastSize = null; setSize(width, height); - like in Platypus[VH]BoxLayoutContainer
 		if (isAttached()) {
 			Scheduler.get().scheduleDeferred(new ScheduledCommand() {
 				@Override

@@ -37,8 +37,10 @@ public class PlatypusCardLayoutContainer extends CardLayoutContainer {
 			super.remove(cards.get(aCardName));
 		super.add(aWidget, new MarginData(vGap, hGap, vGap, hGap));
 		cards.put(aCardName, aWidget);
-		if (isAttached())
-			forceLayout();
+		if (isAttached()){
+			clearSizeCache();// otherwise setSize() will have no effect
+			setSize(width, height);
+		}
 	}
 
 	public int getHgap() {

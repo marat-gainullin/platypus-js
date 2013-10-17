@@ -87,8 +87,10 @@ public class PlatypusGridLayoutContainer extends ResizeContainer {
 		if (aWidget != null) {
 			aWidget.getElement().getStyle().setPosition(Position.ABSOLUTE);
 			super.add(aWidget);
-			if (isAttached())
-				forceLayout();
+			if (isAttached()){
+				clearSizeCache();// otherwise setSize() will have no effect
+				setSize(width, height);
+			}
 		}
 	}
 
