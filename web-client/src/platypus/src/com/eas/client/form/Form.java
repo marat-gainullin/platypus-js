@@ -33,6 +33,7 @@ import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.xhr.client.XMLHttpRequest;
+import com.sencha.gxt.core.client.Style.LayoutRegion;
 import com.sencha.gxt.core.client.util.Point;
 import com.sencha.gxt.widget.core.client.Component;
 import com.sencha.gxt.widget.core.client.Window;
@@ -341,7 +342,7 @@ public class Form {
 
 	protected void addToContainer(Component toAdd, HasWidgets aPanel) {
 		if (aPanel instanceof PlatypusBorderLayoutContainer) {
-			((PlatypusBorderLayoutContainer) aPanel).setCenterWidget(toAdd);
+			((PlatypusBorderLayoutContainer) aPanel).add(toAdd, LayoutRegion.CENTER, 0);
 		} else if (aPanel instanceof PlatypusMarginLayoutContainer) {
 			MarginConstraints mc = new MarginConstraints();
 			mc.setTop(new Margin(0, Style.Unit.PX));
@@ -800,7 +801,7 @@ public class Form {
 	        aModule.showOnPanel = function(aPanel) {
 	        	if(aPanel.unwrap)
 	        		showedWnd = aForm.@com.eas.client.form.Form::showOnPanel(Lcom/google/gwt/user/client/ui/HasWidgets;)(aPanel.unwrap());
-	        	else if ("tagName" in aPanel) 
+	        	else if (aPanel.tagName) 
 	        		showedWnd = aForm.@com.eas.client.form.Form::showOnPanel(Lcom/google/gwt/user/client/Element;)(aPanel);	
 	        	else 
 	        		showedWnd = aForm.@com.eas.client.form.Form::showOnPanel(Ljava/lang/String;)(aPanel);
