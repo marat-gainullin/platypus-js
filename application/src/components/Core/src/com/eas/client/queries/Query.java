@@ -31,11 +31,11 @@ public abstract class Query<T extends Client> {
     protected Map<String, Map<String, String>> parametersBinds = new HashMap<>();
     protected transient Fields fields = new Fields();
     protected transient Parameters params = new Parameters();
-    protected transient String title = null;
+    protected transient String title;
     protected String dbId;
     protected String entityId;
-    protected boolean procedure = false;
-    protected boolean manual = false;
+    protected boolean procedure;
+    protected boolean manual;
     protected Set<String> readRoles = new HashSet<>();
     protected Set<String> writeRoles = new HashSet<>();
     protected PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);

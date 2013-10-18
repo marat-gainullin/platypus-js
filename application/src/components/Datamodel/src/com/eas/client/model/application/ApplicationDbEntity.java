@@ -83,11 +83,13 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
             rowset.removeRowsetListener(this);
             unforwardChangeLog();
         }
-        SqlCompiledQuery compiled = query.compile();
-        compiled.setSessionId(model.getSessionId());
-        rowset = compiled.prepareRowset();
-        forwardChangeLog();
-        rowset.addRowsetListener(this);
-        changeSupport.firePropertyChange("rowset", oldRowset, rowset);
+        if (query != null) {
+            SqlCompiledQuery compiled = query.compile();
+            compiled.setSessionId(model.getSessionId());
+            rowset = compiled.prepareRowset();
+            forwardChangeLog();
+            rowset.addRowsetListener(this);
+            changeSupport.firePropertyChange("rowset", oldRowset, rowset);
+        }
     }
 }

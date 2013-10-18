@@ -36,10 +36,10 @@ public class SqlQuery extends Query<DbClient> {
     private final static Pattern STRINGS_PATTERN = Pattern.compile("'[^']*'", Pattern.MULTILINE);
     // For single and multi-table queries
     // Joins, conditions, parametersList, groups, havings etc.
-    protected String sqlText = null;
+    protected String sqlText;
     // the same as sqlText, but it is used when very custom sql is needed.
-    protected String fullSqlText = null;
-    protected Set<String> writable = null;
+    protected String fullSqlText;
+    protected Set<String> writable;
     private int pageSize = FlowProvider.NO_PAGING_PAGE_SIZE;
     private boolean publicAccess;
 
