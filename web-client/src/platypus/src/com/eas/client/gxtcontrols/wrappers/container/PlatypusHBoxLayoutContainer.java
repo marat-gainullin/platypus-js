@@ -20,15 +20,19 @@ public class PlatypusHBoxLayoutContainer extends HBoxLayoutContainer {
 		// flex.setFlex(1);
 		child.setLayoutData(flex);
 		super.add(child);
-		if (isAttached())
-			forceLayout();
+		if (isAttached()){
+			clearSizeCache();// otherwise setSize() will have no effect
+			setSize(width, height);
+		}
 	}
 
 	@Override
 	public boolean remove(Widget child) {
 		boolean res = super.remove(child);
-		if (isAttached())
-			forceLayout();
+		if (isAttached()){
+			clearSizeCache();// otherwise setSize() will have no effect
+			setSize(width, height);
+		}
 		return res;
 	}
 
