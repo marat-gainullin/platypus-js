@@ -8,7 +8,6 @@ import com.eas.client.cache.PlatypusFiles;
 import com.eas.designer.application.indexer.AppElementInfo;
 import com.eas.designer.application.module.PlatypusModuleDataLoader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -20,8 +19,7 @@ import org.openide.util.lookup.ServiceProvider;
  */
 @ServiceProvider(service = CompletionSupportService.class)
 public class ModuleCompletionSupportService implements CompletionSupportService {
-
-    public static final String DOUBLE_QUOTES = "\"\"";//NOI18N
+    
     private static final String MODULE_CONSTRUCTOR_NAME = "Module";//NOI18N
     private static final String SERVER_MODULE_CONSTRUCTOR_NAME = "ServerModule";//NOI18N
     private static final String MODULE_CONSTRUCTOR_JSDOC = "/**\n"
@@ -41,8 +39,8 @@ public class ModuleCompletionSupportService implements CompletionSupportService 
     @Override
     public Collection<SystemConstructorCompletionItem> getSystemConstructors(JsCompletionProvider.CompletionPoint point) {
         List<SystemConstructorCompletionItem> constructors = new ArrayList<>();
-        constructors.add(new SystemConstructorCompletionItem(MODULE_CONSTRUCTOR_NAME, "", Arrays.<String>asList(new String[]{DOUBLE_QUOTES}), MODULE_CONSTRUCTOR_JSDOC, point.caretBeginWordOffset, point.caretEndWordOffset));
-        constructors.add(new SystemConstructorCompletionItem(SERVER_MODULE_CONSTRUCTOR_NAME, "", Arrays.<String>asList(new String[]{DOUBLE_QUOTES}), SERVER_MODULE_CONSTRUCTOR_JSDOC, point.caretBeginWordOffset, point.caretEndWordOffset));
+        constructors.add(new SystemConstructorCompletionItem(MODULE_CONSTRUCTOR_NAME, "", SystemConstructorCompletionItem.DOUBLE_QUOTES_PARAMS, MODULE_CONSTRUCTOR_JSDOC, point.caretBeginWordOffset, point.caretEndWordOffset));
+        constructors.add(new SystemConstructorCompletionItem(SERVER_MODULE_CONSTRUCTOR_NAME, "", SystemConstructorCompletionItem.DOUBLE_QUOTES_PARAMS, SERVER_MODULE_CONSTRUCTOR_JSDOC, point.caretBeginWordOffset, point.caretEndWordOffset));
         return constructors;
     }
 
