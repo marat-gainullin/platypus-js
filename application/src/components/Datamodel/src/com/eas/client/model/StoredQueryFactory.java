@@ -63,7 +63,7 @@ public class StoredQueryFactory {
             // It's not harmful as long as factory maintains dynamic queries cache by itself.
             // It will be simple projection one cache on another.
             ActualCacheEntry<SqlQuery> res = super.get(aId);
-            if (!client.getAppCache().isActual(aId, res.getTxtContentSize(), res.getTxtContentCrc32())) {
+            if (res != null && !client.getAppCache().isActual(aId, res.getTxtContentSize(), res.getTxtContentCrc32())) {
                 remove(aId);
                 client.getAppCache().remove(aId);
                 res = super.get(aId);
@@ -183,7 +183,7 @@ public class StoredQueryFactory {
                 throw new IllegalArgumentException(String.format(CONTENT_EMPTY_MSG, aAppElementId));
             }
         } else {
-            throw new IllegalArgumentException(String.format(ABSENT_QUERY_MSG, aAppElementId));
+            return null;// It is regular situation that query is absent. Just return null. WARNING: don't throw an exception!
         }
     }
     /**
@@ -277,9 +277,9 @@ public class StoredQueryFactory {
      * @throws Exception
      */
     public SqlQuery getQuery(String aAppElementId, boolean aCopy) throws Exception {
-        SqlQuery query = queriesCache.get(aAppElementId).getValue();
+        ActualCacheEntry<SqlQuery> entry = queriesCache.get(aAppElementId);
         // It's significant to copy the query.
-        return query != null ? (aCopy ? query.copy() : query) : null;
+        return entry != null && entry.getValue() != null ? (aCopy ? entry.getValue().copy() : entry.getValue()) : null;
         /**
          * Otherwise we will get situation with same query instance across
          * multiple entities or across multiple calls to execute query request

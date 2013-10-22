@@ -19,14 +19,20 @@ import javax.swing.JInternalFrame;
  */
 public class DesktopPane extends Component<JDesktopPane> {
 
-    protected DesktopPane(JDesktopPane aDelegate) {
-        super();
-        setDelegate(aDelegate);
-    }
+private static final String CONSTRUCTOR_JSDOC = "/**\n"
+            + "* Desktop pane panel component.\n"
+            + "* This component can be used for creating a multi-document GUI or a virtual desktop.\n"
+            + "*/";
 
+    @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC)
     public DesktopPane() {
         super();
         setDelegate(new JDesktopPane());
+    }
+    
+    protected DesktopPane(JDesktopPane aDelegate) {
+        super();
+        setDelegate(aDelegate);
     }
     
     @ScriptFunction(jsDoc="Minimizes all frames on the pane.")

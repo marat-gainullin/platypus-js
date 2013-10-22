@@ -88,7 +88,7 @@ public class ServerReportProxy extends ScriptableObject {
      */
     private static final String SAVE_JSDOC = ""
             + "/**\n"
-            + " * Save report in file with extention xls.\n"
+            + " * Save report in file with extention xlsx.\n"
             + " * aFileName - path to file.\n"
             + " */";
 

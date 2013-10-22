@@ -358,7 +358,7 @@ public class ExcelReport {
         if (!newDir.exists()) {
             newDir.mkdir();
         }
-        reportPath += File.separator + String.valueOf(IDGenerator.genID()) + ".xls";
+        reportPath += File.separator + String.valueOf(IDGenerator.genID()) + ".xlsx";
         return reportPath;
     }
 

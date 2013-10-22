@@ -684,12 +684,39 @@ public class SQLUtils {
 
         NUMBERS,
         LOGICAL,
+        BLOB,
         LOBS,
         BINARIES,
         STRINGS,
         DATES,
         USER_DEFINED,
-        UNSUPPORTED
+        UNSUPPORTED;
+
+        /**
+         * This method should be deleted when all application runtime will
+         * migrate to TypesGroup types
+         *
+         * @return
+         */
+        public int toJdbcAnalog() {
+            if (this == NUMBERS) {
+                return Types.NUMERIC;
+            } else if (this == LOGICAL) {
+                return Types.BOOLEAN;
+            } else if (this == BLOB) {
+                return Types.BLOB;
+            } else if (this == LOBS) {
+                return Types.CLOB;
+            } else if (this == BINARIES) {
+                return Types.VARBINARY;
+            } else if (this == STRINGS) {
+                return Types.VARCHAR;
+            } else if (this == DATES) {
+                return Types.TIMESTAMP;
+            } else {
+                return Types.OTHER;
+            }
+        }
     }
     public static final ResourceBundle DbLocalizations = ResourceBundle.getBundle("com/eas/client/DbLocalizations");
 
@@ -722,7 +749,8 @@ public class SQLUtils {
         typesCompatible.put(java.sql.Types.VARBINARY, TypesGroup.BINARIES);
         typesCompatible.put(java.sql.Types.BINARY, TypesGroup.BINARIES);
         typesCompatible.put(java.sql.Types.LONGVARBINARY, TypesGroup.BINARIES);
-        // Lobs
+         // Lobs
+        typesCompatible.put(java.sql.Types.BLOB, TypesGroup.BLOB);
         typesCompatible.put(java.sql.Types.CLOB, TypesGroup.LOBS);
         typesCompatible.put(java.sql.Types.NCLOB, TypesGroup.LOBS);
         // Strings

@@ -16,7 +16,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Resolver incapsulates functionality, involved in fields types resolving from/to RDBMS friendly form.
+ * Resolver incapsulates functionality, involved in fields types resolving
+ * from/to RDBMS friendly form.
  *
  * @author mg
  */
@@ -41,8 +42,11 @@ public abstract class TypesResolver {
     }
 
     /**
-     * Resovles field's sql type, sql type name and java class name to RDBMS friendly form. I.e. it corrects field type information. For example, oracle geometry has type name MDSYS.SDO_GEOMETRY
-     * (correct only with schema name). Nevetheless, oracle returns type name in the ResultSetMetaData as SDO_GEOMETRY only.
+     * Resovles field's sql type, sql type name and java class name to RDBMS
+     * friendly form. I.e. it corrects field type information. For example,
+     * oracle geometry has type name MDSYS.SDO_GEOMETRY (correct only with
+     * schema name). Nevetheless, oracle returns type name in the
+     * ResultSetMetaData as SDO_GEOMETRY only.
      *
      * @param aField Field instance data type info to be resolved in.
      * @see java.sql.ResultSetMetaData
@@ -69,12 +73,22 @@ public abstract class TypesResolver {
     public abstract Map<Integer, String> getJdbcTypes2RdbmsTypes();
 
     /**
-     * Resovles field's sql type, sql type name and java class name to application friendly form
+     * Resovles field's sql type, sql type name and java class name to
+     * application friendly form
      *
      * @param aField Field instance data type info to be resolved in.
      */
     public void resolve2Application(Field aField) {
         int jdbcType = getJdbcTypeByRDBMSTypename(aField.getTypeInfo().getSqlTypeName());
+        if (jdbcType == Types.OTHER && SQLUtils.isTypeSupported(aField.getTypeInfo().getSqlType())) {
+            // Resolver can't resolve aField's type to application, but such type is supported anyway.
+            // We have to correct such situation.
+            // Falling back to old-style implementation            
+            SQLUtils.TypesGroup tg = SQLUtils.getTypeGroup(aField.getTypeInfo().getSqlType());
+            if (tg != null) {
+                jdbcType = tg.toJdbcAnalog();
+            }
+        }
         aField.setTypeInfo(DataTypeInfo.valueOf(jdbcType).copy());
     }
 

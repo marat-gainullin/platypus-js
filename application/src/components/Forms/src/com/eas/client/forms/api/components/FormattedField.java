@@ -17,11 +17,12 @@ import javax.swing.JFormattedTextField;
  */
 public class FormattedField extends Component<JFormattedTextField> {
     
-    protected FormattedField(JFormattedTextField aDelegate) {
-        super();
-        setDelegate(aDelegate);
-    }
-    
+    private static final String CONSTRUCTOR_JSDOC = "/**\n"
+            + "* Formatted field component. \n"
+            + "* @param value Formatted field value (optional)\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"value"})
     public FormattedField(Object aValue) {
         super();
         setDelegate(new JFormattedTextField());
@@ -30,6 +31,11 @@ public class FormattedField extends Component<JFormattedTextField> {
     
     public FormattedField() {
         this((Object) null);
+    }
+    
+    protected FormattedField(JFormattedTextField aDelegate) {
+        super();
+        setDelegate(aDelegate);
     }
     
     @ScriptFunction(jsDoc = "Gets text of this component.")

@@ -32,7 +32,7 @@ public class FormCompletionSupportService implements CompletionSupportService {
     private static final String FORM_CONSTRUCTOR_NAME = "Form";//NOI18N
     private static final String FORM_CONSTRUCTOR_JSDOC = "/**\n"
             + "* Creates new Platypus Form application element instance.\n"//NOI18N
-            + "* @param appElementName Form application element name\n"//NOI18N
+            + "* @param name Form application element name\n"//NOI18N
             + "*/";//NOI18N
 
     @Override
@@ -43,7 +43,7 @@ public class FormCompletionSupportService implements CompletionSupportService {
     @Override
     public Collection<SystemConstructorCompletionItem> getSystemConstructors(JsCompletionProvider.CompletionPoint point) {
         List<SystemConstructorCompletionItem> constructors = new ArrayList<>();
-        constructors.add(new SystemConstructorCompletionItem(FORM_CONSTRUCTOR_NAME, "", Arrays.<String>asList(new String[]{ModuleCompletionSupportService.DOUBLE_QUOTES}), FORM_CONSTRUCTOR_JSDOC, point.caretBeginWordOffset, point.caretEndWordOffset));
+        constructors.add(new SystemConstructorCompletionItem(FORM_CONSTRUCTOR_NAME, "", SystemConstructorCompletionItem.DOUBLE_QUOTES_PARAMS, FORM_CONSTRUCTOR_JSDOC, point.caretBeginWordOffset, point.caretEndWordOffset));
         return constructors;
     }
 

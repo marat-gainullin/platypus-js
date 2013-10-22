@@ -19,7 +19,7 @@ import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Node;
 import org.openide.nodes.Node.Cookie;
 
-@MIMEResolver.ExtensionRegistration(displayName="#LBL_PlatypusReport_layout_file", extension="xls", mimeType="application/vnd.ms-excel")
+@MIMEResolver.ExtensionRegistration(displayName="#LBL_PlatypusReport_layout_file", extension="xlsx", mimeType="application/vnd.ms-excel")
 public class PlatypusReportDataObject extends PlatypusModuleDataObject {
 
     protected Entry layoutEntry;

@@ -25,6 +25,14 @@ public class CheckBox extends Component<JCheckBox> {
         this(aText, aSelected, null);
     }
     
+    private static final String CONSTRUCTOR_JSDOC = "/**\n"
+            + "* Check box component. \n"
+            + "* @param text Check box text (optional)\n"
+            + "* @param selected true if selected (optional)\n"
+            + "* @param actionPerformed On action performed function (optional)\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text", "selected",  "actionPerformed"})
     public CheckBox(String aText, boolean aSelected, Function aActionPerformedHandler) {
         super();
         setDelegate(new JCheckBox(aText, aSelected));

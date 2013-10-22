@@ -202,6 +202,7 @@ public class QueryResultsView extends javax.swing.JPanel {
         for (Field p : parameters.toCollection()) {
             query.getParameters().add(p.copy());
         }
+        queryEntity.setQueryId(entityId);
         queryEntity.setQuery(query);
         queryEntity.prepareRowsetByQuery();
         model.addEntity(queryEntity);

@@ -430,13 +430,18 @@ public class DatabasesClient implements DbClient {
                                         } else {
                                             fields = mdCaches.get(dbId).getTableMetadata(aEntityId);
                                         }
-                                        Field resolved = fields.get(aFieldName);
-                                        String resolvedTableName = resolved != null ? resolved.getTableName() : null;
-                                        resolvedTableName = resolvedTableName != null ? resolvedTableName.toLowerCase() : "";
-                                        if (query != null && query.getWritable() != null && !query.getWritable().contains(resolvedTableName)) {
-                                            return null;
+                                        if (fields != null) {
+                                            Field resolved = fields.get(aFieldName);
+                                            String resolvedTableName = resolved != null ? resolved.getTableName() : null;
+                                            resolvedTableName = resolvedTableName != null ? resolvedTableName.toLowerCase() : "";
+                                            if (query != null && query.getWritable() != null && !query.getWritable().contains(resolvedTableName)) {
+                                                return null;
+                                            } else {
+                                                return resolved;
+                                            }
                                         } else {
-                                            return resolved;
+                                            Logger.getLogger(DatabasesClient.class.getName()).log(Level.WARNING, "Cant find fields for entity id:" + aEntityId);
+                                            return null;
                                         }
                                     } else {
                                         return null;

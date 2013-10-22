@@ -53,11 +53,12 @@ public class ApplicationPlatypusEntity extends ApplicationEntity<ApplicationPlat
                 rowset.removeRowsetListener(this);
                 unforwardChangeLog();
             }
-            // The first time we obtain a rowset...
-            rowset = query.prepareRowset();
-            forwardChangeLog();
-            rowset.addRowsetListener(this);
-            changeSupport.firePropertyChange("rowset", oldRowset, rowset);
+            if (query != null) {
+                rowset = query.prepareRowset();
+                forwardChangeLog();
+                rowset.addRowsetListener(this);
+                changeSupport.firePropertyChange("rowset", oldRowset, rowset);
+            }
         }
     }
 }

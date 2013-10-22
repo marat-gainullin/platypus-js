@@ -36,7 +36,16 @@ public class DropDownButton extends Component<JDropDownButton> {
     public DropDownButton(String aText, Icon aIcon) {
         this(aText, aIcon, 4);
     }
+    
+    private static final String CONSTRUCTOR_JSDOC = "/**\n"
+            + "* Drop-down button component.\n"
+            + "* @param text Component's text (optional)\n"
+            + "* @param icon Component's icon (optional)\n"
+            + "* @param iconTextGap Text gap (optional)\n"
+            + "* @param actionPerformed On action performed function (optional)\n"
+            + "*/";
 
+    @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text", "icon", "iconTextGap", "actionPerformed"})
     public DropDownButton(String aText, Icon aIcon, int aIconTextGap, Function aActionPerformedHandler) {
         super();
         setDelegate(new JDropDownButton(aText, aIcon));

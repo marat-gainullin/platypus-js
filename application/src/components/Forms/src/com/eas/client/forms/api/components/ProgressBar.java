@@ -14,20 +14,31 @@ import javax.swing.JProgressBar;
  */
 public class ProgressBar extends Component<JProgressBar> {
 
-    protected ProgressBar(JProgressBar aDelegate)
-    {
-        super();
-        setDelegate(aDelegate);
-    }
-    
+ private static final String CONSTRUCTOR_JSDOC = "/**\n"
+            + "* Progress bar component.\n"
+            + "* @param min Minimum value (optional)\n"
+            + "* @param max Maximum value (optional)\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"min", "max"})   
     public ProgressBar(int min, int max) {
         super();
         setDelegate(new JProgressBar(JProgressBar.HORIZONTAL, min, max));
         delegate.setStringPainted(true);
     }
 
+    public ProgressBar(int min) {
+        this(min, 0);
+    }
+    
     public ProgressBar() {
         this(0, 0);
+    }
+    
+    protected ProgressBar(JProgressBar aDelegate)
+    {
+        super();
+        setDelegate(aDelegate);
     }
     
     @ScriptFunction(jsDoc="The progress bar's minimum value.")
