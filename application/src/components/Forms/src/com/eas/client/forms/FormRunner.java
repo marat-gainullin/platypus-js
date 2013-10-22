@@ -448,6 +448,8 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
                     formSize = surface.getSize();
                 }
             });
+            surface.revalidate();
+            surface.repaint();
             showingFormsChanged();
         } else {
             surface.setVisible(true);
@@ -570,6 +572,8 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
                             synchronized (FormRunner.class) {
                                 showingForms.put(formKey, FormRunner.this);
                             }
+                            surface.revalidate();
+                            surface.repaint();
                             showingFormsChanged();
                         }
                         super.processWindowEvent(e);

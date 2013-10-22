@@ -52,8 +52,10 @@ public class PlatypusTabsContainer extends SimpleContainer implements HasSelecti
 
 	public void add(Component aComponent, TabItemConfig aConfig) {
 		tabs.add(aComponent, aConfig);
-		if (isAttached())
-			forceLayout();
+		if (isAttached()){
+			clearSizeCache();// otherwise setSize() will have no effect
+			setSize(width, height);
+		}
 	}
 
 	public void setSelectedComponent(Component aComponent) {

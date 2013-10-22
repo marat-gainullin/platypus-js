@@ -177,6 +177,12 @@ public class SqlCompiledQuery {
             */ 
         return rs;
     }
+    
+    public Rowset prepareRowset() throws Exception {
+        Rowset rowset = new Rowset(flow);
+        rowset.setFields(expectedFields);
+        return rowset;
+    }
 
     /**
      * Executes or enqueue an update to database or platypus server. Enqueueing

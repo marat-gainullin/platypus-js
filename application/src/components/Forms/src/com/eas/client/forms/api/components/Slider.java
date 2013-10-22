@@ -15,11 +15,14 @@ import javax.swing.JSlider;
  */
 public class Slider extends Component<JSlider> {
 
-    protected Slider(JSlider aDelegate) {
-        super();
-        setDelegate(aDelegate);
-    }
+    private static final String CONSTRUCTOR_JSDOC = "/**\n"
+            + "* Slider component.\n"
+            + "* @param min Minimum value (optional)\n"
+            + "* @param max Maximum value (optional)\n"
+            + "* @param value Initial value (optional)\n"
+            + "*/";
 
+    @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"min", "max", "value"}) 
     public Slider(int aOrientation, int min, int max, int value) {
         super();
         int orientation = JSlider.HORIZONTAL;
@@ -39,7 +42,12 @@ public class Slider extends Component<JSlider> {
         this(Orientation.HORIZONTAL, min, max, value);
     }
 
-    @ScriptFunction(jsDocText = "This slider's vertical or horizontal orientation: Orientation.VERTICAL or Orientation.HORIZONTAL")
+    protected Slider(JSlider aDelegate) {
+        super();
+        setDelegate(aDelegate);
+    }
+    
+    @ScriptFunction(jsDoc = "This slider's vertical or horizontal orientation: Orientation.VERTICAL or Orientation.HORIZONTAL")
     public int getOrientation() {
         if (delegate.getOrientation() == JSlider.HORIZONTAL) {
             return Orientation.HORIZONTAL;
@@ -61,7 +69,7 @@ public class Slider extends Component<JSlider> {
         delegate.setOrientation(orientation);
     }
 
-    @ScriptFunction(jsDocText = "The minimum value supported by the slider.")
+    @ScriptFunction(jsDoc = "The minimum value supported by the slider.")
     public int getMinimum() {
         return delegate.getMinimum();
     }
@@ -71,7 +79,7 @@ public class Slider extends Component<JSlider> {
         delegate.setMinimum(aValue);
     }
 
-    @ScriptFunction(jsDocText = "The maximum value supported by the slider.")
+    @ScriptFunction(jsDoc = "The maximum value supported by the slider.")
     public int getMaximum() {
         return delegate.getMaximum();
     }
@@ -81,7 +89,7 @@ public class Slider extends Component<JSlider> {
         delegate.setMaximum(aValue);
     }
     
-    @ScriptFunction(jsDocText = "The slider's current value")
+    @ScriptFunction(jsDoc = "The slider's current value")
     public int getValue() {
         return delegate.getValue();
     }

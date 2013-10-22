@@ -69,7 +69,16 @@ public class PlatypusTreeGridView extends TreeGridView<Row> {
 				try {
 					super.updateColumnHidden(index, hidden);
 				} catch (Exception ex) {
-					Logger.getLogger(PlatypusGridView.class.getName()).log(Level.SEVERE, "Sencha's bug while hiding columns in multi row grid header: " + ex.getMessage());
+					Logger.getLogger(PlatypusGridView.class.getName()).log(Level.SEVERE, "Sencha's bug while hiding a column in multi row grid header: " + ex.getMessage());
+				}
+			}
+			
+			@Override
+			public void updateColumnWidth(int column, int width) {
+				try {
+					super.updateColumnWidth(column, width);
+				} catch (Exception ex) {
+					Logger.getLogger(PlatypusGridView.class.getName()).log(Level.SEVERE, "Sencha's bug while updating column's width in multi row grid header: " + ex.getMessage());
 				}
 			}
 			

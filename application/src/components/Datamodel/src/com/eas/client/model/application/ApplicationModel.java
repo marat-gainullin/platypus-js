@@ -271,7 +271,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         return false;
     }
 
-    @ScriptFunction(jsDocText = "Saves model data changes. "
+    @ScriptFunction(jsDoc = "Saves model data changes. "
             + "If model can't apply the changed, than exception is thrown. "
             + "In this case, application can call model.save() another time to save the changes. "
             + "If an application need to abort futher attempts and discard model data changes, "
@@ -307,10 +307,10 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         return true;
     }
 
-    @ScriptFunction(jsDocText = "Commits model data changes.")
+    @ScriptFunction(jsDoc = "Commits model data changes.")
     public abstract int commit() throws Exception;
 
-    @ScriptFunction(jsDocText = "Drops model data changes. After this method call, save() method have no "
+    @ScriptFunction(jsDoc = "Drops model data changes. After this method call, save() method have no "
             + "any changes to be saved, but still attempts to commit. "
             + "So, call to model.save() on commitable and unchanged model nevertheless leads to commit.")
     public abstract void revert() throws Exception;
@@ -331,7 +331,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         }
     }
 
-    @ScriptFunction(jsDocText = "Requeries model data.")
+    @ScriptFunction(jsDoc = "Requeries model data.")
     public final void requery() throws Exception {
         requery(null, null);
     }
@@ -373,17 +373,17 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         }
     }
 
-    @ScriptFunction(jsDocText = "Refreshes model data if any of its parameters has changed.")
+    @ScriptFunction(jsDoc = "Refreshes model data if any of its parameters has changed.")
     public void execute() throws Exception {
         execute(null, null);
     }
 
-    @ScriptFunction(jsDocText = "Refreshes model data if any of its parameters has changed with callback.")
+    @ScriptFunction(jsDoc = "Refreshes model data if any of its parameters has changed with callback.")
     public void execute(Function aOnSuccess) throws Exception {
         execute(aOnSuccess, null);
     }
 
-    @ScriptFunction(jsDocText = "Refreshes model data if any of its parameters has changed with callback.")
+    @ScriptFunction(jsDoc = "Refreshes model data if any of its parameters has changed with callback.")
     public void execute(Function aOnSuccess, Function aOnFailure) throws Exception {
         try {
             executeRootEntities(false);
@@ -486,7 +486,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
             boolean oldValue = runtime;
             runtime = aValue;
             if (!oldValue && runtime) {
-                executeRootEntities(false);
+                executeRootEntities(true);
             }
             PropertyChangeEvent evt = new PropertyChangeEvent(this, "runtime", oldValue, runtime);
             for (PropertyChangeListener l : changeSupport.getPropertyChangeListeners()) {
@@ -505,7 +505,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         return loadEntity(aQueryId);
     }
 
-    @ScriptFunction(jsDocText = "Creates new entity of model, based on application query.")
+    @ScriptFunction(jsDoc = "Creates new entity of model, based on application query.")
     public synchronized Scriptable loadEntity(String aQueryId) throws Exception {
         if (client == null) {
             throw new NullPointerException("Null client detected while creating an entity");

@@ -15,17 +15,22 @@ import javax.swing.JMenuBar;
  */
 public class MenuBar extends Container<JMenuBar> {
 
-    protected MenuBar(JMenuBar aDelegate) {
-        super();
-        setDelegate(aDelegate);
-    }
+    private static final String CONSTRUCTOR_JSDOC = "/**\n"
+            + "* An implementation of a menu bar.\n"
+            + "*/";
 
+    @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {})
     public MenuBar() {
         super();
         setDelegate(new JMenuBar());
     }
 
-    @ScriptFunction(jsDocText="Adds the item to the menu.")
+    protected MenuBar(JMenuBar aDelegate) {
+        super();
+        setDelegate(aDelegate);
+    }
+    
+    @ScriptFunction(jsDoc="Adds the item to the menu.")
     public void add(Menu aMenu) {
         delegate.add((JMenu) unwrap(aMenu));
     }

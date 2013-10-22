@@ -6,6 +6,7 @@ package com.eas.designer.application.module.completion;
 
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
+import com.eas.client.model.Entity;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
 import com.eas.client.model.script.ScriptableRowset;
@@ -24,7 +25,7 @@ import org.netbeans.spi.editor.completion.CompletionResultSet;
  * @author vv
  */
 public class CompletionContext {
-    
+
     protected static final String MODEL_SCRIPT_NAME = "model";// NOI18N
     public static final String PARAMS_SCRIPT_NAME = "params";// NOI18N
     protected static final String METADATA_SCRIPT_NAME = ApplicationDbModel.DATASOURCE_METADATA_SCRIPT_NAME;
@@ -34,26 +35,24 @@ public class CompletionContext {
     protected static final String REPORT_MODULE_NAME = "Report";// NOI18N
     protected static final String MODULES_OBJECT_NAME = "Modules";// NOI18N
     protected static final String GET_METHOD_NAME = "get";// NOI18N
-    
     protected static final String BEANY_PREFIX_GET = "get";// NOI18N
     protected static final String BEANY_PREFIX_SET = "set";// NOI18N
     protected static final String BEANY_PREFIX_IS = "is";// NOI18N
     protected static final String PARAMETER_TEMPLATE = "p%s";// NOI18N
-    
     protected Class<?> scriptClass;
-    
+
     public CompletionContext(Class<?> aScriptClass) {
         scriptClass = aScriptClass;
     }
-    
+
     public Class<?> getScriptClass() {
         return scriptClass;
     }
-    
+
     public void applyCompletionItems(JsCompletionProvider.CompletionPoint point, int offset, CompletionResultSet resultSet) throws Exception {
         fillJavaCompletionItems(point, resultSet);
     }
-    
+
     public CompletionContext getChildContext(String str, int offset) throws Exception {
         return null;
     }
@@ -63,28 +62,27 @@ public class CompletionContext {
             addItem(resultSet, point.filter, new BeanCompletionItem(field.getClass(), field.getName(), field.getDescription(), point.caretBeginWordOffset, point.caretEndWordOffset));
         }
     }
-    
-    
+
     protected void fillFieldsValues(Fields aFields, JsCompletionProvider.CompletionPoint point, CompletionResultSet resultSet) {
         for (Field field : aFields.toCollection()) {
             addItem(resultSet, point.filter, new FieldCompletionItem(field, point.caretBeginWordOffset, point.caretEndWordOffset));
         }
     }
-    
-    protected void fillEntities(PlatypusModuleDataObject dataObject, CompletionResultSet resultSet, JsCompletionProvider.CompletionPoint point) throws Exception {
-        for (ApplicationDbEntity appEntity : dataObject.getModel().getEntities().values()) {
+
+    protected void fillEntities(Collection<? extends Entity> entities, CompletionResultSet resultSet, JsCompletionProvider.CompletionPoint point) throws Exception {
+        for (Entity appEntity : entities) {
             if (appEntity.getName() != null && !appEntity.getName().isEmpty()) {
                 addItem(resultSet, point.filter, new BeanCompletionItem(ScriptableRowset.class, appEntity.getName(), null, point.caretBeginWordOffset, point.caretEndWordOffset));
             }
         }
     }
-    
+
     protected void addItem(CompletionResultSet resultSet, String aFilter, JsCompletionItem aCompletionItem) {
         if (aFilter == null || aFilter.isEmpty() || aCompletionItem.getText().toLowerCase().startsWith(aFilter.toLowerCase())) {
             resultSet.addItem(aCompletionItem);
         }
     }
-    
+
     protected void fillJavaCompletionItems(JsCompletionProvider.CompletionPoint point, CompletionResultSet resultSet) {
         Map<String, PropBox> props = new HashMap<>();
         List<Method> methods = new ArrayList<>();
@@ -98,15 +96,11 @@ public class CompletionContext {
                             if (pb == null) {
                                 pb = new PropBox();
                                 pb.name = propName;
-                                setPropertyAccessStatus(pb, method.getName());
-                                setPropertyReturnType(pb, method);
-                                setJsDoc(pb, method);
                                 props.put(pb.name, pb);
-                            } else {
-                                setPropertyAccessStatus(pb, method.getName());
-                                setPropertyReturnType(pb, method);
-                                setJsDoc(pb, method);
                             }
+                            setPropertyAccessStatus(pb, method.getName());
+                            setPropertyReturnType(pb, method);
+                            pb.jsDoc = method.getAnnotation(ScriptFunction.class).jsDoc();
                         }
                     } else if (point.filter == null || point.filter.isEmpty() || method.getName().startsWith(point.filter)) {
                         methods.add(method);
@@ -132,15 +126,7 @@ public class CompletionContext {
             }
         }
     }
-    
-    protected void fillModuleJsEntities(PlatypusModuleDataObject dataObject, int offset, JsCompletionProvider.CompletionPoint point, CompletionResultSet resultSet) {
-        JsCompletionSupport cs = new JsCompletionSupport();
-        Collection<JsCompletionItem> items = cs.getCompletionItems(dataObject, "", offset, point);
-        for (JsCompletionItem item : items) {
-            addItem(resultSet, point.filter, item);
-        }
-    }
-    
+
     private static boolean isNumberClass(Class<?> clazz) {
         return Number.class.isAssignableFrom(clazz)
                 || Byte.TYPE.equals(clazz)
@@ -150,14 +136,14 @@ public class CompletionContext {
                 || Float.TYPE.equals(clazz)
                 || Double.TYPE.equals(clazz);
     }
-    
+
     private static void setPropertyReturnType(PropBox pb, Method method) {
         String typeName = getTypeName(method.getReturnType());
         if (typeName != null) {
             pb.typeName = typeName;
         }
     }
-    
+
     private static void setPropertyAccessStatus(PropBox pb, String methodName) {
         if (methodName.startsWith(BEANY_PREFIX_GET) || methodName.startsWith(BEANY_PREFIX_IS)) {
             pb.readable = true;
@@ -166,16 +152,6 @@ public class CompletionContext {
         }
     }
 
-    private static void setJsDoc(PropBox pb, Method method) {
-        String jsDoc = method.getAnnotation(ScriptFunction.class).jsDoc();
-        String jsDocText = method.getAnnotation(ScriptFunction.class).jsDocText();
-        if (jsDoc != null && !jsDoc.isEmpty()) {
-            pb.jsDoc = jsDoc;
-        } else if (jsDocText != null && !jsDocText.isEmpty()) {
-            pb.jsDoc = jsDocText;
-        }
-    }
-    
     private static String getTypeName(Class<?> aType) {
         if (!aType.equals(Void.TYPE)) {
             if (isNumberClass(aType)) {
@@ -200,7 +176,7 @@ public class CompletionContext {
         }
         return null;
     }
-    
+
     private static String getPropertyName(String methodName) {
         String capitalizedPropName = null;
         if (methodName.startsWith(BEANY_PREFIX_GET) || methodName.startsWith(BEANY_PREFIX_SET)) {
@@ -217,5 +193,4 @@ public class CompletionContext {
         return ((method.getName().startsWith(BEANY_PREFIX_GET) || method.getName().startsWith(BEANY_PREFIX_IS)) && method.getParameterTypes().length == 0)
                 || (method.getName().startsWith(BEANY_PREFIX_SET) && method.getParameterTypes().length == 1);
     }
-    
 }

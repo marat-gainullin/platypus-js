@@ -25,7 +25,7 @@ public class ButtonGroup extends Container<ButtonGroupWrapper> {
         setDelegate(new ButtonGroupWrapper());
     }
 
-    @ScriptFunction(jsDocText = "Appends the specified component to the end of this container.")
+    @ScriptFunction(jsDoc = "Appends the specified component to the end of this container.")
     public void add(Component<?> aComp) {
         if (aComp != null) {
             delegate.add(unwrap(aComp));

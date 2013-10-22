@@ -17,12 +17,14 @@ import javax.swing.JLabel;
  */
 public class Label extends Component<JLabel> {
 
-    protected Label(JLabel aDelegate)
-    {
-        super();
-        setDelegate(aDelegate);
-    }
-    
+    private static final String CONSTRUCTOR_JSDOC = "/**\n"
+            + "* Label component.\n"
+            + "* @param text Component's initial text (optional)\n"
+            + "* @param icon Component's icon (optional)\n"
+            + "* @param iconTextGap Text gap (optional)\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text", "icon", "iconTextGap"})
     public Label(String aText, Icon aIcon, int aIconTextGap) {
         super();
         setDelegate(new JLabel(aText, aIcon, JLabel.LEFT));
@@ -41,17 +43,22 @@ public class Label extends Component<JLabel> {
         this(null, null, 4);
     }
 
-    @ScriptFunction(jsDocText="The text string that the label displays.")
+    protected Label(JLabel aDelegate) {
+        super();
+        setDelegate(aDelegate);
+    }
+
+    @ScriptFunction(jsDoc = "The text string that the label displays.")
     public String getText() {
         return delegate.getText();
     }
-    
+
     @ScriptFunction
     public void setText(String aValue) {
         delegate.setText(aValue);
     }
 
-    @ScriptFunction(jsDocText="The graphic image (glyph, icon) that the label displays.")
+    @ScriptFunction(jsDoc = "The graphic image (glyph, icon) that the label displays.")
     public Icon getIcon() {
         return delegate.getIcon();
     }
@@ -61,17 +68,17 @@ public class Label extends Component<JLabel> {
         delegate.setIcon(aValue);
     }
 
-    @ScriptFunction(jsDocText="The amount of space between the text and the icon displayed in this label.")
+    @ScriptFunction(jsDoc = "The amount of space between the text and the icon displayed in this label.")
     public int getIconTextGap() {
         return delegate.getIconTextGap();
     }
-    
+
     @ScriptFunction
     public void setIconTextGap(int aValue) {
         delegate.setIconTextGap(aValue);
     }
 
-    @ScriptFunction(jsDocText="Horizontal position of the text relative to the icon.")
+    @ScriptFunction(jsDoc = "Horizontal position of the text relative to the icon.")
     public int getHorizontalTextPosition() {
         switch (delegate.getHorizontalTextPosition()) {
             case JLabel.LEFT:
@@ -103,7 +110,7 @@ public class Label extends Component<JLabel> {
         }
     }
 
-    @ScriptFunction(jsDocText="Vertical position of the text relative to the icon.")
+    @ScriptFunction(jsDoc = "Vertical position of the text relative to the icon.")
     public int getVerticalTextPosition() {
         switch (delegate.getVerticalTextPosition()) {
             case JLabel.TOP:

@@ -40,7 +40,7 @@ public class GridPane extends Container<JPanel> {
         setDelegate(new JPanel(layout));
     }
 
-    @ScriptFunction(jsDocText = "Appends the specified component to the end of this container.")
+    @ScriptFunction(jsDoc = "Appends the specified component to the end of this container.")
     public void add(Component<?> aComp) {
         if (aComp != null) {
             delegate.add(unwrap(aComp));
@@ -49,7 +49,7 @@ public class GridPane extends Container<JPanel> {
         }
     }
 
-    @ScriptFunction(jsDocText = "Gets the component with the specified row and column.")
+    @ScriptFunction(jsDoc = "Gets the component with the specified row and column.")
     public Component<?> child(int aRow, int aCol) {
         int index = aRow * layout.getColumns() + aCol;
         if (index >= 0 && index < getCount()) {

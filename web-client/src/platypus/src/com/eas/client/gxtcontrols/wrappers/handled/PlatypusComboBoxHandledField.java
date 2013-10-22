@@ -4,6 +4,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.bearsoft.rowset.Row;
+import com.bearsoft.rowset.Rowset;
 import com.eas.client.gxtcontrols.ControlsUtils;
 import com.eas.client.gxtcontrols.ObjectKeyProvider;
 import com.eas.client.gxtcontrols.model.ListStorePkFiller;
@@ -53,7 +54,7 @@ public class PlatypusComboBoxHandledField extends PlatypusComboBox {
 	public void setValueRef(ModelElementRef aValue) {
 		valueRef = aValue;
 		labelProvider.setLookupValueRef(aValue);
-		filler.setValuesRowsetHost(valueRef != null ? valueRef.entity : null);
+		filler.setValuesRowset(valueRef != null && valueRef.entity != null ? valueRef.entity.getRowset() : null);
 	}
 
 	public ModelElementRef getDisplayRef() {
@@ -61,10 +62,18 @@ public class PlatypusComboBoxHandledField extends PlatypusComboBox {
 	}
 
 	public void setDisplayRef(ModelElementRef aValue) {
+		if (displayRef != null && displayRef.entity != null) {
+			Rowset displayRowset = displayRef.entity.getRowset();
+			if (displayRowset != null)
+				displayRowset.removeRowsetListener(filler);
+		}
 		displayRef = aValue;
 		labelProvider.setDisplayValueRef(aValue);
-		if (displayRef != null)
-			filler.ensureRowset(displayRef.entity);
+		if (displayRef != null && displayRef.entity != null) {
+			Rowset displayRowset = displayRef.entity.getRowset();
+			if (displayRowset != null)
+				displayRowset.addRowsetListener(filler);
+		}
 	}
 
 	public JavaScriptObject getCellFunction() {

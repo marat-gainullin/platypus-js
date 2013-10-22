@@ -19,45 +19,51 @@ import javax.swing.JInternalFrame;
  */
 public class DesktopPane extends Component<JDesktopPane> {
 
-    protected DesktopPane(JDesktopPane aDelegate) {
-        super();
-        setDelegate(aDelegate);
-    }
+private static final String CONSTRUCTOR_JSDOC = "/**\n"
+            + "* Desktop pane panel component.\n"
+            + "* This component can be used for creating a multi-document GUI or a virtual desktop.\n"
+            + "*/";
 
+    @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC)
     public DesktopPane() {
         super();
         setDelegate(new JDesktopPane());
     }
     
-    @ScriptFunction(jsDocText="Minimizes all frames on the pane.")
+    protected DesktopPane(JDesktopPane aDelegate) {
+        super();
+        setDelegate(aDelegate);
+    }
+    
+    @ScriptFunction(jsDoc="Minimizes all frames on the pane.")
     public void minimizeAll() {
         for (JInternalFrame f : delegate.getAllFrames()) {
             delegate.getDesktopManager().iconifyFrame(f);
         }
     }
 
-    @ScriptFunction(jsDocText="Restores frames original state and location.")
+    @ScriptFunction(jsDoc="Restores frames original state and location.")
     public void restoreAll() {
         for (JInternalFrame f : delegate.getAllFrames()) {
             delegate.getDesktopManager().deiconifyFrame(f);
         }
     }
 
-    @ScriptFunction(jsDocText="Maximizes all frames on the pane.")
+    @ScriptFunction(jsDoc="Maximizes all frames on the pane.")
     public void maximizeAll() {
         for (JInternalFrame f : delegate.getAllFrames()) {
             delegate.getDesktopManager().maximizeFrame(f);
         }
     }
 
-    @ScriptFunction(jsDocText="Closes all frames on the pane.")
+    @ScriptFunction(jsDoc="Closes all frames on the pane.")
     public void closeAll() {
         for (JInternalFrame f : delegate.getAllFrames()) {
             delegate.getDesktopManager().closeFrame(f);
         }
     }
 
-    @ScriptFunction(jsDocText="Returns array of all frames on the pane.")
+    @ScriptFunction(jsDoc="Returns array of all frames on the pane.")
     public FormRunner[] getForms() {
         List<FormRunner> forms = new ArrayList<>();
         for (JInternalFrame f : delegate.getAllFrames()) {

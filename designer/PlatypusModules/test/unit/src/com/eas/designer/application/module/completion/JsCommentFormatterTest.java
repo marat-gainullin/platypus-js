@@ -29,7 +29,7 @@ public class JsCommentFormatterTest {
 
     @Test
     public void testProcess() {
-        List<String> comments = JsCompletionSupport.getComments(JS_DOC);
+        List<String> comments = CompletionSupport.getComments(JS_DOC);
         JsCommentFormatter formatter = new JsCommentFormatter(comments);
         String html = formatter.toHtml();
         assertEquals(html, HTML);

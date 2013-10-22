@@ -99,7 +99,7 @@ public class ParametersEntity extends Entity {
 	}
 
 	@Override
-	protected Cancellable achieveOrRefreshRowset(CancellableCallback onSuccess, Callback<String> onFailure) throws Exception {
+	protected Cancellable refreshRowset(CancellableCallback onSuccess, Callback<String> onFailure) throws Exception {
 		return null;
 	}
 

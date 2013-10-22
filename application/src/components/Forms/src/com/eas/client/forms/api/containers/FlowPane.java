@@ -36,7 +36,7 @@ public class FlowPane extends Container<JPanel> {
         setDelegate(new JPanel(new FlowLayout(FlowLayout.LEFT, hgap, vgap)));
     }
 
-    @ScriptFunction(jsDocText = "Appends the specified component to the end of this container.")
+    @ScriptFunction(jsDoc = "Appends the specified component to the end of this container.")
     public void add(Component<?> aComp) {
         if (aComp != null) {
             delegate.add(unwrap(aComp));

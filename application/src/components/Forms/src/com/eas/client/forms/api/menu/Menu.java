@@ -16,23 +16,31 @@ import javax.swing.JPopupMenu;
  */
 public class Menu extends Container<JMenu> {
 
-    protected Menu(JMenu aDelegate) {
-        super();
-        setDelegate(aDelegate);
-    }
-
     public Menu() {
         super();
         setDelegate(new JMenu());
     }
+        
+    private static final String CONSTRUCTOR_JSDOC = "/**\n"
+            + "* An implementation of a menu -- a popup window containing MenuItems"
+            + " that is displayed when the user selects an item on the MenuBar."
+            + " In addition to MenuItems, a JMenu can also contain MenuSeparators.\n"
+            + "* @param text the text for the menu label (optional)\n"
+            + "*/";
 
+    @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text"})
     public Menu(String aText) {
         super();
         setDelegate(new JMenu(aText));
     }
 
+    protected Menu(JMenu aDelegate) {
+        super();
+        setDelegate(aDelegate);
+    }
+    
     @Override
-    @ScriptFunction(jsDocText="Gets the parent container.")
+    @ScriptFunction(jsDoc="Gets the parent container.")
     public Container<?> getParent() {
         Container<?> parent = super.getParent();
         if (parent == null && delegate.getParent() instanceof JPopupMenu && ((JPopupMenu) delegate.getParent()).getInvoker() instanceof JMenu) {
@@ -42,12 +50,12 @@ public class Menu extends Container<JMenu> {
     }
 
     @Override
-    @ScriptFunction(jsDocText="Gets the child item whith specified index.")
+    @ScriptFunction(jsDoc="Gets the child item whith specified index.")
     public Component<?> child(int aIndex) {
         return getComponentWrapper(delegate.getMenuComponent(aIndex));
     }
 
-    @ScriptFunction(jsDocText="The text of the menu.")
+    @ScriptFunction(jsDoc="The text of the menu.")
     public String getText() {
         return delegate.getText();
     }
@@ -57,13 +65,13 @@ public class Menu extends Container<JMenu> {
         delegate.setText(aValue);
     }
 
-    @ScriptFunction(jsDocText="Adds the item to the menu.")
+    @ScriptFunction(jsDoc="Adds the item to the menu.")
     public void add(Component<?> aComp) {
         delegate.add(unwrap(aComp));
     }
 
     @Override
-    @ScriptFunction(jsDocText="Gets the count of the menu items.")
+    @ScriptFunction(jsDoc="Gets the count of the menu items.")
     public int getCount() {
         return delegate.getMenuComponentCount();
     }

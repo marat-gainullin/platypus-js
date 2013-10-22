@@ -38,35 +38,6 @@ public abstract class JsCompletionProvider implements CompletionProvider {
             + "/**\n"
             + "* %s\n"
             + "*/";
-    private static final String[] jsKeywords = {
-        "break",
-        "case",
-        "catch",
-        "continue",
-        "debugger",
-        "default",
-        "delete",
-        "do",
-        "else",
-        "finally",
-        "for",
-        "function",
-        "if",
-        "in",
-        "instanceof",
-        "new",
-        "return",
-        "switch",
-        "this",
-        "throw",
-        "try",
-        "typeof",
-        "var",
-        "void",
-        "while",
-        "with"
-    };
-
     public static class CompletionPoint {
 
         public String filter = null;
@@ -157,12 +128,6 @@ public abstract class JsCompletionProvider implements CompletionProvider {
     }
 
     protected abstract void fillCompletionPoint(PlatypusModuleDataObject dataObject, CompletionPoint point, CompletionResultSet resultSet, Document doc, int caretOffset) throws Exception;
-
-    protected void fillJsKeywords( CompletionPoint point, CompletionResultSet resultSet) {
-        for (String keyword : jsKeywords) {
-            addItem(resultSet, point.filter, new JsKeywordCompletionItem(keyword, point.caretBeginWordOffset, point.caretEndWordOffset));
-        }
-    }
     
     protected void fillJavaEntities(Class<?> aImplClass, CompletionPoint point, CompletionResultSet resultSet) {
         Map<String, PropBox> props = new HashMap<>();
@@ -177,15 +142,11 @@ public abstract class JsCompletionProvider implements CompletionProvider {
                             if (pb == null) {
                                 pb = new PropBox();
                                 pb.name = propName;
-                                setPropertyAccessStatus(pb, method.getName());
-                                setPropertyReturnType(pb, method);
-                                setJsDoc(pb, method);
                                 props.put(pb.name, pb);
-                            } else {
-                                setPropertyAccessStatus(pb, method.getName());
-                                setPropertyReturnType(pb, method);
-                                setJsDoc(pb, method);
                             }
+                            setPropertyAccessStatus(pb, method.getName());
+                            setPropertyReturnType(pb, method);
+                            pb.jsDoc = method.getAnnotation(ScriptFunction.class).jsDoc();
                         }
                     } else if (point.filter == null || point.filter.isEmpty() || method.getName().startsWith(point.filter)) {
                         methods.add(method);
@@ -219,15 +180,15 @@ public abstract class JsCompletionProvider implements CompletionProvider {
         }
     }
 
-    private static void setJsDoc(PropBox pb, Method method) {
-        String jsDoc = method.getAnnotation(ScriptFunction.class).jsDoc();
-        String jsDocText = method.getAnnotation(ScriptFunction.class).jsDocText();
-        if (jsDoc != null && !jsDoc.isEmpty()) {
-            pb.jsDoc = jsDoc;
-        } else if (jsDocText != null && !jsDocText.isEmpty()) {
-            pb.jsDoc = jsDocText;
-        }
-    }
+//    private static void setJsDoc(PropBox pb, Method method) {
+//        String jsDoc = method.getAnnotation(ScriptFunction.class).jsDoc();
+//        String jsDocText = method.getAnnotation(ScriptFunction.class).jsDocText();
+//        if (jsDoc != null && !jsDoc.isEmpty()) {
+//            pb.jsDoc = jsDoc;
+//        } else if (jsDocText != null && !jsDocText.isEmpty()) {
+//            pb.jsDoc = jsDocText;
+//        }
+//    }
 
     private static String getTypeName(Class<?> type) {
         if (!type.equals(Void.TYPE)) {

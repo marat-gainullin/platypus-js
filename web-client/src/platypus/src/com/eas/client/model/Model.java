@@ -843,7 +843,7 @@ public class Model {
 		if (!oldValue && runtime) {
 			resolveHandlers();
 			validateQueries();
-			executeRootEntities(false, null, null);
+			executeRootEntities(true, null, null);
 		}
 	}
 

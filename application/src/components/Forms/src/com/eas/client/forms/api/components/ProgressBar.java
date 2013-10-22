@@ -14,23 +14,34 @@ import javax.swing.JProgressBar;
  */
 public class ProgressBar extends Component<JProgressBar> {
 
-    protected ProgressBar(JProgressBar aDelegate)
-    {
-        super();
-        setDelegate(aDelegate);
-    }
-    
+ private static final String CONSTRUCTOR_JSDOC = "/**\n"
+            + "* Progress bar component.\n"
+            + "* @param min Minimum value (optional)\n"
+            + "* @param max Maximum value (optional)\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"min", "max"})   
     public ProgressBar(int min, int max) {
         super();
         setDelegate(new JProgressBar(JProgressBar.HORIZONTAL, min, max));
         delegate.setStringPainted(true);
     }
 
+    public ProgressBar(int min) {
+        this(min, 0);
+    }
+    
     public ProgressBar() {
         this(0, 0);
     }
     
-    @ScriptFunction(jsDocText="The progress bar's minimum value.")
+    protected ProgressBar(JProgressBar aDelegate)
+    {
+        super();
+        setDelegate(aDelegate);
+    }
+    
+    @ScriptFunction(jsDoc="The progress bar's minimum value.")
     public int getMinimum()
     {
         return delegate.getMinimum();
@@ -42,7 +53,7 @@ public class ProgressBar extends Component<JProgressBar> {
         delegate.setMinimum(aValue);
     }
     
-    @ScriptFunction(jsDocText="The progress bar's maximum value.")
+    @ScriptFunction(jsDoc="The progress bar's maximum value.")
     public int getMaximum()
     {
         return delegate.getMaximum();
@@ -54,7 +65,7 @@ public class ProgressBar extends Component<JProgressBar> {
         delegate.setMaximum(aValue);
     }
     
-    @ScriptFunction(jsDocText="The current value of the progress bar.")
+    @ScriptFunction(jsDoc="The current value of the progress bar.")
     public int getValue()
     {
         return delegate.getValue();
@@ -66,7 +77,7 @@ public class ProgressBar extends Component<JProgressBar> {
         delegate.setValue(aValue);
     }
     
-    @ScriptFunction(jsDocText="String representation of the current progress.")
+    @ScriptFunction(jsDoc="String representation of the current progress.")
     public String getText()
     {
         return delegate.getString();

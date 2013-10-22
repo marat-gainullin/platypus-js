@@ -26,10 +26,11 @@ public class PlatypusFilesSupport {
 
     public static final String APP_ELEMENT_NAME = "app-element-name"; //NOI18N
     public static final String APP_ELEMENT_NAME_ANNOTATION = "@name"; //NOI18N
+    public static final String PUBLIC_ANNOTATION = "@public"; //NOI18N
     // jsDoc or sqlDoc containing element name annotation regex parts 1 and 2
     private static final String NAMED_ANNOTATION_PATTERN_1 = "^\\s*/\\*\\*(?=(?:(?!\\*/)[\\s\\S])*?"; //NOI18N
     private static final String NAMED_ANNOTATION_PATTERN_2 = ")(?:(?!\\*/)[\\s\\S])*\\*/"; //NOI18N
-
+    
     public static String getAppElementIdByAnnotation(File aFile) {
         try {
             String fileContent = FileUtils.readString(aFile, PlatypusFiles.DEFAULT_ENCODING);
@@ -40,6 +41,18 @@ public class PlatypusFilesSupport {
         return null;
     }
 
+    public static String getAppElementIdForConnectionAppElement(File file) {
+        try {
+            EasSettings connectionSettings = XmlDom2ConnectionSettings.document2Settings(Source2XmlDom.transform(FileUtils.readString(file, PlatypusFiles.DEFAULT_ENCODING)));
+            if (connectionSettings != null) {
+                return connectionSettings.getName();
+            }
+        } catch (Exception ex) {
+            Logger.getLogger(PlatypusFilesSupport.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
+    }
+    
     /**
      * Extracts annotation value form given content. May return annotation
      * value, null or an empty string.
@@ -135,18 +148,15 @@ public class PlatypusFilesSupport {
         return docComment + aContent;
     }
 
-    public static String getAppElementIdForConnectionAppElement(File file) {
-        try {
-            EasSettings connectionSettings = XmlDom2ConnectionSettings.document2Settings(Source2XmlDom.transform(FileUtils.readString(file, PlatypusFiles.DEFAULT_ENCODING)));
-            if (connectionSettings != null) {
-                return connectionSettings.getName();
-            }
-        } catch (Exception ex) {
-            Logger.getLogger(PlatypusFilesSupport.class.getName()).log(Level.SEVERE, null, ex);
+    public static String getMainJsDocBody(String aContent) {
+        Pattern pattern = Pattern.compile(getAnnotatedDocRegexStr(APP_ELEMENT_NAME_ANNOTATION));
+        Matcher matcher = pattern.matcher(aContent);
+        if (matcher.find()) {
+            return matcher.group();
         }
         return null;
     }
-
+    
     private static String getAnnotatedDocRegexStr(String anAnnotation) {
         return NAMED_ANNOTATION_PATTERN_1 + anAnnotation + NAMED_ANNOTATION_PATTERN_2;
     }

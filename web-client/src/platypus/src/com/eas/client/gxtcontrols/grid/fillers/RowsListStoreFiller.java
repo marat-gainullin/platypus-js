@@ -17,8 +17,6 @@ import com.bearsoft.rowset.events.RowsetRequeryEvent;
 import com.bearsoft.rowset.events.RowsetRollbackEvent;
 import com.bearsoft.rowset.events.RowsetSaveEvent;
 import com.bearsoft.rowset.exceptions.RowsetException;
-import com.eas.client.beans.PropertyChangeEvent;
-import com.eas.client.beans.PropertyChangeListener;
 import com.eas.client.model.Entity;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.Scheduler;
@@ -31,7 +29,7 @@ import com.sencha.gxt.data.shared.loader.ListLoadResult;
 import com.sencha.gxt.data.shared.loader.ListLoader;
 import com.sencha.gxt.data.shared.loader.LoadResultListStoreBinding;
 
-public class RowsListStoreFiller extends RowsetAdapter implements PropertyChangeListener, ListStoreFiller<Row> {
+public class RowsListStoreFiller extends RowsetAdapter implements ListStoreFiller<Row> {
 
 	protected class ObservingProxy implements DataProxy<ListLoadConfig, ListLoadResult<Row>> {
 
@@ -74,19 +72,12 @@ public class RowsListStoreFiller extends RowsetAdapter implements PropertyChange
 	protected Entity rowsetHost;
 	protected Rowset rowset;
 	protected String rowsetError;
-	protected int deferred;
 
-	public RowsListStoreFiller(ListStore<Row> aStore, Entity aRowsetHost, Set<Entity> toEnsure) {
+	public RowsListStoreFiller(ListStore<Row> aStore, Entity aRowsetHost) {
 		super();
 		store = aStore;
 		rowsetHost = aRowsetHost;
-		for (Entity e : toEnsure) {
-			if (e != null && e.getRowset() == null) {
-				e.getChangeSupport().addPropertyChangeListener(this);
-				++deferred;
-			}
-		}
-		if (rowsetHost != null && deferred == 0) {
+		if (rowsetHost != null) {
 			rowset = rowsetHost.getRowset();
 			rowset.addRowsetListener(this);
 		}
@@ -103,38 +94,9 @@ public class RowsListStoreFiller extends RowsetAdapter implements PropertyChange
 		return store;
 	}
 
-	@Override
-	public void propertyChange(final PropertyChangeEvent evt) {
-		if ("rowset".equals(evt.getPropertyName())) {
-			if (evt.getOldValue() == null && evt.getNewValue() != null) {
-				assert evt.getNewValue() instanceof Rowset;
-				assert evt.getSource() instanceof Entity;
-				Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-					@Override
-					public void execute() {
-						((Entity) evt.getSource()).getChangeSupport().removePropertyChangeListener(RowsListStoreFiller.this);
-					}
-				});
-				if (--deferred == 0) {
-					rowsetError = null;
-					rowset = rowsetHost.getRowset();
-					rowset.addRowsetListener(this);
-					checkIfDataLoaded();
-				}
-			}
-		} else if ("rowsetError".equals(evt.getPropertyName())) {
-			if (evt.getOldValue() == null && evt.getNewValue() != null) {
-				rowsetError = (String) evt.getNewValue();
-				checkIfDataError();
-				if (rowset == null)
-					loader.load();
-			}
-		}
-	}
-
 	@SuppressWarnings("serial")
 	protected void checkIfDataLoaded() {
-		if (loadCallback != null && rowset != null && !rowset.isPending() && deferred == 0) {
+		if (loadCallback != null && rowset != null && !rowset.isPending()) {
 			store.clear();
 			loadCallback.onSuccess(new ListLoadResult<Row>() {
 				@Override

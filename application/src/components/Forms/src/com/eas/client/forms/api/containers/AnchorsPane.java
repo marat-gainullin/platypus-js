@@ -24,19 +24,24 @@ import org.mozilla.javascript.Undefined;
  */
 public class AnchorsPane extends Container<JPanel> {
 
+    private static final String CONSTRUCTOR_JSDOC = "/**\n"
+            + "* A container with Anchors Layout.\n" 
+            + "*/";
+
+    @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {})
+    public AnchorsPane() {
+        super();
+        setDelegate(new JPanel(new MarginLayout()));
+    }
+
     protected AnchorsPane(JPanel aDelegate) {
         super();
         assert aDelegate != null;
         assert aDelegate.getLayout() instanceof MarginLayout;
         setDelegate(aDelegate);
     }
-
-    public AnchorsPane() {
-        super();
-        setDelegate(new JPanel(new MarginLayout()));
-    }
-
-    @ScriptFunction(jsDocText = "Appends the specified component to the container with specified placement.")
+    
+    @ScriptFunction(jsDoc = "Appends the specified component to the container with specified placement.")
     public void add(Component<?> aComp, Scriptable aAnchors) {
         if (aComp != null) {
             delegate.add(unwrap(aComp), scriptable2MarginConstraints(aAnchors));
@@ -79,21 +84,21 @@ public class AnchorsPane extends Container<JPanel> {
         return new MarginConstraints(left, top, right, bottom, width, height);
     }
     
-    @ScriptFunction(jsDocText = "Brings the specified component to front on this panel.")
+    @ScriptFunction(jsDoc = "Brings the specified component to front on this panel.")
     public void toFront(Component aComp) {
         Ordering.toFront(delegate, aComp);
     }
 
-    @ScriptFunction(jsDocText = "Brings the specified component to back on this panel.")
+    @ScriptFunction(jsDoc = "Brings the specified component to back on this panel.")
     public void toBack(Component aComp) {
         Ordering.toBack(delegate, aComp);
     }
-    @ScriptFunction(jsDocText = "")
+    @ScriptFunction(jsDoc = "")
     public void toFront(Component aComp, int aCount) {
         Ordering.toFront(delegate, aComp, aCount);
     }
 
-    @ScriptFunction(jsDocText = "")
+    @ScriptFunction(jsDoc = "")
     public void toBack(Component aComp, int aCount) {
         Ordering.toBack(delegate, aComp, aCount);
     }

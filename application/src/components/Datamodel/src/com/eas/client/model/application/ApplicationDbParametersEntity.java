@@ -4,6 +4,7 @@
  */
 package com.eas.client.model.application;
 
+import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
@@ -46,13 +47,19 @@ public class ApplicationDbParametersEntity extends ApplicationDbEntity implement
     }
 
     @Override
+    public Rowset getRowset() throws Exception {
+        execute();
+        return super.getRowset();
+    }
+
+    @Override
     public Fields getFields() {
         return model.getParameters();
     }
 
     @Override
     public void validateQuery() throws Exception {
-        // no op for parameters entity
+        execute();
     }
 
     @Override
@@ -69,9 +76,8 @@ public class ApplicationDbParametersEntity extends ApplicationDbEntity implement
 
     @Override
     public void accept(ModelVisitor<ApplicationDbEntity> visitor) {
-        if(visitor instanceof ApplicationModelVisitor<?>)
-        {
-            ((ApplicationModelVisitor<?>)visitor).visit(this);
+        if (visitor instanceof ApplicationModelVisitor<?>) {
+            ((ApplicationModelVisitor<?>) visitor).visit(this);
         }
     }
 
@@ -112,7 +118,7 @@ public class ApplicationDbParametersEntity extends ApplicationDbEntity implement
     public Scriptable defineProperties() throws Exception {
         if (model.getScriptScope() != null && model.getScriptScope() instanceof ScriptableObject) {
             ScriptableObject scope = (ScriptableObject) model.getScriptScope();
-            ScriptableRowset<ApplicationDbEntity> sRowset = new ScriptableRowset<>((ApplicationDbEntity)this);
+            ScriptableRowset<ApplicationDbEntity> sRowset = new ScriptableRowset<>((ApplicationDbEntity) this);
             // global parameters names
             Fields md = sRowset.getFields();
             sRowset.createScriptableFields();
@@ -158,8 +164,7 @@ public class ApplicationDbParametersEntity extends ApplicationDbEntity implement
     }
 
     @Override
-    protected void achieveOrRefreshRowset() throws Exception {
+    protected void refreshRowset() throws Exception {
         // no op
     }
-
 }

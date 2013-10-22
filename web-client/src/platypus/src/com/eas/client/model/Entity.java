@@ -23,7 +23,6 @@ import java.util.logging.Logger;
 import com.bearsoft.rowset.Converter;
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.RowsetCallbackAdapter;
 import com.bearsoft.rowset.dataflow.DelegatingFlowProvider;
 import com.bearsoft.rowset.dataflow.TransactionListener;
 import com.bearsoft.rowset.dataflow.TransactionListener.Registration;
@@ -273,59 +272,45 @@ public class Entity implements RowsetListener {
 							throw "Bad arguments. There are must at least one argument";
 					},
 					sort : function(aComparator) {
-						if(aComparator != null && aComparator != undefined)
-						{
-							if(aComparator.call != undefined)
-							{
-								aEntity.@com.eas.client.model.Entity::sort(Lcom/google/gwt/core/client/JavaScriptObject;)(aComparator);
-							}else
-								aEntity.@com.eas.client.model.Entity::sort(Lcom/bearsoft/rowset/sorting/RowsComparator;)(aComparator);
+						if(aComparator){
+							aEntity.@com.eas.client.model.Entity::sort(Ljava/lang/Object;)(aComparator);
 						}else
 							throw "A comparing function or comparator object must be specified."; 
 					},
 				    // array accessor methods
-				    concat : function()
-				    {
+				    concat : function(){
 				    	var i;
 				    	var concated = [];
 						var rowset = getRowset();
 						if(rowset != null){
 							var size = rowset.@com.bearsoft.rowset.Rowset::size()();
-							for(i=0;i<size;i++)
-							{
+							for(i=0;i<size;i++){
 								var row = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(i+1);
 								var rowFacade = @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(row, aEntity);
 				    			concated.push(rowFacade);
 							}
-					    	for(i=0;i<arguments.length;i++)
-					    	{
-					    		if(Array.isArray(arguments[i]))
-					    		{
-					    			for(var l=0;l<arguments[i].length;l++)
-					    			{
+					    	for(i=0;i<arguments.length;i++){
+					    		if(Array.isArray(arguments[i])){
+					    			for(var l=0;l<arguments[i].length;l++){
 					    				concated.push(arguments[i][l]);
 					    			}
-					    		}else
-					    		{ 
+					    		}else{ 
 					    			concated.push(arguments[i]);
 					    		}
 					    	}
 						}
 					    return concated;
 				    },
-				    join : function(aSeparator)
-				    {
+				    join : function(aSeparator){
 				    	var joined = [];
 						var rowset = getRowset();
 						if(rowset != null){
 							var size = rowset.@com.bearsoft.rowset.Rowset::size()();
-							for(var i=0;i<size;i++)
-							{
+							for(var i=0;i<size;i++){
 								var row = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(i+1);
 								var rowFacade = @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(row, aEntity);
 								var sElement = "{";
-								for(var l=0;l<rowFacade.length;l++)
-								{
+								for(var l=0;l<rowFacade.length;l++){
 									if(l > 0)
 										sElement += ", ";
 									sElement += rowFacade.md[l].name + ":" + rowFacade[l];
@@ -1339,55 +1324,41 @@ public class Entity implements RowsetListener {
 		return true;
 	}
 
-	protected Cancellable achieveOrRefreshRowset(final CancellableCallback onSuccess, final Callback<String> onFailure) throws Exception {
-		if (query != null) {
-			if (rowset == null) {
-				// The first time we obtain a rowset...
-				final Entity rowsetListener = this;
-				return query.execute(new RowsetCallbackAdapter() {
-
-					@Override
-					public void doWork(Rowset aRowset) throws Exception {
-						rowset = aRowset;
-						rowset.currentToOriginal();
-						rowset.setFlowProvider(new DelegatingFlowProvider(rowset.getFlowProvider()) {
-							public java.util.List<com.bearsoft.rowset.changes.Change> getChangeLog() {
-								return model.getChangeLog();
-							};
-
-							@Override
-							public Registration addTransactionListener(TransactionListener aListener) {
-								return model.addTransactionListener(aListener);
-							}
-						});
-						rowset.first();
-						rowset.addRowsetListener(rowsetListener);
-						changeSupport.firePropertyChange("rowset", null, rowset);
-						rowset.getRowsetChangeSupport().fireRequeriedEvent();
-						onSuccess.run();
-					}
-				}, new Callback<String>() {
-					@Override
-					public void run(String aResult) throws Exception {
-						changeSupport.firePropertyChange("rowsetError", null, aResult);
-						if (onFailure != null)
-							onFailure.run(aResult);
-					}
-
-					@Override
-					public void cancel() {
-					}
-				});
-			} else {
-				return rowset.refresh(query.getParameters(), onSuccess, onFailure);
-			}
-		}
-		return null;
+	protected Cancellable refreshRowset(CancellableCallback onSuccess, Callback<String> onFailure) throws Exception {
+		if (query != null && rowset != null) {
+			return rowset.refresh(query.getParameters(), onSuccess, onFailure);
+		}else
+			return null;
 	}
 
 	public void validateQuery() throws Exception {
 		if (query == null) {
 			setQuery(Application.getAppQuery(queryId));
+			if(query != null){
+				Rowset oldRowset = rowset;
+				if(rowset != null){
+					rowset.removeRowsetListener(this);
+					if(rowset.getFlowProvider() instanceof DelegatingFlowProvider){
+						DelegatingFlowProvider dfp = (DelegatingFlowProvider)rowset.getFlowProvider();
+						rowset.setFlowProvider(dfp.getDelegate());
+					}
+				}
+				rowset = query.prepareRowset();
+				if(rowset != null){
+					rowset.setFlowProvider(new DelegatingFlowProvider(rowset.getFlowProvider()) {
+						public java.util.List<com.bearsoft.rowset.changes.Change> getChangeLog() {
+							return model.getChangeLog();
+						};
+		
+						@Override
+						public Registration addTransactionListener(TransactionListener aListener) {
+							return model.addTransactionListener(aListener);
+						}
+					});
+					rowset.addRowsetListener(this);
+				}
+				changeSupport.firePropertyChange("rowset", oldRowset, rowset);
+			}
 		}
 	}
 
@@ -1597,8 +1568,6 @@ public class Entity implements RowsetListener {
 				boolean parametersBinded = bindQueryParameters();
 				if(parametersBinded)
 					invalidate();
-				if(rowset == null)
-					invalidate();
 				if (!isValid()) {
 					// if we have no rowset yet or query parameters values have
 					// been changed ...
@@ -1615,7 +1584,7 @@ public class Entity implements RowsetListener {
 							model.setProcess(lprocess);
 						}
 					}
-					pending = achieveOrRefreshRowset(new CancellableCallbackAdapter() {
+					pending = refreshRowset(new CancellableCallbackAdapter() {
 
 						@Override
 						public void doWork() throws Exception {
@@ -2490,6 +2459,15 @@ public class Entity implements RowsetListener {
 		return aComparatorFun(row1, row2);
 	}-*/;
 
+	public void sort(Object aComparator) throws Exception {
+		if(aComparator instanceof RowsComparator){
+			sort((RowsComparator)aComparator);
+		}else{
+			assert aComparator instanceof JavaScriptObject; 
+			sort((JavaScriptObject)aComparator);
+		}		
+	}
+	
 	public void sort(final JavaScriptObject aComparatorFunc) throws Exception {
 		Comparator<Row> comparator = new Comparator<Row>() {
 

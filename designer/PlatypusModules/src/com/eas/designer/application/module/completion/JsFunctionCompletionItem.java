@@ -7,8 +7,6 @@ package com.eas.designer.application.module.completion;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import javax.swing.ImageIcon;
@@ -52,7 +50,7 @@ public class JsFunctionCompletionItem extends JsCompletionItem {
     
     @Override
     public void render(Graphics g, Font defaultFont, Color defaultColor, Color backgroundColor, int width, int height, boolean selected) {
-        CompletionUtilities.renderHtml(icon, getLeftHtmlText(false), rightText, g, defaultFont,
+        CompletionUtilities.renderHtml(getIcon(), getLeftHtmlText(false), rightText, g, defaultFont,
                 (selected ? Color.white : defaultColor), width, height, selected);
     }
     
@@ -75,7 +73,7 @@ public class JsFunctionCompletionItem extends JsCompletionItem {
 
     @Override
     public String getInfomationText() {
-        JsCommentFormatter formatter = new JsCommentFormatter(JsCompletionSupport.getComments(informationText));
+        JsCommentFormatter formatter = new JsCommentFormatter(CompletionSupport.getComments(informationText));
         return formatter.toHtml();
     }
     

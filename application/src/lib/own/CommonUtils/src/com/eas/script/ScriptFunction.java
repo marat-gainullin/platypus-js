@@ -10,18 +10,18 @@ import java.lang.annotation.Target;
  * 
  * @author vv
  */
-@Target(ElementType.METHOD)
+@Target({ElementType.METHOD, ElementType.CONSTRUCTOR})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ScriptFunction {
     /**
      * Function's jsDoc
-     * @return jsDoc HTML
+     * @return jsDoc section text
      */
     public String jsDoc() default "";// NOI18N
     
     /**
-     * Function's jsDoc simple text
-     * @return text string
+     * Function's parameters names
+     * @return 
      */
-    public String jsDocText() default "";// NOI18N
+    public String[] params() default {};
 }

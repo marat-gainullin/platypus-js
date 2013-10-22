@@ -57,7 +57,7 @@ public abstract class AbstractChart extends Chart<Object> {
 
 	protected static ListStoreFiller<? extends Object> createEntityFiller(Entity aEntity) {
 		if (aEntity != null) {
-			return new RowsListStoreFiller(new ListStore<Row>(new RowKeyProvider()), aEntity, Collections.singleton(aEntity));
+			return new RowsListStoreFiller(new ListStore<Row>(new RowKeyProvider()), aEntity);
 		} else
 			return null;
 	}
