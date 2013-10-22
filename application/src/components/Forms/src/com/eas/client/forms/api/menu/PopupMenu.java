@@ -15,16 +15,22 @@ import javax.swing.JPopupMenu;
  */
 public class PopupMenu extends Container<JPopupMenu> {
 
-    protected PopupMenu(JPopupMenu aDelegate) {
-        super();
-        setDelegate(aDelegate);
-    }
+    private static final String CONSTRUCTOR_JSDOC = "/**\n"
+            + "* An implementation of a popup menu -- a small window that pops up\n" 
+            + "* and displays a series of choices.\n"
+            + "*/";
 
+    @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {})
     public PopupMenu() {
         super();
         setDelegate(new JPopupMenu());
     }
 
+    protected PopupMenu(JPopupMenu aDelegate) {
+        super();
+        setDelegate(aDelegate);
+    }
+    
     @ScriptFunction(jsDoc="Adds the item to the menu.")
     public void add(Menu aMenu) {
         delegate.add((JMenu) unwrap(aMenu));

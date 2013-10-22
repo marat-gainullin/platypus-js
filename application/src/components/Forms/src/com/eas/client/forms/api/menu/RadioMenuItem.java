@@ -6,6 +6,7 @@ package com.eas.client.forms.api.menu;
 
 import com.eas.client.forms.api.Component;
 import com.eas.client.forms.api.Container;
+import com.eas.script.ScriptFunction;
 import javax.swing.JMenu;
 import javax.swing.JPopupMenu;
 import javax.swing.JRadioButtonMenuItem;
@@ -26,6 +27,14 @@ public class RadioMenuItem extends Component<JRadioButtonMenuItem> {
         this(aText, aSelected, null);
     }
 
+    private static final String CONSTRUCTOR_JSDOC = "/**\n"
+            + "* An implementation of a radio button menu item.\n"
+            + "* @param text the text of the component (optional)\n"
+            + "* @param selected true if selected (optional)\n"
+            + "* @param actionPerformed On action performed function (optional)\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text", "selected", "actionPerformed"})
     public RadioMenuItem(String aText, boolean aSelected, Function aActionPerformedHandler) {
         super();
         setDelegate(new JRadioButtonMenuItem(aText, aSelected));
