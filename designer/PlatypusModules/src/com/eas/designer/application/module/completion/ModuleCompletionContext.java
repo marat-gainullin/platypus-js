@@ -172,6 +172,22 @@ public class ModuleCompletionContext extends CompletionContext {
                 || (aNode instanceof Name && aNode.getParent() instanceof NewExpression));
     }
 
+    public static CompletionContext getModuleCompletionContext(Project project, String appElementId) {
+        FileObject appElementFileObject = IndexerQuery.appElementId2File(project, appElementId);
+        if (appElementFileObject == null) {
+            return null;
+        }
+        try {
+            DataObject referencedDataObject = DataObject.find(appElementFileObject);
+            if (referencedDataObject instanceof PlatypusModuleDataObject) {
+                return ((PlatypusModuleDataObject) DataObject.find(appElementFileObject)).getCompletionContext();
+            }
+        } catch (DataObjectNotFoundException ex) {
+            //no-op
+        }
+        return null;
+    }
+
     public static CompletionContext findModuleCompletionContext(String fieldName, int offset, PlatypusModuleDataObject appElementDataObject) {
         AstRoot ast = appElementDataObject.getAst();
         if (ast != null) {
@@ -379,24 +395,8 @@ public class ModuleCompletionContext extends CompletionContext {
             return ctx;
         }
 
-        private String stripElementId(String str) {
+        private static String stripElementId(String str) {
             return StringUtils.strip(StringUtils.strip(StringUtils.strip(str, "\""), "'"));//NOI18N
-        }
-
-        private CompletionContext getModuleCompletionContext(Project project, String appElementId) {
-            FileObject appElementFileObject = IndexerQuery.appElementId2File(project, appElementId);
-            if (appElementFileObject == null) {
-                return null;
-            }
-            try {
-                DataObject referencedDataObject = DataObject.find(appElementFileObject);
-                if (referencedDataObject instanceof PlatypusModuleDataObject) {
-                    return ((PlatypusModuleDataObject) DataObject.find(appElementFileObject)).getCompletionContext();
-                }
-            } catch (DataObjectNotFoundException ex) {
-                //no-op
-            }
-            return null;
         }
     }
 }
