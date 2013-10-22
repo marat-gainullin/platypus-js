@@ -24,18 +24,23 @@ import org.mozilla.javascript.Undefined;
  */
 public class AnchorsPane extends Container<JPanel> {
 
+    private static final String CONSTRUCTOR_JSDOC = "/**\n"
+            + "* A container with Anchors Layout.\n" 
+            + "*/";
+
+    @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {})
+    public AnchorsPane() {
+        super();
+        setDelegate(new JPanel(new MarginLayout()));
+    }
+
     protected AnchorsPane(JPanel aDelegate) {
         super();
         assert aDelegate != null;
         assert aDelegate.getLayout() instanceof MarginLayout;
         setDelegate(aDelegate);
     }
-
-    public AnchorsPane() {
-        super();
-        setDelegate(new JPanel(new MarginLayout()));
-    }
-
+    
     @ScriptFunction(jsDoc = "Appends the specified component to the container with specified placement.")
     public void add(Component<?> aComp, Scriptable aAnchors) {
         if (aComp != null) {
