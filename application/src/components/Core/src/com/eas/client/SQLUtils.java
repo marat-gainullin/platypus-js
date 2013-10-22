@@ -22,8 +22,10 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URL;
 import java.sql.*;
-import java.sql.Date;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.sql.rowset.RowSetMetaDataImpl;
@@ -447,19 +449,14 @@ public class SQLUtils {
     }
 
     /*
-    public static String extractConnectionSchema(Properties aProps) {
-        if (aProps != null) {
-            String schema = aProps.getProperty(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME);
-            if (schema == null) {
-                schema = aProps.getProperty(ClientConstants.DB_CONNECTION_USER_PROP_NAME);
-            }
-            return schema;
-        }
-        return null;
-    }
-    */ 
+     * public static String extractConnectionSchema(Properties aProps) { if
+     * (aProps != null) { String schema =
+     * aProps.getProperty(ClientConstants.DB_CONNECTION_SCHEMA_PROP_NAME); if
+     * (schema == null) { schema =
+     * aProps.getProperty(ClientConstants.DB_CONNECTION_USER_PROP_NAME); }
+     * return schema; } return null; }
+     */
     // Not doing anything yet. Just return SQl passed
-
     public static String resolveSQL_n_BindParameters(String sql, AppCache aCache) {
         // aCache - metadata cache. It's synchronized.
         // But evrything else is unsynchronized. And because
@@ -726,7 +723,6 @@ public class SQLUtils {
         typesCompatible.put(java.sql.Types.BINARY, TypesGroup.BINARIES);
         typesCompatible.put(java.sql.Types.LONGVARBINARY, TypesGroup.BINARIES);
         // Lobs
-        typesCompatible.put(java.sql.Types.BLOB, TypesGroup.LOBS);
         typesCompatible.put(java.sql.Types.CLOB, TypesGroup.LOBS);
         typesCompatible.put(java.sql.Types.NCLOB, TypesGroup.LOBS);
         // Strings

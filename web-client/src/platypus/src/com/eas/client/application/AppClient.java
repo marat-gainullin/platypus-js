@@ -349,7 +349,7 @@ public class AppClient {
 	}
 
 	public static String param(String aName, String aValue) {
-		return aName + "=" + (aValue != null ? URL.encode(aValue) : "");
+		return aName + "=" + (aValue != null ? URL.encodePathSegment(aValue) : "");
 	}
 
 	public static String params(String... aParams) {
