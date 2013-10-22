@@ -20,7 +20,7 @@ public class NewReportWizardIterator extends NewApplicationElementWizardIterator
     @TemplateRegistration(
             folder = "Platypus application elements",
     position = 300,
-    content = {"PlatypusReportTemplate.js", "PlatypusReportTemplate.model", "PlatypusReportTemplate.xls"},
+    content = {"PlatypusReportTemplate.js", "PlatypusReportTemplate.model", "PlatypusReportTemplate.xlsx"},
     displayName = "#Templates/Other/PlatypusReportTemplate",
     description = "Report.html",
     scriptEngine = "freemarker")
