@@ -19,7 +19,7 @@ public class FormattedField extends Component<JFormattedTextField> {
     
     private static final String CONSTRUCTOR_JSDOC = "/**\n"
             + "* Formatted field component. \n"
-            + "* @param value Formatted field value (optional)\n"
+            + "* @param value the value for the formatted field (optional)\n"
             + "*/";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"value"})

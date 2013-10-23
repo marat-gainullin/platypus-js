@@ -18,16 +18,22 @@ import org.mozilla.javascript.Function;
  */
 public class TabbedPane extends Container<JTabbedPane> {
 
-    protected TabbedPane(JTabbedPane aDelegate) {
-        super();
-        setDelegate(aDelegate);
-    }
+    private static final String CONSTRUCTOR_JSDOC = "/**\n"
+            + "* A component that lets the user switch between a group of components by\n" 
+            + "* clicking on a tab with a given title and/or icon.\n" 
+            + "*/";
 
+    @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {})
     public TabbedPane() {
         super();
         setDelegate(new JTabbedPane());
     }
 
+    protected TabbedPane(JTabbedPane aDelegate) {
+        super();
+        setDelegate(aDelegate);
+    }
+    
     @ScriptFunction(jsDoc = "Appends the component whith specified text to the end of this container.")
     public void add(Component<?> aComp, String aText) {
         delegate.addTab(aText, unwrap(aComp));

@@ -15,11 +15,12 @@ import javax.swing.JToolBar;
  */
 public class ToolBar extends Container<JToolBar> {
 
-    protected ToolBar(JToolBar aDelegate) {
-        super();
-        setDelegate(aDelegate);
-    }
+    private static final String CONSTRUCTOR_JSDOC = "/**\n"
+            + "* <code>ToolBar</code> provides a component that is useful for displaying commonly used actions or controls.\n"
+            + "* @param floatable if <code>true</code>, the tool bar can be moved; <code>false</code> otherwise (optional)\n"
+            + "*/";
 
+    @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {})
     public ToolBar(boolean floatable) {
         super();
         setDelegate(new JToolBar());
@@ -30,6 +31,11 @@ public class ToolBar extends Container<JToolBar> {
         this(false);
     }
 
+    protected ToolBar(JToolBar aDelegate) {
+        super();
+        setDelegate(aDelegate);
+    }
+    
     @ScriptFunction(jsDoc = "Appends the specified component to the end of this container.")
     public void add(Component<?> aComp) {
         if (aComp != null) {

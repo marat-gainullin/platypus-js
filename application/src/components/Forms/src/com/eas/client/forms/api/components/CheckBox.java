@@ -27,9 +27,9 @@ public class CheckBox extends Component<JCheckBox> {
     
     private static final String CONSTRUCTOR_JSDOC = "/**\n"
             + "* Check box component. \n"
-            + "* @param text Check box text (optional)\n"
-            + "* @param selected true if selected (optional)\n"
-            + "* @param actionPerformed On action performed function (optional)\n"
+            + "* @param text the text of the check box (optional)\n"
+            + "* @param selected <code>true</code> if selected (optional)\n"
+            + "* @param actionPerformed the function for the action performed (optional)\n"
             + "*/";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text", "selected",  "actionPerformed"})

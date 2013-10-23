@@ -25,6 +25,7 @@ public class BorderPane extends Container<JPanel> {
     public BorderPane(int hgap) {
         this(hgap, 0);
     }
+    
     private static final String CONSTRUCTOR_JSDOC = "/**\n"
             + "* A container with Border Layout.\n"
             + "* @param hgap the horizontal gap (optional)."

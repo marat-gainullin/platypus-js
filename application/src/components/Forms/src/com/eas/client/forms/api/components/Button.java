@@ -34,10 +34,10 @@ public class Button extends Component<JButton> {
     
     private static final String CONSTRUCTOR_JSDOC = "/**\n"
             + "* Simple button component.\n"
-            + "* @param text Component's text (optional)\n"
-            + "* @param icon Component's icon (optional)\n"
-            + "* @param iconTextGap Text gap (optional)\n"
-            + "* @param actionPerformed On action performed function (optional)\n"
+            + "* @param text the text of the component (optional)\n"
+            + "* @param icon the icon of the component (optional)\n"
+            + "* @param iconTextGap the text gap (optional)\n"
+            + "* @param actionPerformed the function for the action performed handler(optional)\n"
             + "*/";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text", "icon", "iconTextGap", "actionPerformed"})

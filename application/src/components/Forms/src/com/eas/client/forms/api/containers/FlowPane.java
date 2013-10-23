@@ -16,13 +16,6 @@ import javax.swing.JPanel;
  */
 public class FlowPane extends Container<JPanel> {
 
-    protected FlowPane(JPanel aDelegate) {
-        super();
-        assert aDelegate != null;
-        assert aDelegate.getLayout() instanceof FlowLayout;
-        setDelegate(aDelegate);
-    }
-
     public FlowPane() {
         this(0, 0);
     }
@@ -31,11 +24,25 @@ public class FlowPane extends Container<JPanel> {
         this(hgap, 0);
     }
 
+    private static final String CONSTRUCTOR_JSDOC = "/**\n"
+            + "* A container with Flow Layout.\n"
+            + "* @param hgap the horizontal gap (optional)."
+            + "* @param vgap the vertical gap (optional)."
+            + "*/";
+
+    @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"hgap", "vgap"})
     public FlowPane(int hgap, int vgap) {
         super();
         setDelegate(new JPanel(new FlowLayout(FlowLayout.LEFT, hgap, vgap)));
     }
 
+    protected FlowPane(JPanel aDelegate) {
+        super();
+        assert aDelegate != null;
+        assert aDelegate.getLayout() instanceof FlowLayout;
+        setDelegate(aDelegate);
+    }
+    
     @ScriptFunction(jsDoc = "Appends the specified component to the end of this container.")
     public void add(Component<?> aComp) {
         if (aComp != null) {

@@ -27,7 +27,7 @@ public class MenuItem extends Component<JMenuItem> {
             + "* A menu item that can be selected or deselected.\n"
             + "* @param text the text of the component (optional)\n"
             + "* @param icon the icon of the component (optional)\n"
-            + "* @param actionPerformed On action performed function (optional)\n"
+            + "* @param actionPerformed the function for the action performed handler (optional)\n"
             + "*/";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text", "icon", "actionPerformed"})

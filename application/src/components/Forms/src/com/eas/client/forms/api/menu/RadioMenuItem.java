@@ -30,7 +30,7 @@ public class RadioMenuItem extends Component<JRadioButtonMenuItem> {
     private static final String CONSTRUCTOR_JSDOC = "/**\n"
             + "* An implementation of a radio button menu item.\n"
             + "* @param text the text of the component (optional)\n"
-            + "* @param selected true if selected (optional)\n"
+            + "* @param selected <code>true</code> if selected (optional)\n"
             + "* @param actionPerformed On action performed function (optional)\n"
             + "*/";
 

@@ -81,9 +81,10 @@ public class BoxPane extends Container<JPanel> {
         }
         delegate.revalidate();
     }
+    
     private static final String CONSTRUCTOR_JSDOC = "/**\n"
             + "* A container with Box Layout. By default uses horisontal orientation.\n" 
-            + "@param orientation Orientation.HORIZONTAL or Orientation.VERTICAL (optional)"
+            + "@param orientation <code>Orientation.HORIZONTAL</code> or <code>Orientation.VERTICAL</code> (optional)"
             + "*/";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"orientation"})

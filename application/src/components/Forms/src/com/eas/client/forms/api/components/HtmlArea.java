@@ -16,7 +16,7 @@ public class HtmlArea extends Component<JEditorPane>{
     
     private static final String CONSTRUCTOR_JSDOC = "/**\n"
             + "* HTML area component. \n"
-            + "* @param text Html area initial text (optional)\n"
+            + "* @param text the initial text for the HTML area (optional)\n"
             + "*/";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text"})
