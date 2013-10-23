@@ -48,7 +48,7 @@ public class JsCompletionItem implements CompletionItem {
     public ImageIcon getIcon() {
         return icon;
     }
-    
+
     @Override
     public void defaultAction(JTextComponent component) {
         try {
@@ -80,7 +80,6 @@ public class JsCompletionItem implements CompletionItem {
     public CompletionTask createDocumentationTask() {
         if (getInfomationText() != null && !getInfomationText().isEmpty()) {
             return new AsyncCompletionTask(new AsyncCompletionQuery() {
-
                 @Override
                 protected void query(CompletionResultSet completionResultSet, Document document, int i) {
                     completionResultSet.setDocumentation(new JsCompletionDocumentation(JsCompletionItem.this));
@@ -95,7 +94,6 @@ public class JsCompletionItem implements CompletionItem {
     @Override
     public CompletionTask createToolTipTask() {
         return new AsyncCompletionTask(new AsyncCompletionQuery() {
-
             @Override
             protected void query(CompletionResultSet completionResultSet, Document document, int i) {
                 JToolTip toolTip = new JToolTip();
@@ -125,16 +123,21 @@ public class JsCompletionItem implements CompletionItem {
     public CharSequence getInsertPrefix() {
         return null;
     }
-    
+
     public String getText() {
         return text;
     }
 
     public String getInfomationText() {
-        return informationText;
+        if (informationText == null || informationText.isEmpty()) {
+            return "";//NOI18N
+        } else {
+            JsCommentFormatter formatter = new JsCommentFormatter(CompletionSupport.getComments(informationText));
+            return formatter.toHtml();
+        }
     }
-    
-    protected  String getLeftHtmlText(boolean plainText) {
+
+    protected String getLeftHtmlText(boolean plainText) {
         return text;
     }
 }

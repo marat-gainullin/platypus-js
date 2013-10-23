@@ -35,35 +35,50 @@ private static final String CONSTRUCTOR_JSDOC = "/**\n"
         setDelegate(aDelegate);
     }
     
-    @ScriptFunction(jsDoc="Minimizes all frames on the pane.")
+    private static final String MINIMIZE_ALL_JSDOC = "/**\n"
+            + "* Minimizes all frames on the pane.\n"
+            + "*/";
+    @ScriptFunction(jsDoc=MINIMIZE_ALL_JSDOC)
     public void minimizeAll() {
         for (JInternalFrame f : delegate.getAllFrames()) {
             delegate.getDesktopManager().iconifyFrame(f);
         }
     }
 
-    @ScriptFunction(jsDoc="Restores frames original state and location.")
+    private static final String RESTORE_ALL_JSDOC = "/**\n"
+            + "* Restores frames original state and location.\n"
+            + "*/";
+    @ScriptFunction(jsDoc=RESTORE_ALL_JSDOC)
     public void restoreAll() {
         for (JInternalFrame f : delegate.getAllFrames()) {
             delegate.getDesktopManager().deiconifyFrame(f);
         }
     }
 
-    @ScriptFunction(jsDoc="Maximizes all frames on the pane.")
+    private static final String MAXIMIZE_ALL_JSDOC = "/**\n"
+            + "* Maximizes all frames on the pane.\n"
+            + "*/";
+    @ScriptFunction(jsDoc=MAXIMIZE_ALL_JSDOC)
     public void maximizeAll() {
         for (JInternalFrame f : delegate.getAllFrames()) {
             delegate.getDesktopManager().maximizeFrame(f);
         }
     }
 
-    @ScriptFunction(jsDoc="Closes all frames on the pane.")
+    private static final String CLOSE_ALL_JSDOC = "/**\n"
+            + "* Closes all frames on the pane.\n"
+            + "*/";
+    @ScriptFunction(jsDoc=CLOSE_ALL_JSDOC)
     public void closeAll() {
         for (JInternalFrame f : delegate.getAllFrames()) {
             delegate.getDesktopManager().closeFrame(f);
         }
     }
 
-    @ScriptFunction(jsDoc="Returns array of all frames on the pane.")
+    private static final String FORMS_JSDOC = "/**\n"
+            + "* Gets an array of all frames on the pane.\n"
+            + "*/";
+    @ScriptFunction(jsDoc=FORMS_JSDOC)
     public FormRunner[] getForms() {
         List<FormRunner> forms = new ArrayList<>();
         for (JInternalFrame f : delegate.getAllFrames()) {

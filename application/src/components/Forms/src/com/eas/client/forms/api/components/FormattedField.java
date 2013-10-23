@@ -38,12 +38,19 @@ public class FormattedField extends Component<JFormattedTextField> {
         setDelegate(aDelegate);
     }
     
-    @ScriptFunction(jsDoc = "Gets text of this component.")
+    private static final String TEXT_JSDOC = "/**\n"
+            + "* Text on the component.\n"
+            + "*/";
+    @ScriptFunction(jsDoc = TEXT_JSDOC)
     public String getText() {
         return delegate.getText();
     }
     
-    @ScriptFunction(jsDoc = "The value of this component.")
+    private static final String VALUE_JSDOC = "/**\n"
+            + "* The value of this component.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = VALUE_JSDOC)
     public Object getValue() {
         return ScriptUtils.javaToJS(delegate.getValue(), jsWrapper);
     }
@@ -53,6 +60,10 @@ public class FormattedField extends Component<JFormattedTextField> {
         delegate.setValue(ScriptUtils.js2Java(aValue));
     }
     
+    private static final String FORMAT_JSDOC = "/**\n"
+            + "* Field text format.\n"
+            + "*/";
+    @ScriptFunction(jsDoc = FORMAT_JSDOC)
     public String getFormat() {
         if (delegate.getFormatter() != null) {
             return ControlsUtils.formatByFormatter(delegate.getFormatter());
@@ -65,6 +76,7 @@ public class FormattedField extends Component<JFormattedTextField> {
         }
     }
     
+    @ScriptFunction
     public void setFormat(String aValue) throws ParseException {
         if (getFormat() == null ? aValue != null : !getFormat().equals(aValue)) {
             if (delegate.getFormatter() != null) {

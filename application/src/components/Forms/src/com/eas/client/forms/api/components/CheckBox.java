@@ -47,7 +47,11 @@ public class CheckBox extends Component<JCheckBox> {
         this(null, false);
     }
     
-    @ScriptFunction(jsDoc="Text of the check box.")
+    private static final String TEXT_JSDOC = "/**\n"
+            + "* Text of the check box."
+            + "*/";
+    
+    @ScriptFunction(jsDoc=TEXT_JSDOC)
     public String getText() {
         return delegate.getText();
     }
@@ -66,7 +70,11 @@ public class CheckBox extends Component<JCheckBox> {
         delegate.setIcon(aValue);
     }
 */
-    @ScriptFunction(jsDoc="Determines whether this component is selected.")
+    private static final String SELECTED_JSDOC = "/**\n"
+            + "* Determines whether this component is selected."
+            + "*/";
+    
+    @ScriptFunction(jsDoc=SELECTED_JSDOC)
     public boolean isSelected() {
         return delegate.isSelected();
     }

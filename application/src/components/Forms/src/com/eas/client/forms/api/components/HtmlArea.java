@@ -37,7 +37,10 @@ public class HtmlArea extends Component<JEditorPane>{
         setDelegate(aDelegate);
     }
     
-    @ScriptFunction(jsDoc = "The text contained in this component.")
+    private static final String TEXT_JSDOC = "/**\n"
+            + "* Text on the component.\n"
+            + "*/";
+    @ScriptFunction(jsDoc = TEXT_JSDOC)
     public String getText() {
         return delegate.getText();
     }
