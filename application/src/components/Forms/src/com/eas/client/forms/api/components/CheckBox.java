@@ -27,9 +27,9 @@ public class CheckBox extends Component<JCheckBox> {
     
     private static final String CONSTRUCTOR_JSDOC = "/**\n"
             + "* Check box component. \n"
-            + "* @param text Check box text (optional)\n"
-            + "* @param selected true if selected (optional)\n"
-            + "* @param actionPerformed On action performed function (optional)\n"
+            + "* @param text the text of the check box (optional)\n"
+            + "* @param selected <code>true</code> if selected (optional)\n"
+            + "* @param actionPerformed the function for the action performed (optional)\n"
             + "*/";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text", "selected",  "actionPerformed"})
@@ -47,7 +47,11 @@ public class CheckBox extends Component<JCheckBox> {
         this(null, false);
     }
     
-    @ScriptFunction(jsDoc="Text of the check box.")
+    private static final String TEXT_JSDOC = "/**\n"
+            + "* Text of the check box."
+            + "*/";
+    
+    @ScriptFunction(jsDoc=TEXT_JSDOC)
     public String getText() {
         return delegate.getText();
     }
@@ -66,7 +70,11 @@ public class CheckBox extends Component<JCheckBox> {
         delegate.setIcon(aValue);
     }
 */
-    @ScriptFunction(jsDoc="Determines whether this component is selected.")
+    private static final String SELECTED_JSDOC = "/**\n"
+            + "* Determines whether this component is selected."
+            + "*/";
+    
+    @ScriptFunction(jsDoc=SELECTED_JSDOC)
     public boolean isSelected() {
         return delegate.isSelected();
     }

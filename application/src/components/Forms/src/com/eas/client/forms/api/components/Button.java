@@ -34,10 +34,10 @@ public class Button extends Component<JButton> {
     
     private static final String CONSTRUCTOR_JSDOC = "/**\n"
             + "* Simple button component.\n"
-            + "* @param text Component's text (optional)\n"
-            + "* @param icon Component's icon (optional)\n"
-            + "* @param iconTextGap Text gap (optional)\n"
-            + "* @param actionPerformed On action performed function (optional)\n"
+            + "* @param text the text of the component (optional)\n"
+            + "* @param icon the icon of the component (optional)\n"
+            + "* @param iconTextGap the text gap (optional)\n"
+            + "* @param actionPerformed the function for the action performed handler(optional)\n"
             + "*/";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text", "icon", "iconTextGap", "actionPerformed"})
@@ -59,8 +59,12 @@ public class Button extends Component<JButton> {
     public Button() {
         this(null, null, 4);
     }
-
-    @ScriptFunction(jsDoc = "Text on the button.")
+    
+    private static final String TEXT_JSDOC = "/**\n"
+            + "* Text on the button."
+            + "*/";
+    
+    @ScriptFunction(jsDoc = TEXT_JSDOC)
     public String getText() {
         return delegate.getText();
     }
@@ -70,7 +74,10 @@ public class Button extends Component<JButton> {
         delegate.setText(aValue);
     }
 
-    @ScriptFunction(jsDoc = "Image picture for the button.")
+    private static final String ICON_JSDOC = "/**\n"
+            + "* Image picture for the button."
+            + "*/";
+    @ScriptFunction(jsDoc = ICON_JSDOC)
     public Icon getIcon() {
         return delegate.getIcon();
     }
@@ -80,7 +87,10 @@ public class Button extends Component<JButton> {
         delegate.setIcon(aValue);
     }
 
-    @ScriptFunction(jsDoc = "The amount of space between the text and the icon displayed in this button.")
+    private static final String ICON_TEXT_GAP_JSDOC = "/**\n"
+            + "* The amount of space between the text and the icon displayed in this button.\n"
+            + "*/";
+    @ScriptFunction(jsDoc = ICON_TEXT_GAP_JSDOC)
     public int getIconTextGap() {
         return delegate.getIconTextGap();
     }
@@ -90,7 +100,10 @@ public class Button extends Component<JButton> {
         delegate.setIconTextGap(aValue);
     }
 
-    @ScriptFunction(jsDoc = "Horizontal position of the text relative to the icon.")
+    private static final String HORIZONTAL_TEXT_POSITION_JSDOC = "/**\n"
+            + "* Horizontal position of the text relative to the icon.\n"
+            + "*/";
+    @ScriptFunction(jsDoc = HORIZONTAL_TEXT_POSITION_JSDOC)
     public int getHorizontalTextPosition() {
         switch (delegate.getHorizontalTextPosition()) {
             case JLabel.LEFT:
@@ -122,7 +135,10 @@ public class Button extends Component<JButton> {
         }
     }
 
-    @ScriptFunction(jsDoc = "Vertical position of the text relative to the icon.")
+    private static final String VERTICAL_TEXT_POSITION_JSDOC = "/**\n"
+            + "* Vertical position of the text relative to the icon.\n"
+            + "*/";
+    @ScriptFunction(jsDoc = VERTICAL_TEXT_POSITION_JSDOC)
     public int getVerticalTextPosition() {
         switch (delegate.getVerticalTextPosition()) {
             case JLabel.TOP:

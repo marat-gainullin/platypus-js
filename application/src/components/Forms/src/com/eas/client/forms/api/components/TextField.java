@@ -16,7 +16,7 @@ public class TextField extends Component<JTextField>{
         
     private static final String CONSTRUCTOR_JSDOC = "/**\n"
             + "* Text field component. \n"
-            + "* @param text Text field initial text (optional)\n"
+            + "* @param text the initial text for the component (optional)\n"
             + "*/";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text"})

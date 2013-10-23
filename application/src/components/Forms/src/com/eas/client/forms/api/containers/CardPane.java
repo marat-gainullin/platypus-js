@@ -17,13 +17,6 @@ import javax.swing.JPanel;
  */
 public class CardPane extends Container<JPanel> {
 
-    protected CardPane(JPanel aDelegate) {
-        super();
-        assert aDelegate != null;
-        assert aDelegate.getLayout() instanceof CardLayout;
-        setDelegate(aDelegate);
-    }
-
     public CardPane() {
         this(0, 0);
     }
@@ -32,11 +25,25 @@ public class CardPane extends Container<JPanel> {
         this(hgap, 0);
     }
 
+    private static final String CONSTRUCTOR_JSDOC = "/**\n"
+            + "* A container with Card Layout.\n"
+            + "* @param hgap the horizontal gap (optional)."
+            + "* @param vgap the vertical gap (optional)."
+            + "*/";
+
+    @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"hgap", "vgap"})
     public CardPane(int hgap, int vgap) {
         super();
         setDelegate(new JPanel(new PlatypusCardLayout(hgap, vgap)));
     }
 
+    protected CardPane(JPanel aDelegate) {
+        super();
+        assert aDelegate != null;
+        assert aDelegate.getLayout() instanceof CardLayout;
+        setDelegate(aDelegate);
+    }
+    
     @ScriptFunction(jsDoc = "Appends the component to this container with the specified name.")
     public void add(Component<?> aComp, String aCardName) {
         if (aComp != null) {

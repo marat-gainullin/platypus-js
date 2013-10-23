@@ -56,7 +56,7 @@ public class CompletionContext {
     public CompletionContext getChildContext(String str, int offset) throws Exception {
         return null;
     }
-    
+
     protected void fillFields(Fields aFields, JsCompletionProvider.CompletionPoint point, CompletionResultSet resultSet) {
         for (Field field : aFields.toCollection()) {
             addItem(resultSet, point.filter, new BeanCompletionItem(field.getClass(), field.getName(), field.getDescription(), point.caretBeginWordOffset, point.caretEndWordOffset));
@@ -100,7 +100,9 @@ public class CompletionContext {
                             }
                             setPropertyAccessStatus(pb, method.getName());
                             setPropertyReturnType(pb, method);
-                            pb.jsDoc = method.getAnnotation(ScriptFunction.class).jsDoc();
+                            if (pb.jsDoc == null || pb.jsDoc.isEmpty()) {
+                                pb.jsDoc = method.getAnnotation(ScriptFunction.class).jsDoc();
+                            }
                         }
                     } else if (point.filter == null || point.filter.isEmpty() || method.getName().startsWith(point.filter)) {
                         methods.add(method);

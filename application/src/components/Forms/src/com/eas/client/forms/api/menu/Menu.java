@@ -24,7 +24,7 @@ public class Menu extends Container<JMenu> {
     private static final String CONSTRUCTOR_JSDOC = "/**\n"
             + "* An implementation of a menu -- a popup window containing MenuItems"
             + " that is displayed when the user selects an item on the MenuBar."
-            + " In addition to MenuItems, a JMenu can also contain MenuSeparators.\n"
+            + " In addition to <code>MenuItems</code>, a <code>Menu</code> can also contain <code>MenuSeparators</code>.\n"
             + "* @param text the text for the menu label (optional)\n"
             + "*/";
 

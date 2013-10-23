@@ -19,9 +19,9 @@ public class Label extends Component<JLabel> {
 
     private static final String CONSTRUCTOR_JSDOC = "/**\n"
             + "* Label component.\n"
-            + "* @param text Component's initial text (optional)\n"
-            + "* @param icon Component's icon (optional)\n"
-            + "* @param iconTextGap Text gap (optional)\n"
+            + "* @param text the initial text for the component (optional)\n"
+            + "* @param icon the icon for the component (optional)\n"
+            + "* @param iconTextGap the text gap (optional)\n"
             + "*/";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text", "icon", "iconTextGap"})

@@ -16,8 +16,8 @@ public class ProgressBar extends Component<JProgressBar> {
 
  private static final String CONSTRUCTOR_JSDOC = "/**\n"
             + "* Progress bar component.\n"
-            + "* @param min Minimum value (optional)\n"
-            + "* @param max Maximum value (optional)\n"
+            + "* @param min the minimum value (optional)\n"
+            + "* @param max the maximum value (optional)\n"
             + "*/";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"min", "max"})   
