@@ -16,11 +16,12 @@ import javax.swing.JScrollPane;
  */
 public class ScrollPane extends Container<JScrollPane> {
 
-    protected ScrollPane(JScrollPane aDelegate) {
-        super();
-        setDelegate(aDelegate);
-    }
+     private static final String CONSTRUCTOR_JSDOC = "/**\n"
+            + "* Provides a scrollable view of a lightweight component.\n"
+            + "* @param view the component to display in the scrollpane's viewport (optional)\n"
+            + "*/";
 
+    @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"view"})
     public ScrollPane(Component<?> aComp) {
         super();
         setDelegate(new JScrollPane(unwrap(aComp)));
@@ -30,6 +31,11 @@ public class ScrollPane extends Container<JScrollPane> {
         this((Component<?>) null);
     }
 
+    protected ScrollPane(JScrollPane aDelegate) {
+        super();
+        setDelegate(aDelegate);
+    }
+    
     @ScriptFunction(jsDoc = "Appends the specified component to the end of this container.")
     public void add(Component<?> aComp) {
         if (aComp != null) {

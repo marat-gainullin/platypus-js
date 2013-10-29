@@ -15,11 +15,14 @@ import javax.swing.JSlider;
  */
 public class Slider extends Component<JSlider> {
 
-    protected Slider(JSlider aDelegate) {
-        super();
-        setDelegate(aDelegate);
-    }
+    private static final String CONSTRUCTOR_JSDOC = "/**\n"
+            + "* Slider component.\n"
+            + "* @param min the minimum value (optional)\n"
+            + "* @param max the maximum value (optional)\n"
+            + "* @param value the initial value (optional)\n"
+            + "*/";
 
+    @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"min", "max", "value"}) 
     public Slider(int aOrientation, int min, int max, int value) {
         super();
         int orientation = JSlider.HORIZONTAL;
@@ -39,6 +42,11 @@ public class Slider extends Component<JSlider> {
         this(Orientation.HORIZONTAL, min, max, value);
     }
 
+    protected Slider(JSlider aDelegate) {
+        super();
+        setDelegate(aDelegate);
+    }
+    
     @ScriptFunction(jsDoc = "This slider's vertical or horizontal orientation: Orientation.VERTICAL or Orientation.HORIZONTAL")
     public int getOrientation() {
         if (delegate.getOrientation() == JSlider.HORIZONTAL) {

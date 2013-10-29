@@ -25,16 +25,21 @@ import org.mozilla.javascript.Undefined;
  */
 public class AbsolutePane extends Container<JPanel> {
 
+    private static final String CONSTRUCTOR_JSDOC = "/**\n"
+            + "* A container with Absolute Layout.\n" 
+            + "*/";
+
+    @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {})
+    public AbsolutePane() {
+        super();
+        setDelegate(new JPanel(new MarginLayout()));
+    }
+
     protected AbsolutePane(JPanel aDelegate) {
         super();
         assert aDelegate != null;
         assert aDelegate.getLayout() == null;
         setDelegate(aDelegate);
-    }
-
-    public AbsolutePane() {
-        super();
-        setDelegate(new JPanel(new MarginLayout()));
     }
 
     @ScriptFunction(jsDoc = "Appends the specified component at left top corner of this container.")
@@ -79,7 +84,7 @@ public class AbsolutePane extends Container<JPanel> {
         Margin height = MarginConstraintsDesignInfo.parseMargin(oHeight != null ? Context.toString(oHeight) : null);
         return new MarginConstraints(left, top, null, null, width, height);
     }
-    
+
     @ScriptFunction(jsDoc = "Brings the specified component to front on this panel.")
     public void toFront(Component aComp) {
         Ordering.toFront(delegate, aComp);
@@ -89,6 +94,7 @@ public class AbsolutePane extends Container<JPanel> {
     public void toBack(Component aComp) {
         Ordering.toBack(delegate, aComp);
     }
+
     @ScriptFunction(jsDoc = "")
     public void toFront(Component aComp, int aCount) {
         Ordering.toFront(delegate, aComp, aCount);

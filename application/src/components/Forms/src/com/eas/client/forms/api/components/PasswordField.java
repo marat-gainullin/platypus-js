@@ -13,13 +13,13 @@ import javax.swing.JPasswordField;
  * @author mg
  */
 public class PasswordField extends Component<JPasswordField>{
-    
-    protected PasswordField(JPasswordField aDelegate)
-    {
-        super();
-        setDelegate(aDelegate);
-    }
-    
+      
+    private static final String CONSTRUCTOR_JSDOC = "/**\n"
+            + "* Password field component.\n"
+            + "* @param text the text for the component (optional)\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text"})
     public PasswordField(String aText)
     {
         super();
@@ -29,6 +29,12 @@ public class PasswordField extends Component<JPasswordField>{
     public PasswordField()
     {
         this((String)null);
+    }
+    
+    protected PasswordField(JPasswordField aDelegate)
+    {
+        super();
+        setDelegate(aDelegate);
     }
     
     @ScriptFunction(jsDoc="The text contained in this component.")

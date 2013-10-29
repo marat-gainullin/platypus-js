@@ -14,11 +14,12 @@ import javax.swing.JEditorPane;
  */
 public class HtmlArea extends Component<JEditorPane>{
     
-    protected HtmlArea(JEditorPane aDelegate) {
-        super();
-        setDelegate(aDelegate);
-    }
+    private static final String CONSTRUCTOR_JSDOC = "/**\n"
+            + "* HTML area component. \n"
+            + "* @param text the initial text for the HTML area (optional)\n"
+            + "*/";
 
+    @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text"})
     public HtmlArea(String aText) {
         super();
         JEditorPane pane = new JEditorPane();
@@ -31,7 +32,15 @@ public class HtmlArea extends Component<JEditorPane>{
         this((String) null);
     }
 
-    @ScriptFunction(jsDoc = "The text contained in this component.")
+    protected HtmlArea(JEditorPane aDelegate) {
+        super();
+        setDelegate(aDelegate);
+    }
+    
+    private static final String TEXT_JSDOC = "/**\n"
+            + "* Text on the component.\n"
+            + "*/";
+    @ScriptFunction(jsDoc = TEXT_JSDOC)
     public String getText() {
         return delegate.getText();
     }

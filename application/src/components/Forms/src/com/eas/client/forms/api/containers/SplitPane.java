@@ -16,15 +16,16 @@ import javax.swing.JSplitPane;
  */
 public class SplitPane extends Container<JSplitPane> {
 
-    protected SplitPane(JSplitPane aDelegate) {
-        super();
-        setDelegate(aDelegate);
-    }
-
     public SplitPane() {
         this(Orientation.HORIZONTAL);
     }
 
+    private static final String CONSTRUCTOR_JSDOC = "/**\n"
+            + "* <code>SplitPane</code> is used to divide two (and only two) components. By default uses horisontal orientation.\n" 
+            + "* @param orientation <code>Orientation.HORIZONTAL</code> or <code>Orientation.VERTICAL</code> (optional)\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"orientation"})
     public SplitPane(int aOrientation) {
         super();
         if (aOrientation == Orientation.HORIZONTAL) {
@@ -36,6 +37,11 @@ public class SplitPane extends Container<JSplitPane> {
         }
     }
 
+    protected SplitPane(JSplitPane aDelegate) {
+        super();
+        setDelegate(aDelegate);
+    }
+    
     @ScriptFunction(jsDoc = "The orientation of the container.")
     public int getOrientation() {
         if (delegate.getOrientation() == JSplitPane.HORIZONTAL_SPLIT) {

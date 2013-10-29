@@ -60,7 +60,7 @@ public class FormCompletionContext extends ModuleCompletionContext {
                     ScriptFunction annotation = constructor.getAnnotation(ScriptFunction.class);
                     addItem(resultSet,
                             point.filter,
-                            new SystemConstructorCompletionItem(clazz.getSimpleName(),
+                            new ComponentConstructorCompletionItem(clazz.getSimpleName(),
                             "",//NOI18N
                             Arrays.<String>asList(annotation.params()),
                             annotation.jsDoc(),

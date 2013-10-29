@@ -22,6 +22,7 @@ import org.mozilla.javascript.ast.AstNode;
 import org.mozilla.javascript.ast.AstRoot;
 import org.mozilla.javascript.ast.FunctionNode;
 import org.mozilla.javascript.ast.Name;
+import org.mozilla.javascript.ast.NewExpression;
 import org.mozilla.javascript.ast.NodeVisitor;
 import org.mozilla.javascript.ast.PropertyGet;
 import org.mozilla.javascript.ast.ScriptNode;
@@ -133,18 +134,24 @@ public class ModuleHyperlinkProvider implements HyperlinkProviderExt {
         if (node == null || !(node instanceof Name)) {
             return DeclarationLocation.NONE;
         }
-
+        FileObject fo = NbEditorUtilities.getFileObject(doc);
+        PlatypusModuleDataObject appElementDataObject = (PlatypusModuleDataObject) DataObject.find(fo);
+        if (node.getParent() instanceof NewExpression) {
+            CompletionContext typeCompletionContext = ModuleCompletionContext.getModuleCompletionContext(appElementDataObject.getProject(), ((Name)node).getIdentifier());
+            if (typeCompletionContext == null || !(typeCompletionContext instanceof ModuleCompletionContext)) {
+                return DeclarationLocation.NONE;
+            } else {
+                return new DeclarationLocation(((ModuleCompletionContext)typeCompletionContext).getDataObject(), 0);
+            }
+        }
         makePath(node);
         if (identifiersPath == null || identifiersPath.isEmpty()) {
             return DeclarationLocation.NONE;
         }
-
-        FileObject fo = NbEditorUtilities.getFileObject(doc);
-        PlatypusModuleDataObject appElementDataObject = (PlatypusModuleDataObject) DataObject.find(fo);
         for (int i = 0; i < identifiersPath.size() - 1; i++) {
             String fieldName = identifiersPath.get(i);
             CompletionContext typeCompletionContext = ModuleCompletionContext.findModuleCompletionContext(fieldName, offset, appElementDataObject);
-            if (typeCompletionContext == null || typeCompletionContext == null || !(typeCompletionContext instanceof ModuleCompletionContext)) {
+            if (typeCompletionContext == null || !(typeCompletionContext instanceof ModuleCompletionContext)) {
                 return DeclarationLocation.NONE;
             }
             appElementDataObject = ((ModuleCompletionContext) typeCompletionContext).getDataObject();

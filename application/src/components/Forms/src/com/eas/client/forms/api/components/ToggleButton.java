@@ -22,15 +22,19 @@ public class ToggleButton extends Component<JToggleButton> {
 
     protected ButtonGroup group;
 
-    protected ToggleButton(JToggleButton aDelegate) {
-        super();
-        setDelegate(aDelegate);
-    }
-
     public ToggleButton(String aText, Icon aIcon, boolean aSelected, int aIconTextGap) {
         this(aText, aIcon, aSelected, aIconTextGap, null);
     }
 
+    private static final String CONSTRUCTOR_JSDOC = "/**\n"
+            + "* Toggle button component.\n"
+            + "* @param text the text for the component (optional)\n"
+            + "* @param icon the icon for the component (optional)\n"
+            + "* @param iconTextGap the text gap (optional)\n"
+            + "* @param actionPerformed the function for the action performed handler (optional)\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text", "icon", "iconTextGap", "actionPerformed"})
     public ToggleButton(String aText, Icon aIcon, boolean aSelected, int aIconTextGap, Function aActionPerformedHandler) {
         super();
         setDelegate(new JToggleButton(aText, aIcon, aSelected));
@@ -58,6 +62,11 @@ public class ToggleButton extends Component<JToggleButton> {
         this(null, null, false, 4);
     }
 
+    protected ToggleButton(JToggleButton aDelegate) {
+        super();
+        setDelegate(aDelegate);
+    }
+    
     @ScriptFunction(jsDoc="Text on the button.")
     public String getText() {
         return delegate.getText();
