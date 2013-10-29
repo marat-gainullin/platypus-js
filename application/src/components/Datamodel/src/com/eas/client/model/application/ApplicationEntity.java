@@ -577,8 +577,26 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
         super.setTableSchemaName(aValue);
     }
 
+    /**
+     * WARNING!!! This nethod is for external use only.
+     * It allows to set a rowset from any environment and so it resets entitiy state
+     * e.g. executed and executing flags are resetted, entity is re-signed to rowset's 
+     * events and fields is resetted with rowset's fields.
+     * @param aRowset 
+     */
     public void setRowset(Rowset aRowset) {
+        Rowset oldRowset = rowset;
+        if (rowset != null) {
+            rowset.removeRowsetListener(this);
+        }
         rowset = aRowset;
+        fields = rowset.getFields();
+        executed = true;
+        executing = false;
+        if (rowset != null) {
+            rowset.addRowsetListener(this);
+            changeSupport.firePropertyChange("rowset", oldRowset, rowset);
+        }
     }
 
     protected abstract void refreshRowset() throws Exception;

@@ -7,6 +7,8 @@ package com.eas.client.gxtcontrols.wrappers.container;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.widget.core.client.container.CardLayoutContainer;
@@ -19,7 +21,7 @@ import com.sencha.gxt.widget.core.client.container.MarginData;
 public class PlatypusCardLayoutContainer extends CardLayoutContainer {
 	private int hGap = 0;
 	private int vGap = 0;
-	private Map<String, IsWidget> cards = new HashMap();
+	private Map<String, IsWidget> cards = new HashMap<String, IsWidget>();
 
 	public PlatypusCardLayoutContainer(int aVGap, int aHGap) {
 		super();
@@ -37,9 +39,13 @@ public class PlatypusCardLayoutContainer extends CardLayoutContainer {
 			super.remove(cards.get(aCardName));
 		super.add(aWidget, new MarginData(vGap, hGap, vGap, hGap));
 		cards.put(aCardName, aWidget);
-		if (isAttached()){
-			clearSizeCache();// otherwise setSize() will have no effect
-			setSize(width, height);
+		if (isAttached()) {
+			Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+				@Override
+				public void execute() {
+					forceLayout();
+				}
+			});
 		}
 	}
 

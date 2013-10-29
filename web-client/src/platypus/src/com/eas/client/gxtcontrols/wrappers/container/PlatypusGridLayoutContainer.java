@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Style.Position;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Widget;
@@ -87,9 +89,13 @@ public class PlatypusGridLayoutContainer extends ResizeContainer {
 		if (aWidget != null) {
 			aWidget.getElement().getStyle().setPosition(Position.ABSOLUTE);
 			super.add(aWidget);
-			if (isAttached()){
-				clearSizeCache();// otherwise setSize() will have no effect
-				setSize(width, height);
+			if (isAttached()) {
+				Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+					@Override
+					public void execute() {
+						forceLayout();
+					}
+				});
 			}
 		}
 	}

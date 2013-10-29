@@ -88,9 +88,11 @@ public class IntegrationTest extends GeoBaseTest {
             ApplicationDbEntity e = new ApplicationDbEntity(datamodel);
             e.regenerateId();
             e.setTableName(tableName);
+            e.validateQuery();
             datamodel.addEntity(e);
             final Rowset rowset = e.getRowset();
             assertNotNull(rowset);
+            rowset.refresh();
             assertTrue(rowset.size() > 0);
             final RowsetFeatureDescriptor rfd = new RowsetFeatureDescriptor(e.getTableName(), e);
             rfd.setCrsWkt(DELAWARE_MAP_CRS_WKT);

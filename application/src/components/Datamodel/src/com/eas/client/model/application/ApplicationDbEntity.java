@@ -71,7 +71,7 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
             } else if (tableName != null) {
                 query = SQLUtils.validateTableSqlQuery(getTableDbId(), getTableName(), getTableSchemaName(), model.getClient());
             } else {
-                assert false;
+                assert false : "Entity must have queryId or tableName to validate it's query";
             }
             prepareRowsetByQuery();
         }
@@ -82,6 +82,7 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
         if (rowset != null) {
             rowset.removeRowsetListener(this);
             unforwardChangeLog();
+            rowset = null;
         }
         if (query != null) {
             SqlCompiledQuery compiled = query.compile();

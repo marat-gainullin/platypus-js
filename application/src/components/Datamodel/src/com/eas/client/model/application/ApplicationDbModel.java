@@ -189,9 +189,10 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
         modelEntity.setName(USER_DATASOURCE_NAME);
         SqlQuery query = new SqlQuery(client, aDbId, aSqlText);
         query.setEntityId(String.valueOf(IDGenerator.genID()));
-        modelEntity.setQuery(query);
         StoredQueryFactory factory = new StoredQueryFactory(client, true);
         factory.putTableFieldsMetadata(query);// only select will be filled with output columns
+        modelEntity.setQuery(query);
+        modelEntity.prepareRowsetByQuery();
         return modelEntity.defineProperties();// .md collection will be empty if query is not a select
     }
 
