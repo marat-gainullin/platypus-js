@@ -3,8 +3,8 @@
 @set LAF_JAR="%CUR_DIR%/lib/thirdparty/laf/JTattoo.jar"
 @set MAIN_CP="com.eas.client.updater.Updater"
 @set UPDATER_PATH="%CUR_DIR%/lib/own/Updater.jar"
-@set URL_CONFIG=http://research.office.altsoft.biz/platypus/client/updates/update.xml
-@set URL_UPDATE=http://research.office.altsoft.biz/platypus/client/updates/application.zip
+@set URL_CONFIG=http://research.office.altsoft.biz/platypus/client/updates/NightlyBuild/update.xml
+@set URL_UPDATE=http://research.office.altsoft.biz/platypus/client/updates/NightlyBuild/application.zip
 @set CONFIG_NAME="%CUR_DIR%/run/update.xml"
 @set TMP_UPDATE_NAME="%CUR_DIR%/app.zip"
 @set PLATYPUS_HOME="%CUR_DIR%/"
