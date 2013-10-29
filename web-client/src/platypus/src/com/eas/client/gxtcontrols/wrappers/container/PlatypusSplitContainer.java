@@ -1,5 +1,7 @@
 package com.eas.client.gxtcontrols.wrappers.container;
 
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
@@ -89,9 +91,13 @@ public class PlatypusSplitContainer extends BorderLayoutContainer {
 			leftComponent.getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
 			cp.setWidget(leftComponent);
 		}
-		if (isAttached()){
-			clearSizeCache();// otherwise setSize() will have no effect
-			setSize(width, height);
+		if (isAttached()) {
+			Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+				@Override
+				public void execute() {
+					forceLayout();
+				}
+			});
 		}
 	}
 
@@ -103,9 +109,13 @@ public class PlatypusSplitContainer extends BorderLayoutContainer {
 			c.add(rightComponent, new MarginData(0, 0, 0, 0));
 			setCenterWidget(c, new MarginData(0, 0, 0, 0));
 		}
-		if (isAttached()){
-			clearSizeCache();// otherwise setSize() will have no effect
-			setSize(width, height);
+		if (isAttached()) {
+			Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+				@Override
+				public void execute() {
+					forceLayout();
+				}
+			});
 		}
 	}
 

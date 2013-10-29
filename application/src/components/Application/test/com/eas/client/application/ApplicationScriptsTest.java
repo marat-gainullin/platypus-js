@@ -64,7 +64,7 @@ public class ApplicationScriptsTest {
     }
 
     public static void scriptTest(String aModuleId) throws Exception {
-        System.out.println("stating script test for the " + aModuleId + ". Expecting some exceptions while failure.");
+        System.out.println("starting script test for the " + aModuleId + ". Expecting some exceptions while failure.");
         DbClient client = initDevelopTestClient();
         try {
             ScriptRunner script = new ScriptRunner(aModuleId, client, ScriptRunner.initializePlatypusStandardLibScope(), new TestPrincipalHost(), new TestScriptDocumentsHost(new ClientCompiledScriptDocuments(client)), new Object[]{});

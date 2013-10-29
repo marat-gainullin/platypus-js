@@ -20,21 +20,20 @@ public class FileUpdaterTest {
     @Test
     public void testUpdateFile_String() {
         System.out.println("Download and unzip files");
-        String link = "http://research.office.altsoft.biz/platypus/client/updates/application.zip";
+        String link = "http://research.office.altsoft.biz/platypus/client/updates/NightlyBuild/application.zip";
         String fname = "app.zip";
         DownloadFile df=new DownloadFile(link, fname);
         df.setShowReplaceDlg(false);
         df.setShowProgress(false);
         df.downloadFileHttpLink();
         FileUpdater instance = new FileUpdater(link, "");
-        boolean expResult = true;
-        File updater = new File("lib\\own");
+        File updater = new File("lib/own");
         updater.mkdirs();
         boolean result = instance.unPackZip(fname);
         File f = new File("app.txt");
         f.delete();
-        updater = new File("lib\\own\\Updater-new.jar");
+        updater = new File("lib/own/Updater-new.jar");
         updater.delete();
-        assertEquals(expResult, result);
+        assertTrue(result);
     }
 }

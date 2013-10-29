@@ -14,51 +14,47 @@ import static org.junit.Assert.*;
  *
  * @author pk
  */
-public class RowsetFeatureDescriptorTest extends GeoBaseTest
-{
+public class RowsetFeatureDescriptorTest extends GeoBaseTest {
+
     private static ApplicationDbModel datamodel;
     private static ApplicationDbEntity colaMarkets;
 
-    public RowsetFeatureDescriptorTest()
-    {
+    public RowsetFeatureDescriptorTest() {
     }
 
     @BeforeClass
-    public static void setUpClass() throws Exception
-    {
+    public static void setUpClass() throws Exception {
         GeoBaseTest.setUpClass();
         datamodel = new ApplicationDbModel(dbClient);
         datamodel.setRuntime(true);
         colaMarkets = new ApplicationDbEntity(datamodel);
         colaMarkets.regenerateId();
         colaMarkets.setTableName("COLA_MARKETS");
+        colaMarkets.validateQuery();
         datamodel.addEntity(colaMarkets);
         final Rowset rowset = colaMarkets.getRowset();
         assertNotNull(rowset);
+        rowset.refresh();
         assertTrue(rowset.size() > 0);
     }
 
     @AfterClass
-    public static void tearDownClass() throws Exception
-    {
+    public static void tearDownClass() throws Exception {
     }
 
     @Before
-    public void setUp()
-    {
+    public void setUp() {
     }
 
     @After
-    public void tearDown()
-    {
+    public void tearDown() {
     }
 
     /**
      * Test of getEntity method, of class RowsetFeatureDescriptor.
      */
     @Test
-    public void testGetEntity()
-    {
+    public void testGetEntity() {
         System.out.println("getEntity");
         RowsetFeatureDescriptor instance = new RowsetFeatureDescriptor("colaMarkets", colaMarkets);
         assertEquals(colaMarkets, instance.getEntity());
@@ -69,8 +65,7 @@ public class RowsetFeatureDescriptorTest extends GeoBaseTest
      * Test of setEntity method, of class RowsetFeatureDescriptor.
      */
     @Test
-    public void testSetEntity()
-    {
+    public void testSetEntity() {
         System.out.println("setEntity");
         RowsetFeatureDescriptor instance = new RowsetFeatureDescriptor();
         assertNull(instance.getEntity());
@@ -83,8 +78,7 @@ public class RowsetFeatureDescriptorTest extends GeoBaseTest
      * Test of getTypeName method, of class RowsetFeatureDescriptor.
      */
     @Test
-    public void testGetTypeName()
-    {
+    public void testGetTypeName() {
         System.out.println("getTypeName");
         RowsetFeatureDescriptor instance = new RowsetFeatureDescriptor();
         assertNull(instance.getTypeName());
@@ -96,8 +90,7 @@ public class RowsetFeatureDescriptorTest extends GeoBaseTest
      * Test of setTypeName method, of class RowsetFeatureDescriptor.
      */
     @Test
-    public void testSetTypeName()
-    {
+    public void testSetTypeName() {
         System.out.println("setTypeName");
         RowsetFeatureDescriptor instance = new RowsetFeatureDescriptor();
         assertNull(instance.getTypeName());
@@ -109,16 +102,14 @@ public class RowsetFeatureDescriptorTest extends GeoBaseTest
      * Test of toString method, of class RowsetFeatureDescriptor.
      */
     @Test
-    public void testToString()
-    {
+    public void testToString() {
         System.out.println("toString");
         RowsetFeatureDescriptor instance = new RowsetFeatureDescriptor("colaMarkets", colaMarkets);
         assertTrue(instance.toString().startsWith("Features rowset, type colaMarkets, entity com.eas.client.model.application.ApplicationDbEntity@"));
     }
 
     @Test
-    public void testCloning() throws CloneNotSupportedException
-    {
+    public void testCloning() throws CloneNotSupportedException {
         System.out.println("clone");
         RowsetFeatureDescriptor instance = new RowsetFeatureDescriptor("colaMarkets", colaMarkets);
         RowsetFeatureDescriptor cloned = instance.copy();
@@ -129,5 +120,4 @@ public class RowsetFeatureDescriptorTest extends GeoBaseTest
         assertEquals(instance.getRef(), cloned.getRef());
         assertEquals(instance.getTypeName(), cloned.getTypeName());
     }
-
 }

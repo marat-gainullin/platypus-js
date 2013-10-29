@@ -32,48 +32,46 @@ import org.opengis.feature.type.AttributeDescriptor;
  *
  * @author pk
  */
-public class DatamodelDataStoreTest extends GeoBaseTest
-{
+public class DatamodelDataStoreTest extends GeoBaseTest {
+
     private Map<String, RowsetFeatureDescriptor> map;
     private ApplicationDbModel datamodel;
 
-    public DatamodelDataStoreTest()
-    {
+    public DatamodelDataStoreTest() {
     }
 
     @AfterClass
-    public static void tearDownClass() throws Exception
-    {
+    public static void tearDownClass() throws Exception {
     }
 
     @Before
-    public void setUp() throws Exception
-    {
+    public void setUp() throws Exception {
         datamodel = new ApplicationDbModel(dbClient);
         datamodel.setRuntime(true);
         map = new HashMap<>();
         ApplicationDbEntity e = new ApplicationDbEntity(datamodel);
         e.regenerateId();
         e.setTableName("COLA_MARKETS");
+        e.validateQuery();
         datamodel.addEntity(e);
         final Rowset rowset = e.getRowset();
         assertNotNull(rowset);
+        rowset.refresh();
         assertTrue(rowset.size() > 0);
         map.put(e.getTableName(), new RowsetFeatureDescriptor(e.getTableName(), e));
     }
 
     @After
-    public void tearDown()
-    {
+    public void tearDown() {
     }
 
     /**
      * Test of getTypeNames method, of class DatamodelDataStore.
+     *
      * @throws Exception
      */
     @Test
-    public void testGetTypeNames() throws Exception
-    {
+    public void testGetTypeNames() throws Exception {
         System.out.println("getTypeNames");
         DatamodelDataStore myDS = new DatamodelDataStore();
         String[] expResult = new String[0];
@@ -81,28 +79,26 @@ public class DatamodelDataStoreTest extends GeoBaseTest
         assertArrayEquals(expResult, result);
         //TODO put some datasources into myDS and check the type names to be equal to datasources names.
         myDS.setFeatureDescriptors(map);
-        expResult = new String[]
-                {
-                    "COLA_MARKETS"
-                };
+        expResult = new String[]{
+            "COLA_MARKETS"
+        };
         result = myDS.getTypeNames();
         assertArrayEquals(expResult, result);
     }
 
     /**
      * Test of getSchema method, of class DatamodelDataStore.
+     *
      * @throws Exception
      */
     @Test
-    public void testGetSchema() throws Exception
-    {
+    public void testGetSchema() throws Exception {
         System.out.println("getSchema");
         final DatamodelDataStore myDS = new DatamodelDataStore();
         myDS.setFeatureDescriptors(map);
         //TODO test for SRS.
         final SimpleFeatureType schema = myDS.getSchema("COLA_MARKETS");
-        final String[] names = new String[]
-        {
+        final String[] names = new String[]{
             "MKT_ID", "NAME", "SHAPE", DatamodelDataStore.ROW_ATTR_NAME
         };
         assertEquals(names.length, schema.getAttributeCount());
@@ -122,11 +118,11 @@ public class DatamodelDataStoreTest extends GeoBaseTest
 
     /**
      * Test of getFeatureReader method, of class DatamodelDataStore.
+     *
      * @throws Exception
      */
     @Test
-    public void testGetFeatureReader() throws Exception
-    {
+    public void testGetFeatureReader() throws Exception {
         System.out.println("getFeatureReader");
         final DatamodelDataStore myDS = new DatamodelDataStore();
         myDS.setFeatureDescriptors(map);
@@ -141,8 +137,7 @@ public class DatamodelDataStoreTest extends GeoBaseTest
      * Test of getFeatureDescriptors method, of class DatamodelDataStore.
      */
     @Test
-    public void testGetFeatureDSes()
-    {
+    public void testGetFeatureDSes() {
         System.out.println("getFeatureDSes");
         DatamodelDataStore instance = new DatamodelDataStore();
         assertEquals(0, instance.getFeatureDescriptors().size());
@@ -154,8 +149,7 @@ public class DatamodelDataStoreTest extends GeoBaseTest
      * Test of setFeatureDescriptors method, of class DatamodelDataStore.
      */
     @Test
-    public void testSetFeatureDSes()
-    {
+    public void testSetFeatureDSes() {
         System.out.println("setFeatureDSes");
         DatamodelDataStore instance = new DatamodelDataStore();
         //Test setting as map.
@@ -172,11 +166,11 @@ public class DatamodelDataStoreTest extends GeoBaseTest
 
     /**
      * Test of getFeatureSource method, of class DatamodelDataStore.
-     * @throws Exception 
+     *
+     * @throws Exception
      */
     @Test
-    public void testGetFeatureSource() throws Exception
-    {
+    public void testGetFeatureSource() throws Exception {
         System.out.println("getFeatureSource");
         DatamodelDataStore instance = new DatamodelDataStore();
         instance.setFeatureDescriptors(map);

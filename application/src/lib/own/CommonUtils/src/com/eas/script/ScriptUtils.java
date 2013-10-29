@@ -163,9 +163,9 @@ public class ScriptUtils {
         return aValue;
     }
 
-    public static Object javaToJS(Object aValue, Scriptable aScriptable) {
+    public static Object javaToJS(Object aValue, Scriptable aScope) {
         if (aValue instanceof Date) {
-            return toDateFunc.call(Context.getCurrentContext(), topLevelScope, null, new Object[]{Context.javaToJS(aValue, aScriptable)});
+            return toDateFunc.call(Context.getCurrentContext(), topLevelScope, null, new Object[]{Context.javaToJS(aValue, aScope)});
         } else if (aValue instanceof Number) {
             return Double.valueOf(((Number) aValue).doubleValue());
         } else if (aValue instanceof String) {
@@ -173,7 +173,7 @@ public class ScriptUtils {
         } else if (aValue instanceof Boolean) {
             return aValue;
         } else {
-            return Context.javaToJS(aValue, aScriptable);
+            return Context.javaToJS(aValue, aScope);
         }
     }
 

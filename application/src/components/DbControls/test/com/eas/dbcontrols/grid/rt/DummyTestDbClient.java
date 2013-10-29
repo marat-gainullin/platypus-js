@@ -143,4 +143,10 @@ public class DummyTestDbClient implements DbClient{
     public FlowProvider createFlowProvider(String string, String string1, String string2, String string3, Fields fields, Set<String> set, Set<String> set1) throws Exception {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
+    @Override
+    public QueriesListener.Registration addQueriesListener(QueriesListener ql) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+        
 }

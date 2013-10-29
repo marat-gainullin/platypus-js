@@ -2,7 +2,6 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package com.eas.dbcontrols.grid.rt;
 
 import com.bearsoft.rowset.metadata.Fields;
@@ -12,10 +11,9 @@ import com.eas.client.queries.SqlQuery;
  *
  * @author Gala
  */
-public class DummyTestSqlQuery extends SqlQuery{
+public class DummyTestSqlQuery extends SqlQuery {
 
-    public DummyTestSqlQuery()
-    {
+    public DummyTestSqlQuery() {
         super();
     }
 
@@ -23,5 +21,4 @@ public class DummyTestSqlQuery extends SqlQuery{
     public Fields getFields() {
         return null;
     }
-
 }
