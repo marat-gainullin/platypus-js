@@ -309,13 +309,13 @@ public abstract class RowsetsModel {
             }
             if (cellsLocator.find(cellsKeys)) {
                 if (rCol.getCellsValuesRowset() != cellsLocator.getRowset()) {
-                    int cursorPos = rCol.getCellsValuesRowset().getCursorPos();
+                    int cursorPos = cellsLocator.getRowset().getCursorPos();
                     try {
                         boolean positioned = cellsLocator.first();
                         assert positioned;
                         return rCol.getCellsValuesRowset().getCurrentRow();
                     } finally {
-                        restoreRowsRowsetCursorPos(rCol.getCellsValuesRowset(), cursorPos);
+                        restoreRowsRowsetCursorPos(cellsLocator.getRowset(), cursorPos);
                     }
                 } else {
                     return cellsLocator.getRow(0);

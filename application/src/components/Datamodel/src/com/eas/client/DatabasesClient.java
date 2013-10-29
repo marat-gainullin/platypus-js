@@ -140,28 +140,39 @@ public class DatabasesClient implements DbClient {
 
     @Override
     public TransactionListener.Registration addTransactionListener(final TransactionListener aListener) {
-        transactionListeners.add(aListener);
-        return new TransactionListener.Registration() {
-            @Override
-            public void remove() {
-                transactionListeners.remove(aListener);
-            }
-        };
+        synchronized (transacted) {
+            transactionListeners.add(aListener);
+            return new TransactionListener.Registration() {
+                @Override
+                public void remove() {
+                    synchronized (transacted) {
+                        transactionListeners.remove(aListener);
+                    }
+                }
+            };
+        }
     }
 
+    @Override
     public QueriesListener.Registration addQueriesListener(final QueriesListener aListener) {
-        queriesListeners.add(aListener);
-        return new QueriesListener.Registration() {
-            @Override
-            public void remove() {
-                queriesListeners.remove(aListener);
-            }
-        };
+        synchronized (queriesListeners) {
+            queriesListeners.add(aListener);
+            return new QueriesListener.Registration() {
+                @Override
+                public void remove() {
+                    synchronized (queriesListeners) {
+                        queriesListeners.remove(aListener);
+                    }
+                }
+            };
+        }
     }
 
     protected void fireQueriesCleared() {
-        for (QueriesListener l : queriesListeners.toArray(new QueriesListener[]{})) {
-            l.cleared();
+        synchronized (queriesListeners) {
+            for (QueriesListener l : queriesListeners.toArray(new QueriesListener[]{})) {
+                l.cleared();
+            }
         }
     }
 

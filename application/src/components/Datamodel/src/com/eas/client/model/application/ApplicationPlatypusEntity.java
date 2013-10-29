@@ -6,7 +6,7 @@ package com.eas.client.model.application;
 
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.changes.Change;
-import com.bearsoft.rowset.metadata.Parameters;
+import com.bearsoft.rowset.exceptions.InvalidFieldsExceptionException;
 import com.eas.client.queries.PlatypusQuery;
 import java.util.List;
 
@@ -48,17 +48,22 @@ public class ApplicationPlatypusEntity extends ApplicationEntity<ApplicationPlat
             } else {
                 throw new IllegalStateException("In three-tier mode only managed queries are allowed!");
             }
-            Rowset oldRowset = rowset;
-            if (rowset != null) {
-                rowset.removeRowsetListener(this);
-                unforwardChangeLog();
-            }
-            if (query != null) {
-                rowset = query.prepareRowset();
-                forwardChangeLog();
-                rowset.addRowsetListener(this);
-                changeSupport.firePropertyChange("rowset", oldRowset, rowset);
-            }
+            prepareRowsetByQuery();
+        }
+    }
+
+    protected void prepareRowsetByQuery() throws InvalidFieldsExceptionException {
+        Rowset oldRowset = rowset;
+        if (rowset != null) {
+            rowset.removeRowsetListener(this);
+            unforwardChangeLog();
+            rowset = null;
+        }
+        if (query != null) {
+            rowset = query.prepareRowset();
+            forwardChangeLog();
+            rowset.addRowsetListener(this);
+            changeSupport.firePropertyChange("rowset", oldRowset, rowset);
         }
     }
 }

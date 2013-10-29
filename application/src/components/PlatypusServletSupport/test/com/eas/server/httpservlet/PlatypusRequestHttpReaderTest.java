@@ -15,6 +15,7 @@ import com.bearsoft.rowset.metadata.Field;
 import com.eas.server.httpservlet.serial.ChangeJsonReader;
 import com.eas.client.threetier.RowsetJsonConstants;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import static org.junit.Assert.*;
@@ -31,7 +32,7 @@ public class PlatypusRequestHttpReaderTest {
     @Test
     public void timeStampReadTest() throws ParseException {
         System.out.println("timeStampRedTest with millis");
-        Date dt = RowsetJsonConstants.DATE_FORMATTER.parse("2012-03-05T23:45:02.305Z");
+        Date dt = new SimpleDateFormat(RowsetJsonConstants.DATE_FORMAT).parse("2012-03-05T23:45:02.305Z");
         assertEquals(1330976702305L, dt.getTime());
     }
 
