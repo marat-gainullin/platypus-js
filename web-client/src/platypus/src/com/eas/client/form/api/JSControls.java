@@ -795,6 +795,26 @@ public class JSControls {
 			});
 			Object.defineProperty(aPublished, "horizontalTextPosition", {
 				get : function() {
+					var position = comp.@com.eas.client.gxtcontrols.wrappers.component.PlatypusTextButton::getHorizontalTextPosition()(); 
+					switch (position) {
+						case @com.google.gwt.dom.client.Style.TextAlign::RIGHT : return $wnd.HorizontalPosition.RIGHT; 
+						case @com.google.gwt.dom.client.Style.TextAlign::LEFT : return $wnd.HorizontalPosition.LEFT;
+						default : return  $wnd.HorizontalPosition.CENTER;
+					}
+				},
+				set : function(aValue) {
+					switch (aValue) {
+						case $wnd.HorizontalPosition.LEFT: 
+							comp.@com.eas.client.gxtcontrols.wrappers.component.PlatypusTextButton::setHorizontalTextPosition(Lcom/google/gwt/dom/client/Style$TextAlign;)(@com.google.gwt.dom.client.Style.TextAlign::LEFT);
+						  	break;
+						case $wnd.HorizontalPosition.RIGHT:
+							comp.@com.eas.client.gxtcontrols.wrappers.component.PlatypusTextButton::setHorizontalTextPosition(Lcom/google/gwt/dom/client/Style$TextAlign;)(@com.google.gwt.dom.client.Style.TextAlign::RIGHT);
+							break;
+					}
+				}
+			});
+			Object.defineProperty(aPublished, "horizontalIconPosition", {
+				get : function() {
 					var position = comp.@com.sencha.gxt.widget.core.client.button.CellButtonBase::getIconAlign()(); 
 					switch (position) {
 						case @com.sencha.gxt.cell.core.client.ButtonCell.IconAlign::RIGHT : return $wnd.HorizontalPosition.LEFT; 
@@ -804,13 +824,13 @@ public class JSControls {
 				},
 				set : function(aValue) {
 					switch (aValue) {
-						case $wnd.HorizontalPosition.LEFT:
+						case $wnd.HorizontalPosition.LEFT: 
 							comp.@com.sencha.gxt.widget.core.client.button.CellButtonBase::setIconAlign(Lcom/sencha/gxt/cell/core/client/ButtonCell$IconAlign;)(@com.sencha.gxt.cell.core.client.ButtonCell.IconAlign::RIGHT);
 						  	break;
 						case $wnd.HorizontalPosition.RIGHT:
 							comp.@com.sencha.gxt.widget.core.client.button.CellButtonBase::setIconAlign(Lcom/sencha/gxt/cell/core/client/ButtonCell$IconAlign;)(@com.sencha.gxt.cell.core.client.ButtonCell.IconAlign::LEFT);
 							break;
-					}	
+					}		
 				}
 			});
 			Object.defineProperty(aPublished, "verticalTextPosition", {

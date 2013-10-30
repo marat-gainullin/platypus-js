@@ -27,7 +27,7 @@ public class PlatypusReportDataObject extends PlatypusModuleDataObject {
 
     public PlatypusReportDataObject(FileObject aJsFile, MultiFileLoader aLoader) throws Exception {
         super(aJsFile, aLoader);
-        FileObject aLayoutFile = FileUtil.findBrother(aJsFile, PlatypusFiles.REPORT_LAYOUT_EXTENSION);
+        FileObject aLayoutFile = FileUtil.findBrother(aJsFile, PlatypusFiles.REPORT_LAYOUT_EXTENSION_X);
         layoutEntry = registerEntry(aLayoutFile);
     }
 

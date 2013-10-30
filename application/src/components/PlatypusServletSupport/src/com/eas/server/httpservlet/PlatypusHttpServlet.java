@@ -67,7 +67,7 @@ public class PlatypusHttpServlet extends HttpServlet {
     //public static final String ERROR_JSON = "{\"success\": \"false\", \"error\": \"%s\", \"accessControl\": \"%s\", \"sqlstate\": \"%s\", \"sqlcode\": \"%s\"}";
     public static final String SUBJECT_CONTEXT_KEY = "javax.security.auth.Subject.container";
     public static final String HTTP_HOST_OBJECT_NAME = "http";
-    public static final String EXCEL_CONTENT_TYPE = "application/xls";
+    public static final String EXCEL_CONTENT_TYPE = "application/xlsx";
     public static final String HTML_CONTENTTYPE = "text/html";
     public static final String TEXT_CONTENTTYPE = "text/plain";
     public static final String CREATE_MODULE_RESPONSE_FUNCTIONS_PROP = "functions";

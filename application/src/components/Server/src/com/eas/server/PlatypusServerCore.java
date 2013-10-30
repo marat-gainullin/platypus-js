@@ -147,11 +147,12 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
             module = new ServerScriptRunner(this, getSessionManager().getSystemSession(), aModuleName, ScriptRunner.initializePlatypusStandardLibScope(), this, this, new Object[]{});
         }
         module.execute();
-        getSessionManager().setCurrentSession(getSessionManager().getSystemSession());
+        Session oldSession = getSessionManager().getCurrentSession();
         try {
+            getSessionManager().setCurrentSession(getSessionManager().getSystemSession());
             return module.executeMethod(aMethodName, aArgs);
         } finally {
-            getSessionManager().setCurrentSession(null);
+            getSessionManager().setCurrentSession(oldSession);
         }
     }
 

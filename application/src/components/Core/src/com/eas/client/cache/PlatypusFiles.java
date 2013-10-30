@@ -26,7 +26,8 @@ public class PlatypusFiles {
             + "</outputFields>"; // NOI18N
     public static final String SQL_EXTENSION = "sql"; // NOI18N
     public static final String DIALECT_EXTENSION = "dialect"; // NOI18N
-    public static final String REPORT_LAYOUT_EXTENSION = "xlsx"; // NOI18N
+    public static final String REPORT_LAYOUT_EXTENSION = "xls"; // NOI18N
+    public static final String REPORT_LAYOUT_EXTENSION_X = "xlsx"; // NOI18N
     public static final String DB_SCHEME_EXTENSION = "pd"; // NOI18N
     public static final String CONNECTION_EXTENSION = "pc"; // NOI18N
     // Queries annotations
@@ -42,6 +43,7 @@ public class PlatypusFiles {
             add(PlatypusFiles.DIALECT_EXTENSION);
             add(PlatypusFiles.OUT_EXTENSION);
             add(PlatypusFiles.REPORT_LAYOUT_EXTENSION);
+            add(PlatypusFiles.REPORT_LAYOUT_EXTENSION_X);
             add(PlatypusFiles.DB_SCHEME_EXTENSION);
             add(PlatypusFiles.CONNECTION_EXTENSION);
         }
