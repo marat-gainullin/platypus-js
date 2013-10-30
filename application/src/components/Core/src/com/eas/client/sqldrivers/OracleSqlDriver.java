@@ -119,9 +119,51 @@ public class OracleSqlDriver extends SqlDriver {
             + " AND Upper(k.table_name) in (%s) "
             + "ORDER BY c.owner,c.table_name,c.position";
     protected static final String SQL_FOREIGN_KEYS = ""
+            + "with"
+            + " fkey as (select"       
+            + "             r_owner,"
+            + "             r_constraint_name,"
+            + "             owner fktable_schem,"
+            + "             constraint_name fk_name,"
+            + "             table_name fktable_name,"
+            + "             delete_rule,deferrable,deferred"
+            + "          from all_constraints t"
+            + "          where constraint_type = 'R' and upper(owner) = upper('%s') and Upper(table_name) in (%s)),"
+            + " fpkey as (select"
+            + "              fktable_schem,"
+            + "              fk_name,"
+            + "              fktable_name,"
+            + "              t2.delete_rule,"
+            + "              t2.deferrable,"
+            + "              t2.deferred,"
+            + "              owner pktable_schem,"
+            + "              constraint_name pk_name,"
+            + "              table_name pktable_name"
+            + "          from all_constraints t1 inner join fkey t2 on (t1.owner = t2.r_owner and t1.constraint_name = t2.r_constraint_name)"
+            + "          where t1.constraint_type = 'P')"
+            + " select"
+            + "   fpkey.fktable_schem,"
+            + "   fpkey.fk_name,"
+            + "   fpkey.fktable_name,"
+            + "   null update_rule,"
+            + "   decode(fpkey.delete_rule, 'CASCADE', 0, 'SET NULL', 2, 1) as delete_rule,"
+            + "   decode(fpkey.DEFERRABLE, 'DEFERRABLE', 5, 'NOT DEFERRABLE', 7, 'DEFERRED', 6) deferrability,"
+            + "   fpkey.deferred,"
+            + "   fpkey.pktable_schem,"
+            + "   fpkey.pk_name,"
+            + "   fpkey.pktable_name,"
+            + "   fcol.column_name fkcolumn_name,"
+            + "   pcol.column_name pkcolumn_name,"
+            + "   fcol.position as key_seq"
+            + " from fpkey"
+            + "   inner join all_cons_columns fcol on fpkey.fktable_schem = fcol.owner and  fpkey.fk_name = fcol.constraint_name"
+            + "   inner join all_cons_columns pcol on fpkey.pktable_schem = pcol.owner and  fpkey.pk_name = pcol.constraint_name"
+            + " where fcol.position = pcol.position "
+            + " order by pktable_schem, pktable_name, key_seq";
+            /* marat
             + "with "
-            + "cols as (select * from all_cons_columns ac where upper(ac.owner) = '%s'),"
-            + "cons as (select * from all_constraints ac where upper(ac.owner) = '%s')"
+            + "cols as (select * from all_cons_columns ac where upper(ac.owner) = Upper('%s')),"
+            + "cons as (select * from all_constraints ac where upper(ac.owner) = Upper('%s'))"
             + "select * from "
             + "(select "
             + "  null fktable_cat"
@@ -149,6 +191,7 @@ public class OracleSqlDriver extends SqlDriver {
             + ") pc"
             + "    on (rc.pk_name = pc.constraint_name)"
             + "order by pc.pktable_schem, pc.pktable_name, pc.key_seq";
+            */ 
             /*
             + "SELECT"
             + " NULL pktable_cat,"
@@ -248,7 +291,8 @@ public class OracleSqlDriver extends SqlDriver {
     public String getSql4TableForeignKeys(String aOwnerName, Set<String> aTableNames) {
         if (aTableNames != null && !aTableNames.isEmpty()) {
             String tablesList = constructIn(aTableNames).toUpperCase();
-            return String.format(SQL_FOREIGN_KEYS, aOwnerName, aOwnerName, tablesList);
+//marat            return String.format(SQL_FOREIGN_KEYS, aOwnerName, aOwnerName, tablesList);
+            return String.format(SQL_FOREIGN_KEYS, aOwnerName, tablesList);
         } else {
             return null;
         }

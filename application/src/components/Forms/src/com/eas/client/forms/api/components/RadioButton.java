@@ -19,7 +19,7 @@ public class RadioButton extends Component<JRadioButton> {
     private static final String CONSTRUCTOR_JSDOC = "/**\n"
             + "* Radio button component.\n"
             + "* @param text Component's text (optional)\n"
-            + "* @param selected true if component is selected (optional)\n"
+            + "* @param selected <code>true</code> if component is selected (optional)\n"
             + "* @param actionPerformed On action performed function (optional)\n"
             + "*/";
 

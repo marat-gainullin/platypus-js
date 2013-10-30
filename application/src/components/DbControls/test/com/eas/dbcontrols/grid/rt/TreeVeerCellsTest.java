@@ -670,6 +670,7 @@ public class TreeVeerCellsTest extends GridBaseTest {
 
         ApplicationDbModel dm = new ApplicationDbModel(new DummyTestDbClient());
         assertNotNull(dm);
+        dm.setRuntime(true);
         ApplicationDbEntity cells2Entity = dm.newGenericEntity();
         dm.addEntity(cells2Entity);
         cells2Entity.setQuery(new DummyTestSqlQuery());
@@ -680,7 +681,6 @@ public class TreeVeerCellsTest extends GridBaseTest {
         cells2ValuesEntity.setRowset(cells2ValuesRowset);
         Relation colRelation = new Relation(cells2Entity, cells2Rowset.getFields().get(1), cells2ValuesEntity, cells2ValuesRowset.getFields().get(1));
         dm.addRelation(colRelation);
-        dm.setRuntime(true);
 
         int s1ToGlueToIndex = 1;
         int s2ToGlueToIndex = 3;

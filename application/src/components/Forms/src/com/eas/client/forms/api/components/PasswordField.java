@@ -16,7 +16,7 @@ public class PasswordField extends Component<JPasswordField>{
       
     private static final String CONSTRUCTOR_JSDOC = "/**\n"
             + "* Password field component.\n"
-            + "* @param text Component's initial text (optional)\n"
+            + "* @param text the text for the component (optional)\n"
             + "*/";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text"})

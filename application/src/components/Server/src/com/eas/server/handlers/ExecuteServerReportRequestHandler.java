@@ -72,6 +72,7 @@ public class ExecuteServerReportRequestHandler extends SessionRequestHandler<Exe
                         }
                         runner.refresh();
                     }
+                    runner.checkPrincipalPermission();
                     if (!runner.hasModuleAnnotation(JsDoc.Tag.PUBLIC_TAG)) {
                         throw new AccessControlException(String.format("Public access to report %s is denied.", moduleName));//NOI18N
                     }

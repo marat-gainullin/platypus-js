@@ -28,40 +28,31 @@ import javax.swing.JViewport;
  */
 public class BoxPane extends Container<JPanel> {
 
-    protected class Resizer implements ContainerListener, HierarchyBoundsListener, PropertyChangeListener {
-
-        @Override
-        public void componentAdded(ContainerEvent e) {
-            ajustSize();
-        }
-
-        @Override
-        public void componentRemoved(ContainerEvent e) {
-            ajustSize();
-        }
-
-        @Override
-        public void ancestorMoved(HierarchyEvent e) {
-        }
-
-        @Override
-        public void ancestorResized(HierarchyEvent e) {
-            ajustSize();
-        }
-
-        @Override
-        public void propertyChange(PropertyChangeEvent evt) {
-            if ("preferredSize".equals(evt.getPropertyName())) {
-                java.awt.Component sourceComp = (java.awt.Component) evt.getSource();
-                if (sourceComp.getParent() == delegate) {
-                    int axis = ((BoxLayout) delegate.getLayout()).getAxis();
-                    SwingFactory.prefToMaxForBox(axis, sourceComp);
-                    ajustSize();
-                }
-            }
-        }
-    }
     protected Resizer resizer = new Resizer();
+    private static final String CONSTRUCTOR_JSDOC = "/**\n"
+            + "* A container with Box Layout. By default uses horisontal orientation.\n"
+            + "@param orientation Orientation.HORIZONTAL or Orientation.VERTICAL (optional)"
+            + "*/";
+
+    @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"orientation"})
+    public BoxPane(int aOrientaion) {
+        super();
+        int axis = BoxLayout.X_AXIS;
+        if (aOrientaion == Orientation.HORIZONTAL) {
+            axis = BoxLayout.X_AXIS;
+        } else if (aOrientaion == Orientation.VERTICAL) {
+            axis = BoxLayout.Y_AXIS;
+        }
+        setDelegate(new JPanel());
+        BoxLayout layout = new BoxLayout(delegate, axis);
+        delegate.setLayout(layout);
+        delegate.addContainerListener(resizer);
+        delegate.addHierarchyBoundsListener(resizer);
+    }
+
+    public BoxPane() {
+        this(Orientation.HORIZONTAL);
+    }
 
     protected BoxPane(JPanel aDelegate) {
         super();
@@ -80,25 +71,6 @@ public class BoxPane extends Container<JPanel> {
             comp.addPropertyChangeListener(resizer);
         }
         delegate.revalidate();
-    }
-
-    public BoxPane(int aOrientaion) {
-        super();
-        int axis = BoxLayout.X_AXIS;
-        if (aOrientaion == Orientation.HORIZONTAL) {
-            axis = BoxLayout.X_AXIS;
-        } else if (aOrientaion == Orientation.VERTICAL) {
-            axis = BoxLayout.Y_AXIS;
-        }
-        setDelegate(new JPanel());
-        BoxLayout layout = new BoxLayout(delegate, axis);
-        delegate.setLayout(layout);
-        delegate.addContainerListener(resizer);
-        delegate.addHierarchyBoundsListener(resizer);
-    }
-
-    public BoxPane() {
-        this(Orientation.HORIZONTAL);
     }
 
     @ScriptFunction(jsDoc = "Box orientation of this container.")
@@ -183,6 +155,40 @@ public class BoxPane extends Container<JPanel> {
             }
             delegate.setPreferredSize(newsize);
             delegate.setSize(newsize);
+        }
+    }
+
+    protected class Resizer implements ContainerListener, HierarchyBoundsListener, PropertyChangeListener {
+
+        @Override
+        public void componentAdded(ContainerEvent e) {
+            ajustSize();
+        }
+
+        @Override
+        public void componentRemoved(ContainerEvent e) {
+            ajustSize();
+        }
+
+        @Override
+        public void ancestorMoved(HierarchyEvent e) {
+        }
+
+        @Override
+        public void ancestorResized(HierarchyEvent e) {
+            ajustSize();
+        }
+
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+            if ("preferredSize".equals(evt.getPropertyName())) {
+                java.awt.Component sourceComp = (java.awt.Component) evt.getSource();
+                if (sourceComp.getParent() == delegate) {
+                    int axis = ((BoxLayout) delegate.getLayout()).getAxis();
+                    SwingFactory.prefToMaxForBox(axis, sourceComp);
+                    ajustSize();
+                }
+            }
         }
     }
 }

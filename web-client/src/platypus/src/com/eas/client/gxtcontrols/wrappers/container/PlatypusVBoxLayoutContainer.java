@@ -20,18 +20,26 @@ public class PlatypusVBoxLayoutContainer extends VBoxLayoutContainer {
 		// flex.setFlex(1);
 		child.setLayoutData(flex);
 		super.add(child);
-		if (isAttached()){
-			clearSizeCache();// otherwise setSize() will have no effect
-			setSize(width, height);
+		if (isAttached()) {
+			Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+				@Override
+				public void execute() {
+					forceLayout();
+				}
+			});
 		}
 	}
 
 	@Override
 	public boolean remove(Widget child) {
 		boolean res = super.remove(child);
-		if (isAttached()){
-			clearSizeCache();// otherwise setSize() will have no effect
-			setSize(width, height);
+		if (isAttached()) {
+			Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+				@Override
+				public void execute() {
+					forceLayout();
+				}
+			});
 		}
 		return res;
 	}

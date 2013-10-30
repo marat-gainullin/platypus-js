@@ -45,7 +45,7 @@ public class StoredQueryFactoryTest extends BaseTest {
     }
 
     @Test
-    public void testFirstAnnotationsComma1() throws Exception {        
+    public void testFirstAnnotationsComma1() throws Exception {
         String role1 = "admin";
         String role2 = "mechaniker";
         String role3 = "dispatcher";
@@ -64,9 +64,9 @@ public class StoredQueryFactoryTest extends BaseTest {
         assertTrue(q.getReadRoles().contains(role2));
         assertTrue(q.getReadRoles().contains(role3));
     }
-    
+
     @Test
-    public void testFirstAnnotationsComma2() throws Exception {        
+    public void testFirstAnnotationsComma2() throws Exception {
         String role1 = "admin";
         String role2 = "mechaniker";
         String role3 = "dispatcher";
@@ -87,7 +87,7 @@ public class StoredQueryFactoryTest extends BaseTest {
     }
 
     @Test
-    public void testFirstAnnotationsSpace() throws Exception {        
+    public void testFirstAnnotationsSpace() throws Exception {
         String role1 = "admin";
         String role2 = "mechaniker";
         String role3 = "dispatcher";
@@ -108,7 +108,7 @@ public class StoredQueryFactoryTest extends BaseTest {
     }
 
     @Test
-    public void testLastAnnotationsSpace() throws Exception {        
+    public void testLastAnnotationsSpace() throws Exception {
         String role1 = "admin";
         String role2 = "mechaniker";
         String role3 = "dispatcher";
@@ -127,9 +127,9 @@ public class StoredQueryFactoryTest extends BaseTest {
         assertTrue(q.getReadRoles().contains(role2));
         assertTrue(q.getReadRoles().contains(role3));
     }
-    
+
     @Test
-    public void testMiddleAnnotationsSpace1() throws Exception {        
+    public void testMiddleAnnotationsSpace1() throws Exception {
         String role1 = "admin";
         String role2 = "mechaniker";
         String role3 = "dispatcher";
@@ -148,9 +148,9 @@ public class StoredQueryFactoryTest extends BaseTest {
         assertTrue(q.getReadRoles().contains(role2));
         assertTrue(q.getReadRoles().contains(role3));
     }
-    
+
     @Test
-    public void testMiddleAnnotationsSpace2() throws Exception {        
+    public void testMiddleAnnotationsSpace2() throws Exception {
         String role1 = "admin";
         String role2 = "mechaniker";
         String role3 = "dispatcher";
@@ -169,9 +169,9 @@ public class StoredQueryFactoryTest extends BaseTest {
         assertTrue(q.getReadRoles().contains(role2));
         assertTrue(q.getReadRoles().contains(role3));
     }
-    
+
     @Test
-    public void testMiddleReadAnnotationsSpace2() throws Exception {        
+    public void testMiddleReadAnnotationsSpace2() throws Exception {
         String role1 = "admin";
         String role2 = "mechaniker";
         String role3 = "dispatcher";
@@ -190,9 +190,9 @@ public class StoredQueryFactoryTest extends BaseTest {
         assertTrue(q.getReadRoles().contains(role2));
         assertTrue(q.getReadRoles().contains(role3));
     }
-    
+
     @Test
-    public void testMiddleWriteAnnotationsSpace2() throws Exception {        
+    public void testMiddleWriteAnnotationsSpace2() throws Exception {
         String role1 = "admin";
         String role2 = "mechaniker";
         String role3 = "dispatcher";
@@ -211,9 +211,9 @@ public class StoredQueryFactoryTest extends BaseTest {
         assertTrue(q.getWriteRoles().contains(role2));
         assertTrue(q.getWriteRoles().contains(role3));
     }
-    
+
     @Test
-    public void testMiddleReadWriteAnnotationsSpace2() throws Exception {        
+    public void testMiddleReadWriteAnnotationsSpace2() throws Exception {
         String role1 = "admin";
         String role2 = "mechaniker";
         String role3 = "dispatcher";
@@ -240,7 +240,7 @@ public class StoredQueryFactoryTest extends BaseTest {
         assertTrue(q.getWriteRoles().contains(role2));
         assertFalse(q.getWriteRoles().contains(role3));
     }
-    
+
     @Test
     public void testCompilingWithSubqueries() throws Exception {
         DbClient client = BaseTest.initDevelopTestClient();
@@ -249,10 +249,10 @@ public class StoredQueryFactoryTest extends BaseTest {
         String queryId = insertEntity(client, queryContent);
         try {
             SqlQuery testQuery = queryFactory.getQuery(queryId);
-            assertEquals("SELECT T0.ORDER_NO, 'Some text' AS VALUE_FIELD_1, TABLE1.ID, TABLE1.F1, TABLE1.F3, T0.AMOUNT FROM TABLE1, TABLE2,  (/**\n" +
-                                                                                                                                " * @name namedQuery4Tests\n" +
-                                                                                                                                "*/\n" +
-                                                                                                                                "Select goodOrder.ORDER_ID as ORDER_NO, goodOrder.AMOUNT, customers.CUSTOMER_NAME as CUSTOMER \nFrom GOODORDER goodOrder\n Inner Join CUSTOMER customers on (goodOrder.CUSTOMER = customers.CUSTOMER_ID)\n and (goodOrder.AMOUNT > customers.CUSTOMER_NAME)\n Where :P4 = goodOrder.GOOD)  T0  WHERE ((TABLE2.FIELDA<TABLE1.F1) AND (:P2=TABLE1.F3)) AND (:P3=T0.AMOUNT)",
+            assertEquals("SELECT T0.ORDER_NO, 'Some text' AS VALUE_FIELD_1, TABLE1.ID, TABLE1.F1, TABLE1.F3, T0.AMOUNT FROM TABLE1, TABLE2,  (/**\n"
+                    + " * @name namedQuery4Tests\n"
+                    + "*/\n"
+                    + "Select goodOrder.ORDER_ID as ORDER_NO, goodOrder.AMOUNT, customers.CUSTOMER_NAME as CUSTOMER \nFrom GOODORDER goodOrder\n Inner Join CUSTOMER customers on (goodOrder.CUSTOMER = customers.CUSTOMER_ID)\n and (goodOrder.AMOUNT > customers.CUSTOMER_NAME)\n Where :P4 = goodOrder.GOOD)  T0  WHERE ((TABLE2.FIELDA<TABLE1.F1) AND (:P2=TABLE1.F3)) AND (:P3=T0.AMOUNT)",
                     testQuery.getSqlText());
             assertEquals(6, testQuery.getFields().getFieldsCount());
             for (int i = 0; i < testQuery.getFields().getFieldsCount(); i++) {
@@ -278,9 +278,9 @@ public class StoredQueryFactoryTest extends BaseTest {
         String queryId = insertEntity(client, queryContent);
         try {
             SqlQuery testQuery = queryFactory.getQuery(queryId);
-            assertEquals("SELECT T0.ORDER_NO, 'Some text', TABLE1.ID, TABLE1.F1, TABLE1.F3, T0.AMOUNT FROM TABLE1, TABLE2,  (/**\n" +
-                                                                                                                            " * @name 128082898425059\n" +
-                                                                                                                            "*/\n"
+            assertEquals("SELECT T0.ORDER_NO, 'Some text', TABLE1.ID, TABLE1.F1, TABLE1.F3, T0.AMOUNT FROM TABLE1, TABLE2,  (/**\n"
+                    + " * @name 128082898425059\n"
+                    + "*/\n"
                     + "Select goodOrder.ORDER_ID as ORDER_NO, goodOrder.AMOUNT, customers.CUSTOMER_NAME as CUSTOMER \nFrom GOODORDER goodOrder\n Inner Join CUSTOMER customers on (goodOrder.CUSTOMER = customers.CUSTOMER_ID)\n and (goodOrder.AMOUNT > customers.CUSTOMER_NAME)\n Where :P4 = goodOrder.GOOD)  T0  WHERE ((TABLE2.FIELDA<TABLE1.F1) AND (:P2=TABLE1.F3)) AND (:P3=T0.AMOUNT)",
                     testQuery.getSqlText());
             assertEquals(6, testQuery.getFields().getFieldsCount());
@@ -307,10 +307,10 @@ public class StoredQueryFactoryTest extends BaseTest {
         String queryId = insertEntity(client, queryContent);
         try {
             SqlQuery testQuery = queryFactory.getQuery(queryId);
-            assertEquals("SELECT * FROM TABLE1, TABLE2,  (/**\n" +
-                                                            " * @name 128082898425059\n" +
-                                                            "*/\n" +
-                                                            "Select goodOrder.ORDER_ID as ORDER_NO, goodOrder.AMOUNT, customers.CUSTOMER_NAME as CUSTOMER \nFrom GOODORDER goodOrder\n Inner Join CUSTOMER customers on (goodOrder.CUSTOMER = customers.CUSTOMER_ID)\n and (goodOrder.AMOUNT > customers.CUSTOMER_NAME)\n Where :P4 = goodOrder.GOOD)  T0  WHERE ((TABLE2.FIELDA<TABLE1.F1) AND (:P2=TABLE1.F3)) AND (:P3=T0.AMOUNT)",
+            assertEquals("SELECT * FROM TABLE1, TABLE2,  (/**\n"
+                    + " * @name 128082898425059\n"
+                    + "*/\n"
+                    + "Select goodOrder.ORDER_ID as ORDER_NO, goodOrder.AMOUNT, customers.CUSTOMER_NAME as CUSTOMER \nFrom GOODORDER goodOrder\n Inner Join CUSTOMER customers on (goodOrder.CUSTOMER = customers.CUSTOMER_ID)\n and (goodOrder.AMOUNT > customers.CUSTOMER_NAME)\n Where :P4 = goodOrder.GOOD)  T0  WHERE ((TABLE2.FIELDA<TABLE1.F1) AND (:P2=TABLE1.F3)) AND (:P3=T0.AMOUNT)",
                     testQuery.getSqlText());
             assertEquals(11, testQuery.getFields().getFieldsCount());
             for (int i = 0; i < testQuery.getFields().getFieldsCount(); i++) {
@@ -331,10 +331,10 @@ public class StoredQueryFactoryTest extends BaseTest {
         String queryId = insertEntity(client, queryContent);
         try {
             SqlQuery testQuery = queryFactory.getQuery(queryId);
-            assertEquals("SELECT * FROM TABLE1, TABLE2,  (/**\n" +
-                                                            " * @name 128082898425059\n" +
-                                                            "*/\n" +
-                                                            "Select goodOrder.ORDER_ID as ORDER_NO, goodOrder.AMOUNT, customers.CUSTOMER_NAME as CUSTOMER \nFrom GOODORDER goodOrder\n Inner Join CUSTOMER customers on (goodOrder.CUSTOMER = customers.CUSTOMER_ID)\n and (goodOrder.AMOUNT > customers.CUSTOMER_NAME)\n Where :P4 = goodOrder.GOOD)  T0  WHERE ((TABLE2.FIELDA<TABLE1.F1) AND (:P2=TABLE1.F3)) AND (:P3=T0.AMOUNT)",
+            assertEquals("SELECT * FROM TABLE1, TABLE2,  (/**\n"
+                    + " * @name 128082898425059\n"
+                    + "*/\n"
+                    + "Select goodOrder.ORDER_ID as ORDER_NO, goodOrder.AMOUNT, customers.CUSTOMER_NAME as CUSTOMER \nFrom GOODORDER goodOrder\n Inner Join CUSTOMER customers on (goodOrder.CUSTOMER = customers.CUSTOMER_ID)\n and (goodOrder.AMOUNT > customers.CUSTOMER_NAME)\n Where :P4 = goodOrder.GOOD)  T0  WHERE ((TABLE2.FIELDA<TABLE1.F1) AND (:P2=TABLE1.F3)) AND (:P3=T0.AMOUNT)",
                     testQuery.getSqlText());
             assertEquals(11, testQuery.getFields().getFieldsCount());
             for (int i = 0; i < testQuery.getFields().getFieldsCount(); i++) {
@@ -355,11 +355,11 @@ public class StoredQueryFactoryTest extends BaseTest {
         String queryId = insertEntity(client, queryContent);
         try {
             SqlQuery testQuery = queryFactory.getQuery(queryId);
-            assertEquals("SELECT TABLE1.*, TABLE2.FiELdB FROM TABLE1, TABLE2,  (/**\n" +
-                                                                                " * @name namedQuery4Tests\n" +
-                                                                                "*/\n" +
-                                                                                "Select goodOrder.ORDER_ID as ORDER_NO, goodOrder.AMOUNT, customers.CUSTOMER_NAME as CUSTOMER \nFrom GOODORDER goodOrder\n Inner Join CUSTOMER customers on (goodOrder.CUSTOMER = customers.CUSTOMER_ID)\n and (goodOrder.AMOUNT > customers.CUSTOMER_NAME)\n Where :P4 = goodOrder.GOOD)  T0  WHERE ((TABLE2.FIELDA<TABLE1.F1) AND (:P2=TABLE1.F3)) AND (:P3=T0.AMOUNT)",
-                                                                                                    testQuery.getSqlText());
+            assertEquals("SELECT TABLE1.*, TABLE2.FiELdB FROM TABLE1, TABLE2,  (/**\n"
+                    + " * @name namedQuery4Tests\n"
+                    + "*/\n"
+                    + "Select goodOrder.ORDER_ID as ORDER_NO, goodOrder.AMOUNT, customers.CUSTOMER_NAME as CUSTOMER \nFrom GOODORDER goodOrder\n Inner Join CUSTOMER customers on (goodOrder.CUSTOMER = customers.CUSTOMER_ID)\n and (goodOrder.AMOUNT > customers.CUSTOMER_NAME)\n Where :P4 = goodOrder.GOOD)  T0  WHERE ((TABLE2.FIELDA<TABLE1.F1) AND (:P2=TABLE1.F3)) AND (:P3=T0.AMOUNT)",
+                    testQuery.getSqlText());
             assertEquals(5, testQuery.getFields().getFieldsCount());
             for (int i = 0; i < testQuery.getFields().getFieldsCount(); i++) {
                 Field fieldMtd = testQuery.getFields().get(i + 1);
@@ -472,10 +472,12 @@ public class StoredQueryFactoryTest extends BaseTest {
         StoredQueryFactory queryFactory = new StoredQueryFactory(client);
         String queryId = insertEmptyEntity(client);
         try {
-            SqlQuery testQuery = queryFactory.getQuery(queryId);
-            Fields metadata = testQuery.getFields();
-            assertEquals(1, metadata.getFieldsCount());
-            assertEquals(metadata.get(1).getName(), "dummy");
+            try {
+                SqlQuery testQuery = queryFactory.getQuery(queryId);
+                fail("Empty query must lead to an exception, but it doesn't. Why?");
+            } catch (Exception ex) {
+                //fine. there muist be an exception
+            }
         } finally {
             deleteEntity(queryId, client);
         }
@@ -509,7 +511,7 @@ public class StoredQueryFactoryTest extends BaseTest {
     }
 
     private String insertEntity(DbClient aClient, String queryContent) throws Exception {
-        String aQueryId = IDGenerator.genID().toString();       
+        String aQueryId = IDGenerator.genID().toString();
         SqlQuery insertEntity = new SqlQuery(aClient, "insert into MTD_ENTITIES (MDENT_ID, MDENT_TYPE, MDENT_NAME, MDENT_CONTENT_TXT) values (:id, :type, :name, :content)");
         insertEntity.putParameter("type", DataTypeInfo.DECIMAL, ClientConstants.ET_QUERY);
         insertEntity.putParameter("name", DataTypeInfo.VARCHAR, "Test Query");

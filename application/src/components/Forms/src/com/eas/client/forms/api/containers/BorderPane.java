@@ -18,13 +18,6 @@ import javax.swing.JPanel;
  */
 public class BorderPane extends Container<JPanel> {
 
-    protected BorderPane(JPanel aDelegate) {
-        super();
-        assert aDelegate != null;
-        assert aDelegate.getLayout() instanceof BorderLayout;
-        setDelegate(aDelegate);
-    }
-
     public BorderPane() {
         this(0, 0);
     }
@@ -32,14 +25,28 @@ public class BorderPane extends Container<JPanel> {
     public BorderPane(int hgap) {
         this(hgap, 0);
     }
+    
+    private static final String CONSTRUCTOR_JSDOC = "/**\n"
+            + "* A container with Border Layout.\n"
+            + "* @param hgap the horizontal gap (optional)."
+            + "* @param vgap the vertical gap (optional)."
+            + "*/";
 
+    @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"hgap", "vgap"})
     public BorderPane(int hgap, int vgap) {
         super();
         setDelegate(new JPanel(new BorderLayout(hgap, vgap)));
     }
 
+    protected BorderPane(JPanel aDelegate) {
+        super();
+        assert aDelegate != null;
+        assert aDelegate.getLayout() instanceof BorderLayout;
+        setDelegate(aDelegate);
+    }
+
     @ScriptFunction(jsDoc = "Appends the specified component to this container on the specified place: "
-    + "HorizontalPosition.LEFT, HorizontalPosition.CENTER, HorizontalPosition.RIGHT, VerticalPosition.TOP, VerticalPosition.BOTTOM.")
+            + "HorizontalPosition.LEFT, HorizontalPosition.CENTER, HorizontalPosition.RIGHT, VerticalPosition.TOP, VerticalPosition.BOTTOM.")
     public void add(Component<?> aComp, int aPlace) {
         if (aComp != null) {
             String place;
@@ -70,7 +77,7 @@ public class BorderPane extends Container<JPanel> {
     }
 
     @ScriptFunction(jsDoc = "Appends the specified component to this container on the specified place: "
-    + "HorizontalPosition.LEFT, HorizontalPosition.CENTER, HorizontalPosition.RIGHT, VerticalPosition.TOP, VerticalPosition.BOTTOM.")
+            + "HorizontalPosition.LEFT, HorizontalPosition.CENTER, HorizontalPosition.RIGHT, VerticalPosition.TOP, VerticalPosition.BOTTOM.")
     public void add(Component<?> aComp, int aPlace, int aSize) {
         add(aComp, aPlace);
     }
@@ -79,7 +86,7 @@ public class BorderPane extends Container<JPanel> {
     public void add(Component<?> aComp) {
         add(aComp, HorizontalPosition.CENTER);
     }
-    
+
     @ScriptFunction(jsDoc = "The component that was added using HorizontalPosition.LEFT constraint.")
     public Component<?> getLeftComponent() {
         BorderLayout layout = (BorderLayout) delegate.getLayout();

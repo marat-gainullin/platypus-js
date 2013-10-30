@@ -1,5 +1,7 @@
 package com.eas.client.gxtcontrols.wrappers.container;
 
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.logical.shared.HasSelectionHandlers;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
@@ -52,9 +54,13 @@ public class PlatypusTabsContainer extends SimpleContainer implements HasSelecti
 
 	public void add(Component aComponent, TabItemConfig aConfig) {
 		tabs.add(aComponent, aConfig);
-		if (isAttached()){
-			clearSizeCache();// otherwise setSize() will have no effect
-			setSize(width, height);
+		if (isAttached()) {
+			Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+				@Override
+				public void execute() {
+					forceLayout();
+				}
+			});
 		}
 	}
 

@@ -32,25 +32,22 @@ import org.opengis.feature.simple.SimpleFeatureType;
  * @author pk
  */
 @RunWith(JMock.class)
-public class DatamodelEntityFeatureSourceTest extends GeoBaseTest
-{
+public class DatamodelEntityFeatureSourceTest extends GeoBaseTest {
+
     private ApplicationDbModel datamodel;
     private HashMap<String, RowsetFeatureDescriptor> map;
     private DatamodelDataStore dataStore;
     private Mockery context = new JUnit4Mockery();
 
-    public DatamodelEntityFeatureSourceTest()
-    {
+    public DatamodelEntityFeatureSourceTest() {
     }
 
     @AfterClass
-    public static void tearDownClass() throws Exception
-    {
+    public static void tearDownClass() throws Exception {
     }
 
     @Before
-    public void setUp() throws Exception
-    {
+    public void setUp() throws Exception {
         datamodel = new ApplicationDbModel(dbClient);
         datamodel.setRuntime(true);
         map = new HashMap<>();
@@ -58,8 +55,10 @@ public class DatamodelEntityFeatureSourceTest extends GeoBaseTest
         e.regenerateId();
         e.setTableName("COLA_MARKETS");
         datamodel.addEntity(e);
+        e.validateQuery();
         final Rowset rowset = e.getRowset();
         assertNotNull(rowset);
+        rowset.refresh();
         assertTrue(rowset.size() > 0);
         map.put(e.getTableName(), new RowsetFeatureDescriptor(e.getTableName(), e));
         dataStore = new DatamodelDataStore();
@@ -67,17 +66,16 @@ public class DatamodelEntityFeatureSourceTest extends GeoBaseTest
     }
 
     @After
-    public void tearDown()
-    {
+    public void tearDown() {
     }
 
     /**
      * Test of getDataStore method, of class RowsFeatureSource.
+     *
      * @throws IOException
      */
     @Test
-    public void testGetDataStore() throws IOException
-    {
+    public void testGetDataStore() throws IOException {
         System.out.println("getDataStore");
         RowsFeatureSource instance = (RowsFeatureSource) dataStore.getFeatureSource("COLA_MARKETS");
         assertEquals(dataStore, instance.getDataStore());
@@ -85,48 +83,36 @@ public class DatamodelEntityFeatureSourceTest extends GeoBaseTest
 
     /**
      * Test of addFeatureListener method, of class RowsFeatureSource.
-     * @throws IOException 
-    @Test
-    public void testAddFeatureListener() throws IOException
-    {
-        try
-        {
-            System.out.println("addFeatureListener");
-            final RowsFeatureSource instance = (RowsFeatureSource) dataStore.getFeatureSource("COLA_MARKETS");
-            final FeatureListener listener = context.mock(FeatureListener.class);
-            instance.addFeatureListener(listener);
-            context.checking(new Expectations()
-            {
-
-                {
-                    oneOf(listener).changed((FeatureEvent) with(allOf(
-                            aNonNull(FeatureEvent.class),
-                            hasProperty("bounds", aNull(ReferencedEnvelope.class)),
-                            hasProperty("filter", aNull(Filter.class)),
-                            hasProperty("source", same(instance)),
-                            hasProperty("type", equalTo(Type.CHANGED)))));
-                }
-            });
-            map.get("COLA_MARKETS").getEntity().refresh();
-        } catch (SQLException ex)
-        {
-            throw new IOException(ex);
-        }
-    }
+     *
+     * @throws IOException
+     * @Test public void testAddFeatureListener() throws IOException { try {
+     * System.out.println("addFeatureListener"); final RowsFeatureSource
+     * instance = (RowsFeatureSource)
+     * dataStore.getFeatureSource("COLA_MARKETS"); final FeatureListener
+     * listener = context.mock(FeatureListener.class);
+     * instance.addFeatureListener(listener); context.checking(new
+     * Expectations() {
+     *
+     * {
+     * oneOf(listener).changed((FeatureEvent) with(allOf(
+     * aNonNull(FeatureEvent.class), hasProperty("bounds",
+     * aNull(ReferencedEnvelope.class)), hasProperty("filter",
+     * aNull(Filter.class)), hasProperty("source", same(instance)),
+     * hasProperty("type", equalTo(Type.CHANGED))))); } });
+     * map.get("COLA_MARKETS").getEntity().refresh(); } catch (SQLException ex)
+     * { throw new IOException(ex); } }
      */
-
     /**
      * Test of removeFeatureListener method, of class RowsFeatureSource.
+     *
      * @throws IOException
      */
     @Test
-    public void testRemoveFeatureListener() throws IOException
-    {
+    public void testRemoveFeatureListener() throws IOException {
         System.out.println("removeFeatureListener");
         RowsFeatureSource instance = (RowsFeatureSource) dataStore.getFeatureSource("COLA_MARKETS");
         final FeatureListener listener = context.mock(FeatureListener.class);
-        context.checking(new Expectations()
-        {
+        context.checking(new Expectations() {
             {
                 never(listener).changed(with(any(FeatureEvent.class)));
             }
@@ -137,11 +123,11 @@ public class DatamodelEntityFeatureSourceTest extends GeoBaseTest
 
     /**
      * Test of getSchema method, of class RowsFeatureSource.
+     *
      * @throws IOException
      */
     @Test
-    public void testGetSchema() throws IOException
-    {
+    public void testGetSchema() throws IOException {
         System.out.println("getSchema");
         RowsFeatureSource instance = (RowsFeatureSource) dataStore.getFeatureSource("COLA_MARKETS");
         SimpleFeatureType result = instance.getSchema();
@@ -150,11 +136,11 @@ public class DatamodelEntityFeatureSourceTest extends GeoBaseTest
 
     /**
      * Test of getFeatures method, of class RowsFeatureSource.
+     *
      * @throws IOException
      */
     @Test
-    public void testGetFeatures() throws IOException
-    {
+    public void testGetFeatures() throws IOException {
         System.out.println("getFeatures");
         RowsFeatureSource instance = (RowsFeatureSource) dataStore.getFeatureSource("COLA_MARKETS");
         final FeatureCollection<SimpleFeatureType, SimpleFeature> features = instance.getFeatures();

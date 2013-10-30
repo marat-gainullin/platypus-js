@@ -16,7 +16,7 @@ public class HtmlArea extends Component<JEditorPane>{
     
     private static final String CONSTRUCTOR_JSDOC = "/**\n"
             + "* HTML area component. \n"
-            + "* @param text Html area initial text (optional)\n"
+            + "* @param text the initial text for the HTML area (optional)\n"
             + "*/";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text"})
@@ -37,7 +37,10 @@ public class HtmlArea extends Component<JEditorPane>{
         setDelegate(aDelegate);
     }
     
-    @ScriptFunction(jsDoc = "The text contained in this component.")
+    private static final String TEXT_JSDOC = "/**\n"
+            + "* Text on the component.\n"
+            + "*/";
+    @ScriptFunction(jsDoc = TEXT_JSDOC)
     public String getText() {
         return delegate.getText();
     }

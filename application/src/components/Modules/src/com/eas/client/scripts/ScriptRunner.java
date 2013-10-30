@@ -292,12 +292,13 @@ public class ScriptRunner extends ScriptableObject {
         protected static AppCache cache;
         protected static PrincipalHost principalHost;
         protected static CompiledScriptDocumentsHost scriptDocumentsHost;
-        
+
         /**
          * Initializes a static fields.
+         *
          * @param aClient Client instance
          * @param aPrincipalHost Login support
-         * @param aScriptDocumentsHost Scripts host 
+         * @param aScriptDocumentsHost Scripts host
          * @throws Exception If something goes wrong
          */
         public static void init(Client aClient, PrincipalHost aPrincipalHost, CompiledScriptDocumentsHost aScriptDocumentsHost) throws Exception {
@@ -309,7 +310,8 @@ public class ScriptRunner extends ScriptableObject {
         }
 
         /**
-         * Gets an principal provider. 
+         * Gets an principal provider.
+         *
          * @return Principal host instance
          */
         public static PrincipalHost getPrincipalHost() {
@@ -318,20 +320,23 @@ public class ScriptRunner extends ScriptableObject {
 
         /**
          * Gets script documents host.
+         *
          * @return Script documents host instance
          */
         public static CompiledScriptDocumentsHost getScriptDocumentsHost() {
             return scriptDocumentsHost;
         }
-        
+
         /**
          * Gets an absolute path to the application's directory.
-         * @return Application's directory full path or null if not path is not avaliable
+         *
+         * @return Application's directory full path or null if not path is not
+         * avaliable
          */
         public static String getApplicationPath() {
             EasSettings settings = client.getSettings();
             if (settings instanceof DbConnectionSettings) {
-                return ((DbConnectionSettings)settings).getApplicationPath();
+                return ((DbConnectionSettings) settings).getApplicationPath();
             } else {
                 return null;
             }
@@ -339,6 +344,7 @@ public class ScriptRunner extends ScriptableObject {
 
         /**
          * Loads a resource's bytes either from disk or from datatbase.
+         *
          * @param aResourceId An relative path to the resource
          * @return Bytes for resource
          * @throws Exception If some error occurs when reading the resource
@@ -396,6 +402,7 @@ public class ScriptRunner extends ScriptableObject {
 
         /**
          * Loads a resource as text for UTF-8 encoding.
+         *
          * @param aResourceId An relative path to the resource
          * @return Resource's text
          * @throws Exception If some error occurs when reading the resource
@@ -406,6 +413,7 @@ public class ScriptRunner extends ScriptableObject {
 
         /**
          * Loads a resource as text.
+         *
          * @param aResourceId An relative path to the resource
          * @param aEncodingName Encoding name
          * @return Resource's text
@@ -439,11 +447,11 @@ public class ScriptRunner extends ScriptableObject {
             return uri.normalize().getPath();
             //}
         }
-        
+
         private static Client getClient() {
             return client;
         }
-                
+
         private static URL encodeUrl(URL url) throws URISyntaxException, MalformedURLException {
             String file = "";
             if (url.getPath() != null && !url.getPath().isEmpty()) {
@@ -552,6 +560,22 @@ public class ScriptRunner extends ScriptableObject {
         }
     }
 
+    /**
+     * Checks module roles.
+     * @throws Exception 
+     */
+    public void checkPrincipalPermission() throws Exception {
+        if (moduleAllowedRoles != null && !moduleAllowedRoles.isEmpty()) {
+            PlatypusPrincipal principal = getPrincipal();
+            if (principal != null && principal.hasAnyRole(moduleAllowedRoles)) {
+                return;
+            }
+            throw new AccessControlException(String.format("Access denied to %s module for %s PlatypusPrincipal.",//NOI18N
+                    ScriptRunner.this.appElementId,
+                    principal != null ? principal.getName() : null));
+        }
+    }
+
     private void defineJsClass(final String aClassName, ApplicationElement aAppElement) {
         compiledScriptDocumentsHost.defineJsClass(aClassName, aAppElement);
     }
@@ -561,8 +585,8 @@ public class ScriptRunner extends ScriptableObject {
      */
     public class SecureFunction implements Function, Runnable {
 
-        String name;
-        Function func;
+        protected String name;
+        protected Function func;
 
         public SecureFunction(String aName, Function aFun) {
             super();
@@ -609,15 +633,7 @@ public class ScriptRunner extends ScriptableObject {
                             ScriptRunner.this.appElementId,
                             principal != null ? principal.getName() : null));
                 } else {
-                    if (moduleAllowedRoles != null && !moduleAllowedRoles.isEmpty()) {
-                        if (principal != null && principal.hasAnyRole(moduleAllowedRoles)) {
-                            return;
-                        }
-                        throw new AccessControlException(String.format("Access denied to %s function in %s module for %s PlatypusPrincipal at module level.",//NOI18N
-                                name,
-                                ScriptRunner.this.appElementId,
-                                principal != null ? principal.getName() : null));
-                    }
+                    ScriptRunner.this.checkPrincipalPermission();
                 }
             } catch (Exception ex) {
                 if (ex instanceof AccessControlException) {
