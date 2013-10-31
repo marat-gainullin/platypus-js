@@ -85,7 +85,7 @@ public class OracleSqlDriver extends SqlDriver {
             + "        2004, 'CLOB', 2005, 'BFILE', -13, 'FLOAT', 6, 'TIMESTAMP(6)', 93, 'TIMESTAMP(6) WITH TIME ZONE',"
             + "       -101, 'TIMESTAMP(6) WITH LOCAL TIME ZONE', -102, 'INTERVAL YEAR(2) TO MONTH', -103, 'INTERVAL DAY(2) TO SECOND(6)', "
             + "       -104, 'BINARY_FLOAT', 100, 'BINARY_DOUBLE', 101, 1111) AS data_type,"
-            + " t.data_type type_name,"
+            + " (case when t.data_type_owner is null then t.data_type else t.data_type_owner || '.' || t.data_type end) type_name,"
             + " (case when t.char_length > 0 then t.char_length else nvl(t.data_precision,t.data_length) end) AS column_size,"
             + " 0 AS buffer_length,"
             + " t.data_scale decimal_digits,"
@@ -189,7 +189,7 @@ public class OracleSqlDriver extends SqlDriver {
             + ", cs.constraint_name"
             + "  from cols c inner join (select * from cons where cons.constraint_type='P') cs on (c.constraint_name = cs.constraint_name)"
             + ") pc"
-            + "    on (rc.pk_name = pc.constraint_name)"
+            + "    on (rc.pk_name = pc.constraint_name and rc.key_seq = pc.key_seq) "
             + "order by pc.pktable_schem, pc.pktable_name, pc.key_seq";
             */ 
             /*

@@ -64,7 +64,10 @@ public abstract class TypesResolver {
         String sqlTypeName = typeInfo.getSqlTypeName();
         // check on different rdbms
         if (sqlTypeName == null || !containsRDBMSTypename(sqlTypeName) || sqlType != getJdbcTypeByRDBMSTypename(sqlTypeName)) {
-            sqlTypeName = jdbcTypes2RdbmsTypes.get(sqlType);
+            // ??????? !!!!!!!
+            if (jdbcTypes2RdbmsTypes.containsKey(sqlType)) {
+                sqlTypeName = jdbcTypes2RdbmsTypes.get(sqlType);
+            }    
         }
         aField.setTypeInfo(new DataTypeInfo(sqlType, sqlTypeName, typeInfo.getJavaClassName()));
         resolveFieldSize(aField);
