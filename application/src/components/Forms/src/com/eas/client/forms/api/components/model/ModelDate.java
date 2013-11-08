@@ -13,17 +13,25 @@ import com.eas.script.ScriptFunction;
  */
 public class ModelDate extends ScalarModelComponent<DbDate> {
 
-    protected ModelDate(DbDate aDelegate) {
-        super();
-        setDelegate(aDelegate);
-    }
+    private static final String CONSTRUCTOR_JSDOC = "/**\n"
+            + "* A model component that shows a date. \n"
+            + "*/";
 
+    @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC)
     public ModelDate() {
         super();
         setDelegate(new DbDate());
     }
 
-    @ScriptFunction(jsDoc = "Determines if component is editable.")
+    protected ModelDate(DbDate aDelegate) {
+        super();
+        setDelegate(aDelegate);
+    }
+    private static final String EDITABLE_JSDOC = "/**\n"
+            + "* Determines if component is editable. \n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = EDITABLE_JSDOC)
     public boolean isEditable() {
         return delegate.isEditable();
     }
@@ -32,29 +40,28 @@ public class ModelDate extends ScalarModelComponent<DbDate> {
     public void setEditable(boolean aValue) {
         delegate.setEditable(aValue);
     }
-    
-    @ScriptFunction(jsDoc = "Sets up the control appearance. If true, than calndar panel is displayed, otherwise date/time combo is displayed.")
-    public boolean isExpanded()
-    {
+    private static final String EXPANDED_JSDOC = "/**\n"
+            + "* Sets up the control appearance. If true, than calndar panel is displayed, otherwise date/time combo is displayed. \n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = EXPANDED_JSDOC)
+    public boolean isExpanded() {
         return delegate.isExpanded();
     }
-    
+
     @ScriptFunction
-    public void setExpanded(boolean aValue) throws Exception
-    {
+    public void setExpanded(boolean aValue) throws Exception {
         delegate.setExpanded(aValue);
         invalidate();
     }
-    
+
     @ScriptFunction
-    public String getDateFormat()
-    {
+    public String getDateFormat() {
         return delegate.getDateFormat();
     }
-    
+
     @ScriptFunction
-    public void setDateFormat(String aValue)
-    {
+    public void setDateFormat(String aValue) {
         delegate.setDateFormat(aValue);
         invalidate();
     }

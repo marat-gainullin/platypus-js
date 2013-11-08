@@ -18,17 +18,24 @@ import org.mozilla.javascript.Scriptable;
  */
 public class ModelGrid extends Component<DbGrid> {
 
-    protected ModelGrid(DbGrid aDelegate) {
-        super();
-        setDelegate(aDelegate);
-    }
-
+    private static final String CONSTRUCTOR_JSDOC = "/**\n"
+            + "* A model component that shows a data grid. \n"
+            + "*/";
+    @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC)
     public ModelGrid() {
         super();
         setDelegate(new DbGrid());
     }
 
-    @ScriptFunction(jsDoc = "/**\n * Determines if grid shows horizontal lines.\n */")
+    protected ModelGrid(DbGrid aDelegate) {
+        super();
+        setDelegate(aDelegate);
+    }
+    
+    private static final String SHOW_HORIZONTAL_LINES_JSDOC = "/**\n"
+            + "* Determines if grid shows horizontal lines. \n"
+            + "*/";
+    @ScriptFunction(jsDoc = SHOW_HORIZONTAL_LINES_JSDOC)
     public boolean isShowHorizontalLines() {
         return delegate.isShowHorizontalLines();
     }
@@ -38,7 +45,11 @@ public class ModelGrid extends Component<DbGrid> {
         delegate.setShowHorizontalLines(aValue);
     }
 
-    @ScriptFunction(jsDoc = "/**\n * Determines if grid shows vertical lines.\n */")
+    private static final String SHOW_VERTICAL_LINES_JSDOC = "/**\n"
+            + "* Determines if grid shows vertical lines. \n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = SHOW_VERTICAL_LINES_JSDOC)
     public boolean isShowVerticalLines() {
         return delegate.isShowVerticalLines();
     }
@@ -48,7 +59,11 @@ public class ModelGrid extends Component<DbGrid> {
         delegate.setShowVerticalLines(aValue);
     }
 
-    @ScriptFunction(jsDoc = "/**\n * Odd rows color.\n */")
+    private static final String ODD_ROW_COLOR_JSDOC = "/**\n"
+            + "* Odd rows color. \n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = ODD_ROW_COLOR_JSDOC)
     public Color getOddRowsColor() {
         return delegate.getOddRowsColor();
     }
@@ -58,7 +73,11 @@ public class ModelGrid extends Component<DbGrid> {
         delegate.setOddRowsColor(aValue);
     }
 
-    @ScriptFunction(jsDoc = "/**\n * Determines if grid shows odd rows if other color.\n */")
+    private static final String SHOW_ODD_ROWS_IN_OTHER_COLOR_JSDOC = "/**\n"
+            + "* Determines if grid shows odd rows if other color. \n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = SHOW_ODD_ROWS_IN_OTHER_COLOR_JSDOC)
     public boolean isShowOddRowsInOtherColor() {
         return isShowOddRowsInOtherColor();
     }
@@ -68,7 +87,11 @@ public class ModelGrid extends Component<DbGrid> {
         delegate.setShowOddRowsInOtherColor(aValue);
     }
 
-    @ScriptFunction(jsDoc = "/**\n * The color of the grid.\n */")
+    private static final String GRID_COLOR_JSDOC = "/**\n"
+            + "* The color of the grid. \n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = GRID_COLOR_JSDOC)
     public Color getGridColor() {
         return delegate.getGridColor();
     }
@@ -78,16 +101,24 @@ public class ModelGrid extends Component<DbGrid> {
         delegate.setGridColor(aValue);
     }
 
-    @ScriptFunction(jsDoc = "/**\n * The height of grid's rows.\n */")
+    private static final String ROWS_HEIGHT_JSDOC = "/**\n"
+            + "* The height of grid's rows. \n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = ROWS_HEIGHT_JSDOC)
     public int getRowsHeight() {
         return delegate.getRowsHeight();
     }
-
+    
     @ScriptFunction
     public void setRowsHeight(int aValue) {
         delegate.setRowsHeight(aValue);
     }
 
+    private static final String ON_RENDER_JSDOC = "/**\n"
+            + "* The height of grid's rows. \n"
+            + "*/";
+    
     @ScriptFunction
     public Function getOnRender()
     {

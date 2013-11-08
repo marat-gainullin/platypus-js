@@ -16,17 +16,25 @@ import javax.swing.JFormattedTextField;
  */
 public class ModelFormattedField extends ScalarModelComponent<DbLabel> {
 
-    public ModelFormattedField(DbLabel aDelegate) {
-        super();
-        setDelegate(aDelegate);
-    }
+    private static final String CONSTRUCTOR_JSDOC = "/**\n"
+            + "* A model component that shows a date. \n"
+            + "*/";
 
+    @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC)
     public ModelFormattedField() {
         super();
         setDelegate(new DbLabel());
     }
 
-    @ScriptFunction(jsDoc = "Determines if component is editable.")
+    protected ModelFormattedField(DbLabel aDelegate) {
+        super();
+        setDelegate(aDelegate);
+    }
+    
+    private static final String EDITABLE_JSDOC = "/**\n"
+            + "* Determines if component is editable. \n"
+            + "*/";
+    @ScriptFunction(jsDoc = EDITABLE_JSDOC)
     public boolean isEditable() {
         return delegate.isEditable();
     }
@@ -36,6 +44,10 @@ public class ModelFormattedField extends ScalarModelComponent<DbLabel> {
         delegate.setEditable(aValue);
     }
 
+    private static final String FORMAT_JSDOC = "/**\n"
+            + "* The format string of the component. \n"
+            + "*/";
+    @ScriptFunction(jsDoc = FORMAT_JSDOC)
     public String getFormat() {
         if (delegate.getFocusTargetComponent() instanceof JFormattedTextField) {
             JFormattedTextField delegateFf = (JFormattedTextField) delegate.getFocusTargetComponent();
