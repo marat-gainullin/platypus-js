@@ -18,6 +18,8 @@ import org.netbeans.api.progress.ProgressHandle;
 import org.netbeans.api.progress.ProgressHandleFactory;
 import org.netbeans.spi.project.ActionProvider;
 import org.netbeans.spi.project.ui.support.DefaultProjectOperations;
+import org.openide.DialogDisplayer;
+import org.openide.NotifyDescriptor;
 import org.openide.awt.StatusDisplayer;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
@@ -119,7 +121,7 @@ public class PlatypusProjectActions implements ActionProvider {
         } else if (COMMAND_CONNECT.equals(command)) {
             return !project.isDbConnected();
         } else if (COMMAND_DEPLOY.equals(command) || COMMAND_IMPORT.equals(command)) {
-            return project.getSettings().isDbAppSources() && project.isDbConnected() && !project.getDeployer().isBusy();
+            return project.isDbConnected() && !project.getDeployer().isBusy();
         } else if (COMMAND_CLEAN.equals(command)) {
             PlatypusWebModuleManager pwmm = project.getLookup().lookup(PlatypusWebModuleManager.class);
             assert pwmm != null;
@@ -132,64 +134,82 @@ public class PlatypusProjectActions implements ActionProvider {
 
     private void deploy() {
         if (project.isDbConnected()) {
-            RequestProcessor.Task deployTask = project.getRequestProcessor().create(new Runnable() {
-                @Override
-                public void run() {
-                    InputOutput io = project.getOutputWindowIO();
-                    project.getDeployer().setOut(io.getOut());
-                    project.getDeployer().setErr(io.getErr());
-                    project.getDeployer().deploy();
-                }
-            });
-            final ProgressHandle ph = ProgressHandleFactory.createHandle(NbBundle.getMessage(PlatypusProjectActions.class, "LBL_Deploy_Progress"), deployTask); // NOI18N  
-            deployTask.addTaskListener(new TaskListener() {
-                @Override
-                public void taskFinished(org.openide.util.Task task) {
-                    ph.finish();
-                    StatusDisplayer.getDefault().setStatusText(NbBundle.getMessage(PlatypusProjectActions.class, "LBL_Deploy_Complete")); // NOI18N
-                }
-            });
-            ph.start();
-            deployTask.schedule(0);
+            NotifyDescriptor d = new NotifyDescriptor(
+                    NbBundle.getMessage(PlatypusProjectActions.class, "MSG_Deploy_Dialog"), //NOI18N
+                    NbBundle.getMessage(PlatypusProjectActions.class, "LBL_Deploy_Dialog"), //NOI18N
+                    NotifyDescriptor.OK_CANCEL_OPTION,
+                    NotifyDescriptor.INFORMATION_MESSAGE,
+                    null,
+                    null);
+            if (NotifyDescriptor.YES_OPTION.equals(DialogDisplayer.getDefault().notify(d))) {
+                RequestProcessor.Task deployTask = project.getRequestProcessor().create(new Runnable() {
+                    @Override
+                    public void run() {
+                        InputOutput io = project.getOutputWindowIO();
+                        project.getDeployer().setOut(io.getOut());
+                        project.getDeployer().setErr(io.getErr());
+                        project.getDeployer().deploy();
+                    }
+                });
+                final ProgressHandle ph = ProgressHandleFactory.createHandle(NbBundle.getMessage(PlatypusProjectActions.class, "LBL_Deploy_Progress"), deployTask); // NOI18N  
+                deployTask.addTaskListener(new TaskListener() {
+                    @Override
+                    public void taskFinished(org.openide.util.Task task) {
+                        ph.finish();
+                        StatusDisplayer.getDefault().setStatusText(NbBundle.getMessage(PlatypusProjectActions.class, "LBL_Deploy_Complete")); // NOI18N
+                    }
+                });
+                ph.start();
+                deployTask.schedule(0);
+            }
         }
     }
 
     private void importApplication() {
         if (project.isDbConnected()) {
-            RequestProcessor.Task importTask = project.getRequestProcessor().create(new Runnable() {
-                @Override
-                public void run() {
-                    InputOutput io = project.getOutputWindowIO();
-                    project.getDeployer().setOut(io.getOut());
-                    project.getDeployer().setErr(io.getErr());
+            NotifyDescriptor d = new NotifyDescriptor(
+                    NbBundle.getMessage(PlatypusProjectActions.class, "MSG_Import_Dialog"), //NOI18N
+                    NbBundle.getMessage(PlatypusProjectActions.class, "LBL_Import_Dialog"), //NOI18N
+                    NotifyDescriptor.OK_CANCEL_OPTION,
+                    NotifyDescriptor.INFORMATION_MESSAGE,
+                    null,
+                    null);
+            if (NotifyDescriptor.YES_OPTION.equals(DialogDisplayer.getDefault().notify(d))) {
+                RequestProcessor.Task importTask = project.getRequestProcessor().create(new Runnable() {
+                    @Override
+                    public void run() {
+                        InputOutput io = project.getOutputWindowIO();
+                        project.getDeployer().setOut(io.getOut());
+                        project.getDeployer().setErr(io.getErr());
 
-                    try {
-                        AppCache cache = project.getClient().getAppCache();
-                        if (cache instanceof FilesAppCache) {
-                            ((FilesAppCache) cache).unwatch();
-                        }
                         try {
-                            project.getDeployer().importApplication();
-                        } finally {
+                            AppCache cache = project.getClient().getAppCache();
                             if (cache instanceof FilesAppCache) {
-                                ((FilesAppCache) cache).watch();
+                                ((FilesAppCache) cache).unwatch();
                             }
+                            try {
+                                project.getDeployer().importApplication();
+                            } finally {
+                                if (cache instanceof FilesAppCache) {
+                                    ((FilesAppCache) cache).watch();
+                                }
+                            }
+                        } catch (Exception ex) {
+                            throw new RuntimeException(ex);
                         }
-                    } catch (Exception ex) {
-                        throw new RuntimeException(ex);
                     }
-                }
-            });
-            final ProgressHandle ph = ProgressHandleFactory.createHandle(NbBundle.getMessage(PlatypusProjectActions.class, "LBL_Import_Progress"), importTask); // NOI18N  
-            importTask.addTaskListener(new TaskListener() {
-                @Override
-                public void taskFinished(org.openide.util.Task task) {
-                    ph.finish();
-                    StatusDisplayer.getDefault().setStatusText(NbBundle.getMessage(PlatypusProjectActions.class, "LBL_Import_Complete")); // NOI18N
-                }
-            });
-            ph.start();
-            importTask.schedule(0);
+                });
+                final ProgressHandle ph = ProgressHandleFactory.createHandle(NbBundle.getMessage(PlatypusProjectActions.class, "LBL_Import_Progress"), importTask); // NOI18N  
+                importTask.addTaskListener(new TaskListener() {
+                    @Override
+                    public void taskFinished(org.openide.util.Task task) {
+                        ph.finish();
+                        StatusDisplayer.getDefault().setStatusText(NbBundle.getMessage(PlatypusProjectActions.class, "LBL_Import_Complete")); // NOI18N
+                    }
+                });
+                ph.start();
+                importTask.schedule(0);
+            }
         }
     }
 
