@@ -11,7 +11,7 @@ import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.junit.client.GWTTestCase;
 import com.google.gwt.user.client.Timer;
 
-public class ORMTest extends GWTTestCase {
+public abstract class PlatypusModulesTest extends GWTTestCase {
 	public static final String GWT_MODULE_NAME = "com.eas.client.application.Main";
 
 	protected boolean onSuccessCalled;
@@ -25,29 +25,32 @@ public class ORMTest extends GWTTestCase {
 		onSuccessCalled = true;
 	}
 
+	protected abstract String testsModuleName();
+	
 	@Override
 	protected void gwtSetUp() throws Exception {
 		super.gwtSetUp();
 		delayTestFinish(60 * 60 * 1000);
 		final AppClient client = ModelBaseTest.initDevelopTestClient(getModuleName());
+		Application.publish(client);
 		Loader loader = new Loader(client);
-		loader.load(Collections.singleton("ORM_Relations_Test"), new CancellableCallbackAdapter() {
+		loader.load(Collections.singleton(testsModuleName()), new CancellableCallbackAdapter() {
 
-			protected native JavaScriptObject bind(ORMTest aRunner)/*-{
+			protected native JavaScriptObject bind(PlatypusModulesTest aRunner, String aModuleName)/*-{
 				window.Logger = {info:function(aMessage){}, severe : function(aMessage){}, warning : function(aMessage){},
 				fine:function(aMessage){}, finer : function(aMessage){}, finest : function(aMessage){}};
 				$wnd.Logger = window.Logger;
-				var instance = new $wnd.ORM_Relations_Test();
+				var constr = $wnd[aModuleName];
+				var instance = new constr();
 				instance.onSuccess = function(aValue) {
-					aRunner.@com.eas.client.script.ORMTest::onSuccess(I)(aValue);
+					aRunner.@com.eas.client.script.PlatypusModulesTest::onSuccess(I)(aValue);
 				}
 				return instance;
 			}-*/;
 
 			@Override
 			protected void doWork() throws Exception {
-				Application.publish(client);
-				JavaScriptObject instance = bind(ORMTest.this);
+				JavaScriptObject instance = bind(PlatypusModulesTest.this, testsModuleName());
 			}
 
 		});

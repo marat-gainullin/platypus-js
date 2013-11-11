@@ -169,6 +169,8 @@ public class StoredQueryFactory {
                             putParametersMetadata(query, model);
                             if (putTableFieldsMetadata(query)) {
                                 putStoredTableFieldsMetadata(query, additionalFieldsMetadata);
+                            }else{
+                                query.setCommand(true);
                             }
                         } finally {
                             query.setSqlText(compiledSqlText);

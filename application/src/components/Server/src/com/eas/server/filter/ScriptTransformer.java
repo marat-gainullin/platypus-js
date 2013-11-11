@@ -31,6 +31,7 @@ public class ScriptTransformer {
     public static final String SERVER_REPORT = "ServerReport";
     private Name _this = new Name(0, SELF_NAME);
     private Set<String> dependencies = new HashSet<>();
+    private Set<String> queryDependencies = new HashSet<>();
     private Set<String> serverDependencies = new HashSet<>();
     private Set<String> dynamicDependencies = new HashSet<>();
     private Stack<Scope> scopeStack = new Stack<>();
@@ -348,6 +349,18 @@ public class ScriptTransformer {
                     putDependence(((StringLiteral) arguments.get(0)).getValue());
                 }
             }
+        } else if(name.getIdentifier().equals("loadEntity") && name.getParent() instanceof PropertyGet){
+            AstNode target = ((PropertyGet) name.getParent()).getTarget();
+            if(target instanceof PropertyGet)
+                target = ((PropertyGet)target).getProperty();
+            if(target instanceof Name && ((Name) target).getIdentifier().equals("model")){
+                assert aNode.getParent().getParent() instanceof FunctionCall : ERROR_DEPENDECIES_PARSE_ERROR;
+                FunctionCall funcCall = (FunctionCall) aNode.getParent().getParent();
+                List<AstNode> arguments = funcCall.getArguments();
+                if (!arguments.isEmpty() && arguments.get(0) instanceof StringLiteral) {
+                    putQueryDependence(((StringLiteral) arguments.get(0)).getValue());
+                }
+            }
         } else if (aNode.getParent() instanceof NewExpression) {
             if (name.getIdentifier().equals(FORM)
                     || name.getIdentifier().equals(MODULE)) {
@@ -422,6 +435,16 @@ public class ScriptTransformer {
         if (!dependencies.contains(entityId)) {
             dependencies.add(entityId);
         }
+    }
+    
+    private void putQueryDependence(String entityId) {
+        if (!queryDependencies.contains(entityId)) {
+            queryDependencies.add(entityId);
+        }
+    }
+
+    public Set<String> getQueryDependencies() {
+        return queryDependencies;
     }
 
     public Set<String> getDependencies() {

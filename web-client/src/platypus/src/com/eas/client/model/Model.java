@@ -854,15 +854,16 @@ public class Model {
 		}
 	}
 
-	protected static final String USER_DATASOURCE_NAME = "userQuery";
+	protected static final String USER_DATASOURCE_NAME = "userEntity";
 
 	public synchronized Object jsLoadEntity(String aQueryId) throws Exception {
 		if (client == null) {
-			throw new NullPointerException("Null client detected while creating a query");
+			throw new NullPointerException("Null client detected while creating an entity");
 		}
 		Entity entity = new Entity(this);
 		entity.setName(USER_DATASOURCE_NAME);
 		entity.setQueryId(aQueryId);
+		entity.validateQuery();
 		//addEntity(entity); To avoid memory leaks you should not add the entity in the model!
 		return Entity.publishEntityFacade(entity);
 	}

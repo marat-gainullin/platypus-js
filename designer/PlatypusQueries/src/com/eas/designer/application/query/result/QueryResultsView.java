@@ -38,6 +38,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.StringReader;
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -164,7 +165,13 @@ public class QueryResultsView extends javax.swing.JPanel {
         return aTableSchemaName != null && !aTableSchemaName.isEmpty() ? String.format("%s.%s", aTableSchemaName, aTableName) : aTableName; //NOI18N
     }
 
-    private void initModel() throws Exception {
+    /**
+     *
+     * @return True if underlying suery is a select, false if it a insert,
+     * delete, update or stored procedure call
+     * @throws Exception
+     */
+    private boolean initModel() throws Exception {
         model = new ApplicationDbModel(client);
         ScriptUtils.enterContext();
         try {
@@ -173,7 +180,16 @@ public class QueryResultsView extends javax.swing.JPanel {
             setupQueryEntityBySql();
             setModelRelations();
             // enable dataworks
-            model.setRuntime(true);
+            if (queryEntity.getQuery().isCommand()) {
+                queryEntity.getQuery().setManual(true);
+                model.setRuntime(true);
+                int rowsAffected = client.executeUpdate(queryEntity.getQuery().compile());
+                showInfo(NbBundle.getMessage(QuerySetupView.class, "QueryResultsView.affectedRowsMessage", rowsAffected));
+                return false;
+            } else {
+                model.setRuntime(true);
+                return true;
+            }
         } finally {
             Context.exit();
         }
@@ -189,11 +205,11 @@ public class QueryResultsView extends javax.swing.JPanel {
         SqlQuery query = new SqlQuery(client, queryText);
         query.setDbId(dbId);
         query.setEntityId(entityId);
-        query.setPageSize(pageSize);        
+        query.setPageSize(pageSize);
         try {
             StoredQueryFactory factory = new StoredQueryFactory(client, false);
-            factory.putTableFieldsMetadata(query);
-            enableCommitQueryButton(true);
+            query.setCommand(!factory.putTableFieldsMetadata(query));
+            enableCommitQueryButton(!query.isCommand());
             hintCommitQueryButton(NbBundle.getMessage(QueryResultsView.class, "HINT_Commit"));
         } catch (Exception ex) {
             enableCommitQueryButton(false);
@@ -432,22 +448,26 @@ public class QueryResultsView extends javax.swing.JPanel {
 
     private void refreshButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_refreshButtonActionPerformed
         if (model != null) {
-            RequestProcessor.getDefault().execute(
-                    new Runnable() {
-                        @Override
-                        public void run() {
-                            final ProgressHandle ph = ProgressHandleFactory.createHandle(getName());
-                            ph.start();
-                            try {
-                                model.requery();
-                                showQueryResultsMessage();
-                            } catch (Exception ex) {
-                                logger.log(Level.SEVERE, "Error refreshing model.", ex); //NO1I18N
-                            } finally {
-                                ph.finish();
-                            }
+            RequestProcessor.getDefault().execute(new Runnable() {
+                @Override
+                public void run() {
+                    final ProgressHandle ph = ProgressHandleFactory.createHandle(getName());
+                    ph.start();
+                    try {
+                        if (queryEntity.getQuery().isCommand()) {
+                            int rowsAffected = client.executeUpdate(queryEntity.getQuery().compile());
+                            showInfo(NbBundle.getMessage(QuerySetupView.class, "QueryResultsView.affectedRowsMessage", rowsAffected));
+                        } else {
+                            model.requery();
+                            showQueryResultsMessage();
                         }
-                    });
+                    } catch (Exception ex) {
+                        showWarning(ex.getMessage()); //NO1I18N
+                    } finally {
+                        ph.finish();
+                    }
+                }
+            });
 
         }
     }//GEN-LAST:event_refreshButtonActionPerformed
@@ -457,37 +477,37 @@ public class QueryResultsView extends javax.swing.JPanel {
             if (model != null && model.isModified()) {
                 RequestProcessor.getDefault().execute(
                         new Runnable() {
-                            @Override
-                            public void run() {
-                                final ProgressHandle ph = ProgressHandleFactory.createHandle(getName());
-                                ph.start();
-                                try {
-                                    assert model.getClient() instanceof DatabasesClient;
-                                    DatabasesClient client = (DatabasesClient) model.getClient();
-                                    final StoredQueryFactory qFactory = client.getQueryFactory();
-                                    client.setQueryFactory(new StoredQueryFactory(client, false) {
-                                        @Override
-                                        public SqlQuery getQuery(String aAppElementId, boolean aCopy) throws Exception {
-                                            if (entityId.equals(aAppElementId)) {
-                                                return queryEntity.getQuery();
-                                            } else {
-                                                return qFactory.getQuery(aAppElementId, aCopy);
-                                            }
-                                        }
-                                    });
-                                    try {
-                                        model.save();
-                                        showInfo(NbBundle.getMessage(QueryResultsView.class, "DataSaved"));
-                                    } finally {
-                                        client.setQueryFactory(qFactory);
+                    @Override
+                    public void run() {
+                        final ProgressHandle ph = ProgressHandleFactory.createHandle(getName());
+                        ph.start();
+                        try {
+                            assert model.getClient() instanceof DatabasesClient;
+                            DatabasesClient client = (DatabasesClient) model.getClient();
+                            final StoredQueryFactory qFactory = client.getQueryFactory();
+                            client.setQueryFactory(new StoredQueryFactory(client, false) {
+                                @Override
+                                public SqlQuery getQuery(String aAppElementId, boolean aCopy) throws Exception {
+                                    if (entityId.equals(aAppElementId)) {
+                                        return queryEntity.getQuery();
+                                    } else {
+                                        return qFactory.getQuery(aAppElementId, aCopy);
                                     }
-                                } catch (Exception ex) {
-                                    logger.log(Level.SEVERE, "Error saving model.", ex); //NO1I18N
-                                } finally {
-                                    ph.finish();
                                 }
+                            });
+                            try {
+                                model.save();
+                                showInfo(NbBundle.getMessage(QueryResultsView.class, "DataSaved"));
+                            } finally {
+                                client.setQueryFactory(qFactory);
                             }
-                        });
+                        } catch (Exception ex) {
+                            logger.log(Level.SEVERE, "Error saving model.", ex); //NO1I18N
+                        } finally {
+                            ph.finish();
+                        }
+                    }
+                });
 
             }
         } catch (Exception ex) {
@@ -565,11 +585,11 @@ public class QueryResultsView extends javax.swing.JPanel {
     private void requestExecuteQuery() {
         RequestProcessor.getDefault().execute(
                 new Runnable() {
-                    @Override
-                    public void run() {
-                        execute();
-                    }
-                });
+            @Override
+            public void run() {
+                execute();
+            }
+        });
     }
 
     private void execute() {
@@ -578,15 +598,25 @@ public class QueryResultsView extends javax.swing.JPanel {
         ph.start();
         resetMessage();
         try {
-            refresh();
-            showQueryResultsMessage();
-            enableRefreshQueryButton(true);
-            enableCommitQueryButton(true);
-            enableNextPageButton(true);
+            if (refresh()) {
+                showQueryResultsMessage();
+                enableRefreshQueryButton(true);
+                enableCommitQueryButton(true);
+                enableNextPageButton(true);
+            } else {
+                enableRefreshQueryButton(true);
+                enableCommitQueryButton(false);
+                enableNextPageButton(false);
+                deleteButton.setEnabled(false);
+                addButton.setEnabled(false);
+            }
         } catch (Throwable ex) {
             showWarning(ex.getMessage());
-            enableCommitQueryButton(false);
             enableRefreshQueryButton(false);
+            enableCommitQueryButton(false);
+            enableNextPageButton(false);
+            deleteButton.setEnabled(false);
+            addButton.setEnabled(false);
         } finally {
             enableRunQueryButton(true);
             ph.finish();
@@ -638,9 +668,19 @@ public class QueryResultsView extends javax.swing.JPanel {
         });
     }
 
-    private void refresh() throws Exception {
-        initModel();
-        initDbGrid();
+    /**
+     *
+     * @return True if results grid is initialized and false if dml query has
+     * been executed
+     * @throws Exception
+     */
+    private boolean refresh() throws Exception {
+        if (initModel()) {
+            initDbGrid();
+            return true;
+        } else {
+            return false;
+        }
     }
 
     private void initDbGrid() throws Exception {

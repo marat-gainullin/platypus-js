@@ -105,6 +105,7 @@ public class AppElementsFilter {
             + ScriptTransformer.SELF_NAME + ".handled = true;\n"
             + BROWSER_SOURCE_TAIL;
     public static final String DEPENDENCY_TAG_NAME = "dependency";
+    public static final String QUERY_DEPENDENCY_TAG_NAME = "entityDependency";
     public static final String SERVER_DEPENDENCY_TAG_NAME = "serverDependency";
     protected PlatypusServerCore serverCore;
     protected final Map<String, ActualCacheEntry<Filtered>> filtered = new HashMap<>();
@@ -167,6 +168,7 @@ public class AppElementsFilter {
             if (doc != null) {
                 String moduleId = aAppElement.getId();
                 Set<String> dependencies = null;
+                Set<String> queryDependencies = null;
                 Set<String> serverDependencies = null;
                 assert doc.getChildNodes().getLength() == 1 : "Platypus application elements must contain only one root tag in xml DOM";
                 Node rootNode = doc.getChildNodes().item(0);
@@ -203,6 +205,7 @@ public class AppElementsFilter {
                             }
                             docNode.getParentNode().removeChild(docNode);
                             dependencies = transformer.getDependencies();
+                            queryDependencies = transformer.getQueryDependencies();
                             serverDependencies = transformer.getServerDependencies();
                             break;
                         case Model2XmlDom.DATAMODEL_TAG_NAME:
@@ -244,6 +247,13 @@ public class AppElementsFilter {
                     for (String serverDependency : serverDependencies) {
                         Node depencyNode = doc.createElement(SERVER_DEPENDENCY_TAG_NAME);
                         depencyNode.setTextContent(serverDependency);
+                        rootNode.appendChild(depencyNode);
+                    }
+                }
+                if (queryDependencies != null && !queryDependencies.isEmpty()) {
+                    for (String dependency : queryDependencies) {
+                        Node depencyNode = doc.createElement(QUERY_DEPENDENCY_TAG_NAME);
+                        depencyNode.setTextContent(dependency);
                         rootNode.appendChild(depencyNode);
                     }
                 }
