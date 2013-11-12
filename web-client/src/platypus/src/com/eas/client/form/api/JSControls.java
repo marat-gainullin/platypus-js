@@ -223,7 +223,8 @@ public class JSControls {
 					return  $wnd.HorizontalPosition.CENTER;
 				},
 				set : function(aValue) {
-					console.log("Not supported yet.");
+					if($wnd.console)
+						$wnd.console.log("verticalAlignment in buttons is not supported yet.");
 				}
 			});
 			return published;
