@@ -198,6 +198,7 @@ public class PlatypusResponseWriter implements PlatypusResponseVisitor {
         } else {
             writer.put(RequestsTags.TAG_RESULT_VALUE, rsp.getResult());
         }
+        writer.put(RequestsTags.TAG_FORMAT, rsp.getFormat());
         writer.flush();
     }
 

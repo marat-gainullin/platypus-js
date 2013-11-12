@@ -25,6 +25,7 @@ public class ServerReportRunner extends ServerScriptRunner {
 
     private byte[] template;
     private Function onBeforRender;
+    private String format;
     
      public ServerReportRunner(PlatypusServerCore aServerCore, Session aCreationSession, String aModuleId, Scriptable aScope, PrincipalHost aPrincipalHost, CompiledScriptDocumentsHost aCompiledScriptDocumentsHost, Object[] args) throws Exception {
         super(aServerCore, aCreationSession, aModuleId, aScope, aPrincipalHost, aCompiledScriptDocumentsHost, args);
@@ -33,7 +34,7 @@ public class ServerReportRunner extends ServerScriptRunner {
         if (scriptDoc != null) {
             if (scriptDoc instanceof ReportDocument) {
                 template = ((ReportDocument) scriptDoc).getTemplate();
-
+                format = ((ReportDocument) scriptDoc).getFormat();
             }
         }
     }
@@ -77,5 +78,12 @@ public class ServerReportRunner extends ServerScriptRunner {
     protected void definePropertiesAndMethods() {
         super.definePropertiesAndMethods();
         defineProperty(ReportRunner.BEFORE_RENDER_HANDLER_NAME, ServerReportRunner.class, EMPTY);
+    }
+
+    /**
+     * @return the format
+     */
+    public String getFormat() {
+        return format;
     }
 }

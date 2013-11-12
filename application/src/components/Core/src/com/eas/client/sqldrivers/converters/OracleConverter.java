@@ -61,7 +61,7 @@ public class OracleConverter extends PlatypusConverter {
                 } catch (SQLException ex) {
                     throw new RowsetException(ex);
                 }
-            } else if (aTypeInfo.getSqlType() == Types.STRUCT && aValue != null && aValue instanceof Geometry) {
+            } else if (aValue instanceof Geometry) {
                 try {
                     Connection conn = aStmt.getConnection();
                     assert conn instanceof OracleConnection || conn.unwrap(OracleConnection.class) instanceof OracleConnection;

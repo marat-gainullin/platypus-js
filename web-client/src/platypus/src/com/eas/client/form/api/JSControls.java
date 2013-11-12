@@ -150,6 +150,34 @@ public class JSControls {
 			if (aCallback) {
 				published.onActionPerformed = aCallback; 
 			}	 	
+			Object.defineProperty(published, "horizontalAlignment", {
+				get : function() {
+					var position = aComponent.@com.eas.client.gxtcontrols.wrappers.component.PlatypusTextButton::getHorizontalAlignment()(); 
+					switch (position) {
+						case @com.google.gwt.dom.client.Style.TextAlign::RIGHT : return $wnd.HorizontalPosition.RIGHT; 
+						case @com.google.gwt.dom.client.Style.TextAlign::LEFT : return $wnd.HorizontalPosition.LEFT;
+						default : return  $wnd.HorizontalPosition.CENTER;
+					}
+				},
+				set : function(aValue) {
+					switch (aValue) {
+						case $wnd.HorizontalPosition.LEFT: 
+							aComponent.@com.eas.client.gxtcontrols.wrappers.component.PlatypusTextButton::setHorizontalAlignment(Lcom/google/gwt/dom/client/Style$TextAlign;)(@com.google.gwt.dom.client.Style.TextAlign::LEFT);
+						  	break;
+						case $wnd.HorizontalPosition.RIGHT:
+							aComponent.@com.eas.client.gxtcontrols.wrappers.component.PlatypusTextButton::setHorizontalAlignment(Lcom/google/gwt/dom/client/Style$TextAlign;)(@com.google.gwt.dom.client.Style.TextAlign::RIGHT);
+							break;
+					}
+				}
+			});
+			Object.defineProperty(published, "verticalAlignment", {
+				get : function() {
+					return  $wnd.HorizontalPosition.CENTER;
+				},
+				set : function(aValue) {
+					console.log("Not supported yet.");
+				}
+			});
 			return published;
 		};	
 		
@@ -793,27 +821,8 @@ public class JSControls {
 					comp.@com.sencha.gxt.widget.core.client.button.CellButtonBase::setText(Ljava/lang/String;)(aValue!=null?(''+aValue):null);
 				}
 			});
+			
 			Object.defineProperty(aPublished, "horizontalTextPosition", {
-				get : function() {
-					var position = comp.@com.eas.client.gxtcontrols.wrappers.component.PlatypusTextButton::getHorizontalTextPosition()(); 
-					switch (position) {
-						case @com.google.gwt.dom.client.Style.TextAlign::RIGHT : return $wnd.HorizontalPosition.RIGHT; 
-						case @com.google.gwt.dom.client.Style.TextAlign::LEFT : return $wnd.HorizontalPosition.LEFT;
-						default : return  $wnd.HorizontalPosition.CENTER;
-					}
-				},
-				set : function(aValue) {
-					switch (aValue) {
-						case $wnd.HorizontalPosition.LEFT: 
-							comp.@com.eas.client.gxtcontrols.wrappers.component.PlatypusTextButton::setHorizontalTextPosition(Lcom/google/gwt/dom/client/Style$TextAlign;)(@com.google.gwt.dom.client.Style.TextAlign::LEFT);
-						  	break;
-						case $wnd.HorizontalPosition.RIGHT:
-							comp.@com.eas.client.gxtcontrols.wrappers.component.PlatypusTextButton::setHorizontalTextPosition(Lcom/google/gwt/dom/client/Style$TextAlign;)(@com.google.gwt.dom.client.Style.TextAlign::RIGHT);
-							break;
-					}
-				}
-			});
-			Object.defineProperty(aPublished, "horizontalIconPosition", {
 				get : function() {
 					var position = comp.@com.sencha.gxt.widget.core.client.button.CellButtonBase::getIconAlign()(); 
 					switch (position) {

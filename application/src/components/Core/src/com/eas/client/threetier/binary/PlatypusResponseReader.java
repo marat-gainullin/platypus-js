@@ -151,6 +151,9 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
             st.write(nd.getData(), nd.getOffset(), nd.getSize());
             rsp.setResult(st.toByteArray());
         }
+        if (input.containsChild(RequestsTags.TAG_FORMAT)) {
+            rsp.setFormat(input.getChild(RequestsTags.TAG_FORMAT).getString());
+        }
     }
 
     @Override
@@ -221,8 +224,9 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
             throw new ProtoReaderException("Query fields are not specified");
         }
         appQuery.setEntityId(dom.getChild(RequestsTags.TAG_QUERY_ID).getString());
-        if(dom.containsChild(RequestsTags.TAG_DML))
+        if (dom.containsChild(RequestsTags.TAG_DML)) {
             appQuery.setManual(dom.getChild(RequestsTags.TAG_DML).getInt() == 1);
+        }
         ProtoNode titleNode = dom.getChild(RequestsTags.TAG_TITLE);
         if (titleNode != null) {
             appQuery.setTitle(titleNode.getString());

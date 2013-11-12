@@ -14,7 +14,7 @@ public class PlatypusTextButton extends TextButton {
 	protected static ButtonCellResources buttonResources = GWT.create(ButtonCellResources.class);
 
 	protected int iconTextGap = 4;
-	protected TextAlign horizontalTextPosition = TextAlign.CENTER;
+	protected TextAlign horizontalAlignment = TextAlign.CENTER;
 	
 	public int getIconTextGap() {
 		return iconTextGap;
@@ -27,13 +27,13 @@ public class PlatypusTextButton extends TextButton {
 		}
 	}
 
-	public TextAlign getHorizontalTextPosition() {
-		return horizontalTextPosition;
+	public TextAlign getHorizontalAlignment() {
+		return horizontalAlignment;
 	}
 
-	public void setHorizontalTextPosition(TextAlign aValue) {
-		if (horizontalTextPosition.compareTo(aValue) != 0) {
-			horizontalTextPosition = aValue;
+	public void setHorizontalAlignment(TextAlign aValue) {
+		if (horizontalAlignment.compareTo(aValue) != 0) {
+			horizontalAlignment = aValue;
 			redraw();
 		}
 	}
@@ -55,7 +55,7 @@ public class PlatypusTextButton extends TextButton {
 		}
 		XElement text = el.selectNode("."+buttonResources.style().text());
 		if (text != null) {
-			text.getStyle().setTextAlign(horizontalTextPosition);
+			text.getStyle().setTextAlign(horizontalAlignment);
 		}
 		ControlsUtils.reapplyStyle(this);
 	}

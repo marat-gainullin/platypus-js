@@ -547,6 +547,7 @@ public class AppClient {
 	public void startDownloadRequest(String aUrlPrefix, final int aRequestType, Map<String, String> aParams, RequestBuilder.Method aMethod) throws Exception {
 		final Frame frame = new Frame();
 		frame.setVisible(false);
+		
 		frame.addLoadHandler(new LoadHandler() {
 			
 			@Override
@@ -555,20 +556,12 @@ public class AppClient {
 						
 						@Override
 						public void run() {
-							//frame.removeFromParent();
+							frame.removeFromParent();
 						}
 					};
 					timer.schedule(2000);
 			}
 		});
-		frame.addHandler(new ErrorHandler() {
-			
-			@Override
-			public void onError(ErrorEvent event) {
-				Logger.getLogger("Test").log(Level.ALL, "onerror");
-				
-			}
-		}, ErrorEvent.getType());
 		String query = "";
 		for (Entry<String, String> ent : aParams.entrySet()) {
 			query += param(ent.getKey(), ent.getValue()) + "&";

@@ -10,6 +10,7 @@ import com.bearsoft.rowset.exceptions.InvalidCursorPositionException;
 import com.bearsoft.rowset.utils.IDGenerator;
 import com.bearsoft.rowset.wrappers.jdbc.ResultSetImpl;
 import com.eas.client.ClientConstants;
+import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.model.application.ApplicationEntity;
 import com.eas.client.model.application.ApplicationModel;
 import com.eas.client.model.application.ApplicationParametersEntity;
@@ -49,6 +50,7 @@ public class ExcelReport {
     protected CompactBlob template = null;
     protected boolean validTemplate = true;
     protected String templatePath = null;
+    private String format = null;
     protected Map<String, ScriptableRowset<?>> fakeRowsetes = new HashMap<>();
     protected Map<String, Object> generated;
 
@@ -63,6 +65,9 @@ public class ExcelReport {
         super();
         model = aModel;
         so = aSo;
+        if (so instanceof ReportRunner) {
+            format = ((ReportRunner) so).format;
+        }
     }
 
     public CompactBlob getTemplate() throws Exception {
@@ -97,7 +102,7 @@ public class ExcelReport {
 
     public void show() throws Exception {
         Workbook workbook = executeReport();
-        String lPath2Save = generateReportPath();
+        String lPath2Save = generateReportPath(format);
         saveReport(workbook, lPath2Save);
         File f = new File(lPath2Save);
         f.deleteOnExit();
@@ -115,7 +120,7 @@ public class ExcelReport {
 
     public void print() throws Exception {
         Workbook workbook = executeReport();
-        String lPath2Save = generateReportPath();
+        String lPath2Save = generateReportPath(format);
         saveReport(workbook, lPath2Save);
         File f = new File(lPath2Save);
         f.deleteOnExit();
@@ -126,7 +131,7 @@ public class ExcelReport {
         CompactBlob template2Edit = template;
         if (template2Edit != null) {
             if (templatePath == null) {
-                templatePath = generateReportPath();
+                templatePath = generateReportPath(format);
             }
             if (templatePath != null && !templatePath.isEmpty()) {
                 try {
@@ -343,7 +348,7 @@ public class ExcelReport {
         }
     }
 
-    public String generateReportPath() {
+    public String generateReportPath(String aFormat) {
         String reportPath = System.getProperty(ClientConstants.USER_HOME_PROP_NAME);
         if (!reportPath.endsWith(File.separator)) {
             reportPath += File.separator;
@@ -358,7 +363,7 @@ public class ExcelReport {
         if (!newDir.exists()) {
             newDir.mkdir();
         }
-        reportPath += File.separator + String.valueOf(IDGenerator.genID()) + ".xlsx";
+        reportPath += File.separator + String.valueOf(IDGenerator.genID()) + "." + aFormat != null ? aFormat : PlatypusFiles.REPORT_LAYOUT_EXTENSION_X;
         return reportPath;
     }
 
