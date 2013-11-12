@@ -100,10 +100,13 @@ public class ExecuteServerReportRequest extends Request {
     public static class Response extends com.eas.client.threetier.Response {
 
         private byte[] result;
+        private String format;
 
-        public Response(long requestID, byte[] aResult) {
+        public Response(long requestID, byte[] aResult, String aFormat) {
             super(requestID);
             result = aResult;
+            format = aFormat;
+            
         }
 
         public byte[] getResult() {
@@ -117,6 +120,20 @@ public class ExecuteServerReportRequest extends Request {
         @Override
         public void accept(PlatypusResponseVisitor aVisitor) throws Exception {
             aVisitor.visit(this);
+        }
+
+        /**
+         * @return the format
+         */
+        public String getFormat() {
+            return format;
+        }
+
+        /**
+         * @param aFormat the format to set
+         */
+        public void setFormat(String aFormat) {
+            format = aFormat;
         }
     }
 }

@@ -5,6 +5,7 @@
 package com.eas.client.reports.store;
 
 import com.eas.client.Client;
+import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.reports.ReportDocument;
 import com.eas.client.scripts.ScriptDocument;
@@ -39,6 +40,7 @@ public class Dom2ReportDocument extends Dom2ScriptDocument {
     public ScriptDocument parseDom(Client aClient, Document aDom) throws Exception {
         ScriptDocument superDoc = super.parseDom(aClient, aDom);
         byte[] template = null;
+        String format = null;
         NodeList roots = aDom.getChildNodes();
         for (int i = 0; i < roots.getLength(); i++) {
             Node root = roots.item(i);
@@ -47,6 +49,7 @@ public class Dom2ReportDocument extends Dom2ScriptDocument {
                 for (int j = 0; j < tags.getLength(); j++) {
                     Node child = tags.item(j);
                     if (ApplicationElement.XLS_LAYOUT_TAG_NAME.equals(child.getNodeName())) {
+                        format = child.getAttributes().getNamedItem(ApplicationElement.EXT_TAG_ATTRIBUTE_NAME) != null ? child.getAttributes().getNamedItem(ApplicationElement.EXT_TAG_ATTRIBUTE_NAME).getNodeValue() : PlatypusFiles.REPORT_LAYOUT_EXTENSION;
                         String strContent = child.getTextContent();
                         if (strContent != null && !strContent.isEmpty()) {
                             UUDecoder decoder = new UUDecoder();
@@ -57,6 +60,7 @@ public class Dom2ReportDocument extends Dom2ScriptDocument {
             }
         }
         ReportDocument doc = new ReportDocument(template, superDoc.getModel(), superDoc.getScriptSource());
+        doc.setFormat(format);
         return doc;
     }
 }

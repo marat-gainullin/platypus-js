@@ -56,8 +56,9 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
     public static PlatypusServerCore getInstance(DbConnectionSettings aDbSettings, Set<String> aTasks, String aStartAppElementId) throws Exception {
         if (instance == null) {
             final Set<String> tasks = new HashSet<>();
-            if(aTasks != null)
+            if (aTasks != null) {
                 tasks.addAll(aTasks);
+            }
             DatabasesClient serverCoreDbClient = new DatabasesClient(aDbSettings, true, new ServerTasksScanner(tasks));
             instance = new PlatypusServerCore(serverCoreDbClient, tasks, aStartAppElementId);
             serverCoreDbClient.setContextHost(instance);
@@ -147,11 +148,12 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
             module = new ServerScriptRunner(this, getSessionManager().getSystemSession(), aModuleName, ScriptRunner.initializePlatypusStandardLibScope(), this, this, new Object[]{});
         }
         module.execute();
-        getSessionManager().setCurrentSession(getSessionManager().getSystemSession());
+        Session oldSession = getSessionManager().getCurrentSession();
         try {
+            getSessionManager().setCurrentSession(getSessionManager().getSystemSession());
             return module.executeMethod(aMethodName, aArgs);
         } finally {
-            getSessionManager().setCurrentSession(null);
+            getSessionManager().setCurrentSession(oldSession);
         }
     }
 
@@ -170,8 +172,7 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
     }
 
     /**
-     * Starts a server task, initializing it with supplied module
-     * annotations.
+     * Starts a server task, initializing it with supplied module annotations.
      *
      * @param aModuleId Module identifier, specifying a module for the task
      * @return Success status
@@ -191,11 +192,10 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
                 }
             }
             if (!stateless) {
-                final Session systemSession = getSessionManager().getSystemSession();
                 try {
                     ServerScriptRunner module = scriptsCache.get(aModuleId);
                     if (module != null) {
-                        ServerTask task = new ServerTask(systemSession, module);
+                        ServerTask task = new ServerTask(module);
                         task.run();
                         return true;
                     } else {
@@ -288,21 +288,24 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
 
         public static final String STARTING_BACKGROUND_TASK_MSG = "Starting background task \"%s\"";
         public static final String STARTED_BACKGROUND_TASK_MSG = "Background task \"%s\" started successfully";
-        private final Session session;
         private ServerScriptRunner module;
 
-        public ServerTask(Session aSession, ServerScriptRunner aModule) {
+        public ServerTask(ServerScriptRunner aModule) {
             super();
             module = aModule;
-            session = aSession;
         }
 
         @Override
         public void run() {
             try {
                 Logger.getLogger(ServerTask.class.getName()).info(String.format(STARTING_BACKGROUND_TASK_MSG, module.getApplicationElementId()));
-                module.execute();
-                session.registerModule(module);
+                getSessionManager().setCurrentSession(getSessionManager().getSystemSession());
+                try {
+                    module.execute();
+                    getSessionManager().getSystemSession().registerModule(module);
+                } finally {
+                    getSessionManager().setCurrentSession(null);
+                }
                 Logger.getLogger(ServerTask.class.getName()).info(String.format(STARTED_BACKGROUND_TASK_MSG, module.getApplicationElementId()));
             } catch (Exception ex) {
                 Logger.getLogger(PlatypusServerCore.class.getName()).log(Level.SEVERE, null, ex);

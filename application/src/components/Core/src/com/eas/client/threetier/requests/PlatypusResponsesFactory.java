@@ -114,6 +114,6 @@ public class PlatypusResponsesFactory implements PlatypusRequestVisitor{
    
     @Override
     public void visit(ExecuteServerReportRequest rq) throws Exception {
-        response = new ExecuteServerReportRequest.Response(requestId, null);
+        response = new ExecuteServerReportRequest.Response(requestId, null, null);
     }
 }

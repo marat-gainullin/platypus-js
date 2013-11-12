@@ -201,7 +201,7 @@ public class AppElementsFilter {
                                 }
                                 break;
                                 default:
-                                    throw new Exception("Application element of unexpected type occured. Only Modules, Forms and Reports are allowed be requested by browser.");
+                                    throw new Exception("Application element of unexpected type occured. Only Modules and Forms are allowed be requested by browser.");
                             }
                             docNode.getParentNode().removeChild(docNode);
                             dependencies = transformer.getDependencies();

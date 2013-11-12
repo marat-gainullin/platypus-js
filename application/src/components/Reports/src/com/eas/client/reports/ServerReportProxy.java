@@ -74,7 +74,7 @@ public class ServerReportProxy extends ScriptableObject {
         client.executeRequest(rq);
         byte[] result = ((ExecuteServerReportRequest.Response) rq.getResponse()).getResult();
         ExcelReport exRep = new ExcelReport();
-        String repPath = exRep.generateReportPath();
+        String repPath = exRep.generateReportPath(((ExecuteServerReportRequest.Response) rq.getResponse()).getFormat());
         exRep.saveReport(result, repPath);
         File f = new File(repPath);
         f.deleteOnExit();
@@ -118,7 +118,7 @@ public class ServerReportProxy extends ScriptableObject {
         client.executeRequest(rq);
         byte[] result = ((ExecuteServerReportRequest.Response) rq.getResponse()).getResult();
         ExcelReport exRep = new ExcelReport();
-        String repPath = exRep.generateReportPath();
+        String repPath = exRep.generateReportPath(((ExecuteServerReportRequest.Response) rq.getResponse()).getFormat());
         exRep.saveReport(result, repPath);
         File f = new File(repPath);
         f.deleteOnExit();

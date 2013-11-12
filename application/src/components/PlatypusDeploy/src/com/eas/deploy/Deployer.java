@@ -21,6 +21,7 @@ import com.eas.client.settings.ConnectionSettings2XmlDom;
 import com.eas.util.FileUtils;
 import com.eas.util.StringUtils;
 import com.eas.xml.dom.XmlDom2String;
+import com.sun.org.apache.xerces.internal.dom.ElementImpl;
 import java.io.*;
 import java.util.*;
 import java.util.logging.Level;
@@ -373,8 +374,9 @@ public class Deployer extends BaseDeployer {
         if (layoutNodes.getLength() != 1) {
             throw new DeployException(CHECK_REQUIRED_TAG_EXCEPTION_MSG + ApplicationElement.XLS_LAYOUT_TAG_NAME);
         }
+        String ext = layoutNodes.item(0).getAttributes().getNamedItem(ApplicationElement.EXT_TAG_ATTRIBUTE_NAME) != null ? layoutNodes.item(0).getAttributes().getNamedItem(ApplicationElement.EXT_TAG_ATTRIBUTE_NAME).getNodeValue() : PlatypusFiles.REPORT_LAYOUT_EXTENSION;
         String aName = checkFileName(appElement.getName());
-        File reportLayoutFile = new File(parentDirectory, addExtension(aName, PlatypusFiles.REPORT_LAYOUT_EXTENSION));
+        File reportLayoutFile = new File(parentDirectory, addExtension(aName, ext));
         if (reportLayoutFile.createNewFile()) {
             UUDecoder decoder = new UUDecoder();
             FileUtils.writeBytes(reportLayoutFile, decoder.decodeBuffer(layoutNodes.item(0).getTextContent()));

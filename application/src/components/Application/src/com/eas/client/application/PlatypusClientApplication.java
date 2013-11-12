@@ -73,8 +73,8 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
     public static final String BAD_APP_CREDENTIALS_MSG = "Bad application credentials.";
     public static final String APP_ELEMENT_MISSING_MSG = "Application element identifier missing. Nothing to do, so exit.";
     public static final String CLIENT_REQUIRED_AFTER_LOGIN_MSG = "After successfull login there must be a client.";
-    public static final String MISSING_SUCH_APP_ELEMENT_MSG = "Application element with identifier specified is absent. Nothing to do, so exit.";
-    public static final String NON_RUNNABLE_APP_ELEMENT_MSG = "Application element specified is of non-runnable type. Nothing to do, so exit.";
+    public static final String MISSING_SUCH_APP_ELEMENT_MSG = "Application element with identifier specified (%s) is absent. Nothing to do, so exit.";
+    public static final String NON_RUNNABLE_APP_ELEMENT_MSG = "Application element specified (%s) is of non-runnable type. Nothing to do, so exit.";
     public static final String STOP_BEFORE_RUN_CMD_SWITCH = "stopBeforeRun";
     public static final String BAD_APPLICATION_PATH_MSG = "Application path must follow applicationpath (ap) parameter";
     public static final String APPLICATION_PATH_NOT_EXISTS_MSG = "Application path does not exist.";
@@ -552,12 +552,12 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
                 } else if (appElement.getType() == ClientConstants.ET_RESOURCE) {
                     ScriptRunner.executeResource(appElement.getId());
                 } else {
-                    Logger.getLogger(PlatypusClientApplication.class.getName()).severe(NON_RUNNABLE_APP_ELEMENT_MSG);
+                    Logger.getLogger(PlatypusClientApplication.class.getName()).severe(String.format(NON_RUNNABLE_APP_ELEMENT_MSG, appElementId));
                     // no actions, so just exit.
                     exit(0);
                 }
             } else {
-                Logger.getLogger(PlatypusClientApplication.class.getName()).severe(MISSING_SUCH_APP_ELEMENT_MSG);
+                Logger.getLogger(PlatypusClientApplication.class.getName()).severe(String.format(MISSING_SUCH_APP_ELEMENT_MSG, appElementId));
                 // no actions, so just exit.
                 exit(0);
             }
