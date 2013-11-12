@@ -177,7 +177,7 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
                 settings.setUser(dbUser);
                 settings.setPassword(new String(dbPassword));
                 if (dbSchema != null && !dbSchema.isEmpty()) {
-                    ((DbConnectionSettings)settings).setSchema(dbSchema);
+                    ((DbConnectionSettings) settings).setSchema(dbSchema);
                 }
                 if (appPath != null) {
                     ((DbConnectionSettings) settings).setApplicationPath(appPath);
@@ -386,13 +386,13 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
                     throw new IllegalArgumentException("syntax: -laf <LaF class name>");
                 }
                 /*    
-            } else if ((CMD_SWITCHS_PREFIX + LOGLEVEL_CMD_SWITCH).equalsIgnoreCase(args[i])) {
-                if (i < args.length - 1) {
-                    logLevel = Level.parse(args[i + 1]);
-                    i += 2;
-                } else {
-                    throw new IllegalArgumentException("syntax: -loglevel <log level>");
-                }
+                 } else if ((CMD_SWITCHS_PREFIX + LOGLEVEL_CMD_SWITCH).equalsIgnoreCase(args[i])) {
+                 if (i < args.length - 1) {
+                 logLevel = Level.parse(args[i + 1]);
+                 i += 2;
+                 } else {
+                 throw new IllegalArgumentException("syntax: -loglevel <log level>");
+                 }
                  } else if ((CMD_SWITCHS_PREFIX + LOG_CMD_SWITCH).equalsIgnoreCase(args[i])) {
                  if (i < args.length - 1) {
                  logFileName = args[i + 1];
