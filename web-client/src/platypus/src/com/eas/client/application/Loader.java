@@ -50,8 +50,9 @@ public class Loader {
 	}
 
 	public static final String INJECTED_SCRIPT_CLASS_NAME = "platypus-injected-script";
-	public static final String SERVER_MODULE_TOUCHED_NAME = "-platypus-server-module-proxy-";
+	public static final String SERVER_MODULE_TOUCHED_NAME = "-PSMP-";
 	public static final String DEPENDENCY_TAG_NAME = "dependency";
+	public static final String QUERY_DEPENDENCY_TAG_NAME = "entityDependency";
 	public static final String SERVER_DEPENDENCY_TAG_NAME = "serverDependency";
 	public static final String MODEL_TAG_NAME = "datamodel";
 	public static final String ENTITY_TAG_NAME = "entity";
@@ -185,6 +186,10 @@ public class Loader {
 											queryDependencies.add(dependency);
 										}
 									}
+								} else if (QUERY_DEPENDENCY_TAG_NAME.equals(docNode.getNodeName())) {
+									String dependency = docNode.getFirstChild().getNodeValue();
+									if (dependency != null && !dependency.isEmpty() && !touchedAppElements.contains(dependency))
+										queryDependencies.add(dependency);
 								}
 							}
 						}

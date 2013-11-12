@@ -13,22 +13,32 @@ import com.eas.script.ScriptFunction;
  */
 public class ModelCheckBox extends ScalarModelComponent<DbCheck> {
 
-    protected ModelCheckBox(DbCheck aDelegate) {
-        super();
-        setDelegate(aDelegate);
-    }
-
     public ModelCheckBox() throws Exception {
         super();
         setDelegate(new DbCheck());
     }
 
+    private static final String CONSTRUCTOR_JSDOC = "/**\n"
+            + "* An implementation of a model check box -- an item that can be selected or deselected, and which displays its state to the user. \n"
+            + "* @param text the text of the component (optional)\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text"})
     public ModelCheckBox(String aText) throws Exception {
         this();
         delegate.setText(aText);
     }
 
-    @ScriptFunction(jsDoc = "Text of the component.")
+    protected ModelCheckBox(DbCheck aDelegate) {
+        super();
+        setDelegate(aDelegate);
+    }
+    
+    private static final String TEXT_JSDOC = "/**\n"
+            + "* Text on the check box."
+            + "*/";
+    
+    @ScriptFunction(jsDoc = TEXT_JSDOC)
     public String getText() {
         return delegate.getText();
     }
@@ -38,7 +48,10 @@ public class ModelCheckBox extends ScalarModelComponent<DbCheck> {
         delegate.setText(aValue);
     }
 
-    @ScriptFunction(jsDoc = "Determines if component is editable.")
+    private static final String EDITABLE_JSDOC = "/**\n"
+            + "* Determines if component is editable."
+            + "*/";
+    @ScriptFunction(jsDoc = EDITABLE_JSDOC)
     public boolean isEditable() {
         return delegate.isEditable();
     }

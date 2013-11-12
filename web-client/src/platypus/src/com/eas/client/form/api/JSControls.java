@@ -108,6 +108,54 @@ public class JSControls {
 				}
 			});
 
+			Object.defineProperty(published, "horizontalAlignment", {
+				get : function() {
+					var position = aComponent.@com.eas.client.gxtcontrols.wrappers.component.PlatypusLabel::getHorizontalAlignment()();
+					switch(position) { 
+						case @com.eas.client.gxtcontrols.wrappers.component.PlatypusLabel::LEFT :	return $wnd.HorizontalPosition.LEFT; 
+						case @com.eas.client.gxtcontrols.wrappers.component.PlatypusLabel::RIGHT :	return $wnd.HorizontalPosition.RIGHT; 
+						case @com.eas.client.gxtcontrols.wrappers.component.PlatypusLabel::CENTER :	return $wnd.HorizontalPosition.CENTER;
+						default : return null; 
+					}	
+				},
+				set : function(aValue) {
+					switch (aValue) {
+						case $wnd.HorizontalPosition.LEFT:
+							aComponent.@com.eas.client.gxtcontrols.wrappers.component.PlatypusLabel::setHorizontalAlignment(I)(@com.eas.client.gxtcontrols.wrappers.component.PlatypusLabel::LEFT);
+							break;
+						case $wnd.HorizontalPosition.RIGHT:
+							aComponent.@com.eas.client.gxtcontrols.wrappers.component.PlatypusLabel::setHorizontalAlignment(I)(@com.eas.client.gxtcontrols.wrappers.component.PlatypusLabel::RIGHT);
+							break;
+						case $wnd.HorizontalPosition.CENTER:
+							aComponent.@com.eas.client.gxtcontrols.wrappers.component.PlatypusLabel::setHorizontalAlignment(I)(@com.eas.client.gxtcontrols.wrappers.component.PlatypusLabel::CENTER);
+							break;
+					}
+				}
+			});
+			Object.defineProperty(published, "verticalAlignment", {
+				get : function() {
+					var positon = aComponent.@com.eas.client.gxtcontrols.wrappers.component.PlatypusLabel::getVerticalAlignment()();
+					switch(position) { 
+						case @com.eas.client.gxtcontrols.wrappers.component.PlatypusLabel::TOP :	return $wnd.VerticalPosition.TOP; 
+						case @com.eas.client.gxtcontrols.wrappers.component.PlatypusLabel::BOTTOM :	return $wnd.VerticalPosition.BOTTOM; 
+						case @com.eas.client.gxtcontrols.wrappers.component.PlatypusLabel::CENTER :	return $wnd.VerticalPosition.CENTER;
+						default : return null;
+					} 
+				},
+				set : function(aValue) {
+					switch (aValue) {
+						case $wnd.VerticalPosition.TOP:
+							aComponent.@com.eas.client.gxtcontrols.wrappers.component.PlatypusLabel::setVerticalAlignment(I)(@com.eas.client.gxtcontrols.wrappers.component.PlatypusLabel::TOP);
+							break;
+						case $wnd.VerticalPosition.BOTTOM:
+							aComponent.@com.eas.client.gxtcontrols.wrappers.component.PlatypusLabel::setVerticalAlignment(I)(@com.eas.client.gxtcontrols.wrappers.component.PlatypusLabel::BOTTOM);
+							break;
+						case $wnd.VerticalPosition.CENTER:
+							aComponent.@com.eas.client.gxtcontrols.wrappers.component.PlatypusLabel::setVerticalAlignment(I)(@com.eas.client.gxtcontrols.wrappers.component.PlatypusLabel::CENTER);
+							break;
+					}
+				}
+			});
 			if (aText) {
 				published.text = aText;
 			} 	

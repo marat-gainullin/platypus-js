@@ -18,17 +18,26 @@ import org.mozilla.javascript.Wrapper;
  */
 public class ModelCombo extends ScalarModelComponent<DbCombo> {
 
-    protected ModelCombo(DbCombo aDelegate) {
-        super();
-        setDelegate(aDelegate);
-    }
+    private static final String CONSTRUCTOR_JSDOC = "/**\n"
+            + "* A model component that combines a button or editable field and a drop-down list. \n"
+            + "*/";
 
+    @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC)
     public ModelCombo() {
         super();
         setDelegate(new DbCombo());
     }
 
-    @ScriptFunction(jsDoc = "Value field of the component.")
+    protected ModelCombo(DbCombo aDelegate) {
+        super();
+        setDelegate(aDelegate);
+    }
+    
+    private static final String VALUE_FIELD_JSDOC = "/**\n"
+            + "* Value field of the component. \n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = VALUE_FIELD_JSDOC)
     public Field getValueField() {
         if (delegate.getScriptScope() instanceof FormRunner) {
             return delegate.getValueField() != null ? delegate.getValueField().getField() : null;
@@ -51,7 +60,10 @@ public class ModelCombo extends ScalarModelComponent<DbCombo> {
         }
     }
 
-    @ScriptFunction(jsDoc = "Display field of the component.")
+    private static final String DISPLAY_FIELD_JSDOC = "/**\n"
+            + "* Display field of the component. \n"
+            + "*/";
+    @ScriptFunction(jsDoc = DISPLAY_FIELD_JSDOC)
     public Field getDisplayField() {
         if (delegate.getScriptScope() instanceof FormRunner) {
             return delegate.getDisplayField() != null ? delegate.getDisplayField().getField() : null;
@@ -74,7 +86,10 @@ public class ModelCombo extends ScalarModelComponent<DbCombo> {
         }
     }
 
-    @ScriptFunction(jsDoc = "Determines if component shown as list.")
+    private static final String LIST_JSDOC = "/**\n"
+            + "* Determines if component shown as list.\n"
+            + "*/";
+    @ScriptFunction(jsDoc = LIST_JSDOC)
     public boolean isList() throws Exception {
         return delegate.isList();
     }
@@ -85,7 +100,10 @@ public class ModelCombo extends ScalarModelComponent<DbCombo> {
         invalidate();
     }
 
-    @ScriptFunction(jsDoc = "Determines if component is editable.")
+    private static final String EDITABLE_JSDOC = "/**\n"
+            + "* Determines if component is editable.\n"
+            + "*/";
+    @ScriptFunction(jsDoc = EDITABLE_JSDOC)
     public boolean isEditable() {
         return delegate.isEditable();
     }

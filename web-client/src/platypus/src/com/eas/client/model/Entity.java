@@ -1507,7 +1507,7 @@ public class Entity implements RowsetListener {
 	}
 
 	public void refresh(final CancellableCallback onSuccess, Callback<String> onFailure) throws Exception {
-		if (model != null && model.isRuntime()) {
+		if (model != null/* && model.isRuntime()*/) {
 			invalidate();
 			internalExecute(onSuccess, onFailure);
 			/*
@@ -1541,7 +1541,7 @@ public class Entity implements RowsetListener {
 	}
 
 	public void execute(final CancellableCallback onSuccess, Callback<String> onFailure) throws Exception {
-		if (model != null && model.isRuntime()) {
+		if (model != null/* && model.isRuntime()*/) {
 			internalExecute(onSuccess, onFailure);
 			/*
 			 * internalExecute(new CancellableCallbackAdapter() {
@@ -1553,7 +1553,7 @@ public class Entity implements RowsetListener {
 	}
 
 	protected void internalExecute(final CancellableCallback onSuccess, final Callback<String> onFailure) throws Exception {
-		if (model != null && model.isRuntime()) {
+		if (model != null/* && model.isRuntime()*/) {
 			assert query != null : QUERY_REQUIRED;
 			// try to select any data only within non-manual queries
 			// platypus manual queries are:

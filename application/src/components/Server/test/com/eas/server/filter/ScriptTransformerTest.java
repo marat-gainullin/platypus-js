@@ -431,7 +431,21 @@ public class ScriptTransformerTest {
         assertTrue(transformer.getDependencies().isEmpty());
         assertTrue(transformer.getServerDependencies().isEmpty());
     }
-
+    
+    @Test
+    public void testParseDependencies9() {
+        String va1 = "var q = model.loadEntity('someQuery');";
+        String va2 = "_platypusModuleSelf.q = _platypusModuleSelf.model.loadEntity('someQuery');\n";
+        ScriptTransformer transformer = new ScriptTransformer(va1);
+        transformer.addExternalVariable("model");
+        String va3 = transformer.transform();
+        assertEquals(va2, va3);
+        assertTrue(transformer.getDependencies().isEmpty());
+        assertTrue(transformer.getServerDependencies().isEmpty());
+        assertEquals(1, transformer.getQueryDependencies().size());
+        assertEquals("someQuery", transformer.getQueryDependencies().iterator().next());
+    }
+    
     @Test
     public void testExternalVariable() {
         String va1 = "model.save();";

@@ -46,7 +46,9 @@ public abstract class TypesResolver {
      * friendly form. I.e. it corrects field type information. For example,
      * oracle geometry has type name MDSYS.SDO_GEOMETRY (correct only with
      * schema name). Nevetheless, oracle returns type name in the
-     * ResultSetMetaData as SDO_GEOMETRY only.
+     * ResultSetMetaData as SDO_GEOMETRY only. this method is used in sql driver for field
+     * definiion generation. It is NOT used prior to applying data changes in a database.
+     * Converter is responsible for a whole conversion in data applying process.
      *
      * @param aField Field instance data type info to be resolved in.
      * @see java.sql.ResultSetMetaData
@@ -64,7 +66,10 @@ public abstract class TypesResolver {
         String sqlTypeName = typeInfo.getSqlTypeName();
         // check on different rdbms
         if (sqlTypeName == null || !containsRDBMSTypename(sqlTypeName) || sqlType != getJdbcTypeByRDBMSTypename(sqlTypeName)) {
-            sqlTypeName = jdbcTypes2RdbmsTypes.get(sqlType);
+            // ??????? !!!!!!!
+            if (jdbcTypes2RdbmsTypes.containsKey(sqlType)) {
+                sqlTypeName = jdbcTypes2RdbmsTypes.get(sqlType);
+            }    
         }
         aField.setTypeInfo(new DataTypeInfo(sqlType, sqlTypeName, typeInfo.getJavaClassName()));
         resolveFieldSize(aField);
