@@ -55,6 +55,7 @@ public class PlatypusModuleDataLoader extends MultiFileLoader {
         if (!fo.isFolder()
                 && FileUtil.findBrother(fo, PlatypusFiles.FORM_EXTENSION) == null
                 && FileUtil.findBrother(fo, PlatypusFiles.REPORT_LAYOUT_EXTENSION_X) == null) {
+                //&& FileUtil.findBrother(fo, PlatypusFiles.REPORT_LAYOUT_EXTENSION) == null) {
             String ext = fo.getExt();
             if (ext.equals(PlatypusFiles.MODEL_EXTENSION)) {
                 return FileUtil.findBrother(fo, PlatypusFiles.JAVASCRIPT_EXTENSION);
