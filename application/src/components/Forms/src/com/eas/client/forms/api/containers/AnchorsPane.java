@@ -40,8 +40,13 @@ public class AnchorsPane extends Container<JPanel> {
         assert aDelegate.getLayout() instanceof MarginLayout;
         setDelegate(aDelegate);
     }
+    private static final String ADD_JSDOC = "/**\n"
+            + "* Appends the specified component to the container with specified placement.\n"
+            + "* @param component the component to add"
+            + "* @param anchors the anchors object for the component, can contain the following properties: left, width, right, top, height, bottom"
+            + "*/";
     
-    @ScriptFunction(jsDoc = "Appends the specified component to the container with specified placement.")
+    @ScriptFunction(jsDoc = ADD_JSDOC, params = {"component", "anchors"})
     public void add(Component<?> aComp, Scriptable aAnchors) {
         if (aComp != null) {
             delegate.add(unwrap(aComp), scriptable2MarginConstraints(aAnchors));
@@ -84,21 +89,32 @@ public class AnchorsPane extends Container<JPanel> {
         return new MarginConstraints(left, top, right, bottom, width, height);
     }
     
-    @ScriptFunction(jsDoc = "Brings the specified component to front on this panel.")
     public void toFront(Component aComp) {
         Ordering.toFront(delegate, aComp);
     }
 
-    @ScriptFunction(jsDoc = "Brings the specified component to back on this panel.")
     public void toBack(Component aComp) {
         Ordering.toBack(delegate, aComp);
     }
-    @ScriptFunction(jsDoc = "")
+    
+    private static final String TO_FRONT_JSDOC = "/**\n"
+            + "* Brings the specified component to front on this panel.\n"
+            + "* @param component the component"
+            + "* @param count steps to move the component (optional)"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = TO_FRONT_JSDOC, params = {"component", "count"})
     public void toFront(Component aComp, int aCount) {
         Ordering.toFront(delegate, aComp, aCount);
     }
 
-    @ScriptFunction(jsDoc = "")
+    private static final String TO_BACK_JSDOC = "/**\n"
+            + "* Brings the specified component to back on this panel.\n"
+            + "* @param component the component"
+            + "* @param count steps to move the component (optional)"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = TO_BACK_JSDOC)
     public void toBack(Component aComp, int aCount) {
         Ordering.toBack(delegate, aComp, aCount);
     }

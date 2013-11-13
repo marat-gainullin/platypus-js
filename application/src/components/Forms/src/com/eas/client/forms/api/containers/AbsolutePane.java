@@ -114,7 +114,7 @@ public class AbsolutePane extends Container<JPanel> {
     private static final String TO_BACK_JSDOC = "/**\n"
             + "* Brings the specified component to back on this panel.\n"
             + "* @param component the component"
-            + "* @param count steps to move the component"
+            + "* @param count steps to move the component (optional)"
             + "*/";
     
     @ScriptFunction(jsDoc = TO_BACK_JSDOC)
