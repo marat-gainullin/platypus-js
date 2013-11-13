@@ -44,8 +44,8 @@ public class AbsolutePane extends Container<JPanel> {
 
     private static final String ADD_JSDOC = "/**\n"
             + "* Appends the specified component at left top corner of this container.\n"
-            + "* @param component the component to add"
-            + "* @param anchors the anchors object for the component, can contain the following properties: left, width, top, height"
+            + "* @param component the component to add\n"
+            + "* @param anchors the anchors object for the component, can contain the following properties: left, width, top, height\n"
             + "*/";
     
     @ScriptFunction(jsDoc = ADD_JSDOC, params = {"component", "anchors"})
@@ -102,8 +102,8 @@ public class AbsolutePane extends Container<JPanel> {
 
     private static final String TO_FRONT_JSDOC = "/**\n"
             + "* Brings the specified component to front on this panel.\n"
-            + "* @param component the component"
-            + "* @param count steps to move the component (optional)"
+            + "* @param component the component\n"
+            + "* @param count steps to move the component (optional)\n"
             + "*/";
     
     @ScriptFunction(jsDoc = TO_FRONT_JSDOC, params = {"component", "count"})
@@ -113,8 +113,8 @@ public class AbsolutePane extends Container<JPanel> {
 
     private static final String TO_BACK_JSDOC = "/**\n"
             + "* Brings the specified component to back on this panel.\n"
-            + "* @param component the component"
-            + "* @param count steps to move the component (optional)"
+            + "* @param component the component\n"
+            + "* @param count steps to move the component (optional)\n"
             + "*/";
     
     @ScriptFunction(jsDoc = TO_BACK_JSDOC)
