@@ -74,6 +74,7 @@ public class PlatypusHttpServlet extends HttpServlet {
     public static final String TEXT_CONTENTTYPE = "text/plain";
     public static final String CREATE_MODULE_RESPONSE_FUNCTIONS_PROP = "functions";
     public static final String CREATE_MODULE_RESPONSE_IS_REPORT_PROP = "isReport";
+    public static final String CREATE_MODULE_RESPONSE_IS_PERMITTED_PROP = "isPermitted";
     private PlatypusServerCore serverCore;
     private ThreadLocal<HttpServletRequest> currentRequest = new ThreadLocal<>();
 
@@ -243,7 +244,7 @@ public class PlatypusHttpServlet extends HttpServlet {
         }
     }
 
-    private static String moduleResponseToJson(Set<String> functionsNames, boolean isReport) {
+    private static String moduleResponseToJson(Set<String> functionsNames, boolean isReport, boolean isPermitted) {
         return (new StringBuilder())
                 .append("{")
                 .append("\"").append(CREATE_MODULE_RESPONSE_FUNCTIONS_PROP).append("\"")
@@ -253,6 +254,10 @@ public class PlatypusHttpServlet extends HttpServlet {
                 .append("\"").append(CREATE_MODULE_RESPONSE_IS_REPORT_PROP).append("\"")
                 .append(":")
                 .append(Boolean.valueOf(isReport).toString())
+                .append(",")
+                .append("\"").append(CREATE_MODULE_RESPONSE_IS_PERMITTED_PROP).append("\"")
+                .append(":")
+                .append(Boolean.valueOf(isPermitted).toString())
                 .append("}")
                 .toString();
     }
@@ -440,7 +445,7 @@ public class PlatypusHttpServlet extends HttpServlet {
             } else if (aPlatypusResponse instanceof CreateServerModuleResponse) {
                 CreateServerModuleResponse csmr = (CreateServerModuleResponse) aPlatypusResponse;
                 makeResponseNotCacheable(aHttpResponse);
-                writeJsonResponse(moduleResponseToJson(csmr.getFunctionsNames(), csmr.isReport()), aHttpResponse);
+                writeJsonResponse(moduleResponseToJson(csmr.getFunctionsNames(), csmr.isReport(), csmr.isPermitted()), aHttpResponse);
             } else if (aPlatypusResponse instanceof ExecuteServerModuleMethodRequest.Response) {
                 Object result = ((ExecuteServerModuleMethodRequest.Response) aPlatypusResponse).getResult();
                 makeResponseNotCacheable(aHttpResponse);

@@ -3,34 +3,33 @@ package com.eas.client.threetier.requests;
 import com.eas.client.threetier.Response;
 import java.util.Set;
 
-public class CreateServerModuleResponse extends Response
-{
+public class CreateServerModuleResponse extends Response {
+
     private String moduleName;
     private Set<String> functionsNames;
     private boolean report;
+    private boolean permitted;
 
-    public CreateServerModuleResponse(long aRequestId, String aModuleName, Set<String> aFunctionsNames, boolean isReport)
-    {
+    public CreateServerModuleResponse(long aRequestId, String aModuleName, Set<String> aFunctionsNames, boolean isReport, boolean isPermitted) {
         super(aRequestId);
         moduleName = aModuleName;
         functionsNames = aFunctionsNames;
         report = isReport;
+        permitted = isPermitted;
     }
 
-    public String getModuleName()
-    {
+    public String getModuleName() {
         return moduleName;
     }
 
     public void setModuleName(String aValue) {
         moduleName = aValue;
     }
-    
-    public Set<String> getFunctionsNames()
-    {
+
+    public Set<String> getFunctionsNames() {
         return functionsNames;
     }
-    
+
     /**
      * @return the report
      */
@@ -38,11 +37,8 @@ public class CreateServerModuleResponse extends Response
         return report;
     }
 
-    /**
-     * @param aValue the report to set
-     */
-    public void setReport(boolean aValue) {
-        report = aValue;
+    public boolean isPermitted() {
+        return permitted;
     }
 
     @Override

@@ -42,7 +42,13 @@ public class CreateServerModuleRequestHandler extends SessionRequestHandler<Crea
             serverModule = runModule(getServerCore(), getSession(), moduleId);
             Logger.getLogger(CreateServerModuleRequestHandler.class.getName()).log(Level.FINE, "Created server module for script {0} with id {1} on request {2}", new Object[]{getRequest().getModuleName(), serverModule.getModuleId(), getRequest().getID()});
         }
-        return new CreateServerModuleResponse(getRequest().getID(), serverModule.getModuleId(), serverModule.getFunctionsNames(), serverModule instanceof ServerReportRunner);
+        boolean permitted = true;
+        try {
+            serverModule.checkPrincipalPermission();
+        } catch (AccessControlException ex) {
+            permitted = false;
+        }
+        return new CreateServerModuleResponse(getRequest().getID(), serverModule.getModuleId(), serverModule.getFunctionsNames(), serverModule instanceof ServerReportRunner, permitted);
     }
 
     public static ServerScriptRunner runModule(PlatypusServerCore aServerCore, Session aSession, String aModuleId) throws Exception {
@@ -80,7 +86,9 @@ public class CreateServerModuleRequestHandler extends SessionRequestHandler<Crea
         serverModule.execute();
         // Clients are not allowed to manage modules instances in system session,
         // so we take care only of session modules.
-        aSession.registerModule(serverModule);
+        if (!(serverModule instanceof ServerReportRunner)) {// reports are allways stateless.
+            aSession.registerModule(serverModule);
+        }
         return serverModule;
     }
 }

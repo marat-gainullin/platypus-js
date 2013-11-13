@@ -12,13 +12,12 @@ import java.util.Collections;
  *
  * @author mg
  */
-public class PlatypusResponsesFactory implements PlatypusRequestVisitor{
-    
+public class PlatypusResponsesFactory implements PlatypusRequestVisitor {
+
     protected long requestId;
     protected Response response;
-    
-    public PlatypusResponsesFactory(long aRequestId)
-    {
+
+    public PlatypusResponsesFactory(long aRequestId) {
         super();
         requestId = aRequestId;
     }
@@ -49,7 +48,7 @@ public class PlatypusResponsesFactory implements PlatypusRequestVisitor{
 
     @Override
     public void visit(CreateServerModuleRequest rq) throws Exception {
-        response = new CreateServerModuleResponse(requestId, null, Collections.<String>emptySet(), false);
+        response = new CreateServerModuleResponse(requestId, null, Collections.<String>emptySet(), false, true);
     }
 
     @Override
@@ -111,7 +110,7 @@ public class PlatypusResponsesFactory implements PlatypusRequestVisitor{
     public void visit(AppElementRequest rq) throws Exception {
         response = new AppElementRequest.Response(requestId, null);
     }
-   
+
     @Override
     public void visit(ExecuteServerReportRequest rq) throws Exception {
         response = new ExecuteServerReportRequest.Response(requestId, null, null);

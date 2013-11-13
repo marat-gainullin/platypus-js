@@ -72,17 +72,16 @@ public class ExecuteServerReportRequestHandler extends SessionRequestHandler<Exe
                         }
                         runner.refresh();
                     }
-                    runner.checkPrincipalPermission();
                     if (!runner.hasModuleAnnotation(JsDoc.Tag.PUBLIC_TAG)) {
                         throw new AccessControlException(String.format("Public access to report %s is denied.", moduleName));//NOI18N
                     }
+                    runner.checkPrincipalPermission();
                     Logger.getLogger(ExecuteServerReportRequest.class.getName()).log(Level.FINE, EXECUTE_REPORT_MSG, new Object[]{getRequest().getModuleName()});
                     byte[] result = runner.executeReport();
                     if (moduleSession != systemSession) {// reports are allways stateless, but system session.
                         moduleSession.unregisterModule(moduleName);
                     }
                     return new ExecuteServerReportRequest.Response(getRequest().getID(), result, runner.getFormat());
-                    //TODO: Передать в параметрах размер файла отчета и тип отчета
                 }
             } else {
                 throw new IllegalStateException(String.format(MODULE_NOT_REPORT_MSG, getRequest().getModuleName()));
