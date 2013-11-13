@@ -13,17 +13,26 @@ import com.eas.script.ScriptFunction;
  */
 public class ModelImage extends ScalarModelComponent<DbImage> {
 
-    protected ModelImage(DbImage aDelegate) {
-        super();
-        setDelegate(aDelegate);
-    }
-
+    private static final String CONSTRUCTOR_JSDOC = "/**\n"
+            + "* A model component that shows an image. \n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC)
     public ModelImage() {
         super();
         setDelegate(new DbImage());
     }
 
-    @ScriptFunction(jsDoc = "Determines if component is editable.")
+    protected ModelImage(DbImage aDelegate) {
+        super();
+        setDelegate(aDelegate);
+    }
+    
+    private static final String EDITABLE_JSDOC = "/**\n"
+            + "* Determines if component is editable. \n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = EDITABLE_JSDOC)
     public boolean isEditable() {
         return delegate.isEditable();
     }
@@ -33,7 +42,12 @@ public class ModelImage extends ScalarModelComponent<DbImage> {
         delegate.setEditable(aValue);
     }
     
-    @ScriptFunction(jsDoc = "Determines if image is displayed with real dimensions and not scaled. If False, than image is fitted and scaled with mouse wheel.")
+    private static final String PLAIN_JSDOC = "/**\n"
+            + "* Determines if image is displayed with real dimensions and not scaled.\n"
+            + "* If false, the image is fitted and can be scaled with the mouse wheel.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = PLAIN_JSDOC)
     public boolean isPlain()
     {
         return delegate.isPlain();
