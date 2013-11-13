@@ -64,7 +64,11 @@ public abstract class ScalarModelComponent<D extends DbControlPanel> extends Com
         }
     }
 
-    @ScriptFunction(jsDoc = "Model entity's field.")
+    private static final String FIELD_JSDOC = "/**\n"
+            + "* Model entity's field.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = FIELD_JSDOC)
     public Field getField() {
         if (delegate.getScriptScope() instanceof FormRunner) {
             return delegate.getDatamodelElement() != null ? delegate.getDatamodelElement().getField() : null;
@@ -87,7 +91,11 @@ public abstract class ScalarModelComponent<D extends DbControlPanel> extends Com
         }
     }
 
-    @ScriptFunction(jsDoc = "Component's on select event handler.")
+    private static final String ON_SELECT_JSDOC = "/**\n"
+            + "* Component's selection event handler function.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = ON_SELECT_JSDOC)
     public Function getOnSelect() {
         return delegate.getOnSelect();
     }
@@ -99,7 +107,11 @@ public abstract class ScalarModelComponent<D extends DbControlPanel> extends Com
         delegate.repaint();
     }
 
-    @ScriptFunction(jsDoc = "Component's on render event handler.")
+    private static final String ON_RENDER_JSDOC = "/**\n"
+            + "* Component's rendering event handler function.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = ON_RENDER_JSDOC)
     public Function getOnRender() {
         return delegate.getOnRender();
     }
@@ -109,7 +121,11 @@ public abstract class ScalarModelComponent<D extends DbControlPanel> extends Com
         delegate.setOnRender(aValue);
     }
 
-    @ScriptFunction(jsDoc = "Component's value.")
+    private static final String VALUE_JSDOC = "/**\n"
+            + "* Component's value.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = VALUE_JSDOC)
     public Object getValue() throws Exception {
         validate();
         return delegate.getValue();
@@ -135,6 +151,12 @@ public abstract class ScalarModelComponent<D extends DbControlPanel> extends Com
         delegate.repaint();
     }
 
+    
+    private static final String REDRAW_JSDOC = "/**\n"
+            + "* Redraw the component.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = REDRAW_JSDOC)
     public void redraw(){
         delegate.revalidate();
         delegate.repaint();
