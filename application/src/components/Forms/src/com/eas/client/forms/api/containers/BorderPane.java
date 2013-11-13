@@ -121,7 +121,7 @@ public class BorderPane extends Container<JPanel> {
 
     private static final String TOP_COMPONENT_JSDOC = "/**\n"
             + "* The component added using HorizontalPosition.TOP constraint.\n"
-            + "* If no component at this constraint then set to <code>null</code>.\n"
+            + "* If no component at the container on this constraint then set to <code>null</code>.\n"
             + "*/";
     
     @ScriptFunction(jsDoc = TOP_COMPONENT_JSDOC)
@@ -150,7 +150,7 @@ public class BorderPane extends Container<JPanel> {
 
     private static final String RIGHT_COMPONENT_JSDOC = "/**\n"
             + "* The component added using HorizontalPosition.RIGHT constraint.\n"
-            + "* If no component at this constraint then set to <code>null</code>.\n"
+            + "* If no component at the container on this constraint then set to <code>null</code>.\n"
             + "*/";
     @ScriptFunction(jsDoc = RIGHT_COMPONENT_JSDOC)
     public Component<?> getRightComponent() {
@@ -179,7 +179,7 @@ public class BorderPane extends Container<JPanel> {
 
     private static final String BOTTOM_COMPONENT_JSDOC = "/**\n"
             + "* The component added using HorizontalPosition.BOTTOM constraint.\n"
-            + "* If no component at this constraint then set to <code>null</code>.\n"
+            + "* If no component at the container on this constraint then set to <code>null</code>.\n"
             + "*/";
     
     @ScriptFunction(jsDoc = BOTTOM_COMPONENT_JSDOC)
@@ -209,7 +209,7 @@ public class BorderPane extends Container<JPanel> {
     
     private static final String CENTER_COMPONENT_JSDOC = "/**\n"
             + "* The component added using HorizontalPosition.CENTER constraint.\n"
-            + "* If no component at this constraint then set to <code>null</code>.\n"
+            + "* If no component at the container on this constraint then set to <code>null</code>.\n"
             + "*/";
     
     @ScriptFunction(jsDoc = CENTER_COMPONENT_JSDOC)
