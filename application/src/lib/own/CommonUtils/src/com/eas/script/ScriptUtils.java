@@ -40,6 +40,15 @@ public class ScriptUtils {
     protected static final String toXMLStringFuncSource = ""
             + "function toXMLString(aObj){ return aObj.toXMLString(); }"
             + "";
+    protected static final String extendFuncSource = ""
+            + "function extend(Child, Parent) {"
+            + "  var F = function() {"
+            + "  };"
+            + "  F.prototype = Parent.prototype;"
+            + "  Child.prototype = new F();"
+            + "  Child.prototype.constructor = Child;"
+            + "  Child.superclass = Parent.prototype;"
+            + "}";
     protected static final String scalarDefFuncSource = ""
             + "function(targetEntity, targetFieldName, sourceFieldName){"
             + "    var _self = this;"
@@ -79,6 +88,7 @@ public class ScriptUtils {
     protected static Function parseJsonFunc;
     protected static Function writeJsonFunc;
     protected static Function toXMLStringFunc;
+    protected static Function extendFunc;
     protected static Function scalarDefFunc;
     protected static Function collectionDefFunc;
     protected static ScriptableObject topLevelScope;
@@ -96,6 +106,7 @@ public class ScriptUtils {
                 parseJsonFunc = ctx.compileFunction(topLevelScope, parseJsonFuncSource, "parseJsonFunc", 0, null);
                 writeJsonFunc = ctx.compileFunction(topLevelScope, writeJsonFuncSource, "writeJsonFunc", 0, null);
                 toXMLStringFunc = ctx.compileFunction(topLevelScope, toXMLStringFuncSource, "toXMLStringFunc", 0, null);
+                extendFunc = ctx.compileFunction(topLevelScope, extendFuncSource, "extendFunc", 0, null);
                 scalarDefFunc = ctx.compileFunction(topLevelScope, scalarDefFuncSource, "scalarDefFunc", 0, null);
                 collectionDefFunc = ctx.compileFunction(topLevelScope, collectionDefFuncSource, "collectionDefFunc", 0, null);
             } finally {
@@ -202,6 +213,16 @@ public class ScriptUtils {
         Context cx = Context.enter();
         try {
             return (String) toXMLStringFunc.call(cx, topLevelScope, null, new Object[]{aObj});
+        } finally {
+            Context.exit();
+        }
+    }
+    
+    public static void extend(Function aChild, Function aParent) {
+        init();
+        Context cx = Context.enter();
+        try {
+            extendFunc.call(cx, topLevelScope, null, new Object[]{aChild, aParent});
         } finally {
             Context.exit();
         }

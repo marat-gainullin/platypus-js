@@ -39,14 +39,8 @@ public class ScriptRunnerPrototype extends IdScriptableObject {
     }
 
     public static void init(Scriptable scope, boolean sealed) {
-        init(scope, sealed, getInstance());
-    }
-
-    public static void init(Scriptable scope, boolean sealed, ScriptRunnerPrototype obj) {
+        ScriptRunnerPrototype obj = getInstance();
         IdFunctionObject ctor = obj.exportAsJSClass(MAX_PROTOTYPE_ID, scope, sealed);
-        if (obj != getInstance()) {
-            obj.setPrototype(getInstance());
-        }
         if (sealed) {
             obj.sealObject();
         }

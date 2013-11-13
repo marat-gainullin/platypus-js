@@ -166,8 +166,10 @@ public final class PlatypusServerInstance implements Server, ServerInstanceImple
         arguments.add(ps.getDbSettings().getUser());
         arguments.add(ProjectRunner.OPTION_PREFIX + ServerMain.APP_DB_PASSWORD_CONF_PARAM);
         arguments.add(ps.getDbSettings().getPassword());
-        arguments.add(ProjectRunner.OPTION_PREFIX + ServerMain.APP_DB_SCHEMA_CONF_PARAM);
-        arguments.add(ps.getDbSettings().getSchema());
+        if (ps.getDbSettings().getSchema() != null) {
+            arguments.add(ProjectRunner.OPTION_PREFIX + ServerMain.APP_DB_SCHEMA_CONF_PARAM);
+            arguments.add(ps.getDbSettings().getSchema());
+        }
 
         if (!ProjectRunner.isSetByOption(ServerMain.IFACE_CONF_PARAM, project.getSettings().getRunClientOptions())) {
             arguments.add(ProjectRunner.OPTION_PREFIX + ServerMain.IFACE_CONF_PARAM);
@@ -197,8 +199,10 @@ public final class PlatypusServerInstance implements Server, ServerInstanceImple
     }
 
     public void stop() {
-        serverRunTask.cancel(true);
-        serverRunTask = null;
+        if (serverRunTask != null) {
+            serverRunTask.cancel(true);
+            serverRunTask = null;
+        }
     }
 
     private static String getExecutablePath(File aBinDir) {

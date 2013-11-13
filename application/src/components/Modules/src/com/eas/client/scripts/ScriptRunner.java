@@ -77,17 +77,16 @@ public class ScriptRunner extends ScriptableObject {
     }
 
     public ScriptRunner(String aAppElementId, Client aClient, Scriptable aScope, PrincipalHost aPrincipalHost, CompiledScriptDocumentsHost aCompiledScriptDocumentsHost, Object[] args) throws Exception {
-        this(aClient, aScope, aPrincipalHost, aCompiledScriptDocumentsHost, args);
-        setApplicationElementId(aAppElementId, args);
+        this(aClient, aScope, aPrincipalHost, aCompiledScriptDocumentsHost);
+        loadApplicationElement(aAppElementId, args);
     }
 
-    public ScriptRunner(Client aClient, Scriptable aScope, PrincipalHost aPrincipalHost, CompiledScriptDocumentsHost aCompiledScriptDocumentsHost, Object[] args) throws Exception {
-        super(aScope, null);
+    public ScriptRunner(Client aClient, Scriptable aScope, PrincipalHost aPrincipalHost, CompiledScriptDocumentsHost aCompiledScriptDocumentsHost) throws Exception {
+        super(aScope, ScriptRunnerPrototype.getInstance());
         client = aClient;
         principalHost = aPrincipalHost;
         compiledScriptDocumentsHost = aCompiledScriptDocumentsHost;
         definePropertiesAndMethods();
-        setPrototype(ScriptRunnerPrototype.getInstance());
     }
 
     public boolean hasModuleAnnotation(String aName) {
@@ -95,14 +94,20 @@ public class ScriptRunner extends ScriptableObject {
     }
 
     protected void doExecute() throws Exception {
-        ScriptUtils.enterContext();
+        Context cx = Context.getCurrentContext();
+        boolean wasContext = cx != null;
+        if (!wasContext) {
+            cx = ScriptUtils.enterContext();
+        }
         try {
             model.setRuntime(true);
             // Executing of the datamodel here is very useful.
             // At this moment all of the scripts, including standard and platypus libraries
             // are executed, and so, it works properly!
         } finally {
-            Context.exit();
+            if (!wasContext) {
+                Context.exit();
+            }
         }
     }
 
@@ -137,21 +142,18 @@ public class ScriptRunner extends ScriptableObject {
     protected void prepareScript(ScriptDocument scriptDoc, Object[] args) throws Exception {
         Context context = ScriptUtils.enterContext();
         try {
-            model.setScriptScope(this);
-            if (scriptDoc.getScript() != null) {
+            model.setScriptScope(this);// model.scriptScope - is not a scope, but 'this'
+            if (scriptDoc.getFunction() != null) {
                 if (System.getProperty(DEBUG_PROPERTY) != null) {
                     Breakpoints.getInstance().checkPendingBreakpoints();
                 }
-                if (scriptDoc.getScript() instanceof Function) {
-                    Object[] jsArgs = new Object[args != null ? args.length : 0];
-                    for (int i = 0; i < jsArgs.length; i++) {
-                        jsArgs[i] = ScriptUtils.javaToJS(args[i], this);
-                    }
-                    defineProperty("arguments", jsArgs, ScriptableObject.READONLY);
-                    ((Function) scriptDoc.getScript()).call(context, this, this, jsArgs);
-                } else {
-                    scriptDoc.getScript().exec(context, this);
+                Object[] jsArgs = new Object[args != null ? args.length : 0];
+                for (int i = 0; i < jsArgs.length; i++) {
+                    jsArgs[i] = ScriptUtils.javaToJS(args[i], ScriptUtils.getScope());
                 }
+                //defineProperty("arguments", jsArgs, ScriptableObject.READONLY);
+                //getParentScope().get("Messages", getParentScope());
+                scriptDoc.getFunction().call(context, getParentScope(), this, jsArgs);
             }
             model.resolveHandlers();
         } finally {
@@ -258,13 +260,18 @@ public class ScriptRunner extends ScriptableObject {
                 }
             }
         } catch (Exception ex) {
-            // no op
+            // no op. Because absence of a particuler class will lead to script error anyway.
         }
         Object obj = super.get(name, start);
         if (obj instanceof Function) {
             obj = new SecureFunction(name, (Function) obj);
         }
         return obj;
+    }
+
+    @Override
+    public void put(String name, Scriptable start, Object value) {
+        super.put(name, start, value);
     }
 
     protected static class NotResourceException extends Exception {
@@ -481,6 +488,14 @@ public class ScriptRunner extends ScriptableObject {
                 try {
                     String source = PlatypusScriptedResource.loadText(resourceId);
                     if (source != null) {
+                        /**
+                         * TODO: check update of rhino. May be it would be able
+                         * to use bytecode generation. if
+                         * (currentContext.getDebugger() == null) {
+                         * currentContext.setOptimizationLevel(5); }else
+                         * currentContext.setOptimizationLevel(-1);
+                         */
+                        cx.setOptimizationLevel(-1);
                         Script lib = cx.compileString(source, resourceId, 0, null);
                         lib.exec(cx, checkStandardObjects(cx));
                     } else {
@@ -513,7 +528,7 @@ public class ScriptRunner extends ScriptableObject {
     public static Scriptable checkStandardObjects(Context currentContext) throws Exception {
         synchronized (standardObjectsScopeLock) {
             if (standardObjectsScope == null) {
-                standardObjectsScope = new ScriptRunner(PlatypusScriptedResource.getClient(), ScriptUtils.getScope(), PlatypusScriptedResource.getPrincipalHost(), PlatypusScriptedResource.getScriptDocumentsHost(), new Object[]{});
+                standardObjectsScope = new ScriptRunner(PlatypusScriptedResource.getClient(), ScriptUtils.getScope(), PlatypusScriptedResource.getPrincipalHost(), PlatypusScriptedResource.getScriptDocumentsHost());
             }
         }
         return standardObjectsScope;
@@ -547,7 +562,7 @@ public class ScriptRunner extends ScriptableObject {
         return compiledScriptDocumentsHost;
     }
 
-    protected void setApplicationElementId(String aAppElementId, Object[] args) throws Exception {
+    public void loadApplicationElement(String aAppElementId, Object[] args) throws Exception {
         if (appElementId == null ? aAppElementId != null : !appElementId.equals(aAppElementId)) {
             shrink();
             appElementId = aAppElementId;
@@ -562,7 +577,8 @@ public class ScriptRunner extends ScriptableObject {
 
     /**
      * Checks module roles.
-     * @throws Exception 
+     *
+     * @throws Exception
      */
     public void checkPrincipalPermission() throws Exception {
         if (moduleAllowedRoles != null && !moduleAllowedRoles.isEmpty()) {
@@ -583,15 +599,13 @@ public class ScriptRunner extends ScriptableObject {
     /**
      * Wrapper class for function with security check.
      */
-    public class SecureFunction implements Function, Runnable {
+    public class SecureFunction extends WrapperFunction implements Runnable {
 
         protected String name;
-        protected Function func;
 
         public SecureFunction(String aName, Function aFun) {
-            super();
+            super(aFun);
             name = aName;
-            func = aFun;
         }
 
         @Override
@@ -607,18 +621,13 @@ public class ScriptRunner extends ScriptableObject {
         @Override
         public Object call(Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
             checkPrincipalPermission();
-            return func.call(cx, scope, thisObj, args);
+            return super.call(cx, scope, thisObj, args);
         }
 
         @Override
         public Scriptable construct(Context cx, Scriptable scope, Object[] args) {
             checkPrincipalPermission();
-            return func.construct(cx, scope, args);
-        }
-
-        @Override
-        public String getClassName() {
-            return func.getClassName();
+            return super.construct(cx, scope, args);
         }
 
         private void checkPrincipalPermission() throws AccessControlException {
@@ -642,6 +651,63 @@ public class ScriptRunner extends ScriptableObject {
                     throw new AccessControlException(ex.getMessage());
                 }
             }
+        }
+    }
+
+    public static abstract class PlatypusModuleConstructorWrapper extends WrapperFunction {
+
+        protected String moduleName;
+
+        public PlatypusModuleConstructorWrapper(String aModuleName, Function aDelegate) {
+            super(aDelegate);
+            moduleName = aModuleName;
+        }
+
+        protected abstract Scriptable createObject(Context cx, Scriptable scope, Object[] args);
+
+        @Override
+        public Scriptable construct(Context cx, Scriptable scope, Object[] args) {
+            try {
+                Scriptable runner = createObject(cx, scope, args);
+                Object oprot = get("prototype", this);
+                if (oprot instanceof Scriptable) {
+                    runner.setPrototype((Scriptable) oprot);
+                }
+                return runner;
+            } catch (Exception ex) {
+                Logger.getLogger(PlatypusModuleConstructorWrapper.class.getName()).log(Level.SEVERE, null, ex);
+                return null;
+            }
+        }
+
+        @Override
+        public Object call(Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
+            throw new IllegalStateException(moduleName + "() should be used as a constructor only.");
+        }
+    }
+
+    public static class WrapperFunction implements Function {
+
+        protected Function func;
+
+        public WrapperFunction(Function aFun) {
+            super();
+            func = aFun;
+        }
+
+        @Override
+        public Scriptable construct(Context cx, Scriptable scope, Object[] args) {
+            return func.construct(cx, scope, args);
+        }
+
+        @Override
+        public Object call(Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
+            return func.call(cx, scope, thisObj, args);
+        }
+
+        @Override
+        public String getClassName() {
+            return func.getClassName();
         }
 
         @Override
@@ -723,17 +789,4 @@ public class ScriptRunner extends ScriptableObject {
             return func;
         }
     }
-    /*
-     public class ModuleConstructor extends BaseFunction {
-
-     public ModuleConstructor(Scriptable scope, Scriptable prototype) {
-     super(scope, prototype);
-     }
-
-     @Override
-     public Scriptable construct(Context cx, Scriptable scope, Object[] args) {
-     return super.construct(cx, scope, args);
-     }
-     }
-     */
 }

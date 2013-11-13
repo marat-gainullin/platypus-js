@@ -142,7 +142,7 @@ public class SessionTest {
         }
 
         @Override
-        protected void setApplicationElementId(String aAppElementId, Object[] args) throws Exception {
+        public void loadApplicationElement(String aAppElementId, Object[] args) throws Exception {
             super.appElementId = aAppElementId;
         }
 

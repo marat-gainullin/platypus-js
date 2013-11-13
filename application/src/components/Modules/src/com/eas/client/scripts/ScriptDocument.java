@@ -10,7 +10,7 @@ import com.eas.script.JsDoc;
 import com.eas.script.JsDoc.Tag;
 import com.eas.script.ScriptUtils;
 import java.util.*;
-import org.mozilla.javascript.Script;
+import org.mozilla.javascript.Function;
 import org.mozilla.javascript.Token;
 import org.mozilla.javascript.ast.*;
 import org.w3c.dom.Document;
@@ -27,16 +27,17 @@ public class ScriptDocument {
     protected long txtCrc32;
     private ApplicationModel<?, ?, ?, ?> model;
     private String scriptSource;
-    private Script script;
+    private Function function;
     private AstRoot ast;
     private Set<String> depencies = new HashSet<>();
     private List<Tag> moduleAnnotations;
     /**
-     * User roles that have access to all module's functions, if empty all users allowed
+     * User roles that have access to all module's functions, if empty all users
+     * allowed
      */
     private Set<String> moduleAllowedRoles = new HashSet<>();
     /**
-     * Roles have that access to concrete functions, if empty all users allowed 
+     * Roles have that access to concrete functions, if empty all users allowed
      */
     private Map<String, Set<String>> functionAllowedRoles = new HashMap<>();
 
@@ -103,12 +104,12 @@ public class ScriptDocument {
         return depencies;
     }
 
-    public Script getScript() {
-        return script;
+    public Function getFunction() {
+        return function;
     }
 
-    public void setScript(Script aScript) {
-        script = aScript;
+    public void setFunction(Function aScript) {
+        function = aScript;
     }
 
     public Set<String> getModuleAllowedRoles() {
@@ -126,7 +127,7 @@ public class ScriptDocument {
     public void setFunctionAllowedRoles(Map<String, Set<String>> aFunctionAllowedRoles) {
         functionAllowedRoles = aFunctionAllowedRoles;
     }
-    
+
     public List<Tag> getModuleAnnotations() {
         return moduleAnnotations != null ? Collections.unmodifiableList(moduleAnnotations) : null;
     }
@@ -136,7 +137,6 @@ public class ScriptDocument {
         ast = ScriptUtils.parseJs(scriptSource);
         final Set<Comment> functionComments = new HashSet<>();
         ast.visit(new NodeVisitor() {
-
             @Override
             public boolean visit(AstNode node) {
                 if (node.getParent() == null) { //visit only the top level
@@ -196,9 +196,8 @@ public class ScriptDocument {
             }
         }
     }
-    
-    public Document toDom() throws Exception
-    {
+
+    public Document toDom() throws Exception {
         return ScriptDocument2Dom.scriptDocument2Dom(this);
     }
 }

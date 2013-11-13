@@ -38,15 +38,9 @@ public class ReportRunnerPrototype extends IdScriptableObject {
     }
 
     public static void init(Scriptable scope, boolean sealed) {
-        init(scope, sealed, getInstance());
-        reportPrototype.setPrototype(ScriptRunnerPrototype.getInstance());
-    }
-
-    public static void init(Scriptable scope, boolean sealed, ReportRunnerPrototype obj) {
+        ReportRunnerPrototype obj = getInstance();
         obj.exportAsJSClass(MAX_PROTOTYPE_ID, scope, sealed);
-        if (obj != getInstance()) {
-            obj.setPrototype(getInstance());
-        }
+        obj.setPrototype(ScriptRunnerPrototype.getInstance());
         if (sealed) {
             obj.sealObject();
         }
@@ -116,7 +110,6 @@ public class ReportRunnerPrototype extends IdScriptableObject {
                 if (thisObj == null) {
                     if (args[0] != null) {
                         if (thisObj == null) {
-                            // Здесь можно вставить разрешение имен модулей
                             String scriptId = args[0].toString();
                             try {
                                 ScriptRunner clientWrapper = ScriptRunnerPrototype.lookupScriptRunner(scope);

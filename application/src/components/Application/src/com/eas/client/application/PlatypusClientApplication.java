@@ -36,7 +36,7 @@ import javax.swing.JFrame;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import org.mozilla.javascript.Context;
-import org.mozilla.javascript.IdFunctionObject;
+import org.mozilla.javascript.Function;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 
@@ -670,58 +670,59 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
 
     @Override
     public void defineJsClass(final String aClassName, ApplicationElement aAppElement) {
-        switch (aAppElement.getType()) {
-            case ClientConstants.ET_COMPONENT:
-                ScriptRunnerPrototype.init(ScriptUtils.getScope(), true, new ScriptRunnerPrototype() {
-                    @Override
-                    public String getClassName() {
-                        return aClassName;
-                    }
-
-                    @Override
-                    public Object execIdCall(IdFunctionObject f, Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
-                        if (f.methodId() == Id_constructor && thisObj == null) {
-                            return super.execIdCall(f, cx, scope, thisObj, new Object[]{aClassName, args});
-                        } else {
-                            return super.execIdCall(f, cx, scope, thisObj, args);
+        try {
+            ScriptDocument sDoc = scriptDocuments.compileScriptDocument(aClassName);
+            switch (aAppElement.getType()) {
+                case ClientConstants.ET_COMPONENT: {
+                    Function f = new ScriptRunner.PlatypusModuleConstructorWrapper(aClassName, sDoc.getFunction()) {
+                        @Override
+                        protected Scriptable createObject(Context cntxt, Scriptable scope, Object[] args) {
+                            try {
+                                ScriptRunner runner = new ScriptRunner(client, scope, PlatypusClientApplication.this, PlatypusClientApplication.this);
+                                runner.loadApplicationElement(aClassName, args);
+                                return runner;
+                            } catch (Exception ex) {
+                                throw new IllegalStateException(ex);
+                            }
                         }
-                    }
-                });
+                    };
+                    ScriptUtils.extend(f, (Function) ScriptUtils.getScope().get("Module", ScriptUtils.getScope()));
+                    ScriptUtils.getScope().defineProperty(aClassName, f, ScriptableObject.READONLY);
+                }
                 break;
-            case ClientConstants.ET_FORM:
-                FormRunnerPrototype.init(ScriptUtils.getScope(), true, new FormRunnerPrototype() {
-                    @Override
-                    public String getClassName() {
-                        return aClassName;
-                    }
-
-                    @Override
-                    public Object execIdCall(IdFunctionObject f, Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
-                        if (f.methodId() == Id_constructor && thisObj == null) {
-                            return super.execIdCall(f, cx, scope, thisObj, new Object[]{aClassName, args});
-                        } else {
-                            return super.execIdCall(f, cx, scope, thisObj, args);
+                case ClientConstants.ET_FORM: {
+                    Function f = new ScriptRunner.PlatypusModuleConstructorWrapper(aClassName, sDoc.getFunction()) {
+                        @Override
+                        protected Scriptable createObject(Context cntxt, Scriptable scope, Object[] args) {
+                            try {
+                                return new FormRunner(aClassName, client, scope, PlatypusClientApplication.this, PlatypusClientApplication.this, args);
+                            } catch (Exception ex) {
+                                throw new IllegalStateException(ex);
+                            }
                         }
-                    }
-                });
+                    };
+                    ScriptUtils.extend(f, (Function) ScriptUtils.getScope().get("Form", ScriptUtils.getScope()));
+                    ScriptUtils.getScope().defineProperty(aClassName, f, ScriptableObject.READONLY);
+                }
                 break;
-            case ClientConstants.ET_REPORT:
-                ReportRunnerPrototype.init(ScriptUtils.getScope(), true, new ReportRunnerPrototype() {
-                    @Override
-                    public String getClassName() {
-                        return aClassName;
-                    }
-
-                    @Override
-                    public Object execIdCall(IdFunctionObject f, Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
-                        if (f.methodId() == Id_constructor && thisObj == null) {
-                            return super.execIdCall(f, cx, scope, thisObj, new Object[]{aClassName, args});
-                        } else {
-                            return super.execIdCall(f, cx, scope, thisObj, args);
+                case ClientConstants.ET_REPORT: {
+                    Function f = new ScriptRunner.PlatypusModuleConstructorWrapper(aClassName, sDoc.getFunction()) {
+                        @Override
+                        protected Scriptable createObject(Context cntxt, Scriptable scope, Object[] args) {
+                            try {
+                                return new ReportRunner(aClassName, client, scope, PlatypusClientApplication.this, PlatypusClientApplication.this, args);
+                            } catch (Exception ex) {
+                                throw new IllegalStateException(ex);
+                            }
                         }
-                    }
-                });
+                    };
+                    ScriptUtils.extend(f, (Function) ScriptUtils.getScope().get("Report", ScriptUtils.getScope()));
+                    ScriptUtils.getScope().defineProperty(aClassName, f, ScriptableObject.READONLY);
+                }
                 break;
+            }
+        } catch (Exception ex) {
+            throw new IllegalStateException(ex);
         }
     }
 }

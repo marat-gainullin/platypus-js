@@ -17,6 +17,7 @@ import org.mozilla.javascript.Scriptable;
 public class ServerReportRunnerPrototype extends IdScriptableObject {
 
     public static final String BAD_SCRIPT_SCOPE_MSG = "Can't find reqired script runner scope!";
+    public static final String CORE_MISSING_MSG = "Platypus server core missing!";
     private static final String ID_CONSTRUCTOR = "constructor";
     private static final String ID_TOSOURCE = "toSource";
     private static final String ID_TOSTRING = "toString";
@@ -28,6 +29,9 @@ public class ServerReportRunnerPrototype extends IdScriptableObject {
     public static void init(Scriptable scope, boolean sealed) {
         ServerReportRunnerPrototype obj = new ServerReportRunnerPrototype();
         obj.exportAsJSClass(MAX_PROTOTYPE_ID, scope, sealed);
+        obj.setPrototype(ServerScriptRunnerPrototype.getInstance());
+        if(sealed)
+            obj.sealObject();
     }
 
     @Override
@@ -98,29 +102,28 @@ public class ServerReportRunnerPrototype extends IdScriptableObject {
             if (args.length >= 1) {
                 if (thisObj == null) {
                     if (args[0] != null) {
-                        if (thisObj == null) {
-                            String scriptId = args[0].toString();
-                            try {
-                                ServerScriptRunner serverCoreWrapper = lookupScriptRunner(scope);
-                                assert serverCoreWrapper != null : BAD_SCRIPT_SCOPE_MSG;
-                                return new ServerReportRunner(serverCoreWrapper.getServerCore(),
-                                        serverCoreWrapper.getCreationSession(),
-                                        scriptId,
-                                        ScriptRunner.initializePlatypusStandardLibScope(),
-                                        serverCoreWrapper.getServerCore(),
-                                        serverCoreWrapper.getServerCore(),
-                                        (args.length > 1 && args[1] instanceof Object[]) ? (Object[]) args[1] : null);
-                            } catch (Exception ex) {
-                                throw new IllegalArgumentException(ex);
-                            }
-                        } else {
-                            throw new IllegalArgumentException(String.format(ONLY_CONSTRUCTOR_MSG, REPORT_TAG, REPORT_TAG));
+                        String scriptId = args[0].toString();
+                        try {
+                            PlatypusServerCore core = PlatypusServerCore.getInstance();
+                            assert core != null : CORE_MISSING_MSG;
+                            assert scope != null : BAD_SCRIPT_SCOPE_MSG;
+                            ServerReportRunner runner = new ServerReportRunner(core,
+                                    core.getSessionManager().getCurrentSession(),
+                                    scriptId,
+                                    ScriptRunner.initializePlatypusStandardLibScope(),
+                                    core,
+                                    core,
+                                    (args.length > 1 && args[1] instanceof Object[]) ? (Object[]) args[1] : null);
+                            runner.setPrototype(this);
+                            return runner;
+                        } catch (Exception ex) {
+                            throw new IllegalArgumentException(ex);
                         }
                     } else {
                         throw new IllegalArgumentException(String.format(CONSTRUCTOR_PARAMETER_MISSING, REPORT_TAG, REPORT_TAG));
                     }
                 } else {
-                    throw incompatibleCallError(f);
+                    throw new IllegalArgumentException(String.format(ONLY_CONSTRUCTOR_MSG, REPORT_TAG, REPORT_TAG));
                 }
             } else {
                 throw incompatibleCallError(f);

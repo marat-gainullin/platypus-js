@@ -72,6 +72,7 @@ public class PlatypusServer extends PlatypusServerCore {
 
     public void start() throws Exception {
         Logger.getLogger(PlatypusServer.class.getName()).log(Level.INFO, "Application elements are located at: {0}", databasesClient.getAppCache() instanceof FilesAppCache ? ((FilesAppCache) databasesClient.getAppCache()).getSrcPathName() : databasesClient.getSettings().getUrl());
+        instance = this;// Hack, but server is natural singleton and so it is ok.
         startServerTasks();
         for (InetSocketAddress s : listenAddresses) {
             initializeAndBindAcceptor(s);
