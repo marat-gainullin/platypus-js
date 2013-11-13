@@ -513,6 +513,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         E entity = newGenericEntity();
         entity.setName(USER_DATASOURCE_NAME);
         entity.setQueryId(aQueryId);
+        entity.validateQuery();
         //addEntity(entity); To avoid memory leaks you should not add the entity in the model!
         return entity.defineProperties();
     }

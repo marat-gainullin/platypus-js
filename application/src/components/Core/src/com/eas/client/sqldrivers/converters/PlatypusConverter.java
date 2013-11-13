@@ -9,7 +9,9 @@ import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.eas.client.sqldrivers.resolvers.TypesResolver;
 
 /**
- * Base class for all platypus converters
+ * Base class for all platypus converters.
+ * It converts some RDBMS-specific data to abstract application form while reading and
+ * to RDBMS-specific while applying data.
  *
  * @author mg
  */
@@ -21,6 +23,14 @@ public abstract class PlatypusConverter extends RowsetConverter {
         resolver = aResolver;
     }
 
+    /**
+     * Determines if aTypeInfo is about a geometry type.
+     * this method is used in from RDBMS and to RDBMS data flow processes.
+     * It is bad situation and we have a TODO: split isGeometry method into two methods: 
+     *   idRBDMSGeomtry and isApplicationGeometry.
+     * @param aTypeInfo
+     * @return 
+     */
     public boolean isGeometry(DataTypeInfo aTypeInfo){
         return DataTypeInfo.GEOMETRY.equals(aTypeInfo);
     }

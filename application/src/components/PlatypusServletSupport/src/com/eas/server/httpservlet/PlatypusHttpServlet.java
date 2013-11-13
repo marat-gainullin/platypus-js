@@ -3,6 +3,7 @@ package com.eas.server.httpservlet;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.ClientConstants;
+import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.queries.Query;
@@ -68,6 +69,7 @@ public class PlatypusHttpServlet extends HttpServlet {
     public static final String SUBJECT_CONTEXT_KEY = "javax.security.auth.Subject.container";
     public static final String HTTP_HOST_OBJECT_NAME = "http";
     public static final String EXCEL_CONTENT_TYPE = "application/xls";
+    public static final String EXCELX_CONTENT_TYPE = "application/xlsx";
     public static final String HTML_CONTENTTYPE = "text/html";
     public static final String TEXT_CONTENTTYPE = "text/plain";
     public static final String CREATE_MODULE_RESPONSE_FUNCTIONS_PROP = "functions";
@@ -281,10 +283,10 @@ public class PlatypusHttpServlet extends HttpServlet {
         writeResponse(aResponse, aHttpResponse, RowsetJsonConstants.JSON_CONTENTTYPE);
     }
 
-    private void writeExcelResponse(byte[] aResponse, HttpServletResponse aHttpResponse) throws UnsupportedEncodingException, IOException {
+    private void writeExcelResponse(byte[] aResponse, String aFormat, HttpServletResponse aHttpResponse) throws UnsupportedEncodingException, IOException {
         aHttpResponse.setCharacterEncoding(SettingsConstants.COMMON_ENCODING);
-        aHttpResponse.setContentType(EXCEL_CONTENT_TYPE);
-        aHttpResponse.addHeader("Content-Disposition", "attachment; filename=\"report.xlsx\"");
+        aHttpResponse.setContentType(aFormat != null && aFormat.equals(PlatypusFiles.REPORT_LAYOUT_EXTENSION) ? EXCEL_CONTENT_TYPE : EXCELX_CONTENT_TYPE);
+        aHttpResponse.addHeader("Content-Disposition", "attachment; filename=\"report." + aFormat != null ? aFormat : PlatypusFiles.REPORT_LAYOUT_EXTENSION_X + "\"");
         aHttpResponse.setContentLength(aResponse.length);
         aHttpResponse.getOutputStream().write(aResponse);
         aHttpResponse.getOutputStream().flush();
@@ -473,7 +475,7 @@ public class PlatypusHttpServlet extends HttpServlet {
                 String appElementIdToSend = ((StartAppElementRequest.Response) aPlatypusResponse).getAppElementId();
                 writeJsonResponse(appElementIdToSend != null ? ("\"" + appElementIdToSend + "\"") : "null", aHttpResponse);
             } else if (aPlatypusResponse instanceof ExecuteServerReportRequest.Response) {
-                writeExcelResponse(((ExecuteServerReportRequest.Response) aPlatypusResponse).getResult(), aHttpResponse);
+                writeExcelResponse(((ExecuteServerReportRequest.Response) aPlatypusResponse).getResult(), ((ExecuteServerReportRequest.Response) aPlatypusResponse).getFormat(), aHttpResponse);
             } else if (aPlatypusResponse instanceof AppElementRequest.Response) {
                 if (isResourceRequest(aHttpRequest) && aHttpRequest.getParameter(PlatypusHttpRequestParams.TYPE) == null) {
                     AppElementRequest.Response appElementResponse = (AppElementRequest.Response) aPlatypusResponse;

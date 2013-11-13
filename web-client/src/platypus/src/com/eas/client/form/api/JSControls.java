@@ -108,6 +108,54 @@ public class JSControls {
 				}
 			});
 
+			Object.defineProperty(published, "horizontalAlignment", {
+				get : function() {
+					var position = aComponent.@com.eas.client.gxtcontrols.wrappers.component.PlatypusLabel::getHorizontalAlignment()();
+					switch(position) { 
+						case @com.eas.client.gxtcontrols.wrappers.component.PlatypusLabel::LEFT :	return $wnd.HorizontalPosition.LEFT; 
+						case @com.eas.client.gxtcontrols.wrappers.component.PlatypusLabel::RIGHT :	return $wnd.HorizontalPosition.RIGHT; 
+						case @com.eas.client.gxtcontrols.wrappers.component.PlatypusLabel::CENTER :	return $wnd.HorizontalPosition.CENTER;
+						default : return null; 
+					}	
+				},
+				set : function(aValue) {
+					switch (aValue) {
+						case $wnd.HorizontalPosition.LEFT:
+							aComponent.@com.eas.client.gxtcontrols.wrappers.component.PlatypusLabel::setHorizontalAlignment(I)(@com.eas.client.gxtcontrols.wrappers.component.PlatypusLabel::LEFT);
+							break;
+						case $wnd.HorizontalPosition.RIGHT:
+							aComponent.@com.eas.client.gxtcontrols.wrappers.component.PlatypusLabel::setHorizontalAlignment(I)(@com.eas.client.gxtcontrols.wrappers.component.PlatypusLabel::RIGHT);
+							break;
+						case $wnd.HorizontalPosition.CENTER:
+							aComponent.@com.eas.client.gxtcontrols.wrappers.component.PlatypusLabel::setHorizontalAlignment(I)(@com.eas.client.gxtcontrols.wrappers.component.PlatypusLabel::CENTER);
+							break;
+					}
+				}
+			});
+			Object.defineProperty(published, "verticalAlignment", {
+				get : function() {
+					var positon = aComponent.@com.eas.client.gxtcontrols.wrappers.component.PlatypusLabel::getVerticalAlignment()();
+					switch(position) { 
+						case @com.eas.client.gxtcontrols.wrappers.component.PlatypusLabel::TOP :	return $wnd.VerticalPosition.TOP; 
+						case @com.eas.client.gxtcontrols.wrappers.component.PlatypusLabel::BOTTOM :	return $wnd.VerticalPosition.BOTTOM; 
+						case @com.eas.client.gxtcontrols.wrappers.component.PlatypusLabel::CENTER :	return $wnd.VerticalPosition.CENTER;
+						default : return null;
+					} 
+				},
+				set : function(aValue) {
+					switch (aValue) {
+						case $wnd.VerticalPosition.TOP:
+							aComponent.@com.eas.client.gxtcontrols.wrappers.component.PlatypusLabel::setVerticalAlignment(I)(@com.eas.client.gxtcontrols.wrappers.component.PlatypusLabel::TOP);
+							break;
+						case $wnd.VerticalPosition.BOTTOM:
+							aComponent.@com.eas.client.gxtcontrols.wrappers.component.PlatypusLabel::setVerticalAlignment(I)(@com.eas.client.gxtcontrols.wrappers.component.PlatypusLabel::BOTTOM);
+							break;
+						case $wnd.VerticalPosition.CENTER:
+							aComponent.@com.eas.client.gxtcontrols.wrappers.component.PlatypusLabel::setVerticalAlignment(I)(@com.eas.client.gxtcontrols.wrappers.component.PlatypusLabel::CENTER);
+							break;
+					}
+				}
+			});
 			if (aText) {
 				published.text = aText;
 			} 	
@@ -150,6 +198,35 @@ public class JSControls {
 			if (aCallback) {
 				published.onActionPerformed = aCallback; 
 			}	 	
+			Object.defineProperty(published, "horizontalAlignment", {
+				get : function() {
+					var position = aComponent.@com.eas.client.gxtcontrols.wrappers.component.PlatypusTextButton::getHorizontalAlignment()(); 
+					switch (position) {
+						case @com.google.gwt.dom.client.Style.TextAlign::RIGHT : return $wnd.HorizontalPosition.RIGHT; 
+						case @com.google.gwt.dom.client.Style.TextAlign::LEFT : return $wnd.HorizontalPosition.LEFT;
+						default : return  $wnd.HorizontalPosition.CENTER;
+					}
+				},
+				set : function(aValue) {
+					switch (aValue) {
+						case $wnd.HorizontalPosition.LEFT: 
+							aComponent.@com.eas.client.gxtcontrols.wrappers.component.PlatypusTextButton::setHorizontalAlignment(Lcom/google/gwt/dom/client/Style$TextAlign;)(@com.google.gwt.dom.client.Style.TextAlign::LEFT);
+						  	break;
+						case $wnd.HorizontalPosition.RIGHT:
+							aComponent.@com.eas.client.gxtcontrols.wrappers.component.PlatypusTextButton::setHorizontalAlignment(Lcom/google/gwt/dom/client/Style$TextAlign;)(@com.google.gwt.dom.client.Style.TextAlign::RIGHT);
+							break;
+					}
+				}
+			});
+			Object.defineProperty(published, "verticalAlignment", {
+				get : function() {
+					return  $wnd.HorizontalPosition.CENTER;
+				},
+				set : function(aValue) {
+					if($wnd.console)
+						$wnd.console.log("verticalAlignment in buttons is not supported yet.");
+				}
+			});
 			return published;
 		};	
 		
@@ -793,6 +870,7 @@ public class JSControls {
 					comp.@com.sencha.gxt.widget.core.client.button.CellButtonBase::setText(Ljava/lang/String;)(aValue!=null?(''+aValue):null);
 				}
 			});
+			
 			Object.defineProperty(aPublished, "horizontalTextPosition", {
 				get : function() {
 					var position = comp.@com.sencha.gxt.widget.core.client.button.CellButtonBase::getIconAlign()(); 
@@ -804,13 +882,13 @@ public class JSControls {
 				},
 				set : function(aValue) {
 					switch (aValue) {
-						case $wnd.HorizontalPosition.LEFT:
+						case $wnd.HorizontalPosition.LEFT: 
 							comp.@com.sencha.gxt.widget.core.client.button.CellButtonBase::setIconAlign(Lcom/sencha/gxt/cell/core/client/ButtonCell$IconAlign;)(@com.sencha.gxt.cell.core.client.ButtonCell.IconAlign::RIGHT);
 						  	break;
 						case $wnd.HorizontalPosition.RIGHT:
 							comp.@com.sencha.gxt.widget.core.client.button.CellButtonBase::setIconAlign(Lcom/sencha/gxt/cell/core/client/ButtonCell$IconAlign;)(@com.sencha.gxt.cell.core.client.ButtonCell.IconAlign::LEFT);
 							break;
-					}	
+					}		
 				}
 			});
 			Object.defineProperty(aPublished, "verticalTextPosition", {

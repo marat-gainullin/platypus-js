@@ -25,8 +25,7 @@ ExcelReport = com.eas.client.reports.ExcelReport;
 
 var formsPresent = typeof(com.eas.client.forms.FormRunner) == FUNC_TYPE_NAME;
 
-if (formsPresent)
-{
+if (formsPresent){
     FieldsGrid = com.eas.dbcontrols.grid.EntityFieldsGrid;
 }
 

@@ -26,6 +26,7 @@ public class ReportRunner extends ScriptRunner {
     public static final String BEFORE_RENDER_HANDLER_NAME = "onBeforeRender"; //NOI18N
     protected byte[] template;
     private Function onBeforRender;
+    protected String format;
     
 
     public ReportRunner(String aReportId, Client aClient, Scriptable aScope, PrincipalHost aPrincipalHost, CompiledScriptDocumentsHost aCompiledScriptDocumentsHost, Object[] args) throws Exception {
@@ -37,6 +38,7 @@ public class ReportRunner extends ScriptRunner {
     protected void prepare(ScriptDocument scriptDoc, Object[] args) throws Exception {
         assert scriptDoc instanceof ReportDocument;
         template = ((ReportDocument) scriptDoc).getTemplate();
+        format = ((ReportDocument) scriptDoc).getFormat();
         super.prepare(scriptDoc, args);
     }
 

@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import com.google.gwt.user.client.Timer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -44,8 +45,10 @@ import com.eas.client.xhr.XMLHttpRequest2;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArrayString;
-import com.google.gwt.dom.client.FormElement;
-import com.google.gwt.dom.client.InputElement;
+import com.google.gwt.event.dom.client.ErrorEvent;
+import com.google.gwt.event.dom.client.ErrorHandler;
+import com.google.gwt.event.dom.client.LoadEvent;
+import com.google.gwt.event.dom.client.LoadHandler;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
@@ -55,6 +58,8 @@ import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.user.client.Window.Location;
+import com.google.gwt.user.client.ui.Frame;
+import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.xhr.client.ReadyStateChangeHandler;
 import com.google.gwt.xhr.client.XMLHttpRequest;
 import com.google.gwt.xhr.client.XMLHttpRequest.ResponseType;
@@ -349,7 +354,7 @@ public class AppClient {
 	}
 
 	public static String param(String aName, String aValue) {
-		return aName + "=" + (aValue != null ? URL.encode(aValue) : "");
+		return aName + "=" + (aValue != null ? URL.encodePathSegment(aValue) : "");
 	}
 
 	public static String params(String... aParams) {
@@ -540,23 +545,30 @@ public class AppClient {
 	}
 
 	public void startDownloadRequest(String aUrlPrefix, final int aRequestType, Map<String, String> aParams, RequestBuilder.Method aMethod) throws Exception {
-		com.google.gwt.dom.client.Document doc = com.google.gwt.dom.client.Document.get();
-		FormElement frm = doc.createFormElement();
-		frm.setMethod(aMethod.toString());
-		frm.setAction(baseUrl + aUrlPrefix);
+		final Frame frame = new Frame();
+		frame.setVisible(false);
+		
+		frame.addLoadHandler(new LoadHandler() {
+			
+			@Override
+			public void onLoad(LoadEvent event) {
+					Timer timer = new Timer() {
+						
+						@Override
+						public void run() {
+							frame.removeFromParent();
+						}
+					};
+					timer.schedule(2000);
+			}
+		});
+		String query = "";
 		for (Entry<String, String> ent : aParams.entrySet()) {
-			InputElement text = doc.createHiddenInputElement();
-			text.setValue(ent.getValue());
-			text.setName(ent.getKey());
-			frm.appendChild(text);
+			query += param(ent.getKey(), ent.getValue()) + "&";
 		}
-		InputElement text = doc.createHiddenInputElement();
-		text.setValue(String.valueOf(aRequestType));
-		text.setName(PlatypusHttpRequestParams.TYPE);
-		frm.appendChild(text);
-		doc.getBody().appendChild(frm);
-		frm.submit();
-		frm.removeFromParent();
+		query += param(PlatypusHttpRequestParams.TYPE, String.valueOf(aRequestType));
+		frame.setUrl(baseUrl + aUrlPrefix + "?" + query);
+		RootPanel.get().add(frame);
 	}
 
 	public XMLHttpRequest2 syncRequest(String aUrl, ResponseType aResponseType) throws Exception {

@@ -1,6 +1,7 @@
 package com.eas.client.gxtcontrols.wrappers.component;
 
 import com.eas.client.gxtcontrols.ControlsUtils;
+import com.google.gwt.dom.client.Style.TextAlign;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.sencha.gxt.cell.core.client.ButtonCell.IconAlign;
@@ -13,7 +14,8 @@ public class PlatypusTextButton extends TextButton {
 	protected static ButtonCellResources buttonResources = GWT.create(ButtonCellResources.class);
 
 	protected int iconTextGap = 4;
-
+	protected TextAlign horizontalAlignment = TextAlign.CENTER;
+	
 	public int getIconTextGap() {
 		return iconTextGap;
 	}
@@ -25,6 +27,17 @@ public class PlatypusTextButton extends TextButton {
 		}
 	}
 
+	public TextAlign getHorizontalAlignment() {
+		return horizontalAlignment;
+	}
+
+	public void setHorizontalAlignment(TextAlign aValue) {
+		if (horizontalAlignment.compareTo(aValue) != 0) {
+			horizontalAlignment = aValue;
+			redraw();
+		}
+	}
+	
 	@Override
 	protected void onRedraw() {
 		super.onRedraw();
@@ -40,7 +53,11 @@ public class PlatypusTextButton extends TextButton {
 			else if (getIconAlign() == IconAlign.TOP)
 				imageWrap.getStyle().setPaddingBottom(iconTextGap, Unit.PX);
 		}
+		XElement text = el.selectNode("."+buttonResources.style().text());
+		if (text != null) {
+			text.getStyle().setTextAlign(horizontalAlignment);
+		}
 		ControlsUtils.reapplyStyle(this);
 	}
-
+	
 }

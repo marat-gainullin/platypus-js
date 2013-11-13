@@ -19,6 +19,7 @@ import com.eas.client.model.query.QueryModel;
 import com.eas.client.model.query.QueryParametersEntity;
 import com.eas.client.model.store.XmlDom2QueryDocument;
 import com.eas.client.queries.SqlQuery;
+import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.script.JsDoc;
 import java.io.StringReader;
 import java.sql.Types;
@@ -169,6 +170,8 @@ public class StoredQueryFactory {
                             putParametersMetadata(query, model);
                             if (putTableFieldsMetadata(query)) {
                                 putStoredTableFieldsMetadata(query, additionalFieldsMetadata);
+                            }else{
+                                query.setCommand(true);
                             }
                         } finally {
                             query.setSqlText(compiledSqlText);
@@ -496,6 +499,14 @@ public class StoredQueryFactory {
         if (parsedQuery instanceof Select) {
             Select select = (Select) parsedQuery;
             resolveOutputFieldsFromTables(aQuery, select.getSelectBody());
+            SqlDriver driver = client.getDbMetadataCache(aQuery.getDbId()).getConnectionDriver();
+            Fields queryFields = aQuery.getFields();
+            if (queryFields != null) {
+                for (Field field : queryFields.toCollection()) {
+                    driver.getTypesResolver().resolve2Application(field);
+                }
+            }
+
             return true;
         }
         return false;

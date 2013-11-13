@@ -23,7 +23,6 @@ import com.eas.client.DbClient;
 import com.eas.client.events.ScriptSourcedEvent;
 import com.eas.client.model.RowsetMissingException;
 import com.eas.client.model.application.ApplicationEntity;
-import com.eas.client.model.application.ApplicationParametersEntity;
 import com.eas.client.queries.SqlQuery;
 import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptUtils;
@@ -247,6 +246,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         entity = aEntity;
     }
 
+    /*
     protected void checkModelExecuted() throws Exception {
         if (entity != null) {
             if (!entity.getModel().isRuntime() && !(entity instanceof ApplicationParametersEntity)) {
@@ -254,10 +254,11 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
             }
         }
     }
+    */ 
 
     protected void checkRowset() throws Exception {
         if (entity != null) {
-            checkModelExecuted();
+            //checkModelExecuted();
             Rowset rs = entity.getRowset();
             if (rs == null) {
                 throw new RowsetMissingException();
@@ -1281,7 +1282,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     @ScriptFunction(jsDoc = "Refreshes rowset only if any of its parameters has changed.")
     public void execute() throws Exception {
         if (entity != null) {
-            checkModelExecuted();
+            //checkModelExecuted();
             if (entity.getQuery().isManual()) {
                 entity.getQuery().setManual(false);
                 try {
@@ -1306,7 +1307,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
             assert tag instanceof RowsetHostObject;
             RowsetHostObject<E> rowsetFacade = (RowsetHostObject<E>) tag;
             try {
-                checkModelExecuted();
+                //checkModelExecuted();
                 if (entity.getQuery().isManual()) {
                     entity.getQuery().setManual(false);
                     try {
@@ -1389,7 +1390,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     @ScriptFunction(jsDoc = "Requeries rowset's data.")
     public void requery() throws Exception {
         if (entity != null) {
-            checkModelExecuted();
+            //checkModelExecuted();
             if (entity.getQuery().isManual()) {
                 entity.getQuery().setManual(false);
                 try {
@@ -1414,7 +1415,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
             assert tag instanceof RowsetHostObject;
             RowsetHostObject<E> rowsetFacade = (RowsetHostObject<E>) tag;
             try {
-                checkModelExecuted();
+                //checkModelExecuted();
                 if (entity.getQuery().isManual()) {
                     entity.getQuery().setManual(false);
                     try {

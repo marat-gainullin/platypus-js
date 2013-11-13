@@ -81,7 +81,7 @@ public class ExecuteServerReportRequestHandler extends SessionRequestHandler<Exe
                     if (moduleSession != systemSession) {// reports are allways stateless, but system session.
                         moduleSession.unregisterModule(moduleName);
                     }
-                    return new ExecuteServerReportRequest.Response(getRequest().getID(), result);
+                    return new ExecuteServerReportRequest.Response(getRequest().getID(), result, runner.getFormat());
                     //TODO: Передать в параметрах размер файла отчета и тип отчета
                 }
             } else {

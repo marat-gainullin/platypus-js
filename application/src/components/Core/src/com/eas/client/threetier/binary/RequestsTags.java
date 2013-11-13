@@ -87,6 +87,7 @@ public class RequestsTags extends CoreTags{
     public static final int TAG_NULL_RESULT = 43;
     public static final int TAG_RESULT_VALUE = 44;
     public static final int TAG_UNDEFINED_RESULT = 45;
+    public static final int TAG_FORMAT = 46;
     //RowsetResponse
     public static final int TAG_ROWSET = 46;
     public static final int TAG_PARAMETERS = 47;

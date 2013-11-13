@@ -39,6 +39,7 @@ public class ApplicationElement {
     public static final String LAYOUT_TAG_NAME = "layout";
     // reports
     public static final String XLS_LAYOUT_TAG_NAME = "xlsLayout";
+    public static final String EXT_TAG_ATTRIBUTE_NAME = "ext";
     // queries
     public final static String QUERY_ROOT_TAG_NAME = "query";
     public final static String SQL_TAG_NAME = "sql";

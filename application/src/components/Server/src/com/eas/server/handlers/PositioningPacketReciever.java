@@ -56,16 +56,20 @@ public class PositioningPacketReciever implements PacketReciever {
         if (result != null) {
             result = ScriptUtils.js2Java(result);
             assert result instanceof String;
-            Matcher m = URL_PATTERN.matcher((String) result);
-            while (m.find()) {
-                send(aPacket, IDN.toASCII(m.group("URL").toLowerCase()), Integer.parseInt(m.group("PORT")), m.group("SCHEMA").toLowerCase(),
-                        m.group("USER"), m.group("PASS"), m.group("PATH"));
-            }
+            send(aPacket, (String) result);
         }
         return null;
     }
 
-    public Object send(PositioningPacket aPacket, String aHost, Integer aPort, String aProtocolName, String aUser, String aPassword, String aPath) throws Exception {
+    public static void send(PositioningPacket aPacket, String aUrl) throws Exception {
+        Matcher m = URL_PATTERN.matcher(aUrl);
+        while (m.find()) {
+            send(aPacket, IDN.toASCII(m.group("URL").toLowerCase()), Integer.parseInt(m.group("PORT")), m.group("SCHEMA").toLowerCase(),
+                    m.group("USER"), m.group("PASS"), m.group("PATH"));
+        }
+    }
+
+    public static Object send(PositioningPacket aPacket, String aHost, Integer aPort, String aProtocolName, String aUser, String aPassword, String aPath) throws Exception {
         if (aHost != null && !aHost.isEmpty()
                 && aProtocolName != null && !aProtocolName.isEmpty()
                 && aPort != null && aPort > 0 && aPort < 65535

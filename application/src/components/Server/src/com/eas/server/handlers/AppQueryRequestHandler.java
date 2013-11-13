@@ -44,6 +44,7 @@ public class AppQueryRequestHandler extends SessionRequestHandler<AppQueryReques
             throw new AccessControlException(String.format(ACCESS_DENIED_MSG, query.getEntityId(), getSession().getPrincipal().getName()));
         }
         assert query.getEntityId().equals(getRequest().getQueryId());
+        /** this code is moved to stored query factory in order to code abstraction
         SqlDriver driver = getServerCore().getDatabasesClient().getDbMetadataCache(query.getDbId()).getConnectionDriver();
         Fields queryFields = query.getFields();
         if (queryFields != null) {
@@ -51,6 +52,7 @@ public class AppQueryRequestHandler extends SessionRequestHandler<AppQueryReques
                 driver.getTypesResolver().resolve2Application(field);
             }
         }
+        */ 
         return new AppQueryResponse(getRequest().getID(), query);
     }
 }

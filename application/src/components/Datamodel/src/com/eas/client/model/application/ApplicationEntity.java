@@ -312,7 +312,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
     }
 
     public boolean execute() throws Exception {
-        if (model != null && model.isRuntime()) {
+        if (model != null/* && model.isRuntime()*/) {
             setExecutedRecursivly(false);
             boolean lexecuted = internalExecute(false);
             internalExecuteChildren(false);
@@ -327,7 +327,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
 
     protected boolean internalExecute(boolean refresh) throws Exception {
         boolean res = false;
-        if (!executing && model != null && model.isRuntime()
+        if (!executing && model != null/* && model.isRuntime()*/
                 && isAllParentsExecuted()) {
             //assert !datamodel.isAjusting() || !refresh;
             executing = true;

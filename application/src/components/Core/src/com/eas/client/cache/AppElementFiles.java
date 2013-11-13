@@ -167,9 +167,11 @@ public class AppElementFiles {
                                 rootTag.appendChild(layoutRootElement);
                                 break;
                             }
-                            case PlatypusFiles.REPORT_LAYOUT_EXTENSION: {
+                            case PlatypusFiles.REPORT_LAYOUT_EXTENSION: 
+                            case PlatypusFiles.REPORT_LAYOUT_EXTENSION_X: {
                                 assert rootTag != null;
                                 Element reportLayoutTag = appElementDom.createElement(ApplicationElement.XLS_LAYOUT_TAG_NAME);
+                                reportLayoutTag.setAttribute(ApplicationElement.EXT_TAG_ATTRIBUTE_NAME,  FileUtils.getFileExtension(file));
                                 UUEncoder encoder = new UUEncoder();
                                 String contentPart = encoder.encodeBuffer(FileUtils.readBytes(file));
                                 accumulator.append(contentPart);
@@ -225,7 +227,7 @@ public class AppElementFiles {
     public Integer getAppElementType() {
         if (hasExtension(PlatypusFiles.JAVASCRIPT_EXTENSION) && hasExtension(PlatypusFiles.MODEL_EXTENSION) && hasExtension(PlatypusFiles.FORM_EXTENSION)) {
             return ClientConstants.ET_FORM;
-        } else if (hasExtension(PlatypusFiles.JAVASCRIPT_EXTENSION) && hasExtension(PlatypusFiles.MODEL_EXTENSION) && hasExtension(PlatypusFiles.REPORT_LAYOUT_EXTENSION)) {
+        } else if (hasExtension(PlatypusFiles.JAVASCRIPT_EXTENSION) && hasExtension(PlatypusFiles.MODEL_EXTENSION) && (hasExtension(PlatypusFiles.REPORT_LAYOUT_EXTENSION) || hasExtension(PlatypusFiles.REPORT_LAYOUT_EXTENSION_X))) {
             return ClientConstants.ET_REPORT;
         } else if (hasExtension(PlatypusFiles.JAVASCRIPT_EXTENSION) && hasExtension(PlatypusFiles.MODEL_EXTENSION)) {
             return ClientConstants.ET_COMPONENT;
@@ -274,7 +276,7 @@ public class AppElementFiles {
             case ClientConstants.ET_FORM:
                 return PlatypusFiles.JAVASCRIPT_EXTENSION.equals(ext) || PlatypusFiles.MODEL_EXTENSION.equals(ext) || PlatypusFiles.FORM_EXTENSION.equals(ext);
             case ClientConstants.ET_REPORT:
-                return PlatypusFiles.JAVASCRIPT_EXTENSION.equals(ext) || PlatypusFiles.MODEL_EXTENSION.equals(ext) || PlatypusFiles.REPORT_LAYOUT_EXTENSION.equals(ext);
+                return PlatypusFiles.JAVASCRIPT_EXTENSION.equals(ext) || PlatypusFiles.MODEL_EXTENSION.equals(ext) || PlatypusFiles.REPORT_LAYOUT_EXTENSION.equals(ext) || PlatypusFiles.REPORT_LAYOUT_EXTENSION_X.equals(ext);
             case ClientConstants.ET_QUERY:
                 return PlatypusFiles.SQL_EXTENSION.equals(ext) || PlatypusFiles.DIALECT_EXTENSION.equals(ext) || PlatypusFiles.MODEL_EXTENSION.equals(ext) || PlatypusFiles.OUT_EXTENSION.equals(ext);
             case ClientConstants.ET_CONNECTION:

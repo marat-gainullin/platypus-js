@@ -17,6 +17,7 @@ import org.w3c.dom.Document;
 public class ReportDocument extends ScriptDocument{
 
     protected byte[] template;
+    private String format;
 
     public ReportDocument(byte[] aTemplate, ApplicationModel<?, ?, ?, ?> aModel, String aSource)
     {
@@ -42,4 +43,25 @@ public class ReportDocument extends ScriptDocument{
     public Document toDom() throws Exception {
         return ReportDocument2Dom.reportDocument2Dom(this);
     }
+
+    /**
+     * @return the format
+     */
+    public String getFormat() {
+        return format;
+    }
+
+    /**
+     * @param aFormat the format to set
+     */
+    public void setFormat(String aFormat) {
+        this.format = aFormat;
+    }
+    
+    public long getSize() {
+        if (template != null) {
+            return template.length;
+        }
+        return 0;
+    } 
 }

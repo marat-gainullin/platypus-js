@@ -42,6 +42,7 @@ public class SqlQuery extends Query<DbClient> {
     protected Set<String> writable;
     private int pageSize = FlowProvider.NO_PAGING_PAGE_SIZE;
     private boolean publicAccess;
+    private boolean command;
 
     /**
      * Creates an instance of Query with empty SQL query text and parameters
@@ -94,6 +95,7 @@ public class SqlQuery extends Query<DbClient> {
             writable.addAll(aSource.getWritable());
         }
         publicAccess = aSource.isPublicAccess();
+        command = aSource.isCommand();
     }
 
     @Override
@@ -101,6 +103,14 @@ public class SqlQuery extends Query<DbClient> {
         return new SqlQuery(this);
     }
 
+    public boolean isCommand() {
+        return command;
+    }
+
+    public void setCommand(boolean command) {
+        this.command = command;
+    }
+        
     /**
      * Returns the SQL query text.
      *

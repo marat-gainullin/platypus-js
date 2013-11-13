@@ -110,6 +110,38 @@ public class Label extends Component<JLabel> {
         }
     }
 
+    @ScriptFunction(jsDoc = "Horizontal position of the text with the icon relative to the component's size.")
+    public int getHorizontalAlignment() {
+        switch (delegate.getHorizontalAlignment()) {
+            case JLabel.LEFT:
+                return HorizontalPosition.LEFT;
+            case JLabel.CENTER:
+                return HorizontalPosition.CENTER;
+            case JLabel.RIGHT:
+                return HorizontalPosition.RIGHT;
+            default:
+                return HorizontalPosition.LEFT;
+        }
+    }
+
+    @ScriptFunction
+    public void setHorizontalAlignment(int aValue) {
+        switch (aValue) {
+            case HorizontalPosition.LEFT:
+                delegate.setHorizontalAlignment(JLabel.LEFT);
+                break;
+            case HorizontalPosition.CENTER:
+                delegate.setHorizontalAlignment(JLabel.CENTER);
+                break;
+            case HorizontalPosition.RIGHT:
+                delegate.setHorizontalAlignment(JLabel.RIGHT);
+                break;
+            default:
+                delegate.setHorizontalAlignment(JLabel.LEFT);
+                break;
+        }
+    }
+
     @ScriptFunction(jsDoc = "Vertical position of the text relative to the icon.")
     public int getVerticalTextPosition() {
         switch (delegate.getVerticalTextPosition()) {
@@ -138,6 +170,38 @@ public class Label extends Component<JLabel> {
                 break;
             default:
                 delegate.setVerticalTextPosition(JLabel.CENTER);
+                break;
+        }
+    }
+    
+    @ScriptFunction(jsDoc = "Vertical position of the text with the icon relative to the component's size.")
+    public int getVerticalAlignment() {
+        switch (delegate.getVerticalAlignment()) {
+            case JLabel.TOP:
+                return VerticalPosition.TOP;
+            case JLabel.CENTER:
+                return VerticalPosition.CENTER;
+            case JLabel.BOTTOM:
+                return VerticalPosition.BOTTOM;
+            default:
+                return VerticalPosition.CENTER;
+        }
+    }
+
+    @ScriptFunction
+    public void setVerticalAlignment(int aValue) {
+        switch (aValue) {
+            case VerticalPosition.TOP:
+                delegate.setVerticalAlignment(JLabel.TOP);
+                break;
+            case VerticalPosition.CENTER:
+                delegate.setVerticalAlignment(JLabel.CENTER);
+                break;
+            case VerticalPosition.BOTTOM:
+                delegate.setVerticalAlignment(JLabel.BOTTOM);
+                break;
+            default:
+                delegate.setVerticalAlignment(JLabel.CENTER);
                 break;
         }
     }
