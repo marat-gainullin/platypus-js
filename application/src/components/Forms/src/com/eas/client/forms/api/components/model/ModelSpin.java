@@ -13,17 +13,26 @@ import com.eas.script.ScriptFunction;
  */
 public class ModelSpin extends ScalarModelComponent<DbSpin> {
 
-    protected ModelSpin(DbSpin aDelegate) {
-        super();
-        setDelegate(aDelegate);
-    }
-
+    private static final String CONSTRUCTOR_JSDOC = "/**\n"
+            + "* A model component that represents a combination of a numeric text box and arrow buttons to change the value incrementally. \n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC)
     public ModelSpin() {
         super();
         setDelegate(new DbSpin());
     }
 
-    @ScriptFunction(jsDoc = "Determines if component is editable.")
+    protected ModelSpin(DbSpin aDelegate) {
+        super();
+        setDelegate(aDelegate);
+    }
+    
+    private static final String EDITABLE_JSDOC = "/**\n"
+            + "* Determines if component is editable.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = EDITABLE_JSDOC)
     public boolean isEditable() {
         return delegate.isEditable();
     }
@@ -33,7 +42,11 @@ public class ModelSpin extends ScalarModelComponent<DbSpin> {
         delegate.setEditable(aValue);
     }
 
-    @ScriptFunction(jsDoc = "Determines lower bound of spinner's value. If it's null, valus is unlimited at lower bound.")
+    private static final String MIN_JSDOC = "/**\n"
+            + "* Determines the lower bound of spinner's value. If it's null, valus is unlimited at lower bound.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = MIN_JSDOC)
     public Double getMin() {
         return delegate.getMin();
     }
@@ -44,7 +57,11 @@ public class ModelSpin extends ScalarModelComponent<DbSpin> {
         delegate.setMin(aValue);
     }
     
-    @ScriptFunction(jsDoc = "Determines upper bound of spinner's value. If it's null, valus is unlimited at upper bound.")
+    private static final String MAX_JSDOC = "/**\n"
+            + "* Determines the upper bound of spinner's value. If it's null, valus is unlimited at upper bound.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = MAX_JSDOC)
     public Double getMax() {
         return delegate.getMax();
     }
@@ -55,7 +72,11 @@ public class ModelSpin extends ScalarModelComponent<DbSpin> {
         delegate.setMax(aValue);
     }
     
-    @ScriptFunction(jsDoc = "Determines spinner's value change step. Can't be null.")
+    private static final String STEP_JSDOC = "/**\n"
+            + "* Determines the spinner's value change step. Can't be null.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = STEP_JSDOC)
     public double getStep() {
         return delegate.getStep();
     }
