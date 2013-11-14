@@ -15,11 +15,22 @@ import javax.swing.JComponent;
  */
 public abstract class Container<D extends JComponent> extends Component<D> {
 
-    @ScriptFunction(jsDoc = "Gets the nth component in this container.")
+    private static final String CHILD_JSDOC = "/**\n"
+            + "* Gets the container's nth component.\n"
+            + "* @param index the component's index\n"
+            + "* @return the component\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = CHILD_JSDOC, params = {"index"})
     public Component<?> child(int aIndex) {
         return getComponentWrapper(delegate.getComponent(aIndex));
     }
 
+    private static final String CHILDREN_JSDOC = "/**\n"
+            + "* Gets the container's children components.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = CHILDREN_JSDOC)
     public Component<?>[] getChildren() {
         List<Component<?>> ch = new ArrayList<>();
         for (int i = 0; i < getCount(); i++) {
@@ -28,21 +39,34 @@ public abstract class Container<D extends JComponent> extends Component<D> {
         return ch.toArray(new Component<?>[]{});
     }
 
-    @ScriptFunction(jsDoc = "Removes the specified component from this container.")
+    private static final String REMOVE_JSDOC = "/**\n"
+            + "* Removes the specified component from this container.\n"
+            + "* @param component the component to remove\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = REMOVE_JSDOC, params = {"component"})
     public void remove(Component<?> aComp) {
         delegate.remove(unwrap(aComp));
         delegate.revalidate();
         delegate.repaint();
     }
 
-    @ScriptFunction(jsDoc = "Removes all the components from this container.")
+    private static final String CLEAR_JSDOC = "/**\n"
+            + "* Removes all the components from this container.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = CLEAR_JSDOC)
     public void clear() {
         delegate.removeAll();
         delegate.revalidate();
         delegate.repaint();
     }
 
-    @ScriptFunction(jsDoc = "Gets the number of components in this panel.")
+    private static final String COUNT_JSDOC = "/**\n"
+            + "* Gets the number of components in this panel.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = COUNT_JSDOC)
     public int getCount() {
         return delegate.getComponentCount();
     }

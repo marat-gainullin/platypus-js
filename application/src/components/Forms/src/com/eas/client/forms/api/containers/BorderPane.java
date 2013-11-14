@@ -74,7 +74,7 @@ public class BorderPane extends Container<JPanel> {
     }
     
     private static final String ADD_JSDOC = "/**\n"
-            + "* Appends the specified component to this container on the specified placement\n"
+            + "* Appends the specified component to this container on the specified placement.\n"
             + "* @param component the component to add\n"
             + "* @param place the placement in the container: <code>HorizontalPosition.LEFT</code>, <code>HorizontalPosition.CENTER</code>, <code>HorizontalPosition.RIGHT</code>, <code>VerticalPosition.TOP</code> or <code>VerticalPosition.BOTTOM</code> (optional)\n"
             + "* @param size the size of the component by the provided place direction (optional)\n"

@@ -73,7 +73,11 @@ public class BoxPane extends Container<JPanel> {
         delegate.revalidate();
     }
 
-    @ScriptFunction(jsDoc = "Box orientation of this container.")
+    private static final String ORIENTATION_JSDOC = "/**\n"
+            + "* Box orientation of this container.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = ORIENTATION_JSDOC)
     public int getOrientation() {
         int axis = ((BoxLayout) delegate.getLayout()).getAxis();
         if (axis == BoxLayout.X_AXIS || axis == BoxLayout.LINE_AXIS) {
@@ -83,7 +87,12 @@ public class BoxPane extends Container<JPanel> {
         }
     }
 
-    @ScriptFunction(jsDoc = "Appends the specified component to the end of this container.")
+    private static final String ADD_JSDOC = "/**\n"
+            + "* Appends the specified component to the end of this container.\n"
+            + "* @param component the component to add\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = ADD_JSDOC, params = {"component"})
     public void add(Component<?> aComp) {
         if (aComp != null) {
             JComponent comp = unwrap(aComp);
