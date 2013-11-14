@@ -28,10 +28,10 @@ public class GridPane extends Container<JPanel> {
     
     private static final String CONSTRUCTOR_JSDOC = "/**\n"
             + "* A container with Grid Layout.\n"
-            + "* @param rows the number of grid rows."
-            + "* @param cols the number of grid columns."
-            + "* @param hgap the horizontal gap (optional)."
-            + "* @param vgap the vertical gap (optional)."
+            + "* @param rows the number of grid rows.\n"
+            + "* @param cols the number of grid columns.\n"
+            + "* @param hgap the horizontal gap (optional).\n"
+            + "* @param vgap the vertical gap (optional).\n"
             + "*/";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"rows", "cols", "hgap", "vgap"})
@@ -41,7 +41,12 @@ public class GridPane extends Container<JPanel> {
         setDelegate(new JPanel(layout));
     }
 
-    @ScriptFunction(jsDoc = "Appends the specified component to the end of this container.")
+    private static final String ADD_JSDOC = "/**\n"
+            + "* Appends the specified component to the end of this container.\n"
+            + "* @param component the component to add\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = ADD_JSDOC, params = {"component"})
     public void add(Component<?> aComp) {
         if (aComp != null) {
             delegate.add(unwrap(aComp));

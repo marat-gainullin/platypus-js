@@ -27,8 +27,8 @@ public class CardPane extends Container<JPanel> {
 
     private static final String CONSTRUCTOR_JSDOC = "/**\n"
             + "* A container with Card Layout. It treats each component in the container as a card. Only one card is visible at a time, and the container acts as a stack of cards.\n"
-            + "* @param hgap the horizontal gap (optional)."
-            + "* @param vgap the vertical gap (optional)."
+            + "* @param hgap the horizontal gap (optional).\n"
+            + "* @param vgap the vertical gap (optional).\n"
             + "*/";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"hgap", "vgap"})

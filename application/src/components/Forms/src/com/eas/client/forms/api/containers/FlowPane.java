@@ -26,8 +26,8 @@ public class FlowPane extends Container<JPanel> {
 
     private static final String CONSTRUCTOR_JSDOC = "/**\n"
             + "* A container with Flow Layout.\n"
-            + "* @param hgap the horizontal gap (optional)."
-            + "* @param vgap the vertical gap (optional)."
+            + "* @param hgap the horizontal gap (optional).\n"
+            + "* @param vgap the vertical gap (optional).\n"
             + "*/";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"hgap", "vgap"})
