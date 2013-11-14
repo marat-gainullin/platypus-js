@@ -34,14 +34,20 @@ public class TabbedPane extends Container<JTabbedPane> {
         setDelegate(aDelegate);
     }
     
-    @ScriptFunction(jsDoc = "Appends the component whith specified text to the end of this container.")
+    private static final String ADD_JSDOC = "/**\n"
+            + "* Appends the component whith specified text to the end of this container.\n"
+            + "* @param component the component to add\n"
+            + "* @param text the text for the tab\n"
+            + "* @param icon the icon for the tab (optional)\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = ADD_JSDOC, params = {"component", "text", "icon"})
     public void add(Component<?> aComp, String aText) {
         delegate.addTab(aText, unwrap(aComp));
         delegate.revalidate();
         delegate.repaint();
     }
 
-    @ScriptFunction(jsDoc = "Appends the component whith specified text and Icon to the end of this container.")
     public void add(Component<?> aComp, String aText, Icon aIcon) {
         if (aComp != null) {
             delegate.addTab(aText, aIcon, unwrap(aComp));
@@ -50,7 +56,11 @@ public class TabbedPane extends Container<JTabbedPane> {
         }
     }
 
-    @ScriptFunction(jsDoc = "The selected component.")
+    private static final String SELECTED_COMPONENT_JSDOC = "/**\n"
+            + "* The selected component.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = SELECTED_COMPONENT_JSDOC)
     public Component<?> getSelectedComponent() {
         return getComponentWrapper(delegate.getSelectedComponent());
     }
@@ -64,7 +74,11 @@ public class TabbedPane extends Container<JTabbedPane> {
         }
     }
 
-    @ScriptFunction(jsDoc = "The selected component's index.")
+    private static final String SELECTED_INDEX_JSDOC = "/**\n"
+            + "* The selected component's index.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = SELECTED_INDEX_JSDOC)
     public int getSelectedIndex() {
         return delegate.getSelectedIndex();
     }
@@ -74,7 +88,11 @@ public class TabbedPane extends Container<JTabbedPane> {
         delegate.setSelectedIndex(aIndex);
     }
 
-    @ScriptFunction(jsDoc = "Selected tab change event.")
+    private static final String ON_STATE_CHANGED_JSDOC = "/**\n"
+            + "* Selected tab change event handler function.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = ON_STATE_CHANGED_JSDOC)
     public Function getOnStateChanged() {
         ControlEventsIProxy proxy = getEventsProxy(delegate);
         return proxy != null ? proxy.getHandlers().get(ControlEventsIProxy.stateChanged) : null;

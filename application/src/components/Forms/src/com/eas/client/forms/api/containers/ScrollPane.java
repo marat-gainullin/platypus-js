@@ -36,7 +36,12 @@ public class ScrollPane extends Container<JScrollPane> {
         setDelegate(aDelegate);
     }
     
-    @ScriptFunction(jsDoc = "Appends the specified component to the end of this container.")
+    private static final String ADD_JSDOC = "/**\n"
+            + "* Appends the specified component to the end of this container.\n"
+            + "* @param component the component to add\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = ADD_JSDOC, params = {"component"})
     public void add(Component<?> aComp) {
         if (aComp != null) {
             delegate.setViewportView(unwrap(aComp));
@@ -45,7 +50,11 @@ public class ScrollPane extends Container<JScrollPane> {
         }
     }
 
-    @ScriptFunction(jsDoc = "Sets the specified component as the scroll pane view.")
+    private static final String VIEW_JSDOC = "/**\n"
+            + "* The specified component as the scroll pane view.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = VIEW_JSDOC)
     public Component<?> getView() {
         return getComponentWrapper(delegate.getViewport().getView());
     }
@@ -59,6 +68,12 @@ public class ScrollPane extends Container<JScrollPane> {
         }
     }
 
+    private static final String REMOVE_JSDOC = "/**\n"
+            + "* Removes the specified component from this container.\n"
+            + "* @param component the component to remove\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = REMOVE_JSDOC, params = {"component"})
     @Override
     public void remove(Component<?> aComp) {
         if (aComp == getView()) {
@@ -66,11 +81,22 @@ public class ScrollPane extends Container<JScrollPane> {
         }
     }
 
+    private static final String COUNT_JSDOC = "/**\n"
+            + "* Gets the number of components in this panel.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = COUNT_JSDOC)
     @Override
     public int getCount() {
         return 1;// to avoid swing's viewports to be included in results
     }
 
+    private static final String CHILD_JSDOC = "/**\n"
+            + "* Gets the container's child component.\n"
+            + "* @return the child component\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = CHILD_JSDOC)
     @Override
     public Component<?> child(int aIndex) {
         return getView();// to avoid swing's viewports to be included in results
