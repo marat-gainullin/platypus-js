@@ -31,7 +31,7 @@ public class BoxPane extends Container<JPanel> {
     protected Resizer resizer = new Resizer();
     private static final String CONSTRUCTOR_JSDOC = "/**\n"
             + "* A container with Box Layout. By default uses horisontal orientation.\n"
-            + "@param orientation Orientation.HORIZONTAL or Orientation.VERTICAL (optional)"
+            + "@param orientation Orientation.HORIZONTAL or Orientation.VERTICAL (optional)\n"
             + "*/";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"orientation"})
@@ -107,6 +107,11 @@ public class BoxPane extends Container<JPanel> {
         }
     }
 
+    private static final String CLEAR_JSDOC = "/**\n"
+            + "* Removes all the components from this container.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = CLEAR_JSDOC)
     @Override
     public void clear() {
         for (java.awt.Component comp : delegate.getComponents()) {
@@ -117,6 +122,12 @@ public class BoxPane extends Container<JPanel> {
         super.clear();
     }
 
+    private static final String REMOVE_JSDOC = "/**\n"
+            + "* Removes the specified component from this container.\n"
+            + "* @param component the component to remove\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = REMOVE_JSDOC, params = {"component"})
     @Override
     public void remove(Component<?> aComp) {
         if (aComp != null) {
