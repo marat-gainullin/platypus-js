@@ -26,8 +26,8 @@ public class FlowPane extends Container<JPanel> {
 
     private static final String CONSTRUCTOR_JSDOC = "/**\n"
             + "* A container with Flow Layout.\n"
-            + "* @param hgap the horizontal gap (optional)."
-            + "* @param vgap the vertical gap (optional)."
+            + "* @param hgap the horizontal gap (optional).\n"
+            + "* @param vgap the vertical gap (optional).\n"
             + "*/";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"hgap", "vgap"})
@@ -43,7 +43,12 @@ public class FlowPane extends Container<JPanel> {
         setDelegate(aDelegate);
     }
     
-    @ScriptFunction(jsDoc = "Appends the specified component to the end of this container.")
+    private static final String ADD_JSDOC = "/**\n"
+            + "* Appends the specified component to the end of this container.\n"
+            + "* @param component the component to add\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = ADD_JSDOC, params = {"component"})
     public void add(Component<?> aComp) {
         if (aComp != null) {
             delegate.add(unwrap(aComp));

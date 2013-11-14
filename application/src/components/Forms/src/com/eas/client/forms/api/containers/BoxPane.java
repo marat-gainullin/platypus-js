@@ -31,7 +31,7 @@ public class BoxPane extends Container<JPanel> {
     protected Resizer resizer = new Resizer();
     private static final String CONSTRUCTOR_JSDOC = "/**\n"
             + "* A container with Box Layout. By default uses horisontal orientation.\n"
-            + "@param orientation Orientation.HORIZONTAL or Orientation.VERTICAL (optional)"
+            + "@param orientation Orientation.HORIZONTAL or Orientation.VERTICAL (optional)\n"
             + "*/";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"orientation"})
@@ -73,7 +73,11 @@ public class BoxPane extends Container<JPanel> {
         delegate.revalidate();
     }
 
-    @ScriptFunction(jsDoc = "Box orientation of this container.")
+    private static final String ORIENTATION_JSDOC = "/**\n"
+            + "* Box orientation of this container.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = ORIENTATION_JSDOC)
     public int getOrientation() {
         int axis = ((BoxLayout) delegate.getLayout()).getAxis();
         if (axis == BoxLayout.X_AXIS || axis == BoxLayout.LINE_AXIS) {
@@ -83,7 +87,12 @@ public class BoxPane extends Container<JPanel> {
         }
     }
 
-    @ScriptFunction(jsDoc = "Appends the specified component to the end of this container.")
+    private static final String ADD_JSDOC = "/**\n"
+            + "* Appends the specified component to the end of this container.\n"
+            + "* @param component the component to add\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = ADD_JSDOC, params = {"component"})
     public void add(Component<?> aComp) {
         if (aComp != null) {
             JComponent comp = unwrap(aComp);
@@ -98,6 +107,11 @@ public class BoxPane extends Container<JPanel> {
         }
     }
 
+    private static final String CLEAR_JSDOC = "/**\n"
+            + "* Removes all the components from this container.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = CLEAR_JSDOC)
     @Override
     public void clear() {
         for (java.awt.Component comp : delegate.getComponents()) {
@@ -108,6 +122,12 @@ public class BoxPane extends Container<JPanel> {
         super.clear();
     }
 
+    private static final String REMOVE_JSDOC = "/**\n"
+            + "* Removes the specified component from this container.\n"
+            + "* @param component the component to remove\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = REMOVE_JSDOC, params = {"component"})
     @Override
     public void remove(Component<?> aComp) {
         if (aComp != null) {

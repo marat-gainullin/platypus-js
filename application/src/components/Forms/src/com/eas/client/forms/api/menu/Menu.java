@@ -22,9 +22,9 @@ public class Menu extends Container<JMenu> {
     }
         
     private static final String CONSTRUCTOR_JSDOC = "/**\n"
-            + "* An implementation of a menu -- a popup window containing MenuItems"
-            + " that is displayed when the user selects an item on the MenuBar."
-            + " In addition to <code>MenuItems</code>, a <code>Menu</code> can also contain <code>MenuSeparators</code>.\n"
+            + "* An implementation of a menu -- a popup window containing MenuItems\n"
+            + "* that is displayed when the user selects an item on the MenuBar.\n"
+            + "* In addition to <code>MenuItems</code>, a <code>Menu</code> can also contain <code>MenuSeparators</code>.\n"
             + "* @param text the text for the menu label (optional)\n"
             + "*/";
 
@@ -39,8 +39,12 @@ public class Menu extends Container<JMenu> {
         setDelegate(aDelegate);
     }
     
+    private static final String PARENT_JSDOC = "/**\n"
+            + "* The parent container.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = PARENT_JSDOC)
     @Override
-    @ScriptFunction(jsDoc="Gets the parent container.")
     public Container<?> getParent() {
         Container<?> parent = super.getParent();
         if (parent == null && delegate.getParent() instanceof JPopupMenu && ((JPopupMenu) delegate.getParent()).getInvoker() instanceof JMenu) {
@@ -49,13 +53,24 @@ public class Menu extends Container<JMenu> {
         return parent;
     }
 
+    
+    private static final String CHILD_JSDOC = "/**\n"
+            + "* Gets the child item component whith specified index.\n"
+            + "* @param index the component's index in the container\n"
+            + "* @return the child component\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = CHILD_JSDOC, params = {"index"})
     @Override
-    @ScriptFunction(jsDoc="Gets the child item whith specified index.")
     public Component<?> child(int aIndex) {
         return getComponentWrapper(delegate.getMenuComponent(aIndex));
     }
 
-    @ScriptFunction(jsDoc="The text of the menu.")
+    private static final String TEXT_JSDOC = "/**\n"
+            + "* The text of the menu.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = TEXT_JSDOC)
     public String getText() {
         return delegate.getText();
     }
@@ -65,13 +80,22 @@ public class Menu extends Container<JMenu> {
         delegate.setText(aValue);
     }
 
-    @ScriptFunction(jsDoc="Adds the item to the menu.")
+    private static final String ADD_JSDOC = "/**\n"
+            + "* Adds the item to the menu.\n"
+            + "* @param component the component to add\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = ADD_JSDOC, params = {"component"})
     public void add(Component<?> aComp) {
         delegate.add(unwrap(aComp));
     }
 
+    
+    private static final String COUNT_JSDOC = "/**\n"
+            + "* Gets the count of the menu items.\n"
+            + "*/";
     @Override
-    @ScriptFunction(jsDoc="Gets the count of the menu items.")
+    @ScriptFunction(jsDoc=COUNT_JSDOC)
     public int getCount() {
         return delegate.getMenuComponentCount();
     }

@@ -49,6 +49,11 @@ public class CheckMenuItem extends Component<JCheckBoxMenuItem> {
         setDelegate(aDelegate);
     }
     
+    private static final String PARENT_JSDOC = "/**\n"
+            + "* The parent container.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = PARENT_JSDOC)
     @Override
     public Container<?> getParent() {
         Container<?> parent = super.getParent();
@@ -58,6 +63,11 @@ public class CheckMenuItem extends Component<JCheckBoxMenuItem> {
         return parent;
     }
 
+    private static final String TEXT_JSDOC = "/**\n"
+            + "* The menu item text.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = TEXT_JSDOC)
     public String getText() {
         return delegate.getText();
     }
@@ -65,7 +75,12 @@ public class CheckMenuItem extends Component<JCheckBoxMenuItem> {
     public void setText(String aValue) {
         delegate.setText(aValue);
     }
-
+    
+    private static final String SELECTED_JSDOC = "/**\n"
+            + "* <code>true</code> if the menu item is selected.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = SELECTED_JSDOC)
     public boolean isSelected() {
         return delegate.isSelected();
     }

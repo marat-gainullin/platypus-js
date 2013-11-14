@@ -25,11 +25,10 @@ public class BorderPane extends Container<JPanel> {
     public BorderPane(int hgap) {
         this(hgap, 0);
     }
-    
     private static final String CONSTRUCTOR_JSDOC = "/**\n"
             + "* A container with Border Layout.\n"
-            + "* @param hgap the horizontal gap (optional)."
-            + "* @param vgap the vertical gap (optional)."
+            + "* @param hgap the horizontal gap (optional).\n"
+            + "* @param vgap the vertical gap (optional)\n."
             + "*/";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"hgap", "vgap"})
@@ -45,8 +44,6 @@ public class BorderPane extends Container<JPanel> {
         setDelegate(aDelegate);
     }
 
-    @ScriptFunction(jsDoc = "Appends the specified component to this container on the specified place: "
-            + "HorizontalPosition.LEFT, HorizontalPosition.CENTER, HorizontalPosition.RIGHT, VerticalPosition.TOP, VerticalPosition.BOTTOM.")
     public void add(Component<?> aComp, int aPlace) {
         if (aComp != null) {
             String place;
@@ -75,19 +72,29 @@ public class BorderPane extends Container<JPanel> {
             delegate.repaint();
         }
     }
+    
+    private static final String ADD_JSDOC = "/**\n"
+            + "* Appends the specified component to this container on the specified placement.\n"
+            + "* @param component the component to add\n"
+            + "* @param place the placement in the container: <code>HorizontalPosition.LEFT</code>, <code>HorizontalPosition.CENTER</code>, <code>HorizontalPosition.RIGHT</code>, <code>VerticalPosition.TOP</code> or <code>VerticalPosition.BOTTOM</code> (optional)\n"
+            + "* @param size the size of the component by the provided place direction (optional)\n"
+            + "*/";
 
-    @ScriptFunction(jsDoc = "Appends the specified component to this container on the specified place: "
-            + "HorizontalPosition.LEFT, HorizontalPosition.CENTER, HorizontalPosition.RIGHT, VerticalPosition.TOP, VerticalPosition.BOTTOM.")
+    @ScriptFunction(jsDoc = ADD_JSDOC, params = {"component", "place", "size"})
     public void add(Component<?> aComp, int aPlace, int aSize) {
         add(aComp, aPlace);
     }
 
-    @ScriptFunction(jsDoc = "Appends the specified component to this container in it's center.")
     public void add(Component<?> aComp) {
         add(aComp, HorizontalPosition.CENTER);
     }
 
-    @ScriptFunction(jsDoc = "The component that was added using HorizontalPosition.LEFT constraint.")
+    private static final String LEFT_COMPONENT_JSDOC = "/**\n"
+            + "* The component added using HorizontalPosition.LEFT constraint.\n"
+            + "* If no component at this constraint then set to <code>null</code>.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = LEFT_COMPONENT_JSDOC)
     public Component<?> getLeftComponent() {
         BorderLayout layout = (BorderLayout) delegate.getLayout();
         java.awt.Component target = layout.getLayoutComponent(BorderLayout.WEST);
@@ -112,7 +119,12 @@ public class BorderPane extends Container<JPanel> {
         add(aComp, HorizontalPosition.LEFT);
     }
 
-    @ScriptFunction(jsDoc = "The component that was added using VerticalPosition.TOP constraint.")
+    private static final String TOP_COMPONENT_JSDOC = "/**\n"
+            + "* The component added using HorizontalPosition.TOP constraint.\n"
+            + "* If no component at the container on this constraint then set to <code>null</code>.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = TOP_COMPONENT_JSDOC)
     public Component<?> getTopComponent() {
         BorderLayout layout = (BorderLayout) delegate.getLayout();
         java.awt.Component target = layout.getLayoutComponent(BorderLayout.NORTH);
@@ -136,7 +148,11 @@ public class BorderPane extends Container<JPanel> {
         add(aComp, VerticalPosition.TOP);
     }
 
-    @ScriptFunction(jsDoc = "The component that was added using HorizontalPosition.RIGHT constraint.")
+    private static final String RIGHT_COMPONENT_JSDOC = "/**\n"
+            + "* The component added using HorizontalPosition.RIGHT constraint.\n"
+            + "* If no component at the container on this constraint then set to <code>null</code>.\n"
+            + "*/";
+    @ScriptFunction(jsDoc = RIGHT_COMPONENT_JSDOC)
     public Component<?> getRightComponent() {
         BorderLayout layout = (BorderLayout) delegate.getLayout();
         java.awt.Component target = layout.getLayoutComponent(BorderLayout.EAST);
@@ -161,7 +177,12 @@ public class BorderPane extends Container<JPanel> {
         add(aComp, HorizontalPosition.RIGHT);
     }
 
-    @ScriptFunction(jsDoc = "The component that was added using VerticalPosition.BOTTOM constraint.")
+    private static final String BOTTOM_COMPONENT_JSDOC = "/**\n"
+            + "* The component added using HorizontalPosition.BOTTOM constraint.\n"
+            + "* If no component at the container on this constraint then set to <code>null</code>.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = BOTTOM_COMPONENT_JSDOC)
     public Component<?> getBottomComponent() {
         BorderLayout layout = (BorderLayout) delegate.getLayout();
         java.awt.Component target = layout.getLayoutComponent(BorderLayout.SOUTH);
@@ -185,8 +206,13 @@ public class BorderPane extends Container<JPanel> {
         }
         add(aComp, VerticalPosition.BOTTOM);
     }
-
-    @ScriptFunction(jsDoc = "The component that was added using HorizontalPosition.CENTER constraint.")
+    
+    private static final String CENTER_COMPONENT_JSDOC = "/**\n"
+            + "* The component added using HorizontalPosition.CENTER constraint.\n"
+            + "* If no component at the container on this constraint then set to <code>null</code>.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = CENTER_COMPONENT_JSDOC)
     public Component<?> getCenterComponent() {
         BorderLayout layout = (BorderLayout) delegate.getLayout();
         return getComponentWrapper(layout.getLayoutComponent(BorderLayout.CENTER));

@@ -637,7 +637,14 @@ public class FormUtils {
         com.eas.client.forms.api.components.model.ModelSpin.class,
         com.eas.client.forms.api.components.model.ModelFormattedField.class,
         com.eas.client.forms.api.components.model.ModelCombo.class,
-        Panel.class,
+        com.eas.client.forms.api.containers.AbsolutePane.class,
+        com.eas.client.forms.api.containers.AnchorsPane.class,
+        com.eas.client.forms.api.containers.BorderPane.class,
+        com.eas.client.forms.api.containers.BoxPane.class,
+        com.eas.client.forms.api.containers.ButtonGroup.class,
+        com.eas.client.forms.api.containers.CardPane.class,
+        com.eas.client.forms.api.containers.FlowPane.class,
+        com.eas.client.forms.api.containers.GridPane.class,
         com.eas.client.forms.api.containers.ScrollPane.class,
         com.eas.client.forms.api.containers.SplitPane.class,
         com.eas.client.forms.api.containers.TabbedPane.class,
@@ -684,16 +691,6 @@ public class FormUtils {
         swingClasses2PlatypusApiClasses.put(DbCombo.class, com.eas.client.forms.api.components.model.ModelCombo.class);
         //
         swingClasses2PlatypusApiClasses.put(JPanel.class, Panel.class);
-        /*
-         swingClasses2PlatypusApiClasses.put(JPanel.class, com.eas.client.forms.api.containers.AbsolutePane.class);
-         swingClasses2PlatypusApiClasses.put(JPanel.class, com.eas.client.forms.api.containers.AnchorsPane.class);
-         swingClasses2PlatypusApiClasses.put(JPanel.class, com.eas.client.forms.api.containers.BorderPane.class);
-         swingClasses2PlatypusApiClasses.put(JPanel.class, com.eas.client.forms.api.containers.BoxPane.class);
-         swingClasses2PlatypusApiClasses.put(JPanel.class, com.eas.client.forms.api.containers.ButtonGroup.class);
-         swingClasses2PlatypusApiClasses.put(JPanel.class, com.eas.client.forms.api.containers.CardPane.class);
-         swingClasses2PlatypusApiClasses.put(JPanel.class, com.eas.client.forms.api.containers.FlowPane.class);
-         swingClasses2PlatypusApiClasses.put(JPanel.class, com.eas.client.forms.api.containers.GridPane.class);
-         */
         swingClasses2PlatypusApiClasses.put(JScrollPane.class, com.eas.client.forms.api.containers.ScrollPane.class);
         swingClasses2PlatypusApiClasses.put(JSplitPane.class, com.eas.client.forms.api.containers.SplitPane.class);
         swingClasses2PlatypusApiClasses.put(JTabbedPane.class, com.eas.client.forms.api.containers.TabbedPane.class);
@@ -1380,7 +1377,7 @@ public class FormUtils {
     public static Class[] getPlatypusApiClasses() {
         return apiClasses;
     }
-    
+
     public static Class<?> getPlatypusControlClass(Class<?> aBeanClass) {
         if (swingClasses2PlatypusApiClasses.containsKey(aBeanClass)) {
             return swingClasses2PlatypusApiClasses.get(aBeanClass);
