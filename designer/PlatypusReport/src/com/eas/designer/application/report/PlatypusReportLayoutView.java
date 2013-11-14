@@ -174,11 +174,6 @@ public class PlatypusReportLayoutView extends TopComponent implements MultiViewE
     }
 
     @Override
-    public UndoRedo getUndoRedo() {
-        return dataObject.getLookup().lookup(PlatypusReportSupport.class).getModelUndo();
-    }
-
-    @Override
     protected String preferredID() {
         return PlatypusReportLayoutDescription.REPORT_LAYOUT_VIEW_NAME;
     }

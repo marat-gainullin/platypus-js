@@ -363,7 +363,7 @@ public class ExcelReport {
         if (!newDir.exists()) {
             newDir.mkdir();
         }
-        reportPath += File.separator + String.valueOf(IDGenerator.genID()) + "." + aFormat != null ? aFormat : PlatypusFiles.REPORT_LAYOUT_EXTENSION_X;
+        reportPath += File.separator + String.valueOf(IDGenerator.genID()) + "." + (aFormat != null ? aFormat : PlatypusFiles.REPORT_LAYOUT_EXTENSION_X);
         return reportPath;
     }
 
