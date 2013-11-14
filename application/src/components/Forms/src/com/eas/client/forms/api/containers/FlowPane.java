@@ -43,7 +43,12 @@ public class FlowPane extends Container<JPanel> {
         setDelegate(aDelegate);
     }
     
-    @ScriptFunction(jsDoc = "Appends the specified component to the end of this container.")
+    private static final String ADD_JSDOC = "/**\n"
+            + "* Appends the specified component to the end of this container.\n"
+            + "* @param component the component to add\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = ADD_JSDOC, params = {"component"})
     public void add(Component<?> aComp) {
         if (aComp != null) {
             delegate.add(unwrap(aComp));
