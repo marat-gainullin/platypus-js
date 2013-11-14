@@ -31,7 +31,12 @@ public class PopupMenu extends Container<JPopupMenu> {
         setDelegate(aDelegate);
     }
     
-    @ScriptFunction(jsDoc="Adds the item to the menu.")
+    private static final String ADD_JSDOC = "/**\n"
+            + "* Adds the item to the menu.\n"
+            + "* @param menu the menu component to add\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = ADD_JSDOC, params = {"menu"})
     public void add(Menu aMenu) {
         delegate.add((JMenu) unwrap(aMenu));
     }

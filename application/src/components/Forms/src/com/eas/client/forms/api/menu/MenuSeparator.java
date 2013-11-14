@@ -33,6 +33,12 @@ public class MenuSeparator extends Component<JSeparator> {
         setDelegate(aDelegate);
     }
     
+    
+    private static final String PARENT_JSDOC = "/**\n"
+            + "* The parent container.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = PARENT_JSDOC)
     @Override
     public Container<?> getParent() {
         Container<?> parent = super.getParent();

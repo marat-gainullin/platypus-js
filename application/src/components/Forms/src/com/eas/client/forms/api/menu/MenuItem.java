@@ -50,6 +50,11 @@ public class MenuItem extends Component<JMenuItem> {
         setDelegate(aDelegate);
     }
     
+    private static final String PARENT_JSDOC = "/**\n"
+            + "* The parent container.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = PARENT_JSDOC)
     @Override
     public Container<?> getParent() {
         Container<?> parent = super.getParent();
@@ -59,7 +64,11 @@ public class MenuItem extends Component<JMenuItem> {
         return parent;
     }
 
-    @ScriptFunction(jsDoc="Text on the menu item.")
+    private static final String TEXT_JSDOC = "/**\n"
+            + "* The menu item text.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = TEXT_JSDOC)
     public String getText() {
         return delegate.getText();
     }
@@ -69,7 +78,11 @@ public class MenuItem extends Component<JMenuItem> {
         delegate.setText(aValue);
     }
 
-    @ScriptFunction(jsDoc="Image picture for the menu item.")
+    private static final String ICON_JSDOC = "/**\n"
+            + "* Image picture for the menu item.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = ICON_JSDOC)
     public Icon getIcon() {
         return delegate.getIcon();
     }
