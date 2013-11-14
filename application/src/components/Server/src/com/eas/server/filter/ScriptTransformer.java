@@ -19,7 +19,7 @@ import org.mozilla.javascript.ast.*;
  */
 public class ScriptTransformer {
 
-    public static final String SELF_NAME = "_platypusModuleSelf";
+//    public static final String SELF_NAME = "_self";
     public static final String ERROR_BAD_AST = "bad Ast";
     public static final String ERROR_DEPENDECIES_PARSE_ERROR = "dependencies parse error";
     public static final String MODULES = "Modules";
@@ -29,17 +29,17 @@ public class ScriptTransformer {
     public static final String FORM = "Form";
     public static final String REPORT = "Report";
     public static final String SERVER_REPORT = "ServerReport";
-    private Name _this = new Name(0, SELF_NAME);
+    //private Name _this = new Name(0, SELF_NAME);
     private Set<String> dependencies = new HashSet<>();
     private Set<String> queryDependencies = new HashSet<>();
     private Set<String> serverDependencies = new HashSet<>();
     private Set<String> dynamicDependencies = new HashSet<>();
-    private Stack<Scope> scopeStack = new Stack<>();
+    //private Stack<Scope> scopeStack = new Stack<>();
     private AstRoot sourceRoot;
     private String source;
     private AppCache cache;
     private ErrorReporter compilationErrorReporter;
-    private Set<String> externalVariables = new HashSet<>();
+    //private Set<String> externalVariables = new HashSet<>();
 
     public ScriptTransformer(String aSource) {
         this(aSource, null);
@@ -51,6 +51,7 @@ public class ScriptTransformer {
         cache = aCache;
     }
 
+    /*
     private void recursiveScopeSetup(Map<Node, List<Node>> aTree, Node aParent) {
         List<Node> children = aTree.get(aParent);
         if (children != null && children.size() > 0) {
@@ -73,7 +74,7 @@ public class ScriptTransformer {
             }
         }
     }
-
+*/
     private Map<Node, List<Node>> createAstTree(AstRoot aRoot) {
         final Map<Node, List<Node>> tree = new HashMap<>();
         aRoot.visit(new NodeVisitor() {
@@ -101,16 +102,16 @@ public class ScriptTransformer {
         compilationErrorReporter = compilerEnv.getErrorReporter();
         Parser p = new Parser(compilerEnv, compilationErrorReporter);
         sourceRoot = p.parse(source, "", 0);
-        scopeStack.push(sourceRoot);
-        Map<Node, List<Node>> newTree = createAstTree(sourceRoot);
-        recursiveScopeSetup(newTree, sourceRoot);
-        final List<Runnable> treeMutationTasks = new ArrayList<>();
+        //scopeStack.push(sourceRoot);
+        //Map<Node, List<Node>> newTree = createAstTree(sourceRoot);
+        //recursiveScopeSetup(newTree, sourceRoot);
+        //final List<Runnable> treeMutationTasks = new ArrayList<>();
         sourceRoot.visit(new NodeVisitor() {
             public static final String REQUIRE_FUNCTION_NAME = "require";
 
             @Override
             public boolean visit(final AstNode node) {
-                if (node instanceof VariableDeclaration) {
+                /*if (node instanceof VariableDeclaration) {
                     final List<VariableInitializer> variables = ((VariableDeclaration) node).getVariables();
                     assert !variables.isEmpty() : ERROR_BAD_AST;
                     final VariableInitializer anyVariable = (VariableInitializer) variables.get(0);
@@ -175,8 +176,9 @@ public class ScriptTransformer {
                             }
                         });
                     }
-                } else if (node instanceof Name) {
+                } else */if (node instanceof Name) {
                     attemptToParseDependenciesFromNode(node);
+                    /*
                     final Name name = (Name) node;
                     if (isTopLevel(name) && !isObjectLiteralPropName(name)) {
                         if (!(name.getParent() instanceof PropertyGet) || ((PropertyGet) name.getParent()).getProperty() != name) {
@@ -278,7 +280,7 @@ public class ScriptTransformer {
                                 varDecl.setType(Token.VAR);
                             }
                         }
-                    }
+                    }*/
                 } else if (node instanceof StringLiteral && node.getParent() instanceof ArrayLiteral && node.getParent().getParent() instanceof FunctionCall) {
                     StringLiteral sl = (StringLiteral) node;
                     FunctionCall call = (FunctionCall) node.getParent().getParent();
@@ -303,10 +305,12 @@ public class ScriptTransformer {
                 return true;
             }
         });
+        /*
         for (Runnable task : treeMutationTasks) {
             task.run();
         }
         externalVariables.clear();
+        */ 
         dependencies.removeAll(dynamicDependencies);
         serverDependencies.removeAll(dynamicDependencies);
         return sourceRoot.toSource();
@@ -391,19 +395,25 @@ public class ScriptTransformer {
     }
 
     private void convertNameIdentifier(Name aName, String aIdentifier) {
-        if (aName.getIdentifier().equals(REPORT) || aName.getIdentifier().equals(SERVER_REPORT)) {
-            aName.setIdentifier(SERVER_REPORT + aIdentifier);
-        } else if (aName.getIdentifier().equals(SERVER_MODULE)) {
-            aName.setIdentifier(SERVER_MODULE + aIdentifier);
-        } else {
-            if (Character.isDigit(aIdentifier.charAt(0))) {
-                aName.setIdentifier(aName.getIdentifier() + aIdentifier);
-            } else {
-                aName.setIdentifier(aIdentifier);
-            }
+        switch (aName.getIdentifier()) {
+            case REPORT:
+            case SERVER_REPORT:
+                aName.setIdentifier(SERVER_REPORT + aIdentifier);
+                break;
+            case SERVER_MODULE:
+                aName.setIdentifier(SERVER_MODULE + aIdentifier);
+                break;
+            default:
+                if (Character.isDigit(aIdentifier.charAt(0))) {
+                    aName.setIdentifier(aName.getIdentifier() + aIdentifier);
+                } else {
+                    aName.setIdentifier(aIdentifier);
+                }
+                break;
         }
     }
 
+    /*
     private Assignment variableInitializer2Assignment(VariableInitializer variable) {
         assert variable.getTarget() instanceof Name : ERROR_BAD_AST;
         AstNode left = variable.getTarget();
@@ -420,7 +430,7 @@ public class ScriptTransformer {
         Assignment assignment = new Assignment(Token.ASSIGN, left, right, 0);
         return assignment;
     }
-
+    
     private boolean isTopLevel(Name aName) {
         return aName.getScope().getDefiningScope(aName.getIdentifier()) instanceof AstRoot
                 || (aName.getScope().getDefiningScope(aName.getIdentifier()) == null
@@ -430,6 +440,7 @@ public class ScriptTransformer {
     private boolean isObjectLiteralPropName(Name aName){
         return aName != null && aName.getParent() instanceof ObjectProperty && ((ObjectProperty)aName.getParent()).getLeft() == aName;
     }
+    */ 
 
     private void putDependence(String entityId) {
         if (!dependencies.contains(entityId)) {
@@ -458,6 +469,7 @@ public class ScriptTransformer {
     /**
      * @return the externalVariables
      */
+    /*
     public Set<String> getExternalVariables() {
         return externalVariables;
     }
@@ -465,6 +477,7 @@ public class ScriptTransformer {
     /**
      * @param externalVariables the externalVariables to set
      */
+    /*
     public void setExternalVariables(Set<String> aExternalVariables) {
         externalVariables = aExternalVariables;
     }
@@ -475,7 +488,7 @@ public class ScriptTransformer {
                 && !externalVariables.contains(aVarName)) {
             externalVariables.add(aVarName);
         }
-    }
+    }*/
 
     /**
      * @return the serverDependencies

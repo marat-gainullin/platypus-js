@@ -8,8 +8,6 @@ import com.eas.client.AppCache;
 import com.eas.client.ClientConstants;
 import com.eas.client.cache.ActualCacheEntry;
 import com.eas.client.metadata.ApplicationElement;
-import com.eas.client.model.Model;
-import com.eas.client.model.application.ApplicationEntity;
 import com.eas.client.model.application.ApplicationModel;
 import com.eas.client.model.store.Model2XmlDom;
 import com.eas.client.scripts.ScriptDocument;
@@ -42,6 +40,7 @@ public class AppElementsFilter {
         }
     }
     public static final String SECURITY_VIOLATION_TEMPLATE = "function %s(){ throw 'Access to %s for %s denied! Contact your system administrator please.' }";
+    /*
     protected static String[] topLevelModulePropertiesAndMethods = new String[]{
         "model", "principal", "applicationElementId"
     };
@@ -56,53 +55,61 @@ public class AppElementsFilter {
         "onWindowRestored", "onWindowMaximized", "onWindowActivated", "onWindowDeactivated",
         "show", "showModal", "showOnPanel", "showInternalFrame", "close"
     };
+    */ 
     public static final String BROWSER_SELF_TEMPLATE = ""
             + "try{"
-            + "var " + ScriptTransformer.SELF_NAME + " = this;\n"
-            + "Object.defineProperty(" + ScriptTransformer.SELF_NAME + ", \"applicationElementId\", {\n"
-            + "    get:function() {\n"
-            + "        return '%s';\n"
-            + "    }\n"
-            + "});\n"
-            + "var ___appElement = window.platypus.getCached(" + ScriptTransformer.SELF_NAME + ".applicationElementId);\n";
-    public static final String BROWSER_MODEL_READ_TEMPLATE = "window.platypus.readModel(___appElement, " + ScriptTransformer.SELF_NAME + ");\n";
-    public static final String BROWSER_FORM_READ_TEMPLATE = "window.platypus.readForm(___appElement, " + ScriptTransformer.SELF_NAME + ");\n";
-    //public static final String BROWSER_REPORT_READ_TEMPLATE = "window.platypus.readReport(___appElement, " + ScriptTransformer.SELF_NAME + ");\n";
+//            + "var " + ScriptTransformer.SELF_NAME + " = this;"
+            + "Object.defineProperty(this, \"applicationElementId\", {"
+            + "    get:function() {"
+            + "        return '%s';"
+            + "    }"
+            + "});"
+            + "var ___appElement = window.platypus.getCached(this.applicationElementId);";
+    public static final String BROWSER_MODEL_READ_TEMPLATE = "window.platypus.readModel(___appElement, this);";
+    public static final String BROWSER_FORM_READ_TEMPLATE = "window.platypus.readForm(___appElement, this);";
+    //public static final String BROWSER_REPORT_READ_TEMPLATE = "window.platypus.readReport(___appElement, this);";
     public static final String BROWSER_SOURCE_BODY = ""
-            + "%s\n";
+            + "%s";
     public static final String BROWSER_SOURCE_TAIL = ""
-            + ScriptTransformer.SELF_NAME + ".model.runtime = true;\n"
-            + "} catch(e) {\n"
-            + "    if(window.console && e != null){\n"
-            + "        window.console.log(e.toString());\n"
-            + "        if(e.stack)\n"
-            + "            window.console.log(e.stack);\n"
-            + "    }\n"
+            + "this.model.runtime = true;"
+            + "} catch(e) {"
+            + "    if(window.console && e != null){"
+            + "        window.console.log(e.toString());"
+            + "        if(e.stack)"
+            + "            window.console.log(e.stack);"
+            + "    }"
             + "}"
-            + "}\n"
-            + "(function(){\n"
-            + "    var appElement = '%s';\n"
-            + "    if(!window.platypusModulesConstructors)\n"
-            + "        window.platypusModulesConstructors = {};\n"
-            + "    window.platypusModulesConstructors[appElement] = %s;\n"
-            + "    if(window.platypusModulesOnLoad && window.platypusModulesOnLoad[appElement])\n"
-            + "        window.platypusModulesOnLoad[appElement]();\n"
+            + "}"
+            + "(function(){"
+            + "    var appElement = '%s';"
+            + "    if(!window.platypusModulesConstructors)"
+            + "        window.platypusModulesConstructors = {};"
+            + "    var constr = %s;"
+            + "    window.platypusModulesConstructors[appElement] = constr;"
+            + "    if(window.platypusModulesOnLoad && window.platypusModulesOnLoad[appElement])"
+            + "        window.platypusModulesOnLoad[appElement]();"
+            + "  var F = function() {"
+            + "  };"
+            + "  F.prototype = %s.prototype;"
+            + "  constr.prototype = new F();"
+            + "  constr.prototype.constructor = constr;"
+            + "  constr.superclass = %s.prototype;"
             + "})();";
     public static final String BROWSER_MODULE_TEMPLATE = ""
-            + "function %s()\n"// Module name
-            + "{\n"
+            + "function %s()"// Module name
+            + "{"
             + BROWSER_SELF_TEMPLATE
             + BROWSER_MODEL_READ_TEMPLATE
             + BROWSER_SOURCE_BODY
             + BROWSER_SOURCE_TAIL;
     public static final String BROWSER_FORM_TEMPLATE = ""
-            + "function %s()\n"// Module name
-            + "{\n"
+            + "function %s()"// Module name
+            + "{"
             + BROWSER_SELF_TEMPLATE
             + BROWSER_MODEL_READ_TEMPLATE
             + BROWSER_FORM_READ_TEMPLATE
             + BROWSER_SOURCE_BODY
-            + ScriptTransformer.SELF_NAME + ".handled = true;\n"
+            + "this.handled = true;"
             + BROWSER_SOURCE_TAIL;
     public static final String DEPENDENCY_TAG_NAME = "dependency";
     public static final String QUERY_DEPENDENCY_TAG_NAME = "entityDependency";
@@ -181,23 +188,27 @@ public class AppElementsFilter {
                             ScriptTransformer transformer = buildTransformer(appSource, scriptDoc.getModel());
                             switch (aAppElement.getType()) {
                                 case ClientConstants.ET_COMPONENT: {
+                                    /*
                                     for (String topLevelVarMethod : topLevelModulePropertiesAndMethods) {
                                         transformer.addExternalVariable(topLevelVarMethod);
                                     }
+                                    */ 
                                     String constructorName = checkModuleName("Module", moduleId);
                                     probableScript = String.format(BROWSER_MODULE_TEMPLATE,
-                                            constructorName, moduleId, transformer.transform(), moduleId, constructorName);
+                                            constructorName, moduleId, transformer.transform(), moduleId, constructorName, "Module", "Module");
                                 }
                                 break;
                                 case ClientConstants.ET_FORM: {
+                                    /*
                                     for (String topLevelVarMethod : topLevelFomPropertiesAndMethods) {
                                         transformer.addExternalVariable(topLevelVarMethod);
                                     }
                                     addAsExternals(doc.getElementsByTagName("widget"), transformer);
                                     addAsExternals(doc.getElementsByTagName("nonvisual"), transformer);
+                                    */ 
                                     String constructorName = checkModuleName("Form", moduleId);
                                     probableScript = String.format(BROWSER_FORM_TEMPLATE,
-                                            constructorName, moduleId, transformer.transform(), moduleId, constructorName);
+                                            constructorName, moduleId, transformer.transform(), moduleId, constructorName, "Form", "Form");
                                 }
                                 break;
                                 default:
@@ -268,6 +279,7 @@ public class AppElementsFilter {
 
     protected ScriptTransformer buildTransformer(String aSource, ApplicationModel<?, ?, ?, ?> aModel) throws Exception {
         ScriptTransformer transformer = new ScriptTransformer(aSource, serverCore.getDatabasesClient().getAppCache());
+        /*
         transformer.addExternalVariable(Model.DATASOURCE_METADATA_SCRIPT_NAME);
         transformer.addExternalVariable(Model.PARAMETERS_SCRIPT_NAME);
         for (int i = 1; i <= aModel.getParameters().getParametersCount(); i++) {
@@ -276,6 +288,7 @@ public class AppElementsFilter {
         for (ApplicationEntity<?, ?, ?> entity : aModel.getEntities().values()) {
             transformer.addExternalVariable(entity.getName());
         }
+        */ 
         return transformer;
     }
 
@@ -303,6 +316,7 @@ public class AppElementsFilter {
         return scriptDoc.getModuleAllowedRoles();
     }
 
+    /*
     private void addAsExternals(NodeList widgets, ScriptTransformer transformer) throws DOMException {
         if (widgets != null) {
             for (int w = 0; w < widgets.getLength(); w++) {
@@ -317,4 +331,5 @@ public class AppElementsFilter {
             }
         }
     }
+    */ 
 }

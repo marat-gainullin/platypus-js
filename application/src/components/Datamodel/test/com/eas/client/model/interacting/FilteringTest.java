@@ -130,7 +130,7 @@ public class FilteringTest extends BaseTest {
         try {
             System.out.println("Test of filtering process with key values of various types, but same values");
             ApplicationDbModel model = BaseTest.modelFromStream(client, FilteringTest.class.getResourceAsStream(MODEL_TEST_PATH));
-            model.setScriptScope(BaseTest.getDummyScriptableObject());
+            model.setScriptThis(BaseTest.getDummyScriptableObject());
             model.setRuntime(true);
             ModelState state = new ModelState(model);
             Rowset rowset = state.IZMERJAEMIE_VELICHINI.getRowset();
@@ -225,7 +225,7 @@ public class FilteringTest extends BaseTest {
         ScriptUtils.enterContext();
         try {
             ApplicationDbModel model = BaseTest.modelFromStream(client, FilteringTest.class.getResourceAsStream(MODEL_TEST_PATH));
-            model.setScriptScope(BaseTest.getDummyScriptableObject());
+            model.setScriptThis(BaseTest.getDummyScriptableObject());
             model.setRuntime(true);
             ModelState state = new ModelState(model);
             Rowset rowset = state.IZMERJAEMIE_VELICHINI.getRowset();
@@ -277,7 +277,7 @@ public class FilteringTest extends BaseTest {
         ScriptUtils.enterContext();
         try {
             ApplicationDbModel model = BaseTest.modelFromStream(client, FilteringTest.class.getResourceAsStream(MODEL_TEST_PATH));
-            model.setScriptScope(BaseTest.getDummyScriptableObject());
+            model.setScriptThis(BaseTest.getDummyScriptableObject());
             model.setRuntime(true);
             ModelState state = new ModelState(model);
             Map<Long, Integer> counts = state.gatherRowCounts();
@@ -392,7 +392,7 @@ public class FilteringTest extends BaseTest {
         ScriptUtils.enterContext();
         try {
             ApplicationDbModel model = BaseTest.modelFromStream(client, FilteringTest.class.getResourceAsStream(MODEL_TEST_PATH));
-            model.setScriptScope(BaseTest.getDummyScriptableObject());
+            model.setScriptThis(BaseTest.getDummyScriptableObject());
             model.setRuntime(true);
             ModelState state = new ModelState(model);
 
@@ -427,7 +427,7 @@ public class FilteringTest extends BaseTest {
         ScriptUtils.enterContext();
         try {
             ApplicationDbModel model = BaseTest.modelFromStream(client, FilteringTest.class.getResourceAsStream(MODEL_TEST_PATH));
-            model.setScriptScope(BaseTest.getDummyScriptableObject());
+            model.setScriptThis(BaseTest.getDummyScriptableObject());
             model.setRuntime(true);
             ModelState state = new ModelState(model);
 
@@ -474,7 +474,7 @@ public class FilteringTest extends BaseTest {
         ScriptUtils.enterContext();
         try {
             ApplicationDbModel model = BaseTest.modelFromStream(client, FilteringTest.class.getResourceAsStream(MODEL_TEST_PATH));
-            model.setScriptScope(BaseTest.getDummyScriptableObject());
+            model.setScriptThis(BaseTest.getDummyScriptableObject());
             model.setRuntime(true);
             ModelState state = new ModelState(model);
             Rowset rowset = state.IZMERJAEMIE_VELICHINI.getRowset();
@@ -577,7 +577,7 @@ public class FilteringTest extends BaseTest {
         ScriptUtils.enterContext();
         try {
             ApplicationDbModel model = BaseTest.modelFromStream(client, FilteringTest.class.getResourceAsStream(MODEL_TEST_PATH));
-            model.setScriptScope(BaseTest.getDummyScriptableObject());
+            model.setScriptThis(BaseTest.getDummyScriptableObject());
             model.setRuntime(true);
 
             ModelState state = new ModelState(model);
@@ -715,7 +715,7 @@ public class FilteringTest extends BaseTest {
         ScriptUtils.enterContext();
         try {
             ApplicationDbModel model = BaseTest.modelFromStream(client, FilteringTest.class.getResourceAsStream(MODEL_TEST_PATH));
-            model.setScriptScope(BaseTest.getDummyScriptableObject());
+            model.setScriptThis(BaseTest.getDummyScriptableObject());
             model.setRuntime(true);
 
             ModelState state = new ModelState(model);

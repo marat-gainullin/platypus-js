@@ -118,8 +118,8 @@ public class ApplicationPlatypusParametersEntity extends ApplicationPlatypusEnti
 
     @Override
     public Scriptable defineProperties() throws Exception {
-        if (model.getScriptScope() != null && model.getScriptScope() instanceof ScriptableObject) {
-            ScriptableObject scope = (ScriptableObject) model.getScriptScope();
+        if (model.getScriptThis() != null && model.getScriptThis() instanceof ScriptableObject) {
+            ScriptableObject scope = (ScriptableObject) model.getScriptThis();
             ScriptableRowset<ApplicationPlatypusEntity> sRowset = new ScriptableRowset<>((ApplicationPlatypusEntity)this);
             // global parameters names
             Fields md = sRowset.getFields();

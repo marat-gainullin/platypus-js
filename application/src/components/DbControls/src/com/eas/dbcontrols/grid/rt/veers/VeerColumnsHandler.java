@@ -14,10 +14,12 @@ import com.eas.dbcontrols.grid.DbGridColumn;
 import com.eas.dbcontrols.grid.rt.DummyCellEditor;
 import com.eas.dbcontrols.grid.rt.columns.model.RowModelColumn;
 import com.eas.dbcontrols.visitors.DbSwingFactory;
+import com.eas.script.ScriptUtils;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.table.TableColumn;
 import org.mozilla.javascript.Function;
+import org.mozilla.javascript.Scriptable;
 
 /**
  *
@@ -35,10 +37,14 @@ public class VeerColumnsHandler implements TableColumnHandler {
     }
 
     protected Function getHandler(String aHandlerName) {
-        if (model != null && model.getScriptScope() != null && aHandlerName != null && !aHandlerName.isEmpty()) {
-            Object oFunction = model.getScriptScope().get(aHandlerName, model.getScriptScope());
-            if (oFunction instanceof Function) {
-                return (Function) oFunction;
+        if (aHandlerName != null && !aHandlerName.isEmpty() && model != null && model.getScriptThis() != null) {
+            Object oHandlers = model.getScriptThis().get(ScriptUtils.HANDLERS_PROP_NAME, model.getScriptThis());
+            if (oHandlers instanceof Scriptable) {
+                Scriptable sHandlers = (Scriptable) oHandlers;
+                Object oHandler = sHandlers.get(aHandlerName, sHandlers);
+                if (oHandler instanceof Function) {
+                    return (Function) oHandler;
+                }
             }
         }
         return null;

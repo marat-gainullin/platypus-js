@@ -4,12 +4,10 @@
  */
 package com.eas.dbcontrols;
 
-import com.eas.client.geo.RowsetFeatureDescriptor;
 import com.eas.controls.ControlsDesignInfoVisitor;
 import com.eas.dbcontrols.check.DbCheckDesignInfo;
 import com.eas.dbcontrols.combo.DbComboDesignInfo;
 import com.eas.dbcontrols.date.DbDateDesignInfo;
-import com.eas.dbcontrols.grid.DbGridColumn;
 import com.eas.dbcontrols.grid.DbGridDesignInfo;
 import com.eas.dbcontrols.image.DbImageDesignInfo;
 import com.eas.dbcontrols.label.DbLabelDesignInfo;

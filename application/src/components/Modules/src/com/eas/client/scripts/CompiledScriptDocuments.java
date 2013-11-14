@@ -33,7 +33,7 @@ public abstract class CompiledScriptDocuments {
     public synchronized void clearCompiledScriptDocuments() {
         compiledDocuments.clear();
     }
-
+    
     public synchronized ScriptDocument compileScriptDocument(String aAppElementId) throws Exception {
         ActualCacheEntry<ScriptDocument> scriptDocEntry = compiledDocuments.get(aAppElementId);
         ScriptDocument scriptDoc = scriptDocEntry != null ? scriptDocEntry.getValue() : null;
@@ -56,7 +56,7 @@ public abstract class CompiledScriptDocuments {
                      * currentContext.setOptimizationLevel(-1);
                      */
                     cx.setOptimizationLevel(-1);
-                    Function compiledFunc = cx.compileFunction(ScriptRunner.checkStandardObjects(cx), "function "+appElement.getId()+"(){"+scriptDoc.getScriptSource()+"}", appElement.getId(), 0, null);
+                    Function compiledFunc = cx.compileFunction(ScriptRunner.checkStandardObjects(cx), "function "+appElement.getId()+"(){"+scriptDoc.getScriptSource()+"; this[\""+ScriptUtils.HANDLERS_PROP_NAME+"\"]="+scriptDoc.generateTopLevelNamedFunctionsContainer()+";}", appElement.getId(), 0, null);
                     scriptDoc.setFunction(compiledFunc);
                 } finally {
                     Context.exit();

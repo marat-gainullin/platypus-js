@@ -52,7 +52,7 @@ public class RowWithRowsetMetadataTest  extends BaseTest {
         try {
             ScriptableObject scope = ScriptUtils.getScope();
             dm.setRuntime(true);
-            dm.setScriptScope(scope);
+            dm.setScriptThis(scope);
             // let's compile test script
             Script script = cx.compileString(SCRIPT_TEST_SOURCE, "rowWithRowsetFieldsTest", 0, null);
             script.exec(cx, scope);

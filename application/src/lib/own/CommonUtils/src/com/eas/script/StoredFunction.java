@@ -9,24 +9,25 @@ import org.mozilla.javascript.Function;
 import org.mozilla.javascript.Scriptable;
 
 /**
- * Dummy implementation, intended only for function name storing.
- * This class is utilized by data model and model-aware controls, while designing, and serialization.
+ * Dummy implementation, intended only for function name storing. This class is
+ * utilized by data model and model-aware controls, while designing, and
+ * serialization.
+ *
  * @author mg
  */
-public class StoredFunction implements Function{
-    public static final String DUMMY_IMPLEMENTATION = "Can't support this call, since this is dummy implementation, intended only for function name storing.";
+public class StoredFunction implements Function {
 
+    public static final String DUMMY_IMPLEMENTATION = "Can't support this call, since this is dummy implementation, intended only for function name storing.";
     protected String name;
-    
-    public StoredFunction(String aName)
-    {
+
+    public StoredFunction(String aName) {
         name = aName;
     }
 
     public String getName() {
         return name;
     }
-    
+
     @Override
     public Object call(Context cntxt, Scriptable s, Scriptable s1, Object[] os) {
         throw new UnsupportedOperationException(DUMMY_IMPLEMENTATION);
@@ -116,5 +117,4 @@ public class StoredFunction implements Function{
     public boolean hasInstance(Scriptable s) {
         throw new UnsupportedOperationException(DUMMY_IMPLEMENTATION);
     }
-   
 }

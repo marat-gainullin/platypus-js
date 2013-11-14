@@ -44,7 +44,7 @@ public class SubstitutingTest  extends BaseTest {
         Context cx = cf.enterContext();
         try {
             ScriptableObject scope = ScriptUtils.getScope();
-            dm.setScriptScope(scope);
+            dm.setScriptThis(scope);
             dm.setRuntime(true);
 
             Scriptable jsSr1 = (Scriptable)scope.get("entity1", scope);

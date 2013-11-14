@@ -116,8 +116,8 @@ public class ApplicationDbParametersEntity extends ApplicationDbEntity implement
 
     @Override
     public Scriptable defineProperties() throws Exception {
-        if (model.getScriptScope() != null && model.getScriptScope() instanceof ScriptableObject) {
-            ScriptableObject scope = (ScriptableObject) model.getScriptScope();
+        if (model.getScriptThis() != null && model.getScriptThis() instanceof ScriptableObject) {
+            ScriptableObject scope = (ScriptableObject) model.getScriptThis();
             ScriptableRowset<ApplicationDbEntity> sRowset = new ScriptableRowset<>((ApplicationDbEntity) this);
             // global parameters names
             Fields md = sRowset.getFields();

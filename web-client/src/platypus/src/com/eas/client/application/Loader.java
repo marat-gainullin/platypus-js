@@ -50,7 +50,7 @@ public class Loader {
 	}
 
 	public static final String INJECTED_SCRIPT_CLASS_NAME = "platypus-injected-script";
-	public static final String SERVER_MODULE_TOUCHED_NAME = "-PSMP-";
+	public static final String SERVER_MODULE_TOUCHED_NAME = "Proxy-";
 	public static final String DEPENDENCY_TAG_NAME = "dependency";
 	public static final String QUERY_DEPENDENCY_TAG_NAME = "entityDependency";
 	public static final String SERVER_DEPENDENCY_TAG_NAME = "serverDependency";

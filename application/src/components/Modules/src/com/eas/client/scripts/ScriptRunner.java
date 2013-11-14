@@ -120,12 +120,13 @@ public class ScriptRunner extends ScriptableObject {
         prepareRoles(scriptDoc);
         prepareModel(scriptDoc);
         prepareScript(scriptDoc, args);
+        this.delete(ScriptUtils.HANDLERS_PROP_NAME);
     }
 
     protected void prepareRoles(ScriptDocument scriptDoc) throws Exception {
         txtContentLength = scriptDoc.getTxtContentLength();
         txtCrc32 = scriptDoc.getTxtCrc32();
-        functionAllowedRoles = scriptDoc.getFunctionAllowedRoles();
+        functionAllowedRoles = scriptDoc.getPropertyAllowedRoles();
         moduleAllowedRoles = scriptDoc.getModuleAllowedRoles();
         moduleAnnotations = scriptDoc.getModuleAnnotations();
     }
@@ -142,7 +143,7 @@ public class ScriptRunner extends ScriptableObject {
     protected void prepareScript(ScriptDocument scriptDoc, Object[] args) throws Exception {
         Context context = ScriptUtils.enterContext();
         try {
-            model.setScriptScope(this);// model.scriptScope - is not a scope, but 'this'
+            model.setScriptThis(this);
             if (scriptDoc.getFunction() != null) {
                 if (System.getProperty(DEBUG_PROPERTY) != null) {
                     Breakpoints.getInstance().checkPendingBreakpoints();
@@ -151,8 +152,6 @@ public class ScriptRunner extends ScriptableObject {
                 for (int i = 0; i < jsArgs.length; i++) {
                     jsArgs[i] = ScriptUtils.javaToJS(args[i], ScriptUtils.getScope());
                 }
-                //defineProperty("arguments", jsArgs, ScriptableObject.READONLY);
-                //getParentScope().get("Messages", getParentScope());
                 scriptDoc.getFunction().call(context, getParentScope(), this, jsArgs);
             }
             model.resolveHandlers();

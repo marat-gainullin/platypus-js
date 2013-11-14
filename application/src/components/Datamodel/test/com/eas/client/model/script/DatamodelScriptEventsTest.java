@@ -143,7 +143,7 @@ public class DatamodelScriptEventsTest extends BaseTest {
         ContextFactory cf = ContextFactory.getGlobal();
         Context cx = cf.enterContext();
         try {
-            model.setScriptScope(BaseTest.getDummyScriptableObject());
+            model.setScriptThis(BaseTest.getDummyScriptableObject());
             model.setRuntime(true);
             Rowset rowset = entity11.getRowset();
             // scrolls and changes

@@ -1215,6 +1215,7 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
         Runnable handlersResolver = prepareForm(scriptDoc);
         prepareScript(scriptDoc, args);
         handlersResolver.run();
+        this.delete(ScriptUtils.HANDLERS_PROP_NAME);
     }
 
     protected Runnable prepareForm(ScriptDocument scriptDoc) throws Exception {
@@ -1282,21 +1283,21 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
     protected void definePropertiesAndMethods() {
         super.definePropertiesAndMethods();
         defineFunctionProperties(new String[]{
-                    "getDialog",
-                    "getInternalFrame",
-                    "getFormId",
-                    "getFrame",
-                    "show",
-                    "showInternalFrame",
-                    "showModal",
-                    "showDialog",
-                    "showOnPanel",
-                    "close",
-                    "minimize",
-                    "maximize",
-                    "restore",
-                    "toFront"
-                }, FormRunner.class, EMPTY);
+            "getDialog",
+            "getInternalFrame",
+            "getFormId",
+            "getFrame",
+            "show",
+            "showInternalFrame",
+            "showModal",
+            "showDialog",
+            "showOnPanel",
+            "close",
+            "minimize",
+            "maximize",
+            "restore",
+            "toFront"
+        }, FormRunner.class, EMPTY);
         defineProperty("formKey", FormRunner.class, EMPTY);
         defineProperty("visible", FormRunner.class, READONLY);
         defineProperty("left", FormRunner.class, EMPTY);
@@ -1330,12 +1331,15 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
 
     @Override
     public Function getHandler(String aHandlerName) {
-        Object oHandler = get(aHandlerName, this);
-        if (oHandler instanceof Function) {
-            return (Function) oHandler;
-        } else {
-            return null;
+        Object oHandlers = get(ScriptUtils.HANDLERS_PROP_NAME);
+        if (oHandlers instanceof Scriptable) {
+            Scriptable sHandlers = (Scriptable) oHandlers;
+            Object oHandler = sHandlers.get(aHandlerName, sHandlers);
+            if (oHandler instanceof Function) {
+                return (Function) oHandler;
+            }
         }
+        return null;
     }
 
     @Override
