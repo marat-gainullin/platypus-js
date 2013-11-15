@@ -285,10 +285,10 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
     private static final String SHOW_ON_PANEL_FRAME_JSDOC = ""
             + "/**\n"
             + "* Script method showing the form on panel.\n"
-            + "* @param panel Parent panel.\n"
+            + "* @param panel the parent panel.\n"
             + "*/";
 
-    @ScriptFunction(jsDoc = SHOW_ON_PANEL_FRAME_JSDOC)
+    @ScriptFunction(jsDoc = SHOW_ON_PANEL_FRAME_JSDOC, params = {"panel"})
     public void showOnPanel(Object aParent) throws Exception {
         com.eas.client.forms.api.Container<?> hostPanel;
         if (aParent != null) {
@@ -310,13 +310,13 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
     public String getFormId() {
         return getApplicationElementId();
     }
-    private static final String GET_FORM_KEY_JSDOC = ""
+    
+    private static final String FORM_KEY_JSDOC = ""
             + "/**\n"
-            + "* Gets form keys.\n"
-            + "* @return keys List of form keys.\n"
+            + "* The form key. Used to identify a form instance. Initialy set to the form's application element ID.\n"
             + "*/";
 
-    @ScriptFunction(jsDoc = GET_FORM_KEY_JSDOC)
+    @ScriptFunction(jsDoc = FORM_KEY_JSDOC)
     public String getFormKey() {
         return formKey;
     }
@@ -336,7 +336,7 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
     }
     private static final String IS_VISIBLE_JSDOC = ""
             + "/**\n"
-            + "* Checks if form visible\n"
+            + "* Checks if form visible.\n"
             + "*/";
 
     @ScriptFunction(jsDoc = IS_VISIBLE_JSDOC)

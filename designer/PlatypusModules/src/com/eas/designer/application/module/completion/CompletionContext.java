@@ -7,10 +7,8 @@ package com.eas.designer.application.module.completion;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
 import com.eas.client.model.Entity;
-import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
 import com.eas.client.model.script.ScriptableRowset;
-import com.eas.designer.application.module.PlatypusModuleDataObject;
 import com.eas.script.ScriptFunction;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -38,7 +36,6 @@ public class CompletionContext {
     protected static final String BEANY_PREFIX_GET = "get";// NOI18N
     protected static final String BEANY_PREFIX_SET = "set";// NOI18N
     protected static final String BEANY_PREFIX_IS = "is";// NOI18N
-    protected static final String PARAMETER_TEMPLATE = "p%s";// NOI18N
     protected Class<?> scriptClass;
 
     public CompletionContext(Class<?> aScriptClass) {
@@ -114,8 +111,11 @@ public class CompletionContext {
             }
             for (Method method : methods) {
                 List<String> parameters = new ArrayList<>();
-                for (int i = 0; i < method.getParameterTypes().length; i++) {
-                    parameters.add(String.format(PARAMETER_TEMPLATE, i));
+                String[] params = method.getAnnotation(ScriptFunction.class).params();
+                if (params != null) {
+                    for (String param : params) {
+                        parameters.add(param);
+                    }
                 }
                 JsFunctionCompletionItem functionCompletionItem = new JsFunctionCompletionItem(
                         method.getName(),
