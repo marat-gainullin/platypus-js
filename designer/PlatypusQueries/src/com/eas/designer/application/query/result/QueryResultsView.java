@@ -175,7 +175,7 @@ public class QueryResultsView extends javax.swing.JPanel {
         model = new ApplicationDbModel(client);
         ScriptUtils.enterContext();
         try {
-            model.setScriptScope(ScriptUtils.getScope());
+            model.setScriptThis(ScriptUtils.getScope());
             model.setParameters(parameters);
             setupQueryEntityBySql();
             setModelRelations();

@@ -199,7 +199,7 @@ public class QuerySetupView extends javax.swing.JPanel {
         paramsModel = new ApplicationDbModel();
         ScriptUtils.enterContext();
         try {
-            paramsModel.setScriptScope(ScriptUtils.getScope());
+            paramsModel.setScriptThis(ScriptUtils.getScope());
             paramsModel.setParameters(parentView.getParameters().copy());
             paramsModel.setRuntime(true);
             parametersGrid = new EntityFieldsGrid();
