@@ -229,43 +229,43 @@ public class XmlDom2Model implements ModelVisitor {
 			public void run() {
 				Node a = attrs.getNamedItem(Model.DATASOURCE_AFTER_CHANGE_EVENT_TAG_NAME);
 				if (a != null) {
-					entity.setOnAfterChange(module.<JsObject>cast().getJs(a.getNodeValue()));
+					entity.setOnAfterChange(module.<Utils.JsModule> cast().getHandler(a.getNodeValue()));
 				}
 				a = attrs.getNamedItem(Model.DATASOURCE_AFTER_DELETE_EVENT_TAG_NAME);
 				if (a != null) {
-					entity.setOnAfterDelete(module.<JsObject>cast().getJs(a.getNodeValue()));
+					entity.setOnAfterDelete(module.<Utils.JsModule> cast().getHandler(a.getNodeValue()));
 				}
 				a = attrs.getNamedItem(Model.DATASOURCE_AFTER_INSERT_EVENT_TAG_NAME);
 				if (a != null) {
-					entity.setOnAfterInsert(module.<JsObject>cast().getJs(a.getNodeValue()));
+					entity.setOnAfterInsert(module.<Utils.JsModule> cast().getHandler(a.getNodeValue()));
 				}
 				a = attrs.getNamedItem(Model.DATASOURCE_AFTER_SCROLL_EVENT_TAG_NAME);
 				if (a != null) {
-					entity.setOnAfterScroll(module.<JsObject>cast().getJs(a.getNodeValue()));
+					entity.setOnAfterScroll(module.<Utils.JsModule> cast().getHandler(a.getNodeValue()));
 				}
 				a = attrs.getNamedItem(Model.DATASOURCE_AFTER_FILTER_EVENT_TAG_NAME);
 				if (a != null) {
-					entity.setOnFiltered(module.<JsObject>cast().getJs(a.getNodeValue()));
+					entity.setOnFiltered(module.<Utils.JsModule> cast().getHandler(a.getNodeValue()));
 				}
 				a = attrs.getNamedItem(Model.DATASOURCE_AFTER_REQUERY_EVENT_TAG_NAME);
 				if (a != null) {
-					entity.setOnRequeried(module.<JsObject>cast().getJs(a.getNodeValue()));
+					entity.setOnRequeried(module.<Utils.JsModule> cast().getHandler(a.getNodeValue()));
 				}
 				a = attrs.getNamedItem(Model.DATASOURCE_BEFORE_CHANGE_EVENT_TAG_NAME);
 				if (a != null) {
-					entity.setOnBeforeChange(module.<JsObject>cast().getJs(a.getNodeValue()));
+					entity.setOnBeforeChange(module.<Utils.JsModule> cast().getHandler(a.getNodeValue()));
 				}
 				a = attrs.getNamedItem(Model.DATASOURCE_BEFORE_DELETE_EVENT_TAG_NAME);
 				if (a != null) {
-					entity.setOnBeforeDelete(module.<JsObject>cast().getJs(a.getNodeValue()));
+					entity.setOnBeforeDelete(module.<Utils.JsModule> cast().getHandler(a.getNodeValue()));
 				}
 				a = attrs.getNamedItem(Model.DATASOURCE_BEFORE_INSERT_EVENT_TAG_NAME);
 				if (a != null) {
-					entity.setOnBeforeInsert(module.<JsObject>cast().getJs(a.getNodeValue()));
+					entity.setOnBeforeInsert(module.<Utils.JsModule> cast().getHandler(a.getNodeValue()));
 				}
 				a = attrs.getNamedItem(Model.DATASOURCE_BEFORE_SCROLL_EVENT_TAG_NAME);
 				if (a != null) {
-					entity.setOnBeforeScroll(module.<JsObject>cast().getJs(a.getNodeValue()));
+					entity.setOnBeforeScroll(module.<Utils.JsModule> cast().getHandler(a.getNodeValue()));
 				}
 			}
 

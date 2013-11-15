@@ -20,7 +20,7 @@ import org.w3c.dom.Document;
  * @author pk, mg refactoring
  */
 public class ScriptDocument {
-    
+
     private String entityId;
     private String title;
     protected long txtContentLength;
@@ -100,6 +100,7 @@ public class ScriptDocument {
 
     public void setScriptSource(String aScriptSource) {
         scriptSource = aScriptSource;
+        ast = null;
     }
 
     public Set<String> getDepencies() {
@@ -142,8 +143,9 @@ public class ScriptDocument {
         StringBuilder sb = new StringBuilder();
         sb.append("{");
         for (String aName : topLevelNamedFunctionsNames) {
-            if(sb.length() > 1)
+            if (sb.length() > 1) {
                 sb.append(",");
+            }
             sb.append("\"").append(aName).append("\"").append(":").append(aName);
         }
         sb.append("}");
@@ -164,28 +166,32 @@ public class ScriptDocument {
      */
     public void readScriptAnnotations() {
         assert scriptSource != null : "Javascript source can't be null";
-        ast = ScriptUtils.parseJs(scriptSource);
-        ast.visit(new NodeVisitor() {
-            @Override
-            public boolean visit(AstNode node) {
-                if (node.getParent() == ast.getAstRoot() && node instanceof FunctionNode) {
-                    String fName = ((FunctionNode) node).getName();
-                    if (fName != null && !fName.isEmpty()) {
-                        topLevelNamedFunctionsNames.add(fName);
+        if (ast == null) {
+            topLevelNamedFunctionsNames.clear();
+            propertyAllowedRoles.clear();
+            ast = ScriptUtils.parseJs(scriptSource);
+            ast.visit(new NodeVisitor() {
+                @Override
+                public boolean visit(AstNode node) {
+                    if (node.getParent() == ast.getAstRoot() && node instanceof FunctionNode) {
+                        String fName = ((FunctionNode) node).getName();
+                        if (fName != null && !fName.isEmpty()) {
+                            topLevelNamedFunctionsNames.add(fName);
+                        }
                     }
-                }
-                if (node.getJsDoc() != null && node instanceof Assignment) {
-                    Assignment as = (Assignment) node;
-                    if (as.getLeft() instanceof PropertyGet) {
-                        PropertyGet pg = (PropertyGet) as.getLeft();
-                        Name n = pg.getProperty();
-                        readPropertyRoles(n.getIdentifier(), node.getJsDoc());
+                    if (node.getJsDoc() != null && node instanceof Assignment) {
+                        Assignment as = (Assignment) node;
+                        if (as.getLeft() instanceof PropertyGet) {
+                            PropertyGet pg = (PropertyGet) as.getLeft();
+                            Name n = pg.getProperty();
+                            readPropertyRoles(n.getIdentifier(), node.getJsDoc());
+                        }
                     }
+                    return true;
                 }
-                return true;
-            }
-        });
-        readModuleAnnotations();
+            });
+            readModuleAnnotations();
+        }
     }
 
     private void readModuleAnnotations() {

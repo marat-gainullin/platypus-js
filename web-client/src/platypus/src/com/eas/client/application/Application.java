@@ -1062,7 +1062,7 @@ public class Application {
 						Collection<String> results = new ArrayList<String>();
 						results.add(aResult);
 						loadings = loader.load(results, new ExecuteApplicationCallback(results));
-					}else{
+					} else {
 						onReady();
 					}
 				}
@@ -1087,22 +1087,28 @@ public class Application {
 		}
 	}
 
+	/**
+	 * Avoiding parallel Loader.load() calls like this:
+	 * require(["Module1", "Module2", "Module3", "Module4"], function(){});
+	 * require(["Module0", "Module2", "Module5", "Module7"], function(){});
+	 * Here, loader will be called twice form "Module2" in parallel.
+	 */
 	protected static boolean requiring;
-	
-	protected static class RequireProcess{
+
+	protected static class RequireProcess {
 		public JavaScriptObject deps;
 		public JavaScriptObject onSuccess;
 		public JavaScriptObject onFailure;
-		
-		public RequireProcess(JavaScriptObject aDeps, final JavaScriptObject aOnSuccess, final JavaScriptObject aOnFailure){
+
+		public RequireProcess(JavaScriptObject aDeps, final JavaScriptObject aOnSuccess, final JavaScriptObject aOnFailure) {
 			deps = aDeps;
 			onSuccess = aOnSuccess;
 			onFailure = aOnFailure;
 		}
 	}
-	
+
 	protected static List<RequireProcess> requireProcesses = new ArrayList<RequireProcess>();
-	
+
 	public static void require(JavaScriptObject aDeps, final JavaScriptObject aOnSuccess, final JavaScriptObject aOnFailure) {
 		final Set<String> deps = new HashSet<String>();
 		JsArrayString depsValues = aDeps.<JsArrayString> cast();
@@ -1111,41 +1117,35 @@ public class Application {
 			if (!loader.isLoaded(dep))
 				deps.add(dep);
 		}
-		if (!deps.isEmpty()) {
-			if(!requiring){
-				requiring = true;
-				try {
-					loader.prepareOptimistic();
-					loader.load(deps, new CancellableCallbackAdapter() {
-	
-						@Override
-						protected void doWork() throws Exception {
-							if (loader.isLoaded(deps)) {
+		if (!requiring) {
+			requiring = true;
+			try {
+				loader.prepareOptimistic();
+				loader.load(deps, new CancellableCallbackAdapter() {
+
+					@Override
+					protected void doWork() throws Exception {
+						requiring = false;
+						try {
+							if (deps.isEmpty() || loader.isLoaded(deps)) {
 								Utils.invokeJsFunction(aOnSuccess);
 							} else {
 								Utils.invokeJsFunction(aOnFailure);
 							}
-							requiring = false;
-							if(!requireProcesses.isEmpty()){
+						} finally {
+							if (!requireProcesses.isEmpty()) {
 								RequireProcess p = requireProcesses.remove(0);
 								assert p != null;
 								require(p.deps, p.onSuccess, p.onFailure);
 							}
 						}
-					});
-				} catch (Exception ex) {
-					Logger.getLogger(Application.class.getName()).log(Level.SEVERE, null, ex);
-				}
-			}else{
-				requireProcesses.add(new RequireProcess(aDeps, aOnSuccess, aOnFailure));
+					}
+				});
+			} catch (Exception ex) {
+				Logger.getLogger(Application.class.getName()).log(Level.SEVERE, null, ex);
 			}
-		} else{
-			Utils.invokeJsFunction(aOnSuccess);
-			if(!requireProcesses.isEmpty()){
-				RequireProcess p = requireProcesses.remove(0);
-				assert p != null;
-				require(p.deps, p.onSuccess, p.onFailure);
-			}
+		} else {
+			requireProcesses.add(new RequireProcess(aDeps, aOnSuccess, aOnFailure));
 		}
 	}
 }

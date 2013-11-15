@@ -12,6 +12,7 @@ import com.eas.client.model.application.ApplicationModel;
 import com.eas.client.model.store.Model2XmlDom;
 import com.eas.client.scripts.ScriptDocument;
 import com.eas.client.scripts.store.Dom2ScriptDocument;
+import com.eas.script.ScriptUtils;
 import com.eas.server.PlatypusServerCore;
 import com.eas.xml.dom.XmlDom2String;
 import java.util.HashMap;
@@ -44,8 +45,8 @@ public class AppElementsFilter {
     protected static String[] topLevelModulePropertiesAndMethods = new String[]{
         "model", "principal", "applicationElementId"
     };
-    protected static String[] topLevelFomPropertiesAndMethods = new String[]{
-        "model", "principal", "applicationElementId", "view", "formKey", "defaultCloseOperation",
+    protected static String[] topLevelFormPropertiesAndMethods = new String[]{
+        "view", "formKey", "defaultCloseOperation",
         "icon", "title",
         "resizable", "minimized", "maximized", "minimizable", "maximizable",
         "minimize", "maximize", "restore", "toFront",
@@ -86,8 +87,6 @@ public class AppElementsFilter {
             + "        window.platypusModulesConstructors = {};"
             + "    var constr = %s;"
             + "    window.platypusModulesConstructors[appElement] = constr;"
-            + "    if(window.platypusModulesOnLoad && window.platypusModulesOnLoad[appElement])"
-            + "        window.platypusModulesOnLoad[appElement]();"
             + "  var F = function() {"
             + "  };"
             + "  F.prototype = %s.prototype;"
@@ -171,8 +170,9 @@ public class AppElementsFilter {
             aAppElement = aAppElement.copy();// because of mutations of xml content dom, made by this code.
             String probableScript = null;
             Document doc = aAppElement.getContent();
-            ScriptDocument scriptDoc = Dom2ScriptDocument.dom2ScriptDocument(serverCore.getDatabasesClient(), doc);
             if (doc != null) {
+                ScriptDocument scriptDoc = Dom2ScriptDocument.dom2ScriptDocument(serverCore.getDatabasesClient(), doc);
+                scriptDoc.readScriptAnnotations();
                 String moduleId = aAppElement.getId();
                 Set<String> dependencies = null;
                 Set<String> queryDependencies = null;
@@ -195,12 +195,15 @@ public class AppElementsFilter {
                                     */ 
                                     String constructorName = checkModuleName("Module", moduleId);
                                     probableScript = String.format(BROWSER_MODULE_TEMPLATE,
-                                            constructorName, moduleId, transformer.transform(), moduleId, constructorName, "Module", "Module");
+                                            constructorName, moduleId, appSource+"; this[\""+ScriptUtils.HANDLERS_PROP_NAME+"\"]="+scriptDoc.generateTopLevelNamedFunctionsContainer()+";", moduleId, constructorName, "Module", "Module");
                                 }
                                 break;
                                 case ClientConstants.ET_FORM: {
                                     /*
-                                    for (String topLevelVarMethod : topLevelFomPropertiesAndMethods) {
+                                    for (String topLevelVarMethod : topLevelModulePropertiesAndMethods) {
+                                        transformer.addExternalVariable(topLevelVarMethod);
+                                    }
+                                    for (String topLevelVarMethod : topLevelFormPropertiesAndMethods) {
                                         transformer.addExternalVariable(topLevelVarMethod);
                                     }
                                     addAsExternals(doc.getElementsByTagName("widget"), transformer);
@@ -208,13 +211,14 @@ public class AppElementsFilter {
                                     */ 
                                     String constructorName = checkModuleName("Form", moduleId);
                                     probableScript = String.format(BROWSER_FORM_TEMPLATE,
-                                            constructorName, moduleId, transformer.transform(), moduleId, constructorName, "Form", "Form");
+                                            constructorName, moduleId, appSource+"; this[\""+ScriptUtils.HANDLERS_PROP_NAME+"\"]="+scriptDoc.generateTopLevelNamedFunctionsContainer()+";", moduleId, constructorName, "Form", "Form");
                                 }
                                 break;
                                 default:
                                     throw new Exception("Application element of unexpected type occured. Only Modules and Forms are allowed be requested by browser.");
                             }
                             docNode.getParentNode().removeChild(docNode);
+                            transformer.transform();
                             dependencies = transformer.getDependencies();
                             queryDependencies = transformer.getQueryDependencies();
                             serverDependencies = transformer.getServerDependencies();

@@ -218,7 +218,7 @@ public class ScriptUtils {
             Context.exit();
         }
     }
-    
+
     public static void extend(Function aChild, Function aParent) {
         init();
         Context cx = Context.enter();
@@ -233,7 +233,7 @@ public class ScriptUtils {
         init();
         Context cx = Context.enter();
         try {
-            return (ScriptableObject)scalarDefFunc.construct(cx, topLevelScope, new Object[]{targetEntity, targetFieldName, sourceFieldName});
+            return (ScriptableObject) scalarDefFunc.construct(cx, topLevelScope, new Object[]{targetEntity, targetFieldName, sourceFieldName});
         } finally {
             Context.exit();
         }
@@ -243,7 +243,7 @@ public class ScriptUtils {
         init();
         Context cx = Context.enter();
         try {
-            return (ScriptableObject)collectionDefFunc.construct(cx, topLevelScope, new Object[]{sourceEntity, targetFieldName, sourceFieldName});
+            return (ScriptableObject) collectionDefFunc.construct(cx, topLevelScope, new Object[]{sourceEntity, targetFieldName, sourceFieldName});
         } finally {
             Context.exit();
         }
@@ -258,16 +258,19 @@ public class ScriptUtils {
         return p.parse(aSource, "", 0); //NOI18N      
     }
 
-    public static boolean isValidJsIdentifier(String str) {
-        if (str != null && !str.trim().isEmpty()) {
+    public static boolean isValidJsIdentifier(final String aName) {
+        if (aName != null && !aName.trim().isEmpty()) {
             init();
-            Context cx = Context.enter();
             try {
-                return cx.compileFunction(topLevelScope, String.format("function %s() {}", str), null, 0, null) != null; //NOI18N
+                inContext(new Runnable() {
+                    @Override
+                    public void run() {
+                        Context.getCurrentContext().compileFunction(topLevelScope, String.format("function %s() {}", aName), null, 0, null); //NOI18N
+                    }
+                });
+                return true;
             } catch (Exception ex) {
                 return false;
-            } finally {
-                Context.exit();
             }
         }
         return false;
@@ -280,6 +283,23 @@ public class ScriptUtils {
         }
         cx.getWrapFactory().setJavaPrimitiveWrap(false);
         return cx;
+    }
+
+    public static void inContext(Runnable aAction) {
+        if (aAction != null) {
+            Context cx = Context.getCurrentContext();
+            boolean wasContext = cx != null;
+            if (!wasContext) {
+                enterContext();
+            }
+            try {
+                aAction.run();
+            } finally {
+                if (!wasContext) {
+                    Context.exit();
+                }
+            }
+        }
     }
 
     public static String toString(Object value) {
