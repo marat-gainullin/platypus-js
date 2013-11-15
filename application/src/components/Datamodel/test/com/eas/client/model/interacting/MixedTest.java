@@ -136,7 +136,7 @@ public class MixedTest extends BaseTest {
         ScriptUtils.enterContext();
         try {
             ApplicationDbModel model = BaseTest.modelFromStream(client, MixedTest.class.getResourceAsStream(MODEL_TEST_PATH));
-            model.setScriptScope(BaseTest.getDummyScriptableObject());
+            model.setScriptThis(BaseTest.getDummyScriptableObject());
             model.setRuntime(true);
             ModelState state = new ModelState(model);
             Map<Long, Integer> counts = state.gatherRowCounts();
@@ -271,7 +271,7 @@ public class MixedTest extends BaseTest {
         ScriptUtils.enterContext();
         try {
             ApplicationDbModel model = BaseTest.modelFromStream(client, MixedTest.class.getResourceAsStream(MODEL_TEST_PATH));
-            model.setScriptScope(BaseTest.getDummyScriptableObject());
+            model.setScriptThis(BaseTest.getDummyScriptableObject());
             model.setRuntime(true);
             ModelState state = new ModelState(model);
             listenerOf1Layer = null;
@@ -332,7 +332,7 @@ public class MixedTest extends BaseTest {
         ScriptUtils.enterContext();
         try {
             ApplicationDbModel model = BaseTest.modelFromStream(client, MixedTest.class.getResourceAsStream(MODEL_TEST_PATH));
-            model.setScriptScope(BaseTest.getDummyScriptableObject());
+            model.setScriptThis(BaseTest.getDummyScriptableObject());
             model.setRuntime(true);
             ModelState state = new ModelState(model);
 
@@ -375,7 +375,7 @@ public class MixedTest extends BaseTest {
         ScriptUtils.enterContext();
         try {
             ApplicationDbModel model = BaseTest.modelFromStream(client, MixedTest.class.getResourceAsStream(MODEL_TEST_PATH));
-            model.setScriptScope(BaseTest.getDummyScriptableObject());
+            model.setScriptThis(BaseTest.getDummyScriptableObject());
             model.setRuntime(true);
             ModelState state = new ModelState(model);
 

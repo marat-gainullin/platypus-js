@@ -48,11 +48,11 @@ public class GxtModelControlsFactory extends GxtControlsFactory {
 		@Override
 		public void run() {
 			if (cellFunctionName != null && !cellFunctionName.isEmpty()) {
-				JavaScriptObject cellFunction = module.<JsObject> cast().getJs(cellFunctionName);
+				JavaScriptObject cellFunction = module.<Utils.JsModule> cast().getHandler(cellFunctionName);
 				field.setOnRender(cellFunction);
 			}
 			if (selectFunctionName != null && !selectFunctionName.isEmpty()) {
-				JavaScriptObject selectFunction = module.<JsObject> cast().getJs(selectFunctionName);
+				JavaScriptObject selectFunction = module.<Utils.JsModule> cast().getHandler(selectFunctionName);
 				field.setOnSelect(selectFunction);
 			}
 		}

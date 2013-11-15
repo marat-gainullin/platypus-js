@@ -27,6 +27,7 @@ import org.mozilla.javascript.xml.XMLObject;
  */
 public class ScriptUtils {
 
+    public static final String HANDLERS_PROP_NAME = "-x-handlers-funcs-";
     public static final String WRAPPER_PROP_NAME = "wrapperComponent";
     protected static final String toDateFuncSource = ""
             + "function toJsDate(aJavaDate){ return aJavaDate != null?new Date(aJavaDate.time):null; }"
@@ -40,6 +41,15 @@ public class ScriptUtils {
     protected static final String toXMLStringFuncSource = ""
             + "function toXMLString(aObj){ return aObj.toXMLString(); }"
             + "";
+    protected static final String extendFuncSource = ""
+            + "function extend(Child, Parent) {"
+            + "  var F = function() {"
+            + "  };"
+            + "  F.prototype = Parent.prototype;"
+            + "  Child.prototype = new F();"
+            + "  Child.prototype.constructor = Child;"
+            + "  Child.superclass = Parent.prototype;"
+            + "}";
     protected static final String scalarDefFuncSource = ""
             + "function(targetEntity, targetFieldName, sourceFieldName){"
             + "    var _self = this;"
@@ -79,6 +89,7 @@ public class ScriptUtils {
     protected static Function parseJsonFunc;
     protected static Function writeJsonFunc;
     protected static Function toXMLStringFunc;
+    protected static Function extendFunc;
     protected static Function scalarDefFunc;
     protected static Function collectionDefFunc;
     protected static ScriptableObject topLevelScope;
@@ -96,6 +107,7 @@ public class ScriptUtils {
                 parseJsonFunc = ctx.compileFunction(topLevelScope, parseJsonFuncSource, "parseJsonFunc", 0, null);
                 writeJsonFunc = ctx.compileFunction(topLevelScope, writeJsonFuncSource, "writeJsonFunc", 0, null);
                 toXMLStringFunc = ctx.compileFunction(topLevelScope, toXMLStringFuncSource, "toXMLStringFunc", 0, null);
+                extendFunc = ctx.compileFunction(topLevelScope, extendFuncSource, "extendFunc", 0, null);
                 scalarDefFunc = ctx.compileFunction(topLevelScope, scalarDefFuncSource, "scalarDefFunc", 0, null);
                 collectionDefFunc = ctx.compileFunction(topLevelScope, collectionDefFuncSource, "collectionDefFunc", 0, null);
             } finally {
@@ -207,11 +219,21 @@ public class ScriptUtils {
         }
     }
 
+    public static void extend(Function aChild, Function aParent) {
+        init();
+        Context cx = Context.enter();
+        try {
+            extendFunc.call(cx, topLevelScope, null, new Object[]{aChild, aParent});
+        } finally {
+            Context.exit();
+        }
+    }
+
     public static ScriptableObject scalarPropertyDefinition(Scriptable targetEntity, String targetFieldName, String sourceFieldName) {
         init();
         Context cx = Context.enter();
         try {
-            return (ScriptableObject)scalarDefFunc.construct(cx, topLevelScope, new Object[]{targetEntity, targetFieldName, sourceFieldName});
+            return (ScriptableObject) scalarDefFunc.construct(cx, topLevelScope, new Object[]{targetEntity, targetFieldName, sourceFieldName});
         } finally {
             Context.exit();
         }
@@ -221,7 +243,7 @@ public class ScriptUtils {
         init();
         Context cx = Context.enter();
         try {
-            return (ScriptableObject)collectionDefFunc.construct(cx, topLevelScope, new Object[]{sourceEntity, targetFieldName, sourceFieldName});
+            return (ScriptableObject) collectionDefFunc.construct(cx, topLevelScope, new Object[]{sourceEntity, targetFieldName, sourceFieldName});
         } finally {
             Context.exit();
         }
@@ -236,16 +258,19 @@ public class ScriptUtils {
         return p.parse(aSource, "", 0); //NOI18N      
     }
 
-    public static boolean isValidJsIdentifier(String str) {
-        if (str != null && !str.trim().isEmpty()) {
+    public static boolean isValidJsIdentifier(final String aName) {
+        if (aName != null && !aName.trim().isEmpty()) {
             init();
-            Context cx = Context.enter();
             try {
-                return cx.compileFunction(topLevelScope, String.format("function %s() {}", str), null, 0, null) != null; //NOI18N
+                inContext(new Runnable() {
+                    @Override
+                    public void run() {
+                        Context.getCurrentContext().compileFunction(topLevelScope, String.format("function %s() {}", aName), null, 0, null); //NOI18N
+                    }
+                });
+                return true;
             } catch (Exception ex) {
                 return false;
-            } finally {
-                Context.exit();
             }
         }
         return false;
@@ -258,6 +283,23 @@ public class ScriptUtils {
         }
         cx.getWrapFactory().setJavaPrimitiveWrap(false);
         return cx;
+    }
+
+    public static void inContext(Runnable aAction) {
+        if (aAction != null) {
+            Context cx = Context.getCurrentContext();
+            boolean wasContext = cx != null;
+            if (!wasContext) {
+                enterContext();
+            }
+            try {
+                aAction.run();
+            } finally {
+                if (!wasContext) {
+                    Context.exit();
+                }
+            }
+        }
     }
 
     public static String toString(Object value) {

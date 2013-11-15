@@ -31,6 +31,8 @@ public class ServerReportProxyPrototype extends IdScriptableObject {
     public static void init(Scriptable scope, boolean sealed) {
         com.eas.client.reports.ServerReportProxyPrototype obj = new com.eas.client.reports.ServerReportProxyPrototype();
         obj.exportAsJSClass(MAX_PROTOTYPE_ID, scope, sealed);
+        if(sealed)
+            obj.sealObject();
     }
 
     @Override

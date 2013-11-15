@@ -192,28 +192,28 @@ public class GxtControlsFactory {
 			@Override
 			public void run() {
 				if (aTag.hasAttribute("windowOpened")) {
-					form.setWindowOpened(module.<JsObject>cast().getJs(aTag.getAttribute("windowOpened")));
+					form.setWindowOpened(module.<Utils.JsModule> cast().getHandler(aTag.getAttribute("windowOpened")));
 				}
 				if (aTag.hasAttribute("windowClosing")) {
-					form.setWindowClosing(module.<JsObject>cast().getJs(aTag.getAttribute("windowClosing")));
+					form.setWindowClosing(module.<Utils.JsModule> cast().getHandler(aTag.getAttribute("windowClosing")));
 				}
 				if (aTag.hasAttribute("windowClosed")) {
-					form.setWindowClosed(module.<JsObject>cast().getJs(aTag.getAttribute("windowClosed")));
+					form.setWindowClosed(module.<Utils.JsModule> cast().getHandler(aTag.getAttribute("windowClosed")));
 				}
 				if (aTag.hasAttribute("windowMinimized")) {
-					form.setWindowMinimized(module.<JsObject>cast().getJs(aTag.getAttribute("windowMinimized")));
+					form.setWindowMinimized(module.<Utils.JsModule> cast().getHandler(aTag.getAttribute("windowMinimized")));
 				}
 				if (aTag.hasAttribute("windowRestored")) {
-					form.setWindowRestored(module.<JsObject>cast().getJs(aTag.getAttribute("windowRestored")));
+					form.setWindowRestored(module.<Utils.JsModule> cast().getHandler(aTag.getAttribute("windowRestored")));
 				}
 				if (aTag.hasAttribute("windowMaximized")) {
-					form.setWindowMaximized(module.<JsObject>cast().getJs(aTag.getAttribute("windowMaximized")));
+					form.setWindowMaximized(module.<Utils.JsModule> cast().getHandler(aTag.getAttribute("windowMaximized")));
 				}
 				if (aTag.hasAttribute("windowActivated")) {
-					form.setWindowActivated(module.<JsObject>cast().getJs(aTag.getAttribute("windowActivated")));
+					form.setWindowActivated(module.<Utils.JsModule> cast().getHandler(aTag.getAttribute("windowActivated")));
 				}
 				if (aTag.hasAttribute("windowDeactivated")) {
-					form.setWindowDeactivated(module.<JsObject>cast().getJs(aTag.getAttribute("windowDeactivated")));
+					form.setWindowDeactivated(module.<Utils.JsModule> cast().getHandler(aTag.getAttribute("windowDeactivated")));
 				}
 			}
 		});
@@ -973,74 +973,74 @@ public class GxtControlsFactory {
 			@Override
 			public void run() {
 				if (aTag.hasAttribute("actionPerformed")) {
-					executor.setActionPerformed(module.<JsObject>cast().getJs(aTag.getAttribute("actionPerformed")));
+					executor.setActionPerformed(module.<Utils.JsModule> cast().getHandler(aTag.getAttribute("actionPerformed")));
 				}
 				if (aTag.hasAttribute("mouseEntered")) {
-					executor.setMouseEntered(module.<JsObject>cast().getJs(aTag.getAttribute("mouseEntered")));
+					executor.setMouseEntered(module.<Utils.JsModule> cast().getHandler(aTag.getAttribute("mouseEntered")));
 				}
 				if (aTag.hasAttribute("mouseExited")) {
-					executor.setMouseExited(module.<JsObject>cast().getJs(aTag.getAttribute("mouseExited")));
+					executor.setMouseExited(module.<Utils.JsModule> cast().getHandler(aTag.getAttribute("mouseExited")));
 				}
 				if (aTag.hasAttribute("mousePressed")) {
-					executor.setMousePressed(module.<JsObject>cast().getJs(aTag.getAttribute("mousePressed")));
+					executor.setMousePressed(module.<Utils.JsModule> cast().getHandler(aTag.getAttribute("mousePressed")));
 				}
 				if (aTag.hasAttribute("mouseReleased")) {
-					executor.setMouseReleased(module.<JsObject>cast().getJs(aTag.getAttribute("mouseReleased")));
+					executor.setMouseReleased(module.<Utils.JsModule> cast().getHandler(aTag.getAttribute("mouseReleased")));
 				}
 				if (aTag.hasAttribute("mouseWheelMoved")) {
-					executor.setMouseWheelMoved(module.<JsObject>cast().getJs(aTag.getAttribute("mouseWheelMoved")));
+					executor.setMouseWheelMoved(module.<Utils.JsModule> cast().getHandler(aTag.getAttribute("mouseWheelMoved")));
 				}
 				if (aTag.hasAttribute("mouseMoved")) {
-					executor.setMouseMoved(module.<JsObject>cast().getJs(aTag.getAttribute("mouseMoved")));
+					executor.setMouseMoved(module.<Utils.JsModule> cast().getHandler(aTag.getAttribute("mouseMoved")));
 				}
 
 				if (aTag.hasAttribute("mouseClicked")) {
-					executor.setMouseClicked(module.<JsObject>cast().getJs(aTag.getAttribute("mouseClicked")));
+					executor.setMouseClicked(module.<Utils.JsModule> cast().getHandler(aTag.getAttribute("mouseClicked")));
 				}
 				if (aTag.hasAttribute("mouseDragged")) {
-					executor.setMouseDragged(module.<JsObject>cast().getJs(aTag.getAttribute("mouseDragged")));
+					executor.setMouseDragged(module.<Utils.JsModule> cast().getHandler(aTag.getAttribute("mouseDragged")));
 				}
 
 				if (aTag.hasAttribute("keyTyped")) {
-					executor.setKeyTyped(module.<JsObject>cast().getJs(aTag.getAttribute("keyTyped")));
+					executor.setKeyTyped(module.<Utils.JsModule> cast().getHandler(aTag.getAttribute("keyTyped")));
 				}
 				if (aTag.hasAttribute("keyPressed")) {
-					executor.setKeyPressed(module.<JsObject>cast().getJs(aTag.getAttribute("keyPressed")));
+					executor.setKeyPressed(module.<Utils.JsModule> cast().getHandler(aTag.getAttribute("keyPressed")));
 				}
 				if (aTag.hasAttribute("keyReleased")) {
-					executor.setKeyReleased(module.<JsObject>cast().getJs(aTag.getAttribute("keyReleased")));
+					executor.setKeyReleased(module.<Utils.JsModule> cast().getHandler(aTag.getAttribute("keyReleased")));
 				}
 				if (aTag.hasAttribute("focusGained")) {
-					executor.setFocusGained(module.<JsObject>cast().getJs(aTag.getAttribute("focusGained")));
+					executor.setFocusGained(module.<Utils.JsModule> cast().getHandler(aTag.getAttribute("focusGained")));
 				}
 				if (aTag.hasAttribute("focusLost")) {
-					executor.setFocusLost(module.<JsObject>cast().getJs(aTag.getAttribute("focusLost")));
+					executor.setFocusLost(module.<Utils.JsModule> cast().getHandler(aTag.getAttribute("focusLost")));
 				}
 				if (aTag.hasAttribute("componentShown")) {
-					executor.setComponentShown(module.<JsObject>cast().getJs(aTag.getAttribute("componentShown")));
+					executor.setComponentShown(module.<Utils.JsModule> cast().getHandler(aTag.getAttribute("componentShown")));
 				}
 				if (aTag.hasAttribute("componentResized")) {
-					executor.setComponentResized(module.<JsObject>cast().getJs(aTag.getAttribute("componentResized")));
+					executor.setComponentResized(module.<Utils.JsModule> cast().getHandler(aTag.getAttribute("componentResized")));
 				}
 				if (aTag.hasAttribute("componentHidden")) {
-					executor.setComponentHidden(module.<JsObject>cast().getJs(aTag.getAttribute("componentHidden")));
+					executor.setComponentHidden(module.<Utils.JsModule> cast().getHandler(aTag.getAttribute("componentHidden")));
 				}
 				if (aTag.hasAttribute("componentRemoved")) {
-					executor.setComponentRemoved(module.<JsObject>cast().getJs(aTag.getAttribute("componentRemoved")));
+					executor.setComponentRemoved(module.<Utils.JsModule> cast().getHandler(aTag.getAttribute("componentRemoved")));
 				}
 				if (aTag.hasAttribute("componentAdded")) {
-					executor.setComponentAdded(module.<JsObject>cast().getJs(aTag.getAttribute("componentAdded")));
+					executor.setComponentAdded(module.<Utils.JsModule> cast().getHandler(aTag.getAttribute("componentAdded")));
 				}
 
 				if (aTag.hasAttribute("componentMoved")) {
-					executor.setComponentMoved(module.<JsObject>cast().getJs(aTag.getAttribute("componentMoved")));
+					executor.setComponentMoved(module.<Utils.JsModule> cast().getHandler(aTag.getAttribute("componentMoved")));
 				}
 				// if (aTag.hasAttribute("itemStateChanged")) {
 				// executor.setItemStateChanged(Utils.lookupProperty(module,
 				// aTag.getAttribute("itemStateChanged")));
 				// }
 				if (aTag.hasAttribute("stateChanged")) {
-					executor.setStateChanged(module.<JsObject>cast().getJs(aTag.getAttribute("stateChanged")));
+					executor.setStateChanged(module.<Utils.JsModule> cast().getHandler(aTag.getAttribute("stateChanged")));
 				}
 				// if (aTag.hasAttribute("propertyChange")) {
 				// executor.setPropertyChange(Utils.lookupProperty(module,

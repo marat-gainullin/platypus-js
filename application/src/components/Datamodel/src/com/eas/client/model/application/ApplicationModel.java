@@ -67,10 +67,10 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
     }
 
     @Override
-    public void setScriptScope(Scriptable aScriptScope) throws Exception {
-        Scriptable oldValue = scriptScope;
-        super.setScriptScope(aScriptScope);
-        if (scriptScope != null && scriptScope instanceof ScriptableObject) {
+    public void setScriptThis(Scriptable aScriptScope) throws Exception {
+        Scriptable oldValue = scriptThis;
+        super.setScriptThis(aScriptScope);
+        if (scriptThis != null && scriptThis instanceof ScriptableObject) {
             for (E ent : entities.values()) {
                 if (ent != null) {
                     ent.defineProperties();
@@ -107,9 +107,9 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
                 }
             }
             //////////////////
-            ((ScriptableObject) scriptScope).defineProperty(SCRIPT_MODEL_NAME, ScriptUtils.javaToJS(this, aScriptScope), ScriptableObject.READONLY);
+            ((ScriptableObject) scriptThis).defineProperty(SCRIPT_MODEL_NAME, ScriptUtils.javaToJS(this, aScriptScope), ScriptableObject.READONLY);
         }
-        changeSupport.firePropertyChange("scriptScope", oldValue, scriptScope);
+        changeSupport.firePropertyChange("scriptScope", oldValue, scriptThis);
     }
 
     @Override
@@ -124,7 +124,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
     }
     
     public void resolveHandlers() {
-        if (scriptScope != null) {
+        if (scriptThis != null) {
             for (E ent : entities.values()) {
                 if (ent != null) {
                     ent.resolveHandlers();
@@ -292,7 +292,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
                         cx = ScriptUtils.enterContext();
                     }
                     try {
-                        aCallback.call(cx, scriptScope, scriptScope, new Object[]{});
+                        aCallback.call(cx, scriptThis, scriptThis, new Object[]{});
                     } finally {
                         if (!wasContext) {
                             Context.exit();
@@ -346,7 +346,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
                     cx = ScriptUtils.enterContext();
                 }
                 try {
-                    aOnSuccess.call(cx, scriptScope, scriptScope, new Object[]{});
+                    aOnSuccess.call(cx, scriptThis, scriptThis, new Object[]{});
                 } finally {
                     if (!wasContext) {
                         Context.exit();
@@ -361,7 +361,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
                     cx = ScriptUtils.enterContext();
                 }
                 try {
-                    aOnFailure.call(cx, scriptScope, scriptScope, new Object[]{ex.getMessage()});
+                    aOnFailure.call(cx, scriptThis, scriptThis, new Object[]{ex.getMessage()});
                 } finally {
                     if (!wasContext) {
                         Context.exit();
@@ -394,7 +394,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
                     cx = ScriptUtils.enterContext();
                 }
                 try {
-                    aOnSuccess.call(cx, scriptScope, scriptScope, new Object[]{});
+                    aOnSuccess.call(cx, scriptThis, scriptThis, new Object[]{});
                 } finally {
                     if (!wasContext) {
                         Context.exit();
@@ -409,7 +409,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
                     cx = ScriptUtils.enterContext();
                 }
                 try {
-                    aOnFailure.call(cx, scriptScope, scriptScope, new Object[]{ex.getMessage()});
+                    aOnFailure.call(cx, scriptThis, scriptThis, new Object[]{ex.getMessage()});
                 } finally {
                     if (!wasContext) {
                         Context.exit();

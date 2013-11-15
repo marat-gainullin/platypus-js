@@ -14,6 +14,24 @@ import com.google.gwt.xml.client.NodeList;
 
 public class Utils {
 
+	public static class JsModule extends JsObject {
+		protected JsModule() {
+		}
+
+		public final JavaScriptObject getHandler(String aHandlerName) {
+			JavaScriptObject container = getJs("-x-handlers-funcs-");
+			if (container != null) {
+				return container.<JsObject> cast().getJs(aHandlerName);
+			} else
+				return null;
+		}
+		
+		public final void clearFunctionsContainer(){
+			deleteProperty("-x-handlers-funcs-");
+		}
+
+	}
+
 	public static class JsObject extends JavaScriptObject {
 		protected JsObject() {
 		}
@@ -21,11 +39,15 @@ public class Utils {
 		public final native Object getJava(String aName)/*-{
 			return $wnd.boxAsJava(this[aName]);
 		}-*/;
-		
+
 		public final native JavaScriptObject getJs(String aName)/*-{
 			return this[aName];
 		}-*/;
-		
+
+		public final native JavaScriptObject deleteProperty(String aName)/*-{
+			delete this[aName];
+		}-*/;
+
 		public final native void defineProperty(String aName, JavaScriptObject aDefinition)/*-{
 			Object.defineProperty(this, aName, aDefinition);
 		}-*/;
@@ -38,47 +60,47 @@ public class Utils {
 			}
 		};
 	}-*/;
-	
+
 	public static native JavaScriptObject publishRunnable(Runnable aValue)/*-{
 		return (function() {
-				aValue.@java.lang.Runnable::run()();
-				});
+			aValue.@java.lang.Runnable::run()();
+		});
 	}-*/;
-	
+
 	public static native JavaScriptObject stringToArrayBuffer(String aValue) throws Exception/*-{
-		if(aValue){
+		if (aValue) {
 			var buffer = new ArrayBuffer(aValue.length);
 			var bufferView = new Uint8Array(buffer);
-			for(var i = 0; i < aValue.length; i++)
+			for ( var i = 0; i < aValue.length; i++)
 				bufferView[i] = aValue.charCodeAt(i);
 			return buffer;
-		}else
+		} else
 			return null;
 	}-*/;
-	
-	public static void invokeLater(final JavaScriptObject aTarget){
-		Scheduler.get().scheduleDeferred(new ScheduledCommand(){
+
+	public static void invokeLater(final JavaScriptObject aTarget) {
+		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
 			@Override
 			public void execute() {
 				invokeJsFunction(aTarget);
 			}
 		});
 	}
-	
-	public static void invokeScheduled(int aTimeout, final JavaScriptObject aTarget){
-		Scheduler.get().scheduleFixedDelay(new RepeatingCommand(){
-			
+
+	public static void invokeScheduled(int aTimeout, final JavaScriptObject aTarget) {
+		Scheduler.get().scheduleFixedDelay(new RepeatingCommand() {
+
 			@Override
 			public boolean execute() {
-				try{
+				try {
 					invokeJsFunction(aTarget);
-				}finally{
+				} finally {
 					return false;
 				}
 			}
 		}, aTimeout);
 	}
-	
+
 	public static String format(final String format, final String... args) {
 		String[] split = format.split("%s");
 		final StringBuffer msg = new StringBuffer();

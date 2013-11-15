@@ -10,7 +10,7 @@ import com.eas.script.JsDoc;
 import com.eas.script.JsDoc.Tag;
 import com.eas.script.ScriptUtils;
 import java.util.*;
-import org.mozilla.javascript.Script;
+import org.mozilla.javascript.Function;
 import org.mozilla.javascript.Token;
 import org.mozilla.javascript.ast.*;
 import org.w3c.dom.Document;
@@ -27,18 +27,21 @@ public class ScriptDocument {
     protected long txtCrc32;
     private ApplicationModel<?, ?, ?, ?> model;
     private String scriptSource;
-    private Script script;
+    private Function function;
     private AstRoot ast;
+    private Set<String> topLevelNamedFunctionsNames = new HashSet<>();
     private Set<String> depencies = new HashSet<>();
     private List<Tag> moduleAnnotations;
     /**
-     * User roles that have access to all module's functions, if empty all users allowed
+     * User roles that have access to all module's functions, if empty all users
+     * allowed
      */
     private Set<String> moduleAllowedRoles = new HashSet<>();
     /**
-     * Roles have that access to concrete functions, if empty all users allowed 
+     * Roles that have access to specific properties, if empty all users are
+     * allowed
      */
-    private Map<String, Set<String>> functionAllowedRoles = new HashMap<>();
+    private Map<String, Set<String>> propertyAllowedRoles = new HashMap<>();
 
     public ScriptDocument(ApplicationModel<?, ?, ?, ?> aModel, String aSource) {
         super();
@@ -97,18 +100,19 @@ public class ScriptDocument {
 
     public void setScriptSource(String aScriptSource) {
         scriptSource = aScriptSource;
+        ast = null;
     }
 
     public Set<String> getDepencies() {
         return depencies;
     }
 
-    public Script getScript() {
-        return script;
+    public Function getFunction() {
+        return function;
     }
 
-    public void setScript(Script aScript) {
-        script = aScript;
+    public void setFunction(Function aScript) {
+        function = aScript;
     }
 
     public Set<String> getModuleAllowedRoles() {
@@ -119,40 +123,78 @@ public class ScriptDocument {
         moduleAllowedRoles = aModuleAllowedRoles;
     }
 
-    public Map<String, Set<String>> getFunctionAllowedRoles() {
-        return functionAllowedRoles;
+    public Map<String, Set<String>> getPropertyAllowedRoles() {
+        return propertyAllowedRoles;
     }
 
-    public void setFunctionAllowedRoles(Map<String, Set<String>> aFunctionAllowedRoles) {
-        functionAllowedRoles = aFunctionAllowedRoles;
+    public void setPropertyAllowedRoles(Map<String, Set<String>> aAllowedRoles) {
+        propertyAllowedRoles = aAllowedRoles;
     }
-    
+
     public List<Tag> getModuleAnnotations() {
         return moduleAnnotations != null ? Collections.unmodifiableList(moduleAnnotations) : null;
     }
 
-    public void readScriptAnnotations() {
-        assert scriptSource != null : "Javascript source can't be null";
-        ast = ScriptUtils.parseJs(scriptSource);
-        final Set<Comment> functionComments = new HashSet<>();
-        ast.visit(new NodeVisitor() {
-
-            @Override
-            public boolean visit(AstNode node) {
-                if (node.getParent() == null) { //visit only the top level
-                    return true;
-                }
-                if (node instanceof FunctionNode) {
-                    readFunctionRoles(((FunctionNode) node).getName(), node.getJsDoc());
-                    functionComments.add(node.getJsDocNode());
-                }
-                return false;
-            }
-        });
-        readModuleAnnotations(functionComments);
+    public Set<String> getTopLevelNamedFunctionsNames() {
+        return topLevelNamedFunctionsNames;
     }
 
-    private void readModuleAnnotations(Set<Comment> aFunctionComments) {
+    public String generateTopLevelNamedFunctionsContainer() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("{");
+        for (String aName : topLevelNamedFunctionsNames) {
+            if (sb.length() > 1) {
+                sb.append(",");
+            }
+            sb.append("\"").append(aName).append("\"").append(":").append(aName);
+        }
+        sb.append("}");
+        return sb.toString();
+    }
+
+    /**
+     * Reads script annotations. Annotations, accompanied with
+     *
+     * @name annotation are the 'module annotations'. Annotations, followed by
+     * any property assignment are the 'property annotations'. Property
+     * annotations will be taken into account while accessing through modules.
+     * WARNING!!! This method is suited for analyzing of plain scripts, e.g.
+     * platypus modules constructors bodies. If scriptSource will be reshaped
+     * into form of: function Module1(){ this.member = ...}, than this method
+     * should be refactored to take into account inner scope of top-level
+     * function.
+     */
+    public void readScriptAnnotations() {
+        assert scriptSource != null : "Javascript source can't be null";
+        if (ast == null) {
+            topLevelNamedFunctionsNames.clear();
+            propertyAllowedRoles.clear();
+            ast = ScriptUtils.parseJs(scriptSource);
+            ast.visit(new NodeVisitor() {
+                @Override
+                public boolean visit(AstNode node) {
+                    if (node.getParent() == ast.getAstRoot() && node instanceof FunctionNode) {
+                        String fName = ((FunctionNode) node).getName();
+                        if (fName != null && !fName.isEmpty()) {
+                            topLevelNamedFunctionsNames.add(fName);
+                        }
+                    }
+                    if (node.getJsDoc() != null && node instanceof Assignment) {
+                        Assignment as = (Assignment) node;
+                        if (as.getLeft() instanceof PropertyGet) {
+                            PropertyGet pg = (PropertyGet) as.getLeft();
+                            Name n = pg.getProperty();
+                            readPropertyRoles(n.getIdentifier(), node.getJsDoc());
+                        }
+                    }
+                    return true;
+                }
+            });
+            readModuleAnnotations();
+        }
+    }
+
+    private void readModuleAnnotations() {
         assert ast != null;
         moduleAnnotations = new ArrayList<>();
         SortedSet<Comment> comments = ast.getComments();
@@ -160,7 +202,7 @@ public class ScriptDocument {
             for (Comment comment : comments) {
                 if (comment.getCommentType().equals(Token.CommentType.JSDOC)) {
                     JsDoc jsDoc = new JsDoc(comment.getValue());
-                    if (jsDoc.containsModuleName() || !aFunctionComments.contains(comment)) {
+                    if (jsDoc.containsModuleName()) {
                         jsDoc.parseAnnotations();
                         for (Tag tag : jsDoc.getAnnotations()) {
                             moduleAnnotations.add(tag);
@@ -176,29 +218,28 @@ public class ScriptDocument {
         }
     }
 
-    private void readFunctionRoles(String aFunctionName, String aJsDocBody) {
+    private void readPropertyRoles(String aPropertyName, String aJsDocBody) {
         if (aJsDocBody != null) {
             JsDoc jsDoc = new JsDoc(aJsDocBody);
             if (!jsDoc.containsModuleName()) {
                 jsDoc.parseAnnotations();
                 for (Tag tag : jsDoc.getAnnotations()) {
                     if (tag.getName().equals(JsDoc.Tag.ROLES_ALLOWED_TAG)) {
-                        Set<String> roles = functionAllowedRoles.get(tag.getName());
+                        Set<String> roles = propertyAllowedRoles.get(aPropertyName);
                         if (roles == null) {
                             roles = new HashSet<>();
                         }
                         for (String role : tag.getParams()) {
                             roles.add(role);
                         }
-                        functionAllowedRoles.put(aFunctionName, roles);
+                        propertyAllowedRoles.put(aPropertyName, roles);
                     }
                 }
             }
         }
     }
-    
-    public Document toDom() throws Exception
-    {
+
+    public Document toDom() throws Exception {
         return ScriptDocument2Dom.scriptDocument2Dom(this);
     }
 }

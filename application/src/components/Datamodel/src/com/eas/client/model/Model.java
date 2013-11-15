@@ -54,7 +54,7 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
     protected Map<Long, E> entities = new HashMap<>();
     protected P parametersEntity;
     protected Parameters parameters = new Parameters();
-    protected Scriptable scriptScope;
+    protected Scriptable scriptThis;
     protected boolean runtime = false;
     protected boolean commitable = true;
     protected int ajustingCounter = 0;
@@ -328,12 +328,12 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
         return aEntity.getInOutRelations();
     }
 
-    public Scriptable getScriptScope() {
-        return scriptScope;
+    public Scriptable getScriptThis() {
+        return scriptThis;
     }
 
-    public void setScriptScope(Scriptable aScriptScope) throws Exception {
-        scriptScope = aScriptScope;
+    public void setScriptThis(Scriptable aScriptObject) throws Exception {
+        scriptThis = aScriptObject;
     }
 
     public int getAjustingCounter() {
@@ -489,7 +489,7 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
                 if (!(evt.getSource() instanceof Entity<?, ?, ?>)
                         && !(evt.getSource() instanceof Model<?, ?, ?, ?>)) {
                     if (evt.getPropertyName().equals("scriptScope")) {
-                        setScriptScope((Scriptable) evt.getNewValue());
+                        setScriptThis((Scriptable) evt.getNewValue());
                     }
                     if (evt.getPropertyName().equals("runtime")) {
                         setRuntime((Boolean) evt.getNewValue());

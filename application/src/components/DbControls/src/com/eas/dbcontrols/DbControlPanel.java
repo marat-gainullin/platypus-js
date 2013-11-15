@@ -606,10 +606,10 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
     }
 
     protected void acceptCellValue(Object aValue) throws Exception {
-        if (scriptScope == null && model != null) {
-            scriptScope = model.getScriptScope();
+        if (scriptThis == null && model != null) {
+            scriptThis = model.getScriptThis();
         }
-        if (standalone && scriptScope != null
+        if (standalone && scriptThis != null
                 && handleFunction != null) {
             Object dataToProcess = aValue instanceof CellData ? ((CellData) aValue).data : aValue;
             CellData cd = new CellData(new CascadedStyle(), dataToProcess, achiveDisplayValue(dataToProcess));
@@ -627,7 +627,7 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
                 if (row != null) {
                     rowIds = row.getPKValues();
                 }
-                Object retValue = handleFunction.call(cx, eventThis != null ? eventThis : scriptScope, eventThis != null ? eventThis : scriptScope, new Object[]{new CellRenderEvent(eventThis != null ? eventThis : scriptScope, rowIds != null && rowIds.length > 0 ? (rowIds.length > 1 ? rowIds : rowIds[0]) : null, null, cd, row != null ? RowHostObject.publishRow(scriptScope, row, rsEntity) : null)});
+                Object retValue = handleFunction.call(cx, eventThis != null ? eventThis : scriptThis, eventThis != null ? eventThis : scriptThis, new Object[]{new CellRenderEvent(eventThis != null ? eventThis : scriptThis, rowIds != null && rowIds.length > 0 ? (rowIds.length > 1 ? rowIds : rowIds[0]) : null, null, cd, row != null ? RowHostObject.publishRow(scriptThis, row, rsEntity) : null)});
                 if (Boolean.TRUE.equals(retValue)) {
                     try {
                         cd.data = ScriptUtils.js2Java(cd.data);
@@ -755,7 +755,7 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
     protected ApplicationEntity<?, ?, ?> rsEntity;
     protected int colIndex = 0;
     protected DbControlRowsetListener rowsetListener;
-    protected Scriptable scriptScope;
+    protected Scriptable scriptThis;
     protected Scriptable eventThis;
 
     protected void bind() throws Exception {
@@ -812,15 +812,15 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
 
     ///// script interface /////
     public Object getValue() throws Exception {
-        if (scriptScope != null) {
-            return ScriptUtils.javaToJS(editingValue, scriptScope);
+        if (scriptThis != null) {
+            return ScriptUtils.javaToJS(editingValue, scriptThis);
         } else {
             return null;
         }
     }
 
     public void setValue(Object aValue) throws Exception {
-        if (scriptScope != null) {
+        if (scriptThis != null) {
             aValue = ScriptUtils.js2Java(aValue);
             if (standalone) {
                 if (!setValue2Rowset(aValue)) {
@@ -1088,10 +1088,10 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
         public void actionPerformed(ActionEvent e) {
             Function selectFunction = getSelectFunction();
             if (selectFunction != null) {
-                if (scriptScope == null && model != null) {
-                    scriptScope = model.getScriptScope();
+                if (scriptThis == null && model != null) {
+                    scriptThis = model.getScriptThis();
                 }
-                if (scriptScope != null) {
+                if (scriptThis != null) {
                     Context cx = Context.getCurrentContext();
                     boolean wasContext = cx != null;
                     if (!wasContext) {
@@ -1102,7 +1102,7 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
                         if (oEditor == null) {
                             oEditor = DbControlPanel.this;
                         }
-                        selectFunction.call(cx, eventThis != null ? eventThis : scriptScope, eventThis != null ? eventThis : scriptScope, new Object[]{oEditor});
+                        selectFunction.call(cx, eventThis != null ? eventThis : scriptThis, eventThis != null ? eventThis : scriptThis, new Object[]{oEditor});
                         /*
                          Component focusTarget = getFocusTargetComponent();
                          if (focusTarget != null) {
@@ -1120,10 +1120,14 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
     }
 
     protected Function getHandler(String aHandlerName) {
-        if (model != null && model.getScriptScope() != null) {
-            Object oFunction = model.getScriptScope().get(aHandlerName, model.getScriptScope());
-            if (oFunction instanceof Function) {
-                return (Function) oFunction;
+        if (aHandlerName != null && !aHandlerName.isEmpty() && model != null && model.getScriptThis() != null) {
+            Object oHandlers = model.getScriptThis().get(ScriptUtils.HANDLERS_PROP_NAME, model.getScriptThis());
+            if (oHandlers instanceof Scriptable) {
+                Scriptable sHandlers = (Scriptable) oHandlers;
+                Object oHandler = sHandlers.get(aHandlerName, sHandlers);
+                if (oHandler instanceof Function) {
+                    return (Function) oHandler;
+                }
             }
         }
         return null;
@@ -1153,11 +1157,11 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
     }
 
     public Scriptable getScriptScope() {
-        return scriptScope;
+        return scriptThis;
     }
 
     public void setScriptScope(Scriptable aScriptScope) {
-        scriptScope = aScriptScope;
+        scriptThis = aScriptScope;
     }
 
     @Undesignable

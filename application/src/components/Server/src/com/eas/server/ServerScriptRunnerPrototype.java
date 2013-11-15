@@ -16,7 +16,8 @@ import org.mozilla.javascript.Scriptable;
  */
 public class ServerScriptRunnerPrototype extends IdScriptableObject {
 
-    public static final String BAD_SCRIPT_SCOPE_MSG = "Can't find reqired script runner scope!";
+    public static final String BAD_SCRIPT_SCOPE_MSG = "Can't find required script runner scope!";
+    public static final String CORE_MISSING_MSG = "Platypus server core missing!";
     private static final String ID_CONSTRUCTOR = "constructor";
     private static final String ID_TOSOURCE = "toSource";
     private static final String ID_TOSTRING = "toString";
@@ -24,10 +25,21 @@ public class ServerScriptRunnerPrototype extends IdScriptableObject {
     private static final String MODULE_TAG = "Module";
     private static final String ONLY_CONSTRUCTOR_MSG = "Can't call %s(...). Only new %s(...) is allowed.";
     private static final String CONSTRUCTOR_PARAMETER_MISSING = "For new %s(...) constructor, module name/id parameter is required.";
+    private static ServerScriptRunnerPrototype instance;
+
+    public static ServerScriptRunnerPrototype getInstance() {
+        if (instance == null) {
+            instance = new ServerScriptRunnerPrototype();
+        }
+        return instance;
+    }
 
     public static void init(Scriptable scope, boolean sealed) {
-        ServerScriptRunnerPrototype obj = new ServerScriptRunnerPrototype();
+        ServerScriptRunnerPrototype obj = getInstance();
         obj.exportAsJSClass(MAX_PROTOTYPE_ID, scope, sealed);
+        if (sealed) {
+            obj.sealObject();
+        }
     }
 
     @Override
@@ -98,29 +110,28 @@ public class ServerScriptRunnerPrototype extends IdScriptableObject {
             if (args.length >= 1) {
                 if (thisObj == null) {
                     if (args[0] != null) {
-                        if (thisObj == null) {
-                            String scriptId = args[0].toString();
-                            try {
-                                ServerScriptRunner serverCoreWrapper = lookupScriptRunner(scope);
-                                assert serverCoreWrapper != null : BAD_SCRIPT_SCOPE_MSG;
-                                return new ServerScriptRunner(serverCoreWrapper.getServerCore(),
-                                        serverCoreWrapper.getCreationSession(),
-                                        scriptId,
-                                        ScriptRunner.initializePlatypusStandardLibScope(),
-                                        serverCoreWrapper.getServerCore(),
-                                        serverCoreWrapper.getServerCore(),
-                                        (args.length > 1 && args[1] instanceof Object[]) ? (Object[]) args[1] : null);
-                            } catch (Exception ex) {
-                                throw new IllegalArgumentException(ex);
-                            }
-                        } else {
-                            throw new IllegalArgumentException(String.format(ONLY_CONSTRUCTOR_MSG, MODULE_TAG, MODULE_TAG));
+                        String scriptId = args[0].toString();
+                        try {
+                            PlatypusServerCore core = PlatypusServerCore.getInstance();
+                            assert core != null : CORE_MISSING_MSG;
+                            assert scope != null : BAD_SCRIPT_SCOPE_MSG;
+                            ServerScriptRunner runner = new ServerScriptRunner(core,
+                                    core.getSessionManager().getCurrentSession(),
+                                    scriptId,
+                                    ScriptRunner.initializePlatypusStandardLibScope(),
+                                    core,
+                                    core,
+                                    (args.length > 1 && args[1] instanceof Object[]) ? (Object[]) args[1] : null);
+                            runner.setPrototype(this);
+                            return runner;
+                        } catch (Exception ex) {
+                            throw new IllegalArgumentException(ex);
                         }
                     } else {
                         throw new IllegalArgumentException(String.format(CONSTRUCTOR_PARAMETER_MISSING, MODULE_TAG, MODULE_TAG));
                     }
                 } else {
-                    throw incompatibleCallError(f);
+                    throw new IllegalArgumentException(String.format(ONLY_CONSTRUCTOR_MSG, MODULE_TAG, MODULE_TAG));
                 }
             } else {
                 throw incompatibleCallError(f);

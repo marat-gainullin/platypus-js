@@ -63,15 +63,9 @@ public class FormRunnerPrototype extends IdScriptableObject {
     }
 
     public static void init(Scriptable scope, boolean sealed) {
-        init(scope, sealed, getInstance());
-        formPrototype.setPrototype(ScriptRunnerPrototype.getInstance());
-    }
-
-    public static void init(Scriptable scope, boolean sealed, FormRunnerPrototype obj) {
+        FormRunnerPrototype obj = getInstance();
         obj.exportAsJSClass(MAX_PROTOTYPE_ID, scope, false);
-        if (obj != getInstance()) {
-            obj.setPrototype(getInstance());
-        }
+        obj.setPrototype(ScriptRunnerPrototype.getInstance());
         if (sealed) {
             obj.sealObject();
         }

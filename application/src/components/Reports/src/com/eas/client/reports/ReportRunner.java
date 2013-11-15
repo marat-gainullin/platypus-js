@@ -25,9 +25,8 @@ public class ReportRunner extends ScriptRunner {
 
     public static final String BEFORE_RENDER_HANDLER_NAME = "onBeforeRender"; //NOI18N
     protected byte[] template;
-    private Function onBeforRender;
+    private Function onBeforeRender;
     protected String format;
-    
 
     public ReportRunner(String aReportId, Client aClient, Scriptable aScope, PrincipalHost aPrincipalHost, CompiledScriptDocumentsHost aCompiledScriptDocumentsHost, Object[] args) throws Exception {
         super(aReportId, aClient, aScope, aPrincipalHost, aCompiledScriptDocumentsHost, args);
@@ -43,6 +42,25 @@ public class ReportRunner extends ScriptRunner {
     }
 
     @Override
+    protected void prepareScript(ScriptDocument scriptDoc, Object[] args) throws Exception {
+        super.prepareScript(scriptDoc, args);
+        onBeforeRender = getHandler(BEFORE_RENDER_HANDLER_NAME);
+    }
+
+    public Function getHandler(String aHandlerName) {
+        if (aHandlerName != null && !aHandlerName.isEmpty() && model != null && model.getScriptThis() != null) {
+            Object oHandlers = model.getScriptThis().get(ScriptUtils.HANDLERS_PROP_NAME, model.getScriptThis());
+            if (oHandlers instanceof Scriptable) {
+                Scriptable sHandlers = (Scriptable) oHandlers;
+                Object oHandler = sHandlers.get(aHandlerName, sHandlers);
+                if (oHandler instanceof Function) {
+                    return (Function) oHandler;
+                }
+            }
+        }
+        return null;
+    }
+    @Override
     protected void shrink() throws Exception {
         template = null;
         super.shrink();
@@ -57,9 +75,9 @@ public class ReportRunner extends ScriptRunner {
     protected void definePropertiesAndMethods() {
         super.definePropertiesAndMethods();
         defineFunctionProperties(new String[]{
-                    "show",
-                    "print",
-                    "save"}, ReportRunner.class, EMPTY);
+            "show",
+            "print",
+            "save"}, ReportRunner.class, EMPTY);
         defineProperty(BEFORE_RENDER_HANDLER_NAME, ReportRunner.class, EMPTY);
     }
     private static final String SHOW_JSDOC = ""
@@ -71,7 +89,7 @@ public class ReportRunner extends ScriptRunner {
     public void show() throws Exception {
         if (template != null) {
             execute();
-            preRender();
+            invokeOnBeforeRender();
             ExcelReport xlsReport = new ExcelReport(model, this);
             xlsReport.setTemplate(new CompactBlob(template));
             xlsReport.show();
@@ -86,7 +104,7 @@ public class ReportRunner extends ScriptRunner {
     public void print() throws Exception {
         if (template != null) {
             execute();
-            preRender();
+            invokeOnBeforeRender();
             ExcelReport xlsReport = new ExcelReport(model, this);
             xlsReport.setTemplate(new CompactBlob(template));
             xlsReport.print();
@@ -96,7 +114,7 @@ public class ReportRunner extends ScriptRunner {
     public void save(String aFileName) throws Exception {
         if (template != null) {
             execute();
-            preRender();
+            invokeOnBeforeRender();
             ExcelReport xlsReport = new ExcelReport(model, this);
             xlsReport.setTemplate(new CompactBlob(template));
             xlsReport.save(aFileName);
@@ -106,25 +124,20 @@ public class ReportRunner extends ScriptRunner {
     /**
      * Invokes handler for the Report pre-render event
      */
-    private void preRender() {
-        Context cx = ScriptUtils.enterContext();
+    private void invokeOnBeforeRender() {
+        Context cx = Context.getCurrentContext();
+        boolean wasContext = cx != null;
+        if (!wasContext) {
+            cx = ScriptUtils.enterContext();
+        }
         try {
-            Function preRendreHandler = getOnBeforeRender();
-            if (preRendreHandler != null) {
-                preRendreHandler.call(cx, this, this, new Object[]{ Context.javaToJS(new ScriptSourcedEvent(this), this)});
+            if (onBeforeRender != null) {
+                onBeforeRender.call(cx, this, this, new Object[]{Context.javaToJS(new ScriptSourcedEvent(this), this)});
             }
         } finally {
-            Context.exit();
+            if (!wasContext) {
+                Context.exit();
+            }
         }
-    }
-    
-    @ScriptFunction
-    public Function getOnBeforeRender() {
-        return onBeforRender;
-    }
-
-    @ScriptFunction
-    public void setOnBeforeRender(Function aValue) {
-        onBeforRender = aValue;
     }
 }

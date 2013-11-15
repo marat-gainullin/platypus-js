@@ -11,7 +11,7 @@ import com.eas.script.ScriptUtils;
 import java.util.HashMap;
 import java.util.Map;
 import org.mozilla.javascript.Context;
-import org.mozilla.javascript.Script;
+import org.mozilla.javascript.Function;
 
 /**
  *
@@ -33,7 +33,7 @@ public abstract class CompiledScriptDocuments {
     public synchronized void clearCompiledScriptDocuments() {
         compiledDocuments.clear();
     }
-
+    
     public synchronized ScriptDocument compileScriptDocument(String aAppElementId) throws Exception {
         ActualCacheEntry<ScriptDocument> scriptDocEntry = compiledDocuments.get(aAppElementId);
         ScriptDocument scriptDoc = scriptDocEntry != null ? scriptDocEntry.getValue() : null;
@@ -46,7 +46,7 @@ public abstract class CompiledScriptDocuments {
             ApplicationElement appElement = client.getAppCache().get(aAppElementId);
             if (appElement != null) {
                 scriptDoc = appElement2Document(appElement);
-                Context сontext = ScriptUtils.enterContext();
+                Context cx = ScriptUtils.enterContext();
                 try {
                     assert appElement.getId() != null : "Application element with null id occured!";
                     /**
@@ -55,9 +55,9 @@ public abstract class CompiledScriptDocuments {
                      * == null) { currentContext.setOptimizationLevel(5); }else
                      * currentContext.setOptimizationLevel(-1);
                      */
-                    сontext.setOptimizationLevel(-1);
-                    Script compiledScript = сontext.compileString(scriptDoc.getScriptSource(), appElement.getId(), 0, null);
-                    scriptDoc.setScript(compiledScript);
+                    cx.setOptimizationLevel(-1);
+                    Function compiledFunc = cx.compileFunction(ScriptRunner.checkStandardObjects(cx), "function "+appElement.getId()+"(){"+scriptDoc.getScriptSource()+"; this[\""+ScriptUtils.HANDLERS_PROP_NAME+"\"]="+scriptDoc.generateTopLevelNamedFunctionsContainer()+";}", appElement.getId(), 0, null);
+                    scriptDoc.setFunction(compiledFunc);
                 } finally {
                     Context.exit();
                 }

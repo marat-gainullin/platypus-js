@@ -306,7 +306,7 @@ public class DbCombo extends DbControlPanel implements DbControl {
             try {
                 try {
                     Object displayFromScript = null;
-                    if (standalone && scriptScope != null
+                    if (standalone && scriptThis != null
                             && getOnRender() != null) {
                         if (displayCache.containsKey(aValue)) {
                             displayFromScript = displayCache.get(aValue);
@@ -319,7 +319,7 @@ public class DbCombo extends DbControlPanel implements DbControl {
                                 ScriptUtils.enterContext();
                             }
                             try {
-                                Object retValue = getOnRender().call(cx, eventThis != null ? eventThis : scriptScope, eventThis != null ? eventThis : scriptScope, new Object[]{new CellRenderEvent(eventThis != null ? eventThis : scriptScope, null, null, cd, null)});
+                                Object retValue = getOnRender().call(cx, eventThis != null ? eventThis : scriptThis, eventThis != null ? eventThis : scriptThis, new Object[]{new CellRenderEvent(eventThis != null ? eventThis : scriptThis, null, null, cd, null)});
                                 if (Boolean.TRUE.equals(retValue)) {
                                     try {
                                         aValue = ScriptUtils.js2Java(cd.data);

@@ -815,12 +815,12 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
             for (int i = 0; i < deepModel.getRowCount(); i++) {
                 if (rowsSelectionModel.isSelectedIndex(i)) {
                     Row row = index2Row(rowSorter.convertRowIndexToModel(i));
-                    RowHostObject rowFacade = RowHostObject.publishRow(model.getScriptScope(), row, rowsEntity);
+                    RowHostObject rowFacade = RowHostObject.publishRow(model.getScriptThis(), row, rowsEntity);
                     selectedRows.add(rowFacade);
                 }
             }
         }
-        return Context.getCurrentContext().newArray(model.getScriptScope(), selectedRows.toArray(new Object[]{}));
+        return Context.getCurrentContext().newArray(model.getScriptThis(), selectedRows.toArray(new Object[]{}));
     }
 
     /*
@@ -1169,10 +1169,14 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
     }
 
     protected Function getHandler(String aHandlerName) {
-        if (model != null && model.getScriptScope() != null && aHandlerName != null && !aHandlerName.isEmpty()) {
-            Object oFunction = model.getScriptScope().get(aHandlerName, model.getScriptScope());
-            if (oFunction instanceof Function) {
-                return (Function) oFunction;
+        if (aHandlerName != null && !aHandlerName.isEmpty() && model != null && model.getScriptThis() != null) {
+            Object oHandlers = model.getScriptThis().get(ScriptUtils.HANDLERS_PROP_NAME, model.getScriptThis());
+            if (oHandlers instanceof Scriptable) {
+                Scriptable sHandlers = (Scriptable) oHandlers;
+                Object oHandler = sHandlers.get(aHandlerName, sHandlers);
+                if (oHandler instanceof Function) {
+                    return (Function) oHandler;
+                }
             }
         }
         return null;
@@ -2005,19 +2009,19 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
             String[] row = aCells[i];
             Object[] o = new Object[row.length];
             System.arraycopy(row, 0, o, 0, row.length);
-            cells[i] = Context.getCurrentContext().newArray(model.getScriptScope(), o);
+            cells[i] = Context.getCurrentContext().newArray(model.getScriptThis(), o);
         }
         return cells;
     }
 
     public Scriptable getCells() {
         Object[] cells = convertView(getGridView(false, false));
-        return Context.getCurrentContext().newArray(model.getScriptScope(), cells);
+        return Context.getCurrentContext().newArray(model.getScriptThis(), cells);
     }
 
     public Scriptable getSelectedCells() {
         Object[] selectedCells = convertView(getGridView(true, false));
-        return Context.getCurrentContext().newArray(model.getScriptScope(), selectedCells);
+        return Context.getCurrentContext().newArray(model.getScriptThis(), selectedCells);
     }
 
     public Scriptable getColumnsScriptView() {
@@ -2026,7 +2030,7 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
             for (ScriptableColumn scrCol : scriptableColumns) {
                 columns.add(scrCol.getPublished());
             }
-            return Context.getCurrentContext().newArray(model.getScriptScope(), columns.toArray());
+            return Context.getCurrentContext().newArray(model.getScriptThis(), columns.toArray());
         }
         return null;
     }

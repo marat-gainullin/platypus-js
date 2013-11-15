@@ -342,6 +342,7 @@ public class ServerMain {
         appDbClient.setPrincipalHost(server);
         ScriptRunner.PlatypusScriptedResource.init(appDbClient, server, server);
         ScriptUtils.getScope().defineProperty(ServerScriptRunner.MODULES_SCRIPT_NAME, server.getScriptsCache(), ScriptableObject.READONLY);
+        
         server.start();
     }
 

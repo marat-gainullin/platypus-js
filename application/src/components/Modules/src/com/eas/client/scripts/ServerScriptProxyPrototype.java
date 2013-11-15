@@ -28,6 +28,8 @@ public class ServerScriptProxyPrototype extends IdScriptableObject {
     public static void init(Scriptable scope, boolean sealed) {
         ServerScriptProxyPrototype obj = new ServerScriptProxyPrototype();
         obj.exportAsJSClass(MAX_PROTOTYPE_ID, scope, sealed);
+        if(sealed)
+            obj.sealObject();
     }
 
     @Override

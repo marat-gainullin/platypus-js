@@ -145,7 +145,7 @@ public class ScriptableRowsetSyntaxTest extends BaseTest {
         try {
             Scriptable scope = cx.newObject(ScriptUtils.getScope());
             dm.setRuntime(true);
-            dm.setScriptScope(scope);
+            dm.setScriptThis(scope);
             // let's compile test script
             Script script = cx.compileString(aSource, "rowsetSyntaxTest", 0, null);
             script.exec(cx, scope);
@@ -183,7 +183,7 @@ public class ScriptableRowsetSyntaxTest extends BaseTest {
         try {
             Scriptable scope = cx.newObject(ScriptUtils.getScope());
             dm.setRuntime(true);
-            dm.setScriptScope(scope);
+            dm.setScriptThis(scope);
 
             RowsetHostObject srEntity = (RowsetHostObject) scope.get(entityName, scope);
             assertNotNull(srEntity);

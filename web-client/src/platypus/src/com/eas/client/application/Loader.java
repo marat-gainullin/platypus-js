@@ -22,11 +22,9 @@ import com.eas.client.DocumentCallbackAdapter;
 import com.eas.client.PlatypusHttpRequestParams;
 import com.eas.client.ResponseCallbackAdapter;
 import com.eas.client.StringCallbackAdapter;
-import com.eas.client.Utils;
 import com.eas.client.queries.Query;
 import com.eas.client.queries.QueryCallbackAdapter;
 import com.google.gwt.core.client.Callback;
-import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.ScriptInjector;
 import com.google.gwt.dom.client.ScriptElement;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -50,7 +48,7 @@ public class Loader {
 	}
 
 	public static final String INJECTED_SCRIPT_CLASS_NAME = "platypus-injected-script";
-	public static final String SERVER_MODULE_TOUCHED_NAME = "-PSMP-";
+	public static final String SERVER_MODULE_TOUCHED_NAME = "Proxy-";
 	public static final String DEPENDENCY_TAG_NAME = "dependency";
 	public static final String QUERY_DEPENDENCY_TAG_NAME = "entityDependency";
 	public static final String SERVER_DEPENDENCY_TAG_NAME = "serverDependency";
@@ -100,12 +98,6 @@ public class Loader {
 			}
 		};
 	}
-
-	protected static native void injectPlaypusModuleCallback(String aAppElementName, JavaScriptObject aCallback)/*-{
-		if (!$wnd.platypusModulesOnLoad)
-			$wnd.platypusModulesOnLoad = {};
-		$wnd.platypusModulesOnLoad[aAppElementName] = aCallback;
-	}-*/;
 
 	public Cancellable load(final Collection<String> aAppElementNames, final CancellableCallback onEnd) throws Exception {
 		final Collection<Cancellable> loadingsStarted = new ArrayList<Cancellable>();
@@ -251,12 +243,11 @@ public class Loader {
 				String jsURL = client.resourceUrl(appElementName);
 				if (GXT.isChrome())// remove if chrome bug 266971 is fixed
 					jsURL += "?" + PlatypusHttpRequestParams.CACHE_BUSTER + "=" + IDGenerator.genId();
-				injectPlaypusModuleCallback(appElementName, Utils.publishRunnable(new Runnable() {
+				ScriptInjector.fromUrl(jsURL).setCallback(new Callback<Void, Exception>() {
 
 					@Override
-					public void run() {
+					public void onSuccess(Void result) {
 						try {
-							injectPlaypusModuleCallback(appElementName, null);
 							fireLoaded.run();
 							loaded.run();
 						} catch (Exception ex) {
@@ -264,18 +255,9 @@ public class Loader {
 						}
 					}
 
-				}));
-				ScriptInjector.fromUrl(jsURL).setCallback(new Callback<Void, Exception>() {
-
-					@Override
-					public void onSuccess(Void result) {
-						// app element script-calling callback is used
-					}
-
 					@Override
 					public void onFailure(Exception reason) {
 						try {
-							injectPlaypusModuleCallback(appElementName, null);
 							Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, "Script [" + appElementName + "] is not loaded. Cause is: " + reason.getMessage());
 							assert !loadedAppElements.contains(appElementName);
 							// Erroneous dependencies and other erroneous

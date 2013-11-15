@@ -123,7 +123,7 @@ public class QueringTest extends BaseTest {
         ScriptUtils.enterContext();
         try {
             ApplicationDbModel model = BaseTest.modelFromStream(client, QueringTest.class.getResourceAsStream(MODEL_TEST_PATH));
-            model.setScriptScope(BaseTest.getDummyScriptableObject());
+            model.setScriptThis(BaseTest.getDummyScriptableObject());
             model.setRuntime(true);
             ModelState state = new ModelState(model);
             int parIndex = model.getParametersEntity().getRowset().getFields().find("P_ID");
@@ -245,7 +245,7 @@ public class QueringTest extends BaseTest {
         ScriptUtils.enterContext();
         try {
             ApplicationDbModel model = BaseTest.modelFromStream(client, FilteringTest.class.getResourceAsStream(MODEL_TEST_PATH));
-            model.setScriptScope(BaseTest.getDummyScriptableObject());
+            model.setScriptThis(BaseTest.getDummyScriptableObject());
             model.setRuntime(true);
             ModelState state = new ModelState(model);
 
@@ -280,7 +280,7 @@ public class QueringTest extends BaseTest {
         ScriptUtils.enterContext();
         try {
             ApplicationDbModel model = BaseTest.modelFromStream(client, FilteringTest.class.getResourceAsStream(MODEL_TEST_PATH));
-            model.setScriptScope(BaseTest.getDummyScriptableObject());
+            model.setScriptThis(BaseTest.getDummyScriptableObject());
             model.setRuntime(true);
             ModelState state = new ModelState(model);
 
@@ -327,7 +327,7 @@ public class QueringTest extends BaseTest {
         ScriptUtils.enterContext();
         try {
             ApplicationDbModel model = BaseTest.modelFromStream(client, QueringTest.class.getResourceAsStream(MODEL_TEST_PATH));
-            model.setScriptScope(BaseTest.getDummyScriptableObject());
+            model.setScriptThis(BaseTest.getDummyScriptableObject());
             model.setRuntime(true);
             ModelState state = new ModelState(model);
             Rowset rowset = state.IZMERJAEMIE_VELICHINI.getRowset();
@@ -431,7 +431,7 @@ public class QueringTest extends BaseTest {
         ScriptUtils.enterContext();
         try {
             ApplicationDbModel model = BaseTest.modelFromStream(client, QueringTest.class.getResourceAsStream(MODEL_TEST_PATH));
-            model.setScriptScope(BaseTest.getDummyScriptableObject());
+            model.setScriptThis(BaseTest.getDummyScriptableObject());
             model.setRuntime(true);
 
             ModelState state = new ModelState(model);
@@ -575,7 +575,7 @@ public class QueringTest extends BaseTest {
         ScriptUtils.enterContext();
         try {
             ApplicationDbModel model = BaseTest.modelFromStream(client, QueringTest.class.getResourceAsStream(MODEL_TEST_PATH));
-            model.setScriptScope(BaseTest.getDummyScriptableObject());
+            model.setScriptThis(BaseTest.getDummyScriptableObject());
             model.setRuntime(true);
 
             ModelState state = new ModelState(model);

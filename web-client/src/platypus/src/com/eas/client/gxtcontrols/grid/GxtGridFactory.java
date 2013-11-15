@@ -13,7 +13,6 @@ import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.events.RowsetListener;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.eas.client.Utils;
-import com.eas.client.Utils.JsObject;
 import com.eas.client.form.Form;
 import com.eas.client.form.api.JSEvents;
 import com.eas.client.gxtcontrols.ControlsUtils;
@@ -100,11 +99,11 @@ public class GxtGridFactory {
 		@Override
 		public void run() {
 			if (cellFunctionName != null && !cellFunctionName.isEmpty()) {
-				JavaScriptObject cellFunction = module.<JsObject> cast().getJs(cellFunctionName);
+				JavaScriptObject cellFunction = module.<Utils.JsModule> cast().getHandler(cellFunctionName);
 				column.setCellFunction(cellFunction);
 			}
 			if (selectFunctionName != null && !selectFunctionName.isEmpty()) {
-				JavaScriptObject selectFunction = module.<JsObject> cast().getJs(selectFunctionName);
+				JavaScriptObject selectFunction = module.<Utils.JsModule> cast().getHandler(selectFunctionName);
 				column.setSelectFunction(selectFunction);
 			}
 		}
@@ -298,7 +297,7 @@ public class GxtGridFactory {
 		handlersResolvers.add(new Runnable() {
 			@Override
 			public void run() {
-				modelGrid.setGeneralCellFunction(model.getModule().<JsObject> cast().getJs(generalCellFunctionName));
+				modelGrid.setGeneralCellFunction(model.getModule().<Utils.JsModule> cast().getHandler(generalCellFunctionName));
 			}
 		});
 		for (ModelGridColumn<?> column : publishedColumns)
