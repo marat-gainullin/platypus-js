@@ -8,7 +8,7 @@ import com.eas.script.ScriptFunction;
 import org.mozilla.javascript.Function;
 
 /**
- * This class keeps information of script properties of a Form object
+ * This class holds information of the script properties of a Form object
  * @author vv
  */
 public class Form {
