@@ -19,7 +19,7 @@ import org.openide.loaders.MultiFileLoader;
  * @author mg
  */
 @DataObject.Registrations(value = {
-    //@DataObject.Registration(position = 200, displayName = "#LBL_PlatypusReport_loader_name", mimeType = "application/vnd.ms-excel"),
+    @DataObject.Registration(position = 200, displayName = "#LBL_PlatypusReport_loader_name", mimeType = "application/vnd.ms-excel"),
     @DataObject.Registration(position = 200, displayName = "#LBL_PlatypusReport_loader_name", mimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
     @DataObject.Registration(position = 200, displayName = "#LBL_PlatypusReport_loader_name", mimeType = "text/javascript"),
     @DataObject.Registration(position = 200, displayName = "#LBL_PlatypusReport_loader_name", mimeType = "text/model+xml")
@@ -57,14 +57,14 @@ public class PlatypusReportDataLoader extends MultiFileLoader {
         // never recognize folders.
         if (!fo.isFolder()) {
             String ext = fo.getExt();
-            if (ext.equals(PlatypusFiles.MODEL_EXTENSION) && FileUtil.findBrother(fo, PlatypusFiles.REPORT_LAYOUT_EXTENSION_X) != null /*|| FileUtil.findBrother(fo, PlatypusFiles.REPORT_LAYOUT_EXTENSION) != null)*/) {
+            if (ext.equals(PlatypusFiles.MODEL_EXTENSION) && (FileUtil.findBrother(fo, PlatypusFiles.REPORT_LAYOUT_EXTENSION_X) != null || FileUtil.findBrother(fo, PlatypusFiles.REPORT_LAYOUT_EXTENSION) != null)) {
                 return FileUtil.findBrother(fo, PlatypusFiles.JAVASCRIPT_EXTENSION);
-            } else if ((ext.equals(PlatypusFiles.REPORT_LAYOUT_EXTENSION_X) /*|| ext.equals(PlatypusFiles.REPORT_LAYOUT_EXTENSION)*/) && FileUtil.findBrother(fo, PlatypusFiles.MODEL_EXTENSION) != null) {
+            } else if ((ext.equals(PlatypusFiles.REPORT_LAYOUT_EXTENSION_X) || ext.equals(PlatypusFiles.REPORT_LAYOUT_EXTENSION)) && FileUtil.findBrother(fo, PlatypusFiles.MODEL_EXTENSION) != null) {
                 return FileUtil.findBrother(fo, PlatypusFiles.JAVASCRIPT_EXTENSION);
             } else if (ext.equals(PlatypusFiles.JAVASCRIPT_EXTENSION)
                     && FileUtil.findBrother(fo, PlatypusFiles.MODEL_EXTENSION) != null
-                    && FileUtil.findBrother(fo, PlatypusFiles.REPORT_LAYOUT_EXTENSION_X) != null) {
-                       // || FileUtil.findBrother(fo, PlatypusFiles.REPORT_LAYOUT_EXTENSION) != null)) {
+                    && (FileUtil.findBrother(fo, PlatypusFiles.REPORT_LAYOUT_EXTENSION_X) != null
+                        || FileUtil.findBrother(fo, PlatypusFiles.REPORT_LAYOUT_EXTENSION) != null)) {
                 return fo;
             }
         }
@@ -101,8 +101,8 @@ public class PlatypusReportDataLoader extends MultiFileLoader {
     protected MultiDataObject.Entry createSecondaryEntry(MultiDataObject obj,
             FileObject secondaryFile) {
         assert PlatypusFiles.MODEL_EXTENSION.equals(secondaryFile.getExt())
-                || PlatypusFiles.REPORT_LAYOUT_EXTENSION_X.equals(secondaryFile.getExt()); 
-                //|| PlatypusFiles.REPORT_LAYOUT_EXTENSION.equals(secondaryFile.getExt());
+                || PlatypusFiles.REPORT_LAYOUT_EXTENSION_X.equals(secondaryFile.getExt()) 
+                || PlatypusFiles.REPORT_LAYOUT_EXTENSION.equals(secondaryFile.getExt());
         return new FileEntry(obj, secondaryFile);
     }
 

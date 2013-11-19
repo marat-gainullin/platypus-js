@@ -28,9 +28,9 @@ public class PlatypusReportDataObject extends PlatypusModuleDataObject {
     public PlatypusReportDataObject(FileObject aJsFile, MultiFileLoader aLoader) throws Exception {
         super(aJsFile, aLoader);
         FileObject aLayoutFile = FileUtil.findBrother(aJsFile, PlatypusFiles.REPORT_LAYOUT_EXTENSION_X);
-//        if (aLayoutFile == null) {
-//            aLayoutFile = FileUtil.findBrother(aJsFile, PlatypusFiles.REPORT_LAYOUT_EXTENSION);
-//        }
+        if (aLayoutFile == null) {
+            aLayoutFile = FileUtil.findBrother(aJsFile, PlatypusFiles.REPORT_LAYOUT_EXTENSION);
+        }
         layoutEntry = registerEntry(aLayoutFile);
     }
 
@@ -41,7 +41,8 @@ public class PlatypusReportDataObject extends PlatypusModuleDataObject {
 
     public void checkLayoutData() throws IOException {
         if (xlReport == null) {
-            xlReport = new ExcelReport();
+            xlReport = new ExcelReport(getLayoutFile().getExt());
+            xlReport.setTemplate(null);
             xlReport.setTemplate(new CompactBlob(layoutEntry.getFile().asBytes()));
         }
     }
