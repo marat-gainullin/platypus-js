@@ -32,7 +32,7 @@ public class NativeJavaHostObject extends NativeJavaObject {
 
     @Override
     public void put(String name, Scriptable start, Object value) {
-        if (super.has(name, start)) {
+        if (!delegate.has(name, start)) {
             super.put(name, start, value);
         } else {
             delegate.put(name, delegate, value);
@@ -41,7 +41,7 @@ public class NativeJavaHostObject extends NativeJavaObject {
 
     @Override
     public void put(int index, Scriptable start, Object value) {
-        if (super.has(index, start)) {
+        if (!delegate.has(index, start)) {
             super.put(index, start, value);
         } else {
             delegate.put(index, delegate, value);
@@ -50,7 +50,7 @@ public class NativeJavaHostObject extends NativeJavaObject {
 
     @Override
     public Object get(String name, Scriptable start) {
-        if (super.has(name, start)) {
+        if (!delegate.has(name, start)) {
             return super.get(name, start);
         } else {
             return delegate.get(name, start);
@@ -59,7 +59,7 @@ public class NativeJavaHostObject extends NativeJavaObject {
 
     @Override
     public Object get(int index, Scriptable start) {
-        if (super.has(index, start)) {
+        if (!delegate.has(index, start)) {
             return super.get(index, start);
         } else {
             return delegate.get(index, start);

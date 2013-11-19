@@ -4,6 +4,7 @@
  */
 package com.eas.debugger.jmx.server;
 
+import com.eas.script.ScriptUtils;
 import java.util.ArrayList;
 import java.util.List;
 import javax.management.AttributeChangeNotification;
@@ -183,6 +184,7 @@ public class Debugger extends NotificationBroadcasterSupport implements Debugger
 
     protected Debugger(boolean needInitialBreak) {
         super();
+        ScriptUtils.getScope();// force Rhino ininializations. Some initialization are related to ContextFactory.
         ContextFactory factory = ContextFactory.getGlobal();
         Global global = new Global();
         global.init(factory);

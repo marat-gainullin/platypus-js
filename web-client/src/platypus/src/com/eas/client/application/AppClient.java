@@ -770,7 +770,7 @@ public class AppClient {
 				@Override
 				protected void doWork(XMLHttpRequest aResponse) throws Exception {
 					if (onFailure != null) {
-						onFailure.run(aResponse.getStatusText());
+						onFailure.run(aResponse.getResponseText() != null ? aResponse.getResponseText() : aResponse.getStatusText());
 					}
 				}
 			});

@@ -636,7 +636,7 @@ public class ScriptRunner extends ScriptableObject {
                     if (principal != null && principal.hasAnyRole(functionAllowedRoles.get(name))) {
                         return;
                     }
-                    throw new AccessControlException(String.format("Access denied to %s function in %s module for %s PlatypusPrincipal.",//NOI18N
+                    throw new AccessControlException(String.format("Access denied to %s function in %s module for %s.",//NOI18N
                             name,
                             ScriptRunner.this.appElementId,
                             principal != null ? principal.getName() : null));

@@ -60,6 +60,11 @@ public class ExcelReport {
     public ExcelReport() {
         super();
     }
+    
+    public ExcelReport(String aFormat) {
+        super();
+        format = aFormat;
+    }
 
     public ExcelReport(ApplicationModel<?, ?, ?, ?> aModel, ScriptableObject aSo) {
         super();

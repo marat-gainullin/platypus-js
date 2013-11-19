@@ -291,7 +291,7 @@ public class PlatypusHttpServlet extends HttpServlet {
     private void writeExcelResponse(byte[] aResponse, String aFormat, HttpServletResponse aHttpResponse) throws UnsupportedEncodingException, IOException {
         aHttpResponse.setCharacterEncoding(SettingsConstants.COMMON_ENCODING);
         aHttpResponse.setContentType(aFormat != null && aFormat.equals(PlatypusFiles.REPORT_LAYOUT_EXTENSION) ? EXCEL_CONTENT_TYPE : EXCELX_CONTENT_TYPE);
-        aHttpResponse.addHeader("Content-Disposition", "attachment; filename=\"report." + aFormat != null ? aFormat : PlatypusFiles.REPORT_LAYOUT_EXTENSION_X + "\"");
+        aHttpResponse.addHeader("Content-Disposition", "attachment; filename=\"report." + (aFormat != null ? aFormat : PlatypusFiles.REPORT_LAYOUT_EXTENSION_X) + "\"");
         aHttpResponse.setContentLength(aResponse.length);
         aHttpResponse.getOutputStream().write(aResponse);
         aHttpResponse.getOutputStream().flush();

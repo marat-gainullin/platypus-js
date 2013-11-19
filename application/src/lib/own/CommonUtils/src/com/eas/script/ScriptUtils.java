@@ -8,6 +8,7 @@ import java.util.Date;
 import org.mozilla.javascript.CompilerEnvirons;
 import org.mozilla.javascript.ConsString;
 import org.mozilla.javascript.Context;
+import org.mozilla.javascript.ContextFactory;
 import org.mozilla.javascript.ErrorReporter;
 import org.mozilla.javascript.EvaluatorException;
 import org.mozilla.javascript.Function;
@@ -93,6 +94,28 @@ public class ScriptUtils {
     protected static Function scalarDefFunc;
     protected static Function collectionDefFunc;
     protected static ScriptableObject topLevelScope;
+
+    static class EnhancedJavaAccessContextFactory extends ContextFactory {
+
+        @Override
+        public boolean hasFeature(Context cx, int featureIndex) {
+            return featureIndex == Context.FEATURE_ENHANCED_JAVA_ACCESS ? true : super.hasFeature(cx, featureIndex);
+        }
+
+        @Override
+        protected Context makeContext() {
+            Context cx = super.makeContext();
+            if (wrapFactory != null) {
+                cx.setWrapFactory(wrapFactory);
+            }
+            cx.getWrapFactory().setJavaPrimitiveWrap(false);
+            return cx;
+        }
+    }
+
+    static {
+        ContextFactory.initGlobal(new EnhancedJavaAccessContextFactory());
+    }
 
     private static void init() {
         if (topLevelScope == null) {
@@ -276,13 +299,13 @@ public class ScriptUtils {
         return false;
     }
 
+    /**
+     * TODO: eliminate this method.
+     *
+     * @return
+     */
     public static Context enterContext() {
-        Context cx = Context.enter();
-        if (wrapFactory != null) {
-            cx.setWrapFactory(wrapFactory);
-        }
-        cx.getWrapFactory().setJavaPrimitiveWrap(false);
-        return cx;
+        return Context.enter();
     }
 
     public static void inContext(Runnable aAction) {

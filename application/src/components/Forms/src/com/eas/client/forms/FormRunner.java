@@ -1357,9 +1357,9 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
                 } finally {
                     if (!wasContext) {
                         Context.exit();
-                    }
+                    }            
                 }
-            } catch (Exception ex) {
+            } catch (Exception ex) {                                         
                 Logger.getLogger(FormRunner.class.getName()).log(Level.SEVERE, ex.getMessage());
             }
         }

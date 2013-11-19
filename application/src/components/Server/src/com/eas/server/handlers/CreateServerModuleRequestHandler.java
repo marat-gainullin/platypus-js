@@ -51,7 +51,7 @@ public class CreateServerModuleRequestHandler extends SessionRequestHandler<Crea
         return new CreateServerModuleResponse(getRequest().getID(), serverModule.getModuleId(), serverModule.getFunctionsNames(), serverModule instanceof ServerReportRunner, permitted);
     }
 
-    public static ServerScriptRunner runModule(PlatypusServerCore aServerCore, Session aSession, String aModuleId) throws Exception {
+    static ServerScriptRunner runModule(PlatypusServerCore aServerCore, Session aSession, String aModuleId) throws Exception {
         ServerScriptRunner serverModule = null;
         ScriptDocument scriptDoc = aServerCore.getDocuments().compileScriptDocument(aModuleId);
         if (scriptDoc != null) {
