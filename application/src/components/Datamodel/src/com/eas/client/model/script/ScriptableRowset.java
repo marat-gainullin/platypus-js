@@ -1668,7 +1668,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
 
     private static final String REQUERY_JSDOC = ""
             + "/**\n"
-            + "* Requeries rowset's data. Forses rowset data refresh, no matter if its parameters has changed or not.\n"
+            + "* Requeries the rowset's data. Forses the rowset to refresh its data, no matter if its parameters has changed or not.\n"
             + "* @param onSuccessCallback the handler function for refresh data on success event (optional)\n"
             + "* @param onFailureCallback the handler function for refresh data on failure event (optional)\n"
             + "*/";
