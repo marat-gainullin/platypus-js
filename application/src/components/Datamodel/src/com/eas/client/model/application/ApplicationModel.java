@@ -514,7 +514,14 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         return loadEntity(aQueryId);
     }
 
-    @ScriptFunction(jsDoc = "Creates new entity of model, based on application query.")
+    private static final String LOAD_ENTITY_JSDOC = ""
+            + "/**\n"
+            + "* Creates new entity of model, based on application query.\n"
+            + "* @param queryId the query application element ID\n"
+            + "* @return a new entity"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = LOAD_ENTITY_JSDOC, params = {"queryId"})
     public synchronized Scriptable loadEntity(String aQueryId) throws Exception {
         if (client == null) {
             throw new NullPointerException("Null client detected while creating an entity");
