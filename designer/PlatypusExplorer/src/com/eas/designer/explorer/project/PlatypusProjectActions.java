@@ -8,6 +8,8 @@ import com.eas.client.AppCache;
 import com.eas.client.cache.FilesAppCache;
 import com.eas.designer.application.project.PlatypusProject;
 import com.eas.designer.explorer.j2ee.PlatypusWebModuleManager;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -18,6 +20,7 @@ import org.netbeans.api.progress.ProgressHandle;
 import org.netbeans.api.progress.ProgressHandleFactory;
 import org.netbeans.spi.project.ActionProvider;
 import org.netbeans.spi.project.ui.support.DefaultProjectOperations;
+import org.openide.DialogDescriptor;
 import org.openide.DialogDisplayer;
 import org.openide.NotifyDescriptor;
 import org.openide.awt.StatusDisplayer;
@@ -84,14 +87,14 @@ public class PlatypusProjectActions implements ActionProvider {
                     DefaultProjectOperations.performDefaultMoveOperation(project);
                     break;
                 case COMMAND_RUN:
-                    ProjectRunner.run(project, project.getSettings().getAppSettings().getRunElement());
+                    run(false);
                     break;
                 case COMMAND_CLEAN_AND_RUN:
                     clean();
-                    ProjectRunner.run(project, project.getSettings().getAppSettings().getRunElement());
+                    run(false);
                     break;
                 case COMMAND_DEBUG:
-                    ProjectRunner.debug(project, project.getSettings().getAppSettings().getRunElement());
+                    run(true);
                     break;
                 case COMMAND_DEPLOY:
                     deploy();
@@ -130,6 +133,28 @@ public class PlatypusProjectActions implements ActionProvider {
             return true;
         }
         return false;
+    }
+
+    private void run(boolean debug) throws Exception {
+        String runAppElement = project.getSettings().getAppSettings().getRunElement();
+        if (runAppElement == null || runAppElement.isEmpty()) {
+            final SelectAppElementPanel panel = new SelectAppElementPanel(project);
+            DialogDescriptor dd = new DialogDescriptor(panel, "App element Id");
+            if (DialogDescriptor.OK_OPTION.equals(DialogDisplayer.getDefault().notify(dd))) {
+                runAppElement = panel.getAppElementId();
+                if (panel.isSaveAsDefault()) {
+                    project.getSettings().getAppSettings().setRunElement(runAppElement);
+                    project.getSettings().save();
+                }
+            } else {
+                return;
+            }
+        }
+        if (!debug) {
+            ProjectRunner.run(project, runAppElement);
+        } else {
+            ProjectRunner.debug(project, runAppElement);
+        }
     }
 
     private void deploy() {
