@@ -732,7 +732,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     private static final String UHSHIFT_JSDOC = ""
             + "/**\n"
             + "* Adds one or more elements to the front of an array and returns the new length of the array.\n"
-            + "* @param elements the objects to add.\n"
+            + "* @param elements the objects to add\n"
             + "*/";
 
     @ScriptFunction(jsDoc = UHSHIFT_JSDOC, params = {"elements"})
@@ -749,7 +749,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     }
     private static final String REVERSE_JSDOC = ""
             + "/**\n"
-            + "* Reverses an array in place.  The first array element becomes the last and the last becomes the first.\n"
+            + "* Reverses an array in place. The first array element becomes the last and the last becomes the first.\n"
             + "*/";
 
     @ScriptFunction(jsDoc = REVERSE_JSDOC)
@@ -1646,7 +1646,6 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     }
 
     // Requery interface
-    @ScriptFunction(jsDoc = "Requeries rowset's data.")
     public void requery() throws Exception {
         if (entity != null) {
             //checkModelExecuted();
@@ -1663,7 +1662,6 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         }
     }
 
-    @ScriptFunction(jsDoc = "Requeries rowset's data with a callbacks.")
     public void requery(Function aOnSuccess) throws Exception {
         requery(aOnSuccess, null);
     }
