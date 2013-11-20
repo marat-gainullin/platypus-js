@@ -221,7 +221,7 @@ public abstract class Query<T extends Client> {
             param = new Parameter();
             params.add(param);
         }
-        param.setName(aName.toUpperCase());
+        param.setName(aName);
         param.setTypeInfo(aTypeInfo.copy());
         param.setDefaultValue(aValue);
         param.setValue(aValue);

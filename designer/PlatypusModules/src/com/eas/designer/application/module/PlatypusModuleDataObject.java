@@ -10,6 +10,7 @@ import com.eas.client.model.application.ApplicationDbModel;
 import com.eas.client.model.store.XmlDom2ApplicationModel;
 import com.eas.client.scripts.ScriptRunner;
 import com.eas.designer.application.PlatypusUtils;
+import com.eas.designer.application.indexer.IndexerQuery;
 import com.eas.designer.application.module.completion.CompletionContext;
 import com.eas.designer.application.module.completion.ModuleCompletionContext;
 import com.eas.designer.application.module.events.ApplicationModuleEvents;
@@ -198,6 +199,30 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
             try (OutputStream out = getModelFile().getOutputStream()) {
                 out.write(modelContent.getBytes(PlatypusUtils.COMMON_ENCODING_NAME));
                 out.flush();
+            }
+        }
+    }
+
+    @Override
+    protected void handleDelete() throws IOException {
+        String oldId = IndexerQuery.file2AppElementId(getPrimaryFile());
+        super.handleDelete();
+        if (getClient() != null) {
+            try {
+                getClient().appEntityChanged(oldId);
+            } catch (Exception ex) {
+                throw new IOException(ex);
+            }
+        }
+    }
+
+    public void notifyChanged() throws Exception {
+        if (getClient() != null) {
+            unsignFromQueries();
+            try {
+                getClient().appEntityChanged(IndexerQuery.file2AppElementId(getPrimaryFile()));
+            } finally {
+                signOnQueries();
             }
         }
     }

@@ -70,7 +70,7 @@ public class CommitRequestHandler extends SessionRequestHandler<CommitRequest> {
         for (Change change : changes) {
             SqlCompiledQuery entity = entities.get(change.entityId);
             if (entity == null) {
-                SqlQuery query = client.getQueryFactory().getQuery(change.entityId, false);
+                SqlQuery query = client.getAppQuery(change.entityId, false);
                 if (!query.isPublicAccess()) {
                     throw new AccessControlException(String.format("Public access to query entity %s is denied while commiting changes for that entity.", change.entityId));//NOI18N
                 }

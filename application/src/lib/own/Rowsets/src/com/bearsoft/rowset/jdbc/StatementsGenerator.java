@@ -57,7 +57,7 @@ public class StatementsGenerator implements ChangeVisitor {
                     return stmt.executeUpdate();
                 }
             } else {
-                Logger.getLogger(StatementsLogEntry.class.getName()).log(Level.WARNING, "Invalid StatementsLogEntry occured!");
+                Logger.getLogger(StatementsLogEntry.class.getName()).log(Level.INFO, "Invalid StatementsLogEntry occured!");
                 return 0;
             }
         }
@@ -200,87 +200,93 @@ public class StatementsGenerator implements ChangeVisitor {
 
     @Override
     public void visit(Update aChange) throws Exception {
-        entitiesHost.checkRights(aChange.entityId);
-        Map<String, UpdateChunk> updates = new HashMap<>();
-        // data
-        for (int i = 0; i < aChange.data.length; i++) {
-            Field field = entitiesHost.resolveField(aChange.entityId, aChange.data[i].name);
-            if (field != null) {
-                UpdateChunk chunk = updates.get(field.getTableName());
-                if (chunk == null) {
-                    chunk = new UpdateChunk();
-                    updates.put(field.getTableName(), chunk);
-                    chunk.update = new StatementsLogEntry(converter);
-                    // Adding here is strongly needed. Because of order in with other and this statememts are added
-                    // to the log and therefore applied into a database during a transaction.
-                    logEntries.add(chunk.update);
-                    chunk.columnsClause = new StringBuilder();
-                    chunk.data = new ArrayList<>();
-                }
-                if (!chunk.data.isEmpty()) {
-                    chunk.columnsClause.append(", ");
-                }
-                chunk.columnsClause.append(field.getOriginalName() != null ? field.getOriginalName() : field.getName()).append(" = ?");
-                chunk.data.add(aChange.data[i]);
-            }
-        }
-        // keys
-        for (int i = 0; i < aChange.keys.length; i++) {
-            Field field = entitiesHost.resolveField(aChange.entityId, aChange.keys[i].name);
-            if (field != null) {
-                UpdateChunk chunk = updates.get(field.getTableName());
-                if (chunk != null) {
-                    if (chunk.keys == null) {
-                        chunk.keys = new ArrayList<>();
+        if (!aChange.consumed) {
+            entitiesHost.checkRights(aChange.entityId);
+            Map<String, UpdateChunk> updates = new HashMap<>();
+            // data
+            for (int i = 0; i < aChange.data.length; i++) {
+                Field field = entitiesHost.resolveField(aChange.entityId, aChange.data[i].name);
+                if (field != null) {
+                    UpdateChunk chunk = updates.get(field.getTableName());
+                    if (chunk == null) {
+                        chunk = new UpdateChunk();
+                        updates.put(field.getTableName(), chunk);
+                        chunk.update = new StatementsLogEntry(converter);
+                        // Adding here is strongly needed. Because of order in with other and this statememts are added
+                        // to the log and therefore applied into a database during a transaction.
+                        logEntries.add(chunk.update);
+                        chunk.columnsClause = new StringBuilder();
+                        chunk.data = new ArrayList<>();
                     }
-                    chunk.keys.add(new Change.Value(field.getOriginalName() != null ? field.getOriginalName() : field.getName(), aChange.keys[i].value, aChange.keys[i].type));
+                    if (!chunk.data.isEmpty()) {
+                        chunk.columnsClause.append(", ");
+                    }
+                    chunk.columnsClause.append(field.getOriginalName() != null ? field.getOriginalName() : field.getName()).append(" = ?");
+                    chunk.data.add(aChange.data[i]);
                 }
             }
-        }
-        for (String tableName : updates.keySet()) {
-            UpdateChunk chunk = updates.get(tableName);
-            if (chunk.data != null && !chunk.data.isEmpty()
-                    && chunk.keys != null) {
-                chunk.update.clause = String.format(UPDATE_CLAUSE, tableName, chunk.columnsClause.toString(), generateWhereClause(chunk.keys));
-                chunk.update.parameters.addAll(chunk.data);
-                chunk.update.parameters.addAll(chunk.keys);
+            // keys
+            for (int i = 0; i < aChange.keys.length; i++) {
+                Field field = entitiesHost.resolveField(aChange.entityId, aChange.keys[i].name);
+                if (field != null) {
+                    UpdateChunk chunk = updates.get(field.getTableName());
+                    if (chunk != null) {
+                        if (chunk.keys == null) {
+                            chunk.keys = new ArrayList<>();
+                        }
+                        chunk.keys.add(new Change.Value(field.getOriginalName() != null ? field.getOriginalName() : field.getName(), aChange.keys[i].value, aChange.keys[i].type));
+                    }
+                }
             }
-            chunk.update.valid = chunk.data != null && !chunk.data.isEmpty()
-                    && chunk.keys != null && !chunk.keys.isEmpty();
+            for (String tableName : updates.keySet()) {
+                UpdateChunk chunk = updates.get(tableName);
+                if (chunk.data != null && !chunk.data.isEmpty()
+                        && chunk.keys != null) {
+                    chunk.update.clause = String.format(UPDATE_CLAUSE, tableName, chunk.columnsClause.toString(), generateWhereClause(chunk.keys));
+                    chunk.update.parameters.addAll(chunk.data);
+                    chunk.update.parameters.addAll(chunk.keys);
+                }
+                chunk.update.valid = chunk.data != null && !chunk.data.isEmpty()
+                        && chunk.keys != null && !chunk.keys.isEmpty();
+            }
         }
     }
 
     @Override
     public void visit(Delete aChange) throws Exception {
-        entitiesHost.checkRights(aChange.entityId);
-        Map<String, StatementsLogEntry> deletes = new HashMap<>();
-        for (int i = 0; i < aChange.keys.length; i++) {
-            Field field = entitiesHost.resolveField(aChange.entityId, aChange.keys[i].name);
-            if (field != null) {
-                StatementsLogEntry delete = deletes.get(field.getTableName());
-                if (delete == null) {
-                    delete = new StatementsLogEntry(converter);
-                    deletes.put(field.getTableName(), delete);
-                    // Adding here is strongly needed. Because of order in with other and this statememts are added
-                    // to the log and therefore applied into a database during a transaction.
-                    logEntries.add(delete);
+        if (!aChange.consumed) {
+            entitiesHost.checkRights(aChange.entityId);
+            Map<String, StatementsLogEntry> deletes = new HashMap<>();
+            for (int i = 0; i < aChange.keys.length; i++) {
+                Field field = entitiesHost.resolveField(aChange.entityId, aChange.keys[i].name);
+                if (field != null) {
+                    StatementsLogEntry delete = deletes.get(field.getTableName());
+                    if (delete == null) {
+                        delete = new StatementsLogEntry(converter);
+                        deletes.put(field.getTableName(), delete);
+                        // Adding here is strongly needed. Because of order in with other and this statememts are added
+                        // to the log and therefore applied into a database during a transaction.
+                        logEntries.add(delete);
+                    }
+                    delete.parameters.add(new Change.Value(field.getOriginalName() != null ? field.getOriginalName() : field.getName(), aChange.keys[i].value, aChange.keys[i].type));
                 }
-                delete.parameters.add(new Change.Value(field.getOriginalName() != null ? field.getOriginalName() : field.getName(), aChange.keys[i].value, aChange.keys[i].type));
             }
-        }
-        for (String tableName : deletes.keySet()) {
-            StatementsLogEntry delete = deletes.get(tableName);
-            delete.clause = String.format(DELETE_CLAUSE, tableName, generateWhereClause(delete.parameters));
-            delete.valid = !delete.parameters.isEmpty();
+            for (String tableName : deletes.keySet()) {
+                StatementsLogEntry delete = deletes.get(tableName);
+                delete.clause = String.format(DELETE_CLAUSE, tableName, generateWhereClause(delete.parameters));
+                delete.valid = !delete.parameters.isEmpty();
+            }
         }
     }
 
     @Override
     public void visit(Command aChange) throws Exception {
-        entitiesHost.checkRights(aChange.entityId);
-        StatementsLogEntry logEntry = new StatementsLogEntry(converter);
-        logEntry.clause = aChange.command;
-        logEntry.parameters.addAll(Arrays.asList(aChange.parameters));
-        logEntries.add(logEntry);
+        if (!aChange.consumed) {
+            entitiesHost.checkRights(aChange.entityId);
+            StatementsLogEntry logEntry = new StatementsLogEntry(converter);
+            logEntry.clause = aChange.command;
+            logEntry.parameters.addAll(Arrays.asList(aChange.parameters));
+            logEntries.add(logEntry);
+        }
     }
 }

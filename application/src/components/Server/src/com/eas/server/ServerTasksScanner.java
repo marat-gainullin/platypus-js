@@ -37,7 +37,11 @@ public class ServerTasksScanner implements FilesAppCache.ScanCallback {
                 List<JsDoc.Tag> annotations = doc.getModuleAnnotations();
                 if (annotations != null) {
                     for (JsDoc.Tag tag : annotations) {
-                        if (JsDoc.Tag.ACCEPTOR_TAG.equals(tag.getName()) || JsDoc.Tag.AUTHORIZER_TAG.equals(tag.getName()) || JsDoc.Tag.RESIDENT_TAG.equals(tag.getName())) {
+                        if (JsDoc.Tag.ACCEPTOR_TAG.equals(tag.getName())
+                                || JsDoc.Tag.AUTHORIZER_TAG.equals(tag.getName())
+                                || JsDoc.Tag.RESIDENT_TAG.equals(tag.getName())
+                                || JsDoc.Tag.VALIDATOR_TAG.equals(tag.getName())
+                                ) {
                             tasks.add(aAppElementId);
                         }
                     }

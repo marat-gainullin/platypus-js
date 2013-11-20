@@ -150,7 +150,7 @@ public class StoredQueryFactory {
             aAppElementId = aAppElementId.substring(1);
             appElement = client.getAppCache().get(aAppElementId);
         }
-        if (appElement != null) {// Ordinary queries, stored in application database
+        if (appElement != null && appElement.getType() == ClientConstants.ET_QUERY) {// Ordinary queries, stored in application database
             Document queryDom = appElement.getContent();
             if (queryDom != null) {
                 QueryDocument queryDoc = XmlDom2QueryDocument.transform(client, aAppElementId, queryDom);

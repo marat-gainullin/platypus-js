@@ -5,6 +5,8 @@
 package com.eas.script;
 
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.mozilla.javascript.CompilerEnvirons;
 import org.mozilla.javascript.ConsString;
 import org.mozilla.javascript.Context;
@@ -12,6 +14,7 @@ import org.mozilla.javascript.ErrorReporter;
 import org.mozilla.javascript.EvaluatorException;
 import org.mozilla.javascript.Function;
 import org.mozilla.javascript.IdScriptableObject;
+import org.mozilla.javascript.ImporterTopLevel;
 import org.mozilla.javascript.NativeJavaObject;
 import org.mozilla.javascript.Parser;
 import org.mozilla.javascript.Scriptable;
@@ -96,24 +99,23 @@ public class ScriptUtils {
 
     private static void init() {
         if (topLevelScope == null) {
-            Context ctx = Context.getCurrentContext();
-            boolean wasContext = ctx != null;
-            if (!wasContext) {
-                ctx = ScriptUtils.enterContext();
-            }
             try {
-                topLevelScope = (ScriptableObject) ctx.initStandardObjects();
-                toDateFunc = ctx.compileFunction(topLevelScope, toDateFuncSource, "toDateFunc", 0, null);
-                parseJsonFunc = ctx.compileFunction(topLevelScope, parseJsonFuncSource, "parseJsonFunc", 0, null);
-                writeJsonFunc = ctx.compileFunction(topLevelScope, writeJsonFuncSource, "writeJsonFunc", 0, null);
-                toXMLStringFunc = ctx.compileFunction(topLevelScope, toXMLStringFuncSource, "toXMLStringFunc", 0, null);
-                extendFunc = ctx.compileFunction(topLevelScope, extendFuncSource, "extendFunc", 0, null);
-                scalarDefFunc = ctx.compileFunction(topLevelScope, scalarDefFuncSource, "scalarDefFunc", 0, null);
-                collectionDefFunc = ctx.compileFunction(topLevelScope, collectionDefFuncSource, "collectionDefFunc", 0, null);
-            } finally {
-                if (!wasContext) {
-                    Context.exit();
-                }
+                inContext(new ScriptAction() {
+                    @Override
+                    public Object run(Context cx) throws Exception {
+                        topLevelScope = new ImporterTopLevel(cx);
+                        toDateFunc = cx.compileFunction(topLevelScope, toDateFuncSource, "toDateFunc", 0, null);
+                        parseJsonFunc = cx.compileFunction(topLevelScope, parseJsonFuncSource, "parseJsonFunc", 0, null);
+                        writeJsonFunc = cx.compileFunction(topLevelScope, writeJsonFuncSource, "writeJsonFunc", 0, null);
+                        toXMLStringFunc = cx.compileFunction(topLevelScope, toXMLStringFuncSource, "toXMLStringFunc", 0, null);
+                        extendFunc = cx.compileFunction(topLevelScope, extendFuncSource, "extendFunc", 0, null);
+                        scalarDefFunc = cx.compileFunction(topLevelScope, scalarDefFuncSource, "scalarDefFunc", 0, null);
+                        collectionDefFunc = cx.compileFunction(topLevelScope, collectionDefFuncSource, "collectionDefFunc", 0, null);
+                        return topLevelScope;
+                    }
+                });
+            } catch (Exception ex) {
+                Logger.getLogger(ScriptUtils.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
@@ -262,13 +264,12 @@ public class ScriptUtils {
         if (aName != null && !aName.trim().isEmpty()) {
             init();
             try {
-                inContext(new Runnable() {
+                return inContext(new ScriptAction() {
                     @Override
-                    public void run() {
-                        Context.getCurrentContext().compileFunction(topLevelScope, String.format("function %s() {}", aName), null, 0, null); //NOI18N
+                    public Boolean run(Context cx) {
+                        return cx.compileFunction(topLevelScope, String.format("function %s() {}", aName), null, 0, null) != null; //NOI18N
                     }
                 });
-                return true;
             } catch (Exception ex) {
                 return false;
             }
@@ -285,21 +286,27 @@ public class ScriptUtils {
         return cx;
     }
 
-    public static void inContext(Runnable aAction) {
+    public interface ScriptAction {
+
+        public <T> T run(Context cx) throws Exception;
+    }
+
+    public static <T> T inContext(ScriptAction aAction) throws Exception {
         if (aAction != null) {
             Context cx = Context.getCurrentContext();
             boolean wasContext = cx != null;
             if (!wasContext) {
-                enterContext();
+                cx = enterContext();
             }
             try {
-                aAction.run();
+                return aAction.<T>run(cx);
             } finally {
                 if (!wasContext) {
                     Context.exit();
                 }
             }
         }
+        return null;
     }
 
     public static String toString(Object value) {

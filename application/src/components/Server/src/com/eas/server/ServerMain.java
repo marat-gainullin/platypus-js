@@ -7,6 +7,7 @@ package com.eas.server;
 import com.bearsoft.rowset.resourcepool.BearResourcePool;
 import com.eas.client.ClientConstants;
 import com.eas.client.DatabasesClient;
+import com.eas.client.ScriptedDatabasesClient;
 import com.eas.client.scripts.ScriptRunner;
 import com.eas.client.settings.DbConnectionSettings;
 import com.eas.debugger.jmx.server.Breakpoints;
@@ -329,7 +330,7 @@ public class ServerMain {
         if (appPath != null) {
             settings.setApplicationPath(appPath);
         }
-        DatabasesClient appDbClient = new DatabasesClient(settings, false, new ServerTasksScanner(tasks));
+        ScriptedDatabasesClient appDbClient = new ScriptedDatabasesClient(settings, false, new ServerTasksScanner(tasks));
         if (System.getProperty(ScriptRunner.DEBUG_PROPERTY) != null) {
             Debugger debugger = Debugger.initialize(false);
             registerMBean(DebuggerMBean.DEBUGGER_MBEAN_NAME, debugger);

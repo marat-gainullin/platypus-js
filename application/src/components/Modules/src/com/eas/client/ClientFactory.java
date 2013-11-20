@@ -33,13 +33,14 @@ public class ClientFactory {
     public static final String CONNECTION_URL_SETTING = "url";
     public static final String CONNECTION_SCHEMA_SETTING = "schema";
     public static final String CONNECTION_USER_SETTING = "user";
-    private static EasSettings[] settings = null;
+    private static EasSettings[] settings;
     private static EasSettings defaultSettings;
 
     public static Client getInstance(EasSettings aSettings) throws Exception {
         if (aSettings instanceof DbConnectionSettings) {
             DbConnectionSettings dbSettings = (DbConnectionSettings) aSettings;
-            return new DatabasesClient(dbSettings);
+            ScriptedDatabasesClient client = new ScriptedDatabasesClient(dbSettings);
+            return client;
         } else if (aSettings instanceof PlatypusConnectionSettings) {
             String url = aSettings.getUrl();
             if (PlatypusHttpConstants.PROTOCOL_HTTPS.equals(url.substring(0, 5).toLowerCase())) {

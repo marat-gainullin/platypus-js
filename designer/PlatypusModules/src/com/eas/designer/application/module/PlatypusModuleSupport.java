@@ -54,6 +54,7 @@ import org.openide.text.CloneableEditor;
 import org.openide.text.CloneableEditorSupport;
 import org.openide.text.DataEditorSupport;
 import org.openide.text.PositionRef;
+import org.openide.util.Exceptions;
 import org.openide.util.UserQuestionException;
 import org.openide.windows.CloneableOpenSupport;
 import org.openide.windows.CloneableTopComponent;
@@ -217,10 +218,15 @@ public class PlatypusModuleSupport extends DataEditorSupport implements OpenCook
 
     @Override
     public void saveDocument() throws IOException {
-        super.saveDocument();
-        // save model file
-        dataObject.saveModel();
-        dataObject.setModified(false);
+        try {
+            super.saveDocument();
+            // save model file
+            dataObject.saveModel();
+            dataObject.setModified(false);
+            dataObject.notifyChanged();
+        } catch (Exception ex) {
+            throw new IOException(ex);
+        }
     }
 
     @Override
@@ -318,7 +324,8 @@ public class PlatypusModuleSupport extends DataEditorSupport implements OpenCook
      * display name.
      *
      * @param formDataObject form data object representing the multiview tc.
-     * @return display names of the MVTC. The second item can      * be <code>null</code>.
+     * @return display names of the MVTC. The second item can *
+     * be <code>null</code>.
      */
     protected String[] getMVTCDisplayName(PlatypusModuleDataObject formDataObject) {
         Node node = formDataObject.getNodeDelegate();
@@ -334,9 +341,9 @@ public class PlatypusModuleSupport extends DataEditorSupport implements OpenCook
         boolean modified = formDataObject.isModified();
         boolean readOnly = readOnly(formDataObject);
         return new String[]{
-                    DataEditorSupport.annotateName(title, false, modified, readOnly),
-                    DataEditorSupport.annotateName(htmlTitle, true, modified, readOnly)
-                };
+            DataEditorSupport.annotateName(title, false, modified, readOnly),
+            DataEditorSupport.annotateName(htmlTitle, true, modified, readOnly)
+        };
     }
 
     protected boolean readOnly(PlatypusModuleDataObject formDataObject) {

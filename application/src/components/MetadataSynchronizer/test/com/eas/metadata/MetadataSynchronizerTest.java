@@ -19,8 +19,7 @@ import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.ForeignKeySpec;
 import com.bearsoft.rowset.metadata.ForeignKeySpec.ForeignKeyRule;
 import com.bearsoft.rowset.metadata.PrimaryKeySpec;
-import com.eas.client.Client;
-import com.eas.client.ClientFactory;
+import com.eas.client.DatabasesClient;
 import com.eas.client.DbClient;
 import com.eas.client.metadata.DbTableIndexColumnSpec;
 import com.eas.client.metadata.DbTableIndexSpec;
@@ -1007,15 +1006,11 @@ public class MetadataSynchronizerTest {
         EasSettings settings = EasSettings.createInstance(aDbConnection.getUrl());
         settings.setUser(aDbConnection.getUser());
         settings.setPassword(aDbConnection.getPassword());
-        if (settings instanceof DbConnectionSettings) {
-            ((DbConnectionSettings)settings).setSchema(aDbConnection.getSchema());
-            ((DbConnectionSettings) settings).setInitSchema(false);
-        }
+        assert settings instanceof DbConnectionSettings;
+        ((DbConnectionSettings)settings).setSchema(aDbConnection.getSchema());
+        ((DbConnectionSettings) settings).setInitSchema(false);
         settings.setUrl(aDbConnection.getUrl());
-        Client lclient = ClientFactory.getInstance(settings);
-        assert lclient instanceof DbClient;
-        DbClient client = (DbClient) lclient;
-        return client;
+        return new DatabasesClient((DbConnectionSettings)settings);
     }
 
     private void clearSchema(DbConnection aDbConnection) throws Exception {

@@ -152,7 +152,7 @@ public class DatabaseSetupWizardPanelVisual extends JPanel implements DocumentLi
         try {
             DbConnectionSettings dbSettings = constructConnectionSettings();
             try {
-                Client client = ClientFactory.getInstance(dbSettings);
+                Client client = ClientFactory.getInstance(dbSettings, null);
                 client.shutdown();
                 connectionErrorMsg = null;
             } catch (Exception ex) {

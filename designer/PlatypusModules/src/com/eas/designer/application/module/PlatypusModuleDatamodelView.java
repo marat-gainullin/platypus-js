@@ -20,9 +20,9 @@ import com.eas.client.model.gui.view.entities.EntityView;
 import com.eas.client.model.gui.view.model.ApplicationModelView;
 import com.eas.client.model.gui.view.model.ApplicationModelView.ForeignKeyBindingTask;
 import com.eas.designer.application.HandlerRegistration;
+import com.eas.designer.application.indexer.PlatypusPathRecognizer;
 import com.eas.designer.datamodel.nodes.EntityNode;
 import com.eas.designer.datamodel.nodes.FieldNode;
-import com.eas.designer.explorer.PlatypusDataObject;
 import com.eas.designer.explorer.model.windows.ModelInspector;
 import com.eas.designer.explorer.model.windows.QueriesDragHandler;
 import com.eas.designer.explorer.model.windows.QueryDocumentJumper;
@@ -194,7 +194,13 @@ public final class PlatypusModuleDatamodelView extends TopComponent implements M
         if (dataObject.getClient() != null) {
             if (dataObject.isModelValid()) {
                 TablesSelector tablesSelector = new TablesSelector(dataObject.getAppRoot(), dataObject.getClient(), true, true, NbBundle.getMessage(PlatypusModuleDatamodelView.class, "LBL_PlatypusModule_View_Name"), PlatypusModuleDatamodelView.this);
-                QueriesSelector queriesSelector = new QueriesSelector(dataObject.getAppRoot());
+                QueriesSelector queriesSelector = new QueriesSelector(dataObject.getAppRoot()) {
+                    @Override
+                    public void fillAllowedMimeTypes(Set<String> allowedMimeTypes) {
+                        super.fillAllowedMimeTypes(allowedMimeTypes);
+                        allowedMimeTypes.add(PlatypusPathRecognizer.JAVASRIPT_MIME_TYPE);
+                    }
+                };
                 appModelEditor = new ApplicationModelEditorView(tablesSelector, queriesSelector);
                 appModelEditor.getModelView().addEntityViewDoubleClickListener(new QueryDocumentJumper<ApplicationDbEntity>(dataObject.getProject()));
                 ApplicationDbModel model = dataObject.getModel();

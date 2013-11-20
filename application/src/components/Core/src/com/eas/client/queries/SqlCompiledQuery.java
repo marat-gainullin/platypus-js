@@ -87,6 +87,18 @@ public class SqlCompiledQuery {
         createFlow();
     }
 
+    public SqlCompiledQuery(DbClient aClient, String aDbId, String aEntityId, String aSqlClause, Parameters aParams, Fields aExpectedFields, Set<String> aReadRoles, Set<String> aWriteRoles) throws Exception {
+        super();
+        sqlClause = aSqlClause;
+        parameters = aParams;
+        databaseId = aDbId;
+        entityId = aEntityId;
+        expectedFields = aExpectedFields;
+        client = aClient;
+        readRoles = aReadRoles;
+        writeRoles = aWriteRoles;
+        createFlow();
+    }
     /**
      * Creates an instance of compiled query.
      *
