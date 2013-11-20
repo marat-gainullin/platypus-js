@@ -15,6 +15,7 @@ import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.Client;
 import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.queries.Query;
+import com.eas.script.ScriptFunction;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -452,6 +453,13 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
         return runtime;
     }
 
+    
+    private static final String COMMITABLE_JSDOC = ""
+            + "/**\n"
+            + "* Determines if the model is auto commitable by <code>save</code> method.\n"
+            + "* @see save commit\n"
+            + "*/";
+    @ScriptFunction(jsDoc = COMMITABLE_JSDOC)
     public boolean isCommitable() {
         return commitable;
     }

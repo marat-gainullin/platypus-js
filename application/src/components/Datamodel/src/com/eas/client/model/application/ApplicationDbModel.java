@@ -110,11 +110,15 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
         }
     }
 
-    @ScriptFunction(jsDoc = "Saves model data changes. Calls aCallback when done."
-    + "If model can't apply the changed, than exception is thrown. "
-    + "In this case, application can call model.save() another time to save the changes. "
-    + "If an application need to abort futher attempts and discard model data changes, "
-    + "than it can call model.revert().")
+    private static final String SAVE_JSDOC = ""
+            + "/**\n"
+            + "* Saves model data changes.\n"
+            + "* If model can't apply the changed data, than exception is thrown. In this case, application can call model.save() another time to save the changes.\n"
+            + "* If an application needs to abort futher attempts and discard model data changes, use <code>model.revert()</code>.\n"
+            + "* @param callback the function to be envoked after the data changes saved (optional)\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = SAVE_JSDOC, params = {"callback"})
     @Override
     public boolean save(Function aCallback) throws Exception {
         for (String dbId : changeLogs.keySet()) {
@@ -123,6 +127,12 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
         return super.save(aCallback);
     }
 
+    private static final String COMMIT_JSDOC = ""
+            + "/**\n"
+            + "* Commits model data changes.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = COMMIT_JSDOC)
     @Override
     public int commit() throws Exception {
         if (commitable) {
@@ -132,6 +142,12 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
         }
     }
 
+    private static final String SAVED_JSDOC = ""
+            + "/**\n"
+            + "* Notifies the model what it is saved.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = SAVED_JSDOC)
     @Override
     public void saved() throws Exception {
         for (List<Change> changeLog : changeLogs.values()) {
@@ -152,12 +168,18 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
     public void rolledback() throws Exception {
     }
 
-    @ScriptFunction(jsDoc = "Requeries model data with callback.")
     public void requery(Function aOnSuccess) throws Exception {
         requery(aOnSuccess, null);
     }
     
-    @ScriptFunction(jsDoc = "Requeries model data with callback.")
+    private static final String REQUERY_JSDOC = ""
+            + "/**\n"
+            + "* Requeries the model data. Forses the model data refresh, no matter if its parameters has changed or not.\n"
+            + "* @param onSuccessCallback the handler function for refresh data on success event (optional)\n"
+            + "* @param onFailureCallback the handler function for refresh data on failure event (optional)\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = REQUERY_JSDOC, params = {"onSuccessCallback", "onFailureCallback"})
     @Override
     public void requery(Function aOnSuccess, Function aOnFailure) throws Exception {
         for (List<Change> changeLog : changeLogs.values()) {
@@ -175,12 +197,19 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
         return changeLog;
     }
 
-    @ScriptFunction(jsDoc = "Creates new entity of model, based on passed sql query. This method works only in two tier components of a system.")
     public synchronized Scriptable createEntity(String aSqlText) throws Exception {
         return createEntity(aSqlText, null);
     }
 
-    @ScriptFunction(jsDoc = "Creates new entity of model, based on passed datasource name and sql query. This method works only in two tier components of a system.")
+    private static final String CREATE_ENTITY_JSDOC = ""
+            + "/**\n"
+            + "* Creates new entity of model, based on passed sql query. This method works only in two tier components of a system.\n"
+            + "* @param sqlText SQL text for the new entity\n"
+            + "* @param dbId the concrete database ID (optional)\n"
+            + "* @return an entity instance\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = CREATE_ENTITY_JSDOC, params = {"sqlText", "dbId"})
     public synchronized Scriptable createEntity(String aSqlText, String aDbId) throws Exception {
         if (client == null) {
             throw new NullPointerException("Null client detected while creating a query");
@@ -201,7 +230,15 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
         executeSql(aSql, null);
     }
 
-    @ScriptFunction(jsDoc = "Executed sql query against specific datasource. This method works only in two tier components of a system.")
+    private static final String EXECUTE_SQL_JSDOC = ""
+            + "/**\n"
+            + "* Executes a SQL query against specific datasource. This method works only in two tier components of a system.\n"
+            + "* @param sqlText SQL text for the new entity\n"
+            + "* @param dbId the concrete database ID (optional)\n"
+            + "* @return an entity instance\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = EXECUTE_SQL_JSDOC, params = {"sqlText", "dbId"})
     public void executeSql(String aSqlClause, String aDbId) throws Exception {
         if (client == null) {
             throw new NullPointerException("Null client detected while creating a query");

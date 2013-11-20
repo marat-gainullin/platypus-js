@@ -273,15 +273,19 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         return false;
     }
 
-    @ScriptFunction(jsDoc = "Saves model data changes. "
-            + "If model can't apply the changed, than exception is thrown. "
-            + "In this case, application can call model.save() another time to save the changes. "
-            + "If an application need to abort futher attempts and discard model data changes, "
-            + "than it can call model.revert().")
     public final boolean save() throws Exception {
         return save(null);
     }
 
+    private static final String SAVE_JSDOC = ""
+            + "/**\n"
+            + "* Saves model data changes.\n"
+            + "* If model can't apply the changed data, than exception is thrown. In this case, application can call model.save() another time to save the changes.\n"
+            + "* If an application needs to abort futher attempts and discard model data changes, use <code>model.revert()</code>.\n"
+            + "* @param callback the function to be envoked after the data changes saved (optional)\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = SAVE_JSDOC, params = {"callback"})
     public boolean save(final Function aCallback) throws Exception {
         if (commitable) {
             try {
@@ -304,14 +308,30 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         return true;
     }
 
-    @ScriptFunction(jsDoc = "Commits model data changes.")
+    private static final String COMMIT_JSDOC = ""
+            + "/**\n"
+            + "* Commits model data changes.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = COMMIT_JSDOC)
     public abstract int commit() throws Exception;
 
-    @ScriptFunction(jsDoc = "Drops model data changes. After this method call, save() method have no "
-            + "any changes to be saved, but still attempts to commit. "
-            + "So, call to model.save() on commitable and unchanged model nevertheless leads to commit.")
+    private static final String REVERT_JSDOC = ""
+            + "/**\n"
+            + "* Drops model data changes.\n"
+            + "* After this method call, save() method have no changes to be saved, but still attempts to commit.\n"
+            + "* Call <code>model.save()</code> on commitable and unchanged model nevertheless leads to a commit."
+            + "*/";
+    
+    @ScriptFunction(jsDoc = REVERT_JSDOC)
     public abstract void revert() throws Exception;
 
+    private static final String SAVED_JSDOC = ""
+            + "/**\n"
+            + "* Notifies the model what it is saved.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = SAVED_JSDOC)
     public abstract void saved() throws Exception;
 
     public abstract void rolledback() throws Exception;
@@ -328,11 +348,18 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         }
     }
 
-    @ScriptFunction(jsDoc = "Requeries model data.")
     public final void requery() throws Exception {
         requery(null, null);
     }
 
+    private static final String REQUERY_JSDOC = ""
+            + "/**\n"
+            + "* Requeries the model data. Forses the model data refresh, no matter if its parameters has changed or not.\n"
+            + "* @param onSuccessCallback the handler function for refresh data on success event (optional)\n"
+            + "* @param onFailureCallback the handler function for refresh data on failure event (optional)\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = REQUERY_JSDOC, params = {"onSuccessCallback", "onFailureCallback"})
     public void requery(final Function aOnSuccess, final Function aOnFailure) throws Exception {
         try {
             executeRootEntities(true);
@@ -360,17 +387,22 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         }
     }
 
-    @ScriptFunction(jsDoc = "Refreshes model data if any of its parameters has changed.")
     public void execute() throws Exception {
         execute(null, null);
     }
 
-    @ScriptFunction(jsDoc = "Refreshes model data if any of its parameters has changed with callback.")
     public void execute(Function aOnSuccess) throws Exception {
         execute(aOnSuccess, null);
     }
-
-    @ScriptFunction(jsDoc = "Refreshes model data if any of its parameters has changed with callback.")
+    
+    private static final String EXECUTE_JSDOC = ""
+            + "/**\n"
+            + "* Refreshes the model, only if any of its parameters has changed.\n"
+            + "* @param onSuccessCallback the handler function for refresh data on success event (optional)\n"
+            + "* @param onFailureCallback the handler function for refresh data on failure event (optional)\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = EXECUTE_JSDOC, params = {"onSuccessCallback", "onFailureCallback"})
     public void execute(final Function aOnSuccess, final Function aOnFailure) throws Exception {
         try {
             executeRootEntities(false);
