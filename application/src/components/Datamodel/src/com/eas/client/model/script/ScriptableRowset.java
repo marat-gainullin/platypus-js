@@ -218,7 +218,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         public Object getValue(Scriptable aDelegate) throws Exception {
             Object lValue = null;
             Rowset eRowset = getRowset();
-            if (eRowset != null && eRowset.size() > 0 && (!eRowset.isBeforeFirst() && !eRowset.isAfterLast()) || eRowset.isInserting()) {
+            if (eRowset != null && ((eRowset.size() > 0 && !eRowset.isBeforeFirst() && !eRowset.isAfterLast()) || eRowset.isInserting())) {
                 lValue = eRowset.getObject(eRowset.getFields().find(fieldName));
             }
             if (lValue == null) {
@@ -1771,6 +1771,21 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     public void insertRow(Object... requiedFields) throws Exception {
         Logger.getLogger(ScriptableRowset.class.getName()).warning("Call of a deprecated method 'insertRow()', use 'insert()' method instead");
         insert(requiedFields);
+    }
+
+    private static final String INSTANCE_CONSTRUCTOR_JSDOC = ""
+            + "/**\n"
+            + "* The constructor funciton for the entity's data array elements creation.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = INSTANCE_CONSTRUCTOR_JSDOC)
+    public Function getElementConstructor() {
+        return entity.getInstanceConstructor();
+    }
+
+    @ScriptFunction
+    public void setElementConstructor(Function aValue) {
+        entity.setInstanceConstructor(aValue);
     }
 
     private static final String ON_CHANGED_JSDOC = ""
