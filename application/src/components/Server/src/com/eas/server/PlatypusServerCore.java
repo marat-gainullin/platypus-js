@@ -6,6 +6,7 @@ package com.eas.server;
 
 import com.eas.client.ClientConstants;
 import com.eas.client.DatabasesClient;
+import com.eas.client.ScriptedDatabasesClient;
 import com.eas.client.login.DbPlatypusPrincipal;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.login.PrincipalHost;
@@ -56,7 +57,7 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
             if (aTasks != null) {
                 tasks.addAll(aTasks);
             }
-            DatabasesClient serverCoreDbClient = new DatabasesClient(aDbSettings, true, new ServerTasksScanner(tasks));
+            ScriptedDatabasesClient serverCoreDbClient = new ScriptedDatabasesClient(aDbSettings, true, new ServerTasksScanner(tasks));
             instance = new PlatypusServerCore(serverCoreDbClient, tasks, aStartAppElementId);
             serverCoreDbClient.setContextHost(instance);
             serverCoreDbClient.setPrincipalHost(instance);
@@ -96,14 +97,14 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
     }
     protected String defaultAppElement;
     protected SessionManager sessionManager;
-    protected DatabasesClient databasesClient;
+    protected ScriptedDatabasesClient databasesClient;
     protected ServerScriptsCache scriptsCache;
     protected ServerCompiledScriptDocuments scriptDocuments;
     protected AppElementsFilter browsersFilter;
     protected final Set<String> tasks;
     protected final Set<String> extraAuthorizers = new HashSet<>();
 
-    public PlatypusServerCore(DatabasesClient aDatabasesClient, Set<String> aTasks, String aDefaultAppElement) throws Exception {
+    public PlatypusServerCore(ScriptedDatabasesClient aDatabasesClient, Set<String> aTasks, String aDefaultAppElement) throws Exception {
         databasesClient = aDatabasesClient;
         sessionManager = new SessionManager(this);
         scriptsCache = new ServerScriptsCache(this);
@@ -205,6 +206,9 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
                     case JsDoc.Tag.AUTHORIZER_TAG:
                         extraAuthorizers.add(aModuleId);
                         break;
+                    case JsDoc.Tag.VALIDATOR_TAG:
+                        databasesClient.addValidator(aModuleId);
+                        break;
                 }
             }
             if (!stateless) {
@@ -223,7 +227,7 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
                     return false;
                 }
             } else {
-                Logger.getLogger(PlatypusServerCore.class.getName()).warning(String.format("Module \"%s\" is stateless, skipping it. Hope it will be used as an authorizer or as an acceptor.", aModuleId));
+                Logger.getLogger(PlatypusServerCore.class.getName()).warning(String.format("Module \"%s\" is stateless, skipping it. Hope it will be used as an authorizer, validator or as an acceptor.", aModuleId));
                 return false;
             }
         } else {

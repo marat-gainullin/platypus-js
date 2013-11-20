@@ -50,7 +50,6 @@ import javax.swing.border.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.undo.UndoableEditSupport;
-import org.openide.util.Exceptions;
 
 /**
  *
@@ -73,7 +72,7 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
     public static final Integer INSET_ZONE = 6; //minimum 3
     public static final Integer HALF_INSET_ZONE = INSET_ZONE >>> 1;
     // Data
-    protected E entity = null;
+    protected E entity;
     // Controls
     protected Action minimizeRestoreAction;
     protected EntityViewMoverResizer viewMover = new EntityViewMoverResizer();
@@ -341,17 +340,25 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
     }
 
     private String getCheckedEntityTitle() {
-        String text;
+        String text = "";
         if (entity instanceof ApplicationParametersEntity || entity instanceof QueryParametersEntity) {
             text = DatamodelDesignUtils.getLocalizedString("Parameters");
-        } else if (entity.getName() != null && !entity.getName().isEmpty() && entity.getTitle() != null && !entity.getTitle().isEmpty()) {
-            text = String.format("%s [%s]", entity.getName(), entity.getTitle());
-        } else if (entity.getName() != null && !entity.getName().isEmpty()) {
-            text = entity.getName();
-        } else if (entity.getTitle() != null && !entity.getTitle().isEmpty()) {
-            text = entity.getTitle();
-        } else {
-            text = DatamodelDesignUtils.getLocalizedString("noName");
+        } else if (entity != null) {
+            try {
+                String eName = entity.getName();
+                String eTitle = entity.getTitle();
+                if (eName != null && !eName.isEmpty() && eTitle != null && !eTitle.isEmpty()) {
+                    text = String.format("%s [%s]", eName, eTitle);
+                } else if (eName != null && !eName.isEmpty()) {
+                    text = eName;
+                } else if (eTitle != null && !eTitle.isEmpty()) {
+                    text = eTitle;
+                } else {
+                    text = DatamodelDesignUtils.getLocalizedString("noName");
+                }
+            } catch (Exception ex) {
+                ex = ex;
+            }
         }
         return text;
     }
@@ -696,8 +703,8 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
         }
 
         public void beginDraggingEntityView(EntityView<E> aView) {
-            E entity = aView.getEntity();
-            moveEdit = new MoveEntityEdit<>(entity, aView.getLocation(), aView.getLocation());
+            E lentity = aView.getEntity();
+            moveEdit = new MoveEntityEdit<>(lentity, aView.getLocation(), aView.getLocation());
             for (Relation rel : aView.getInOutRelations()) {
                 if (rel.isManual()) {
                     RelationPolylineEdit edit = new RelationPolylineEdit(rel, rel.getXs(), rel.getYs(), null, null);
@@ -712,10 +719,10 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
                 Point location = aView.getLocation();
                 moveEdit.setAfterLocation(location);
                 if (moveEdit.isSignificant()) {
-                    E entity = moveEdit.getEntity();
-                    assert entity != null;
-                    entity.setX(location.x);
-                    entity.setY(location.y);
+                    E lentity = moveEdit.getEntity();
+                    assert lentity != null;
+                    lentity.setX(location.x);
+                    lentity.setY(location.y);
                     undoSupport.beginUpdate();
                     try {
                         undoSupport.postEdit(moveEdit);
@@ -738,8 +745,8 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
         protected Set<RelationPolylineEdit> relationsPolylinesEdits = new HashSet<>();
 
         public void beginResizingEntityView(EntityView<E> aView) {
-            E entity = aView.getEntity();
-            resizeEdit = new ResizeEntityEdit<>(entity, aView.getBounds(), aView.getBounds());
+            E lentity = aView.getEntity();
+            resizeEdit = new ResizeEntityEdit<>(lentity, aView.getBounds(), aView.getBounds());
             for (Relation rel : aView.getInOutRelations()) {
                 if (rel.isManual()) {
                     RelationPolylineEdit edit = new RelationPolylineEdit(rel, rel.getXs(), rel.getYs(), null, null);
@@ -754,11 +761,11 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
                 Rectangle afterRect = aView.getBounds();
                 resizeEdit.setAfterBounds(afterRect);
                 if (resizeEdit.isSignificant()) {
-                    E entity = resizeEdit.getEntity();
-                    entity.setX(afterRect.x);
-                    entity.setY(afterRect.y);
-                    entity.setWidth(afterRect.width);
-                    entity.setHeight(afterRect.height);
+                    E lentity = resizeEdit.getEntity();
+                    lentity.setX(afterRect.x);
+                    lentity.setY(afterRect.y);
+                    lentity.setWidth(afterRect.width);
+                    lentity.setHeight(afterRect.height);
                     undoSupport.beginUpdate();
                     try {
                         undoSupport.postEdit(resizeEdit);

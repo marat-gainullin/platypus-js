@@ -5,6 +5,7 @@
 package com.eas.deploy;
 
 import com.eas.client.ClientFactory;
+import com.eas.client.DatabasesClient;
 import com.eas.client.DbClient;
 import com.eas.deploy.project.PlatypusSettings;
 import com.eas.xml.dom.Source2XmlDom;
@@ -102,7 +103,7 @@ public class BaseDeployer {
     private DbClient createDbClient() {
         try {
             checkSettings();
-            return (DbClient) ClientFactory.getInstance(settings.getDbSettings());
+            return new DatabasesClient(settings.getDbSettings());
         } catch (Exception ex) {
             Logger.getLogger(Deployer.class.getName()).log(Level.SEVERE, null, ex);
         }

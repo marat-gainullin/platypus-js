@@ -165,12 +165,4 @@ public class ServerReportRunnerPrototype extends IdScriptableObject {
                 throw new IllegalArgumentException(String.valueOf(id));
         }
     }
-
-    public static ServerReportRunner lookupScriptRunner(Scriptable aScope) {
-        Scriptable currentScope = aScope;
-        while (currentScope != null && !(currentScope instanceof ServerScriptRunner)) {
-            currentScope = currentScope.getParentScope();
-        }
-        return (ServerReportRunner) currentScope;
-    }
 }

@@ -9,15 +9,13 @@ import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.ForeignKeySpec;
 import com.bearsoft.rowset.metadata.PrimaryKeySpec;
-import com.eas.client.Client;
-import com.eas.client.ClientFactory;
+import com.eas.client.DatabasesClient;
 import com.eas.client.DbClient;
 import com.eas.client.SQLUtils;
 import com.eas.client.metadata.DbTableIndexColumnSpec;
 import com.eas.client.metadata.DbTableIndexSpec;
 import com.eas.client.queries.SqlCompiledQuery;
 import com.eas.client.settings.DbConnectionSettings;
-import com.eas.client.settings.EasSettings;
 import com.eas.metadata.DBStructure;
 import com.eas.metadata.MetadataSynchronizer;
 import com.eas.metadata.MetadataUtils;
@@ -2351,10 +2349,8 @@ public class MetadataCompareForm extends javax.swing.JFrame {
 
     private DbClient createClient() throws Exception {
         try {
-            EasSettings settings = new DbConnectionSettings(destUrl, destSchema, destUser, destPassword, SQLUtils.dialectByUrl(destUrl), false);
-            Client lclient = ClientFactory.getInstance(settings);
-            assert lclient instanceof DbClient;
-            return (DbClient) lclient;
+            DbConnectionSettings settings = new DbConnectionSettings(destUrl, destSchema, destUser, destPassword, SQLUtils.dialectByUrl(destUrl), false);
+            return new DatabasesClient(settings);
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, ex.getMessage(), errorConnectionTitle, JOptionPane.ERROR_MESSAGE);
             throw ex;

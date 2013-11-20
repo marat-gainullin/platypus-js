@@ -267,9 +267,8 @@ public class MetadataSynchronizer {
     private DbClient createClient(String aUrl, String aSchema, String aUser, String aPassword) throws Exception {
         log(Level.INFO, String.format("Start creating connection to schema %s", aSchema));
         try {
-            EasSettings settings = new DbConnectionSettings(aUrl, aSchema, aUser, aPassword, SQLUtils.dialectByUrl(aUrl), false);
-            Client client = ClientFactory.getInstance(settings);
-            assert client instanceof DbClient;
+            DbConnectionSettings settings = new DbConnectionSettings(aUrl, aSchema, aUser, aPassword, SQLUtils.dialectByUrl(aUrl), false);
+            DbClient client = new DatabasesClient(settings);
             log(Level.INFO, String.format("Connect to schema %s created", aSchema));
             return (DbClient) client;
         } catch (Exception ex) {

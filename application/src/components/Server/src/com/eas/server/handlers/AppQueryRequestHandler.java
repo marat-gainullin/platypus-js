@@ -4,10 +4,7 @@
  */
 package com.eas.server.handlers;
 
-import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.Fields;
 import com.eas.client.queries.SqlQuery;
-import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.client.threetier.Response;
 import com.eas.client.threetier.requests.AppQueryRequest;
 import com.eas.client.threetier.requests.AppQueryResponse;

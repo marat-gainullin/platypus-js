@@ -13,7 +13,8 @@ import com.bearsoft.rowset.metadata.DataTypeInfo;
 public abstract class Change {
 
     public String entityId;
-    
+    public boolean consumed;
+
     public static class Value {
 
         public String name;
@@ -27,11 +28,14 @@ public abstract class Change {
         }
     }
 
-    public Change(String aEntityId)
-    {
+    public Change(String aEntityId) {
         super();
         entityId = aEntityId;
     }
-    
+
+    public void consume() {
+        consumed = true;
+    }
+
     public abstract void accept(ChangeVisitor aChangeVisitor) throws Exception;
 }

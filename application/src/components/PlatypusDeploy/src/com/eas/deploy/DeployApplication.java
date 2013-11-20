@@ -4,8 +4,7 @@
  */
 package com.eas.deploy;
 
-import com.eas.client.Client;
-import com.eas.client.ClientFactory;
+import com.eas.client.DatabasesClient;
 import com.eas.client.DbClient;
 import com.eas.client.settings.DbConnectionSettings;
 import com.eas.client.settings.EasSettings;
@@ -228,15 +227,12 @@ public class DeployApplication {
 
     private DbClient getClient() throws Exception {
         EasSettings settings = EasSettings.createInstance(url);
+        assert settings instanceof DbConnectionSettings;
         settings.setUser(dbuser);
         settings.setPassword(dbpassword);
-        if (settings instanceof DbConnectionSettings) {
-            ((DbConnectionSettings) settings).setSchema(dbschema);
-        }
+        ((DbConnectionSettings) settings).setSchema(dbschema);
         settings.setUrl(url);
-        Client client = ClientFactory.getInstance(settings);
-        assert client instanceof DbClient;
-        return (DbClient) client;
+        return new DatabasesClient((DbConnectionSettings) settings);
     }
 
     private void printVersion() {

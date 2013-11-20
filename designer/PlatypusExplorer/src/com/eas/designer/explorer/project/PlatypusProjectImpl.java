@@ -5,9 +5,13 @@
 package com.eas.designer.explorer.project;
 
 import com.eas.client.AppCache;
-import com.eas.client.ClientFactory;
 import com.eas.client.DbClient;
+import com.eas.client.ScriptedDatabasesClient;
+import com.eas.client.application.ClientCompiledScriptDocuments;
 import com.eas.client.cache.PlatypusFiles;
+import com.eas.client.metadata.ApplicationElement;
+import com.eas.client.scripts.CompiledScriptDocuments;
+import com.eas.client.scripts.CompiledScriptDocumentsHost;
 import com.eas.client.settings.DbConnectionSettings;
 import com.eas.deploy.BaseDeployer;
 import com.eas.deploy.DbMigrator;
@@ -237,7 +241,21 @@ public class PlatypusProjectImpl implements PlatypusProject {
             DbConnectionSettings dbSettings = settings.getAppSettings().getDbSettings();
             dbSettings.setApplicationPath(getProjectDirectory().getPath());
 
-            final DbClient lclient = (DbClient) ClientFactory.getInstance(dbSettings);
+            final ScriptedDatabasesClient lclient = new ScriptedDatabasesClient(dbSettings);
+            final CompiledScriptDocuments documents = new ClientCompiledScriptDocuments(lclient);
+            lclient.setScriptDocumentsHost(new CompiledScriptDocumentsHost(){
+
+                @Override
+                public CompiledScriptDocuments getDocuments() {
+                    return documents;
+                }
+
+                @Override
+                public void defineJsClass(String aClassName, ApplicationElement aAppElement) {
+                    throw new IllegalStateException("Can't define javascript classes during design time.");
+                }
+                
+            });
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
                 public void run() {

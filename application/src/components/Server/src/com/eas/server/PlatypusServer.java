@@ -4,7 +4,7 @@
  */
 package com.eas.server;
 
-import com.eas.client.DatabasesClient;
+import com.eas.client.ScriptedDatabasesClient;
 import com.eas.client.cache.FilesAppCache;
 import com.eas.client.scripts.ScriptDocument;
 import com.eas.client.threetier.ErrorResponse;
@@ -53,7 +53,7 @@ public class PlatypusServer extends PlatypusServerCore {
     private final Map<Integer, Integer> portsSessionIdleCheckIntervals;
     private final Map<Integer, Integer> portsNumWorkerThreads;
 
-    public PlatypusServer(DatabasesClient aDatabasesClient, SSLContext aSslContext, InetSocketAddress[] aAddresses, Map<Integer, String> aPortsProtocols, Map<Integer, Integer> aPortsSessionIdleTimeouts, Map<Integer, Integer> aPortsSessionIdleCheckInterval, Map<Integer, Integer> aPortsNumWorkerThreads, Set<String> aTasks, String aDefaultAppElement) throws Exception {
+    public PlatypusServer(ScriptedDatabasesClient aDatabasesClient, SSLContext aSslContext, InetSocketAddress[] aAddresses, Map<Integer, String> aPortsProtocols, Map<Integer, Integer> aPortsSessionIdleTimeouts, Map<Integer, Integer> aPortsSessionIdleCheckInterval, Map<Integer, Integer> aPortsNumWorkerThreads, Set<String> aTasks, String aDefaultAppElement) throws Exception {
         super(aDatabasesClient, aTasks, aDefaultAppElement);
 
         if (aAddresses == null) {

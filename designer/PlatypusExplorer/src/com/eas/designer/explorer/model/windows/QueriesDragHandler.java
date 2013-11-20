@@ -50,7 +50,8 @@ public class QueriesDragHandler extends TransferHandler {
         try {
             DataObject dObject = extractDataObject(support);
             if (dObject != null) {
-                return PlatypusFiles.SQL_EXTENSION.equalsIgnoreCase(dObject.getPrimaryFile().getExt());
+                return PlatypusFiles.SQL_EXTENSION.equalsIgnoreCase(dObject.getPrimaryFile().getExt()) ||
+                       PlatypusFiles.JAVASCRIPT_EXTENSION.equalsIgnoreCase(dObject.getPrimaryFile().getExt());
             } else {
                 return delegate.canImport(support);
             }
@@ -65,8 +66,9 @@ public class QueriesDragHandler extends TransferHandler {
         try {
             DataObject dObject = extractDataObject(support);
             if (dObject != null) {
+                boolean isModule = PlatypusFiles.JAVASCRIPT_EXTENSION.equalsIgnoreCase(dObject.getPrimaryFile().getExt());
                 boolean isQuery = PlatypusFiles.SQL_EXTENSION.equalsIgnoreCase(dObject.getPrimaryFile().getExt());
-                if (isQuery) {
+                if (isQuery || isModule) {
                     String queryId = IndexerQuery.file2AppElementId(dObject.getPrimaryFile());
                     if (queryId != null) {
                         Point mouseLoc = MouseInfo.getPointerInfo().getLocation();

@@ -165,7 +165,7 @@ public class DbClientTest {
     public void extraFieldsInsertTest() throws Exception {
         System.out.println("extraFieldsInsertTest");
         // initialize client in single thread mode as at the startup of the program
-        Client lfclient = ClientFactory.getInstance(settings);
+        Client lfclient = new DatabasesClient(settings);
         assertTrue(lfclient instanceof DbClient);
         DbClient lclient = (DbClient) lfclient;
         try {
@@ -228,7 +228,7 @@ public class DbClientTest {
         System.out.println("extraFieldsUpdateTest");
 
         // initialize client in single thread mode as at the startup of the program
-        Client lfclient = ClientFactory.getInstance(settings);
+        Client lfclient = new DatabasesClient(settings);
         assertTrue(lfclient instanceof DbClient);
         DbClient lclient = (DbClient) lfclient;
         try {
