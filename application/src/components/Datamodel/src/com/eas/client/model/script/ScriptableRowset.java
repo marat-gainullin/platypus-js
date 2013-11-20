@@ -714,7 +714,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     private static final String PUSH_JSDOC = ""
             + "/**\n"
             + "* Adds one or more elements to the end of an array and returns the new length of the array.\n"
-            + "* @param objects the objects to push.\n"
+            + "* @param objects the objects to push, e.g.: { propName1: propValue1, propName2: propValue2 } (optional)\n"
             + "*/";
 
     @ScriptFunction(jsDoc = PUSH_JSDOC, params = {"objects"})
@@ -1437,7 +1437,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     private static final String CREATE_SORTER_JSDOC = ""
             + "/**\n"
             + "* Creates an instance of comparator object using specified constraints objects.\n"
-            + "* @param pairs the search conditions pairs, if a form of key-values pairs, where the key is the property object (e.g. entity.md.propName) and the value for this property\n"
+            + "* @param pairs the search conditions pairs, in a form of key-values pairs, where the key is the property object (e.g. entity.md.propName) and the value for this property\n"
             + "* @return a comparator object to be passed as a parameter to entity's <code>sort</code> method\n"
             + "*/";
     
@@ -1554,18 +1554,19 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         }
     }
 
-    private static final String EXECUTE_JSDOC = ""
-            + "/**\n"
-            + "* Refreshes rowset, only if any of its parameters has changed.\n"
-            + "* @param callback the handler function for refresh data on success event (optional)\n"
-            + "*/";
     
-    @ScriptFunction(jsDoc = EXECUTE_JSDOC, params = {"callback"})
     public void execute(Function aOnSuccess) throws Exception {
         execute(aOnSuccess, null);
     }
 
-    @ScriptFunction(jsDoc = "Refreshes rowset only if any of its parameters has changed with callback.")
+    private static final String EXECUTE_JSDOC = ""
+            + "/**\n"
+            + "* Refreshes rowset, only if any of its parameters has changed.\n"
+            + "* @param onSuccessCallback the handler function for refresh data on success event (optional)\n"
+            + "* @param onFailureCallback the handler function for refresh data on failure event (optional)\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = EXECUTE_JSDOC, params = {"onSuccessCallback", "onFailureCallback"})
     public void execute(Function aOnSuccess, Function aOnFailure) throws Exception {
         if (entity != null) {
             assert tag instanceof RowsetHostObject;
@@ -1606,7 +1607,13 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         }
     }
 
-    @ScriptFunction(jsDoc = "Enqueues rowset's changes.")
+    private static final String ENQEUE_UPDATE_JSDOC = ""
+            + "/**\n"
+            + "* Enqueues DML SQL clause (e.g. UPDATE, DELETE) provided in this entity query.\n"
+            + "* Provide query parameters if required. To commit the transaction invoke @see executeUpdate.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = ENQEUE_UPDATE_JSDOC)
     public int enqueueUpdate() throws Exception {
         if (entity != null) {
             if (entity.getModel().getClient() instanceof AppClient) {
@@ -1619,7 +1626,13 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         return 0;
     }
 
-    @ScriptFunction(jsDoc = "Applies a sql clause into the database.")
+    private static final String EXECUTE_UPDATE_JSDOC = ""
+            + "/**\n"
+            + "* Applies the updates into the database and commits the transaction.\n"
+            + "* To enqueue updates use @see enqueueUpdate method.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = EXECUTE_UPDATE_JSDOC)
     public int executeUpdate() throws Exception {
         if (entity != null) {
             if (entity.getModel().getClient() instanceof AppClient) {
@@ -1632,24 +1645,6 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         return 0;
     }
 
-    /*
-     @ScriptFunction(jsDoc = "Refreshes children entities.")
-     public void executeChildrenOnly() throws Exception {
-     if (entity != null) {
-     checkModelExecuted();
-     Set<Relation<E>> outRels = entity.getOutRelations();
-     if (outRels != null) {
-     for (Relation<E> rel : outRels) {
-     if (rel != null && rel.getRightEntity() != null) {
-     E rEnt = rel.getRightEntity();
-     rEnt.execute();
-     }
-     }
-     }
-     }
-
-     }
-     */
     // Requery interface
     @ScriptFunction(jsDoc = "Requeries rowset's data.")
     public void requery() throws Exception {
@@ -1673,7 +1668,14 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         requery(aOnSuccess, null);
     }
 
-    @ScriptFunction(jsDoc = "Requeries rowset's data with a callbacks.")
+    private static final String REQUERY_JSDOC = ""
+            + "/**\n"
+            + "* Requeries rowset's data. Forses rowset data refresh, no matter if its parameters has changed or not.\n"
+            + "* @param onSuccessCallback the handler function for refresh data on success event (optional)\n"
+            + "* @param onFailureCallback the handler function for refresh data on failure event (optional)\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = REQUERY_JSDOC, params = {"onSuccessCallback", "onFailureCallback"})
     public void requery(Function aOnSuccess, Function aOnFailure) throws Exception {
         if (entity != null) {
             assert tag instanceof RowsetHostObject;
@@ -1714,25 +1716,15 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         }
     }
 
-    /*
-     @ScriptFunction(jsDoc = "Requeries children entities.")
-     public void requeryChildrenOnly() throws Exception {
-     if (entity != null) {
-     checkModelExecuted();
-     Set<Relation<E>> outRels = entity.getOutRelations();
-     if (outRels != null) {
-     for (Relation<E> rel : outRels) {
-     if (rel != null && rel.getRightEntity() != null) {
-     E rEnt = rel.getRightEntity();
-     rEnt.refresh();
-     }
-     }
-     }
-     }
-     }
-     */
     // modify interface
-    @ScriptFunction(jsDoc = "Inserts new row in the rowset and sets cursor on this row.")
+    
+     private static final String INSERT_JSDOC = ""
+            + "/**\n"
+            + "* Inserts new row in the rowset and sets cursor on this row. @see push\n"
+            + "* @param pairs the fields value pairs, in a form of key-values pairs, where the key is the property object (e.g. entity.md.propName) and the value for this property (optional)\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = INSERT_JSDOC)
     public void insert(Object... requiedFields) throws Exception {
         Rowset rowset = getRowset();
         if (requiedFields != null) {
@@ -1752,26 +1744,28 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         return oldCount != rowset.size();
     }
 
-    @ScriptFunction(jsDoc = "Deletes all rows in rowset.")
+    private static final String DELETE_ALL_JSDOC = ""
+            + "/**\n"
+            + "* Deletes all rows in the rowset.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = DELETE_ALL_JSDOC)
     public boolean deleteAll() throws Exception {
         Rowset rowset = getRowset();
         rowset.deleteAll();
         return rowset.isEmpty();
     }
 
-    /*
-     public void save() throws Exception {
-     //Rowset rowset = getRowset();
-     if (entity.getModel().isCommitable()) {
-     entity.getModel().commit();
-     }
-     }
-     */
     public Rowset unwrap() throws Exception {
         return getRowset();
     }
 
-    @ScriptFunction(jsDoc = "Deletes row on cursor position.")
+    private static final String DELETE_ROW_JSDOC = ""
+            + "/**\n"
+            + "* Deletes the row on the cursor position.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = DELETE_ROW_JSDOC)
     public boolean deleteRow() throws Exception {
         return delete();
     }
@@ -1791,7 +1785,12 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         insert(requiedFields);
     }
 
-    @ScriptFunction(jsDoc = "After object data change event.")
+    private static final String ON_CHANGED_JSDOC = ""
+            + "/**\n"
+            + "* The handler funciton for the event occured after the entity data change.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = ON_CHANGED_JSDOC)
     public Function getOnChanged() {
         return entity.getOnAfterChange();
     }
@@ -1801,7 +1800,12 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         entity.setOnAfterChange(aValue);
     }
 
-    @ScriptFunction(jsDoc = "After delete object event.")
+    private static final String ON_DELETED_JSDOC = ""
+            + "/**\n"
+            + "* The handler funciton for the event occured after an entity row has been deleted.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = ON_DELETED_JSDOC)
     public Function getOnDeleted() {
         return entity.getOnAfterDelete();
     }
@@ -1811,7 +1815,12 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         entity.setOnAfterDelete(aValue);
     }
 
-    @ScriptFunction(jsDoc = "After insert object event.")
+    private static final String ON_INSERTED_JSDOC = ""
+            + "/**\n"
+            + "* The handler funciton for the event occured after an entity row has been inserted.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = ON_INSERTED_JSDOC)
     public Function getOnInserted() {
         return entity.getOnAfterInsert();
     }
@@ -1821,7 +1830,12 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         entity.setOnAfterInsert(aValue);
     }
 
-    @ScriptFunction(jsDoc = "After cursor position change event.")
+    private static final String ON_SCROLLED_JSDOC = ""
+            + "/**\n"
+            + "* The handler funciton for the event occured after the cursor position changed.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = ON_SCROLLED_JSDOC)
     public Function getOnScrolled() {
         return entity.getOnAfterScroll();
     }
@@ -1831,7 +1845,12 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         entity.setOnAfterScroll(aValue);
     }
 
-    @ScriptFunction(jsDoc = "Before object data change event.")
+    private static final String WILL_CHANGE_JSDOC = ""
+            + "/**\n"
+            + "* The handler funciton for the event occured before the entity data change.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = WILL_CHANGE_JSDOC)
     public Function getWillChange() {
         return entity.getOnBeforeChange();
     }
@@ -1841,7 +1860,12 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         entity.setOnBeforeChange(aValue);
     }
 
-    @ScriptFunction(jsDoc = "Before delete object event.")
+    private static final String WILL_DELETE_JSDOC = ""
+            + "/**\n"
+            + "* The handler funciton for the event occured before an entity row has been deleted.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = WILL_DELETE_JSDOC)
     public Function getWillDelete() {
         return entity.getOnBeforeDelete();
     }
@@ -1851,7 +1875,12 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         entity.setOnBeforeDelete(aValue);
     }
 
-    @ScriptFunction(jsDoc = "Before insert object event.")
+    private static final String WILL_INSERT_JSDOC = ""
+            + "/**\n"
+            + "* The handler funciton for the event occured before an entity row has been inserted.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = WILL_INSERT_JSDOC)
     public Function getWillInsert() {
         return entity.getOnBeforeInsert();
     }
@@ -1861,7 +1890,12 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         entity.setOnBeforeInsert(aValue);
     }
 
-    @ScriptFunction(jsDoc = "Before cursor position change event.")
+    private static final String WILL_SCROLL_JSDOC = ""
+            + "/**\n"
+            + "* The handler funciton for the event occured before the cursor position changed.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = WILL_SCROLL_JSDOC)
     public Function getWillScroll() {
         return entity.getOnBeforeScroll();
     }
@@ -1871,7 +1905,12 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         entity.setOnBeforeScroll(aValue);
     }
 
-    @ScriptFunction(jsDoc = "After filter event.")
+    private static final String ON_FILTERED_JSDOC = ""
+            + "/**\n"
+            + "* The handler funciton for the event occured after the filter have been applied to the entity.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = ON_FILTERED_JSDOC)
     public Function getOnFiltered() {
         return entity.getOnFiltered();
     }
@@ -1881,7 +1920,12 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         entity.setOnFiltered(aValue);
     }
 
-    @ScriptFunction(jsDoc = "After requery event.")
+    private static final String ON_REQUIRED_JSDOC = ""
+            + "/**\n"
+            + "* The handler funciton for the event occured after the entity data have been required.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = ON_REQUIRED_JSDOC)
     public Function getOnRequeried() {
         return entity.getOnRequeried();
     }
