@@ -616,7 +616,7 @@ public class DbMap extends JPanel implements DbControl, RowsetsDbControl, Proper
         Polygon hitPoly = GisUtilities.constructRectyPolygon(new Point2D.Double(aHitPoint.getX() - bufferZoneWidth, aHitPoint.getY() - bufferZoneWidth), new Point2D.Double(aHitPoint.getX() + bufferZoneWidth, aHitPoint.getY() + bufferZoneWidth));
         return hit(hitPoly, true);
     }
-    
+
     public List<SelectionEntry> nonSelectableHit(Point aHitPoint) throws Exception {
         double bufferZoneWidth = calculateCurrentHitBuffer();
         Polygon hitPoly = GisUtilities.constructRectyPolygon(new Point2D.Double(aHitPoint.getX() - bufferZoneWidth, aHitPoint.getY() - bufferZoneWidth), new Point2D.Double(aHitPoint.getX() + bufferZoneWidth, aHitPoint.getY() + bufferZoneWidth));
@@ -628,17 +628,17 @@ public class DbMap extends JPanel implements DbControl, RowsetsDbControl, Proper
         FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(GeoTools.getDefaultHints());
         for (Layer layer : pane.getLightweightMapContext().layers()) {
             FeatureSource fs = layer.getFeatureSource();
-                RowsetFeatureDescriptor featureDescriptor = dataStore.getFeatureDescriptors().get(fs.getName().getLocalPart());
+            RowsetFeatureDescriptor featureDescriptor = dataStore.getFeatureDescriptors().get(fs.getName().getLocalPart());
             if ((needSelectable && featureDescriptor.isSelectable()) || !needSelectable) {
-                    Filter filter = ff.intersects(ff.property(fs.getSchema().getGeometryDescriptor().getLocalName()), ff.literal(aHitPoly));
-                    FeatureCollection<SimpleFeatureType, SimpleFeature> layerResults = fs.getFeatures(filter);
-                    FeatureIterator<SimpleFeature> fIt = layerResults.features();
-                    while (fIt.hasNext()) {
-                        SimpleFeature feature = fIt.next();
-                        GisUtilities.convertSimpleFeature2SelectionEntries(feature, hitedResults, featureDescriptor);
-                    }
+                Filter filter = ff.intersects(ff.property(fs.getSchema().getGeometryDescriptor().getLocalName()), ff.literal(aHitPoly));
+                FeatureCollection<SimpleFeatureType, SimpleFeature> layerResults = fs.getFeatures(filter);
+                FeatureIterator<SimpleFeature> fIt = layerResults.features();
+                while (fIt.hasNext()) {
+                    SimpleFeature feature = fIt.next();
+                    GisUtilities.convertSimpleFeature2SelectionEntries(feature, hitedResults, featureDescriptor);
                 }
             }
+        }
         return hitedResults;
     }
 
@@ -763,23 +763,22 @@ public class DbMap extends JPanel implements DbControl, RowsetsDbControl, Proper
         pane.getActionMap().put(aAction.getClass().getSimpleName(), aAction);
     }
 
-    public void fireScriptEvent(Object aEvent) {
+    public void fireScriptEvent(final Object aEvent) {
         if (eventHandler != null && (eventThis != null || scriptScope != null)) {
-            Context cx = Context.getCurrentContext();
-            boolean wasContext = cx != null;
-            if (!wasContext) {
-                cx = ScriptUtils.enterContext();
-            }
             try {
-                eventHandler.call(cx, eventThis != null ? eventThis : scriptScope, eventThis != null ? eventThis : scriptScope, new Object[]{aEvent});
-            } finally {
-                if (!wasContext) {
-                    Context.exit();
-                }
+                ScriptUtils.inContext(new ScriptUtils.ScriptAction() {
+                    @Override
+                    public Object run(Context cx) throws Exception {
+                        eventHandler.call(cx, eventThis != null ? eventThis : scriptScope, eventThis != null ? eventThis : scriptScope, new Object[]{aEvent});
+                        return null;
+                    }
+                });
+            } catch (Exception ex) {
+                Logger.getLogger(DbMap.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-    };
-    
+    }
+
     public String beforeToolTipShow(Row aRow, ApplicationEntity<?, ?, ?> aEntity) throws Exception {
         Object func = scriptScope.get(BEFORE_SHOW_TOOL_TIP_FUNCTION_NAME, scriptScope);
         if (func != null && func instanceof Function) {
@@ -789,7 +788,9 @@ public class DbMap extends JPanel implements DbControl, RowsetsDbControl, Proper
             }
         }
         return null;
-     };
+    }
+
+    ;
 
     @Undesignable
     public Function getOnEvent() {

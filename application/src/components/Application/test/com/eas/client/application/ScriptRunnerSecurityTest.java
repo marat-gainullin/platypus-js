@@ -21,9 +21,11 @@ import com.eas.client.settings.PlatypusConnectionSettings;
 import com.eas.client.threetier.PlatypusNativeClient;
 import com.eas.client.threetier.http.PlatypusHttpClient;
 import com.eas.script.ScriptUtils;
+import com.eas.script.ScriptUtils.ScriptAction;
 import java.security.AccessControlException;
 import org.junit.*;
 import static org.junit.Assert.*;
+import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
 
 /**
@@ -198,10 +200,10 @@ public class ScriptRunnerSecurityTest {
         UNSECURE, SECURE, SECURE_FUNCTION;
     }
 
-    public static void setupScriptDocuments(AppClient client){
+    public static void setupScriptDocuments(AppClient client) {
         scriptDocuments = new ClientCompiledScriptDocuments(client);
     }
-    
+
     private void setupModules(int moduleType, AppClient client) throws Exception {
         setupScriptDocuments(client);
         client.login(USER1_NAME, USER_PASSWORD.toCharArray());//USER1 has permission for every module of these
@@ -265,20 +267,26 @@ public class ScriptRunnerSecurityTest {
         throw new IllegalArgumentException(UNKNOWN_TEST_TYPE_MESSAGE);
     }
 
-    private void assertHasPermissionExecuteMethod(ScriptRunner sr, boolean hasPermission) throws Exception {
-        if (hasPermission) {
-            Function fun = (Function) sr.get("test");
-            Object result = fun.call(ScriptUtils.enterContext(), sr, sr, new Object[0]);
-            assertNotNull(result);
-            assertEquals(result, "test");
-        } else {
-            try {
-                Function fun = (Function) sr.get("test");
-                Object result = fun.call(ScriptUtils.enterContext(), sr, sr, new Object[0]);
-                fail("Access permission assertion failed");
-            } catch (Exception ex) {
-                assertTrue(ex instanceof AccessControlException);
+    private void assertHasPermissionExecuteMethod(final ScriptRunner aRunner, final boolean hasPermission) throws Exception {
+        ScriptUtils.inContext(new ScriptAction() {
+            @Override
+            public Object run(Context cx) throws Exception {
+                if (hasPermission) {
+                    Function fun = (Function) aRunner.get("test");
+                    Object result = fun.call(cx, aRunner, aRunner, new Object[0]);
+                    assertNotNull(result);
+                    assertEquals(result, "test");
+                } else {
+                    try {
+                        Function fun = (Function) aRunner.get("test");
+                        Object result = fun.call(cx, aRunner, aRunner, new Object[0]);
+                        fail("Access permission assertion failed");
+                    } catch (Exception ex) {
+                        assertTrue(ex instanceof AccessControlException);
+                    }
+                }
+                return null;
             }
-        }
+        });
     }
 }

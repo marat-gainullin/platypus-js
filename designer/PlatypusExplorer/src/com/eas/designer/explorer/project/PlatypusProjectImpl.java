@@ -242,20 +242,6 @@ public class PlatypusProjectImpl implements PlatypusProject {
             dbSettings.setApplicationPath(getProjectDirectory().getPath());
 
             final ScriptedDatabasesClient lclient = new ScriptedDatabasesClient(dbSettings);
-            final CompiledScriptDocuments documents = new ClientCompiledScriptDocuments(lclient);
-            lclient.setScriptDocumentsHost(new CompiledScriptDocumentsHost(){
-
-                @Override
-                public CompiledScriptDocuments getDocuments() {
-                    return documents;
-                }
-
-                @Override
-                public void defineJsClass(String aClassName, ApplicationElement aAppElement) {
-                    throw new IllegalStateException("Can't define javascript classes during design time.");
-                }
-                
-            });
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
                 public void run() {

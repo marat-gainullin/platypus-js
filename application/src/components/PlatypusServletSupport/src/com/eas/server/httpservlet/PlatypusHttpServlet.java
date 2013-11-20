@@ -25,6 +25,7 @@ import com.eas.server.handlers.ExecuteServerModuleMethodRequestHandler;
 import com.eas.server.httpservlet.serial.query.QueryJsonWriter;
 import com.eas.client.threetier.RowsetJsonConstants;
 import com.eas.client.threetier.RowsetJsonWriter;
+import com.eas.script.ScriptUtils.ScriptAction;
 import com.eas.util.StringUtils;
 import java.io.*;
 import java.net.URLConnection;
@@ -447,7 +448,7 @@ public class PlatypusHttpServlet extends HttpServlet {
                 makeResponseNotCacheable(aHttpResponse);
                 writeJsonResponse(moduleResponseToJson(csmr.getFunctionsNames(), csmr.isReport(), csmr.isPermitted()), aHttpResponse);
             } else if (aPlatypusResponse instanceof ExecuteServerModuleMethodRequest.Response) {
-                Object result = ((ExecuteServerModuleMethodRequest.Response) aPlatypusResponse).getResult();
+                final Object result = ((ExecuteServerModuleMethodRequest.Response) aPlatypusResponse).getResult();
                 makeResponseNotCacheable(aHttpResponse);
                 if (result instanceof Rowset) {
                     writeResponse((Rowset) result, aHttpResponse, aHttpRequest);
@@ -458,12 +459,13 @@ public class PlatypusHttpServlet extends HttpServlet {
                 } else if (result instanceof XMLObject) {
                     writeResponse(ScriptUtils.toXMLString((XMLObject) result), aHttpResponse, HTML_CONTENTTYPE);
                 } else {
-                    ScriptUtils.enterContext();
-                    try {
-                        writeJsonResponse(ScriptUtils.toJson(ScriptUtils.javaToJS(result, ScriptUtils.getScope())), aHttpResponse);
-                    } finally {
-                        Context.exit();
-                    }
+                    ScriptUtils.inContext(new ScriptAction() {
+                        @Override
+                        public Object run(Context cx) throws Exception {
+                            writeJsonResponse(ScriptUtils.toJson(ScriptUtils.javaToJS(result, ScriptUtils.getScope())), aHttpResponse);
+                            return null;
+                        }
+                    });
                 }
             } else if (aPlatypusResponse instanceof AppQueryResponse) {
                 Query<?> query = ((AppQueryResponse) aPlatypusResponse).getAppQuery();

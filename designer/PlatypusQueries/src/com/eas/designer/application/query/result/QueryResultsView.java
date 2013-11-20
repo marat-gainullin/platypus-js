@@ -28,6 +28,7 @@ import com.eas.designer.application.indexer.IndexerQuery;
 import com.eas.designer.application.query.PlatypusQueryDataObject;
 import com.eas.designer.application.query.editing.SqlTextEditsComplementor;
 import com.eas.script.ScriptUtils;
+import com.eas.script.ScriptUtils.ScriptAction;
 import java.awt.Color;
 import java.awt.Dialog;
 import java.awt.Toolkit;
@@ -173,26 +174,26 @@ public class QueryResultsView extends javax.swing.JPanel {
      */
     private boolean initModel() throws Exception {
         model = new ApplicationDbModel(client);
-        ScriptUtils.enterContext();
-        try {
-            model.setScriptThis(ScriptUtils.getScope());
-            model.setParameters(parameters);
-            setupQueryEntityBySql();
-            setModelRelations();
-            // enable dataworks
-            if (queryEntity.getQuery().isCommand()) {
-                queryEntity.getQuery().setManual(true);
-                model.setRuntime(true);
-                int rowsAffected = client.executeUpdate(queryEntity.getQuery().compile());
-                showInfo(NbBundle.getMessage(QuerySetupView.class, "QueryResultsView.affectedRowsMessage", rowsAffected));
-                return false;
-            } else {
-                model.setRuntime(true);
-                return true;
+        return ScriptUtils.inContext(new ScriptAction() {
+            @Override
+            public Boolean run(Context cntxt) throws Exception {
+                model.setScriptThis(ScriptUtils.getScope());
+                model.setParameters(parameters);
+                setupQueryEntityBySql();
+                setModelRelations();
+                // enable dataworks
+                if (queryEntity.getQuery().isCommand()) {
+                    queryEntity.getQuery().setManual(true);
+                    model.setRuntime(true);
+                    int rowsAffected = client.executeUpdate(queryEntity.getQuery().compile());
+                    showInfo(NbBundle.getMessage(QuerySetupView.class, "QueryResultsView.affectedRowsMessage", rowsAffected));
+                    return false;
+                } else {
+                    model.setRuntime(true);
+                    return true;
+                }
             }
-        } finally {
-            Context.exit();
-        }
+        });
     }
 
     private void setupQueryEntityBySql() throws Exception {

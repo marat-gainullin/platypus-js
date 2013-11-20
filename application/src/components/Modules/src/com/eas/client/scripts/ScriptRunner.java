@@ -19,6 +19,7 @@ import com.eas.script.JsDoc;
 import com.eas.script.JsDoc.Tag;
 import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptUtils;
+import com.eas.script.ScriptUtils.ScriptAction;
 import com.eas.util.BinaryUtils;
 import java.io.IOException;
 import java.io.InputStream;
@@ -94,21 +95,16 @@ public class ScriptRunner extends ScriptableObject {
     }
 
     protected void doExecute() throws Exception {
-        Context cx = Context.getCurrentContext();
-        boolean wasContext = cx != null;
-        if (!wasContext) {
-            cx = ScriptUtils.enterContext();
-        }
-        try {
-            model.setRuntime(true);
-            // Executing of the datamodel here is very useful.
-            // At this moment all of the scripts, including standard and platypus libraries
-            // are executed, and so, it works properly!
-        } finally {
-            if (!wasContext) {
-                Context.exit();
+        ScriptUtils.inContext(new ScriptAction() {
+            @Override
+            public Object run(Context cx) throws Exception {
+                model.setRuntime(true);
+                // Executing of the datamodel here is very useful.
+                // At this moment all of the scripts, including standard and platypus libraries
+                // are executed, and so, it works properly!
+                return null;
             }
-        }
+        });
     }
 
     protected void definePropertiesAndMethods() {
@@ -140,24 +136,25 @@ public class ScriptRunner extends ScriptableObject {
         }
     }
 
-    protected void prepareScript(ScriptDocument scriptDoc, Object[] args) throws Exception {
-        Context context = ScriptUtils.enterContext();
-        try {
-            model.setScriptThis(this);
-            if (scriptDoc.getFunction() != null) {
-                if (System.getProperty(DEBUG_PROPERTY) != null) {
-                    Breakpoints.getInstance().checkPendingBreakpoints();
+    protected void prepareScript(final ScriptDocument scriptDoc, final Object[] args) throws Exception {
+        ScriptUtils.inContext(new ScriptAction() {
+            @Override
+            public Object run(Context cx) throws Exception {
+                model.setScriptThis(ScriptRunner.this);
+                if (scriptDoc.getFunction() != null) {
+                    if (System.getProperty(DEBUG_PROPERTY) != null) {
+                        Breakpoints.getInstance().checkPendingBreakpoints();
+                    }
+                    Object[] jsArgs = new Object[args != null ? args.length : 0];
+                    for (int i = 0; i < jsArgs.length; i++) {
+                        jsArgs[i] = ScriptUtils.javaToJS(args[i], ScriptUtils.getScope());
+                    }
+                    scriptDoc.getFunction().call(cx, getParentScope(), ScriptRunner.this, jsArgs);
                 }
-                Object[] jsArgs = new Object[args != null ? args.length : 0];
-                for (int i = 0; i < jsArgs.length; i++) {
-                    jsArgs[i] = ScriptUtils.javaToJS(args[i], ScriptUtils.getScope());
-                }
-                scriptDoc.getFunction().call(context, getParentScope(), this, jsArgs);
+                model.resolveHandlers();
+                return null;
             }
-            model.resolveHandlers();
-        } finally {
-            Context.exit();
-        }
+        });
     }
 
     public void execute() throws Exception {
@@ -475,42 +472,37 @@ public class ScriptRunner extends ScriptableObject {
     }
     protected static Set<String> executedScriptResources = new HashSet<>();
 
-    public static void executeResource(String aResourceId) throws Exception {
-        String resourceId = PlatypusScriptedResource.translateResourcePath(aResourceId);
+    public static void executeResource(final String aResourceId) throws Exception {
+        final String resourceId = PlatypusScriptedResource.translateResourcePath(aResourceId);
         if (!executedScriptResources.contains(resourceId)) {
-            Context cx = Context.getCurrentContext();
-            boolean wasContext = cx != null;
-            if (!wasContext) {
-                cx = ScriptUtils.enterContext();
-            }
             try {
-                try {
-                    String source = PlatypusScriptedResource.loadText(resourceId);
-                    if (source != null) {
-                        /**
-                         * TODO: check update of rhino. May be it would be able
-                         * to use bytecode generation. if
-                         * (currentContext.getDebugger() == null) {
-                         * currentContext.setOptimizationLevel(5); }else
-                         * currentContext.setOptimizationLevel(-1);
-                         */
-                        cx.setOptimizationLevel(-1);
-                        Script lib = cx.compileString(source, resourceId, 0, null);
-                        lib.exec(cx, checkStandardObjects(cx));
-                    } else {
-                        throw new IllegalArgumentException("Script resource not found: " + resourceId + ". Hint: Regular platypus modules can't be used as resources.");
+                ScriptUtils.inContext(new ScriptAction() {
+                    @Override
+                    public Object run(Context cx) throws Exception {
+                        String source = PlatypusScriptedResource.loadText(resourceId);
+                        if (source != null) {
+                            /**
+                             * TODO: check update of rhino. May be it would be
+                             * able to use bytecode generation. if
+                             * (currentContext.getDebugger() == null) {
+                             * currentContext.setOptimizationLevel(5); }else
+                             * currentContext.setOptimizationLevel(-1);
+                             */
+                            cx.setOptimizationLevel(-1);
+                            Script lib = cx.compileString(source, resourceId, 0, null);
+                            lib.exec(cx, checkStandardObjects(cx));
+                        } else {
+                            throw new IllegalArgumentException("Script resource not found: " + resourceId + ". Hint: Regular platypus modules can't be used as resources.");
+                        }
+                        return null;
                     }
-                } catch (NotResourceException ex) {
-                    // Silently return.
-                    // There are cases, when require is called with regular platypus module id.
-                    // In such case, we have to ignore require call in SE client and server and servlet,
-                    // and perform standard actions for html5 browser client.
-                    return;
-                }
-            } finally {
-                if (!wasContext) {
-                    Context.exit();
-                }
+                });
+            } catch (NotResourceException ex) {
+                // Silently return.
+                // There are cases, when require is called with regular platypus module id.
+                // In such case, we have to ignore require call in SE client and server and servlet,
+                // and perform standard actions for html5 browser client.
+                return;
             }
             executedScriptResources.add(resourceId);
         }
@@ -536,18 +528,19 @@ public class ScriptRunner extends ScriptableObject {
     public static Scriptable initializePlatypusStandardLibScope() throws Exception {
         synchronized (standardObjectsScopeLock) {
             if (platypusStandardLibScope == null) {
-                Context context = ScriptUtils.enterContext();
-                try {
-                    checkStandardObjects(context);
-                    // Fix from rsp! Let's initialize library functions
-                    // in top-level scope.
-                    //platypusStandardLibScope = (ScriptableObject) context.newObject(standardObjectsScope);
-                    //platypusStandardLibScope.setPrototype(standardObjectsScope);
-                    platypusStandardLibScope = standardObjectsScope;
-                    importScriptLibrary("/com/eas/client/scripts/standartLib.js", "platypusStandardLib", context, platypusStandardLibScope);
-                } finally {
-                    Context.exit();
-                }
+                ScriptUtils.inContext(new ScriptAction() {
+                    @Override
+                    public Object run(Context cx) throws Exception {
+                        checkStandardObjects(cx);
+                        // Fix from rsp! Let's initialize library functions
+                        // in top-level scope.
+                        //platypusStandardLibScope = (ScriptableObject) context.newObject(standardObjectsScope);
+                        //platypusStandardLibScope.setPrototype(standardObjectsScope);
+                        platypusStandardLibScope = standardObjectsScope;
+                        importScriptLibrary("/com/eas/client/scripts/standartLib.js", "platypusStandardLib", cx, platypusStandardLibScope);
+                        return null;
+                    }
+                });
             }
         }
         return platypusStandardLibScope;
@@ -609,11 +602,16 @@ public class ScriptRunner extends ScriptableObject {
 
         @Override
         public void run() {
-            Context cx = ScriptUtils.enterContext();
             try {
-                call(cx, ScriptUtils.getScope(), null, new Object[]{});
-            } finally {
-                Context.exit();
+                ScriptUtils.inContext(new ScriptAction() {
+                    @Override
+                    public Object run(Context cx) throws Exception {
+                        call(cx, ScriptUtils.getScope(), null, new Object[]{});
+                        return null;
+                    }
+                });
+            } catch (Exception ex) {
+                Logger.getLogger(ScriptRunner.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
 

@@ -24,6 +24,7 @@ import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.queries.Query;
 import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptUtils;
+import com.eas.script.ScriptUtils.ScriptAction;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.*;
@@ -81,7 +82,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
             }
             //
             for (ReferenceRelation<E> aRelation : referenceRelations) {
-                String scalarPropertyName = aRelation.getScalarPropertyName();                
+                String scalarPropertyName = aRelation.getScalarPropertyName();
                 if (scalarPropertyName == null || scalarPropertyName.isEmpty()) {
                     scalarPropertyName = aRelation.getRightEntity().getName();
                 }
@@ -113,16 +114,17 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
     }
 
     @Override
-    public boolean validate() throws Exception{
+    public boolean validate() throws Exception {
         boolean res = super.validate();
-        if(res){
-            for(Relation<E> rel : referenceRelations)
+        if (res) {
+            for (Relation<E> rel : referenceRelations) {
                 resolveRelation(rel, this);
+            }
             checkReferenceRelationsIntegrity();
         }
         return res;
     }
-    
+
     public void resolveHandlers() {
         if (scriptThis != null) {
             for (E ent : entities.values()) {
@@ -141,11 +143,11 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
 
     @Override
     public Model<E, P, C, Q> copy() throws Exception {
-        Model<E, P, C, Q>  copied = super.copy();
+        Model<E, P, C, Q> copied = super.copy();
         for (ReferenceRelation<E> relation : referenceRelations) {
-            ReferenceRelation<E> rcopied = (ReferenceRelation<E>)relation.copy();
+            ReferenceRelation<E> rcopied = (ReferenceRelation<E>) relation.copy();
             resolveRelation(rcopied, copied);
-            ((ApplicationModel<E, P, C, Q>)copied).getReferenceRelations().add(rcopied);
+            ((ApplicationModel<E, P, C, Q>) copied).getReferenceRelations().add(rcopied);
         }
         return copied;
     }
@@ -155,7 +157,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         super.checkRelationsIntegrity();
         checkReferenceRelationsIntegrity();
     }
-    
+
     protected void checkReferenceRelationsIntegrity() {
         List<ReferenceRelation<E>> toDel = new ArrayList<>();
         for (ReferenceRelation<E> rel : referenceRelations) {
@@ -280,24 +282,19 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         return save(null);
     }
 
-    public boolean save(Function aCallback) throws Exception {
+    public boolean save(final Function aCallback) throws Exception {
         if (commitable) {
             try {
                 commit();
                 saved();
                 if (aCallback != null) {
-                    Context cx = Context.getCurrentContext();
-                    boolean wasContext = cx != null;
-                    if (!wasContext) {
-                        cx = ScriptUtils.enterContext();
-                    }
-                    try {
-                        aCallback.call(cx, scriptThis, scriptThis, new Object[]{});
-                    } finally {
-                        if (!wasContext) {
-                            Context.exit();
+                    ScriptUtils.inContext(new ScriptAction() {
+                        @Override
+                        public Object run(Context cx) throws Exception {
+                            aCallback.call(cx, scriptThis, scriptThis, new Object[]{});
+                            return null;
                         }
-                    }
+                    });
                 }
             } catch (Exception ex) {
                 rolledback();
@@ -336,37 +333,27 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         requery(null, null);
     }
 
-    public void requery(Function aOnSuccess, Function aOnFailure) throws Exception {
+    public void requery(final Function aOnSuccess, final Function aOnFailure) throws Exception {
         try {
             executeRootEntities(true);
             if (aOnSuccess != null) {
-                Context cx = Context.getCurrentContext();
-                boolean wasContext = cx != null;
-                if (!wasContext) {
-                    cx = ScriptUtils.enterContext();
-                }
-                try {
-                    aOnSuccess.call(cx, scriptThis, scriptThis, new Object[]{});
-                } finally {
-                    if (!wasContext) {
-                        Context.exit();
+                ScriptUtils.inContext(new ScriptAction() {
+                    @Override
+                    public Object run(Context cx) throws Exception {
+                        aOnSuccess.call(cx, scriptThis, scriptThis, new Object[]{});
+                        return null;
                     }
-                }
+                });
             }
-        } catch (Exception ex) {
+        } catch (final Exception ex) {
             if (aOnFailure != null) {
-                Context cx = Context.getCurrentContext();
-                boolean wasContext = cx != null;
-                if (!wasContext) {
-                    cx = ScriptUtils.enterContext();
-                }
-                try {
-                    aOnFailure.call(cx, scriptThis, scriptThis, new Object[]{ex.getMessage()});
-                } finally {
-                    if (!wasContext) {
-                        Context.exit();
+                ScriptUtils.inContext(new ScriptAction() {
+                    @Override
+                    public Object run(Context cx) throws Exception {
+                        aOnFailure.call(cx, scriptThis, scriptThis, new Object[]{ex.getMessage()});
+                        return null;
                     }
-                }
+                });
             } else {
                 throw ex;
             }
@@ -384,37 +371,27 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
     }
 
     @ScriptFunction(jsDoc = "Refreshes model data if any of its parameters has changed with callback.")
-    public void execute(Function aOnSuccess, Function aOnFailure) throws Exception {
+    public void execute(final Function aOnSuccess, final Function aOnFailure) throws Exception {
         try {
             executeRootEntities(false);
             if (aOnSuccess != null) {
-                Context cx = Context.getCurrentContext();
-                boolean wasContext = cx != null;
-                if (!wasContext) {
-                    cx = ScriptUtils.enterContext();
-                }
-                try {
-                    aOnSuccess.call(cx, scriptThis, scriptThis, new Object[]{});
-                } finally {
-                    if (!wasContext) {
-                        Context.exit();
+                ScriptUtils.inContext(new ScriptAction() {
+                    @Override
+                    public Object run(Context cx) throws Exception {
+                        aOnSuccess.call(cx, scriptThis, scriptThis, new Object[]{});
+                        return null;
                     }
-                }
+                });
             }
-        } catch (Exception ex) {
+        } catch (final Exception ex) {
             if (aOnFailure != null) {
-                Context cx = Context.getCurrentContext();
-                boolean wasContext = cx != null;
-                if (!wasContext) {
-                    cx = ScriptUtils.enterContext();
-                }
-                try {
-                    aOnFailure.call(cx, scriptThis, scriptThis, new Object[]{ex.getMessage()});
-                } finally {
-                    if (!wasContext) {
-                        Context.exit();
+                ScriptUtils.inContext(new ScriptAction() {
+                    @Override
+                    public Object run(Context cx) throws Exception {
+                        aOnFailure.call(cx, scriptThis, scriptThis, new Object[]{ex.getMessage()});
+                        return null;
                     }
-                }
+                });
             } else {
                 throw ex;
             }

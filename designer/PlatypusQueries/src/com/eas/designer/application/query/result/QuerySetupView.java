@@ -20,6 +20,7 @@ import com.eas.designer.application.query.editing.SqlTextEditsComplementor;
 import com.eas.designer.application.query.lexer.SqlLanguageHierarchy;
 import com.eas.designer.application.query.result.QueryResultsView.PageSizeItem;
 import com.eas.script.ScriptUtils;
+import com.eas.script.ScriptUtils.ScriptAction;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dialog;
@@ -68,18 +69,18 @@ public class QuerySetupView extends javax.swing.JPanel {
     protected static final Logger logger = Logger.getLogger(QuerySetupView.class.getName());
 
     public QuerySetupView(QueryResultsView aParentView) throws Exception {
-        parentView = aParentView;      
-        initComponents();    
+        parentView = aParentView;
+        initComponents();
         initParametersView();
         initDocument();
         initSqlEditor();
         saveParamsCheckBox.setSelected(isSaveParamsValuesEnabled());
     }
-    
+
     public final boolean isSaveParamsValuesEnabled() {
         return NbPreferences.forModule(QuerySetupView.class).getBoolean(SAVE_PARAMS_VAULES_ENABLED_KEY, true);
     }
-    
+
     public final void setSaveParamsValuesEnabled(boolean val) {
         NbPreferences.forModule(QuerySetupView.class).putBoolean(SAVE_PARAMS_VAULES_ENABLED_KEY, val);
     }
@@ -168,12 +169,12 @@ public class QuerySetupView extends javax.swing.JPanel {
 
     private void pageSizeComboBoxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_pageSizeComboBoxItemStateChanged
         if (evt.getStateChange() == ItemEvent.SELECTED) {
-             parentView.setPageSize(((PageSizeItem)evt.getItem()).getValue());
+            parentView.setPageSize(((PageSizeItem) evt.getItem()).getValue());
         }
     }//GEN-LAST:event_pageSizeComboBoxItemStateChanged
 
     private void toolbarRunButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_toolbarRunButtonActionPerformed
-        ((JComponent)evt.getSource()).requestFocus();//changes focus to validate entered values
+        ((JComponent) evt.getSource()).requestFocus();//changes focus to validate entered values
         dialogDescriptor.setValue(DialogDescriptor.OK_OPTION);
         dialog.setVisible(false);
     }//GEN-LAST:event_toolbarRunButtonActionPerformed
@@ -181,7 +182,6 @@ public class QuerySetupView extends javax.swing.JPanel {
     private void saveParamsCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveParamsCheckBoxActionPerformed
         setSaveParamsValuesEnabled(saveParamsCheckBox.isSelected());
     }//GEN-LAST:event_saveParamsCheckBoxActionPerformed
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel bottomPanel;
     private javax.swing.JSplitPane mainPane;
@@ -197,19 +197,20 @@ public class QuerySetupView extends javax.swing.JPanel {
 
     private void initParametersView() throws Exception {
         paramsModel = new ApplicationDbModel();
-        ScriptUtils.enterContext();
-        try {
-            paramsModel.setScriptThis(ScriptUtils.getScope());
-            paramsModel.setParameters(parentView.getParameters().copy());
-            paramsModel.setRuntime(true);
-            parametersGrid = new EntityFieldsGrid();
-            parametersGrid.setLabelTitle(NbBundle.getMessage(QuerySetupView.class, "Parameter")); //NOI18N
-            parametersGrid.setValueTitle(NbBundle.getMessage(QuerySetupView.class, "Value")); //NOI18N
-            parametersGrid.setEntity(paramsModel.getParametersEntity());
-            topPanel.add(new JScrollPane(parametersGrid), BorderLayout.CENTER);
-        } finally {
-            Context.exit();
-        }
+        ScriptUtils.inContext(new ScriptAction() {
+            @Override
+            public Object run(Context cntxt) throws Exception {
+                paramsModel.setScriptThis(ScriptUtils.getScope());
+                paramsModel.setParameters(parentView.getParameters().copy());
+                paramsModel.setRuntime(true);
+                parametersGrid = new EntityFieldsGrid();
+                parametersGrid.setLabelTitle(NbBundle.getMessage(QuerySetupView.class, "Parameter")); //NOI18N
+                parametersGrid.setValueTitle(NbBundle.getMessage(QuerySetupView.class, "Value")); //NOI18N
+                parametersGrid.setEntity(paramsModel.getParametersEntity());
+                topPanel.add(new JScrollPane(parametersGrid), BorderLayout.CENTER);
+                return null;
+            }
+        });
     }
 
     private void initSqlEditor() throws BadLocationException {
@@ -234,7 +235,7 @@ public class QuerySetupView extends javax.swing.JPanel {
     public Parameters getParameters() {
         return paramsModel.getParameters();
     }
-    
+
     public void setDialog(Dialog aDialog, DialogDescriptor aDialogDescriptor) {
         if (aDialog == null || aDialogDescriptor == null) {
             throw new IllegalArgumentException("Parent dialog or dialog descriptor is null."); // NOI18N
@@ -247,7 +248,6 @@ public class QuerySetupView extends javax.swing.JPanel {
         if (aPane.getDocument() instanceof NbDocument.CustomEditor) {
             NbDocument.CustomEditor ce = (NbDocument.CustomEditor) aPane.getDocument();
             ce.addUndoableEditListener(new UndoableEditListener() {
-
                 @Override
                 public void undoableEditHappened(UndoableEditEvent e) {
                     try {

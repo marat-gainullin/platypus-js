@@ -286,14 +286,18 @@ public abstract class RowsetsModel {
         if (cRow != null && rRow != null && cellsLocator != null) {
             Object[] rKeys = rRow.getPKValues();
             Object[] cKeys = cRow.getPKValues();
-            if(rKeys.length == 0)
-                throw new IllegalStateException("Row key is not found for "+rowsEntity.getFormattedNameAndTitle());
-            if(rKeys.length > 1)
-                throw new IllegalStateException("Row key is ambiguous for "+rowsEntity.getFormattedNameAndTitle());
-            if(cKeys.length == 0)
-                throw new IllegalStateException("Column key is not found for "+rowsEntity.getFormattedNameAndTitle());
-            if(cKeys.length > 1)
-                throw new IllegalStateException("Column key is ambiguous for "+rowsEntity.getFormattedNameAndTitle());
+            if (rKeys.length == 0) {
+                throw new IllegalStateException("Row key is not found for " + rowsEntity.getFormattedNameAndTitle());
+            }
+            if (rKeys.length > 1) {
+                throw new IllegalStateException("Row key is ambiguous for " + rowsEntity.getFormattedNameAndTitle());
+            }
+            if (cKeys.length == 0) {
+                throw new IllegalStateException("Column key is not found for " + rowsEntity.getFormattedNameAndTitle());
+            }
+            if (cKeys.length > 1) {
+                throw new IllegalStateException("Column key is ambiguous for " + rowsEntity.getFormattedNameAndTitle());
+            }
             Object[] cellsKeys = new Object[rKeys.length + cKeys.length];
             System.arraycopy(rKeys, 0, cellsKeys, 0, rKeys.length);
             System.arraycopy(cKeys, 0, cellsKeys, rKeys.length, cKeys.length);
@@ -488,33 +492,29 @@ public abstract class RowsetsModel {
         }
     }
 
-    private CellData complementCellData(CellData cellData, Row aRow, ModelColumn aColumn) throws Exception {
+    private CellData complementCellData(final CellData aCellData, final Row aRow, final ModelColumn aColumn) throws Exception {
         Function handler = aColumn.getCellsHandler();
         if (handler == null) {
             handler = generalCellsHandler;
         }
         if (scriptScope != null && handler != null) {
-            Context cx = Context.getCurrentContext();
-            boolean wasContext = cx != null;
-            if (!wasContext) {
-                cx = ScriptUtils.enterContext();
-            }
-            try {
-                Object rowPkValue = getRowPkValue4Script(aRow);
-                Object colPkValue = null;
-                if (aColumn instanceof RowModelColumn) {
-                    RowModelColumn rmc = (RowModelColumn) aColumn;
-                    colPkValue = getRowPkValue4Script(rmc.getRow());
+            final Function lhandler = handler;
+            ScriptUtils.inContext(new ScriptUtils.ScriptAction() {
+                @Override
+                public Object run(Context cx) throws Exception {
+                    Object rowPkValue = getRowPkValue4Script(aRow);
+                    Object colPkValue = null;
+                    if (aColumn instanceof RowModelColumn) {
+                        RowModelColumn rmc = (RowModelColumn) aColumn;
+                        colPkValue = getRowPkValue4Script(rmc.getRow());
+                    }
+                    Scriptable calcedThis = aColumn.getEventsThis() != null ? aColumn.getEventsThis() : scriptScope;
+                    lhandler.call(cx, scriptScope, calcedThis, new Object[]{new CellRenderEvent(calcedThis, rowPkValue, colPkValue, aCellData, RowHostObject.publishRow(scriptScope, aRow, rowsEntity))});
+                    return null;
                 }
-                Scriptable calcedThis = aColumn.getEventsThis() != null ? aColumn.getEventsThis() : scriptScope;
-                handler.call(cx, scriptScope, calcedThis, new Object[]{new CellRenderEvent(calcedThis, rowPkValue, colPkValue, cellData, RowHostObject.publishRow(scriptScope, aRow, rowsEntity))});
-            } finally {
-                if (!wasContext) {
-                    Context.exit();
-                }
-            }
+            });
         }
-        return cellData;
+        return aCellData;
     }
 
     public void removeColumn(ModelColumn aColumn) {

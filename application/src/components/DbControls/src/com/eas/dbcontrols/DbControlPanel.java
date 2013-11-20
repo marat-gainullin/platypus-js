@@ -19,6 +19,7 @@ import com.eas.design.Designable;
 import com.eas.design.Undesignable;
 import com.eas.gui.CascadedStyle;
 import com.eas.script.ScriptUtils;
+import com.eas.script.ScriptUtils.ScriptAction;
 import java.awt.*;
 import java.awt.event.*;
 import java.beans.PropertyChangeEvent;
@@ -612,34 +613,33 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
         if (standalone && scriptThis != null
                 && handleFunction != null) {
             Object dataToProcess = aValue instanceof CellData ? ((CellData) aValue).data : aValue;
-            CellData cd = new CellData(new CascadedStyle(), dataToProcess, achiveDisplayValue(dataToProcess));
-            Context cx = Context.getCurrentContext();
-            boolean wasContext = cx != null;
-            if (!wasContext) {
-                cx = ScriptUtils.enterContext();
-            }
-            try {
-                Row row = null;
-                if (rsEntity != null && !rsEntity.getRowset().isBeforeFirst() && !rsEntity.getRowset().isAfterLast()) {
-                    row = rsEntity.getRowset().getCurrentRow();
-                }
-                Object[] rowIds = null;
-                if (row != null) {
-                    rowIds = row.getPKValues();
-                }
-                Object retValue = handleFunction.call(cx, eventThis != null ? eventThis : scriptThis, eventThis != null ? eventThis : scriptThis, new Object[]{new CellRenderEvent(eventThis != null ? eventThis : scriptThis, rowIds != null && rowIds.length > 0 ? (rowIds.length > 1 ? rowIds : rowIds[0]) : null, null, cd, row != null ? RowHostObject.publishRow(scriptThis, row, rsEntity) : null)});
-                if (Boolean.TRUE.equals(retValue)) {
-                    try {
-                        cd.data = ScriptUtils.js2Java(cd.data);
-                        cd.display = ScriptUtils.js2Java(cd.display);
-                        aValue = cd;
-                    } catch (Exception ex) {
-                        Logger.getLogger(DbControlPanel.class.getName()).log(Level.SEVERE, null, ex);
+            final CellData cd = new CellData(new CascadedStyle(), dataToProcess, achiveDisplayValue(dataToProcess));
+            Boolean handled = ScriptUtils.inContext(new ScriptAction() {
+                @Override
+                public Boolean run(Context cx) throws Exception {
+                    Row row = null;
+                    if (rsEntity != null && !rsEntity.getRowset().isBeforeFirst() && !rsEntity.getRowset().isAfterLast()) {
+                        row = rsEntity.getRowset().getCurrentRow();
+                    }
+                    Object[] rowIds = null;
+                    if (row != null) {
+                        rowIds = row.getPKValues();
+                    }
+                    Object retValue = handleFunction.call(cx, eventThis != null ? eventThis : scriptThis, eventThis != null ? eventThis : scriptThis, new Object[]{new CellRenderEvent(eventThis != null ? eventThis : scriptThis, rowIds != null && rowIds.length > 0 ? (rowIds.length > 1 ? rowIds : rowIds[0]) : null, null, cd, row != null ? RowHostObject.publishRow(scriptThis, row, rsEntity) : null)});
+                    if (retValue instanceof Boolean) {
+                        return (Boolean) retValue;
+                    } else {
+                        return false;
                     }
                 }
-            } finally {
-                if (!wasContext) {
-                    Context.exit();
+            });
+            if (Boolean.TRUE.equals(handled)) {
+                try {
+                    cd.data = ScriptUtils.js2Java(cd.data);
+                    cd.display = ScriptUtils.js2Java(cd.display);
+                    aValue = cd;
+                } catch (Exception ex) {
+                    Logger.getLogger(DbControlPanel.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         }
@@ -1086,33 +1086,26 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            Function selectFunction = getSelectFunction();
+            final Function selectFunction = getSelectFunction();
             if (selectFunction != null) {
                 if (scriptThis == null && model != null) {
                     scriptThis = model.getScriptThis();
                 }
                 if (scriptThis != null) {
-                    Context cx = Context.getCurrentContext();
-                    boolean wasContext = cx != null;
-                    if (!wasContext) {
-                        cx = ScriptUtils.enterContext();
-                    }
                     try {
-                        Object oEditor = DbControlPanel.this.getClientProperty(ScriptUtils.WRAPPER_PROP_NAME);
-                        if (oEditor == null) {
-                            oEditor = DbControlPanel.this;
-                        }
-                        selectFunction.call(cx, eventThis != null ? eventThis : scriptThis, eventThis != null ? eventThis : scriptThis, new Object[]{oEditor});
-                        /*
-                         Component focusTarget = getFocusTargetComponent();
-                         if (focusTarget != null) {
-                         focusTarget.requestFocus();
-                         }
-                         */
-                    } finally {
-                        if (!wasContext) {
-                            Context.exit();
-                        }
+                        ScriptUtils.inContext(new ScriptAction() {
+                            @Override
+                            public Object run(Context cx) throws Exception {
+                                Object oEditor = DbControlPanel.this.getClientProperty(ScriptUtils.WRAPPER_PROP_NAME);
+                                if (oEditor == null) {
+                                    oEditor = DbControlPanel.this;
+                                }
+                                selectFunction.call(cx, eventThis != null ? eventThis : scriptThis, eventThis != null ? eventThis : scriptThis, new Object[]{oEditor});
+                                return null;
+                            }
+                        });
+                    } catch (Exception ex) {
+                        Logger.getLogger(DbControlPanel.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
             }

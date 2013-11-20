@@ -33,6 +33,7 @@ import com.eas.client.model.visitors.ApplicationModelVisitor;
 import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.queries.Query;
 import com.eas.script.ScriptUtils;
+import com.eas.script.ScriptUtils.ScriptAction;
 import com.eas.script.StoredFunction;
 import java.util.*;
 import java.util.logging.Level;
@@ -842,26 +843,20 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
         }
     }
 
-    public Object executeScriptEvent(Function aHandler, ScriptSourcedEvent aEvent) {
+    public Object executeScriptEvent(final Function aHandler, final ScriptSourcedEvent aEvent) {
         Object res = null;
         if (aHandler != null) {
             try {
-                Scriptable scope = model.getScriptThis();
+                final Scriptable scope = model.getScriptThis();
                 if (scope != null) {
                     model.fireScriptEventExecuting((E) this, scope, aHandler, aEvent);
-                    Context cx = Context.getCurrentContext();
-                    boolean wasContext = cx != null;
-                    if (!wasContext) {
-                        cx = ScriptUtils.enterContext();
-                    }
-                    try {
-                        Object[] args = new Object[]{ScriptUtils.javaToJS(aEvent, scope)};
-                        res = aHandler.call(cx, scope, sRowsetWrap != null ? sRowsetWrap : scope, args);
-                    } finally {
-                        if (!wasContext) {
-                            Context.exit();
+                    res = ScriptUtils.inContext(new ScriptAction() {
+                        @Override
+                        public Object run(Context cx) throws Exception {
+                            Object[] args = new Object[]{ScriptUtils.javaToJS(aEvent, scope)};
+                            return aHandler.call(cx, scope, sRowsetWrap != null ? sRowsetWrap : scope, args);
                         }
-                    }
+                    });
                 }
             } catch (Exception ex) {
                 if (!(ex instanceof IllegalStateException) || ex.getMessage() == null || !ex.getMessage().equals("break")) {
@@ -910,27 +905,27 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
     }
 
     @Override
-    public boolean willScroll(RowsetScrollEvent aEvent) {
+    public boolean willScroll(final RowsetScrollEvent aEvent) {
         boolean res = true;
         assert aEvent.getRowset() == rowset;
         if (model.isAjusting()) {
             model.addSavedRowIndex((E) this, aEvent.getOldRowIndex());
         } else {
-            Context cx = Context.getCurrentContext();
-            boolean wasContext = cx != null;
-            if (!wasContext) {
-                ScriptUtils.enterContext();
-            }
             try {
-                // call script method
-                Object sRes = executeScriptEvent(onBeforeScroll, new CursorPositionWillChangeEvent(sRowsetWrap, aEvent.getNewRowIndex()));
-                if (sRes != null && sRes instanceof Boolean) {
-                    return (Boolean) sRes;
-                }
-            } finally {
-                if (!wasContext) {
-                    Context.exit();
-                }
+                res = ScriptUtils.inContext(new ScriptAction() {
+                    @Override
+                    public Boolean run(Context cx) throws Exception {
+                        // call script method
+                        Object sRes = executeScriptEvent(onBeforeScroll, new CursorPositionWillChangeEvent(sRowsetWrap, aEvent.getNewRowIndex()));
+                        if (sRes != null && sRes instanceof Boolean) {
+                            return (Boolean) sRes;
+                        } else {
+                            return true;
+                        }
+                    }
+                });
+            } catch (Exception ex) {
+                Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
         return res;
@@ -986,31 +981,27 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
     }
 
     @Override
-    public boolean willChangeRow(RowChangeEvent aEvent) {
+    public boolean willChangeRow(final RowChangeEvent aEvent) {
         boolean assertres = model.isAjusting();
         assert !assertres;
         boolean res = true;
         Fields fmdv = getFields();
         if (fmdv != null) {
-            Field field = fmdv.get(aEvent.getFieldIndex());
+            final Field field = fmdv.get(aEvent.getFieldIndex());
             if (field != null) {
                 try {
                     // call script method
-                    Context cx = Context.getCurrentContext();
-                    boolean wasContext = cx != null;
-                    if (!wasContext) {
-                        ScriptUtils.enterContext();
-                    }
-                    try {
-                        Object sRes = executeScriptEvent(onBeforeChange, new EntityInstanceChangeEvent(RowHostObject.publishRow(model.getScriptThis(), aEvent.getChangedRow(), this), field, ScriptUtils.javaToJS(aEvent.getOldValue(), model.getScriptThis()), ScriptUtils.javaToJS(aEvent.getNewValue(), model.getScriptThis())));
-                        if (sRes != null && sRes instanceof Boolean) {
-                            return (Boolean) sRes;
+                    res = ScriptUtils.inContext(new ScriptAction() {
+                        @Override
+                        public Boolean run(Context cx) throws Exception {
+                            Object sRes = executeScriptEvent(onBeforeChange, new EntityInstanceChangeEvent(RowHostObject.publishRow(model.getScriptThis(), aEvent.getChangedRow(), ApplicationEntity.this), field, ScriptUtils.javaToJS(aEvent.getOldValue(), model.getScriptThis()), ScriptUtils.javaToJS(aEvent.getNewValue(), model.getScriptThis())));
+                            if (sRes != null && sRes instanceof Boolean) {
+                                return (Boolean) sRes;
+                            } else {
+                                return true;
+                            }
                         }
-                    } finally {
-                        if (!wasContext) {
-                            Context.exit();
-                        }
-                    }
+                    });
                 } catch (Exception ex) {
                     Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -1020,27 +1011,21 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
     }
 
     @Override
-    public void rowChanged(RowChangeEvent aEvent) {
+    public void rowChanged(final RowChangeEvent aEvent) {
         try {
             boolean assertres = model.isAjusting();
             assert !assertres;
             Fields lfields = getFields();
             if (lfields != null) {
-                Field field = lfields.get(aEvent.getFieldIndex());
+                final Field field = lfields.get(aEvent.getFieldIndex());
                 if (field != null) {
-                    // call script method
-                    Context cx = Context.getCurrentContext();
-                    boolean wasContext = cx != null;
-                    if (!wasContext) {
-                        ScriptUtils.enterContext();
-                    }
-                    try {
-                        enqueueScriptEvent(onAfterChange, new EntityInstanceChangeEvent(RowHostObject.publishRow(model.getScriptThis(), aEvent.getChangedRow(), this), field, ScriptUtils.javaToJS(aEvent.getOldValue(), model.getScriptThis()), ScriptUtils.javaToJS(aEvent.getNewValue(), model.getScriptThis())));
-                    } finally {
-                        if (!wasContext) {
-                            Context.exit();
+                    ScriptUtils.inContext(new ScriptAction() {
+                        @Override
+                        public Object run(Context cx) throws Exception {
+                            enqueueScriptEvent(onAfterChange, new EntityInstanceChangeEvent(RowHostObject.publishRow(model.getScriptThis(), aEvent.getChangedRow(), ApplicationEntity.this), field, ScriptUtils.javaToJS(aEvent.getOldValue(), model.getScriptThis()), ScriptUtils.javaToJS(aEvent.getNewValue(), model.getScriptThis())));
+                            return null;
                         }
-                    }
+                    });
                 }
             }
             internalExecuteChildren(false, aEvent.getFieldIndex());
@@ -1069,27 +1054,22 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
     }
 
     @Override
-    public boolean willInsertRow(RowsetInsertEvent event) {
+    public boolean willInsertRow(final RowsetInsertEvent event) {
         boolean res = true;
         // call script method
         assert !model.isAjusting();
         try {
-            Context cx = Context.getCurrentContext();
-            boolean wasContext = cx != null;
-            if (!wasContext) {
-                ScriptUtils.enterContext();
-            }
-            try {
-                Object sRes = executeScriptEvent(onBeforeInsert, new EntityInstanceInsert(sRowsetWrap, RowHostObject.publishRow(model.getScriptThis(), event.getRow(), this)));
-                if (sRes != null && sRes instanceof Boolean) {
-                    return (Boolean) sRes;
+            res = ScriptUtils.inContext(new ScriptAction() {
+                @Override
+                public Boolean run(Context cx) throws Exception {
+                    Object sRes = executeScriptEvent(onBeforeInsert, new EntityInstanceInsert(sRowsetWrap, RowHostObject.publishRow(model.getScriptThis(), event.getRow(), ApplicationEntity.this)));
+                    if (sRes != null && sRes instanceof Boolean) {
+                        return (Boolean) sRes;
+                    } else {
+                        return true;
+                    }
                 }
-            } finally {
-                if (!wasContext) {
-                    Context.exit();
-                }
-            }
-
+            });
         } catch (Exception ex) {
             Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -1111,26 +1091,22 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
     }
 
     @Override
-    public boolean willDeleteRow(RowsetDeleteEvent event) {
+    public boolean willDeleteRow(final RowsetDeleteEvent event) {
         boolean res = true;
         // call script method
         assert !model.isAjusting();
         try {
-            Context cx = Context.getCurrentContext();
-            boolean wasContext = cx != null;
-            if (!wasContext) {
-                ScriptUtils.enterContext();
-            }
-            try {
-                Object sRes = executeScriptEvent(onBeforeDelete, new EntityInstanceDelete(sRowsetWrap, RowHostObject.publishRow(model.getScriptThis(), event.getRow(), this)));
-                if (sRes != null && sRes instanceof Boolean) {
-                    return (Boolean) sRes;
+            res = ScriptUtils.inContext(new ScriptAction() {
+                @Override
+                public Boolean run(Context cx) throws Exception {
+                    Object sRes = executeScriptEvent(onBeforeDelete, new EntityInstanceDelete(sRowsetWrap, RowHostObject.publishRow(model.getScriptThis(), event.getRow(), ApplicationEntity.this)));
+                    if (sRes != null && sRes instanceof Boolean) {
+                        return (Boolean) sRes;
+                    } else {
+                        return true;
+                    }
                 }
-            } finally {
-                if (!wasContext) {
-                    Context.exit();
-                }
-            }
+            });
         } catch (Exception ex) {
             Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -1138,23 +1114,18 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
     }
 
     @Override
-    public void rowInserted(RowsetInsertEvent event) {
+    public void rowInserted(final RowsetInsertEvent event) {
         try {
             boolean assertres = model.isAjusting();
             assert !assertres;
             // call script method
-            Context cx = Context.getCurrentContext();
-            boolean wasContext = cx != null;
-            if (!wasContext) {
-                ScriptUtils.enterContext();
-            }
-            try {
-                enqueueScriptEvent(onAfterInsert, new EntityInstanceInsert(sRowsetWrap, RowHostObject.publishRow(model.getScriptThis(), event.getRow(), this)));
-            } finally {
-                if (!wasContext) {
-                    Context.exit();
+            ScriptUtils.inContext(new ScriptAction() {
+                @Override
+                public Object run(Context cx) throws Exception {
+                    enqueueScriptEvent(onAfterInsert, new EntityInstanceInsert(sRowsetWrap, RowHostObject.publishRow(model.getScriptThis(), event.getRow(), ApplicationEntity.this)));
+                    return null;
                 }
-            }
+            });
             internalExecuteChildren(false);
             model.pumpScriptEvents();
         } catch (Exception ex) {
@@ -1163,23 +1134,18 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
     }
 
     @Override
-    public void rowDeleted(RowsetDeleteEvent event) {
+    public void rowDeleted(final RowsetDeleteEvent event) {
         try {
             boolean assertres = model.isAjusting();
             assert !assertres;
             // call script method
-            Context cx = Context.getCurrentContext();
-            boolean wasContext = cx != null;
-            if (!wasContext) {
-                ScriptUtils.enterContext();
-            }
-            try {
-                enqueueScriptEvent(onAfterDelete, new EntityInstanceDelete(sRowsetWrap, RowHostObject.publishRow(model.getScriptThis(), event.getRow(), this)));
-            } finally {
-                if (!wasContext) {
-                    Context.exit();
+            ScriptUtils.inContext(new ScriptAction() {
+                @Override
+                public Object run(Context cx) throws Exception {
+                    enqueueScriptEvent(onAfterDelete, new EntityInstanceDelete(sRowsetWrap, RowHostObject.publishRow(model.getScriptThis(), event.getRow(), ApplicationEntity.this)));
+                    return null;
                 }
-            }
+            });
             internalExecuteChildren(false);
             model.pumpScriptEvents();
         } catch (Exception ex) {

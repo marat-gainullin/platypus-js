@@ -8,6 +8,7 @@ import com.eas.client.login.PrincipalHost;
 import com.eas.client.scripts.CompiledScriptDocumentsHost;
 import com.eas.client.scripts.ScriptRunner;
 import com.eas.script.ScriptUtils;
+import com.eas.script.ScriptUtils.ScriptAction;
 import java.util.HashSet;
 import java.util.Set;
 import org.mozilla.javascript.*;
@@ -40,81 +41,82 @@ public class ServerScriptRunner extends ScriptRunner {
         return serverCore;
     }
 
-    public synchronized Object executeMethod(String methodName, Object[] arguments) throws Exception {
-        Context context = ScriptUtils.enterContext();
-        try {
-            execute();
-            final Object oFunction = get(methodName, this);
-            if (oFunction instanceof SecureFunction) {
-                SecureFunction f = (SecureFunction) oFunction;
-                if (!(f.unwrap() instanceof FunctionObject)) {
-                    if (arguments != null) {
-                        for (int i = 0; i < arguments.length; i++) {
-                            if (arguments[i] != null) {
-                                arguments[i] = ScriptUtils.javaToJS(arguments[i], this);
+    public synchronized Object executeMethod(final String aMethodName, final Object[] aArguments) throws Exception {
+        return ScriptUtils.inContext(new ScriptAction() {
+            @Override
+            public Object run(Context cx) throws Exception {
+                execute();
+                final Object oFunction = get(aMethodName, ServerScriptRunner.this);
+                if (oFunction instanceof SecureFunction) {
+                    SecureFunction f = (SecureFunction) oFunction;
+                    if (!(f.unwrap() instanceof FunctionObject)) {
+                        if (aArguments != null) {
+                            for (int i = 0; i < aArguments.length; i++) {
+                                if (aArguments[i] != null) {
+                                    aArguments[i] = ScriptUtils.javaToJS(aArguments[i], ServerScriptRunner.this);
+                                }
                             }
                         }
+                        return ScriptUtils.js2Java(f.call(cx, ServerScriptRunner.this, ServerScriptRunner.this, aArguments));
                     }
-                    return ScriptUtils.js2Java(f.call(context, this, this, arguments));
+                }
+                throw new IllegalArgumentException("Unknown method \"" + aMethodName + "()\"");
+            }
+        });
+    }
+
+    public synchronized Object getValue(final String aPropertyName) throws Exception {
+        return ScriptUtils.inContext(new ScriptAction() {
+            @Override
+            public Object run(Context cx) throws Exception {
+                execute();
+                Object prop = get(aPropertyName, ServerScriptRunner.this);
+                if (prop instanceof Undefined || prop == Scriptable.NOT_FOUND) {
+                    return Undefined.instance;
+                } else {
+                    return ScriptUtils.js2Java(prop);
                 }
             }
-            throw new IllegalArgumentException("Unknown method \"" + methodName + "()\"");
-        } finally {
-            Context.exit();
-        }
+        });
     }
 
-    public synchronized Object getValue(String propertyName) throws Exception {
-        ScriptUtils.enterContext();
-        try {
-            execute();
-            Object prop = get(propertyName, this);
-            if (prop instanceof Undefined || prop == Scriptable.NOT_FOUND) {
-                return Undefined.instance;
-            } else {
-                return ScriptUtils.js2Java(prop);
+    public synchronized void setValue(final String aPropertyName, final Object aValue) throws Exception {
+        ScriptUtils.inContext(new ScriptAction() {
+            @Override
+            public Object run(Context cx) throws Exception {
+                execute();
+                put(aPropertyName, ServerScriptRunner.this, ScriptUtils.javaToJS(aValue, ServerScriptRunner.this));
+                return null;
             }
-        } finally {
-            Context.exit();
-        }
+        });
     }
 
-    public synchronized void setValue(String propertyName, Object argument) throws Exception {
-        ScriptUtils.enterContext();
-        try {
-            execute();
-            put(propertyName, this, ScriptUtils.javaToJS(argument, this));
-        } finally {
-            Context.exit();
-        }
-    }
-    
     @Override
     protected void definePropertiesAndMethods() {
         super.definePropertiesAndMethods();
         defineFunctionProperties(new String[]{
-                    "getCreationSession",
-                    "getServerCore"
-                }, ServerScriptRunner.class, EMPTY);
+            "getCreationSession",
+            "getServerCore"
+        }, ServerScriptRunner.class, EMPTY);
     }
 
-    public Set<String> getFunctionsNames() {
-        ScriptUtils.enterContext();
-        try {
-            Set<String> names = new HashSet<>();
-            for (Object key : getIds()) {
-                if (key instanceof String && get(key) instanceof SecureFunction) {
-                    SecureFunction f = (SecureFunction) get(key);
-                    Function uf = f.unwrap();
-                    if (!(uf instanceof FunctionObject)) {
-                        names.add((String) key);
+    public Set<String> getFunctionsNames() throws Exception {
+        return ScriptUtils.inContext(new ScriptAction() {
+            @Override
+            public Set<String> run(Context cx) throws Exception {
+                Set<String> names = new HashSet<>();
+                for (Object key : getIds()) {
+                    if (key instanceof String && get(key) instanceof SecureFunction) {
+                        SecureFunction f = (SecureFunction) get(key);
+                        Function uf = f.unwrap();
+                        if (!(uf instanceof FunctionObject)) {
+                            names.add((String) key);
+                        }
                     }
                 }
+                return names;
             }
-            return names;
-        } finally {
-            Context.exit();
-        }
+        });
     }
 
     public void destroy() {

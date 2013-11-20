@@ -4,7 +4,7 @@
  */
 package com.eas.server;
 
-import com.eas.client.DatabasesClient;
+import com.eas.client.ScriptedDatabasesClient;
 import com.eas.client.settings.DbConnectionSettings;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
@@ -39,7 +39,7 @@ public class PlatypusServerTest {
         settings.setUser(login);
         settings.setPassword(passwd);
         SSLContext sslContext = ServerMain.createSSLContext();
-        server = new PlatypusServer(new DatabasesClient(settings), sslContext, new InetSocketAddress[]{new InetSocketAddress("localhost", TEST_PORT)}, new HashMap<Integer, String>(), null, null, null, new HashSet<String>(), null);
+        server = new PlatypusServer(new ScriptedDatabasesClient(settings), sslContext, new InetSocketAddress[]{new InetSocketAddress("localhost", TEST_PORT)}, new HashMap<Integer, String>(), null, null, null, new HashSet<String>(), null);
         server.start();
     }
 

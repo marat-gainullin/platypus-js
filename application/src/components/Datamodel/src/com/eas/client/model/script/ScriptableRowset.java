@@ -247,15 +247,14 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     }
 
     /*
-    protected void checkModelExecuted() throws Exception {
-        if (entity != null) {
-            if (!entity.getModel().isRuntime() && !(entity instanceof ApplicationParametersEntity)) {
-                entity.getModel().setRuntime(true);
-            }
-        }
-    }
-    */ 
-
+     protected void checkModelExecuted() throws Exception {
+     if (entity != null) {
+     if (!entity.getModel().isRuntime() && !(entity instanceof ApplicationParametersEntity)) {
+     entity.getModel().setRuntime(true);
+     }
+     }
+     }
+     */
     protected void checkRowset() throws Exception {
         if (entity != null) {
             //checkModelExecuted();
@@ -1302,10 +1301,10 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     }
 
     @ScriptFunction(jsDoc = "Refreshes rowset only if any of its parameters has changed with callback.")
-    public void execute(Function aOnSuccess, Function aOnFailure) throws Exception {
+    public void execute(final Function aOnSuccess, final Function aOnFailure) throws Exception {
         if (entity != null) {
             assert tag instanceof RowsetHostObject;
-            RowsetHostObject<E> rowsetFacade = (RowsetHostObject<E>) tag;
+            final RowsetHostObject<E> rowsetFacade = (RowsetHostObject<E>) tag;
             try {
                 //checkModelExecuted();
                 if (entity.getQuery().isManual()) {
@@ -1321,20 +1320,15 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
                 if (aOnSuccess != null) {
                     entity.executeScriptEvent(aOnSuccess, new ScriptSourcedEvent(rowsetFacade));
                 }
-            } catch (Exception ex) {
+            } catch (final Exception ex) {
                 if (aOnFailure != null) {
-                    Context cx = Context.getCurrentContext();
-                    boolean wasContext = cx != null;
-                    if (!wasContext) {
-                        cx = ScriptUtils.enterContext();
-                    }
-                    try {
-                        aOnFailure.call(cx, rowsetFacade, rowsetFacade, new Object[]{ex.getMessage()});
-                    } finally {
-                        if (!wasContext) {
-                            Context.exit();
+                    ScriptUtils.inContext(new ScriptUtils.ScriptAction() {
+                        @Override
+                        public Object run(Context cx) throws Exception {
+                            aOnFailure.call(cx, rowsetFacade, rowsetFacade, new Object[]{ex.getMessage()});
+                            return null;
                         }
-                    }
+                    });
                 } else {
                     throw ex;
                 }
@@ -1410,10 +1404,10 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     }
 
     @ScriptFunction(jsDoc = "Requeries rowset's data with a callbacks.")
-    public void requery(Function aOnSuccess, Function aOnFailure) throws Exception {
+    public void requery(final Function aOnSuccess, final Function aOnFailure) throws Exception {
         if (entity != null) {
             assert tag instanceof RowsetHostObject;
-            RowsetHostObject<E> rowsetFacade = (RowsetHostObject<E>) tag;
+            final RowsetHostObject<E> rowsetFacade = (RowsetHostObject<E>) tag;
             try {
                 //checkModelExecuted();
                 if (entity.getQuery().isManual()) {
@@ -1429,20 +1423,15 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
                 if (aOnSuccess != null) {
                     entity.executeScriptEvent(aOnSuccess, new ScriptSourcedEvent(rowsetFacade));
                 }
-            } catch (Exception ex) {
+            } catch (final Exception ex) {
                 if (aOnFailure != null) {
-                    Context cx = Context.getCurrentContext();
-                    boolean wasContext = cx != null;
-                    if (!wasContext) {
-                        cx = ScriptUtils.enterContext();
-                    }
-                    try {
-                        aOnFailure.call(cx, rowsetFacade, rowsetFacade, new Object[]{ex.getMessage()});
-                    } finally {
-                        if (!wasContext) {
-                            Context.exit();
+                    ScriptUtils.inContext(new ScriptUtils.ScriptAction() {
+                        @Override
+                        public Object run(Context cx) throws Exception {
+                            aOnFailure.call(cx, rowsetFacade, rowsetFacade, new Object[]{ex.getMessage()});
+                            return null;
                         }
-                    }
+                    });
                 } else {
                     throw ex;
                 }

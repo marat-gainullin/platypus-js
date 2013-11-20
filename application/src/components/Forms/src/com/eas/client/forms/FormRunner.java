@@ -27,6 +27,7 @@ import com.eas.resources.images.IconCache;
 import com.eas.script.NativeJavaHostObject;
 import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptUtils;
+import com.eas.script.ScriptUtils.ScriptAction;
 import com.eas.util.exceptions.ClosedManageException;
 import java.awt.*;
 import java.awt.Dialog.ModalityType;
@@ -86,16 +87,21 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
 
     protected static void initializePlatypusGuiLibScope() throws IOException {
         if (platypusGuiLibScope == null) {
-            Context context = ScriptUtils.enterContext();
             try {
-                // Fix from rsp! Let's initialize library functions
-                // in top-level scope.
-                //platypusGuiLibScope = (ScriptableObject) context.newObject(platypusStandardLibScope);
-                //platypusGuiLibScope.setPrototype(platypusStandardLibScope);
-                platypusGuiLibScope = platypusStandardLibScope;
-                importScriptLibrary("/com/eas/client/forms/gui.js", "gui", context, platypusGuiLibScope);
-            } finally {
-                Context.exit();
+                ScriptUtils.inContext(new ScriptAction() {
+                    @Override
+                    public Object run(Context cx) throws Exception {
+                        // Fix from rsp! Let's initialize library functions
+                        // in top-level scope.
+                        //platypusGuiLibScope = (ScriptableObject) context.newObject(platypusStandardLibScope);
+                        //platypusGuiLibScope.setPrototype(platypusStandardLibScope);
+                        platypusGuiLibScope = platypusStandardLibScope;
+                        importScriptLibrary("/com/eas/client/forms/gui.js", "gui", cx, platypusGuiLibScope);
+                        return null;
+                    }
+                });
+            } catch (Exception ex) {
+                throw new IOException(ex);
             }
         }
     }
@@ -113,22 +119,16 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
 
     protected void showingFormsChanged() {
         if (onChange != null) {
-            Context cx = Context.getCurrentContext();
-            boolean wasContext = cx != null;
-            if (!wasContext) {
-                cx = ScriptUtils.enterContext();
-            }
             try {
-                onChange.call(cx, FormRunner.this, FormRunnerPrototype.getInstance().getConstructor(), new Object[]{ScriptUtils.javaToJS(new ScriptSourcedEvent(FormRunner.this), FormRunner.this)});
-            } finally {
-                if (!wasContext) {
-                    Context.exit();
-                }
-            }
-            Context.enter();
-            try {
-            } finally {
-                Context.exit();
+                ScriptUtils.inContext(new ScriptAction() {
+                    @Override
+                    public Object run(Context cx) throws Exception {
+                        onChange.call(cx, FormRunner.this, FormRunnerPrototype.getInstance().getConstructor(), new Object[]{ScriptUtils.javaToJS(new ScriptSourcedEvent(FormRunner.this), FormRunner.this)});
+                        return null;
+                    }
+                });
+            } catch (Exception ex) {
+                Logger.getLogger(FormRunner.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
@@ -310,7 +310,6 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
     public String getFormId() {
         return getApplicationElementId();
     }
-    
     private static final String FORM_KEY_JSDOC = ""
             + "/**\n"
             + "* The form key. Used to identify a form instance. Initialy set to the form's application element ID.\n"
@@ -611,11 +610,16 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
                 SwingUtilities.invokeLater(new Runnable() {
                     @Override
                     public void run() {
-                        Context cx = ScriptUtils.enterContext();
                         try {
-                            onOkModalResult.call(cx, FormRunner.this, FormRunner.this, new Object[]{selected});
-                        } finally {
-                            Context.exit();
+                            ScriptUtils.inContext(new ScriptAction() {
+                                @Override
+                                public Object run(Context cx) throws Exception {
+                                    onOkModalResult.call(cx, FormRunner.this, FormRunner.this, new Object[]{selected});
+                                    return null;
+                                }
+                            });
+                        } catch (Exception ex) {
+                            Logger.getLogger(FormRunner.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     }
                 });
@@ -1241,20 +1245,21 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
         components = new HashMap<>();
         components.putAll(factory.getNonvisuals());
         components.putAll(factory.getComponents());
-        Context cx = ScriptUtils.enterContext();
-        try {
-            for (Entry<String, JComponent> entry : components.entrySet()) {
-                if (form != entry.getValue()) {
-                    defineProperty(entry.getKey(), publishComponent(entry.getValue(), this, factory.getControlDesignInfos().get(entry.getKey())), READONLY);
+        ScriptUtils.inContext(new ScriptAction() {
+            @Override
+            public Object run(Context cx) throws Exception {
+                for (Entry<String, JComponent> entry : components.entrySet()) {
+                    if (form != entry.getValue()) {
+                        defineProperty(entry.getKey(), publishComponent(entry.getValue(), FormRunner.this, factory.getControlDesignInfos().get(entry.getKey())), READONLY);
+                    }
                 }
+                FormRunner.super.delete(VIEW_SCRIPT_NAME);
+                ControlsWrapper viewWrapper = new ControlsWrapper(form);
+                (new PanelDesignInfo()).accept(viewWrapper);
+                defineProperty(VIEW_SCRIPT_NAME, ScriptUtils.javaToJS(viewWrapper.getResult(), FormRunner.this), READONLY);
+                return null;
             }
-            super.delete(VIEW_SCRIPT_NAME);
-            ControlsWrapper viewWrapper = new ControlsWrapper(form);
-            (new PanelDesignInfo()).accept(viewWrapper);
-            defineProperty(VIEW_SCRIPT_NAME, ScriptUtils.javaToJS(viewWrapper.getResult(), this), READONLY);
-        } finally {
-            Context.exit();
-        }
+        });
         return new Runnable() {
             @Override
             public void run() {
@@ -1343,23 +1348,17 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
     }
 
     @Override
-    public Object executeEvent(Function aHandler, Scriptable aEventThis, Object anEvent) {
+    public Object executeEvent(final Function aHandler, final Scriptable aEventThis, final Object anEvent) {
         // The components map must be filled before any event can occur.
         if (components != null && aHandler != null) {
             try {
-                Context cx = Context.getCurrentContext();
-                boolean wasContext = cx != null;
-                if (!wasContext) {
-                    cx = ScriptUtils.enterContext();
-                }
-                try {
-                    return ScriptUtils.js2Java(aHandler.call(cx, this, aEventThis, new Object[]{anEvent}));
-                } finally {
-                    if (!wasContext) {
-                        Context.exit();
-                    }            
-                }
-            } catch (Exception ex) {                                         
+                return ScriptUtils.inContext(new ScriptAction() {
+                    @Override
+                    public Object run(Context cx) throws Exception {
+                        return ScriptUtils.js2Java(aHandler.call(cx, FormRunner.this, aEventThis, new Object[]{anEvent}));
+                    }
+                });
+            } catch (Exception ex) {
                 Logger.getLogger(FormRunner.class.getName()).log(Level.SEVERE, ex.getMessage());
             }
         }

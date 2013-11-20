@@ -114,32 +114,26 @@ public class ServerScriptProxy extends ScriptableObject {
                         @Override
                         public void run() {
                             try {
-                                Object result = platypusClient.executeServerModuleMethod(moduleName, methodName, args);
-                                Context cx = Context.getCurrentContext();
-                                boolean wasContext = cx != null;
-                                if (!wasContext) {
-                                    cx = ScriptUtils.enterContext();
-                                }
-                                try {
-                                    successCallback.call(cx, StubFunction.this, StubFunction.this, new Object[]{result});
-                                } finally {
-                                    if (!wasContext) {
-                                        Context.exit();
+                                final Object result = platypusClient.executeServerModuleMethod(moduleName, methodName, args);
+                                ScriptUtils.inContext(new ScriptUtils.ScriptAction() {
+                                    @Override
+                                    public Object run(Context cx) throws Exception {
+                                        successCallback.call(cx, StubFunction.this, StubFunction.this, new Object[]{result});
+                                        return null;
                                     }
-                                }
-                            } catch (Exception ex) {
+                                });
+                            } catch (final Exception ex) {
                                 if (failureCallback != null) {
-                                    Context cx = Context.getCurrentContext();
-                                    boolean wasContext = cx != null;
-                                    if (!wasContext) {
-                                        cx = ScriptUtils.enterContext();
-                                    }
                                     try {
-                                        failureCallback.call(cx, StubFunction.this, StubFunction.this, new Object[]{ex.getMessage()});
-                                    } finally {
-                                        if (!wasContext) {
-                                            Context.exit();
-                                        }
+                                        ScriptUtils.inContext(new ScriptUtils.ScriptAction() {
+                                            @Override
+                                            public Object run(Context cx) throws Exception {
+                                                failureCallback.call(cx, StubFunction.this, StubFunction.this, new Object[]{ex.getMessage()});
+                                                return null;
+                                            }
+                                        });
+                                    } catch (Exception ex1) {
+                                        Logger.getLogger(ServerScriptProxy.class.getName()).log(Level.SEVERE, null, ex1);
                                     }
                                 }
                                 Logger.getLogger(ServerScriptProxy.class.getName()).log(Level.SEVERE, null, ex);

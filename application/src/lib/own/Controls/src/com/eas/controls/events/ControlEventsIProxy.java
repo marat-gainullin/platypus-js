@@ -6,6 +6,7 @@ package com.eas.controls.events;
 
 import com.eas.controls.FormEventsExecutor;
 import com.eas.script.ScriptUtils;
+import com.eas.script.ScriptUtils.ScriptAction;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.event.*;
@@ -91,32 +92,31 @@ public class ControlEventsIProxy implements MouseListener,
         return handlers;
     }
 
-    protected Object executeEvent(int aEventId, Object anEvent) {
-        Context cx = Context.getCurrentContext();
-        boolean wasContext = cx != null;
-        if (!wasContext) {
-            cx = ScriptUtils.enterContext();
-        }
+    protected Object executeEvent(final int aEventId, final Object anEvent) {
         try {
-            Function handler = handlers.get(aEventId);
-            if (handler != null) {
-                if (executor != null) {
-                    return executor.executeEvent(handler, eventThis != null ? eventThis : executor, ScriptUtils.javaToJS(anEvent, handler));
-                } else {
-                    FormEventsExecutor fExecutor = lookupExecutor(handler);
-                    if (fExecutor != null) {
-                        return fExecutor.executeEvent(handler, eventThis != null ? eventThis : fExecutor, ScriptUtils.javaToJS(anEvent, handler));
+            return ScriptUtils.inContext(new ScriptAction() {
+                @Override
+                public Object run(Context cx) throws Exception {
+                    Function handler = handlers.get(aEventId);
+                    if (handler != null) {
+                        if (executor != null) {
+                            return executor.executeEvent(handler, eventThis != null ? eventThis : executor, ScriptUtils.javaToJS(anEvent, handler));
+                        } else {
+                            FormEventsExecutor fExecutor = lookupExecutor(handler);
+                            if (fExecutor != null) {
+                                return fExecutor.executeEvent(handler, eventThis != null ? eventThis : fExecutor, ScriptUtils.javaToJS(anEvent, handler));
+                            } else {
+                                return null;
+                            }
+                        }
                     } else {
                         return null;
                     }
                 }
-            } else {
-                return null;
-            }
-        } finally {
-            if (!wasContext) {
-                Context.exit();
-            }
+            });
+        } catch (Exception ex) {
+            Logger.getLogger(ControlEventsIProxy.class.getName()).log(Level.SEVERE, null, ex);
+            return null;
         }
     }
 

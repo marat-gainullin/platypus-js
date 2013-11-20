@@ -300,15 +300,6 @@ public class ScriptUtils {
         return false;
     }
 
-    /**
-     * TODO: eliminate this method.
-     *
-     * @return
-     */
-    public static Context enterContext() {
-        return Context.enter();
-    }
-
     public interface ScriptAction {
 
         public <T> T run(Context cx) throws Exception;
@@ -319,7 +310,7 @@ public class ScriptUtils {
             Context cx = Context.getCurrentContext();
             boolean wasContext = cx != null;
             if (!wasContext) {
-                cx = enterContext();
+                cx = Context.enter();
             }
             try {
                 return aAction.<T>run(cx);

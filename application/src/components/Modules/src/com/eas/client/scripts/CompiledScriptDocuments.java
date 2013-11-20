@@ -33,7 +33,7 @@ public abstract class CompiledScriptDocuments {
     public synchronized void clearCompiledScriptDocuments() {
         compiledDocuments.clear();
     }
-    
+
     public synchronized ScriptDocument compileScriptDocument(String aAppElementId) throws Exception {
         ActualCacheEntry<ScriptDocument> scriptDocEntry = compiledDocuments.get(aAppElementId);
         ScriptDocument scriptDoc = scriptDocEntry != null ? scriptDocEntry.getValue() : null;
@@ -43,24 +43,26 @@ public abstract class CompiledScriptDocuments {
             client.getAppCache().remove(aAppElementId);
         }
         if (scriptDoc == null) {
-            ApplicationElement appElement = client.getAppCache().get(aAppElementId);
+            final ApplicationElement appElement = client.getAppCache().get(aAppElementId);
             if (appElement != null) {
-                scriptDoc = appElement2Document(appElement);
-                Context cx = ScriptUtils.enterContext();
-                try {
-                    assert appElement.getId() != null : "Application element with null id occured!";
-                    /**
-                     * TODO: check update of rhino. May be it would be able to
-                     * use bytecode generation. if (currentContext.getDebugger()
-                     * == null) { currentContext.setOptimizationLevel(5); }else
-                     * currentContext.setOptimizationLevel(-1);
-                     */
-                    cx.setOptimizationLevel(-1);
-                    Function compiledFunc = cx.compileFunction(ScriptRunner.checkStandardObjects(cx), "function "+appElement.getId()+"(){"+scriptDoc.getScriptSource()+"; this[\""+ScriptUtils.HANDLERS_PROP_NAME+"\"]="+scriptDoc.generateTopLevelNamedFunctionsContainer()+";}", appElement.getId(), 0, null);
-                    scriptDoc.setFunction(compiledFunc);
-                } finally {
-                    Context.exit();
-                }
+                scriptDoc = ScriptUtils.inContext(new ScriptUtils.ScriptAction() {
+                    @Override
+                    public ScriptDocument run(Context cx) throws Exception {
+                        ScriptDocument lscriptDoc = appElement2Document(appElement);
+                        assert appElement.getId() != null : "Application element with null id occured!";
+                        /**
+                         * TODO: check update of rhino. May be it would be able
+                         * to use bytecode generation. if
+                         * (currentContext.getDebugger() == null) {
+                         * currentContext.setOptimizationLevel(5); }else
+                         * currentContext.setOptimizationLevel(-1);
+                         */
+                        cx.setOptimizationLevel(-1);
+                        Function compiledFunc = cx.compileFunction(ScriptRunner.checkStandardObjects(cx), "function " + appElement.getId() + "(){" + lscriptDoc.getScriptSource() + "; this[\"" + ScriptUtils.HANDLERS_PROP_NAME + "\"]=" + lscriptDoc.generateTopLevelNamedFunctionsContainer() + ";}", appElement.getId(), 0, null);
+                        lscriptDoc.setFunction(compiledFunc);
+                        return lscriptDoc;
+                    }
+                });
                 compiledDocuments.put(aAppElementId, new ActualCacheEntry<>(scriptDoc, appElement.getTxtContentLength(), appElement.getTxtCrc32()));
             }
         }

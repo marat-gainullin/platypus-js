@@ -60,6 +60,7 @@ public class ReportRunner extends ScriptRunner {
         }
         return null;
     }
+
     @Override
     protected void shrink() throws Exception {
         template = null;
@@ -124,20 +125,15 @@ public class ReportRunner extends ScriptRunner {
     /**
      * Invokes handler for the Report pre-render event
      */
-    private void invokeOnBeforeRender() {
-        Context cx = Context.getCurrentContext();
-        boolean wasContext = cx != null;
-        if (!wasContext) {
-            cx = ScriptUtils.enterContext();
-        }
-        try {
-            if (onBeforeRender != null) {
-                onBeforeRender.call(cx, this, this, new Object[]{Context.javaToJS(new ScriptSourcedEvent(this), this)});
+    private void invokeOnBeforeRender() throws Exception {
+        ScriptUtils.inContext(new ScriptUtils.ScriptAction() {
+            @Override
+            public Object run(Context cx) throws Exception {
+                if (onBeforeRender != null) {
+                    onBeforeRender.call(cx, ReportRunner.this, ReportRunner.this, new Object[]{Context.javaToJS(new ScriptSourcedEvent(ReportRunner.this), ReportRunner.this)});
+                }
+                return null;
             }
-        } finally {
-            if (!wasContext) {
-                Context.exit();
-            }
-        }
+        });
     }
 }

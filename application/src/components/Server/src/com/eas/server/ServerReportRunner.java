@@ -26,8 +26,8 @@ public class ServerReportRunner extends ServerScriptRunner {
     private byte[] template;
     private Function onBeforRender;
     private String format;
-    
-     public ServerReportRunner(PlatypusServerCore aServerCore, Session aCreationSession, String aModuleId, Scriptable aScope, PrincipalHost aPrincipalHost, CompiledScriptDocumentsHost aCompiledScriptDocumentsHost, Object[] args) throws Exception {
+
+    public ServerReportRunner(PlatypusServerCore aServerCore, Session aCreationSession, String aModuleId, Scriptable aScope, PrincipalHost aPrincipalHost, CompiledScriptDocumentsHost aCompiledScriptDocumentsHost, Object[] args) throws Exception {
         super(aServerCore, aCreationSession, aModuleId, aScope, aPrincipalHost, aCompiledScriptDocumentsHost, args);
         assert aCompiledScriptDocumentsHost != null;
         ScriptDocument scriptDoc = aCompiledScriptDocumentsHost.getDocuments().compileScriptDocument(appElementId);
@@ -38,12 +38,12 @@ public class ServerReportRunner extends ServerScriptRunner {
             }
         }
     }
-    
+
     @Override
     public synchronized Object executeMethod(String methodName, Object[] arguments) throws Exception {
         throw new AccessException("Could not execute method \"" + methodName + "()\" in report.");
-    } 
-     
+    }
+
     @ScriptFunction
     public Function getOnBeforeRender() {
         return onBeforRender;
@@ -55,23 +55,23 @@ public class ServerReportRunner extends ServerScriptRunner {
     }
 
     public synchronized byte[] executeReport() throws Exception {
-        Context cx = ScriptUtils.enterContext();
-        try {
-            if (template != null) {
-                execute();
-                Function preRendreHandler = getOnBeforeRender();
-                if (preRendreHandler != null) {
-                    preRendreHandler.call(cx, this, this, new Object[]{Context.javaToJS(new ScriptSourcedEvent(this), this)});
+        return ScriptUtils.inContext(new ScriptUtils.ScriptAction() {
+            @Override
+            public byte[] run(Context cx) throws Exception {
+                if (template != null) {
+                    execute();
+                    Function preRendreHandler = getOnBeforeRender();
+                    if (preRendreHandler != null) {
+                        preRendreHandler.call(cx, ServerReportRunner.this, ServerReportRunner.this, new Object[]{Context.javaToJS(new ScriptSourcedEvent(ServerReportRunner.this), ServerReportRunner.this)});
+                    }
+                    ExcelReport er = new ExcelReport(model, ServerReportRunner.this);
+                    er.setTemplate(new CompactBlob(template));
+                    return er.create();
+                } else {
+                    return null;
                 }
-                ExcelReport er = new ExcelReport(model, this);
-                er.setTemplate(new CompactBlob(template));
-                return er.create();
-            } else {
-                return null;
             }
-        } finally {
-            Context.exit();
-        }
+        });
     }
 
     @Override
