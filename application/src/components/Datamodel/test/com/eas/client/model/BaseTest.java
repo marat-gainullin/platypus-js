@@ -10,6 +10,7 @@ import com.eas.client.model.application.ApplicationDbModel;
 import com.eas.client.model.store.XmlDom2ApplicationModel;
 import com.eas.client.settings.DbConnectionSettings;
 import com.eas.script.ScriptUtils;
+import com.eas.script.ScriptUtils.ScriptAction;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
@@ -52,16 +53,16 @@ public class BaseTest {
     public static final String RESOURCES_PREFIX = "/com/eas/client/model/resources/";
     public static final String DUMMY_HANDLER_NAME = "dummyHandler";
     public static final String MODEL_SCRIPT_SOURCE = "var t = 0; function " + DUMMY_HANDLER_NAME + "(){var yu = 75;}\n"
-            + "function "+Model.DATASOURCE_BEFORE_SCROLL_EVENT_TAG_NAME+"(){}\n"
-            + "function "+Model.DATASOURCE_BEFORE_CHANGE_EVENT_TAG_NAME+"(){}\n"
-            + "function "+Model.DATASOURCE_BEFORE_INSERT_EVENT_TAG_NAME+"(){}\n"
-            + "function "+Model.DATASOURCE_BEFORE_DELETE_EVENT_TAG_NAME+"(){}\n"
-            + "function "+Model.DATASOURCE_AFTER_SCROLL_EVENT_TAG_NAME+"(){}\n"
-            + "function "+Model.DATASOURCE_AFTER_CHANGE_EVENT_TAG_NAME+"(){}\n"
-            + "function "+Model.DATASOURCE_AFTER_INSERT_EVENT_TAG_NAME+"(){}\n"
-            + "function "+Model.DATASOURCE_AFTER_DELETE_EVENT_TAG_NAME+"(){}\n"
-            + "function "+Model.DATASOURCE_AFTER_FILTER_EVENT_TAG_NAME+"(){}\n"
-            + "function "+Model.DATASOURCE_AFTER_REQUERY_EVENT_TAG_NAME+"(){}\n";
+            + "function " + Model.DATASOURCE_BEFORE_SCROLL_EVENT_TAG_NAME + "(){}\n"
+            + "function " + Model.DATASOURCE_BEFORE_CHANGE_EVENT_TAG_NAME + "(){}\n"
+            + "function " + Model.DATASOURCE_BEFORE_INSERT_EVENT_TAG_NAME + "(){}\n"
+            + "function " + Model.DATASOURCE_BEFORE_DELETE_EVENT_TAG_NAME + "(){}\n"
+            + "function " + Model.DATASOURCE_AFTER_SCROLL_EVENT_TAG_NAME + "(){}\n"
+            + "function " + Model.DATASOURCE_AFTER_CHANGE_EVENT_TAG_NAME + "(){}\n"
+            + "function " + Model.DATASOURCE_AFTER_INSERT_EVENT_TAG_NAME + "(){}\n"
+            + "function " + Model.DATASOURCE_AFTER_DELETE_EVENT_TAG_NAME + "(){}\n"
+            + "function " + Model.DATASOURCE_AFTER_FILTER_EVENT_TAG_NAME + "(){}\n"
+            + "function " + Model.DATASOURCE_AFTER_REQUERY_EVENT_TAG_NAME + "(){}\n";
     protected static ScriptableObject dummyScriptableObject = null;
 
     public static DbClient initDevelopTestClient() throws Exception {
@@ -93,7 +94,7 @@ public class BaseTest {
         model.accept(new XmlDom2ApplicationModel(modelDoc));
         return model;
     }
-    
+
     public static ApplicationDbModel modelFromString(DbClient aClient, String sData) throws Exception {
         Document modelDoc = BaseTest.documentFromString(sData);
         ApplicationDbModel model = new ApplicationDbModel(aClient);
@@ -101,11 +102,11 @@ public class BaseTest {
         return model;
     }
 
-    public static synchronized Function getDummyHandler(String aHandlerName) {
+    public static synchronized Function getDummyHandler(String aHandlerName) throws Exception {
         return (Function) getDummyScriptableObject().get(aHandlerName, getDummyScriptableObject());
     }
 
-    public static synchronized ScriptableObject getDummyScriptableObject() {
+    public static synchronized ScriptableObject getDummyScriptableObject() throws Exception {
         if (dummyScriptableObject == null) {
             dummyScriptableObject = new ScriptableObject(ScriptUtils.getScope(), ScriptUtils.getScope()) {
                 @Override
@@ -113,14 +114,15 @@ public class BaseTest {
                     return "DummyTestScriptableObject";
                 }
             };
-            Context cx = ScriptUtils.enterContext();
-            try {
-                cx.setOptimizationLevel(-1);
-                Script lScript = cx.compileString(MODEL_SCRIPT_SOURCE, "dummyTestScript", 0, null);
-                lScript.exec(cx, dummyScriptableObject);
-            } finally {
-                Context.exit();
-            }
+            ScriptUtils.inContext(new ScriptAction() {
+                @Override
+                public Object run(Context cx) throws Exception {
+                    cx.setOptimizationLevel(-1);
+                    Script lScript = cx.compileString(MODEL_SCRIPT_SOURCE, "dummyTestScript", 0, null);
+                    lScript.exec(cx, dummyScriptableObject);
+                    return null;
+                }
+            });
         }
         return dummyScriptableObject;
     }

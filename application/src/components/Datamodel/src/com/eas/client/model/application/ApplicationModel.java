@@ -125,6 +125,34 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         return res;
     }
 
+    @Override
+    protected void resolveRelation(Relation<E> aRelation, Model<E, P, C, Q> aModel) throws Exception {
+        super.resolveRelation(aRelation, aModel);
+        if (aRelation instanceof ReferenceRelation<?>) {
+            if (aRelation.getLeftField() != null && !aRelation.getLeftField().isFk()) {
+                aRelation.setLeftField(null);
+            }
+            if (aRelation.getRightField() != null && !aRelation.getRightField().isPk()) {
+                aRelation.setRightField(null);
+            }
+            if (aRelation.getLeftField() != null
+                    && aRelation.getLeftField().isFk()
+                    && aRelation.getRightField() != null
+                    && aRelation.getRightField().isPk()) {
+                String leftTableName = aRelation.getLeftField().getFk().getReferee().getTable();
+                String leftFieldName = aRelation.getLeftField().getFk().getReferee().getField();
+                String rightTableName = aRelation.getRightField().getTableName();
+                String rightFieldName = aRelation.getRightField().getName();
+                boolean tablesSame = (leftTableName == null ? rightTableName == null : leftTableName.equalsIgnoreCase(rightTableName));
+                boolean fieldsSame = (leftFieldName == null ? rightFieldName == null : leftFieldName.equalsIgnoreCase(rightFieldName));
+                if (!tablesSame || !fieldsSame) {
+                    aRelation.setLeftField(null);
+                    aRelation.setRightField(null);
+                }
+            }
+        }
+    }
+
     public void resolveHandlers() {
         if (scriptThis != null) {
             for (E ent : entities.values()) {
@@ -276,7 +304,6 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
     public final boolean save() throws Exception {
         return save(null);
     }
-
     private static final String SAVE_JSDOC = ""
             + "/**\n"
             + "* Saves model data changes.\n"
@@ -284,7 +311,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
             + "* If an application needs to abort futher attempts and discard model data changes, use <code>model.revert()</code>.\n"
             + "* @param callback the function to be envoked after the data changes saved (optional)\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = SAVE_JSDOC, params = {"callback"})
     public boolean save(final Function aCallback) throws Exception {
         if (commitable) {
@@ -307,30 +334,27 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         }
         return true;
     }
-
     private static final String COMMIT_JSDOC = ""
             + "/**\n"
             + "* Commits model data changes.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = COMMIT_JSDOC)
     public abstract int commit() throws Exception;
-
     private static final String REVERT_JSDOC = ""
             + "/**\n"
             + "* Drops model data changes.\n"
             + "* After this method call, save() method have no changes to be saved, but still attempts to commit.\n"
             + "* Call <code>model.save()</code> on commitable and unchanged model nevertheless leads to a commit."
             + "*/";
-    
+
     @ScriptFunction(jsDoc = REVERT_JSDOC)
     public abstract void revert() throws Exception;
-
     private static final String SAVED_JSDOC = ""
             + "/**\n"
             + "* Notifies the model what it is saved.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = SAVED_JSDOC)
     public abstract void saved() throws Exception;
 
@@ -351,14 +375,13 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
     public final void requery() throws Exception {
         requery(null, null);
     }
-
     private static final String REQUERY_JSDOC = ""
             + "/**\n"
             + "* Requeries the model data. Forses the model data refresh, no matter if its parameters has changed or not.\n"
             + "* @param onSuccessCallback the handler function for refresh data on success event (optional)\n"
             + "* @param onFailureCallback the handler function for refresh data on failure event (optional)\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = REQUERY_JSDOC, params = {"onSuccessCallback", "onFailureCallback"})
     public void requery(final Function aOnSuccess, final Function aOnFailure) throws Exception {
         try {
@@ -394,14 +417,13 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
     public void execute(Function aOnSuccess) throws Exception {
         execute(aOnSuccess, null);
     }
-    
     private static final String EXECUTE_JSDOC = ""
             + "/**\n"
             + "* Refreshes the model, only if any of its parameters has changed.\n"
             + "* @param onSuccessCallback the handler function for refresh data on success event (optional)\n"
             + "* @param onFailureCallback the handler function for refresh data on failure event (optional)\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = EXECUTE_JSDOC, params = {"onSuccessCallback", "onFailureCallback"})
     public void execute(final Function aOnSuccess, final Function aOnFailure) throws Exception {
         try {

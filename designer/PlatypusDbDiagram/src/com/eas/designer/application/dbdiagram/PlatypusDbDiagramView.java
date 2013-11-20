@@ -208,6 +208,9 @@ public class PlatypusDbDiagramView extends CloneableTopComponent {
         setLayout(new BorderLayout());
         if (dataObject.getProject().getClient() != null) {
             if (dataObject.isModelValid()) {
+                if (editor != null) {
+                    editor.setModel(null);
+                }
                 editor = new DbSchemeEditorView(dataObject.getModel(),
                         new TablesSelector(dataObject.getPrimaryFile(), dataObject.getClient(),
                         NbBundle.getMessage(PlatypusDbDiagramView.class, "HINT_PlatypusDbDiagramTopComponent", dataObject.getPrimaryFile().getName()), PlatypusDbDiagramView.this),

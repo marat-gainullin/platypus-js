@@ -27,7 +27,6 @@ import com.eas.designer.application.query.lexer.SqlLanguageHierarchy;
 import com.eas.designer.application.query.nodes.QueryRootNode;
 import com.eas.designer.datamodel.nodes.EntityNode;
 import com.eas.designer.datamodel.nodes.FieldNode;
-import com.eas.designer.explorer.PlatypusDataObject;
 import com.eas.designer.explorer.model.windows.ModelInspector;
 import com.eas.designer.explorer.model.windows.QueriesDragHandler;
 import com.eas.designer.explorer.model.windows.QueryDocumentJumper;
@@ -266,6 +265,9 @@ public class PlatypusQueryView extends CloneableTopComponent {
         pnlFromNWhere.removeAll();
         if (dataObject.getClient() != null) {
             if (dataObject.isModelValid()) {
+                if (modelView != null) {
+                    modelView.setModel(null);
+                }
                 modelView = new QueryModelView(dataObject.getModel(), tablesSelector, new QueriesSelector(dataObject.getAppRoot()));
                 modelView.addEntityViewDoubleClickListener(new QueryDocumentJumper<QueryEntity>(dataObject.getProject()));
                 TransferHandler modelViewOriginalTrnadferHandler = modelView.getTransferHandler();

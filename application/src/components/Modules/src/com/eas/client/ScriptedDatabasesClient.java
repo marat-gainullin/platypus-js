@@ -56,17 +56,9 @@ public class ScriptedDatabasesClient extends DatabasesClient {
                             public boolean isPublicAccess() {
                                 return true;
                             }
-                            
                         };
-                        Scriptable scope = ScriptRunner.checkStandardObjects(cx);
-                        Object oConstructor = scope.get(aQueryId, scope);
-                        if (oConstructor == Scriptable.NOT_FOUND) {
-                            oConstructor = ScriptUtils.getScope().get(aQueryId, ScriptUtils.getScope());
-                        }
-                        if (oConstructor instanceof Function) {
-                            Function fConstructor = (Function) oConstructor;
-                            Scriptable schemaContainer = fConstructor.construct(cx, scope, new Object[]{});
-                            assert schemaContainer instanceof ScriptRunner : "Datasource class must be a platypus module";
+                        ScriptRunner schemaContainer = createModule(cx, aQueryId);
+                        if (schemaContainer != null) {
                             Fields fields = new Fields();
                             query.setFields(fields);
                             query.setEntityId(aQueryId);
@@ -178,16 +170,18 @@ public class ScriptedDatabasesClient extends DatabasesClient {
     }
 
     /**
-     * Adds transaction validator module.
-     * Validator modules are used in commit to verify transaction changes log.
-     * They mey consume particuled changes and optionally send them to custom data store or a service.
-     * If validator module detects an errorneous data changes, than it should thor ab exception.
-     * @param aModuleId 
+     * Adds transaction validator module. Validator modules are used in commit
+     * to verify transaction changes log. They mey consume particuled changes
+     * and optionally send them to custom data store or a service. If validator
+     * module detects an errorneous data changes, than it should thor ab
+     * exception.
+     *
+     * @param aModuleId
      */
-    public void addValidator(String aModuleId){
+    public void addValidator(String aModuleId) {
         validators.add(aModuleId);
     }
-    
+
     @Override
     protected void clearQueries(String aDbId) throws Exception {
         super.clearQueries(aDbId);
@@ -211,21 +205,30 @@ public class ScriptedDatabasesClient extends DatabasesClient {
         return query;
     }
 
+    protected ScriptRunner createModule(Context cx, String aModuleName) throws Exception {
+        Scriptable scope = ScriptRunner.checkStandardObjects(cx);
+        Object oConstructor = scope.get(aModuleName, scope);
+        if (oConstructor == Scriptable.NOT_FOUND) {
+            oConstructor = ScriptUtils.getScope().get(aModuleName, ScriptUtils.getScope());
+        }
+        if (oConstructor instanceof Function) {
+            Function fConstructor = (Function) oConstructor;
+            Scriptable created = fConstructor.construct(cx, scope, new Object[]{});
+            assert created instanceof ScriptRunner : "Datasource or validator class must be a platypus module";
+            return (ScriptRunner) created;
+        } else {
+            return null;
+        }
+    }
+
     @Override
     public FlowProvider createFlowProvider(String aDbId, final String aSessionId, final String aEntityId, String aSqlClause, final Fields aExpectedFields, Set<String> aReadRoles, Set<String> aWriteRoles) throws Exception {
         if (JAVASCRIPT_QUERY_CONTENTS.equals(aSqlClause)) {
             return ScriptUtils.inContext(new ScriptAction() {
                 @Override
                 public FlowProvider run(Context cx) throws Exception {
-                    Scriptable scope = ScriptRunner.checkStandardObjects(cx);
-                    Object oConstructor = scope.get(aEntityId, scope);
-                    if (oConstructor == Scriptable.NOT_FOUND) {
-                        oConstructor = ScriptUtils.getScope().get(aEntityId, ScriptUtils.getScope());
-                    }
-                    if (oConstructor instanceof Function) {
-                        Function fConstructor = (Function) oConstructor;
-                        Scriptable dataFeeder = fConstructor.construct(cx, scope, new Object[]{});
-                        assert dataFeeder instanceof ScriptRunner : "Datasource class must be a platypus module";
+                    ScriptRunner dataFeeder = createModule(cx, aEntityId);
+                    if (dataFeeder != null) {
                         return new PlatypusScriptedFlowProvider(ScriptedDatabasesClient.this, aExpectedFields, (ScriptRunner) dataFeeder, aSessionId);
                     } else {
                         throw new IllegalStateException(" datasource module: " + aEntityId + " not found");
@@ -242,19 +245,13 @@ public class ScriptedDatabasesClient extends DatabasesClient {
         ScriptUtils.inContext(new ScriptAction() {
             @Override
             public Object run(Context cx) throws Exception {
-                Scriptable scope = ScriptRunner.checkStandardObjects(cx);
                 for (String validatorName : validators) {
-                    Object oConstructor = scope.get(validatorName, scope);
-                    if (oConstructor == Scriptable.NOT_FOUND) {
-                        oConstructor = ScriptUtils.getScope().get(validatorName, ScriptUtils.getScope());
-                    }
-                    if (oConstructor instanceof Function) {
-                        Function fConstructor = (Function) oConstructor;
-                        Scriptable validator = fConstructor.construct(cx, scope, new Object[]{});
+                    ScriptRunner validator = createModule(cx, validatorName);
+                    if (validator != null) {
                         Object oValidate = validator.get("validate", validator);
                         if (oValidate instanceof Function) {
                             Function fValidate = (Function) oValidate;
-                            Object oResult = fValidate.call(cx, scope, validator, new Object[]{aSessionId, aDatasourceId, Context.javaToJS(aLog.toArray(), scope)});
+                            Object oResult = fValidate.call(cx, validator.getParentScope(), validator, new Object[]{aSessionId, aDatasourceId, Context.javaToJS(aLog.toArray(), validator.getParentScope())});
                             if (oResult != null && oResult != Context.getUndefinedValue() && Boolean.FALSE.equals(Context.toBoolean(oResult))) {
                                 break;
                             }

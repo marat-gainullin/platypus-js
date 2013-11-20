@@ -932,10 +932,13 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
     }
 
     public void setModel(M aModel) {
-        if (aModel != model) {
+        if (model != aModel) {
             try {
                 if (model != null) {
                     model.removeEditingListener(modelListener);
+                    for (Relation<E> rel : model.getRelations()) {
+                        rel.getChangeSupport().removePropertyChangeListener(relationPolylinePropagator);
+                    }
                 }
                 model = aModel;
                 recreateEntityViews();

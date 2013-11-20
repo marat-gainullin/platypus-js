@@ -185,14 +185,17 @@ public class ApplicationModelView extends ModelView<ApplicationDbEntity, Applica
                 for (Field field : fields.getForeinKeys()) {
                     assert field.getFk() != null;
                     String tableName = field.getFk().getReferee().getTable();
+                    String fieldName = field.getFk().getReferee().getField();
                     Set<EntityFieldRef<ApplicationDbEntity>> pks = pksByTable.get(tableName);
                     if (pks != null) {
                         for (EntityFieldRef<ApplicationDbEntity> pk : pks) {
-                            ReferenceRelation<ApplicationDbEntity> relation = new ReferenceRelation<>(entity, field, pk.entity, pk.field);
-                            String relId = generateRelationId(relation);
-                            if (!alreadyRels.contains(relId)) {
-                                alreadyRels.add(relId);
-                                aTask.run(relation);
+                            if (pk.field.getName().equalsIgnoreCase(fieldName)) {
+                                ReferenceRelation<ApplicationDbEntity> relation = new ReferenceRelation<>(entity, field, pk.entity, pk.field);
+                                String relId = generateRelationId(relation);
+                                if (!alreadyRels.contains(relId)) {
+                                    alreadyRels.add(relId);
+                                    aTask.run(relation);
+                                }
                             }
                         }
                     }
@@ -273,6 +276,11 @@ public class ApplicationModelView extends ModelView<ApplicationDbEntity, Applica
 
     @Override
     public void setModel(ApplicationDbModel aModel) {
+        if (model != null) {
+            for (ReferenceRelation<ApplicationDbEntity> rel : model.getReferenceRelations()) {
+                rel.getChangeSupport().removePropertyChangeListener(relationPolylinePropagator);
+            }
+        }
         super.setModel(aModel); //To change body of generated methods, choose Tools | Templates.
         if (model != null) {
             for (ReferenceRelation<ApplicationDbEntity> rel : model.getReferenceRelations()) {
