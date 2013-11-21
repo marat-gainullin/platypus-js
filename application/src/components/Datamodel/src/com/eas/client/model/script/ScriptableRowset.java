@@ -1775,7 +1775,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
 
     private static final String ON_CHANGED_JSDOC = ""
             + "/**\n"
-            + "* The handler funciton for the event occured after the entity data change.\n"
+            + "* The handler function for the event occured after the entity data change.\n"
             + "*/";
     
     @ScriptFunction(jsDoc = ON_CHANGED_JSDOC)
@@ -1790,7 +1790,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
 
     private static final String ON_DELETED_JSDOC = ""
             + "/**\n"
-            + "* The handler funciton for the event occured after an entity row has been deleted.\n"
+            + "* The handler function for the event occured after an entity row has been deleted.\n"
             + "*/";
     
     @ScriptFunction(jsDoc = ON_DELETED_JSDOC)
@@ -1805,7 +1805,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
 
     private static final String ON_INSERTED_JSDOC = ""
             + "/**\n"
-            + "* The handler funciton for the event occured after an entity row has been inserted.\n"
+            + "* The handler function for the event occured after an entity row has been inserted.\n"
             + "*/";
     
     @ScriptFunction(jsDoc = ON_INSERTED_JSDOC)
@@ -1820,7 +1820,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
 
     private static final String ON_SCROLLED_JSDOC = ""
             + "/**\n"
-            + "* The handler funciton for the event occured after the cursor position changed.\n"
+            + "* The handler function for the event occured after the cursor position changed.\n"
             + "*/";
     
     @ScriptFunction(jsDoc = ON_SCROLLED_JSDOC)
@@ -1835,7 +1835,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
 
     private static final String WILL_CHANGE_JSDOC = ""
             + "/**\n"
-            + "* The handler funciton for the event occured before the entity data change.\n"
+            + "* The handler function for the event occured before the entity data change.\n"
             + "*/";
     
     @ScriptFunction(jsDoc = WILL_CHANGE_JSDOC)
@@ -1850,7 +1850,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
 
     private static final String WILL_DELETE_JSDOC = ""
             + "/**\n"
-            + "* The handler funciton for the event occured before an entity row has been deleted.\n"
+            + "* The handler function for the event occured before an entity row has been deleted.\n"
             + "*/";
     
     @ScriptFunction(jsDoc = WILL_DELETE_JSDOC)
@@ -1865,7 +1865,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
 
     private static final String WILL_INSERT_JSDOC = ""
             + "/**\n"
-            + "* The handler funciton for the event occured before an entity row has been inserted.\n"
+            + "* The handler function for the event occured before an entity row has been inserted.\n"
             + "*/";
     
     @ScriptFunction(jsDoc = WILL_INSERT_JSDOC)
@@ -1880,7 +1880,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
 
     private static final String WILL_SCROLL_JSDOC = ""
             + "/**\n"
-            + "* The handler funciton for the event occured before the cursor position changed.\n"
+            + "* The handler function for the event occured before the cursor position changed.\n"
             + "*/";
     
     @ScriptFunction(jsDoc = WILL_SCROLL_JSDOC)
@@ -1895,7 +1895,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
 
     private static final String ON_FILTERED_JSDOC = ""
             + "/**\n"
-            + "* The handler funciton for the event occured after the filter have been applied to the entity.\n"
+            + "* The handler function for the event occured after the filter have been applied to the entity.\n"
             + "*/";
     
     @ScriptFunction(jsDoc = ON_FILTERED_JSDOC)
@@ -1910,7 +1910,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
 
     private static final String ON_REQUIRED_JSDOC = ""
             + "/**\n"
-            + "* The handler funciton for the event occured after the entity data have been required.\n"
+            + "* The handler function for the event occured after the entity data have been required.\n"
             + "*/";
     
     @ScriptFunction(jsDoc = ON_REQUIRED_JSDOC)
