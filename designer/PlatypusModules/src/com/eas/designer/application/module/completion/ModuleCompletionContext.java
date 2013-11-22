@@ -4,20 +4,15 @@
  */
 package com.eas.designer.application.module.completion;
 
-import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.model.application.ApplicationDbEntity;
-import com.eas.client.scripts.ScriptRunner;
 import com.eas.designer.application.indexer.AppElementInfo;
 import com.eas.designer.application.indexer.IndexerQuery;
-import com.eas.designer.application.module.PlatypusModuleDataLoader;
 import com.eas.designer.application.module.PlatypusModuleDataObject;
 import static com.eas.designer.application.module.completion.CompletionContext.MODEL_SCRIPT_NAME;
 import com.eas.designer.application.module.parser.AstUtlities;
 import com.eas.designer.explorer.utils.StringUtils;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +21,7 @@ import org.mozilla.javascript.ast.AstNode;
 import org.mozilla.javascript.ast.AstRoot;
 import org.mozilla.javascript.ast.FunctionCall;
 import org.mozilla.javascript.ast.FunctionNode;
+import org.mozilla.javascript.ast.KeywordLiteral;
 import org.mozilla.javascript.ast.Name;
 import org.mozilla.javascript.ast.NewExpression;
 import org.mozilla.javascript.ast.NodeVisitor;
@@ -77,7 +73,7 @@ public class ModuleCompletionContext extends CompletionContext {
     };
     protected PlatypusModuleDataObject dataObject;
 
-    public ModuleCompletionContext(PlatypusModuleDataObject aDataObject, Class<? extends ScriptRunner> aClass) {
+    public ModuleCompletionContext(PlatypusModuleDataObject aDataObject, Class<?> aClass) {
         super(aClass);
         dataObject = aDataObject;
     }
@@ -88,13 +84,17 @@ public class ModuleCompletionContext extends CompletionContext {
 
     @Override
     public void applyCompletionItems(JsCompletionProvider.CompletionPoint point, int offset, CompletionResultSet resultSet) throws Exception {
-        JsCodeCompletionScopeInfo completionScopeInfo = getCompletionScopeInfo(offset, point.filter);
+        JsCodeCompletionScopeInfo completionScopeInfo = getCompletionScopeInfo(dataObject, offset, point.filter);
         fillJsEntities(completionScopeInfo, point, resultSet);
-        if (completionScopeInfo.mode == CompletionMode.VARIABLES_AND_FUNCTIONS) {
-            fillVariablesAndFunctions(point, resultSet);
-        } else if (completionScopeInfo.mode == CompletionMode.CONSTRUCTORS) {
+//        if (completionScopeInfo.mode == CompletionMode.VARIABLES_AND_FUNCTIONS) {
+//            fillVariablesAndFunctions(point, resultSet);
+//        } else 
+        if (completionScopeInfo.mode == CompletionMode.CONSTRUCTORS) {
             fillSystemConstructors(point, resultSet);
             fillApplicatonElementsConstructors(IndexerQuery.appElementsByPrefix(dataObject.getProject(), point.filter != null ? point.filter : ""), point, resultSet);//NOI18N
+        }
+        if (point.context.length == 0) {
+            fillJsKeywords(point, resultSet);
         }
     }
 
@@ -103,10 +103,7 @@ public class ModuleCompletionContext extends CompletionContext {
         fillEntities(dataObject.getModel().getEntities().values(), resultSet, point);
         addItem(resultSet, point.filter, new BeanCompletionItem(dataObject.getModel().getClass(), MODEL_SCRIPT_NAME, null, point.caretBeginWordOffset, point.caretEndWordOffset));
         addItem(resultSet, point.filter, new BeanCompletionItem(dataObject.getModel().getParametersEntity().getRowset().getClass(), PARAMS_SCRIPT_NAME, null, point.caretBeginWordOffset, point.caretEndWordOffset));
-        fillJavaCompletionItems(point, resultSet);
-        if (point.context.length == 0) {
-            fillJsKeywords(point, resultSet);
-        }
+        fillJavaCompletionItems(point, resultSet);      
     }
 
     protected void fillSystemConstructors(JsCompletionProvider.CompletionPoint point, CompletionResultSet resultSet) {
@@ -145,34 +142,34 @@ public class ModuleCompletionContext extends CompletionContext {
         if (entity != null) {
             return new EntityCompletionContext(entity);
         }
-        CompletionContext typeCompletionContext = findModuleCompletionContext(fieldName, offset, dataObject);
+        CompletionContext typeCompletionContext = findCompletionContext(fieldName, offset, this);
         if (typeCompletionContext != null) {
             return typeCompletionContext;
         }
         return null;
     }
 
-    protected void fillJsEntities(JsCodeCompletionScopeInfo completionScopeInfo, JsCompletionProvider.CompletionPoint point, CompletionResultSet resultSet) {
-        JsCompletonItemsSupport cs = new JsCompletonItemsSupport();
+    protected static void fillJsEntities(JsCodeCompletionScopeInfo completionScopeInfo, JsCompletionProvider.CompletionPoint point, CompletionResultSet resultSet) {
+        ScanJsItemsSupport cs = new ScanJsItemsSupport();
         Collection<JsCompletionItem> items = cs.getCompletionItems(completionScopeInfo, "", point);
         for (JsCompletionItem item : items) {
             addItem(resultSet, point.filter, item);
         }
     }
 
-    protected JsCodeCompletionScopeInfo getCompletionScopeInfo(int offset, String text) {
-        AstRoot tree = dataObject.getAst();
+    protected static JsCodeCompletionScopeInfo getCompletionScopeInfo(PlatypusModuleDataObject aDataObject, int offset, String text) {
+        AstRoot tree = aDataObject.getAst();
         AstNode offsetNode = AstUtlities.getOffsetNode(tree, offset);
         CompletionMode codeCompletionInfo = isInNewExpression(offsetNode, text) ? CompletionMode.CONSTRUCTORS : CompletionMode.VARIABLES_AND_FUNCTIONS;
         return new JsCodeCompletionScopeInfo(offsetNode, codeCompletionInfo);
     }
 
-    private boolean isInNewExpression(AstNode aNode, String txt) {
+    private static boolean isInNewExpression(AstNode aNode, String txt) {
         return (aNode != null) && ((aNode instanceof NewExpression && (txt == null || txt.isEmpty()))
                 || (aNode instanceof Name && aNode.getParent() instanceof NewExpression));
     }
 
-    public static CompletionContext getModuleCompletionContext(Project project, String appElementId) {
+    public static ModuleCompletionContext getModuleCompletionContext(Project project, String appElementId) {
         FileObject appElementFileObject = IndexerQuery.appElementId2File(project, appElementId);
         if (appElementFileObject == null) {
             return null;
@@ -188,8 +185,8 @@ public class ModuleCompletionContext extends CompletionContext {
         return null;
     }
 
-    public static CompletionContext findModuleCompletionContext(String fieldName, int offset, PlatypusModuleDataObject appElementDataObject) {
-        AstRoot ast = appElementDataObject.getAst();
+    public static CompletionContext findCompletionContext(String fieldName, int offset, ModuleCompletionContext parentModuleContext) {
+        AstRoot ast = parentModuleContext.dataObject.getAst();
         if (ast != null) {
             AstNode offsetNode = AstUtlities.getOffsetNode(ast, offset);
             AstNode currentNode = offsetNode;
@@ -197,7 +194,7 @@ public class ModuleCompletionContext extends CompletionContext {
                 if (currentNode instanceof ScriptNode) {
                     ScriptNode scriptNode = (ScriptNode) currentNode;
                     ModuleCompletionContext.FindModuleElementSupport visitor =
-                            new ModuleCompletionContext.FindModuleElementSupport(appElementDataObject.getProject(), scriptNode, fieldName);
+                            new ModuleCompletionContext.FindModuleElementSupport(scriptNode, fieldName, parentModuleContext);
                     CompletionContext ctx = visitor.getModuleInfo();
                     if (ctx != null) {
                         return ctx;
@@ -241,7 +238,7 @@ public class ModuleCompletionContext extends CompletionContext {
         }
     }
 
-    public static class JsCompletonItemsSupport {
+    public static class ScanJsItemsSupport {
 
         private Map<String, JsCompletionItem> functionsMap;
         private Map<String, JsCompletionItem> fieldsMap;
@@ -321,11 +318,12 @@ public class ModuleCompletionContext extends CompletionContext {
         private AstNode node;
         private String fieldName;
         private CompletionContext ctx;
+        ModuleCompletionContext parentContext;
 
-        public FindModuleElementSupport(Project project, AstNode node, String fieldName) {
-            this.prj = project;
+        public FindModuleElementSupport(AstNode node, String fieldName, ModuleCompletionContext aParentContext) {
             this.node = node;
             this.fieldName = fieldName;
+            parentContext = aParentContext;
         }
 
         public CompletionContext getModuleInfo() {
@@ -363,7 +361,7 @@ public class ModuleCompletionContext extends CompletionContext {
                                                     return false;
                                                 }
                                             }
-                                            //checks for new moduleName() expression
+                                            //checks for new ModuleName() expression
                                             CompletionContext cc = getModuleCompletionContext(prj, stripElementId(ne.getTarget().getString()));
                                             if (cc != null) {
                                                 ctx = cc;
@@ -383,6 +381,8 @@ public class ModuleCompletionContext extends CompletionContext {
                                                 }
                                             }
                                         }
+                                    } else if (variableInitializer.getInitializer() instanceof KeywordLiteral && variableDeclaration.getParent() instanceof AstRoot) {
+                                        ctx = new ThisCompletionContext(parentContext);
                                     }
                                 }
                             }
@@ -397,6 +397,33 @@ public class ModuleCompletionContext extends CompletionContext {
 
         private static String stripElementId(String str) {
             return StringUtils.strip(StringUtils.strip(StringUtils.strip(str, "\""), "'"));//NOI18N
+        }
+    }
+
+    public static class ThisCompletionContext extends CompletionContext {
+
+         private ModuleCompletionContext parentContext;
+        
+        public ThisCompletionContext(ModuleCompletionContext aParentContext) {
+            super(aParentContext.getScriptClass());
+            parentContext = aParentContext;
+        }
+
+        @Override
+        public void applyCompletionItems(JsCompletionProvider.CompletionPoint point, int offset, CompletionResultSet resultSet) throws Exception {
+            JsCodeCompletionScopeInfo completionScopeInfo = getCompletionScopeInfo(parentContext.getDataObject(), offset, point.filter);
+            fillJsEntities(completionScopeInfo, point, resultSet);
+            if (completionScopeInfo.mode == CompletionMode.VARIABLES_AND_FUNCTIONS) {
+                fillVariablesAndFunctions(point, resultSet);
+            }
+        }
+
+        protected void fillVariablesAndFunctions(JsCompletionProvider.CompletionPoint point, CompletionResultSet resultSet) throws Exception {
+            fillFieldsValues(parentContext.getDataObject().getModel().getParametersEntity().getFields(), point, resultSet);
+            fillEntities(parentContext.getDataObject().getModel().getEntities().values(), resultSet, point);
+            addItem(resultSet, point.filter, new BeanCompletionItem(parentContext.getDataObject().getModel().getClass(), MODEL_SCRIPT_NAME, null, point.caretBeginWordOffset, point.caretEndWordOffset));
+            addItem(resultSet, point.filter, new BeanCompletionItem(parentContext.getDataObject().getModel().getParametersEntity().getRowset().getClass(), PARAMS_SCRIPT_NAME, null, point.caretBeginWordOffset, point.caretEndWordOffset));
+            fillJavaCompletionItems(point, resultSet);
         }
     }
 }

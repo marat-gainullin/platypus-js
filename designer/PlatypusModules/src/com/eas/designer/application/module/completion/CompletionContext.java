@@ -74,7 +74,7 @@ public class CompletionContext {
         }
     }
 
-    protected void addItem(CompletionResultSet resultSet, String aFilter, JsCompletionItem aCompletionItem) {
+    protected static void addItem(CompletionResultSet resultSet, String aFilter, JsCompletionItem aCompletionItem) {
         if (aFilter == null || aFilter.isEmpty() || aCompletionItem.getText().toLowerCase().startsWith(aFilter.toLowerCase())) {
             resultSet.addItem(aCompletionItem);
         }
