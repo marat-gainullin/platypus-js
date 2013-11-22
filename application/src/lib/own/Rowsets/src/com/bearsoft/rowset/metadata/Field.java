@@ -33,18 +33,18 @@ public class Field {
     // In queries, such as select t1.f1 as f11, t2.f1 as f21 to preserve output fields' names unique,
     // but be able to generate right update sql clauses for multiple tables.
     protected String originalName = "";
-    protected String description = null;// Such data is read from db, and so may be null
+    protected String description;// Such data is read from db, and so may be null
     protected DataTypeInfo typeInfo = DataTypeInfo.INOPERABLE_TYPE.copy();
-    protected int size = 0;
-    protected int scale = 0;
-    protected int precision = 0;
+    protected int size;
+    protected int scale;
+    protected int precision;
     protected boolean signed = true;
     protected boolean nullable = true;
-    protected boolean readonly = false;
-    protected boolean pk = false;
-    protected ForeignKeySpec fk = null;
-    protected String tableName = null;
-    protected String schemaName = null;
+    protected boolean readonly;
+    protected boolean pk;
+    protected ForeignKeySpec fk;
+    protected String tableName;
+    protected String schemaName;
     protected PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
     protected Object tag;
     public static final String PK_PROPERTY = "pk";

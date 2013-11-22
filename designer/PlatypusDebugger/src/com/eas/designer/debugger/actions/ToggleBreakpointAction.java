@@ -18,9 +18,7 @@ import org.openide.text.Line;
  */
 public class ToggleBreakpointAction extends AbstractAction {
 
-    
-    public ToggleBreakpointAction()
-    {
+    public ToggleBreakpointAction() {
         super();
         putValue("default-action", true);
         putValue("supported-annotation-types", new String[]{
@@ -28,7 +26,7 @@ public class ToggleBreakpointAction extends AbstractAction {
             "Platypus-Disabled-Breakpoint-Annotation"
         });
     }
-    
+
     @Override
     public void actionPerformed(ActionEvent ev) {
         toggleBreakpoint();

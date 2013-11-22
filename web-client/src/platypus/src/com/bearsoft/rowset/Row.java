@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.bearsoft.rowset.changes.Insert;
 import com.bearsoft.rowset.exceptions.InvalidColIndexException;
 import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.metadata.Field;
@@ -34,6 +35,7 @@ public class Row {
 	protected boolean inserted = false;
 	protected List<Object> originalValues = new ArrayList();
 	protected List<Object> currentValues = new ArrayList();
+	protected Insert insertChange;
 
 	/**
 	 * Row's POJO-like constructor.
@@ -225,11 +227,20 @@ public class Row {
 		inserted = true;
 	}
 
+    public Insert getInsertChange() {
+        return insertChange;
+    }
+
+    public void setInserted(Insert aInsert) {
+        inserted = true;
+        insertChange = aInsert;
+    }
 	/**
 	 * Clears the inserted flag.
 	 */
 	public void clearInserted() {
 		inserted = false;
+        insertChange = null;
 	}
 
 	/**

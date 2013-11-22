@@ -19,7 +19,9 @@ import javax.swing.JComponent;
 import org.netbeans.api.project.Project;
 import org.netbeans.spi.debugger.ui.AttachType;
 import org.netbeans.spi.debugger.ui.Controller;
+import org.openide.DialogDisplayer;
 import org.openide.ErrorManager;
+import org.openide.NotifyDescriptor;
 import org.openide.util.Utilities;
 
 /**
@@ -53,9 +55,10 @@ public class PlatypusAttachType extends AttachType {
                     DebuggerEnvironment env = new DebuggerEnvironment(Utilities.actionsGlobalContext().lookup(Project.class));
                     env.host = settings.getHost();
                     env.port = settings.getPort();
-                    DebuggerUtils.attachDebugger(env);
+                    DebuggerUtils.attachDebugger(env, 1);
                     return true;
                 } catch (Exception ex) {
+                    DialogDisplayer.getDefault().notify(new NotifyDescriptor.Message(ex.getMessage()));
                     ErrorManager.getDefault().notify(ex);
                     return false;
                 }

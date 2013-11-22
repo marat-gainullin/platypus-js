@@ -16,7 +16,6 @@ import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
-import org.netbeans.api.debugger.ActionsManager;
 import org.netbeans.api.debugger.Breakpoint;
 import org.netbeans.api.debugger.DebuggerEngine;
 import org.netbeans.api.debugger.DebuggerEngine.Destructor;
@@ -35,18 +34,18 @@ import org.openide.text.Line;
  */
 public class DebuggerUtils {
 
-    public static void attachDebugger(DebuggerEnvironment env) throws Exception {
+    public static void attachDebugger(DebuggerEnvironment env, int aRetryCount) throws Exception {
         JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + env.host + ":" + String.valueOf(env.port) + "/jmxrmi");
         ObjectName mBeanDebuggerName = new ObjectName(DebuggerMBean.DEBUGGER_MBEAN_NAME);
         ObjectName mBeanBreakpointsName = new ObjectName(BreakpointsMBean.BREAKPOINTS_MBEAN_NAME);
         MBeanDebuggerListener listener = new MBeanDebuggerListener(env.project);
 
-        JMXConnector jmxc = null;
         MBeanServerConnection jmxConnection = null;
         DebuggerMBean debugger = null;
         BreakpointsMBean breakpoints = null;
         // let's wait until program register it's mbeans.
-        int ioCounter = 0;
+        int ioCounter = 1;
+        JMXConnector jmxc = null;
         while (true) {
             try {
                 jmxc = JMXConnectorFactory.connect(url, null);
@@ -55,13 +54,11 @@ public class DebuggerUtils {
                 debugger = JMX.newMBeanProxy(jmxConnection, mBeanDebuggerName, DebuggerMBean.class);
                 breakpoints = JMX.newMBeanProxy(jmxConnection, mBeanBreakpointsName, BreakpointsMBean.class);
                 break;
-            } catch (InstanceNotFoundException ex) {
-                Thread.sleep(500);
-            } catch (IOException ex) {
-                if (ioCounter <= 16) {
-                    ioCounter++;
-                    Thread.sleep(500);
-                } else {
+            } catch (InstanceNotFoundException | IOException ex) {
+                if (aRetryCount > 0 && ex instanceof InstanceNotFoundException) {
+                    Thread.sleep(250);
+                }
+                if (++ioCounter > aRetryCount) {
                     throw ex;
                 }
             }
@@ -76,6 +73,7 @@ public class DebuggerUtils {
         } else {
             startDebugging(env);
             listener.debuggingStarted = true;
+            listener.processWaiter = startProcessWaiting(jmxc, dEngines);
         }
     }
 
@@ -103,24 +101,27 @@ public class DebuggerUtils {
             env.mDebugger.continueRun();
         }
     }
-    
+
     public static void killEngine(DebuggerEngine engine) throws Exception {
         DebuggerEnvironment env = engine.lookupFirst(DebuggerConstants.DEBUGGER_SERVICERS_PATH, DebuggerEnvironment.class);
-        if (env.runningProgram == null) {// Debugger was attached to external program
-            if (!env.mDebuggerListener.positionedOnSource()) {
-                for (Breakpoint breakpoint : DebuggerManager.getDebuggerManager().getBreakpoints()) {
-                    if (breakpoint instanceof PlatypusBreakpoint) {
-                        PlatypusBreakpoint pbreak = (PlatypusBreakpoint) breakpoint;
-                        pbreak.remoteRemove(env.mBreakpoints);
+        try {
+            if (env.runningProgram == null) {// Debugger was attached to external program
+                if (!env.mDebuggerListener.positionedOnSource()) {
+                    for (Breakpoint breakpoint : DebuggerManager.getDebuggerManager().getBreakpoints()) {
+                        if (breakpoint instanceof PlatypusBreakpoint) {
+                            PlatypusBreakpoint pbreak = (PlatypusBreakpoint) breakpoint;
+                            pbreak.remoteRemove(env.mBreakpoints);
+                        }
                     }
+                    env.mDebugger.continueRun();
                 }
-                env.mDebugger.continueRun();
             }
+        } finally {
+            Destructor d = engine.new Destructor();
+            d.killEngine();
         }
-        Destructor d = engine.new Destructor();
-        d.killEngine();
     }
-    
+
     public static void startProcessWaiting(final Future<Integer> runningProgram, final DebuggerEngine[] dEngines) {
         Thread thread = new Thread(new Runnable() {
             @Override
@@ -139,6 +140,30 @@ public class DebuggerUtils {
         thread.start();
     }
 
+    public static Thread startProcessWaiting(final JMXConnector jmxc, final DebuggerEngine[] dEngines) {
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    while (true) {
+                        jmxc.getMBeanServerConnection();
+                        Thread.sleep(250);
+                    }
+                } catch (IOException ex) {
+                    for (DebuggerEngine engine : dEngines) {
+                        Destructor d = engine.new Destructor();
+                        d.killEngine();
+                    }
+                } catch (InterruptedException ex) {
+                    // no op
+                    ex = null;
+                }
+            }
+        });
+        thread.start();
+        return thread;
+    }
+
     public static String getUrlAsRelativePath(FileObject sourceFile) {
         Project p = FileOwnerQuery.getOwner(sourceFile);
         FileObject rootFileObject = getSourcesRoot(p);
@@ -150,7 +175,7 @@ public class DebuggerUtils {
         FileObject rootFileObject = getSourcesRoot(project);
         return rootFileObject.getFileObject(url);
     }
-    
+
     private static FileObject getSourcesRoot(Project project) {
         ClassPathProvider cpp = project.getLookup().lookup(ClassPathProvider.class);
         if (cpp != null) {

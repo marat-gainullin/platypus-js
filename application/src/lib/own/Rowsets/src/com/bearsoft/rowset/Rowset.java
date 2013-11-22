@@ -1918,6 +1918,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
             }
             insert.data = data.toArray(new Change.Value[]{});
             changesLog.add(insert);
+            aRow.setInserted(insert);
         }
     }
 
@@ -1948,10 +1949,13 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
             }
             List<Change> changesLog = flow.getChangeLog();
             Field field = fields.get(colIndex);
-            Update update = new Update(flow.getEntityId());
-            update.data = new Change.Value[]{new Change.Value(field.getName(), newValue, field.getTypeInfo())};
-            update.keys = generateChangeLogKeys(colIndex, aRow, oldValue);
-            changesLog.add(update);
+            boolean insertComplemented = tryToComplementInsert(aRow, field, newValue);
+            if (!insertComplemented) {
+                Update update = new Update(flow.getEntityId());
+                update.data = new Change.Value[]{new Change.Value(field.getName(), newValue, field.getTypeInfo())};
+                update.keys = generateChangeLogKeys(colIndex, aRow, oldValue);
+                changesLog.add(update);
+            }
         }
     }
 
@@ -2108,5 +2112,27 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
     public Filter[] getFilters() {
         Filter[] res = new Filter[filters.size()];
         return filters.toArray(res);
+    }
+
+    private boolean tryToComplementInsert(Row aRow, Field field, Object newValue) {
+        boolean insertComplemented = false;
+        Insert insertChange = aRow.getInsertChange();
+        if (insertChange != null && !insertChange.consumed && !field.isNullable()) {
+            boolean met = false;
+            for (Change.Value value : insertChange.data) {
+                if (value.name.equalsIgnoreCase(field.getName())) {
+                    met = true;
+                    break;
+                }
+            }
+            if (!met) {
+                Change.Value[] newdata = new Change.Value[insertChange.data.length+1];
+                newdata[newdata.length-1] = new Change.Value(field.getName(), newValue, field.getTypeInfo());
+                System.arraycopy(insertChange.data, 0, newdata, 0, insertChange.data.length);
+                insertChange.data = newdata;
+                insertComplemented = true;
+            }
+        }
+        return insertComplemented;
     }
 }

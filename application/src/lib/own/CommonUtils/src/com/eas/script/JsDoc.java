@@ -190,7 +190,13 @@ public class JsDoc {
         }
 
         private boolean isParametrized() {
-            return ROLES_ALLOWED_TAG.equals(name) || ROLES_ALLOWED_READ_TAG.equals(name) || ROLES_ALLOWED_WRITE_TAG.equals(name) || READONLY_TAG.equals(name) || WRITABLE_TAG.equals(name) || ACCEPTED_PROTOCOL_TAG.equals(name);
+            return ROLES_ALLOWED_TAG.equals(name)
+                    || ROLES_ALLOWED_READ_TAG.equals(name)
+                    || ROLES_ALLOWED_WRITE_TAG.equals(name)
+                    || READONLY_TAG.equals(name)
+                    || WRITABLE_TAG.equals(name)
+                    || ACCEPTED_PROTOCOL_TAG.equals(name)
+                    || VALIDATOR_TAG.equals(name);
         }
 
         private List<String> parseParams() {

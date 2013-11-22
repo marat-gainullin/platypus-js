@@ -25,7 +25,7 @@ import org.netbeans.api.debugger.Watch;
  */
 public class PlatypusDebuggerListener implements DebuggerManagerListener {
 
-    private static PlatypusDebuggerListener instance = null;
+    private static PlatypusDebuggerListener instance;
 
     public static void checkListening() {
         if (instance == null) {

@@ -427,10 +427,10 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
 				}, new Callback<String>() {
 					public void run(String aResult) throws Exception {
 						pending = false;
-						if(aResult == null)
+						if (aResult == null)
 							aResult = "Unknown network error. May be cancelled.";
 						rowsetChangeSupport.fireNetErrorEvent(aResult);
-						if(onFailure != null)
+						if (onFailure != null)
 							onFailure.run(aResult);
 					}
 
@@ -445,15 +445,15 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
 	}
 
 	public void silentFirst() throws InvalidCursorPositionException {
-        Set<RowsetListener> l = rowsetChangeSupport.getRowsetListeners();
-        rowsetChangeSupport.setRowsetListeners(null);
-        try {
-        	first();
-        } finally {
-        	rowsetChangeSupport.setRowsetListeners(l);
-        }
-    }
-	
+		Set<RowsetListener> l = rowsetChangeSupport.getRowsetListeners();
+		rowsetChangeSupport.setRowsetListeners(null);
+		try {
+			first();
+		} finally {
+			rowsetChangeSupport.setRowsetListeners(l);
+		}
+	}
+
 	/**
 	 * Returns current rows vector. Used with filtering classes.
 	 * 
@@ -1553,7 +1553,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
 	}
 
 	public Object getJsObject(String aFieldName) throws Exception {
-		
+
 		return Utils.toJs(getObject(fields.find(aFieldName)));
 	}
 
@@ -1945,10 +1945,13 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
 			}
 			List<Change> changesLog = flow.getChangeLog();
 			Field field = fields.get(colIndex);
-			Update update = new Update(flow.getEntityId());
-			update.data = new Change.Value[] { new Change.Value(field.getName(), newValue, field.getTypeInfo()) };
-			update.keys = generateChangeLogKeys(colIndex, aRow, oldValue);
-			changesLog.add(update);
+			boolean insertComplemented = tryToComplementInsert(aRow, field, newValue);
+			if (!insertComplemented) {
+				Update update = new Update(flow.getEntityId());
+				update.data = new Change.Value[] { new Change.Value(field.getName(), newValue, field.getTypeInfo()) };
+				update.keys = generateChangeLogKeys(colIndex, aRow, oldValue);
+				changesLog.add(update);
+			}
 		}
 	}
 
@@ -2117,5 +2120,29 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
 	public Filter[] getFilters() {
 		Filter[] res = new Filter[filters.size()];
 		return filters.toArray(res);
+	}
+
+	private boolean tryToComplementInsert(Row aRow, Field field, Object newValue) {
+		boolean insertComplemented = false;
+		Insert insertChange = aRow.getInsertChange();
+		if (insertChange != null && !field.isNullable()) {
+			boolean met = false;
+			for (Change.Value value : insertChange.data) {
+				if (value.name.equalsIgnoreCase(field.getName())) {
+					met = true;
+					break;
+				}
+			}
+			if (!met) {
+				Change.Value[] newdata = new Change.Value[insertChange.data.length + 1];
+				newdata[newdata.length - 1] = new Change.Value(field.getName(), newValue, field.getTypeInfo());
+				for(int i = 0; i < insertChange.data.length;i++){
+					newdata[i] = insertChange.data[i];
+				}
+				insertChange.data = newdata;
+				insertComplemented = true;
+			}
+		}
+		return insertComplemented;
 	}
 }

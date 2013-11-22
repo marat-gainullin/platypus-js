@@ -1,7 +1,6 @@
 package com.eas.designer.debugger.ui;
 
 import com.eas.debugger.jmx.server.DebuggerMBean;
-import com.eas.designer.application.indexer.IndexerQuery;
 import com.eas.designer.debugger.CodePointInfo;
 import com.eas.designer.debugger.DebuggerConstants;
 import com.eas.designer.debugger.DebuggerEnvironment;
@@ -16,6 +15,7 @@ import javax.management.NotificationListener;
 import javax.management.ObjectName;
 import javax.swing.Action;
 import org.netbeans.spi.debugger.ContextProvider;
+import org.netbeans.spi.debugger.DebuggerServiceRegistration;
 import org.netbeans.spi.debugger.ui.Constants;
 import org.netbeans.spi.viewmodel.*;
 import org.openide.filesystems.FileObject;
@@ -23,8 +23,11 @@ import org.openide.util.NbBundle;
 
 /**
  *
- * @author Jan Jancura
+ * @author mg
  */
+@DebuggerServiceRegistration(path = "PlatypusJsSession/CallStackView",
+        types = {NodeActionsProvider.class, NodeModel.class, TableModel.class, TreeModel.class},
+        position = 10000)
 public class CallStackModel implements TreeModel, NodeModel,
         NodeActionsProvider, TableModel, NotificationListener {
 

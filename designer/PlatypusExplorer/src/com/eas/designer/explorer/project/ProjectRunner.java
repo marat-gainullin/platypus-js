@@ -95,20 +95,26 @@ public class ProjectRunner {
                 Future<Integer> runningProgram = start(project, appElementId, true);
                 if (runningProgram != null) {
                     try {
-//                if (Boolean.TRUE.equals(project.getSettings().isUseAppServer())) {
-//                    DebuggerEnvironment serverEnv = new DebuggerEnvironment();
-//                    serverEnv.host = LOCAL_HOSTNAME;
-//                    serverEnv.port = project.getSettings().getDebugServerPort();
-//                    DebuggerUtils.attachDebugger(serverEnv);
-//                    project.getOutputWindowIO().getOut().println("Application server debug activated.");
-//                }
-                        DebuggerEnvironment env = new DebuggerEnvironment(project);
-                        env.host = LOCAL_HOSTNAME;
-                        env.port = project.getSettings().getDebugClientPort();
-                        env.runningProgram = runningProgram;
-                        env.runningElement = project.getSettings().getAppSettings().getRunElement();
-                        DebuggerUtils.attachDebugger(env);
+                        DebuggerEnvironment clientEnv = new DebuggerEnvironment(project);
+                        clientEnv.host = LOCAL_HOSTNAME;
+                        clientEnv.port = project.getSettings().getDebugClientPort();
+                        clientEnv.runningProgram = runningProgram;
+                        clientEnv.runningElement = project.getSettings().getAppSettings().getRunElement();
+                        DebuggerUtils.attachDebugger(clientEnv, 3);
                         project.getOutputWindowIO().getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Client_Debug_Activated"));//NOI18N
+                    } catch (Exception ex) {
+                        runningProgram.cancel(true);
+                        ErrorManager.getDefault().notify(ex);
+                        return;
+                    }
+                    try {
+                        DebuggerEnvironment serverEnv = new DebuggerEnvironment(project);
+                        serverEnv.host = LOCAL_HOSTNAME;
+                        serverEnv.port = project.getSettings().getDebugServerPort();
+                        serverEnv.runningProgram = null;
+                        serverEnv.runningElement = null;
+                        DebuggerUtils.attachDebugger(serverEnv, 3);
+                        project.getOutputWindowIO().getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Server_Debug_Activated"));//NOI18N
                     } catch (Exception ex) {
                         runningProgram.cancel(true);
                         ErrorManager.getDefault().notify(ex);

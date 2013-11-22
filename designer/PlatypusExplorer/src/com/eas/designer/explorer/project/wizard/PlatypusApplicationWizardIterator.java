@@ -5,16 +5,10 @@
 package com.eas.designer.explorer.project.wizard;
 
 import com.eas.client.settings.DbConnectionSettings;
-import com.eas.deploy.BaseDeployer;
-import com.eas.deploy.project.PlatypusSettings;
-import com.eas.designer.application.PlatypusUtils;
 import com.eas.designer.explorer.project.PlatypusProjectSettingsImpl;
-import com.eas.xml.dom.XmlDom2String;
 import java.awt.Component;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.text.MessageFormat;
 import java.util.LinkedHashSet;
 import java.util.NoSuchElementException;

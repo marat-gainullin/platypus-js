@@ -1,5 +1,6 @@
 package com.bearsoft.rowset;
 
+import com.bearsoft.rowset.changes.Insert;
 import com.bearsoft.rowset.exceptions.InvalidColIndexException;
 import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.metadata.Field;
@@ -25,6 +26,7 @@ public class Row extends Object {
     protected boolean inserted = false;
     protected List<Object> originalValues = new ArrayList<>();
     protected List<Object> currentValues = new ArrayList<>();
+    protected Insert insertChange;
     protected Object tag;
 
     /**
@@ -213,11 +215,20 @@ public class Row extends Object {
         inserted = true;
     }
 
+    public Insert getInsertChange() {
+        return insertChange;
+    }
+
+    public void setInserted(Insert aInsert) {
+        inserted = true;
+        insertChange = aInsert;
+    }
     /**
      * Clears the inserted flag.
      */
     public void clearInserted() {
         inserted = false;
+        insertChange = null;
     }
 
     /**
@@ -268,8 +279,7 @@ public class Row extends Object {
      * Sets current value of particular column.
      *
      * @param aColIndex ordinal position of the column. It's value lies within
-     * the range of [1:
-     * <code>getColumnCount()</code>].
+     * the range of [1: <code>getColumnCount()</code>].
      * @param aColValue value that you whant to be setted to the column as the
      * current column value.
      * @throws InvalidColIndexException if colIndex < 1 or colIndex >
@@ -307,8 +317,7 @@ public class Row extends Object {
      * Returns current column value.
      *
      * @param colIndex ordinal position of the column. It's value lies within
-     * the range of [1:
-     * <code>getColumnCount()</code>].
+     * the range of [1: <code>getColumnCount()</code>].
      * @return The column's current value.
      * @throws InvalidColIndexException if colIndex < 1 or colIndex >
      * <code>getColumnCount()</code>
@@ -331,8 +340,7 @@ public class Row extends Object {
      * Returns original column value.
      *
      * @param colIndex ordinal position of the column. It's value lies within
-     * the range of [1:
-     * <code>getColumnCount()</code>].
+     * the range of [1: <code>getColumnCount()</code>].
      * @return The column's original value.
      * @throws InvalidColIndexException if colIndex < 1 or colIndex >
      * <code>getColumnCount()</code>

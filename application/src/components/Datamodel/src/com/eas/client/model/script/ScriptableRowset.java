@@ -907,7 +907,6 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         sb.append(aPostfix);
         return sb.toString();
     }
-
     private static final String SLICE_JSDOC = ""
             + "/**\n"
             + "* Creates a shallow copy of a portion of an array.\n"
@@ -915,7 +914,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
             + "* @param end zero-based index at which to end extraction. slice extracts up to but not including end\n"
             + "* @return a new \"one level deep\" copy that contains copies of the elements sliced from the original array (optional)\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = SLICE_JSDOC, params = {"begin", "end"})
     public Scriptable slice(Integer... arguments) throws Exception {
         if (arguments != null && arguments.length <= 2) {
@@ -953,13 +952,12 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
             throw new IllegalArgumentException("There are must be one or two arguments to slice function");
         }
     }
-
     private static final String STRING_JSDOC = ""
             + "/**\n"
             + "* Creates a <code>String</code> representation the rowset.\n"
             + "* @return a <code>String</code> representing the array and its elements\n"
             + "*/";
-    
+
     @Override
     @ScriptFunction(jsDoc = STRING_JSDOC)
     public String toString() {
@@ -990,14 +988,13 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
             throw new IllegalStateException(ex);
         }
     }
-
     private static final String INDEX_OF_JSDOC = ""
             + "/**\n"
             + "* Gets the first index of an element within the array equal to the specified value, or -1 if none is found.\n"
             + "* @param searchElement an element to locate in the array\n"
             + "* @return the first index of the element in the array\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = INDEX_OF_JSDOC, params = {"searchElement"})
     public int indexOf(Object aObj) throws Exception {
         Rowset rowset = getRowset();
@@ -1011,14 +1008,13 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         }
         return -1;
     }
-
     private static final String LAST_INDEX_OF_JSDOC = ""
             + "/**\n"
             + "* Gets the last index of an element within the array equal to the specified value, or -1 if none is found.\n"
             + "* @param searchElement an element to locate in the array\n"
             + "* @return the first index of the element in the array\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = LAST_INDEX_OF_JSDOC, params = {"searchElement"})
     public int lastIndexOf(Object aObj) throws Exception {
         Rowset rowset = getRowset();
@@ -1032,9 +1028,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         }
         return -1;
     }
-
     // Array iteration methods
-    
     private static final String FILTER_JSDOC = ""
             + "/**\n"
             + "* Creates a new array with all of the elements of this array for which the provided filtering function returns true.\n"
@@ -1042,7 +1036,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
             + "* @param thisObject <code>Object</code> to use as <code>this</code> when executing callback (optional)\n"
             + "* @return the new filtered array\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = FILTER_JSDOC, params = {"callback", "thisObject"})
     public Scriptable filter(Object... arguments) throws Exception {
         if (arguments != null && arguments.length <= 2) {
@@ -1077,14 +1071,13 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
             throw new IllegalArgumentException("There are must be one or two arguments to filter function");
         }
     }
-
     private static final String FOR_EACH_JSDOC = ""
             + "/**\n"
             + "* Calls a function for each element in the array.\n"
             + "* @param callback the function to execute for each element\n"
             + "* @param thisObject <code>Object</code> to use as <code>this</code> when executing callback (optional)\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = FOR_EACH_JSDOC, params = {"callback", "thisObject"})
     public void forEach(Object... arguments) throws Exception {
         if (arguments != null && arguments.length <= 2) {
@@ -1114,7 +1107,6 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
             throw new IllegalArgumentException("There are must be one or two arguments to forEach function");
         }
     }
-
     private static final String EVERY_JSDOC = ""
             + "/**\n"
             + "* Tests whether all elements in the array pass the test implemented by the provided function.\n"
@@ -1122,7 +1114,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
             + "* @param thisObject <code>Object</code> to use as <code>this</code> when executing callback (optional)\n"
             + "* @return <code>true</code> if <code>callback</code> returned a true value for all elements, will return <code>true</code> and will return <code>false</code> otherwise\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = EVERY_JSDOC, params = {"callback", "thisObject"})
     public boolean every(Object... arguments) throws Exception {
         if (arguments != null && arguments.length <= 2) {
@@ -1156,7 +1148,6 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
             throw new IllegalArgumentException("There are must be one or two arguments to every function");
         }
     }
-
     private static final String MAP_JSDOC = ""
             + "/**\n"
             + "* Creates a new array with the results of calling a provided function on every element in this array. <code>map</code> does not mutate the array on which it is called.\n"
@@ -1164,7 +1155,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
             + "* @param thisObject <code>Object</code> to use as <code>this</code> when executing callback (optional)\n"
             + "* @return a new array with the results of calling a provided function on every element\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = MAP_JSDOC, params = {"callback", "thisObject"})
     public Scriptable map(Object... arguments) throws Exception {
         if (arguments != null && arguments.length <= 2) {
@@ -1197,7 +1188,6 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
             throw new IllegalArgumentException("There are must be one or two arguments to map function");
         }
     }
-
     private static final String SOME_JSDOC = ""
             + "/**\n"
             + "* Tests whether any of elements in the array pass the test implemented by the provided function.\n"
@@ -1205,7 +1195,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
             + "* @param thisObject <code>Object</code> to use as <code>this</code> when executing callback (optional)\n"
             + "* @return <code>true</code> if <code>callback</code> returned a true value for any element, will return <code>true</code> and will return <code>false</code> otherwise\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = SOME_JSDOC, params = {"callback", "thisObject"})
     public boolean some(Object... arguments) throws Exception {
         if (arguments != null && arguments.length <= 2) {
@@ -1239,7 +1229,6 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
             throw new IllegalArgumentException("There are must be one or two arguments to some function");
         }
     }
-
     private static final String REDUCE_JSDOC = ""
             + "/**\n"
             + "* Applies a function against an accumulator and each value of the array (from left-to-right) as to reduce it to a single value.\n"
@@ -1251,7 +1240,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
             + "* @param initialValue the <code>Object</code> to use as the first argument to the first call of the callback (optional)\n"
             + "* @return the result value\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = REDUCE_JSDOC, params = {"callback", "initialValue"})
     public Object reduce(Object... arguments) throws Exception {
         if (arguments != null && arguments.length <= 2) {
@@ -1285,7 +1274,6 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
             throw new IllegalArgumentException("There are must be one or two arguments to reduce function");
         }
     }
-
     private static final String REDUCE_RIGHT_JSDOC = ""
             + "/**\n"
             + "* Applies a function against an accumulator and each value of the array (from right-to-left) as to reduce it to a single value.\n"
@@ -1297,7 +1285,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
             + "* @param initialValue the <code>Object</code> to use as the first argument to the first call of the callback (optional)\n"
             + "* @return the result value\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = REDUCE_RIGHT_JSDOC, params = {"callback", "initialValue"})
     public Object reduceRight(Object... arguments) throws Exception {
         if (arguments != null && arguments.length <= 2) {
@@ -1375,14 +1363,13 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         }
         return null;
     }
-
-     private static final String CREATE_FILTER_JSDOC = ""
+    private static final String CREATE_FILTER_JSDOC = ""
             + "/**\n"
             + "* Creates an instace of filter object to filter rowset data in-place using specified constraints objects.\n"
             + "* @param pairs the search conditions pairs, if a form of key-values pairs, where the key is the property object (e.g. entity.md.propName) and the value for this property\n"
             + "* @return a comparator object\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = CREATE_FILTER_JSDOC, params = {"pairs"})
     public ScriptableFilter createFilter(Object... constraints) throws Exception {
         if (constraints != null && constraints.length > 0) {
@@ -1433,68 +1420,64 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         }
         return null;
     }
-
     private static final String CREATE_SORTER_JSDOC = ""
             + "/**\n"
             + "* Creates an instance of comparator object using specified constraints objects.\n"
             + "* @param pairs the search conditions pairs, in a form of key-values pairs, where the key is the property object (e.g. entity.md.propName) and the value for this property\n"
             + "* @return a comparator object to be passed as a parameter to entity's <code>sort</code> method\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = CREATE_SORTER_JSDOC)
     public RowsComparator createSorting(Object... constraints) throws Exception {
         if (constraints != null && constraints.length > 0) {
             Rowset rowset = getRowset();
-            if (constraints != null && constraints.length > 0) {
-                List<SortingCriterion> criteria = new ArrayList<>();
-                for (int i = 0; i < constraints.length; i += 2) {
-                    int colIndex = 0;
-                    if (constraints[i] instanceof Double) {
-                        Double d = (Double) constraints[i];
-                        if (Math.abs(Math.round(d) - d) < 1e-10) {
-                            Long lFieldIndex = Math.round(d);
-                            if (Math.abs(lFieldIndex.intValue() - lFieldIndex) == 0) {
-                                colIndex = lFieldIndex.intValue();
-                            } else {
-                                throw new RowsetException(String.valueOf(i + 1) + " fieldIndex is out of integer value range.");
-                            }
+            List<SortingCriterion> criteria = new ArrayList<>();
+            for (int i = 0; i < constraints.length; i += 2) {
+                int colIndex = 0;
+                if (constraints[i] instanceof Double) {
+                    Double d = (Double) constraints[i];
+                    if (Math.abs(Math.round(d) - d) < 1e-10) {
+                        Long lFieldIndex = Math.round(d);
+                        if (Math.abs(lFieldIndex.intValue() - lFieldIndex) == 0) {
+                            colIndex = lFieldIndex.intValue();
                         } else {
-                            throw new RowsetException(String.valueOf(i + 1) + " fieldIndex must be an integer value, but it is not.");
-                        }
-                    } else if (constraints[i] instanceof Field) {
-                        Field rsFmd = (Field) constraints[i];
-                        colIndex = rowset.getFields().find(rsFmd.getName());
-                        if (colIndex <= 0) {
-                            throw new RowsetException(String.valueOf(i + 1) + " field name not found.");
+                            throw new RowsetException(String.valueOf(i + 1) + " fieldIndex is out of integer value range.");
                         }
                     } else {
-                        throw new RowsetException(String.valueOf(i + 1) + " field must be an integer col index or field metadata descriptor.");
+                        throw new RowsetException(String.valueOf(i + 1) + " fieldIndex must be an integer value, but it is not.");
                     }
-                    if (colIndex > 0) {
-                        boolean ascending = true;
-                        if (constraints.length > i + 1) {
-                            if (constraints[i + 1] instanceof Boolean) {
-                                ascending = (Boolean) constraints[i + 1];
-                            } else {
-                                throw new RowsetException(String.valueOf(i + 2) + " ascending/descending order argument is invalid. It must be a boolean value");
-                            }
-                        }
-                        criteria.add(new SortingCriterion(colIndex, ascending));
-                    } else {
-                        throw new RowsetException(String.valueOf(i + 1) + " invalid arguments.");
+                } else if (constraints[i] instanceof Field) {
+                    Field rsFmd = (Field) constraints[i];
+                    colIndex = rowset.getFields().find(rsFmd.getName());
+                    if (colIndex <= 0) {
+                        throw new RowsetException(String.valueOf(i + 1) + " field name not found.");
                     }
+                } else {
+                    throw new RowsetException(String.valueOf(i + 1) + " field must be an integer col index or field metadata descriptor.");
                 }
-                return new RowsComparator(criteria);
+                if (colIndex > 0) {
+                    boolean ascending = true;
+                    if (constraints.length > i + 1) {
+                        if (constraints[i + 1] instanceof Boolean) {
+                            ascending = (Boolean) constraints[i + 1];
+                        } else {
+                            throw new RowsetException(String.valueOf(i + 2) + " ascending/descending order argument is invalid. It must be a boolean value");
+                        }
+                    }
+                    criteria.add(new SortingCriterion(colIndex, ascending));
+                } else {
+                    throw new RowsetException(String.valueOf(i + 1) + " invalid arguments.");
+                }
             }
+            return new RowsComparator(criteria);
         }
         return null;
     }
-
     private static final String ACTIVE_FILTER_JSDOC = ""
             + "/**\n"
             + "* Entity's active <code>Filter</code> object.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = ACTIVE_FILTER_JSDOC)
     public Filter getActiveFilter() throws Exception {
         Rowset rowset = getRowset();
@@ -1513,24 +1496,22 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         entity.setUserFiltering(false);
         entity.filterRowset();
     }
-
     private static final String BEGIN_UPDATE_JSDOC = ""
             + "/**\n"
             + "* Disables automatic model update on parameters change, @see endUpdate method.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = BEGIN_UPDATE_JSDOC)
     public void beginUpdate() {
         if (entity != null) {
             entity.beginUpdate();
         }
     }
-
     private static final String END_UPDATE_JSDOC = ""
             + "/**\n"
             + "* Enables automatic model update on parameters change, @see beginUpdate method.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = END_UPDATE_JSDOC)
     public void endUpdate() throws Exception {
         if (entity != null) {
@@ -1554,18 +1535,16 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         }
     }
 
-    
     public void execute(Function aOnSuccess) throws Exception {
         execute(aOnSuccess, null);
     }
-
     private static final String EXECUTE_JSDOC = ""
             + "/**\n"
             + "* Refreshes rowset, only if any of its parameters has changed.\n"
             + "* @param onSuccessCallback the handler function for refresh data on success event (optional)\n"
             + "* @param onFailureCallback the handler function for refresh data on failure event (optional)\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = EXECUTE_JSDOC, params = {"onSuccessCallback", "onFailureCallback"})
     public void execute(final Function aOnSuccess, final Function aOnFailure) throws Exception {
         if (entity != null) {
@@ -1601,13 +1580,12 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
             }
         }
     }
-
     private static final String ENQEUE_UPDATE_JSDOC = ""
             + "/**\n"
             + "* Enqueues DML SQL clause (e.g. UPDATE, DELETE) provided in this entity query.\n"
             + "* Provide query parameters if required. To commit the transaction invoke @see executeUpdate.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = ENQEUE_UPDATE_JSDOC)
     public int enqueueUpdate() throws Exception {
         if (entity != null) {
@@ -1620,13 +1598,12 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         }
         return 0;
     }
-
     private static final String EXECUTE_UPDATE_JSDOC = ""
             + "/**\n"
             + "* Applies the updates into the database and commits the transaction.\n"
             + "* To enqueue updates use @see enqueueUpdate method.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = EXECUTE_UPDATE_JSDOC)
     public int executeUpdate() throws Exception {
         if (entity != null) {
@@ -1660,14 +1637,13 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     public void requery(Function aOnSuccess) throws Exception {
         requery(aOnSuccess, null);
     }
-
     private static final String REQUERY_JSDOC = ""
             + "/**\n"
             + "* Requeries the rowset's data. Forses the rowset to refresh its data, no matter if its parameters has changed or not.\n"
             + "* @param onSuccessCallback the handler function for refresh data on success event (optional)\n"
             + "* @param onFailureCallback the handler function for refresh data on failure event (optional)\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = REQUERY_JSDOC, params = {"onSuccessCallback", "onFailureCallback"})
     public void requery(final Function aOnSuccess, final Function aOnFailure) throws Exception {
         if (entity != null) {
@@ -1703,15 +1679,13 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
             }
         }
     }
-
     // modify interface
-    
-     private static final String INSERT_JSDOC = ""
+    private static final String INSERT_JSDOC = ""
             + "/**\n"
             + "* Inserts new row in the rowset and sets cursor on this row. @see push\n"
             + "* @param pairs the fields value pairs, in a form of key-values pairs, where the key is the property object (e.g. entity.md.propName) and the value for this property (optional)\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = INSERT_JSDOC)
     public void insert(Object... requiedFields) throws Exception {
         Rowset rowset = getRowset();
@@ -1731,12 +1705,11 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         }
         return oldCount != rowset.size();
     }
-
     private static final String DELETE_ALL_JSDOC = ""
             + "/**\n"
             + "* Deletes all rows in the rowset.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = DELETE_ALL_JSDOC)
     public boolean deleteAll() throws Exception {
         Rowset rowset = getRowset();
@@ -1747,12 +1720,11 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     public Rowset unwrap() throws Exception {
         return getRowset();
     }
-
     private static final String DELETE_ROW_JSDOC = ""
             + "/**\n"
             + "* Deletes the row on the cursor position.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = DELETE_ROW_JSDOC)
     public boolean deleteRow() throws Exception {
         return delete();
@@ -1772,27 +1744,25 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         Logger.getLogger(ScriptableRowset.class.getName()).warning("Call of a deprecated method 'insertRow()', use 'insert()' method instead");
         insert(requiedFields);
     }
-
     private static final String INSTANCE_CONSTRUCTOR_JSDOC = ""
             + "/**\n"
-            + "* The constructor funciton for the entity's data array elements creation.\n"
+            + "* Experimental. The constructor funciton for the entity's data array elements.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = INSTANCE_CONSTRUCTOR_JSDOC)
-    public Function getElementConstructor() {
+    public Function getElementClass() {
         return entity.getInstanceConstructor();
     }
 
     @ScriptFunction
-    public void setElementConstructor(Function aValue) {
+    public void setElementClass(Function aValue) {
         entity.setInstanceConstructor(aValue);
     }
-
     private static final String ON_CHANGED_JSDOC = ""
             + "/**\n"
             + "* The handler funciton for the event occured after the entity data change.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = ON_CHANGED_JSDOC)
     public Function getOnChanged() {
         return entity.getOnAfterChange();
@@ -1802,12 +1772,11 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     public void setOnChanged(Function aValue) {
         entity.setOnAfterChange(aValue);
     }
-
     private static final String ON_DELETED_JSDOC = ""
             + "/**\n"
             + "* The handler funciton for the event occured after an entity row has been deleted.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = ON_DELETED_JSDOC)
     public Function getOnDeleted() {
         return entity.getOnAfterDelete();
@@ -1817,12 +1786,11 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     public void setOnDeleted(Function aValue) {
         entity.setOnAfterDelete(aValue);
     }
-
     private static final String ON_INSERTED_JSDOC = ""
             + "/**\n"
             + "* The handler funciton for the event occured after an entity row has been inserted.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = ON_INSERTED_JSDOC)
     public Function getOnInserted() {
         return entity.getOnAfterInsert();
@@ -1832,12 +1800,11 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     public void setOnInserted(Function aValue) {
         entity.setOnAfterInsert(aValue);
     }
-
     private static final String ON_SCROLLED_JSDOC = ""
             + "/**\n"
             + "* The handler funciton for the event occured after the cursor position changed.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = ON_SCROLLED_JSDOC)
     public Function getOnScrolled() {
         return entity.getOnAfterScroll();
@@ -1847,12 +1814,11 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     public void setOnScrolled(Function aValue) {
         entity.setOnAfterScroll(aValue);
     }
-
     private static final String WILL_CHANGE_JSDOC = ""
             + "/**\n"
             + "* The handler funciton for the event occured before the entity data change.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = WILL_CHANGE_JSDOC)
     public Function getWillChange() {
         return entity.getOnBeforeChange();
@@ -1862,12 +1828,11 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     public void setWillChange(Function aValue) {
         entity.setOnBeforeChange(aValue);
     }
-
     private static final String WILL_DELETE_JSDOC = ""
             + "/**\n"
             + "* The handler funciton for the event occured before an entity row has been deleted.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = WILL_DELETE_JSDOC)
     public Function getWillDelete() {
         return entity.getOnBeforeDelete();
@@ -1877,12 +1842,11 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     public void setWillDelete(Function aValue) {
         entity.setOnBeforeDelete(aValue);
     }
-
     private static final String WILL_INSERT_JSDOC = ""
             + "/**\n"
             + "* The handler funciton for the event occured before an entity row has been inserted.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = WILL_INSERT_JSDOC)
     public Function getWillInsert() {
         return entity.getOnBeforeInsert();
@@ -1892,12 +1856,11 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     public void setWillInsert(Function aValue) {
         entity.setOnBeforeInsert(aValue);
     }
-
     private static final String WILL_SCROLL_JSDOC = ""
             + "/**\n"
             + "* The handler funciton for the event occured before the cursor position changed.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = WILL_SCROLL_JSDOC)
     public Function getWillScroll() {
         return entity.getOnBeforeScroll();
@@ -1907,12 +1870,11 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     public void setWillScroll(Function aValue) {
         entity.setOnBeforeScroll(aValue);
     }
-
     private static final String ON_FILTERED_JSDOC = ""
             + "/**\n"
             + "* The handler funciton for the event occured after the filter have been applied to the entity.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = ON_FILTERED_JSDOC)
     public Function getOnFiltered() {
         return entity.getOnFiltered();
@@ -1922,12 +1884,11 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     public void setOnFiltered(Function aValue) {
         entity.setOnFiltered(aValue);
     }
-
     private static final String ON_REQUIRED_JSDOC = ""
             + "/**\n"
             + "* The handler funciton for the event occured after the entity data have been required.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = ON_REQUIRED_JSDOC)
     public Function getOnRequeried() {
         return entity.getOnRequeried();
