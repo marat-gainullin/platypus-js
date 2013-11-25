@@ -4,8 +4,14 @@
  */
 package com.eas.debugger.jmx.server;
 
+import com.eas.script.NativeJavaHostObject;
+import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptUtils;
 import com.eas.script.ScriptUtils.ScriptAction;
+import java.beans.BeanInfo;
+import java.beans.Introspector;
+import java.beans.MethodDescriptor;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import javax.management.AttributeChangeNotification;
@@ -15,8 +21,10 @@ import org.mozilla.javascript.Callable;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextFactory;
 import org.mozilla.javascript.Kit;
+import org.mozilla.javascript.NativeJavaObject;
 import org.mozilla.javascript.ScriptRuntime;
 import org.mozilla.javascript.Scriptable;
+import org.mozilla.javascript.ScriptableObject;
 import org.mozilla.javascript.Undefined;
 import org.mozilla.javascript.tools.debugger.Dim;
 import org.mozilla.javascript.tools.debugger.Dim.ContextData;
@@ -65,10 +73,12 @@ public class Debugger extends NotificationBroadcasterSupport implements Debugger
     @Override
     public void updateSourceText(SourceInfo sourceInfo) {
     }
+    protected int frameIndex = 0;
 
     @Override
     public void enterInterrupt(StackFrame lastFrame, String threadTitle, String alertMessage) {
-        lastFrame.scope();
+        jsDebugger.contextSwitch(0);
+        frameIndex = 0;
         String[] ecodedFrame = encodeFrame(lastFrame, threadTitle);
         AttributeChangeNotification notification = new AttributeChangeNotification(this, interruptSequence++, System.currentTimeMillis(), "Platypus debugger encoutered a break in user program", BREAK_ATTRIBUTE_NAME, "String[]", null, ecodedFrame);
         sendNotification(notification);
@@ -119,16 +129,16 @@ public class Debugger extends NotificationBroadcasterSupport implements Debugger
 
     @Override
     public String evaluate(String aExpression) throws Exception {
-        jsDebugger.contextSwitch(0);
+        //jsDebugger.contextSwitch(0);
         return jsDebugger.eval(aExpression);
     }
 
     @Override
     public String[] locals() throws Exception {
-        jsDebugger.contextSwitch(0);
+        //jsDebugger.contextSwitch(0);
         ContextData ctxData = jsDebugger.currentContextData();
         if (ctxData != null) {
-            Object oScope = ctxData.getFrame(0).scope();
+            Object oScope = ctxData.getFrame(frameIndex).scope();
             if (oScope instanceof Scriptable) {
                 Object[] oIds = jsDebugger.getObjectIds(oScope);
                 return idsToStrings(oIds);
@@ -137,11 +147,58 @@ public class Debugger extends NotificationBroadcasterSupport implements Debugger
         return null;
     }
 
+    protected String capitalize(String aValue) {
+        return aValue.length() > 1 ? aValue.substring(0, 1).toUpperCase() + aValue.substring(1) : aValue;
+    }
+
     @Override
     public String[] props(String aExpression) throws Exception {
-        jsDebugger.contextSwitch(0);
+        //jsDebugger.contextSwitch(0);
+        List<String> ids = new ArrayList<>();
         Object oResult = eval(aExpression);
-        return oResult != null ? idsToStrings(jsDebugger.getObjectIds(oResult)) : new String[]{};
+        if (oResult instanceof Scriptable) {
+            Scriptable sResult = (Scriptable) oResult;
+            Object[] oIds = sResult.getIds();
+            if(sResult instanceof ScriptableObject){
+                ScriptableObject so = (ScriptableObject)sResult;
+                oIds = so.getAllIds();
+            }
+            for (Object oId : oIds) {
+                if (oId instanceof String && sResult instanceof NativeJavaObject) {
+                    NativeJavaObject njo = (NativeJavaObject) sResult;
+                    // check ScriptFunction annotation;
+                    Object javaObject = njo.unwrap();
+                    BeanInfo bi = Introspector.getBeanInfo(javaObject.getClass());
+                    Method annotationTarget = null;
+                    for (MethodDescriptor md : bi.getMethodDescriptors()) {
+                        String mName = md.getMethod().getName();
+                        if (mName.equals((String) oId)
+                                || mName.equals("get" + capitalize((String) oId))
+                                || mName.equals("is" + capitalize((String) oId))) {
+                            annotationTarget = md.getMethod();break;
+                        }
+                    }
+                    boolean documented = false;
+                    if (annotationTarget != null) {
+                        if (annotationTarget.getAnnotation(ScriptFunction.class) != null) {
+                            documented = true;
+                        }
+                    }
+                    if (sResult instanceof NativeJavaHostObject) {
+                        NativeJavaHostObject javaHostObject = (NativeJavaHostObject) sResult;
+                        boolean scriptableProp = javaHostObject.getDelegate().has((String) oId, javaHostObject.getDelegate());
+                        if (scriptableProp || documented) {
+                            ids.add((String) oId);
+                        }
+                    } else if (documented) {
+                        ids.add((String) oId);
+                    }
+                } else {
+                    ids.add(oId.toString());
+                }
+            }
+        }
+        return ids.toArray(new String[]{});
     }
 
     @Override
@@ -156,6 +213,17 @@ public class Debugger extends NotificationBroadcasterSupport implements Debugger
             return stack;
         }
         return new String[0][0];
+    }
+
+    @Override
+    public int currentFrame() throws Exception {
+        return frameIndex;
+    }
+
+    @Override
+    public void setCurrentFrame(int aValue) throws Exception {
+        jsDebugger.contextSwitch(aValue);
+        frameIndex = aValue;
     }
 
     private String[] idsToStrings(Object[] oIds) {
@@ -274,7 +342,6 @@ public class Debugger extends NotificationBroadcasterSupport implements Debugger
         if (expr == null) {
             return result;
         }
-        int frameIndex = 0;
         ContextData contextData = jsDebugger.currentContextData();
         if (contextData == null || frameIndex >= contextData.frameCount()) {
             return result;

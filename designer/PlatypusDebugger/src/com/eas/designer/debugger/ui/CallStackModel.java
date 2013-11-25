@@ -35,6 +35,7 @@ public class CallStackModel implements TreeModel, NodeModel,
 
         public FileObject file;
         public CodePointInfo cInfo;
+        public int index;
 
         @Override
         public String toString() {
@@ -57,9 +58,11 @@ public class CallStackModel implements TreeModel, NodeModel,
     private Set<ModelListener> listeners = new HashSet<>();
     protected DebuggerEnvironment environment;
     protected StackFrameInfo[] stack;
+    protected ContextProvider contextProvider;
 
-    public CallStackModel(ContextProvider contextProvider) throws Exception {
+    public CallStackModel(ContextProvider aContextProvider) throws Exception {
         super();
+        contextProvider = aContextProvider;
         environment = contextProvider.lookupFirst(DebuggerConstants.DEBUGGER_SERVICERS_PATH, DebuggerEnvironment.class);
         ObjectName mBeanDebuggerName = new ObjectName(DebuggerMBean.DEBUGGER_MBEAN_NAME);
         MBeanServerConnection jmxConnection = contextProvider.lookupFirst(DebuggerConstants.DEBUGGER_SERVICERS_PATH, MBeanServerConnection.class);
@@ -74,6 +77,7 @@ public class CallStackModel implements TreeModel, NodeModel,
                 for (int i = 0; i < stack.length; i++) {
                     StackFrameInfo info = new StackFrameInfo();
                     info.cInfo = CodePointInfo.valueOf(environment.project, sStack[i]);
+                    info.index = i;
                     info.file = info.cInfo.fo;
                     if (info.file == null) {
                         Logger.getLogger(CallStackModel.class.getName()).log(Level.WARNING, NbBundle.getMessage(DebuggerUtils.class, "LBL_file_unavailable_for_app_element", info.cInfo.url));
@@ -229,8 +233,19 @@ public class CallStackModel implements TreeModel, NodeModel,
     public String getIconBase(Object node) throws UnknownTypeException {
         if (node == ROOT) {
             return null;
+        } else if (node instanceof StackFrameInfo) {
+            try {
+                StackFrameInfo fi = (StackFrameInfo) node;
+                if (fi.index == environment.mDebugger.currentFrame()) {
+                    return CURRENT_CALL_STACK;
+                } else {
+                    return CALL_STACK;
+                }
+            } catch (Exception ex) {
+                throw new UnknownTypeException(ex);
+            }
         } else {
-            return CALL_STACK;
+            throw new UnknownTypeException(node);
         }
     }
 
@@ -262,6 +277,16 @@ public class CallStackModel implements TreeModel, NodeModel,
             try {
                 StackFrameInfo frame = (StackFrameInfo) node;
                 frame.cInfo.show();
+                environment.mDebugger.setCurrentFrame(frame.index);
+                fireChanges();
+                TreeModel localsTree = contextProvider.lookupFirst("LocalsView", TreeModel.class);
+                if(localsTree instanceof JsLocalsTreeModel){
+                    ((JsLocalsTreeModel)localsTree).fireChanges();
+                }
+                TreeModel watchesTree = contextProvider.lookupFirst("WatchesView", TreeModel.class);
+                if(watchesTree instanceof JsWatchesTreeModel){
+                    ((JsWatchesTreeModel)watchesTree).fireChanges();
+                }
             } catch (Exception ex) {
                 throw new UnknownTypeException(node);
             }

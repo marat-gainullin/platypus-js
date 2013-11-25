@@ -5,6 +5,7 @@
 package com.eas.client.forms.api.events;
 
 import com.eas.client.forms.api.Component;
+import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptUtils;
 import java.util.EventObject;
 import javax.swing.JComponent;
@@ -22,6 +23,7 @@ public abstract class Event<E extends EventObject> {
         delegate = aDelegate;
     }
 
+    @ScriptFunction(jsDoc = "Source of event propagation")
     public Component<?> getSource() {
         Object oSource = delegate.getSource();
         if (oSource instanceof JComponent) {

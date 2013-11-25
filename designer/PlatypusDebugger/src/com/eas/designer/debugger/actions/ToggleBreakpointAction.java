@@ -6,8 +6,6 @@ package com.eas.designer.debugger.actions;
 
 import com.eas.designer.debugger.PlatypusBreakpoint;
 import com.eas.designer.debugger.annotations.PlatypusBreakpointAnnotation;
-import java.awt.event.ActionEvent;
-import javax.swing.AbstractAction;
 import org.netbeans.api.debugger.Breakpoint;
 import org.netbeans.api.debugger.DebuggerManager;
 import org.openide.text.Line;
@@ -16,21 +14,7 @@ import org.openide.text.Line;
  *
  * @author mg
  */
-public class ToggleBreakpointAction extends AbstractAction {
-
-    public ToggleBreakpointAction() {
-        super();
-        putValue("default-action", true);
-        putValue("supported-annotation-types", new String[]{
-            "Platypus-Breakpoint-Annotation",
-            "Platypus-Disabled-Breakpoint-Annotation"
-        });
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent ev) {
-        toggleBreakpoint();
-    }
+public final class ToggleBreakpointAction {
 
     public static void toggleBreakpoint() {
         Line line = PlatypusBreakpointAnnotation.getCurrentLine();

@@ -137,6 +137,7 @@ public class DebuggerUtils {
                 }
             }
         });
+        thread.setDaemon(true);
         thread.start();
     }
 
@@ -160,6 +161,7 @@ public class DebuggerUtils {
                 }
             }
         });
+        thread.setDaemon(true);
         thread.start();
         return thread;
     }

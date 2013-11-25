@@ -39,4 +39,8 @@ public interface DebuggerMBean {
     public String[] props(String aExpression) throws Exception;
 
     public String[][] getCallStack() throws Exception;
+    
+    public int currentFrame() throws Exception;
+    
+    public void setCurrentFrame(int aValue) throws Exception;
 }

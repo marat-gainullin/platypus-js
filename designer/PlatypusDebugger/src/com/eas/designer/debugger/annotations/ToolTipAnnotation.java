@@ -27,12 +27,6 @@ import org.openide.text.NbDocument;
  */
 public class ToolTipAnnotation extends Annotation {
 
-    /*
-    protected Part part;
-    protected EditorCookie eCookie;
-    protected EditorUI eui;
-     * 
-     */
     @Override
     public String getAnnotationType() {
         return null;//"Platypus-debugger-tooltip-annotation";

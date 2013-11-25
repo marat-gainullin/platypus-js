@@ -6,8 +6,6 @@ package com.eas.designer.debugger.ui;
 
 import org.netbeans.spi.debugger.ContextProvider;
 import org.netbeans.spi.debugger.DebuggerServiceRegistration;
-import org.netbeans.spi.viewmodel.NodeModelFilter;
-import org.netbeans.spi.viewmodel.TableModel;
 import org.netbeans.spi.viewmodel.TreeModel;
 import org.netbeans.spi.viewmodel.UnknownTypeException;
 
@@ -16,13 +14,13 @@ import org.netbeans.spi.viewmodel.UnknownTypeException;
  * @author mg
  */
 @DebuggerServiceRegistration(path = "PlatypusJsSession/LocalsView",
-        types = {TreeModel.class, TableModel.class, NodeModelFilter.class},
-        position = 10001)
-public class LocalsModel extends WatchesModel {
+        types = {TreeModel.class},
+        position = 10003)
+public class JsLocalsTreeModel extends JsWatchesTreeModel{
 
     protected ChildWatch[] locals;
 
-    public LocalsModel(ContextProvider aProvider) throws Exception {
+    public JsLocalsTreeModel(ContextProvider aProvider) throws Exception {
         super(aProvider);
     }
 
@@ -48,11 +46,6 @@ public class LocalsModel extends WatchesModel {
     protected void fireChanges() {
         locals = null;
         super.fireChanges();
-    }
-
-    @Override
-    public Object getValueAt(Object node, String columnID) throws UnknownTypeException {
-        return super.getValueAt(node, columnID); 
     }
 
     @Override
