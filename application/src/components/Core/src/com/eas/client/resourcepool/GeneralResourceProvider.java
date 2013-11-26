@@ -7,7 +7,9 @@ package com.eas.client.resourcepool;
 import com.bearsoft.rowset.exceptions.ResourceUnavalableException;
 import com.eas.client.AppCache;
 import com.eas.client.Client;
+import com.eas.client.ClientConstants;
 import com.eas.client.SQLUtils;
+import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.settings.DbConnectionSettings;
 import com.eas.client.sqldrivers.SqlDriver;
 import java.sql.Connection;
@@ -125,7 +127,7 @@ public class GeneralResourceProvider {
 
     private void initApplicationSchema(DataSource aSource) throws Exception {
         try (Connection lconn = aSource.getConnection()) {
-            lconn.setAutoCommit(false);            
+            lconn.setAutoCommit(false);
             String dialect = dialectByConnection(lconn);
             SqlDriver driver = SQLUtils.getSqlDriver(dialect);
             driver.initializeApplicationSchema(lconn);
@@ -141,7 +143,7 @@ public class GeneralResourceProvider {
             return null;
         }
     }
-    
+
     public synchronized String getPoolDialect(String aDbId) throws Exception {
         getPooledDataSource(aDbId);
         DbConnectionSettings settings = connectionPoolsSettings.get(aDbId);
@@ -155,13 +157,16 @@ public class GeneralResourceProvider {
     private DataSource try2CreatePool(String aDbId) throws Exception {
         AppCache cache = client.getAppCache();
         if (cache != null) {
-            DbConnectionSettings lsettings = DbConnectionSettings.read(cache.get(aDbId).getContent());
-            if (lsettings != null) {
-                DataSource lPool = constructDataSource(lsettings);
-                testDataSource(lPool, lsettings);
-                connectionPools.put(aDbId, lPool);
-                connectionPoolsSettings.put(aDbId, lsettings);
-                return lPool;
+            ApplicationElement appConnection = cache.get(aDbId);
+            if (appConnection.getType() == ClientConstants.ET_CONNECTION) {
+                DbConnectionSettings lsettings = DbConnectionSettings.read(appConnection.getContent());
+                if (lsettings != null) {
+                    DataSource lPool = constructDataSource(lsettings);
+                    testDataSource(lPool, lsettings);
+                    connectionPools.put(aDbId, lPool);
+                    connectionPoolsSettings.put(aDbId, lsettings);
+                    return lPool;
+                }
             }
         }
         return null;
@@ -177,25 +182,24 @@ public class GeneralResourceProvider {
     }
 
     /*
-    public static Properties constructPropertiesByDbConnectionSettings(DbConnectionSettings dbSettings) {
-        if (dbSettings != null) {
-            Properties props = dbSettings.getInfo();
-            String jdbcUrl = dbSettings.getUrl();
-            if (props != null && jdbcUrl != null) {
-                Properties serverProps = new Properties();
-                Set<Entry<Object, Object>> entries = props.entrySet();
-                for (Entry<Object, Object> entry : entries) {
-                    serverProps.put(entry.getKey(), entry.getValue());
-                }
-                serverProps.remove(ClientConstants.DB_CONNECTION_USER_PROP_NAME);
-                serverProps.remove(ClientConstants.DB_CONNECTION_PASSWORD_PROP_NAME);
-                return serverProps;
-            }
-        }
-        return null;
-    }
-    */ 
-
+     public static Properties constructPropertiesByDbConnectionSettings(DbConnectionSettings dbSettings) {
+     if (dbSettings != null) {
+     Properties props = dbSettings.getInfo();
+     String jdbcUrl = dbSettings.getUrl();
+     if (props != null && jdbcUrl != null) {
+     Properties serverProps = new Properties();
+     Set<Entry<Object, Object>> entries = props.entrySet();
+     for (Entry<Object, Object> entry : entries) {
+     serverProps.put(entry.getKey(), entry.getValue());
+     }
+     serverProps.remove(ClientConstants.DB_CONNECTION_USER_PROP_NAME);
+     serverProps.remove(ClientConstants.DB_CONNECTION_PASSWORD_PROP_NAME);
+     return serverProps;
+     }
+     }
+     return null;
+     }
+     */
     private String dialectByConnection(Connection aConnection) throws SQLException {
         String dialect = SQLUtils.dialectByUrl(aConnection.getMetaData().getURL());
         if (dialect == null) {

@@ -183,8 +183,8 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
             getSessionManager().setCurrentSession(oldSession);
         }
     }
-    public static final String STARTING_BACKGROUND_TASK_MSG = "Starting background task \"%s\"";
-    public static final String STARTED_BACKGROUND_TASK_MSG = "Background task \"%s\" started successfully";
+    public static final String STARTING_RESIDENT_TASK_MSG = "Starting resident task \"%s\"";
+    public static final String STARTED_RESIDENT_TASK_MSG = "Resident task \"%s\" started successfully";
 
     /**
      * Starts a server task, initializing it with supplied module annotations.
@@ -193,7 +193,7 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
      * @return Success status
      */
     public boolean startServerTask(String aModuleId) throws Exception {
-        Logger.getLogger(PlatypusServerCore.class.getName()).info(String.format(STARTING_BACKGROUND_TASK_MSG, aModuleId));
+        Logger.getLogger(PlatypusServerCore.class.getName()).info(String.format(STARTING_RESIDENT_TASK_MSG, aModuleId));
         ScriptDocument sDoc = scriptDocuments.compileScriptDocument(aModuleId);
         if (sDoc != null) {
             boolean stateless = false;
@@ -206,7 +206,8 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
                         extraAuthorizers.add(aModuleId);
                         break;
                     case JsDoc.Tag.VALIDATOR_TAG:
-                        databasesClient.addValidator(aModuleId);
+                        stateless = true;
+                        databasesClient.addValidator(aModuleId,  tag.getParams());
                         break;
                 }
             }
@@ -215,14 +216,14 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
                     ServerScriptRunner module = scriptsCache.get(aModuleId);
                     if (module != null) {
                         module.execute();
-                        Logger.getLogger(PlatypusServerCore.class.getName()).info(String.format(STARTED_BACKGROUND_TASK_MSG, aModuleId));
+                        Logger.getLogger(PlatypusServerCore.class.getName()).info(String.format(STARTED_RESIDENT_TASK_MSG, aModuleId));
                         return true;
                     } else {
-                        Logger.getLogger(PlatypusServerCore.class.getName()).warning(String.format("Background task \"%s\" is illegal (may be bad class name). Skipping it.", aModuleId));
+                        Logger.getLogger(PlatypusServerCore.class.getName()).warning(String.format("Resident task \"%s\" is illegal (may be bad class name). Skipping it.", aModuleId));
                         return false;
                     }
                 } catch (Exception ex) {
-                    Logger.getLogger(PlatypusServerCore.class.getName()).severe(String.format("Background task \"%s\" caused an error: %s. Skipping it.", aModuleId, ex.getMessage()));
+                    Logger.getLogger(PlatypusServerCore.class.getName()).severe(String.format("Resident task \"%s\" caused an error: %s. Skipping it.", aModuleId, ex.getMessage()));
                     return false;
                 }
             } else {

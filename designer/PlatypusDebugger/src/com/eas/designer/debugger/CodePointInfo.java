@@ -23,6 +23,7 @@ public class CodePointInfo {
     public int lineNo;
     public String functionName;
     public String threadName;
+    public int frameIndex;
 
     private CodePointInfo() {
     }

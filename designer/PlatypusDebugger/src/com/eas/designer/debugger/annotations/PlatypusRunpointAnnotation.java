@@ -13,13 +13,16 @@ import org.openide.text.Line;
  */
 public class PlatypusRunpointAnnotation extends Annotation {
 
+    /** Annotation type constant. */
+    public static final String CURRENT_LINE_ANNOTATION_TYPE = "CurrentPC";
+    
     public PlatypusRunpointAnnotation() {
         super();
     }
 
     @Override
     public String getAnnotationType() {
-        return "Platypus-Runpoint-Annotation";
+        return CURRENT_LINE_ANNOTATION_TYPE;
     }
 
     @Override

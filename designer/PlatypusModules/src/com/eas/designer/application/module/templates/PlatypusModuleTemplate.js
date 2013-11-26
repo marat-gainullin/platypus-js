@@ -3,4 +3,4 @@
  * @author ${user}
  * @name ${appElementName}
  */
-var _self = this;
+var self = this;

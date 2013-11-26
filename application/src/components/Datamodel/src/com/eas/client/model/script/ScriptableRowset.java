@@ -1444,47 +1444,45 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     public RowsComparator createSorting(Object... constraints) throws Exception {
         if (constraints != null && constraints.length > 0) {
             Rowset rowset = getRowset();
-            if (constraints != null && constraints.length > 0) {
-                List<SortingCriterion> criteria = new ArrayList<>();
-                for (int i = 0; i < constraints.length; i += 2) {
-                    int colIndex = 0;
-                    if (constraints[i] instanceof Double) {
-                        Double d = (Double) constraints[i];
-                        if (Math.abs(Math.round(d) - d) < 1e-10) {
-                            Long lFieldIndex = Math.round(d);
-                            if (Math.abs(lFieldIndex.intValue() - lFieldIndex) == 0) {
-                                colIndex = lFieldIndex.intValue();
-                            } else {
-                                throw new RowsetException(String.valueOf(i + 1) + " fieldIndex is out of integer value range.");
-                            }
+            List<SortingCriterion> criteria = new ArrayList<>();
+            for (int i = 0; i < constraints.length; i += 2) {
+                int colIndex = 0;
+                if (constraints[i] instanceof Double) {
+                    Double d = (Double) constraints[i];
+                    if (Math.abs(Math.round(d) - d) < 1e-10) {
+                        Long lFieldIndex = Math.round(d);
+                        if (Math.abs(lFieldIndex.intValue() - lFieldIndex) == 0) {
+                            colIndex = lFieldIndex.intValue();
                         } else {
-                            throw new RowsetException(String.valueOf(i + 1) + " fieldIndex must be an integer value, but it is not.");
-                        }
-                    } else if (constraints[i] instanceof Field) {
-                        Field rsFmd = (Field) constraints[i];
-                        colIndex = rowset.getFields().find(rsFmd.getName());
-                        if (colIndex <= 0) {
-                            throw new RowsetException(String.valueOf(i + 1) + " field name not found.");
+                            throw new RowsetException(String.valueOf(i + 1) + " fieldIndex is out of integer value range.");
                         }
                     } else {
-                        throw new RowsetException(String.valueOf(i + 1) + " field must be an integer col index or field metadata descriptor.");
+                        throw new RowsetException(String.valueOf(i + 1) + " fieldIndex must be an integer value, but it is not.");
                     }
-                    if (colIndex > 0) {
-                        boolean ascending = true;
-                        if (constraints.length > i + 1) {
-                            if (constraints[i + 1] instanceof Boolean) {
-                                ascending = (Boolean) constraints[i + 1];
-                            } else {
-                                throw new RowsetException(String.valueOf(i + 2) + " ascending/descending order argument is invalid. It must be a boolean value");
-                            }
-                        }
-                        criteria.add(new SortingCriterion(colIndex, ascending));
-                    } else {
-                        throw new RowsetException(String.valueOf(i + 1) + " invalid arguments.");
+                } else if (constraints[i] instanceof Field) {
+                    Field rsFmd = (Field) constraints[i];
+                    colIndex = rowset.getFields().find(rsFmd.getName());
+                    if (colIndex <= 0) {
+                        throw new RowsetException(String.valueOf(i + 1) + " field name not found.");
                     }
+                } else {
+                    throw new RowsetException(String.valueOf(i + 1) + " field must be an integer col index or field metadata descriptor.");
                 }
-                return new RowsComparator(criteria);
+                if (colIndex > 0) {
+                    boolean ascending = true;
+                    if (constraints.length > i + 1) {
+                        if (constraints[i + 1] instanceof Boolean) {
+                            ascending = (Boolean) constraints[i + 1];
+                        } else {
+                            throw new RowsetException(String.valueOf(i + 2) + " ascending/descending order argument is invalid. It must be a boolean value");
+                        }
+                    }
+                    criteria.add(new SortingCriterion(colIndex, ascending));
+                } else {
+                    throw new RowsetException(String.valueOf(i + 1) + " invalid arguments.");
+                }
             }
+            return new RowsComparator(criteria);
         }
         return null;
     }
@@ -1761,16 +1759,16 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     }
     private static final String INSTANCE_CONSTRUCTOR_JSDOC = ""
             + "/**\n"
-            + "* The constructor funciton for the entity's data array elements creation.\n"
+            + "* Experimental. The constructor funciton for the entity's data array elements.\n"
             + "*/";
 
     @ScriptFunction(jsDoc = INSTANCE_CONSTRUCTOR_JSDOC)
-    public Function getElementConstructor() {
+    public Function getElementClass() {
         return entity.getInstanceConstructor();
     }
 
     @ScriptFunction
-    public void setElementConstructor(Function aValue) {
+    public void setElementClass(Function aValue) {
         entity.setInstanceConstructor(aValue);
     }
     private static final String ON_CHANGED_JSDOC = ""
