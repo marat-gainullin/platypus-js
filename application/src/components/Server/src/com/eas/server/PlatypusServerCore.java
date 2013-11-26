@@ -47,7 +47,6 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
     static {
         ServerScriptRunnerPrototype.init(ScriptUtils.getScope(), true);
         ServerReportRunnerPrototype.init(ScriptUtils.getScope(), true);
-        ServerScriptProxyPrototype.init(ScriptUtils.getScope(), true);
     }
     protected static PlatypusServerCore instance;
 

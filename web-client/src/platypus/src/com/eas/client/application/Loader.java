@@ -163,7 +163,7 @@ public class Loader {
 										dependencies.add(dependency);
 								} else if (SERVER_DEPENDENCY_TAG_NAME.equals(docNode.getNodeName())) {
 									String dependency = docNode.getFirstChild().getNodeValue();
-									if (dependency != null && !dependency.isEmpty() && !touchedAppElements.contains(dependency))
+									if (dependency != null && !dependency.isEmpty() && !touchedAppElements.contains(SERVER_MODULE_TOUCHED_NAME + dependency))
 										serverModuleDependencies.add(dependency);
 								} else if (MODEL_TAG_NAME.equals(docNode.getNodeName())) {
 									assert docNode instanceof Element;
@@ -184,7 +184,7 @@ public class Loader {
 										queryDependencies.add(dependency);
 								}
 							}
-						}
+						}					
 						fireLoaded.run();
 						if (!dependencies.isEmpty() || !serverModuleDependencies.isEmpty() || !queryDependencies.isEmpty()) {
 							int accumulate = 0;

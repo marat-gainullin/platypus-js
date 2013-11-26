@@ -58,7 +58,7 @@ public abstract class CompiledScriptDocuments {
                          * currentContext.setOptimizationLevel(-1);
                          */
                         cx.setOptimizationLevel(-1);
-                        Function compiledFunc = cx.compileFunction(ScriptRunner.checkStandardObjects(cx), "function " + appElement.getId() + "(){" + lscriptDoc.getScriptSource() + "; this[\"" + ScriptUtils.HANDLERS_PROP_NAME + "\"]=" + lscriptDoc.generateTopLevelNamedFunctionsContainer() + ";}", appElement.getId(), 0, null);
+                        Function compiledFunc = cx.compileFunction(ScriptRunner.checkStandardObjects(cx), "function " + appElement.getId() + "(){" + lscriptDoc.getScriptSource() + "\n; this[\"" + ScriptUtils.HANDLERS_PROP_NAME + "\"]=" + lscriptDoc.generateTopLevelNamedFunctionsContainer() + ";}", appElement.getId(), 0, null);
                         lscriptDoc.setFunction(compiledFunc);
                         return lscriptDoc;
                     }
