@@ -677,6 +677,9 @@ public class ScriptRunner extends ScriptableObject {
                 if (oprot instanceof Scriptable) {
                     runner.setPrototype((Scriptable) oprot);
                 }
+                if(runner instanceof ScriptRunner){
+                    ((ScriptRunner)runner).execute();
+                }
                 return runner;
             } catch (Exception ex) {
                 Logger.getLogger(PlatypusModuleConstructorWrapper.class.getName()).log(Level.SEVERE, null, ex);

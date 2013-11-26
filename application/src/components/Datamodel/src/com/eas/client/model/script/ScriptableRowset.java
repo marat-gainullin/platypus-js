@@ -354,6 +354,19 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
         return false;
     }
 
+    public boolean isManual() throws Exception {
+        if (entity != null && entity.getQuery() != null) {
+            return entity.getQuery().isManual();
+        }
+        return false;
+    }
+
+    public void setManual(boolean aValue) {
+        if (entity != null && entity.getQuery() != null) {
+            entity.getQuery().setManual(aValue);
+        }
+    }
+
     public boolean isTableQuery() {
         if (entity != null) {
             return entity.getQueryId() == null;

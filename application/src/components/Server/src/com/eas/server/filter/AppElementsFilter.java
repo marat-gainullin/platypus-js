@@ -185,7 +185,8 @@ public class AppElementsFilter {
                     switch (docNode.getNodeName()) {
                         case ApplicationElement.SCRIPT_SOURCE_TAG_NAME:
                             String appSource = docNode.getTextContent();
-                            ScriptTransformer transformer = buildTransformer(appSource, scriptDoc.getModel());
+                            DependenciesWorker transformer = buildTransformer(appSource, scriptDoc.getModel());
+                            String source = transformer.transform();
                             switch (aAppElement.getType()) {
                                 case ClientConstants.ET_COMPONENT: {
                                     /*
@@ -195,7 +196,7 @@ public class AppElementsFilter {
                                     */ 
                                     String constructorName = checkModuleName("Module", moduleId);
                                     probableScript = String.format(BROWSER_MODULE_TEMPLATE,
-                                            constructorName, moduleId, appSource+"; this[\""+ScriptUtils.HANDLERS_PROP_NAME+"\"]="+scriptDoc.generateTopLevelNamedFunctionsContainer()+";", moduleId, constructorName, "Module", "Module");
+                                            constructorName, moduleId, source+"\n ; this[\""+ScriptUtils.HANDLERS_PROP_NAME+"\"]="+scriptDoc.generateTopLevelNamedFunctionsContainer()+";", moduleId, constructorName, "Module", "Module");
                                 }
                                 break;
                                 case ClientConstants.ET_FORM: {
@@ -211,14 +212,14 @@ public class AppElementsFilter {
                                     */ 
                                     String constructorName = checkModuleName("Form", moduleId);
                                     probableScript = String.format(BROWSER_FORM_TEMPLATE,
-                                            constructorName, moduleId, appSource+"; this[\""+ScriptUtils.HANDLERS_PROP_NAME+"\"]="+scriptDoc.generateTopLevelNamedFunctionsContainer()+";", moduleId, constructorName, "Form", "Form");
+                                            constructorName, moduleId, source+"\n ; this[\""+ScriptUtils.HANDLERS_PROP_NAME+"\"]="+scriptDoc.generateTopLevelNamedFunctionsContainer()+";", moduleId, constructorName, "Form", "Form");
                                 }
                                 break;
                                 default:
                                     throw new Exception("Application element of unexpected type occured. Only Modules and Forms are allowed be requested by browser.");
                             }
                             docNode.getParentNode().removeChild(docNode);
-                            transformer.transform();
+                            
                             dependencies = transformer.getDependencies();
                             queryDependencies = transformer.getQueryDependencies();
                             serverDependencies = transformer.getServerDependencies();
@@ -281,8 +282,8 @@ public class AppElementsFilter {
         }
     }
 
-    protected ScriptTransformer buildTransformer(String aSource, ApplicationModel<?, ?, ?, ?> aModel) throws Exception {
-        ScriptTransformer transformer = new ScriptTransformer(aSource, serverCore.getDatabasesClient().getAppCache());
+    protected DependenciesWorker buildTransformer(String aSource, ApplicationModel<?, ?, ?, ?> aModel) throws Exception {
+        DependenciesWorker transformer = new DependenciesWorker(aSource, serverCore.getDatabasesClient().getAppCache());
         /*
         transformer.addExternalVariable(Model.DATASOURCE_METADATA_SCRIPT_NAME);
         transformer.addExternalVariable(Model.PARAMETERS_SCRIPT_NAME);
