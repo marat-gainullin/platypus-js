@@ -33,6 +33,7 @@ public abstract class Event<E extends EventObject> {
         }
     }
 
+    @ScriptFunction(jsDoc = "Generates a string representation of an object")
     @Override
     public String toString() {
         return String.format("%s on %s", getClass().getSimpleName(), getSource() != null ? getSource().toString() : "");
