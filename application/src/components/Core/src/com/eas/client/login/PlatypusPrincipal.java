@@ -4,6 +4,7 @@
  */
 package com.eas.client.login;
 
+import com.eas.script.ScriptFunction;
 import java.security.Principal;
 import java.util.Set;
 
@@ -22,6 +23,7 @@ public abstract class PlatypusPrincipal implements Principal {
         name = aName;
     }
 
+    @ScriptFunction(jsDoc = "Checks if a user have a specified role")
     public abstract boolean hasRole(String aRole) throws Exception;
 
     public boolean hasAnyRole(Set<String> aRoles) throws Exception {
@@ -36,6 +38,7 @@ public abstract class PlatypusPrincipal implements Principal {
         return true;
     }
     
+    @ScriptFunction(jsDoc = "Generates a string representation of an object")
     @Override
     public String toString() {
         return super.toString() + "{username: \"" + name + "\"}";
@@ -67,6 +70,8 @@ public abstract class PlatypusPrincipal implements Principal {
         return name.hashCode();
     }
 
+    @ScriptFunction(jsDoc = "Returns name of the user")
+    @Override
     public String getName() {
         return name;
     }
