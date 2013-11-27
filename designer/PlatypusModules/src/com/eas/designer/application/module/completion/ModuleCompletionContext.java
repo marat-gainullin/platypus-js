@@ -63,7 +63,6 @@ public class ModuleCompletionContext extends CompletionContext {
         JsCodeCompletionScopeInfo completionScopeInfo = getCompletionScopeInfo(dataObject, offset, point.filter);
         if (completionScopeInfo.mode == CompletionMode.CONSTRUCTORS) {
             fillSystemConstructors(point, resultSet);
-            fillApplicatonElementsConstructors(IndexerQuery.appElementsByPrefix(dataObject.getProject(), point.filter != null ? point.filter : ""), point, resultSet);//NOI18N
         }
     }
 
@@ -72,17 +71,6 @@ public class ModuleCompletionContext extends CompletionContext {
             Collection<SystemConstructorCompletionItem> items = scp.getSystemConstructors(point);
             if (items != null) {
                 for (SystemConstructorCompletionItem item : items) {
-                    addItem(resultSet, point.filter, item);
-                }
-            }
-        }
-    }
-
-    protected void fillApplicatonElementsConstructors(Collection<AppElementInfo> appElements, JsCompletionProvider.CompletionPoint point, CompletionResultSet resultSet) {
-        for (CompletionSupportService scp : Lookup.getDefault().lookupAll(CompletionSupportService.class)) {
-            Collection<AppElementConstructorCompletionItem> items = scp.getAppElementsConstructors(appElements, point);
-            if (items != null) {
-                for (AppElementConstructorCompletionItem item : items) {
                     addItem(resultSet, point.filter, item);
                 }
             }
@@ -234,7 +222,10 @@ public class ModuleCompletionContext extends CompletionContext {
                                             if (isModuleInitializerName(ne.getTarget().getString())
                                                     && ne.getArguments() != null
                                                     && ne.getArguments().size() > 0) {
-                                                ctx = getModuleCompletionContext(parentContext.getDataObject().getProject(), stripElementId(ne.getArguments().get(0).toSource())).createThisContext();
+                                                ModuleCompletionContext mctx = getModuleCompletionContext(parentContext.getDataObject().getProject(), stripElementId(ne.getArguments().get(0).toSource()));
+                                                if (mctx != null) {
+                                                    ctx = mctx.createThisContext();
+                                                }
                                                 return false;
                                             }
                                             //checks for Platypus API classes
@@ -265,8 +256,8 @@ public class ModuleCompletionContext extends CompletionContext {
                                                 }
                                             }
                                         }
-                                        } else if (variableInitializer.getInitializer() instanceof KeywordLiteral && Token.THIS == variableInitializer.getInitializer().getType()) {
-                                            ctx = new ThisCompletionContext(parentContext);
+                                    } else if (variableInitializer.getInitializer() instanceof KeywordLiteral && Token.THIS == variableInitializer.getInitializer().getType()) {
+                                        ctx = new ThisCompletionContext(parentContext);
                                     }
                                 }
                             }

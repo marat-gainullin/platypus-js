@@ -43,16 +43,5 @@ public class ModuleCompletionSupportService implements CompletionSupportService 
         constructors.add(new SystemConstructorCompletionItem(SERVER_MODULE_CONSTRUCTOR_NAME, "", SystemConstructorCompletionItem.DOUBLE_QUOTES_PARAMS, SERVER_MODULE_CONSTRUCTOR_JSDOC, point.caretBeginWordOffset, point.caretEndWordOffset));
         return constructors;
     }
-
-    @Override
-    public Collection<AppElementConstructorCompletionItem> getAppElementsConstructors(Collection<AppElementInfo> appElements, JsCompletionProvider.CompletionPoint point) {
-        List<AppElementConstructorCompletionItem> constructors = new ArrayList<>();
-        for (AppElementInfo appElementInfo : appElements) {
-            if (PlatypusFiles.JAVASCRIPT_EXTENSION.equals(appElementInfo.primaryFileObject.getExt())
-                    && appElementInfo.primaryFileObject.equals(PlatypusModuleDataLoader.findPrimaryFileImpl(appElementInfo.primaryFileObject))) {
-                constructors.add(new AppElementConstructorCompletionItem(appElementInfo.appElementId, "", Collections.<String>emptyList(), appElementInfo.primaryFileObject, point.caretBeginWordOffset, point.caretEndWordOffset));
-            }
-        }
-        return constructors;
-    }
+    
 }
