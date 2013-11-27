@@ -75,8 +75,10 @@ public class CompletionContext {
     }
 
     protected static void addItem(CompletionResultSet resultSet, String aFilter, JsCompletionItem aCompletionItem) {
-        if (aFilter == null || aFilter.isEmpty() || aCompletionItem.getText().toLowerCase().startsWith(aFilter.toLowerCase())) {
-            resultSet.addItem(aCompletionItem);
+        if (aFilter == null || aFilter.isEmpty() || (aCompletionItem.getText().toLowerCase().startsWith(aFilter.toLowerCase()) && !aCompletionItem.getText().equals(aFilter))) {
+            if (aFilter == null || !(aFilter.endsWith(")") || aFilter.endsWith("}"))) {//NOI18N
+                resultSet.addItem(aCompletionItem);
+            }
         }
     }
 
