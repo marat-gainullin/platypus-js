@@ -12,28 +12,21 @@ import static com.eas.designer.application.module.completion.CompletionContext.M
 import static com.eas.designer.application.module.completion.CompletionContext.addItem;
 import com.eas.designer.application.module.parser.AstUtlities;
 import com.eas.designer.explorer.utils.StringUtils;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import org.mozilla.javascript.Token;
-import org.mozilla.javascript.ast.Assignment;
 import org.mozilla.javascript.ast.AstNode;
 import org.mozilla.javascript.ast.AstRoot;
 import org.mozilla.javascript.ast.FunctionCall;
 import org.mozilla.javascript.ast.FunctionNode;
-import org.mozilla.javascript.ast.KeywordLiteral;
 import org.mozilla.javascript.ast.Name;
 import org.mozilla.javascript.ast.NewExpression;
 import org.mozilla.javascript.ast.NodeVisitor;
 import org.mozilla.javascript.ast.PropertyGet;
 import org.mozilla.javascript.ast.ScriptNode;
 import org.mozilla.javascript.ast.Block;
-import org.mozilla.javascript.ast.ExpressionStatement;
-import org.mozilla.javascript.ast.Symbol;
+import org.mozilla.javascript.ast.KeywordLiteral;
+import org.mozilla.javascript.ast.Scope;
 import org.mozilla.javascript.ast.VariableDeclaration;
 import org.mozilla.javascript.ast.VariableInitializer;
 import org.netbeans.api.project.Project;
@@ -50,7 +43,6 @@ import org.openide.util.Lookup;
 public class ModuleCompletionContext extends CompletionContext {
 
     public static final String THIS_KEYWORD = "this"; //NOI18N
-    
     protected PlatypusModuleDataObject dataObject;
 
     public ModuleCompletionContext(PlatypusModuleDataObject aDataObject, Class<?> aClass) {
@@ -62,6 +54,10 @@ public class ModuleCompletionContext extends CompletionContext {
         return dataObject;
     }
 
+    public ThisCompletionContext createThisContext() {
+        return new ThisCompletionContext(this);
+    }
+
     @Override
     public void applyCompletionItems(JsCompletionProvider.CompletionPoint point, int offset, CompletionResultSet resultSet) throws Exception {
         JsCodeCompletionScopeInfo completionScopeInfo = getCompletionScopeInfo(dataObject, offset, point.filter);
@@ -69,14 +65,6 @@ public class ModuleCompletionContext extends CompletionContext {
             fillSystemConstructors(point, resultSet);
             fillApplicatonElementsConstructors(IndexerQuery.appElementsByPrefix(dataObject.getProject(), point.filter != null ? point.filter : ""), point, resultSet);//NOI18N
         }
-    }
-
-    protected void fillVariablesAndFunctions(JsCompletionProvider.CompletionPoint point, CompletionResultSet resultSet) throws Exception {
-        fillFieldsValues(dataObject.getModel().getParametersEntity().getFields(), point, resultSet);
-        fillEntities(dataObject.getModel().getEntities().values(), resultSet, point);
-        addItem(resultSet, point.filter, new BeanCompletionItem(dataObject.getModel().getClass(), MODEL_SCRIPT_NAME, null, point.caretBeginWordOffset, point.caretEndWordOffset));
-        addItem(resultSet, point.filter, new BeanCompletionItem(dataObject.getModel().getParametersEntity().getRowset().getClass(), PARAMS_SCRIPT_NAME, null, point.caretBeginWordOffset, point.caretEndWordOffset));
-        fillJavaCompletionItems(point, resultSet);
     }
 
     protected void fillSystemConstructors(JsCompletionProvider.CompletionPoint point, CompletionResultSet resultSet) {
@@ -103,20 +91,7 @@ public class ModuleCompletionContext extends CompletionContext {
 
     @Override
     public CompletionContext getChildContext(String fieldName, int offset) throws Exception {
-        switch (fieldName) {
-            case MODEL_SCRIPT_NAME: {
-                return new ModelCompletionContext(dataObject);
-            }
-            case PARAMS_SCRIPT_NAME: {
-                return new EntityCompletionContext(dataObject.getModel().getParametersEntity());
-            }
-        }
-        ApplicationDbEntity entity = dataObject.getModel().getEntityByName(fieldName);
-        if (entity != null) {
-            return new EntityCompletionContext(entity);
-        }
-        CompletionContext typeCompletionContext = findCompletionContext(fieldName, offset, this);
-        return typeCompletionContext;
+        return findCompletionContext(fieldName, offset, this);
     }
 
     protected static JsCodeCompletionScopeInfo getCompletionScopeInfo(PlatypusModuleDataObject aDataObject, int offset, String text) {
@@ -148,16 +123,21 @@ public class ModuleCompletionContext extends CompletionContext {
     }
 
     public static CompletionContext findCompletionContext(String fieldName, int offset, ModuleCompletionContext parentModuleContext) {
-        AstRoot ast = parentModuleContext.dataObject.getAst();
-        if (ast != null) {     
-            AstNode offsetNode = AstUtlities.getOffsetNode(ast, offset);
+        AstRoot astRoot = parentModuleContext.dataObject.getAst();
+        if (astRoot != null) {
+            AstNode offsetNode = AstUtlities.getOffsetNode(astRoot, offset);
+            FindModuleConstructorBlockSupport helper = new FindModuleConstructorBlockSupport();
+            Block moduleConstructorBlock = helper.findModuleConstuctorBlock(astRoot);
+            if (offsetNode != null && offsetNode.equals(moduleConstructorBlock) && THIS_KEYWORD.equals(fieldName)) {
+                return new ThisCompletionContext(parentModuleContext);
+            }
             AstNode currentNode = offsetNode;
             for (;;) {//up to the root node  
                 if (currentNode instanceof ScriptNode) {
                     ScriptNode scriptNode = (ScriptNode) currentNode;
                     ModuleCompletionContext.FindModuleElementSupport visitor =
                             new ModuleCompletionContext.FindModuleElementSupport(scriptNode, fieldName, parentModuleContext);
-                    CompletionContext ctx = visitor.getModuleInfo();
+                    CompletionContext ctx = visitor.findContext();
                     if (ctx != null) {
                         return ctx;
                     }
@@ -194,123 +174,26 @@ public class ModuleCompletionContext extends CompletionContext {
         }
     }
 
-    public static class ScanJsItemsSupport {
+    private static class FindModuleConstructorBlockSupport {
 
-        private Map<String, JsCompletionItem> functionsMap;
-        private Map<String, JsCompletionItem> fieldsMap;
-        private AstNode currentNode;
+        Block constructorBlock;
 
-        public Collection<JsCompletionItem> getScopeCompletionItems(JsCodeCompletionScopeInfo scopeInfo, String rightText, JsCompletionProvider.CompletionPoint point) {
-            functionsMap = new HashMap<>();
-            fieldsMap = new HashMap<>();
-            fillScopeCompletionItems(scopeInfo, rightText, point);
-            List<JsCompletionItem> items = new ArrayList<>(functionsMap.values());
-            items.addAll(new ArrayList<>(fieldsMap.values()));
-            return items;
-        }
+        private Block findModuleConstuctorBlock(final AstRoot astRoot) {
 
-        public Collection<JsCompletionItem> getPropertyCompletionItems(JsCodeCompletionScopeInfo scopeInfo, String rightText, JsCompletionProvider.CompletionPoint point) {
-            functionsMap = new HashMap<>();
-            fieldsMap = new HashMap<>();
-            fillPropetyCompletionItems(scopeInfo, point.getLastContextItem(), point);
-            List<JsCompletionItem> items = new ArrayList<>(functionsMap.values());
-            items.addAll(new ArrayList<>(fieldsMap.values()));
-            return items;
-        }
-
-        private void fillScopeCompletionItems(final JsCodeCompletionScopeInfo scopeInfo, final String rightText, final JsCompletionProvider.CompletionPoint point) {
-            currentNode = scopeInfo.scope;
-            for (;;) {//up to the root node  
-                if (currentNode instanceof ScriptNode) {
-                    ScriptNode scriptNode = (ScriptNode) currentNode;
-                    //scan for variables and functions because we need more data about them
-                    scriptNode.visit(new NodeVisitor() {
-                        @Override
-                        public boolean visit(AstNode an) {
-                            if (an == currentNode) {
-                                return true;
-                            }
-                            if (an instanceof FunctionNode) {
-                                FunctionNode fn = (FunctionNode) an;
-                                functionsMap.put(fn.getName(),
-                                        new JsFunctionCompletionItem(fn.getName(), rightText, getFunctionParams(fn), fn.getJsDoc(), point.caretBeginWordOffset, point.caretEndWordOffset));
-                                return false;
-                            }
-                            if (scopeInfo.mode == CompletionMode.VARIABLES_AND_FUNCTIONS && an instanceof VariableDeclaration) {
-                                VariableDeclaration variableDeclaration = (VariableDeclaration) an;
-                                if (variableDeclaration.getVariables() != null) {
-                                    for (VariableInitializer variableInitializer : variableDeclaration.getVariables()) {
-                                        fieldsMap.put(variableInitializer.getTarget().getString(),
-                                                new JsFieldCompletionItem(variableInitializer.getTarget().getString(), rightText, variableDeclaration.getJsDoc(), point.caretBeginWordOffset, point.caretEndWordOffset));
-                                    }
-                                }
-                                return false;
-                            }
-                            return an instanceof ScriptNode || an instanceof Block;
-                        }
-                    });
-                    if (scopeInfo.mode == CompletionMode.VARIABLES_AND_FUNCTIONS) {
-                        // get parameters in the scope
-                        for (Symbol symbol : scriptNode.getSymbols()) {
-                            switch (symbol.getDeclType()) {
-                                case Token.LP:
-                                    fieldsMap.put(symbol.getName(), new JsFieldCompletionItem(symbol.getName(), "", null, point.caretBeginWordOffset, point.caretEndWordOffset));//NOI18N
-                                    break;
-
-                            }
-                        }
-                    }
-                }
-                currentNode = currentNode.getParent();
-                if (currentNode == null) {
-                    break;
-                }
-            }
-        }
-
-        private void fillPropetyCompletionItems(final JsCodeCompletionScopeInfo scopeInfo, final String rightText, final JsCompletionProvider.CompletionPoint point) {
-            scopeInfo.scope.getAstRoot().visit(new NodeVisitor() {
+            astRoot.visit(new NodeVisitor() {
                 @Override
                 public boolean visit(AstNode an) {
-                    if (an == scopeInfo.scope.getAstRoot()) {
+                    if (astRoot.equals(an)) {
                         return true;
                     }
-
-                    if (an instanceof ExpressionStatement) {
-                        ExpressionStatement es = (ExpressionStatement) an;
-                        if (es.getExpression() instanceof Assignment) {
-                            Assignment as = (Assignment) es.getExpression();
-                            if (as.getLeft() instanceof PropertyGet) {
-                                PropertyGet pg = (PropertyGet) as.getLeft();
-                                if (pg.getLeft() instanceof Name) {
-                                    Name n = (Name) pg.getLeft();
-                                    if (n.getIdentifier().equals(rightText)) {
-                                        if (as.getRight() instanceof FunctionNode) {
-                                            FunctionNode fn = (FunctionNode) as.getRight();
-                                            functionsMap.put(pg.getProperty().getIdentifier(),
-                                                    new JsFunctionCompletionItem(pg.getProperty().getIdentifier(), "", getFunctionParams(fn), as.getJsDoc(), point.caretBeginWordOffset, point.caretEndWordOffset));
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
+                    if (an instanceof FunctionNode) {
+                        FunctionNode fn = (FunctionNode) an;
+                        constructorBlock = (Block) fn.getBody();
                     }
                     return false;
                 }
             });
-        }
-
-        private List<String> getFunctionParams(FunctionNode aFunctionNode) {
-            List<String> params = new ArrayList<>();
-            if (aFunctionNode.getSymbols() != null) {
-                for (Symbol symbol : aFunctionNode.getSymbols()) { // get the function's parameters
-                    if (symbol.getDeclType() == Token.LP) {
-                        params.add(symbol.getName());
-                    }
-                }
-            }
-            return params;
+            return constructorBlock;
         }
     }
 
@@ -327,77 +210,73 @@ public class ModuleCompletionContext extends CompletionContext {
             parentContext = aParentContext;
         }
 
-        public CompletionContext getModuleInfo() {
-            if (node instanceof AstRoot && THIS_KEYWORD.equals(fieldName)) {
-                return new ThisCompletionContext(parentContext);
-            } else {
-                node.visit(new NodeVisitor() {
-                    @Override
-                    public boolean visit(AstNode an) {
-                        if (an == node) {
-                            return true;
-                        }
-                        if (an instanceof FunctionNode) {
-                            return false;
-                        }
-                        if (an instanceof VariableDeclaration) {
-                            VariableDeclaration variableDeclaration = (VariableDeclaration) an;
-                            if (variableDeclaration.getVariables() != null) {
-                                for (VariableInitializer variableInitializer : variableDeclaration.getVariables()) {
-                                    if (variableInitializer.getTarget() != null
-                                            && variableInitializer.getTarget().getString().equals(fieldName)
-                                            && variableInitializer.getInitializer() != null) {
-                                        if (variableInitializer.getInitializer() instanceof NewExpression) {
-                                            NewExpression ne = (NewExpression) variableInitializer.getInitializer();
-                                            if (ne.getTarget() != null && ne.getTarget() instanceof Name) {
-                                                //checks for new Module(moduleName) like expression 
-                                                if (isModuleInitializerName(ne.getTarget().getString())
-                                                        && ne.getArguments() != null
-                                                        && ne.getArguments().size() > 0) {
-                                                    ctx = getModuleCompletionContext(parentContext.getDataObject().getProject(), stripElementId(ne.getArguments().get(0).toSource()));
-                                                    return false;
-                                                }
-                                                //checks for Platypus API classes
-                                                for (CompletionSupportService scp : Lookup.getDefault().lookupAll(CompletionSupportService.class)) {
-                                                    Class clazz = scp.getClassByName(ne.getTarget().getString());
-                                                    if (clazz != null) {
-                                                        ctx = new CompletionContext(clazz);
-                                                        return false;
-                                                    }
-                                                }
-                                                //checks for new ModuleName() expression
-                                                CompletionContext cc = getModuleCompletionContext(parentContext.getDataObject().getProject(), stripElementId(ne.getTarget().getString()));
-                                                if (cc != null) {
-                                                    ctx = cc;
+        public CompletionContext findContext() {
+            node.visit(new NodeVisitor() {
+                @Override
+                public boolean visit(AstNode an) {
+                    if (an == node) {
+                        return true;
+                    }
+                    if (an instanceof FunctionNode) {
+                        return false;
+                    }
+                    if (an instanceof VariableDeclaration) {
+                        VariableDeclaration variableDeclaration = (VariableDeclaration) an;
+                        if (variableDeclaration.getVariables() != null) {
+                            for (VariableInitializer variableInitializer : variableDeclaration.getVariables()) {
+                                if (variableInitializer.getTarget() != null
+                                        && variableInitializer.getTarget().getString().equals(fieldName)
+                                        && variableInitializer.getInitializer() != null) {
+                                    if (variableInitializer.getInitializer() instanceof NewExpression) {
+                                        NewExpression ne = (NewExpression) variableInitializer.getInitializer();
+                                        if (ne.getTarget() != null && ne.getTarget() instanceof Name) {
+                                            //checks for new Module(moduleName) like expression 
+                                            if (isModuleInitializerName(ne.getTarget().getString())
+                                                    && ne.getArguments() != null
+                                                    && ne.getArguments().size() > 0) {
+                                                ctx = getModuleCompletionContext(parentContext.getDataObject().getProject(), stripElementId(ne.getArguments().get(0).toSource())).createThisContext();
+                                                return false;
+                                            }
+                                            //checks for Platypus API classes
+                                            for (CompletionSupportService scp : Lookup.getDefault().lookupAll(CompletionSupportService.class)) {
+                                                Class clazz = scp.getClassByName(ne.getTarget().getString());
+                                                if (clazz != null) {
+                                                    ctx = new CompletionContext(clazz);
                                                     return false;
                                                 }
                                             }
-                                            //checks for Modules.get(moduleName) expression
-                                        } else if (variableInitializer.getInitializer() instanceof FunctionCall) {
-                                            FunctionCall fc = (FunctionCall) variableInitializer.getInitializer();
-                                            if (fc.getTarget() instanceof PropertyGet) {
-                                                PropertyGet pg = (PropertyGet) fc.getTarget();
-                                                if (pg.getLeft().getString().equals(MODULES_OBJECT_NAME)
-                                                        && pg.getRight().getString().equals(GET_METHOD_NAME)) {
-                                                    if (fc.getArguments() != null && fc.getArguments().size() > 0) {
-                                                        ctx = getModuleCompletionContext(parentContext.getDataObject().getProject(), stripElementId(fc.getArguments().get(0).toSource()));
-                                                        return false;
-                                                    }
-                                                }
+                                            //checks for new ModuleName() expression
+                                            CompletionContext cc = getModuleCompletionContext(parentContext.getDataObject().getProject(), stripElementId(ne.getTarget().getString())).createThisContext();
+                                            if (cc != null) {
+                                                ctx = cc;
+                                                return false;
                                             }
-                                        } else if (variableInitializer.getInitializer() instanceof KeywordLiteral && Token.THIS == variableInitializer.getInitializer().getType() && variableDeclaration.getParent() instanceof AstRoot) {
-                                            ctx = new ThisCompletionContext(parentContext);
                                         }
+                                        //checks for Modules.get(moduleName) expression
+                                    } else if (variableInitializer.getInitializer() instanceof FunctionCall) {
+                                        FunctionCall fc = (FunctionCall) variableInitializer.getInitializer();
+                                        if (fc.getTarget() instanceof PropertyGet) {
+                                            PropertyGet pg = (PropertyGet) fc.getTarget();
+                                            if (pg.getLeft().getString().equals(MODULES_OBJECT_NAME)
+                                                    && pg.getRight().getString().equals(GET_METHOD_NAME)) {
+                                                if (fc.getArguments() != null && fc.getArguments().size() > 0) {
+                                                    ctx = getModuleCompletionContext(parentContext.getDataObject().getProject(), stripElementId(fc.getArguments().get(0).toSource())).createThisContext();
+                                                    return false;
+                                                }
+                                            }
+                                        }
+                                        } else if (variableInitializer.getInitializer() instanceof KeywordLiteral && Token.THIS == variableInitializer.getInitializer().getType()) {
+                                            ctx = new ThisCompletionContext(parentContext);
                                     }
                                 }
                             }
-                            return false;
                         }
-                        return true;
+                        return false;
                     }
-                });
-                return ctx;
-            }
+                    return true;
+                }
+            });
+            return ctx;
         }
 
         private static String stripElementId(String str) {
@@ -414,10 +293,30 @@ public class ModuleCompletionContext extends CompletionContext {
             parentContext = aParentContext;
         }
 
+        public ModuleCompletionContext getParentContext() {
+            return parentContext;
+        }
+
+        @Override
+        public CompletionContext getChildContext(String fieldName, int offset) throws Exception {
+            switch (fieldName) {
+                case MODEL_SCRIPT_NAME: {
+                    return new ModelCompletionContext(parentContext.getDataObject());
+                }
+                case PARAMS_SCRIPT_NAME: {
+                    return new EntityCompletionContext(parentContext.getDataObject().getModel().getParametersEntity());
+                }
+            }
+            ApplicationDbEntity entity = parentContext.getDataObject().getModel().getEntityByName(fieldName);
+            if (entity != null) {
+                return new EntityCompletionContext(entity);
+            }
+            return null;
+        }
+
         @Override
         public void applyCompletionItems(JsCompletionProvider.CompletionPoint point, int offset, CompletionResultSet resultSet) throws Exception {
             JsCodeCompletionScopeInfo completionScopeInfo = getCompletionScopeInfo(parentContext.getDataObject(), offset, point.filter);
-            fillJsEntities(completionScopeInfo, point, resultSet);
             if (completionScopeInfo.mode == CompletionMode.VARIABLES_AND_FUNCTIONS) {
                 fillVariablesAndFunctions(point, resultSet);
             }
@@ -429,14 +328,6 @@ public class ModuleCompletionContext extends CompletionContext {
             addItem(resultSet, point.filter, new BeanCompletionItem(parentContext.getDataObject().getModel().getClass(), MODEL_SCRIPT_NAME, null, point.caretBeginWordOffset, point.caretEndWordOffset));
             addItem(resultSet, point.filter, new BeanCompletionItem(parentContext.getDataObject().getModel().getParametersEntity().getRowset().getClass(), PARAMS_SCRIPT_NAME, null, point.caretBeginWordOffset, point.caretEndWordOffset));
             fillJavaCompletionItems(point, resultSet);
-        }
-
-        protected static void fillJsEntities(JsCodeCompletionScopeInfo completionScopeInfo, JsCompletionProvider.CompletionPoint point, CompletionResultSet resultSet) {
-            ScanJsItemsSupport cs = new ScanJsItemsSupport();
-            Collection<JsCompletionItem> items = cs.getPropertyCompletionItems(completionScopeInfo, "", point);
-            for (JsCompletionItem item : items) {
-                addItem(resultSet, point.filter, item);
-            }
         }
     }
 }
