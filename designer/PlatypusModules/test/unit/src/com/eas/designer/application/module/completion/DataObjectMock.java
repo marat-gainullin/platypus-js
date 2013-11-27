@@ -5,7 +5,7 @@
 package com.eas.designer.application.module.completion;
 
 import com.eas.designer.application.module.AstProvider;
-import com.eas.designer.application.module.parser.JsParser;
+import com.eas.script.JsParser;
 import org.mozilla.javascript.ast.AstRoot;
 
 /**

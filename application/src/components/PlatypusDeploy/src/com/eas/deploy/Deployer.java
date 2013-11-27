@@ -21,7 +21,6 @@ import com.eas.client.settings.ConnectionSettings2XmlDom;
 import com.eas.util.FileUtils;
 import com.eas.util.StringUtils;
 import com.eas.xml.dom.XmlDom2String;
-import com.sun.org.apache.xerces.internal.dom.ElementImpl;
 import java.io.*;
 import java.util.*;
 import java.util.logging.Level;
@@ -142,7 +141,7 @@ public class Deployer extends BaseDeployer {
     }
 
     /**
-     * Removes the project's component from the database
+     * Removes the project's contents from the database
      *
      */
     public void undeploy() {

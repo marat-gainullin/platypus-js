@@ -12,7 +12,7 @@ import org.junit.Test;
  *
  * @author kl
  */
-public class ScriptTransformerTest {
+public class DependenciesWalkerTest {
 
     /*
     @Test
@@ -344,7 +344,7 @@ public class ScriptTransformerTest {
     public void testParseDependencies1() {
         String va1 = "var moduleName = 'SOME_MODULE_NAME'; Modules.get(moduleName);";
         //String va2 = "" + ScriptTransformer.SELF_NAME + ".moduleName = 'SOME_MODULE_NAME';\nModules.get(" + ScriptTransformer.SELF_NAME + ".moduleName);\n";
-        DependenciesWorker transformer = new DependenciesWorker(va1);
+        DependenciesWalker transformer = new DependenciesWalker(va1);
         //String va3 = transformer.transform();
         //assertEquals(va3, va2);
         assertTrue(transformer.getDependencies().isEmpty());
@@ -355,7 +355,7 @@ public class ScriptTransformerTest {
         String SOME_MODULE_TWO = "SOME_MODULE_TWO";
         String va1 = "var moduleName = 'SOME_MODULE_NAME'; Modules.get(\"" + SOME_MODULE_TWO + "\");";
         //String va2 = "" + ScriptTransformer.SELF_NAME + ".moduleName = 'SOME_MODULE_NAME';\nModules.get(\"" + SOME_MODULE_TWO + "\");\n";
-        DependenciesWorker transformer = new DependenciesWorker(va1);
+        DependenciesWalker transformer = new DependenciesWalker(va1);
         String va3 = transformer.transform();
         //assertEquals(va3, va2);
         Set<String> dependencies = transformer.getDependencies();
@@ -368,7 +368,7 @@ public class ScriptTransformerTest {
         String FORM_ID_HERE = "FORM_ID_HERE";
         String va1 = "var form = new Form(\"" + FORM_ID_HERE + "\");";
         //String va2 = "" + ScriptTransformer.SELF_NAME + ".form = new " + FORM_ID_HERE + "();\n";
-        DependenciesWorker transformer = new DependenciesWorker(va1);
+        DependenciesWalker transformer = new DependenciesWalker(va1);
         String va3 = transformer.transform();
         //assertEquals(va3, va2);
         Set<String> dependencies = transformer.getDependencies();
@@ -380,7 +380,7 @@ public class ScriptTransformerTest {
     public void testParseDependencies4() {
         String va1 = "var report = new Report(\"ANY_REPORT_NAME\"); var module = new Module(\"ANY_MODULE_NAME\"); var form = new Form(\"123456789123456\");";
         //String va2 = "" + ScriptTransformer.SELF_NAME + ".report = new ServerReportANY_REPORT_NAME();\n" + ScriptTransformer.SELF_NAME + ".module = new ANY_MODULE_NAME();\n" + ScriptTransformer.SELF_NAME + ".form = new Form123456789123456();\n";
-        DependenciesWorker transformer = new DependenciesWorker(va1);
+        DependenciesWalker transformer = new DependenciesWalker(va1);
         String va3 = transformer.transform();
         //assertEquals(va3, va2);
         assertFalse(transformer.getDependencies().isEmpty());
@@ -392,7 +392,7 @@ public class ScriptTransformerTest {
     public void testParseDependencies5() {
         String va1 = "var report = new ServerReport(\"ANY_REPORT_NAME\"); var module = new Module(\"ANY_MODULE_NAME\"); var report2 = new Report(\"ANY_REPORT_NAME\"); var servModule = new ServerModule(\"ANY_MODULE_NAME\");";
         //String va2 = "" + ScriptTransformer.SELF_NAME + ".report = new ServerReportANY_REPORT_NAME();\n" + ScriptTransformer.SELF_NAME + ".module = new ANY_MODULE_NAME();\n" + ScriptTransformer.SELF_NAME + ".report2 = new ServerReportANY_REPORT_NAME();\n" + ScriptTransformer.SELF_NAME + ".servModule = new ServerModuleANY_MODULE_NAME();\n";
-        DependenciesWorker transformer = new DependenciesWorker(va1);
+        DependenciesWalker transformer = new DependenciesWalker(va1);
         String va3 = transformer.transform();
         //assertEquals(va3, va2);
         assertFalse(transformer.getDependencies().isEmpty());
@@ -404,7 +404,7 @@ public class ScriptTransformerTest {
     public void testParseDependencies6() {
         String va1 = "require([\"ANY_REPORT_NAME\", \"ANY_MODULE_NAME\"], function(){var report = new ServerReport(\"ANY_REPORT_NAME\"); var module = new Module(\"ANY_MODULE1_NAME\"); var report2 = new Report(\"ANY_REPORT_NAME\"); var servModule = new ServerModule(\"ANY_MODULE_NAME\");});";
         //String va2 = "require([\"ANY_REPORT_NAME\", \"ANY_MODULE_NAME\"], function() {\n  var report = new ServerReportANY_REPORT_NAME();\n  var module = new ANY_MODULE1_NAME();\n  var report2 = new ServerReportANY_REPORT_NAME();\n  var servModule = new ServerModuleANY_MODULE_NAME();\n});\n";
-        DependenciesWorker transformer = new DependenciesWorker(va1);
+        DependenciesWalker transformer = new DependenciesWalker(va1);
         String va3 = transformer.transform();
         //assertEquals(va3, va2);
         assertFalse(transformer.getDependencies().isEmpty());
@@ -416,7 +416,7 @@ public class ScriptTransformerTest {
     public void testParseDependencies7() {
         String va1 = "require([\"ANY_REPORT_NAME\", \"ANY_MODULE_NAME\", \"ANY_MODULE1_NAME\"], function(){var report = new ServerReport(\"ANY_REPORT_NAME\"); var module = new Module(\"ANY_MODULE1_NAME\"); var report2 = new Report(\"ANY_REPORT_NAME\"); var servModule = new ServerModule(\"ANY_MODULE_NAME\");});";
         //String va2 = "require([\"ANY_REPORT_NAME\", \"ANY_MODULE_NAME\", \"ANY_MODULE1_NAME\"], function() {\n  var report = new ServerReportANY_REPORT_NAME();\n  var module = new ANY_MODULE1_NAME();\n  var report2 = new ServerReportANY_REPORT_NAME();\n  var servModule = new ServerModuleANY_MODULE_NAME();\n});\n";
-        DependenciesWorker transformer = new DependenciesWorker(va1);
+        DependenciesWalker transformer = new DependenciesWalker(va1);
         String va3 = transformer.transform();
         //assertEquals(va3, va2);
         assertTrue(transformer.getDependencies().isEmpty());
@@ -427,7 +427,7 @@ public class ScriptTransformerTest {
     public void testParseDependencies8() {
         String va1 = "require(\"ANY_REPORT_NAME\", function(){var report = new ServerReport(\"ANY_REPORT_NAME\"); var report2 = new Report(\"ANY_REPORT_NAME\")});";
         //String va2 = "require(\"ANY_REPORT_NAME\", function() {\n  var report = new ServerReportANY_REPORT_NAME();\n  var report2 = new ServerReportANY_REPORT_NAME();\n});\n";
-        DependenciesWorker transformer = new DependenciesWorker(va1);
+        DependenciesWalker transformer = new DependenciesWalker(va1);
         String va3 = transformer.transform();
         //assertEquals(va3, va2);
         assertTrue(transformer.getDependencies().isEmpty());
@@ -438,7 +438,7 @@ public class ScriptTransformerTest {
     public void testParseDependencies9() {
         String va1 = "var q = model.loadEntity('someQuery');";
         //String va2 = "_platypusModuleSelf.q = _platypusModuleSelf.model.loadEntity('someQuery');\n";
-        DependenciesWorker transformer = new DependenciesWorker(va1);
+        DependenciesWalker transformer = new DependenciesWalker(va1);
         //transformer.addExternalVariable("model");
         String va3 = transformer.transform();
         //assertEquals(va2, va3);

@@ -17,7 +17,7 @@ import org.mozilla.javascript.ast.*;
  *
  * @author kl, mg refactoring
  */
-public class DependenciesWorker {
+public class DependenciesWalker {
 
     public static final String ERROR_BAD_AST = "bad Ast";
     public static final String ERROR_DEPENDECIES_PARSE_ERROR = "dependencies parse error";
@@ -37,11 +37,11 @@ public class DependenciesWorker {
     private AppCache cache;
     private ErrorReporter compilationErrorReporter;
 
-    public DependenciesWorker(String aSource) {
+    public DependenciesWalker(String aSource) {
         this(aSource, null);
     }
 
-    public DependenciesWorker(String aSource, AppCache aCache) {
+    public DependenciesWalker(String aSource, AppCache aCache) {
         super();
         source = aSource;
         cache = aCache;
@@ -163,7 +163,7 @@ public class DependenciesWorker {
                         putDependence(name.getIdentifier());
                     }
                 } catch (Exception ex) {
-                    Logger.getLogger(DependenciesWorker.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(DependenciesWalker.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         }

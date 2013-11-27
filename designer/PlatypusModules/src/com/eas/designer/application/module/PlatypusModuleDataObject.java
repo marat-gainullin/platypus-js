@@ -15,7 +15,7 @@ import com.eas.designer.application.module.completion.CompletionContext;
 import com.eas.designer.application.module.completion.ModuleCompletionContext;
 import com.eas.designer.application.module.events.ApplicationModuleEvents;
 import com.eas.designer.application.module.nodes.ApplicationModelNodeChildren;
-import com.eas.designer.application.module.parser.JsParser;
+import com.eas.script.JsParser;
 import com.eas.designer.application.project.PlatypusProject;
 import com.eas.designer.explorer.PlatypusDataObject;
 import com.eas.designer.datamodel.nodes.ModelNode;
@@ -29,6 +29,7 @@ import org.openide.cookies.EditorCookie;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.filesystems.MIMEResolver;
+import org.openide.loaders.DataObject;
 import org.openide.loaders.MultiFileLoader;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.CookieSet;
@@ -201,6 +202,11 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
                 out.flush();
             }
         }
+    }
+
+    @Override
+    protected boolean needAnnotationRename(DataObject aDataObject) {
+        return false; 
     }
 
     @Override
