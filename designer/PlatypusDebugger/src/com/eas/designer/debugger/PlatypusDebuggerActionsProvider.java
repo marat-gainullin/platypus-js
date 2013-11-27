@@ -9,15 +9,11 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import org.netbeans.api.debugger.ActionsManager;
-import org.netbeans.api.debugger.Breakpoint;
 import org.netbeans.api.debugger.DebuggerEngine;
-import org.netbeans.api.debugger.DebuggerEngine.Destructor;
 import org.netbeans.api.debugger.DebuggerManager;
 import org.netbeans.spi.debugger.ActionsProvider;
 import org.netbeans.spi.debugger.ActionsProviderListener;
 import org.openide.ErrorManager;
-import org.openide.filesystems.FileObject;
-import org.openide.text.Line;
 
 /**
  *

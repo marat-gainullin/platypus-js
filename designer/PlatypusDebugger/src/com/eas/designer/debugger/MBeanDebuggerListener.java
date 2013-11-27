@@ -5,7 +5,6 @@
 package com.eas.designer.debugger;
 
 import com.eas.debugger.jmx.server.DebuggerMBean;
-import com.eas.designer.application.indexer.IndexerQuery;
 import com.eas.designer.debugger.annotations.PlatypusRunpointAnnotation;
 import javax.management.AttributeChangeNotification;
 import javax.management.Notification;
@@ -13,6 +12,7 @@ import javax.management.NotificationListener;
 import org.netbeans.api.debugger.ActionsManager;
 import org.netbeans.api.debugger.DebuggerEngine;
 import org.netbeans.api.debugger.DebuggerManager;
+import org.netbeans.api.debugger.Session;
 import org.netbeans.api.project.Project;
 import org.openide.ErrorManager;
 import org.openide.cookies.EditorCookie;
@@ -28,6 +28,7 @@ import org.openide.text.Line;
 public class MBeanDebuggerListener implements NotificationListener {
 
     protected boolean debuggingStarted;
+    protected Thread processWaiter;
     protected boolean running;
     protected PlatypusRunpointAnnotation annotation = new PlatypusRunpointAnnotation();
     protected Project project;
@@ -37,8 +38,14 @@ public class MBeanDebuggerListener implements NotificationListener {
     }
 
     public void die() {
-        annotation.detach();
-        annotation = null;
+        if (annotation != null) {
+            annotation.detach();
+            annotation = null;
+        }
+        if(processWaiter != null){
+            processWaiter.interrupt();
+            processWaiter = null;
+        }
     }
 
     @Override
@@ -64,13 +71,20 @@ public class MBeanDebuggerListener implements NotificationListener {
         // Let's find our engine;
         running = false;
         DebuggerEngine ourEngine = null;
+        Session ourSession = null;
         DebuggerEngine[] engines = DebuggerManager.getDebuggerManager().getDebuggerEngines();
         for (DebuggerEngine engine : engines) {
             if (this == engine.lookupFirst(DebuggerConstants.DEBUGGER_SERVICERS_PATH, DebuggerEnvironment.class).mDebuggerListener) {
                 ourEngine = engine;
+                ourSession = ourEngine.lookupFirst(DebuggerConstants.DEBUGGER_SERVICERS_PATH, Session.class);
+                break;
             }
         }
-        assert ourEngine != null : "Debugging engine missing";
+        assert ourEngine != null || ourSession != null : "Debugging engine missing";
+
+        if (DebuggerManager.getDebuggerManager().getCurrentEngine() != ourEngine) {
+            DebuggerManager.getDebuggerManager().setCurrentSession(ourSession);
+        }
 
         if (cpInfo.fo != null) {// can't open libraries
             if (cpInfo.fo != null) {
@@ -83,7 +97,6 @@ public class MBeanDebuggerListener implements NotificationListener {
                             annotation.attach(lineObject);
                             final Annotation addedAnnotation = annotation;
                             Runnable showRunnable = new Runnable() {
-
                                 @Override
                                 public void run() {
                                     lineObject.show(Line.ShowOpenType.OPEN, Line.ShowVisibilityType.FRONT);

@@ -19,6 +19,18 @@ import org.openide.util.Utilities;
  */
 public class PlatypusBreakpointAnnotation extends BreakpointAnnotation {
 
+    /**
+     * Annotation type constant.
+     */
+    public static final String BREAKPOINT_ANNOTATION_TYPE = "Breakpoint"; // NOI18N
+    /**
+     * Annotation type constant.
+     */
+    public static final String CONDITIONAL_BREAKPOINT_ANNOTATION_TYPE = "CondBreakpoint"; // NOI18N
+    /**
+     * Annotation type constant.
+     */
+    public static final String DISABLED_CONDITIONAL_BREAKPOINT_ANNOTATION_TYPE = "DisabledCondBreakpoint"; // NOI18N
     protected PlatypusBreakpoint breakpoint;
 
     public PlatypusBreakpointAnnotation(PlatypusBreakpoint aBreakpoint) {
@@ -33,7 +45,7 @@ public class PlatypusBreakpointAnnotation extends BreakpointAnnotation {
 
     @Override
     public String getAnnotationType() {
-        return "Platypus-Breakpoint-Annotation";
+        return BREAKPOINT_ANNOTATION_TYPE;
     }
 
     @Override
@@ -53,7 +65,8 @@ public class PlatypusBreakpointAnnotation extends BreakpointAnnotation {
     public static Line getCurrentLine() {
         FileObject fo = Utilities.actionsGlobalContext().lookup(FileObject.class);
         if (isJsFile(fo)) {
-            return EditorContextDispatcher.getDefault().getCurrentLine();
+            Line cLine = EditorContextDispatcher.getDefault().getCurrentLine();
+            return cLine != null ? cLine : EditorContextDispatcher.getDefault().getMostRecentLine();
         } else {
             return null;
         }
@@ -67,5 +80,4 @@ public class PlatypusBreakpointAnnotation extends BreakpointAnnotation {
             pBreak.addAnnotation(annotation);
         }
     }
-
 }

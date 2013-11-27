@@ -5,13 +5,18 @@
 package com.eas.designer.explorer.project;
 
 import com.eas.client.AppCache;
+import com.eas.client.Client;
 import com.eas.client.DbClient;
 import com.eas.client.ScriptedDatabasesClient;
 import com.eas.client.application.ClientCompiledScriptDocuments;
 import com.eas.client.cache.PlatypusFiles;
+import com.eas.client.login.PlatypusPrincipal;
+import com.eas.client.login.PrincipalHost;
+import com.eas.client.login.SystemPlatypusPrincipal;
 import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.scripts.CompiledScriptDocuments;
 import com.eas.client.scripts.CompiledScriptDocumentsHost;
+import com.eas.client.scripts.ScriptRunner;
 import com.eas.client.settings.DbConnectionSettings;
 import com.eas.deploy.BaseDeployer;
 import com.eas.deploy.DbMigrator;
@@ -25,6 +30,7 @@ import com.eas.designer.explorer.j2ee.PlatypusWebModule;
 import com.eas.designer.explorer.j2ee.PlatypusWebModuleManager;
 import com.eas.designer.explorer.model.windows.ModelInspector;
 import com.eas.designer.explorer.project.ui.PlatypusProjectCustomizerProvider;
+import com.eas.script.ScriptUtils;
 import com.eas.util.BinaryUtils;
 import java.awt.Component;
 import java.beans.PropertyChangeEvent;
@@ -42,6 +48,7 @@ import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
+import org.mozilla.javascript.Context;
 import org.netbeans.api.java.classpath.ClassPath;
 import org.netbeans.api.java.classpath.GlobalPathRegistry;
 import org.netbeans.api.progress.ProgressHandle;
@@ -241,7 +248,30 @@ public class PlatypusProjectImpl implements PlatypusProject {
             DbConnectionSettings dbSettings = settings.getAppSettings().getDbSettings();
             dbSettings.setApplicationPath(getProjectDirectory().getPath());
 
-            final ScriptedDatabasesClient lclient = new ScriptedDatabasesClient(dbSettings);
+            final ScriptedDatabasesClient lclient = new ScriptedDatabasesClient(dbSettings) {
+                protected CompiledScriptDocuments documents = new ClientCompiledScriptDocuments(this);
+
+                @Override
+                protected ScriptRunner createModule(Context cx, String aModuleName) throws Exception {
+                    ScriptRunner created = new ScriptRunner(aModuleName, (Client) this, ScriptUtils.getScope(), new PrincipalHost() {
+                        @Override
+                        public PlatypusPrincipal getPrincipal() {
+                            return new SystemPlatypusPrincipal();
+                        }
+                    }, new CompiledScriptDocumentsHost() {
+                        @Override
+                        public CompiledScriptDocuments getDocuments() {
+                            return documents;
+                        }
+
+                        @Override
+                        public void defineJsClass(String string, ApplicationElement ae) {
+                            throw new UnsupportedOperationException("Javascript classesd defining is not supported within a designer."); //To change body of generated methods, choose Tools | Templates.
+                        }
+                    }, new Object[]{});
+                    return created;
+                }
+            };
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
                 public void run() {
@@ -292,10 +322,10 @@ public class PlatypusProjectImpl implements PlatypusProject {
         html = html.replaceAll("dbValidateBaseHref", urlBase.toString());
         JEditorPane htmlPage = new JEditorPane("text/html", html);
         htmlPage.setEditable(false);
-        
+
         return new JScrollPane(htmlPage);
     }
-    
+
     @Override
     public synchronized HandlerRegistration addClientChangeListener(final Runnable onChange) {
         clientListeners.add(onChange);
@@ -395,13 +425,13 @@ public class PlatypusProjectImpl implements PlatypusProject {
     public RequestProcessor getRequestProcessor() {
         return RP;
     }
-    
+
     private SearchInfoDefinition getSearchInfoDescription() {
         return SearchInfoDefinitionFactory.createSearchInfo(
                 getProjectDirectory(),
                 new SearchFilterDefinition[]{
-                    searchFilter
-                });
+            searchFilter
+        });
     }
 
     private final class PlatypusOpenedHook extends ProjectOpenedHook {
@@ -431,10 +461,12 @@ public class PlatypusProjectImpl implements PlatypusProject {
     }
 
     private final class PlatypusClassPathProvider implements ClassPathProvider {
-      
+
         /**
          * Find some kind of a classpath for a given file or default classpath.
-         * @param file a file somewhere, or a source root, or null for default classpath
+         *
+         * @param file a file somewhere, or a source root, or null for default
+         * classpath
          * @param type a classpath type
          * @return an appropriate classpath, or null for no answer
          */
@@ -451,7 +483,7 @@ public class PlatypusProjectImpl implements PlatypusProject {
 
         private final PropertyChangeSupport support = new PropertyChangeSupport(this);
         private List<PathResourceImplementation> resources;
-        
+
         @Override
         public synchronized List<? extends PathResourceImplementation> getResources() {
             try {

@@ -12,6 +12,7 @@
 package com.eas.designer.debugger.ui;
 
 import com.eas.designer.debugger.AttachSettings;
+import java.awt.event.KeyEvent;
 
 /**
  *

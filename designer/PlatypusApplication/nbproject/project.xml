@@ -183,6 +183,7 @@
                 <package>com.eas.client.forms.api.events</package>
                 <package>com.eas.client.forms.api.menu</package>
                 <package>com.eas.client.geo</package>
+                <package>com.eas.client.login</package>
                 <package>com.eas.client.metadata</package>
                 <package>com.eas.client.model</package>
                 <package>com.eas.client.model.application</package>
@@ -288,6 +289,7 @@
                 <package>net.sf.jsqlparser.util.deparser</package>
                 <package>oracle.jdbc</package>
                 <package>oracle.jdbc.driver</package>
+                <package>org.apache.poi.ss.usermodel</package>
                 <package>org.h2</package>
                 <package>org.h2.api</package>
                 <package>org.h2.bnf</package>
@@ -319,6 +321,7 @@
                 <package>org.h2.util</package>
                 <package>org.h2.value</package>
                 <package>org.jfree.chart</package>
+                <package>org.jfree.ui</package>
                 <package>org.jinterop.dcom.common</package>
                 <package>org.mozilla.javascript</package>
                 <package>org.mozilla.javascript.ast</package>
@@ -345,46 +348,23 @@
                 <package>org.postgresql.translation</package>
                 <package>org.postgresql.util</package>
                 <package>org.postgresql.xa</package>
+                <package>rpc</package>
             </public-packages>
-            <class-path-extension>
-                <runtime-relative-path>ext/Routing.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/Routing.jar</binary-origin>
-            </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/jai_core-1.1.3.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/jai_core-1.1.3.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
-                <runtime-relative-path>ext/SyntaxPane.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/SyntaxPane.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
-                <runtime-relative-path>ext/jtds-1.2.3.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/jtds-1.2.3.jar</binary-origin>
+                <runtime-relative-path>ext/Routing.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/Routing.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/gt-jdbc-oracle-2.7.0.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/gt-jdbc-oracle-2.7.0.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
-                <runtime-relative-path>ext/Modules.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/Modules.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
                 <runtime-relative-path>ext/DbControls.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/DbControls.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
-                <runtime-relative-path>ext/commons-beanutils-1.8.2.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/commons-beanutils-1.8.2.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
-                <runtime-relative-path>ext/PlatypusServletSupport.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/PlatypusServletSupport.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
-                <runtime-relative-path>ext/Forms.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/Forms.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/mysql-connector-java-5.1.20-bin.jar</runtime-relative-path>
@@ -399,14 +379,6 @@
                 <binary-origin>release/modules/ext/Grid.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
-                <runtime-relative-path>ext/Rowsets.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/Rowsets.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
-                <runtime-relative-path>ext/BinaryTags.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/BinaryTags.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
                 <runtime-relative-path>ext/gt-api-2.7.0.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/gt-api-2.7.0.jar</binary-origin>
             </class-path-extension>
@@ -415,20 +387,8 @@
                 <binary-origin>release/modules/ext/Reports.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
-                <runtime-relative-path>ext/jxls-core-1.0.1.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/jxls-core-1.0.1.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
-                <runtime-relative-path>ext/db2jcc.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/db2jcc.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
                 <runtime-relative-path>ext/Application.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/Application.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
-                <runtime-relative-path>ext/IconLib.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/IconLib.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/gt-render-2.7.0.jar</runtime-relative-path>
@@ -439,20 +399,8 @@
                 <binary-origin>release/modules/ext/jfreechart-1.0.15.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
-                <runtime-relative-path>ext/GeoPane.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/GeoPane.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
-                <runtime-relative-path>ext/gt-main-2.7.0.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/gt-main-2.7.0.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
                 <runtime-relative-path>ext/Controls.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/Controls.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
-                <runtime-relative-path>ext/geoapi-2.3-M1.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/geoapi-2.3-M1.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/MetadataSynchronizer.jar</runtime-relative-path>
@@ -463,60 +411,132 @@
                 <binary-origin>release/modules/ext/gt-metadata-2.7.0.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
-                <runtime-relative-path>ext/geoapi-pending-2.3-M1.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/geoapi-pending-2.3-M1.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
-                <runtime-relative-path>ext/j-interop.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/j-interop.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
                 <runtime-relative-path>ext/gt-referencing-2.7.0.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/gt-referencing-2.7.0.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
-                <runtime-relative-path>ext/SqlParser.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/SqlParser.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/ojdbc6.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/ojdbc6.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
-                <runtime-relative-path>ext/js.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/js.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
                 <runtime-relative-path>ext/Core.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/Core.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
-                <runtime-relative-path>ext/Server.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/Server.jar</binary-origin>
+                <runtime-relative-path>ext/js.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/js.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
-                <runtime-relative-path>ext/postgresql-8.4-701.jdbc4.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/postgresql-8.4-701.jdbc4.jar</binary-origin>
+                <runtime-relative-path>ext/poi-3.9-20121203.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/poi-3.9-20121203.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/Datamodel.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/Datamodel.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
-                <runtime-relative-path>ext/jts-1.11.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/jts-1.11.jar</binary-origin>
+                <runtime-relative-path>ext/postgresql-8.4-701.jdbc4.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/postgresql-8.4-701.jdbc4.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/GeoAddon.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/GeoAddon.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
-                <runtime-relative-path>ext/db2jcc_license_cu.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/db2jcc_license_cu.jar</binary-origin>
+                <runtime-relative-path>ext/jts-1.11.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/jts-1.11.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/j-interopdeps.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/j-interopdeps.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/h2-1.3.167.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/h2-1.3.167.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/SyntaxPane.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/SyntaxPane.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/jtds-1.2.3.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/jtds-1.2.3.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/Modules.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/Modules.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/commons-beanutils-1.8.2.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/commons-beanutils-1.8.2.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/PlatypusServletSupport.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/PlatypusServletSupport.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/Forms.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/Forms.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/Rowsets.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/Rowsets.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/BinaryTags.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/BinaryTags.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/jxls-core-1.0.1.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/jxls-core-1.0.1.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/IconLib.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/IconLib.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/db2jcc.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/db2jcc.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/GeoPane.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/GeoPane.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/gt-main-2.7.0.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/gt-main-2.7.0.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/geoapi-2.3-M1.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/geoapi-2.3-M1.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/geoapi-pending-2.3-M1.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/geoapi-pending-2.3-M1.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/jcifs-1.2.19.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/jcifs-1.2.19.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/j-interop.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/j-interop.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/SqlParser.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/SqlParser.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/Server.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/Server.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/jcommon-1.0.18.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/jcommon-1.0.18.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/db2jcc_license_cu.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/db2jcc_license_cu.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/jsr-275-1.0-beta-2.jar</runtime-relative-path>
@@ -527,12 +547,12 @@
                 <binary-origin>release/modules/ext/CommonUtils.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
-                <runtime-relative-path>ext/JCalendar.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/JCalendar.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
                 <runtime-relative-path>ext/ScalablePane.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/ScalablePane.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/JCalendar.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/JCalendar.jar</binary-origin>
             </class-path-extension>
         </data>
     </configuration>

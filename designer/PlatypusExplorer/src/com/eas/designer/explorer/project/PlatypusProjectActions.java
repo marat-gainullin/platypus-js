@@ -8,8 +8,6 @@ import com.eas.client.AppCache;
 import com.eas.client.cache.FilesAppCache;
 import com.eas.designer.application.project.PlatypusProject;
 import com.eas.designer.explorer.j2ee.PlatypusWebModuleManager;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;

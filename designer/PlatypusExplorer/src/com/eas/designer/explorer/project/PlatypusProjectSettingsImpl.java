@@ -623,6 +623,7 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
 
     /**
      * Gets the log level for Platypus Client.
+     *
      * @return Log level value
      */
     @Override
@@ -639,9 +640,10 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
     }
 
     /**
-      * Sets a log level for Platypus Client.
-      * @param aValue Log level value
-      */
+     * Sets a log level for Platypus Client.
+     *
+     * @param aValue Log level value
+     */
     @Override
     public void setClientLogLevel(Level aValue) {
         Level oldValue = getClientLogLevel();
@@ -656,6 +658,7 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
 
     /**
      * Gets the log level for Platypus Server.
+     *
      * @return Log level value
      */
     @Override
@@ -672,9 +675,10 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
     }
 
     /**
-      * Sets a log level for Platypus Server.
-      * @param aValue Log level value
-      */
+     * Sets a log level for Platypus Server.
+     *
+     * @param aValue Log level value
+     */
     @Override
     public void setServerLogLevel(Level aValue) {
         Level oldValue = getServerLogLevel();

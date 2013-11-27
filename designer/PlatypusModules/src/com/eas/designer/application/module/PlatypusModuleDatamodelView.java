@@ -201,6 +201,9 @@ public final class PlatypusModuleDatamodelView extends TopComponent implements M
                         allowedMimeTypes.add(PlatypusPathRecognizer.JAVASRIPT_MIME_TYPE);
                     }
                 };
+                if (appModelEditor != null) {
+                    appModelEditor.setModel(null);
+                }
                 appModelEditor = new ApplicationModelEditorView(tablesSelector, queriesSelector);
                 appModelEditor.getModelView().addEntityViewDoubleClickListener(new QueryDocumentJumper<ApplicationDbEntity>(dataObject.getProject()));
                 ApplicationDbModel model = dataObject.getModel();

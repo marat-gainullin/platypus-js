@@ -60,6 +60,8 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
     protected Function onAfterDelete;
     protected Function onRequeried;
     protected Function onFiltered;
+    //
+    protected Function instanceConstructor;
     protected RowsetHostObject<E> sRowsetWrap;
     protected Map<String, ScriptableObject> ormDefinitions = new HashMap<>();
     protected transient List<Integer> filterConstraints = new ArrayList<>();
@@ -96,6 +98,14 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
 
     public Map<String, ScriptableObject> getOrmDefinitions() {
         return Collections.unmodifiableMap(ormDefinitions);
+    }
+
+    public Function getInstanceConstructor() {
+        return instanceConstructor;
+    }
+
+    public void setInstanceConstructor(Function aValue) {
+        instanceConstructor = aValue;
     }
 
     @Override

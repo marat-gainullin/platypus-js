@@ -7,6 +7,7 @@ package com.eas.designer.debugger.ui;
 import com.eas.designer.debugger.PlatypusBreakpoint;
 import java.util.HashSet;
 import java.util.Set;
+import org.netbeans.spi.debugger.DebuggerServiceRegistration;
 import org.netbeans.spi.viewmodel.ModelEvent;
 import org.netbeans.spi.viewmodel.ModelListener;
 import org.netbeans.spi.viewmodel.NodeModel;
@@ -17,6 +18,9 @@ import org.openide.filesystems.FileObject;
  *
  * @author mg
  */
+@DebuggerServiceRegistration(path = "PlatypusJsSession/BreakpointsView",
+        types = NodeModel.class,
+        position = 10000)
 public class BreakpointModel implements NodeModel {
 
     public static final String RESOURCE_PREFIX =

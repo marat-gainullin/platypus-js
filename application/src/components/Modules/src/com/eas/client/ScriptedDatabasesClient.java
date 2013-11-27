@@ -17,16 +17,20 @@ import com.eas.client.scripts.ScriptRunner;
 import com.eas.client.settings.DbConnectionSettings;
 import com.eas.script.ScriptUtils;
 import com.eas.script.ScriptUtils.ScriptAction;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
 import org.mozilla.javascript.IdFunctionObject;
+import org.mozilla.javascript.ScriptRuntime;
 import org.mozilla.javascript.Scriptable;
 
 /**
@@ -36,7 +40,8 @@ import org.mozilla.javascript.Scriptable;
 public class ScriptedDatabasesClient extends DatabasesClient {
 
     protected static final String JAVASCRIPT_QUERY_CONTENTS = "javascript query";
-    protected Set<String> validators = new HashSet<>();
+    // key - validator name, value datasources list
+    protected Map<String, Collection<String>> validators = new HashMap<>();
     protected FreqCache<String, SqlQuery> scriptedQueries = new FreqCache<String, SqlQuery>() {
         @Override
         protected SqlQuery getNewEntry(final String aQueryId) throws Exception {
@@ -45,10 +50,11 @@ public class ScriptedDatabasesClient extends DatabasesClient {
                 return ScriptUtils.inContext(new ScriptAction() {
                     @Override
                     public SqlQuery run(Context cx) throws Exception {
+                        final String aDatasourceId = aQueryId;
                         SqlQuery query = new SqlQuery(ScriptedDatabasesClient.this) {
                             @Override
                             public SqlCompiledQuery compile() throws UnboundSqlParameterException, Exception {
-                                SqlCompiledQuery compiled = new SqlCompiledQuery(ScriptedDatabasesClient.this, null, aQueryId, JAVASCRIPT_QUERY_CONTENTS, getParameters(), getFields(), Collections.<String>emptySet(), Collections.<String>emptySet());
+                                SqlCompiledQuery compiled = new SqlCompiledQuery(ScriptedDatabasesClient.this, aDatasourceId, aQueryId, JAVASCRIPT_QUERY_CONTENTS, getParameters(), getFields(), Collections.<String>emptySet(), Collections.<String>emptySet());
                                 return compiled;
                             }
 
@@ -56,20 +62,13 @@ public class ScriptedDatabasesClient extends DatabasesClient {
                             public boolean isPublicAccess() {
                                 return true;
                             }
-                            
                         };
-                        Scriptable scope = ScriptRunner.checkStandardObjects(cx);
-                        Object oConstructor = scope.get(aQueryId, scope);
-                        if (oConstructor == Scriptable.NOT_FOUND) {
-                            oConstructor = ScriptUtils.getScope().get(aQueryId, ScriptUtils.getScope());
-                        }
-                        if (oConstructor instanceof Function) {
-                            Function fConstructor = (Function) oConstructor;
-                            Scriptable schemaContainer = fConstructor.construct(cx, scope, new Object[]{});
-                            assert schemaContainer instanceof ScriptRunner : "Datasource class must be a platypus module";
+                        ScriptRunner schemaContainer = createModule(cx, aQueryId);
+                        if (schemaContainer != null) {
                             Fields fields = new Fields();
                             query.setFields(fields);
                             query.setEntityId(aQueryId);
+                            query.setDbId(aDatasourceId);
                             Object oSchema = schemaContainer.get("schema", schemaContainer);
                             readScriptFields(aQueryId, oSchema, fields);
                             for (Field p : ((ScriptRunner) schemaContainer).getModel().getParameters().toCollection()) {
@@ -117,10 +116,16 @@ public class ScriptedDatabasesClient extends DatabasesClient {
                                                     field.setTypeInfo(DataTypeInfo.TIMESTAMP.copy());
                                                 }
                                             }
+                                            Object oRequired = sElement.get("required", sElement);
+                                            if (oRequired != Scriptable.NOT_FOUND) {
+                                                boolean bRequired = Context.toBoolean(oRequired);
+                                                field.setNullable(!bRequired);
+                                            }
                                             Object oKey = sElement.get("key", sElement);
                                             if (oKey != Scriptable.NOT_FOUND) {
                                                 boolean bKey = Context.toBoolean(oKey);
                                                 field.setPk(bKey);
+                                                field.setNullable(false);
                                             }
                                             Object oRef = sElement.get("ref", sElement);
                                             if (oRef instanceof Scriptable) {
@@ -178,16 +183,18 @@ public class ScriptedDatabasesClient extends DatabasesClient {
     }
 
     /**
-     * Adds transaction validator module.
-     * Validator modules are used in commit to verify transaction changes log.
-     * They mey consume particuled changes and optionally send them to custom data store or a service.
-     * If validator module detects an errorneous data changes, than it should thor ab exception.
-     * @param aModuleId 
+     * Adds transaction validator module. Validator modules are used in commit
+     * to verify transaction changes log. They mey consume particuled changes
+     * and optionally send them to custom data store or a service. If validator
+     * module detects an errorneous data changes, than it should thor ab
+     * exception.
+     *
+     * @param aModuleId
      */
-    public void addValidator(String aModuleId){
-        validators.add(aModuleId);
+    public void addValidator(String aModuleId, Collection<String> aDatasources) {
+        validators.put(aModuleId, aDatasources);
     }
-    
+
     @Override
     protected void clearQueries(String aDbId) throws Exception {
         super.clearQueries(aDbId);
@@ -211,21 +218,27 @@ public class ScriptedDatabasesClient extends DatabasesClient {
         return query;
     }
 
+    protected ScriptRunner createModule(Context cx, String aModuleName) throws Exception {
+        Scriptable scope = ScriptRunner.checkStandardObjects(cx);
+        Object oConstructor = ScriptRuntime.name(cx, scope, aModuleName);
+        if (oConstructor instanceof Function) {
+            Function fConstructor = (Function) oConstructor;
+            Scriptable created = fConstructor.construct(cx, scope, new Object[]{});
+            assert created instanceof ScriptRunner : "Datasource or validator class must be a platypus module";
+            return (ScriptRunner) created;
+        } else {
+            return null;
+        }
+    }
+
     @Override
     public FlowProvider createFlowProvider(String aDbId, final String aSessionId, final String aEntityId, String aSqlClause, final Fields aExpectedFields, Set<String> aReadRoles, Set<String> aWriteRoles) throws Exception {
         if (JAVASCRIPT_QUERY_CONTENTS.equals(aSqlClause)) {
             return ScriptUtils.inContext(new ScriptAction() {
                 @Override
                 public FlowProvider run(Context cx) throws Exception {
-                    Scriptable scope = ScriptRunner.checkStandardObjects(cx);
-                    Object oConstructor = scope.get(aEntityId, scope);
-                    if (oConstructor == Scriptable.NOT_FOUND) {
-                        oConstructor = ScriptUtils.getScope().get(aEntityId, ScriptUtils.getScope());
-                    }
-                    if (oConstructor instanceof Function) {
-                        Function fConstructor = (Function) oConstructor;
-                        Scriptable dataFeeder = fConstructor.construct(cx, scope, new Object[]{});
-                        assert dataFeeder instanceof ScriptRunner : "Datasource class must be a platypus module";
+                    ScriptRunner dataFeeder = createModule(cx, aEntityId);
+                    if (dataFeeder != null) {
                         return new PlatypusScriptedFlowProvider(ScriptedDatabasesClient.this, aExpectedFields, (ScriptRunner) dataFeeder, aSessionId);
                     } else {
                         throw new IllegalStateException(" datasource module: " + aEntityId + " not found");
@@ -242,32 +255,47 @@ public class ScriptedDatabasesClient extends DatabasesClient {
         ScriptUtils.inContext(new ScriptAction() {
             @Override
             public Object run(Context cx) throws Exception {
-                Scriptable scope = ScriptRunner.checkStandardObjects(cx);
-                for (String validatorName : validators) {
-                    Object oConstructor = scope.get(validatorName, scope);
-                    if (oConstructor == Scriptable.NOT_FOUND) {
-                        oConstructor = ScriptUtils.getScope().get(validatorName, ScriptUtils.getScope());
-                    }
-                    if (oConstructor instanceof Function) {
-                        Function fConstructor = (Function) oConstructor;
-                        Scriptable validator = fConstructor.construct(cx, scope, new Object[]{});
-                        Object oValidate = validator.get("validate", validator);
-                        if (oValidate instanceof Function) {
-                            Function fValidate = (Function) oValidate;
-                            Object oResult = fValidate.call(cx, scope, validator, new Object[]{aSessionId, aDatasourceId, Context.javaToJS(aLog.toArray(), scope)});
-                            if (oResult != null && oResult != Context.getUndefinedValue() && Boolean.FALSE.equals(Context.toBoolean(oResult))) {
-                                break;
+                Map<String, Collection<String>> lvalidators = new HashMap<>();
+                lvalidators.putAll(validators);
+                Collection<String> flowAsValidator = lvalidators.get(aDatasourceId);
+                if (flowAsValidator == null || flowAsValidator.isEmpty()) {
+                    lvalidators.put(aDatasourceId, Arrays.asList(new String[]{aDatasourceId}));
+                }
+                for (String validatorName : lvalidators.keySet()) {
+                    Collection<String> datasources = lvalidators.get(validatorName);
+                    if (datasources == null || datasources.isEmpty() || datasources.contains(aDatasourceId)) {
+                        ScriptRunner validator = createModule(cx, validatorName);
+                        if (validator != null) {
+                            Object oValidate = validator.get("validate", validator);
+                            if (oValidate instanceof Function) {
+                                Function fValidate = (Function) oValidate;
+                                Object oResult = fValidate.call(cx, validator.getParentScope(), validator, new Object[]{Context.javaToJS(aLog.toArray(), validator.getParentScope()), aDatasourceId, aSessionId});
+                                if (oResult != null && oResult != Context.getUndefinedValue() && Boolean.FALSE.equals(Context.toBoolean(oResult))) {
+                                    break;
+                                }
+                            } else {
+                                if (validators.containsKey(validatorName)) {
+                                    Logger.getLogger(ScriptedDatabasesClient.class.getName()).log(Level.WARNING, "\"validate\" method couldn''t be found in {0} module.", validatorName);
+                                }// else { silent ignore because method 'validate' is optional for custom data source modules}
                             }
                         } else {
-                            Logger.getLogger(ScriptedDatabasesClient.class.getName()).log(Level.WARNING, "\"validate\" method couldn''t be found in {0} module.", validatorName);
+                            Logger.getLogger(ScriptedDatabasesClient.class.getName()).log(Level.WARNING, "{0} constructor couldn''t be found", validatorName);
                         }
-                    } else {
-                        Logger.getLogger(ScriptedDatabasesClient.class.getName()).log(Level.WARNING, "{0} constructor couldn''t be found", validatorName);
                     }
                 }
                 return null;
             }
         });
-        return super.commit(aSessionId, aDatasourceId, aLog);
+        boolean consumed = true;
+        for (Change change : aLog) {
+            if (!change.consumed) {
+                consumed = false;
+            }
+        }
+        if (!consumed) {
+            return super.commit(aSessionId, aDatasourceId, aLog);
+        } else {
+            return 0;
+        }
     }
 }

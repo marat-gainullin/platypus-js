@@ -12,11 +12,14 @@ import com.bearsoft.rowset.metadata.Fields;
 import com.eas.client.model.Model;
 import com.eas.client.model.application.ApplicationEntity;
 import com.eas.script.ScriptUtils;
+import com.eas.script.ScriptUtils.ScriptAction;
 import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.EvaluatorException;
+import org.mozilla.javascript.Function;
+import org.mozilla.javascript.ScriptRuntime;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 
@@ -202,15 +205,34 @@ public class RowHostObject extends ScriptableObject {
         }
     }
 
-    public static RowHostObject publishRow(Scriptable aScope, Row aRow, ApplicationEntity<?, ?, ?> aEntity) throws Exception {
+    public static RowHostObject publishRow(final Scriptable aScope, final Row aRow, final ApplicationEntity<?, ?, ?> aEntity) throws Exception {
         if (aRow != null) {
-            Object published = aRow.getTag();
-            if (published == null) {
-                published = new RowHostObject(aScope, aRow, aEntity);
-                aRow.setTag(published);
-            }
-            assert published instanceof RowHostObject;
-            return (RowHostObject) published;
+            return ScriptUtils.inContext(new ScriptAction() {
+                @Override
+                public RowHostObject run(Context cx) throws Exception {
+                    Object published = aRow.getTag();
+                    if (published == null) {
+                        published = new RowHostObject(aScope, aRow, aEntity);
+                        aRow.setTag(published);
+                        Function constr = aEntity.getInstanceConstructor();
+                        if (constr == null) {
+                            Object oConstr = ScriptRuntime.name(cx, aScope, "Object");
+                            if (oConstr instanceof Function) {
+                                constr = (Function) oConstr;
+                            }
+                        }
+                        if (constr != null) {
+                            Object oprot = constr.get("prototype", constr);
+                            if (oprot instanceof Scriptable) {
+                                ((Scriptable) published).setPrototype((Scriptable) oprot);
+                            }
+                            constr.call(cx, aScope, (Scriptable) published, new Object[]{});
+                        }
+                    }
+                    assert published instanceof RowHostObject;
+                    return (RowHostObject) published;
+                }
+            });
         } else {
             return null;
         }

@@ -38,4 +38,8 @@ public abstract class Change {
     }
 
     public abstract void accept(ChangeVisitor aChangeVisitor) throws Exception;
+
+    public String getType() {
+        return getClass().getSimpleName();
+    }
 }

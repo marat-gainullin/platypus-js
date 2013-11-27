@@ -270,12 +270,8 @@ public class ApplicationModelEditorView extends JPanel implements Customizer {
     }
 
     public void setModel(ApplicationDbModel aModel) throws Exception {
-        if (aModel != modelView.getModel()) {
-            if (modelView != null) {
-                modelView.setModel(aModel);
-            } else {
-                modelView.setModel(null);
-            }
+        if (modelView.getModel() != aModel) {
+            modelView.setModel(aModel);
             scalablePane.checkComponents();
             if (undo != null) {
                 undo.discardAllEdits();
