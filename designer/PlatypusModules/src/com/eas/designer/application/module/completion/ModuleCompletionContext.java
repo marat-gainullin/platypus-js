@@ -4,16 +4,12 @@
  */
 package com.eas.designer.application.module.completion;
 
-import com.eas.client.model.application.ApplicationDbEntity;
-import com.eas.designer.application.indexer.AppElementInfo;
 import com.eas.designer.application.indexer.IndexerQuery;
 import com.eas.designer.application.module.PlatypusModuleDataObject;
-import static com.eas.designer.application.module.completion.CompletionContext.MODEL_SCRIPT_NAME;
 import static com.eas.designer.application.module.completion.CompletionContext.addItem;
 import com.eas.designer.application.module.parser.AstUtlities;
 import com.eas.designer.explorer.utils.StringUtils;
 import java.util.Collection;
-import java.util.List;
 import org.mozilla.javascript.Token;
 import org.mozilla.javascript.ast.AstNode;
 import org.mozilla.javascript.ast.AstRoot;
@@ -26,7 +22,6 @@ import org.mozilla.javascript.ast.PropertyGet;
 import org.mozilla.javascript.ast.ScriptNode;
 import org.mozilla.javascript.ast.Block;
 import org.mozilla.javascript.ast.KeywordLiteral;
-import org.mozilla.javascript.ast.Scope;
 import org.mozilla.javascript.ast.VariableDeclaration;
 import org.mozilla.javascript.ast.VariableInitializer;
 import org.netbeans.api.project.Project;
@@ -54,8 +49,8 @@ public class ModuleCompletionContext extends CompletionContext {
         return dataObject;
     }
 
-    public ThisCompletionContext createThisContext() {
-        return new ThisCompletionContext(this);
+    public ModuleThisCompletionContext createThisContext() {
+        return new ModuleThisCompletionContext(this);
     }
 
     @Override
@@ -82,7 +77,7 @@ public class ModuleCompletionContext extends CompletionContext {
         return findCompletionContext(fieldName, offset, this);
     }
 
-    protected static JsCodeCompletionScopeInfo getCompletionScopeInfo(PlatypusModuleDataObject aDataObject, int offset, String text) {
+    public static JsCodeCompletionScopeInfo getCompletionScopeInfo(PlatypusModuleDataObject aDataObject, int offset, String text) {
         AstRoot tree = aDataObject.getAst();
         AstNode offsetNode = AstUtlities.getOffsetNode(tree, offset);
         CompletionMode codeCompletionInfo = isInNewExpression(offsetNode, text) ? CompletionMode.CONSTRUCTORS : CompletionMode.VARIABLES_AND_FUNCTIONS;
@@ -117,7 +112,7 @@ public class ModuleCompletionContext extends CompletionContext {
             FindModuleConstructorBlockSupport helper = new FindModuleConstructorBlockSupport();
             Block moduleConstructorBlock = helper.findModuleConstuctorBlock(astRoot);
             if (offsetNode != null && offsetNode.equals(moduleConstructorBlock) && THIS_KEYWORD.equals(fieldName)) {
-                return new ThisCompletionContext(parentModuleContext);
+                return new ModuleThisCompletionContext(parentModuleContext);
             }
             AstNode currentNode = offsetNode;
             for (;;) {//up to the root node  
@@ -257,7 +252,7 @@ public class ModuleCompletionContext extends CompletionContext {
                                             }
                                         }
                                     } else if (variableInitializer.getInitializer() instanceof KeywordLiteral && Token.THIS == variableInitializer.getInitializer().getType()) {
-                                        ctx = new ThisCompletionContext(parentContext);
+                                        ctx = new ModuleThisCompletionContext(parentContext);
                                     }
                                 }
                             }
@@ -272,53 +267,6 @@ public class ModuleCompletionContext extends CompletionContext {
 
         private static String stripElementId(String str) {
             return StringUtils.strip(StringUtils.strip(StringUtils.strip(str, "\""), "'"));//NOI18N
-        }
-    }
-
-    public static class ThisCompletionContext extends CompletionContext {
-
-        private ModuleCompletionContext parentContext;
-
-        public ThisCompletionContext(ModuleCompletionContext aParentContext) {
-            super(aParentContext.getScriptClass());
-            parentContext = aParentContext;
-        }
-
-        public ModuleCompletionContext getParentContext() {
-            return parentContext;
-        }
-
-        @Override
-        public CompletionContext getChildContext(String fieldName, int offset) throws Exception {
-            switch (fieldName) {
-                case MODEL_SCRIPT_NAME: {
-                    return new ModelCompletionContext(parentContext.getDataObject());
-                }
-                case PARAMS_SCRIPT_NAME: {
-                    return new EntityCompletionContext(parentContext.getDataObject().getModel().getParametersEntity());
-                }
-            }
-            ApplicationDbEntity entity = parentContext.getDataObject().getModel().getEntityByName(fieldName);
-            if (entity != null) {
-                return new EntityCompletionContext(entity);
-            }
-            return null;
-        }
-
-        @Override
-        public void applyCompletionItems(JsCompletionProvider.CompletionPoint point, int offset, CompletionResultSet resultSet) throws Exception {
-            JsCodeCompletionScopeInfo completionScopeInfo = getCompletionScopeInfo(parentContext.getDataObject(), offset, point.filter);
-            if (completionScopeInfo.mode == CompletionMode.VARIABLES_AND_FUNCTIONS) {
-                fillVariablesAndFunctions(point, resultSet);
-            }
-        }
-
-        protected void fillVariablesAndFunctions(JsCompletionProvider.CompletionPoint point, CompletionResultSet resultSet) throws Exception {
-            fillFieldsValues(parentContext.getDataObject().getModel().getParametersEntity().getFields(), point, resultSet);
-            fillEntities(parentContext.getDataObject().getModel().getEntities().values(), resultSet, point);
-            addItem(resultSet, point.filter, new BeanCompletionItem(parentContext.getDataObject().getModel().getClass(), MODEL_SCRIPT_NAME, null, point.caretBeginWordOffset, point.caretEndWordOffset));
-            addItem(resultSet, point.filter, new BeanCompletionItem(parentContext.getDataObject().getModel().getParametersEntity().getRowset().getClass(), PARAMS_SCRIPT_NAME, null, point.caretBeginWordOffset, point.caretEndWordOffset));
-            fillJavaCompletionItems(point, resultSet);
         }
     }
 }
