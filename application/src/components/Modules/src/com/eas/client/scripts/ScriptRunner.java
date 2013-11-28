@@ -234,7 +234,14 @@ public class ScriptRunner extends ScriptableObject {
      * @see PlatypusPrincipal
      */
     @ScriptFunction(jsDoc = GET_PRINCIPAL_JSDOC)
-    public PlatypusPrincipal getPrincipal() {
+    public Object getPrincipal() {
+        if (principalHost != null) {
+            return Context.javaToJS(principalHost.getPrincipal(), this);
+        }
+        return null;
+    }
+
+    protected PlatypusPrincipal _getPrincipal() {
         if (principalHost != null) {
             return principalHost.getPrincipal();
         }
@@ -574,7 +581,7 @@ public class ScriptRunner extends ScriptableObject {
      */
     public void checkPrincipalPermission() throws Exception {
         if (moduleAllowedRoles != null && !moduleAllowedRoles.isEmpty()) {
-            PlatypusPrincipal principal = getPrincipal();
+            PlatypusPrincipal principal = _getPrincipal();
             if (principal != null && principal.hasAnyRole(moduleAllowedRoles)) {
                 return;
             }
@@ -629,7 +636,7 @@ public class ScriptRunner extends ScriptableObject {
 
         private void checkPrincipalPermission() throws AccessControlException {
             try {
-                PlatypusPrincipal principal = getPrincipal();
+                PlatypusPrincipal principal = _getPrincipal();
                 if (functionAllowedRoles != null && functionAllowedRoles.get(name) != null && !functionAllowedRoles.get(name).isEmpty()) {
                     if (principal != null && principal.hasAnyRole(functionAllowedRoles.get(name))) {
                         return;

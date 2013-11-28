@@ -17,7 +17,7 @@ import com.eas.client.scripts.ScriptRunner;
 import com.eas.client.settings.DbConnectionSettings;
 import com.eas.script.ScriptUtils;
 import com.eas.script.ScriptUtils.ScriptAction;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -255,15 +255,9 @@ public class ScriptedDatabasesClient extends DatabasesClient {
         ScriptUtils.inContext(new ScriptAction() {
             @Override
             public Object run(Context cx) throws Exception {
-                Map<String, Collection<String>> lvalidators = new HashMap<>();
-                lvalidators.putAll(validators);
-                Collection<String> flowAsValidator = lvalidators.get(aDatasourceId);
-                if (flowAsValidator == null || flowAsValidator.isEmpty()) {
-                    lvalidators.put(aDatasourceId, Arrays.asList(new String[]{aDatasourceId}));
-                }
-                for (String validatorName : lvalidators.keySet()) {
-                    Collection<String> datasources = lvalidators.get(validatorName);
-                    if (datasources == null || datasources.isEmpty() || datasources.contains(aDatasourceId)) {
+                for (String validatorName : validators.keySet()) {
+                    Collection<String> datasourcesUnderControl = validators.get(validatorName);
+                    if (datasourcesUnderControl == null || datasourcesUnderControl.isEmpty() || datasourcesUnderControl.contains(aDatasourceId)) {
                         ScriptRunner validator = createModule(cx, validatorName);
                         if (validator != null) {
                             Object oValidate = validator.get("validate", validator);
@@ -274,12 +268,26 @@ public class ScriptedDatabasesClient extends DatabasesClient {
                                     break;
                                 }
                             } else {
-                                if (validators.containsKey(validatorName)) {
-                                    Logger.getLogger(ScriptedDatabasesClient.class.getName()).log(Level.WARNING, "\"validate\" method couldn''t be found in {0} module.", validatorName);
-                                }// else { silent ignore because method 'validate' is optional for custom data source modules}
+                                Logger.getLogger(ScriptedDatabasesClient.class.getName()).log(Level.WARNING, "\"validate\" method couldn''t be found in {0} module.", validatorName);
                             }
                         } else {
                             Logger.getLogger(ScriptedDatabasesClient.class.getName()).log(Level.WARNING, "{0} constructor couldn''t be found", validatorName);
+                        }
+                    }
+                }
+                if (aDatasourceId != null) {
+                    ScriptRunner dataSourceApplier = createModule(cx, aDatasourceId);
+                    if (dataSourceApplier != null) {
+                        Object oApply = dataSourceApplier.get("apply", dataSourceApplier);
+                        if (oApply instanceof Function) {
+                            Function fApply = (Function) oApply;
+                            List<Change> forApply = new ArrayList<>();
+                            for (Change change : aLog) {
+                                if (aDatasourceId.equals(change.entityId)) {
+                                    forApply.add(change);
+                                }
+                            }
+                            fApply.call(cx, dataSourceApplier.getParentScope(), dataSourceApplier, new Object[]{Context.javaToJS(forApply.toArray(), dataSourceApplier.getParentScope()), aSessionId});
                         }
                     }
                 }

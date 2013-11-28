@@ -6,17 +6,23 @@ package com.eas.client.cache;
 
 import com.eas.client.settings.EasSettings;
 import com.eas.client.settings.XmlDom2ConnectionSettings;
+import com.eas.script.JsParser;
 import com.eas.util.FileUtils;
 import com.eas.util.StringUtils;
 import com.eas.xml.dom.Source2XmlDom;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.mozilla.javascript.EvaluatorException;
+import org.mozilla.javascript.Node;
+import org.mozilla.javascript.ast.AstRoot;
+import org.mozilla.javascript.ast.FunctionNode;
 
 /**
  *
@@ -30,11 +36,46 @@ public class PlatypusFilesSupport {
     // jsDoc or sqlDoc containing element name annotation regex parts 1 and 2
     private static final String NAMED_ANNOTATION_PATTERN_1 = "^\\s*/\\*\\*(?=(?:(?!\\*/)[\\s\\S])*?"; //NOI18N
     private static final String NAMED_ANNOTATION_PATTERN_2 = ")(?:(?!\\*/)[\\s\\S])*\\*/"; //NOI18N
-    
+
+    public static String extractFirstFunctionName(String aJsContent) {
+        try {
+            AstRoot parseResult = JsParser.parse(aJsContent);
+            return extractFirstFunctionName(parseResult);
+        } catch (EvaluatorException ex) {
+            return null;
+        }
+    }
+
+    public static String extractFirstFunctionName(AstRoot jsRoot) {
+        FunctionNode func = extractFirstFunction(jsRoot);
+        return func != null ? func.getFunctionName().getIdentifier() : null;
+    }
+
+    public static FunctionNode extractFirstFunction(AstRoot jsRoot) {
+        if (jsRoot != null) {
+            Iterator<Node> nodes = jsRoot.iterator();
+            while (nodes.hasNext()) {
+                Node node = nodes.next();
+                if (node instanceof FunctionNode && ((FunctionNode) node).getFunctionName() != null
+                        && ((FunctionNode) node).getFunctionName().getIdentifier() != null
+                        && !((FunctionNode) node).getFunctionName().getIdentifier().isEmpty()) {
+                    return ((FunctionNode) node);
+                }
+            }
+            return null;
+        } else {
+            return null;
+        }
+    }
+
     public static String getAppElementIdByAnnotation(File aFile) {
         try {
             String fileContent = FileUtils.readString(aFile, PlatypusFiles.DEFAULT_ENCODING);
-            return getAnnotationValue(fileContent, APP_ELEMENT_NAME_ANNOTATION);
+            if (aFile.getPath().endsWith("." + PlatypusFiles.JAVASCRIPT_EXTENSION)) {
+                return extractFirstFunctionName(fileContent);
+            } else {
+                return getAnnotationValue(fileContent, APP_ELEMENT_NAME_ANNOTATION);
+            }
         } catch (IOException ex) {
             Logger.getLogger(PlatypusFiles.class.getName()).log(Level.INFO, null, ex);
         }
@@ -52,7 +93,7 @@ public class PlatypusFilesSupport {
         }
         return null;
     }
-    
+
     /**
      * Extracts annotation value form given content. May return annotation
      * value, null or an empty string.
@@ -85,7 +126,7 @@ public class PlatypusFilesSupport {
         }
         return null;
     }
-    
+
     public static String replaceAnnotationValue(String aContent, String aAnnotationName, String aValue) {
         Pattern pattern = Pattern.compile(getAnnotatedDocRegexStr(aAnnotationName));
         Matcher matcher = pattern.matcher(aContent);
@@ -127,9 +168,9 @@ public class PlatypusFilesSupport {
                             }
                         }
                         String tokensStr = StringUtils.join(" ", tokens) + rightPadding;
-                        if (!"*".equals(tokensStr.trim())){
+                        if (!"*".equals(tokensStr.trim())) {
                             list.add(tokensStr);
-                        }     
+                        }
                     } else {
                         list.add(line);
                     }
@@ -143,7 +184,7 @@ public class PlatypusFilesSupport {
         }
         list.add("/**"); //NOI18N
         list.add(" * " + aAnnotationName + " " + aValue); //NOI18N
-        list.add(" */"+System.getProperty("line.separator")); //NOI18N
+        list.add(" */" + System.getProperty("line.separator")); //NOI18N
         String docComment = StringUtils.join(System.getProperty("line.separator"), list.toArray(new String[]{}));
         return docComment + aContent;
     }
@@ -156,7 +197,7 @@ public class PlatypusFilesSupport {
         }
         return null;
     }
-    
+
     private static String getAnnotatedDocRegexStr(String anAnnotation) {
         return NAMED_ANNOTATION_PATTERN_1 + anAnnotation + NAMED_ANNOTATION_PATTERN_2;
     }

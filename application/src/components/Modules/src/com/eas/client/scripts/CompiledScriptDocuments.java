@@ -12,6 +12,8 @@ import java.util.HashMap;
 import java.util.Map;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
+import org.mozilla.javascript.Script;
+import org.mozilla.javascript.Scriptable;
 
 /**
  *
@@ -58,8 +60,15 @@ public abstract class CompiledScriptDocuments {
                          * currentContext.setOptimizationLevel(-1);
                          */
                         cx.setOptimizationLevel(-1);
-                        Function compiledFunc = cx.compileFunction(ScriptRunner.checkStandardObjects(cx), "function " + appElement.getId() + "(){" + lscriptDoc.getScriptSource() + "\n; this[\"" + ScriptUtils.HANDLERS_PROP_NAME + "\"]=" + lscriptDoc.generateTopLevelNamedFunctionsContainer() + ";}", appElement.getId(), 0, null);
-                        lscriptDoc.setFunction(compiledFunc);
+                        String filteredSource = lscriptDoc.filterSource();
+                        Script compiledScript = cx.compileString(filteredSource, appElement.getId(), 0, null);
+                        Scriptable scope = ScriptRunner.checkStandardObjects(cx);
+                        compiledScript.exec(cx, scope);
+                        Object oConstructor = scope.get(appElement.getId(), scope);
+                        if (oConstructor instanceof Function) {
+                            lscriptDoc.setFunction((Function) oConstructor);
+                            scope.delete(appElement.getId());
+                        }
                         return lscriptDoc;
                     }
                 });

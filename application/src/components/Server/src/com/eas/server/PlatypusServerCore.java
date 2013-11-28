@@ -207,7 +207,7 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
                         break;
                     case JsDoc.Tag.VALIDATOR_TAG:
                         stateless = true;
-                        databasesClient.addValidator(aModuleId,  tag.getParams());
+                        databasesClient.addValidator(aModuleId, tag.getParams());
                         break;
                 }
             }
@@ -252,7 +252,17 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
 
     @Override
     public PlatypusPrincipal getPrincipal() {
-        return sessionManager.getCurrentSession().getPrincipal();
+        if (sessionManager.getCurrentSession() != null) {
+            return sessionManager.getCurrentSession().getPrincipal();
+        } else {
+            // Construct a dummy Principal for a debugger can discover inner Principal's structure
+            return new PlatypusPrincipal("No current session found") {
+                @Override
+                public boolean hasRole(String string) throws Exception {
+                    return false;
+                }
+            };
+        }
     }
 
     @Override

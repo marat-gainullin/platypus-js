@@ -58,12 +58,16 @@ public class FileIndexer extends CustomIndexer {
                     if (f != null) {
                         String appElementName = null;
                         boolean isPublic = false;
-                        if (!nameExt.endsWith(PlatypusFiles.CONNECTION_EXTENSION)) {
-                            String fileContent = FileUtils.readString(f, PlatypusFiles.DEFAULT_ENCODING);
-                            appElementName = PlatypusFilesSupport.getAnnotationValue(fileContent, PlatypusFilesSupport.APP_ELEMENT_NAME_ANNOTATION);
-                            isPublic = PlatypusFilesSupport.getAnnotationValue(fileContent, PlatypusFilesSupport.PUBLIC_ANNOTATION) != null;
-                        } else {
+                        if (nameExt.endsWith("." + PlatypusFiles.CONNECTION_EXTENSION)) {
                             appElementName = PlatypusFilesSupport.getAppElementIdForConnectionAppElement(f);
+                        } else {
+                            String fileContent = FileUtils.readString(f, PlatypusFiles.DEFAULT_ENCODING);
+                            if (nameExt.endsWith("." + PlatypusFiles.JAVASCRIPT_EXTENSION)) {
+                                appElementName = PlatypusFilesSupport.extractFirstFunctionName(fileContent);
+                            } else {
+                                appElementName = PlatypusFilesSupport.getAnnotationValue(fileContent, PlatypusFilesSupport.APP_ELEMENT_NAME_ANNOTATION);
+                            }
+                            isPublic = PlatypusFilesSupport.getAnnotationValue(fileContent, PlatypusFilesSupport.PUBLIC_ANNOTATION) != null;
                         }
                         if (appElementName != null) {
                             d.addPair(APP_ELEMENT_NAME, appElementName, true, true);
