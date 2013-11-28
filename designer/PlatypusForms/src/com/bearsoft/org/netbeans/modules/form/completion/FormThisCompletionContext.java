@@ -30,8 +30,8 @@ import org.netbeans.spi.editor.completion.CompletionResultSet;
  */
 public class FormThisCompletionContext extends ModuleThisCompletionContext {
     
-    public FormThisCompletionContext(ModuleCompletionContext aParentContext) {
-        super(aParentContext);
+    public FormThisCompletionContext(ModuleCompletionContext aParentContext, boolean anEnableJsElementsCompletion) {
+        super(aParentContext, anEnableJsElementsCompletion);
     }
     
     @Override

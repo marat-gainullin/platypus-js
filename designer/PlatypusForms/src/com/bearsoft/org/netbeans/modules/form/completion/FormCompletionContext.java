@@ -26,8 +26,8 @@ public class FormCompletionContext extends ModuleCompletionContext {
     }
     
     @Override
-    public ModuleThisCompletionContext createThisContext() {
-        return new FormThisCompletionContext(this);
+    public ModuleThisCompletionContext createThisContext(boolean anEnableJsElementsCompletion) {
+        return new FormThisCompletionContext(this, anEnableJsElementsCompletion);
     }
 
     @Override

@@ -5,6 +5,26 @@
 package com.eas.designer.application.module.completion;
 
 import com.eas.client.model.application.ApplicationDbEntity;
+import com.eas.designer.application.module.completion.ModuleCompletionContext.CompletionMode;
+import com.eas.designer.application.module.completion.ModuleCompletionContext.JsCodeCompletionScopeInfo;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import org.mozilla.javascript.Token;
+import org.mozilla.javascript.ast.Assignment;
+import org.mozilla.javascript.ast.AstNode;
+import org.mozilla.javascript.ast.Block;
+import org.mozilla.javascript.ast.ExpressionStatement;
+import org.mozilla.javascript.ast.FunctionNode;
+import org.mozilla.javascript.ast.NodeVisitor;
+import org.mozilla.javascript.ast.PropertyGet;
+import org.mozilla.javascript.ast.ScriptNode;
+import org.mozilla.javascript.ast.Symbol;
+import org.mozilla.javascript.ast.VariableDeclaration;
+import org.mozilla.javascript.ast.VariableInitializer;
 import org.netbeans.spi.editor.completion.CompletionResultSet;
 
 /**
@@ -12,11 +32,14 @@ import org.netbeans.spi.editor.completion.CompletionResultSet;
  * @author vv
  */
 public class ModuleThisCompletionContext extends CompletionContext {
+
+    private boolean enableJsElementsCompletion;
     private ModuleCompletionContext parentContext;
 
-    public ModuleThisCompletionContext(ModuleCompletionContext aParentContext) {
+    public ModuleThisCompletionContext(ModuleCompletionContext aParentContext, boolean anEnableJsElementsCompletion) {
         super(aParentContext.getScriptClass());
         parentContext = aParentContext;
+        enableJsElementsCompletion = anEnableJsElementsCompletion;
     }
 
     public ModuleCompletionContext getParentContext() {
@@ -26,14 +49,12 @@ public class ModuleThisCompletionContext extends CompletionContext {
     @Override
     public CompletionContext getChildContext(String fieldName, int offset) throws Exception {
         switch (fieldName) {
-            case MODEL_SCRIPT_NAME:
-                {
-                    return new ModelCompletionContext(parentContext.getDataObject());
-                }
-            case PARAMS_SCRIPT_NAME:
-                {
-                    return new EntityCompletionContext(parentContext.getDataObject().getModel().getParametersEntity());
-                }
+            case MODEL_SCRIPT_NAME: {
+                return new ModelCompletionContext(parentContext.getDataObject());
+            }
+            case PARAMS_SCRIPT_NAME: {
+                return new EntityCompletionContext(parentContext.getDataObject().getModel().getParametersEntity());
+            }
         }
         ApplicationDbEntity entity = parentContext.getDataObject().getModel().getEntityByName(fieldName);
         if (entity != null) {
@@ -57,6 +78,68 @@ public class ModuleThisCompletionContext extends CompletionContext {
         addItem(resultSet, point.filter, new BeanCompletionItem(parentContext.getDataObject().getModel().getClass(), MODEL_SCRIPT_NAME, null, point.caretBeginWordOffset, point.caretEndWordOffset));
         addItem(resultSet, point.filter, new BeanCompletionItem(parentContext.getDataObject().getModel().getParametersEntity().getRowset().getClass(), PARAMS_SCRIPT_NAME, null, point.caretBeginWordOffset, point.caretEndWordOffset));
         fillJavaCompletionItems(point, resultSet);
+        if (enableJsElementsCompletion) {
+            ModuleCompletionContext.FindModuleConstructorBlockSupport helper = new ModuleCompletionContext.FindModuleConstructorBlockSupport();
+            ScanJsElementsSupport scanner = new ScanJsElementsSupport(helper.findModuleConstuctorBlock(parentContext.getDataObject().getAst()));
+            for (JsCompletionItem i : scanner.getCompletionItems(point)) {
+                addItem(resultSet, point.filter, i);
+            }
+        }
     }
-    
+
+    public static class ScanJsElementsSupport {
+
+        private final Block moduleThisBlock;
+        private Map<String, JsCompletionItem> functionsMap;
+        private Map<String, JsCompletionItem> fieldsMap;
+
+        public ScanJsElementsSupport(Block aModuleThisBlock) {
+            moduleThisBlock = aModuleThisBlock;
+        }
+
+        public Collection<JsCompletionItem> getCompletionItems(JsCompletionProvider.CompletionPoint point) {
+            functionsMap = new HashMap<>();
+            fieldsMap = new HashMap<>();
+            scan(point);
+            List<JsCompletionItem> items = new ArrayList<>(functionsMap.values());
+            items.addAll(new ArrayList<>(fieldsMap.values()));
+            return items;
+        }
+
+        private void scan(final JsCompletionProvider.CompletionPoint point) {
+            moduleThisBlock.visit(new NodeVisitor() {
+                @Override
+                public boolean visit(AstNode an) {
+                    if (an.equals(moduleThisBlock)) {
+                        return true;
+                    }
+                    if (an instanceof ExpressionStatement) {
+                        ExpressionStatement es = (ExpressionStatement) an;
+                        if (es.getExpression() instanceof Assignment) {
+                            Assignment a = (Assignment) es.getExpression();
+                            if (a.getLeft() instanceof PropertyGet) {
+                                PropertyGet pg = (PropertyGet) a.getLeft();
+                                if (pg.getTarget().getType() == Token.THIS) {
+                                    if (a.getRight() instanceof FunctionNode) {
+                                        FunctionNode fn = (FunctionNode) a.getRight();
+                                        List<String> params = new ArrayList<>();
+                                        if (fn.getSymbols() != null) {
+                                            for (Symbol symbol : fn.getSymbols()) { // get function parameters
+                                                if (symbol.getDeclType() == Token.LP) {
+                                                    params.add(symbol.getName());
+                                                }
+                                            }
+                                        }
+                                        functionsMap.put(pg.getProperty().getIdentifier(),
+                                                new JsFunctionCompletionItem(pg.getProperty().getIdentifier(), "", params, a.getJsDoc(), point.caretBeginWordOffset, point.caretEndWordOffset));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    return false;
+                }
+            });
+        }
+    }
 }
