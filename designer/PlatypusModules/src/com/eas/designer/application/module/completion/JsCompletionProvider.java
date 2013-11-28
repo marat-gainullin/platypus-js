@@ -44,6 +44,14 @@ public abstract class JsCompletionProvider implements CompletionProvider {
         public String[] context;
         public int caretBeginWordOffset;
         public int caretEndWordOffset;
+        
+        public String getLastContextItem() {
+            if (context != null && context.length > 0) {
+                return context[context.length - 1];
+            } else {
+                return null;
+            }
+        }
     }
 
     @Override

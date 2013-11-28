@@ -47,14 +47,14 @@ public class JsCompletionSupportTest {
      */
     @Test
     public void testParse() throws DataObjectExistsException {        
-        ModuleCompletionContext.JsCompletonItemsSupport instance;
+        ModuleCompletionContext.ScanJsItemsSupport instance;
         CompletionPoint point = new CompletionPoint();
         Collection<JsCompletionItem> results;
         Set<JsFunction> functionSet;
         Set<String> fieldsSet;
         // verify top level scope
         point.caretBeginWordOffset = point.caretEndWordOffset = 0; //Caret position
-        instance = new ModuleCompletionContext.JsCompletonItemsSupport();
+        instance = new ModuleCompletionContext.ScanJsItemsSupport();
         String source = JS + JS_DOC + JS_DOC_FUNCTION;
         DataObjectMock astProvider = new DataObjectMock(source);
         results = instance.getCompletionItems(astProvider, "", point.caretBeginWordOffset, point);
@@ -73,7 +73,7 @@ public class JsCompletionSupportTest {
         
         //verify embedded level
         point.caretBeginWordOffset = point.caretEndWordOffset = 35; //Caret position
-        instance = new ModuleCompletionContext.JsCompletonItemsSupport();
+        instance = new ModuleCompletionContext.ScanJsItemsSupport();
         results = instance.getCompletionItems(astProvider, "", point.caretBeginWordOffset, point); //NOI18N
         assertTrue(results != null);
         assertTrue(results.size() > 0);       

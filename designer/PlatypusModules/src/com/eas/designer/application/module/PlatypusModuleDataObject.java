@@ -65,7 +65,7 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
         return ast;
     }
 
-    public CompletionContext getCompletionContext() {
+    public ModuleCompletionContext getCompletionContext() {
         return new ModuleCompletionContext(this, ScriptRunner.class);
     }
 

@@ -4,6 +4,7 @@
  */
 package com.eas.designer.application.module.hyperlink;
 
+import com.eas.client.scripts.ScriptRunner;
 import com.eas.designer.application.module.PlatypusModuleDataObject;
 import com.eas.designer.application.module.completion.CompletionContext;
 import com.eas.designer.application.module.completion.ModuleCompletionContext;
@@ -137,11 +138,11 @@ public class ModuleHyperlinkProvider implements HyperlinkProviderExt {
         FileObject fo = NbEditorUtilities.getFileObject(doc);
         PlatypusModuleDataObject appElementDataObject = (PlatypusModuleDataObject) DataObject.find(fo);
         if (node.getParent() instanceof NewExpression) {
-            CompletionContext typeCompletionContext = ModuleCompletionContext.getModuleCompletionContext(appElementDataObject.getProject(), ((Name)node).getIdentifier());
-            if (typeCompletionContext == null || !(typeCompletionContext instanceof ModuleCompletionContext)) {
+            ModuleCompletionContext typeCompletionContext = ModuleCompletionContext.getModuleCompletionContext(appElementDataObject.getProject(), ((Name)node).getIdentifier());
+            if (typeCompletionContext == null) {
                 return DeclarationLocation.NONE;
             } else {
-                return new DeclarationLocation(((ModuleCompletionContext)typeCompletionContext).getDataObject(), 0);
+                return new DeclarationLocation(typeCompletionContext.getDataObject(), 0);
             }
         }
         makePath(node);
@@ -150,7 +151,7 @@ public class ModuleHyperlinkProvider implements HyperlinkProviderExt {
         }
         for (int i = 0; i < identifiersPath.size() - 1; i++) {
             String fieldName = identifiersPath.get(i);
-            CompletionContext typeCompletionContext = ModuleCompletionContext.findModuleCompletionContext(fieldName, offset, appElementDataObject);
+            CompletionContext typeCompletionContext = ModuleCompletionContext.findCompletionContext(fieldName, offset, new ModuleCompletionContext(appElementDataObject, ScriptRunner.class));
             if (typeCompletionContext == null || !(typeCompletionContext instanceof ModuleCompletionContext)) {
                 return DeclarationLocation.NONE;
             }

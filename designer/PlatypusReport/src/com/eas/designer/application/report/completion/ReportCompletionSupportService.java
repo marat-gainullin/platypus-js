@@ -41,16 +41,4 @@ public class ReportCompletionSupportService implements CompletionSupportService 
         constructors.add(new SystemConstructorCompletionItem(REPORT_CONSTRUCTOR_NAME, "", SystemConstructorCompletionItem.DOUBLE_QUOTES_PARAMS, REPORT_CONSTRUCTOR_JSDOC, point.caretBeginWordOffset, point.caretEndWordOffset));
         return constructors;
     }
-
-    @Override
-    public Collection<AppElementConstructorCompletionItem> getAppElementsConstructors(Collection<AppElementInfo> appElements, JsCompletionProvider.CompletionPoint point) {
-        List<AppElementConstructorCompletionItem> constructors = new ArrayList<>();
-        for (AppElementInfo appElementInfo : appElements) {
-            if (PlatypusFiles.JAVASCRIPT_EXTENSION.equals(appElementInfo.primaryFileObject.getExt())
-                    && appElementInfo.primaryFileObject.equals(PlatypusReportDataLoader.findPrimaryFileImpl(appElementInfo.primaryFileObject))) {
-                constructors.add(new ReportConstructorCompletionItem(appElementInfo.appElementId, "", Collections.<String>emptyList(), appElementInfo.primaryFileObject, point.caretBeginWordOffset, point.caretEndWordOffset));
-            }
-        }
-        return constructors;
-    }
 }

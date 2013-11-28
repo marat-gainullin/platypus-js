@@ -53,6 +53,7 @@ import com.eas.dbcontrols.DbControl;
 import com.eas.designer.application.module.PlatypusModuleDataObject;
 import com.eas.designer.application.module.PlatypusModuleSupport;
 import com.eas.designer.application.module.completion.CompletionContext;
+import com.eas.designer.application.module.completion.ModuleCompletionContext;
 import com.eas.designer.application.module.events.ApplicationEntityEventsCookie;
 import com.eas.designer.application.module.events.ApplicationModuleEvents;
 import com.eas.designer.application.module.nodes.ApplicationEntityNode;
@@ -129,7 +130,7 @@ public class PlatypusFormDataObject extends PlatypusModuleDataObject {
     }
 
     @Override
-    public CompletionContext getCompletionContext() {
+    public ModuleCompletionContext getCompletionContext() {
         return new FormCompletionContext(this, FormRunner.class);
     }
 
