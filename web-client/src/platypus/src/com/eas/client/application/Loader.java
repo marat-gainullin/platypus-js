@@ -313,10 +313,11 @@ public class Loader {
 		};
 		if (!appElementNames.isEmpty()) {
 			for (final String appElementName : appElementNames) {
-				startLoadings.add(client.createServerModule(appElementName, new DocumentCallbackAdapter() {
+				startLoadings.add(client.createServerModule(appElementName, new com.eas.client.Callback<Void>() {
 
 					@Override
-					protected void doWork(Document aDoc) throws Exception {
+					public void run(Void aDoc) throws Exception {
+						/*
 						String source = null;
 						Element rootNode = aDoc.getDocumentElement();
 						NodeList docNodes = rootNode.getChildNodes();
@@ -336,8 +337,13 @@ public class Loader {
 							scriptElement.setType(TYPE_JAVASCRIPT);
 							htmlDom.getBody().appendChild(scriptElement);
 						}
+						*/
 						fireLoaded(SERVER_MODULE_TOUCHED_NAME + appElementName);
 						loaded.run();
+					}
+
+					@Override
+                    public void cancel() {
 					}
 
 				}, new StringCallbackAdapter() {

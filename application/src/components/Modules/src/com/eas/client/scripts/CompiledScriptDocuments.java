@@ -14,6 +14,7 @@ import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
 import org.mozilla.javascript.Script;
 import org.mozilla.javascript.Scriptable;
+import org.mozilla.javascript.ScriptableObject;
 
 /**
  *
@@ -62,11 +63,12 @@ public abstract class CompiledScriptDocuments {
                         cx.setOptimizationLevel(-1);
                         String filteredSource = lscriptDoc.filterSource();
                         Script compiledScript = cx.compileString(filteredSource, appElement.getId(), 0, null);
-                        Scriptable scope = ScriptRunner.checkStandardObjects(cx);
+                        ScriptableObject scope = ScriptRunner.checkStandardObjects(cx);
                         compiledScript.exec(cx, scope);
                         Object oConstructor = scope.get(appElement.getId(), scope);
                         if (oConstructor instanceof Function) {
                             lscriptDoc.setFunction((Function) oConstructor);
+                            scope.setAttributes(appElement.getId(), ScriptableObject.EMPTY);
                             scope.delete(appElement.getId());
                         }
                         return lscriptDoc;
