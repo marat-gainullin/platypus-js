@@ -31,6 +31,7 @@ import org.mozilla.javascript.ast.Name;
 import org.mozilla.javascript.ast.NewExpression;
 import org.mozilla.javascript.ast.NodeVisitor;
 import org.mozilla.javascript.ast.PropertyGet;
+import org.mozilla.javascript.ast.StringLiteral;
 import org.netbeans.api.progress.ProgressUtils;
 import org.netbeans.lib.editor.hyperlink.spi.HyperlinkProviderExt;
 import org.netbeans.lib.editor.hyperlink.spi.HyperlinkType;
@@ -140,12 +141,17 @@ public class ModuleHyperlinkProvider implements HyperlinkProviderExt {
         FileObject fo = NbEditorUtilities.getFileObject(doc);
         PlatypusModuleDataObject appElementDataObject = (PlatypusModuleDataObject) DataObject.find(fo);
         if (node.getParent() instanceof NewExpression) {
-            ModuleCompletionContext typeCompletionContext = ModuleCompletionContext.getModuleCompletionContext(appElementDataObject.getProject(), ((Name) node).getIdentifier());
-            if (typeCompletionContext == null) {
-                return DeclarationLocation.NONE;
-            } else {
-                return new DeclarationLocation(typeCompletionContext.getDataObject(), 0);
+            NewExpression ne = (NewExpression) node.getParent();
+            if (ne.getArguments() != null && ne.getArguments().size() > 0) {
+                if (ne.getArguments().get(0) instanceof StringLiteral) {
+                    StringLiteral sl = (StringLiteral) ne.getArguments().get(0);
+                    ModuleCompletionContext typeCompletionContext = ModuleCompletionContext.getModuleCompletionContext(appElementDataObject.getProject(), sl.getValue(false));
+                    if (typeCompletionContext != null) {
+                        return new DeclarationLocation(typeCompletionContext.getDataObject(), 0);
+                    }
+                }
             }
+            return DeclarationLocation.NONE;
         }
         makePath(node);
         if (identifiersPath == null || identifiersPath.isEmpty()) {

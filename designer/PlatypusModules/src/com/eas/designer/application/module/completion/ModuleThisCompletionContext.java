@@ -5,11 +5,8 @@
 package com.eas.designer.application.module.completion;
 
 import com.eas.client.model.application.ApplicationDbEntity;
-import com.eas.designer.application.module.completion.ModuleCompletionContext.CompletionMode;
-import com.eas.designer.application.module.completion.ModuleCompletionContext.JsCodeCompletionScopeInfo;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,10 +18,7 @@ import org.mozilla.javascript.ast.ExpressionStatement;
 import org.mozilla.javascript.ast.FunctionNode;
 import org.mozilla.javascript.ast.NodeVisitor;
 import org.mozilla.javascript.ast.PropertyGet;
-import org.mozilla.javascript.ast.ScriptNode;
 import org.mozilla.javascript.ast.Symbol;
-import org.mozilla.javascript.ast.VariableDeclaration;
-import org.mozilla.javascript.ast.VariableInitializer;
 import org.netbeans.spi.editor.completion.CompletionResultSet;
 
 /**
