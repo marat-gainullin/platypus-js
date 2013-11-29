@@ -8,6 +8,7 @@ import com.eas.client.scripts.ScriptRunner;
 import com.eas.designer.application.module.PlatypusModuleDataObject;
 import com.eas.designer.application.module.completion.CompletionContext;
 import com.eas.designer.application.module.completion.ModuleCompletionContext;
+import com.eas.designer.application.module.completion.ModuleThisCompletionContext;
 import com.eas.designer.application.module.parser.AstUtlities;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -19,16 +20,17 @@ import javax.swing.SwingUtilities;
 import javax.swing.text.Document;
 import javax.swing.text.StyledDocument;
 import org.mozilla.javascript.Node;
+import org.mozilla.javascript.Token;
+import org.mozilla.javascript.ast.Assignment;
 import org.mozilla.javascript.ast.AstNode;
 import org.mozilla.javascript.ast.AstRoot;
+import org.mozilla.javascript.ast.Block;
+import org.mozilla.javascript.ast.ExpressionStatement;
 import org.mozilla.javascript.ast.FunctionNode;
 import org.mozilla.javascript.ast.Name;
 import org.mozilla.javascript.ast.NewExpression;
 import org.mozilla.javascript.ast.NodeVisitor;
 import org.mozilla.javascript.ast.PropertyGet;
-import org.mozilla.javascript.ast.ScriptNode;
-import org.mozilla.javascript.ast.VariableDeclaration;
-import org.mozilla.javascript.ast.VariableInitializer;
 import org.netbeans.api.progress.ProgressUtils;
 import org.netbeans.lib.editor.hyperlink.spi.HyperlinkProviderExt;
 import org.netbeans.lib.editor.hyperlink.spi.HyperlinkType;
@@ -138,7 +140,7 @@ public class ModuleHyperlinkProvider implements HyperlinkProviderExt {
         FileObject fo = NbEditorUtilities.getFileObject(doc);
         PlatypusModuleDataObject appElementDataObject = (PlatypusModuleDataObject) DataObject.find(fo);
         if (node.getParent() instanceof NewExpression) {
-            ModuleCompletionContext typeCompletionContext = ModuleCompletionContext.getModuleCompletionContext(appElementDataObject.getProject(), ((Name)node).getIdentifier());
+            ModuleCompletionContext typeCompletionContext = ModuleCompletionContext.getModuleCompletionContext(appElementDataObject.getProject(), ((Name) node).getIdentifier());
             if (typeCompletionContext == null) {
                 return DeclarationLocation.NONE;
             } else {
@@ -152,17 +154,17 @@ public class ModuleHyperlinkProvider implements HyperlinkProviderExt {
         for (int i = 0; i < identifiersPath.size() - 1; i++) {
             String fieldName = identifiersPath.get(i);
             CompletionContext typeCompletionContext = ModuleCompletionContext.findCompletionContext(fieldName, offset, new ModuleCompletionContext(appElementDataObject, ScriptRunner.class));
-            if (typeCompletionContext == null || !(typeCompletionContext instanceof ModuleCompletionContext)) {
+            if (typeCompletionContext == null || !(typeCompletionContext instanceof ModuleThisCompletionContext)) {
                 return DeclarationLocation.NONE;
             }
-            appElementDataObject = ((ModuleCompletionContext) typeCompletionContext).getDataObject();
+            appElementDataObject = ((ModuleThisCompletionContext) typeCompletionContext).getParentContext().getDataObject();
             if (appElementDataObject == null) {
                 return DeclarationLocation.NONE;
             }
             offset = 0;
         }
         String name = identifiersPath.get(identifiersPath.size() - 1);
-        AstNode declarationNode = findDeclaration(identifiersPath.size() == 1 ? node : appElementDataObject.getAst(), name);
+        AstNode declarationNode = findDeclaration(appElementDataObject.getAst(), name);
         if (declarationNode != null) {
             return new DeclarationLocation(appElementDataObject, declarationNode.getAbsolutePosition());
         }
@@ -190,48 +192,27 @@ public class ModuleHyperlinkProvider implements HyperlinkProviderExt {
         }
     }
 
-    private AstNode findDeclaration(AstNode node, String declarationName) {
-        AstNode currentNode = node;
-        for (;;) {//up to the root node
-            if (currentNode instanceof ScriptNode) {
-                ScriptNode scriptNode = (ScriptNode) currentNode;
-                if (scriptNode instanceof FunctionNode) {
-                    AstNode declaration = scanLevel(((FunctionNode) currentNode).getBody(), declarationName);
-                    if (declaration != null) {
-                        return declaration;
-                    }
-                } else {
-                    AstNode declaration = scanLevel(currentNode, declarationName);
-                    if (declaration != null) {
-                        return declaration;
-                    }
-                }
-            }
-            currentNode = currentNode.getParent();
-            if (currentNode == null) {
-                break;
-            }
-        }
-        return null;
+    private AstNode findDeclaration(AstRoot astRoot, String declarationName) {
+        ModuleCompletionContext.FindModuleConstructorBlockSupport helper = new ModuleCompletionContext.FindModuleConstructorBlockSupport();
+        Block moduleConstructorBlock = helper.findModuleConstuctorBlock(astRoot);
+        return scanLevel(moduleConstructorBlock, declarationName);
     }
 
     private AstNode scanLevel(AstNode currentNode, String declarationName) {
         Node n = currentNode.getFirstChild();
         while (n != null) {
-            if (n instanceof FunctionNode) {
-                FunctionNode functionNode = (FunctionNode) n;
-                if (functionNode.getFunctionName().getIdentifier().equals(declarationName)) {
-                    return functionNode;
-                }
-            }
-            if (n instanceof VariableDeclaration) {
-                VariableDeclaration variableDeclarationNode = (VariableDeclaration) n;
-                List<VariableInitializer> variables = variableDeclarationNode.getVariables();
-                if (variables != null) {
-                    for (VariableInitializer variable : variables) {
-                        if (variable.getTarget() instanceof Name
-                                && ((Name) variable.getTarget()).getIdentifier().equals(declarationName)) {
-                            return variableDeclarationNode;
+            if (n instanceof ExpressionStatement) {
+                ExpressionStatement es = (ExpressionStatement) n;
+                if (es.getExpression() instanceof Assignment) {
+                    Assignment a = (Assignment) es.getExpression();
+                    if (a.getLeft() instanceof PropertyGet) {
+                        PropertyGet pg = (PropertyGet) a.getLeft();
+                        if (pg.getTarget().getType() == Token.THIS) {
+                            if (a.getRight() instanceof FunctionNode) {
+                                if (pg.getProperty().getIdentifier().equals(declarationName)) {
+                                    return a.getLeft();
+                                }
+                            }
                         }
                     }
                 }
