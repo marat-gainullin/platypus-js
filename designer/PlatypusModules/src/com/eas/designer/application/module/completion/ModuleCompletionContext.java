@@ -49,8 +49,8 @@ public class ModuleCompletionContext extends CompletionContext {
         return dataObject;
     }
 
-    public ModuleThisCompletionContext createThisContext() {
-        return new ModuleThisCompletionContext(this);
+    public ModuleThisCompletionContext createThisContext(boolean enableJsElementsCompletion) {
+        return new ModuleThisCompletionContext(this, enableJsElementsCompletion);
     }
 
     @Override
@@ -112,7 +112,7 @@ public class ModuleCompletionContext extends CompletionContext {
             FindModuleConstructorBlockSupport helper = new FindModuleConstructorBlockSupport();
             Block moduleConstructorBlock = helper.findModuleConstuctorBlock(astRoot);
             if (offsetNode != null && offsetNode.equals(moduleConstructorBlock) && THIS_KEYWORD.equals(fieldName)) {
-                return new ModuleThisCompletionContext(parentModuleContext);
+                return parentModuleContext.createThisContext(false);
             }
             AstNode currentNode = offsetNode;
             for (;;) {//up to the root node  
@@ -157,11 +157,11 @@ public class ModuleCompletionContext extends CompletionContext {
         }
     }
 
-    private static class FindModuleConstructorBlockSupport {
+    public static class FindModuleConstructorBlockSupport {
 
         Block constructorBlock;
 
-        private Block findModuleConstuctorBlock(final AstRoot astRoot) {
+        public Block findModuleConstuctorBlock(final AstRoot astRoot) {
 
             astRoot.visit(new NodeVisitor() {
                 @Override
@@ -219,7 +219,7 @@ public class ModuleCompletionContext extends CompletionContext {
                                                     && ne.getArguments().size() > 0) {
                                                 ModuleCompletionContext mctx = getModuleCompletionContext(parentContext.getDataObject().getProject(), stripElementId(ne.getArguments().get(0).toSource()));
                                                 if (mctx != null) {
-                                                    ctx = mctx.createThisContext();
+                                                    ctx = mctx.createThisContext(true);
                                                 }
                                                 return false;
                                             }
@@ -232,7 +232,7 @@ public class ModuleCompletionContext extends CompletionContext {
                                                 }
                                             }
                                             //checks for new ModuleName() expression
-                                            CompletionContext cc = getModuleCompletionContext(parentContext.getDataObject().getProject(), stripElementId(ne.getTarget().getString())).createThisContext();
+                                            CompletionContext cc = getModuleCompletionContext(parentContext.getDataObject().getProject(), stripElementId(ne.getTarget().getString())).createThisContext(false);
                                             if (cc != null) {
                                                 ctx = cc;
                                                 return false;
@@ -246,13 +246,13 @@ public class ModuleCompletionContext extends CompletionContext {
                                             if (pg.getLeft().getString().equals(MODULES_OBJECT_NAME)
                                                     && pg.getRight().getString().equals(GET_METHOD_NAME)) {
                                                 if (fc.getArguments() != null && fc.getArguments().size() > 0) {
-                                                    ctx = getModuleCompletionContext(parentContext.getDataObject().getProject(), stripElementId(fc.getArguments().get(0).toSource())).createThisContext();
+                                                    ctx = getModuleCompletionContext(parentContext.getDataObject().getProject(), stripElementId(fc.getArguments().get(0).toSource())).createThisContext(true);
                                                     return false;
                                                 }
                                             }
                                         }
                                     } else if (variableInitializer.getInitializer() instanceof KeywordLiteral && Token.THIS == variableInitializer.getInitializer().getType()) {
-                                        ctx = new ModuleThisCompletionContext(parentContext);
+                                        ctx = parentContext.createThisContext(false);
                                     }
                                 }
                             }
