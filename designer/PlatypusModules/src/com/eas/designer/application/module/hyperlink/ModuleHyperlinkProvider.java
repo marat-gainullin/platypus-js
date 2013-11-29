@@ -31,7 +31,10 @@ import org.mozilla.javascript.ast.Name;
 import org.mozilla.javascript.ast.NewExpression;
 import org.mozilla.javascript.ast.NodeVisitor;
 import org.mozilla.javascript.ast.PropertyGet;
+import org.mozilla.javascript.ast.ScriptNode;
 import org.mozilla.javascript.ast.StringLiteral;
+import org.mozilla.javascript.ast.VariableDeclaration;
+import org.mozilla.javascript.ast.VariableInitializer;
 import org.netbeans.api.progress.ProgressUtils;
 import org.netbeans.lib.editor.hyperlink.spi.HyperlinkProviderExt;
 import org.netbeans.lib.editor.hyperlink.spi.HyperlinkType;
@@ -157,24 +160,34 @@ public class ModuleHyperlinkProvider implements HyperlinkProviderExt {
         if (identifiersPath == null || identifiersPath.isEmpty()) {
             return DeclarationLocation.NONE;
         }
-        for (int i = 0; i < identifiersPath.size() - 1; i++) {
-            String fieldName = identifiersPath.get(i);
-            CompletionContext typeCompletionContext = ModuleCompletionContext.findCompletionContext(fieldName, offset, new ModuleCompletionContext(appElementDataObject, ScriptRunner.class));
-            if (typeCompletionContext == null || !(typeCompletionContext instanceof ModuleThisCompletionContext)) {
+        if (identifiersPath.size() == 1) {
+            AstNode declarationNode = findLocalDeclaration(node, identifiersPath.get(0));
+            if (declarationNode != null) {
+                return new DeclarationLocation(appElementDataObject, declarationNode.getAbsolutePosition());
+            } else {
                 return DeclarationLocation.NONE;
             }
-            appElementDataObject = ((ModuleThisCompletionContext) typeCompletionContext).getParentContext().getDataObject();
-            if (appElementDataObject == null) {
-                return DeclarationLocation.NONE;
+            
+        } else {
+            for (int i = 0; i < identifiersPath.size() - 1; i++) {
+                String fieldName = identifiersPath.get(i);
+                CompletionContext typeCompletionContext = ModuleCompletionContext.findCompletionContext(fieldName, offset, new ModuleCompletionContext(appElementDataObject, ScriptRunner.class));
+                if (typeCompletionContext == null || !(typeCompletionContext instanceof ModuleThisCompletionContext)) {
+                    return DeclarationLocation.NONE;
+                }
+                appElementDataObject = ((ModuleThisCompletionContext) typeCompletionContext).getParentContext().getDataObject();
+                if (appElementDataObject == null) {
+                    return DeclarationLocation.NONE;
+                }
+                offset = 0;
             }
-            offset = 0;
+            String name = identifiersPath.get(identifiersPath.size() - 1);
+            AstNode declarationNode = findModuleThisPropertyDeclaration(appElementDataObject.getAst(), name);
+            if (declarationNode != null) {
+                return new DeclarationLocation(appElementDataObject, declarationNode.getAbsolutePosition());
+            }
+            return DeclarationLocation.NONE;
         }
-        String name = identifiersPath.get(identifiersPath.size() - 1);
-        AstNode declarationNode = findDeclaration(appElementDataObject.getAst(), name);
-        if (declarationNode != null) {
-            return new DeclarationLocation(appElementDataObject, declarationNode.getAbsolutePosition());
-        }
-        return DeclarationLocation.NONE;
     }
 
     private void makePath(AstNode node) {
@@ -198,13 +211,63 @@ public class ModuleHyperlinkProvider implements HyperlinkProviderExt {
         }
     }
 
-    private AstNode findDeclaration(AstRoot astRoot, String declarationName) {
+    private AstNode findLocalDeclaration(AstNode node, String declarationName) {
+        AstNode currentNode = node;
+        for (;;) {//up to the root node
+            if (currentNode instanceof ScriptNode) {
+                ScriptNode scriptNode = (ScriptNode) currentNode;
+                if (scriptNode instanceof FunctionNode) {
+                    AstNode declaration = scanLevel(((FunctionNode) currentNode).getBody(), declarationName);
+                    if (declaration != null) {
+                        return declaration;
+                    }
+                } else {
+                    AstNode declaration = scanLevel(currentNode, declarationName);
+                    if (declaration != null) {
+                        return declaration;
+                    }
+                }
+            }
+            currentNode = currentNode.getParent();
+            if (currentNode == null) {
+                break;
+            }
+        }
+        return null;
+    }
+    
+    private AstNode scanLevel(AstNode currentNode, String declarationName) {
+        Node n = currentNode.getFirstChild();
+        while (n != null) {
+            if (n instanceof FunctionNode) {
+                FunctionNode functionNode = (FunctionNode) n;
+                if (functionNode.getFunctionName().getIdentifier().equals(declarationName)) {
+                    return functionNode;
+                }
+            }
+            if (n instanceof VariableDeclaration) {
+                VariableDeclaration variableDeclarationNode = (VariableDeclaration) n;
+                List<VariableInitializer> variables = variableDeclarationNode.getVariables();
+                if (variables != null) {
+                    for (VariableInitializer variable : variables) {
+                        if (variable.getTarget() instanceof Name
+                                && ((Name) variable.getTarget()).getIdentifier().equals(declarationName)) {
+                            return variableDeclarationNode;
+                        }
+                    }
+                }
+            }
+            n = n.getNext();
+        }
+        return null;
+    }
+    private AstNode findModuleThisPropertyDeclaration(AstRoot astRoot, String declarationName) {
         ModuleCompletionContext.FindModuleConstructorBlockSupport helper = new ModuleCompletionContext.FindModuleConstructorBlockSupport();
         Block moduleConstructorBlock = helper.findModuleConstuctorBlock(astRoot);
-        return scanLevel(moduleConstructorBlock, declarationName);
+        return scanModuleThisLevel(moduleConstructorBlock, declarationName);
     }
 
-    private AstNode scanLevel(AstNode currentNode, String declarationName) {
+    private AstNode scanModuleThisLevel(AstNode currentNode, String declarationName) {
         Node n = currentNode.getFirstChild();
         while (n != null) {
             if (n instanceof ExpressionStatement) {
