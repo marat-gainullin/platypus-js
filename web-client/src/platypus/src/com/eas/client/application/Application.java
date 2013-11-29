@@ -603,6 +603,14 @@ public class Application {
 		$wnd.Form.getShownForm = function(aFormKey){
 			return @com.eas.client.form.Form::getShownForm(Ljava/lang/String;)(aFormKey);
 		}
+		$wnd.ServerModule = function(aModuleId){
+			$wnd.platypus.defineServerModule(aModuleId, this);
+		};
+		$wnd.ServerReport = function(aModuleId){
+			$wnd.platypus.defineServerModule(aModuleId, this);
+		};
+		$wnd.Report = $wnd.ServerReport;
+		
 		Object.defineProperty($wnd.Form, "shown", {
 			get : function() {
 				return @com.eas.client.form.Form::getShownForms()();

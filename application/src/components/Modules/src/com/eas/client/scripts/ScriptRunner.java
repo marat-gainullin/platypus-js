@@ -523,7 +523,7 @@ public class ScriptRunner extends ScriptableObject {
         }
     }
 
-    public static Scriptable checkStandardObjects(Context currentContext) throws Exception {
+    public static ScriptableObject checkStandardObjects(Context currentContext) throws Exception {
         synchronized (standardObjectsScopeLock) {
             if (standardObjectsScope == null) {
                 standardObjectsScope = new ScriptRunner(PlatypusScriptedResource.getClient(), ScriptUtils.getScope(), PlatypusScriptedResource.getPrincipalHost(), PlatypusScriptedResource.getScriptDocumentsHost());

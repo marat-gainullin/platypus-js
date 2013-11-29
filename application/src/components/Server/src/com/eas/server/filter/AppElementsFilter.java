@@ -184,9 +184,9 @@ public class AppElementsFilter {
                     switch (docNode.getNodeName()) {
                         case ApplicationElement.SCRIPT_SOURCE_TAG_NAME:
                             String appSource = docNode.getTextContent();
-                            DependenciesWalker transformer = new DependenciesWalker(appSource, serverCore.getDatabasesClient().getAppCache());
-                            String source = transformer.transform();
-                            ScriptDocument sideEffectsAdder = new ScriptDocument(null, source);
+                            DependenciesWalker dependecies = new DependenciesWalker(appSource, serverCore.getDatabasesClient().getAppCache());
+                            dependecies.walk();
+                            ScriptDocument sideEffectsAdder = new ScriptDocument(null, appSource);
                             sideEffectsAdder.readScriptAnnotations();
                             switch (aAppElement.getType()) {
                                 case ClientConstants.ET_COMPONENT: {
@@ -233,9 +233,9 @@ public class AppElementsFilter {
                             }
                             docNode.getParentNode().removeChild(docNode);
 
-                            dependencies = transformer.getDependencies();
-                            queryDependencies = transformer.getQueryDependencies();
-                            serverDependencies = transformer.getServerDependencies();
+                            dependencies = dependecies.getDependencies();
+                            queryDependencies = dependecies.getQueryDependencies();
+                            serverDependencies = dependecies.getServerDependencies();
                             break;
                         case Model2XmlDom.DATAMODEL_TAG_NAME:
                             NodeList entitiesNodes = docNode.getChildNodes();
