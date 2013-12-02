@@ -4,6 +4,7 @@
  */
 package com.eas.designer.application.module.completion;
 
+import com.eas.client.cache.PlatypusFilesSupport;
 import com.eas.designer.application.indexer.IndexerQuery;
 import com.eas.designer.application.module.PlatypusModuleDataObject;
 import static com.eas.designer.application.module.completion.CompletionContext.addItem;
@@ -20,7 +21,6 @@ import org.mozilla.javascript.ast.NewExpression;
 import org.mozilla.javascript.ast.NodeVisitor;
 import org.mozilla.javascript.ast.PropertyGet;
 import org.mozilla.javascript.ast.ScriptNode;
-import org.mozilla.javascript.ast.Block;
 import org.mozilla.javascript.ast.KeywordLiteral;
 import org.mozilla.javascript.ast.VariableDeclaration;
 import org.mozilla.javascript.ast.VariableInitializer;
@@ -109,8 +109,7 @@ public class ModuleCompletionContext extends CompletionContext {
         AstRoot astRoot = parentModuleContext.dataObject.getAst();
         if (astRoot != null) {
             AstNode offsetNode = AstUtlities.getOffsetNode(astRoot, offset);
-            FindModuleConstructorBlockSupport helper = new FindModuleConstructorBlockSupport();
-            Block moduleConstructorBlock = helper.findModuleConstuctorBlock(astRoot);
+            AstNode moduleConstructorBlock = PlatypusFilesSupport.extractFirstFunction(astRoot).getBody();
             if (offsetNode != null && offsetNode.equals(moduleConstructorBlock) && THIS_KEYWORD.equals(fieldName)) {
                 return parentModuleContext.createThisContext(false);
             }
@@ -154,29 +153,6 @@ public class ModuleCompletionContext extends CompletionContext {
         public JsCodeCompletionScopeInfo(AstNode aScope, CompletionMode aMode) {
             scope = aScope;
             mode = aMode;
-        }
-    }
-
-    public static class FindModuleConstructorBlockSupport {
-
-        Block constructorBlock;
-
-        public Block findModuleConstuctorBlock(final AstRoot astRoot) {
-
-            astRoot.visit(new NodeVisitor() {
-                @Override
-                public boolean visit(AstNode an) {
-                    if (astRoot.equals(an)) {
-                        return true;
-                    }
-                    if (an instanceof FunctionNode) {
-                        FunctionNode fn = (FunctionNode) an;
-                        constructorBlock = (Block) fn.getBody();
-                    }
-                    return false;
-                }
-            });
-            return constructorBlock;
         }
     }
 

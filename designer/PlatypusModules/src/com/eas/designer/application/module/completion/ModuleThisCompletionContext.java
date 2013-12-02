@@ -4,6 +4,7 @@
  */
 package com.eas.designer.application.module.completion;
 
+import com.eas.client.cache.PlatypusFilesSupport;
 import com.eas.client.model.application.ApplicationDbEntity;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -13,7 +14,6 @@ import java.util.Map;
 import org.mozilla.javascript.Token;
 import org.mozilla.javascript.ast.Assignment;
 import org.mozilla.javascript.ast.AstNode;
-import org.mozilla.javascript.ast.Block;
 import org.mozilla.javascript.ast.ExpressionStatement;
 import org.mozilla.javascript.ast.FunctionNode;
 import org.mozilla.javascript.ast.NodeVisitor;
@@ -73,8 +73,7 @@ public class ModuleThisCompletionContext extends CompletionContext {
         addItem(resultSet, point.filter, new BeanCompletionItem(parentContext.getDataObject().getModel().getParametersEntity().getRowset().getClass(), PARAMS_SCRIPT_NAME, null, point.caretBeginWordOffset, point.caretEndWordOffset));
         fillJavaCompletionItems(point, resultSet);
         if (enableJsElementsCompletion) {
-            ModuleCompletionContext.FindModuleConstructorBlockSupport helper = new ModuleCompletionContext.FindModuleConstructorBlockSupport();
-            ScanJsElementsSupport scanner = new ScanJsElementsSupport(helper.findModuleConstuctorBlock(parentContext.getDataObject().getAst()));
+            ScanJsElementsSupport scanner = new ScanJsElementsSupport(PlatypusFilesSupport.extractFirstFunction(parentContext.getDataObject().getAst()).getBody());
             for (JsCompletionItem i : scanner.getCompletionItems(point)) {
                 addItem(resultSet, point.filter, i);
             }
@@ -83,11 +82,11 @@ public class ModuleThisCompletionContext extends CompletionContext {
 
     public static class ScanJsElementsSupport {
 
-        private final Block moduleThisBlock;
+        private final AstNode moduleThisBlock;
         private Map<String, JsCompletionItem> functionsMap;
         private Map<String, JsCompletionItem> fieldsMap;
 
-        public ScanJsElementsSupport(Block aModuleThisBlock) {
+        public ScanJsElementsSupport(AstNode aModuleThisBlock) {
             moduleThisBlock = aModuleThisBlock;
         }
 

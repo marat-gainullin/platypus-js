@@ -4,6 +4,7 @@
  */
 package com.eas.designer.application.module.hyperlink;
 
+import com.eas.client.cache.PlatypusFilesSupport;
 import com.eas.client.scripts.ScriptRunner;
 import com.eas.designer.application.module.PlatypusModuleDataObject;
 import com.eas.designer.application.module.completion.CompletionContext;
@@ -24,7 +25,6 @@ import org.mozilla.javascript.Token;
 import org.mozilla.javascript.ast.Assignment;
 import org.mozilla.javascript.ast.AstNode;
 import org.mozilla.javascript.ast.AstRoot;
-import org.mozilla.javascript.ast.Block;
 import org.mozilla.javascript.ast.ExpressionStatement;
 import org.mozilla.javascript.ast.FunctionNode;
 import org.mozilla.javascript.ast.Name;
@@ -262,9 +262,7 @@ public class ModuleHyperlinkProvider implements HyperlinkProviderExt {
         return null;
     }
     private AstNode findModuleThisPropertyDeclaration(AstRoot astRoot, String declarationName) {
-        ModuleCompletionContext.FindModuleConstructorBlockSupport helper = new ModuleCompletionContext.FindModuleConstructorBlockSupport();
-        Block moduleConstructorBlock = helper.findModuleConstuctorBlock(astRoot);
-        return scanModuleThisLevel(moduleConstructorBlock, declarationName);
+        return scanModuleThisLevel(PlatypusFilesSupport.extractFirstFunction(astRoot).getBody(), declarationName);
     }
 
     private AstNode scanModuleThisLevel(AstNode currentNode, String declarationName) {
