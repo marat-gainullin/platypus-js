@@ -6,7 +6,6 @@ package com.eas.designer.debugger;
 
 import com.eas.debugger.jmx.server.DebuggerMBean;
 import com.eas.designer.debugger.annotations.PlatypusRunpointAnnotation;
-import com.eas.designer.debugger.ui.BreakpointModel;
 import javax.management.AttributeChangeNotification;
 import javax.management.Notification;
 import javax.management.NotificationListener;
@@ -14,7 +13,6 @@ import org.netbeans.api.debugger.DebuggerEngine;
 import org.netbeans.api.debugger.DebuggerManager;
 import org.netbeans.api.debugger.Session;
 import org.netbeans.api.project.Project;
-import org.netbeans.spi.viewmodel.NodeModel;
 import org.openide.ErrorManager;
 import org.openide.cookies.EditorCookie;
 import org.openide.filesystems.FileObject;
