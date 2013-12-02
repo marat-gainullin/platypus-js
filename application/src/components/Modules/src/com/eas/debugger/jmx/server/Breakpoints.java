@@ -45,11 +45,7 @@ public class Breakpoints implements BreakpointsMBean {
         if (si != null) {
             return si.breakableLine(aLineNumber);
         } else {
-            try {
-                return sourceModuleId != null;
-            } catch (Exception ex) {
-                return false;
-            }
+            return sourceModuleId != null && !sourceModuleId.isEmpty();// give pending breakpoints a chance
         }
     }
 

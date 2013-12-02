@@ -7,13 +7,14 @@ package com.eas.client.scripts;
 import com.eas.client.Client;
 import com.eas.client.cache.ActualCacheEntry;
 import com.eas.client.metadata.ApplicationElement;
+import static com.eas.client.scripts.ScriptRunner.DEBUG_PROPERTY;
+import com.eas.debugger.jmx.server.Breakpoints;
 import com.eas.script.ScriptUtils;
 import java.util.HashMap;
 import java.util.Map;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
 import org.mozilla.javascript.Script;
-import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 
 /**
@@ -63,6 +64,9 @@ public abstract class CompiledScriptDocuments {
                         cx.setOptimizationLevel(-1);
                         String filteredSource = lscriptDoc.filterSource();
                         Script compiledScript = cx.compileString(filteredSource, appElement.getId(), 0, null);
+                        if (System.getProperty(DEBUG_PROPERTY) != null) {
+                            Breakpoints.getInstance().checkPendingBreakpoints();
+                        }
                         ScriptableObject scope = ScriptRunner.checkStandardObjects(cx);
                         compiledScript.exec(cx, scope);
                         Object oConstructor = scope.get(appElement.getId(), scope);

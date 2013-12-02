@@ -142,9 +142,6 @@ public class ScriptRunner extends ScriptableObject {
             public Object run(Context cx) throws Exception {
                 model.setScriptThis(ScriptRunner.this);
                 if (scriptDoc.getFunction() != null) {
-                    if (System.getProperty(DEBUG_PROPERTY) != null) {
-                        Breakpoints.getInstance().checkPendingBreakpoints();
-                    }
                     Object[] jsArgs = new Object[args != null ? args.length : 0];
                     for (int i = 0; i < jsArgs.length; i++) {
                         jsArgs[i] = ScriptUtils.javaToJS(args[i], ScriptUtils.getScope());
@@ -497,6 +494,9 @@ public class ScriptRunner extends ScriptableObject {
                              */
                             cx.setOptimizationLevel(-1);
                             Script lib = cx.compileString(source, resourceId, 0, null);
+                            if (System.getProperty(DEBUG_PROPERTY) != null) {
+                                Breakpoints.getInstance().checkPendingBreakpoints();
+                            }
                             lib.exec(cx, checkStandardObjects(cx));
                         } else {
                             throw new IllegalArgumentException("Script resource not found: " + resourceId + ". Hint: Regular platypus modules can't be used as resources.");
@@ -677,8 +677,8 @@ public class ScriptRunner extends ScriptableObject {
                 if (oprot instanceof Scriptable) {
                     runner.setPrototype((Scriptable) oprot);
                 }
-                if(runner instanceof ScriptRunner){
-                    ((ScriptRunner)runner).execute();
+                if (runner instanceof ScriptRunner) {
+                    ((ScriptRunner) runner).execute();
                 }
                 return runner;
             } catch (Exception ex) {

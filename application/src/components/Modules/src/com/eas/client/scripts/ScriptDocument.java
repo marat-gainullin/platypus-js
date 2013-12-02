@@ -225,35 +225,9 @@ public class ScriptDocument {
                     return true;
                 }
             });
-            //readModuleAnnotations();
         }
     }
 
-    /*
-     private void readModuleAnnotations() {
-     assert ast != null;
-     moduleAnnotations = new ArrayList<>();
-     SortedSet<Comment> comments = ast.getComments();
-     if (comments != null) {
-     for (Comment comment : comments) {
-     if (comment.getCommentType().equals(Token.CommentType.JSDOC)) {
-     JsDoc jsDoc = new JsDoc(comment.getValue());
-     if (jsDoc.containsModuleName()) {
-     jsDoc.parseAnnotations();
-     for (Tag tag : jsDoc.getAnnotations()) {
-     moduleAnnotations.add(tag);
-     if (tag.getName().equals(JsDoc.Tag.ROLES_ALLOWED_TAG)) {
-     for (String role : tag.getParams()) {
-     moduleAllowedRoles.add(role);
-     }
-     }
-     }
-     }
-     }
-     }
-     }
-     }
-     */
     private void readPropertyRoles(String aPropertyName, String aJsDocBody) {
         if (aJsDocBody != null) {
             JsDoc jsDoc = new JsDoc(aJsDocBody);
