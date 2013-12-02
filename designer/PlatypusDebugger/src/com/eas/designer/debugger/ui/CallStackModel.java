@@ -19,6 +19,7 @@ import org.netbeans.spi.debugger.DebuggerServiceRegistration;
 import org.netbeans.spi.debugger.ui.Constants;
 import org.netbeans.spi.viewmodel.*;
 import org.openide.filesystems.FileObject;
+import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 
 /**
@@ -214,8 +215,17 @@ public class CallStackModel implements TreeModel, NodeModel,
         if (node == ROOT) {
             return ROOT;
         } else if (node instanceof StackFrameInfo) {
-            StackFrameInfo frame = (StackFrameInfo) node;
-            return frame.toString();
+            try {
+                StackFrameInfo frame = (StackFrameInfo) node;
+                String res = frame.toString();
+                if (frame.index == environment.mDebugger.currentFrame()) {
+                    return "<html><b>" + res;
+                } else {
+                    return res;
+                }
+            } catch (Exception ex) {
+                Exceptions.printStackTrace(ex);
+            }
         }
         throw new UnknownTypeException(node);
     }
@@ -242,7 +252,8 @@ public class CallStackModel implements TreeModel, NodeModel,
                     return CALL_STACK;
                 }
             } catch (Exception ex) {
-                throw new UnknownTypeException(ex);
+                Exceptions.printStackTrace(ex);
+                return CALL_STACK;
             }
         } else {
             throw new UnknownTypeException(node);
@@ -280,12 +291,12 @@ public class CallStackModel implements TreeModel, NodeModel,
                 environment.mDebugger.setCurrentFrame(frame.index);
                 fireChanges();
                 TreeModel localsTree = contextProvider.lookupFirst("LocalsView", TreeModel.class);
-                if(localsTree instanceof JsLocalsTreeModel){
-                    ((JsLocalsTreeModel)localsTree).fireChanges();
+                if (localsTree instanceof JsLocalsTreeModel) {
+                    ((JsLocalsTreeModel) localsTree).fireChanges();
                 }
                 TreeModel watchesTree = contextProvider.lookupFirst("WatchesView", TreeModel.class);
-                if(watchesTree instanceof JsWatchesTreeModel){
-                    ((JsWatchesTreeModel)watchesTree).fireChanges();
+                if (watchesTree instanceof JsWatchesTreeModel) {
+                    ((JsWatchesTreeModel) watchesTree).fireChanges();
                 }
             } catch (Exception ex) {
                 throw new UnknownTypeException(node);

@@ -70,7 +70,7 @@ public class CodePointInfo {
 
                             @Override
                             public void run() {
-                                lineObject.show(Line.ShowOpenType.OPEN, Line.ShowVisibilityType.FRONT);
+                                lineObject.show(Line.ShowOpenType.OPEN, Line.ShowVisibilityType.FOCUS);
                             }
                         };
                         if (java.awt.EventQueue.isDispatchThread()) {

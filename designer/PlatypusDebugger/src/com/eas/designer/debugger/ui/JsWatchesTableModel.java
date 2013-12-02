@@ -4,21 +4,10 @@
  */
 package com.eas.designer.debugger.ui;
 
-import com.eas.debugger.jmx.server.DebuggerMBean;
 import com.eas.designer.debugger.DebuggerConstants;
 import com.eas.designer.debugger.DebuggerEnvironment;
-import java.beans.PropertyChangeEvent;
 import java.util.HashSet;
 import java.util.Set;
-import javax.management.MBeanServerConnection;
-import javax.management.Notification;
-import javax.management.NotificationListener;
-import javax.management.ObjectName;
-import org.netbeans.api.debugger.Breakpoint;
-import org.netbeans.api.debugger.DebuggerEngine;
-import org.netbeans.api.debugger.DebuggerManager;
-import org.netbeans.api.debugger.DebuggerManagerListener;
-import org.netbeans.api.debugger.Session;
 import org.netbeans.api.debugger.Watch;
 import org.netbeans.modules.debugger.ui.models.WatchesTableModel;
 import org.netbeans.spi.debugger.ContextProvider;
@@ -40,7 +29,7 @@ import org.netbeans.spi.viewmodel.UnknownTypeException;
     @DebuggerServiceRegistration(path = "PlatypusJsSession/LocalsView",
             types = TableModel.class,
             position = 10001)})
-public class JsWatchesTableModel extends WatchesTableModel implements NotificationListener, DebuggerManagerListener {
+public class JsWatchesTableModel extends WatchesTableModel {
 
     protected Set<ModelListener> listeners = new HashSet<>();
     protected DebuggerEnvironment environment;
@@ -48,10 +37,6 @@ public class JsWatchesTableModel extends WatchesTableModel implements Notificati
     public JsWatchesTableModel(ContextProvider contextProvider) throws Exception {
         super();
         environment = contextProvider.lookupFirst(DebuggerConstants.DEBUGGER_SERVICERS_PATH, DebuggerEnvironment.class);
-        ObjectName mBeanDebuggerName = new ObjectName(DebuggerMBean.DEBUGGER_MBEAN_NAME);
-        MBeanServerConnection jmxConnection = contextProvider.lookupFirst(DebuggerConstants.DEBUGGER_SERVICERS_PATH, MBeanServerConnection.class);
-        jmxConnection.addNotificationListener(mBeanDebuggerName, this, null, null);
-        DebuggerManager.getDebuggerManager().addDebuggerListener(this);
     }
 
     /**
@@ -74,8 +59,9 @@ public class JsWatchesTableModel extends WatchesTableModel implements Notificati
     @Override
     public Object getValueAt(Object node, String columnID) throws UnknownTypeException {
         if (node instanceof Watch || node instanceof ChildWatch) {
-            if (/*Constants.WATCH_TO_STRING_COLUMN_ID.equals(columnID)
-                     || */Constants.WATCH_VALUE_COLUMN_ID.equals(columnID)
+            if (Constants.WATCH_TO_STRING_COLUMN_ID.equals(columnID)
+                    || Constants.WATCH_VALUE_COLUMN_ID.equals(columnID)
+                    || Constants.LOCALS_TO_STRING_COLUMN_ID.equals(columnID)
                     || Constants.LOCALS_VALUE_COLUMN_ID.equals(columnID)) {
                 String expression = extractWatchExpression(node);
                 try {
@@ -93,8 +79,10 @@ public class JsWatchesTableModel extends WatchesTableModel implements Notificati
                     return ex.getMessage();
                 }
             }
+            return "";// May be extra columns in in future
+        } else {
+            throw new UnknownTypeException(node);
         }
-        throw new UnknownTypeException(node);
     }
 
     /**
@@ -114,9 +102,16 @@ public class JsWatchesTableModel extends WatchesTableModel implements Notificati
      */
     @Override
     public boolean isReadOnly(Object node, String columnID) throws UnknownTypeException {
-        return Constants.WATCH_TO_STRING_COLUMN_ID.equals(columnID)
-                || Constants.WATCH_VALUE_COLUMN_ID.equals(columnID)
-                || Constants.WATCH_TYPE_COLUMN_ID.equals(columnID);
+        if (node instanceof Watch || node instanceof ChildWatch) {
+            return Constants.WATCH_TO_STRING_COLUMN_ID.equals(columnID)
+                    || Constants.WATCH_VALUE_COLUMN_ID.equals(columnID)
+                    || Constants.WATCH_TYPE_COLUMN_ID.equals(columnID)
+                    || Constants.LOCALS_TO_STRING_COLUMN_ID.equals(columnID)
+                    || Constants.LOCALS_VALUE_COLUMN_ID.equals(columnID)
+                    || Constants.LOCALS_TYPE_COLUMN_ID.equals(columnID);
+        } else {
+            throw new UnknownTypeException(node);
+        }
     }
 
     /**
@@ -135,6 +130,18 @@ public class JsWatchesTableModel extends WatchesTableModel implements Notificati
      */
     @Override
     public void setValueAt(Object node, String columnID, Object value) throws UnknownTypeException {
+        if (node instanceof Watch || node instanceof ChildWatch) {
+            if (Constants.WATCH_VALUE_COLUMN_ID.equals(columnID)
+                    || Constants.LOCALS_VALUE_COLUMN_ID.equals(columnID)) {
+                String expression = extractWatchExpression(node);
+                try {
+                    environment.mDebugger.evaluate(expression + " = " + String.valueOf(value));
+                } catch (Exception ex) {
+                }
+            }
+        } else {
+            throw new UnknownTypeException(node);
+        }
     }
 
     public static String extractWatchExpression(Object w) {
@@ -145,85 +152,5 @@ public class JsWatchesTableModel extends WatchesTableModel implements Notificati
         } else {
             return "";
         }
-    }
-
-    @Override
-    public void handleNotification(Notification notification, Object handback) {
-        fireChanges();
-    }
-
-    protected void fireChanges() {
-        /*
-         ModelEvent.TableValueChanged event = new ModelEvent.TableValueChanged(this, , );
-         ModelListener[] v = listeners.toArray(new ModelListener[]{});
-         for (ModelListener l : v) {
-         l.modelChanged(event);
-         }
-         */
-    }
-
-    /**
-     * Registers given listener.
-     *
-     * @param l the listener to add
-     */
-    @Override
-    public void addModelListener(ModelListener l) {
-        listeners.add(l);
-    }
-
-    /**
-     * Unregisters given listener.
-     *
-     * @param l the listener to remove
-     */
-    @Override
-    public void removeModelListener(ModelListener l) {
-        listeners.remove(l);
-    }
-
-    @Override
-    public Breakpoint[] initBreakpoints() {
-        return null;
-    }
-
-    @Override
-    public void breakpointAdded(Breakpoint breakpoint) {
-    }
-
-    @Override
-    public void breakpointRemoved(Breakpoint breakpoint) {
-    }
-
-    @Override
-    public void initWatches() {
-    }
-
-    @Override
-    public void watchAdded(Watch watch) {
-    }
-
-    @Override
-    public void watchRemoved(Watch watch) {
-    }
-
-    @Override
-    public void sessionAdded(Session session) {
-    }
-
-    @Override
-    public void sessionRemoved(Session session) {
-    }
-
-    @Override
-    public void engineAdded(DebuggerEngine engine) {
-    }
-
-    @Override
-    public void engineRemoved(DebuggerEngine engine) {
-    }
-
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
     }
 }

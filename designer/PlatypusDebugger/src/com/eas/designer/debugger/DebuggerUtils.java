@@ -26,7 +26,6 @@ import org.netbeans.api.project.Project;
 import org.netbeans.spi.java.classpath.ClassPathProvider;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
-import org.openide.text.Line;
 
 /**
  *
@@ -71,48 +70,34 @@ public class DebuggerUtils {
         if (env.runningProgram != null) {
             startProcessWaiting(env.runningProgram, dEngines);
         } else {
-            startDebugging(env);
-            listener.debuggingStarted = true;
             listener.processWaiter = startProcessWaiting(jmxc, dEngines);
         }
     }
 
     public static void startDebugging(DebuggerEnvironment env) throws Exception {
-        FileObject file = env.mDebuggerListener.getCurrentAppFile();
-        int lineNumber = env.mDebuggerListener.getCurrentLineNumber();
-        boolean haveBreakpoint = false;
+        // transfer breakpoints
         Breakpoint[] breaks = DebuggerManager.getDebuggerManager().getBreakpoints();
         for (Breakpoint breakPoint : breaks) {
             if (breakPoint instanceof PlatypusBreakpoint) {
                 PlatypusBreakpoint pBreak = (PlatypusBreakpoint) breakPoint;
-                Line line = pBreak.getLine();
-                FileObject bFile = line.getLookup().lookup(FileObject.class);
-                if (lineNumber == line.getLineNumber()
-                        && bFile == file) {
-                    haveBreakpoint = true;
-                    break;
-                }
                 pBreak.remoteAdd(env.mBreakpoints);
             }
         }
-        // if the debugger has stopped the program, but breakpoint is absent, we have to run program.
-        if (env.runningProgram != null && !env.mDebuggerListener.isRunning() && !haveBreakpoint) {
-            env.mDebuggerListener.cancelStoppedAnnotation();
-            env.mDebugger.continueRun();
-        }
+        env.mDebuggerListener.debuggingStarted = true;
+        env.mDebuggerListener.running = true;
     }
 
     public static void killEngine(DebuggerEngine engine) throws Exception {
         DebuggerEnvironment env = engine.lookupFirst(DebuggerConstants.DEBUGGER_SERVICERS_PATH, DebuggerEnvironment.class);
         try {
-            if (env.runningProgram == null) {// Debugger was attached to external program
-                if (!env.mDebuggerListener.positionedOnSource()) {
-                    for (Breakpoint breakpoint : DebuggerManager.getDebuggerManager().getBreakpoints()) {
-                        if (breakpoint instanceof PlatypusBreakpoint) {
-                            PlatypusBreakpoint pbreak = (PlatypusBreakpoint) breakpoint;
-                            pbreak.remoteRemove(env.mBreakpoints);
-                        }
+            if (env != null && env.runningProgram == null) {// Debugger was attached to external program
+                for (Breakpoint breakpoint : DebuggerManager.getDebuggerManager().getBreakpoints()) {
+                    if (breakpoint instanceof PlatypusBreakpoint) {
+                        PlatypusBreakpoint pbreak = (PlatypusBreakpoint) breakpoint;
+                        pbreak.remoteRemove(env.mBreakpoints);
                     }
+                }
+                if (!env.mDebuggerListener.running) {
                     env.mDebugger.continueRun();
                 }
             }

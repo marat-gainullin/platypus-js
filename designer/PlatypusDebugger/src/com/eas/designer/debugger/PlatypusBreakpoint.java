@@ -68,6 +68,19 @@ public class PlatypusBreakpoint extends Breakpoint {
         return line;
     }
 
+    public boolean isHitted() {
+        if (line != null) {
+            DebuggerEngine engine = DebuggerManager.getDebuggerManager().getCurrentEngine();
+            if (engine != null) {
+                DebuggerEnvironment env = engine.lookupFirst(DebuggerConstants.DEBUGGER_SERVICERS_PATH, DebuggerEnvironment.class);
+                if (env != null && env.mDebuggerListener != null && line == env.mDebuggerListener.getRunponitAnnotateable()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public void addAnnotation(BreakpointAnnotation aAnnotation) {
         annotations.add(aAnnotation);
         aAnnotation.attach(line);
@@ -114,8 +127,10 @@ public class PlatypusBreakpoint extends Breakpoint {
             annotations.add(annotation);
             DebuggerEngine[] engines = DebuggerManager.getDebuggerManager().getDebuggerEngines();
             for (DebuggerEngine engine : engines) {
-                BreakpointsMBean breakpoints = engine.lookupFirst(DebuggerConstants.DEBUGGER_SERVICERS_PATH, DebuggerEnvironment.class).mBreakpoints;
-                remoteRemove(breakpoints);
+                DebuggerEnvironment env = engine.lookupFirst(DebuggerConstants.DEBUGGER_SERVICERS_PATH, DebuggerEnvironment.class);
+                if (env != null && env.mBreakpoints != null) {
+                    remoteRemove(env.mBreakpoints);
+                }
             }
             firePropertyChange(PROP_ENABLED, Boolean.TRUE, Boolean.FALSE);
         }
@@ -140,8 +155,10 @@ public class PlatypusBreakpoint extends Breakpoint {
             annotations.add(annotation);
             DebuggerEngine[] engines = DebuggerManager.getDebuggerManager().getDebuggerEngines();
             for (DebuggerEngine engine : engines) {
-                BreakpointsMBean breakpoints = engine.lookupFirst(DebuggerConstants.DEBUGGER_SERVICERS_PATH, DebuggerEnvironment.class).mBreakpoints;
-                remoteAdd(breakpoints);
+                DebuggerEnvironment env = engine.lookupFirst(DebuggerConstants.DEBUGGER_SERVICERS_PATH, DebuggerEnvironment.class);
+                if (env != null && env.mBreakpoints != null) {
+                    remoteAdd(env.mBreakpoints);
+                }
             }
             firePropertyChange(PROP_ENABLED, Boolean.FALSE, Boolean.TRUE);
         }

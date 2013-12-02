@@ -4,52 +4,41 @@
  */
 package com.eas.designer.debugger;
 
-import com.eas.debugger.jmx.server.BreakpointsMBean;
 import com.eas.debugger.jmx.server.DebuggerMBean;
 import com.eas.designer.debugger.annotations.PlatypusBreakpointAnnotation;
-import java.beans.PropertyChangeEvent;
-import java.util.concurrent.Future;
+import java.io.IOException;
 import java.util.logging.Logger;
+import javax.management.InstanceNotFoundException;
+import javax.management.ListenerNotFoundException;
 import javax.management.MBeanServerConnection;
+import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import org.netbeans.api.debugger.Breakpoint;
 import org.netbeans.api.debugger.DebuggerEngine;
 import org.netbeans.api.debugger.DebuggerManager;
-import org.netbeans.api.debugger.DebuggerManagerListener;
-import org.netbeans.api.debugger.Session;
-import org.netbeans.api.debugger.Watch;
+import org.netbeans.api.debugger.DebuggerManagerAdapter;
 
 /**
  *
  * @author mg
  */
-public class PlatypusDebuggerListener implements DebuggerManagerListener {
-
-    private static PlatypusDebuggerListener instance;
-
-    public static void checkListening() {
-        if (instance == null) {
-            instance = new PlatypusDebuggerListener();
-            DebuggerManager.getDebuggerManager().addDebuggerListener(instance);
-        }
-    }
-
-    @Override
-    public Breakpoint[] initBreakpoints() {
-        return null;
-    }
+public class PlatypusDebuggerListener extends DebuggerManagerAdapter {
 
     @Override
     public void breakpointAdded(Breakpoint breakpoint) {
         if (breakpoint instanceof PlatypusBreakpoint) {
             PlatypusBreakpoint pBreak = (PlatypusBreakpoint) breakpoint;
-            pBreak.clearAnnotations();
-            PlatypusBreakpointAnnotation.addAnnotation(pBreak);
+            if (PlatypusBreakpointAnnotation.getCurrentLine() != null) {
+                pBreak.clearAnnotations();
+                PlatypusBreakpointAnnotation.addAnnotation(pBreak);
+            }
             if (pBreak.isEnabled()) {
                 DebuggerEngine[] engines = DebuggerManager.getDebuggerManager().getDebuggerEngines();
                 for (DebuggerEngine engine : engines) {
-                    BreakpointsMBean breakpoints = engine.lookupFirst(DebuggerConstants.DEBUGGER_SERVICERS_PATH, DebuggerEnvironment.class).mBreakpoints;
-                    pBreak.remoteAdd(breakpoints);
+                    DebuggerEnvironment env = engine.lookupFirst(DebuggerConstants.DEBUGGER_SERVICERS_PATH, DebuggerEnvironment.class);
+                    if (env != null && env.mBreakpoints != null) {
+                        pBreak.remoteAdd(env.mBreakpoints);
+                    }
                 }
             }
         }
@@ -62,54 +51,30 @@ public class PlatypusDebuggerListener implements DebuggerManagerListener {
             pBreak.clearAnnotations();
             DebuggerEngine[] engines = DebuggerManager.getDebuggerManager().getDebuggerEngines();
             for (DebuggerEngine engine : engines) {
-                BreakpointsMBean breakpoints = engine.lookupFirst(DebuggerConstants.DEBUGGER_SERVICERS_PATH, DebuggerEnvironment.class).mBreakpoints;
-                pBreak.remoteRemove(breakpoints);
+                DebuggerEnvironment env = engine.lookupFirst(DebuggerConstants.DEBUGGER_SERVICERS_PATH, DebuggerEnvironment.class);
+                if (env != null && env.mBreakpoints != null) {
+                    pBreak.remoteRemove(env.mBreakpoints);
+                }
             }
         }
-    }
-
-    @Override
-    public void initWatches() {
-    }
-
-    @Override
-    public void watchAdded(Watch watch) {
-    }
-
-    @Override
-    public void watchRemoved(Watch watch) {
-    }
-
-    @Override
-    public void sessionAdded(Session session) {
-    }
-
-    @Override
-    public void sessionRemoved(Session session) {
-    }
-
-    @Override
-    public void engineAdded(DebuggerEngine engine) {
     }
 
     @Override
     public void engineRemoved(DebuggerEngine engine) {
         try {
-            MBeanDebuggerListener dbgListener = engine.lookupFirst(DebuggerConstants.DEBUGGER_SERVICERS_PATH, DebuggerEnvironment.class).mDebuggerListener;
-            dbgListener.die();
-            MBeanServerConnection jmxConnection = engine.lookupFirst(DebuggerConstants.DEBUGGER_SERVICERS_PATH, MBeanServerConnection.class);
-            ObjectName mBeanName = new ObjectName(DebuggerMBean.DEBUGGER_MBEAN_NAME);
-            jmxConnection.removeNotificationListener(mBeanName, dbgListener);
-            Future<Integer> f = engine.lookupFirst(DebuggerConstants.DEBUGGER_SERVICERS_PATH, DebuggerEnvironment.class).runningProgram;
-            if (f != null) {
-                f.cancel(true);
+            DebuggerEnvironment env = engine.lookupFirst(DebuggerConstants.DEBUGGER_SERVICERS_PATH, DebuggerEnvironment.class);
+            if (env != null) {
+                MBeanDebuggerListener dbgListener = env.mDebuggerListener;
+                dbgListener.die();
+                MBeanServerConnection jmxConnection = engine.lookupFirst(DebuggerConstants.DEBUGGER_SERVICERS_PATH, MBeanServerConnection.class);
+                ObjectName mBeanName = new ObjectName(DebuggerMBean.DEBUGGER_MBEAN_NAME);
+                jmxConnection.removeNotificationListener(mBeanName, dbgListener);
+                if (env.runningProgram != null) {// The program was created by the debugger, and so kill it too
+                    env.runningProgram.cancel(true);
+                }
             }
-        } catch (Exception ex) {
+        } catch (MalformedObjectNameException | InstanceNotFoundException | ListenerNotFoundException | IOException ex) {
             Logger.getLogger(PlatypusDebuggerListener.class.getName()).info(ex.getMessage());
         }
-    }
-
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
     }
 }

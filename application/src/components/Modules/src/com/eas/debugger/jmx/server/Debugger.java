@@ -25,6 +25,7 @@ import org.mozilla.javascript.Callable;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextFactory;
 import org.mozilla.javascript.Kit;
+import org.mozilla.javascript.NativeJavaArray;
 import org.mozilla.javascript.NativeJavaObject;
 import org.mozilla.javascript.ScriptRuntime;
 import org.mozilla.javascript.Scriptable;
@@ -238,6 +239,9 @@ public class Debugger extends NotificationBroadcasterSupport implements Debugger
                         ids.add(oId.toString());
                     }
                 }
+            }
+            if(oResult instanceof NativeJavaArray){
+                ids.add("length");
             }
         }
         return ids.toArray(new String[]{});

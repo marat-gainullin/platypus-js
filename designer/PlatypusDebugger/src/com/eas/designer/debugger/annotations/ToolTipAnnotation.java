@@ -38,8 +38,8 @@ public class ToolTipAnnotation extends Annotation {
         final JEditorPane ep = EditorContextDispatcher.getDefault().getMostRecentEditor();
         DebuggerEngine currentEngine = DebuggerManager.getDebuggerManager().getCurrentEngine();
         if (lpart != null && ep != null && ep.getDocument() != null && currentEngine != null) {
-            DebuggerEnvironment de = currentEngine.lookupFirst(DebuggerConstants.DEBUGGER_SERVICERS_PATH, DebuggerEnvironment.class);
-            if (de != null) {
+            DebuggerEnvironment env = currentEngine.lookupFirst(DebuggerConstants.DEBUGGER_SERVICERS_PATH, DebuggerEnvironment.class);
+            if (env != null) {
                 Line line = lpart.getLine();
                 DataObject dob = DataEditorSupport.findDataObject(line);
                 if (dob != null) {
@@ -56,7 +56,7 @@ public class ToolTipAnnotation extends Annotation {
                                 isMethodPtr);
                         if (expression != null) {
                             try {
-                                return expression + " = " + de.mDebugger.evaluate(expression);
+                                return expression + " = " + env.mDebugger.evaluate(expression);
                             } catch (Exception ex) {
                                 return ex.getLocalizedMessage();
                             }
