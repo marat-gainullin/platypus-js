@@ -39,8 +39,8 @@ public class ModuleCompletionSupportService implements CompletionSupportService 
     @Override
     public Collection<SystemConstructorCompletionItem> getSystemConstructors(JsCompletionProvider.CompletionPoint point) {
         List<SystemConstructorCompletionItem> constructors = new ArrayList<>();
-        constructors.add(new SystemConstructorCompletionItem(MODULE_CONSTRUCTOR_NAME, "", SystemConstructorCompletionItem.DOUBLE_QUOTES_PARAMS, MODULE_CONSTRUCTOR_JSDOC, point.caretBeginWordOffset, point.caretEndWordOffset));
-        constructors.add(new SystemConstructorCompletionItem(SERVER_MODULE_CONSTRUCTOR_NAME, "", SystemConstructorCompletionItem.DOUBLE_QUOTES_PARAMS, SERVER_MODULE_CONSTRUCTOR_JSDOC, point.caretBeginWordOffset, point.caretEndWordOffset));
+        constructors.add(new SystemConstructorCompletionItem(MODULE_CONSTRUCTOR_NAME, "", Collections.EMPTY_LIST, MODULE_CONSTRUCTOR_JSDOC, point.caretBeginWordOffset, point.caretEndWordOffset));
+        constructors.add(new SystemConstructorCompletionItem(SERVER_MODULE_CONSTRUCTOR_NAME, "", Collections.EMPTY_LIST, SERVER_MODULE_CONSTRUCTOR_JSDOC, point.caretBeginWordOffset, point.caretEndWordOffset));
         return constructors;
     }
     

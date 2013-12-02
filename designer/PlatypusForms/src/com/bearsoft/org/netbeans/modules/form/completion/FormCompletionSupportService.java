@@ -43,7 +43,7 @@ public class FormCompletionSupportService implements CompletionSupportService {
     @Override
     public Collection<SystemConstructorCompletionItem> getSystemConstructors(JsCompletionProvider.CompletionPoint point) {
         List<SystemConstructorCompletionItem> constructors = new ArrayList<>();
-        constructors.add(new SystemConstructorCompletionItem(FORM_CONSTRUCTOR_NAME, "", SystemConstructorCompletionItem.DOUBLE_QUOTES_PARAMS, FORM_CONSTRUCTOR_JSDOC, point.caretBeginWordOffset, point.caretEndWordOffset));
+        constructors.add(new SystemConstructorCompletionItem(FORM_CONSTRUCTOR_NAME, "", Collections.EMPTY_LIST, FORM_CONSTRUCTOR_JSDOC, point.caretBeginWordOffset, point.caretEndWordOffset));
         return constructors;
     }
 }
