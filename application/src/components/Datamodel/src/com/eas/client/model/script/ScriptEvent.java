@@ -75,8 +75,8 @@ public class ScriptEvent<E extends ApplicationEntity<?, ?, E>> {
     }
 
     public void resolveHandler() {
-        if (handler instanceof StoredFunction) {
-            handler = entity.getHandler(((StoredFunction) handler).getName());
+        if (handler instanceof StoredFunction && entity != null && entity.getModel() != null) {
+            handler = entity.getModel().getHandler(((StoredFunction) handler).getName());
         }
     }
 }

@@ -8,6 +8,7 @@ import com.eas.script.NativeJavaHostObject;
 import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptUtils;
 import com.eas.script.ScriptUtils.ScriptAction;
+import com.eas.util.StringUtils;
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
@@ -152,9 +153,6 @@ public class Debugger extends NotificationBroadcasterSupport implements Debugger
         return null;
     }
 
-    protected String capitalize(String aValue) {
-        return aValue.length() > 1 ? aValue.substring(0, 1).toUpperCase() + aValue.substring(1) : aValue;
-    }
     /**
      * Comprised of last named method, wich is documented and used in properties
      * descriptors
@@ -228,7 +226,7 @@ public class Debugger extends NotificationBroadcasterSupport implements Debugger
                         if (methods != null && getters != null) {
                             if (methods.containsKey((String) oId)) {
                                 inFreeMethod = true;
-                            } else if (getters.containsKey("get" + capitalize((String) oId)) || getters.containsKey("is" + capitalize((String) oId))) {
+                            } else if (getters.containsKey("get" + StringUtils.capitalize((String) oId)) || getters.containsKey("is" + StringUtils.capitalize((String) oId))) {
                                 inGetter = true;
                             }
                         }

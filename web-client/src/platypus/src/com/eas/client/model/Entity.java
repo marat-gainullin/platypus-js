@@ -84,6 +84,7 @@ public class Entity implements RowsetListener {
 	protected JavaScriptObject onRequeried;
 	protected JavaScriptObject onFiltered;
 	protected JavaScriptObject jsPublished;
+	protected JavaScriptObject jsElementClass;
 	// for runtime
 	protected List<Integer> filterConstraints = new ArrayList<Integer>();
 	protected Cancellable pending;
@@ -138,7 +139,7 @@ public class Entity implements RowsetListener {
 
 	public static native void publish(JavaScriptObject aModule, Entity aEntity) throws Exception/*-{
 		var dsName = aEntity.@com.eas.client.model.Entity::getName()();
-		if (dsName != undefined && dsName != null && dsName != '') {
+		if (dsName) {
 			var publishedRowsetFacade = @com.eas.client.model.Entity::publishEntityFacade(Lcom/eas/client/model/Entity;)(aEntity);
 			Object.defineProperty(aModule, dsName, {
 				get : function() {
@@ -751,15 +752,16 @@ public class Entity implements RowsetListener {
 					}
 				};			
 				// properties
-				Object.defineProperty(published, "queryId",    { get : function(){ return published.getQueryId()}});
-				Object.defineProperty(published, "manual",     { get : function(){ return aEntity.@com.eas.client.model.Entity::isManual()()}, set : function(aValue){ aEntity.@com.eas.client.model.Entity::setManual(Z)(!!aValue)}});
-				Object.defineProperty(published, "modified",   { get : function(){ return published.isModified()}});
-				Object.defineProperty(published, "empty",      { get : function(){ return published.isEmpty()}});
-				Object.defineProperty(published, "inserting",  { get : function(){ return published.isInserting()}});
-				Object.defineProperty(published, "size",       { get : function(){ return published.getSize()}});
-				Object.defineProperty(published, "length",     { get : function(){ return published.getSize()}});
-				Object.defineProperty(published, "rowIndex",   { get : function(){ return published.getRowIndex()}, set : function(aValue){ published.setRowIndex(aValue)}});
-				Object.defineProperty(published, "substitute", { get : function(){ return published.getSubstitute()}, set : function(aValue){ published.setSubstitute(aValue)}});
+				Object.defineProperty(published, "queryId",      { get : function(){ return published.getQueryId()}});
+				Object.defineProperty(published, "manual",       { get : function(){ return aEntity.@com.eas.client.model.Entity::isManual()()}, set : function(aValue){ aEntity.@com.eas.client.model.Entity::setManual(Z)(!!aValue)}});
+				Object.defineProperty(published, "modified",     { get : function(){ return published.isModified()}});
+				Object.defineProperty(published, "empty",        { get : function(){ return published.isEmpty()}});
+				Object.defineProperty(published, "inserting",    { get : function(){ return published.isInserting()}});
+				Object.defineProperty(published, "size",         { get : function(){ return published.getSize()}});
+				Object.defineProperty(published, "length",       { get : function(){ return published.getSize()}});
+				Object.defineProperty(published, "rowIndex",     { get : function(){ return published.getRowIndex()}, set : function(aValue){ published.setRowIndex(aValue)}});
+				Object.defineProperty(published, "substitute",   { get : function(){ return published.getSubstitute()}, set : function(aValue){ published.setSubstitute(aValue)}});
+				Object.defineProperty(published, "elementClass", { get : function(){ return aEntity.@com.eas.client.model.Entity::getElementClass()()}, set : function(aValue){ aEntity.@com.eas.client.model.Entity::setElementClass(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue)}});
 				
 				Object.defineProperty(published, "md",         { get : function(){ return @com.eas.client.model.Entity::publishFieldsFacade(Lcom/bearsoft/rowset/metadata/Fields;Lcom/eas/client/model/Entity;)(aEntity.@com.eas.client.model.Entity::getFields()(), aEntity) }});
 				// cursor-row dynamic properties interface
@@ -921,17 +923,26 @@ public class Entity implements RowsetListener {
 			var published = aRow.@com.bearsoft.rowset.Row::getPublished()();
 			if(published == null)
 			{
-				published = {
-					getColumnObject : function(aFieldName) {
+				var elClass = aEntity.@com.eas.client.model.Entity::getElementClass()();
+				if(elClass != null && typeof elClass == "function")
+					published = new elClass();
+				else
+					published = {}; 
+				Object.defineProperty(published, "getColumnObject", { get : function(){
+					return function(aFieldName) {
 						return $wnd.boxAsJs(aRow.@com.bearsoft.rowset.Row::getFieldObject(Ljava/lang/String;)(aFieldName));
-					},
-					setColumnObject : function(aFieldName, aValue) {
+					}
+				}});
+				Object.defineProperty(published, "setColumnObject", { get : function(){
+					return function(aFieldName, aValue) {
 						aRow.@com.bearsoft.rowset.Row::setFieldObject(Ljava/lang/String;Ljava/lang/Object;)(aFieldName, $wnd.boxAsJava(aValue));
-					},
-					unwrap : function() {
+					}
+				}});
+				Object.defineProperty(published, "unwrap", { get : function(){
+					return function() {
 						return aRow;
-					} 
-				};
+					}
+				}});
 				Object.defineProperty(published, "md", { get : function(){ return @com.eas.client.model.Entity::publishFieldsFacade(Lcom/bearsoft/rowset/metadata/Fields;Lcom/eas/client/model/Entity;)(aRow.@com.bearsoft.rowset.Row::getFields()(), aEntity); }});
 				Object.defineProperty(published, "length", { get : function(){ return published.md.length; }});
 				for(var i=0;i<published.md.length;i++)
@@ -2545,4 +2556,12 @@ public class Entity implements RowsetListener {
 	public JavaScriptObject getPublished() {
 		return jsPublished;
 	}
+	
+	public JavaScriptObject getElementClass() {
+	    return jsElementClass;
+    }
+	
+	public void setElementClass(JavaScriptObject aValue) {
+	    jsElementClass = aValue;
+    }
 }
