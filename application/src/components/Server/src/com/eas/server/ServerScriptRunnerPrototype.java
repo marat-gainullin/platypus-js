@@ -123,6 +123,7 @@ public class ServerScriptRunnerPrototype extends IdScriptableObject {
                                     core,
                                     (args.length > 1 && args[1] instanceof Object[]) ? (Object[]) args[1] : null);
                             runner.setPrototype(this);
+                            runner.execute();
                             return runner;
                         } catch (Exception ex) {
                             throw new IllegalArgumentException(ex);

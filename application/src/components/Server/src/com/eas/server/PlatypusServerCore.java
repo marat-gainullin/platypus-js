@@ -151,13 +151,13 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
      */
     public Object executeServerModuleMethod(String aModuleName, String aMethodName, Object[] aArgs) throws Exception {
         ServerScriptRunner module = getSessionManager().getSystemSession().getModule(aModuleName);
-        if (module == null) {
-            module = new ServerScriptRunner(this, getSessionManager().getSystemSession(), aModuleName, ScriptRunner.initializePlatypusStandardLibScope(), this, this, new Object[]{});
-        }
-        module.execute();
         Session oldSession = getSessionManager().getCurrentSession();
         try {
             getSessionManager().setCurrentSession(getSessionManager().getSystemSession());
+            if (module == null) {
+                module = new ServerScriptRunner(this, getSessionManager().getSystemSession(), aModuleName, ScriptRunner.initializePlatypusStandardLibScope(), this, this, new Object[]{});
+            }
+            module.execute();
             return module.executeMethod(aMethodName, aArgs);
         } finally {
             getSessionManager().setCurrentSession(oldSession);

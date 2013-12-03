@@ -156,7 +156,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
                 String leftTableName = aRelation.getLeftField().getFk().getReferee().getTable();
                 String leftFieldName = aRelation.getLeftField().getFk().getReferee().getField();
                 String rightTableName = aRelation.getRightField().getTableName();
-                String rightFieldName = aRelation.getRightField().getName();
+                String rightFieldName = aRelation.getRightField().getOriginalName();
                 boolean tablesSame = (leftTableName == null ? rightTableName == null : leftTableName.equalsIgnoreCase(rightTableName));
                 boolean fieldsSame = (leftFieldName == null ? rightFieldName == null : leftFieldName.equalsIgnoreCase(rightFieldName));
                 if (!tablesSame || !fieldsSame) {
@@ -191,6 +191,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
             resolveRelation(rcopied, copied);
             ((ApplicationModel<E, P, C, Q>) copied).getReferenceRelations().add(rcopied);
         }
+        ((ApplicationModel<E, P, C, Q>) copied).checkReferenceRelationsIntegrity();
         return copied;
     }
 
@@ -549,14 +550,13 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         Logger.getLogger(ApplicationModel.class.getName()).log(Level.WARNING, "createQuery deprecated call detected. Use loadEntity() instead.");
         return loadEntity(aQueryId);
     }
-
     private static final String LOAD_ENTITY_JSDOC = ""
             + "/**\n"
             + "* Creates new entity of model, based on application query.\n"
             + "* @param queryId the query application element ID\n"
             + "* @return a new entity"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = LOAD_ENTITY_JSDOC, params = {"queryId"})
     public synchronized Scriptable loadEntity(String aQueryId) throws Exception {
         if (client == null) {
