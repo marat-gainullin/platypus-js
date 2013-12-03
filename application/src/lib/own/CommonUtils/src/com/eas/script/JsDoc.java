@@ -85,6 +85,11 @@ public class JsDoc {
     public static class Tag {
 
         /**
+         * Author tag
+         */
+        public static final String AUTHOR_TAG = "@author";
+        
+        /**
          * Annotation for defining application element's name.
          */
         public static final String NAME_TAG = "@name";

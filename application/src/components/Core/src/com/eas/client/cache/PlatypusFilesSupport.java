@@ -6,6 +6,7 @@ package com.eas.client.cache;
 
 import com.eas.client.settings.EasSettings;
 import com.eas.client.settings.XmlDom2ConnectionSettings;
+import com.eas.script.JsDoc;
 import com.eas.script.JsParser;
 import com.eas.util.FileUtils;
 import com.eas.util.StringUtils;
@@ -30,9 +31,6 @@ import org.mozilla.javascript.ast.FunctionNode;
  */
 public class PlatypusFilesSupport {
 
-    public static final String APP_ELEMENT_NAME = "app-element-name"; //NOI18N
-    public static final String APP_ELEMENT_NAME_ANNOTATION = "@name"; //NOI18N
-    public static final String PUBLIC_ANNOTATION = "@public"; //NOI18N
     // jsDoc or sqlDoc containing element name annotation regex parts 1 and 2
     private static final String NAMED_ANNOTATION_PATTERN_1 = "^\\s*/\\*\\*(?=(?:(?!\\*/)[\\s\\S])*?"; //NOI18N
     private static final String NAMED_ANNOTATION_PATTERN_2 = ")(?:(?!\\*/)[\\s\\S])*\\*/"; //NOI18N
@@ -74,7 +72,7 @@ public class PlatypusFilesSupport {
             if (aFile.getPath().endsWith("." + PlatypusFiles.JAVASCRIPT_EXTENSION)) {
                 return extractFirstFunctionName(fileContent);
             } else {
-                return getAnnotationValue(fileContent, APP_ELEMENT_NAME_ANNOTATION);
+                return getAnnotationValue(fileContent, JsDoc.Tag.NAME_TAG);
             }
         } catch (IOException ex) {
             Logger.getLogger(PlatypusFiles.class.getName()).log(Level.INFO, null, ex);
@@ -190,7 +188,7 @@ public class PlatypusFilesSupport {
     }
 
     public static String getMainJsDocBody(String aContent) {
-        Pattern pattern = Pattern.compile(getAnnotatedDocRegexStr(APP_ELEMENT_NAME_ANNOTATION));
+        Pattern pattern = Pattern.compile(getAnnotatedDocRegexStr(JsDoc.Tag.NAME_TAG));
         Matcher matcher = pattern.matcher(aContent);
         if (matcher.find()) {
             return matcher.group();

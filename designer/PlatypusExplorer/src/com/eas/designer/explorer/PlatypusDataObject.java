@@ -10,6 +10,7 @@ import com.eas.client.cache.PlatypusFilesSupport;
 import com.eas.designer.application.HandlerRegistration;
 import com.eas.designer.application.project.PlatypusProject;
 import com.eas.designer.explorer.files.wizard.NewApplicationElementWizardIterator;
+import com.eas.script.JsDoc;
 import java.awt.EventQueue;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -208,9 +209,9 @@ public abstract class PlatypusDataObject extends MultiDataObject {
         DataObject copied = super.handleCopy(df);
         if (needAnnotationRename(copied)) {
             String content = copied.getPrimaryFile().asText(PlatypusFiles.DEFAULT_ENCODING);
-            String oldPlatypusId = PlatypusFilesSupport.getAnnotationValue(content, PlatypusFilesSupport.APP_ELEMENT_NAME_ANNOTATION);
+            String oldPlatypusId = PlatypusFilesSupport.getAnnotationValue(content, JsDoc.Tag.NAME_TAG);
             String newPlatypusId = NewApplicationElementWizardIterator.getNewValidAppElementName(getProject(), oldPlatypusId);            
-            content = PlatypusFilesSupport.replaceAnnotationValue(content, PlatypusFilesSupport.APP_ELEMENT_NAME_ANNOTATION, newPlatypusId);
+            content = PlatypusFilesSupport.replaceAnnotationValue(content, JsDoc.Tag.NAME_TAG, newPlatypusId);
             try (OutputStream os = copied.getPrimaryFile().getOutputStream()) {
                 os.write(content.getBytes(PlatypusFiles.DEFAULT_ENCODING));
                 os.flush();
