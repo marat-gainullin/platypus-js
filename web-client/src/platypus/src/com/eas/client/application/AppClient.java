@@ -497,7 +497,7 @@ public class AppClient {
 					 * contents of the JavaScript XmlHttpRequest object so we
 					 * manually null out our reference to the JavaScriptObject
 					 */
-					String errorMsg = XMLHttpRequest2.getBrowserSpecificFailure(req);
+					String errorMsg = XMLHttpRequest2.getBrowserSpecificFailure(xhr);
 					if (errorMsg != null) {
 						Throwable exception = new RuntimeException(errorMsg);
 						Logger.getLogger(AppClient.class.getName()).log(Level.SEVERE, null, exception);
@@ -633,7 +633,11 @@ public class AppClient {
 		}
 		if (moduleData.isReport) {
 			aModule.show = function() {
-				$wnd.platypus.executeServerReport(aModuleName, aModule);
+				if (moduleData.isPermitted) {
+					$wnd.platypus.executeServerReport(aModuleName, aModule);
+				} else {
+					throw "AccessControlException";
+				}	
 			}
 			aModule.print = aModule.show;
 		}

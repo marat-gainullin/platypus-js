@@ -36,6 +36,8 @@ public class ServerScriptsCache {
                     serverCore,
                     serverCore,
                     new Object[]{});
+            runner.setPrototype(ServerScriptRunnerPrototype.getInstance());
+            runner.execute();
             cache.put(aModuleId, runner);
         }
         return runner;

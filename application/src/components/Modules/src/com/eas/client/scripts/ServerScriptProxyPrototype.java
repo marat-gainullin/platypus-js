@@ -112,6 +112,7 @@ public class ServerScriptProxyPrototype extends IdScriptableObject {
                                 } else {
                                     ScriptRunner srunner = new ScriptRunner(scriptId, clientWrapper.getClient(), ScriptRunner.initializePlatypusStandardLibScope(), clientWrapper.getPrincipalHost(), clientWrapper.getCompiledScriptDocumentsHost(), (args.length > 1 && args[1] instanceof Object[]) ? (Object[]) args[1] : null);
                                     srunner.setPrototype(this);
+                                    srunner.execute();
                                     return srunner;
                                 }
                             } catch (Exception ex) {

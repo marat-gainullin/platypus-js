@@ -250,52 +250,5 @@ public class ScriptedDatabasesClient extends DatabasesClient {
         }
     }
 
-    @Override
-    protected int commit(final String aSessionId, final String aDatasourceId, final List<Change> aLog) throws Exception {
-        ScriptUtils.inContext(new ScriptAction() {
-            @Override
-            public Object run(Context cx) throws Exception {
-                Map<String, Collection<String>> lvalidators = new HashMap<>();
-                lvalidators.putAll(validators);
-                Collection<String> flowAsValidator = lvalidators.get(aDatasourceId);
-                if (flowAsValidator == null || flowAsValidator.isEmpty()) {
-                    lvalidators.put(aDatasourceId, Arrays.asList(new String[]{aDatasourceId}));
-                }
-                for (String validatorName : lvalidators.keySet()) {
-                    Collection<String> datasources = lvalidators.get(validatorName);
-                    if (datasources == null || datasources.isEmpty() || datasources.contains(aDatasourceId)) {
-                        ScriptRunner validator = createModule(cx, validatorName);
-                        if (validator != null) {
-                            Object oValidate = validator.get("validate", validator);
-                            if (oValidate instanceof Function) {
-                                Function fValidate = (Function) oValidate;
-                                Object oResult = fValidate.call(cx, validator.getParentScope(), validator, new Object[]{Context.javaToJS(aLog.toArray(), validator.getParentScope()), aDatasourceId, aSessionId});
-                                if (oResult != null && oResult != Context.getUndefinedValue() && Boolean.FALSE.equals(Context.toBoolean(oResult))) {
-                                    break;
-                                }
-                            } else {
-                                if (validators.containsKey(validatorName)) {
-                                    Logger.getLogger(ScriptedDatabasesClient.class.getName()).log(Level.WARNING, "\"validate\" method couldn''t be found in {0} module.", validatorName);
-                                }// else { silent ignore because method 'validate' is optional for custom data source modules}
-                            }
-                        } else {
-                            Logger.getLogger(ScriptedDatabasesClient.class.getName()).log(Level.WARNING, "{0} constructor couldn''t be found", validatorName);
-                        }
-                    }
-                }
-                return null;
-            }
-        });
-        boolean consumed = true;
-        for (Change change : aLog) {
-            if (!change.consumed) {
-                consumed = false;
-            }
-        }
-        if (!consumed) {
-            return super.commit(aSessionId, aDatasourceId, aLog);
-        } else {
-            return 0;
-        }
-    }
+   
 }
