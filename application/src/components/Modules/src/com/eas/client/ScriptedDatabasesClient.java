@@ -17,7 +17,6 @@ import com.eas.client.scripts.ScriptRunner;
 import com.eas.client.settings.DbConnectionSettings;
 import com.eas.script.ScriptUtils;
 import com.eas.script.ScriptUtils.ScriptAction;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -91,15 +90,21 @@ public class ScriptedDatabasesClient extends DatabasesClient {
                                     if (oElement instanceof Scriptable) {
                                         Scriptable sElement = (Scriptable) oElement;
                                         Object oName = sElement.get("name", sElement);
-                                        String sName = Context.toString(oName);
+                                        String sName = oName != Scriptable.NOT_FOUND ? Context.toString(oName) : null;
                                         if (sName != null && !sName.isEmpty()) {
                                             Field field = new Field();
-                                            field.setTableName(aQueryId);
                                             field.setTypeInfo(DataTypeInfo.OTHER);
                                             fields.add(field);
                                             field.setName(sName);
+                                            field.setOriginalName(sName);
+                                            Object oEntity = sElement.get("entity", sElement);
+                                            String sEntity = oEntity != Scriptable.NOT_FOUND ? Context.toString(oEntity) : null;
+                                            if (sEntity != null && !sEntity.isEmpty()) {
+                                                field.setTableName(sEntity);
+                                            }else
+                                                field.setTableName(aQueryId);
                                             Object oDescription = sElement.get("description", sElement);
-                                            String sDescription = Context.toString(oDescription);
+                                            String sDescription = oDescription != Scriptable.NOT_FOUND ? Context.toString(oDescription) : null;
                                             if (sDescription != null && !sDescription.isEmpty()) {
                                                 field.setDescription(sDescription);
                                             }
@@ -128,23 +133,23 @@ public class ScriptedDatabasesClient extends DatabasesClient {
                                                 field.setNullable(false);
                                             }
                                             Object oRef = sElement.get("ref", sElement);
-                                            if (oRef instanceof Scriptable) {
+                                            if (oRef != Scriptable.NOT_FOUND && oRef instanceof Scriptable) {
                                                 Scriptable sRef = (Scriptable) oRef;
                                                 Object oProperty = sRef.get("property", sRef);
                                                 if (oProperty != Scriptable.NOT_FOUND) {
                                                     String sProperty = Context.toString(oProperty);
                                                     if (sProperty != null && !sProperty.isEmpty()) {
-                                                        Object oEntity = sRef.get("entity", sRef);
-                                                        String sEntity;
-                                                        if (oEntity == Scriptable.NOT_FOUND) {
-                                                            sEntity = aQueryId;
+                                                        Object oRefEntity = sRef.get("entity", sRef);
+                                                        String sRefEntity;
+                                                        if (oRefEntity == Scriptable.NOT_FOUND) {
+                                                            sRefEntity = aQueryId;
                                                         } else {
-                                                            sEntity = Context.toString(oEntity);
-                                                            if (sEntity == null || sEntity.isEmpty()) {
-                                                                sEntity = aQueryId;
+                                                            sRefEntity = Context.toString(oRefEntity);
+                                                            if (sRefEntity == null || sRefEntity.isEmpty()) {
+                                                                sRefEntity = aQueryId;
                                                             }
                                                         }
-                                                        field.setFk(new ForeignKeySpec(null, aQueryId, field.getName(), null, ForeignKeySpec.ForeignKeyRule.CASCADE, ForeignKeySpec.ForeignKeyRule.CASCADE, false, null, sEntity, sProperty, null));
+                                                        field.setFk(new ForeignKeySpec(null, aQueryId, field.getName(), null, ForeignKeySpec.ForeignKeyRule.CASCADE, ForeignKeySpec.ForeignKeyRule.CASCADE, false, null, sRefEntity, sProperty, null));
                                                     }
                                                 }
                                             }
@@ -250,5 +255,55 @@ public class ScriptedDatabasesClient extends DatabasesClient {
         }
     }
 
-   
+    @Override
+    protected int commit(final String aSessionId, final String aDatasourceId, final List<Change> aLog) throws Exception {
+        ScriptUtils.inContext(new ScriptAction() {
+            @Override
+            public Object run(Context cx) throws Exception {
+                for (String validatorName : validators.keySet()) {
+                    Collection<String> datasourcesUnderControl = validators.get(validatorName);
+                    if (datasourcesUnderControl == null || datasourcesUnderControl.isEmpty() || datasourcesUnderControl.contains(aDatasourceId)) {
+                        ScriptRunner validator = createModule(cx, validatorName);
+                        if (validator != null) {
+                            Object oValidate = validator.get("validate", validator);
+                            if (oValidate instanceof Function) {
+                                Function fValidate = (Function) oValidate;
+                                Object oResult = fValidate.call(cx, validator.getParentScope(), validator, new Object[]{Context.javaToJS(aLog.toArray(), validator.getParentScope()), aDatasourceId, aSessionId});
+                                if (oResult != null && oResult != Context.getUndefinedValue() && Boolean.FALSE.equals(Context.toBoolean(oResult))) {
+                                    break;
+                                }
+                            } else {
+                                Logger.getLogger(ScriptedDatabasesClient.class.getName()).log(Level.WARNING, "\"validate\" method couldn''t be found in {0} module.", validatorName);
+                            }
+                        } else {
+                            Logger.getLogger(ScriptedDatabasesClient.class.getName()).log(Level.WARNING, "{0} constructor couldn''t be found", validatorName);
+                        }
+                    }
+                }
+                if (aDatasourceId != null) {
+                    ScriptRunner dataSourceApplier = createModule(cx, aDatasourceId);
+                    if (dataSourceApplier != null) {
+                        Object oApply = dataSourceApplier.get("apply", dataSourceApplier);
+                        if (oApply instanceof Function) {
+                            Function fApply = (Function) oApply;
+                            fApply.call(cx, dataSourceApplier.getParentScope(), dataSourceApplier, new Object[]{Context.javaToJS(aLog.toArray(), dataSourceApplier.getParentScope()), aSessionId});
+                        }
+                    }
+                }
+                return null;
+            }
+        });
+        boolean consumed = true;
+        for (Change change : aLog) {
+            if (!change.consumed) {
+                consumed = false;
+            }
+        }
+        if (!consumed) {
+            return super.commit(aSessionId, aDatasourceId, aLog);
+        } else {
+            aLog.clear();
+            return 0;
+        }
+    }
 }

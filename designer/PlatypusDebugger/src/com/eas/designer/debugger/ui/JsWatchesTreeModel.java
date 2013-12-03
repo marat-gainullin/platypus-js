@@ -7,7 +7,6 @@ package com.eas.designer.debugger.ui;
 import com.eas.debugger.jmx.server.DebuggerMBean;
 import com.eas.designer.debugger.DebuggerConstants;
 import com.eas.designer.debugger.DebuggerEnvironment;
-import java.beans.PropertyChangeEvent;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -16,11 +15,6 @@ import javax.management.MBeanServerConnection;
 import javax.management.Notification;
 import javax.management.NotificationListener;
 import javax.management.ObjectName;
-import org.netbeans.api.debugger.Breakpoint;
-import org.netbeans.api.debugger.DebuggerEngine;
-import org.netbeans.api.debugger.DebuggerManager;
-import org.netbeans.api.debugger.DebuggerManagerListener;
-import org.netbeans.api.debugger.Session;
 import org.netbeans.api.debugger.Watch;
 import org.netbeans.modules.debugger.ui.models.WatchesTreeModel;
 import org.netbeans.spi.debugger.ContextProvider;
@@ -37,7 +31,7 @@ import org.netbeans.spi.viewmodel.UnknownTypeException;
 @DebuggerServiceRegistration(path = "PlatypusJsSession/WatchesView",
         types = {TreeModel.class},
         position = 10002)
-public class JsWatchesTreeModel extends WatchesTreeModel implements NotificationListener, DebuggerManagerListener {
+public class JsWatchesTreeModel extends WatchesTreeModel implements NotificationListener{
 
     protected Set<ModelListener> listeners = new HashSet<>();
     protected DebuggerEnvironment environment;
@@ -49,7 +43,6 @@ public class JsWatchesTreeModel extends WatchesTreeModel implements Notification
         ObjectName mBeanDebuggerName = new ObjectName(DebuggerMBean.DEBUGGER_MBEAN_NAME);
         MBeanServerConnection jmxConnection = contextProvider.lookupFirst(DebuggerConstants.DEBUGGER_SERVICERS_PATH, MBeanServerConnection.class);
         jmxConnection.addNotificationListener(mBeanDebuggerName, this, null, null);
-        DebuggerManager.getDebuggerManager().addDebuggerListener(this);
         super.addModelListener(new ModelListener(){
 
             @Override
@@ -117,30 +110,19 @@ public class JsWatchesTreeModel extends WatchesTreeModel implements Notification
         fireChanges();
     }
 
-    private void fireTreeChanged() {
-        ModelListener[] v = listeners.toArray(new ModelListener[]{});
-        int k = v.length;
-        for (int i = 0; i < k; i++) {
-            v[i].modelChanged(
-                    new ModelEvent.NodeChanged(this, ROOT));
-            v[i].modelChanged(
-                    new ModelEvent.NodeChanged(this, ROOT, ModelEvent.NodeChanged.CHILDREN_MASK));
-        }
-    }
-
-    private void fireWatchPropertyChanged(Watch b, String propertyName) {
-        ModelListener[] v = listeners.toArray(new ModelListener[]{});
-        int k = v.length;
-        for (int i = 0; i < k; i++) {
-            v[i].modelChanged(
-                    new ModelEvent.NodeChanged(this, b));
-        }
-    }
-
     protected void fireChanges() {
         structure.clear();
         fireTreeChanged();
     }
+    private void fireTreeChanged() {
+        ModelEvent evt1 = new ModelEvent.NodeChanged(this, ROOT);
+        ModelEvent evt2 = new ModelEvent.NodeChanged(this, ROOT, ModelEvent.NodeChanged.CHILDREN_MASK);
+        for (ModelListener l : listeners.toArray(new ModelListener[]{})) {
+            l.modelChanged(evt1);
+            l.modelChanged(evt2);
+        }
+    }
+
 
     /**
      * Registers given listener.
@@ -160,65 +142,5 @@ public class JsWatchesTreeModel extends WatchesTreeModel implements Notification
     @Override
     public void removeModelListener(ModelListener l) {
         listeners.remove(l);
-    }
-
-    @Override
-    public Breakpoint[] initBreakpoints() {
-        fireChanges();
-        return null;
-    }
-
-    @Override
-    public void breakpointAdded(Breakpoint breakpoint) {
-        fireChanges();
-    }
-
-    @Override
-    public void breakpointRemoved(Breakpoint breakpoint) {
-        fireChanges();
-    }
-
-    @Override
-    public void initWatches() {
-        fireChanges();
-    }
-
-    @Override
-    public void watchAdded(Watch watch) {
-        watch.addPropertyChangeListener(this);
-        fireChanges();
-    }
-
-    @Override
-    public void watchRemoved(Watch watch) {
-        watch.removePropertyChangeListener(this);
-        fireChanges();
-    }
-
-    @Override
-    public void sessionAdded(Session session) {
-        fireChanges();
-    }
-
-    @Override
-    public void sessionRemoved(Session session) {
-        fireChanges();
-    }
-
-    @Override
-    public void engineAdded(DebuggerEngine engine) {
-        fireChanges();
-    }
-
-    @Override
-    public void engineRemoved(DebuggerEngine engine) {
-        fireChanges();
-    }
-
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-        if (evt.getSource() instanceof Watch) {
-            fireWatchPropertyChanged((Watch) evt.getSource(), null);
-        }
     }
 }

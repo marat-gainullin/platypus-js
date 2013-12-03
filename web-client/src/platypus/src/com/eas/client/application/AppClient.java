@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import com.google.gwt.user.client.Timer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -45,8 +44,6 @@ import com.eas.client.xhr.XMLHttpRequest2;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArrayString;
-import com.google.gwt.event.dom.client.ErrorEvent;
-import com.google.gwt.event.dom.client.ErrorHandler;
 import com.google.gwt.event.dom.client.LoadEvent;
 import com.google.gwt.event.dom.client.LoadHandler;
 import com.google.gwt.http.client.RequestBuilder;
@@ -57,6 +54,7 @@ import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.safehtml.shared.SafeUri;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window.Location;
 import com.google.gwt.user.client.ui.Frame;
 import com.google.gwt.user.client.ui.RootPanel;
@@ -64,7 +62,6 @@ import com.google.gwt.xhr.client.ReadyStateChangeHandler;
 import com.google.gwt.xhr.client.XMLHttpRequest;
 import com.google.gwt.xhr.client.XMLHttpRequest.ResponseType;
 import com.google.gwt.xml.client.Document;
-import com.google.gwt.xml.client.Node;
 import com.google.gwt.xml.client.XMLParser;
 import com.sencha.gxt.core.client.GXT;
 
@@ -81,9 +78,11 @@ public class AppClient {
 	public static final String API_URI = "/api";
 	public static final String SELF_NAME = "_platypusModuleSelf";
 
+	/*
 	public static final String SERVER_MODULE_BODY = "function %s () {\n" + "    window.platypus.defineServerModule(\"%s\", this);\n" + "}";
 	public static final String SERVER_MODULE_FUNCTION_NAME = "ServerModule";
 	public static final String SERVER_REPORT_FUNCTION_NAME = "ServerReport";
+	*/
 	protected static Set<String> attachedCss = new HashSet<String>();
 	//
 	private static DateTimeFormat defaultDateFormat = RowsetReader.ISO_DATE_FORMAT;// DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.ISO_8601);
@@ -98,8 +97,6 @@ public class AppClient {
 		String pageUrl = GWT.getHostPageBaseURL();
 		return pageUrl.substring(0, pageUrl.length() - 1);
 	}
-
-	private Map<String, Document> serverElements = new HashMap<String, Document>();
 
 	public static void init() {
 		if (appClient == null) {
@@ -739,10 +736,9 @@ public class AppClient {
 		}
 	}
 
-	public Cancellable createServerModule(final String aModuleName, final Callback<Document> onSuccess, final Callback<String> onFailure) throws Exception {
-		Document doc = serverElements.get(aModuleName);
-		if (doc != null) {
-			onSuccess.run(doc);
+	public Cancellable createServerModule(final String aModuleName, final Callback<Void> onSuccess, final Callback<String> onFailure) throws Exception {
+		if (isServerModule(aModuleName)) {
+			onSuccess.run(null);
 			return new Cancellable() {
 
 				@Override
@@ -759,6 +755,7 @@ public class AppClient {
 					// Some post processing
 					String appElementName = aModuleName;
 					addServerModule(appElementName, aResponse.getResponseText());
+					/*
 					Document doc = XMLParser.createDocument();
 					Node nd = doc.createElement("script");
 					doc.appendChild(nd);
@@ -768,7 +765,8 @@ public class AppClient {
 					ndc.appendChild(doc.createTextNode(src));
 					nd.appendChild(ndc);
 					serverElements.put(appElementName, doc);
-					onSuccess.run(doc);
+					*/
+					onSuccess.run(null);
 				}
 			}, new ResponseCallbackAdapter() {
 				@Override
@@ -795,6 +793,10 @@ public class AppClient {
 			return false;
 	}-*/;
 
+	public static native boolean isServerModule(String aModuleName) throws Exception /*-{
+		return ($wnd.serverModules && $wnd.serverModules[aModuleName]) ? true : false;
+	}-*/;
+	
 	public static native void publishApi(AppClient aClient) throws Exception /*-{
 		$wnd.platypus.defineServerModule = function(aModuleName, aModule) {
 			@com.eas.client.application.AppClient::defineServerModule(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aModule);

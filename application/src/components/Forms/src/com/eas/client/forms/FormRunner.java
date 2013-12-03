@@ -912,12 +912,10 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
         }
     }
 
-    @ScriptFunction
     public int getDefaultCloseOperation() {
         return defaultCloseOperation;
     }
 
-    @ScriptFunction
     public void setDefaultCloseOperation(int aValue) {
         defaultCloseOperation = aValue;
         if (surface instanceof JDialog) {
@@ -1066,12 +1064,10 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
         }
     }
 
-    @ScriptFunction
     public boolean getAlwaysOnTop() {
         return alwaysOnTop;
     }
 
-    @ScriptFunction
     public void setAlwaysOnTop(boolean aValue) {
         alwaysOnTop = aValue;
         if (surface instanceof JDialog) {
@@ -1288,15 +1284,10 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
     protected void definePropertiesAndMethods() {
         super.definePropertiesAndMethods();
         defineFunctionProperties(new String[]{
-            "getDialog",
-            "getInternalFrame",
-            "getFormId",
-            "getFrame",
             "show",
-            "showInternalFrame",
             "showModal",
-            "showDialog",
             "showOnPanel",
+            "showInternalFrame",
             "close",
             "minimize",
             "maximize",
@@ -1313,9 +1304,6 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
         defineProperty("maximized", FormRunner.class, READONLY);
         defineProperty("minimizable", FormRunner.class, EMPTY);
         defineProperty("maximizable", FormRunner.class, EMPTY);
-        defineProperty("frameVisible", FormRunner.class, READONLY);
-        defineProperty("dialogVisible", FormRunner.class, READONLY);
-        defineProperty("internalFrameVisible", FormRunner.class, READONLY);
         defineProperty("defaultCloseOperation", FormRunner.class, EMPTY);
         defineProperty("icon", FormRunner.class, EMPTY);
         defineProperty("title", FormRunner.class, EMPTY);

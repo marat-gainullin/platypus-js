@@ -5,6 +5,7 @@
 package com.bearsoft.rowset.changes;
 
 import com.bearsoft.rowset.metadata.DataTypeInfo;
+import com.eas.script.ScriptFunction;
 
 /**
  *
@@ -33,12 +34,19 @@ public abstract class Change {
         entityId = aEntityId;
     }
 
+    @ScriptFunction(jsDoc = "Consumes the change, so other validators and database applier won't apply it.")
     public void consume() {
         consumed = true;
     }
 
+    @ScriptFunction(jsDoc = "Indicated if the change is consumed.")
+    public boolean isConsumed(){
+        return consumed;
+    }
+    
     public abstract void accept(ChangeVisitor aChangeVisitor) throws Exception;
 
+    @ScriptFunction(jsDoc = "Indicates the change's type (Insert, Update, Delete or Command).")
     public String getType() {
         return getClass().getSimpleName();
     }

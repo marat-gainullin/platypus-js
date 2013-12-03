@@ -17,7 +17,7 @@ import org.mozilla.javascript.ast.*;
  *
  * @author kl, mg refactoring
  */
-public class DependenciesWorker {
+public class DependenciesWalker {
 
     public static final String ERROR_BAD_AST = "bad Ast";
     public static final String ERROR_DEPENDECIES_PARSE_ERROR = "dependencies parse error";
@@ -37,17 +37,17 @@ public class DependenciesWorker {
     private AppCache cache;
     private ErrorReporter compilationErrorReporter;
 
-    public DependenciesWorker(String aSource) {
+    public DependenciesWalker(String aSource) {
         this(aSource, null);
     }
 
-    public DependenciesWorker(String aSource, AppCache aCache) {
+    public DependenciesWalker(String aSource, AppCache aCache) {
         super();
         source = aSource;
         cache = aCache;
     }
 
-    public String transform() {
+    public String walk() {
         CompilerEnvirons compilerEnv = CompilerEnvirons.ideEnvirons();
         compilerEnv.setRecordingLocalJsDocComments(true);
         compilerEnv.setAllowSharpComments(true);
@@ -145,7 +145,6 @@ public class DependenciesWorker {
                     || name.getIdentifier().equals(MODULE)) {
                 String ident = getIdent(aNode);
                 if (ident != null) {
-                    convertNameIdentifier(name, ident);
                     putDependence(ident);
                 }
             } else if (name.getIdentifier().equals(REPORT)
@@ -153,7 +152,6 @@ public class DependenciesWorker {
                     || name.getIdentifier().equals(SERVER_MODULE)) {
                 String ident = getIdent(aNode);
                 if (ident != null) {
-                    convertNameIdentifier(name, ident);
                     putServerDependencies(ident);
                 }
             } else if (cache != null) {
@@ -163,28 +161,9 @@ public class DependenciesWorker {
                         putDependence(name.getIdentifier());
                     }
                 } catch (Exception ex) {
-                    Logger.getLogger(DependenciesWorker.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(DependenciesWalker.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
-        }
-    }
-
-    private void convertNameIdentifier(Name aName, String aIdentifier) {
-        switch (aName.getIdentifier()) {
-            case REPORT:
-            case SERVER_REPORT:
-                aName.setIdentifier(SERVER_REPORT + aIdentifier);
-                break;
-            case SERVER_MODULE:
-                aName.setIdentifier(SERVER_MODULE + aIdentifier);
-                break;
-            default:
-                if (Character.isDigit(aIdentifier.charAt(0))) {
-                    aName.setIdentifier(aName.getIdentifier() + aIdentifier);
-                } else {
-                    aName.setIdentifier(aIdentifier);
-                }
-                break;
         }
     }
 

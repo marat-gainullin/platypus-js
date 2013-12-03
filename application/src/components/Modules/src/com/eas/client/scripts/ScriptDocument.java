@@ -11,7 +11,6 @@ import com.eas.script.JsDoc.Tag;
 import com.eas.script.ScriptUtils;
 import java.util.*;
 import org.mozilla.javascript.Function;
-import org.mozilla.javascript.Token;
 import org.mozilla.javascript.ast.*;
 import org.w3c.dom.Document;
 
@@ -27,8 +26,9 @@ public class ScriptDocument {
     protected long txtCrc32;
     private ApplicationModel<?, ?, ?, ?> model;
     private String scriptSource;
-    private Function function;
+    private Function constructor;
     private AstRoot ast;
+    private FunctionNode firstFunction;
     private Set<String> topLevelNamedFunctionsNames = new HashSet<>();
     private Set<String> depencies = new HashSet<>();
     private List<Tag> moduleAnnotations;
@@ -108,11 +108,11 @@ public class ScriptDocument {
     }
 
     public Function getFunction() {
-        return function;
+        return constructor;
     }
 
-    public void setFunction(Function aScript) {
-        function = aScript;
+    public void setFunction(Function aFunction) {
+        constructor = aFunction;
     }
 
     public Set<String> getModuleAllowedRoles() {
@@ -137,6 +137,22 @@ public class ScriptDocument {
 
     public Set<String> getTopLevelNamedFunctionsNames() {
         return topLevelNamedFunctionsNames;
+    }
+
+    public String filterSource() {
+        return filterSource(null, null);
+    }
+
+    public String filterSource(String bodyPreCode, String bodyPostCode) {
+        String toInsert = "; this[\"" + ScriptUtils.HANDLERS_PROP_NAME + "\"]=" + generateTopLevelNamedFunctionsContainer() + ";";
+        int functionsCaptureInsertAt = firstFunction.getAbsolutePosition() + firstFunction.getLength() - 1;
+        if (bodyPreCode == null) {
+            return scriptSource.substring(0, functionsCaptureInsertAt) + toInsert + (bodyPostCode != null ? bodyPostCode : "") + scriptSource.substring(functionsCaptureInsertAt, scriptSource.length());
+        } else {
+            AstNode body = firstFunction.getBody();
+            int bodyPreCodeInsertAt = body.getAbsolutePosition() + 1;
+            return scriptSource.substring(0, bodyPreCodeInsertAt) + bodyPreCode + scriptSource.substring(bodyPreCodeInsertAt, functionsCaptureInsertAt) + toInsert + (bodyPostCode != null ? bodyPostCode : "") + scriptSource.substring(functionsCaptureInsertAt, scriptSource.length());
+        }
     }
 
     public String generateTopLevelNamedFunctionsContainer() {
@@ -167,54 +183,48 @@ public class ScriptDocument {
     public void readScriptAnnotations() {
         assert scriptSource != null : "Javascript source can't be null";
         if (ast == null) {
+            moduleAnnotations = new ArrayList<>();
             topLevelNamedFunctionsNames.clear();
             propertyAllowedRoles.clear();
             ast = ScriptUtils.parseJs(scriptSource);
+            firstFunction = null;
             ast.visit(new NodeVisitor() {
                 @Override
                 public boolean visit(AstNode node) {
-                    if (node.getParent() == ast.getAstRoot() && node instanceof FunctionNode) {
+                    if (node instanceof FunctionNode && node.getParent() instanceof Block && node.getParent().getParent() instanceof FunctionNode && node.getParent().getParent().getParent() == ast.getAstRoot()) {
                         String fName = ((FunctionNode) node).getName();
                         if (fName != null && !fName.isEmpty()) {
                             topLevelNamedFunctionsNames.add(fName);
                         }
                     }
-                    if (node.getJsDoc() != null && node instanceof Assignment) {
-                        Assignment as = (Assignment) node;
-                        if (as.getLeft() instanceof PropertyGet) {
-                            PropertyGet pg = (PropertyGet) as.getLeft();
-                            Name n = pg.getProperty();
-                            readPropertyRoles(n.getIdentifier(), node.getJsDoc());
+                    if (firstFunction == null && node instanceof FunctionNode && node.getParent() == ast.getAstRoot()) {
+                        firstFunction = (FunctionNode) node;
+                    }
+                    if (node.getJsDoc() != null) {
+                        if (node instanceof Assignment) {
+                            Assignment as = (Assignment) node;
+                            if (as.getLeft() instanceof PropertyGet) {
+                                PropertyGet pg = (PropertyGet) as.getLeft();
+                                Name n = pg.getProperty();
+                                readPropertyRoles(n.getIdentifier(), node.getJsDoc());
+                            }
+                        }
+                        if (node instanceof FunctionNode && node.getParent() == ast.getAstRoot()) {
+                            JsDoc jsDoc = new JsDoc(node.getJsDocNode().getValue());
+                            jsDoc.parseAnnotations();
+                            for (Tag tag : jsDoc.getAnnotations()) {
+                                moduleAnnotations.add(tag);
+                                if (tag.getName().equals(JsDoc.Tag.ROLES_ALLOWED_TAG)) {
+                                    for (String role : tag.getParams()) {
+                                        moduleAllowedRoles.add(role);
+                                    }
+                                }
+                            }
                         }
                     }
                     return true;
                 }
             });
-            readModuleAnnotations();
-        }
-    }
-
-    private void readModuleAnnotations() {
-        assert ast != null;
-        moduleAnnotations = new ArrayList<>();
-        SortedSet<Comment> comments = ast.getComments();
-        if (comments != null) {
-            for (Comment comment : comments) {
-                if (comment.getCommentType().equals(Token.CommentType.JSDOC)) {
-                    JsDoc jsDoc = new JsDoc(comment.getValue());
-                    if (jsDoc.containsModuleName()) {
-                        jsDoc.parseAnnotations();
-                        for (Tag tag : jsDoc.getAnnotations()) {
-                            moduleAnnotations.add(tag);
-                            if (tag.getName().equals(JsDoc.Tag.ROLES_ALLOWED_TAG)) {
-                                for (String role : tag.getParams()) {
-                                    moduleAllowedRoles.add(role);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
         }
     }
 

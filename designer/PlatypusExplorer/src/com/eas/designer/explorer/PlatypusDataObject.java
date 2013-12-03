@@ -209,7 +209,7 @@ public abstract class PlatypusDataObject extends MultiDataObject {
         if (needAnnotationRename(copied)) {
             String content = copied.getPrimaryFile().asText(PlatypusFiles.DEFAULT_ENCODING);
             String oldPlatypusId = PlatypusFilesSupport.getAnnotationValue(content, PlatypusFilesSupport.APP_ELEMENT_NAME_ANNOTATION);
-            String newPlatypusId = NewApplicationElementWizardIterator.getNewValidAppElementName(getProject(), oldPlatypusId);
+            String newPlatypusId = NewApplicationElementWizardIterator.getNewValidAppElementName(getProject(), oldPlatypusId);            
             content = PlatypusFilesSupport.replaceAnnotationValue(content, PlatypusFilesSupport.APP_ELEMENT_NAME_ANNOTATION, newPlatypusId);
             try (OutputStream os = copied.getPrimaryFile().getOutputStream()) {
                 os.write(content.getBytes(PlatypusFiles.DEFAULT_ENCODING));

@@ -5,12 +5,14 @@
 package com.eas.server.httpservlet;
 
 import com.bearsoft.rowset.Converter;
+import com.bearsoft.rowset.RowsetConverter;
 import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.changes.EntitiesHost;
 import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
+import com.eas.client.DbMetadataCache;
 import com.eas.client.queries.SqlQuery;
 import com.eas.client.settings.SettingsConstants;
 import com.eas.client.threetier.HelloRequest;
@@ -103,7 +105,7 @@ public class PlatypusRequestHttpReader implements PlatypusRequestVisitor {
             List<Change> changes = ChangeJsonReader.parse(jsonText, new EntitiesHost() {
                 @Override
                 public Field resolveField(String aEntityId, String aFieldName) throws Exception {
-                    SqlQuery query = serverCore.getDatabasesClient().getQueryFactory().getQuery(aEntityId, false);
+                    SqlQuery query = serverCore.getDatabasesClient().getAppQuery(aEntityId, false);
                     if (query != null) {
                         if (!query.getFields().isEmpty()) {
                             return query.getFields().get(aFieldName);
@@ -275,7 +277,8 @@ public class PlatypusRequestHttpReader implements PlatypusRequestVisitor {
     private Parameters decodeQueryParams(String aQueryId, HttpServletRequest aRequest) throws RowsetException, IOException, UnsupportedEncodingException, Exception {
         SqlQuery query = serverCore.getDatabasesClient().getAppQuery(aQueryId);
         Parameters params = query.getParameters();
-        Converter converter = serverCore.getDatabasesClient().getDbMetadataCache(query.getDbId()).getConnectionDriver().getConverter();
+        DbMetadataCache mdCache = serverCore.getDatabasesClient().getDbMetadataCache(query.getDbId());
+        Converter converter = mdCache != null && mdCache.getConnectionDriver() != null ? mdCache.getConnectionDriver().getConverter() : new RowsetConverter();
         for (int i = 1; i <= params.getParametersCount(); i++) {
             Parameter param = params.get(i);
             String paramValue = aRequest.getParameter(param.getName());
