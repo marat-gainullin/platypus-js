@@ -64,7 +64,7 @@ public class FileIndexer extends CustomIndexer {
                         } else {
                             String fileContent = FileUtils.readString(f, PlatypusFiles.DEFAULT_ENCODING);
                             if (fo.existsExt(PlatypusFiles.MODEL_EXTENSION) && nameExt.endsWith("." + PlatypusFiles.JAVASCRIPT_EXTENSION)) {
-                                appElementName = PlatypusFilesSupport.extractFirstFunctionName(fileContent);
+                                appElementName = PlatypusFilesSupport.extractModuleConstructorName(fileContent);
                             } else {
                                 appElementName = PlatypusFilesSupport.getAnnotationValue(fileContent, JsDoc.Tag.NAME_TAG);
                             }

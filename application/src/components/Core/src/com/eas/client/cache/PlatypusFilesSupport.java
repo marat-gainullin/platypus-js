@@ -24,6 +24,7 @@ import org.mozilla.javascript.EvaluatorException;
 import org.mozilla.javascript.Node;
 import org.mozilla.javascript.ast.AstRoot;
 import org.mozilla.javascript.ast.FunctionNode;
+import org.mozilla.javascript.ast.Name;
 
 /**
  *
@@ -32,37 +33,65 @@ import org.mozilla.javascript.ast.FunctionNode;
 public class PlatypusFilesSupport {
 
     // jsDoc or sqlDoc containing element name annotation regex parts 1 and 2
-    private static final String NAMED_ANNOTATION_PATTERN_1 = "^\\s*/\\*\\*(?=(?:(?!\\*/)[\\s\\S])*?"; //NOI18N
-    private static final String NAMED_ANNOTATION_PATTERN_2 = ")(?:(?!\\*/)[\\s\\S])*\\*/"; //NOI18N
+    private static final String NAMED_ANNOTATION_PATTERN_FIRST_PART = "^\\s*/\\*\\*(?=(?:(?!\\*/)[\\s\\S])*?"; //NOI18N
+    private static final String NAMED_ANNOTATION_PATTERN_SECOND_PART = ")(?:(?!\\*/)[\\s\\S])*\\*/"; //NOI18N
 
-    public static String extractFirstFunctionName(String aJsContent) {
+    public static String extractModuleConstructorName(String aJsContent) {
         try {
             AstRoot parseResult = JsParser.parse(aJsContent);
-            return extractFirstFunctionName(parseResult);
+            return extractModuleConstructorName(parseResult);
         } catch (EvaluatorException ex) {
             return null;
         }
     }
 
-    public static String extractFirstFunctionName(AstRoot jsRoot) {
-        FunctionNode func = extractFirstFunction(jsRoot);
+    public static String extractModuleConstructorName(AstRoot jsRoot) {
+        FunctionNode func = extractModuleConstructor(jsRoot);
         return func != null ? func.getFunctionName().getIdentifier() : null;
     }
 
-    public static FunctionNode extractFirstFunction(AstRoot jsRoot) {
+    public static FunctionNode extractModuleConstructor(AstRoot jsRoot) {
         if (jsRoot != null) {
             Iterator<Node> nodes = jsRoot.iterator();
+            int functions = 0;
+            int annotatedConstructors = 0;
+            FunctionNode result = null;
             while (nodes.hasNext()) {
                 Node node = nodes.next();
-                if (node instanceof FunctionNode && ((FunctionNode) node).getFunctionName() != null
-                        && ((FunctionNode) node).getFunctionName().getIdentifier() != null
-                        && !((FunctionNode) node).getFunctionName().getIdentifier().isEmpty()) {
-                    return ((FunctionNode) node);
+                if (node instanceof FunctionNode) {
+                    FunctionNode fn = (FunctionNode) node;
+                    if (fn.getFunctionName() != null
+                            && fn.getFunctionName().getIdentifier() != null
+                            && !(fn.getFunctionName().getIdentifier().isEmpty())) {            
+                        if (functions == 0) {
+                            result = fn;
+                        }
+                        functions++;
+                        if (fn.getJsDoc() != null) {
+                            JsDoc jsDoc = new JsDoc(fn.getJsDoc());
+                            if (jsDoc.containsModuleAnnotation()) {                       
+                                result = fn;
+                                annotatedConstructors++;
+                            }
+                        }
+                    }
                 }
+            }
+            if (annotatedConstructors == 1) {
+                return result;
+            } else if (functions == 1) {
+                Logger.getLogger(PlatypusFilesSupport.class.getName()).info("Single function is found in the module -- considered as a module's constructor.");
+                return result;
+            } else if (functions == 0) {
+                Logger.getLogger(PlatypusFilesSupport.class.getName()).warning("No functions found in the module.");         
+            } else if (annotatedConstructors > 1) {
+                Logger.getLogger(PlatypusFilesSupport.class.getName()).warning("More than one annotated constructor found.");
+            } else if (annotatedConstructors == 0 && functions > 1) {
+                Logger.getLogger(PlatypusFilesSupport.class.getName()).warning("No annotated constructors and more than one plain function found.");
             }
             return null;
         } else {
-            return null;
+            throw new NullPointerException("Ast root is null.");
         }
     }
 
@@ -70,7 +99,7 @@ public class PlatypusFilesSupport {
         try {
             String fileContent = FileUtils.readString(aFile, PlatypusFiles.DEFAULT_ENCODING);
             if (aFile.getPath().endsWith("." + PlatypusFiles.JAVASCRIPT_EXTENSION)) {
-                return extractFirstFunctionName(fileContent);
+                return extractModuleConstructorName(fileContent);
             } else {
                 return getAnnotationValue(fileContent, JsDoc.Tag.NAME_TAG);
             }
@@ -124,7 +153,7 @@ public class PlatypusFilesSupport {
         }
         return null;
     }
-
+    
     public static String replaceAnnotationValue(String aContent, String aAnnotationName, String aValue) {
         Pattern pattern = Pattern.compile(getAnnotatedDocRegexStr(aAnnotationName));
         Matcher matcher = pattern.matcher(aContent);
@@ -197,6 +226,6 @@ public class PlatypusFilesSupport {
     }
 
     private static String getAnnotatedDocRegexStr(String anAnnotation) {
-        return NAMED_ANNOTATION_PATTERN_1 + anAnnotation + NAMED_ANNOTATION_PATTERN_2;
+        return NAMED_ANNOTATION_PATTERN_FIRST_PART + anAnnotation + NAMED_ANNOTATION_PATTERN_SECOND_PART;
     }
 }

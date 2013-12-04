@@ -34,6 +34,7 @@ import com.eas.designer.application.query.nodes.QueryRootNode;
 import com.eas.designer.application.query.nodes.QueryRootNodePropertiesUndoRecorder;
 import com.eas.designer.datamodel.nodes.ModelNode;
 import com.eas.designer.explorer.PlatypusDataObject;
+import com.eas.designer.explorer.files.wizard.NewApplicationElementWizardIterator;
 import com.eas.script.JsDoc;
 import com.eas.xml.dom.Source2XmlDom;
 import com.eas.xml.dom.XmlDom2String;
@@ -42,6 +43,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.StringReader;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.EditorKit;
 import javax.swing.undo.UndoableEdit;
@@ -58,6 +61,8 @@ import org.openide.awt.StatusDisplayer;
 import org.openide.awt.UndoRedo;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
+import org.openide.loaders.DataFolder;
+import org.openide.loaders.DataObject;
 import org.openide.loaders.DataObjectExistsException;
 import org.openide.loaders.MultiFileLoader;
 import org.openide.nodes.AbstractNode;
@@ -629,5 +634,19 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         } else {
             return false;
         }
+    }
+
+    @Override
+    protected DataObject handleCopy(DataFolder df) throws IOException {
+        DataObject copied = super.handleCopy(df);
+        String content = copied.getPrimaryFile().asText(PlatypusFiles.DEFAULT_ENCODING);
+        String oldPlatypusId = PlatypusFilesSupport.getAnnotationValue(content, JsDoc.Tag.NAME_TAG);
+        String newPlatypusId = NewApplicationElementWizardIterator.getNewValidAppElementName(getProject(), oldPlatypusId);
+        content = PlatypusFilesSupport.replaceAnnotationValue(content, JsDoc.Tag.NAME_TAG, newPlatypusId);
+        try (OutputStream os = copied.getPrimaryFile().getOutputStream()) {
+            os.write(content.getBytes(PlatypusFiles.DEFAULT_ENCODING));
+            os.flush();
+        }
+        return copied;
     }
 }

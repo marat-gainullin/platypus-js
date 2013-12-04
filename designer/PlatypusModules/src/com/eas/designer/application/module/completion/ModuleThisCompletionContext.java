@@ -73,7 +73,7 @@ public class ModuleThisCompletionContext extends CompletionContext {
         addItem(resultSet, point.filter, new BeanCompletionItem(parentContext.getDataObject().getModel().getParametersEntity().getRowset().getClass(), PARAMS_SCRIPT_NAME, null, point.caretBeginWordOffset, point.caretEndWordOffset));
         fillJavaCompletionItems(point, resultSet);
         if (enableJsElementsCompletion) {
-            ScanJsElementsSupport scanner = new ScanJsElementsSupport(PlatypusFilesSupport.extractFirstFunction(parentContext.getDataObject().getAst()).getBody());
+            ScanJsElementsSupport scanner = new ScanJsElementsSupport(PlatypusFilesSupport.extractModuleConstructor(parentContext.getDataObject().getAst()).getBody());
             for (JsCompletionItem i : scanner.getCompletionItems(point)) {
                 addItem(resultSet, point.filter, i);
             }

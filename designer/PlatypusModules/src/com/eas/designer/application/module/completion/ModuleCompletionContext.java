@@ -109,7 +109,7 @@ public class ModuleCompletionContext extends CompletionContext {
         AstRoot astRoot = parentModuleContext.dataObject.getAst();
         if (astRoot != null) {
             AstNode offsetNode = AstUtlities.getOffsetNode(astRoot, offset);
-            AstNode moduleConstructorBlock = PlatypusFilesSupport.extractFirstFunction(astRoot).getBody();
+            AstNode moduleConstructorBlock = PlatypusFilesSupport.extractModuleConstructor(astRoot).getBody();
             if (offsetNode != null && offsetNode.equals(moduleConstructorBlock) && THIS_KEYWORD.equals(fieldName)) {
                 return parentModuleContext.createThisContext(false);
             }

@@ -119,9 +119,4 @@ public class PlatypusDbDiagramDataObject extends PlatypusDataObject {
             out.flush();
         }
     }
-
-    @Override
-    protected boolean needAnnotationRename(DataObject aDataObject) {
-        return false;
-    }
 }

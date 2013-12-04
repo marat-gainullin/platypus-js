@@ -262,7 +262,7 @@ public class ModuleHyperlinkProvider implements HyperlinkProviderExt {
         return null;
     }
     private AstNode findModuleThisPropertyDeclaration(AstRoot astRoot, String declarationName) {
-        return scanModuleThisLevel(PlatypusFilesSupport.extractFirstFunction(astRoot).getBody(), declarationName);
+        return scanModuleThisLevel(PlatypusFilesSupport.extractModuleConstructor(astRoot).getBody(), declarationName);
     }
 
     private AstNode scanModuleThisLevel(AstNode currentNode, String declarationName) {
