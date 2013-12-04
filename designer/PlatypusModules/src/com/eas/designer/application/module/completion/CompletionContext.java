@@ -27,6 +27,7 @@ public class CompletionContext {
     protected static final String MODEL_SCRIPT_NAME = "model";// NOI18N
     public static final String PARAMS_SCRIPT_NAME = "params";// NOI18N
     protected static final String METADATA_SCRIPT_NAME = ApplicationDbModel.DATASOURCE_METADATA_SCRIPT_NAME;
+    protected static final String CURSOR_ENTITY_PROPERTY_NAME = "cursor";//NOI18N
     protected static final String MODULE_NAME = "Module";// NOI18N
     protected static final String SERVER_MODULE_NAME = "ServerModule";// NOI18N
     protected static final String FORM_MODULE_NAME = "Form";// NOI18N
