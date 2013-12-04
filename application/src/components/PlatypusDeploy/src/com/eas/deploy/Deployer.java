@@ -18,6 +18,7 @@ import com.eas.client.model.store.Model2XmlDom;
 import com.eas.client.queries.SqlCompiledQuery;
 import com.eas.client.queries.SqlQuery;
 import com.eas.client.settings.ConnectionSettings2XmlDom;
+import com.eas.script.JsDoc;
 import com.eas.util.FileUtils;
 import com.eas.util.StringUtils;
 import com.eas.xml.dom.XmlDom2String;
@@ -394,11 +395,11 @@ public class Deployer extends BaseDeployer {
     }
 
     private static String checkAnnotation(String aContent, String aAnnotationValue) {
-        String aName = PlatypusFilesSupport.getAnnotationValue(aContent, PlatypusFilesSupport.APP_ELEMENT_NAME_ANNOTATION);
+        String aName = PlatypusFilesSupport.getAnnotationValue(aContent, JsDoc.Tag.NAME_TAG);
         if (aName != null && !aName.isEmpty()) {
             return aContent;
         } else {
-            return PlatypusFilesSupport.replaceAnnotationValue(aContent, PlatypusFilesSupport.APP_ELEMENT_NAME_ANNOTATION, aAnnotationValue);
+            return PlatypusFilesSupport.replaceAnnotationValue(aContent, JsDoc.Tag.NAME_TAG, aAnnotationValue);
         }
     }
 
