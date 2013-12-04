@@ -231,7 +231,6 @@ public class ScriptDocument {
     private void readPropertyRoles(String aPropertyName, String aJsDocBody) {
         if (aJsDocBody != null) {
             JsDoc jsDoc = new JsDoc(aJsDocBody);
-            if (!jsDoc.containsModuleName()) {
                 jsDoc.parseAnnotations();
                 for (Tag tag : jsDoc.getAnnotations()) {
                     if (tag.getName().equals(JsDoc.Tag.ROLES_ALLOWED_TAG)) {
@@ -245,7 +244,6 @@ public class ScriptDocument {
                         propertyAllowedRoles.put(aPropertyName, roles);
                     }
                 }
-            }
         }
     }
 

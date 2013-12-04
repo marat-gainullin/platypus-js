@@ -4,21 +4,28 @@
  */
 package com.eas.designer.application.connection;
 
+import com.eas.client.cache.PlatypusFiles;
+import com.eas.client.cache.PlatypusFilesSupport;
 import com.eas.client.settings.ConnectionSettings2XmlDom;
 import com.eas.client.settings.DbConnectionSettings;
 import com.eas.client.settings.EasSettings;
 import com.eas.client.settings.XmlDom2ConnectionSettings;
-import com.eas.designer.application.HandlerRegistration;
 import com.eas.designer.application.PlatypusUtils;
 import com.eas.designer.explorer.PlatypusDataObject;
+import com.eas.designer.explorer.files.wizard.NewApplicationElementWizardIterator;
+import com.eas.script.JsDoc;
 import com.eas.xml.dom.Source2XmlDom;
 import com.eas.xml.dom.XmlDom2String;
+import java.io.IOException;
 import java.io.OutputStream;
+import java.util.logging.Logger;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.MIMEResolver;
+import org.openide.loaders.DataFolder;
 import org.openide.loaders.DataObject;
 import org.openide.loaders.MultiFileLoader;
 import org.openide.nodes.CookieSet;
+import org.openide.util.Exceptions;
 import org.w3c.dom.Document;
 
 @DataObject.Registration(displayName = "#CTL_PlatypusConnectionAction", iconBase = "com/eas/designer/application/connection/connection.png", mimeType = "text/connection+xml")
@@ -139,5 +146,24 @@ public class PlatypusConnectionDataObject extends PlatypusDataObject {
             out.write(data);
             out.flush();
         }
+    }
+    
+    @Override
+    protected DataObject handleCopy(DataFolder df) throws IOException {
+        DataObject copied = super.handleCopy(df);
+        DbConnectionSettings dbs;
+        try {
+            dbs = (DbConnectionSettings)XmlDom2ConnectionSettings.document2Settings(Source2XmlDom.transform(copied.getPrimaryFile().asText(PlatypusFiles.DEFAULT_ENCODING)));
+        } catch (Exception ex) {
+            Logger.getLogger(PlatypusConnectionDataObject.class.getName()).warning("Error reading database connection file.");
+            return null;
+        }
+        dbs.setName(NewApplicationElementWizardIterator.getNewValidAppElementName(getProject(), dbs.getName()));
+        Document doc = ConnectionSettings2XmlDom.settingsToDocument(dbs);
+        try (OutputStream os = copied.getPrimaryFile().getOutputStream()) {
+            os.write(XmlDom2String.transform(doc).getBytes(PlatypusFiles.DEFAULT_ENCODING));
+            os.flush();
+        }
+        return copied;
     }
 }

@@ -252,9 +252,9 @@ public class JsCodeGenerator implements Cookie {
     private InteriorSection insertEventHandlerSection(String handlerName) throws javax.swing.text.BadLocationException {
         int endPos = 0;
         AstRoot jsRoot = ((PlatypusModuleDataObject)editorSupport.getDataObject()).getAst();
-        FunctionNode firstFunction = PlatypusFilesSupport.extractFirstFunction(jsRoot);
-        if (firstFunction != null) {
-            endPos = firstFunction.getAbsolutePosition() + firstFunction.getLength() - 2;// because of the following inserting code...
+        FunctionNode moduleConstructor = PlatypusFilesSupport.extractModuleConstructor(jsRoot);
+        if (moduleConstructor != null) {
+            endPos = moduleConstructor.getAbsolutePosition() + moduleConstructor.getLength() - 2;// because of the following inserting code...
         } else {// if we have no valid ast
             int sectionsCount = 0;
             // find last event handler

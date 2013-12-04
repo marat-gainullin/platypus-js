@@ -34,6 +34,7 @@ import com.eas.designer.application.query.nodes.QueryRootNode;
 import com.eas.designer.application.query.nodes.QueryRootNodePropertiesUndoRecorder;
 import com.eas.designer.datamodel.nodes.ModelNode;
 import com.eas.designer.explorer.PlatypusDataObject;
+import com.eas.designer.explorer.files.wizard.NewApplicationElementWizardIterator;
 import com.eas.script.JsDoc;
 import com.eas.xml.dom.Source2XmlDom;
 import com.eas.xml.dom.XmlDom2String;
@@ -42,6 +43,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.StringReader;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.EditorKit;
 import javax.swing.undo.UndoableEdit;
@@ -58,6 +61,8 @@ import org.openide.awt.StatusDisplayer;
 import org.openide.awt.UndoRedo;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
+import org.openide.loaders.DataFolder;
+import org.openide.loaders.DataObject;
 import org.openide.loaders.DataObjectExistsException;
 import org.openide.loaders.MultiFileLoader;
 import org.openide.nodes.AbstractNode;
@@ -169,9 +174,9 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         Document modelDoc = Source2XmlDom.transform(modelEntry.getFile().asText(PlatypusUtils.COMMON_ENCODING_NAME));
         model = XmlDom2QueryModel.transform(getClient(), modelDoc);
         dbId = model.getDbId();
-        publicQuery = PlatypusFilesSupport.getAnnotationValue(sqlText, PlatypusFiles.PUBLIC_ANNOTATION_NAME) != null;
-        procedure = PlatypusFilesSupport.getAnnotationValue(sqlText, PlatypusFiles.PROCEDURE_ANNOTATION_NAME) != null;
-        manual = PlatypusFilesSupport.getAnnotationValue(sqlText, PlatypusFiles.MANUAL_ANNOTATION_NAME) != null;
+        publicQuery = PlatypusFilesSupport.getAnnotationValue(sqlText, JsDoc.Tag.PUBLIC_TAG) != null;
+        procedure = PlatypusFilesSupport.getAnnotationValue(sqlText, JsDoc.Tag.PROCEDURE_TAG) != null;
+        manual = PlatypusFilesSupport.getAnnotationValue(sqlText, JsDoc.Tag.MANUAL_TAG) != null;
         readonly = PlatypusFilesSupport.getAnnotationValue(sqlText, JsDoc.Tag.READONLY_TAG) != null;
 
         //TODO set output fields in query document
@@ -265,7 +270,7 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
             firePropertyChange(PUBLIC_PROP_NAME, oldValue, aValue);
             try {
                 String content = sqlTextDocument.getText(0, sqlTextDocument.getLength());
-                String newContent = PlatypusFilesSupport.replaceAnnotationValue(content, PlatypusFiles.PUBLIC_ANNOTATION_NAME, publicQuery ? "" : null);
+                String newContent = PlatypusFilesSupport.replaceAnnotationValue(content, JsDoc.Tag.PUBLIC_TAG, publicQuery ? "" : null);
                 sqlTextDocument.replace(0, sqlTextDocument.getLength(), newContent, null);
             } catch (BadLocationException ex) {
                 ErrorManager.getDefault().notify(ex);
@@ -284,7 +289,7 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
             procedureChanged(oldValue, aValue);
             try {
                 String content = sqlTextDocument.getText(0, sqlTextDocument.getLength());
-                String newContent = PlatypusFilesSupport.replaceAnnotationValue(content, PlatypusFiles.PROCEDURE_ANNOTATION_NAME, procedure ? "" : null);
+                String newContent = PlatypusFilesSupport.replaceAnnotationValue(content, JsDoc.Tag.PROCEDURE_TAG, procedure ? "" : null);
                 sqlTextDocument.replace(0, sqlTextDocument.getLength(), newContent, null);
             } catch (BadLocationException ex) {
                 ErrorManager.getDefault().notify(ex);
@@ -307,7 +312,7 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
             manualChanged(oldValue, aValue);
             try {
                 String content = sqlTextDocument.getText(0, sqlTextDocument.getLength());
-                String newContent = PlatypusFilesSupport.replaceAnnotationValue(content, PlatypusFiles.MANUAL_ANNOTATION_NAME, manual ? "" : null);
+                String newContent = PlatypusFilesSupport.replaceAnnotationValue(content, JsDoc.Tag.MANUAL_TAG, manual ? "" : null);
                 sqlTextDocument.replace(0, sqlTextDocument.getLength(), newContent, null);
             } catch (BadLocationException ex) {
                 ErrorManager.getDefault().notify(ex);
@@ -492,17 +497,17 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         commitedStatement = statement;
         sqlText = sqlTextDocument.getText(0, sqlTextDocument.getLength());
         boolean oldPublicQuery = publicQuery;
-        publicQuery = PlatypusFilesSupport.getAnnotationValue(sqlText, PlatypusFiles.PUBLIC_ANNOTATION_NAME) != null;
+        publicQuery = PlatypusFilesSupport.getAnnotationValue(sqlText, JsDoc.Tag.PUBLIC_TAG) != null;
         if (oldPublicQuery != publicQuery) {
             firePropertyChange(PUBLIC_PROP_NAME, oldPublicQuery, publicQuery);
         }
         boolean oldProcedure = procedure;
-        procedure = PlatypusFilesSupport.getAnnotationValue(sqlText, PlatypusFiles.PROCEDURE_ANNOTATION_NAME) != null;
+        procedure = PlatypusFilesSupport.getAnnotationValue(sqlText, JsDoc.Tag.PROCEDURE_TAG) != null;
         if (oldProcedure != procedure) {
             firePropertyChange(PROCEDURE_PROP_NAME, oldProcedure, procedure);
         }
         boolean oldManual = manual;
-        manual = PlatypusFilesSupport.getAnnotationValue(sqlText, PlatypusFiles.MANUAL_ANNOTATION_NAME) != null;
+        manual = PlatypusFilesSupport.getAnnotationValue(sqlText, JsDoc.Tag.MANUAL_TAG) != null;
         if (oldManual != manual) {
             firePropertyChange(MANUAL_PROP_NAME, oldManual, manual);
         }
@@ -629,5 +634,19 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         } else {
             return false;
         }
+    }
+
+    @Override
+    protected DataObject handleCopy(DataFolder df) throws IOException {
+        DataObject copied = super.handleCopy(df);
+        String content = copied.getPrimaryFile().asText(PlatypusFiles.DEFAULT_ENCODING);
+        String oldPlatypusId = PlatypusFilesSupport.getAnnotationValue(content, JsDoc.Tag.NAME_TAG);
+        String newPlatypusId = NewApplicationElementWizardIterator.getNewValidAppElementName(getProject(), oldPlatypusId);
+        content = PlatypusFilesSupport.replaceAnnotationValue(content, JsDoc.Tag.NAME_TAG, newPlatypusId);
+        try (OutputStream os = copied.getPrimaryFile().getOutputStream()) {
+            os.write(content.getBytes(PlatypusFiles.DEFAULT_ENCODING));
+            os.flush();
+        }
+        return copied;
     }
 }
