@@ -606,6 +606,21 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     public RowHostObject getRow(int aIndex) throws Exception {
         return RowHostObject.publishRow(entity.getModel().getScriptThis(), getRowset().getRow(aIndex), entity);
     }
+    
+    private static final String CURSOR_JSDOC = ""
+            + "/**\n"
+            + "* Gets the row at cursor position.\n"
+            + "* @return the row object or <code>null</code> if cursor is before first or after last position.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = CURSOR_JSDOC)
+    public RowHostObject getCursor() throws Exception{
+        if(bof() || eof())
+            return null;
+        else
+            return getRow(getRowIndex());
+    }    
+    
     private static final String ROW_INDEX_JSDOC = ""
             + "/**\n"
             + "* The current cursor position, starting form <code>1</code>.\n"

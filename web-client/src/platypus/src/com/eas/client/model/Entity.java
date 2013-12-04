@@ -762,6 +762,7 @@ public class Entity implements RowsetListener {
 				Object.defineProperty(published, "rowIndex",     { get : function(){ return published.getRowIndex()}, set : function(aValue){ published.setRowIndex(aValue)}});
 				Object.defineProperty(published, "substitute",   { get : function(){ return published.getSubstitute()}, set : function(aValue){ published.setSubstitute(aValue)}});
 				Object.defineProperty(published, "elementClass", { get : function(){ return aEntity.@com.eas.client.model.Entity::getElementClass()()}, set : function(aValue){ aEntity.@com.eas.client.model.Entity::setElementClass(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue)}});
+				Object.defineProperty(published, "cursor",       { get : function(){ return (published.bof() || published.eof()) ? null : published[published.rowIndex-1];}});
 				
 				Object.defineProperty(published, "md",         { get : function(){ return @com.eas.client.model.Entity::publishFieldsFacade(Lcom/bearsoft/rowset/metadata/Fields;Lcom/eas/client/model/Entity;)(aEntity.@com.eas.client.model.Entity::getFields()(), aEntity) }});
 				// cursor-row dynamic properties interface
