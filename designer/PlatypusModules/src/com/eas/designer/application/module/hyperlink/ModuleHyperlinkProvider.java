@@ -265,28 +265,12 @@ public class ModuleHyperlinkProvider implements HyperlinkProviderExt {
         return null;
     }
     private AstNode findModuleThisPropertyDeclaration(AstRoot astRoot, String declarationName) {
-        return scanModuleThisLevel(PlatypusFilesSupport.extractModuleConstructor(astRoot).getBody(), declarationName, getThisAliases(PlatypusFilesSupport.extractModuleConstructor(astRoot)));
+        return scanModuleThisLevel(PlatypusFilesSupport.extractModuleConstructor(astRoot).getBody(),
+                declarationName,
+                ModuleThisCompletionContext.getThisAliases(PlatypusFilesSupport.extractModuleConstructor(astRoot)));
     }
-
-    private Set<String> getThisAliases(FunctionNode astRoot) {
-        Set<String> aliases = new HashSet<>();
-        Iterator<Node> i = astRoot.getBody().iterator();
-        while(i.hasNext()) {
-            Node n = i.next();
-            if (n instanceof VariableDeclaration) {
-                VariableDeclaration vd = (VariableDeclaration)n;
-                for (VariableInitializer vi : vd.getVariables()) {
-                    if (vi.getInitializer() != null && vi.getInitializer().getType() == Token.THIS && vi.getTarget() instanceof Name) {
-                        Name nameNode = (Name)vi.getTarget();
-                        aliases.add(nameNode.getIdentifier());
-                    }
-                }
-            }
-        }
-        return aliases;
-    } 
     
-    private AstNode scanModuleThisLevel(AstNode currentNode, String declarationName, Set<String> aliases) {
+    private static AstNode scanModuleThisLevel(AstNode currentNode, String declarationName, Set<String> aliases) {
         Node n = currentNode.getFirstChild();
         while (n != null) {
             if (n instanceof ExpressionStatement) {
