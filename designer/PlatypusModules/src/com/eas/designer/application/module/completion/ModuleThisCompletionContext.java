@@ -123,7 +123,7 @@ public class ModuleThisCompletionContext extends CompletionContext {
             return items;
         }
 
-        private void scan(final JsCompletionProvider.CompletionPoint point, final Set<String> aliases) {
+        private void scan(final JsCompletionProvider.CompletionPoint point, final Set<String> thisAliases) {
             if (moduleConstructor.getBody() != null) {
                 moduleConstructor.getBody().visit(new NodeVisitor() {
                     @Override
@@ -138,7 +138,7 @@ public class ModuleThisCompletionContext extends CompletionContext {
                                 if (a.getLeft() instanceof PropertyGet) {
                                     PropertyGet pg = (PropertyGet) a.getLeft();
                                     if (pg.getTarget().getType() == Token.THIS
-                                            || (pg.getTarget() instanceof Name && aliases.contains(((Name)pg.getTarget()).getIdentifier()))) {
+                                            || (pg.getTarget() instanceof Name && thisAliases.contains(((Name)pg.getTarget()).getIdentifier()))) {
                                         if (a.getRight() instanceof FunctionNode) {
                                             FunctionNode fn = (FunctionNode) a.getRight();
                                             List<String> params = new ArrayList<>();
