@@ -148,10 +148,20 @@ public class ModuleHyperlinkProvider implements HyperlinkProviderExt {
         PlatypusModuleDataObject appElementDataObject = (PlatypusModuleDataObject) DataObject.find(fo);
         if (node.getParent() instanceof NewExpression) {
             NewExpression ne = (NewExpression) node.getParent();
-            if (ne.getArguments() != null && ne.getArguments().size() > 0) {
-                if (ne.getArguments().get(0) instanceof StringLiteral) {
-                    StringLiteral sl = (StringLiteral) ne.getArguments().get(0);
-                    ModuleCompletionContext typeCompletionContext = ModuleCompletionContext.getModuleCompletionContext(appElementDataObject.getProject(), sl.getValue(false));
+            if (ne.getTarget() instanceof Name) {
+                Name constructorName = (Name) ne.getTarget();
+                if (ModuleCompletionContext.isModuleInitializerName(constructorName.getIdentifier())
+                        && ne.getArguments() != null
+                        && ne.getArguments().size() > 0) {
+                    if (ne.getArguments().get(0) instanceof StringLiteral) {
+                        StringLiteral sl = (StringLiteral) ne.getArguments().get(0);
+                        ModuleCompletionContext typeCompletionContext = ModuleCompletionContext.getModuleCompletionContext(appElementDataObject.getProject(), sl.getValue(false));
+                        if (typeCompletionContext != null) {
+                            return new DeclarationLocation(typeCompletionContext.getDataObject(), 0);
+                        }
+                    }
+                } else {
+                    ModuleCompletionContext typeCompletionContext = ModuleCompletionContext.getModuleCompletionContext(appElementDataObject.getProject(), constructorName.getIdentifier());
                     if (typeCompletionContext != null) {
                         return new DeclarationLocation(typeCompletionContext.getDataObject(), 0);
                     }

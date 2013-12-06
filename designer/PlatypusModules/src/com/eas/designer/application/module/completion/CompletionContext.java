@@ -32,6 +32,7 @@ public class CompletionContext {
     protected static final String SERVER_MODULE_NAME = "ServerModule";// NOI18N
     protected static final String FORM_MODULE_NAME = "Form";// NOI18N
     protected static final String REPORT_MODULE_NAME = "Report";// NOI18N
+    protected static final String SERVER_REPORT_MODULE_NAME = "ServerReport";// NOI18N
     protected static final String MODULES_OBJECT_NAME = "Modules";// NOI18N
     protected static final String GET_METHOD_NAME = "get";// NOI18N
     protected static final String BEANY_PREFIX_GET = "get";// NOI18N
