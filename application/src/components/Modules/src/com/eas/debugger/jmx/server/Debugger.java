@@ -152,7 +152,6 @@ public class Debugger extends NotificationBroadcasterSupport implements Debugger
         }
         return null;
     }
-
     /**
      * Comprised of last named method, wich is documented and used in properties
      * descriptors
@@ -238,7 +237,7 @@ public class Debugger extends NotificationBroadcasterSupport implements Debugger
                     }
                 }
             }
-            if(oResult instanceof NativeJavaArray){
+            if (oResult instanceof NativeJavaArray) {
                 ids.add("length");
             }
         }

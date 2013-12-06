@@ -5,6 +5,7 @@
 package com.eas.client.forms.api.events;
 
 import com.eas.client.forms.api.Component;
+import com.eas.script.ScriptFunction;
 import javax.swing.JComponent;
 
 /**
@@ -17,6 +18,7 @@ public class ContainerEvent extends Event<java.awt.event.ContainerEvent> {
         super(aEvent);
     }
 
+    @ScriptFunction(jsDoc = "Component the operation is performed on.")
     public Component<?> getChild() {
         return delegate.getChild() instanceof JComponent ? lookupApiComponent((JComponent) delegate.getChild()) : null;
     }

@@ -6,7 +6,6 @@ package com.eas.designer.application.query.editing;
 
 import com.bearsoft.rowset.metadata.Parameter;
 import com.eas.client.ClientConstants;
-import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.cache.PlatypusFilesSupport;
 import com.eas.client.model.Relation;
 import com.eas.client.model.gui.edits.AccessibleCompoundEdit;
@@ -84,11 +83,7 @@ public class QueryDocumentEditsComplementor {
 
     public String costructTablyName(QueryEntity qEntity) {
         if (qEntity.getQueryId() != null) {
-            if (qEntity.getQueryId().matches("\\d+")) {
-                return ClientConstants.QUERY_ID_PREFIX + qEntity.getQueryId();
-            } else {
-                return qEntity.getQueryId();
-            }
+            return ClientConstants.STORED_QUERY_REF_PREFIX + qEntity.getQueryId();
         } else {
             return qEntity.getTableName();
         }

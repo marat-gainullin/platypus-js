@@ -5,9 +5,7 @@
 package com.eas.client.queries;
 
 import com.bearsoft.rowset.metadata.DataTypeInfo;
-import com.eas.client.SQLUtils;
 import com.eas.client.exceptions.UnboundSqlParameterException;
-import java.util.regex.Pattern;
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.*;
@@ -70,10 +68,6 @@ public class SqlQueryTest {
 
     @Test
     public void testCheckingForSubQuery() {
-        String a = "(T_Q125051387971687_1.LAST_OP_TIME IS NOT NULL)", b = "Q125051387971687_1", c = "Q125051387971687";
-        Pattern pattern = Pattern.compile(SQLUtils.SUBQUERY_TABLE_NAME_REGEXP);
-        assertFalse(pattern.matcher(a).matches());
-        assertFalse(pattern.matcher(b).matches());
-        assertTrue(pattern.matcher(c).matches());
+        fail("unimplemented");
     }
 }

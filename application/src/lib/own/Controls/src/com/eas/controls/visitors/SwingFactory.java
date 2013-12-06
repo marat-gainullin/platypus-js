@@ -246,8 +246,10 @@ public class SwingFactory implements ControlsDesignInfoVisitor {
     @Override
     public void visit(FormDesignInfo aInfo) {
         result = new JPanel();
+        comp = result;
         result.setName(aInfo.getName());
         processControlProperties(result, aInfo);
+        processControlEvents(aInfo);
         result.setVisible(true);// hidden forms are made with windows hide, but this is root container and so it must be visible allways!
         if (aInfo.getDesignedPreferredSize() != null) {
             result.setPreferredSize(aInfo.getDesignedPreferredSize());

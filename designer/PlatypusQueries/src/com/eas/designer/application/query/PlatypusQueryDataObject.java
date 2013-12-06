@@ -43,8 +43,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.StringReader;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.EditorKit;
 import javax.swing.undo.UndoableEdit;
@@ -565,21 +563,33 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         return tables;
     }
 
-    private void validateStatement() throws Exception {
+    public DbMetadataCache getMetadataCache() throws Exception {
         DbClient client = getClient();
-        if (client != null) {
-            DbMetadataCache mdCache = client.getDbMetadataCache(dbId);
+        return client != null ? client.getDbMetadataCache(dbId) : null;
+    }
+
+    private void validateStatement() throws Exception {
+        DbMetadataCache mdCache = getMetadataCache();
+        if (mdCache != null) {
             Map<String, Table> tables = TablesFinder.getTablesMap(TO_CASE.LOWER, statement, true);
             for (Table table : tables.values()) {
                 String schema = table.getSchemaName();
                 if (schema != null && schema.equalsIgnoreCase(mdCache.getConnectionSchema())) {
                     schema = null;
                 }
-                String cachedTableName = (schema != null ? schema + "." : "") + table.getName();
-                if (!mdCache.containsTableMetadata(cachedTableName) && !existsAppQuery(cachedTableName)) {
-                    throw new AbsentTableParseException(NbBundle.getMessage(PlatypusQueryDataObject.class, "absentTable", cachedTableName));
+                String cachedTablyName = (schema != null ? schema + "." : "") + table.getName();
+                if (!validateTablyName(cachedTablyName)) {
+                    throw new AbsentTableParseException(NbBundle.getMessage(PlatypusQueryDataObject.class, "absentTable", cachedTablyName));
                 }
             }
+        }
+    }
+
+    private boolean validateTablyName(String aTablyName) throws Exception {
+        if (aTablyName.startsWith(ClientConstants.STORED_QUERY_REF_PREFIX)) {
+            return existsAppQuery(aTablyName.substring(ClientConstants.STORED_QUERY_REF_PREFIX.length()));
+        } else {
+            return validateTableName(aTablyName) || existsAppQuery(aTablyName);
         }
     }
 
@@ -619,14 +629,11 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         firePropertyChange(OUTPUT_FIELDS, aOldValue, aNewValue);
     }
 
-    public boolean existsAppQuery(String aTablyName) {
+    public boolean existsAppQuery(String aStoreQueryName) {
         PlatypusProject project = getProject();
         if (project != null) {
             try {
-                ApplicationElement appElement = project.getAppCache().get(aTablyName);
-                if (appElement == null && StoredQueryFactory.SUBQUERY_LINK_PATTERN.matcher(aTablyName.toLowerCase()).matches()) {
-                    appElement = project.getAppCache().get(aTablyName.substring(1));
-                }
+                ApplicationElement appElement = project.getAppCache().get(aStoreQueryName);
                 return appElement != null && appElement.getType() == ClientConstants.ET_QUERY;
             } catch (Exception ex) {
                 return false;
@@ -648,5 +655,20 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
             os.flush();
         }
         return copied;
+    }
+
+    public boolean validateTableName(String aTablyName) throws Exception {
+        DbMetadataCache mdCache = getMetadataCache();
+        if (mdCache != null) {
+            boolean containsTableMetadata;
+            try {
+                containsTableMetadata = mdCache.getTableMetadata(aTablyName) != null;
+            } catch (Exception ex) {
+                containsTableMetadata = false;
+            }
+            return containsTableMetadata;
+        } else {
+            return false;
+        }
     }
 }

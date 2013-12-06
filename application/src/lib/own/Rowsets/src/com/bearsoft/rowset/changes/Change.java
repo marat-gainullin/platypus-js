@@ -27,6 +27,16 @@ public abstract class Change {
             value = aValue;
             type = aType;
         }
+
+        @ScriptFunction(jsDoc = "Name of changed property.")
+        public String getName() {
+            return name;
+        }
+
+        @ScriptFunction(jsDoc = "New value.")
+        public Object getValue() {
+            return value;
+        }
     }
 
     public Change(String aEntityId) {
@@ -40,14 +50,19 @@ public abstract class Change {
     }
 
     @ScriptFunction(jsDoc = "Indicated if the change is consumed.")
-    public boolean isConsumed(){
+    public boolean isConsumed() {
         return consumed;
     }
-    
+
     public abstract void accept(ChangeVisitor aChangeVisitor) throws Exception;
 
     @ScriptFunction(jsDoc = "Indicates the change's type (Insert, Update, Delete or Command).")
     public String getType() {
         return getClass().getSimpleName();
+    }
+
+    @Override
+    public String toString() {
+        return getType();
     }
 }

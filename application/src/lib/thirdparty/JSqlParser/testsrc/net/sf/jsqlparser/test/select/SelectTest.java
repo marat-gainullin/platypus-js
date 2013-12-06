@@ -39,8 +39,7 @@ public class SelectTest extends TestCase {
     }
 
     public void testTableAlias() throws JSQLParserException {
-        String statement =
-                "SELECT t1.name FROM table1 AS t1 WHERE t1.id = 12";
+        String statement = "SELECT t1.name FROM #table1 AS t1 WHERE t1.id = 12";
         Select select = (Select) parserManager.parse(new StringReader(statement));
         assertEquals(statement, "" + select);
     }

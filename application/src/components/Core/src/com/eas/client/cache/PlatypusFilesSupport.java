@@ -4,6 +4,7 @@
  */
 package com.eas.client.cache;
 
+import com.eas.client.ClientConstants;
 import com.eas.client.settings.EasSettings;
 import com.eas.client.settings.XmlDom2ConnectionSettings;
 import com.eas.script.JsDoc;
@@ -24,7 +25,6 @@ import org.mozilla.javascript.EvaluatorException;
 import org.mozilla.javascript.Node;
 import org.mozilla.javascript.ast.AstRoot;
 import org.mozilla.javascript.ast.FunctionNode;
-import org.mozilla.javascript.ast.Name;
 
 /**
  *
@@ -80,7 +80,7 @@ public class PlatypusFilesSupport {
             if (annotatedConstructors == 1) {
                 return result;
             } else if (functions == 1) {
-                Logger.getLogger(PlatypusFilesSupport.class.getName()).info("Single function is found in the module -- considered as a module's constructor.");
+                Logger.getLogger(PlatypusFilesSupport.class.getName()).info("Single function is found in the module - considered as a module's constructor.");
                 return result;
             } else if (functions == 0) {
                 Logger.getLogger(PlatypusFilesSupport.class.getName()).warning("No functions found in the module.");         
@@ -135,7 +135,7 @@ public class PlatypusFilesSupport {
         Matcher matcher = pattern.matcher(aContent);
         if (matcher.find()) {
             String docComment = matcher.group();
-            String[] lines = docComment.split(System.getProperty("line.separator")); //NOI18N
+            String[] lines = docComment.split(System.getProperty(ClientConstants.LINE_SEPARATOR_PROP_NAME)); //NOI18N
             for (String line : lines) {
                 if (line.contains(aAnnotationName)) {
                     String[] tokens = line.split("\\s");  //NOI18N
@@ -205,14 +205,14 @@ public class PlatypusFilesSupport {
                 if (!processed && aValue != null) {
                     list.add(list.size() > 2 ? 2 : 1, " * " + aAnnotationName + " " + aValue); //NOI18N
                 }
-                docComment = StringUtils.join(System.getProperty("line.separator"), list.toArray(new String[]{})); //NOI18N
+                docComment = StringUtils.join(System.getProperty(ClientConstants.LINE_SEPARATOR_PROP_NAME), list.toArray(new String[]{})); //NOI18N
                 return matcher.replaceFirst(docComment);
             }
         }
         list.add("/**"); //NOI18N
         list.add(" * " + aAnnotationName + " " + aValue); //NOI18N
-        list.add(" */" + System.getProperty("line.separator")); //NOI18N
-        String docComment = StringUtils.join(System.getProperty("line.separator"), list.toArray(new String[]{}));
+        list.add(" */" + System.getProperty(ClientConstants.LINE_SEPARATOR_PROP_NAME)); //NOI18N
+        String docComment = StringUtils.join(System.getProperty(ClientConstants.LINE_SEPARATOR_PROP_NAME), list.toArray(new String[]{}));
         return docComment + aContent;
     }
 
