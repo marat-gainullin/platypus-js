@@ -170,7 +170,7 @@ public class ModuleHyperlinkProvider implements HyperlinkProviderExt {
             } else {
                 return DeclarationLocation.NONE;
             }
-            
+
         } else {
             for (int i = 0; i < identifiersPath.size() - 1; i++) {
                 String fieldName = identifiersPath.get(i);
@@ -238,7 +238,7 @@ public class ModuleHyperlinkProvider implements HyperlinkProviderExt {
         }
         return null;
     }
-    
+
     private AstNode scanLevel(AstNode currentNode, String declarationName) {
         Node n = currentNode.getFirstChild();
         while (n != null) {
@@ -264,33 +264,37 @@ public class ModuleHyperlinkProvider implements HyperlinkProviderExt {
         }
         return null;
     }
+
     private AstNode findModuleThisPropertyDeclaration(AstRoot astRoot, String declarationName) {
-        return scanModuleThisLevel(PlatypusFilesSupport.extractModuleConstructor(astRoot).getBody(),
+        FunctionNode moduleConstructor = PlatypusFilesSupport.extractModuleConstructor(astRoot);
+        return scanModuleThisLevel(moduleConstructor,
                 declarationName,
-                ModuleThisCompletionContext.getThisAliases(PlatypusFilesSupport.extractModuleConstructor(astRoot)));
+                ModuleThisCompletionContext.getThisAliases(moduleConstructor));
     }
-    
-    private static AstNode scanModuleThisLevel(AstNode currentNode, String declarationName, Set<String> aliases) {
-        Node n = currentNode.getFirstChild();
-        while (n != null) {
-            if (n instanceof ExpressionStatement) {
-                ExpressionStatement es = (ExpressionStatement) n;
-                if (es.getExpression() instanceof Assignment) {
-                    Assignment a = (Assignment) es.getExpression();
-                    if (a.getLeft() instanceof PropertyGet) {
-                        PropertyGet pg = (PropertyGet) a.getLeft();
-                        if ((pg.getTarget().getType() == Token.THIS) 
-                                || (pg.getTarget() instanceof Name && aliases.contains(((Name)pg.getTarget()).getIdentifier()))) {
-                            if (a.getRight() instanceof FunctionNode) {
-                                if (pg.getProperty().getIdentifier().equals(declarationName)) {
-                                    return a.getLeft();
+
+    private static AstNode scanModuleThisLevel(FunctionNode moduleConstructor, String declarationName, Set<String> aliases) {
+        if (moduleConstructor.getBody() != null) {
+            Node n = moduleConstructor.getBody().getFirstChild();
+            while (n != null) {
+                if (n instanceof ExpressionStatement) {
+                    ExpressionStatement es = (ExpressionStatement) n;
+                    if (es.getExpression() instanceof Assignment) {
+                        Assignment a = (Assignment) es.getExpression();
+                        if (a.getLeft() instanceof PropertyGet) {
+                            PropertyGet pg = (PropertyGet) a.getLeft();
+                            if ((pg.getTarget().getType() == Token.THIS)
+                                    || (pg.getTarget() instanceof Name && aliases.contains(((Name) pg.getTarget()).getIdentifier()))) {
+                                if (a.getRight() instanceof FunctionNode) {
+                                    if (pg.getProperty().getIdentifier().equals(declarationName)) {
+                                        return a.getLeft();
+                                    }
                                 }
                             }
                         }
                     }
                 }
+                n = n.getNext();
             }
-            n = n.getNext();
         }
         return null;
     }
