@@ -7,6 +7,7 @@ package com.eas.designer.application.module.completion;
 import com.eas.client.cache.PlatypusFilesSupport;
 import com.eas.designer.application.indexer.IndexerQuery;
 import com.eas.designer.application.module.PlatypusModuleDataObject;
+import static com.eas.designer.application.module.completion.CompletionContext.REPORT_MODULE_NAME;
 import static com.eas.designer.application.module.completion.CompletionContext.addItem;
 import com.eas.designer.application.module.parser.AstUtlities;
 import com.eas.designer.explorer.utils.StringUtils;
@@ -133,11 +134,12 @@ public class ModuleCompletionContext extends CompletionContext {
         return null;
     }
 
-    private static boolean isModuleInitializerName(String name) {
+    public static boolean isModuleInitializerName(String name) {
         return name.equals(MODULE_NAME)
                 || name.equals(SERVER_MODULE_NAME)
                 || name.equals(FORM_MODULE_NAME)
-                || name.equals(REPORT_MODULE_NAME);
+                || name.equals(REPORT_MODULE_NAME)
+                || name.equals(SERVER_REPORT_MODULE_NAME);
     }
 
     public enum CompletionMode {
