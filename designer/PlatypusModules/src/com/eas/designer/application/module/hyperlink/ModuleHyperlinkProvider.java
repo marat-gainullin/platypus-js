@@ -14,9 +14,12 @@ import com.eas.designer.application.module.parser.AstUtlities;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Logger;
 import javax.swing.SwingUtilities;
 import javax.swing.text.Document;
 import javax.swing.text.StyledDocument;
@@ -262,10 +265,28 @@ public class ModuleHyperlinkProvider implements HyperlinkProviderExt {
         return null;
     }
     private AstNode findModuleThisPropertyDeclaration(AstRoot astRoot, String declarationName) {
-        return scanModuleThisLevel(PlatypusFilesSupport.extractModuleConstructor(astRoot).getBody(), declarationName);
+        return scanModuleThisLevel(PlatypusFilesSupport.extractModuleConstructor(astRoot).getBody(), declarationName, getThisAliases(PlatypusFilesSupport.extractModuleConstructor(astRoot)));
     }
 
-    private AstNode scanModuleThisLevel(AstNode currentNode, String declarationName) {
+    private Set<String> getThisAliases(FunctionNode astRoot) {
+        Set<String> aliases = new HashSet<>();
+        Iterator<Node> i = astRoot.getBody().iterator();
+        while(i.hasNext()) {
+            Node n = i.next();
+            if (n instanceof VariableDeclaration) {
+                VariableDeclaration vd = (VariableDeclaration)n;
+                for (VariableInitializer vi : vd.getVariables()) {
+                    if (vi.getInitializer() != null && vi.getInitializer().getType() == Token.THIS && vi.getTarget() instanceof Name) {
+                        Name nameNode = (Name)vi.getTarget();
+                        aliases.add(nameNode.getIdentifier());
+                    }
+                }
+            }
+        }
+        return aliases;
+    } 
+    
+    private AstNode scanModuleThisLevel(AstNode currentNode, String declarationName, Set<String> aliases) {
         Node n = currentNode.getFirstChild();
         while (n != null) {
             if (n instanceof ExpressionStatement) {
@@ -274,7 +295,8 @@ public class ModuleHyperlinkProvider implements HyperlinkProviderExt {
                     Assignment a = (Assignment) es.getExpression();
                     if (a.getLeft() instanceof PropertyGet) {
                         PropertyGet pg = (PropertyGet) a.getLeft();
-                        if (pg.getTarget().getType() == Token.THIS) {
+                        if ((pg.getTarget().getType() == Token.THIS) 
+                                || (pg.getTarget() instanceof Name && aliases.contains(((Name)pg.getTarget()).getIdentifier()))) {
                             if (a.getRight() instanceof FunctionNode) {
                                 if (pg.getProperty().getIdentifier().equals(declarationName)) {
                                     return a.getLeft();
