@@ -5,7 +5,10 @@
 package com.eas.designer.debugger.ui;
 
 import com.eas.designer.debugger.PlatypusBreakpoint;
-import org.netbeans.modules.debugger.ui.models.BreakpointsActionsProvider;
+import javax.swing.Action;
+import org.netbeans.spi.debugger.DebuggerServiceRegistration;
+import org.netbeans.spi.viewmodel.NodeActionsProvider;
+import org.netbeans.spi.viewmodel.NodeActionsProviderFilter;
 import org.netbeans.spi.viewmodel.UnknownTypeException;
 import org.openide.text.Line;
 
@@ -13,14 +16,15 @@ import org.openide.text.Line;
  *
  * @author mg
  */
-public class PlatypusBreakpointsActionsProvider extends BreakpointsActionsProvider {
+@DebuggerServiceRegistration(path = "BreakpointsView", types={NodeActionsProviderFilter.class})
+public class BreakpointsActionsFilter implements NodeActionsProviderFilter {
 
-    public PlatypusBreakpointsActionsProvider() {
+    public BreakpointsActionsFilter() {
         super();
     }
 
     @Override
-    public void performDefaultAction(Object node) throws UnknownTypeException {
+    public void performDefaultAction(NodeActionsProvider original, Object node) throws UnknownTypeException {
         if (node instanceof PlatypusBreakpoint) {
             try {
                 PlatypusBreakpoint breakPoint = (PlatypusBreakpoint) node;
@@ -31,7 +35,12 @@ public class PlatypusBreakpointsActionsProvider extends BreakpointsActionsProvid
                 throw new UnknownTypeException(node);
             }
         } else {
-            super.performDefaultAction(node);
+            original.performDefaultAction(node);
         }
+    }
+
+    @Override
+    public Action[] getActions(NodeActionsProvider original, Object node) throws UnknownTypeException {
+        return original.getActions(node);
     }
 }
