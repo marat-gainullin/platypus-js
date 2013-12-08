@@ -22,18 +22,14 @@ public class PlatypusSplitContainer extends BorderLayoutContainer {
 	private class Handler implements BeforeCollapseHandler, BeforeExpandHandler {
 		@Override
 		public void onBeforeCollapse(BeforeCollapseEvent event) {
-			/* Some bugs occur in BorderLayoutContainer when uncommented
 			event.setCancelled(true);
 			onCollapse((ContentPanel) event.getSource());
-			*/
 		}
 
 		@Override
 		public void onBeforeExpand(BeforeExpandEvent event) {
-			/* Some bugs occur in BorderLayoutContainer when uncommented
 			event.setCancelled(true);
 			onExpand((ContentPanel) event.getSource());
-			*/
 		}
 
 	}
@@ -86,8 +82,11 @@ public class PlatypusSplitContainer extends BorderLayoutContainer {
 				layoutData.setMargins(new Margins(0, 0, dividerSize, 0));
 				setNorthWidget(cp, layoutData);
 			}
-			cp.addBeforeCollapseHandler(collapseHandler);
-			cp.addBeforeExpandHandler(collapseHandler);
+			if (cp.isRendered()) {// Without this condition internal handler is added also and lead to bugs
+				// Using of only internal handler is impossible due to crazy conditions in GXT code.
+				cp.addBeforeCollapseHandler(collapseHandler);
+				cp.addBeforeExpandHandler(collapseHandler);
+			}
 			leftComponent.getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
 			cp.setWidget(leftComponent);
 		}
