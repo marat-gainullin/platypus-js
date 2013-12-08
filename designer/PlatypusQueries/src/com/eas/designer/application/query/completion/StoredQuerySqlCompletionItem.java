@@ -4,32 +4,30 @@
  */
 package com.eas.designer.application.query.completion;
 
-import com.bearsoft.rowset.metadata.Fields;
 import com.eas.client.model.gui.IconCache;
-import java.util.Map.Entry;
+import com.eas.designer.application.indexer.IndexerQuery;
+import com.eas.designer.application.query.PlatypusQueryDataObject;
 import org.openide.util.NbBundle;
 
 /**
  *
  * @author mg
  */
-public class TableSqlCompletionItem extends SqlCompletionItem {
+public class StoredQuerySqlCompletionItem extends SqlCompletionItem {
 
-    protected Fields table;
+    protected PlatypusQueryDataObject query;
 
-    public TableSqlCompletionItem(Entry<String, Fields> aTableEntry, int aStartOffset, int aEndOffset) {
-        super(aTableEntry.getKey(), aTableEntry.getValue().getTableDescription(), aStartOffset, aEndOffset);
-        icon = IconCache.getIcon("table.png");
-        rightText = NbBundle.getMessage(TableSqlCompletionItem.class, "table");
+    public StoredQuerySqlCompletionItem(PlatypusQueryDataObject aQuery, int aStartOffset, int aEndOffset) {
+        super(IndexerQuery.file2AppElementId(aQuery.getPrimaryFile()), aQuery.getName(), aStartOffset, aEndOffset);
+        query = aQuery;
+        icon = IconCache.getIcon("query.png");
+        rightText = NbBundle.getMessage(StoredQuerySqlCompletionItem.class, "query");
     }
 
-    public TableSqlCompletionItem(String aAlias, Fields aTable, int aStartOffset, int aEndOffset) {
-        super(aAlias, aTable != null ? aTable.getTableDescription() : null, aStartOffset, aEndOffset);
-        icon = IconCache.getIcon("table.png");
-        if (aAlias.equalsIgnoreCase(aTable.get(1).getTableName())) {
-            rightText = NbBundle.getMessage(TableSqlCompletionItem.class, "table");
-        } else {
-            rightText = NbBundle.getMessage(TableSqlCompletionItem.class, "aliasToTable") + " " + aTable.get(1).getTableName();
-        }
+    public StoredQuerySqlCompletionItem(String aAlias, PlatypusQueryDataObject aQuery, int aStartOffset, int aEndOffset) {
+        super(aAlias, aQuery.getName(), aStartOffset, aEndOffset);
+        query = aQuery;
+        icon = IconCache.getIcon("query.png");
+        rightText = NbBundle.getMessage(StoredQuerySqlCompletionItem.class, "aliasToQuery") + " " + IndexerQuery.file2AppElementId(aQuery.getPrimaryFile());
     }
 }

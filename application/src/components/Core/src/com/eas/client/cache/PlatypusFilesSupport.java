@@ -80,7 +80,7 @@ public class PlatypusFilesSupport {
             if (annotatedConstructors == 1) {
                 return result;
             } else if (functions == 1) {
-                Logger.getLogger(PlatypusFilesSupport.class.getName()).info("Single function is found in the module - considered as a module's constructor.");
+                Logger.getLogger(PlatypusFilesSupport.class.getName()).finer("Single function is found in the module - considered as a module's constructor.");
                 return result;
             } else if (functions == 0) {
                 Logger.getLogger(PlatypusFilesSupport.class.getName()).warning("No functions found in the module.");         

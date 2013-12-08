@@ -8,6 +8,7 @@ import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
+import com.eas.client.ClientConstants;
 import com.eas.client.DbClient;
 import com.eas.client.DbMetadataCache;
 import com.eas.designer.application.query.PlatypusQueryDataObject;
@@ -66,6 +67,13 @@ public class SqlCompletionProvider implements CompletionProvider {
             resultSet.addItem(item);
             addedCompletionItems++;
         }
+    }
+
+    public void fillCompletionByStoredQueries(PlatypusQueryDataObject dataObject, CompletionPoint point, CompletionResultSet resultSet) {
+        /* TODO: get *.sql files -> PlatypusQueryDataObject|s list in project and exclude dataobject which is same as dataObject parameter
+        SqlCompletionItem item = new StoredQuerySqlCompletionItem(, point.startOffset, point.endOffset);
+        addCompletionItem(point, item, resultSet);
+        */ 
     }
 
     public void fillCompletionByTablesBySchema(String aSchema, PlatypusQueryDataObject dataObject, CompletionPoint point, CompletionResultSet resultSet) throws Exception {
@@ -154,7 +162,11 @@ public class SqlCompletionProvider implements CompletionProvider {
                 }
             }
         } else {
-            fillCompletionByTablesBySchema(null, dataObject, point, resultSet);
+            if (point.filter != null && point.filter.startsWith(ClientConstants.STORED_QUERY_REF_PREFIX)) {
+                fillCompletionByStoredQueries(dataObject, point, resultSet);
+            } else {
+                fillCompletionByTablesBySchema(null, dataObject, point, resultSet);
+            }
         }
     }
 
@@ -371,56 +383,61 @@ public class SqlCompletionProvider implements CompletionProvider {
                     }
                 }
             }
-            TokenHierarchy<?> hierarchy = TokenHierarchy.get(doc);
-            TokenSequence<LexSqlTokenId> ts = hierarchy.tokenSequence(LexSqlTokenId.language());
-            while (ts.moveNext()) {
-                Token<LexSqlTokenId> t = ts.token();
-                int tokenOffset = ts.offset();
-                int tokenLength = t.length();
-                int counter = 0;
-                if (tokenLength != t.text().length()) {
-                    while (counter < t.text().length() && t.text().charAt(counter++) == ' ') {
-                        tokenOffset++;
-                        tokenLength--;
+            doc.readLock();
+            try {
+                TokenHierarchy<?> hierarchy = TokenHierarchy.get(doc);
+                TokenSequence<LexSqlTokenId> ts = hierarchy.tokenSequence(LexSqlTokenId.language());
+                while (ts.moveNext()) {
+                    Token<LexSqlTokenId> t = ts.token();
+                    int tokenOffset = ts.offset();
+                    int tokenLength = t.length();
+                    int counter = 0;
+                    if (tokenLength != t.text().length()) {
+                        while (counter < t.text().length() && t.text().charAt(counter++) == ' ') {
+                            tokenOffset++;
+                            tokenLength--;
+                        }
+                        counter = t.text().length() - 1;
+                        while (counter >= 0 && t.text().charAt(counter--) == ' ') {
+                            tokenLength--;
+                        }
                     }
-                    counter = t.text().length() - 1;
-                    while (counter >= 0 && t.text().charAt(counter--) == ' ') {
-                        tokenLength--;
+                    if (caretOffset <= tokenOffset) {
+                        break;
+                    }
+                    if (caretOffset > tokenOffset && caretOffset <= tokenOffset + tokenLength) {
+                        if (SqlLanguageHierarchy.KEYWORD_CATEGORY_NAME.equals(t.id().primaryCategory())) {
+                            point.zone = KEYWORD_ZONE;
+                        }
+                    }
+                    if ("select".equalsIgnoreCase(t.text().toString())) {
+                        point.zone = SELECT_ZONE;
+                    } else if ("from".equalsIgnoreCase(t.text().toString())) {
+                        point.zone = FROM_ZONE;
+                    } else if ("where".equalsIgnoreCase(t.text().toString())) {
+                        point.zone = WHERE_ZONE;
+                    } else if ("having".equalsIgnoreCase(t.text().toString())) {
+                        point.zone = HAVING_ZONE;
+                    } else if ("group".equalsIgnoreCase(t.text().toString())) {
+                        point.zone = GROUP_ZONE;
+                        ts.moveNext(); // BY
+                    } else if ("insert".equalsIgnoreCase(t.text().toString())) {
+                        point.zone = INSERT_INTO_ZONE;
+                        ts.moveNext(); // INTO
+                    } else if ("values".equalsIgnoreCase(t.text().toString())) {
+                        point.zone = INSERT_VALUES_ZONE;
+                    } else if (point.zone == INSERT_INTO_ZONE && "(".equalsIgnoreCase(t.text().toString())) {
+                        point.zone = INSERT_FIELDS_ZONE;
+                    } else if (point.zone == INSERT_VALUES_ZONE && "(".equalsIgnoreCase(t.text().toString())) {
+                        point.zone = INSERT_VALUES_LIST_ZONE;
+                    } else if ("update".equalsIgnoreCase(t.text().toString())) {
+                        point.zone = UPDATE_ZONE;
+                    } else if ("set".equalsIgnoreCase(t.text().toString())) {
+                        point.zone = SET_ZONE;
                     }
                 }
-                if (caretOffset <= tokenOffset) {
-                    break;
-                }
-                if (caretOffset > tokenOffset && caretOffset <= tokenOffset + tokenLength) {
-                    if (SqlLanguageHierarchy.KEYWORD_CATEGORY_NAME.equals(t.id().primaryCategory())) {
-                        point.zone = KEYWORD_ZONE;
-                    }
-                }
-                if ("select".equalsIgnoreCase(t.text().toString())) {
-                    point.zone = SELECT_ZONE;
-                } else if ("from".equalsIgnoreCase(t.text().toString())) {
-                    point.zone = FROM_ZONE;
-                } else if ("where".equalsIgnoreCase(t.text().toString())) {
-                    point.zone = WHERE_ZONE;
-                } else if ("having".equalsIgnoreCase(t.text().toString())) {
-                    point.zone = HAVING_ZONE;
-                } else if ("group".equalsIgnoreCase(t.text().toString())) {
-                    point.zone = GROUP_ZONE;
-                    ts.moveNext(); // BY
-                } else if ("insert".equalsIgnoreCase(t.text().toString())) {
-                    point.zone = INSERT_INTO_ZONE;
-                    ts.moveNext(); // INTO
-                } else if ("values".equalsIgnoreCase(t.text().toString())) {
-                    point.zone = INSERT_VALUES_ZONE;
-                } else if (point.zone == INSERT_INTO_ZONE && "(".equalsIgnoreCase(t.text().toString())) {
-                    point.zone = INSERT_FIELDS_ZONE;
-                } else if (point.zone == INSERT_VALUES_ZONE && "(".equalsIgnoreCase(t.text().toString())) {
-                    point.zone = INSERT_VALUES_LIST_ZONE;
-                } else if ("update".equalsIgnoreCase(t.text().toString())) {
-                    point.zone = UPDATE_ZONE;
-                } else if ("set".equalsIgnoreCase(t.text().toString())) {
-                    point.zone = SET_ZONE;
-                }
+            } finally {
+                doc.readUnlock();
             }
         } else {
             point.zone = UNKNOWN_ZONE;
@@ -495,8 +512,8 @@ public class SqlCompletionProvider implements CompletionProvider {
     protected int getStartWordOffset(NbEditorDocument aDoc, int caretOffset) throws Exception {
         while (caretOffset > 0 && aDoc.getLength() > 0
                 && (Character.isJavaIdentifierPart(aDoc.getText(caretOffset - 1, 1).toCharArray()[0])
-                || aDoc.getText(caretOffset - 1, 1).toCharArray()[0] == ':') // Parameters case
-                ) {
+                || aDoc.getText(caretOffset - 1, 1).startsWith(":")/*Parameters case*/
+                || aDoc.getText(caretOffset - 1, 1).startsWith(ClientConstants.STORED_QUERY_REF_PREFIX)/*Sub-queries strong reference case*/)) {
             caretOffset--;
         }
         return caretOffset;
