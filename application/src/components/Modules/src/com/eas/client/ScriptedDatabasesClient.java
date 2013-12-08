@@ -262,7 +262,8 @@ public class ScriptedDatabasesClient extends DatabasesClient {
             public Object run(Context cx) throws Exception {
                 for (String validatorName : validators.keySet()) {
                     Collection<String> datasourcesUnderControl = validators.get(validatorName);
-                    if (datasourcesUnderControl == null || datasourcesUnderControl.isEmpty() || datasourcesUnderControl.contains(aDatasourceId)) {
+                    // aDatasourceId must be null or it must be contained in datasourcesUnderControl to validated by script validator
+                    if (((datasourcesUnderControl == null || datasourcesUnderControl.isEmpty()) && aDatasourceId == null) || (datasourcesUnderControl != null && datasourcesUnderControl.contains(aDatasourceId))) {
                         ScriptRunner validator = createModule(cx, validatorName);
                         if (validator != null) {
                             Object oValidate = validator.get("validate", validator);

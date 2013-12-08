@@ -1,6 +1,7 @@
 /**
  * Datasource module is stateless data fetch/apply provider.
  * @author ${user}
+ * @module
  */
 function ${appElementName}(){
     var self = this;
