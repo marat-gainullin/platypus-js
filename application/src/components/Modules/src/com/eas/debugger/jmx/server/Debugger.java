@@ -168,6 +168,7 @@ public class Debugger extends NotificationBroadcasterSupport implements Debugger
             Class<?> clazz = aTarget.unwrap().getClass();
             if (!freeMethods.containsKey(clazz.getName())) {
                 Map<String, Method> getters = new HashMap<>();
+                Map<String, Method> setters = new HashMap<>();
                 BeanInfo bi = Introspector.getBeanInfo(clazz);
                 for (PropertyDescriptor pd : bi.getPropertyDescriptors()) {
                     Method getter = pd.getReadMethod();
@@ -175,6 +176,18 @@ public class Debugger extends NotificationBroadcasterSupport implements Debugger
                             && getter.getAnnotation(ScriptFunction.class) != null)// check ScriptFunction annotation;
                     {
                         getters.put(getter.getName(), getter);
+                        if (pd.getWriteMethod() != null) {
+                            setters.put(pd.getWriteMethod().getName(), pd.getWriteMethod());
+                        }
+                    }
+                    Method setter = pd.getWriteMethod();
+                    if (setter != null
+                            && setter.getAnnotation(ScriptFunction.class) != null)// check ScriptFunction annotation;
+                    {
+                        setters.put(setter.getName(), setter);
+                        if (pd.getReadMethod() != null) {
+                            getters.put(pd.getReadMethod().getName(), pd.getReadMethod());
+                        }
                     }
                 }
                 propsGetters.put(clazz.getName(), getters);
@@ -184,7 +197,8 @@ public class Debugger extends NotificationBroadcasterSupport implements Debugger
                     Method method = md.getMethod();
                     if (method != null
                             && method.getAnnotation(ScriptFunction.class) != null// check ScriptFunction annotation;
-                            && !getters.containsKey(method.getName())) {
+                            && !getters.containsKey(method.getName())
+                            && !setters.containsKey(method.getName())) {
                         methods.put(method.getName(), method);
                     }
                 }

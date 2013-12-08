@@ -68,7 +68,7 @@ public class RadioButton extends Component<JRadioButton> {
     }
 
     @ScriptFunction(jsDoc="The state of the button.")
-    public boolean isSelected() {
+    public boolean getSelected() {
         return delegate.isSelected();
     }
 

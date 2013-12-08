@@ -37,7 +37,7 @@ public class ModelGrid extends Component<DbGrid> {
             + "*/";
 
     @ScriptFunction(jsDoc = SHOW_HORIZONTAL_LINES_JSDOC)
-    public boolean isShowHorizontalLines() {
+    public boolean getShowHorizontalLines() {
         return delegate.isShowHorizontalLines();
     }
 
@@ -50,7 +50,7 @@ public class ModelGrid extends Component<DbGrid> {
             + "*/";
 
     @ScriptFunction(jsDoc = SHOW_VERTICAL_LINES_JSDOC)
-    public boolean isShowVerticalLines() {
+    public boolean getShowVerticalLines() {
         return delegate.isShowVerticalLines();
     }
 
@@ -76,8 +76,8 @@ public class ModelGrid extends Component<DbGrid> {
             + "*/";
 
     @ScriptFunction(jsDoc = SHOW_ODD_ROWS_IN_OTHER_COLOR_JSDOC)
-    public boolean isShowOddRowsInOtherColor() {
-        return isShowOddRowsInOtherColor();
+    public boolean getShowOddRowsInOtherColor() {
+        return delegate.isShowOddRowsInOtherColor();
     }
 
     @ScriptFunction
@@ -134,12 +134,12 @@ public class ModelGrid extends Component<DbGrid> {
     }
 
     @ScriptFunction
-    public boolean isEditable() {
+    public boolean getEditable() {
         return delegate.isEditable();
     }
 
     @ScriptFunction
-    public boolean isInsertable() {
+    public boolean getInsertable() {
         return delegate.isInsertable();
     }
     private static final String INSERTABLE_JSDOC = "/**\n"
@@ -152,7 +152,7 @@ public class ModelGrid extends Component<DbGrid> {
     }
 
     @ScriptFunction
-    public boolean isDeletable() {
+    public boolean getDeletable() {
         return delegate.isDeletable();
     }
     private static final String DELETABLE_JSDOC = "/**\n"

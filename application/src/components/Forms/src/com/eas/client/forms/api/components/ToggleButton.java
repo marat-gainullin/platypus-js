@@ -162,7 +162,7 @@ public class ToggleButton extends Component<JToggleButton> {
     }
 
     @ScriptFunction(jsDoc="The state of the button.")
-    public boolean isSelected() {
+    public boolean getSelected() {
         return delegate.isSelected();
     }
 

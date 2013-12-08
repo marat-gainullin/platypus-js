@@ -75,7 +75,7 @@ public class CheckBox extends Component<JCheckBox> {
             + "*/";
     
     @ScriptFunction(jsDoc=SELECTED_JSDOC)
-    public boolean isSelected() {
+    public boolean getSelected() {
         return delegate.isSelected();
     }
     

@@ -582,12 +582,11 @@ public class ScriptRunner extends ScriptableObject {
     public void checkPrincipalPermission() throws Exception {
         if (moduleAllowedRoles != null && !moduleAllowedRoles.isEmpty()) {
             PlatypusPrincipal principal = _getPrincipal();
-            if (principal != null && principal.hasAnyRole(moduleAllowedRoles)) {
-                return;
+            if (principal == null || !principal.hasAnyRole(moduleAllowedRoles)) {
+                throw new AccessControlException(String.format("Access denied to %s module for %s PlatypusPrincipal.",//NOI18N
+                        ScriptRunner.this.appElementId,
+                        principal != null ? principal.getName() : null));
             }
-            throw new AccessControlException(String.format("Access denied to %s module for %s PlatypusPrincipal.",//NOI18N
-                    ScriptRunner.this.appElementId,
-                    principal != null ? principal.getName() : null));
         }
     }
 
