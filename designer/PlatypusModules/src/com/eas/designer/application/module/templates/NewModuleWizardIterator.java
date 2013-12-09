@@ -39,6 +39,20 @@ public class NewModuleWizardIterator extends NewApplicationElementWizardIterator
                 content = {"PlatypusModuleValidatorTemplate.js", "PlatypusModuleValidatorTemplate.model"},
                 displayName = "#Templates/Other/PlatypusModuleValidatorTemplate",
                 description = "ModuleValidator.html",
+                scriptEngine = "freemarker"),
+        @TemplateRegistration(
+                folder = "Platypus application elements",
+                position = 300,
+                content = {"PlatypusModuleResidentTemplate.js", "PlatypusModuleResidentTemplate.model"},
+                displayName = "#Templates/Other/PlatypusModuleResidentTemplate",
+                description = "ModuleResident.html",
+                scriptEngine = "freemarker"),
+        @TemplateRegistration(
+                folder = "Platypus application elements",
+                position = 300,
+                content = {"PlatypusModuleStatelessTemplate.js", "PlatypusModuleStatelessTemplate.model"},
+                displayName = "#Templates/Other/PlatypusModuleStatelessTemplate",
+                description = "ModuleStateless.html",
                 scriptEngine = "freemarker")})
     public static NewApplicationElementWizardIterator createIterator() {
         return new NewModuleWizardIterator();

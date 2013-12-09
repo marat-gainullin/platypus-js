@@ -11,6 +11,9 @@ import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.ClientConstants;
 import com.eas.client.DbClient;
 import com.eas.client.DbMetadataCache;
+import com.eas.client.queries.SqlQuery;
+import com.eas.designer.application.indexer.AppElementInfo;
+import com.eas.designer.application.indexer.IndexerQuery;
 import com.eas.designer.application.query.PlatypusQueryDataObject;
 import com.eas.designer.application.query.lexer.LexSqlTokenId;
 import com.eas.designer.application.query.lexer.SqlLanguageHierarchy;
@@ -39,6 +42,9 @@ import org.netbeans.spi.editor.completion.CompletionTask;
 import org.netbeans.spi.editor.completion.support.AsyncCompletionQuery;
 import org.netbeans.spi.editor.completion.support.AsyncCompletionTask;
 import org.openide.ErrorManager;
+import org.openide.filesystems.FileObject;
+import org.openide.loaders.DataObject;
+import org.openide.loaders.DataObjectNotFoundException;
 import org.openide.util.NbBundle;
 
 /**
@@ -50,7 +56,7 @@ public class SqlCompletionProvider implements CompletionProvider {
     public static final int UNKNOWN_ZONE = 0; //
     public static final int SELECT_ZONE = 1; // aliases, table names without aliases and column with dot
     public static final int FROM_ZONE = 3; // tables names
-    public static final int WHERE_ZONE = 5; // tables names
+    public static final int WHERE_ZONE = 5; //  aliases, tables names
     public static final int HAVING_ZONE = 7; // aliases, table names without aliases
     public static final int GROUP_ZONE = 8;
     public static final int INSERT_INTO_ZONE = 9;
@@ -69,11 +75,19 @@ public class SqlCompletionProvider implements CompletionProvider {
         }
     }
 
-    public void fillCompletionByStoredQueries(PlatypusQueryDataObject dataObject, CompletionPoint point, CompletionResultSet resultSet) {
-        /* TODO: get *.sql files -> PlatypusQueryDataObject|s list in project and exclude dataobject which is same as dataObject parameter
-        SqlCompletionItem item = new StoredQuerySqlCompletionItem(, point.startOffset, point.endOffset);
-        addCompletionItem(point, item, resultSet);
-        */ 
+    public void fillCompletionByStoredQueries(PlatypusQueryDataObject dataObject, CompletionPoint point, CompletionResultSet resultSet) throws DataObjectNotFoundException {
+        Collection<AppElementInfo> appElements = IndexerQuery.appElementsByPrefix(dataObject.getProject(), "");
+        if (appElements != null) {
+            for (AppElementInfo appInfo : appElements) {
+                if (appInfo != null && appInfo.primaryFileObject != null) {
+                    DataObject fdo = DataObject.find(appInfo.primaryFileObject);
+                    if (fdo instanceof PlatypusQueryDataObject && fdo != dataObject) {
+                        SqlCompletionItem item = new StoredQuerySqlCompletionItem(appInfo.appElementId, dataObject, (PlatypusQueryDataObject) fdo, point.startOffset, point.endOffset);
+                        addCompletionItem(point, item, resultSet);
+                    }
+                }
+            }
+        }
     }
 
     public void fillCompletionByTablesBySchema(String aSchema, PlatypusQueryDataObject dataObject, CompletionPoint point, CompletionResultSet resultSet) throws Exception {
@@ -84,7 +98,7 @@ public class SqlCompletionProvider implements CompletionProvider {
     public void fillCompletionByTables(Map<String, Fields> tables, PlatypusQueryDataObject dataObject, CompletionPoint point, CompletionResultSet resultSet) throws Exception {
         if (tables != null) {
             for (Entry<String, Fields> aTableEntry : tables.entrySet()) {
-                SqlCompletionItem item = new TableSqlCompletionItem(aTableEntry, point.startOffset, point.endOffset);
+                SqlCompletionItem item = new TableSqlCompletionItem(dataObject, aTableEntry, point.startOffset, point.endOffset);
                 addCompletionItem(point, item, resultSet);
             }
         }
@@ -195,8 +209,20 @@ public class SqlCompletionProvider implements CompletionProvider {
                                 if (aliasOrTable != null) {
                                     // [Alias's] tables's fields
                                     Table table = tables.get(aliasOrTable);
-                                    Fields fields = mdCache.getTableMetadata(table.getWholeTableName());
-                                    fillCompletionByFields(fields, dataObject, point, resultSet);
+
+                                    String parserTableName = table.getWholeTableName();
+                                    Fields fields = null;
+                                    if (parserTableName.startsWith(ClientConstants.STORED_QUERY_REF_PREFIX)) {
+                                        SqlQuery q = client.getAppQuery(parserTableName.substring(1));
+                                        if (q != null) {
+                                            fields = q.getFields();
+                                        }
+                                    } else {
+                                        fields = mdCache.getTableMetadata(table.getWholeTableName());
+                                    }
+                                    if (fields != null) {
+                                        fillCompletionByFields(fields, dataObject, point, resultSet);
+                                    }
                                 } else {
                                     // fallback to default schema's tables
                                     Fields fields = mdCache.getTableMetadata(point.prevContext);
@@ -211,9 +237,21 @@ public class SqlCompletionProvider implements CompletionProvider {
                 } else {
                     Map<String, Table> tables = TablesFinder.getTablesMap(null, dataObject.getStatement(), true);
                     for (String alias : tables.keySet()) {
-                        Fields fields = mdCache.getTableMetadata(tables.get(alias).getWholeTableName());
-                        SqlCompletionItem item = new TableSqlCompletionItem(alias, fields, point.startOffset, point.endOffset);
-                        addCompletionItem(point, item, resultSet);
+                        String parserTableName = tables.get(alias).getWholeTableName();
+                        if (parserTableName.startsWith(ClientConstants.STORED_QUERY_REF_PREFIX)) {
+                            FileObject subjectFO = IndexerQuery.appElementId2File(dataObject.getProject(), parserTableName.substring(1));
+                            if (subjectFO != null) {
+                                DataObject subjectDO = DataObject.find(subjectFO);
+                                if (subjectDO instanceof PlatypusQueryDataObject) {
+                                    SqlCompletionItem item = new StoredQuerySqlCompletionItem(dataObject, (PlatypusQueryDataObject) subjectDO, alias, point.startOffset, point.endOffset);
+                                    addCompletionItem(point, item, resultSet);
+                                }
+                            }
+                        } else {
+                            Fields fields = mdCache.getTableMetadata(parserTableName);
+                            SqlCompletionItem item = new TableSqlCompletionItem(dataObject, alias, fields, point.startOffset, point.endOffset);
+                            addCompletionItem(point, item, resultSet);
+                        }
                     }
                 }
             }
@@ -244,8 +282,19 @@ public class SqlCompletionProvider implements CompletionProvider {
                             if (aliasOrTable != null) {
                                 // [Alias's] tables's fields
                                 Table table = tables.get(aliasOrTable);
-                                Fields fields = mdCache.getTableMetadata(table.getWholeTableName());
-                                fillCompletionByFields(fields, dataObject, point, resultSet);
+                                String parserTableName = table.getWholeTableName();
+                                Fields fields = null;
+                                if (parserTableName.startsWith(ClientConstants.STORED_QUERY_REF_PREFIX)) {
+                                    SqlQuery q = client.getAppQuery(parserTableName.substring(1));
+                                    if (q != null) {
+                                        fields = q.getFields();
+                                    }
+                                } else {
+                                    fields = mdCache.getTableMetadata(table.getWholeTableName());
+                                }
+                                if (fields != null) {
+                                    fillCompletionByFields(fields, dataObject, point, resultSet);
+                                }
                             } else {
                                 // fallback to default schema's tables
                                 Fields fields = mdCache.getTableMetadata(point.prevContext);
@@ -260,9 +309,21 @@ public class SqlCompletionProvider implements CompletionProvider {
             } else {
                 Map<String, Table> tables = TablesFinder.getTablesMap(null, dataObject.getStatement(), true);
                 for (String alias : tables.keySet()) {
-                    Fields fields = mdCache.getTableMetadata(tables.get(alias).getWholeTableName());
-                    SqlCompletionItem item = new TableSqlCompletionItem(alias, fields, point.startOffset, point.endOffset);
-                    addCompletionItem(point, item, resultSet);
+                    String parserTableName = tables.get(alias).getWholeTableName();
+                    if (parserTableName.startsWith(ClientConstants.STORED_QUERY_REF_PREFIX)) {
+                        FileObject subjectFO = IndexerQuery.appElementId2File(dataObject.getProject(), parserTableName.substring(1));
+                        if (subjectFO != null) {
+                            DataObject subjectDO = DataObject.find(subjectFO);
+                            if (subjectDO instanceof PlatypusQueryDataObject) {
+                                SqlCompletionItem item = new StoredQuerySqlCompletionItem(dataObject, (PlatypusQueryDataObject) subjectDO, alias, point.startOffset, point.endOffset);
+                                addCompletionItem(point, item, resultSet);
+                            }
+                        }
+                    } else {
+                        Fields fields = mdCache.getTableMetadata(parserTableName);
+                        SqlCompletionItem item = new TableSqlCompletionItem(dataObject, alias, fields, point.startOffset, point.endOffset);
+                        addCompletionItem(point, item, resultSet);
+                    }
                 }
             }
         }

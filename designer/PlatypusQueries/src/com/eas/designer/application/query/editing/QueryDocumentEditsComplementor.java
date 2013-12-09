@@ -58,8 +58,8 @@ import net.sf.jsqlparser.util.deparser.StatementDeParser;
  */
 public class QueryDocumentEditsComplementor {
 
-    private static final String QUERY_ALIAS_PREFIX = "q";
-    private static final String TABLE_ALIAS_PREFIX = "t";
+    public static final String QUERY_ALIAS_PREFIX = "q";
+    public static final String TABLE_ALIAS_PREFIX = "t";
     private static final String NEW_ENTITY_STATEMENT_SQL = "select * from ";
 
     public CompoundEdit complementEditWithStatement(Statement statement, UndoableEdit edit) throws Exception, BadLocationException {
@@ -119,7 +119,7 @@ public class QueryDocumentEditsComplementor {
         }
     }
 
-    public String findFreeAliasName(Map<String, Table> aTables, String baseName) {
+    public static String findFreeAliasName(Map<String, Table> aTables, String baseName) {
         Set<String> names = new HashSet<>();
         names.addAll(aTables.keySet());
         String name = baseName;

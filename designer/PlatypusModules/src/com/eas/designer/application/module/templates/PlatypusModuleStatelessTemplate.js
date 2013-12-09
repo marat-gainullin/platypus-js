@@ -1,6 +1,7 @@
 /**
  * 
  * @author ${user}
+ * @stateless 
  * @module
  */
 function ${appElementName}(){

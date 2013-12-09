@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import javax.management.AttributeChangeNotification;
 import javax.management.MBeanNotificationInfo;
 import javax.management.NotificationBroadcasterSupport;
@@ -210,7 +212,7 @@ public class Debugger extends NotificationBroadcasterSupport implements Debugger
     @Override
     public String[] props(String aExpression) throws Exception {
         //jsDebugger.contextSwitch(0);
-        List<String> ids = new ArrayList<>();
+        SortedSet<String> ids = new TreeSet<>();
         Object oResult = evalToObject(aExpression);
         if (oResult instanceof Scriptable) {
             Scriptable sResult = (Scriptable) oResult;

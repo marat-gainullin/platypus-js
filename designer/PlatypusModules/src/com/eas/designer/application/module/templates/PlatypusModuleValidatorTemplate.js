@@ -4,7 +4,7 @@
  * @author ${user}
  * @module
  * @validator DataSource1, DataSource2
- */
+ */ 
 function ${appElementName}(){
     var self = this;
     

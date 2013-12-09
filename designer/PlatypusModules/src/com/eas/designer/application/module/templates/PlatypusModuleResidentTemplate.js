@@ -1,7 +1,8 @@
 /**
  * 
  * @author ${user}
- * @module
+ * @resident
+ * @module 
  */
 function ${appElementName}(){
     var self = this;

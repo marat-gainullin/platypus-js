@@ -2,7 +2,6 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package com.eas.designer.application.query.completion;
 
 import com.bearsoft.rowset.metadata.Parameter;
@@ -11,11 +10,10 @@ import com.bearsoft.rowset.metadata.Parameter;
  *
  * @author mg
  */
-public class ParameterSqlCompletionItem extends FieldSqlCompletionItem{
+public class ParameterSqlCompletionItem extends FieldSqlCompletionItem {
 
-    public ParameterSqlCompletionItem(Parameter aParam, int aStartOffset, int aEndOffset)
-    {
+    public ParameterSqlCompletionItem(Parameter aParam, int aStartOffset, int aEndOffset) {
         super(aParam, aStartOffset, aEndOffset);
-        text = ":"+aParam.getName();
+        text = ":" + aParam.getName();
     }
 }
