@@ -5,13 +5,13 @@
 package com.eas.designer.application.module;
 
 import com.eas.client.cache.PlatypusFiles;
+import com.eas.client.cache.PlatypusFilesSupport;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
 import com.eas.client.model.store.XmlDom2ApplicationModel;
 import com.eas.client.scripts.ScriptRunner;
 import com.eas.designer.application.PlatypusUtils;
 import com.eas.designer.application.indexer.IndexerQuery;
-import com.eas.designer.application.module.completion.CompletionContext;
 import com.eas.designer.application.module.completion.ModuleCompletionContext;
 import com.eas.designer.application.module.events.ApplicationModuleEvents;
 import com.eas.designer.application.module.nodes.ApplicationModelNodeChildren;
@@ -19,16 +19,22 @@ import com.eas.script.JsParser;
 import com.eas.designer.application.project.PlatypusProject;
 import com.eas.designer.explorer.PlatypusDataObject;
 import com.eas.designer.datamodel.nodes.ModelNode;
+import com.eas.designer.explorer.files.wizard.NewApplicationElementWizardIterator;
 import com.eas.xml.dom.Source2XmlDom;
 import com.eas.xml.dom.XmlDom2String;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.text.Document;
 import org.mozilla.javascript.ast.AstRoot;
+import org.mozilla.javascript.ast.FunctionNode;
+import org.mozilla.javascript.ast.Name;
 import org.openide.cookies.EditorCookie;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.filesystems.MIMEResolver;
+import org.openide.loaders.DataFolder;
 import org.openide.loaders.DataObject;
 import org.openide.loaders.MultiFileLoader;
 import org.openide.nodes.AbstractNode;
@@ -205,11 +211,6 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
     }
 
     @Override
-    protected boolean needAnnotationRename(DataObject aDataObject) {
-        return false; 
-    }
-
-    @Override
     protected void handleDelete() throws IOException {
         String oldId = IndexerQuery.file2AppElementId(getPrimaryFile());
         super.handleDelete();
@@ -235,5 +236,33 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
 
     public JsCodeGenerator getCodeGenerator() {
         return codeGenerator;
+    }
+    
+        @Override
+    protected DataObject handleCopy(DataFolder df) throws IOException {
+        DataObject copied = super.handleCopy(df);
+            String content = copied.getPrimaryFile().asText(PlatypusFiles.DEFAULT_ENCODING);
+            String newContent = getCopyModuleContent(content);
+            try (OutputStream os = copied.getPrimaryFile().getOutputStream()) {
+                os.write(newContent.getBytes(PlatypusFiles.DEFAULT_ENCODING));
+                os.flush();
+            }
+        return copied;
+    }
+        
+    private String getCopyModuleContent(String aJsContent) {
+        AstRoot jsRoot = JsParser.parse(aJsContent);
+        FunctionNode func = PlatypusFilesSupport.extractModuleConstructor(jsRoot);
+        if (func != null) {
+                Name consructorName = func.getFunctionName();
+                String oldName = consructorName.getIdentifier();
+                String newName = NewApplicationElementWizardIterator.getNewValidAppElementName(getProject(), oldName);
+                StringBuilder sb = new StringBuilder(aJsContent.substring(0, consructorName.getAbsolutePosition()));
+                sb.append(newName);
+                sb.append(aJsContent.substring(consructorName.getAbsolutePosition() + oldName.length()));
+                return sb.toString();
+        } else {
+            return aJsContent;
+        }
     }
 }

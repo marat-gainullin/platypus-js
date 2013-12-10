@@ -14,9 +14,12 @@ import com.eas.designer.application.module.parser.AstUtlities;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Logger;
 import javax.swing.SwingUtilities;
 import javax.swing.text.Document;
 import javax.swing.text.StyledDocument;
@@ -145,10 +148,20 @@ public class ModuleHyperlinkProvider implements HyperlinkProviderExt {
         PlatypusModuleDataObject appElementDataObject = (PlatypusModuleDataObject) DataObject.find(fo);
         if (node.getParent() instanceof NewExpression) {
             NewExpression ne = (NewExpression) node.getParent();
-            if (ne.getArguments() != null && ne.getArguments().size() > 0) {
-                if (ne.getArguments().get(0) instanceof StringLiteral) {
-                    StringLiteral sl = (StringLiteral) ne.getArguments().get(0);
-                    ModuleCompletionContext typeCompletionContext = ModuleCompletionContext.getModuleCompletionContext(appElementDataObject.getProject(), sl.getValue(false));
+            if (ne.getTarget() instanceof Name) {
+                Name constructorName = (Name) ne.getTarget();
+                if (ModuleCompletionContext.isModuleInitializerName(constructorName.getIdentifier())
+                        && ne.getArguments() != null
+                        && ne.getArguments().size() > 0) {
+                    if (ne.getArguments().get(0) instanceof StringLiteral) {
+                        StringLiteral sl = (StringLiteral) ne.getArguments().get(0);
+                        ModuleCompletionContext typeCompletionContext = ModuleCompletionContext.getModuleCompletionContext(appElementDataObject.getProject(), sl.getValue(false));
+                        if (typeCompletionContext != null) {
+                            return new DeclarationLocation(typeCompletionContext.getDataObject(), 0);
+                        }
+                    }
+                } else {
+                    ModuleCompletionContext typeCompletionContext = ModuleCompletionContext.getModuleCompletionContext(appElementDataObject.getProject(), constructorName.getIdentifier());
                     if (typeCompletionContext != null) {
                         return new DeclarationLocation(typeCompletionContext.getDataObject(), 0);
                     }
@@ -167,7 +180,7 @@ public class ModuleHyperlinkProvider implements HyperlinkProviderExt {
             } else {
                 return DeclarationLocation.NONE;
             }
-            
+
         } else {
             for (int i = 0; i < identifiersPath.size() - 1; i++) {
                 String fieldName = identifiersPath.get(i);
@@ -235,7 +248,7 @@ public class ModuleHyperlinkProvider implements HyperlinkProviderExt {
         }
         return null;
     }
-    
+
     private AstNode scanLevel(AstNode currentNode, String declarationName) {
         Node n = currentNode.getFirstChild();
         while (n != null) {
@@ -261,30 +274,37 @@ public class ModuleHyperlinkProvider implements HyperlinkProviderExt {
         }
         return null;
     }
+
     private AstNode findModuleThisPropertyDeclaration(AstRoot astRoot, String declarationName) {
-        return scanModuleThisLevel(PlatypusFilesSupport.extractFirstFunction(astRoot).getBody(), declarationName);
+        FunctionNode moduleConstructor = PlatypusFilesSupport.extractModuleConstructor(astRoot);
+        return scanModuleThisLevel(moduleConstructor,
+                declarationName,
+                ModuleThisCompletionContext.getThisAliases(moduleConstructor));
     }
 
-    private AstNode scanModuleThisLevel(AstNode currentNode, String declarationName) {
-        Node n = currentNode.getFirstChild();
-        while (n != null) {
-            if (n instanceof ExpressionStatement) {
-                ExpressionStatement es = (ExpressionStatement) n;
-                if (es.getExpression() instanceof Assignment) {
-                    Assignment a = (Assignment) es.getExpression();
-                    if (a.getLeft() instanceof PropertyGet) {
-                        PropertyGet pg = (PropertyGet) a.getLeft();
-                        if (pg.getTarget().getType() == Token.THIS) {
-                            if (a.getRight() instanceof FunctionNode) {
-                                if (pg.getProperty().getIdentifier().equals(declarationName)) {
-                                    return a.getLeft();
+    private static AstNode scanModuleThisLevel(FunctionNode moduleConstructor, String declarationName, Set<String> aliases) {
+        if (moduleConstructor.getBody() != null) {
+            Node n = moduleConstructor.getBody().getFirstChild();
+            while (n != null) {
+                if (n instanceof ExpressionStatement) {
+                    ExpressionStatement es = (ExpressionStatement) n;
+                    if (es.getExpression() instanceof Assignment) {
+                        Assignment a = (Assignment) es.getExpression();
+                        if (a.getLeft() instanceof PropertyGet) {
+                            PropertyGet pg = (PropertyGet) a.getLeft();
+                            if ((pg.getTarget().getType() == Token.THIS)
+                                    || (pg.getTarget() instanceof Name && aliases.contains(((Name) pg.getTarget()).getIdentifier()))) {
+                                if (a.getRight() instanceof FunctionNode) {
+                                    if (pg.getProperty().getIdentifier().equals(declarationName)) {
+                                        return a.getLeft();
+                                    }
                                 }
                             }
                         }
                     }
                 }
+                n = n.getNext();
             }
-            n = n.getNext();
         }
         return null;
     }

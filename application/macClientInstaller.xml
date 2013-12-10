@@ -54,7 +54,6 @@ your ANT library remove the 'classpath' attribute from the "taskdef" element.
 					<include name="lib/own/IconLib.jar"/>
 					<include name="lib/own/Rowsets.jar"/>
 					<include name="lib/own/Updater.jar"/>
-					<include name="lib/own/SyntaxPane.jar"/>
 					<include name="lib/own/ScalablePane.jar"/>
 				
 					<include name="lib/thirdparty/JCalendar.jar"/>

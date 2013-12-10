@@ -5,14 +5,10 @@
 package com.eas.designer.explorer;
 
 import com.eas.client.DbClient;
-import com.eas.client.cache.PlatypusFiles;
-import com.eas.client.cache.PlatypusFilesSupport;
 import com.eas.designer.application.HandlerRegistration;
 import com.eas.designer.application.project.PlatypusProject;
-import com.eas.designer.explorer.files.wizard.NewApplicationElementWizardIterator;
 import java.awt.EventQueue;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
@@ -20,8 +16,6 @@ import java.util.logging.Logger;
 import org.netbeans.api.project.FileOwnerQuery;
 import org.netbeans.api.project.Project;
 import org.openide.filesystems.FileObject;
-import org.openide.loaders.DataFolder;
-import org.openide.loaders.DataObject;
 import org.openide.loaders.DataObjectExistsException;
 import org.openide.loaders.MultiDataObject;
 import org.openide.loaders.MultiFileLoader;
@@ -91,7 +85,7 @@ public abstract class PlatypusDataObject extends MultiDataObject {
                     try {
                         validateModel();
                     } catch (Exception ex) {
-                        Logger.getLogger(PlatypusDataObject.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+                        Logger.getLogger(PlatypusDataObject.class.getName()).log(Level.WARNING, ex.getMessage(), ex);
                     } finally {
                         EventQueue.invokeLater(new Runnable() {
                             @Override
@@ -197,27 +191,5 @@ public abstract class PlatypusDataObject extends MultiDataObject {
         } else {
             return null;
         }
-    }
-
-    protected boolean needAnnotationRename(DataObject aDataObject) {
-        return aDataObject != null && aDataObject.getPrimaryFile() != null;
-    }
-
-    @Override
-    protected DataObject handleCopy(DataFolder df) throws IOException {
-        DataObject copied = super.handleCopy(df);
-        if (needAnnotationRename(copied)) {
-            String content = copied.getPrimaryFile().asText(PlatypusFiles.DEFAULT_ENCODING);
-            String oldPlatypusId = PlatypusFilesSupport.getAnnotationValue(content, PlatypusFilesSupport.APP_ELEMENT_NAME_ANNOTATION);
-            String newPlatypusId = NewApplicationElementWizardIterator.getNewValidAppElementName(getProject(), oldPlatypusId);            
-            content = PlatypusFilesSupport.replaceAnnotationValue(content, PlatypusFilesSupport.APP_ELEMENT_NAME_ANNOTATION, newPlatypusId);
-            try (OutputStream os = copied.getPrimaryFile().getOutputStream()) {
-                os.write(content.getBytes(PlatypusFiles.DEFAULT_ENCODING));
-                os.flush();
-            }
-        } else {
-            Logger.getLogger(PlatypusDataObject.class.getName()).log(Level.WARNING, "Copy error. Couldn't get primary file.");
-        }
-        return copied;
     }
 }

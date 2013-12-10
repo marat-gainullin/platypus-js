@@ -70,7 +70,7 @@ public class QueryModelView extends ModelView<QueryEntity, QueryParametersEntity
             entity.setY(rect.y);
             entity.setWidth(rect.width);
             entity.setHeight(rect.height);
-            entity.setQueryId(aApplicationElementId);
+            entity.setQueryId(aApplicationElementId);            
             NewEntityEdit edit = new NewEntityEdit(model, entity);
             edit.redo();
             undoSupport.postEdit(edit);

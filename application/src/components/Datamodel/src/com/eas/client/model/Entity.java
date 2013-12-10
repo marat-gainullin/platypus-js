@@ -200,23 +200,21 @@ public abstract class Entity<M extends Model<E, ?, ?, Q>, Q extends Query<?>, E 
     }
 
     public String getTitle() {
-        String ltitle = title;
-        if (ltitle == null || ltitle.isEmpty()) {
+        if (title == null || title.isEmpty()) {
             if (queryId != null) {
                 Q lquery = getQuery();
                 title = lquery != null ? lquery.getTitle() : "";
             } else if (tableName != null) {
                 Fields lfields = getFields();
                 if (lfields != null) {
-                    ltitle = lfields.getTableDescription();
-                    if (ltitle == null || ltitle.isEmpty() || ltitle.equalsIgnoreCase(tableName)) {
-                        ltitle = getFullTableNameEntityForDescription();
+                    title = lfields.getTableDescription();
+                    if (title == null || title.isEmpty() || title.equalsIgnoreCase(tableName)) {
+                        title = getFullTableNameEntityForDescription();
                     }
-                    title = ltitle;
                 }
             }
         }
-        return ltitle;
+        return title;
     }
 
     public void setTitle(String aValue) {

@@ -33,7 +33,7 @@ public class ModelSpin extends ScalarModelComponent<DbSpin> {
             + "*/";
     
     @ScriptFunction(jsDoc = EDITABLE_JSDOC)
-    public boolean isEditable() {
+    public boolean getEditable() {
         return delegate.isEditable();
     }
 

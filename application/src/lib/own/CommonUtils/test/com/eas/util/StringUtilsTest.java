@@ -4,6 +4,7 @@
  */
 package com.eas.util;
 
+import java.beans.Introspector;
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.*;
@@ -79,5 +80,29 @@ public class StringUtilsTest {
         expResult = "test__";
         result = StringUtils.replaceUnsupportedSymbolsinFileNames(str);
         assertEquals(expResult, result);
+    }
+    
+    @Test
+    public void testCapitalizeStabilityMethod(){
+        String methodName = "getX";
+        String propName = Introspector.decapitalize(methodName.substring(3));
+        String methodName1 = "get"+StringUtils.capitalize(propName);
+        assertEquals(methodName, methodName1);
+        String _methodName = "getXYZ";
+        String _propName = Introspector.decapitalize(_methodName.substring(3));
+        String _methodName1 = "get"+StringUtils.capitalize(_propName);
+        assertEquals(_methodName, _methodName1);
+    }
+    
+    @Test
+    public void testCapitalizeStabilityProperty(){
+        String propName = "x";
+        String methodName = "get"+StringUtils.capitalize(propName);
+        String propName1 = Introspector.decapitalize(methodName.substring(3));
+        assertEquals(propName, propName1);
+        String _propName = "XYZ";
+        String _methodName = "get"+StringUtils.capitalize(_propName);
+        String _propName1 = Introspector.decapitalize(_methodName.substring(3));
+        assertEquals(_propName, _propName1);
     }
 }

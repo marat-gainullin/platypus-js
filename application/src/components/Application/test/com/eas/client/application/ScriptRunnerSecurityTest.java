@@ -34,15 +34,15 @@ import org.mozilla.javascript.Function;
  */
 public class ScriptRunnerSecurityTest {
 
-    public static final String UNSECURE_MODULE_ID = "133189621201879";
-    public static final String SECURE_MODULE_ID = "133189149718000";
-    public static final String SECURE_FUNCTION_MODULE_ID = "133189629266067";
-    public static final String UNSECURE_FORM_ID = "133239635501682";
-    public static final String SECURE_FORM_ID = "133239639702802";
-    public static final String SECURE_FUNCTION_FORM_ID = "133300884117270";
-    public static final String UNSECURE_REPORT_ID = "133239663976162";
-    public static final String SECURE_REPORT_ID = "133239674465069";
-    public static final String SECURE_REPORT_FORM_ID = "133300898183656";
+    public static final String UNSECURE_MODULE_ID = "UnsecureModule";
+    public static final String SECURE_MODULE_ID = "SecureModule";
+    public static final String SECURE_FUNCTION_MODULE_ID = "SecureFunctionModule";
+    public static final String UNSECURE_FORM_ID = "UnsecureForm";
+    public static final String SECURE_FORM_ID = "SecureForm";
+    public static final String SECURE_FUNCTION_FORM_ID = "ScureFunctionForm";
+    public static final String UNSECURE_REPORT_ID = "UnsecureReport";
+    public static final String SECURE_REPORT_ID = "SecureReport";
+    public static final String SECURE_REPORT_FORM_ID = "SecureFunctionReport";
     public static final String DEFAULT_USER_NAME = "test";
     /**
      * This user has no roles

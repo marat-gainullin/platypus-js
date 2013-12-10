@@ -32,6 +32,7 @@ import com.eas.client.model.script.ScriptableRowset;
 import com.eas.client.model.visitors.ApplicationModelVisitor;
 import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.queries.Query;
+import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptUtils;
 import com.eas.script.ScriptUtils.ScriptAction;
 import com.eas.script.StoredFunction;
@@ -344,6 +345,9 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
                 // platypus manual queries are:
                 //  - insert, update, delete queries;
                 //  - stored procedures, witch changes data.
+                if (query == null) {
+                    throw new IllegalStateException("Query must present. QueryId: " + queryId + "; tableName: " + getFullTableNameEntityForDescription());
+                }
                 if (!query.isManual()) {
                     // There might be entities - parameters values sources, with no data in theirs rowsets,
                     // so we can't bind query parameters to proper values. In the such case we initialize
@@ -881,6 +885,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             this.newIndex = newIndex;
         }
 
+        @ScriptFunction(jsDoc = "Cursor position the cursor will be set on")
         public int getNewIndex() {
             return newIndex;
         }
@@ -895,6 +900,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             this.oldIndex = oldIndex;
         }
 
+        @ScriptFunction(jsDoc = "Cursor position the cursor was on")
         public int getOldIndex() {
             return oldIndex;
         }
@@ -963,14 +969,22 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             return field;
         }
 
+        @ScriptFunction(jsDoc = "Changed property name")
+        public String getPropertyName() {
+            return field != null ? field.getName() : null;
+        }
+
+        @ScriptFunction(jsDoc = "Old value")
         public Object getOldValue() {
             return oldValue;
         }
 
+        @ScriptFunction(jsDoc = "New value")
         public Object getNewValue() {
             return newValue;
         }
 
+        @ScriptFunction(jsDoc = "Updated element")
         public Scriptable getObject() {
             return source;
         }
@@ -1040,10 +1054,12 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             this.inserted = inserted;
         }
 
+        @ScriptFunction(jsDoc = "Inserted element")
         public RowHostObject getInserted() {
             return inserted;
         }
 
+        @ScriptFunction(jsDoc = "Inserted element")
         public RowHostObject getObject() {
             return inserted;
         }
@@ -1081,6 +1097,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             this.deleted = deleted;
         }
 
+        @ScriptFunction(jsDoc = "Deleted element")
         public RowHostObject getDeleted() {
             return deleted;
         }

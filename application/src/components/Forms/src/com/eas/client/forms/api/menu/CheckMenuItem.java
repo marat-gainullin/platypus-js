@@ -81,7 +81,7 @@ public class CheckMenuItem extends Component<JCheckBoxMenuItem> {
             + "*/";
     
     @ScriptFunction(jsDoc = SELECTED_JSDOC)
-    public boolean isSelected() {
+    public boolean getSelected() {
         return delegate.isSelected();
     }
 

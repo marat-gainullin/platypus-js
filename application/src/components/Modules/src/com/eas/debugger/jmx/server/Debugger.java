@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import javax.management.AttributeChangeNotification;
 import javax.management.MBeanNotificationInfo;
 import javax.management.NotificationBroadcasterSupport;
@@ -152,7 +154,6 @@ public class Debugger extends NotificationBroadcasterSupport implements Debugger
         }
         return null;
     }
-
     /**
      * Comprised of last named method, wich is documented and used in properties
      * descriptors
@@ -169,6 +170,7 @@ public class Debugger extends NotificationBroadcasterSupport implements Debugger
             Class<?> clazz = aTarget.unwrap().getClass();
             if (!freeMethods.containsKey(clazz.getName())) {
                 Map<String, Method> getters = new HashMap<>();
+                Map<String, Method> setters = new HashMap<>();
                 BeanInfo bi = Introspector.getBeanInfo(clazz);
                 for (PropertyDescriptor pd : bi.getPropertyDescriptors()) {
                     Method getter = pd.getReadMethod();
@@ -176,6 +178,18 @@ public class Debugger extends NotificationBroadcasterSupport implements Debugger
                             && getter.getAnnotation(ScriptFunction.class) != null)// check ScriptFunction annotation;
                     {
                         getters.put(getter.getName(), getter);
+                        if (pd.getWriteMethod() != null) {
+                            setters.put(pd.getWriteMethod().getName(), pd.getWriteMethod());
+                        }
+                    }
+                    Method setter = pd.getWriteMethod();
+                    if (setter != null
+                            && setter.getAnnotation(ScriptFunction.class) != null)// check ScriptFunction annotation;
+                    {
+                        setters.put(setter.getName(), setter);
+                        if (pd.getReadMethod() != null) {
+                            getters.put(pd.getReadMethod().getName(), pd.getReadMethod());
+                        }
                     }
                 }
                 propsGetters.put(clazz.getName(), getters);
@@ -185,7 +199,8 @@ public class Debugger extends NotificationBroadcasterSupport implements Debugger
                     Method method = md.getMethod();
                     if (method != null
                             && method.getAnnotation(ScriptFunction.class) != null// check ScriptFunction annotation;
-                            && !getters.containsKey(method.getName())) {
+                            && !getters.containsKey(method.getName())
+                            && !setters.containsKey(method.getName())) {
                         methods.put(method.getName(), method);
                     }
                 }
@@ -197,7 +212,7 @@ public class Debugger extends NotificationBroadcasterSupport implements Debugger
     @Override
     public String[] props(String aExpression) throws Exception {
         //jsDebugger.contextSwitch(0);
-        List<String> ids = new ArrayList<>();
+        SortedSet<String> ids = new TreeSet<>();
         Object oResult = evalToObject(aExpression);
         if (oResult instanceof Scriptable) {
             Scriptable sResult = (Scriptable) oResult;
@@ -238,7 +253,7 @@ public class Debugger extends NotificationBroadcasterSupport implements Debugger
                     }
                 }
             }
-            if(oResult instanceof NativeJavaArray){
+            if (oResult instanceof NativeJavaArray) {
                 ids.add("length");
             }
         }

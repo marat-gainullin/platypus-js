@@ -30,10 +30,6 @@ public class PlatypusFiles {
     public static final String REPORT_LAYOUT_EXTENSION_X = "xlsx"; // NOI18N
     public static final String DB_SCHEME_EXTENSION = "pd"; // NOI18N
     public static final String CONNECTION_EXTENSION = "pc"; // NOI18N
-    // Queries annotations
-    public static final String PUBLIC_ANNOTATION_NAME = "@public";
-    public static final String PROCEDURE_ANNOTATION_NAME = "@procedure";
-    public static final String MANUAL_ANNOTATION_NAME = "@manual";
     private static final List<String> PLATYPUS_FILE_EXTENSIONS = new ArrayList<String>() {
         {
             add(PlatypusFiles.JAVASCRIPT_EXTENSION);

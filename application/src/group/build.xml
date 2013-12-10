@@ -118,13 +118,6 @@
             <param name="call.target" value="jar"/>
             <param name="transfer.built-jar.properties" value="${built-jar.properties}"/>
         </antcall>
-        <antcall target="-maybe-call-dep">
-            <param name="call.built.properties" value="${built-jar.properties}"/>
-            <param location="${project.SyntaxPane}" name="call.subproject"/>
-            <param location="${project.SyntaxPane}/build.xml" name="call.script"/>
-            <param name="call.target" value="jar"/>
-            <param name="transfer.built-jar.properties" value="${built-jar.properties}"/>
-        </antcall>
 	<antcall target="-maybe-call-dep">
             <param name="call.built.properties" value="${built-jar.properties}" /> 
             <param location="${project.Updater}" name="call.subproject" /> 
@@ -283,7 +276,6 @@
         <subant buildpath="${project.GeoPane}" antfile="build.xml" target="test"/>
         <subant buildpath="${project.Grid}" antfile="build.xml" target="test"/>
         <subant buildpath="${project.ScalablePane}" antfile="build.xml" target="test"/>
-        <subant buildpath="${project.SyntaxPane}" antfile="build.xml" target="test"/>
         <subant buildpath="${project.Updater}" antfile="build.xml" target="test"/>
         <subant buildpath="${project.OpcDa}" antfile="build.xml" target="test"/>
         <subant buildpath="${project.BinaryTags}" antfile="build.xml" target="test"/>
@@ -380,7 +372,6 @@
 				<include name="lib/own/IconLib.jar"/>
 				<include name="lib/own/Rowsets.jar"/>
 				<include name="lib/own/Updater-new.jar"/>
-				<include name="lib/own/SyntaxPane.jar"/>
 				<include name="lib/own/ScalablePane.jar"/>
 				
 				<include name="lib/thirdparty/JCalendar.jar"/>

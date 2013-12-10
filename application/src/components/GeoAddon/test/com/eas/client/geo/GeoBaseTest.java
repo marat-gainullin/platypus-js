@@ -4,11 +4,9 @@
  */
 package com.eas.client.geo;
 
-import com.eas.client.ClientFactory;
 import com.eas.client.DatabasesClient;
 import com.eas.client.DbClient;
 import com.eas.client.settings.DbConnectionSettings;
-import com.eas.client.settings.EasSettings;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -25,13 +23,12 @@ public class GeoBaseTest {
         String url = "jdbc:oracle:thin:@asvr:1521/adb";
         String login = "eas";
         String passwd = "eas";
-        EasSettings settings = new DbConnectionSettings();
+        DbConnectionSettings settings = new DbConnectionSettings();
         settings.setUrl(url);
         settings.setUser(login);
         settings.setPassword(passwd);
 
-        ClientFactory.setDefaultSettings(settings);
-        dbClient = new DatabasesClient((DbConnectionSettings) settings);
+        dbClient = new DatabasesClient(settings);
     }
 
     @Test

@@ -92,6 +92,7 @@ public class ClientConstants {
     public static final String F_COLUMNS_COMMENTS_COMMENT_FIELD_NAME = "COMMENTS";
     public static final String F_TABLE_COMMENTS_NAME_FIELD_NAME = "TABLE_NAME";
     
+    public static final String STORED_QUERY_REF_PREFIX = "#";
     // Java properties names
     public static final String USER_DIR_PROP_NAME = "user.dir";
     public static final String USER_HOME_PROP_NAME = "user.home";
@@ -117,7 +118,6 @@ public class ClientConstants {
     // Error messages
     public static final String NO_SETTINGS_FILE = "No or bad settings file: ";
     public static final String NO_JAVA_PROPERTY = "No java property: ";
-    public static final String QUERY_ID_PREFIX = "q";
     //public static final String DB_CONNECTION_USER_PROP_NAME = "user";
     //public static final String DB_CONNECTION_PASSWORD_PROP_NAME = "password";
     //public static final String DB_CONNECTION_SCHEMA_PROP_NAME = "schema";

@@ -24,10 +24,10 @@ import static org.junit.Assert.*;
  */
 public class PlatypusClientSecurityTest {
 
-    public static final String UNSECURE_MODULE_ID = "133189621201879";
-    public static final String UNSECURE_NONPUBLIC_MODULE_ID = "a136255099211989";
-    public static final String SECURE_MODULE_ID = "133189149718000";
-    public static final String SECURE_FUNCTION_MODULE_ID = "133189629266067";
+    public static final String UNSECURE_MODULE_ID = "UnsecureModule";
+    public static final String UNSECURE_NONPUBLIC_MODULE_ID = "UnsecureNonPublicModule";
+    public static final String SECURE_MODULE_ID = "SecureModule";
+    public static final String SECURE_FUNCTION_MODULE_ID = "SecureFunctionModule";
     public static final String UNSECURE_QUERY_ID = "133189616153303";
     public static final String SECURE_QUERY_ID = "133189623152950";
     public static final String SECURE_READ_QUERY_ID = "133189634694079";

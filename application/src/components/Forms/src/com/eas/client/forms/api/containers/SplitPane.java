@@ -85,7 +85,7 @@ public class SplitPane extends Container<JSplitPane> {
             + "*/";
     
     @ScriptFunction(jsDoc = ONE_TOUCH_EXPANDABLE_JSDOC)
-    public boolean isOneTouchExpandable() {
+    public boolean getOneTouchExpandable() {
         return delegate.isOneTouchExpandable();
     }
 

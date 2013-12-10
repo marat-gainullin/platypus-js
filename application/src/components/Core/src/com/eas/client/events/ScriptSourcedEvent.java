@@ -4,6 +4,7 @@
  */
 package com.eas.client.events;
 
+import com.eas.script.ScriptFunction;
 import org.mozilla.javascript.Scriptable;
 
 /**
@@ -18,6 +19,7 @@ public class ScriptSourcedEvent {
         this.source = source;
     }
 
+    @ScriptFunction(jsDoc = "Object event propagation started from")
     public Scriptable getSource() {
         return source;
     }

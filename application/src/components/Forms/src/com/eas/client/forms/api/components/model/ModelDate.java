@@ -32,7 +32,7 @@ public class ModelDate extends ScalarModelComponent<DbDate> {
             + "*/";
 
     @ScriptFunction(jsDoc = EDITABLE_JSDOC)
-    public boolean isEditable() {
+    public boolean getEditable() {
         return delegate.isEditable();
     }
 
@@ -45,7 +45,7 @@ public class ModelDate extends ScalarModelComponent<DbDate> {
             + "*/";
 
     @ScriptFunction(jsDoc = EXPANDED_JSDOC)
-    public boolean isExpanded() {
+    public boolean getExpanded() {
         return delegate.isExpanded();
     }
 

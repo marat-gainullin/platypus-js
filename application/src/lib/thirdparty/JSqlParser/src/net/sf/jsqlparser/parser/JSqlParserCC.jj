@@ -24,6 +24,7 @@
 options{
     IGNORE_CASE=true;
     STATIC=false;
+    UNICODE_INPUT=true;
     ERROR_REPORTING=true;
 //  DEBUG_LOOKAHEAD= true;
 //  FORCE_LA_CHECK=true;
@@ -256,6 +257,11 @@ TOKEN : /* Numeric Constants */
 
 }
 
+TOKEN : 
+{
+   <S_CROSS: "#">
+}
+
 SPECIAL_TOKEN: 
 {
    <LINE_COMMENT: "--"(~["\r","\n"])*>
@@ -264,7 +270,7 @@ SPECIAL_TOKEN:
 
 TOKEN:
 {
-    < S_IDENTIFIER: ( <LETTER> ) + ( <DIGIT> | <LETTER> |<SPECIAL_CHARS>)* >
+    < S_IDENTIFIER: ( <S_CROSS> | <LETTER> ) + ( <DIGIT> | <LETTER> |<SPECIAL_CHARS>)* >
 |   < #LETTER: [
 
          "A"-"Z",
@@ -553,7 +559,6 @@ TOKEN:
    |< TILDA: "~" >
    |< EXCLAMATION: "!" >
    |< AT: "@" >
-   |< CROSS: "#" >
    |< DOLLAR: "$" >
    |< SINGLEQUOTE: "'" >
    |< DOUBLEQUOTE: "\"" >

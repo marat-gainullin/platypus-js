@@ -21,7 +21,7 @@ public class ScriptEvent<E extends ApplicationEntity<?, ?, E>> {
     protected Function handler;
     protected ScriptSourcedEvent event;
 
-    protected Scriptable scope = null;
+    protected Scriptable scope;
 
     /**
      * Standard script event constructor, suitable for enqueueing and further pumping.

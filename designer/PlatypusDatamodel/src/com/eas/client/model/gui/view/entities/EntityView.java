@@ -83,6 +83,7 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
     protected JPanel paramsFieldsPanel;
     protected JScrollPane paramsFieldsScroll;
     protected JLabel absentQueryLabel = new JLabel();
+    protected JTextArea absentQueryText = new JTextArea();
     protected JList<Field> fieldsList = new JList() {
         @Override
         public void setSelectionInterval(int anchor, int lead) {
@@ -302,14 +303,19 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
             add(paramsFieldsScroll, BorderLayout.CENTER);
         } else {
             add(absentQueryLabel, BorderLayout.CENTER);
+            add(absentQueryText, BorderLayout.SOUTH);
         }
         setBorder(ordinaryBorder);
         setOpaque(false);
     }
 
     protected void initAbsentLabel() {
+        absentQueryText.setBorder(null);
+        absentQueryText.setEditable(false);
+        absentQueryText.setOpaque(false);
+        absentQueryText.setLineWrap(true);
         if (entity != null && entity.getQueryId() != null) {
-            absentQueryLabel.setText(String.format(DatamodelDesignUtils.getLocalizedString("absentQuery"), entity.getQueryId()));
+            absentQueryText.setText(String.format(DatamodelDesignUtils.getLocalizedString("absentQuery"), entity.getQueryId()));
         } else {
             String fullTableName = entity.getTableName();
             if (fullTableName == null) {
@@ -319,10 +325,11 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
             if (schemaName != null && !schemaName.isEmpty()) {
                 fullTableName = schemaName + "." + fullTableName;
             }
-            absentQueryLabel.setText(String.format(DatamodelDesignUtils.getLocalizedString("absentTable"), fullTableName));
+            absentQueryText.setText(String.format(DatamodelDesignUtils.getLocalizedString("absentTable"), fullTableName));
         }
-        absentQueryLabel.setToolTipText(absentQueryLabel.getText());
+        absentQueryLabel.setToolTipText(absentQueryText.getText());
         absentQueryLabel.setIcon(IconCache.getIcon("datamodel32.png"));
+        absentQueryLabel.setHorizontalAlignment(SwingConstants.CENTER);
         absentQueryLabel.setHorizontalTextPosition(SwingConstants.CENTER);
         absentQueryLabel.setVerticalTextPosition(SwingConstants.BOTTOM);
     }
@@ -865,6 +872,7 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
                 case Entity.QUERY_VALID_PROPERTY:
                     remove(paramsFieldsScroll);
                     remove(absentQueryLabel);
+                    remove(absentQueryText);
                     Fields entityFields = entity.getFields();
                     if (entityFields != null) {
                         add(paramsFieldsScroll, BorderLayout.CENTER);
@@ -876,6 +884,7 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
                         fieldsModel.fireDataChanged();
                     } else {
                         add(absentQueryLabel, BorderLayout.CENTER);
+                        add(absentQueryText, BorderLayout.SOUTH);
                     }
                     revalidate();
                     repaint();

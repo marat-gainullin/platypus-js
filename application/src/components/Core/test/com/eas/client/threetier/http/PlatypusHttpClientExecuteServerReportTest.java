@@ -23,7 +23,7 @@ public class PlatypusHttpClientExecuteServerReportTest {
 
     protected PlatypusConnectionSettings settings;
     protected PlatypusConnectionSettings badUrlSettings;
-    private String MODULE_NAME = "134062649490636";
+    private String MODULE_NAME = "TestReportCore";
     protected PlatypusHttpClient client;
 
     @Before

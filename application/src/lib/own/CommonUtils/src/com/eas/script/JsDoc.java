@@ -43,9 +43,13 @@ public class JsDoc {
         return Collections.unmodifiableList(tags);
     }
 
-    public boolean containsModuleName() {
+    public boolean containsTagWithName(String name) {
+        return Tag.containsTagWithName(tags, name);
+    }
+    
+    public boolean containsModuleAnnotation() {
         for (String line : lines) {
-            if (line.startsWith(Tag.NAME_TAG)) {
+            if (line.startsWith(Tag.MODULE_TAG)) {
                 return true;
             }
         }
@@ -84,6 +88,16 @@ public class JsDoc {
      */
     public static class Tag {
 
+        /**
+         * Author tag
+         */
+        public static final String AUTHOR_TAG = "@author";
+        
+        /**
+         * Marker for a module's constructor.
+         */
+        public static final String MODULE_TAG = "@module";
+        
         /**
          * Annotation for defining application element's name.
          */

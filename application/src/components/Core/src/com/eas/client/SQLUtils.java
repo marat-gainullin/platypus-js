@@ -38,8 +38,6 @@ public class SQLUtils {
 
     public static final String TABLE_NAME_2_SQL = "select * from %s";
     public static final String PARAMETER_NAME_REGEXP = ":{1}([A-za-z]\\w*\\b)";
-    public static final String SUBQUERY_LINK_REGEXP = "[,\\s]+Q([0-9]+)\\s+";
-    public static final String SUBQUERY_TABLE_NAME_REGEXP = "Q([0-9]+)";
     public static final String PROPERTIES_VALUE_REGEXP = "={1}([A-za-z]\\w+\\b)";
     public static final String SQL_PARAM_MDENT_PARENT_ID = "aParentID";
     public static final String SQL_SELECT_MD_ROOTS = "select * from " + ClientConstants.T_MTD_ENTITIES + " where " + ClientConstants.T_MTD_ENTITIES + "." + ClientConstants.F_MDENT_PARENT_ID + " is null";

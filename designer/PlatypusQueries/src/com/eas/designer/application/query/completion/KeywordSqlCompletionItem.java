@@ -5,6 +5,7 @@
 package com.eas.designer.application.query.completion;
 
 import com.eas.designer.application.query.lexer.SqlTokenId;
+import com.eas.util.StringUtils;
 import org.netbeans.spi.editor.completion.CompletionTask;
 
 /**
@@ -20,6 +21,7 @@ public class KeywordSqlCompletionItem extends SqlCompletionItem {
         } else {
             text = token.name();
         }
+        text = StringUtils.capitalize(text.toLowerCase());
     }
 
     @Override
