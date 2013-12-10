@@ -61,20 +61,20 @@ public class CompletionContext {
 
     protected void fillFields(Fields aFields, CompletionPoint point, CompletionResultSet resultSet) {
         for (Field field : aFields.toCollection()) {
-            addItem(resultSet, point.filter, new BeanCompletionItem(field.getClass(), field.getName(), field.getDescription(), point.caretBeginWordOffset, point.caretEndWordOffset));
+            addItem(resultSet, point.getFilter(), new BeanCompletionItem(field.getClass(), field.getName(), field.getDescription(), point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
         }
     }
 
     protected void fillFieldsValues(Fields aFields, CompletionPoint point, CompletionResultSet resultSet) {
         for (Field field : aFields.toCollection()) {
-            addItem(resultSet, point.filter, new FieldCompletionItem(field, point.caretBeginWordOffset, point.caretEndWordOffset));
+            addItem(resultSet, point.getFilter(), new FieldCompletionItem(field, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
         }
     }
 
     protected void fillEntities(Collection<? extends Entity> entities, CompletionResultSet resultSet, CompletionPoint point) throws Exception {
         for (Entity appEntity : entities) {
             if (appEntity.getName() != null && !appEntity.getName().isEmpty()) {
-                addItem(resultSet, point.filter, new BeanCompletionItem(ScriptableRowset.class, appEntity.getName(), null, point.caretBeginWordOffset, point.caretEndWordOffset));
+                addItem(resultSet, point.getFilter(), new BeanCompletionItem(ScriptableRowset.class, appEntity.getName(), null, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
             }
         }
     }
@@ -95,7 +95,7 @@ public class CompletionContext {
                 if (method.isAnnotationPresent(ScriptFunction.class)) {
                     if (isBeanPatternMethod(method)) {
                         String propName = getPropertyName(method.getName());
-                        if (point.filter == null || point.filter.isEmpty() || propName.startsWith(point.filter)) {
+                        if (point.getFilter() == null || point.getFilter().isEmpty() || propName.startsWith(point.getFilter())) {
                             PropBox pb = props.get(propName);
                             if (pb == null) {
                                 pb = new PropBox();
@@ -108,13 +108,13 @@ public class CompletionContext {
                                 pb.jsDoc = method.getAnnotation(ScriptFunction.class).jsDoc();
                             }
                         }
-                    } else if (point.filter == null || point.filter.isEmpty() || method.getName().startsWith(point.filter)) {
+                    } else if (point.getFilter() == null || point.getFilter().isEmpty() || method.getName().startsWith(point.getFilter())) {
                         methods.add(method);
                     }
                 }
             }
             for (PropBox pb : props.values()) {
-                resultSet.addItem(new PropertyCompletionItem(pb, point.caretBeginWordOffset, point.caretEndWordOffset));
+                resultSet.addItem(new PropertyCompletionItem(pb, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
             }
             for (Method method : methods) {
                 List<String> parameters = new ArrayList<>();
@@ -128,8 +128,8 @@ public class CompletionContext {
                         method.getName(),
                         getTypeName(method.getReturnType()),
                         parameters, method.getAnnotation(ScriptFunction.class).jsDoc(),
-                        point.caretBeginWordOffset,
-                        point.caretEndWordOffset,
+                        point.getCaretBeginWordOffset(),
+                        point.getCaretEndWordOffset(),
                         true);
                 resultSet.addItem(functionCompletionItem);
             }

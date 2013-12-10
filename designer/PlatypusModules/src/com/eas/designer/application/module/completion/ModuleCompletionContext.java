@@ -57,7 +57,7 @@ public class ModuleCompletionContext extends CompletionContext {
 
     @Override
     public void applyCompletionItems(CompletionPoint point, int offset, CompletionResultSet resultSet) throws Exception {
-        JsCodeCompletionScopeInfo completionScopeInfo = getCompletionScopeInfo(dataObject, offset, point.filter);
+        JsCodeCompletionScopeInfo completionScopeInfo = getCompletionScopeInfo(dataObject, offset, point.getFilter());
         if (completionScopeInfo.mode == CompletionMode.CONSTRUCTORS) {
             fillSystemConstructors(point, resultSet);
         }
@@ -68,7 +68,7 @@ public class ModuleCompletionContext extends CompletionContext {
             Collection<SystemConstructorCompletionItem> items = scp.getSystemConstructors(point);
             if (items != null) {
                 for (SystemConstructorCompletionItem item : items) {
-                    addItem(resultSet, point.filter, item);
+                    addItem(resultSet, point.getFilter(), item);
                 }
             }
         }

@@ -39,7 +39,7 @@ public class ReportCompletionSupportService implements CompletionSupportService 
     @Override
     public Collection<SystemConstructorCompletionItem> getSystemConstructors(CompletionPoint point) {
         List<SystemConstructorCompletionItem> constructors = new ArrayList<>();
-        constructors.add(new SystemConstructorCompletionItem(REPORT_CONSTRUCTOR_NAME, "", Collections.EMPTY_LIST, REPORT_CONSTRUCTOR_JSDOC, point.caretBeginWordOffset, point.caretEndWordOffset));
+        constructors.add(new SystemConstructorCompletionItem(REPORT_CONSTRUCTOR_NAME, "", Collections.EMPTY_LIST, REPORT_CONSTRUCTOR_JSDOC, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
         return constructors;
     }
 }

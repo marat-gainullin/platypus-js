@@ -68,7 +68,7 @@ public class ModuleThisCompletionContext extends CompletionContext {
     @Override
     public void applyCompletionItems(CompletionPoint point, int offset, CompletionResultSet resultSet) throws Exception {
         super.applyCompletionItems(point, offset, resultSet);
-        ModuleCompletionContext.JsCodeCompletionScopeInfo completionScopeInfo = ModuleCompletionContext.getCompletionScopeInfo(parentContext.getDataObject(), offset, point.filter);
+        ModuleCompletionContext.JsCodeCompletionScopeInfo completionScopeInfo = ModuleCompletionContext.getCompletionScopeInfo(parentContext.getDataObject(), offset, point.getFilter());
         if (completionScopeInfo.mode == ModuleCompletionContext.CompletionMode.VARIABLES_AND_FUNCTIONS) {
             fillVariablesAndFunctions(point, resultSet);
         }
@@ -93,12 +93,12 @@ public class ModuleThisCompletionContext extends CompletionContext {
     }
 
     protected void fillVariablesAndFunctions(CompletionPoint point, CompletionResultSet resultSet) throws Exception {
-        addItem(resultSet, point.filter, new BeanCompletionItem(parentContext.getDataObject().getModel().getClass(), MODEL_SCRIPT_NAME, null, point.caretBeginWordOffset, point.caretEndWordOffset));
-        addItem(resultSet, point.filter, new BeanCompletionItem(parentContext.getDataObject().getModel().getParametersEntity().getRowset().getClass(), PARAMS_SCRIPT_NAME, null, point.caretBeginWordOffset, point.caretEndWordOffset));
+        addItem(resultSet, point.getFilter(), new BeanCompletionItem(parentContext.getDataObject().getModel().getClass(), MODEL_SCRIPT_NAME, null, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
+        addItem(resultSet, point.getFilter(), new BeanCompletionItem(parentContext.getDataObject().getModel().getParametersEntity().getRowset().getClass(), PARAMS_SCRIPT_NAME, null, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
         if (enableJsElementsCompletion) {
             ScanJsElementsSupport scanner = new ScanJsElementsSupport(PlatypusFilesSupport.extractModuleConstructor(parentContext.getDataObject().getAst()));
             for (JsCompletionItem i : scanner.getCompletionItems(point)) {
-                addItem(resultSet, point.filter, i);
+                addItem(resultSet, point.getFilter(), i);
             }
         }
     }
@@ -149,7 +149,7 @@ public class ModuleThisCompletionContext extends CompletionContext {
                                                 }
                                             }
                                             functionsMap.put(pg.getProperty().getIdentifier(),
-                                                    new JsFunctionCompletionItem(pg.getProperty().getIdentifier(), "", params, a.getJsDoc(), point.caretBeginWordOffset, point.caretEndWordOffset));
+                                                    new JsFunctionCompletionItem(pg.getProperty().getIdentifier(), "", params, a.getJsDoc(), point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
                                         }
                                     }
                                 }

@@ -8,7 +8,6 @@ import com.bearsoft.org.netbeans.modules.form.FormUtils;
 import com.eas.client.scripts.ScriptRunner;
 import com.eas.designer.application.module.PlatypusModuleDataObject;
 import com.eas.designer.application.module.completion.CompletionPoint;
-import com.eas.designer.application.module.completion.JsCompletionProvider;
 import com.eas.designer.application.module.completion.ModuleCompletionContext;
 import com.eas.designer.application.module.completion.ModuleThisCompletionContext;
 import com.eas.script.ScriptFunction;
@@ -45,13 +44,13 @@ public class FormCompletionContext extends ModuleCompletionContext {
                 if (constructor.isAnnotationPresent(ScriptFunction.class)) {
                     ScriptFunction annotation = constructor.getAnnotation(ScriptFunction.class);
                     addItem(resultSet,
-                            point.filter,
+                            point.getFilter(),
                             new ComponentConstructorCompletionItem(clazz.getSimpleName(),
                             "",//NOI18N
                             Arrays.<String>asList(annotation.params()),
                             annotation.jsDoc(),
-                            point.caretBeginWordOffset,
-                            point.caretEndWordOffset));
+                            point.getCaretBeginWordOffset(),
+                            point.getCaretEndWordOffset()));
                     break;
                 }
             }

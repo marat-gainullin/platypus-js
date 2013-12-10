@@ -65,7 +65,7 @@ public class DbGridCompletionContext extends CompletionContext {
     protected void fillColumns(List<DbGridColumn> columns, CompletionResultSet resultSet, CompletionPoint point) {
         for (DbGridColumn dCol : columns) {
             if (dCol.getName() != null && !dCol.getName().isEmpty()) {
-                addItem(resultSet, point.filter, new BeanCompletionItem(dCol.getClass(), dCol.getName(), null, point.caretBeginWordOffset, point.caretEndWordOffset));
+                addItem(resultSet, point.getFilter(), new BeanCompletionItem(dCol.getClass(), dCol.getName(), null, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
             }
         }
     }

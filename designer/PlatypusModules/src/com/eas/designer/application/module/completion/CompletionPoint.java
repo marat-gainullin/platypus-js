@@ -24,10 +24,32 @@ import org.netbeans.modules.editor.NbEditorDocument;
 public class CompletionPoint {
 
     private static char DOT_CHARACTER = '.';//NOI18N
-    public String filter = "";//NOI18N
-    public CompletionToken[] context;
-    public int caretBeginWordOffset;
-    public int caretEndWordOffset;
+
+    private String filter = "";//NOI18N
+    private CompletionToken[] context;
+    private int caretBeginWordOffset;
+    private int caretEndWordOffset;
+    private AstRoot astRoot;
+    
+    public String getFilter() {
+        return filter;
+    }
+
+    public CompletionToken[] getContext() {
+        return context;
+    }
+
+    public int getCaretBeginWordOffset() {
+        return caretBeginWordOffset;
+    }
+
+    public int getCaretEndWordOffset() {
+        return caretEndWordOffset;
+    }
+    
+    public AstRoot getAstRoot() {
+        return astRoot;
+    }
     
     public static CompletionPoint createInstance(NbEditorDocument doc, int caretOffset) throws Exception {
         final CompletionPoint cp = new CompletionPoint();
@@ -38,9 +60,9 @@ public class CompletionPoint {
                 boolean afterDotCaretPosintion = !Character.isJavaIdentifierPart(caretPositionChar)
                         && preCaretPositionChar == DOT_CHARACTER;
                 String docStr = doc.getText(0, doc.getLength());
-                AstRoot root = JsParser.parse(afterDotCaretPosintion ? sanitizeDot(docStr, caretOffset - 1) : docStr);
-                AstNode offsetNode = AstUtlities.getOffsetNode(root, afterDotCaretPosintion ? caretOffset - 1 : caretOffset);
-                final AstNode subRoot = getCompletionSubtree(root, offsetNode);
+                cp.astRoot = JsParser.parse(afterDotCaretPosintion ? sanitizeDot(docStr, caretOffset - 1) : docStr);
+                AstNode offsetNode = AstUtlities.getOffsetNode(cp.astRoot, afterDotCaretPosintion ? caretOffset - 1 : caretOffset);
+                final AstNode subRoot = getCompletionSubtree(cp.astRoot, offsetNode);
                 if (subRoot != null) {
                     List<CompletionToken> ctx = getContextTokens(subRoot);
                     if (ctx.size() > 0) {
@@ -114,7 +136,7 @@ public class CompletionPoint {
         }
     }
 
-    protected static int getStartWordOffset(NbEditorDocument aDoc, int caretOffset) throws Exception {
+    private static int getStartWordOffset(NbEditorDocument aDoc, int caretOffset) throws Exception {
         while (caretOffset > 0 && aDoc.getLength() > 0
                 && (Character.isJavaIdentifierPart(aDoc.getText(caretOffset - 1, 1).toCharArray()[0]))) {
             caretOffset--;
@@ -122,7 +144,7 @@ public class CompletionPoint {
         return caretOffset;
     }
 
-    public static int getEndWordOffset(NbEditorDocument aDoc, int caretOffset) throws BadLocationException {
+    private static int getEndWordOffset(NbEditorDocument aDoc, int caretOffset) throws BadLocationException {
         while (caretOffset < aDoc.getLength() && aDoc.getLength() > 0
                 && Character.isJavaIdentifierPart(aDoc.getText(caretOffset, 1).toCharArray()[0])) {
             caretOffset++;

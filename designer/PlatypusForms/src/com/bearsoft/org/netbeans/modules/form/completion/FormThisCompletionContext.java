@@ -38,9 +38,9 @@ public class FormThisCompletionContext extends ModuleThisCompletionContext {
     @Override
     public void applyCompletionItems(CompletionPoint point, int offset, CompletionResultSet resultSet) throws Exception {
         super.applyCompletionItems(point, offset, resultSet);
-        ModuleCompletionContext.JsCodeCompletionScopeInfo completionScopeInfo = ModuleCompletionContext.getCompletionScopeInfo(getParentContext().getDataObject(), offset, point.filter);
+        ModuleCompletionContext.JsCodeCompletionScopeInfo completionScopeInfo = ModuleCompletionContext.getCompletionScopeInfo(getParentContext().getDataObject(), offset, point.getFilter());
         if (completionScopeInfo.mode == ModuleCompletionContext.CompletionMode.VARIABLES_AND_FUNCTIONS) {
-            addItem(resultSet, point.filter, new BeanCompletionItem(Container.class, FormRunner.VIEW_SCRIPT_NAME, null, point.caretBeginWordOffset, point.caretEndWordOffset)); //NOI18N
+            addItem(resultSet, point.getFilter(), new BeanCompletionItem(Container.class, FormRunner.VIEW_SCRIPT_NAME, null, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset())); //NOI18N
             fillComponents(point, resultSet);
         }
     }
@@ -72,12 +72,12 @@ public class FormThisCompletionContext extends ModuleThisCompletionContext {
         for (RADComponent<?> comp : fm.getOrderedComponentList()) {
             if (!(comp instanceof RADModelGridColumn) && !(comp instanceof RADModelMapLayer) && comp.getName() != null && !comp.getName().isEmpty()) {
                 // <comp>
-                if (point.filter == null || point.filter.isEmpty() || comp.getName().toLowerCase().startsWith(point.filter.toLowerCase())) {
+                if (point.getFilter() == null || point.getFilter().isEmpty() || comp.getName().toLowerCase().startsWith(point.getFilter().toLowerCase())) {
                     String compName = comp.getName();
                     if (RADVisualFormContainer.FORM_NAME.equals(compName)) {
                         continue;
                     }
-                    addItem(resultSet, point.filter, new BeanCompletionItem(FormUtils.getPlatypusControlClass(comp.getBeanClass()), compName, null, point.caretBeginWordOffset, point.caretEndWordOffset));
+                    addItem(resultSet, point.getFilter(), new BeanCompletionItem(FormUtils.getPlatypusControlClass(comp.getBeanClass()), compName, null, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
                 }
             }
         }

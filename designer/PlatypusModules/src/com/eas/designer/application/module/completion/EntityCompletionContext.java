@@ -32,8 +32,8 @@ public class EntityCompletionContext extends CompletionContext {
         if (scriptClass != null) {
             fillJavaCompletionItems(point, resultSet);
         }
-        addItem(resultSet, point.filter, new BeanCompletionItem(Parameters.class, PARAMS_SCRIPT_NAME, null, point.caretBeginWordOffset, point.caretEndWordOffset));
-        addItem(resultSet, point.filter, new BeanCompletionItem(Fields.class, METADATA_SCRIPT_NAME, null, point.caretBeginWordOffset, point.caretEndWordOffset));
+        addItem(resultSet, point.getFilter(), new BeanCompletionItem(Parameters.class, PARAMS_SCRIPT_NAME, null, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
+        addItem(resultSet, point.getFilter(), new BeanCompletionItem(Fields.class, METADATA_SCRIPT_NAME, null, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
     }
 
     @Override
