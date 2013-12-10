@@ -1,6 +1,6 @@
 package com.eas.designer.application.module.completion;
 
-import com.eas.designer.application.module.completion.JsCompletionProvider.CompletionPoint;
+import com.eas.designer.application.module.completion.CompletionPoint;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;

@@ -7,6 +7,7 @@ package com.eas.designer.application.report.completion;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.designer.application.indexer.AppElementInfo;
 import com.eas.designer.application.module.completion.AppElementConstructorCompletionItem;
+import com.eas.designer.application.module.completion.CompletionPoint;
 import com.eas.designer.application.module.completion.CompletionSupportService;
 import com.eas.designer.application.module.completion.JsCompletionProvider;
 import com.eas.designer.application.module.completion.SystemConstructorCompletionItem;
@@ -36,7 +37,7 @@ public class ReportCompletionSupportService implements CompletionSupportService 
     }
 
     @Override
-    public Collection<SystemConstructorCompletionItem> getSystemConstructors(JsCompletionProvider.CompletionPoint point) {
+    public Collection<SystemConstructorCompletionItem> getSystemConstructors(CompletionPoint point) {
         List<SystemConstructorCompletionItem> constructors = new ArrayList<>();
         constructors.add(new SystemConstructorCompletionItem(REPORT_CONSTRUCTOR_NAME, "", Collections.EMPTY_LIST, REPORT_CONSTRUCTOR_JSDOC, point.caretBeginWordOffset, point.caretEndWordOffset));
         return constructors;

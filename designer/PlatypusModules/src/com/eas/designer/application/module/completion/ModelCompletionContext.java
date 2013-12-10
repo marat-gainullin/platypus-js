@@ -23,7 +23,7 @@ public class ModelCompletionContext extends CompletionContext {
     }
 
     @Override
-    public void applyCompletionItems(JsCompletionProvider.CompletionPoint point, int offset, CompletionResultSet resultSet) throws Exception {
+    public void applyCompletionItems(CompletionPoint point, int offset, CompletionResultSet resultSet) throws Exception {
         fillEntities(dataObject.getModel().getEntities().values(), resultSet, point);
         fillJavaCompletionItems(point, resultSet);
     }

@@ -48,7 +48,7 @@ public class CompletionContext {
         return scriptClass;
     }
 
-    public void applyCompletionItems(JsCompletionProvider.CompletionPoint point, int offset, CompletionResultSet resultSet) throws Exception {
+    public void applyCompletionItems(CompletionPoint point, int offset, CompletionResultSet resultSet) throws Exception {
         fillJavaCompletionItems(point, resultSet);
     }
 
@@ -56,19 +56,19 @@ public class CompletionContext {
         return null;
     }
 
-    protected void fillFields(Fields aFields, JsCompletionProvider.CompletionPoint point, CompletionResultSet resultSet) {
+    protected void fillFields(Fields aFields, CompletionPoint point, CompletionResultSet resultSet) {
         for (Field field : aFields.toCollection()) {
             addItem(resultSet, point.filter, new BeanCompletionItem(field.getClass(), field.getName(), field.getDescription(), point.caretBeginWordOffset, point.caretEndWordOffset));
         }
     }
 
-    protected void fillFieldsValues(Fields aFields, JsCompletionProvider.CompletionPoint point, CompletionResultSet resultSet) {
+    protected void fillFieldsValues(Fields aFields, CompletionPoint point, CompletionResultSet resultSet) {
         for (Field field : aFields.toCollection()) {
             addItem(resultSet, point.filter, new FieldCompletionItem(field, point.caretBeginWordOffset, point.caretEndWordOffset));
         }
     }
 
-    protected void fillEntities(Collection<? extends Entity> entities, CompletionResultSet resultSet, JsCompletionProvider.CompletionPoint point) throws Exception {
+    protected void fillEntities(Collection<? extends Entity> entities, CompletionResultSet resultSet, CompletionPoint point) throws Exception {
         for (Entity appEntity : entities) {
             if (appEntity.getName() != null && !appEntity.getName().isEmpty()) {
                 addItem(resultSet, point.filter, new BeanCompletionItem(ScriptableRowset.class, appEntity.getName(), null, point.caretBeginWordOffset, point.caretEndWordOffset));
@@ -84,7 +84,7 @@ public class CompletionContext {
         }
     }
 
-    protected void fillJavaCompletionItems(JsCompletionProvider.CompletionPoint point, CompletionResultSet resultSet) {
+    protected void fillJavaCompletionItems(CompletionPoint point, CompletionResultSet resultSet) {
         Map<String, PropBox> props = new HashMap<>();
         List<Method> methods = new ArrayList<>();
         if (scriptClass != null) {

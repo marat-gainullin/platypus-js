@@ -10,6 +10,7 @@ import com.eas.dbcontrols.grid.DbGridColumn;
 import com.eas.dbcontrols.grid.rt.columns.ScriptableColumn;
 import com.eas.designer.application.module.completion.BeanCompletionItem;
 import com.eas.designer.application.module.completion.CompletionContext;
+import com.eas.designer.application.module.completion.CompletionPoint;
 import com.eas.designer.application.module.completion.JsCompletionProvider;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +30,7 @@ public class DbGridCompletionContext extends CompletionContext {
     }
 
     @Override
-    public void applyCompletionItems(JsCompletionProvider.CompletionPoint point, int offset, CompletionResultSet resultSet) throws Exception {
+    public void applyCompletionItems(CompletionPoint point, int offset, CompletionResultSet resultSet) throws Exception {
         super.applyCompletionItems(point, offset, resultSet);    
         List<DbGridColumn> linearColumns = new ArrayList<>();
         enumerateColumns(grid.getHeader(), linearColumns);
@@ -61,7 +62,7 @@ public class DbGridCompletionContext extends CompletionContext {
         }
     }
 
-    protected void fillColumns(List<DbGridColumn> columns, CompletionResultSet resultSet, JsCompletionProvider.CompletionPoint point) {
+    protected void fillColumns(List<DbGridColumn> columns, CompletionResultSet resultSet, CompletionPoint point) {
         for (DbGridColumn dCol : columns) {
             if (dCol.getName() != null && !dCol.getName().isEmpty()) {
                 addItem(resultSet, point.filter, new BeanCompletionItem(dCol.getClass(), dCol.getName(), null, point.caretBeginWordOffset, point.caretEndWordOffset));

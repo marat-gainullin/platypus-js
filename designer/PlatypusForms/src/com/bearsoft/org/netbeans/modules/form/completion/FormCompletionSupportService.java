@@ -9,6 +9,7 @@ import com.bearsoft.org.netbeans.modules.form.PlatypusFormDataLoader;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.designer.application.indexer.AppElementInfo;
 import com.eas.designer.application.module.completion.AppElementConstructorCompletionItem;
+import com.eas.designer.application.module.completion.CompletionPoint;
 import com.eas.designer.application.module.completion.CompletionSupportService;
 import com.eas.designer.application.module.completion.JsCompletionProvider;
 import com.eas.designer.application.module.completion.ModuleCompletionSupportService;
@@ -41,7 +42,7 @@ public class FormCompletionSupportService implements CompletionSupportService {
     }
 
     @Override
-    public Collection<SystemConstructorCompletionItem> getSystemConstructors(JsCompletionProvider.CompletionPoint point) {
+    public Collection<SystemConstructorCompletionItem> getSystemConstructors(CompletionPoint point) {
         List<SystemConstructorCompletionItem> constructors = new ArrayList<>();
         constructors.add(new SystemConstructorCompletionItem(FORM_CONSTRUCTOR_NAME, "", Collections.EMPTY_LIST, FORM_CONSTRUCTOR_JSDOC, point.caretBeginWordOffset, point.caretEndWordOffset));
         return constructors;

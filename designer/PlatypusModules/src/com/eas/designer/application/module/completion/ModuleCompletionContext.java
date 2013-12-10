@@ -55,14 +55,14 @@ public class ModuleCompletionContext extends CompletionContext {
     }
 
     @Override
-    public void applyCompletionItems(JsCompletionProvider.CompletionPoint point, int offset, CompletionResultSet resultSet) throws Exception {
+    public void applyCompletionItems(CompletionPoint point, int offset, CompletionResultSet resultSet) throws Exception {
         JsCodeCompletionScopeInfo completionScopeInfo = getCompletionScopeInfo(dataObject, offset, point.filter);
         if (completionScopeInfo.mode == CompletionMode.CONSTRUCTORS) {
             fillSystemConstructors(point, resultSet);
         }
     }
 
-    protected void fillSystemConstructors(JsCompletionProvider.CompletionPoint point, CompletionResultSet resultSet) {
+    protected void fillSystemConstructors(CompletionPoint point, CompletionResultSet resultSet) {
         for (CompletionSupportService scp : Lookup.getDefault().lookupAll(CompletionSupportService.class)) {
             Collection<SystemConstructorCompletionItem> items = scp.getSystemConstructors(point);
             if (items != null) {
@@ -210,10 +210,13 @@ public class ModuleCompletionContext extends CompletionContext {
                                                 }
                                             }
                                             //checks for new ModuleName() expression
-                                            CompletionContext cc = getModuleCompletionContext(parentContext.getDataObject().getProject(), stripElementId(ne.getTarget().getString())).createThisContext(false);
-                                            if (cc != null) {
-                                                ctx = cc;
-                                                return false;
+                                            ModuleCompletionContext mcc = getModuleCompletionContext(parentContext.getDataObject().getProject(), stripElementId(ne.getTarget().getString()));
+                                            if (mcc != null) {
+                                                CompletionContext cc = mcc.createThisContext(true);
+                                                if (cc != null) {
+                                                    ctx = cc;
+                                                    return false;
+                                                }
                                             }
                                         }
                                         //checks for Modules.get(moduleName) expression

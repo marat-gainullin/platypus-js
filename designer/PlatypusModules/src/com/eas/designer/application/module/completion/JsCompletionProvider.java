@@ -5,6 +5,10 @@
 package com.eas.designer.application.module.completion;
 
 import com.eas.designer.application.module.PlatypusModuleDataObject;
+import com.eas.designer.application.module.completion.CompletionPoint.CompletionToken;
+import com.eas.designer.application.module.completion.CompletionPoint.CompletionTokenType;
+import com.eas.designer.application.module.parser.AstUtlities;
+import com.eas.script.JsParser;
 import com.eas.script.ScriptFunction;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -16,6 +20,10 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.StyledDocument;
+import org.mozilla.javascript.ast.AstNode;
+import org.mozilla.javascript.ast.AstRoot;
+import org.mozilla.javascript.ast.Name;
+import org.mozilla.javascript.ast.PropertyGet;
 import org.netbeans.modules.editor.NbEditorDocument;
 import org.netbeans.spi.editor.completion.CompletionProvider;
 import org.netbeans.spi.editor.completion.CompletionResultSet;
@@ -38,21 +46,6 @@ public abstract class JsCompletionProvider implements CompletionProvider {
             + "/**\n"
             + "* %s\n"
             + "*/";
-    public static class CompletionPoint {
-
-        public String filter = null;
-        public String[] context;
-        public int caretBeginWordOffset;
-        public int caretEndWordOffset;
-        
-        public String getLastContextItem() {
-            if (context != null && context.length > 0) {
-                return context[context.length - 1];
-            } else {
-                return null;
-            }
-        }
-    }
 
     @Override
     public int getAutoQueryTypes(JTextComponent component, String typedText) {
@@ -61,7 +54,7 @@ public abstract class JsCompletionProvider implements CompletionProvider {
 
     @Override
     public CompletionTask createTask(int queryType, JTextComponent component) {
-            return createCompletionTask(component);
+        return createCompletionTask(component);
     }
 
     public CompletionTask createCompletionTask(JTextComponent component) {
@@ -71,7 +64,7 @@ public abstract class JsCompletionProvider implements CompletionProvider {
                 try {
                     PlatypusModuleDataObject dataObject = (PlatypusModuleDataObject) doc.getProperty(PlatypusModuleDataObject.DATAOBJECT_DOC_PROPERTY);
                     if (doc instanceof NbEditorDocument) {
-                        CompletionPoint completionPoint = calcCompletionPoint((NbEditorDocument) doc, caretOffset);
+                        CompletionPoint completionPoint = CompletionPoint.createInstance((NbEditorDocument)doc, caretOffset);
                         fillCompletionPoint(dataObject, completionPoint, resultSet, doc, caretOffset);
                     }
                     resultSet.finish();
@@ -80,37 +73,6 @@ public abstract class JsCompletionProvider implements CompletionProvider {
                 }
             }
         }, component);
-    }
-
-    public static CompletionPoint calcCompletionPoint(NbEditorDocument doc, int caretOffset) throws Exception {
-        CompletionPoint point = new CompletionPoint();
-        point.filter = null;
-        if (caretOffset > 0) {
-            final StyledDocument styledDoc = (StyledDocument) doc;
-            // Calc start and end offset
-            int startOffset = getStartWordOffset(doc, caretOffset);
-            int endOffset = getEndWordOffset(doc, caretOffset);
-            // Can't use following values for contexts calculation
-            // because offsets are to be modified while contexts calculation.
-            point.caretBeginWordOffset = startOffset;
-            point.caretEndWordOffset = endOffset;
-            // Calc filter fragment
-            if (caretOffset - startOffset > 0) {
-                point.filter = styledDoc.getText(startOffset, caretOffset - startOffset);
-            }
-            // calc dots context
-            List<String> context = new ArrayList<>();
-            while (startOffset > 0 && ".".equals(doc.getText(startOffset - 1, 1))) {
-                int currentOffset = startOffset - 1;
-                startOffset = getStartWordOffset(doc, currentOffset);
-                endOffset = getEndWordOffset(doc, currentOffset);
-                String contextFragment = styledDoc.getText(startOffset, endOffset - startOffset);
-                context.add(contextFragment.trim());
-            }
-            Collections.reverse(context);
-            point.context = context.toArray(new String[0]);
-        }
-        return point;
     }
 
     protected static int getStartWordOffset(NbEditorDocument aDoc, int caretOffset) throws Exception {
@@ -136,7 +98,7 @@ public abstract class JsCompletionProvider implements CompletionProvider {
     }
 
     protected abstract void fillCompletionPoint(PlatypusModuleDataObject dataObject, CompletionPoint point, CompletionResultSet resultSet, Document doc, int caretOffset) throws Exception;
-    
+
     protected void fillJavaEntities(Class<?> aImplClass, CompletionPoint point, CompletionResultSet resultSet) {
         Map<String, PropBox> props = new HashMap<>();
         List<Method> methods = new ArrayList<>();
@@ -197,7 +159,6 @@ public abstract class JsCompletionProvider implements CompletionProvider {
 //            pb.jsDoc = jsDocText;
 //        }
 //    }
-
     private static String getTypeName(Class<?> type) {
         if (!type.equals(Void.TYPE)) {
             if (isNumberClass(type)) {

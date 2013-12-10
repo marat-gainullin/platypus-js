@@ -22,7 +22,7 @@ public class MetadataCompletionContext extends CompletionContext {
     }
     
     @Override
-    public void applyCompletionItems(JsCompletionProvider.CompletionPoint point, int offset, CompletionResultSet resultSet) throws Exception {
+    public void applyCompletionItems(CompletionPoint point, int offset, CompletionResultSet resultSet) throws Exception {
         fillFieldsValues(entity.getFields(), point, resultSet);
     }
     

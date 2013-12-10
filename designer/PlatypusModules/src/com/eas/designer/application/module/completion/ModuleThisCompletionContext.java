@@ -65,7 +65,7 @@ public class ModuleThisCompletionContext extends CompletionContext {
     }
 
     @Override
-    public void applyCompletionItems(JsCompletionProvider.CompletionPoint point, int offset, CompletionResultSet resultSet) throws Exception {
+    public void applyCompletionItems(CompletionPoint point, int offset, CompletionResultSet resultSet) throws Exception {
         super.applyCompletionItems(point, offset, resultSet);
         ModuleCompletionContext.JsCodeCompletionScopeInfo completionScopeInfo = ModuleCompletionContext.getCompletionScopeInfo(parentContext.getDataObject(), offset, point.filter);
         if (completionScopeInfo.mode == ModuleCompletionContext.CompletionMode.VARIABLES_AND_FUNCTIONS) {
@@ -91,7 +91,7 @@ public class ModuleThisCompletionContext extends CompletionContext {
         return aliases;
     }
 
-    protected void fillVariablesAndFunctions(JsCompletionProvider.CompletionPoint point, CompletionResultSet resultSet) throws Exception {
+    protected void fillVariablesAndFunctions(CompletionPoint point, CompletionResultSet resultSet) throws Exception {
         fillFieldsValues(parentContext.getDataObject().getModel().getParametersEntity().getFields(), point, resultSet);
         fillEntities(parentContext.getDataObject().getModel().getEntities().values(), resultSet, point);
         addItem(resultSet, point.filter, new BeanCompletionItem(parentContext.getDataObject().getModel().getClass(), MODEL_SCRIPT_NAME, null, point.caretBeginWordOffset, point.caretEndWordOffset));
@@ -114,7 +114,7 @@ public class ModuleThisCompletionContext extends CompletionContext {
             moduleConstructor = aModuleConstructor;
         }
 
-        public Collection<JsCompletionItem> getCompletionItems(JsCompletionProvider.CompletionPoint point) {
+        public Collection<JsCompletionItem> getCompletionItems(CompletionPoint point) {
             functionsMap = new HashMap<>();
             fieldsMap = new HashMap<>();
             scan(point, getThisAliases(moduleConstructor));
@@ -123,7 +123,7 @@ public class ModuleThisCompletionContext extends CompletionContext {
             return items;
         }
 
-        private void scan(final JsCompletionProvider.CompletionPoint point, final Set<String> thisAliases) {
+        private void scan(final CompletionPoint point, final Set<String> thisAliases) {
             if (moduleConstructor.getBody() != null) {
                 moduleConstructor.getBody().visit(new NodeVisitor() {
                     @Override

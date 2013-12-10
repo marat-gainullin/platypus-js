@@ -18,6 +18,7 @@ import com.eas.client.forms.api.components.model.ModelGrid;
 import com.eas.dbcontrols.grid.DbGrid;
 import com.eas.designer.application.module.completion.BeanCompletionItem;
 import com.eas.designer.application.module.completion.CompletionContext;
+import com.eas.designer.application.module.completion.CompletionPoint;
 import com.eas.designer.application.module.completion.JsCompletionProvider;
 import com.eas.designer.application.module.completion.ModuleCompletionContext;
 import com.eas.designer.application.module.completion.ModuleThisCompletionContext;
@@ -35,7 +36,7 @@ public class FormThisCompletionContext extends ModuleThisCompletionContext {
     }
     
     @Override
-    public void applyCompletionItems(JsCompletionProvider.CompletionPoint point, int offset, CompletionResultSet resultSet) throws Exception {
+    public void applyCompletionItems(CompletionPoint point, int offset, CompletionResultSet resultSet) throws Exception {
         super.applyCompletionItems(point, offset, resultSet);
         ModuleCompletionContext.JsCodeCompletionScopeInfo completionScopeInfo = ModuleCompletionContext.getCompletionScopeInfo(getParentContext().getDataObject(), offset, point.filter);
         if (completionScopeInfo.mode == ModuleCompletionContext.CompletionMode.VARIABLES_AND_FUNCTIONS) {
@@ -66,7 +67,7 @@ public class FormThisCompletionContext extends ModuleThisCompletionContext {
         return null;
     }
 
-    protected void fillComponents(JsCompletionProvider.CompletionPoint point, CompletionResultSet resultSet) {
+    protected void fillComponents(CompletionPoint point, CompletionResultSet resultSet) {
         FormModel fm = getFormModel();
         for (RADComponent<?> comp : fm.getOrderedComponentList()) {
             if (!(comp instanceof RADModelGridColumn) && !(comp instanceof RADModelMapLayer) && comp.getName() != null && !comp.getName().isEmpty()) {

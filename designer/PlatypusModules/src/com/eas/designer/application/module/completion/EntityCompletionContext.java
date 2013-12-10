@@ -6,7 +6,7 @@ package com.eas.designer.application.module.completion;
 
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.script.ScriptableRowset;
-import com.eas.designer.application.module.completion.JsCompletionProvider.CompletionPoint;
+import com.eas.designer.application.module.completion.CompletionPoint;
 import org.netbeans.spi.editor.completion.CompletionResultSet;
 
 /**
