@@ -231,7 +231,7 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
                 return false;
             }
         } else {
-            Logger.getLogger(PlatypusServerCore.class.getName()).warning(String.format("Background task \"%s\" is illegal (no module). Skipping it.", aModuleId));
+            Logger.getLogger(PlatypusServerCore.class.getName()).warning(String.format("Resident task \"%s\" is illegal (no module). Skipping it.", aModuleId));
             return false;
         }
     }
