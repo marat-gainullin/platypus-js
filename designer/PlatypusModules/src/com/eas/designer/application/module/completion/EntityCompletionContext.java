@@ -4,9 +4,14 @@
  */
 package com.eas.designer.application.module.completion;
 
+import com.bearsoft.rowset.metadata.Fields;
+import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.script.ScriptableRowset;
 import static com.eas.designer.application.module.completion.CompletionContext.addItem;
+import static com.eas.designer.application.module.completion.CompletionContext.isPropertyGet;
+import com.eas.designer.application.module.completion.CompletionPoint.CompletionToken;
+import com.eas.designer.application.module.completion.CompletionPoint.CompletionTokenType;
 import org.netbeans.spi.editor.completion.CompletionResultSet;
 
 /**
@@ -27,17 +32,19 @@ public class EntityCompletionContext extends CompletionContext {
         if (scriptClass != null) {
             fillJavaCompletionItems(point, resultSet);
         }
-        addItem(resultSet, point.filter, new BeanCompletionItem(entity.getRowset().getClass(), PARAMS_SCRIPT_NAME, null, point.caretBeginWordOffset, point.caretEndWordOffset));
-        addItem(resultSet, point.filter, new BeanCompletionItem(entity.getFields().getClass(), METADATA_SCRIPT_NAME, null, point.caretBeginWordOffset, point.caretEndWordOffset));
+        addItem(resultSet, point.filter, new BeanCompletionItem(Parameters.class, PARAMS_SCRIPT_NAME, null, point.caretBeginWordOffset, point.caretEndWordOffset));
+        addItem(resultSet, point.filter, new BeanCompletionItem(Fields.class, METADATA_SCRIPT_NAME, null, point.caretBeginWordOffset, point.caretEndWordOffset));
     }
 
     @Override
-    public CompletionContext getChildContext(String fieldName, int offset) throws Exception {
-        if (METADATA_SCRIPT_NAME.equalsIgnoreCase(fieldName)) {
+    public CompletionContext getChildContext(CompletionToken token, int offset) throws Exception {
+        if (isPropertyGet(token, METADATA_SCRIPT_NAME)) {
             return new MetadataCompletionContext(entity.getFields());
-        } else if (CURSOR_ENTITY_PROPERTY_NAME.equalsIgnoreCase(fieldName)) {
+        } else if(isPropertyGet(token, CURSOR_ENTITY_PROPERTY_NAME)) {
             return new EntityElementCompletionContext(entity);
-        } else if (PARAMS_SCRIPT_NAME.equals(fieldName)) {
+        } else if (CompletionTokenType.ELEMENT_GET == token.type && !isQuotedString(token.name)) { 
+            return new EntityElementCompletionContext(entity);
+        }else if (isPropertyGet(token, PARAMS_SCRIPT_NAME)) {
             return new ParametersCompletionContext(entity.getQuery().getParameters());
         } else {
             return null;

@@ -7,6 +7,7 @@ package com.eas.designer.application.module.completion;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameters;
 import static com.eas.designer.application.module.completion.CompletionContext.addItem;
+import com.eas.designer.application.module.completion.CompletionPoint.CompletionToken;
 import org.netbeans.spi.editor.completion.CompletionResultSet;
 
 /**
@@ -32,8 +33,8 @@ public class ParametersCompletionContext extends CompletionContext {
     }
 
     @Override
-    public CompletionContext getChildContext(String fieldName, int offset) throws Exception {
-        if (METADATA_SCRIPT_NAME.equalsIgnoreCase(fieldName)) {
+    public CompletionContext getChildContext(CompletionToken token, int offset) throws Exception {
+        if (METADATA_SCRIPT_NAME.equals(token)) {
             return new MetadataCompletionContext(parameters);
         } else {
             return null;

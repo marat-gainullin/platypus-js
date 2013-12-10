@@ -11,7 +11,7 @@ import com.eas.dbcontrols.grid.rt.columns.ScriptableColumn;
 import com.eas.designer.application.module.completion.BeanCompletionItem;
 import com.eas.designer.application.module.completion.CompletionContext;
 import com.eas.designer.application.module.completion.CompletionPoint;
-import com.eas.designer.application.module.completion.JsCompletionProvider;
+import com.eas.designer.application.module.completion.CompletionPoint.CompletionToken;
 import java.util.ArrayList;
 import java.util.List;
 import org.netbeans.spi.editor.completion.CompletionResultSet;
@@ -38,12 +38,12 @@ public class DbGridCompletionContext extends CompletionContext {
     }
 
     @Override
-    public CompletionContext getChildContext(String fieldName, int offset) throws Exception {
+    public CompletionContext getChildContext(CompletionToken token, int offset) throws Exception {
         List<DbGridColumn> linearColumns = new ArrayList<>();
         enumerateColumns(grid.getHeader(), linearColumns);
         DbGridColumn targetCol = null;
         for (DbGridColumn col : linearColumns) {
-            if (col.getName() != null && !col.getName().isEmpty() && col.getName().equals(fieldName)) {
+            if (col.getName() != null && !col.getName().isEmpty() && col.getName().equals(token.name)) {
                 targetCol = col;
             }
         }

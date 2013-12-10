@@ -29,8 +29,8 @@ public class ModelCompletionContext extends CompletionContext {
     }
 
     @Override
-    public CompletionContext getChildContext(String fieldName, int offset) throws Exception {
-        ApplicationDbEntity entity = dataObject.getModel().getEntityByName(fieldName);
+    public CompletionContext getChildContext(CompletionPoint.CompletionToken token, int offset) throws Exception {
+        ApplicationDbEntity entity = dataObject.getModel().getEntityByName(token.name);
         if (entity != null) {
             return new EntityCompletionContext(entity);
         }

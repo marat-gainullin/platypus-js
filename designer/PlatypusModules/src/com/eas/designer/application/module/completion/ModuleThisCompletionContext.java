@@ -6,6 +6,7 @@ package com.eas.designer.application.module.completion;
 
 import com.eas.client.cache.PlatypusFilesSupport;
 import com.eas.client.model.application.ApplicationDbEntity;
+import com.eas.designer.application.module.completion.CompletionPoint.CompletionToken;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -48,8 +49,8 @@ public class ModuleThisCompletionContext extends CompletionContext {
     }
 
     @Override
-    public CompletionContext getChildContext(String fieldName, int offset) throws Exception {
-        switch (fieldName) {
+    public CompletionContext getChildContext(CompletionToken token, int offset) throws Exception {
+        switch (token.name) {
             case MODEL_SCRIPT_NAME: {
                 return new ModelCompletionContext(parentContext.getDataObject());
             }
@@ -57,7 +58,7 @@ public class ModuleThisCompletionContext extends CompletionContext {
                 return new ParametersCompletionContext(parentContext.getDataObject().getModel().getParametersEntity().getFields());
             }
         }
-        ApplicationDbEntity entity = parentContext.getDataObject().getModel().getEntityByName(fieldName);
+        ApplicationDbEntity entity = parentContext.getDataObject().getModel().getEntityByName(token.name);
         if (entity != null) {
             return new EntityCompletionContext(entity);
         }

@@ -19,7 +19,7 @@ import com.eas.dbcontrols.grid.DbGrid;
 import com.eas.designer.application.module.completion.BeanCompletionItem;
 import com.eas.designer.application.module.completion.CompletionContext;
 import com.eas.designer.application.module.completion.CompletionPoint;
-import com.eas.designer.application.module.completion.JsCompletionProvider;
+import com.eas.designer.application.module.completion.CompletionPoint.CompletionToken;
 import com.eas.designer.application.module.completion.ModuleCompletionContext;
 import com.eas.designer.application.module.completion.ModuleThisCompletionContext;
 import java.awt.Container;
@@ -46,15 +46,15 @@ public class FormThisCompletionContext extends ModuleThisCompletionContext {
     }
     
     @Override
-    public CompletionContext getChildContext(String fieldName, int offset) throws Exception {
-        CompletionContext completionContext = super.getChildContext(fieldName, offset);
+    public CompletionContext getChildContext(CompletionToken token, int offset) throws Exception {
+        CompletionContext completionContext = super.getChildContext(token, offset);
         if (completionContext != null) {
             return completionContext;
         }
-        if (FormRunner.VIEW_SCRIPT_NAME.equals(fieldName)) {
+        if (FormRunner.VIEW_SCRIPT_NAME.equals(token.name)) {
             return new CompletionContext(Container.class);
         }
-        RADComponent<?> comp = getComponentByName(fieldName);
+        RADComponent<?> comp = getComponentByName(token.name);
         if (comp != null) {
             Class<?> platypusControlClass = FormUtils.getPlatypusControlClass(comp.getBeanClass());
             if (!ModelGrid.class.isAssignableFrom(platypusControlClass)) {

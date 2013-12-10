@@ -9,6 +9,7 @@ import com.eas.designer.application.indexer.IndexerQuery;
 import com.eas.designer.application.module.PlatypusModuleDataObject;
 import static com.eas.designer.application.module.completion.CompletionContext.REPORT_MODULE_NAME;
 import static com.eas.designer.application.module.completion.CompletionContext.addItem;
+import com.eas.designer.application.module.completion.CompletionPoint.CompletionToken;
 import com.eas.designer.application.module.parser.AstUtlities;
 import com.eas.designer.explorer.utils.StringUtils;
 import java.util.Collection;
@@ -74,8 +75,8 @@ public class ModuleCompletionContext extends CompletionContext {
     }
 
     @Override
-    public CompletionContext getChildContext(String fieldName, int offset) throws Exception {
-        return findCompletionContext(fieldName, offset, this);
+    public CompletionContext getChildContext(CompletionToken token, int offset) throws Exception {
+        return findCompletionContext(token.name, offset, this);
     }
 
     public static JsCodeCompletionScopeInfo getCompletionScopeInfo(PlatypusModuleDataObject aDataObject, int offset, String text) {

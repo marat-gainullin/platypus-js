@@ -9,6 +9,8 @@ import com.bearsoft.rowset.metadata.Fields;
 import com.eas.client.model.Entity;
 import com.eas.client.model.application.ApplicationDbModel;
 import com.eas.client.model.script.ScriptableRowset;
+import com.eas.designer.application.module.completion.CompletionPoint.CompletionToken;
+import com.eas.designer.application.module.completion.CompletionPoint.CompletionTokenType;
 import com.eas.script.ScriptFunction;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -38,6 +40,7 @@ public class CompletionContext {
     protected static final String BEANY_PREFIX_GET = "get";// NOI18N
     protected static final String BEANY_PREFIX_SET = "set";// NOI18N
     protected static final String BEANY_PREFIX_IS = "is";// NOI18N
+    private static int QUOTED_STRING_MIN_LENGTH = 2;
     protected Class<?> scriptClass;
 
     public CompletionContext(Class<?> aScriptClass) {
@@ -52,7 +55,7 @@ public class CompletionContext {
         fillJavaCompletionItems(point, resultSet);
     }
 
-    public CompletionContext getChildContext(String str, int offset) throws Exception {
+    public CompletionContext getChildContext(CompletionToken token, int offset) throws Exception {
         return null;
     }
 
@@ -75,7 +78,7 @@ public class CompletionContext {
             }
         }
     }
-
+    
     protected static void addItem(CompletionResultSet resultSet, String aFilter, JsCompletionItem aCompletionItem) {
         if (aFilter == null || aFilter.isEmpty() || (aCompletionItem.getText().toLowerCase().startsWith(aFilter.toLowerCase()) && !aCompletionItem.getText().equals(aFilter))) {
             if (aFilter == null || !(aFilter.endsWith(")") || aFilter.endsWith("}"))) {//NOI18N
@@ -132,7 +135,20 @@ public class CompletionContext {
             }
         }
     }
-
+    
+    protected static boolean isPropertyGet(CompletionToken token, String propertyName) {
+        return (CompletionTokenType.PROPERTY_GET == token.type && propertyName.equals(token.name))
+                || (CompletionTokenType.ELEMENT_GET == token.type && isQuotedString(token.name) && propertyName.equals(removeQuotes(token.name)));
+    }
+    
+    protected static boolean isQuotedString(String str) {
+        return str != null & str.length() > QUOTED_STRING_MIN_LENGTH && str.startsWith("\"") && str.endsWith("\"");//NOI18N
+    }
+    
+    private static String removeQuotes(String str) {
+        return str.substring(1, str.length() - 1);
+    }
+    
     private static boolean isNumberClass(Class<?> clazz) {
         return Number.class.isAssignableFrom(clazz)
                 || Byte.TYPE.equals(clazz)

@@ -20,8 +20,7 @@ public class ModuleCompletionProvider extends JsCompletionProvider {
             CompletionContext completionContext = dataObject.getCompletionContext();
             if (point.context != null && point.context.length > 0) {
                 for (int i = 0; i < point.context.length; i++) {
-                    String fieldName = point.context[i].name;
-                    completionContext = completionContext.getChildContext(fieldName, caretOffset);
+                    completionContext = completionContext.getChildContext(point.context[i], caretOffset);
                     if (completionContext == null) {
                         return;
                     }
