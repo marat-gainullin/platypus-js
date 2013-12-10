@@ -5,6 +5,7 @@
 package com.eas.designer.application.module.completion;
 
 import com.bearsoft.rowset.metadata.Field;
+import com.bearsoft.rowset.metadata.Fields;
 import com.eas.client.model.application.ApplicationDbEntity;
 import org.netbeans.spi.editor.completion.CompletionResultSet;
 
@@ -14,16 +15,16 @@ import org.netbeans.spi.editor.completion.CompletionResultSet;
  */
 public class MetadataCompletionContext extends CompletionContext {
     
-    ApplicationDbEntity entity;
+    Fields fields;
     
-    public MetadataCompletionContext(ApplicationDbEntity anEntity) {
+    public MetadataCompletionContext(Fields aFields) {
         super(null);
-        entity = anEntity;
+        fields = aFields;
     }
     
     @Override
     public void applyCompletionItems(CompletionPoint point, int offset, CompletionResultSet resultSet) throws Exception {
-        fillFieldsValues(entity.getFields(), point, resultSet);
+        fillFieldsValues(fields, point, resultSet);
     }
     
     @Override

@@ -54,7 +54,7 @@ public class ModuleThisCompletionContext extends CompletionContext {
                 return new ModelCompletionContext(parentContext.getDataObject());
             }
             case PARAMS_SCRIPT_NAME: {
-                return new EntityCompletionContext(parentContext.getDataObject().getModel().getParametersEntity());
+                return new ParametersCompletionContext(parentContext.getDataObject().getModel().getParametersEntity().getFields());
             }
         }
         ApplicationDbEntity entity = parentContext.getDataObject().getModel().getEntityByName(fieldName);
@@ -92,8 +92,8 @@ public class ModuleThisCompletionContext extends CompletionContext {
     }
 
     protected void fillVariablesAndFunctions(CompletionPoint point, CompletionResultSet resultSet) throws Exception {
-        fillFieldsValues(parentContext.getDataObject().getModel().getParametersEntity().getFields(), point, resultSet);
-        fillEntities(parentContext.getDataObject().getModel().getEntities().values(), resultSet, point);
+        //fillFieldsValues(parentContext.getDataObject().getModel().getParametersEntity().getFields(), point, resultSet);
+        //fillEntities(parentContext.getDataObject().getModel().getEntities().values(), resultSet, point);
         addItem(resultSet, point.filter, new BeanCompletionItem(parentContext.getDataObject().getModel().getClass(), MODEL_SCRIPT_NAME, null, point.caretBeginWordOffset, point.caretEndWordOffset));
         addItem(resultSet, point.filter, new BeanCompletionItem(parentContext.getDataObject().getModel().getParametersEntity().getRowset().getClass(), PARAMS_SCRIPT_NAME, null, point.caretBeginWordOffset, point.caretEndWordOffset));
         if (enableJsElementsCompletion) {

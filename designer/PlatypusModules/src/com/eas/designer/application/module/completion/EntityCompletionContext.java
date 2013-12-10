@@ -6,7 +6,7 @@ package com.eas.designer.application.module.completion;
 
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.script.ScriptableRowset;
-import com.eas.designer.application.module.completion.CompletionPoint;
+import static com.eas.designer.application.module.completion.CompletionContext.addItem;
 import org.netbeans.spi.editor.completion.CompletionResultSet;
 
 /**
@@ -27,15 +27,18 @@ public class EntityCompletionContext extends CompletionContext {
         if (scriptClass != null) {
             fillJavaCompletionItems(point, resultSet);
         }
+        addItem(resultSet, point.filter, new BeanCompletionItem(entity.getRowset().getClass(), PARAMS_SCRIPT_NAME, null, point.caretBeginWordOffset, point.caretEndWordOffset));
         addItem(resultSet, point.filter, new BeanCompletionItem(entity.getFields().getClass(), METADATA_SCRIPT_NAME, null, point.caretBeginWordOffset, point.caretEndWordOffset));
     }
 
     @Override
     public CompletionContext getChildContext(String fieldName, int offset) throws Exception {
         if (METADATA_SCRIPT_NAME.equalsIgnoreCase(fieldName)) {
-            return new MetadataCompletionContext(entity);
+            return new MetadataCompletionContext(entity.getFields());
         } else if (CURSOR_ENTITY_PROPERTY_NAME.equalsIgnoreCase(fieldName)) {
             return new EntityElementCompletionContext(entity);
+        } else if (PARAMS_SCRIPT_NAME.equals(fieldName)) {
+            return new ParametersCompletionContext(entity.getQuery().getParameters());
         } else {
             return null;
         }
