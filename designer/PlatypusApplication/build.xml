@@ -32,7 +32,6 @@
         <copy file="${lib_own}/BinaryTags.jar" todir="${dest_dir}" overwrite="true" />
         <copy file="${lib_own}/Rowsets.jar" todir="${dest_dir}" overwrite="true" />
         <copy file="${lib_own}/ScalablePane.jar" todir="${dest_dir}" overwrite="true" />
-        <copy file="${lib_own}/SyntaxPane.jar" todir="${dest_dir}" overwrite="true" />
         <copy file="${lib_own}/Routing.jar" todir="${dest_dir}" overwrite="true" />
         
         <copy file="${lib_tp}/JCalendar.jar" todir="${dest_dir}" overwrite="true" />

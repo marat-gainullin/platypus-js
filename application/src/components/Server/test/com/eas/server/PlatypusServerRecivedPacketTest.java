@@ -51,7 +51,7 @@ public class PlatypusServerRecivedPacketTest {
         ports.put(TEST_PORT, "platypus");
         ports.put(TEST_PORT+1, "asc6");
         Set<String> modules = new HashSet<>();
-        modules.add("134148360246876");//"asc6"
+        modules.add("Asc6Acceptor");//"asc6"
         server = new PlatypusServer(new ScriptedDatabasesClient(settings), sslContext, addresses, ports, null, null, null, modules, null);
         server.start();
     }
@@ -79,7 +79,7 @@ public class PlatypusServerRecivedPacketTest {
 
     @Test
     public void testSimpleConnecting() throws UnknownHostException, IOException {
-        PacketReciever reciever = new com.eas.server.handlers.PositioningPacketReciever(server, "134148360246876");
+        PacketReciever reciever = new com.eas.server.handlers.PositioningPacketReciever(server, "Asc6Acceptor");
         try {
             Calendar cl = Calendar.getInstance();
             cl.set(2012, 7, 5, 10, 20, 30);

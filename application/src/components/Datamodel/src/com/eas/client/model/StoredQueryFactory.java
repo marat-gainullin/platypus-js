@@ -24,10 +24,12 @@ import com.eas.util.StringUtils;
 import java.io.StringReader;
 import java.sql.Types;
 import java.util.*;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.xml.parsers.ParserConfigurationException;
+import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.ResultsFinder;
 import net.sf.jsqlparser.SourcesFinder;
 import net.sf.jsqlparser.parser.*;
@@ -43,8 +45,8 @@ import org.w3c.dom.Document;
  */
 public class StoredQueryFactory {
 
-    public static final String _Q = "\\"+ClientConstants.STORED_QUERY_REF_PREFIX+"?";
-    
+    public static final String _Q = "\\" + ClientConstants.STORED_QUERY_REF_PREFIX + "?";
+
     private Fields processSubQuery(SqlQuery aQuery, SubSelect aSubSelect) throws Exception {
         SqlQuery subQuery = new SqlQuery(aQuery.getClient(), aQuery.getDbId(), "");
         subQuery.setEntityId(aSubSelect.getAliasName());
@@ -213,7 +215,7 @@ public class StoredQueryFactory {
                 SqlQuery result = new SqlQuery(client);
                 result.setEntityId(IDGenerator.genID().toString());
                 result.setDbId(leftSqlQuery.getDbId());
-                String leftQueryName  = ClientConstants.STORED_QUERY_REF_PREFIX + leftQueryId.toString();
+                String leftQueryName = ClientConstants.STORED_QUERY_REF_PREFIX + leftQueryId.toString();
                 String leftQueryAlias = leftQueryId.toString();
                 // Text for sql query is generated
                 String selectClause = "*";
@@ -497,19 +499,27 @@ public class StoredQueryFactory {
      */
     public boolean putTableFieldsMetadata(SqlQuery aQuery) throws Exception {
         CCJSqlParserManager parserManager = new CCJSqlParserManager();
-        Statement parsedQuery = parserManager.parse(new StringReader(aQuery.getSqlText()));
-        if (parsedQuery instanceof Select) {
-            Select select = (Select) parsedQuery;
-            resolveOutputFieldsFromTables(aQuery, select.getSelectBody());
-            SqlDriver driver = client.getDbMetadataCache(aQuery.getDbId()).getConnectionDriver();
-            Fields queryFields = aQuery.getFields();
-            if (queryFields != null) {
-                for (Field field : queryFields.toCollection()) {
-                    driver.getTypesResolver().resolve2Application(field);
+        try {
+            Statement parsedQuery = parserManager.parse(new StringReader(aQuery.getSqlText()));
+            if (parsedQuery instanceof Select) {
+                Select select = (Select) parsedQuery;
+                resolveOutputFieldsFromTables(aQuery, select.getSelectBody());
+                SqlDriver driver = client.getDbMetadataCache(aQuery.getDbId()).getConnectionDriver();
+                Fields queryFields = aQuery.getFields();
+                if (queryFields != null) {
+                    for (Field field : queryFields.toCollection()) {
+                        driver.getTypesResolver().resolve2Application(field);
+                    }
                 }
-            }
 
-            return true;
+                return true;
+            }
+        } catch (JSQLParserException ex) {
+            if (aQuery.isProcedure()) {
+                Logger.getLogger(StoredQueryFactory.class.getName()).log(Level.WARNING, null, ex);
+            } else {
+                throw ex;
+            }
         }
         return false;
     }
@@ -662,7 +672,7 @@ public class StoredQueryFactory {
                      * самостоятельно. Такая вот особенность парсера.
                      */
                     Fields tableFields = getTableFields(aQuery.getDbId(), (Table) source);
-                    field = tableFields.get(column.getColumnName());
+                    field = tableFields != null ? tableFields.get(column.getColumnName()) : null;
                 } else if (source instanceof SubSelect) {
                     Fields subFields = processSubQuery(aQuery, (SubSelect) source);
                     field = subFields.get(column.getColumnName());

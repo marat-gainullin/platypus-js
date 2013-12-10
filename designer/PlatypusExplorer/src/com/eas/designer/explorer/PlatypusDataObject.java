@@ -5,15 +5,10 @@
 package com.eas.designer.explorer;
 
 import com.eas.client.DbClient;
-import com.eas.client.cache.PlatypusFiles;
-import com.eas.client.cache.PlatypusFilesSupport;
 import com.eas.designer.application.HandlerRegistration;
 import com.eas.designer.application.project.PlatypusProject;
-import com.eas.designer.explorer.files.wizard.NewApplicationElementWizardIterator;
-import com.eas.script.JsDoc;
 import java.awt.EventQueue;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
@@ -21,8 +16,6 @@ import java.util.logging.Logger;
 import org.netbeans.api.project.FileOwnerQuery;
 import org.netbeans.api.project.Project;
 import org.openide.filesystems.FileObject;
-import org.openide.loaders.DataFolder;
-import org.openide.loaders.DataObject;
 import org.openide.loaders.DataObjectExistsException;
 import org.openide.loaders.MultiDataObject;
 import org.openide.loaders.MultiFileLoader;
@@ -92,7 +85,7 @@ public abstract class PlatypusDataObject extends MultiDataObject {
                     try {
                         validateModel();
                     } catch (Exception ex) {
-                        Logger.getLogger(PlatypusDataObject.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+                        Logger.getLogger(PlatypusDataObject.class.getName()).log(Level.WARNING, ex.getMessage(), ex);
                     } finally {
                         EventQueue.invokeLater(new Runnable() {
                             @Override

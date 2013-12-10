@@ -18,10 +18,10 @@ import static org.junit.Assert.*;
  */
 public class PlatypusClientResourcesSecurityTest {
 
-    public static final String UNSECURE_FORM_ID = "133239635501682";
-    public static final String SECURE_FORM_ID = "133239639702802";
-    public static final String UNSECURE_REPORT_ID = "133239663976162";
-    public static final String SECURE_REPORT_ID = "133239674465069";
+    public static final String UNSECURE_FORM_ID = "UnsecureForm";
+    public static final String SECURE_FORM_ID = "SecureForm";
+    public static final String UNSECURE_REPORT_ID = "UnsecureReport";
+    public static final String SECURE_REPORT_ID = "SecureReport";
     public static final String SECURITY_TESTS_STRUCTURE_DIAGRAM_ID = "133215611839876";
     public static final String SECURITY_TESTS_FOLDER_ID = "133189145962527";
     public static final String RECYCLED_ELEMENTS_ID = "0";

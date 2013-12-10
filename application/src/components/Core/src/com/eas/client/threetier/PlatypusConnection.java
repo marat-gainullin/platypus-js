@@ -37,7 +37,7 @@ public abstract class PlatypusConnection implements AppConnection {
             Logger.getLogger(PlatypusNativeConnection.class.getName()).log(Level.FINEST, ACCESSCONTROL_EXCEPTION_LOG_MSG, new Object[]{aResponse.getRequestID(), aResponse.getError()});
             throw new AccessControlException(((ErrorResponse) aResponse).getError());
         } else {
-            throw new Exception(((ErrorResponse) aResponse).getError());
+            throw new Exception("Error from server: "+((ErrorResponse) aResponse).getError());
         }
     }
 }

@@ -107,8 +107,8 @@ public class SqlQuery extends Query<DbClient> {
         return command;
     }
 
-    public void setCommand(boolean command) {
-        this.command = command;
+    public void setCommand(boolean aValue) {
+        command = aValue;
     }
         
     /**

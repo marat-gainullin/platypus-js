@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <query>
-    <sql>SELECT * FROM TABLE1, TABLE2, Q128082898425059 T0 WHERE ((TABLE2.FIELDA&lt;TABLE1.F1) AND (:P2=TABLE1.F3)) AND (:P3=T0.AMOUNT)</sql>
+    <sql>SELECT * FROM TABLE1, TABLE2, #128082898425059 T0 WHERE ((TABLE2.FIELDA&lt;TABLE1.F1) AND (:P2=TABLE1.F3)) AND (:P3=T0.AMOUNT)</sql>
     <datamodel>
         <parameters>
             <parameter description="" name="P1" nullable="true" precision="0" scale="0" signed="true" size="100" type="-3"/>

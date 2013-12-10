@@ -16,7 +16,6 @@ import com.eas.client.scripts.CompiledScriptDocuments;
 import com.eas.client.scripts.CompiledScriptDocumentsHost;
 import com.eas.client.scripts.ScriptDocument;
 import com.eas.client.scripts.ScriptRunner;
-import com.eas.client.scripts.ServerScriptProxyPrototype;
 import com.eas.client.settings.DbConnectionSettings;
 import com.eas.debugger.jmx.server.Breakpoints;
 import com.eas.debugger.jmx.server.Debugger;
@@ -215,6 +214,7 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
                 try {
                     ServerScriptRunner module = scriptsCache.get(aModuleId);
                     if (module != null) {
+                        sessionManager.getSystemSession().registerModule(module);
                         module.execute();
                         Logger.getLogger(PlatypusServerCore.class.getName()).info(String.format(STARTED_RESIDENT_TASK_MSG, aModuleId));
                         return true;

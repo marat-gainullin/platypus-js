@@ -44,7 +44,7 @@ web.xml:
   </resource-ref>
   <security-constraint>
     <web-resource-collection>
-      <url-pattern>/application/api/*</url-pattern>
+      <url-pattern>/application/*</url-pattern>
     </web-resource-collection>
     <auth-constraint>
       <role-name>*</role-name>
@@ -116,6 +116,10 @@ Standalone server command line:
 Standalone server JVM arguments:
 
 -ea -D.level=INFO -Djava.util.logging.FileHandler.limit=300 -Djava.util.logging.FileHandler.count=1000 -Dhandlers=java.util.logging.ConsoleHandler,java.util.logging.FileHandler -Djava.util.logging.FileHandler.formatter=com.eas.util.logging.PlatypusFormatter -Djava.util.logging.ConsoleHandler.formatter=com.eas.util.logging.PlatypusFormatter -Djava.util.logging.FileHandler.pattern=%h/.platypus/logs/server%g.xls -Djava.util.logging.config.class=com.eas.util.logging.LoggersConfig
+
+Java SE Application JVM arguments:
+
+-ea -D.level=INFO -Djava.util.logging.FileHandler.limit=300 -Djava.util.logging.FileHandler.count=1000 -Dhandlers=java.util.logging.ConsoleHandler,java.util.logging.FileHandler -Djava.util.logging.FileHandler.formatter=com.eas.util.logging.PlatypusFormatter -Djava.util.logging.ConsoleHandler.formatter=com.eas.util.logging.PlatypusFormatter -Djava.util.logging.FileHandler.pattern=%h/.platypus/logs/client%g.log -Djava.util.logging.config.class=com.eas.util.logging.LoggersConfig
 
 Known issues:
 -After platypus-tests application starts, one need to replace web.xml and context.xml and than restart J2EE server.

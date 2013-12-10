@@ -65,9 +65,4 @@ public class SqlQueryTest {
         assertEquals(java.sql.Types.INTEGER, q.getParameters().get(3).getTypeInfo().getSqlType());
         assertEquals(1, q.getParameters().get(3).getValue());
     }
-
-    @Test
-    public void testCheckingForSubQuery() {
-        fail("unimplemented");
-    }
 }

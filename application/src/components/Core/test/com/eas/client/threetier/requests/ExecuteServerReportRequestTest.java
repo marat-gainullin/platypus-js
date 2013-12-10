@@ -19,7 +19,7 @@ import static org.junit.Assert.*;
 public class ExecuteServerReportRequestTest {
 
     private static PlatypusNativeClient appClient;
-    static String MODULE_NAME = "134062649490636";
+    static String MODULE_NAME = "TestReportCore";
 
     public ExecuteServerReportRequestTest() {
     }

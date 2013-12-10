@@ -345,6 +345,9 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
                 // platypus manual queries are:
                 //  - insert, update, delete queries;
                 //  - stored procedures, witch changes data.
+                if (query == null) {
+                    throw new IllegalStateException("Query must present. QueryId: " + queryId + "; tableName: " + getFullTableNameEntityForDescription());
+                }
                 if (!query.isManual()) {
                     // There might be entities - parameters values sources, with no data in theirs rowsets,
                     // so we can't bind query parameters to proper values. In the such case we initialize
