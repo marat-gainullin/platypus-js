@@ -199,6 +199,9 @@ public class JdbcReader {
                 } else {
                     appObject = aResultSet.getObject(i);
                 }
+                if (aExpectedFields.find(jdbcField.getName()) == 0) {
+                    throw new InvalidColIndexException(String.format("Field with name \"%s\" not found in output fields.", jdbcField.getName()));
+                }
                 row.setColumnObject(aExpectedFields.find(jdbcField.getName()), appObject);
             }
             return row;
