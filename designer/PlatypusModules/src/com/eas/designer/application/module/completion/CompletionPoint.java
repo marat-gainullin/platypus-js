@@ -4,14 +4,11 @@
  */
 package com.eas.designer.application.module.completion;
 
-import static com.eas.designer.application.module.completion.JsCompletionProvider.getStartWordOffset;
 import com.eas.designer.application.module.parser.AstUtlities;
 import com.eas.script.JsParser;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import javax.swing.text.BadLocationException;
-import javax.swing.text.StyledDocument;
 import org.mozilla.javascript.ast.AstNode;
 import org.mozilla.javascript.ast.AstRoot;
 import org.mozilla.javascript.ast.ElementGet;
