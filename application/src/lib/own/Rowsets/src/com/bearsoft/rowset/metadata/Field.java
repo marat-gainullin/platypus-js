@@ -119,24 +119,32 @@ public class Field {
         return changeSupport;
     }
 
+    private static final String FK_JS_DOC = "/**\n"
+            + "* Indicates that this field is a foreign key to another table or it is a self-reference key.\n"
+            + "*/";
+    
     /**
      * Returns if this field is foreign key to another table or it is
-     * self-reference key.
+     * a self-reference key.
      *
      * @return If this field is foreign key to another table or it is
      * self-reference key.
      */
-    @ScriptFunction(jsDoc = "Indicates that this field is foreign key to another table or it is self-reference key.")
+    @ScriptFunction(jsDoc = FK_JS_DOC)
     public boolean isFk() {
         return fk != null;
     }
 
+    private static final String PK_JS_DOC = "/**\n"
+            + "* Determines that this field is a primary key.\n"
+            + "*/";
+    
     /**
      * Returns if this field is primary key.
      *
      * @return If this field is primary key.
      */
-    @ScriptFunction(jsDoc = "Determines if this field is primary key.")
+    @ScriptFunction(jsDoc = PK_JS_DOC)
     public boolean isPk() {
         return pk;
     }
@@ -176,12 +184,16 @@ public class Field {
         changeSupport.firePropertyChange(FK_PROPERTY, oldValue, aValue);
     }
 
+    private static final String READOLNY_JS_DOC = "/**\n"
+            + "* Determines if this field is readonly.\n"
+            + "*/";
+    
     /**
      * Returns if this field is readonly.
      *
-     * @return If this field is readonly.
+     * @return If true this field is readonly.
      */
-    @ScriptFunction(jsDoc = "Determines if this field is readonly.")
+    @ScriptFunction(jsDoc = READOLNY_JS_DOC)
     public boolean isReadonly() {
         return readonly;
     }
@@ -253,12 +265,16 @@ public class Field {
      }
      */
 
+    
+    private static final String NAME_JS_DOC = "/**\n"
+            + "* The name of the field.\n"
+            + "*/";
     /**
      * Returns the name of the field.
      *
      * @return The name of the field.
      */
-    @ScriptFunction(jsDoc = "The name of the field.")
+    @ScriptFunction(jsDoc = NAME_JS_DOC)
     public String getName() {
         return name;
     }
@@ -275,9 +291,13 @@ public class Field {
         changeSupport.firePropertyChange(NAME_PROPERTY, oldValue, aValue);
     }
 
-    @ScriptFunction(jsDoc = "The original name of the field. "
-            + "In queries, such as select t1.f1 as f11, t2.f1 as f21 to preserve output fields' names unique, "
-            + "but be able to generate right update sql clauses for multiple tables.")
+    private static final String ORIGINAL_NAME_JS_DOC = "/**\n"
+            + "* The original name of the field.\n"
+            + "* In queries, such as select t1.f1 as f11, t2.f1 as f21 to preserve output fields' names unique,\n"
+            + "* but be able to generate right update sql clauses for multiple tables.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = ORIGINAL_NAME_JS_DOC)
     public String getOriginalName() {
         return originalName;
     }
@@ -289,12 +309,16 @@ public class Field {
         changeSupport.firePropertyChange(ORIGINAL_NAME_PROPERTY, oldValue, originalName);
     }
 
+    private static final String DESCRIPTION_JS_DOC = "/**\n"
+            + "* The description of the field.\n"
+            + "*/";
+    
     /**
      * Returns description of the field.
      *
      * @return Description of the field.
      */
-    @ScriptFunction(jsDoc = "The description of the field.")
+    @ScriptFunction(jsDoc = DESCRIPTION_JS_DOC)
     public String getDescription() {
         return description;
     }
@@ -311,12 +335,16 @@ public class Field {
         changeSupport.firePropertyChange(DESCRIPTION_PROPERTY, oldValue, aValue);
     }
 
+    private static final String TYPE_INFO_JS_DOC = "/**\n"
+            + "* The field's type information.\n"
+            + "*/";
+    
     /**
-     * Returns the field's type description
+     * Returns the field's type information
      *
-     * @return The field's type description
+     * @return The field's type information
      */
-    @ScriptFunction(jsDoc = "The field's type description.")
+    @ScriptFunction(jsDoc = TYPE_INFO_JS_DOC)
     public DataTypeInfo getTypeInfo() {
         return typeInfo;
     }
@@ -334,12 +362,16 @@ public class Field {
         changeSupport.firePropertyChange(TYPE_INFO_PROPERTY, oldValue, typeInfo);
     }
 
+    private static final String SCHEMA_NAME_JS_DOC = "/**\n"
+            + "* This field schema name.\n"
+            + "*/";
+    
     /**
      * Returns the field's schema name.
      *
      * @return The field's schema name.
      */
-    @ScriptFunction(jsDoc = "This field schema name.")
+    @ScriptFunction(jsDoc = SCHEMA_NAME_JS_DOC)
     public String getSchemaName() {
         return schemaName;
     }
@@ -356,12 +388,16 @@ public class Field {
         changeSupport.firePropertyChange(SCHEMA_NAME_PROPERTY, oldValue, aValue);
     }
 
+    private static final String TABLE_NAME_JS_DOC = "/**\n"
+            + "* This field table's name.\n"
+            + "*/";
+    
     /**
      * Returns the field's table name.
      *
      * @return The field's table name.
      */
-    @ScriptFunction(jsDoc = "Table name of the field.")
+    @ScriptFunction(jsDoc = TABLE_NAME_JS_DOC)
     public String getTableName() {
         return tableName;
     }
@@ -378,12 +414,16 @@ public class Field {
         changeSupport.firePropertyChange(TABLE_NAME_PROPERTY, oldValue, aValue);
     }
 
+    private static final String SIZE_JS_DOC = "/**\n"
+            + "* The size of the field.\n"
+            + "*/";
+    
     /**
      * Returns the field size.
      *
      * @return The field size.
      */
-    @ScriptFunction(jsDoc = "The size of the field.")
+    @ScriptFunction(jsDoc = SIZE_JS_DOC)
     public int getSize() {
         return size;
     }
@@ -400,12 +440,16 @@ public class Field {
         changeSupport.firePropertyChange(SIZE_PROPERTY, oldValue, aValue);
     }
 
+    private static final String SCALE_JS_DOC = "/**\n"
+            + "* The scale of the field.\n"
+            + "*/";
+    
     /**
      * Returns the field's scale.
      *
      * @return The field's scale.
      */
-    @ScriptFunction(jsDoc = "Field's scale.")
+    @ScriptFunction(jsDoc = SCALE_JS_DOC)
     public int getScale() {
         return scale;
     }
@@ -422,12 +466,16 @@ public class Field {
         changeSupport.firePropertyChange(SCALE_PROPERTY, oldValue, aValue);
     }
 
+    private static final String PRECISION_JS_DOC = "/**\n"
+            + "* The precision of the field.\n"
+            + "*/";
+    
     /**
      * Returns the field's precision.
      *
      * @return The field's precision.
      */
-    @ScriptFunction(jsDoc = "Field's precision.")
+    @ScriptFunction(jsDoc = PRECISION_JS_DOC)
     public int getPrecision() {
         return precision;
     }
@@ -444,12 +492,16 @@ public class Field {
         changeSupport.firePropertyChange(PRECISION_PROPERTY, oldValue, aValue);
     }
 
+    private static final String SIGNED_JS_DOC = "/**\n"
+            + "* Determines if the field is signed.\n"
+            + "*/";
+    
     /**
      * Returns whether this field is signed.
      *
      * @return Whether this field is signed.
      */
-    @ScriptFunction(jsDoc = "Determines if field is signed.")
+    @ScriptFunction(jsDoc = SIGNED_JS_DOC)
     public boolean isSigned() {
         return signed;
     }
@@ -466,12 +518,16 @@ public class Field {
         changeSupport.firePropertyChange(SIGNED_PROPERTY, oldValue, aValue);
     }
 
+    private static final String NULLABLE_JS_DOC = "/**\n"
+            + "* Determines if field is nullable.\n"
+            + "*/";
+    
     /**
      * Returns whether this field is nullable.
      *
      * @return Whether this field is nullable.
      */
-    @ScriptFunction(jsDoc = "Determines if field is nullable.")
+    @ScriptFunction(jsDoc = NULLABLE_JS_DOC)
     public boolean isNullable() {
         return nullable;
     }
