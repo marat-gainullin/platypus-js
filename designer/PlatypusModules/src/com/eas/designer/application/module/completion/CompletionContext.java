@@ -151,7 +151,8 @@ public class CompletionContext {
     }
     
     protected static boolean isQuotedString(String str) {
-        return str != null & str.length() > QUOTED_STRING_MIN_LENGTH && str.startsWith("\"") && str.endsWith("\"");//NOI18N
+        return str != null & str.length() > QUOTED_STRING_MIN_LENGTH 
+                && ((str.startsWith("\"") && str.endsWith("\"")) || (str.startsWith("'") && str.endsWith("'")));//NOI18N
     }
     
     private static String removeQuotes(String str) {
