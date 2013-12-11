@@ -13,7 +13,6 @@ import com.eas.sensors.positioning.PositioningPacket;
 import com.eas.sensors.retranslate.RetranslatePacketFactory;
 import com.eas.sensors.retranslate.http.HttpPushEncoder;
 import com.eas.server.PlatypusServerCore;
-import com.eas.server.PositioningPacketStorage;
 import java.net.IDN;
 import java.net.InetSocketAddress;
 import java.security.cert.X509Certificate;
@@ -41,8 +40,6 @@ public class PositioningPacketReciever implements PacketReciever {
     public static final Pattern URL_PATTERN = Pattern.compile("(?:(?<SCHEMA>[a-z0-9\\+\\.\\-]+):)?(?://)?(?:(?<USER>[a-zA-Z0-9\\$\\-\\_\\.\\+\\!\\*\\'\\(\\)\\,\\\"]+):(?<PASS>[a-zA-Z0-9\\$\\-\\_\\.\\+\\!\\*\\'\\(\\)\\,\\\"]*)@)?(?<URL>[a-zA-Z0-9\\$\\-\\_\\.\\+\\!\\*\\'\\(\\)\\,\\\"]+):?(?<PORT>\\d+)?(?<PATH>/[a-zA-Z0-9\\$\\-\\_\\.\\+\\!\\*\\'\\(\\)\\,\\\"]+)*(?<FILE>/[a-zA-Z0-9\\$\\-\\_\\.\\+\\!\\*\\'\\(\\)\\,\\\"]+)?(?<QUERY>\\?[a-zA-Z0-9\\$\\-\\_\\.\\+\\!\\*\\'\\(\\)\\,\\\"\\;\\/\\?\\:\\@\\=\\&]+)?");
     protected String moduleId;
     protected PlatypusServerCore serverCore;
-    private PositioningPacketStorage packetStorage = new PositioningPacketStorage();
-    private PositioningPacketStorage invalidPacketStorage = new PositioningPacketStorage(false);
 
     public PositioningPacketReciever(PlatypusServerCore aServer, String aModuleId) {
         super();
@@ -157,19 +154,5 @@ public class PositioningPacketReciever implements PacketReciever {
     @Override
     public void putWaitingRequest(String aDeviceID, DeviceRequest aRequest) {
         PositioningIoHandler.waitingRequests.putRequest(aDeviceID, aRequest);
-    }
-
-    /**
-     * @return the packetStorage
-     */
-    public PositioningPacketStorage getPacketStorage() {
-        return packetStorage;
-    }
-
-    /**
-     * @return the packetNotValidStorage
-     */
-    public PositioningPacketStorage getInvalidPacketStorage() {
-        return invalidPacketStorage;
     }
 }

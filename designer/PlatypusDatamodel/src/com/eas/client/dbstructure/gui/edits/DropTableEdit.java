@@ -28,10 +28,10 @@ import java.util.logging.Logger;
  */
 public class DropTableEdit extends DbStructureEdit {
 
-    protected Fields fields = null;
+    protected Fields fields;
     protected List<ForeignKeySpec> inFks = new ArrayList<>();
     protected List<ForeignKeySpec> outFks = new ArrayList<>();
-    protected String tableName = null;
+    protected String tableName;
 
     public DropTableEdit(SqlActionsController aSqlController, String aTableName, Fields aFields, FieldsEntity tableEntity) {
         super(aSqlController);
