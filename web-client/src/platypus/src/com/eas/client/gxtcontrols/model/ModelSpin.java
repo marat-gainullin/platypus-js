@@ -1,6 +1,7 @@
 package com.eas.client.gxtcontrols.model;
 
 import com.bearsoft.rowset.metadata.Field;
+import com.eas.client.gxtcontrols.ControlsUtils;
 import com.eas.client.gxtcontrols.converters.DoubleRowValueConverter;
 import com.eas.client.gxtcontrols.wrappers.component.PlatypusAdapterStandaloneField;
 import com.eas.client.gxtcontrols.wrappers.handled.PlatypusDateHandledField;
@@ -194,10 +195,10 @@ public class ModelSpin extends PlatypusAdapterStandaloneField<Double> {
 	}
 	
 	public void setEmptyText(String aValue){
-		((PlatypusSpinnerHandledField)target).setEmptyText(aValue);
+		ControlsUtils.setEmptyText(((PlatypusSpinnerHandledField)target), aValue);
 	}
 	
 	public String getEmptyText(){
-		return ((PlatypusSpinnerHandledField)target).getEmptyText();
-	}
+		return ControlsUtils.getEmptyText(((PlatypusSpinnerHandledField)target));
+	}	
 }

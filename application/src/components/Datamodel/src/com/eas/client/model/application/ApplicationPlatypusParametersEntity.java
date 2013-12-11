@@ -16,6 +16,7 @@ import com.eas.client.model.script.ScriptableRowset;
 import com.eas.client.model.visitors.ApplicationModelVisitor;
 import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.queries.PlatypusQuery;
+import com.eas.script.NativeJavaHostObject;
 import java.util.ArrayList;
 import java.util.List;
 import org.mozilla.javascript.Scriptable;
@@ -119,31 +120,36 @@ public class ApplicationPlatypusParametersEntity extends ApplicationPlatypusEnti
     @Override
     public Scriptable defineProperties() throws Exception {
         if (model.getScriptThis() != null && model.getScriptThis() instanceof ScriptableObject) {
-            ScriptableObject scope = (ScriptableObject) model.getScriptThis();
             ScriptableRowset<ApplicationPlatypusEntity> sRowset = new ScriptableRowset<>((ApplicationPlatypusEntity)this);
-            // global parameters names
+            NativeJavaHostObject modelPublished = model.getPublished();
+            sRowsetWrap = new RowsetHostObject<>(sRowset, modelPublished);
+            // deprecated
+            /* global parameters names */
             Fields md = sRowset.getFields();
             sRowset.createScriptableFields();
+            ScriptableObject moduleThis = (ScriptableObject) model.getScriptThis();
             if (md != null) {
                 for (int i = 1; i <= md.getFieldsCount(); i++) {
                     Field field = md.get(i);
                     String fName = field.getName();
                     if (fName != null && !fName.isEmpty()) {
-                        scope.defineProperty(fName, sRowset.getScriptableField(fName), ScriptableRowset.getValueScriptableFieldMethod, ScriptableRowset.setValueScriptableFieldMethod, 0);
+                        /* var m = new Module1(); m.param1 */
+                        moduleThis.defineProperty(fName, sRowset.getScriptableField(fName), ScriptableRowset.getValueScriptableFieldMethod, ScriptableRowset.setValueScriptableFieldMethod, 0);
                     }
                 }
             }
-            // predefined and user parameters names
-            sRowsetWrap = new RowsetHostObject<>(sRowset, scope);
-            // global parameters metadata
-            scope.defineProperty(Model.DATASOURCE_METADATA_SCRIPT_NAME, sRowsetWrap.get(Model.DATASOURCE_METADATA_SCRIPT_NAME, sRowsetWrap), ScriptableObject.READONLY);
-            // predefined
-            scope.defineProperty(Model.PARAMETERS_SCRIPT_NAME, sRowsetWrap, ScriptableObject.READONLY);
-            // user
+            /* predefined and user parameters names
+            /* global parameters metadata */
+            moduleThis.defineProperty(Model.DATASOURCE_METADATA_SCRIPT_NAME, sRowsetWrap.get(Model.DATASOURCE_METADATA_SCRIPT_NAME, sRowsetWrap), ScriptableObject.READONLY);
+            /* predefined */
+            moduleThis.defineProperty(Model.PARAMETERS_SCRIPT_NAME, sRowsetWrap, ScriptableObject.READONLY);
+            /* user */
             String dsName = getName();
             if (dsName != null && !dsName.isEmpty()) {
-                scope.defineProperty(dsName, sRowsetWrap, ScriptableObject.READONLY);
+                moduleThis.defineProperty(dsName, sRowsetWrap, ScriptableObject.READONLY);
             }
+            //
+            modelPublished.defineProperty(Model.PARAMETERS_SCRIPT_NAME, sRowsetWrap);
             return sRowsetWrap;
         }
         return null;

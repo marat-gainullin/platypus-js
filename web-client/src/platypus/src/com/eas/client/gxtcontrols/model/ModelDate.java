@@ -180,10 +180,10 @@ public class ModelDate extends PlatypusAdapterStandaloneField<Date> {
 	}
 	
 	public void setEmptyText(String aValue){
-		((PlatypusDateHandledField)target).setEmptyText(aValue);
+		ControlsUtils.setEmptyText(((PlatypusDateHandledField)target), aValue);
 	}
 	
 	public String getEmptyText(){
-		return ((PlatypusDateHandledField)target).getEmptyText();
-	}
+		return ControlsUtils.getEmptyText(((PlatypusDateHandledField)target));
+	}	
 }

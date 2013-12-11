@@ -1,6 +1,7 @@
 package com.eas.client.gxtcontrols.model;
 
 import com.bearsoft.rowset.metadata.Field;
+import com.eas.client.gxtcontrols.ControlsUtils;
 import com.eas.client.gxtcontrols.converters.StringRowValueConverter;
 import com.eas.client.gxtcontrols.wrappers.component.PlatypusAdapterStandaloneField;
 import com.eas.client.gxtcontrols.wrappers.handled.PlatypusFormattedTextHandledField;
@@ -153,10 +154,11 @@ public class ModelTextArea extends PlatypusAdapterStandaloneField<String> {
 	}
 	
 	public void setEmptyText(String aValue){
-		((PlatypusTextHandledArea)target).setEmptyText(aValue);
+		ControlsUtils.setEmptyText(((PlatypusTextHandledArea)target), aValue);
 	}
 	
 	public String getEmptyText(){
-		return ((PlatypusTextHandledArea)target).getEmptyText();
+		return ControlsUtils.getEmptyText(((PlatypusTextHandledArea)target));
 	}
+	
 }

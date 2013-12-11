@@ -738,7 +738,7 @@ public class GxtControlsFactory {
 	}
 
 	private Component createPasswordField(Element aTag) throws Exception {
-		PasswordField component = new PlatypusPasswordField();
+		PlatypusPasswordField component = new PlatypusPasswordField();
 		processEvents(component, aTag);
 		Publisher.publish(component);
 		setText(component, aTag);

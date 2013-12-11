@@ -913,7 +913,7 @@ public class Entity implements RowsetListener {
 	}-*/;
 
 	public static native void publishRows(JavaScriptObject aPublished) throws Exception/*-{
-		for ( var j = 0; j < aPublished.length; j++) {
+		for (var j = 0; j < aPublished.length; j++) {
 			aPublished[(j + "")] = aPublished.getRow(j + 1);
 		}
 	}-*/;

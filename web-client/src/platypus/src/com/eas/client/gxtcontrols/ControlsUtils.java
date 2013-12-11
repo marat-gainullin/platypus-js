@@ -22,6 +22,7 @@ import com.eas.client.model.Entity;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.dom.client.Style.FontStyle;
@@ -41,6 +42,7 @@ import com.sencha.gxt.widget.core.client.Window;
 import com.sencha.gxt.widget.core.client.container.Container;
 import com.sencha.gxt.widget.core.client.form.AdapterField;
 import com.sencha.gxt.widget.core.client.form.FileUploadField;
+import com.sencha.gxt.widget.core.client.form.ValueBaseField;
 import com.sencha.gxt.widget.core.client.grid.Grid;
 
 public class ControlsUtils {
@@ -141,6 +143,20 @@ public class ControlsUtils {
 		 */
 	}
 
+	public static String getEmptyText(ValueBaseField<?> aField) {
+		XElement iel = XElement.as(aField.getCell().getInputElement(aField.getElement()));
+		return iel.getAttribute("placeholder");
+	}
+
+	public static void setEmptyText(ValueBaseField<?> aField, String aValue) {
+		XElement iel = XElement.as(aField.getCell().getInputElement(aField.getElement()));
+		setEmptyText(iel, aValue);
+	}
+
+	public static void setEmptyText(Element aElement, String aValue) {
+		aElement.setAttribute("placeholder", aValue);
+	}
+	
 	protected static RegExp rgbPattern = RegExp.compile("rgb *\\( *([0-9]+) *, *([0-9]+) *, *([0-9]+) *\\)");
 	protected static RegExp rgbaPattern = RegExp.compile("rgba *\\( *([0-9]+) *, *([0-9]+) *, *([0-9]+) *, *([0-9]*\\.?[0-9]+) *\\)");
 
@@ -163,7 +179,7 @@ public class ControlsUtils {
 						return PublishedColor.create(Integer.valueOf(m1.getGroup(1)), // r
 						        Integer.valueOf(m1.getGroup(2)), // g
 						        Integer.valueOf(m1.getGroup(3)), // b
-						        Math.round(Float.valueOf(m1.getGroup(3))*255)); // a
+						        Math.round(Float.valueOf(m1.getGroup(3)) * 255)); // a
 					}
 				}
 			}
@@ -212,7 +228,8 @@ public class ControlsUtils {
 	 * @return
 	 * @throws Exception
 	 */
-	public static PublishedCell calcStandalonePublishedCell(JavaScriptObject aEventThis, JavaScriptObject cellFunction, Row aRow, String aDisplay, ModelElementRef aModelElement, PublishedCell aAlreadyCell) throws Exception {
+	public static PublishedCell calcStandalonePublishedCell(JavaScriptObject aEventThis, JavaScriptObject cellFunction, Row aRow, String aDisplay, ModelElementRef aModelElement,
+	        PublishedCell aAlreadyCell) throws Exception {
 		if (aEventThis != null && aModelElement != null && cellFunction != null) {
 			if (aRow != null) {
 				PublishedCell cell = aAlreadyCell != null ? aAlreadyCell : Publisher.publishCell(Utils.toJs(aRow.getColumnObject(aModelElement.getColIndex())), aDisplay);
@@ -320,12 +337,14 @@ public class ControlsUtils {
 				aElement.getStyle().setProperty("fontFamily", aFont != null ? aFont.getFamily() : "");
 				if (aFont != null) {
 					aElement.getStyle().setFontSize(aFont.getSize(), Unit.PT);
-					if(aFont.isBold())
+					if (aFont.isBold())
 						aElement.getStyle().setFontWeight(FontWeight.BOLD);
-					//aElement.getStyle().setFontWeight(aFont.isBold() ? FontWeight.BOLD : FontWeight.NORMAL);
-					if(aFont.isItalic())
+					// aElement.getStyle().setFontWeight(aFont.isBold() ?
+					// FontWeight.BOLD : FontWeight.NORMAL);
+					if (aFont.isItalic())
 						aElement.getStyle().setFontStyle(FontStyle.ITALIC);
-					//aElement.getStyle().setFontStyle(aFont.isItalic() ? FontStyle.ITALIC : FontStyle.NORMAL);
+					// aElement.getStyle().setFontStyle(aFont.isItalic() ?
+					// FontStyle.ITALIC : FontStyle.NORMAL);
 				} else {
 					aElement.getStyle().clearFontSize();
 					aElement.getStyle().clearFontWeight();
@@ -378,5 +397,5 @@ public class ControlsUtils {
 			ControlsUtils.applyFont(aComponent, published.getFont());
 		if (published.isCursorSet())
 			ControlsUtils.applyCursor(aComponent, published.getCursor());
-    }
+	}
 }

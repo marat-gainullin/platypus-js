@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <shortcuts>
     <programGroup defaultName="Alternative-Soft" location="applications"/>
-	 <shortcut
+    <shortcut
      name="PlatypusClient"
      programGroup="yes"
      desktop="yes"

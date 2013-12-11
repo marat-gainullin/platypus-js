@@ -100,7 +100,7 @@ public class ProjectRunner {
                         clientEnv.port = project.getSettings().getDebugClientPort();
                         clientEnv.runningProgram = runningProgram;
                         clientEnv.runningElement = project.getSettings().getAppSettings().getRunElement();
-                        DebuggerUtils.attachDebugger(clientEnv, 3);
+                        DebuggerUtils.attachDebugger(clientEnv, 5);
                         project.getOutputWindowIO().getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Client_Debug_Activated"));//NOI18N
                     } catch (Exception ex) {
                         runningProgram.cancel(true);
@@ -114,7 +114,7 @@ public class ProjectRunner {
                             serverEnv.port = project.getSettings().getDebugServerPort();
                             serverEnv.runningProgram = null;
                             serverEnv.runningElement = null;
-                            DebuggerUtils.attachDebugger(serverEnv, 3);
+                            DebuggerUtils.attachDebugger(serverEnv, 5);
                             project.getOutputWindowIO().getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Server_Debug_Activated"));//NOI18N
                         } catch (Exception ex) {
                             ErrorManager.getDefault().notify(ex);

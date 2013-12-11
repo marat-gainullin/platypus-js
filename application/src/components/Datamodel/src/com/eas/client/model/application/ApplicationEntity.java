@@ -532,8 +532,14 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
         if (model.getScriptThis() != null && model.getScriptThis() instanceof ScriptableObject) {
             if (name != null && !name.isEmpty()) {
                 ScriptableRowset<E> sRowset = new ScriptableRowset<>((E) this);
-                sRowsetWrap = new RowsetHostObject<>(sRowset, model.getScriptThis());
-                ((ScriptableObject) model.getScriptThis()).defineProperty(name, sRowsetWrap, ScriptableObject.READONLY);
+                sRowsetWrap = new RowsetHostObject<>(sRowset, model.getPublished());
+                // var m = new Module1(); m.model.entity1
+                model.getPublished().defineProperty(name, sRowsetWrap);
+                // deprecated
+                ScriptableObject moduleThis = (ScriptableObject) model.getScriptThis();                
+                /* var m = new Module1(); m.entity1 */
+                moduleThis.defineProperty(name, sRowsetWrap, ScriptableObject.READONLY);
+                //
                 return sRowsetWrap;
             }
         }

@@ -49,7 +49,7 @@ public class BreakpointsReader implements Properties.Reader {
     public void write(Object object, Properties properties) {
         if (object instanceof PlatypusBreakpoint) {
             PlatypusBreakpoint b = (PlatypusBreakpoint) object;
-            FileObject fo = (FileObject) b.getLine().getLookup().lookup(FileObject.class);
+            FileObject fo = b.getLine().getLookup().lookup(FileObject.class);
             properties.setString("url", fo.toURL().toString());
             properties.setInt(
                     "lineNumber",

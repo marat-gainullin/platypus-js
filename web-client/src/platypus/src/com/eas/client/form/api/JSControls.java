@@ -381,7 +381,7 @@ public class JSControls {
 			}
 
 			var published = this;
-			aComponent = aComponent || @com.sencha.gxt.widget.core.client.form.PasswordField::new()();
+			aComponent = aComponent || @com.eas.client.gxtcontrols.wrappers.component.PlatypusPasswordField::new()();
 			published.unwrap = function() {
 				return aComponent;
 			};
@@ -390,18 +390,18 @@ public class JSControls {
 
 			Object.defineProperty(published, "text", {
 				get : function() {
-					return aComponent.@com.sencha.gxt.widget.core.client.form.PasswordField::getText()();
+					return aComponent.@com.eas.client.gxtcontrols.wrappers.component.PlatypusPasswordField::getText()();
 				},
 				set : function(aValue) {
-					aComponent.@com.sencha.gxt.widget.core.client.form.PasswordField::setText(Ljava/lang/String;)(aValue!=null?''+aValue:null);
+					aComponent.@com.eas.client.gxtcontrols.wrappers.component.PlatypusPasswordField::setText(Ljava/lang/String;)(aValue!=null?''+aValue:null);
 				}
 			});
 			Object.defineProperty(published, "emptyText", {
 				get : function() {
-					return aComponent.@com.sencha.gxt.widget.core.client.form.PasswordField::getEmptyText()();
+					return aComponent.@com.eas.client.gxtcontrols.wrappers.component.PlatypusPasswordField::getEmptyText()();
 				},
 				set : function(aValue) {
-					aComponent.@com.sencha.gxt.widget.core.client.form.PasswordField::setEmptyText(Ljava/lang/String;)(aValue!=null?''+aValue:null);
+					aComponent.@com.eas.client.gxtcontrols.wrappers.component.PlatypusPasswordField::setEmptyText(Ljava/lang/String;)(aValue!=null?''+aValue:null);
 				}
 			});
 			

@@ -1,5 +1,6 @@
 package com.eas.client.gxtcontrols.wrappers.component;
 
+import com.eas.client.gxtcontrols.ControlsUtils;
 import com.sencha.gxt.cell.core.client.form.PasswordInputCell;
 import com.sencha.gxt.widget.core.client.form.PasswordField;
 
@@ -34,5 +35,15 @@ public class PlatypusPasswordField extends PasswordField {
 				recurse = false;
 			}
 		}
+	}
+	
+	@Override
+	public String getEmptyText() {
+		return ControlsUtils.getEmptyText(this);
+	}
+	
+	@Override
+	public void setEmptyText(String emptyText) {
+		ControlsUtils.setEmptyText(this, emptyText);
 	}
 }

@@ -3,6 +3,7 @@ package com.eas.client.gxtcontrols.wrappers.component;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.eas.client.gxtcontrols.ControlsUtils;
 import com.google.gwt.event.dom.client.HasAllKeyHandlers;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
@@ -65,11 +66,13 @@ public class PlatypusHtmlEditor extends HtmlEditor implements HasAllKeyHandlers 
 	}
 
 	protected String emptyText;
-	
+
 	public void setEmptyText(String aValue) {
 		emptyText = aValue;
 		if (sourceTextArea != null)
-			sourceTextArea.setEmptyText(aValue);
+			ControlsUtils.setEmptyText(sourceTextArea, aValue);
+		if (textArea != null)
+			ControlsUtils.setEmptyText(textArea.getElement(), aValue);
 	}
 
 	public String getEmptyText() {
