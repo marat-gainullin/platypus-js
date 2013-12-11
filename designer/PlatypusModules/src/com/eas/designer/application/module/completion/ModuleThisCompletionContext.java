@@ -50,13 +50,8 @@ public class ModuleThisCompletionContext extends CompletionContext {
 
     @Override
     public CompletionContext getChildContext(CompletionToken token, int offset) throws Exception {
-        switch (token.name) {
-            case MODEL_SCRIPT_NAME: {
-                return new ModelCompletionContext(parentContext.getDataObject());
-            }
-            case PARAMS_SCRIPT_NAME: {
-                return new ParametersCompletionContext(parentContext.getDataObject().getModel().getParametersEntity().getFields());
-            }
+        if (MODEL_SCRIPT_NAME.equals(token.name)) {
+            return new ModelCompletionContext(parentContext.getDataObject());
         }
         ApplicationDbEntity entity = parentContext.getDataObject().getModel().getEntityByName(token.name);
         if (entity != null) {
@@ -94,7 +89,6 @@ public class ModuleThisCompletionContext extends CompletionContext {
 
     protected void fillVariablesAndFunctions(CompletionPoint point, CompletionResultSet resultSet) throws Exception {
         addItem(resultSet, point.getFilter(), new BeanCompletionItem(parentContext.getDataObject().getModel().getClass(), MODEL_SCRIPT_NAME, null, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
-        addItem(resultSet, point.getFilter(), new BeanCompletionItem(parentContext.getDataObject().getModel().getParametersEntity().getRowset().getClass(), PARAMS_SCRIPT_NAME, null, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
         if (enableJsElementsCompletion) {
             ScanJsElementsSupport scanner = new ScanJsElementsSupport(PlatypusFilesSupport.extractModuleConstructor(parentContext.getDataObject().getAst()));
             for (JsCompletionItem i : scanner.getCompletionItems(point)) {
