@@ -18,7 +18,7 @@ import java.awt.Color;
 public class TextFieldDesignInfo extends ControlDesignInfo {
 
     protected int columns;
-    protected int horizontalAlignment = 10;// javax.swing.SwingConstants.LEADING;
+    protected int horizontalAlignment = 10;// javax.swing.SwingConstants.LEADING; 
     protected int scrollOffset;
     protected int caretPosition;
     protected boolean dragEnabled;
@@ -26,6 +26,7 @@ public class TextFieldDesignInfo extends ControlDesignInfo {
     protected int selectionEnd;
     protected int selectionStart;
     protected String text;
+    protected String emptyText;
     protected Color caretColor;
     protected Color disabledTextColor;
     protected Color selectedTextColor;
@@ -141,6 +142,18 @@ public class TextFieldDesignInfo extends ControlDesignInfo {
         String oldValue = text;
         text = aValue;
         firePropertyChange("text", oldValue, text);
+    }
+
+    @Serial
+    public String getEmptyText() {
+        return emptyText;
+    }
+
+    @Serial
+    public void setEmptyText(String aValue) {
+        String oldValue = emptyText;
+        emptyText = aValue;
+        firePropertyChange("emptyText", oldValue, emptyText);
     }
 
     public Color getCaretColor() {
@@ -280,6 +293,9 @@ public class TextFieldDesignInfo extends ControlDesignInfo {
         if ((this.text == null) ? (other.text != null) : !this.text.equals(other.text)) {
             return false;
         }
+        if ((this.emptyText == null) ? (other.emptyText != null) : !this.emptyText.equals(other.emptyText)) {
+            return false;
+        }
         if (this.caretColor != other.caretColor && (this.caretColor == null || !this.caretColor.equals(other.caretColor))) {
             return false;
         }
@@ -314,7 +330,8 @@ public class TextFieldDesignInfo extends ControlDesignInfo {
             selectionEnd = source.selectionEnd;
             selectionStart = source.selectionStart;
 
-            text = source.text != null ? new String(source.text.toCharArray()) : null;
+            text = source.text;
+            emptyText = source.emptyText;
             caretColor = source.caretColor != null ? new Color(source.caretColor.getRed(), source.caretColor.getGreen(), source.caretColor.getBlue(), source.caretColor.getAlpha()) : null;
             disabledTextColor = source.disabledTextColor != null ? new Color(source.disabledTextColor.getRed(), source.disabledTextColor.getGreen(), source.disabledTextColor.getBlue(), source.disabledTextColor.getAlpha()) : null;
             selectedTextColor = source.selectedTextColor != null ? new Color(source.selectedTextColor.getRed(), source.selectedTextColor.getGreen(), source.selectedTextColor.getBlue(), source.selectedTextColor.getAlpha()) : null;

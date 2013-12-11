@@ -12,40 +12,45 @@ import javax.swing.JPasswordField;
  *
  * @author mg
  */
-public class PasswordField extends Component<JPasswordField>{
-      
+public class PasswordField extends Component<JPasswordField> {
+
     private static final String CONSTRUCTOR_JSDOC = "/**\n"
             + "* Password field component.\n"
             + "* @param text the text for the component (optional)\n"
             + "*/";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text"})
-    public PasswordField(String aText)
-    {
+    public PasswordField(String aText) {
         super();
         setDelegate(new JPasswordField(aText));
     }
-    
-    public PasswordField()
-    {
-        this((String)null);
+
+    public PasswordField() {
+        this((String) null);
     }
-    
-    protected PasswordField(JPasswordField aDelegate)
-    {
+
+    protected PasswordField(JPasswordField aDelegate) {
         super();
         setDelegate(aDelegate);
     }
-    
-    @ScriptFunction(jsDoc="The text contained in this component.")
-    public String getText()
-    {
+
+    @ScriptFunction(jsDoc = "The text contained in this component.")
+    public String getText() {
         return new String(delegate.getPassword());
     }
-    
+
     @ScriptFunction
-    public void setText(String aValue)
-    {
+    public void setText(String aValue) {
         delegate.setText(aValue);
+    }
+
+    @ScriptFunction
+    public String getEmptyText() {
+        return (String) delegate.getClientProperty(Component.EMPTY_TEXT_PROP_NAME);
+    }
+
+    @ScriptFunction
+    public void setEmptyText(String aValue) {
+        delegate.putClientProperty(Component.EMPTY_TEXT_PROP_NAME, aValue);
     }
 }

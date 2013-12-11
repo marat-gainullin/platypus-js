@@ -161,4 +161,13 @@ public class ModelFormattedField extends PlatypusAdapterStandaloneField<Object> 
 	public void setValue(Object value, boolean fireEvents) {
 		super.setValue(value, fireEvents);
 	}
+	
+	public void setEmptyText(String aValue){
+		((PlatypusFormattedTextHandledField)target).setEmptyText(aValue);
+	}
+	
+	public String getEmptyText(){
+		return ((PlatypusFormattedTextHandledField)target).getEmptyText();
+	}
+	
 }

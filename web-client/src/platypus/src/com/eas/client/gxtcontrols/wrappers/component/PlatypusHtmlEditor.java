@@ -64,6 +64,18 @@ public class PlatypusHtmlEditor extends HtmlEditor implements HasAllKeyHandlers 
 		reregisterFocusBlur();
 	}
 
+	protected String emptyText;
+	
+	public void setEmptyText(String aValue) {
+		emptyText = aValue;
+		if (sourceTextArea != null)
+			sourceTextArea.setEmptyText(aValue);
+	}
+
+	public String getEmptyText() {
+		return emptyText;
+	}
+
 	protected void reregisterFocusBlur() {
 		registered.removeHandler();
 		if (sourceTextArea != null) {
@@ -93,7 +105,7 @@ public class PlatypusHtmlEditor extends HtmlEditor implements HasAllKeyHandlers 
 		try {// to fix GXT's bug
 			super.onEnable();
 		} catch (Exception ex) {
-			Logger.getLogger(PlatypusHtmlEditor.class.getName()).log(Level.SEVERE, "Sencha's bug in HtmlEditor: "+ex.getMessage());
+			Logger.getLogger(PlatypusHtmlEditor.class.getName()).log(Level.SEVERE, "Sencha's bug in HtmlEditor: " + ex.getMessage());
 		}
 	}
 
@@ -102,7 +114,7 @@ public class PlatypusHtmlEditor extends HtmlEditor implements HasAllKeyHandlers 
 		try {// to fix GXT's bug
 			super.onDisable();
 		} catch (Exception ex) {
-			Logger.getLogger(PlatypusHtmlEditor.class.getName()).log(Level.SEVERE, "Sencha's bug in HtmlEditor: "+ex.getMessage());
+			Logger.getLogger(PlatypusHtmlEditor.class.getName()).log(Level.SEVERE, "Sencha's bug in HtmlEditor: " + ex.getMessage());
 		}
 	}
 

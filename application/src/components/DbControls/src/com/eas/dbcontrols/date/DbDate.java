@@ -473,6 +473,19 @@ public class DbDate extends DbControlPanel implements DbControl {
         }
     }
     
+    
+    protected String emptyText;
+    
+    public String getEmptyText() {
+        return emptyText;
+    }
+
+    public void setEmptyText(String aValue) {
+        String oldValue = emptyText;
+        emptyText = aValue;
+        firePropertyChange("emptyText", oldValue, emptyText);
+    }
+
     private String convertString2DateFormat(String dateFormat) {
         if (dateFormat != null) {
             switch (dateFormat) {

@@ -244,4 +244,17 @@ public class DbText extends DbControlPanel implements DbControl {
     protected JTextComponent createMultilineTextControl() {
         return new ModifiableTextArea(kind, borderless);
     }
+    
+    protected String emptyText;
+    
+    public String getEmptyText() {
+        return emptyText;
+    }
+
+    public void setEmptyText(String aValue) {
+        String oldValue = emptyText;
+        emptyText = aValue;
+        firePropertyChange("emptyText", oldValue, emptyText);
+    }
+
 }

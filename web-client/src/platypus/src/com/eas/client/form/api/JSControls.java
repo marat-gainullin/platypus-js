@@ -396,6 +396,15 @@ public class JSControls {
 					aComponent.@com.sencha.gxt.widget.core.client.form.PasswordField::setText(Ljava/lang/String;)(aValue!=null?''+aValue:null);
 				}
 			});
+			Object.defineProperty(published, "emptyText", {
+				get : function() {
+					return aComponent.@com.sencha.gxt.widget.core.client.form.PasswordField::getEmptyText()();
+				},
+				set : function(aValue) {
+					aComponent.@com.sencha.gxt.widget.core.client.form.PasswordField::setEmptyText(Ljava/lang/String;)(aValue!=null?''+aValue:null);
+				}
+			});
+			
 			if (aText) {
 				published.text = aText;
 			} 	
@@ -424,6 +433,14 @@ public class JSControls {
 				},
 				set : function(aValue) {
 					aComponent.@com.eas.client.gxtcontrols.wrappers.component.PlatypusTextField::setText(Ljava/lang/String;)(aValue!=null?''+aValue:null);
+				}
+			});
+			Object.defineProperty(published, "emptyText", {
+				get : function() {
+					return aComponent.@com.eas.client.gxtcontrols.wrappers.component.PlatypusTextField::getEmptyText()();
+				},
+				set : function(aValue) {
+					aComponent.@com.eas.client.gxtcontrols.wrappers.component.PlatypusTextField::setEmptyText(Ljava/lang/String;)(aValue!=null?''+aValue:null);
 				}
 			});
 
@@ -455,6 +472,14 @@ public class JSControls {
 				},
 				set : function(aValue) {
 					aComponent.@com.eas.client.gxtcontrols.wrappers.component.PlatypusFormattedTextField::setText(Ljava/lang/String;)(aValue!=null?''+aValue:null);
+				}
+			});
+			Object.defineProperty(published, "emptyText", {
+				get : function() {
+					return aComponent.@com.eas.client.gxtcontrols.wrappers.component.PlatypusFormattedTextField::getEmptyText()();
+				},
+				set : function(aValue) {
+					aComponent.@com.eas.client.gxtcontrols.wrappers.component.PlatypusFormattedTextField::setEmptyText(Ljava/lang/String;)(aValue!=null?''+aValue:null);
 				}
 			});
 
@@ -506,6 +531,14 @@ public class JSControls {
 				set : function(aValue) {
 					aComponent.@com.eas.client.gxtcontrols.wrappers.component.PlatypusTextArea::setText(Ljava/lang/String;)(aValue!=null?''+aValue:null);
 				}
+			});			
+			Object.defineProperty(published, "emptyText", {
+				get : function() {
+					return aComponent.@com.eas.client.gxtcontrols.wrappers.component.PlatypusTextArea::getEmptyText()();
+				},
+				set : function(aValue) {
+					aComponent.@com.eas.client.gxtcontrols.wrappers.component.PlatypusTextArea::setEmptyText(Ljava/lang/String;)(aValue!=null?''+aValue:null);
+				}
 			});
 			
 			if (aText) {
@@ -535,6 +568,14 @@ public class JSControls {
 				},
 				set : function(aValue) {
 					aComponent.@com.eas.client.gxtcontrols.wrappers.component.PlatypusHtmlEditor::setValue(Ljava/lang/String;)(aValue!=null?''+aValue:null);
+				}
+			});
+			Object.defineProperty(published, "emptyText", {
+				get : function() {
+					return aComponent.@com.eas.client.gxtcontrols.wrappers.component.PlatypusHtmlEditor::getEmptyText()();
+				},
+				set : function(aValue) {
+					aComponent.@com.eas.client.gxtcontrols.wrappers.component.PlatypusHtmlEditor::setEmptyText(Ljava/lang/String;)(aValue!=null?''+aValue:null);
 				}
 			});
 			

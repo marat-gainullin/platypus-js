@@ -850,6 +850,19 @@ public class DbCombo extends DbControlPanel implements DbControl {
     public boolean isFieldContentModified() {
         return !standalone;
     }
+    
+    protected String emptyText;
+    
+    public String getEmptyText() {
+        return emptyText;
+    }
+
+    public void setEmptyText(String aValue) {
+        String oldValue = emptyText;
+        emptyText = aValue;
+        firePropertyChange("emptyText", oldValue, emptyText);
+    }
+
     /*
      public static final long serialVersionUID = 2687354L;
     

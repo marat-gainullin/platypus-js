@@ -65,4 +65,15 @@ public class ModelDate extends ScalarModelComponent<DbDate> {
         delegate.setDateFormat(aValue);
         invalidate();
     }
+    
+    @ScriptFunction
+    public String getEmptyText() {
+        return delegate.getEmptyText();
+    }
+
+    @ScriptFunction
+    public void setEmptyText(String aValue) {
+        delegate.setEmptyText(aValue);
+    }
+
 }

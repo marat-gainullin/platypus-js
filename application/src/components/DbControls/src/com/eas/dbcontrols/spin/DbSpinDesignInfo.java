@@ -22,6 +22,7 @@ public class DbSpinDesignInfo extends DbControlDesignInfo {
     protected Double min;
     protected Double max;
     protected double step = 1;
+    protected String emptyText;
 
     public DbSpinDesignInfo() {
         super();
@@ -42,6 +43,9 @@ public class DbSpinDesignInfo extends DbControlDesignInfo {
         if (this.step != other.step) {
             return false;
         }
+        if ((this.emptyText == null) ? (other.emptyText != null) : !this.emptyText.equals(other.emptyText)) {
+            return false;
+        }
         return true;
     }
 
@@ -53,6 +57,7 @@ public class DbSpinDesignInfo extends DbControlDesignInfo {
             setMin(aInfo.getMin());
             setMax(aInfo.getMax());
             setStep(aInfo.getStep());
+            setEmptyText(aInfo.getEmptyText());
         }
     }
 
@@ -102,6 +107,18 @@ public class DbSpinDesignInfo extends DbControlDesignInfo {
         double old = step;
         step = aValue;
         firePropertyChange(PROP_STEP, old, aValue);
+    }
+
+    @Serial
+    public String getEmptyText() {
+        return emptyText;
+    }
+
+    @Serial
+    public void setEmptyText(String aValue) {
+        String oldValue = emptyText;
+        emptyText = aValue;
+        firePropertyChange("emptyText", oldValue, emptyText);
     }
 
     @Override

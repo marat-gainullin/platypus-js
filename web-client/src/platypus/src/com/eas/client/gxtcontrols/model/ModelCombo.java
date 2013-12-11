@@ -7,6 +7,7 @@ import com.eas.client.gxtcontrols.CrossUpdater;
 import com.eas.client.gxtcontrols.converters.ObjectRowValueConverter;
 import com.eas.client.gxtcontrols.wrappers.component.PlatypusAdapterStandaloneField;
 import com.eas.client.gxtcontrols.wrappers.handled.PlatypusComboBoxHandledField;
+import com.eas.client.gxtcontrols.wrappers.handled.PlatypusSpinnerHandledField;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Model;
 import com.eas.client.model.ParametersEntity;
@@ -278,5 +279,13 @@ public class ModelCombo extends PlatypusAdapterStandaloneField<Object> {
 
 	public void setValue(Object value, boolean fireEvents) {
 		super.setValue(value, fireEvents);
+	}
+	
+	public void setEmptyText(String aValue){
+		((PlatypusComboBoxHandledField)target).setEmptyText(aValue);
+	}
+	
+	public String getEmptyText(){
+		return ((PlatypusComboBoxHandledField)target).getEmptyText();
 	}
 }

@@ -12,7 +12,6 @@ import java.util.logging.Logger;
 
 import com.eas.client.ImageResourceCallback;
 import com.eas.client.Utils;
-import com.eas.client.Utils.JsObject;
 import com.eas.client.application.AppClient;
 import com.eas.client.form.Form;
 import com.eas.client.gxtcontrols.events.GxtEventsExecutor;
@@ -645,6 +644,8 @@ public class GxtControlsFactory {
 		processEvents(component, aTag);
 		Publisher.publish(component);
 		setText(component, aTag);
+		if (aTag.hasAttribute("emptyText"))
+			component.setEmptyText(aTag.getAttribute("emptyText"));
 		// *********************************************************************
 		// !!!??? This will only work when the widget is attached to the
 		// document and not hidden.
@@ -668,6 +669,9 @@ public class GxtControlsFactory {
 
 		PlatypusFormattedTextField component = new PlatypusFormattedTextField(new ObjectFormat(formatType, formatPattern));
 		processEvents(component, aTag);
+		if (aTag.hasAttribute("emptyText"))
+			component.setEmptyText(aTag.getAttribute("emptyText"));
+		
 		Publisher.publish(component);
 		setText(component, aTag);
 		// *********************************************************************
@@ -691,6 +695,8 @@ public class GxtControlsFactory {
 		PlatypusTextArea component = new PlatypusTextArea();
 		processEvents(component, aTag);
 		Publisher.publish(component);
+		if (aTag.hasAttribute("emptyText"))
+			component.setEmptyText(aTag.getAttribute("emptyText"));
 		setText(component, aTag);
 		checkBorders(component, aTag);
 		PublishedComponent publishedComp = (PublishedComponent) component.getData(Form.PUBLISHED_DATA_KEY);
@@ -702,6 +708,8 @@ public class GxtControlsFactory {
 		PlatypusHtmlEditor component = new PlatypusHtmlEditor();
 		processEvents(component, aTag);
 		Publisher.publish(component);
+		if (aTag.hasAttribute("emptyText"))
+			component.setEmptyText(aTag.getAttribute("emptyText"));
 		if (aTag.hasAttribute("text"))
 			component.setValue(aTag.getAttribute("text"));
 		// component.setReadOnly(!(Utils.getBooleanAttribute(aTag, "editable",
@@ -734,6 +742,8 @@ public class GxtControlsFactory {
 		processEvents(component, aTag);
 		Publisher.publish(component);
 		setText(component, aTag);
+		if (aTag.hasAttribute("emptyText"))
+			component.setEmptyText(aTag.getAttribute("emptyText"));
 		checkBorders(component, aTag);
 		PublishedComponent publishedComp = (PublishedComponent) component.getData(Form.PUBLISHED_DATA_KEY);
 		processGeneralProperties(component, aTag, publishedComp);

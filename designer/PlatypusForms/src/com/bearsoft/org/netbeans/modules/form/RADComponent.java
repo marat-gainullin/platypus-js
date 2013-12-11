@@ -43,6 +43,8 @@
  */
 package com.bearsoft.org.netbeans.modules.form;
 
+import static com.bearsoft.org.netbeans.modules.form.FormProperty.DETACHED_READ;
+import static com.bearsoft.org.netbeans.modules.form.FormProperty.DETACHED_WRITE;
 import com.bearsoft.org.netbeans.modules.form.RADProperty.FakePropertyDescriptor;
 import com.bearsoft.org.netbeans.modules.form.bound.ModelControlListener;
 import com.bearsoft.org.netbeans.modules.form.editors.AbstractFormatterFactoryEditor;
@@ -72,8 +74,10 @@ import javax.swing.ButtonGroup;
 import javax.swing.JFormattedTextField.AbstractFormatterFactory;
 import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeListener;
+import javax.swing.text.JTextComponent;
 import org.openide.ErrorManager;
 import org.openide.nodes.*;
+import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
 import org.openide.util.Utilities;
@@ -833,7 +837,7 @@ public abstract class RADComponent<C> {
         }
     }
 
-    private void createBeanProperties() {
+    protected void createBeanProperties() {
         List<FormProperty<?>> prefProps = new ArrayList<>();
         List<FormProperty<?>> normalProps = new ArrayList<>();
         List<FormProperty<?>> expertProps = new ArrayList<>();
@@ -1164,9 +1168,9 @@ public abstract class RADComponent<C> {
             }
         }
         // hack for buttons - add fake property for ButtonGroup
-        if ((getBeanInstance() instanceof javax.swing.JToggleButton && !(getBeanInstance() instanceof javax.swing.JCheckBox))||
-                getBeanInstance() instanceof javax.swing.JRadioButton ||
-                getBeanInstance() instanceof javax.swing.JRadioButtonMenuItem) {
+        if ((getBeanInstance() instanceof javax.swing.JToggleButton && !(getBeanInstance() instanceof javax.swing.JCheckBox))
+                || getBeanInstance() instanceof javax.swing.JRadioButton
+                || getBeanInstance() instanceof javax.swing.JRadioButtonMenuItem) {
             try {
                 ButtonGroupProperty prop = new ButtonGroupProperty(this);
                 setPropertyListener(prop);
@@ -1184,6 +1188,19 @@ public abstract class RADComponent<C> {
                 }
             } catch (InvocationTargetException | IllegalAccessException | IntrospectionException ex) {
                 ErrorManager.getDefault().notify(ex);
+            }
+        }
+        
+        if(getBeanInstance() instanceof javax.swing.text.JTextComponent){
+            try {
+                PropertyDescriptor pd = new FakePropertyDescriptor("emptyText", String.class); // NOI18N
+                RADProperty<?> prop = createBeanProperty(pd, null, null);
+                if (prop != null) {
+                    nameToProperty.put("emptyText", prop); // NOI18N
+                    normalProps.add(prop);
+                }
+            } catch (IntrospectionException ex) {
+                Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
             }
         }
 

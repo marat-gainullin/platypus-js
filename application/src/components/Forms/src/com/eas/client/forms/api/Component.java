@@ -31,6 +31,8 @@ import org.mozilla.javascript.Function;
  */
 public abstract class Component<D extends JComponent> {
 
+    protected static final String EMPTY_TEXT_PROP_NAME = "emptyText";
+    
     protected Font font;
     protected Cursor cursor;
     protected String errorMessage;
