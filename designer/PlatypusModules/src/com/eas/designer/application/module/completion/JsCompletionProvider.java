@@ -56,7 +56,7 @@ public abstract class JsCompletionProvider implements CompletionProvider {
                     PlatypusModuleDataObject dataObject = (PlatypusModuleDataObject) doc.getProperty(PlatypusModuleDataObject.DATAOBJECT_DOC_PROPERTY);
                     if (doc instanceof NbEditorDocument) {
                         CompletionPoint completionPoint = CompletionPoint.createInstance((NbEditorDocument)doc, caretOffset);
-                        fillCompletionPoint(dataObject, completionPoint, resultSet, doc, caretOffset);
+                        fillCompletionPoint(dataObject, completionPoint, resultSet, caretOffset);
                     }
                     resultSet.finish();
                 } catch (Exception ex) {
@@ -66,5 +66,5 @@ public abstract class JsCompletionProvider implements CompletionProvider {
         }, component);
     }
 
-    protected abstract void fillCompletionPoint(PlatypusModuleDataObject dataObject, CompletionPoint point, CompletionResultSet resultSet, Document doc, int caretOffset) throws Exception;
+    protected abstract void fillCompletionPoint(PlatypusModuleDataObject dataObject, CompletionPoint point, CompletionResultSet resultSet, int caretOffset) throws Exception;
 }

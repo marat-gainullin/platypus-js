@@ -24,5 +24,10 @@ public class DataObjectMock implements AstProvider {
     public AstRoot getAst() {
         return JsParser.parse(source);
     }
+
+    @Override
+    public void setAst(AstRoot anAstRoot) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
     
 }

@@ -13,6 +13,9 @@ import com.eas.designer.application.module.completion.CompletionPoint.Completion
 import com.eas.designer.application.module.parser.AstUtlities;
 import com.eas.designer.explorer.utils.StringUtils;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import org.mozilla.javascript.Token;
 import org.mozilla.javascript.ast.AstNode;
 import org.mozilla.javascript.ast.AstRoot;
@@ -39,7 +42,16 @@ import org.openide.util.Lookup;
  */
 public class ModuleCompletionContext extends CompletionContext {
 
-    public static final String THIS_KEYWORD = "this"; //NOI18N
+    public static final String THIS_KEYWORD = "this";//NOI18N
+    private static final Set<String> ARRAY_ITERATION_FUNCTIONS_NAMES = new HashSet<String>() {{
+        add("forEach");//NOI18N
+        add("filter");//NOI18N
+        add("every");//NOI18N
+        add("map");//NOI18N
+        add("some");//NOI18N
+        add("reduce");//NOI18N
+        add("reduceRight");//NOI18N
+    }};
     protected PlatypusModuleDataObject dataObject;
 
     public ModuleCompletionContext(PlatypusModuleDataObject aDataObject, Class<?> aClass) {
@@ -120,7 +132,7 @@ public class ModuleCompletionContext extends CompletionContext {
                 if (currentNode instanceof ScriptNode) {
                     ScriptNode scriptNode = (ScriptNode) currentNode;
                     ModuleCompletionContext.FindModuleElementSupport visitor =
-                            new ModuleCompletionContext.FindModuleElementSupport(scriptNode, fieldName, parentModuleContext);
+                            new ModuleCompletionContext.FindModuleElementSupport(scriptNode, fieldName, offset, parentModuleContext);
                     CompletionContext ctx = visitor.findContext();
                     if (ctx != null) {
                         return ctx;
@@ -163,12 +175,14 @@ public class ModuleCompletionContext extends CompletionContext {
 
         private final AstNode node;
         private final String fieldName;
+        private final int caretOffset;
         private final ModuleCompletionContext parentContext;
         private CompletionContext ctx;
 
-        public FindModuleElementSupport(AstNode aNode, String aFieldName, ModuleCompletionContext aParentContext) {
+        public FindModuleElementSupport(AstNode aNode, String aFieldName, int aCaretOffset, ModuleCompletionContext aParentContext) {
             node = aNode;
             fieldName = aFieldName;
+            caretOffset = aCaretOffset;
             parentContext = aParentContext;
         }
 
@@ -180,6 +194,12 @@ public class ModuleCompletionContext extends CompletionContext {
                         return true;
                     }
                     if (an instanceof FunctionNode) {
+//                        if (an.getAbsolutePosition() <= caretOffset && an.getAbsolutePosition() + an.getLength() >= caretOffset){
+//                            FunctionNode fn = (FunctionNode)an;
+//                            if (ARRAY_ITERATION_FUNCTIONS_NAMES.contains(fn.getName())) {
+//                                fn.getParams();
+//                            }   
+//                        }
                         return false;
                     }
                     if (an instanceof VariableDeclaration) {

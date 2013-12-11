@@ -26,7 +26,7 @@ public class CompletionPoint {
     private static char DOT_CHARACTER = '.';//NOI18N
 
     private String filter = "";//NOI18N
-    private CompletionToken[] context;
+    private CompletionToken[] completionTokens;
     private int caretBeginWordOffset;
     private int caretEndWordOffset;
     private AstRoot astRoot;
@@ -35,8 +35,8 @@ public class CompletionPoint {
         return filter;
     }
 
-    public CompletionToken[] getContext() {
-        return context;
+    public CompletionToken[] getCompletionTokens() {
+        return completionTokens;
     }
 
     public int getCaretBeginWordOffset() {
@@ -67,9 +67,9 @@ public class CompletionPoint {
                     List<CompletionToken> ctx = getContextTokens(subRoot);
                     if (ctx.size() > 0) {
                         if (!afterDotCaretPosintion) {
-                            cp.context = ctx.subList(0, ctx.size() - 1).toArray(new CompletionToken[0]);
+                            cp.completionTokens = ctx.subList(0, ctx.size() - 1).toArray(new CompletionToken[0]);
                         } else {
-                            cp.context = ctx.subList(0, ctx.size()).toArray(new CompletionToken[0]);
+                            cp.completionTokens = ctx.subList(0, ctx.size()).toArray(new CompletionToken[0]);
                         }
                     }
                 }

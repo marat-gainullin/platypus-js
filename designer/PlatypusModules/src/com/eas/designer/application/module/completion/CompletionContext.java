@@ -40,8 +40,9 @@ public class CompletionContext {
     protected static final String BEANY_PREFIX_GET = "get";// NOI18N
     protected static final String BEANY_PREFIX_SET = "set";// NOI18N
     protected static final String BEANY_PREFIX_IS = "is";// NOI18N
-    private static int QUOTED_STRING_MIN_LENGTH = 2;
-    protected Class<?> scriptClass;
+    private static final int QUOTED_STRING_MIN_LENGTH = 2;
+    private Class<?> scriptClass;
+    private CompletionPoint completionPoint;
 
     public CompletionContext(Class<?> aScriptClass) {
         scriptClass = aScriptClass;
@@ -51,6 +52,14 @@ public class CompletionContext {
         return scriptClass;
     }
 
+    public CompletionPoint getCompletionPoint() {
+        return completionPoint;
+    }
+    
+    public void setCompltionPoint(CompletionPoint aCompletionPoint) {
+        completionPoint = aCompletionPoint;
+    }
+    
     public void applyCompletionItems(CompletionPoint point, int offset, CompletionResultSet resultSet) throws Exception {
         fillJavaCompletionItems(point, resultSet);
     }

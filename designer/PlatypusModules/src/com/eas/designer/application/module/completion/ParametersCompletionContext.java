@@ -25,7 +25,7 @@ public class ParametersCompletionContext extends CompletionContext {
 
     @Override
     public void applyCompletionItems(CompletionPoint point, int offset, CompletionResultSet resultSet) throws Exception {
-        if (scriptClass != null) {
+        if (getScriptClass() != null) {
             fillJavaCompletionItems(point, resultSet);
         }
         fillFieldsValues(parameters, point, resultSet);
