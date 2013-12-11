@@ -1,7 +1,6 @@
 package com.eas.designer.application.module.completion;
 
 import com.eas.designer.application.module.PlatypusModuleDataObject;
-import javax.swing.text.Document;
 import org.netbeans.spi.editor.completion.CompletionResultSet;
 
 /*
