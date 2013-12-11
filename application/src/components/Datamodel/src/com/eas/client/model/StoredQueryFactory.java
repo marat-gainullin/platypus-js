@@ -11,6 +11,7 @@ import com.eas.client.DbClient;
 import com.eas.client.DbMetadataCache;
 import com.eas.client.cache.ActualCacheEntry;
 import com.eas.client.cache.FreqCache;
+import com.eas.client.exceptions.NoSuchEntityException;
 import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.model.QueryDocument.StoredFieldMetadata;
 import com.eas.client.model.query.QueryEntity;
@@ -378,19 +379,24 @@ public class StoredQueryFactory {
                     }
                     Matcher subQueryMatcher = subQueryPattern.matcher(processedSql);
                     if (subQueryMatcher.find()) {
-                        SqlQuery subQuery = queriesCache.get(entity.getQueryId()).getValue();
-                        if (subQuery != null && subQuery.getSqlText() != null) {
-                            String subQueryText = subQuery.getSqlText();
-                            subQueryText = replaceLinkedParameters(subQueryText, entity.getInRelations());
+                        ActualCacheEntry<SqlQuery> entry = queriesCache.get(entity.getQueryId());
+                        if (entry != null) {
+                            SqlQuery subQuery = entry.getValue();
+                            if (subQuery != null && subQuery.getSqlText() != null) {
+                                String subQueryText = subQuery.getSqlText();
+                                subQueryText = replaceLinkedParameters(subQueryText, entity.getInRelations());
 
-                            String sqlBegin = processedSql.substring(0, subQueryMatcher.start());
-                            String sqlToInsert = " (" + subQueryText + ") ";
-                            String sqlTail = processedSql.substring(subQueryMatcher.end());
-                            if (tAlias != null && !tAlias.isEmpty()) {
-                                processedSql = sqlBegin + sqlToInsert + " " + tAlias + " " + sqlTail;
-                            } else {
-                                processedSql = sqlBegin + sqlToInsert + " " + queryTablyName + " " + sqlTail;
+                                String sqlBegin = processedSql.substring(0, subQueryMatcher.start());
+                                String sqlToInsert = " (" + subQueryText + ") ";
+                                String sqlTail = processedSql.substring(subQueryMatcher.end());
+                                if (tAlias != null && !tAlias.isEmpty()) {
+                                    processedSql = sqlBegin + sqlToInsert + " " + tAlias + " " + sqlTail;
+                                } else {
+                                    processedSql = sqlBegin + sqlToInsert + " " + queryTablyName + " " + sqlTail;
+                                }
                             }
+                        } else {
+                            throw new NoSuchEntityException(entity.getQueryId());
                         }
                     }
                 }
