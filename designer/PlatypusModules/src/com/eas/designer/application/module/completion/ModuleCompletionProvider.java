@@ -18,16 +18,6 @@ public class ModuleCompletionProvider extends JsCompletionProvider {
     protected void fillCompletionPoint(PlatypusModuleDataObject dataObject, CompletionPoint point, CompletionResultSet resultSet, int caretOffset) throws Exception {
         if (dataObject != null && dataObject.getProject().isDbConnected()) {
             dataObject.setAst(point.getAstRoot());
-//            CompletionContext completionContext = dataObject.getCompletionContext();
-//            if (point.getContext() != null && point.getContext().length > 0) {
-//                for (int i = 0; i < point.getContext().length; i++) {
-//                    completionContext = completionContext.getChildContext(point.getContext()[i], caretOffset);
-//                    if (completionContext == null) {
-//                        return;
-//                    }
-//                    caretOffset = 0;
-//                }
-//            }
             CompletionContext initialCompltionContext = dataObject.getCompletionContext();
             initialCompltionContext.setCompltionPoint(point);
             CompletionContext completionContext = getCompletionContext(initialCompltionContext, caretOffset);
