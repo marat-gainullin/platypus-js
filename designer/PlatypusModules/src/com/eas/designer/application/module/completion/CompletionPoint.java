@@ -12,6 +12,7 @@ import javax.swing.text.BadLocationException;
 import org.mozilla.javascript.ast.AstNode;
 import org.mozilla.javascript.ast.AstRoot;
 import org.mozilla.javascript.ast.ElementGet;
+import org.mozilla.javascript.ast.KeywordLiteral;
 import org.mozilla.javascript.ast.Name;
 import org.mozilla.javascript.ast.NodeVisitor;
 import org.mozilla.javascript.ast.PropertyGet;
@@ -24,13 +25,12 @@ import org.netbeans.modules.editor.NbEditorDocument;
 public class CompletionPoint {
 
     private static char DOT_CHARACTER = '.';//NOI18N
-
     private String filter = "";//NOI18N
     private CompletionToken[] completionTokens;
     private int caretBeginWordOffset;
     private int caretEndWordOffset;
     private AstRoot astRoot;
-    
+
     public String getFilter() {
         return filter;
     }
@@ -46,11 +46,11 @@ public class CompletionPoint {
     public int getCaretEndWordOffset() {
         return caretEndWordOffset;
     }
-    
+
     public AstRoot getAstRoot() {
         return astRoot;
     }
-    
+
     public static CompletionPoint createInstance(NbEditorDocument doc, int caretOffset) throws Exception {
         final CompletionPoint cp = new CompletionPoint();
         if (caretOffset > 0) {
@@ -89,6 +89,10 @@ public class CompletionPoint {
             @Override
             public boolean visit(AstNode an) {
                 if (an == subRoot) {
+                    if (an instanceof KeywordLiteral) { // this.
+                        ctx.add(new CompletionToken(an.toSource(), CompletionTokenType.IDENTIFIER));
+                        return false;
+                    }
                     if (an instanceof Name) { // prop1.
                         ctx.add(new CompletionToken(((Name) an).getIdentifier(), CompletionTokenType.IDENTIFIER));
                         return false;
@@ -103,6 +107,9 @@ public class CompletionPoint {
                     PropertyGet pg = (PropertyGet) an.getParent();
                     if (pg.getTarget() == an && an instanceof Name) {
                         ctx.add(new CompletionToken(((Name) an).getIdentifier(), CompletionTokenType.IDENTIFIER));
+                        return false;
+                    } if (pg.getTarget() == an && an instanceof KeywordLiteral) {
+                        ctx.add(new CompletionToken(an.toSource(), CompletionTokenType.IDENTIFIER));
                         return false;
                     } else if (pg.getProperty() == an && an instanceof Name) {
                         ctx.add(new CompletionToken(((Name) an).getIdentifier(), CompletionTokenType.PROPERTY_GET));
@@ -123,14 +130,15 @@ public class CompletionPoint {
     }
 
     private static AstNode getCompletionSubtree(AstRoot root, AstNode node) {
-        if (node instanceof Name || node instanceof ElementGet) {
+        if (node instanceof Name
+                || node instanceof KeywordLiteral
+                || node instanceof ElementGet
+                || node instanceof PropertyGet) {
             AstNode subTree = node;
             while ((subTree.getParent() instanceof PropertyGet)) {
                 subTree = subTree.getParent();
             }
             return subTree;
-        } else if (node instanceof PropertyGet || node instanceof ElementGet) {
-            return node;
         } else {
             return null;
         }

@@ -43,15 +43,17 @@ import org.openide.util.Lookup;
 public class ModuleCompletionContext extends CompletionContext {
 
     public static final String THIS_KEYWORD = "this";//NOI18N
-    private static final Set<String> ARRAY_ITERATION_FUNCTIONS_NAMES = new HashSet<String>() {{
-        add("forEach");//NOI18N
-        add("filter");//NOI18N
-        add("every");//NOI18N
-        add("map");//NOI18N
-        add("some");//NOI18N
-        add("reduce");//NOI18N
-        add("reduceRight");//NOI18N
-    }};
+    private static final Set<String> ARRAY_ITERATION_FUNCTIONS_NAMES = new HashSet<String>() {
+        {
+            add("forEach");//NOI18N
+            add("filter");//NOI18N
+            add("every");//NOI18N
+            add("map");//NOI18N
+            add("some");//NOI18N
+            add("reduce");//NOI18N
+            add("reduceRight");//NOI18N
+        }
+    };
     protected PlatypusModuleDataObject dataObject;
 
     public ModuleCompletionContext(PlatypusModuleDataObject aDataObject, Class<?> aClass) {
@@ -123,16 +125,18 @@ public class ModuleCompletionContext extends CompletionContext {
         AstRoot astRoot = parentModuleContext.dataObject.getAst();
         if (astRoot != null) {
             AstNode offsetNode = AstUtlities.getOffsetNode(astRoot, offset);
-            AstNode moduleConstructorBlock = PlatypusFilesSupport.extractModuleConstructor(astRoot).getBody();
-            if (offsetNode != null && offsetNode.equals(moduleConstructorBlock) && THIS_KEYWORD.equals(fieldName)) {
-                return parentModuleContext.createThisContext(false);
-            }
             AstNode currentNode = offsetNode;
+            AstNode parentScope = null;
             for (;;) {//up to the root node  
                 if (currentNode instanceof ScriptNode) {
-                    ScriptNode scriptNode = (ScriptNode) currentNode;
+                    if (parentScope == null) {
+                        parentScope = currentNode; 
+                    }
                     ModuleCompletionContext.FindModuleElementSupport visitor =
-                            new ModuleCompletionContext.FindModuleElementSupport(scriptNode, fieldName, offset, parentModuleContext);
+                            new ModuleCompletionContext.FindModuleElementSupport(currentNode,
+                                parentScope == PlatypusFilesSupport.extractModuleConstructor(astRoot),
+                                fieldName,
+                                parentModuleContext);
                     CompletionContext ctx = visitor.findContext();
                     if (ctx != null) {
                         return ctx;
@@ -173,24 +177,24 @@ public class ModuleCompletionContext extends CompletionContext {
 
     private static class FindModuleElementSupport {
 
-        private final AstNode node;
+        private final AstNode lookupScope;
+        private final boolean moduleConstructorScope;
         private final String fieldName;
-        private final int caretOffset;
         private final ModuleCompletionContext parentContext;
         private CompletionContext ctx;
 
-        public FindModuleElementSupport(AstNode aNode, String aFieldName, int aCaretOffset, ModuleCompletionContext aParentContext) {
-            node = aNode;
+        public FindModuleElementSupport(AstNode aLookupScope, boolean aModuleConstructorScope, String aFieldName, ModuleCompletionContext aParentContext) {
+            lookupScope = aLookupScope;
+            moduleConstructorScope = aModuleConstructorScope;
             fieldName = aFieldName;
-            caretOffset = aCaretOffset;
             parentContext = aParentContext;
         }
 
         public CompletionContext findContext() {
-            node.visit(new NodeVisitor() {
+            lookupScope.visit(new NodeVisitor() {
                 @Override
                 public boolean visit(AstNode an) {
-                    if (an == node) {
+                    if (an == lookupScope) {
                         return true;
                     }
                     if (an instanceof FunctionNode) {
@@ -201,6 +205,13 @@ public class ModuleCompletionContext extends CompletionContext {
 //                            }   
 //                        }
                         return false;
+                    }
+                    if (an instanceof PropertyGet && moduleConstructorScope) {
+                        PropertyGet pg = (PropertyGet) an;
+                        if (pg.getTarget() instanceof KeywordLiteral && Token.THIS == pg.getTarget().getType()) {
+                            ctx = parentContext.createThisContext(false);
+                            return false;
+                        }
                     }
                     if (an instanceof VariableDeclaration) {
                         VariableDeclaration variableDeclaration = (VariableDeclaration) an;
@@ -255,6 +266,7 @@ public class ModuleCompletionContext extends CompletionContext {
                                         }
                                     } else if (variableInitializer.getInitializer() instanceof KeywordLiteral && Token.THIS == variableInitializer.getInitializer().getType()) {
                                         ctx = parentContext.createThisContext(false);
+                                        return false;
                                     }
                                 }
                             }
