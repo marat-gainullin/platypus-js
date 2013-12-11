@@ -34,7 +34,7 @@ public class ParametersCompletionContext extends CompletionContext {
 
     @Override
     public CompletionContext getChildContext(CompletionToken token, int offset) throws Exception {
-        if (METADATA_SCRIPT_NAME.equals(token)) {
+        if (isPropertyGet(token, METADATA_SCRIPT_NAME)) {
             return new MetadataCompletionContext(parameters);
         } else {
             return null;
