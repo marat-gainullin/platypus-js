@@ -222,7 +222,7 @@ public class ModuleCompletionContext extends CompletionContext {
                     }
                     if (an instanceof PropertyGet && moduleConstructorScope) {
                         PropertyGet pg = (PropertyGet) an;
-                        if (pg.getTarget() instanceof KeywordLiteral && Token.THIS == pg.getTarget().getType()) {
+                        if (pg.getTarget() instanceof KeywordLiteral && Token.THIS == pg.getTarget().getType()) { // things like this.prop1
                             ctx = parentContext.createThisContext(false);
                             return false;
                         }
@@ -278,7 +278,8 @@ public class ModuleCompletionContext extends CompletionContext {
                                                 }
                                             }
                                         }
-                                    } else if (variableInitializer.getInitializer() instanceof KeywordLiteral && Token.THIS == variableInitializer.getInitializer().getType()) {
+                                    } else if (variableInitializer.getInitializer() instanceof KeywordLiteral 
+                                            && Token.THIS == variableInitializer.getInitializer().getType()) {// var self = this;
                                         ctx = parentContext.createThisContext(false);
                                         return false;
                                     }
