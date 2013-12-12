@@ -10,6 +10,7 @@ import com.bearsoft.org.netbeans.modules.form.PersistenceException;
 import com.bearsoft.org.netbeans.modules.form.PlatypusFormDataObject;
 import com.bearsoft.org.netbeans.modules.form.PlatypusFormSupport;
 import com.bearsoft.org.netbeans.modules.form.RADComponent;
+import com.bearsoft.org.netbeans.modules.form.RADVisualContainer;
 import com.bearsoft.org.netbeans.modules.form.RADVisualFormContainer;
 import com.bearsoft.org.netbeans.modules.form.bound.RADModelGridColumn;
 import com.bearsoft.org.netbeans.modules.form.bound.RADModelMapLayer;
@@ -30,21 +31,21 @@ import org.netbeans.spi.editor.completion.CompletionResultSet;
  * @author vv
  */
 public class FormThisCompletionContext extends ModuleThisCompletionContext {
-    
+
     public FormThisCompletionContext(ModuleCompletionContext aParentContext, boolean anEnableJsElementsCompletion) {
         super(aParentContext, anEnableJsElementsCompletion);
     }
-    
+
     @Override
     public void applyCompletionItems(CompletionPoint point, int offset, CompletionResultSet resultSet) throws Exception {
         super.applyCompletionItems(point, offset, resultSet);
         ModuleCompletionContext.JsCodeCompletionScopeInfo completionScopeInfo = ModuleCompletionContext.getCompletionScopeInfo(getParentContext().getDataObject(), offset, point.getFilter());
         if (completionScopeInfo.mode == ModuleCompletionContext.CompletionMode.VARIABLES_AND_FUNCTIONS) {
-            addItem(resultSet, point.getFilter(), new BeanCompletionItem(Container.class, FormRunner.VIEW_SCRIPT_NAME, null, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset())); //NOI18N
+            addItem(resultSet, point.getFilter(), new BeanCompletionItem(getPlaypusContainerClass(), FormRunner.VIEW_SCRIPT_NAME, null, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset())); //NOI18N
             fillComponents(point, resultSet);
         }
     }
-    
+
     @Override
     public CompletionContext getChildContext(CompletionToken token, int offset) throws Exception {
         CompletionContext completionContext = super.getChildContext(token, offset);
@@ -52,7 +53,12 @@ public class FormThisCompletionContext extends ModuleThisCompletionContext {
             return completionContext;
         }
         if (FormRunner.VIEW_SCRIPT_NAME.equals(token.name)) {
-            return new CompletionContext(Container.class);
+            Class<?> conainerClass = getPlaypusContainerClass();
+            if (conainerClass != null) {
+                return new CompletionContext(conainerClass);
+            } else {
+                return null;
+            }
         }
         RADComponent<?> comp = getComponentByName(token.name);
         if (comp != null) {
@@ -65,6 +71,11 @@ public class FormThisCompletionContext extends ModuleThisCompletionContext {
             }
         }
         return null;
+    }
+
+    protected Class<?> getPlaypusContainerClass() {
+        RADVisualContainer<?> container = getFormModel().getTopRADComponent();
+        return FormUtils.getPlatypusConainerClass(container.getLayoutSupport().getSupportedClass());
     }
 
     protected void fillComponents(CompletionPoint point, CompletionResultSet resultSet) {
@@ -102,6 +113,4 @@ public class FormThisCompletionContext extends ModuleThisCompletionContext {
             return null;
         }
     }
-
-
 }

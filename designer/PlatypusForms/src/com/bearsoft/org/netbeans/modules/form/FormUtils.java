@@ -44,6 +44,7 @@
 package com.bearsoft.org.netbeans.modules.form;
 
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates.MarginLayoutSupport;
+import com.eas.client.forms.api.containers.*;
 import com.eas.client.model.ModelElementRef;
 import com.eas.dbcontrols.check.DbCheck;
 import com.eas.dbcontrols.combo.DbCombo;
@@ -658,12 +659,14 @@ public class FormUtils {
     };
     private static final Map<String, Class<?>> scriptNames2PlatypusApiClasses = new HashMap<>();
     private static final Map<Class<?>, Class<?>> swingClasses2PlatypusApiClasses = new HashMap<>();
+    private static final Map<Class<?>, Class<?>> layoutClasses2PlatypusContainerClasses = new HashMap<>();
 
     private static class Panel extends com.eas.client.forms.api.Container<JPanel> {
     }
 
     static {
         initScriptNames2PlatypusApiClasses();
+        initLayoutClasses2PlatypusContainerClasses();
         swingClasses2PlatypusApiClasses.put(JLabel.class, com.eas.client.forms.api.components.Label.class);
         swingClasses2PlatypusApiClasses.put(JButton.class, com.eas.client.forms.api.components.Button.class);
         swingClasses2PlatypusApiClasses.put(JCheckBox.class, com.eas.client.forms.api.components.CheckBox.class);
@@ -708,6 +711,16 @@ public class FormUtils {
         for (Class<?> clazz : apiClasses) {
             scriptNames2PlatypusApiClasses.put(clazz.getSimpleName(), clazz);
         }
+    }
+
+    private static void initLayoutClasses2PlatypusContainerClasses() {
+        layoutClasses2PlatypusContainerClasses.put(com.eas.controls.layouts.margin.MarginLayout.class, AnchorsPane.class);
+        layoutClasses2PlatypusContainerClasses.put(java.awt.BorderLayout.class, BorderPane.class);
+        layoutClasses2PlatypusContainerClasses.put(javax.swing.BoxLayout.class, BoxPane.class);
+        layoutClasses2PlatypusContainerClasses.put(org.netbeans.lib.awtextra.AbsoluteLayout.class, AbsolutePane.class); 
+        layoutClasses2PlatypusContainerClasses.put(java.awt.FlowLayout.class, FlowPane.class);
+        layoutClasses2PlatypusContainerClasses.put(java.awt.CardLayout.class, CardPane.class);
+        layoutClasses2PlatypusContainerClasses.put(java.awt.GridLayout.class, GridPane.class);
     }
 
     // -----------------------------------------------------------------------------
@@ -1384,6 +1397,10 @@ public class FormUtils {
         } else {
             return aBeanClass;
         }
+    }
+
+    public static Class<?> getPlatypusConainerClass(Class<?> aLayoutClass) {
+        return layoutClasses2PlatypusContainerClasses.get(aLayoutClass);
     }
 
     private static Object findPropertyClsf(String name, Object[] clsf) {
