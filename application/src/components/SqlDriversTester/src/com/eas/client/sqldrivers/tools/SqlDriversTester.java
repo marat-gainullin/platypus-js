@@ -13,7 +13,8 @@ import com.bearsoft.rowset.metadata.ForeignKeySpec.ForeignKeyRule;
 import com.bearsoft.rowset.metadata.PrimaryKeySpec;
 import com.eas.client.Client;
 import com.eas.client.ClientConstants;
-import com.eas.client.ClientFactory;
+import com.eas.client.DatabasesClient;
+//import com.eas.client.ClientFactory;
 import com.eas.client.DbClient;
 import com.eas.client.DbMetadataCache;
 import com.eas.client.SQLUtils;
@@ -52,7 +53,7 @@ public class SqlDriversTester extends JFrame {
     private Connection connectJDBC = null;   // для jdbc connection
     private SqlDriver platypusDriver = null; // для jdbc connection
     private DbClient client = null;           // для platypus connection
-    private SqlDriver driver = null;         // для platypus connection 
+    private SqlDriver driver = null;         // для platypus connection
     private Map<String, Object[]> jdbcSets = new HashMap<>();
     //--- переменные для SELECT ---
     private String[] sqls_select = null;
@@ -242,7 +243,7 @@ public class SqlDriversTester extends JFrame {
         // n-имя типа базы
         // 0-имя jdbc драйвера
         // 1-строка соединения
-        // 2-имя схемы 
+        // 2-имя схемы
         // 3-пользователь БД
         // 4-пароль БД
         // 5-драйвер platypus для данной БД
@@ -663,7 +664,7 @@ public class SqlDriversTester extends JFrame {
         pnMain_commentDS.add(spCenterH_commentDS, BorderLayout.CENTER);
         pnMain_commentDS.add(pnSouth_commentDS, BorderLayout.SOUTH);
 
-        //--- панель тестирования  INDEX *************        
+        //--- панель тестирования  INDEX *************
         JPanel pnMain_index = new JPanel(new BorderLayout());
         JPanel pnWest_index = new JPanel(new VerticalFlowLayout(0, 0, 0, true, false));
         JPanel pnWest1_index = new JPanel(new GridLayout(8, 4));
@@ -733,7 +734,7 @@ public class SqlDriversTester extends JFrame {
         pnMain_index.add(pnSouth_index, BorderLayout.SOUTH);
 
 
-        //--- панель тестирования  PKey *************        
+        //--- панель тестирования  PKey *************
         JPanel pnMain_pk = new JPanel(new BorderLayout());
         JPanel pnWest_pk = new JPanel(new VerticalFlowLayout(0, 0, 0, true, false));
         JPanel pnWest1_pk = new JPanel(new GridLayout(5, 4));
@@ -787,7 +788,7 @@ public class SqlDriversTester extends JFrame {
         pnSouth_pk.add(btnRun_pk);
         pnMain_pk.add(pnSouth_pk, BorderLayout.SOUTH);
 
-        //--- панель тестирования  FKey *************        
+        //--- панель тестирования  FKey *************
         JPanel pnMain_fk = new JPanel(new BorderLayout());
         JPanel pnWest_fk = new JPanel(new VerticalFlowLayout(0, 0, 0, true, false));
         JPanel pnWest1_fk = new JPanel(new GridLayout(9, 4));
@@ -1084,7 +1085,7 @@ public class SqlDriversTester extends JFrame {
                         textLog.append("Error !!!\nException: " + ex + "\n\n");
                         Logger.getLogger(SqlDriversTester.class.getName()).log(Level.SEVERE, null, ex);
                     }
-                }  
+                }
                 if (statementJDBC != null) {
                     try {
                         statementJDBC.close();
@@ -1092,7 +1093,7 @@ public class SqlDriversTester extends JFrame {
                         textLog.append( "Error !!!\nException: " + ex + "\n\n");
                         Logger.getLogger(SqlDriversTester.class.getName()).log(Level.SEVERE, null, ex);
                     }
-                }    
+                }
             }
 
         }
@@ -1461,11 +1462,11 @@ public class SqlDriversTester extends JFrame {
     private DbClient createPlatypusClient(String aUrl, String aSchema, String aUser, String aPassword, boolean createSysTables) throws Exception {
         Logger.getLogger(SqlDriversTester.class.getName()).log(Level.INFO, "Start creating connection to schema {0}", aSchema);
         try {
-            EasSettings settings = new DbConnectionSettings(aUrl, aSchema, aUser, aPassword, SQLUtils.dialectByUrl(aUrl), createSysTables);
-            Client lclient = ClientFactory.getInstance(settings);
-            assert lclient instanceof DbClient;
+            //EasSettings settings = new DbConnectionSettings(aUrl, aSchema, aUser, aPassword, SQLUtils.dialectByUrl(aUrl), createSysTables);
+            DbConnectionSettings settings = new DbConnectionSettings(aUrl, aSchema, aUser, aPassword, SQLUtils.dialectByUrl(aUrl), false);
+            DbClient dbClient = new DatabasesClient(settings);
             Logger.getLogger(SqlDriversTester.class.getName()).log(Level.INFO, "Connect to schema %s created", aSchema);
-            return (DbClient) lclient;
+            return dbClient;
         } catch (Exception ex) {
             Logger.getLogger(SqlDriversTester.class.getName()).log(Level.INFO, "Connect to schema %s not created", aSchema);
             throw ex;
@@ -1755,7 +1756,7 @@ public class SqlDriversTester extends JFrame {
                     int tableTypeColIndex = fieldsTable.find(ClientConstants.JDBCPKS_TABLE_TYPE_FIELD_NAME);
                     int cnt = 0;
                     do {
-                        // each table 
+                        // each table
                         String tableType = null;
                         if (tableTypeColIndex > 0) {
                             tableType = rowsetTablesList.getString(tableTypeColIndex);
@@ -1998,7 +1999,7 @@ public class SqlDriversTester extends JFrame {
             }
         }
     }
-    
+
 
     /**
      * @param args the command line arguments
