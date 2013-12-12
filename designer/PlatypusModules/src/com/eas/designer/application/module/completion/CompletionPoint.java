@@ -26,7 +26,7 @@ public class CompletionPoint {
 
     private static char DOT_CHARACTER = '.';//NOI18N
     private String filter = "";//NOI18N
-    private CompletionToken[] completionTokens;
+    private List<CompletionToken> completionTokens;
     private int caretBeginWordOffset;
     private int caretEndWordOffset;
     private AstRoot astRoot;
@@ -35,7 +35,7 @@ public class CompletionPoint {
         return filter;
     }
 
-    public CompletionToken[] getCompletionTokens() {
+    public List<CompletionToken> getCompletionTokens() {
         return completionTokens;
     }
 
@@ -64,12 +64,12 @@ public class CompletionPoint {
                 AstNode offsetNode = AstUtlities.getOffsetNode(cp.astRoot, afterDotCaretPosintion ? caretOffset - 1 : caretOffset);
                 final AstNode subRoot = getCompletionSubtree(cp.astRoot, offsetNode);
                 if (subRoot != null) {
-                    List<CompletionToken> ctx = getContextTokens(subRoot);
-                    if (ctx.size() > 0) {
+                    List<CompletionToken> tokens = getContextTokens(subRoot);
+                    if (tokens.size() > 0) {
                         if (!afterDotCaretPosintion) {
-                            cp.completionTokens = ctx.subList(0, ctx.size() - 1).toArray(new CompletionToken[0]);
+                            cp.completionTokens = tokens.subList(0, tokens.size() - 1);
                         } else {
-                            cp.completionTokens = ctx.subList(0, ctx.size()).toArray(new CompletionToken[0]);
+                            cp.completionTokens = tokens.subList(0, tokens.size());
                         }
                     }
                 }
@@ -83,7 +83,7 @@ public class CompletionPoint {
         return cp;
     }
 
-    private static List<CompletionToken> getContextTokens(final AstNode subRoot) {
+    public static List<CompletionToken> getContextTokens(final AstNode subRoot) {
         final List<CompletionToken> ctx = new ArrayList<>();
         subRoot.visit(new NodeVisitor() {
             @Override
@@ -97,6 +97,7 @@ public class CompletionPoint {
                         ctx.add(new CompletionToken(((Name) an).getIdentifier(), CompletionTokenType.IDENTIFIER));
                         return false;
                     }
+                    return true;
                 } else if (an.getParent() instanceof ElementGet) {
                     ElementGet eg = (ElementGet) an.getParent();
                     if (eg.getElement() == an) { //prop1[prop2] , don't drill deeper

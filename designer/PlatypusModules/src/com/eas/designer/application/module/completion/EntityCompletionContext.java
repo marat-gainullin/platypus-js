@@ -41,7 +41,7 @@ public class EntityCompletionContext extends CompletionContext {
         if (isPropertyGet(token, METADATA_SCRIPT_NAME)) {
             return new MetadataCompletionContext(entity.getFields());
         } else if(isPropertyGet(token, CURSOR_ENTITY_PROPERTY_NAME)) {
-            return new EntityElementCompletionContext(entity);
+            return getElementCompletionContext();
         } else if (CompletionTokenType.ELEMENT_GET == token.type && !isQuotedString(token.name)) { 
             return new EntityElementCompletionContext(entity);
         }else if (isPropertyGet(token, PARAMS_SCRIPT_NAME)) {
@@ -49,5 +49,9 @@ public class EntityCompletionContext extends CompletionContext {
         } else {
             return null;
         }
+    }
+    
+    public CompletionContext getElementCompletionContext() {
+        return new EntityElementCompletionContext(entity);
     }
 }

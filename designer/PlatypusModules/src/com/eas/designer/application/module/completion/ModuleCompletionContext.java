@@ -34,6 +34,7 @@ import org.netbeans.spi.editor.completion.CompletionResultSet;
 import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataObject;
 import org.openide.loaders.DataObjectNotFoundException;
+import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 
 /**
@@ -130,13 +131,13 @@ public class ModuleCompletionContext extends CompletionContext {
             for (;;) {//up to the root node  
                 if (currentNode instanceof ScriptNode) {
                     if (parentScope == null) {
-                        parentScope = currentNode; 
+                        parentScope = currentNode;
                     }
                     ModuleCompletionContext.FindModuleElementSupport visitor =
                             new ModuleCompletionContext.FindModuleElementSupport(currentNode,
-                                parentScope == PlatypusFilesSupport.extractModuleConstructor(astRoot),
-                                fieldName,
-                                parentModuleContext);
+                            parentScope == PlatypusFilesSupport.extractModuleConstructor(astRoot),
+                            fieldName,
+                            parentModuleContext);
                     CompletionContext ctx = visitor.findContext();
                     if (ctx != null) {
                         return ctx;
@@ -195,16 +196,29 @@ public class ModuleCompletionContext extends CompletionContext {
                 @Override
                 public boolean visit(AstNode an) {
                     if (an == lookupScope) {
+                        if (an instanceof FunctionNode) {
+                            FunctionNode fn = (FunctionNode) an;
+                            if (fn.getParams() != null && fn.getParams().size() > 0 && fieldName.equals(fn.getParams().get(0).toSource())) {
+                                if (fn.getParent() instanceof FunctionCall) {
+                                    FunctionCall fc = (FunctionCall) fn.getParent();
+                                    List<CompletionToken> tokens = CompletionPoint.getContextTokens(fc);
+                                    if (tokens != null && tokens.size() > 1) {
+                                        CompletionToken funcitonCallToken = tokens.get(tokens.size() - 1);
+                                        if (fn == fc.getArguments().get(0) && ARRAY_ITERATION_FUNCTIONS_NAMES.contains(funcitonCallToken.name)) {
+                                            try {
+                                                CompletionContext c = ModuleCompletionProvider.getCompletionContext(parentContext, tokens.subList(0, tokens.size() - 1), fc.getAbsolutePosition());
+                                                if (c instanceof EntityCompletionContext) {
+                                                    ctx = ((EntityCompletionContext)c).getElementCompletionContext();
+                                                }
+                                            } catch (Exception ex) {
+                                                Exceptions.printStackTrace(ex);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
                         return true;
-                    }
-                    if (an instanceof FunctionNode) {
-//                        if (an.getAbsolutePosition() <= caretOffset && an.getAbsolutePosition() + an.getLength() >= caretOffset){
-//                            FunctionNode fn = (FunctionNode)an;
-//                            if (ARRAY_ITERATION_FUNCTIONS_NAMES.contains(fn.getName())) {
-//                                fn.getParams();
-//                            }   
-//                        }
-                        return false;
                     }
                     if (an instanceof PropertyGet && moduleConstructorScope) {
                         PropertyGet pg = (PropertyGet) an;
