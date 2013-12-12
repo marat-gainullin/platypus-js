@@ -196,7 +196,7 @@ public class ModuleCompletionContext extends CompletionContext {
                 @Override
                 public boolean visit(AstNode an) {
                     if (an == lookupScope) {
-                        if (an instanceof FunctionNode) {
+                        if (an instanceof FunctionNode) {// Completion support for Array iteration functions parameters on an entity
                             FunctionNode fn = (FunctionNode) an;
                             if (fn.getParams() != null && fn.getParams().size() > 0 && fieldName.equals(fn.getParams().get(0).toSource())) {
                                 if (fn.getParent() instanceof FunctionCall) {
