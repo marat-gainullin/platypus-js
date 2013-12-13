@@ -16,14 +16,14 @@ public class NoSuchEntityException extends Exception {
         super(cause);
     }
 
-    public NoSuchEntityException(Long entityId, Throwable cause)
+    public NoSuchEntityException(String entityId, Throwable cause)
     {
-        super(entityId.toString(), cause);
+        super(entityId, cause);
     }
 
-    public NoSuchEntityException(Long entityId)
+    public NoSuchEntityException(String entityId)
     {
-        super(entityId.toString());
+        super(entityId);
     }
 
     public NoSuchEntityException()

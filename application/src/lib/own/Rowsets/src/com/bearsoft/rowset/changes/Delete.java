@@ -4,6 +4,8 @@
  */
 package com.bearsoft.rowset.changes;
 
+import com.eas.script.ScriptFunction;
+
 /**
  *
  * @author mg
@@ -12,13 +14,17 @@ public class Delete extends Change {
 
     public Value[] keys;
 
-    public Delete(String aEntityId)
-    {
+    public Delete(String aEntityId) {
         super(aEntityId);
     }
-    
+
     @Override
     public void accept(ChangeVisitor aChangeVisitor) throws Exception {
         aChangeVisitor.visit(this);
+    }
+
+    @ScriptFunction(jsDoc = "Keys values used for identification of deleted data.")
+    public Value[] getKeys() {
+        return keys;
     }
 }

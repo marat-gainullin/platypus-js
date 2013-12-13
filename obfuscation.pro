@@ -3,7 +3,6 @@
 -injars 'C:\projects\platypusClientLite\lib\own'
 -outjars 'C:\projects\platypusobfuscated\lib\own'
 -injars 'C:\projects\platypusClientLite\lib\thirdparty\JCalendar.jar'
--injars 'C:\projects\platypusClientLite\lib\thirdparty\Rudp.jar'
 -injars 'C:\projects\platypusClientLite\lib\thirdparty\SqlParser.jar'
 -outjars 'C:\projects\platypusobfuscated\lib\thirdparty'
 

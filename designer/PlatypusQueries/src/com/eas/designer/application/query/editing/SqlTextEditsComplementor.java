@@ -7,7 +7,6 @@ package com.eas.designer.application.query.editing;
 import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.ClientConstants;
-import com.eas.client.SQLUtils;
 import com.eas.client.model.dbscheme.FieldsEntity;
 import com.eas.client.model.gui.edits.DeleteEntityEdit;
 import com.eas.client.model.gui.edits.DeleteRelationEdit;
@@ -25,7 +24,6 @@ import com.eas.designer.application.query.editing.riddle.SelectRiddler;
 import com.eas.designer.application.query.editing.riddle.StatementRiddler;
 import java.awt.Rectangle;
 import java.util.*;
-import java.util.regex.Pattern;
 import javax.swing.undo.CompoundEdit;
 import javax.swing.undo.UndoableEdit;
 import net.sf.jsqlparser.TablesFinder;
@@ -44,7 +42,6 @@ import net.sf.jsqlparser.statement.Statement;
 public class SqlTextEditsComplementor {
 
     private final static String PARAMETERS_NAME = "!parameters!";
-    private final static Pattern SUBQUERY_LINK_PATTERN = Pattern.compile(SQLUtils.SUBQUERY_TABLE_NAME_REGEXP, Pattern.CASE_INSENSITIVE);
     protected PlatypusQueryDataObject dataObject;
 
     public SqlTextEditsComplementor(PlatypusQueryDataObject aDataObject) {
@@ -191,7 +188,7 @@ public class SqlTextEditsComplementor {
     }
 
     public static String generateSyntaxicId(QueryEntity entity) {
-        String tablyName = null;
+        String tablyName;
         if (entity instanceof QueryParametersEntity) {
             tablyName = PARAMETERS_NAME;
         } else {
@@ -200,10 +197,7 @@ public class SqlTextEditsComplementor {
             } else {
                 if (entity.getQueryId() != null) {
                     String inQueryName = entity.getQueryId();
-                    if (inQueryName.matches("\\d+")) {
-                        inQueryName = ClientConstants.QUERY_ID_PREFIX + entity.getQueryId();
-                    }
-                    tablyName = inQueryName;
+                    tablyName = ClientConstants.STORED_QUERY_REF_PREFIX + inQueryName;
                 } else {
                     if (entity.getTableSchemaName() != null && !entity.getTableSchemaName().isEmpty()) {
                         tablyName = entity.getTableSchemaName() + "." + entity.getTableName();
@@ -233,8 +227,7 @@ public class SqlTextEditsComplementor {
         // Prepare model's tables map
         Map<String, QueryEntity> modelTables = new HashMap<>();
         for (QueryEntity entity : model.getEntities().values()) {
-            String tablyName = null;
-            tablyName = generateSyntaxicId(entity);
+            String tablyName = generateSyntaxicId(entity);
             modelTables.put(tablyName, entity);
         }
         return modelTables;
@@ -282,7 +275,7 @@ public class SqlTextEditsComplementor {
         }
     }
 
-    private void synchronizeTables(CompoundEdit section, QueryModel model, Map<String, Table> aTables) {
+    private void synchronizeTables(CompoundEdit section, QueryModel model, Map<String, Table> aTables) throws Exception {
         // Let's prepare tables map.
         // In order to achieve correct runtime query processing,
         // we had to add tables with schema in their's names two times in the map.
@@ -346,13 +339,20 @@ public class SqlTextEditsComplementor {
                 toAdd.setWidth(rect.width);
                 toAdd.setHeight(rect.height);
                 toAdd.setAlias(table.getAlias() != null ? table.getAlias().getName() : "");
-                if (dataObject.existsAppQuery(table.getName())) {
-                    toAdd.setQueryId(table.getName());
-                } else if (SUBQUERY_LINK_PATTERN.matcher(table.getName()).matches()) {
+                if (table.getName().startsWith(ClientConstants.STORED_QUERY_REF_PREFIX)) {// strong referecne to stored subquery
                     toAdd.setQueryId(table.getName().substring(1));
                 } else {
-                    toAdd.setTableSchemaName(table.getSchemaName());
-                    toAdd.setTableName(table.getName());
+                    String schema = table.getSchemaName();
+                    if (schema != null && schema.equalsIgnoreCase(dataObject.getMetadataCache().getConnectionSchema())) {
+                        schema = null;
+                    }
+                    String cachedTablyName = (schema != null ? schema + "." : "") + table.getName();
+                    if (dataObject.validateTableName(cachedTablyName)) {//Tables have a priority in soft referecnes
+                        toAdd.setTableSchemaName(schema);
+                        toAdd.setTableName(table.getName());
+                    } else {
+                        toAdd.setQueryId(table.getName());
+                    }
                 }
                 NewEntityEdit<QueryEntity, QueryModel> edit = new NewEntityEdit<>(model, toAdd);
                 edits.add(edit);

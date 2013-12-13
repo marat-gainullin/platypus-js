@@ -207,22 +207,28 @@ public class QueryResultsView extends javax.swing.JPanel {
         query.setDbId(dbId);
         query.setEntityId(entityId);
         query.setPageSize(pageSize);
-        try {
-            StoredQueryFactory factory = new StoredQueryFactory(client, false);
-            query.setCommand(!factory.putTableFieldsMetadata(query));
-            enableCommitQueryButton(!query.isCommand());
-            hintCommitQueryButton(NbBundle.getMessage(QueryResultsView.class, "HINT_Commit"));
-        } catch (Exception ex) {
-            enableCommitQueryButton(false);
-            hintCommitQueryButton(NbBundle.getMessage(QueryResultsView.class, "HINT_Uncommitable"));
-        }
         for (Field p : parameters.toCollection()) {
             query.getParameters().add(p.copy());
         }
         queryEntity.setQueryId(entityId);
         queryEntity.setQuery(query);
-        queryEntity.prepareRowsetByQuery();
         model.addEntity(queryEntity);
+        try {
+            StoredQueryFactory factory = new StoredQueryFactory(client, false);
+            query.setCommand(!factory.putTableFieldsMetadata(query));
+            enableCommitQueryButton(!query.isCommand());
+            enableNextPageButton(!query.isCommand());
+            enableAddButton(!query.isCommand());
+            hintCommitQueryButton(NbBundle.getMessage(QueryResultsView.class, "HINT_Commit"));
+        } catch (Exception ex) {
+            query.setFields(null);// We have to accept database's fields here.
+            enableCommitQueryButton(false);
+            enableNextPageButton(false);
+            enableAddButton(false);
+            hintCommitQueryButton(NbBundle.getMessage(QueryResultsView.class, "HINT_Uncommitable"));
+        }
+        enableRefreshQueryButton(true);
+        queryEntity.prepareRowsetByQuery();
     }
 
     public PlatypusQueryDataObject getQueryDataObject() {
@@ -584,8 +590,7 @@ public class QueryResultsView extends javax.swing.JPanel {
     }
 
     private void requestExecuteQuery() {
-        RequestProcessor.getDefault().execute(
-                new Runnable() {
+        RequestProcessor.getDefault().execute(new Runnable() {
             @Override
             public void run() {
                 execute();
@@ -601,23 +606,13 @@ public class QueryResultsView extends javax.swing.JPanel {
         try {
             if (refresh()) {
                 showQueryResultsMessage();
-                enableRefreshQueryButton(true);
-                enableCommitQueryButton(true);
-                enableNextPageButton(true);
-            } else {
-                enableRefreshQueryButton(true);
-                enableCommitQueryButton(false);
-                enableNextPageButton(false);
-                deleteButton.setEnabled(false);
-                addButton.setEnabled(false);
             }
         } catch (Throwable ex) {
             showWarning(ex.getMessage());
-            enableRefreshQueryButton(false);
             enableCommitQueryButton(false);
             enableNextPageButton(false);
-            deleteButton.setEnabled(false);
-            addButton.setEnabled(false);
+            enableDeleteButton(false);
+            enableAddButton(false);
         } finally {
             enableRunQueryButton(true);
             ph.finish();
@@ -669,6 +664,24 @@ public class QueryResultsView extends javax.swing.JPanel {
         });
     }
 
+    private void enableAddButton(final boolean enable) {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                addButton.setEnabled(enable);
+            }
+        });
+    }
+    
+    private void enableDeleteButton(final boolean enable) {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                deleteButton.setEnabled(enable);
+            }
+        });
+    }
+    
     /**
      *
      * @return True if results grid is initialized and false if dml query has

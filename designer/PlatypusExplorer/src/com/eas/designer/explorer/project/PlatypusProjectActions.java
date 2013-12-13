@@ -137,7 +137,7 @@ public class PlatypusProjectActions implements ActionProvider {
         String runAppElement = project.getSettings().getAppSettings().getRunElement();
         if (runAppElement == null || runAppElement.isEmpty()) {
             final SelectAppElementPanel panel = new SelectAppElementPanel(project);
-            DialogDescriptor dd = new DialogDescriptor(panel, "App element Id");
+            DialogDescriptor dd = new DialogDescriptor(panel, NbBundle.getMessage(PlatypusProjectActions.class, "MSG_Run_Element_Dialog"));//NOI18N
             if (DialogDescriptor.OK_OPTION.equals(DialogDisplayer.getDefault().notify(dd))) {
                 runAppElement = panel.getAppElementId();
                 if (panel.isSaveAsDefault()) {

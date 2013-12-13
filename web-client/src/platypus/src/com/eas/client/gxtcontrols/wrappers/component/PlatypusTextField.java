@@ -1,5 +1,6 @@
 package com.eas.client.gxtcontrols.wrappers.component;
 
+import com.eas.client.gxtcontrols.ControlsUtils;
 import com.sencha.gxt.cell.core.client.form.TextInputCell;
 import com.sencha.gxt.widget.core.client.form.TextField;
 
@@ -8,16 +9,14 @@ public class PlatypusTextField extends TextField {
 	/**
 	 * Grid inline editing constructor
 	 */
-	public PlatypusTextField()
-	{
+	public PlatypusTextField() {
 		super();
 	}
-	
-	public PlatypusTextField(TextInputCell aCell)
-	{
+
+	public PlatypusTextField(TextInputCell aCell) {
 		super(aCell);
 	}
-	
+
 	@Override
 	public String getValue() {
 		return super.getValue();
@@ -27,7 +26,7 @@ public class PlatypusTextField extends TextField {
 	public void setValue(String value, boolean fireEvents) {
 		super.setValue(value, fireEvents);
 	}
-	
+
 	// There is a bug in GXT. onBlur handlers call finishEditing, thus commiting
 	// edited value.
 	// It's OK, but when redraw() calls setInnerHTML(), browser fires onBlur
@@ -49,5 +48,15 @@ public class PlatypusTextField extends TextField {
 				recurse = false;
 			}
 		}
+	}
+	
+	@Override
+	public String getEmptyText() {
+		return ControlsUtils.getEmptyText(this);
+	}
+	
+	@Override
+	public void setEmptyText(String emptyText) {
+		ControlsUtils.setEmptyText(this, emptyText);
 	}
 }

@@ -31,6 +31,8 @@ import org.mozilla.javascript.Function;
  */
 public abstract class Component<D extends JComponent> {
 
+    protected static final String EMPTY_TEXT_PROP_NAME = "emptyText";
+    
     protected Font font;
     protected Cursor cursor;
     protected String errorMessage;
@@ -107,7 +109,7 @@ public abstract class Component<D extends JComponent> {
             + "*/";
 
     @ScriptFunction(jsDoc = VISIBLE_JSDOC)
-    public boolean isVisible() {
+    public boolean getVisible() {
         return delegate.isVisible();
     }
 
@@ -120,7 +122,7 @@ public abstract class Component<D extends JComponent> {
             + "*/";
 
     @ScriptFunction(jsDoc = FOCUSABLE_JSDOC)
-    public boolean isFocusable() {
+    public boolean getFocusable() {
         return delegate.isFocusable();
     }
 
@@ -135,7 +137,7 @@ public abstract class Component<D extends JComponent> {
             + "*/";
 
     @ScriptFunction(jsDoc = ENABLED_JSDOC)
-    public boolean isEnabled() {
+    public boolean getEnabled() {
         return delegate.isEnabled();
     }
 
@@ -161,7 +163,7 @@ public abstract class Component<D extends JComponent> {
             + "* True if this component is completely opaque.\n"
             + "*/";
     @ScriptFunction(jsDoc = OPAQUE_TEXT_JSDOC)
-    public boolean isOpaque() {
+    public boolean getOpaque() {
         return delegate.isOpaque();
     }
 

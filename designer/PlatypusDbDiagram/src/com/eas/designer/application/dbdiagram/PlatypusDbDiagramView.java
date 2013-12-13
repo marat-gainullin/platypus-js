@@ -20,7 +20,6 @@ import com.eas.designer.application.query.result.QueryResultTopComponent;
 import com.eas.designer.application.query.result.QueryResultsView;
 import com.eas.designer.datamodel.nodes.EntityNode;
 import com.eas.designer.datamodel.nodes.FieldNode;
-import com.eas.designer.explorer.PlatypusDataObject;
 import com.eas.designer.explorer.model.windows.ModelInspector;
 import com.eas.designer.explorer.selectors.TablesSelector;
 import java.awt.BorderLayout;

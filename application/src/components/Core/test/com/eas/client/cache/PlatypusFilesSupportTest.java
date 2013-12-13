@@ -4,6 +4,7 @@
  */
 package com.eas.client.cache;
 
+import com.eas.client.ClientConstants;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -17,7 +18,7 @@ import static org.junit.Assert.*;
  */
 public class PlatypusFilesSupportTest {
 
-    protected static final String CRLF = System.getProperty("line.separator");
+    protected static final String CRLF = System.getProperty(ClientConstants.LINE_SEPARATOR_PROP_NAME);
     
     public PlatypusFilesSupportTest() {
     }

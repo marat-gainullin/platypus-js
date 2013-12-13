@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.mozilla.javascript.NativeJavaObject;
+import org.mozilla.javascript.ScriptRuntime;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 
@@ -32,37 +33,45 @@ public class NativeJavaHostObject extends NativeJavaObject {
 
     @Override
     public void put(String name, Scriptable start, Object value) {
-        if (!delegate.has(name, start)) {
-            super.put(name, start, value);
-        } else {
+        if (delegate.has(name, start)) {
             delegate.put(name, delegate, value);
+        } else {
+            if (super.has(name, start)) {
+                super.put(name, start, value);
+            } else {
+                delegate.put(name, delegate, value);
+            }
         }
     }
 
     @Override
     public void put(int index, Scriptable start, Object value) {
-        if (!delegate.has(index, start)) {
-            super.put(index, start, value);
-        } else {
+        if (delegate.has(index, start)) {
             delegate.put(index, delegate, value);
+        } else {
+            if (super.has(index, start)) {
+                super.put(index, start, value);
+            } else {
+                delegate.put(index, delegate, value);
+            }
         }
     }
 
     @Override
     public Object get(String name, Scriptable start) {
-        if (!delegate.has(name, start)) {
-            return super.get(name, start);
-        } else {
+        if (delegate.has(name, start)) {
             return delegate.get(name, start);
+        } else {
+            return super.get(name, start);
         }
     }
 
     @Override
     public Object get(int index, Scriptable start) {
-        if (!delegate.has(index, start)) {
-            return super.get(index, start);
-        } else {
+        if (delegate.has(index, start)) {
             return delegate.get(index, start);
+        } else {
+            return super.get(index, start);
         }
     }
 
@@ -104,6 +113,10 @@ public class NativeJavaHostObject extends NativeJavaObject {
         if (delegate.has(index, this)) {
             delegate.delete(index);
         }// super.delete will be no op. see NativeJavaObject
+    }
+
+    public ScriptableObject getDelegate() {
+        return delegate;
     }
 
     public void defineProperty(String propertyName, Object delegateTo,

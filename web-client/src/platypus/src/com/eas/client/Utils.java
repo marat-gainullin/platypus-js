@@ -215,11 +215,11 @@ public class Utils {
 	public static native Object unwrap(JavaScriptObject aValue) throws Exception/*-{
 		if (aValue == null || aValue == undefined)
 			return null;
-		else if (aValue.constructor.name == "Date" && aValue.getTime != undefined)
+		else if (aValue instanceof Date || aValue instanceof $wnd.Date || aValue.constructor.name == "Date")
 			return @com.eas.client.Utils::double2Date(D)(aValue.getTime());
-		else if(aValue.constructor.name == "Boolean")
+		else if(aValue instanceof Boolean || aValue instanceof $wnd.Boolean || aValue.constructor.name == "Boolean")
 			return new @java.lang.Boolean::new(Z)((aValue == true));
-		else if(aValue.constructor.name == "String" && aValue.length != undefined && aValue.toLowerCase != undefined && aValue.toUpperCase != undefined)
+		else if(aValue instanceof String || aValue instanceof $wnd.String || aValue.constructor.name == "String")
 			return new @java.lang.String::new(Ljava/lang/String;)(aValue+'');
 		else if(!isNaN(aValue)) {
 			return new @java.lang.Double::new(D)((new Number(aValue)) * 1);

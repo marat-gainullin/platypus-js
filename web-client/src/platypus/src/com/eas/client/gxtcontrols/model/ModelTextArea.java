@@ -1,8 +1,10 @@
 package com.eas.client.gxtcontrols.model;
 
 import com.bearsoft.rowset.metadata.Field;
+import com.eas.client.gxtcontrols.ControlsUtils;
 import com.eas.client.gxtcontrols.converters.StringRowValueConverter;
 import com.eas.client.gxtcontrols.wrappers.component.PlatypusAdapterStandaloneField;
+import com.eas.client.gxtcontrols.wrappers.handled.PlatypusFormattedTextHandledField;
 import com.eas.client.gxtcontrols.wrappers.handled.PlatypusTextHandledArea;
 import com.eas.client.gxtcontrols.wrappers.handled.PlatypusTextHandledAreaInputCell;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -150,4 +152,13 @@ public class ModelTextArea extends PlatypusAdapterStandaloneField<String> {
 	public void setValue(String value, boolean fireEvents) {
 	    super.setValue(value, fireEvents);
 	}
+	
+	public void setEmptyText(String aValue){
+		ControlsUtils.setEmptyText(((PlatypusTextHandledArea)target), aValue);
+	}
+	
+	public String getEmptyText(){
+		return ControlsUtils.getEmptyText(((PlatypusTextHandledArea)target));
+	}
+	
 }

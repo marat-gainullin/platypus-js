@@ -4,9 +4,12 @@
  */
 package com.eas.designer.application.module.hyperlink;
 
+import com.eas.client.cache.PlatypusFilesSupport;
+import com.eas.client.scripts.ScriptRunner;
 import com.eas.designer.application.module.PlatypusModuleDataObject;
 import com.eas.designer.application.module.completion.CompletionContext;
 import com.eas.designer.application.module.completion.ModuleCompletionContext;
+import com.eas.designer.application.module.completion.ModuleThisCompletionContext;
 import com.eas.designer.application.module.parser.AstUtlities;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -18,14 +21,18 @@ import javax.swing.SwingUtilities;
 import javax.swing.text.Document;
 import javax.swing.text.StyledDocument;
 import org.mozilla.javascript.Node;
+import org.mozilla.javascript.Token;
+import org.mozilla.javascript.ast.Assignment;
 import org.mozilla.javascript.ast.AstNode;
 import org.mozilla.javascript.ast.AstRoot;
+import org.mozilla.javascript.ast.ExpressionStatement;
 import org.mozilla.javascript.ast.FunctionNode;
 import org.mozilla.javascript.ast.Name;
 import org.mozilla.javascript.ast.NewExpression;
 import org.mozilla.javascript.ast.NodeVisitor;
 import org.mozilla.javascript.ast.PropertyGet;
 import org.mozilla.javascript.ast.ScriptNode;
+import org.mozilla.javascript.ast.StringLiteral;
 import org.mozilla.javascript.ast.VariableDeclaration;
 import org.mozilla.javascript.ast.VariableInitializer;
 import org.netbeans.api.progress.ProgressUtils;
@@ -137,35 +144,60 @@ public class ModuleHyperlinkProvider implements HyperlinkProviderExt {
         FileObject fo = NbEditorUtilities.getFileObject(doc);
         PlatypusModuleDataObject appElementDataObject = (PlatypusModuleDataObject) DataObject.find(fo);
         if (node.getParent() instanceof NewExpression) {
-            CompletionContext typeCompletionContext = ModuleCompletionContext.getModuleCompletionContext(appElementDataObject.getProject(), ((Name)node).getIdentifier());
-            if (typeCompletionContext == null || !(typeCompletionContext instanceof ModuleCompletionContext)) {
-                return DeclarationLocation.NONE;
-            } else {
-                return new DeclarationLocation(((ModuleCompletionContext)typeCompletionContext).getDataObject(), 0);
+            NewExpression ne = (NewExpression) node.getParent();
+            if (ne.getTarget() instanceof Name) {
+                Name constructorName = (Name) ne.getTarget();
+                if (ModuleCompletionContext.isModuleInitializerName(constructorName.getIdentifier())
+                        && ne.getArguments() != null
+                        && ne.getArguments().size() > 0) {
+                    if (ne.getArguments().get(0) instanceof StringLiteral) {
+                        StringLiteral sl = (StringLiteral) ne.getArguments().get(0);
+                        ModuleCompletionContext typeCompletionContext = ModuleCompletionContext.getModuleCompletionContext(appElementDataObject.getProject(), sl.getValue(false));
+                        if (typeCompletionContext != null) {
+                            return new DeclarationLocation(typeCompletionContext.getDataObject(), 0);
+                        }
+                    }
+                } else {
+                    ModuleCompletionContext typeCompletionContext = ModuleCompletionContext.getModuleCompletionContext(appElementDataObject.getProject(), constructorName.getIdentifier());
+                    if (typeCompletionContext != null) {
+                        return new DeclarationLocation(typeCompletionContext.getDataObject(), 0);
+                    }
+                }
             }
+            return DeclarationLocation.NONE;
         }
         makePath(node);
         if (identifiersPath == null || identifiersPath.isEmpty()) {
             return DeclarationLocation.NONE;
         }
-        for (int i = 0; i < identifiersPath.size() - 1; i++) {
-            String fieldName = identifiersPath.get(i);
-            CompletionContext typeCompletionContext = ModuleCompletionContext.findModuleCompletionContext(fieldName, offset, appElementDataObject);
-            if (typeCompletionContext == null || !(typeCompletionContext instanceof ModuleCompletionContext)) {
+        if (identifiersPath.size() == 1) {
+            AstNode declarationNode = findLocalDeclaration(node, identifiersPath.get(0));
+            if (declarationNode != null) {
+                return new DeclarationLocation(appElementDataObject, declarationNode.getAbsolutePosition());
+            } else {
                 return DeclarationLocation.NONE;
             }
-            appElementDataObject = ((ModuleCompletionContext) typeCompletionContext).getDataObject();
-            if (appElementDataObject == null) {
-                return DeclarationLocation.NONE;
+
+        } else {
+            for (int i = 0; i < identifiersPath.size() - 1; i++) {
+                String fieldName = identifiersPath.get(i);
+                CompletionContext typeCompletionContext = ModuleCompletionContext.findCompletionContext(fieldName, offset, new ModuleCompletionContext(appElementDataObject, ScriptRunner.class));
+                if (typeCompletionContext == null || !(typeCompletionContext instanceof ModuleThisCompletionContext)) {
+                    return DeclarationLocation.NONE;
+                }
+                appElementDataObject = ((ModuleThisCompletionContext) typeCompletionContext).getParentContext().getDataObject();
+                if (appElementDataObject == null) {
+                    return DeclarationLocation.NONE;
+                }
+                offset = 0;
             }
-            offset = 0;
+            String name = identifiersPath.get(identifiersPath.size() - 1);
+            AstNode declarationNode = findModuleThisPropertyDeclaration(appElementDataObject.getAst(), name);
+            if (declarationNode != null) {
+                return new DeclarationLocation(appElementDataObject, declarationNode.getAbsolutePosition());
+            }
+            return DeclarationLocation.NONE;
         }
-        String name = identifiersPath.get(identifiersPath.size() - 1);
-        AstNode declarationNode = findDeclaration(identifiersPath.size() == 1 ? node : appElementDataObject.getAst(), name);
-        if (declarationNode != null) {
-            return new DeclarationLocation(appElementDataObject, declarationNode.getAbsolutePosition());
-        }
-        return DeclarationLocation.NONE;
     }
 
     private void makePath(AstNode node) {
@@ -189,7 +221,7 @@ public class ModuleHyperlinkProvider implements HyperlinkProviderExt {
         }
     }
 
-    private AstNode findDeclaration(AstNode node, String declarationName) {
+    private AstNode findLocalDeclaration(AstNode node, String declarationName) {
         AstNode currentNode = node;
         for (;;) {//up to the root node
             if (currentNode instanceof ScriptNode) {
@@ -221,6 +253,12 @@ public class ModuleHyperlinkProvider implements HyperlinkProviderExt {
                 FunctionNode functionNode = (FunctionNode) n;
                 if (functionNode.getFunctionName().getIdentifier().equals(declarationName)) {
                     return functionNode;
+                } else {
+                    for (AstNode paramNode : functionNode.getParams()) {
+                        if (paramNode.toSource().equals(declarationName)) {
+                            return paramNode;
+                        }
+                    }
                 }
             }
             if (n instanceof VariableDeclaration) {
@@ -236,6 +274,40 @@ public class ModuleHyperlinkProvider implements HyperlinkProviderExt {
                 }
             }
             n = n.getNext();
+        }
+        return null;
+    }
+
+    private AstNode findModuleThisPropertyDeclaration(AstRoot astRoot, String declarationName) {
+        FunctionNode moduleConstructor = PlatypusFilesSupport.extractModuleConstructor(astRoot);
+        return scanModuleThisLevel(moduleConstructor,
+                declarationName,
+                ModuleThisCompletionContext.getThisAliases(moduleConstructor));
+    }
+
+    private static AstNode scanModuleThisLevel(FunctionNode moduleConstructor, String declarationName, Set<String> aliases) {
+        if (moduleConstructor.getBody() != null) {
+            Node n = moduleConstructor.getBody().getFirstChild();
+            while (n != null) {
+                if (n instanceof ExpressionStatement) {
+                    ExpressionStatement es = (ExpressionStatement) n;
+                    if (es.getExpression() instanceof Assignment) {
+                        Assignment a = (Assignment) es.getExpression();
+                        if (a.getLeft() instanceof PropertyGet) {
+                            PropertyGet pg = (PropertyGet) a.getLeft();
+                            if ((pg.getTarget().getType() == Token.THIS)
+                                    || (pg.getTarget() instanceof Name && aliases.contains(((Name) pg.getTarget()).getIdentifier()))) {
+                                if (a.getRight() instanceof FunctionNode) {
+                                    if (pg.getProperty().getIdentifier().equals(declarationName)) {
+                                        return a.getLeft();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                n = n.getNext();
+            }
         }
         return null;
     }

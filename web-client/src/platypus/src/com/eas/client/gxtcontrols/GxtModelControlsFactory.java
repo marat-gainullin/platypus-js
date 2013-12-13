@@ -3,7 +3,6 @@ package com.eas.client.gxtcontrols;
 import java.util.Date;
 
 import com.eas.client.Utils;
-import com.eas.client.Utils.JsObject;
 import com.eas.client.gxtcontrols.converters.BooleanRowValueConverter;
 import com.eas.client.gxtcontrols.converters.DateRowValueConverter;
 import com.eas.client.gxtcontrols.converters.DoubleRowValueConverter;
@@ -111,7 +110,9 @@ public class GxtModelControlsFactory extends GxtControlsFactory {
 					mText.setPublishedField(published);
 					mText.setEditable(!readonly);
 					mText.setSelectOnly(selectOnly);
-
+					if (aTag.hasAttribute("emptyText"))
+						mText.setEmptyText(aTag.getAttribute("emptyText"));
+					
 					checkBorders(mText, aTag);
 					processGeneralProperties(mText, aTag, published);
 					return mText;
@@ -131,6 +132,8 @@ public class GxtModelControlsFactory extends GxtControlsFactory {
 					mTextArea.setPublishedField(published);
 					mTextArea.setEditable(!readonly);
 					mTextArea.setSelectOnly(selectOnly);
+					if (aTag.hasAttribute("emptyText"))
+						mTextArea.setEmptyText(aTag.getAttribute("emptyText"));
 
 					checkBorders(mTextArea, aTag);
 					processGeneralProperties(mTextArea, aTag, published);
@@ -154,6 +157,8 @@ public class GxtModelControlsFactory extends GxtControlsFactory {
 					mDate.setPublishedField(published);
 					mDate.setEditable(!readonly);
 					mDate.setSelectOnly(selectOnly);
+					if (aTag.hasAttribute("emptyText"))
+						mDate.setEmptyText(aTag.getAttribute("emptyText"));
 
 					checkBorders(mDate, aTag);
 					processGeneralProperties(mDate, aTag, published);
@@ -204,6 +209,8 @@ public class GxtModelControlsFactory extends GxtControlsFactory {
 					mSpin.setPublishedField(published);
 					mSpin.setEditable(!readonly);
 					mSpin.setSelectOnly(selectOnly);
+					if (aTag.hasAttribute("emptyText"))
+						mSpin.setEmptyText(aTag.getAttribute("emptyText"));
 
 					checkBorders(mSpin, aTag);
 					processGeneralProperties(mSpin, aTag, published);
@@ -243,6 +250,8 @@ public class GxtModelControlsFactory extends GxtControlsFactory {
 					mCombo.setEditable(!readonly);
 					mCombo.setSelectOnly(selectOnly);
 					mCombo.setList(list);
+					if (aTag.hasAttribute("emptyText"))
+						mCombo.setEmptyText(aTag.getAttribute("emptyText"));
 
 					checkBorders(mCombo, aTag);
 					processGeneralProperties(mCombo, aTag, published);

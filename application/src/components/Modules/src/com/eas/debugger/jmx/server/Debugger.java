@@ -4,10 +4,23 @@
  */
 package com.eas.debugger.jmx.server;
 
+import com.eas.script.NativeJavaHostObject;
+import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptUtils;
 import com.eas.script.ScriptUtils.ScriptAction;
+import com.eas.util.StringUtils;
+import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.MethodDescriptor;
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import javax.management.AttributeChangeNotification;
 import javax.management.MBeanNotificationInfo;
 import javax.management.NotificationBroadcasterSupport;
@@ -15,8 +28,11 @@ import org.mozilla.javascript.Callable;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextFactory;
 import org.mozilla.javascript.Kit;
+import org.mozilla.javascript.NativeJavaArray;
+import org.mozilla.javascript.NativeJavaObject;
 import org.mozilla.javascript.ScriptRuntime;
 import org.mozilla.javascript.Scriptable;
+import org.mozilla.javascript.ScriptableObject;
 import org.mozilla.javascript.Undefined;
 import org.mozilla.javascript.tools.debugger.Dim;
 import org.mozilla.javascript.tools.debugger.Dim.ContextData;
@@ -65,10 +81,12 @@ public class Debugger extends NotificationBroadcasterSupport implements Debugger
     @Override
     public void updateSourceText(SourceInfo sourceInfo) {
     }
+    protected int frameIndex = 0;
 
     @Override
     public void enterInterrupt(StackFrame lastFrame, String threadTitle, String alertMessage) {
-        lastFrame.scope();
+        jsDebugger.contextSwitch(0);
+        frameIndex = 0;
         String[] ecodedFrame = encodeFrame(lastFrame, threadTitle);
         AttributeChangeNotification notification = new AttributeChangeNotification(this, interruptSequence++, System.currentTimeMillis(), "Platypus debugger encoutered a break in user program", BREAK_ATTRIBUTE_NAME, "String[]", null, ecodedFrame);
         sendNotification(notification);
@@ -119,16 +137,16 @@ public class Debugger extends NotificationBroadcasterSupport implements Debugger
 
     @Override
     public String evaluate(String aExpression) throws Exception {
-        jsDebugger.contextSwitch(0);
+        //jsDebugger.contextSwitch(0);
         return jsDebugger.eval(aExpression);
     }
 
     @Override
     public String[] locals() throws Exception {
-        jsDebugger.contextSwitch(0);
+        //jsDebugger.contextSwitch(0);
         ContextData ctxData = jsDebugger.currentContextData();
         if (ctxData != null) {
-            Object oScope = ctxData.getFrame(0).scope();
+            Object oScope = ctxData.getFrame(frameIndex).scope();
             if (oScope instanceof Scriptable) {
                 Object[] oIds = jsDebugger.getObjectIds(oScope);
                 return idsToStrings(oIds);
@@ -136,12 +154,110 @@ public class Debugger extends NotificationBroadcasterSupport implements Debugger
         }
         return null;
     }
+    /**
+     * Comprised of last named method, wich is documented and used in properties
+     * descriptors
+     */
+    protected Map<String, Map<String, Method>> propsGetters = new HashMap<>();
+    /**
+     * Comprised of last named method, wich is documented and not used in
+     * properties descriptors
+     */
+    protected Map<String, Map<String, Method>> freeMethods = new HashMap<>();
+
+    protected void checkBeanInfo(NativeJavaObject aTarget) throws IntrospectionException {
+        if (aTarget != null && aTarget.unwrap() != null) {
+            Class<?> clazz = aTarget.unwrap().getClass();
+            if (!freeMethods.containsKey(clazz.getName())) {
+                Map<String, Method> getters = new HashMap<>();
+                Map<String, Method> setters = new HashMap<>();
+                BeanInfo bi = Introspector.getBeanInfo(clazz);
+                for (PropertyDescriptor pd : bi.getPropertyDescriptors()) {
+                    Method getter = pd.getReadMethod();
+                    if (getter != null
+                            && getter.getAnnotation(ScriptFunction.class) != null)// check ScriptFunction annotation;
+                    {
+                        getters.put(getter.getName(), getter);
+                        if (pd.getWriteMethod() != null) {
+                            setters.put(pd.getWriteMethod().getName(), pd.getWriteMethod());
+                        }
+                    }
+                    Method setter = pd.getWriteMethod();
+                    if (setter != null
+                            && setter.getAnnotation(ScriptFunction.class) != null)// check ScriptFunction annotation;
+                    {
+                        setters.put(setter.getName(), setter);
+                        if (pd.getReadMethod() != null) {
+                            getters.put(pd.getReadMethod().getName(), pd.getReadMethod());
+                        }
+                    }
+                }
+                propsGetters.put(clazz.getName(), getters);
+
+                Map<String, Method> methods = new HashMap<>();
+                for (MethodDescriptor md : bi.getMethodDescriptors()) {
+                    Method method = md.getMethod();
+                    if (method != null
+                            && method.getAnnotation(ScriptFunction.class) != null// check ScriptFunction annotation;
+                            && !getters.containsKey(method.getName())
+                            && !setters.containsKey(method.getName())) {
+                        methods.put(method.getName(), method);
+                    }
+                }
+                freeMethods.put(clazz.getName(), methods);
+            }
+        }
+    }
 
     @Override
     public String[] props(String aExpression) throws Exception {
-        jsDebugger.contextSwitch(0);
-        Object oResult = eval(aExpression);
-        return oResult != null ? idsToStrings(jsDebugger.getObjectIds(oResult)) : new String[]{};
+        //jsDebugger.contextSwitch(0);
+        SortedSet<String> ids = new TreeSet<>();
+        Object oResult = evalToObject(aExpression);
+        if (oResult instanceof Scriptable) {
+            Scriptable sResult = (Scriptable) oResult;
+            Object[] oIds = sResult.getIds();
+            if (sResult instanceof ScriptableObject) {
+                ScriptableObject so = (ScriptableObject) sResult;
+                oIds = so.getAllIds();
+            }
+            if (sResult instanceof NativeJavaObject) {
+                NativeJavaObject njo = (NativeJavaObject) sResult;
+                checkBeanInfo(njo);
+            }
+            for (Object oId : oIds) {
+                if (oId != null) {
+                    if (oId instanceof String && sResult instanceof NativeJavaObject) {
+                        NativeJavaObject njo = (NativeJavaObject) sResult;
+                        boolean scriptableProp = false;
+                        boolean inGetter = false;
+                        boolean inFreeMethod = false;
+                        if (sResult instanceof NativeJavaHostObject) {
+                            NativeJavaHostObject javaHostObject = (NativeJavaHostObject) sResult;
+                            scriptableProp = javaHostObject.getDelegate().has((String) oId, javaHostObject.getDelegate());
+                        }
+                        Map<String, Method> getters = njo.unwrap() != null ? propsGetters.get(njo.unwrap().getClass().getName()) : null;
+                        Map<String, Method> methods = njo.unwrap() != null ? freeMethods.get(njo.unwrap().getClass().getName()) : null;
+                        if (methods != null && getters != null) {
+                            if (methods.containsKey((String) oId)) {
+                                inFreeMethod = true;
+                            } else if (getters.containsKey("get" + StringUtils.capitalize((String) oId)) || getters.containsKey("is" + StringUtils.capitalize((String) oId))) {
+                                inGetter = true;
+                            }
+                        }
+                        if (scriptableProp || inFreeMethod || inGetter) {
+                            ids.add((String) oId);
+                        }
+                    } else {
+                        ids.add(oId.toString());
+                    }
+                }
+            }
+            if (oResult instanceof NativeJavaArray) {
+                ids.add("length");
+            }
+        }
+        return ids.toArray(new String[]{});
     }
 
     @Override
@@ -156,6 +272,17 @@ public class Debugger extends NotificationBroadcasterSupport implements Debugger
             return stack;
         }
         return new String[0][0];
+    }
+
+    @Override
+    public int currentFrame() throws Exception {
+        return frameIndex;
+    }
+
+    @Override
+    public void setCurrentFrame(int aValue) throws Exception {
+        jsDebugger.contextSwitch(aValue);
+        frameIndex = aValue;
     }
 
     private String[] idsToStrings(Object[] oIds) {
@@ -269,12 +396,11 @@ public class Debugger extends NotificationBroadcasterSupport implements Debugger
         return new MBeanNotificationInfo[]{info};
     }
 
-    public Object eval(final String expr) throws Exception {
+    public Object evalToObject(final String expr) throws Exception {
         String result = "undefined";
         if (expr == null) {
             return result;
         }
-        int frameIndex = 0;
         ContextData contextData = jsDebugger.currentContextData();
         if (contextData == null || frameIndex >= contextData.frameCount()) {
             return result;
@@ -283,7 +409,7 @@ public class Debugger extends NotificationBroadcasterSupport implements Debugger
         return ScriptUtils.inContext(new ScriptAction() {
             @Override
             public Object run(Context cx) throws Exception {
-                return do_eval(cx, frame, expr);
+                return doEvalToObject(cx, frame, expr);
             }
         });
     }
@@ -291,7 +417,7 @@ public class Debugger extends NotificationBroadcasterSupport implements Debugger
     /**
      * Evaluates script in the given stack frame.
      */
-    private static Object do_eval(Context cx, StackFrame frame, String expr) {
+    private static Object doEvalToObject(Context cx, StackFrame frame, String expr) {
         String resultString;
         org.mozilla.javascript.debug.Debugger saved_debugger = cx.getDebugger();
         Object saved_data = cx.getDebuggerContextData();

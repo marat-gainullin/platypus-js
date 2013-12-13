@@ -39,7 +39,7 @@ public class PlatypusClientTest {
     public static final String TEST_ROLE = "role1";// form testuser1
     public static final String TEST_PASSWD = "test";
     public static final String TEST_QUERY_ID = "130875374904760";
-    public static final String TEST_SERVER_MODULE_ID = "130892365750900";
+    public static final String TEST_SERVER_MODULE_ID = "HttpTestServerModule";
     public static final String TEST_SERVER_MODULE_NAME = TEST_SERVER_MODULE_ID;
     public static AppClient client;
 

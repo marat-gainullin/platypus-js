@@ -23,7 +23,6 @@ import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.bearsoft.rowset.metadata.PrimaryKeySpec;
 import com.eas.client.Utils;
-import com.eas.client.Utils.JsObject;
 import com.eas.client.application.AppClient;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Model;

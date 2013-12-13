@@ -13,15 +13,18 @@ import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.Client;
 import com.eas.client.events.ScriptSourcedEvent;
+import com.eas.client.model.Entity;
 import com.eas.client.model.Model;
 import com.eas.client.model.ModelScriptEventsListener;
 import com.eas.client.model.ModelScriptEventsSupport;
 import com.eas.client.model.Relation;
+import com.eas.client.model.script.ApplicationModelHostObject;
 import com.eas.client.model.script.ScriptEvent;
 import com.eas.client.model.script.ScriptableRowset;
 import com.eas.client.model.visitors.ApplicationModelVisitor;
 import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.queries.Query;
+import com.eas.script.NativeJavaHostObject;
 import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptUtils;
 import com.eas.script.ScriptUtils.ScriptAction;
@@ -48,7 +51,6 @@ import org.w3c.dom.Document;
  */
 public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P extends E, C extends Client, Q extends Query<C>> extends Model<E, P, C, Q> {
 
-    public static final String SCRIPT_MODEL_NAME = "model";
     protected Set<ReferenceRelation<E>> referenceRelations = new HashSet<>();
     protected Set<Long> savedRowIndexEntities = new HashSet<>();
     protected List<Entry<E, Integer>> savedEntitiesRowIndexes = new ArrayList<>();
@@ -72,6 +74,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         Scriptable oldValue = scriptThis;
         super.setScriptThis(aScriptScope);
         if (scriptThis != null && scriptThis instanceof ScriptableObject) {
+            ((ScriptableObject) scriptThis).defineProperty(Entity.MODEL_PROPERTY, new ApplicationModelHostObject(aScriptScope, this), ScriptableObject.READONLY);
             for (E ent : entities.values()) {
                 if (ent != null) {
                     ent.defineProperties();
@@ -108,9 +111,22 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
                 }
             }
             //////////////////
-            ((ScriptableObject) scriptThis).defineProperty(SCRIPT_MODEL_NAME, ScriptUtils.javaToJS(this, aScriptScope), ScriptableObject.READONLY);
         }
         changeSupport.firePropertyChange("scriptScope", oldValue, scriptThis);
+    }
+    
+    public Function getHandler(String aHandlerName) {
+        if (aHandlerName != null && !aHandlerName.isEmpty() && getScriptThis() != null) {
+            Object oHandlers = getScriptThis().get(ScriptUtils.HANDLERS_PROP_NAME, getScriptThis());
+            if (oHandlers instanceof Scriptable) {
+                Scriptable sHandlers = (Scriptable) oHandlers;
+                Object oHandler = sHandlers.get(aHandlerName, sHandlers);
+                if (oHandler instanceof Function) {
+                    return (Function) oHandler;
+                }
+            }
+        }
+        return null;
     }
 
     @Override
@@ -142,7 +158,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
                 String leftTableName = aRelation.getLeftField().getFk().getReferee().getTable();
                 String leftFieldName = aRelation.getLeftField().getFk().getReferee().getField();
                 String rightTableName = aRelation.getRightField().getTableName();
-                String rightFieldName = aRelation.getRightField().getName();
+                String rightFieldName = aRelation.getRightField().getOriginalName();
                 boolean tablesSame = (leftTableName == null ? rightTableName == null : leftTableName.equalsIgnoreCase(rightTableName));
                 boolean fieldsSame = (leftFieldName == null ? rightFieldName == null : leftFieldName.equalsIgnoreCase(rightFieldName));
                 if (!tablesSame || !fieldsSame) {
@@ -177,6 +193,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
             resolveRelation(rcopied, copied);
             ((ApplicationModel<E, P, C, Q>) copied).getReferenceRelations().add(rcopied);
         }
+        ((ApplicationModel<E, P, C, Q>) copied).checkReferenceRelationsIntegrity();
         return copied;
     }
 
@@ -535,14 +552,13 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         Logger.getLogger(ApplicationModel.class.getName()).log(Level.WARNING, "createQuery deprecated call detected. Use loadEntity() instead.");
         return loadEntity(aQueryId);
     }
-
     private static final String LOAD_ENTITY_JSDOC = ""
             + "/**\n"
             + "* Creates new entity of model, based on application query.\n"
             + "* @param queryId the query application element ID\n"
             + "* @return a new entity"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = LOAD_ENTITY_JSDOC, params = {"queryId"})
     public synchronized Scriptable loadEntity(String aQueryId) throws Exception {
         if (client == null) {

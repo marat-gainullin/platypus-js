@@ -421,4 +421,17 @@ public class DbSpin extends DbControlPanel implements DbControl {
             }
         }
     }
+    
+    protected String emptyText;
+    
+    public String getEmptyText() {
+        return emptyText;
+    }
+
+    public void setEmptyText(String aValue) {
+        String oldValue = emptyText;
+        emptyText = aValue;
+        firePropertyChange("emptyText", oldValue, emptyText);
+    }
+
 }

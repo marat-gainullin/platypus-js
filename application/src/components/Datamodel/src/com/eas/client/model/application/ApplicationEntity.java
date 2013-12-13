@@ -32,6 +32,7 @@ import com.eas.client.model.script.ScriptableRowset;
 import com.eas.client.model.visitors.ApplicationModelVisitor;
 import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.queries.Query;
+import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptUtils;
 import com.eas.script.ScriptUtils.ScriptAction;
 import com.eas.script.StoredFunction;
@@ -113,20 +114,6 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
         if (visitor instanceof ApplicationModelVisitor<?>) {
             ((ApplicationModelVisitor<E>) visitor).visit((E) this);
         }
-    }
-
-    public Function getHandler(String aHandlerName) {
-        if (aHandlerName != null && !aHandlerName.isEmpty() && model != null && model.getScriptThis() != null) {
-            Object oHandlers = model.getScriptThis().get(ScriptUtils.HANDLERS_PROP_NAME, model.getScriptThis());
-            if (oHandlers instanceof Scriptable) {
-                Scriptable sHandlers = (Scriptable) oHandlers;
-                Object oHandler = sHandlers.get(aHandlerName, sHandlers);
-                if (oHandler instanceof Function) {
-                    return (Function) oHandler;
-                }
-            }
-        }
-        return null;
     }
 
     public RowsetHostObject<E> getRowsetWrap() {
@@ -358,6 +345,9 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
                 // platypus manual queries are:
                 //  - insert, update, delete queries;
                 //  - stored procedures, witch changes data.
+                if (query == null) {
+                    throw new IllegalStateException("Query must present. QueryId: " + queryId + "; tableName: " + getFullTableNameEntityForDescription());
+                }
                 if (!query.isManual()) {
                     // There might be entities - parameters values sources, with no data in theirs rowsets,
                     // so we can't bind query parameters to proper values. In the such case we initialize
@@ -542,8 +532,14 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
         if (model.getScriptThis() != null && model.getScriptThis() instanceof ScriptableObject) {
             if (name != null && !name.isEmpty()) {
                 ScriptableRowset<E> sRowset = new ScriptableRowset<>((E) this);
-                sRowsetWrap = new RowsetHostObject<>(sRowset, model.getScriptThis());
-                ((ScriptableObject) model.getScriptThis()).defineProperty(name, sRowsetWrap, ScriptableObject.READONLY);
+                sRowsetWrap = new RowsetHostObject<>(sRowset, model.getPublished());
+                // var m = new Module1(); m.model.entity1
+                model.getPublished().defineProperty(name, sRowsetWrap);
+                // deprecated
+                ScriptableObject moduleThis = (ScriptableObject) model.getScriptThis();                
+                /* var m = new Module1(); m.entity1 */
+                moduleThis.defineProperty(name, sRowsetWrap, ScriptableObject.READONLY);
+                //
                 return sRowsetWrap;
             }
         }
@@ -895,6 +891,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             this.newIndex = newIndex;
         }
 
+        @ScriptFunction(jsDoc = "Cursor position the cursor will be set on")
         public int getNewIndex() {
             return newIndex;
         }
@@ -909,6 +906,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             this.oldIndex = oldIndex;
         }
 
+        @ScriptFunction(jsDoc = "Cursor position the cursor was on")
         public int getOldIndex() {
             return oldIndex;
         }
@@ -977,14 +975,22 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             return field;
         }
 
+        @ScriptFunction(jsDoc = "Changed property name")
+        public String getPropertyName() {
+            return field != null ? field.getName() : null;
+        }
+
+        @ScriptFunction(jsDoc = "Old value")
         public Object getOldValue() {
             return oldValue;
         }
 
+        @ScriptFunction(jsDoc = "New value")
         public Object getNewValue() {
             return newValue;
         }
 
+        @ScriptFunction(jsDoc = "Updated element")
         public Scriptable getObject() {
             return source;
         }
@@ -1054,10 +1060,12 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             this.inserted = inserted;
         }
 
+        @ScriptFunction(jsDoc = "Inserted element")
         public RowHostObject getInserted() {
             return inserted;
         }
 
+        @ScriptFunction(jsDoc = "Inserted element")
         public RowHostObject getObject() {
             return inserted;
         }
@@ -1095,6 +1103,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             this.deleted = deleted;
         }
 
+        @ScriptFunction(jsDoc = "Deleted element")
         public RowHostObject getDeleted() {
             return deleted;
         }
@@ -1295,35 +1304,37 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
     }
 
     protected void resolveHandlers() {
-        if (onAfterChange instanceof StoredFunction) {
-            onAfterChange = getHandler(((StoredFunction) onAfterChange).getName());
-        }
-        if (onAfterDelete instanceof StoredFunction) {
-            onAfterDelete = getHandler(((StoredFunction) onAfterDelete).getName());
-        }
-        if (onAfterInsert instanceof StoredFunction) {
-            onAfterInsert = getHandler(((StoredFunction) onAfterInsert).getName());
-        }
-        if (onAfterScroll instanceof StoredFunction) {
-            onAfterScroll = getHandler(((StoredFunction) onAfterScroll).getName());
-        }
-        if (onBeforeChange instanceof StoredFunction) {
-            onBeforeChange = getHandler(((StoredFunction) onBeforeChange).getName());
-        }
-        if (onBeforeDelete instanceof StoredFunction) {
-            onBeforeDelete = getHandler(((StoredFunction) onBeforeDelete).getName());
-        }
-        if (onBeforeInsert instanceof StoredFunction) {
-            onBeforeInsert = getHandler(((StoredFunction) onBeforeInsert).getName());
-        }
-        if (onBeforeScroll instanceof StoredFunction) {
-            onBeforeScroll = getHandler(((StoredFunction) onBeforeScroll).getName());
-        }
-        if (onFiltered instanceof StoredFunction) {
-            onFiltered = getHandler(((StoredFunction) onFiltered).getName());
-        }
-        if (onRequeried instanceof StoredFunction) {
-            onRequeried = getHandler(((StoredFunction) onRequeried).getName());
+        if (model != null) {
+            if (onAfterChange instanceof StoredFunction) {
+                onAfterChange = model.getHandler(((StoredFunction) onAfterChange).getName());
+            }
+            if (onAfterDelete instanceof StoredFunction) {
+                onAfterDelete = model.getHandler(((StoredFunction) onAfterDelete).getName());
+            }
+            if (onAfterInsert instanceof StoredFunction) {
+                onAfterInsert = model.getHandler(((StoredFunction) onAfterInsert).getName());
+            }
+            if (onAfterScroll instanceof StoredFunction) {
+                onAfterScroll = model.getHandler(((StoredFunction) onAfterScroll).getName());
+            }
+            if (onBeforeChange instanceof StoredFunction) {
+                onBeforeChange = model.getHandler(((StoredFunction) onBeforeChange).getName());
+            }
+            if (onBeforeDelete instanceof StoredFunction) {
+                onBeforeDelete = model.getHandler(((StoredFunction) onBeforeDelete).getName());
+            }
+            if (onBeforeInsert instanceof StoredFunction) {
+                onBeforeInsert = model.getHandler(((StoredFunction) onBeforeInsert).getName());
+            }
+            if (onBeforeScroll instanceof StoredFunction) {
+                onBeforeScroll = model.getHandler(((StoredFunction) onBeforeScroll).getName());
+            }
+            if (onFiltered instanceof StoredFunction) {
+                onFiltered = model.getHandler(((StoredFunction) onFiltered).getName());
+            }
+            if (onRequeried instanceof StoredFunction) {
+                onRequeried = model.getHandler(((StoredFunction) onRequeried).getName());
+            }
         }
     }
 }

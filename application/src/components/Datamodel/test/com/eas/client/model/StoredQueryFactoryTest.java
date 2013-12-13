@@ -10,6 +10,7 @@ import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.ClientConstants;
 import com.eas.client.DbClient;
+import com.eas.client.exceptions.NoSuchEntityException;
 import com.eas.client.queries.SqlQuery;
 import com.eas.client.settings.SettingsConstants;
 import com.eas.script.JsDoc;
@@ -318,6 +319,24 @@ public class StoredQueryFactoryTest extends BaseTest {
                 assertNotNull(fieldMtd);
             }
             assertEquals(4, testQuery.getParameters().getParametersCount());
+        } finally {
+            deleteEntity(queryId, client);
+        }
+    }
+    
+    @Test
+    public void testBadSubquery() throws Exception {
+        DbClient client = BaseTest.initDevelopTestClient();
+        StoredQueryFactory queryFactory = new StoredQueryFactory(client);
+        String queryContent = readQueryContent(RESOURCES_PREFIX + "testQueryBadSubQuery.xml");
+        String queryId = insertEntity(client, queryContent);
+        try {
+            SqlQuery testQuery = queryFactory.getQuery(queryId);
+            fail("Query could not compiled.");
+        } catch(Exception ex) {
+            if (!(ex instanceof NoSuchEntityException)) {
+                throw new Exception("We must got NoSuchEntityException error.", ex);
+            }
         } finally {
             deleteEntity(queryId, client);
         }

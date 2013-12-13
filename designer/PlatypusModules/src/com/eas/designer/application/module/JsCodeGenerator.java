@@ -4,12 +4,15 @@
  */
 package com.eas.designer.application.module;
 
+import com.eas.client.cache.PlatypusFilesSupport;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.reflect.Method;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.mozilla.javascript.ast.AstRoot;
+import org.mozilla.javascript.ast.FunctionNode;
 import org.netbeans.api.editor.guards.GuardedSection;
 import org.netbeans.api.editor.guards.InteriorSection;
 import org.openide.nodes.Node.Cookie;
@@ -47,8 +50,7 @@ public class JsCodeGenerator implements Cookie {
 
     public void eventHandlerAdded(Method aListenerMethod, String handlerName, String handlerText, String annotationText, boolean newHandler) {
         if (newHandler) {
-            generateEventHandler(handlerName,
-                    aListenerMethod, annotationText);
+            generateEventHandler(handlerName, aListenerMethod, annotationText);
         }
         gotoEventHandler(handlerName);
     }
@@ -72,7 +74,6 @@ public class JsCodeGenerator implements Cookie {
         // will generate only non-existent handlers
         if (sec == null) {
             StringWriter buffer = new StringWriter();
-
             try {
                 if (sec == null) {
                     sec = insertEventHandlerSection(handlerName);
@@ -88,10 +89,10 @@ public class JsCodeGenerator implements Cookie {
                 buffer.flush();
                 i1 = buffer.getBuffer().length();
                 String bodyText = getDefaultEventBody();
-                buffer.write("    " + bodyText);
+                buffer.write("        " + bodyText);
                 buffer.flush();
                 i2 = buffer.getBuffer().length();
-                buffer.write("}\n"); // footer with new line // NOI18N
+                buffer.write("    }\n"); // footer with new line // NOI18N
                 buffer.flush();
 
                 if (i0 != 0) {
@@ -176,7 +177,7 @@ public class JsCodeGenerator implements Cookie {
             throws IOException {
         String[] paramNames = generateParametersNames(originalMethod);
         // generate the method
-        writer.write("function "); // NOI18N
+        writer.write("    function "); // NOI18N
         writer.write(methodName != null ? methodName : originalMethod.getName());
         writer.write("("); // NOI18N
 
@@ -250,20 +251,26 @@ public class JsCodeGenerator implements Cookie {
 
     private InteriorSection insertEventHandlerSection(String handlerName) throws javax.swing.text.BadLocationException {
         int endPos = 0;
-        int sectionsCount = 0;
-        // find last event handler
-        for (GuardedSection sec : editorSupport.getGuardedSectionManager().getGuardedSections()) {
-            if (sec instanceof InteriorSection) {
-                sectionsCount++;
-                int pos = sec.getEndPosition().getOffset();
-                if (pos > endPos) {
-                    endPos = pos;
+        AstRoot jsRoot = ((PlatypusModuleDataObject)editorSupport.getDataObject()).getAst();
+        FunctionNode moduleConstructor = PlatypusFilesSupport.extractModuleConstructor(jsRoot);
+        if (moduleConstructor != null) {
+            endPos = moduleConstructor.getAbsolutePosition() + moduleConstructor.getLength() - 2;// because of the following inserting code...
+        } else {// if we have no valid ast
+            int sectionsCount = 0;
+            // find last event handler
+            for (GuardedSection sec : editorSupport.getGuardedSectionManager().getGuardedSections()) {
+                if (sec instanceof InteriorSection) {
+                    sectionsCount++;
+                    int pos = sec.getEndPosition().getOffset();
+                    if (pos > endPos) {
+                        endPos = pos;
+                    }
                 }
             }
-        }
-        if (sectionsCount == 0) {
-            int docLength = editorSupport.getDocument().getLength();
-            endPos = docLength > 0 ? docLength - 1 : 0;
+            if (sectionsCount == 0) {
+                int docLength = editorSupport.getDocument().getLength();
+                endPos = docLength > 0 ? docLength - 1 : 0;
+            }
         }
         // if there is another guarded section following with no gap, insert empty line (#109242)
         for (GuardedSection sec : editorSupport.getGuardedSectionManager().getGuardedSections()) {

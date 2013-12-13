@@ -108,4 +108,8 @@ public class StringUtils {
         }
         return val;
     }
+    
+    public static String capitalize(String aValue) {
+        return aValue.length() > 0 ? aValue.substring(0, 1).toUpperCase() + aValue.substring(1) : aValue;
+    }
 }

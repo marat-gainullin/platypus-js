@@ -10,7 +10,6 @@ import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import javax.swing.ImageIcon;
 import javax.swing.JToolTip;
-import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.StyledDocument;
@@ -50,11 +49,15 @@ public class SqlCompletionItem implements CompletionItem {
         try {
             StyledDocument doc = (StyledDocument) component.getDocument();
             doc.remove(startOffset, endOffset - startOffset);
-            doc.insertString(startOffset, text, null);
+            doc.insertString(startOffset, getTestToInsert(), null);
             Completion.get().hideAll();
-        } catch (BadLocationException ex) {
+        } catch (Exception ex) {
             ErrorManager.getDefault().notify(ex);
         }
+    }
+
+    protected String getTestToInsert() throws Exception {
+        return text;
     }
 
     @Override
@@ -76,7 +79,6 @@ public class SqlCompletionItem implements CompletionItem {
     public CompletionTask createDocumentationTask() {
         if (informationText != null) {
             return new AsyncCompletionTask(new AsyncCompletionQuery() {
-
                 @Override
                 protected void query(CompletionResultSet completionResultSet, Document document, int i) {
                     completionResultSet.setDocumentation(new SqlCompletionDocumentation(SqlCompletionItem.this));
@@ -91,7 +93,6 @@ public class SqlCompletionItem implements CompletionItem {
     @Override
     public CompletionTask createToolTipTask() {
         return new AsyncCompletionTask(new AsyncCompletionQuery() {
-
             @Override
             protected void query(CompletionResultSet completionResultSet, Document document, int i) {
                 JToolTip toolTip = new JToolTip();

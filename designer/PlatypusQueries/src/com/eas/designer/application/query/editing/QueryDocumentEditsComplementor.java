@@ -6,7 +6,6 @@ package com.eas.designer.application.query.editing;
 
 import com.bearsoft.rowset.metadata.Parameter;
 import com.eas.client.ClientConstants;
-import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.cache.PlatypusFilesSupport;
 import com.eas.client.model.Relation;
 import com.eas.client.model.gui.edits.AccessibleCompoundEdit;
@@ -25,6 +24,7 @@ import com.eas.designer.application.query.editing.riddle.RiddleTask;
 import com.eas.designer.application.query.editing.riddle.StatementRiddler;
 import com.eas.designer.application.query.nodes.QueryEntityNode;
 import com.eas.designer.datamodel.nodes.NodePropertyUndoableEdit;
+import com.eas.script.JsDoc;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -58,8 +58,8 @@ import net.sf.jsqlparser.util.deparser.StatementDeParser;
  */
 public class QueryDocumentEditsComplementor {
 
-    private static final String QUERY_ALIAS_PREFIX = "q";
-    private static final String TABLE_ALIAS_PREFIX = "t";
+    public static final String QUERY_ALIAS_PREFIX = "q";
+    public static final String TABLE_ALIAS_PREFIX = "t";
     private static final String NEW_ENTITY_STATEMENT_SQL = "select * from ";
 
     public CompoundEdit complementEditWithStatement(Statement statement, UndoableEdit edit) throws Exception, BadLocationException {
@@ -83,11 +83,7 @@ public class QueryDocumentEditsComplementor {
 
     public String costructTablyName(QueryEntity qEntity) {
         if (qEntity.getQueryId() != null) {
-            if (qEntity.getQueryId().matches("\\d+")) {
-                return ClientConstants.QUERY_ID_PREFIX + qEntity.getQueryId();
-            } else {
-                return qEntity.getQueryId();
-            }
+            return ClientConstants.STORED_QUERY_REF_PREFIX + qEntity.getQueryId();
         } else {
             return qEntity.getTableName();
         }
@@ -123,7 +119,7 @@ public class QueryDocumentEditsComplementor {
         }
     }
 
-    public String findFreeAliasName(Map<String, Table> aTables, String baseName) {
+    public static String findFreeAliasName(Map<String, Table> aTables, String baseName) {
         Set<String> names = new HashSet<>();
         names.addAll(aTables.keySet());
         String name = baseName;
@@ -246,10 +242,10 @@ public class QueryDocumentEditsComplementor {
 
     private String normalizeFactQueryText(String factText) {
         if (factText != null) {
-            String authorAnnotationValue = PlatypusFilesSupport.getAnnotationValue(factText, "@author");
-            String nameAnnotationValue = PlatypusFilesSupport.getAnnotationValue(factText, PlatypusFilesSupport.APP_ELEMENT_NAME_ANNOTATION);
-            String procedureAnnotationValue = PlatypusFilesSupport.getAnnotationValue(factText, PlatypusFiles.PROCEDURE_ANNOTATION_NAME);
-            String manualAnnotationValue = PlatypusFilesSupport.getAnnotationValue(factText, PlatypusFiles.MANUAL_ANNOTATION_NAME);
+            String authorAnnotationValue = PlatypusFilesSupport.getAnnotationValue(factText, JsDoc.Tag.AUTHOR_TAG);
+            String nameAnnotationValue = PlatypusFilesSupport.getAnnotationValue(factText, JsDoc.Tag.NAME_TAG);
+            String procedureAnnotationValue = PlatypusFilesSupport.getAnnotationValue(factText, JsDoc.Tag.PROCEDURE_TAG);
+            String manualAnnotationValue = PlatypusFilesSupport.getAnnotationValue(factText, JsDoc.Tag.MANUAL_TAG);
             StringBuilder factTextBuilder = new StringBuilder();
             factTextBuilder.append("/**\n");
             factTextBuilder.append(" *\n");
@@ -257,13 +253,13 @@ public class QueryDocumentEditsComplementor {
                 factTextBuilder.append(" * ").append("@author").append(" ").append(authorAnnotationValue).append("\n");
             }
             if (nameAnnotationValue != null) {
-                factTextBuilder.append(" * ").append(PlatypusFilesSupport.APP_ELEMENT_NAME_ANNOTATION).append(" ").append(nameAnnotationValue).append("\n");
+                factTextBuilder.append(" * ").append(JsDoc.Tag.NAME_TAG).append(" ").append(nameAnnotationValue).append("\n");
             }
             if (procedureAnnotationValue != null) {
-                factTextBuilder.append(" * ").append(PlatypusFiles.PROCEDURE_ANNOTATION_NAME).append(" ").append(procedureAnnotationValue).append("\n");
+                factTextBuilder.append(" * ").append(JsDoc.Tag.PROCEDURE_TAG).append(" ").append(procedureAnnotationValue).append("\n");
             }
             if (manualAnnotationValue != null) {
-                factTextBuilder.append(" * ").append(PlatypusFiles.MANUAL_ANNOTATION_NAME).append(" ").append(manualAnnotationValue).append("\n");
+                factTextBuilder.append(" * ").append(JsDoc.Tag.MANUAL_TAG).append(" ").append(manualAnnotationValue).append("\n");
             }
             factTextBuilder.append(" */\n");
             factText = factTextBuilder.toString();

@@ -44,21 +44,7 @@ public class ReportRunner extends ScriptRunner {
     @Override
     protected void prepareScript(ScriptDocument scriptDoc, Object[] args) throws Exception {
         super.prepareScript(scriptDoc, args);
-        onBeforeRender = getHandler(BEFORE_RENDER_HANDLER_NAME);
-    }
-
-    public Function getHandler(String aHandlerName) {
-        if (aHandlerName != null && !aHandlerName.isEmpty() && model != null && model.getScriptThis() != null) {
-            Object oHandlers = model.getScriptThis().get(ScriptUtils.HANDLERS_PROP_NAME, model.getScriptThis());
-            if (oHandlers instanceof Scriptable) {
-                Scriptable sHandlers = (Scriptable) oHandlers;
-                Object oHandler = sHandlers.get(aHandlerName, sHandlers);
-                if (oHandler instanceof Function) {
-                    return (Function) oHandler;
-                }
-            }
-        }
-        return null;
+        onBeforeRender = model.getHandler(BEFORE_RENDER_HANDLER_NAME);
     }
 
     @Override

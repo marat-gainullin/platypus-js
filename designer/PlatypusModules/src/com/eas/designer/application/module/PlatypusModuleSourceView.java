@@ -4,7 +4,6 @@
  */
 package com.eas.designer.application.module;
 
-import com.eas.designer.debugger.PlatypusDebuggerListener;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
@@ -13,6 +12,7 @@ import javax.swing.JComponent;
 import javax.swing.JEditorPane;
 import javax.swing.JToolBar;
 import javax.swing.text.Document;
+import org.netbeans.api.debugger.DebuggerManager;
 import org.netbeans.core.spi.multiview.CloseOperationState;
 import org.netbeans.core.spi.multiview.MultiViewElement;
 import org.netbeans.core.spi.multiview.MultiViewElementCallback;
@@ -84,13 +84,13 @@ public final class PlatypusModuleSourceView extends CloneableEditor implements M
     public void componentOpened() {
         super.componentOpened();
         updateName();
+        DebuggerManager.getDebuggerManager().getBreakpoints();// initialize breakpoints' storing listeners of the debugger manager
     }
 
     @Override
     public void componentActivated() {
         if (dataObject.isValid()) {
             EditorContextDispatcher.getDefault(); //initialize EditorContextDispatcher's global lookup's listeners
-            PlatypusDebuggerListener.checkListening();
         }
         callback.getTopComponent().requestActive();
         super.componentActivated();

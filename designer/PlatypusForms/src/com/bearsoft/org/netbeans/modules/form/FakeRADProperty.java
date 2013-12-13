@@ -52,11 +52,29 @@ import java.lang.reflect.InvocationTargetException;
  */
 public class FakeRADProperty<T> extends RADProperty<T> {
 
+    protected T value;
+
     /**
      * Creates a new instance of FakeRADProperty
      */
     FakeRADProperty(RADComponent<?> comp, FakePropertyDescriptor desc) throws IllegalAccessException, InvocationTargetException {
         super(comp, desc);
-        setAccessType(NORMAL_RW);
+        setAccessType(DETACHED_READ | DETACHED_WRITE);
     }
+
+    @Override
+    public T getValue() throws IllegalAccessException, InvocationTargetException {
+        return value;
+    }
+
+    @Override
+    public void setValue(T aValue) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        value = aValue;
+    }
+
+    @Override
+    public boolean supportsDefaultValue() {
+        return true;
+    }
+    
 }

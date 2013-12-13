@@ -12,6 +12,8 @@ import org.mozilla.javascript.ast.AstRoot;
  */
 public interface AstProvider {
     
-    public AstRoot getAst();
+    AstRoot getAst();
+    
+    void setAst(AstRoot anAstRoot);
     
 }

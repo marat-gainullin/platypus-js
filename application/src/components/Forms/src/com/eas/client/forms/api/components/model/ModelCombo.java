@@ -90,7 +90,7 @@ public class ModelCombo extends ScalarModelComponent<DbCombo> {
             + "* Determines if component shown as list.\n"
             + "*/";
     @ScriptFunction(jsDoc = LIST_JSDOC)
-    public boolean isList() throws Exception {
+    public boolean getList() throws Exception {
         return delegate.isList();
     }
 
@@ -104,7 +104,7 @@ public class ModelCombo extends ScalarModelComponent<DbCombo> {
             + "* Determines if component is editable.\n"
             + "*/";
     @ScriptFunction(jsDoc = EDITABLE_JSDOC)
-    public boolean isEditable() {
+    public boolean getEditable() {
         return delegate.isEditable();
     }
 
@@ -112,4 +112,15 @@ public class ModelCombo extends ScalarModelComponent<DbCombo> {
     public void setEditable(boolean aValue) {
         delegate.setEditable(aValue);
     }
+    
+    @ScriptFunction
+    public String getEmptyText() {
+        return delegate.getEmptyText();
+    }
+
+    @ScriptFunction
+    public void setEmptyText(String aValue) {
+        delegate.setEmptyText(aValue);
+    }
+
 }

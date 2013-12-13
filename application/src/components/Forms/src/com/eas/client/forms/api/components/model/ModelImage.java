@@ -33,7 +33,7 @@ public class ModelImage extends ScalarModelComponent<DbImage> {
             + "*/";
     
     @ScriptFunction(jsDoc = EDITABLE_JSDOC)
-    public boolean isEditable() {
+    public boolean getEditable() {
         return delegate.isEditable();
     }
 
@@ -48,7 +48,7 @@ public class ModelImage extends ScalarModelComponent<DbImage> {
             + "*/";
     
     @ScriptFunction(jsDoc = PLAIN_JSDOC)
-    public boolean isPlain()
+    public boolean getPlain()
     {
         return delegate.isPlain();
     }

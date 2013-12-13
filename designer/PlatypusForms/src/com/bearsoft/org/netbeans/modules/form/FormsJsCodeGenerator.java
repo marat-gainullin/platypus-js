@@ -3,12 +3,15 @@ package com.bearsoft.org.netbeans.modules.form;
 import com.bearsoft.org.netbeans.modules.form.bound.RADModelGrid;
 import com.bearsoft.org.netbeans.modules.form.bound.RADModelGridColumn;
 import com.bearsoft.org.netbeans.modules.form.bound.RADModelScalarComponent;
+import com.eas.client.cache.PlatypusFilesSupport;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.reflect.Method;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.mozilla.javascript.ast.AstRoot;
+import org.mozilla.javascript.ast.FunctionNode;
 import org.netbeans.api.editor.guards.GuardedSection;
 import org.netbeans.api.editor.guards.InteriorSection;
 
@@ -23,13 +26,13 @@ public class FormsJsCodeGenerator extends CodeGenerator {
     private static final String EVT_SECTION_PREFIX = "event_"; // NOI18N
     private static final String EVT_VARIABLE_NAME = "evt"; // NOI18N
     // scalar model-aware components
-    public static Method selectValueMethod = null;
-    public static Method handleValueMethod = null;
+    public static Method selectValueMethod;
+    public static Method handleValueMethod;
     // model aware grid
-    public static Method handleCellMethod = null;
+    public static Method handleCellMethod;
     // grid columns
-    public static Method columnSelectValueMethod = null;
-    public static Method columnHandleValueMethod = null;
+    public static Method columnSelectValueMethod;
+    public static Method columnHandleValueMethod;
 
     static {
         try {
@@ -71,49 +74,48 @@ public class FormsJsCodeGenerator extends CodeGenerator {
             Method originalMethod,
             String bodyText,
             String annotationText) {
-        if (!initialized || !canGenerate) {
-            return;
-        }
+        if (initialized && canGenerate) {
 
-        InteriorSection sec = getEventHandlerSection(handlerName);
-        if (sec != null && bodyText == null) {
-            return; // already exists, no need to generate
-        }
-        StringWriter buffer = new StringWriter();
-
-        try {
-            if (sec == null) {
-                sec = insertEvendHandlerSection(handlerName);
+            InteriorSection sec = getEventHandlerSection(handlerName);
+            if (sec != null && bodyText == null) {
+                return; // already exists, no need to generate
             }
-            int i0, i1, i2;
+            StringWriter buffer = new StringWriter();
 
-            if (annotationText != null) {
-                buffer.write(annotationText);
+            try {
+                if (sec == null) {
+                    sec = insertEvendHandlerSection(handlerName);
+                }
+                int i0, i1, i2;
+
+                if (annotationText != null) {
+                    buffer.write(annotationText);
+                    buffer.flush();
+                }
+                i0 = buffer.getBuffer().length();
+                generateListenerMethodHeader(handlerName, originalMethod, buffer);
                 buffer.flush();
-            }
-            i0 = buffer.getBuffer().length();
-            generateListenerMethodHeader(handlerName, originalMethod, buffer);
-            buffer.flush();
-            i1 = buffer.getBuffer().length();
-            if (bodyText == null) {
-                bodyText = getDefaultEventBody();
-            }
-            buffer.write(bodyText);
-            buffer.flush();
-            i2 = buffer.getBuffer().length();
-            buffer.write("}\n"); // footer with new line // NOI18N
-            buffer.flush();
+                i1 = buffer.getBuffer().length();
+                if (bodyText == null) {
+                    bodyText = getDefaultEventBody();
+                }
+                buffer.write(bodyText);
+                buffer.flush();
+                i2 = buffer.getBuffer().length();
+                buffer.write("    }\n"); // footer with new line // NOI18N
+                buffer.flush();
 
-            if (i0 != 0) {
-                formEditorSupport.getDocument().insertString(sec.getStartPosition().getOffset(), annotationText, null);
-            }
-            sec.setHeader(buffer.getBuffer().substring(i0, i1));
-            sec.setBody(buffer.getBuffer().substring(i1, i2));
-            sec.setFooter(buffer.getBuffer().substring(i2));
+                if (i0 != 0) {
+                    formEditorSupport.getDocument().insertString(sec.getStartPosition().getOffset(), annotationText, null);
+                }
+                sec.setHeader(buffer.getBuffer().substring(i0, i1));
+                sec.setBody(buffer.getBuffer().substring(i1, i2));
+                sec.setFooter(buffer.getBuffer().substring(i2));
 
-            buffer.close();
-            clearUndo();
-        } catch (javax.swing.text.BadLocationException | java.io.IOException e) {
+                buffer.close();
+                clearUndo();
+            } catch (javax.swing.text.BadLocationException | java.io.IOException e) {
+            }
         }
     }
 
@@ -153,7 +155,7 @@ public class FormsJsCodeGenerator extends CodeGenerator {
     }
 
     private String getDefaultEventBody() {
-        return "\t" + FormUtils.getBundleString("MSG_EventHandlerBody"); // NOI18N
+        return "        " + FormUtils.getBundleString("MSG_EventHandlerBody"); // NOI18N
     }
 
     /**
@@ -190,20 +192,26 @@ public class FormsJsCodeGenerator extends CodeGenerator {
 
     private InteriorSection insertEvendHandlerSection(String handlerName) throws javax.swing.text.BadLocationException {
         int endPos = 0;
-        int sectionsCount = 0;
-        // find last event handler
-        for (GuardedSection sec : formEditorSupport.getGuardedSectionManager().getGuardedSections()) {
-            if (sec instanceof InteriorSection) {
-                sectionsCount++;
-                int pos = sec.getEndPosition().getOffset();
-                if (pos > endPos) {
-                    endPos = pos;
+        AstRoot jsRoot = formEditorSupport.getFormDataObject().getAst();
+        FunctionNode moduleConstructor = PlatypusFilesSupport.extractModuleConstructor(jsRoot);
+        if (moduleConstructor != null) {
+            endPos = moduleConstructor.getAbsolutePosition() + moduleConstructor.getLength() - 2;// because of the following inserting code...
+        } else {// if we have no valid ast
+            int sectionsCount = 0;
+            // find last event handler
+            for (GuardedSection sec : formEditorSupport.getGuardedSectionManager().getGuardedSections()) {
+                if (sec instanceof InteriorSection) {
+                    sectionsCount++;
+                    int pos = sec.getEndPosition().getOffset();
+                    if (pos > endPos) {
+                        endPos = pos;
+                    }
                 }
             }
-        }
-        if (sectionsCount == 0) {
-            int docLength = formEditorSupport.getDocument().getLength();
-            endPos = docLength > 0 ? docLength - 1 : 0;
+            if (sectionsCount == 0) {
+                int docLength = formEditorSupport.getDocument().getLength();
+                endPos = docLength > 0 ? docLength - 1 : 0;
+            }
         }
         // if there is another guarded section following with no gap, insert empty line (#109242)
         for (GuardedSection sec : formEditorSupport.getGuardedSectionManager().getGuardedSections()) {
@@ -255,7 +263,7 @@ public class FormsJsCodeGenerator extends CodeGenerator {
             }
         }
         // generate the method
-        writer.write("function "); // NOI18N
+        writer.write("    function "); // NOI18N
         writer.write(methodName != null ? methodName : aMethod.getName());
         writer.write("("); // NOI18N
 

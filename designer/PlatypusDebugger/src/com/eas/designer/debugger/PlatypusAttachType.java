@@ -93,8 +93,8 @@ public class PlatypusAttachType extends AttachType {
         }
     }
     protected AttachSettings settings = new AttachSettings();
-    protected AttachToProcessCustomizer customizer = new AttachToProcessCustomizer(settings);
     protected AttachTypeController controller = new AttachTypeController();
+    protected AttachToProcessCustomizer customizer = new AttachToProcessCustomizer(settings, controller);
 
     public PlatypusAttachType() {
         super();

@@ -212,7 +212,7 @@ public class SqlLanguageHierarchy extends LanguageHierarchy<SqlTokenId> {
                     new SqlTokenId("DOUBLEQUOTE", SPECIAL_CATEGORY_NAME, CCJSqlParserConstants.DOUBLEQUOTE),
                     new SqlTokenId("BACKQUOTE", SPECIAL_CATEGORY_NAME, CCJSqlParserConstants.BACKQUOTE),
                     new SqlTokenId("BACKSLASH", SPECIAL_CATEGORY_NAME, CCJSqlParserConstants.BACKSLASH),
-                    new SqlTokenId("CROSS", SPECIAL_CATEGORY_NAME, CCJSqlParserConstants.CROSS),
+                    ///* excluded because of strong subquery reference symbol */new SqlTokenId("CROSS", SPECIAL_CATEGORY_NAME, CCJSqlParserConstants.CROSS),
                     /** RegularExpression Id. */
                     new SqlTokenId("DOT", SPECIAL_CATEGORY_NAME, CCJSqlParserConstants.DOT),
                     /** RegularExpression Id. */

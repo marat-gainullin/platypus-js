@@ -9,9 +9,9 @@ import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.ClientConstants;
 import com.eas.client.DbClient;
 import com.eas.client.DbMetadataCache;
-import com.eas.client.SQLUtils;
 import com.eas.client.cache.ActualCacheEntry;
 import com.eas.client.cache.FreqCache;
+import com.eas.client.exceptions.NoSuchEntityException;
 import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.model.QueryDocument.StoredFieldMetadata;
 import com.eas.client.model.query.QueryEntity;
@@ -21,13 +21,16 @@ import com.eas.client.model.store.XmlDom2QueryDocument;
 import com.eas.client.queries.SqlQuery;
 import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.script.JsDoc;
+import com.eas.util.StringUtils;
 import java.io.StringReader;
 import java.sql.Types;
 import java.util.*;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.xml.parsers.ParserConfigurationException;
+import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.ResultsFinder;
 import net.sf.jsqlparser.SourcesFinder;
 import net.sf.jsqlparser.parser.*;
@@ -42,6 +45,8 @@ import org.w3c.dom.Document;
  * @author pk begining. mg full refactoring inside second version.
  */
 public class StoredQueryFactory {
+
+    public static final String _Q = "\\" + ClientConstants.STORED_QUERY_REF_PREFIX + "?";
 
     private Fields processSubQuery(SqlQuery aQuery, SubSelect aSubSelect) throws Exception {
         SqlQuery subQuery = new SqlQuery(aQuery.getClient(), aQuery.getDbId(), "");
@@ -79,17 +84,17 @@ public class StoredQueryFactory {
     }
     public static final String INNER_JOIN_CONSTRUCTION = "select %s from %s %s inner join %s on (%s.%s = %s.%s)";
     public static final String ABSENT_QUERY_MSG = "Query %s is not found";
-    public static final String CANT_LOAD_NULL_MSG = "Query ID is null.";
+    public static final String CANT_LOAD_NULL_MSG = "Query Id is null.";
     public static final String COLON = ":";
     public static final String CONTENT_EMPTY_MSG = "Content of %s is empty";
     public static final String DUMMY_FIELD_NAME = "dummy";
     public static final String INEER_JOIN_CONSTRUCTING_MSG = "Constructing query with left Query %s and right table %s";
     public static final String LOADING_QUERY_MSG = "Loading stored query %s";
-    public static final Pattern SUBQUERY_LINK_PATTERN = Pattern.compile(SQLUtils.SUBQUERY_TABLE_NAME_REGEXP, Pattern.CASE_INSENSITIVE);
     private DbClient client;
     private DbMetadataCache dbMdCache;
     private StoredQueryCache queriesCache;
     private boolean preserveDatasources;
+    private List<String> processedQueries = new ArrayList<>();// for circular references discovering
 
     public void addTableFieldsToSelectResults(SqlQuery aQuery, Table table) throws Exception {
         Fields fields = getTableFields(aQuery.getDbId(), table);
@@ -140,53 +145,57 @@ public class StoredQueryFactory {
         return uniqueTables;
     }
 
-    protected ActualCacheEntry<SqlQuery> loadQuery(String aAppElementId) throws ParserConfigurationException, Exception {
-        if (aAppElementId == null) {
-            throw new NullPointerException(CANT_LOAD_NULL_MSG);
+    protected synchronized ActualCacheEntry<SqlQuery> loadQuery(String aAppElementId) throws ParserConfigurationException, Exception {
+        if (processedQueries.contains(aAppElementId)) {
+            throw new IllegalStateException(String.format("Circular reference in queries/subqueries occured: %s%s%s", StringUtils.join(COLON, processedQueries.toArray(new String[]{})), COLON, aAppElementId));
         }
-        Logger.getLogger(this.getClass().getName()).finer(String.format(LOADING_QUERY_MSG, aAppElementId));
-        ApplicationElement appElement = client.getAppCache().get(aAppElementId);
-        if (appElement == null && SUBQUERY_LINK_PATTERN.matcher(aAppElementId).matches()) {
-            aAppElementId = aAppElementId.substring(1);
-            appElement = client.getAppCache().get(aAppElementId);
-        }
-        if (appElement != null && appElement.getType() == ClientConstants.ET_QUERY) {// Ordinary queries, stored in application database
-            Document queryDom = appElement.getContent();
-            if (queryDom != null) {
-                QueryDocument queryDoc = XmlDom2QueryDocument.transform(client, aAppElementId, queryDom);
+        processedQueries.add(aAppElementId);
+        try {
+            if (aAppElementId == null) {
+                throw new NullPointerException(CANT_LOAD_NULL_MSG);
+            }
+            Logger.getLogger(this.getClass().getName()).finer(String.format(LOADING_QUERY_MSG, aAppElementId));
+            ApplicationElement appElement = client.getAppCache().get(aAppElementId);
+            if (appElement != null && appElement.getType() == ClientConstants.ET_QUERY) {// Ordinary queries, stored in application database
+                Document queryDom = appElement.getContent();
+                if (queryDom != null) {
+                    QueryDocument queryDoc = XmlDom2QueryDocument.transform(client, aAppElementId, queryDom);
 
-                QueryModel model = queryDoc.getModel();
-                SqlQuery query = queryDoc.getQuery();
-                putRolesMutatables(query);
-                List<StoredFieldMetadata> additionalFieldsMetadata = queryDoc.getAdditionalFieldsMetadata();
-                String sqlText = query.getSqlText();
-                if (sqlText != null && !sqlText.isEmpty()) {
-                    if (query.getFullSqlText() != null && !query.getFullSqlText().isEmpty()) {
-                        sqlText = query.getFullSqlText();
-                    }
-                    try {
-                        String compiledSqlText = compileSubqueries(sqlText, model);
+                    QueryModel model = queryDoc.getModel();
+                    SqlQuery query = queryDoc.getQuery();
+                    putRolesMutatables(query);
+                    List<StoredFieldMetadata> additionalFieldsMetadata = queryDoc.getAdditionalFieldsMetadata();
+                    String sqlText = query.getSqlText();
+                    if (sqlText != null && !sqlText.isEmpty()) {
+                        if (query.getFullSqlText() != null && !query.getFullSqlText().isEmpty()) {
+                            sqlText = query.getFullSqlText();
+                        }
                         try {
-                            putParametersMetadata(query, model);
-                            if (putTableFieldsMetadata(query)) {
-                                putStoredTableFieldsMetadata(query, additionalFieldsMetadata);
-                            }else{
-                                query.setCommand(true);
+                            String compiledSqlText = compileSubqueries(sqlText, model);
+                            try {
+                                putParametersMetadata(query, model);
+                                if (putTableFieldsMetadata(query)) {
+                                    putStoredTableFieldsMetadata(query, additionalFieldsMetadata);
+                                } else {
+                                    query.setCommand(true);
+                                }
+                            } finally {
+                                query.setSqlText(compiledSqlText);
                             }
                         } finally {
-                            query.setSqlText(compiledSqlText);
+                            query.setTitle(appElement.getName());
+                            query.getFields().setTableDescription(query.getTitle());
                         }
-                    } finally {
-                        query.setTitle(appElement.getName());
-                        query.getFields().setTableDescription(query.getTitle());
                     }
+                    return new ActualCacheEntry<>(query, appElement.getTxtContentLength(), appElement.getTxtCrc32());
+                } else {
+                    throw new IllegalArgumentException(String.format(CONTENT_EMPTY_MSG, aAppElementId));
                 }
-                return new ActualCacheEntry<>(query, appElement.getTxtContentLength(), appElement.getTxtCrc32());
             } else {
-                throw new IllegalArgumentException(String.format(CONTENT_EMPTY_MSG, aAppElementId));
+                return null;// It is regular situation that query is absent. Just return null. WARNING: don't throw an exception!
             }
-        } else {
-            return null;// It is regular situation that query is absent. Just return null. WARNING: don't throw an exception!
+        } finally {
+            processedQueries.remove(processedQueries.size() - 1);
         }
     }
     /**
@@ -207,8 +216,8 @@ public class StoredQueryFactory {
                 SqlQuery result = new SqlQuery(client);
                 result.setEntityId(IDGenerator.genID().toString());
                 result.setDbId(leftSqlQuery.getDbId());
-                String leftQueryName = ClientConstants.QUERY_ID_PREFIX + leftQueryId.toString();
-                String leftQueryAlias = ClientConstants.QUERY_ID_PREFIX + "_" + leftQueryId.toString();
+                String leftQueryName = ClientConstants.STORED_QUERY_REF_PREFIX + leftQueryId.toString();
+                String leftQueryAlias = leftQueryId.toString();
                 // Text for sql query is generated
                 String selectClause = "*";
                 if (!rightTableFields.isEmpty()) {
@@ -331,9 +340,8 @@ public class StoredQueryFactory {
     }
 
     /**
-     * Заменяет в запросе ссылки на подзапросы на их реальный контент.
-     * Подставляет параметры запроса в соответствии со связями в параметры
-     * подзапросов.
+     * Заменяет в запросе ссылки на подзапросы на их содержимое. Подставляет
+     * параметры запроса в соответствии со связями в параметры подзапросов.
      *
      * @return Запрос без ссылок на подзапросы.
      */
@@ -351,13 +359,10 @@ public class StoredQueryFactory {
                 assert entity != null;
                 if (entity.getQueryId() != null) {
                     String queryTablyName = entity.getQueryId();
-                    if (queryTablyName.matches("\\d+")) {
-                        queryTablyName = ClientConstants.QUERY_ID_PREFIX + queryTablyName;
-                    }
-                    Pattern subQueryPattern = Pattern.compile(queryTablyName, Pattern.CASE_INSENSITIVE);
+                    Pattern subQueryPattern = Pattern.compile(_Q + queryTablyName, Pattern.CASE_INSENSITIVE);
                     String tAlias = entity.getAlias();
                     if (tAlias != null && !tAlias.isEmpty()) {
-                        subQueryPattern = Pattern.compile(queryTablyName + "[\\s]+" + tAlias, Pattern.CASE_INSENSITIVE);
+                        subQueryPattern = Pattern.compile(_Q + queryTablyName + "[\\s]+" + tAlias, Pattern.CASE_INSENSITIVE);
                         if (tAlias.equalsIgnoreCase(queryTablyName)
                                 && !subQueryPattern.matcher(processedSql).find()) {
                             /**
@@ -369,24 +374,29 @@ public class StoredQueryFactory {
                              * нахождение такого алиаса и имени таблицы
                              * (подзапроса).
                              */
-                            subQueryPattern = Pattern.compile(queryTablyName, Pattern.CASE_INSENSITIVE);
+                            subQueryPattern = Pattern.compile(_Q + queryTablyName, Pattern.CASE_INSENSITIVE);
                         }
                     }
                     Matcher subQueryMatcher = subQueryPattern.matcher(processedSql);
                     if (subQueryMatcher.find()) {
-                        SqlQuery subQuery = queriesCache.get(entity.getQueryId()).getValue();
-                        if (subQuery != null && subQuery.getSqlText() != null) {
-                            String subQueryText = subQuery.getSqlText();
-                            subQueryText = replaceLinkedParameters(subQueryText, entity.getInRelations());
+                        ActualCacheEntry<SqlQuery> entry = queriesCache.get(entity.getQueryId());
+                        if (entry != null) {
+                            SqlQuery subQuery = entry.getValue();
+                            if (subQuery != null && subQuery.getSqlText() != null) {
+                                String subQueryText = subQuery.getSqlText();
+                                subQueryText = replaceLinkedParameters(subQueryText, entity.getInRelations());
 
-                            String sqlBegin = processedSql.substring(0, subQueryMatcher.start());
-                            String sqlToInsert = " (" + subQueryText + ") ";
-                            String sqlTail = processedSql.substring(subQueryMatcher.end());
-                            if (tAlias != null && !tAlias.isEmpty()) {
-                                processedSql = sqlBegin + sqlToInsert + " " + tAlias + " " + sqlTail;
-                            } else {
-                                processedSql = sqlBegin + sqlToInsert + " " + queryTablyName + " " + sqlTail;
+                                String sqlBegin = processedSql.substring(0, subQueryMatcher.start());
+                                String sqlToInsert = " (" + subQueryText + ") ";
+                                String sqlTail = processedSql.substring(subQueryMatcher.end());
+                                if (tAlias != null && !tAlias.isEmpty()) {
+                                    processedSql = sqlBegin + sqlToInsert + " " + tAlias + " " + sqlTail;
+                                } else {
+                                    processedSql = sqlBegin + sqlToInsert + " " + queryTablyName + " " + sqlTail;
+                                }
                             }
+                        } else {
+                            throw new NoSuchEntityException(entity.getQueryId());
                         }
                     }
                 }
@@ -495,19 +505,27 @@ public class StoredQueryFactory {
      */
     public boolean putTableFieldsMetadata(SqlQuery aQuery) throws Exception {
         CCJSqlParserManager parserManager = new CCJSqlParserManager();
-        Statement parsedQuery = parserManager.parse(new StringReader(aQuery.getSqlText()));
-        if (parsedQuery instanceof Select) {
-            Select select = (Select) parsedQuery;
-            resolveOutputFieldsFromTables(aQuery, select.getSelectBody());
-            SqlDriver driver = client.getDbMetadataCache(aQuery.getDbId()).getConnectionDriver();
-            Fields queryFields = aQuery.getFields();
-            if (queryFields != null) {
-                for (Field field : queryFields.toCollection()) {
-                    driver.getTypesResolver().resolve2Application(field);
+        try {
+            Statement parsedQuery = parserManager.parse(new StringReader(aQuery.getSqlText()));
+            if (parsedQuery instanceof Select) {
+                Select select = (Select) parsedQuery;
+                resolveOutputFieldsFromTables(aQuery, select.getSelectBody());
+                SqlDriver driver = client.getDbMetadataCache(aQuery.getDbId()).getConnectionDriver();
+                Fields queryFields = aQuery.getFields();
+                if (queryFields != null) {
+                    for (Field field : queryFields.toCollection()) {
+                        driver.getTypesResolver().resolve2Application(field);
+                    }
                 }
-            }
 
-            return true;
+                return true;
+            }
+        } catch (JSQLParserException ex) {
+            if (aQuery.isProcedure()) {
+                Logger.getLogger(StoredQueryFactory.class.getName()).log(Level.WARNING, null, ex);
+            } else {
+                throw ex;
+            }
         }
         return false;
     }
@@ -593,12 +611,7 @@ public class StoredQueryFactory {
                     field = new Field(col.getAlias() != null ? col.getAlias().getName()
                             : (col.getExpression() instanceof Column ? ((Column) col.getExpression()).getColumnName() : ""));
 
-                    // Such field is absent in database tables and so, field's table is the processed query.
-                    if (Character.isDigit(aQuery.getEntityId().charAt(0))) {
-                        field.setTableName(ClientConstants.QUERY_ID_PREFIX + aQuery.getEntityId());
-                    } else {
-                        field.setTableName(aQuery.getEntityId());
-                    }
+                    field.setTableName(aQuery.getEntityId());
                     /**
                      * There is an unsolved problem about type of the
                      * expression. This might be solved using manually setted up
@@ -615,27 +628,36 @@ public class StoredQueryFactory {
     /**
      * Returns cached table fields if
      * <code>aTablyName</code> is a table name or query fields if
-     * <code>aTablyName</code> is query tably name in format: q<id>.
+     * <code>aTablyName</code> is query tably name in format: #<id>.
      *
      * @param aDbId Databse identifier, the query belongs to. That database is
-     * query-inner table metadata source, but query is stored in application
-     * databse.
+     * query-inner table metadata source, but query is stored in application.
      * @param aTablyName Table or query tably name.
      * @return Fields instance.
      * @throws Exception
      */
     protected Fields getTablyFields(String aDbId, String aTablyName) throws Exception {
-        ApplicationElement testAppElement = client.getAppCache().get(aTablyName);
-        if (testAppElement == null && SUBQUERY_LINK_PATTERN.matcher(aTablyName).matches()) {
-            aTablyName = aTablyName.substring(1);
-            testAppElement = client.getAppCache().get(aTablyName);
+        Fields tableFields;
+        if (aTablyName.startsWith(ClientConstants.STORED_QUERY_REF_PREFIX)) {// strong reference to stored subquery
+            tableFields = null;
+            aTablyName = aTablyName.substring(ClientConstants.STORED_QUERY_REF_PREFIX.length());
+        } else {// soft reference to table or a stored subquery.
+            try {
+                tableFields = client.getDbMetadataCache(aDbId).getTableMetadata(aTablyName);
+            } catch (Exception ex) {
+                tableFields = null;
+            }
         }
-        if (testAppElement != null && testAppElement.getType() == ClientConstants.ET_QUERY) {
-            SqlQuery query = queriesCache.get(aTablyName).getValue();
-            return query.getFields();
+        if (tableFields != null) {// Tables have a higher priority in soft reference case
+            return tableFields;
         } else {
-            //                                                     
-            return client.getDbMetadataCache(aDbId).getTableMetadata(aTablyName);
+            ApplicationElement testAppElement = client.getAppCache().get(aTablyName);
+            if (testAppElement != null && testAppElement.getType() == ClientConstants.ET_QUERY) {
+                SqlQuery query = queriesCache.get(aTablyName).getValue();
+                return query.getFields();
+            } else {
+                return null;
+            }
         }
     }
 
@@ -656,7 +678,7 @@ public class StoredQueryFactory {
                      * самостоятельно. Такая вот особенность парсера.
                      */
                     Fields tableFields = getTableFields(aQuery.getDbId(), (Table) source);
-                    field = tableFields.get(column.getColumnName());
+                    field = tableFields != null ? tableFields.get(column.getColumnName()) : null;
                 } else if (source instanceof SubSelect) {
                     Fields subFields = processSubQuery(aQuery, (SubSelect) source);
                     field = subFields.get(column.getColumnName());
@@ -712,7 +734,7 @@ public class StoredQueryFactory {
              * Заменим имя оригинальной таблицы на алиас если это возможно,
              * чтобы в редакторе запросов было хорошо видно откуда взялось поле.
              */
-            if (preserveDatasources) {
+            if (source != null && preserveDatasources) {
                 boolean aliasPresent = source.getAlias() != null && !source.getAlias().getName().isEmpty();
                 if (aliasPresent) {
                     copied.setTableName(source.getAlias().getName());

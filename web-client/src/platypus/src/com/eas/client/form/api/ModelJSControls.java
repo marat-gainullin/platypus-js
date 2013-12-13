@@ -151,6 +151,14 @@ public class ModelJSControls {
 				return aComponent;
 			};
 			publishComponentProperties(published);
+			Object.defineProperty(published, "emptyText", {
+				get : function() {
+					return aComponent.@com.eas.client.gxtcontrols.model.ModelFormattedField::getEmptyText()();
+				},
+				set : function(aValue) {
+					aComponent.@com.eas.client.gxtcontrols.model.ModelFormattedField::setEmptyText(Ljava/lang/String;)(aValue!=null?''+aValue:null);
+				}
+			});
 			publishModelComponentProperties(published);
 
 			if(!injected) {
@@ -174,6 +182,14 @@ public class ModelJSControls {
 				return aComponent;
 			};
 			publishComponentProperties(published);
+			Object.defineProperty(published, "emptyText", {
+				get : function() {
+					return aComponent.@com.eas.client.gxtcontrols.model.ModelTextArea::getEmptyText()();
+				},
+				set : function(aValue) {
+					aComponent.@com.eas.client.gxtcontrols.model.ModelTextArea::setEmptyText(Ljava/lang/String;)(aValue!=null?''+aValue:null);
+				}
+			});
 			publishModelComponentProperties(published);
 
 			if(!injected) {
@@ -197,6 +213,14 @@ public class ModelJSControls {
 				return aComponent;
 			};
 			publishComponentProperties(published);
+			Object.defineProperty(published, "emptyText", {
+				get : function() {
+					return aComponent.@com.eas.client.gxtcontrols.model.ModelDate::getEmptyText()();
+				},
+				set : function(aValue) {
+					aComponent.@com.eas.client.gxtcontrols.model.ModelDate::setEmptyText(Ljava/lang/String;)(aValue!=null?''+aValue:null);
+				}
+			});
 			publishModelComponentProperties(published);
 
 			if(!injected) {
@@ -220,6 +244,14 @@ public class ModelJSControls {
 				return aComponent;
 			};
 			publishComponentProperties(published);
+			Object.defineProperty(published, "emptyText", {
+				get : function() {
+					return aComponent.@com.eas.client.gxtcontrols.model.ModelSpin::getEmptyText()();
+				},
+				set : function(aValue) {
+					aComponent.@com.eas.client.gxtcontrols.model.ModelSpin::setEmptyText(Ljava/lang/String;)(aValue!=null?''+aValue:null);
+				}
+			});
 			publishModelComponentProperties(published);
 
 			if(!injected) {
@@ -243,6 +275,14 @@ public class ModelJSControls {
 				return aComponent;
 			};
 			publishComponentProperties(published);
+			Object.defineProperty(published, "emptyText", {
+				get : function() {
+					return aComponent.@com.eas.client.gxtcontrols.model.ModelCombo::getEmptyText()();
+				},
+				set : function(aValue) {
+					aComponent.@com.eas.client.gxtcontrols.model.ModelCombo::setEmptyText(Ljava/lang/String;)(aValue!=null?''+aValue:null);
+				}
+			});
 			publishModelComponentProperties(published);
 
 			if(!injected) {

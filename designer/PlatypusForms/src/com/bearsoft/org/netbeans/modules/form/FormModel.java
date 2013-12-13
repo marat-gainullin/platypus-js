@@ -52,6 +52,7 @@ import com.bearsoft.org.netbeans.modules.form.layoutsupport.LayoutSupportManager
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates.MarginLayoutSupport;
 import com.eas.dbcontrols.DbControlPanel;
 import java.awt.Container;
+import java.beans.Introspector;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
@@ -120,7 +121,7 @@ public class FormModel {
     }
 
     public String findFreeComponentName(String baseName) {
-        baseName = baseName.substring(0, 1).toLowerCase() + baseName.substring(1);
+        baseName = Introspector.decapitalize(baseName);
         RADComponent<?> comp = getRADComponent(baseName);
         int counter = 0;
         String generatedName = baseName;

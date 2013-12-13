@@ -52,7 +52,7 @@ public class ModelCheckBox extends ScalarModelComponent<DbCheck> {
             + "* Determines if component is editable."
             + "*/";
     @ScriptFunction(jsDoc = EDITABLE_JSDOC)
-    public boolean isEditable() {
+    public boolean getEditable() {
         return delegate.isEditable();
     }
 

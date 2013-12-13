@@ -23,6 +23,7 @@ import com.eas.dbcontrols.grid.DbGrid;
 import com.eas.dbcontrols.grid.DbGridColumn;
 import com.eas.dbcontrols.grid.DbGridRowsColumnsDesignInfo;
 import com.eas.dbcontrols.visitors.DbSwingFactory;
+import com.eas.util.StringUtils;
 import java.beans.EventSetDescriptor;
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
@@ -181,7 +182,9 @@ public class RADModelGrid extends RADVisualComponent<DbGrid> implements Componen
                             RADModelGridColumn radColumn = new RADModelGridColumn();
                             radColumn.initialize(getFormModel());
                             radColumn.initInstance(DbGridColumn.class);
-                            radColumn.setStoredName(getFormModel().findFreeComponentName((columnField.getName() != null && !columnField.getName().isEmpty()) ? columnField.getName() : "Column"));
+                            String colBaseName = (columnField.getName() != null && !columnField.getName().isEmpty()) ? columnField.getName() : "Column";
+                            colBaseName = "col"+StringUtils.capitalize(colBaseName);
+                            radColumn.setStoredName(getFormModel().findFreeComponentName(colBaseName));
                             DbGridColumn column = radColumn.getBeanInstance();
 
                             int lwidth = 50;

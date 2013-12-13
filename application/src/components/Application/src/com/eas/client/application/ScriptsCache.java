@@ -5,6 +5,7 @@
 package com.eas.client.application;
 
 import com.eas.client.scripts.ScriptRunner;
+import com.eas.client.scripts.ScriptRunnerPrototype;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,6 +32,8 @@ public class ScriptsCache {
         }
         if (runner == null) {
             runner = new ScriptRunner(aModuleId, app.getClient(), ScriptRunner.initializePlatypusStandardLibScope(), app, app, new Object[]{});
+            runner.setPrototype(ScriptRunnerPrototype.getInstance());
+            runner.execute();
             cache.put(aModuleId, runner);
         }
         return runner;

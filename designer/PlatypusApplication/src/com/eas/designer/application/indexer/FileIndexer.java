@@ -6,6 +6,7 @@ package com.eas.designer.application.indexer;
 
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.cache.PlatypusFilesSupport;
+import com.eas.script.JsDoc;
 import com.eas.util.FileUtils;
 import java.io.File;
 import java.io.IOException;
@@ -58,12 +59,16 @@ public class FileIndexer extends CustomIndexer {
                     if (f != null) {
                         String appElementName = null;
                         boolean isPublic = false;
-                        if (!nameExt.endsWith(PlatypusFiles.CONNECTION_EXTENSION)) {
-                            String fileContent = FileUtils.readString(f, PlatypusFiles.DEFAULT_ENCODING);
-                            appElementName = PlatypusFilesSupport.getAnnotationValue(fileContent, PlatypusFilesSupport.APP_ELEMENT_NAME_ANNOTATION);
-                            isPublic = PlatypusFilesSupport.getAnnotationValue(fileContent, PlatypusFilesSupport.PUBLIC_ANNOTATION) != null;
-                        } else {
+                        if (nameExt.endsWith("." + PlatypusFiles.CONNECTION_EXTENSION)) {
                             appElementName = PlatypusFilesSupport.getAppElementIdForConnectionAppElement(f);
+                        } else {
+                            String fileContent = FileUtils.readString(f, PlatypusFiles.DEFAULT_ENCODING);
+                            if (fo.existsExt(PlatypusFiles.MODEL_EXTENSION) && nameExt.endsWith("." + PlatypusFiles.JAVASCRIPT_EXTENSION)) {
+                                appElementName = PlatypusFilesSupport.extractModuleConstructorName(fileContent);
+                            } else {
+                                appElementName = PlatypusFilesSupport.getAnnotationValue(fileContent, JsDoc.Tag.NAME_TAG);
+                            }
+                            isPublic = PlatypusFilesSupport.getAnnotationValue(fileContent, JsDoc.Tag.PUBLIC_TAG) != null;
                         }
                         if (appElementName != null) {
                             d.addPair(APP_ELEMENT_NAME, appElementName, true, true);

@@ -1,6 +1,9 @@
 /**
  * 
  * @author ${user}
- * @name ${appElementName}
  */
-var _self = this;
+function ${appElementName}(){
+    var self = this;
+    
+    // TODO : place your code here
+}

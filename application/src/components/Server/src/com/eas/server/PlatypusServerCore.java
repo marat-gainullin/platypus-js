@@ -16,7 +16,6 @@ import com.eas.client.scripts.CompiledScriptDocuments;
 import com.eas.client.scripts.CompiledScriptDocumentsHost;
 import com.eas.client.scripts.ScriptDocument;
 import com.eas.client.scripts.ScriptRunner;
-import com.eas.client.scripts.ServerScriptProxyPrototype;
 import com.eas.client.settings.DbConnectionSettings;
 import com.eas.debugger.jmx.server.Breakpoints;
 import com.eas.debugger.jmx.server.Debugger;
@@ -47,7 +46,6 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
     static {
         ServerScriptRunnerPrototype.init(ScriptUtils.getScope(), true);
         ServerReportRunnerPrototype.init(ScriptUtils.getScope(), true);
-        ServerScriptProxyPrototype.init(ScriptUtils.getScope(), true);
     }
     protected static PlatypusServerCore instance;
 
@@ -152,13 +150,13 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
      */
     public Object executeServerModuleMethod(String aModuleName, String aMethodName, Object[] aArgs) throws Exception {
         ServerScriptRunner module = getSessionManager().getSystemSession().getModule(aModuleName);
-        if (module == null) {
-            module = new ServerScriptRunner(this, getSessionManager().getSystemSession(), aModuleName, ScriptRunner.initializePlatypusStandardLibScope(), this, this, new Object[]{});
-        }
-        module.execute();
         Session oldSession = getSessionManager().getCurrentSession();
         try {
             getSessionManager().setCurrentSession(getSessionManager().getSystemSession());
+            if (module == null) {
+                module = new ServerScriptRunner(this, getSessionManager().getSystemSession(), aModuleName, ScriptRunner.initializePlatypusStandardLibScope(), this, this, new Object[]{});
+            }
+            module.execute();
             return module.executeMethod(aMethodName, aArgs);
         } finally {
             getSessionManager().setCurrentSession(oldSession);
@@ -208,7 +206,7 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
                         break;
                     case JsDoc.Tag.VALIDATOR_TAG:
                         stateless = true;
-                        databasesClient.addValidator(aModuleId,  tag.getParams());
+                        databasesClient.addValidator(aModuleId, tag.getParams());
                         break;
                 }
             }
@@ -216,6 +214,7 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
                 try {
                     ServerScriptRunner module = scriptsCache.get(aModuleId);
                     if (module != null) {
+                        sessionManager.getSystemSession().registerModule(module);
                         module.execute();
                         Logger.getLogger(PlatypusServerCore.class.getName()).info(String.format(STARTED_RESIDENT_TASK_MSG, aModuleId));
                         return true;
@@ -232,7 +231,7 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
                 return false;
             }
         } else {
-            Logger.getLogger(PlatypusServerCore.class.getName()).warning(String.format("Background task \"%s\" is illegal (no module). Skipping it.", aModuleId));
+            Logger.getLogger(PlatypusServerCore.class.getName()).warning(String.format("Resident task \"%s\" is illegal (no module). Skipping it.", aModuleId));
             return false;
         }
     }
@@ -253,7 +252,17 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
 
     @Override
     public PlatypusPrincipal getPrincipal() {
-        return sessionManager.getCurrentSession().getPrincipal();
+        if (sessionManager.getCurrentSession() != null) {
+            return sessionManager.getCurrentSession().getPrincipal();
+        } else {
+            // Construct a dummy Principal for a debugger can discover inner Principal's structure
+            return new PlatypusPrincipal("No current session found") {
+                @Override
+                public boolean hasRole(String string) throws Exception {
+                    return false;
+                }
+            };
+        }
     }
 
     @Override

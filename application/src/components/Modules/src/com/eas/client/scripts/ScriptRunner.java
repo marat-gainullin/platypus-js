@@ -142,9 +142,6 @@ public class ScriptRunner extends ScriptableObject {
             public Object run(Context cx) throws Exception {
                 model.setScriptThis(ScriptRunner.this);
                 if (scriptDoc.getFunction() != null) {
-                    if (System.getProperty(DEBUG_PROPERTY) != null) {
-                        Breakpoints.getInstance().checkPendingBreakpoints();
-                    }
                     Object[] jsArgs = new Object[args != null ? args.length : 0];
                     for (int i = 0; i < jsArgs.length; i++) {
                         jsArgs[i] = ScriptUtils.javaToJS(args[i], ScriptUtils.getScope());
@@ -234,7 +231,14 @@ public class ScriptRunner extends ScriptableObject {
      * @see PlatypusPrincipal
      */
     @ScriptFunction(jsDoc = GET_PRINCIPAL_JSDOC)
-    public PlatypusPrincipal getPrincipal() {
+    public Object getPrincipal() {
+        if (principalHost != null) {
+            return Context.javaToJS(principalHost.getPrincipal(), this);
+        }
+        return null;
+    }
+
+    protected PlatypusPrincipal _getPrincipal() {
         if (principalHost != null) {
             return principalHost.getPrincipal();
         }
@@ -490,6 +494,9 @@ public class ScriptRunner extends ScriptableObject {
                              */
                             cx.setOptimizationLevel(-1);
                             Script lib = cx.compileString(source, resourceId, 0, null);
+                            if (System.getProperty(DEBUG_PROPERTY) != null) {
+                                Breakpoints.getInstance().checkPendingBreakpoints();
+                            }
                             lib.exec(cx, checkStandardObjects(cx));
                         } else {
                             throw new IllegalArgumentException("Script resource not found: " + resourceId + ". Hint: Regular platypus modules can't be used as resources.");
@@ -516,7 +523,7 @@ public class ScriptRunner extends ScriptableObject {
         }
     }
 
-    public static Scriptable checkStandardObjects(Context currentContext) throws Exception {
+    public static ScriptableObject checkStandardObjects(Context currentContext) throws Exception {
         synchronized (standardObjectsScopeLock) {
             if (standardObjectsScope == null) {
                 standardObjectsScope = new ScriptRunner(PlatypusScriptedResource.getClient(), ScriptUtils.getScope(), PlatypusScriptedResource.getPrincipalHost(), PlatypusScriptedResource.getScriptDocumentsHost());
@@ -574,13 +581,12 @@ public class ScriptRunner extends ScriptableObject {
      */
     public void checkPrincipalPermission() throws Exception {
         if (moduleAllowedRoles != null && !moduleAllowedRoles.isEmpty()) {
-            PlatypusPrincipal principal = getPrincipal();
-            if (principal != null && principal.hasAnyRole(moduleAllowedRoles)) {
-                return;
+            PlatypusPrincipal principal = _getPrincipal();
+            if (principal == null || !principal.hasAnyRole(moduleAllowedRoles)) {
+                throw new AccessControlException(String.format("Access denied to %s module for %s PlatypusPrincipal.",//NOI18N
+                        ScriptRunner.this.appElementId,
+                        principal != null ? principal.getName() : null));
             }
-            throw new AccessControlException(String.format("Access denied to %s module for %s PlatypusPrincipal.",//NOI18N
-                    ScriptRunner.this.appElementId,
-                    principal != null ? principal.getName() : null));
         }
     }
 
@@ -629,7 +635,7 @@ public class ScriptRunner extends ScriptableObject {
 
         private void checkPrincipalPermission() throws AccessControlException {
             try {
-                PlatypusPrincipal principal = getPrincipal();
+                PlatypusPrincipal principal = _getPrincipal();
                 if (functionAllowedRoles != null && functionAllowedRoles.get(name) != null && !functionAllowedRoles.get(name).isEmpty()) {
                     if (principal != null && principal.hasAnyRole(functionAllowedRoles.get(name))) {
                         return;
@@ -669,6 +675,9 @@ public class ScriptRunner extends ScriptableObject {
                 Object oprot = get("prototype", this);
                 if (oprot instanceof Scriptable) {
                     runner.setPrototype((Scriptable) oprot);
+                }
+                if (runner instanceof ScriptRunner) {
+                    ((ScriptRunner) runner).execute();
                 }
                 return runner;
             } catch (Exception ex) {

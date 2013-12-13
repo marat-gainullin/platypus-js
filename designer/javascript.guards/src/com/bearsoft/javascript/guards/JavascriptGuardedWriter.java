@@ -212,7 +212,7 @@ final class JavascriptGuardedWriter {
      * @return iterator of the SectionDesc
      */
     private List<SectionDescriptor> prepareSections(List<? extends GuardedSection> list) {
-        List<SectionDescriptor> dest = new ArrayList<SectionDescriptor>(list.size());
+        List<SectionDescriptor> dest = new ArrayList<>(list.size());
 
         for (GuardedSection o : list) {
             if (o instanceof SimpleSection) {

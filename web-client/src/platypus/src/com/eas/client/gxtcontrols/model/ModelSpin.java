@@ -1,8 +1,10 @@
 package com.eas.client.gxtcontrols.model;
 
 import com.bearsoft.rowset.metadata.Field;
+import com.eas.client.gxtcontrols.ControlsUtils;
 import com.eas.client.gxtcontrols.converters.DoubleRowValueConverter;
 import com.eas.client.gxtcontrols.wrappers.component.PlatypusAdapterStandaloneField;
+import com.eas.client.gxtcontrols.wrappers.handled.PlatypusDateHandledField;
 import com.eas.client.gxtcontrols.wrappers.handled.PlatypusSpinnerHandledField;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.logical.shared.SelectionEvent;
@@ -191,4 +193,12 @@ public class ModelSpin extends PlatypusAdapterStandaloneField<Double> {
 	public void setStep(Double aValue) {
 		getTarget().setIncrement(aValue);
 	}
+	
+	public void setEmptyText(String aValue){
+		ControlsUtils.setEmptyText(((PlatypusSpinnerHandledField)target), aValue);
+	}
+	
+	public String getEmptyText(){
+		return ControlsUtils.getEmptyText(((PlatypusSpinnerHandledField)target));
+	}	
 }

@@ -34,6 +34,7 @@ import com.eas.designer.application.query.nodes.QueryRootNode;
 import com.eas.designer.application.query.nodes.QueryRootNodePropertiesUndoRecorder;
 import com.eas.designer.datamodel.nodes.ModelNode;
 import com.eas.designer.explorer.PlatypusDataObject;
+import com.eas.designer.explorer.files.wizard.NewApplicationElementWizardIterator;
 import com.eas.script.JsDoc;
 import com.eas.xml.dom.Source2XmlDom;
 import com.eas.xml.dom.XmlDom2String;
@@ -58,6 +59,8 @@ import org.openide.awt.StatusDisplayer;
 import org.openide.awt.UndoRedo;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
+import org.openide.loaders.DataFolder;
+import org.openide.loaders.DataObject;
 import org.openide.loaders.DataObjectExistsException;
 import org.openide.loaders.MultiFileLoader;
 import org.openide.nodes.AbstractNode;
@@ -169,9 +172,9 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         Document modelDoc = Source2XmlDom.transform(modelEntry.getFile().asText(PlatypusUtils.COMMON_ENCODING_NAME));
         model = XmlDom2QueryModel.transform(getClient(), modelDoc);
         dbId = model.getDbId();
-        publicQuery = PlatypusFilesSupport.getAnnotationValue(sqlText, PlatypusFiles.PUBLIC_ANNOTATION_NAME) != null;
-        procedure = PlatypusFilesSupport.getAnnotationValue(sqlText, PlatypusFiles.PROCEDURE_ANNOTATION_NAME) != null;
-        manual = PlatypusFilesSupport.getAnnotationValue(sqlText, PlatypusFiles.MANUAL_ANNOTATION_NAME) != null;
+        publicQuery = PlatypusFilesSupport.getAnnotationValue(sqlText, JsDoc.Tag.PUBLIC_TAG) != null;
+        procedure = PlatypusFilesSupport.getAnnotationValue(sqlText, JsDoc.Tag.PROCEDURE_TAG) != null;
+        manual = PlatypusFilesSupport.getAnnotationValue(sqlText, JsDoc.Tag.MANUAL_TAG) != null;
         readonly = PlatypusFilesSupport.getAnnotationValue(sqlText, JsDoc.Tag.READONLY_TAG) != null;
 
         //TODO set output fields in query document
@@ -265,7 +268,7 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
             firePropertyChange(PUBLIC_PROP_NAME, oldValue, aValue);
             try {
                 String content = sqlTextDocument.getText(0, sqlTextDocument.getLength());
-                String newContent = PlatypusFilesSupport.replaceAnnotationValue(content, PlatypusFiles.PUBLIC_ANNOTATION_NAME, publicQuery ? "" : null);
+                String newContent = PlatypusFilesSupport.replaceAnnotationValue(content, JsDoc.Tag.PUBLIC_TAG, publicQuery ? "" : null);
                 sqlTextDocument.replace(0, sqlTextDocument.getLength(), newContent, null);
             } catch (BadLocationException ex) {
                 ErrorManager.getDefault().notify(ex);
@@ -284,7 +287,7 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
             procedureChanged(oldValue, aValue);
             try {
                 String content = sqlTextDocument.getText(0, sqlTextDocument.getLength());
-                String newContent = PlatypusFilesSupport.replaceAnnotationValue(content, PlatypusFiles.PROCEDURE_ANNOTATION_NAME, procedure ? "" : null);
+                String newContent = PlatypusFilesSupport.replaceAnnotationValue(content, JsDoc.Tag.PROCEDURE_TAG, procedure ? "" : null);
                 sqlTextDocument.replace(0, sqlTextDocument.getLength(), newContent, null);
             } catch (BadLocationException ex) {
                 ErrorManager.getDefault().notify(ex);
@@ -307,7 +310,7 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
             manualChanged(oldValue, aValue);
             try {
                 String content = sqlTextDocument.getText(0, sqlTextDocument.getLength());
-                String newContent = PlatypusFilesSupport.replaceAnnotationValue(content, PlatypusFiles.MANUAL_ANNOTATION_NAME, manual ? "" : null);
+                String newContent = PlatypusFilesSupport.replaceAnnotationValue(content, JsDoc.Tag.MANUAL_TAG, manual ? "" : null);
                 sqlTextDocument.replace(0, sqlTextDocument.getLength(), newContent, null);
             } catch (BadLocationException ex) {
                 ErrorManager.getDefault().notify(ex);
@@ -492,17 +495,17 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         commitedStatement = statement;
         sqlText = sqlTextDocument.getText(0, sqlTextDocument.getLength());
         boolean oldPublicQuery = publicQuery;
-        publicQuery = PlatypusFilesSupport.getAnnotationValue(sqlText, PlatypusFiles.PUBLIC_ANNOTATION_NAME) != null;
+        publicQuery = PlatypusFilesSupport.getAnnotationValue(sqlText, JsDoc.Tag.PUBLIC_TAG) != null;
         if (oldPublicQuery != publicQuery) {
             firePropertyChange(PUBLIC_PROP_NAME, oldPublicQuery, publicQuery);
         }
         boolean oldProcedure = procedure;
-        procedure = PlatypusFilesSupport.getAnnotationValue(sqlText, PlatypusFiles.PROCEDURE_ANNOTATION_NAME) != null;
+        procedure = PlatypusFilesSupport.getAnnotationValue(sqlText, JsDoc.Tag.PROCEDURE_TAG) != null;
         if (oldProcedure != procedure) {
             firePropertyChange(PROCEDURE_PROP_NAME, oldProcedure, procedure);
         }
         boolean oldManual = manual;
-        manual = PlatypusFilesSupport.getAnnotationValue(sqlText, PlatypusFiles.MANUAL_ANNOTATION_NAME) != null;
+        manual = PlatypusFilesSupport.getAnnotationValue(sqlText, JsDoc.Tag.MANUAL_TAG) != null;
         if (oldManual != manual) {
             firePropertyChange(MANUAL_PROP_NAME, oldManual, manual);
         }
@@ -560,21 +563,33 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         return tables;
     }
 
-    private void validateStatement() throws Exception {
+    public DbMetadataCache getMetadataCache() throws Exception {
         DbClient client = getClient();
-        if (client != null) {
-            DbMetadataCache mdCache = client.getDbMetadataCache(dbId);
+        return client != null ? client.getDbMetadataCache(dbId) : null;
+    }
+
+    private void validateStatement() throws Exception {
+        DbMetadataCache mdCache = getMetadataCache();
+        if (mdCache != null) {
             Map<String, Table> tables = TablesFinder.getTablesMap(TO_CASE.LOWER, statement, true);
             for (Table table : tables.values()) {
                 String schema = table.getSchemaName();
                 if (schema != null && schema.equalsIgnoreCase(mdCache.getConnectionSchema())) {
                     schema = null;
                 }
-                String cachedTableName = (schema != null ? schema + "." : "") + table.getName();
-                if (!mdCache.containsTableMetadata(cachedTableName) && !existsAppQuery(cachedTableName)) {
-                    throw new AbsentTableParseException(NbBundle.getMessage(PlatypusQueryDataObject.class, "absentTable", cachedTableName));
+                String cachedTablyName = (schema != null ? schema + "." : "") + table.getName();
+                if (!validateTablyName(cachedTablyName)) {
+                    throw new AbsentTableParseException(NbBundle.getMessage(PlatypusQueryDataObject.class, "absentTable", cachedTablyName));
                 }
             }
+        }
+    }
+
+    private boolean validateTablyName(String aTablyName) throws Exception {
+        if (aTablyName.startsWith(ClientConstants.STORED_QUERY_REF_PREFIX)) {
+            return existsAppQuery(aTablyName.substring(ClientConstants.STORED_QUERY_REF_PREFIX.length()));
+        } else {
+            return validateTableName(aTablyName) || existsAppQuery(aTablyName);
         }
     }
 
@@ -614,18 +629,44 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         firePropertyChange(OUTPUT_FIELDS, aOldValue, aNewValue);
     }
 
-    public boolean existsAppQuery(String aTablyName) {
+    public boolean existsAppQuery(String aStoreQueryName) {
         PlatypusProject project = getProject();
         if (project != null) {
             try {
-                ApplicationElement appElement = project.getAppCache().get(aTablyName);
-                if (appElement == null && StoredQueryFactory.SUBQUERY_LINK_PATTERN.matcher(aTablyName.toLowerCase()).matches()) {
-                    appElement = project.getAppCache().get(aTablyName.substring(1));
-                }
+                ApplicationElement appElement = project.getAppCache().get(aStoreQueryName);
                 return appElement != null && appElement.getType() == ClientConstants.ET_QUERY;
             } catch (Exception ex) {
                 return false;
             }
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    protected DataObject handleCopy(DataFolder df) throws IOException {
+        DataObject copied = super.handleCopy(df);
+        String content = copied.getPrimaryFile().asText(PlatypusFiles.DEFAULT_ENCODING);
+        String oldPlatypusId = PlatypusFilesSupport.getAnnotationValue(content, JsDoc.Tag.NAME_TAG);
+        String newPlatypusId = NewApplicationElementWizardIterator.getNewValidAppElementName(getProject(), oldPlatypusId);
+        content = PlatypusFilesSupport.replaceAnnotationValue(content, JsDoc.Tag.NAME_TAG, newPlatypusId);
+        try (OutputStream os = copied.getPrimaryFile().getOutputStream()) {
+            os.write(content.getBytes(PlatypusFiles.DEFAULT_ENCODING));
+            os.flush();
+        }
+        return copied;
+    }
+
+    public boolean validateTableName(String aTablyName) throws Exception {
+        DbMetadataCache mdCache = getMetadataCache();
+        if (mdCache != null) {
+            boolean containsTableMetadata;
+            try {
+                containsTableMetadata = mdCache.getTableMetadata(aTablyName) != null;
+            } catch (Exception ex) {
+                containsTableMetadata = false;
+            }
+            return containsTableMetadata;
         } else {
             return false;
         }

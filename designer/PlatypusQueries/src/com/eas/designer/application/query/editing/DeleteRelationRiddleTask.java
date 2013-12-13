@@ -122,10 +122,7 @@ public class DeleteRelationRiddleTask implements RiddleTask {
 
             String entityTableName = null;
             if (aQueryEntity.getQueryId() != null) {
-                entityTableName = aQueryEntity.getQueryId();
-                if (entityTableName.matches("\\d+")) {
-                    entityTableName = ClientConstants.QUERY_ID_PREFIX + entityTableName;
-                }
+                entityTableName = ClientConstants.STORED_QUERY_REF_PREFIX + aQueryEntity.getQueryId();
             } else {
                 entityTableName = aQueryEntity.getTableName();
                 if (aQueryEntity.getTableSchemaName() != null && !aQueryEntity.getTableSchemaName().isEmpty()) {
@@ -147,10 +144,7 @@ public class DeleteRelationRiddleTask implements RiddleTask {
 
             String entityTableName = null;
             if (aQueryEntity.getQueryId() != null) {
-                entityTableName = aQueryEntity.getQueryId();
-                if (entityTableName.matches("\\d+")) {
-                    entityTableName = ClientConstants.QUERY_ID_PREFIX + entityTableName;
-                }
+                entityTableName = ClientConstants.STORED_QUERY_REF_PREFIX + aQueryEntity.getQueryId();
             } else {
                 entityTableName = aQueryEntity.getTableName();
                 if (aQueryEntity.getTableSchemaName() != null && !aQueryEntity.getTableSchemaName().isEmpty()) {

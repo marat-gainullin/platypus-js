@@ -121,6 +121,7 @@ public class ScriptRunnerPrototype extends IdScriptableObject {
                                 assert clientWrapper != null : BAD_SCRIPT_SCOPE_MSG;
                                 ScriptRunner scriptRunner = new ScriptRunner(scriptId, clientWrapper.getClient(), ScriptRunner.initializePlatypusStandardLibScope(), clientWrapper.getPrincipalHost(), clientWrapper.getCompiledScriptDocumentsHost(), (args.length > 1 && args[1] instanceof Object[]) ? (Object[]) args[1] : null);
                                 scriptRunner.setPrototype(this);
+                                scriptRunner.execute();
                                 return scriptRunner;
                             } catch (Exception ex) {
                                 throw new IllegalArgumentException(ex);

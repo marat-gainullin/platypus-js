@@ -19,6 +19,7 @@ public class DbDateDesignInfo extends DbControlDesignInfo {
     public static final String EXPANDED = "expanded";
     protected String dateFormat = "DD_MM_YYYY";
     protected boolean expanded = false;
+    protected String emptyText;
 
     public DbDateDesignInfo() {
         super();
@@ -36,6 +37,9 @@ public class DbDateDesignInfo extends DbControlDesignInfo {
         if (this.expanded != other.expanded) {
             return false;
         }
+        if ((this.emptyText == null) ? (other.emptyText != null) : !this.emptyText.equals(other.emptyText)) {
+            return false;
+        }
         return true;
     }
 
@@ -46,6 +50,7 @@ public class DbDateDesignInfo extends DbControlDesignInfo {
             DbDateDesignInfo aInfo = (DbDateDesignInfo) aSource;
             setDateFormat(aInfo.getDateFormat() != null ? new String(aInfo.getDateFormat().toCharArray()) : null);
             setExpanded(aInfo.isExpanded());
+            setEmptyText(aInfo.getEmptyText());
         }
     }
 
@@ -71,6 +76,18 @@ public class DbDateDesignInfo extends DbControlDesignInfo {
         boolean old = expanded;
         expanded = aValue;
         firePropertyChange(EXPANDED, old, aValue);
+    }
+
+    @Serial
+    public String getEmptyText() {
+        return emptyText;
+    }
+
+    @Serial
+    public void setEmptyText(String aValue) {
+        String oldValue = emptyText;
+        emptyText = aValue;
+        firePropertyChange("emptyText", oldValue, emptyText);
     }
 
     @Override

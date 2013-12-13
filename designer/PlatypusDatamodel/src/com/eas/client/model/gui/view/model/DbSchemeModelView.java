@@ -765,7 +765,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbS
                             super.actionPerformed(e);
                             break;
                         case JOptionPane.NO_OPTION:
-                            dropTable(getSelectedEntities(), sqlController, e);
+                            dropTables(getSelectedEntities(), sqlController, e);
                             break;
                     }
                 }
@@ -908,51 +908,49 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbS
         private boolean doDropField(FieldsEntity entity, CompoundEdit aEdit, Field field, ActionEvent e) {
             DropFieldEdit edit = new DropFieldEdit(sqlController, field, entity);
             edit.redo();
-            assert edit != null;
             aEdit.addEdit(edit);
             return true;
         }
 
-        private void dropTable(Set<FieldsEntity> tableEntities, SqlActionsController sqlController, ActionEvent e) {
+        private void dropTables(Set<FieldsEntity> tableEntities, SqlActionsController sqlController, ActionEvent e) {
             if (tableEntities != null) {
-                for (FieldsEntity tableEntity : tableEntities) {
-                    // act with table and it's entity.
-                    // Dropping foreign keys, table and removing theirs entities and relations
-                    Set<Relation<FieldsEntity>> inRels = tableEntity.getInRelations();
-                    int rCount = getRecordsCount(tableEntity);
-                    String msg = null;
-                    if (rCount == 0 && !inRels.isEmpty()) {
-                        msg = DbStructureUtils.getString("areYouSureInRelationsPresent", String.valueOf(inRels.size()), null);
-                    } else if (rCount > 0 && inRels.isEmpty()) {
-                        msg = DbStructureUtils.getString("areYouSureDataPresent", String.valueOf(rCount), null);
-                    } else if (rCount > 0 && !inRels.isEmpty()) {
-                        msg = DbStructureUtils.getString("areYouSureInRelationsDataPresent", String.valueOf(inRels.size()), String.valueOf(rCount));
+                undoSupport.beginUpdate();
+                try {
+                    for (FieldsEntity tableEntity : tableEntities.toArray(new FieldsEntity[]{})) {
+                        // act with table and it's entity.
+                        // Dropping foreign keys, table and removing theirs entities and relations
+                        Set<Relation<FieldsEntity>> inRels = tableEntity.getInRelations();
+                        int rCount = getRecordsCount(tableEntity);
+                        String msg = null;
+                        if (rCount == 0 && !inRels.isEmpty()) {
+                            msg = DbStructureUtils.getString("areYouSureInRelationsPresent", String.valueOf(inRels.size()), null);
+                        } else if (rCount > 0 && inRels.isEmpty()) {
+                            msg = DbStructureUtils.getString("areYouSureDataPresent", String.valueOf(rCount), null);
+                        } else if (rCount > 0 && !inRels.isEmpty()) {
+                            msg = DbStructureUtils.getString("areYouSureInRelationsDataPresent", String.valueOf(inRels.size()), String.valueOf(rCount));
+                        }
+                        if (msg == null || JOptionPane.YES_OPTION == JOptionPane.showConfirmDialog(DbSchemeModelView.this, msg, DbStructureUtils.getString("dbSchemeEditor"), JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE)) {
+                            doDropTable(tableEntity, sqlController, e);
+                        }
                     }
-                    if (msg == null || JOptionPane.YES_OPTION == JOptionPane.showConfirmDialog(DbSchemeModelView.this, msg, DbStructureUtils.getString("dbSchemeEditor"), JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE)) {
-                        doDropTable(tableEntity, sqlController, e);
-                    }
+                    super.actionPerformed(e);
+                } finally {
+                    undoSupport.endUpdate();
                 }
             }
         }
 
-        public void doDropTable(FieldsEntity tableEntity, SqlActionsController sqlController, ActionEvent e) {
+        protected void doDropTable(FieldsEntity tableEntity, SqlActionsController sqlController, ActionEvent e) {
             EntityView<FieldsEntity> eView = getEntityView(tableEntity);
             DropTableEdit edit = new DropTableEdit(sqlController, tableEntity.getTableName(), eView.getFields(), tableEntity);
             try {
                 edit.redo();
+                undoSupport.postEdit(edit);
             } catch (Exception ex) {
                 int userChoice = JOptionPane.showConfirmDialog(DbSchemeModelView.this, ex.getLocalizedMessage() + " \n" + DbStructureUtils.getString("removeFromDiagram"), DbStructureUtils.getString("dbSchemeEditor"), JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
                 if (userChoice == JOptionPane.YES_OPTION) {
                     super.actionPerformed(e);
                 }
-                return;
-            }
-            undoSupport.beginUpdate();
-            try {
-                undoSupport.postEdit(edit);
-                super.actionPerformed(e);
-            } finally {
-                undoSupport.endUpdate();
             }
         }
 

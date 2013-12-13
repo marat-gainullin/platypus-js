@@ -10,9 +10,9 @@ import com.eas.client.login.PrincipalHost;
 import com.eas.client.reports.ExcelReport;
 import com.eas.client.reports.ReportDocument;
 import com.eas.client.reports.ReportRunner;
+import static com.eas.client.reports.ReportRunner.BEFORE_RENDER_HANDLER_NAME;
 import com.eas.client.scripts.CompiledScriptDocumentsHost;
 import com.eas.client.scripts.ScriptDocument;
-import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptUtils;
 import java.rmi.AccessException;
 import org.mozilla.javascript.*;
@@ -24,7 +24,7 @@ import org.mozilla.javascript.*;
 public class ServerReportRunner extends ServerScriptRunner {
 
     private byte[] template;
-    private Function onBeforRender;
+    private Function onBeforeRender;
     private String format;
 
     public ServerReportRunner(PlatypusServerCore aServerCore, Session aCreationSession, String aModuleId, Scriptable aScope, PrincipalHost aPrincipalHost, CompiledScriptDocumentsHost aCompiledScriptDocumentsHost, Object[] args) throws Exception {
@@ -44,14 +44,10 @@ public class ServerReportRunner extends ServerScriptRunner {
         throw new AccessException("Could not execute method \"" + methodName + "()\" in report.");
     }
 
-    @ScriptFunction
-    public Function getOnBeforeRender() {
-        return onBeforRender;
-    }
-
-    @ScriptFunction
-    public void setOnBeforeRender(Function aValue) {
-        onBeforRender = aValue;
+    @Override
+    protected void prepareScript(ScriptDocument scriptDoc, Object[] args) throws Exception {
+        super.prepareScript(scriptDoc, args);
+        onBeforeRender = model.getHandler(BEFORE_RENDER_HANDLER_NAME);
     }
 
     public synchronized byte[] executeReport() throws Exception {
@@ -60,7 +56,7 @@ public class ServerReportRunner extends ServerScriptRunner {
             public byte[] run(Context cx) throws Exception {
                 if (template != null) {
                     execute();
-                    Function preRendreHandler = getOnBeforeRender();
+                    Function preRendreHandler = onBeforeRender;
                     if (preRendreHandler != null) {
                         preRendreHandler.call(cx, ServerReportRunner.this, ServerReportRunner.this, new Object[]{Context.javaToJS(new ScriptSourcedEvent(ServerReportRunner.this), ServerReportRunner.this)});
                     }

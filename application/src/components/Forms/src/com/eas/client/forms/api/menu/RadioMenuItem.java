@@ -81,7 +81,7 @@ public class RadioMenuItem extends Component<JRadioButtonMenuItem> {
             + "*/";
     
     @ScriptFunction(jsDoc = SELECTED_JSDOC)
-    public boolean isSelected() {
+    public boolean getSelected() {
         return delegate.isSelected();
     }
 

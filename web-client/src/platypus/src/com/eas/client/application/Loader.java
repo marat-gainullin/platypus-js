@@ -159,11 +159,11 @@ public class Loader {
 								// unfortunately not yet.
 								if (DEPENDENCY_TAG_NAME.equals(docNode.getNodeName())) {
 									String dependency = docNode.getFirstChild().getNodeValue();
-									if (dependency != null && !dependency.isEmpty() && !touchedAppElements.contains(dependency))
+									if (dependency != null && !dependency.isEmpty() && !isLoaded(dependency))
 										dependencies.add(dependency);
 								} else if (SERVER_DEPENDENCY_TAG_NAME.equals(docNode.getNodeName())) {
 									String dependency = docNode.getFirstChild().getNodeValue();
-									if (dependency != null && !dependency.isEmpty() && !touchedAppElements.contains(dependency))
+									if (dependency != null && !dependency.isEmpty() && !isTouched(SERVER_MODULE_TOUCHED_NAME + dependency))
 										serverModuleDependencies.add(dependency);
 								} else if (MODEL_TAG_NAME.equals(docNode.getNodeName())) {
 									assert docNode instanceof Element;
@@ -174,17 +174,17 @@ public class Loader {
 										assert entityNode instanceof Element;
 										Element entityTag = (Element) entityNode;
 										String dependency = entityTag.getAttribute(QUERY_ID_ATTR_NAME);
-										if (dependency != null && !dependency.isEmpty() && !touchedAppElements.contains(dependency)) {
+										if (dependency != null && !dependency.isEmpty() && !isTouched(dependency)) {
 											queryDependencies.add(dependency);
 										}
 									}
 								} else if (QUERY_DEPENDENCY_TAG_NAME.equals(docNode.getNodeName())) {
 									String dependency = docNode.getFirstChild().getNodeValue();
-									if (dependency != null && !dependency.isEmpty() && !touchedAppElements.contains(dependency))
+									if (dependency != null && !dependency.isEmpty() && !isTouched(dependency))
 										queryDependencies.add(dependency);
 								}
 							}
-						}
+						}					
 						fireLoaded.run();
 						if (!dependencies.isEmpty() || !serverModuleDependencies.isEmpty() || !queryDependencies.isEmpty()) {
 							int accumulate = 0;
@@ -313,10 +313,11 @@ public class Loader {
 		};
 		if (!appElementNames.isEmpty()) {
 			for (final String appElementName : appElementNames) {
-				startLoadings.add(client.createServerModule(appElementName, new DocumentCallbackAdapter() {
+				startLoadings.add(client.createServerModule(appElementName, new com.eas.client.Callback<Void>() {
 
 					@Override
-					protected void doWork(Document aDoc) throws Exception {
+					public void run(Void aDoc) throws Exception {
+						/*
 						String source = null;
 						Element rootNode = aDoc.getDocumentElement();
 						NodeList docNodes = rootNode.getChildNodes();
@@ -336,8 +337,13 @@ public class Loader {
 							scriptElement.setType(TYPE_JAVASCRIPT);
 							htmlDom.getBody().appendChild(scriptElement);
 						}
+						*/
 						fireLoaded(SERVER_MODULE_TOUCHED_NAME + appElementName);
 						loaded.run();
+					}
+
+					@Override
+                    public void cancel() {
 					}
 
 				}, new StringCallbackAdapter() {

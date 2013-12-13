@@ -31,6 +31,7 @@ import com.eas.client.Cancellable;
 import com.eas.client.CancellableCallback;
 import com.eas.client.CancellableCallbackAdapter;
 import com.eas.client.Utils;
+import com.eas.client.Utils.JsObject;
 import com.eas.client.application.AppClient;
 import com.eas.client.beans.PropertyChangeSupport;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -289,18 +290,20 @@ public class Model {
 
 	public void publish(JavaScriptObject aModule) throws Exception {
 		module = aModule;
-		ParametersEntity entity = getParametersEntity();
-		Entity.publish(module, entity);
-		String oldName = entity.getName();
-		try {
-			if (!"params".equals(oldName)) {
-				entity.setName("params");
-				Entity.publish(module, entity);
-				Entity.publishRows(entity.getPublished());
-			}
-		} finally {
-			entity.setName(oldName);
+		// deprecated
+		ParametersEntity parametersEntity = getParametersEntity();
+		Entity.publish(module, parametersEntity);
+		if (!"params".equals(parametersEntity.getName())) {
+		    String oldName = parametersEntity.getName();
+		    try {
+				parametersEntity.setName("params");
+				Entity.publish(module, parametersEntity);
+		    } finally {
+			    parametersEntity.setName(oldName);
+		    }
 		}
+		Entity.publishRows(parametersEntity.getPublished());
+		//
 		publishTopLevelFacade(aModule, this);
 		publishRowsets();
 	}
@@ -309,8 +312,20 @@ public class Model {
 		assert module != null : "Module has to be already installed while publishing rowsets facades.";
 		validateQueries();
 		for (Entity entity : entities.values()) {
-			if (!(entity instanceof ParametersEntity)) {
-				Entity.publish(module, entity);
+			if (entity instanceof ParametersEntity) {
+				String oldName = entity.getName();
+				try {
+					if (!"params".equals(oldName)) {
+						entity.setName("params");
+						Entity.publish(module.<JsObject>cast().getJs("model"), entity);
+						Entity.publishRows(entity.getPublished());
+					}
+				} finally {
+					entity.setName(oldName);
+				}
+			}else{
+				Entity.publish(module, entity);/* deprecated */
+				Entity.publish(module.<JsObject>cast().getJs("model"), entity);
 			}
 		}
         //
@@ -448,12 +463,13 @@ public class Model {
 			get : function() {
 				return publishedModel;
 			}
-		});
+		});		
+		// deprecated
 		Object.defineProperty(aModule, "md", {
 			get : function() {
 				return aModule.params.md;
 			}
-		});
+		});		
 		for ( var i = 0; i < aModule.md.length; i++) {
 			(function() {
 				var param = aModule.md[i];
@@ -467,6 +483,7 @@ public class Model {
 				});
 			})();
 		}
+		//
 	}-*/;
 
 	public int getAjustingCounter() {

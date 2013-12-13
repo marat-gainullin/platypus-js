@@ -35,7 +35,7 @@ public class ModelFormattedField extends ScalarModelComponent<DbLabel> {
             + "* Determines if component is editable. \n"
             + "*/";
     @ScriptFunction(jsDoc = EDITABLE_JSDOC)
-    public boolean isEditable() {
+    public boolean getEditable() {
         return delegate.isEditable();
     }
 
@@ -75,4 +75,15 @@ public class ModelFormattedField extends ScalarModelComponent<DbLabel> {
             }
         }
     }
+    
+    @ScriptFunction
+    public String getEmptyText() {
+        return delegate.getEmptyText();
+    }
+
+    @ScriptFunction
+    public void setEmptyText(String aValue) {
+        delegate.setEmptyText(aValue);
+    }
+
 }

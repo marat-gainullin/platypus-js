@@ -274,4 +274,17 @@ public class DbLabel extends DbControlPanel implements DbControl {
         }
         return false;
     }    
+    
+    protected String emptyText;
+    
+    public String getEmptyText() {
+        return emptyText;
+    }
+
+    public void setEmptyText(String aValue) {
+        String oldValue = emptyText;
+        emptyText = aValue;
+        firePropertyChange("emptyText", oldValue, emptyText);
+    }
+
 }

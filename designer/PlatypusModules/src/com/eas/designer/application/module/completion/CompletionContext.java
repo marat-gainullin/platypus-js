@@ -9,6 +9,8 @@ import com.bearsoft.rowset.metadata.Fields;
 import com.eas.client.model.Entity;
 import com.eas.client.model.application.ApplicationDbModel;
 import com.eas.client.model.script.ScriptableRowset;
+import com.eas.designer.application.module.completion.CompletionPoint.CompletionToken;
+import com.eas.designer.application.module.completion.CompletionPoint.CompletionTokenType;
 import com.eas.script.ScriptFunction;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -27,16 +29,19 @@ public class CompletionContext {
     protected static final String MODEL_SCRIPT_NAME = "model";// NOI18N
     public static final String PARAMS_SCRIPT_NAME = "params";// NOI18N
     protected static final String METADATA_SCRIPT_NAME = ApplicationDbModel.DATASOURCE_METADATA_SCRIPT_NAME;
+    protected static final String CURSOR_ENTITY_PROPERTY_NAME = "cursor";//NOI18N
     protected static final String MODULE_NAME = "Module";// NOI18N
     protected static final String SERVER_MODULE_NAME = "ServerModule";// NOI18N
     protected static final String FORM_MODULE_NAME = "Form";// NOI18N
     protected static final String REPORT_MODULE_NAME = "Report";// NOI18N
+    protected static final String SERVER_REPORT_MODULE_NAME = "ServerReport";// NOI18N
     protected static final String MODULES_OBJECT_NAME = "Modules";// NOI18N
     protected static final String GET_METHOD_NAME = "get";// NOI18N
     protected static final String BEANY_PREFIX_GET = "get";// NOI18N
     protected static final String BEANY_PREFIX_SET = "set";// NOI18N
     protected static final String BEANY_PREFIX_IS = "is";// NOI18N
-    protected Class<?> scriptClass;
+    private static final int QUOTED_STRING_MIN_LENGTH = 2;
+    private Class<?> scriptClass;
 
     public CompletionContext(Class<?> aScriptClass) {
         scriptClass = aScriptClass;
@@ -45,42 +50,44 @@ public class CompletionContext {
     public Class<?> getScriptClass() {
         return scriptClass;
     }
-
-    public void applyCompletionItems(JsCompletionProvider.CompletionPoint point, int offset, CompletionResultSet resultSet) throws Exception {
+    
+    public void applyCompletionItems(CompletionPoint point, int offset, CompletionResultSet resultSet) throws Exception {
         fillJavaCompletionItems(point, resultSet);
     }
 
-    public CompletionContext getChildContext(String str, int offset) throws Exception {
+    public CompletionContext getChildContext(CompletionToken token, int offset) throws Exception {
         return null;
     }
 
-    protected void fillFields(Fields aFields, JsCompletionProvider.CompletionPoint point, CompletionResultSet resultSet) {
+    protected void fillFields(Fields aFields, CompletionPoint point, CompletionResultSet resultSet) {
         for (Field field : aFields.toCollection()) {
-            addItem(resultSet, point.filter, new BeanCompletionItem(field.getClass(), field.getName(), field.getDescription(), point.caretBeginWordOffset, point.caretEndWordOffset));
+            addItem(resultSet, point.getFilter(), new BeanCompletionItem(field.getClass(), field.getName(), field.getDescription(), point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
         }
     }
 
-    protected void fillFieldsValues(Fields aFields, JsCompletionProvider.CompletionPoint point, CompletionResultSet resultSet) {
+    protected void fillFieldsValues(Fields aFields, CompletionPoint point, CompletionResultSet resultSet) {
         for (Field field : aFields.toCollection()) {
-            addItem(resultSet, point.filter, new FieldCompletionItem(field, point.caretBeginWordOffset, point.caretEndWordOffset));
+            addItem(resultSet, point.getFilter(), new FieldCompletionItem(field, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
         }
     }
 
-    protected void fillEntities(Collection<? extends Entity> entities, CompletionResultSet resultSet, JsCompletionProvider.CompletionPoint point) throws Exception {
+    protected void fillEntities(Collection<? extends Entity> entities, CompletionResultSet resultSet, CompletionPoint point) throws Exception {
         for (Entity appEntity : entities) {
             if (appEntity.getName() != null && !appEntity.getName().isEmpty()) {
-                addItem(resultSet, point.filter, new BeanCompletionItem(ScriptableRowset.class, appEntity.getName(), null, point.caretBeginWordOffset, point.caretEndWordOffset));
+                addItem(resultSet, point.getFilter(), new BeanCompletionItem(ScriptableRowset.class, appEntity.getName(), null, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
+            }
+        }
+    }
+    
+    protected static void addItem(CompletionResultSet resultSet, String aFilter, JsCompletionItem aCompletionItem) {
+        if (aFilter == null || aFilter.isEmpty() || (aCompletionItem.getText().toLowerCase().startsWith(aFilter.toLowerCase()) && !aCompletionItem.getText().equals(aFilter))) {
+            if (aFilter == null || !(aFilter.endsWith(")") || aFilter.endsWith("}"))) {//NOI18N
+                resultSet.addItem(aCompletionItem);
             }
         }
     }
 
-    protected void addItem(CompletionResultSet resultSet, String aFilter, JsCompletionItem aCompletionItem) {
-        if (aFilter == null || aFilter.isEmpty() || aCompletionItem.getText().toLowerCase().startsWith(aFilter.toLowerCase())) {
-            resultSet.addItem(aCompletionItem);
-        }
-    }
-
-    protected void fillJavaCompletionItems(JsCompletionProvider.CompletionPoint point, CompletionResultSet resultSet) {
+    protected void fillJavaCompletionItems(CompletionPoint point, CompletionResultSet resultSet) {
         Map<String, PropBox> props = new HashMap<>();
         List<Method> methods = new ArrayList<>();
         if (scriptClass != null) {
@@ -88,7 +95,7 @@ public class CompletionContext {
                 if (method.isAnnotationPresent(ScriptFunction.class)) {
                     if (isBeanPatternMethod(method)) {
                         String propName = getPropertyName(method.getName());
-                        if (point.filter == null || point.filter.isEmpty() || propName.startsWith(point.filter)) {
+                        if (point.getFilter() == null || point.getFilter().isEmpty() || propName.startsWith(point.getFilter())) {
                             PropBox pb = props.get(propName);
                             if (pb == null) {
                                 pb = new PropBox();
@@ -101,13 +108,13 @@ public class CompletionContext {
                                 pb.jsDoc = method.getAnnotation(ScriptFunction.class).jsDoc();
                             }
                         }
-                    } else if (point.filter == null || point.filter.isEmpty() || method.getName().startsWith(point.filter)) {
+                    } else if (point.getFilter() == null || point.getFilter().isEmpty() || method.getName().startsWith(point.getFilter())) {
                         methods.add(method);
                     }
                 }
             }
             for (PropBox pb : props.values()) {
-                resultSet.addItem(new PropertyCompletionItem(pb, point.caretBeginWordOffset, point.caretEndWordOffset));
+                resultSet.addItem(new PropertyCompletionItem(pb, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
             }
             for (Method method : methods) {
                 List<String> parameters = new ArrayList<>();
@@ -121,14 +128,28 @@ public class CompletionContext {
                         method.getName(),
                         getTypeName(method.getReturnType()),
                         parameters, method.getAnnotation(ScriptFunction.class).jsDoc(),
-                        point.caretBeginWordOffset,
-                        point.caretEndWordOffset,
+                        point.getCaretBeginWordOffset(),
+                        point.getCaretEndWordOffset(),
                         true);
                 resultSet.addItem(functionCompletionItem);
             }
         }
     }
-
+    
+    protected static boolean isPropertyGet(CompletionToken token, String propertyName) {
+        return (CompletionTokenType.PROPERTY_GET == token.type && propertyName.equals(token.name))
+                || (CompletionTokenType.ELEMENT_GET == token.type && isQuotedString(token.name) && propertyName.equals(removeQuotes(token.name)));
+    }
+    
+    protected static boolean isQuotedString(String str) {
+        return str != null & str.length() > QUOTED_STRING_MIN_LENGTH 
+                && ((str.startsWith("\"") && str.endsWith("\"")) || (str.startsWith("'") && str.endsWith("'")));//NOI18N
+    }
+    
+    private static String removeQuotes(String str) {
+        return str.substring(1, str.length() - 1);
+    }
+    
     private static boolean isNumberClass(Class<?> clazz) {
         return Number.class.isAssignableFrom(clazz)
                 || Byte.TYPE.equals(clazz)
