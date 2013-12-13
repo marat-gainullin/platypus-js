@@ -7,7 +7,7 @@ package com.bearsoft.org.netbeans.modules.form.completion;
 import com.bearsoft.org.netbeans.modules.form.FormUtils;
 import com.eas.client.scripts.ScriptRunner;
 import com.eas.designer.application.module.PlatypusModuleDataObject;
-import com.eas.designer.application.module.completion.JsCompletionProvider;
+import com.eas.designer.application.module.completion.CompletionPoint;
 import com.eas.designer.application.module.completion.ModuleCompletionContext;
 import com.eas.designer.application.module.completion.ModuleThisCompletionContext;
 import com.eas.script.ScriptFunction;
@@ -31,26 +31,26 @@ public class FormCompletionContext extends ModuleCompletionContext {
     }
 
     @Override
-    public void applyCompletionItems(JsCompletionProvider.CompletionPoint point, int offset, CompletionResultSet resultSet) throws Exception {
+    public void applyCompletionItems(CompletionPoint point, int offset, CompletionResultSet resultSet) throws Exception {
         super.applyCompletionItems(point, offset, resultSet);
         
     }
 
     @Override
-    protected void fillSystemConstructors(JsCompletionProvider.CompletionPoint point, CompletionResultSet resultSet) {
+    protected void fillSystemConstructors(CompletionPoint point, CompletionResultSet resultSet) {
         super.fillSystemConstructors(point, resultSet);
         for (Class<?> clazz : FormUtils.getPlatypusApiClasses()) {
             for (Constructor<?> constructor : clazz.getConstructors()) {
                 if (constructor.isAnnotationPresent(ScriptFunction.class)) {
                     ScriptFunction annotation = constructor.getAnnotation(ScriptFunction.class);
                     addItem(resultSet,
-                            point.filter,
+                            point.getFilter(),
                             new ComponentConstructorCompletionItem(clazz.getSimpleName(),
                             "",//NOI18N
                             Arrays.<String>asList(annotation.params()),
                             annotation.jsDoc(),
-                            point.caretBeginWordOffset,
-                            point.caretEndWordOffset));
+                            point.getCaretBeginWordOffset(),
+                            point.getCaretEndWordOffset()));
                     break;
                 }
             }

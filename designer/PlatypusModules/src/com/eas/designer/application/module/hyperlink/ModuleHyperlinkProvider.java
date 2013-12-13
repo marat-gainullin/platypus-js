@@ -14,12 +14,9 @@ import com.eas.designer.application.module.parser.AstUtlities;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumSet;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Logger;
 import javax.swing.SwingUtilities;
 import javax.swing.text.Document;
 import javax.swing.text.StyledDocument;
@@ -256,6 +253,12 @@ public class ModuleHyperlinkProvider implements HyperlinkProviderExt {
                 FunctionNode functionNode = (FunctionNode) n;
                 if (functionNode.getFunctionName().getIdentifier().equals(declarationName)) {
                     return functionNode;
+                } else {
+                    for (AstNode paramNode : functionNode.getParams()) {
+                        if (paramNode.toSource().equals(declarationName)) {
+                            return paramNode;
+                        }
+                    }
                 }
             }
             if (n instanceof VariableDeclaration) {
