@@ -84,6 +84,7 @@ public class DebuggerUtils {
             }
         }
         env.mDebuggerListener.debuggingStarted = true;
+        env.mDebugger.continueRun();
         env.mDebuggerListener.running = true;
     }
 

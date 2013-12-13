@@ -61,6 +61,7 @@ public class ProjectRunner {
     private static final String EQUALS_SIGN = "="; //NOI18N
     private static final String FALSE = "false"; //NOI18N
     private static final String LOCAL_HOSTNAME = "localhost"; //NOI18N
+    private static final int DEBUGGER_CONNECT_MAX_ATTEMPTS = 3;
 
     /**
      * Starts an application in run mode.
@@ -100,7 +101,7 @@ public class ProjectRunner {
                         clientEnv.port = project.getSettings().getDebugClientPort();
                         clientEnv.runningProgram = runningProgram;
                         clientEnv.runningElement = project.getSettings().getAppSettings().getRunElement();
-                        DebuggerUtils.attachDebugger(clientEnv, 5);
+                        DebuggerUtils.attachDebugger(clientEnv, DEBUGGER_CONNECT_MAX_ATTEMPTS);
                         project.getOutputWindowIO().getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Client_Debug_Activated"));//NOI18N
                     } catch (Exception ex) {
                         runningProgram.cancel(true);
@@ -114,7 +115,7 @@ public class ProjectRunner {
                             serverEnv.port = project.getSettings().getDebugServerPort();
                             serverEnv.runningProgram = null;
                             serverEnv.runningElement = null;
-                            DebuggerUtils.attachDebugger(serverEnv, 5);
+                            DebuggerUtils.attachDebugger(serverEnv, DEBUGGER_CONNECT_MAX_ATTEMPTS);
                             project.getOutputWindowIO().getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Server_Debug_Activated"));//NOI18N
                         } catch (Exception ex) {
                             ErrorManager.getDefault().notify(ex);
