@@ -32,6 +32,7 @@ import org.netbeans.api.extexecution.ExecutionService;
 import org.netbeans.api.extexecution.ExternalProcessBuilder;
 import org.openide.ErrorManager;
 import org.openide.awt.HtmlBrowser;
+import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 import org.openide.windows.IOProvider;
 import org.openide.windows.InputOutput;
@@ -61,7 +62,7 @@ public class ProjectRunner {
     private static final String EQUALS_SIGN = "="; //NOI18N
     private static final String FALSE = "false"; //NOI18N
     private static final String LOCAL_HOSTNAME = "localhost"; //NOI18N
-    private static final int DEBUGGER_CONNECT_MAX_ATTEMPTS = 3;
+    private static final int DEBUGGER_CONNECT_MAX_ATTEMPTS = 10;
 
     /**
      * Starts an application in run mode.
@@ -103,23 +104,21 @@ public class ProjectRunner {
                         clientEnv.runningElement = project.getSettings().getAppSettings().getRunElement();
                         DebuggerUtils.attachDebugger(clientEnv, DEBUGGER_CONNECT_MAX_ATTEMPTS);
                         project.getOutputWindowIO().getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Client_Debug_Activated"));//NOI18N
-                    } catch (Exception ex) {
-                        runningProgram.cancel(true);
-                        ErrorManager.getDefault().notify(ex);
-                        return;
-                    }
-                    if (project.getSettings().getRunAppServerType() != AppServerType.NONE) {
-                        try {
-                            DebuggerEnvironment serverEnv = new DebuggerEnvironment(project);
-                            serverEnv.host = LOCAL_HOSTNAME;
-                            serverEnv.port = project.getSettings().getDebugServerPort();
-                            serverEnv.runningProgram = null;
-                            serverEnv.runningElement = null;
-                            DebuggerUtils.attachDebugger(serverEnv, DEBUGGER_CONNECT_MAX_ATTEMPTS);
-                            project.getOutputWindowIO().getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Server_Debug_Activated"));//NOI18N
-                        } catch (Exception ex) {
-                            ErrorManager.getDefault().notify(ex);
+                        if (project.getSettings().getRunAppServerType() == AppServerType.PLATYPUS_SERVER) {
+                            try {
+                                DebuggerEnvironment serverEnv = new DebuggerEnvironment(project);
+                                serverEnv.host = LOCAL_HOSTNAME;
+                                serverEnv.port = project.getSettings().getDebugServerPort();
+                                serverEnv.runningProgram = null;
+                                serverEnv.runningElement = null;
+                                DebuggerUtils.attachDebugger(serverEnv, DEBUGGER_CONNECT_MAX_ATTEMPTS);
+                                project.getOutputWindowIO().getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Server_Debug_Activated"));//NOI18N
+                            } catch (Exception ex) {
+                                ErrorManager.getDefault().notify(ex);
+                            }
                         }
+                    } catch (Exception ex) {
+                        ErrorManager.getDefault().notify(ex);
                     }
                 }
             }

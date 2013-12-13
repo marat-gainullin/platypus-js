@@ -33,6 +33,10 @@ import org.openide.filesystems.FileUtil;
  */
 public class DebuggerUtils {
 
+    public static void attachDebugger(DebuggerEnvironment env) throws Exception {
+        attachDebugger(env, 1);
+    }
+    
     public static void attachDebugger(DebuggerEnvironment env, int aRetryCount) throws Exception {
         JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + env.host + ":" + String.valueOf(env.port) + "/jmxrmi");
         ObjectName mBeanDebuggerName = new ObjectName(DebuggerMBean.DEBUGGER_MBEAN_NAME);
@@ -54,7 +58,7 @@ public class DebuggerUtils {
                 breakpoints = JMX.newMBeanProxy(jmxConnection, mBeanBreakpointsName, BreakpointsMBean.class);
                 break;
             } catch (InstanceNotFoundException | IOException ex) {
-                if (aRetryCount > 0 && ex instanceof InstanceNotFoundException) {
+                if (aRetryCount > 1) {
                     Thread.sleep(250);
                 }
                 if (++ioCounter > aRetryCount) {
