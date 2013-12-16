@@ -692,9 +692,8 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
     }
 
     /**
-     * Registers an
-     * <code>UndoableEditListener</code>. The listener is notified whenever an
-     * edit occurs which can be undone.
+     * Registers an <code>UndoableEditListener</code>. The listener is notified
+     * whenever an edit occurs which can be undone.
      *
      * @param l an <code>UndoableEditListener</code> object
      * @see #removeUndoableEditListener
@@ -704,8 +703,7 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
     }
 
     /**
-     * Removes an
-     * <code>UndoableEditListener</code>.
+     * Removes an <code>UndoableEditListener</code>.
      *
      * @param l the <code>UndoableEditListener</code> object to be removed
      * @see #addUndoableEditListener
@@ -715,9 +713,8 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
     }
 
     /**
-     * Registers an
-     * <code>ModelSelectionListener</code>. The listener is notified whenever an
-     * entity is selected.
+     * Registers an <code>ModelSelectionListener</code>. The listener is
+     * notified whenever an entity is selected.
      *
      * @param l an <code>ModelSelectionListener</code> object
      * @see #removeEntitySelectionListener
@@ -727,8 +724,7 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
     }
 
     /**
-     * Removes an
-     * <code>EntitySelectionListener</code>.
+     * Removes an <code>EntitySelectionListener</code>.
      *
      * @param l the <code>EntitySelectionListener</code> object to be removed
      * @see #addEntitySelectionListener
@@ -1282,6 +1278,7 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
                 entitiesIndex.remove(eView.getBounds(), eView);
                 eView.shrink();
                 preparePaths();
+                rerouteConnectors();
             }
         }
     }
@@ -2192,24 +2189,28 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
             super();
         }
 
+        protected void deleteEntities(Collection<E> aEntities) {
+            undoSupport.beginUpdate();
+            try {
+                Set<E> toDelete = new HashSet<>();
+                toDelete.addAll(aEntities);
+                for (E entity : toDelete) {
+                    if (!isParametersEntity(entity)) {
+                        if (((M) entity.getModel()).checkEntityRemovingValid(entity)) {
+                            doDeleteEntity(entity);
+                        }
+                    }
+                }
+            } finally {
+                undoSupport.endUpdate();
+            }
+        }
+
         @Override
         public void actionPerformed(ActionEvent e) {
             if (isEnabled()) {
                 if (isAnySelectedEntities()) {
-                    undoSupport.beginUpdate();
-                    try {
-                        List<Object> selected = Arrays.asList(selectedEntities.toArray());
-                        for (Object oEntity : selected) {
-                            if (!isParametersEntity((E) oEntity)) {
-                                E entity = (E) oEntity;
-                                if (((M) entity.getModel()).checkEntityRemovingValid(entity)) {
-                                    doDeleteEntity(entity);
-                                }
-                            }
-                        }
-                    } finally {
-                        undoSupport.endUpdate();
-                    }
+                    deleteEntities(selectedEntities);
                 } else if (isSelectedRelations()) {
                     Set<Relation<E>> rels = getSelectedRelations();
                     if (rels != null && !rels.isEmpty()) {
