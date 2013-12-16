@@ -19,6 +19,7 @@ import java.util.Set;
 import org.mozilla.javascript.Token;
 import org.mozilla.javascript.ast.AstNode;
 import org.mozilla.javascript.ast.AstRoot;
+import org.mozilla.javascript.ast.Block;
 import org.mozilla.javascript.ast.FunctionCall;
 import org.mozilla.javascript.ast.FunctionNode;
 import org.mozilla.javascript.ast.Name;
@@ -31,10 +32,10 @@ import org.mozilla.javascript.ast.VariableDeclaration;
 import org.mozilla.javascript.ast.VariableInitializer;
 import org.netbeans.api.project.Project;
 import org.netbeans.spi.editor.completion.CompletionResultSet;
+import org.openide.ErrorManager;
 import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataObject;
 import org.openide.loaders.DataObjectNotFoundException;
-import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 
 /**
@@ -122,7 +123,7 @@ public class ModuleCompletionContext extends CompletionContext {
         return null;
     }
 
-    public static CompletionContext findCompletionContext(String fieldName, int offset, ModuleCompletionContext parentModuleContext) {
+public static CompletionContext findCompletionContext(String fieldName, int offset, ModuleCompletionContext parentModuleContext) {
         AstRoot astRoot = parentModuleContext.dataObject.getAst();
         if (astRoot != null) {
             AstNode offsetNode = AstUtlities.getOffsetNode(astRoot, offset);
@@ -134,8 +135,9 @@ public class ModuleCompletionContext extends CompletionContext {
                         parentScope = currentNode;
                     }
                     ModuleCompletionContext.FindModuleElementSupport visitor =
-                            new ModuleCompletionContext.FindModuleElementSupport(currentNode,
-                            parentScope == PlatypusFilesSupport.extractModuleConstructor(astRoot),
+                            new ModuleCompletionContext.FindModuleElementSupport(PlatypusFilesSupport.extractModuleConstructor(astRoot),
+                                    parentScope,
+                                    currentNode,
                             fieldName,
                             parentModuleContext);
                     CompletionContext ctx = visitor.findContext();
@@ -151,6 +153,7 @@ public class ModuleCompletionContext extends CompletionContext {
         }
         return null;
     }
+
 
     public static boolean isModuleInitializerName(String name) {
         return name.equals(MODULE_NAME)
@@ -178,15 +181,18 @@ public class ModuleCompletionContext extends CompletionContext {
 
     private static class FindModuleElementSupport {
 
+        private final AstNode moduleConstructorScope;
+        private final AstNode parentScope;
         private final AstNode lookupScope;
-        private final boolean moduleConstructorScope;
+        
         private final String fieldName;
         private final ModuleCompletionContext parentContext;
         private CompletionContext ctx;
 
-        public FindModuleElementSupport(AstNode aLookupScope, boolean aModuleConstructorScope, String aFieldName, ModuleCompletionContext aParentContext) {
+        public FindModuleElementSupport(AstNode aModuleConstructor, AstNode aParentNode, AstNode aLookupScope, String aFieldName, ModuleCompletionContext aParentContext) {
+            moduleConstructorScope = aModuleConstructor;
+            parentScope = aParentNode;
             lookupScope = aLookupScope;
-            moduleConstructorScope = aModuleConstructorScope;
             fieldName = aFieldName;
             parentContext = aParentContext;
         }
@@ -196,10 +202,10 @@ public class ModuleCompletionContext extends CompletionContext {
                 @Override
                 public boolean visit(AstNode an) {
                     if (an == lookupScope) {
-                        if (an instanceof FunctionNode) {// Completion support for Array iteration functions parameters on an entity
+                        if (an instanceof FunctionNode) {
                             FunctionNode fn = (FunctionNode) an;
                             if (fn.getParams() != null && fn.getParams().size() > 0 && fieldName.equals(fn.getParams().get(0).toSource())) {
-                                if (fn.getParent() instanceof FunctionCall) {
+                                if (fn.getParent() instanceof FunctionCall) { // Completion support for Array iteration functions parameters on an entity
                                     FunctionCall fc = (FunctionCall) fn.getParent();
                                     List<CompletionToken> tokens = CompletionPoint.getContextTokens(fc);
                                     if (tokens != null && tokens.size() > 1) {
@@ -209,20 +215,23 @@ public class ModuleCompletionContext extends CompletionContext {
                                                 CompletionContext c = ModuleCompletionProvider.getCompletionContext(parentContext, tokens.subList(0, tokens.size() - 1), fc.getAbsolutePosition());
                                                 if (c instanceof EntityCompletionContext) {
                                                     ctx = ((EntityCompletionContext)c).getElementCompletionContext();
+                                                    return false;
                                                 }
                                             } catch (Exception ex) {
-                                                Exceptions.printStackTrace(ex);
+                                                ErrorManager.getDefault().notify(ex);
                                             }
                                         }
                                     }
+                                } else if (fn.getParent() instanceof Block && fn.getParent().getParent() == moduleConstructorScope) {
+                                    fn.getName();
                                 }
                             }
                         }
                         return true;
                     }
-                    if (an instanceof PropertyGet && moduleConstructorScope) {
+                    if (an instanceof PropertyGet && parentScope == moduleConstructorScope) {
                         PropertyGet pg = (PropertyGet) an;
-                        if (pg.getTarget() instanceof KeywordLiteral && Token.THIS == pg.getTarget().getType()) { // things like this.prop1
+                        if (THIS_KEYWORD.equals(fieldName) && pg.getTarget() instanceof KeywordLiteral && Token.THIS == pg.getTarget().getType()) { // things like this.prop1
                             ctx = parentContext.createThisContext(false);
                             return false;
                         }
