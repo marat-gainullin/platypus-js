@@ -484,37 +484,37 @@ public class QueryResultsView extends javax.swing.JPanel {
             if (model != null && model.isModified()) {
                 RequestProcessor.getDefault().execute(
                         new Runnable() {
-                    @Override
-                    public void run() {
-                        final ProgressHandle ph = ProgressHandleFactory.createHandle(getName());
-                        ph.start();
-                        try {
-                            assert model.getClient() instanceof DatabasesClient;
-                            DatabasesClient client = (DatabasesClient) model.getClient();
-                            final StoredQueryFactory qFactory = client.getQueryFactory();
-                            client.setQueryFactory(new StoredQueryFactory(client, false) {
-                                @Override
-                                public SqlQuery getQuery(String aAppElementId, boolean aCopy) throws Exception {
-                                    if (entityId.equals(aAppElementId)) {
-                                        return queryEntity.getQuery();
-                                    } else {
-                                        return qFactory.getQuery(aAppElementId, aCopy);
+                            @Override
+                            public void run() {
+                                final ProgressHandle ph = ProgressHandleFactory.createHandle(getName());
+                                ph.start();
+                                try {
+                                    assert model.getClient() instanceof DatabasesClient;
+                                    DatabasesClient client = (DatabasesClient) model.getClient();
+                                    final StoredQueryFactory qFactory = client.getQueryFactory();
+                                    client.setQueryFactory(new StoredQueryFactory(client, false) {
+                                        @Override
+                                        public SqlQuery getQuery(String aAppElementId, boolean aCopy) throws Exception {
+                                            if (entityId.equals(aAppElementId)) {
+                                                return queryEntity.getQuery();
+                                            } else {
+                                                return qFactory.getQuery(aAppElementId, aCopy);
+                                            }
+                                        }
+                                    });
+                                    try {
+                                        model.save();
+                                        showInfo(NbBundle.getMessage(QueryResultsView.class, "DataSaved"));
+                                    } finally {
+                                        client.setQueryFactory(qFactory);
                                     }
+                                } catch (Exception ex) {
+                                    logger.log(Level.SEVERE, "Error saving model.", ex); //NO1I18N
+                                } finally {
+                                    ph.finish();
                                 }
-                            });
-                            try {
-                                model.save();
-                                showInfo(NbBundle.getMessage(QueryResultsView.class, "DataSaved"));
-                            } finally {
-                                client.setQueryFactory(qFactory);
                             }
-                        } catch (Exception ex) {
-                            logger.log(Level.SEVERE, "Error saving model.", ex); //NO1I18N
-                        } finally {
-                            ph.finish();
-                        }
-                    }
-                });
+                        });
 
             }
         } catch (Exception ex) {
@@ -672,7 +672,7 @@ public class QueryResultsView extends javax.swing.JPanel {
             }
         });
     }
-    
+
     private void enableDeleteButton(final boolean enable) {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
@@ -681,7 +681,7 @@ public class QueryResultsView extends javax.swing.JPanel {
             }
         });
     }
-    
+
     /**
      *
      * @return True if results grid is initialized and false if dml query has
@@ -865,7 +865,11 @@ public class QueryResultsView extends javax.swing.JPanel {
             try {
                 Preferences paramPreferences = paramsPreferences.node(parameter.getName());
                 String strVal = (String) converter.convert2RowsetCompatible(((Parameter) parameter).getValue(), DataTypeInfo.VARCHAR);
-                paramPreferences.put(VALUE_PREF_KEY, strVal);
+                if (strVal != null) {
+                    paramPreferences.put(VALUE_PREF_KEY, strVal);
+                } else {
+                    paramPreferences.remove(VALUE_PREF_KEY);
+                }
             } catch (Exception ex) {
                 //no-op
             }
