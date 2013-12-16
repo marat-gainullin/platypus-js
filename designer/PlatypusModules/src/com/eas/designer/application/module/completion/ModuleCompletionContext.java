@@ -23,6 +23,7 @@ import org.mozilla.javascript.Token;
 import org.mozilla.javascript.ast.AstNode;
 import org.mozilla.javascript.ast.AstRoot;
 import org.mozilla.javascript.ast.Block;
+import org.mozilla.javascript.ast.ExpressionStatement;
 import org.mozilla.javascript.ast.FunctionCall;
 import org.mozilla.javascript.ast.FunctionNode;
 import org.mozilla.javascript.ast.Name;
@@ -127,7 +128,7 @@ public class ModuleCompletionContext extends CompletionContext {
         return null;
     }
 
-public static CompletionContext findCompletionContext(String fieldName, int offset, ModuleCompletionContext parentModuleContext) {
+    public static CompletionContext findCompletionContext(String fieldName, int offset, ModuleCompletionContext parentModuleContext) {
         AstRoot astRoot = parentModuleContext.dataObject.getAst();
         if (astRoot != null) {
             AstNode offsetNode = AstUtlities.getOffsetNode(astRoot, offset);
@@ -138,12 +139,12 @@ public static CompletionContext findCompletionContext(String fieldName, int offs
                     if (parentScope == null) {
                         parentScope = currentNode;
                     }
-                    ModuleCompletionContext.FindModuleElementSupport visitor =
-                            new ModuleCompletionContext.FindModuleElementSupport(PlatypusFilesSupport.extractModuleConstructor(astRoot),
+                    ModuleCompletionContext.FindModuleElementSupport visitor
+                            = new ModuleCompletionContext.FindModuleElementSupport(PlatypusFilesSupport.extractModuleConstructor(astRoot),
                                     parentScope,
                                     currentNode,
-                            fieldName,
-                            parentModuleContext);
+                                    fieldName,
+                                    parentModuleContext);
                     CompletionContext ctx = visitor.findContext();
                     if (ctx != null) {
                         return ctx;
@@ -157,7 +158,6 @@ public static CompletionContext findCompletionContext(String fieldName, int offs
         }
         return null;
     }
-
 
     public static boolean isModuleInitializerName(String name) {
         return name.equals(MODULE_NAME)
@@ -188,7 +188,7 @@ public static CompletionContext findCompletionContext(String fieldName, int offs
         private final AstNode moduleConstructorScope;
         private final AstNode parentScope;
         private final AstNode lookupScope;
-        
+
         private final String fieldName;
         private final ModuleCompletionContext parentContext;
         private CompletionContext ctx;
@@ -208,7 +208,7 @@ public static CompletionContext findCompletionContext(String fieldName, int offs
                     if (an == lookupScope) {
                         if (an instanceof FunctionNode) {
                             FunctionNode fn = (FunctionNode) an;
-                            if (fn.getParams() != null && fn.getParams().size() > 0 
+                            if (fn.getParams() != null && fn.getParams().size() > 0
                                     && fieldName.equals(fn.getParams().get(0).toSource())) {// function parameter completion
                                 if (fn.getParent() instanceof FunctionCall) { // array iteration methods parameters on an entity with anonymous function an the fist parameter
                                     FunctionCall fc = (FunctionCall) fn.getParent();
@@ -219,7 +219,7 @@ public static CompletionContext findCompletionContext(String fieldName, int offs
                                             try {
                                                 CompletionContext c = ModuleCompletionProvider.getCompletionContext(parentContext, tokens.subList(0, tokens.size() - 1), fc.getAbsolutePosition());
                                                 if (c instanceof EntityCompletionContext) {
-                                                    ctx = ((EntityCompletionContext)c).getElementCompletionContext();
+                                                    ctx = ((EntityCompletionContext) c).getElementCompletionContext();
                                                     return false;
                                                 }
                                             } catch (Exception ex) {
@@ -228,17 +228,33 @@ public static CompletionContext findCompletionContext(String fieldName, int offs
                                         }
                                     }
                                 } else if (fn.getName() != null && fn.getParent() instanceof Block && fn.getParent().getParent() == moduleConstructorScope) {
+                                    try {
                                         //TODO implement event handler function parameter
+                                    } catch (Exception ex) {
+                                        Exceptions.printStackTrace(ex);
+                                    }
                                 }
                             }
                         }
                         return true;
                     }
-                    if (an instanceof PropertyGet && parentScope == moduleConstructorScope) {
-                        PropertyGet pg = (PropertyGet) an;
-                        if (THIS_KEYWORD.equals(fieldName) && pg.getTarget() instanceof KeywordLiteral && Token.THIS == pg.getTarget().getType()) { // things like this.prop1
-                            ctx = parentContext.createThisContext(false);
-                            return false;
+                    if (parentScope == moduleConstructorScope) {
+                        if (an instanceof PropertyGet) {
+                            PropertyGet pg = (PropertyGet) an;
+                            if (THIS_KEYWORD.equals(fieldName) 
+                                    && pg.getTarget() instanceof KeywordLiteral 
+                                    && Token.THIS == pg.getTarget().getType()) { // this.prop1
+                                ctx = parentContext.createThisContext(false);
+                                return false;
+                            }
+                        } else if (an instanceof ExpressionStatement) {
+                            ExpressionStatement es = (ExpressionStatement) an;
+                            if (THIS_KEYWORD.equals(fieldName) 
+                                    && es.getExpression() instanceof KeywordLiteral 
+                                    && Token.THIS == es.getExpression().getType()) { // this.
+                                ctx = parentContext.createThisContext(false);
+                                return false;
+                            }
                         }
                     }
                     if (an instanceof VariableDeclaration) {
@@ -292,7 +308,7 @@ public static CompletionContext findCompletionContext(String fieldName, int offs
                                                 }
                                             }
                                         }
-                                    } else if (variableInitializer.getInitializer() instanceof KeywordLiteral 
+                                    } else if (variableInitializer.getInitializer() instanceof KeywordLiteral
                                             && Token.THIS == variableInitializer.getInitializer().getType()) {// var self = this;
                                         ctx = parentContext.createThisContext(false);
                                         return false;
