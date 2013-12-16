@@ -205,7 +205,7 @@ public static CompletionContext findCompletionContext(String fieldName, int offs
                         if (an instanceof FunctionNode) {
                             FunctionNode fn = (FunctionNode) an;
                             if (fn.getParams() != null && fn.getParams().size() > 0 && fieldName.equals(fn.getParams().get(0).toSource())) {
-                                if (fn.getParent() instanceof FunctionCall) { // Completion support for Array iteration functions parameters on an entity
+                                if (fn.getParent() instanceof FunctionCall) { // Array iteration methods parameters on an entity
                                     FunctionCall fc = (FunctionCall) fn.getParent();
                                     List<CompletionToken> tokens = CompletionPoint.getContextTokens(fc);
                                     if (tokens != null && tokens.size() > 1) {
@@ -223,7 +223,7 @@ public static CompletionContext findCompletionContext(String fieldName, int offs
                                         }
                                     }
                                 } else if (fn.getParent() instanceof Block && fn.getParent().getParent() == moduleConstructorScope) {
-                                    fn.getName();
+                                    //TODO implement event handler function parameter
                                 }
                             }
                         }
