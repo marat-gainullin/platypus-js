@@ -5,6 +5,8 @@
 package com.eas.designer.application.module.completion;
 
 import com.eas.client.cache.PlatypusFilesSupport;
+import com.eas.client.events.ScriptSourcedEvent;
+import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.designer.application.indexer.IndexerQuery;
 import com.eas.designer.application.module.PlatypusModuleDataObject;
 import static com.eas.designer.application.module.completion.CompletionContext.REPORT_MODULE_NAME;
@@ -12,6 +14,7 @@ import static com.eas.designer.application.module.completion.CompletionContext.a
 import com.eas.designer.application.module.completion.CompletionPoint.CompletionToken;
 import com.eas.designer.application.module.parser.AstUtlities;
 import com.eas.designer.explorer.utils.StringUtils;
+import com.eas.script.StoredFunction;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -36,6 +39,7 @@ import org.openide.ErrorManager;
 import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataObject;
 import org.openide.loaders.DataObjectNotFoundException;
+import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 
 /**
@@ -204,8 +208,9 @@ public static CompletionContext findCompletionContext(String fieldName, int offs
                     if (an == lookupScope) {
                         if (an instanceof FunctionNode) {
                             FunctionNode fn = (FunctionNode) an;
-                            if (fn.getParams() != null && fn.getParams().size() > 0 && fieldName.equals(fn.getParams().get(0).toSource())) {
-                                if (fn.getParent() instanceof FunctionCall) { // Array iteration methods parameters on an entity
+                            if (fn.getParams() != null && fn.getParams().size() > 0 
+                                    && fieldName.equals(fn.getParams().get(0).toSource())) {// function parameter completion
+                                if (fn.getParent() instanceof FunctionCall) { // array iteration methods parameters on an entity with anonymous function an the fist parameter
                                     FunctionCall fc = (FunctionCall) fn.getParent();
                                     List<CompletionToken> tokens = CompletionPoint.getContextTokens(fc);
                                     if (tokens != null && tokens.size() > 1) {
@@ -222,8 +227,8 @@ public static CompletionContext findCompletionContext(String fieldName, int offs
                                             }
                                         }
                                     }
-                                } else if (fn.getParent() instanceof Block && fn.getParent().getParent() == moduleConstructorScope) {
-                                    //TODO implement event handler function parameter
+                                } else if (fn.getName() != null && fn.getParent() instanceof Block && fn.getParent().getParent() == moduleConstructorScope) {
+                                        //TODO implement event handler function parameter
                                 }
                             }
                         }
