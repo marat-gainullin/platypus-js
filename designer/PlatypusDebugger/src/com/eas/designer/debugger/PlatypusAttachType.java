@@ -55,7 +55,7 @@ public class PlatypusAttachType extends AttachType {
                     DebuggerEnvironment env = new DebuggerEnvironment(Utilities.actionsGlobalContext().lookup(Project.class));
                     env.host = settings.getHost();
                     env.port = settings.getPort();
-                    DebuggerUtils.attachDebugger(env, 1);
+                    DebuggerUtils.attachDebugger(env);
                     return true;
                 } catch (Exception ex) {
                     DialogDisplayer.getDefault().notify(new NotifyDescriptor.Message(ex.getMessage()));
