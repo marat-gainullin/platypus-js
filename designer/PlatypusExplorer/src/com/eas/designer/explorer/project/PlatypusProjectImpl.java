@@ -266,7 +266,7 @@ public class PlatypusProjectImpl implements PlatypusProject {
 
                         @Override
                         public void defineJsClass(String string, ApplicationElement ae) {
-                            throw new UnsupportedOperationException("Javascript classesd defining is not supported within a designer."); //To change body of generated methods, choose Tools | Templates.
+                            throw new UnsupportedOperationException("Javascript classes defining is not supported within a designer."); //To change body of generated methods, choose Tools | Templates.
                         }
                     }, new Object[]{});
                     return created;
