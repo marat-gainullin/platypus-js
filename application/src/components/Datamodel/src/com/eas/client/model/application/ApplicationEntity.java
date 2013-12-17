@@ -890,8 +890,11 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             super(aSource);
             this.newIndex = newIndex;
         }
-
-        @ScriptFunction(jsDoc = "Cursor position the cursor will be set on")
+        
+        private static final String NEW_INDEX_JSDOC = "/**\n"
+                + "* Cursor position the cursor will be set on.\n"
+                + "*/";
+        @ScriptFunction(jsDoc = NEW_INDEX_JSDOC)
         public int getNewIndex() {
             return newIndex;
         }
@@ -975,22 +978,38 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             return field;
         }
 
-        @ScriptFunction(jsDoc = "Changed property name")
+        private static final String PROPERTY_NAME_JSDOC = "/**\n"
+                + "* The changed property name.\n"
+                + "*/";
+        
+        @ScriptFunction(jsDoc = PROPERTY_NAME_JSDOC)
         public String getPropertyName() {
             return field != null ? field.getName() : null;
         }
-
-        @ScriptFunction(jsDoc = "Old value")
+        
+        private static final String OLD_VALUE_JSDOC = "/**\n"
+                + "* The old value.\n"
+                + "*/";
+        
+        @ScriptFunction(jsDoc = OLD_VALUE_JSDOC)
         public Object getOldValue() {
             return oldValue;
         }
 
-        @ScriptFunction(jsDoc = "New value")
+        private static final String NEW_VALUE_JSDOC = "/**\n"
+                + "* The new value.\n"
+                + "*/";
+        
+        @ScriptFunction(jsDoc = NEW_VALUE_JSDOC)
         public Object getNewValue() {
             return newValue;
         }
 
-        @ScriptFunction(jsDoc = "Updated element")
+        private static final String OBJECT_JSDOC = "/**\n"
+                + "* The updated element.\n"
+                + "*/";
+        
+        @ScriptFunction(jsDoc = OBJECT_JSDOC)
         public Scriptable getObject() {
             return source;
         }
@@ -1060,12 +1079,20 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             this.inserted = inserted;
         }
 
-        @ScriptFunction(jsDoc = "Inserted element")
+        private static final String INSERTED_JSDOC = "/**\n"
+                + "* The inserted element.\n"
+                + "*/";
+        
+        @ScriptFunction(jsDoc = INSERTED_JSDOC)
         public RowHostObject getInserted() {
             return inserted;
         }
 
-        @ScriptFunction(jsDoc = "Inserted element")
+        private static final String OBJECT_JSDOC = "/**\n"
+                + "* The inserted element.\n"
+                + "*/";
+        
+        @ScriptFunction(jsDoc = OBJECT_JSDOC)
         public RowHostObject getObject() {
             return inserted;
         }
@@ -1103,7 +1130,11 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             this.deleted = deleted;
         }
 
-        @ScriptFunction(jsDoc = "Deleted element")
+        private static final String DELETED_JSDOC = "/**\n"
+                + "* The deleted element.\n"
+                + "*/";
+        
+        @ScriptFunction(jsDoc = DELETED_JSDOC)
         public RowHostObject getDeleted() {
             return deleted;
         }

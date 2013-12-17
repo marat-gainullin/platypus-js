@@ -5,6 +5,8 @@
 package com.eas.designer.application.module.completion;
 
 import com.eas.client.cache.PlatypusFilesSupport;
+import com.eas.client.events.ScriptSourcedEvent;
+import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.designer.application.indexer.IndexerQuery;
 import com.eas.designer.application.module.PlatypusModuleDataObject;
 import static com.eas.designer.application.module.completion.CompletionContext.REPORT_MODULE_NAME;
@@ -12,6 +14,7 @@ import static com.eas.designer.application.module.completion.CompletionContext.a
 import com.eas.designer.application.module.completion.CompletionPoint.CompletionToken;
 import com.eas.designer.application.module.parser.AstUtlities;
 import com.eas.designer.explorer.utils.StringUtils;
+import com.eas.script.StoredFunction;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -19,6 +22,8 @@ import java.util.Set;
 import org.mozilla.javascript.Token;
 import org.mozilla.javascript.ast.AstNode;
 import org.mozilla.javascript.ast.AstRoot;
+import org.mozilla.javascript.ast.Block;
+import org.mozilla.javascript.ast.ExpressionStatement;
 import org.mozilla.javascript.ast.FunctionCall;
 import org.mozilla.javascript.ast.FunctionNode;
 import org.mozilla.javascript.ast.Name;
@@ -31,6 +36,7 @@ import org.mozilla.javascript.ast.VariableDeclaration;
 import org.mozilla.javascript.ast.VariableInitializer;
 import org.netbeans.api.project.Project;
 import org.netbeans.spi.editor.completion.CompletionResultSet;
+import org.openide.ErrorManager;
 import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataObject;
 import org.openide.loaders.DataObjectNotFoundException;
@@ -133,11 +139,12 @@ public class ModuleCompletionContext extends CompletionContext {
                     if (parentScope == null) {
                         parentScope = currentNode;
                     }
-                    ModuleCompletionContext.FindModuleElementSupport visitor =
-                            new ModuleCompletionContext.FindModuleElementSupport(currentNode,
-                            parentScope == PlatypusFilesSupport.extractModuleConstructor(astRoot),
-                            fieldName,
-                            parentModuleContext);
+                    ModuleCompletionContext.FindModuleElementSupport visitor
+                            = new ModuleCompletionContext.FindModuleElementSupport(PlatypusFilesSupport.extractModuleConstructor(astRoot),
+                                    parentScope,
+                                    currentNode,
+                                    fieldName,
+                                    parentModuleContext);
                     CompletionContext ctx = visitor.findContext();
                     if (ctx != null) {
                         return ctx;
@@ -178,15 +185,18 @@ public class ModuleCompletionContext extends CompletionContext {
 
     private static class FindModuleElementSupport {
 
+        private final AstNode moduleConstructorScope;
+        private final AstNode parentScope;
         private final AstNode lookupScope;
-        private final boolean moduleConstructorScope;
+
         private final String fieldName;
         private final ModuleCompletionContext parentContext;
         private CompletionContext ctx;
 
-        public FindModuleElementSupport(AstNode aLookupScope, boolean aModuleConstructorScope, String aFieldName, ModuleCompletionContext aParentContext) {
+        public FindModuleElementSupport(AstNode aModuleConstructor, AstNode aParentNode, AstNode aLookupScope, String aFieldName, ModuleCompletionContext aParentContext) {
+            moduleConstructorScope = aModuleConstructor;
+            parentScope = aParentNode;
             lookupScope = aLookupScope;
-            moduleConstructorScope = aModuleConstructorScope;
             fieldName = aFieldName;
             parentContext = aParentContext;
         }
@@ -196,10 +206,11 @@ public class ModuleCompletionContext extends CompletionContext {
                 @Override
                 public boolean visit(AstNode an) {
                     if (an == lookupScope) {
-                        if (an instanceof FunctionNode) {// Completion support for Array iteration functions parameters on an entity
+                        if (an instanceof FunctionNode) {
                             FunctionNode fn = (FunctionNode) an;
-                            if (fn.getParams() != null && fn.getParams().size() > 0 && fieldName.equals(fn.getParams().get(0).toSource())) {
-                                if (fn.getParent() instanceof FunctionCall) {
+                            if (fn.getParams() != null && fn.getParams().size() > 0
+                                    && fieldName.equals(fn.getParams().get(0).toSource())) {// function parameter completion
+                                if (fn.getParent() instanceof FunctionCall) { // array iteration methods parameters on an entity with anonymous function an the fist parameter
                                     FunctionCall fc = (FunctionCall) fn.getParent();
                                     List<CompletionToken> tokens = CompletionPoint.getContextTokens(fc);
                                     if (tokens != null && tokens.size() > 1) {
@@ -208,23 +219,42 @@ public class ModuleCompletionContext extends CompletionContext {
                                             try {
                                                 CompletionContext c = ModuleCompletionProvider.getCompletionContext(parentContext, tokens.subList(0, tokens.size() - 1), fc.getAbsolutePosition());
                                                 if (c instanceof EntityCompletionContext) {
-                                                    ctx = ((EntityCompletionContext)c).getElementCompletionContext();
+                                                    ctx = ((EntityCompletionContext) c).getElementCompletionContext();
+                                                    return false;
                                                 }
                                             } catch (Exception ex) {
-                                                Exceptions.printStackTrace(ex);
+                                                ErrorManager.getDefault().notify(ex);
                                             }
                                         }
+                                    }
+                                } else if (fn.getName() != null && fn.getParent() instanceof Block && fn.getParent().getParent() == moduleConstructorScope) {
+                                    try {
+                                        //TODO implement event handler function parameter
+                                    } catch (Exception ex) {
+                                        Exceptions.printStackTrace(ex);
                                     }
                                 }
                             }
                         }
                         return true;
                     }
-                    if (an instanceof PropertyGet && moduleConstructorScope) {
-                        PropertyGet pg = (PropertyGet) an;
-                        if (pg.getTarget() instanceof KeywordLiteral && Token.THIS == pg.getTarget().getType()) { // things like this.prop1
-                            ctx = parentContext.createThisContext(false);
-                            return false;
+                    if (parentScope == moduleConstructorScope) {
+                        if (an instanceof PropertyGet) {
+                            PropertyGet pg = (PropertyGet) an;
+                            if (THIS_KEYWORD.equals(fieldName) 
+                                    && pg.getTarget() instanceof KeywordLiteral 
+                                    && Token.THIS == pg.getTarget().getType()) { // this.prop1
+                                ctx = parentContext.createThisContext(false);
+                                return false;
+                            }
+                        } else if (an instanceof ExpressionStatement) {
+                            ExpressionStatement es = (ExpressionStatement) an;
+                            if (THIS_KEYWORD.equals(fieldName) 
+                                    && es.getExpression() instanceof KeywordLiteral 
+                                    && Token.THIS == es.getExpression().getType()) { // this.
+                                ctx = parentContext.createThisContext(false);
+                                return false;
+                            }
                         }
                     }
                     if (an instanceof VariableDeclaration) {
@@ -278,7 +308,7 @@ public class ModuleCompletionContext extends CompletionContext {
                                                 }
                                             }
                                         }
-                                    } else if (variableInitializer.getInitializer() instanceof KeywordLiteral 
+                                    } else if (variableInitializer.getInitializer() instanceof KeywordLiteral
                                             && Token.THIS == variableInitializer.getInitializer().getType()) {// var self = this;
                                         ctx = parentContext.createThisContext(false);
                                         return false;
