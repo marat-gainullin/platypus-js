@@ -13,7 +13,7 @@ import com.bearsoft.rowset.Rowset;
  * @author mg
  * @see RowsetListener
  */
-public class RowsetDeleteEvent extends RowsetEvent{
+public class RowsetDeleteEvent extends RowsetEvent {
 
     protected Row row = null;
     protected boolean ajusting;
