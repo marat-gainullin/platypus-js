@@ -4,9 +4,6 @@
  */
 package com.eas.designer.application.module.completion;
 
-import com.eas.client.cache.PlatypusFiles;
-import com.eas.designer.application.indexer.AppElementInfo;
-import com.eas.designer.application.module.PlatypusModuleDataLoader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
