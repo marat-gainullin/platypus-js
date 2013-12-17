@@ -44,12 +44,14 @@ import org.openide.util.actions.SystemAction;
 /**
  *
  * @author mg
+ * @param <E>
  */
 public class EntityNode<E extends Entity<?, ?, E>> extends AbstractNode implements PropertyChangeListener {
 
     public static final String PROPS_EVENTS_TAB_NAME = "tabName";
     public static final String NAME_PROP_NAME = "name";
     public static final String TITLE_PROP_NAME = "title";
+    public static final String ALIAS_PROP_NAME = "alias";
     protected Map<String, Node.Property<String>> nameToProperty = new HashMap<>();
     protected E entity;
     protected Action[] actions;
@@ -115,6 +117,8 @@ public class EntityNode<E extends Entity<?, ?, E>> extends AbstractNode implemen
 
     @Override
     public String getHtmlDisplayName() {
+        return EntityView.getCheckedEntityTitle(entity);
+        /*
         String displayName = getDisplayName();
         String name = getName();
         if (name != null && !name.isEmpty()) {
@@ -122,6 +126,7 @@ public class EntityNode<E extends Entity<?, ?, E>> extends AbstractNode implemen
         } else {
             return String.format("<html>%s", displayName);
         }
+        */        
     }
 
     public E getEntity() {
@@ -172,7 +177,8 @@ public class EntityNode<E extends Entity<?, ?, E>> extends AbstractNode implemen
     public void processNodePropertyChange(PropertyChangeEvent evt) {
         switch (evt.getPropertyName()) {
             case TITLE_PROP_NAME:
-                firePropertyChange(TITLE_PROP_NAME, evt.getOldValue(), evt.getNewValue());
+            case ALIAS_PROP_NAME:
+                firePropertyChange(evt.getPropertyName(), evt.getOldValue(), evt.getNewValue());
                 fireDisplayNameChange((String) evt.getOldValue(), (String) evt.getNewValue());
                 break;
             case NAME_PROP_NAME:

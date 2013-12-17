@@ -16,8 +16,10 @@ import com.bearsoft.rowset.metadata.Parameters;
 import com.bearsoft.rowset.utils.CollectionListener;
 import com.eas.client.SQLUtils;
 import com.eas.client.model.Entity;
+import com.eas.client.model.Model;
 import com.eas.client.model.Relation;
 import com.eas.client.model.application.ApplicationParametersEntity;
+import com.eas.client.model.dbscheme.FieldsEntity;
 import com.eas.client.model.gui.DatamodelDesignUtils;
 import com.eas.client.model.gui.IconCache;
 import com.eas.client.model.gui.edits.HideEntityFieldsEdit;
@@ -54,6 +56,7 @@ import javax.swing.undo.UndoableEditSupport;
 /**
  *
  * @author mg
+ * @param <E>
  */
 public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
 
@@ -191,7 +194,7 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
     public void setEntityViewSelectedLook() {
         setBorder(selectedBorder);
         titleLabel.setForeground(selectedColor.brighter().brighter());
-        toolbarPanel.setBackground(selectedColor);
+        toolbarPanel.setBackground(selectedColor.darker());
     }
 
     public void setEntityViewUnselectedLook() {
@@ -346,13 +349,27 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
         }
     }
 
-    private String getCheckedEntityTitle() {
+    protected String getCheckedEntityTitle() {
+        return getCheckedEntityTitle(entity);
+    }
+
+    public static <E extends Entity<?, ?, E>> String getCheckedEntityTitle(E entity) {
         String text = "";
-        if (entity instanceof ApplicationParametersEntity || entity instanceof QueryParametersEntity) {
+        if (entity instanceof ApplicationParametersEntity) {
+            text = String.format("%s [%s]", Model.PARAMETERS_SCRIPT_NAME, DatamodelDesignUtils.getLocalizedString("Parameters"));
+        } else if (entity instanceof QueryParametersEntity) {
             text = DatamodelDesignUtils.getLocalizedString("Parameters");
         } else if (entity != null) {
             try {
                 String eName = entity.getName();
+                if (entity instanceof FieldsEntity) {
+                    eName = entity.getTableName();
+                    if (entity.getTableSchemaName() != null && !entity.getTableSchemaName().isEmpty()) {
+                        eName = entity.getTableSchemaName() + "." + eName;
+                    }
+                } else if (entity instanceof QueryEntity) {
+                    eName = ((QueryEntity) entity).getAlias();
+                }
                 String eTitle = entity.getTitle();
                 if (eName != null && !eName.isEmpty() && eTitle != null && !eTitle.isEmpty()) {
                     text = String.format("%s [%s]", eName, eTitle);
