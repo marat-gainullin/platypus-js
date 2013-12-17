@@ -9,7 +9,6 @@ import com.eas.designer.application.module.completion.CompletionSupportService;
 import com.eas.designer.application.module.completion.SystemConstructorCompletionItem;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import org.openide.util.lookup.ServiceProvider;
 
@@ -34,7 +33,15 @@ public class ReportCompletionSupportService implements CompletionSupportService 
     @Override
     public Collection<SystemConstructorCompletionItem> getSystemConstructors(CompletionPoint point) {
         List<SystemConstructorCompletionItem> constructors = new ArrayList<>();
-        constructors.add(new SystemConstructorCompletionItem(REPORT_CONSTRUCTOR_NAME, "", Collections.EMPTY_LIST, REPORT_CONSTRUCTOR_JSDOC, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
+        constructors.add(new SystemConstructorCompletionItem(REPORT_CONSTRUCTOR_NAME,
+                "",//NOI18N
+                new ArrayList<String>() {
+                    {
+                        add("name");//NOI18N
+                    }
+                }, REPORT_CONSTRUCTOR_JSDOC,
+                point.getCaretBeginWordOffset(),
+                point.getCaretEndWordOffset()));
         return constructors;
     }
 }
