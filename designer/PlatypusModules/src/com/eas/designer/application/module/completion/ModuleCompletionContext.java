@@ -238,6 +238,7 @@ public class ModuleCompletionContext extends CompletionContext {
                                         }
                                     }
                                 } else if (fn.getName() != null && fn.getParent() instanceof Block && fn.getParent().getParent() == moduleConstructorScope) {
+                                    //event handler function parameter
                                     try {
                                         ModelNode<ApplicationDbEntity, ApplicationDbModel> modelNode = parentContext.getDataObject().getModelNode();
                                         Children modelChildren = modelNode.getChildren();
@@ -262,7 +263,6 @@ public class ModuleCompletionContext extends CompletionContext {
                                                 }
                                             }
                                         }
-                                        //TODO implement event handler function parameter
                                     } catch (Exception ex) {
                                         Exceptions.printStackTrace(ex);
                                     }
