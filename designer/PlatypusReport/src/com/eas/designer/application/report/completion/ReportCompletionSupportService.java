@@ -6,6 +6,7 @@ package com.eas.designer.application.report.completion;
 
 import com.eas.designer.application.module.completion.CompletionPoint;
 import com.eas.designer.application.module.completion.CompletionSupportService;
+import com.eas.designer.application.module.completion.JsCompletionItem;
 import com.eas.designer.application.module.completion.SystemConstructorCompletionItem;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,8 +32,8 @@ public class ReportCompletionSupportService implements CompletionSupportService 
     }
 
     @Override
-    public Collection<SystemConstructorCompletionItem> getSystemConstructors(CompletionPoint point) {
-        List<SystemConstructorCompletionItem> constructors = new ArrayList<>();
+    public Collection<JsCompletionItem> getSystemConstructors(CompletionPoint point) {
+        List<JsCompletionItem> constructors = new ArrayList<>();
         constructors.add(new SystemConstructorCompletionItem(REPORT_CONSTRUCTOR_NAME,
                 "",//NOI18N
                 new ArrayList<String>() {

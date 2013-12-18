@@ -7,10 +7,12 @@ package com.bearsoft.org.netbeans.modules.form.completion;
 import com.bearsoft.org.netbeans.modules.form.FormUtils;
 import com.eas.designer.application.module.completion.CompletionPoint;
 import com.eas.designer.application.module.completion.CompletionSupportService;
+import com.eas.designer.application.module.completion.JsCompletionItem;
 import com.eas.designer.application.module.completion.SystemConstructorCompletionItem;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import org.netbeans.spi.editor.completion.CompletionItem;
 import org.openide.util.lookup.ServiceProvider;
 
 /**
@@ -32,8 +34,8 @@ public class FormCompletionSupportService implements CompletionSupportService {
     }
 
     @Override
-    public Collection<SystemConstructorCompletionItem> getSystemConstructors(CompletionPoint point) {
-        List<SystemConstructorCompletionItem> constructors = new ArrayList<>();
+    public Collection<JsCompletionItem> getSystemConstructors(CompletionPoint point) {
+        List<JsCompletionItem> constructors = new ArrayList<>();
         constructors.add(new SystemConstructorCompletionItem(FORM_CONSTRUCTOR_NAME,
                 "",//NOI18N
                 new ArrayList<String>() {
