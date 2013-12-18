@@ -37,7 +37,7 @@ import org.apache.mina.transport.socket.nio.NioSocketConnector;
 public class PositioningPacketReciever implements PacketReciever {
 
     public static final String RECIEVER_METHOD_NAME = "recieved";
-    public static final Pattern URL_PATTERN = Pattern.compile("(?:(?<SCHEMA>[a-z0-9\\+\\.\\-]+):)?(?://)?(?:(?<USER>[a-zA-Z0-9\\$\\-\\_\\.\\+\\!\\*\\'\\(\\)\\,\\\"]+):(?<PASS>[a-zA-Z0-9\\$\\-\\_\\.\\+\\!\\*\\'\\(\\)\\,\\\"]*)@)?(?<URL>[a-zA-Z0-9\\$\\-\\_\\.\\+\\!\\*\\'\\(\\)\\,\\\"]+):?(?<PORT>\\d+)?(?<PATH>/[a-zA-Z0-9\\$\\-\\_\\.\\+\\!\\*\\'\\(\\)\\,\\\"]+)*(?<FILE>/[a-zA-Z0-9\\$\\-\\_\\.\\+\\!\\*\\'\\(\\)\\,\\\"]+)?(?<QUERY>\\?[a-zA-Z0-9\\$\\-\\_\\.\\+\\!\\*\\'\\(\\)\\,\\\"\\;\\/\\?\\:\\@\\=\\&]+)?");
+    public static final Pattern URL_PATTERN = Pattern.compile("(?:(?<SCHEMA>[a-z0-9\\+\\.\\-]+):)?(?://)?(?:(?<USER>[a-zA-Z0-9\\$\\-\\_\\.\\+\\!\\*\\'\\(\\)\\,\\\"]+):(?<PASS>[a-zA-Z0-9\\$\\-\\_\\.\\+\\!\\*\\'\\(\\)\\,\\\"]*)@)?(?<URL>[a-zA-Z0-9\\$\\-\\_\\.\\+\\!\\*\\'\\(\\)\\,\\\"]+):?(?<PORT>\\d+)?(?<PATH>/[/a-zA-Z0-9\\$\\-\\_\\.\\+\\!\\*\\'\\(\\)\\,\\\"]+)*(?<FILE>/[a-zA-Z0-9\\$\\-\\_\\.\\+\\!\\*\\'\\(\\)\\,\\\"]+)?(?<QUERY>\\?[a-zA-Z0-9\\$\\-\\_\\.\\+\\!\\*\\'\\(\\)\\,\\\"\\;\\/\\?\\:\\@\\=\\&]+)?");
     protected String moduleId;
     protected PlatypusServerCore serverCore;
 
@@ -62,11 +62,19 @@ public class PositioningPacketReciever implements PacketReciever {
         Matcher m = URL_PATTERN.matcher(aUrl);
         while (m.find()) {
             send(aPacket, IDN.toASCII(m.group("URL").toLowerCase()), Integer.parseInt(m.group("PORT")), m.group("SCHEMA").toLowerCase(),
-                    m.group("USER"), m.group("PASS"), m.group("PATH"));
+                    m.group("USER"), m.group("PASS"), m.group("PATH"), m.group("QUERY"));
         }
     }
 
-    public static Object send(PositioningPacket aPacket, String aHost, Integer aPort, String aProtocolName, String aUser, String aPassword, String aPath) throws Exception {
+    public static void send(Object aData, String aUrl) throws Exception {
+        Matcher m = URL_PATTERN.matcher(aUrl);
+        while (m.find()) {
+            send(aData, IDN.toASCII(m.group("URL").toLowerCase()), Integer.parseInt(m.group("PORT")), m.group("SCHEMA").toLowerCase(),
+                    m.group("USER"), m.group("PASS"), m.group("PATH"), m.group("QUERY"));
+        }
+    }
+
+    public static Object send(PositioningPacket aPacket, String aHost, Integer aPort, String aProtocolName, String aUser, String aPassword, String aPath, String aQuery) throws Exception {
         if (aHost != null && !aHost.isEmpty()
                 && aProtocolName != null && !aProtocolName.isEmpty()
                 && aPort != null && aPort > 0 && aPort < 65535
@@ -77,63 +85,83 @@ public class PositioningPacketReciever implements PacketReciever {
                 String id = sId.toString();
                 IoSession ioSession = retranslateSessions.get(id);
                 if (ioSession == null) {
-                    IoConnector connector = new NioSocketConnector();
-                    if (aProtocolName.equals(RetranslatePacketFactory.HTTPS_PROTOCOL_NAME)) {
-                        TrustManager[] trustAllCerts = new TrustManager[]{
-                            new X509TrustManager() {
-                                @Override
-                                public X509Certificate[] getAcceptedIssuers() {
-                                    return null;
-                                }
-
-                                @Override
-                                public void checkClientTrusted(X509Certificate[] certs, String authType) {
-                                }
-
-                                @Override
-                                public void checkServerTrusted(X509Certificate[] certs, String authType) {
-                                }
-                            }
-                        };
-                        SSLContext sc = SSLContext.getInstance("TLS");
-                        sc.init(null, trustAllCerts, new java.security.SecureRandom());
-                        SslFilter filter = new SslFilter(sc);
-                        filter.setUseClientMode(true);
-                        filter.setNeedClientAuth(false);
-                        connector.getFilterChain().addLast("ssl", filter);
-                    }
-                    ProtocolEncoder encoder = RetranslatePacketFactory.getPacketEncoder(aProtocolName);
-                    if (encoder instanceof HttpPushEncoder) {
-                        HttpPushEncoder encod = (HttpPushEncoder) encoder;
-                        encod.setHost(aHost);
-                        encod.setPath(aPath);
-                        encod.setUser(aUser);
-                        encod.setPassword(aPassword);
-                    }
-                    connector.getFilterChain().addLast(aProtocolName, new ProtocolCodecFilter(encoder, RetranslatePacketFactory.getPacketDecoder(aProtocolName)));
-                    connector.setHandler(RetranslatePacketFactory.getPacketHandler(aProtocolName, retranslateSessions));
-                    connector.setConnectTimeoutMillis(WAIT_SEND_TIMEOUT);
-                    ConnectFuture future = connector.connect(new InetSocketAddress(aHost, aPort));
-                    future.awaitUninterruptibly();
-                    if (future.isConnected()) {
-                        ioSession = future.getSession();
-                        ioSession.getConfig().setUseReadOperation(true);
+                    ioSession = send(aPacket, aHost, aPort, aProtocolName, aUser, aPassword, aPath, aQuery, ioSession);
+                    if (ioSession != null) {
                         ioSession.setAttribute(ATTRIBUTE_SESSION_ID, id);
                         retranslateSessions.put(id, ioSession);
-                        WriteFuture write = ioSession.write(aPacket);
-                        write.awaitUninterruptibly(WAIT_SEND_TIMEOUT);
-                    } else {
-                        connector.dispose();
                     }
-                } else {
-                    WriteFuture write = ioSession.write(aPacket);
-                    write.awaitUninterruptibly(WAIT_SEND_TIMEOUT);
                 }
                 return ioSession;
             }
         }
         return null;
+    }
 
+    public static Object send(Object aData, String aHost, Integer aPort, String aProtocolName, String aUser, String aPassword, String aPath, String aQuery) throws Exception {
+        if (aHost != null && !aHost.isEmpty()
+                && aProtocolName != null && !aProtocolName.isEmpty()
+                && aPort != null && aPort > 0 && aPort < 65535
+                && aData != null) {
+            if (RetranslatePacketFactory.isProtocolSupported(aProtocolName)) {
+                send(aData, aHost, aPort, aProtocolName, aUser, aPassword, aPath, aQuery, null);
+            }
+        }
+        return null;
+    }
+
+    private static IoSession send(Object aData, String aHost, Integer aPort, String aProtocolName, String aUser, String aPassword, String aPath, String aQuery, IoSession aSession) throws Exception {
+        if (aSession == null) {
+            IoConnector connector = new NioSocketConnector();
+            if (aProtocolName.equals(RetranslatePacketFactory.HTTPS_PROTOCOL_NAME)) {
+                TrustManager[] trustAllCerts = new TrustManager[]{
+                    new X509TrustManager() {
+                        @Override
+                        public X509Certificate[] getAcceptedIssuers() {
+                            return null;
+                        }
+
+                        @Override
+                        public void checkClientTrusted(X509Certificate[] certs, String authType) {
+                        }
+
+                        @Override
+                        public void checkServerTrusted(X509Certificate[] certs, String authType) {
+                        }
+                    }
+                };
+                SSLContext sc = SSLContext.getInstance("TLS");
+                sc.init(null, trustAllCerts, new java.security.SecureRandom());
+                SslFilter filter = new SslFilter(sc);
+                filter.setUseClientMode(true);
+                filter.setNeedClientAuth(false);
+                connector.getFilterChain().addLast("ssl", filter);
+            }
+            ProtocolEncoder encoder = RetranslatePacketFactory.getPacketEncoder(aProtocolName);
+            if (encoder instanceof HttpPushEncoder) {
+                HttpPushEncoder encod = (HttpPushEncoder) encoder;
+                encod.setHost(aHost);
+                encod.setPath(aPath + aQuery);
+                encod.setUser(aUser);
+                encod.setPassword(aPassword);
+            }
+            connector.getFilterChain().addLast(aProtocolName, new ProtocolCodecFilter(encoder, RetranslatePacketFactory.getPacketDecoder(aProtocolName)));
+            connector.setHandler(RetranslatePacketFactory.getPacketHandler(aProtocolName, retranslateSessions));
+            connector.setConnectTimeoutMillis(WAIT_SEND_TIMEOUT);
+            ConnectFuture future = connector.connect(new InetSocketAddress(aHost, aPort));
+            future.awaitUninterruptibly();
+            if (future.isConnected()) {
+                aSession = future.getSession();
+                aSession.getConfig().setUseReadOperation(true);
+                WriteFuture write = aSession.write(aData);
+                write.awaitUninterruptibly(WAIT_SEND_TIMEOUT);
+            } else {
+                connector.dispose();
+            }
+        } else {
+            WriteFuture write = aSession.write(aData);
+            write.awaitUninterruptibly(WAIT_SEND_TIMEOUT);
+        }
+        return aSession;
     }
 
     /**
