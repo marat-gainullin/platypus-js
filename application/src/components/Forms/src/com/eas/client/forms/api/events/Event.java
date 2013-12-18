@@ -23,7 +23,11 @@ public abstract class Event<E extends EventObject> {
         delegate = aDelegate;
     }
 
-    @ScriptFunction(jsDoc = "Source of event propagation")
+    private static final String SOURCE_JS_DOC = "/**\n"
+            + "* The source component object of the event.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = SOURCE_JS_DOC)
     public Component<?> getSource() {
         Object oSource = delegate.getSource();
         if (oSource instanceof JComponent) {
@@ -33,7 +37,6 @@ public abstract class Event<E extends EventObject> {
         }
     }
 
-    @ScriptFunction(jsDoc = "Generates a string representation of an object")
     @Override
     public String toString() {
         return String.format("%s on %s", getClass().getSimpleName(), getSource() != null ? getSource().toString() : "");

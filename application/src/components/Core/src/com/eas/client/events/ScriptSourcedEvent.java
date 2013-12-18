@@ -20,7 +20,7 @@ public class ScriptSourcedEvent {
     }
 
     private static final String SOURCE_JS_DOC = "/**\n"
-            + "* The source of the event.\n"
+            + "* The source object of the event.\n"
             + "*/";
     @ScriptFunction(jsDoc = SOURCE_JS_DOC)
     public Scriptable getSource() {

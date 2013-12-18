@@ -5,7 +5,8 @@
 package com.eas.client.forms.api.events;
 
 /**
- *
+ * Wraps low level event in script form API event.
+ * Important: keep conversion method name as <code>wrap</code>
  * @author mg
  */
 public class EventsWrapper {

@@ -159,6 +159,8 @@ public class DependenciesWalker {
                     ApplicationElement appElement = cache.get(name.getIdentifier());
                     if (appElement != null && (appElement.getType() == ClientConstants.ET_COMPONENT || appElement.getType() == ClientConstants.ET_FORM)) {
                         putDependence(name.getIdentifier());
+                    } else {
+                        Logger.getLogger(DependenciesWalker.class.getName()).log(Level.SEVERE, "Found two different application element with same constructors {0}", appElement != null ? appElement.getName() : "");
                     }
                 } catch (Exception ex) {
                     Logger.getLogger(DependenciesWalker.class.getName()).log(Level.SEVERE, null, ex);

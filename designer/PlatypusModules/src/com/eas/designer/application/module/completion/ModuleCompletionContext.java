@@ -5,16 +5,19 @@
 package com.eas.designer.application.module.completion;
 
 import com.eas.client.cache.PlatypusFilesSupport;
-import com.eas.client.events.ScriptSourcedEvent;
 import com.eas.client.model.application.ApplicationDbEntity;
+import com.eas.client.model.application.ApplicationDbModel;
 import com.eas.designer.application.indexer.IndexerQuery;
+import com.eas.designer.application.module.ModuleUtils;
 import com.eas.designer.application.module.PlatypusModuleDataObject;
 import static com.eas.designer.application.module.completion.CompletionContext.REPORT_MODULE_NAME;
 import static com.eas.designer.application.module.completion.CompletionContext.addItem;
 import com.eas.designer.application.module.completion.CompletionPoint.CompletionToken;
+import com.eas.designer.application.module.events.ApplicationEntityEventProperty;
+import com.eas.designer.application.module.nodes.ApplicationEntityNode;
 import com.eas.designer.application.module.parser.AstUtlities;
+import com.eas.designer.datamodel.nodes.ModelNode;
 import com.eas.designer.explorer.utils.StringUtils;
-import com.eas.script.StoredFunction;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -40,7 +43,10 @@ import org.openide.ErrorManager;
 import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataObject;
 import org.openide.loaders.DataObjectNotFoundException;
-import org.openide.util.Exceptions;
+import org.openide.nodes.Children;
+import org.openide.nodes.Node;
+import org.openide.nodes.Node.Property;
+import org.openide.nodes.Node.PropertySet;
 import org.openide.util.Lookup;
 
 /**
@@ -92,6 +98,37 @@ public class ModuleCompletionContext extends CompletionContext {
                     addItem(resultSet, point.getFilter(), item);
                 }
             }
+        }
+    }
+
+    protected Class<?> getEventHandlerFunctionParameterClass(String functionName) {
+        if (functionName == null) {
+            throw new NullPointerException("Function name is null.");
+        } else {
+            try {
+                ModelNode<ApplicationDbEntity, ApplicationDbModel> modelNode = getDataObject().getModelNode();
+                Children modelChildren = modelNode.getChildren();
+                for (Node node : modelChildren.getNodes()) {
+                    if (node instanceof ApplicationEntityNode) {
+                        PropertySet[] propertySets = node.getPropertySets();
+                        for (PropertySet ps : propertySets) {
+                            if (ApplicationEntityNode.EVENTS_PROPERTY_SET_NAME.equals(ps.getName())) {
+                                for (Property p : ps.getProperties()) {
+                                    if (p instanceof ApplicationEntityEventProperty) {
+                                        ApplicationEntityEventProperty eventProperty = (ApplicationEntityEventProperty) p;
+                                        if (eventProperty.hasEventHandler() && functionName.equals(eventProperty.getEventHandler())) {
+                                            return ModuleUtils.getScriptEventClass(eventProperty.getName());
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (Exception ex) {
+                ErrorManager.getDefault().notify(ex);
+            }
+            return null;
         }
     }
 
@@ -228,10 +265,11 @@ public class ModuleCompletionContext extends CompletionContext {
                                         }
                                     }
                                 } else if (fn.getName() != null && fn.getParent() instanceof Block && fn.getParent().getParent() == moduleConstructorScope) {
-                                    try {
-                                        //TODO implement event handler function parameter
-                                    } catch (Exception ex) {
-                                        Exceptions.printStackTrace(ex);
+                                    //event handler function parameter
+                                    Class<?> eventClass = parentContext.getEventHandlerFunctionParameterClass(fn.getName());
+                                    if (eventClass != null) {
+                                        ctx = new CompletionContext(eventClass);
+                                        return false;
                                     }
                                 }
                             }
@@ -241,16 +279,16 @@ public class ModuleCompletionContext extends CompletionContext {
                     if (parentScope == moduleConstructorScope) {
                         if (an instanceof PropertyGet) {
                             PropertyGet pg = (PropertyGet) an;
-                            if (THIS_KEYWORD.equals(fieldName) 
-                                    && pg.getTarget() instanceof KeywordLiteral 
+                            if (THIS_KEYWORD.equals(fieldName)
+                                    && pg.getTarget() instanceof KeywordLiteral
                                     && Token.THIS == pg.getTarget().getType()) { // this.prop1
                                 ctx = parentContext.createThisContext(false);
                                 return false;
                             }
                         } else if (an instanceof ExpressionStatement) {
                             ExpressionStatement es = (ExpressionStatement) an;
-                            if (THIS_KEYWORD.equals(fieldName) 
-                                    && es.getExpression() instanceof KeywordLiteral 
+                            if (THIS_KEYWORD.equals(fieldName)
+                                    && es.getExpression() instanceof KeywordLiteral
                                     && Token.THIS == es.getExpression().getType()) { // this.
                                 ctx = parentContext.createThisContext(false);
                                 return false;
