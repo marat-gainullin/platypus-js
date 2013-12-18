@@ -50,6 +50,7 @@ public abstract class PlatypusDataObject extends MultiDataObject {
 
     /**
      * WARNING!!! This method is executed in a separate thread.
+     * @throws java.lang.Exception
      */
     protected abstract void validateModel() throws Exception;
 

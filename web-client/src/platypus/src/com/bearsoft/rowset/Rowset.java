@@ -1915,6 +1915,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
 			}
 			insert.data = data.toArray(new Change.Value[] {});
 			changesLog.add(insert);
+			aRow.setInserted(insert);
 		}
 	}
 
