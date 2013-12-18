@@ -62,6 +62,19 @@ public class PositioningPacketRecieverTest {
         }
         assertEquals(aUrl, result.toString());
     }
+    
+    @Test
+    public void testParsePathQueryInUrl() {
+        System.out.println("urlParse");
+        String aUrl = "http://localhost:8080/transport/application/api?__type=14&__moduleName=WebClientsSupport&__methodName=pushPacket";
+        Matcher m = PositioningPacketReciever.URL_PATTERN.matcher(aUrl);
+        if (m.find()) {
+            assertTrue("/transport/application/api".equals(m.group("PATH")));
+            assertTrue("?__type=14&__moduleName=WebClientsSupport&__methodName=pushPacket".equals(m.group("QUERY")));
+        } else {
+            fail("Could not parse url.");
+        }
+    }
 
     /**
      * Test of putWaitingRequest method, of class PositioningPacketReciever.
@@ -71,7 +84,6 @@ public class PositioningPacketRecieverTest {
     @Test
     public void testSendData() throws Exception {
         System.out.println("sendData");
-        PositioningPacketReciever reciever = new PositioningPacketReciever(null, null);
         PositioningPacket packet = new PositioningPacket();
         packet.setImei("111111111111111");
         packet.setTime(new Date());
@@ -79,7 +91,7 @@ public class PositioningPacketRecieverTest {
         packet.setSOS(false);
         packet.setLatitude(40.99f);
         packet.setLongtitude(57.01f);
-        Object session = reciever.send(packet, "localhost", 8443, "https", "testuser1", "test", "/application/api?__type=1");
+        Object session = PositioningPacketReciever.send(packet, "localhost", 8443, "https", "testuser1", "test", "/application/api","?__type=1");
         assertNotNull(session);
         assertTrue(session instanceof IoSession);
         IoSession ioSession = (IoSession) session;
@@ -91,7 +103,19 @@ public class PositioningPacketRecieverTest {
         } else {
             fail("No data for read in session.");
         }
-        session = reciever.send(packet, "localhost", 8080, "http", "testuser1", "test", "/application/api?__type=1");
+        session = PositioningPacketReciever.send(packet, "localhost", 8080, "http", "testuser1", "test", "/application/api","?__type=1");
+        assertNotNull(session);
+        assertTrue(session instanceof IoSession);
+        ioSession = (IoSession) session;
+        read = ioSession.read();
+        if (read.awaitUninterruptibly(10000)) {
+            Integer statusCode = (Integer)ioSession.getAttribute("status");
+            assertNotNull(statusCode);
+            assertEquals(200, statusCode.intValue());
+        } else {
+            fail("No data for read in session.");
+        }
+        session = PositioningPacketReciever.send("{test:\"test\"}", "localhost", 8080, "http", "testuser1", "test", "/application/api","?__type=1");
         assertNotNull(session);
         assertTrue(session instanceof IoSession);
         ioSession = (IoSession) session;

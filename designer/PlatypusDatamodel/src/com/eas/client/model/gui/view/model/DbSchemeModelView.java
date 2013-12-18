@@ -912,28 +912,32 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbS
             return true;
         }
 
-        private void dropTables(Set<FieldsEntity> tableEntities, SqlActionsController sqlController, ActionEvent e) {
-            if (tableEntities != null) {
+        private void dropTables(Set<FieldsEntity> aTableEntities, SqlActionsController sqlController, ActionEvent e) {
+            if (aTableEntities != null) {
+                Set<FieldsEntity> tableEntities = new HashSet<>();
+                for (FieldsEntity tableEntity : aTableEntities) {
+                    // Act with table and it's entity.
+                    // Dropping foreign keys, table and removing theirs entities and relations.
+                    Set<Relation<FieldsEntity>> inRels = tableEntity.getInRelations();
+                    int rCount = getRecordsCount(tableEntity);
+                    String msg = null;
+                    if (rCount == 0 && !inRels.isEmpty()) {
+                        msg = DbStructureUtils.getString("areYouSureInRelationsPresent", String.valueOf(inRels.size()), null);
+                    } else if (rCount > 0 && inRels.isEmpty()) {
+                        msg = DbStructureUtils.getString("areYouSureDataPresent", String.valueOf(rCount), null);
+                    } else if (rCount > 0 && !inRels.isEmpty()) {
+                        msg = DbStructureUtils.getString("areYouSureInRelationsDataPresent", String.valueOf(inRels.size()), String.valueOf(rCount));
+                    }
+                    if (msg == null || JOptionPane.YES_OPTION == JOptionPane.showConfirmDialog(DbSchemeModelView.this, tableEntity.getTableName() + ". " +  msg, DbStructureUtils.getString("dbSchemeEditor"), JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE)) {
+                        tableEntities.add(tableEntity);
+                    }
+                }
                 undoSupport.beginUpdate();
                 try {
-                    for (FieldsEntity tableEntity : tableEntities.toArray(new FieldsEntity[]{})) {
-                        // act with table and it's entity.
-                        // Dropping foreign keys, table and removing theirs entities and relations
-                        Set<Relation<FieldsEntity>> inRels = tableEntity.getInRelations();
-                        int rCount = getRecordsCount(tableEntity);
-                        String msg = null;
-                        if (rCount == 0 && !inRels.isEmpty()) {
-                            msg = DbStructureUtils.getString("areYouSureInRelationsPresent", String.valueOf(inRels.size()), null);
-                        } else if (rCount > 0 && inRels.isEmpty()) {
-                            msg = DbStructureUtils.getString("areYouSureDataPresent", String.valueOf(rCount), null);
-                        } else if (rCount > 0 && !inRels.isEmpty()) {
-                            msg = DbStructureUtils.getString("areYouSureInRelationsDataPresent", String.valueOf(inRels.size()), String.valueOf(rCount));
-                        }
-                        if (msg == null || JOptionPane.YES_OPTION == JOptionPane.showConfirmDialog(DbSchemeModelView.this, msg, DbStructureUtils.getString("dbSchemeEditor"), JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE)) {
-                            doDropTable(tableEntity, sqlController, e);
-                        }
+                    for (FieldsEntity tableEntity : tableEntities) {
+                        doDropTable(tableEntity, sqlController, e);
                     }
-                    super.actionPerformed(e);
+                    super.deleteEntities(tableEntities);
                 } finally {
                     undoSupport.endUpdate();
                 }

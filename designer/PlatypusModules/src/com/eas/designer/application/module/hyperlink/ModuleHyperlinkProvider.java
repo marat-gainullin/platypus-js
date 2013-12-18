@@ -230,6 +230,12 @@ public class ModuleHyperlinkProvider implements HyperlinkProviderExt {
                     AstNode declaration = scanLevel(((FunctionNode) currentNode).getBody(), declarationName);
                     if (declaration != null) {
                         return declaration;
+                    } else {
+                        for (AstNode paramNode : ((FunctionNode) currentNode).getParams()) {
+                            if (paramNode.toSource().equals(declarationName)) {
+                                return paramNode;
+                            }
+                        }
                     }
                 } else {
                     AstNode declaration = scanLevel(currentNode, declarationName);
@@ -253,12 +259,6 @@ public class ModuleHyperlinkProvider implements HyperlinkProviderExt {
                 FunctionNode functionNode = (FunctionNode) n;
                 if (functionNode.getFunctionName().getIdentifier().equals(declarationName)) {
                     return functionNode;
-                } else {
-                    for (AstNode paramNode : functionNode.getParams()) {
-                        if (paramNode.toSource().equals(declarationName)) {
-                            return paramNode;
-                        }
-                    }
                 }
             }
             if (n instanceof VariableDeclaration) {

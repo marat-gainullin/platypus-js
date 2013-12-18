@@ -26,12 +26,17 @@ import org.netbeans.api.project.Project;
 import org.netbeans.spi.java.classpath.ClassPathProvider;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
+import org.openide.loaders.DataObject;
 
 /**
  *
  * @author mg
  */
 public class DebuggerUtils {
+
+    public static void attachDebugger(DebuggerEnvironment env) throws Exception {
+        attachDebugger(env, 1);
+    }
 
     public static void attachDebugger(DebuggerEnvironment env, int aRetryCount) throws Exception {
         JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + env.host + ":" + String.valueOf(env.port) + "/jmxrmi");
@@ -54,7 +59,10 @@ public class DebuggerUtils {
                 breakpoints = JMX.newMBeanProxy(jmxConnection, mBeanBreakpointsName, BreakpointsMBean.class);
                 break;
             } catch (InstanceNotFoundException | IOException ex) {
-                if (aRetryCount > 0 && ex instanceof InstanceNotFoundException) {
+                if (env.runningProgram != null && env.runningProgram.isDone()) {
+                    throw ex;
+                }
+                if (aRetryCount > 1) {
                     Thread.sleep(250);
                 }
                 if (++ioCounter > aRetryCount) {
@@ -66,6 +74,7 @@ public class DebuggerUtils {
         env.mDebugger = debugger;
         env.mDebuggerListener = listener;
         DebuggerInfo di = DebuggerInfo.create(DebuggerConstants.DEBUGGER_SERVICERS_PATH, new Object[]{env, jmxConnection});
+        
         DebuggerEngine[] dEngines = DebuggerManager.getDebuggerManager().startDebugging(di);
         if (env.runningProgram != null) {
             startProcessWaiting(env.runningProgram, dEngines);
@@ -76,14 +85,21 @@ public class DebuggerUtils {
 
     public static void startDebugging(DebuggerEnvironment env) throws Exception {
         // transfer breakpoints
-        Breakpoint[] breaks = DebuggerManager.getDebuggerManager().getBreakpoints();
-        for (Breakpoint breakPoint : breaks) {
-            if (breakPoint instanceof PlatypusBreakpoint) {
-                PlatypusBreakpoint pBreak = (PlatypusBreakpoint) breakPoint;
-                pBreak.remoteAdd(env.mBreakpoints);
+        if (env.runningProgram == null || !env.runningProgram.isDone()) {
+            Breakpoint[] breaks = DebuggerManager.getDebuggerManager().getBreakpoints();
+            for (Breakpoint breakPoint : breaks) {
+                if (breakPoint instanceof PlatypusBreakpoint) {
+                    PlatypusBreakpoint pBreak = (PlatypusBreakpoint) breakPoint;
+                    DataObject dObj = pBreak.getLine().getLookup().lookup(DataObject.class);
+                    Project project = FileOwnerQuery.getOwner(dObj.getPrimaryFile());
+                    if (env.project == null || project == env.project) {
+                        pBreak.remoteAdd(env.mBreakpoints);
+                    }
+                }
             }
         }
         env.mDebuggerListener.debuggingStarted = true;
+        env.mDebugger.continueRun();
         env.mDebuggerListener.running = true;
     }
 

@@ -43,7 +43,8 @@ public abstract class Component<D extends JComponent> {
     public Container<?> getParent() {
         return getContainerWrapper(delegate.getParent() instanceof JViewport && delegate.getParent().getParent() instanceof JScrollPane ? delegate.getParent().getParent() : delegate.getParent());
     }
-
+    
+    @ScriptFunction(jsDoc = "Gets name of this component.")
     public String getName() {
         return delegate.getName();
     }

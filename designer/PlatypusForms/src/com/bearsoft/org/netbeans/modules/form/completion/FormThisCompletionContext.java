@@ -95,14 +95,8 @@ public class FormThisCompletionContext extends ModuleThisCompletionContext {
     }
 
     private FormModel getFormModel() {
-        try {
-            PlatypusFormDataObject formDataObject = (PlatypusFormDataObject) getParentContext().getDataObject();
-            PlatypusFormSupport support = formDataObject.getLookup().lookup(PlatypusFormSupport.class);
-            support.loadForm();
-            return support.getFormModel();
-        } catch (PersistenceException ex) {
-            throw new IllegalStateException("Form model can't be read");
-        }
+        assert getParentContext() instanceof FormCompletionContext;
+        return ((FormCompletionContext) getParentContext()).getFormModel();
     }
 
     protected RADComponent<?> getComponentByName(String aName) {

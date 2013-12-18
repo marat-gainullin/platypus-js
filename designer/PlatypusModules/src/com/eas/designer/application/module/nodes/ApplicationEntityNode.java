@@ -11,7 +11,6 @@ import com.eas.designer.application.module.events.ApplicationEntityEventProperty
 import com.eas.designer.application.module.events.ApplicationEntityEventsAction;
 import com.eas.designer.application.module.events.ApplicationModuleEvents;
 import com.eas.designer.datamodel.nodes.EntityNode;
-import static com.eas.designer.datamodel.nodes.EntityNode.PROPS_EVENTS_TAB_NAME;
 import com.eas.script.ScriptUtils;
 import com.eas.script.StoredFunction;
 import java.beans.PropertyChangeEvent;
@@ -36,6 +35,7 @@ import org.openide.util.actions.SystemAction;
  */
 public class ApplicationEntityNode extends EntityNode<ApplicationDbEntity> {
 
+    public static final String EVENTS_PROPERTY_SET_NAME = "events";//NOI18N
     protected ApplicationModuleEvents moduleEvents;
 
     public ApplicationEntityNode(ApplicationDbEntity aEntity, ApplicationModuleEvents aModuleEvents, UndoRedo.Manager aUndoReciever, Lookup aLookup) throws Exception {
@@ -135,7 +135,7 @@ public class ApplicationEntityNode extends EntityNode<ApplicationDbEntity> {
             Sheet.Set eSet = new Sheet.Set();
             eSet.setDisplayName(NbBundle.getMessage(ApplicationEntityNode.class, "CTL_Events"));
             eSet.setShortDescription(NbBundle.getMessage(ApplicationEntityNode.class, "HINT_Events"));
-            eSet.setName("events");
+            eSet.setName(EVENTS_PROPERTY_SET_NAME);
             eSet.setValue(PROPS_EVENTS_TAB_NAME, eSet.getDisplayName());
             ApplicationEntityEventDesc[] events = ApplicationEntityEventDesc.getApplicableEvents();
             for (ApplicationEntityEventDesc event : events) {

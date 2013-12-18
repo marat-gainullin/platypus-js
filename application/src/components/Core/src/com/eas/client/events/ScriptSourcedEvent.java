@@ -19,7 +19,10 @@ public class ScriptSourcedEvent {
         this.source = source;
     }
 
-    @ScriptFunction(jsDoc = "Object event propagation started from")
+    private static final String SOURCE_JS_DOC = "/**\n"
+            + "* The source object of the event.\n"
+            + "*/";
+    @ScriptFunction(jsDoc = SOURCE_JS_DOC)
     public Scriptable getSource() {
         return source;
     }

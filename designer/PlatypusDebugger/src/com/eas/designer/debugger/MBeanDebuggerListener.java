@@ -118,7 +118,6 @@ public class MBeanDebuggerListener implements NotificationListener {
             }
         } else {// use the chance to transfer pending break points
             DebuggerUtils.startDebugging(ourEnv);
-            ourEnv.mDebugger.continueRun();
         }
         ourEngine.getActionsManager().doAction(DebuggerConstants.ACTION_ENABLED_CHANGED);
     }
