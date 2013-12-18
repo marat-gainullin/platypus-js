@@ -8,6 +8,7 @@ import com.eas.client.gxtcontrols.ControlsUtils;
 import com.eas.client.gxtcontrols.converters.DateRowValueConverter;
 import com.eas.client.gxtcontrols.wrappers.component.PlatypusAdapterStandaloneField;
 import com.eas.client.gxtcontrols.wrappers.handled.PlatypusDateHandledField;
+import com.eas.client.gxtcontrols.wrappers.handled.PlatypusTextHandledArea;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.i18n.shared.DateTimeFormat;
 import com.sencha.gxt.cell.core.client.form.DateCell;
@@ -177,4 +178,12 @@ public class ModelDate extends PlatypusAdapterStandaloneField<Date> {
 	public void setValue(Date value, boolean fireEvents) {
 		super.setValue(value, fireEvents);
 	}
+	
+	public void setEmptyText(String aValue){
+		ControlsUtils.setEmptyText(((PlatypusDateHandledField)target), aValue);
+	}
+	
+	public String getEmptyText(){
+		return ControlsUtils.getEmptyText(((PlatypusDateHandledField)target));
+	}	
 }

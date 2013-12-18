@@ -15,6 +15,7 @@ import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.Client;
 import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.queries.Query;
+import com.eas.script.NativeJavaHostObject;
 import com.eas.script.ScriptFunction;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -56,6 +57,7 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
     protected P parametersEntity;
     protected Parameters parameters = new Parameters();
     protected Scriptable scriptThis;
+    protected NativeJavaHostObject published;
     protected boolean runtime = false;
     protected boolean commitable = true;
     protected int ajustingCounter = 0;
@@ -335,6 +337,14 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
 
     public void setScriptThis(Scriptable aScriptObject) throws Exception {
         scriptThis = aScriptObject;
+    }
+
+    public NativeJavaHostObject getPublished() {
+        return published;
+    }
+
+    public void setPublished(NativeJavaHostObject published) {
+        this.published = published;
     }
 
     public int getAjustingCounter() {

@@ -3,6 +3,7 @@ package com.eas.client.gxtcontrols.wrappers.component;
 import java.text.ParseException;
 
 import com.eas.client.Utils;
+import com.eas.client.gxtcontrols.ControlsUtils;
 
 public class PlatypusFormattedTextField extends FormattedTextField {
 
@@ -68,5 +69,15 @@ public class PlatypusFormattedTextField extends FormattedTextField {
 				recurse = false;
 			}
 		}
+	}
+	
+	@Override
+	public String getEmptyText() {
+		return ControlsUtils.getEmptyText(this);
+	}
+	
+	@Override
+	public void setEmptyText(String emptyText) {
+		ControlsUtils.setEmptyText(this, emptyText);
 	}
 }

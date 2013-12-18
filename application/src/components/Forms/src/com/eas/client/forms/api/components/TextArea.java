@@ -35,7 +35,7 @@ public class TextArea extends Component<JTextPane> {
         super();
         setDelegate(aDelegate);
     }
-    
+
     @ScriptFunction(jsDoc = "The text contained in this component.")
     public String getText() {
         return delegate.getText();
@@ -44,5 +44,15 @@ public class TextArea extends Component<JTextPane> {
     @ScriptFunction
     public void setText(String aValue) {
         delegate.setText(aValue);
+    }
+
+    @ScriptFunction
+    public String getEmptyText() {
+        return (String) delegate.getClientProperty(Component.EMPTY_TEXT_PROP_NAME);
+    }
+
+    @ScriptFunction
+    public void setEmptyText(String aValue) {
+        delegate.putClientProperty(Component.EMPTY_TEXT_PROP_NAME, aValue);
     }
 }

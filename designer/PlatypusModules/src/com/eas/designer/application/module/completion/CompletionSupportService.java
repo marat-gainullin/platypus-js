@@ -15,6 +15,6 @@ public interface CompletionSupportService {
 
     public Class<?> getClassByName(String name);
         
-    public Collection<SystemConstructorCompletionItem> getSystemConstructors(JsCompletionProvider.CompletionPoint point);
+    public Collection<SystemConstructorCompletionItem> getSystemConstructors(CompletionPoint point);
    
 }

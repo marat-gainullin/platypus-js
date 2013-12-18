@@ -99,6 +99,7 @@ import javax.swing.text.JTextComponent;
  * @author mg
  */
 public class SwingFactory implements ControlsDesignInfoVisitor {
+    protected static final String EMPTY_TEXT_PROP_NAME = "emptyText";
 
     // initialized from client code
     protected FormEventsExecutor eventsExecutor;
@@ -488,6 +489,7 @@ public class SwingFactory implements ControlsDesignInfoVisitor {
         }
         tf.setSelectionEnd(aInfo.getSelectionEnd());
         tf.setSelectionStart(aInfo.getSelectionStart());
+        tf.putClientProperty(EMPTY_TEXT_PROP_NAME, aInfo.getEmptyText());
     }
 
     @Override

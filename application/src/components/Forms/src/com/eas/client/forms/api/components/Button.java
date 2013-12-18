@@ -61,7 +61,7 @@ public class Button extends Component<JButton> {
     }
     
     private static final String TEXT_JSDOC = "/**\n"
-            + "* Text on the button."
+            + "* Text on the button.\n"
             + "*/";
     
     @ScriptFunction(jsDoc = TEXT_JSDOC)
@@ -75,7 +75,7 @@ public class Button extends Component<JButton> {
     }
 
     private static final String ICON_JSDOC = "/**\n"
-            + "* Image picture for the button."
+            + "* Image picture for the button.\n"
             + "*/";
     @ScriptFunction(jsDoc = ICON_JSDOC)
     public Icon getIcon() {

@@ -20,6 +20,7 @@ public class DbLabelDesignInfo extends DbControlDesignInfo {
     public static final String VALUETYPE = "valueType";
     protected String format;
     protected int valueType = ControlsUtils.MASK;
+    protected String emptyText;
 
     public DbLabelDesignInfo() {
         super();
@@ -37,6 +38,9 @@ public class DbLabelDesignInfo extends DbControlDesignInfo {
         if (this.valueType != other.valueType) {
             return false;
         }
+        if ((this.emptyText == null) ? (other.emptyText != null) : !this.emptyText.equals(other.emptyText)) {
+            return false;
+        }
         return true;
     }
 
@@ -47,6 +51,7 @@ public class DbLabelDesignInfo extends DbControlDesignInfo {
             DbLabelDesignInfo aInfo = (DbLabelDesignInfo) aSource;
             setFormat(aInfo.getFormat() != null ? new String(aInfo.getFormat().toCharArray()) : null);
             setValueType(aInfo.getValueType());
+            setEmptyText(aInfo.getEmptyText());
         }
     }
 
@@ -76,6 +81,18 @@ public class DbLabelDesignInfo extends DbControlDesignInfo {
         int oldValue = valueType;
         valueType = aValue;
         firePropertyChange("valueType", oldValue, valueType);
+    }
+
+    @Serial
+    public String getEmptyText() {
+        return emptyText;
+    }
+
+    @Serial
+    public void setEmptyText(String aValue) {
+        String oldValue = emptyText;
+        emptyText = aValue;
+        firePropertyChange("emptyText", oldValue, emptyText);
     }
 
     @Override

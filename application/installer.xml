@@ -87,8 +87,6 @@
 
 	  <fileset dir="bin" targetdir="$INSTALL_PATH/bin">
 	    <include name="*.jar" />
-	    <exclude name="DatamodelDesigner.jar" />
-	    <exclude name="DbControlsDesigner.jar" />
 	    <exclude name="Server.jar" />
 		<exclude name="PlatypusServletSupport.jar"/>
 		<exclude name="MetadataSynchronizer.jar"/>

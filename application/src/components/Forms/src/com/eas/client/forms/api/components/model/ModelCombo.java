@@ -112,4 +112,15 @@ public class ModelCombo extends ScalarModelComponent<DbCombo> {
     public void setEditable(boolean aValue) {
         delegate.setEditable(aValue);
     }
+    
+    @ScriptFunction
+    public String getEmptyText() {
+        return delegate.getEmptyText();
+    }
+
+    @ScriptFunction
+    public void setEmptyText(String aValue) {
+        delegate.setEmptyText(aValue);
+    }
+
 }

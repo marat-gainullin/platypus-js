@@ -22,6 +22,7 @@ public class DbComboDesignInfo extends DbControlDesignInfo {
     protected boolean list = true;
     protected ModelElementRef valueField;
     protected ModelElementRef displayField;
+    protected String emptyText;
 
     public DbComboDesignInfo() {
         super();
@@ -45,6 +46,9 @@ public class DbComboDesignInfo extends DbControlDesignInfo {
         if (this.list != other.list) {
             return false;
         }
+        if ((this.emptyText == null) ? (other.emptyText != null) : !this.emptyText.equals(other.emptyText)) {
+            return false;
+        }
         return true;
     }
 
@@ -56,6 +60,7 @@ public class DbComboDesignInfo extends DbControlDesignInfo {
             setDisplayField(aInfo.getDisplayField() != null ? aInfo.getDisplayField().copy() : null);
             setValueField(aInfo.getValueField() != null ? aInfo.getValueField().copy() : null);
             setList(aInfo.isList());
+            setEmptyText(aInfo.getEmptyText());
         }
     }
 
@@ -93,6 +98,18 @@ public class DbComboDesignInfo extends DbControlDesignInfo {
         ModelElementRef old = valueField;
         valueField = aValueField;
         firePropertyChange(VALUEFIELD, old, valueField);
+    }
+
+    @Serial
+    public String getEmptyText() {
+        return emptyText;
+    }
+
+    @Serial
+    public void setEmptyText(String aValue) {
+        String oldValue = emptyText;
+        emptyText = aValue;
+        firePropertyChange("emptyText", oldValue, emptyText);
     }
 
     @Override

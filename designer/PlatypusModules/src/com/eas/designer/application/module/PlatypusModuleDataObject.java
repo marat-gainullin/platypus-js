@@ -24,8 +24,6 @@ import com.eas.xml.dom.Source2XmlDom;
 import com.eas.xml.dom.XmlDom2String;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.text.Document;
 import org.mozilla.javascript.ast.AstRoot;
 import org.mozilla.javascript.ast.FunctionNode;
@@ -67,16 +65,22 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
     }
 
     @Override
-    public AstRoot getAst() {
+    public synchronized AstRoot getAst() {
         validateAst();
         return ast;
+    }
+
+    @Override
+    public synchronized void setAst(AstRoot anAstRoot) {
+        ast = anAstRoot;
+        astIsValid = (ast != null);
     }
 
     public ModuleCompletionContext getCompletionContext() {
         return new ModuleCompletionContext(this, ScriptRunner.class);
     }
 
-    protected synchronized void validateAst() {
+    protected void validateAst() {
         if (!astIsValid) {
             Document doc = null;
             try {
@@ -237,30 +241,30 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
     public JsCodeGenerator getCodeGenerator() {
         return codeGenerator;
     }
-    
-        @Override
+
+    @Override
     protected DataObject handleCopy(DataFolder df) throws IOException {
         DataObject copied = super.handleCopy(df);
-            String content = copied.getPrimaryFile().asText(PlatypusFiles.DEFAULT_ENCODING);
-            String newContent = getCopyModuleContent(content);
-            try (OutputStream os = copied.getPrimaryFile().getOutputStream()) {
-                os.write(newContent.getBytes(PlatypusFiles.DEFAULT_ENCODING));
-                os.flush();
-            }
+        String content = copied.getPrimaryFile().asText(PlatypusFiles.DEFAULT_ENCODING);
+        String newContent = getCopyModuleContent(content);
+        try (OutputStream os = copied.getPrimaryFile().getOutputStream()) {
+            os.write(newContent.getBytes(PlatypusFiles.DEFAULT_ENCODING));
+            os.flush();
+        }
         return copied;
     }
-        
+
     private String getCopyModuleContent(String aJsContent) {
         AstRoot jsRoot = JsParser.parse(aJsContent);
         FunctionNode func = PlatypusFilesSupport.extractModuleConstructor(jsRoot);
         if (func != null) {
-                Name consructorName = func.getFunctionName();
-                String oldName = consructorName.getIdentifier();
-                String newName = NewApplicationElementWizardIterator.getNewValidAppElementName(getProject(), oldName);
-                StringBuilder sb = new StringBuilder(aJsContent.substring(0, consructorName.getAbsolutePosition()));
-                sb.append(newName);
-                sb.append(aJsContent.substring(consructorName.getAbsolutePosition() + oldName.length()));
-                return sb.toString();
+            Name consructorName = func.getFunctionName();
+            String oldName = consructorName.getIdentifier();
+            String newName = NewApplicationElementWizardIterator.getNewValidAppElementName(getProject(), oldName);
+            StringBuilder sb = new StringBuilder(aJsContent.substring(0, consructorName.getAbsolutePosition()));
+            sb.append(newName);
+            sb.append(aJsContent.substring(consructorName.getAbsolutePosition() + oldName.length()));
+            return sb.toString();
         } else {
             return aJsContent;
         }

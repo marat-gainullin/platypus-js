@@ -16,15 +16,6 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
-                    <code-name-base>org.apache.tools.ant.module</code-name-base>
-                    <build-prerequisite/>
-                    <compile-dependency/>
-                    <run-dependency>
-                        <release-version>3</release-version>
-                        <specification-version>3.61.1.2</specification-version>
-                    </run-dependency>
-                </dependency>
-                <dependency>
                     <code-name-base>org.netbeans.api.debugger</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>

@@ -16,6 +16,7 @@ import com.eas.client.queries.SqlQuery;
  */
 public class QueryEntity extends Entity<QueryModel, SqlQuery, QueryEntity> {
 
+    public static final String ALIAS_PROPERTY = "alias";
     protected String alias;
 
     public QueryEntity() {
@@ -49,7 +50,7 @@ public class QueryEntity extends Entity<QueryModel, SqlQuery, QueryEntity> {
     public void setAlias(String aValue) {
         String oldValue = alias;
         alias = aValue;
-        changeSupport.firePropertyChange("alias", oldValue, aValue);
+        changeSupport.firePropertyChange(ALIAS_PROPERTY, oldValue, aValue);
     }
 
     @Override

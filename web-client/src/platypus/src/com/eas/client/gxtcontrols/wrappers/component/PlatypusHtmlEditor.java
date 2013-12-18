@@ -3,6 +3,7 @@ package com.eas.client.gxtcontrols.wrappers.component;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.eas.client.gxtcontrols.ControlsUtils;
 import com.google.gwt.event.dom.client.HasAllKeyHandlers;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
@@ -64,6 +65,20 @@ public class PlatypusHtmlEditor extends HtmlEditor implements HasAllKeyHandlers 
 		reregisterFocusBlur();
 	}
 
+	protected String emptyText;
+
+	public void setEmptyText(String aValue) {
+		emptyText = aValue;
+		if (sourceTextArea != null)
+			ControlsUtils.setEmptyText(sourceTextArea, aValue);
+		if (textArea != null)
+			ControlsUtils.setEmptyText(textArea.getElement(), aValue);
+	}
+
+	public String getEmptyText() {
+		return emptyText;
+	}
+
 	protected void reregisterFocusBlur() {
 		registered.removeHandler();
 		if (sourceTextArea != null) {
@@ -93,7 +108,7 @@ public class PlatypusHtmlEditor extends HtmlEditor implements HasAllKeyHandlers 
 		try {// to fix GXT's bug
 			super.onEnable();
 		} catch (Exception ex) {
-			Logger.getLogger(PlatypusHtmlEditor.class.getName()).log(Level.SEVERE, "Sencha's bug in HtmlEditor: "+ex.getMessage());
+			Logger.getLogger(PlatypusHtmlEditor.class.getName()).log(Level.SEVERE, "Sencha's bug in HtmlEditor: " + ex.getMessage());
 		}
 	}
 
@@ -102,7 +117,7 @@ public class PlatypusHtmlEditor extends HtmlEditor implements HasAllKeyHandlers 
 		try {// to fix GXT's bug
 			super.onDisable();
 		} catch (Exception ex) {
-			Logger.getLogger(PlatypusHtmlEditor.class.getName()).log(Level.SEVERE, "Sencha's bug in HtmlEditor: "+ex.getMessage());
+			Logger.getLogger(PlatypusHtmlEditor.class.getName()).log(Level.SEVERE, "Sencha's bug in HtmlEditor: " + ex.getMessage());
 		}
 	}
 

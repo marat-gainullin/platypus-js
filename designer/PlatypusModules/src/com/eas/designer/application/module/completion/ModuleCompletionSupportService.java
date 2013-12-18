@@ -4,9 +4,6 @@
  */
 package com.eas.designer.application.module.completion;
 
-import com.eas.client.cache.PlatypusFiles;
-import com.eas.designer.application.indexer.AppElementInfo;
-import com.eas.designer.application.module.PlatypusModuleDataLoader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -19,7 +16,7 @@ import org.openide.util.lookup.ServiceProvider;
  */
 @ServiceProvider(service = CompletionSupportService.class)
 public class ModuleCompletionSupportService implements CompletionSupportService {
-    
+
     private static final String MODULE_CONSTRUCTOR_NAME = "Module";//NOI18N
     private static final String SERVER_MODULE_CONSTRUCTOR_NAME = "ServerModule";//NOI18N
     private static final String MODULE_CONSTRUCTOR_JSDOC = "/**\n"
@@ -37,11 +34,26 @@ public class ModuleCompletionSupportService implements CompletionSupportService 
     }
 
     @Override
-    public Collection<SystemConstructorCompletionItem> getSystemConstructors(JsCompletionProvider.CompletionPoint point) {
+    public Collection<SystemConstructorCompletionItem> getSystemConstructors(CompletionPoint point) {
         List<SystemConstructorCompletionItem> constructors = new ArrayList<>();
-        constructors.add(new SystemConstructorCompletionItem(MODULE_CONSTRUCTOR_NAME, "", Collections.EMPTY_LIST, MODULE_CONSTRUCTOR_JSDOC, point.caretBeginWordOffset, point.caretEndWordOffset));
-        constructors.add(new SystemConstructorCompletionItem(SERVER_MODULE_CONSTRUCTOR_NAME, "", Collections.EMPTY_LIST, SERVER_MODULE_CONSTRUCTOR_JSDOC, point.caretBeginWordOffset, point.caretEndWordOffset));
+        constructors.add(new SystemConstructorCompletionItem(MODULE_CONSTRUCTOR_NAME,
+                "",//NOI18N
+                new ArrayList<String>() {
+                    {
+                        add("name");//NOI18N
+                    }
+                },
+                MODULE_CONSTRUCTOR_JSDOC,
+                point.getCaretBeginWordOffset(),
+                point.getCaretEndWordOffset()));
+        constructors.add(new SystemConstructorCompletionItem(SERVER_MODULE_CONSTRUCTOR_NAME,
+                "",//NOI18N
+                new ArrayList<String>() {
+                    {
+                        add("name");//NOI18N
+                    }
+                }, SERVER_MODULE_CONSTRUCTOR_JSDOC, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
         return constructors;
     }
-    
+
 }

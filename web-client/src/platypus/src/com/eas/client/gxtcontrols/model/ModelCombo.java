@@ -3,6 +3,7 @@ package com.eas.client.gxtcontrols.model;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.eas.client.Utils;
+import com.eas.client.gxtcontrols.ControlsUtils;
 import com.eas.client.gxtcontrols.CrossUpdater;
 import com.eas.client.gxtcontrols.converters.ObjectRowValueConverter;
 import com.eas.client.gxtcontrols.wrappers.component.PlatypusAdapterStandaloneField;
@@ -279,4 +280,12 @@ public class ModelCombo extends PlatypusAdapterStandaloneField<Object> {
 	public void setValue(Object value, boolean fireEvents) {
 		super.setValue(value, fireEvents);
 	}
+	
+	public void setEmptyText(String aValue){
+		ControlsUtils.setEmptyText(((PlatypusComboBoxHandledField)target), aValue);
+	}
+	
+	public String getEmptyText(){
+		return ControlsUtils.getEmptyText(((PlatypusComboBoxHandledField)target));
+	}	
 }

@@ -75,4 +75,15 @@ public class ModelFormattedField extends ScalarModelComponent<DbLabel> {
             }
         }
     }
+    
+    @ScriptFunction
+    public String getEmptyText() {
+        return delegate.getEmptyText();
+    }
+
+    @ScriptFunction
+    public void setEmptyText(String aValue) {
+        delegate.setEmptyText(aValue);
+    }
+
 }

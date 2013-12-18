@@ -113,13 +113,14 @@ public class DbSwingFactory extends SwingFactory implements DbControlsDesignInfo
         try {
             visitControl(aInfo);
             assert comp instanceof DbCombo;
-            DbCombo combo = (DbCombo) comp;
+            DbCombo modelCombo = (DbCombo) comp;
             checkTextLFProps(aInfo);
             processControlEvents(aInfo);
             visitModelScalarControl(aInfo);
-            combo.setList(aInfo.isList());
-            combo.setValueField(aInfo.getValueField());
-            combo.setDisplayField(aInfo.getDisplayField());
+            modelCombo.setList(aInfo.isList());
+            modelCombo.setValueField(aInfo.getValueField());
+            modelCombo.setDisplayField(aInfo.getDisplayField());
+            modelCombo.setEmptyText(aInfo.getEmptyText());
         } catch (Exception ex) {
             Logger.getLogger(DbSwingFactory.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -136,6 +137,7 @@ public class DbSwingFactory extends SwingFactory implements DbControlsDesignInfo
             visitModelScalarControl(aInfo);
             modelDate.setDateFormat(aInfo.getDateFormat());
             modelDate.setExpanded(aInfo.isExpanded());
+            modelDate.setEmptyText(aInfo.getEmptyText());
         } catch (Exception ex) {
             Logger.getLogger(DbSwingFactory.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -165,6 +167,7 @@ public class DbSwingFactory extends SwingFactory implements DbControlsDesignInfo
             processControlEvents(aInfo);
             visitModelScalarControl(aInfo);
             modelLabel.setFormatterFactory(ControlsUtils.formatterFactoryByFormat(aInfo.getFormat(), aInfo.getValueType()));
+            modelLabel.setEmptyText(aInfo.getEmptyText());
         } catch (Exception ex) {
             Logger.getLogger(DbSwingFactory.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -194,6 +197,7 @@ public class DbSwingFactory extends SwingFactory implements DbControlsDesignInfo
             modelSpin.setMin(aInfo.getMin());
             modelSpin.setMax(aInfo.getMax());
             modelSpin.setStep(aInfo.getStep());
+            modelSpin.setEmptyText(aInfo.getEmptyText());
         } catch (Exception ex) {
             Logger.getLogger(DbSwingFactory.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -206,6 +210,7 @@ public class DbSwingFactory extends SwingFactory implements DbControlsDesignInfo
             assert comp instanceof DbText;
             DbText modelText = (DbText) comp;
             checkTextLFProps(aInfo);
+            modelText.setEmptyText(aInfo.getEmptyText());
             processControlEvents(aInfo);
             visitModelScalarControl(aInfo);
         } catch (Exception ex) {
