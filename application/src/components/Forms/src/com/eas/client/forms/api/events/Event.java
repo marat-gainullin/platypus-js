@@ -24,7 +24,7 @@ public abstract class Event<E extends EventObject> {
     }
 
     private static final String SOURCE_JS_DOC = "/**\n"
-            + "* The source component object of event propagation.\n"
+            + "* The source component object of the event.\n"
             + "*/";
     
     @ScriptFunction(jsDoc = SOURCE_JS_DOC)
