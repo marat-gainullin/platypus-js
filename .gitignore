@@ -36,3 +36,8 @@ com.google.gdt.eclipse.core.prefs
 .metadata
 *.zip
 com.google.gdt.eclipse.core.prefs
+/application/src/lib/own/ScalablePane/nbproject/private/
+/application/src/lib/thirdparty/JSqlParser/nbproject/private/
+/application/src/lib/own/Grid/nbproject/private/
+/application/src/lib/thirdparty/JCalendar/nbproject/private/
+/application/src/lib/own/OpcDa/nbproject/private/
