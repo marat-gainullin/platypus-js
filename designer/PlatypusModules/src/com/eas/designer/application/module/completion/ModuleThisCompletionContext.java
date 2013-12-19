@@ -6,7 +6,10 @@ package com.eas.designer.application.module.completion;
 
 import com.eas.client.cache.PlatypusFilesSupport;
 import com.eas.client.model.application.ApplicationDbEntity;
+import com.eas.client.model.application.ApplicationDbModel;
 import com.eas.designer.application.module.completion.CompletionPoint.CompletionToken;
+import com.eas.server.httpservlet.HttpScriptContext;
+import com.eas.server.httpservlet.PlatypusHttpServlet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -35,8 +38,13 @@ import org.netbeans.spi.editor.completion.CompletionResultSet;
  */
 public class ModuleThisCompletionContext extends CompletionContext {
 
-    private boolean enableJsElementsCompletion;
-    private ModuleCompletionContext parentContext;
+    private final boolean enableJsElementsCompletion;
+    private final ModuleCompletionContext parentContext;
+    
+    private static final String HTTP_PROPERTY_JS_DOC = "/**\n"
+            + "* The object to hold the current HTTP request/response data.\n"
+            + "* <strong>Avaliable in module's public methods when invoked by HTTP protocol.</strong>\n"
+            + "*/"; 
 
     public ModuleThisCompletionContext(ModuleCompletionContext aParentContext, boolean anEnableJsElementsCompletion) {
         super(aParentContext.getScriptClass());
@@ -57,7 +65,7 @@ public class ModuleThisCompletionContext extends CompletionContext {
         if (entity != null) {
             return new EntityCompletionContext(entity);
         }
-        return null;
+        return getSpecificContext(token);
     }
 
     @Override
@@ -66,6 +74,7 @@ public class ModuleThisCompletionContext extends CompletionContext {
         ModuleCompletionContext.JsCodeCompletionScopeInfo completionScopeInfo = ModuleCompletionContext.getCompletionScopeInfo(parentContext.getDataObject(), offset, point.getFilter());
         if (completionScopeInfo.mode == ModuleCompletionContext.CompletionMode.VARIABLES_AND_FUNCTIONS) {
             fillVariablesAndFunctions(point, resultSet);
+            fillSpecificObjects(point, resultSet);
         }
     }
 
@@ -88,12 +97,24 @@ public class ModuleThisCompletionContext extends CompletionContext {
     }
 
     protected void fillVariablesAndFunctions(CompletionPoint point, CompletionResultSet resultSet) throws Exception {
-        addItem(resultSet, point.getFilter(), new BeanCompletionItem(parentContext.getDataObject().getModel().getClass(), MODEL_SCRIPT_NAME, null, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
+        addItem(resultSet, point.getFilter(), new BeanCompletionItem(ApplicationDbModel.class, MODEL_SCRIPT_NAME, null, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
         if (enableJsElementsCompletion) {
             ScanJsElementsSupport scanner = new ScanJsElementsSupport(PlatypusFilesSupport.extractModuleConstructor(parentContext.getDataObject().getAst()));
             for (JsCompletionItem i : scanner.getCompletionItems(point)) {
                 addItem(resultSet, point.getFilter(), i);
             }
+        }
+    }
+
+    protected void fillSpecificObjects(CompletionPoint point, CompletionResultSet resultSet) throws Exception {
+        addItem(resultSet, point.getFilter(), new BeanCompletionItem(HttpScriptContext.class, PlatypusHttpServlet.HTTP_HOST_OBJECT_NAME, HTTP_PROPERTY_JS_DOC, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
+    }
+
+    protected CompletionContext getSpecificContext(CompletionToken token) {
+        if (PlatypusHttpServlet.HTTP_HOST_OBJECT_NAME.equals(token.name)) {
+            return new HttpCompletionContext();
+        } else {
+            return null;
         }
     }
 

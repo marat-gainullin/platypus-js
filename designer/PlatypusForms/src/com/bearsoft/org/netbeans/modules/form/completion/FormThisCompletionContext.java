@@ -94,6 +94,17 @@ public class FormThisCompletionContext extends ModuleThisCompletionContext {
         }
     }
 
+    
+    @Override
+    protected void fillSpecificObjects(CompletionPoint point, CompletionResultSet resultSet) throws Exception {
+        //NO OP
+    }
+    
+    @Override
+    protected CompletionContext getSpecificContext(CompletionToken token) {
+        return null;
+    }
+    
     private FormModel getFormModel() {
         assert getParentContext() instanceof FormCompletionContext;
         return ((FormCompletionContext) getParentContext()).getFormModel();
