@@ -63,8 +63,8 @@ public abstract class PlatypusDataObject extends MultiDataObject {
     
     protected void signOnQueries() {
         unsignFromQueries();
-        if (getProject().getClient() != null) {
-            projectClientQueriesListener = getProject().getClient().addQueriesListener(new DbClient.QueriesListener() {
+        if (getClient() != null) {
+            projectClientQueriesListener = getClient().addQueriesListener(new DbClient.QueriesListener() {
                 @Override
                 public void cleared() {
                     if (isModelValid()) {

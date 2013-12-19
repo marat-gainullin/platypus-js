@@ -265,7 +265,7 @@ public class QueryResultsView extends javax.swing.JPanel {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                messageLabel.setForeground(Color.RED);
+                messageLabel.setForeground(Color.RED.darker());
                 messageLabel.setText(str);
             }
         });
@@ -504,12 +504,12 @@ public class QueryResultsView extends javax.swing.JPanel {
                                     });
                                     try {
                                         model.save();
-                                        showInfo(NbBundle.getMessage(QueryResultsView.class, "DataSaved"));
+                                        showWarning(NbBundle.getMessage(QueryResultsView.class, "DataSaved"));
                                     } finally {
                                         client.setQueryFactory(qFactory);
                                     }
                                 } catch (Exception ex) {
-                                    logger.log(Level.SEVERE, "Error saving model.", ex); //NO1I18N
+                                    showInfo(ex.getMessage()); //NO1I18N
                                 } finally {
                                     ph.finish();
                                 }

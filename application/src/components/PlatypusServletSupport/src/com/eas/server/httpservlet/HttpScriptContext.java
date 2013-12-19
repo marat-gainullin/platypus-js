@@ -7,6 +7,7 @@ package com.eas.server.httpservlet;
 import com.eas.util.BinaryUtils;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.Enumeration;
@@ -266,9 +267,12 @@ public class HttpScriptContext extends ScriptableObject {
         private final static String HEADERS_PROP_NAME = "headers";//NOI18N
         private final static String STATUS_PROP_NAME = "status";//NOI18N
         private final static String CONTENT_TYPE_PROP_NAME = "contentType";//NOI18N
+        private final static String RESET_METHOD_NAME = "reset";//NOI18N
         private final static String ADD_HEADER_METHOD_NAME = "addHeader";//NOI18N
         private final static String SET_HEADER_METHOD_NAME = "setHeader";//NOI18N
         private final static String ADD_COOKIE_METHOD_NAME = "addCookie";//NOI18N
+        private final static String BODY_PROP_NAME = "body";//NOI18N
+        private final static String BODY_BUFFER_PROP_NAME = "bodyBuffer";//NOI18N
         private final static String RESPONSE_JS_CLASS_NAME = "Response";//NOI18N
         private HttpServletResponse httpResponse;
         private ResponseHeaders headers;
@@ -282,7 +286,10 @@ public class HttpScriptContext extends ScriptableObject {
 
             r.defineProperty(STATUS_PROP_NAME, HttpScriptContext.Response.class, EMPTY);
             r.defineProperty(CONTENT_TYPE_PROP_NAME, HttpScriptContext.Response.class, EMPTY);
+            r.defineProperty(BODY_PROP_NAME, HttpScriptContext.Request.class, READONLY);
+            r.defineProperty(BODY_BUFFER_PROP_NAME, HttpScriptContext.Request.class, READONLY);
             r.defineFunctionProperties(new String[]{
+                RESET_METHOD_NAME,
                 ADD_HEADER_METHOD_NAME,
                 SET_HEADER_METHOD_NAME,
                 ADD_COOKIE_METHOD_NAME}, Response.class, EMPTY);
@@ -309,6 +316,44 @@ public class HttpScriptContext extends ScriptableObject {
 
         public void setContentType(String type) {
             httpResponse.setContentType(type);
+        }
+
+        public void reset(){
+            httpResponse.reset();
+        }
+        
+        protected String body;
+
+        public String getBody() throws IOException {
+            return body;
+        }
+
+        public void setBody(String aValue) throws IOException {
+            body = aValue;
+            String encoding = httpResponse.getCharacterEncoding();
+            if (encoding == null || encoding.isEmpty()) {
+                Logger.getLogger(HttpScriptContext.class.getName()).log(Level.WARNING, "Missing character encoding. Falling back to utf-8.");
+                encoding = "utf-8";
+            }
+            if (Charset.isSupported(encoding)) {
+                setBodyBuffer(aValue.getBytes(encoding));
+            } else {
+                throw new IOException(String.format("Character encoding %s is not supported.", encoding));
+            }
+        }
+
+        protected byte[] bodyBuffer;
+
+        public byte[] getBodyBuffer() throws IOException {
+            return bodyBuffer;
+        }
+
+        public void setBodyBuffer(byte[] aValue) throws IOException {
+            bodyBuffer = aValue;
+            httpResponse.resetBuffer();
+            try (OutputStream os = httpResponse.getOutputStream()) {
+                os.write(aValue);
+            }
         }
 
         public ResponseHeaders getHeaders() {

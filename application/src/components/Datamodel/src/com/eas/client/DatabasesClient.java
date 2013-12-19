@@ -83,8 +83,7 @@ public class DatabasesClient implements DbClient {
     protected Set<QueriesListener> queriesListeners = new HashSet<>();
 
     /**
-     * Constructs
-     * <code>DatabasesClient</code> (two-tier mode).
+     * Constructs <code>DatabasesClient</code> (two-tier mode).
      *
      * @param aSettings <code>DbConnectionSettings</code> instance, describing
      * url for connection and user credentials. There may be some additional
@@ -96,8 +95,7 @@ public class DatabasesClient implements DbClient {
     }
 
     /**
-     * Constructs
-     * <code>DatabasesClient</code> (two-tier mode).
+     * Constructs <code>DatabasesClient</code> (two-tier mode).
      *
      * @param aSettings <code>DbConnectionSettings</code> instance, describing
      * url for connection and user credentials. There may be some additional
@@ -352,8 +350,13 @@ public class DatabasesClient implements DbClient {
                     Parameter param = params.get(i);
                     converter.convert2JdbcAndAssign(param.getValue(), param.getTypeInfo(), connection, i, stmt);
                 }
-                rowsAffected += stmt.executeUpdate();
-                connection.commit();
+                try {
+                    rowsAffected += stmt.executeUpdate();
+                    connection.commit();
+                } catch (Exception ex) {
+                    connection.rollback();
+                    throw ex;
+                }
             }
         }
         return rowsAffected;
