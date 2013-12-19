@@ -26,6 +26,10 @@ public class ExecuteServerModuleMethodRequestHandler extends SessionRequestHandl
     public static final String MODEL_SAVE_ERROR_MSG = "While attempting to save model of unactual server module %s";
     public static final String MODULE_MISSING_MSG = "No module %s";
     public static final String RERUN_MSG = "About to re-run server module {0}";
+    /**
+     * There are cases when a request needs to be complemented by temporarily environment.
+     * Such as http request/response facades of servlet container
+     */
     private ExecuteEventsCallback executeCallback;
 
     public ExecuteServerModuleMethodRequestHandler(PlatypusServerCore aServerCore, Session aSession, ExecuteServerModuleMethodRequest aRequest) {
@@ -93,6 +97,12 @@ public class ExecuteServerModuleMethodRequestHandler extends SessionRequestHandl
         }
     }
 
+    /**
+     * There are cases when a request needs to be complemented by temporarily environment.
+     * Such as http request/response facades of servlet container.
+     * Because of temporarily nature of such environment, we have to inject some properties into
+     * ServerScriptRunner before a method execution and delete it from there after a method execution.
+     */
     public interface ExecuteEventsCallback {
 
         void beforeExecute(ServerScriptRunner runner);
