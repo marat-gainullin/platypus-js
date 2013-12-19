@@ -128,7 +128,6 @@ public class PlatypusWebModuleManager {
             String deployResultMessage = NbBundle.getMessage(PlatypusWebModuleManager.class, "MSG_Web_App_Deployed");//NOI18N
             Logger.getLogger(PlatypusWebModuleManager.class.getName()).log(Level.INFO, deployResultMessage);
             project.getOutputWindowIO().getOut().println(deployResultMessage);
-
         } catch (Exception ex) {
             project.getOutputWindowIO().getErr().println(ex.getMessage());
             ErrorManager.getDefault().notify(ex);
@@ -292,7 +291,6 @@ public class PlatypusWebModuleManager {
             }
             String starupScript = String.format(START_JS_FILE_TEMPLATE, appElementId, appElementId);
             FileUtils.writeString(FileUtil.toFile(startJs), starupScript, PlatypusUtils.COMMON_ENCODING_NAME);
-
         } else {
             throw new IllegalStateException(NbBundle.getMessage(PlatypusWebModuleManager.class, "MSG_App_Element_ID_Invalid"));//NOI18N
         }
@@ -355,14 +353,14 @@ public class PlatypusWebModuleManager {
         }
     }
 
-    private void copyLibJars(FileObject libsDir) throws Exception, EmptyPlatformHomePathException, IOException {
+    private void copyLibJars(FileObject libsDir) throws Exception {
         Set<File> jdbcDriverFiles = new HashSet<>();
         for (String clazz : DbConnectionSettings.readDrivers().values()) {
             File jdbcDriver = PlatypusPlatform.findThirdpartyJar(clazz);
             if (jdbcDriver != null) {
                 FileObject jdbcDriverFo = FileUtil.toFileObject(jdbcDriver);
                 Enumeration<? extends FileObject> jdbcDriversEnumeration = jdbcDriverFo.getParent().getChildren(false);
-                while(jdbcDriversEnumeration.hasMoreElements()) {
+                while (jdbcDriversEnumeration.hasMoreElements()) {
                     FileObject fo = jdbcDriversEnumeration.nextElement();
                     jdbcDriverFiles.add(FileUtil.toFile(fo));
                 }
@@ -372,9 +370,13 @@ public class PlatypusWebModuleManager {
         Enumeration<? extends FileObject> filesEnumeration = platformLibDir.getChildren(true);
         while (filesEnumeration.hasMoreElements()) {
             FileObject fo = filesEnumeration.nextElement();
-            if (PlatypusPlatform.JAR_FILE_EXTENSION.equalsIgnoreCase(fo.getExt())
+            if (!fo.isFolder() && PlatypusPlatform.JAR_FILE_EXTENSION.equalsIgnoreCase(fo.getExt())
                     && !jdbcDriverFiles.contains(FileUtil.toFile(fo))) {
+                Logger.getLogger(PlatypusWebModuleManager.class.getName()).log(Level.INFO, "Copying lib: {0}", fo.getPath());
                 FileUtil.copyFile(fo, libsDir, fo.getName());
+                Logger.getLogger(PlatypusWebModuleManager.class.getName()).log(Level.INFO, "Lib copied");
+            } else {
+                Logger.getLogger(PlatypusWebModuleManager.class.getName()).log(Level.INFO, "Skipped while copying libs: {0}", fo.getPath());
             }
         }
     }
