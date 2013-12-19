@@ -45,7 +45,7 @@ public class HttpScriptContext extends ScriptableObject {
     }
 
     private static final String REQUEST_JS_DOC = "/**\n"
-            + "* HTTP request (server module on web only).\n"
+            + "* HTTP request, when invoked by HTTP protocol.\n"
             + "*/";
 
     @ScriptFunction(jsDoc = REQUEST_JS_DOC)
@@ -54,9 +54,9 @@ public class HttpScriptContext extends ScriptableObject {
     }
 
     private static final String RESPONSE_JS_DOC = "/**\n"
-            + "* HTTP response (server module on web only).\n"
+            + "* HTTP response, when invoked by HTTP protocol.\n"
             + "*/";
-
+    @ScriptFunction(jsDoc = RESPONSE_JS_DOC)
     public Response getResponse() {
         return response;
     }
@@ -230,7 +230,8 @@ public class HttpScriptContext extends ScriptableObject {
         }
 
         private static final String HEADERS_JS_DOC = "/**\n"
-                + "* The header for the request.\n"
+                + "* The headers object for the request (read only).\n"
+                + "* A header data is avaliable as a JavaScript property of this object.\n"
                 + "*/";
         @ScriptFunction(jsDoc = HEADERS_JS_DOC)
         public RequestHeaders getHeaders() {
@@ -465,7 +466,9 @@ public class HttpScriptContext extends ScriptableObject {
         }
 
         private static final String HEADERS_JS_DOC = "/**\n"
-                + "* The response headers.\n"
+                + "* The response headers object.\n"
+                + "* A header data is avaliable as a JavaScript property of this object.\n"
+                + "* "
                 + "*/";
         
         @ScriptFunction(jsDoc = HEADERS_JS_DOC)
@@ -496,8 +499,10 @@ public class HttpScriptContext extends ScriptableObject {
         }
 
         private static final String ADD_COOKIE_JS_DOC = "/**\n"
-                + "* Adds the new cookie to the response.\n"
-                + "* @param cookie the cookie\n"
+                + "* Adds a new cookie to the response.\n"
+                + "* Use a key-value object with the following properties:\n"
+                + "* <code>name</code>, <code>value</code>, <code>comment</code>, <code>domain</code>, <code>maxAg</code>e, <code>path</code>, <code>secure</code>, <code>version</code>.\n"
+                + "* @param cookie the cookie object, for example <code>{name: 'platypus', value: 'test', maxAge: 60*60}</code>\n"
                 + "*/";
         
         @ScriptFunction(jsDoc = ADD_COOKIE_JS_DOC,  params = {"cookie"})

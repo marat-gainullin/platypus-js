@@ -40,6 +40,11 @@ public class ModuleThisCompletionContext extends CompletionContext {
 
     private final boolean enableJsElementsCompletion;
     private final ModuleCompletionContext parentContext;
+    
+    private static final String HTTP_PROPERTY_JS_DOC = "/**\n"
+            + "* The object to hold the current HTTP request/response data.\n"
+            + "* <strong>Avaliable in module's instance public methods when invoked by HTTP protocol.</strong>\n"
+            + "*/"; 
 
     public ModuleThisCompletionContext(ModuleCompletionContext aParentContext, boolean anEnableJsElementsCompletion) {
         super(aParentContext.getScriptClass());
@@ -102,7 +107,7 @@ public class ModuleThisCompletionContext extends CompletionContext {
     }
 
     protected void fillSpecificObjects(CompletionPoint point, CompletionResultSet resultSet) throws Exception {
-        addItem(resultSet, point.getFilter(), new BeanCompletionItem(HttpScriptContext.class, PlatypusHttpServlet.HTTP_HOST_OBJECT_NAME, null, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
+        addItem(resultSet, point.getFilter(), new BeanCompletionItem(HttpScriptContext.class, PlatypusHttpServlet.HTTP_HOST_OBJECT_NAME, HTTP_PROPERTY_JS_DOC, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
     }
 
     protected CompletionContext getSpecificContext(CompletionToken token) {

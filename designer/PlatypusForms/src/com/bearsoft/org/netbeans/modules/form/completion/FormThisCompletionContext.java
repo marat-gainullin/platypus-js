@@ -100,6 +100,7 @@ public class FormThisCompletionContext extends ModuleThisCompletionContext {
         //NO OP
     }
     
+    @Override
     protected CompletionContext getSpecificContext(CompletionToken token) {
         return null;
     }
