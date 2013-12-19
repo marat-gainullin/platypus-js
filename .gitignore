@@ -52,3 +52,8 @@ application/src/group/nbproject/project.properties
 application/src/lib/own/CommonUtils/nbproject/project.properties
 application/src/lib/own/Rowsets/nbproject/project.properties
 application/lib/own/README.TXT
+/application/src/lib/own/ScalablePane/nbproject/private/
+/application/src/lib/thirdparty/JSqlParser/nbproject/private/
+/application/src/lib/own/Grid/nbproject/private/
+/application/src/lib/thirdparty/JCalendar/nbproject/private/
+/application/src/lib/own/OpcDa/nbproject/private/
