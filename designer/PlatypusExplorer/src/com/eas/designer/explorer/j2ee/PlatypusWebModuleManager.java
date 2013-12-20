@@ -374,7 +374,6 @@ public class PlatypusWebModuleManager {
                     && !jdbcDriverFiles.contains(FileUtil.toFile(fo))) {
                 Logger.getLogger(PlatypusWebModuleManager.class.getName()).log(Level.INFO, "Copying lib: {0}", fo.getPath());
                 FileUtil.copyFile(fo, libsDir, fo.getName());
-                Logger.getLogger(PlatypusWebModuleManager.class.getName()).log(Level.INFO, "Lib copied");
             } else {
                 Logger.getLogger(PlatypusWebModuleManager.class.getName()).log(Level.INFO, "Skipped while copying libs: {0}", fo.getPath());
             }
