@@ -467,7 +467,7 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
     private static final String COMMITABLE_JSDOC = ""
             + "/**\n"
             + "* Determines if the model is auto commitable by <code>save</code> method.\n"
-            + "* @see save commit\n"
+            + "* @see save commit.\n"
             + "*/";
     @ScriptFunction(jsDoc = COMMITABLE_JSDOC)
     public boolean isCommitable() {

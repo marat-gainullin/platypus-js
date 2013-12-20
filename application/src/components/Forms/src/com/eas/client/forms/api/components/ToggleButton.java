@@ -26,7 +26,8 @@ public class ToggleButton extends Component<JToggleButton> {
         this(aText, aIcon, aSelected, aIconTextGap, null);
     }
 
-    private static final String CONSTRUCTOR_JSDOC = "/**\n"
+    private static final String CONSTRUCTOR_JSDOC = ""
+            + "/**\n"
             + "* Toggle button component.\n"
             + "* @param text the text for the component (optional)\n"
             + "* @param icon the icon for the component (optional)\n"
@@ -67,7 +68,10 @@ public class ToggleButton extends Component<JToggleButton> {
         setDelegate(aDelegate);
     }
     
-    @ScriptFunction(jsDoc="Text on the button.")
+    @ScriptFunction(jsDoc=""
+            + "/**\n"
+            + " * Text on the button.\n"
+            + " */")
     public String getText() {
         return delegate.getText();
     }
@@ -77,7 +81,10 @@ public class ToggleButton extends Component<JToggleButton> {
         delegate.setText(aValue);
     }
 
-    @ScriptFunction(jsDoc="Image picture for the button.")
+    @ScriptFunction(jsDoc=""
+            + "/**\n"
+            + " * Image picture for the button.\n"
+            + " */")
     public Icon getIcon() {
         return delegate.getIcon();
     }
@@ -87,7 +94,10 @@ public class ToggleButton extends Component<JToggleButton> {
         delegate.setIcon(aValue);
     }
 
-    @ScriptFunction(jsDoc="The amount of space between the text and the icon displayed in this button.")
+    @ScriptFunction(jsDoc=""
+            + "/**\n"
+            + " * The amount of space between the text and the icon displayed in this button.\n"
+            + " */")
     public int getIconTextGap() {
         return delegate.getIconTextGap();
     }
@@ -97,7 +107,10 @@ public class ToggleButton extends Component<JToggleButton> {
         delegate.setIconTextGap(aValue);
     }
 
-    @ScriptFunction(jsDoc="Horizontal position of the text relative to the icon.")
+    @ScriptFunction(jsDoc=""
+            + "/**\n"
+            + " * Horizontal position of the text relative to the icon.\n"
+            + " */")
     public int getHorizontalTextPosition() {
         switch (delegate.getHorizontalTextPosition()) {
             case JLabel.LEFT:
@@ -129,7 +142,10 @@ public class ToggleButton extends Component<JToggleButton> {
         }
     }
     
-    @ScriptFunction(jsDoc="Vertical position of the text relative to the icon.")
+    @ScriptFunction(jsDoc=""
+            + "/**\n"
+            + " * Vertical position of the text relative to the icon.\n"
+            + " */")
     public int getVerticalTextPosition() {
         switch (delegate.getVerticalTextPosition()) {
             case JLabel.TOP:
@@ -161,7 +177,10 @@ public class ToggleButton extends Component<JToggleButton> {
         }
     }
 
-    @ScriptFunction(jsDoc="The state of the button.")
+    @ScriptFunction(jsDoc=""
+            + "/**\n"
+            + " * The state of the button.\n"
+            + " */")
     public boolean getSelected() {
         return delegate.isSelected();
     }
@@ -171,7 +190,10 @@ public class ToggleButton extends Component<JToggleButton> {
         delegate.setSelected(aValue);
     }
 
-    @ScriptFunction(jsDoc="The ButtonGroup this component belongs to.")
+    @ScriptFunction(jsDoc=""
+            + "/**\n"
+            + " * The ButtonGroup this component belongs to.\n"
+            + " */")
     public ButtonGroup getButtonGroup() {
         return group;
     }

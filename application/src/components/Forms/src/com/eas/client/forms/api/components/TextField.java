@@ -14,7 +14,8 @@ import javax.swing.JTextField;
  */
 public class TextField extends Component<JTextField> {
 
-    private static final String CONSTRUCTOR_JSDOC = "/**\n"
+    private static final String CONSTRUCTOR_JSDOC = ""
+            + "/**\n"
             + "* Text field component. \n"
             + "* @param text the initial text for the component (optional)\n"
             + "*/";
@@ -34,7 +35,10 @@ public class TextField extends Component<JTextField> {
         setDelegate(aDelegate);
     }
 
-    @ScriptFunction(jsDoc = "The text contained in this component.")
+    @ScriptFunction(jsDoc = ""
+            + "/**\n"
+            + " * The text contained in this component.\n"
+            + " */")
     public String getText() {
         return delegate.getText();
     }

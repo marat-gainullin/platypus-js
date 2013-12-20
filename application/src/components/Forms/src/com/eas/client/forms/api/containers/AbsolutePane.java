@@ -25,9 +25,10 @@ import org.mozilla.javascript.Undefined;
  */
 public class AbsolutePane extends Container<JPanel> {
 
-    private static final String CONSTRUCTOR_JSDOC = "/**\n"
-            + "* A container with Absolute Layout.\n" 
-            + "*/";
+    private static final String CONSTRUCTOR_JSDOC = ""
+            + "/**\n"
+            + " * A container with Absolute Layout.\n" 
+            + " */";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {})
     public AbsolutePane() {
@@ -42,10 +43,11 @@ public class AbsolutePane extends Container<JPanel> {
         setDelegate(aDelegate);
     }
 
-    private static final String ADD_JSDOC = "/**\n"
+    private static final String ADD_JSDOC = ""
+            + "/**\n"
             + "* Appends the specified component at left top corner of this container.\n"
-            + "* @param component the component to add\n"
-            + "* @param anchors the anchors object for the component, can contain the following properties: left, width, top, height\n"
+            + "* @param component the component to add.\n"
+            + "* @param anchors the anchors object for the component, can contain the following properties: left, width, top, height.\n"
             + "*/";
     
     @ScriptFunction(jsDoc = ADD_JSDOC, params = {"component", "anchors"})
@@ -100,7 +102,8 @@ public class AbsolutePane extends Container<JPanel> {
         Ordering.toBack(delegate, aComp);
     }
 
-    private static final String TO_FRONT_JSDOC = "/**\n"
+    private static final String TO_FRONT_JSDOC = ""
+            + "/**\n"
             + "* Brings the specified component to front on this panel.\n"
             + "* @param component the component\n"
             + "* @param count steps to move the component (optional)\n"
@@ -111,7 +114,8 @@ public class AbsolutePane extends Container<JPanel> {
         Ordering.toFront(delegate, aComp, aCount);
     }
 
-    private static final String TO_BACK_JSDOC = "/**\n"
+    private static final String TO_BACK_JSDOC = ""
+            + "/**\n"
             + "* Brings the specified component to back on this panel.\n"
             + "* @param component the component\n"
             + "* @param count steps to move the component (optional)\n"

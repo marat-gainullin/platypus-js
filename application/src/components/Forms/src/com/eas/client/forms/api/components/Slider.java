@@ -15,7 +15,8 @@ import javax.swing.JSlider;
  */
 public class Slider extends Component<JSlider> {
 
-    private static final String CONSTRUCTOR_JSDOC = "/**\n"
+    private static final String CONSTRUCTOR_JSDOC = ""
+            + "/**\n"
             + "* Slider component.\n"
             + "* @param min the minimum value (optional)\n"
             + "* @param max the maximum value (optional)\n"
@@ -47,7 +48,10 @@ public class Slider extends Component<JSlider> {
         setDelegate(aDelegate);
     }
     
-    @ScriptFunction(jsDoc = "This slider's vertical or horizontal orientation: Orientation.VERTICAL or Orientation.HORIZONTAL")
+    @ScriptFunction(jsDoc = ""
+            + "/**\n"
+            + " * This slider's vertical or horizontal orientation: Orientation.VERTICAL or Orientation.HORIZONTAL\n"
+            + " */")
     public int getOrientation() {
         if (delegate.getOrientation() == JSlider.HORIZONTAL) {
             return Orientation.HORIZONTAL;
@@ -69,7 +73,10 @@ public class Slider extends Component<JSlider> {
         delegate.setOrientation(orientation);
     }
 
-    @ScriptFunction(jsDoc = "The minimum value supported by the slider.")
+    @ScriptFunction(jsDoc = ""
+            + "/**\n"
+            + " * The minimum value supported by the slider.\n"
+            + " */")
     public int getMinimum() {
         return delegate.getMinimum();
     }
@@ -79,7 +86,10 @@ public class Slider extends Component<JSlider> {
         delegate.setMinimum(aValue);
     }
 
-    @ScriptFunction(jsDoc = "The maximum value supported by the slider.")
+    @ScriptFunction(jsDoc = ""
+            + "/**\n"
+            + " * The maximum value supported by the slider.\n"
+            + " */")
     public int getMaximum() {
         return delegate.getMaximum();
     }
@@ -89,7 +99,10 @@ public class Slider extends Component<JSlider> {
         delegate.setMaximum(aValue);
     }
     
-    @ScriptFunction(jsDoc = "The slider's current value")
+    @ScriptFunction(jsDoc = ""
+            + "/**\n"
+            + " * The slider's current value.\n"
+            + " */")
     public int getValue() {
         return delegate.getValue();
     }

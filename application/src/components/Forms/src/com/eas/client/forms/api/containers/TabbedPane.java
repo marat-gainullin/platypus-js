@@ -18,10 +18,11 @@ import org.mozilla.javascript.Function;
  */
 public class TabbedPane extends Container<JTabbedPane> {
 
-    private static final String CONSTRUCTOR_JSDOC = "/**\n"
-            + "* A component that lets the user switch between a group of components by\n" 
-            + "* clicking on a tab with a given title and/or icon.\n" 
-            + "*/";
+    private static final String CONSTRUCTOR_JSDOC = ""
+            + "/**\n"
+            + " * A component that lets the user switch between a group of components by\n" 
+            + " * clicking on a tab with a given title and/or icon.\n" 
+            + " */";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {})
     public TabbedPane() {
@@ -34,12 +35,13 @@ public class TabbedPane extends Container<JTabbedPane> {
         setDelegate(aDelegate);
     }
     
-    private static final String ADD_JSDOC = "/**\n"
-            + "* Appends the component whith specified text to the end of this container.\n"
-            + "* @param component the component to add\n"
-            + "* @param text the text for the tab\n"
-            + "* @param icon the icon for the tab (optional)\n"
-            + "*/";
+    private static final String ADD_JSDOC = ""
+            + "/**\n"
+            + " * Appends the component whith specified text to the end of this container.\n"
+            + " * @param component the component to add.\n"
+            + " * @param text the text for the tab.\n"
+            + " * @param icon the icon for the tab (optional).\n"
+            + " */";
     
     @ScriptFunction(jsDoc = ADD_JSDOC, params = {"component", "text", "icon"})
     public void add(Component<?> aComp, String aText) {
@@ -56,9 +58,10 @@ public class TabbedPane extends Container<JTabbedPane> {
         }
     }
 
-    private static final String SELECTED_COMPONENT_JSDOC = "/**\n"
-            + "* The selected component.\n"
-            + "*/";
+    private static final String SELECTED_COMPONENT_JSDOC = ""
+            + "/**\n"
+            + " * The selected component.\n"
+            + " */";
     
     @ScriptFunction(jsDoc = SELECTED_COMPONENT_JSDOC)
     public Component<?> getSelectedComponent() {
@@ -74,9 +77,10 @@ public class TabbedPane extends Container<JTabbedPane> {
         }
     }
 
-    private static final String SELECTED_INDEX_JSDOC = "/**\n"
-            + "* The selected component's index.\n"
-            + "*/";
+    private static final String SELECTED_INDEX_JSDOC = ""
+            + "/**\n"
+            + " * The selected component's index.\n"
+            + " */";
     
     @ScriptFunction(jsDoc = SELECTED_INDEX_JSDOC)
     public int getSelectedIndex() {
@@ -88,9 +92,10 @@ public class TabbedPane extends Container<JTabbedPane> {
         delegate.setSelectedIndex(aIndex);
     }
 
-    private static final String ON_STATE_CHANGED_JSDOC = "/**\n"
-            + "* Selected tab change event handler function.\n"
-            + "*/";
+    private static final String ON_STATE_CHANGED_JSDOC = ""
+            + "/**\n"
+            + " * Selected tab change event handler function.\n"
+            + " */";
     
     @ScriptFunction(jsDoc = ON_STATE_CHANGED_JSDOC)
     public Function getOnStateChanged() {

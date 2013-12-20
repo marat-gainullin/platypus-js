@@ -326,7 +326,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
             + "* Saves model data changes.\n"
             + "* If model can't apply the changed data, than exception is thrown. In this case, application can call model.save() another time to save the changes.\n"
             + "* If an application needs to abort futher attempts and discard model data changes, use <code>model.revert()</code>.\n"
-            + "* @param callback the function to be envoked after the data changes saved (optional)\n"
+            + "* @param callback the function to be envoked after the data changes saved (optional).\n"
             + "*/";
 
     @ScriptFunction(jsDoc = SAVE_JSDOC, params = {"callback"})
@@ -362,7 +362,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
             + "/**\n"
             + "* Drops model data changes.\n"
             + "* After this method call, save() method have no changes to be saved, but still attempts to commit.\n"
-            + "* Call <code>model.save()</code> on commitable and unchanged model nevertheless leads to a commit."
+            + "* Call <code>model.save()</code> on commitable and unchanged model nevertheless leads to a commit.\n"
             + "*/";
 
     @ScriptFunction(jsDoc = REVERT_JSDOC)
@@ -395,8 +395,8 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
     private static final String REQUERY_JSDOC = ""
             + "/**\n"
             + "* Requeries the model data. Forses the model data refresh, no matter if its parameters has changed or not.\n"
-            + "* @param onSuccessCallback the handler function for refresh data on success event (optional)\n"
-            + "* @param onFailureCallback the handler function for refresh data on failure event (optional)\n"
+            + "* @param onSuccessCallback the handler function for refresh data on success event (optional).\n"
+            + "* @param onFailureCallback the handler function for refresh data on failure event (optional).\n"
             + "*/";
 
     @ScriptFunction(jsDoc = REQUERY_JSDOC, params = {"onSuccessCallback", "onFailureCallback"})
@@ -437,8 +437,8 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
     private static final String EXECUTE_JSDOC = ""
             + "/**\n"
             + "* Refreshes the model, only if any of its parameters has changed.\n"
-            + "* @param onSuccessCallback the handler function for refresh data on success event (optional)\n"
-            + "* @param onFailureCallback the handler function for refresh data on failure event (optional)\n"
+            + "* @param onSuccessCallback the handler function for refresh data on success event (optional).\n"
+            + "* @param onFailureCallback the handler function for refresh data on failure event (optional).\n"
             + "*/";
 
     @ScriptFunction(jsDoc = EXECUTE_JSDOC, params = {"onSuccessCallback", "onFailureCallback"})
@@ -555,8 +555,8 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
     private static final String LOAD_ENTITY_JSDOC = ""
             + "/**\n"
             + "* Creates new entity of model, based on application query.\n"
-            + "* @param queryId the query application element ID\n"
-            + "* @return a new entity"
+            + "* @param queryId the query application element ID.\n"
+            + "* @return a new entity."
             + "*/";
 
     @ScriptFunction(jsDoc = LOAD_ENTITY_JSDOC, params = {"queryId"})

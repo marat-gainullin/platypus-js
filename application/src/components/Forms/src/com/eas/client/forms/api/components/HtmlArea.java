@@ -14,7 +14,8 @@ import javax.swing.JEditorPane;
  */
 public class HtmlArea extends Component<JEditorPane> {
 
-    private static final String CONSTRUCTOR_JSDOC = "/**\n"
+    private static final String CONSTRUCTOR_JSDOC = ""
+            + "/**\n"
             + "* HTML area component. \n"
             + "* @param text the initial text for the HTML area (optional)\n"
             + "*/";
@@ -36,7 +37,8 @@ public class HtmlArea extends Component<JEditorPane> {
         super();
         setDelegate(aDelegate);
     }
-    private static final String TEXT_JSDOC = "/**\n"
+    private static final String TEXT_JSDOC = ""
+            + "/**\n"
             + "* Text on the component.\n"
             + "*/";
 

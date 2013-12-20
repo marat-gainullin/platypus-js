@@ -23,11 +23,12 @@ public class MenuItem extends Component<JMenuItem> {
         this(aText, aIcon, null);
     }
 
-    private static final String CONSTRUCTOR_JSDOC = "/**\n"
+    private static final String CONSTRUCTOR_JSDOC = ""
+            + "/**\n"
             + "* A menu item that can be selected or deselected.\n"
-            + "* @param text the text of the component (optional)\n"
-            + "* @param icon the icon of the component (optional)\n"
-            + "* @param actionPerformed the function for the action performed handler (optional)\n"
+            + "* @param text the text of the component (optional).\n"
+            + "* @param icon the icon of the component (optional).\n"
+            + "* @param actionPerformed the function for the action performed handler (optional).\n"
             + "*/";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text", "icon", "actionPerformed"})
@@ -50,7 +51,8 @@ public class MenuItem extends Component<JMenuItem> {
         setDelegate(aDelegate);
     }
     
-    private static final String PARENT_JSDOC = "/**\n"
+    private static final String PARENT_JSDOC = ""
+            + "/**\n"
             + "* The parent container.\n"
             + "*/";
     
@@ -64,7 +66,8 @@ public class MenuItem extends Component<JMenuItem> {
         return parent;
     }
 
-    private static final String TEXT_JSDOC = "/**\n"
+    private static final String TEXT_JSDOC = ""
+            + "/**\n"
             + "* The menu item text.\n"
             + "*/";
     
@@ -78,7 +81,8 @@ public class MenuItem extends Component<JMenuItem> {
         delegate.setText(aValue);
     }
 
-    private static final String ICON_JSDOC = "/**\n"
+    private static final String ICON_JSDOC = ""
+            + "/**\n"
             + "* Image picture for the menu item.\n"
             + "*/";
     

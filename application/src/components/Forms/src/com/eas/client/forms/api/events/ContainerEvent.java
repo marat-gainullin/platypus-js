@@ -18,7 +18,10 @@ public class ContainerEvent extends Event<java.awt.event.ContainerEvent> {
         super(aEvent);
     }
 
-    @ScriptFunction(jsDoc = "Component the operation is performed on.")
+    @ScriptFunction(jsDoc = ""
+            + "/**\n"
+            + " * Component the operation is performed on.\n"
+            + " */")
     public Component<?> getChild() {
         return delegate.getChild() instanceof JComponent ? lookupApiComponent((JComponent) delegate.getChild()) : null;
     }

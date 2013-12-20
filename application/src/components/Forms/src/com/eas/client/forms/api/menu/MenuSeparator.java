@@ -17,7 +17,8 @@ import javax.swing.JSeparator;
  */
 public class MenuSeparator extends Component<JSeparator> {
 
-    private static final String CONSTRUCTOR_JSDOC = "/**\n"
+    private static final String CONSTRUCTOR_JSDOC = ""
+            + "/**\n"
             + "* MenuSeparator provides a general purpose component for\n"
             + "* implementing divider lines - most commonly used as a divider\n"
             + "* between menu items that breaks them up into logical groupings.\n"
@@ -34,7 +35,8 @@ public class MenuSeparator extends Component<JSeparator> {
     }
     
     
-    private static final String PARENT_JSDOC = "/**\n"
+    private static final String PARENT_JSDOC = ""
+            + "/**\n"
             + "* The parent container.\n"
             + "*/";
     

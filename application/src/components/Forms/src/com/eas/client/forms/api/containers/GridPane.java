@@ -26,7 +26,8 @@ public class GridPane extends Container<JPanel> {
         this(rows, cols, hgap, 0);
     }
     
-    private static final String CONSTRUCTOR_JSDOC = "/**\n"
+    private static final String CONSTRUCTOR_JSDOC = ""
+            + "/**\n"
             + "* A container with Grid Layout.\n"
             + "* @param rows the number of grid rows.\n"
             + "* @param cols the number of grid columns.\n"
@@ -49,7 +50,8 @@ public class GridPane extends Container<JPanel> {
         layout = (GridLayout) aDelegate.getLayout();
     }
     
-    private static final String ADD_JSDOC = "/**\n"
+    private static final String ADD_JSDOC = ""
+            + "/**\n"
             + "* Appends the specified component to the end of this container.\n"
             + "* @param component the component to add\n"
             + "*/";
@@ -63,7 +65,8 @@ public class GridPane extends Container<JPanel> {
         }
     }
 
-    private static final String CHILD_JSDOC = "/**\n"
+    private static final String CHILD_JSDOC = ""
+            + "/**\n"
             + "* Gets the component with the specified row and column.\n"
             + "* @param row the row of the component\n"
             + "* @param column the column of the component\n"

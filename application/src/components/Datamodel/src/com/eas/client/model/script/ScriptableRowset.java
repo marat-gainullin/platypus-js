@@ -377,7 +377,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     private static final String EMPTY_JSDOC = ""
             + "/**\n"
             + "* Checks if the rowset is empty.\n"
-            + "* @return <code>true</code> if the rowset is empty and <code>false</code> otherwise\n"
+            + "* @return <code>true</code> if the rowset is empty and <code>false</code> otherwise.\n"
             + "*/";
 
     @ScriptFunction(jsDoc = EMPTY_JSDOC)
@@ -398,8 +398,8 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     private static final String FIND_JSDOC = ""
             + "/**\n"
             + "* Finds rows using field -- field value pairs.\n"
-            + "* @param pairs the search conditions pairs, if a form of key-values pairs, where the key is the property object (e.g. entity.md.propName) and the value for this property\n"
-            + "* @return the rows object's array accordind to the search condition or empty array if nothing is found\n"
+            + "* @param pairs the search conditions pairs, if a form of key-values pairs, where the key is the property object (e.g. entity.md.propName) and the value for this property.\n"
+            + "* @return the rows object's array accordind to the search condition or empty array if nothing is found.\n"
             + "*/";
 
     @ScriptFunction(jsDoc = FIND_JSDOC, params = {"pairs"})
@@ -460,8 +460,8 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     private static final String FIND_BY_ID_JSDOC = ""
             + "/**\n"
             + "* Finds row by its key. Key must a single property.\n"
-            + "* @param key the unique identifier of the row\n"
-            + "* @return a row object or <code>null</code> if nothing is found\n"
+            + "* @param key the unique identifier of the row.\n"
+            + "* @return a row object or <code>null</code> if nothing is found.\n"
             + "*/";
 
     @ScriptFunction(jsDoc = FIND_BY_ID_JSDOC, params = {"key"})
@@ -487,8 +487,8 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     private static final String SCROLL_TO_JSDOC = ""
             + "/**\n"
             + "* Sets the rowset cursor to the specified row.\n"
-            + "* @param row the row to position the entity cursor\n"
-            + "* @return <code>true</code> if the rowset scrolled successfully and <code>false</code> otherwise\n"
+            + "* @param row the row to position the entity cursor.\n"
+            + "* @return <code>true</code> if the rowset scrolled successfully and <code>false</code> otherwise.\n"
             + "*/";
 
     @ScriptFunction(jsDoc = SCROLL_TO_JSDOC, params = {"row"})
@@ -528,7 +528,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     private static final String BOF_JSDOC = ""
             + "/**\n"
             + "* Checks if cursor in the position before the first row.\n"
-            + "* @return <code>true</code> if cursor in the position before the first row and <code>false</code> otherwise\n"
+            + "* @return <code>true</code> if cursor in the position before the first row and <code>false</code> otherwise.\n"
             + "*/";
 
     @ScriptFunction(jsDoc = BOF_JSDOC)
@@ -538,7 +538,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     private static final String EOF_JSDOC = ""
             + "/**\n"
             + "* Checks if cursor in the position before the first row.\n"
-            + "* @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise\n"
+            + "* @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.\n"
             + "*/";
 
     @ScriptFunction(jsDoc = EOF_JSDOC)
@@ -548,7 +548,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     private static final String FIRST_JSDOC = ""
             + "/**\n"
             + "* Moves the rowset cursor to the first row.\n"
-            + "* @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise\n"
+            + "* @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.\n"
             + "*/";
 
     @ScriptFunction(jsDoc = FIRST_JSDOC)
@@ -558,7 +558,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     private static final String NEXT_JSDOC = ""
             + "/**\n"
             + "* Moves the rowset cursor to the next row.\n"
-            + "* @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise\n"
+            + "* @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.\n"
             + "*/";
 
     @ScriptFunction(jsDoc = NEXT_JSDOC)
@@ -568,7 +568,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     private static final String PREV_JSDOC = ""
             + "/**\n"
             + "* Moves the rowset cursor to the privious row.\n"
-            + "* @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise\n"
+            + "* @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.\n"
             + "*/";
 
     @ScriptFunction(jsDoc = PREV_JSDOC)
@@ -578,7 +578,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     private static final String LAST_JSDOC = ""
             + "/**\n"
             + "* Moves the rowset cursor to the last row.\n"
-            + "* @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise\n"
+            + "* @return <code>true</code> if cursor moved successfully and <code>false</code> otherwise.\n"
             + "*/";
 
     @ScriptFunction(jsDoc = LAST_JSDOC)
@@ -589,7 +589,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
             + "/**\n"
             + "* Checks if the cursor is on the specified index.\n"
             + "* @param index the row index to check, starting form <code>1</code>.\n"
-            + "* @return <code>true</code> if the cursor is on the row with specified index and <code>false</code> otherwise\n"
+            + "* @return <code>true</code> if the cursor is on the row with specified index and <code>false</code> otherwise.\n"
             + "*/";
 
     @ScriptFunction(jsDoc = POS_JSDOC, params = {"index"})
@@ -600,7 +600,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
             + "/**\n"
             + "* Gets the row at specified index.\n"
             + "* @param index the row index, starting form <code>1</code>.\n"
-            + "* @return the row object or <code>null</code> if no row object have found at the specified index\n"
+            + "* @return the row object or <code>null</code> if no row object have found at the specified index.\n"
             + "*/";
 
     @ScriptFunction(jsDoc = GET_ROW_JSDOC, params = {"index"})
@@ -744,7 +744,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     private static final String PUSH_JSDOC = ""
             + "/**\n"
             + "* Adds one or more elements to the end of an array and returns the new length of the array.\n"
-            + "* @param objects the objects to push, e.g.: { propName1: propValue1, propName2: propValue2 } (optional)\n"
+            + "* @param objects the objects to push, e.g.: { propName1: propValue1, propName2: propValue2 } (optional).\n"
             + "*/";
 
     @ScriptFunction(jsDoc = PUSH_JSDOC, params = {"objects"})
@@ -762,7 +762,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     private static final String UHSHIFT_JSDOC = ""
             + "/**\n"
             + "* Adds one or more elements to the front of an array and returns the new length of the array.\n"
-            + "* @param elements the objects to add\n"
+            + "* @param elements the objects to add.\n"
             + "*/";
 
     @ScriptFunction(jsDoc = UHSHIFT_JSDOC, params = {"elements"})
@@ -790,10 +790,10 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     private static final String SPLICE_JSDOC = ""
             + "/**\n"
             + "* Changes the content of an array, adding new elements while removing old elements.\n"
-            + "* @param index index at which to start changing the array\n"
-            + "* @param howMany an integer indicating the number of old array elements to remove\n"
+            + "* @param index index at which to start changing the array.\n"
+            + "* @param howMany an integer indicating the number of old array elements to remove.\n"
             + "* @param elements the elements to add to the array. If you don't specify any elements, <code>splice</code> simply removes elements from the array.\n"
-            + "* @return an array containing the removed elements\n"
+            + "* @return an array containing the removed elements.\n"
             + "*/";
 
     @ScriptFunction(jsDoc = SPLICE_JSDOC, params = {"index", "howMany", "elements"})
@@ -878,8 +878,8 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     private static final String CONCAT_JSDOC = ""
             + "/**\n"
             + "* Creates a new array comprised of this array joined with other array(s) and/or value(s).\n"
-            + "* @param elements array(s) and/or value(s) to concatenate to the resulting array\n"
-            + "* @return a new array comprised of this array joined with other value(s)\n"
+            + "* @param elements array(s) and/or value(s) to concatenate to the resulting array.\n"
+            + "* @return a new array comprised of this array joined with other value(s).\n"
             + "*/";
 
     @ScriptFunction(jsDoc = CONCAT_JSDOC, params = {"elements"})
@@ -906,8 +906,8 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     private static final String JOIN_JSDOC = ""
             + "/**\n"
             + "* Joins all elements of an array into a string.\n"
-            + "* @param separator a separator <code>String</code>, if omitted, the array elements are separated with a comma (optional)\n"
-            + "* @return a <code>String</code> conversions of all array elements\n"
+            + "* @param separator a separator <code>String</code>, if omitted, the array elements are separated with a comma (optional).\n"
+            + "* @return a <code>String</code> conversions of all array elements.\n"
             + "*/";
 
     @ScriptFunction(jsDoc = JOIN_JSDOC, params = {"separator"})
@@ -941,8 +941,8 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
             + "/**\n"
             + "* Creates a shallow copy of a portion of an array.\n"
             + "* @param begin zero-based index at which to begin extraction.\n"
-            + "* @param end zero-based index at which to end extraction. slice extracts up to but not including end\n"
-            + "* @return a new \"one level deep\" copy that contains copies of the elements sliced from the original array (optional)\n"
+            + "* @param end zero-based index at which to end extraction. slice extracts up to but not including end.\n"
+            + "* @return a new \"one level deep\" copy that contains copies of the elements sliced from the original array (optional).\n"
             + "*/";
 
     @ScriptFunction(jsDoc = SLICE_JSDOC, params = {"begin", "end"})
@@ -985,7 +985,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     private static final String STRING_JSDOC = ""
             + "/**\n"
             + "* Creates a <code>String</code> representation the rowset.\n"
-            + "* @return a <code>String</code> representing the array and its elements\n"
+            + "* @return a <code>String</code> representing the array and its elements.\n"
             + "*/";
 
     @Override
@@ -1021,8 +1021,8 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     private static final String INDEX_OF_JSDOC = ""
             + "/**\n"
             + "* Gets the first index of an element within the array equal to the specified value, or -1 if none is found.\n"
-            + "* @param searchElement an element to locate in the array\n"
-            + "* @return the first index of the element in the array\n"
+            + "* @param searchElement an element to locate in the array.\n"
+            + "* @return the first index of the element in the array.\n"
             + "*/";
 
     @ScriptFunction(jsDoc = INDEX_OF_JSDOC, params = {"searchElement"})
@@ -1041,8 +1041,8 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     private static final String LAST_INDEX_OF_JSDOC = ""
             + "/**\n"
             + "* Gets the last index of an element within the array equal to the specified value, or -1 if none is found.\n"
-            + "* @param searchElement an element to locate in the array\n"
-            + "* @return the first index of the element in the array\n"
+            + "* @param searchElement an element to locate in the array.\n"
+            + "* @return the first index of the element in the array.\n"
             + "*/";
 
     @ScriptFunction(jsDoc = LAST_INDEX_OF_JSDOC, params = {"searchElement"})
@@ -1062,9 +1062,9 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     private static final String FILTER_JSDOC = ""
             + "/**\n"
             + "* Creates a new array with all of the elements of this array for which the provided filtering function returns true.\n"
-            + "* @param callback the function to test each element of the array\n"
-            + "* @param thisObject <code>Object</code> to use as <code>this</code> when executing callback (optional)\n"
-            + "* @return the new filtered array\n"
+            + "* @param callback the function to test each element of the array.\n"
+            + "* @param thisObject <code>Object</code> to use as <code>this</code> when executing callback (optional).\n"
+            + "* @return the new filtered array.\n"
             + "*/";
 
     @ScriptFunction(jsDoc = FILTER_JSDOC, params = {"callback", "thisObject"})
@@ -1104,8 +1104,8 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     private static final String FOR_EACH_JSDOC = ""
             + "/**\n"
             + "* Calls a function for each element in the array.\n"
-            + "* @param callback the function to execute for each element\n"
-            + "* @param thisObject <code>Object</code> to use as <code>this</code> when executing callback (optional)\n"
+            + "* @param callback the function to execute for each element.\n"
+            + "* @param thisObject <code>Object</code> to use as <code>this</code> when executing callback (optional).\n"
             + "*/";
 
     @ScriptFunction(jsDoc = FOR_EACH_JSDOC, params = {"callback", "thisObject"})
@@ -1140,9 +1140,9 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     private static final String EVERY_JSDOC = ""
             + "/**\n"
             + "* Tests whether all elements in the array pass the test implemented by the provided function.\n"
-            + "* @param callback the test function to execute for each element\n"
-            + "* @param thisObject <code>Object</code> to use as <code>this</code> when executing callback (optional)\n"
-            + "* @return <code>true</code> if <code>callback</code> returned a true value for all elements, will return <code>true</code> and will return <code>false</code> otherwise\n"
+            + "* @param callback the test function to execute for each element.\n"
+            + "* @param thisObject <code>Object</code> to use as <code>this</code> when executing callback (optional).\n"
+            + "* @return <code>true</code> if <code>callback</code> returned a true value for all elements, will return <code>true</code> and will return <code>false</code> otherwise.\n"
             + "*/";
 
     @ScriptFunction(jsDoc = EVERY_JSDOC, params = {"callback", "thisObject"})
@@ -1181,9 +1181,9 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     private static final String MAP_JSDOC = ""
             + "/**\n"
             + "* Creates a new array with the results of calling a provided function on every element in this array. <code>map</code> does not mutate the array on which it is called.\n"
-            + "* @param callback the function that produces an element of the new Array from an element of the current one\n"
-            + "* @param thisObject <code>Object</code> to use as <code>this</code> when executing callback (optional)\n"
-            + "* @return a new array with the results of calling a provided function on every element\n"
+            + "* @param callback the function that produces an element of the new Array from an element of the current one.\n"
+            + "* @param thisObject <code>Object</code> to use as <code>this</code> when executing callback (optional).\n"
+            + "* @return a new array with the results of calling a provided function on every element.\n"
             + "*/";
 
     @ScriptFunction(jsDoc = MAP_JSDOC, params = {"callback", "thisObject"})
@@ -1221,9 +1221,9 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     private static final String SOME_JSDOC = ""
             + "/**\n"
             + "* Tests whether any of elements in the array pass the test implemented by the provided function.\n"
-            + "* @param callback the test function to execute for each element\n"
-            + "* @param thisObject <code>Object</code> to use as <code>this</code> when executing callback (optional)\n"
-            + "* @return <code>true</code> if <code>callback</code> returned a true value for any element, will return <code>true</code> and will return <code>false</code> otherwise\n"
+            + "* @param callback the test function to execute for each element.\n"
+            + "* @param thisObject <code>Object</code> to use as <code>this</code> when executing callback (optional).\n"
+            + "* @return <code>true</code> if <code>callback</code> returned a true value for any element, will return <code>true</code> and will return <code>false</code> otherwise.\n"
             + "*/";
 
     @ScriptFunction(jsDoc = SOME_JSDOC, params = {"callback", "thisObject"})
@@ -1263,12 +1263,12 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
             + "/**\n"
             + "* Applies a function against an accumulator and each value of the array (from left-to-right) as to reduce it to a single value.\n"
             + "* @param callback the function to execute on each value in the array, taking four arguments:\n"
-            + "*     @param previousValue the value previously returned in the last invocation of the <code>callback</code>, or <code>initialValue</code>, if supplied. (See below.)\n"
-            + "*     @param currentValue the current element being processed in the array\n"
-            + "*     @param index the index of the current element being processed in the array\n"
-            + "*     @param array the array <code>reduce</code> was called upon\n"
-            + "* @param initialValue the <code>Object</code> to use as the first argument to the first call of the callback (optional)\n"
-            + "* @return the result value\n"
+            + "*     @param previousValue the value previously returned in the last invocation of the <code>callback</code>, or <code>initialValue</code>, if supplied. (See below.).\n"
+            + "*     @param currentValue the current element being processed in the array.\n"
+            + "*     @param index the index of the current element being processed in the array.\n"
+            + "*     @param array the array <code>reduce</code> was called upon.\n"
+            + "* @param initialValue the <code>Object</code> to use as the first argument to the first call of the callback (optional).\n"
+            + "* @return the result value.\n"
             + "*/";
 
     @ScriptFunction(jsDoc = REDUCE_JSDOC, params = {"callback", "initialValue"})
@@ -1308,12 +1308,12 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
             + "/**\n"
             + "* Applies a function against an accumulator and each value of the array (from right-to-left) as to reduce it to a single value.\n"
             + "* @param callback the function to execute on each value in the array, taking four arguments:\n"
-            + "*     @param previousValue the value previously returned in the last invocation of the <code>callback</code>, or <code>initialValue</code>, if supplied. (See below.)\n"
-            + "*     @param currentValue the current element being processed in the array\n"
-            + "*     @param index the index of the current element being processed in the array\n"
-            + "*     @param array the array <code>reduce</code> was called upon\n"
-            + "* @param initialValue the <code>Object</code> to use as the first argument to the first call of the callback (optional)\n"
-            + "* @return the result value\n"
+            + "*     @param previousValue the value previously returned in the last invocation of the <code>callback</code>, or <code>initialValue</code>, if supplied. (See below.).\n"
+            + "*     @param currentValue the current element being processed in the array.\n"
+            + "*     @param index the index of the current element being processed in the array.\n"
+            + "*     @param array the array <code>reduce</code> was called upon.\n"
+            + "* @param initialValue the <code>Object</code> to use as the first argument to the first call of the callback (optional).\n"
+            + "* @return the result value.\n"
             + "*/";
 
     @ScriptFunction(jsDoc = REDUCE_RIGHT_JSDOC, params = {"callback", "initialValue"})
@@ -1396,8 +1396,8 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     private static final String CREATE_FILTER_JSDOC = ""
             + "/**\n"
             + "* Creates an instace of filter object to filter rowset data in-place using specified constraints objects.\n"
-            + "* @param pairs the search conditions pairs, if a form of key-values pairs, where the key is the property object (e.g. entity.md.propName) and the value for this property\n"
-            + "* @return a comparator object\n"
+            + "* @param pairs the search conditions pairs, if a form of key-values pairs, where the key is the property object (e.g. entity.md.propName) and the value for this property.\n"
+            + "* @return a comparator object.\n"
             + "*/";
 
     @ScriptFunction(jsDoc = CREATE_FILTER_JSDOC, params = {"pairs"})
@@ -1453,8 +1453,8 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     private static final String CREATE_SORTER_JSDOC = ""
             + "/**\n"
             + "* Creates an instance of comparator object using specified constraints objects.\n"
-            + "* @param pairs the search conditions pairs, in a form of key-values pairs, where the key is the property object (e.g. entity.md.propName) and the value for this property\n"
-            + "* @return a comparator object to be passed as a parameter to entity's <code>sort</code> method\n"
+            + "* @param pairs the search conditions pairs, in a form of key-values pairs, where the key is the property object (e.g. entity.md.propName) and the value for this property.\n"
+            + "* @return a comparator object to be passed as a parameter to entity's <code>sort</code> method.\n"
             + "*/";
 
     @ScriptFunction(jsDoc = CREATE_SORTER_JSDOC)
@@ -1571,8 +1571,8 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     private static final String EXECUTE_JSDOC = ""
             + "/**\n"
             + "* Refreshes rowset, only if any of its parameters has changed.\n"
-            + "* @param onSuccessCallback the handler function for refresh data on success event (optional)\n"
-            + "* @param onFailureCallback the handler function for refresh data on failure event (optional)\n"
+            + "* @param onSuccessCallback the handler function for refresh data on success event (optional).\n"
+            + "* @param onFailureCallback the handler function for refresh data on failure event (optional).\n"
             + "*/";
 
     @ScriptFunction(jsDoc = EXECUTE_JSDOC, params = {"onSuccessCallback", "onFailureCallback"})
@@ -1670,8 +1670,8 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     private static final String REQUERY_JSDOC = ""
             + "/**\n"
             + "* Requeries the rowset's data. Forses the rowset to refresh its data, no matter if its parameters has changed or not.\n"
-            + "* @param onSuccessCallback the handler function for refresh data on success event (optional)\n"
-            + "* @param onFailureCallback the handler function for refresh data on failure event (optional)\n"
+            + "* @param onSuccessCallback the handler function for refresh data on success event (optional).\n"
+            + "* @param onFailureCallback the handler function for refresh data on failure event (optional).\n"
             + "*/";
 
     @ScriptFunction(jsDoc = REQUERY_JSDOC, params = {"onSuccessCallback", "onFailureCallback"})
@@ -1712,8 +1712,8 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     // modify interface
     private static final String INSERT_JSDOC = ""
             + "/**\n"
-            + "* Inserts new row in the rowset and sets cursor on this row. @see push\n"
-            + "* @param pairs the fields value pairs, in a form of key-values pairs, where the key is the property object (e.g. entity.md.propName) and the value for this property (optional)\n"
+            + "* Inserts new row in the rowset and sets cursor on this row. @see push.\n"
+            + "* @param pairs the fields value pairs, in a form of key-values pairs, where the key is the property object (e.g. entity.md.propName) and the value for this property (optional).\n"
             + "*/";
 
     @ScriptFunction(jsDoc = INSERT_JSDOC)

@@ -24,7 +24,8 @@ public class FlowPane extends Container<JPanel> {
         this(hgap, 0);
     }
 
-    private static final String CONSTRUCTOR_JSDOC = "/**\n"
+    private static final String CONSTRUCTOR_JSDOC = ""
+            + "/**\n"
             + "* A container with Flow Layout.\n"
             + "* @param hgap the horizontal gap (optional).\n"
             + "* @param vgap the vertical gap (optional).\n"
@@ -43,7 +44,8 @@ public class FlowPane extends Container<JPanel> {
         setDelegate(aDelegate);
     }
     
-    private static final String ADD_JSDOC = "/**\n"
+    private static final String ADD_JSDOC = ""
+            + "/**\n"
             + "* Appends the specified component to the end of this container.\n"
             + "* @param component the component to add\n"
             + "*/";

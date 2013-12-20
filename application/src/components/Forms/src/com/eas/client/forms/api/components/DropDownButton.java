@@ -37,12 +37,13 @@ public class DropDownButton extends Component<JDropDownButton> {
         this(aText, aIcon, 4);
     }
     
-    private static final String CONSTRUCTOR_JSDOC = "/**\n"
+    private static final String CONSTRUCTOR_JSDOC = ""
+            + "/**\n"
             + "* Drop-down button component.\n"
-            + "* @param text the text of the component (optional)\n"
-            + "* @param icon the icon of the component (optional)\n"
-            + "* @param iconTextGap the text gap (optional)\n"
-            + "* @param actionPerformed the function for the action performed handler (optional)\n"
+            + "* @param text the text of the component (optional).\n"
+            + "* @param icon the icon of the component (optional).\n"
+            + "* @param iconTextGap the text gap (optional).\n"
+            + "* @param actionPerformed the function for the action performed handler (optional).\n"
             + "*/";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text", "icon", "iconTextGap", "actionPerformed"})
@@ -65,7 +66,8 @@ public class DropDownButton extends Component<JDropDownButton> {
         this(null, null, 4);
     }
     
-    private static final String DROP_DOWN_MENU_JSDOC = "/**\n"
+    private static final String DROP_DOWN_MENU_JSDOC = ""
+            + "/**\n"
             + "* <code>PopupMenu</code> for the component.\n"
             + "*/";
     @ScriptFunction(jsDoc=DROP_DOWN_MENU_JSDOC)
@@ -80,7 +82,8 @@ public class DropDownButton extends Component<JDropDownButton> {
         delegate.setDropDownMenu(jPopupMenu instanceof JPopupMenu ? (JPopupMenu) jPopupMenu : null);
     }
 
-    private static final String TEXT_JSDOC = "/**\n"
+    private static final String TEXT_JSDOC = ""
+            + "/**\n"
             + "* Text on the button.\n"
             + "*/";
     @ScriptFunction(jsDoc=TEXT_JSDOC)
@@ -93,7 +96,8 @@ public class DropDownButton extends Component<JDropDownButton> {
         delegate.setText(aValue);
     }
 
-    private static final String ICON_JSDOC = "/**\n"
+    private static final String ICON_JSDOC = ""
+            + "/**\n"
             + "* Image picture for the button.\n"
             + "*/";
     @ScriptFunction(jsDoc=ICON_JSDOC)
@@ -106,7 +110,8 @@ public class DropDownButton extends Component<JDropDownButton> {
         delegate.setIcon(aValue);
     }
 
-    private static final String ICON_TEXT_GAP_JSDOC = "/**\n"
+    private static final String ICON_TEXT_GAP_JSDOC = ""
+            + "/**\n"
             + "* The amount of space between the text and the icon displayed in this button.\n"
             + "*/";
     @ScriptFunction(jsDoc=ICON_TEXT_GAP_JSDOC)
@@ -119,7 +124,8 @@ public class DropDownButton extends Component<JDropDownButton> {
         delegate.setIconTextGap(aValue);
     }
 
-    private static final String HORIZONTAL_TEXT_POSITION_JSDOC = "/**\n"
+    private static final String HORIZONTAL_TEXT_POSITION_JSDOC = ""
+            + "/**\n"
             + "* Horizontal position of the text relative to the icon.\n"
             + "*/";
     @ScriptFunction(jsDoc=HORIZONTAL_TEXT_POSITION_JSDOC)
@@ -154,7 +160,8 @@ public class DropDownButton extends Component<JDropDownButton> {
         }
     }
     
-    private static final String VERTICAL_TEXT_POSITION_JSDOC = "/**\n"
+    private static final String VERTICAL_TEXT_POSITION_JSDOC = ""
+            + "/**\n"
             + "* Vertical position of the text relative to the icon.\n"
             + "*/";
     @ScriptFunction(jsDoc=VERTICAL_TEXT_POSITION_JSDOC)

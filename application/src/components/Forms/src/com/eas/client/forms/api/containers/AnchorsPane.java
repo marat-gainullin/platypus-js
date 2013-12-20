@@ -24,9 +24,10 @@ import org.mozilla.javascript.Undefined;
  */
 public class AnchorsPane extends Container<JPanel> {
 
-    private static final String CONSTRUCTOR_JSDOC = "/**\n"
-            + "* A container with Anchors Layout.\n" 
-            + "*/";
+    private static final String CONSTRUCTOR_JSDOC = ""
+            + "/**\n"
+            + " * A container with Anchors Layout.\n" 
+            + " */";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {})
     public AnchorsPane() {
@@ -40,10 +41,11 @@ public class AnchorsPane extends Container<JPanel> {
         assert aDelegate.getLayout() instanceof MarginLayout;
         setDelegate(aDelegate);
     }
-    private static final String ADD_JSDOC = "/**\n"
+    private static final String ADD_JSDOC = ""
+            + "/**\n"
             + "* Appends the specified component to the container with specified placement.\n"
-            + "* @param component the component to add\n"
-            + "* @param anchors the anchors object for the component, can contain the following properties: left, width, right, top, height, bottom\n"
+            + "* @param component the component to add.\n"
+            + "* @param anchors the anchors object for the component, can contain the following properties: left, width, right, top, height, bottom.\n"
             + "*/";
     
     @ScriptFunction(jsDoc = ADD_JSDOC, params = {"component", "anchors"})
@@ -97,10 +99,11 @@ public class AnchorsPane extends Container<JPanel> {
         Ordering.toBack(delegate, aComp);
     }
     
-    private static final String TO_FRONT_JSDOC = "/**\n"
+    private static final String TO_FRONT_JSDOC = ""
+            + "/**\n"
             + "* Brings the specified component to front on this panel.\n"
-            + "* @param component the component\n"
-            + "* @param count steps to move the component (optional)\n"
+            + "* @param component the component.\n"
+            + "* @param count steps to move the component (optional).\n"
             + "*/";
     
     @ScriptFunction(jsDoc = TO_FRONT_JSDOC, params = {"component", "count"})
@@ -108,10 +111,11 @@ public class AnchorsPane extends Container<JPanel> {
         Ordering.toFront(delegate, aComp, aCount);
     }
 
-    private static final String TO_BACK_JSDOC = "/**\n"
+    private static final String TO_BACK_JSDOC = ""
+            + "/**\n"
             + "* Brings the specified component to back on this panel.\n"
-            + "* @param component the component\n"
-            + "* @param count steps to move the component (optional)\n"
+            + "* @param component the component.\n"
+            + "* @param count steps to move the component (optional).\n"
             + "*/";
     
     @ScriptFunction(jsDoc = TO_BACK_JSDOC)

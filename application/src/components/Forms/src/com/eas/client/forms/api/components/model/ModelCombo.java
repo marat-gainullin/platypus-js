@@ -18,9 +18,10 @@ import org.mozilla.javascript.Wrapper;
  */
 public class ModelCombo extends ScalarModelComponent<DbCombo> {
 
-    private static final String CONSTRUCTOR_JSDOC = "/**\n"
-            + "* A model component that combines a button or editable field and a drop-down list. \n"
-            + "*/";
+    private static final String CONSTRUCTOR_JSDOC = ""
+            + "/**\n"
+            + " * A model component that combines a button or editable field and a drop-down list.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC)
     public ModelCombo() {
@@ -33,8 +34,9 @@ public class ModelCombo extends ScalarModelComponent<DbCombo> {
         setDelegate(aDelegate);
     }
     
-    private static final String VALUE_FIELD_JSDOC = "/**\n"
-            + "* Value field of the component. \n"
+    private static final String VALUE_FIELD_JSDOC = ""
+            + "/**\n"
+            + "* Value field of the component.\n"
             + "*/";
     
     @ScriptFunction(jsDoc = VALUE_FIELD_JSDOC)
@@ -60,8 +62,9 @@ public class ModelCombo extends ScalarModelComponent<DbCombo> {
         }
     }
 
-    private static final String DISPLAY_FIELD_JSDOC = "/**\n"
-            + "* Display field of the component. \n"
+    private static final String DISPLAY_FIELD_JSDOC = ""
+            + "/**\n"
+            + "* Display field of the component.\n"
             + "*/";
     @ScriptFunction(jsDoc = DISPLAY_FIELD_JSDOC)
     public Field getDisplayField() {
@@ -86,7 +89,8 @@ public class ModelCombo extends ScalarModelComponent<DbCombo> {
         }
     }
 
-    private static final String LIST_JSDOC = "/**\n"
+    private static final String LIST_JSDOC = ""
+            + "/**\n"
             + "* Determines if component shown as list.\n"
             + "*/";
     @ScriptFunction(jsDoc = LIST_JSDOC)
@@ -100,7 +104,8 @@ public class ModelCombo extends ScalarModelComponent<DbCombo> {
         invalidate();
     }
 
-    private static final String EDITABLE_JSDOC = "/**\n"
+    private static final String EDITABLE_JSDOC = ""
+            + "/**\n"
             + "* Determines if component is editable.\n"
             + "*/";
     @ScriptFunction(jsDoc = EDITABLE_JSDOC)

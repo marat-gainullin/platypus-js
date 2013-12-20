@@ -175,8 +175,8 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
     private static final String REQUERY_JSDOC = ""
             + "/**\n"
             + "* Requeries the model data. Forses the model data refresh, no matter if its parameters has changed or not.\n"
-            + "* @param onSuccessCallback the handler function for refresh data on success event (optional)\n"
-            + "* @param onFailureCallback the handler function for refresh data on failure event (optional)\n"
+            + "* @param onSuccessCallback the handler function for refresh data on success event (optional).\n"
+            + "* @param onFailureCallback the handler function for refresh data on failure event (optional).\n"
             + "*/";
     
     @ScriptFunction(jsDoc = REQUERY_JSDOC, params = {"onSuccessCallback", "onFailureCallback"})
@@ -204,9 +204,9 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
     private static final String CREATE_ENTITY_JSDOC = ""
             + "/**\n"
             + "* Creates new entity of model, based on passed sql query. This method works only in two tier components of a system.\n"
-            + "* @param sqlText SQL text for the new entity\n"
-            + "* @param dbId the concrete database ID (optional)\n"
-            + "* @return an entity instance\n"
+            + "* @param sqlText SQL text for the new entity.\n"
+            + "* @param dbId the concrete database ID (optional).\n"
+            + "* @return an entity instance.\n"
             + "*/";
     
     @ScriptFunction(jsDoc = CREATE_ENTITY_JSDOC, params = {"sqlText", "dbId"})
@@ -225,7 +225,10 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
         return modelEntity.defineProperties();// .md collection will be empty if query is not a select
     }
 
-    @ScriptFunction(jsDoc = "Executed sql query. This method works only in two tier components of a system.")
+    @ScriptFunction(jsDoc = ""
+            + "/**\n"
+            + " * Executed sql query. This method works only in two tier components of a system.\n"
+            + " */")
     public void executeSql(String aSql) throws Exception {
         executeSql(aSql, null);
     }
@@ -233,9 +236,9 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
     private static final String EXECUTE_SQL_JSDOC = ""
             + "/**\n"
             + "* Executes a SQL query against specific datasource. This method works only in two tier components of a system.\n"
-            + "* @param sqlText SQL text for the new entity\n"
-            + "* @param dbId the concrete database ID (optional)\n"
-            + "* @return an entity instance\n"
+            + "* @param sqlText SQL text for the new entity.\n"
+            + "* @param dbId the concrete database ID (optional).\n"
+            + "* @return an entity instance.\n"
             + "*/";
     
     @ScriptFunction(jsDoc = EXECUTE_SQL_JSDOC, params = {"sqlText", "dbId"})
