@@ -1430,6 +1430,10 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
 			wideCheckCursor();
 		}
 	}
+	
+	public void deleteRow(Row aRow) throws RowsetException {
+		delete(Collections.singleton(aRow));
+	}
 
 	/**
 	 * Deletes specified rows from the rowset. Rows are marked as deleted and

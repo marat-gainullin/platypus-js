@@ -1528,8 +1528,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
      * removed from cuurent rows vector. After deleting, cursor position becomes
      * invalid and rowset may be repositioned.
      *
-     * @param aRowIndex Index of row to be deleted from the rowset. aRowIndex is
-     * 1-based.
+     * @param aRowIndex Index of row to be deleted from the rowset. aRowIndex is 1-based.
      * @see #isBeforeFirst()
      * @see #isAfterLast()
      * @see #delete()

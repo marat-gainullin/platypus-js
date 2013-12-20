@@ -233,7 +233,7 @@ public class MultiLevelHeader extends JPanel {
             GridColumnsGroup group = aGroups.get(0);
             GridBagConstraints constraints = group2Constraints.get(group);
             assert constraints != null;
-            if (group.getParent() != null) {
+            if (group.getParent() != null && !group.getParent().isSubstitute()) {
                 GridBagConstraints parentConstraints = group2Constraints.get(group.getParent());
                 assert parentConstraints != null;
                 constraints.gridx = parentConstraints.gridx;
