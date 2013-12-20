@@ -57,6 +57,7 @@ public class HttpScriptContext extends ScriptableObject {
     private static final String RESPONSE_JS_DOC = "/**\n"
             + "* HTTP response, when invoked by HTTP protocol.\n"
             + "*/";
+
     @ScriptFunction(jsDoc = RESPONSE_JS_DOC)
     public Response getResponse() {
         return response;
@@ -175,6 +176,7 @@ public class HttpScriptContext extends ScriptableObject {
         private static final String CONTENT_TYPE_JS_DOC = "/**\n"
                 + "* The MIME type of the body of the request, or <code>null</code> if the type is not known.\n"
                 + "*/";
+
         @ScriptFunction(jsDoc = CONTENT_TYPE_JS_DOC)
         public String getContentType() {
             return httpRequest.getContentType();
@@ -183,6 +185,7 @@ public class HttpScriptContext extends ScriptableObject {
         private static final String BODY_JS_DOC = "/**\n"
                 + "* The request body.\n"
                 + "*/";
+
         @ScriptFunction(jsDoc = BODY_JS_DOC)
         public String getBody() throws IOException {
             String encoding = httpRequest.getCharacterEncoding();
@@ -203,6 +206,7 @@ public class HttpScriptContext extends ScriptableObject {
         private static final String BODY_BUFFER_JS_DOC = "/**\n"
                 + "* The request body as a binary array.\n"
                 + "*/";
+
         @ScriptFunction(jsDoc = BODY_BUFFER_JS_DOC)
         public byte[] getBodyBuffer() throws IOException {
             try (InputStream is = httpRequest.getInputStream()) {
@@ -210,21 +214,21 @@ public class HttpScriptContext extends ScriptableObject {
             }
         }
 
-        
         private static final String CONTEXT_PATH_JS_DOC = "/**\n"
                 + "* The portion of the request URI that indicates the context of the request.\n"
                 + "* The context path always comes first in a request URI. The path starts with a \"/\" character but does not end with a \"/\" character.\n"
                 + "* For the default (root) context, this method returns \"\".\n"
                 + "*/";
+
         @ScriptFunction(jsDoc = CONTEXT_PATH_JS_DOC)
         public String getContextPath() {
             return httpRequest.getContextPath();
         }
 
-        
         private static final String COOKIES_JS_DOC = "/**\n"
                 + "* The cookies for the request.\n"
                 + "*/";
+
         @ScriptFunction(jsDoc = COOKIES_JS_DOC)
         public Cookies getCookies() {
             return cookies;
@@ -234,6 +238,7 @@ public class HttpScriptContext extends ScriptableObject {
                 + "* The headers object for the request (read only).\n"
                 + "* A header data is avaliable as a JavaScript property of this object.\n"
                 + "*/";
+
         @ScriptFunction(jsDoc = HEADERS_JS_DOC)
         public RequestHeaders getHeaders() {
             return headers;
@@ -242,7 +247,7 @@ public class HttpScriptContext extends ScriptableObject {
         private static final String LOCAL_ADDR_JS_DOC = "/**\n"
                 + "* The Internet Protocol (IP) address of the interface on which the request was received.\n"
                 + "*/";
-        
+
         @ScriptFunction(jsDoc = LOCAL_ADDR_JS_DOC)
         public String getLocalAddr() {
             return httpRequest.getLocalAddr();
@@ -251,7 +256,7 @@ public class HttpScriptContext extends ScriptableObject {
         private static final String LOCAL_NAME_JS_DOC = "/**\n"
                 + "* The host name of the Internet Protocol (IP) interface on which the request was received.\n"
                 + "*/";
-        
+
         @ScriptFunction(jsDoc = LOCAL_NAME_JS_DOC)
         public String getLocalName() {
             return httpRequest.getLocalName();
@@ -260,7 +265,7 @@ public class HttpScriptContext extends ScriptableObject {
         private static final String LOCAL_PORT_JS_DOC = "/**\n"
                 + "* The Internet Protocol (IP) port number of the interface on which the request was received.\n"
                 + "*/";
-        
+
         @ScriptFunction(jsDoc = LOCAL_PORT_JS_DOC)
         public int getLocalPort() {
             return httpRequest.getLocalPort();
@@ -269,7 +274,7 @@ public class HttpScriptContext extends ScriptableObject {
         private static final String METHOD_JS_DOC = "/**\n"
                 + "* The name of the HTTP method with which this request was made, for example, GET, POST, or PUT.\n"
                 + "*/";
-        
+
         @ScriptFunction(jsDoc = METHOD_JS_DOC)
         public String getMethod() {
             return httpRequest.getMethod();
@@ -278,7 +283,7 @@ public class HttpScriptContext extends ScriptableObject {
         private static final String PARAMS_JS_DOC = "/**\n"
                 + "* The request parameters.\n"
                 + "*/";
-        
+
         @ScriptFunction(jsDoc = PARAMS_JS_DOC)
         public Params getParams() {
             return params;
@@ -288,7 +293,7 @@ public class HttpScriptContext extends ScriptableObject {
                 + "* Any extra path information associated with the URL the client sent when it made this request.\n"
                 + "* The extra path information follows the servlet path but precedes the query string and will start with a \"/\" character.\n"
                 + "*/";
-        
+
         @ScriptFunction(jsDoc = PATH_INFO_JS_DOC)
         public String getPathInfo() {
             return httpRequest.getPathInfo();
@@ -297,7 +302,7 @@ public class HttpScriptContext extends ScriptableObject {
         private static final String PATH_TRANSLATED_JS_DOC = "/**\n"
                 + "* Any extra path information after the servlet name but before the query string, and translates it to a real path.\n"
                 + "*/";
-        
+
         @ScriptFunction(jsDoc = PATH_TRANSLATED_JS_DOC)
         public String getPathTranslated() {
             return httpRequest.getPathTranslated();
@@ -306,7 +311,7 @@ public class HttpScriptContext extends ScriptableObject {
         private static final String PROTOCOL_JS_DOC = "/**\n"
                 + "* The name and version of the protocol the request uses in the form protocol/majorVersion.minorVersion, for example, HTTP/1.1.\n"
                 + "*/";
-        
+
         @ScriptFunction(jsDoc = PROTOCOL_JS_DOC)
         public String getProtocol() {
             return httpRequest.getProtocol();
@@ -315,7 +320,7 @@ public class HttpScriptContext extends ScriptableObject {
         private static final String QUERY_STRING_JS_DOC = "/**\n"
                 + "* The query string that is contained in the request URL after the path.\n"
                 + "*/";
-        
+
         @ScriptFunction(jsDoc = QUERY_STRING_JS_DOC)
         public String getQueryString() {
             return httpRequest.getQueryString();
@@ -324,7 +329,7 @@ public class HttpScriptContext extends ScriptableObject {
         private static final String REMOTE_ADDR_JS_DOC = "/**\n"
                 + "* The Internet Protocol (IP) address of the client or last proxy that sent the request.\n"
                 + "*/";
-        
+
         @ScriptFunction(jsDoc = REMOTE_ADDR_JS_DOC)
         public String getRemoteAddr() {
             return httpRequest.getRemoteAddr();
@@ -334,7 +339,7 @@ public class HttpScriptContext extends ScriptableObject {
                 + "* The fully qualified name of the client or the last proxy that sent the request.\n"
                 + "* If the engine cannot or chooses not to resolve the hostname (to improve performance), this method returns the dotted-string form of the IP address.\n"
                 + "*/";
-        
+
         @ScriptFunction(jsDoc = REMOTE_HOST_JS_DOC)
         public String getRemoteHost() {
             return httpRequest.getRemoteHost();
@@ -343,17 +348,17 @@ public class HttpScriptContext extends ScriptableObject {
         private static final String REMOTE_PORT_JS_DOC = "/**\n"
                 + "* The Internet Protocol (IP) source port of the client or last proxy that sent the request.\n"
                 + "*/";
-        
+
         @ScriptFunction(jsDoc = REMOTE_PORT_JS_DOC)
         public int getRemotePort() {
             return httpRequest.getRemotePort();
         }
-        
+
         private static final String REQUEST_URI_JS_DOC = "/**\n"
                 + "* The part of this request's URL from the protocol name up to the query string in the first line of the HTTP request.\n"
                 + "* The web container does not decode this String.\n"
                 + "*/";
-        
+
         @ScriptFunction(jsDoc = REQUEST_URI_JS_DOC)
         public String getRequestURI() {
             return httpRequest.getRequestURI();
@@ -363,7 +368,7 @@ public class HttpScriptContext extends ScriptableObject {
                 + "* Reconstructs the URL the client used to make the request.\n"
                 + "* The returned URL contains a protocol, server name, port number, and server path, but it does not include query string parameters.\n"
                 + "*/";
-        
+
         @ScriptFunction(jsDoc = REQUEST_URL_JS_DOC)
         public String getRequestURL() {
             return httpRequest.getRequestURL().toString();
@@ -372,7 +377,7 @@ public class HttpScriptContext extends ScriptableObject {
         private static final String SCHEME_JS_DOC = "/**\n"
                 + "* The name of the scheme used to make this request, for example, http, https, or ftp.\n"
                 + "*/";
-        
+
         @ScriptFunction(jsDoc = SCHEME_JS_DOC)
         public String getScheme() {
             return httpRequest.getScheme();
@@ -381,7 +386,7 @@ public class HttpScriptContext extends ScriptableObject {
         private static final String SERVER_NAME_JS_DOC = "/**\n"
                 + "* The host name of the server to which the request was sent. It is the value of the part before \":\".\n"
                 + "*/";
-        
+
         @ScriptFunction(jsDoc = SERVER_NAME_JS_DOC)
         public String getServerName() {
             return httpRequest.getServerName();
@@ -390,7 +395,7 @@ public class HttpScriptContext extends ScriptableObject {
         private static final String SERVER_PORT_JS_DOC = "/**\n"
                 + "* The port number to which the request was sent. It is the value of the part after \":\".\n"
                 + "*/";
-        
+
         @ScriptFunction(jsDoc = SERVER_PORT_JS_DOC)
         public int getServerPort() {
             return httpRequest.getServerPort();
@@ -399,7 +404,7 @@ public class HttpScriptContext extends ScriptableObject {
         private static final String SECURE_JS_DOC = "/**\n"
                 + "* A boolean indicating whether this request was made using a secure channel, such as HTTPS.\n"
                 + "*/";
-        
+
         @ScriptFunction(jsDoc = SECURE_JS_DOC)
         public boolean getSecure() {
             return httpRequest.isSecure();
@@ -435,8 +440,8 @@ public class HttpScriptContext extends ScriptableObject {
 
             r.defineProperty(STATUS_PROP_NAME, HttpScriptContext.Response.class, EMPTY);
             r.defineProperty(CONTENT_TYPE_PROP_NAME, HttpScriptContext.Response.class, EMPTY);
-            r.defineProperty(BODY_PROP_NAME, HttpScriptContext.Request.class, READONLY);
-            r.defineProperty(BODY_BUFFER_PROP_NAME, HttpScriptContext.Request.class, READONLY);
+            r.defineProperty(BODY_PROP_NAME, HttpScriptContext.Response.class, READONLY);
+            r.defineProperty(BODY_BUFFER_PROP_NAME, HttpScriptContext.Response.class, READONLY);
             r.defineFunctionProperties(new String[]{
                 RESET_METHOD_NAME,
                 ADD_HEADER_METHOD_NAME,
@@ -449,7 +454,7 @@ public class HttpScriptContext extends ScriptableObject {
         private static final String STATUS_JS_DOC = "/**\n"
                 + "* The current status code of this response.\n"
                 + "*/";
-        
+
         @ScriptFunction(jsDoc = STATUS_JS_DOC)
         public int getStatus() {
             return httpResponse.getStatus();
@@ -461,8 +466,9 @@ public class HttpScriptContext extends ScriptableObject {
 
         private static final String CONTENT_TYPE_JS_DOC = "/**\n"
                 + "* The content type used for the MIME body sent in this response.\n"
+                + "* Content type must be set prior to body or bodyBuffer.\n"
                 + "*/";
-        
+
         @ScriptFunction(jsDoc = CONTENT_TYPE_JS_DOC)
         public String getContentType() {
             return httpResponse.getContentType();
@@ -472,12 +478,18 @@ public class HttpScriptContext extends ScriptableObject {
             httpResponse.setContentType(type);
         }
 
-        public void reset(){
+        public void reset() {
             httpResponse.reset();
         }
-        
+
         protected String body;
 
+        private static final String BODY_JS_DOC = "/**\n"
+                + "* The text body sent in this response. The body must be set after content type.\n"
+                + "* Note that Content-Length is set automatically.\n"
+                + "*/";
+
+        @ScriptFunction(jsDoc = BODY_JS_DOC)
         public String getBody() throws IOException {
             return body;
         }
@@ -490,6 +502,7 @@ public class HttpScriptContext extends ScriptableObject {
                 encoding = "utf-8";
             }
             if (Charset.isSupported(encoding)) {
+                httpResponse.setCharacterEncoding(encoding);
                 setBodyBuffer(aValue.getBytes(encoding));
             } else {
                 throw new IOException(String.format("Character encoding %s is not supported.", encoding));
@@ -498,6 +511,12 @@ public class HttpScriptContext extends ScriptableObject {
 
         protected byte[] bodyBuffer;
 
+        private static final String BODY_BUFFER_JS_DOC = "/**\n"
+                + "* The binary body sent in this response.\n"
+                + "* Note that Content-Length is set automatically.\n"
+                + "*/";
+
+        @ScriptFunction(jsDoc = BODY_BUFFER_JS_DOC)
         public byte[] getBodyBuffer() throws IOException {
             return bodyBuffer;
         }
@@ -505,8 +524,13 @@ public class HttpScriptContext extends ScriptableObject {
         public void setBodyBuffer(byte[] aValue) throws IOException {
             bodyBuffer = aValue;
             httpResponse.resetBuffer();
-            try (OutputStream os = httpResponse.getOutputStream()) {
-                os.write(aValue);
+            if (aValue != null) {
+                try (OutputStream os = httpResponse.getOutputStream()) {
+                    os.write(aValue);
+                }
+                httpResponse.setContentLength(aValue.length);
+            } else {
+                httpResponse.setContentLength(0);
             }
         }
 
@@ -515,7 +539,7 @@ public class HttpScriptContext extends ScriptableObject {
                 + "* A header data is avaliable as a JavaScript property of this object.\n"
                 + "* "
                 + "*/";
-        
+
         @ScriptFunction(jsDoc = HEADERS_JS_DOC)
         public ResponseHeaders getHeaders() {
             return headers;
@@ -526,8 +550,8 @@ public class HttpScriptContext extends ScriptableObject {
                 + "* @param name the header name\n"
                 + "* @param value the header value\n"
                 + "*/";
-        
-        @ScriptFunction(jsDoc = ADD_HEADER_JS_DOC,  params = {"name", "value"})
+
+        @ScriptFunction(jsDoc = ADD_HEADER_JS_DOC, params = {"name", "value"})
         public void addHeader(String name, String value) {
             httpResponse.addHeader(name, value);
         }
@@ -537,8 +561,8 @@ public class HttpScriptContext extends ScriptableObject {
                 + "* @param name the header name\n"
                 + "* @param value the header value\n"
                 + "*/";
-        
-        @ScriptFunction(jsDoc = SET_HEADER_JS_DOC,  params = {"name", "value"})
+
+        @ScriptFunction(jsDoc = SET_HEADER_JS_DOC, params = {"name", "value"})
         public void setHeader(String name, String value) {
             httpResponse.setHeader(name, value);
         }
@@ -549,8 +573,8 @@ public class HttpScriptContext extends ScriptableObject {
                 + "* <code>name</code>, <code>value</code>, <code>comment</code>, <code>domain</code>, <code>maxAg</code>e, <code>path</code>, <code>secure</code>, <code>version</code>.\n"
                 + "* @param cookie the cookie object, for example <code>{name: 'platypus', value: 'test', maxAge: 60*60}</code>\n"
                 + "*/";
-        
-        @ScriptFunction(jsDoc = ADD_COOKIE_JS_DOC,  params = {"cookie"})
+
+        @ScriptFunction(jsDoc = ADD_COOKIE_JS_DOC, params = {"cookie"})
         public void addCookie(Object obj) {
             if (obj instanceof Scriptable) {
                 Scriptable cookieObj = (Scriptable) obj;
@@ -593,7 +617,7 @@ public class HttpScriptContext extends ScriptableObject {
 
             }
         }
-        
+
         @Override
         public String getClassName() {
             return RESPONSE_JS_CLASS_NAME;
@@ -757,7 +781,7 @@ public class HttpScriptContext extends ScriptableObject {
         private static final String COMMENT_JS_DOC = "/**\n"
                 + "* The comment describing the purpose of this cookie, or <code>null</code> if the cookie has no comment.\n"
                 + "*/";
-        
+
         @ScriptFunction(jsDoc = COMMENT_JS_DOC)
         public String getComment() {
             return cookie.getComment();
@@ -770,7 +794,7 @@ public class HttpScriptContext extends ScriptableObject {
         private static final String DOMAIN_JS_DOC = "/**\n"
                 + "* The domain name of this Cookie.\n"
                 + "*/";
-        
+
         @ScriptFunction(jsDoc = DOMAIN_JS_DOC)
         public String getDomain() {
             return cookie.getDomain();
@@ -783,7 +807,7 @@ public class HttpScriptContext extends ScriptableObject {
         private static final String MAX_AGE_JS_DOC = "/**\n"
                 + "* The maximum age in seconds for this Cookie.\n"
                 + "*/";
-        
+
         @ScriptFunction(jsDoc = MAX_AGE_JS_DOC)
         public int getMaxAge() {
             return cookie.getMaxAge();
@@ -796,7 +820,7 @@ public class HttpScriptContext extends ScriptableObject {
         private static final String NAME_JS_DOC = "/**\n"
                 + "* The name of the cookie.\n"
                 + "*/";
-        
+
         @ScriptFunction(jsDoc = NAME_JS_DOC)
         public String getName() {
             return cookie.getName();
@@ -805,7 +829,7 @@ public class HttpScriptContext extends ScriptableObject {
         private static final String PATH_JS_DOC = "/**\n"
                 + "* The path on the server to which the browser returns this cookie. The cookie is visible to all subpaths on the server.\n"
                 + "*/";
-        
+
         @ScriptFunction(jsDoc = PATH_JS_DOC)
         public String getPath() {
             return cookie.getPath();
@@ -818,7 +842,7 @@ public class HttpScriptContext extends ScriptableObject {
         private static final String SECURE_JS_DOC = "/**\n"
                 + "* Indicates to the browser whether the cookie should only be sent using a secure protocol, such as HTTPS or SSL.\n"
                 + "*/";
-        
+
         @ScriptFunction(jsDoc = SECURE_JS_DOC)
         public boolean getSecure() {
             return cookie.getSecure();
@@ -831,7 +855,7 @@ public class HttpScriptContext extends ScriptableObject {
         private static final String VALUE_JS_DOC = "/**\n"
                 + "* The current value of this Cookie.\n"
                 + "*/";
-        
+
         @ScriptFunction(jsDoc = VALUE_JS_DOC)
         public String getValue() {
             return cookie.getValue();
@@ -844,7 +868,7 @@ public class HttpScriptContext extends ScriptableObject {
         private static final String VERSION_JS_DOC = "/**\n"
                 + "* The version of the protocol this cookie complies with.\n"
                 + "*/";
-        
+
         @ScriptFunction(jsDoc = VERSION_JS_DOC)
         public int getVersion() {
             return cookie.getVersion();

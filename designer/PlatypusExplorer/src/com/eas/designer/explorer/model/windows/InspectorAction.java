@@ -55,7 +55,9 @@ public class InspectorAction extends AbstractAction {
         putValue(SMALL_ICON, ImageUtilities.loadImageIcon("com/eas/designer/application/module/windows/inspector.png", false)); // NOI18N
     }
 
-    /** Opens component inspector (Form structure) component. */
+    /** 
+     * Opens component inspector (Form structure) component.
+     * @param evt */
     @Override
     public void actionPerformed(ActionEvent evt) {
         // show ModelInspector

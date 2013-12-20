@@ -737,13 +737,16 @@ public class Entity implements RowsetListener {
 						if(rowset != null)
 							rowset.@com.bearsoft.rowset.Rowset::deleteAll()();
 					},
-					deleteRow : function(aRowIndex) {
+					deleteRow : function(aRow) {
 						var rowset = getRowset();
 						if(rowset != null)
 						{
-							if(aRowIndex != undefined)
-								rowset.@com.bearsoft.rowset.Rowset::deleteAt(I)(aRowIndex);
-							else
+							if(aRow){
+								if(aRow.unwrap)
+									rowset.@com.bearsoft.rowset.Rowset::deleteRow(Lcom/bearsoft/rowset/Row;)(aRow.unwrap());
+								else
+									rowset.@com.bearsoft.rowset.Rowset::deleteAt(I)(aRow);
+							}else
 								rowset.@com.bearsoft.rowset.Rowset::delete()();
 						}
 					},

@@ -35,6 +35,7 @@ import org.mozilla.javascript.*;
 /**
  *
  * @author mg
+ * @param <E> ApplicationEntity class parameter
  */
 public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
 
@@ -606,21 +607,22 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     public RowHostObject getRow(int aIndex) throws Exception {
         return RowHostObject.publishRow(entity.getModel().getScriptThis(), getRowset().getRow(aIndex), entity);
     }
-    
+
     private static final String CURSOR_JSDOC = ""
             + "/**\n"
             + "* Gets the row at cursor position.\n"
             + "* @return the row object or <code>null</code> if cursor is before first or after last position.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = CURSOR_JSDOC)
-    public RowHostObject getCursor() throws Exception{
-        if(bof() || eof())
+    public RowHostObject getCursor() throws Exception {
+        if (bof() || eof()) {
             return null;
-        else
+        } else {
             return getRow(getRowIndex());
-    }    
-    
+        }
+    }
+
     private static final String ROW_INDEX_JSDOC = ""
             + "/**\n"
             + "* The current cursor position, starting form <code>1</code>.\n"
@@ -853,12 +855,12 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
                         try {
                             Object compValue = ScriptUtils.js2Java(
                                     cFunc.call(Context.getCurrentContext(),
-                                    cFunc.getParentScope(),
-                                    entity.getModel().getScriptThis(),
-                                    new Object[]{
-                                RowHostObject.publishRow(cFunc.getParentScope(), r1, entity),
-                                RowHostObject.publishRow(cFunc.getParentScope(), r2, entity)
-                            }));
+                                            cFunc.getParentScope(),
+                                            entity.getModel().getScriptThis(),
+                                            new Object[]{
+                                                RowHostObject.publishRow(cFunc.getParentScope(), r1, entity),
+                                                RowHostObject.publishRow(cFunc.getParentScope(), r2, entity)
+                                            }));
                             return compValue instanceof Number ? ((Number) compValue).intValue() : 0;
                         } catch (Exception ex) {
                             throw new IllegalStateException(ex);
@@ -1748,14 +1750,50 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     public Rowset unwrap() throws Exception {
         return getRowset();
     }
-    private static final String DELETE_ROW_JSDOC = ""
+    private static final String DELETE_ROW_AT_CURSOR_JSDOC = ""
             + "/**\n"
-            + "* Deletes the row on the cursor position.\n"
-            + "*/";
+            + " * Deletes the row at the cursor position.\n"
+            + " */";
 
-    @ScriptFunction(jsDoc = DELETE_ROW_JSDOC)
+    @ScriptFunction(jsDoc = DELETE_ROW_AT_CURSOR_JSDOC)
     public boolean deleteRow() throws Exception {
         return delete();
+    }
+
+    private static final String DELETE_ROW_BY_INDEX_JSDOC = ""
+            + "/**\n"
+            + " * Deletes the row by cursor-like index.\n"
+            + " * @param aIndex row position in terms of cursor API. 1-based.\n"
+            + " */";
+
+    @ScriptFunction(jsDoc = DELETE_ROW_BY_INDEX_JSDOC)
+    public boolean deleteRow(int aCursorIndex) throws Exception {
+        Rowset rowset = getRowset();
+        if (aCursorIndex >= 1 && aCursorIndex <= rowset.size()) {
+            rowset.deleteAt(aCursorIndex);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private static final String DELETE_ROW_BY_ROW_JSDOC = ""
+            + "/**\n"
+            + " * Deletes the row passed in.\n"
+            + " * @param aRow A row to be deleted.\n"
+            + " */";
+
+    @ScriptFunction(jsDoc = DELETE_ROW_BY_ROW_JSDOC)
+    public boolean deleteRow(RowHostObject aRow) throws Exception {
+        if (aRow != null && aRow.unwrap() != null) {
+            Rowset rowset = getRowset();
+            int oldSize = rowset.size();
+            rowset.delete(Collections.singleton(aRow.unwrap()));
+            int newSize = rowset.size();
+            return oldSize > newSize;
+        } else {
+            return false;
+        }
     }
 
     public boolean deleteAllRows() throws Exception {

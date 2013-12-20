@@ -361,7 +361,7 @@ public class PlatypusHttpServlet extends HttpServlet {
      */
     @Override
     public String getServletInfo() {
-        return "Platypus servlet provides platypus http clients communication with java ee servers";
+        return "Platypus servlet provides platypus http clients communication with J2EE/Servlet containers";
     }// </editor-fold>
 
     protected Request readPlatypusRequest(HttpServletRequest aRequest, HttpServletResponse aResponse, Session aSession) throws Exception {
