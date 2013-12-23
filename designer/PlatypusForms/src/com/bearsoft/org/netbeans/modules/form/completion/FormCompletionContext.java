@@ -53,7 +53,6 @@ public class FormCompletionContext extends ModuleCompletionContext {
     protected Class<?> getEventHandlerFunctionParameterClass(String functionName) {
         Class<?> clazz = super.getEventHandlerFunctionParameterClass(functionName);
         if (clazz == null) {
-            FormModel formModel = getFormModel();
             for (RADComponent<?> component : getFormModel().getAllComponents()) {
                 for (Event event : component.getAllEvents()) {
                     String[] eventHandlers = event.getEventHandlers();
