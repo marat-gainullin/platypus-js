@@ -13,9 +13,10 @@ import com.eas.script.ScriptFunction;
  */
 public class ModelDate extends ScalarModelComponent<DbDate> {
 
-    private static final String CONSTRUCTOR_JSDOC = "/**\n"
-            + "* A model component that shows a date. \n"
-            + "*/";
+    private static final String CONSTRUCTOR_JSDOC = ""
+            + "/**\n"
+            + " * A model component that shows a date. \n"
+            + " */";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC)
     public ModelDate() {
@@ -27,9 +28,10 @@ public class ModelDate extends ScalarModelComponent<DbDate> {
         super();
         setDelegate(aDelegate);
     }
-    private static final String EDITABLE_JSDOC = "/**\n"
-            + "* Determines if component is editable. \n"
-            + "*/";
+    private static final String EDITABLE_JSDOC = ""
+            + "/**\n"
+            + " * Determines if component is editable.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = EDITABLE_JSDOC)
     public boolean getEditable() {
@@ -40,8 +42,9 @@ public class ModelDate extends ScalarModelComponent<DbDate> {
     public void setEditable(boolean aValue) {
         delegate.setEditable(aValue);
     }
-    private static final String EXPANDED_JSDOC = "/**\n"
-            + "* Sets up the control appearance. If true, than calndar panel is displayed, otherwise date/time combo is displayed. \n"
+    private static final String EXPANDED_JSDOC = ""
+            + "/**\n"
+            + "* Sets up the control appearance. If true, than calndar panel is displayed, otherwise date/time combo is displayed.\n"
             + "*/";
 
     @ScriptFunction(jsDoc = EXPANDED_JSDOC)

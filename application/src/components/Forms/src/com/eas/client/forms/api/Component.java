@@ -32,30 +32,36 @@ import org.mozilla.javascript.Function;
 public abstract class Component<D extends JComponent> {
 
     protected static final String EMPTY_TEXT_PROP_NAME = "emptyText";
-    
+
     protected Font font;
     protected Cursor cursor;
     protected String errorMessage;
     protected D delegate;
     protected NativeJavaHostObject jsWrapper;
 
-    @ScriptFunction(jsDoc = "Gets the parent of this component.")
+    @ScriptFunction(jsDoc = ""
+            + "/**\n"
+            + " * Gets the parent of this component.\n"
+            + " */")
     public Container<?> getParent() {
         return getContainerWrapper(delegate.getParent() instanceof JViewport && delegate.getParent().getParent() instanceof JScrollPane ? delegate.getParent().getParent() : delegate.getParent());
     }
-    
-    @ScriptFunction(jsDoc = "Gets name of this component.")
+
+    @ScriptFunction(jsDoc = "/**\n"
+            + " * Gets name of this component.\n"
+            + " */")
     public String getName() {
         return delegate.getName();
     }
-    private static final String GET_NEXT_FOCUSABLE_COMPONENT_JSDOC = "/**\n"
-            + "* Overrides the default focus traversal policy for this"
-            + " component's focus traversal cycle by unconditionally"
-            + " setting the specified component as the next"
-            + " component in the cycle, and this component"
-            + " as the specified component's previous"
-            + " component in the cycle.\n"
-            + "*/";
+    private static final String GET_NEXT_FOCUSABLE_COMPONENT_JSDOC = ""
+            + "/**\n"
+            + " * Overrides the default focus traversal policy for this"
+            + " * component's focus traversal cycle by unconditionally"
+            + " * setting the specified component as the next"
+            + " * component in the cycle, and this component"
+            + " * as the specified component's previous"
+            + " * component in the cycle.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = GET_NEXT_FOCUSABLE_COMPONENT_JSDOC)
     public Component<?> getNextFocusableComponent() {
@@ -66,10 +72,11 @@ public abstract class Component<D extends JComponent> {
     public void setNextFocusableComponent(Component<?> aValue) {
         delegate.setNextFocusableComponent(unwrap(aValue));
     }
-    private static final String ERROR_JSDOC = "/**\n"
-            + "* An error message of this component."
-            + " Validation procedure may set this property and subsequent focus lost event will clear it.\n"
-            + "*/";
+    private static final String ERROR_JSDOC = ""
+            + "/**\n"
+            + " * An error message of this component.\n"
+            + " * Validation procedure may set this property and subsequent focus lost event will clear it.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = ERROR_JSDOC)
     public String getError() {
@@ -79,9 +86,10 @@ public abstract class Component<D extends JComponent> {
     public void setError(String aValue) {
         errorMessage = aValue;
     }
-    private static final String BACKGROUND_JSDOC = "/**\n"
-            + "* The background color of this component.\n"
-            + "*/";
+    private static final String BACKGROUND_JSDOC = ""
+            + "/**\n"
+            + " * The background color of this component.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = BACKGROUND_JSDOC)
     public ScriptColor getBackground() {
@@ -92,9 +100,10 @@ public abstract class Component<D extends JComponent> {
     public void setBackground(Color aValue) {
         delegate.setBackground(aValue);
     }
-    private static final String FOREGROUND_JSDOC = "/**\n"
-            + "* The foreground color of this component.\n"
-            + "*/";
+    private static final String FOREGROUND_JSDOC = ""
+            + "/**\n"
+            + " * The foreground color of this component.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = FOREGROUND_JSDOC)
     public Color getForeground() {
@@ -105,9 +114,10 @@ public abstract class Component<D extends JComponent> {
     public void setForeground(Color aValue) {
         delegate.setForeground(aValue);
     }
-    private static final String VISIBLE_JSDOC = "/**\n"
-            + "* Determines whether this component should be visible when its parent is visible.\n"
-            + "*/";
+    private static final String VISIBLE_JSDOC = ""
+            + "/**\n"
+            + " * Determines whether this component should be visible when its parent is visible.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = VISIBLE_JSDOC)
     public boolean getVisible() {
@@ -118,9 +128,10 @@ public abstract class Component<D extends JComponent> {
     public void setVisible(boolean aValue) {
         delegate.setVisible(aValue);
     }
-    private static final String FOCUSABLE_JSDOC = "/**\n"
-            + "* Determines whether this component may be focused.\n"
-            + "*/";
+    private static final String FOCUSABLE_JSDOC = ""
+            + "/**\n"
+            + " * Determines whether this component may be focused.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = FOCUSABLE_JSDOC)
     public boolean getFocusable() {
@@ -131,10 +142,9 @@ public abstract class Component<D extends JComponent> {
     public void setFocusable(boolean aValue) {
         delegate.setFocusable(aValue);
     }
-    private static final String ENABLED_JSDOC = "/**\n"
-            + "Determines whether this component is enabled. An enabled component "
-            + "can respond to user input and generate events. Components are "
-            + "enabled initially by default."
+    private static final String ENABLED_JSDOC = ""
+            + "/**\n"
+            + "* Determines whether this component is enabled. An enabled component can respond to user input and generate events. Components are enabled initially by default.\n"
             + "*/";
 
     @ScriptFunction(jsDoc = ENABLED_JSDOC)
@@ -146,9 +156,10 @@ public abstract class Component<D extends JComponent> {
     public void setEnabled(boolean aValue) {
         delegate.setEnabled(aValue);
     }
-    private static final String TOOLTIP_TEXT_JSDOC = "/**\n"
-            + "* The tooltip string that has been set with.\n"
-            + "*/";
+    private static final String TOOLTIP_TEXT_JSDOC = ""
+            + "/**\n"
+            + " * The tooltip string that has been set with.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = TOOLTIP_TEXT_JSDOC)
     public String getToolTipText() {
@@ -160,9 +171,11 @@ public abstract class Component<D extends JComponent> {
         delegate.setToolTipText(aValue);
     }
 
-    private static final String OPAQUE_TEXT_JSDOC = "/**\n"
-            + "* True if this component is completely opaque.\n"
-            + "*/";
+    private static final String OPAQUE_TEXT_JSDOC = ""
+            + "/**\n"
+            + " * True if this component is completely opaque.\n"
+            + " */";
+
     @ScriptFunction(jsDoc = OPAQUE_TEXT_JSDOC)
     public boolean getOpaque() {
         return delegate.isOpaque();
@@ -173,9 +186,11 @@ public abstract class Component<D extends JComponent> {
         delegate.setOpaque(aValue);
     }
 
-    private static final String COMPONENT_POPUP_MENU_JSDOC = "/**\n"
-            + "* <code>PopupMenu</code> that assigned for this component.\n"
-            + "*/";
+    private static final String COMPONENT_POPUP_MENU_JSDOC = ""
+            + "/**\n"
+            + " * <code>PopupMenu</code> that assigned for this component.\n"
+            + " */";
+
     @ScriptFunction(jsDoc = COMPONENT_POPUP_MENU_JSDOC)
     public PopupMenu getComponentPopupMenu() {
         return (PopupMenu) getContainerWrapper(delegate.getComponentPopupMenu());
@@ -186,9 +201,11 @@ public abstract class Component<D extends JComponent> {
         delegate.setComponentPopupMenu((JPopupMenu) unwrap(aMenu));
     }
 
-     private static final String FONT_JSDOC = "/**\n"
-            + "* The font of this component.\n"
-            + "*/";
+    private static final String FONT_JSDOC = ""
+            + "/**\n"
+            + " * The font of this component.\n"
+            + " */";
+
     @ScriptFunction(jsDoc = FONT_JSDOC)
     public Font getFont() {
         if (font == null) {
@@ -208,9 +225,11 @@ public abstract class Component<D extends JComponent> {
         }
     }
 
-    private static final String CURSOR_JSDOC = "/**\n"
-            + "* Current <code>Cursor</code> of this component.\n"
-            + "*/";
+    private static final String CURSOR_JSDOC = ""
+            + "/**\n"
+            + " * Current <code>Cursor</code> of this component.\n"
+            + " */";
+
     @ScriptFunction(jsDoc = CURSOR_JSDOC)
     public Cursor getCursor() {
         if (cursor == null && delegate.getCursor() != null) {
@@ -225,9 +244,11 @@ public abstract class Component<D extends JComponent> {
         delegate.setCursor(cursor != null ? cursor.unwrap() : null);
     }
 
-    private static final String ON_MOUSE_CLICKED_JSDOC = "/**\n"
+    private static final String ON_MOUSE_CLICKED_JSDOC = ""
+            + "/**\n"
             + "* Mouse clicked event handler function.\n"
             + "*/";
+
     @ScriptFunction(jsDoc = ON_MOUSE_CLICKED_JSDOC)
     public Function getOnMouseClicked() {
         ControlEventsIProxy proxy = getEventsProxy(delegate);
@@ -242,9 +263,11 @@ public abstract class Component<D extends JComponent> {
         }
     }
 
-    private static final String ON_MOUSE_DRAGGED_JSDOC = "/**\n"
+    private static final String ON_MOUSE_DRAGGED_JSDOC = ""
+            + "/**\n"
             + "* Mouse dragged event handler function.\n"
             + "*/";
+
     @ScriptFunction(jsDoc = ON_MOUSE_DRAGGED_JSDOC)
     public Function getOnMouseDragged() {
         ControlEventsIProxy proxy = getEventsProxy(delegate);
@@ -259,9 +282,11 @@ public abstract class Component<D extends JComponent> {
         }
     }
 
-    private static final String ON_MOUSE_ENTERED_JSDOC = "/**\n"
+    private static final String ON_MOUSE_ENTERED_JSDOC = ""
+            + "/**\n"
             + "* Mouse entered over the component event handler function.\n"
             + "*/";
+
     @ScriptFunction(jsDoc = ON_MOUSE_ENTERED_JSDOC)
     public Function getOnMouseEntered() {
         ControlEventsIProxy proxy = getEventsProxy(delegate);
@@ -276,9 +301,11 @@ public abstract class Component<D extends JComponent> {
         }
     }
 
-    private static final String ON_MOUSE_EXITED_JSDOC = "/**\n"
+    private static final String ON_MOUSE_EXITED_JSDOC = ""
+            + "/**\n"
             + "* Mouse exited over the component event handler function.\n"
             + "*/";
+
     @ScriptFunction(jsDoc = ON_MOUSE_EXITED_JSDOC)
     public Function getOnMouseExited() {
         ControlEventsIProxy proxy = getEventsProxy(delegate);
@@ -293,9 +320,11 @@ public abstract class Component<D extends JComponent> {
         }
     }
 
-    private static final String ON_MOUSE_MOVED_JSDOC = "/**\n"
+    private static final String ON_MOUSE_MOVED_JSDOC = ""
+            + "/**\n"
             + "* Mouse moved event handler function.\n"
             + "*/";
+
     @ScriptFunction(jsDoc = ON_MOUSE_MOVED_JSDOC)
     public Function getOnMouseMoved() {
         ControlEventsIProxy proxy = getEventsProxy(delegate);
@@ -310,9 +339,11 @@ public abstract class Component<D extends JComponent> {
         }
     }
 
-    private static final String ON_MOUSE_PRESSED_JSDOC = "/**\n"
+    private static final String ON_MOUSE_PRESSED_JSDOC = ""
+            + "/**\n"
             + "* Mouse pressed event handler function.\n"
             + "*/";
+
     @ScriptFunction(jsDoc = ON_MOUSE_PRESSED_JSDOC)
     public Function getOnMousePressed() {
         ControlEventsIProxy proxy = getEventsProxy(delegate);
@@ -326,10 +357,12 @@ public abstract class Component<D extends JComponent> {
             proxy.getHandlers().put(ControlEventsIProxy.mousePressed, aValue);
         }
     }
-    
-    private static final String ON_MOUSE_RELEASED_JSDOC = "/**\n"
+
+    private static final String ON_MOUSE_RELEASED_JSDOC = ""
+            + "/**\n"
             + "* Mouse released event handler function.\n"
             + "*/";
+
     @ScriptFunction(jsDoc = ON_MOUSE_RELEASED_JSDOC)
     public Function getOnMouseReleased() {
         ControlEventsIProxy proxy = getEventsProxy(delegate);
@@ -344,9 +377,11 @@ public abstract class Component<D extends JComponent> {
         }
     }
 
-    private static final String ON_MOUSE_WHEEL_MOVED_JSDOC = "/**\n"
+    private static final String ON_MOUSE_WHEEL_MOVED_JSDOC = ""
+            + "/**\n"
             + "* Mouse wheel moved event handler function.\n"
             + "*/";
+
     @ScriptFunction(jsDoc = ON_MOUSE_WHEEL_MOVED_JSDOC)
     public Function getOnMouseWheelMoved() {
         ControlEventsIProxy proxy = getEventsProxy(delegate);
@@ -361,9 +396,11 @@ public abstract class Component<D extends JComponent> {
         }
     }
 
-    private static final String ON_ACTION_PERFORMED_JSDOC = "/**\n"
+    private static final String ON_ACTION_PERFORMED_JSDOC = ""
+            + "/**\n"
             + "* Main action performed event handler function.\n"
             + "*/";
+
     @ScriptFunction(jsDoc = ON_ACTION_PERFORMED_JSDOC)
     public Function getOnActionPerformed() {
         ControlEventsIProxy proxy = getEventsProxy(delegate);
@@ -378,9 +415,11 @@ public abstract class Component<D extends JComponent> {
         }
     }
 
-    private static final String ON_COMPONENT_ADDED_JSDOC = "/**\n"
+    private static final String ON_COMPONENT_ADDED_JSDOC = ""
+            + "/**\n"
             + "* Component added event hanler function.\n"
             + "*/";
+
     @ScriptFunction(jsDoc = ON_COMPONENT_ADDED_JSDOC)
     public Function getOnComponentAdded() {
         ControlEventsIProxy proxy = getEventsProxy(delegate);
@@ -395,9 +434,11 @@ public abstract class Component<D extends JComponent> {
         }
     }
 
-    private static final String ON_COMPONENT_HIDDEN_JSDOC = "/**\n"
+    private static final String ON_COMPONENT_HIDDEN_JSDOC = ""
+            + "/**\n"
             + "* Component hidden event handler function.\n"
             + "*/";
+
     @ScriptFunction(jsDoc = ON_COMPONENT_HIDDEN_JSDOC)
     public Function getOnComponentHidden() {
         ControlEventsIProxy proxy = getEventsProxy(delegate);
@@ -412,9 +453,11 @@ public abstract class Component<D extends JComponent> {
         }
     }
 
-    private static final String ON_COMPONENT_MOVED_JSDOC = "/**\n"
+    private static final String ON_COMPONENT_MOVED_JSDOC = ""
+            + "/**\n"
             + "* Component moved event handler function.\n"
             + "*/";
+
     @ScriptFunction(jsDoc = ON_COMPONENT_MOVED_JSDOC)
     public Function getOnComponentMoved() {
         ControlEventsIProxy proxy = getEventsProxy(delegate);
@@ -429,9 +472,11 @@ public abstract class Component<D extends JComponent> {
         }
     }
 
-    private static final String ON_COMPONENT_REMOVED_JSDOC = "/**\n"
+    private static final String ON_COMPONENT_REMOVED_JSDOC = ""
+            + "/**\n"
             + "* Component removed event handler function.\n"
             + "*/";
+
     @ScriptFunction(jsDoc = ON_COMPONENT_REMOVED_JSDOC)
     public Function getOnComponentRemoved() {
         ControlEventsIProxy proxy = getEventsProxy(delegate);
@@ -446,9 +491,11 @@ public abstract class Component<D extends JComponent> {
         }
     }
 
-    private static final String ON_COMPONENT_RESIZED_JSDOC = "/**\n"
+    private static final String ON_COMPONENT_RESIZED_JSDOC = ""
+            + "/**\n"
             + "* Component resized event handler function.\n"
             + "*/";
+
     @ScriptFunction(jsDoc = ON_COMPONENT_RESIZED_JSDOC)
     public Function getOnComponentResized() {
         ControlEventsIProxy proxy = getEventsProxy(delegate);
@@ -463,9 +510,11 @@ public abstract class Component<D extends JComponent> {
         }
     }
 
-    private static final String ON_COMPONENT_SHOWN_JSDOC = "/**\n"
+    private static final String ON_COMPONENT_SHOWN_JSDOC = ""
+            + "/**\n"
             + "* Component shown event handler function.\n"
             + "*/";
+
     @ScriptFunction(jsDoc = ON_COMPONENT_SHOWN_JSDOC)
     public Function getOnComponentShown() {
         ControlEventsIProxy proxy = getEventsProxy(delegate);
@@ -480,9 +529,11 @@ public abstract class Component<D extends JComponent> {
         }
     }
 
-    private static final String ON_FOCUS_GAINED_JSDOC = "/**\n"
+    private static final String ON_FOCUS_GAINED_JSDOC = ""
+            + "/**\n"
             + "* Keyboard focus gained by the component event.\n"
             + "*/";
+
     @ScriptFunction(jsDoc = ON_FOCUS_GAINED_JSDOC)
     public Function getOnFocusGained() {
         ControlEventsIProxy proxy = getEventsProxy(delegate);
@@ -497,9 +548,11 @@ public abstract class Component<D extends JComponent> {
         }
     }
 
-    private static final String ON_FOCUS_LOST_JSDOC = "/**\n"
+    private static final String ON_FOCUS_LOST_JSDOC = ""
+            + "/**\n"
             + "* Keyboard focus lost by the component event handler function.\n"
             + "*/";
+
     @ScriptFunction(jsDoc = ON_FOCUS_LOST_JSDOC)
     public Function getOnFocusLost() {
         ControlEventsIProxy proxy = getEventsProxy(delegate);
@@ -514,9 +567,11 @@ public abstract class Component<D extends JComponent> {
         }
     }
 
-    private static final String ON_KEY_PRESSED_JSDOC = "/**\n"
+    private static final String ON_KEY_PRESSED_JSDOC = ""
+            + "/**\n"
             + "* Key pressed event handler function.\n"
             + "*/";
+
     @ScriptFunction(jsDoc = ON_KEY_PRESSED_JSDOC)
     public Function getOnKeyPressed() {
         ControlEventsIProxy proxy = getEventsProxy(delegate);
@@ -531,9 +586,11 @@ public abstract class Component<D extends JComponent> {
         }
     }
 
-    private static final String ON_KEY_RELEASED_JSDOC = "/**\n"
+    private static final String ON_KEY_RELEASED_JSDOC = ""
+            + "/**\n"
             + "* Key released event handler function.\n"
             + "*/";
+
     @ScriptFunction(jsDoc = ON_KEY_RELEASED_JSDOC)
     public Function getOnKeyReleased() {
         ControlEventsIProxy proxy = getEventsProxy(delegate);
@@ -547,11 +604,12 @@ public abstract class Component<D extends JComponent> {
             proxy.getHandlers().put(ControlEventsIProxy.keyReleased, aValue);
         }
     }
-    
-    private static final String ON_KEY_TYPED_JSDOC = "/**\n"
+
+    private static final String ON_KEY_TYPED_JSDOC = ""
+            + "/**\n"
             + "* Key typed event handler function.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = ON_KEY_TYPED_JSDOC)
     public Function getOnKeyTyped() {
         ControlEventsIProxy proxy = getEventsProxy(delegate);
@@ -566,9 +624,11 @@ public abstract class Component<D extends JComponent> {
         }
     }
 
-    private static final String LEFT_JSDOC = "/**\n"
+    private static final String LEFT_JSDOC = ""
+            + "/**\n"
             + "* Horizontal coordinate of the component.\n"
             + "*/";
+
     @ScriptFunction(jsDoc = LEFT_JSDOC)
     public int getLeft() {
         return delegate.getLocation().x;
@@ -582,9 +642,11 @@ public abstract class Component<D extends JComponent> {
         delegate.setLocation(aValue, getTop());
     }
 
-    private static final String TOP_JSDOC = "/**\n"
+    private static final String TOP_JSDOC = ""
+            + "/**\n"
             + "* Vertical coordinate of the component.\n"
             + "*/";
+
     @ScriptFunction(jsDoc = TOP_JSDOC)
     public int getTop() {
         return delegate.getLocation().y;
@@ -598,9 +660,11 @@ public abstract class Component<D extends JComponent> {
         delegate.setLocation(getLeft(), aValue);
     }
 
-    private static final String WIDTH_JSDOC = "/**\n"
+    private static final String WIDTH_JSDOC = ""
+            + "/**\n"
             + "* Width of the component.\n"
             + "*/";
+
     @ScriptFunction(jsDoc = WIDTH_JSDOC)
     public int getWidth() {
         return delegate.getSize().width;
@@ -625,9 +689,11 @@ public abstract class Component<D extends JComponent> {
         delegate.setSize(aValue, getHeight());
     }
 
-    private static final String HEIGHT_JSDOC = "/**\n"
+    private static final String HEIGHT_JSDOC = ""
+            + "/**\n"
             + "* Height of the component.\n"
             + "*/";
+
     @ScriptFunction(jsDoc = HEIGHT_JSDOC)
     public int getHeight() {
         return delegate.getSize().height;
@@ -652,9 +718,11 @@ public abstract class Component<D extends JComponent> {
         delegate.setSize(getWidth(), aValue);
     }
 
-    private static final String FOCUS_JSDOC = "/**\n"
+    private static final String FOCUS_JSDOC = ""
+            + "/**\n"
             + "* Tries to acquire focus for this component.\n"
             + "*/";
+
     @ScriptFunction(jsDoc = FOCUS_JSDOC)
     public void focus() {
         delegate.requestFocus();
@@ -685,17 +753,21 @@ public abstract class Component<D extends JComponent> {
     }
 
     // Native API
-    private static final String NATIVE_COMPONENT_JSDOC = "/**\n"
+    private static final String NATIVE_COMPONENT_JSDOC = ""
+            + "/**\n"
             + "* Native API. Returns low level swing component. Applicable only in J2SE swing client.\n"
             + "*/";
+
     @ScriptFunction(jsDoc = NATIVE_COMPONENT_JSDOC)
     public JComponent getComponent() {
         return delegate;
     }
 
-    private static final String NATIVE_ELEMENT_JSDOC = "/**\n"
+    private static final String NATIVE_ELEMENT_JSDOC = ""
+            + "/**\n"
             + "* Native API. Returns low level html element. Applicable only in HTML5 client.\n"
             + "*/";
+
     @ScriptFunction(jsDoc = NATIVE_ELEMENT_JSDOC)
     public Object getElement() {
         return null;

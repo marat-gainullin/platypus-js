@@ -29,10 +29,11 @@ import javax.swing.JViewport;
 public class BoxPane extends Container<JPanel> {
 
     protected Resizer resizer = new Resizer();
-    private static final String CONSTRUCTOR_JSDOC = "/**\n"
-            + "* A container with Box Layout. By default uses horisontal orientation.\n"
-            + "@param orientation Orientation.HORIZONTAL or Orientation.VERTICAL (optional)\n"
-            + "*/";
+    private static final String CONSTRUCTOR_JSDOC = ""
+            + "/**\n"
+            + " * A container with Box Layout. By default uses horisontal orientation.\n"
+            + " * @param orientation Orientation.HORIZONTAL or Orientation.VERTICAL (optional).\n"
+            + " */";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"orientation"})
     public BoxPane(int aOrientaion) {
@@ -73,7 +74,8 @@ public class BoxPane extends Container<JPanel> {
         delegate.revalidate();
     }
 
-    private static final String ORIENTATION_JSDOC = "/**\n"
+    private static final String ORIENTATION_JSDOC = ""
+            + "/**\n"
             + "* Box orientation of this container.\n"
             + "*/";
     
@@ -87,7 +89,8 @@ public class BoxPane extends Container<JPanel> {
         }
     }
 
-    private static final String ADD_JSDOC = "/**\n"
+    private static final String ADD_JSDOC = ""
+            + "/**\n"
             + "* Appends the specified component to the end of this container.\n"
             + "* @param component the component to add\n"
             + "*/";
@@ -107,7 +110,8 @@ public class BoxPane extends Container<JPanel> {
         }
     }
 
-    private static final String CLEAR_JSDOC = "/**\n"
+    private static final String CLEAR_JSDOC = ""
+            + "/**\n"
             + "* Removes all the components from this container.\n"
             + "*/";
     
@@ -122,7 +126,8 @@ public class BoxPane extends Container<JPanel> {
         super.clear();
     }
 
-    private static final String REMOVE_JSDOC = "/**\n"
+    private static final String REMOVE_JSDOC = ""
+            + "/**\n"
             + "* Removes the specified component from this container.\n"
             + "* @param component the component to remove\n"
             + "*/";

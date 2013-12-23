@@ -13,9 +13,10 @@ import com.eas.script.ScriptFunction;
  */
 public class ModelImage extends ScalarModelComponent<DbImage> {
 
-    private static final String CONSTRUCTOR_JSDOC = "/**\n"
-            + "* A model component that shows an image. \n"
-            + "*/";
+    private static final String CONSTRUCTOR_JSDOC = ""
+            + "/**\n"
+            + " * A model component that shows an image.\n"
+            + " */";
     
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC)
     public ModelImage() {

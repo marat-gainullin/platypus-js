@@ -15,10 +15,11 @@ import javax.swing.JComponent;
  */
 public abstract class Container<D extends JComponent> extends Component<D> {
 
-    private static final String CHILD_JSDOC = "/**\n"
-            + "* Gets the container's nth component.\n"
-            + "* @param index the component's index in the container\n"
-            + "* @return the child component\n"
+    private static final String CHILD_JSDOC = ""
+            + "/**\n"
+            + " * Gets the container's nth component.\n"
+            + " * @param index the component's index in the container\n"
+            + " * @return the child component\n"
             + "*/";
     
     @ScriptFunction(jsDoc = CHILD_JSDOC, params = {"index"})
@@ -26,7 +27,8 @@ public abstract class Container<D extends JComponent> extends Component<D> {
         return getComponentWrapper(delegate.getComponent(aIndex));
     }
 
-    private static final String CHILDREN_JSDOC = "/**\n"
+    private static final String CHILDREN_JSDOC = ""
+            + "/**\n"
             + "* Gets the container's children components.\n"
             + "*/";
     
@@ -39,7 +41,8 @@ public abstract class Container<D extends JComponent> extends Component<D> {
         return ch.toArray(new Component<?>[]{});
     }
 
-    private static final String REMOVE_JSDOC = "/**\n"
+    private static final String REMOVE_JSDOC = ""
+            + "/**\n"
             + "* Removes the specified component from this container.\n"
             + "* @param component the component to remove\n"
             + "*/";
@@ -51,7 +54,8 @@ public abstract class Container<D extends JComponent> extends Component<D> {
         delegate.repaint();
     }
 
-    private static final String CLEAR_JSDOC = "/**\n"
+    private static final String CLEAR_JSDOC = ""
+            + "/**\n"
             + "* Removes all the components from this container.\n"
             + "*/";
     
@@ -62,7 +66,8 @@ public abstract class Container<D extends JComponent> extends Component<D> {
         delegate.repaint();
     }
 
-    private static final String COUNT_JSDOC = "/**\n"
+    private static final String COUNT_JSDOC = ""
+            + "/**\n"
             + "* Gets the number of components in this panel.\n"
             + "*/";
     

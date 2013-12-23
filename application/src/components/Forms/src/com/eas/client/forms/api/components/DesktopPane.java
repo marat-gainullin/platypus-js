@@ -19,66 +19,77 @@ import javax.swing.JInternalFrame;
  */
 public class DesktopPane extends Component<JDesktopPane> {
 
-private static final String CONSTRUCTOR_JSDOC = "/**\n"
-            + "* Desktop pane panel component.\n"
-            + "* This component can be used for creating a multi-document GUI or a virtual desktop.\n"
-            + "*/";
+    private static final String CONSTRUCTOR_JSDOC = ""
+            + "/**\n"
+            + " * Desktop pane panel component.\n"
+            + " * This component can be used for creating a multi-document GUI or a virtual desktop.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC)
     public DesktopPane() {
         super();
         setDelegate(new JDesktopPane());
     }
-    
+
     protected DesktopPane(JDesktopPane aDelegate) {
         super();
         setDelegate(aDelegate);
     }
-    
-    private static final String MINIMIZE_ALL_JSDOC = "/**\n"
+
+    private static final String MINIMIZE_ALL_JSDOC = ""
+            + "/**\n"
             + "* Minimizes all frames on the pane.\n"
             + "*/";
-    @ScriptFunction(jsDoc=MINIMIZE_ALL_JSDOC)
+
+    @ScriptFunction(jsDoc = MINIMIZE_ALL_JSDOC)
     public void minimizeAll() {
         for (JInternalFrame f : delegate.getAllFrames()) {
             delegate.getDesktopManager().iconifyFrame(f);
         }
     }
 
-    private static final String RESTORE_ALL_JSDOC = "/**\n"
+    private static final String RESTORE_ALL_JSDOC = ""
+            + "/**\n"
             + "* Restores frames original state and location.\n"
             + "*/";
-    @ScriptFunction(jsDoc=RESTORE_ALL_JSDOC)
+
+    @ScriptFunction(jsDoc = RESTORE_ALL_JSDOC)
     public void restoreAll() {
         for (JInternalFrame f : delegate.getAllFrames()) {
             delegate.getDesktopManager().deiconifyFrame(f);
         }
     }
 
-    private static final String MAXIMIZE_ALL_JSDOC = "/**\n"
+    private static final String MAXIMIZE_ALL_JSDOC = ""
+            + "/**\n"
             + "* Maximizes all frames on the pane.\n"
             + "*/";
-    @ScriptFunction(jsDoc=MAXIMIZE_ALL_JSDOC)
+
+    @ScriptFunction(jsDoc = MAXIMIZE_ALL_JSDOC)
     public void maximizeAll() {
         for (JInternalFrame f : delegate.getAllFrames()) {
             delegate.getDesktopManager().maximizeFrame(f);
         }
     }
 
-    private static final String CLOSE_ALL_JSDOC = "/**\n"
+    private static final String CLOSE_ALL_JSDOC = ""
+            + "/**\n"
             + "* Closes all frames on the pane.\n"
             + "*/";
-    @ScriptFunction(jsDoc=CLOSE_ALL_JSDOC)
+
+    @ScriptFunction(jsDoc = CLOSE_ALL_JSDOC)
     public void closeAll() {
         for (JInternalFrame f : delegate.getAllFrames()) {
             delegate.getDesktopManager().closeFrame(f);
         }
     }
 
-    private static final String FORMS_JSDOC = "/**\n"
+    private static final String FORMS_JSDOC = ""
+            + "/**\n"
             + "* Gets an array of all frames on the pane.\n"
             + "*/";
-    @ScriptFunction(jsDoc=FORMS_JSDOC)
+
+    @ScriptFunction(jsDoc = FORMS_JSDOC)
     public FormRunner[] getForms() {
         List<FormRunner> forms = new ArrayList<>();
         for (JInternalFrame f : delegate.getAllFrames()) {

@@ -16,7 +16,8 @@ import javax.swing.JScrollPane;
  */
 public class ScrollPane extends Container<JScrollPane> {
 
-     private static final String CONSTRUCTOR_JSDOC = "/**\n"
+     private static final String CONSTRUCTOR_JSDOC = ""
+             + "/**\n"
             + "* Provides a scrollable view of a lightweight component.\n"
             + "* @param view the component to display in the scrollpane's viewport (optional)\n"
             + "*/";
@@ -36,7 +37,8 @@ public class ScrollPane extends Container<JScrollPane> {
         setDelegate(aDelegate);
     }
     
-    private static final String ADD_JSDOC = "/**\n"
+    private static final String ADD_JSDOC = ""
+            + "/**\n"
             + "* Appends the specified component to the end of this container.\n"
             + "* @param component the component to add\n"
             + "*/";
@@ -50,7 +52,8 @@ public class ScrollPane extends Container<JScrollPane> {
         }
     }
 
-    private static final String VIEW_JSDOC = "/**\n"
+    private static final String VIEW_JSDOC = ""
+            + "/**\n"
             + "* The specified component as the scroll pane view.\n"
             + "*/";
     
@@ -68,7 +71,8 @@ public class ScrollPane extends Container<JScrollPane> {
         }
     }
 
-    private static final String REMOVE_JSDOC = "/**\n"
+    private static final String REMOVE_JSDOC = ""
+            + "/**\n"
             + "* Removes the specified component from this container.\n"
             + "* @param component the component to remove\n"
             + "*/";
@@ -81,7 +85,8 @@ public class ScrollPane extends Container<JScrollPane> {
         }
     }
 
-    private static final String COUNT_JSDOC = "/**\n"
+    private static final String COUNT_JSDOC = ""
+            + "/**\n"
             + "* Gets the number of components in this panel.\n"
             + "*/";
     
@@ -91,7 +96,8 @@ public class ScrollPane extends Container<JScrollPane> {
         return 1;// to avoid swing's viewports to be included in results
     }
 
-    private static final String CHILD_JSDOC = "/**\n"
+    private static final String CHILD_JSDOC = ""
+            + "/**\n"
             + "* Gets the container's child component.\n"
             + "* @return the child component\n"
             + "*/";

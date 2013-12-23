@@ -15,9 +15,10 @@ import javax.swing.JMenuBar;
  */
 public class MenuBar extends Container<JMenuBar> {
 
-    private static final String CONSTRUCTOR_JSDOC = "/**\n"
-            + "* An implementation of a menu bar.\n"
-            + "*/";
+    private static final String CONSTRUCTOR_JSDOC = ""
+            + "/**\n"
+            + " * An implementation of a menu bar.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {})
     public MenuBar() {
@@ -30,7 +31,8 @@ public class MenuBar extends Container<JMenuBar> {
         setDelegate(aDelegate);
     }
     
-    private static final String ADD_JSDOC = "/**\n"
+    private static final String ADD_JSDOC = ""
+            + "/**\n"
             + "* Adds the item to the menu.\n"
             + "* @param menu the menu component to add\n"
             + "*/";

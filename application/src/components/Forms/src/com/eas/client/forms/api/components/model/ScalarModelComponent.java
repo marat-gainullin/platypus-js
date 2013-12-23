@@ -64,7 +64,8 @@ public abstract class ScalarModelComponent<D extends DbControlPanel> extends Com
         }
     }
 
-    private static final String FIELD_JSDOC = "/**\n"
+    private static final String FIELD_JSDOC = ""
+            + "/**\n"
             + "* Model entity's field.\n"
             + "*/";
     
@@ -91,7 +92,8 @@ public abstract class ScalarModelComponent<D extends DbControlPanel> extends Com
         }
     }
 
-    private static final String ON_SELECT_JSDOC = "/**\n"
+    private static final String ON_SELECT_JSDOC = ""
+            + "/**\n"
             + "* Component's selection event handler function.\n"
             + "*/";
     
@@ -107,7 +109,8 @@ public abstract class ScalarModelComponent<D extends DbControlPanel> extends Com
         delegate.repaint();
     }
 
-    private static final String ON_RENDER_JSDOC = "/**\n"
+    private static final String ON_RENDER_JSDOC = ""
+            + "/**\n"
             + "* Component's rendering event handler function.\n"
             + "*/";
     
@@ -121,7 +124,8 @@ public abstract class ScalarModelComponent<D extends DbControlPanel> extends Com
         delegate.setOnRender(aValue);
     }
 
-    private static final String VALUE_JSDOC = "/**\n"
+    private static final String VALUE_JSDOC = ""
+            + "/**\n"
             + "* Component's value.\n"
             + "*/";
     
@@ -152,7 +156,8 @@ public abstract class ScalarModelComponent<D extends DbControlPanel> extends Com
     }
 
     
-    private static final String REDRAW_JSDOC = "/**\n"
+    private static final String REDRAW_JSDOC = ""
+            + "/**\n"
             + "* Redraw the component.\n"
             + "*/";
     

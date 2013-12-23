@@ -15,8 +15,8 @@ public class Form {
     
     private static final String SHOWN_JSDOC = ""
             + "/**\n"
-            + "* The form's show and hide event handler function.\n"
-            + "*/";
+            + " * The form's show and hide event handler function.\n"
+            + " */";
     
     @ScriptFunction(jsDoc = SHOWN_JSDOC)
     public Form[] getShown() {
@@ -25,8 +25,8 @@ public class Form {
     
     private static final String ON_CHANGE_JSDOC = ""
             + "/**\n"
-            + "* The form's show and hide event handler function.\n"
-            + "*/";
+            + " * The form's show and hide event handler function.\n"
+            + " */";
     @ScriptFunction(jsDoc = ON_CHANGE_JSDOC)
     public Function getOnChange() {
         return null;

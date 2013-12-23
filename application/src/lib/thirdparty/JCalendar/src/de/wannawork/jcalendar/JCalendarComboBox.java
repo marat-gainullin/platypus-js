@@ -150,10 +150,7 @@ public class JCalendarComboBox extends JPanel implements AncestorListener, Chang
         }
 
         boolean isInPopup(Component src, Point aPt) {
-            for (Component c = src; c != null; c = c.getParent()) {
-                if (c instanceof JPopupMenu) {
-                    c = ((JPopupMenu) c).getInvoker();
-                }
+            for (Component c = src; c != null; c = c instanceof JPopupMenu ? ((JPopupMenu) c).getInvoker() : c.getParent()) {
                 if (c instanceof Applet || (c instanceof Window && !(c instanceof JCalendarPopupWindow))) {
                     break;
                 } else if (c instanceof JCalendarPopupWindow || c instanceof JCalendarInvokerButton) {
@@ -174,7 +171,6 @@ public class JCalendarComboBox extends JPanel implements AncestorListener, Chang
                 if (converted != null && bounds.contains(converted)) {
                     return true;
                 }
-
             }
             return false;
         }

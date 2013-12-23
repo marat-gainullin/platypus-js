@@ -15,9 +15,9 @@ import javax.swing.JPopupMenu;
  */
 public class PopupMenu extends Container<JPopupMenu> {
 
-    private static final String CONSTRUCTOR_JSDOC = "/**\n"
-            + "* An implementation of a popup menu -- a small window that pops up\n" 
-            + "* and displays a series of choices.\n"
+    private static final String CONSTRUCTOR_JSDOC = ""
+            + "/**\n"
+            + "* An implementation of a popup menu -- a small window that pops up and displays a series of choices.\n"
             + "*/";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {})
@@ -31,9 +31,10 @@ public class PopupMenu extends Container<JPopupMenu> {
         setDelegate(aDelegate);
     }
     
-    private static final String ADD_JSDOC = "/**\n"
+    private static final String ADD_JSDOC = ""
+            + "/**\n"
             + "* Adds the item to the menu.\n"
-            + "* @param menu the menu component to add\n"
+            + "* @param menu the menu component to add.\n"
             + "*/";
     
     @ScriptFunction(jsDoc = ADD_JSDOC, params = {"menu"})

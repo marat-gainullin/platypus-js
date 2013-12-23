@@ -220,8 +220,8 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
     // Platypus script interface
     private static final String SHOW_JSDOC = ""
             + "/**\n"
-            + "* Shows the form as an ordinary window.\n"
-            + "*/";
+            + " * Shows the form as an ordinary window.\n"
+            + " */";
 
     /**
      * Script method showing the form as ordinary frame
@@ -245,8 +245,8 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
     }
     private static final String SHOW_MODAL_JSDOC = ""
             + "/**\n"
-            + "* Shows the form as a dialog (modal window).\n"
-            + "*/";
+            + " * Shows the form as a dialog (modal window).\n"
+            + " */";
 
     /**
      * Script method showing the form as modal dialog
@@ -260,8 +260,8 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
     }
     private static final String SHOW_INTERNAL_FRAME_JSDOC = ""
             + "/**\n"
-            + "* Shows the form as internal window in a desktop.\n"
-            + "*/";
+            + " * Shows the form as internal window in a desktop.\n"
+            + " */";
 
     /**
      * Script method showing the form as internal frame.
@@ -284,9 +284,9 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
     }
     private static final String SHOW_ON_PANEL_FRAME_JSDOC = ""
             + "/**\n"
-            + "* Script method showing the form on panel.\n"
-            + "* @param panel the parent panel.\n"
-            + "*/";
+            + " * Script method showing the form on panel.\n"
+            + " * @param panel the parent panel.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = SHOW_ON_PANEL_FRAME_JSDOC, params = {"panel"})
     public void showOnPanel(Object aParent) throws Exception {
@@ -312,8 +312,8 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
     }
     private static final String FORM_KEY_JSDOC = ""
             + "/**\n"
-            + "* The form key. Used to identify a form instance. Initialy set to the form's application element ID.\n"
-            + "*/";
+            + " * The form key. Used to identify a form instance. Initialy set to the form's application element ID.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = FORM_KEY_JSDOC)
     public String getFormKey() {
@@ -335,8 +335,8 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
     }
     private static final String IS_VISIBLE_JSDOC = ""
             + "/**\n"
-            + "* Checks if form visible.\n"
-            + "*/";
+            + " * Checks if form visible.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = IS_VISIBLE_JSDOC)
     public boolean getVisible() {
@@ -676,9 +676,9 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
     }
     private static final String CLOSE_JSDOC = ""
             + "/**\n"
-            + "* Closes form.\n"
-            + "* @param aSelected Value to be passed as a result of a selection into showModal's callback.\n"
-            + "*/";
+            + " * Closes form.\n"
+            + " * @param aSelected Value to be passed as a result of a selection into showModal's callback.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = CLOSE_JSDOC)
     public void close(Object aSelected) {
@@ -707,8 +707,8 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
     }
     private static final String MINIMIZE_JSDOC = ""
             + "/**\n"
-            + "* Minimizes form\n"
-            + "*/";
+            + " * Minimizes form\n"
+            + " */";
 
     @ScriptFunction(jsDoc = MINIMIZE_JSDOC)
     public void minimize() {
@@ -726,8 +726,8 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
     }
     private static final String MAXIMIZE_JSDOC = ""
             + "/**\n"
-            + "* Maximizes form\n"
-            + "*/";
+            + " * Maximizes form\n"
+            + " */";
 
     @ScriptFunction(jsDoc = MAXIMIZE_JSDOC)
     public void maximize() {
@@ -746,8 +746,8 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
     }
     private static final String RESTORE_JSDOC = ""
             + "/**\n"
-            + "* Restores form\n"
-            + "*/";
+            + " * Restores form\n"
+            + " */";
 
     @ScriptFunction(jsDoc = RESTORE_JSDOC)
     public void restore() {
@@ -768,8 +768,8 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
     }
     private static final String TO_FRONT_JSDOC = ""
             + "/**\n"
-            + "* Moves form to the front\n"
-            + "*/";
+            + " * Moves form to the front\n"
+            + " */";
 
     @ScriptFunction(jsDoc = TO_FRONT_JSDOC)
     public void toFront() {
@@ -806,9 +806,9 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
     }
     private static final String IS_MAXIMIZED_JSDOC = ""
             + "/**\n"
-            + "* Checks if form is maximized\n"
-            + "* return maximized True if maximized\n"
-            + "*/";
+            + " * Checks if form is maximized\n"
+            + " * return maximized True if maximized\n"
+            + " */";
 
     @ScriptFunction(jsDoc = IS_MAXIMIZED_JSDOC)
     public boolean getMaximized() {

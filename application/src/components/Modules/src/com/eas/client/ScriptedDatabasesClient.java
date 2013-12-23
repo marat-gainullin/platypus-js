@@ -101,8 +101,9 @@ public class ScriptedDatabasesClient extends DatabasesClient {
                                             String sEntity = oEntity != Scriptable.NOT_FOUND ? Context.toString(oEntity) : null;
                                             if (sEntity != null && !sEntity.isEmpty()) {
                                                 field.setTableName(sEntity);
-                                            }else
+                                            } else {
                                                 field.setTableName(aQueryId);
+                                            }
                                             Object oDescription = sElement.get("description", sElement);
                                             String sDescription = oDescription != Scriptable.NOT_FOUND ? Context.toString(oDescription) : null;
                                             if (sDescription != null && !sDescription.isEmpty()) {
@@ -282,12 +283,15 @@ public class ScriptedDatabasesClient extends DatabasesClient {
                     }
                 }
                 if (aDatasourceId != null) {
-                    ScriptRunner dataSourceApplier = createModule(cx, aDatasourceId);
-                    if (dataSourceApplier != null) {
-                        Object oApply = dataSourceApplier.get("apply", dataSourceApplier);
-                        if (oApply instanceof Function) {
-                            Function fApply = (Function) oApply;
-                            fApply.call(cx, dataSourceApplier.getParentScope(), dataSourceApplier, new Object[]{Context.javaToJS(aLog.toArray(), dataSourceApplier.getParentScope()), aSessionId});
+                    ApplicationElement appElement = getAppCache().get(aDatasourceId);
+                    if (appElement != null && appElement.getType() == ClientConstants.ET_COMPONENT) {
+                        ScriptRunner dataSourceApplier = createModule(cx, aDatasourceId);
+                        if (dataSourceApplier != null) {
+                            Object oApply = dataSourceApplier.get("apply", dataSourceApplier);
+                            if (oApply instanceof Function) {
+                                Function fApply = (Function) oApply;
+                                fApply.call(cx, dataSourceApplier.getParentScope(), dataSourceApplier, new Object[]{Context.javaToJS(aLog.toArray(), dataSourceApplier.getParentScope()), aSessionId});
+                            }
                         }
                     }
                 }

@@ -48,7 +48,10 @@ public class Label extends Component<JLabel> {
         setDelegate(aDelegate);
     }
 
-    @ScriptFunction(jsDoc = "The text string that the label displays.")
+    @ScriptFunction(jsDoc = ""
+            + "/**\n"
+            + " * The text string that the label displays.\n"
+            + " */")
     public String getText() {
         return delegate.getText();
     }
@@ -58,7 +61,10 @@ public class Label extends Component<JLabel> {
         delegate.setText(aValue);
     }
 
-    @ScriptFunction(jsDoc = "The graphic image (glyph, icon) that the label displays.")
+    @ScriptFunction(jsDoc = ""
+            + "/**\n"
+            + " * The graphic image (glyph, icon) that the label displays.\n"
+            + " */")
     public Icon getIcon() {
         return delegate.getIcon();
     }
@@ -68,7 +74,10 @@ public class Label extends Component<JLabel> {
         delegate.setIcon(aValue);
     }
 
-    @ScriptFunction(jsDoc = "The amount of space between the text and the icon displayed in this label.")
+    @ScriptFunction(jsDoc = ""
+            + "/**\n"
+            + " * The amount of space between the text and the icon displayed in this label.\n"
+            + " */")
     public int getIconTextGap() {
         return delegate.getIconTextGap();
     }
@@ -78,7 +87,10 @@ public class Label extends Component<JLabel> {
         delegate.setIconTextGap(aValue);
     }
 
-    @ScriptFunction(jsDoc = "Horizontal position of the text relative to the icon.")
+    @ScriptFunction(jsDoc = ""
+            + "/**\n"
+            + " * Horizontal position of the text relative to the icon.\n"
+            + " */")
     public int getHorizontalTextPosition() {
         switch (delegate.getHorizontalTextPosition()) {
             case JLabel.LEFT:
@@ -110,7 +122,10 @@ public class Label extends Component<JLabel> {
         }
     }
 
-    @ScriptFunction(jsDoc = "Horizontal position of the text with the icon relative to the component's size.")
+    @ScriptFunction(jsDoc = ""
+            + "/**\n"
+            + " * Horizontal position of the text with the icon relative to the component's size.\n"
+            + " */")
     public int getHorizontalAlignment() {
         switch (delegate.getHorizontalAlignment()) {
             case JLabel.LEFT:
@@ -142,7 +157,10 @@ public class Label extends Component<JLabel> {
         }
     }
 
-    @ScriptFunction(jsDoc = "Vertical position of the text relative to the icon.")
+    @ScriptFunction(jsDoc = ""
+            + "/**\n"
+            + " * Vertical position of the text relative to the icon.\n"
+            + " */")
     public int getVerticalTextPosition() {
         switch (delegate.getVerticalTextPosition()) {
             case JLabel.TOP:
@@ -173,8 +191,11 @@ public class Label extends Component<JLabel> {
                 break;
         }
     }
-    
-    @ScriptFunction(jsDoc = "Vertical position of the text with the icon relative to the component's size.")
+
+    @ScriptFunction(jsDoc = ""
+            + "/**\n"
+            + " * Vertical position of the text with the icon relative to the component's size.\n"
+            + " */")
     public int getVerticalAlignment() {
         switch (delegate.getVerticalAlignment()) {
             case JLabel.TOP:

@@ -17,7 +17,8 @@ import javax.swing.JFormattedTextField;
  */
 public class FormattedField extends Component<JFormattedTextField> {
 
-    private static final String CONSTRUCTOR_JSDOC = "/**\n"
+    private static final String CONSTRUCTOR_JSDOC = ""
+            + "/**\n"
             + "* Formatted field component. \n"
             + "* @param value the value for the formatted field (optional)\n"
             + "*/";
@@ -37,7 +38,8 @@ public class FormattedField extends Component<JFormattedTextField> {
         super();
         setDelegate(aDelegate);
     }
-    private static final String TEXT_JSDOC = "/**\n"
+    private static final String TEXT_JSDOC = ""
+            + "/**\n"
             + "* Text on the component.\n"
             + "*/";
 
@@ -45,7 +47,8 @@ public class FormattedField extends Component<JFormattedTextField> {
     public String getText() {
         return delegate.getText();
     }
-    private static final String VALUE_JSDOC = "/**\n"
+    private static final String VALUE_JSDOC = ""
+            + "/**\n"
             + "* The value of this component.\n"
             + "*/";
 
@@ -58,7 +61,8 @@ public class FormattedField extends Component<JFormattedTextField> {
     public void setValue(Object aValue) {
         delegate.setValue(ScriptUtils.js2Java(aValue));
     }
-    private static final String FORMAT_JSDOC = "/**\n"
+    private static final String FORMAT_JSDOC = ""
+            + "/**\n"
             + "* Field text format.\n"
             + "*/";
 

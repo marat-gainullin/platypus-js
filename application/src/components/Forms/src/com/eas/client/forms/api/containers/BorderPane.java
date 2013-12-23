@@ -25,11 +25,12 @@ public class BorderPane extends Container<JPanel> {
     public BorderPane(int hgap) {
         this(hgap, 0);
     }
-    private static final String CONSTRUCTOR_JSDOC = "/**\n"
-            + "* A container with Border Layout.\n"
-            + "* @param hgap the horizontal gap (optional).\n"
-            + "* @param vgap the vertical gap (optional)\n."
-            + "*/";
+    private static final String CONSTRUCTOR_JSDOC = ""
+            + "/**\n"
+            + " * A container with Border Layout.\n"
+            + " * @param hgap the horizontal gap (optional).\n"
+            + " * @param vgap the vertical gap (optional).\n"
+            + " */";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"hgap", "vgap"})
     public BorderPane(int hgap, int vgap) {
@@ -73,11 +74,12 @@ public class BorderPane extends Container<JPanel> {
         }
     }
     
-    private static final String ADD_JSDOC = "/**\n"
+    private static final String ADD_JSDOC = ""
+            + "/**\n"
             + "* Appends the specified component to this container on the specified placement.\n"
-            + "* @param component the component to add\n"
-            + "* @param place the placement in the container: <code>HorizontalPosition.LEFT</code>, <code>HorizontalPosition.CENTER</code>, <code>HorizontalPosition.RIGHT</code>, <code>VerticalPosition.TOP</code> or <code>VerticalPosition.BOTTOM</code> (optional)\n"
-            + "* @param size the size of the component by the provided place direction (optional)\n"
+            + "* @param component the component to add.\n"
+            + "* @param place the placement in the container: <code>HorizontalPosition.LEFT</code>, <code>HorizontalPosition.CENTER</code>, <code>HorizontalPosition.RIGHT</code>, <code>VerticalPosition.TOP</code> or <code>VerticalPosition.BOTTOM</code> (optional).\n"
+            + "* @param size the size of the component by the provided place direction (optional).\n"
             + "*/";
 
     @ScriptFunction(jsDoc = ADD_JSDOC, params = {"component", "place", "size"})
@@ -89,7 +91,8 @@ public class BorderPane extends Container<JPanel> {
         add(aComp, HorizontalPosition.CENTER);
     }
 
-    private static final String LEFT_COMPONENT_JSDOC = "/**\n"
+    private static final String LEFT_COMPONENT_JSDOC = ""
+            + "/**\n"
             + "* The component added using HorizontalPosition.LEFT constraint.\n"
             + "* If no component at this constraint then set to <code>null</code>.\n"
             + "*/";
@@ -119,7 +122,8 @@ public class BorderPane extends Container<JPanel> {
         add(aComp, HorizontalPosition.LEFT);
     }
 
-    private static final String TOP_COMPONENT_JSDOC = "/**\n"
+    private static final String TOP_COMPONENT_JSDOC = ""
+            + "/**\n"
             + "* The component added using HorizontalPosition.TOP constraint.\n"
             + "* If no component at the container on this constraint then set to <code>null</code>.\n"
             + "*/";
@@ -148,7 +152,8 @@ public class BorderPane extends Container<JPanel> {
         add(aComp, VerticalPosition.TOP);
     }
 
-    private static final String RIGHT_COMPONENT_JSDOC = "/**\n"
+    private static final String RIGHT_COMPONENT_JSDOC = ""
+            + "/**\n"
             + "* The component added using HorizontalPosition.RIGHT constraint.\n"
             + "* If no component at the container on this constraint then set to <code>null</code>.\n"
             + "*/";
@@ -177,7 +182,8 @@ public class BorderPane extends Container<JPanel> {
         add(aComp, HorizontalPosition.RIGHT);
     }
 
-    private static final String BOTTOM_COMPONENT_JSDOC = "/**\n"
+    private static final String BOTTOM_COMPONENT_JSDOC = ""
+            + "/**\n"
             + "* The component added using HorizontalPosition.BOTTOM constraint.\n"
             + "* If no component at the container on this constraint then set to <code>null</code>.\n"
             + "*/";
@@ -207,7 +213,8 @@ public class BorderPane extends Container<JPanel> {
         add(aComp, VerticalPosition.BOTTOM);
     }
     
-    private static final String CENTER_COMPONENT_JSDOC = "/**\n"
+    private static final String CENTER_COMPONENT_JSDOC = ""
+            + "/**\n"
             + "* The component added using HorizontalPosition.CENTER constraint.\n"
             + "* If no component at the container on this constraint then set to <code>null</code>.\n"
             + "*/";

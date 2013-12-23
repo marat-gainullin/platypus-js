@@ -14,9 +14,10 @@ import javax.swing.JPasswordField;
  */
 public class PasswordField extends Component<JPasswordField> {
 
-    private static final String CONSTRUCTOR_JSDOC = "/**\n"
+    private static final String CONSTRUCTOR_JSDOC = ""
+            + "/**\n"
             + "* Password field component.\n"
-            + "* @param text the text for the component (optional)\n"
+            + "* @param text the text for the component (optional).\n"
             + "*/";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text"})
@@ -34,7 +35,10 @@ public class PasswordField extends Component<JPasswordField> {
         setDelegate(aDelegate);
     }
 
-    @ScriptFunction(jsDoc = "The text contained in this component.")
+    @ScriptFunction(jsDoc = ""
+            + "/**\n"
+            + " * The text contained in this component.\n"
+            + " */")
     public String getText() {
         return new String(delegate.getPassword());
     }

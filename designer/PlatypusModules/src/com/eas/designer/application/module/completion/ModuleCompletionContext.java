@@ -92,9 +92,9 @@ public class ModuleCompletionContext extends CompletionContext {
 
     protected void fillSystemConstructors(CompletionPoint point, CompletionResultSet resultSet) {
         for (CompletionSupportService scp : Lookup.getDefault().lookupAll(CompletionSupportService.class)) {
-            Collection<SystemConstructorCompletionItem> items = scp.getSystemConstructors(point);
+            Collection<JsCompletionItem> items = scp.getSystemConstructors(point);
             if (items != null) {
-                for (SystemConstructorCompletionItem item : items) {
+                for (JsCompletionItem item : items) {
                     addItem(resultSet, point.getFilter(), item);
                 }
             }

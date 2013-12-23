@@ -16,7 +16,8 @@ public class MouseEvent extends Event<java.awt.event.MouseEvent> {
         super(aDelegate);
     }
 
-    private static final String X_JS_DOC = "/**\n"
+    private static final String X_JS_DOC = ""
+            + "/**\n"
             + "* X cursor coordinate in component's space.\n"
             + "*/";
     
@@ -25,7 +26,8 @@ public class MouseEvent extends Event<java.awt.event.MouseEvent> {
         return delegate.getX();
     }
 
-    private static final String Y_JS_DOC = "/**\n"
+    private static final String Y_JS_DOC = ""
+            + "/**\n"
             + "* Y cursor coordinate in component's space.\n"
             + "*/";
     
@@ -34,7 +36,8 @@ public class MouseEvent extends Event<java.awt.event.MouseEvent> {
         return delegate.getY();
     }
 
-    private static final String BUTTON_JS_DOC = "/**\n"
+    private static final String BUTTON_JS_DOC = ""
+            + "/**\n"
             + "* Which, if any, of the mouse buttons has changed state.\n"
             + "* Values: 0 - no button, 1 - button 1, 2 - button 2, 3 - button 3.\n"
             + "*/";
@@ -44,7 +47,8 @@ public class MouseEvent extends Event<java.awt.event.MouseEvent> {
         return delegate.getButton();
     }
 
-    private static final String CLICK_COUNT_JS_DOC = "/**\n"
+    private static final String CLICK_COUNT_JS_DOC = ""
+            + "/**\n"
             + "* The number of mouse clicks associated with this event.\n"
             + "*/";
     
@@ -53,7 +57,8 @@ public class MouseEvent extends Event<java.awt.event.MouseEvent> {
         return delegate.getClickCount();
     }
 
-    private static final String ALT_DOWN_JS_DOC = "/**\n"
+    private static final String ALT_DOWN_JS_DOC = ""
+            + "/**\n"
             + "* Alt key is down on this event.\n"
             + "*/";
     
@@ -62,7 +67,8 @@ public class MouseEvent extends Event<java.awt.event.MouseEvent> {
         return delegate.isAltDown() || delegate.isAltGraphDown();
     }
 
-    private static final String CONTROL_DOWN_JS_DOC = "/**\n"
+    private static final String CONTROL_DOWN_JS_DOC = ""
+            + "/**\n"
             + "* Ctrl key is down on this event.\n"
             + "*/";
     
@@ -71,7 +77,8 @@ public class MouseEvent extends Event<java.awt.event.MouseEvent> {
         return delegate.isControlDown();
     }
 
-    private static final String SHIFT_DOWN_JS_DOC = "/**\n"
+    private static final String SHIFT_DOWN_JS_DOC = ""
+            + "/**\n"
             + "* Shift key is down on this event.\n"
             + "*/";
     
@@ -80,7 +87,8 @@ public class MouseEvent extends Event<java.awt.event.MouseEvent> {
         return delegate.isShiftDown();
     }
 
-    private static final String META_DOWN_JS_DOC = "/**\n"
+    private static final String META_DOWN_JS_DOC = ""
+            + "/**\n"
             + "* Meta key is down on this event.\n"
             + "*/";
     

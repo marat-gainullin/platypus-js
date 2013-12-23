@@ -14,7 +14,8 @@ import javax.swing.JTextPane;
  */
 public class TextArea extends Component<JTextPane> {
 
-    private static final String CONSTRUCTOR_JSDOC = "/**\n"
+    private static final String CONSTRUCTOR_JSDOC = ""
+            + "/**\n"
             + "* Text area component. \n"
             + "* @param text the text for the component (optional)\n"
             + "*/";
@@ -36,7 +37,10 @@ public class TextArea extends Component<JTextPane> {
         setDelegate(aDelegate);
     }
 
-    @ScriptFunction(jsDoc = "The text contained in this component.")
+    @ScriptFunction(jsDoc = ""
+            + "/**\n"
+            + " * The text contained in this component.\n"
+            + " */")
     public String getText() {
         return delegate.getText();
     }

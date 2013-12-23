@@ -34,8 +34,8 @@ public class ModuleCompletionSupportService implements CompletionSupportService 
     }
 
     @Override
-    public Collection<SystemConstructorCompletionItem> getSystemConstructors(CompletionPoint point) {
-        List<SystemConstructorCompletionItem> constructors = new ArrayList<>();
+    public Collection<JsCompletionItem> getSystemConstructors(CompletionPoint point) {
+        List<JsCompletionItem> constructors = new ArrayList<>();
         constructors.add(new SystemConstructorCompletionItem(MODULE_CONSTRUCTOR_NAME,
                 "",//NOI18N
                 new ArrayList<String>() {

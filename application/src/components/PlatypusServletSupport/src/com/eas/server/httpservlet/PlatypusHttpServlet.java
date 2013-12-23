@@ -77,7 +77,7 @@ public class PlatypusHttpServlet extends HttpServlet {
     public static final String CREATE_MODULE_RESPONSE_IS_REPORT_PROP = "isReport";
     public static final String CREATE_MODULE_RESPONSE_IS_PERMITTED_PROP = "isPermitted";
     private PlatypusServerCore serverCore;
-    private ThreadLocal<HttpServletRequest> currentRequest = new ThreadLocal<>();
+    private final ThreadLocal<HttpServletRequest> currentRequest = new ThreadLocal<>();
 
     @Override
     public void init(ServletConfig config) throws ServletException {
@@ -361,7 +361,7 @@ public class PlatypusHttpServlet extends HttpServlet {
      */
     @Override
     public String getServletInfo() {
-        return "Platypus servlet provides platypus http clients communication with java ee servers";
+        return "Platypus servlet provides platypus http clients communication with J2EE/Servlet containers";
     }// </editor-fold>
 
     protected Request readPlatypusRequest(HttpServletRequest aRequest, HttpServletResponse aResponse, Session aSession) throws Exception {
@@ -458,7 +458,7 @@ public class PlatypusHttpServlet extends HttpServlet {
                     writeJsonResponse(ScriptUtils.toJson(result), aHttpResponse);
                 } else if (result instanceof XMLObject) {
                     writeResponse(ScriptUtils.toXMLString((XMLObject) result), aHttpResponse, HTML_CONTENTTYPE);
-                } else {
+                } else if(result != null){
                     ScriptUtils.inContext(new ScriptAction() {
                         @Override
                         public Object run(Context cx) throws Exception {

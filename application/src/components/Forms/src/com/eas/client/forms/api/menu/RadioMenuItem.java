@@ -27,11 +27,12 @@ public class RadioMenuItem extends Component<JRadioButtonMenuItem> {
         this(aText, aSelected, null);
     }
 
-    private static final String CONSTRUCTOR_JSDOC = "/**\n"
+    private static final String CONSTRUCTOR_JSDOC = ""
+            + "/**\n"
             + "* An implementation of a radio button menu item.\n"
-            + "* @param text the text of the component (optional)\n"
-            + "* @param selected <code>true</code> if selected (optional)\n"
-            + "* @param actionPerformed On action performed function (optional)\n"
+            + "* @param text the text of the component (optional).\n"
+            + "* @param selected <code>true</code> if selected (optional).\n"
+            + "* @param actionPerformed On action performed function (optional).\n"
             + "*/";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text", "selected", "actionPerformed"})
@@ -49,7 +50,8 @@ public class RadioMenuItem extends Component<JRadioButtonMenuItem> {
         this(null, false);
     }
 
-    private static final String PARENT_JSDOC = "/**\n"
+    private static final String PARENT_JSDOC = ""
+            + "/**\n"
             + "* The parent container.\n"
             + "*/";
     
@@ -63,7 +65,8 @@ public class RadioMenuItem extends Component<JRadioButtonMenuItem> {
         return parent;
     }
 
-    private static final String TEXT_JSDOC = "/**\n"
+    private static final String TEXT_JSDOC = ""
+            + "/**\n"
             + "* The menu item text.\n"
             + "*/";
     
@@ -76,7 +79,8 @@ public class RadioMenuItem extends Component<JRadioButtonMenuItem> {
         delegate.setText(aValue);
     }
 
-    private static final String SELECTED_JSDOC = "/**\n"
+    private static final String SELECTED_JSDOC = ""
+            + "/**\n"
             + "* <code>true</code> if the menu item is selected.\n"
             + "*/";
     
