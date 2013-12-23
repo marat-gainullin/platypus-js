@@ -12,7 +12,6 @@ import com.eas.designer.application.module.completion.SystemConstructorCompletio
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import org.netbeans.spi.editor.completion.CompletionItem;
 import org.openide.util.lookup.ServiceProvider;
 
 /**
