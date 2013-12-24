@@ -18,6 +18,7 @@ import com.eas.designer.application.module.nodes.ApplicationEntityNode;
 import com.eas.designer.application.module.parser.AstUtlities;
 import com.eas.designer.datamodel.nodes.ModelNode;
 import com.eas.designer.explorer.utils.StringUtils;
+import com.eas.script.ScriptObj;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -87,12 +88,25 @@ public class ModuleCompletionContext extends CompletionContext {
         JsCodeCompletionScopeInfo completionScopeInfo = getCompletionScopeInfo(dataObject, offset, point.getFilter());
         if (completionScopeInfo.mode == CompletionMode.CONSTRUCTORS) {
             fillSystemConstructors(point, resultSet);
+        } else if (completionScopeInfo.mode == CompletionMode.VARIABLES_AND_FUNCTIONS) {
+            fillSystemObjects(point, resultSet);
         }
     }
 
     protected void fillSystemConstructors(CompletionPoint point, CompletionResultSet resultSet) {
         for (CompletionSupportService scp : Lookup.getDefault().lookupAll(CompletionSupportService.class)) {
             Collection<JsCompletionItem> items = scp.getSystemConstructors(point);
+            if (items != null) {
+                for (JsCompletionItem item : items) {
+                    addItem(resultSet, point.getFilter(), item);
+                }
+            }
+        }
+    }
+
+    protected void fillSystemObjects(CompletionPoint point, CompletionResultSet resultSet) {
+        for (CompletionSupportService scp : Lookup.getDefault().lookupAll(CompletionSupportService.class)) {
+            Collection<JsCompletionItem> items = scp.getSystemObjects(point);
             if (items != null) {
                 for (JsCompletionItem item : items) {
                     addItem(resultSet, point.getFilter(), item);
@@ -166,6 +180,12 @@ public class ModuleCompletionContext extends CompletionContext {
     }
 
     public static CompletionContext findCompletionContext(String fieldName, int offset, ModuleCompletionContext parentModuleContext) {
+        for (CompletionSupportService scp : Lookup.getDefault().lookupAll(CompletionSupportService.class)) {
+            Class clazz = scp.getClassByName(fieldName);
+            if (clazz !=null && clazz.isAnnotationPresent(ScriptObj.class)) {
+                return new CompletionContext(clazz);
+            }
+        }
         AstRoot astRoot = parentModuleContext.dataObject.getAst();
         if (astRoot != null) {
             AstNode offsetNode = AstUtlities.getOffsetNode(astRoot, offset);

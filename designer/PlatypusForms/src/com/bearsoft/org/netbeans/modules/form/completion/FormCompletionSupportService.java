@@ -8,8 +8,10 @@ import com.bearsoft.org.netbeans.modules.form.FormUtils;
 import com.eas.designer.application.module.completion.CompletionPoint;
 import com.eas.designer.application.module.completion.CompletionSupportService;
 import com.eas.designer.application.module.completion.JsCompletionItem;
+import com.eas.designer.application.module.completion.JsFieldCompletionItem;
 import com.eas.designer.application.module.completion.SystemConstructorCompletionItem;
 import com.eas.script.ScriptFunction;
+import com.eas.script.ScriptObj;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,9 +28,9 @@ public class FormCompletionSupportService implements CompletionSupportService {
 
     private static final String FORM_CONSTRUCTOR_NAME = "Form";//NOI18N
     private static final String FORM_CONSTRUCTOR_JSDOC = "/**\n"
-            + "* Creates new Platypus Form application element instance.\n"//NOI18N
-            + "* @param name Form application element name\n"//NOI18N
-            + "*/";//NOI18N
+            + "* Creates new Platypus Form application element instance.\n"
+            + "* @param name Form application element name\n"
+            + "*/";
 
     @Override
     public Class getClassByName(String name) {
@@ -37,12 +39,12 @@ public class FormCompletionSupportService implements CompletionSupportService {
 
     @Override
     public Collection<JsCompletionItem> getSystemConstructors(CompletionPoint point) {
-        List<JsCompletionItem> constructors = new ArrayList<>();
+        List<JsCompletionItem> items = new ArrayList<>();
         for (Class<?> clazz : FormUtils.getPlatypusApiClasses()) {
             for (Constructor<?> constructor : clazz.getConstructors()) {
                 if (constructor.isAnnotationPresent(ScriptFunction.class)) {
                     ScriptFunction annotation = constructor.getAnnotation(ScriptFunction.class);
-                    constructors.add(
+                    items.add(
                             new ComponentConstructorCompletionItem(annotation.name().isEmpty() ?
                                     clazz.getSimpleName() : annotation.name(),
                                     "",//NOI18N
@@ -54,7 +56,7 @@ public class FormCompletionSupportService implements CompletionSupportService {
                 }
             }
         }
-        constructors.add(new SystemConstructorCompletionItem(FORM_CONSTRUCTOR_NAME,
+        items.add(new SystemConstructorCompletionItem(FORM_CONSTRUCTOR_NAME,
                 "",//NOI18N
                 new ArrayList<String>() {
                     {
@@ -64,6 +66,23 @@ public class FormCompletionSupportService implements CompletionSupportService {
                 FORM_CONSTRUCTOR_JSDOC,
                 point.getCaretBeginWordOffset(),
                 point.getCaretEndWordOffset()));
-        return constructors;
+        return items;
+    }
+
+    @Override
+    public Collection<JsCompletionItem> getSystemObjects(CompletionPoint point) {
+        List<JsCompletionItem> items = new ArrayList<>();
+        for (Class<?> clazz : FormUtils.getPlatypusApiClasses()) {
+            if (clazz.isAnnotationPresent(ScriptObj.class)) {
+                ScriptObj objectInfo = clazz.getAnnotation(ScriptObj.class);
+                    items.add(
+                            new JsFieldCompletionItem(objectInfo.name().isEmpty() ?
+                                    clazz.getSimpleName() : objectInfo.name(),
+                                    "",//NOI18N
+                                    objectInfo.jsDoc(),
+                                    point.getCaretBeginWordOffset(),
+                                    point.getCaretEndWordOffset()));
+        }}
+        return items;
     }
 }

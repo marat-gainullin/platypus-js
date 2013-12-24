@@ -58,6 +58,7 @@ import com.eas.dbcontrols.spin.DbSpin;
 import com.eas.dbcontrols.text.DbText;
 import com.eas.gui.JDropDownButton;
 import com.eas.script.ScriptFunction;
+import com.eas.script.ScriptObj;
 import java.awt.*;
 import java.beans.*;
 import java.io.*;
@@ -658,8 +659,16 @@ public class FormUtils {
         com.eas.client.forms.api.menu.MenuItem.class,
         PopupMenu.class,
         com.eas.client.forms.api.menu.RadioMenuItem.class,
-        com.eas.gui.CascadedStyle.class
+        com.eas.gui.CascadedStyle.class,
+        com.eas.client.forms.IconResources.class,
+        com.eas.gui.Font.class,
+        com.eas.gui.FontStyle.class,
+        com.eas.client.scripts.ScriptColor.class,
+        com.eas.client.forms.api.VerticalPosition.class,
+        com.eas.client.forms.api.HorizontalPosition.class,
+        com.eas.client.forms.api.Orientation.class
     };
+
     private static final Map<String, Class<?>> scriptNames2PlatypusApiClasses = new HashMap<>();
     private static final Map<Class<?>, Class<?>> swingClasses2PlatypusApiClasses = new HashMap<>();
     private static final Map<Class<?>, Class<?>> layoutClasses2PlatypusContainerClasses = new HashMap<>();
@@ -715,8 +724,14 @@ public class FormUtils {
             scriptNames2PlatypusApiClasses.put(getScriptConstructorName(clazz), clazz);
         }
     }
-
+    
     private static String getScriptConstructorName(Class<?> clazz) {
+        if (clazz.isAnnotationPresent(ScriptObj.class)) {
+            ScriptObj objectInfo = clazz.getAnnotation(ScriptObj.class);
+            if (!objectInfo.name().isEmpty()) {
+                return objectInfo.name();
+            }
+        }
         for (Constructor<?> constructor : clazz.getConstructors()) {
             if (constructor.isAnnotationPresent(ScriptFunction.class)) {
                 ScriptFunction scriptInfo = constructor.getAnnotation(ScriptFunction.class);
@@ -1405,7 +1420,7 @@ public class FormUtils {
     public static Class[] getPlatypusApiClasses() {
         return apiClasses;
     }
-
+    
     public static Class<?> getPlatypusControlClass(Class<?> aBeanClass) {
         if (swingClasses2PlatypusApiClasses.containsKey(aBeanClass)) {
             return swingClasses2PlatypusApiClasses.get(aBeanClass);

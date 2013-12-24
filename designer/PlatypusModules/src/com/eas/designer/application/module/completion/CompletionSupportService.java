@@ -17,4 +17,5 @@ public interface CompletionSupportService {
         
     public Collection<JsCompletionItem> getSystemConstructors(CompletionPoint point);
    
+    public Collection<JsCompletionItem> getSystemObjects(CompletionPoint point);
 }
