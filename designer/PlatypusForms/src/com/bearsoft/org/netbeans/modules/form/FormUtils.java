@@ -57,6 +57,7 @@ import com.eas.dbcontrols.scheme.DbScheme;
 import com.eas.dbcontrols.spin.DbSpin;
 import com.eas.dbcontrols.text.DbText;
 import com.eas.gui.JDropDownButton;
+import com.eas.script.ScriptFunction;
 import java.awt.*;
 import java.beans.*;
 import java.io.*;
@@ -656,7 +657,8 @@ public class FormUtils {
         com.eas.client.forms.api.menu.MenuBar.class,
         com.eas.client.forms.api.menu.MenuItem.class,
         PopupMenu.class,
-        com.eas.client.forms.api.menu.RadioMenuItem.class
+        com.eas.client.forms.api.menu.RadioMenuItem.class,
+        com.eas.gui.CascadedStyle.class
     };
     private static final Map<String, Class<?>> scriptNames2PlatypusApiClasses = new HashMap<>();
     private static final Map<Class<?>, Class<?>> swingClasses2PlatypusApiClasses = new HashMap<>();
@@ -710,10 +712,22 @@ public class FormUtils {
 
     private static void initScriptNames2PlatypusApiClasses() {
         for (Class<?> clazz : apiClasses) {
-            scriptNames2PlatypusApiClasses.put(clazz.getSimpleName(), clazz);
+            scriptNames2PlatypusApiClasses.put(getScriptConstructorName(clazz), clazz);
         }
     }
 
+    private static String getScriptConstructorName(Class<?> clazz) {
+        for (Constructor<?> constructor : clazz.getConstructors()) {
+            if (constructor.isAnnotationPresent(ScriptFunction.class)) {
+                ScriptFunction scriptInfo = constructor.getAnnotation(ScriptFunction.class);
+                if (!scriptInfo.name().isEmpty()) {
+                    return scriptInfo.name();
+                }
+            }
+        }
+        return clazz.getSimpleName();
+    }
+    
     private static void initLayoutClasses2PlatypusContainerClasses() {
         layoutClasses2PlatypusContainerClasses.put(com.eas.controls.layouts.margin.MarginLayout.class, AnchorsPane.class);
         layoutClasses2PlatypusContainerClasses.put(java.awt.BorderLayout.class, BorderPane.class);

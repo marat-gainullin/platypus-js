@@ -13,6 +13,13 @@ import java.lang.annotation.Target;
 @Target({ElementType.METHOD, ElementType.CONSTRUCTOR})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ScriptFunction {
+    
+    /**
+     * Function's name
+     * @return name
+     */
+    public String name() default "";// NOI18N
+    
     /**
      * Function's jsDoc
      * @return jsDoc section text
