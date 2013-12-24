@@ -84,28 +84,6 @@ public class FormCompletionContext extends ModuleCompletionContext {
 
     }
 
-    @Override
-    protected void fillSystemConstructors(CompletionPoint point, CompletionResultSet resultSet) {
-        super.fillSystemConstructors(point, resultSet);
-        for (Class<?> clazz : FormUtils.getPlatypusApiClasses()) {
-            for (Constructor<?> constructor : clazz.getConstructors()) {
-                if (constructor.isAnnotationPresent(ScriptFunction.class)) {
-                    ScriptFunction annotation = constructor.getAnnotation(ScriptFunction.class);
-                    addItem(resultSet,
-                            point.getFilter(),
-                            new ComponentConstructorCompletionItem(annotation.name().isEmpty() ?
-                                    clazz.getSimpleName() : annotation.name(),
-                                    "",//NOI18N
-                                    Arrays.<String>asList(annotation.params()),
-                                    annotation.jsDoc(),
-                                    point.getCaretBeginWordOffset(),
-                                    point.getCaretEndWordOffset()));
-                    break;
-                }
-            }
-        }
-    }
-
     private Class<?> lowLevelEventType2ScriptEventType(Class<?> aClass) {
         for (Method method : EVENT_WRAPPER_CLASS.getMethods()) {
             if (method.getName().equals(EVENTS_WRAPPER_METHOD_NAME) && Modifier.isStatic(method.getModifiers())) {

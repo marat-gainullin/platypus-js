@@ -9,7 +9,10 @@ import com.eas.designer.application.module.completion.CompletionPoint;
 import com.eas.designer.application.module.completion.CompletionSupportService;
 import com.eas.designer.application.module.completion.JsCompletionItem;
 import com.eas.designer.application.module.completion.SystemConstructorCompletionItem;
+import com.eas.script.ScriptFunction;
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import org.openide.util.lookup.ServiceProvider;
@@ -35,6 +38,22 @@ public class FormCompletionSupportService implements CompletionSupportService {
     @Override
     public Collection<JsCompletionItem> getSystemConstructors(CompletionPoint point) {
         List<JsCompletionItem> constructors = new ArrayList<>();
+        for (Class<?> clazz : FormUtils.getPlatypusApiClasses()) {
+            for (Constructor<?> constructor : clazz.getConstructors()) {
+                if (constructor.isAnnotationPresent(ScriptFunction.class)) {
+                    ScriptFunction annotation = constructor.getAnnotation(ScriptFunction.class);
+                    constructors.add(
+                            new ComponentConstructorCompletionItem(annotation.name().isEmpty() ?
+                                    clazz.getSimpleName() : annotation.name(),
+                                    "",//NOI18N
+                                    Arrays.<String>asList(annotation.params()),
+                                    annotation.jsDoc(),
+                                    point.getCaretBeginWordOffset(),
+                                    point.getCaretEndWordOffset()));
+                    break;
+                }
+            }
+        }
         constructors.add(new SystemConstructorCompletionItem(FORM_CONSTRUCTOR_NAME,
                 "",//NOI18N
                 new ArrayList<String>() {
