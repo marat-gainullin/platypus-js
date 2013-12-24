@@ -76,7 +76,7 @@ public class FormCompletionSupportService implements CompletionSupportService {
             if (clazz.isAnnotationPresent(ScriptObj.class)) {
                 ScriptObj objectInfo = clazz.getAnnotation(ScriptObj.class);
                     items.add(
-                            new JsFieldCompletionItem(objectInfo.name().isEmpty() ?
+                            new FormObjectCompletionItem(objectInfo.name().isEmpty() ?
                                     clazz.getSimpleName() : objectInfo.name(),
                                     "",//NOI18N
                                     objectInfo.jsDoc(),
