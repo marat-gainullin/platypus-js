@@ -100,7 +100,7 @@ public class PlatypusScriptedResource {
     @ScriptFunction(params = {"path"}, jsDoc = "/**\n"
             + "* Loads a resource's bytes either from disk or from datatbase.\n"
             + "* @param path a relative path to the resource\n"
-            + "* @return the resource as a bytes array"
+            + "* @return the resource as a bytes array\n"
             + "*/")
     public static byte[] load(String aResourceId) throws Exception {
         if (aResourceId != null && !aResourceId.isEmpty()) {
@@ -176,7 +176,7 @@ public class PlatypusScriptedResource {
             + "* Loads a resource as text.\n"
             + "* @param path an relative path to the resource\n"
             + "* @param encoding an name of the specific encoding, UTF-8 by default (optional)\n"
-            + "* @return the resource as a <code>string</code>"
+            + "* @return the resource as a <code>string</code>\n"
             + "*/")
     public static String loadText(String aResourceId, String aEncodingName) throws Exception {
         byte[] data = load(aResourceId);
