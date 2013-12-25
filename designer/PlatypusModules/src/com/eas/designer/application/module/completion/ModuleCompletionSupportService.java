@@ -4,9 +4,11 @@
  */
 package com.eas.designer.application.module.completion;
 
+import com.eas.client.scripts.ScriptRunner;
+import com.eas.designer.application.module.ModuleUtils;
+import com.eas.script.ScriptObj;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import org.openide.util.lookup.ServiceProvider;
 
@@ -30,7 +32,7 @@ public class ModuleCompletionSupportService implements CompletionSupportService 
 
     @Override
     public Class<?> getClassByName(String name) {
-        return null;
+        return ModuleUtils.getPlatypusApiClassByName(name);
     }
 
     @Override
@@ -59,6 +61,17 @@ public class ModuleCompletionSupportService implements CompletionSupportService 
     @Override
     public Collection<JsCompletionItem> getSystemObjects(CompletionPoint point) {
         List<JsCompletionItem> items = new ArrayList<>();
+        for (Class<?> clazz : ModuleUtils.getPlatypusApiClasses()) {
+            if (clazz.isAnnotationPresent(ScriptObj.class)) {
+                ScriptObj objectInfo = clazz.getAnnotation(ScriptObj.class);
+                    items.add(
+                            new JsFieldCompletionItem(objectInfo.name().isEmpty() ?
+                                    clazz.getSimpleName() : objectInfo.name(),
+                                    "",//NOI18N
+                                    objectInfo.jsDoc(),
+                                    point.getCaretBeginWordOffset(),
+                                    point.getCaretEndWordOffset()));
+        }}
         return items;
     }
 

@@ -56,6 +56,7 @@ import com.eas.dbcontrols.map.DbMap;
 import com.eas.dbcontrols.scheme.DbScheme;
 import com.eas.dbcontrols.spin.DbSpin;
 import com.eas.dbcontrols.text.DbText;
+import com.eas.designer.application.module.ModuleUtils;
 import com.eas.gui.JDropDownButton;
 import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptObj;
@@ -722,26 +723,8 @@ public class FormUtils {
 
     private static void initScriptNames2PlatypusApiClasses() {
         for (Class<?> clazz : apiClasses) {
-            scriptNames2PlatypusApiClasses.put(getScriptConstructorName(clazz), clazz);
+            scriptNames2PlatypusApiClasses.put(ModuleUtils.getScriptConstructorName(clazz), clazz);
         }
-    }
-    
-    private static String getScriptConstructorName(Class<?> clazz) {
-        if (clazz.isAnnotationPresent(ScriptObj.class)) {
-            ScriptObj objectInfo = clazz.getAnnotation(ScriptObj.class);
-            if (!objectInfo.name().isEmpty()) {
-                return objectInfo.name();
-            }
-        }
-        for (Constructor<?> constructor : clazz.getConstructors()) {
-            if (constructor.isAnnotationPresent(ScriptFunction.class)) {
-                ScriptFunction scriptInfo = constructor.getAnnotation(ScriptFunction.class);
-                if (!scriptInfo.name().isEmpty()) {
-                    return scriptInfo.name();
-                }
-            }
-        }
-        return clazz.getSimpleName();
     }
     
     private static void initLayoutClasses2PlatypusContainerClasses() {
