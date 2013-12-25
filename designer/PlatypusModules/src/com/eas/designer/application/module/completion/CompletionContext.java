@@ -14,6 +14,7 @@ import com.eas.designer.application.module.completion.CompletionPoint.Completion
 import com.eas.script.ScriptFunction;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -120,9 +121,7 @@ public class CompletionContext {
                 List<String> parameters = new ArrayList<>();
                 String[] params = method.getAnnotation(ScriptFunction.class).params();
                 if (params != null) {
-                    for (String param : params) {
-                        parameters.add(param);
-                    }
+                    parameters.addAll(Arrays.asList(params));
                 }
                 JsFunctionCompletionItem functionCompletionItem = new JsFunctionCompletionItem(
                         method.getName(),
