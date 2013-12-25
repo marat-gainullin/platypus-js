@@ -63,7 +63,7 @@ public class ModuleCompletionSupportService implements CompletionSupportService 
             + "* @param successCallback a handler function for a file upload success\n"
             + "* @param progessCallback a handler function for a file upload success,"
             + " takes as a parameter <code>evt</code> object with the following propeties:"
-            + " <code>loaded<code> -- the currectly loaded value and <code>total</code> -- the total file size\n"
+            + " <code>loaded</code> -- the currectly loaded value and <code>total</code> -- the total file size\n"
             + "* @param failureCallback a handler function for a file upload failure, takes as a parameter an error string\n"
             + "*/";
     
