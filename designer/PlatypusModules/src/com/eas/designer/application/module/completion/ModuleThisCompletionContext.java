@@ -41,6 +41,10 @@ public class ModuleThisCompletionContext extends CompletionContext {
     private final boolean enableJsElementsCompletion;
     private final ModuleCompletionContext parentContext;
     
+    private static final String MODEL_PROPERTY_JS_DOC = "/**\n"
+            + "* The module's data model.\n"
+            + "*/"; 
+    
     private static final String HTTP_PROPERTY_JS_DOC = "/**\n"
             + "* The object to hold the current HTTP request/response data.\n"
             + "* <strong>Avaliable in module's public methods when invoked by HTTP protocol.</strong>\n"
@@ -97,7 +101,7 @@ public class ModuleThisCompletionContext extends CompletionContext {
     }
 
     protected void fillVariablesAndFunctions(CompletionPoint point, CompletionResultSet resultSet) throws Exception {
-        addItem(resultSet, point.getFilter(), new BeanCompletionItem(ApplicationDbModel.class, MODEL_SCRIPT_NAME, null, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
+        addItem(resultSet, point.getFilter(), new BeanCompletionItem(ApplicationDbModel.class, MODEL_SCRIPT_NAME, MODEL_PROPERTY_JS_DOC, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
         if (enableJsElementsCompletion) {
             ScanJsElementsSupport scanner = new ScanJsElementsSupport(PlatypusFilesSupport.extractModuleConstructor(parentContext.getDataObject().getAst()));
             for (JsCompletionItem i : scanner.getCompletionItems(point)) {

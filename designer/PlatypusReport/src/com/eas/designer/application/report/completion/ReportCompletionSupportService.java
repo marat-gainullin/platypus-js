@@ -45,4 +45,10 @@ public class ReportCompletionSupportService implements CompletionSupportService 
                 point.getCaretEndWordOffset()));
         return constructors;
     }
+
+    @Override
+    public Collection<JsCompletionItem> getSystemObjects(CompletionPoint point) {
+        List<JsCompletionItem> items = new ArrayList<>();
+        return items;
+    }
 }
