@@ -5,13 +5,29 @@
 package com.eas.client.scripts;
 
 import com.eas.gui.CascadedStyle;
+import com.eas.script.ScriptFunction;
+import com.eas.script.ScriptObj;
 import java.awt.Color;
 
 /**
  *
  * @author mg
  */
+@ScriptObj(name = "Color", jsDoc = "/**\n"
+        + "* The <code>Color</code> class is used to encapsulate colors in the default RGB color space.\n"
+        + "*/")
 public class ScriptColor extends java.awt.Color {
+
+    @ScriptFunction(name = "Color", params = {"red", "green", "blue", "alpha"}, jsDoc = "/**\n"
+            + "* The <code>Color</code> class is used to encapsulate colors in the default RGB color space."
+            + "* @param red Red compontent (optional)\n"
+            + "* @param red Green compontent (optional)\n"
+            + "* @param red Blue compontent (optional)\n"
+            + "* @param red Alpha compontent (optional)\n"
+            + "*/")
+    public ScriptColor(int r, int g, int b, int a) {
+        super(r, g, b, a);
+    }
 
     public ScriptColor() {
         this(0, 0, 0, 0xff);
@@ -19,10 +35,6 @@ public class ScriptColor extends java.awt.Color {
 
     public ScriptColor(int r, int g, int b) {
         super(r, g, b);
-    }
-
-    public ScriptColor(int r, int g, int b, int a) {
-        super(r, g, b, a);
     }
 
     public ScriptColor(java.awt.Color aColor) {
@@ -33,6 +45,66 @@ public class ScriptColor extends java.awt.Color {
         this(Color.decode(aEncoded));
     }
 
+    @ScriptFunction
+    public static Color getWHITE() {
+        return WHITE;
+    } 
+
+    @ScriptFunction
+    public static Color getLIGHT_GRAY() {
+        return LIGHT_GRAY;
+    }
+    
+    @ScriptFunction
+    public static Color getGRAY() {
+        return GRAY;
+    }
+    
+    @ScriptFunction
+    public static Color getDARK_GRAY() {
+        return DARK_GRAY;
+    }
+    
+    @ScriptFunction
+    public static Color getBLACK() {
+        return BLACK;
+    }
+    
+    @ScriptFunction
+    public static Color getRED() {
+        return RED;
+    }
+    
+    @ScriptFunction
+    public static Color getPINK() {
+        return PINK;
+    }
+    
+    @ScriptFunction
+    public static Color getORANGE() {
+        return ORANGE;
+    }
+    
+    @ScriptFunction
+    public static Color getYELLOW() {
+        return YELLOW;
+    }
+    
+    @ScriptFunction
+    public static Color getMAGENTA() {
+        return MAGENTA;
+    }
+    
+    @ScriptFunction
+    public static Color getCYAN() {
+        return CYAN;
+    }
+    
+    @ScriptFunction
+    public static Color getBLUE() {
+        return BLUE;
+    }
+    
     @Override
     public String toString() {
         return CascadedStyle.encodeColor(this);

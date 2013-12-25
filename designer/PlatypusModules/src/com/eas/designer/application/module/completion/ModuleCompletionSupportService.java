@@ -4,9 +4,11 @@
  */
 package com.eas.designer.application.module.completion;
 
+import com.eas.client.scripts.ScriptRunner;
+import com.eas.designer.application.module.ModuleUtils;
+import com.eas.script.ScriptObj;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import org.openide.util.lookup.ServiceProvider;
 
@@ -20,23 +22,23 @@ public class ModuleCompletionSupportService implements CompletionSupportService 
     private static final String MODULE_CONSTRUCTOR_NAME = "Module";//NOI18N
     private static final String SERVER_MODULE_CONSTRUCTOR_NAME = "ServerModule";//NOI18N
     private static final String MODULE_CONSTRUCTOR_JSDOC = "/**\n"
-            + "* Creates new Platypus application element instance.\n"//NOI18N
-            + "* @param name Application element name\n"//NOI18N
-            + "*/";//NOI18N
+            + "* Creates new Platypus application element instance.\n"
+            + "* @param name Application element name\n"
+            + "*/";
     private static final String SERVER_MODULE_CONSTRUCTOR_JSDOC = "/**\n"
-            + "* Creates new proxy to a Platypus application element instance on the server.\n"//NOI18N
-            + "* @param name Server application element name\n"//NOI18N
-            + "*/";//NOI18N
+            + "* Creates new proxy to a Platypus application element instance on the server.\n"
+            + "* @param name Server application element name\n"
+            + "*/";
 
     @Override
     public Class<?> getClassByName(String name) {
-        return null;
+        return ModuleUtils.getPlatypusApiClassByName(name);
     }
 
     @Override
     public Collection<JsCompletionItem> getSystemConstructors(CompletionPoint point) {
-        List<JsCompletionItem> constructors = new ArrayList<>();
-        constructors.add(new SystemConstructorCompletionItem(MODULE_CONSTRUCTOR_NAME,
+        List<JsCompletionItem> items = new ArrayList<>();
+        items.add(new SystemConstructorCompletionItem(MODULE_CONSTRUCTOR_NAME,
                 "",//NOI18N
                 new ArrayList<String>() {
                     {
@@ -46,14 +48,31 @@ public class ModuleCompletionSupportService implements CompletionSupportService 
                 MODULE_CONSTRUCTOR_JSDOC,
                 point.getCaretBeginWordOffset(),
                 point.getCaretEndWordOffset()));
-        constructors.add(new SystemConstructorCompletionItem(SERVER_MODULE_CONSTRUCTOR_NAME,
+        items.add(new SystemConstructorCompletionItem(SERVER_MODULE_CONSTRUCTOR_NAME,
                 "",//NOI18N
                 new ArrayList<String>() {
                     {
                         add("name");//NOI18N
                     }
                 }, SERVER_MODULE_CONSTRUCTOR_JSDOC, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
-        return constructors;
+        return items;
+    }
+
+    @Override
+    public Collection<JsCompletionItem> getSystemObjects(CompletionPoint point) {
+        List<JsCompletionItem> items = new ArrayList<>();
+        for (Class<?> clazz : ModuleUtils.getPlatypusApiClasses()) {
+            if (clazz.isAnnotationPresent(ScriptObj.class)) {
+                ScriptObj objectInfo = clazz.getAnnotation(ScriptObj.class);
+                    items.add(
+                            new JsFieldCompletionItem(objectInfo.name().isEmpty() ?
+                                    clazz.getSimpleName() : objectInfo.name(),
+                                    "",//NOI18N
+                                    objectInfo.jsDoc(),
+                                    point.getCaretBeginWordOffset(),
+                                    point.getCaretEndWordOffset()));
+        }}
+        return items;
     }
 
 }
