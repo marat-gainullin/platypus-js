@@ -198,10 +198,10 @@ public class ScriptRunner extends ScriptableObject {
     public long getTxtCrc32() {
         return txtCrc32;
     }
-    private static final String GET_PRINCIPAL_JSDOC = ""
+    
+    private static final String PRINCIPAL_JSDOC = ""
             + "/**\n"
-            + "* Script security API.\n"
-            + "* @return PlatypusPrincipal instance, wich may be used to check roles in\n"
+            + "* <code>PlatypusPrincipal</code> instance, wich may be used to check roles in\n"
             + "* application code with calls of the hasRole method.\n"
             + "*/";
 
@@ -212,7 +212,7 @@ public class ScriptRunner extends ScriptableObject {
      * application code with calls of the hasRole method.
      * @see PlatypusPrincipal
      */
-    @ScriptFunction(jsDoc = GET_PRINCIPAL_JSDOC)
+    @ScriptFunction(jsDoc = PRINCIPAL_JSDOC)
     public Object getPrincipal() {
         if (principalHost != null) {
             return Context.javaToJS(principalHost.getPrincipal(), this);
