@@ -181,18 +181,12 @@ public class ScriptRunner extends ScriptableObject {
     public ApplicationModel<?, ?, ?, ?> getModel() {
         return model;
     }
-    private static final String GET_APPICATION_ELEMENT_ID_JSDOC = ""
-            + "/**\n"
-            + "* Gets application element Id.\n"
-            + "* @return Module's application element Id\n"
-            + "*/";
 
     /**
      * Gets application element Id
      *
      * @return Module's application element Id
      */
-    @ScriptFunction(jsDoc = GET_APPICATION_ELEMENT_ID_JSDOC)
     public String getApplicationElementId() {
         return appElementId;
     }
