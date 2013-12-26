@@ -556,7 +556,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
             + "/**\n"
             + "* Creates new entity of model, based on application query.\n"
             + "* @param queryId the query application element ID.\n"
-            + "* @return a new entity."
+            + "* @return a new entity.\n"
             + "*/";
 
     @ScriptFunction(jsDoc = LOAD_ENTITY_JSDOC, params = {"queryId"})
