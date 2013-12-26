@@ -10,7 +10,6 @@ import com.eas.client.model.application.ApplicationDbModel;
 import com.eas.designer.application.indexer.IndexerQuery;
 import com.eas.designer.application.module.ModuleUtils;
 import com.eas.designer.application.module.PlatypusModuleDataObject;
-import static com.eas.designer.application.module.completion.CompletionContext.REPORT_MODULE_NAME;
 import static com.eas.designer.application.module.completion.CompletionContext.addItem;
 import com.eas.designer.application.module.completion.CompletionPoint.CompletionToken;
 import com.eas.designer.application.module.events.ApplicationEntityEventProperty;
@@ -57,6 +56,14 @@ import org.openide.util.Lookup;
 public class ModuleCompletionContext extends CompletionContext {
 
     public static final String THIS_KEYWORD = "this";//NOI18N
+    public static final String PARAMS_SCRIPT_NAME = "params";// NOI18N
+    protected static final String METADATA_SCRIPT_NAME = ApplicationDbModel.DATASOURCE_METADATA_SCRIPT_NAME;
+    protected static final String MODULE_NAME = "Module";// NOI18N
+    protected static final String SERVER_MODULE_NAME = "ServerModule";// NOI18N
+    protected static final String FORM_MODULE_NAME = "Form";// NOI18N
+    protected static final String REPORT_MODULE_NAME = "Report";// NOI18N
+    protected static final String SERVER_REPORT_MODULE_NAME = "ServerReport";// NOI18N
+    protected static final String MODULES_OBJECT_NAME = "Modules";// NOI18N
     private static final Set<String> ARRAY_ITERATION_FUNCTIONS_NAMES = new HashSet<String>() {
         {
             add("forEach");//NOI18N

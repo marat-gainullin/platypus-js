@@ -202,7 +202,7 @@ public class ScriptRunner extends ScriptableObject {
     private static final String PRINCIPAL_JSDOC = ""
             + "/**\n"
             + "* <code>PlatypusPrincipal</code> instance, wich may be used to check roles in\n"
-            + "* application code with calls of the hasRole method.\n"
+            + "* application code with calls of the <code>hasRole</code> method.\n"
             + "*/";
 
     /**
