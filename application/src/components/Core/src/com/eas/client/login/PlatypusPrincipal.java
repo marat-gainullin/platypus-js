@@ -23,7 +23,23 @@ public abstract class PlatypusPrincipal implements Principal {
         name = aName;
     }
 
-    @ScriptFunction(jsDoc = "Checks if a user have a specified role")
+    private static final String NAME_JS_DOC = "/**\n"
+            + "* The username.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = NAME_JS_DOC)
+    @Override
+    public String getName() {
+        return name;
+    }
+    
+    private static final String HAS_ROLE_JS_DOC = "/**\n"
+            + "* Checks if a user have a specified role.\n"
+            + "* @param role a role's name to test\n"
+            + "* @return <code>true</code> if the user has the provided role\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = HAS_ROLE_JS_DOC)
     public abstract boolean hasRole(String aRole) throws Exception;
 
     public boolean hasAnyRole(Set<String> aRoles) throws Exception {
@@ -38,7 +54,6 @@ public abstract class PlatypusPrincipal implements Principal {
         return true;
     }
     
-    @ScriptFunction(jsDoc = "Generates a string representation of an object")
     @Override
     public String toString() {
         return super.toString() + "{username: \"" + name + "\"}";
@@ -68,11 +83,5 @@ public abstract class PlatypusPrincipal implements Principal {
     @Override
     public int hashCode() {
         return name.hashCode();
-    }
-
-    @ScriptFunction(jsDoc = "Returns name of the user")
-    @Override
-    public String getName() {
-        return name;
     }
 }

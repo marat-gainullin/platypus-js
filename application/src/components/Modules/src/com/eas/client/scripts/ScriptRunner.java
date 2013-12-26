@@ -181,18 +181,12 @@ public class ScriptRunner extends ScriptableObject {
     public ApplicationModel<?, ?, ?, ?> getModel() {
         return model;
     }
-    private static final String GET_APPICATION_ELEMENT_ID_JSDOC = ""
-            + "/**\n"
-            + "* Gets application element Id.\n"
-            + "* @return Module's application element Id\n"
-            + "*/";
 
     /**
      * Gets application element Id
      *
      * @return Module's application element Id
      */
-    @ScriptFunction(jsDoc = GET_APPICATION_ELEMENT_ID_JSDOC)
     public String getApplicationElementId() {
         return appElementId;
     }
@@ -204,11 +198,11 @@ public class ScriptRunner extends ScriptableObject {
     public long getTxtCrc32() {
         return txtCrc32;
     }
-    private static final String GET_PRINCIPAL_JSDOC = ""
+    
+    private static final String PRINCIPAL_JSDOC = ""
             + "/**\n"
-            + "* Script security API.\n"
-            + "* @return PlatypusPrincipal instance, wich may be used to check roles in\n"
-            + "* application code with calls of the hasRole method.\n"
+            + "* <code>PlatypusPrincipal</code> instance, wich may be used to check roles in\n"
+            + "* application code with calls of the <code>hasRole</code> method.\n"
             + "*/";
 
     /**
@@ -218,7 +212,7 @@ public class ScriptRunner extends ScriptableObject {
      * application code with calls of the hasRole method.
      * @see PlatypusPrincipal
      */
-    @ScriptFunction(jsDoc = GET_PRINCIPAL_JSDOC)
+    @ScriptFunction(jsDoc = PRINCIPAL_JSDOC)
     public Object getPrincipal() {
         if (principalHost != null) {
             return Context.javaToJS(principalHost.getPrincipal(), this);

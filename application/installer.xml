@@ -137,7 +137,6 @@
         <description/> 
 	    <fileset dir="bin" targetdir="$INSTALL_PATH/bin">
 	        <include name="pwc/**" />
-			<include name="pwa.js"/>
       	</fileset>
     </pack>
 	

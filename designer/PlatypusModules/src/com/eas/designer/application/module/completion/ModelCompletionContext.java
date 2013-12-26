@@ -7,8 +7,8 @@ package com.eas.designer.application.module.completion;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationModel;
 import com.eas.designer.application.module.PlatypusModuleDataObject;
-import static com.eas.designer.application.module.completion.CompletionContext.PARAMS_SCRIPT_NAME;
 import static com.eas.designer.application.module.completion.CompletionContext.addItem;
+import static com.eas.designer.application.module.completion.ModuleCompletionContext.PARAMS_SCRIPT_NAME;
 import org.netbeans.spi.editor.completion.CompletionResultSet;
 
 /**
