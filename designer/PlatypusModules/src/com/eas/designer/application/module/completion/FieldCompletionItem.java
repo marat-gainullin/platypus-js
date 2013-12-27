@@ -21,7 +21,7 @@ public class FieldCompletionItem extends JsCompletionItem {
     private static final int SORT_PRIORITY = 10;
     
     public FieldCompletionItem(Field aField, int aStartOffset, int aEndOffset) {
-        super(aField.getName(), (aField.getDescription() != null && !aField.getDescription().isEmpty()) ? aField.getDescription() : null, aStartOffset, aEndOffset);
+        super(aField.getName(), aField.getDescription(), aStartOffset, aEndOffset);
         Icon fIcon = calcFieldIcon(aField.getTypeInfo().getSqlType(), aField);
         if (fIcon != null) {
             icon = new ImageIcon(ImageUtilities.icon2Image(fIcon));
@@ -32,6 +32,11 @@ public class FieldCompletionItem extends JsCompletionItem {
     @Override
     public int getSortPriority() {
         return SORT_PRIORITY;
+    }
+    
+    @Override
+    public String getInfomationText() {
+        return informationText == null ? "" : informationText;//NOI18N
     }
     
     public static Icon calcFieldIcon(int sqlType, Field field) {

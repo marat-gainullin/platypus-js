@@ -50,26 +50,6 @@ public class CompletionContext {
         return null;
     }
 
-    protected void fillFields(Fields aFields, CompletionPoint point, CompletionResultSet resultSet) {
-        for (Field field : aFields.toCollection()) {
-            addItem(resultSet, point.getFilter(), new BeanCompletionItem(field.getClass(), field.getName(), field.getDescription(), point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
-        }
-    }
-
-    protected void fillFieldsValues(Fields aFields, CompletionPoint point, CompletionResultSet resultSet) {
-        for (Field field : aFields.toCollection()) {
-            addItem(resultSet, point.getFilter(), new FieldCompletionItem(field, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
-        }
-    }
-
-    protected void fillEntities(Collection<? extends Entity> entities, CompletionResultSet resultSet, CompletionPoint point) throws Exception {
-        for (Entity appEntity : entities) {
-            if (appEntity.getName() != null && !appEntity.getName().isEmpty()) {
-                addItem(resultSet, point.getFilter(), new BeanCompletionItem(ScriptableRowset.class, appEntity.getName(), null, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
-            }
-        }
-    }
-
     protected static void addItem(CompletionResultSet resultSet, String aFilter, JsCompletionItem aCompletionItem) {
         if (aFilter == null || aFilter.isEmpty() || (aCompletionItem.getText().toLowerCase().startsWith(aFilter.toLowerCase()) && !aCompletionItem.getText().equals(aFilter))) {
             if (aFilter == null || !(aFilter.endsWith(")") || aFilter.endsWith("}"))) {//NOI18N
