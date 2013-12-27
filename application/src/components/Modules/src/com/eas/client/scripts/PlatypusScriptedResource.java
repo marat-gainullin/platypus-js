@@ -18,11 +18,16 @@ import com.eas.script.ScriptObj;
 import com.eas.util.BinaryUtils;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.IDN;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLConnection;
+import java.nio.charset.Charset;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -172,16 +177,62 @@ public class PlatypusScriptedResource {
      * @return Resource's text
      * @throws Exception If some error occurs when reading the resource
      */
-    @ScriptFunction(params = {"path", "encoding"}, jsDoc = "/**\n"
+    @ScriptFunction(params = {"path", "encoding"}, jsDoc = ""
+            + "/**\n"
             + "* Loads a resource as text.\n"
             + "* @param path an relative path to the resource\n"
-            + "* @param encoding an name of the specific encoding, UTF-8 by default (optional)\n"
+            + "* @param encoding an name of the specific encoding, UTF-8 by default (optional). Note: If a resource is loaded via http, http response content type header's charset have a priority.\n"
             + "* @return the resource as a <code>string</code>\n"
             + "*/")
     public static String loadText(String aResourceId, String aEncodingName) throws Exception {
-        byte[] data = load(aResourceId);
+        if (aEncodingName == null) {
+            aEncodingName = SettingsConstants.COMMON_ENCODING;
+        }
+        byte[] data = null;
+        Matcher htppMatcher = pattern.matcher(aResourceId);
+        if (htppMatcher.matches()) {
+            URL url = new URL(aResourceId);
+            URLConnection conn = null;
+            InputStream is = null;
+            try {
+                conn = url.openConnection();
+                conn.setRequestProperty("accept-encoding", "deflate");
+                ((HttpURLConnection) conn).getResponseCode();
+                is = conn.getInputStream();
+            } catch (IOException ex) {
+                url = encodeUrl(url);
+                conn = url.openConnection();
+                ((HttpURLConnection) conn).getResponseCode();
+                is = conn.getInputStream();
+            }
+            try (InputStream _is = is) {
+                data = BinaryUtils.readStream(_is, -1);
+                String contentType = conn.getContentType();
+                if (contentType != null) {
+                    contentType = contentType.replaceAll("\\s+", "").toLowerCase();
+                    if (contentType.contains(";charset=")) {
+                        String[] typeCharset = contentType.split(";charset=");
+                        if (typeCharset.length == 2 && typeCharset[1] != null) {
+                            aEncodingName = typeCharset[1];
+                        } else {
+                            Logger.getLogger(PlatypusScriptedResource.class.getName()).log(Level.WARNING, ENCODING_MISSING_MSG, aEncodingName);
+                        }
+                    } else {
+                        Logger.getLogger(PlatypusScriptedResource.class.getName()).log(Level.WARNING, ENCODING_MISSING_MSG, aEncodingName);
+                    }
+                } else {
+                    Logger.getLogger(PlatypusScriptedResource.class.getName()).log(Level.WARNING, ENCODING_MISSING_MSG, aEncodingName);
+                }
+            }
+        } else {
+            data = load(aResourceId);
+        }
+        if (!Charset.isSupported(aEncodingName)) {
+            throw new IllegalStateException("Encoding: " + aEncodingName + " is not supported.");
+        }
         return data != null ? new String(data, aEncodingName) : null;
     }
+    public static final String ENCODING_MISSING_MSG = "Encoding missing in http response. Falling back to {0}";
 
     protected static String translateResourcePath(String aPath) throws Exception {
         /*
