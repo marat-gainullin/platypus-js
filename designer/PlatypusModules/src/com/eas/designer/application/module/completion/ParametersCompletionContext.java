@@ -29,7 +29,7 @@ public class ParametersCompletionContext extends CompletionContext {
         if (getScriptClass() != null) {
             fillJavaCompletionItems(point, resultSet);
         }
-        fillFieldsValues(parameters, point, resultSet);
+        EntityElementCompletionContext.fillFieldsValues(parameters, point, resultSet);
         addItem(resultSet, point.getFilter(), new BeanCompletionItem(Parameters.class, METADATA_SCRIPT_NAME, null, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
     }
 

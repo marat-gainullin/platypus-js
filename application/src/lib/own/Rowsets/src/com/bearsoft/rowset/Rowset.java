@@ -952,7 +952,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
     }
 
     /**
-     * Positions rowset on specified row number. Row number is 1-based.
+     * Positions the rowset cursor on the specified row number. Row number is 1-based.
      *
      * @param aCursorPos Cursor position you whant to be setted in this rowset.
      * @return True if cursor position in rowset equals to aCursorPos.
