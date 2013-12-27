@@ -6,20 +6,17 @@ package com.eas.designer.explorer.dbmigrations;
 
 import com.eas.designer.explorer.project.PlatypusProjectImpl;
 import java.awt.event.ActionEvent;
-import java.net.URL;
+import java.util.MissingResourceException;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import org.netbeans.api.progress.ProgressHandle;
 import org.netbeans.api.progress.ProgressHandleFactory;
-import org.netbeans.modules.j2ee.deployment.devmodules.api.Deployment;
-import org.netbeans.modules.j2ee.deployment.devmodules.spi.J2eeModuleProvider;
 import org.openide.DialogDisplayer;
+import org.openide.ErrorManager;
 import org.openide.NotifyDescriptor;
-import org.openide.awt.HtmlBrowser;
 import org.openide.awt.StatusDisplayer;
 import org.openide.nodes.Node;
 import org.openide.util.ContextAwareAction;
-import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
 import org.openide.util.RequestProcessor;
@@ -61,8 +58,8 @@ public class CleanupMigrationsAction extends AbstractAction implements ContextAw
                         if (DialogDisplayer.getDefault().notify(d) == NotifyDescriptor.YES_OPTION) {
                             cleanupMigrations(project);
                         }
-                    } catch (Exception ex) {
-                        Exceptions.printStackTrace(ex);
+                    } catch (MissingResourceException ex) {
+                        ErrorManager.getDefault().notify(ex);
                     }
                 }
 
@@ -96,6 +93,11 @@ public class CleanupMigrationsAction extends AbstractAction implements ContextAw
             public void taskFinished(org.openide.util.Task task) {
                 ph.finish();
                 StatusDisplayer.getDefault().setStatusText(NbBundle.getMessage(CleanupMigrationsAction.class, "LBL_Cleanup_Migrations_Complete")); // NOI18N
+                try {
+                    project.getDbMigrationsRoot().refresh();
+                } catch (Exception ex) {
+                    ErrorManager.getDefault().notify(ex);
+                }
             }
         });
         ph.start();
