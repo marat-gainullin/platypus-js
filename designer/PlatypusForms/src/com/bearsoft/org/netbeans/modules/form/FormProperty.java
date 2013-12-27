@@ -106,6 +106,7 @@ public abstract class FormProperty<T> extends Node.Property<T> {
     public static final int NO_READ = DETACHED_READ | NO_READ_PROP; // no reading from property (bits 0,2)
     public static final int NO_WRITE = DETACHED_WRITE | NO_WRITE_PROP; // no writing to property (bits 1,3)
     public static final String CHANGE_IMMEDIATE_PROP_NAME = "changeImmediate";
+    public static final String NULL_VALUE_PROP_NAME = "nullValue";
     // ------------------------
     // variables
     protected int accessType = NORMAL_RW;
@@ -123,6 +124,7 @@ public abstract class FormProperty<T> extends Node.Property<T> {
             String displayName, String shortDescription) {
         super(type);
         setValue(CHANGE_IMMEDIATE_PROP_NAME, Boolean.FALSE); // NOI18N
+        setValue(NULL_VALUE_PROP_NAME, "");// TODO: Due to error in NetBeans StringEditor, we have to tune here. Tuning is bad, because of emtyText absence. String literal "nullValue" is used because of ObjectEditor.PROP_NULL is inaccessible.
         setName(name);
         setDisplayName(displayName);
         setShortDescription(getDescriptionWithType(shortDescription, getValueType()));
@@ -162,9 +164,9 @@ public abstract class FormProperty<T> extends Node.Property<T> {
         String type = org.openide.util.Utilities.getClassName(valueType);
         return description == null
                 ? FormUtils.getFormattedBundleString("HINT_PropertyType", // NOI18N
-                new Object[]{type})
+                        new Object[]{type})
                 : FormUtils.getFormattedBundleString("HINT_PropertyTypeWithDescription", // NOI18N
-                new Object[]{type, description});
+                        new Object[]{type, description});
     }
 
     // ----------------------------------------
@@ -189,15 +191,14 @@ public abstract class FormProperty<T> extends Node.Property<T> {
         return (accessType & NO_READ_PROP) == 0;
     }
 
-    public boolean isDetachedRead()
-    {
+    public boolean isDetachedRead() {
         return (accessType & DETACHED_READ) == 0;
     }
-    
-    public boolean isDetachedWrite()
-    {
+
+    public boolean isDetachedWrite() {
         return (accessType & DETACHED_WRITE) == 0;
     }
+
     /**
      * Tests whether the property is writable.
      */
@@ -219,8 +220,8 @@ public abstract class FormProperty<T> extends Node.Property<T> {
      * true if the value of the property is different from the default value and
      * if it is accessible and replicable (readable and writeable property).
      *
-     * @return <code>true</code> if the property was changed, * * * *
-     * returns <code>false</code> otherwise.
+     * @return <code>true</code> if the property was changed, * * * * returns
+     * <code>false</code> otherwise.
      */
     public boolean isChanged() {
         return valueChanged;
@@ -259,7 +260,7 @@ public abstract class FormProperty<T> extends Node.Property<T> {
             return super.getPropertyEditor();
         }
     }
-    
+
     public FormPropertyContext getPropertyContext() {
         return propertyContext;
     }
