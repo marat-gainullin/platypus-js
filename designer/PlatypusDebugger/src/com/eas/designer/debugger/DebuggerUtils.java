@@ -9,6 +9,8 @@ import com.eas.debugger.jmx.server.DebuggerMBean;
 import com.eas.designer.application.indexer.PlatypusPathRecognizer;
 import java.io.IOException;
 import java.util.concurrent.Future;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.management.InstanceNotFoundException;
 import javax.management.JMX;
 import javax.management.MBeanServerConnection;
@@ -59,6 +61,7 @@ public class DebuggerUtils {
                 breakpoints = JMX.newMBeanProxy(jmxConnection, mBeanBreakpointsName, BreakpointsMBean.class);
                 break;
             } catch (InstanceNotFoundException | IOException ex) {
+                Logger.getLogger(DebuggerUtils.class.getName()).log(Level.INFO, "Trying to connect by JMX for application debugging. Retry counter: {0}", ioCounter);
                 if (env.runningProgram != null && env.runningProgram.isDone()) {
                     throw ex;
                 }
