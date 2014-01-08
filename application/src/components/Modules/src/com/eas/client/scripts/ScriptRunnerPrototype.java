@@ -12,7 +12,8 @@ import org.mozilla.javascript.IdScriptableObject;
 import org.mozilla.javascript.Scriptable;
 
 /**
- *
+ * <code>ScriptRunner</code> integration with Rhino.
+ * @see ScriptRunner
  * @author mg
  */
 public class ScriptRunnerPrototype extends IdScriptableObject {

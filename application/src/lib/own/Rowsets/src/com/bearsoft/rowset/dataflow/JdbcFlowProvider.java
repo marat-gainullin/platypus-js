@@ -46,18 +46,15 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
      *
      * @param aJdbcSourceTag Jdbc source key value. It may be long number or
      * string identifier.
+     * @param aSessionId
      * @param aDataSource A DataSource instance, that would supply resources for
      * use them by flow dataSource in single operations, like retriving data of
      * applying data changes.
-     * @param aJdbcSourceId A Jdbc source id hint, dataSource should use to
-     * achieve connection instance.
      * @param aClause A sql clause, dataSource should use to achieve
      * PreparedStatement instance to use it in the result set querying process.
+     * @param aExpectedFields
      * @param aConverter A converter to be used while reading from and write to
      * a jdbc datasource.
-     * @param aTable A table name to be used to apply changes. Note that sql
-     * clause might be constructed over several tables, but updates may be saved
-     * to only one table, so you must choose.
      * @see DataSource
      */
     public JdbcFlowProvider(JKT aJdbcSourceTag, String aSessionId, DataSource aDataSource, Converter aConverter, String aClause, Fields aExpectedFields) {
@@ -83,7 +80,7 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
      * @inheritDoc
      */
     @Override
-    public Rowset nextPage() throws RowsetException {
+    public Rowset nextPage() throws Exception {
         if (!isPaged() || lowLevelResults == null) {
             throw new FlowProviderNotPagedException(BAD_NEXTPAGE_REFRESH_CHAIN_MSG);
         } else if (converter != null) {

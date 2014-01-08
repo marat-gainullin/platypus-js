@@ -15,7 +15,9 @@ import org.mozilla.javascript.ast.*;
 import org.w3c.dom.Document;
 
 /**
- *
+ * Implementation service support for script related tasks.
+ * It is cached and therefor purged from time to time.
+ * Don't store references on it in your client code!
  * @author pk, mg refactoring
  */
 public class ScriptDocument {

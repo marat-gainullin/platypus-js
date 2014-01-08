@@ -18,7 +18,9 @@ import org.mozilla.javascript.Undefined;
 import org.mozilla.javascript.UniqueTag;
 
 /**
- *
+ * Network js modules proxy. Implements <code>new ServerModule("ModuleName")</code> feature.
+ * Integrated with Rhino via <code>ServerScriptProxyPrototype</code>.
+ * @see ServerScriptProxyPrototype
  * @author pk, mg refactoring
  */
 public class ServerScriptProxy extends ScriptableObject {

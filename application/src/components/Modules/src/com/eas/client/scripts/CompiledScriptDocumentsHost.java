@@ -7,7 +7,7 @@ package com.eas.client.scripts;
 import com.eas.client.metadata.ApplicationElement;
 
 /**
- *
+ * Environment contract interface for <code>CompiledScriptDocuments</code>
  * @author mg
  */
 public interface CompiledScriptDocumentsHost {

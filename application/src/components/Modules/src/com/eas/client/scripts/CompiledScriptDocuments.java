@@ -18,7 +18,7 @@ import org.mozilla.javascript.Script;
 import org.mozilla.javascript.ScriptableObject;
 
 /**
- *
+ * <code>ScriptDocument</code> cache.
  * @author mg
  */
 public abstract class CompiledScriptDocuments {

@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
  * and their values with type information. Provides a method compile() to
  * transform it to a SqlCompiledQuery replacing parameters names in the query
  * text to "?" placeholders accepted by JDBC, along with a vector of parameters
- * values in the right order. Method compile recursively resolves the queries
+ * values in the right order. Method <code>compile()</code> recursively resolves the queries
  * reusing and parameters bindings.</p>
  *
  * @author mg
