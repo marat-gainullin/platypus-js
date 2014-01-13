@@ -17,6 +17,7 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.HashSet;
 import java.util.Set;
@@ -24,15 +25,14 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.geotools.geometry.jts.ReferencedEnvelope;
-import org.geotools.map.MapContext;
-import org.geotools.map.MapLayer;
+import org.geotools.map.Layer;
+import org.geotools.map.MapContent;
 import org.geotools.map.event.MapLayerEvent;
 import org.geotools.map.event.MapLayerListener;
 import org.geotools.renderer.GTRenderer;
 import org.geotools.renderer.lite.StreamingRenderer;
+import org.geotools.resources.BoundingBoxes;
 import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.opengis.referencing.crs.ProjectedCRS;
 import org.opengis.referencing.operation.MathTransform2D;
 import org.opengis.referencing.operation.TransformException;
 
@@ -50,7 +50,7 @@ public class JGeoPane extends JTiledPane {
     protected MapLayerListener screenChangesReflector;
     protected Set<GeoPaneViewpointListener> viewListeners = new HashSet<>();
     protected Set<GeoPaneMouseListener> mouseListeners = new HashSet<>();
-    protected MapContext screenContext;
+    protected MapContent screenContext;
     protected GTRenderer screenRenderer = new StreamingRenderer();
 
     /**
@@ -168,15 +168,6 @@ public class JGeoPane extends JTiledPane {
         return constructRectyPolygonGeometry(lu, br);
     }
 
-    private CoordinateReferenceSystem getGeneralGeoCrs() {
-        MapContext context = getGeneralMapContext();
-        CoordinateReferenceSystem generalcrs = context.getCoordinateReferenceSystem();
-        if (generalcrs instanceof ProjectedCRS) {
-            generalcrs = ((ProjectedCRS) generalcrs).getBaseCRS();
-        }
-        return generalcrs;
-    }
-
     public double snapScale(double coef) {
         if (getBackingUrl() != null && !getBackingUrl().isEmpty()) {
             double powValue = Math.log(coef) / Math.log(2);
@@ -252,11 +243,11 @@ public class JGeoPane extends JTiledPane {
         super.repaint();
     }
 
-    public JGeoPane(MapContext aContext, MapContext aLightweightContext, boolean aAsync) {
+    public JGeoPane(MapContent aContext, MapContent aLightweightContext, boolean aAsync) {
         this(aContext, aLightweightContext, null, aAsync);
     }
 
-    public JGeoPane(MapContext aContext, MapContext aLightweightContext, MapContext aScreenContext, boolean aAsync) {
+    public JGeoPane(MapContent aContext, MapContent aLightweightContext, MapContent aScreenContext, boolean aAsync) {
         super();
         setLayout(new GeoLayout());
         screenContext = aScreenContext;
@@ -280,11 +271,11 @@ public class JGeoPane extends JTiledPane {
         addLayersListeners();
     }
 
-    public JGeoPane(MapContext aContext, MapContext aLightweightContext, String aBackingUrl) {
+    public JGeoPane(MapContent aContext, MapContent aLightweightContext, String aBackingUrl) {
         this(aContext, aLightweightContext, null, aBackingUrl);
     }
 
-    public JGeoPane(MapContext aContext, MapContext aLightweightContext, MapContext aScreenContext, String aBackingUrl) {
+    public JGeoPane(MapContent aContext, MapContent aLightweightContext, MapContent aScreenContext, String aBackingUrl) {
         super();
         setLayout(new GeoLayout());
         screenContext = aScreenContext;
@@ -308,48 +299,48 @@ public class JGeoPane extends JTiledPane {
         addLayersListeners();
     }
 
-    public MapContext getScreenContext() {
+    public MapContent getScreenContext() {
         return screenContext;
     }
 
-    public void setScreenContext(MapContext aValue) {
+    public void setScreenContext(MapContent aValue) {
         screenContext = aValue;
     }
 
     private void removeLayersListeners() {
-        MapContext generalContext = ((MapTilesCache) cache).getMapDisplayContext();
-        MapContext lightweightContext = ((MapTilesCache) lightweightCache).getMapDisplayContext();
+        MapContent generalContext = ((MapTilesCache) cache).getMapDisplayContext();
+        MapContent lightweightContext = ((MapTilesCache) lightweightCache).getMapDisplayContext();
         if (generalChangesReflector != null) {
-            for (MapLayer layer : generalContext.getLayers()) {
+            for (Layer layer : generalContext.layers()) {
                 layer.removeMapLayerListener(generalChangesReflector);
             }
         }
         if (lightChangesReflector != null) {
-            for (MapLayer layer : lightweightContext.getLayers()) {
+            for (Layer layer : lightweightContext.layers()) {
                 layer.removeMapLayerListener(lightChangesReflector);
             }
         }
         if (screenContext != null && screenChangesReflector != null) {
-            for (MapLayer layer : screenContext.getLayers()) {
+            for (Layer layer : screenContext.layers()) {
                 layer.removeMapLayerListener(screenChangesReflector);
             }
         }
     }
 
     private void addLayersListeners() {
-        MapContext generalContext = ((MapTilesCache) cache).getMapDisplayContext();
-        MapContext lightweightContext = ((MapTilesCache) lightweightCache).getMapDisplayContext();
+        MapContent generalContext = ((MapTilesCache) cache).getMapDisplayContext();
+        MapContent lightweightContext = ((MapTilesCache) lightweightCache).getMapDisplayContext();
         generalChangesReflector = new LayersChangesReflector(cache);
         lightChangesReflector = new LayersChangesReflector(lightweightCache);
         screenChangesReflector = new ScreenChangesReflector();
-        for (MapLayer layer : generalContext.getLayers()) {
+        for (Layer layer : generalContext.layers()) {
             layer.addMapLayerListener(generalChangesReflector);
         }
-        for (MapLayer layer : lightweightContext.getLayers()) {
+        for (Layer layer : lightweightContext.layers()) {
             layer.addMapLayerListener(lightChangesReflector);
         }
         if (screenContext != null) {
-            for (MapLayer layer : screenContext.getLayers()) {
+            for (Layer layer : screenContext.layers()) {
                 layer.addMapLayerListener(screenChangesReflector);
             }
         }
@@ -369,7 +360,7 @@ public class JGeoPane extends JTiledPane {
             synchronized (screenContext) {
                 try {
                     // let's paint selection and phanton layers
-                    screenRenderer.setContext(screenContext);
+                    screenRenderer.setMapContent(screenContext);
                     Rectangle clip = g.getClipBounds();
                     Point2D.Double lu = screen2Cartesian(clip.getLocation());
                     Point2D.Double br = screen2Cartesian(new Point(clip.x + clip.width, clip.y + clip.height));
@@ -384,12 +375,12 @@ public class JGeoPane extends JTiledPane {
         super.paintScreenContext(g);
     }
 
-    public MapContext getGeneralMapContext() {
+    public MapContent getGeneralMapContext() {
         assert cache instanceof MapTilesCache : "JGeoPane instance requires MapTilesCache instance as general cache";
         return ((MapTilesCache) cache).getMapDisplayContext();
     }
 
-    public MapContext getLightweightMapContext() {
+    public MapContent getLightweightMapContext() {
         assert lightweightCache instanceof MapTilesCache : "JGeoPane instance requires MapTilesCache instance as general cache";
         return ((MapTilesCache) lightweightCache).getMapDisplayContext();
     }
@@ -412,13 +403,13 @@ public class JGeoPane extends JTiledPane {
         }
         if (!oldBackingUrl.equals(aBackingUrl)) {
             removeLayersListeners();
-            MapContext generalMapContext = getGeneralMapContext();
+            MapContent generalMapContext = getGeneralMapContext();
             assert cache instanceof AsyncMapTilesCache;
             ((AsyncMapTilesCache) cache).shutdown();
-            if (aBackingUrl != null && !aBackingUrl.isEmpty()) {
-                cache = GeoPaneUtils.createWebTilesCache(generalMapContext, cacheLock, cartesian2Screen, aBackingUrl);
-            } else {
+            if (aBackingUrl.isEmpty()) {
                 cache = new AsyncMapTilesCache(generalMapContext, cacheLock, cartesian2Screen);
+            } else {
+                cache = GeoPaneUtils.createWebTilesCache(generalMapContext, cacheLock, cartesian2Screen, aBackingUrl);
             }
             cache.setBackground(getBackground());
             ((AsyncMapTilesCache) cache).addRenderingTaskListener(new TileRenderedRepainter());
@@ -430,9 +421,9 @@ public class JGeoPane extends JTiledPane {
     }
 
     public void fit() throws Exception {
-        MapContext generalMapContext = getGeneralMapContext();
+        MapContent generalMapContext = getGeneralMapContext();
         Dimension size = getSize();
-        Envelope projectedBounds = generalMapContext.getLayerBounds();
+        Envelope projectedBounds = generalMapContext.getMaxBounds();
         double destWidth = projectedBounds.getWidth();
         double destHeight = projectedBounds.getHeight();
         Coordinate centre = projectedBounds.centre();
@@ -459,10 +450,10 @@ public class JGeoPane extends JTiledPane {
 
         Geometry bounds = aArea.getBoundary();
         Envelope envBounds = bounds.getEnvelopeInternal();
-        Point2D.Double lu = new Point2D.Double(envBounds.getMinX(), envBounds.getMinY());
-        Point2D.Double rb = new Point2D.Double(envBounds.getMaxX(), envBounds.getMaxY());
-        Point2D.Double cartlu = geo2Cartesian(lu);
-        Point2D.Double cartrb = geo2Cartesian(rb);
+        Point2D.Double leftUpCorner = new Point2D.Double(envBounds.getMinX(), envBounds.getMinY());
+        Point2D.Double rightBottomCorner = new Point2D.Double(envBounds.getMaxX(), envBounds.getMaxY());
+        Point2D.Double cartlu = geo2Cartesian(leftUpCorner);
+        Point2D.Double cartrb = geo2Cartesian(rightBottomCorner);
         double destWidth = Math.abs(cartrb.getX() - cartlu.getX());
         double destHeight = Math.abs(cartrb.getY() - cartlu.getY());
         Coordinate centre = new Coordinate((cartrb.getX() + cartlu.getX()) / 2, (cartrb.getY() + cartlu.getY()) / 2);
@@ -478,6 +469,7 @@ public class JGeoPane extends JTiledPane {
         double coef = Math.min(sx, sy);
         coef = snapScale(coef);
         scaleView(coef, coef, false);
+        
         Point2D.Double projectedScreenCenter = screen2Cartesian(new Point(0, 0));
         translateView(projectedScreenCenter.x - centre.x, projectedScreenCenter.y - centre.y, true);
         repaint();

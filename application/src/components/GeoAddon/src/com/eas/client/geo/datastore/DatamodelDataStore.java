@@ -14,7 +14,6 @@ import com.bearsoft.rowset.metadata.Fields;
 import com.eas.client.geo.RowsetFeatureDescriptor;
 import com.eas.client.model.application.ApplicationEntity;
 import java.io.IOException;
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -27,6 +26,7 @@ import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.referencing.CRS;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.referencing.FactoryException;
 
 /**
  *
@@ -35,13 +35,15 @@ import org.opengis.feature.simple.SimpleFeatureType;
 public class DatamodelDataStore extends AbstractDataStore {
 
     public boolean isGeometry(DataTypeInfo aTypeInfo) {
-        return (/*Oracle*/aTypeInfo.getSqlType() == Types.STRUCT || aTypeInfo.getSqlType() == java.sql.Types.OTHER) && (aTypeInfo.getSqlTypeName().endsWith("GEOMETRY") || aTypeInfo.getSqlTypeName().endsWith("CURVE")
-                || aTypeInfo.getSqlTypeName().endsWith("POLYGON") || aTypeInfo.getSqlTypeName().endsWith("LINESTRING") || aTypeInfo.getSqlTypeName().endsWith("POINT")
-                || aTypeInfo.getSqlTypeName().endsWith("SURFACE")/*Oracle*/
-                || /*PostGIS*/ "point".equalsIgnoreCase(aTypeInfo.getSqlTypeName()) || "line".equalsIgnoreCase(aTypeInfo.getSqlTypeName())
+        return DataTypeInfo.GEOMETRY.equals(aTypeInfo);
+        //This is bad way because abstraction became.
+        /* return (/*Oracle*//*aTypeInfo.getSqlType() == Types.STRUCT || aTypeInfo.getSqlType() == java.sql.Types.OTHER) && (aTypeInfo.getSqlTypeName().endsWith("GEOMETRY") || aTypeInfo.getSqlTypeName().endsWith("CURVE")
+                /*|| aTypeInfo.getSqlTypeName().endsWith("POLYGON") || aTypeInfo.getSqlTypeName().endsWith("LINESTRING") || aTypeInfo.getSqlTypeName().endsWith("POINT")
+                /*|| aTypeInfo.getSqlTypeName().endsWith("SURFACE")/*Oracle*/
+                /*|| /*PostGIS*/ /*"point".equalsIgnoreCase(aTypeInfo.getSqlTypeName()) || "line".equalsIgnoreCase(aTypeInfo.getSqlTypeName())
                 || "lseg".equalsIgnoreCase(aTypeInfo.getSqlTypeName()) || "box".equalsIgnoreCase(aTypeInfo.getSqlTypeName())
                 || "path".equalsIgnoreCase(aTypeInfo.getSqlTypeName()) || "polygon".equalsIgnoreCase(aTypeInfo.getSqlTypeName())
-                || "circle".equalsIgnoreCase(aTypeInfo.getSqlTypeName()))/*PostGIS*/;
+                /*|| "circle".equalsIgnoreCase(aTypeInfo.getSqlTypeName()))/*PostGIS*/
     }
 
     protected static class TypeInfoEntry {
@@ -63,7 +65,7 @@ public class DatamodelDataStore extends AbstractDataStore {
     }
 
     private TypeInfoEntry achieveTypeInfo(String aTypeName, final RowsetFeatureDescriptor descriptor, Rowset rowset) throws RowsetException, IOException, IllegalStateException {
-        TypeInfoEntry typeInfo = null;
+        TypeInfoEntry typeInfo;
         synchronized (typeInfos) {
             typeInfo = typeInfos.get(aTypeName);
             if (typeInfo == null) {
@@ -175,7 +177,7 @@ public class DatamodelDataStore extends AbstractDataStore {
             simpleFeatureTypeBuilder.add(DatamodelDataStore.ROW_ATTR_NAME, Row.class);
             SimpleFeatureType featureType = simpleFeatureTypeBuilder.buildFeatureType();
             return featureType;
-        } catch (Exception ex) {
+        } catch (NullPointerException | FactoryException | ClassNotFoundException ex) {
             if (!(ex instanceof IOException)) {
                 throw new IOException(ex);
             } else {

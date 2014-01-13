@@ -16,7 +16,7 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 import java.util.List;
 import java.util.Map;
-import org.geotools.map.MapLayer;
+import org.geotools.map.Layer;
 import org.mozilla.javascript.Function;
 
 /**
@@ -166,7 +166,7 @@ public class ModelMap extends Component<DbMap> {
             + "*/";
     
     @ScriptFunction(jsDoc = ADD_LAYER_JSDOC, params = {"layerTitle", "rowset", "geometryClass", "styleAttributes"})
-    public MapLayer addLayer(String aLayerTitle, ScriptableRowset<?> aRowset, Class<?> aGeometryClass, Map<String, Object> aStyleAttributes) throws Exception {
+    public Layer addLayer(String aLayerTitle, ScriptableRowset<?> aRowset, Class<?> aGeometryClass, Map<String, Object> aStyleAttributes) throws Exception {
         return delegate.addLayer(aLayerTitle, aRowset, aGeometryClass, aStyleAttributes);
     }
 
@@ -177,7 +177,7 @@ public class ModelMap extends Component<DbMap> {
             + "*/";
     
     @ScriptFunction(jsDoc = REMOVE_LAYER_JSDOC)
-    public MapLayer removeLayer(String aLayerTitle) throws Exception {
+    public Layer removeLayer(String aLayerTitle) throws Exception {
         return delegate.removeLayer(aLayerTitle);
     }
     
@@ -187,7 +187,7 @@ public class ModelMap extends Component<DbMap> {
             + "*/";
 
     @ScriptFunction(jsDoc = REMOVE_ALL_LAYER_JSDOC)
-    public MapLayer[] removeAllLayers() {
+    public Layer[] removeAllLayers() {
         return delegate.removeAllLayers();
     }
 
@@ -198,7 +198,7 @@ public class ModelMap extends Component<DbMap> {
             + "*/";
     
     @ScriptFunction(jsDoc = LAYER_JSDOC, params = {"layerTitle"})
-    public MapLayer getLayer(String aLayerTitle) {
+    public Layer getLayer(String aLayerTitle) {
         return delegate.getLayer(aLayerTitle);
     }
 

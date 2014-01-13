@@ -28,6 +28,7 @@ public class ZoomInAction extends GeoPaneAction {
         putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_ADD, 0));
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
         try {
             Point2D.Double screenCenterBefore = pane.screen2Cartesian(new Point(0, 0));

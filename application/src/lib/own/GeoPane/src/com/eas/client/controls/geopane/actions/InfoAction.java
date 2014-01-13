@@ -9,11 +9,11 @@ import com.eas.client.controls.geopane.JGeoPane;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.geom.NoninvertibleTransformException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.Action;
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.operation.TransformException;
 
 /**
  *
@@ -27,6 +27,7 @@ public class InfoAction extends GeoPaneAction {
         putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_I, KeyEvent.CTRL_DOWN_MASK));
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
         String infoMessage = pane.viewToString() + "\n";
         String aoiCartesian = null;
@@ -39,14 +40,13 @@ public class InfoAction extends GeoPaneAction {
         }
         try {
             aoiGeo = pane.aoiToGeoString();
-        } catch (Exception ex) {
+        } catch (NoninvertibleTransformException | FactoryException | TransformException ex) {
             aoiGeo = GeoPaneUtils.getString("screenInvalidGeo");
         }
         try
         {
-            projectionWkt = pane.getGeneralMapContext().getAreaOfInterest().getCoordinateReferenceSystem().toWKT();
-        }catch(Exception ex)
-        {
+            projectionWkt = pane.getGeneralMapContext().getViewport().getBounds().getCoordinateReferenceSystem().toWKT();
+        }catch(UnsupportedOperationException ex){
             projectionWkt = GeoPaneUtils.getString("projectionWktUnavailable");
         }
         infoMessage += aoiCartesian;

@@ -39,10 +39,12 @@ public class SelectionPhantomsFeatureReader implements FeatureReader<SimpleFeatu
         }
     }
 
+    @Override
     public SimpleFeatureType getFeatureType() {
         return featureType;
     }
 
+    @Override
     public SimpleFeature next() throws IOException, IllegalArgumentException, NoSuchElementException {
         if (closed) {
             throw new IOException("Reader is closed!");
@@ -59,10 +61,12 @@ public class SelectionPhantomsFeatureReader implements FeatureReader<SimpleFeatu
         return res;
     }
 
+    @Override
     public boolean hasNext() throws IOException {
         return listIndex < selection.size();
     }
 
+    @Override
     public void close() throws IOException {
         closed = true;
     }

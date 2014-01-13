@@ -106,8 +106,8 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
     protected Component dragTarget;
     protected boolean reallyDragged;
     protected boolean needRerouteConnectors = true;
-    protected QuadTree<EntityView<E>> entitiesIndex = new QuadTree<>();
-    protected QuadTree<Relation<E>> connectorsIndex = new QuadTree<>();
+    protected com.bearsoft.routing.QuadTree<EntityView<E>> entitiesIndex = new QuadTree<>();
+    protected com.bearsoft.routing.QuadTree<Relation<E>> connectorsIndex = new QuadTree<>();
     protected Paths paths;
     // selection
     protected Set<Relation<E>> hittedRelations = new HashSet<>();
@@ -125,8 +125,8 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
     protected Set<ModelSelectionListener<E>> entitySelectionListeners = new HashSet<>();
 
     protected void refreshView() {
-        entitiesIndex = new QuadTree<>();
-        connectorsIndex = new QuadTree<>();
+        entitiesIndex = new com.bearsoft.routing.QuadTree<>();
+        connectorsIndex = new com.bearsoft.routing.QuadTree<>();
         for (EntityView<E> view : entityViews.values()) {
             entitiesIndex.insert(view.getBounds(), view);
         }
