@@ -359,8 +359,8 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
     public abstract int commit() throws Exception;
     private static final String REVERT_JSDOC = ""
             + "/**\n"
-            + "* Drops model data changes.\n"
-            + "* After this method call, save() method have no changes to be saved, but still attempts to commit.\n"
+            + "* Reverts model data changes.\n"
+            + "* After this method call, no data changes are avaliable for <code>model.save()</code> method, but the model still attempts to commit.\n"
             + "* Call <code>model.save()</code> on commitable and unchanged model nevertheless leads to a commit.\n"
             + "*/";
 
