@@ -15,10 +15,11 @@ import com.eas.script.ScriptFunction;
  */
 public class ButtonGroup extends Container<ButtonGroupWrapper> {
 
-    private static final String CONSTRUCTOR_JSDOC = "/**\n"
-            + "* Creates a multiple-exclusion scope for a set of buttons.\n"
-            +" * Creating a set of buttons with the same <code>ButtonGroup</code> object means that turning \"on\" one of those buttons turns off all other buttons in the group. \n"
-            + "*/";
+    private static final String CONSTRUCTOR_JSDOC = ""
+            + "/**\n"
+            + " * Creates a multiple-exclusion scope for a set of buttons.\n"
+            +"  * Creating a set of buttons with the same <code>ButtonGroup</code> object means that turning \"on\" one of those buttons turns off all other buttons in the group.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {})
     public ButtonGroup() {
@@ -31,7 +32,8 @@ public class ButtonGroup extends Container<ButtonGroupWrapper> {
         setDelegate(aDelegate);
     }
     
-    private static final String ADD_JSDOC = "/**\n"
+    private static final String ADD_JSDOC = ""
+            + "/**\n"
             + "* Appends the specified component to the end of this container.\n"
             + "*/";
     

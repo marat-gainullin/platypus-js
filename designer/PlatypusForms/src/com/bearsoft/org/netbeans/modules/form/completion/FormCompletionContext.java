@@ -24,7 +24,6 @@ import java.util.Arrays;
 import org.netbeans.spi.editor.completion.CompletionResultSet;
 import org.openide.ErrorManager;
 
-
 /**
  *
  * @author vv
@@ -33,7 +32,7 @@ public class FormCompletionContext extends ModuleCompletionContext {
 
     private static final Class EVENT_WRAPPER_CLASS = com.eas.client.forms.api.events.EventsWrapper.class;
     private static final String EVENTS_WRAPPER_METHOD_NAME = "wrap";//NOI18N
-    
+
     public FormCompletionContext(PlatypusModuleDataObject dataObject, Class<? extends ScriptRunner> aClass) {
         super(dataObject, aClass);
     }
@@ -53,19 +52,18 @@ public class FormCompletionContext extends ModuleCompletionContext {
     protected Class<?> getEventHandlerFunctionParameterClass(String functionName) {
         Class<?> clazz = super.getEventHandlerFunctionParameterClass(functionName);
         if (clazz == null) {
-            FormModel formModel = getFormModel();
             for (RADComponent<?> component : getFormModel().getAllComponents()) {
                 for (Event event : component.getAllEvents()) {
                     String[] eventHandlers = event.getEventHandlers();
                     if (eventHandlers != null) {
                         for (String eventHanler : eventHandlers) {
-                             if (eventHanler.equals(functionName)) {
-                                 Class<?>[] parameterTypes = event.getListenerMethod().getParameterTypes();
-                                 if (parameterTypes != null && parameterTypes.length > 0) {
-                                     Class<?> scriptEventClass = lowLevelEventType2ScriptEventType(parameterTypes[0]);
-                                     return scriptEventClass != null ? scriptEventClass : com.eas.client.forms.api.events.Event.class;
-                                 }
-                             }
+                            if (eventHanler.equals(functionName)) {
+                                Class<?>[] parameterTypes = event.getListenerMethod().getParameterTypes();
+                                if (parameterTypes != null && parameterTypes.length > 0) {
+                                    Class<?> scriptEventClass = lowLevelEventType2ScriptEventType(parameterTypes[0]);
+                                    return scriptEventClass != null ? scriptEventClass : com.eas.client.forms.api.events.Event.class;
+                                }
+                            }
                         }
                     }
                 }
@@ -86,29 +84,8 @@ public class FormCompletionContext extends ModuleCompletionContext {
 
     }
 
-    @Override
-    protected void fillSystemConstructors(CompletionPoint point, CompletionResultSet resultSet) {
-        super.fillSystemConstructors(point, resultSet);
-        for (Class<?> clazz : FormUtils.getPlatypusApiClasses()) {
-            for (Constructor<?> constructor : clazz.getConstructors()) {
-                if (constructor.isAnnotationPresent(ScriptFunction.class)) {
-                    ScriptFunction annotation = constructor.getAnnotation(ScriptFunction.class);
-                    addItem(resultSet,
-                            point.getFilter(),
-                            new ComponentConstructorCompletionItem(clazz.getSimpleName(),
-                                    "",//NOI18N
-                                    Arrays.<String>asList(annotation.params()),
-                                    annotation.jsDoc(),
-                                    point.getCaretBeginWordOffset(),
-                                    point.getCaretEndWordOffset()));
-                    break;
-                }
-            }
-        }
-    }
-    
     private Class<?> lowLevelEventType2ScriptEventType(Class<?> aClass) {
-        for (Method method : EVENT_WRAPPER_CLASS.getMethods() ){
+        for (Method method : EVENT_WRAPPER_CLASS.getMethods()) {
             if (method.getName().equals(EVENTS_WRAPPER_METHOD_NAME) && Modifier.isStatic(method.getModifiers())) {
                 Class<?>[] parameterTypes = method.getParameterTypes();
                 if (parameterTypes != null && parameterTypes.length > 0 && parameterTypes[0].equals(aClass)) {

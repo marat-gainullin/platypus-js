@@ -60,7 +60,7 @@ public class Model {
 	protected List<Entry<Entity, Integer>> savedEntitiesRowIndexes = new ArrayList<Entry<Entity, Integer>>();
 	protected AppClient client = null;
 	protected Set<Relation> relations = new HashSet<Relation>();
-    protected Set<ReferenceRelation> referenceRelations = new HashSet<ReferenceRelation>();
+	protected Set<ReferenceRelation> referenceRelations = new HashSet<ReferenceRelation>();
 	protected Map<String, Entity> entities = new HashMap<String, Entity>();
 	protected ParametersEntity parametersEntity;
 	protected Parameters parameters = new Parameters();
@@ -86,39 +86,39 @@ public class Model {
 		}
 
 		protected String assembleErrors() {
-			if(errors != null && !errors.isEmpty()){
-				StringBuilder sb = new StringBuilder(); 
-				for(Entity entity : errors.keySet()){
-					if(sb.length() > 0)
+			if (errors != null && !errors.isEmpty()) {
+				StringBuilder sb = new StringBuilder();
+				for (Entity entity : errors.keySet()) {
+					if (sb.length() > 0)
 						sb.append("\n");
 					sb.append(errors.get(entity)).append(" (").append(entity.getName()).append("[ ").append(entity.getTitle()).append("])");
 				}
-		        return sb.toString();
+				return sb.toString();
 			}
-	        return null;
-        }
-		
-		public void cancel() throws Exception{
-			if(onFailure != null)
+			return null;
+		}
+
+		public void cancel() throws Exception {
+			if (onFailure != null)
 				onFailure.run("Canceled");
 		}
-		
-		public void success() throws Exception{
-			if(onSuccess != null)
+
+		public void success() throws Exception {
+			if (onSuccess != null)
 				onSuccess.run();
 		}
-		
-		public void failure() throws Exception{
-			if(onFailure != null)
+
+		public void failure() throws Exception {
+			if (onFailure != null)
 				onFailure.run(assembleErrors());
 		}
 
 		public void end() throws Exception {
-			if(errors.isEmpty())
+			if (errors.isEmpty())
 				success();
 			else
 				failure();
-        }
+		}
 	}
 
 	public static class SimpleEntry implements Entry<Entity, Integer> {
@@ -168,11 +168,11 @@ public class Model {
 			resolveCopiedRelation(rcopied, copied);
 			copied.addRelation(rcopied);
 		}
-        for (ReferenceRelation relation : referenceRelations) {
-            ReferenceRelation rcopied = (ReferenceRelation)relation.copy();
-            resolveCopiedRelation(rcopied, copied);
-            copied.addRelation(rcopied);
-        }
+		for (ReferenceRelation relation : referenceRelations) {
+			ReferenceRelation rcopied = (ReferenceRelation) relation.copy();
+			resolveCopiedRelation(rcopied, copied);
+			copied.addRelation(rcopied);
+		}
 		return copied;
 	}
 
@@ -206,6 +206,33 @@ public class Model {
 			}
 		}
 	}
+	
+	public void checkRelationsIntegrity() {
+        List<Relation> toDel = new ArrayList<Relation>();
+        for (Relation rel : relations) {
+            if (rel.getLeftEntity() == null || (rel.getLeftField() == null && rel.getLeftParameter() == null)
+                    || rel.getRightEntity() == null || (rel.getRightField() == null && rel.getRightParameter() == null)) {
+                toDel.add(rel);
+            }
+        }
+        for (Relation rel : toDel) {
+            removeRelation(rel);
+        }
+        checkReferenceRelationsIntegrity();
+    }
+
+    protected void checkReferenceRelationsIntegrity() {
+        List<ReferenceRelation> toDel = new ArrayList<ReferenceRelation>();
+        for (ReferenceRelation rel : referenceRelations) {
+            if (rel.getLeftEntity() == null || (rel.getLeftField() == null && rel.getLeftParameter() == null)
+                    || rel.getRightEntity() == null || (rel.getRightField() == null && rel.getRightParameter() == null)) {
+                toDel.add(rel);
+            }
+        }
+        for (ReferenceRelation rel : toDel) {
+        	referenceRelations.remove(rel);
+        }
+    }
 
 	/**
 	 * Base model constructor.
@@ -246,10 +273,10 @@ public class Model {
 		client = aValue;
 	}
 
-    public Set<ReferenceRelation> getReferenceRelations() {
-        return Collections.unmodifiableSet(referenceRelations);
-    }
-    
+	public Set<ReferenceRelation> getReferenceRelations() {
+		return Collections.unmodifiableSet(referenceRelations);
+	}
+
 	public boolean isPending() {
 		for (Entity entity : entities.values()) {
 			if (entity.isPending())
@@ -267,9 +294,9 @@ public class Model {
 	}
 
 	public void addRelation(Relation aRel) {
-		if(aRel instanceof ReferenceRelation){
-			referenceRelations.add((ReferenceRelation)aRel);
-		}else{
+		if (aRel instanceof ReferenceRelation) {
+			referenceRelations.add((ReferenceRelation) aRel);
+		} else {
 			relations.add(aRel);
 			Entity lEntity = aRel.getLeftEntity();
 			Entity rEntity = aRel.getRightEntity();
@@ -289,23 +316,28 @@ public class Model {
 	}
 
 	public void publish(JavaScriptObject aModule) throws Exception {
-		module = aModule;
-		// deprecated
-		ParametersEntity parametersEntity = getParametersEntity();
-		Entity.publish(module, parametersEntity);
-		if (!"params".equals(parametersEntity.getName())) {
-		    String oldName = parametersEntity.getName();
-		    try {
-				parametersEntity.setName("params");
-				Entity.publish(module, parametersEntity);
-		    } finally {
-			    parametersEntity.setName(oldName);
-		    }
+		try {
+			module = aModule;
+			// deprecated
+			ParametersEntity parametersEntity = getParametersEntity();
+			Entity.publish(module, parametersEntity);
+			if (!"params".equals(parametersEntity.getName())) {
+				String oldName = parametersEntity.getName();
+				try {
+					parametersEntity.setName("params");
+					Entity.publish(module, parametersEntity);
+				} finally {
+					parametersEntity.setName(oldName);
+				}
+			}
+			Entity.publishRows(parametersEntity.getPublished());
+			//
+			publishTopLevelFacade(aModule, this);
+			publishRowsets();
+		} catch (Exception ex) {
+			Logger.getLogger(Model.class.getName()).log(Level.SEVERE, null, ex);
+			throw ex;
 		}
-		Entity.publishRows(parametersEntity.getPublished());
-		//
-		publishTopLevelFacade(aModule, this);
-		publishRowsets();
 	}
 
 	public void publishRowsets() throws Exception {
@@ -317,101 +349,93 @@ public class Model {
 				try {
 					if (!"params".equals(oldName)) {
 						entity.setName("params");
-						Entity.publish(module.<JsObject>cast().getJs("model"), entity);
+						Entity.publish(module.<JsObject> cast().getJs("model"), entity);
 						Entity.publishRows(entity.getPublished());
 					}
 				} finally {
 					entity.setName(oldName);
 				}
-			}else{
+			} else {
 				Entity.publish(module, entity);/* deprecated */
-				Entity.publish(module.<JsObject>cast().getJs("model"), entity);
+				Entity.publish(module.<JsObject> cast().getJs("model"), entity);
 			}
 		}
-        //
-        for (ReferenceRelation aRelation : referenceRelations) {
-            String scalarPropertyName = aRelation.getScalarPropertyName();                
-            if (scalarPropertyName == null || scalarPropertyName.isEmpty()) {
-                scalarPropertyName = aRelation.getRightEntity().getName();
-            }
-            if (scalarPropertyName != null && !scalarPropertyName.isEmpty()) {
-                aRelation.getLeftEntity().putOrmDefinition(
-                        scalarPropertyName,
-                        ormPropertiedDefiner.scalar(
-	                        aRelation.getRightEntity().getPublished(),
-	                        aRelation.getRightField().getName(),
-	                        aRelation.getLeftField().getName()));
-            }
-            String collectionPropertyName = aRelation.getCollectionPropertyName();
-            if (collectionPropertyName == null || collectionPropertyName.isEmpty()) {
-                collectionPropertyName = aRelation.getLeftEntity().getName();
-            }
-            if (collectionPropertyName != null && !collectionPropertyName.isEmpty()) {
-                aRelation.getRightEntity().putOrmDefinition(
-                        collectionPropertyName,
-                        ormPropertiedDefiner.collection(
-	                        aRelation.getLeftEntity().getPublished(),
-	                        aRelation.getRightField().getName(),
-	                        aRelation.getLeftField().getName()));
-            }
-        }
-        //////////////////
+		//
+		for (ReferenceRelation aRelation : referenceRelations) {
+			String scalarPropertyName = aRelation.getScalarPropertyName();
+			if (scalarPropertyName == null || scalarPropertyName.isEmpty()) {
+				scalarPropertyName = aRelation.getRightEntity().getName();
+			}
+			if (scalarPropertyName != null && !scalarPropertyName.isEmpty()) {
+				aRelation.getLeftEntity().putOrmDefinition(scalarPropertyName,
+				        ormPropertiedDefiner.scalar(aRelation.getRightEntity().getPublished(), aRelation.getRightField().getName(), aRelation.getLeftField().getName()));
+			}
+			String collectionPropertyName = aRelation.getCollectionPropertyName();
+			if (collectionPropertyName == null || collectionPropertyName.isEmpty()) {
+				collectionPropertyName = aRelation.getLeftEntity().getName();
+			}
+			if (collectionPropertyName != null && !collectionPropertyName.isEmpty()) {
+				aRelation.getRightEntity().putOrmDefinition(collectionPropertyName,
+				        ormPropertiedDefiner.collection(aRelation.getLeftEntity().getPublished(), aRelation.getRightField().getName(), aRelation.getLeftField().getName()));
+			}
+		}
+		// ////////////////
 	}
 
-	private static DefinitionsContainer ormPropertiedDefiner = DefinitionsContainer.init(); 
-	
-	private static final class DefinitionsContainer extends JavaScriptObject{
-		
-		protected DefinitionsContainer(){
+	private static DefinitionsContainer ormPropertiedDefiner = DefinitionsContainer.init();
+
+	private static final class DefinitionsContainer extends JavaScriptObject {
+
+		protected DefinitionsContainer() {
 		}
-		
+
 		public native static DefinitionsContainer init()/*-{
 			return {
-				scalarDef : function(targetEntity, targetFieldName, sourceFieldName){
-	                var _self = this;
-	                _self.enumerable = true;
-	                _self.configurable = false;
-	                _self.get = function(){
-	                    var found = targetEntity.find(targetEntity.md[targetFieldName], this[sourceFieldName]);
-	                    return found.length == 0 ? null : (found.length == 1 ? found[0] : found);
-	                };
-	                _self.set = function(aValue){
-	                    this[sourceFieldName] = aValue ? aValue[targetFieldName] : null;
-	                };
+				scalarDef : function(targetEntity, targetFieldName, sourceFieldName) {
+					var _self = this;
+					_self.enumerable = true;
+					_self.configurable = false;
+					_self.get = function() {
+						var found = targetEntity.find(targetEntity.md[targetFieldName], this[sourceFieldName]);
+						return found.length == 0 ? null : (found.length == 1 ? found[0] : found);
+					};
+					_self.set = function(aValue) {
+						this[sourceFieldName] = aValue ? aValue[targetFieldName] : null;
+					};
 				},
-				collectionDef : function(sourceEntity, targetFieldName, sourceFieldName){
-	                var _self = this;
-	                _self.enumerable = true;
-	                _self.configurable = false;
-	                _self.get = function(){
-	                    var res = sourceEntity.find(sourceEntity.md[sourceFieldName], this[targetFieldName]);
-	                    if(res && res.length > 0){
-	                        return res;
-	                    }else{
-	                        var emptyCollectionPropName = '-x-empty-collection-'+sourceFieldName;
-	                        var emptyCollection = this[emptyCollectionPropName];
-	                        if(!emptyCollection){
-	                            emptyCollection = [];
-	                            this[emptyCollectionPropName] = emptyCollection;
-	                        }
-	                        return emptyCollection;
-	                    }
-	                };
+				collectionDef : function(sourceEntity, targetFieldName, sourceFieldName) {
+					var _self = this;
+					_self.enumerable = true;
+					_self.configurable = false;
+					_self.get = function() {
+						var res = sourceEntity.find(sourceEntity.md[sourceFieldName], this[targetFieldName]);
+						if (res && res.length > 0) {
+							return res;
+						} else {
+							var emptyCollectionPropName = '-x-empty-collection-' + sourceFieldName;
+							var emptyCollection = this[emptyCollectionPropName];
+							if (!emptyCollection) {
+								emptyCollection = [];
+								this[emptyCollectionPropName] = emptyCollection;
+							}
+							return emptyCollection;
+						}
+					};
 				}
 			}
 		}-*/;
-		
+
 		public native JavaScriptObject scalar(JavaScriptObject targetEntity, String targetFieldName, String sourceFieldName)/*-{
 			var constr = this.scalarDef;
 			return new constr(targetEntity, targetFieldName, sourceFieldName);
 		}-*/;
-		
+
 		public native JavaScriptObject collection(JavaScriptObject sourceEntity, String targetFieldName, String sourceFieldName)/*-{
 			var constr = this.collectionDef;
 			return new constr(sourceEntity, targetFieldName, sourceFieldName);
 		}-*/;
 	}
-	
+
 	public native static void publishTopLevelFacade(JavaScriptObject aModule, Model aModel) throws Exception/*-{
 		var publishedModel = {
 			createQuery : function(aQueryId) {
@@ -463,13 +487,13 @@ public class Model {
 			get : function() {
 				return publishedModel;
 			}
-		});		
+		});
 		// deprecated
 		Object.defineProperty(aModule, "md", {
 			get : function() {
 				return aModule.params.md;
 			}
-		});		
+		});
 		for ( var i = 0; i < aModule.md.length; i++) {
 			(function() {
 				var param = aModule.md[i];
@@ -575,17 +599,17 @@ public class Model {
 		commitable = aValue;
 	}
 
-	public NetworkProcess getProcess(){
+	public NetworkProcess getProcess() {
 		return process;
 	}
-	
+
 	public void setProcess(NetworkProcess aValue) {
-	    process = aValue;
-    }
-	
+		process = aValue;
+	}
+
 	public void terminateProcess(Entity aSource, String aErrorMessage) throws Exception {
-		if(process != null){
-			if(aErrorMessage != null){
+		if (process != null) {
+			if (aErrorMessage != null) {
 				process.errors.put(aSource, aErrorMessage);
 			}
 			if (!isPending()) {
@@ -681,8 +705,8 @@ public class Model {
 				}
 
 				@Override
-                public void cancel() {
-                }
+				public void cancel() {
+				}
 			});
 		} else
 			return null;
@@ -720,16 +744,16 @@ public class Model {
 				if (onSuccess != null)
 					Utils.invokeJsFunction(onSuccess);
 			}
-		}, new Callback<String>(){
+		}, new Callback<String>() {
 			@Override
 			public void run(String aResult) throws Exception {
-				if(onFailure != null)
+				if (onFailure != null)
 					Utils.executeScriptEventVoid(module, onFailure, aResult);
 			}
 
 			@Override
-            public void cancel() {
-            }
+			public void cancel() {
+			}
 		});
 	}
 
@@ -745,16 +769,16 @@ public class Model {
 				if (onSuccess != null)
 					Utils.invokeJsFunction(onSuccess);
 			}
-		}, new Callback<String>(){
+		}, new Callback<String>() {
 			@Override
 			public void run(String aResult) throws Exception {
-				if(onFailure != null)
+				if (onFailure != null)
 					Utils.executeScriptEventVoid(module, onFailure, aResult);
 			}
 
 			@Override
-            public void cancel() {
-            }
+			public void cancel() {
+			}
 		});
 	}
 
@@ -790,9 +814,9 @@ public class Model {
 		final Set<Entity> toExecute = new HashSet<Entity>();
 		for (Entity entity : entities.values()) {
 			if (!(entity instanceof ParametersEntity)) {// ParametersEntity is
-														// in the entities, so
-														// we have to filter it
-														// out
+				                                        // in the entities, so
+				                                        // we have to filter it
+				                                        // out
 				if (refresh)
 					entity.invalidate();
 				Set<Relation> dependanceRels = new HashSet<Relation>();
@@ -806,7 +830,7 @@ public class Model {
 				}
 			}
 		}
-		if(process != null)
+		if (process != null)
 			process.cancel();
 		process = new NetworkProcess(onSuccess, onFailure);
 		executeEntities(toExecute, onSuccess, onFailure);
@@ -859,8 +883,8 @@ public class Model {
 		runtime = aValue;
 		if (!oldValue && runtime) {
 			resolveHandlers();
-			if(module != null)
-				module.<Utils.JsModule>cast().clearFunctionsContainer();
+			if (module != null)
+				module.<Utils.JsModule> cast().clearFunctionsContainer();
 			validateQueries();
 			executeRootEntities(true, null, null);
 		}
@@ -883,7 +907,8 @@ public class Model {
 		entity.setName(USER_DATASOURCE_NAME);
 		entity.setQueryId(aQueryId);
 		entity.validateQuery();
-		//addEntity(entity); To avoid memory leaks you should not add the entity in the model!
+		// addEntity(entity); To avoid memory leaks you should not add the
+		// entity in the model!
 		return Entity.publishEntityFacade(entity);
 	}
 }

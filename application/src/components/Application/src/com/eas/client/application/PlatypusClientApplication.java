@@ -511,7 +511,7 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
             ServerReportProxyPrototype.init(ScriptUtils.getScope(), true);
             ReportRunnerPrototype.init(ScriptUtils.getScope(), true);
             FormRunnerPrototype.init(ScriptUtils.getScope(), true);
-            ScriptRunner.PlatypusScriptedResource.init(client, getInstance(), getInstance());
+            PlatypusScriptedResource.init(client, getInstance(), getInstance());
             ScriptUtils.getScope().defineProperty(MODULES_SCRIPT_NAME, scriptsCache, ScriptableObject.READONLY);
 
             runFirstAction();

@@ -5,6 +5,7 @@
 package com.eas.designer.application.module.completion;
 
 import com.eas.client.cache.PlatypusFilesSupport;
+import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
 import com.eas.designer.application.module.completion.CompletionPoint.CompletionToken;
@@ -38,8 +39,14 @@ import org.netbeans.spi.editor.completion.CompletionResultSet;
  */
 public class ModuleThisCompletionContext extends CompletionContext {
 
+    protected static final String MODEL_SCRIPT_NAME = "model";// NOI18N
+    protected static final String PRINCIPAL_SCRIPT_NAME = "principal";// NOI18N
     private final boolean enableJsElementsCompletion;
     private final ModuleCompletionContext parentContext;
+    
+    private static final String MODEL_PROPERTY_JS_DOC = "/**\n"
+            + "* The module's data model.\n"
+            + "*/"; 
     
     private static final String HTTP_PROPERTY_JS_DOC = "/**\n"
             + "* The object to hold the current HTTP request/response data.\n"
@@ -60,6 +67,9 @@ public class ModuleThisCompletionContext extends CompletionContext {
     public CompletionContext getChildContext(CompletionToken token, int offset) throws Exception {
         if (MODEL_SCRIPT_NAME.equals(token.name)) {
             return new ModelCompletionContext(parentContext.getDataObject());
+        }
+        if (PRINCIPAL_SCRIPT_NAME.equals(token.name)) {
+            return new CompletionContext(PlatypusPrincipal.class);
         }
         ApplicationDbEntity entity = parentContext.getDataObject().getModel().getEntityByName(token.name);
         if (entity != null) {
@@ -97,7 +107,7 @@ public class ModuleThisCompletionContext extends CompletionContext {
     }
 
     protected void fillVariablesAndFunctions(CompletionPoint point, CompletionResultSet resultSet) throws Exception {
-        addItem(resultSet, point.getFilter(), new BeanCompletionItem(ApplicationDbModel.class, MODEL_SCRIPT_NAME, null, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
+        addItem(resultSet, point.getFilter(), new BeanCompletionItem(ApplicationDbModel.class, MODEL_SCRIPT_NAME, MODEL_PROPERTY_JS_DOC, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
         if (enableJsElementsCompletion) {
             ScanJsElementsSupport scanner = new ScanJsElementsSupport(PlatypusFilesSupport.extractModuleConstructor(parentContext.getDataObject().getAst()));
             for (JsCompletionItem i : scanner.getCompletionItems(point)) {

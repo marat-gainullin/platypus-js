@@ -8,6 +8,7 @@ import com.bearsoft.rowset.resourcepool.BearResourcePool;
 import com.eas.client.ClientConstants;
 import com.eas.client.DatabasesClient;
 import com.eas.client.ScriptedDatabasesClient;
+import com.eas.client.scripts.PlatypusScriptedResource;
 import com.eas.client.scripts.ScriptRunner;
 import com.eas.client.settings.DbConnectionSettings;
 import com.eas.debugger.jmx.server.Breakpoints;
@@ -341,7 +342,7 @@ public class ServerMain {
         PlatypusServer server = new PlatypusServer(appDbClient, ctx, getListenAddresses(), getPortsProtocols(), getPortsSessionIdleTimeouts(), getPortsSessionIdleCheckIntervals(), getPortsNumWorkerThreads(), tasks, appElement);
         appDbClient.setContextHost(server);
         appDbClient.setPrincipalHost(server);
-        ScriptRunner.PlatypusScriptedResource.init(appDbClient, server, server);
+        PlatypusScriptedResource.init(appDbClient, server, server);
         ScriptUtils.getScope().defineProperty(ServerScriptRunner.MODULES_SCRIPT_NAME, server.getScriptsCache(), ScriptableObject.READONLY);
         
         server.start();

@@ -13,9 +13,10 @@ import com.eas.script.ScriptFunction;
  */
 public class ModelTextArea extends ScalarModelComponent<DbText> {
 
-    private static final String CONSTRUCTOR_JSDOC = "/**\n"
-            + "* A model components for a text area.\n"
-            + "*/";
+    private static final String CONSTRUCTOR_JSDOC = ""
+            + "/**\n"
+            + " * A model components for a text area.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC)
     public ModelTextArea() {
@@ -27,9 +28,10 @@ public class ModelTextArea extends ScalarModelComponent<DbText> {
         super();
         setDelegate(aDelegate);
     }
-    private static final String EDITABLE_JSDOC = "/**\n"
-            + "* Determines if component is editable.\n"
-            + "*/";
+    private static final String EDITABLE_JSDOC = ""
+            + "/**\n"
+            + " * Determines if component is editable.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = EDITABLE_JSDOC)
     public boolean getEditable() {

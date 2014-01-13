@@ -24,7 +24,7 @@ import org.netbeans.modules.editor.NbEditorDocument;
  */
 public class CompletionPoint {
 
-    private static char DOT_CHARACTER = '.';//NOI18N
+    private final static char DOT_CHARACTER = '.';//NOI18N
     private String filter = "";//NOI18N
     private List<CompletionToken> completionTokens;
     private int caretBeginWordOffset;
@@ -73,11 +73,11 @@ public class CompletionPoint {
                         }
                     }
                 }
-                cp.caretBeginWordOffset = getStartWordOffset(doc, caretOffset);
-                cp.caretEndWordOffset = getEndWordOffset(doc, caretOffset);
-                if (caretOffset - cp.caretBeginWordOffset > 0) {
-                    cp.filter = doc.getText(cp.caretBeginWordOffset, caretOffset - cp.caretBeginWordOffset);
-                }
+            }
+            cp.caretBeginWordOffset = getStartWordOffset(doc, caretOffset);
+            cp.caretEndWordOffset = getEndWordOffset(doc, caretOffset);
+            if (caretOffset - cp.caretBeginWordOffset > 0) {
+                cp.filter = doc.getText(cp.caretBeginWordOffset, caretOffset - cp.caretBeginWordOffset);
             }
         }
         return cp;
@@ -109,7 +109,8 @@ public class CompletionPoint {
                     if (pg.getTarget() == an && an instanceof Name) {
                         ctx.add(new CompletionToken(((Name) an).getIdentifier(), CompletionTokenType.IDENTIFIER));
                         return false;
-                    } if (pg.getTarget() == an && an instanceof KeywordLiteral) {
+                    }
+                    if (pg.getTarget() == an && an instanceof KeywordLiteral) {
                         ctx.add(new CompletionToken(an.toSource(), CompletionTokenType.IDENTIFIER));
                         return false;
                     } else if (pg.getProperty() == an && an instanceof Name) {

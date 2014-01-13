@@ -4,41 +4,31 @@
  */
 package com.eas.client.scripts;
 
-import com.eas.client.AppCache;
 import com.eas.client.Client;
 import com.eas.client.ClientConstants;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.login.PrincipalHost;
 import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.model.application.ApplicationModel;
-import com.eas.client.settings.DbConnectionSettings;
-import com.eas.client.settings.EasSettings;
-import com.eas.client.settings.SettingsConstants;
 import com.eas.debugger.jmx.server.Breakpoints;
 import com.eas.script.JsDoc;
 import com.eas.script.JsDoc.Tag;
 import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptUtils;
 import com.eas.script.ScriptUtils.ScriptAction;
-import com.eas.util.BinaryUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.IDN;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.security.AccessControlException;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.mozilla.javascript.*;
 
 /**
- *
+ * Main core js module implementation.
+ * Integrated with Rhino via <code>ScriptRunnerPrototype</code>.
+ * @see ScriptRunnerPrototype
  * @author pk, mg refactoring
  */
 public class ScriptRunner extends ScriptableObject {
@@ -94,6 +84,10 @@ public class ScriptRunner extends ScriptableObject {
         return Tag.containsTagWithName(moduleAnnotations, aName);
     }
 
+    /**
+     * Queries model's data for the first time.
+     * @throws Exception 
+     */
     protected void doExecute() throws Exception {
         ScriptUtils.inContext(new ScriptAction() {
             @Override
@@ -136,6 +130,12 @@ public class ScriptRunner extends ScriptableObject {
         }
     }
 
+    /**
+     * Injects platypus features into 'this' object, calls js module's constructor with arguments and finally resolves model'd entities' events handlers.
+     * @param scriptDoc
+     * @param args
+     * @throws Exception 
+     */
     protected void prepareScript(final ScriptDocument scriptDoc, final Object[] args) throws Exception {
         ScriptUtils.inContext(new ScriptAction() {
             @Override
@@ -154,6 +154,10 @@ public class ScriptRunner extends ScriptableObject {
         });
     }
 
+    /**
+     * Ensures that model's data is queried and fetched from sources. (Note: in asynchronous clients data in not fetched here).
+     * @throws Exception 
+     */
     public void execute() throws Exception {
         if (!executed) {
             executed = true;
@@ -161,6 +165,11 @@ public class ScriptRunner extends ScriptableObject {
         }
     }
 
+    /**
+     * Shrinks internal structures, allowing to reuse this instance of <code>ScriptRunner</code> with probably new content (hot reloading feature).
+     * @see #refresh() 
+     * @throws Exception 
+     */
     protected void shrink() throws Exception {
         model = null;
         functionAllowedRoles = null;
@@ -172,6 +181,7 @@ public class ScriptRunner extends ScriptableObject {
      * Refreshs content of the script runner. Reloads it from application
      * storage and re-executes new instance of model.
      *
+     * @see #shrink() 
      * @throws Exception
      */
     public synchronized void refresh() throws Exception {
@@ -193,18 +203,12 @@ public class ScriptRunner extends ScriptableObject {
     public ApplicationModel<?, ?, ?, ?> getModel() {
         return model;
     }
-    private static final String GET_APPICATION_ELEMENT_ID_JSDOC = ""
-            + "/**\n"
-            + "* Gets application element Id.\n"
-            + "* @return Module's application element Id\n"
-            + "*/";
 
     /**
      * Gets application element Id
      *
      * @return Module's application element Id
      */
-    @ScriptFunction(jsDoc = GET_APPICATION_ELEMENT_ID_JSDOC)
     public String getApplicationElementId() {
         return appElementId;
     }
@@ -216,11 +220,11 @@ public class ScriptRunner extends ScriptableObject {
     public long getTxtCrc32() {
         return txtCrc32;
     }
-    private static final String GET_PRINCIPAL_JSDOC = ""
+    
+    private static final String PRINCIPAL_JSDOC = ""
             + "/**\n"
-            + "* Script security API.\n"
-            + "* @return PlatypusPrincipal instance, wich may be used to check roles in\n"
-            + "* application code with calls of the hasRole method.\n"
+            + "* <code>PlatypusPrincipal</code> instance, wich may be used to check roles in\n"
+            + "* application code with calls of the <code>hasRole</code> method.\n"
             + "*/";
 
     /**
@@ -230,7 +234,7 @@ public class ScriptRunner extends ScriptableObject {
      * application code with calls of the hasRole method.
      * @see PlatypusPrincipal
      */
-    @ScriptFunction(jsDoc = GET_PRINCIPAL_JSDOC)
+    @ScriptFunction(jsDoc = PRINCIPAL_JSDOC)
     public Object getPrincipal() {
         if (principalHost != null) {
             return Context.javaToJS(principalHost.getPrincipal(), this);
@@ -250,6 +254,12 @@ public class ScriptRunner extends ScriptableObject {
         return ScriptRunner.class.getName();
     }
 
+    /**
+     * Overriden to provide dynamic js classes definition.
+     * @param name Script property name. In case of global ScriptRunner object it may serve as platypus js module name.
+     * @param start
+     * @return 
+     */
     @Override
     public Object get(String name, Scriptable start) {
         try {
@@ -291,191 +301,17 @@ public class ScriptRunner extends ScriptableObject {
             return resourceId;
         }
     }
-
-    public static class PlatypusScriptedResource {
-
-        private static final Pattern pattern = Pattern.compile("https?://.*");
-        protected static Client client;
-        protected static AppCache cache;
-        protected static PrincipalHost principalHost;
-        protected static CompiledScriptDocumentsHost scriptDocumentsHost;
-
-        /**
-         * Initializes a static fields.
-         *
-         * @param aClient Client instance
-         * @param aPrincipalHost Login support
-         * @param aScriptDocumentsHost Scripts host
-         * @throws Exception If something goes wrong
-         */
-        public static void init(Client aClient, PrincipalHost aPrincipalHost, CompiledScriptDocumentsHost aScriptDocumentsHost) throws Exception {
-            assert cache == null : "Platypus application resources may be initialized only once.";
-            client = aClient;
-            cache = client.getAppCache();
-            principalHost = aPrincipalHost;
-            scriptDocumentsHost = aScriptDocumentsHost;
-        }
-
-        /**
-         * Gets an principal provider.
-         *
-         * @return Principal host instance
-         */
-        public static PrincipalHost getPrincipalHost() {
-            return principalHost;
-        }
-
-        /**
-         * Gets script documents host.
-         *
-         * @return Script documents host instance
-         */
-        public static CompiledScriptDocumentsHost getScriptDocumentsHost() {
-            return scriptDocumentsHost;
-        }
-
-        /**
-         * Gets an absolute path to the application's directory.
-         *
-         * @return Application's directory full path or null if not path is not
-         * avaliable
-         */
-        public static String getApplicationPath() {
-            EasSettings settings = client.getSettings();
-            if (settings instanceof DbConnectionSettings) {
-                return ((DbConnectionSettings) settings).getApplicationPath();
-            } else {
-                return null;
-            }
-        }
-
-        /**
-         * Loads a resource's bytes either from disk or from datatbase.
-         *
-         * @param aResourceId An relative path to the resource
-         * @return Bytes for resource
-         * @throws Exception If some error occurs when reading the resource
-         */
-        public static byte[] load(String aResourceId) throws Exception {
-            if (aResourceId != null && !aResourceId.isEmpty()) {
-                Matcher htppMatcher = pattern.matcher(aResourceId);
-                if (htppMatcher.matches()) {
-                    URL url = new URL(aResourceId);
-                    try {
-                        try (InputStream is = url.openStream()) {
-                            return BinaryUtils.readStream(is, -1);
-                        }
-                    } catch (IOException ex) {
-                        url = encodeUrl(url);
-                        try (InputStream is = url.openStream()) {
-                            return BinaryUtils.readStream(is, -1);
-                        }
-                    }
-                } else {
-                    if (cache == null) {
-                        throw new IllegalStateException("Platypus application resources have to be initialized first.");
-                    }
-
-                    String resourceId = translateResourcePath(aResourceId);
-                    /*
-                     File test = new File(resourceId);
-                     if (test.exists()) {
-                     return FileUtils.readBytes(test);
-                     } else {
-                     */
-                    ApplicationElement appElement = cache.get(resourceId);
-                    if (appElement != null) {
-                        if (appElement.getType() == ClientConstants.ET_RESOURCE) {
-                            // let's check actuality
-                            if (!cache.isActual(appElement.getId(), appElement.getTxtContentLength(), appElement.getTxtCrc32())) {
-                                cache.remove(appElement.getId());
-                                appElement = cache.get(resourceId);
-                            }
-                        } else {
-                            throw new NotResourceException(resourceId);
-                        }
-                    }
-                    if (appElement != null && appElement.getType() == ClientConstants.ET_RESOURCE) {
-                        return appElement.getBinaryContent();
-                    } else {
-                        throw new IllegalArgumentException(String.format("Resource %s not found", aResourceId));
-                    }
-                    //}
-                }
-            } else {
-                return null;
-            }
-        }
-
-        /**
-         * Loads a resource as text for UTF-8 encoding.
-         *
-         * @param aResourceId An relative path to the resource
-         * @return Resource's text
-         * @throws Exception If some error occurs when reading the resource
-         */
-        public static String loadText(String aResourceId) throws Exception {
-            return loadText(aResourceId, SettingsConstants.COMMON_ENCODING);
-        }
-
-        /**
-         * Loads a resource as text.
-         *
-         * @param aResourceId An relative path to the resource
-         * @param aEncodingName Encoding name
-         * @return Resource's text
-         * @throws Exception If some error occurs when reading the resource
-         */
-        public static String loadText(String aResourceId, String aEncodingName) throws Exception {
-            byte[] data = load(aResourceId);
-            return data != null ? new String(data, aEncodingName) : null;
-        }
-
-        protected static String translateResourcePath(String aPath) throws Exception {
-            /*
-             File test = new File(aPath);
-             if (test.exists()) {
-             // it seems, that id is a real file path
-             return test.getPath();
-             } else {
-             */
-            if (aPath.startsWith("/")) {
-                throw new IllegalStateException("Platypus resource path can't begin with /. Platypus resource paths must point somewhere in application, but not in filesystem.");
-            }
-            if (aPath.startsWith("..") || aPath.startsWith(".")) {
-                /*
-                 EvaluatorException ex = Context.reportRuntimeError("_");
-                 ScriptStackElement[] stack = ex.getScriptStack();
-                 traverse stack to reach non platypusStandardLib script and use it as base path
-                 */
-                throw new IllegalStateException("Platypus resource paths must be application-absolute. \"" + aPath + "\" is not application-absolute");
-            }
-            URI uri = new URI(null, null, aPath, null);
-            return uri.normalize().getPath();
-            //}
-        }
-
-        private static Client getClient() {
-            return client;
-        }
-
-        private static URL encodeUrl(URL url) throws URISyntaxException, MalformedURLException {
-            String file = "";
-            if (url.getPath() != null && !url.getPath().isEmpty()) {
-                file += (new URI(null, null, url.getPath(), null)).toASCIIString();
-            }
-            if (url.getQuery() != null && !url.getQuery().isEmpty()) {
-                file += "?" + url.getQuery();
-            }
-            if (url.getRef() != null && !url.getRef().isEmpty()) {
-                file += "#" + url.getRef();
-            }
-            url = new URL(url.getProtocol(), IDN.toASCII(url.getHost()), url.getPort(), file);
-            return url;
-        }
-    }
+    
+    /**
+     * Accounting of already executed scripts. Allows to avoid reexecution.
+     */
     protected static Set<String> executedScriptResources = new HashSet<>();
 
+    /**
+     * Executes a plain js resource (file).
+     * @param aResourceId
+     * @throws Exception 
+     */
     public static void executeResource(final String aResourceId) throws Exception {
         final String resourceId = PlatypusScriptedResource.translateResourcePath(aResourceId);
         if (!executedScriptResources.contains(resourceId)) {
@@ -515,6 +351,15 @@ public class ScriptRunner extends ScriptableObject {
         }
     }
 
+    /**
+     * Imports a system library js resource (file) into global js space.
+     * @param libResourceName Js resource (file) name (aka standardLib.js). See use cases for convenience.
+     * @param aLibName Js virtual library name. See use cases for convenience.
+     * @param currentContext
+     * @param aScope
+     * @return
+     * @throws IOException 
+     */
     public static Script importScriptLibrary(String libResourceName, String aLibName, Context currentContext, Scriptable aScope) throws IOException {
         try (InputStream is = ScriptRunner.class.getResourceAsStream(libResourceName); InputStreamReader isr = new InputStreamReader(is)) {
             Script compiled = currentContext.compileReader(isr, aLibName, 0, null);
@@ -523,6 +368,14 @@ public class ScriptRunner extends ScriptableObject {
         }
     }
 
+    /**
+     * 
+     * Ensures that platypus standard script scope is constructed.
+     * @param currentContext
+     * @return
+     * @throws Exception 
+     * @see #get(java.lang.String, org.mozilla.javascript.Scriptable) 
+     */
     public static ScriptableObject checkStandardObjects(Context currentContext) throws Exception {
         synchronized (standardObjectsScopeLock) {
             if (standardObjectsScope == null) {
@@ -561,6 +414,12 @@ public class ScriptRunner extends ScriptableObject {
         return compiledScriptDocumentsHost;
     }
 
+    /**
+     * Loads a script document from application database or filesystem and prepares it for execution and calls module's constructor.
+     * @param aAppElementId Global module name (at application level) or path to executable js file.
+     * @param args Js module's constructor arguments.
+     * @throws Exception 
+     */
     public void loadApplicationElement(String aAppElementId, Object[] args) throws Exception {
         if (appElementId == null ? aAppElementId != null : !appElementId.equals(aAppElementId)) {
             shrink();

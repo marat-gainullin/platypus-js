@@ -28,6 +28,8 @@ import javax.swing.text.Document;
 import org.mozilla.javascript.ast.AstRoot;
 import org.mozilla.javascript.ast.FunctionNode;
 import org.mozilla.javascript.ast.Name;
+import org.netbeans.api.project.FileOwnerQuery;
+import org.netbeans.api.project.Project;
 import org.openide.cookies.EditorCookie;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
@@ -246,7 +248,7 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
     protected DataObject handleCopy(DataFolder df) throws IOException {
         DataObject copied = super.handleCopy(df);
         String content = copied.getPrimaryFile().asText(PlatypusFiles.DEFAULT_ENCODING);
-        String newContent = getCopyModuleContent(content);
+        String newContent = getCopyModuleContent(FileOwnerQuery.getOwner(copied.getPrimaryFile()), content);
         try (OutputStream os = copied.getPrimaryFile().getOutputStream()) {
             os.write(newContent.getBytes(PlatypusFiles.DEFAULT_ENCODING));
             os.flush();
@@ -254,13 +256,13 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
         return copied;
     }
 
-    private String getCopyModuleContent(String aJsContent) {
+    private String getCopyModuleContent(Project project, String aJsContent) {
         AstRoot jsRoot = JsParser.parse(aJsContent);
         FunctionNode func = PlatypusFilesSupport.extractModuleConstructor(jsRoot);
         if (func != null) {
             Name consructorName = func.getFunctionName();
             String oldName = consructorName.getIdentifier();
-            String newName = NewApplicationElementWizardIterator.getNewValidAppElementName(getProject(), oldName);
+            String newName = NewApplicationElementWizardIterator.getNewValidAppElementName(project, oldName);
             StringBuilder sb = new StringBuilder(aJsContent.substring(0, consructorName.getAbsolutePosition()));
             sb.append(newName);
             sb.append(aJsContent.substring(consructorName.getAbsolutePosition() + oldName.length()));

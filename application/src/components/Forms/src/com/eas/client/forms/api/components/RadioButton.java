@@ -16,7 +16,8 @@ import org.mozilla.javascript.Function;
  */
 public class RadioButton extends Component<JRadioButton> {
 
-    private static final String CONSTRUCTOR_JSDOC = "/**\n"
+    private static final String CONSTRUCTOR_JSDOC = ""
+            + "/**\n"
             + "* Radio button component.\n"
             + "* @param text Component's text (optional)\n"
             + "* @param selected <code>true</code> if component is selected (optional)\n"
@@ -47,7 +48,10 @@ public class RadioButton extends Component<JRadioButton> {
         setDelegate(aDelegate);
     }
     
-    @ScriptFunction(jsDoc="The button's text.")
+    @ScriptFunction(jsDoc=""
+            + "/**\n"
+            + " * The button's text.\n"
+            + " */")
     public String getText() {
         return delegate.getText();
     }
@@ -57,7 +61,10 @@ public class RadioButton extends Component<JRadioButton> {
         delegate.setText(aValue);
     }
 
-    @ScriptFunction(jsDoc="The default icon.")
+    @ScriptFunction(jsDoc=""
+            + "/**\n"
+            + " * The default icon.\n"
+            + " */")
     public Icon getIcon() {
         return delegate.getIcon();
     }
@@ -67,7 +74,10 @@ public class RadioButton extends Component<JRadioButton> {
         delegate.setIcon(aValue);
     }
 
-    @ScriptFunction(jsDoc="The state of the button.")
+    @ScriptFunction(jsDoc=""
+            + "/**\n"
+            + " * The state of the button.\n"
+            + " */")
     public boolean getSelected() {
         return delegate.isSelected();
     }

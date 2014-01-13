@@ -81,7 +81,7 @@ Object.defineProperty(Resource, "load", {
     get: function() {
         return function(aResName, aOnSuccess, aOnFailure) {
             try{
-                var loaded = com.eas.client.scripts.ScriptRunner.PlatypusScriptedResource.load(aResName);
+                var loaded = com.eas.client.scripts.PlatypusScriptedResource.load(aResName);
                 if (aOnSuccess)
                     aOnSuccess(loaded);
                 return loaded;
@@ -107,8 +107,8 @@ Object.defineProperty(Resource, "loadText", {
                 onFailure = aOnFailure;
             }
             try{
-                var _loaded = encoding ? com.eas.client.scripts.ScriptRunner.PlatypusScriptedResource.loadText(aResName, encoding) :
-                                         com.eas.client.scripts.ScriptRunner.PlatypusScriptedResource.loadText(aResName);
+                var _loaded = encoding ? com.eas.client.scripts.PlatypusScriptedResource.loadText(aResName, encoding) :
+                                         com.eas.client.scripts.PlatypusScriptedResource.loadText(aResName);
                 if(onSuccess)
                     onSuccess(_loaded);
                 else
@@ -125,7 +125,7 @@ Object.defineProperty(Resource, "loadText", {
 
 Object.defineProperty(Resource, "applicationPath", {
     get: function() {
-        return com.eas.client.scripts.ScriptRunner.PlatypusScriptedResource.getApplicationPath();
+        return com.eas.client.scripts.PlatypusScriptedResource.getApplicationPath();
     }
 });
 

@@ -10,6 +10,7 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import org.netbeans.api.progress.ProgressHandle;
 import org.netbeans.api.progress.ProgressHandleFactory;
+import org.openide.ErrorManager;
 import org.openide.awt.StatusDisplayer;
 import org.openide.nodes.Node;
 import org.openide.util.ContextAwareAction;
@@ -83,6 +84,11 @@ public class AddDdMetadataMigrationAction extends AbstractAction implements Cont
             public void taskFinished(org.openide.util.Task task) {
                 ph.finish();
                 StatusDisplayer.getDefault().setStatusText(NbBundle.getMessage(AddSqlMigrationAction.class, "LBL_Create_Mtd_Migration_Complete")); // NOI18N
+                try {
+                    project.getDbMigrationsRoot().refresh();
+                } catch (Exception ex) {
+                    ErrorManager.getDefault().notify(ex);
+                }
             }
         });
         ph.start();

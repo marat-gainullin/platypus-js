@@ -20,9 +20,10 @@ public class SplitPane extends Container<JSplitPane> {
         this(Orientation.HORIZONTAL);
     }
 
-    private static final String CONSTRUCTOR_JSDOC = "/**\n"
+    private static final String CONSTRUCTOR_JSDOC = ""
+            + "/**\n"
             + "* <code>SplitPane</code> is used to divide two (and only two) components. By default uses horisontal orientation.\n" 
-            + "* @param orientation <code>Orientation.HORIZONTAL</code> or <code>Orientation.VERTICAL</code> (optional)\n"
+            + "* @param orientation <code>Orientation.HORIZONTAL</code> or <code>Orientation.VERTICAL</code> (optional).\n"
             + "*/";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"orientation"})
@@ -42,7 +43,8 @@ public class SplitPane extends Container<JSplitPane> {
         setDelegate(aDelegate);
     }
     
-    private static final String ORIENTATION_JSDOC = "/**\n"
+    private static final String ORIENTATION_JSDOC = ""
+            + "/**\n"
             + "* The orientation of the container.\n"
             + "*/";
     
@@ -66,7 +68,8 @@ public class SplitPane extends Container<JSplitPane> {
         }
     }
 
-    private static final String DIVIDER_LOCATION_JSDOC = "/**\n"
+    private static final String DIVIDER_LOCATION_JSDOC = ""
+            + "/**\n"
             + "* The split pane divider's location in pixels\n"
             + "*/";
     
@@ -80,7 +83,8 @@ public class SplitPane extends Container<JSplitPane> {
         delegate.setDividerLocation(aValue);
     }
 
-    private static final String ONE_TOUCH_EXPANDABLE_JSDOC = "/**\n"
+    private static final String ONE_TOUCH_EXPANDABLE_JSDOC = ""
+            + "/**\n"
             + "* True if the pane is one touch expandable.\n"
             + "*/";
     
@@ -94,7 +98,8 @@ public class SplitPane extends Container<JSplitPane> {
         delegate.setOneTouchExpandable(aValue);
     }
 
-    private static final String FIRST_COMPONENT_JSDOC = "/**\n"
+    private static final String FIRST_COMPONENT_JSDOC = ""
+            + "/**\n"
             + "* The first component of the container.\n"
             + "*/";
     
@@ -110,7 +115,8 @@ public class SplitPane extends Container<JSplitPane> {
         delegate.repaint();
     }
 
-    private static final String SECOND_COMPONENT_JSDOC = "/**\n"
+    private static final String SECOND_COMPONENT_JSDOC = ""
+            + "/**\n"
             + "* The second component of the container.\n"
             + "*/";
     
@@ -126,9 +132,10 @@ public class SplitPane extends Container<JSplitPane> {
         delegate.repaint();
     }
 
-    private static final String ADD_JSDOC = "/**\n"
+    private static final String ADD_JSDOC = ""
+            + "/**\n"
             + "* Appends the specified component to the end of this container.\n"
-            + "* @param component the component to add\n"
+            + "* @param component the component to add.\n"
             + "*/";
     
     @ScriptFunction(jsDoc = ADD_JSDOC, params = {"component"})

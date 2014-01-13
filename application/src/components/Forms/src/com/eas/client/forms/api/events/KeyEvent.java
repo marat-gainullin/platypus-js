@@ -16,7 +16,8 @@ public class KeyEvent extends Event<java.awt.event.KeyEvent> {
         super(aDelegate);
     }
 
-    private static final String KEY_JS_DOC = "/**\n"
+    private static final String KEY_JS_DOC = ""
+            + "/**\n"
             + "* Key code associated with this event.\n"
             + "*/";
     
@@ -25,7 +26,8 @@ public class KeyEvent extends Event<java.awt.event.KeyEvent> {
         return delegate.getKeyCode();
     }
 
-     private static final String ALT_DOWN_JS_DOC = "/**\n"
+     private static final String ALT_DOWN_JS_DOC = ""
+             + "/**\n"
             + "* Alt key is down on this event.\n"
             + "*/";
     
@@ -34,7 +36,8 @@ public class KeyEvent extends Event<java.awt.event.KeyEvent> {
         return delegate.isAltDown() || delegate.isAltGraphDown();
     }
 
-    private static final String CONTROL_DOWN_JS_DOC = "/**\n"
+    private static final String CONTROL_DOWN_JS_DOC = ""
+            + "/**\n"
             + "* Ctrl key is down on this event.\n"
             + "*/";
     
@@ -43,7 +46,8 @@ public class KeyEvent extends Event<java.awt.event.KeyEvent> {
         return delegate.isControlDown();
     }
 
-    private static final String SHIFT_DOWN_JS_DOC = "/**\n"
+    private static final String SHIFT_DOWN_JS_DOC = ""
+            + "/**\n"
             + "* Shift key is down on this event.\n"
             + "*/";
     
@@ -52,7 +56,8 @@ public class KeyEvent extends Event<java.awt.event.KeyEvent> {
         return delegate.isShiftDown();
     }
 
-    private static final String META_DOWN_JS_DOC = "/**\n"
+    private static final String META_DOWN_JS_DOC = ""
+            + "/**\n"
             + "* Meta key is down on this event.\n"
             + "*/";
     

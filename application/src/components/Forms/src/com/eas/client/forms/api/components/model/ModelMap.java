@@ -25,9 +25,10 @@ import org.mozilla.javascript.Function;
  */
 public class ModelMap extends Component<DbMap> {
 
-    private static final String CONSTRUCTOR_JSDOC = "/**\n"
-            + "* A model component that shows a map. \n"
-            + "*/";
+    private static final String CONSTRUCTOR_JSDOC = ""
+            + "/**\n"
+            + " * A model component that shows a map.\n"
+            + " */";
     
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC)
     public ModelMap() {
@@ -40,8 +41,9 @@ public class ModelMap extends Component<DbMap> {
         setDelegate(aDelegate);
     }
     
-    private static final String BACKING_URL_JSDOC = "/**\n"
-            + "* The map service URL.\n"
+    private static final String BACKING_URL_JSDOC = ""
+            + "/**\n"
+            + "* The map tiles service URL.\n"
             + "*/";
     
     @ScriptFunction(jsDoc = BACKING_URL_JSDOC)
@@ -54,9 +56,10 @@ public class ModelMap extends Component<DbMap> {
         delegate.setBackingUrl(aUrl);
     }
 
-    private static final String GO_TO_GEO_POSITION_JSDOC = "/**\n"
-            + "* Makes map move to the specified geo position. \n"
-            + "* @param position the position on the map \n"
+    private static final String GO_TO_GEO_POSITION_JSDOC = ""
+            + "/**\n"
+            + "* Makes map move to the specified geo position.\n"
+            + "* @param position the position on the map.\n"
             + "*/";
     
     @ScriptFunction(jsDoc = GO_TO_GEO_POSITION_JSDOC, params = {"position"})
@@ -64,8 +67,9 @@ public class ModelMap extends Component<DbMap> {
         delegate.goToGeoPosition(aPosition);
     }
 
-    private static final String GEO_POSITION_JSDOC = "/**\n"
-            + "* The current geo position on the map. \n"
+    private static final String GEO_POSITION_JSDOC = ""
+            + "/**\n"
+            + "* The current geo position on the map.\n"
             + "*/";
     
     @ScriptFunction(jsDoc = GEO_POSITION_JSDOC)
@@ -78,7 +82,8 @@ public class ModelMap extends Component<DbMap> {
         delegate.fit();
     }
     
-    private static final String FIT_JSDOC = "/**\n"
+    private static final String FIT_JSDOC = ""
+            + "/**\n"
             + "* Fits the map to the specified area. If area parameter is not provided fits the map to the maximum extent. \n"
             + "* @param area the <code>Geometry</code> of the specified area (optional) \n"
             + "*/";
@@ -88,9 +93,10 @@ public class ModelMap extends Component<DbMap> {
         delegate.fit(aArea);
     }
 
-    private static final String HIT_JSDOC = "/**\n"
-            + "* Hits to the specified point. \n"
-            + "* @param hitObject the object to hit, can be either a Point or a Polygon instance \n"
+    private static final String HIT_JSDOC = ""
+            + "/**\n"
+            + "* Hits to the specified point.\n"
+            + "* @param hitObject the object to hit, can be either a Point or a Polygon instance.\n"
             + "* @return an array of <code>SelectionEntry</code> elements\n"
             + "*/";
     
@@ -104,9 +110,9 @@ public class ModelMap extends Component<DbMap> {
     }
 
     private static final String HIT_SELECTION_JSDOC = "/**\n"
-            + "* Hits the selection on the specified point. \n"
-            + "* @param hitPoint the Point to hit \n"
-            + "* @return an array of <code>SelectionEntry</code> elements\n"
+            + "* Hits the selection on the specified point.\n"
+            + "* @param hitPoint the Point to hit.\n"
+            + "* @return an array of <code>SelectionEntry</code> elements.\n"
             + "*/";
     
     @ScriptFunction(jsDoc = HIT_SELECTION_JSDOC, params = {"hitPoint"})
@@ -114,9 +120,10 @@ public class ModelMap extends Component<DbMap> {
         return delegate.hitSelection(aHitPoint);
     }
 
-    private static final String SELECT_JSDOC = "/**\n"
-            + "* Selects specified entries. \n"
-            + "* @param selectionEntries the array of <code>SelectionEntry</code> elements to select \n"
+    private static final String SELECT_JSDOC = ""
+            + "/**\n"
+            + "* Selects specified entries.\n"
+            + "* @param selectionEntries the array of <code>SelectionEntry</code> elements to select.\n"
             + "*/";
     
     @ScriptFunction(jsDoc = SELECT_JSDOC, params = {"selectionEntries"})
@@ -124,7 +131,8 @@ public class ModelMap extends Component<DbMap> {
         delegate.select(aSelectionEntries);
     }
 
-    private static final String PANE_JSDOC = "/**\n"
+    private static final String PANE_JSDOC = ""
+            + "/**\n"
             + "* The map's geo pane (read only).\n"
             + "*/";
     
@@ -133,7 +141,8 @@ public class ModelMap extends Component<DbMap> {
         return delegate.getPane();
     }
 
-    private static final String TOOLS_JSDOC = "/**\n"
+    private static final String TOOLS_JSDOC = ""
+            + "/**\n"
             + "* The map's mouse tools.\n"
             + "*/";
     
@@ -142,7 +151,8 @@ public class ModelMap extends Component<DbMap> {
         return delegate.getTools();
     }
 
-    private static final String ON_EVENT_JSDOC = "/**\n"
+    private static final String ON_EVENT_JSDOC = ""
+            + "/**\n"
             + "* The map's event handler function.\n"
             + "*/";
     
@@ -156,13 +166,14 @@ public class ModelMap extends Component<DbMap> {
         delegate.setOnEvent(aValue);
     }
 
-    private static final String ADD_LAYER_JSDOC = "/**\n"
+    private static final String ADD_LAYER_JSDOC = ""
+            + "/**\n"
             + "* Adds new layer to the map.\n"
-            + "* @param layerTitle the layer's title \n"
-            + "* @param rowset the layer's data\n"
-            + "* @param geometryClass the geometry class\n"
-            + "* @param styleAttributes the layer's style attributes\n"
-            + "* @return <code>MapLayer</code> instance\n"
+            + "* @param layerTitle the layer's title.\n"
+            + "* @param rowset the layer's data.\n"
+            + "* @param geometryClass the geometry class.\n"
+            + "* @param styleAttributes the layer's style attributes.\n"
+            + "* @return <code>MapLayer</code> instance.\n"
             + "*/";
     
     @ScriptFunction(jsDoc = ADD_LAYER_JSDOC, params = {"layerTitle", "rowset", "geometryClass", "styleAttributes"})
@@ -170,10 +181,11 @@ public class ModelMap extends Component<DbMap> {
         return delegate.addLayer(aLayerTitle, aRowset, aGeometryClass, aStyleAttributes);
     }
 
-    private static final String REMOVE_LAYER_JSDOC = "/**\n"
+    private static final String REMOVE_LAYER_JSDOC = ""
+            + "/**\n"
             + "* Removes layer by the specified title.\n"
-            + "* @param layerTitle the layer's title \n"
-            + "* @return <code>MapLayer</code> instance\n"
+            + "* @param layerTitle the layer's title.\n"
+            + "* @return <code>MapLayer</code> instance.\n"
             + "*/";
     
     @ScriptFunction(jsDoc = REMOVE_LAYER_JSDOC)
@@ -181,9 +193,10 @@ public class ModelMap extends Component<DbMap> {
         return delegate.removeLayer(aLayerTitle);
     }
     
-    private static final String REMOVE_ALL_LAYER_JSDOC = "/**\n"
+    private static final String REMOVE_ALL_LAYER_JSDOC = ""
+            + "/**\n"
             + "* Removes all layers of the map.\n"
-            + "* @return an array of <code>MapLayer</code> instances\n"
+            + "* @return an array of <code>MapLayer</code> instances.\n"
             + "*/";
 
     @ScriptFunction(jsDoc = REMOVE_ALL_LAYER_JSDOC)
@@ -191,10 +204,11 @@ public class ModelMap extends Component<DbMap> {
         return delegate.removeAllLayers();
     }
 
-    private static final String LAYER_JSDOC = "/**\n"
+    private static final String LAYER_JSDOC = ""
+            + "/**\n"
             + "* Gets map's layer by the title.\n"
-            + "* @param layerTitle the layer's title\n"
-            + "* @return an <code>MapLayer</code> instance\n"
+            + "* @param layerTitle the layer's title.\n"
+            + "* @return an <code>MapLayer</code> instance.\n"
             + "*/";
     
     @ScriptFunction(jsDoc = LAYER_JSDOC, params = {"layerTitle"})
@@ -202,10 +216,11 @@ public class ModelMap extends Component<DbMap> {
         return delegate.getLayer(aLayerTitle);
     }
 
-    private static final String CARTESIAN2GEO_JSDOC = "/**\n"
+    private static final String CARTESIAN2GEO_JSDOC = ""
+            + "/**\n"
             + "* Transforms point from cartesian to geo coordinate system.\n"
-            + "* @param point the <code>Point</code> to transform\n"
-            + "* @return an tranformed <code>Point</code> instance\n"
+            + "* @param point the <code>Point</code> to transform.\n"
+            + "* @return an tranformed <code>Point</code> instance.\n"
             + "*/";
     
     @ScriptFunction(jsDoc = CARTESIAN2GEO_JSDOC, params = {"point"})
@@ -213,10 +228,11 @@ public class ModelMap extends Component<DbMap> {
         return delegate.cartesian2Geo(aPt);
     }
 
-    private static final String GEO2CARTESIAN_JSDOC = "/**\n"
+    private static final String GEO2CARTESIAN_JSDOC = ""
+            + "/**\n"
             + "* Transforms point from geo to cartesian coordinate system.\n"
-            + "* @param point the <code>Point</code> to transform\n"
-            + "* @return an tranformed <code>Point</code> instance\n"
+            + "* @param point the <code>Point</code> to transform.\n"
+            + "* @return an tranformed <code>Point</code> instance.\n"
             + "*/";
     
     @ScriptFunction(jsDoc = GEO2CARTESIAN_JSDOC, params = {"point"})
@@ -224,10 +240,11 @@ public class ModelMap extends Component<DbMap> {
         return delegate.geo2Cartesian(aPt);
     }
 
-    private static final String CARTESIAN2SCREEN_JSDOC = "/**\n"
+    private static final String CARTESIAN2SCREEN_JSDOC = ""
+            + "/**\n"
             + "* Transforms point from cartesian to screen coordinate system.\n"
-            + "* @param point the <code>Point</code> to transform\n"
-            + "* @return an tranformed <code>Point</code> instance\n"
+            + "* @param point the <code>Point</code> to transform.\n"
+            + "* @return an tranformed <code>Point</code> instance.\n"
             + "*/";
     
     @ScriptFunction(jsDoc = CARTESIAN2SCREEN_JSDOC, params = {"point"})
@@ -235,10 +252,11 @@ public class ModelMap extends Component<DbMap> {
         return delegate.cartesian2Screen(aPt);
     }
 
-    private static final String SCREEN2CARTESIAN_JSDOC = "/**\n"
+    private static final String SCREEN2CARTESIAN_JSDOC = ""
+            + "/**\n"
             + "* Tranaforms point from  screen to cartesian coordinate system.\n"
-            + "* @param point the <code>Point</code> to transform\n"
-            + "* @return an tranformed <code>Point</code> instance\n"
+            + "* @param point the <code>Point</code> to transform.\n"
+            + "* @return an tranformed <code>Point</code> instance.\n"
             + "*/";
     
     @ScriptFunction(jsDoc = SCREEN2CARTESIAN_JSDOC, params = {"point"})

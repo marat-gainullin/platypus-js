@@ -10,7 +10,6 @@ import com.eas.client.model.application.ApplicationDbModel;
 import com.eas.designer.application.indexer.IndexerQuery;
 import com.eas.designer.application.module.ModuleUtils;
 import com.eas.designer.application.module.PlatypusModuleDataObject;
-import static com.eas.designer.application.module.completion.CompletionContext.REPORT_MODULE_NAME;
 import static com.eas.designer.application.module.completion.CompletionContext.addItem;
 import com.eas.designer.application.module.completion.CompletionPoint.CompletionToken;
 import com.eas.designer.application.module.events.ApplicationEntityEventProperty;
@@ -18,6 +17,7 @@ import com.eas.designer.application.module.nodes.ApplicationEntityNode;
 import com.eas.designer.application.module.parser.AstUtlities;
 import com.eas.designer.datamodel.nodes.ModelNode;
 import com.eas.designer.explorer.utils.StringUtils;
+import com.eas.script.ScriptObj;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -56,6 +56,14 @@ import org.openide.util.Lookup;
 public class ModuleCompletionContext extends CompletionContext {
 
     public static final String THIS_KEYWORD = "this";//NOI18N
+    public static final String PARAMS_SCRIPT_NAME = "params";// NOI18N
+    protected static final String METADATA_SCRIPT_NAME = ApplicationDbModel.DATASOURCE_METADATA_SCRIPT_NAME;
+    protected static final String MODULE_NAME = "Module";// NOI18N
+    protected static final String SERVER_MODULE_NAME = "ServerModule";// NOI18N
+    protected static final String FORM_MODULE_NAME = "Form";// NOI18N
+    protected static final String REPORT_MODULE_NAME = "Report";// NOI18N
+    protected static final String SERVER_REPORT_MODULE_NAME = "ServerReport";// NOI18N
+    protected static final String MODULES_OBJECT_NAME = "Modules";// NOI18N
     private static final Set<String> ARRAY_ITERATION_FUNCTIONS_NAMES = new HashSet<String>() {
         {
             add("forEach");//NOI18N
@@ -87,12 +95,25 @@ public class ModuleCompletionContext extends CompletionContext {
         JsCodeCompletionScopeInfo completionScopeInfo = getCompletionScopeInfo(dataObject, offset, point.getFilter());
         if (completionScopeInfo.mode == CompletionMode.CONSTRUCTORS) {
             fillSystemConstructors(point, resultSet);
+        } else if (completionScopeInfo.mode == CompletionMode.VARIABLES_AND_FUNCTIONS) {
+            fillSystemObjects(point, resultSet);
         }
     }
 
     protected void fillSystemConstructors(CompletionPoint point, CompletionResultSet resultSet) {
         for (CompletionSupportService scp : Lookup.getDefault().lookupAll(CompletionSupportService.class)) {
             Collection<JsCompletionItem> items = scp.getSystemConstructors(point);
+            if (items != null) {
+                for (JsCompletionItem item : items) {
+                    addItem(resultSet, point.getFilter(), item);
+                }
+            }
+        }
+    }
+
+    protected void fillSystemObjects(CompletionPoint point, CompletionResultSet resultSet) {
+        for (CompletionSupportService scp : Lookup.getDefault().lookupAll(CompletionSupportService.class)) {
+            Collection<JsCompletionItem> items = scp.getSystemObjects(point);
             if (items != null) {
                 for (JsCompletionItem item : items) {
                     addItem(resultSet, point.getFilter(), item);
@@ -166,6 +187,12 @@ public class ModuleCompletionContext extends CompletionContext {
     }
 
     public static CompletionContext findCompletionContext(String fieldName, int offset, ModuleCompletionContext parentModuleContext) {
+        for (CompletionSupportService scp : Lookup.getDefault().lookupAll(CompletionSupportService.class)) {
+            Class clazz = scp.getClassByName(fieldName);
+            if (clazz != null && clazz.isAnnotationPresent(ScriptObj.class)) {
+                return new CompletionContext(clazz);
+            }
+        }
         AstRoot astRoot = parentModuleContext.dataObject.getAst();
         if (astRoot != null) {
             AstNode offsetNode = AstUtlities.getOffsetNode(astRoot, offset);
@@ -293,6 +320,9 @@ public class ModuleCompletionContext extends CompletionContext {
                                 ctx = parentContext.createThisContext(false);
                                 return false;
                             }
+                        } else if (Token.THIS == an.getType() && THIS_KEYWORD.equals(fieldName)) {
+                            ctx = parentContext.createThisContext(false);
+                            return false;
                         }
                     }
                     if (an instanceof VariableDeclaration) {
@@ -350,11 +380,20 @@ public class ModuleCompletionContext extends CompletionContext {
                                             && Token.THIS == variableInitializer.getInitializer().getType()) {// var self = this;
                                         ctx = parentContext.createThisContext(false);
                                         return false;
+                                    } else {
+                                        List<CompletionToken> tokens = CompletionPoint.getContextTokens(variableInitializer);
+                                        if (tokens != null && tokens.size() > 1) {
+                                            try {
+                                                ctx = ModuleCompletionProvider.getCompletionContext(parentContext, tokens, variableInitializer.getAbsolutePosition());
+                                                return false;
+                                            } catch (Exception ex) {
+                                                ErrorManager.getDefault().notify(ex);
+                                            }
+                                        }
                                     }
                                 }
                             }
                         }
-                        return false;
                     }
                     return true;
                 }

@@ -21,11 +21,12 @@ public class Menu extends Container<JMenu> {
         setDelegate(new JMenu());
     }
         
-    private static final String CONSTRUCTOR_JSDOC = "/**\n"
+    private static final String CONSTRUCTOR_JSDOC = ""
+            + "/**\n"
             + "* An implementation of a menu -- a popup window containing MenuItems\n"
             + "* that is displayed when the user selects an item on the MenuBar.\n"
             + "* In addition to <code>MenuItems</code>, a <code>Menu</code> can also contain <code>MenuSeparators</code>.\n"
-            + "* @param text the text for the menu label (optional)\n"
+            + "* @param text the text for the menu label (optional).\n"
             + "*/";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text"})
@@ -39,7 +40,8 @@ public class Menu extends Container<JMenu> {
         setDelegate(aDelegate);
     }
     
-    private static final String PARENT_JSDOC = "/**\n"
+    private static final String PARENT_JSDOC = ""
+            + "/**\n"
             + "* The parent container.\n"
             + "*/";
     
@@ -54,9 +56,10 @@ public class Menu extends Container<JMenu> {
     }
 
     
-    private static final String CHILD_JSDOC = "/**\n"
+    private static final String CHILD_JSDOC = ""
+            + "/**\n"
             + "* Gets the child item component whith specified index.\n"
-            + "* @param index the component's index in the container\n"
+            + "* @param index the component's index in the container.\n"
             + "* @return the child component\n"
             + "*/";
     
@@ -66,7 +69,8 @@ public class Menu extends Container<JMenu> {
         return getComponentWrapper(delegate.getMenuComponent(aIndex));
     }
 
-    private static final String TEXT_JSDOC = "/**\n"
+    private static final String TEXT_JSDOC = ""
+            + "/**\n"
             + "* The text of the menu.\n"
             + "*/";
     
@@ -80,7 +84,8 @@ public class Menu extends Container<JMenu> {
         delegate.setText(aValue);
     }
 
-    private static final String ADD_JSDOC = "/**\n"
+    private static final String ADD_JSDOC = ""
+            + "/**\n"
             + "* Adds the item to the menu.\n"
             + "* @param component the component to add\n"
             + "*/";
@@ -91,7 +96,8 @@ public class Menu extends Container<JMenu> {
     }
 
     
-    private static final String COUNT_JSDOC = "/**\n"
+    private static final String COUNT_JSDOC = ""
+            + "/**\n"
             + "* Gets the count of the menu items.\n"
             + "*/";
     @Override

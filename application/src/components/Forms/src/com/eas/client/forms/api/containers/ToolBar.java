@@ -15,9 +15,10 @@ import javax.swing.JToolBar;
  */
 public class ToolBar extends Container<JToolBar> {
 
-    private static final String CONSTRUCTOR_JSDOC = "/**\n"
+    private static final String CONSTRUCTOR_JSDOC = ""
+            + "/**\n"
             + "* <code>ToolBar</code> provides a component that is useful for displaying commonly used actions or controls.\n"
-            + "* @param floatable if <code>true</code>, the tool bar can be moved; <code>false</code> otherwise (optional)\n"
+            + "* @param floatable if <code>true</code>, the tool bar can be moved; <code>false</code> otherwise (optional).\n"
             + "*/";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {})
@@ -36,9 +37,10 @@ public class ToolBar extends Container<JToolBar> {
         setDelegate(aDelegate);
     }
     
-    private static final String ADD_JSDOC = "/**\n"
+    private static final String ADD_JSDOC = ""
+            + "/**\n"
             + "* Appends the specified component to the end of this container.\n"
-            + "* @param component the component to add\n"
+            + "* @param component the component to add.\n"
             + "*/";
     
     @ScriptFunction(jsDoc = ADD_JSDOC, params = {"component", "text", "icon"})

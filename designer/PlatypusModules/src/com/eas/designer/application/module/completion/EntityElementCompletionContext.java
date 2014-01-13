@@ -4,9 +4,11 @@
  */
 package com.eas.designer.application.module.completion;
 
+import com.bearsoft.rowset.metadata.Field;
+import com.bearsoft.rowset.metadata.Fields;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.script.ScriptableRowset;
-import com.eas.designer.application.module.completion.CompletionPoint;
+import static com.eas.designer.application.module.completion.CompletionContext.addItem;
 import org.netbeans.spi.editor.completion.CompletionResultSet;
 
 /**
@@ -24,6 +26,12 @@ public class EntityElementCompletionContext extends CompletionContext {
     
     @Override
     public void applyCompletionItems(CompletionPoint point, int offset, CompletionResultSet resultSet) throws Exception {
-        fillFields(entity.getFields(), point, resultSet);
+        fillFieldsValues(entity.getFields(), point, resultSet);
+    }
+    
+    protected static void fillFieldsValues(Fields aFields, CompletionPoint point, CompletionResultSet resultSet) {
+        for (Field field : aFields.toCollection()) {
+            addItem(resultSet, point.getFilter(), new FieldCompletionItem(field, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
+        }
     }
 }

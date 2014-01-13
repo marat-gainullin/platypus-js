@@ -29,8 +29,7 @@ public abstract class DatabaseFlowProvider<JKT> implements FlowProvider {
      * A flow provider, intended to support jdbc data sources.
      * @param aClause A sql clause, provider should use to achieve PreparedStatement instance to use it in the
      * result set querying process.
-     * @param aTable A table name to be used to apply changes. Note that sql clause might be constructed
-     * over several tables, but updates may be saved to only one table, so you must choose.
+     * @param aSessionId
      * @param aJdbcSourceTag Jdbc source key value. It may be long number or string identifier.
      */
     public DatabaseFlowProvider(JKT aJdbcSourceTag, String aSessionId, String aClause) {

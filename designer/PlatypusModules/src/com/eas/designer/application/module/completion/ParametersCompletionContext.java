@@ -8,6 +8,7 @@ import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameters;
 import static com.eas.designer.application.module.completion.CompletionContext.addItem;
 import com.eas.designer.application.module.completion.CompletionPoint.CompletionToken;
+import static com.eas.designer.application.module.completion.ModuleCompletionContext.METADATA_SCRIPT_NAME;
 import org.netbeans.spi.editor.completion.CompletionResultSet;
 
 /**
@@ -28,7 +29,7 @@ public class ParametersCompletionContext extends CompletionContext {
         if (getScriptClass() != null) {
             fillJavaCompletionItems(point, resultSet);
         }
-        fillFieldsValues(parameters, point, resultSet);
+        EntityElementCompletionContext.fillFieldsValues(parameters, point, resultSet);
         addItem(resultSet, point.getFilter(), new BeanCompletionItem(Parameters.class, METADATA_SCRIPT_NAME, null, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
     }
 

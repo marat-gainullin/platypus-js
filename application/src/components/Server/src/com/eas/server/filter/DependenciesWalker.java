@@ -128,11 +128,12 @@ public class DependenciesWalker {
                     putDependence(((StringLiteral) arguments.get(0)).getValue());
                 }
             }
-        } else if(name.getIdentifier().equals("loadEntity") && name.getParent() instanceof PropertyGet){
+        } else if (name.getIdentifier().equals("loadEntity") && name.getParent() instanceof PropertyGet) {
             AstNode target = ((PropertyGet) name.getParent()).getTarget();
-            if(target instanceof PropertyGet)
-                target = ((PropertyGet)target).getProperty();
-            if(target instanceof Name && ((Name) target).getIdentifier().equals("model")){
+            if (target instanceof PropertyGet) {
+                target = ((PropertyGet) target).getProperty();
+            }
+            if (target instanceof Name && ((Name) target).getIdentifier().equals("model")) {
                 assert aNode.getParent().getParent() instanceof FunctionCall : ERROR_DEPENDECIES_PARSE_ERROR;
                 FunctionCall funcCall = (FunctionCall) aNode.getParent().getParent();
                 List<AstNode> arguments = funcCall.getArguments();
@@ -157,11 +158,13 @@ public class DependenciesWalker {
             } else if (cache != null) {
                 try {
                     ApplicationElement appElement = cache.get(name.getIdentifier());
-                    if (appElement != null && (appElement.getType() == ClientConstants.ET_COMPONENT || appElement.getType() == ClientConstants.ET_FORM)) {
-                        putDependence(name.getIdentifier());
-                    } else {
-                        Logger.getLogger(DependenciesWalker.class.getName()).log(Level.SEVERE, "Found two different application element with same constructors {0}", appElement != null ? appElement.getName() : "");
-                    }
+                    if (appElement != null) {
+                        if (appElement.getType() == ClientConstants.ET_COMPONENT || appElement.getType() == ClientConstants.ET_FORM) {
+                            putDependence(name.getIdentifier());
+                        } else {
+                            Logger.getLogger(DependenciesWalker.class.getName()).log(Level.SEVERE, "Several application elements with same constructor ({0}) are found.", appElement.getName());
+                        }
+                    }// ordinary script class
                 } catch (Exception ex) {
                     Logger.getLogger(DependenciesWalker.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -174,7 +177,7 @@ public class DependenciesWalker {
             dependencies.add(entityId);
         }
     }
-    
+
     private void putQueryDependence(String entityId) {
         if (!queryDependencies.contains(entityId)) {
             queryDependencies.add(entityId);

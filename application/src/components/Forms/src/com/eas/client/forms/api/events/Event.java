@@ -23,7 +23,8 @@ public abstract class Event<E extends EventObject> {
         delegate = aDelegate;
     }
 
-    private static final String SOURCE_JS_DOC = "/**\n"
+    private static final String SOURCE_JS_DOC = ""
+            + "/**\n"
             + "* The source component object of the event.\n"
             + "*/";
     

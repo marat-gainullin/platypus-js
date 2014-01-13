@@ -116,12 +116,12 @@ public class OracleConverter extends PlatypusConverter {
     @Override
     public Object getFromJdbcAndConvert2RowsetCompatible(ResultSet aRs, int aColIndex, DataTypeInfo aTypeInfo) throws RowsetException {
         try {
-            Connection conn = aRs.getStatement().getConnection();
-            assert conn instanceof OracleConnection || conn.unwrap(OracleConnection.class) instanceof OracleConnection;
-            if (!(conn instanceof OracleConnection)) {
-                conn = conn.unwrap(OracleConnection.class);
-            }
             if (isGeometry(aTypeInfo)) {
+                Connection conn = aRs.getStatement().getConnection();
+                assert conn instanceof OracleConnection || conn.unwrap(OracleConnection.class) instanceof OracleConnection;
+                if (!(conn instanceof OracleConnection)) {
+                    conn = conn.unwrap(OracleConnection.class);
+                }
                 Object value = aRs.getObject(aColIndex);
                 if (value instanceof oracle.sql.STRUCT) {
                     final GeometryConverter geometryConverter = new GeometryConverter((OracleConnection) conn);

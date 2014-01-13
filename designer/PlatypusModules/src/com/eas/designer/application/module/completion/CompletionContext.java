@@ -14,6 +14,7 @@ import com.eas.designer.application.module.completion.CompletionPoint.Completion
 import com.eas.script.ScriptFunction;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -26,22 +27,12 @@ import org.netbeans.spi.editor.completion.CompletionResultSet;
  */
 public class CompletionContext {
 
-    protected static final String MODEL_SCRIPT_NAME = "model";// NOI18N
-    public static final String PARAMS_SCRIPT_NAME = "params";// NOI18N
-    protected static final String METADATA_SCRIPT_NAME = ApplicationDbModel.DATASOURCE_METADATA_SCRIPT_NAME;
-    protected static final String CURSOR_ENTITY_PROPERTY_NAME = "cursor";//NOI18N
-    protected static final String MODULE_NAME = "Module";// NOI18N
-    protected static final String SERVER_MODULE_NAME = "ServerModule";// NOI18N
-    protected static final String FORM_MODULE_NAME = "Form";// NOI18N
-    protected static final String REPORT_MODULE_NAME = "Report";// NOI18N
-    protected static final String SERVER_REPORT_MODULE_NAME = "ServerReport";// NOI18N
-    protected static final String MODULES_OBJECT_NAME = "Modules";// NOI18N
     protected static final String GET_METHOD_NAME = "get";// NOI18N
     protected static final String BEANY_PREFIX_GET = "get";// NOI18N
     protected static final String BEANY_PREFIX_SET = "set";// NOI18N
     protected static final String BEANY_PREFIX_IS = "is";// NOI18N
     private static final int QUOTED_STRING_MIN_LENGTH = 2;
-    private Class<?> scriptClass;
+    private final Class<?> scriptClass;
 
     public CompletionContext(Class<?> aScriptClass) {
         scriptClass = aScriptClass;
@@ -50,7 +41,7 @@ public class CompletionContext {
     public Class<?> getScriptClass() {
         return scriptClass;
     }
-    
+
     public void applyCompletionItems(CompletionPoint point, int offset, CompletionResultSet resultSet) throws Exception {
         fillJavaCompletionItems(point, resultSet);
     }
@@ -59,26 +50,6 @@ public class CompletionContext {
         return null;
     }
 
-    protected void fillFields(Fields aFields, CompletionPoint point, CompletionResultSet resultSet) {
-        for (Field field : aFields.toCollection()) {
-            addItem(resultSet, point.getFilter(), new BeanCompletionItem(field.getClass(), field.getName(), field.getDescription(), point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
-        }
-    }
-
-    protected void fillFieldsValues(Fields aFields, CompletionPoint point, CompletionResultSet resultSet) {
-        for (Field field : aFields.toCollection()) {
-            addItem(resultSet, point.getFilter(), new FieldCompletionItem(field, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
-        }
-    }
-
-    protected void fillEntities(Collection<? extends Entity> entities, CompletionResultSet resultSet, CompletionPoint point) throws Exception {
-        for (Entity appEntity : entities) {
-            if (appEntity.getName() != null && !appEntity.getName().isEmpty()) {
-                addItem(resultSet, point.getFilter(), new BeanCompletionItem(ScriptableRowset.class, appEntity.getName(), null, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
-            }
-        }
-    }
-    
     protected static void addItem(CompletionResultSet resultSet, String aFilter, JsCompletionItem aCompletionItem) {
         if (aFilter == null || aFilter.isEmpty() || (aCompletionItem.getText().toLowerCase().startsWith(aFilter.toLowerCase()) && !aCompletionItem.getText().equals(aFilter))) {
             if (aFilter == null || !(aFilter.endsWith(")") || aFilter.endsWith("}"))) {//NOI18N
@@ -120,9 +91,7 @@ public class CompletionContext {
                 List<String> parameters = new ArrayList<>();
                 String[] params = method.getAnnotation(ScriptFunction.class).params();
                 if (params != null) {
-                    for (String param : params) {
-                        parameters.add(param);
-                    }
+                    parameters.addAll(Arrays.asList(params));
                 }
                 JsFunctionCompletionItem functionCompletionItem = new JsFunctionCompletionItem(
                         method.getName(),
@@ -135,21 +104,21 @@ public class CompletionContext {
             }
         }
     }
-    
+
     protected static boolean isPropertyGet(CompletionToken token, String propertyName) {
         return (CompletionTokenType.PROPERTY_GET == token.type && propertyName.equals(token.name))
                 || (CompletionTokenType.ELEMENT_GET == token.type && isQuotedString(token.name) && propertyName.equals(removeQuotes(token.name)));
     }
-    
+
     protected static boolean isQuotedString(String str) {
-        return str != null & str.length() > QUOTED_STRING_MIN_LENGTH 
+        return str != null & str.length() > QUOTED_STRING_MIN_LENGTH
                 && ((str.startsWith("\"") && str.endsWith("\"")) || (str.startsWith("'") && str.endsWith("'")));//NOI18N
     }
-    
+
     private static String removeQuotes(String str) {
         return str.substring(1, str.length() - 1);
     }
-    
+
     private static boolean isNumberClass(Class<?> clazz) {
         return Number.class.isAssignableFrom(clazz)
                 || Byte.TYPE.equals(clazz)
@@ -209,7 +178,11 @@ public class CompletionContext {
             capitalizedPropName = methodName.substring(2);
             assert !capitalizedPropName.isEmpty();
         }
-        return capitalizedPropName.substring(0, 1).toLowerCase() + capitalizedPropName.substring(1);
+        if (capitalizedPropName.toUpperCase().equals(capitalizedPropName)) {
+            return capitalizedPropName;
+        } else {
+            return capitalizedPropName.substring(0, 1).toLowerCase() + capitalizedPropName.substring(1);
+        }
     }
 
     private static boolean isBeanPatternMethod(Method method) {

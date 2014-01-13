@@ -4,7 +4,7 @@ import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationParametersEntity;
 import com.eas.design.Designable;
 import com.eas.designer.application.module.PlatypusModuleDataObject;
-import com.eas.designer.application.module.completion.CompletionContext;
+import static com.eas.designer.application.module.completion.ModuleCompletionContext.PARAMS_SCRIPT_NAME;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -19,8 +19,8 @@ import org.openide.nodes.Node.Cookie;
 public class ApplicationModuleEvents implements Cookie {
 
     // Event handlers: mapping event handler name to it's using counter
-    private Map<String, Integer> eventHandlers = new HashMap<>();
-    private PlatypusModuleDataObject dataObject;
+    private final Map<String, Integer> eventHandlers = new HashMap<>();
+    private final PlatypusModuleDataObject dataObject;
 
     public ApplicationModuleEvents(PlatypusModuleDataObject aModel) {
         dataObject = aModel;
@@ -91,12 +91,12 @@ public class ApplicationModuleEvents implements Cookie {
     }
 
     public String findFreeHandlerName(ApplicationDbEntity entity, ApplicationEntityEventDesc event) {
-        String componentName = entity.getName(); // NOI18N
+        String componentName = entity.getName();
         if (componentName == null) {
             if (entity instanceof ApplicationParametersEntity) {
-                componentName = CompletionContext.PARAMS_SCRIPT_NAME;
+                componentName = PARAMS_SCRIPT_NAME;
             } else {
-                componentName = "";
+                componentName = "";//NOI18N
             }
         }
         String methodName = event.getListenerMethod().getName();

@@ -12,6 +12,8 @@ import static com.eas.designer.application.module.completion.CompletionContext.a
 import static com.eas.designer.application.module.completion.CompletionContext.isPropertyGet;
 import com.eas.designer.application.module.completion.CompletionPoint.CompletionToken;
 import com.eas.designer.application.module.completion.CompletionPoint.CompletionTokenType;
+import static com.eas.designer.application.module.completion.ModuleCompletionContext.METADATA_SCRIPT_NAME;
+import static com.eas.designer.application.module.completion.ModuleCompletionContext.PARAMS_SCRIPT_NAME;
 import org.netbeans.spi.editor.completion.CompletionResultSet;
 
 /**
@@ -20,6 +22,7 @@ import org.netbeans.spi.editor.completion.CompletionResultSet;
  */
 public class EntityCompletionContext extends CompletionContext {
 
+    protected static final String CURSOR_ENTITY_PROPERTY_NAME = "cursor";//NOI18N
     ApplicationDbEntity entity;
 
     public EntityCompletionContext(ApplicationDbEntity anEntity) {

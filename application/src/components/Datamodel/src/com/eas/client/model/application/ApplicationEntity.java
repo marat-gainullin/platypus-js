@@ -536,7 +536,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
                 // var m = new Module1(); m.model.entity1
                 model.getPublished().defineProperty(name, sRowsetWrap);
                 // deprecated
-                ScriptableObject moduleThis = (ScriptableObject) model.getScriptThis();                
+                ScriptableObject moduleThis = (ScriptableObject) model.getScriptThis();
                 /* var m = new Module1(); m.entity1 */
                 moduleThis.defineProperty(name, sRowsetWrap, ScriptableObject.READONLY);
                 //
@@ -840,7 +840,6 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             } else {
                 return false;
 
-
             }
         } catch (Exception ex) {
             Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
@@ -890,10 +889,12 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             super(aSource);
             this.newIndex = newIndex;
         }
-        
-        private static final String NEW_INDEX_JSDOC = "/**\n"
+
+        private static final String NEW_INDEX_JSDOC = ""
+                + "/**\n"
                 + "* Cursor position the cursor will be set on.\n"
                 + "*/";
+
         @ScriptFunction(jsDoc = NEW_INDEX_JSDOC)
         public int getNewIndex() {
             return newIndex;
@@ -909,7 +910,10 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             this.oldIndex = oldIndex;
         }
 
-        @ScriptFunction(jsDoc = "Cursor position the cursor was on")
+        @ScriptFunction(jsDoc = ""
+                + "/**\n"
+                + " * Cursor position the cursor was on.\n"
+                + " */")
         public int getOldIndex() {
             return oldIndex;
         }
@@ -978,37 +982,41 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             return field;
         }
 
-        private static final String PROPERTY_NAME_JSDOC = "/**\n"
+        private static final String PROPERTY_NAME_JSDOC = ""
+                + "/**\n"
                 + "* The changed property name.\n"
                 + "*/";
-        
+
         @ScriptFunction(jsDoc = PROPERTY_NAME_JSDOC)
         public String getPropertyName() {
             return field != null ? field.getName() : null;
         }
-        
-        private static final String OLD_VALUE_JSDOC = "/**\n"
+
+        private static final String OLD_VALUE_JSDOC = ""
+                + "/**\n"
                 + "* The old value.\n"
                 + "*/";
-        
+
         @ScriptFunction(jsDoc = OLD_VALUE_JSDOC)
         public Object getOldValue() {
             return oldValue;
         }
 
-        private static final String NEW_VALUE_JSDOC = "/**\n"
+        private static final String NEW_VALUE_JSDOC = ""
+                + "/**\n"
                 + "* The new value.\n"
                 + "*/";
-        
+
         @ScriptFunction(jsDoc = NEW_VALUE_JSDOC)
         public Object getNewValue() {
             return newValue;
         }
 
-        private static final String OBJECT_JSDOC = "/**\n"
+        private static final String OBJECT_JSDOC = ""
+                + "/**\n"
                 + "* The updated element.\n"
                 + "*/";
-        
+
         @ScriptFunction(jsDoc = OBJECT_JSDOC)
         public Scriptable getObject() {
             return source;
@@ -1079,19 +1087,21 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             this.inserted = inserted;
         }
 
-        private static final String INSERTED_JSDOC = "/**\n"
+        private static final String INSERTED_JSDOC = ""
+                + "/**\n"
                 + "* The inserted element.\n"
                 + "*/";
-        
+
         @ScriptFunction(jsDoc = INSERTED_JSDOC)
         public RowHostObject getInserted() {
             return inserted;
         }
 
-        private static final String OBJECT_JSDOC = "/**\n"
+        private static final String OBJECT_JSDOC = ""
+                + "/**\n"
                 + "* The inserted element.\n"
                 + "*/";
-        
+
         @ScriptFunction(jsDoc = OBJECT_JSDOC)
         public RowHostObject getObject() {
             return inserted;
@@ -1130,10 +1140,11 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             this.deleted = deleted;
         }
 
-        private static final String DELETED_JSDOC = "/**\n"
+        private static final String DELETED_JSDOC = ""
+                + "/**\n"
                 + "* The deleted element.\n"
                 + "*/";
-        
+
         @ScriptFunction(jsDoc = DELETED_JSDOC)
         public RowHostObject getDeleted() {
             return deleted;

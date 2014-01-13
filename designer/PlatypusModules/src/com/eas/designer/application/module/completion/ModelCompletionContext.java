@@ -4,11 +4,14 @@
  */
 package com.eas.designer.application.module.completion;
 
+import com.eas.client.model.Entity;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationModel;
+import com.eas.client.model.script.ScriptableRowset;
 import com.eas.designer.application.module.PlatypusModuleDataObject;
-import static com.eas.designer.application.module.completion.CompletionContext.PARAMS_SCRIPT_NAME;
 import static com.eas.designer.application.module.completion.CompletionContext.addItem;
+import static com.eas.designer.application.module.completion.ModuleCompletionContext.PARAMS_SCRIPT_NAME;
+import java.util.Collection;
 import org.netbeans.spi.editor.completion.CompletionResultSet;
 
 /**
@@ -41,5 +44,13 @@ public class ModelCompletionContext extends CompletionContext {
             return new EntityCompletionContext(entity);
         }
         return null;
+    }
+    
+    protected void fillEntities(Collection<? extends Entity> entities, CompletionResultSet resultSet, CompletionPoint point) throws Exception {
+        for (Entity appEntity : entities) {
+            if (appEntity.getName() != null && !appEntity.getName().isEmpty()) {
+                addItem(resultSet, point.getFilter(), new BeanCompletionItem(ScriptableRowset.class, appEntity.getName(), null, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
+            }
+        }
     }
 }

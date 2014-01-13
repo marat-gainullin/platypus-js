@@ -18,10 +18,11 @@ public class ModelCheckBox extends ScalarModelComponent<DbCheck> {
         setDelegate(new DbCheck());
     }
 
-    private static final String CONSTRUCTOR_JSDOC = "/**\n"
-            + "* An implementation of a model check box -- an item that can be selected or deselected, and which displays its state to the user. \n"
-            + "* @param text the text of the component (optional)\n"
-            + "*/";
+    private static final String CONSTRUCTOR_JSDOC = ""
+            + "/**\n"
+            + " * An implementation of a model check box -- an item that can be selected or deselected, and which displays its state to the user.\n"
+            + " * @param text the text of the component (optional).\n"
+            + " */";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text"})
     public ModelCheckBox(String aText) throws Exception {
@@ -34,7 +35,8 @@ public class ModelCheckBox extends ScalarModelComponent<DbCheck> {
         setDelegate(aDelegate);
     }
     
-    private static final String TEXT_JSDOC = "/**\n"
+    private static final String TEXT_JSDOC = ""
+            + "/**\n"
             + "* Text on the check box."
             + "*/";
     
@@ -48,9 +50,11 @@ public class ModelCheckBox extends ScalarModelComponent<DbCheck> {
         delegate.setText(aValue);
     }
 
-    private static final String EDITABLE_JSDOC = "/**\n"
+    private static final String EDITABLE_JSDOC = ""
+            + "/**\n"
             + "* Determines if component is editable."
             + "*/";
+    
     @ScriptFunction(jsDoc = EDITABLE_JSDOC)
     public boolean getEditable() {
         return delegate.isEditable();

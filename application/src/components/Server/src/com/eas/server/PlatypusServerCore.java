@@ -14,6 +14,7 @@ import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.queries.ContextHost;
 import com.eas.client.scripts.CompiledScriptDocuments;
 import com.eas.client.scripts.CompiledScriptDocumentsHost;
+import com.eas.client.scripts.PlatypusScriptedResource;
 import com.eas.client.scripts.ScriptDocument;
 import com.eas.client.scripts.ScriptRunner;
 import com.eas.client.settings.DbConnectionSettings;
@@ -38,7 +39,7 @@ import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 
 /**
- *
+ * The core class for platypus server infrastructure (e.g. Standalone J2SE server and J2EE servlets).
  * @author mg
  */
 public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledScriptDocumentsHost {
@@ -59,7 +60,7 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
             instance = new PlatypusServerCore(serverCoreDbClient, tasks, aStartAppElementId);
             serverCoreDbClient.setContextHost(instance);
             serverCoreDbClient.setPrincipalHost(instance);
-            ScriptRunner.PlatypusScriptedResource.init(serverCoreDbClient, instance, instance);
+            PlatypusScriptedResource.init(serverCoreDbClient, instance, instance);
             ScriptUtils.getScope().defineProperty(ServerScriptRunner.MODULES_SCRIPT_NAME, instance.getScriptsCache(), ScriptableObject.READONLY);
 
             if (System.getProperty(ScriptRunner.DEBUG_PROPERTY) != null) {

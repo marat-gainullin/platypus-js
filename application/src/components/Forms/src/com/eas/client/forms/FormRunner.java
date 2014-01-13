@@ -217,59 +217,58 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
         setPrototype(FormRunnerPrototype.getInstance());
         formKey = aFormId;
     }
-    // Platypus script interface
+    
+    // Script interface
+    
     private static final String SHOW_JSDOC = ""
             + "/**\n"
-            + "* Shows the form as an ordinary window.\n"
-            + "*/";
+            + " * Shows the form as an ordinary window.\n"
+            + " */";
 
     /**
      * Script method showing the form as ordinary frame
-     *
-     * @throws Exception
+     * @throws Exception an exception if something goes wrong
      */
     @ScriptFunction(jsDoc = SHOW_JSDOC)
     public void show() throws Exception {
         displayAsFrame();
     }
 
-    /**
-     * Same as showModal
-     *
-     * @return
-     * @throws Exception
-     * @see #showModal()
-     */
     public Object showDialog(Function onOkModalResult) throws Exception {
         return showModal(onOkModalResult);
     }
+
     private static final String SHOW_MODAL_JSDOC = ""
             + "/**\n"
-            + "* Shows the form as a dialog (modal window).\n"
-            + "*/";
+            + " * Shows the form as a dialog (modal window).\n"
+            + " * @param callback a callback handler function\n"
+            + " */";
 
     /**
      * Script method showing the form as modal dialog
      *
-     * @return Value of modalResult property.
-     * @throws Exception
+     * @param onOkModalResult a callback handler function
+     * @return value of the modalResult property
+     * @throws Exception an exception if something goes wrong
      */
-    @ScriptFunction(jsDoc = SHOW_MODAL_JSDOC)
+    @ScriptFunction(params = {"callback"}, jsDoc = SHOW_MODAL_JSDOC)
     public Object showModal(Function onOkModalResult) throws Exception {
         return displayAsDialog(onOkModalResult);
     }
+
     private static final String SHOW_INTERNAL_FRAME_JSDOC = ""
             + "/**\n"
-            + "* Shows the form as internal window in a desktop.\n"
-            + "*/";
+            + " * Shows the form as an internal window in a desktop.\n"
+            + " * @param desktop the parent desktop object\n"
+            + " */";
 
     /**
-     * Script method showing the form as internal frame.
+     * Script method showing the form as an internal frame.
      *
-     * @param desktopObject Should be instanceof JDesktopPane
-     * @throws Exception
+     * @param desktopObject Should be an instance of JDesktopPane
+     * @throws Exception an exception if something goes wrong
      */
-    @ScriptFunction(jsDoc = SHOW_INTERNAL_FRAME_JSDOC)
+    @ScriptFunction(params = {"desktop"}, jsDoc = SHOW_INTERNAL_FRAME_JSDOC)
     public void showInternalFrame(Object desktopObject) throws Exception {
         DesktopPane desktopPane;
         if (desktopObject instanceof NativeJavaObject) {
@@ -282,13 +281,14 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
         }
         displayAsInternalFrame(desktopPane);
     }
+
     private static final String SHOW_ON_PANEL_FRAME_JSDOC = ""
             + "/**\n"
-            + "* Script method showing the form on panel.\n"
-            + "* @param panel the parent panel.\n"
-            + "*/";
+            + " * Script method showing the form in embedded mode on the panel.\n"
+            + " * @param panel the parent panel\n"
+            + " */";
 
-    @ScriptFunction(jsDoc = SHOW_ON_PANEL_FRAME_JSDOC, params = {"panel"})
+    @ScriptFunction(params = {"panel"}, jsDoc = SHOW_ON_PANEL_FRAME_JSDOC)
     public void showOnPanel(Object aParent) throws Exception {
         com.eas.client.forms.api.Container<?> hostPanel;
         if (aParent != null) {
@@ -310,10 +310,11 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
     public String getFormId() {
         return getApplicationElementId();
     }
+
     private static final String FORM_KEY_JSDOC = ""
             + "/**\n"
-            + "* The form key. Used to identify a form instance. Initialy set to the form's application element ID.\n"
-            + "*/";
+            + " * The form key. Used to identify a form instance. Initialy set to the form's application element name.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = FORM_KEY_JSDOC)
     public String getFormKey() {
@@ -333,10 +334,11 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
             }
         }
     }
+
     private static final String IS_VISIBLE_JSDOC = ""
             + "/**\n"
-            + "* Checks if form visible.\n"
-            + "*/";
+            + " * Checks if this form is visible.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = IS_VISIBLE_JSDOC)
     public boolean getVisible() {
@@ -676,11 +678,11 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
     }
     private static final String CLOSE_JSDOC = ""
             + "/**\n"
-            + "* Closes form.\n"
-            + "* @param aSelected Value to be passed as a result of a selection into showModal's callback.\n"
-            + "*/";
+            + " * Closes this form.\n"
+            + " * @param obj an object to be passed as a result of a selection into <code>showModal</code> callback handler function.\n"
+            + " */";
 
-    @ScriptFunction(jsDoc = CLOSE_JSDOC)
+    @ScriptFunction(params = {"obj"}, jsDoc = CLOSE_JSDOC)
     public void close(Object aSelected) {
         if (surface != null) {
             try {
@@ -705,10 +707,11 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
             }
         }
     }
+
     private static final String MINIMIZE_JSDOC = ""
             + "/**\n"
-            + "* Minimizes form\n"
-            + "*/";
+            + " * Minimizes this form.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = MINIMIZE_JSDOC)
     public void minimize() {
@@ -724,10 +727,11 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
             }
         }
     }
+
     private static final String MAXIMIZE_JSDOC = ""
             + "/**\n"
-            + "* Maximizes form\n"
-            + "*/";
+            + " * Maximizes this form.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = MAXIMIZE_JSDOC)
     public void maximize() {
@@ -746,8 +750,8 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
     }
     private static final String RESTORE_JSDOC = ""
             + "/**\n"
-            + "* Restores form\n"
-            + "*/";
+            + " * Restores this form state.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = RESTORE_JSDOC)
     public void restore() {
@@ -766,10 +770,11 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
             }
         }
     }
+
     private static final String TO_FRONT_JSDOC = ""
             + "/**\n"
-            + "* Moves form to the front\n"
-            + "*/";
+            + " * Moves form to the front position.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = TO_FRONT_JSDOC)
     public void toFront() {
@@ -785,13 +790,12 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
             }
         }
     }
-    private static final String IS_MINIMIZED_JSDOC = ""
+    private static final String GET_MINIMIZED_JSDOC = ""
             + "/**\n"
-            + " * Returns if form is minimized\n"
-            + " * return minimized True if minimized\n"
+            + " * <code>true</code> if this form is minimized.\n"
             + " */";
 
-    @ScriptFunction(jsDoc = IS_MINIMIZED_JSDOC)
+    @ScriptFunction(jsDoc = GET_MINIMIZED_JSDOC)
     public boolean getMinimized() {
         if (surface != null) {
             if (surface instanceof JInternalFrame) {
@@ -804,11 +808,11 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
         }
         return false;
     }
+
     private static final String IS_MAXIMIZED_JSDOC = ""
             + "/**\n"
-            + "* Checks if form is maximized\n"
-            + "* return maximized True if maximized\n"
-            + "*/";
+            + " * <code>true</code> if this form is maximized.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = IS_MAXIMIZED_JSDOC)
     public boolean getMaximized() {
@@ -824,7 +828,12 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
         return false;
     }
 
-    @ScriptFunction
+    private static final String LEFT_JSDOC = ""
+            + "/**\n"
+            + " * The distance for this form to the parent container's left side.\n"
+            + " */";
+
+    @ScriptFunction(jsDoc = LEFT_JSDOC)
     public int getLeft() {
         if (surface != null) {
             return surface.getLocation().x;
@@ -845,7 +854,12 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
         locationByPlatform = false;
     }
 
-    @ScriptFunction
+    private static final String TOP_JSDOC = ""
+            + "/**\n"
+            + " * The distance for this form to the parent container's top side.\n"
+            + " */";
+
+    @ScriptFunction(jsDoc = TOP_JSDOC)
     public int getTop() {
         if (surface != null) {
             return surface.getLocation().y;
@@ -866,7 +880,12 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
         locationByPlatform = false;
     }
 
-    @ScriptFunction
+    private static final String WIDTH_JSDOC = ""
+            + "/**\n"
+            + " * The form's width.\n"
+            + " */";
+
+    @ScriptFunction(jsDoc = WIDTH_JSDOC)
     public int getWidth() {
         if (surface != null) {
             return surface.getWidth();
@@ -889,7 +908,12 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
         }
     }
 
-    @ScriptFunction
+    private static final String HEIGHT_JSDOC = ""
+            + "/**\n"
+            + " * The form's height.\n"
+            + " */";
+
+    @ScriptFunction(jsDoc = HEIGHT_JSDOC)
     public int getHeight() {
         if (surface != null) {
             return surface.getHeight();
@@ -929,7 +953,12 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
         }
     }
 
-    @ScriptFunction
+    private static final String ICON_JSDOC = ""
+            + "/**\n"
+            + " * The form's icon.\n"
+            + " */";
+
+    @ScriptFunction(jsDoc = ICON_JSDOC)
     public Object getIcon() {
         return icon;
     }
@@ -950,7 +979,12 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
         }
     }
 
-    @ScriptFunction
+    private static final String TITLE_JSDOC = ""
+            + "/**\n"
+            + " * The form's title text.\n"
+            + " */";
+
+    @ScriptFunction(jsDoc = TITLE_JSDOC)
     public String getTitle() {
         return title;
     }
@@ -969,7 +1003,12 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
         }
     }
 
-    @ScriptFunction
+    private static final String RESIZABLE_JSDOC = ""
+            + "/**\n"
+            + " * <code>true</code> if this form resizable.\n"
+            + " */";
+
+    @ScriptFunction(jsDoc = RESIZABLE_JSDOC)
     public boolean getResizable() {
         return resizable;
     }
@@ -988,7 +1027,12 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
         }
     }
 
-    @ScriptFunction
+    private static final String MAXIMIZABLE_JSDOC = ""
+            + "/**\n"
+            + " * <code>true</code> if this form maximizable.\n"
+            + " */";
+
+    @ScriptFunction(jsDoc = MAXIMIZABLE_JSDOC)
     public boolean getMaximizable() {
         return maximizable;
     }
@@ -1007,7 +1051,12 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
         }
     }
 
-    @ScriptFunction
+    private static final String MINIMIZABLE_JSDOC = ""
+            + "/**\n"
+            + " * <code>true</code> if this form minimizable.\n"
+            + " */";
+
+    @ScriptFunction(jsDoc = MINIMIZABLE_JSDOC)
     public boolean getMinimizable() {
         return minimizable;
     }
@@ -1026,7 +1075,12 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
         }
     }
 
-    @ScriptFunction
+    private static final String UNDECORATED_JSDOC = ""
+            + "/**\n"
+            + " * <code>true</code> if no decoration to be enabled for this form.\n"
+            + " */";
+
+    @ScriptFunction(jsDoc = UNDECORATED_JSDOC)
     public boolean getUndecorated() {
         return undecorated;
     }
@@ -1045,7 +1099,12 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
         }
     }
 
-    @ScriptFunction
+    private static final String OPACITY_JSDOC = ""
+            + "/**\n"
+            + " * The opacity of the form.\n"
+            + " */";
+
+    @ScriptFunction(jsDoc = OPACITY_JSDOC)
     public float getOpacity() {
         return opacity;
     }
@@ -1063,7 +1122,13 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
             ((JFrame) surface).setOpacity(opacity);
         }
     }
+ 
+    private static final String ALWAYS_ON_TOP_JSDOC = ""
+            + "/**\n"
+            + " * Determines whether this window should always be above other windows.\n"
+            + " */";
 
+    @ScriptFunction(jsDoc = ALWAYS_ON_TOP_JSDOC)
     public boolean getAlwaysOnTop() {
         return alwaysOnTop;
     }
@@ -1081,7 +1146,13 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
         }
     }
 
-    @ScriptFunction
+    private static final String LOCATION_BY_PLATFORM_JSDOC = ""
+            + "/**\n"
+            + " * Determines whether this form should appear at the default location\n"
+            + " * for the native windowing system or at the current location.\n"
+            + " */";
+
+    @ScriptFunction(jsDoc = LOCATION_BY_PLATFORM_JSDOC)
     public boolean getLocationByPlatform() {
         return locationByPlatform;
     }
@@ -1100,7 +1171,12 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
         }
     }
 
-    @ScriptFunction
+    private static final String ON_WINDOW_OPENED_JSDOC = ""
+            + "/**\n"
+            + " * The handler function for the form's <i>before open</i> event.\n"
+            + " */";
+    
+    @ScriptFunction(jsDoc = ON_WINDOW_OPENED_JSDOC)
     public Function getOnWindowOpened() {
         return windowHandler != null ? windowHandler.getHandlers().get(WindowEventsIProxy.windowOpened) : null;
     }
@@ -1112,19 +1188,29 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
         }
     }
 
-    @ScriptFunction
+    private static final String ON_WINDOW_CLOSING_JSDOC = ""
+            + "/**\n"
+            + " * The handler function for the form's <i>before close</i> event.\n"
+            + " */";
+    
+    @ScriptFunction(jsDoc = ON_WINDOW_CLOSING_JSDOC)
     public Function getOnWindowClosing() {
         return windowHandler != null ? windowHandler.getHandlers().get(WindowEventsIProxy.windowClosing) : null;
     }
 
-    @ScriptFunction
+    @ScriptFunction()
     public void setOnWindowClosing(Function aValue) {
         if (windowHandler != null) {
             windowHandler.getHandlers().put(WindowEventsIProxy.windowClosing, aValue);
         }
     }
 
-    @ScriptFunction
+    private static final String ON_WINDOW_CLOSED_JSDOC = ""
+            + "/**\n"
+            + " * The handler function for the form's <i>after close</i> event.\n"
+            + " */";
+    
+    @ScriptFunction(jsDoc = ON_WINDOW_CLOSED_JSDOC)
     public Function getOnWindowClosed() {
         return windowHandler != null ? windowHandler.getHandlers().get(WindowEventsIProxy.windowClosed) : null;
     }
@@ -1136,7 +1222,12 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
         }
     }
 
-    @ScriptFunction
+    private static final String ON_WINDOW_MINIMIZED_JSDOC = ""
+            + "/**\n"
+            + " * The handler function for the form's <i>after minimize</i> event.\n"
+            + " */";
+    
+    @ScriptFunction(jsDoc = ON_WINDOW_MINIMIZED_JSDOC)
     public Function getOnWindowMinimized() {
         return windowHandler != null ? windowHandler.getHandlers().get(WindowEventsIProxy.windowIconified) : null;
     }
@@ -1148,7 +1239,12 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
         }
     }
 
-    @ScriptFunction
+    private static final String ON_WINDOW_RESTORED_JSDOC = ""
+            + "/**\n"
+            + " * The handler function for the form's <i>after restore</i> event.\n"
+            + " */";
+    
+    @ScriptFunction(jsDoc = ON_WINDOW_RESTORED_JSDOC)
     public Function getOnWindowRestored() {
         return windowHandler != null ? windowHandler.getHandlers().get(WindowEventsIProxy.windowRestored) : null;
     }
@@ -1160,7 +1256,12 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
         }
     }
 
-    @ScriptFunction
+    private static final String ON_WINDOW_MAXIMIZED_JSDOC = ""
+            + "/**\n"
+            + " * The handler function for the form's <i>after maximize</i> event.\n"
+            + " */";
+    
+    @ScriptFunction(jsDoc = ON_WINDOW_MAXIMIZED_JSDOC)
     public Function getOnWindowMaximized() {
         return windowHandler != null ? windowHandler.getHandlers().get(WindowEventsIProxy.windowMaximized) : null;
     }
@@ -1172,7 +1273,12 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
         }
     }
 
-    @ScriptFunction
+    private static final String ON_WINDOW_ACTIVATED_JSDOC = ""
+            + "/**\n"
+            + " * The handler function for the form's <i>after activate</i> event.\n"
+            + " */";
+    
+    @ScriptFunction(jsDoc = ON_WINDOW_ACTIVATED_JSDOC)
     public Function getOnWindowActivated() {
         return windowHandler != null ? windowHandler.getHandlers().get(WindowEventsIProxy.windowActivated) : null;
     }
@@ -1184,7 +1290,12 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
         }
     }
 
-    @ScriptFunction
+    private static final String ON_WINDOW_DEACTIVATED_JSDOC = ""
+            + "/**\n"
+            + " * The handler function for the form's <i>after deactivate</i> event.\n"
+            + " */";
+    
+    @ScriptFunction(jsDoc = ON_WINDOW_DEACTIVATED_JSDOC)
     public Function getOnWindowDeactivated() {
         return windowHandler != null ? windowHandler.getHandlers().get(WindowEventsIProxy.windowDeactivated) : null;
     }

@@ -33,7 +33,7 @@ import org.mozilla.javascript.ScriptRuntime;
 import org.mozilla.javascript.Scriptable;
 
 /**
- *
+ * Multi data source client. It allows to use js modules as datasources, validators and appliers.
  * @author mg
  */
 public class ScriptedDatabasesClient extends DatabasesClient {

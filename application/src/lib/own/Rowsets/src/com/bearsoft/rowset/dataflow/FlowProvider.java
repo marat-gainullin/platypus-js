@@ -7,13 +7,12 @@ package com.bearsoft.rowset.dataflow;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.exceptions.FlowProviderNotPagedException;
-import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.metadata.Parameters;
 import java.util.List;
 
 /**
  * This interface is intended to serve as base contract for data
- * quering/reading/achieving and than applying chages to variety of unknown and
+ * quering/fetching/reading and than applying changes to variety of unknown and
  * mystery sources/recipients.
  *
  * @author mg
@@ -26,8 +25,8 @@ public interface FlowProvider {
      * Returns back-end entity identifier. It might be a database table, or ORM
      * entity.
      *
-     * @return
-     * @throws Exception
+     * @return Back-end entity identifier. It might be a database table, or ORM
+     * entity
      */
     public String getEntityId();
 
@@ -43,7 +42,8 @@ public interface FlowProvider {
      * rowset can't be achieved, in some circumstances, this method must return
      * at least an empty Rowset instance. Values from this parameter collection
      * are applied one by one in the straight order.
-     * @return Rowset instance, containing data, retrived from the source.
+     * @return Rowset instance, containing data, retrieved from the source.
+     * @throws java.lang.Exception
      * @see Parameters
      */
     public Rowset refresh(Parameters aParams) throws Exception;
@@ -51,9 +51,9 @@ public interface FlowProvider {
     /**
      * Fetches a next page of data from an abstract data source.
      *
-     * @return Rowset instance, containing data, retrived from the source while
+     * @return Rowset instance, containing data, retrieved from the source while
      * fetching a page.
-     * @throws RowsetException, FlowProviderNotPagedException
+     * @throws Exception
      * @see FlowProviderNotPagedException
      */
     public Rowset nextPage() throws Exception;
@@ -84,5 +84,10 @@ public interface FlowProvider {
      */
     public List<Change> getChangeLog();
 
+    /**
+     * Allows any client code to be informed about success or failure of a transaction.
+     * @param aListener
+     * @return 
+     */
     public TransactionListener.Registration addTransactionListener(TransactionListener aListener);
 }

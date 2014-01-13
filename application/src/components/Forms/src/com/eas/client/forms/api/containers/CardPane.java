@@ -25,7 +25,8 @@ public class CardPane extends Container<JPanel> {
         this(hgap, 0);
     }
 
-    private static final String CONSTRUCTOR_JSDOC = "/**\n"
+    private static final String CONSTRUCTOR_JSDOC = ""
+            + "/**\n"
             + "* A container with Card Layout. It treats each component in the container as a card. Only one card is visible at a time, and the container acts as a stack of cards.\n"
             + "* @param hgap the horizontal gap (optional).\n"
             + "* @param vgap the vertical gap (optional).\n"
@@ -44,7 +45,8 @@ public class CardPane extends Container<JPanel> {
         setDelegate(aDelegate);
     }
     
-    private static final String ADD_JSDOC = "/**\n"
+    private static final String ADD_JSDOC = ""
+            + "/**\n"
             + "* Appends the component to this container with the specified name.\n"
             + "* @param component the component to add.\n"
             + "* @param cardName the name of the card.\n"
@@ -59,7 +61,8 @@ public class CardPane extends Container<JPanel> {
         }
     }
 
-    private static final String CHILD_JSDOC = "/**\n"
+    private static final String CHILD_JSDOC = ""
+            + "/**\n"
             + "* Gets the component with the specified name from the container.\n"
             + "* @param cardName the card name\n"
             + "*/";
@@ -70,7 +73,8 @@ public class CardPane extends Container<JPanel> {
         return getComponentWrapper(layout.getComponent(aCardName));
     }
 
-    private static final String SHOW_JSDOC = "/**\n"
+    private static final String SHOW_JSDOC = ""
+            + "/**\n"
             + "* Flips to the component that was added to this layout with the specified name.\n"
             + "* @param name the card name\n"
             + "*/";
