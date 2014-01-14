@@ -151,19 +151,20 @@ public class FeatureStyleDescriptor implements Cloneable {
     }
 
     private Style createPolygonStyle() {
-        PolygonSymbolizer sym = sf.createPolygonSymbolizer(null,
-                sf.createFill(ff.literal(DEFAULT_SHADOW_COLOR),
-                ff.literal(DEFAULT_SHADOW_OPACITY_VALUE)),
-                null);
-        
-        if (opacity != null && opacity.intValue() == 100 ) {
+        Rule rule = sf.createRule();
+        if (opacity == null || opacity.intValue() == 100) {
             FunctionFactory funcf = new DefaultFunctionFactory();
             List<Expression> lst = new ArrayList<>(3);
             lst.add(ff.property(geometryField == null ? "" : geometryField.getFieldName()));
             lst.add(ff.literal(0.00004f));
             lst.add(ff.literal(-0.0002f));
             Function f = funcf.function("offset", lst, null);
+            PolygonSymbolizer sym = sf.createPolygonSymbolizer(null,
+                    sf.createFill(ff.literal(DEFAULT_SHADOW_COLOR),
+                            ff.literal(DEFAULT_SHADOW_OPACITY_VALUE)),
+                    null);
             sym.setGeometry(f);
+            rule.symbolizers().add(sym);
         }
 
         Stroke stroke = sf.createStroke(ff.literal(lineColor == null ? DEFAULT_LINE_COLOR : lineColor),
@@ -171,10 +172,8 @@ public class FeatureStyleDescriptor implements Cloneable {
                 ff.literal((float) (opacity == null ? DEFAULT_OPACITY_VALUE : ((Number) (opacity / 100.0)).floatValue())));
         PolygonSymbolizer symPoly = sf.createPolygonSymbolizer(stroke,
                 sf.createFill(ff.literal(fillColor == null ? DEFAULT_FILL_COLOR : fillColor),
-                ff.literal((float) (opacity == null ? DEFAULT_OPACITY_VALUE : ((Number) (opacity / 100.0)).floatValue()))),
+                        ff.literal((float) (opacity == null ? DEFAULT_OPACITY_VALUE : ((Number) (opacity / 100.0)).floatValue()))),
                 null);
-        Rule rule = sf.createRule();
-        rule.symbolizers().add(sym);
         rule.symbolizers().add(symPoly);
         TextSymbolizer textSym = buildTextSymbolizer();
         if (textSym != null) {

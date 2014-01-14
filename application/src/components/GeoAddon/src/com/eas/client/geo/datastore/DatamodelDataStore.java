@@ -34,7 +34,7 @@ import org.opengis.referencing.FactoryException;
  */
 public class DatamodelDataStore extends AbstractDataStore {
 
-    public boolean isGeometry(DataTypeInfo aTypeInfo) {
+    public static boolean isGeometry(DataTypeInfo aTypeInfo) {
         return DataTypeInfo.GEOMETRY.equals(aTypeInfo);
         //This is bad way because abstraction became.
         /* return (/*Oracle*//*aTypeInfo.getSqlType() == Types.STRUCT || aTypeInfo.getSqlType() == java.sql.Types.OTHER) && (aTypeInfo.getSqlTypeName().endsWith("GEOMETRY") || aTypeInfo.getSqlTypeName().endsWith("CURVE")
