@@ -12,7 +12,7 @@ import com.eas.client.controls.geopane.cache.webtiles.AsyncYandexMapTilesCache;
 import java.awt.geom.AffineTransform;
 import java.util.ResourceBundle;
 import java.util.concurrent.locks.ReadWriteLock;
-import org.geotools.map.MapContext;
+import org.geotools.map.MapContent;
 
 /**
  *
@@ -30,7 +30,7 @@ public class GeoPaneUtils {
         }
     }
 
-    public static AsyncMapTilesCache createWebTilesCache(MapContext aContext, ReadWriteLock aMapContextLock, AffineTransform aViewTransform, String aUrlFormatString) {
+    public static AsyncMapTilesCache createWebTilesCache(MapContent aContext, ReadWriteLock aMapContextLock, AffineTransform aViewTransform, String aUrlFormatString) {
         if (aUrlFormatString != null && !aUrlFormatString.isEmpty()) {
             if (aUrlFormatString.toLowerCase().contains("yandex")) {
                 AsyncYandexMapTilesCache cache = new AsyncYandexMapTilesCache(aUrlFormatString, aContext, aMapContextLock, aViewTransform);

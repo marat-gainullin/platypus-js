@@ -268,7 +268,6 @@
                 <package>com.mysql.jdbc.profiler</package>
                 <package>com.mysql.jdbc.util</package>
                 <package>com.vividsolutions.jts.geom</package>
-                <package>com.vividsolutions.jts.index</package>
                 <package>com.vividsolutions.jts.index.quadtree</package>
                 <package>javax.media.jai</package>
                 <package>net.sf.jsqlparser</package>
@@ -326,6 +325,7 @@
                 <package>org.jinterop.dcom.common</package>
                 <package>org.mozilla.javascript</package>
                 <package>org.mozilla.javascript.ast</package>
+                <package>org.opengis.filter.temporal</package>
                 <package>org.postgresql</package>
                 <package>org.postgresql.copy</package>
                 <package>org.postgresql.core</package>
@@ -360,12 +360,24 @@
                 <binary-origin>release/modules/ext/Routing.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
-                <runtime-relative-path>ext/gt-jdbc-oracle-2.7.0.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/gt-jdbc-oracle-2.7.0.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
                 <runtime-relative-path>ext/DbControls.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/DbControls.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/gt-main-10.3.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/gt-main-10.3.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/gt-render-10.3.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/gt-render-10.3.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/gt-referencing-10.3.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/gt-referencing-10.3.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/gt-opengis-10.3.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/gt-opengis-10.3.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/mysql-connector-java-5.1.20-bin.jar</runtime-relative-path>
@@ -380,20 +392,12 @@
                 <binary-origin>release/modules/ext/Grid.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
-                <runtime-relative-path>ext/gt-api-2.7.0.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/gt-api-2.7.0.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
                 <runtime-relative-path>ext/Reports.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/Reports.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/Application.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/Application.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
-                <runtime-relative-path>ext/gt-render-2.7.0.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/gt-render-2.7.0.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/jfreechart-1.0.15.jar</runtime-relative-path>
@@ -408,12 +412,8 @@
                 <binary-origin>release/modules/ext/MetadataSynchronizer.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
-                <runtime-relative-path>ext/gt-metadata-2.7.0.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/gt-metadata-2.7.0.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
-                <runtime-relative-path>ext/gt-referencing-2.7.0.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/gt-referencing-2.7.0.jar</binary-origin>
+                <runtime-relative-path>ext/jts-1.13.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/jts-1.13.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/ojdbc6.jar</runtime-relative-path>
@@ -440,12 +440,12 @@
                 <binary-origin>release/modules/ext/postgresql-8.4-701.jdbc4.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
-                <runtime-relative-path>ext/GeoAddon.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/GeoAddon.jar</binary-origin>
+                <runtime-relative-path>ext/gt-metadata-10.3.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/gt-metadata-10.3.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
-                <runtime-relative-path>ext/jts-1.11.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/jts-1.11.jar</binary-origin>
+                <runtime-relative-path>ext/GeoAddon.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/GeoAddon.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/j-interopdeps.jar</runtime-relative-path>
@@ -468,12 +468,20 @@
                 <binary-origin>release/modules/ext/commons-beanutils-1.8.2.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
+                <runtime-relative-path>ext/gt-jdbc-oracle-10.3.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/gt-jdbc-oracle-10.3.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
                 <runtime-relative-path>ext/PlatypusServletSupport.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/PlatypusServletSupport.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/Forms.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/Forms.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/gt-api-10.3.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/gt-api-10.3.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/Rowsets.jar</runtime-relative-path>
@@ -498,10 +506,6 @@
             <class-path-extension>
                 <runtime-relative-path>ext/GeoPane.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/GeoPane.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
-                <runtime-relative-path>ext/gt-main-2.7.0.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/gt-main-2.7.0.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/geoapi-2.3-M1.jar</runtime-relative-path>

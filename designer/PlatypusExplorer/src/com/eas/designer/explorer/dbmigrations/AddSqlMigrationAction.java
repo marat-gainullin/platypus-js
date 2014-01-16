@@ -11,16 +11,15 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import org.netbeans.api.progress.ProgressHandle;
 import org.netbeans.api.progress.ProgressHandleFactory;
+import org.openide.ErrorManager;
 import org.openide.awt.StatusDisplayer;
 import org.openide.nodes.Node;
 import org.openide.util.ContextAwareAction;
 import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
-import org.openide.util.NotImplementedException;
 import org.openide.util.RequestProcessor;
 import org.openide.util.TaskListener;
-import org.openide.windows.IOProvider;
 import org.openide.windows.InputOutput;
 
 /**
@@ -86,6 +85,11 @@ public class AddSqlMigrationAction extends AbstractAction implements ContextAwar
             public void taskFinished(org.openide.util.Task task) {
                 ph.finish();
                 StatusDisplayer.getDefault().setStatusText(NbBundle.getMessage(AddSqlMigrationAction.class, "LBL_Create_Sql_Migration_Complete")); // NOI18N
+                try {
+                    project.getDbMigrationsRoot().refresh();
+                } catch (Exception ex) {
+                    ErrorManager.getDefault().notify(ex);
+                }
             }
         });
         ph.start();

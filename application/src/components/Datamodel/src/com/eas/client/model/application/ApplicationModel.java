@@ -24,7 +24,6 @@ import com.eas.client.model.script.ScriptableRowset;
 import com.eas.client.model.visitors.ApplicationModelVisitor;
 import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.queries.Query;
-import com.eas.script.NativeJavaHostObject;
 import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptUtils;
 import com.eas.script.ScriptUtils.ScriptAction;
@@ -360,8 +359,8 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
     public abstract int commit() throws Exception;
     private static final String REVERT_JSDOC = ""
             + "/**\n"
-            + "* Drops model data changes.\n"
-            + "* After this method call, save() method have no changes to be saved, but still attempts to commit.\n"
+            + "* Reverts model data changes.\n"
+            + "* After this method call, no data changes are avaliable for <code>model.save()</code> method, but the model still attempts to commit.\n"
             + "* Call <code>model.save()</code> on commitable and unchanged model nevertheless leads to a commit.\n"
             + "*/";
 
@@ -556,7 +555,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
             + "/**\n"
             + "* Creates new entity of model, based on application query.\n"
             + "* @param queryId the query application element ID.\n"
-            + "* @return a new entity."
+            + "* @return a new entity.\n"
             + "*/";
 
     @ScriptFunction(jsDoc = LOAD_ENTITY_JSDOC, params = {"queryId"})

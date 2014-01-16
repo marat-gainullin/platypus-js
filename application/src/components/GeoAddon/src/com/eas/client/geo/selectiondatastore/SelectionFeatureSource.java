@@ -6,7 +6,6 @@ package com.eas.client.geo.selectiondatastore;
 
 import java.io.IOException;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 import org.geotools.data.AbstractFeatureSource;
 import org.geotools.data.DataStore;
@@ -15,7 +14,6 @@ import org.geotools.data.FeatureListener;
 import org.geotools.data.Query;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
-import org.geotools.filter.Filter;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
@@ -62,7 +60,7 @@ public class SelectionFeatureSource extends AbstractFeatureSource {
             ls = new FeatureListener[listeners.size()];
             ls = listeners.toArray(ls);
         }
-        FeatureEvent e = new FeatureEvent(this, FeatureEvent.Type.CHANGED, (ReferencedEnvelope) null, (Filter) null);
+        FeatureEvent e = new FeatureEvent(this, FeatureEvent.Type.CHANGED, null, null);
         for (FeatureListener l : ls) {
             l.changed(e);
         }

@@ -13,7 +13,8 @@ import org.mozilla.javascript.IdScriptableObject;
 import org.mozilla.javascript.Scriptable;
 
 /**
- *
+ * Experimental. Pends of Web client.
+ * Entity creation integration with Rhino (cases of script as: var dogs = new Entity('dogsQuery'); dogs.requery()...).
  * @author mg
  */
 public class EntityPrototype extends IdScriptableObject {

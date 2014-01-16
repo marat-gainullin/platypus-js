@@ -53,7 +53,6 @@ import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
 import java.beans.PropertyChangeEvent;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -70,13 +69,10 @@ import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.factory.GeoTools;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
-import org.geotools.map.DefaultMapContext;
+import org.geotools.map.FeatureLayer;
 import org.geotools.map.Layer;
-import org.geotools.map.MapContext;
-import org.geotools.map.MapLayer;
+import org.geotools.map.MapContent;
 import org.geotools.referencing.ReferencingFactoryFinder;
-import org.geotools.referencing.cs.DefaultCartesianCS;
-import org.geotools.referencing.operation.DefiningConversion;
 import org.geotools.styling.Style;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
@@ -86,9 +82,7 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory2;
-import org.opengis.parameter.ParameterValueGroup;
 import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.IdentifiedObject;
 import org.opengis.referencing.crs.CRSFactory;
 import org.opengis.referencing.crs.GeographicCRS;
 import org.opengis.referencing.crs.ProjectedCRS;
@@ -169,9 +163,7 @@ public class DbMap extends JPanel implements DbControl, RowsetsDbControl, Proper
     protected Function eventHandler;
     protected String mapTitle;
     protected List<RowsetFeatureDescriptor> features = new ArrayList<>();
-    protected String projectionName;
-    protected String geoCrsWkt;
-    protected ParameterValueGroup projectionParameters;
+    protected String crsWkt;
 
     public DbMap() {
         setLayout(new BorderLayout());
@@ -269,30 +261,12 @@ public class DbMap extends JPanel implements DbControl, RowsetsDbControl, Proper
         features = aValue;
     }
 
-    @Undesignable
-    public String getProjectionName() {
-        return projectionName;
+    public String getCrsWkt() {
+        return crsWkt;
     }
 
-    public void setProjectionName(String aValue) {
-        projectionName = aValue;
-    }
-
-    public String getGeoCrsWkt() {
-        return geoCrsWkt;
-    }
-
-    public void setGeoCrsWkt(String aValue) {
-        geoCrsWkt = aValue;
-    }
-
-    @Undesignable
-    public ParameterValueGroup getProjectionParameters() {
-        return projectionParameters;
-    }
-
-    public void setProjectionParameters(ParameterValueGroup aValue) {
-        projectionParameters = aValue;
+    public void setCrsWkt(String aValue) {
+        crsWkt = aValue;
     }
 
     public void cleanup() {
@@ -307,11 +281,13 @@ public class DbMap extends JPanel implements DbControl, RowsetsDbControl, Proper
             final Logger logger = Logger.getLogger(DbMap.class.getName());
             try {
                 logger.fine("Configuring geo pane with feature layers."); //NOI18N
-                final DefaultMapContext mapContext = new DefaultMapContext(),
-                        activeMapContext = new DefaultMapContext(),
-                        screenMapContext = new DefaultMapContext();
-
                 checkFeatureDescriptorsCrsWkt();
+                if (projectedCrs == null) {
+                    throw new NullPointerException("Projected CRS havn't been created.");
+                }
+                final MapContent mapContext = new MapContent(projectedCrs),
+                        activeMapContext = new MapContent(projectedCrs),
+                        screenMapContext = new MapContent(projectedCrs);
                 dataStore.setFeatureDescriptors(features);
                 if (mapTitle != null && !mapTitle.isEmpty()) {
                     mapContext.setTitle(mapTitle);
@@ -320,23 +296,18 @@ public class DbMap extends JPanel implements DbControl, RowsetsDbControl, Proper
                     logger.fine(String.format("Adding layer for feature %s", featureDescriptor.getTypeName())); //NOI18N
                     final Style style = featureDescriptor.getStyle().isEmpty() ? null : featureDescriptor.getStyle().buildStyle(featureDescriptor.getGeometryBindingClass(), projectedCrs.getConversionFromBase().getMathTransform().toWKT());
                     if (featureDescriptor.isActive()) {
-                        activeMapContext.addLayer(dataStore.getFeatureSource(featureDescriptor.getTypeName()), style);
+                        activeMapContext.addLayer(new FeatureLayer(dataStore.getFeatureSource(featureDescriptor.getTypeName()), style));
                     } else {
-                        mapContext.addLayer(dataStore.getFeatureSource(featureDescriptor.getTypeName()), style);
+                        mapContext.addLayer(new FeatureLayer(dataStore.getFeatureSource(featureDescriptor.getTypeName()), style));
                     }
                 }
-                if (projectedCrs == null) {
-                    throw new NullPointerException("Projected CRS havn't been created.");
-                }
+                
 
                 selectionStore = new SelectionDataStore(projectedCrs.getBaseCRS());
-                screenMapContext.addLayer(selectionStore.getFeatureSource(SelectionDataStore.SELECTION_FEATURE_PHANTOM_TYPE_NAME), GisUtilities.buildSelectionPhantomStyle());
-                screenMapContext.addLayer(selectionStore.getFeatureSource(SelectionDataStore.SELECTION_FEATURE_TYPE_NAME), GisUtilities.buildSelectionStyle());
-                screenMapContext.getLayer(screenMapContext.getLayerCount() - 1).setSelected(true);
-
-                mapContext.setCoordinateReferenceSystem(projectedCrs);
-                activeMapContext.setCoordinateReferenceSystem(projectedCrs);
-                screenMapContext.setCoordinateReferenceSystem(projectedCrs);
+                screenMapContext.addLayer(new FeatureLayer(selectionStore.getFeatureSource(SelectionDataStore.SELECTION_FEATURE_PHANTOM_TYPE_NAME), GisUtilities.buildSelectionPhantomStyle()));
+                screenMapContext.addLayer(new FeatureLayer(selectionStore.getFeatureSource(SelectionDataStore.SELECTION_FEATURE_TYPE_NAME), GisUtilities.buildSelectionStyle()));
+                screenMapContext.layers().get(screenMapContext.layers().size() - 1).setSelected(true);
+                
                 logger.fine("Setting up the geo pane."); //NOI18N
                 if (backingUrl != null) {
                     pane = new JGeoPane(mapContext, activeMapContext, screenMapContext, backingUrl);
@@ -371,12 +342,9 @@ public class DbMap extends JPanel implements DbControl, RowsetsDbControl, Proper
     }
 
     public ProjectedCRS createProjectedCrs() throws FactoryException {
-        if (projectionName != null && !projectionName.isEmpty()
-                && projectionParameters != null && geoCrsWkt != null && !geoCrsWkt.isEmpty()) {
+        if (crsWkt != null && !crsWkt.isEmpty()) {
             CRSFactory crsFactory = ReferencingFactoryFinder.getCRSFactory(null);
-            final GeographicCRS geoCrs = (GeographicCRS) crsFactory.createFromWKT(geoCrsWkt);
-            final DefiningConversion conversion = new DefiningConversion("User-defined projected CRS", projectionParameters);
-            return crsFactory.createProjectedCRS(Collections.singletonMap(IdentifiedObject.NAME_KEY, "User-defined projected CRS"), geoCrs, conversion, DefaultCartesianCS.GENERIC_2D);
+            return  (ProjectedCRS)crsFactory.createFromWKT(crsWkt);
         } else {
             return null;
         }
@@ -389,11 +357,13 @@ public class DbMap extends JPanel implements DbControl, RowsetsDbControl, Proper
      * @param aLayerTitle Title of created layer.
      * @param aRowset ScriptableRowset instance, the new layer will be based on.
      * @param aGeometryClass Class of the geometry to be used in new layer.
+     * @param aStyleAttributes
      * @return MapLayer instance, just created.
+     * @throws java.lang.Exception
      */
-    public MapLayer addLayer(String aLayerTitle, ScriptableRowset<?> aRowset, Class<?> aGeometryClass, Map<String, Object> aStyleAttributes) throws Exception {
-        MapLayer layer;
-        MapContext lightweightMapContext = pane.getLightweightMapContext();
+    public Layer addLayer(String aLayerTitle, ScriptableRowset<?> aRowset, Class<?> aGeometryClass, Map<String, Object> aStyleAttributes) throws Exception {
+        Layer layer;
+        MapContent lightweightMapContext = pane.getLightweightMapContext();
         synchronized (lightweightMapContext) {
             RowsetFeatureDescriptor newFeatureDescriptor = new RowsetFeatureDescriptor(aLayerTitle, aRowset.getEntity(), new ModelEntityRef(aRowset.getEntity().getEntityId()));
             newFeatureDescriptor.setActive(true);
@@ -430,8 +400,8 @@ public class DbMap extends JPanel implements DbControl, RowsetsDbControl, Proper
                 newFeatureDescriptor.getStyle().setPointSymbol((PointSymbol) oPointSymbol);
             }
             Style newStyle = newFeatureDescriptor.getStyle().buildStyle(newFeatureDescriptor.getGeometryBindingClass(), projectedCrs.getConversionFromBase().getMathTransform().toWKT());
-            lightweightMapContext.addLayer(newFeatureSource, newStyle);
-            layer = lightweightMapContext.getLayer(lightweightMapContext.getLayerCount() - 1);
+            lightweightMapContext.addLayer(new FeatureLayer(newFeatureSource, newStyle));
+            layer = lightweightMapContext.layers().get(lightweightMapContext.layers().size() - 1);
             layer.addMapLayerListener(pane.getLightChangesReflector());
         }
         pane.clearLightweightCache();
@@ -439,12 +409,11 @@ public class DbMap extends JPanel implements DbControl, RowsetsDbControl, Proper
         return layer;
     }
 
-    public MapLayer removeLayer(String aLayerTitle) throws Exception {
-        MapLayer removed;
-        MapContext lightweightMapContext = pane.getLightweightMapContext();
+    public Layer removeLayer(String aLayerTitle) throws Exception {
+        Layer removed;
+        MapContent lightweightMapContext = pane.getLightweightMapContext();
         synchronized (lightweightMapContext) {
-            MapLayer[] lightweightLayers = lightweightMapContext.getLayers();
-            removed = findLayer(aLayerTitle, lightweightLayers);
+            removed = findLayer(aLayerTitle, lightweightMapContext.layers());
             if (removed != null) {
                 lightweightMapContext.removeLayer(removed);
                 removed.removeMapLayerListener(pane.getLightChangesReflector());
@@ -457,41 +426,39 @@ public class DbMap extends JPanel implements DbControl, RowsetsDbControl, Proper
         return removed;
     }
 
-    public MapLayer[] removeAllLayers() {
-        MapLayer[] lightweightLayers;
-        MapContext lightweightMapContext = pane.getLightweightMapContext();
+    public Layer[] removeAllLayers() {
+        List<Layer>lightweightLayers;
+        MapContent lightweightMapContext = pane.getLightweightMapContext();
         synchronized (lightweightMapContext) {
-            lightweightLayers = lightweightMapContext.getLayers();
-            lightweightMapContext.removeLayers(lightweightLayers);
-            for (MapLayer layer : lightweightLayers) {
+            lightweightLayers = lightweightMapContext.layers();
+            for (Layer layer : lightweightLayers) {
                 layer.removeMapLayerListener(pane.getLightChangesReflector());
             }
+            lightweightLayers.clear();
         }
         pane.clearLightweightCache();
         pane.repaint();
-        return lightweightLayers;
+        return lightweightLayers.toArray(new Layer[0]);
     }
 
-    public MapLayer getLayer(String aLayerTitle) {
-        MapContext generalMapContext = pane.getGeneralMapContext();
-        MapLayer found;
+    public Layer getLayer(String aLayerTitle) {
+        MapContent generalMapContext = pane.getGeneralMapContext();
+        Layer found;
         synchronized (generalMapContext) {// may this is not need to do because changes are made only on lightweight context
-            MapLayer[] generalLayers = generalMapContext.getLayers();
-            found = findLayer(aLayerTitle, generalLayers);
+            found = findLayer(aLayerTitle, generalMapContext.layers());
         }
         if (found == null) {
-            MapContext lightweightMapContext = pane.getLightweightMapContext();
+            MapContent lightweightMapContext = pane.getLightweightMapContext();
             synchronized (lightweightMapContext) {
-                MapLayer[] lightweightLayers = lightweightMapContext.getLayers();
-                found = findLayer(aLayerTitle, lightweightLayers);
+                found = findLayer(aLayerTitle, lightweightMapContext.layers());
             }
         }
         return found;
     }
 
-    private MapLayer findLayer(String aLayerTitle, MapLayer[] layers) {
-        for (MapLayer layer : layers) {
-            FeatureSource<SimpleFeatureType, SimpleFeature> layersource = layer.getFeatureSource();
+    private Layer findLayer(String aLayerTitle, List<Layer> layers) {
+        for (Layer layer : layers) {
+            FeatureSource<?, ?> layersource = layer.getFeatureSource();
             if (layersource instanceof RowsFeatureSource) {
                 RowsFeatureSource rSource = (RowsFeatureSource) layersource;
                 if (rSource.getName() != null) {
@@ -665,10 +632,9 @@ public class DbMap extends JPanel implements DbControl, RowsetsDbControl, Proper
         if (!selectionStore.isEmpty()) {
             List<SelectionEntry> hitedResults = new ArrayList<>();
             FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(GeoTools.getDefaultHints());
-            for (int i = 0; i < pane.getScreenContext().getLayerCount(); i++) {
-                MapLayer layer = pane.getScreenContext().getLayer(i);
+            for (Layer layer : pane.getScreenContext().layers()) {
                 if (layer.isSelected()) {
-                    FeatureSource<SimpleFeatureType, SimpleFeature> fs = layer.getFeatureSource();
+                    FeatureSource<SimpleFeatureType, SimpleFeature> fs = (FeatureSource<SimpleFeatureType, SimpleFeature>) layer.getFeatureSource();
                     Filter filter = ff.intersects(ff.property(fs.getSchema().getGeometryDescriptor().getLocalName()), ff.literal(aHitPoly));
                     FeatureCollection<SimpleFeatureType, SimpleFeature> layerResults = fs.getFeatures(filter);
                     FeatureIterator<SimpleFeature> fIt = layerResults.features();

@@ -31,9 +31,10 @@ import org.netbeans.api.extexecution.ExecutionDescriptor;
 import org.netbeans.api.extexecution.ExecutionService;
 import org.netbeans.api.extexecution.ExternalProcessBuilder;
 import org.openide.ErrorManager;
+import org.openide.actions.SaveAllAction;
 import org.openide.awt.HtmlBrowser;
-import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
+import org.openide.util.actions.SystemAction;
 import org.openide.windows.IOProvider;
 import org.openide.windows.InputOutput;
 
@@ -64,6 +65,13 @@ public class ProjectRunner {
     private static final String LOCAL_HOSTNAME = "localhost"; //NOI18N
     private static final int DEBUGGER_CONNECT_MAX_ATTEMPTS = 10;
 
+    protected static void saveAll() {
+        SaveAllAction action = SystemAction.get(SaveAllAction.class);
+        if (action != null) {
+            action.performAction();
+        }
+    }
+
     /**
      * Starts an application in run mode.
      *
@@ -73,7 +81,7 @@ public class ProjectRunner {
      * @throws Exception If something goes wrong.
      */
     public static void run(final PlatypusProject project, final String appElementId) throws Exception {
-
+        saveAll();
         project.getRequestProcessor().post(new Runnable() {
             @Override
             public void run() {
@@ -91,6 +99,7 @@ public class ProjectRunner {
      * @throws Exception If something goes wrong.
      */
     public static void debug(final PlatypusProject project, final String appElementId) throws Exception {
+        saveAll();
         project.getRequestProcessor().post(new Runnable() {
             @Override
             public void run() {

@@ -17,6 +17,7 @@ public interface RenderingTaskListener {
      * Occurs while firing an event of the rendering task have been completed.
      * WARNING!!! This method is called from executor service thread and it
      * implementors have to use all appropriate synchronization.
+     * @param aTask
      */
     public void taskCompleted(RenderingTask aTask);
 }

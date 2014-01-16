@@ -5,6 +5,7 @@
 package com.eas.designer.application.module.completion;
 
 import com.eas.client.cache.PlatypusFilesSupport;
+import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
 import com.eas.designer.application.module.completion.CompletionPoint.CompletionToken;
@@ -38,6 +39,8 @@ import org.netbeans.spi.editor.completion.CompletionResultSet;
  */
 public class ModuleThisCompletionContext extends CompletionContext {
 
+    protected static final String MODEL_SCRIPT_NAME = "model";// NOI18N
+    protected static final String PRINCIPAL_SCRIPT_NAME = "principal";// NOI18N
     private final boolean enableJsElementsCompletion;
     private final ModuleCompletionContext parentContext;
     
@@ -64,6 +67,9 @@ public class ModuleThisCompletionContext extends CompletionContext {
     public CompletionContext getChildContext(CompletionToken token, int offset) throws Exception {
         if (MODEL_SCRIPT_NAME.equals(token.name)) {
             return new ModelCompletionContext(parentContext.getDataObject());
+        }
+        if (PRINCIPAL_SCRIPT_NAME.equals(token.name)) {
+            return new CompletionContext(PlatypusPrincipal.class);
         }
         ApplicationDbEntity entity = parentContext.getDataObject().getModel().getEntityByName(token.name);
         if (entity != null) {

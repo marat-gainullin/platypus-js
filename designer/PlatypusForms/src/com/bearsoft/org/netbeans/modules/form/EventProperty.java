@@ -387,28 +387,6 @@ public class EventProperty extends FormProperty<String> {
         @Override
         public java.awt.Component getCustomEditor() {
             return null;
-            /*
-             if (isReadOnly())
-             return null;
-            
-             final EventCustomEditor ed = new EventCustomEditor(EventProperty.this);
-             DialogDescriptor dd = new DialogDescriptor(
-             ed,
-             FormUtils.getFormattedBundleString(
-             "FMT_MSG_HandlersFor", // NOI18N
-             new Object [] { getListenerMethod().getName() }),
-             true,
-             new ActionListener() {
-             @Override
-             public void actionPerformed(ActionEvent evt) {
-             if (evt.getSource().equals(DialogDescriptor.OK_OPTION)) {
-             ed.doChanges();
-             }
-             }
-             });
-            
-             return DialogDisplayer.getDefault().createDialog(dd);
-             */
         }
     }
 }

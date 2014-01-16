@@ -146,7 +146,7 @@ public class DbMigrator extends BaseDeployer {
             String sqlBatchPath = getSqlScriptFilePath(migrationNumber);
             if (!new File(mtdSnapshotPath).exists() && !new File(sqlBatchPath).exists()) {
                 createSqlScriptFile(sqlBatchPath);
-                //We must not update the version, because the file is empty yet
+                setCurrentDbVersion(migrationNumber);//Still not 100% clear should we do this
                 out.println("New SQL migration created to version: " + migrationNumber); // NOI18N
             } else {
                 err.format("Migration for next version %d already exists.\n", migrationNumber);

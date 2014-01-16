@@ -351,21 +351,12 @@
                 <package>com.bearsoft.org.netbeans.modules.form</package>
                 <package>com.bearsoft.org.netbeans.modules.form.actions</package>
                 <package>com.bearsoft.org.netbeans.modules.form.assistant</package>
-                <package>com.bearsoft.org.netbeans.modules.form.beaninfo.awt</package>
                 <package>com.bearsoft.org.netbeans.modules.form.beaninfo.swing</package>
-                <package>com.bearsoft.org.netbeans.modules.form.codestructure</package>
                 <package>com.bearsoft.org.netbeans.modules.form.editors</package>
-                <package>com.bearsoft.org.netbeans.modules.form.editors2</package>
-                <package>com.bearsoft.org.netbeans.modules.form.fakepeer</package>
-                <package>com.bearsoft.org.netbeans.modules.form.forminfo</package>
-                <package>com.bearsoft.org.netbeans.modules.form.layoutdesign</package>
-                <package>com.bearsoft.org.netbeans.modules.form.layoutdesign.support</package>
                 <package>com.bearsoft.org.netbeans.modules.form.layoutsupport</package>
                 <package>com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates</package>
                 <package>com.bearsoft.org.netbeans.modules.form.menu</package>
                 <package>com.bearsoft.org.netbeans.modules.form.palette</package>
-                <package>com.bearsoft.org.netbeans.modules.form.project</package>
-                <package>com.bearsoft.org.netbeans.modules.form.wizard</package>
                 <package>org.netbeans.lib.awtextra</package>
             </public-packages>
             <class-path-extension>

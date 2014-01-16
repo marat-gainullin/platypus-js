@@ -27,16 +27,6 @@ import org.netbeans.spi.editor.completion.CompletionResultSet;
  */
 public class CompletionContext {
 
-    protected static final String MODEL_SCRIPT_NAME = "model";// NOI18N
-    public static final String PARAMS_SCRIPT_NAME = "params";// NOI18N
-    protected static final String METADATA_SCRIPT_NAME = ApplicationDbModel.DATASOURCE_METADATA_SCRIPT_NAME;
-    protected static final String CURSOR_ENTITY_PROPERTY_NAME = "cursor";//NOI18N
-    protected static final String MODULE_NAME = "Module";// NOI18N
-    protected static final String SERVER_MODULE_NAME = "ServerModule";// NOI18N
-    protected static final String FORM_MODULE_NAME = "Form";// NOI18N
-    protected static final String REPORT_MODULE_NAME = "Report";// NOI18N
-    protected static final String SERVER_REPORT_MODULE_NAME = "ServerReport";// NOI18N
-    protected static final String MODULES_OBJECT_NAME = "Modules";// NOI18N
     protected static final String GET_METHOD_NAME = "get";// NOI18N
     protected static final String BEANY_PREFIX_GET = "get";// NOI18N
     protected static final String BEANY_PREFIX_SET = "set";// NOI18N
@@ -58,26 +48,6 @@ public class CompletionContext {
 
     public CompletionContext getChildContext(CompletionToken token, int offset) throws Exception {
         return null;
-    }
-
-    protected void fillFields(Fields aFields, CompletionPoint point, CompletionResultSet resultSet) {
-        for (Field field : aFields.toCollection()) {
-            addItem(resultSet, point.getFilter(), new BeanCompletionItem(field.getClass(), field.getName(), field.getDescription(), point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
-        }
-    }
-
-    protected void fillFieldsValues(Fields aFields, CompletionPoint point, CompletionResultSet resultSet) {
-        for (Field field : aFields.toCollection()) {
-            addItem(resultSet, point.getFilter(), new FieldCompletionItem(field, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
-        }
-    }
-
-    protected void fillEntities(Collection<? extends Entity> entities, CompletionResultSet resultSet, CompletionPoint point) throws Exception {
-        for (Entity appEntity : entities) {
-            if (appEntity.getName() != null && !appEntity.getName().isEmpty()) {
-                addItem(resultSet, point.getFilter(), new BeanCompletionItem(ScriptableRowset.class, appEntity.getName(), null, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
-            }
-        }
     }
 
     protected static void addItem(CompletionResultSet resultSet, String aFilter, JsCompletionItem aCompletionItem) {

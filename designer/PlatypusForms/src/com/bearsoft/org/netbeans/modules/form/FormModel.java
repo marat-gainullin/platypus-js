@@ -940,6 +940,7 @@ public class FormModel {
      * @param event event for which the handler was created.
      * @param handler name of the event handler.
      * @param bodyText body of the event handler.
+     * @param annotationText
      * @param createdNew newly created event handler?
      * @return event that has been fired.
      */
@@ -1015,6 +1016,8 @@ public class FormModel {
      * Fires an event informing about renaming an event handler. An undoable
      * edit is created and registered automatically.
      *
+     * @param aOldComponent
+     * @param aNewComponent
      * @return event that has been fired.
      */
     public FormModelEvent fireTopDesignComponentChanged(RADVisualContainer aOldComponent, RADVisualContainer aNewComponent) {

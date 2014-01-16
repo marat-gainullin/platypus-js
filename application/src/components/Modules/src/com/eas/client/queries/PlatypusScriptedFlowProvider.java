@@ -29,7 +29,8 @@ import org.mozilla.javascript.Function;
 import org.mozilla.javascript.Scriptable;
 
 /**
- *
+ * Specific <code>FlowProvider</code> implementation, that allows js modules to be used as data sources.
+ * @see FlowProvider
  * @author mg
  */
 public class PlatypusScriptedFlowProvider implements FlowProvider {

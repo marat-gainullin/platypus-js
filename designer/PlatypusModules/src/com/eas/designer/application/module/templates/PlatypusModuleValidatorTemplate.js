@@ -6,7 +6,7 @@
  * @validator DataSource1, DataSource2
  */ 
 function ${appElementName}(){
-    var self = this;
+    var self = this, model = this.model;
     
     /**
      * Method for validating of changes log to be applied within a particular datasources.

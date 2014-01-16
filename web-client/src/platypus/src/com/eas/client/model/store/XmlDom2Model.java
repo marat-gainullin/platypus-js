@@ -100,19 +100,24 @@ public class XmlDom2Model implements ModelVisitor {
 	protected List<Runnable> handlersResolvers;
 	protected Collection<Runnable> relationsResolvers = new ArrayList<Runnable>();
 
-	public static Model transform(Document doc, JavaScriptObject aModule) {
-		final List<Runnable> hResolvers = new ArrayList<Runnable>();
-		Model model = new Model(AppClient.getInstance(), new Runnable() {
-			@Override
-			public void run() {
-				for (Runnable hResolver : hResolvers) {
-					hResolver.run();
+	public static Model transform(Document doc, JavaScriptObject aModule) throws Exception {
+		try {
+			final List<Runnable> hResolvers = new ArrayList<Runnable>();
+			Model model = new Model(AppClient.getInstance(), new Runnable() {
+				@Override
+				public void run() {
+					for (Runnable hResolver : hResolvers) {
+						hResolver.run();
+					}
 				}
-			}
-		});
-		XmlDom2Model transformer = new XmlDom2Model(doc, aModule, hResolvers);
-		model.accept(transformer);
-		return model;
+			});
+			XmlDom2Model transformer = new XmlDom2Model(doc, aModule, hResolvers);
+			model.accept(transformer);
+			return model;
+		} catch (Exception ex) {
+			Logger.getLogger(Model.class.getName()).log(Level.SEVERE, null, ex);
+			throw ex;
+		}
 	}
 
 	protected XmlDom2Model(Document aDoc, JavaScriptObject aModule, List<Runnable> aHandlersResolvers) {
@@ -190,9 +195,10 @@ public class XmlDom2Model implements ModelVisitor {
 					}
 				}
 				model.validateQueries();
-                for (Runnable resolver : relationsResolvers) {
-                    resolver.run();
-                }
+				for (Runnable resolver : relationsResolvers) {
+					resolver.run();
+				}
+				model.checkRelationsIntegrity();
 			} finally {
 				relationsResolvers = null;
 				model = null;
@@ -307,45 +313,45 @@ public class XmlDom2Model implements ModelVisitor {
 			Runnable resolver = new Runnable() {
 				@Override
 				public void run() {
-                    try {
-                        Entity lEntity = model.getEntityById(leftEntityId);
-                        if (ParametersEntity.PARAMETERS_ENTITY_ID.equals(leftEntityId)) {
-                            lEntity = model.getParametersEntity();
-                            if (leftParameterName != null && !leftParameterName.isEmpty()) {
-                                relation.setLeftField(lEntity.getFields().get(leftParameterName));
-                            } else if (leftFieldName != null && !leftFieldName.isEmpty()) {
-                                relation.setLeftField(lEntity.getFields().get(leftFieldName));
-                            }
-                        } else if (lEntity != null) {
-                            if (leftParameterName != null && !leftParameterName.isEmpty()) {
-                                relation.setLeftField(lEntity.getQuery().getParameters().get(leftParameterName));
-                            } else if (leftFieldName != null && !leftFieldName.isEmpty()) {
-                                relation.setLeftField(lEntity.getFields().get(leftFieldName));
-                            }
-                        }
-                        relation.setLeftEntity(lEntity);
-                        lEntity.addOutRelation(relation);
+					try {
+						Entity lEntity = model.getEntityById(leftEntityId);
+						if (ParametersEntity.PARAMETERS_ENTITY_ID.equals(leftEntityId)) {
+							lEntity = model.getParametersEntity();
+							if (leftParameterName != null && !leftParameterName.isEmpty()) {
+								relation.setLeftField(lEntity.getFields().get(leftParameterName));
+							} else if (leftFieldName != null && !leftFieldName.isEmpty()) {
+								relation.setLeftField(lEntity.getFields().get(leftFieldName));
+							}
+						} else if (lEntity != null) {
+							if (leftParameterName != null && !leftParameterName.isEmpty()) {
+								relation.setLeftField(lEntity.getQuery().getParameters().get(leftParameterName));
+							} else if (leftFieldName != null && !leftFieldName.isEmpty()) {
+								relation.setLeftField(lEntity.getFields().get(leftFieldName));
+							}
+						}
+						relation.setLeftEntity(lEntity);
+						lEntity.addOutRelation(relation);
 
-                        Entity rEntity = model.getEntityById(rightEntityId);
-                        if (ParametersEntity.PARAMETERS_ENTITY_ID.equals(rightEntityId)) {
-                            rEntity = model.getParametersEntity();
-                            if (rightParameterName != null && !rightParameterName.isEmpty()) {
-                                relation.setRightField(rEntity.getFields().get(rightParameterName));
-                            } else if (rightFieldName != null && !rightFieldName.isEmpty()) {
-                                relation.setRightField(rEntity.getFields().get(rightFieldName));
-                            }
-                        } else if (rEntity != null) {
-                            if (rightParameterName != null && !rightParameterName.isEmpty()) {
-                                relation.setRightField(rEntity.getQuery().getParameters().get(rightParameterName));
-                            } else if (rightFieldName != null && !rightFieldName.isEmpty()) {
-                                relation.setRightField(rEntity.getFields().get(rightFieldName));
-                            }
-                        }
-                        relation.setRightEntity(rEntity);
-                        rEntity.addInRelation(relation);
-                    } catch (Exception ex) {
-                        Logger.getLogger(XmlDom2Model.class.getName()).log(Level.SEVERE, null, ex);
-                    }
+						Entity rEntity = model.getEntityById(rightEntityId);
+						if (ParametersEntity.PARAMETERS_ENTITY_ID.equals(rightEntityId)) {
+							rEntity = model.getParametersEntity();
+							if (rightParameterName != null && !rightParameterName.isEmpty()) {
+								relation.setRightField(rEntity.getFields().get(rightParameterName));
+							} else if (rightFieldName != null && !rightFieldName.isEmpty()) {
+								relation.setRightField(rEntity.getFields().get(rightFieldName));
+							}
+						} else if (rEntity != null) {
+							if (rightParameterName != null && !rightParameterName.isEmpty()) {
+								relation.setRightField(rEntity.getQuery().getParameters().get(rightParameterName));
+							} else if (rightFieldName != null && !rightFieldName.isEmpty()) {
+								relation.setRightField(rEntity.getFields().get(rightFieldName));
+							}
+						}
+						relation.setRightEntity(rEntity);
+						rEntity.addInRelation(relation);
+					} catch (Exception ex) {
+						Logger.getLogger(XmlDom2Model.class.getName()).log(Level.SEVERE, null, ex);
+					}
 				}
 			};
 			relationsResolvers.add(resolver);
@@ -358,13 +364,15 @@ public class XmlDom2Model implements ModelVisitor {
 		NamedNodeMap attrs = currentTag.getAttributes();
 		Node scalarna = attrs.getNamedItem(SCALAR_PROP_NAME_ATTR_NAME);
 		Node collectionna = attrs.getNamedItem(COLLECTION_PROP_NAME_ATTR_NAME);
-		
-        String scalarPropertyName = scalarna != null ? scalarna.getNodeValue() : null;;
-        String collectionPropertyName = collectionna != null ? collectionna.getNodeValue() : null;;
-        relation.setScalarPropertyName(scalarPropertyName != null ? scalarPropertyName.trim() : null);
-        relation.setCollectionPropertyName(collectionPropertyName != null ? collectionPropertyName.trim() : null);
+
+		String scalarPropertyName = scalarna != null ? scalarna.getNodeValue() : null;
+		;
+		String collectionPropertyName = collectionna != null ? collectionna.getNodeValue() : null;
+		;
+		relation.setScalarPropertyName(scalarPropertyName != null ? scalarPropertyName.trim() : null);
+		relation.setCollectionPropertyName(collectionPropertyName != null ? collectionPropertyName.trim() : null);
 	}
-	
+
 	@Override
 	public void visit(ParametersEntity entity) {
 		readEntityEventsAttributes(currentTag, entity);
@@ -629,9 +637,9 @@ public class XmlDom2Model implements ModelVisitor {
 	@Override
 	public void visit(Model aModel) {
 		try {
-	        readModel(aModel);
-        } catch (Exception e) {
-	        e.printStackTrace();
-        }
+			readModel(aModel);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }

@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.geotools.map.MapContext;
+import org.geotools.map.MapContent;
 import org.geotools.renderer.GTRenderer;
 import org.geotools.renderer.lite.StreamingRenderer;
 
@@ -34,7 +34,8 @@ public class AsyncMapTilesCache extends MapTilesCache {
     public class AsyncRenderingTask extends RenderingTask {
 
         protected Thread executingThread;
-
+        private boolean rendered = false;
+                
         public AsyncRenderingTask(Point aTilePoint) throws NoninvertibleTransformException {
             super(aTilePoint);
         }
@@ -47,6 +48,7 @@ public class AsyncMapTilesCache extends MapTilesCache {
                 if (!isStopped() && isActual()) {
                     try {
                         super.run();
+                        setRendered(true);
                     } finally {
                         offeredTasks.remove(tilePoint);
                         // fireRenderingTaskCompleted() must be called strictly after offeredTasks.remove() !
@@ -75,6 +77,20 @@ public class AsyncMapTilesCache extends MapTilesCache {
             taskRenderer.stopRendering();
             setStopped(true);
         }
+
+        /**
+         * @return the rendered
+         */
+        public synchronized boolean isRendered() {
+            return rendered;
+        }
+
+        /**
+         * @param aRendered the rendered to set
+         */
+        public synchronized void setRendered(boolean aRendered) {
+            rendered = aRendered;
+        }
     }
     protected Map<Point, AsyncRenderingTask> offeredTasks = new ConcurrentHashMap<>();
     protected ExecutorService executor = new ThreadPoolExecutor(Runtime.getRuntime().availableProcessors(), Runtime.getRuntime().availableProcessors() * 4,
@@ -83,12 +99,12 @@ public class AsyncMapTilesCache extends MapTilesCache {
     protected Set<RenderingTaskListener> listeners = new HashSet<>();
     protected ReadWriteLock mapContextLock;
 
-    public AsyncMapTilesCache(int aCacheSize, MapContext aDisplayContext, ReadWriteLock aMapContextLock, AffineTransform aTransform) {
+    public AsyncMapTilesCache(int aCacheSize, MapContent aDisplayContext, ReadWriteLock aMapContextLock, AffineTransform aTransform) {
         super(aCacheSize, aDisplayContext, aTransform);
         mapContextLock = aMapContextLock;
     }
 
-    public AsyncMapTilesCache(MapContext aDisplayContext, ReadWriteLock aMapContextLock, AffineTransform aTransform) {
+    public AsyncMapTilesCache(MapContent aDisplayContext, ReadWriteLock aMapContextLock, AffineTransform aTransform) {
         super(aDisplayContext, aTransform);
         mapContextLock = aMapContextLock;
     }
@@ -155,7 +171,7 @@ public class AsyncMapTilesCache extends MapTilesCache {
         for (Point taskPoint : offeredTasks.keySet()) {
             if (!aActualArea.contains(taskPoint)) {
                 AsyncRenderingTask task = offeredTasks.get(taskPoint);
-                if (task != null) {
+                if (task != null && task.isRendered()) {
                     try {
                         task.stop();
                     } catch (InterruptedException ex) {

@@ -4,6 +4,8 @@
  */
 package com.eas.client.geo;
 
+import com.bearsoft.rowset.metadata.Field;
+import com.eas.client.geo.datastore.DatamodelDataStore;
 import com.eas.client.model.ModelElementRef;
 import com.eas.client.model.ModelEntityRef;
 import com.eas.client.model.application.ApplicationEntity;
@@ -51,6 +53,7 @@ public class RowsetFeatureDescriptor extends DesignInfo {
         super();
         typeName = aTypeName;
         entity = aEntity;
+        style.setGeometryField(getGeometryField());
     }
 
     public RowsetFeatureDescriptor(String aTypeName, ApplicationEntity<?, ?, ?> aEntity, ModelEntityRef aRef) {
@@ -58,6 +61,7 @@ public class RowsetFeatureDescriptor extends DesignInfo {
         typeName = aTypeName;
         ref = aRef;
         entity = aEntity;
+        style.setGeometryField(getGeometryField());
         assert aRef.entityId != null;
         assert aEntity != null;
         assert aRef.entityId.equals(aEntity.getEntityId());
@@ -82,6 +86,7 @@ public class RowsetFeatureDescriptor extends DesignInfo {
     public void setEntity(ApplicationEntity<?, ?, ?> aValue) {
         ApplicationEntity<?, ?, ?> old = entity;
         entity = aValue;
+        style.setGeometryField(getGeometryField());
         changeSupport.firePropertyChange(ENTITY, old, aValue);
     }
 
@@ -316,7 +321,7 @@ public class RowsetFeatureDescriptor extends DesignInfo {
         changeSupport.firePropertyChange(CRSWKT, old, aValue);
     }
 
-    @Designable(category="appearance")
+    @Designable(category = "appearance")
     public Color getFillColor() {
         return style.getFillColor();
     }
@@ -325,7 +330,7 @@ public class RowsetFeatureDescriptor extends DesignInfo {
         style.setFillColor(aValue);
     }
 
-    @Designable(category="appearance")
+    @Designable(category = "appearance")
     public Color getHaloColor() {
         return style.getHaloColor();
     }
@@ -334,7 +339,7 @@ public class RowsetFeatureDescriptor extends DesignInfo {
         style.setHaloColor(aValue);
     }
 
-    @Designable(category="appearance")
+    @Designable(category = "appearance")
     public Font getFont() {
         return style.getFont();
     }
@@ -343,7 +348,7 @@ public class RowsetFeatureDescriptor extends DesignInfo {
         style.setFont(aValue);
     }
 
-    @Designable(category="appearance")
+    @Designable(category = "appearance")
     public ModelElementRef getLabelField() {
         return style.getLabelField();
     }
@@ -352,7 +357,7 @@ public class RowsetFeatureDescriptor extends DesignInfo {
         style.setLabelField(aValue);
     }
 
-    @Designable(category="appearance")
+    @Designable(category = "appearance")
     public Color getLineColor() {
         return style.getLineColor();
     }
@@ -361,7 +366,7 @@ public class RowsetFeatureDescriptor extends DesignInfo {
         style.setLineColor(aValue);
     }
 
-    @Designable(category="appearance")
+    @Designable(category = "appearance")
     public Integer getOpacity() {
         return style.getOpacity();
     }
@@ -370,7 +375,7 @@ public class RowsetFeatureDescriptor extends DesignInfo {
         style.setOpacity(aValue);
     }
 
-    @Designable(displayName="pointSymbol", category="appearance")
+    @Designable(displayName = "pointSymbol", category = "appearance")
     public String getPointSymbolName() {
         return style.getPointSymbolName();
     }
@@ -379,7 +384,7 @@ public class RowsetFeatureDescriptor extends DesignInfo {
         style.setPointSymbolName(aValue);
     }
 
-    @Designable(category="appearance")
+    @Designable(category = "appearance")
     public Float getSize() {
         return style.getSize();
     }
@@ -390,6 +395,18 @@ public class RowsetFeatureDescriptor extends DesignInfo {
 
     public PropertyChangeSupport getChangeSupport() {
         return changeSupport;
+    }
+
+    private ModelElementRef getGeometryField() {
+        if (entity != null) {
+            for (Field field : entity.getFields().toCollection()) {
+                if (DatamodelDataStore.isGeometry(field.getTypeInfo())) {
+                    return new ModelElementRef(field, true, entity.getEntityId());
+                }
+            }
+            return null;
+        }
+        return null;
     }
 
     @Override

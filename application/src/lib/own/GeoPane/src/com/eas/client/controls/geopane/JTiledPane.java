@@ -145,7 +145,6 @@ public class JTiledPane extends JPanel {
                 for (int x = clipTiles.minX; x <= clipTiles.maxX; x++) {
                     for (int y = clipTiles.minY; y <= clipTiles.maxY; y++) {
                         if (x == cX && y == cY || x == cX - 1 && y == cY - 1 || x == cX - 1 && y == cY || x == cX && y == cY - 1) {
-                            continue;
                         } else {
                             paintTile(x, y, clip, tiledGraphics);
                         }

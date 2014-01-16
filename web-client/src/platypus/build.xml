@@ -59,8 +59,6 @@
     <copy todir="${destdir}">
       <fileset dir="war" includes="pwc/**"/>
     </copy>
-    <!-- Platypus web API -->  
-    <copy file="war/pwa.js" todir="${destdir}" overwrite="true"/>
   </target>
 
 </project>

@@ -12,7 +12,7 @@ import org.mozilla.javascript.IdScriptableObject;
 import org.mozilla.javascript.Scriptable;
 
 /**
- *
+ * ServerScriptProxy integration with Rhino.
  * @author mg
  */
 public class ServerScriptProxyPrototype extends IdScriptableObject {

@@ -61,7 +61,7 @@ public class FormPropertyEditor<T> implements PropertyEditor,
         PropertyChangeListener,
         ExPropertyEditor {
 
-    private T value = null;
+    private T value;
     private boolean valueEdited;
     private FormProperty<T> property;
     private WeakReference<PropertyEnv> propertyEnv;
@@ -190,9 +190,10 @@ public class FormPropertyEditor<T> implements PropertyEditor,
     /**
      * Paint a representation of the value into a given area of screen real
      * estate. Note that the propertyEditor is responsible for doing its own
-     * clipping so that it fits into the given rectangle. <p> If the
-     * PropertyEditor doesn't honor paint requests(see isPaintable) this method
-     * should be a silent noop.
+     * clipping so that it fits into the given rectangle.
+     * <p>
+     * If the PropertyEditor doesn't honor paint requests(see isPaintable) this
+     * method should be a silent noop.
      *
      * @param gfx Graphics object to paint into.
      * @param box Rectangle within graphics object into which we should paint.
@@ -209,7 +210,8 @@ public class FormPropertyEditor<T> implements PropertyEditor,
     /**
      * This method is intended for use when generating Java code to set the
      * value of the property. It should return a fragment of Java code that can
-     * be used to initialize a variable with the current property value. <p>
+     * be used to initialize a variable with the current property value.
+     * <p>
      * Example results are "2", "new Color(127,127,34)", "Color.orange", etc.
      *
      * @return A fragment of Java code representing an initializer for the
@@ -227,9 +229,12 @@ public class FormPropertyEditor<T> implements PropertyEditor,
      * to edit.
      *
      * @return The property value as a string suitable for presentation to a
-     * human to edit. <p> Returns "null" is the value can't be expressed as a
-     * string. <p> If a non-null value is returned, then the PropertyEditor
-     * should be prepared to parse that string back in setAsText().
+     * human to edit.
+     * <p>
+     * Returns "null" is the value can't be expressed as a string.
+     * <p>
+     * If a non-null value is returned, then the PropertyEditor should be
+     * prepared to parse that string back in setAsText().
      */
     @Override
     public String getAsText() {
@@ -286,9 +291,11 @@ public class FormPropertyEditor<T> implements PropertyEditor,
      * A PropertyEditor may chose to make available a full custom Component that
      * edits its property value. It is the responsibility of the PropertyEditor
      * to hook itself up to its editor Component itself and to report property
-     * value changes by firing a PropertyChange event. <P> The higher-level code
-     * that calls getCustomEditor may either embed the Component in some larger
-     * property sheet, or it may put it in its own individual dialog, or ...
+     * value changes by firing a PropertyChange event.
+     * <P>
+     * The higher-level code that calls getCustomEditor may either embed the
+     * Component in some larger property sheet, or it may put it in its own
+     * individual dialog, or ...
      *
      * @return A java.awt.Component that will allow a human to directly edit the
      * current property value. May be null if this is not supported.

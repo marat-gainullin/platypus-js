@@ -8,7 +8,7 @@ import java.awt.geom.AffineTransform;
 import java.util.Locale;
 import java.util.Random;
 import java.util.concurrent.locks.ReadWriteLock;
-import org.geotools.map.MapContext;
+import org.geotools.map.MapContent;
 
 /**
  *
@@ -17,9 +17,9 @@ import org.geotools.map.MapContext;
 public class AsyncOSMMapTilesCache extends AsyncWebMapTilesCache {
 
     protected Random rnd = new Random(System.currentTimeMillis());
-    private String[] domains = new String[]{"a", "b", "c"};
+    private final String[] domains = new String[]{"a", "b", "c"};
 
-    public AsyncOSMMapTilesCache(String aBaseUrl, MapContext aDisplayContext, ReadWriteLock aMapContextLock, AffineTransform aTransform) {
+    public AsyncOSMMapTilesCache(String aBaseUrl, MapContent aDisplayContext, ReadWriteLock aMapContextLock, AffineTransform aTransform) {
         super(aBaseUrl, aDisplayContext, aMapContextLock, aTransform);
     }
 

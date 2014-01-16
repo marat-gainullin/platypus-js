@@ -26,7 +26,9 @@ import java.util.logging.Logger;
 import org.mozilla.javascript.*;
 
 /**
- *
+ * Main core js module implementation.
+ * Integrated with Rhino via <code>ScriptRunnerPrototype</code>.
+ * @see ScriptRunnerPrototype
  * @author pk, mg refactoring
  */
 public class ScriptRunner extends ScriptableObject {
@@ -82,6 +84,10 @@ public class ScriptRunner extends ScriptableObject {
         return Tag.containsTagWithName(moduleAnnotations, aName);
     }
 
+    /**
+     * Queries model's data for the first time.
+     * @throws Exception 
+     */
     protected void doExecute() throws Exception {
         ScriptUtils.inContext(new ScriptAction() {
             @Override
@@ -124,6 +130,12 @@ public class ScriptRunner extends ScriptableObject {
         }
     }
 
+    /**
+     * Injects platypus features into 'this' object, calls js module's constructor with arguments and finally resolves model'd entities' events handlers.
+     * @param scriptDoc
+     * @param args
+     * @throws Exception 
+     */
     protected void prepareScript(final ScriptDocument scriptDoc, final Object[] args) throws Exception {
         ScriptUtils.inContext(new ScriptAction() {
             @Override
@@ -142,6 +154,10 @@ public class ScriptRunner extends ScriptableObject {
         });
     }
 
+    /**
+     * Ensures that model's data is queried and fetched from sources. (Note: in asynchronous clients data in not fetched here).
+     * @throws Exception 
+     */
     public void execute() throws Exception {
         if (!executed) {
             executed = true;
@@ -149,6 +165,11 @@ public class ScriptRunner extends ScriptableObject {
         }
     }
 
+    /**
+     * Shrinks internal structures, allowing to reuse this instance of <code>ScriptRunner</code> with probably new content (hot reloading feature).
+     * @see #refresh() 
+     * @throws Exception 
+     */
     protected void shrink() throws Exception {
         model = null;
         functionAllowedRoles = null;
@@ -160,6 +181,7 @@ public class ScriptRunner extends ScriptableObject {
      * Refreshs content of the script runner. Reloads it from application
      * storage and re-executes new instance of model.
      *
+     * @see #shrink() 
      * @throws Exception
      */
     public synchronized void refresh() throws Exception {
@@ -181,18 +203,12 @@ public class ScriptRunner extends ScriptableObject {
     public ApplicationModel<?, ?, ?, ?> getModel() {
         return model;
     }
-    private static final String GET_APPICATION_ELEMENT_ID_JSDOC = ""
-            + "/**\n"
-            + "* Gets application element Id.\n"
-            + "* @return Module's application element Id\n"
-            + "*/";
 
     /**
      * Gets application element Id
      *
      * @return Module's application element Id
      */
-    @ScriptFunction(jsDoc = GET_APPICATION_ELEMENT_ID_JSDOC)
     public String getApplicationElementId() {
         return appElementId;
     }
@@ -204,11 +220,11 @@ public class ScriptRunner extends ScriptableObject {
     public long getTxtCrc32() {
         return txtCrc32;
     }
-    private static final String GET_PRINCIPAL_JSDOC = ""
+    
+    private static final String PRINCIPAL_JSDOC = ""
             + "/**\n"
-            + "* Script security API.\n"
-            + "* @return PlatypusPrincipal instance, wich may be used to check roles in\n"
-            + "* application code with calls of the hasRole method.\n"
+            + "* <code>PlatypusPrincipal</code> instance, wich may be used to check roles in\n"
+            + "* application code with calls of the <code>hasRole</code> method.\n"
             + "*/";
 
     /**
@@ -218,7 +234,7 @@ public class ScriptRunner extends ScriptableObject {
      * application code with calls of the hasRole method.
      * @see PlatypusPrincipal
      */
-    @ScriptFunction(jsDoc = GET_PRINCIPAL_JSDOC)
+    @ScriptFunction(jsDoc = PRINCIPAL_JSDOC)
     public Object getPrincipal() {
         if (principalHost != null) {
             return Context.javaToJS(principalHost.getPrincipal(), this);
@@ -238,6 +254,12 @@ public class ScriptRunner extends ScriptableObject {
         return ScriptRunner.class.getName();
     }
 
+    /**
+     * Overriden to provide dynamic js classes definition.
+     * @param name Script property name. In case of global ScriptRunner object it may serve as platypus js module name.
+     * @param start
+     * @return 
+     */
     @Override
     public Object get(String name, Scriptable start) {
         try {
@@ -280,8 +302,16 @@ public class ScriptRunner extends ScriptableObject {
         }
     }
     
+    /**
+     * Accounting of already executed scripts. Allows to avoid reexecution.
+     */
     protected static Set<String> executedScriptResources = new HashSet<>();
 
+    /**
+     * Executes a plain js resource (file).
+     * @param aResourceId
+     * @throws Exception 
+     */
     public static void executeResource(final String aResourceId) throws Exception {
         final String resourceId = PlatypusScriptedResource.translateResourcePath(aResourceId);
         if (!executedScriptResources.contains(resourceId)) {
@@ -321,6 +351,15 @@ public class ScriptRunner extends ScriptableObject {
         }
     }
 
+    /**
+     * Imports a system library js resource (file) into global js space.
+     * @param libResourceName Js resource (file) name (aka standardLib.js). See use cases for convenience.
+     * @param aLibName Js virtual library name. See use cases for convenience.
+     * @param currentContext
+     * @param aScope
+     * @return
+     * @throws IOException 
+     */
     public static Script importScriptLibrary(String libResourceName, String aLibName, Context currentContext, Scriptable aScope) throws IOException {
         try (InputStream is = ScriptRunner.class.getResourceAsStream(libResourceName); InputStreamReader isr = new InputStreamReader(is)) {
             Script compiled = currentContext.compileReader(isr, aLibName, 0, null);
@@ -329,6 +368,14 @@ public class ScriptRunner extends ScriptableObject {
         }
     }
 
+    /**
+     * 
+     * Ensures that platypus standard script scope is constructed.
+     * @param currentContext
+     * @return
+     * @throws Exception 
+     * @see #get(java.lang.String, org.mozilla.javascript.Scriptable) 
+     */
     public static ScriptableObject checkStandardObjects(Context currentContext) throws Exception {
         synchronized (standardObjectsScopeLock) {
             if (standardObjectsScope == null) {
@@ -367,6 +414,12 @@ public class ScriptRunner extends ScriptableObject {
         return compiledScriptDocumentsHost;
     }
 
+    /**
+     * Loads a script document from application database or filesystem and prepares it for execution and calls module's constructor.
+     * @param aAppElementId Global module name (at application level) or path to executable js file.
+     * @param args Js module's constructor arguments.
+     * @throws Exception 
+     */
     public void loadApplicationElement(String aAppElementId, Object[] args) throws Exception {
         if (appElementId == null ? aAppElementId != null : !appElementId.equals(aAppElementId)) {
             shrink();

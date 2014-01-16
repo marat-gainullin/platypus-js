@@ -39,7 +39,7 @@ import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 
 /**
- *
+ * The core class for platypus server infrastructure (e.g. Standalone J2SE server and J2EE servlets).
  * @author mg
  */
 public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledScriptDocumentsHost {

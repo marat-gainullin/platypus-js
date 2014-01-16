@@ -24,6 +24,7 @@ public class UpAction extends GeoPaneAction {
         putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0));
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
         try {
             pane.translateGrid(0, 2);

@@ -55,12 +55,9 @@ public abstract class Component<D extends JComponent> {
     }
     private static final String GET_NEXT_FOCUSABLE_COMPONENT_JSDOC = ""
             + "/**\n"
-            + " * Overrides the default focus traversal policy for this"
-            + " * component's focus traversal cycle by unconditionally"
-            + " * setting the specified component as the next"
-            + " * component in the cycle, and this component"
-            + " * as the specified component's previous"
-            + " * component in the cycle.\n"
+            + " * Overrides the default focus traversal policy for this component's focus traversal cycle"
+            + " by unconditionally setting the specified component as the next component in the cycle,"
+            + " and this component as the specified component's previous component.\n"
             + " */";
 
     @ScriptFunction(jsDoc = GET_NEXT_FOCUSABLE_COMPONENT_JSDOC)

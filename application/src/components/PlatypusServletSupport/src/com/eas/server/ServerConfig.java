@@ -13,7 +13,7 @@ import java.util.logging.Logger;
 import javax.servlet.ServletConfig;
 
 /**
- *
+ * Servlet configuration parser.
  * @author ml
  */
 public class ServerConfig {

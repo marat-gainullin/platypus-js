@@ -587,7 +587,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     }
     private static final String POS_JSDOC = ""
             + "/**\n"
-            + "* Checks if the cursor is on the specified index.\n"
+            + "* Positions the rowset cursor on the specified row number. Row number is 1-based.\n"
             + "* @param index the row index to check, starting form <code>1</code>.\n"
             + "* @return <code>true</code> if the cursor is on the row with specified index and <code>false</code> otherwise.\n"
             + "*/";
