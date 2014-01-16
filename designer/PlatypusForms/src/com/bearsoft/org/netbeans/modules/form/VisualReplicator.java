@@ -170,6 +170,7 @@ public class VisualReplicator {
     /**
      * Intended for updating semi-visual components aka DbGrid. DbGrid is the
      * only such component.
+     * @param aRadCont
      */
     protected void checkModelGridCloneUpdate(ComponentContainer aRadCont) {
         if (aRadCont instanceof RADModelGrid) {

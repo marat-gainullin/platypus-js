@@ -28,6 +28,7 @@ import org.mozilla.javascript.Function;
 /**
  *
  * @author mg
+ * @param <D>
  */
 public abstract class Component<D extends JComponent> {
 
