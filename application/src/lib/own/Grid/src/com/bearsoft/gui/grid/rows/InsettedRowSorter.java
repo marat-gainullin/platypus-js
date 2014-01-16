@@ -17,11 +17,13 @@ import javax.swing.table.TableModel;
 /**
  *
  * @author mg
+ * @param <M>
  */
 public class InsettedRowSorter<M extends TableModel> extends DelegatingRowSorter<M> {
 
     protected class DelegateListener implements RowSorterListener {
 
+        @Override
         public void sorterChanged(RowSorterEvent e) {
             fireRowSorterChanged(null);
         }

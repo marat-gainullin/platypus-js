@@ -19,6 +19,7 @@ import javax.swing.table.TableModel;
 /**
  *
  * @author mg
+ * @param <M>
  */
 public class TabularRowsSorter<M extends TableModel> extends RowSorter<M> {
 
@@ -72,6 +73,7 @@ public class TabularRowsSorter<M extends TableModel> extends RowSorter<M> {
 
     protected class SorterRowComparator implements Comparator<SorterRow> {
 
+        @Override
         public int compare(SorterRow o1, SorterRow o2) {
             return compareRows(o1.modelIndex, o2.modelIndex);
         }
