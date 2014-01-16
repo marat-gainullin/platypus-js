@@ -30,7 +30,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.StringTokenizer;
+import java.util.TreeSet;
 import java.util.logging.FileHandler;
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
@@ -355,7 +357,7 @@ public class MetadataSynchronizer {
             int tableColIndex = fieldsTable.find(ClientConstants.JDBCCOLS_TABLE_NAME);
             int tableTypeColIndex = fieldsTable.find(ClientConstants.JDBCPKS_TABLE_TYPE_FIELD_NAME);
             do {
-                // each table 
+                // each table
                 String tableType = null;
                 if (tableTypeColIndex > 0) {
                     tableType = rowsetTablesList.getString(tableTypeColIndex);
@@ -387,7 +389,7 @@ public class MetadataSynchronizer {
 
         DbMetadataCache mdCache;
 
-        // for default logger       
+        // for default logger
         int cntFields = 0;
         int cntIndexes = 0;
         int cntIndexesF = 0;
@@ -414,7 +416,7 @@ public class MetadataSynchronizer {
                 int tableColIndex = fieldsTable.find(ClientConstants.JDBCCOLS_TABLE_NAME);
                 int tableTypeColIndex = fieldsTable.find(ClientConstants.JDBCPKS_TABLE_TYPE_FIELD_NAME);
                 do {
-                    // each table 
+                    // each table
                     String tableType = null;
                     if (tableTypeColIndex > 0) {
                         tableType = rowsetTablesList.getString(tableTypeColIndex);
@@ -571,8 +573,12 @@ public class MetadataSynchronizer {
         Element tablesElement = doc.createElement(TABLES_TAG_NAME);
         rootElement.appendChild(tablesElement);
 
+        //sort table names
+        SortedSet<String> sortedNames=new TreeSet<>();
+        sortedNames.addAll(tablesStructure.keySet());
         // for all tables
-        for (String tableName : tablesStructure.keySet()) {
+//        for (String tableName : tablesStructure.keySet()) {
+        for (String tableName : sortedNames) {
             // each table
             TableStructure tblStructure = tablesStructure.get(tableName);
             cntTables++;
@@ -894,7 +900,7 @@ public class MetadataSynchronizer {
                                     String pkTable = fkColumnElement.getAttribute(PKTABLE_ATTR_NAME);
                                     String pkField = fkColumnElement.getAttribute(PKFIELD_ATTR_NAME);
 
-                                    // ????  in Oracle only DELETERULE                                   
+                                    // ????  in Oracle only DELETERULE
                                     String attributeFkUpdate = fkColumnElement.getAttribute(FKUPDATERULE_ATTR_NAME);
                                     ForeignKeyRule updateFkRule = (attributeFkUpdate != null && !attributeFkUpdate.equalsIgnoreCase("null") ? ForeignKeyRule.valueOf(attributeFkUpdate) : null);
 
@@ -1291,7 +1297,7 @@ public class MetadataSynchronizer {
 
         int i = 0;
         while (i < args.length) {
-            // section From   
+            // section From
             if ((CMD_SWITCHS_PREFIX + URLFROM_CMD_SWITCH).equalsIgnoreCase(args[i])) {
                 if (i < args.length - 1) {
                     urlFrom = args[i + 1];

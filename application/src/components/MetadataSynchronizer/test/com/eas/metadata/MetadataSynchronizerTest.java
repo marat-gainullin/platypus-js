@@ -190,23 +190,23 @@ public class MetadataSynchronizerTest {
         runTestFields(aLogName, "test6", aSourceSetting, aDestinationSetting, "Tbl", "Fld", true, true, true, 0, null, false, false);
 
 
-////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!        
+////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //        if (!aDestinationSetting.getDatabase().equals(Database.DB2)) {
-//// ПЕРЕДЕЛАТЬ на удаление/создание ???????????        
+//// ПЕРЕДЕЛАТЬ на удаление/создание ???????????
 ////The ALTER TABLE ALTER COLUMN SET DATA TYPE statement allows changing columns of the following data types only:
 ////
 ////    Character
 ////    Numeric
 ////    Binary
 //            runTestFields("test7",aSourceSetting, aDestinationSetting, "Tbl", "Fld",true,true,true,0,null,false,true);
-//        }    
+//        }
         printText(--cntTabs, "*** end runAllTestsFields ***");
     }
 
     private void runAllTestIndexes(String aLogName, SourceDbSetting aSourceSetting, DestinationDbSetting aDestinationSetting) throws Exception {
         printText(cntTabs++, "*** runAllTestIndexes ***");
         IndexDefine[] state1 = {
-            //indexName, isClustered(=false !!!), isHashed, isUnique,arrayColumns            
+            //indexName, isClustered(=false !!!), isHashed, isUnique,arrayColumns
             new IndexDefine("Ind1", false, true, false, new IndexColumnDefine[]{new IndexColumnDefine("f1", true)}),
             new IndexDefine("Ind2", false, false, true, new IndexColumnDefine[]{new IndexColumnDefine("f2", true), new IndexColumnDefine("f3", true)}),
             new IndexDefine("Ind3", false, false, false, new IndexColumnDefine[]{new IndexColumnDefine("f1", true), new IndexColumnDefine("f3", true)})
@@ -440,7 +440,7 @@ public class MetadataSynchronizerTest {
             }
         } finally {
             client.shutdown();
-        }    
+        }
     }
 
     private void createFields(SourceDbSetting aSourceSetting, String aTableName, String aFieldName, boolean aNullable, boolean aReadonly, boolean aSigned, int aPrecision, String aDescription, boolean changeSize, boolean changeType) throws Exception {
@@ -511,7 +511,7 @@ public class MetadataSynchronizerTest {
             }
         } finally {
             client.shutdown();
-        }    
+        }
     }
 
     private void createIndexes(DbConnection aDbConnection, String aTableName, IndexDefine[] aIndexesDefine) throws Exception {
@@ -564,7 +564,7 @@ public class MetadataSynchronizerTest {
             }
         } finally {
             client.shutdown();
-        }    
+        }
     }
 
     private void createKeys(DbConnection aDbConnection, Map<String, String[]> aPKeysDefine, FKeyDefine[] aFKeysDefine) throws Exception {
@@ -675,7 +675,7 @@ public class MetadataSynchronizerTest {
             }
         } finally {
             client.shutdown();
-        }    
+        }
     }
 
     private void checkTables(DbConnection aDbConnection, TableDefine[] aTablesDefine) throws Exception {
@@ -941,7 +941,7 @@ public class MetadataSynchronizerTest {
             logText(cntTabs, "table=", tableName, " \t", "fkName=", cNameDefine);
             if (fieldsDefine != null) {
                 assertNotNull(tableName);
-//????                
+//????
 //                assertNotNull(deleteRuleDefine);
 //                assertNotNull(updateRuleDefine);
 //                assertNotNull(referTableNameDefine);
@@ -1066,9 +1066,9 @@ public class MetadataSynchronizerTest {
             if (aLogName != null) {
                 sqlLog.addHandler(MetadataSynchronizer.createFileHandler(aLogName + ".log", logEncoding, new LineLogFormatter()));
                 errorLog.addHandler(MetadataSynchronizer.createFileHandler(aLogName + "_err.log", logEncoding, new LineLogFormatter()));
-            }    
+            }
             MetadataSynchronizer mds = new MetadataSynchronizer(null, sqlLog, errorLog, null);
-        
+
             mds.setSourceDatabase(aSourceConnection.getUrl(), aSourceConnection.getSchema(), aSourceConnection.getUser(), aSourceConnection.getPassword());
             mds.setDestinationDatabase(aDestinationConnection.getUrl(), aDestinationConnection.getSchema(), aDestinationConnection.getUser(), aDestinationConnection.getPassword());
             mds.setNoDropTables(aNoDropTables);
