@@ -44,7 +44,6 @@ application/src/components/Modules/nbproject/project.properties
 application/src/components/PlatypusDeploy/nbproject/build-impl.xml
 application/src/components/PlatypusDeploy/nbproject/genfiles.properties
 application/src/components/PlatypusDeploy/nbproject/project.properties
-application/src/components/Reports/nbproject/project.properties
 application/src/components/Server/nbproject/build-impl.xml
 application/src/components/Server/nbproject/genfiles.properties
 application/src/components/Server/nbproject/project.properties
