@@ -9,6 +9,7 @@
 /designer/dist/
 /application/src/group/nbproject/private/
 /application/src/lib/own/Updater/nbproject/private/
+/application/src/lib/own/Routing/nbproject/private/
 /application/src/lib/own/BinaryTags/nbproject/private/
 /application/src/lib/own/Controls/nbproject/private/
 /application/src/lib/own/Rowsets/nbproject/private/
@@ -22,6 +23,7 @@
 /application/src/components/Modules/nbproject/private/
 /application/src/components/Datamodel/nbproject/private/
 /application/src/components/GeoAddon/nbproject/private/
+/application/src/components/PlatypusDeploy/nbproject/private/
 /application/src/components/MetadataSynchronizer/nbproject/private/
 /application/src/components/SqlDriversTester/dist/
 /application/src/group/build.num
