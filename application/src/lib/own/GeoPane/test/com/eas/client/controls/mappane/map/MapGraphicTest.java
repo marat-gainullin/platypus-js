@@ -31,14 +31,12 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import org.geotools.data.collection.ListFeatureCollection;
 import org.geotools.feature.FeatureCollection;
-import org.geotools.feature.FeatureCollections;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.geometry.jts.ReferencedEnvelope;
-import org.geotools.map.DefaultMapContext;
-import org.geotools.map.DefaultMapLayer;
-import org.geotools.map.MapContext;
-import org.geotools.map.MapLayer;
+import org.geotools.map.FeatureLayer;
+import org.geotools.map.Layer;
+import org.geotools.map.MapContent;
 import org.geotools.referencing.CRS;
 import org.geotools.renderer.GTRenderer;
 import org.geotools.renderer.lite.StreamingRenderer;
@@ -155,14 +153,14 @@ public class MapGraphicTest {
         
         FeatureCollection fcollection = new ListFeatureCollection(featureType, lst);
         
-        final MapContext mainContext = new DefaultMapContext(projectedCrs);
-        mainContext.setAreaOfInterest(aoi);
+        final MapContent mainContext = new MapContent(projectedCrs);
+        mainContext.getViewport().setBounds(aoi);
 
-        MapLayer layer1 = new DefaultMapLayer(fcollection, lineStyle, "Main layer");
+        Layer layer1 = new FeatureLayer(fcollection, lineStyle, "Main layer");
         mainContext.addLayer(layer1);
 
         final GTRenderer renderer = new StreamingRenderer();
-        renderer.setContext(mainContext);
+        renderer.setMapContent(mainContext);
 
         final AffineTransform transform = new AffineTransform();
         transform.scale(8e-4, 8e-4);
@@ -176,7 +174,7 @@ public class MapGraphicTest {
                 Graphics2D g2d = (Graphics2D) g;
                 g2d.translate(size.width / 2, size.height / 2);
                 Rectangle screenArea = new Rectangle(-200, -200, 400, 400);
-                renderer.paint(g2d, new Rectangle(-200, -200, 400, 400), mainContext.getAreaOfInterest(), transform);
+                renderer.paint(g2d, new Rectangle(-200, -200, 400, 400), mainContext.getViewport().getBounds(), transform);
                 //renderer.paint(g2d, screenArea, mainContext.getLayerBounds(), transform);
                 g2d.draw(screenArea);
             }

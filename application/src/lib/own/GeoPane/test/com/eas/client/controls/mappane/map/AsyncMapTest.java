@@ -28,14 +28,12 @@ import javax.swing.JFrame;
 import javax.swing.KeyStroke;
 import org.geotools.data.collection.ListFeatureCollection;
 import org.geotools.feature.FeatureCollection;
-import org.geotools.feature.FeatureCollections;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.geometry.jts.ReferencedEnvelope;
-import org.geotools.map.DefaultMapContext;
-import org.geotools.map.DefaultMapLayer;
-import org.geotools.map.MapContext;
-import org.geotools.map.MapLayer;
+import org.geotools.map.FeatureLayer;
+import org.geotools.map.Layer;
+import org.geotools.map.MapContent;
 import org.geotools.styling.LineSymbolizer;
 import org.geotools.styling.Style;
 import org.junit.Test;
@@ -59,6 +57,7 @@ public class AsyncMapTest extends MapGraphicTest{
             putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0));
         }
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             try {
                 pane.translateGrid(2, 0);
@@ -77,6 +76,7 @@ public class AsyncMapTest extends MapGraphicTest{
             putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0));
         }
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             try {
                 pane.translateGrid(-2, 0);
@@ -95,6 +95,7 @@ public class AsyncMapTest extends MapGraphicTest{
             putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0));
         }
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             try {
                 pane.translateGrid(0, 2);
@@ -113,6 +114,7 @@ public class AsyncMapTest extends MapGraphicTest{
             putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0));
         }
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             try {
                 pane.translateGrid(0, -2);
@@ -144,8 +146,8 @@ public class AsyncMapTest extends MapGraphicTest{
 
         ReferencedEnvelope aoi = new ReferencedEnvelope(new Rectangle2D.Double(viewPoint.x - 100, viewPoint.y - 100, 4 * 111000, 200), projectedCrs); // meters
 
-        MapContext mainContext = new DefaultMapContext(projectedCrs);
-        mainContext.setAreaOfInterest(aoi);
+        MapContent mainContext = new MapContent(projectedCrs);
+        mainContext.getViewport().setBounds(aoi);
 
         SimpleFeatureTypeBuilder typeBuilder = new SimpleFeatureTypeBuilder();
         typeBuilder.setCRS(dataCrs);
@@ -167,11 +169,11 @@ public class AsyncMapTest extends MapGraphicTest{
         
         FeatureCollection fcollection1 = new ListFeatureCollection(featureType, lst);
         lst.clear();
-        MapLayer layer1 = new DefaultMapLayer(fcollection1, lineStyle, "Main layer");
+        Layer layer1 = new FeatureLayer(fcollection1, lineStyle, "Main layer");
         mainContext.addLayer(layer1);
 
-        final MapContext lightContext = new DefaultMapContext(projectedCrs);
-        lightContext.setAreaOfInterest(aoi);
+        final MapContent lightContext = new MapContent(projectedCrs);
+        lightContext.getViewport().setBounds(aoi);
         
         attrs[0] = lightweightLine;
         String lStringId = String.valueOf(lNo++);
@@ -181,7 +183,7 @@ public class AsyncMapTest extends MapGraphicTest{
 
         FeatureCollection fcollection2 = new ListFeatureCollection(featureType, lst);
         
-        MapLayer layer2 = new DefaultMapLayer(fcollection2, lineStyle1, "Lightweight layer");
+        Layer layer2 = new FeatureLayer(fcollection2, lineStyle1, "Lightweight layer");
         lightContext.addLayer(layer2);
 
 

@@ -23,6 +23,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
@@ -32,7 +33,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.ImageIcon;
-import org.geotools.map.MapContext;
+import org.geotools.map.MapContent;
 
 /**
  *
@@ -188,10 +189,7 @@ public abstract class AsyncWebMapTilesCache extends AsyncMapTilesCache {
             if (this.y != other.y) {
                 return false;
             }
-            if (this.z != other.z) {
-                return false;
-            }
-            return true;
+            return this.z == other.z;
         }
 
         @Override
@@ -209,11 +207,11 @@ public abstract class AsyncWebMapTilesCache extends AsyncMapTilesCache {
         }
     }
 
-    public AsyncWebMapTilesCache(int aCacheSize, MapContext aDisplayContext, ReadWriteLock aMapContextLock, AffineTransform aTransform) {
+    public AsyncWebMapTilesCache(int aCacheSize, MapContent aDisplayContext, ReadWriteLock aMapContextLock, AffineTransform aTransform) {
         super(aCacheSize, aDisplayContext, aMapContextLock, aTransform);
     }
 
-    public AsyncWebMapTilesCache(String aBaseUrl, MapContext aDisplayContext, ReadWriteLock aMapContextLock, AffineTransform aTransform) {
+    public AsyncWebMapTilesCache(String aBaseUrl, MapContent aDisplayContext, ReadWriteLock aMapContextLock, AffineTransform aTransform) {
         super(aDisplayContext, aMapContextLock, aTransform);
         tilesServerUrl = aBaseUrl;
     }
@@ -268,9 +266,7 @@ public abstract class AsyncWebMapTilesCache extends AsyncMapTilesCache {
     /**
      * Loads image from Web tiles index (like yandex, google, yahoo) or
      * from disk file cache.
-     * @param x Ordinal horizontal number of the tile in the index.
-     * @param y Ordinal vertical number of the tile in the index.
-     * @param z Detalization level of the index.
+     * @param aTileKey
      * @return Image achieved.
      * WARNING! Detalization level is NOT zoom of any kind.
      * Although Web documentation names z as zoom level, it's not true!
@@ -308,7 +304,7 @@ public abstract class AsyncWebMapTilesCache extends AsyncMapTilesCache {
                 } finally {
                 }
             }
-        } catch (Exception ex) {
+        } catch (IOException ex) {
             Logger.getLogger(AsyncWebMapTilesCache.class.getName()).log(Level.SEVERE, "{0} is unavailable. The cause is: {1}", new Object[]{aTileKey.toString(), ex.toString()});
             ceckPlaceHolderImage();
             urledImage = urledPlaceholderImage;

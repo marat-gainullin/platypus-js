@@ -8,7 +8,7 @@ import java.awt.geom.AffineTransform;
 import java.util.Locale;
 import java.util.Random;
 import java.util.concurrent.locks.ReadWriteLock;
-import org.geotools.map.MapContext;
+import org.geotools.map.MapContent;
 
 /**
  *
@@ -22,7 +22,7 @@ public class AsyncGoogleMapTilesCache extends AsyncWebMapTilesCache {
     protected int minSat = 0;
     protected int maxSat = 3;
 
-    public AsyncGoogleMapTilesCache(String aBaseUrl, MapContext aDisplayContext, ReadWriteLock aMapContextLock, AffineTransform aTransform) {
+    public AsyncGoogleMapTilesCache(String aBaseUrl, MapContent aDisplayContext, ReadWriteLock aMapContextLock, AffineTransform aTransform) {
         super(aBaseUrl, aDisplayContext, aMapContextLock, aTransform);
     }
 

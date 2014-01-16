@@ -24,7 +24,7 @@ import org.netbeans.modules.editor.NbEditorDocument;
  */
 public class CompletionPoint {
 
-    private static char DOT_CHARACTER = '.';//NOI18N
+    private final static char DOT_CHARACTER = '.';//NOI18N
     private String filter = "";//NOI18N
     private List<CompletionToken> completionTokens;
     private int caretBeginWordOffset;

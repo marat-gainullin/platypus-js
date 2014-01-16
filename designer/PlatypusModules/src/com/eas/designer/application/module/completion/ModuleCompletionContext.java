@@ -189,7 +189,7 @@ public class ModuleCompletionContext extends CompletionContext {
     public static CompletionContext findCompletionContext(String fieldName, int offset, ModuleCompletionContext parentModuleContext) {
         for (CompletionSupportService scp : Lookup.getDefault().lookupAll(CompletionSupportService.class)) {
             Class clazz = scp.getClassByName(fieldName);
-            if (clazz !=null && clazz.isAnnotationPresent(ScriptObj.class)) {
+            if (clazz != null && clazz.isAnnotationPresent(ScriptObj.class)) {
                 return new CompletionContext(clazz);
             }
         }
@@ -320,6 +320,9 @@ public class ModuleCompletionContext extends CompletionContext {
                                 ctx = parentContext.createThisContext(false);
                                 return false;
                             }
+                        } else if (Token.THIS == an.getType() && THIS_KEYWORD.equals(fieldName)) {
+                            ctx = parentContext.createThisContext(false);
+                            return false;
                         }
                     }
                     if (an instanceof VariableDeclaration) {
@@ -377,11 +380,20 @@ public class ModuleCompletionContext extends CompletionContext {
                                             && Token.THIS == variableInitializer.getInitializer().getType()) {// var self = this;
                                         ctx = parentContext.createThisContext(false);
                                         return false;
+                                    } else {
+                                        List<CompletionToken> tokens = CompletionPoint.getContextTokens(variableInitializer);
+                                        if (tokens != null && tokens.size() > 1) {
+                                            try {
+                                                ctx = ModuleCompletionProvider.getCompletionContext(parentContext, tokens, variableInitializer.getAbsolutePosition());
+                                                return false;
+                                            } catch (Exception ex) {
+                                                ErrorManager.getDefault().notify(ex);
+                                            }
+                                        }
                                     }
                                 }
                             }
                         }
-                        return false;
                     }
                     return true;
                 }

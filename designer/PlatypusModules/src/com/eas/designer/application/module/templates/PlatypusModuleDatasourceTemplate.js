@@ -4,7 +4,7 @@
  * @module 
  */
 function ${appElementName}(){
-    var self = this;
+    var self = this, model = this.model;
     
     this.schema = [
         // TODO : place schema definition here, such as:

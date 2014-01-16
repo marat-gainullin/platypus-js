@@ -22,7 +22,6 @@ import org.geotools.styling.*;
 import org.opengis.filter.FilterFactory;
 import org.opengis.filter.expression.Expression;
 import org.opengis.filter.expression.Function;
-import org.opengis.style.GraphicalSymbol;
 
 /**
  *
@@ -38,8 +37,8 @@ public class FeatureStyleDescriptor implements Cloneable {
     public static final String OPACITY = "opacity";
     public static final String POINTSYMBOL = "pointSymbol";
     public static final String SIZE = "size";
-    private static StyleFactory sf = CommonFactoryFinder.getStyleFactory(null);
-    private static FilterFactory ff = CommonFactoryFinder.getFilterFactory(null);
+    private static final StyleFactory sf = CommonFactoryFinder.getStyleFactory();
+    private static final FilterFactory ff = CommonFactoryFinder.getFilterFactory();
     private final static Color DEFAULT_FILL_COLOR = Color.white;
     private final static Color DEFAULT_LINE_COLOR = Color.black;
     private final static Color DEFAULT_SHADOW_COLOR = new Color(85, 85, 85);
@@ -57,7 +56,6 @@ public class FeatureStyleDescriptor implements Cloneable {
     private SerialColor serialFillColor;
     private SerialColor serialHaloColor;
     private SerialFont serialFont;
-    private String mathTransformWKT;
     protected PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
 
     public void removePropertyChangeListener(String propertyName, PropertyChangeListener listener) {
@@ -153,19 +151,20 @@ public class FeatureStyleDescriptor implements Cloneable {
     }
 
     private Style createPolygonStyle() {
-        PolygonSymbolizer sym = sf.createPolygonSymbolizer(null,
-                sf.createFill(ff.literal(DEFAULT_SHADOW_COLOR),
-                ff.literal(DEFAULT_SHADOW_OPACITY_VALUE)),
-                null);
-        
-        if (opacity != null && opacity.intValue() == 100 ) {
+        Rule rule = sf.createRule();
+        if (opacity == null || opacity.intValue() == 100) {
             FunctionFactory funcf = new DefaultFunctionFactory();
             List<Expression> lst = new ArrayList<>(3);
             lst.add(ff.property(geometryField == null ? "" : geometryField.getFieldName()));
             lst.add(ff.literal(0.00004f));
             lst.add(ff.literal(-0.0002f));
             Function f = funcf.function("offset", lst, null);
+            PolygonSymbolizer sym = sf.createPolygonSymbolizer(null,
+                    sf.createFill(ff.literal(DEFAULT_SHADOW_COLOR),
+                            ff.literal(DEFAULT_SHADOW_OPACITY_VALUE)),
+                    null);
             sym.setGeometry(f);
+            rule.symbolizers().add(sym);
         }
 
         Stroke stroke = sf.createStroke(ff.literal(lineColor == null ? DEFAULT_LINE_COLOR : lineColor),
@@ -173,10 +172,8 @@ public class FeatureStyleDescriptor implements Cloneable {
                 ff.literal((float) (opacity == null ? DEFAULT_OPACITY_VALUE : ((Number) (opacity / 100.0)).floatValue())));
         PolygonSymbolizer symPoly = sf.createPolygonSymbolizer(stroke,
                 sf.createFill(ff.literal(fillColor == null ? DEFAULT_FILL_COLOR : fillColor),
-                ff.literal((float) (opacity == null ? DEFAULT_OPACITY_VALUE : ((Number) (opacity / 100.0)).floatValue()))),
+                        ff.literal((float) (opacity == null ? DEFAULT_OPACITY_VALUE : ((Number) (opacity / 100.0)).floatValue()))),
                 null);
-        Rule rule = sf.createRule();
-        rule.symbolizers().add(sym);
         rule.symbolizers().add(symPoly);
         TextSymbolizer textSym = buildTextSymbolizer();
         if (textSym != null) {
@@ -200,32 +197,32 @@ public class FeatureStyleDescriptor implements Cloneable {
     }
 
     private Style createLineStyle(String aWKT) {
-        FunctionFactory funcf = new DefaultFunctionFactory();
-        FunctionFactory arrowFact = new ArrowFunctionFactory();
-        List<Expression> lst = new ArrayList<>(2);
-        lst.add(ff.property(geometryField == null ? "" : geometryField.getFieldName()));
-        Function f = funcf.function("endPoint", lst, null);
-        Stroke stroke = sf.createStroke(ff.literal(lineColor == null ? DEFAULT_LINE_COLOR : lineColor), null);
-        Mark mark = sf.createMark(ff.literal("shape://carrow"),
-                stroke, null, null, null);//sf.createFill(ff.literal(lineColor == null ? DEFAULT_LINE_COLOR : lineColor))
-        List<GraphicalSymbol> graphicalLst = new ArrayList<>(1);
-        graphicalLst.add(mark);
-        lst.add(ff.literal(aWKT));
-        Graphic graphic = sf.graphic(graphicalLst,
-                ff.literal((float) (opacity == null ? DEFAULT_OPACITY_VALUE : ((Number) (opacity / 100.0)).floatValue())),
-                ff.literal(20),
-                arrowFact.function("endArrowAngle", lst, null),
-                sf.createAnchorPoint(ff.literal(0.0f), ff.literal(0.0f)),
-                sf.createDisplacement(ff.literal(0.0f), ff.literal(0.0f)));
-        PointSymbolizer ps = sf.createPointSymbolizer(graphic, null);
-        ps.setGeometry(f);
+//        FunctionFactory funcf = new DefaultFunctionFactory();
+//        FunctionFactory arrowFact = new ArrowFunctionFactory();
+//        List<Expression> lst = new ArrayList<>(2);
+//        lst.add(ff.property(geometryField == null ? "" : geometryField.getFieldName()));
+//        Function f = funcf.function("endPoint", lst, null);
+//        Stroke stroke = sf.createStroke(ff.literal(lineColor == null ? DEFAULT_LINE_COLOR : lineColor), null);
+//        Mark mark = sf.createMark(ff.literal("shape://carrow"),
+//                stroke, null, null, null);//sf.createFill(ff.literal(lineColor == null ? DEFAULT_LINE_COLOR : lineColor))
+//        List<GraphicalSymbol> graphicalLst = new ArrayList<>(1);
+//        graphicalLst.add(mark);
+//        lst.add(ff.literal(aWKT));
+//        Graphic graphic = sf.graphic(graphicalLst,
+//                ff.literal((float) (opacity == null ? DEFAULT_OPACITY_VALUE : ((Number) (opacity / 100.0)).floatValue())),
+//                ff.literal(20),
+//                arrowFact.function("endArrowAngle", lst, null),
+//                sf.createAnchorPoint(ff.literal(0.0f), ff.literal(0.0f)),
+//                sf.createDisplacement(ff.literal(0.0f), ff.literal(0.0f)));
+//        PointSymbolizer ps = sf.createPointSymbolizer(graphic, null);
+//        ps.setGeometry(f);
         Stroke lineStroke = sf.createStroke(ff.literal(lineColor == null ? DEFAULT_LINE_COLOR : lineColor),
                 ff.literal(size == null ? DEFAULT_SIZE_VALUE : size.floatValue()),
                 ff.literal((float) (opacity == null ? DEFAULT_OPACITY_VALUE : ((Number) (opacity / 100.0)).floatValue())));
         LineSymbolizer lineSym = sf.createLineSymbolizer(lineStroke, null);
         Rule rule = sf.createRule();
         rule.symbolizers().add(lineSym);
-        rule.symbolizers().add(ps);
+        //rule.symbolizers().add(ps);
         TextSymbolizer textSym = buildTextSymbolizer();
         if (textSym != null) {
             rule.symbolizers().add(textSym);

@@ -38,10 +38,12 @@ public class RowsFeatureReader implements FeatureReader<SimpleFeatureType, Simpl
         featureBuilder = new SimpleFeatureBuilder(featureType);
     }
 
+    @Override
     public SimpleFeatureType getFeatureType() {
         return featureType;
     }
 
+    @Override
     public SimpleFeature next() throws IOException {
         try {
             if (closed) {
@@ -59,6 +61,7 @@ public class RowsFeatureReader implements FeatureReader<SimpleFeatureType, Simpl
         }
     }
 
+    @Override
     public boolean hasNext() throws IOException {
         if (closed) {
             throw new IOException("Reader is closed!");
@@ -66,6 +69,7 @@ public class RowsFeatureReader implements FeatureReader<SimpleFeatureType, Simpl
         return rowIndex < rows.size();
     }
 
+    @Override
     public void close() throws IOException {
         closed = true;
     }
