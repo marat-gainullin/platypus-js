@@ -105,6 +105,9 @@ public class RadComponentResolver extends RadInitializer implements DbControlsDe
                 visualComp.getBeanInstance().setSize(cdi.getDesignedPreferredSize());
             }
             if (component instanceof RADVisualComponent<?>) {
+                if (cdi.getDesignedPreferredSize() != null) {
+                    ((RADVisualComponent<?>) component).getBeanInstance().setSize(cdi.getDesignedPreferredSize());
+                }
                 if (parent.getLayoutSupport() != null
                         && parent.getLayoutSupport().getLayoutDelegate() != null) {
                     parent.getFormModel().addVisualComponent((RADVisualComponent<?>) component, parent, -1, ((RADVisualComponent<?>) component).getLayoutConstraints(parent.getLayoutSupport().getLayoutDelegate().getClass()), false);

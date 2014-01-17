@@ -99,6 +99,7 @@ import javax.swing.text.JTextComponent;
  * @author mg
  */
 public class SwingFactory implements ControlsDesignInfoVisitor {
+
     protected static final String EMPTY_TEXT_PROP_NAME = "emptyText";
 
     // initialized from client code
@@ -189,7 +190,6 @@ public class SwingFactory implements ControlsDesignInfoVisitor {
     public void processControlProperties(Component comp, ControlDesignInfo aInfo) {
         // properties
         comp.setName(aInfo.getName());
-
         if (aInfo.getBackground() != null) {
             comp.setBackground(aInfo.getBackground());
         }
@@ -210,6 +210,8 @@ public class SwingFactory implements ControlsDesignInfoVisitor {
         }
         if (aInfo.getPreferredSize() != null) {
             comp.setPreferredSize(aInfo.getPreferredSize());
+        } else if (aInfo.getDesignedPreferredSize() != null) {
+            comp.setPreferredSize(aInfo.getDesignedPreferredSize());
         }
         if (aInfo.getMaximumSize() != null) {
             comp.setMaximumSize(aInfo.getMaximumSize());
