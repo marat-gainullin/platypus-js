@@ -4,7 +4,6 @@
  */
 package com.eas.designer.explorer.h2;
 
-import com.eas.designer.explorer.server.PlatypusServerInstance;
 import java.util.ArrayList;
 import java.util.List;
 import org.netbeans.api.db.explorer.node.NodeProvider;
