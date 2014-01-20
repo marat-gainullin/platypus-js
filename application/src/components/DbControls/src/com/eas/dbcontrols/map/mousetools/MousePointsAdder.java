@@ -28,6 +28,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.SwingUtilities;
 import org.geotools.data.FeatureSource;
+import org.geotools.map.Layer;
 import org.geotools.map.MapLayer;
 import org.opengis.feature.Feature;
 import org.opengis.feature.type.FeatureType;
@@ -219,8 +220,8 @@ public class MousePointsAdder extends MapTool {
                     map.getSelection().getSelection().add(new SelectionEntry(features2Entities.get(featureId2InsertTo), rows.get(featureId2InsertTo), featureId2InsertTo, rowsColIndexes.get(featureId2InsertTo), closestGeometry.getNumGeometries() > 1 ? gIdx : -1, cIdx, gHoleIdx, point2Add.getCoordinate()));
                     map.fireSelectionChanged();
                     // Let's fire feature chaned event to all editabble layers
-                    MapLayer[] lightLayers = map.getPane().getLightweightMapContext().getLayers();
-                    for(MapLayer layer:lightLayers)
+                    List<Layer> lightLayers = map.getPane().getLightweightMapContext().layers();
+                    for(Layer layer:lightLayers)
                     {
                         FeatureSource<? extends FeatureType, ? extends Feature> source = layer.getFeatureSource();
                         assert source instanceof RowsFeatureSource;

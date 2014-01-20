@@ -17,10 +17,9 @@ import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.locks.ReadWriteLock;
 import java.util.logging.Logger;
 import org.geotools.geometry.jts.ReferencedEnvelope;
-import org.geotools.map.MapContext;
+import org.geotools.map.MapContent;
 import org.geotools.renderer.GTRenderer;
 import org.geotools.renderer.lite.StreamingRenderer;
 import org.geotools.referencing.CRS;
@@ -71,6 +70,7 @@ public abstract class MapTilesCache extends TilesCache {
             tileTransform = new AffineTransform(cartesian2ScreenTransform);
         }
 
+        @Override
         public void run() {
             if (!isStopped() && isActual()) {
                 BufferedImage img = (BufferedImage) imagesQueue.poll();
@@ -90,7 +90,7 @@ public abstract class MapTilesCache extends TilesCache {
                 assert g instanceof Graphics2D;
                 assert taskRenderer != null;
                 if (!isStopped() && isActual()) {
-                    taskRenderer.setContext(mapDisplayContext);
+                    taskRenderer.setMapContent(mapDisplayContext);
                     try {
                         taskRenderer.paint((Graphics2D) g, paintArea, tileAoi, tileTransform);
                     } catch (Exception ex) {
@@ -154,11 +154,11 @@ public abstract class MapTilesCache extends TilesCache {
             double x2 = -Double.MAX_VALUE;
             double y1 = Double.MAX_VALUE;
             double y2 = -Double.MAX_VALUE;
-            for (int i = 0; i < pts.length; i++) {
-                x1 = Math.min(x1, pts[i].x);
-                y1 = Math.min(y1, pts[i].y);
-                x2 = Math.max(x2, pts[i].x);
-                y2 = Math.max(y2, pts[i].y);
+            for (Point2D.Double pt : pts) {
+                x1 = Math.min(x1, pt.x);
+                y1 = Math.min(y1, pt.y);
+                x2 = Math.max(x2, pt.x);
+                y2 = Math.max(y2, pt.y);
             }
             tileAoi = new ReferencedEnvelope(x1, x2, y1, y2, mapDisplayContextCrs);
         }
@@ -174,7 +174,7 @@ public abstract class MapTilesCache extends TilesCache {
     /**
      * Contains local query envelope (area of interest), coordinate reference system and list of layers.
      */
-    protected MapContext mapDisplayContext;
+    protected MapContent mapDisplayContext;
     // Added to avoid synchronization problems with getCoordinateReferenceSystem() method of DefaultMapContext
     protected CoordinateReferenceSystem mapDisplayContextCrs;
     /**
@@ -185,21 +185,22 @@ public abstract class MapTilesCache extends TilesCache {
     protected MathTransform2D mapToCartesianTransform;
     protected MathTransform2D cartesian2MapTransform;
 
-    public MapTilesCache(MapContext aDisplayContext, AffineTransform aTransform) {
+    public MapTilesCache(MapContent aDisplayContext, AffineTransform aTransform) {
         super();
         mapDisplayContext = aDisplayContext;
         mapDisplayContextCrs = mapDisplayContext.getCoordinateReferenceSystem();
         cartesian2ScreenTransform = aTransform;
     }
 
-    public MapTilesCache(int aCacheSize, MapContext aDisplayContext, AffineTransform aTransform) {
+    public MapTilesCache(int aCacheSize, MapContent aDisplayContext, AffineTransform aTransform) {
         this(aDisplayContext, aTransform);
         cacheSize = aCacheSize;
     }
     
+    @Override
     protected abstract Image renderTile(Point ptKey);
 
-    public MapContext getMapDisplayContext() {
+    public MapContent getMapDisplayContext() {
         return mapDisplayContext;
     }
 

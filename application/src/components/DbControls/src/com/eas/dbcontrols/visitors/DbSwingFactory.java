@@ -297,9 +297,8 @@ public class DbSwingFactory extends SwingFactory implements DbControlsDesignInfo
                 }
             });
             map.setMapTitle(aInfo.getMapTitle());
-            map.setProjectionName(aInfo.getProjectionName());
-            map.setProjectionParameters(aInfo.getProjectionParameters());
-            map.setGeoCrsWkt(aInfo.getGeoCrsWkt());
+            map.setBackingUrl(aInfo.getBackingUrl());
+            map.setCrsWkt(aInfo.getCrsWkt());
             map.getFeatures().addAll(aInfo.getFeatures());
         } catch (Exception ex) {
             Logger.getLogger(DbSwingFactory.class.getName()).log(Level.SEVERE, null, ex);

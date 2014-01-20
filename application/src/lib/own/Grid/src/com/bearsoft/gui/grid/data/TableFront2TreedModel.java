@@ -22,13 +22,14 @@ import javax.swing.table.TableModel;
 /**
  * This class in the table front to a treed data.
  * @author mg
+ * @param <T>
  */
 public class TableFront2TreedModel<T> implements TableModel {
 
     protected Set<TableModelListener> listeners = new HashSet<>();
-    protected TreedModel<T> treedModel = null;
+    protected TreedModel<T> treedModel;
     protected Set<T> expanded = new HashSet<>();
-    protected List<T> front = null;
+    protected List<T> front;
     protected Map<T, Integer> frontIndexes = new HashMap<>();
     protected ChildrenFetcher<T> childrenFetcher;
 
@@ -285,8 +286,8 @@ public class TableFront2TreedModel<T> implements TableModel {
 
     /**
      * Converts element of the model to it's position in front.
-     * @param anElement Element of the model to return row of.
-     * @return Row number of model's element. It returns -1 if element is not in expanded space,
+     * @param anElement Element of the model to return index of.
+     * @return Index of model's element. It returns -1 if element is not in expanded space,
      * including case of an element doesn't belong to the model at all.
      */
     public int getIndexOf(T anElement) {

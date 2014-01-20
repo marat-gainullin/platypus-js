@@ -72,8 +72,8 @@ public class GisUtilities {
         LinearRing shell = new LinearRing(polygonSeq, gFactory);
         List<LinearRing> holes = new ArrayList<>();
         if (aHoles != null) {
-            for (int i = 0; i < aHoles.length; i++) {
-                Coordinate[] coord = aHoles[i].getCoordinates();
+            for (Geometry aHole : aHoles) {
+                Coordinate[] coord = aHole.getCoordinates();
                 if (coord.length > 1) {
                     CoordinateSequence holeSeq = csFactory.create(coord);
                     holes.add(new LinearRing(holeSeq, gFactory));

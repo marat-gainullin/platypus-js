@@ -25,6 +25,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.SwingUtilities;
 import org.geotools.data.FeatureSource;
+import org.geotools.map.Layer;
 import org.geotools.map.MapLayer;
 import org.opengis.feature.Feature;
 import org.opengis.feature.type.FeatureType;
@@ -87,8 +88,8 @@ public class MousePointsMover extends MapTool {
                         entitiy.getRowset().setModified(true);
                     }
                     // Let's fire feature chaned event to all editable layers
-                    MapLayer[] lightLayers = map.getPane().getLightweightMapContext().getLayers();
-                    for(MapLayer layer:lightLayers)
+                    List<Layer>lightLayers = map.getPane().getLightweightMapContext().layers();
+                    for(Layer layer:lightLayers)
                     {
                         FeatureSource<? extends FeatureType, ? extends Feature> source = layer.getFeatureSource();
                         assert source instanceof RowsFeatureSource;

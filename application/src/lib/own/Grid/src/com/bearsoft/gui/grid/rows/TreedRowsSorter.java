@@ -11,6 +11,8 @@ import javax.swing.ListSelectionModel;
 /**
  *
  * @author mg
+ * @param <T>
+ * @param <M>
  */
 public class TreedRowsSorter<T, M extends TableFront2TreedModel<T>> extends TabularRowsSorter<M> {
 
@@ -25,12 +27,12 @@ public class TreedRowsSorter<T, M extends TableFront2TreedModel<T>> extends Tabu
         if (model.unwrap().getParentOf(el1) != model.unwrap().getParentOf(el2)) {
             List<T> path1 = model.buildPathTo(el1);
             List<T> path2 = model.buildPathTo(el2);
-            if (path2.contains(el1)) // el1 is parent of el2
-            {
+            if (path2.contains(el1)) {
+                // el1 is parent of el2
                 return -1;
             }
-            if (path1.contains(el2)) // el2 is parent of el1
-            {
+            if (path1.contains(el2)) {
+                // el2 is parent of el1
                 return 1;
             }
             for (int i = 0; i < Math.min(path1.size(), path2.size()); i++) {

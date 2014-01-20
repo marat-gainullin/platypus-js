@@ -10,7 +10,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.geotools.map.MapContext;
+import org.geotools.map.MapContent;
 
 /**
  *
@@ -18,11 +18,11 @@ import org.geotools.map.MapContext;
  */
 public class SyncMapTilesCache extends MapTilesCache {
 
-    public SyncMapTilesCache(int aCacheSize, MapContext aDisplayContext, AffineTransform aTransform) {
+    public SyncMapTilesCache(int aCacheSize, MapContent aDisplayContext, AffineTransform aTransform) {
         super(aCacheSize, aDisplayContext, aTransform);
     }
 
-    public SyncMapTilesCache(MapContext aDisplayContext, AffineTransform aTransform) {
+    public SyncMapTilesCache(MapContent aDisplayContext, AffineTransform aTransform) {
         super(aDisplayContext, aTransform);
     }
 
