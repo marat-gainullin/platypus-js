@@ -355,6 +355,7 @@ public class PlatypusWebModuleManager {
 
     private void copyLibJars(FileObject libsDir) throws Exception {
         Set<File> jdbcDriverFiles = new HashSet<>();
+        //Do not copy JDBC drivers to the WEB-INF/lib
         for (String clazz : DbConnectionSettings.readDrivers().values()) {
             File jdbcDriver = PlatypusPlatform.findThirdpartyJar(clazz);
             if (jdbcDriver != null) {
