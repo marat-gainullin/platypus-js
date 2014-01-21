@@ -91,14 +91,13 @@ public class TomcatWebAppManager implements WebAppManager {
         File jarFile = PlatypusPlatform.findThirdpartyJar(className);
         if (jarFile != null) {
             FileObject jdbcDriverFo = FileUtil.toFileObject(jarFile);
-//                Enumeration<? extends FileObject> jdbcDriversEnumeration = jdbcDriverFo.getParent().getChildren(false);
-//                while(jdbcDriversEnumeration.hasMoreElements()) {
-//                    FileObject fo = jdbcDriversEnumeration.nextElement();
-//                    if (PlatypusPlatform.JAR_FILE_EXTENSION.equalsIgnoreCase(fo.getExt())) {
-//                        fo.copy(targetDirectory, fo.getName(), fo.getExt());
-//                    }
-//                }
-            jdbcDriverFo.copy(targetDirectory, jdbcDriverFo.getName(), jdbcDriverFo.getExt());
+                Enumeration<? extends FileObject> jdbcDriversEnumeration = jdbcDriverFo.getParent().getChildren(false);
+                while(jdbcDriversEnumeration.hasMoreElements()) {
+                    FileObject fo = jdbcDriversEnumeration.nextElement();
+                    if (PlatypusPlatform.JAR_FILE_EXTENSION.equalsIgnoreCase(fo.getExt())) {
+                        fo.copy(targetDirectory, fo.getName(), fo.getExt());
+                    }
+                }
         } else {
             throw new FileNotFoundException("JDBC driver for " + className + " isn't found.");
         }

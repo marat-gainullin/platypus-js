@@ -10,12 +10,16 @@ import com.eas.designer.explorer.project.ProjectRunner;
 import com.eas.designer.explorer.server.Server;
 import com.eas.designer.explorer.server.ServerState;
 import com.eas.designer.explorer.server.ServerSupport;
+import com.eas.designer.explorer.utils.DatabaseServerType;
 import java.io.File;
 import java.util.concurrent.Future;
 import javax.swing.event.ChangeListener;
+import org.netbeans.api.db.explorer.ConnectionManager;
+import org.netbeans.api.db.explorer.DatabaseConnection;
 import org.netbeans.api.extexecution.ExecutionDescriptor;
 import org.netbeans.api.extexecution.ExecutionService;
 import org.netbeans.api.extexecution.ExternalProcessBuilder;
+import org.netbeans.spi.db.explorer.DatabaseRuntime;
 import org.openide.awt.StatusDisplayer;
 import org.openide.util.ChangeSupport;
 import org.openide.util.NbBundle;
@@ -24,7 +28,7 @@ import org.openide.util.NbBundle;
  *
  * @author vv
  */
-public class H2DbServerInstance implements Server {
+public class H2Dabatabase implements DatabaseRuntime, Server {
 
     
     private final String H2_INSTANCE_NAME = "H2"; // NOI18N
@@ -35,17 +39,40 @@ public class H2DbServerInstance implements Server {
     private final String H2_TOOL_OPTION = "-tool"; // NOI18N
     private final int H2_DEFAULT_PORT = 9092;
     private volatile ServerState serverState = ServerState.STOPPED;
-    private ChangeSupport changeSupport = new ChangeSupport(this);
+    private final ChangeSupport changeSupport = new ChangeSupport(this);
     private Future<Integer> serverRunTask;
-    private static H2DbServerInstance platypusDevDbServer;
+    private static H2Dabatabase platypusDevDbServer;
 
-    public static synchronized H2DbServerInstance getInstance() {
+    private H2Dabatabase() {    
+    }
+    
+    public static synchronized H2Dabatabase getDefault() {
         if (platypusDevDbServer == null) {
-            platypusDevDbServer = new H2DbServerInstance();
+            platypusDevDbServer = new H2Dabatabase();
         }
         return platypusDevDbServer;
     }
 
+    @Override
+    public String getJDBCDriverClass() {
+        return DatabaseServerType.H2.jdbcClassName;
+    }
+
+    @Override
+    public boolean acceptsDatabaseURL(String url) {
+        return url.trim().startsWith("jdbc:h2:tcp://");//NOI18N
+    }
+
+    @Override
+    public boolean isRunning() {
+        return ServerState.RUNNING == getServerState();
+    }
+
+    @Override
+    public boolean canStart() {
+        return ServerState.STOPPED == getServerState();
+    }
+    
     public void addChangeListener(final ChangeListener listener) {
         changeSupport.addChangeListener(listener);
     }
@@ -54,15 +81,18 @@ public class H2DbServerInstance implements Server {
         changeSupport.removeChangeListener(listener);
     }
 
+    @Override
     public ServerState getServerState() {
         return serverState;
     }
 
+    @Override
     public void setServerState(ServerState aServerState) {
         serverState = aServerState;
         changeSupport.fireChange();
     }
 
+    @Override
     public void start() {
         ExecutionDescriptor descriptor = new ExecutionDescriptor()
                 .frontWindow(true)
@@ -76,6 +106,7 @@ public class H2DbServerInstance implements Server {
             @Override
             public void run() {
                 setServerState(ServerState.STOPPED);
+                disconnectAllH2Connections();
                 serverRunTask = null;
             }
         });
@@ -85,13 +116,13 @@ public class H2DbServerInstance implements Server {
             libDir = PlatypusPlatform.getThirdpartyLibDirectory();
             h2Dir = new File(libDir, H2_DIRECTORY_NAME);         
         } catch (EmptyPlatformHomePathException | IllegalStateException ex) {
-            StatusDisplayer.getDefault().setStatusText(NbBundle.getMessage(H2DbServerInstance.class, "LBL_Unable_Start_H2_Path")); // NOI18N
+            StatusDisplayer.getDefault().setStatusText(NbBundle.getMessage(H2Dabatabase.class, "LBL_Unable_Start_H2_Path")); // NOI18N
             if (PlatypusPlatform.showPlatformHomeDialog()) {
                 try {
                     libDir = PlatypusPlatform.getThirdpartyLibDirectory();
                     h2Dir = new File(libDir, H2_DIRECTORY_NAME);
                 } catch (EmptyPlatformHomePathException | IllegalStateException ex1) {
-                    StatusDisplayer.getDefault().setStatusText(NbBundle.getMessage(H2DbServerInstance.class, "LBL_Unable_Start_H2_Path")); // NOI18N
+                    StatusDisplayer.getDefault().setStatusText(NbBundle.getMessage(H2Dabatabase.class, "LBL_Unable_Start_H2_Path")); // NOI18N
                     return;
                 }
             } else {
@@ -128,11 +159,21 @@ public class H2DbServerInstance implements Server {
         }
     }
 
+    @Override
     public void stop() {
+        disconnectAllH2Connections();
         serverRunTask.cancel(true);
         serverRunTask = null;
     }
 
+    private void disconnectAllH2Connections() {
+        for (DatabaseConnection connection : ConnectionManager.getDefault().getConnections()) {
+            if (getDefault().acceptsDatabaseURL(connection.getDatabaseURL())) {
+                ConnectionManager.getDefault().disconnect(connection);
+            }
+        }
+    }
+    
     private String getClasspath(File dir) {
         return dir.getAbsolutePath() + "/*"; //NOI18N
     }
