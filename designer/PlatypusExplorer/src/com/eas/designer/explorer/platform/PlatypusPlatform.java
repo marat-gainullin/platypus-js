@@ -32,7 +32,6 @@ import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.util.NbBundle;
 import org.openide.util.NbPreferences;
-import org.openide.util.Utilities;
 
 /**
  *

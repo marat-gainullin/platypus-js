@@ -185,5 +185,11 @@
                     </folder>
                 </folder>
             </folder>
+            <folder name="Runtimes">
+                <file name="H2Runtime.instance">
+                    <attr name="instanceCreate" methodvalue="com.eas.designer.explorer.h2.H2Dabatabase.getDefault"/>
+                    <attr name="instanceOf" stringvalue="org.netbeans.spi.db.explorer.DatabaseRuntime"/>
+                </file>
+            </folder>
         </folder>
 </filesystem>

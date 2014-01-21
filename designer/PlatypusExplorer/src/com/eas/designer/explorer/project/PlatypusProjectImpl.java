@@ -105,8 +105,8 @@ public class PlatypusProjectImpl implements PlatypusProject {
     private Deployer deployer;
     private DbMigrator migrator;
     private ClassPath sourceRoot;
-    private Set<Runnable> clientListeners = new HashSet<>();
-    private SearchFilter searchFilter;
+    private final Set<Runnable> clientListeners = new HashSet<>();
+    private final SearchFilter searchFilter;
 
     public PlatypusProjectImpl(FileObject aProjectDir, ProjectState aState) throws Exception {
         super();
