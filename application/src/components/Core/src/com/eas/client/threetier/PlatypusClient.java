@@ -17,10 +17,9 @@ import com.eas.client.AppClient;
 import com.eas.client.ClientConstants;
 import com.eas.client.cache.AppElementsCache;
 import com.eas.client.cache.DatabaseMdCache;
+import com.eas.client.cache.PlatypusAppCache;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.queries.PlatypusQuery;
-import com.eas.client.settings.EasSettings;
-import com.eas.client.settings.PlatypusConnectionSettings;
 import com.eas.client.threetier.requests.*;
 import com.eas.util.BinaryUtils;
 import com.eas.util.StringUtils;
@@ -71,13 +70,24 @@ public abstract class PlatypusClient implements AppClient {
         char[] password = DEFAULT_TRUSTSTORE_PASSWORD.toCharArray();
         return password;
     }
-    private AppElementsCache appCache;
-    private PlatypusConnectionSettings plSettings;
+    private final PlatypusAppCache appCache;
+    protected String url;
     protected PlatypusPrincipal principal;
     protected List<Change> changeLog = new ArrayList<>();
     protected Map<String, DatabaseMdCache> mdCaches = new HashMap<>();
     protected Set<TransactionListener> transactionListeners = new HashSet<>();
 
+    public PlatypusClient(String aUrl) throws Exception{
+        super();
+        url = aUrl;
+        appCache = new PlatypusAppCache(this);
+    }
+    
+    @Override
+    public String getUrl() {
+        return url;
+    }
+    
     @Override
     public TransactionListener.Registration addTransactionListener(final TransactionListener aListener) {
         transactionListeners.add(aListener);
@@ -92,15 +102,6 @@ public abstract class PlatypusClient implements AppClient {
     @Override
     public List<Change> getChangeLog() {
         return changeLog;
-    }
-
-    @Override
-    public EasSettings getSettings() {
-        return plSettings;
-    }
-
-    public void setSettings(PlatypusConnectionSettings aSettings) {
-        plSettings = aSettings;
     }
 
     @Override
@@ -186,10 +187,6 @@ public abstract class PlatypusClient implements AppClient {
     @Override
     public synchronized AppCache getAppCache() throws Exception {
         return appCache;
-    }
-
-    public synchronized void setAppCache(AppElementsCache aAppCache) {
-        appCache = aAppCache;
     }
 
     @Override

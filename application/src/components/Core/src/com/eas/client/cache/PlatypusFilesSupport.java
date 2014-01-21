@@ -5,13 +5,10 @@
 package com.eas.client.cache;
 
 import com.eas.client.ClientConstants;
-import com.eas.client.settings.EasSettings;
-import com.eas.client.settings.XmlDom2ConnectionSettings;
 import com.eas.script.JsDoc;
 import com.eas.script.JsParser;
 import com.eas.util.FileUtils;
 import com.eas.util.StringUtils;
-import com.eas.xml.dom.Source2XmlDom;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -105,18 +102,6 @@ public class PlatypusFilesSupport {
             }
         } catch (IOException ex) {
             Logger.getLogger(PlatypusFiles.class.getName()).log(Level.INFO, null, ex);
-        }
-        return null;
-    }
-
-    public static String getAppElementIdForConnectionAppElement(File file) {
-        try {
-            EasSettings connectionSettings = XmlDom2ConnectionSettings.document2Settings(Source2XmlDom.transform(FileUtils.readString(file, PlatypusFiles.DEFAULT_ENCODING)));
-            if (connectionSettings != null) {
-                return connectionSettings.getName();
-            }
-        } catch (Exception ex) {
-            Logger.getLogger(PlatypusFilesSupport.class.getName()).log(Level.SEVERE, null, ex);
         }
         return null;
     }

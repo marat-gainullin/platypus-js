@@ -1,9 +1,4 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/*
  * LoginFrame.java
  *
  * Created on Jun 25, 2009, 11:19:43 AM
@@ -12,8 +7,8 @@ package com.eas.client.login;
 
 import com.eas.client.Client;
 import com.eas.client.ClientFactory;
+import com.eas.client.settings.ConnectionSettings;
 import com.eas.client.settings.DbConnectionSettings;
-import com.eas.client.settings.EasSettings;
 import com.eas.client.settings.PlatypusConnectionSettings;
 import com.eas.util.exceptions.ExceptionListenerSupport;
 import com.eas.util.exceptions.ExceptionThrower;
@@ -46,22 +41,22 @@ public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower 
     /**
      * A return status code - returned if OK button has been pressed
      */
+    public static final ResourceBundle bundle = ResourceBundle.getBundle("com/eas/client/login/Bundle");
     public static final int RET_OK = 1;
     private static final String CANCEL_ACTION_ID = "cancel";
     private static final String LAST_LOGIN_USERNAME_PREFKEY = "lastLoginUserName";
     private static final String OK_ACTION_ID = "ok";
     private int returnStatus = RET_CANCEL;
-    private ExceptionListenerSupport exSupport = new ExceptionListenerSupport();
-    private LoginAction loginAction = new LoginAction();
-    private NewConnectionAction newConnectionAction = new NewConnectionAction();
-    private ModifyConnectionAction modifyConnectionAction = new ModifyConnectionAction();
-    private ToggleConnectionsVisibility toggleConnectionsVisibilityAction = new ToggleConnectionsVisibility();
-    public static final ResourceBundle bundle = ResourceBundle.getBundle("com/eas/client/login/Bundle");
-    private DeleteConnectionAction deleteConnectionAction = new DeleteConnectionAction();
-    private ConnectionsSelectionListener connectionsSelectionListener = new ConnectionsSelectionListener();
-    private ConnectionsListModel connectionsListModel;
+    private final ExceptionListenerSupport exSupport = new ExceptionListenerSupport();
+    private final LoginAction loginAction = new LoginAction();
+    private final NewConnectionAction newConnectionAction = new NewConnectionAction();
+    private final ModifyConnectionAction modifyConnectionAction = new ModifyConnectionAction();
+    private final ToggleConnectionsVisibility toggleConnectionsVisibilityAction = new ToggleConnectionsVisibility();
+    private final DeleteConnectionAction deleteConnectionAction = new DeleteConnectionAction();
+    private final ConnectionsSelectionListener connectionsSelectionListener = new ConnectionsSelectionListener();
+    private final ConnectionsListModel connectionsListModel;
     private int connectionsPanelHeight;
-    private LoginCallback loginCallback;
+    private final LoginCallback loginCallback;
     private Client client;
     protected String url;
     protected String dbUser;
@@ -73,24 +68,19 @@ public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower 
      * User's login and connection selection dialog.
      *
      * @param aUrl preset URL
-     * @param aDbUser preset database user name
-     * @param aDbPassword preset database password
      * @param aUser preset application user name
      * @param aPassword preset password
      * @param aLoginCallback callback for login action
      * @throws Exception if login failed
      */
-    public LoginFrame(String aUrl, String aDbUser, char[] aDbPassword, String aUser, char[] aPassword, LoginCallback aLoginCallback) throws Exception {
+    public LoginFrame(String aUrl, String aUser, char[] aPassword, LoginCallback aLoginCallback) throws Exception {
         super((java.awt.Frame) null, true);
         url = aUrl;
-        dbUser = aDbUser;
-        dbPassword = aDbPassword;
         user = aUser;
         password = aPassword;
         loginCallback = aLoginCallback;
         connectionsListModel = new ConnectionsListModel();
         initComponents();
-        pnlDbLogin.setVisible(isDbModeLogin() || isFullModeLogin());
         if (!isFullModeLogin()) {
             hideConnectionUI();
         }
@@ -147,6 +137,7 @@ public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower 
         dispose();
     }
 
+    /*
     private boolean isAppModeLogin() {
         return url != null && !url.isEmpty() && EasSettings.isAppServerUrl(url);
     }
@@ -159,8 +150,9 @@ public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower 
         return url != null && !url.isEmpty() && !isAppModeLogin() && !isDbShortModeLogin();
     }
 
+    */
     private boolean isFullModeLogin() {
-        return !isAppModeLogin() && !isDbShortModeLogin() && !isDbModeLogin();
+        return url == null || url.isEmpty();
     }
 
     public Client getClient() {
@@ -183,12 +175,6 @@ public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower 
         tfPassword = new javax.swing.JPasswordField();
         lblPassword = new javax.swing.JLabel();
         checkRememberPassword = new javax.swing.JCheckBox();
-        pnlDbLogin = new javax.swing.JPanel();
-        lblDbUserName = new javax.swing.JLabel();
-        lblDbPassword = new javax.swing.JLabel();
-        tfDbUserName = new javax.swing.JTextField();
-        tfDbPassword = new javax.swing.JPasswordField();
-        checkDbRememberPassword = new javax.swing.JCheckBox();
         pnlConnectionInfo = new javax.swing.JPanel();
         lblConnections = new javax.swing.JLabel();
         scrollConnections = new javax.swing.JScrollPane();
@@ -239,7 +225,7 @@ public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower 
                         .addContainerGap())
                     .addGroup(pnlAppLoginLayout.createSequentialGroup()
                         .addComponent(checkRememberPassword)
-                        .addGap(17, 113, Short.MAX_VALUE))))
+                        .addGap(17, 345, Short.MAX_VALUE))))
         );
         pnlAppLoginLayout.setVerticalGroup(
             pnlAppLoginLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -257,65 +243,18 @@ public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower 
                 .addGap(10, 10, 10))
         );
 
-        lblDbUserName.setLabelFor(tfUserName);
-        lblDbUserName.setText(bundle.getString("LoginDialog.lblDbUserName.text")); // NOI18N
-
-        lblDbPassword.setLabelFor(tfPassword);
-        lblDbPassword.setText(bundle.getString("LoginDialog.lblDbPassword.text")); // NOI18N
-
-        tfDbUserName.setAutoscrolls(false);
-
-        tfDbPassword.setAutoscrolls(false);
-
-        checkDbRememberPassword.setText(bundle.getString("checkDbRememberPassword.text")); // NOI18N
-
-        javax.swing.GroupLayout pnlDbLoginLayout = new javax.swing.GroupLayout(pnlDbLogin);
-        pnlDbLogin.setLayout(pnlDbLoginLayout);
-        pnlDbLoginLayout.setHorizontalGroup(
-            pnlDbLoginLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlDbLoginLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(pnlDbLoginLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(checkDbRememberPassword, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 196, Short.MAX_VALUE)
-                    .addGroup(pnlDbLoginLayout.createSequentialGroup()
-                        .addGroup(pnlDbLoginLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(lblDbUserName, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(lblDbPassword))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(pnlDbLoginLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(tfDbPassword, javax.swing.GroupLayout.DEFAULT_SIZE, 140, Short.MAX_VALUE)
-                            .addComponent(tfDbUserName, javax.swing.GroupLayout.DEFAULT_SIZE, 140, Short.MAX_VALUE))))
-                .addContainerGap())
-        );
-        pnlDbLoginLayout.setVerticalGroup(
-            pnlDbLoginLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlDbLoginLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(pnlDbLoginLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblDbUserName)
-                    .addComponent(tfDbUserName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(pnlDbLoginLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(tfDbPassword, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblDbPassword))
-                .addGap(18, 18, 18)
-                .addComponent(checkDbRememberPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-
         javax.swing.GroupLayout pnlLoginLayout = new javax.swing.GroupLayout(pnlLogin);
         pnlLogin.setLayout(pnlLoginLayout);
         pnlLoginLayout.setHorizontalGroup(
             pnlLoginLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlLoginLayout.createSequentialGroup()
-                .addComponent(pnlDbLogin, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(pnlAppLogin, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap()
+                .addComponent(pnlAppLogin, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
         );
         pnlLoginLayout.setVerticalGroup(
             pnlLoginLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(pnlAppLogin, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(pnlDbLogin, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
         getContentPane().add(pnlLogin, java.awt.BorderLayout.NORTH);
@@ -345,7 +284,7 @@ public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower 
                 .addContainerGap()
                 .addGroup(pnlConnectionInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(lblConnections)
-                    .addComponent(scrollConnections, javax.swing.GroupLayout.DEFAULT_SIZE, 396, Short.MAX_VALUE))
+                    .addComponent(scrollConnections, javax.swing.GroupLayout.DEFAULT_SIZE, 388, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(pnlConnectionInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(btnNewConnection, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -367,7 +306,7 @@ public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower 
                         .addComponent(btnDeleteConnection))
                     .addGroup(pnlConnectionInfoLayout.createSequentialGroup()
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(scrollConnections, javax.swing.GroupLayout.DEFAULT_SIZE, 151, Short.MAX_VALUE)))
+                        .addComponent(scrollConnections, javax.swing.GroupLayout.DEFAULT_SIZE, 150, Short.MAX_VALUE)))
                 .addContainerGap())
         );
 
@@ -393,7 +332,7 @@ public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower 
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlBottomLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(btnToggleConnections, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 251, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 243, Short.MAX_VALUE)
                 .addComponent(btnOk, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnCancel, javax.swing.GroupLayout.PREFERRED_SIZE, 89, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -436,22 +375,16 @@ public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower 
     private javax.swing.JButton btnNewConnection;
     private javax.swing.JButton btnOk;
     private javax.swing.JButton btnToggleConnections;
-    private javax.swing.JCheckBox checkDbRememberPassword;
     private javax.swing.JCheckBox checkRememberPassword;
     private javax.swing.JLabel lblConnections;
-    private javax.swing.JLabel lblDbPassword;
-    private javax.swing.JLabel lblDbUserName;
     private javax.swing.JLabel lblPassword;
     private javax.swing.JLabel lblUserName;
     private javax.swing.JList lstConnections;
     private javax.swing.JPanel pnlAppLogin;
     private javax.swing.JPanel pnlBottom;
     private javax.swing.JPanel pnlConnectionInfo;
-    private javax.swing.JPanel pnlDbLogin;
     private javax.swing.JPanel pnlLogin;
     private javax.swing.JScrollPane scrollConnections;
-    private javax.swing.JPasswordField tfDbPassword;
-    private javax.swing.JTextField tfDbUserName;
     private javax.swing.JPasswordField tfPassword;
     private javax.swing.JTextField tfUserName;
     // End of variables declaration//GEN-END:variables
@@ -474,21 +407,11 @@ public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower 
     }
 
     private boolean login() throws Exception {
-        if (isAppModeLogin()) {
-            EasSettings settings = EasSettings.createInstance(url);
-            assert settings instanceof PlatypusConnectionSettings;
-            return loginCallback.tryToLogin(settings, null, null, tfUserName.getText(), tfPassword.getPassword());
-        } else if (isDbShortModeLogin()) {
-            EasSettings settings = EasSettings.createInstance(url);
-            assert settings instanceof DbConnectionSettings;
-            return loginCallback.tryToLogin(settings, dbUser, dbPassword, tfUserName.getText(), tfPassword.getPassword());
-        } else if (isDbModeLogin()) {
-            EasSettings settings = EasSettings.createInstance(url);
-            assert settings instanceof DbConnectionSettings;
-            return loginCallback.tryToLogin(settings, tfDbUserName.getText(), tfDbPassword.getPassword(), tfUserName.getText(), tfPassword.getPassword());
-        } else if (isFullModeLogin() && !lstConnections.isSelectionEmpty()) {
-            EasSettings settings = (EasSettings) lstConnections.getSelectedValue();
-            return loginCallback.tryToLogin(settings, tfDbUserName.getText(), tfDbPassword.getPassword(), tfUserName.getText(), tfPassword.getPassword());
+        if (!isFullModeLogin()) {
+            return loginCallback.tryToLogin(tfUserName.getText(), tfPassword.getPassword());
+        } else if (!lstConnections.isSelectionEmpty()) {
+            ConnectionSettings settings = (ConnectionSettings) lstConnections.getSelectedValue();
+            return loginCallback.tryToLogin(tfUserName.getText(), tfPassword.getPassword());
         } else {
             return false;
         }
@@ -500,18 +423,12 @@ public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower 
             connectionsPref.removeNode();
             connectionsPref = Preferences.userRoot().node(ClientFactory.CONNECTIONS_SETTINGS_NODE);
             for (int i = 0; i < connectionsListModel.getSize(); i++) {
-                EasSettings settings = (EasSettings) connectionsListModel.getElementAt(i);
+                ConnectionSettings settings = (ConnectionSettings) connectionsListModel.getElementAt(i);
                 if (settings.isEditable()) {
                     String strIndex = String.valueOf(i);
                     connectionsPref.node(strIndex).put(ClientFactory.CONNECTION_TITLE_SETTING, settings.getName() != null ? settings.getName() : "");
                     connectionsPref.node(strIndex).put(ClientFactory.CONNECTION_URL_SETTING, settings.getUrl() != null ? settings.getUrl() : "");
                     connectionsPref.node(strIndex).put(ClientFactory.CONNECTION_USER_SETTING, settings.getUser() != null ? settings.getUser() : "");
-                    if (settings instanceof DbConnectionSettings) {
-                        String schema = ((DbConnectionSettings)settings).getSchema();
-                        if(schema == null)
-                            schema = "";
-                        connectionsPref.node(strIndex).put(ClientFactory.CONNECTION_SCHEMA_SETTING, schema);
-                    }
                 }
             }
         } catch (BackingStoreException ex) {
@@ -527,22 +444,9 @@ public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower 
         return lstConnections.getSelectedIndex();
     }
 
-    public void setDbPassword(String aPassword) {
-        tfDbPassword.setText(aPassword);
-        checkDbRememberPassword.setSelected(aPassword != null && !aPassword.isEmpty());
-    }
-
     public void setUserPassword(String aPassword) {
         tfPassword.setText(aPassword);
         checkRememberPassword.setSelected(aPassword != null && !aPassword.isEmpty());
-    }
-
-    public String getDbPassword() {
-        if (checkDbRememberPassword.isSelected()) {
-            return new String(tfDbPassword.getPassword());
-        } else {
-            return null;
-        }
     }
 
     public String getUserPassword() {
@@ -596,22 +500,18 @@ public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower 
                     String url = dlg.getUrl();
                     String userName = dlg.getUserName();
                     String name = dlg.getConnectionName();
-                    EasSettings s = EasSettings.createInstance(url);
-                    if (s != null) {
-                        s.setUrl(url);
+                    ConnectionSettings settings = new PlatypusConnectionSettings();
+                        settings.setUrl(url);
                         if (name != null && !name.isEmpty()) {
-                            s.setName(name);
+                            settings.setName(name);
                         }
                         if (userName != null) {
-                            s.setUser(userName);
+                            settings.setUser(userName);
                         }
-                        connectionsListModel.putElementAt(saveIndex, s);
+                        connectionsListModel.putElementAt(saveIndex, settings);
                         lstConnections.setSelectedIndex(saveIndex);
                         updatePreferences();
                         lstConnections.requestFocus();
-                    } else {
-                        JOptionPane.showMessageDialog(LoginFrame.this, bundle.getString("LoginDialog.NewConnectionFailedMessage"), bundle.getString("LoginDialog.title"), JOptionPane.ERROR_MESSAGE);
-                    }
                 }
             } catch (Throwable t) {
                 assert exSupport != null;
@@ -627,7 +527,7 @@ public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower 
             try {
                 int selectedIndex = lstConnections.getSelectedIndex();
                 assert selectedIndex >= 0; //we won't be enabled otherwise
-                EasSettings settings = (EasSettings) connectionsListModel.getElementAt(selectedIndex);
+                ConnectionSettings settings = (ConnectionSettings) connectionsListModel.getElementAt(selectedIndex);
                 ConnectionSettingsDialog dlg = new ConnectionSettingsDialog(null, true);
                 dlg.setUrl(settings.getUrl());
                 dlg.setConnectionName(settings.getName());
@@ -640,9 +540,6 @@ public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower 
                     settings.setUser(dlg.getUserName());
                     connectionsListModel.fireContentsChanged(selectedIndex);
                     updatePreferences();
-                    if (settings instanceof DbConnectionSettings) {
-                        tfDbUserName.setText(dlg.getUserName());
-                    }
                     lstConnections.requestFocus();
                 }
             } catch (Throwable t) {
@@ -658,7 +555,7 @@ public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower 
             try {
                 int selectedIndex = lstConnections.getSelectedIndex();
                 assert selectedIndex >= 0; //we won't be enabled otherwise
-                EasSettings settings = (EasSettings) connectionsListModel.getElementAt(selectedIndex);
+                ConnectionSettings settings = (ConnectionSettings) connectionsListModel.getElementAt(selectedIndex);
                 int choice = JOptionPane.showConfirmDialog(LoginFrame.this, bundle.getString("LoginDialog.ConnectionDeletionConfirmationMessage") + settings.getUrl(), bundle.getString("LoginDialog.ConnectionDeletionConfirmationTitle"), JOptionPane.YES_NO_OPTION);
                 if (choice == JOptionPane.YES_OPTION) {
                     connectionsListModel.removeElementAt(selectedIndex);
@@ -677,19 +574,11 @@ public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower 
         @Override
         public void valueChanged(ListSelectionEvent e) {
             if (!e.getValueIsAdjusting()) {
-                EasSettings selectedSettings = (EasSettings) lstConnections.getSelectedValue();
+                ConnectionSettings selectedSettings = (ConnectionSettings) lstConnections.getSelectedValue();
                 boolean modificationsEnabled = selectedSettings != null && selectedSettings.isEditable();
                 modifyConnectionAction.setEnabled(modificationsEnabled);
                 deleteConnectionAction.setEnabled(modificationsEnabled);
-                if (selectedSettings instanceof DbConnectionSettings) {
-                    pnlDbLogin.setVisible(true);
-                    DbConnectionSettings dbSettings = (DbConnectionSettings) selectedSettings;
-                    tfDbUserName.setText(dbSettings.getUser());
-                    tfDbPassword.setText(null);
-                    tfPassword.setText(null);
-                } else {
-                    pnlDbLogin.setVisible(false);
-                }
+                tfPassword.setText(null);
             }
         }
     }

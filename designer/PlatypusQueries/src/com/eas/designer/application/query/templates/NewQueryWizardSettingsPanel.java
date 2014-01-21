@@ -4,17 +4,17 @@
  */
 package com.eas.designer.application.query.templates;
 
-import com.eas.client.cache.PlatypusFiles;
 import com.eas.designer.explorer.project.PlatypusProjectImpl;
 import java.awt.Component;
 import java.util.HashSet;
 import java.util.Set;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import org.netbeans.api.db.explorer.ConnectionManager;
+import org.netbeans.api.db.explorer.DatabaseConnection;
 import org.openide.ErrorManager;
 import org.openide.WizardDescriptor;
 import org.openide.WizardValidationException;
-import org.openide.filesystems.FileObject;
 import org.openide.util.HelpCtx;
 
 /**
@@ -112,8 +112,9 @@ public class NewQueryWizardSettingsPanel implements
         return false;
     }
 
-    public boolean isConnectionElement(FileObject aFile) throws Exception {
-        return PlatypusFiles.CONNECTION_EXTENSION.equalsIgnoreCase(aFile.getExt());
+    public boolean connectionExist(String aDatasourceName) throws Exception {
+        DatabaseConnection conn = ConnectionManager.getDefault().getConnection(aDatasourceName);        
+        return conn != null;
     }
 
     public PlatypusProjectImpl getProject() {

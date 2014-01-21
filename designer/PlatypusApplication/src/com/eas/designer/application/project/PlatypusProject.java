@@ -24,15 +24,15 @@ import org.openide.windows.InputOutput;
  */
 public interface PlatypusProject extends Project {
     
-    boolean isDbConnected();
+    boolean isDbConnected(String aDatasourceId);
 
     DbClient getClient();
 
     AppCache getAppCache() throws Exception;
 
-    void startConnecting2db();
+    void startConnecting2db(String aDatasourceId);
     
-    void disconnectFormDb() throws InterruptedException, ExecutionException;
+    void disconnectFormDb(String aDatasourceId) throws InterruptedException, ExecutionException;
     
     Deployer getDeployer();
     
@@ -40,7 +40,7 @@ public interface PlatypusProject extends Project {
     
     InputOutput getOutputWindowIO();
     
-    Component generateDbPlaceholder() throws Exception;
+    Component generateDbPlaceholder(String aDatasourceId) throws Exception;
     
     Component generateDbValidatePlaceholder() throws Exception;
     

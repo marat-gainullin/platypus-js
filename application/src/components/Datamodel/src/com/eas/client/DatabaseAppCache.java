@@ -2,12 +2,11 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.client.cache;
+package com.eas.client;
 
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.metadata.DataTypeInfo;
-import com.eas.client.ClientConstants;
-import com.eas.client.DbClient;
+import com.eas.client.cache.AppElementsCache;
 import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.queries.SqlCompiledQuery;
 import com.eas.client.queries.SqlQuery;
@@ -16,12 +15,28 @@ import com.eas.client.queries.SqlQuery;
  *
  * @author mg
  */
-public class DatabaseAppCache extends AppElementsCache<DbClient> {
+public class DatabaseAppCache extends AppElementsCache {
 
     public static final String ACTUALITY_QUERY_TEXT = "select %s, %s, %s from %s where %s = :%s";
+    public static final String APP_URL_PREFIX = "jndi://";
 
-    public DatabaseAppCache(DbClient aClient) throws Exception {
-        super(aClient);
+    protected String appDatabaseJndiUrl;
+    protected String datasourceName;
+    protected DbClient client;
+
+    public DatabaseAppCache(String aAppDatabaseJndiName) throws Exception {
+        super();
+        if (!aAppDatabaseJndiName.startsWith(APP_URL_PREFIX)) {
+            throw new IllegalArgumentException("Application jndi url must start with " + APP_URL_PREFIX + " prefix.");
+        }
+        appDatabaseJndiUrl = aAppDatabaseJndiName;
+        datasourceName = appDatabaseJndiUrl.substring(APP_URL_PREFIX.length(), appDatabaseJndiUrl.length());
+        client = new DatabasesClient(null, datasourceName, false);
+    }
+
+    @Override
+    public String getApplicationPath() {
+        return appDatabaseJndiUrl;
     }
 
     @Override

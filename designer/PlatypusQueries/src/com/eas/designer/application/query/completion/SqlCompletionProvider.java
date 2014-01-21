@@ -137,7 +137,7 @@ public class SqlCompletionProvider implements CompletionProvider {
             DbClient client = dataObject.getClient();
             if (client != null) {
                 Insert iStatement = (Insert) dataObject.getStatement();
-                DbMetadataCache mdCache = client.getDbMetadataCache(dataObject.getDbId());
+                DbMetadataCache mdCache = client.getDbMetadataCache(dataObject.getDatasourceName());
                 String schema = iStatement.getTable().getSchemaName();
                 String defaultSchema = mdCache.getConnectionSchema();
                 Fields fields = mdCache.getTableMetadata(defaultSchema.equalsIgnoreCase(schema) ? iStatement.getTable().getName() : iStatement.getTable().getWholeTableName());
@@ -151,7 +151,7 @@ public class SqlCompletionProvider implements CompletionProvider {
             DbClient client = dataObject.getClient();
             if (client != null) {
                 Update uStatement = (Update) dataObject.getStatement();
-                DbMetadataCache mdCache = client.getDbMetadataCache(dataObject.getDbId());
+                DbMetadataCache mdCache = client.getDbMetadataCache(dataObject.getDatasourceName());
                 String schema = uStatement.getTable().getSchemaName();
                 String defaultSchema = mdCache.getConnectionSchema();
                 Fields fields = mdCache.getTableMetadata(defaultSchema.equalsIgnoreCase(schema) ? uStatement.getTable().getName() : uStatement.getTable().getWholeTableName());
@@ -188,7 +188,7 @@ public class SqlCompletionProvider implements CompletionProvider {
         if (dataObject.getStatement() instanceof Select) {
             DbClient client = dataObject.getClient();
             if (client != null) {
-                DbMetadataCache mdCache = client.getDbMetadataCache(dataObject.getDbId());
+                DbMetadataCache mdCache = client.getDbMetadataCache(dataObject.getDatasourceName());
                 if (point.atDot) {
                     if (point.prevContext != null) {
                         Set<String> schemas = dataObject.achieveSchemas();
@@ -261,7 +261,7 @@ public class SqlCompletionProvider implements CompletionProvider {
     public void fillCompletionWhereZone(PlatypusQueryDataObject dataObject, CompletionPoint point, CompletionResultSet resultSet) throws Exception {
         DbClient client = dataObject.getClient();
         if (client != null) {
-            DbMetadataCache mdCache = client.getDbMetadataCache(dataObject.getDbId());
+            DbMetadataCache mdCache = client.getDbMetadataCache(dataObject.getDatasourceName());
             if (point.atDot) {
                 if (point.prevContext != null) {
                     Set<String> schemas = dataObject.achieveSchemas();

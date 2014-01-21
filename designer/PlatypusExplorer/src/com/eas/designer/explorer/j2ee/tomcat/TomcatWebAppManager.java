@@ -6,7 +6,7 @@ package com.eas.designer.explorer.j2ee.tomcat;
 
 import com.eas.client.ClientConstants;
 import com.eas.client.SQLUtils;
-import com.eas.client.settings.DbConnectionSettings;
+import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.designer.application.PlatypusUtils;
 import com.eas.designer.explorer.j2ee.PlatypusWebModule;
 import com.eas.designer.explorer.j2ee.WebAppManager;
@@ -27,6 +27,8 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.netbeans.api.db.explorer.ConnectionManager;
+import org.netbeans.api.db.explorer.DatabaseConnection;
 import org.netbeans.modules.j2ee.deployment.devmodules.api.Deployment;
 import org.netbeans.modules.j2ee.deployment.devmodules.api.InstanceRemovedException;
 import org.netbeans.modules.j2ee.deployment.devmodules.api.ServerInstance;
@@ -48,7 +50,7 @@ public class TomcatWebAppManager implements WebAppManager {
     public final String CONTEXT_FILE_NAME = "context.xml"; //NOI18N
     public final String DATASOURCE_REALM_CLASS_NAME = "org.apache.catalina.realm.DataSourceRealm"; //NOI18N
     protected final PlatypusProjectImpl project;
-    private ServerInstance si;
+    private final ServerInstance si;
 
     public TomcatWebAppManager(PlatypusProjectImpl aProject, String serverInstanceID) throws InstanceRemovedException {
         project = aProject;
@@ -101,7 +103,7 @@ public class TomcatWebAppManager implements WebAppManager {
             throw new FileNotFoundException("JDBC driver for " + className + " isn't found.");
         }
     }
-    
+
     /**
      * Returns true if the specified classpath contains a class of the given
      * name, false otherwise.
@@ -156,7 +158,7 @@ public class TomcatWebAppManager implements WebAppManager {
             for (Resource res : getDataSources()) {
                 ctx.addResource(res);
             }
-            ctx.setRealm(getRealm()); 
+            ctx.setRealm(getRealm());
         } catch (Exception ex) {
             ErrorManager.getDefault().notify(ex);
         }
@@ -165,26 +167,24 @@ public class TomcatWebAppManager implements WebAppManager {
 
     private List<DataSourceResource> getDataSources() throws Exception {
         List<DataSourceResource> resources = new ArrayList<>();
-        resources.add(getMainDbConnectionResource());
-        return resources;
-    }
-
-    private DataSourceResource getMainDbConnectionResource() throws Exception {
-        DataSourceResource dataSourceResource = new DataSourceResource();
-        dataSourceResource.setName(PlatypusWebModule.MAIN_DATASOURCE_NAME);
-        dataSourceResource.setType(DataSourceResource.DATA_SOURCE_RESOURCE_TYPE_NAME);
-        DbConnectionSettings dbSettings = project.getSettings().getAppSettings().getDbSettings();
-        dataSourceResource.setUrl(dbSettings.getUrl());
-        String dialect = SQLUtils.dialectByUrl(dbSettings.getUrl());
-        if (dialect != null) {
-            String driverClassName = DbConnectionSettings.readDrivers().get(dialect);
-            dataSourceResource.setDriverClassName(driverClassName);
-        } else {
-            throw new IllegalStateException(String.format("Unsupported JDBC driver or incorrect URL: %s", dbSettings.getUrl()));
+        DatabaseConnection[] dataSources = ConnectionManager.getDefault().getConnections();
+        for (DatabaseConnection connection : dataSources) {
+            DataSourceResource dataSourceResource = new DataSourceResource();
+            resources.add(dataSourceResource);
+            dataSourceResource.setType(DataSourceResource.DATA_SOURCE_RESOURCE_TYPE_NAME);
+            dataSourceResource.setName(connection.getDisplayName());
+            dataSourceResource.setUrl(connection.getDatabaseURL());
+            String dialect = SQLUtils.dialectByUrl(connection.getDatabaseURL());
+            if (dialect != null) {
+                String driverClassName = GeneralResourceProvider.getDrivers().get(dialect);
+                dataSourceResource.setDriverClassName(driverClassName);
+            } else {
+                throw new IllegalStateException(String.format("Unsupported JDBC driver or incorrect URL: %s", connection.getDatabaseURL()));
+            }
+            dataSourceResource.setUsername(connection.getUser());
+            dataSourceResource.setPassword(connection.getPassword());
         }
-        dataSourceResource.setUsername(dbSettings.getUser());
-        dataSourceResource.setPassword(dbSettings.getPassword());
-        return dataSourceResource;
+        return resources;
     }
 
     private Realm getRealm() {

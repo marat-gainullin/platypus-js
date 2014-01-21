@@ -15,6 +15,17 @@ CREATE TABLE mtd_entities
   CONSTRAINT mtd_names_unique UNIQUE (mdent_parent_id, mdent_name)
 )
 #GO
+CREATE TABLE MTD_VERSION
+(
+    VERSION_VALUE numeric NOT NULL,
+    CONSTRAINT mtd_version_pk PRIMARY KEY(VERSION_VALUE)
+)
+#GO
+INSERT INTO MTD_VERSION (VERSION_VALUE) VALUES (0)
+#GO
+CREATE OR REPLACE VIEW dummytable AS SELECT character varying(100) '' as dummy 
+#GO
+
 CREATE TABLE mtd_users
 (
   usr_name character varying(200) NOT NULL,
@@ -36,19 +47,9 @@ CREATE TABLE mtd_groups
 ALTER TABLE mtd_groups
     ADD CONSTRAINT MTD_GROUPS_USERS_FK FOREIGN KEY(USR_NAME) REFERENCES MTD_USERS(USR_NAME) ON DELETE CASCADE ON UPDATE CASCADE 
 #GO
-CREATE TABLE MTD_VERSION
-(
-    VERSION_VALUE numeric NOT NULL,
-    CONSTRAINT mtd_version_pk PRIMARY KEY(VERSION_VALUE)
-)
-#GO
-INSERT INTO MTD_VERSION (VERSION_VALUE) VALUES (0)
-#GO
-CREATE OR REPLACE VIEW dummytable AS SELECT character varying(100) '' as dummy 
-#GO
-insert into MTD_USERS (USR_NAME, USR_PASSWD)
+insert into mtd_users (USR_NAME, USR_PASSWD)
     VALUES ('admin', 'abe6db4c9f5484fae8d79f2e868a673c')
 #GO
-insert into MTD_GROUPS (USR_NAME, GROUP_NAME)
+insert into mtd_groups (USR_NAME, GROUP_NAME)
     VALUES ('admin', 'admin')
 #GO

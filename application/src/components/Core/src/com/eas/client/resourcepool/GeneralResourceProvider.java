@@ -5,24 +5,25 @@
 package com.eas.client.resourcepool;
 
 import com.bearsoft.rowset.exceptions.ResourceUnavalableException;
-import com.eas.client.AppCache;
-import com.eas.client.Client;
-import com.eas.client.ClientConstants;
-import com.eas.client.SQLUtils;
-import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.settings.DbConnectionSettings;
-import com.eas.client.sqldrivers.SqlDriver;
+import com.eas.client.settings.SettingsConstants;
+import com.eas.util.BinaryUtils;
+import com.eas.xml.dom.Source2XmlDom;
+import java.io.InputStream;
 import java.sql.Connection;
-import java.sql.ResultSet;
+import java.sql.Driver;
+import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.sql.Statement;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.naming.Context;
-import javax.naming.InitialContext;
 import javax.sql.DataSource;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  *
@@ -30,64 +31,126 @@ import javax.sql.DataSource;
  */
 public class GeneralResourceProvider {
 
-    public static final String BAD_APPLICATION_RESOURCE_POOL_MSG = "Application database resource pool hasn't been initialized! It has to be initialized while client creation !ONLY!.";
-    private Client client;
-    /* db connections pools
-     * <Long, >  - is connection pool id. It's the same as a connection descriptor db id.
-     * "null" - is the metabase connections pool. It's connection descriptor is in the server settings
-     */
-    private Map<String, DataSource> connectionPools = new HashMap<>();
-    private Map<String, DbConnectionSettings> connectionPoolsSettings = new HashMap<>();
+    private static GeneralResourceProvider instance;
+    // file constants
+    public static transient final String DB_DRIVERS_FILE_NAME = "DbDrivers.xml";
+    // dom constants
+    public static transient final String DB_DRIVER_TAG_NAME = "driver";
+    public static transient final String DB_DRIVER_DIALECT_ATTR_NAME = "dialect";
 
-    public GeneralResourceProvider(DbConnectionSettings aSettings, Client aClient) throws Exception {
-        super();
-        client = aClient;
-        DataSource lmdSource = constructDataSource(aSettings);
-        testDataSource(lmdSource, aSettings);
-        if (aSettings.isInitSchema()) {
-            initApplicationSchema(lmdSource);
-        }
-        connectionPools.put(null, lmdSource);
-        connectionPoolsSettings.put(null, aSettings);
-    }
+    protected static transient Map<String, String> drivers;
 
-    private DataSource constructDataSource(DbConnectionSettings aSettings) throws Exception {
+    static {
         try {
-            Context initContext = new InitialContext();
-            DataSource ds;
-            try {
-                // J2EE servers
-                ds = (DataSource) initContext.lookup(aSettings.getUrl());
-            } catch (javax.naming.NamingException ex) {
-                // Apache Tomcat component's JNDI context 
-                Context envContext = (Context) initContext.lookup("java:/comp/env"); //NOI18N
-                ds = (DataSource) envContext.lookup(aSettings.getUrl());
-            }
-            return ds;
+            drivers = readDrivers();
         } catch (Exception ex) {
-            return new PlatypusNativeDataSource(aSettings.getMaxConnections(), aSettings.getMaxStatements(), aSettings.getResourceTimeout(), aSettings.getUrl(), aSettings.getUser(), aSettings.getPassword());
+            Logger.getLogger(GeneralResourceProvider.class.getName()).log(Level.SEVERE, null, ex);
+            System.exit(255);
         }
     }
 
+    public static Map<String, String> getDrivers() {
+        return drivers;
+    }    
+    
     /**
-     * This constructor is intended for descendants with custom functioning and
-     * without (may be) connection pools.
+     * Gets information about JDBC drivers supported by Platypus Platform.
      *
-     * @throws Exception
+     * @return Dictionary where the key is database dialect and value is JDBC
+     * driver class name
+     * @throws Exception if something goes wrong
      */
-    GeneralResourceProvider() throws Exception {
+    public static Map<String, String> readDrivers() throws Exception {
+        Map<String, String> ldrivers = new HashMap<>();
+        try (InputStream is = GeneralResourceProvider.class.getResourceAsStream(DB_DRIVERS_FILE_NAME)) {
+            if (is.available() > 0) {
+                String driversDataString = new String(BinaryUtils.readStream(is, -1), SettingsConstants.COMMON_ENCODING);
+                Document driversDoc = Source2XmlDom.transform(driversDataString);
+                Node jdbcNode = driversDoc.getFirstChild();
+                if (jdbcNode != null && "jdbc".equals(jdbcNode.getNodeName())) { //NOI18N
+                    NodeList driversNodes = jdbcNode.getChildNodes();
+                    ldrivers.clear();
+                    for (int i = 0; i < driversNodes.getLength(); i++) {
+                        Node driverNode = driversNodes.item(i);
+                        if (driverNode instanceof Element && DB_DRIVER_TAG_NAME.equals(driverNode.getNodeName())) {
+                            Element element = (Element) driverNode;
+                            String dialect = element.getAttribute(DB_DRIVER_DIALECT_ATTR_NAME);
+                            String driverClassName = element.getTextContent();
+                            if (dialect != null && !dialect.isEmpty() && driverClassName != null && !driverClassName.isEmpty()) {
+                                ldrivers.put(dialect, driverClassName.replaceAll("[\\s\\r\\n\\t]", "")); //NOI18N
+                            }
+                        }
+                    }
+                } else {
+                    throw new Exception("jdbc root node expected, but none found");
+                }
+            } else {
+                throw new Exception("jdbc drivers description file is empty");
+            }
+            return ldrivers;
+        }
+    }
+
+    static void registerDrivers(Collection<String> aDrivers) throws SQLException {
+        if (aDrivers != null) {
+            for (String driverClassName : aDrivers) {
+                try {
+                    Class<?> clazz = Class.forName(driverClassName);
+                    if (clazz != null) {
+                        try {
+                            Driver dr = (Driver) clazz.newInstance();
+                            try {
+                                DriverManager.registerDriver(dr);
+                            } catch (SQLException ex) {
+                                Logger.getLogger(GeneralResourceProvider.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                        } catch (InstantiationException | IllegalAccessException ex) {
+                            Logger.getLogger(GeneralResourceProvider.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
+                } catch (ClassNotFoundException ex) {
+                    Logger.getLogger(GeneralResourceProvider.class.getName()).log(Level.WARNING, "JDBC driver class not found: {0}", driverClassName);
+                }
+            }
+        }
+    }
+
+    /* db connections pools
+     * <String, >  - is connection pool id. It's the same as a connection descriptor db id.
+     */
+    private final Map<String, PlatypusNativeDataSource> connectionPools = new HashMap<>();
+    private final Map<String, DbConnectionSettings> connectionPoolsSettings = new HashMap<>();
+
+    public static GeneralResourceProvider getInstance() throws SQLException {
+        if (instance == null) {
+            registerDrivers(drivers.values());
+            instance = new GeneralResourceProvider();
+        }
+        return instance;
+    }
+
+    protected GeneralResourceProvider() {
         super();
     }
 
-    public synchronized DataSource getPooledDataSource(String aDbId) throws ResourceUnavalableException {
+    public void registerDatasource(String aName, DbConnectionSettings aSettings) {
+        connectionPoolsSettings.put(aName, aSettings);
+    }
+
+    public void unregisterDatasource(String aName) throws SQLException {
+        disconnectDatasource(aName);
+        connectionPoolsSettings.remove(aName);
+    }
+    
+    private PlatypusNativeDataSource constructDataSource(DbConnectionSettings aSettings) throws Exception {
+        return new PlatypusNativeDataSource(aSettings.getMaxConnections(), aSettings.getMaxStatements(), aSettings.getResourceTimeout(), aSettings.getUrl(), aSettings.getUser(), aSettings.getPassword());
+    }
+
+    public synchronized DataSource getPooledDataSource(String aDatasourceName) throws ResourceUnavalableException {
         try {
-            DataSource dbPool = connectionPools.get(aDbId);
+            DataSource dbPool = connectionPools.get(aDatasourceName);
             if (dbPool == null) {
-                if (aDbId != null) {
-                    dbPool = try2CreatePool(aDbId);
-                } else {
-                    throw new ResourceUnavalableException(BAD_APPLICATION_RESOURCE_POOL_MSG);
-                }
+                dbPool = try2CreatePool(aDatasourceName);
             }
             return dbPool;
         } catch (Exception ex) {
@@ -95,116 +158,35 @@ public class GeneralResourceProvider {
         }
     }
 
-    private void testDataSource(DataSource aSource, DbConnectionSettings aSettings) throws Exception {
+    private void testDataSource(DataSource aSource) throws Exception {
         try (Connection lconn = aSource.getConnection()) {
-            String dialect = dialectByConnection(lconn);
-            if (dialect != null) {
-                aSettings.setDialect(dialect);
-                String schemaName = aSettings.getSchema();
-                if (schemaName == null) {
-                    SqlDriver driver = SQLUtils.getSqlDriver(dialect);
-                    if (driver != null) {
-                        String getSchemaClause = driver.getSql4GetConnectionContext();
-                        try (Statement stmt = lconn.createStatement()) {
-                            try (ResultSet rs = stmt.executeQuery(getSchemaClause)) {
-                                if (rs.next() && rs.getMetaData().getColumnCount() > 0) {
-                                    schemaName = rs.getString(1);
-                                    if (schemaName != null && !schemaName.isEmpty()) {
-                                        aSettings.setSchema(schemaName);
-                                    }
-                                }
-                            }
-                        }
-                    } else {
-                        Logger.getLogger(GeneralResourceProvider.class.getName()).log(Level.SEVERE, String.format("Can't obtain sql driver for %s", aSettings.getUrl()));
-                    }
-                }
-            } else {
-                Logger.getLogger(GeneralResourceProvider.class.getName()).log(Level.SEVERE, String.format("Can't determine sql dialect for %s. May be it is unsuuported RDBMS.", aSettings.getUrl()));
-            }
         }
     }
 
-    private void initApplicationSchema(DataSource aSource) throws Exception {
-        try (Connection lconn = aSource.getConnection()) {
-            lconn.setAutoCommit(false);
-            String dialect = dialectByConnection(lconn);
-            SqlDriver driver = SQLUtils.getSqlDriver(dialect);
-            driver.initializeApplicationSchema(lconn);
-        }
-    }
-
-    public synchronized String getPoolSchema(String aDbId) throws Exception {
-        getPooledDataSource(aDbId);
-        DbConnectionSettings settings = connectionPoolsSettings.get(aDbId);
-        if (settings != null) {
-            return settings.getSchema();
+    private DataSource try2CreatePool(String aDataSourceId) throws Exception {
+        DbConnectionSettings lsettings = connectionPoolsSettings.get(aDataSourceId);
+        if (lsettings != null) {
+            PlatypusNativeDataSource lPool = constructDataSource(lsettings);
+            testDataSource(lPool);
+            connectionPools.put(aDataSourceId, lPool);
+            return lPool;
         } else {
             return null;
         }
     }
 
-    public synchronized String getPoolDialect(String aDbId) throws Exception {
-        getPooledDataSource(aDbId);
-        DbConnectionSettings settings = connectionPoolsSettings.get(aDbId);
-        if (settings != null) {
-            return settings.getDialect();
+    public synchronized boolean disconnectDatasource(String aName) throws SQLException {
+        if (connectionPools.containsKey(aName)) {
+            PlatypusNativeDataSource pool = connectionPools.remove(aName);
+            pool.shutdown();
+            return true;
         } else {
-            return null;
+            return false;
         }
     }
 
-    private DataSource try2CreatePool(String aDbId) throws Exception {
-        AppCache cache = client.getAppCache();
-        if (cache != null) {
-            ApplicationElement appConnection = cache.get(aDbId);
-            if (appConnection.getType() == ClientConstants.ET_CONNECTION) {
-                DbConnectionSettings lsettings = DbConnectionSettings.read(appConnection.getContent());
-                if (lsettings != null) {
-                    DataSource lPool = constructDataSource(lsettings);
-                    testDataSource(lPool, lsettings);
-                    connectionPools.put(aDbId, lPool);
-                    connectionPoolsSettings.put(aDbId, lsettings);
-                    return lPool;
-                }
-            }
-        }
-        return null;
+    public synchronized boolean isDatasourceConnected(String aName) {
+        return connectionPools.containsKey(aName);
     }
 
-    /**
-     * Frees any resources, holded by this resource provider. Calls shutdown
-     * method on all db connection pools.
-     */
-    public void shutdown() {
-        assert connectionPools != null;
-        connectionPools.clear();
-    }
-
-    /*
-     public static Properties constructPropertiesByDbConnectionSettings(DbConnectionSettings dbSettings) {
-     if (dbSettings != null) {
-     Properties props = dbSettings.getInfo();
-     String jdbcUrl = dbSettings.getUrl();
-     if (props != null && jdbcUrl != null) {
-     Properties serverProps = new Properties();
-     Set<Entry<Object, Object>> entries = props.entrySet();
-     for (Entry<Object, Object> entry : entries) {
-     serverProps.put(entry.getKey(), entry.getValue());
-     }
-     serverProps.remove(ClientConstants.DB_CONNECTION_USER_PROP_NAME);
-     serverProps.remove(ClientConstants.DB_CONNECTION_PASSWORD_PROP_NAME);
-     return serverProps;
-     }
-     }
-     return null;
-     }
-     */
-    private String dialectByConnection(Connection aConnection) throws SQLException {
-        String dialect = SQLUtils.dialectByUrl(aConnection.getMetaData().getURL());
-        if (dialect == null) {
-            dialect = SQLUtils.dialectByProductName(aConnection.getMetaData().getDatabaseProductName());
-        }
-        return dialect;
-    }
 }

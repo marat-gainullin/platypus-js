@@ -10,12 +10,12 @@ import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.ForeignKeySpec;
 import com.bearsoft.rowset.metadata.PrimaryKeySpec;
 import com.eas.client.DatabasesClient;
-import com.eas.client.DbClient;
 import com.eas.client.SQLUtils;
 import com.eas.client.metadata.DbTableIndexColumnSpec;
 import com.eas.client.metadata.DbTableIndexSpec;
-import com.eas.client.queries.SqlCompiledQuery;
+import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.client.settings.DbConnectionSettings;
+import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.metadata.DBStructure;
 import com.eas.metadata.MetadataSynchronizer;
 import com.eas.metadata.MetadataUtils;
@@ -24,6 +24,8 @@ import java.awt.CardLayout;
 import java.awt.EventQueue;
 import java.awt.LayoutManager;
 import java.awt.Rectangle;
+import java.sql.Connection;
+import java.sql.Statement;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
@@ -33,6 +35,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.sql.DataSource;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -1073,19 +1076,17 @@ public class MetadataCompareForm extends javax.swing.JFrame {
             @Override
             public void run() {
                 try {
-                    DbClient client = createClient();
-                    try {
+                    GeneralResourceProvider.getInstance().registerDatasource(MetadataSynchronizer.FAKE_DATASOURCE_NAME, new DbConnectionSettings(destUrl, destUser, destPassword));
+                    DataSource sqlsTarget = GeneralResourceProvider.getInstance().getPooledDataSource(MetadataSynchronizer.FAKE_DATASOURCE_NAME);
+                    try (Connection conn = sqlsTarget.getConnection()) {
+                        // Let's dive int oschema context
+                        String dialect = DatabasesClient.dialectByConnection(conn);
+                        SqlDriver driver = SQLUtils.getSqlDriver(dialect);
+                        driver.applyContextToConnection(conn, destSchema);
                         for (int i = 0; i < size; i++) {
                             if (sqlModel.isChoiced(i)) {
-                                try {
-                                    SqlCompiledQuery query = new SqlCompiledQuery(client, null, sqlModel.getSql(i));
-                                    query.enqueueUpdate();
-                                    try {
-                                        client.commit(null);
-                                    } catch (Exception ex) {
-                                        client.rollback(null);
-                                        throw ex;
-                                    }
+                                try (Statement stmt = conn.createStatement()){
+                                    stmt.executeQuery(sqlModel.getSql(i));
                                     sqlModel.setChoice(i, false);
                                     sqlModel.setResult(i, "Ok");
                                     final int row = i;
@@ -1105,7 +1106,7 @@ public class MetadataCompareForm extends javax.swing.JFrame {
                             }
                         }
                     } finally {
-                        client.shutdown();
+                        GeneralResourceProvider.getInstance().unregisterDatasource(MetadataSynchronizer.FAKE_DATASOURCE_NAME);
                     }
                 } catch (Exception ex) {
                     Logger.getLogger(MetadataCompareForm.class.getName()).log(Level.SEVERE, null, ex);
@@ -1352,7 +1353,7 @@ public class MetadataCompareForm extends javax.swing.JFrame {
                     String srcDialect = srcDBStructure.getDatabaseDialect();
                     String destDialect = destDBStructure.getDatabaseDialect();
                     boolean oneDialect = (srcDialect != null && srcDialect.equalsIgnoreCase(destDialect));
-                    SortedSet<String> tablesNames = new TreeSet();
+                    SortedSet<String> tablesNames = new TreeSet<>();
                     fillUpperKeys(tablesNames, srcTables);
                     fillUpperKeys(tablesNames, destTables);
                     for (String tableName : tablesNames) {
@@ -1830,7 +1831,7 @@ public class MetadataCompareForm extends javax.swing.JFrame {
                     destFields += dlm + (srcPKeysSize == 0 ? destField : String.format(COLOR_FORMAT, destField));
                     nodeType = DbStructureInfo.COMPARE_TYPE.NOT_EQUAL;
                 }
-            }    
+            }
             String srcRow;
             String destRow;
             boolean equals = (srcPKeysSize == 0 || destPKeysSize == 0 || srcPkeyName.equalsIgnoreCase(destPkeyName));
@@ -2347,13 +2348,4 @@ public class MetadataCompareForm extends javax.swing.JFrame {
         cardLayout.show(pnInfo, aCardName);
     }
 
-    private DbClient createClient() throws Exception {
-        try {
-            DbConnectionSettings settings = new DbConnectionSettings(destUrl, destSchema, destUser, destPassword, SQLUtils.dialectByUrl(destUrl), false);
-            return new DatabasesClient(settings);
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, ex.getMessage(), errorConnectionTitle, JOptionPane.ERROR_MESSAGE);
-            throw ex;
-        }
-    }
 }

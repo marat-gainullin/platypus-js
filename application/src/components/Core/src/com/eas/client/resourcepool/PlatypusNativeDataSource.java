@@ -90,4 +90,12 @@ public class PlatypusNativeDataSource extends BearResourcePool<BearDatabaseConne
     public boolean isWrapperFor(Class<?> iface) throws SQLException {
         return false;
     }
+
+    void shutdown() throws SQLException {
+        for(BearDatabaseConnection conn : resources){
+            conn.shutdown();
+        }
+        resources.clear();
+    }
+
 }

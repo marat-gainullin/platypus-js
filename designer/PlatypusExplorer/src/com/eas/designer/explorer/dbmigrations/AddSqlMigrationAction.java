@@ -5,7 +5,6 @@
 package com.eas.designer.explorer.dbmigrations;
 
 import com.eas.designer.explorer.project.PlatypusProjectImpl;
-import com.eas.designer.explorer.project.PlatypusProjectActions;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -43,7 +42,7 @@ public class AddSqlMigrationAction extends AbstractAction implements ContextAwar
             return new AbstractAction() {
                 @Override
                 public boolean isEnabled() {
-                    return project.isDbConnected();
+                    return project.isDbConnected(project.getSettings().getAppSettings().getDefaultDatasource());
                 }
 
                 @Override

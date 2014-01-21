@@ -4,27 +4,28 @@
  */
 package com.eas.server;
 
-import com.eas.client.ClientConstants;
-import com.eas.client.settings.DbConnectionSettings;
 import com.eas.util.StringUtils;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.logging.Logger;
 import javax.servlet.ServletConfig;
 
 /**
  * Servlet configuration parser.
+ *
  * @author ml
  */
 public class ServerConfig {
 
-    public static final String APPELEMENT_CONF_PARAM_NAME = "appelement";
-    public static final String APP_DB_SCHEMA_CONF_PARAM = "dbschema";
+    // configuration parameters
+    public static final String APPELEMENT_CONF_PARAM = "appelement";
     public static final String TASKS_PARAM = "tasks";
+    public static final String APP_URL_CONF_PARAM = "url";
+    public static final String DEF_DATASOURCE_CONF_PARAM = "default-datasource";
+    //
     protected String appElementId;
-    protected String appPath;
+    protected String url;
+    protected String defaultDatasourceName;
     protected Set<String> tasks = new HashSet<>();
-    protected DbConnectionSettings dbSettings;
 
     public static ServerConfig parse(ServletConfig aConfig) throws Exception {
         return new ServerConfig(aConfig);
@@ -33,33 +34,24 @@ public class ServerConfig {
     private ServerConfig(ServletConfig aConfig) throws Exception {
         Enumeration<String> paramNames = aConfig.getServletContext().getInitParameterNames();
         if (paramNames != null && paramNames.hasMoreElements()) {
-            String dbUrl = null;
-            String dbSchema = null;
             while (paramNames.hasMoreElements()) {
                 String paramName = paramNames.nextElement();
                 if (paramName != null) {
                     String paramValue = aConfig.getServletContext().getInitParameter(paramName);
-                    if (ServerConfig.TASKS_PARAM.equals(paramName)) {
+                    if (TASKS_PARAM.equals(paramName)) {
                         paramValue = paramValue.replaceAll(",", " ");
                         tasks.addAll(StringUtils.split(paramValue, " "));
-                    } else if (ClientConstants.DB_CONNECTION_URL_PROP_NAME.equalsIgnoreCase(paramName)) {
-                        dbUrl = paramValue;
-                    } else if (APPELEMENT_CONF_PARAM_NAME.equalsIgnoreCase(paramName)) {
+                    } else if (APP_URL_CONF_PARAM.equalsIgnoreCase(paramName)) {
+                        url = paramValue;
+                    } else if (DEF_DATASOURCE_CONF_PARAM.equalsIgnoreCase(paramName)) {
+                        defaultDatasourceName = paramValue;
+                    } else if (APPELEMENT_CONF_PARAM.equalsIgnoreCase(paramName)) {
                         appElementId = paramValue;
-                    } else if (APP_DB_SCHEMA_CONF_PARAM.equalsIgnoreCase(paramName)) {
-                        dbSchema = paramValue;
-                    } else if (ClientConstants.APP_PATH_CMD_PROP_NAME.equalsIgnoreCase(paramName) || ClientConstants.APP_PATH_CMD_PROP_NAME1.equalsIgnoreCase(paramName)) {
-                        appPath = paramValue;
                     }
                 }
             }
-            if (dbUrl != null) {
-                dbSettings = new DbConnectionSettings(dbUrl, dbSchema, null, null, null);
-                if (appPath != null) {
-                    dbSettings.setApplicationPath(Paths.get(appPath).isAbsolute() ? appPath : aConfig.getServletContext().getRealPath(appPath));
-                }
-            } else {
-                String msg = String.format("Required settings missing. %s is required", ClientConstants.DB_CONNECTION_URL_PROP_NAME);
+            if (url == null) {
+                String msg = String.format("Required settings missing. %s is required", APP_URL_CONF_PARAM);
                 Logger.getLogger(ServerConfig.class.getName()).severe(msg);
                 throw new Exception(msg);
             }
@@ -70,8 +62,12 @@ public class ServerConfig {
         return appElementId;
     }
 
-    public DbConnectionSettings getDbSettings() {
-        return dbSettings;
+    public String getUrl() {
+        return url;
+    }
+
+    public String getDefaultDatasourceName() {
+        return defaultDatasourceName;
     }
 
     public Set<String> getTasks() {

@@ -5,8 +5,10 @@
 package com.eas.server;
 
 import com.eas.client.ClientConstants;
+import com.eas.client.DatabaseAppCache;
 import com.eas.client.DatabasesClient;
 import com.eas.client.ScriptedDatabasesClient;
+import com.eas.client.cache.FilesAppCache;
 import com.eas.client.login.DbPlatypusPrincipal;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.login.PrincipalHost;
@@ -17,7 +19,6 @@ import com.eas.client.scripts.CompiledScriptDocumentsHost;
 import com.eas.client.scripts.PlatypusScriptedResource;
 import com.eas.client.scripts.ScriptDocument;
 import com.eas.client.scripts.ScriptRunner;
-import com.eas.client.settings.DbConnectionSettings;
 import com.eas.debugger.jmx.server.Breakpoints;
 import com.eas.debugger.jmx.server.Debugger;
 import com.eas.debugger.jmx.server.DebuggerMBean;
@@ -25,6 +26,7 @@ import com.eas.debugger.jmx.server.Settings;
 import com.eas.script.JsDoc;
 import com.eas.script.ScriptUtils;
 import com.eas.server.filter.AppElementsFilter;
+import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.util.HashSet;
 import java.util.Set;
@@ -39,7 +41,9 @@ import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 
 /**
- * The core class for platypus server infrastructure (e.g. Standalone J2SE server and J2EE servlets).
+ * The core class for platypus server infrastructure (e.g. Standalone J2SE
+ * server and J2EE servlets).
+ *
  * @author mg
  */
 public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledScriptDocumentsHost {
@@ -50,13 +54,29 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
     }
     protected static PlatypusServerCore instance;
 
-    public static PlatypusServerCore getInstance(DbConnectionSettings aDbSettings, Set<String> aTasks, String aStartAppElementId) throws Exception {
+    public static PlatypusServerCore getInstance(String aApplicationUrl, String aDefaultDatasourceName, Set<String> aTasks, String aStartAppElementId) throws Exception {
         if (instance == null) {
             final Set<String> tasks = new HashSet<>();
             if (aTasks != null) {
                 tasks.addAll(aTasks);
             }
-            ScriptedDatabasesClient serverCoreDbClient = new ScriptedDatabasesClient(aDbSettings, true, new ServerTasksScanner(tasks));
+            ScriptedDatabasesClient serverCoreDbClient;
+            if (aApplicationUrl.toLowerCase().startsWith("jndi") || aApplicationUrl.toLowerCase().startsWith("file")) {
+                if (aApplicationUrl.startsWith("jndi")) {
+                    serverCoreDbClient = new ScriptedDatabasesClient(new DatabaseAppCache(aApplicationUrl), aDefaultDatasourceName, true, new ServerTasksScanner(tasks));
+                } else {// file://
+                    File f = new File(aApplicationUrl);
+                    if (f.exists() && f.isDirectory()) {
+                        FilesAppCache filesAppCache = new FilesAppCache(f.getPath());
+                        filesAppCache.watch();
+                        serverCoreDbClient = new ScriptedDatabasesClient(filesAppCache, aDefaultDatasourceName, true, new ServerTasksScanner(tasks));
+                    } else {
+                        throw new IllegalArgumentException("applicationUrl: " + aApplicationUrl + " doesn't point to existent directory.");
+                    }
+                }
+            } else {
+                throw new Exception("Unknown protocol in url: " + aApplicationUrl);
+            }
             instance = new PlatypusServerCore(serverCoreDbClient, tasks, aStartAppElementId);
             serverCoreDbClient.setContextHost(instance);
             serverCoreDbClient.setPrincipalHost(instance);
@@ -191,6 +211,7 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
      *
      * @param aModuleId Module identifier, specifying a module for the task
      * @return Success status
+     * @throws java.lang.Exception
      */
     public boolean startServerTask(String aModuleId) throws Exception {
         Logger.getLogger(PlatypusServerCore.class.getName()).info(String.format(STARTING_RESIDENT_TASK_MSG, aModuleId));

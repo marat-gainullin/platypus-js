@@ -4,7 +4,6 @@
  */
 package com.eas.client.cache;
 
-import com.eas.client.Client;
 import com.eas.client.ClientConstants;
 import com.eas.client.metadata.ApplicationElement;
 import com.eas.util.FileUtils;
@@ -36,13 +35,13 @@ import java.util.zip.CRC32;
  *
  * @author mg
  */
-public class FilesAppCache extends AppElementsCache<Client> {
+public class FilesAppCache extends AppElementsCache {
 
     public interface ScanCallback {
 
         public void fileScanned(String aAppElementId, File aFile);
     }
-    
+
     protected class FilesWatchDog implements Runnable {
 
         public FilesWatchDog() {
@@ -118,7 +117,7 @@ public class FilesAppCache extends AppElementsCache<Client> {
     // - FilteredAppElementRequestHandler (PlatypusHttpServlet),
     // - IsAppElementActualRequestHandler (Server),
     // - AppElementRequestHandler (Server).
-    protected String srcPathName;
+    protected String appPathName;
     protected Thread watchDog;
     protected Map<WatchKey, Path> watchKey2Directory = new HashMap<>();
     protected Map<String, Set<String>> id2Paths = new HashMap<>();
@@ -127,23 +126,25 @@ public class FilesAppCache extends AppElementsCache<Client> {
     protected WatchService service;
     protected ScanCallback scanCallback;
 
-    public FilesAppCache(String aSrcPathName) throws Exception {
-        this(aSrcPathName, null);
+    public FilesAppCache(String aAppPathName) throws Exception {
+        this(aAppPathName, null);
     }
-    
-    public FilesAppCache(String aSrcPathName, ScanCallback aScanCallback) throws Exception {
-        super(null);
-        srcPathName = aSrcPathName;
+
+    public FilesAppCache(String aAppPathName, ScanCallback aScanCallback) throws Exception {
+        super();
+        appPathName = aAppPathName;
         File srcDirectory = checkRootDirectory();
         scanCallback = aScanCallback;
         scanSource(srcDirectory);
     }
 
-    public String getSrcPathName() {
-        return srcPathName;
+    @Override
+    public String getApplicationPath() {
+        return appPathName;
     }
 
     private File checkRootDirectory() throws IllegalArgumentException {
+        String srcPathName = calcSrcPath();
         File srcDirectory = new File(srcPathName);
         if (!srcDirectory.exists() || !srcDirectory.isDirectory()) {
             throw new IllegalArgumentException(String.format("%s doesn't point to a directory.", srcPathName));
@@ -177,6 +178,7 @@ public class FilesAppCache extends AppElementsCache<Client> {
     public synchronized void watch() throws Exception {
         service = FileSystems.getDefault().newWatchService();
         if (isWindows()) {
+            String srcPathName = calcSrcPath();
             Path srcPath = Paths.get(new File(srcPathName).toURI());
             WatchKey wk = srcPath.register(service, new WatchEvent.Kind<?>[]{StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_DELETE, StandardWatchEventKinds.ENTRY_MODIFY}, ExtendedWatchEventModifier.FILE_TREE);
             watchKey2Directory.put(wk, srcPath);
@@ -202,10 +204,8 @@ public class FilesAppCache extends AppElementsCache<Client> {
     public boolean isActual(String aId, long aTxtContentLength, long aTxtCrc32) throws Exception {
         ApplicationElement appElement = get(aId);
         if (appElement != null) {
-            Long ourSize = appElement.getTxtContentLength();
-            Long ourCrc32 = appElement.getTxtCrc32();
-            ourSize = ourSize == null ? 0 : ourSize;
-            ourCrc32 = ourCrc32 == null ? 0 : ourCrc32;
+            long ourSize = appElement.getTxtContentLength();
+            long ourCrc32 = appElement.getTxtCrc32();
             long thiersSize = aTxtContentLength;
             long thiersCrc32 = aTxtCrc32;
             return thiersSize == ourSize && thiersCrc32 == ourCrc32;
@@ -224,7 +224,7 @@ public class FilesAppCache extends AppElementsCache<Client> {
                 return family.getApplicationElement();
             }
         }
-        File resFile = new File((srcPathName + File.separatorChar + aId).replace('/', File.separatorChar));
+        File resFile = new File((calcSrcPath() + File.separatorChar + aId).replace('/', File.separatorChar));
         if (resFile.exists()) {
             String ext = FileUtils.getFileExtension(resFile);
             String fileName = resFile.getPath();
@@ -348,10 +348,11 @@ public class FilesAppCache extends AppElementsCache<Client> {
                 }
                 remove(id1);// force the cache to refresh application element's content
                 remove(id2);// force the cache to refresh application element's content
-                if(scanCallback != null && id2 != null)
-                    for(File f : family.getFiles()){
+                if (scanCallback != null && id2 != null) {
+                    for (File f : family.getFiles()) {
                         scanCallback.fileScanned(id2, f);
                     }
+                }
             }
         } catch (Exception ex) {
             Logger.getLogger(FilesAppCache.class.getName()).log(Level.SEVERE, null, ex);
@@ -370,7 +371,7 @@ public class FilesAppCache extends AppElementsCache<Client> {
                     if (id1 != null) {
                         remove(id1);
                     } else {
-                        String id = aFile.getPath().substring(srcPathName.length() + 1).replace(File.separatorChar, '/');
+                        String id = aFile.getPath().substring(calcSrcPath().length() + 1).replace(File.separatorChar, '/');
                         assert !id.startsWith("/") : "Cached platypus application element's id can't start with /. Id from absolute path is not caching subject.";
                         remove(id);
                     }
@@ -393,6 +394,10 @@ public class FilesAppCache extends AppElementsCache<Client> {
         } catch (Exception ex) {
             Logger.getLogger(FilesAppCache.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+
+    private String calcSrcPath() {
+        return appPathName + File.separator + PlatypusFiles.PLATYPUS_PROJECT_SOURCES_ROOT;
     }
 
     protected synchronized void clearFamiliesByPathPrefix(String aPathPrefix) {

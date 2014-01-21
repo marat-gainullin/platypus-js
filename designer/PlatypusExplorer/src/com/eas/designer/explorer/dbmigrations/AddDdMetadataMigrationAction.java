@@ -42,7 +42,7 @@ public class AddDdMetadataMigrationAction extends AbstractAction implements Cont
             return new AbstractAction() {
                 @Override
                 public boolean isEnabled() {
-                    return project.isDbConnected();
+                    return project.isDbConnected(project.getSettings().getAppSettings().getDefaultDatasource());
                 }
 
                 @Override

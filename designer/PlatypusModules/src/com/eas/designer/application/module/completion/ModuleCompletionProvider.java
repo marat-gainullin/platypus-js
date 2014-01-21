@@ -41,7 +41,7 @@ public class ModuleCompletionProvider implements CompletionProvider {
                 try {
                     PlatypusModuleDataObject dataObject = (PlatypusModuleDataObject) doc.getProperty(PlatypusModuleDataObject.DATAOBJECT_DOC_PROPERTY);
                     if (doc instanceof NbEditorDocument) {
-                        CompletionPoint completionPoint = CompletionPoint.createInstance((NbEditorDocument)doc, caretOffset);
+                        CompletionPoint completionPoint = CompletionPoint.createInstance((NbEditorDocument) doc, caretOffset);
                         fillCompletionPoint(dataObject, completionPoint, resultSet, caretOffset);
                     }
                     resultSet.finish();
@@ -51,15 +51,13 @@ public class ModuleCompletionProvider implements CompletionProvider {
             }
         }, component);
     }
-    
+
     protected void fillCompletionPoint(PlatypusModuleDataObject dataObject, CompletionPoint point, CompletionResultSet resultSet, int caretOffset) throws Exception {
-        if (dataObject != null && dataObject.getProject().isDbConnected()) {
-            dataObject.setAst(point.getAstRoot());
-            CompletionContext initialCompltionContext = dataObject.getCompletionContext();
-            CompletionContext completionContext = getCompletionContext(initialCompltionContext, point.getCompletionTokens(), caretOffset);
-            if (completionContext != null) {
-                completionContext.applyCompletionItems(point, caretOffset, resultSet);
-            }
+        dataObject.setAst(point.getAstRoot());
+        CompletionContext initialCompltionContext = dataObject.getCompletionContext();
+        CompletionContext completionContext = getCompletionContext(initialCompltionContext, point.getCompletionTokens(), caretOffset);
+        if (completionContext != null) {
+            completionContext.applyCompletionItems(point, caretOffset, resultSet);
         }
     }
 

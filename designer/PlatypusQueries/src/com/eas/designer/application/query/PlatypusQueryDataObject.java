@@ -80,7 +80,7 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
     public static final String PROCEDURE_PROP_NAME = "procedure";
     public static final String MANUAL_PROP_NAME = "manual";
     public static final String READONLY_PROP_NAME = "readonly";
-    public static final String CONN_PROP_NAME = "dbId";
+    public static final String CONN_PROP_NAME = "datasourceName";
     //
     public static final String DATAOBJECT_DOC_PROPERTY = "dataObject";
     public static final String OUTPUT_FIELDS = "outputFields";
@@ -92,7 +92,7 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
     // Read / Write data
     protected String sqlText;
     protected String dialectText;
-    protected String dbId;
+    protected String datasourceName;
     protected boolean publicQuery;
     protected boolean procedure;
     protected boolean manual;
@@ -171,7 +171,7 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         }
         Document modelDoc = Source2XmlDom.transform(modelEntry.getFile().asText(PlatypusUtils.COMMON_ENCODING_NAME));
         model = XmlDom2QueryModel.transform(getClient(), modelDoc);
-        dbId = model.getDbId();
+        datasourceName = model.getDbId();
         publicQuery = PlatypusFilesSupport.getAnnotationValue(sqlText, JsDoc.Tag.PUBLIC_TAG) != null;
         procedure = PlatypusFilesSupport.getAnnotationValue(sqlText, JsDoc.Tag.PROCEDURE_TAG) != null;
         manual = PlatypusFilesSupport.getAnnotationValue(sqlText, JsDoc.Tag.MANUAL_TAG) != null;
@@ -238,16 +238,16 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         return getLookup().lookup(PlatypusQuerySupport.class).getModelUndo();
     }
 
-    public String getDbId() {
-        return dbId;
+    public String getDatasourceName() {
+        return datasourceName;
     }
 
-    public void setDbId(String aValue) throws Exception {
-        String oldValue = dbId;
+    public void setDatasourceName(String aValue) throws Exception {
+        String oldValue = datasourceName;
         if (aValue != null && aValue.isEmpty()) {
             aValue = null;
         }
-        dbId = aValue;
+        datasourceName = aValue;
         if (model != null) {
             model.setDbId(aValue);
         }
@@ -521,10 +521,10 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         Set<String> schemas = new HashSet<>();
         DbClient client = getClient();
         if (client != null) {
-            DbMetadataCache mdCache = client.getDbMetadataCache(dbId);
+            DbMetadataCache mdCache = client.getDbMetadataCache(datasourceName);
             SqlDriver driver = mdCache.getConnectionDriver();
             String sql4Schemas = driver.getSql4SchemasEnumeration();
-            SqlCompiledQuery schemasQuery = new SqlCompiledQuery(client, dbId, sql4Schemas);
+            SqlCompiledQuery schemasQuery = new SqlCompiledQuery(client, datasourceName, sql4Schemas);
             Rowset schemasRowset = schemasQuery.executeQuery();
             int schemaColIndex = schemasRowset.getFields().find(ClientConstants.JDBCCOLS_TABLE_SCHEM);
             schemasRowset.beforeFirst();
@@ -540,7 +540,7 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         Map<String, Fields> tables = new HashMap<>();
         DbClient client = getClient();
         if (client != null) {
-            DbMetadataCache mdCache = client.getDbMetadataCache(dbId);
+            DbMetadataCache mdCache = client.getDbMetadataCache(datasourceName);
             if (aSchema != null && aSchema.equalsIgnoreCase(mdCache.getConnectionSchema())) {
                 aSchema = null;
             }
@@ -549,7 +549,7 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
             }
             SqlDriver driver = mdCache.getConnectionDriver();
             String sql4Tables = driver.getSql4TablesEnumeration(aSchema != null ? aSchema : mdCache.getConnectionSchema());
-            SqlCompiledQuery tablesQuery = new SqlCompiledQuery(client, dbId, sql4Tables);
+            SqlCompiledQuery tablesQuery = new SqlCompiledQuery(client, datasourceName, sql4Tables);
             Rowset tablesRowset = tablesQuery.executeQuery();
             //int schemaColIndex = tablesRowset.getFields().find(ClientConstants.JDBCCOLS_TABLE_SCHEM);
             int tableColIndex = tablesRowset.getFields().find(ClientConstants.JDBCCOLS_TABLE_NAME);
@@ -565,7 +565,7 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
 
     public DbMetadataCache getMetadataCache() throws Exception {
         DbClient client = getClient();
-        return client != null ? client.getDbMetadataCache(dbId) : null;
+        return client != null ? client.getDbMetadataCache(datasourceName) : null;
     }
 
     private void validateStatement() throws Exception {
@@ -608,7 +608,7 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         if (statementError == null && client != null && s != null && !s.isEmpty()) {
             try {
                 StoredQueryFactory factory = new StoredQueryFactory(client, true);
-                SqlQuery outQuery = new SqlQuery(client, dbId, s);
+                SqlQuery outQuery = new SqlQuery(client, datasourceName, s);
                 outQuery.setEntityId(String.valueOf(IDGenerator.genID()));
                 factory.putTableFieldsMetadata(outQuery);
                 outputFields = outQuery.getFields();

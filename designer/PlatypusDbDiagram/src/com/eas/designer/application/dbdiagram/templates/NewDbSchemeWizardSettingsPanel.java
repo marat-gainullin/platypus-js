@@ -11,6 +11,8 @@ import java.util.HashSet;
 import java.util.Set;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import org.netbeans.api.db.explorer.ConnectionManager;
+import org.netbeans.api.db.explorer.DatabaseConnection;
 import org.openide.ErrorManager;
 import org.openide.WizardDescriptor;
 import org.openide.WizardValidationException;
@@ -114,9 +116,11 @@ public class NewDbSchemeWizardSettingsPanel implements WizardDescriptor.Panel,
         return false;
     }
 
-    public boolean isConnectionElement(FileObject aFile) throws Exception {
-        return PlatypusFiles.CONNECTION_EXTENSION.equalsIgnoreCase(aFile.getExt());
+    public boolean connectionExist(String aDatasourceName) throws Exception {
+        DatabaseConnection conn = ConnectionManager.getDefault().getConnection(aDatasourceName);        
+        return conn != null;
     }
+
 
     public PlatypusProjectImpl getProject() {
         return project;

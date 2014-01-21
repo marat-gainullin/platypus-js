@@ -9,7 +9,6 @@ import com.eas.client.AppClient;
 import com.eas.client.cache.DatabaseMdCache;
 import com.eas.client.cache.PlatypusAppCache;
 import com.eas.client.login.AppPlatypusPrincipal;
-import com.eas.client.settings.PlatypusConnectionSettings;
 import com.eas.client.threetier.PlatypusClient;
 import com.eas.client.threetier.PlatypusNativeClient;
 import com.eas.client.threetier.Request;
@@ -28,11 +27,9 @@ public class PlatypusHttpClient extends PlatypusClient implements AppClient {
 
     private PlatypusHttpConnection conn;
 
-    public PlatypusHttpClient(PlatypusConnectionSettings aConnectionSettings) throws Exception {
-        super();
-        setSettings(aConnectionSettings);
-        setAppCache(new PlatypusAppCache(this));
-        conn = new PlatypusHttpConnection(aConnectionSettings.getUrl());
+    public PlatypusHttpClient(String aUrl) throws Exception {
+        super(aUrl);
+        conn = new PlatypusHttpConnection(aUrl);
     }
 
     @Override

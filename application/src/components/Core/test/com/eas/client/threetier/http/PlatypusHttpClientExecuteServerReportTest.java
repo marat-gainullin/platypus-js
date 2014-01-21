@@ -21,21 +21,13 @@ import org.junit.Test;
  */
 public class PlatypusHttpClientExecuteServerReportTest {
 
-    protected PlatypusConnectionSettings settings;
-    protected PlatypusConnectionSettings badUrlSettings;
-    private String MODULE_NAME = "TestReportCore";
+    private final String MODULE_NAME = "TestReportCore";
     protected PlatypusHttpClient client;
 
     @Before
     public void prepareSettings() throws Exception {
-        settings = new PlatypusConnectionSettings();
-        settings.setName("Platypus http test connection");
-        settings.setUrl(PlatypusHttpTestConstants.HTTP_REQUEST_URL);
-        badUrlSettings = new PlatypusConnectionSettings();
-        badUrlSettings.setName("Platypus http bad url test connection");
-        badUrlSettings.setUrl(PlatypusHttpTestConstants.HTTP_REQUEST_BAD_URL);
         try {
-            client = new PlatypusHttpClient(settings);
+            client = new PlatypusHttpClient(PlatypusHttpTestConstants.HTTP_REQUEST_URL);
             client.login(PlatypusClientSecurityTest.USER0_NAME, PlatypusClientSecurityTest.USER_PASSWORD.toCharArray());
             client.createServerModule(MODULE_NAME);// for parameters passing to report as stateless module
         } catch (Exception ex) {

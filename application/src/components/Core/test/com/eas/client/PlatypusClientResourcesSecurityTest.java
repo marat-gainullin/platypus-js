@@ -6,7 +6,6 @@ package com.eas.client;
 
 import static com.eas.client.PlatypusClientSecurityTest.*;
 import com.eas.client.metadata.ApplicationElement;
-import com.eas.client.settings.PlatypusConnectionSettings;
 import com.eas.client.threetier.PlatypusNativeClient;
 import java.io.File;
 import org.junit.*;
@@ -32,10 +31,7 @@ public class PlatypusClientResourcesSecurityTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        PlatypusConnectionSettings nativeSettings = new PlatypusConnectionSettings();
-        nativeSettings.setUrl("platypus://localhost:8500/");
-        nativeSettings.setName("Test native connection");
-        appClient = new PlatypusNativeClient(nativeSettings);    
+        appClient = new PlatypusNativeClient("platypus://localhost:8500/");    
     }
 
     private static void clearFileCacheDirectory() throws Exception {

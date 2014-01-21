@@ -5,7 +5,6 @@
 package com.eas.client.cache;
 
 import com.eas.client.AppCache;
-import com.eas.client.Client;
 import com.eas.client.ClientConstants;
 import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.threetier.PlatypusNativeClient;
@@ -19,18 +18,16 @@ import java.util.logging.Logger;
  *
  * @author mg
  */
-public abstract class AppElementsCache<T extends Client> extends FreqCache<String, ApplicationElement> implements AppCache {
+public abstract class AppElementsCache extends FreqCache<String, ApplicationElement> implements AppCache {
 
     public static final String PROPERTY_REQUIRED_MSG = "Property %s is required";
     public static final String APP_ELEMENT_PROPERTIES_FILE_NAME = "entity.properties";
     public static final String APP_ELEMENT_TXT_CONTENT_FILE_NAME = "entity.txt";
     public static final String APP_ELEMENT_BIN_CONTENT_FILE_NAME = "entity.bin";
-    protected T client = null;
     protected String CACHED_ENTITIES_PATH;
 
-    public AppElementsCache(T aClient) throws Exception {
+    public AppElementsCache() throws Exception {
         super();
-        client = aClient;
         initializeFileCache();
     }
 
@@ -50,8 +47,8 @@ public abstract class AppElementsCache<T extends Client> extends FreqCache<Strin
         if (!newDir.exists()) {
             newDir.mkdir();
         }
-        String url = client.getSettings().getUrl();
-        String urlHash = String.valueOf(Math.abs(url.hashCode()));
+        String appPath = getApplicationPath();
+        String urlHash = String.valueOf(Math.abs(appPath.hashCode()));
         String connectionPath = "app_" + urlHash;
         CACHED_ENTITIES_PATH += File.separator + connectionPath;
         newDir = new File(CACHED_ENTITIES_PATH);
@@ -231,7 +228,7 @@ public abstract class AppElementsCache<T extends Client> extends FreqCache<Strin
 
     protected ApplicationElement getFromFileCache(String aId) throws Exception {
         synchronized (lock) {
-            ApplicationElement appElement = null;
+            ApplicationElement appElement = new ApplicationElement();
             try {
                 String entityDirectoryPath = generatePath(aId);
                 File cachedEntityDirectory = new File(entityDirectoryPath);
@@ -249,7 +246,6 @@ public abstract class AppElementsCache<T extends Client> extends FreqCache<Strin
                     String propsString = file2String(propsFile);
                     String[] propsStrings = propsString.split("\n");
                     if (propsStrings != null) {
-                        appElement = new ApplicationElement();
                         boolean wasId = false;
                         boolean wasType = false;
                         boolean wasName = false;

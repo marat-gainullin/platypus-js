@@ -374,10 +374,15 @@ public class MsSqlSqlDriver extends SqlDriver {
     }
 
     @Override
-    public String getApplicationSchemaInitResourceName() {
-        return "/" + MsSqlSqlDriver.class.getPackage().getName().replace(".", "/") + "/sqlscripts/MsSqlInitSchema.sql";
+    public String getApplicationInitResourceName() {
+        return "/" + MsSqlSqlDriver.class.getPackage().getName().replace(".", "/") + "/sqlscripts/MsSqlInitApp.sql";
     }
 
+    @Override
+    public String getUsersSpaceInitResourceName() {
+        return "/" + MsSqlSqlDriver.class.getPackage().getName().replace(".", "/") + "/sqlscripts/MsSqlInitUsersSpace.sql";
+    }
+    
     @Override
     public Set<Integer> getSupportedJdbcDataTypes() {
         return resolver.getSupportedJdbcDataTypes();

@@ -30,7 +30,7 @@ import org.junit.Test;
  */
 public class DbClientTest {
 
-    private static int TEST_THREADS_COUNT = 64;
+    protected static final int TEST_THREADS_COUNT = 64;
     protected static int ORDER_ID = 280513973;
     protected static int AMOUNT = 45;
     protected static int GOOD = 2;

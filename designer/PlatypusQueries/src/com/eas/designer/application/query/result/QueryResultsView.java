@@ -100,7 +100,7 @@ public class QueryResultsView extends javax.swing.JPanel {
         initCopyMessage();
         queryDataObject = aQueryDataObject;
         client = aQueryDataObject.getClient();
-        dbId = queryDataObject.getDbId();
+        dbId = queryDataObject.getDatasourceName();
         String storedQueryText = queryDataObject.getSqlTextDocument().getText(0, queryDataObject.getSqlTextDocument().getLength());
         String storedDialectQueryText = queryDataObject.getSqlFullTextDocument().getText(0, queryDataObject.getSqlFullTextDocument().getLength());
         StoredQueryFactory factory = new StoredQueryFactory(client);

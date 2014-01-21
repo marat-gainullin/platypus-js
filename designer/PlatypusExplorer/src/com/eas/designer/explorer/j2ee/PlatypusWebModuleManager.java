@@ -4,8 +4,7 @@
  */
 package com.eas.designer.explorer.j2ee;
 
-import com.eas.client.ClientConstants;
-import com.eas.client.settings.DbConnectionSettings;
+import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.designer.application.PlatypusUtils;
 import com.eas.designer.explorer.j2ee.dd.AppListener;
 import com.eas.designer.explorer.j2ee.dd.AuthConstraint;
@@ -24,6 +23,7 @@ import com.eas.designer.explorer.platform.EmptyPlatformHomePathException;
 import com.eas.designer.explorer.platform.PlatypusPlatform;
 import com.eas.designer.application.project.ClientType;
 import com.eas.designer.explorer.project.PlatypusProjectImpl;
+import com.eas.server.ServerMain;
 import com.eas.server.httpservlet.PlatypusHttpServlet;
 import com.eas.server.httpservlet.PlatypusSessionsSynchronizer;
 import com.eas.util.FileUtils;
@@ -297,10 +297,12 @@ public class PlatypusWebModuleManager {
     }
 
     private void configureParams(WebApplication wa) throws Exception {
-        if (!project.getSettings().isDbAppSources()) {
-            wa.addInitParam(new ContextParam(ClientConstants.APP_PATH_CMD_PROP_NAME1, project.getProjectDirectory().getPath()));
+        wa.addInitParam(new ContextParam(ServerMain.DEF_DATASOURCE_CONF_PARAM, project.getSettings().getAppSettings().getDefaultDatasource()));
+        if (project.getSettings().isDbAppSources()) {
+            wa.addInitParam(new ContextParam(ServerMain.APP_URL_CONF_PARAM, "jndi://" + project.getSettings().getAppSettings().getDefaultDatasource()));
+        } else {
+            wa.addInitParam(new ContextParam(ServerMain.APP_URL_CONF_PARAM, project.getProjectDirectory().toURL().toString()));
         }
-        wa.addInitParam(new ContextParam(ClientConstants.DB_CONNECTION_URL_PROP_NAME, PlatypusWebModule.MAIN_DATASOURCE_NAME));
     }
 
     private void configureServlet(WebApplication wa) {
@@ -355,7 +357,7 @@ public class PlatypusWebModuleManager {
 
     private void copyLibJars(FileObject libsDir) throws Exception {
         Set<File> jdbcDriverFiles = new HashSet<>();
-        for (String clazz : DbConnectionSettings.readDrivers().values()) {
+        for (String clazz : GeneralResourceProvider.getDrivers().values()) {
             File jdbcDriver = PlatypusPlatform.findThirdpartyJar(clazz);
             if (jdbcDriver != null) {
                 FileObject jdbcDriverFo = FileUtil.toFileObject(jdbcDriver);

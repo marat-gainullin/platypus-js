@@ -205,7 +205,7 @@ public class PlatypusDbDiagramView extends CloneableTopComponent {
     private void initComponents() throws Exception {
         removeAll();
         setLayout(new BorderLayout());
-        if (dataObject.getProject().getClient() != null) {
+        if (dataObject.getProject().isDbConnected(dataObject.getModel().getDbId())) {
             if (dataObject.isModelValid()) {
                 if (editor != null) {
                     editor.setModel(null);
@@ -276,7 +276,7 @@ public class PlatypusDbDiagramView extends CloneableTopComponent {
                 add(dataObject.getProject().generateDbValidatePlaceholder(), BorderLayout.CENTER);
             }
         } else {
-            add(dataObject.getProject().generateDbPlaceholder(), BorderLayout.CENTER);
+            add(dataObject.getProject().generateDbPlaceholder(dataObject.getModel().getDbId()), BorderLayout.CENTER);
         }
         revalidate();
         repaint();

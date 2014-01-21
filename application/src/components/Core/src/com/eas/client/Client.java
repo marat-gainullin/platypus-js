@@ -6,7 +6,6 @@ package com.eas.client;
 
 import com.bearsoft.rowset.dataflow.TransactionListener;
 import com.eas.client.queries.Query;
-import com.eas.client.settings.EasSettings;
 
 /**
  * Interface, declaring work with metadata caches, login/logout, resources and transactions
@@ -22,13 +21,7 @@ public interface Client {
      * @throws Exception 
      */
     public String getStartAppElement() throws Exception;
-    
-    /**
-     * Returns settings, used to connect to the server (dbms or application server).
-     * @return Settings, have been used to connect to the server.
-     */
-    public EasSettings getSettings();
-    
+        
     /**
      * Shuts application down. Frees all resources and disconnects from any servers.
      */
@@ -37,13 +30,16 @@ public interface Client {
     /**
      * Returns Query instance, containing fields and parameters description.
      * It returned without sql text and main table.
+     * @param aQueryId
      * @return Query instance.
+     * @throws java.lang.Exception
      */
     public Query getAppQuery(String aQueryId) throws Exception;
 
     /**
      * Returns application elements cache.
      * @return AppCache instance.
+     * @throws java.lang.Exception
      * @see AppCache
      */
     public AppCache getAppCache() throws Exception;

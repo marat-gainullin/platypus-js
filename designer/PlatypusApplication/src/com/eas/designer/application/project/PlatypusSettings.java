@@ -1,11 +1,5 @@
-package com.eas.deploy.project;
+package com.eas.designer.application.project;
 
-import com.eas.client.settings.ConnectionSettings2XmlDom;
-import com.eas.client.settings.DbConnectionSettings;
-import com.eas.client.settings.EasSettings;
-import com.eas.client.settings.XmlDom2ConnectionSettings;
-import com.eas.server.PlatypusServer;
-import com.eas.util.StringUtils;
 import java.beans.PropertyChangeSupport;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -18,14 +12,15 @@ import org.w3c.dom.*;
 public class PlatypusSettings {
 
     public static final String CONTEXT_TAG_NAME = "context";
-    public static final String DISPLAY_NAME_ATTR_NAME = "displayName";
+    //public static final String DISPLAY_NAME_ATTR_NAME = "displayName";
     public static final String RUN_CONFIGURATION_TAG_NAME = "run";
     public static final String RUNNING_ELEMENT_ATTR_NAME = "appElement";
+    public static final String DEFAULT_DATASOURCE_ATTR_NAME = "defaultDatasource";
     // Running configuration
     protected String runElement;
+    protected String defaultDatasource;
     protected static DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     protected DocumentBuilder builder;
-    protected DbConnectionSettings dbSettings;
     protected PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
 
     public PlatypusSettings() throws Exception {
@@ -41,16 +36,15 @@ public class PlatypusSettings {
         Document doc = builder.newDocument();
         doc.setXmlStandalone(true);
         Element rootTag = doc.createElement(CONTEXT_TAG_NAME);
+        if (defaultDatasource != null) {
+            rootTag.setAttribute(DEFAULT_DATASOURCE_ATTR_NAME, defaultDatasource);
+        }
         doc.appendChild(rootTag);
         Element runTag = doc.createElement(RUN_CONFIGURATION_TAG_NAME);
         rootTag.appendChild(runTag);
         if (runElement != null) {
             runTag.setAttribute(RUNNING_ELEMENT_ATTR_NAME, runElement);
         }
-        Document dbDoc = ConnectionSettings2XmlDom.settingsToDocument(dbSettings);
-        Element dbTag = dbDoc.getDocumentElement();
-        doc.adoptNode(dbTag);
-        rootTag.appendChild(dbTag);
         return doc;
     }
 
@@ -68,6 +62,7 @@ public class PlatypusSettings {
         NodeList projectNl = aDoc.getElementsByTagName(CONTEXT_TAG_NAME);
         if (projectNl != null && projectNl.getLength() == 1 && projectNl.item(0) instanceof Element) {
             Element projectTag = (Element) projectNl.item(0);
+            platypusSettings.defaultDatasource = projectTag.getAttribute(DEFAULT_DATASOURCE_ATTR_NAME);
             Element runTag = getElementByName(projectTag, RUN_CONFIGURATION_TAG_NAME);
             if (runTag != null) {
                 String sRunningElement = runTag.getAttribute(RUNNING_ELEMENT_ATTR_NAME);
@@ -75,16 +70,6 @@ public class PlatypusSettings {
                     platypusSettings.runElement = sRunningElement;
                 }
             }
-            Node settingsTag = getElementByName(projectTag, ConnectionSettings2XmlDom.DB_SETTINGS_TAG_NAME);
-            Document dbDoc = factory.newDocumentBuilder().newDocument();
-            dbDoc.adoptNode(settingsTag);
-            dbDoc.appendChild(settingsTag);
-            EasSettings settings = XmlDom2ConnectionSettings.document2Settings(dbDoc); // deserialize connection settings. throw exceptions of non-database connection settings.
-            if (!(settings instanceof DbConnectionSettings)) {
-                throw new Exception("Platypus designer projects must contain information about two-tier connection to database");
-            }
-            DbConnectionSettings dbSettings = (DbConnectionSettings) settings;
-            platypusSettings.dbSettings = dbSettings;
             return platypusSettings;
         }
         return null;
@@ -111,26 +96,17 @@ public class PlatypusSettings {
             changeSupport.firePropertyChange("runningElement", oldValue, runElement);
         }
     }
-        
-    /**
-     * Gets project's database settings.
-     *
-     * @return Db settings
-     */
-    public DbConnectionSettings getDbSettings() {
-        return dbSettings;
+
+    public String getDefaultDatasource() {
+        return defaultDatasource;
     }
 
-    /**
-     * Sets project's database settings.
-     *
-     * @param aValue Db settings
-     */
-    public void setDbSettings(DbConnectionSettings aValue) {
-        if (dbSettings != aValue) {
-            DbConnectionSettings oldValue = dbSettings;
-            dbSettings = aValue;
-            changeSupport.firePropertyChange("dbSettings", oldValue, dbSettings);
+    public void setDefaultDatasource(String aValue) {
+        if (defaultDatasource == null ? aValue != null : !defaultDatasource.equals(aValue)) {
+            String oldValue = defaultDatasource;
+            defaultDatasource = aValue;
+            changeSupport.firePropertyChange("defaultDatasource", oldValue, defaultDatasource);
         }
     }
+
 }

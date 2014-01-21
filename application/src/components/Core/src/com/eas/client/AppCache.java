@@ -11,6 +11,8 @@ import com.eas.client.metadata.ApplicationElement;
  * @author mg
  */
 public interface AppCache {
+
+    public String getApplicationPath();
     
     public boolean isActual(String aId, long aTxtContentLength, long aTxtCrc32) throws Exception;
     
@@ -39,6 +41,8 @@ public interface AppCache {
 
     /**
      * Clears all cached data. I.e. tables metadata, application elements and information about indexes.
+     * @throws java.lang.Exception
      */
     public void clear() throws Exception;
+    
 }

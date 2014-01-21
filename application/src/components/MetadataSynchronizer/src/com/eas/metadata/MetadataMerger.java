@@ -37,7 +37,6 @@ public class MetadataMerger {
     private String srcDialect;
     private String destDialect;
     private boolean oneDialect = false;
-    private DbMetadataCache mdCache;
     private SqlDriver driver;
     private String dSchema;
     private String sqlCommandEndChars = ";";
@@ -66,6 +65,7 @@ public class MetadataMerger {
      * @param aListTables list tables for work
      */
     public MetadataMerger(DbClient aClient, DBStructure srcMetadata, DBStructure destMetadata, boolean aNoExecuteSQL, boolean aNoDropTables, Set<String> aListTables, Logger aSystemLogger, Logger aSqlLogger, Logger aErrorLogger, boolean createSqlsList) throws Exception {
+        super();
         client = aClient;
         assert client != null;
         if (srcMetadata != null) {
@@ -86,7 +86,7 @@ public class MetadataMerger {
             listTables = aListTables;
         }
 
-        mdCache = client.getDbMetadataCache(null);
+        DbMetadataCache mdCache = client.getDbMetadataCache(null);
         driver = mdCache.getConnectionDriver();
         dSchema = mdCache.getConnectionSchema();
 

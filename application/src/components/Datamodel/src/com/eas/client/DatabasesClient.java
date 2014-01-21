@@ -20,11 +20,9 @@ import com.bearsoft.rowset.jdbc.JdbcReader;
 import com.bearsoft.rowset.jdbc.StatementsGenerator;
 import com.bearsoft.rowset.jdbc.StatementsGenerator.StatementsLogEntry;
 import com.bearsoft.rowset.metadata.*;
-import com.eas.client.cache.DatabaseAppCache;
 import com.eas.client.cache.DatabaseMdCache;
 import com.eas.client.cache.FilesAppCache;
 import com.eas.client.cache.FilesAppCache.ScanCallback;
-import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.login.DbPlatypusPrincipal;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.login.PrincipalHost;
@@ -35,17 +33,16 @@ import com.eas.client.queries.PlatypusJdbcFlowProvider;
 import com.eas.client.queries.SqlCompiledQuery;
 import com.eas.client.queries.SqlQuery;
 import com.eas.client.resourcepool.GeneralResourceProvider;
-import com.eas.client.settings.DbConnectionSettings;
-import com.eas.client.settings.EasSettings;
 import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.util.StringUtils;
-import java.io.File;
 import java.security.AccessControlException;
 import java.sql.*;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.naming.Context;
+import javax.naming.InitialContext;
 import javax.sql.DataSource;
 
 /**
@@ -65,11 +62,8 @@ public class DatabasesClient implements DbClient {
     public static final String USER_MISSING_MSG = "No user found (%s)";
     // metadata
     protected Map<String, DatabaseMdCache> mdCaches = new HashMap<>();
-    protected AppCache appCache = null;
-    // resources
-    protected GeneralResourceProvider resourceProvider;
-    // settings
-    protected DbConnectionSettings dbSettings;
+    protected boolean autoFillMetadata = true;
+    protected AppCache appCache;
     // queries
     protected StoredQueryFactory queries;
     // callback interface for context
@@ -79,61 +73,70 @@ public class DatabasesClient implements DbClient {
     // transactions
     // Map<String - session id, Map<String - database id, ...
     protected final Map<String, Map<String, List<Change>>> transacted = new HashMap<>();
-    protected Set<TransactionListener> transactionListeners = new HashSet<>();
-    protected Set<QueriesListener> queriesListeners = new HashSet<>();
+    protected final Set<TransactionListener> transactionListeners = new HashSet<>();
+    protected final Set<QueriesListener> queriesListeners = new HashSet<>();
+    // datasource name used by default. E.g. in queries with null datasource name
+    protected String defaultDatasourceName;
 
     /**
      * Constructs <code>DatabasesClient</code> (two-tier mode).
      *
-     * @param aSettings <code>DbConnectionSettings</code> instance, describing
-     * url for connection and user credentials. There may be some additional
-     * attributes, such as database dialect, etc.
-     * @see ConnectionPrepender
+     * @param anAppCache
+     * @param aDefaultDatasourceName Datasource name used by default. E.g. in
+     * queries with null datasource name
+     * @param aAutoFillMetadata If true, metadatacache will be filled with
+     * tables, keys and other metadata in schema automatically. Otherwise it
+     * will query metadata table by table in each case. Default is true.
+     * @throws java.lang.Exception
      */
-    public DatabasesClient(DbConnectionSettings aSettings) throws Exception {
-        this(aSettings, false);
+    public DatabasesClient(AppCache anAppCache, String aDefaultDatasourceName, boolean aAutoFillMetadata) throws Exception {
+        this(anAppCache, aDefaultDatasourceName, aAutoFillMetadata, null);
     }
 
     /**
-     * Constructs <code>DatabasesClient</code> (two-tier mode).
      *
-     * @param aSettings <code>DbConnectionSettings</code> instance, describing
-     * url for connection and user credentials. There may be some additional
-     * attributes, such as database dialect, etc.
-     * @param inContainer flag indicating that <code>DatabasesClient</code>
-     * instance is creating in a container, i.e. J2EE application server.
-     * @see ConnectionPrepender
+     * @param anAppCache
+     * @param aDefaultDatasourceName
+     * @param aAutoFillMetadata If true, metadatacache will be filled with
+     * tables, keys and other metadata in schema automatically. Otherwise it
+     * will query metadata table by table in each case. Default is true.
+     * @param aScanCallback
+     * @throws Exception
      */
-    public DatabasesClient(DbConnectionSettings aSettings, boolean inContainer) throws Exception {
-        this(aSettings, inContainer, null);
-    }
-
-    public DatabasesClient(DbConnectionSettings aSettings, boolean inContainer, ScanCallback aScanCallback) throws Exception {
+    public DatabasesClient(AppCache anAppCache, String aDefaultDatasourceName, boolean aAutoFillMetadata, ScanCallback aScanCallback) throws Exception {
         super();
-        dbSettings = aSettings;
-        if (!inContainer) {
-            DbConnectionSettings.registerDrivers(dbSettings.getDrivers().values());
-        }
-        resourceProvider = new GeneralResourceProvider(dbSettings, this);
-        if (aSettings.getApplicationPath() != null && !aSettings.getApplicationPath().isEmpty()) {
-            File f = new File(aSettings.getApplicationPath());
-            if (f.exists() && f.isDirectory()) {
-                FilesAppCache filesAppCache = new FilesAppCache(f.getPath() + File.separator + PlatypusFiles.PLATYPUS_PROJECT_SOURCES_ROOT, aScanCallback);
-                filesAppCache.watch();
-                appCache = filesAppCache;
-            } else {
-                appCache = new DatabaseAppCache(this);
-                Logger.getLogger(DatabasesClient.class.getName()).log(Level.INFO, String.format("Path %s doesn't exist or it's not a directory. Falling back database application store", aSettings.getApplicationPath()));
-            }
-        } else {
-            appCache = new DatabaseAppCache(this);
-        }
-        DatabaseMdCache dbMdCache = new DatabaseMdCache(this, null);
-        mdCaches.put(null, dbMdCache);
-        if (!dbSettings.isDeferCache()) {
-            dbMdCache.fillTablesCacheByConnectionSchema(true);
-        }
+        autoFillMetadata = aAutoFillMetadata;
+        defaultDatasourceName = aDefaultDatasourceName;
+        appCache = anAppCache;
         queries = new StoredQueryFactory(this);
+    }
+
+    public String getDefaultDatasourceName() {
+        return defaultDatasourceName;
+    }
+
+    public boolean isAutoFillMetadata() {
+        return autoFillMetadata;
+    }
+
+    public DataSource obtainDataSource(String aDataSourceId) throws Exception {
+        if (aDataSourceId == null) {
+            aDataSourceId = defaultDatasourceName;
+        }
+        Context initContext = new InitialContext();
+        try {
+            // J2EE servers
+            return (DataSource) initContext.lookup(aDataSourceId);
+        } catch (javax.naming.NamingException ex) {
+            try {
+                // Apache Tomcat component's JNDI context 
+                Context envContext = (Context) initContext.lookup("java:/comp/env"); //NOI18N
+                return (DataSource) envContext.lookup(aDataSourceId);
+            } catch (javax.naming.NamingException ex1) {
+                // Platypus standalone server or client
+                return GeneralResourceProvider.getInstance().getPooledDataSource(aDataSourceId);
+            }
+        }
     }
 
     @Override
@@ -174,22 +177,12 @@ public class DatabasesClient implements DbClient {
         }
     }
 
-    @Override
-    public void setAppCache(AppCache aAppCache) {
-        appCache = aAppCache;
-    }
-
     /**
      * @param aContextHost <code>ConnectionPrepender</code> instance to be used
      * in flow providers, created by the client.
      */
     public void setContextHost(ContextHost aContextHost) {
         contextHost = aContextHost;
-    }
-
-    @Override
-    public EasSettings getSettings() {
-        return dbSettings;
     }
 
     @Override
@@ -206,16 +199,16 @@ public class DatabasesClient implements DbClient {
     }
 
     @Override
-    public synchronized List<Change> getChangeLog(String aDatabaseId, String aSessionId) {
+    public synchronized List<Change> getChangeLog(String aDatasourceId, String aSessionId) {
         Map<String, List<Change>> enqueuedByDb = transacted.get(aSessionId);
         if (enqueuedByDb == null) {
             enqueuedByDb = new HashMap<>();
             transacted.put(aSessionId, enqueuedByDb);
         }
-        List<Change> enqueued = enqueuedByDb.get(aDatabaseId);
+        List<Change> enqueued = enqueuedByDb.get(aDatasourceId);
         if (enqueued == null) {
             enqueued = new CopyOnWriteArrayList<>();
-            enqueuedByDb.put(aDatabaseId, enqueued);
+            enqueuedByDb.put(aDatasourceId, enqueued);
         }
         return enqueued;
     }
@@ -243,29 +236,21 @@ public class DatabasesClient implements DbClient {
      * Factory method for DatabaseFlowProvider. Intended to incapsulate flow
      * provider creation in two tier or three tier applications.
      *
-     * @param aDbId
+     * @param aDatasourceId
+     * @param aSessionId
+     * @param aEntityId
      * @param aSqlClause
-     * @param aMainTable
+     * @param aExpectedFields
+     * @param aReadRoles
+     * @param aWriteRoles
      * @return FlowProvider created.
      * @throws Exception
      */
     @Override
-    public FlowProvider createFlowProvider(String aDbId, String aSessionId, String aEntityId, String aSqlClause, Fields aExpectedFields, Set<String> aReadRoles, Set<String> aWriteRoles) throws Exception {
-        return new PlatypusJdbcFlowProvider(this, aDbId, aSessionId, aEntityId, resourceProvider.getPooledDataSource(aDbId), getDbMetadataCache(aDbId), aSqlClause, aExpectedFields, contextHost, aReadRoles, aWriteRoles);
+    public FlowProvider createFlowProvider(String aDatasourceId, String aSessionId, String aEntityId, String aSqlClause, Fields aExpectedFields, Set<String> aReadRoles, Set<String> aWriteRoles) throws Exception {
+        return new PlatypusJdbcFlowProvider(this, aDatasourceId, aSessionId, aEntityId, obtainDataSource(aDatasourceId), getDbMetadataCache(aDatasourceId), aSqlClause, aExpectedFields, contextHost, aReadRoles, aWriteRoles);
     }
 
-    /*
-     protected void convertPkFields2PkCols(Rowset aRowSet, String[] aPkNames) {
-     if (aRowSet != null && aPkNames != null) {
-     for (int i = 0; i < aPkNames.length; i++) {
-     int colIndex = aRowSet.getFields().find(aPkNames[i]);
-     if (colIndex > 0) {
-     aRowSet.getFields().get(colIndex).setPk(true);
-     }
-     }
-     }
-     }
-     */
     public String getSqlLogMessage(SqlCompiledQuery query) {
         StringBuilder sb = new StringBuilder("Executing SQL: ");
         sb.append(query.getSqlClause());
@@ -317,7 +302,6 @@ public class DatabasesClient implements DbClient {
      */
     @Override
     public void shutdown() {
-        assert resourceProvider != null;
         if (appCache instanceof FilesAppCache) {
             try {
                 ((FilesAppCache) appCache).unwatch();
@@ -325,27 +309,25 @@ public class DatabasesClient implements DbClient {
                 Logger.getLogger(DatabasesClient.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        resourceProvider.shutdown();
     }
 
-    public void clearDbStatements(String aDbId) throws Exception {
-        assert resourceProvider != null;
-        if (aDbId == null) {
-            //resourceProvider.clearPoolStatements(aDbId);
+    public void clearDbStatements(String aDatasourceId) throws Exception {
+        if (aDatasourceId == null) {
+            //resourceProvider.clearPoolStatements(aDatasourceId);
         } else {
             // removePool will clear statments, so no need to additional and non-atomic call
-            //resourceProvider.removePool(aDbId);
+            //resourceProvider.removePool(aDatasourceId);
         }
     }
 
     @Override
-    public int executeUpdate(SqlCompiledQuery query) throws Exception {
+    public int executeUpdate(SqlCompiledQuery aQuery) throws Exception {
         int rowsAffected = 0;
-        Converter converter = getDbMetadataCache(query.getDatabaseId()).getConnectionDriver().getConverter();
-        DataSource dataSource = resourceProvider.getPooledDataSource(query.getDatabaseId());
+        Converter converter = getDbMetadataCache(aQuery.getDatabaseId()).getConnectionDriver().getConverter();
+        DataSource dataSource = obtainDataSource(aQuery.getDatabaseId());
         if (dataSource != null) {
-            try (Connection connection = dataSource.getConnection(); PreparedStatement stmt = connection.prepareStatement(query.getSqlClause())) {
-                Parameters params = query.getParameters();
+            try (Connection connection = dataSource.getConnection(); PreparedStatement stmt = connection.prepareStatement(aQuery.getSqlClause())) {
+                Parameters params = aQuery.getParameters();
                 for (int i = 1; i <= params.getParametersCount(); i++) {
                     Parameter param = params.get(i);
                     converter.convert2JdbcAndAssign(param.getValue(), param.getTypeInfo(), connection, i, stmt);
@@ -353,7 +335,7 @@ public class DatabasesClient implements DbClient {
                 try {
                     rowsAffected += stmt.executeUpdate();
                     connection.commit();
-                } catch (Exception ex) {
+                } catch (SQLException ex) {
                     connection.rollback();
                     throw ex;
                 }
@@ -381,13 +363,15 @@ public class DatabasesClient implements DbClient {
     }
 
     @Override
-    public synchronized DbMetadataCache getDbMetadataCache(String aDbId) throws Exception {
-        if (!mdCaches.containsKey(aDbId)) {
-            DatabaseMdCache cache = new DatabaseMdCache(this, aDbId);
-            mdCaches.put(aDbId, cache);
-            cache.fillTablesCacheByConnectionSchema(true);
+    public synchronized DbMetadataCache getDbMetadataCache(String aDatasourceId) throws Exception {
+        if (!mdCaches.containsKey(aDatasourceId)) {
+            DatabaseMdCache cache = new DatabaseMdCache(this, aDatasourceId);
+            mdCaches.put(aDatasourceId, cache);
+            if (autoFillMetadata) {
+                cache.fillTablesCacheByConnectionSchema(true);
+            }
         }
-        return mdCaches.get(aDbId);
+        return mdCaches.get(aDatasourceId);
     }
 
     @Override
@@ -425,7 +409,7 @@ public class DatabasesClient implements DbClient {
         if (driver != null) {
             Converter converter = driver.getConverter();
             assert aLog != null;
-            DataSource dataSource = resourceProvider.getPooledDataSource(aDatasourceId);
+            DataSource dataSource = obtainDataSource(aDatasourceId);
             try (Connection connection = dataSource.getConnection()) {
                 connection.setAutoCommit(false);
                 try {
@@ -479,7 +463,7 @@ public class DatabasesClient implements DbClient {
                                             return resolved;
                                         }
                                     } else {
-                                        Logger.getLogger(DatabasesClient.class.getName()).log(Level.WARNING, "Cant find fields for entity id:" + aEntityId);
+                                        Logger.getLogger(DatabasesClient.class.getName()).log(Level.WARNING, "Cant find fields for entity id:{0}", aEntityId);
                                         return null;
                                     }
                                 } else {
@@ -536,11 +520,11 @@ public class DatabasesClient implements DbClient {
     }
 
     @Override
-    public Rowset getDbTypesInfo(String aDbId) throws Exception {
-        Logger.getLogger(DatabasesClient.class.getName()).fine(String.format(TYPES_INFO_TRACE_MSG, aDbId));
+    public Rowset getDbTypesInfo(String aDatasourceId) throws Exception {
+        Logger.getLogger(DatabasesClient.class.getName()).fine(String.format(TYPES_INFO_TRACE_MSG, aDatasourceId));
         Rowset lrowSet = new Rowset();
-        JdbcReader rsReader = new JdbcReader(getDbMetadataCache(aDbId).getConnectionDriver().getConverter());
-        DataSource dataSource = resourceProvider.getPooledDataSource(aDbId);
+        JdbcReader rsReader = new JdbcReader(getDbMetadataCache(aDatasourceId).getConnectionDriver().getConverter());
+        DataSource dataSource = obtainDataSource(aDatasourceId);
         if (dataSource != null) {
             try (Connection lconn = dataSource.getConnection()) {
                 DatabaseMetaData dbmd = lconn.getMetaData();
@@ -558,7 +542,9 @@ public class DatabasesClient implements DbClient {
         for (DatabaseMdCache cache : mdCaches.values()) {
             cache.clear();
         }
-        appCache.clear();
+        if (appCache != null) {
+            appCache.clear();
+        }
         queries.clearCache();
         clearDbStatements(null);
         fireQueriesCleared();
@@ -573,7 +559,7 @@ public class DatabasesClient implements DbClient {
                 if (appElement.getType() == ClientConstants.ET_QUERY) {
                     //queries.clearCache(aEntityId);// Bad solution. There are may be some queries, using this query and so on.
                     clearQueries(null);// possible overhead, but this is better way than previous.
-                } else if (appElement.getType() == ClientConstants.ET_CONNECTION) {
+                } else if (appElement.getType() == 10) {// TODO: migrate to a new way
                     DbMetadataCache dbMdCache = getDbMetadataCache(aEntityId);
                     if (dbMdCache != null) {
                         dbMdCache.clear();
@@ -589,22 +575,22 @@ public class DatabasesClient implements DbClient {
         }
     }
 
-    protected void clearQueries(String aDbId) throws Exception {
+    protected void clearQueries(String aDatasourceId) throws Exception {
         clearDbStatements(null);
         queries.clearCache();
         fireQueriesCleared();
     }
 
     @Override
-    public void dbTableChanged(String aDbId, String aSchema, String aTable) throws Exception {
-        DbMetadataCache cache = getDbMetadataCache(aDbId);
+    public void dbTableChanged(String aDatasourceId, String aSchema, String aTable) throws Exception {
+        DbMetadataCache cache = getDbMetadataCache(aDatasourceId);
         String fullTableName = aTable;
         if (aSchema != null && !aSchema.isEmpty()) {
             fullTableName = aSchema + "." + fullTableName;
         }
         cache.removeTableMetadata(fullTableName);
         cache.removeTableIndexes(fullTableName);
-        clearQueries(aDbId);
+        clearQueries(aDatasourceId);
     }
 
     /**
@@ -634,13 +620,25 @@ public class DatabasesClient implements DbClient {
     }
 
     @Override
-    public String getConnectionSchema(String aDbId) throws Exception {
-        return resourceProvider.getPoolSchema(aDbId);
+    public String getConnectionSchema(String aDatasourceId) throws Exception {
+        DataSource ds = obtainDataSource(aDatasourceId);
+        return schemaByConnection(ds.getConnection());
     }
 
     @Override
-    public String getConnectionDialect(String aDbId) throws Exception {
-        return resourceProvider.getPoolDialect(aDbId);
+    public String getConnectionDialect(String aDatasourceId) throws Exception {
+        DataSource ds = obtainDataSource(aDatasourceId);
+        try (Connection conn = ds.getConnection()) {
+            return dialectByConnection(conn);
+        }
+    }
+
+    @Override
+    public SqlDriver getConnectionDriver(String aDatasourceId) throws Exception {
+        DataSource ds = obtainDataSource(aDatasourceId);
+        try (Connection conn = ds.getConnection()) {
+            return SQLUtils.getSqlDriver(dialectByConnection(conn));
+        }
     }
 
     protected static Set<String> getUserRoles(DbClient aClient, String aUserName) throws Exception {
@@ -676,5 +674,49 @@ public class DatabasesClient implements DbClient {
             }
         }
         return rowsAffected;
+    }
+
+    public static String dialectByConnection(Connection aConnection) throws SQLException {
+        String dialect = SQLUtils.dialectByUrl(aConnection.getMetaData().getURL());
+        if (dialect == null) {
+            dialect = SQLUtils.dialectByProductName(aConnection.getMetaData().getDatabaseProductName());
+        }
+        return dialect;
+    }
+
+    public static String schemaByConnection(Connection aConnection) throws SQLException {
+        String dialect = dialectByConnection(aConnection);
+        SqlDriver driver = SQLUtils.getSqlDriver(dialect);
+        if (driver != null) {
+            String getSchemaClause = driver.getSql4GetConnectionContext();
+            try (Statement stmt = aConnection.createStatement()) {
+                try (ResultSet rs = stmt.executeQuery(getSchemaClause)) {
+                    if (rs.next() && rs.getMetaData().getColumnCount() > 0) {
+                        return rs.getString(1);
+                    }
+                }
+            }
+        } else {
+            Logger.getLogger(GeneralResourceProvider.class.getName()).log(Level.SEVERE, String.format("Can't obtain sql driver for %s", aConnection.toString()));
+        }
+        return null;
+    }
+
+    public static void initApplication(DataSource aSource) throws Exception {
+        try (Connection lconn = aSource.getConnection()) {
+            lconn.setAutoCommit(false);
+            String dialect = dialectByConnection(lconn);
+            SqlDriver driver = SQLUtils.getSqlDriver(dialect);
+            driver.initializeApplication(lconn);
+        }
+    }
+
+    public static void initUsersSpace(DataSource aSource) throws Exception {
+        try (Connection lconn = aSource.getConnection()) {
+            lconn.setAutoCommit(false);
+            String dialect = dialectByConnection(lconn);
+            SqlDriver driver = SQLUtils.getSqlDriver(dialect);
+            driver.initializeApplication(lconn);
+        }
     }
 }

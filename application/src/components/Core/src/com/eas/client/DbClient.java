@@ -11,6 +11,7 @@ import com.bearsoft.rowset.metadata.Fields;
 import com.eas.client.login.PrincipalHost;
 import com.eas.client.queries.SqlCompiledQuery;
 import com.eas.client.queries.SqlQuery;
+import com.eas.client.sqldrivers.SqlDriver;
 import java.util.List;
 import java.util.Set;
 
@@ -31,30 +32,43 @@ public interface DbClient extends Client {
     }
     /**
      * Returns conection schema name.
-     * @param aDbId Identifier of database connection. Null means application database connection.
+     * @param aDatasource Identifier of database connection. Null means application database connection.
      * @return Schema name, that is used to connect to database (default schema).
+     * @throws java.lang.Exception
      */
-    public String getConnectionSchema(String aDbId) throws Exception;
+    public String getConnectionSchema(String aDatasource) throws Exception;
     
     /**
      * Returns conection dialect name.
-     * @param aDbId Identifier of database connection. Null means application database connection.
+     * @param aDatasource Identifier of database connection. Null means application database connection.
      * @return Schema name, that is used to connect to database (dialect of default connection).
+     * @throws java.lang.Exception
      */
-    public String getConnectionDialect(String aDbId) throws Exception;
+    public String getConnectionDialect(String aDatasource) throws Exception;
+    
+    /**
+     * Returns conection sql driver. Selection is based on dialect name.
+     * @param aDatasource Identifier of database connection. Null means application database connection.
+     * @return Schema name, that is used to connect to database (dialect of default connection).
+     * @throws java.lang.Exception
+     */
+    public SqlDriver getConnectionDriver(String aDatasource) throws Exception;
     
     /**
      * Returns SqlQuery instance, containing fields and parameters description.
      * It returned without sql text and main table.
+     * @param aQueryId
      * @return SqlQuery instance.
+     * @throws java.lang.Exception
      */
     @Override
     public SqlQuery getAppQuery(String aQueryId) throws Exception;
     
     public QueriesListener.Registration addQueriesListener(QueriesListener aListener);
-        /**
+    
+    /**
      * Creates and returns new data flow provider, setted up with settings passed through parameters
-     * @param aDatabaseId Connection identifier. May be null for metabase.
+     * @param aDatasourceId Datasource JNDI name. May be null for default database.
      * @param aSessionId Session identifier. May be null for system session.
      * @param aEntityId Data entity identifier. Table name or query identifier. Table name is allowed in two-tier mode only.
      * @param aSqlClause Query text for execute as select.
@@ -62,21 +76,20 @@ public interface DbClient extends Client {
      * @param aReadRoles A set of roles allowed to select data with this provider.
      * @param aWriteRoles A set of roles allowed to update data with this provider.
      * @return Data flow provider instance created.
+     * @throws java.lang.Exception
      */
-    public FlowProvider createFlowProvider(String aDatabaseId, String aSessionId, String aEntityId, String aSqlClause, Fields aExpectedFields, Set<String> aReadRoles, Set<String> aWriteRoles) throws Exception;
+    public FlowProvider createFlowProvider(String aDatasourceId, String aSessionId, String aEntityId, String aSqlClause, Fields aExpectedFields, Set<String> aReadRoles, Set<String> aWriteRoles) throws Exception;
 
-    public List<Change> getChangeLog(String aDatabaseId, String aSessionId);
+    public List<Change> getChangeLog(String aDatasourceId, String aSessionId);
     
     /**
      * Returns metadata cache for the specified database.
-     * @param aDbId Databse identifier
+     * @param aDatasourceId Datasource JNDI name. May be null for default database.
      * @return DbMetadataCache instance.
      * @throws Exception
      * @see DbMetadataCache
      */
-    public DbMetadataCache getDbMetadataCache(String aDbId) throws Exception;
-
-    public void setAppCache(AppCache aCache);
+    public DbMetadataCache getDbMetadataCache(String aDatasourceId) throws Exception;
     
     /**
      * Enqueues an arbitrary sql statement through a SqlCompiledQuery instance.
@@ -124,5 +137,11 @@ public interface DbClient extends Client {
      */
     public PrincipalHost getPrincipalHost();
 
-    public Rowset getDbTypesInfo(String dbId) throws Exception;
+    /**
+     * 
+     * @param aDatasourceId Datasource JNDI name. May be null for default database.
+     * @return Results rowset
+     * @throws Exception 
+     */
+    public Rowset getDbTypesInfo(String aDatasourceId) throws Exception;
 }

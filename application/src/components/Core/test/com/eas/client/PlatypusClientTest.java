@@ -16,7 +16,6 @@ import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.queries.PlatypusQuery;
 import com.eas.client.queries.Query;
-import com.eas.client.settings.PlatypusConnectionSettings;
 import com.eas.client.threetier.PlatypusNativeClient;
 import com.eas.client.threetier.PlatypusThreeTierFlowProvider;
 import com.eas.client.threetier.requests.AppElementRequest;
@@ -48,10 +47,7 @@ public class PlatypusClientTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        PlatypusConnectionSettings settings = new PlatypusConnectionSettings();
-        settings.setUrl("platypus://localhost:8500/");
-        settings.setName("Test connection");
-        client = new PlatypusNativeClient(settings);
+        client = new PlatypusNativeClient("platypus://localhost:8500/");
         client.login("test", "test".toCharArray());
     }
 
@@ -164,10 +160,7 @@ public class PlatypusClientTest {
 
     @Test
     public void testIsUserInRole() throws Exception {
-        PlatypusConnectionSettings settings = new PlatypusConnectionSettings();
-        settings.setUrl("platypus://localhost:8500/");
-        settings.setName("Test connection");
-        AppClient instance = new PlatypusNativeClient(settings);
+        AppClient instance = new PlatypusNativeClient("platypus://localhost:8500/");
         instance.login(TEST_LOGIN, TEST_PASSWD.toCharArray());
         IsUserInRoleRequest rq = new IsUserInRoleRequest(IDGenerator.genID(), TEST_ROLE);
         instance.executeRequest(rq);

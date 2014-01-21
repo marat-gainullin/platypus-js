@@ -5,7 +5,6 @@
 package com.eas.client.threetier.requests;
 
 import com.bearsoft.rowset.utils.IDGenerator;
-import com.eas.client.settings.PlatypusConnectionSettings;
 import com.eas.client.threetier.PlatypusNativeClient;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -26,10 +25,7 @@ public class ExecuteServerReportRequestTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        PlatypusConnectionSettings nativeSettings = new PlatypusConnectionSettings();
-        nativeSettings.setUrl("platypus://localhost:8500/");
-        nativeSettings.setName("Test native connection");
-        appClient = new PlatypusNativeClient(nativeSettings);
+        appClient = new PlatypusNativeClient("platypus://localhost:8500/");
         try {
             appClient.login("testuser3", "test".toCharArray());
             appClient.createServerModule(MODULE_NAME);

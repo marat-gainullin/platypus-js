@@ -5,7 +5,6 @@
 
 package com.eas.client.login;
 
-import com.eas.client.settings.EasSettings;
 import javax.security.auth.callback.Callback;
 
 /**
@@ -14,5 +13,5 @@ import javax.security.auth.callback.Callback;
  */
 public interface LoginCallback extends Callback{
 
-    public boolean tryToLogin(EasSettings aSettings, String aDbUserName, char[] aDbPassword, String aUserName, char[] aPassword) throws Exception;
+    public boolean tryToLogin(String aUserName, char[] aPassword) throws Exception;
 }

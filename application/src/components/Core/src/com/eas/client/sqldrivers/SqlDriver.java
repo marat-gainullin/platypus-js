@@ -52,9 +52,26 @@ public abstract class SqlDriver {
         super();
     }
 
-    public void initializeApplicationSchema(Connection aConnection) throws Exception {
-        if (!checkApplicationSchemaInitialized(aConnection)) {
-            String scriptText = readInitScriptResource();
+    /**
+     * Adds tables, foreign keys etc. to a database for application in database storage.
+     * @param aConnection
+     * @throws Exception 
+     */
+    public void initializeApplication(Connection aConnection) throws Exception {
+        if (!checkApplicationInitialized(aConnection)) {
+            String scriptText = readApplicationInitScriptResource();
+            applyScript(scriptText, aConnection);
+        }
+    }
+    
+    /**
+     * Adds tables, foreign keys etc. to a database for in database users space
+     * @param aConnection
+     * @throws Exception 
+     */
+    public void initializeUsersSpace(Connection aConnection) throws Exception {
+        if (!checkUsersSpaceInitialized(aConnection)) {
+            String scriptText = readUsersSpaceInitScriptResource();
             applyScript(scriptText, aConnection);
         }
     }
@@ -86,13 +103,21 @@ public abstract class SqlDriver {
     public abstract TypesResolver getTypesResolver();
 
     /**
-     * *
+     *
      * Gets database initial script location and file name.
      *
      * @return
      */
-    public abstract String getApplicationSchemaInitResourceName();
+    public abstract String getApplicationInitResourceName();
 
+    /**
+     *
+     * Gets database initial script location and file name.
+     *
+     * @return
+     */
+    public abstract String getUsersSpaceInitResourceName();
+    
     /**
      * Returns subset of jdbc types, supported by particular database. The trick
      * is that database uses own identifiers for it's types and we need an extra
@@ -499,7 +524,7 @@ public abstract class SqlDriver {
         }
     }
 
-    private boolean checkApplicationSchemaInitialized(Connection aConnection) {
+    private boolean checkApplicationInitialized(Connection aConnection) {
         try {
             try (PreparedStatement stmt = aConnection.prepareStatement(String.format(SQLUtils.SQL_MAX_COMMON_BY_FIELD, ClientConstants.F_MDENT_ID, ClientConstants.F_MDENT_ID, ClientConstants.T_MTD_ENTITIES))) {
                 ResultSet res = stmt.executeQuery();
@@ -517,8 +542,31 @@ public abstract class SqlDriver {
         return false;
     }
 
-    private String readInitScriptResource() throws IOException {
-        String resName = getApplicationSchemaInitResourceName();
+    private boolean checkUsersSpaceInitialized(Connection aConnection) {
+        try {
+            try (PreparedStatement stmt = aConnection.prepareStatement(String.format(SQLUtils.SQL_MAX_COMMON_BY_FIELD, ClientConstants.F_USR_NAME, ClientConstants.F_USR_NAME, ClientConstants.T_MTD_USERS))) {
+                ResultSet res = stmt.executeQuery();
+                res.close();
+            }
+            return true;
+        } catch (SQLException ex) {
+            try {
+                aConnection.rollback();
+            } catch (SQLException ex1) {
+                Logger.getLogger(SqlDriver.class.getName()).log(Level.SEVERE, null, ex1);
+            }
+            Logger.getLogger(SqlDriver.class.getName()).log(Level.SEVERE, "In database users space seems to be uninitialized. {0}", ex.getMessage());
+        }
+        return false;
+    }
+    
+    private String readApplicationInitScriptResource() throws IOException {
+        String resName = getApplicationInitResourceName();
+        return readScriptResource(resName);
+    }
+    
+    private String readUsersSpaceInitScriptResource() throws IOException {
+        String resName = getUsersSpaceInitResourceName();
         return readScriptResource(resName);
     }
 

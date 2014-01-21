@@ -364,7 +364,7 @@ public class PlatypusQueryView extends CloneableTopComponent {
             mnuCopy.setText(clientMissingMessage);
             mnuPaste.setText(clientMissingMessage);
             tablesSelector.setClient(null);
-            pnlFromNWhere.add(dataObject.getProject().generateDbPlaceholder(), BorderLayout.CENTER);
+            pnlFromNWhere.add(dataObject.getProject().generateDbPlaceholder(dataObject.getDatasourceName()), BorderLayout.CENTER);
         }
         revalidate();
         repaint();

@@ -4,7 +4,6 @@
  */
 package com.eas.designer.explorer.project.wizard;
 
-import com.eas.client.settings.DbConnectionSettings;
 import com.eas.designer.explorer.project.PlatypusProjectSettingsImpl;
 import java.awt.Component;
 import java.io.File;
@@ -40,8 +39,7 @@ public class PlatypusApplicationWizardIterator implements WizardDescriptor./*Pro
     
     private WizardDescriptor.Panel<WizardDescriptor>[] createPanels() {
         return new WizardDescriptor.Panel[]{
-                    new NameAndLocationWizardPanel(),
-                    new DatabaseSetupWizardPanel()
+                    new NameAndLocationWizardPanel()
                 };
     }
     
@@ -58,13 +56,11 @@ public class PlatypusApplicationWizardIterator implements WizardDescriptor./*Pro
         String projDirName = (String) wiz.getProperty("projDir");
         String projName = (String) wiz.getProperty("projName");
         String projTitle = (String) wiz.getProperty("projTitle");
-        DbConnectionSettings dbSettings = (DbConnectionSettings) wiz.getProperty("DbConnectionSettings");
         File projDir = FileUtil.normalizeFile(new File(projDirName).getAbsoluteFile());
         File projSpecDir = new File(projDir, projName);
         if (projSpecDir.mkdirs()) {
             try {
                 PlatypusProjectSettingsImpl settings = new PlatypusProjectSettingsImpl(FileUtil.toFileObject(projSpecDir));
-                settings.getAppSettings().setDbSettings(dbSettings);
                 settings.setDisplayName(projTitle);
                 settings.save();
             } catch (Exception ex) {
@@ -110,7 +106,6 @@ public class PlatypusApplicationWizardIterator implements WizardDescriptor./*Pro
         wd.putProperty("projDir", null);
         wd.putProperty("projName", null);
         wd.putProperty("projTitle", null);
-        wd.putProperty(DatabaseSetupWizardPanelVisual.PROP_SETTINGS, null);
         wd = null;
         panels = null;
     }

@@ -14,16 +14,15 @@ import com.eas.client.ConnectionSettingsVisitor;
  *
  * @author mg
  */
-public abstract class EasSettings {
+public abstract class ConnectionSettings {
 
-    public static transient final String EAS_SETTINGS_FILE_NAME = "EasSettings.xml";
-    protected String url = "";
     protected String name;
+    protected String url = "";
     protected String user;
     protected String password;
     protected boolean editable = true;
 
-    protected EasSettings() {
+    protected ConnectionSettings() {
         super();
     }
 
@@ -63,20 +62,7 @@ public abstract class EasSettings {
         this.password = password;
     }
 
-    public static EasSettings createInstance(String connectionString) throws Exception {
-        if (isJdbcUrl(connectionString)) {
-            DbConnectionSettings settings = new DbConnectionSettings();
-            settings.setUrl(connectionString);
-            return settings;
-        } else if (isAppServerUrl(connectionString)) {
-            PlatypusConnectionSettings settings = new PlatypusConnectionSettings();
-            settings.setUrl(connectionString);
-            return settings;
-        } else {
-            return null;
-        }
-    }
-    
+    /*
     public static boolean isJdbcUrl(String url) {
         return url.startsWith("jdbc:");//NOI18N
     }
@@ -84,6 +70,7 @@ public abstract class EasSettings {
     public static boolean isAppServerUrl(String url) {
         return url.startsWith("platypus") || url.startsWith("http");//NOI18N
     }
+    */
 
     public boolean isEditable() {
         return editable;

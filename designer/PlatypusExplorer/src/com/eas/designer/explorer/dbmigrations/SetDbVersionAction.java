@@ -5,7 +5,6 @@
 package com.eas.designer.explorer.dbmigrations;
 
 import com.eas.designer.explorer.project.PlatypusProjectImpl;
-import com.eas.util.StringUtils;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -44,13 +43,13 @@ public class SetDbVersionAction extends AbstractAction implements ContextAwareAc
             return new AbstractAction() {
                 @Override
                 public boolean isEnabled() {
-                    return project.isDbConnected();
+                    return project.isDbConnected(project.getSettings().getAppSettings().getDefaultDatasource());
                 }
 
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     try {
-                        if (project.isDbConnected()) {
+                        if (project.isDbConnected(project.getSettings().getAppSettings().getDefaultDatasource())) {
                             InputLine d = new NotifyDescriptor.InputLine(
                                     NbBundle.getMessage(SetDbVersionAction.class, "CTL_SetDbVersionAction_Dialog_Msg"), // NOI18N
                                     NbBundle.getMessage(SetDbVersionAction.class, "CTL_SetDbVersionAction_Dialog_Title") // NOI18N

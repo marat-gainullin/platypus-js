@@ -44,13 +44,13 @@ public class ApplyMigrationsAction extends AbstractAction implements ContextAwar
             return new AbstractAction() {
                 @Override
                 public boolean isEnabled() {
-                    return project.isDbConnected();
+                    return project.isDbConnected(project.getSettings().getAppSettings().getDefaultDatasource());
                 }
 
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     try {
-                        if (project.isDbConnected()) {
+                        if (project.isDbConnected(project.getSettings().getAppSettings().getDefaultDatasource())) {
                             applyMigrations(project);
                         }
                     } catch (Exception ex) {
@@ -81,12 +81,12 @@ public class ApplyMigrationsAction extends AbstractAction implements ContextAwar
                 project.getDbMigrator().setErr(io.getErr());
                 project.getDbMigrator().applyMigrations();
                 try {
-                    project.disconnectFormDb();
+                    project.disconnectFormDb(project.getSettings().getAppSettings().getDefaultDatasource());
                 } catch (InterruptedException | ExecutionException ex) {
                     Logger.getLogger(ApplyMigrationsAction.class.getName()).log(Level.SEVERE, "Error when disconnecting from database after the apply migration action.", ex);//NOI18N
                     throw new RuntimeException(ex);
                 }
-                project.startConnecting2db();
+                project.startConnecting2db(project.getSettings().getAppSettings().getDefaultDatasource());
             }
         });
         final ProgressHandle ph = ProgressHandleFactory.createHandle(NbBundle.getMessage(ApplyMigrationsAction.class, "LBL_Apply_Migrations_Progress"), applyTask);//NOI18N  

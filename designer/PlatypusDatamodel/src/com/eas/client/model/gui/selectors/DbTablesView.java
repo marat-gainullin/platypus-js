@@ -15,8 +15,6 @@ import com.eas.client.dbstructure.DbStructureUtils;
 import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.model.gui.DatamodelDesignUtils;
 import com.eas.client.model.gui.IconCache;
-import com.eas.client.settings.DbConnectionSettings;
-import com.eas.client.settings.XmlDom2ConnectionSettings;
 import java.awt.Component;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
@@ -34,9 +32,9 @@ public class DbTablesView extends JPanel {
     protected FindAction findAction = new FindAction();
     protected FindAgainAction findAgainAction = new FindAgainAction();
     protected DbClient client;
-    protected String dialogTitle = null;
-    protected String searchSubject = null;
-    protected String connectionId = null;
+    protected String dialogTitle;
+    protected String searchSubject;
+    protected String connectionId;
     protected AppElementSelectorCallback connectionSelector;
 
     protected void refreshButtons() {
@@ -49,32 +47,21 @@ public class DbTablesView extends JPanel {
 
     public void refreshControls(String aSchema) throws Exception {
         // refresh controls
-        DbConnectionSettings settings = readSettings();
-
         if (connectionId == null) {
-            String appDbTitle = ((DbConnectionSettings) client.getSettings()).getName();
-            if (appDbTitle == null || appDbTitle.isEmpty()) {
-                appDbTitle = DatamodelDesignUtils.getLocalizedString("defaultDatabase");
-            }
-            txtConnection.setText(appDbTitle);
+            txtConnection.setText(DatamodelDesignUtils.getLocalizedString("defaultDatabase"));
         } else {
             ApplicationElement appElement = client.getAppCache().get(connectionId);
             txtConnection.setText(appElement.getName());
         }
         String schema = aSchema;
         if (schema == null || schema.isEmpty()) {
-            schema = settings.getSchema();
+            schema = client.getConnectionSchema(connectionId);
         }
         int schemaIndx = locateSchema(schema);
         if (schemaIndx != -1) {
             comboSchema.setSelectedIndex(schemaIndx);
         }
         refreshButtons();
-    }
-
-    public String getDefaultSchema() throws Exception {
-        DbConnectionSettings settings = readSettings();
-        return settings.getSchema();
     }
 
     public int locateSchema(String aSchema) {
@@ -86,15 +73,6 @@ public class DbTablesView extends JPanel {
             }
         }
         return -1;
-    }
-
-    private DbConnectionSettings readSettings() throws Exception {
-        if (connectionId == null) {
-            return (DbConnectionSettings) client.getSettings();
-        } else {
-            ApplicationElement appElement = client.getAppCache().get(connectionId);
-            return (DbConnectionSettings) XmlDom2ConnectionSettings.document2Settings(appElement.getContent());
-        }
     }
 
     public class FindAction extends AbstractAction {
@@ -353,7 +331,7 @@ public class DbTablesView extends JPanel {
 
     private void btnDefaultSchemaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDefaultSchemaActionPerformed
         try {
-            String schema = getDefaultSchema();
+            String schema = client.getConnectionSchema(connectionId);
             int schemaIdx = locateSchema(schema);
             if (schemaIdx != -1) {
                 comboSchema.setSelectedIndex(schemaIdx);

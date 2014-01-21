@@ -5,7 +5,6 @@
 package com.eas.server;
 
 import com.eas.client.ScriptedDatabasesClient;
-import com.eas.client.cache.FilesAppCache;
 import com.eas.client.scripts.ScriptDocument;
 import com.eas.client.threetier.ErrorResponse;
 import com.eas.client.threetier.Request;
@@ -71,7 +70,7 @@ public class PlatypusServer extends PlatypusServerCore {
     }
 
     public void start() throws Exception {
-        Logger.getLogger(PlatypusServer.class.getName()).log(Level.INFO, "Application elements are located at: {0}", databasesClient.getAppCache() instanceof FilesAppCache ? ((FilesAppCache) databasesClient.getAppCache()).getSrcPathName() : databasesClient.getSettings().getUrl());
+        Logger.getLogger(PlatypusServer.class.getName()).log(Level.INFO, "Application is located at: {0}", databasesClient.getAppCache().getApplicationPath());
         instance = this;// Hack, but server is natural singleton and so it is ok.
         startServerTasks();
         for (InetSocketAddress s : listenAddresses) {

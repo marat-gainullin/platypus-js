@@ -10,23 +10,16 @@
  */
 package com.eas.designer.application.query.templates;
 
-import com.eas.client.settings.DbConnectionSettings;
-import com.eas.client.settings.EasSettings;
-import com.eas.client.settings.XmlDom2ConnectionSettings;
-import com.eas.designer.application.PlatypusUtils;
-import com.eas.designer.application.indexer.IndexerQuery;
-import com.eas.designer.explorer.FileChooser;
-import com.eas.xml.dom.Source2XmlDom;
-import java.sql.DriverManager;
-import java.util.HashSet;
-import java.util.Properties;
-import java.util.Set;
+import com.eas.designer.application.utils.DatabaseConnectionComboBoxModel;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import javax.swing.DefaultComboBoxModel;
-import org.openide.DialogDescriptor;
-import org.openide.DialogDisplayer;
+import org.netbeans.api.db.explorer.ConnectionManager;
+import org.netbeans.api.db.explorer.DatabaseConnection;
 import org.openide.ErrorManager;
 import org.openide.WizardDescriptor;
-import org.openide.filesystems.FileObject;
 import org.openide.util.NbBundle;
 
 /**
@@ -36,52 +29,41 @@ import org.openide.util.NbBundle;
 public class QuerySettingsVisualPanel extends javax.swing.JPanel {
 
     protected NewQueryWizardSettingsPanel panel;
-    protected FileObject connectionFile;
+    protected String datasourceName;
     protected DefaultComboBoxModel<String> schemasModel;
 
     /** Creates new form QuerySettingsVisualPanel */
     public QuerySettingsVisualPanel(NewQueryWizardSettingsPanel aWizardStep) {
         initComponents();
         panel = aWizardStep;
-    }
+        txtConnection.setModel(new DatabaseConnectionComboBoxModel());
+        txtConnection.addActionListener(new ActionListener(){
 
-    protected DbConnectionSettings readSettings(FileObject aFile) throws Exception {
-        EasSettings settings = null;
-        if (aFile != null) {
-            String sContent = aFile.asText(PlatypusUtils.COMMON_ENCODING_NAME);
-            settings = XmlDom2ConnectionSettings.document2Settings(Source2XmlDom.transform(sContent));
-        } else {
-            settings = panel.getProject().getClient().getSettings();
-        }
-        assert settings instanceof DbConnectionSettings : "Platypus application designer must work only in two tier mode.";
-        return (DbConnectionSettings) settings;
-    }
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                DatabaseConnection conn = (DatabaseConnection)txtConnection.getSelectedItem();
+                datasourceName = conn != null ? conn.getDisplayName() : null;
+            }
+        
+        });
+        txtConnection.addItemListener(new ItemListener(){
 
-    protected void refreshButtons() {
-        if (connectionFile == null) {
-            btnApplicationConnection.setSelected(true);
-        } else {
-            btnSpecificConnection.setSelected(true);
-        }
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                DatabaseConnection conn = (DatabaseConnection)txtConnection.getSelectedItem();
+                datasourceName = conn != null ? conn.getDisplayName() : null;
+            }
+        });
     }
 
     public void refreshControls() throws Exception {
-        String connectionId = null;
-        if (connectionFile != null) {
-            connectionId = IndexerQuery.file2AppElementId(connectionFile);
-        }
-        if (connectionId == null) {
-            txtConnection.setText(panel.getProject().getDisplayName());
-        } else {
-            assert connectionFile != null;
-            txtConnection.setText(connectionFile.getName());
-        }
-        refreshButtons();
+        DatabaseConnection conn = ConnectionManager.getDefault().getConnection(datasourceName);
+        txtConnection.setSelectedItem(conn);
     }
 
     public boolean valid(WizardDescriptor wd) throws Exception {
-        FileObject lconnectionFile = (FileObject) wd.getProperty(NewQueryWizardSettingsPanel.CONNECTION_PROP_NAME);
-        if (lconnectionFile != null && !panel.isConnectionElement(lconnectionFile)) {
+        String lconnectionName = (String) wd.getProperty(NewQueryWizardSettingsPanel.CONNECTION_PROP_NAME);
+        if (lconnectionName != null && !panel.connectionExist(lconnectionName)) {
             wd.putProperty(WizardDescriptor.PROP_ERROR_MESSAGE, NbBundle.getMessage(QuerySettingsVisualPanel.class, "nonConnectionFile"));
             return false;
         }
@@ -90,11 +72,11 @@ public class QuerySettingsVisualPanel extends javax.swing.JPanel {
     }
 
     void store(WizardDescriptor wd) throws Exception {
-        wd.putProperty(NewQueryWizardSettingsPanel.CONNECTION_PROP_NAME, connectionFile);
+        wd.putProperty(NewQueryWizardSettingsPanel.CONNECTION_PROP_NAME, datasourceName);
     }
 
     void read(WizardDescriptor wd) throws Exception {
-        connectionFile = (FileObject) wd.getProperty(NewQueryWizardSettingsPanel.CONNECTION_PROP_NAME);
+        datasourceName = (String) wd.getProperty(NewQueryWizardSettingsPanel.CONNECTION_PROP_NAME);
         refreshControls();
     }
 
@@ -107,18 +89,12 @@ public class QuerySettingsVisualPanel extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        groupConnectionType = new javax.swing.ButtonGroup();
         lblConnection = new javax.swing.JLabel();
-        txtConnection = new javax.swing.JTextField();
         btnApplicationConnection = new javax.swing.JToggleButton();
-        btnSpecificConnection = new javax.swing.JToggleButton();
+        txtConnection = new javax.swing.JComboBox();
 
         lblConnection.setText(org.openide.util.NbBundle.getMessage(QuerySettingsVisualPanel.class, "QuerySettingsVisualPanel.lblConnection.text")); // NOI18N
 
-        txtConnection.setEditable(false);
-
-        groupConnectionType.add(btnApplicationConnection);
-        btnApplicationConnection.setSelected(true);
         btnApplicationConnection.setText(org.openide.util.NbBundle.getMessage(QuerySettingsVisualPanel.class, "QuerySettingsVisualPanel.btnApplicationConnection.text")); // NOI18N
         btnApplicationConnection.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -126,13 +102,7 @@ public class QuerySettingsVisualPanel extends javax.swing.JPanel {
             }
         });
 
-        groupConnectionType.add(btnSpecificConnection);
-        btnSpecificConnection.setText(org.openide.util.NbBundle.getMessage(QuerySettingsVisualPanel.class, "QuerySettingsVisualPanel.btnSpecificConnection.text")); // NOI18N
-        btnSpecificConnection.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnSpecificConnectionActionPerformed(evt);
-            }
-        });
+        txtConnection.setEditable(true);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -142,11 +112,9 @@ public class QuerySettingsVisualPanel extends javax.swing.JPanel {
                 .addContainerGap()
                 .addComponent(lblConnection)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtConnection, javax.swing.GroupLayout.DEFAULT_SIZE, 242, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(btnApplicationConnection)
+                .addComponent(txtConnection, 0, 230, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnSpecificConnection)
+                .addComponent(btnApplicationConnection)
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -155,24 +123,15 @@ public class QuerySettingsVisualPanel extends javax.swing.JPanel {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblConnection)
-                    .addComponent(txtConnection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnApplicationConnection)
-                    .addComponent(btnSpecificConnection))
+                    .addComponent(txtConnection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(266, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
-    private void btnSpecificConnectionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSpecificConnectionActionPerformed
-        try {
-            selectNewConnection();
-        } catch (Exception ex) {
-            ErrorManager.getDefault().notify(ex);
-        }
-    }//GEN-LAST:event_btnSpecificConnectionActionPerformed
-
     private void btnApplicationConnectionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnApplicationConnectionActionPerformed
         try {
-            connectionFile = null;
+            datasourceName = null;            
             refreshControls();
         } catch (Exception ex) {
             ErrorManager.getDefault().notify(ex);
@@ -180,34 +139,8 @@ public class QuerySettingsVisualPanel extends javax.swing.JPanel {
     }//GEN-LAST:event_btnApplicationConnectionActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JToggleButton btnApplicationConnection;
-    private javax.swing.JToggleButton btnSpecificConnection;
-    private javax.swing.ButtonGroup groupConnectionType;
     private javax.swing.JLabel lblConnection;
-    private javax.swing.JTextField txtConnection;
+    private javax.swing.JComboBox txtConnection;
     // End of variables declaration//GEN-END:variables
 
-    private void selectNewConnection() throws Exception {
-        Set<String> allowedMimeTypes = new HashSet<>();
-        allowedMimeTypes.add("text/connection+xml");
-        FileObject fo = FileChooser.selectAppElement(panel.getProject().getSrcRoot(), connectionFile, allowedMimeTypes);
-        if (fo != connectionFile) {
-            // let's test connection capability
-            try {
-                DbConnectionSettings settings = readSettings(connectionFile);
-                Properties props = new Properties();
-                props.put("user", settings.getUser());
-                props.put("password", settings.getPassword());
-                props.put("schema", settings.getSchema());
-                java.sql.Connection conn = DriverManager.getConnection(settings.getUrl(), props);
-                conn.close();
-            } catch (Exception ex) {
-                refreshButtons();
-                DialogDescriptor.Message dd = new DialogDescriptor.Message(ex.getMessage(), DialogDescriptor.Message.ERROR_MESSAGE);
-                DialogDisplayer.getDefault().notify(dd);
-                return;
-            }
-            connectionFile = fo;
-            refreshControls();
-        }
-    }
 }

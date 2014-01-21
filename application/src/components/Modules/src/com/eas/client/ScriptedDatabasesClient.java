@@ -14,7 +14,6 @@ import com.eas.client.queries.PlatypusScriptedFlowProvider;
 import com.eas.client.queries.SqlCompiledQuery;
 import com.eas.client.queries.SqlQuery;
 import com.eas.client.scripts.ScriptRunner;
-import com.eas.client.settings.DbConnectionSettings;
 import com.eas.script.ScriptUtils;
 import com.eas.script.ScriptUtils.ScriptAction;
 import java.util.Collection;
@@ -170,22 +169,15 @@ public class ScriptedDatabasesClient extends DatabasesClient {
     /**
      * @inheritDoc
      */
-    public ScriptedDatabasesClient(DbConnectionSettings aSettings) throws Exception {
-        super(aSettings, false);
+    public ScriptedDatabasesClient(AppCache anAppCache, String aDefaultDatasourceName, boolean aAutoFillMetadata) throws Exception {
+        super(anAppCache, aDefaultDatasourceName, aAutoFillMetadata);
     }
 
     /**
      * @inheritDoc
      */
-    public ScriptedDatabasesClient(DbConnectionSettings aSettings, boolean inContainer) throws Exception {
-        super(aSettings, inContainer, null);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public ScriptedDatabasesClient(DbConnectionSettings aSettings, boolean inContainer, FilesAppCache.ScanCallback aScanCallback) throws Exception {
-        super(aSettings, inContainer, aScanCallback);
+    public ScriptedDatabasesClient(AppCache anAppCache, String aDefaultDatasourceName, boolean aAutoFillMetadata, FilesAppCache.ScanCallback aScanCallback) throws Exception {
+        super(anAppCache, aDefaultDatasourceName, aAutoFillMetadata, aScanCallback);
     }
 
     /**
