@@ -16,7 +16,6 @@ import org.netbeans.spi.editor.completion.CompletionResultSet;
 import org.netbeans.spi.editor.completion.CompletionTask;
 import org.netbeans.spi.editor.completion.support.AsyncCompletionQuery;
 import org.netbeans.spi.editor.completion.support.AsyncCompletionTask;
-import org.openide.ErrorManager;
 
 /**
  *
@@ -44,10 +43,10 @@ public class ModuleCompletionProvider implements CompletionProvider {
                         CompletionPoint completionPoint = CompletionPoint.createInstance((NbEditorDocument) doc, caretOffset);
                         fillCompletionPoint(dataObject, completionPoint, resultSet, caretOffset);
                     }
-                    resultSet.finish();
                 } catch (Exception ex) {
-                    ErrorManager.getDefault().notify(ex);
+                    resultSet.addItem(new JsCompletionItem(ex.getMessage(), null, -1, -1));
                 }
+                resultSet.finish();
             }
         }, component);
     }

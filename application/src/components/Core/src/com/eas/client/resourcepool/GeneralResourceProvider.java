@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.naming.NamingException;
 import javax.sql.DataSource;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -51,8 +52,8 @@ public class GeneralResourceProvider {
 
     public static Map<String, String> getDrivers() {
         return drivers;
-    }    
-    
+    }
+
     /**
      * Gets information about JDBC drivers supported by Platypus Platform.
      *
@@ -141,7 +142,7 @@ public class GeneralResourceProvider {
         disconnectDatasource(aName);
         connectionPoolsSettings.remove(aName);
     }
-    
+
     private PlatypusNativeDataSource constructDataSource(DbConnectionSettings aSettings) throws Exception {
         return new PlatypusNativeDataSource(aSettings.getMaxConnections(), aSettings.getMaxStatements(), aSettings.getResourceTimeout(), aSettings.getUrl(), aSettings.getUser(), aSettings.getPassword());
     }
@@ -171,7 +172,7 @@ public class GeneralResourceProvider {
             connectionPools.put(aDataSourceId, lPool);
             return lPool;
         } else {
-            return null;
+            throw new NamingException("Datasource " + aDataSourceId + " is not registered");
         }
     }
 

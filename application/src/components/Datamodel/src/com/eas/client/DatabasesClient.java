@@ -16,6 +16,7 @@ import com.bearsoft.rowset.changes.Command;
 import com.bearsoft.rowset.changes.EntitiesHost;
 import com.bearsoft.rowset.dataflow.FlowProvider;
 import com.bearsoft.rowset.dataflow.TransactionListener;
+import com.bearsoft.rowset.exceptions.ResourceUnavalableException;
 import com.bearsoft.rowset.jdbc.JdbcReader;
 import com.bearsoft.rowset.jdbc.StatementsGenerator;
 import com.bearsoft.rowset.jdbc.StatementsGenerator.StatementsLogEntry;
@@ -368,7 +369,11 @@ public class DatabasesClient implements DbClient {
             DatabaseMdCache cache = new DatabaseMdCache(this, aDatasourceId);
             mdCaches.put(aDatasourceId, cache);
             if (autoFillMetadata) {
-                cache.fillTablesCacheByConnectionSchema(true);
+                try {
+                    cache.fillTablesCacheByConnectionSchema(true);
+                } catch (ResourceUnavalableException ex) {
+                    Logger.getLogger(DatabasesClient.class.getName()).log(Level.INFO, ex.getMessage());
+                }
             }
         }
         return mdCaches.get(aDatasourceId);
@@ -622,7 +627,7 @@ public class DatabasesClient implements DbClient {
     @Override
     public String getConnectionSchema(String aDatasourceId) throws Exception {
         DataSource ds = obtainDataSource(aDatasourceId);
-        return schemaByConnection(ds.getConnection());
+        return ds != null ? schemaByConnection(ds.getConnection()) : null;
     }
 
     @Override

@@ -227,10 +227,10 @@ public class PlatypusProjectImpl implements PlatypusProject {
     }
 
     @Override
-    public void disconnectFormDb(final String aDatasourceId) throws InterruptedException, ExecutionException {
+    public void disconnectFormDb(final String aDatasourceName) throws InterruptedException, ExecutionException {
         if (connecting2Db != null) {
             connecting2Db.waitFinished();
-            DatabaseConnection conn = ConnectionManager.getDefault().getConnection(aDatasourceId);
+            DatabaseConnection conn = ConnectionManager.getDefault().getConnection(aDatasourceName);
             if (conn != null) {
                 ConnectionManager.getDefault().disconnect(conn);
             }
@@ -281,9 +281,9 @@ public class PlatypusProjectImpl implements PlatypusProject {
         getOutputWindowIO().getOut().println(dbConnectingCompleteMsg);
     }
 
-    private void connect2db(String aDatasourceId) {
+    private void connect2db(String aDatasourceName) {
         try {
-            DatabaseConnection conn = ConnectionManager.getDefault().getConnection(aDatasourceId);
+            DatabaseConnection conn = ConnectionManager.getDefault().getConnection(aDatasourceName);
             if (conn != null) {
                 ConnectionManager.getDefault().connect(conn);
             }

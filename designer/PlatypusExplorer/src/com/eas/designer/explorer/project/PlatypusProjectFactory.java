@@ -34,8 +34,8 @@ public final class PlatypusProjectFactory implements ProjectFactory {
             }
         } catch (Exception ex) {
             // no-op
+            return null;
         }
-        return null;
     }
 
     @Override
