@@ -74,7 +74,7 @@ public class Deployer extends BaseDeployer {
     }
 
     private void init() {
-        sourcesRoot = new File(projectDir, PlatypusFiles.PLATYPUS_PROJECT_SOURCES_ROOT);
+        sourcesRoot = new File(dir, PlatypusFiles.PLATYPUS_PROJECT_SOURCES_ROOT);
     }
 
     /**

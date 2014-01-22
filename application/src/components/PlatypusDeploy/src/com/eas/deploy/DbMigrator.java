@@ -36,27 +36,16 @@ public class DbMigrator extends BaseDeployer {
 
     public static final String MTD_SNAPSHOT_MIGRATION_EXT = "xdm"; // NOI18N
     public static final String SQL_BATCH_MIGRATION_EXT = "batch"; // NOI18N
-    public static final String PLATYPUS_PROJECT_BOOTSTRAP_DIR = "db"; // NOI18N
     protected static final String GET_CURRENT_DB_VERSION_SQL = "SELECT VERSION_VALUE FROM " // NOI18N
             + ClientConstants.T_MTD_VERSION;
     private static final String ILLEGAL_VERSIONS_RECORDS_NUMBER_MSG = "Illegal versions records number - only one record allowed."; // NOI18N
-    private File bootstrapDirectory;
 
     public DbMigrator(String aProjectPath) {
         super(aProjectPath);
-        init();
     }
 
     public DbMigrator(File aProjectDir, DbClient aClient) {
         super(aProjectDir, aClient);
-        init();
-    }
-
-    private void init() {
-        bootstrapDirectory = new File(projectDir, PLATYPUS_PROJECT_BOOTSTRAP_DIR);
-        if (!bootstrapDirectory.isDirectory()) {
-            throw new IllegalArgumentException("Bootstrap path is not for directory: " + bootstrapDirectory.getAbsolutePath()); // NOI18N 
-        }
     }
 
     /**
@@ -173,7 +162,7 @@ public class DbMigrator extends BaseDeployer {
             busy = true;
         }
         try {
-            assert bootstrapDirectory != null;
+            assert dir != null;
             out.println("Cleanup migrations directory..."); // NOI18N
             List<File> filesList = listActualMigrations(null);
             for (int i = 0; i < filesList.size(); i++) {
@@ -273,7 +262,7 @@ public class DbMigrator extends BaseDeployer {
     // Ordering is important for method result
     private List<File> listActualMigrations(Integer currentDbVersion) throws DeployException {
         TreeMap<Integer, File> migrations = new TreeMap<>();
-        File[] migrationFiles = bootstrapDirectory.listFiles(new MigrationsFilesFilter());
+        File[] migrationFiles = dir.listFiles(new MigrationsFilesFilter());
         for (File f : migrationFiles) {
             Integer i = parseInt(FileUtils.removeExtension(f.getName()), null);
             if (i != null && (currentDbVersion == null || i > currentDbVersion)) {
@@ -326,12 +315,12 @@ public class DbMigrator extends BaseDeployer {
     }
 
     private String getMtdSnapshotFilePath(int migrationNumber) {
-        File f = new File(bootstrapDirectory, String.valueOf(migrationNumber) + String.valueOf(FileUtils.EXTENSION_SEPARATOR) + MTD_SNAPSHOT_MIGRATION_EXT);
+        File f = new File(dir, String.valueOf(migrationNumber) + String.valueOf(FileUtils.EXTENSION_SEPARATOR) + MTD_SNAPSHOT_MIGRATION_EXT);
         return f.getAbsolutePath();
     }
 
     private String getSqlScriptFilePath(int migrationNumber) {
-        File f = new File(bootstrapDirectory, Integer.valueOf(migrationNumber).toString() + FileUtils.EXTENSION_SEPARATOR + SQL_BATCH_MIGRATION_EXT);
+        File f = new File(dir, Integer.valueOf(migrationNumber).toString() + FileUtils.EXTENSION_SEPARATOR + SQL_BATCH_MIGRATION_EXT);
         return f.getAbsolutePath();
     }
 

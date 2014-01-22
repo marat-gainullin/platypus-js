@@ -4,7 +4,6 @@
  */
 package com.eas.deploy;
 
-import com.eas.client.ClientFactory;
 import com.eas.client.DatabasesClient;
 import com.eas.client.DbClient;
 import com.eas.deploy.project.PlatypusSettings;
@@ -25,7 +24,7 @@ public class BaseDeployer {
     
     protected static final String LOCKED_MSG = "Deployer is locked.";
     
-    protected File projectDir;
+    protected File dir;
     protected DbClient client;
     protected File projectSettingsFile;
     protected boolean silentMode;
@@ -37,27 +36,27 @@ public class BaseDeployer {
     public BaseDeployer() {
     }
     
-    public BaseDeployer(File aProjectDir, DbClient aClient) {
-        if (!aProjectDir.isDirectory()) {
-            throw new IllegalArgumentException("Project path is not for directory: " + aProjectDir.getAbsolutePath()); // NOI18N 
+    public BaseDeployer(File aDir, DbClient aClient) {
+        if (!aDir.isDirectory()) {
+            throw new IllegalArgumentException("Project path is not for directory: " + aDir.getAbsolutePath()); // NOI18N 
         }
-        projectDir = aProjectDir;
+        dir = aDir;
         client = aClient;
-        projectSettingsFile = new File(projectDir, PLATYPUS_SETTINGS_FILE);
+        projectSettingsFile = new File(dir, PLATYPUS_SETTINGS_FILE);
     }
     
-    public BaseDeployer(String aProjectPath) {
-        if (aProjectPath == null) {
-            throw new NullPointerException("Project path is null"); // NOI18N
+    public BaseDeployer(String aDirPath) {
+        if (aDirPath == null) {
+            throw new NullPointerException("Target path is null"); // NOI18N
         }
-        if (aProjectPath.isEmpty()) {
-            throw new IllegalArgumentException("Project path is empty"); // NOI18N
+        if (aDirPath.isEmpty()) {
+            throw new IllegalArgumentException("Target path is empty"); // NOI18N
         }
-        projectDir = new File(aProjectPath);
-        if (!projectDir.isDirectory()) {
-            throw new IllegalArgumentException("Project path is not for directory: " + projectDir.getAbsolutePath()); // NOI18N 
+        dir = new File(aDirPath);
+        if (!dir.isDirectory()) {
+            throw new IllegalArgumentException("Target path is not for directory: " + dir.getAbsolutePath()); // NOI18N 
         }
-        projectSettingsFile = new File(projectDir, PLATYPUS_SETTINGS_FILE);
+        projectSettingsFile = new File(dir, PLATYPUS_SETTINGS_FILE);
     }
     
     /**
