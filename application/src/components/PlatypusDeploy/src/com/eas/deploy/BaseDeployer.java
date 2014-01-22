@@ -38,7 +38,7 @@ public class BaseDeployer {
     
     public BaseDeployer(File aDir, DbClient aClient) {
         if (!aDir.isDirectory()) {
-            throw new IllegalArgumentException("Project path is not for directory: " + aDir.getAbsolutePath()); // NOI18N 
+            throw new IllegalArgumentException("Target path is not for directory: " + aDir.getAbsolutePath()); // NOI18N 
         }
         dir = aDir;
         client = aClient;
