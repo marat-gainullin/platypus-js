@@ -67,9 +67,7 @@ public interface PlatypusProject extends Project {
     ProjectState getState();
 
     FileObject getSrcRoot() throws Exception;
-
-    FileObject getDbMigrationsRoot() throws Exception;
-
+    
     PlatypusProjectInformation getProjectInfo();
 
     SubTreeSearchOptions getSubTreeSearchOptions();

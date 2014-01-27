@@ -6,9 +6,6 @@ package com.eas.designer.explorer.project.ui;
 
 import com.eas.designer.application.PlatypusUtils;
 import com.eas.designer.explorer.PlatypusDataObject;
-import com.eas.designer.explorer.dbmigrations.DbMetadataMigrationDataObject;
-import com.eas.designer.explorer.dbmigrations.DbMigrationsNode;
-import com.eas.designer.explorer.dbmigrations.SqlMigrationDataObject;
 import com.eas.designer.explorer.project.PlatypusProjectImpl;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -34,9 +31,7 @@ public class PlatypusProjectNodesList implements NodeList<String> {
     private static final String JAVASCRIPT_FILE_EXTENSION = "js";
     private static final String PACKAGE_PREFIX = "com/eas/designer/explorer/project/ui/";
     public static final ImageIcon sourceIcon = ImageUtilities.loadImageIcon(PACKAGE_PREFIX + "elements.png", true);
-    public static final ImageIcon migrationsIcon = ImageUtilities.loadImageIcon(PACKAGE_PREFIX + "db.png", true);
     public static final DataFilter APPLICATION_TYPES_FILTER = new ApplicationTypesFilter();
-    public static final DataFilter DB_MIGRATIONS_TYPES_FILTER = new DbMigrationsTypesFilter();
     protected List<String> keys = new ArrayList<>();
     protected List<Node> nodes = new ArrayList<>();
     protected PlatypusProjectImpl project;
@@ -53,11 +48,6 @@ public class PlatypusProjectNodesList implements NodeList<String> {
                 sourceIcon,
                 PlatypusUtils.ELEMENTS_SOURCES_GROUP,
                 NbBundle.getMessage(PlatypusProjectImpl.class, PlatypusUtils.ELEMENTS_SOURCES_GROUP)));
-        keys.add(PlatypusUtils.DB_MIGRATIONS_SOURCES_GROUP);
-        DataFolder dbMigrationsDataFolder = DataFolder.findFolder(project.getDbMigrationsRoot());
-        nodes.add(new DbMigrationsNode(project, dbMigrationsDataFolder.getNodeDelegate(),
-                dbMigrationsDataFolder.createNodeChildren(DB_MIGRATIONS_TYPES_FILTER), migrationsIcon, migrationsIcon, PlatypusUtils.DB_MIGRATIONS_SOURCES_GROUP, NbBundle.getMessage(PlatypusProjectImpl.class, PlatypusUtils.DB_MIGRATIONS_SOURCES_GROUP)));
-
     }
 
     @Override
@@ -97,14 +87,6 @@ public class PlatypusProjectNodesList implements NodeList<String> {
         @Override
         public boolean acceptDataObject(DataObject d) {
             return d.getPrimaryFile().isFolder() || JAVASCRIPT_FILE_EXTENSION.equals(d.getPrimaryFile().getExt()) || d instanceof PlatypusDataObject;
-        }
-    }
-    
-    public static class DbMigrationsTypesFilter implements DataFilter {
-
-        @Override
-        public boolean acceptDataObject(DataObject d) {
-            return d instanceof DbMetadataMigrationDataObject || d instanceof SqlMigrationDataObject;
         }
     }
 }

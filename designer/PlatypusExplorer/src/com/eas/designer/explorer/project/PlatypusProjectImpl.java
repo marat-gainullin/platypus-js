@@ -451,11 +451,6 @@ public class PlatypusProjectImpl implements PlatypusProject {
         return getDirectory(PlatypusUtils.PLATYPUS_PROJECT_SOURCES_ROOT);
     }
 
-    @Override
-    public FileObject getDbMigrationsRoot() throws Exception {
-        return getDirectory(PlatypusUtils.PLATYPUS_PROJECT_DB_MIGRATIONS_DIR);
-    }
-
     private FileObject getDirectory(String name) {
         FileObject directory = projectDir.getFileObject(name);
         if (directory == null) {
