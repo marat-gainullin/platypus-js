@@ -372,7 +372,7 @@ public class PlatypusDbDiagramView extends CloneableTopComponent {
     }
 
     protected DbSchemeModelView getModelView() {
-        return (DbSchemeModelView) editor.getEntitiesView();
+        return editor != null ? (DbSchemeModelView) editor.getEntitiesView() : null;
     }
 
     @Override

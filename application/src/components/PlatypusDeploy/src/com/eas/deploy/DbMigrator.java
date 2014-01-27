@@ -38,13 +38,11 @@ public class DbMigrator extends BaseDeployer {
     protected static final String GET_CURRENT_DB_VERSION_SQL = "SELECT VERSION_VALUE FROM " // NOI18N
             + ClientConstants.T_MTD_VERSION;
     private static final String ILLEGAL_VERSIONS_RECORDS_NUMBER_MSG = "Illegal versions records number - only one record allowed."; // NOI18N
+    protected File dir;
 
-    public DbMigrator(String aProjectPath) {
-        super(aProjectPath);
-    }
-
-    public DbMigrator(File aProjectDir, DbClient aClient) {
-        super(aProjectDir, aClient);
+    public DbMigrator(File aDir, DatabasesClient aClient) {
+        super(aClient);
+        dir = aDir;
     }
 
     /**
@@ -60,12 +58,12 @@ public class DbMigrator extends BaseDeployer {
             busy = true;
         }
         try {
-            out.println("Migrating database started..."); // NOI18N
+            out.println("Migrating of database is started..."); // NOI18N
             applyMigrationsImpl();
-            out.println("Migrating database completed."); // NOI18N
+            out.println("Migrating of database is complete."); // NOI18N
             out.println();
         } catch (Exception ex) {
-            err.println("Migrating database error: " + ex.getMessage()); // NOI18N
+            err.println("Database migration error: " + ex.getMessage()); // NOI18N
             Logger.getLogger(DbMigrator.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             synchronized (this) {
@@ -313,18 +311,10 @@ public class DbMigrator extends BaseDeployer {
         return f.getAbsolutePath();
     }
 
-    void initApp() throws Exception {
-        DatabasesClient.initApplication(client.obtainDataSource(null));
-    }
-
-    void initUsersSpace() throws Exception {
-        DatabasesClient.initUsersSpace(client.obtainDataSource(null));
-    }
-    
     void initVersioning() throws Exception {
         DatabasesClient.initVersioning(client.obtainDataSource(null));
     }
-
+    
     private static class MigrationsFilesFilter implements FilenameFilter {
 
         @Override

@@ -220,7 +220,7 @@ public class ScriptedDatabasesClient extends DatabasesClient {
 
     @Override
     public synchronized DbMetadataCache getDbMetadataCache(String aDatasourceId) throws Exception {
-        ApplicationElement appElement = getAppCache().get(aDatasourceId);
+        ApplicationElement appElement = aDatasourceId != null ? getAppCache().get(aDatasourceId) : null;
         if (appElement == null || appElement.getType() != ClientConstants.ET_COMPONENT) {
             return super.getDbMetadataCache(aDatasourceId);
         } else {

@@ -37,6 +37,7 @@ import com.eas.script.ScriptUtils;
 import com.eas.util.BinaryUtils;
 import com.eas.util.ListenerRegistration;
 import java.awt.Component;
+import java.awt.EventQueue;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -123,15 +124,22 @@ public class PlatypusProjectImpl implements PlatypusProject {
         settings = new PlatypusProjectSettingsImpl(aProjectDir);
         settings.getChangeSupport().addPropertyChangeListener(new PropertyChangeListener() {
             @Override
-            public void propertyChange(PropertyChangeEvent evt) {
+            public void propertyChange(final PropertyChangeEvent evt) {
                 state.markModified();
                 if (PlatypusSettings.DEFAULT_DATASOURCE_ATTR_NAME.equals(evt.getPropertyName())) {
-                    try {
-                        client.setDefaultDatasourceName((String) evt.getNewValue());
-                        fireClientDefaultDatasourceChanged((String) evt.getOldValue(), (String) evt.getNewValue());
-                    } catch (Exception ex) {
-                        Exceptions.printStackTrace(ex);
-                    }
+                    EventQueue.invokeLater(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            try {
+                                client.setDefaultDatasourceName((String) evt.getNewValue());
+                                fireClientDefaultDatasourceChanged((String) evt.getOldValue(), (String) evt.getNewValue());
+                            } catch (Exception ex) {
+                                Exceptions.printStackTrace(ex);
+                            }
+                        }
+
+                    });
                 }
             }
         });
@@ -222,24 +230,30 @@ public class PlatypusProjectImpl implements PlatypusProject {
         }
     }
 
-    public void disconnectedFromDatasource(String aDatasourceName) {
-        try {
-            if (ModelInspector.isInstance()) {
-                ModelInspector mi = ModelInspector.getInstance();
-                mi.setNodesReflector(null);
-                mi.setViewData(null);
+    public void disconnectedFromDatasource(final String aDatasourceName) {
+        SwingUtilities.invokeLater(new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    if (ModelInspector.isInstance()) {
+                        ModelInspector mi = ModelInspector.getInstance();
+                        mi.setNodesReflector(null);
+                        mi.setViewData(null);
+                    }
+                    DbMetadataCache mdCache = client.getDbMetadataCache((aDatasourceName == null ? client.getDefaultDatasourceName() == null : aDatasourceName.equals(client.getDefaultDatasourceName())) ? null : aDatasourceName);
+                    if (mdCache != null) {
+                        mdCache.clear();
+                    }
+                    GeneralResourceProvider.getInstance().unregisterDatasource(aDatasourceName);
+                    fireClientDisconnected(aDatasourceName);
+                    StatusDisplayer.getDefault().setStatusText(NbBundle.getMessage(PlatypusProjectActions.class, "LBL_Connection_Lost")); // NOI18N
+                    client.clearQueries();
+                } catch (Exception ex) {
+                    Exceptions.printStackTrace(ex);
+                }
             }
-            DbMetadataCache mdCache = client.getDbMetadataCache((aDatasourceName == null ? client.getDefaultDatasourceName() == null : aDatasourceName.equals(client.getDefaultDatasourceName())) ? null : aDatasourceName);
-            if (mdCache != null) {
-                mdCache.clear();
-            }
-            GeneralResourceProvider.getInstance().unregisterDatasource(aDatasourceName);
-            fireClientDisconnected(aDatasourceName);
-            StatusDisplayer.getDefault().setStatusText(NbBundle.getMessage(PlatypusProjectActions.class, "LBL_Connection_Lost")); // NOI18N
-            client.clearQueries();
-        } catch (Exception ex) {
-            Exceptions.printStackTrace(ex);
-        }
+        });
     }
 
     @Override
@@ -265,40 +279,19 @@ public class PlatypusProjectImpl implements PlatypusProject {
 
     private synchronized void fireClientConnected(final String aDatasourceName) {
         for (final PlatypusProject.ClientChangeListener onChange : clientListeners) {
-            SwingUtilities.invokeLater(new Runnable() {
-
-                @Override
-                public void run() {
-                    onChange.connected(aDatasourceName);
-                }
-
-            });
+            onChange.connected(aDatasourceName);
         }
     }
 
     private synchronized void fireClientDisconnected(final String aDatasourceName) {
         for (final PlatypusProject.ClientChangeListener onChange : clientListeners) {
-            SwingUtilities.invokeLater(new Runnable() {
-
-                @Override
-                public void run() {
-                    onChange.disconnected(aDatasourceName);
-                }
-
-            });
+            onChange.disconnected(aDatasourceName);
         }
     }
 
     private synchronized void fireClientDefaultDatasourceChanged(final String aOldDatasourceName, final String aNewDatasourceName) {
         for (final PlatypusProject.ClientChangeListener onChange : clientListeners) {
-            SwingUtilities.invokeLater(new Runnable() {
-
-                @Override
-                public void run() {
-                    onChange.defaultDatasourceNameChanged(aOldDatasourceName, aNewDatasourceName);
-                }
-
-            });
+            onChange.defaultDatasourceNameChanged(aOldDatasourceName, aNewDatasourceName);
         }
     }
 
@@ -312,22 +305,33 @@ public class PlatypusProjectImpl implements PlatypusProject {
         return IOProvider.getDefault().getIO(getDisplayName(), false);
     }
 
-    public void connectedToDatasource(String aDatasourceName) throws Exception {
+    public void connectedToDatasource(final String aDatasourceName) throws Exception {
         connecting2Db = null;
         assert client != null;
-        DatabaseConnection conn = DatabaseConnections.lookup(aDatasourceName);
+        final DatabaseConnection conn = DatabaseConnections.lookup(aDatasourceName);
         assert conn != null : "Already connected datasource disappeared";
-        GeneralResourceProvider.getInstance().registerDatasource(aDatasourceName, new DbConnectionSettings(conn.getDatabaseURL(), conn.getUser(), conn.getPassword(), conn.getSchema(), conn.getConnectionProperties()));
-        DbMetadataCache mdCache = client.getDbMetadataCache(aDatasourceName);
-        if (mdCache != null) {
-            mdCache.clear();
-            mdCache.fillTablesCacheByConnectionSchema(true);
-        }
-        String dbConnectingCompleteMsg = NbBundle.getMessage(PlatypusProjectImpl.class, "LBL_Connecting_Complete"); // NOI18N  
-        StatusDisplayer.getDefault().setStatusText(dbConnectingCompleteMsg);
-        getOutputWindowIO().getOut().println(dbConnectingCompleteMsg);
-        fireClientConnected(aDatasourceName);
-        client.clearQueries();
+        SwingUtilities.invokeLater(new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    GeneralResourceProvider.getInstance().registerDatasource(aDatasourceName, new DbConnectionSettings(conn.getDatabaseURL(), conn.getUser(), conn.getPassword(), conn.getSchema(), conn.getConnectionProperties()));
+                    DbMetadataCache mdCache = client.getDbMetadataCache(aDatasourceName);
+                    if (mdCache != null) {
+                        mdCache.clear();
+                        mdCache.fillTablesCacheByConnectionSchema(true);
+                    }
+                    String dbConnectingCompleteMsg = NbBundle.getMessage(PlatypusProjectImpl.class, "LBL_Connecting_Complete"); // NOI18N
+                    StatusDisplayer.getDefault().setStatusText(dbConnectingCompleteMsg);
+                    getOutputWindowIO().getOut().println(dbConnectingCompleteMsg);
+                    fireClientConnected(aDatasourceName);
+                    client.clearQueries();
+                } catch (Exception ex) {
+                    Exceptions.printStackTrace(ex);
+                }
+            }
+
+        });
     }
 
     private void connect2db(String aDatasourceName) {
@@ -504,6 +508,7 @@ public class PlatypusProjectImpl implements PlatypusProject {
                 AppCache cache = client.getAppCache();
                 if (cache instanceof FilesAppCache) {
                     ((FilesAppCache) cache).rescan();
+                    ((FilesAppCache) cache).watch();
                 }
                 GlobalPathRegistry.getDefault().register(PlatypusPathRecognizer.SOURCE_CP, new ClassPath[]{sourceRoot});
                 startConnecting2db(getSettings().getAppSettings().getDefaultDatasource());
@@ -517,6 +522,10 @@ public class PlatypusProjectImpl implements PlatypusProject {
             try {
                 if (datasourceListener != null) {
                     datasourceListener.remove();
+                }
+                AppCache cache = client.getAppCache();
+                if (cache instanceof FilesAppCache) {
+                    ((FilesAppCache) cache).unwatch();
                 }
                 Logger.getLogger(PlatypusProjectImpl.class.getName()).log(Level.INFO, "Project closed");
                 GlobalPathRegistry.getDefault().unregister(PlatypusPathRecognizer.SOURCE_CP, new ClassPath[]{sourceRoot});

@@ -162,7 +162,16 @@ public abstract class AppElementsCache extends FreqCache<String, ApplicationElem
                             propsString.append(String.valueOf(aAppElement.getParentId()));
                             propsString.append(ClientConstants.CRLF);
                         }
-
+                        if (aAppElement.getType() != ClientConstants.ET_RESOURCE) {
+                            propsString.append(ClientConstants.F_MDENT_CONTENT_TXT_CRC32);
+                            propsString.append("=");
+                            propsString.append(String.valueOf(aAppElement.getTxtCrc32()));
+                            propsString.append(ClientConstants.CRLF);
+                            propsString.append(ClientConstants.F_MDENT_CONTENT_TXT_SIZE);
+                            propsString.append("=");
+                            propsString.append(String.valueOf(aAppElement.getTxtContentLength()));
+                            propsString.append(ClientConstants.CRLF);
+                        }
                         string2File(propsFile, propsString.toString());
 
                         if (aAppElement.getType() == ClientConstants.ET_RESOURCE) {
@@ -226,6 +235,8 @@ public abstract class AppElementsCache extends FreqCache<String, ApplicationElem
     protected ApplicationElement getFromFileCache(String aId) throws Exception {
         synchronized (lock) {
             try {
+                Long txtCrc32 = null;
+                Long txtlength = null;
                 String entityDirectoryPath = generatePath(aId);
                 File cachedEntityDirectory = new File(entityDirectoryPath);
                 File propsFile = new File(entityDirectoryPath + File.separator + APP_ELEMENT_PROPERTIES_FILE_NAME);
@@ -271,6 +282,10 @@ public abstract class AppElementsCache extends FreqCache<String, ApplicationElem
                                             appElement.setOrder(Double.valueOf(lValue));
                                         } else if (ClientConstants.F_MDENT_PARENT_ID.equalsIgnoreCase(lKey)) {
                                             appElement.setParentId(lValue);
+                                        } else if (ClientConstants.F_MDENT_CONTENT_TXT_SIZE.equalsIgnoreCase(lKey)) {
+                                            txtlength = Long.valueOf(lValue);
+                                        } else if (ClientConstants.F_MDENT_CONTENT_TXT_CRC32.equalsIgnoreCase(lKey)) {
+                                            txtCrc32 = Long.valueOf(lValue);
                                         }
                                     }
                                 }
@@ -291,6 +306,8 @@ public abstract class AppElementsCache extends FreqCache<String, ApplicationElem
                         appElement.setBinaryContent(FileUtils.readBytes(binaryFile));
                     } else {
                         appElement.setTxtContent(file2String(txtFile));
+                        appElement.setTxtContentLength(txtlength);
+                        appElement.setTxtCrc32(txtCrc32);
                     }
                     return appElement;
                 }

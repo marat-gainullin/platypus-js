@@ -95,7 +95,7 @@ public class PlatypusProjectActions implements ActionProvider {
                     run(true);
                     break;
                 case COMMAND_DEPLOY:
-                    deploy();
+                    deployApplication();
                     break;
                 case COMMAND_IMPORT:
                     importApplication();
@@ -155,7 +155,7 @@ public class PlatypusProjectActions implements ActionProvider {
         }
     }
 
-    private void deploy() {
+    private void deployApplication() {
         if (project.isDbConnected(project.getSettings().getAppSettings().getDefaultDatasource())) {
             NotifyDescriptor d = new NotifyDescriptor(
                     NbBundle.getMessage(PlatypusProjectActions.class, "MSG_Deploy_Dialog"), //NOI18N

@@ -5,7 +5,9 @@
 package com.eas.client;
 
 import com.eas.client.cache.FilesAppCache;
+import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.client.settings.ConnectionSettings;
+import com.eas.client.settings.DbConnectionSettings;
 import com.eas.client.settings.PlatypusConnectionSettings;
 import com.eas.client.threetier.PlatypusNativeClient;
 import com.eas.client.threetier.http.PlatypusHttpClient;
@@ -29,27 +31,36 @@ public class ClientFactory {
     public static final String SETTINGS_NODE = "/com/eas/client";
     public static final String CONNECTIONS_SETTINGS_NODE = SETTINGS_NODE + "/connections";
     public static final String DEFAULT_CONNECTION_INDEX_SETTING = "defaultConnectionIndex";
-    public static final String DEFAULT_CONNECTION_USER_PASSWORD = "userPassword";
     public static final String CONNECTION_TITLE_SETTING = "title";
     public static final String CONNECTION_URL_SETTING = "url";
     public static final String CONNECTION_USER_SETTING = "user";
+    public static final String CONNECTION_PASSWORD_SETTING = "password";
     private static ConnectionSettings[] settings;
     private static ConnectionSettings defaultSettings;
 
     public static Client getInstance(String aApplicationUrl, String aDefaultDatasourceName) throws Exception {
-        if (aApplicationUrl.toLowerCase().startsWith(PlatypusHttpConstants.PROTOCOL_HTTP)) {
-            return new PlatypusHttpsClient(aApplicationUrl);
-        } else if (aApplicationUrl.toLowerCase().startsWith(PlatypusHttpConstants.PROTOCOL_HTTPS)) {
-            return new PlatypusHttpClient(aApplicationUrl);
-        } else if (aApplicationUrl.toLowerCase().startsWith("platypus")) {
-            return new PlatypusNativeClient(aApplicationUrl);
-        } else if (aApplicationUrl.toLowerCase().startsWith("jndi") || aApplicationUrl.toLowerCase().startsWith("file")) {
-            AppCache appCache = obtainTwoTierAppCache(aApplicationUrl);
+        if (aApplicationUrl.endsWith(H2DB_FILE_SUFFIX) && (new File(aApplicationUrl)).exists()) {
+            aDefaultDatasourceName = "ds-" + Math.abs(aApplicationUrl.hashCode());
+            String jndiUrl = "jndi://" + aDefaultDatasourceName;
+            GeneralResourceProvider.getInstance().registerDatasource(aDefaultDatasourceName, new DbConnectionSettings("jdbc:h2:/" + aApplicationUrl.substring(0, aApplicationUrl.length()-H2DB_FILE_SUFFIX.length()), "sa", "sa", "PUBLIC", null));
+            AppCache appCache = obtainTwoTierAppCache(jndiUrl);
             return new ScriptedDatabasesClient(appCache, aDefaultDatasourceName, true);
         } else {
-            throw new Exception("Unknown protocol in url: " + aApplicationUrl);
+            if (aApplicationUrl.toLowerCase().startsWith(PlatypusHttpConstants.PROTOCOL_HTTP)) {
+                return new PlatypusHttpsClient(aApplicationUrl);
+            } else if (aApplicationUrl.toLowerCase().startsWith(PlatypusHttpConstants.PROTOCOL_HTTPS)) {
+                return new PlatypusHttpClient(aApplicationUrl);
+            } else if (aApplicationUrl.toLowerCase().startsWith("platypus")) {
+                return new PlatypusNativeClient(aApplicationUrl);
+            } else if (aApplicationUrl.toLowerCase().startsWith("jndi") || aApplicationUrl.toLowerCase().startsWith("file")) {
+                AppCache appCache = obtainTwoTierAppCache(aApplicationUrl);
+                return new ScriptedDatabasesClient(appCache, aDefaultDatasourceName, true);
+            } else {
+                throw new Exception("Unknown protocol in url: " + aApplicationUrl);
+            }
         }
     }
+    public static final String H2DB_FILE_SUFFIX = ".h2.db";
 
     public static AppCache obtainTwoTierAppCache(String aApplicationUrl) throws Exception {
         AppCache appCache;
@@ -143,6 +154,7 @@ public class ClientFactory {
             connectionsettings.setUrl(connUrl);
             connectionsettings.setName(connectionPrefs.get(ClientFactory.CONNECTION_TITLE_SETTING, ""));
             connectionsettings.setUser(connectionPrefs.get(ClientFactory.CONNECTION_USER_SETTING, ""));
+            connectionsettings.setPassword(connectionPrefs.get(ClientFactory.CONNECTION_PASSWORD_SETTING, ""));
             connectionsettings.setEditable(aEditable);
         }
     }

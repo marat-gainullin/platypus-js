@@ -60,6 +60,7 @@ public abstract class SqlDriver {
     public void initializeApplication(Connection aConnection) throws Exception {
         if (!checkApplicationInitialized(aConnection)) {
             String scriptText = readApplicationInitScriptResource();
+            Logger.getLogger(SqlDriver.class.getName()).log(Level.INFO, "About to initialize in-database application.");
             applyScript(scriptText, aConnection);
         }
     }
@@ -72,6 +73,7 @@ public abstract class SqlDriver {
     public void initializeUsersSpace(Connection aConnection) throws Exception {
         if (!checkUsersSpaceInitialized(aConnection)) {
             String scriptText = readUsersSpaceInitScriptResource();
+            Logger.getLogger(SqlDriver.class.getName()).log(Level.INFO, "About to initialize in-database users space.");
             applyScript(scriptText, aConnection);
         }
     }
@@ -84,6 +86,7 @@ public abstract class SqlDriver {
     public void initializeVersion(Connection aConnection) throws Exception {
         if (!checkVersionInitialized(aConnection)) {
             String scriptText = readVersionInitScriptResource();
+            Logger.getLogger(SqlDriver.class.getName()).log(Level.INFO, "About to initialize database versioning.");
             applyScript(scriptText, aConnection);
         }
     }
@@ -557,7 +560,7 @@ public abstract class SqlDriver {
             } catch (SQLException ex1) {
                 Logger.getLogger(SqlDriver.class.getName()).log(Level.SEVERE, null, ex1);
             }
-            Logger.getLogger(SqlDriver.class.getName()).log(Level.SEVERE, "Application schema seems to be uninitialized. {0}", ex.getMessage());
+            Logger.getLogger(SqlDriver.class.getName()).log(Level.WARNING, "Application schema seems to be uninitialized. {0}", ex.getMessage());
         }
         return false;
     }
@@ -575,7 +578,7 @@ public abstract class SqlDriver {
             } catch (SQLException ex1) {
                 Logger.getLogger(SqlDriver.class.getName()).log(Level.SEVERE, null, ex1);
             }
-            Logger.getLogger(SqlDriver.class.getName()).log(Level.SEVERE, "In database users space seems to be uninitialized. {0}", ex.getMessage());
+            Logger.getLogger(SqlDriver.class.getName()).log(Level.WARNING, "In database users space seems to be uninitialized. {0}", ex.getMessage());
         }
         return false;
     }
@@ -593,7 +596,7 @@ public abstract class SqlDriver {
             } catch (SQLException ex1) {
                 Logger.getLogger(SqlDriver.class.getName()).log(Level.SEVERE, null, ex1);
             }
-            Logger.getLogger(SqlDriver.class.getName()).log(Level.SEVERE, "Database vertioning seems to be uninitialized. {0}", ex.getMessage());
+            Logger.getLogger(SqlDriver.class.getName()).log(Level.WARNING, "Database vertioning seems to be uninitialized. {0}", ex.getMessage());
         }
         return false;
     }

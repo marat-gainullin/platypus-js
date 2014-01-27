@@ -8,7 +8,6 @@ package com.eas.client.login;
 import com.eas.client.Client;
 import com.eas.client.ClientFactory;
 import com.eas.client.settings.ConnectionSettings;
-import com.eas.client.settings.DbConnectionSettings;
 import com.eas.client.settings.PlatypusConnectionSettings;
 import com.eas.util.exceptions.ExceptionListenerSupport;
 import com.eas.util.exceptions.ExceptionThrower;
@@ -44,7 +43,6 @@ public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower 
     public static final ResourceBundle bundle = ResourceBundle.getBundle("com/eas/client/login/Bundle");
     public static final int RET_OK = 1;
     private static final String CANCEL_ACTION_ID = "cancel";
-    private static final String LAST_LOGIN_USERNAME_PREFKEY = "lastLoginUserName";
     private static final String OK_ACTION_ID = "ok";
     private int returnStatus = RET_CANCEL;
     private final ExceptionListenerSupport exSupport = new ExceptionListenerSupport();
@@ -58,9 +56,7 @@ public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower 
     private int connectionsPanelHeight;
     private final LoginCallback loginCallback;
     private Client client;
-    protected String url;
-    protected String dbUser;
-    protected char[] dbPassword;
+    protected String defaultUrl;
     protected String user;
     protected char[] password;
 
@@ -75,7 +71,7 @@ public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower 
      */
     public LoginFrame(String aUrl, String aUser, char[] aPassword, LoginCallback aLoginCallback) throws Exception {
         super((java.awt.Frame) null, true);
-        url = aUrl;
+        defaultUrl = aUrl;
         user = aUser;
         password = aPassword;
         loginCallback = aLoginCallback;
@@ -85,10 +81,6 @@ public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower 
             hideConnectionUI();
         }
         getRootPane().setDefaultButton(btnOk);
-        tfUserName.setText(Preferences.userNodeForPackage(LoginFrame.class).get(LAST_LOGIN_USERNAME_PREFKEY, ""));
-        if (tfUserName.getText() != null && !tfUserName.getText().isEmpty()) {
-            tfPassword.requestFocus();
-        }
         Action cancelAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -111,20 +103,13 @@ public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower 
         }
     }
 
-    private void hideConnectionUI() {       
+    private void hideConnectionUI() {
         btnToggleConnections.setVisible(false);
         pnlConnectionInfo.setVisible(false);
     }
 
     private void doClose(int retStatus) {
-        url = null;
-        dbUser = null;
-        if (dbPassword != null) {
-            for (int i = 0; i < dbPassword.length; i++) {
-                dbPassword[i] = 0;
-            }
-            dbPassword = null;
-        }
+        defaultUrl = null;
         user = null;
         if (password != null) {
             for (int i = 0; i < password.length; i++) {
@@ -137,22 +122,8 @@ public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower 
         dispose();
     }
 
-    /*
-    private boolean isAppModeLogin() {
-        return url != null && !url.isEmpty() && EasSettings.isAppServerUrl(url);
-    }
-
-    private boolean isDbShortModeLogin() {
-        return url != null && !url.isEmpty() && EasSettings.isJdbcUrl(url) && dbUser != null && !dbUser.isEmpty() && dbPassword != null && dbPassword.length > 0;
-    }
-
-    private boolean isDbModeLogin() {
-        return url != null && !url.isEmpty() && !isAppModeLogin() && !isDbShortModeLogin();
-    }
-
-    */
     private boolean isFullModeLogin() {
-        return url == null || url.isEmpty();
+        return defaultUrl == null || defaultUrl.isEmpty();
     }
 
     public Client getClient() {
@@ -368,6 +339,7 @@ public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower 
             btnCancelActionPerformed(new ActionEvent(this, 0, null));
         }
     }//GEN-LAST:event_formKeyTyped
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCancel;
     private javax.swing.JButton btnDeleteConnection;
@@ -408,16 +380,16 @@ public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower 
 
     private boolean login() throws Exception {
         if (!isFullModeLogin()) {
-            return loginCallback.tryToLogin(tfUserName.getText(), tfPassword.getPassword());
+            return loginCallback.tryToLogin(defaultUrl, tfUserName.getText(), tfPassword.getPassword());
         } else if (!lstConnections.isSelectionEmpty()) {
-            ConnectionSettings settings = (ConnectionSettings) lstConnections.getSelectedValue();
-            return loginCallback.tryToLogin(tfUserName.getText(), tfPassword.getPassword());
+            ConnectionSettings settings = (ConnectionSettings)lstConnections.getSelectedValue();
+            return loginCallback.tryToLogin(settings.getUrl(), tfUserName.getText(), tfPassword.getPassword());
         } else {
             return false;
         }
     }
 
-    private void updatePreferences() {
+    public void updatePreferences() {
         try {
             Preferences connectionsPref = Preferences.userRoot().node(ClientFactory.CONNECTIONS_SETTINGS_NODE);
             connectionsPref.removeNode();
@@ -429,6 +401,7 @@ public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower 
                     connectionsPref.node(strIndex).put(ClientFactory.CONNECTION_TITLE_SETTING, settings.getName() != null ? settings.getName() : "");
                     connectionsPref.node(strIndex).put(ClientFactory.CONNECTION_URL_SETTING, settings.getUrl() != null ? settings.getUrl() : "");
                     connectionsPref.node(strIndex).put(ClientFactory.CONNECTION_USER_SETTING, settings.getUser() != null ? settings.getUser() : "");
+                    connectionsPref.node(strIndex).put(ClientFactory.CONNECTION_PASSWORD_SETTING, settings.getPassword() != null ? settings.getPassword() : "");
                 }
             }
         } catch (BackingStoreException ex) {
@@ -469,7 +442,16 @@ public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower 
         public void actionPerformed(ActionEvent e) {
             try {
                 if (login()) {
-                    Preferences.userNodeForPackage(LoginFrame.class).put(LAST_LOGIN_USERNAME_PREFKEY, tfUserName.getText());
+                    if (isFullModeLogin()) {
+                        if (checkRememberPassword.isSelected()) {
+                            ConnectionSettings settings = (ConnectionSettings) lstConnections.getSelectedValue();
+                            if (settings != null) {
+                                settings.setUser(tfUserName.getText());
+                                settings.setPassword(String.valueOf(tfPassword.getPassword()));
+                            }
+                        }
+                        updatePreferences();
+                    }
                     doClose(RET_OK);
                 }
             } catch (Exception ex) {
@@ -498,20 +480,16 @@ public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower 
                         saveIndex = connectionsListModel.getSize();
                     }
                     String url = dlg.getUrl();
-                    String userName = dlg.getUserName();
                     String name = dlg.getConnectionName();
                     ConnectionSettings settings = new PlatypusConnectionSettings();
-                        settings.setUrl(url);
-                        if (name != null && !name.isEmpty()) {
-                            settings.setName(name);
-                        }
-                        if (userName != null) {
-                            settings.setUser(userName);
-                        }
-                        connectionsListModel.putElementAt(saveIndex, settings);
-                        lstConnections.setSelectedIndex(saveIndex);
-                        updatePreferences();
-                        lstConnections.requestFocus();
+                    settings.setUrl(url);
+                    if (name != null && !name.isEmpty()) {
+                        settings.setName(name);
+                    }
+                    connectionsListModel.putElementAt(saveIndex, settings);
+                    lstConnections.setSelectedIndex(saveIndex);
+                    updatePreferences();
+                    lstConnections.requestFocus();
                 }
             } catch (Throwable t) {
                 assert exSupport != null;
@@ -531,13 +509,11 @@ public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower 
                 ConnectionSettingsDialog dlg = new ConnectionSettingsDialog(null, true);
                 dlg.setUrl(settings.getUrl());
                 dlg.setConnectionName(settings.getName());
-                dlg.setUserName(settings.getUser());
                 dlg.setVisible(true);
                 int retVal = dlg.getReturnStatus();
                 if (retVal == ConnectionSettingsDialog.RET_OK) {
                     settings.setUrl(dlg.getUrl());
                     settings.setName(dlg.getConnectionName());
-                    settings.setUser(dlg.getUserName());
                     connectionsListModel.fireContentsChanged(selectedIndex);
                     updatePreferences();
                     lstConnections.requestFocus();
@@ -569,16 +545,28 @@ public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower 
         }
     }
 
+    private void updateCredentialsControls() {
+        ConnectionSettings selectedSettings = (ConnectionSettings) lstConnections.getSelectedValue();
+        if (selectedSettings != null) {
+            tfUserName.setText(selectedSettings.getUser());
+            tfPassword.setText(selectedSettings.getPassword());
+        }
+        if (tfUserName.getText() != null && !tfUserName.getText().isEmpty()) {
+            tfPassword.requestFocus();
+        }
+    }
+
     private class ConnectionsSelectionListener implements ListSelectionListener {
 
         @Override
         public void valueChanged(ListSelectionEvent e) {
-            if (!e.getValueIsAdjusting()) {
+            if (!e.getValueIsAdjusting() && isFullModeLogin()) {
                 ConnectionSettings selectedSettings = (ConnectionSettings) lstConnections.getSelectedValue();
                 boolean modificationsEnabled = selectedSettings != null && selectedSettings.isEditable();
                 modifyConnectionAction.setEnabled(modificationsEnabled);
                 deleteConnectionAction.setEnabled(modificationsEnabled);
-                tfPassword.setText(null);
+                updateCredentialsControls();
+                lstConnections.requestFocus();
             }
         }
     }

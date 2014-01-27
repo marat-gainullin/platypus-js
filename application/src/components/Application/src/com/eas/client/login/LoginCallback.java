@@ -13,5 +13,5 @@ import javax.security.auth.callback.Callback;
  */
 public interface LoginCallback extends Callback{
 
-    public boolean tryToLogin(String aUserName, char[] aPassword) throws Exception;
+    public boolean tryToLogin(String aUrl, String aUserName, char[] aPassword) throws Exception;
 }

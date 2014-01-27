@@ -17,6 +17,7 @@ public class DeployApplication {
 
     private static final String DEPLOY_TARGET_DATASOURCE = "deployTarget";
     public static final String APP_PATH_CMD_SWITCH = "ap";
+    public static final String MIGRATIONS_PATH_CMD_SWITCH = "migrations";
     public static final String URL_CMD_SWITCH = "url";
     public static final String DBUSER_CMD_SWITCH = "dbuser";
     public static final String DBSCHEMA_CMD_SWITCH = "dbschema";
@@ -48,6 +49,7 @@ public class DeployApplication {
             + CMD_SWITCHS_PREFIX + GET_CURRENT_VERSION_CMD_SWITCH + " - prints current database vesion\n"
             + CMD_SWITCHS_PREFIX + SET_CURRENT_VERSION_CMD_SWITCH + " <version>  - sets database version to number set in <version>\n"
             + CMD_SWITCHS_PREFIX + APP_PATH_CMD_SWITCH + " <app_path> - sets application directory\n"
+            + CMD_SWITCHS_PREFIX + MIGRATIONS_PATH_CMD_SWITCH + " <migrations_path> - sets directory with database migrations\n"
             + CMD_SWITCHS_PREFIX + URL_CMD_SWITCH + " <url> - database JDBC URL\n"
             + CMD_SWITCHS_PREFIX + DBSCHEMA_CMD_SWITCH + " <schema> - database schema\n"
             + CMD_SWITCHS_PREFIX + DBUSER_CMD_SWITCH + " <user_name> - database user name\n"
@@ -59,6 +61,7 @@ public class DeployApplication {
     private String dbschema;
     private String dbpassword;
     private File platypusAppDir;
+    private File migrationsDir;
     private Deployer deployer;
     private DbMigrator migrator;
     private DeployMode mode = DeployMode.PRINT_HELP;
@@ -93,7 +96,20 @@ public class DeployApplication {
                     }
                     i += 2;
                 } else {
-                    throw new IllegalArgumentException("Url syntax: " + CMD_SWITCHS_PREFIX + URL_CMD_SWITCH + " <value>");
+                    throw new IllegalArgumentException("Application path syntax: " + CMD_SWITCHS_PREFIX + URL_CMD_SWITCH + " <value>");
+                }
+            } else if ((CMD_SWITCHS_PREFIX + MIGRATIONS_PATH_CMD_SWITCH).equalsIgnoreCase(args[i])) {
+                if (i < args.length - 1) {
+                    migrationsDir = new File(args[i + 1]);
+                    if (!migrationsDir.exists()) {
+                        throw new IllegalArgumentException("Migrations path set by " + CMD_SWITCHS_PREFIX + MIGRATIONS_PATH_CMD_SWITCH + " does not exist.");
+                    }
+                    if (!migrationsDir.isDirectory()) {
+                        throw new IllegalArgumentException("Migrations path set by " + CMD_SWITCHS_PREFIX + MIGRATIONS_PATH_CMD_SWITCH + " is not directory.");
+                    }
+                    i += 2;
+                } else {
+                    throw new IllegalArgumentException("Migrations path syntax: " + CMD_SWITCHS_PREFIX + URL_CMD_SWITCH + " <value>");
                 }
             } else if ((CMD_SWITCHS_PREFIX + URL_CMD_SWITCH).equalsIgnoreCase(args[i])) {
                 if (i < args.length - 1) {
@@ -208,12 +224,12 @@ public class DeployApplication {
                     migrator.cleanup();
                     break;
                 case INITAPP:
-                    initMigrator();
-                    migrator.initApp();
+                    initDeployer();
+                    deployer.initApp();
                     break;
                 case INITUSERS:
-                    initMigrator();
-                    migrator.initUsersSpace();
+                    initDeployer();
+                    deployer.initUsersSpace();
                     break;
                 case INITVERSIONING:
                     initMigrator();
@@ -246,7 +262,7 @@ public class DeployApplication {
 
     private void initMigrator() throws Exception {
         if (isDbParamsSetExplicitly()) {
-            migrator = new DbMigrator(platypusAppDir, new DatabasesClient(null, DEPLOY_TARGET_DATASOURCE, false));
+            migrator = new DbMigrator(migrationsDir, new DatabasesClient(null, DEPLOY_TARGET_DATASOURCE, false));
         } else {
             throw new IllegalArgumentException("Database connection arguments are not set properly");
         }

@@ -60,13 +60,13 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
     public static final String BAD_DEF_DATASOURCE_MSG = "default-datasource value not specified";
 
     public static final String USER_HOME_ABSENTFILE_MSG = ClientConstants.USER_HOME_PROP_NAME + " property points to non-existent location";
-    public static final String USER_HOME_MISSING_MSG = ClientConstants.USER_HOME_PROP_NAME + " property missing. Please specify it with -Dplatypus.home=... java comannd line switch";
+    public static final String USER_HOME_MISSING_MSG = ClientConstants.USER_HOME_PROP_NAME + " property missing. Please specify it with -D" + ClientConstants.USER_HOME_PROP_NAME + "=... command line switch";
     public static final String USER_HOME_NOT_A_DIRECTORY_MSG = ClientConstants.USER_HOME_PROP_NAME + " property points to non-directory";
     public static final String BAD_DB_CREDENTIALS_MSG = "Bad database credentials.  May be bad db connection settings (url, dbuser, dbpassword).";
     public static final String BAD_APP_CREDENTIALS_MSG = "Bad application credentials.";
-    public static final String APP_ELEMENT_MISSING_MSG = "Application element identifier missing. Nothing to do, so exit.";
+    public static final String APP_ELEMENT_MISSING_MSG = "Application element name missing. Nothing to do, so exit.";
     public static final String CLIENT_REQUIRED_AFTER_LOGIN_MSG = "After successfull login there must be a client.";
-    public static final String MISSING_SUCH_APP_ELEMENT_MSG = "Application element with identifier specified (%s) is absent. Nothing to do, so exit.";
+    public static final String MISSING_SUCH_APP_ELEMENT_MSG = "Application element with name specified (%s) is absent. Nothing to do, so exit.";
     public static final String NON_RUNNABLE_APP_ELEMENT_MSG = "Application element specified (%s) is of non-runnable type. Nothing to do, so exit.";
     public static final String STOP_BEFORE_RUN_CMD_SWITCH = "stopBeforeRun";
     public static final String BAD_APPLICATION_PATH_MSG = "Application path must follow applicationpath (ap) parameter";
@@ -142,7 +142,8 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
                 return guiLogin();
             }
         } else {
-            throw new Exception("Platypus application needs at least a valid application directory path in url parameter or url of service (database, platypus server or j2ee server application) with an application.");
+            return guiLogin();
+            //throw new Exception("Platypus application needs at least a valid application directory path in url parameter or url of service (database, platypus server or j2ee server application) with an application.");
         }
     }
 
@@ -167,9 +168,10 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
     private boolean guiLogin() throws Exception {
         LoginFrame frame = new LoginFrame(url, user, password, new LoginCallback() {
             @Override
-            public boolean tryToLogin(String aAppUserName, char[] aAppPassword) throws Exception {
-                Client lclient = ClientFactory.getInstance(url, defDatasource);
+            public boolean tryToLogin(String aUrl, String aAppUserName, char[] aAppPassword) throws Exception {
+                Client lclient = ClientFactory.getInstance(aUrl, defDatasource);
                 try {
+                    url = aUrl;
                     return appLogin(lclient, aAppUserName, aAppPassword);
                 } catch (Exception ex) {
                     lclient.shutdown();
@@ -180,20 +182,11 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
         Preferences settingsNode = Preferences.userRoot().node(ClientFactory.SETTINGS_NODE);
         frame.addExceptionListener(this);
         frame.selectDefaultSettings();
-        frame.setUserPassword(settingsNode.get(ClientFactory.DEFAULT_CONNECTION_USER_PASSWORD, ""));
         frame.pack();
         frame.setVisible(true);
         int retValue = frame.getReturnStatus();
         frame.dispose();
         settingsNode.putInt(ClientFactory.DEFAULT_CONNECTION_INDEX_SETTING, frame.getSelectedConnectionIndex());
-
-        if (retValue == LoginFrame.RET_OK) {
-            if (frame.getUserPassword() != null) {
-                settingsNode.put(ClientFactory.DEFAULT_CONNECTION_USER_PASSWORD, frame.getUserPassword());
-            } else {
-                settingsNode.remove(ClientFactory.DEFAULT_CONNECTION_USER_PASSWORD);
-            }
-        }
         return retValue == LoginFrame.RET_OK;
     }
 

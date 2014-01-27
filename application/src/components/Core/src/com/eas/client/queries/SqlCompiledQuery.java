@@ -31,7 +31,7 @@ public class SqlCompiledQuery {
     protected Parameters parameters;// 1 - Based    
     protected Fields expectedFields;// 1 - Based
     protected FlowProvider flow;
-    protected boolean procedure = false;
+    protected boolean procedure;
     protected Set<String> readRoles = new HashSet<>();
     protected Set<String> writeRoles = new HashSet<>();
     private int pageSize = FlowProvider.NO_PAGING_PAGE_SIZE;

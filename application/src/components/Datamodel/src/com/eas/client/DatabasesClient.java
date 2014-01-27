@@ -286,9 +286,10 @@ public class DatabasesClient implements DbClient {
         return sb.toString();
     }
 
-    public static DbPlatypusPrincipal credentialsToPrincipalWithBasicAuthentication(DbClient aClient, String aUserName, String password) throws Exception {
+    public static DbPlatypusPrincipal credentialsToPrincipalWithBasicAuthentication(DatabasesClient aClient, String aUserName, String password) throws Exception {
         final SqlQuery q = new SqlQuery(aClient, USER_QUERY_TEXT);
         q.putParameter(USERNAME_PARAMETER_NAME, DataTypeInfo.VARCHAR, aUserName.toUpperCase());
+        aClient.initUsersSpace(q.getDbId());
         final Rowset rs = q.compile().executeQuery();
         if (rs.first() && password.equals(rs.getString(rs.getFields().find(ClientConstants.F_USR_PASSWD)))) {
             return new DbPlatypusPrincipal(aUserName,
@@ -301,9 +302,10 @@ public class DatabasesClient implements DbClient {
         return null;
     }
 
-    public static DbPlatypusPrincipal userNameToPrincipal(DbClient aClient, String aUserName) throws Exception {
+    public static DbPlatypusPrincipal userNameToPrincipal(DatabasesClient aClient, String aUserName) throws Exception {
         final SqlQuery q = new SqlQuery(aClient, USER_QUERY_TEXT);
         q.putParameter(USERNAME_PARAMETER_NAME, DataTypeInfo.VARCHAR, aUserName.toUpperCase());
+        aClient.initUsersSpace(q.getDbId());
         final Rowset rs = q.compile().executeQuery();
         if (rs.first()) {
             return new DbPlatypusPrincipal(aUserName,
@@ -716,6 +718,13 @@ public class DatabasesClient implements DbClient {
             SqlDriver driver = SQLUtils.getSqlDriver(dialect);
             driver.initializeApplication(lconn);
         }
+    }
+
+    public void initUsersSpace(String aDatasourceName) throws Exception {
+        if (aDatasourceName == null) {
+            aDatasourceName = defaultDatasourceName;
+        }
+        initUsersSpace(obtainDataSource(aDatasourceName));
     }
 
     public static void initUsersSpace(DataSource aSource) throws Exception {

@@ -67,6 +67,14 @@ public class Deployer extends BaseDeployer {
         sourcesRoot = new File(aProjectDir, PlatypusFiles.PLATYPUS_PROJECT_SOURCES_ROOT);
     }
 
+    void initApp() throws Exception {
+        DatabasesClient.initApplication(client.obtainDataSource(null));
+    }
+
+    void initUsersSpace() throws Exception {
+        DatabasesClient.initUsersSpace(client.obtainDataSource(null));
+    }
+    
     /**
      * Deploys Platypus application component to the database
      *
@@ -81,6 +89,7 @@ public class Deployer extends BaseDeployer {
         }
         try {
             out.println("Deploy to database started.."); // NOI18N
+            initApp();
             appElements = new LinkedHashMap<>();
 
             //Prepare application elements items
@@ -176,8 +185,8 @@ public class Deployer extends BaseDeployer {
         try {
             out.println("Import from database started.."); // NOI18N
             //Get application elements entities 
-            SqlQuery selectComponentEntitiesQuery = new SqlQuery(client, SELECT_ENTITIES_SQL);
-            Rowset rs = selectComponentEntitiesQuery.compile().executeQuery();
+            SqlQuery applicationElementsQuery = new SqlQuery(client, SELECT_ENTITIES_SQL);
+            Rowset rs = applicationElementsQuery.compile().executeQuery();
 
             //Build application elements tree, find root node for the component
             appElementsTree = new HashMap<>();
@@ -222,7 +231,7 @@ public class Deployer extends BaseDeployer {
             out.println();
         } catch (Exception ex) {
             Logger.getLogger(Deployer.class.getName()).log(Level.SEVERE, null, ex);
-            err.println("Error import component: " + ex.getMessage());
+            err.println("Import error occured: " + ex.getMessage());
         } finally {
             synchronized (this) {
                 busy = false;
