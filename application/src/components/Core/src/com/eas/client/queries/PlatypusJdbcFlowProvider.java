@@ -13,6 +13,7 @@ import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.DbClient;
 import com.eas.client.DbMetadataCache;
 import com.eas.client.login.PlatypusPrincipal;
+import com.eas.util.ListenerRegistration;
 import java.security.AccessControlException;
 import java.sql.Connection;
 import java.util.Collections;
@@ -48,7 +49,7 @@ public class PlatypusJdbcFlowProvider extends JdbcFlowProvider<String> {
     }
 
     @Override
-    public TransactionListener.Registration addTransactionListener(TransactionListener tl) {
+    public ListenerRegistration addTransactionListener(TransactionListener tl) {
         return client.addTransactionListener(tl);
     }
 

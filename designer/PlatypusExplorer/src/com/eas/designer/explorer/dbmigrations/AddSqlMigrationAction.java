@@ -73,9 +73,11 @@ public class AddSqlMigrationAction extends AbstractAction implements ContextAwar
             @Override
             public void run() {
                 InputOutput io = project.getOutputWindowIO();
+                /*
                 project.getDbMigrator().setOut(io.getOut());
                 project.getDbMigrator().setErr(io.getErr());
                 project.getDbMigrator().createSqlMigration();
+                       */ 
             }
         });
         final ProgressHandle ph = ProgressHandleFactory.createHandle(NbBundle.getMessage(AddSqlMigrationAction.class, "LBL_Create_Sql_Migration_Progress"), createMigrationTask); // NOI18N  

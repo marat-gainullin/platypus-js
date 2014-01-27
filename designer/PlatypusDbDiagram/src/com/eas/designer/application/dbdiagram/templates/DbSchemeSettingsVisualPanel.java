@@ -10,20 +10,16 @@
  */
 package com.eas.designer.application.dbdiagram.templates;
 
-import com.eas.client.DatabasesClient;
 import com.eas.designer.application.PlatypusUtils;
-import com.eas.designer.application.utils.DatabaseConnectionComboBoxModel;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.sql.Connection;
+import com.eas.designer.application.utils.DatabaseConnectionRenderer;
+import com.eas.designer.application.utils.DatabaseConnections;
 import java.util.List;
 import javax.swing.DefaultComboBoxModel;
 import org.netbeans.api.db.explorer.ConnectionManager;
 import org.netbeans.api.db.explorer.DatabaseConnection;
 import org.openide.ErrorManager;
 import org.openide.WizardDescriptor;
+import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 
 /**
@@ -42,49 +38,41 @@ public class DbSchemeSettingsVisualPanel extends javax.swing.JPanel {
     public DbSchemeSettingsVisualPanel(NewDbSchemeWizardSettingsPanel aWizardStep) {
         initComponents();
         panel = aWizardStep;
-        txtConnection.setModel(new DatabaseConnectionComboBoxModel());
-        txtConnection.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                DatabaseConnection conn = (DatabaseConnection) txtConnection.getSelectedItem();
-                datasourceName = conn != null ? conn.getDisplayName() : null;
-            }
-
-        });
-        txtConnection.addItemListener(new ItemListener() {
-
-            @Override
-            public void itemStateChanged(ItemEvent e) {
-                DatabaseConnection conn = (DatabaseConnection) txtConnection.getSelectedItem();
-                datasourceName = conn != null ? conn.getDisplayName() : null;
-            }
-        });
+        schemasModel = new DefaultComboBoxModel();
+        comboSchema.setModel(schemasModel);
+        txtConnection.setModel(new DefaultComboBoxModel(ConnectionManager.getDefault().getConnections()));
+        txtConnection.setRenderer(new DatabaseConnectionRenderer(panel.getProject()));
     }
 
     public String getDefaultSchema() throws Exception {
-        DatabaseConnection conn = ConnectionManager.getDefault().getConnection(datasourceName);
-        Connection jdbcConn = conn.getJDBCConnection();
-        if (jdbcConn != null) {
-            return DatabasesClient.schemaByConnection(jdbcConn);
-        } else {
-            return null;
+        return panel.getProject().getClient().getConnectionSchema(datasourceName);
+    }
+
+    private boolean refreshingControls;
+
+    public void refreshControls(String schema) throws Exception {
+        refreshingControls = true;
+        try {
+            String dsName = datasourceName;
+            if (dsName == null) {
+                dsName = panel.getProject().getSettings().getAppSettings().getDefaultDatasource();
+            }
+            DatabaseConnection conn = DatabaseConnections.lookup(dsName);
+            txtConnection.setSelectedItem(datasourceName == null ? null : conn);
+            refreshSchemas(conn);
+            comboSchema.setSelectedIndex(locateSchema(schema));
+        } finally {
+            refreshingControls = false;
         }
     }
 
-    public void refreshControls(String schema) throws Exception {
-        DatabaseConnection conn = ConnectionManager.getDefault().getConnection(datasourceName);
-        if (conn != null) {
+    protected void refreshSchemas(DatabaseConnection conn) throws Exception {
+        schemasModel.removeAllElements();
+        if (conn != null && conn.getJDBCConnection() != null) {
             List<String> schemas = PlatypusUtils.achieveSchemas(conn.getDatabaseURL(), conn.getUser(), conn.getPassword());
-            schemasModel = new DefaultComboBoxModel(schemas.toArray(new String[0]));
-            comboSchema.setModel(schemasModel);
-            int schemaIndx = locateSchema(schema);
-            if (schemaIndx != -1) {
-                comboSchema.setSelectedIndex(schemaIndx);
+            for (String schemaName : schemas) {
+                schemasModel.addElement(schemaName);
             }
-            txtConnection.setSelectedItem(conn);
-        } else {
-            txtConnection.setSelectedItem(null);
         }
     }
 
@@ -104,10 +92,16 @@ public class DbSchemeSettingsVisualPanel extends javax.swing.JPanel {
     }
 
     public boolean valid(WizardDescriptor wd) throws Exception {
-        String lDatasourceName = (String) wd.getProperty(NewDbSchemeWizardSettingsPanel.CONNECTION_PROP_NAME);
-        //String lschema = (String) wd.getProperty(NewDbSchemeWizardSettingsPanel.SCHEMA_PROP_NAME);
-        if (lDatasourceName != null && !panel.connectionExist(lDatasourceName)) {
+        String lDatasourceName = datasourceName;
+        if (lDatasourceName == null) {
+            lDatasourceName = panel.getProject().getSettings().getAppSettings().getDefaultDatasource();
+        }
+        if (lDatasourceName == null || !panel.datasourceExist(lDatasourceName)) {
             wd.putProperty(WizardDescriptor.PROP_ERROR_MESSAGE, NbBundle.getMessage(DbSchemeSettingsVisualPanel.class, "nonConnectionFile"));
+            return false;
+        }
+        if (!panel.datasourceConnected(lDatasourceName)) {
+            wd.putProperty(WizardDescriptor.PROP_ERROR_MESSAGE, NbBundle.getMessage(DbSchemeSettingsVisualPanel.class, "schemasUnavailable"));
             return false;
         }
         wd.putProperty(WizardDescriptor.PROP_INFO_MESSAGE, NbBundle.getMessage(DbSchemeSettingsVisualPanel.class, "readyForNextStep"));
@@ -115,12 +109,9 @@ public class DbSchemeSettingsVisualPanel extends javax.swing.JPanel {
     }
 
     void store(WizardDescriptor wd) throws Exception {
-        String schema = null;
-        if (schemasModel != null) {
-            schema = (String) schemasModel.getSelectedItem();
-            if (datasourceName == null && schema != null && !schema.isEmpty()) {
-                schema = checkDefaultSchema(schema);
-            }
+        String schema = (String) schemasModel.getSelectedItem();
+        if (schema != null && !schema.isEmpty()) {
+            schema = checkDefaultSchema(schema);
         }
         wd.putProperty(NewDbSchemeWizardSettingsPanel.CONNECTION_PROP_NAME, datasourceName);
         wd.putProperty(NewDbSchemeWizardSettingsPanel.SCHEMA_PROP_NAME, schema);
@@ -147,25 +138,31 @@ public class DbSchemeSettingsVisualPanel extends javax.swing.JPanel {
         lblConnection = new javax.swing.JLabel();
         lblSchema = new javax.swing.JLabel();
         comboSchema = new javax.swing.JComboBox();
-        btnApplicationConnection = new javax.swing.JToggleButton();
         btnDefaultSchema = new javax.swing.JButton();
         txtConnection = new javax.swing.JComboBox();
+        btnApplicationConnection = new javax.swing.JButton();
 
         lblConnection.setText(org.openide.util.NbBundle.getMessage(DbSchemeSettingsVisualPanel.class, "DbSchemeSettingsVisualPanel.lblConnection.text")); // NOI18N
 
         lblSchema.setText(org.openide.util.NbBundle.getMessage(DbSchemeSettingsVisualPanel.class, "DbSchemeSettingsVisualPanel.lblSchema.text")); // NOI18N
 
-        btnApplicationConnection.setText(org.openide.util.NbBundle.getMessage(DbSchemeSettingsVisualPanel.class, "DbSchemeSettingsVisualPanel.btnApplicationConnection.text")); // NOI18N
-        btnApplicationConnection.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnApplicationConnectionActionPerformed(evt);
-            }
-        });
-
         btnDefaultSchema.setText(org.openide.util.NbBundle.getMessage(DbSchemeSettingsVisualPanel.class, "DbSchemeSettingsVisualPanel.btnDefaultSchema.text")); // NOI18N
         btnDefaultSchema.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnDefaultSchemaActionPerformed(evt);
+            }
+        });
+
+        txtConnection.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtConnectionActionPerformed(evt);
+            }
+        });
+
+        btnApplicationConnection.setText(org.openide.util.NbBundle.getMessage(DbSchemeSettingsVisualPanel.class, "DbSchemeSettingsVisualPanel.btnApplicationConnection.text")); // NOI18N
+        btnApplicationConnection.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnApplicationConnectionActionPerformed(evt);
             }
         });
 
@@ -181,11 +178,11 @@ public class DbSchemeSettingsVisualPanel extends javax.swing.JPanel {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(comboSchema, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(txtConnection, 0, 274, Short.MAX_VALUE))
+                    .addComponent(txtConnection, 0, 248, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(btnApplicationConnection)
-                    .addComponent(btnDefaultSchema))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(btnApplicationConnection, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnDefaultSchema, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -194,8 +191,8 @@ public class DbSchemeSettingsVisualPanel extends javax.swing.JPanel {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblConnection)
-                    .addComponent(btnApplicationConnection)
-                    .addComponent(txtConnection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtConnection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnApplicationConnection))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblSchema)
@@ -208,10 +205,7 @@ public class DbSchemeSettingsVisualPanel extends javax.swing.JPanel {
     private void btnDefaultSchemaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDefaultSchemaActionPerformed
         try {
             String schema = getDefaultSchema();
-            int schemaIndx = locateSchema(schema);
-            if (schemaIndx != -1) {
-                comboSchema.setSelectedIndex(schemaIndx);
-            }
+            comboSchema.setSelectedIndex(locateSchema(schema));
         } catch (Exception ex) {
             ErrorManager.getDefault().notify(ex);
         }
@@ -221,12 +215,29 @@ public class DbSchemeSettingsVisualPanel extends javax.swing.JPanel {
         try {
             datasourceName = null;
             refreshControls(getDefaultSchema());
+            panel.fireChangeEvent();
         } catch (Exception ex) {
             ErrorManager.getDefault().notify(ex);
         }
     }//GEN-LAST:event_btnApplicationConnectionActionPerformed
+
+    private void txtConnectionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtConnectionActionPerformed
+        if (!refreshingControls) {
+            try {
+                DatabaseConnection conn = (DatabaseConnection) txtConnection.getSelectedItem();
+                datasourceName = conn != null ? conn.getDisplayName() : null;
+                refreshSchemas(conn);                
+                String schema = getDefaultSchema();
+                comboSchema.setSelectedIndex(locateSchema(schema));
+                panel.fireChangeEvent();
+            } catch (Exception ex) {
+                Exceptions.printStackTrace(ex);
+            }
+        }
+    }//GEN-LAST:event_txtConnectionActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JToggleButton btnApplicationConnection;
+    private javax.swing.JButton btnApplicationConnection;
     private javax.swing.JButton btnDefaultSchema;
     private javax.swing.JComboBox comboSchema;
     private javax.swing.JLabel lblConnection;
@@ -234,33 +245,6 @@ public class DbSchemeSettingsVisualPanel extends javax.swing.JPanel {
     private javax.swing.JComboBox txtConnection;
     // End of variables declaration//GEN-END:variables
 
-    /*
-     private void selectNewConnection() throws Exception {
-     Set<String> allowedMimeTypes = new HashSet<>();
-     allowedMimeTypes.add("text/connection+xml");
-     FileObject fo = FileChooser.selectAppElement(panel.getProject().getSrcRoot(), connectionFile, allowedMimeTypes);
-     if (fo != connectionFile) {
-     // let's test connection capability
-     try {
-     DbConnectionSettings settings = readSettings(connectionFile);
-     Properties props = new Properties();
-     props.put("user", settings.getUser());
-     props.put("password", settings.getPassword());
-     props.put("schema", settings.getSchema());
-     java.sql.Connection conn = DriverManager.getConnection(settings.getUrl(), props);
-     conn.close();
-     } catch (Exception ex) {
-     refreshButtons();
-     DialogDescriptor.Message dd = new DialogDescriptor.Message(ex.getMessage(), DialogDescriptor.Message.ERROR_MESSAGE);
-     DialogDisplayer.getDefault().notify(dd);
-     return;
-     }
-     connectionFile = fo;
-     String schema = getDefaultSchema();
-     refreshControls(schema);
-     }
-     }
-     */
     private String checkDefaultSchema(String schema) throws Exception {
         String defSchema = getDefaultSchema();
         if (schema != null && !schema.isEmpty() && schema.equalsIgnoreCase(defSchema)) {

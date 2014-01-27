@@ -22,6 +22,7 @@ import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.queries.PlatypusQuery;
 import com.eas.client.threetier.requests.*;
 import com.eas.util.BinaryUtils;
+import com.eas.util.ListenerRegistration;
 import com.eas.util.StringUtils;
 import java.io.*;
 import java.net.URISyntaxException;
@@ -74,7 +75,6 @@ public abstract class PlatypusClient implements AppClient {
     protected String url;
     protected PlatypusPrincipal principal;
     protected List<Change> changeLog = new ArrayList<>();
-    protected Map<String, DatabaseMdCache> mdCaches = new HashMap<>();
     protected Set<TransactionListener> transactionListeners = new HashSet<>();
 
     public PlatypusClient(String aUrl) throws Exception{
@@ -89,9 +89,9 @@ public abstract class PlatypusClient implements AppClient {
     }
     
     @Override
-    public TransactionListener.Registration addTransactionListener(final TransactionListener aListener) {
+    public ListenerRegistration addTransactionListener(final TransactionListener aListener) {
         transactionListeners.add(aListener);
-        return new TransactionListener.Registration() {
+        return new ListenerRegistration() {
             @Override
             public void remove() {
                 transactionListeners.remove(aListener);

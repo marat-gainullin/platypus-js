@@ -12,6 +12,7 @@ import com.eas.client.login.PrincipalHost;
 import com.eas.client.queries.SqlCompiledQuery;
 import com.eas.client.queries.SqlQuery;
 import com.eas.client.sqldrivers.SqlDriver;
+import com.eas.util.ListenerRegistration;
 import java.util.List;
 import java.util.Set;
 
@@ -22,11 +23,6 @@ import java.util.Set;
 public interface DbClient extends Client {
     
     public interface QueriesListener {
-
-        public interface Registration {
-
-            public void remove();
-        }
 
         public void cleared();
     }
@@ -64,7 +60,7 @@ public interface DbClient extends Client {
     @Override
     public SqlQuery getAppQuery(String aQueryId) throws Exception;
     
-    public QueriesListener.Registration addQueriesListener(QueriesListener aListener);
+    public ListenerRegistration addQueriesListener(QueriesListener aListener);
     
     /**
      * Creates and returns new data flow provider, setted up with settings passed through parameters

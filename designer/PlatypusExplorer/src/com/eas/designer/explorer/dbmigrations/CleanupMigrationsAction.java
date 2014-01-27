@@ -82,9 +82,11 @@ public class CleanupMigrationsAction extends AbstractAction implements ContextAw
             @Override
             public void run() {
                 InputOutput io = IOProvider.getDefault().getIO(project.getDisplayName(), false);
+                /*
                 project.getDbMigrator().setOut(io.getOut());
                 project.getDbMigrator().setErr(io.getErr());
                 project.getDbMigrator().cleanup();
+                        */
             }
         });
         final ProgressHandle ph = ProgressHandleFactory.createHandle(NbBundle.getMessage(CleanupMigrationsAction.class, "LBL_Cleanup_Migrations_Progress"), cleanupTask); // NOI18N  

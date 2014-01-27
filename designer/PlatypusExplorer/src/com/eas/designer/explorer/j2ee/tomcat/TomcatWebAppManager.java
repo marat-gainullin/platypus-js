@@ -182,6 +182,7 @@ public class TomcatWebAppManager implements WebAppManager {
             }
             dataSourceResource.setUsername(connection.getUser());
             dataSourceResource.setPassword(connection.getPassword());
+            dataSourceResource.setSchema(connection.getSchema());
         }
         return resources;
     }
@@ -189,7 +190,7 @@ public class TomcatWebAppManager implements WebAppManager {
     private Realm getRealm() {
         DataSourceRealm realm = new DataSourceRealm();
         realm.setClassName(DATASOURCE_REALM_CLASS_NAME);
-        realm.setDataSourceName(PlatypusWebModule.MAIN_DATASOURCE_NAME);
+        realm.setDataSourceName(project.getSettings().getAppSettings().getDefaultDatasource());
         realm.setUserTable(ClientConstants.T_MTD_USERS);
         realm.setUserNameCol(ClientConstants.F_USR_NAME);
         realm.setUserCredCol(ClientConstants.F_USR_PASSWD);

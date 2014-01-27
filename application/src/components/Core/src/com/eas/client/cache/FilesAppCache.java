@@ -125,17 +125,25 @@ public class FilesAppCache extends AppElementsCache {
     protected Map<String, AppElementFiles> families = new HashMap<>();
     protected WatchService service;
     protected ScanCallback scanCallback;
+    protected boolean autoScan;
 
     public FilesAppCache(String aAppPathName) throws Exception {
-        this(aAppPathName, null);
+        this(aAppPathName, true, null);
     }
 
     public FilesAppCache(String aAppPathName, ScanCallback aScanCallback) throws Exception {
-        super();
+        this(aAppPathName, true, aScanCallback);
+    }
+
+    public FilesAppCache(String aAppPathName, boolean aAutoScan, ScanCallback aScanCallback) throws Exception {
+        super("app-" + String.valueOf(aAppPathName.hashCode()));
+        autoScan = aAutoScan;
         appPathName = aAppPathName;
-        File srcDirectory = checkRootDirectory();
         scanCallback = aScanCallback;
-        scanSource(srcDirectory);
+        if (autoScan) {
+            File srcDirectory = checkRootDirectory();
+            scanSource(srcDirectory);
+        }
     }
 
     @Override
@@ -153,9 +161,9 @@ public class FilesAppCache extends AppElementsCache {
     }
 
     @Override
-    protected void initializeFileCache() throws Exception {
+    protected void initializeFileCache(String aAppNameHash) throws Exception {
         if (secondCacheEnabled) {
-            super.initializeFileCache();
+            super.initializeFileCache(aAppNameHash);
         }
     }
 
@@ -255,6 +263,14 @@ public class FilesAppCache extends AppElementsCache {
         // windows
         return (os.indexOf("win") >= 0);
 
+    }
+
+    public synchronized void rescan() {
+        id2Paths.clear();
+        path2Id.clear();
+        families.clear();
+        File srcDirectory = checkRootDirectory();
+        scanSource(srcDirectory);
     }
 
     private synchronized void scanSource(File aDirectory) {

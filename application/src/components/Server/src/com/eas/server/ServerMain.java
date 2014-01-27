@@ -14,7 +14,6 @@ import com.eas.client.scripts.ScriptRunner;
 import com.eas.debugger.jmx.server.Breakpoints;
 import com.eas.debugger.jmx.server.Debugger;
 import com.eas.debugger.jmx.server.DebuggerMBean;
-import com.eas.debugger.jmx.server.Settings;
 import com.eas.script.ScriptUtils;
 import com.eas.util.StringUtils;
 import java.io.*;
@@ -100,16 +99,20 @@ public class ServerMain {
     }
 
     private static void parseArgs(String[] args, Set<String> aTasksModules) throws Exception {
-        for (int i = 0; i < args.length; i++) {
+        DatasourcesArgsConsumer dsArgs = new DatasourcesArgsConsumer();
+        int i = 0;
+        while (i < args.length) {
             if ((CMD_SWITCHS_PREFIX + APP_URL_CONF_PARAM).equalsIgnoreCase(args[i])) {
                 if (i + 1 < args.length) {
                     url = args[i + 1];
+                    i += 2;
                 } else {
                     printHelp(BAD_APP_URL_MSG);
                 }
             } else if ((CMD_SWITCHS_PREFIX + DEF_DATASOURCE_CONF_PARAM).equalsIgnoreCase(args[i])) {
                 if (i + 1 < args.length) {
                     defDatasource = args[i + 1];
+                    i += 2;
                 } else {
                     printHelp(BAD_DEF_DATASOURCE_MSG);
                 }
@@ -117,47 +120,62 @@ public class ServerMain {
                 if (i + 1 < args.length) {
                     String modulesNames = args[i + 1];
                     aTasksModules.addAll(StringUtils.split(modulesNames, ","));
+                    i += 2;
                 } else {
                     printHelp(BACKGROUND_TASK_WITHOUT_VALUE_MSG);
                 }
             } else if ((CMD_SWITCHS_PREFIX + IFACE_CONF_PARAM).equalsIgnoreCase(args[i])) {
                 if (i + 1 < args.length) {
                     iface = args[i + 1];
+                    i += 2;
                 } else {
                     printHelp(INTERFACES_WITHOUT_VALUE_MSG);
                 }
             } else if ((CMD_SWITCHS_PREFIX + PROTOCOLS_CONF_PARAM).equalsIgnoreCase(args[i])) {
                 if (i + 1 < args.length) {
                     protocols = args[i + 1];
+                    i += 2;
                 } else {
                     printHelp(PROTOCOLS_WITHOUT_VALUE_MSG);
                 }
             } else if ((CMD_SWITCHS_PREFIX + NUM_WORKER_THREADS_CONF_PARAM).equalsIgnoreCase(args[i])) {
                 if (i + 1 < args.length) {
                     numWorkerThreads = args[i + 1];
+                    i += 2;
                 } else {
                     printHelp(PROTOCOLS_WITHOUT_VALUE_MSG);
                 }
             } else if ((CMD_SWITCHS_PREFIX + SESSION_IDLE_TIMEOUT_CONF_PARAM).equalsIgnoreCase(args[i])) {
                 if (i + 1 < args.length) {
                     sessionIdleTimeout = args[i + 1];
+                    i += 2;
                 } else {
                     printHelp(PROTOCOLS_WITHOUT_VALUE_MSG);
                 }
             } else if ((CMD_SWITCHS_PREFIX + SESSION_IDLE_CHECK_INTERVAL_CONF_PARAM).equalsIgnoreCase(args[i])) {
                 if (i + 1 < args.length) {
                     sessionIdleCheckInterval = args[i + 1];
+                    i += 2;
                 } else {
                     printHelp(PROTOCOLS_WITHOUT_VALUE_MSG);
                 }
             } else if ((CMD_SWITCHS_PREFIX + APP_ELEMENT_CONF_PARAM).equalsIgnoreCase(args[i])) {
                 if (i + 1 < args.length) {
+                    i += 2;
                     appElement = args[i + 1];
                 } else {
                     printHelp(BAD_DEFAULT_APPLICATION_ELEMENT_MSG);
                 }
+            } else {
+                int consumed = dsArgs.consume(args, i);
+                if (consumed > 0) {
+                    i += consumed;
+                } else {
+                    throw new IllegalArgumentException("unknown argument: " + args[i]);
+                }
             }
         }
+        dsArgs.registerDatasources();
     }
 
     protected static void registerMBean(String aName, Object aBean) throws Exception {
@@ -179,18 +197,14 @@ public class ServerMain {
         if (url == null || url.isEmpty()) {
             throw new IllegalArgumentException("Application url ( -url parameter) is required.");
         }
-
-        DatasourcesArgsConsumer.consume(args);
-
         SSLContext ctx = createSSLContext();
         AppCache appCache = ClientFactory.obtainTwoTierAppCache(url);
         ScriptedDatabasesClient appDbClient = new ScriptedDatabasesClient(appCache, defDatasource, true, new ServerTasksScanner(tasks));
+        // Apply debugging facility
         if (System.getProperty(ScriptRunner.DEBUG_PROPERTY) != null) {
             Debugger debugger = Debugger.initialize(false);
             registerMBean(DebuggerMBean.DEBUGGER_MBEAN_NAME, debugger);
             registerMBean(Breakpoints.BREAKPOINTS_MBEAN_NAME, Breakpoints.getInstance());
-            // Apply debugging facility
-            registerMBean(Settings.SETTINGS_MBEAN_NAME, new Settings(appDbClient));
         }
         PlatypusServer server = new PlatypusServer(appDbClient, ctx, getListenAddresses(), getPortsProtocols(), getPortsSessionIdleTimeouts(), getPortsSessionIdleCheckIntervals(), getPortsNumWorkerThreads(), tasks, appElement);
         appDbClient.setContextHost(server);

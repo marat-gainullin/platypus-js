@@ -35,6 +35,7 @@ import com.eas.client.queries.SqlCompiledQuery;
 import com.eas.client.queries.SqlQuery;
 import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.client.sqldrivers.SqlDriver;
+import com.eas.util.ListenerRegistration;
 import com.eas.util.StringUtils;
 import java.security.AccessControlException;
 import java.sql.*;
@@ -44,6 +45,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.naming.Context;
 import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.sql.DataSource;
 
 /**
@@ -116,6 +118,18 @@ public class DatabasesClient implements DbClient {
         return defaultDatasourceName;
     }
 
+    public void setDefaultDatasourceName(String aValue) throws Exception {
+        if (defaultDatasourceName == null ? aValue != null : !defaultDatasourceName.equals(aValue)) {
+            defaultDatasourceName = aValue;
+            DatabaseMdCache mdCache = mdCaches.get(null);
+            if (mdCache != null) {
+                mdCache.clear();
+            }
+            mdCaches.remove(null);
+            appEntityChanged(null);
+        }
+    }
+
     public boolean isAutoFillMetadata() {
         return autoFillMetadata;
     }
@@ -124,27 +138,31 @@ public class DatabasesClient implements DbClient {
         if (aDataSourceId == null) {
             aDataSourceId = defaultDatasourceName;
         }
-        Context initContext = new InitialContext();
-        try {
-            // J2EE servers
-            return (DataSource) initContext.lookup(aDataSourceId);
-        } catch (javax.naming.NamingException ex) {
+        if (aDataSourceId != null) {
+            Context initContext = new InitialContext();
             try {
-                // Apache Tomcat component's JNDI context 
-                Context envContext = (Context) initContext.lookup("java:/comp/env"); //NOI18N
-                return (DataSource) envContext.lookup(aDataSourceId);
-            } catch (javax.naming.NamingException ex1) {
-                // Platypus standalone server or client
-                return GeneralResourceProvider.getInstance().getPooledDataSource(aDataSourceId);
+                // J2EE servers
+                return (DataSource) initContext.lookup(aDataSourceId);
+            } catch (NamingException ex) {
+                try {
+                    // Apache Tomcat component's JNDI context 
+                    Context envContext = (Context) initContext.lookup("java:/comp/env"); //NOI18N
+                    return (DataSource) envContext.lookup(aDataSourceId);
+                } catch (NamingException ex1) {
+                    // Platypus standalone server or client
+                    return GeneralResourceProvider.getInstance().getPooledDataSource(aDataSourceId);
+                }
             }
+        } else {
+            throw new NamingException("Null datasource name is not allowed (Default datasource name is null also).");
         }
     }
 
     @Override
-    public TransactionListener.Registration addTransactionListener(final TransactionListener aListener) {
+    public ListenerRegistration addTransactionListener(final TransactionListener aListener) {
         synchronized (transacted) {
             transactionListeners.add(aListener);
-            return new TransactionListener.Registration() {
+            return new ListenerRegistration() {
                 @Override
                 public void remove() {
                     synchronized (transacted) {
@@ -156,10 +174,10 @@ public class DatabasesClient implements DbClient {
     }
 
     @Override
-    public QueriesListener.Registration addQueriesListener(final QueriesListener aListener) {
+    public ListenerRegistration addQueriesListener(final QueriesListener aListener) {
         synchronized (queriesListeners) {
             queriesListeners.add(aListener);
-            return new QueriesListener.Registration() {
+            return new ListenerRegistration() {
                 @Override
                 public void remove() {
                     synchronized (queriesListeners) {
@@ -312,15 +330,6 @@ public class DatabasesClient implements DbClient {
         }
     }
 
-    public void clearDbStatements(String aDatasourceId) throws Exception {
-        if (aDatasourceId == null) {
-            //resourceProvider.clearPoolStatements(aDatasourceId);
-        } else {
-            // removePool will clear statments, so no need to additional and non-atomic call
-            //resourceProvider.removePool(aDatasourceId);
-        }
-    }
-
     @Override
     public int executeUpdate(SqlCompiledQuery aQuery) throws Exception {
         int rowsAffected = 0;
@@ -372,7 +381,7 @@ public class DatabasesClient implements DbClient {
                 try {
                     cache.fillTablesCacheByConnectionSchema(true);
                 } catch (ResourceUnavalableException ex) {
-                    Logger.getLogger(DatabasesClient.class.getName()).log(Level.INFO, ex.getMessage());
+                    Logger.getLogger(DatabasesClient.class.getName()).log(Level.WARNING, ex.getMessage());
                 }
             }
         }
@@ -551,28 +560,16 @@ public class DatabasesClient implements DbClient {
             appCache.clear();
         }
         queries.clearCache();
-        clearDbStatements(null);
         fireQueriesCleared();
     }
 
     @Override
-    public void appEntityChanged(String aEntityId) throws Exception {
+    public synchronized void appEntityChanged(String aEntityId) throws Exception {
         if (aEntityId != null) {
             AppCache cache = getAppCache();
             ApplicationElement appElement = cache.get(aEntityId);
-            if (appElement != null) {
-                if (appElement.getType() == ClientConstants.ET_QUERY) {
-                    //queries.clearCache(aEntityId);// Bad solution. There are may be some queries, using this query and so on.
-                    clearQueries(null);// possible overhead, but this is better way than previous.
-                } else if (appElement.getType() == 10) {// TODO: migrate to a new way
-                    DbMetadataCache dbMdCache = getDbMetadataCache(aEntityId);
-                    if (dbMdCache != null) {
-                        dbMdCache.clear();
-                    }
-                    clearQueries(null);// possible overhead, but this is better way than previous.
-                }
-            } else {
-                clearQueries(null);// possible overhead, but this is better way than previous.
+            if (appElement != null && (appElement.getType() == ClientConstants.ET_QUERY || appElement.getType() == ClientConstants.ET_COMPONENT)) {
+                clearQueries();
             }
             cache.remove(aEntityId);
         } else {
@@ -580,22 +577,21 @@ public class DatabasesClient implements DbClient {
         }
     }
 
-    protected void clearQueries(String aDatasourceId) throws Exception {
-        clearDbStatements(null);
+    public void clearQueries() throws Exception {
         queries.clearCache();
         fireQueriesCleared();
     }
 
     @Override
-    public void dbTableChanged(String aDatasourceId, String aSchema, String aTable) throws Exception {
-        DbMetadataCache cache = getDbMetadataCache(aDatasourceId);
+    public void dbTableChanged(String aDatasourceName, String aSchema, String aTable) throws Exception {
+        DbMetadataCache cache = getDbMetadataCache(aDatasourceName);
         String fullTableName = aTable;
         if (aSchema != null && !aSchema.isEmpty()) {
             fullTableName = aSchema + "." + fullTableName;
         }
         cache.removeTableMetadata(fullTableName);
         cache.removeTableIndexes(fullTableName);
-        clearQueries(aDatasourceId);
+        clearQueries();
     }
 
     /**
@@ -627,7 +623,13 @@ public class DatabasesClient implements DbClient {
     @Override
     public String getConnectionSchema(String aDatasourceId) throws Exception {
         DataSource ds = obtainDataSource(aDatasourceId);
-        return ds != null ? schemaByConnection(ds.getConnection()) : null;
+        if (ds != null) {
+            try (Connection conn = ds.getConnection()) {
+                return schemaByConnection(conn);
+            }
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -721,7 +723,16 @@ public class DatabasesClient implements DbClient {
             lconn.setAutoCommit(false);
             String dialect = dialectByConnection(lconn);
             SqlDriver driver = SQLUtils.getSqlDriver(dialect);
-            driver.initializeApplication(lconn);
+            driver.initializeUsersSpace(lconn);
+        }
+    }
+
+    public static void initVersioning(DataSource aSource) throws Exception {
+        try (Connection lconn = aSource.getConnection()) {
+            lconn.setAutoCommit(false);
+            String dialect = dialectByConnection(lconn);
+            SqlDriver driver = SQLUtils.getSqlDriver(dialect);
+            driver.initializeVersion(lconn);
         }
     }
 }

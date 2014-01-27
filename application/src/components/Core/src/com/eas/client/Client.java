@@ -6,6 +6,7 @@ package com.eas.client;
 
 import com.bearsoft.rowset.dataflow.TransactionListener;
 import com.eas.client.queries.Query;
+import com.eas.util.ListenerRegistration;
 
 /**
  * Interface, declaring work with metadata caches, login/logout, resources and transactions
@@ -44,7 +45,7 @@ public interface Client {
      */
     public AppCache getAppCache() throws Exception;
 
-    public TransactionListener.Registration addTransactionListener(TransactionListener aListener);
+    public ListenerRegistration addTransactionListener(TransactionListener aListener);
     
     /**
      * Performs all necessary work on inner structures, such as caches, according to

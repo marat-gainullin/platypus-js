@@ -39,7 +39,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.StringReader;
-import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -75,7 +74,7 @@ public class QueryResultsView extends javax.swing.JPanel {
     private final PlatypusQueryDataObject queryDataObject;
     private QuerySetupView querySetupView;
     private DbGrid dbGrid;
-    private DbClient client;
+    private final DbClient client;
     private String queryText;
     private Parameters parameters;
     private ApplicationDbModel model;
@@ -88,10 +87,10 @@ public class QueryResultsView extends javax.swing.JPanel {
     private static final int[] pageSizes = {100, 200, 500, 1000};
     private PageSizeItem[] pageSizeItems;
     private int pageSize;
-    private String entityId = IDGenerator.genID().toString();
+    private final String entityId = IDGenerator.genID().toString();
     private String dbId;
     private String queryId;
-    private RowsetConverter converter = new RowsetConverter();
+    private final RowsetConverter converter = new RowsetConverter();
 
     public QueryResultsView(PlatypusQueryDataObject aQueryDataObject) throws Exception {
         super();
@@ -251,22 +250,24 @@ public class QueryResultsView extends javax.swing.JPanel {
         showInfo(""); // NOI18N
     }
 
-    private void showInfo(final String str) {
+    private void showInfo(final String aText) {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
                 messageLabel.setForeground(UIManager.getColor(DEFAULT_TEXT_COLOR_KEY));
-                messageLabel.setText(str);
+                messageLabel.setText(aText);
+                messageLabel.setCaretPosition(0);
             }
         });
     }
 
-    private void showWarning(final String str) {
+    private void showWarning(final String aText) {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
                 messageLabel.setForeground(Color.RED.darker());
-                messageLabel.setText(str);
+                messageLabel.setText(aText);
+                messageLabel.setCaretPosition(0);
             }
         });
     }
@@ -293,7 +294,7 @@ public class QueryResultsView extends javax.swing.JPanel {
         if (logger.isLoggable(Level.FINEST)) {
             for (int i = 1; i <= parameters.getParametersCount(); i++) {
                 Parameter p = parameters.get(i);
-                logger.log(Level.FINEST, "Parameter {0} of type {1} is assigned value {2}", new Object[]{p.getName(), p.getTypeInfo().getSqlTypeName(), p.getValue()});
+                logger.log(Level.FINEST, "Parameter {0} of type {1} is assigned with value: {2}", new Object[]{p.getName(), p.getTypeInfo().getSqlTypeName(), p.getValue()});
             }
         }
     }
@@ -318,7 +319,9 @@ public class QueryResultsView extends javax.swing.JPanel {
         resultsPanel = new javax.swing.JPanel();
         gridPanel = new javax.swing.JPanel();
         footerPanel = new javax.swing.JPanel();
-        messageLabel = new javax.swing.JLabel();
+        messageLabel = new javax.swing.JTextField();
+
+        setLayout(new java.awt.BorderLayout());
 
         toolBar.setFloatable(false);
         toolBar.setOrientation(javax.swing.SwingConstants.VERTICAL);
@@ -402,47 +405,24 @@ public class QueryResultsView extends javax.swing.JPanel {
         toolBar.add(runButton);
         toolBar.add(verticalFiller);
 
+        add(toolBar, java.awt.BorderLayout.WEST);
+
         resultsPanel.setLayout(new java.awt.BorderLayout());
 
         gridPanel.setLayout(new java.awt.BorderLayout());
         resultsPanel.add(gridPanel, java.awt.BorderLayout.CENTER);
 
-        footerPanel.setPreferredSize(new java.awt.Dimension(371, 20));
+        footerPanel.setPreferredSize(new java.awt.Dimension(10, 22));
+        footerPanel.setLayout(new java.awt.BorderLayout());
 
-        messageLabel.setText(org.openide.util.NbBundle.getMessage(QueryResultsView.class, "QueryResultsView.messageLabel.text")); // NOI18N
-
-        javax.swing.GroupLayout footerPanelLayout = new javax.swing.GroupLayout(footerPanel);
-        footerPanel.setLayout(footerPanelLayout);
-        footerPanelLayout.setHorizontalGroup(
-            footerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(footerPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(messageLabel)
-                .addContainerGap(308, Short.MAX_VALUE))
-        );
-        footerPanelLayout.setVerticalGroup(
-            footerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(footerPanelLayout.createSequentialGroup()
-                .addComponent(messageLabel)
-                .addGap(0, 5, Short.MAX_VALUE))
-        );
+        messageLabel.setEditable(false);
+        messageLabel.setBorder(null);
+        messageLabel.setOpaque(false);
+        footerPanel.add(messageLabel, java.awt.BorderLayout.CENTER);
 
         resultsPanel.add(footerPanel, java.awt.BorderLayout.SOUTH);
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
-        this.setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addComponent(toolBar, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(resultsPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(toolBar, javax.swing.GroupLayout.DEFAULT_SIZE, 300, Short.MAX_VALUE)
-            .addComponent(resultsPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        );
+        add(resultsPanel, java.awt.BorderLayout.CENTER);
     }// </editor-fold>//GEN-END:initComponents
 
     private void runButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_runButtonActionPerformed
@@ -545,7 +525,7 @@ public class QueryResultsView extends javax.swing.JPanel {
     private javax.swing.JButton deleteButton;
     private javax.swing.JPanel footerPanel;
     private javax.swing.JPanel gridPanel;
-    private javax.swing.JLabel messageLabel;
+    private javax.swing.JTextField messageLabel;
     private javax.swing.JButton nextPageButton;
     private javax.swing.JButton refreshButton;
     private javax.swing.JPanel resultsPanel;

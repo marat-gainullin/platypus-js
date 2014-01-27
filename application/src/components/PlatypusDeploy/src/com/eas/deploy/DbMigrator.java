@@ -322,6 +322,10 @@ public class DbMigrator extends BaseDeployer {
     void initUsersSpace() throws Exception {
         DatabasesClient.initUsersSpace(client.obtainDataSource(null));
     }
+    
+    void initVersioning() throws Exception {
+        DatabasesClient.initVersioning(client.obtainDataSource(null));
+    }
 
     private static class MigrationsFilesFilter implements FilenameFilter {
 

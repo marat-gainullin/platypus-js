@@ -15,13 +15,14 @@ import com.eas.client.model.gui.selectors.SelectedParameter;
 import com.eas.client.model.gui.view.ModelSelectionListener;
 import com.eas.client.model.gui.view.entities.EntityView;
 import com.eas.client.model.gui.view.model.DbSchemeModelView;
-import com.eas.designer.application.HandlerRegistration;
+import com.eas.designer.application.project.PlatypusProject;
 import com.eas.designer.application.query.result.QueryResultTopComponent;
 import com.eas.designer.application.query.result.QueryResultsView;
 import com.eas.designer.datamodel.nodes.EntityNode;
 import com.eas.designer.datamodel.nodes.FieldNode;
 import com.eas.designer.explorer.model.windows.ModelInspector;
 import com.eas.designer.explorer.selectors.TablesSelector;
+import com.eas.util.ListenerRegistration;
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.beans.PropertyChangeEvent;
@@ -45,6 +46,7 @@ import org.openide.ErrorManager;
 import org.openide.awt.UndoRedo;
 import org.openide.explorer.ExplorerManager;
 import org.openide.nodes.Node;
+import org.openide.util.Exceptions;
 import org.openide.util.ImageUtilities;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
@@ -129,8 +131,8 @@ public class PlatypusDbDiagramView extends CloneableTopComponent {
     protected transient DbSchemeEditorView editor;
     protected transient DataObjectListener dataObjectListener;
     protected transient NodeSelectionListener exlorerSelectionListener = new NodeSelectionListener();
-    protected transient HandlerRegistration clientChangeListener;
-    protected transient HandlerRegistration modelValidChangeListener;
+    protected transient ListenerRegistration clientChangeListener;
+    protected transient ListenerRegistration modelValidChangeListener;
 
     public PlatypusDbDiagramView() throws Exception {
         super();
@@ -151,19 +153,62 @@ public class PlatypusDbDiagramView extends CloneableTopComponent {
         dataObjectListener = new DataObjectListener();
         setName(dataObject.getPrimaryFile().getName());
         setToolTipText(NbBundle.getMessage(PlatypusDbDiagramView.class, "HINT_PlatypusDbDiagramTopComponent", dataObject.getPrimaryFile().getPath()));
-        initComponents();
-        Runnable componentsIniter = new Runnable() {
+        initDbRelatedViews();
+
+        modelValidChangeListener = dataObject.addModelValidChangeListener(new Runnable() {
             @Override
             public void run() {
                 try {
-                    initComponents();
+                    initDbRelatedViews();
                 } catch (Exception ex) {
                     ErrorManager.getDefault().notify(ex);
                 }
             }
-        };
-        clientChangeListener = dataObject.addClientChangeListener(componentsIniter);
-        modelValidChangeListener = dataObject.addModelValidChangeListener(componentsIniter);
+        });
+        clientChangeListener = dataObject.addClientChangeListener(new PlatypusProject.ClientChangeListener() {
+
+            @Override
+            public void connected(String aDatasourceName) {
+                try {
+                    String dsName = dataObject.getModel().getDbId();
+                    if (dsName == null) {
+                        dsName = dataObject.getProject().getSettings().getAppSettings().getDefaultDatasource();
+                    }
+                    if (dsName == null ? aDatasourceName == null : dsName.equals(aDatasourceName)) {
+                        initDbRelatedViews();
+                    }
+                } catch (Exception ex) {
+                    Exceptions.printStackTrace(ex);
+                }
+            }
+
+            @Override
+            public void disconnected(String aDatasourceName) {
+                try {
+                    String dsName = dataObject.getModel().getDbId();
+                    if (dsName == null) {
+                        dsName = dataObject.getProject().getSettings().getAppSettings().getDefaultDatasource();
+                    }
+                    if (dsName == null ? aDatasourceName == null : dsName.equals(aDatasourceName)) {
+                        initDbRelatedViews();
+                    }
+                } catch (Exception ex) {
+                    Exceptions.printStackTrace(ex);
+                }
+            }
+
+            @Override
+            public void defaultDatasourceNameChanged(String aOldDatasourceName, String aNewDatasourceName) {
+                try {
+                    if (dataObject.getModel().getDbId() == null && dataObject.isModelValid()) {
+                        dataObject.setModelValid(false);
+                        dataObject.startModelValidating();
+                    }
+                } catch (Exception ex) {
+                    Exceptions.printStackTrace(ex);
+                }
+            }
+        });
     }
 
     @Override
@@ -202,7 +247,7 @@ public class PlatypusDbDiagramView extends CloneableTopComponent {
         }
     }
 
-    private void initComponents() throws Exception {
+    private void initDbRelatedViews() throws Exception {
         removeAll();
         setLayout(new BorderLayout());
         if (dataObject.getProject().isDbConnected(dataObject.getModel().getDbId())) {
@@ -211,28 +256,28 @@ public class PlatypusDbDiagramView extends CloneableTopComponent {
                     editor.setModel(null);
                 }
                 editor = new DbSchemeEditorView(dataObject.getModel(),
-                        new TablesSelector(dataObject.getPrimaryFile(), dataObject.getClient(),
-                        NbBundle.getMessage(PlatypusDbDiagramView.class, "HINT_PlatypusDbDiagramTopComponent", dataObject.getPrimaryFile().getName()), PlatypusDbDiagramView.this),
+                        new TablesSelector(dataObject.getProject(),
+                                NbBundle.getMessage(PlatypusDbDiagramView.class, "HINT_PlatypusDbDiagramTopComponent", dataObject.getPrimaryFile().getName()), PlatypusDbDiagramView.this),
                         new UndoManager() {
-                    @Override
-                    public synchronized boolean addEdit(UndoableEdit anEdit) {
-                        ((UndoRedo.Manager) getUndoRedo()).undoableEditHappened(new UndoableEditEvent(this, anEdit));
-                        return true;
-                    }
-                }, new RunQueryCallback() {
-                    @Override
-                    public void runQuery(DbClient aClient, String aDbId, String aSchemaName, String aTableName) {
-                        try {
-                            QueryResultsView resultsView = new QueryResultsView(aClient, aDbId, aSchemaName, aTableName);
-                            QueryResultTopComponent window = (QueryResultTopComponent) WindowManager.getDefault().findTopComponent(QUERY_RESULT_TOPCOMPONENT_PREFFERED_ID);
-                            window.openAtTabPosition(0);
-                            window.addResultsView(resultsView);
-                            window.requestActive();
-                        } catch (Exception ex) {
-                            ErrorManager.getDefault().notify(ex);
-                        }
-                    }
-                });
+                            @Override
+                            public synchronized boolean addEdit(UndoableEdit anEdit) {
+                                ((UndoRedo.Manager) getUndoRedo()).undoableEditHappened(new UndoableEditEvent(this, anEdit));
+                                return true;
+                            }
+                        }, new RunQueryCallback() {
+                            @Override
+                            public void runQuery(DbClient aClient, String aDbId, String aSchemaName, String aTableName) {
+                                try {
+                                    QueryResultsView resultsView = new QueryResultsView(aClient, aDbId, aSchemaName, aTableName);
+                                    QueryResultTopComponent window = (QueryResultTopComponent) WindowManager.getDefault().findTopComponent(QUERY_RESULT_TOPCOMPONENT_PREFFERED_ID);
+                                    window.openAtTabPosition(0);
+                                    window.addResultsView(resultsView);
+                                    window.requestActive();
+                                } catch (Exception ex) {
+                                    ErrorManager.getDefault().notify(ex);
+                                }
+                            }
+                        });
                 add(editor, BorderLayout.CENTER);
                 updateTitle();
                 dataObject.addPropertyChangeListener(dataObjectListener);
@@ -333,7 +378,7 @@ public class PlatypusDbDiagramView extends CloneableTopComponent {
     @Override
     protected void componentActivated() {
         try {
-            if (dataObject.isValid() && dataObject.getClient() != null) {
+            if (dataObject.isValid() && dataObject.getClient() != null && dataObject.isModelValid()) {
                 ModelInspector.getInstance().setNodesReflector(exlorerSelectionListener);
                 ModelInspector.getInstance().setViewData(new ModelInspector.ViewData<>(getModelView(), getUndoRedo(), dataObject.getModelNode()));
                 WindowManager wm = WindowManager.getDefault();

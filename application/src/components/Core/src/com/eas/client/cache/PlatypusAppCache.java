@@ -20,7 +20,7 @@ public class PlatypusAppCache extends AppElementsCache{
     protected AppClient client;
     
     public PlatypusAppCache(AppClient aClient) throws Exception{
-        super();
+        super("app-" + String.valueOf(aClient.getUrl().hashCode()));
         client = aClient;
     }
 

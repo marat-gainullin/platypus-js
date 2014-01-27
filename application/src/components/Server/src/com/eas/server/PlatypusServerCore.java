@@ -22,12 +22,12 @@ import com.eas.client.scripts.ScriptRunner;
 import com.eas.debugger.jmx.server.Breakpoints;
 import com.eas.debugger.jmx.server.Debugger;
 import com.eas.debugger.jmx.server.DebuggerMBean;
-import com.eas.debugger.jmx.server.Settings;
 import com.eas.script.JsDoc;
 import com.eas.script.ScriptUtils;
 import com.eas.server.filter.AppElementsFilter;
 import java.io.File;
 import java.lang.management.ManagementFactory;
+import java.net.URI;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -65,7 +65,7 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
                 if (aApplicationUrl.startsWith("jndi")) {
                     serverCoreDbClient = new ScriptedDatabasesClient(new DatabaseAppCache(aApplicationUrl), aDefaultDatasourceName, true, new ServerTasksScanner(tasks));
                 } else {// file://
-                    File f = new File(aApplicationUrl);
+                    File f = new File(new URI(aApplicationUrl));
                     if (f.exists() && f.isDirectory()) {
                         FilesAppCache filesAppCache = new FilesAppCache(f.getPath());
                         filesAppCache.watch();
@@ -89,8 +89,6 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
                 registerMBean(DebuggerMBean.DEBUGGER_MBEAN_NAME, debugger);
                 unRegisterMBean(Breakpoints.BREAKPOINTS_MBEAN_NAME);
                 registerMBean(Breakpoints.BREAKPOINTS_MBEAN_NAME, Breakpoints.getInstance());
-                unRegisterMBean(Settings.SETTINGS_MBEAN_NAME);
-                registerMBean(Settings.SETTINGS_MBEAN_NAME, new Settings(serverCoreDbClient));
             }
             instance.startServerTasks();
         }

@@ -25,7 +25,7 @@ public class DatabaseAppCache extends AppElementsCache {
     protected DbClient client;
 
     public DatabaseAppCache(String aAppDatabaseJndiName) throws Exception {
-        super();
+        super("app-" + String.valueOf(aAppDatabaseJndiName.hashCode()));
         if (!aAppDatabaseJndiName.startsWith(APP_URL_PREFIX)) {
             throw new IllegalArgumentException("Application jndi url must start with " + APP_URL_PREFIX + " prefix.");
         }

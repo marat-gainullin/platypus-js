@@ -32,7 +32,9 @@ import org.mozilla.javascript.ScriptRuntime;
 import org.mozilla.javascript.Scriptable;
 
 /**
- * Multi data source client. It allows to use js modules as datasources, validators and appliers.
+ * Multi data source client. It allows to use js modules as datasources,
+ * validators and appliers.
+ *
  * @author mg
  */
 public class ScriptedDatabasesClient extends DatabasesClient {
@@ -194,8 +196,8 @@ public class ScriptedDatabasesClient extends DatabasesClient {
     }
 
     @Override
-    protected void clearQueries(String aDbId) throws Exception {
-        super.clearQueries(aDbId);
+    public void clearQueries() throws Exception {
+        super.clearQueries();
         scriptedQueries.clear();
     }
 
@@ -203,17 +205,27 @@ public class ScriptedDatabasesClient extends DatabasesClient {
     public void appEntityChanged(String aEntityId) throws Exception {
         super.appEntityChanged(aEntityId);
         if (scriptedQueries.containsKey(aEntityId)) {
-            clearQueries(null);
+            clearQueries();
         }
     }
 
     @Override
     public SqlQuery getAppQuery(final String aQueryId, boolean aCopy) throws Exception {
-        SqlQuery query = super.getAppQuery(aQueryId, aCopy);
+        SqlQuery query = scriptedQueries.get(aQueryId);
         if (query == null) {
-            query = scriptedQueries.get(aQueryId);
+            query = super.getAppQuery(aQueryId, aCopy);
         }
         return query;
+    }
+
+    @Override
+    public synchronized DbMetadataCache getDbMetadataCache(String aDatasourceId) throws Exception {
+        ApplicationElement appElement = getAppCache().get(aDatasourceId);
+        if (appElement == null || appElement.getType() != ClientConstants.ET_COMPONENT) {
+            return super.getDbMetadataCache(aDatasourceId);
+        } else {
+            return null;
+        }
     }
 
     protected ScriptRunner createModule(Context cx, String aModuleName) throws Exception {

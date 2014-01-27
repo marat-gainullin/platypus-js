@@ -10,7 +10,6 @@ import com.bearsoft.rowset.compacts.CompactClob;
 import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.ClientConstants;
 import com.eas.client.DatabasesClient;
-import com.eas.client.DbClient;
 import com.eas.client.cache.AppElementFiles;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.cache.PlatypusFilesSupport;

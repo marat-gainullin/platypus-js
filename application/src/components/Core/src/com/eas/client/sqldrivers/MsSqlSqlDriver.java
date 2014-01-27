@@ -384,6 +384,11 @@ public class MsSqlSqlDriver extends SqlDriver {
     }
     
     @Override
+    public String getVersionInitResourceName() {
+        return "/" + MsSqlSqlDriver.class.getPackage().getName().replace(".", "/") + "/sqlscripts/MsSqlInitVersion.sql";
+    }
+    
+    @Override
     public Set<Integer> getSupportedJdbcDataTypes() {
         return resolver.getSupportedJdbcDataTypes();
     }

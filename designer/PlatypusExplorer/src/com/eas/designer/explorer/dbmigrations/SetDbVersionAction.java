@@ -54,7 +54,7 @@ public class SetDbVersionAction extends AbstractAction implements ContextAwareAc
                                     NbBundle.getMessage(SetDbVersionAction.class, "CTL_SetDbVersionAction_Dialog_Msg"), // NOI18N
                                     NbBundle.getMessage(SetDbVersionAction.class, "CTL_SetDbVersionAction_Dialog_Title") // NOI18N
                                     );
-                            d.setInputText(String.valueOf(project.getDbMigrator().getCurrentDbVersion()));
+                            //d.setInputText(String.valueOf(project.getDbMigrator().getCurrentDbVersion()));
                             if (DialogDisplayer.getDefault().notify(d) == NotifyDescriptor.OK_OPTION) {
                                 try {
                                     int n = Integer.parseInt(d.getInputText());
@@ -91,7 +91,7 @@ public class SetDbVersionAction extends AbstractAction implements ContextAwareAc
         RequestProcessor.Task setDbVersionTask = RP.create(new Runnable() {
             @Override
             public void run() {
-                project.getDbMigrator().setCurrentDbVersion(version);
+                //project.getDbMigrator().setCurrentDbVersion(version);
             }
         });
         final ProgressHandle ph = ProgressHandleFactory.createHandle(NbBundle.getMessage(SetDbVersionAction.class, "LBL_LBL_Set_Db_Version_Progress"), setDbVersionTask); // NOI18N  

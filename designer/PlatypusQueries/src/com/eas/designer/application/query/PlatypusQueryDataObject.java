@@ -45,7 +45,6 @@ import java.io.StringReader;
 import java.util.*;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.EditorKit;
-import javax.swing.undo.UndoableEdit;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.TablesFinder;
 import net.sf.jsqlparser.TablesFinder.TO_CASE;
@@ -146,24 +145,6 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         super.dispose();
     }
 
-    @Override
-    protected void clientChanged() {
-        if (model != null) {
-            try {
-                DbClient client = getClient();
-                model.setClient(client);
-                refreshOutputFields();
-                if (client != null) {
-                    PlatypusQuerySupport support = getLookup().lookup(PlatypusQuerySupport.class);
-                    UndoableEdit edit = support.complementSqlTextEdit(null);
-                    support.getModelUndo().addEdit(edit);
-                }
-            } catch (Exception ex) {
-                ErrorManager.getDefault().notify(ex);
-            }
-        }
-    }
-
     protected void readQuery() throws Exception {
         sqlText = getPrimaryFile().asText(PlatypusUtils.COMMON_ENCODING_NAME);
         if (dialectEntry.getFile() != getPrimaryFile()) {
@@ -252,8 +233,8 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
             model.setDbId(aValue);
         }
         firePropertyChange(CONN_PROP_NAME, oldValue, aValue);
-        if ((oldValue == null && aValue != null) || (oldValue != null && !oldValue.equals(aValue))) {
-            refreshOutputFields();
+        if (getClient() != null) {
+            getClient().appEntityChanged(IndexerQuery.file2AppElementId(getPrimaryFile()));
         }
     }
 
@@ -419,7 +400,10 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         }
     }
 
-    public void shrink() {
+    public void shrink() throws IOException {
+        if (modelNode != null) {
+            modelNode.destroy();
+        }
         modelNode = null;
         statement = null;
         commitedStatement = null;
@@ -460,7 +444,7 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
             try {
                 getClient().appEntityChanged(IndexerQuery.file2AppElementId(getPrimaryFile()));
             } finally {
-                signOnQueries();
+                resignOnQueries();
             }
         }
     }

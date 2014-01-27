@@ -48,7 +48,7 @@ public class AddDdMetadataMigrationAction extends AbstractAction implements Cont
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     try {
-                        createDbMetadataMigration(project);
+                        //createDbMetadataMigration(project);
                     } catch (Exception ex) {
                         Exceptions.printStackTrace(ex);
                     }
@@ -68,6 +68,7 @@ public class AddDdMetadataMigrationAction extends AbstractAction implements Cont
         }
     }
 
+    /*
     private void createDbMetadataMigration(final PlatypusProjectImpl project) {
         RequestProcessor.Task createMigrationTask = RP.create(new Runnable() {
             @Override
@@ -94,4 +95,5 @@ public class AddDdMetadataMigrationAction extends AbstractAction implements Cont
         ph.start();
         createMigrationTask.schedule(0);
     }
+    */
 }

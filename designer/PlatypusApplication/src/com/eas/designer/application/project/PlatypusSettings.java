@@ -36,7 +36,7 @@ public class PlatypusSettings {
         Document doc = builder.newDocument();
         doc.setXmlStandalone(true);
         Element rootTag = doc.createElement(CONTEXT_TAG_NAME);
-        if (defaultDatasource != null) {
+        if (defaultDatasource != null && !defaultDatasource.isEmpty()) {
             rootTag.setAttribute(DEFAULT_DATASOURCE_ATTR_NAME, defaultDatasource);
         }
         doc.appendChild(rootTag);
@@ -62,7 +62,10 @@ public class PlatypusSettings {
         NodeList projectNl = aDoc.getElementsByTagName(CONTEXT_TAG_NAME);
         if (projectNl != null && projectNl.getLength() == 1 && projectNl.item(0) instanceof Element) {
             Element projectTag = (Element) projectNl.item(0);
-            platypusSettings.defaultDatasource = projectTag.getAttribute(DEFAULT_DATASOURCE_ATTR_NAME);
+            String defDatasource = projectTag.getAttribute(DEFAULT_DATASOURCE_ATTR_NAME);
+            if (defDatasource != null && !defDatasource.isEmpty()) {
+                platypusSettings.defaultDatasource = defDatasource;
+            }
             Element runTag = getElementByName(projectTag, RUN_CONFIGURATION_TAG_NAME);
             if (runTag != null) {
                 String sRunningElement = runTag.getAttribute(RUNNING_ELEMENT_ATTR_NAME);

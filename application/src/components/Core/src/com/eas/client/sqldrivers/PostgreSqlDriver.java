@@ -322,6 +322,11 @@ public class PostgreSqlDriver extends SqlDriver {
     }
     
     @Override
+    public String getVersionInitResourceName() {
+        return "/" + PostgreSqlDriver.class.getPackage().getName().replace(".", "/") + "/sqlscripts/PostgreInitVersion.sql";
+    }
+    
+    @Override
     public Set<Integer> getSupportedJdbcDataTypes() {
         return resolver.getSupportedJdbcDataTypes();
     }

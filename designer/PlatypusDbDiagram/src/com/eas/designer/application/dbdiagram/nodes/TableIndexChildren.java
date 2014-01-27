@@ -9,6 +9,7 @@ import com.eas.client.metadata.DbTableIndexSpec;
 import com.eas.client.model.dbscheme.FieldsEntity;
 import com.eas.designer.application.dbdiagram.nodes.TableIndexChildren.DbTableIndexColumnKey;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.List;
 import org.openide.nodes.Children;
@@ -25,6 +26,7 @@ public class TableIndexChildren extends Children.Keys<DbTableIndexColumnKey> {
     java.util.Map<DbTableIndexColumnSpec, DbTableIndexColumnKey> keysMap = new IdentityHashMap<>();
 
     public TableIndexChildren(DbTableIndexSpec anIndex, FieldsEntity aTableEntity) {
+        super();
         index = anIndex;
         tableEntity = aTableEntity;
     }
@@ -36,6 +38,13 @@ public class TableIndexChildren extends Children.Keys<DbTableIndexColumnKey> {
     @Override
     protected void addNotify() {
         setKeys(getKeys());
+        super.addNotify();
+    }
+
+    @Override
+    protected void removeNotify() {
+        setKeys(Collections.EMPTY_LIST);
+        super.removeNotify();
     }
 
     @Override

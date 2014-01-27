@@ -9,12 +9,14 @@ import com.eas.client.model.Entity;
 import com.eas.client.model.Model;
 import com.eas.client.model.ModelEditingListener;
 import com.eas.client.model.Relation;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import org.openide.ErrorManager;
 import org.openide.awt.UndoRedo;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
+import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 
 /**
@@ -31,7 +33,6 @@ public abstract class ModelNodeChildren<E extends Entity<?, ?, E>, MV extends Mo
     public ModelNodeChildren(MV aModel, UndoRedo.Manager aUndoReciever, Lookup aLookup) {
         super();
         model = aModel;
-        model.addEditingListener(this);
         undoReciever = aUndoReciever;
         undoRecordrer = new EntityNodePropertiesUndoRecorder(aUndoReciever);
         lookup = aLookup;
@@ -39,18 +40,20 @@ public abstract class ModelNodeChildren<E extends Entity<?, ?, E>, MV extends Mo
 
     @Override
     protected void addNotify() {
+        model.addEditingListener(this);
         setKeys(getKeys());
     }
 
     @Override
-    protected void removeNotify() {
+    public void removeNotify() {
+        model.removeEditingListener(this);
         setKeys(Collections.EMPTY_SET);
     }
 
     @Override
     protected Node[] createNodes(Object key) {
         try {
-            Node createdNode = createNode((E)key);
+            Node createdNode = createNode((E) key);
             createdNode.addPropertyChangeListener(undoRecordrer);
             return new Node[]{createdNode};
         } catch (Exception ex) {
@@ -58,21 +61,26 @@ public abstract class ModelNodeChildren<E extends Entity<?, ?, E>, MV extends Mo
             return null;
         }
     }
-    
+
     protected Collection getKeys() {
         return model.getAllEntities().values();
     }
 
     @Override
     protected void destroyNodes(Node[] aNodes) {
-        super.destroyNodes(aNodes);
-        for (Node node : aNodes) {
-            node.removePropertyChangeListener(undoRecordrer);
+        try {
+            for (Node node : aNodes) {
+                node.removePropertyChangeListener(undoRecordrer);
+                node.destroy();
+            }
+            super.destroyNodes(aNodes);
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
         }
     }
 
     protected abstract EntityNode<E> createNode(E key) throws Exception;
-    
+
     @Override
     public void entityAdded(E e) {
         setKeys(getKeys());

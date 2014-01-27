@@ -541,6 +541,11 @@ public class Db2SqlDriver extends SqlDriver {
     }
     
     @Override
+    public String getVersionInitResourceName() {
+        return "/" + Db2SqlDriver.class.getPackage().getName().replace(".", "/") + "/sqlscripts/Db2InitVersion.sql";
+    }
+    
+    @Override
     public Set<Integer> getSupportedJdbcDataTypes() {
         return resolver.getSupportedJdbcDataTypes();
     }

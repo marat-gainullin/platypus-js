@@ -84,9 +84,6 @@ public class PlatypusHttpClient extends PlatypusClient implements AppClient {
                 getAppCache().remove(aEntityId);
             } else {
                 getAppCache().clear();
-                for (DatabaseMdCache cache : mdCaches.values()) {
-                    cache.clear();
-                }
             }
         } catch (Exception ex) {
             Logger.getLogger(PlatypusNativeClient.class.getName()).log(Level.SEVERE, null, ex);

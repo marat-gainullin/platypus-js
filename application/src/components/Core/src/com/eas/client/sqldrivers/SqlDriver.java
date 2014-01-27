@@ -77,6 +77,18 @@ public abstract class SqlDriver {
     }
 
     /**
+     * Adds tables, foreign keys etc. to a database for database versioning
+     * @param aConnection
+     * @throws Exception 
+     */
+    public void initializeVersion(Connection aConnection) throws Exception {
+        if (!checkVersionInitialized(aConnection)) {
+            String scriptText = readVersionInitScriptResource();
+            applyScript(scriptText, aConnection);
+        }
+    }
+
+    /**
      * *
      * The database supports deferrable constraints to enable constrains check
      * on transaction commit.
@@ -104,7 +116,7 @@ public abstract class SqlDriver {
 
     /**
      *
-     * Gets database initial script location and file name.
+     * Gets in database application initial script location and file name.
      *
      * @return
      */
@@ -112,11 +124,19 @@ public abstract class SqlDriver {
 
     /**
      *
-     * Gets database initial script location and file name.
+     * Gets in database users space initial script location and file name.
      *
      * @return
      */
     public abstract String getUsersSpaceInitResourceName();
+    
+    /**
+     *
+     * Gets database versioning initial script location and file name.
+     *
+     * @return
+     */
+    public abstract String getVersionInitResourceName();
     
     /**
      * Returns subset of jdbc types, supported by particular database. The trick
@@ -560,6 +580,24 @@ public abstract class SqlDriver {
         return false;
     }
     
+    private boolean checkVersionInitialized(Connection aConnection) {
+        try {
+            try (PreparedStatement stmt = aConnection.prepareStatement(String.format(SQLUtils.SQL_MAX_COMMON_BY_FIELD, ClientConstants.F_VERSION_VALUE, ClientConstants.F_VERSION_VALUE, ClientConstants.T_MTD_VERSION))) {
+                ResultSet res = stmt.executeQuery();
+                res.close();
+            }
+            return true;
+        } catch (SQLException ex) {
+            try {
+                aConnection.rollback();
+            } catch (SQLException ex1) {
+                Logger.getLogger(SqlDriver.class.getName()).log(Level.SEVERE, null, ex1);
+            }
+            Logger.getLogger(SqlDriver.class.getName()).log(Level.SEVERE, "Database vertioning seems to be uninitialized. {0}", ex.getMessage());
+        }
+        return false;
+    }
+    
     private String readApplicationInitScriptResource() throws IOException {
         String resName = getApplicationInitResourceName();
         return readScriptResource(resName);
@@ -570,6 +608,11 @@ public abstract class SqlDriver {
         return readScriptResource(resName);
     }
 
+    private String readVersionInitScriptResource() throws IOException {
+        String resName = getVersionInitResourceName();
+        return readScriptResource(resName);
+    }
+    
     protected String readScriptResource(String resName) throws IOException {
         try (InputStream is = SqlDriver.class.getResourceAsStream(resName)) {
             byte[] data = new byte[is.available()];

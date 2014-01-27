@@ -29,15 +29,15 @@ import javax.swing.event.ListDataListener;
  */
 public class DbTablesListModel implements ListModel<String> {
 
-    protected Rowset tablesRowset = null;
+    protected Rowset tablesRowset;
     protected Set<ListDataListener> listeners = new HashSet<>();
     protected int schemaColIndex = -1;
     protected int tableColIndex = -1;
-    protected String dbId = null;
-    protected DbClient client = null;
+    protected String dbId;
+    protected DbClient client;
     protected String schema;
-    protected DbMetadataCache mdCache = null;
-    protected AppCache appCache = null;
+    protected DbMetadataCache mdCache;
+    protected AppCache appCache;
 
     public DbTablesListModel(DbClient aClient, String aDbId) {
         super();
@@ -49,7 +49,7 @@ public class DbTablesListModel implements ListModel<String> {
             schema = mdCache.getConnectionSchema();
             setTablesRowset(createRowset());
         } catch (Exception ex) {
-            Logger.getLogger(DbTablesListModel.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(DbTablesListModel.class.getName()).log(Level.WARNING, null, ex);
         }
     }
 
@@ -89,7 +89,7 @@ public class DbTablesListModel implements ListModel<String> {
     }
 
     public void setSchema(String aSchema) throws Exception {
-        if (!schema.equals(aSchema)) {
+        if (schema == null ? aSchema != null : !schema.equals(aSchema)) {
             schema = aSchema;
             setTablesRowset(createRowset());
         }

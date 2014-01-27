@@ -19,7 +19,6 @@ import com.eas.client.threetier.PlatypusClient;
 import com.eas.debugger.jmx.server.Breakpoints;
 import com.eas.debugger.jmx.server.Debugger;
 import com.eas.debugger.jmx.server.DebuggerMBean;
-import com.eas.debugger.jmx.server.Settings;
 import com.eas.script.ScriptUtils;
 import java.awt.EventQueue;
 import java.beans.ExceptionListener;
@@ -118,9 +117,7 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
         super();
         // turn off bold fonts
         UIManager.put("swing.boldMetal", Boolean.FALSE);
-        //checkLogsDirectory();
         parseArgs(args);
-        DatasourcesArgsConsumer.consume(args);
         System.setProperty("java.awt.Window.locationByPlatform", "true");
     }
 
@@ -251,6 +248,7 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
     }
 
     private void parseArgs(String[] args) throws Exception {
+        DatasourcesArgsConsumer dsArgs = new DatasourcesArgsConsumer();
         int i = 0;
         while (i < args.length) {
             if ((CMD_SWITCHS_PREFIX + URL_CMD_SWITCH).equalsIgnoreCase(args[i])) {
@@ -306,9 +304,15 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
                 needInitialBreak = true;
                 i++;
             } else {
-                throw new IllegalArgumentException("unknown argument: " + args[i]);
+                int consumed = dsArgs.consume(args, i);
+                if (consumed > 0) {
+                    i += consumed;
+                } else {
+                    throw new IllegalArgumentException("unknown argument: " + args[i]);
+                }
             }
         }
+        dsArgs.registerDatasources();
     }
 
     protected void run() throws Exception {
@@ -321,10 +325,6 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
         // Start working
         if (login()) {
             assert client != null : CLIENT_REQUIRED_AFTER_LOGIN_MSG;
-            // Apply debugging facility
-            if (System.getProperty(ScriptRunner.DEBUG_PROPERTY) != null) {
-                registerMBean(Settings.SETTINGS_MBEAN_NAME, new Settings(client));
-            }
             appCache = client.getAppCache();
             Logger.getLogger(PlatypusClientApplication.class.getName()).log(Level.INFO, APPLICATION_ELEMENTS_LOCATION_MSG, appCache.getApplicationPath());
             scriptsCache = new ScriptsCache(this);

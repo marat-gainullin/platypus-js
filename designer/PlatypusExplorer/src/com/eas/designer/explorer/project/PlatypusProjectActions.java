@@ -214,6 +214,7 @@ public class PlatypusProjectActions implements ActionProvider {
                                 project.getDeployer().importApplication();
                             } finally {
                                 if (cache instanceof FilesAppCache) {
+                                    ((FilesAppCache) cache).rescan();
                                     ((FilesAppCache) cache).watch();
                                 }
                             }

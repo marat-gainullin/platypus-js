@@ -77,9 +77,11 @@ public class ApplyMigrationsAction extends AbstractAction implements ContextAwar
             @Override
             public void run() {
                 InputOutput io = project.getOutputWindowIO();
+                /*
                 project.getDbMigrator().setOut(io.getOut());
                 project.getDbMigrator().setErr(io.getErr());
                 project.getDbMigrator().applyMigrations();
+                        */
                 try {
                     project.disconnectFormDb(project.getSettings().getAppSettings().getDefaultDatasource());
                 } catch (InterruptedException | ExecutionException ex) {

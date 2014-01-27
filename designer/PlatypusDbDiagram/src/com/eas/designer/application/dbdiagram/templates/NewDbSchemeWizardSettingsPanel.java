@@ -4,27 +4,23 @@
  */
 package com.eas.designer.application.dbdiagram.templates;
 
-import com.eas.client.cache.PlatypusFiles;
+import com.eas.designer.application.utils.DatabaseConnections;
 import com.eas.designer.explorer.project.PlatypusProjectImpl;
 import java.awt.Component;
 import java.util.HashSet;
 import java.util.Set;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import org.netbeans.api.db.explorer.ConnectionManager;
 import org.netbeans.api.db.explorer.DatabaseConnection;
 import org.openide.ErrorManager;
 import org.openide.WizardDescriptor;
-import org.openide.WizardValidationException;
-import org.openide.filesystems.FileObject;
 import org.openide.util.HelpCtx;
 
 /**
  *
  * @author mg
  */
-public class NewDbSchemeWizardSettingsPanel implements WizardDescriptor.Panel,
-        WizardDescriptor.ValidatingPanel, WizardDescriptor.FinishablePanel {
+public class NewDbSchemeWizardSettingsPanel implements WizardDescriptor.Panel<WizardDescriptor>, WizardDescriptor.FinishablePanel<WizardDescriptor> {
 
     public static final String CONNECTION_PROP_NAME = "connectionId";
     public static final String SCHEMA_PROP_NAME = "schema";
@@ -51,9 +47,9 @@ public class NewDbSchemeWizardSettingsPanel implements WizardDescriptor.Panel,
     }
 
     @Override
-    public void readSettings(Object settings) {
+    public void readSettings(WizardDescriptor settings) {
         try {
-            wizardDescriptor = (WizardDescriptor) settings;
+            wizardDescriptor = settings;
             component.read(wizardDescriptor);
         } catch (Exception ex) {
             ErrorManager.getDefault().notify(ex);
@@ -61,9 +57,9 @@ public class NewDbSchemeWizardSettingsPanel implements WizardDescriptor.Panel,
     }
 
     @Override
-    public void storeSettings(Object settings) {
+    public void storeSettings(WizardDescriptor settings) {
         try {
-            WizardDescriptor d = (WizardDescriptor) settings;
+            WizardDescriptor d = settings;
             component.store(d);
         } catch (Exception ex) {
             ErrorManager.getDefault().notify(ex);
@@ -96,7 +92,7 @@ public class NewDbSchemeWizardSettingsPanel implements WizardDescriptor.Panel,
         }
     }
 
-    protected final void fireChangeEvent() {
+    public final void fireChangeEvent() {
         Set<ChangeListener> ls;
         synchronized (listeners) {
             ls = new HashSet<>(listeners);
@@ -108,19 +104,19 @@ public class NewDbSchemeWizardSettingsPanel implements WizardDescriptor.Panel,
     }
 
     @Override
-    public void validate() throws WizardValidationException {
-    }
-
-    @Override
     public boolean isFinishPanel() {
         return false;
     }
 
-    public boolean connectionExist(String aDatasourceName) throws Exception {
-        DatabaseConnection conn = ConnectionManager.getDefault().getConnection(aDatasourceName);        
+    public boolean datasourceExist(String aDatasourceName) throws Exception {
+        DatabaseConnection conn = DatabaseConnections.lookup(aDatasourceName);        
         return conn != null;
     }
 
+    public boolean datasourceConnected(String aDatasourceName) throws Exception {
+        DatabaseConnection conn = DatabaseConnections.lookup(aDatasourceName);        
+        return conn != null && conn.getJDBCConnection() != null;
+    }
 
     public PlatypusProjectImpl getProject() {
         return project;

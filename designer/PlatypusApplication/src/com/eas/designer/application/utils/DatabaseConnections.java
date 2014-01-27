@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.designer.explorer;
+package com.eas.designer.application.utils;
 
 import com.eas.util.ListenerRegistration;
 import java.sql.Connection;
@@ -17,22 +17,22 @@ import org.openide.util.RequestProcessor;
  * Watches for NetBeans <code>DatabaseConnection</code> connections states. 
  * @author vv
  */
-public class DatabaseConnectionsWatcher {
+public class DatabaseConnections {
 
     private static final int DELAY = 1000;
 
-    private static DatabaseConnectionsWatcher connectionsWatcher;
-    private static final RequestProcessor RP = new RequestProcessor(DatabaseConnectionsWatcher.class);
+    private static DatabaseConnections connectionsWatcher;
+    private static final RequestProcessor RP = new RequestProcessor(DatabaseConnections.class);
     private static RequestProcessor.Task watchTask;
     private final Set<DatabaseConnectionsListener> listeners = new HashSet<>();
     private final Set<String> connected = new HashSet<>();
 
-    private DatabaseConnectionsWatcher() {
+    private DatabaseConnections() {
     }
 
-    public static synchronized DatabaseConnectionsWatcher getDefault() {
+    public static synchronized DatabaseConnections getDefault() {
         if (connectionsWatcher == null) {
-            connectionsWatcher = new DatabaseConnectionsWatcher();
+            connectionsWatcher = new DatabaseConnections();
             startWatch();
         }
         return connectionsWatcher;
@@ -44,7 +44,7 @@ public class DatabaseConnectionsWatcher {
 
             @Override
             public void remove() {
-                synchronized (DatabaseConnectionsWatcher.this) {
+                synchronized (DatabaseConnections.this) {
                     listeners.remove(aListener);
                 }
             }
@@ -95,5 +95,14 @@ public class DatabaseConnectionsWatcher {
 
     private void removeFromConnected(DatabaseConnection conn) {
         connected.remove(conn.getName());
+    }
+    
+    public static DatabaseConnection lookup(String aDisplayName){
+        for(DatabaseConnection conn : ConnectionManager.getDefault().getConnections()){
+            if(aDisplayName == null ? conn.getDisplayName() == null : aDisplayName.equals(conn.getDisplayName())){
+                return conn;
+            }
+        }
+        return null;
     }
 }

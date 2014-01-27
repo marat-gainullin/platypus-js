@@ -466,6 +466,11 @@ public class OracleSqlDriver extends SqlDriver {
     }
 
     @Override
+    public String getVersionInitResourceName() {
+        return "/" + OracleSqlDriver.class.getPackage().getName().replace(".", "/") + "/sqlscripts/OracleInitVersion.sql";
+    }
+
+    @Override
     public Set<Integer> getSupportedJdbcDataTypes() {
         return resolver.getSupportedJdbcDataTypes();
     }

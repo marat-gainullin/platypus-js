@@ -5,8 +5,6 @@
 package com.eas.client.threetier;
 
 import com.bearsoft.rowset.utils.IDGenerator;
-import com.eas.client.cache.DatabaseMdCache;
-import com.eas.client.cache.PlatypusAppCache;
 import com.eas.client.login.AppPlatypusPrincipal;
 import com.eas.client.threetier.requests.AppElementChangedRequest;
 import com.eas.client.threetier.requests.LoginRequest;
@@ -81,9 +79,6 @@ public class PlatypusNativeClient extends PlatypusClient {
                 getAppCache().remove(aEntityId);
             } else {
                 getAppCache().clear();
-                for (DatabaseMdCache cache : mdCaches.values()) {
-                    cache.clear();
-                }
             }
         } catch (Exception ex) {
             Logger.getLogger(PlatypusNativeClient.class.getName()).log(Level.SEVERE, null, ex);

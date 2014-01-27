@@ -25,12 +25,12 @@
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
                   <Component id="comboSchema" max="32767" attributes="0"/>
-                  <Component id="txtConnection" pref="274" max="32767" attributes="0"/>
+                  <Component id="txtConnection" pref="248" max="32767" attributes="0"/>
               </Group>
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="btnApplicationConnection" min="-2" max="-2" attributes="0"/>
-                  <Component id="btnDefaultSchema" min="-2" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                  <Component id="btnApplicationConnection" max="32767" attributes="0"/>
+                  <Component id="btnDefaultSchema" max="32767" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
@@ -42,8 +42,8 @@
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="lblConnection" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="btnApplicationConnection" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="txtConnection" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="btnApplicationConnection" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
@@ -73,16 +73,6 @@
     </Component>
     <Component class="javax.swing.JComboBox" name="comboSchema">
     </Component>
-    <Component class="javax.swing.JToggleButton" name="btnApplicationConnection">
-      <Properties>
-        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="com/eas/designer/application/dbdiagram/templates/Bundle.properties" key="DbSchemeSettingsVisualPanel.btnApplicationConnection.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
-        </Property>
-      </Properties>
-      <Events>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnApplicationConnectionActionPerformed"/>
-      </Events>
-    </Component>
     <Component class="javax.swing.JButton" name="btnDefaultSchema">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
@@ -94,6 +84,19 @@
       </Events>
     </Component>
     <Component class="javax.swing.JComboBox" name="txtConnection">
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="txtConnectionActionPerformed"/>
+      </Events>
+    </Component>
+    <Component class="javax.swing.JButton" name="btnApplicationConnection">
+      <Properties>
+        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+          <ResourceString bundle="com/eas/designer/application/dbdiagram/templates/Bundle.properties" key="DbSchemeSettingsVisualPanel.btnApplicationConnection.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+        </Property>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnApplicationConnectionActionPerformed"/>
+      </Events>
     </Component>
   </SubComponents>
 </Form>

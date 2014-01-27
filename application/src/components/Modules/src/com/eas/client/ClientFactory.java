@@ -12,6 +12,7 @@ import com.eas.client.threetier.http.PlatypusHttpClient;
 import com.eas.client.threetier.http.PlatypusHttpConstants;
 import com.eas.client.threetier.http.PlatypusHttpsClient;
 import java.io.File;
+import java.net.URI;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Level;
@@ -55,7 +56,7 @@ public class ClientFactory {
         if (aApplicationUrl.startsWith("jndi")) {
             appCache = new DatabaseAppCache(aApplicationUrl);
         } else {// file://
-            File f = new File(aApplicationUrl);
+            File f = new File(new URI(aApplicationUrl));
             if (f.exists() && f.isDirectory()) {
                 FilesAppCache filesAppCache = new FilesAppCache(f.getPath());
                 filesAppCache.watch();

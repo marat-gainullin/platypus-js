@@ -312,6 +312,14 @@ public class H2SqlDriver extends SqlDriver {
      * @inheritDoc
      */
     @Override
+    public String getVersionInitResourceName() {
+        return "/" + H2SqlDriver.class.getPackage().getName().replace(".", "/") + "/sqlscripts/H2InitVersion.sql";
+    }
+    
+    /**
+     * @inheritDoc
+     */
+    @Override
     public Set<Integer> getSupportedJdbcDataTypes() {
         return resolver.getSupportedJdbcDataTypes();
     }

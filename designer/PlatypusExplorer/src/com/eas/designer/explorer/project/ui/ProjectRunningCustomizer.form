@@ -42,7 +42,10 @@
                   </Group>
                   <Group type="102" attributes="0">
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="cbNotStartServer" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Group type="102" alignment="0" attributes="0">
+                              <Component id="cbNotStartServer" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                          </Group>
                           <Group type="102" alignment="0" attributes="0">
                               <Group type="103" groupAlignment="0" max="-2" attributes="0">
                                   <Component id="lblClientType" alignment="0" pref="125" max="32767" attributes="0"/>
@@ -55,10 +58,10 @@
                                   <Component id="lblClientServerMessage" min="-2" max="-2" attributes="0"/>
                                   <Group type="102" attributes="0">
                                       <Group type="103" groupAlignment="0" attributes="0">
-                                          <Component id="txtConnection" max="32767" attributes="0"/>
                                           <Component id="cbClientType" alignment="0" max="32767" attributes="0"/>
                                           <Component id="txtRunPath" alignment="0" max="32767" attributes="0"/>
                                           <Component id="cbAppServerType" alignment="0" max="32767" attributes="0"/>
+                                          <Component id="txtConnection" alignment="0" max="32767" attributes="0"/>
                                       </Group>
                                       <EmptySpace min="-2" max="-2" attributes="0"/>
                                       <Group type="103" groupAlignment="0" max="-2" attributes="0">
@@ -108,7 +111,7 @@
               <EmptySpace max="-2" attributes="0"/>
               <Component id="cbNotStartServer" min="-2" max="-2" attributes="0"/>
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
-              <Component id="tabbedPane" pref="248" max="32767" attributes="0"/>
+              <Component id="tabbedPane" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -183,7 +186,7 @@
                                   <Component id="spClientDebugPort" max="32767" attributes="0"/>
                                   <Component id="cbClientLogLevel" min="-2" pref="109" max="-2" attributes="0"/>
                               </Group>
-                              <EmptySpace pref="318" max="32767" attributes="0"/>
+                              <EmptySpace pref="324" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                   </Group>
@@ -227,7 +230,7 @@
                           <Component id="lblClientDebugPort" min="-2" pref="24" max="-2" attributes="0"/>
                           <Component id="spClientDebugPort" min="-2" pref="22" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace pref="27" max="32767" attributes="0"/>
+                      <EmptySpace pref="33" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -369,7 +372,7 @@
                                   <Component id="spServerDebugPort" alignment="0" min="-2" pref="109" max="-2" attributes="0"/>
                                   <Component id="spServerPort" alignment="0" min="-2" pref="109" max="-2" attributes="0"/>
                               </Group>
-                              <EmptySpace min="0" pref="297" max="32767" attributes="0"/>
+                              <EmptySpace min="0" pref="303" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
@@ -404,7 +407,7 @@
                           <Component id="spServerDebugPort" alignment="0" min="-2" pref="22" max="-2" attributes="0"/>
                           <Component id="lblServerDebugPort" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace pref="79" max="32767" attributes="0"/>
+                      <EmptySpace pref="85" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -518,7 +521,7 @@
                               </Group>
                               <EmptySpace min="-2" max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
-                                  <Component id="cbj2eeServer" pref="236" max="32767" attributes="0"/>
+                                  <Component id="cbj2eeServer" pref="242" max="32767" attributes="0"/>
                                   <Component id="txtContext" max="32767" attributes="0"/>
                               </Group>
                               <EmptySpace min="-2" max="-2" attributes="0"/>
@@ -545,7 +548,7 @@
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="cbEnableSecurity" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace pref="138" max="32767" attributes="0"/>
+                      <EmptySpace pref="144" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -673,9 +676,6 @@
       </Events>
     </Component>
     <Component class="javax.swing.JComboBox" name="txtConnection">
-      <Properties>
-        <Property name="editable" type="boolean" value="true"/>
-      </Properties>
     </Component>
     <Component class="javax.swing.JLabel" name="lblDefDatasource">
       <Properties>

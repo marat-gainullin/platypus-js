@@ -353,6 +353,11 @@ public class MySqlSqlDriver extends SqlDriver {
     }
     
     @Override
+    public String getVersionInitResourceName() {
+        return "/" + MySqlSqlDriver.class.getPackage().getName().replace(".", "/") + "/sqlscripts/MySqlInitVersion.sql";
+    }
+    
+    @Override
     public Set<Integer> getSupportedJdbcDataTypes() {
         return resolver.getSupportedJdbcDataTypes();
     }

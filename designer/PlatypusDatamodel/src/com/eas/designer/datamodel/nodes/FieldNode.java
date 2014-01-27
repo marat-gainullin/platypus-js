@@ -80,6 +80,12 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
     }
 
     @Override
+    public void destroy() throws IOException {
+        field.getChangeSupport().removePropertyChangeListener(this);        
+        super.destroy();
+    }
+
+    @Override
     public String getDisplayName() {
         String description = field.getDescription();
         String name = field.getName();

@@ -39,7 +39,9 @@ public class AddQueryAction extends DmAction {
         if (isEnabled()) {
             try {
                 String appElement = appElementSelector.select(null);
-                modelView.doAddQuery(appElement, 0, 0);
+                if (appElement != null) {
+                    modelView.doAddQuery(appElement, 0, 0);
+                }
             } catch (Exception ex) {
                 Logger.getLogger(AddQueryAction.class.getName()).log(Level.SEVERE, null, ex);
             }

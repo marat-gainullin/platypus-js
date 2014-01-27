@@ -21,6 +21,7 @@ import java.awt.Image;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyEditor;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
@@ -56,6 +57,12 @@ public class OutputFieldNode extends AbstractNode implements PropertyChangeListe
         field = aField;
         dataObject = aDataObject;
         field.getChangeSupport().addPropertyChangeListener(this);
+    }
+
+    @Override
+    public void destroy() throws IOException {
+        field.getChangeSupport().removePropertyChangeListener(this);
+        super.destroy();
     }
 
     @Override

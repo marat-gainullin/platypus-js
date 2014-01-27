@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.designer.explorer;
+package com.eas.designer.application.utils;
 
 import org.netbeans.api.db.explorer.DatabaseConnection;
 

@@ -30,6 +30,7 @@ public class DeployApplication {
     public static final String CLEANUP_CMD_SWITCH = "clean"; // NOI18N
     public static final String INIT_APP_CMD_SWITCH = "initapp"; // NOI18N
     public static final String INIT_USERS_SPACE_CMD_SWITCH = "initusers"; // NOI18N
+    public static final String INIT_VERSIONING_CMD_SWITCH = "initversioning";
     public static final String GET_CURRENT_VERSION_CMD_SWITCH = "getver"; // NOI18N
     public static final String SET_CURRENT_VERSION_CMD_SWITCH = "setver"; // NOI18N
     public static final String CMD_SWITCHS_PREFIX = "-";
@@ -65,7 +66,7 @@ public class DeployApplication {
 
     public enum DeployMode {
 
-        DEPLOY, UNDEPLOY, IMPORT, APPLY_MIGRATIONS, CREATE_MTD_SNAPSHOT, CREATE_SQL_BATCH, CLEANUP, INITAPP, INITUSERS, GET_CURRENT_VERSION, SET_CURRENT_VERSION, PRINT_HELP
+        DEPLOY, UNDEPLOY, IMPORT, APPLY_MIGRATIONS, CREATE_MTD_SNAPSHOT, CREATE_SQL_BATCH, CLEANUP, INITAPP, INITUSERS, INITVERSIONING, GET_CURRENT_VERSION, SET_CURRENT_VERSION, PRINT_HELP
     }
 
     /**
@@ -149,6 +150,9 @@ public class DeployApplication {
             } else if ((CMD_SWITCHS_PREFIX + INIT_USERS_SPACE_CMD_SWITCH).equalsIgnoreCase(args[i])) {
                 mode = DeployMode.INITUSERS;
                 i++;
+            } else if ((CMD_SWITCHS_PREFIX + INIT_VERSIONING_CMD_SWITCH).equalsIgnoreCase(args[i])) {
+                mode = DeployMode.INITVERSIONING;
+                i++;
             } else if ((CMD_SWITCHS_PREFIX + GET_CURRENT_VERSION_CMD_SWITCH).equalsIgnoreCase(args[i])) {
                 mode = DeployMode.GET_CURRENT_VERSION;
                 i++;
@@ -210,6 +214,10 @@ public class DeployApplication {
                 case INITUSERS:
                     initMigrator();
                     migrator.initUsersSpace();
+                    break;
+                case INITVERSIONING:
+                    initMigrator();
+                    migrator.initVersioning();
                     break;
                 case GET_CURRENT_VERSION:
                     initMigrator();

@@ -144,18 +144,22 @@ public class GeneralResourceProvider {
     }
 
     private PlatypusNativeDataSource constructDataSource(DbConnectionSettings aSettings) throws Exception {
-        return new PlatypusNativeDataSource(aSettings.getMaxConnections(), aSettings.getMaxStatements(), aSettings.getResourceTimeout(), aSettings.getUrl(), aSettings.getUser(), aSettings.getPassword());
+        return new PlatypusNativeDataSource(aSettings.getMaxConnections(), aSettings.getMaxStatements(), aSettings.getResourceTimeout(), aSettings.getUrl(), aSettings.getUser(), aSettings.getPassword(), aSettings.getSchema(), aSettings.getProperties());
     }
 
-    public synchronized DataSource getPooledDataSource(String aDatasourceName) throws ResourceUnavalableException {
-        try {
-            DataSource dbPool = connectionPools.get(aDatasourceName);
-            if (dbPool == null) {
-                dbPool = try2CreatePool(aDatasourceName);
+    public synchronized DataSource getPooledDataSource(String aDatasourceName) throws Exception {
+        if (connectionPoolsSettings.containsKey(aDatasourceName)) {
+            try {
+                DataSource dbPool = connectionPools.get(aDatasourceName);
+                if (dbPool == null) {
+                    dbPool = try2CreatePool(aDatasourceName);
+                }
+                return dbPool;
+            } catch (Exception ex) {
+                throw new ResourceUnavalableException(ex);
             }
-            return dbPool;
-        } catch (Exception ex) {
-            throw new ResourceUnavalableException(ex);
+        } else {
+            throw new NamingException("Datasource " + aDatasourceName + " is not registered");
         }
     }
 

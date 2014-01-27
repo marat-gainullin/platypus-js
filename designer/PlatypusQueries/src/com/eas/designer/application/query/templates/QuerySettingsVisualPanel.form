@@ -20,10 +20,10 @@
               <EmptySpace min="-2" max="-2" attributes="0"/>
               <Component id="lblConnection" min="-2" max="-2" attributes="0"/>
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
-              <Component id="txtConnection" pref="230" max="32767" attributes="0"/>
+              <Component id="txtConnection" pref="210" max="32767" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="btnApplicationConnection" min="-2" max="-2" attributes="0"/>
-              <EmptySpace max="-2" attributes="0"/>
+              <EmptySpace min="-2" pref="4" max="-2" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -33,8 +33,8 @@
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="lblConnection" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="btnApplicationConnection" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="txtConnection" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="btnApplicationConnection" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace pref="266" max="32767" attributes="0"/>
           </Group>
@@ -49,7 +49,9 @@
         </Property>
       </Properties>
     </Component>
-    <Component class="javax.swing.JToggleButton" name="btnApplicationConnection">
+    <Component class="javax.swing.JComboBox" name="txtConnection">
+    </Component>
+    <Component class="javax.swing.JButton" name="btnApplicationConnection">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
           <ResourceString bundle="com/eas/designer/application/query/templates/Bundle.properties" key="QuerySettingsVisualPanel.btnApplicationConnection.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
@@ -58,11 +60,6 @@
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnApplicationConnectionActionPerformed"/>
       </Events>
-    </Component>
-    <Component class="javax.swing.JComboBox" name="txtConnection">
-      <Properties>
-        <Property name="editable" type="boolean" value="true"/>
-      </Properties>
     </Component>
   </SubComponents>
 </Form>

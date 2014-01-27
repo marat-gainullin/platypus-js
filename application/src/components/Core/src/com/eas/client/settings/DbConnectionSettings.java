@@ -13,6 +13,7 @@ import com.eas.client.ConnectionSettingsVisitor;
 import com.eas.xml.dom.Source2XmlDom;
 import java.io.IOException;
 import java.io.Reader;
+import java.util.Properties;
 import org.w3c.dom.Document;
 
 /**
@@ -20,19 +21,42 @@ import org.w3c.dom.Document;
  * @author mg
  */
 public class DbConnectionSettings extends ConnectionSettings {
+
     protected int maxConnections = BearResourcePool.DEFAULT_MAXIMUM_SIZE;
     protected int maxStatements = BearResourcePool.DEFAULT_MAXIMUM_SIZE * 5;
     protected int resourceTimeout = BearResourcePool.WAIT_TIMEOUT;
+    protected String schema;
+    protected Properties props = new Properties();
 
     public DbConnectionSettings() {
         super();
     }
 
     public DbConnectionSettings(String anUrl, String anUser, String aPassword) throws Exception {
+        this(anUrl, anUser, aPassword, null, null);
+    }
+
+    public DbConnectionSettings(String anUrl, String anUser, String aPassword, String aSchema, Properties aProperties) throws Exception {
         this();
         url = anUrl;
         user = anUser;
         password = aPassword;
+        schema = aSchema;
+        if (aProperties != null) {
+            props.putAll(aProperties);
+        }
+    }
+
+    public String getSchema() {
+        return schema;
+    }
+
+    public void setSchema(String aValue) {
+        schema = aValue;
+    }
+
+    public Properties getProperties() {
+        return props;
     }
 
     public int getMaxConnections() {

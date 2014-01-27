@@ -21,17 +21,17 @@ import java.util.logging.Logger;
 public abstract class AppElementsCache extends FreqCache<String, ApplicationElement> implements AppCache {
 
     public static final String PROPERTY_REQUIRED_MSG = "Property %s is required";
-    public static final String APP_ELEMENT_PROPERTIES_FILE_NAME = "entity.properties";
-    public static final String APP_ELEMENT_TXT_CONTENT_FILE_NAME = "entity.txt";
-    public static final String APP_ELEMENT_BIN_CONTENT_FILE_NAME = "entity.bin";
+    public static final String APP_ELEMENT_PROPERTIES_FILE_NAME = ".properties";
+    public static final String APP_ELEMENT_TXT_CONTENT_FILE_NAME = ".txt";
+    public static final String APP_ELEMENT_BIN_CONTENT_FILE_NAME = ".bin";
     protected String CACHED_ENTITIES_PATH;
 
-    public AppElementsCache() throws Exception {
+    public AppElementsCache(String aAppNameHash) throws Exception {
         super();
-        initializeFileCache();
+        initializeFileCache(aAppNameHash);
     }
 
-    protected void initializeFileCache() throws Exception {
+    protected void initializeFileCache(String aAppNameHash) throws Exception {
         //Make file cache directories
         CACHED_ENTITIES_PATH = System.getProperty(ClientConstants.USER_HOME_PROP_NAME);
         if (!CACHED_ENTITIES_PATH.endsWith(File.separator)) {
@@ -47,10 +47,7 @@ public abstract class AppElementsCache extends FreqCache<String, ApplicationElem
         if (!newDir.exists()) {
             newDir.mkdir();
         }
-        String appPath = getApplicationPath();
-        String urlHash = String.valueOf(Math.abs(appPath.hashCode()));
-        String connectionPath = "app_" + urlHash;
-        CACHED_ENTITIES_PATH += File.separator + connectionPath;
+        CACHED_ENTITIES_PATH += File.separator + aAppNameHash;
         newDir = new File(CACHED_ENTITIES_PATH);
         if (!newDir.exists()) {
             newDir.mkdir();
@@ -60,16 +57,16 @@ public abstract class AppElementsCache extends FreqCache<String, ApplicationElem
     /**
      * Generates path and creates it.
      *
-     * @param aId Application element id.
+     * @param aAppelementName Application element name.
      * @return Generated and created path name.
      */
-    protected String generatePath(String aId) {
-        String pathName = CACHED_ENTITIES_PATH + File.separator + aId.hashCode();//String.valueOf(aId % 100);
+    protected String generatePath(String aAppelementName) {
+        String pathName = CACHED_ENTITIES_PATH + File.separator + String.valueOf(Math.abs(aAppelementName.hashCode()) % 100);
         File path = new File(pathName);
         if (!path.exists()) {
             path.mkdir();
         }
-        pathName += File.separator + aId;
+        pathName += File.separator + aAppelementName;
         pathName = pathName.replace('/', File.separatorChar);
         return pathName;
     }
@@ -228,7 +225,6 @@ public abstract class AppElementsCache extends FreqCache<String, ApplicationElem
 
     protected ApplicationElement getFromFileCache(String aId) throws Exception {
         synchronized (lock) {
-            ApplicationElement appElement = new ApplicationElement();
             try {
                 String entityDirectoryPath = generatePath(aId);
                 File cachedEntityDirectory = new File(entityDirectoryPath);
@@ -242,6 +238,7 @@ public abstract class AppElementsCache extends FreqCache<String, ApplicationElem
                         && propsFile.length() <= Integer.MAX_VALUE
                         && txtFile.length() <= Integer.MAX_VALUE
                         && binaryFile.length() <= Integer.MAX_VALUE) {
+                    ApplicationElement appElement = new ApplicationElement();
                     // properties
                     String propsString = file2String(propsFile);
                     String[] propsStrings = propsString.split("\n");
@@ -295,12 +292,12 @@ public abstract class AppElementsCache extends FreqCache<String, ApplicationElem
                     } else {
                         appElement.setTxtContent(file2String(txtFile));
                     }
+                    return appElement;
                 }
             } catch (IOException | NumberFormatException | IllegalStateException ex) {
-                appElement = null;
                 Logger.getLogger(PlatypusNativeClient.class.getName()).log(Level.SEVERE, null, ex);
             }
-            return appElement;
+            return null;
         }
     }
 }

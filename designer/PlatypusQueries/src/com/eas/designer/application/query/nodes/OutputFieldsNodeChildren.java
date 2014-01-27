@@ -26,12 +26,19 @@ public class OutputFieldsNodeChildren extends Children.Keys<Field> {
     public OutputFieldsNodeChildren(PlatypusQueryDataObject aDataObject) {
         super();
         dataObject = aDataObject;
-        dataObject.addPropertyChangeListener(dataObjectPropertyChangeListener);
     }
 
     @Override
     protected void addNotify() {
+        dataObject.addPropertyChangeListener(dataObjectPropertyChangeListener);
         outputFieldsToKeys();
+    }
+
+    @Override
+    protected void removeNotify() {
+        dataObject.removePropertyChangeListener(dataObjectPropertyChangeListener);
+        setKeys(Collections.EMPTY_LIST);
+        super.removeNotify();
     }
 
     private void outputFieldsToKeys() {
