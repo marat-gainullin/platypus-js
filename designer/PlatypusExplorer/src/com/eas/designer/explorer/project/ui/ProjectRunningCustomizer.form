@@ -48,7 +48,7 @@
                           </Group>
                           <Group type="102" alignment="0" attributes="0">
                               <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                                  <Component id="lblClientType" alignment="0" pref="125" max="32767" attributes="0"/>
+                                  <Component id="lblClientType" alignment="0" max="32767" attributes="0"/>
                                   <Component id="lblRunPath" alignment="0" max="32767" attributes="0"/>
                                   <Component id="lblServeType" alignment="0" max="32767" attributes="0"/>
                                   <Component id="lblDefDatasource" alignment="0" max="32767" attributes="0"/>
@@ -61,7 +61,7 @@
                                           <Component id="cbClientType" alignment="0" max="32767" attributes="0"/>
                                           <Component id="txtRunPath" alignment="0" max="32767" attributes="0"/>
                                           <Component id="cbAppServerType" alignment="0" max="32767" attributes="0"/>
-                                          <Component id="txtConnection" alignment="0" max="32767" attributes="0"/>
+                                          <Component id="cbConnections" alignment="0" max="32767" attributes="0"/>
                                       </Group>
                                       <EmptySpace min="-2" max="-2" attributes="0"/>
                                       <Group type="103" groupAlignment="0" max="-2" attributes="0">
@@ -100,7 +100,7 @@
               </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="txtConnection" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="cbConnections" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="lblDefDatasource" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="btnAddDatasource" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
@@ -675,7 +675,7 @@
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cbNotStartServerActionPerformed"/>
       </Events>
     </Component>
-    <Component class="javax.swing.JComboBox" name="txtConnection">
+    <Component class="javax.swing.JComboBox" name="cbConnections">
     </Component>
     <Component class="javax.swing.JLabel" name="lblDefDatasource">
       <Properties>
