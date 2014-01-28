@@ -24,7 +24,6 @@ import org.openide.loaders.DataObject;
 import org.openide.loaders.DataObjectExistsException;
 import org.openide.loaders.MultiFileLoader;
 import org.openide.nodes.CookieSet;
-import org.openide.util.Lookup;
 import org.openide.util.lookup.Lookups;
 import org.openide.util.lookup.ProxyLookup;
 import org.w3c.dom.Document;
@@ -46,11 +45,6 @@ public class PlatypusDbDiagramDataObject extends PlatypusDataObject {
     protected void dispose() {
         getLookup().lookup(PlatypusDbDiagramSupport.class).closeAllViews();
         super.dispose();
-    }
-
-    @Override
-    public Lookup getLookup() {
-        return getCookieSet().getLookup();
     }
 
     @Override

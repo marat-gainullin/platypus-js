@@ -112,7 +112,7 @@ public class ClientFactory {
         if (defaultConnectionIndex < 0) {
             defaultConnectionIndex = 0;
         }
-        Map<String, ConnectionSettings> settingsMap = new TreeMap<>();
+        Map<Integer, ConnectionSettings> settingsMap = new TreeMap<>();
         Preferences userConnectionsPrefs = Preferences.userRoot().node(CONNECTIONS_SETTINGS_NODE);
 
         settingsNodeToSettings(userConnectionsPrefs, settingsMap, true);
@@ -126,7 +126,7 @@ public class ClientFactory {
         }
         settings = new ConnectionSettings[settingsMap.size()];
         int i = 0;
-        for (String connNodeName : settingsMap.keySet()) {
+        for (Integer connNodeName : settingsMap.keySet()) {
             settings[i++] = settingsMap.get(connNodeName);
         }
         if (settings.length > 0) {
@@ -143,14 +143,14 @@ public class ClientFactory {
         }
     }
 
-    private static void settingsNodeToSettings(Preferences connectionsPrefs, Map<String, ConnectionSettings> settingsMap, boolean aEditable) throws Exception {
+    private static void settingsNodeToSettings(Preferences connectionsPrefs, Map<Integer, ConnectionSettings> settingsMap, boolean aEditable) throws Exception {
         String[] settingsNodesNames = connectionsPrefs.childrenNames();
         for (int i = 0; i < settingsNodesNames.length; i++) {
             Preferences connectionPrefs = connectionsPrefs.node(settingsNodesNames[i]);
             String connUrl = connectionPrefs.get(ClientFactory.CONNECTION_URL_SETTING, "jdbc");
             connUrl = connUrl.replaceAll("[\\s\\r\\n\\t]", "");
             ConnectionSettings connectionsettings = new PlatypusConnectionSettings();
-            settingsMap.put(settingsNodesNames[i], connectionsettings);
+            settingsMap.put(Integer.valueOf(settingsNodesNames[i]), connectionsettings);
             connectionsettings.setUrl(connUrl);
             connectionsettings.setName(connectionPrefs.get(ClientFactory.CONNECTION_TITLE_SETTING, ""));
             connectionsettings.setUser(connectionPrefs.get(ClientFactory.CONNECTION_USER_SETTING, ""));

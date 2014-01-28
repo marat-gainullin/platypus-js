@@ -68,7 +68,6 @@ import org.openide.nodes.Node;
 import org.openide.text.Annotation;
 import org.openide.text.CloneableEditorSupport;
 import org.openide.text.NbDocument;
-import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
 import org.w3c.dom.Document;
 
@@ -132,11 +131,6 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
             ((AbstractNode) node).setIconBaseWithExtension(PlatypusQueryDataObject.class.getPackage().getName().replace('.', '/') + "/query.png");
         }
         return node;
-    }
-
-    @Override
-    public Lookup getLookup() {
-        return getCookieSet().getLookup();
     }
 
     @Override

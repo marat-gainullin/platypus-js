@@ -42,6 +42,7 @@ public class DbSchemeSettingsVisualPanel extends javax.swing.JPanel {
         comboSchema.setModel(schemasModel);
         txtConnection.setModel(new DefaultComboBoxModel(ConnectionManager.getDefault().getConnections()));
         txtConnection.setRenderer(new DatabaseConnectionRenderer(panel.getProject()));
+        refreshControls(null);
     }
 
     public String getDefaultSchema() throws Exception {
@@ -50,7 +51,7 @@ public class DbSchemeSettingsVisualPanel extends javax.swing.JPanel {
 
     private boolean refreshingControls;
 
-    public void refreshControls(String schema) throws Exception {
+    public void refreshControls(String schema) {
         refreshingControls = true;
         try {
             String dsName = datasourceName;
@@ -58,9 +59,16 @@ public class DbSchemeSettingsVisualPanel extends javax.swing.JPanel {
                 dsName = panel.getProject().getSettings().getAppSettings().getDefaultDatasource();
             }
             DatabaseConnection conn = DatabaseConnections.lookup(dsName);
-            txtConnection.setSelectedItem(datasourceName == null ? null : conn);
-            refreshSchemas(conn);
-            comboSchema.setSelectedIndex(locateSchema(schema));
+            txtConnection.setSelectedItem(dsName == null ? null : conn);
+            try {
+                refreshSchemas(conn);
+                if (schema == null || schema.isEmpty()) {
+                    schema = getDefaultSchema();
+                }
+                comboSchema.setSelectedIndex(locateSchema(schema));
+            } catch (Exception ex) {
+                Exceptions.printStackTrace(ex);
+            }
         } finally {
             refreshingControls = false;
         }
@@ -120,9 +128,6 @@ public class DbSchemeSettingsVisualPanel extends javax.swing.JPanel {
     void read(WizardDescriptor wd) throws Exception {
         datasourceName = (String) wd.getProperty(NewDbSchemeWizardSettingsPanel.CONNECTION_PROP_NAME);
         String schema = (String) wd.getProperty(NewDbSchemeWizardSettingsPanel.SCHEMA_PROP_NAME);
-        if (schema == null || schema.isEmpty()) {
-            schema = getDefaultSchema();
-        }
         refreshControls(schema);
     }
 
@@ -214,7 +219,7 @@ public class DbSchemeSettingsVisualPanel extends javax.swing.JPanel {
     private void btnApplicationConnectionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnApplicationConnectionActionPerformed
         try {
             datasourceName = null;
-            refreshControls(getDefaultSchema());
+            refreshControls(null);
             panel.fireChangeEvent();
         } catch (Exception ex) {
             ErrorManager.getDefault().notify(ex);
@@ -226,7 +231,7 @@ public class DbSchemeSettingsVisualPanel extends javax.swing.JPanel {
             try {
                 DatabaseConnection conn = (DatabaseConnection) txtConnection.getSelectedItem();
                 datasourceName = conn != null ? conn.getDisplayName() : null;
-                refreshSchemas(conn);                
+                refreshSchemas(conn);
                 String schema = getDefaultSchema();
                 comboSchema.setSelectedIndex(locateSchema(schema));
                 panel.fireChangeEvent();

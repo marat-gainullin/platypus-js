@@ -145,11 +145,6 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
         return model;
     }
 
-    @Override
-    public Lookup getLookup() {
-        return getCookieSet().getLookup();
-    }
-
     private Document getDocument() throws IOException {
         EditorCookie ec = getLookup().lookup(EditorCookie.class);
         if (ec == null) {

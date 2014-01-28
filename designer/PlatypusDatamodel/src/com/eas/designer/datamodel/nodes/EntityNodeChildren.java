@@ -50,11 +50,11 @@ public abstract class EntityNodeChildren<T> extends Children.Keys<T> implements 
             for (int i = 1; i <= query.getParameters().getParametersCount(); i++) {
                 keys.add(createKey(query.getParameters().get(i)));
             }
-            Fields fields = entity.getFields();
-            if (fields != null) {
-                for (int i = 1; i <= entity.getFields().getFieldsCount(); i++) {
-                    keys.add(createKey(entity.getFields().get(i)));
-                }
+        }
+        Fields fields = entity.getFields();
+        if (fields != null) {
+            for (int i = 1; i <= entity.getFields().getFieldsCount(); i++) {
+                keys.add(createKey(entity.getFields().get(i)));
             }
         }
         return keys;

@@ -14,6 +14,7 @@ import javax.swing.event.ChangeListener;
 import org.netbeans.api.db.explorer.DatabaseConnection;
 import org.openide.ErrorManager;
 import org.openide.WizardDescriptor;
+import org.openide.util.Exceptions;
 import org.openide.util.HelpCtx;
 
 /**
@@ -109,12 +110,12 @@ public class NewDbSchemeWizardSettingsPanel implements WizardDescriptor.Panel<Wi
     }
 
     public boolean datasourceExist(String aDatasourceName) throws Exception {
-        DatabaseConnection conn = DatabaseConnections.lookup(aDatasourceName);        
+        DatabaseConnection conn = DatabaseConnections.lookup(aDatasourceName);
         return conn != null;
     }
 
     public boolean datasourceConnected(String aDatasourceName) throws Exception {
-        DatabaseConnection conn = DatabaseConnections.lookup(aDatasourceName);        
+        DatabaseConnection conn = DatabaseConnections.lookup(aDatasourceName);
         return conn != null && conn.getJDBCConnection() != null;
     }
 

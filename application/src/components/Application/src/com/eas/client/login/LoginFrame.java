@@ -7,6 +7,8 @@ package com.eas.client.login;
 
 import com.eas.client.Client;
 import com.eas.client.ClientFactory;
+import static com.eas.client.ClientFactory.DEFAULT_CONNECTION_INDEX_SETTING;
+import static com.eas.client.ClientFactory.SETTINGS_NODE;
 import com.eas.client.settings.ConnectionSettings;
 import com.eas.client.settings.PlatypusConnectionSettings;
 import com.eas.util.exceptions.ExceptionListenerSupport;
@@ -382,7 +384,7 @@ public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower 
         if (!isFullModeLogin()) {
             return loginCallback.tryToLogin(defaultUrl, tfUserName.getText(), tfPassword.getPassword());
         } else if (!lstConnections.isSelectionEmpty()) {
-            ConnectionSettings settings = (ConnectionSettings)lstConnections.getSelectedValue();
+            ConnectionSettings settings = (ConnectionSettings) lstConnections.getSelectedValue();
             return loginCallback.tryToLogin(settings.getUrl(), tfUserName.getText(), tfPassword.getPassword());
         } else {
             return false;
@@ -394,8 +396,12 @@ public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower 
             Preferences connectionsPref = Preferences.userRoot().node(ClientFactory.CONNECTIONS_SETTINGS_NODE);
             connectionsPref.removeNode();
             connectionsPref = Preferences.userRoot().node(ClientFactory.CONNECTIONS_SETTINGS_NODE);
+            int defaultSettingsIndex = -1;
             for (int i = 0; i < connectionsListModel.getSize(); i++) {
                 ConnectionSettings settings = (ConnectionSettings) connectionsListModel.getElementAt(i);
+                if (settings == ClientFactory.getDefaultSettings()) {
+                    defaultSettingsIndex = i;
+                }
                 if (settings.isEditable()) {
                     String strIndex = String.valueOf(i);
                     connectionsPref.node(strIndex).put(ClientFactory.CONNECTION_TITLE_SETTING, settings.getName() != null ? settings.getName() : "");
@@ -403,6 +409,9 @@ public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower 
                     connectionsPref.node(strIndex).put(ClientFactory.CONNECTION_USER_SETTING, settings.getUser() != null ? settings.getUser() : "");
                     connectionsPref.node(strIndex).put(ClientFactory.CONNECTION_PASSWORD_SETTING, settings.getPassword() != null ? settings.getPassword() : "");
                 }
+            }
+            if (defaultSettingsIndex != -1) {
+                Preferences.userRoot().node(SETTINGS_NODE).putInt(DEFAULT_CONNECTION_INDEX_SETTING, defaultSettingsIndex);
             }
         } catch (BackingStoreException ex) {
             exSupport.exceptionThrown(ex);
@@ -443,12 +452,13 @@ public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower 
             try {
                 if (login()) {
                     if (isFullModeLogin()) {
-                        if (checkRememberPassword.isSelected()) {
-                            ConnectionSettings settings = (ConnectionSettings) lstConnections.getSelectedValue();
-                            if (settings != null) {
+                        ConnectionSettings settings = (ConnectionSettings) lstConnections.getSelectedValue();
+                        if (settings != null) {
+                            if (checkRememberPassword.isSelected()) {
                                 settings.setUser(tfUserName.getText());
                                 settings.setPassword(String.valueOf(tfPassword.getPassword()));
                             }
+                            ClientFactory.setDefaultSettings(settings);
                         }
                         updatePreferences();
                     }
@@ -553,6 +563,9 @@ public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower 
         }
         if (tfUserName.getText() != null && !tfUserName.getText().isEmpty()) {
             tfPassword.requestFocus();
+        }
+        if (tfPassword.getPassword() != null && tfPassword.getPassword().length > 0) {
+            checkRememberPassword.setSelected(true);
         }
     }
 

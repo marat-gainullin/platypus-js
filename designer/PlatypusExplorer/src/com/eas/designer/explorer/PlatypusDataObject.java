@@ -59,6 +59,11 @@ public abstract class PlatypusDataObject extends MultiDataObject {
             resignOnQueries();
         }
     }
+    
+    @Override
+    protected int associateLookup() {
+        return 1;
+    }
 
     /**
      * WARNING!!! This method is executed in a separate thread.

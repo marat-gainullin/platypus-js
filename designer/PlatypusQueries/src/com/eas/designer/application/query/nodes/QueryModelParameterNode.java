@@ -17,9 +17,9 @@ import org.openide.util.NbBundle;
  *
  * @author vv
  */
-public class QueryModelParametersNode extends QueryParameterNode {
+public class QueryModelParameterNode extends QueryParameterNode {
     
-    public QueryModelParametersNode(Parameter aField, Lookup aLookup) {
+    public QueryModelParameterNode(Parameter aField, Lookup aLookup) {
         super(aField, aLookup);
     }
     
@@ -28,7 +28,7 @@ public class QueryModelParametersNode extends QueryParameterNode {
         if (isValidName(getEntity().getModel(), val)) {
             return super.editName(val);
         } else {
-            throw Exceptions.attachLocalizedMessage(new IllegalArgumentException(), String.format(NbBundle.getMessage(QueryModelParametersNode.class, "MSG_InvalidParameterName"), val)); //NOI18N
+            throw Exceptions.attachLocalizedMessage(new IllegalArgumentException(), String.format(NbBundle.getMessage(QueryModelParameterNode.class, "MSG_InvalidParameterName"), val)); //NOI18N
         }
 
     }
