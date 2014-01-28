@@ -74,24 +74,23 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
         appSettings = projectSettings.getAppSettings();
         serversModel = new DefaultComboBoxModel(getJ2eePlatforms());
         initComponents();
-        txtConnection.setModel(new DefaultComboBoxModel(ConnectionManager.getDefault().getConnections()));
-        ((DefaultComboBoxModel)txtConnection.getModel()).insertElementAt(null, 0);
-        txtConnection.setRenderer(new DatabaseConnectionRenderer(null));
-        txtConnection.setSelectedItem(appSettings.getDefaultDatasource() != null ? DatabaseConnections.lookup(appSettings.getDefaultDatasource()) : null);
-        txtConnection.addActionListener(new ActionListener() {
+        setupConnectionsModel();
+        cbConnections.setRenderer(new DatabaseConnectionRenderer(null));
+        cbConnections.setSelectedItem(appSettings.getDefaultDatasource() != null ? DatabaseConnections.lookup(appSettings.getDefaultDatasource()) : null);
+        cbConnections.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                DatabaseConnection conn = (DatabaseConnection) txtConnection.getSelectedItem();
+                DatabaseConnection conn = (DatabaseConnection) cbConnections.getSelectedItem();
                 appSettings.setDefaultDatasource(conn != null ? conn.getDisplayName() : null);
             }
 
         });
-        txtConnection.addItemListener(new ItemListener() {
+        cbConnections.addItemListener(new ItemListener() {
 
             @Override
             public void itemStateChanged(ItemEvent e) {
-                DatabaseConnection conn = (DatabaseConnection) txtConnection.getSelectedItem();
+                DatabaseConnection conn = (DatabaseConnection) cbConnections.getSelectedItem();
                 appSettings.setDefaultDatasource(conn != null ? conn.getDisplayName() : null);
             }
         });
@@ -147,6 +146,20 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
                 }
             }
         });
+    }
+
+    private void setupConnectionsModel() {
+        String selectedName = cbConnections.getSelectedItem() != null ? ((DatabaseConnection) cbConnections.getSelectedItem()).getDisplayName() : null;
+        cbConnections.setModel(new DefaultComboBoxModel(ConnectionManager.getDefault().getConnections()));
+        ((DefaultComboBoxModel) cbConnections.getModel()).insertElementAt(null, 0);
+        if (selectedName != null) {
+            for (DatabaseConnection c : ConnectionManager.getDefault().getConnections()) {
+                if (c.getDisplayName() != null && c.getDisplayName().equals(selectedName)) {
+                    cbConnections.setSelectedItem(c);
+                    return;
+                }
+            }
+        }
     }
 
     private J2eePlatformAdapter[] getJ2eePlatforms() {
@@ -296,7 +309,7 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
         cbAppServerType = new javax.swing.JComboBox();
         lblClientServerMessage = new javax.swing.JLabel();
         cbNotStartServer = new javax.swing.JCheckBox();
-        txtConnection = new javax.swing.JComboBox();
+        cbConnections = new javax.swing.JComboBox();
         lblDefDatasource = new javax.swing.JLabel();
         btnAddDatasource = new javax.swing.JButton();
 
@@ -568,7 +581,7 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
                 .addGroup(serverPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(lblServerPort, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(lblServerVmOptions, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(lblServerOptions, javax.swing.GroupLayout.DEFAULT_SIZE, 76, Short.MAX_VALUE)
+                    .addComponent(lblServerOptions, javax.swing.GroupLayout.PREFERRED_SIZE, 76, Short.MAX_VALUE)
                     .addComponent(lblServerLogLevel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(lblServerDebugPort, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGap(10, 10, 10)
@@ -754,7 +767,7 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
                                 .addGap(0, 0, Short.MAX_VALUE))
                             .addGroup(layout.createSequentialGroup()
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(lblClientType, javax.swing.GroupLayout.DEFAULT_SIZE, 125, Short.MAX_VALUE)
+                                    .addComponent(lblClientType, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                     .addComponent(lblRunPath, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                     .addComponent(lblServeType, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                     .addComponent(lblDefDatasource, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -766,7 +779,7 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
                                             .addComponent(cbClientType, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                             .addComponent(txtRunPath)
                                             .addComponent(cbAppServerType, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                            .addComponent(txtConnection, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                            .addComponent(cbConnections, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                             .addComponent(btnBrowse, javax.swing.GroupLayout.DEFAULT_SIZE, 105, Short.MAX_VALUE)
@@ -792,7 +805,7 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
                     .addComponent(cbAppServerType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtConnection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(cbConnections, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(lblDefDatasource)
                     .addComponent(btnAddDatasource))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -995,6 +1008,7 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
 
     private void btnAddDatasourceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddDatasourceActionPerformed
         ConnectionManager.getDefault().showAddConnectionDialog(null);
+        setupConnectionsModel();
     }//GEN-LAST:event_btnAddDatasourceActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -1004,6 +1018,7 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
     private javax.swing.JComboBox cbAppServerType;
     private javax.swing.JComboBox cbClientLogLevel;
     private javax.swing.JComboBox cbClientType;
+    private javax.swing.JComboBox cbConnections;
     private javax.swing.JCheckBox cbEnableSecurity;
     private javax.swing.JCheckBox cbNotStartServer;
     private javax.swing.JComboBox cbServerLogLevel;
@@ -1039,7 +1054,6 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
     private javax.swing.JTextField txtClientOptions;
     private javax.swing.JTextField txtClientUrl;
     private javax.swing.JTextField txtClientVmOptions;
-    private javax.swing.JComboBox txtConnection;
     private javax.swing.JTextField txtContext;
     private javax.swing.JPasswordField txtPassword;
     private javax.swing.JTextField txtRunPath;
