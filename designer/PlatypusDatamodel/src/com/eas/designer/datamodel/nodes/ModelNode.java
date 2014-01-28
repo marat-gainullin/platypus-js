@@ -9,6 +9,7 @@ import com.eas.client.model.Entity;
 import com.eas.client.model.Model;
 import com.eas.client.model.gui.IconCache;
 import java.awt.Image;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -33,7 +34,18 @@ public class ModelNode<E extends Entity<?, ?, E>, M extends Model<E, ?, DbClient
         dataObject = aDataObject;
     }
 
+    @Override
+    public void destroy() throws IOException {
+        ((ModelNodeChildren) getChildren()).removeNotify();
+        super.destroy();
+    }
+
     public boolean isVisibleRoot() {
+        return true;
+    }
+
+    @Override
+    public boolean canDestroy() {
         return true;
     }
 

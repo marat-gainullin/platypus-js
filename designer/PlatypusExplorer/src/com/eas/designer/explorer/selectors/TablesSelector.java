@@ -8,8 +8,8 @@ import com.eas.client.DbClient;
 import com.eas.client.metadata.TableRef;
 import com.eas.client.model.gui.selectors.TableNameSelector;
 import com.eas.client.model.gui.selectors.TablesSelectorCallback;
+import com.eas.designer.application.project.PlatypusProject;
 import java.awt.Component;
-import org.openide.filesystems.FileObject;
 
 /**
  *
@@ -17,30 +17,30 @@ import org.openide.filesystems.FileObject;
  */
 public class TablesSelector implements TablesSelectorCallback {
 
-    protected FileObject appRoot;
     protected DbClient client;
     protected String title;
     protected Component parent;
+    protected PlatypusProject project;
     protected boolean allowDatabaseChange;
     protected boolean allowSchemaChange;
 
-    public TablesSelector(FileObject anAppRoot, DbClient aDbClient, String aTitle, Component aParent) {
+    public TablesSelector(PlatypusProject aProject, String aTitle, Component aParent) {
         super();
-        appRoot = anAppRoot;
-        client = aDbClient;
+        client = aProject.getClient();
+        project = aProject;
         title = aTitle;
         parent = aParent;
     }
 
-    public TablesSelector(FileObject anAppRoot, DbClient aDbClient, boolean aAllowDatabaseChange, boolean aAllowSchemaChange, String aTitle, Component aParent) {
-        this(anAppRoot, aDbClient, aTitle, aParent);
+    public TablesSelector(PlatypusProject aProject, boolean aAllowDatabaseChange, boolean aAllowSchemaChange, String aTitle, Component aParent) {
+        this(aProject, aTitle, aParent);
         allowDatabaseChange = aAllowDatabaseChange;
         allowSchemaChange = aAllowSchemaChange;
     }
 
     @Override
     public TableRef[] selectTableRef(TableRef oldRef) throws Exception {
-        return TableNameSelector.selectTableName(client, new ConnectionSelector(appRoot), oldRef, allowDatabaseChange, allowSchemaChange, parent, title);
+        return TableNameSelector.selectTableName(project, oldRef, allowDatabaseChange, allowSchemaChange, parent, title);
     }
 
     public void setClient(DbClient aDbClient) {

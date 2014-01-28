@@ -54,15 +54,8 @@ public class PlatypusDbDiagramDataObject extends PlatypusDataObject {
     }
 
     @Override
-    protected void signOnQueries() {
-        // no op, since db diagrams doesn't contains queries.
-    }
-
-    @Override
-    protected void clientChanged() {
-        if (model != null) {
-            model.setClient(getClient());
-        }
+    protected void resignOnQueries() {
+        // no op, since db diagrams doesn't contain queries.
     }
 
     @Override

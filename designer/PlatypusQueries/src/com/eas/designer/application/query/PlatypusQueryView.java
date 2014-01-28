@@ -21,7 +21,7 @@ import com.eas.client.model.query.QueryEntity;
 import com.eas.client.model.query.QueryParametersEntity;
 import com.eas.client.utils.scalableui.JScalableScrollPane;
 import com.eas.client.utils.scalableui.ScaleListener;
-import com.eas.designer.application.HandlerRegistration;
+import com.eas.designer.application.project.PlatypusProject;
 import com.eas.designer.application.query.actions.QueryResultsAction;
 import com.eas.designer.application.query.lexer.SqlLanguageHierarchy;
 import com.eas.designer.application.query.nodes.QueryRootNode;
@@ -33,6 +33,7 @@ import com.eas.designer.explorer.model.windows.QueryDocumentJumper;
 import com.eas.designer.explorer.selectors.QueriesSelector;
 import com.eas.designer.explorer.selectors.TablesSelector;
 import com.eas.gui.JDropDownButton;
+import com.eas.util.ListenerRegistration;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -64,6 +65,7 @@ import org.openide.explorer.ExplorerManager;
 import org.openide.nodes.Node;
 import org.openide.text.CloneableEditorSupport;
 import org.openide.text.NbDocument;
+import org.openide.util.Exceptions;
 import org.openide.util.ImageUtilities;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
@@ -188,8 +190,9 @@ public class PlatypusQueryView extends CloneableTopComponent {
     protected transient TablesSelector tablesSelector;
     protected transient JScalableScrollPane querySchemeScroll;
     protected transient JComboBox<String> comboZoom = new JComboBox<>();
-    protected transient HandlerRegistration clientChangeListener;
-    protected transient HandlerRegistration modelValidChangeListener;
+    protected transient ListenerRegistration clientChangeListener;
+    protected transient ListenerRegistration modelValidChangeListener;
+
     protected PlatypusQueryDataObject dataObject;
     protected static final Dimension BTN_DIMENSION = new Dimension(28, 28);
 
@@ -226,7 +229,7 @@ public class PlatypusQueryView extends CloneableTopComponent {
         dataObjectListener = new DataObjectListener();
         setName(dataObject.getPrimaryFile().getName());
         setToolTipText(NbBundle.getMessage(PlatypusQueryView.class, "HINT_PlatypusQueryTopComponent", dataObject.getPrimaryFile().getPath()));
-        tablesSelector = new TablesSelector(dataObject.getAppRoot(), dataObject.getClient(), false, true, NbBundle.getMessage(PlatypusQueryView.class, "selectQuery"), this);
+        tablesSelector = new TablesSelector(dataObject.getProject(), false, true, NbBundle.getMessage(PlatypusQueryView.class, "selectTable"), this);
 
         undoableEditsAccumulator = new UndoableEditListener() {
             @Override
@@ -247,23 +250,75 @@ public class PlatypusQueryView extends CloneableTopComponent {
         refinedComponent = initCustomEditor(txtSqlDialectPane);
         pnlSqlDialectSource.add(refinedComponent, BorderLayout.CENTER);
         initDbRelatedViews();
-        Runnable dbRelatedViewsIniter = new Runnable() {
+
+        modelValidChangeListener = dataObject.addModelValidChangeListener(new Runnable() {
             @Override
             public void run() {
                 try {
                     initDbRelatedViews();
+                    if (dataObject.isModelValid()) {
+                        dataObject.refreshOutputFields();
+                    }
                 } catch (Exception ex) {
                     ErrorManager.getDefault().notify(ex);
                 }
             }
-        };
-        clientChangeListener = dataObject.addClientChangeListener(dbRelatedViewsIniter);
-        modelValidChangeListener = dataObject.addModelValidChangeListener(dbRelatedViewsIniter);
+        });
+        clientChangeListener = dataObject.addClientChangeListener(new PlatypusProject.ClientChangeListener() {
+
+            @Override
+            public void connected(String aDatasourceName) {
+                String dsName = dataObject.getDatasourceName();
+                if (dsName == null) {
+                    dsName = dataObject.getProject().getSettings().getAppSettings().getDefaultDatasource();
+                }
+                if (dsName == null ? aDatasourceName == null : dsName.equals(aDatasourceName)) {
+                    try {
+                        initDbRelatedViews();
+                        if (dataObject.isModelValid()) {
+                            dataObject.refreshOutputFields();
+                        }
+                    } catch (Exception ex) {
+                        Exceptions.printStackTrace(ex);
+                    }
+                }
+            }
+
+            @Override
+            public void disconnected(String aDatasourceName) {
+                String dsName = dataObject.getDatasourceName();
+                if (dsName == null) {
+                    dsName = dataObject.getProject().getSettings().getAppSettings().getDefaultDatasource();
+                }
+                if (dsName == null ? aDatasourceName == null : dsName.equals(aDatasourceName)) {
+                    try {
+                        initDbRelatedViews();
+                    } catch (Exception ex) {
+                        Exceptions.printStackTrace(ex);
+                    }
+                }
+            }
+
+            @Override
+            public void defaultDatasourceNameChanged(String aOldDatasourceName, String aNewDatasourceName) {
+                if (dataObject.getDatasourceName() == null) {
+                    try {
+                        initDbRelatedViews();
+                        if (dataObject.isModelValid()) {
+                            dataObject.refreshOutputFields();
+                        }
+                    } catch (Exception ex) {
+                        Exceptions.printStackTrace(ex);
+                    }
+                }
+            }
+        });
     }
 
     protected void initDbRelatedViews() throws Exception {
+        boolean isConnected = dataObject.getProject().isDbConnected(dataObject.getDatasourceName());
         pnlFromNWhere.removeAll();
-        if (dataObject.getClient() != null) {
+        if (isConnected) {
             if (dataObject.isModelValid()) {
                 if (modelView != null) {
                     modelView.setModel(null);
@@ -364,7 +419,7 @@ public class PlatypusQueryView extends CloneableTopComponent {
             mnuCopy.setText(clientMissingMessage);
             mnuPaste.setText(clientMissingMessage);
             tablesSelector.setClient(null);
-            pnlFromNWhere.add(dataObject.getProject().generateDbPlaceholder(), BorderLayout.CENTER);
+            pnlFromNWhere.add(dataObject.getProject().generateDbPlaceholder(dataObject.getDatasourceName()), BorderLayout.CENTER);
         }
         revalidate();
         repaint();
@@ -380,7 +435,7 @@ public class PlatypusQueryView extends CloneableTopComponent {
                         "Document:" + aPane.getDocument() // NOI18N
                         + " implementing NbDocument.CustomEditor may not" // NOI18N
                         + " return null component" // NOI18N
-                        );
+                );
             }
             return customComponent;
         }

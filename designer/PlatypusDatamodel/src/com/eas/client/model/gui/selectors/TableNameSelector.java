@@ -4,9 +4,10 @@
  */
 package com.eas.client.model.gui.selectors;
 
-import com.eas.client.DbClient;
 import com.eas.client.metadata.TableRef;
+import com.eas.client.model.gui.DatamodelDesignUtils;
 import com.eas.client.model.gui.ResultingDialog;
+import com.eas.designer.application.project.PlatypusProject;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Window;
@@ -20,6 +21,8 @@ import java.util.logging.Logger;
 import javax.swing.JScrollPane;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import org.openide.DialogDisplayer;
+import org.openide.NotifyDescriptor;
 
 /**
  *
@@ -40,81 +43,87 @@ public class TableNameSelector {
         return null;
     }
 
-    public static TableRef[] selectTableName(DbClient aClient, AppElementSelectorCallback aAppElementSelector, TableRef aOldValue, Component aParentComponent, String aTitle) throws Exception {
-        return selectTableName(aClient, aAppElementSelector, aOldValue, false, aParentComponent, aTitle);
+    public static TableRef[] selectTableName(PlatypusProject aProject, TableRef aOldValue, Component aParentComponent, String aTitle) throws Exception {
+        return selectTableName(aProject, aOldValue, false, aParentComponent, aTitle);
     }
 
-    public static TableRef[] selectTableName(DbClient aClient, AppElementSelectorCallback aAppElementSelector, TableRef aOldValue, boolean allowDBChange, Component aParentComponent, String aTitle) throws Exception {
-        return selectTableName(aClient, aAppElementSelector, aOldValue, allowDBChange, true, aParentComponent, aTitle);
+    public static TableRef[] selectTableName(PlatypusProject aProject, TableRef aOldValue, boolean allowDBChange, Component aParentComponent, String aTitle) throws Exception {
+        return selectTableName(aProject, aOldValue, allowDBChange, true, aParentComponent, aTitle);
     }
 
-    public static TableRef[] selectTableName(DbClient aClient, AppElementSelectorCallback aAppElementSelector, TableRef aOldValue, boolean allowDBChange, boolean allowSchemaChange, Component aParentComponent, String aTitle) throws Exception {
+    public static TableRef[] selectTableName(PlatypusProject aProject, TableRef aOldValue, boolean allowDBChange, boolean allowSchemaChange, Component aParentComponent, String aTitle) throws Exception {
         TableRef[] selected = null;
         Window parentWindow = getFirstParentWindow(aParentComponent);
 
         JScrollPane scroll = new JScrollPane();
-        final DbTablesView tablesView = new DbTablesView(aClient, aOldValue.dbId, aOldValue.schema, aTitle, allowSchemaChange, allowDBChange, aAppElementSelector);
-        scroll.setViewportView(tablesView);
-        final ResultingDialog dlg = new ResultingDialog(parentWindow, aTitle, scroll);
+        final DbTablesView tablesView = new DbTablesView(aProject, aOldValue.dbId, aOldValue.schema, aTitle, allowSchemaChange, allowDBChange);
+        if (tablesView.txtConnection.getModel().getSize() != 0) {
+            scroll.setViewportView(tablesView);
+            final ResultingDialog dlg = new ResultingDialog(parentWindow, aTitle, scroll);
 
-        tablesView.lstTables.addMouseListener(new MouseAdapter() {
+            tablesView.lstTables.addMouseListener(new MouseAdapter() {
 
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (e.getClickCount() > 1 && dlg.getOkAction().isEnabled()) {
-                    dlg.getOkAction().actionPerformed(null);
-                } else {
-                    super.mouseClicked(e);
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    if (e.getClickCount() > 1 && dlg.getOkAction().isEnabled()) {
+                        dlg.getOkAction().actionPerformed(null);
+                    } else {
+                        super.mouseClicked(e);
+                    }
                 }
-            }
-        });
-        tablesView.lstTables.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            });
+            tablesView.lstTables.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 
-            @Override
-            public void valueChanged(ListSelectionEvent e) {
-                dlg.getOkAction().setEnabled(!tablesView.lstTables.isSelectionEmpty());
-            }
-        });
+                @Override
+                public void valueChanged(ListSelectionEvent e) {
+                    dlg.getOkAction().setEnabled(!tablesView.lstTables.isSelectionEmpty());
+                }
+            });
 
-        dlg.pack();
-        Dimension packedSize = dlg.getSize();
-        dlg.setSize(packedSize.width, Math.round(packedSize.width*1.2f));
-        dlg.setVisible(true);
-        if (dlg.isOk()) {
-            List<TableRef> aSelected = new ArrayList<>();
-            Object[] osSelected = tablesView.lstTables.getSelectedValues();
-            for (Object oSelected : osSelected) {
-                if (oSelected != null && oSelected instanceof String) {
-                    String sSelected = (String) oSelected;
+            dlg.pack();
+            Dimension packedSize = dlg.getSize();
+            dlg.setSize(packedSize.width, Math.round(packedSize.width * 1.2f));
+            dlg.setVisible(true);
+            if (dlg.isOk()) {
+                List<TableRef> aSelected = new ArrayList<>();
+                List<String> sSelectedList = tablesView.lstTables.getSelectedValuesList();
+                for (String sSelected : sSelectedList) {
                     int indexOfDot = sSelected.indexOf(".");
                     if (indexOfDot != -1) {
                         String schemaName = sSelected.substring(0, indexOfDot);
                         String tableName = sSelected.substring(indexOfDot + 1);
                         TableRef lselected = new TableRef();
-                        lselected.dbId = aOldValue.dbId;
+                        lselected.dbId = tablesView.datasourceName;
                         lselected.schema = schemaName;
                         lselected.tableName = tableName;
                         aSelected.add(lselected);
                     }
                 }
+                selected = aSelected.toArray(new TableRef[aSelected.size()]);
+                checkTableRefDefaultDatasourceAndSchema(aProject, selected);
             }
-            selected = aSelected.toArray(new TableRef[aSelected.size()]);
-            checkTableRefDefaultSchema(aClient, selected);
+        } else {
+            NotifyDescriptor d = new NotifyDescriptor.Message(DatamodelDesignUtils.getLocalizedString("noConnections"), NotifyDescriptor.WARNING_MESSAGE);
+            DialogDisplayer.getDefault().notify(d);
         }
         return selected;
     }
 
-    protected static void checkTableRefDefaultSchema(DbClient aClient, TableRef[] aRefs) {
+    protected static void checkTableRefDefaultDatasourceAndSchema(PlatypusProject aProject, TableRef[] aRefs) {
         if (aRefs != null) {
             for (TableRef tRef : aRefs) {
                 if (tRef != null && tRef.schema != null && !tRef.schema.isEmpty()) {
                     try {
-                        if (aClient != null) {
-                            String schema = aClient.getDbMetadataCache(tRef.dbId).getConnectionSchema();
+                        if (aProject.getClient() != null) {
+                            String schema = aProject.getClient().getConnectionSchema(tRef.dbId);
                             if (schema != null && !schema.isEmpty()
                                     && schema.equalsIgnoreCase(tRef.schema)) {
                                 tRef.schema = null;
                             }
+                        }
+                        String defDatasource = aProject.getSettings().getAppSettings().getDefaultDatasource();
+                        if (tRef.dbId == null ? defDatasource == null : tRef.dbId.equals(defDatasource)) {
+                            tRef.dbId = null;
                         }
                     } catch (Exception ex) {
                         Logger.getLogger(TableNameSelector.class.getName()).log(Level.SEVERE, null, ex);

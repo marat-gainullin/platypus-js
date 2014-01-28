@@ -18,6 +18,7 @@ import com.eas.client.login.PrincipalHost;
 import com.eas.client.queries.SqlCompiledQuery;
 import com.eas.client.queries.SqlQuery;
 import com.eas.client.settings.EasSettings;
+import com.eas.util.ListenerRegistration;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -130,7 +131,7 @@ public class DummyTestDbClient implements DbClient{
     }
 
     @Override
-    public TransactionListener.Registration addTransactionListener(TransactionListener tl) {
+    public ListenerRegistration addTransactionListener(TransactionListener tl) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
@@ -145,7 +146,7 @@ public class DummyTestDbClient implements DbClient{
     }
 
     @Override
-    public QueriesListener.Registration addQueriesListener(QueriesListener ql) {
+    public ListenerRegistration addQueriesListener(QueriesListener ql) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
         

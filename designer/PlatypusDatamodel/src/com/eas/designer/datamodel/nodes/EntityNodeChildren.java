@@ -39,8 +39,6 @@ public abstract class EntityNodeChildren<T> extends Children.Keys<T> implements 
         lookup = aLookup;
         undoRedo = aUndoReciever;
         setFields(entity.getFields());
-        entity.getModel().getChangeSupport().addPropertyChangeListener("client", this);
-        entity.getChangeSupport().addPropertyChangeListener(Entity.QUERY_VALID_PROPERTY, this);
     }
 
     protected abstract T createKey(Field aField);
@@ -52,11 +50,11 @@ public abstract class EntityNodeChildren<T> extends Children.Keys<T> implements 
             for (int i = 1; i <= query.getParameters().getParametersCount(); i++) {
                 keys.add(createKey(query.getParameters().get(i)));
             }
-        }
-        Fields fields = entity.getFields();
-        if (fields != null) {
-            for (int i = 1; i <= entity.getFields().getFieldsCount(); i++) {
-                keys.add(createKey(entity.getFields().get(i)));
+            Fields fields = entity.getFields();
+            if (fields != null) {
+                for (int i = 1; i <= entity.getFields().getFieldsCount(); i++) {
+                    keys.add(createKey(entity.getFields().get(i)));
+                }
             }
         }
         return keys;
@@ -64,20 +62,23 @@ public abstract class EntityNodeChildren<T> extends Children.Keys<T> implements 
 
     @Override
     protected void addNotify() {
+        entity.getChangeSupport().addPropertyChangeListener(Entity.QUERY_VALID_PROPERTY, this);
         setKeys(computeKeys());
     }
 
     @Override
     protected void removeNotify() {
+        entity.getChangeSupport().removePropertyChangeListener(Entity.QUERY_VALID_PROPERTY, this);
         entity.getModel().getChangeSupport().removePropertyChangeListener(this);
         setFields(null);
         setKeys(Collections.EMPTY_SET);
+        super.removeNotify();
     }
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        if ("client".equalsIgnoreCase(evt.getPropertyName()) || Entity.QUERY_VALID_PROPERTY.equalsIgnoreCase(evt.getPropertyName())) {
-            setFields(entity.getFields());
+        if (Entity.QUERY_VALID_PROPERTY.equalsIgnoreCase(evt.getPropertyName())) {
+            setFields(entity.getQuery() != null ? entity.getFields() : null);
             setKeys(computeKeys());
         }
     }

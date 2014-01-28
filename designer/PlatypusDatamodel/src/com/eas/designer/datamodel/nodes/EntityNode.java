@@ -15,6 +15,7 @@ import com.eas.designer.datamodel.ModelUndoProvider;
 import java.awt.Image;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -57,11 +58,18 @@ public class EntityNode<E extends Entity<?, ?, E>> extends AbstractNode implemen
     protected Action[] actions;
     protected ShowEntityAction defaultAction;
 
-    public EntityNode(E aEntity, UndoRedo.Manager aUndoReciever, Children children, Lookup aLookup) throws Exception {
+    public EntityNode(E aEntity, UndoRedo.Manager aUndoReciever, EntityNodeChildren children, Lookup aLookup) throws Exception {
         super(children, aLookup);
         entity = aEntity;
         entity.getChangeSupport().addPropertyChangeListener(this);
         defaultAction = SystemAction.get(ShowEntityAction.class);
+    }
+
+    @Override
+    public void destroy() throws IOException {
+        entity.getChangeSupport().removePropertyChangeListener(this);
+        ((EntityNodeChildren)getChildren()).removeNotify();
+        super.destroy();
     }
 
     @Override

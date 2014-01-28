@@ -19,6 +19,7 @@ import com.eas.client.model.script.ParametersHostObject;
 import com.eas.client.scripts.ScriptRunner;
 import com.eas.script.ScriptUtils;
 import com.eas.script.ScriptUtils.ScriptAction;
+import com.eas.util.ListenerRegistration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -138,7 +139,7 @@ public class PlatypusScriptedFlowProvider implements FlowProvider {
     }
 
     @Override
-    public TransactionListener.Registration addTransactionListener(TransactionListener tl) {
+    public ListenerRegistration addTransactionListener(TransactionListener tl) {
         return client.addTransactionListener(tl);
     }
 }

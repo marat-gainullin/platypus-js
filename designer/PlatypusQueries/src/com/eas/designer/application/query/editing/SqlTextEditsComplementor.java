@@ -138,7 +138,9 @@ public class SqlTextEditsComplementor {
                     QueryEntity lEntity = tables.get(tblId.toLowerCase());
                     if (lEntity != null) {
                         modelRel.setLeftEntity(lEntity);
-                        modelRel.setLeftField(lEntity.getFields().get(leftSideId.substring(dotIdx + 1)));
+                        if (lEntity.getFields() != null) {
+                            modelRel.setLeftField(lEntity.getFields().get(leftSideId.substring(dotIdx + 1)));
+                        }
                     }
                 }
             }
@@ -153,7 +155,9 @@ public class SqlTextEditsComplementor {
                     QueryEntity rEntity = tables.get(tblId.toLowerCase());
                     if (rEntity != null) {
                         modelRel.setRightEntity(rEntity);
-                        modelRel.setRightField(rEntity.getFields().get(rightSideId.substring(dotIdx + 1)));
+                        if (rEntity.getFields() != null) {
+                            modelRel.setRightField(rEntity.getFields().get(rightSideId.substring(dotIdx + 1)));
+                        }
                     }
                 }
             }

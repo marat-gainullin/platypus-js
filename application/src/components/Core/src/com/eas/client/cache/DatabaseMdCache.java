@@ -65,7 +65,7 @@ public class DatabaseMdCache implements DbMetadataCache {
     @Override
     public SqlDriver getConnectionDriver() throws Exception {
         if (connectionDriver == null) {
-            connectionDriver = SQLUtils.getSqlDriver(client.getConnectionDialect(dbId));
+            connectionDriver = client.getConnectionDriver(dbId);
         }
         return connectionDriver;
     }
@@ -131,6 +131,7 @@ public class DatabaseMdCache implements DbMetadataCache {
             Rowset rs = query.executeQuery();
             int colIndex = rs.getFields().find(ClientConstants.JDBCCOLS_TABLE_NAME);
             assert colIndex > 0;
+            tablesFields.clear();
             Set<String> tablesNames = new HashSet<>();
             rs.beforeFirst();
             while (rs.next()) {

@@ -81,7 +81,7 @@ public class PlatypusHttpClientTest {
     @Before
     public void beforeTest() throws Exception {
         if (client == null) {
-            client = new PlatypusHttpClient(getSettigs());
+            client = new PlatypusHttpClient(PlatypusHttpTestConstants.HTTP_REQUEST_URL);
         }
         client.login(PlatypusClientTest.TEST_LOGIN, PlatypusClientTest.TEST_PASSWD.toCharArray());
     }

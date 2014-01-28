@@ -23,6 +23,7 @@ import java.util.Map.Entry;
  * Abstract platypus query with parameters.
  *
  * @author mg
+ * @param <T>
  */
 public abstract class Query<T extends Client> {
 

@@ -14,7 +14,6 @@ import com.eas.client.queries.PlatypusScriptedFlowProvider;
 import com.eas.client.queries.SqlCompiledQuery;
 import com.eas.client.queries.SqlQuery;
 import com.eas.client.scripts.ScriptRunner;
-import com.eas.client.settings.DbConnectionSettings;
 import com.eas.script.ScriptUtils;
 import com.eas.script.ScriptUtils.ScriptAction;
 import java.util.Collection;
@@ -33,7 +32,9 @@ import org.mozilla.javascript.ScriptRuntime;
 import org.mozilla.javascript.Scriptable;
 
 /**
- * Multi data source client. It allows to use js modules as datasources, validators and appliers.
+ * Multi data source client. It allows to use js modules as datasources,
+ * validators and appliers.
+ *
  * @author mg
  */
 public class ScriptedDatabasesClient extends DatabasesClient {
@@ -170,22 +171,15 @@ public class ScriptedDatabasesClient extends DatabasesClient {
     /**
      * @inheritDoc
      */
-    public ScriptedDatabasesClient(DbConnectionSettings aSettings) throws Exception {
-        super(aSettings, false);
+    public ScriptedDatabasesClient(AppCache anAppCache, String aDefaultDatasourceName, boolean aAutoFillMetadata) throws Exception {
+        super(anAppCache, aDefaultDatasourceName, aAutoFillMetadata);
     }
 
     /**
      * @inheritDoc
      */
-    public ScriptedDatabasesClient(DbConnectionSettings aSettings, boolean inContainer) throws Exception {
-        super(aSettings, inContainer, null);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public ScriptedDatabasesClient(DbConnectionSettings aSettings, boolean inContainer, FilesAppCache.ScanCallback aScanCallback) throws Exception {
-        super(aSettings, inContainer, aScanCallback);
+    public ScriptedDatabasesClient(AppCache anAppCache, String aDefaultDatasourceName, boolean aAutoFillMetadata, FilesAppCache.ScanCallback aScanCallback) throws Exception {
+        super(anAppCache, aDefaultDatasourceName, aAutoFillMetadata, aScanCallback);
     }
 
     /**
@@ -202,8 +196,8 @@ public class ScriptedDatabasesClient extends DatabasesClient {
     }
 
     @Override
-    protected void clearQueries(String aDbId) throws Exception {
-        super.clearQueries(aDbId);
+    public void clearQueries() throws Exception {
+        super.clearQueries();
         scriptedQueries.clear();
     }
 
@@ -211,17 +205,27 @@ public class ScriptedDatabasesClient extends DatabasesClient {
     public void appEntityChanged(String aEntityId) throws Exception {
         super.appEntityChanged(aEntityId);
         if (scriptedQueries.containsKey(aEntityId)) {
-            clearQueries(null);
+            clearQueries();
         }
     }
 
     @Override
     public SqlQuery getAppQuery(final String aQueryId, boolean aCopy) throws Exception {
-        SqlQuery query = super.getAppQuery(aQueryId, aCopy);
+        SqlQuery query = scriptedQueries.get(aQueryId);
         if (query == null) {
-            query = scriptedQueries.get(aQueryId);
+            query = super.getAppQuery(aQueryId, aCopy);
         }
         return query;
+    }
+
+    @Override
+    public synchronized DbMetadataCache getDbMetadataCache(String aDatasourceId) throws Exception {
+        ApplicationElement appElement = aDatasourceId != null ? getAppCache().get(aDatasourceId) : null;
+        if (appElement == null || appElement.getType() != ClientConstants.ET_COMPONENT) {
+            return super.getDbMetadataCache(aDatasourceId);
+        } else {
+            return null;
+        }
     }
 
     protected ScriptRunner createModule(Context cx, String aModuleName) throws Exception {

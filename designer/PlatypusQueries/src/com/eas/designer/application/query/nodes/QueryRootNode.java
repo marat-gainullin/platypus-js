@@ -13,6 +13,7 @@ import com.eas.designer.datamodel.nodes.ModelNodeChildren;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyEditor;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import org.openide.nodes.PropertySupport;
 import org.openide.nodes.Sheet;
@@ -30,7 +31,14 @@ public class QueryRootNode extends ModelNode<QueryEntity, QueryModel> implements
     public QueryRootNode(ModelNodeChildren<QueryEntity, QueryModel> aChildren, PlatypusQueryDataObject aDataObject) throws Exception {
         super(aChildren, aDataObject);
         setIconBaseWithExtension(ICON_PATH);
-        aDataObject.addPropertyChangeListener(this);
+        dataObject.addPropertyChangeListener(this);
+    }
+
+    @Override
+    public void destroy() throws IOException {
+        dataObject.removePropertyChangeListener(this);
+        ((ModelNodeChildren)getChildren()).removeNotify();
+        super.destroy();
     }
 
     @Override

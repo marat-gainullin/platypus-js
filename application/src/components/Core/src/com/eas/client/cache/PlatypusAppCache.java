@@ -15,10 +15,18 @@ import com.eas.client.threetier.requests.IsAppElementActualRequest;
  *
  * @author mg
  */
-public class PlatypusAppCache extends AppElementsCache<AppClient>{
+public class PlatypusAppCache extends AppElementsCache{
 
+    protected AppClient client;
+    
     public PlatypusAppCache(AppClient aClient) throws Exception{
-        super(aClient);
+        super("app-" + String.valueOf(aClient.getUrl().hashCode()));
+        client = aClient;
+    }
+
+    @Override
+    public String getApplicationPath() {
+        return client.getUrl();
     }
 
     @Override

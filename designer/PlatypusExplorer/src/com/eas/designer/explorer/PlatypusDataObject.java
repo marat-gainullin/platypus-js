@@ -5,8 +5,8 @@
 package com.eas.designer.explorer;
 
 import com.eas.client.DbClient;
-import com.eas.designer.application.HandlerRegistration;
 import com.eas.designer.application.project.PlatypusProject;
+import com.eas.util.ListenerRegistration;
 import java.awt.EventQueue;
 import java.io.IOException;
 import java.util.HashSet;
@@ -22,29 +22,41 @@ import org.openide.loaders.MultiFileLoader;
 import org.openide.util.RequestProcessor;
 
 /**
- * Base class for Platypus Data Objects.
+ * Base class for Platypus data objects.
  *
  * @author vv
  */
 public abstract class PlatypusDataObject extends MultiDataObject {
 
-    private static RequestProcessor RP = new RequestProcessor(PlatypusDataObject.class.getName(), 10);
-    private Set<Runnable> clientListeners = new HashSet<>();
-    protected HandlerRegistration projectClientListener;
-    protected DbClient.QueriesListener.Registration projectClientQueriesListener;
+    private static final RequestProcessor RP = new RequestProcessor(PlatypusDataObject.class.getName(), 10);
+    private final Set<PlatypusProject.ClientChangeListener> clientListeners = new HashSet<>();
+    protected ListenerRegistration projectClientListener;
+    protected ListenerRegistration projectClientQueriesListener;
 
     public PlatypusDataObject(FileObject pf, MultiFileLoader loader) throws DataObjectExistsException {
         super(pf, loader);
         if (getProject() != null) {
-            projectClientListener = getProject().addClientChangeListener(new Runnable() {
+            projectClientListener = getProject().addClientChangeListener(new PlatypusProject.ClientChangeListener() {
+
                 @Override
-                public void run() {
-                    clientChanged();
-                    signOnQueries();
-                    fireClientChanged();
+                public void connected(String aDatasourceName) {
+                    resignOnQueries();
+                    fireClientConnected(aDatasourceName);
+                }
+
+                @Override
+                public void disconnected(String aDatasourceName) {
+                    resignOnQueries();
+                    fireClientDisconnected(aDatasourceName);
+                }
+
+                @Override
+                public void defaultDatasourceNameChanged(String aOldDatasourceName, String aNewDatasourceName) {
+                    resignOnQueries();
+                    fireDeafultDatasourceNameChanged(aOldDatasourceName, aNewDatasourceName);
                 }
             });
-            signOnQueries();
+            resignOnQueries();
         }
     }
 
@@ -61,7 +73,7 @@ public abstract class PlatypusDataObject extends MultiDataObject {
         }
     }
     
-    protected void signOnQueries() {
+    protected void resignOnQueries() {
         unsignFromQueries();
         if (getClient() != null) {
             projectClientQueriesListener = getClient().addQueriesListener(new DbClient.QueriesListener() {
@@ -77,7 +89,11 @@ public abstract class PlatypusDataObject extends MultiDataObject {
     }
     protected boolean validationStarted;
 
-    protected void startModelValidating() {
+    public boolean isValidationStarted() {
+        return validationStarted;
+    }
+
+    public void startModelValidating() {
         if (!isModelValid() && !validationStarted) {
             validationStarted = true;
             RP.execute(new Runnable() {
@@ -101,8 +117,6 @@ public abstract class PlatypusDataObject extends MultiDataObject {
         }
     }
 
-    protected abstract void clientChanged();
-
     @Override
     protected void handleDelete() throws IOException {
         dispose();
@@ -122,9 +136,9 @@ public abstract class PlatypusDataObject extends MultiDataObject {
         super.dispose();
     }
 
-    public HandlerRegistration addClientChangeListener(final Runnable onChange) {
+    public ListenerRegistration addClientChangeListener(final PlatypusProject.ClientChangeListener onChange) {
         clientListeners.add(onChange);
-        return new HandlerRegistration() {
+        return new ListenerRegistration() {
             @Override
             public void remove() {
                 clientListeners.remove(onChange);
@@ -132,12 +146,24 @@ public abstract class PlatypusDataObject extends MultiDataObject {
         };
     }
 
-    private void fireClientChanged() {
-        for (Runnable onChange : clientListeners.toArray(new Runnable[]{})) {
-            onChange.run();
+    private void fireClientConnected(String aDatasourceName) {
+        for (PlatypusProject.ClientChangeListener onChange : clientListeners.toArray(new PlatypusProject.ClientChangeListener[]{})) {
+            onChange.connected(aDatasourceName);
         }
     }
 
+    private void fireClientDisconnected(String aDatasourceName) {
+        for (PlatypusProject.ClientChangeListener onChange : clientListeners.toArray(new PlatypusProject.ClientChangeListener[]{})) {
+            onChange.disconnected(aDatasourceName);
+        }
+    }
+    
+    private void fireDeafultDatasourceNameChanged(String aOldDatasourceName, String aNewDatasourceName) {
+        for (PlatypusProject.ClientChangeListener onChange : clientListeners.toArray(new PlatypusProject.ClientChangeListener[]{})) {
+            onChange.defaultDatasourceNameChanged(aOldDatasourceName, aNewDatasourceName);
+        }
+    }
+    
     public final PlatypusProject getProject() {
         Project pr = FileOwnerQuery.getOwner(getPrimaryFile());
         if (pr instanceof PlatypusProject) {
@@ -169,9 +195,9 @@ public abstract class PlatypusDataObject extends MultiDataObject {
         }
     }
 
-    public HandlerRegistration addModelValidChangeListener(final Runnable onChange) {
+    public ListenerRegistration addModelValidChangeListener(final Runnable onChange) {
         modelValidListeners.add(onChange);
-        return new HandlerRegistration() {
+        return new ListenerRegistration() {
             @Override
             public void remove() {
                 modelValidListeners.remove(onChange);

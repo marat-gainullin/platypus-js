@@ -4,7 +4,6 @@
  */
 package com.eas.designer.application.project;
 
-import com.eas.deploy.project.PlatypusSettings;
 import java.beans.PropertyChangeSupport;
 import java.util.logging.Level;
 

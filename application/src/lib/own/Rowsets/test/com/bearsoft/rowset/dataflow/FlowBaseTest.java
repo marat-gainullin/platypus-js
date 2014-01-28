@@ -10,6 +10,7 @@ import com.bearsoft.rowset.resourcepool.BearCallableStatement;
 import com.bearsoft.rowset.resourcepool.BearDatabaseConnection;
 import com.bearsoft.rowset.resourcepool.BearPreparedStatement;
 import com.bearsoft.rowset.resourcepool.BearResourcePool;
+import com.eas.util.ListenerRegistration;
 import java.io.PrintWriter;
 import java.sql.*;
 import java.util.ArrayList;
@@ -87,7 +88,7 @@ public class FlowBaseTest {
         }
 
         @Override
-        public TransactionListener.Registration addTransactionListener(TransactionListener aListener) {
+        public ListenerRegistration addTransactionListener(TransactionListener aListener) {
             throw new UnsupportedOperationException("Not supported yet.");
         }
     }

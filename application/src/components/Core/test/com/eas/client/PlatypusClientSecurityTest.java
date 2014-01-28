@@ -10,7 +10,6 @@ import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.queries.PlatypusQuery;
-import com.eas.client.settings.PlatypusConnectionSettings;
 import com.eas.client.threetier.PlatypusNativeClient;
 import com.eas.client.threetier.http.PlatypusHttpClient;
 import com.eas.client.threetier.http.PlatypusHttpTestConstants;
@@ -65,16 +64,8 @@ public class PlatypusClientSecurityTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        PlatypusConnectionSettings nativeSettings = new PlatypusConnectionSettings();
-        nativeSettings.setUrl("platypus://localhost:8500/");
-        nativeSettings.setName("Test native connection");
-        appClient = new PlatypusNativeClient(nativeSettings);
-
-        PlatypusConnectionSettings httpSettings = new PlatypusConnectionSettings();
-        httpSettings.setName("Platypus http test connection");
-        httpSettings.setUrl(PlatypusHttpTestConstants.HTTP_REQUEST_URL);
-        httpClient = new PlatypusHttpClient(httpSettings);
-
+        appClient = new PlatypusNativeClient("platypus://localhost:8500/");
+        httpClient = new PlatypusHttpClient(PlatypusHttpTestConstants.HTTP_REQUEST_URL);
         removeTempData(); // if any
     }
 

@@ -25,7 +25,6 @@ import com.eas.client.metadata.DbTableIndexColumnSpec;
 import com.eas.client.metadata.DbTableIndexSpec;
 import com.eas.client.queries.SqlCompiledQuery;
 import com.eas.client.settings.DbConnectionSettings;
-import com.eas.client.settings.EasSettings;
 import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.metadata.testdefine.Db2TestDefine;
 import com.eas.metadata.testdefine.PostgreTestDefine;
@@ -1008,7 +1007,6 @@ public class MetadataSynchronizerTest {
         settings.setPassword(aDbConnection.getPassword());
         assert settings instanceof DbConnectionSettings;
         ((DbConnectionSettings)settings).setSchema(aDbConnection.getSchema());
-        ((DbConnectionSettings) settings).setInitSchema(false);
         settings.setUrl(aDbConnection.getUrl());
         return new DatabasesClient((DbConnectionSettings)settings);
     }

@@ -192,13 +192,6 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
     }
 
     @Override
-    protected void clientChanged() {
-        if (model != null) {
-            model.setClient(getClient());
-        }
-    }
-
-    @Override
     protected void validateModel() throws Exception {
         if (getModel() != null) {
             getModel().validate();
@@ -235,7 +228,7 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
             try {
                 getClient().appEntityChanged(IndexerQuery.file2AppElementId(getPrimaryFile()));
             } finally {
-                signOnQueries();
+                resignOnQueries();
             }
         }
     }

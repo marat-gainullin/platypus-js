@@ -8,10 +8,9 @@ package com.eas.client.scripts;
 import com.eas.client.AppCache;
 import com.eas.client.Client;
 import com.eas.client.ClientConstants;
+import com.eas.client.DatabasesClient;
 import com.eas.client.login.PrincipalHost;
 import com.eas.client.metadata.ApplicationElement;
-import com.eas.client.settings.DbConnectionSettings;
-import com.eas.client.settings.EasSettings;
 import com.eas.client.settings.SettingsConstants;
 import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptObj;
@@ -85,14 +84,10 @@ public class PlatypusScriptedResource {
      *
      * @return Application's directory full path or null if not path is not
      * avaliable
+     * @throws java.lang.Exception
      */
-    public static String getApplicationPath() {
-        EasSettings settings = client.getSettings();
-        if (settings instanceof DbConnectionSettings) {
-            return ((DbConnectionSettings) settings).getApplicationPath();
-        } else {
-            return null;
-        }
+    public static String getApplicationPath() throws Exception {
+        return client.getAppCache().getApplicationPath();
     }
 
     /**

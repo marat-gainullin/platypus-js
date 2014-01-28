@@ -4,8 +4,7 @@
  */
 package com.eas.designer.explorer.j2ee;
 
-import com.eas.client.ClientConstants;
-import com.eas.client.settings.DbConnectionSettings;
+import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.designer.application.PlatypusUtils;
 import com.eas.designer.explorer.j2ee.dd.AppListener;
 import com.eas.designer.explorer.j2ee.dd.AuthConstraint;
@@ -24,6 +23,7 @@ import com.eas.designer.explorer.platform.EmptyPlatformHomePathException;
 import com.eas.designer.explorer.platform.PlatypusPlatform;
 import com.eas.designer.application.project.ClientType;
 import com.eas.designer.explorer.project.PlatypusProjectImpl;
+import com.eas.server.ServerMain;
 import com.eas.server.httpservlet.PlatypusHttpServlet;
 import com.eas.server.httpservlet.PlatypusSessionsSynchronizer;
 import com.eas.util.FileUtils;
@@ -38,6 +38,8 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.sql.DataSource;
+import org.netbeans.api.db.explorer.ConnectionManager;
+import org.netbeans.api.db.explorer.DatabaseConnection;
 import org.netbeans.modules.j2ee.deployment.devmodules.api.Deployment;
 import org.netbeans.modules.j2ee.deployment.devmodules.spi.J2eeModuleProvider;
 import org.openide.ErrorManager;
@@ -272,7 +274,7 @@ public class PlatypusWebModuleManager {
         configureParams(wa);
         wa.addAppListener(new AppListener(PlatypusSessionsSynchronizer.class.getName()));
         configureServlet(wa);
-        configureDatasource(wa);
+        configureDatasources(wa);
         if (project.getSettings().isWebSecurityEnabled() || ClientType.PLATYPUS_CLIENT.equals(project.getSettings().getRunClientType())) {
             configureSecurity(wa);
         }
@@ -297,10 +299,12 @@ public class PlatypusWebModuleManager {
     }
 
     private void configureParams(WebApplication wa) throws Exception {
-        if (!project.getSettings().isDbAppSources()) {
-            wa.addInitParam(new ContextParam(ClientConstants.APP_PATH_CMD_PROP_NAME1, project.getProjectDirectory().getPath()));
+        wa.addInitParam(new ContextParam(ServerMain.DEF_DATASOURCE_CONF_PARAM, project.getSettings().getAppSettings().getDefaultDatasource()));
+        if (project.getSettings().isDbAppSources()) {
+            wa.addInitParam(new ContextParam(ServerMain.APP_URL_CONF_PARAM, "jndi://" + project.getSettings().getAppSettings().getDefaultDatasource()));
+        } else {
+            wa.addInitParam(new ContextParam(ServerMain.APP_URL_CONF_PARAM, project.getProjectDirectory().toURL().toString()));
         }
-        wa.addInitParam(new ContextParam(ClientConstants.DB_CONNECTION_URL_PROP_NAME, PlatypusWebModule.MAIN_DATASOURCE_NAME));
     }
 
     private void configureServlet(WebApplication wa) {
@@ -316,10 +320,12 @@ public class PlatypusWebModuleManager {
         wa.addServletMapping(new ServletMapping(PLATYPUS_SERVLET_NAME, PLATYPUS_SERVLET_URL_PATTERN));
     }
 
-    private void configureDatasource(WebApplication wa) {
-        ResourceRef resourceRef = new ResourceRef(PlatypusWebModule.MAIN_DATASOURCE_NAME, DataSource.class.getName(), CONTAIER_RESOURCE_SECURITY_TYPE);
-        resourceRef.setDescription("Main database connection"); //NOI18N
-        wa.addResourceRef(resourceRef);
+    private void configureDatasources(WebApplication wa) {
+        for (DatabaseConnection conn : ConnectionManager.getDefault().getConnections()) {
+            ResourceRef resourceRef = new ResourceRef(conn.getDisplayName(), DataSource.class.getName(), CONTAIER_RESOURCE_SECURITY_TYPE);
+            resourceRef.setDescription(conn.getName()); //NOI18N
+            wa.addResourceRef(resourceRef);
+        }
     }
 
     private void configureSecurity(WebApplication wa) {
@@ -355,8 +361,7 @@ public class PlatypusWebModuleManager {
 
     private void copyLibJars(FileObject libsDir) throws Exception {
         Set<File> jdbcDriverFiles = new HashSet<>();
-        //Do not copy JDBC drivers to the WEB-INF/lib
-        for (String clazz : DbConnectionSettings.readDrivers().values()) {
+        for (String clazz : GeneralResourceProvider.getDrivers().values()) {
             File jdbcDriver = PlatypusPlatform.findThirdpartyJar(clazz);
             if (jdbcDriver != null) {
                 FileObject jdbcDriverFo = FileUtil.toFileObject(jdbcDriver);

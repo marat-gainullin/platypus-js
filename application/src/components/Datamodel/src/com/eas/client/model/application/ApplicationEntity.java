@@ -9,7 +9,6 @@ import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.dataflow.DelegatingFlowProvider;
 import com.bearsoft.rowset.dataflow.TransactionListener;
-import com.bearsoft.rowset.dataflow.TransactionListener.Registration;
 import com.bearsoft.rowset.events.*;
 import com.bearsoft.rowset.exceptions.InvalidColIndexException;
 import com.bearsoft.rowset.exceptions.InvalidCursorPositionException;
@@ -36,6 +35,7 @@ import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptUtils;
 import com.eas.script.ScriptUtils.ScriptAction;
 import com.eas.script.StoredFunction;
+import com.eas.util.ListenerRegistration;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -398,7 +398,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             }
 
             @Override
-            public Registration addTransactionListener(TransactionListener aListener) {
+            public ListenerRegistration addTransactionListener(TransactionListener aListener) {
                 return model.addTransactionListener(aListener);
             }
         });

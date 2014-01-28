@@ -24,6 +24,8 @@ import javax.security.auth.login.LoginException;
  */
 public interface AppClient extends Client, PrincipalHost {
 
+    public String getUrl();
+    
     /**
      * Returns PlatypusQuery instance, containing fields and parameters
      * description. It returned without sql text and main table.
@@ -62,6 +64,7 @@ public interface AppClient extends Client, PrincipalHost {
      * execute request
      *
      * @param aRequest request
+     * @throws java.lang.Exception
      */
     public void executeRequest(Request aRequest) throws Exception;
 

@@ -12,18 +12,22 @@ package com.eas.client.model.gui.selectors;
 
 import com.eas.client.DbClient;
 import com.eas.client.dbstructure.DbStructureUtils;
-import com.eas.client.metadata.ApplicationElement;
-import com.eas.client.model.gui.DatamodelDesignUtils;
 import com.eas.client.model.gui.IconCache;
-import com.eas.client.settings.DbConnectionSettings;
-import com.eas.client.settings.XmlDom2ConnectionSettings;
+import com.eas.designer.application.project.PlatypusProject;
+import com.eas.designer.application.utils.DatabaseConnectionRenderer;
+import com.eas.designer.application.utils.DatabaseConnections;
 import java.awt.Component;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
+import org.netbeans.api.db.explorer.ConnectionManager;
+import org.netbeans.api.db.explorer.DatabaseConnection;
+import org.openide.util.Exceptions;
 
 /**
  *
@@ -34,48 +38,10 @@ public class DbTablesView extends JPanel {
     protected FindAction findAction = new FindAction();
     protected FindAgainAction findAgainAction = new FindAgainAction();
     protected DbClient client;
-    protected String dialogTitle = null;
-    protected String searchSubject = null;
-    protected String connectionId = null;
-    protected AppElementSelectorCallback connectionSelector;
-
-    protected void refreshButtons() {
-        if (connectionId == null) {
-            btnDefaultConnection.setSelected(true);
-        } else {
-            btnSelectConnection.setSelected(true);
-        }
-    }
-
-    public void refreshControls(String aSchema) throws Exception {
-        // refresh controls
-        DbConnectionSettings settings = readSettings();
-
-        if (connectionId == null) {
-            String appDbTitle = ((DbConnectionSettings) client.getSettings()).getName();
-            if (appDbTitle == null || appDbTitle.isEmpty()) {
-                appDbTitle = DatamodelDesignUtils.getLocalizedString("defaultDatabase");
-            }
-            txtConnection.setText(appDbTitle);
-        } else {
-            ApplicationElement appElement = client.getAppCache().get(connectionId);
-            txtConnection.setText(appElement.getName());
-        }
-        String schema = aSchema;
-        if (schema == null || schema.isEmpty()) {
-            schema = settings.getSchema();
-        }
-        int schemaIndx = locateSchema(schema);
-        if (schemaIndx != -1) {
-            comboSchema.setSelectedIndex(schemaIndx);
-        }
-        refreshButtons();
-    }
-
-    public String getDefaultSchema() throws Exception {
-        DbConnectionSettings settings = readSettings();
-        return settings.getSchema();
-    }
+    protected String dialogTitle;
+    protected String searchSubject;
+    protected String datasourceName;
+    protected PlatypusProject project;
 
     public int locateSchema(String aSchema) {
         ComboBoxModel<String> schemasModel = comboSchema.getModel();
@@ -86,15 +52,6 @@ public class DbTablesView extends JPanel {
             }
         }
         return -1;
-    }
-
-    private DbConnectionSettings readSettings() throws Exception {
-        if (connectionId == null) {
-            return (DbConnectionSettings) client.getSettings();
-        } else {
-            ApplicationElement appElement = client.getAppCache().get(connectionId);
-            return (DbConnectionSettings) XmlDom2ConnectionSettings.document2Settings(appElement.getContent());
-        }
     }
 
     public class FindAction extends AbstractAction {
@@ -171,14 +128,25 @@ public class DbTablesView extends JPanel {
     }
 
     /**
-     * Creates new form DbTablesView
+     * Creates DbTablesView
+     *
+     * @param aClient
+     * @param aProject
+     * @param aDatasoruceName
+     * @param aSchema
+     * @param aDialogTitle
+     * @param allowSchemaChange
+     * @param allowConnectionChange
      */
-    public DbTablesView(DbClient aClient, String aDbId, String aSchema, String aDialogTitle, boolean allowSchemaChange, boolean allowConnectionChange, AppElementSelectorCallback aConnectionSelector) {
+    public DbTablesView(PlatypusProject aProject, String aDatasourceName, String aSchema, String aDialogTitle, boolean allowSchemaChange, boolean allowConnectionChange) {
         super();
-        connectionId = aDbId;
-        connectionSelector = aConnectionSelector;
+        project = aProject;
+        datasourceName = aDatasourceName;
+        if (datasourceName == null) {
+            datasourceName = project.getSettings().getAppSettings().getDefaultDatasource();
+        }
         initComponents();
-        client = aClient;
+        client = project.getClient();
         dialogTitle = aDialogTitle;
         ActionMap am = lstTables.getActionMap();
         if (am != null) {
@@ -191,21 +159,44 @@ public class DbTablesView extends JPanel {
             im.put((KeyStroke) findAgainAction.getValue(Action.ACCELERATOR_KEY), FindAgainAction.class.getSimpleName());
         }
         try {
-            DbTablesListModel listModel = new DbTablesListModel(client, aDbId);
+            txtConnection.setEnabled(allowConnectionChange);
+            DatabaseConnection defaultConn = DatabaseConnections.lookup(project.getSettings().getAppSettings().getDefaultDatasource());
+            DatabaseConnection currentConn = DatabaseConnections.lookup(datasourceName);
+            List<DatabaseConnection> conns = new ArrayList<>();
+            for (DatabaseConnection conn : ConnectionManager.getDefault().getConnections()) {
+                if (conn.getJDBCConnection() != null) {
+                    conns.add(conn);
+                }
+            }
+            DefaultComboBoxModel<DatabaseConnection> connectionsModel = new DefaultComboBoxModel<>(conns.toArray(new DatabaseConnection[]{}));
+            if (conns.contains(currentConn)) {
+                connectionsModel.setSelectedItem(currentConn);
+            } else {
+                DatabaseConnection selectedConn = (DatabaseConnection) connectionsModel.getSelectedItem();
+                if (selectedConn != null) {
+                    datasourceName = selectedConn.getDisplayName();
+                }
+            }
+            txtConnection.setModel(connectionsModel);
+            txtConnection.setRenderer(new DatabaseConnectionRenderer(null));
+            DbTablesListModel listModel = new DbTablesListModel(client, datasourceName);
             lstTables.setModel(listModel);
             lstTables.setCellRenderer(new DbTablesListRenderer());
             btnFind.setEnabled(findAction.isEnabled());
-            DbSchemasComboModel comboModel = new DbSchemasComboModel(client, aDbId, listModel);
+            DbSchemasComboModel comboModel = new DbSchemasComboModel(client, datasourceName, listModel);
             comboSchema.setModel(comboModel);
-
+            if (aSchema == null || aSchema.isEmpty()) {
+                aSchema = client.getConnectionSchema(datasourceName);
+            }
+            if (aSchema != null) {
+                comboSchema.setSelectedIndex(locateSchema(aSchema));
+            }
             comboSchema.setEnabled(allowSchemaChange);
             btnDefaultSchema.setEnabled(allowSchemaChange);
 
-            btnDefaultConnection.setEnabled(allowConnectionChange);
-            btnSelectConnection.setEnabled(allowConnectionChange);
-            refreshControls(aSchema);
+            btnDefaultConnection.setEnabled(allowConnectionChange && conns.contains(defaultConn));
         } catch (Exception ex) {
-            Logger.getLogger(DbTablesView.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(DbTablesView.class.getName()).log(Level.WARNING, null, ex);
         }
     }
 
@@ -222,7 +213,6 @@ public class DbTablesView extends JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        btnsGroupConnection = new javax.swing.ButtonGroup();
         comboSchema = new javax.swing.JComboBox<String>();
         scrollTablesList = new javax.swing.JScrollPane();
         lstTables = new javax.swing.JList<String>();
@@ -231,9 +221,14 @@ public class DbTablesView extends JPanel {
         btnDefaultSchema = new javax.swing.JButton();
         lblSchema = new javax.swing.JLabel();
         lblConnection = new javax.swing.JLabel();
-        txtConnection = new javax.swing.JTextField();
-        btnDefaultConnection = new javax.swing.JToggleButton();
-        btnSelectConnection = new javax.swing.JToggleButton();
+        btnDefaultConnection = new javax.swing.JButton();
+        txtConnection = new javax.swing.JComboBox();
+
+        comboSchema.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                comboSchemaActionPerformed(evt);
+            }
+        });
 
         lstTables.setModel(new javax.swing.AbstractListModel() {
             String[] strings = { " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " " };
@@ -259,9 +254,6 @@ public class DbTablesView extends JPanel {
 
         lblConnection.setText(DbStructureUtils.getString("lblConnection.text")); // NOI18N
 
-        txtConnection.setEditable(false);
-
-        btnsGroupConnection.add(btnDefaultConnection);
         btnDefaultConnection.setText(DbStructureUtils.getString("btnDefaultConnection.text")); // NOI18N
         btnDefaultConnection.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -269,11 +261,9 @@ public class DbTablesView extends JPanel {
             }
         });
 
-        btnsGroupConnection.add(btnSelectConnection);
-        btnSelectConnection.setText(DbStructureUtils.getString("btnSelectConnection.text")); // NOI18N
-        btnSelectConnection.addActionListener(new java.awt.event.ActionListener() {
+        txtConnection.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnSelectConnectionActionPerformed(evt);
+                txtConnectionActionPerformed(evt);
             }
         });
 
@@ -291,16 +281,12 @@ public class DbTablesView extends JPanel {
                             .addComponent(lblSchema))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(comboSchema, 0, 158, Short.MAX_VALUE)
-                            .addComponent(txtConnection, javax.swing.GroupLayout.DEFAULT_SIZE, 158, Short.MAX_VALUE))
+                            .addComponent(comboSchema, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(txtConnection, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(btnDefaultConnection)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(btnSelectConnection))
-                            .addComponent(btnDefaultSchema))
-                        .addGap(8, 8, 8))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(btnDefaultSchema)
+                            .addComponent(btnDefaultConnection)))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(scrollTablesList, javax.swing.GroupLayout.DEFAULT_SIZE, 376, Short.MAX_VALUE)
                         .addGap(10, 10, 10)))
@@ -311,10 +297,9 @@ public class DbTablesView extends JPanel {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtConnection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnDefaultConnection)
                     .addComponent(lblConnection)
-                    .addComponent(btnSelectConnection))
+                    .addComponent(btnDefaultConnection)
+                    .addComponent(txtConnection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(comboSchema, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -328,52 +313,60 @@ public class DbTablesView extends JPanel {
         );
     }// </editor-fold>//GEN-END:initComponents
 
+    private void btnDefaultSchemaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDefaultSchemaActionPerformed
+        try {
+            String schema = project.getClient().getConnectionSchema(datasourceName);
+            comboSchema.setSelectedIndex(locateSchema(schema));
+            comboSchema.invalidate();
+            comboSchema.repaint();
+        } catch (Exception ex) {
+            Logger.getLogger(DbTablesView.class.getName()).log(Level.WARNING, null, ex);
+        }
+    }//GEN-LAST:event_btnDefaultSchemaActionPerformed
+
     private void btnDefaultConnectionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDefaultConnectionActionPerformed
-        if (connectionId != null) {
+        if (datasourceName != null) {
             try {
-                connectionId = null;
-                refreshControls(null);
+                datasourceName = project.getSettings().getAppSettings().getDefaultDatasource();
+                DatabaseConnection defaultConn = DatabaseConnections.lookup(datasourceName);
+                txtConnection.setSelectedItem(defaultConn);
+                lstTables.setModel(new DbTablesListModel(client, datasourceName));
+                DbSchemasComboModel comboModel = new DbSchemasComboModel(client, datasourceName, (DbTablesListModel) lstTables.getModel());
+                comboSchema.setModel(comboModel);
+                btnDefaultSchemaActionPerformed(null);
             } catch (Exception ex) {
                 Logger.getLogger(DbTablesView.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+
     }//GEN-LAST:event_btnDefaultConnectionActionPerformed
 
-    private void btnSelectConnectionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSelectConnectionActionPerformed
+    private void txtConnectionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtConnectionActionPerformed
         try {
-            String oldValue = connectionId;
-            connectionId = connectionSelector.select(connectionId);
-            if ((connectionId == null && oldValue != null) || (connectionId != null && !connectionId.equals(oldValue))) {
-                refreshControls(null);
-            }
+            datasourceName = txtConnection.getSelectedItem() != null ? ((DatabaseConnection) txtConnection.getSelectedItem()).getDisplayName() : null;
+            lstTables.setModel(new DbTablesListModel(client, datasourceName));
+            DbSchemasComboModel comboModel = new DbSchemasComboModel(client, datasourceName, (DbTablesListModel) lstTables.getModel());
+            comboSchema.setModel(comboModel);
+            btnDefaultSchemaActionPerformed(null);
         } catch (Exception ex) {
-            Logger.getLogger(DbTablesView.class.getName()).log(Level.SEVERE, null, ex);
+            Exceptions.printStackTrace(ex);
         }
-    }//GEN-LAST:event_btnSelectConnectionActionPerformed
+    }//GEN-LAST:event_txtConnectionActionPerformed
 
-    private void btnDefaultSchemaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDefaultSchemaActionPerformed
-        try {
-            String schema = getDefaultSchema();
-            int schemaIdx = locateSchema(schema);
-            if (schemaIdx != -1) {
-                comboSchema.setSelectedIndex(schemaIdx);
-            }
-        } catch (Exception ex) {
-            Logger.getLogger(DbTablesView.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }//GEN-LAST:event_btnDefaultSchemaActionPerformed
+    private void comboSchemaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_comboSchemaActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_comboSchemaActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JToggleButton btnDefaultConnection;
+    private javax.swing.JButton btnDefaultConnection;
     private javax.swing.JButton btnDefaultSchema;
     private javax.swing.JButton btnFind;
-    private javax.swing.JToggleButton btnSelectConnection;
-    private javax.swing.ButtonGroup btnsGroupConnection;
     public javax.swing.JComboBox<String> comboSchema;
     private javax.swing.JLabel lblConnection;
     private javax.swing.JLabel lblSchema;
     public javax.swing.JList<String> lstTables;
     private javax.swing.JScrollPane scrollTablesList;
     private javax.swing.JToolBar tools;
-    private javax.swing.JTextField txtConnection;
+    public javax.swing.JComboBox txtConnection;
     // End of variables declaration//GEN-END:variables
 }

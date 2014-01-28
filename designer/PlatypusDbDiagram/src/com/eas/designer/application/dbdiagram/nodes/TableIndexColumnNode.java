@@ -33,19 +33,21 @@ public class TableIndexColumnNode extends AbstractNode {
 
     DbTableIndexColumnSpec columnSpec;
     FieldsEntity tableEntity;
+    private PropertyChangeListener columnspecListener;
 
     public TableIndexColumnNode(DbTableIndexColumnSpec aColumnSpec, FieldsEntity aTableEntity) {
         super(Children.LEAF);
         columnSpec = aColumnSpec;
         tableEntity = aTableEntity;
-        columnSpec.getChangeSupport().addPropertyChangeListener(new PropertyChangeListener() {
+        columnspecListener = new PropertyChangeListener() {
             @Override
             public void propertyChange(PropertyChangeEvent evt) {
                 if (DbTableIndexColumnSpec.ASCENDING_PROPERTY.equals(evt.getPropertyName())) {
                     firePropertyChange(DbTableIndexColumnSpec.ASCENDING_PROPERTY, evt.getOldValue(), evt.getNewValue());
                 }
             }
-        });
+        };
+        columnSpec.getChangeSupport().addPropertyChangeListener(columnspecListener);
     }
 
     @Override
@@ -78,6 +80,7 @@ public class TableIndexColumnNode extends AbstractNode {
 
     @Override
     public void destroy() throws IOException {
+        columnSpec.getChangeSupport().removePropertyChangeListener(columnspecListener);
         DbTableIndexSpec newIndex = getIndexNode().getIndex().copy();
         DbTableIndexColumnSpec columnToDelete = newIndex.getColumn(columnSpec.getColumnName());
         if (columnToDelete != null) {

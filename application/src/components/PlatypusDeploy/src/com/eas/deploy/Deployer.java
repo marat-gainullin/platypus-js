@@ -9,7 +9,7 @@ import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.compacts.CompactClob;
 import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.ClientConstants;
-import com.eas.client.DbClient;
+import com.eas.client.DatabasesClient;
 import com.eas.client.cache.AppElementFiles;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.cache.PlatypusFilesSupport;
@@ -17,7 +17,6 @@ import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.model.store.Model2XmlDom;
 import com.eas.client.queries.SqlCompiledQuery;
 import com.eas.client.queries.SqlQuery;
-import com.eas.client.settings.ConnectionSettings2XmlDom;
 import com.eas.script.JsDoc;
 import com.eas.util.FileUtils;
 import com.eas.util.StringUtils;
@@ -56,27 +55,26 @@ public class Deployer extends BaseDeployer {
     protected static final String CHECK_REQUIRED_TAG_EXCEPTION_MSG = "In Platypus documents should be exactly one tag: ";
     protected static final String CHECK_OPTIONAL_TAG_EXCEPTION_MSG = "In Platypus documents should be one or zero tags: ";
     protected static final String WRONG_ROOT_ELEMENT_EXCEPTION_MSG = "Wrong root element: %s for application element id: %s";
-    private static DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-    private File sourcesRoot;
+    private static final DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+    private final File sourcesRoot;
     // used by deploy
     private Map<String, ApplicationElement> appElements;
     // used by import
     private Map<String, Set<ApplicationElement>> appElementsTree;
 
-    public Deployer(String aProjectPath) {
-        super(aProjectPath);
-        init();
+    public Deployer(File aProjectDir, DatabasesClient aClient) {
+        super(aClient);
+        sourcesRoot = new File(aProjectDir, PlatypusFiles.PLATYPUS_PROJECT_SOURCES_ROOT);
     }
 
-    public Deployer(File aProjectDir, DbClient aClient) {
-        super(aProjectDir, aClient);
-        init();
+    void initApp() throws Exception {
+        DatabasesClient.initApplication(client.obtainDataSource(null));
     }
 
-    private void init() {
-        sourcesRoot = new File(dir, PlatypusFiles.PLATYPUS_PROJECT_SOURCES_ROOT);
+    void initUsersSpace() throws Exception {
+        DatabasesClient.initUsersSpace(client.obtainDataSource(null));
     }
-
+    
     /**
      * Deploys Platypus application component to the database
      *
@@ -90,8 +88,8 @@ public class Deployer extends BaseDeployer {
             busy = true;
         }
         try {
-            checkDbClient();
             out.println("Deploy to database started.."); // NOI18N
+            initApp();
             appElements = new LinkedHashMap<>();
 
             //Prepare application elements items
@@ -155,7 +153,6 @@ public class Deployer extends BaseDeployer {
         }
         try {
             out.println("Undeploy started.."); // NOI18N
-            checkDbClient();
             SqlQuery deleteQuery = new SqlQuery(client, DELETE_ENTITIES_SQL);
             SqlCompiledQuery deleteCompiledQuery = deleteQuery.compile();
             deleteCompiledQuery.enqueueUpdate();
@@ -187,11 +184,9 @@ public class Deployer extends BaseDeployer {
         }
         try {
             out.println("Import from database started.."); // NOI18N
-            checkDbClient();
-
             //Get application elements entities 
-            SqlQuery selectComponentEntitiesQuery = new SqlQuery(client, SELECT_ENTITIES_SQL);
-            Rowset rs = selectComponentEntitiesQuery.compile().executeQuery();
+            SqlQuery applicationElementsQuery = new SqlQuery(client, SELECT_ENTITIES_SQL);
+            Rowset rs = applicationElementsQuery.compile().executeQuery();
 
             //Build application elements tree, find root node for the component
             appElementsTree = new HashMap<>();
@@ -236,7 +231,7 @@ public class Deployer extends BaseDeployer {
             out.println();
         } catch (Exception ex) {
             Logger.getLogger(Deployer.class.getName()).log(Level.SEVERE, null, ex);
-            err.println("Error import component: " + ex.getMessage());
+            err.println("Import error occured: " + ex.getMessage());
         } finally {
             synchronized (this) {
                 busy = false;
@@ -329,10 +324,6 @@ public class Deployer extends BaseDeployer {
                         } else {
                             throw new DeployException("Wrong root element: " + rootElement.getNodeName() + " for application element id: " + appElement.getId()); // NOI18N  
                         }
-                        break;
-                    case ClientConstants.ET_CONNECTION:
-                        rootElement.setAttribute(ConnectionSettings2XmlDom.NAME_ATTR_NAME, appElement.getId());
-                        saveXml2File(parentDirectory, appElement.getName(), PlatypusFiles.CONNECTION_EXTENSION, rootElement, documentBuilder);
                         break;
                     case ClientConstants.ET_DB_SCHEME:
                         saveXml2File(parentDirectory, appElement.getName(), PlatypusFiles.DB_SCHEME_EXTENSION, rootElement, documentBuilder);
