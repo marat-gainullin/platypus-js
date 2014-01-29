@@ -28,15 +28,15 @@ import java.util.logging.Logger;
  */
 public class MetadataMerger {
 
-    private boolean noDropTables = false;
+    private boolean noDropTables;
     private Set<String> listTables = new HashSet<>();
-    private boolean noExecuteSQL = false;
+    private boolean noExecuteSQL;
     private DbClient client;
     private Map<String, TableStructure> srcMD;
     private Map<String, TableStructure> destMD;
     private String srcDialect;
     private String destDialect;
-    private boolean oneDialect = false;
+    private boolean oneDialect;
     private SqlDriver driver;
     private String dSchema;
     private String sqlCommandEndChars = ";";
@@ -52,7 +52,7 @@ public class MetadataMerger {
     private Set<String> removedIndexes = new HashSet<>();  // for removed indexes
     private Map<String, Set<String>> changedColumnsMap = new HashMap<>();
     private Map<String, Set<String>> droppedColumnsMap = new HashMap<>();
-    private List<String> sqlsList = null;
+    private List<String> sqlsList;
 
     /**
      * merge metadata databases

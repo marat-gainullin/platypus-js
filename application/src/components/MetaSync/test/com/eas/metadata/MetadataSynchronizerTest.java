@@ -19,11 +19,13 @@ import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.ForeignKeySpec;
 import com.bearsoft.rowset.metadata.ForeignKeySpec.ForeignKeyRule;
 import com.bearsoft.rowset.metadata.PrimaryKeySpec;
+import com.eas.client.DatabaseAppCache;
 import com.eas.client.DatabasesClient;
 import com.eas.client.DbClient;
 import com.eas.client.metadata.DbTableIndexColumnSpec;
 import com.eas.client.metadata.DbTableIndexSpec;
 import com.eas.client.queries.SqlCompiledQuery;
+import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.client.settings.DbConnectionSettings;
 import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.metadata.testdefine.Db2TestDefine;
@@ -151,7 +153,6 @@ public class MetadataSynchronizerTest {
             new TableDefine("tt5", "id5", null)
         };
 
-
         TableDefine[] stateAB2 = {
             new TableDefine("tt1", "id1", null),
             new TableDefine("tt3", "id3", "Comment for table"),
@@ -188,7 +189,6 @@ public class MetadataSynchronizerTest {
         runTestFields(aLogName, "test5", aSourceSetting, aDestinationSetting, "Tbl", "Fld", true, true, true, 0, "", false, false);
         runTestFields(aLogName, "test6", aSourceSetting, aDestinationSetting, "Tbl", "Fld", true, true, true, 0, null, false, false);
 
-
 ////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!        
 //        if (!aDestinationSetting.getDatabase().equals(Database.DB2)) {
 //// ПЕРЕДЕЛАТЬ на удаление/создание ???????????        
@@ -212,7 +212,6 @@ public class MetadataSynchronizerTest {
         };
 
         //?????????????????????? asc/desc !!!!!!!!!!!!!!!!!!
-
         IndexDefine[] state2 = {
             new IndexDefine("Ind1", false, true, false, new IndexColumnDefine[]{new IndexColumnDefine("f1", false)}),
             new IndexDefine("Ind2", false, false, true, new IndexColumnDefine[]{new IndexColumnDefine("f2", false), new IndexColumnDefine("f3", false)}),
@@ -369,7 +368,7 @@ public class MetadataSynchronizerTest {
         clearSchema(aSourceSetting.getDbConnection());
         createFields(aSourceSetting, aTableName, aFieldName, aNullable, aReadonly, aSigned, aPrecision, aDescription, changeSize, changeType);
         checkFields(aSourceSetting.getDbConnection(), aSourceSetting.getDbTestDefine(), aSourceSetting.getDatabase(), aTableName, aFieldName, aNullable, aReadonly, aSigned, aPrecision, aDescription, changeSize, changeType);
-        synchronizeDb(logName,aSourceSetting.getDbConnection(), aDestinationSetting.getDbConnection());
+        synchronizeDb(logName, aSourceSetting.getDbConnection(), aDestinationSetting.getDbConnection());
         checkFields(aDestinationSetting.getDbConnection(), aSourceSetting.getDbTestDefine(), aDestinationSetting.getDatabase(), aTableName, aFieldName, aNullable, aReadonly, aSigned, aPrecision, aDescription, changeSize, changeType);
         assertNotNull(XML_NAME);
         checkFields(XML_NAME, aSourceSetting.getDbTestDefine(), aSourceSetting.getDatabase(), aTableName, aFieldName, aNullable, aReadonly, aSigned, aPrecision, aDescription, changeSize, changeType);
@@ -439,7 +438,8 @@ public class MetadataSynchronizerTest {
             }
         } finally {
             client.shutdown();
-        }    
+            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
+        }
     }
 
     private void createFields(SourceDbSetting aSourceSetting, String aTableName, String aFieldName, boolean aNullable, boolean aReadonly, boolean aSigned, int aPrecision, String aDescription, boolean changeSize, boolean changeType) throws Exception {
@@ -475,7 +475,7 @@ public class MetadataSynchronizerTest {
                 String schema = dbConnection.getSchema();
                 executeSql(client, driver.getSql4EmptyTableCreation(schema, tableName, pkFieldName));
 
-                executeSql(client, driver.getSql4DropPkConstraint(schema, new PrimaryKeySpec(schema, tableName, pkFieldName, tableName+SqlDriver.PKEY_NAME_SUFFIX)));
+                executeSql(client, driver.getSql4DropPkConstraint(schema, new PrimaryKeySpec(schema, tableName, pkFieldName, tableName + SqlDriver.PKEY_NAME_SUFFIX)));
 
                 Field field = new Field();
                 field.setSchemaName(schema);
@@ -509,8 +509,9 @@ public class MetadataSynchronizerTest {
                 executeSql(client, sqls);
             }
         } finally {
+            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
             client.shutdown();
-        }    
+        }
     }
 
     private void createIndexes(DbConnection aDbConnection, String aTableName, IndexDefine[] aIndexesDefine) throws Exception {
@@ -563,7 +564,8 @@ public class MetadataSynchronizerTest {
             }
         } finally {
             client.shutdown();
-        }    
+            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
+        }
     }
 
     private void createKeys(DbConnection aDbConnection, Map<String, String[]> aPKeysDefine, FKeyDefine[] aFKeysDefine) throws Exception {
@@ -674,7 +676,8 @@ public class MetadataSynchronizerTest {
             }
         } finally {
             client.shutdown();
-        }    
+            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
+        }
     }
 
     private void checkTables(DbConnection aDbConnection, TableDefine[] aTablesDefine) throws Exception {
@@ -1002,13 +1005,9 @@ public class MetadataSynchronizerTest {
     }
 
     private DbClient createClient(DbConnection aDbConnection) throws Exception {
-        EasSettings settings = EasSettings.createInstance(aDbConnection.getUrl());
-        settings.setUser(aDbConnection.getUser());
-        settings.setPassword(aDbConnection.getPassword());
-        assert settings instanceof DbConnectionSettings;
-        ((DbConnectionSettings)settings).setSchema(aDbConnection.getSchema());
-        settings.setUrl(aDbConnection.getUrl());
-        return new DatabasesClient((DbConnectionSettings)settings);
+        DbConnectionSettings settings = new DbConnectionSettings(aDbConnection.getUrl(), aDbConnection.getUser(), aDbConnection.getPassword(), aDbConnection.getSchema(), null);
+        GeneralResourceProvider.getInstance().registerDatasource("testDb", settings);
+        return new DatabasesClient(new DatabaseAppCache("testDb"), "testDb", true);
     }
 
     private void clearSchema(DbConnection aDbConnection) throws Exception {
@@ -1048,6 +1047,7 @@ public class MetadataSynchronizerTest {
             assertEquals(dbStructure2.size(), 0);
         } finally {
             client.shutdown();
+            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 
@@ -1064,9 +1064,9 @@ public class MetadataSynchronizerTest {
             if (aLogName != null) {
                 sqlLog.addHandler(MetadataSynchronizer.createFileHandler(aLogName + ".log", logEncoding, new LineLogFormatter()));
                 errorLog.addHandler(MetadataSynchronizer.createFileHandler(aLogName + "_err.log", logEncoding, new LineLogFormatter()));
-            }    
+            }
             MetadataSynchronizer mds = new MetadataSynchronizer(null, sqlLog, errorLog, null);
-        
+
             mds.setSourceDatabase(aSourceConnection.getUrl(), aSourceConnection.getSchema(), aSourceConnection.getUser(), aSourceConnection.getPassword());
             mds.setDestinationDatabase(aDestinationConnection.getUrl(), aDestinationConnection.getSchema(), aDestinationConnection.getUser(), aDestinationConnection.getPassword());
             mds.setNoDropTables(aNoDropTables);

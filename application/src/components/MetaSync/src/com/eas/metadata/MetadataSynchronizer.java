@@ -148,7 +148,7 @@ public class MetadataSynchronizer {
     private Logger sqlLogger;
     private Logger errorLogger;
     private Logger infoLogger;
-    private boolean needSqlsList = false;
+    private boolean needSqlsList;
     private List<String> sqlsList;
 
     /**
@@ -167,6 +167,7 @@ public class MetadataSynchronizer {
     }
 
     public MetadataSynchronizer(boolean createSqlsList, Logger aSystemLogger, Logger aSqlLogger, Logger aErrorLogger, Logger aInfoLogger) {
+        super();
         needSqlsList = createSqlsList;
         systemLogger = aSystemLogger;
         sqlLogger = aSqlLogger;
@@ -279,8 +280,8 @@ public class MetadataSynchronizer {
 
         DBStructure srcDBStructure = null;
         if (!emptyFrom) {
-            GeneralResourceProvider.getInstance().registerDatasource(FAKE_DATASOURCE_NAME, new DbConnectionSettings(urlFrom, userFrom, passwordFrom));
-            DbClient client1 = new DatabasesClient(null, FAKE_DATASOURCE_NAME, false);
+            GeneralResourceProvider.getInstance().registerDatasource(METASYNC_DATASOURCE_NAME, new DbConnectionSettings(urlFrom, userFrom, passwordFrom));
+            DbClient client1 = new DatabasesClient(null, METASYNC_DATASOURCE_NAME, false);
             try {
                 srcDBStructure = readDBStructure(client1, schemaFrom);
                 if (!emptyXml) {
@@ -288,7 +289,7 @@ public class MetadataSynchronizer {
                 }
             } finally {
                 client1.shutdown();
-                GeneralResourceProvider.getInstance().unregisterDatasource(FAKE_DATASOURCE_NAME);
+                GeneralResourceProvider.getInstance().unregisterDatasource(METASYNC_DATASOURCE_NAME);
             }
         }
         if (srcDBStructure == null && !emptyXml) {
@@ -296,32 +297,32 @@ public class MetadataSynchronizer {
         }
 
         if (!emptyTo && srcDBStructure != null) {
-            GeneralResourceProvider.getInstance().registerDatasource(FAKE_DATASOURCE_NAME, new DbConnectionSettings(urlTo, userTo, passwordTo));
-            DbClient client2 = new DatabasesClient(null, FAKE_DATASOURCE_NAME, false);
+            GeneralResourceProvider.getInstance().registerDatasource(METASYNC_DATASOURCE_NAME, new DbConnectionSettings(urlTo, userTo, passwordTo));
+            DbClient client2 = new DatabasesClient(null, METASYNC_DATASOURCE_NAME, false);
             try {
                 MetadataMerger metadataMerger = new MetadataMerger(client2, srcDBStructure, readDBStructure(client2, schemaTo), isNoExecute(), isNoDropTables(), tablesList, systemLogger, sqlLogger, errorLogger, needSqlsList);
                 metadataMerger.run();
                 sqlsList = metadataMerger.getSqlsList();
             } finally {
                 client2.shutdown();
-                GeneralResourceProvider.getInstance().unregisterDatasource(FAKE_DATASOURCE_NAME);
+                GeneralResourceProvider.getInstance().unregisterDatasource(METASYNC_DATASOURCE_NAME);
             }
 
             // re-read structure destination for compare with source
             if (infoLogger != null) {
-                GeneralResourceProvider.getInstance().registerDatasource(FAKE_DATASOURCE_NAME, new DbConnectionSettings(urlTo, userTo, passwordTo));
-                DbClient client3 = new DatabasesClient(null, FAKE_DATASOURCE_NAME, false);
+                GeneralResourceProvider.getInstance().registerDatasource(METASYNC_DATASOURCE_NAME, new DbConnectionSettings(urlTo, userTo, passwordTo));
+                DbClient client3 = new DatabasesClient(null, METASYNC_DATASOURCE_NAME, false);
                 try {
                     MetadataUtils.printCompareMetadata(srcDBStructure, readDBStructure(client3, schemaTo), infoLogger);
                 } finally {
                     client3.shutdown();
-                    GeneralResourceProvider.getInstance().unregisterDatasource(FAKE_DATASOURCE_NAME);
+                    GeneralResourceProvider.getInstance().unregisterDatasource(METASYNC_DATASOURCE_NAME);
                 }
             }
         }
     }
-    public static final String FAKE_DATASOURCE_NAME = "fakeDatasource";
-
+    public static final String METASYNC_DATASOURCE_NAME = "metaSyncDatasource";
+/*
     private List<String> getTableNames(DbClient aClient) throws Exception {
         assert aClient != null;
         List<String> tableNamesList = new ArrayList<>();
@@ -355,7 +356,7 @@ public class MetadataSynchronizer {
         }
         return tableNamesList;
     }
-
+*/
     /**
      * Create structure metadata from connection
      *
@@ -510,13 +511,13 @@ public class MetadataSynchronizer {
      * @throws Exception
      */
     public DBStructure readDBStructure(String aUrl, String aSchema, String aUser, String aPassword) throws Exception {
-        GeneralResourceProvider.getInstance().registerDatasource(FAKE_DATASOURCE_NAME, new DbConnectionSettings(aUrl, aUser, aPassword));
-        DbClient client = new DatabasesClient(null, FAKE_DATASOURCE_NAME, false);
+        GeneralResourceProvider.getInstance().registerDatasource(METASYNC_DATASOURCE_NAME, new DbConnectionSettings(aUrl, aUser, aPassword));
+        DbClient client = new DatabasesClient(null, METASYNC_DATASOURCE_NAME, false);
         try {
             return readDBStructure(client, aSchema);
         } finally {
             client.shutdown();
-            GeneralResourceProvider.getInstance().unregisterDatasource(FAKE_DATASOURCE_NAME);
+            GeneralResourceProvider.getInstance().unregisterDatasource(METASYNC_DATASOURCE_NAME);
         }
     }
 

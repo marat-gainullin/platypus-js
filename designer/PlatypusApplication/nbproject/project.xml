@@ -236,13 +236,13 @@
                 <package>com.eas.dbcontrols.visitors</package>
                 <package>com.eas.debugger.jmx.server</package>
                 <package>com.eas.deploy</package>
-                <package>com.eas.deploy.project</package>
                 <package>com.eas.design</package>
                 <package>com.eas.designer.application</package>
                 <package>com.eas.designer.application.indexer</package>
                 <package>com.eas.designer.application.project</package>
                 <package>com.eas.designer.application.utils</package>
                 <package>com.eas.gui</package>
+                <package>com.eas.metadata</package>
                 <package>com.eas.resources.images</package>
                 <package>com.eas.script</package>
                 <package>com.eas.server</package>
@@ -417,10 +417,6 @@
                 <binary-origin>release/modules/ext/Controls.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
-                <runtime-relative-path>ext/MetadataSynchronizer.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/MetadataSynchronizer.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
                 <runtime-relative-path>ext/jts-1.13.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/jts-1.13.jar</binary-origin>
             </class-path-extension>
@@ -555,6 +551,10 @@
             <class-path-extension>
                 <runtime-relative-path>ext/CommonUtils.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/CommonUtils.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/MetaSync.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/MetaSync.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/ScalablePane.jar</runtime-relative-path>

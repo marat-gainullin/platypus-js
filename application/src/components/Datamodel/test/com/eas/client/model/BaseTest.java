@@ -4,10 +4,12 @@
  */
 package com.eas.client.model;
 
+import com.eas.client.DatabaseAppCache;
 import com.eas.client.DatabasesClient;
 import com.eas.client.DbClient;
 import com.eas.client.model.application.ApplicationDbModel;
 import com.eas.client.model.store.XmlDom2ApplicationModel;
+import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.client.settings.DbConnectionSettings;
 import com.eas.script.ScriptUtils;
 import com.eas.script.ScriptUtils.ScriptAction;
@@ -72,7 +74,8 @@ public class BaseTest {
         settings.setUser("eas");
         settings.setPassword("eas");
         settings.setMaxStatements(1);
-        return new DatabasesClient(settings);
+        GeneralResourceProvider.getInstance().registerDatasource("testDb", settings);
+        return new DatabasesClient(new DatabaseAppCache("testDb"), "testDb", true);
     }
 
     public static Document documentFromStream(InputStream is) throws ParserConfigurationException, SAXException, IOException {

@@ -12,6 +12,7 @@ import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.bearsoft.rowset.utils.RowsetUtils;
 import com.eas.client.model.BaseTest;
+import com.eas.client.resourcepool.GeneralResourceProvider;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -20,6 +21,7 @@ import org.junit.Test;
 
 /**
  * Simple changes apply test
+ *
  * @author mg
  */
 public class ApplyTest extends BaseTest {
@@ -47,7 +49,7 @@ public class ApplyTest extends BaseTest {
             //paramTypes.add(DataTypeInfo.NCHAR);
             //paramTypes.add(DataTypeInfo.NVARCHAR);
             //paramTypes.add(DataTypeInfo.LONGNVARCHAR);
-            
+
             FlowProvider flow = client.createFlowProvider(null, null, tableName, selectClause, null, Collections.<String>emptySet(), Collections.<String>emptySet());
 
             for (DataTypeInfo typeInfo : paramTypes) {
@@ -127,6 +129,7 @@ public class ApplyTest extends BaseTest {
             }
         } finally {
             client.shutdown();
+            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 
@@ -195,6 +198,7 @@ public class ApplyTest extends BaseTest {
             }
         } finally {
             client.shutdown();
+            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 }

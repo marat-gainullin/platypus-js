@@ -12,6 +12,7 @@ import com.eas.client.model.EntityDataListener;
 import com.eas.client.model.EntityRefreshFilterDataListener;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
+import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.script.ScriptUtils;
 import com.eas.script.ScriptUtils.ScriptAction;
 import java.math.BigDecimal;
@@ -127,509 +128,544 @@ public class FilteringTest extends BaseTest {
     @Test
     public void filteringMultiTypesKeysTest() throws Exception {
         final DbClient client = initDevelopTestClient();
-        ScriptUtils.inContext(new ScriptUtils.ScriptAction() {
-            @Override
-            public Object run(Context cx) throws Exception {
-                System.out.println("Test of filtering process with key values of various types, but same values");
-                ApplicationDbModel model = BaseTest.modelFromStream(client, FilteringTest.class.getResourceAsStream(MODEL_TEST_PATH));
-                model.setScriptThis(BaseTest.getDummyScriptableObject());
-                model.setRuntime(true);
-                ModelState state = new ModelState(model);
-                Rowset rowset = state.IZMERJAEMIE_VELICHINI.getRowset();
-                int pkColIndex = rowset.getFields().find("ID");
+        try {
+            ScriptUtils.inContext(new ScriptUtils.ScriptAction() {
+                @Override
+                public Object run(Context cx) throws Exception {
+                    System.out.println("Test of filtering process with key values of various types, but same values");
+                    ApplicationDbModel model = BaseTest.modelFromStream(client, FilteringTest.class.getResourceAsStream(MODEL_TEST_PATH));
+                    model.setScriptThis(BaseTest.getDummyScriptableObject());
+                    model.setRuntime(true);
+                    ModelState state = new ModelState(model);
+                    Rowset rowset = state.IZMERJAEMIE_VELICHINI.getRowset();
+                    int pkColIndex = rowset.getFields().find("ID");
 
                 // BigDecimal test
-
-                rowset.beforeFirst();
-                while (rowset.next()) {
-                    Object oPk = rowset.getObject(pkColIndex);
-                    assertNotNull(oPk);
-                    if (oPk instanceof Number) {
-                        Long lPk = ((Number) oPk).longValue();
-                        if (lPk.equals(SILA_EL)) {
-                            // avoid converting to test pre filter converting capability of our entities
-                            rowset.getCurrentRow().setColumnObject(pkColIndex, BigDecimal.valueOf(SILA_EL));
+                    rowset.beforeFirst();
+                    while (rowset.next()) {
+                        Object oPk = rowset.getObject(pkColIndex);
+                        assertNotNull(oPk);
+                        if (oPk instanceof Number) {
+                            Long lPk = ((Number) oPk).longValue();
+                            if (lPk.equals(SILA_EL)) {
+                                // avoid converting to test pre filter converting capability of our entities
+                                rowset.getCurrentRow().setColumnObject(pkColIndex, BigDecimal.valueOf(SILA_EL));
+                            }
                         }
                     }
-                }
-                rowset.beforeFirst();
-                while (rowset.next()) {
-                    Object oPk = rowset.getObject(pkColIndex);
-                    assertNotNull(oPk);
-                    if (oPk instanceof Number) {
-                        Long lPk = ((Number) oPk).longValue();
-                        if (lPk.equals(SILA_EL)) {
-                            assertEquals(1, state.NAIMENOVANIA_SI.getRowset().size());
+                    rowset.beforeFirst();
+                    while (rowset.next()) {
+                        Object oPk = rowset.getObject(pkColIndex);
+                        assertNotNull(oPk);
+                        if (oPk instanceof Number) {
+                            Long lPk = ((Number) oPk).longValue();
+                            if (lPk.equals(SILA_EL)) {
+                                assertEquals(1, state.NAIMENOVANIA_SI.getRowset().size());
+                            }
                         }
                     }
-                }
 
                 // BigInteger test
-
-                rowset.beforeFirst();
-                while (rowset.next()) {
-                    Object oPk = rowset.getObject(pkColIndex);
-                    assertNotNull(oPk);
-                    if (oPk instanceof Number) {
-                        Long lPk = ((Number) oPk).longValue();
-                        if (lPk.equals(SILA_EL)) {
-                            // avoid converting to test pre filter converting capability of our entities
-                            rowset.getCurrentRow().setColumnObject(pkColIndex, BigInteger.valueOf(SILA_EL));
+                    rowset.beforeFirst();
+                    while (rowset.next()) {
+                        Object oPk = rowset.getObject(pkColIndex);
+                        assertNotNull(oPk);
+                        if (oPk instanceof Number) {
+                            Long lPk = ((Number) oPk).longValue();
+                            if (lPk.equals(SILA_EL)) {
+                                // avoid converting to test pre filter converting capability of our entities
+                                rowset.getCurrentRow().setColumnObject(pkColIndex, BigInteger.valueOf(SILA_EL));
+                            }
                         }
                     }
-                }
-                rowset.beforeFirst();
-                while (rowset.next()) {
-                    Object oPk = rowset.getObject(pkColIndex);
-                    assertNotNull(oPk);
-                    if (oPk instanceof Number) {
-                        Long lPk = ((Number) oPk).longValue();
-                        if (lPk.equals(SILA_EL)) {
-                            assertEquals(1, state.NAIMENOVANIA_SI.getRowset().size());
+                    rowset.beforeFirst();
+                    while (rowset.next()) {
+                        Object oPk = rowset.getObject(pkColIndex);
+                        assertNotNull(oPk);
+                        if (oPk instanceof Number) {
+                            Long lPk = ((Number) oPk).longValue();
+                            if (lPk.equals(SILA_EL)) {
+                                assertEquals(1, state.NAIMENOVANIA_SI.getRowset().size());
+                            }
                         }
                     }
-                }
 
                 // Integer test
-
-                rowset.beforeFirst();
-                while (rowset.next()) {
-                    Object oPk = rowset.getObject(pkColIndex);
-                    assertNotNull(oPk);
-                    if (oPk instanceof Number) {
-                        Long lPk = ((Number) oPk).longValue();
-                        if (lPk.equals(SILA_EL)) {
-                            // avoid converting to test pre filter converting capability of our entities
-                            rowset.getCurrentRow().setColumnObject(pkColIndex, Integer.valueOf(SILA_EL.intValue()));
+                    rowset.beforeFirst();
+                    while (rowset.next()) {
+                        Object oPk = rowset.getObject(pkColIndex);
+                        assertNotNull(oPk);
+                        if (oPk instanceof Number) {
+                            Long lPk = ((Number) oPk).longValue();
+                            if (lPk.equals(SILA_EL)) {
+                                // avoid converting to test pre filter converting capability of our entities
+                                rowset.getCurrentRow().setColumnObject(pkColIndex, Integer.valueOf(SILA_EL.intValue()));
+                            }
                         }
                     }
-                }
-                rowset.beforeFirst();
-                while (rowset.next()) {
-                    Object oPk = rowset.getObject(pkColIndex);
-                    assertNotNull(oPk);
-                    if (oPk instanceof Number) {
-                        Long lPk = ((Number) oPk).longValue();
-                        if (lPk.equals(SILA_EL)) {
-                            assertEquals(1, state.NAIMENOVANIA_SI.getRowset().size());
+                    rowset.beforeFirst();
+                    while (rowset.next()) {
+                        Object oPk = rowset.getObject(pkColIndex);
+                        assertNotNull(oPk);
+                        if (oPk instanceof Number) {
+                            Long lPk = ((Number) oPk).longValue();
+                            if (lPk.equals(SILA_EL)) {
+                                assertEquals(1, state.NAIMENOVANIA_SI.getRowset().size());
+                            }
                         }
                     }
+                    return null;
                 }
-                return null;
-            }
-        });
+            });
+        } finally {
+            client.shutdown();
+            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
+        }
     }
 
     @Test
     public void userFilteringTest() throws Exception {
         System.out.println("Enable and disable user custom filtering");
         final DbClient client = initDevelopTestClient();
-        ScriptUtils.inContext(new ScriptUtils.ScriptAction() {
-            @Override
-            public Object run(Context cx) throws Exception {
-                ApplicationDbModel model = BaseTest.modelFromStream(client, FilteringTest.class.getResourceAsStream(MODEL_TEST_PATH));
-                model.setScriptThis(BaseTest.getDummyScriptableObject());
-                model.setRuntime(true);
-                ModelState state = new ModelState(model);
-                Rowset rowset = state.IZMERJAEMIE_VELICHINI.getRowset();
-                int pkColIndex = rowset.getFields().find("ID");
-                rowset.beforeFirst();
-                while (rowset.next()) {
-                    Object oPk = rowset.getObject(pkColIndex);
-                    assertNotNull(oPk);
-                    if (oPk instanceof Number) {
-                        Long lPk = ((Number) oPk).longValue();
-                        if (lPk.equals(DLINA)) {
-                            assertEquals(0, state.NAIMENOVANIA_SI.getRowset().size());
-                        }
-                    }
-                }
-
-                // let's apply user filtering
-                state.NAIMENOVANIA_SI.setUserFiltering(true);
-                try {
+        try {
+            ScriptUtils.inContext(new ScriptUtils.ScriptAction() {
+                @Override
+                public Object run(Context cx) throws Exception {
+                    ApplicationDbModel model = BaseTest.modelFromStream(client, FilteringTest.class.getResourceAsStream(MODEL_TEST_PATH));
+                    model.setScriptThis(BaseTest.getDummyScriptableObject());
+                    model.setRuntime(true);
+                    ModelState state = new ModelState(model);
+                    Rowset rowset = state.IZMERJAEMIE_VELICHINI.getRowset();
+                    int pkColIndex = rowset.getFields().find("ID");
                     rowset.beforeFirst();
                     while (rowset.next()) {
-                        assertEquals(18, state.NAIMENOVANIA_SI.getRowset().size());
-                    }
-                } finally {
-                    // let's cancel user filtering
-                    state.NAIMENOVANIA_SI.setUserFiltering(false);
-                }
-
-                rowset.beforeFirst();
-                while (rowset.next()) {
-                    Object oPk = rowset.getObject(pkColIndex);
-                    assertNotNull(oPk);
-                    if (oPk instanceof Number) {
-                        Long lPk = ((Number) oPk).longValue();
-                        if (lPk.equals(DLINA)) {
-                            assertEquals(0, state.NAIMENOVANIA_SI.getRowset().size());
+                        Object oPk = rowset.getObject(pkColIndex);
+                        assertNotNull(oPk);
+                        if (oPk instanceof Number) {
+                            Long lPk = ((Number) oPk).longValue();
+                            if (lPk.equals(DLINA)) {
+                                assertEquals(0, state.NAIMENOVANIA_SI.getRowset().size());
+                            }
                         }
                     }
+
+                    // let's apply user filtering
+                    state.NAIMENOVANIA_SI.setUserFiltering(true);
+                    try {
+                        rowset.beforeFirst();
+                        while (rowset.next()) {
+                            assertEquals(18, state.NAIMENOVANIA_SI.getRowset().size());
+                        }
+                    } finally {
+                        // let's cancel user filtering
+                        state.NAIMENOVANIA_SI.setUserFiltering(false);
+                    }
+
+                    rowset.beforeFirst();
+                    while (rowset.next()) {
+                        Object oPk = rowset.getObject(pkColIndex);
+                        assertNotNull(oPk);
+                        if (oPk instanceof Number) {
+                            Long lPk = ((Number) oPk).longValue();
+                            if (lPk.equals(DLINA)) {
+                                assertEquals(0, state.NAIMENOVANIA_SI.getRowset().size());
+                            }
+                        }
+                    }
+                    return null;
                 }
-                return null;
-            }
-        });
+            });
+        } finally {
+            client.shutdown();
+            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
+        }
     }
 
     @Test
     public void filteringScrollTest() throws Exception {
         System.out.println("filteringScrollTest, filteringPointsOfIntererstTest");
         final DbClient client = initDevelopTestClient();
-        ScriptUtils.inContext(new ScriptAction() {
-            @Override
-            public Object run(Context cx) throws Exception {
-                ApplicationDbModel model = BaseTest.modelFromStream(client, FilteringTest.class.getResourceAsStream(MODEL_TEST_PATH));
-                model.setScriptThis(BaseTest.getDummyScriptableObject());
-                model.setRuntime(true);
-                ModelState state = new ModelState(model);
-                Map<Long, Integer> counts = state.gatherRowCounts();
+        try {
+            ScriptUtils.inContext(new ScriptAction() {
+                @Override
+                public Object run(Context cx) throws Exception {
+                    ApplicationDbModel model = BaseTest.modelFromStream(client, FilteringTest.class.getResourceAsStream(MODEL_TEST_PATH));
+                    model.setScriptThis(BaseTest.getDummyScriptableObject());
+                    model.setRuntime(true);
+                    ModelState state = new ModelState(model);
+                    Map<Long, Integer> counts = state.gatherRowCounts();
 
-                // let's move some rowset's la la la la...
-                Rowset rowset = state.GRUPPA_OBJECTA_REMONTA.getRowset();
-                rowset.beforeFirst();
-                while (rowset.next()) {
-                    state.ensureRowCounts(counts, state.GRUPPA_OBJECTA_REMONTA.getEntityId());
-                }
-                rowset.first();
+                    // let's move some rowset's la la la la...
+                    Rowset rowset = state.GRUPPA_OBJECTA_REMONTA.getRowset();
+                    rowset.beforeFirst();
+                    while (rowset.next()) {
+                        state.ensureRowCounts(counts, state.GRUPPA_OBJECTA_REMONTA.getEntityId());
+                    }
+                    rowset.first();
 
-                rowset = state.VID_OBJECTA_REMONTA.getRowset();
-                rowset.beforeFirst();
-                while (rowset.next()) {
-                    state.ensureRowCounts(counts, state.VID_OBJECTA_REMONTA.getEntityId());
-                }
-                rowset.first();
+                    rowset = state.VID_OBJECTA_REMONTA.getRowset();
+                    rowset.beforeFirst();
+                    while (rowset.next()) {
+                        state.ensureRowCounts(counts, state.VID_OBJECTA_REMONTA.getEntityId());
+                    }
+                    rowset.first();
 
-                rowset = state.IZMERJAEMIE_VELICHINI.getRowset();
-                int pkColIndex = rowset.getFields().find("ID");
-                rowset.beforeFirst();
-                while (rowset.next()) {
-                    Object oPk = rowset.getObject(pkColIndex);
-                    assertNotNull(oPk);
-                    if (oPk instanceof Number) {
-                        Long lPk = ((Number) oPk).longValue();
-                        if (lPk.equals(DLINA)) {
-                            assertEquals(4, state.EDINICI_IZMERENIJA.getRowset().size());
-                            assertEquals(1, state.EDINICI_IZMERENIJA_1.getRowset().size());
-                            assertEquals(0, state.NAIMENOVANIA_SI.getRowset().size());
-                            Rowset dlinaRowset = state.EDINICI_IZMERENIJA.getRowset();
-                            dlinaRowset.beforeFirst();
-                            while (dlinaRowset.next()) {
+                    rowset = state.IZMERJAEMIE_VELICHINI.getRowset();
+                    int pkColIndex = rowset.getFields().find("ID");
+                    rowset.beforeFirst();
+                    while (rowset.next()) {
+                        Object oPk = rowset.getObject(pkColIndex);
+                        assertNotNull(oPk);
+                        if (oPk instanceof Number) {
+                            Long lPk = ((Number) oPk).longValue();
+                            if (lPk.equals(DLINA)) {
+                                assertEquals(4, state.EDINICI_IZMERENIJA.getRowset().size());
                                 assertEquals(1, state.EDINICI_IZMERENIJA_1.getRowset().size());
+                                assertEquals(0, state.NAIMENOVANIA_SI.getRowset().size());
+                                Rowset dlinaRowset = state.EDINICI_IZMERENIJA.getRowset();
+                                dlinaRowset.beforeFirst();
+                                while (dlinaRowset.next()) {
+                                    assertEquals(1, state.EDINICI_IZMERENIJA_1.getRowset().size());
+                                }
+                                dlinaRowset.first();
+                            } else if (lPk.equals(SILA_EL)) {
+                                assertEquals(1, state.EDINICI_IZMERENIJA.getRowset().size());
+                                assertEquals(1, state.EDINICI_IZMERENIJA_1.getRowset().size());
+                                assertEquals(1, state.NAIMENOVANIA_SI.getRowset().size());
+                            } else if (lPk.equals(DAVL)) {
+                                assertEquals(0, state.EDINICI_IZMERENIJA.getRowset().size());
+                                assertEquals(0, state.EDINICI_IZMERENIJA_1.getRowset().size());
+                                assertEquals(1, state.NAIMENOVANIA_SI.getRowset().size());
+                            } else if (lPk.equals(MOSHN)) {
+                                assertEquals(0, state.EDINICI_IZMERENIJA.getRowset().size());
+                                assertEquals(0, state.EDINICI_IZMERENIJA_1.getRowset().size());
+                                assertEquals(1, state.NAIMENOVANIA_SI.getRowset().size());
+                            } else if (lPk.equals(NAPRJAZH)) {
+                                assertEquals(0, state.EDINICI_IZMERENIJA.getRowset().size());
+                                assertEquals(0, state.EDINICI_IZMERENIJA_1.getRowset().size());
+                                assertEquals(1, state.NAIMENOVANIA_SI.getRowset().size());
+                            } else if (lPk.equals(VOLUME)) {
+                                assertEquals(1, state.EDINICI_IZMERENIJA.getRowset().size());
+                                assertEquals(1, state.EDINICI_IZMERENIJA_1.getRowset().size());
+                                assertEquals(0, state.NAIMENOVANIA_SI.getRowset().size());
+                            } else {
+                                assertEquals(0, state.EDINICI_IZMERENIJA.getRowset().size());
+                                assertEquals(0, state.EDINICI_IZMERENIJA_1.getRowset().size());
+                                assertEquals(0, state.NAIMENOVANIA_SI.getRowset().size());
                             }
-                            dlinaRowset.first();
-                        } else if (lPk.equals(SILA_EL)) {
-                            assertEquals(1, state.EDINICI_IZMERENIJA.getRowset().size());
-                            assertEquals(1, state.EDINICI_IZMERENIJA_1.getRowset().size());
-                            assertEquals(1, state.NAIMENOVANIA_SI.getRowset().size());
-                        } else if (lPk.equals(DAVL)) {
-                            assertEquals(0, state.EDINICI_IZMERENIJA.getRowset().size());
-                            assertEquals(0, state.EDINICI_IZMERENIJA_1.getRowset().size());
-                            assertEquals(1, state.NAIMENOVANIA_SI.getRowset().size());
-                        } else if (lPk.equals(MOSHN)) {
-                            assertEquals(0, state.EDINICI_IZMERENIJA.getRowset().size());
-                            assertEquals(0, state.EDINICI_IZMERENIJA_1.getRowset().size());
-                            assertEquals(1, state.NAIMENOVANIA_SI.getRowset().size());
-                        } else if (lPk.equals(NAPRJAZH)) {
-                            assertEquals(0, state.EDINICI_IZMERENIJA.getRowset().size());
-                            assertEquals(0, state.EDINICI_IZMERENIJA_1.getRowset().size());
-                            assertEquals(1, state.NAIMENOVANIA_SI.getRowset().size());
-                        } else if (lPk.equals(VOLUME)) {
-                            assertEquals(1, state.EDINICI_IZMERENIJA.getRowset().size());
-                            assertEquals(1, state.EDINICI_IZMERENIJA_1.getRowset().size());
-                            assertEquals(0, state.NAIMENOVANIA_SI.getRowset().size());
                         } else {
-                            assertEquals(0, state.EDINICI_IZMERENIJA.getRowset().size());
-                            assertEquals(0, state.EDINICI_IZMERENIJA_1.getRowset().size());
-                            assertEquals(0, state.NAIMENOVANIA_SI.getRowset().size());
+                            assertTrue(false);
                         }
-                    } else {
-                        assertTrue(false);
                     }
-                }
-                rowset.first();
+                    rowset.first();
 
-                rowset = state.MARKI_OBJECTOV_REMONTA.getRowset();
-                pkColIndex = rowset.getFields().find("ID");
-                rowset.beforeFirst();
-                while (rowset.next()) {
-                    Object oPk = rowset.getObject(pkColIndex);
-                    assertNotNull(oPk);
-                    if (oPk instanceof Number) {
-                        Long lPk = ((Number) oPk).longValue();
-                        if (lPk.equals(128049594110963L)) {
-                            assertEquals(2, state.EDINICI_OBORUDOVANIJA.getRowset().size());
-                        } else if (lPk.equals(128049595046828L)) {
-                            assertEquals(2, state.EDINICI_OBORUDOVANIJA.getRowset().size());
-                        } else if (lPk.equals(128049595600024L)) {
-                            assertEquals(2, state.EDINICI_OBORUDOVANIJA.getRowset().size());
-                        } else if (lPk.equals(128049596076572L)) {
-                            assertEquals(3, state.EDINICI_OBORUDOVANIJA.getRowset().size());
-                        } else if (lPk.equals(128049596964037L)) {
-                            assertEquals(2, state.EDINICI_OBORUDOVANIJA.getRowset().size());
-                        } else if (lPk.equals(128049597468768L)) {
-                            assertEquals(2, state.EDINICI_OBORUDOVANIJA.getRowset().size());
-                        } else if (lPk.equals(128049597975084L)) {
-                            assertEquals(4, state.EDINICI_OBORUDOVANIJA.getRowset().size());
-                        } else if (lPk.equals(128049598748403L)) {
-                            assertEquals(2, state.EDINICI_OBORUDOVANIJA.getRowset().size());
-                        } else if (lPk.equals(128049599817169L)) {
-                            assertEquals(0, state.EDINICI_OBORUDOVANIJA.getRowset().size());
-                        } else if (lPk.equals(128049601170306L)) {
-                            assertEquals(1, state.EDINICI_OBORUDOVANIJA.getRowset().size());
+                    rowset = state.MARKI_OBJECTOV_REMONTA.getRowset();
+                    pkColIndex = rowset.getFields().find("ID");
+                    rowset.beforeFirst();
+                    while (rowset.next()) {
+                        Object oPk = rowset.getObject(pkColIndex);
+                        assertNotNull(oPk);
+                        if (oPk instanceof Number) {
+                            Long lPk = ((Number) oPk).longValue();
+                            if (lPk.equals(128049594110963L)) {
+                                assertEquals(2, state.EDINICI_OBORUDOVANIJA.getRowset().size());
+                            } else if (lPk.equals(128049595046828L)) {
+                                assertEquals(2, state.EDINICI_OBORUDOVANIJA.getRowset().size());
+                            } else if (lPk.equals(128049595600024L)) {
+                                assertEquals(2, state.EDINICI_OBORUDOVANIJA.getRowset().size());
+                            } else if (lPk.equals(128049596076572L)) {
+                                assertEquals(3, state.EDINICI_OBORUDOVANIJA.getRowset().size());
+                            } else if (lPk.equals(128049596964037L)) {
+                                assertEquals(2, state.EDINICI_OBORUDOVANIJA.getRowset().size());
+                            } else if (lPk.equals(128049597468768L)) {
+                                assertEquals(2, state.EDINICI_OBORUDOVANIJA.getRowset().size());
+                            } else if (lPk.equals(128049597975084L)) {
+                                assertEquals(4, state.EDINICI_OBORUDOVANIJA.getRowset().size());
+                            } else if (lPk.equals(128049598748403L)) {
+                                assertEquals(2, state.EDINICI_OBORUDOVANIJA.getRowset().size());
+                            } else if (lPk.equals(128049599817169L)) {
+                                assertEquals(0, state.EDINICI_OBORUDOVANIJA.getRowset().size());
+                            } else if (lPk.equals(128049601170306L)) {
+                                assertEquals(1, state.EDINICI_OBORUDOVANIJA.getRowset().size());
+                            }
+                        } else {
+                            assertTrue(false);
                         }
-                    } else {
-                        assertTrue(false);
                     }
+                    rowset.first();
+                    return null;
                 }
-                rowset.first();
-                return null;
-            }
-        });
+            });
+        } finally {
+            client.shutdown();
+            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
+        }
     }
 
     @Test
     public void filteringEmptyKeysSourceTest() throws Exception {
         System.out.println("filteringEmptyKeysSourceTest");
         final DbClient client = initDevelopTestClient();
-        ScriptUtils.inContext(new ScriptAction() {
-            @Override
-            public Object run(Context cx) throws Exception {
-                ApplicationDbModel model = BaseTest.modelFromStream(client, FilteringTest.class.getResourceAsStream(MODEL_TEST_PATH));
-                model.setScriptThis(BaseTest.getDummyScriptableObject());
-                model.setRuntime(true);
-                ModelState state = new ModelState(model);
+        try {
+            ScriptUtils.inContext(new ScriptAction() {
+                @Override
+                public Object run(Context cx) throws Exception {
+                    ApplicationDbModel model = BaseTest.modelFromStream(client, FilteringTest.class.getResourceAsStream(MODEL_TEST_PATH));
+                    model.setScriptThis(BaseTest.getDummyScriptableObject());
+                    model.setRuntime(true);
+                    ModelState state = new ModelState(model);
 
-                Rowset rowset = state.IZMERJAEMIE_VELICHINI.getRowset();
-                int pkColIndex = rowset.getFields().find("ID");
-                rowset.beforeFirst();
-                while (rowset.next()) {
-                    Object oPk = rowset.getObject(pkColIndex);
-                    assertNotNull(oPk);
-                    if (oPk instanceof Number) {
-                        Long lPk = ((Number) oPk).longValue();
-                        if (lPk.equals(DLINA) || lPk.equals(SILA_EL) || lPk.equals(VOLUME)) {
-                            assertEquals(1, state.EDINICI_IZMERENIJA_1.getRowset().size());
+                    Rowset rowset = state.IZMERJAEMIE_VELICHINI.getRowset();
+                    int pkColIndex = rowset.getFields().find("ID");
+                    rowset.beforeFirst();
+                    while (rowset.next()) {
+                        Object oPk = rowset.getObject(pkColIndex);
+                        assertNotNull(oPk);
+                        if (oPk instanceof Number) {
+                            Long lPk = ((Number) oPk).longValue();
+                            if (lPk.equals(DLINA) || lPk.equals(SILA_EL) || lPk.equals(VOLUME)) {
+                                assertEquals(1, state.EDINICI_IZMERENIJA_1.getRowset().size());
+                            } else {
+                                assertNotNull(state.EDINICI_IZMERENIJA_1.getRowset());
+                                assertEquals(0, state.EDINICI_IZMERENIJA_1.getRowset().size());
+                            }
                         } else {
-                            assertNotNull(state.EDINICI_IZMERENIJA_1.getRowset());
-                            assertEquals(0, state.EDINICI_IZMERENIJA_1.getRowset().size());
+                            assertTrue(false);
                         }
-                    } else {
-                        assertTrue(false);
                     }
+                    rowset.first();
+                    return null;
                 }
-                rowset.first();
-                return null;
-            }
-        });
+            });
+        } finally {
+            client.shutdown();
+            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
+        }
     }
 
     @Test
     public void filteringBadSourcePositionTest() throws Exception {
         System.out.println("filteringBadSourcePositionTest");
         final DbClient client = initDevelopTestClient();
-        ScriptUtils.inContext(new ScriptAction() {
-            @Override
-            public Object run(Context cx) throws Exception {
-                ApplicationDbModel model = BaseTest.modelFromStream(client, FilteringTest.class.getResourceAsStream(MODEL_TEST_PATH));
-                model.setScriptThis(BaseTest.getDummyScriptableObject());
-                model.setRuntime(true);
-                ModelState state = new ModelState(model);
+        try {
+            ScriptUtils.inContext(new ScriptAction() {
+                @Override
+                public Object run(Context cx) throws Exception {
+                    ApplicationDbModel model = BaseTest.modelFromStream(client, FilteringTest.class.getResourceAsStream(MODEL_TEST_PATH));
+                    model.setScriptThis(BaseTest.getDummyScriptableObject());
+                    model.setRuntime(true);
+                    ModelState state = new ModelState(model);
 
-                Rowset rowset = state.IZMERJAEMIE_VELICHINI.getRowset();
-                int pkColIndex = rowset.getFields().find("ID");
-                rowset.beforeFirst();
-                while (rowset.next()) {
-                    Object oPk = rowset.getObject(pkColIndex);
-                    assertNotNull(oPk);
-                    if (oPk instanceof Number) {
-                        Long lPk = ((Number) oPk).longValue();
-                        if (lPk.equals(DLINA) || lPk.equals(SILA_EL) || lPk.equals(VOLUME)) {
-                            // ensure state
-                            assertNotNull(state.EDINICI_IZMERENIJA_1.getRowset());
-                            assertEquals(1, state.EDINICI_IZMERENIJA_1.getRowset().size());
-                            // before first
-                            state.EDINICI_IZMERENIJA.getRowset().beforeFirst();
-                            assertEquals(0, state.EDINICI_IZMERENIJA_1.getRowset().size());
-                            state.EDINICI_IZMERENIJA.getRowset().first();
-                            assertEquals(1, state.EDINICI_IZMERENIJA_1.getRowset().size());
-                            // after last
-                            state.EDINICI_IZMERENIJA.getRowset().afterLast();
-                            assertEquals(0, state.EDINICI_IZMERENIJA_1.getRowset().size());
-                            state.EDINICI_IZMERENIJA.getRowset().last();
-                            assertEquals(1, state.EDINICI_IZMERENIJA_1.getRowset().size());
+                    Rowset rowset = state.IZMERJAEMIE_VELICHINI.getRowset();
+                    int pkColIndex = rowset.getFields().find("ID");
+                    rowset.beforeFirst();
+                    while (rowset.next()) {
+                        Object oPk = rowset.getObject(pkColIndex);
+                        assertNotNull(oPk);
+                        if (oPk instanceof Number) {
+                            Long lPk = ((Number) oPk).longValue();
+                            if (lPk.equals(DLINA) || lPk.equals(SILA_EL) || lPk.equals(VOLUME)) {
+                                // ensure state
+                                assertNotNull(state.EDINICI_IZMERENIJA_1.getRowset());
+                                assertEquals(1, state.EDINICI_IZMERENIJA_1.getRowset().size());
+                                // before first
+                                state.EDINICI_IZMERENIJA.getRowset().beforeFirst();
+                                assertEquals(0, state.EDINICI_IZMERENIJA_1.getRowset().size());
+                                state.EDINICI_IZMERENIJA.getRowset().first();
+                                assertEquals(1, state.EDINICI_IZMERENIJA_1.getRowset().size());
+                                // after last
+                                state.EDINICI_IZMERENIJA.getRowset().afterLast();
+                                assertEquals(0, state.EDINICI_IZMERENIJA_1.getRowset().size());
+                                state.EDINICI_IZMERENIJA.getRowset().last();
+                                assertEquals(1, state.EDINICI_IZMERENIJA_1.getRowset().size());
+                            } else {
+                                assertNotNull(state.EDINICI_IZMERENIJA_1.getRowset());
+                                assertEquals(0, state.EDINICI_IZMERENIJA_1.getRowset().size());
+                            }
                         } else {
-                            assertNotNull(state.EDINICI_IZMERENIJA_1.getRowset());
-                            assertEquals(0, state.EDINICI_IZMERENIJA_1.getRowset().size());
+                            assertTrue(false);
                         }
-                    } else {
-                        assertTrue(false);
                     }
+                    rowset.first();
+                    return null;
                 }
-                rowset.first();
-                return null;
-            }
-        });
+            });
+        } finally {
+            client.shutdown();
+            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
+        }
     }
 
     @Test
     public void filteringCrudTest() throws Exception {
         System.out.println("filteringCrudTest");
         final DbClient client = initDevelopTestClient();
-        ScriptUtils.inContext(new ScriptAction() {
-            @Override
-            public Object run(Context cx) throws Exception {
-                ApplicationDbModel model = BaseTest.modelFromStream(client, FilteringTest.class.getResourceAsStream(MODEL_TEST_PATH));
-                model.setScriptThis(BaseTest.getDummyScriptableObject());
-                model.setRuntime(true);
-                ModelState state = new ModelState(model);
-                Rowset rowset = state.IZMERJAEMIE_VELICHINI.getRowset();
-                int pkColIndex = rowset.getFields().find("ID");
+        try {
+            ScriptUtils.inContext(new ScriptAction() {
+                @Override
+                public Object run(Context cx) throws Exception {
+                    ApplicationDbModel model = BaseTest.modelFromStream(client, FilteringTest.class.getResourceAsStream(MODEL_TEST_PATH));
+                    model.setScriptThis(BaseTest.getDummyScriptableObject());
+                    model.setRuntime(true);
+                    ModelState state = new ModelState(model);
+                    Rowset rowset = state.IZMERJAEMIE_VELICHINI.getRowset();
+                    int pkColIndex = rowset.getFields().find("ID");
 
-                // edit rows from dline to sila sveta and vice versa for several times
-                for (int i = 0; i < 56; i++) {
-                    // ensure prestate
-                    rowset.beforeFirst();
-                    while (rowset.next()) {
-                        Object oPk = rowset.getObject(pkColIndex);
-                        assertNotNull(oPk);
-                        if (oPk instanceof Number) {
-                            Long lPk = ((Number) oPk).longValue();
-                            if (lPk.equals(DLINA)) {
-                                assertEquals(4, state.EDINICI_IZMERENIJA.getRowset().size());
-                            } else if (lPk.equals(SILA_LIGHT)) {
-                                assertEquals(0, state.EDINICI_IZMERENIJA.getRowset().size());
+                    // edit rows from dline to sila sveta and vice versa for several times
+                    for (int i = 0; i < 56; i++) {
+                        // ensure prestate
+                        rowset.beforeFirst();
+                        while (rowset.next()) {
+                            Object oPk = rowset.getObject(pkColIndex);
+                            assertNotNull(oPk);
+                            if (oPk instanceof Number) {
+                                Long lPk = ((Number) oPk).longValue();
+                                if (lPk.equals(DLINA)) {
+                                    assertEquals(4, state.EDINICI_IZMERENIJA.getRowset().size());
+                                } else if (lPk.equals(SILA_LIGHT)) {
+                                    assertEquals(0, state.EDINICI_IZMERENIJA.getRowset().size());
+                                }
                             }
                         }
-                    }
-                    // let's edit filter-key field's value.
-                    rowset.beforeFirst();
-                    while (rowset.next()) {
-                        Object oPk = rowset.getObject(pkColIndex);
-                        assertNotNull(oPk);
-                        if (oPk instanceof Number) {
-                            Long lPk = ((Number) oPk).longValue();
-                            if (lPk.equals(DLINA)) {
-                                Rowset edRowset = state.EDINICI_IZMERENIJA.getRowset();
-                                int velColIndex = edRowset.getFields().find("MEASURAND");
-                                int updated = 0;
-                                while (edRowset.size() > 0) {
-                                    edRowset.first();
-                                    edRowset.updateObject(velColIndex, SILA_LIGHT);
-                                    updated++;
-                                    assertTrue(updated <= 4);
+                        // let's edit filter-key field's value.
+                        rowset.beforeFirst();
+                        while (rowset.next()) {
+                            Object oPk = rowset.getObject(pkColIndex);
+                            assertNotNull(oPk);
+                            if (oPk instanceof Number) {
+                                Long lPk = ((Number) oPk).longValue();
+                                if (lPk.equals(DLINA)) {
+                                    Rowset edRowset = state.EDINICI_IZMERENIJA.getRowset();
+                                    int velColIndex = edRowset.getFields().find("MEASURAND");
+                                    int updated = 0;
+                                    while (edRowset.size() > 0) {
+                                        edRowset.first();
+                                        edRowset.updateObject(velColIndex, SILA_LIGHT);
+                                        updated++;
+                                        assertTrue(updated <= 4);
+                                    }
+                                }
+                            }
+                        }
+                        // ensure results
+                        rowset.beforeFirst();
+                        while (rowset.next()) {
+                            Object oPk = rowset.getObject(pkColIndex);
+                            assertNotNull(oPk);
+                            if (oPk instanceof Number) {
+                                Long lPk = ((Number) oPk).longValue();
+                                if (lPk.equals(DLINA)) {
+                                    assertEquals(0, state.EDINICI_IZMERENIJA.getRowset().size());
+                                } else if (lPk.equals(SILA_LIGHT)) {
+                                    assertEquals(4, state.EDINICI_IZMERENIJA.getRowset().size());
+                                }
+                            }
+                        }
+                        // let's edit filter-key field's value.
+                        rowset.beforeFirst();
+                        while (rowset.next()) {
+                            Object oPk = rowset.getObject(pkColIndex);
+                            assertNotNull(oPk);
+                            if (oPk instanceof Number) {
+                                Long lPk = ((Number) oPk).longValue();
+                                if (lPk.equals(SILA_LIGHT)) {
+                                    Rowset edRowset = state.EDINICI_IZMERENIJA.getRowset();
+                                    int velColIndex = edRowset.getFields().find("MEASURAND");
+                                    int updated = 0;
+                                    while (edRowset.size() > 0) {
+                                        edRowset.first();
+                                        edRowset.updateObject(velColIndex, DLINA);
+                                        updated++;
+                                        assertTrue(updated <= 4);
+                                    }
+                                }
+                            }
+                        }
+                        // ensure results
+                        rowset.beforeFirst();
+                        while (rowset.next()) {
+                            Object oPk = rowset.getObject(pkColIndex);
+                            assertNotNull(oPk);
+                            if (oPk instanceof Number) {
+                                Long lPk = ((Number) oPk).longValue();
+                                if (lPk.equals(DLINA)) {
+                                    assertEquals(4, state.EDINICI_IZMERENIJA.getRowset().size());
+                                } else if (lPk.equals(SILA_LIGHT)) {
+                                    assertEquals(0, state.EDINICI_IZMERENIJA.getRowset().size());
                                 }
                             }
                         }
                     }
-                    // ensure results
-                    rowset.beforeFirst();
-                    while (rowset.next()) {
-                        Object oPk = rowset.getObject(pkColIndex);
-                        assertNotNull(oPk);
-                        if (oPk instanceof Number) {
-                            Long lPk = ((Number) oPk).longValue();
-                            if (lPk.equals(DLINA)) {
-                                assertEquals(0, state.EDINICI_IZMERENIJA.getRowset().size());
-                            } else if (lPk.equals(SILA_LIGHT)) {
-                                assertEquals(4, state.EDINICI_IZMERENIJA.getRowset().size());
-                            }
-                        }
-                    }
-                    // let's edit filter-key field's value.
-                    rowset.beforeFirst();
-                    while (rowset.next()) {
-                        Object oPk = rowset.getObject(pkColIndex);
-                        assertNotNull(oPk);
-                        if (oPk instanceof Number) {
-                            Long lPk = ((Number) oPk).longValue();
-                            if (lPk.equals(SILA_LIGHT)) {
-                                Rowset edRowset = state.EDINICI_IZMERENIJA.getRowset();
-                                int velColIndex = edRowset.getFields().find("MEASURAND");
-                                int updated = 0;
-                                while (edRowset.size() > 0) {
-                                    edRowset.first();
-                                    edRowset.updateObject(velColIndex, DLINA);
-                                    updated++;
-                                    assertTrue(updated <= 4);
-                                }
-                            }
-                        }
-                    }
-                    // ensure results
-                    rowset.beforeFirst();
-                    while (rowset.next()) {
-                        Object oPk = rowset.getObject(pkColIndex);
-                        assertNotNull(oPk);
-                        if (oPk instanceof Number) {
-                            Long lPk = ((Number) oPk).longValue();
-                            if (lPk.equals(DLINA)) {
-                                assertEquals(4, state.EDINICI_IZMERENIJA.getRowset().size());
-                            } else if (lPk.equals(SILA_LIGHT)) {
-                                assertEquals(0, state.EDINICI_IZMERENIJA.getRowset().size());
-                            }
-                        }
-                    }
+                    return null;
                 }
-                return null;
-            }
-        });
+            });
+        } finally {
+            client.shutdown();
+            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
+        }
     }
 
     @Test
     public void filteringScriptEventsVsDataEventsTest() throws Exception {
         System.out.println("filteringScriptEventsVsDataTest");
         final DbClient client = initDevelopTestClient();
-        ScriptUtils.inContext(new ScriptAction() {
-            @Override
-            public Object run(Context cx) throws Exception {
-                ApplicationDbModel model = BaseTest.modelFromStream(client, FilteringTest.class.getResourceAsStream(MODEL_TEST_PATH));
-                model.setScriptThis(BaseTest.getDummyScriptableObject());
-                model.setRuntime(true);
+        try {
+            ScriptUtils.inContext(new ScriptAction() {
+                @Override
+                public Object run(Context cx) throws Exception {
+                    ApplicationDbModel model = BaseTest.modelFromStream(client, FilteringTest.class.getResourceAsStream(MODEL_TEST_PATH));
+                    model.setScriptThis(BaseTest.getDummyScriptableObject());
+                    model.setRuntime(true);
 
-                ModelState state = new ModelState(model);
+                    ModelState state = new ModelState(model);
 
-                DataScriptEventsListener scriptListener = new DataScriptEventsListener(state.EDINICI_IZMERENIJA);
-                EntityDataListener dataListener = new EntityDataListener();
-                state.EDINICI_IZMERENIJA.getRowset().addRowsetListener(dataListener);
-                model.addScriptEventsListener(scriptListener);
+                    DataScriptEventsListener scriptListener = new DataScriptEventsListener(state.EDINICI_IZMERENIJA);
+                    EntityDataListener dataListener = new EntityDataListener();
+                    state.EDINICI_IZMERENIJA.getRowset().addRowsetListener(dataListener);
+                    model.addScriptEventsListener(scriptListener);
 
-                DataScriptEventsListener scriptListener1 = new DataScriptEventsListener(state.EDINICI_IZMERENIJA_1);
-                EntityDataListener dataListener1 = new EntityDataListener();
-                state.EDINICI_IZMERENIJA_1.getRowset().addRowsetListener(dataListener1);
-                model.addScriptEventsListener(scriptListener1);
+                    DataScriptEventsListener scriptListener1 = new DataScriptEventsListener(state.EDINICI_IZMERENIJA_1);
+                    EntityDataListener dataListener1 = new EntityDataListener();
+                    state.EDINICI_IZMERENIJA_1.getRowset().addRowsetListener(dataListener1);
+                    model.addScriptEventsListener(scriptListener1);
 
-                DataScriptEventsListener scriptListener2 = new DataScriptEventsListener(state.NAIMENOVANIA_SI);
-                EntityDataListener dataListener2 = new EntityDataListener();
-                state.NAIMENOVANIA_SI.getRowset().addRowsetListener(dataListener2);
-                model.addScriptEventsListener(scriptListener2);
+                    DataScriptEventsListener scriptListener2 = new DataScriptEventsListener(state.NAIMENOVANIA_SI);
+                    EntityDataListener dataListener2 = new EntityDataListener();
+                    state.NAIMENOVANIA_SI.getRowset().addRowsetListener(dataListener2);
+                    model.addScriptEventsListener(scriptListener2);
 
-                Rowset rowset = state.IZMERJAEMIE_VELICHINI.getRowset();
+                    Rowset rowset = state.IZMERJAEMIE_VELICHINI.getRowset();
 
-                int pkColIndex = rowset.getFields().find("ID");
-                dataListener.reset();
-                scriptListener.reset();
-                dataListener1.reset();
-                scriptListener1.reset();
-                dataListener2.reset();
-                scriptListener2.reset();
-                rowset.beforeFirst();
-                assertEquals(dataListener.getEvents(), scriptListener.getEvents());
-                assertEquals(dataListener1.getEvents(), scriptListener1.getEvents());
-                assertEquals(dataListener2.getEvents(), scriptListener2.getEvents());
-                assertTrue(dataListener.getScrollEvents() >= scriptListener.getScrollEvents());
-                assertTrue(dataListener1.getScrollEvents() >= scriptListener1.getScrollEvents());
-                assertTrue(dataListener2.getScrollEvents() >= scriptListener2.getScrollEvents());
-                while (rowset.next()) {
-                    Object oPk = rowset.getObject(pkColIndex);
-                    assertNotNull(oPk);
-                    if (oPk instanceof Number) {
-                        Long lPk = ((Number) oPk).longValue();
-                        if (lPk.equals(DLINA)) {
-                            Rowset edRowset = state.EDINICI_IZMERENIJA.getRowset();
-                            assertEquals(4, edRowset.size());
+                    int pkColIndex = rowset.getFields().find("ID");
+                    dataListener.reset();
+                    scriptListener.reset();
+                    dataListener1.reset();
+                    scriptListener1.reset();
+                    dataListener2.reset();
+                    scriptListener2.reset();
+                    rowset.beforeFirst();
+                    assertEquals(dataListener.getEvents(), scriptListener.getEvents());
+                    assertEquals(dataListener1.getEvents(), scriptListener1.getEvents());
+                    assertEquals(dataListener2.getEvents(), scriptListener2.getEvents());
+                    assertTrue(dataListener.getScrollEvents() >= scriptListener.getScrollEvents());
+                    assertTrue(dataListener1.getScrollEvents() >= scriptListener1.getScrollEvents());
+                    assertTrue(dataListener2.getScrollEvents() >= scriptListener2.getScrollEvents());
+                    while (rowset.next()) {
+                        Object oPk = rowset.getObject(pkColIndex);
+                        assertNotNull(oPk);
+                        if (oPk instanceof Number) {
+                            Long lPk = ((Number) oPk).longValue();
+                            if (lPk.equals(DLINA)) {
+                                Rowset edRowset = state.EDINICI_IZMERENIJA.getRowset();
+                                assertEquals(4, edRowset.size());
+                            }
                         }
+                        assertEquals(dataListener.getEvents(), scriptListener.getEvents());
+                        assertEquals(dataListener1.getEvents(), scriptListener1.getEvents());
+                        assertEquals(dataListener2.getEvents(), scriptListener2.getEvents());
+                        assertTrue(dataListener.getScrollEvents() >= scriptListener.getScrollEvents());
+                        assertTrue(dataListener1.getScrollEvents() >= scriptListener1.getScrollEvents());
+                        assertTrue(dataListener2.getScrollEvents() >= scriptListener2.getScrollEvents());
                     }
                     assertEquals(dataListener.getEvents(), scriptListener.getEvents());
                     assertEquals(dataListener1.getEvents(), scriptListener1.getEvents());
@@ -637,80 +673,77 @@ public class FilteringTest extends BaseTest {
                     assertTrue(dataListener.getScrollEvents() >= scriptListener.getScrollEvents());
                     assertTrue(dataListener1.getScrollEvents() >= scriptListener1.getScrollEvents());
                     assertTrue(dataListener2.getScrollEvents() >= scriptListener2.getScrollEvents());
-                }
-                assertEquals(dataListener.getEvents(), scriptListener.getEvents());
-                assertEquals(dataListener1.getEvents(), scriptListener1.getEvents());
-                assertEquals(dataListener2.getEvents(), scriptListener2.getEvents());
-                assertTrue(dataListener.getScrollEvents() >= scriptListener.getScrollEvents());
-                assertTrue(dataListener1.getScrollEvents() >= scriptListener1.getScrollEvents());
-                assertTrue(dataListener2.getScrollEvents() >= scriptListener2.getScrollEvents());
-                rowset.first();
-                assertEquals(dataListener.getEvents(), scriptListener.getEvents());
-                assertEquals(dataListener1.getEvents(), scriptListener1.getEvents());
-                assertEquals(dataListener2.getEvents(), scriptListener2.getEvents());
-                assertTrue(dataListener.getScrollEvents() >= scriptListener.getScrollEvents());
-                assertTrue(dataListener1.getScrollEvents() >= scriptListener1.getScrollEvents());
-                assertTrue(dataListener2.getScrollEvents() >= scriptListener2.getScrollEvents());
+                    rowset.first();
+                    assertEquals(dataListener.getEvents(), scriptListener.getEvents());
+                    assertEquals(dataListener1.getEvents(), scriptListener1.getEvents());
+                    assertEquals(dataListener2.getEvents(), scriptListener2.getEvents());
+                    assertTrue(dataListener.getScrollEvents() >= scriptListener.getScrollEvents());
+                    assertTrue(dataListener1.getScrollEvents() >= scriptListener1.getScrollEvents());
+                    assertTrue(dataListener2.getScrollEvents() >= scriptListener2.getScrollEvents());
 ///////////////////////////////////////////////
 
-                state.EDINICI_IZMERENIJA.getRowset().removeRowsetListener(dataListener);
-                model.removeScriptEventsListener(scriptListener);
+                    state.EDINICI_IZMERENIJA.getRowset().removeRowsetListener(dataListener);
+                    model.removeScriptEventsListener(scriptListener);
 
-                dataListener1.reset();
-                scriptListener1.reset();
-                dataListener2.reset();
-                scriptListener2.reset();
-                rowset.beforeFirst();
-                assertEquals(dataListener1.getEvents(), scriptListener1.getEvents());
-                assertEquals(dataListener2.getEvents(), scriptListener2.getEvents());
-                assertTrue(dataListener1.getScrollEvents() >= scriptListener1.getScrollEvents());
-                assertTrue(dataListener2.getScrollEvents() >= scriptListener2.getScrollEvents());
-                while (rowset.next()) {
-                    Object oPk = rowset.getObject(pkColIndex);
-                    assertNotNull(oPk);
-                    if (oPk instanceof Number) {
-                        Long lPk = ((Number) oPk).longValue();
-                        if (lPk.equals(DLINA)) {
-                            Rowset edRowset = state.EDINICI_IZMERENIJA.getRowset();
-                            assertEquals(4, edRowset.size());
-                            assertEquals(dataListener1.getEvents(), scriptListener1.getEvents());
-                            assertEquals(dataListener2.getEvents(), scriptListener2.getEvents());
-                            assertTrue(dataListener1.getScrollEvents() >= scriptListener1.getScrollEvents());
-                            assertTrue(dataListener2.getScrollEvents() >= scriptListener2.getScrollEvents());
-                            edRowset.beforeFirst();
-                            assertEquals(dataListener1.getEvents(), scriptListener1.getEvents());
-                            assertEquals(dataListener2.getEvents(), scriptListener2.getEvents());
-                            assertTrue(dataListener1.getScrollEvents() >= scriptListener1.getScrollEvents());
-                            assertTrue(dataListener2.getScrollEvents() >= scriptListener2.getScrollEvents());
-                            while (edRowset.next()) {
-                                assertEquals(1, state.EDINICI_IZMERENIJA_1.getRowset().size());
-                                assertEquals(0, state.NAIMENOVANIA_SI.getRowset().size());
-
+                    dataListener1.reset();
+                    scriptListener1.reset();
+                    dataListener2.reset();
+                    scriptListener2.reset();
+                    rowset.beforeFirst();
+                    assertEquals(dataListener1.getEvents(), scriptListener1.getEvents());
+                    assertEquals(dataListener2.getEvents(), scriptListener2.getEvents());
+                    assertTrue(dataListener1.getScrollEvents() >= scriptListener1.getScrollEvents());
+                    assertTrue(dataListener2.getScrollEvents() >= scriptListener2.getScrollEvents());
+                    while (rowset.next()) {
+                        Object oPk = rowset.getObject(pkColIndex);
+                        assertNotNull(oPk);
+                        if (oPk instanceof Number) {
+                            Long lPk = ((Number) oPk).longValue();
+                            if (lPk.equals(DLINA)) {
+                                Rowset edRowset = state.EDINICI_IZMERENIJA.getRowset();
+                                assertEquals(4, edRowset.size());
                                 assertEquals(dataListener1.getEvents(), scriptListener1.getEvents());
                                 assertEquals(dataListener2.getEvents(), scriptListener2.getEvents());
                                 assertTrue(dataListener1.getScrollEvents() >= scriptListener1.getScrollEvents());
                                 assertTrue(dataListener2.getScrollEvents() >= scriptListener2.getScrollEvents());
+                                edRowset.beforeFirst();
+                                assertEquals(dataListener1.getEvents(), scriptListener1.getEvents());
+                                assertEquals(dataListener2.getEvents(), scriptListener2.getEvents());
+                                assertTrue(dataListener1.getScrollEvents() >= scriptListener1.getScrollEvents());
+                                assertTrue(dataListener2.getScrollEvents() >= scriptListener2.getScrollEvents());
+                                while (edRowset.next()) {
+                                    assertEquals(1, state.EDINICI_IZMERENIJA_1.getRowset().size());
+                                    assertEquals(0, state.NAIMENOVANIA_SI.getRowset().size());
+
+                                    assertEquals(dataListener1.getEvents(), scriptListener1.getEvents());
+                                    assertEquals(dataListener2.getEvents(), scriptListener2.getEvents());
+                                    assertTrue(dataListener1.getScrollEvents() >= scriptListener1.getScrollEvents());
+                                    assertTrue(dataListener2.getScrollEvents() >= scriptListener2.getScrollEvents());
+                                }
+                                assertEquals(dataListener1.getEvents(), scriptListener1.getEvents());
+                                assertEquals(dataListener2.getEvents(), scriptListener2.getEvents());
+                                assertTrue(dataListener1.getScrollEvents() >= scriptListener1.getScrollEvents());
+                                assertTrue(dataListener2.getScrollEvents() >= scriptListener2.getScrollEvents());
+                                edRowset.first();
                             }
-                            assertEquals(dataListener1.getEvents(), scriptListener1.getEvents());
-                            assertEquals(dataListener2.getEvents(), scriptListener2.getEvents());
-                            assertTrue(dataListener1.getScrollEvents() >= scriptListener1.getScrollEvents());
-                            assertTrue(dataListener2.getScrollEvents() >= scriptListener2.getScrollEvents());
-                            edRowset.first();
                         }
+                        assertEquals(dataListener1.getEvents(), scriptListener1.getEvents());
+                        assertEquals(dataListener2.getEvents(), scriptListener2.getEvents());
+                        assertTrue(dataListener1.getScrollEvents() >= scriptListener1.getScrollEvents());
+                        assertTrue(dataListener2.getScrollEvents() >= scriptListener2.getScrollEvents());
                     }
                     assertEquals(dataListener1.getEvents(), scriptListener1.getEvents());
                     assertEquals(dataListener2.getEvents(), scriptListener2.getEvents());
                     assertTrue(dataListener1.getScrollEvents() >= scriptListener1.getScrollEvents());
                     assertTrue(dataListener2.getScrollEvents() >= scriptListener2.getScrollEvents());
+                    rowset.first();
+                    return null;
                 }
-                assertEquals(dataListener1.getEvents(), scriptListener1.getEvents());
-                assertEquals(dataListener2.getEvents(), scriptListener2.getEvents());
-                assertTrue(dataListener1.getScrollEvents() >= scriptListener1.getScrollEvents());
-                assertTrue(dataListener2.getScrollEvents() >= scriptListener2.getScrollEvents());
-                rowset.first();
-                return null;
-            }
-        });
+            });
+        } finally {
+            client.shutdown();
+            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
+        }
     }
     EntityRefreshFilterDataListener listenerOf1Layer = null;
     EntityRefreshFilterDataListener listenerOf2Layer = null;
@@ -720,64 +753,69 @@ public class FilteringTest extends BaseTest {
     public void filteringExecutingOrderTest() throws Exception {
         System.out.println("filteringExecutingOrderTest layer by layer");
         final DbClient client = initDevelopTestClient();
-        ScriptUtils.inContext(new ScriptAction() {
-            @Override
-            public Object run(Context cx) throws Exception {
-                try {
-                    ApplicationDbModel model = BaseTest.modelFromStream(client, FilteringTest.class.getResourceAsStream(MODEL_TEST_PATH));
-                    model.setScriptThis(BaseTest.getDummyScriptableObject());
-                    model.setRuntime(true);
+        try {
+            ScriptUtils.inContext(new ScriptAction() {
+                @Override
+                public Object run(Context cx) throws Exception {
+                    try {
+                        ApplicationDbModel model = BaseTest.modelFromStream(client, FilteringTest.class.getResourceAsStream(MODEL_TEST_PATH));
+                        model.setScriptThis(BaseTest.getDummyScriptableObject());
+                        model.setRuntime(true);
 
-                    ModelState state = new ModelState(model);
+                        ModelState state = new ModelState(model);
 
-                    listenerOf1Layer = null;
-                    listenerOf2Layer = null;
-                    listenerOf3Layer = null;
+                        listenerOf1Layer = null;
+                        listenerOf2Layer = null;
+                        listenerOf3Layer = null;
 
-                    listenerOf1Layer = new EntityRefreshFilterDataListener() {
-                        @Override
-                        protected void incEvents() {
-                            super.incEvents();
-                            assertEquals(0, listenerOf2Layer.getEvents());
-                            assertEquals(0, listenerOf3Layer.getEvents());
-                        }
-                    };
-                    listenerOf2Layer = new EntityRefreshFilterDataListener() {
-                        @Override
-                        protected void incEvents() {
-                            super.incEvents();
-                            assertTrue(listenerOf1Layer.getEvents() > 0);
-                            assertEquals(0, listenerOf3Layer.getEvents());
-                        }
-                    };
-                    listenerOf3Layer = new EntityRefreshFilterDataListener() {
-                        @Override
-                        protected void incEvents() {
-                            super.incEvents();
-                            assertTrue(listenerOf1Layer.getEvents() > 0);
-                            assertTrue(listenerOf2Layer.getEvents() > 0);
-                        }
-                    };
-                    // 1st layer
-                    state.GRUPPA_OBJECTA_REMONTA.getRowset().addRowsetListener(listenerOf1Layer);
-                    state.VID_OBJECTA_REMONTA.getRowset().addRowsetListener(listenerOf1Layer);
-                    state.IZMERJAEMIE_VELICHINI.getRowset().addRowsetListener(listenerOf1Layer);
-                    state.MARKI_OBJECTOV_REMONTA.getRowset().addRowsetListener(listenerOf1Layer);
-                    // 2nd layer
-                    state.EDINICI_IZMERENIJA.getRowset().addRowsetListener(listenerOf2Layer);
-                    state.NAIMENOVANIA_SI.getRowset().addRowsetListener(listenerOf2Layer);
-                    state.EDINICI_OBORUDOVANIJA.getRowset().addRowsetListener(listenerOf2Layer);
-                    // 3rd layer
-                    state.EDINICI_IZMERENIJA_1.getRowset().addRowsetListener(listenerOf3Layer);
+                        listenerOf1Layer = new EntityRefreshFilterDataListener() {
+                            @Override
+                            protected void incEvents() {
+                                super.incEvents();
+                                assertEquals(0, listenerOf2Layer.getEvents());
+                                assertEquals(0, listenerOf3Layer.getEvents());
+                            }
+                        };
+                        listenerOf2Layer = new EntityRefreshFilterDataListener() {
+                            @Override
+                            protected void incEvents() {
+                                super.incEvents();
+                                assertTrue(listenerOf1Layer.getEvents() > 0);
+                                assertEquals(0, listenerOf3Layer.getEvents());
+                            }
+                        };
+                        listenerOf3Layer = new EntityRefreshFilterDataListener() {
+                            @Override
+                            protected void incEvents() {
+                                super.incEvents();
+                                assertTrue(listenerOf1Layer.getEvents() > 0);
+                                assertTrue(listenerOf2Layer.getEvents() > 0);
+                            }
+                        };
+                        // 1st layer
+                        state.GRUPPA_OBJECTA_REMONTA.getRowset().addRowsetListener(listenerOf1Layer);
+                        state.VID_OBJECTA_REMONTA.getRowset().addRowsetListener(listenerOf1Layer);
+                        state.IZMERJAEMIE_VELICHINI.getRowset().addRowsetListener(listenerOf1Layer);
+                        state.MARKI_OBJECTOV_REMONTA.getRowset().addRowsetListener(listenerOf1Layer);
+                        // 2nd layer
+                        state.EDINICI_IZMERENIJA.getRowset().addRowsetListener(listenerOf2Layer);
+                        state.NAIMENOVANIA_SI.getRowset().addRowsetListener(listenerOf2Layer);
+                        state.EDINICI_OBORUDOVANIJA.getRowset().addRowsetListener(listenerOf2Layer);
+                        // 3rd layer
+                        state.EDINICI_IZMERENIJA_1.getRowset().addRowsetListener(listenerOf3Layer);
 
-                    model.requery();
-                } finally {
-                    listenerOf1Layer = null;
-                    listenerOf2Layer = null;
-                    listenerOf3Layer = null;
+                        model.requery();
+                    } finally {
+                        listenerOf1Layer = null;
+                        listenerOf2Layer = null;
+                        listenerOf3Layer = null;
+                    }
+                    return null;
                 }
-                return null;
-            }
-        });
+            });
+        } finally {
+            client.shutdown();
+            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
+        }
     }
 }

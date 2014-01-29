@@ -13,36 +13,22 @@ import com.bearsoft.rowset.metadata.Fields;
 import com.eas.client.AppCache;
 import com.eas.client.DbClient;
 import com.eas.client.DbMetadataCache;
-import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.login.PrincipalHost;
 import com.eas.client.queries.SqlCompiledQuery;
 import com.eas.client.queries.SqlQuery;
-import com.eas.client.settings.EasSettings;
+import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.util.ListenerRegistration;
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
 
 /**
  *
- * @author Gala
+ * @author mg
  */
 public class DummyTestDbClient implements DbClient{
 
     @Override
     public void shutdown() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public PlatypusPrincipal getLoginPrincipal() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public Rowset getUserProperties() throws Exception {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public FlowProvider createFlowProvider(Long l, String string, String string1, Fields aFields, String aContext) throws Exception {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
@@ -76,10 +62,6 @@ public class DummyTestDbClient implements DbClient{
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    public Properties getServerProperties(String l) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
     @Override
     public void appEntityChanged(String l) throws Exception {
         throw new UnsupportedOperationException("Not supported yet.");
@@ -94,12 +76,7 @@ public class DummyTestDbClient implements DbClient{
     public Rowset getDbTypesInfo(String l) throws Exception {
         throw new UnsupportedOperationException("Not supported yet.");
     }
-
-    @Override
-    public EasSettings getSettings() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
+    
     @Override
     public PrincipalHost getPrincipalHost() {
         throw new UnsupportedOperationException("Not supported yet.");
@@ -136,17 +113,17 @@ public class DummyTestDbClient implements DbClient{
     }
 
     @Override
-    public void setAppCache(AppCache ac) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
     public FlowProvider createFlowProvider(String string, String string1, String string2, String string3, Fields fields, Set<String> set, Set<String> set1) throws Exception {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
     public ListenerRegistration addQueriesListener(QueriesListener ql) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public SqlDriver getConnectionDriver(String string) throws Exception {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
         

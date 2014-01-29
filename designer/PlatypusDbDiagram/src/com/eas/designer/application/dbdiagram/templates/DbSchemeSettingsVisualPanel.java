@@ -236,6 +236,7 @@ public class DbSchemeSettingsVisualPanel extends javax.swing.JPanel {
                 comboSchema.setSelectedIndex(locateSchema(schema));
                 panel.fireChangeEvent();
             } catch (Exception ex) {
+                panel.fireChangeEvent();
                 Exceptions.printStackTrace(ex);
             }
         }

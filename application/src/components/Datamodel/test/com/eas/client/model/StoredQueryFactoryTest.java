@@ -12,6 +12,7 @@ import com.eas.client.ClientConstants;
 import com.eas.client.DbClient;
 import com.eas.client.exceptions.NoSuchEntityException;
 import com.eas.client.queries.SqlQuery;
+import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.client.settings.SettingsConstants;
 import com.eas.script.JsDoc;
 import com.eas.util.BinaryUtils;
@@ -245,260 +246,319 @@ public class StoredQueryFactoryTest extends BaseTest {
     @Test
     public void testCompilingWithSubqueries() throws Exception {
         DbClient client = BaseTest.initDevelopTestClient();
-        StoredQueryFactory queryFactory = new StoredQueryFactory(client);
-        String queryContent = readQueryContent(RESOURCES_PREFIX + "testQuery2.xml");
-        String queryId = insertEntity(client, queryContent);
         try {
-            SqlQuery testQuery = queryFactory.getQuery(queryId);
-            assertEquals("SELECT T0.ORDER_NO, 'Some text' AS VALUE_FIELD_1, TABLE1.ID, TABLE1.F1, TABLE1.F3, T0.AMOUNT FROM TABLE1, TABLE2,  (/**\n"
-                    + " * @name namedQuery4Tests\n"
-                    + "*/\n"
-                    + "Select goodOrder.ORDER_ID as ORDER_NO, goodOrder.AMOUNT, customers.CUSTOMER_NAME as CUSTOMER \nFrom GOODORDER goodOrder\n Inner Join CUSTOMER customers on (goodOrder.CUSTOMER = customers.CUSTOMER_ID)\n and (goodOrder.AMOUNT > customers.CUSTOMER_NAME)\n Where :P4 = goodOrder.GOOD)  T0  WHERE ((TABLE2.FIELDA<TABLE1.F1) AND (:P2=TABLE1.F3)) AND (:P3=T0.AMOUNT)",
-                    testQuery.getSqlText());
-            assertEquals(6, testQuery.getFields().getFieldsCount());
-            for (int i = 0; i < testQuery.getFields().getFieldsCount(); i++) {
-                Field fieldMtd = testQuery.getFields().get(i + 1);
-                assertNotNull(fieldMtd);
-                if (i == 0 || i == 5) {
-                    assertNotNull(fieldMtd.getDescription());
-                } else {
-                    assertNull(fieldMtd.getDescription());
+            StoredQueryFactory queryFactory = new StoredQueryFactory(client);
+            String queryContent = readQueryContent(RESOURCES_PREFIX + "testQuery2.xml");
+            String queryId = insertEntity(client, queryContent);
+            try {
+                SqlQuery testQuery = queryFactory.getQuery(queryId);
+                assertEquals("SELECT T0.ORDER_NO, 'Some text' AS VALUE_FIELD_1, TABLE1.ID, TABLE1.F1, TABLE1.F3, T0.AMOUNT FROM TABLE1, TABLE2,  (/**\n"
+                        + " * @name namedQuery4Tests\n"
+                        + "*/\n"
+                        + "Select goodOrder.ORDER_ID as ORDER_NO, goodOrder.AMOUNT, customers.CUSTOMER_NAME as CUSTOMER \nFrom GOODORDER goodOrder\n Inner Join CUSTOMER customers on (goodOrder.CUSTOMER = customers.CUSTOMER_ID)\n and (goodOrder.AMOUNT > customers.CUSTOMER_NAME)\n Where :P4 = goodOrder.GOOD)  T0  WHERE ((TABLE2.FIELDA<TABLE1.F1) AND (:P2=TABLE1.F3)) AND (:P3=T0.AMOUNT)",
+                        testQuery.getSqlText());
+                assertEquals(6, testQuery.getFields().getFieldsCount());
+                for (int i = 0; i < testQuery.getFields().getFieldsCount(); i++) {
+                    Field fieldMtd = testQuery.getFields().get(i + 1);
+                    assertNotNull(fieldMtd);
+                    if (i == 0 || i == 5) {
+                        assertNotNull(fieldMtd.getDescription());
+                    } else {
+                        assertNull(fieldMtd.getDescription());
+                    }
                 }
+                assertEquals(4, testQuery.getParameters().getParametersCount());
+            } finally {
+                deleteEntity(queryId, client);
             }
-            assertEquals(4, testQuery.getParameters().getParametersCount());
         } finally {
-            deleteEntity(queryId, client);
+            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 
     @Test
     public void testCompilingWithSubqueriesBad() throws Exception {
         DbClient client = BaseTest.initDevelopTestClient();
-        StoredQueryFactory queryFactory = new StoredQueryFactory(client);
-        String queryContent = readQueryContent(RESOURCES_PREFIX + "testQuery8BadMetadata.xml");
-        String queryId = insertEntity(client, queryContent);
         try {
-            SqlQuery testQuery = queryFactory.getQuery(queryId);
-            assertEquals("SELECT T0.ORDER_NO, 'Some text', TABLE1.ID, TABLE1.F1, TABLE1.F3, T0.AMOUNT FROM TABLE1, TABLE2,  (/**\n"
-                    + " * @name 128082898425059\n"
-                    + "*/\n"
-                    + "Select goodOrder.ORDER_ID as ORDER_NO, goodOrder.AMOUNT, customers.CUSTOMER_NAME as CUSTOMER \nFrom GOODORDER goodOrder\n Inner Join CUSTOMER customers on (goodOrder.CUSTOMER = customers.CUSTOMER_ID)\n and (goodOrder.AMOUNT > customers.CUSTOMER_NAME)\n Where :P4 = goodOrder.GOOD)  T0  WHERE ((TABLE2.FIELDA<TABLE1.F1) AND (:P2=TABLE1.F3)) AND (:P3=T0.AMOUNT)",
-                    testQuery.getSqlText());
-            assertEquals(6, testQuery.getFields().getFieldsCount());
-            for (int i = 0; i < testQuery.getFields().getFieldsCount(); i++) {
-                Field fieldMtd = testQuery.getFields().get(i + 1);
-                assertNotNull(fieldMtd);
-                if (i == 0 || i == 5) {
-                    assertNotNull(fieldMtd.getDescription());
-                } else {
-                    assertNull(fieldMtd.getDescription());
+            StoredQueryFactory queryFactory = new StoredQueryFactory(client);
+            String queryContent = readQueryContent(RESOURCES_PREFIX + "testQuery8BadMetadata.xml");
+            String queryId = insertEntity(client, queryContent);
+            try {
+                SqlQuery testQuery = queryFactory.getQuery(queryId);
+                assertEquals("SELECT T0.ORDER_NO, 'Some text', TABLE1.ID, TABLE1.F1, TABLE1.F3, T0.AMOUNT FROM TABLE1, TABLE2,  (/**\n"
+                        + " * @name 128082898425059\n"
+                        + "*/\n"
+                        + "Select goodOrder.ORDER_ID as ORDER_NO, goodOrder.AMOUNT, customers.CUSTOMER_NAME as CUSTOMER \nFrom GOODORDER goodOrder\n Inner Join CUSTOMER customers on (goodOrder.CUSTOMER = customers.CUSTOMER_ID)\n and (goodOrder.AMOUNT > customers.CUSTOMER_NAME)\n Where :P4 = goodOrder.GOOD)  T0  WHERE ((TABLE2.FIELDA<TABLE1.F1) AND (:P2=TABLE1.F3)) AND (:P3=T0.AMOUNT)",
+                        testQuery.getSqlText());
+                assertEquals(6, testQuery.getFields().getFieldsCount());
+                for (int i = 0; i < testQuery.getFields().getFieldsCount(); i++) {
+                    Field fieldMtd = testQuery.getFields().get(i + 1);
+                    assertNotNull(fieldMtd);
+                    if (i == 0 || i == 5) {
+                        assertNotNull(fieldMtd.getDescription());
+                    } else {
+                        assertNull(fieldMtd.getDescription());
+                    }
                 }
+                assertEquals(4, testQuery.getParameters().getParametersCount());
+            } finally {
+                deleteEntity(queryId, client);
             }
-            assertEquals(4, testQuery.getParameters().getParametersCount());
         } finally {
-            deleteEntity(queryId, client);
+            client.shutdown();
+            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 
     @Test
     public void testAsteriskMetadata() throws Exception {
         DbClient client = BaseTest.initDevelopTestClient();
-        StoredQueryFactory queryFactory = new StoredQueryFactory(client);
-        String queryContent = readQueryContent(RESOURCES_PREFIX + "testQuery3.xml");
-        String queryId = insertEntity(client, queryContent);
         try {
-            SqlQuery testQuery = queryFactory.getQuery(queryId);
-            assertEquals("SELECT * FROM TABLE1, TABLE2,  (/**\n"
-                    + " * @name 128082898425059\n"
-                    + "*/\n"
-                    + "Select goodOrder.ORDER_ID as ORDER_NO, goodOrder.AMOUNT, customers.CUSTOMER_NAME as CUSTOMER \nFrom GOODORDER goodOrder\n Inner Join CUSTOMER customers on (goodOrder.CUSTOMER = customers.CUSTOMER_ID)\n and (goodOrder.AMOUNT > customers.CUSTOMER_NAME)\n Where :P4 = goodOrder.GOOD)  T0  WHERE ((TABLE2.FIELDA<TABLE1.F1) AND (:P2=TABLE1.F3)) AND (:P3=T0.AMOUNT)",
-                    testQuery.getSqlText());
-            assertEquals(11, testQuery.getFields().getFieldsCount());
-            for (int i = 0; i < testQuery.getFields().getFieldsCount(); i++) {
-                Field fieldMtd = testQuery.getFields().get(i + 1);
-                assertNotNull(fieldMtd);
+            StoredQueryFactory queryFactory = new StoredQueryFactory(client);
+            String queryContent = readQueryContent(RESOURCES_PREFIX + "testQuery3.xml");
+            String queryId = insertEntity(client, queryContent);
+            try {
+                SqlQuery testQuery = queryFactory.getQuery(queryId);
+                assertEquals("SELECT * FROM TABLE1, TABLE2,  (/**\n"
+                        + " * @name 128082898425059\n"
+                        + "*/\n"
+                        + "Select goodOrder.ORDER_ID as ORDER_NO, goodOrder.AMOUNT, customers.CUSTOMER_NAME as CUSTOMER \nFrom GOODORDER goodOrder\n Inner Join CUSTOMER customers on (goodOrder.CUSTOMER = customers.CUSTOMER_ID)\n and (goodOrder.AMOUNT > customers.CUSTOMER_NAME)\n Where :P4 = goodOrder.GOOD)  T0  WHERE ((TABLE2.FIELDA<TABLE1.F1) AND (:P2=TABLE1.F3)) AND (:P3=T0.AMOUNT)",
+                        testQuery.getSqlText());
+                assertEquals(11, testQuery.getFields().getFieldsCount());
+                for (int i = 0; i < testQuery.getFields().getFieldsCount(); i++) {
+                    Field fieldMtd = testQuery.getFields().get(i + 1);
+                    assertNotNull(fieldMtd);
+                }
+                assertEquals(4, testQuery.getParameters().getParametersCount());
+            } finally {
+                deleteEntity(queryId, client);
             }
-            assertEquals(4, testQuery.getParameters().getParametersCount());
         } finally {
-            deleteEntity(queryId, client);
+            client.shutdown();
+            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
-    
+
     @Test
     public void testBadSubquery() throws Exception {
         DbClient client = BaseTest.initDevelopTestClient();
-        StoredQueryFactory queryFactory = new StoredQueryFactory(client);
-        String queryContent = readQueryContent(RESOURCES_PREFIX + "testQueryBadSubQuery.xml");
-        String queryId = insertEntity(client, queryContent);
         try {
-            SqlQuery testQuery = queryFactory.getQuery(queryId);
-            fail("Query could not compiled.");
-        } catch(Exception ex) {
-            if (!(ex instanceof NoSuchEntityException)) {
-                throw new Exception("We must got NoSuchEntityException error.", ex);
+            StoredQueryFactory queryFactory = new StoredQueryFactory(client);
+            String queryContent = readQueryContent(RESOURCES_PREFIX + "testQueryBadSubQuery.xml");
+            String queryId = insertEntity(client, queryContent);
+            try {
+                SqlQuery testQuery = queryFactory.getQuery(queryId);
+                fail("Query could not compiled.");
+            } catch (Exception ex) {
+                if (!(ex instanceof NoSuchEntityException)) {
+                    throw new Exception("We must got NoSuchEntityException error.", ex);
+                }
+            } finally {
+                deleteEntity(queryId, client);
             }
         } finally {
-            deleteEntity(queryId, client);
+            client.shutdown();
+            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 
     @Test
     public void testAsteriskMetadata_NewDesignSerialization() throws Exception {
         DbClient client = BaseTest.initDevelopTestClient();
-        StoredQueryFactory queryFactory = new StoredQueryFactory(client);
-        String queryContent = readQueryContent(RESOURCES_PREFIX + "testQuery3_newDesignSerialization.xml");
-        String queryId = insertEntity(client, queryContent);
         try {
-            SqlQuery testQuery = queryFactory.getQuery(queryId);
-            assertEquals("SELECT * FROM TABLE1, TABLE2,  (/**\n"
-                    + " * @name 128082898425059\n"
-                    + "*/\n"
-                    + "Select goodOrder.ORDER_ID as ORDER_NO, goodOrder.AMOUNT, customers.CUSTOMER_NAME as CUSTOMER \nFrom GOODORDER goodOrder\n Inner Join CUSTOMER customers on (goodOrder.CUSTOMER = customers.CUSTOMER_ID)\n and (goodOrder.AMOUNT > customers.CUSTOMER_NAME)\n Where :P4 = goodOrder.GOOD)  T0  WHERE ((TABLE2.FIELDA<TABLE1.F1) AND (:P2=TABLE1.F3)) AND (:P3=T0.AMOUNT)",
-                    testQuery.getSqlText());
-            assertEquals(11, testQuery.getFields().getFieldsCount());
-            for (int i = 0; i < testQuery.getFields().getFieldsCount(); i++) {
-                Field fieldMtd = testQuery.getFields().get(i + 1);
-                assertNotNull(fieldMtd);
+            StoredQueryFactory queryFactory = new StoredQueryFactory(client);
+            String queryContent = readQueryContent(RESOURCES_PREFIX + "testQuery3_newDesignSerialization.xml");
+            String queryId = insertEntity(client, queryContent);
+            try {
+                SqlQuery testQuery = queryFactory.getQuery(queryId);
+                assertEquals("SELECT * FROM TABLE1, TABLE2,  (/**\n"
+                        + " * @name 128082898425059\n"
+                        + "*/\n"
+                        + "Select goodOrder.ORDER_ID as ORDER_NO, goodOrder.AMOUNT, customers.CUSTOMER_NAME as CUSTOMER \nFrom GOODORDER goodOrder\n Inner Join CUSTOMER customers on (goodOrder.CUSTOMER = customers.CUSTOMER_ID)\n and (goodOrder.AMOUNT > customers.CUSTOMER_NAME)\n Where :P4 = goodOrder.GOOD)  T0  WHERE ((TABLE2.FIELDA<TABLE1.F1) AND (:P2=TABLE1.F3)) AND (:P3=T0.AMOUNT)",
+                        testQuery.getSqlText());
+                assertEquals(11, testQuery.getFields().getFieldsCount());
+                for (int i = 0; i < testQuery.getFields().getFieldsCount(); i++) {
+                    Field fieldMtd = testQuery.getFields().get(i + 1);
+                    assertNotNull(fieldMtd);
+                }
+                assertEquals(4, testQuery.getParameters().getParametersCount());
+            } finally {
+                deleteEntity(queryId, client);
             }
-            assertEquals(4, testQuery.getParameters().getParametersCount());
         } finally {
-            deleteEntity(queryId, client);
+            client.shutdown();
+            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 
     @Test
     public void testPartialTablesAsteriskMetadata() throws Exception {
         DbClient client = BaseTest.initDevelopTestClient();
-        StoredQueryFactory queryFactory = new StoredQueryFactory(client);
-        String queryContent = readQueryContent(RESOURCES_PREFIX + "testQuery3_PartialTablesAsterisk.xml");
-        String queryId = insertEntity(client, queryContent);
         try {
-            SqlQuery testQuery = queryFactory.getQuery(queryId);
-            assertEquals("SELECT TABLE1.*, TABLE2.FiELdB FROM TABLE1, TABLE2,  (/**\n"
-                    + " * @name namedQuery4Tests\n"
-                    + "*/\n"
-                    + "Select goodOrder.ORDER_ID as ORDER_NO, goodOrder.AMOUNT, customers.CUSTOMER_NAME as CUSTOMER \nFrom GOODORDER goodOrder\n Inner Join CUSTOMER customers on (goodOrder.CUSTOMER = customers.CUSTOMER_ID)\n and (goodOrder.AMOUNT > customers.CUSTOMER_NAME)\n Where :P4 = goodOrder.GOOD)  T0  WHERE ((TABLE2.FIELDA<TABLE1.F1) AND (:P2=TABLE1.F3)) AND (:P3=T0.AMOUNT)",
-                    testQuery.getSqlText());
-            assertEquals(5, testQuery.getFields().getFieldsCount());
-            for (int i = 0; i < testQuery.getFields().getFieldsCount(); i++) {
-                Field fieldMtd = testQuery.getFields().get(i + 1);
-                assertNotNull(fieldMtd);
+            StoredQueryFactory queryFactory = new StoredQueryFactory(client);
+            String queryContent = readQueryContent(RESOURCES_PREFIX + "testQuery3_PartialTablesAsterisk.xml");
+            String queryId = insertEntity(client, queryContent);
+            try {
+                SqlQuery testQuery = queryFactory.getQuery(queryId);
+                assertEquals("SELECT TABLE1.*, TABLE2.FiELdB FROM TABLE1, TABLE2,  (/**\n"
+                        + " * @name namedQuery4Tests\n"
+                        + "*/\n"
+                        + "Select goodOrder.ORDER_ID as ORDER_NO, goodOrder.AMOUNT, customers.CUSTOMER_NAME as CUSTOMER \nFrom GOODORDER goodOrder\n Inner Join CUSTOMER customers on (goodOrder.CUSTOMER = customers.CUSTOMER_ID)\n and (goodOrder.AMOUNT > customers.CUSTOMER_NAME)\n Where :P4 = goodOrder.GOOD)  T0  WHERE ((TABLE2.FIELDA<TABLE1.F1) AND (:P2=TABLE1.F3)) AND (:P3=T0.AMOUNT)",
+                        testQuery.getSqlText());
+                assertEquals(5, testQuery.getFields().getFieldsCount());
+                for (int i = 0; i < testQuery.getFields().getFieldsCount(); i++) {
+                    Field fieldMtd = testQuery.getFields().get(i + 1);
+                    assertNotNull(fieldMtd);
+                }
+                assertEquals(4, testQuery.getParameters().getParametersCount());
+            } finally {
+                deleteEntity(queryId, client);
             }
-            assertEquals(4, testQuery.getParameters().getParametersCount());
         } finally {
-            deleteEntity(queryId, client);
+            client.shutdown();
+            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 
     @Test
     public void testWithoutAliases_Schema_NonSchema_Schema_Columns() throws Exception {
         DbClient client = BaseTest.initDevelopTestClient();
-        StoredQueryFactory queryFactory = new StoredQueryFactory(client);
-        String queryContent = readQueryContent(RESOURCES_PREFIX + "testQuery4_Schema_NonSchema_Select.xml");
-        String queryId = insertEntity(client, queryContent);
         try {
-            SqlQuery testQuery = queryFactory.getQuery(queryId);
-            assertEquals("SELECT EAS.MTD_EntitiES.MDENt_ID, MTD_EntitiES.MDENT_NAME, EAS.MTD_EntitiES.MDENT_TYPe, MDENT_ORDER FROM EaS.MTD_EntitiES",
-                    testQuery.getSqlText());
-            assertEquals(4, testQuery.getFields().getFieldsCount());
-            for (int i = 0; i < testQuery.getFields().getFieldsCount(); i++) {
-                Field fieldMtd = testQuery.getFields().get(i + 1);
-                assertNotNull(fieldMtd);
+            StoredQueryFactory queryFactory = new StoredQueryFactory(client);
+            String queryContent = readQueryContent(RESOURCES_PREFIX + "testQuery4_Schema_NonSchema_Select.xml");
+            String queryId = insertEntity(client, queryContent);
+            try {
+                SqlQuery testQuery = queryFactory.getQuery(queryId);
+                assertEquals("SELECT EAS.MTD_EntitiES.MDENt_ID, MTD_EntitiES.MDENT_NAME, EAS.MTD_EntitiES.MDENT_TYPe, MDENT_ORDER FROM EaS.MTD_EntitiES",
+                        testQuery.getSqlText());
+                assertEquals(4, testQuery.getFields().getFieldsCount());
+                for (int i = 0; i < testQuery.getFields().getFieldsCount(); i++) {
+                    Field fieldMtd = testQuery.getFields().get(i + 1);
+                    assertNotNull(fieldMtd);
+                }
+                assertEquals(0, testQuery.getParameters().getParametersCount());
+            } finally {
+                deleteEntity(queryId, client);
             }
-            assertEquals(0, testQuery.getParameters().getParametersCount());
         } finally {
-            deleteEntity(queryId, client);
+            client.shutdown();
+            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 
     @Test
     public void testPrimaryKey() throws Exception {
         DbClient client = BaseTest.initDevelopTestClient();
-        StoredQueryFactory queryFactory = new StoredQueryFactory(client);
-        String queryContent = readQueryContent(RESOURCES_PREFIX + "testQuery4.xml");
-        String queryId = insertEntity(client, queryContent);
         try {
-            SqlQuery testQuery = queryFactory.getQuery(queryId);
-            Fields metadata = testQuery.getFields();
-            assertNotNull(metadata);
-            assertTrue(metadata.getFieldsCount() > 0);
-            assertTrue(metadata.get(1).isPk());
+            StoredQueryFactory queryFactory = new StoredQueryFactory(client);
+            String queryContent = readQueryContent(RESOURCES_PREFIX + "testQuery4.xml");
+            String queryId = insertEntity(client, queryContent);
+            try {
+                SqlQuery testQuery = queryFactory.getQuery(queryId);
+                Fields metadata = testQuery.getFields();
+                assertNotNull(metadata);
+                assertTrue(metadata.getFieldsCount() > 0);
+                assertTrue(metadata.get(1).isPk());
+            } finally {
+                deleteEntity(queryId, client);
+            }
         } finally {
-            deleteEntity(queryId, client);
+            client.shutdown();
+            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 
     @Test
     public void testPrimaryAndForeignKeysWithNamedOutputColumns() throws Exception {
         DbClient client = BaseTest.initDevelopTestClient();
-        StoredQueryFactory queryFactory = new StoredQueryFactory(client);
-        String queryContent = readQueryContent(RESOURCES_PREFIX + "testQuery5.xml");
-        String queryId = insertEntity(client, queryContent);
         try {
-            SqlQuery testQuery = queryFactory.getQuery(queryId);
-            Fields fields = testQuery.getFields();
-            assertNotNull(fields);
-            assertTrue(fields.getFieldsCount() == 2);
-            assertTrue(fields.get(1).isPk());
-            assertTrue(fields.get(2).isPk());
+            StoredQueryFactory queryFactory = new StoredQueryFactory(client);
+            String queryContent = readQueryContent(RESOURCES_PREFIX + "testQuery5.xml");
+            String queryId = insertEntity(client, queryContent);
+            try {
+                SqlQuery testQuery = queryFactory.getQuery(queryId);
+                Fields fields = testQuery.getFields();
+                assertNotNull(fields);
+                assertTrue(fields.getFieldsCount() == 2);
+                assertTrue(fields.get(1).isPk());
+                assertTrue(fields.get(2).isPk());
+            } finally {
+                deleteEntity(queryId, client);
+            }
         } finally {
-            deleteEntity(queryId, client);
+            client.shutdown();
+            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 
     @Test
     public void testPrimaryAndForeignKeysWithAsterisk() throws Exception {
         DbClient client = BaseTest.initDevelopTestClient();
-        StoredQueryFactory queryFactory = new StoredQueryFactory(client);
-        String queryContent = readQueryContent(RESOURCES_PREFIX + "testQuery6.xml");
-        String queryId = insertEntity(client, queryContent);
         try {
-            SqlQuery testQuery = queryFactory.getQuery(queryId);
-            Fields fields = testQuery.getFields();
-            assertNotNull(fields);
-            assertTrue(fields.getFieldsCount() == 23);
-            assertNotNull(fields.get("MDENT_ID"));
-            assertTrue(fields.get("MDENT_ID").isPk());
-            assertNotNull(fields.get("MDLOG_ID"));
-            assertTrue(fields.get("MDLOG_ID").isPk());
-            assertFalse(fields.getPrimaryKeys().isEmpty());
-            assertEquals(2, fields.getPrimaryKeys().size());
-            assertEquals("MDENT_ID", fields.getPrimaryKeys().get(0).getName());
-            assertEquals("MDLOG_ID", fields.getPrimaryKeys().get(1).getName());
+            StoredQueryFactory queryFactory = new StoredQueryFactory(client);
+            String queryContent = readQueryContent(RESOURCES_PREFIX + "testQuery6.xml");
+            String queryId = insertEntity(client, queryContent);
+            try {
+                SqlQuery testQuery = queryFactory.getQuery(queryId);
+                Fields fields = testQuery.getFields();
+                assertNotNull(fields);
+                assertTrue(fields.getFieldsCount() == 23);
+                assertNotNull(fields.get("MDENT_ID"));
+                assertTrue(fields.get("MDENT_ID").isPk());
+                assertNotNull(fields.get("MDLOG_ID"));
+                assertTrue(fields.get("MDLOG_ID").isPk());
+                assertFalse(fields.getPrimaryKeys().isEmpty());
+                assertEquals(2, fields.getPrimaryKeys().size());
+                assertEquals("MDENT_ID", fields.getPrimaryKeys().get(0).getName());
+                assertEquals("MDLOG_ID", fields.getPrimaryKeys().get(1).getName());
+            } finally {
+                deleteEntity(queryId, client);
+            }
         } finally {
-            deleteEntity(queryId, client);
+            client.shutdown();
+            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 
     @Test
     public void testGetQuery() throws Exception {
         DbClient client = BaseTest.initDevelopTestClient();
-        StoredQueryFactory queryFactory = new StoredQueryFactory(client);
-        String queryContent = readQueryContent(RESOURCES_PREFIX + "testQuery1.xml");
-        String queryId = insertEntity(client, queryContent);
         try {
-            SqlQuery testQuery = queryFactory.getQuery(queryId);
-            Fields metadata = testQuery.getFields();
-            assertEquals(3, metadata.getFieldsCount());
+            StoredQueryFactory queryFactory = new StoredQueryFactory(client);
+            String queryContent = readQueryContent(RESOURCES_PREFIX + "testQuery1.xml");
+            String queryId = insertEntity(client, queryContent);
+            try {
+                SqlQuery testQuery = queryFactory.getQuery(queryId);
+                Fields metadata = testQuery.getFields();
+                assertEquals(3, metadata.getFieldsCount());
+            } finally {
+                deleteEntity(queryId, client);
+            }
         } finally {
-            deleteEntity(queryId, client);
+            client.shutdown();
+            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 
     @Test
     public void testGetEmptyQuery() throws Exception {
         DbClient client = BaseTest.initDevelopTestClient();
-        StoredQueryFactory queryFactory = new StoredQueryFactory(client);
-        String queryId = insertEmptyEntity(client);
         try {
+            StoredQueryFactory queryFactory = new StoredQueryFactory(client);
+            String queryId = insertEmptyEntity(client);
             try {
-                SqlQuery testQuery = queryFactory.getQuery(queryId);
-                fail("Empty query must lead to an exception, but it doesn't. Why?");
-            } catch (Exception ex) {
-                //fine. there muist be an exception
+                try {
+                    SqlQuery testQuery = queryFactory.getQuery(queryId);
+                    fail("Empty query must lead to an exception, but it doesn't. Why?");
+                } catch (Exception ex) {
+                    //fine. there muist be an exception
+                }
+            } finally {
+                deleteEntity(queryId, client);
             }
         } finally {
-            deleteEntity(queryId, client);
+            client.shutdown();
+            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 

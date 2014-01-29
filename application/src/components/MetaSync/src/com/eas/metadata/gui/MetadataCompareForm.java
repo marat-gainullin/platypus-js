@@ -1076,8 +1076,8 @@ public class MetadataCompareForm extends javax.swing.JFrame {
             @Override
             public void run() {
                 try {
-                    GeneralResourceProvider.getInstance().registerDatasource(MetadataSynchronizer.FAKE_DATASOURCE_NAME, new DbConnectionSettings(destUrl, destUser, destPassword));
-                    DataSource sqlsTarget = GeneralResourceProvider.getInstance().getPooledDataSource(MetadataSynchronizer.FAKE_DATASOURCE_NAME);
+                    GeneralResourceProvider.getInstance().registerDatasource(MetadataSynchronizer.METASYNC_DATASOURCE_NAME, new DbConnectionSettings(destUrl, destUser, destPassword));
+                    DataSource sqlsTarget = GeneralResourceProvider.getInstance().getPooledDataSource(MetadataSynchronizer.METASYNC_DATASOURCE_NAME);
                     try (Connection conn = sqlsTarget.getConnection()) {
                         // Let's dive int oschema context
                         String dialect = DatabasesClient.dialectByConnection(conn);
@@ -1106,7 +1106,7 @@ public class MetadataCompareForm extends javax.swing.JFrame {
                             }
                         }
                     } finally {
-                        GeneralResourceProvider.getInstance().unregisterDatasource(MetadataSynchronizer.FAKE_DATASOURCE_NAME);
+                        GeneralResourceProvider.getInstance().unregisterDatasource(MetadataSynchronizer.METASYNC_DATASOURCE_NAME);
                     }
                 } catch (Exception ex) {
                     Logger.getLogger(MetadataCompareForm.class.getName()).log(Level.SEVERE, null, ex);

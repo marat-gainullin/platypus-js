@@ -9,6 +9,7 @@ import com.eas.client.model.BaseTest;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
 import com.eas.client.model.application.ApplicationParametersEntity;
+import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.xml.dom.XmlDom2String;
 import java.io.InputStream;
 import static org.junit.Assert.*;
@@ -24,13 +25,17 @@ public class SerialTest extends BaseTest {
     public void logicalStabilityTest() throws Exception {
         System.out.println("serialization logical stability test");
         DbClient client = initDevelopTestClient();
-        ApplicationDbModel model = modelFromResource(client);
-        verifyModel(model);
-
-        for (int i = 0; i < 100; i++) {
-            String writtenString = model2String(model);
-            model = modelFromString(client, writtenString);
+        try {
+            ApplicationDbModel model = modelFromResource(client);
             verifyModel(model);
+            for (int i = 0; i < 100; i++) {
+                String writtenString = model2String(model);
+                model = modelFromString(client, writtenString);
+                verifyModel(model);
+            }
+        } finally {
+            client.shutdown();
+            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 
@@ -38,15 +43,19 @@ public class SerialTest extends BaseTest {
     public void binaryStabilityTest() throws Exception {
         System.out.println("serialization binary stability test");
         DbClient client = initDevelopTestClient();
-        ApplicationDbModel model = modelFromResource(client);
-        verifyModel(model);
-
-        for (int i = 0; i < 100; i++) {
-            String writtenString = model2String(model);
-            model = modelFromString(client, writtenString);
+        try {
+            ApplicationDbModel model = modelFromResource(client);
             verifyModel(model);
-            String writtenString1 = model2String(model);
-            assertEquals(writtenString.length(), writtenString1.length());
+            for (int i = 0; i < 100; i++) {
+                String writtenString = model2String(model);
+                model = modelFromString(client, writtenString);
+                verifyModel(model);
+                String writtenString1 = model2String(model);
+                assertEquals(writtenString.length(), writtenString1.length());
+            }
+        } finally {
+            client.shutdown();
+            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 

@@ -45,9 +45,7 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
 
     public static final String CMD_SWITCHS_PREFIX = "-";
     // command line switches
-    public static final String LAF_CMD_SWITCH = "laf";
     public static final String MODULES_SCRIPT_NAME = "Modules";
-    public static final String RUSSIAN_LOCALE_CMD_SWITCH = "russian";
     public static final String APPELEMENT_CMD_SWITCH = "appElement";
     // auto login switchs
     public static final String URL_CMD_SWITCH = "url";
@@ -272,23 +270,9 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
                 } else {
                     throw new IllegalArgumentException("Password syntax: -password <value>");
                 }
-            } else if ((CMD_SWITCHS_PREFIX + CMD_SWITCHS_PREFIX + RUSSIAN_LOCALE_CMD_SWITCH).equalsIgnoreCase(args[i])) {
-                Locale.setDefault(new Locale("ru", "RU"));
-                i++;
-            } else if ((CMD_SWITCHS_PREFIX + LAF_CMD_SWITCH).equalsIgnoreCase(args[i])) {
-                if (i < args.length - 1) {
-                    UIManager.setLookAndFeel(args[i + 1]);
-                    i += 2;
-                } else {
-                    throw new IllegalArgumentException("syntax: -laf <LaF class name>");
-                }
             } else if ((CMD_SWITCHS_PREFIX + APPELEMENT_CMD_SWITCH).equalsIgnoreCase(args[i])) {
                 if (i < args.length - 1) {
-                    try {
-                        appElementId = args[i + 1];
-                    } catch (NumberFormatException ex) {
-                        throw new IllegalArgumentException("syntax: -appElement <application element id comprised of numbers>");
-                    }
+                    appElementId = args[i + 1];
                     i += 2;
                 } else {
                     throw new IllegalArgumentException("syntax: -appElement <application element id>");
