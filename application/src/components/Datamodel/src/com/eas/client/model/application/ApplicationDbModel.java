@@ -209,14 +209,14 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
             + "* @return an entity instance.\n"
             + "*/";
     
-    @ScriptFunction(jsDoc = CREATE_ENTITY_JSDOC, params = {"sqlText", "dbId"})
-    public synchronized Scriptable createEntity(String aSqlText, String aDbId) throws Exception {
+    @ScriptFunction(jsDoc = CREATE_ENTITY_JSDOC, params = {"sqlText", "datasourceName"})
+    public synchronized Scriptable createEntity(String aSqlText, String aDatasourceName) throws Exception {
         if (client == null) {
             throw new NullPointerException("Null client detected while creating a query");
         }
         ApplicationDbEntity modelEntity = newGenericEntity();
         modelEntity.setName(USER_DATASOURCE_NAME);
-        SqlQuery query = new SqlQuery(client, aDbId, aSqlText);
+        SqlQuery query = new SqlQuery(client, aDatasourceName, aSqlText);
         query.setEntityId(String.valueOf(IDGenerator.genID()));
         StoredQueryFactory factory = new StoredQueryFactory(client, true);
         factory.putTableFieldsMetadata(query);// only select will be filled with output columns
