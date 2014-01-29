@@ -58,6 +58,7 @@ public class PostgreConverter extends PlatypusConverter {
                 }
                 if (casted == null) {
                     aStmt.setNull(aParameterIndex, Types.LONGVARCHAR);
+                    checkDataLoss(aValue);
                 } else {
                     aStmt.setString(aParameterIndex, casted);
                 }
@@ -73,6 +74,7 @@ public class PostgreConverter extends PlatypusConverter {
                 }
                 if (casted == null) {
                     aStmt.setNull(aParameterIndex, Types.BINARY);
+                    checkDataLoss(aValue);
                 } else {
                     aStmt.setBytes(aParameterIndex, casted);
                 }
@@ -89,6 +91,7 @@ public class PostgreConverter extends PlatypusConverter {
                     aStmt.setString(aParameterIndex, castedString);
                 } else {
                     aStmt.setNull(aParameterIndex, Types.VARCHAR);
+                    checkDataLoss(aValue);
                 }
             } else {
                 super.convert2JdbcAndAssign(aValue, aTypeInfo, aConn, aParameterIndex, aStmt);
