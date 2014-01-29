@@ -241,12 +241,12 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
             + "* @return an entity instance.\n"
             + "*/";
     
-    @ScriptFunction(jsDoc = EXECUTE_SQL_JSDOC, params = {"sqlText", "dbId"})
-    public void executeSql(String aSqlClause, String aDbId) throws Exception {
+    @ScriptFunction(jsDoc = EXECUTE_SQL_JSDOC, params = {"sqlText", "datasourceName"})
+    public void executeSql(String aSqlClause, String aDatasourceName) throws Exception {
         if (client == null) {
             throw new NullPointerException("Null client detected while creating a query");
         }
-        SqlCompiledQuery compiled = new SqlCompiledQuery(client, aDbId, aSqlClause);
+        SqlCompiledQuery compiled = new SqlCompiledQuery(client, aDatasourceName, aSqlClause);
         client.executeUpdate(compiled);
     }
 }
