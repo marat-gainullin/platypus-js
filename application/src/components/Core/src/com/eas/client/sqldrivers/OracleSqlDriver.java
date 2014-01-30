@@ -120,7 +120,7 @@ public class OracleSqlDriver extends SqlDriver {
             + "ORDER BY c.owner,c.table_name,c.position";
     protected static final String SQL_FOREIGN_KEYS = ""
             + "with"
-            + " fkey as (select"       
+            + " fkey as (select"
             + "             r_owner,"
             + "             r_constraint_name,"
             + "             owner fktable_schem,"
@@ -160,70 +160,70 @@ public class OracleSqlDriver extends SqlDriver {
             + "   inner join all_cons_columns pcol on fpkey.pktable_schem = pcol.owner and  fpkey.pk_name = pcol.constraint_name"
             + " where fcol.position = pcol.position "
             + " order by pktable_schem, pktable_name, key_seq";
-            /* marat
-            + "with "
-            + "cols as (select * from all_cons_columns ac where upper(ac.owner) = Upper('%s')),"
-            + "cons as (select * from all_constraints ac where upper(ac.owner) = Upper('%s'))"
-            + "select * from "
-            + "(select "
-            + "  null fktable_cat"
-            + ", c.owner fktable_schem"
-            + ", c.table_name fktable_name"
-            + ", c.column_name fkcolumn_name"
-            + ", c.POSITION key_seq"
-            + ", cs.constraint_name fk_name"
-            + ", null update_rule"
-            + ", cs.r_constraint_name pk_name"
-            + ", decode(cs.delete_rule, 'CASCADE', 0, 'SET NULL', 2, 1) as delete_rule"
-            + ", decode(cs.DEFERRABLE, 'DEFERRABLE', 5, 'NOT DEFERRABLE', 7, 'DEFERRED', 6) deferrability"
-            + ", cs.deferred  "
-            + "  from (select * from cols where cols.table_name in(%s)) c inner join (select * from cons where cons.constraint_type='R') cs on (c.constraint_name = cs.constraint_name)"
-            + ") rc"
-            + "    inner join"
-            + "(select"
-            + "  null pktable_cat"
-            + ", c.owner pktable_schem"
-            + ", c.table_name pktable_name"
-            + ", c.column_name pkcolumn_name"
-            + ", c.POSITION key_seq"
-            + ", cs.constraint_name"
-            + "  from cols c inner join (select * from cons where cons.constraint_type='P') cs on (c.constraint_name = cs.constraint_name)"
-            + ") pc"
-            + "    on (rc.pk_name = pc.constraint_name and rc.key_seq = pc.key_seq) "
-            + "order by pc.pktable_schem, pc.pktable_name, pc.key_seq";
-            */ 
-            /*
-            + "SELECT"
-            + " NULL pktable_cat,"
-            + " p.owner pktable_schem,"
-            + " p.table_name pktable_name,"
-            + " pc.column_name pkcolumn_name,"
-            + " NULL fktable_cat,"
-            + " f.owner fktable_schem,"
-            + " f.table_name fktable_name,"
-            + " fc.column_name fkcolumn_name,"
-            + " fc.position key_seq,"
-            + " null as update_rule,"
-            + " decode(f.delete_rule, 'CASCADE', 0, 'SET NULL', 2, 1) as delete_rule,"
-            + " f.constraint_name fk_name,"
-            + "p.constraint_name pk_name,"
-            + " decode(f.deferrable, 'DEFERRABLE', 5, 'NOT DEFERRABLE', 7, 'DEFERRED', 6) deferrability "
-            + "FROM all_cons_columns pc, all_constraints p, all_cons_columns fc, all_constraints f "
-            + "WHERE f.constraint_type = 'R'"
-            + " AND p.owner = f.r_owner"
-            + " AND p.constraint_name = f.r_constraint_name"
-            + " AND p.constraint_type = 'P'"
-            + " AND pc.owner = p.owner"
-            + " AND pc.constraint_name = p.constraint_name"
-            + " AND pc.table_name = p.table_name"
-            + " AND fc.owner = f.owner"
-            + " AND fc.constraint_name = f.constraint_name"
-            + " AND fc.table_name = f.table_name"
-            + " AND fc.position = pc.position"
-            + " AND Upper(p.owner) = Upper('%s')"
-            + " AND Upper(f.table_name) in (%s) "
-            + "ORDER BY pktable_schem, pktable_name, key_seq ";
-            */ 
+    /* marat
+     + "with "
+     + "cols as (select * from all_cons_columns ac where upper(ac.owner) = Upper('%s')),"
+     + "cons as (select * from all_constraints ac where upper(ac.owner) = Upper('%s'))"
+     + "select * from "
+     + "(select "
+     + "  null fktable_cat"
+     + ", c.owner fktable_schem"
+     + ", c.table_name fktable_name"
+     + ", c.column_name fkcolumn_name"
+     + ", c.POSITION key_seq"
+     + ", cs.constraint_name fk_name"
+     + ", null update_rule"
+     + ", cs.r_constraint_name pk_name"
+     + ", decode(cs.delete_rule, 'CASCADE', 0, 'SET NULL', 2, 1) as delete_rule"
+     + ", decode(cs.DEFERRABLE, 'DEFERRABLE', 5, 'NOT DEFERRABLE', 7, 'DEFERRED', 6) deferrability"
+     + ", cs.deferred  "
+     + "  from (select * from cols where cols.table_name in(%s)) c inner join (select * from cons where cons.constraint_type='R') cs on (c.constraint_name = cs.constraint_name)"
+     + ") rc"
+     + "    inner join"
+     + "(select"
+     + "  null pktable_cat"
+     + ", c.owner pktable_schem"
+     + ", c.table_name pktable_name"
+     + ", c.column_name pkcolumn_name"
+     + ", c.POSITION key_seq"
+     + ", cs.constraint_name"
+     + "  from cols c inner join (select * from cons where cons.constraint_type='P') cs on (c.constraint_name = cs.constraint_name)"
+     + ") pc"
+     + "    on (rc.pk_name = pc.constraint_name and rc.key_seq = pc.key_seq) "
+     + "order by pc.pktable_schem, pc.pktable_name, pc.key_seq";
+     */
+    /*
+     + "SELECT"
+     + " NULL pktable_cat,"
+     + " p.owner pktable_schem,"
+     + " p.table_name pktable_name,"
+     + " pc.column_name pkcolumn_name,"
+     + " NULL fktable_cat,"
+     + " f.owner fktable_schem,"
+     + " f.table_name fktable_name,"
+     + " fc.column_name fkcolumn_name,"
+     + " fc.position key_seq,"
+     + " null as update_rule,"
+     + " decode(f.delete_rule, 'CASCADE', 0, 'SET NULL', 2, 1) as delete_rule,"
+     + " f.constraint_name fk_name,"
+     + "p.constraint_name pk_name,"
+     + " decode(f.deferrable, 'DEFERRABLE', 5, 'NOT DEFERRABLE', 7, 'DEFERRED', 6) deferrability "
+     + "FROM all_cons_columns pc, all_constraints p, all_cons_columns fc, all_constraints f "
+     + "WHERE f.constraint_type = 'R'"
+     + " AND p.owner = f.r_owner"
+     + " AND p.constraint_name = f.r_constraint_name"
+     + " AND p.constraint_type = 'P'"
+     + " AND pc.owner = p.owner"
+     + " AND pc.constraint_name = p.constraint_name"
+     + " AND pc.table_name = p.table_name"
+     + " AND fc.owner = f.owner"
+     + " AND fc.constraint_name = f.constraint_name"
+     + " AND fc.table_name = f.table_name"
+     + " AND fc.position = pc.position"
+     + " AND Upper(p.owner) = Upper('%s')"
+     + " AND Upper(f.table_name) in (%s) "
+     + "ORDER BY pktable_schem, pktable_name, key_seq ";
+     */
     protected static final String SQL_INDEX_KEYS = ""
             + "SELECT"
             + " null table_cat,"
@@ -456,8 +456,18 @@ public class OracleSqlDriver extends SqlDriver {
     }
 
     @Override
-    public String getApplicationSchemaInitResourceName() {
-        return "/" + OracleSqlDriver.class.getPackage().getName().replace(".", "/") + "/sqlscripts/OracleInitSchema.sql";
+    public String getApplicationInitResourceName() {
+        return "/" + OracleSqlDriver.class.getPackage().getName().replace(".", "/") + "/sqlscripts/OracleInitApp.sql";
+    }
+
+    @Override
+    public String getUsersSpaceInitResourceName() {
+        return "/" + OracleSqlDriver.class.getPackage().getName().replace(".", "/") + "/sqlscripts/OracleInitUsersSpace.sql";
+    }
+
+    @Override
+    public String getVersionInitResourceName() {
+        return "/" + OracleSqlDriver.class.getPackage().getName().replace(".", "/") + "/sqlscripts/OracleInitVersion.sql";
     }
 
     @Override

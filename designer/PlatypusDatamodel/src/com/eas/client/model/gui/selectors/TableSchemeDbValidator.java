@@ -23,13 +23,13 @@ import org.w3c.dom.Element;
 public class TableSchemeDbValidator extends DefaultMtdSelectionValidator {
 
     // flag, indicating that dbId verification is needed
-    protected boolean isOnlyDb = false;
-    protected String onlyDbId = null;
+    protected boolean isOnlyDb;
+    protected String onlyDbId;
     // flag, indicating that schema verification is needed
-    protected boolean isOnlySchema = false;
-    protected String onlySchema = null;
-    protected DbMetadataCache dbCache = null;
-    protected AppCache appCache = null;
+    protected boolean isOnlySchema;
+    protected String onlySchema;
+    protected DbMetadataCache dbCache;
+    protected AppCache appCache;
 
     public TableSchemeDbValidator(boolean aIsOnlyDb, String aOnlyDbId, boolean aIsOnlySchema, String aOnlySchema, DbClient aClient) throws Exception {
         super(null);
@@ -47,7 +47,6 @@ public class TableSchemeDbValidator extends DefaultMtdSelectionValidator {
         }
         allowedTypes = new ArrayList<>();
         allowedTypes.add(ClientConstants.ET_DB_SCHEME);
-        allowedTypes.add(ClientConstants.ET_CONNECTION);
     }
 
     @Override
@@ -56,58 +55,44 @@ public class TableSchemeDbValidator extends DefaultMtdSelectionValidator {
     }
 
     private boolean isDbIdAndSchemaValid(ApplicationElement entity) {
-        if (entity != null) {
-            if (entity.getType() == ClientConstants.ET_CONNECTION) {
-                if (isOnlyDb) {
-                    if (onlyDbId == null) {
-                        // user have selected some db connection, but we need a table from
-                        // application db, so return false immidiatly.
-                        return false;
-                    }
-                    return entity.getId().equals(onlyDbId);
-                } else // db doesn't matter
-                {
-                    return true;
-                }
-            } else if (entity.getType() == ClientConstants.ET_DB_SCHEME) {
-                if (isOnlyDb) {
-                    if (dbCache != null) {
-                        try {
-                            ApplicationElement appElement = appCache.get(entity.getId());
-                            if (appElement != null) {
-                                Document content = appElement.getContent();
-                                if (content != null) {
-                                    Element datamodelElement = content.getDocumentElement();
-                                    String dbIdAttribute = datamodelElement.getAttribute(Model2XmlDom.DATAMODEL_DB_ID);
-                                    if (String.valueOf(onlyDbId).equalsIgnoreCase(dbIdAttribute) || (dbIdAttribute == null && onlyDbId == null)) {
-                                        // db id is verificated
-                                        if (isOnlySchema) {
-                                            String schemaAttribute = datamodelElement.getAttribute(Model2XmlDom.DATAMODEL_DB_SCHEMA_NAME);
-                                            if (String.valueOf(onlySchema).equalsIgnoreCase(schemaAttribute) || (schemaAttribute == null && (onlySchema == null || onlySchema.isEmpty()))) {
-                                                // schema is verificated
-                                                return true;
-                                            } else {
-                                                if (onlySchema == null || onlySchema.isEmpty()) {
-                                                    // schema might be valid if it contains explicit application schema name
-                                                    return String.valueOf(dbCache.getConnectionSchema()).equalsIgnoreCase(schemaAttribute);
-                                                } else {
-                                                    // schema is invalid
-                                                    return false;
-                                                }
-                                            }
-                                        } else {
+        if (entity.getType() == ClientConstants.ET_DB_SCHEME) {
+            if (isOnlyDb) {
+                if (dbCache != null) {
+                    try {
+                        ApplicationElement appElement = appCache.get(entity.getId());
+                        if (appElement != null) {
+                            Document content = appElement.getContent();
+                            if (content != null) {
+                                Element datamodelElement = content.getDocumentElement();
+                                String dbIdAttribute = datamodelElement.getAttribute(Model2XmlDom.DATAMODEL_DB_ID);
+                                if (String.valueOf(onlyDbId).equalsIgnoreCase(dbIdAttribute) || (dbIdAttribute == null && onlyDbId == null)) {
+                                    // db id is verificated
+                                    if (isOnlySchema) {
+                                        String schemaAttribute = datamodelElement.getAttribute(Model2XmlDom.DATAMODEL_DB_SCHEMA_NAME);
+                                        if (String.valueOf(onlySchema).equalsIgnoreCase(schemaAttribute) || (schemaAttribute == null && (onlySchema == null || onlySchema.isEmpty()))) {
+                                            // schema is verificated
                                             return true;
+                                        } else {
+                                            if (onlySchema == null || onlySchema.isEmpty()) {
+                                                // schema might be valid if it contains explicit application schema name
+                                                return String.valueOf(dbCache.getConnectionSchema()).equalsIgnoreCase(schemaAttribute);
+                                            } else {
+                                                // schema is invalid
+                                                return false;
+                                            }
                                         }
+                                    } else {
+                                        return true;
                                     }
                                 }
                             }
-                        } catch (Exception ex) {
-                            Logger.getLogger(TableSchemeDbValidator.class.getName()).log(Level.SEVERE, null, ex);
                         }
+                    } catch (Exception ex) {
+                        Logger.getLogger(TableSchemeDbValidator.class.getName()).log(Level.SEVERE, null, ex);
                     }
-                } else {
-                    return true;
                 }
+            } else {
+                return true;
             }
         }
         return false;

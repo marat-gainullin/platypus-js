@@ -11,6 +11,7 @@ import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.queries.SqlCompiledQuery;
+import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.client.settings.DbConnectionSettings;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -30,7 +31,7 @@ import org.junit.Test;
  */
 public class DbClientTest {
 
-    private static int TEST_THREADS_COUNT = 64;
+    protected static final int TEST_THREADS_COUNT = 64;
     protected static int ORDER_ID = 280513973;
     protected static int AMOUNT = 45;
     protected static int GOOD = 2;
@@ -62,7 +63,8 @@ public class DbClientTest {
     public void multiThreadedUpdatingRowsetTest() throws Exception {
         System.out.println("multiThreadedUpdatingRowsetTest");
         // initialize client in single thread mode as at the startup of the program
-        final DbClient dbClient = new DatabasesClient((DbConnectionSettings) settings);
+        GeneralResourceProvider.getInstance().registerDatasource("testDb", settings);
+        final DbClient dbClient = new DatabasesClient(new DatabaseAppCache("testDb"), "testDb", true);
         Runnable clientRunnable = new Runnable() {
             @Override
             public void run() {
@@ -150,6 +152,7 @@ public class DbClientTest {
             }
         } finally {
             dbClient.shutdown();
+            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 
@@ -165,7 +168,8 @@ public class DbClientTest {
     public void extraFieldsInsertTest() throws Exception {
         System.out.println("extraFieldsInsertTest");
         // initialize client in single thread mode as at the startup of the program
-        Client lfclient = new DatabasesClient(settings);
+        GeneralResourceProvider.getInstance().registerDatasource("testDb", settings);
+        final Client lfclient = new DatabasesClient(new DatabaseAppCache("testDb"), "testDb", true);
         assertTrue(lfclient instanceof DbClient);
         DbClient lclient = (DbClient) lfclient;
         try {
@@ -178,6 +182,7 @@ public class DbClientTest {
             lclient.commit(null);
         } finally {
             lclient.shutdown();
+            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 
@@ -228,9 +233,8 @@ public class DbClientTest {
         System.out.println("extraFieldsUpdateTest");
 
         // initialize client in single thread mode as at the startup of the program
-        Client lfclient = new DatabasesClient(settings);
-        assertTrue(lfclient instanceof DbClient);
-        DbClient lclient = (DbClient) lfclient;
+        GeneralResourceProvider.getInstance().registerDatasource("testDb", settings);
+        final DbClient lclient = new DatabasesClient(new DatabaseAppCache("testDb"), "testDb", true);
         try {
             Parameters params = new Parameters();
             Rowset goodOrderRowset = makeGoodOrderRowsetWith1Record(lclient, params);
@@ -252,6 +256,7 @@ public class DbClientTest {
             assertTrue(goodOrderRowset.isEmpty());
         } finally {
             lclient.shutdown();
+            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 }

@@ -95,16 +95,16 @@ public class PlatypusProjectActions implements ActionProvider {
                     run(true);
                     break;
                 case COMMAND_DEPLOY:
-                    deploy();
+                    deployApplication();
                     break;
                 case COMMAND_IMPORT:
                     importApplication();
                     break;
                 case COMMAND_CONNECT:
-                    project.startConnecting2db();
+                    project.startConnecting2db(project.getSettings().getAppSettings().getDefaultDatasource());
                     break;
                 case COMMAND_DISCONNECT:
-                    project.disconnectFormDb();
+                    project.disconnectFormDb(project.getSettings().getAppSettings().getDefaultDatasource());
                     break;
                 case COMMAND_CLEAN:
                     clean();
@@ -118,11 +118,11 @@ public class PlatypusProjectActions implements ActionProvider {
     @Override
     public boolean isActionEnabled(String command, Lookup aLookup) throws IllegalArgumentException {
         if (COMMAND_DISCONNECT.equals(command)) {
-            return project.isDbConnected();
+            return project.isDbConnected(project.getSettings().getAppSettings().getDefaultDatasource());
         } else if (COMMAND_CONNECT.equals(command)) {
-            return !project.isDbConnected();
+            return !project.isDbConnected(project.getSettings().getAppSettings().getDefaultDatasource());
         } else if (COMMAND_DEPLOY.equals(command) || COMMAND_IMPORT.equals(command)) {
-            return project.isDbConnected() && !project.getDeployer().isBusy();
+            return project.isDbConnected(project.getSettings().getAppSettings().getDefaultDatasource()) && !project.getDeployer().isBusy();
         } else if (COMMAND_CLEAN.equals(command)) {
             PlatypusWebModuleManager pwmm = project.getLookup().lookup(PlatypusWebModuleManager.class);
             assert pwmm != null;
@@ -155,8 +155,8 @@ public class PlatypusProjectActions implements ActionProvider {
         }
     }
 
-    private void deploy() {
-        if (project.isDbConnected()) {
+    private void deployApplication() {
+        if (project.isDbConnected(project.getSettings().getAppSettings().getDefaultDatasource())) {
             NotifyDescriptor d = new NotifyDescriptor(
                     NbBundle.getMessage(PlatypusProjectActions.class, "MSG_Deploy_Dialog"), //NOI18N
                     NbBundle.getMessage(PlatypusProjectActions.class, "LBL_Deploy_Dialog"), //NOI18N
@@ -189,7 +189,7 @@ public class PlatypusProjectActions implements ActionProvider {
     }
 
     private void importApplication() {
-        if (project.isDbConnected()) {
+        if (project.isDbConnected(project.getSettings().getAppSettings().getDefaultDatasource())) {
             NotifyDescriptor d = new NotifyDescriptor(
                     NbBundle.getMessage(PlatypusProjectActions.class, "MSG_Import_Dialog"), //NOI18N
                     NbBundle.getMessage(PlatypusProjectActions.class, "LBL_Import_Dialog"), //NOI18N
@@ -214,6 +214,7 @@ public class PlatypusProjectActions implements ActionProvider {
                                 project.getDeployer().importApplication();
                             } finally {
                                 if (cache instanceof FilesAppCache) {
+                                    ((FilesAppCache) cache).rescan();
                                     ((FilesAppCache) cache).watch();
                                 }
                             }

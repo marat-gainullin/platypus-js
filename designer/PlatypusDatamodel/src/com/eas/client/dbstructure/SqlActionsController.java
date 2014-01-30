@@ -21,9 +21,9 @@ import java.util.logging.Logger;
  */
 public class SqlActionsController {
 
-    protected DbClient client = null;
-    protected String dbId = null;
-    protected String schema = null;
+    protected DbClient client;
+    protected String dbId;
+    protected String schema;
 
     public SqlActionsController(DbSchemeModel aSchemeModel) throws Exception {
         super();

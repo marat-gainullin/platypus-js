@@ -31,6 +31,7 @@ import org.openide.NotifyDescriptor;
 import org.openide.awt.UndoRedo;
 import org.openide.cookies.*;
 import org.openide.text.CloneableEditorSupport;
+import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 import org.openide.windows.CloneableOpenSupport;
 import org.openide.windows.CloneableTopComponent;
@@ -133,23 +134,21 @@ public class PlatypusQuerySupport extends CloneableOpenSupport implements OpenCo
             @Override
             public void undoableEditHappened(UndoableEditEvent ue) {
                 try {
-                    if (ue.getSource() != dataObject && !queryDocumentEditsComplementor.isComplementing()
+                    if (ue.getSource() != dataObject && dataObject.getClient() != null && !queryDocumentEditsComplementor.isComplementing()
                             && ue.getEdit() != CloneableEditorSupport.BEGIN_COMMIT_GROUP
                             && ue.getEdit() != CloneableEditorSupport.END_COMMIT_GROUP) {
-                        if (dataObject.getClient() != null) {
-                            UndoableEdit anEdit = null;
-                            if (ue.getSource() == dataObject.getSqlTextDocument()) {
-                                anEdit = complementSqlTextEdit(ue.getEdit());
-                            } else {
-                                anEdit = complementQueryDocumentEdit(ue.getEdit());
-                            }
-                            if (anEdit != null) {
-                                ue = new UndoableEditEvent(ue.getSource(), anEdit);
-                                super.undoableEditHappened(ue);
-                            }
+                        UndoableEdit anEdit = null;
+                        if (ue.getSource() == dataObject.getSqlTextDocument()) {
+                            anEdit = complementSqlTextEdit(ue.getEdit());
                         } else {
+                            anEdit = complementQueryDocumentEdit(ue.getEdit());
+                        }
+                        if (anEdit != null) {
+                            ue = new UndoableEditEvent(ue.getSource(), anEdit);
                             super.undoableEditHappened(ue);
                         }
+                    } else {
+                        super.undoableEditHappened(ue);
                     }
                 } catch (Exception ex) {
                     ErrorManager.getDefault().notify(ex);
@@ -299,7 +298,7 @@ public class PlatypusQuerySupport extends CloneableOpenSupport implements OpenCo
         return comps;
     }
 
-    public void shrink() {
+    public void shrink() throws IOException {
         List<CloneableTopComponent> views = getAllViews();
         if (views == null || views.isEmpty()) {
             // Take care of memory consumption.
@@ -314,13 +313,17 @@ public class PlatypusQuerySupport extends CloneableOpenSupport implements OpenCo
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                modelUndo.discardAllEdits();
-                List<CloneableTopComponent> views = getAllViews();
-                for (CloneableTopComponent view : views) {
-                    view.close();
+                try {
+                    modelUndo.discardAllEdits();
+                    List<CloneableTopComponent> views = getAllViews();
+                    for (CloneableTopComponent view : views) {
+                        view.close();
+                    }
+                    // Take care of memory consumption.
+                    dataObject.shrink();
+                } catch (IOException ex) {
+                    Exceptions.printStackTrace(ex);
                 }
-                // Take care of memory consumption.
-                dataObject.shrink();
             }
         });
     }

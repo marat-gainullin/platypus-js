@@ -8,32 +8,37 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
- * Data source JNDI resource.
- * Only required attributes supported yet.
+ * Data source JNDI resource. Only required attributes supported yet.
+ *
  * @author vv
  */
 public class DataSourceResource extends Resource {
+
     public static final String DATA_SOURCE_RESOURCE_TYPE_NAME = "javax.sql.DataSource";//NOI18N
     public static final String DRIVER_CLASS_NAME_ATTR_NAME = "driverClassName";//NOI18N
     public static final String URL_ATTR_NAME = "url";//NOI18N
     public static final String USER_NAME_ATTR_NAME = "username";//NOI18N
     public static final String PASSWORD_ATTR_NAME = "password";//NOI18N
-    
+    public static final String SCHEMA_ATTR_NAME = "schema";//NOI18N
+
     private String driverClassName;
     private String url;
     private String username;
     private String password;
-    
+    private String schema;
+
     /**
      * Gets the fully qualified Java class name of the JDBC driver to be used.
+     *
      * @return JDBC driver name
      */
     public String getDriverClassName() {
         return driverClassName;
     }
-    
+
     /**
      * Sets the fully qualified Java class name of the JDBC driver to be used.
+     *
      * @param driverClassName JDBC driver name
      */
     public void setDriverClassName(String driverClassName) {
@@ -42,14 +47,16 @@ public class DataSourceResource extends Resource {
 
     /**
      * Gets the database URL.
+     *
      * @return database URL
      */
     public String getUrl() {
         return url;
     }
-    
+
     /**
      * Sets the database URL
+     *
      * @param url database URL
      */
     public void setUrl(String url) {
@@ -57,15 +64,19 @@ public class DataSourceResource extends Resource {
     }
 
     /**
-     * Gets the connection username to be passed to our JDBC driver to establish a connection.
+     * Gets the connection username to be passed to our JDBC driver to establish
+     * a connection.
+     *
      * @return connection username
      */
     public String getUsername() {
         return username;
     }
-    
+
     /**
-     * Sets the connection username to be passed to our JDBC driver to establish a connection.
+     * Sets the connection username to be passed to our JDBC driver to establish
+     * a connection.
+     *
      * @param username connection username
      */
     public void setUsername(String username) {
@@ -73,28 +84,46 @@ public class DataSourceResource extends Resource {
     }
 
     /**
-     * Gets the connection password to be passed to our JDBC driver to establish a connection. 
+     * Gets the connection password to be passed to our JDBC driver to establish
+     * a connection.
+     *
      * @return connection password
      */
     public String getPassword() {
         return password;
     }
-    
+
     /**
-     * Sets the connection password to be passed to our JDBC driver to establish a connection. 
+     * Sets the connection password to be passed to our JDBC driver to establish
+     * a connection.
+     *
      * @param password connection password
      */
-     public void setPassword(String password) {
+    public void setPassword(String password) {
         this.password = password;
     }
-     
+
+    public String getSchema() {
+        return schema;
+    }
+
+    public void setSchema(String aValue) {
+        if (aValue != null && aValue.isEmpty()) {
+            aValue = null;
+        }
+        schema = aValue;
+    }
+
     @Override
-     public void load(Element tag) {
+    public void load(Element tag) {
         super.load(tag);
         driverClassName = tag.getAttribute(DRIVER_CLASS_NAME_ATTR_NAME);
         url = tag.getAttribute(URL_ATTR_NAME);
         username = tag.getAttribute(USER_NAME_ATTR_NAME);
         password = tag.getAttribute(PASSWORD_ATTR_NAME);
+        if (tag.hasAttribute(SCHEMA_ATTR_NAME)) {
+            schema = tag.getAttribute(SCHEMA_ATTR_NAME);
+        }
     }
 
     @Override
@@ -112,7 +141,10 @@ public class DataSourceResource extends Resource {
         if (password != null) {
             element.setAttribute(PASSWORD_ATTR_NAME, password);
         }
+        if (schema != null) {
+            element.setAttribute(SCHEMA_ATTR_NAME, schema);
+        }
         return element;
     }
-    
+
 }

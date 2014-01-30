@@ -11,6 +11,7 @@ import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
 import com.eas.client.model.BaseTest;
 import com.eas.client.queries.Query;
+import com.eas.client.resourcepool.GeneralResourceProvider;
 import java.math.BigDecimal;
 import static org.junit.Assert.*;
 import org.junit.Test;
@@ -56,9 +57,9 @@ public class AmbiguousChangesTest extends BaseTest {
             assertEquals(kname.getName(), "kname");
             assertEquals(kname.getOriginalName(), "NAME");
             // Create operation
-            rowset.insertAt(row, true, 1, 
-                    fiedls.find("gname"), "-g- must be overwritten", 
-                    fiedls.find("tname"), "-t- must be overwritten", 
+            rowset.insertAt(row, true, 1,
+                    fiedls.find("gname"), "-g- must be overwritten",
+                    fiedls.find("tname"), "-t- must be overwritten",
                     fiedls.find("kname"), "-k- must be overwritten");
             assertNotNull(row.getColumnObject(fiedls.find("gid")));
             assertNotNull(row.getColumnObject(fiedls.find("tid")));
@@ -118,9 +119,10 @@ public class AmbiguousChangesTest extends BaseTest {
             assertNull(newRow);
         } finally {
             aClient.shutdown();
+            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
-    
+
     @Test
     public void twoWritableTablesTest() throws Exception {
         DbClient aClient = initDevelopTestClient();
@@ -148,9 +150,9 @@ public class AmbiguousChangesTest extends BaseTest {
             assertEquals(kname.getName(), "kname");
             assertEquals(kname.getOriginalName(), "NAME");
             // Create operation
-            rowset.insertAt(row, true, 1, 
-                    fiedls.find("gname"), "-g- must be overwritten", 
-                    fiedls.find("tname"), "-t- must be overwritten", 
+            rowset.insertAt(row, true, 1,
+                    fiedls.find("gname"), "-g- must be overwritten",
+                    fiedls.find("tname"), "-t- must be overwritten",
                     fiedls.find("kname"), "-k- must be overwritten");
             assertNotNull(row.getColumnObject(fiedls.find("gid")));
             assertNotNull(row.getColumnObject(fiedls.find("tid")));
@@ -208,6 +210,7 @@ public class AmbiguousChangesTest extends BaseTest {
             assertNull(newRow);
         } finally {
             aClient.shutdown();
+            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 }

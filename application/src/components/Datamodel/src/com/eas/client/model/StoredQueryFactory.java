@@ -94,7 +94,7 @@ public class StoredQueryFactory {
     private DbMetadataCache dbMdCache;
     private StoredQueryCache queriesCache;
     private boolean preserveDatasources;
-    private List<String> processedQueries = new ArrayList<>();// for circular references discovering
+    private final List<String> processedQueries = new ArrayList<>();// for circular references discovering
 
     public void addTableFieldsToSelectResults(SqlQuery aQuery, Table table) throws Exception {
         Fields fields = getTableFields(aQuery.getDbId(), table);

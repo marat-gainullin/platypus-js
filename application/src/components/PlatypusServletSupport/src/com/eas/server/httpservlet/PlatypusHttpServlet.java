@@ -84,7 +84,7 @@ public class PlatypusHttpServlet extends HttpServlet {
         try {
             super.init(config);
             ServerConfig scp = ServerConfig.parse(config);
-            serverCore = PlatypusServerCore.getInstance(scp.getDbSettings(), scp.getTasks(), scp.getAppElementId());
+            serverCore = PlatypusServerCore.getInstance(scp.getUrl(), scp.getDefaultDatasourceName(), scp.getTasks(), scp.getAppElementId());
         } catch (Exception ex) {
             throw new ServletException(ex);
         }
@@ -515,7 +515,7 @@ public class PlatypusHttpServlet extends HttpServlet {
                 // simple OK response is needed
             } else if (aPlatypusResponse instanceof OutHashRequest.Response) {
                 // don't know how to deal with
-                aHttpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, String.format("Out hash is not supported now. Response class name: %s", aPlatypusResponse != null ? aPlatypusResponse.getClass().getName() : "null"));
+                aHttpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, String.format("Out hash is not supported now. Response class name: %s", aPlatypusResponse.getClass().getName()));
             } else {
                 aHttpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, String.format("Unknown response. Don't know how to deal with it. Response class name: %s", aPlatypusResponse != null ? aPlatypusResponse.getClass().getName() : "null"));
             }

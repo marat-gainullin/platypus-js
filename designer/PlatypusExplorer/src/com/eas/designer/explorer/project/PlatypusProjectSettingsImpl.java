@@ -4,11 +4,10 @@
  */
 package com.eas.designer.explorer.project;
 
+import com.eas.designer.application.project.PlatypusSettings;
 import com.eas.designer.application.project.ClientType;
 import com.eas.designer.application.project.AppServerType;
 import com.eas.designer.application.project.PlatypusProjectSettings;
-import com.eas.deploy.BaseDeployer;
-import com.eas.deploy.project.PlatypusSettings;
 import com.eas.designer.application.PlatypusUtils;
 import com.eas.util.StringUtils;
 import com.eas.xml.dom.Source2XmlDom;
@@ -35,6 +34,7 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
     public static final int CLIENT_APP_DEFAULT_DEBUG_PORT = 8900;
     public static final int SERVER_APP_DEFAULT_DEBUG_PORT = 8901;
     public static final Level DEFAULT_LOG_LEVEL = Level.INFO;
+    public static final String PLATYPUS_SETTINGS_FILE = "platypus.xml";
     public static final String PROJECT_SETTINGS_FILE = "project.properties"; //NOI18N
     public static final String PROJECT_PRIVATE_SETTINGS_FILE = "private.properties"; //NOI18N
     public static final String PROJECT_DISPLAY_NAME_KEY = "projectDisplayName"; //NOI18N
@@ -71,7 +71,7 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
             throw new IllegalArgumentException("Project directory file object is null."); //NOI18N
         }
         projectDir = aProjectDir;
-        String appSettingsStr = new String(getPlatypusSettingsFileObject().asBytes(), PlatypusUtils.COMMON_ENCODING_NAME);
+        String appSettingsStr = getPlatypusSettingsFileObject().asText(PlatypusUtils.COMMON_ENCODING_NAME);
         if (!appSettingsStr.trim().isEmpty()) {
             Document doc = Source2XmlDom.transform(appSettingsStr);
             platypusSettings = PlatypusSettings.valueOf(doc);
@@ -598,9 +598,9 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
     }
 
     protected final FileObject getPlatypusSettingsFileObject() throws IOException {
-        FileObject fo = projectDir.getFileObject(BaseDeployer.PLATYPUS_SETTINGS_FILE);
+        FileObject fo = projectDir.getFileObject(PLATYPUS_SETTINGS_FILE);
         if (fo == null) {
-            fo = projectDir.createData(BaseDeployer.PLATYPUS_SETTINGS_FILE);
+            fo = projectDir.createData(PLATYPUS_SETTINGS_FILE);
         }
         return fo;
     }

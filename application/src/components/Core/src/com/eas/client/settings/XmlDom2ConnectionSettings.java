@@ -23,13 +23,13 @@ public class XmlDom2ConnectionSettings implements ConnectionSettingsVisitor {
         doc = aDoc;
     }
 
-    public static EasSettings document2Settings(Document aDoc) throws Exception {
+    public static ConnectionSettings document2Settings(Document aDoc) throws Exception {
         if (aDoc != null) {
             NodeList nl = aDoc.getChildNodes();
             if (nl.getLength() == 1) {
                 Node settingsNode = nl.item(0);
                 String nodeName = settingsNode.getNodeName();
-                EasSettings settings = null;
+                ConnectionSettings settings = null;
                 if (nodeName.equalsIgnoreCase(ConnectionSettings2XmlDom.DB_SETTINGS_TAG_NAME)) {
                     settings = new DbConnectionSettings();
                 } else if (nodeName.equalsIgnoreCase(ConnectionSettings2XmlDom.PLATYPUS_SERVER_SETTINGS_TAG_NAME)) {
@@ -53,13 +53,7 @@ public class XmlDom2ConnectionSettings implements ConnectionSettingsVisitor {
             aSettings.setName(settingsNode.getAttribute(ConnectionSettings2XmlDom.NAME_ATTR_NAME));
             aSettings.setUrl(settingsNode.getAttribute(ConnectionSettings2XmlDom.URL_ATTR_NAME));
             aSettings.setUser(settingsNode.getAttribute(ConnectionSettings2XmlDom.USER_ATTR_NAME));
-            String schema = settingsNode.getAttribute(ConnectionSettings2XmlDom.SCHEMA_ATTR_NAME);
-            if (schema != null && !schema.isEmpty()) {
-                aSettings.setSchema(schema);
-            }
             aSettings.setPassword(settingsNode.getAttribute(ConnectionSettings2XmlDom.PASSWORD_ATTR_NAME));
-            aSettings.setInitSchema(Boolean.valueOf(settingsNode.getAttribute(ConnectionSettings2XmlDom.INIT_SCHEMA_ATTR_NAME)));
-            aSettings.setDeferCache(Boolean.valueOf(settingsNode.getAttribute(ConnectionSettings2XmlDom.DEFER_CACHE_ATTR_NAME)));
 
         }
     }

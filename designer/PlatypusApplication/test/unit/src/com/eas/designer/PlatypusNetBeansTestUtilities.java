@@ -15,6 +15,7 @@ import com.eas.client.DbClient;
  */
 public class PlatypusNetBeansTestUtilities {
 
+    /*
     public static DbClient initDevelopTestClientInstance() throws Exception {
         DbConnectionSettings settings = new DbConnectionSettings();
         settings.setUrl("jdbc:oracle:thin:@asvr:1521:adb");
@@ -25,4 +26,5 @@ public class PlatypusNetBeansTestUtilities {
         assert client instanceof DbClient;
         return (DbClient) client;
     }
+    */
 }

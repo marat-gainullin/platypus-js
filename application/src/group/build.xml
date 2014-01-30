@@ -253,8 +253,8 @@
         </antcall>
         <antcall target="-maybe-call-dep">
             <param name="call.built.properties" value="${built-jar.properties}"/>
-            <param location="${project.MetadataSynchronizer}" name="call.subproject"/>
-            <param location="${project.MetadataSynchronizer}/build.xml" name="call.script"/>
+            <param location="${project.MetaSync}" name="call.subproject"/>
+            <param location="${project.MetaSync}/build.xml" name="call.script"/>
             <param name="call.target" value="jar"/>
             <param name="transfer.built-jar.properties" value="${built-jar.properties}"/>
         </antcall>

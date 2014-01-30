@@ -59,17 +59,13 @@ public class FileIndexer extends CustomIndexer {
                     if (f != null) {
                         String appElementName = null;
                         boolean isPublic = false;
-                        if (nameExt.endsWith("." + PlatypusFiles.CONNECTION_EXTENSION)) {
-                            appElementName = PlatypusFilesSupport.getAppElementIdForConnectionAppElement(f);
+                        String fileContent = FileUtils.readString(f, PlatypusFiles.DEFAULT_ENCODING);
+                        if (fo.existsExt(PlatypusFiles.MODEL_EXTENSION) && nameExt.endsWith("." + PlatypusFiles.JAVASCRIPT_EXTENSION)) {
+                            appElementName = PlatypusFilesSupport.extractModuleConstructorName(fileContent);
                         } else {
-                            String fileContent = FileUtils.readString(f, PlatypusFiles.DEFAULT_ENCODING);
-                            if (fo.existsExt(PlatypusFiles.MODEL_EXTENSION) && nameExt.endsWith("." + PlatypusFiles.JAVASCRIPT_EXTENSION)) {
-                                appElementName = PlatypusFilesSupport.extractModuleConstructorName(fileContent);
-                            } else {
-                                appElementName = PlatypusFilesSupport.getAnnotationValue(fileContent, JsDoc.Tag.NAME_TAG);
-                            }
-                            isPublic = PlatypusFilesSupport.getAnnotationValue(fileContent, JsDoc.Tag.PUBLIC_TAG) != null;
+                            appElementName = PlatypusFilesSupport.getAnnotationValue(fileContent, JsDoc.Tag.NAME_TAG);
                         }
+                        isPublic = PlatypusFilesSupport.getAnnotationValue(fileContent, JsDoc.Tag.PUBLIC_TAG) != null;
                         if (appElementName != null) {
                             d.addPair(APP_ELEMENT_NAME, appElementName, true, true);
                         }
@@ -98,7 +94,6 @@ public class FileIndexer extends CustomIndexer {
     private static boolean isIndexableFile(String nameExt) {
         //For now indexing only js, sql and connection files
         return nameExt.endsWith(PlatypusFiles.JAVASCRIPT_EXTENSION)
-                || nameExt.endsWith(PlatypusFiles.SQL_EXTENSION)
-                || nameExt.endsWith(PlatypusFiles.CONNECTION_EXTENSION);
+                || nameExt.endsWith(PlatypusFiles.SQL_EXTENSION);
     }
 }

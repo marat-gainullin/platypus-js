@@ -4,12 +4,14 @@
  */
 package com.eas.client.application;
 
+import com.eas.client.DatabaseAppCache;
 import com.eas.client.DatabasesClient;
 import com.eas.client.DbClient;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.login.PrincipalHost;
 import com.eas.client.login.SystemPlatypusPrincipal;
 import com.eas.client.metadata.ApplicationElement;
+import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.client.scripts.CompiledScriptDocuments;
 import com.eas.client.scripts.CompiledScriptDocumentsHost;
 import com.eas.client.scripts.ScriptRunner;
@@ -27,13 +29,10 @@ public class ApplicationScriptsTest {
     }
     
     public static DbClient initDevelopTestClient() throws Exception {
-        DbConnectionSettings settings = new DbConnectionSettings();
-        settings.setUrl("jdbc:oracle:thin:@asvr/adb");
-        settings.setUser("eas");
-        settings.setPassword("eas");
-        settings.setSchema("eas");
+        DbConnectionSettings settings = new DbConnectionSettings("jdbc:oracle:thin:@asvr/adb", "eas", "eas", "eas", null);
         settings.setMaxStatements(1);
-        return new DatabasesClient(settings);
+        GeneralResourceProvider.getInstance().registerDatasource("testDs", settings);
+        return new DatabasesClient(new DatabaseAppCache("testDs"), "testDs", true);
     }
 
     protected static class TestPrincipalHost implements PrincipalHost {
@@ -71,6 +70,7 @@ public class ApplicationScriptsTest {
             script.execute();
         } finally {
             client.shutdown();
+            GeneralResourceProvider.getInstance().unregisterDatasource("testDs");
         }
         System.out.println("script test for " + aModuleId + " has been completed successfully!");
     }

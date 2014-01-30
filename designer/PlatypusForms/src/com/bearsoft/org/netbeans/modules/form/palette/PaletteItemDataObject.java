@@ -522,7 +522,8 @@ public class PaletteItemDataObject extends MultiDataObject implements CookieSet.
     }
 
     @Override
-    public Lookup getLookup() {
-        return getCookieSet().getLookup();
+    protected int associateLookup() {
+        return 1;
     }
+
 }

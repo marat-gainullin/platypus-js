@@ -4,9 +4,10 @@
  */
 package com.eas.designer.explorer.server;
 
-import com.eas.deploy.project.PlatypusSettings;
+import com.eas.client.resourcepool.DatasourcesArgsConsumer;
 import com.eas.designer.application.project.PlatypusProject;
 import com.eas.designer.application.project.PlatypusProjectSettings;
+import com.eas.designer.application.project.PlatypusSettings;
 import com.eas.designer.explorer.project.ProjectRunner;
 import static com.eas.designer.explorer.project.ProjectRunner.getCommandLineStr;
 import static com.eas.designer.explorer.project.ProjectRunner.setLogging;
@@ -19,6 +20,8 @@ import java.util.concurrent.Future;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.event.ChangeListener;
+import org.netbeans.api.db.explorer.ConnectionManager;
+import org.netbeans.api.db.explorer.DatabaseConnection;
 import org.netbeans.api.extexecution.ExecutionDescriptor;
 import org.netbeans.api.extexecution.ExecutionService;
 import org.netbeans.api.extexecution.ExternalProcessBuilder;
@@ -44,7 +47,7 @@ public final class PlatypusServerInstance implements Server, ServerInstanceImple
     private Future<Integer> serverRunTask;
     private volatile ServerState serverState = ServerState.STOPPED;
     private PlatypusProject project;
-    private ChangeSupport changeSupport = new ChangeSupport(this);
+    private final ChangeSupport changeSupport = new ChangeSupport(this);
 
     @Override
     public Node getFullNode() {
@@ -118,19 +121,19 @@ public final class PlatypusServerInstance implements Server, ServerInstanceImple
                 .frontWindow(true)
                 .controllable(true)
                 .preExecution(new Runnable() {
-            @Override
-            public void run() {
-            }
-        })
+                    @Override
+                    public void run() {
+                    }
+                })
                 .postExecution(new Runnable() {
-            @Override
-            public void run() {
-                setServerState(ServerState.STOPPED);
-                serverRunTask = null;
-                io.getOut().println(NbBundle.getMessage(PlatypusServerInstance.class, "MSG_Server_Stopped"));//NOI18N
-                io.getOut().println();
-            }
-        });
+                    @Override
+                    public void run() {
+                        setServerState(ServerState.STOPPED);
+                        serverRunTask = null;
+                        io.getOut().println(NbBundle.getMessage(PlatypusServerInstance.class, "MSG_Server_Stopped"));//NOI18N
+                        io.getOut().println();
+                    }
+                });
         //ExternalProcessBuilder processBuilder = new ExternalProcessBuilder(ProjectRunner.JVM_RUN_COMMAND_NAME);
         List<String> arguments = new ArrayList<>();
         if (project.getSettings().getRunServerVmOptions() != null && !project.getSettings().getRunServerVmOptions().isEmpty()) {
@@ -148,27 +151,50 @@ public final class PlatypusServerInstance implements Server, ServerInstanceImple
         PlatypusSettings ps = project.getSettings().getAppSettings();
         arguments.add(ProjectRunner.OPTION_PREFIX + ProjectRunner.CLASSPATH_OPTION_NAME);
         arguments.add(ProjectRunner.getExtendedClasspath(getExecutablePath(binDir)));
-
         arguments.add(ServerMain.class.getName());
 
-        if (!project.getSettings().isDbAppSources()) {
-            arguments.add(ProjectRunner.OPTION_PREFIX + ServerMain.APP_PATH_PARAM1);
-            arguments.add(project.getProjectDirectory().getPath());
-            io.getOut().println(String.format(NbBundle.getMessage(PlatypusServerInstance.class, "MSG_App_Sources"),//NOI18N
-                    project.getProjectDirectory().getPath()));
-        } else {
-            io.getOut().println(NbBundle.getMessage(PlatypusServerInstance.class, "MSG_App_Sources_Database"));//NOI18N
+        // Iterate through all datasources, registered in the designer.
+        // Apply them as datasources in considered server.
+        DatabaseConnection defaultDatabaseConnection = null;
+        DatabaseConnection[] dataSources = ConnectionManager.getDefault().getConnections();
+        for (DatabaseConnection connection : dataSources) {
+            if (connection.getDisplayName() == null ? ps.getDefaultDatasource() == null : connection.getDisplayName().equals(ps.getDefaultDatasource())) {
+                defaultDatabaseConnection = connection;
+            }
+            arguments.add(ProjectRunner.OPTION_PREFIX + DatasourcesArgsConsumer.DB_RESOURCE_CONF_PARAM);
+            arguments.add(connection.getDisplayName());// Hack because of netbeans
+            arguments.add(ProjectRunner.OPTION_PREFIX + DatasourcesArgsConsumer.DB_URL_CONF_PARAM);
+            arguments.add(connection.getDatabaseURL());
+            arguments.add(ProjectRunner.OPTION_PREFIX + DatasourcesArgsConsumer.DB_USERNAME_CONF_PARAM);
+            arguments.add(connection.getUser());
+            arguments.add(ProjectRunner.OPTION_PREFIX + DatasourcesArgsConsumer.DB_PASSWORD_CONF_PARAM);
+            arguments.add(connection.getPassword());
+            if (connection.getSchema() != null && !connection.getSchema().isEmpty()) {
+                arguments.add(ProjectRunner.OPTION_PREFIX + DatasourcesArgsConsumer.DB_SCHEMA_CONF_PARAM);
+                arguments.add(connection.getSchema());
+            }
         }
 
-        arguments.add(ProjectRunner.OPTION_PREFIX + ServerMain.APP_DB_URL_CONF_PARAM);
-        arguments.add(ps.getDbSettings().getUrl());
-        arguments.add(ProjectRunner.OPTION_PREFIX + ServerMain.APP_DB_USERNAME_CONF_PARAM);
-        arguments.add(ps.getDbSettings().getUser());
-        arguments.add(ProjectRunner.OPTION_PREFIX + ServerMain.APP_DB_PASSWORD_CONF_PARAM);
-        arguments.add(ps.getDbSettings().getPassword());
-        if (ps.getDbSettings().getSchema() != null) {
-            arguments.add(ProjectRunner.OPTION_PREFIX + ServerMain.APP_DB_SCHEMA_CONF_PARAM);
-            arguments.add(ps.getDbSettings().getSchema());
+        if (defaultDatabaseConnection != null) {
+            arguments.add(ProjectRunner.OPTION_PREFIX + ServerMain.DEF_DATASOURCE_CONF_PARAM);
+            arguments.add(ps.getDefaultDatasource());
+        } else if (ps.getDefaultDatasource() != null && !ps.getDefaultDatasource().isEmpty()) {
+            io.getErr().println(NbBundle.getMessage(PlatypusServerInstance.class, "MSG_Missing_App_Database"));
+        }
+
+        if (project.getSettings().isDbAppSources()) {
+            if (defaultDatabaseConnection != null) {
+                arguments.add(ProjectRunner.OPTION_PREFIX + ServerMain.APP_URL_CONF_PARAM);
+                arguments.add("jndi://" + ps.getDefaultDatasource());
+                io.getOut().println(NbBundle.getMessage(PlatypusServerInstance.class, "MSG_App_Sources_Database"));//NOI18N
+            } else {
+                io.getErr().println(NbBundle.getMessage(PlatypusServerInstance.class, "MSG_Missing_App_Database"));
+            }
+        } else {
+            arguments.add(ProjectRunner.OPTION_PREFIX + ServerMain.APP_URL_CONF_PARAM);
+            arguments.add(project.getProjectDirectory().toURL().toString());
+            io.getOut().println(String.format(NbBundle.getMessage(PlatypusServerInstance.class, "MSG_App_Sources"),//NOI18N
+                    project.getProjectDirectory().toURL().toString()));
         }
 
         if (!ProjectRunner.isSetByOption(ServerMain.IFACE_CONF_PARAM, project.getSettings().getRunClientOptions())) {

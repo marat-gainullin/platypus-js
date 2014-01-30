@@ -10,7 +10,7 @@ import com.eas.client.ConnectionSettingsVisitor;
  *
  * @author pk
  */
-public class PlatypusConnectionSettings extends EasSettings {
+public class PlatypusConnectionSettings extends ConnectionSettings {
 
     public static transient final String PLATYPUS_CONNECTION_SETTINGS_FILE_NAME = "PlatypusConnectionSettings.xml";
 

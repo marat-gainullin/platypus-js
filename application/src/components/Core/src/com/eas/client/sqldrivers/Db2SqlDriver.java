@@ -531,10 +531,20 @@ public class Db2SqlDriver extends SqlDriver {
     }
 
     @Override
-    public String getApplicationSchemaInitResourceName() {
-        return "/" + Db2SqlDriver.class.getPackage().getName().replace(".", "/") + "/sqlscripts/Db2InitSchema.sql";
+    public String getApplicationInitResourceName() {
+        return "/" + Db2SqlDriver.class.getPackage().getName().replace(".", "/") + "/sqlscripts/Db2InitApp.sql";
     }
 
+    @Override
+    public String getUsersSpaceInitResourceName() {
+        return "/" + Db2SqlDriver.class.getPackage().getName().replace(".", "/") + "/sqlscripts/Db2InitUsersSpace.sql";
+    }
+    
+    @Override
+    public String getVersionInitResourceName() {
+        return "/" + Db2SqlDriver.class.getPackage().getName().replace(".", "/") + "/sqlscripts/Db2InitVersion.sql";
+    }
+    
     @Override
     public Set<Integer> getSupportedJdbcDataTypes() {
         return resolver.getSupportedJdbcDataTypes();

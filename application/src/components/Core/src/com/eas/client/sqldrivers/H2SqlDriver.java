@@ -296,10 +296,26 @@ public class H2SqlDriver extends SqlDriver {
      * @inheritDoc
      */
     @Override
-    public String getApplicationSchemaInitResourceName() {
-        return "/" + H2SqlDriver.class.getPackage().getName().replace(".", "/") + "/sqlscripts/H2InitSchema.sql";
+    public String getApplicationInitResourceName() {
+        return "/" + H2SqlDriver.class.getPackage().getName().replace(".", "/") + "/sqlscripts/H2InitApp.sql";
     }
 
+    /**
+     * @inheritDoc
+     */
+    @Override
+    public String getUsersSpaceInitResourceName() {
+        return "/" + H2SqlDriver.class.getPackage().getName().replace(".", "/") + "/sqlscripts/H2InitUsersSpace.sql";
+    }
+    
+    /**
+     * @inheritDoc
+     */
+    @Override
+    public String getVersionInitResourceName() {
+        return "/" + H2SqlDriver.class.getPackage().getName().replace(".", "/") + "/sqlscripts/H2InitVersion.sql";
+    }
+    
     /**
      * @inheritDoc
      */

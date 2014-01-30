@@ -28,7 +28,7 @@ public class StopH2DbServerAction extends AbstractAction implements ContextAware
     public Action createContextAwareInstance(Lookup actionContext) {
         H2DbServerNode contextNode = actionContext.lookup(H2DbServerNode.class);
         if (contextNode != null) {
-            final H2DbServerInstance serverInstance = contextNode.getServer();
+            final H2Dabatabase serverInstance = contextNode.getServer();
             return new AbstractAction() {
                 @Override
                 public boolean isEnabled() {

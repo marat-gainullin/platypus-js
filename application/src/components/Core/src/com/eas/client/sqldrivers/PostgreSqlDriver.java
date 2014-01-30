@@ -312,10 +312,20 @@ public class PostgreSqlDriver extends SqlDriver {
     }
 
     @Override
-    public String getApplicationSchemaInitResourceName() {
-        return "/" + PostgreSqlDriver.class.getPackage().getName().replace(".", "/") + "/sqlscripts/PostgreInitSchema.sql";
+    public String getApplicationInitResourceName() {
+        return "/" + PostgreSqlDriver.class.getPackage().getName().replace(".", "/") + "/sqlscripts/PostgreInitApp.sql";
     }
 
+    @Override
+    public String getUsersSpaceInitResourceName() {
+        return "/" + PostgreSqlDriver.class.getPackage().getName().replace(".", "/") + "/sqlscripts/PostgreInitUsersSpace.sql";
+    }
+    
+    @Override
+    public String getVersionInitResourceName() {
+        return "/" + PostgreSqlDriver.class.getPackage().getName().replace(".", "/") + "/sqlscripts/PostgreInitVersion.sql";
+    }
+    
     @Override
     public Set<Integer> getSupportedJdbcDataTypes() {
         return resolver.getSupportedJdbcDataTypes();

@@ -18,20 +18,24 @@ import org.netbeans.spi.editor.completion.CompletionResultSet;
 public class EntityElementCompletionContext extends CompletionContext {
 
     ApplicationDbEntity entity;
-    
+
     public EntityElementCompletionContext(ApplicationDbEntity anEntity) {
         super(ScriptableRowset.class);
         entity = anEntity;
     }
-    
+
     @Override
     public void applyCompletionItems(CompletionPoint point, int offset, CompletionResultSet resultSet) throws Exception {
         fillFieldsValues(entity.getFields(), point, resultSet);
     }
-    
+
     protected static void fillFieldsValues(Fields aFields, CompletionPoint point, CompletionResultSet resultSet) {
-        for (Field field : aFields.toCollection()) {
-            addItem(resultSet, point.getFilter(), new FieldCompletionItem(field, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
+        if (aFields != null) {
+            for (Field field : aFields.toCollection()) {
+                addItem(resultSet, point.getFilter(), new FieldCompletionItem(field, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
+            }
+        } else {
+            throw new IllegalStateException("ORM properties are unavailable");
         }
     }
 }

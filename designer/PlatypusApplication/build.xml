@@ -21,7 +21,7 @@
         <copy file="${rt_dir}/Reports.jar" todir="${dest_dir}" overwrite="true" />
         <copy file="${rt_dir}/Modules.jar" todir="${dest_dir}" overwrite="true" />
         <copy file="${rt_dir}/PlatypusDeploy.jar" todir="${dest_dir}" overwrite="true" />
-        <copy file="${rt_dir}/MetadataSynchronizer.jar" todir="${dest_dir}" overwrite="true" />
+        <copy file="${rt_dir}/MetaSync.jar" todir="${dest_dir}" overwrite="true" />
         <copy file="${rt_dir}/Server.jar" todir="${dest_dir}" overwrite="true" />
         <copy file="${rt_dir}/PlatypusServletSupport.jar" todir="${dest_dir}" overwrite="true" />
         

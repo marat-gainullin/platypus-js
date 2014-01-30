@@ -31,17 +31,17 @@ public class H2DbServerNode extends AbstractNode implements ChangeListener {
     private static final Image RUNNING_ICON = ImageUtilities.icon2Image(ImageUtilities.loadImageIcon(SERVER_PACKAGE_PREFIX + "running.png", true)); //NOI18N
     private static final Image WAITING_ICON = ImageUtilities.icon2Image(ImageUtilities.loadImageIcon(SERVER_PACKAGE_PREFIX + "waiting.png", true)); //NOI18N
     
-    private final H2DbServerInstance serverInstance;
+    private final H2Dabatabase serverInstance;
     protected Action[] actions;
     
     @SuppressWarnings("LeakingThisInConstructor")
-    public H2DbServerNode(H2DbServerInstance aServer) {
+    public H2DbServerNode(H2Dabatabase aServer) {
         super(Children.LEAF);
         serverInstance = aServer;
         serverInstance.addChangeListener(WeakListeners.change(this, serverInstance));
     }
     
-    public H2DbServerInstance getServer() {
+    public H2Dabatabase getServer() {
         return serverInstance;
     }
     

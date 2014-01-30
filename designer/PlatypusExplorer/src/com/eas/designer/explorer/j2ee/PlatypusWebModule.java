@@ -34,7 +34,6 @@ public class PlatypusWebModule extends J2eeModuleProvider implements J2eeModuleI
         ModuleChangeReporter,
         EjbChangeDescriptor {
     
-    public static final String MAIN_DATASOURCE_NAME = "jdbc/main"; //NOI18N 
     public static final String WEB_DIRECTORY = "web"; //NOI18N
     public static final String WEB_INF_DIRECTORY = "WEB-INF"; //NOI18N
     public static final String LIB_DIRECTORY_NAME = "lib"; //NOI18N

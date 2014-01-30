@@ -24,7 +24,6 @@ import org.openide.loaders.DataObject;
 import org.openide.loaders.DataObjectExistsException;
 import org.openide.loaders.MultiFileLoader;
 import org.openide.nodes.CookieSet;
-import org.openide.util.Lookup;
 import org.openide.util.lookup.Lookups;
 import org.openide.util.lookup.ProxyLookup;
 import org.w3c.dom.Document;
@@ -49,20 +48,8 @@ public class PlatypusDbDiagramDataObject extends PlatypusDataObject {
     }
 
     @Override
-    public Lookup getLookup() {
-        return getCookieSet().getLookup();
-    }
-
-    @Override
-    protected void signOnQueries() {
-        // no op, since db diagrams doesn't contains queries.
-    }
-
-    @Override
-    protected void clientChanged() {
-        if (model != null) {
-            model.setClient(getClient());
-        }
+    protected void resignOnQueries() {
+        // no op, since db diagrams doesn't contain queries.
     }
 
     @Override

@@ -89,7 +89,7 @@
 	    <include name="*.jar" />
 	    <exclude name="Server.jar" />
 		<exclude name="PlatypusServletSupport.jar"/>
-		<exclude name="MetadataSynchronizer.jar"/>
+		<exclude name="MetaSync.jar"/>
 		<exclude name="PlatypusDeploy.jar"/>
 	  </fileset>
 	  
@@ -143,7 +143,7 @@
 	<pack name="Platypus tools" id="tools.package" preselected="yes" required="no">
         <description/> 
 	    <fileset dir="bin" targetdir="$INSTALL_PATH/bin">
-	        <include name="MetadataSynchronizer.jar"/>
+	        <include name="MetaSync.jar"/>
 		    <include name="PlatypusDeploy.jar"/>
       	</fileset>
     </pack>

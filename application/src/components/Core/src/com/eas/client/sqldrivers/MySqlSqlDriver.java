@@ -343,10 +343,20 @@ public class MySqlSqlDriver extends SqlDriver {
     }
 
     @Override
-    public String getApplicationSchemaInitResourceName() {
-        return "/" + MySqlSqlDriver.class.getPackage().getName().replace(".", "/") + "/sqlscripts/MySqlInitSchema.sql";
+    public String getApplicationInitResourceName() {
+        return "/" + MySqlSqlDriver.class.getPackage().getName().replace(".", "/") + "/sqlscripts/MySqlInitApp.sql";
     }
 
+    @Override
+    public String getUsersSpaceInitResourceName() {
+        return "/" + MySqlSqlDriver.class.getPackage().getName().replace(".", "/") + "/sqlscripts/MySqlInitUsersSpace.sql";
+    }
+    
+    @Override
+    public String getVersionInitResourceName() {
+        return "/" + MySqlSqlDriver.class.getPackage().getName().replace(".", "/") + "/sqlscripts/MySqlInitVersion.sql";
+    }
+    
     @Override
     public Set<Integer> getSupportedJdbcDataTypes() {
         return resolver.getSupportedJdbcDataTypes();

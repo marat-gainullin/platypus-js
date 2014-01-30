@@ -49,10 +49,8 @@ import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.forms.FormRunner;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbParametersEntity;
-import com.eas.dbcontrols.DbControl;
 import com.eas.designer.application.module.PlatypusModuleDataObject;
 import com.eas.designer.application.module.PlatypusModuleSupport;
-import com.eas.designer.application.module.completion.CompletionContext;
 import com.eas.designer.application.module.completion.ModuleCompletionContext;
 import com.eas.designer.application.module.events.ApplicationEntityEventsCookie;
 import com.eas.designer.application.module.events.ApplicationModuleEvents;
@@ -61,8 +59,6 @@ import com.eas.designer.application.module.nodes.ApplicationModelNodeChildren;
 import com.eas.designer.datamodel.nodes.FieldsOrderSupport;
 import com.eas.designer.datamodel.nodes.ModelNode;
 import java.io.IOException;
-import java.util.Collection;
-import org.openide.ErrorManager;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.filesystems.MIMEResolver;
@@ -97,32 +93,6 @@ public class PlatypusFormDataObject extends PlatypusModuleDataObject {
         super(aJsFile, loader);
         FileObject aFormFile = FileUtil.findBrother(aJsFile, PlatypusFiles.FORM_EXTENSION);
         formEntry = (FileEntry) registerEntry(aFormFile);
-    }
-
-    @Override
-    protected void clientChanged() {
-        super.clientChanged();
-        PlatypusFormSupport formSupport = getLookup().lookup(PlatypusFormSupport.class);
-        if (formSupport != null) {
-            FormModel formModel = formSupport.getFormModel();
-            if (formModel != null) {
-                Collection<RADComponent<?>> components = formModel.getAllComponents();
-                for (RADComponent<?> comp : components) {
-                    if (comp.getBeanInstance() instanceof DbControl) {
-                        try {
-                            DbControl dbControl = ((DbControl) comp.getBeanInstance());
-                            if (getClient() != null) {
-                                dbControl.setModel(getModel());
-                            } else {
-                                dbControl.setModel(null);
-                            }
-                        } catch (Exception ex) {
-                            ErrorManager.getDefault().notify(ex);
-                        }
-                    }
-                }
-            }
-        }
     }
 
     public FileObject getFormFile() {

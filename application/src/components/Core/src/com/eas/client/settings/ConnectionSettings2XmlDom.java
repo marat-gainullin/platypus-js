@@ -22,11 +22,8 @@ public class ConnectionSettings2XmlDom implements ConnectionSettingsVisitor {
     public static final String DB_SETTINGS_TAG_NAME = "dbSettings";
     public static final String NAME_ATTR_NAME = "name";
     protected static final String URL_ATTR_NAME = "url";
-    protected static final String SCHEMA_ATTR_NAME = "schema";
     protected static final String USER_ATTR_NAME = "user";
     protected static final String PASSWORD_ATTR_NAME = "password";
-    protected static final String INIT_SCHEMA_ATTR_NAME = "initschema";
-    protected static final String DEFER_CACHE_ATTR_NAME = "deferCache";
     protected static final String PLATYPUS_SERVER_SETTINGS_TAG_NAME = "platypusServerSettings";
     protected static final String HTTP_SERVER_SETTINGS_TAG_NAME = "httpServerSettings";
     protected static final String EE_SERVER_SETTINGS_TAG_NAME = "eeServerSettings";
@@ -49,7 +46,7 @@ public class ConnectionSettings2XmlDom implements ConnectionSettingsVisitor {
         }
     }
 
-    public static Document settingsToDocument(EasSettings aSettigns) {
+    public static Document settingsToDocument(ConnectionSettings aSettigns) {
         ConnectionSettings2XmlDom v = new ConnectionSettings2XmlDom();
         aSettigns.accept(v);
         return v.getDoc();
@@ -64,10 +61,6 @@ public class ConnectionSettings2XmlDom implements ConnectionSettingsVisitor {
         Element settingsNode = doc.createElement(DB_SETTINGS_TAG_NAME);
         settingsNode.setAttribute(NAME_ATTR_NAME, aSettings.getName());
         settingsNode.setAttribute(URL_ATTR_NAME, aSettings.getUrl());
-        String schema = (String) aSettings.getSchema();
-        if (schema != null && !schema.isEmpty()) {
-            settingsNode.setAttribute(SCHEMA_ATTR_NAME, schema);
-        }
         settingsNode.setAttribute(USER_ATTR_NAME, (String) aSettings.getUser());
         settingsNode.setAttribute(PASSWORD_ATTR_NAME, (String) aSettings.getPassword());
 

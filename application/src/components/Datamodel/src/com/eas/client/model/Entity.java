@@ -118,7 +118,7 @@ public abstract class Entity<M extends Model<E, ?, ?, Q>, Q extends Query<?>, E 
         return res;
     }
 
-    public void clearFields() {
+    public void clearFields() {        
         fields = null;
         query = null;
     }

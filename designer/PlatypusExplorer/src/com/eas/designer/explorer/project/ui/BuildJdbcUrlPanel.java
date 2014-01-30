@@ -40,7 +40,7 @@ public class BuildJdbcUrlPanel extends javax.swing.JPanel {
     }
     
     public String getTitle() {
-        return NbBundle.getMessage(ProjectDatabaseCustomizer.class, "ProjectDatabaseCustomizer.btnBuildJdbcUrl.text");
+        return NbBundle.getMessage(BuildJdbcUrlPanel.class, "ProjectDatabaseCustomizer.btnBuildJdbcUrl.text");
     }
     
     /**

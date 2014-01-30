@@ -5,7 +5,7 @@
 package com.eas.client.login;
 
 import com.eas.client.ClientFactory;
-import com.eas.client.settings.EasSettings;
+import com.eas.client.settings.ConnectionSettings;
 import java.awt.Color;
 import java.awt.Component;
 import java.util.ArrayList;
@@ -23,8 +23,8 @@ import javax.swing.UIManager;
  */
 public class ConnectionsListModel extends AbstractListModel {
 
-    private List<EasSettings> elements = new ArrayList<>();
-    private DbConnectionRenderer connectionRenderer = new DbConnectionRenderer();
+    private final List<ConnectionSettings> elements = new ArrayList<>();
+    private final DbConnectionRenderer connectionRenderer = new DbConnectionRenderer();
 
     public ConnectionsListModel() throws Exception {
         fillElements();
@@ -35,7 +35,7 @@ public class ConnectionsListModel extends AbstractListModel {
         return elements.get(index);
     }
 
-    public void putElementAt(int index, EasSettings element) {
+    public void putElementAt(int index, ConnectionSettings element) {
         if (index == elements.size()) {
             elements.add(element);
         } else {
@@ -64,19 +64,19 @@ public class ConnectionsListModel extends AbstractListModel {
 
     private void fillElements() throws Exception {
         ClientFactory.reset();
-        EasSettings[] settings = ClientFactory.getSettings();
+        ConnectionSettings[] settings = ClientFactory.getSettings();
         if (settings != null) {
             elements.addAll(Arrays.asList(settings));
         }
     }
-    private static Color textInactiveTextcolor = UIManager.getColor("Label.disabledForeground") != null ? UIManager.getColor("Label.disabledForeground") : Color.gray;
+    private static final Color textInactiveTextcolor = UIManager.getColor("Label.disabledForeground") != null ? UIManager.getColor("Label.disabledForeground") : Color.gray;
 
     private class DbConnectionRenderer extends DefaultListCellRenderer {
 
         @Override
         public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
             DefaultListCellRenderer r = (DefaultListCellRenderer) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-            EasSettings settings = (EasSettings) value;
+            ConnectionSettings settings = (ConnectionSettings) value;
             String displayName = settings.getName();
             if (displayName == null || displayName.isEmpty()) {
                 displayName = settings.getUrl();

@@ -29,7 +29,6 @@ public class PlatypusFiles {
     public static final String REPORT_LAYOUT_EXTENSION = "xls"; // NOI18N
     public static final String REPORT_LAYOUT_EXTENSION_X = "xlsx"; // NOI18N
     public static final String DB_SCHEME_EXTENSION = "pd"; // NOI18N
-    public static final String CONNECTION_EXTENSION = "pc"; // NOI18N
     private static final List<String> PLATYPUS_FILE_EXTENSIONS = new ArrayList<String>() {
         {
             add(PlatypusFiles.JAVASCRIPT_EXTENSION);
@@ -41,7 +40,6 @@ public class PlatypusFiles {
             add(PlatypusFiles.REPORT_LAYOUT_EXTENSION);
             add(PlatypusFiles.REPORT_LAYOUT_EXTENSION_X);
             add(PlatypusFiles.DB_SCHEME_EXTENSION);
-            add(PlatypusFiles.CONNECTION_EXTENSION);
         }
     };
     public static final String DEFAULT_ENCODING = SettingsConstants.COMMON_ENCODING; // NOI18N

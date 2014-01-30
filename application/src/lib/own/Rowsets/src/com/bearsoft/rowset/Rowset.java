@@ -25,6 +25,7 @@ import com.bearsoft.rowset.ordering.DefaultOrderersFactory;
 import com.bearsoft.rowset.ordering.OrderersFactory;
 import com.bearsoft.rowset.utils.KeySet;
 import com.bearsoft.rowset.utils.RowsetUtils;
+import com.eas.util.ListenerRegistration;
 import java.beans.*;
 import java.util.*;
 import java.util.logging.Level;
@@ -43,29 +44,29 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
 
     public static final String BAD_FLOW_PROVIDER_RESULT_MSG = "Flow Provider must return at least an empty rowset";
     // support for data flows.
-    protected FlowProvider flow = null;
-    protected TransactionListener.Registration transactionRegisration;
+    protected FlowProvider flow;
+    protected ListenerRegistration transactionRegisration;
     // rowset's metadata
-    protected Fields fields = null;
+    protected Fields fields;
     protected Class<? extends Row> rowsClass = Row.class;
     // rowset's data
     protected List<Row> original = new ArrayList<>();
     protected List<Row> current = new ArrayList<>();
     // data view capabilities
-    protected int currentRowPos = 0; // before first position
-    protected boolean showOriginal = false;
+    protected int currentRowPos; // before first position
+    protected boolean showOriginal;
     // data processing
     protected Set<Filter> filters = new HashSet<>(); // filters
     protected Set<Locator> locators = new HashSet<>(); // locators
-    protected Filter activeFilter = null;
-    protected Row insertingRow = null;
+    protected Filter activeFilter;
+    protected Row insertingRow;
     // client code interaction
     protected PropertyChangeSupport propertyChangeSupport;
     protected RowsetChangeSupport rowsetChangeSupport;
     protected OrderersFactory orderersFactory;
     protected Converter converter = new RowsetConverter();
     protected boolean immediateFilter = true;
-    protected boolean modified = false;
+    protected boolean modified;
 
     /**
      * Simple constructor.

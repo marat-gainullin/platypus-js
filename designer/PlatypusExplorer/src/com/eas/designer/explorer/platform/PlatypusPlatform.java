@@ -4,11 +4,13 @@
  */
 package com.eas.designer.explorer.platform;
 
+import com.eas.designer.explorer.utils.DatabaseServerType;
 import com.eas.util.FileUtils;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
@@ -17,9 +19,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.prefs.Preferences;
+import org.netbeans.api.db.explorer.DatabaseException;
+import org.netbeans.api.db.explorer.JDBCDriver;
+import org.netbeans.api.db.explorer.JDBCDriverManager;
 import org.openide.DialogDescriptor;
 import org.openide.DialogDisplayer;
+import org.openide.ErrorManager;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.util.NbBundle;
@@ -36,8 +44,10 @@ public class PlatypusPlatform {
     public static final String LIB_DIRECTORY_NAME = "lib"; //NOI18N
     public static final String JAR_FILE_EXTENSION = "jar"; //NOI18N
     public static final String THIRDPARTY_LIB_DIRECTORY_NAME = "thirdparty"; //NOI18N
-    
-    private static Map<String, File> jarsCache = new HashMap<>();
+
+    public static final String[] JDBC_CLASSES = {"org.h2.jdbcx.JdbcDataSource"}; //NOI18N
+
+    private static final Map<String, File> jarsCache = new HashMap<>();
 
     /**
      * Gets Platypus platform home directory.
@@ -89,7 +99,7 @@ public class PlatypusPlatform {
         }
         return platformLibDir;
     }
-    
+
     /**
      * Platform's third party subdirectory.
      *
@@ -119,7 +129,7 @@ public class PlatypusPlatform {
         }
         return jarFile;
     }
-    
+
     private static File findJar(FileObject dir, String className) throws IOException {
         List<File> files = new ArrayList<>();
         Enumeration<? extends FileObject> e = dir.getChildren(true);
@@ -164,7 +174,41 @@ public class PlatypusPlatform {
     public static boolean showPlatformHomeDialog() {
         PlatformDirectoryPanel platformDirectorySelectPanel = new PlatformDirectoryPanel(PlatypusPlatform.getPlatformHomePath());
         DialogDescriptor selectionDialog = new DialogDescriptor(platformDirectorySelectPanel, NbBundle.getMessage(PlatypusPlatform.class, "CTL_Platypus_Platform_Title"), true, new PlatypusPlatform.DialogAcionListener(platformDirectorySelectPanel)); //NOI18N
-        return DialogDescriptor.OK_OPTION.equals(DialogDisplayer.getDefault().notify(selectionDialog));
+        Object result = DialogDisplayer.getDefault().notify(selectionDialog);
+        if (DialogDescriptor.OK_OPTION.equals(result)) {
+            try {
+                registerJdbcDrivers();
+                return true;
+            } catch (EmptyPlatformHomePathException ex) {
+                Logger.getLogger(PlatypusPlatform.class.getName()).log(Level.WARNING, "Platform path error.");
+            } catch (IOException | DatabaseException ex) {
+                ErrorManager.getDefault().notify(ex);
+            }
+        }
+        return false;
+    }
+
+    private static void registerJdbcDrivers() throws EmptyPlatformHomePathException, IOException, DatabaseException {
+        for (DatabaseServerType databaseServer : DatabaseServerType.values()) {
+            File mainJar = findThirdpartyJar(databaseServer.jdbcClassName);
+            if (mainJar != null) {
+                FileObject mainJarFo = FileUtil.toFileObject(mainJar);
+                Enumeration<? extends FileObject> jdbcDriversEnumeration = mainJarFo.getParent().getChildren(false);
+                List<URL> urls = new ArrayList<>();
+                while(jdbcDriversEnumeration.hasMoreElements()) {
+                    FileObject fo = jdbcDriversEnumeration.nextElement();
+                    if (PlatypusPlatform.JAR_FILE_EXTENSION.equalsIgnoreCase(fo.getExt())) {
+                        urls.add(fo.toURL());
+                    }
+                }
+                for (JDBCDriver oldDriver : JDBCDriverManager.getDefault().getDrivers(databaseServer.jdbcClassName)) {
+                    if (oldDriver.getName().equals(databaseServer.name)) {
+                        JDBCDriverManager.getDefault().removeDriver(oldDriver);
+                    }
+                }
+                JDBCDriverManager.getDefault().addDriver(JDBCDriver.create(databaseServer.name, databaseServer.name, databaseServer.jdbcClassName, urls.toArray(new URL[0])));
+            }
+        }
     }
 
     static class DialogAcionListener implements ActionListener {
