@@ -767,7 +767,7 @@ public class Entity implements RowsetListener {
 				Object.defineProperty(published, "elementClass", { get : function(){ return aEntity.@com.eas.client.model.Entity::getElementClass()()}, set : function(aValue){ aEntity.@com.eas.client.model.Entity::setElementClass(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue)}});
 				Object.defineProperty(published, "cursor",       { get : function(){ return (published.bof() || published.eof()) ? null : published[published.rowIndex-1];}});
 				
-				Object.defineProperty(published, "md",         { get : function(){ return @com.eas.client.model.Entity::publishFieldsFacade(Lcom/bearsoft/rowset/metadata/Fields;Lcom/eas/client/model/Entity;)(aEntity.@com.eas.client.model.Entity::getFields()(), aEntity) }});
+				Object.defineProperty(published, "schema",         { get : function(){ return @com.eas.client.model.Entity::publishFieldsFacade(Lcom/bearsoft/rowset/metadata/Fields;Lcom/eas/client/model/Entity;)(aEntity.@com.eas.client.model.Entity::getFields()(), aEntity) }});
 				// cursor-row dynamic properties interface
 				for(var i=0;i<published.md.length;i++)
 				{
@@ -786,7 +786,7 @@ public class Entity implements RowsetListener {
 				{
 					var nativeParams = nativeQuery.@com.eas.client.queries.Query::getParameters()();
 					var publishedParams = {};  
-					Object.defineProperty(publishedParams, "md", { get : function(){ return @com.eas.client.model.Entity::publishFieldsFacade(Lcom/bearsoft/rowset/metadata/Fields;Lcom/eas/client/model/Entity;)(nativeParams, aEntity); }});
+					Object.defineProperty(publishedParams, "schema", { get : function(){ return @com.eas.client.model.Entity::publishFieldsFacade(Lcom/bearsoft/rowset/metadata/Fields;Lcom/eas/client/model/Entity;)(nativeParams, aEntity); }});
 					Object.defineProperty(publishedParams, "length", { get : function(){ return publishedParams.md.length; }});
 					for(var i=0;i<publishedParams.md.length;i++)
 					{
@@ -947,7 +947,7 @@ public class Entity implements RowsetListener {
 						return aRow;
 					}
 				}});
-				Object.defineProperty(published, "md", { get : function(){ return @com.eas.client.model.Entity::publishFieldsFacade(Lcom/bearsoft/rowset/metadata/Fields;Lcom/eas/client/model/Entity;)(aRow.@com.bearsoft.rowset.Row::getFields()(), aEntity); }});
+				Object.defineProperty(published, "schema", { get : function(){ return @com.eas.client.model.Entity::publishFieldsFacade(Lcom/bearsoft/rowset/metadata/Fields;Lcom/eas/client/model/Entity;)(aRow.@com.bearsoft.rowset.Row::getFields()(), aEntity); }});
 				Object.defineProperty(published, "length", { get : function(){ return published.md.length; }});
 				for(var i=0;i<published.md.length;i++)
 				{

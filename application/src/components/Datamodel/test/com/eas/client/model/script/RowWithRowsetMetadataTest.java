@@ -4,6 +4,8 @@
  */
 package com.eas.client.model.script;
 
+import com.eas.client.DatabasesClient;
+import com.eas.client.DatabasesClientWithResource;
 import com.eas.client.DbClient;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
@@ -23,7 +25,7 @@ import org.mozilla.javascript.ScriptableObject;
 public class RowWithRowsetMetadataTest extends BaseTest {
 
     private static final String SCRIPT_TEST_SOURCE
-            = "var loc = entity1.createLocator(entity1.md.NAME);\n"
+            = "var loc = entity1.createLocator(entity1.schema.NAME);\n"
             + "loc.find('building1');\n"
             + "java.lang.System.out.println('loc.size: '+loc.size);"
             + "var lRow = loc.getRow(0);\n"
@@ -38,8 +40,8 @@ public class RowWithRowsetMetadataTest extends BaseTest {
     public void fieldsAccessTest() throws Exception {
         System.out.println("fieldsAccessTest");
         String entityName = "entity1";
-        DbClient client = BaseTest.initDevelopTestClient();
-        try {
+        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+            final DatabasesClient client = resource.getClient();
             ApplicationDbModel dm = new ApplicationDbModel(client);
             final ApplicationDbEntity entity11 = dm.newGenericEntity();
             entity11.setQueryId("128015347915605");
@@ -57,9 +59,6 @@ public class RowWithRowsetMetadataTest extends BaseTest {
             } finally {
                 Context.exit();
             }
-        } finally {
-            client.shutdown();
-            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 }

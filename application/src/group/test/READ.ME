@@ -3,10 +3,6 @@ web.xml:
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="3.0" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
   <context-param>
-    <param-name>ap</param-name>
-    <param-value>C:/projects/platypus-tests</param-value>
-  </context-param>
-  <context-param>
     <param-name>appelement</param-name>
     <param-value>FormsAPI</param-value>
   </context-param>
@@ -15,8 +11,12 @@ web.xml:
     <param-value>TestServerTaskModule</param-value>
   </context-param>
   <context-param>
+    <param-name>default-datasource</param-name>
+    <param-value>asvrTestDb</param-value>
+  </context-param>
+  <context-param>
     <param-name>url</param-name>
-    <param-value>jdbc/main</param-value>
+    <param-value>jndi://asvrTestDb</param-value>
   </context-param>
   <listener>
     <listener-class>com.eas.server.httpservlet.PlatypusSessionsSynchronizer</listener-class>
@@ -38,7 +38,7 @@ web.xml:
   </servlet-mapping>
   <resource-ref>
     <description>Main database connection</description>
-    <res-ref-name>jdbc/main</res-ref-name>
+    <res-ref-name>asvrTestDb</res-ref-name>
     <res-type>javax.sql.DataSource</res-type>
     <res-auth>Container</res-auth>
   </resource-ref>
@@ -66,8 +66,8 @@ context.xml:
 
 <?xml version="1.0" encoding="UTF-8"?>
 <Context path="/">
-  <Realm className="org.apache.catalina.realm.DataSourceRealm" dataSourceName="jdbc/main" digest="MD5" localDataSource="true" roleNameCol="GROUP_NAME" userCredCol="USR_PASSWD" userNameCol="USR_NAME" userRoleTable="MTD_GROUPS" userTable="MTD_USERS"/>
-  <Resource driverClassName="oracle.jdbc.OracleDriver" name="jdbc/main" password="eas" type="javax.sql.DataSource" url="jdbc:oracle:thin:@asvr:1521/adb" username="eas"/>
+  <Realm className="org.apache.catalina.realm.DataSourceRealm" dataSourceName="asvrTestDb" digest="MD5" localDataSource="true" roleNameCol="GROUP_NAME" userCredCol="USR_PASSWD" userNameCol="USR_NAME" userRoleTable="MTD_GROUPS" userTable="MTD_USERS"/>
+  <Resource driverClassName="oracle.jdbc.OracleDriver" name="asvrTestDb" password="eas" type="javax.sql.DataSource" url="jdbc:oracle:thin:@asvr:1521/adb" username="eas"/>
 </Context>
 
 private.properties:
@@ -94,7 +94,6 @@ platypus.xml:
 <?xml version="1.0" encoding="UTF-8"?>
 <context>
   <run/>
-  <dbSettings name="" password="eas" url="jdbc:oracle:thin:@asvr:1521/adb" user="eas"/>
 </context>
 
 server.xml update for Tomcat SSL:
@@ -111,7 +110,7 @@ server.xml update for Tomcat SSL:
 
 Standalone server command line:
 
--url jdbc:oracle:thin:@asvr:1521/adb -dbuser eas -dbpassword eas -dbschema eas -tasks TestServerTaskModule
+-datasource asvrTestDb -dburl jdbc:oracle:thin:@asvr:1521/adb -dbuser eas -dbpassword eas -dbschema eas -default-datasource asvrTestDb -url jndi://asvrTestDb -tasks TestServerTaskModule
 
 Standalone server JVM arguments:
 

@@ -34,8 +34,8 @@ public class ApplyTest extends BaseTest {
     @Test
     public void applyCRUDTest() throws Exception {
         System.out.println("applyCRUDTest");
-        DbClient client = initDevelopTestClient();
-        try {
+        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+            DatabasesClient client = resource.getClient();
             Parameters params = new Parameters();
             Parameter param1 = params.createNewField();
             Parameter param2 = params.createNewField();
@@ -127,17 +127,14 @@ public class ApplyTest extends BaseTest {
                 rs.refresh(params);
                 assertTrue(rs.size() == 1);
             }
-        } finally {
-            client.shutdown();
-            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 
     @Test
     public void applyNullsTest() throws Exception {
         System.out.println("applyNullsTest");
-        DbClient client = initDevelopTestClient();
-        try {
+        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+            DatabasesClient client = resource.getClient();
             Parameters params = new Parameters();
             Parameter param1 = params.createNewField();
             Parameter param2 = params.createNewField();
@@ -196,9 +193,6 @@ public class ApplyTest extends BaseTest {
                 rs.refresh(params);
                 assertTrue(rs.size() == 1);
             }
-        } finally {
-            client.shutdown();
-            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 }

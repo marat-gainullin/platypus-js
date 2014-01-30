@@ -5,14 +5,14 @@
 package com.eas.client.model.interacting;
 
 import com.bearsoft.rowset.Rowset;
-import com.eas.client.DbClient;
+import com.eas.client.DatabasesClient;
+import com.eas.client.DatabasesClientWithResource;
 import com.eas.client.model.BaseTest;
 import com.eas.client.model.DataScriptEventsListener;
 import com.eas.client.model.EntityDataListener;
 import com.eas.client.model.EntityRefreshFilterDataListener;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
-import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.script.ScriptUtils;
 import com.eas.script.ScriptUtils.ScriptAction;
 import java.util.HashMap;
@@ -27,19 +27,19 @@ import org.mozilla.javascript.Context;
  */
 public class QueringTest extends BaseTest {
 
-    private static String MODEL_TEST_PATH = BaseTest.RESOURCES_PREFIX + "datamodelQueringRelations.xml";
+    private static final String MODEL_TEST_PATH = BaseTest.RESOURCES_PREFIX + "datamodelQueringRelations.xml";
     // 1st layer
-    private static Long ENTITY_GRUPPA_OBJECTA_REMONTA_PO_RODITELU_ID = 128049787114001L;
-    private static Long ENTITY_VID_OBJECTA_REMONTA_ID = 128049576096827L;
+    private static final Long ENTITY_GRUPPA_OBJECTA_REMONTA_PO_RODITELU_ID = 128049787114001L;
+    private static final Long ENTITY_VID_OBJECTA_REMONTA_ID = 128049576096827L;
     // 2nd layer
-    private static Long ENTITY_IZMERJAEMIE_VELICHINI_ID = 128049576695369L;
-    private static Long ENTITY_MARKI_OBJECTOV_REMONTA_ID = 128049574970367L;
+    private static final Long ENTITY_IZMERJAEMIE_VELICHINI_ID = 128049576695369L;
+    private static final Long ENTITY_MARKI_OBJECTOV_REMONTA_ID = 128049574970367L;
     // 3rd layer
-    private static Long ENTITY_EDINICI_IZMERENIJA_PO_VELICHINE_ID = 128049746332840L;
-    private static Long ENTITY_NAIMENOVANIA_SI_PO_VELICHINE_ID = 128049750556261L;
-    private static Long ENTITY_EDINICI_OBORUDOVANIJA_PO_MARKE_ID = 128049775173425L;
+    private static final Long ENTITY_EDINICI_IZMERENIJA_PO_VELICHINE_ID = 128049746332840L;
+    private static final Long ENTITY_NAIMENOVANIA_SI_PO_VELICHINE_ID = 128049750556261L;
+    private static final Long ENTITY_EDINICI_OBORUDOVANIJA_PO_MARKE_ID = 128049775173425L;
     // 4th layer
-    private static Long ENTITY_EDINICI_IZMERENIJA_PO_VELICHINE_1_ID = 128073170857902L;
+    private static final Long ENTITY_EDINICI_IZMERENIJA_PO_VELICHINE_1_ID = 128073170857902L;
 
     private class ModelState {
 
@@ -121,8 +121,8 @@ public class QueringTest extends BaseTest {
     @Test
     public void queringScrollTest() throws Exception {
         System.out.println("queringScrollTest, queringPointOfInterestTest");
-        final DbClient client = initDevelopTestClient();
-        try {
+        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+            final DatabasesClient client = resource.getClient();
             ScriptUtils.inContext(new ScriptAction() {
                 @Override
                 public Object run(Context cx) throws Exception {
@@ -240,17 +240,14 @@ public class QueringTest extends BaseTest {
                     return null;
                 }
             });
-        } finally {
-            client.shutdown();
-            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 
     @Test
     public void queringEmptyKeysSourceTest() throws Exception {
         System.out.println("queringEmptyKeysSourceTest");
-        final DbClient client = initDevelopTestClient();
-        try {
+        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+            final DatabasesClient client = resource.getClient();
             ScriptUtils.inContext(new ScriptAction() {
                 @Override
                 public Object run(Context cx) throws Exception {
@@ -281,17 +278,14 @@ public class QueringTest extends BaseTest {
                     return null;
                 }
             });
-        } finally {
-            client.shutdown();
-            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 
     @Test
     public void queringBadSourcePositionTest() throws Exception {
         System.out.println("queringBadSourcePositionTest");
-        final DbClient client = initDevelopTestClient();
-        try {
+        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+            final DatabasesClient client = resource.getClient();
             ScriptUtils.inContext(new ScriptAction() {
                 @Override
                 public Object run(Context cx) throws Exception {
@@ -334,17 +328,14 @@ public class QueringTest extends BaseTest {
                     return null;
                 }
             });
-        } finally {
-            client.shutdown();
-            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 
     @Test
     public void queringCrudTest() throws Exception {
         System.out.println("queringCrudTest");
-        final DbClient client = initDevelopTestClient();
-        try {
+        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+            final DatabasesClient client = resource.getClient();
             ScriptUtils.inContext(new ScriptAction() {
                 @Override
                 public Object run(Context cx) throws Exception {
@@ -444,17 +435,14 @@ public class QueringTest extends BaseTest {
                     return null;
                 }
             });
-        } finally {
-            client.shutdown();
-            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 
     @Test
     public void queringScriptEventsVsDataTest() throws Exception {
         System.out.println("queringScriptEventsVsDataTest");
-        final DbClient client = initDevelopTestClient();
-        try {
+        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+            final DatabasesClient client = resource.getClient();
             ScriptUtils.inContext(new ScriptAction() {
                 @Override
                 public Object run(Context cx) throws Exception {
@@ -591,9 +579,6 @@ public class QueringTest extends BaseTest {
                     return null;
                 }
             });
-        } finally {
-            client.shutdown();
-            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
     EntityRefreshFilterDataListener listenerOf1Layer = null;
@@ -603,8 +588,8 @@ public class QueringTest extends BaseTest {
     @Test
     public void queringExecutingOrderTest() throws Exception {
         System.out.println("queringExecutingOrderTest");
-        final DbClient client = initDevelopTestClient();
-        try {
+        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+            final DatabasesClient client = resource.getClient();
             ScriptUtils.inContext(new ScriptAction() {
                 @Override
                 public Object run(Context cx) throws Exception {
@@ -664,9 +649,6 @@ public class QueringTest extends BaseTest {
                     return null;
                 }
             });
-        } finally {
-            client.shutdown();
-            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 }

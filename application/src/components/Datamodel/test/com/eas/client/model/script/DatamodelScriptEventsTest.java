@@ -5,6 +5,8 @@
 package com.eas.client.model.script;
 
 import com.bearsoft.rowset.Rowset;
+import com.eas.client.DatabasesClient;
+import com.eas.client.DatabasesClientWithResource;
 import com.eas.client.DbClient;
 import com.eas.client.model.BaseTest;
 import com.eas.client.model.Model;
@@ -39,8 +41,8 @@ public class DatamodelScriptEventsTest extends BaseTest {
     @Test
     public void entityScriptEventsTest() throws Exception {
         System.out.println("Testing rowset's data editing and rowset scrolling to script events connection");
-        DbClient client = BaseTest.initDevelopTestClient();
-        try {
+        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+            final DatabasesClient client = resource.getClient();
             ApplicationDbModel model = new ApplicationDbModel(client);
             final ApplicationDbEntity entity11 = model.newGenericEntity();
             model.addEntity(entity11);
@@ -193,9 +195,6 @@ public class DatamodelScriptEventsTest extends BaseTest {
             } finally {
                 Context.exit();
             }
-        } finally {
-            client.shutdown();
-            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 }

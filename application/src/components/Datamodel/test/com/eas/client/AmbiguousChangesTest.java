@@ -11,7 +11,6 @@ import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
 import com.eas.client.model.BaseTest;
 import com.eas.client.queries.Query;
-import com.eas.client.resourcepool.GeneralResourceProvider;
 import java.math.BigDecimal;
 import static org.junit.Assert.*;
 import org.junit.Test;
@@ -32,9 +31,9 @@ public class AmbiguousChangesTest extends BaseTest {
 
     @Test
     public void threeTablesTest() throws Exception {
-        DbClient aClient = initDevelopTestClient();
-        try {
-            Query query = aClient.getAppQuery(AMBIGUOUS_QUERY_ID);
+        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+            DatabasesClient client = resource.getClient();
+            Query query = client.getAppQuery(AMBIGUOUS_QUERY_ID);
             Rowset rowset = query.execute();
             int oldRowsetSize = rowset.size();
             assertTrue(oldRowsetSize > 1);
@@ -72,15 +71,15 @@ public class AmbiguousChangesTest extends BaseTest {
             assertEquals(row.getColumnObject(fiedls.find("tid")), NEW_RECORD_ID);
             assertEquals(row.getColumnObject(fiedls.find("kid")), NEW_RECORD_ID);
             //
-            Query command = aClient.getAppQuery(COMMAND_QUERY_ID);
+            Query command = client.getAppQuery(COMMAND_QUERY_ID);
             command.putParameter("gid", DataTypeInfo.DECIMAL, NEW_RECORD_ID);
             command.putParameter("gname", DataTypeInfo.VARCHAR, NEW_RECORD_NAME_G);
             command.enqueueUpdate();
             //rowset.updateObject(fiedls.find("gname"), NEW_RECORD_NAME_G);
             rowset.updateObject(fiedls.find("tname"), NEW_RECORD_NAME_T);
             rowset.updateObject(fiedls.find("kname"), NEW_RECORD_NAME_K);
-            aClient.commit(null);
-            assertTrue(aClient.getChangeLog(null, null).isEmpty());
+            client.commit(null);
+            assertTrue(client.getChangeLog(null, null).isEmpty());
             rowset.refresh();
             fiedls = rowset.getFields();
             assertEquals(oldRowsetSize + 1, rowset.size());
@@ -102,8 +101,8 @@ public class AmbiguousChangesTest extends BaseTest {
             assertEquals(newRow.getColumnObject(fiedls.find("kname")), NEW_RECORD_NAME_K);
             // Delete operation
             rowset.delete();
-            aClient.commit(null);
-            assertTrue(aClient.getChangeLog(null, null).isEmpty());
+            client.commit(null);
+            assertTrue(client.getChangeLog(null, null).isEmpty());
             rowset.refresh();
             fiedls = rowset.getFields();
             assertEquals(oldRowsetSize, rowset.size());
@@ -117,17 +116,14 @@ public class AmbiguousChangesTest extends BaseTest {
                 }
             }
             assertNull(newRow);
-        } finally {
-            aClient.shutdown();
-            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 
     @Test
     public void twoWritableTablesTest() throws Exception {
-        DbClient aClient = initDevelopTestClient();
-        try {
-            Query query = aClient.getAppQuery(AMBIGUOUS_SEMI_WRITABLE_QUERY_ID);
+        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+            DatabasesClient client = resource.getClient();
+            Query query = client.getAppQuery(AMBIGUOUS_SEMI_WRITABLE_QUERY_ID);
             Rowset rowset = query.execute();
             int oldRowsetSize = rowset.size();
             assertTrue(oldRowsetSize > 1);
@@ -168,8 +164,8 @@ public class AmbiguousChangesTest extends BaseTest {
             rowset.updateObject(fiedls.find("gname"), NEW_RECORD_NAME_G);
             rowset.updateObject(fiedls.find("tname"), NEW_RECORD_NAME_T);
             rowset.updateObject(fiedls.find("kname"), NEW_RECORD_NAME_K);
-            aClient.commit(null);
-            assertTrue(aClient.getChangeLog(null, null).isEmpty());
+            client.commit(null);
+            assertTrue(client.getChangeLog(null, null).isEmpty());
             rowset.refresh();
             fiedls = rowset.getFields();
             assertEquals(oldRowsetSize + 1, rowset.size());
@@ -192,8 +188,8 @@ public class AmbiguousChangesTest extends BaseTest {
             assertEquals(newRow.getColumnObject(fiedls.find("kname")), NEW_RECORD_NAME_K);
             // Delete operation
             rowset.delete();
-            aClient.commit(null);
-            assertTrue(aClient.getChangeLog(null, null).isEmpty());
+            client.commit(null);
+            assertTrue(client.getChangeLog(null, null).isEmpty());
             rowset.refresh();
             fiedls = rowset.getFields();
             assertEquals(oldRowsetSize, rowset.size());
@@ -208,9 +204,6 @@ public class AmbiguousChangesTest extends BaseTest {
                 }
             }
             assertNull(newRow);
-        } finally {
-            aClient.shutdown();
-            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 }

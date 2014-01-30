@@ -44,6 +44,7 @@ public class RowsetHostObject<E extends ApplicationEntity<?, ?, E>> extends Nati
         try {
             defineFieldsProperties();
             defineProperty(Model.DATASOURCE_METADATA_SCRIPT_NAME, FieldsHostObject.publishFields(rowset.getFields(), this));
+            defineProperty("md", FieldsHostObject.publishFields(rowset.getFields(), this));
         } catch (Exception ex) {
             Logger.getLogger(RowsetHostObject.class.getName()).log(Level.WARNING, ex.getMessage());
         }

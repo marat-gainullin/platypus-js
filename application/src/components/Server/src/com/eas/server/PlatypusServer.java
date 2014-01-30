@@ -164,13 +164,13 @@ public class PlatypusServer extends PlatypusServerCore {
                 IoAcceptor sensorAcceptor = com.eas.sensors.positioning.AcceptorsFactory.create(protocol, numWorkerThreads, sessionIdleTime, sessionIdleCheckInterval, new com.eas.server.handlers.PositioningPacketReciever(this, acceptorModuleId));
                 if (sensorAcceptor != null) {
                     sensorAcceptor.bind(s);
-                    logger.info(String.format("\nListening on %s; protocol: %s\n", s.toString(), protocol));
+                    logger.info(String.format("Listening on %s; protocol: %s", s.toString(), protocol));
                 }
             } else {
-                logger.info(String.format("\nAcceptor server module was not found for protocol \"%s\"", protocol));
+                logger.info(String.format("Acceptor server module was not found for protocol \"%s\"", protocol));
             }
         } else {
-            logger.info(String.format("\nProtocol \"%s\" is not supported", protocol));
+            logger.info(String.format("Protocol \"%s\" is not supported", protocol));
         }
     }
 

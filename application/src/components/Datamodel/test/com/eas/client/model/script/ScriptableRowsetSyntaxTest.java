@@ -5,12 +5,12 @@
 package com.eas.client.model.script;
 
 import com.bearsoft.rowset.metadata.*;
-import com.eas.client.DbClient;
+import com.eas.client.DatabasesClient;
+import com.eas.client.DatabasesClientWithResource;
 import com.eas.client.model.BaseTest;
 import com.eas.client.model.Model;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
-import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.script.ScriptUtils;
 import static org.junit.Assert.*;
 import org.junit.Test;
@@ -25,14 +25,14 @@ public class ScriptableRowsetSyntaxTest extends BaseTest {
     private static final String SCRIPT_TABLE_PATTERN_TEST_SOURCE
             = "var p = param1;\n"
             + "p = params.param1;\n"
-            + "var m = md;\n"
-            + "m = params.md;\n"
-            + "var mp = md.param1;\n"
-            + "mp = params.md.param1;\n"
+            + "var m = schema;\n"
+            + "m = params.schema;\n"
+            + "var mp = schema.param1;\n"
+            + "mp = params.schema.param1;\n"
             + "var d = entity11.NAME;\n"
-            + "m = entity11.md.NAME;\n"
+            + "m = entity11.schema.NAME;\n"
             + "mp = entity11.params;\n"
-            + "m = entity11.params.md;\n"
+            + "m = entity11.params.schema;\n"
             + "entity11.first();\n"
             + "var rowsetData1 = entity11.ID;\n"
             + "var rowsetData2 = entity11.NAME;\n"
@@ -52,10 +52,10 @@ public class ScriptableRowsetSyntaxTest extends BaseTest {
     private static final String SCRIPT_ORM_TEST_SOURCE
             = "var p = param1;\n"
             + "p = params.param1;\n"
-            + "var m = md;\n"
-            + "m = params.md;\n"
-            + "var mp = md.param1;\n"
-            + "var mp = params.md.param1;\n"
+            + "var m = schema;\n"
+            + "m = params.schema;\n"
+            + "var mp = schema.param1;\n"
+            + "var mp = params.schema.param1;\n"
             + "var d = entity11.length;\n"
             + "entity11.push({ID:150, NAME:'sample7'});"
             + "entity11.push({ID:520, NAME:'sample6'});"
@@ -67,10 +67,10 @@ public class ScriptableRowsetSyntaxTest extends BaseTest {
             + "entity11[entity11.length] = {ID:490, NAME:'sample9'};"
             + "entity11[5] = {ID:820, NAME:'sample8'};"
             + "entity11.pop();"
-            + "m = entity11.md.length;\n"
+            + "m = entity11.schema.length;\n"
             + "mp = entity11.params.length;\n"
-            + "var f0 = entity11.md[0];\n"
-            + "var f5 = entity11.md[5];\n"
+            + "var f0 = entity11.schema[0];\n"
+            + "var f5 = entity11.schema[5];\n"
             + "var firstRow = entity11[0];\n"
             + "var rowData1_1 = firstRow.ID;\n"
             + "var rowData2_1 = firstRow.NAME;\n"
@@ -90,8 +90,8 @@ public class ScriptableRowsetSyntaxTest extends BaseTest {
             + "entity11.sort((function(a, b){\n"
             + "    return a.ID > b.ID?1:-1;\n"
             + "}));\n"
-            + "var f1 = entity11.md[0];\n"
-            + "var entity11Md = entity11.md;\n"
+            + "var f1 = entity11.schema[0];\n"
+            + "var entity11Md = entity11.schema;\n"
             + "var fieldsLength = entity11Md.length;\n"
             + "var lastField = entity11Md[entity11Md.length-1];\n"
             + "for(var pi in entity11)\n"
@@ -99,7 +99,7 @@ public class ScriptableRowsetSyntaxTest extends BaseTest {
             + "        param2 = pi;\n"
             + "    else"
             + "        param2 += \"\\n\"+pi;\n"
-            + "for(var fi in entity11.md)\n"
+            + "for(var fi in entity11.schema)\n"
             + "    if(param3 == null)\n"
             + "        param3 = fi;\n"
             + "    else"
@@ -109,7 +109,7 @@ public class ScriptableRowsetSyntaxTest extends BaseTest {
 
     @Test
     public void tablePatternSyntaxicTest() throws Exception {
-        System.out.println("Testing rowset's script syntax. Cases like a params.md.param1 = ...");
+        System.out.println("Testing rowset's script syntax. Cases like a params.schema.param1 = ...");
         scopeSyntaxicTest(SCRIPT_TABLE_PATTERN_TEST_SOURCE);
     }
 
@@ -122,8 +122,8 @@ public class ScriptableRowsetSyntaxTest extends BaseTest {
     private static void scopeSyntaxicTest(String aSource) throws Exception {
         String entityName = "entity11";
         Double paramValue = new Double(98.597878f);
-        DbClient client = BaseTest.initDevelopTestClient();
-        try {
+        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+            final DatabasesClient client = resource.getClient();
             ApplicationDbModel dm = new ApplicationDbModel(client);
             Parameters params = dm.getParameters();
             Parameter param = (Parameter) params.createNewField("param1");
@@ -155,9 +155,6 @@ public class ScriptableRowsetSyntaxTest extends BaseTest {
             } finally {
                 Context.exit();
             }
-        } finally {
-            client.shutdown();
-            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 
@@ -170,8 +167,8 @@ public class ScriptableRowsetSyntaxTest extends BaseTest {
         String entityName = "entity11";
         String paramName = "param1";
         Double paramValue = new Double(98.597878f);
-        DbClient client = BaseTest.initDevelopTestClient();
-        try {
+        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+            final DatabasesClient client = resource.getClient();
             ApplicationDbModel dm = new ApplicationDbModel(client);
             Parameters params = dm.getParameters();
             Parameter param = (Parameter) params.createNewField(paramName);
@@ -235,20 +232,17 @@ public class ScriptableRowsetSyntaxTest extends BaseTest {
                  * srMdParams.get(paramName, srMdParams)).unwrap(); // var mdP =
                  * md.param1; assertEquals(mdParam, param);
                  */
-                FieldsHostObject srMdParams1 = (FieldsHostObject) srParams.get(Model.DATASOURCE_METADATA_SCRIPT_NAME, scope); // var p = params.md
+                FieldsHostObject srMdParams1 = (FieldsHostObject) srParams.get(Model.DATASOURCE_METADATA_SCRIPT_NAME, scope); // var p = params.schema
                 assertTrue(srMdParams1.unwrap() instanceof Parameters);
                 assertEquals(srMdParams1.unwrap(), params);
                 assertSame(srMdParams1.unwrap(), params);
 
-                Parameter mdParam1 = (Parameter) ((NativeJavaObject) srMdParams1.get(paramName, srMdParams1)).unwrap(); // var p = params.md.param1;
+                Parameter mdParam1 = (Parameter) ((NativeJavaObject) srMdParams1.get(paramName, srMdParams1)).unwrap(); // var p = params.schema.param1;
                 assertEquals(mdParam1, param);
                 assertSame(mdParam1, param);
             } finally {
                 Context.exit();
             }
-        } finally {
-            client.shutdown();
-            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 }
