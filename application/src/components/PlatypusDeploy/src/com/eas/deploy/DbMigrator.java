@@ -73,7 +73,6 @@ public class DbMigrator extends BaseDeployer {
         }
         try {
             out.println("Migrating database started..."); // NOI18N
-            checkSettings();
             checkDbClient();
             applyMigrationsImpl();
             out.println("Migrating database completed."); // NOI18N
@@ -104,7 +103,6 @@ public class DbMigrator extends BaseDeployer {
         }
         try {
             out.println("Creating new Db metadata migration..."); // NOI18N
-            checkSettings();
             checkDbClient();
             int migrationNumber = getCurrentDbVersion() + 1;
             String mtdSnapshotPath = getMtdSnapshotFilePath(migrationNumber);
@@ -195,7 +193,7 @@ public class DbMigrator extends BaseDeployer {
         }
     }
 
-    public Integer getCurrentDbVersion() {
+    public int getCurrentDbVersion() {
         try {
             assert client != null;
             SqlQuery versionQuery = new SqlQuery(client, GET_CURRENT_DB_VERSION_SQL);
@@ -208,7 +206,7 @@ public class DbMigrator extends BaseDeployer {
         } catch (Exception ex) {
             Logger.getLogger(DbMigrator.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return null;
+        return 0;
     }
 
     public void setCurrentDbVersion(int aVersion) {
@@ -305,9 +303,9 @@ public class DbMigrator extends BaseDeployer {
     private void applySqlScript(File sqlScriptFile) throws Exception {
         DbConnectionSettings.registerDrivers(DbConnectionSettings.readDrivers().values());
         Properties props = new Properties();
-        props.put("user", settings.getDbSettings().getUser());
-        props.put("password", settings.getDbSettings().getPassword());
-        try (Connection connection = DriverManager.getConnection(settings.getDbSettings().getUrl(), props)) {
+        props.put("user", client.getSettings().getUser());
+        props.put("password", client.getSettings().getPassword());
+        try (Connection connection = DriverManager.getConnection(client.getSettings().getUrl(), props)) {
             SqlDriver.applyScript(FileUtils.readString(sqlScriptFile, PlatypusFiles.DEFAULT_ENCODING), connection);
         }
     }

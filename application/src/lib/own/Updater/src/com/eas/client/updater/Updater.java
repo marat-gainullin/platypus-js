@@ -4,6 +4,7 @@
  */
 package com.eas.client.updater;
 
+import java.io.File;
 import java.util.ResourceBundle;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
@@ -41,6 +42,8 @@ public class Updater {
 
             String userHome = System.getProperty("user.home");
             String pathHome = FileUpdater.fixFileSeparatorChar(userHome + "/.platypus/logs/Updater_log.log");
+            File logPath =  new File(FileUpdater.fixFileSeparatorChar(userHome + "/.platypus/logs"));
+            logPath.mkdirs();
             FileHandler h = new FileHandler(pathHome);
             h.setFormatter(new SimpleFormatter());
             log.addHandler(h);
