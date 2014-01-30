@@ -37,7 +37,7 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
 
     public static final long PARAMETERS_ENTITY_ID = -1L;
     public static final String PARAMETERS_SCRIPT_NAME = "params";
-    public static final String DATASOURCE_METADATA_SCRIPT_NAME = "md";
+    public static final String DATASOURCE_METADATA_SCRIPT_NAME = "schema";
     public static final String DATASOURCE_NAME_TAG_NAME = "Name";
     public static final String DATASOURCE_TITLE_TAG_NAME = "Title";
     public static final String DATASOURCE_BEFORE_CHANGE_EVENT_TAG_NAME = "onBeforeChange";

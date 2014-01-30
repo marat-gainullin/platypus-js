@@ -24,12 +24,12 @@ public class DatabaseAppCache extends AppElementsCache {
     protected String datasourceName;
     protected DbClient client;
 
-    public DatabaseAppCache(String aAppDatabaseJndiName) throws Exception {
-        super("app-" + String.valueOf(aAppDatabaseJndiName.hashCode()));
-        if (!aAppDatabaseJndiName.startsWith(APP_URL_PREFIX)) {
+    public DatabaseAppCache(String aAppDatabaseJndiUrl) throws Exception {
+        super("app-" + String.valueOf(aAppDatabaseJndiUrl.hashCode()));
+        if (!aAppDatabaseJndiUrl.startsWith(APP_URL_PREFIX)) {
             throw new IllegalArgumentException("Application jndi url must start with " + APP_URL_PREFIX + " prefix.");
         }
-        appDatabaseJndiUrl = aAppDatabaseJndiName;
+        appDatabaseJndiUrl = aAppDatabaseJndiUrl;
         datasourceName = appDatabaseJndiUrl.substring(APP_URL_PREFIX.length(), appDatabaseJndiUrl.length());
         client = new DatabasesClient(null, datasourceName, false);
     }

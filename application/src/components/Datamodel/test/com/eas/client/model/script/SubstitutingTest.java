@@ -4,12 +4,11 @@
  */
 package com.eas.client.model.script;
 
-import com.eas.client.model.script.ScriptableRowset;
-import com.eas.client.DbClient;
+import com.eas.client.DatabasesClient;
+import com.eas.client.DatabasesClientWithResource;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
 import com.eas.client.model.BaseTest;
-import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.script.ScriptUtils;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -28,8 +27,8 @@ public class SubstitutingTest extends BaseTest {
     @Test
     public void dataSubstitutingTest() throws Exception {
         System.out.println("dataSubstitutingTest");
-        DbClient client = BaseTest.initDevelopTestClient();
-        try {
+        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+            final DatabasesClient client = resource.getClient();
             ApplicationDbModel dm = new ApplicationDbModel(client);
             ApplicationDbEntity entity1 = dm.newGenericEntity();
             entity1.setQueryId("128015347915605");
@@ -72,9 +71,6 @@ public class SubstitutingTest extends BaseTest {
             } finally {
                 Context.exit();
             }
-        } finally {
-            client.shutdown();
-            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 }
