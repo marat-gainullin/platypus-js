@@ -103,7 +103,7 @@ public class PositioningPacketReciever implements PacketReciever {
                 && aPort != null && aPort > 0 && aPort < 65535
                 && aData != null) {
             if (RetranslatePacketFactory.isProtocolSupported(aProtocolName)) {
-                send(aData, aHost, aPort, aProtocolName, aUser, aPassword, aPath, aQuery, null);
+                return send(aData, aHost, aPort, aProtocolName, aUser, aPassword, aPath, aQuery, null);
             }
         }
         return null;

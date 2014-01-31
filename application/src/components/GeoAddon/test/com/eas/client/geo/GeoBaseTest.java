@@ -19,7 +19,6 @@ import org.junit.Test;
 public class GeoBaseTest {
 
     private static final String TEST_DATASOURCE_NAME = "testGeoAddOnDatasource";
-    
     protected static DbClient dbClient;
 
     @BeforeClass
@@ -31,7 +30,6 @@ public class GeoBaseTest {
         settings.setUrl(url);
         settings.setUser(login);
         settings.setPassword(passwd);
-
         GeneralResourceProvider.getInstance().registerDatasource(TEST_DATASOURCE_NAME, settings);
         dbClient = new DatabasesClient(null, TEST_DATASOURCE_NAME, false);
     }

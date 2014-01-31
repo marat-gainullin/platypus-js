@@ -54,13 +54,13 @@
 	  </fileset>        
 	  
 	  <fileset dir="lib" targetdir="$INSTALL_PATH/lib">
-		<include name="thirdparty/geotools/jts-1.11.jar"/>
+		<include name="thirdparty/geotools/jts-1.13.jar"/>
 		<include name="thirdparty/geotools/geoapi-2.3-M1.jar"/>
 		<include name="thirdparty/geotools/geoapi-pending-2.3-M1.jar"/>
-		<include name="thirdparty/geotools/gt-api-2.7.0.jar"/>
-		<include name="thirdparty/geotools/gt-main-2.7.0.jar"/>
-		<include name="thirdparty/geotools/gt-metadata-2.7.0.jar"/>
-		<include name="thirdparty/geotools/gt-render-2.7.0.jar"/>
+		<include name="thirdparty/geotools/gt-api-10.3.jar"/>
+		<include name="thirdparty/geotools/gt-main-10.3.jar"/>
+		<include name="thirdparty/geotools/gt-metadata-10.3.jar"/>
+		<include name="thirdparty/geotools/gt-render-10.3.jar"/>
 	  </fileset>  
 	
 	  <fileset dir="etc/security" targetdir="$USER_HOME/.platypus/security">
