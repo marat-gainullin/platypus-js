@@ -46,17 +46,14 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
     public static final String CMD_SWITCHS_PREFIX = "-";
     // command line switches
     public static final String MODULES_SCRIPT_NAME = "Modules";
-    public static final String APPELEMENT_CMD_SWITCH = "appElement";
+    public static final String APPELEMENT_CMD_SWITCH = "appelement";
     // auto login switchs
     public static final String URL_CMD_SWITCH = "url";
     public static final String DEF_DATASOURCE_CONF_PARAM = "default-datasource";
     public static final String USER_CMD_SWITCH = "user";
     public static final String PASSWORD_CMD_SWITCH = "password";
-    // local disk paths
-    public static final String LOGS_PATH = "logs";
     // error messages
     public static final String BAD_DEF_DATASOURCE_MSG = "default-datasource value not specified";
-
     public static final String USER_HOME_ABSENTFILE_MSG = ClientConstants.USER_HOME_PROP_NAME + " property points to non-existent location";
     public static final String USER_HOME_MISSING_MSG = ClientConstants.USER_HOME_PROP_NAME + " property missing. Please specify it with -D" + ClientConstants.USER_HOME_PROP_NAME + "=... command line switch";
     public static final String USER_HOME_NOT_A_DIRECTORY_MSG = ClientConstants.USER_HOME_PROP_NAME + " property points to non-directory";
