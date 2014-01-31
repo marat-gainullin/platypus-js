@@ -4,12 +4,13 @@
  */
 package com.eas.client.model.store;
 
+import com.eas.client.DatabasesClient;
+import com.eas.client.DatabasesClientWithResource;
 import com.eas.client.DbClient;
 import com.eas.client.model.BaseTest;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
 import com.eas.client.model.application.ApplicationParametersEntity;
-import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.xml.dom.XmlDom2String;
 import java.io.InputStream;
 import static org.junit.Assert.*;
@@ -24,8 +25,8 @@ public class SerialTest extends BaseTest {
     @Test
     public void logicalStabilityTest() throws Exception {
         System.out.println("serialization logical stability test");
-        DbClient client = initDevelopTestClient();
-        try {
+        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+            final DatabasesClient client = resource.getClient();
             ApplicationDbModel model = modelFromResource(client);
             verifyModel(model);
             for (int i = 0; i < 100; i++) {
@@ -33,17 +34,14 @@ public class SerialTest extends BaseTest {
                 model = modelFromString(client, writtenString);
                 verifyModel(model);
             }
-        } finally {
-            client.shutdown();
-            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 
     @Test
     public void binaryStabilityTest() throws Exception {
         System.out.println("serialization binary stability test");
-        DbClient client = initDevelopTestClient();
-        try {
+        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+            final DatabasesClient client = resource.getClient();
             ApplicationDbModel model = modelFromResource(client);
             verifyModel(model);
             for (int i = 0; i < 100; i++) {
@@ -53,9 +51,6 @@ public class SerialTest extends BaseTest {
                 String writtenString1 = model2String(model);
                 assertEquals(writtenString.length(), writtenString1.length());
             }
-        } finally {
-            client.shutdown();
-            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 

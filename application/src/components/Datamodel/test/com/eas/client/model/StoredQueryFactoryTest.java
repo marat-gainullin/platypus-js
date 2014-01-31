@@ -9,10 +9,11 @@ import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.ClientConstants;
+import com.eas.client.DatabasesClient;
+import com.eas.client.DatabasesClientWithResource;
 import com.eas.client.DbClient;
 import com.eas.client.exceptions.NoSuchEntityException;
 import com.eas.client.queries.SqlQuery;
-import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.client.settings.SettingsConstants;
 import com.eas.script.JsDoc;
 import com.eas.util.BinaryUtils;
@@ -245,8 +246,8 @@ public class StoredQueryFactoryTest extends BaseTest {
 
     @Test
     public void testCompilingWithSubqueries() throws Exception {
-        DbClient client = BaseTest.initDevelopTestClient();
-        try {
+        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+            DatabasesClient client = resource.getClient();
             StoredQueryFactory queryFactory = new StoredQueryFactory(client);
             String queryContent = readQueryContent(RESOURCES_PREFIX + "testQuery2.xml");
             String queryId = insertEntity(client, queryContent);
@@ -271,15 +272,13 @@ public class StoredQueryFactoryTest extends BaseTest {
             } finally {
                 deleteEntity(queryId, client);
             }
-        } finally {
-            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 
     @Test
     public void testCompilingWithSubqueriesBad() throws Exception {
-        DbClient client = BaseTest.initDevelopTestClient();
-        try {
+        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+            DatabasesClient client = resource.getClient();
             StoredQueryFactory queryFactory = new StoredQueryFactory(client);
             String queryContent = readQueryContent(RESOURCES_PREFIX + "testQuery8BadMetadata.xml");
             String queryId = insertEntity(client, queryContent);
@@ -304,16 +303,13 @@ public class StoredQueryFactoryTest extends BaseTest {
             } finally {
                 deleteEntity(queryId, client);
             }
-        } finally {
-            client.shutdown();
-            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 
     @Test
     public void testAsteriskMetadata() throws Exception {
-        DbClient client = BaseTest.initDevelopTestClient();
-        try {
+        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+            DatabasesClient client = resource.getClient();
             StoredQueryFactory queryFactory = new StoredQueryFactory(client);
             String queryContent = readQueryContent(RESOURCES_PREFIX + "testQuery3.xml");
             String queryId = insertEntity(client, queryContent);
@@ -333,16 +329,13 @@ public class StoredQueryFactoryTest extends BaseTest {
             } finally {
                 deleteEntity(queryId, client);
             }
-        } finally {
-            client.shutdown();
-            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 
     @Test
     public void testBadSubquery() throws Exception {
-        DbClient client = BaseTest.initDevelopTestClient();
-        try {
+        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+            DatabasesClient client = resource.getClient();
             StoredQueryFactory queryFactory = new StoredQueryFactory(client);
             String queryContent = readQueryContent(RESOURCES_PREFIX + "testQueryBadSubQuery.xml");
             String queryId = insertEntity(client, queryContent);
@@ -356,16 +349,13 @@ public class StoredQueryFactoryTest extends BaseTest {
             } finally {
                 deleteEntity(queryId, client);
             }
-        } finally {
-            client.shutdown();
-            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 
     @Test
     public void testAsteriskMetadata_NewDesignSerialization() throws Exception {
-        DbClient client = BaseTest.initDevelopTestClient();
-        try {
+        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+            DatabasesClient client = resource.getClient();
             StoredQueryFactory queryFactory = new StoredQueryFactory(client);
             String queryContent = readQueryContent(RESOURCES_PREFIX + "testQuery3_newDesignSerialization.xml");
             String queryId = insertEntity(client, queryContent);
@@ -385,16 +375,13 @@ public class StoredQueryFactoryTest extends BaseTest {
             } finally {
                 deleteEntity(queryId, client);
             }
-        } finally {
-            client.shutdown();
-            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 
     @Test
     public void testPartialTablesAsteriskMetadata() throws Exception {
-        DbClient client = BaseTest.initDevelopTestClient();
-        try {
+        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+            DatabasesClient client = resource.getClient();
             StoredQueryFactory queryFactory = new StoredQueryFactory(client);
             String queryContent = readQueryContent(RESOURCES_PREFIX + "testQuery3_PartialTablesAsterisk.xml");
             String queryId = insertEntity(client, queryContent);
@@ -414,16 +401,13 @@ public class StoredQueryFactoryTest extends BaseTest {
             } finally {
                 deleteEntity(queryId, client);
             }
-        } finally {
-            client.shutdown();
-            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 
     @Test
     public void testWithoutAliases_Schema_NonSchema_Schema_Columns() throws Exception {
-        DbClient client = BaseTest.initDevelopTestClient();
-        try {
+        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+            DatabasesClient client = resource.getClient();
             StoredQueryFactory queryFactory = new StoredQueryFactory(client);
             String queryContent = readQueryContent(RESOURCES_PREFIX + "testQuery4_Schema_NonSchema_Select.xml");
             String queryId = insertEntity(client, queryContent);
@@ -440,16 +424,13 @@ public class StoredQueryFactoryTest extends BaseTest {
             } finally {
                 deleteEntity(queryId, client);
             }
-        } finally {
-            client.shutdown();
-            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 
     @Test
     public void testPrimaryKey() throws Exception {
-        DbClient client = BaseTest.initDevelopTestClient();
-        try {
+        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+            DatabasesClient client = resource.getClient();
             StoredQueryFactory queryFactory = new StoredQueryFactory(client);
             String queryContent = readQueryContent(RESOURCES_PREFIX + "testQuery4.xml");
             String queryId = insertEntity(client, queryContent);
@@ -462,16 +443,13 @@ public class StoredQueryFactoryTest extends BaseTest {
             } finally {
                 deleteEntity(queryId, client);
             }
-        } finally {
-            client.shutdown();
-            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 
     @Test
     public void testPrimaryAndForeignKeysWithNamedOutputColumns() throws Exception {
-        DbClient client = BaseTest.initDevelopTestClient();
-        try {
+        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+            DatabasesClient client = resource.getClient();
             StoredQueryFactory queryFactory = new StoredQueryFactory(client);
             String queryContent = readQueryContent(RESOURCES_PREFIX + "testQuery5.xml");
             String queryId = insertEntity(client, queryContent);
@@ -485,16 +463,13 @@ public class StoredQueryFactoryTest extends BaseTest {
             } finally {
                 deleteEntity(queryId, client);
             }
-        } finally {
-            client.shutdown();
-            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 
     @Test
     public void testPrimaryAndForeignKeysWithAsterisk() throws Exception {
-        DbClient client = BaseTest.initDevelopTestClient();
-        try {
+        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+            DatabasesClient client = resource.getClient();
             StoredQueryFactory queryFactory = new StoredQueryFactory(client);
             String queryContent = readQueryContent(RESOURCES_PREFIX + "testQuery6.xml");
             String queryId = insertEntity(client, queryContent);
@@ -514,16 +489,13 @@ public class StoredQueryFactoryTest extends BaseTest {
             } finally {
                 deleteEntity(queryId, client);
             }
-        } finally {
-            client.shutdown();
-            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 
     @Test
     public void testGetQuery() throws Exception {
-        DbClient client = BaseTest.initDevelopTestClient();
-        try {
+        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+            DatabasesClient client = resource.getClient();
             StoredQueryFactory queryFactory = new StoredQueryFactory(client);
             String queryContent = readQueryContent(RESOURCES_PREFIX + "testQuery1.xml");
             String queryId = insertEntity(client, queryContent);
@@ -534,16 +506,13 @@ public class StoredQueryFactoryTest extends BaseTest {
             } finally {
                 deleteEntity(queryId, client);
             }
-        } finally {
-            client.shutdown();
-            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 
     @Test
     public void testGetEmptyQuery() throws Exception {
-        DbClient client = BaseTest.initDevelopTestClient();
-        try {
+        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+            DatabasesClient client = resource.getClient();
             StoredQueryFactory queryFactory = new StoredQueryFactory(client);
             String queryId = insertEmptyEntity(client);
             try {
@@ -556,9 +525,6 @@ public class StoredQueryFactoryTest extends BaseTest {
             } finally {
                 deleteEntity(queryId, client);
             }
-        } finally {
-            client.shutdown();
-            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 

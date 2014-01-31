@@ -174,7 +174,7 @@ public class DbMigrator extends BaseDeployer {
         }
     }
 
-    public Integer getCurrentDbVersion() {
+    public int getCurrentDbVersion() {
         try {
             assert client != null;
             SqlQuery versionQuery = new SqlQuery(client, GET_CURRENT_DB_VERSION_SQL);
@@ -187,7 +187,7 @@ public class DbMigrator extends BaseDeployer {
         } catch (Exception ex) {
             Logger.getLogger(DbMigrator.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return null;
+        return 0;
     }
 
     public void setCurrentDbVersion(int aVersion) {

@@ -36,7 +36,7 @@ public class OracleConverter extends PlatypusConverter {
                     || aTypeInfo.getSqlType() == Types.LONGNVARCHAR) { // LONG
                 try {
                     String value = (String) super.convert2JdbcCompatible(aValue, aTypeInfo);
-                    aStmt.setString(aParameterIndex, value);
+                    aStmt.setString(aParameterIndex, value);                    
                 } catch (SQLException ex) {
                     throw new RowsetException(ex);
                 }

@@ -5,14 +5,14 @@
 package com.eas.client.model.interacting;
 
 import com.bearsoft.rowset.Rowset;
-import com.eas.client.DbClient;
+import com.eas.client.DatabasesClient;
+import com.eas.client.DatabasesClientWithResource;
 import com.eas.client.model.BaseTest;
 import com.eas.client.model.DataScriptEventsListener;
 import com.eas.client.model.EntityDataListener;
 import com.eas.client.model.EntityRefreshFilterDataListener;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
-import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.script.ScriptUtils;
 import com.eas.script.ScriptUtils.ScriptAction;
 import java.util.HashMap;
@@ -134,8 +134,8 @@ public class MixedTest extends BaseTest {
     @Test
     public void mixedScrollTest() throws Exception {
         System.out.println("mixedScrollTest, mixedPointOfInterestTest");
-        final DbClient client = initDevelopTestClient();
-        try {
+        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+            final DatabasesClient client = resource.getClient();
             ScriptUtils.inContext(new ScriptUtils.ScriptAction() {
                 @Override
                 public Object run(Context cx) throws Exception {
@@ -262,9 +262,6 @@ public class MixedTest extends BaseTest {
                     return null;
                 }
             });
-        } finally {
-            client.shutdown();
-            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
     EntityRefreshFilterDataListener listenerOf1Layer = null;
@@ -274,8 +271,8 @@ public class MixedTest extends BaseTest {
     @Test
     public void mixedExecutingOrderTest() throws Exception {
         System.out.println("mixedExecutingOrderTest");
-        final DbClient client = initDevelopTestClient();
-        try {
+        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+            final DatabasesClient client = resource.getClient();
             ScriptUtils.inContext(new ScriptAction() {
                 @Override
                 public Object run(Context cx) throws Exception {
@@ -335,17 +332,14 @@ public class MixedTest extends BaseTest {
                     return null;
                 }
             });
-        } finally {
-            client.shutdown();
-            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 
     @Test
     public void mixedCrudTest() throws Exception {
         System.out.println("mixedCrudTest");
-        final DbClient client = initDevelopTestClient();
-        try {
+        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+            final DatabasesClient client = resource.getClient();
             ScriptUtils.inContext(new ScriptAction() {
                 @Override
                 public Object run(Context cx) throws Exception {
@@ -384,17 +378,14 @@ public class MixedTest extends BaseTest {
                     return null;
                 }
             });
-        } finally {
-            client.shutdown();
-            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 
     @Test
     public void mixedScriptEventsVsDataTest() throws Exception {
         System.out.println("mixedScriptEventsVsDataTest");
-        final DbClient client = initDevelopTestClient();
-        try {
+        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+            final DatabasesClient client = resource.getClient();
             ScriptUtils.inContext(new ScriptAction() {
                 @Override
                 public Object run(Context cx) throws Exception {
@@ -492,9 +483,6 @@ public class MixedTest extends BaseTest {
                     return null;
                 }
             });
-        } finally {
-            client.shutdown();
-            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 }

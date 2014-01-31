@@ -42,7 +42,7 @@ public class PlatypusServerTest {
         settings.setPassword(passwd);
         GeneralResourceProvider.getInstance().registerDatasource("testDb", settings);
         SSLContext sslContext = ServerMain.createSSLContext();
-        server = new PlatypusServer(new ScriptedDatabasesClient(new DatabaseAppCache("testDb"), "testDb", true), sslContext, new InetSocketAddress[]{new InetSocketAddress("localhost", TEST_PORT)}, new HashMap<Integer, String>(), null, null, null, new HashSet<String>(), null);
+        server = new PlatypusServer(new ScriptedDatabasesClient(new DatabaseAppCache("jndi://testDb"), "testDb", true), sslContext, new InetSocketAddress[]{new InetSocketAddress("localhost", TEST_PORT)}, new HashMap<Integer, String>(), null, null, null, new HashSet<String>(), null);
         server.start();
     }
 

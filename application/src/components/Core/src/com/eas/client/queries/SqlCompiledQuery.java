@@ -263,27 +263,4 @@ public class SqlCompiledQuery {
         createFlow();
     }
 
-    /**
-     * Checks if expectedFields property is setted and if it is, applies
-     * information about expected fields to rowset's fields.
-     *
-     * @param aRowset Rowset, which is to be processed.
-     * @throws RowsetException
-     */
-    /*
-    protected void refineFields(Rowset aRowset) throws RowsetException {
-        try {
-            assert aRowset != null;
-            DbMetadataCache cache = client.getDbMetadataCache(databaseId);
-            Fields fields = aRowset.getFields();
-            mergeFields(fields, expectedFields);
-            SqlDriver driver = cache.getConnectionDriver();
-            for (Field field : fields.toCollection()) {
-                driver.getTypesResolver().resolve2Application(field);
-            }
-        } catch (Exception ex) {
-            throw new RowsetException(ex);
-        }
-    }
-    */ 
 }

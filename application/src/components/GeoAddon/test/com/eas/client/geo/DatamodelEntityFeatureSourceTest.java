@@ -120,7 +120,7 @@ public class DatamodelEntityFeatureSourceTest extends GeoBaseTest {
         instance.addFeatureListener(listener);
         instance.removeFeatureListener(listener);
     }
-
+    
     /**
      * Test of getSchema method, of class RowsFeatureSource.
      *

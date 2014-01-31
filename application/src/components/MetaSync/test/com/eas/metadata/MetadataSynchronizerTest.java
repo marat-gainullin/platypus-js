@@ -21,6 +21,7 @@ import com.bearsoft.rowset.metadata.ForeignKeySpec.ForeignKeyRule;
 import com.bearsoft.rowset.metadata.PrimaryKeySpec;
 import com.eas.client.DatabaseAppCache;
 import com.eas.client.DatabasesClient;
+import com.eas.client.DatabasesClientWithResource;
 import com.eas.client.DbClient;
 import com.eas.client.metadata.DbTableIndexColumnSpec;
 import com.eas.client.metadata.DbTableIndexSpec;
@@ -1004,16 +1005,15 @@ public class MetadataSynchronizerTest {
         }
     }
 
-    private DbClient createClient(DbConnection aDbConnection) throws Exception {
+    private DatabasesClientWithResource createClient(DbConnection aDbConnection) throws Exception {
         DbConnectionSettings settings = new DbConnectionSettings(aDbConnection.getUrl(), aDbConnection.getUser(), aDbConnection.getPassword(), aDbConnection.getSchema(), null);
-        GeneralResourceProvider.getInstance().registerDatasource("testDb", settings);
-        return new DatabasesClient(new DatabaseAppCache("testDb"), "testDb", true);
+        return new DatabasesClientWithResource(settings);
     }
 
     private void clearSchema(DbConnection aDbConnection) throws Exception {
         MetadataSynchronizer mds = new MetadataSynchronizer();
-        DbClient client = createClient(aDbConnection);
-        try {
+        try(DatabasesClientWithResource resource = createClient(aDbConnection)){
+            DbClient client = resource.getClient();
             DBStructure databaseStructure = mds.readDBStructure(aDbConnection.getUrl(), aDbConnection.getSchema(), aDbConnection.getUser(), aDbConnection.getPassword());
             assertNotNull(databaseStructure);
             Map<String, TableStructure> dbStructure = databaseStructure.getTablesStructure();
@@ -1045,9 +1045,6 @@ public class MetadataSynchronizerTest {
             Map<String, TableStructure> dbStructure2 = databaseStructure2.getTablesStructure();
             assertNotNull(dbStructure2);
             assertEquals(dbStructure2.size(), 0);
-        } finally {
-            client.shutdown();
-            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 

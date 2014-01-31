@@ -222,7 +222,7 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
         factory.putTableFieldsMetadata(query);// only select will be filled with output columns
         modelEntity.setQuery(query);
         modelEntity.prepareRowsetByQuery();
-        return modelEntity.defineProperties();// .md collection will be empty if query is not a select
+        return modelEntity.defineProperties();// .schema collection will be empty if query is not a select
     }
 
     @ScriptFunction(jsDoc = ""
