@@ -153,14 +153,14 @@ public class MapGraphicTest {
         
         FeatureCollection fcollection = new ListFeatureCollection(featureType, lst);
         
-        final MapContent mainContext = new MapContent(projectedCrs);
-        mainContext.getViewport().setBounds(aoi);
+        final MapContent mainContent = new MapContent(projectedCrs);
+        mainContent.getViewport().setBounds(aoi);
 
         Layer layer1 = new FeatureLayer(fcollection, lineStyle, "Main layer");
-        mainContext.addLayer(layer1);
+        mainContent.addLayer(layer1);
 
         final GTRenderer renderer = new StreamingRenderer();
-        renderer.setMapContent(mainContext);
+        renderer.setMapContent(mainContent);
 
         final AffineTransform transform = new AffineTransform();
         transform.scale(8e-4, 8e-4);
@@ -174,7 +174,7 @@ public class MapGraphicTest {
                 Graphics2D g2d = (Graphics2D) g;
                 g2d.translate(size.width / 2, size.height / 2);
                 Rectangle screenArea = new Rectangle(-200, -200, 400, 400);
-                renderer.paint(g2d, new Rectangle(-200, -200, 400, 400), mainContext.getViewport().getBounds(), transform);
+                renderer.paint(g2d, new Rectangle(-200, -200, 400, 400), mainContent.getViewport().getBounds(), transform);
                 //renderer.paint(g2d, screenArea, mainContext.getLayerBounds(), transform);
                 g2d.draw(screenArea);
             }

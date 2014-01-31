@@ -5,14 +5,14 @@
 package com.eas.client.model.interacting;
 
 import com.bearsoft.rowset.Rowset;
-import com.eas.client.DbClient;
+import com.eas.client.DatabasesClient;
+import com.eas.client.DatabasesClientWithResource;
 import com.eas.client.model.BaseTest;
 import com.eas.client.model.DataScriptEventsListener;
 import com.eas.client.model.EntityDataListener;
 import com.eas.client.model.EntityRefreshFilterDataListener;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
-import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.script.ScriptUtils;
 import com.eas.script.ScriptUtils.ScriptAction;
 import java.math.BigDecimal;
@@ -127,8 +127,8 @@ public class FilteringTest extends BaseTest {
 
     @Test
     public void filteringMultiTypesKeysTest() throws Exception {
-        final DbClient client = initDevelopTestClient();
-        try {
+        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+            final DatabasesClient client = resource.getClient();
             ScriptUtils.inContext(new ScriptUtils.ScriptAction() {
                 @Override
                 public Object run(Context cx) throws Exception {
@@ -140,7 +140,7 @@ public class FilteringTest extends BaseTest {
                     Rowset rowset = state.IZMERJAEMIE_VELICHINI.getRowset();
                     int pkColIndex = rowset.getFields().find("ID");
 
-                // BigDecimal test
+                    // BigDecimal test
                     rowset.beforeFirst();
                     while (rowset.next()) {
                         Object oPk = rowset.getObject(pkColIndex);
@@ -165,7 +165,7 @@ public class FilteringTest extends BaseTest {
                         }
                     }
 
-                // BigInteger test
+                    // BigInteger test
                     rowset.beforeFirst();
                     while (rowset.next()) {
                         Object oPk = rowset.getObject(pkColIndex);
@@ -190,7 +190,7 @@ public class FilteringTest extends BaseTest {
                         }
                     }
 
-                // Integer test
+                    // Integer test
                     rowset.beforeFirst();
                     while (rowset.next()) {
                         Object oPk = rowset.getObject(pkColIndex);
@@ -217,17 +217,14 @@ public class FilteringTest extends BaseTest {
                     return null;
                 }
             });
-        } finally {
-            client.shutdown();
-            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 
     @Test
     public void userFilteringTest() throws Exception {
         System.out.println("Enable and disable user custom filtering");
-        final DbClient client = initDevelopTestClient();
-        try {
+        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+            final DatabasesClient client = resource.getClient();
             ScriptUtils.inContext(new ScriptUtils.ScriptAction() {
                 @Override
                 public Object run(Context cx) throws Exception {
@@ -275,17 +272,14 @@ public class FilteringTest extends BaseTest {
                     return null;
                 }
             });
-        } finally {
-            client.shutdown();
-            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 
     @Test
     public void filteringScrollTest() throws Exception {
         System.out.println("filteringScrollTest, filteringPointsOfIntererstTest");
-        final DbClient client = initDevelopTestClient();
-        try {
+        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+            final DatabasesClient client = resource.getClient();
             ScriptUtils.inContext(new ScriptAction() {
                 @Override
                 public Object run(Context cx) throws Exception {
@@ -396,17 +390,14 @@ public class FilteringTest extends BaseTest {
                     return null;
                 }
             });
-        } finally {
-            client.shutdown();
-            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 
     @Test
     public void filteringEmptyKeysSourceTest() throws Exception {
         System.out.println("filteringEmptyKeysSourceTest");
-        final DbClient client = initDevelopTestClient();
-        try {
+        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+            final DatabasesClient client = resource.getClient();
             ScriptUtils.inContext(new ScriptAction() {
                 @Override
                 public Object run(Context cx) throws Exception {
@@ -437,17 +428,14 @@ public class FilteringTest extends BaseTest {
                     return null;
                 }
             });
-        } finally {
-            client.shutdown();
-            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 
     @Test
     public void filteringBadSourcePositionTest() throws Exception {
         System.out.println("filteringBadSourcePositionTest");
-        final DbClient client = initDevelopTestClient();
-        try {
+        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+            final DatabasesClient client = resource.getClient();
             ScriptUtils.inContext(new ScriptAction() {
                 @Override
                 public Object run(Context cx) throws Exception {
@@ -490,17 +478,14 @@ public class FilteringTest extends BaseTest {
                     return null;
                 }
             });
-        } finally {
-            client.shutdown();
-            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 
     @Test
     public void filteringCrudTest() throws Exception {
         System.out.println("filteringCrudTest");
-        final DbClient client = initDevelopTestClient();
-        try {
+        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+            final DatabasesClient client = resource.getClient();
             ScriptUtils.inContext(new ScriptAction() {
                 @Override
                 public Object run(Context cx) throws Exception {
@@ -599,17 +584,14 @@ public class FilteringTest extends BaseTest {
                     return null;
                 }
             });
-        } finally {
-            client.shutdown();
-            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 
     @Test
     public void filteringScriptEventsVsDataEventsTest() throws Exception {
         System.out.println("filteringScriptEventsVsDataTest");
-        final DbClient client = initDevelopTestClient();
-        try {
+        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+            final DatabasesClient client = resource.getClient();
             ScriptUtils.inContext(new ScriptAction() {
                 @Override
                 public Object run(Context cx) throws Exception {
@@ -740,9 +722,6 @@ public class FilteringTest extends BaseTest {
                     return null;
                 }
             });
-        } finally {
-            client.shutdown();
-            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
     EntityRefreshFilterDataListener listenerOf1Layer = null;
@@ -752,8 +731,8 @@ public class FilteringTest extends BaseTest {
     @Test
     public void filteringExecutingOrderTest() throws Exception {
         System.out.println("filteringExecutingOrderTest layer by layer");
-        final DbClient client = initDevelopTestClient();
-        try {
+        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+            final DatabasesClient client = resource.getClient();
             ScriptUtils.inContext(new ScriptAction() {
                 @Override
                 public Object run(Context cx) throws Exception {
@@ -813,9 +792,6 @@ public class FilteringTest extends BaseTest {
                     return null;
                 }
             });
-        } finally {
-            client.shutdown();
-            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 }

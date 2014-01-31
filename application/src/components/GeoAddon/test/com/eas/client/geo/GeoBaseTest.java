@@ -30,7 +30,6 @@ public class GeoBaseTest {
         settings.setUrl(url);
         settings.setUser(login);
         settings.setPassword(passwd);
-
         GeneralResourceProvider.getInstance().registerDatasource(TEST_DATASOURCE_NAME, settings);
         dbClient = new DatabasesClient(null, TEST_DATASOURCE_NAME, false);
     }
@@ -40,7 +39,7 @@ public class GeoBaseTest {
         dbClient.shutdown();
         GeneralResourceProvider.getInstance().unregisterDatasource(TEST_DATASOURCE_NAME);
     }
-
+    
     @Test
     public void dummyTest() {
     }

@@ -7,10 +7,9 @@ package com.eas.client.model;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.sorting.RowsComparator;
 import com.bearsoft.rowset.sorting.SortingCriterion;
-import com.eas.client.DbClient;
+import com.eas.client.DatabasesClientWithResource;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
-import com.eas.client.resourcepool.GeneralResourceProvider;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,9 +25,8 @@ public class RelationsTest extends BaseTest {
     @Test
     public void attainabilityTest() throws Exception {
         System.out.println("attainabilityTest. Field to parameter, parameter to parameter and field to parameter relations test");
-        DbClient client = BaseTest.initDevelopTestClient();
-        try {
-            ApplicationDbModel model = new ApplicationDbModel(client);
+        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+            ApplicationDbModel model = new ApplicationDbModel(resource.getClient());
             ApplicationDbEntity entity11 = model.newGenericEntity();
             entity11.setTableName("GOODORDER");
             ApplicationDbEntity entity21 = model.newGenericEntity();
@@ -92,7 +90,7 @@ public class RelationsTest extends BaseTest {
             assertEquals(1, entity32.getFields().getPrimaryKeys().size());
             assertEquals(1, entity33.getFields().getPrimaryKeys().size());
             assertEquals(1, entity41.getFields().getPrimaryKeys().size());
-        ////
+            ////
 
             // 1 layer
             assertNotNull(entity11.getRowset());
@@ -148,9 +146,6 @@ public class RelationsTest extends BaseTest {
                     assertEquals((Double) amount, (Double) _amount);
                 }
             }
-        } finally {
-            client.shutdown();
-            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 }
