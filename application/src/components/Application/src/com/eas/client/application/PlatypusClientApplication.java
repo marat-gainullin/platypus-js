@@ -24,7 +24,6 @@ import java.awt.EventQueue;
 import java.beans.ExceptionListener;
 import java.io.File;
 import java.lang.management.ManagementFactory;
-import java.util.Locale;
 import java.util.logging.*;
 import java.util.prefs.Preferences;
 import javax.management.ObjectName;
@@ -69,7 +68,7 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
     public static final String APPLICATION_PATH_NOT_DIRECTORY_MSG = "Application path must point to a directory.";
     //
     protected static PlatypusClientApplication app;
-    public static final String APPLICATION_ELEMENTS_LOCATION_MSG = "Application elements are located at: {0}";
+    public static final String APPLICATION_ELEMENTS_LOCATION_MSG = "Application is located at: {0}";
     protected JFrame mainWindow;
     protected Client client;
     protected PlatypusPrincipal principal;
@@ -130,15 +129,17 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
     }
 
     protected boolean login() throws Exception {
-        if (url != null) {
-            if (user != null && password != null) {
-                return consoleLogin();
-            } else {
-                return guiLogin();
-            }
+        if (user != null && password != null) {
+            return consoleLogin();
         } else {
-            return guiLogin();
-            //throw new Exception("Platypus application needs at least a valid application directory path in url parameter or url of service (database, platypus server or j2ee server application) with an application.");
+            // Hack. Due to undefined user space without a datasource,
+            // absent datasource is treated as non authetticated launch.
+            if (defDatasource != null && !defDatasource.isEmpty()) {
+                return guiLogin();
+            } else {
+                client = ClientFactory.getInstance(url, defDatasource);
+                return true;
+            }
         }
     }
 

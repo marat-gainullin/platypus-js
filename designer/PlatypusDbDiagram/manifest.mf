@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 OpenIDE-Module: com.eas.designer.application.dbdiagram
-OpenIDE-Module-Implementation-Version: 316
+OpenIDE-Module-Implementation-Version: 317
 OpenIDE-Module-Layer: com/eas/designer/application/dbdiagram/layer.xml
 OpenIDE-Module-Localizing-Bundle: com/eas/designer/application/dbdiagram/Bundle.properties
 

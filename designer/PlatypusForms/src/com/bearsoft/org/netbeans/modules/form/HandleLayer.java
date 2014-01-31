@@ -158,7 +158,6 @@ public class HandleLayer extends JPanel {
 
         @Override
         public void mousePressed(MouseEvent e) {
-            formDesigner.componentActivated();
             if (HandleLayer.this.isVisible()) {
                 if (SwingUtilities.isRightMouseButton(e)) {
                     if (formDesigner.getDesignerMode() != PlatypusFormLayoutView.MODE_SELECT) {

@@ -21,8 +21,11 @@ import com.eas.dbcontrols.grid.rt.models.RowsetsTableModel;
 import com.eas.dbcontrols.grid.rt.models.RowsetsTreedModel;
 import com.eas.gui.CascadedStyle;
 import java.awt.BorderLayout;
+import java.awt.EventQueue;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -38,7 +41,7 @@ import org.junit.Test;
 
 /**
  *
- * @author Gala
+ * @author mg
  */
 public class RowsSorterTest extends GridBaseTest {
 
@@ -182,87 +185,142 @@ public class RowsSorterTest extends GridBaseTest {
     }
 
     @Test
-    public void sorting1CriteriaAscTest() throws Exception {
-        System.out.println("sorting1CriteriaAscTest");
-        TabularVisualState state = new TabularVisualState();
-        for (int i = 0; i < pkSequencesAsc.length; i++) {
-            state.sorter.toggleSortOrder(i);// asc
-            checkPkSequence(pkSequencesAsc[i], state.table);
-            state.sorter.toggleSortOrder(i);// desc
-            state.sorter.toggleSortOrder(i);// unsorted
-        }
-        state.end();
-    }
+    public void sorting1CriteriaAscTest() {
+        EventQueue.invokeLater(new Runnable() {
 
-    @Test
-    public void sortingMultiCriteriaAscTest() throws Exception {
-        System.out.println("sortingMultiCriteriaAscTest");
-        TabularVisualState state = new TabularVisualState();
-        List<SortKey> criteria = new ArrayList<>();
-        criteria.add(new SortKey(3 - 1, SortOrder.ASCENDING));
-        criteria.add(new SortKey(5 - 1, SortOrder.ASCENDING));
-        criteria.add(new SortKey(7 - 1, SortOrder.ASCENDING));
-        criteria.add(new SortKey(2 - 1, SortOrder.ASCENDING));
-        criteria.add(new SortKey(8 - 1, SortOrder.ASCENDING));
-        criteria.add(new SortKey(4 - 1, SortOrder.ASCENDING));
-        criteria.add(new SortKey(6 - 1, SortOrder.ASCENDING));
-        state.table.getRowSorter().setSortKeys(criteria);
-        checkPkSequence(new long[]{6L, 15L, 16L, 17L, 18L, 19L, 3L, 4L, 2L, 7L, 1L, 5L, 21L, 22L, 20L, 8L, 9L, 10L, 11L, 12L, 13L, 14L}, state.table);
-        state.end();
-    }
-
-    @Test
-    public void sorting1CriteriaDescTest() throws Exception {
-        System.out.println("sorting1CriteriaDescTest");
-        TabularVisualState state = new TabularVisualState();
-        for (int i = 0; i < pkSequencesAsc.length; i++) {
-            state.sorter.toggleSortOrder(i); // asc
-            state.sorter.toggleSortOrder(i); // desc
-            checkPkSequence(pkSequencesDesc[i], state.table);
-            state.sorter.toggleSortOrder(i); // unsorted
-        }
-        state.end();
-    }
-
-    @Test
-    public void sortingMultiCriteriaAscDescTest() throws Exception {
-        System.out.println("sortingMultiCriteriaAscDescTest");
-        TabularVisualState state = new TabularVisualState();
-        List<SortKey> criteria = new ArrayList<>();
-        criteria.add(new SortKey(3 - 1, SortOrder.ASCENDING));
-        criteria.add(new SortKey(5 - 1, SortOrder.ASCENDING));
-        criteria.add(new SortKey(7 - 1, SortOrder.DESCENDING));
-        criteria.add(new SortKey(2 - 1, SortOrder.ASCENDING));
-        criteria.add(new SortKey(8 - 1, SortOrder.DESCENDING));
-        criteria.add(new SortKey(4 - 1, SortOrder.ASCENDING));
-        criteria.add(new SortKey(6 - 1, SortOrder.DESCENDING));
-        state.table.getRowSorter().setSortKeys(criteria);
-        checkPkSequence(new long[]{6L, 15L, 16L, 17L, 18L, 19L, 3L, 4L, 2L, 7L, 1L, 5L, 20L, 22L, 21L, 8L, 9L, 10L, 11L, 12L, 13L, 14L}, state.table);
-        state.end();
-    }
-
-    @Test
-    public void treedSorting1CriteriaAscDescSomeExpandedTest() throws Exception {
-        System.out.println("treedSorting1CriteriaAscDescSomeExpandedTest");
-        TreedVisualState state = new TreedVisualState();
-        state.front.expand(state.rowset.getRow(1), false);
-        state.front.expand(state.rowset.getRow(18), false);
-        long[] treedPkSequencesBefore = new long[state.table.getRowCount()];
-        for (int i = 0; i < treedPkSequencesBefore.length; i++) {
-            Object oValue = state.table.getValueAt(i, 0);
-            if (oValue instanceof CellData) {
-                oValue = ((CellData) oValue).getData();
+            @Override
+            public void run() {
+                try {
+                    System.out.println("sorting1CriteriaAscTest");
+                    TabularVisualState state = new TabularVisualState();
+                    for (int i = 0; i < pkSequencesAsc.length; i++) {
+                        state.sorter.toggleSortOrder(i);// asc
+                        checkPkSequence(pkSequencesAsc[i], state.table);
+                        state.sorter.toggleSortOrder(i);// desc
+                        state.sorter.toggleSortOrder(i);// unsorted
+                    }
+                    state.end();
+                } catch (Exception ex) {
+                    Logger.getLogger(RowsSorterTest.class.getName()).log(Level.SEVERE, null, ex);
+                    fail(ex.getMessage());
+                }
             }
-            treedPkSequencesBefore[i] = ((Integer) oValue).longValue();
-        }
-        for (int i = 0; i < treedPkSequencesAsc.length; i++) {
-            state.sorter.toggleSortOrder(i);// asc
-            checkPkSequence(treedPkSequencesAsc[i], state.table);
-            state.sorter.toggleSortOrder(i);// desc
-            checkPkSequence(treedPkSequencesDesc[i], state.table);
-            state.sorter.toggleSortOrder(i);// unsorted
-            checkPkSequence(treedPkSequencesBefore, state.table);
-        }
-        state.end();
+        });
+    }
+
+    @Test
+    public void sortingMultiCriteriaAscTest() {
+        EventQueue.invokeLater(new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    System.out.println("sortingMultiCriteriaAscTest");
+                    TabularVisualState state = new TabularVisualState();
+                    List<SortKey> criteria = new ArrayList<>();
+                    criteria.add(new SortKey(3 - 1, SortOrder.ASCENDING));
+                    criteria.add(new SortKey(5 - 1, SortOrder.ASCENDING));
+                    criteria.add(new SortKey(7 - 1, SortOrder.ASCENDING));
+                    criteria.add(new SortKey(2 - 1, SortOrder.ASCENDING));
+                    criteria.add(new SortKey(8 - 1, SortOrder.ASCENDING));
+                    criteria.add(new SortKey(4 - 1, SortOrder.ASCENDING));
+                    criteria.add(new SortKey(6 - 1, SortOrder.ASCENDING));
+                    state.table.getRowSorter().setSortKeys(criteria);
+                    checkPkSequence(new long[]{6L, 15L, 16L, 17L, 18L, 19L, 3L, 4L, 2L, 7L, 1L, 5L, 21L, 22L, 20L, 8L, 9L, 10L, 11L, 12L, 13L, 14L}, state.table);
+                    state.end();
+                } catch (Exception ex) {
+                    Logger.getLogger(RowsSorterTest.class.getName()).log(Level.SEVERE, null, ex);
+                    fail(ex.getMessage());
+                }
+            }
+        });
+    }
+
+    @Test
+    public void sorting1CriteriaDescTest() {
+        EventQueue.invokeLater(new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    System.out.println("sorting1CriteriaDescTest");
+                    TabularVisualState state = new TabularVisualState();
+                    for (int i = 0; i < pkSequencesAsc.length; i++) {
+                        state.sorter.toggleSortOrder(i); // asc
+                        state.sorter.toggleSortOrder(i); // desc
+                        checkPkSequence(pkSequencesDesc[i], state.table);
+                        state.sorter.toggleSortOrder(i); // unsorted
+                    }
+                    state.end();
+                } catch (Exception ex) {
+                    Logger.getLogger(RowsSorterTest.class.getName()).log(Level.SEVERE, null, ex);
+                    fail(ex.getMessage());
+                }
+            }
+        });
+    }
+
+    @Test
+    public void sortingMultiCriteriaAscDescTest() {
+        EventQueue.invokeLater(new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    System.out.println("sortingMultiCriteriaAscDescTest");
+                    TabularVisualState state = new TabularVisualState();
+                    List<SortKey> criteria = new ArrayList<>();
+                    criteria.add(new SortKey(3 - 1, SortOrder.ASCENDING));
+                    criteria.add(new SortKey(5 - 1, SortOrder.ASCENDING));
+                    criteria.add(new SortKey(7 - 1, SortOrder.DESCENDING));
+                    criteria.add(new SortKey(2 - 1, SortOrder.ASCENDING));
+                    criteria.add(new SortKey(8 - 1, SortOrder.DESCENDING));
+                    criteria.add(new SortKey(4 - 1, SortOrder.ASCENDING));
+                    criteria.add(new SortKey(6 - 1, SortOrder.DESCENDING));
+                    state.table.getRowSorter().setSortKeys(criteria);
+                    checkPkSequence(new long[]{6L, 15L, 16L, 17L, 18L, 19L, 3L, 4L, 2L, 7L, 1L, 5L, 20L, 22L, 21L, 8L, 9L, 10L, 11L, 12L, 13L, 14L}, state.table);
+                    state.end();
+                } catch (Exception ex) {
+                    Logger.getLogger(RowsSorterTest.class.getName()).log(Level.SEVERE, null, ex);
+                    fail(ex.getMessage());
+                }
+            }
+        });
+    }
+
+    @Test
+    public void treedSorting1CriteriaAscDescSomeExpandedTest() {
+        EventQueue.invokeLater(new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    System.out.println("treedSorting1CriteriaAscDescSomeExpandedTest");
+                    TreedVisualState state = new TreedVisualState();
+                    state.front.expand(state.rowset.getRow(1), false);
+                    state.front.expand(state.rowset.getRow(18), false);
+                    long[] treedPkSequencesBefore = new long[state.table.getRowCount()];
+                    for (int i = 0; i < treedPkSequencesBefore.length; i++) {
+                        Object oValue = state.table.getValueAt(i, 0);
+                        if (oValue instanceof CellData) {
+                            oValue = ((CellData) oValue).getData();
+                        }
+                        treedPkSequencesBefore[i] = ((Integer) oValue).longValue();
+                    }
+                    for (int i = 0; i < treedPkSequencesAsc.length; i++) {
+                        state.sorter.toggleSortOrder(i);// asc
+                        checkPkSequence(treedPkSequencesAsc[i], state.table);
+                        state.sorter.toggleSortOrder(i);// desc
+                        checkPkSequence(treedPkSequencesDesc[i], state.table);
+                        state.sorter.toggleSortOrder(i);// unsorted
+                        checkPkSequence(treedPkSequencesBefore, state.table);
+                    }
+                    state.end();
+                } catch (Exception ex) {
+                    Logger.getLogger(RowsSorterTest.class.getName()).log(Level.SEVERE, null, ex);
+                    fail(ex.getMessage());
+                }
+            }
+        });
     }
 }
