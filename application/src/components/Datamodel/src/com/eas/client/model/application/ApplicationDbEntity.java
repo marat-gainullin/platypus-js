@@ -6,11 +6,15 @@ package com.eas.client.model.application;
 
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.changes.Change;
+import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
+import com.eas.client.DbMetadataCache;
 import com.eas.client.SQLUtils;
 import com.eas.client.queries.SqlCompiledQuery;
 import com.eas.client.queries.SqlQuery;
+import com.eas.client.sqldrivers.SqlDriver;
+import com.eas.client.sqldrivers.resolvers.TypesResolver;
 import java.sql.ParameterMetaData;
 import java.util.List;
 
@@ -88,6 +92,14 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
             SqlCompiledQuery compiled = query.compile();
             compiled.setSessionId(model.getSessionId());
             rowset = compiled.prepareRowset();
+            if (tableName != null) {// such resolving is needed here because table queries are not processed by StoredQueryFactory
+                DbMetadataCache mdCache = model.getClient().getDbMetadataCache(query.getDbId());
+                SqlDriver driver = mdCache.getConnectionDriver();
+                TypesResolver resolver = driver.getTypesResolver();
+                for (Field field : rowset.getFields().toCollection()) {
+                    resolver.resolve2Application(field);
+                }
+            }
             forwardChangeLog();
             rowset.addRowsetListener(this);
             changeSupport.firePropertyChange("rowset", oldRowset, rowset);

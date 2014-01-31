@@ -46,14 +46,15 @@ public class TableIndexNode extends AbstractNode {
     protected static final String TREE_INDEX_ICON_NAME = "tree_index.png";//NOI18N
     protected SqlActionsController sqlController;
     protected DbTableIndexSpec index;
+    protected PropertyChangeListener indexPropertyListener;
     protected FieldsEntity tableEntity;
-    private AddIndexColumnAction addColumnAction = new AddIndexColumnAction();
+    private final AddIndexColumnAction addColumnAction = new AddIndexColumnAction();
 
     public TableIndexNode(DbTableIndexSpec anIndexSpec, FieldsEntity aTableEntity, Lookup aLookup) throws Exception {
         super(new TableIndexChildren(anIndexSpec, aTableEntity), aLookup);
         index = anIndexSpec;
         tableEntity = aTableEntity;
-        index.getChangeSupport().addPropertyChangeListener(new PropertyChangeListener() {
+        indexPropertyListener = new PropertyChangeListener() {
             @Override
             public void propertyChange(PropertyChangeEvent evt) {
                 switch (evt.getPropertyName()) {
@@ -75,7 +76,8 @@ public class TableIndexNode extends AbstractNode {
                         break;
                 }
             }
-        });
+        };
+        index.getChangeSupport().addPropertyChangeListener(indexPropertyListener);
         sqlController = new SqlActionsController(aTableEntity.getModel());
     }
 
@@ -200,6 +202,9 @@ public class TableIndexNode extends AbstractNode {
             return;
         }
         getUndo().undoableEditHappened(new UndoableEditEvent(this, edit));
+        index.getChangeSupport().removePropertyChangeListener(indexPropertyListener);
+        ((TableIndexChildren)getChildren()).removeNotify();
+        super.destroy();
     }
 
     @Override

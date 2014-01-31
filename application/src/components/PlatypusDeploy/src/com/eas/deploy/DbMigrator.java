@@ -7,10 +7,10 @@ package com.eas.deploy;
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
 import com.eas.client.ClientConstants;
-import com.eas.client.DbClient;
+import com.eas.client.DatabasesClient;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.queries.SqlQuery;
-import com.eas.client.settings.DbConnectionSettings;
+import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.metadata.MetadataSynchronizer;
 import com.eas.util.FileUtils;
@@ -18,13 +18,12 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.sql.DataSource;
 import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
@@ -36,27 +35,14 @@ public class DbMigrator extends BaseDeployer {
 
     public static final String MTD_SNAPSHOT_MIGRATION_EXT = "xdm"; // NOI18N
     public static final String SQL_BATCH_MIGRATION_EXT = "batch"; // NOI18N
-    public static final String PLATYPUS_PROJECT_BOOTSTRAP_DIR = "db"; // NOI18N
     protected static final String GET_CURRENT_DB_VERSION_SQL = "SELECT VERSION_VALUE FROM " // NOI18N
             + ClientConstants.T_MTD_VERSION;
     private static final String ILLEGAL_VERSIONS_RECORDS_NUMBER_MSG = "Illegal versions records number - only one record allowed."; // NOI18N
-    private File bootstrapDirectory;
+    protected File dir;
 
-    public DbMigrator(String aProjectPath) {
-        super(aProjectPath);
-        init();
-    }
-
-    public DbMigrator(File aProjectDir, DbClient aClient) {
-        super(aProjectDir, aClient);
-        init();
-    }
-
-    private void init() {
-        bootstrapDirectory = new File(projectDir, PLATYPUS_PROJECT_BOOTSTRAP_DIR);
-        if (!bootstrapDirectory.isDirectory()) {
-            throw new IllegalArgumentException("Bootstrap path is not for directory: " + bootstrapDirectory.getAbsolutePath()); // NOI18N 
-        }
+    public DbMigrator(File aDir, DatabasesClient aClient) {
+        super(aClient);
+        dir = aDir;
     }
 
     /**
@@ -72,14 +58,12 @@ public class DbMigrator extends BaseDeployer {
             busy = true;
         }
         try {
-            out.println("Migrating database started..."); // NOI18N
-            checkSettings();
-            checkDbClient();
+            out.println("Migrating of database is started..."); // NOI18N
             applyMigrationsImpl();
-            out.println("Migrating database completed."); // NOI18N
+            out.println("Migrating of database is complete."); // NOI18N
             out.println();
         } catch (Exception ex) {
-            err.println("Migrating database error: " + ex.getMessage()); // NOI18N
+            err.println("Database migration error: " + ex.getMessage()); // NOI18N
             Logger.getLogger(DbMigrator.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             synchronized (this) {
@@ -89,10 +73,8 @@ public class DbMigrator extends BaseDeployer {
     }
 
     /**
-     * Creates database meta-data snapshot migration to the current database
-     * state.
+     * Creates database metadata snapshot migration to the current database state.
      *
-     * @return Path to the new file
      */
     public void createDbMetadataMigration() {
         synchronized (this) {
@@ -104,13 +86,11 @@ public class DbMigrator extends BaseDeployer {
         }
         try {
             out.println("Creating new Db metadata migration..."); // NOI18N
-            checkSettings();
-            checkDbClient();
             int migrationNumber = getCurrentDbVersion() + 1;
             String mtdSnapshotPath = getMtdSnapshotFilePath(migrationNumber);
             String sqlBatchPath = getSqlScriptFilePath(migrationNumber);
             if (!new File(mtdSnapshotPath).exists() && !new File(sqlBatchPath).exists()) {
-                MetadataSynchronizer.readMetadataSnapshot(client, mtdSnapshotPath, out);
+                MetadataSynchronizer.readMetadataSnapshot(client, client.getConnectionSchema(null), mtdSnapshotPath, out);
                 setCurrentDbVersion(migrationNumber);
                 out.println("New Db metadata migration created to version: " + migrationNumber);
             } else {
@@ -129,7 +109,6 @@ public class DbMigrator extends BaseDeployer {
     /**
      * Creates new SQL migration batch script file.
      *
-     * @return Path to the new file
      */
     public void createSqlMigration() {
         synchronized (this) {
@@ -173,7 +152,7 @@ public class DbMigrator extends BaseDeployer {
             busy = true;
         }
         try {
-            assert bootstrapDirectory != null;
+            assert dir != null;
             out.println("Cleanup migrations directory..."); // NOI18N
             List<File> filesList = listActualMigrations(null);
             for (int i = 0; i < filesList.size(); i++) {
@@ -195,7 +174,7 @@ public class DbMigrator extends BaseDeployer {
         }
     }
 
-    public Integer getCurrentDbVersion() {
+    public int getCurrentDbVersion() {
         try {
             assert client != null;
             SqlQuery versionQuery = new SqlQuery(client, GET_CURRENT_DB_VERSION_SQL);
@@ -208,7 +187,7 @@ public class DbMigrator extends BaseDeployer {
         } catch (Exception ex) {
             Logger.getLogger(DbMigrator.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return null;
+        return 0;
     }
 
     public void setCurrentDbVersion(int aVersion) {
@@ -250,7 +229,7 @@ public class DbMigrator extends BaseDeployer {
                 switch (FileUtils.getFileExtension(m)) {
                     case MTD_SNAPSHOT_MIGRATION_EXT:
                         if (i == filesList.size() - 1 || SQL_BATCH_MIGRATION_EXT.equals(FileUtils.getFileExtension(filesList.get(i + 1)))) {
-                            MetadataSynchronizer.applyMetadataSnapshot(client, m.getAbsolutePath(), dumpDir, out);
+                            MetadataSynchronizer.applyMetadataSnapshot(client, client.getConnectionSchema(null), m.getAbsolutePath(), dumpDir, out);
                             out.format("Metadata migration %d applied to the database.\n", migrationNumber); // NOI18N 
                         } else {
                             out.format("Metadata migration %d skipped.\n", migrationNumber); // NOI18N 
@@ -273,7 +252,7 @@ public class DbMigrator extends BaseDeployer {
     // Ordering is important for method result
     private List<File> listActualMigrations(Integer currentDbVersion) throws DeployException {
         TreeMap<Integer, File> migrations = new TreeMap<>();
-        File[] migrationFiles = bootstrapDirectory.listFiles(new MigrationsFilesFilter());
+        File[] migrationFiles = dir.listFiles(new MigrationsFilesFilter());
         for (File f : migrationFiles) {
             Integer i = parseInt(FileUtils.removeExtension(f.getName()), null);
             if (i != null && (currentDbVersion == null || i > currentDbVersion)) {
@@ -303,11 +282,8 @@ public class DbMigrator extends BaseDeployer {
     }
 
     private void applySqlScript(File sqlScriptFile) throws Exception {
-        DbConnectionSettings.registerDrivers(DbConnectionSettings.readDrivers().values());
-        Properties props = new Properties();
-        props.put("user", settings.getDbSettings().getUser());
-        props.put("password", settings.getDbSettings().getPassword());
-        try (Connection connection = DriverManager.getConnection(settings.getDbSettings().getUrl(), props)) {
+        DataSource ds = GeneralResourceProvider.getInstance().getPooledDataSource(client.getDefaultDatasourceName());
+        try (Connection connection = ds.getConnection()) {
             SqlDriver.applyScript(FileUtils.readString(sqlScriptFile, PlatypusFiles.DEFAULT_ENCODING), connection);
         }
     }
@@ -326,15 +302,19 @@ public class DbMigrator extends BaseDeployer {
     }
 
     private String getMtdSnapshotFilePath(int migrationNumber) {
-        File f = new File(bootstrapDirectory, String.valueOf(migrationNumber) + String.valueOf(FileUtils.EXTENSION_SEPARATOR) + MTD_SNAPSHOT_MIGRATION_EXT);
+        File f = new File(dir, String.valueOf(migrationNumber) + String.valueOf(FileUtils.EXTENSION_SEPARATOR) + MTD_SNAPSHOT_MIGRATION_EXT);
         return f.getAbsolutePath();
     }
 
     private String getSqlScriptFilePath(int migrationNumber) {
-        File f = new File(bootstrapDirectory, Integer.valueOf(migrationNumber).toString() + FileUtils.EXTENSION_SEPARATOR + SQL_BATCH_MIGRATION_EXT);
+        File f = new File(dir, Integer.valueOf(migrationNumber).toString() + FileUtils.EXTENSION_SEPARATOR + SQL_BATCH_MIGRATION_EXT);
         return f.getAbsolutePath();
     }
 
+    void initVersioning() throws Exception {
+        DatabasesClient.initVersioning(client.obtainDataSource(null));
+    }
+    
     private static class MigrationsFilesFilter implements FilenameFilter {
 
         @Override

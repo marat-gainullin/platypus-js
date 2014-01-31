@@ -27,25 +27,34 @@ public class TableIndexesChildren extends Children.Keys<DbTableIndexSpec> {
 
     FieldsEntity entity;
     Lookup lookup;
+    private final PropertyChangeListener entityListener;
 
     public TableIndexesChildren(FieldsEntity anEntity, Lookup aLookup) {
         super();
         entity = anEntity;
         entity.achiveIndexes();
         lookup = aLookup;
-        entity.getChangeSupport().addPropertyChangeListener(FieldsEntity.INDEXES_PROPERTY, new PropertyChangeListener() {
+        entityListener = new PropertyChangeListener() {
 
             @Override
             public void propertyChange(PropertyChangeEvent evt) {
                 setKeys(getKeys());
             }
             
-        });
+        };
+        entity.getChangeSupport().addPropertyChangeListener(FieldsEntity.INDEXES_PROPERTY, entityListener);
     }
 
     @Override
     protected void addNotify() {
         setKeys(getKeys());
+    }
+
+    @Override
+    protected void removeNotify() {
+        entity.getChangeSupport().removePropertyChangeListener(FieldsEntity.INDEXES_PROPERTY, entityListener);
+        setKeys(Collections.EMPTY_LIST);
+        super.removeNotify();
     }
 
     protected List<DbTableIndexSpec> getKeys() {

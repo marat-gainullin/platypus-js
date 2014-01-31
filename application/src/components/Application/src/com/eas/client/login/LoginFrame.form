@@ -48,16 +48,15 @@
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="0" attributes="0">
-                  <Component id="pnlDbLogin" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="pnlAppLogin" max="32767" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
         <DimensionLayout dim="1">
           <Group type="103" groupAlignment="0" attributes="0">
               <Component id="pnlAppLogin" alignment="0" max="32767" attributes="1"/>
-              <Component id="pnlDbLogin" alignment="0" min="0" max="32767" attributes="1"/>
           </Group>
         </DimensionLayout>
       </Layout>
@@ -84,7 +83,7 @@
                           </Group>
                           <Group type="102" alignment="0" attributes="0">
                               <Component id="checkRememberPassword" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace min="17" pref="143" max="32767" attributes="0"/>
+                              <EmptySpace min="17" pref="345" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                   </Group>
@@ -139,91 +138,6 @@
               <Properties>
                 <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
                   <ResourceString bundle="com/eas/client/login/Bundle.properties" key="checkRememberPassword" replaceFormat="bundle.getString(&quot;{key}&quot;)"/>
-                </Property>
-              </Properties>
-            </Component>
-          </SubComponents>
-        </Container>
-        <Container class="javax.swing.JPanel" name="pnlDbLogin">
-
-          <Layout>
-            <DimensionLayout dim="0">
-              <Group type="103" groupAlignment="0" attributes="0">
-                  <Group type="102" alignment="0" attributes="0">
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="checkDbRememberPassword" alignment="1" pref="196" max="32767" attributes="1"/>
-                          <Group type="102" alignment="0" attributes="0">
-                              <Group type="103" groupAlignment="0" attributes="0">
-                                  <Component id="lblDbUserName" alignment="0" min="-2" pref="52" max="-2" attributes="1"/>
-                                  <Component id="lblDbPassword" alignment="0" min="-2" max="-2" attributes="1"/>
-                              </Group>
-                              <EmptySpace max="-2" attributes="0"/>
-                              <Group type="103" groupAlignment="0" attributes="0">
-                                  <Component id="tfDbPassword" pref="140" max="32767" attributes="3"/>
-                                  <Component id="tfDbUserName" alignment="0" pref="140" max="32767" attributes="3"/>
-                              </Group>
-                          </Group>
-                      </Group>
-                      <EmptySpace max="-2" attributes="0"/>
-                  </Group>
-              </Group>
-            </DimensionLayout>
-            <DimensionLayout dim="1">
-              <Group type="103" groupAlignment="0" attributes="0">
-                  <Group type="102" alignment="0" attributes="0">
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Group type="103" groupAlignment="3" attributes="0">
-                          <Component id="lblDbUserName" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="tfDbUserName" alignment="3" min="-2" max="-2" attributes="0"/>
-                      </Group>
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Group type="103" groupAlignment="3" attributes="0">
-                          <Component id="tfDbPassword" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="lblDbPassword" alignment="3" min="-2" max="-2" attributes="0"/>
-                      </Group>
-                      <EmptySpace type="separate" max="-2" attributes="0"/>
-                      <Component id="checkDbRememberPassword" min="-2" pref="19" max="-2" attributes="0"/>
-                      <EmptySpace max="32767" attributes="0"/>
-                  </Group>
-              </Group>
-            </DimensionLayout>
-          </Layout>
-          <SubComponents>
-            <Component class="javax.swing.JLabel" name="lblDbUserName">
-              <Properties>
-                <Property name="labelFor" type="java.awt.Component" editor="org.netbeans.modules.form.ComponentChooserEditor">
-                  <ComponentRef name="tfUserName"/>
-                </Property>
-                <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                  <ResourceString bundle="com/eas/client/login/Bundle.properties" key="LoginDialog.lblDbUserName.text" replaceFormat="bundle.getString(&quot;{key}&quot;)"/>
-                </Property>
-              </Properties>
-            </Component>
-            <Component class="javax.swing.JLabel" name="lblDbPassword">
-              <Properties>
-                <Property name="labelFor" type="java.awt.Component" editor="org.netbeans.modules.form.ComponentChooserEditor">
-                  <ComponentRef name="tfPassword"/>
-                </Property>
-                <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                  <ResourceString bundle="com/eas/client/login/Bundle.properties" key="LoginDialog.lblDbPassword.text" replaceFormat="bundle.getString(&quot;{key}&quot;)"/>
-                </Property>
-              </Properties>
-            </Component>
-            <Component class="javax.swing.JTextField" name="tfDbUserName">
-              <Properties>
-                <Property name="autoscrolls" type="boolean" value="false"/>
-              </Properties>
-            </Component>
-            <Component class="javax.swing.JPasswordField" name="tfDbPassword">
-              <Properties>
-                <Property name="autoscrolls" type="boolean" value="false"/>
-              </Properties>
-            </Component>
-            <Component class="javax.swing.JCheckBox" name="checkDbRememberPassword">
-              <Properties>
-                <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                  <ResourceString bundle="com/eas/client/login/Bundle.properties" key="checkDbRememberPassword.text" replaceFormat="bundle.getString(&quot;{key}&quot;)"/>
                 </Property>
               </Properties>
             </Component>

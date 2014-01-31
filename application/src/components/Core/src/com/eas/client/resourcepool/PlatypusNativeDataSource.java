@@ -28,13 +28,19 @@ public class PlatypusNativeDataSource extends BearResourcePool<BearDatabaseConne
     protected PrintWriter printWriter;
     protected int loginTimeout;
 
-    public PlatypusNativeDataSource(int aMaxConnections, int aMaxStatements, int aResourceTimeout, String aUrl, String aUser, String aPassword) throws Exception {
+    public PlatypusNativeDataSource(int aMaxConnections, int aMaxStatements, int aResourceTimeout, String aUrl, String aUser, String aPassword, String aSchema, Properties aProperties) throws Exception {
         super(aMaxConnections, aResourceTimeout);
         url = aUrl;
         maxStatements = aMaxStatements;
         resourceTimeout = aResourceTimeout;
+        if (aProperties != null) {
+            props.putAll(aProperties);
+        }
         props.put("user", aUser);
         props.put("password", aPassword);
+        if (aSchema != null) {
+            props.put("schema", aSchema);
+        }
     }
 
     @Override
@@ -90,4 +96,12 @@ public class PlatypusNativeDataSource extends BearResourcePool<BearDatabaseConne
     public boolean isWrapperFor(Class<?> iface) throws SQLException {
         return false;
     }
+
+    void shutdown() throws SQLException {
+        for (BearDatabaseConnection conn : resources) {
+            conn.shutdown();
+        }
+        resources.clear();
+    }
+
 }

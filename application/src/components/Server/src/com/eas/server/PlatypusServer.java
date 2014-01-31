@@ -5,7 +5,6 @@
 package com.eas.server;
 
 import com.eas.client.ScriptedDatabasesClient;
-import com.eas.client.cache.FilesAppCache;
 import com.eas.client.scripts.ScriptDocument;
 import com.eas.client.threetier.ErrorResponse;
 import com.eas.client.threetier.Request;
@@ -71,7 +70,7 @@ public class PlatypusServer extends PlatypusServerCore {
     }
 
     public void start() throws Exception {
-        Logger.getLogger(PlatypusServer.class.getName()).log(Level.INFO, "Application elements are located at: {0}", databasesClient.getAppCache() instanceof FilesAppCache ? ((FilesAppCache) databasesClient.getAppCache()).getSrcPathName() : databasesClient.getSettings().getUrl());
+        Logger.getLogger(PlatypusServer.class.getName()).log(Level.INFO, "Application is located at: {0}", databasesClient.getAppCache().getApplicationPath());
         instance = this;// Hack, but server is natural singleton and so it is ok.
         startServerTasks();
         for (InetSocketAddress s : listenAddresses) {
@@ -165,13 +164,13 @@ public class PlatypusServer extends PlatypusServerCore {
                 IoAcceptor sensorAcceptor = com.eas.sensors.positioning.AcceptorsFactory.create(protocol, numWorkerThreads, sessionIdleTime, sessionIdleCheckInterval, new com.eas.server.handlers.PositioningPacketReciever(this, acceptorModuleId));
                 if (sensorAcceptor != null) {
                     sensorAcceptor.bind(s);
-                    logger.info(String.format("\nListening on %s; protocol: %s\n", s.toString(), protocol));
+                    logger.info(String.format("Listening on %s; protocol: %s", s.toString(), protocol));
                 }
             } else {
-                logger.info(String.format("\nAcceptor server module was not found for protocol \"%s\"", protocol));
+                logger.info(String.format("Acceptor server module was not found for protocol \"%s\"", protocol));
             }
         } else {
-            logger.info(String.format("\nProtocol \"%s\" is not supported", protocol));
+            logger.info(String.format("Protocol \"%s\" is not supported", protocol));
         }
     }
 

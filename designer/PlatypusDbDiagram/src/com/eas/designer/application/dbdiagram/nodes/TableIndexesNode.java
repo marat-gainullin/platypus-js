@@ -19,6 +19,7 @@ import com.eas.client.model.dbscheme.FieldsEntity;
 import com.eas.designer.datamodel.ModelUndoProvider;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
+import java.io.IOException;
 import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -56,6 +57,12 @@ public class TableIndexesNode extends AbstractNode {
             Exceptions.printStackTrace(ex);
         }
         entity.getModel().addEditingListener(modelEditingListener);
+    }
+
+    @Override
+    public void destroy() throws IOException {
+        entity.getModel().removeEditingListener(modelEditingListener);
+        super.destroy();
     }
 
     @Override

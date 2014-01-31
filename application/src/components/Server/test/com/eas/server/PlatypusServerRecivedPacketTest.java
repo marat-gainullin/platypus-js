@@ -4,7 +4,9 @@
  */
 package com.eas.server;
 
+import com.eas.client.DatabaseAppCache;
 import com.eas.client.ScriptedDatabasesClient;
+import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.client.settings.DbConnectionSettings;
 import com.eas.sensors.positioning.PacketReciever;
 import com.eas.sensors.positioning.PositioningPacket;
@@ -44,15 +46,16 @@ public class PlatypusServerRecivedPacketTest {
         settings.setUrl(url);
         settings.setUser(login);
         settings.setPassword(passwd);
+        GeneralResourceProvider.getInstance().registerDatasource("testDb", settings);
         SSLContext sslContext = ServerMain.createSSLContext();
-        InetSocketAddress[] addresses = new InetSocketAddress[]{new InetSocketAddress("localhost", TEST_PORT), 
-                                                                new InetSocketAddress("localhost", TEST_PORT+1)};
+        InetSocketAddress[] addresses = new InetSocketAddress[]{new InetSocketAddress("localhost", TEST_PORT),
+            new InetSocketAddress("localhost", TEST_PORT + 1)};
         Map<Integer, String> ports = new HashMap<>();
         ports.put(TEST_PORT, "platypus");
-        ports.put(TEST_PORT+1, "asc6");
+        ports.put(TEST_PORT + 1, "asc6");
         Set<String> modules = new HashSet<>();
         modules.add("Asc6Acceptor");//"asc6"
-        server = new PlatypusServer(new ScriptedDatabasesClient(settings), sslContext, addresses, ports, null, null, null, modules, null);
+        server = new PlatypusServer(new ScriptedDatabasesClient(new DatabaseAppCache("jndi://testDb"), "testDb", true), sslContext, addresses, ports, null, null, null, modules, null);
         server.start();
     }
 
@@ -62,6 +65,7 @@ public class PlatypusServerRecivedPacketTest {
             fail("Sever didn't started.");
         } else {
             server.stop(2, TimeUnit.SECONDS);
+            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 
@@ -94,14 +98,14 @@ public class PlatypusServerRecivedPacketTest {
                 ps.setValidity(true);
                 ps.setTime(cl.getTime());
                 reciever.received(ps);
-                cl.roll(Calendar.MINUTE, i*2);
+                cl.roll(Calendar.MINUTE, i * 2);
             }
         } catch (Exception ex) {
             Logger.getLogger(PlatypusServerRecivedPacketTest.class.getName()).log(Level.SEVERE, null, ex);
             fail(ex.getMessage());
         }
         try {
-            Thread.sleep(3*1000);
+            Thread.sleep(3 * 1000);
         } catch (InterruptedException ex) {
             Logger.getLogger(PlatypusServerRecivedPacketTest.class.getName()).log(Level.SEVERE, null, ex);
         }

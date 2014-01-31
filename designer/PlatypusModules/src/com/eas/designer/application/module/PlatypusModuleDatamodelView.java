@@ -19,8 +19,8 @@ import com.eas.client.model.gui.view.ModelViewDragHandler;
 import com.eas.client.model.gui.view.entities.EntityView;
 import com.eas.client.model.gui.view.model.ApplicationModelView;
 import com.eas.client.model.gui.view.model.ApplicationModelView.ForeignKeyBindingTask;
-import com.eas.designer.application.HandlerRegistration;
 import com.eas.designer.application.indexer.PlatypusPathRecognizer;
+import com.eas.designer.application.project.PlatypusProject;
 import com.eas.designer.datamodel.nodes.EntityNode;
 import com.eas.designer.datamodel.nodes.FieldNode;
 import com.eas.designer.explorer.model.windows.ModelInspector;
@@ -28,6 +28,7 @@ import com.eas.designer.explorer.model.windows.QueriesDragHandler;
 import com.eas.designer.explorer.model.windows.QueryDocumentJumper;
 import com.eas.designer.explorer.selectors.QueriesSelector;
 import com.eas.designer.explorer.selectors.TablesSelector;
+import com.eas.util.ListenerRegistration;
 import java.awt.BorderLayout;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -138,8 +139,8 @@ public final class PlatypusModuleDatamodelView extends TopComponent implements M
     protected transient MultiViewElementCallback callback;
     protected transient ApplicationModelEditorView appModelEditor;
     protected transient NodeSelectionListener exlorerSelectionListener = new NodeSelectionListener();
-    protected transient HandlerRegistration clientChangeListener;
-    protected transient HandlerRegistration modelValidChangeListener;
+    protected transient ListenerRegistration clientChangeListener;
+    protected transient ListenerRegistration modelValidChangeListener;
     protected transient ExplorerManager explorerManager;
     protected PlatypusModuleDataObject dataObject;
 
@@ -160,149 +161,165 @@ public final class PlatypusModuleDatamodelView extends TopComponent implements M
         explorerManager = new ExplorerManager();
         associateLookup(new ProxyLookup(new Lookup[]{
             ExplorerUtils.createLookup(explorerManager, getActionMap()),}));
-
-        /*
-         associateLookup(Lookups.proxy(new Lookup.Provider() {
-         @Override
-         public Lookup getLookup() {
-         return Lookups.fixed(getActivatedNodes() != null ? (Object[]) getActivatedNodes() : new Object[]{});
-         }
-         }));
-         */
-        initModelEditorView();
-        Runnable modelEditorIniter = new Runnable() {
+        initDbRelatedViews();
+        modelValidChangeListener = dataObject.addModelValidChangeListener(new Runnable() {
             @Override
             public void run() {
                 try {
-                    initModelEditorView();
+                    initDbRelatedViews();
                 } catch (Exception ex) {
                     ErrorManager.getDefault().notify(ex);
                 }
             }
-        };
-        clientChangeListener = dataObject.addClientChangeListener(modelEditorIniter);
-        modelValidChangeListener = dataObject.addModelValidChangeListener(modelEditorIniter);
+        });
+        clientChangeListener = dataObject.addClientChangeListener(new PlatypusProject.ClientChangeListener() {
+
+            @Override
+            public void connected(String aDatasourceName) {
+                try {
+                    dataObject.setModelValid(false);
+                    dataObject.startModelValidating();
+                } catch (Exception ex) {
+                    ErrorManager.getDefault().notify(ex);
+                }
+            }
+
+            @Override
+            public void disconnected(String aDatasourceName) {
+                try {
+                    dataObject.setModelValid(false);
+                    dataObject.startModelValidating();
+                } catch (Exception ex) {
+                    ErrorManager.getDefault().notify(ex);
+                }
+            }
+
+            @Override
+            public void defaultDatasourceNameChanged(String aOldDatasourceName, String aNewDatasourceName) {
+                try {
+                    dataObject.setModelValid(false);
+                    dataObject.startModelValidating();
+                } catch (Exception ex) {
+                    ErrorManager.getDefault().notify(ex);
+                }
+            }
+        });
     }
 
     public ApplicationModelView getModelView() {
         return appModelEditor != null ? appModelEditor.getModelView() : null;
     }
 
-    protected void initModelEditorView() throws Exception {
+    protected void initDbRelatedViews() throws Exception {
         removeAll();
         setLayout(new BorderLayout());
-        if (dataObject.getClient() != null) {
-            if (dataObject.isModelValid()) {
-                TablesSelector tablesSelector = new TablesSelector(dataObject.getAppRoot(), dataObject.getClient(), true, true, NbBundle.getMessage(PlatypusModuleDatamodelView.class, "LBL_PlatypusModule_View_Name"), PlatypusModuleDatamodelView.this);
-                QueriesSelector queriesSelector = new QueriesSelector(dataObject.getAppRoot()) {
-                    @Override
-                    public void fillAllowedMimeTypes(Set<String> allowedMimeTypes) {
-                        super.fillAllowedMimeTypes(allowedMimeTypes);
-                        allowedMimeTypes.add(PlatypusPathRecognizer.JAVASRIPT_MIME_TYPE);
-                    }
-                };
-                if (appModelEditor != null) {
-                    appModelEditor.setModel(null);
+        assert dataObject.getClient() != null;
+        if (dataObject.isModelValid()) {
+            TablesSelector tablesSelector = new TablesSelector(dataObject.getProject(), true, true, NbBundle.getMessage(PlatypusModuleDatamodelView.class, "LBL_PlatypusModule_View_Name"), PlatypusModuleDatamodelView.this);
+            QueriesSelector queriesSelector = new QueriesSelector(dataObject.getAppRoot()) {
+                @Override
+                public void fillAllowedMimeTypes(Set<String> allowedMimeTypes) {
+                    super.fillAllowedMimeTypes(allowedMimeTypes);
+                    allowedMimeTypes.add(PlatypusPathRecognizer.JAVASRIPT_MIME_TYPE);
                 }
-                appModelEditor = new ApplicationModelEditorView(tablesSelector, queriesSelector);
-                appModelEditor.getModelView().addEntityViewDoubleClickListener(new QueryDocumentJumper<ApplicationDbEntity>(dataObject.getProject()));
-                ApplicationDbModel model = dataObject.getModel();
-                appModelEditor.setModel(model);
-                appModelEditor.setBorder(new EmptyBorder(0, 0, 0, 0));
-                add(appModelEditor, BorderLayout.CENTER);
-                TransferHandler modelViewOriginalTrnadferHandler = appModelEditor.getModelView().getTransferHandler();
-                if (modelViewOriginalTrnadferHandler instanceof ModelViewDragHandler) {
-                    appModelEditor.getModelView().setTransferHandler(new QueriesDragHandler((ModelViewDragHandler) modelViewOriginalTrnadferHandler, appModelEditor.getModelView()));
-                }
-
-                appModelEditor.setUndo(new UndoManager() {
-                    @Override
-                    public synchronized boolean addEdit(UndoableEdit anEdit) {
-                        PlatypusModuleSupport ps = dataObject.getLookup().lookup(PlatypusModuleSupport.class);
-                        ps.notifyModified();
-                        ps.getModelUndo().undoableEditHappened(new UndoableEditEvent(this, anEdit));
-                        return true;
-                    }
-                });
-                appModelEditor.getModelView().addModelSelectionListener(new ModelSelectionListener<ApplicationDbEntity>() {
-                    @Override
-                    public void selectionChanged(Set<ApplicationDbEntity> oldSelected, Set<ApplicationDbEntity> newSelected) {
-                        try {
-                            Node[] oldNodes = getActivatedNodes();
-                            // Hack. When multi-view element with no any activated node is activated,
-                            // NetBeans' property sheet stay with a node from previous multi-view element.
-                            // So, we need to simulate non-empty activated nodes and take this into account
-                            // here.
-                            if (oldNodes != null && oldNodes.length == 1 && oldNodes[0] == (dataObject.getClient() != null ? dataObject.getModelNode() : dataObject.getNodeDelegate())) {
-                                oldNodes = new Node[]{};
-                            }
-                            Node[] newNodes = ModelInspector.convertSelectedToNodes(dataObject.getModelNode(), oldNodes, oldSelected, newSelected);
-                            // Hack! NetBeans doesn't properly handle activated nodes in multi view's elements
-                            // So, we need to use dummy explorer manager and it's lookup, associated with this multiview element TopComponent
-                            // to produce satisfactory events.
-                            explorerManager.setSelectedNodes(newNodes);
-                            setActivatedNodes(newNodes);
-                        } catch (Exception ex) {
-                            ErrorManager.getDefault().notify(ex);
-                        }
-                    }
-
-                    @Override
-                    public void selectionChanged(List<SelectedParameter<ApplicationDbEntity>> aParameters, List<SelectedField<ApplicationDbEntity>> aFields) {
-                        try {
-                            Node[] oldNodes = getActivatedNodes();
-                            // Hack. When multi-view element with no any activated node is activated,
-                            // NetBeans' property sheet stay with a node from previous multi-view element.
-                            // So, we need to simulate non-empty activated nodes and take this into account
-                            // here.
-                            if (oldNodes != null && oldNodes.length == 1 && oldNodes[0] == (dataObject.getClient() != null ? dataObject.getModelNode() : dataObject.getNodeDelegate())) {
-                                oldNodes = new Node[]{};
-                            }
-                            Node[] newNodes = ModelInspector.convertSelectedToNodes(dataObject.getModelNode(), oldNodes, aParameters, aFields);
-                            // Hack! NetBeans doesn't properly handle activated nodes in multi view's elements
-                            // So, we need to use dummy explorer manager and it's lookup, associated with this multiview element TopComponent
-                            // to produce satisfactory events.
-                            explorerManager.setSelectedNodes(newNodes);
-                            setActivatedNodes(newNodes);
-                        } catch (Exception ex) {
-                            ErrorManager.getDefault().notify(ex);
-                        }
-                    }
-
-                    @Override
-                    public void selectionChanged(Collection<Relation<ApplicationDbEntity>> clctn, Collection<Relation<ApplicationDbEntity>> clctn1) {
-                    }
-                });
-                explorerManager.setRootContext(dataObject.getModelNode());
-                appModelEditor.getModelView().complementReferenceRelationsByKeys(new ApplicationModelView.ForeignKeyBindingTask() {
-                    @Override
-                    public void run(ReferenceRelation<ApplicationDbEntity> aRelation) {
-                        appModelEditor.getModelView().getModel().addReferenceRelation(aRelation);
-                    }
-                });
-                getModelView().complementReferenceRelationsByKeys(new ForeignKeyBindingTask() {
-                    @Override
-                    public void run(ReferenceRelation<ApplicationDbEntity> aRelation) {
-                        try {
-                            dataObject.getModel().addReferenceRelation(aRelation);
-                        } catch (Exception ex) {
-                            Logger.getLogger(PlatypusModuleDatamodelView.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
-                        }
-                    }
-                });
-                UndoRedo ur = getUndoRedo();
-                if (ur instanceof UndoRedo.Manager) {
-                    ((UndoRedo.Manager) ur).discardAllEdits();
-                }
-                dataObject.getModel().fireAllQueriesChanged();
-                componentActivated();
-            } else {
-                explorerManager.setRootContext(dataObject.getNodeDelegate());
-                add(dataObject.getProject().generateDbValidatePlaceholder(), BorderLayout.CENTER);
+            };
+            if (appModelEditor != null) {
+                appModelEditor.setModel(null);
             }
+            appModelEditor = new ApplicationModelEditorView(tablesSelector, queriesSelector);
+            appModelEditor.getModelView().addEntityViewDoubleClickListener(new QueryDocumentJumper<ApplicationDbEntity>(dataObject.getProject()));
+            ApplicationDbModel model = dataObject.getModel();
+            appModelEditor.setModel(model);
+            appModelEditor.setBorder(new EmptyBorder(0, 0, 0, 0));
+            add(appModelEditor, BorderLayout.CENTER);
+            TransferHandler modelViewOriginalTrnadferHandler = appModelEditor.getModelView().getTransferHandler();
+            if (modelViewOriginalTrnadferHandler instanceof ModelViewDragHandler) {
+                appModelEditor.getModelView().setTransferHandler(new QueriesDragHandler((ModelViewDragHandler) modelViewOriginalTrnadferHandler, appModelEditor.getModelView()));
+            }
+
+            appModelEditor.setUndo(new UndoManager() {
+                @Override
+                public synchronized boolean addEdit(UndoableEdit anEdit) {
+                    PlatypusModuleSupport ps = dataObject.getLookup().lookup(PlatypusModuleSupport.class);
+                    ps.getModelUndo().undoableEditHappened(new UndoableEditEvent(this, anEdit));
+                    return true;
+                }
+            });
+            appModelEditor.getModelView().addModelSelectionListener(new ModelSelectionListener<ApplicationDbEntity>() {
+                @Override
+                public void selectionChanged(Set<ApplicationDbEntity> oldSelected, Set<ApplicationDbEntity> newSelected) {
+                    try {
+                        Node[] oldNodes = getActivatedNodes();
+                        // Hack. When multi-view element with no any activated node is activated,
+                        // NetBeans' property sheet stay with a node from previous multi-view element.
+                        // So, we need to simulate non-empty activated nodes and take this into account
+                        // here.
+                        if (oldNodes != null && oldNodes.length == 1 && oldNodes[0] == (dataObject.getClient() != null ? dataObject.getModelNode() : dataObject.getNodeDelegate())) {
+                            oldNodes = new Node[]{};
+                        }
+                        Node[] newNodes = ModelInspector.convertSelectedToNodes(dataObject.getModelNode(), oldNodes, oldSelected, newSelected);
+                        // Hack! NetBeans doesn't properly handle activated nodes in multi view's elements
+                        // So, we need to use dummy explorer manager and it's lookup, associated with this multiview element TopComponent
+                        // to produce satisfactory events.
+                        explorerManager.setSelectedNodes(newNodes);
+                        setActivatedNodes(newNodes);
+                    } catch (Exception ex) {
+                        ErrorManager.getDefault().notify(ex);
+                    }
+                }
+
+                @Override
+                public void selectionChanged(List<SelectedParameter<ApplicationDbEntity>> aParameters, List<SelectedField<ApplicationDbEntity>> aFields) {
+                    try {
+                        Node[] oldNodes = getActivatedNodes();
+                        // Hack. When multi-view element with no any activated node is activated,
+                        // NetBeans' property sheet stay with a node from previous multi-view element.
+                        // So, we need to simulate non-empty activated nodes and take this into account
+                        // here.
+                        if (oldNodes != null && oldNodes.length == 1 && oldNodes[0] == (dataObject.getClient() != null ? dataObject.getModelNode() : dataObject.getNodeDelegate())) {
+                            oldNodes = new Node[]{};
+                        }
+                        Node[] newNodes = ModelInspector.convertSelectedToNodes(dataObject.getModelNode(), oldNodes, aParameters, aFields);
+                        // Hack! NetBeans doesn't properly handle activated nodes in multi view's elements
+                        // So, we need to use dummy explorer manager and it's lookup, associated with this multiview element TopComponent
+                        // to produce satisfactory events.
+                        explorerManager.setSelectedNodes(newNodes);
+                        setActivatedNodes(newNodes);
+                    } catch (Exception ex) {
+                        ErrorManager.getDefault().notify(ex);
+                    }
+                }
+
+                @Override
+                public void selectionChanged(Collection<Relation<ApplicationDbEntity>> clctn, Collection<Relation<ApplicationDbEntity>> clctn1) {
+                }
+            });
+            explorerManager.setRootContext(dataObject.getModelNode());
+            appModelEditor.getModelView().complementReferenceRelationsByKeys(new ApplicationModelView.ForeignKeyBindingTask() {
+                @Override
+                public void run(ReferenceRelation<ApplicationDbEntity> aRelation) {
+                    appModelEditor.getModelView().getModel().addReferenceRelation(aRelation);
+                }
+            });
+            getModelView().complementReferenceRelationsByKeys(new ForeignKeyBindingTask() {
+                @Override
+                public void run(ReferenceRelation<ApplicationDbEntity> aRelation) {
+                    try {
+                        dataObject.getModel().addReferenceRelation(aRelation);
+                    } catch (Exception ex) {
+                        Logger.getLogger(PlatypusModuleDatamodelView.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+                    }
+                }
+            });
+            UndoRedo ur = getUndoRedo();
+            if (ur instanceof UndoRedo.Manager) {
+                ((UndoRedo.Manager) ur).discardAllEdits();
+            }
+            dataObject.getModel().fireAllQueriesChanged();
+            componentActivated();
         } else {
             explorerManager.setRootContext(dataObject.getNodeDelegate());
-            add(dataObject.getProject().generateDbPlaceholder(), BorderLayout.CENTER);
+            add(dataObject.getProject().generateDbValidatePlaceholder(), BorderLayout.CENTER);
         }
         revalidate();
         repaint();

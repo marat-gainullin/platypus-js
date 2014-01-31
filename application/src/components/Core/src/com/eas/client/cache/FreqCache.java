@@ -125,7 +125,7 @@ public abstract class FreqCache<K, V> {
                 CacheEntry entry = entries.get(aId);
                 entry.getCounter++;
                 element = entry.value; // Probably it's not nessasary
-            } else {
+            } else if(element != null){
                 putEntry(new CacheEntry(aId, element));
             }
             shrink();

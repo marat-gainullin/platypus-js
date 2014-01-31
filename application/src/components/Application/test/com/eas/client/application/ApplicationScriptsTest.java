@@ -4,12 +4,13 @@
  */
 package com.eas.client.application;
 
-import com.eas.client.DatabasesClient;
 import com.eas.client.DbClient;
+import com.eas.client.DatabasesClientWithResource;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.login.PrincipalHost;
 import com.eas.client.login.SystemPlatypusPrincipal;
 import com.eas.client.metadata.ApplicationElement;
+import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.client.scripts.CompiledScriptDocuments;
 import com.eas.client.scripts.CompiledScriptDocumentsHost;
 import com.eas.client.scripts.ScriptRunner;
@@ -21,19 +22,15 @@ import org.junit.Test;
  * @author mg
  */
 public class ApplicationScriptsTest {
-    
+
     @Test
-    public void dummy(){
+    public void dummy() {
     }
-    
-    public static DbClient initDevelopTestClient() throws Exception {
-        DbConnectionSettings settings = new DbConnectionSettings();
-        settings.setUrl("jdbc:oracle:thin:@asvr/adb");
-        settings.setUser("eas");
-        settings.setPassword("eas");
-        settings.setSchema("eas");
+
+    public static DatabasesClientWithResource initDevelopTestClient() throws Exception {
+        DbConnectionSettings settings = new DbConnectionSettings("jdbc:oracle:thin:@asvr/adb", "eas", "eas", "eas", null);
         settings.setMaxStatements(1);
-        return new DatabasesClient(settings);
+        return new DatabasesClientWithResource(settings);
     }
 
     protected static class TestPrincipalHost implements PrincipalHost {
@@ -65,14 +62,11 @@ public class ApplicationScriptsTest {
 
     public static void scriptTest(String aModuleId) throws Exception {
         System.out.println("starting script test for the " + aModuleId + ". Expecting some exceptions while failure.");
-        DbClient client = initDevelopTestClient();
-        try {
-            ScriptRunner script = new ScriptRunner(aModuleId, client, ScriptRunner.initializePlatypusStandardLibScope(), new TestPrincipalHost(), new TestScriptDocumentsHost(new ClientCompiledScriptDocuments(client)), new Object[]{});
+        try (DatabasesClientWithResource resource = initDevelopTestClient()) {
+            ScriptRunner script = new ScriptRunner(aModuleId, resource.getClient(), ScriptRunner.initializePlatypusStandardLibScope(), new TestPrincipalHost(), new TestScriptDocumentsHost(new ClientCompiledScriptDocuments(resource.getClient())), new Object[]{});
             script.execute();
-        } finally {
-            client.shutdown();
         }
         System.out.println("script test for " + aModuleId + " has been completed successfully!");
     }
-    
+
 }

@@ -34,37 +34,49 @@
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" attributes="0">
-              <EmptySpace max="-2" attributes="0"/>
+              <EmptySpace min="-2" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="tabbedPane" pref="0" max="32767" attributes="0"/>
+                  <Group type="102" attributes="0">
+                      <Component id="chDbAppSources" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                  </Group>
                   <Group type="102" attributes="0">
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Group type="102" attributes="0">
-                              <Group type="103" groupAlignment="0" attributes="0">
-                                  <Component id="lblClientType" alignment="0" min="-2" pref="125" max="-2" attributes="0"/>
-                                  <Component id="lblServeType" alignment="0" min="-2" max="-2" attributes="0"/>
-                                  <Component id="lblRunPath" alignment="0" min="-2" max="-2" attributes="0"/>
-                              </Group>
-                              <EmptySpace max="-2" attributes="0"/>
-                              <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                                  <Component id="lblClientServerMessage" alignment="0" min="-2" max="-2" attributes="0"/>
-                                  <Component id="cbClientType" alignment="0" max="32767" attributes="0"/>
-                                  <Component id="txtRunPath" alignment="0" max="32767" attributes="0"/>
-                                  <Component id="cbAppServerType" alignment="0" pref="305" max="32767" attributes="0"/>
-                              </Group>
-                              <EmptySpace max="-2" attributes="0"/>
-                              <Component id="btnBrowse" min="-2" pref="105" max="-2" attributes="0"/>
+                          <Group type="102" alignment="0" attributes="0">
+                              <Component id="cbNotStartServer" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                           </Group>
-                          <Component id="chDbAppSources" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Group type="102" alignment="0" attributes="0">
+                              <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                                  <Component id="lblClientType" alignment="0" max="32767" attributes="0"/>
+                                  <Component id="lblRunPath" alignment="0" max="32767" attributes="0"/>
+                                  <Component id="lblServeType" alignment="0" max="32767" attributes="0"/>
+                                  <Component id="lblDefDatasource" alignment="0" max="32767" attributes="0"/>
+                              </Group>
+                              <EmptySpace min="-2" max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="0" attributes="0">
+                                  <Component id="lblClientServerMessage" min="-2" max="-2" attributes="0"/>
+                                  <Group type="102" attributes="0">
+                                      <Group type="103" groupAlignment="0" attributes="0">
+                                          <Component id="cbClientType" alignment="0" max="32767" attributes="0"/>
+                                          <Component id="txtRunPath" alignment="0" max="32767" attributes="0"/>
+                                          <Component id="cbAppServerType" alignment="0" max="32767" attributes="0"/>
+                                          <Component id="cbConnections" alignment="0" max="32767" attributes="0"/>
+                                      </Group>
+                                      <EmptySpace min="-2" max="-2" attributes="0"/>
+                                      <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                                          <Component id="btnBrowse" pref="105" max="32767" attributes="0"/>
+                                          <Component id="btnAddDatasource" max="32767" attributes="0"/>
+                                      </Group>
+                                  </Group>
+                              </Group>
+                          </Group>
                       </Group>
-                      <EmptySpace max="32767" attributes="0"/>
-                  </Group>
-                  <Group type="102" alignment="0" attributes="0">
-                      <Component id="cbNotStartServer" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                      <EmptySpace min="-2" max="-2" attributes="0"/>
                   </Group>
               </Group>
           </Group>
+          <Component id="tabbedPane" max="32767" attributes="0"/>
       </Group>
     </DimensionLayout>
     <DimensionLayout dim="1">
@@ -87,14 +99,19 @@
                   <Component id="cbAppServerType" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="lblClientServerMessage" min="-2" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="cbConnections" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="lblDefDatasource" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="btnAddDatasource" alignment="3" min="-2" max="-2" attributes="0"/>
+              </Group>
               <EmptySpace max="-2" attributes="0"/>
+              <Component id="lblClientServerMessage" min="-2" max="-2" attributes="0"/>
+              <EmptySpace min="-2" pref="7" max="-2" attributes="0"/>
               <Component id="chDbAppSources" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="cbNotStartServer" min="-2" max="-2" attributes="0"/>
-              <EmptySpace max="-2" attributes="0"/>
+              <EmptySpace type="unrelated" max="-2" attributes="0"/>
               <Component id="tabbedPane" max="32767" attributes="0"/>
-              <EmptySpace max="-2" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -169,7 +186,7 @@
                                   <Component id="spClientDebugPort" max="32767" attributes="0"/>
                                   <Component id="cbClientLogLevel" min="-2" pref="109" max="-2" attributes="0"/>
                               </Group>
-                              <EmptySpace pref="442" max="32767" attributes="0"/>
+                              <EmptySpace pref="324" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                   </Group>
@@ -211,12 +228,9 @@
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" max="-2" attributes="0">
                           <Component id="lblClientDebugPort" min="-2" pref="24" max="-2" attributes="0"/>
-                          <Group type="102" attributes="0">
-                              <Component id="spClientDebugPort" min="-2" pref="22" max="-2" attributes="0"/>
-                              <EmptySpace min="5" pref="5" max="-2" attributes="0"/>
-                          </Group>
+                          <Component id="spClientDebugPort" min="-2" pref="22" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace pref="102" max="32767" attributes="0"/>
+                      <EmptySpace pref="33" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -358,7 +372,7 @@
                                   <Component id="spServerDebugPort" alignment="0" min="-2" pref="109" max="-2" attributes="0"/>
                                   <Component id="spServerPort" alignment="0" min="-2" pref="109" max="-2" attributes="0"/>
                               </Group>
-                              <EmptySpace min="0" pref="421" max="32767" attributes="0"/>
+                              <EmptySpace min="0" pref="303" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
@@ -389,11 +403,11 @@
                           <Component id="cbServerLogLevel" alignment="3" min="-2" pref="22" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Group type="103" groupAlignment="3" attributes="0">
-                          <Component id="lblServerDebugPort" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
                           <Component id="spServerDebugPort" alignment="0" min="-2" pref="22" max="-2" attributes="0"/>
+                          <Component id="lblServerDebugPort" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace pref="157" max="32767" attributes="0"/>
+                      <EmptySpace pref="85" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -507,7 +521,7 @@
                               </Group>
                               <EmptySpace min="-2" max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
-                                  <Component id="cbj2eeServer" pref="360" max="32767" attributes="0"/>
+                                  <Component id="cbj2eeServer" pref="242" max="32767" attributes="0"/>
                                   <Component id="txtContext" max="32767" attributes="0"/>
                               </Group>
                               <EmptySpace min="-2" max="-2" attributes="0"/>
@@ -534,7 +548,7 @@
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="cbEnableSecurity" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace pref="216" max="32767" attributes="0"/>
+                      <EmptySpace pref="144" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -659,6 +673,25 @@
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cbNotStartServerActionPerformed"/>
+      </Events>
+    </Component>
+    <Component class="javax.swing.JComboBox" name="cbConnections">
+    </Component>
+    <Component class="javax.swing.JLabel" name="lblDefDatasource">
+      <Properties>
+        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+          <ResourceString bundle="com/eas/designer/explorer/project/ui/Bundle.properties" key="ProjectRunningCustomizer.lblDefDatasource.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+        </Property>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JButton" name="btnAddDatasource">
+      <Properties>
+        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+          <ResourceString bundle="com/eas/designer/explorer/project/ui/Bundle.properties" key="ProjectRunningCustomizer.btnAddDatasource.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+        </Property>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnAddDatasourceActionPerformed"/>
       </Events>
     </Component>
   </SubComponents>

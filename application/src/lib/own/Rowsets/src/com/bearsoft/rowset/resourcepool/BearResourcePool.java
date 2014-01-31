@@ -10,6 +10,7 @@ import java.util.Set;
 /**
  *
  * @author mg
+ * @param <T>
  */
 public abstract class BearResourcePool<T> implements ResourcePool<T> {
 

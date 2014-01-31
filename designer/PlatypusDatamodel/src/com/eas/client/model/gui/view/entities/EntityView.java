@@ -890,8 +890,8 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
                     remove(paramsFieldsScroll);
                     remove(absentQueryLabel);
                     remove(absentQueryText);
-                    Fields entityFields = entity.getFields();
-                    if (entityFields != null) {
+                    if (entity.getQuery() != null) {
+                        Fields entityFields = entity.getFields();
                         add(paramsFieldsScroll, BorderLayout.CENTER);
                         if (isParameterized()) {
                             parametersModel.setFields(entityFields);

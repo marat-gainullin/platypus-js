@@ -16,6 +16,7 @@ import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.AppClient;
 import com.eas.client.threetier.requests.ExecuteQueryRequest;
 import com.eas.client.threetier.requests.RowsetResponse;
+import com.eas.util.ListenerRegistration;
 import java.util.List;
 
 /**
@@ -42,7 +43,7 @@ public class PlatypusThreeTierFlowProvider implements FlowProvider {
     }
 
     @Override
-    public TransactionListener.Registration addTransactionListener(TransactionListener tl) {
+    public ListenerRegistration addTransactionListener(TransactionListener tl) {
         return client.addTransactionListener(tl);
     }
 

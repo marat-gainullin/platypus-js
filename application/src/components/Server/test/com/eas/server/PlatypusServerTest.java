@@ -4,7 +4,9 @@
  */
 package com.eas.server;
 
+import com.eas.client.DatabaseAppCache;
 import com.eas.client.ScriptedDatabasesClient;
+import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.client.settings.DbConnectionSettings;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
@@ -38,8 +40,9 @@ public class PlatypusServerTest {
         settings.setUrl(url);
         settings.setUser(login);
         settings.setPassword(passwd);
+        GeneralResourceProvider.getInstance().registerDatasource("testDb", settings);
         SSLContext sslContext = ServerMain.createSSLContext();
-        server = new PlatypusServer(new ScriptedDatabasesClient(settings), sslContext, new InetSocketAddress[]{new InetSocketAddress("localhost", TEST_PORT)}, new HashMap<Integer, String>(), null, null, null, new HashSet<String>(), null);
+        server = new PlatypusServer(new ScriptedDatabasesClient(new DatabaseAppCache("jndi://testDb"), "testDb", true), sslContext, new InetSocketAddress[]{new InetSocketAddress("localhost", TEST_PORT)}, new HashMap<Integer, String>(), null, null, null, new HashSet<String>(), null);
         server.start();
     }
 
@@ -49,6 +52,7 @@ public class PlatypusServerTest {
             fail("Sever didn't started.");
         } else {
             server.stop(2, TimeUnit.SECONDS);
+            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
         }
     }
 

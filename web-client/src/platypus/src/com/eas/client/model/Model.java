@@ -43,7 +43,7 @@ public class Model {
 
 	public static final String SCRIPT_MODEL_NAME = "model";
 	public static final String PARAMETERS_SCRIPT_NAME = "params";
-	public static final String DATASOURCE_METADATA_SCRIPT_NAME = "md";
+	public static final String DATASOURCE_METADATA_SCRIPT_NAME = "schema";
 	public static final String DATASOURCE_NAME_TAG_NAME = "Name";
 	public static final String DATASOURCE_TITLE_TAG_NAME = "Title";
 	public static final String DATASOURCE_BEFORE_CHANGE_EVENT_TAG_NAME = "onBeforeChange";
@@ -489,9 +489,9 @@ public class Model {
 			}
 		});
 		// deprecated
-		Object.defineProperty(aModule, "md", {
+		Object.defineProperty(aModule, "schema", {
 			get : function() {
-				return aModule.params.md;
+				return aModule.params.schema;
 			}
 		});
 		for ( var i = 0; i < aModule.md.length; i++) {

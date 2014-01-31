@@ -384,6 +384,7 @@ public class RowsetConverter implements Converter {
                         } else if (aValue instanceof byte[]) {
                             return (byte[]) aValue;
                         }
+                        checkDataLoss(aValue);
                         return null;
                     case Types.BLOB:
                         // target type - java.sql.Blob
@@ -394,6 +395,7 @@ public class RowsetConverter implements Converter {
                         } else if (aValue instanceof byte[]) {
                             return new BlobImpl(new CompactBlob((byte[]) aValue));
                         }
+                        checkDataLoss(aValue);
                         return null;
                     case Types.CLOB:
                         // target type - java.sql.Clob
@@ -406,6 +408,7 @@ public class RowsetConverter implements Converter {
                         } else if (aValue instanceof String) {
                             return new ClobImpl(new CompactClob((String) aValue));
                         }
+                        checkDataLoss(aValue);
                         return null;
                     case Types.NCLOB:
                         // target type - java.sql.NClob
@@ -418,6 +421,7 @@ public class RowsetConverter implements Converter {
                         } else if (aValue instanceof String) {
                             return new NClobImpl(new CompactClob((String) aValue));
                         }
+                        checkDataLoss(aValue);
                         return null;
                     case Types.DECIMAL:
                     case Types.NUMERIC:
@@ -432,6 +436,9 @@ public class RowsetConverter implements Converter {
                         } else if (aValue instanceof Date) {
                             castedDecimal = new BigDecimal(((Date) aValue).getTime());
                         }
+                        if (castedDecimal == null) {
+                            checkDataLoss(aValue);
+                        }
                         return castedDecimal;
                     case Types.BIGINT:
                         // target type - BigInteger
@@ -445,6 +452,9 @@ public class RowsetConverter implements Converter {
                         } else if (aValue instanceof Date) {
                             castedInteger = BigInteger.valueOf(((Date) aValue).getTime());
                         }
+                        if (castedInteger == null) {
+                            checkDataLoss(aValue);
+                        }
                         return castedInteger;
                     case Types.SMALLINT:
                         // target type - Short
@@ -457,6 +467,9 @@ public class RowsetConverter implements Converter {
                             castedShort = Integer.valueOf(((Boolean) aValue) ? 1 : 0).shortValue();
                         } else if (aValue instanceof Date) {
                             castedShort = Integer.valueOf((int) ((Date) aValue).getTime()).shortValue();
+                        }
+                        if (castedShort == null) {
+                            checkDataLoss(aValue);
                         }
                         return castedShort;
                     case Types.TINYINT:
@@ -472,6 +485,9 @@ public class RowsetConverter implements Converter {
                         } else if (aValue instanceof Date) {
                             castedInt = Integer.valueOf((int) ((Date) aValue).getTime());
                         }
+                        if (castedInt == null) {
+                            checkDataLoss(aValue);
+                        }
                         return castedInt;
                     case Types.REAL:
                     case Types.FLOAT:
@@ -486,6 +502,9 @@ public class RowsetConverter implements Converter {
                         } else if (aValue instanceof Date) {
                             castedFloat = Float.valueOf((float) ((Date) aValue).getTime());
                         }
+                        if (castedFloat == null) {
+                            checkDataLoss(aValue);
+                        }
                         return castedFloat;
                     case Types.DOUBLE:
                         // target type - Double
@@ -498,6 +517,9 @@ public class RowsetConverter implements Converter {
                             castedDouble = Double.valueOf(((Boolean) aValue) ? 1 : 0);
                         } else if (aValue instanceof Date) {
                             castedDouble = Double.valueOf((double) ((Date) aValue).getTime());
+                        }
+                        if (castedDouble == null) {
+                            checkDataLoss(aValue);
                         }
                         return castedDouble;
                     case Types.CHAR:
@@ -513,7 +535,7 @@ public class RowsetConverter implements Converter {
                         } else if (aValue instanceof String) {
                             castedString = (String) aValue;
                         } else if (aValue instanceof Boolean) {
-                            castedString = ((Boolean) aValue)?((Boolean) aValue).toString():"";
+                            castedString = ((Boolean) aValue) ? ((Boolean) aValue).toString() : "";
                         } else if (aValue instanceof Date) {
                             castedString = String.valueOf(((Date) aValue).getTime());
                         } else if (aValue instanceof CompactClob) {
@@ -524,6 +546,9 @@ public class RowsetConverter implements Converter {
                             } catch (SQLException ex) {
                                 throw new RowsetException(ex);
                             }
+                        }
+                        if (castedString == null) {
+                            checkDataLoss(aValue);
                         }
                         return castedString;
                     case Types.BOOLEAN:
@@ -551,6 +576,9 @@ public class RowsetConverter implements Converter {
                         } else if (aValue instanceof Date) {
                             castedBoolean = !((Date) aValue).equals(new Date(0));
                         }
+                        if (castedBoolean == null) {
+                            checkDataLoss(aValue);
+                        }
                         return castedBoolean;
                     case Types.DATE:
                     case Types.TIMESTAMP:
@@ -577,12 +605,16 @@ public class RowsetConverter implements Converter {
                                 assert false;
                             }
                         } else {
+                            checkDataLoss(aValue);
                             return null;
                         }
-                    default:
+                    default: {
+                        checkDataLoss(aValue);
                         return null;
+                    }
                 }
             } else {
+                checkDataLoss(aValue);
                 return null;
             }
         } catch (SQLException ex) {
@@ -615,6 +647,7 @@ public class RowsetConverter implements Converter {
                         } catch (Exception ex) {
                             aStmt.setNull(aParameterIndex, aTypeInfo.getSqlType(), aTypeInfo.getSqlTypeName());
                         }
+                        checkDataLoss(aValue);
                         break;
                     case Types.BINARY:
                     case Types.VARBINARY:
@@ -652,6 +685,7 @@ public class RowsetConverter implements Converter {
                             aStmt.setBigDecimal(aParameterIndex, castedDecimal);
                         } else {
                             aStmt.setNull(aParameterIndex, aTypeInfo.getSqlType());
+                            checkDataLoss(aValue);
                         }
                         break;
                     case Types.BIGINT:
@@ -661,6 +695,7 @@ public class RowsetConverter implements Converter {
                             aStmt.setBigDecimal(aParameterIndex, new BigDecimal(castedInteger));
                         } else {
                             aStmt.setNull(aParameterIndex, aTypeInfo.getSqlType());
+                            checkDataLoss(aValue);
                         }
                         break;
                     case Types.SMALLINT:
@@ -670,6 +705,7 @@ public class RowsetConverter implements Converter {
                             aStmt.setShort(aParameterIndex, castedShort);
                         } else {
                             aStmt.setNull(aParameterIndex, aTypeInfo.getSqlType());
+                            checkDataLoss(aValue);
                         }
                         break;
                     case Types.TINYINT:
@@ -680,6 +716,7 @@ public class RowsetConverter implements Converter {
                             aStmt.setInt(aParameterIndex, castedInt);
                         } else {
                             aStmt.setNull(aParameterIndex, aTypeInfo.getSqlType());
+                            checkDataLoss(aValue);
                         }
                         break;
                     case Types.REAL:
@@ -690,6 +727,7 @@ public class RowsetConverter implements Converter {
                             aStmt.setFloat(aParameterIndex, castedFloat);
                         } else {
                             aStmt.setNull(aParameterIndex, aTypeInfo.getSqlType());
+                            checkDataLoss(aValue);
                         }
                         break;
                     case Types.DOUBLE:
@@ -699,6 +737,7 @@ public class RowsetConverter implements Converter {
                             aStmt.setDouble(aParameterIndex, castedDouble);
                         } else {
                             aStmt.setNull(aParameterIndex, aTypeInfo.getSqlType());
+                            checkDataLoss(aValue);
                         }
                         break;
                     case Types.CHAR:
@@ -717,6 +756,7 @@ public class RowsetConverter implements Converter {
                             }
                         } else {
                             aStmt.setNull(aParameterIndex, aTypeInfo.getSqlType());
+                            checkDataLoss(aValue);
                         }
                         break;
                     case Types.BOOLEAN:
@@ -727,6 +767,7 @@ public class RowsetConverter implements Converter {
                             aStmt.setBoolean(aParameterIndex, castedBoolean);
                         } else {
                             aStmt.setNull(aParameterIndex, aTypeInfo.getSqlType());
+                            checkDataLoss(aValue);
                         }
                         break;
                     case Types.DATE:
@@ -747,12 +788,19 @@ public class RowsetConverter implements Converter {
             } else {
                 try {
                     aStmt.setNull(aParameterIndex, aTypeInfo.getSqlType());
+                    checkDataLoss(aValue);
                 } catch (SQLException ex) {
                     aStmt.setNull(aParameterIndex, aTypeInfo.getSqlType(), aTypeInfo.getSqlTypeName());
                 }
             }
         } catch (SQLException ex) {
             throw new RowsetException(ex);
+        }
+    }
+
+    protected void checkDataLoss(Object aValue) {
+        if (aValue != null) {
+            Logger.getLogger(RowsetConverter.class.getName()).log(Level.WARNING, "Some value falled to null while tranferring to a database. May be it''s class in unsupported: {0}", aValue.getClass().getName());
         }
     }
 }

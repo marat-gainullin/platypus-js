@@ -27,7 +27,7 @@ public class QueryEntityNodeChildren extends EntityNodeChildren<EntityNodeChildr
     protected Node[] createNodes(EntityFieldKey key) {
         Node node;
         if (key.field instanceof Parameter) {
-            node = new QueryModelParametersNode((Parameter) key.field, lookup);
+            node = new QueryModelParameterNode((Parameter) key.field, lookup);
         } else {
             node = new FieldNode(key.field, lookup);
         }

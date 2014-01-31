@@ -4,6 +4,8 @@
  */
 package com.eas.client.model.store;
 
+import com.eas.client.DatabasesClient;
+import com.eas.client.DatabasesClientWithResource;
 import com.eas.client.DbClient;
 import com.eas.client.model.BaseTest;
 import com.eas.client.model.application.ApplicationDbEntity;
@@ -23,30 +25,32 @@ public class SerialTest extends BaseTest {
     @Test
     public void logicalStabilityTest() throws Exception {
         System.out.println("serialization logical stability test");
-        DbClient client = initDevelopTestClient();
-        ApplicationDbModel model = modelFromResource(client);
-        verifyModel(model);
-
-        for (int i = 0; i < 100; i++) {
-            String writtenString = model2String(model);
-            model = modelFromString(client, writtenString);
+        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+            final DatabasesClient client = resource.getClient();
+            ApplicationDbModel model = modelFromResource(client);
             verifyModel(model);
+            for (int i = 0; i < 100; i++) {
+                String writtenString = model2String(model);
+                model = modelFromString(client, writtenString);
+                verifyModel(model);
+            }
         }
     }
 
     @Test
     public void binaryStabilityTest() throws Exception {
         System.out.println("serialization binary stability test");
-        DbClient client = initDevelopTestClient();
-        ApplicationDbModel model = modelFromResource(client);
-        verifyModel(model);
-
-        for (int i = 0; i < 100; i++) {
-            String writtenString = model2String(model);
-            model = modelFromString(client, writtenString);
+        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+            final DatabasesClient client = resource.getClient();
+            ApplicationDbModel model = modelFromResource(client);
             verifyModel(model);
-            String writtenString1 = model2String(model);
-            assertEquals(writtenString.length(), writtenString1.length());
+            for (int i = 0; i < 100; i++) {
+                String writtenString = model2String(model);
+                model = modelFromString(client, writtenString);
+                verifyModel(model);
+                String writtenString1 = model2String(model);
+                assertEquals(writtenString.length(), writtenString1.length());
+            }
         }
     }
 

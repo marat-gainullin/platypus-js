@@ -4,25 +4,23 @@
  */
 package com.eas.designer.application.query.templates;
 
-import com.eas.client.cache.PlatypusFiles;
 import com.eas.designer.explorer.project.PlatypusProjectImpl;
+import com.eas.designer.application.utils.DatabaseConnections;
 import java.awt.Component;
 import java.util.HashSet;
 import java.util.Set;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import org.netbeans.api.db.explorer.DatabaseConnection;
 import org.openide.ErrorManager;
 import org.openide.WizardDescriptor;
-import org.openide.WizardValidationException;
-import org.openide.filesystems.FileObject;
 import org.openide.util.HelpCtx;
 
 /**
  *
  * @author mg
  */
-public class NewQueryWizardSettingsPanel implements 
-        WizardDescriptor.ValidatingPanel<WizardDescriptor>, WizardDescriptor.FinishablePanel<WizardDescriptor> {
+public class NewQueryWizardSettingsPanel implements WizardDescriptor.Panel<WizardDescriptor>, WizardDescriptor.FinishablePanel<WizardDescriptor> {
 
     public static final String CONNECTION_PROP_NAME = "connectionId";
     protected PlatypusProjectImpl project;
@@ -92,7 +90,7 @@ public class NewQueryWizardSettingsPanel implements
         }
     }
 
-    protected final void fireChangeEvent() {
+    public final void fireChangeEvent() {
         Set<ChangeListener> ls;
         synchronized (listeners) {
             ls = new HashSet<>(listeners);
@@ -104,16 +102,13 @@ public class NewQueryWizardSettingsPanel implements
     }
 
     @Override
-    public void validate() throws WizardValidationException {
-    }
-
-    @Override
     public boolean isFinishPanel() {
         return false;
     }
 
-    public boolean isConnectionElement(FileObject aFile) throws Exception {
-        return PlatypusFiles.CONNECTION_EXTENSION.equalsIgnoreCase(aFile.getExt());
+    public boolean connectionExist(String aDatasourceName) throws Exception {
+        DatabaseConnection conn = DatabaseConnections.lookup(aDatasourceName);        
+        return conn != null;
     }
 
     public PlatypusProjectImpl getProject() {

@@ -98,8 +98,6 @@ public class AppElementFiles {
             return PlatypusFilesSupport.getAppElementIdByAnnotation(findFileByExtension(PlatypusFiles.JAVASCRIPT_EXTENSION));
         } else if (appElementType == ClientConstants.ET_QUERY) {
             return PlatypusFilesSupport.getAppElementIdByAnnotation(findFileByExtension(PlatypusFiles.SQL_EXTENSION));
-        } else if (appElementType == ClientConstants.ET_CONNECTION) {
-            return PlatypusFilesSupport.getAppElementIdForConnectionAppElement(findFileByExtension(PlatypusFiles.CONNECTION_EXTENSION));
         } else if (appElementType == ClientConstants.ET_DB_SCHEME) {
             return IDGenerator.genID().toString();
         }
@@ -128,7 +126,6 @@ public class AppElementFiles {
                     case ClientConstants.ET_QUERY:
                         rootTag = appElementDom.createElement(ApplicationElement.QUERY_ROOT_TAG_NAME);
                         break;
-                    case ClientConstants.ET_CONNECTION:
                     case ClientConstants.ET_DB_SCHEME: {
                         String contentPart = FileUtils.readString(files.iterator().next(), PlatypusFiles.DEFAULT_ENCODING);
                         accumulator.append(contentPart);
@@ -233,8 +230,6 @@ public class AppElementFiles {
             return ClientConstants.ET_COMPONENT;
         } else if (hasExtension(PlatypusFiles.SQL_EXTENSION) && hasExtension(PlatypusFiles.MODEL_EXTENSION)) {
             return ClientConstants.ET_QUERY;
-        } else if (hasExtension(PlatypusFiles.CONNECTION_EXTENSION)) {
-            return ClientConstants.ET_CONNECTION;
         } else if (hasExtension(PlatypusFiles.DB_SCHEME_EXTENSION)) {
             return ClientConstants.ET_DB_SCHEME;
         }
@@ -279,8 +274,6 @@ public class AppElementFiles {
                 return PlatypusFiles.JAVASCRIPT_EXTENSION.equals(ext) || PlatypusFiles.MODEL_EXTENSION.equals(ext) || PlatypusFiles.REPORT_LAYOUT_EXTENSION.equals(ext) || PlatypusFiles.REPORT_LAYOUT_EXTENSION_X.equals(ext);
             case ClientConstants.ET_QUERY:
                 return PlatypusFiles.SQL_EXTENSION.equals(ext) || PlatypusFiles.DIALECT_EXTENSION.equals(ext) || PlatypusFiles.MODEL_EXTENSION.equals(ext) || PlatypusFiles.OUT_EXTENSION.equals(ext);
-            case ClientConstants.ET_CONNECTION:
-                return PlatypusFiles.CONNECTION_EXTENSION.equals(ext);
             case ClientConstants.ET_DB_SCHEME:
                 return PlatypusFiles.DB_SCHEME_EXTENSION.equals(ext);
         }

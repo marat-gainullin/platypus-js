@@ -253,8 +253,8 @@
         </antcall>
         <antcall target="-maybe-call-dep">
             <param name="call.built.properties" value="${built-jar.properties}"/>
-            <param location="${project.MetadataSynchronizer}" name="call.subproject"/>
-            <param location="${project.MetadataSynchronizer}/build.xml" name="call.script"/>
+            <param location="${project.MetaSync}" name="call.subproject"/>
+            <param location="${project.MetaSync}/build.xml" name="call.script"/>
             <param name="call.target" value="jar"/>
             <param name="transfer.built-jar.properties" value="${built-jar.properties}"/>
         </antcall>
@@ -389,16 +389,16 @@
 				
                                 <include name="lib/thirdparty/geotools/geoapi-2.3-M1.jar"/>
                                 <include name="lib/thirdparty/geotools/geoapi-pending-2.3-M1.jar"/>
-                                <include name="lib/thirdparty/geotools/gt-api-9.0-beta1.jar"/>
-                                <include name="lib/thirdparty/geotools/gt-coverage-9.0-beta1.jar"/>
-                                <include name="lib/thirdparty/geotools/gt-cql-9.0-beta1.jar"/>
-                                <include name="lib/thirdparty/geotools/gt-data-9.0-beta1.jar"/>
-                                <include name="lib/thirdparty/geotools/gt-epsg-wkt-9.0-beta1.jar"/>
-                                <include name="lib/thirdparty/geotools/gt-main-9.0-beta1.jar"/>
-                                <include name="lib/thirdparty/geotools/gt-metadata-9.0-beta1.jar"/>
-                                <include name="lib/thirdparty/geotools/gt-referencing-9.0-beta1.jar"/>
-                                <include name="lib/thirdparty/geotools/gt-render-9.0-beta1.jar"/>
-                                <include name="lib/thirdparty/geotools/gt-wms-9.0-beta1.jar"/>
+                                <include name="lib/thirdparty/geotools/gt-api-10.3.jar"/>
+                                <include name="lib/thirdparty/geotools/gt-coverage-10.3.jar"/>
+                                <include name="lib/thirdparty/geotools/gt-cql-10.3.jar"/>
+                                <include name="lib/thirdparty/geotools/gt-data-10.3.jar"/>
+                                <include name="lib/thirdparty/geotools/gt-epsg-wkt-10.3.jar"/>
+                                <include name="lib/thirdparty/geotools/gt-main-10.3.jar"/>
+                                <include name="lib/thirdparty/geotools/gt-metadata-10.3.jar"/>
+                                <include name="lib/thirdparty/geotools/gt-referencing-10.3.jar"/>
+                                <include name="lib/thirdparty/geotools/gt-render-10.3.jar"/>
+                                <include name="lib/thirdparty/geotools/gt-wms-10.3.jar"/>
                                 <include name="lib/thirdparty/geotools/jai_core-1.1.3.jar"/>
                                 <include name="lib/thirdparty/geotools/jsr-275-1.0-beta-2.jar"/>
                                 <include name="lib/thirdparty/geotools/jts-1.13.jar"/>
@@ -409,9 +409,11 @@
 				<include name="lib/thirdparty/commons/commons-digester-2.0.jar"/>
 				<include name="lib/thirdparty/commons/commons-jexl-2.1.1.jar"/>
 				<include name="lib/thirdparty/commons/commons-logging-1.1.1.jar"/>
-				<include name="lib/thirdparty/commons/poi-3.6.jar"/>
-				<include name="lib/thirdparty/commons/poi-ooxml-3.8.jar"/>
-			</fileset>
+				<include name="lib/thirdparty/commons/poi-3.9-20121203.jar"/>
+				<include name="lib/thirdparty/commons/poi-ooxml-3.9-20121203.jar"/>
+				<include name="lib/thirdparty/commons/poi-ooxml-schemas-3.9-20121203.jar"/>
+				<include name="lib/thirdparty/commons/xmlbeans-2.4.0.jar"/>
+				</fileset>
         </zip>
     </target>
 

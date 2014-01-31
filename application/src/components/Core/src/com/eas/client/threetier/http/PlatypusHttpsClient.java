@@ -4,7 +4,6 @@
  */
 package com.eas.client.threetier.http;
 
-import com.eas.client.settings.PlatypusConnectionSettings;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.*;
@@ -36,7 +35,7 @@ public class PlatypusHttpsClient extends PlatypusHttpClient {
         }
     }
 
-    public PlatypusHttpsClient(PlatypusConnectionSettings aConnectionSettings) throws Exception {
-        super(aConnectionSettings);
+    public PlatypusHttpsClient(String aUrl) throws Exception {
+        super(aUrl);
     }
 }

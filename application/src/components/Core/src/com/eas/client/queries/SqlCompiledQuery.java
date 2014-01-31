@@ -31,7 +31,7 @@ public class SqlCompiledQuery {
     protected Parameters parameters;// 1 - Based    
     protected Fields expectedFields;// 1 - Based
     protected FlowProvider flow;
-    protected boolean procedure = false;
+    protected boolean procedure;
     protected Set<String> readRoles = new HashSet<>();
     protected Set<String> writeRoles = new HashSet<>();
     private int pageSize = FlowProvider.NO_PAGING_PAGE_SIZE;
@@ -39,6 +39,7 @@ public class SqlCompiledQuery {
     /**
      * Creates an instance of compiled query.
      *
+     * @param aClient
      * @param aSqlClause the SQL query text
      */
     public SqlCompiledQuery(DbClient aClient, String aSqlClause) throws Exception {
@@ -102,6 +103,7 @@ public class SqlCompiledQuery {
     /**
      * Creates an instance of compiled query.
      *
+     * @param aClient
      * @param aDbId Database identifier.
      * @param aSqlClause the SQL query text
      */
@@ -203,9 +205,6 @@ public class SqlCompiledQuery {
      * enqueueing is performed, affected rows count is returned in subsequent
      * call to commit().
      *
-     * @return Affected rows count. If updating is enqueued, than return value
-     * is 0. Otherwise return value reflects rows count that were inserted,
-     * updated or deleted.
      * @throws Exception
      */
     public void enqueueUpdate() throws Exception {
@@ -264,27 +263,4 @@ public class SqlCompiledQuery {
         createFlow();
     }
 
-    /**
-     * Checks if expectedFields property is setted and if it is, applies
-     * information about expected fields to rowset's fields.
-     *
-     * @param aRowset Rowset, which is to be processed.
-     * @throws RowsetException
-     */
-    /*
-    protected void refineFields(Rowset aRowset) throws RowsetException {
-        try {
-            assert aRowset != null;
-            DbMetadataCache cache = client.getDbMetadataCache(databaseId);
-            Fields fields = aRowset.getFields();
-            mergeFields(fields, expectedFields);
-            SqlDriver driver = cache.getConnectionDriver();
-            for (Field field : fields.toCollection()) {
-                driver.getTypesResolver().resolve2Application(field);
-            }
-        } catch (Exception ex) {
-            throw new RowsetException(ex);
-        }
-    }
-    */ 
 }

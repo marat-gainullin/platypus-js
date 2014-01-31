@@ -11,6 +11,7 @@ import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.queries.SqlCompiledQuery;
+import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.client.settings.DbConnectionSettings;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -30,7 +31,7 @@ import org.junit.Test;
  */
 public class DbClientTest {
 
-    private static int TEST_THREADS_COUNT = 64;
+    protected static final int TEST_THREADS_COUNT = 64;
     protected static int ORDER_ID = 280513973;
     protected static int AMOUNT = 45;
     protected static int GOOD = 2;
@@ -62,67 +63,67 @@ public class DbClientTest {
     public void multiThreadedUpdatingRowsetTest() throws Exception {
         System.out.println("multiThreadedUpdatingRowsetTest");
         // initialize client in single thread mode as at the startup of the program
-        final DbClient dbClient = new DatabasesClient((DbConnectionSettings) settings);
-        Runnable clientRunnable = new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    while (!Thread.interrupted()) {
+        try (DatabasesClientWithResource resource = new DatabasesClientWithResource(settings)) {
+            final DbClient dbClient = resource.getClient();
+            Runnable clientRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        while (!Thread.interrupted()) {
 
-                        Random rnd = new Random();
-                        rnd.setSeed(System.currentTimeMillis());
-                        int due = rnd.nextInt(10);
-                        try {
-                            Thread.sleep(due);
-                        } catch (InterruptedException ex) {
-                            break;
-                        }
-                        SqlCompiledQuery query00 = new SqlCompiledQuery(dbClient, "select TABLE1.ID, TABLE1.F1, TABLE1.F2, TABLE1.F3 from TABLE1 order by TABLE1.F1");
-                        Rowset rowset00 = query00.executeQuery();
-                        rowset00.refresh();
-                        SqlCompiledQuery query0 = new SqlCompiledQuery(dbClient, "select TABLE1.ID, TABLE1.F1, TABLE1.F2, TABLE1.F3 from TABLE1 order by TABLE1.F2");
-                        Rowset rowset0 = query0.executeQuery();
-                        rowset0.refresh();
-                        SqlCompiledQuery query = new SqlCompiledQuery(dbClient, "select TABLE1.ID, TABLE1.F1, TABLE1.F2, TABLE1.F3 from TABLE1 order by TABLE1.ID");
-                        query.setEntityId("TABLE1");
-                        Rowset rowset = query.executeQuery();
-                        rowset.getFields().get("ID").setPk(true);
-                        assertNotNull(rowset.getFlowProvider());
-                        assertTrue(rowset.getFlowProvider() instanceof DatabaseFlowProvider);
-                        rowset.getFields().get(1).setPk(true);
-                        assertTrue(rowset.size() > 0);
-                        rowset.beforeFirst();
-                        boolean rowMet = false;
-                        int newValue = (new Random()).nextInt();
-                        while (rowset.next()) {
-                            Integer id = rowset.getInt(rowset.getFields().find("id"));
-                            assertNotNull(id);
-                            if (id == 2) {
-                                rowMet = true;
-                                rowset.updateObject(rowset.getFields().find("f3"), newValue);
+                            Random rnd = new Random();
+                            rnd.setSeed(System.currentTimeMillis());
+                            int due = rnd.nextInt(10);
+                            try {
+                                Thread.sleep(due);
+                            } catch (InterruptedException ex) {
+                                break;
                             }
+                            SqlCompiledQuery query00 = new SqlCompiledQuery(dbClient, "select TABLE1.ID, TABLE1.F1, TABLE1.F2, TABLE1.F3 from TABLE1 order by TABLE1.F1");
+                            Rowset rowset00 = query00.executeQuery();
+                            rowset00.refresh();
+                            SqlCompiledQuery query0 = new SqlCompiledQuery(dbClient, "select TABLE1.ID, TABLE1.F1, TABLE1.F2, TABLE1.F3 from TABLE1 order by TABLE1.F2");
+                            Rowset rowset0 = query0.executeQuery();
+                            rowset0.refresh();
+                            SqlCompiledQuery query = new SqlCompiledQuery(dbClient, "select TABLE1.ID, TABLE1.F1, TABLE1.F2, TABLE1.F3 from TABLE1 order by TABLE1.ID");
+                            query.setEntityId("TABLE1");
+                            Rowset rowset = query.executeQuery();
+                            rowset.getFields().get("ID").setPk(true);
+                            assertNotNull(rowset.getFlowProvider());
+                            assertTrue(rowset.getFlowProvider() instanceof DatabaseFlowProvider);
+                            rowset.getFields().get(1).setPk(true);
+                            assertTrue(rowset.size() > 0);
+                            rowset.beforeFirst();
+                            boolean rowMet = false;
+                            int newValue = (new Random()).nextInt();
+                            while (rowset.next()) {
+                                Integer id = rowset.getInt(rowset.getFields().find("id"));
+                                assertNotNull(id);
+                                if (id == 2) {
+                                    rowMet = true;
+                                    rowset.updateObject(rowset.getFields().find("f3"), newValue);
+                                }
+                            }
+                            assertTrue(rowMet);
+                            dbClient.commit(null);
+                            dbClient.dbTableChanged(null, "eAs", "test_fieldsAdding");
                         }
-                        assertTrue(rowMet);
-                        dbClient.commit(null);
-                        dbClient.dbTableChanged(null, "eAs", "test_fieldsAdding");
-                    }
 
-                } catch (Exception ex) {
-                    boolean sleepIterrupted = (ex instanceof InterruptedException)
-                            || ((ex instanceof SQLException) && ((SQLException) ex).getCause() instanceof InterruptedException);
-                    if (!sleepIterrupted) {
-                        failedException = ex;
-                        Logger.getLogger(DbClientTest.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (Exception ex) {
+                        boolean sleepIterrupted = (ex instanceof InterruptedException)
+                                || ((ex instanceof SQLException) && ((SQLException) ex).getCause() instanceof InterruptedException);
+                        if (!sleepIterrupted) {
+                            failedException = ex;
+                            Logger.getLogger(DbClientTest.class.getName()).log(Level.SEVERE, null, ex);
+                        }
                     }
                 }
+            };
+            List<Thread> threads = new ArrayList<>();
+            for (int i = 0; i < TEST_THREADS_COUNT; i++) {
+                Thread thread = new Thread(clientRunnable);
+                threads.add(thread);
             }
-        };
-        List<Thread> threads = new ArrayList<>();
-        for (int i = 0; i < TEST_THREADS_COUNT; i++) {
-            Thread thread = new Thread(clientRunnable);
-            threads.add(thread);
-        }
-        try {
             // start the set of threads as in server's thread pool
 
             for (int i = 0; i < threads.size(); i++) {
@@ -148,8 +149,6 @@ public class DbClientTest {
             if (deadlessThreads > 0) {
                 throw new Exception(String.valueOf(deadlessThreads) + " threads are stay alive");
             }
-        } finally {
-            dbClient.shutdown();
         }
     }
 
@@ -165,10 +164,8 @@ public class DbClientTest {
     public void extraFieldsInsertTest() throws Exception {
         System.out.println("extraFieldsInsertTest");
         // initialize client in single thread mode as at the startup of the program
-        Client lfclient = new DatabasesClient(settings);
-        assertTrue(lfclient instanceof DbClient);
-        DbClient lclient = (DbClient) lfclient;
-        try {
+        try (DatabasesClientWithResource resource = new DatabasesClientWithResource(settings)) {
+            DbClient lclient = resource.getClient();
             Parameters params = new Parameters();
             Rowset goodOrderRowset = makeGoodOrderRowsetWith1Record(lclient, params);
             goodOrderRowset.refresh(params);
@@ -176,8 +173,6 @@ public class DbClientTest {
             goodOrderRowset.first();
             goodOrderRowset.delete();
             lclient.commit(null);
-        } finally {
-            lclient.shutdown();
         }
     }
 
@@ -228,10 +223,8 @@ public class DbClientTest {
         System.out.println("extraFieldsUpdateTest");
 
         // initialize client in single thread mode as at the startup of the program
-        Client lfclient = new DatabasesClient(settings);
-        assertTrue(lfclient instanceof DbClient);
-        DbClient lclient = (DbClient) lfclient;
-        try {
+        try (DatabasesClientWithResource resource = new DatabasesClientWithResource(settings)) {
+            DbClient lclient = resource.getClient();
             Parameters params = new Parameters();
             Rowset goodOrderRowset = makeGoodOrderRowsetWith1Record(lclient, params);
             goodOrderRowset.refresh(params);
@@ -250,8 +243,6 @@ public class DbClientTest {
             lclient.commit(null);
             goodOrderRowset.refresh(params);
             assertTrue(goodOrderRowset.isEmpty());
-        } finally {
-            lclient.shutdown();
         }
     }
 }

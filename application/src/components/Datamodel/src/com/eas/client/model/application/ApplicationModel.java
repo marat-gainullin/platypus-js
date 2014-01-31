@@ -27,6 +27,7 @@ import com.eas.client.queries.Query;
 import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptUtils;
 import com.eas.script.ScriptUtils.ScriptAction;
+import com.eas.util.ListenerRegistration;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.*;
@@ -58,9 +59,9 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
     protected ModelScriptEventsSupport<E> scriptEventsSupport = new ModelScriptEventsSupport<>();
     protected Set<TransactionListener> transactionListeners = new HashSet<>();
 
-    public TransactionListener.Registration addTransactionListener(final TransactionListener aListener) {
+    public ListenerRegistration addTransactionListener(final TransactionListener aListener) {
         transactionListeners.add(aListener);
-        return new TransactionListener.Registration() {
+        return new ListenerRegistration() {
             @Override
             public void remove() {
                 transactionListeners.remove(aListener);

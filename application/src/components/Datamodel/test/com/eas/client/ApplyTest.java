@@ -12,6 +12,7 @@ import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.bearsoft.rowset.utils.RowsetUtils;
 import com.eas.client.model.BaseTest;
+import com.eas.client.resourcepool.GeneralResourceProvider;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -20,6 +21,7 @@ import org.junit.Test;
 
 /**
  * Simple changes apply test
+ *
  * @author mg
  */
 public class ApplyTest extends BaseTest {
@@ -32,8 +34,8 @@ public class ApplyTest extends BaseTest {
     @Test
     public void applyCRUDTest() throws Exception {
         System.out.println("applyCRUDTest");
-        DbClient client = initDevelopTestClient();
-        try {
+        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+            DatabasesClient client = resource.getClient();
             Parameters params = new Parameters();
             Parameter param1 = params.createNewField();
             Parameter param2 = params.createNewField();
@@ -47,7 +49,7 @@ public class ApplyTest extends BaseTest {
             //paramTypes.add(DataTypeInfo.NCHAR);
             //paramTypes.add(DataTypeInfo.NVARCHAR);
             //paramTypes.add(DataTypeInfo.LONGNVARCHAR);
-            
+
             FlowProvider flow = client.createFlowProvider(null, null, tableName, selectClause, null, Collections.<String>emptySet(), Collections.<String>emptySet());
 
             for (DataTypeInfo typeInfo : paramTypes) {
@@ -125,16 +127,14 @@ public class ApplyTest extends BaseTest {
                 rs.refresh(params);
                 assertTrue(rs.size() == 1);
             }
-        } finally {
-            client.shutdown();
         }
     }
 
     @Test
     public void applyNullsTest() throws Exception {
         System.out.println("applyNullsTest");
-        DbClient client = initDevelopTestClient();
-        try {
+        try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+            DatabasesClient client = resource.getClient();
             Parameters params = new Parameters();
             Parameter param1 = params.createNewField();
             Parameter param2 = params.createNewField();
@@ -193,8 +193,6 @@ public class ApplyTest extends BaseTest {
                 rs.refresh(params);
                 assertTrue(rs.size() == 1);
             }
-        } finally {
-            client.shutdown();
         }
     }
 }

@@ -45,7 +45,7 @@
                 <id>jar</id>
             </reference>
             <reference>
-                <foreign-project>MetadataSynchronizer</foreign-project>
+                <foreign-project>MetaSync</foreign-project>
                 <artifact-type>jar</artifact-type>
                 <script>build.xml</script>
                 <target>jar</target>

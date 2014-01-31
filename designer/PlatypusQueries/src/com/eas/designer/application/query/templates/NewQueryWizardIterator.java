@@ -4,7 +4,6 @@
  */
 package com.eas.designer.application.query.templates;
 
-import com.eas.designer.application.indexer.IndexerQuery;
 import com.eas.designer.explorer.files.wizard.NewApplicationElementWizardIterator;
 import com.eas.designer.explorer.files.wizard.NewApplicationElementWizardNamePanel;
 import com.eas.designer.explorer.project.PlatypusProjectImpl;
@@ -14,7 +13,6 @@ import org.netbeans.api.templates.TemplateRegistration;
 import org.netbeans.spi.project.ui.templates.support.Templates;
 import org.openide.ErrorManager;
 import org.openide.WizardDescriptor;
-import org.openide.filesystems.FileObject;
 import org.openide.util.NbBundle;
 
 /**
@@ -70,8 +68,6 @@ public class NewQueryWizardIterator extends NewApplicationElementWizardIterator 
         Object oConnection = aWiz.getProperty(NewQueryWizardSettingsPanel.CONNECTION_PROP_NAME);
         if (oConnection instanceof String) {
             dbId = (String) oConnection;
-        } else if (oConnection instanceof FileObject) {
-            dbId = IndexerQuery.file2AppElementId((FileObject) oConnection);
         }
         parameters.put(PLATYPUS_QUERY_DB_ID_PARAM_NAME, String.valueOf(dbId));
         return parameters;

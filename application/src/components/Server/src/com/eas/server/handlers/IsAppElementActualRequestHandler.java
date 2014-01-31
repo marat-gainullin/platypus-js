@@ -7,7 +7,7 @@ package com.eas.server.handlers;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.eas.client.ClientConstants;
-import com.eas.client.cache.DatabaseAppCache;
+import com.eas.client.DatabaseAppCache;
 import com.eas.client.cache.FilesAppCache;
 import com.eas.client.queries.SqlQuery;
 import com.eas.client.threetier.Response;

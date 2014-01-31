@@ -4,7 +4,6 @@
  */
 package com.eas.designer.explorer.h2;
 
-import com.eas.designer.explorer.server.ServerState;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -30,11 +29,11 @@ public class StartH2DbServerAction extends AbstractAction implements ContextAwar
     public Action createContextAwareInstance(Lookup actionContext) {
         H2DbServerNode contextNode = actionContext.lookup(H2DbServerNode.class);
         if (contextNode != null) {
-            final H2DbServerInstance serverInstance = contextNode.getServer();
+            final H2Dabatabase serverInstance = contextNode.getServer();
             return new AbstractAction() {
                 @Override
                 public boolean isEnabled() {
-                    return serverInstance.getServerState() == ServerState.STOPPED;
+                    return serverInstance.canStart();
                 }
 
                 @Override

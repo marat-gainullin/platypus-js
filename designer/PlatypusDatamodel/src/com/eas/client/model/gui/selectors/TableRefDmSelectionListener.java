@@ -2,7 +2,6 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package com.eas.client.model.gui.selectors;
 
 import com.eas.client.metadata.TableRef;
@@ -18,14 +17,13 @@ import javax.swing.Action;
  *
  * @author mg
  */
-public class TableRefDmSelectionListener<E extends Entity<?, ?, E>> implements ModelSelectionListener<E>
-{
+public class TableRefDmSelectionListener<E extends Entity<?, ?, E>> implements ModelSelectionListener<E> {
+
     protected TableRef tableRefTemplate = null;
     protected List<TableRef> selected;
     protected Action okAction = null;
 
-    public TableRefDmSelectionListener(TableRef aTableRefTemplate, List<TableRef> aSelected, Action aOkAction)
-    {
+    public TableRefDmSelectionListener(TableRef aTableRefTemplate, List<TableRef> aSelected, Action aOkAction) {
         super();
         tableRefTemplate = aTableRefTemplate;
         selected = aSelected;
@@ -33,8 +31,7 @@ public class TableRefDmSelectionListener<E extends Entity<?, ?, E>> implements M
     }
 
     @Override
-    public void selectionChanged(List<SelectedParameter<E>> param, List<SelectedField<E>> field)
-    {
+    public void selectionChanged(List<SelectedParameter<E>> param, List<SelectedField<E>> field) {
     }
 
     @Override
@@ -44,8 +41,7 @@ public class TableRefDmSelectionListener<E extends Entity<?, ?, E>> implements M
     @Override
     public void selectionChanged(Set<E> oldSelected, Set<E> newSelected) {
         selected.clear();
-        for(E entity : newSelected)
-        {
+        for (E entity : newSelected) {
             TableRef tr = new TableRef();
             tr.tableName = entity.getTableName();
             tr.dbId = tableRefTemplate.dbId;

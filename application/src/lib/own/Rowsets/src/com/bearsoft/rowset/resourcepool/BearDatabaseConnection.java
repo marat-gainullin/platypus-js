@@ -25,7 +25,7 @@ public class BearDatabaseConnection implements Connection {
     public BearDatabaseConnection(int aMaxStatetments, Connection aDelegate, ResourcePool<BearDatabaseConnection> aPool) throws Exception {
         this(aMaxStatetments, BearResourcePool.WAIT_TIMEOUT, aDelegate, aPool);
     }
-    
+
     public BearDatabaseConnection(int aMaxStatetments, int aResourceTimeout, Connection aDelegate, ResourcePool<BearDatabaseConnection> aPool) throws Exception {
         super();
         delegate = aDelegate;
@@ -469,6 +469,20 @@ public class BearDatabaseConnection implements Connection {
     private void checkClosed() throws SQLException {
         if (delegate == null) {
             throw new SQLException("Connection already closed.");
+        }
+    }
+
+    public synchronized void shutdown() throws SQLException {
+        if (delegate != null) {
+            for (CallableStatement call : calls.values()) {
+                call.close();
+            }
+            calls.clear();
+            for (PreparedStatement stmt : stmts.values()) {
+                stmt.close();
+            }
+            stmts.clear();
+            delegate.close();
         }
     }
 }

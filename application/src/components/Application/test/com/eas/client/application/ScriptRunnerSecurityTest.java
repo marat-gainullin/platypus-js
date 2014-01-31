@@ -17,7 +17,6 @@ import com.eas.client.scripts.CompiledScriptDocumentsHost;
 import com.eas.client.scripts.ScriptRunner;
 import com.eas.client.scripts.ScriptRunnerPrototype;
 import com.eas.client.scripts.ServerScriptProxyPrototype;
-import com.eas.client.settings.PlatypusConnectionSettings;
 import com.eas.client.threetier.PlatypusNativeClient;
 import com.eas.client.threetier.http.PlatypusHttpClient;
 import com.eas.script.ScriptUtils;
@@ -81,14 +80,8 @@ public class ScriptRunnerSecurityTest {
 
     public static void initClients() throws Exception {
         if (nativeClient == null) {
-            PlatypusConnectionSettings nativeSettings = new PlatypusConnectionSettings();
-            nativeSettings.setUrl("platypus://localhost:8500/");
-            nativeSettings.setName("Test native connection");
-            nativeClient = new PlatypusNativeClient(nativeSettings);
-            PlatypusConnectionSettings httpSettings = new PlatypusConnectionSettings();
-            httpSettings.setName("Platypus http test connection");
-            httpSettings.setUrl("http://localhost:8080/application/");
-            httpClient = new PlatypusHttpClient(httpSettings);
+            nativeClient = new PlatypusNativeClient("platypus://localhost:8500/");
+            httpClient = new PlatypusHttpClient("http://localhost:8080/application/");
             scriptDocumentsHost = new CompiledScriptDocumentsHost() {
                 @Override
                 public CompiledScriptDocuments getDocuments() {

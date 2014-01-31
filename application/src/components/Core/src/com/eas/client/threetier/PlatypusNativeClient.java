@@ -5,10 +5,7 @@
 package com.eas.client.threetier;
 
 import com.bearsoft.rowset.utils.IDGenerator;
-import com.eas.client.cache.DatabaseMdCache;
-import com.eas.client.cache.PlatypusAppCache;
 import com.eas.client.login.AppPlatypusPrincipal;
-import com.eas.client.settings.PlatypusConnectionSettings;
 import com.eas.client.threetier.requests.AppElementChangedRequest;
 import com.eas.client.threetier.requests.LoginRequest;
 import com.eas.client.threetier.requests.LogoutRequest;
@@ -25,11 +22,9 @@ public class PlatypusNativeClient extends PlatypusClient {
 
     private PlatypusNativeConnection conn;
 
-    public PlatypusNativeClient(PlatypusConnectionSettings aConnectionSettings) throws Exception {
-        super();
-        setSettings(aConnectionSettings);
-        setAppCache(new PlatypusAppCache(this));
-        URI uri = new URI(aConnectionSettings.getUrl());
+    public PlatypusNativeClient(String aUrl) throws Exception {
+        super(aUrl);
+        URI uri = new URI(url);
         conn = new PlatypusNativeConnection(createSSLContext().getSocketFactory(), uri.getHost(), uri.getPort());
         conn.connect();
         conn.createExchangeThreads();
@@ -84,9 +79,6 @@ public class PlatypusNativeClient extends PlatypusClient {
                 getAppCache().remove(aEntityId);
             } else {
                 getAppCache().clear();
-                for (DatabaseMdCache cache : mdCaches.values()) {
-                    cache.clear();
-                }
             }
         } catch (Exception ex) {
             Logger.getLogger(PlatypusNativeClient.class.getName()).log(Level.SEVERE, null, ex);

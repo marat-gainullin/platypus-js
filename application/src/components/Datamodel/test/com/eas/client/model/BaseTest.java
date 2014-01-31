@@ -4,7 +4,7 @@
  */
 package com.eas.client.model;
 
-import com.eas.client.DatabasesClient;
+import com.eas.client.DatabasesClientWithResource;
 import com.eas.client.DbClient;
 import com.eas.client.model.application.ApplicationDbModel;
 import com.eas.client.model.store.XmlDom2ApplicationModel;
@@ -65,14 +65,14 @@ public class BaseTest {
             + "function " + Model.DATASOURCE_AFTER_REQUERY_EVENT_TAG_NAME + "(){}\n";
     protected static ScriptableObject dummyScriptableObject = null;
 
-    public static DbClient initDevelopTestClient() throws Exception {
+    public static DatabasesClientWithResource initDevelopTestClient() throws Exception {
         DbConnectionSettings settings = new DbConnectionSettings();
         settings.setUrl("jdbc:oracle:thin:@asvr/adb");
         settings.setSchema("eas");
         settings.setUser("eas");
         settings.setPassword("eas");
         settings.setMaxStatements(1);
-        return new DatabasesClient(settings);
+        return new DatabasesClientWithResource(settings);
     }
 
     public static Document documentFromStream(InputStream is) throws ParserConfigurationException, SAXException, IOException {
