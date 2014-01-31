@@ -6,7 +6,9 @@ package com.eas.client.geo;
 
 import com.eas.client.DatabasesClient;
 import com.eas.client.DbClient;
+import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.client.settings.DbConnectionSettings;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -16,6 +18,7 @@ import org.junit.Test;
  */
 public class GeoBaseTest {
 
+    private static final String TEST_DATASOURCE_NAME = "testGeoAddOnDatasource";
     protected static DbClient dbClient;
 
     @BeforeClass
@@ -28,7 +31,14 @@ public class GeoBaseTest {
         settings.setUser(login);
         settings.setPassword(passwd);
 
-        dbClient = new DatabasesClient(settings);
+        GeneralResourceProvider.getInstance().registerDatasource(TEST_DATASOURCE_NAME, settings);
+        dbClient = new DatabasesClient(null, TEST_DATASOURCE_NAME, false);
+    }
+
+    @AfterClass
+    public static void tearDownClass() throws Exception {
+        dbClient.shutdown();
+        GeneralResourceProvider.getInstance().unregisterDatasource(TEST_DATASOURCE_NAME);
     }
 
     @Test

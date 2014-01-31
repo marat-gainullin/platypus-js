@@ -105,6 +105,11 @@ public class ScriptColor extends java.awt.Color {
         return BLUE;
     }
     
+    @ScriptFunction
+    public static Color getGREEN() {
+        return GREEN;
+    }
+    
     @Override
     public String toString() {
         return CascadedStyle.encodeColor(this);
