@@ -44,7 +44,6 @@ public class RowsetPlainTableTest extends GridBaseTest {
     }
 
     @Test
-    @Ignore
     public void rowsCrudTest() throws Exception {
         Rowset rowset = initRowset();
         TableColumnModel columnModel = new DefaultTableColumnModel();
@@ -99,7 +98,6 @@ public class RowsetPlainTableTest extends GridBaseTest {
     }
 
     @Test
-    @Ignore
     public void columnsCrudTest() throws Exception {
         Rowset rowset = initRowset();
         TableColumnModel columnModel = new DefaultTableColumnModel();

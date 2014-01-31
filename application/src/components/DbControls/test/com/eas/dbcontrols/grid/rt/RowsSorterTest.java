@@ -34,7 +34,6 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 import static org.junit.Assert.*;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -71,22 +70,22 @@ public class RowsSorterTest extends GridBaseTest {
         {1, 4, 5, 2, 3, 11, 18, 12, 13, 14, 15, 16, 17, 19, 20, 21, 22},
         {11, 1, 5, 4, 2, 3, 18, 12, 13, 14, 15, 16, 17, 19, 20, 21, 22},
         {1, 4, 5, 2, 3, 21, 22, 11, 18, 12, 14, 15, 16, 17, 19, 20, 13},
-        {1, 13, 14, 15, 16, 17, 19, 20, 4, 5, 11, 18, 12, 2, 21, 22, 3}
+        {1, 4, 5, 11, 18, 13, 12, 14, 15, 16, 17, 19, 20, 2, 21, 22, 3}
     };
     protected static long[][] treedPkSequencesDesc = new long[][]{
         {22, 21, 18, 20, 19, 17, 16, 15, 14, 13, 12, 11, 3, 2, 1, 5, 4},
         {1, 4, 5, 2, 3, 11, 18, 12, 13, 14, 15, 16, 17, 19, 20, 21, 22},
-        {11, 21, 22, 1, 14, 13, 20, 5, 4, 2, 3, 18, 12, 19, 17, 16, 15},
+        {11, 21, 22, 1, 5, 4, 2, 3, 18, 14, 13, 12, 20, 19, 17, 16, 15},
         {22, 21, 18, 20, 19, 17, 16, 15, 14, 13, 12, 11, 1, 5, 4, 2, 3},
         {1, 4, 5, 2, 3, 11, 18, 12, 13, 14, 15, 16, 17, 19, 20, 21, 22},
-        {1, 4, 15, 16, 17, 19, 20, 5, 2, 3, 18, 12, 13, 14, 21, 22, 11},
+        {1, 4, 5, 2, 3, 18, 15, 16, 17, 19, 20, 12, 13, 14, 21, 22, 11},
         {11, 18, 13, 12, 14, 15, 16, 17, 19, 20, 1, 4, 5, 2, 3, 21, 22},
         {3, 22, 21, 2, 18, 20, 19, 17, 16, 15, 14, 12, 13, 11, 1, 5, 4}
     };
 
     protected void checkPkSequence(long[] aPks, JTable aTable) throws Exception {
         assertEquals(aPks.length, aTable.getRowCount());
-        for (int i = 0; i <= aTable.getRowCount() - 1; i++) {
+        for (int i = 0; i < aTable.getRowCount(); i++) {
             Object oValue = aTable.getValueAt(i, 0);
             if (oValue instanceof CellData) {
                 oValue = ((CellData) oValue).getData();
@@ -183,7 +182,6 @@ public class RowsSorterTest extends GridBaseTest {
     }
 
     @Test
-    @Ignore
     public void sorting1CriteriaAscTest() throws Exception {
         System.out.println("sorting1CriteriaAscTest");
         TabularVisualState state = new TabularVisualState();
@@ -197,7 +195,6 @@ public class RowsSorterTest extends GridBaseTest {
     }
 
     @Test
-    @Ignore
     public void sortingMultiCriteriaAscTest() throws Exception {
         System.out.println("sortingMultiCriteriaAscTest");
         TabularVisualState state = new TabularVisualState();
@@ -215,7 +212,6 @@ public class RowsSorterTest extends GridBaseTest {
     }
 
     @Test
-    @Ignore
     public void sorting1CriteriaDescTest() throws Exception {
         System.out.println("sorting1CriteriaDescTest");
         TabularVisualState state = new TabularVisualState();
@@ -229,7 +225,6 @@ public class RowsSorterTest extends GridBaseTest {
     }
 
     @Test
-    @Ignore
     public void sortingMultiCriteriaAscDescTest() throws Exception {
         System.out.println("sortingMultiCriteriaAscDescTest");
         TabularVisualState state = new TabularVisualState();
@@ -247,7 +242,6 @@ public class RowsSorterTest extends GridBaseTest {
     }
 
     @Test
-    @Ignore
     public void treedSorting1CriteriaAscDescSomeExpandedTest() throws Exception {
         System.out.println("treedSorting1CriteriaAscDescSomeExpandedTest");
         TreedVisualState state = new TreedVisualState();

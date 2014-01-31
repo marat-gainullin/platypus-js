@@ -80,7 +80,6 @@ public class RowsetDistributedTableTest extends GridBaseTest {
     }
 
     @Test
-    @Ignore
     public void rowsCrudTest() throws Exception {
         ApplicationDbModel dm = new ApplicationDbModel(new DummyTestDbClient());
         assertNotNull(dm);
@@ -140,7 +139,6 @@ public class RowsetDistributedTableTest extends GridBaseTest {
     }
 
     @Test
-    @Ignore
     public void editAllDataThroughTableModelTest() throws Exception {
         ApplicationDbModel dm = new ApplicationDbModel(new DummyTestDbClient());
         assertNotNull(dm);
