@@ -156,8 +156,14 @@ public class ProjectRunner {
                 }
             }
         }
-        io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Application_Starting"));
         PlatypusProjectSettings pps = project.getSettings();
+        // Hack! TODO: Think on standalone server without database -> without usersspace
+        if(AppServerType.PLATYPUS_SERVER.equals(pps.getRunAppServerType()) &&
+                (pps.getAppSettings().getDefaultDatasource() == null || pps.getAppSettings().getDefaultDatasource().isEmpty())){
+            io.getErr().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Application_OutOfUsersSpaceDatabase"));
+            return null;
+        }
+        io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Application_Starting"));
         String appUrl = null;
         if (!pps.isNotStartServer()) {
             if (AppServerType.PLATYPUS_SERVER.equals(pps.getRunAppServerType())) {
