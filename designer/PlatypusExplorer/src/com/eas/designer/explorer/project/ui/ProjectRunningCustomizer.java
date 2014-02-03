@@ -193,21 +193,12 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
 
     private void checkRunClientServerConfiguration() {
         lblClientServerMessage.setVisible(isValidRunClientServerConfiguration());
-        if (isSecurityForceOn()) {
-            cbEnableSecurity.setSelected(true);
-            cbEnableSecurity.setEnabled(false);
-        } else {
-            cbEnableSecurity.setSelected(projectSettings.isWebSecurityEnabled());
-            cbEnableSecurity.setEnabled(true);
-        }
+        cbEnableSecurity.setSelected(projectSettings.isWebSecurityEnabled());
+        cbEnableSecurity.setEnabled(true);
     }
 
     private boolean isValidRunClientServerConfiguration() {
         return ClientType.WEB_BROWSER.equals(cbClientType.getSelectedItem()) && !AppServerType.J2EE_SERVER.equals(cbAppServerType.getSelectedItem());
-    }
-
-    private boolean isSecurityForceOn() {
-        return ClientType.PLATYPUS_CLIENT.equals(cbClientType.getSelectedItem()) && AppServerType.J2EE_SERVER.equals(cbAppServerType.getSelectedItem());
     }
 
     private void enablePlatypusClientCustomSettings() {

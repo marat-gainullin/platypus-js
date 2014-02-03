@@ -235,7 +235,6 @@ public class GridBaseTest {
     }
 
     @Test
-    @Ignore
     public void dummyTest() {
     }
 

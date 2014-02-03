@@ -91,7 +91,6 @@ public class StoredQueryFactory {
     public static final String INEER_JOIN_CONSTRUCTING_MSG = "Constructing query with left Query %s and right table %s";
     public static final String LOADING_QUERY_MSG = "Loading stored query %s";
     private DbClient client;
-    private DbMetadataCache dbMdCache;
     private StoredQueryCache queriesCache;
     private boolean preserveDatasources;
     private final List<String> processedQueries = new ArrayList<>();// for circular references discovering
@@ -209,6 +208,7 @@ public class StoredQueryFactory {
         if (!dynamicQueries.containsKey(newQueryId)) {
             ActualCacheEntry<SqlQuery> leftSqlQueryEntry = loadQuery(leftQueryId);
             SqlQuery leftSqlQuery = leftSqlQueryEntry != null ? leftSqlQueryEntry.getValue() : null;
+            DbMetadataCache dbMdCache = client.getDbMetadataCache(null);
             Fields rightTableFields = dbMdCache.getTableMetadata(rightTableName);
 
             if (leftSqlQuery != null && rightTableFields != null) {
@@ -318,7 +318,6 @@ public class StoredQueryFactory {
      */
     public StoredQueryFactory(DbClient aClient) throws Exception {
         client = aClient;
-        dbMdCache = client.getDbMetadataCache(null);
         queriesCache = new StoredQueryCache();
     }
 
