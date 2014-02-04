@@ -158,20 +158,22 @@ public final class PlatypusServerInstance implements Server, ServerInstanceImple
         DatabaseConnection defaultDatabaseConnection = null;
         DatabaseConnection[] dataSources = ConnectionManager.getDefault().getConnections();
         for (DatabaseConnection connection : dataSources) {
-            if (connection.getDisplayName() == null ? ps.getDefaultDatasource() == null : connection.getDisplayName().equals(ps.getDefaultDatasource())) {
-                defaultDatabaseConnection = connection;
-            }
-            arguments.add(ProjectRunner.OPTION_PREFIX + DatasourcesArgsConsumer.DB_RESOURCE_CONF_PARAM);
-            arguments.add(connection.getDisplayName());// Hack because of netbeans
-            arguments.add(ProjectRunner.OPTION_PREFIX + DatasourcesArgsConsumer.DB_URL_CONF_PARAM);
-            arguments.add(connection.getDatabaseURL());
-            arguments.add(ProjectRunner.OPTION_PREFIX + DatasourcesArgsConsumer.DB_USERNAME_CONF_PARAM);
-            arguments.add(connection.getUser());
-            arguments.add(ProjectRunner.OPTION_PREFIX + DatasourcesArgsConsumer.DB_PASSWORD_CONF_PARAM);
-            arguments.add(connection.getPassword());
-            if (connection.getSchema() != null && !connection.getSchema().isEmpty()) {
-                arguments.add(ProjectRunner.OPTION_PREFIX + DatasourcesArgsConsumer.DB_SCHEMA_CONF_PARAM);
-                arguments.add(connection.getSchema());
+            if (ProjectRunner.isConnectionValid(connection)) {
+                if (connection.getDisplayName() == null ? ps.getDefaultDatasource() == null : connection.getDisplayName().equals(ps.getDefaultDatasource())) {
+                    defaultDatabaseConnection = connection;
+                }
+                arguments.add(ProjectRunner.OPTION_PREFIX + DatasourcesArgsConsumer.DB_RESOURCE_CONF_PARAM);
+                arguments.add(connection.getDisplayName());// Hack because of netbeans
+                arguments.add(ProjectRunner.OPTION_PREFIX + DatasourcesArgsConsumer.DB_URL_CONF_PARAM);
+                arguments.add(connection.getDatabaseURL());
+                arguments.add(ProjectRunner.OPTION_PREFIX + DatasourcesArgsConsumer.DB_USERNAME_CONF_PARAM);
+                arguments.add(connection.getUser());
+                arguments.add(ProjectRunner.OPTION_PREFIX + DatasourcesArgsConsumer.DB_PASSWORD_CONF_PARAM);
+                arguments.add(connection.getPassword());
+                if (connection.getSchema() != null && !connection.getSchema().isEmpty()) {
+                    arguments.add(ProjectRunner.OPTION_PREFIX + DatasourcesArgsConsumer.DB_SCHEMA_CONF_PARAM);
+                    arguments.add(connection.getSchema());
+                }
             }
         }
 
