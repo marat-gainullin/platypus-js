@@ -5,12 +5,16 @@
 package com.eas.client.forms;
 
 import com.eas.script.ScriptFunction;
+import com.eas.script.ScriptObj;
 import org.mozilla.javascript.Function;
 
 /**
  * This class holds information of the script properties of a Form object
  * @author vv
  */
+@ScriptObj(name = "Form", jsDoc = "/**\n"
+        + "* Application form.\n"
+        + "*/")
 public class Form {
     
     private static final String SHOWN_JSDOC = ""
@@ -26,12 +30,12 @@ public class Form {
     private static final String SHOWN_FORM_JSDOC = ""
             + "/**\n"
             + " * Gets a shown form by its key.\n"
-            + " * @param a form key identifier"
-            + " * @return a form from the open forms registry"
+            + " * @param key a form key identifier\n"
+            + " * @return a form from the open forms registry\n"
             + " */";
     
     @ScriptFunction(jsDoc = SHOWN_FORM_JSDOC, params = {"key"})
-    public Form getShownForm() {
+    public Form getShownForm(String aKey) {
         return null;
     }
     
