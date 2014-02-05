@@ -31,8 +31,7 @@ public class FieldsEntity extends Entity<DbSchemeModel, SqlQuery, FieldsEntity> 
 
     public static final String INDEXES_PROPERTY = "indexes"; //NOI18N
     public static final String FIELDS_PROPERTY = "fields"; //NOI18N
-    protected List<DbTableIndexSpec> grabedIndexes = null;
-    //protected Fields fields;
+    protected List<DbTableIndexSpec> grabedIndexes;
 
     public FieldsEntity() {
         super();
