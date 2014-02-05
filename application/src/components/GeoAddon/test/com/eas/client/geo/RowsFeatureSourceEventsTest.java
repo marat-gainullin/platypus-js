@@ -31,7 +31,7 @@ import org.opengis.feature.simple.SimpleFeatureType;
  *
  * @author mg
  */
-public class RowsFeatureSourceEventsTest  extends GeoBaseTest{
+public class RowsFeatureSourceEventsTest extends GeoBaseTest {
 
     protected final SimpleFeatureTypeBuilder simpleFeatureTypeBuilder = new SimpleFeatureTypeBuilder();
     protected SimpleFeatureType featureType;
@@ -56,12 +56,12 @@ public class RowsFeatureSourceEventsTest  extends GeoBaseTest{
     private int insertSamleData(Rowset aRowset, int toInsert, Integer aType) throws RowsetException {
         for (int i = 0; i < toInsert; i++) {
             aRowset.insert(new Object[]{
-                        1, aRowset.size(), // pk
-                        2, aType, // type
-                        3, GisUtilities.createPoint(45, 45), // geometry
-                        4, "label for geometrty binding tests № " + String.valueOf(i), // label field
-                        5, "sample test row for geometrty binding tests № " + String.valueOf(i) // free field
-                    });
+                1, aRowset.size(), // pk
+                2, aType, // type
+                3, GisUtilities.createPoint(45, 45), // geometry
+                4, "label for geometrty binding tests № " + String.valueOf(i), // label field
+                5, "sample test row for geometrty binding tests № " + String.valueOf(i) // free field
+            });
             aRowset.currentToOriginal();
             aRowset.beforeFirst();
         }
@@ -124,7 +124,13 @@ public class RowsFeatureSourceEventsTest  extends GeoBaseTest{
         testRowset = new Rowset(fields);
         insertSamleData(testRowset, 4, START_FEATURES_TYPE);
         ApplicationDbModel model = new ApplicationDbModel(dbClient);
-        ApplicationDbEntity entity = new ApplicationDbEntity(model);
+        ApplicationDbEntity entity = new ApplicationDbEntity(model) {
+
+            @Override
+            public void validateQuery() throws Exception {
+                // no op here because of setRowset()
+            }
+        };
         entity.setRowset(testRowset);
         // setup feature style
         styleDescriptor.setLabelField(new ModelElementRef(labelField, true, entity.getEntityId()));
