@@ -102,7 +102,7 @@ public class QueryResultsView extends javax.swing.JPanel {
         dbId = queryDataObject.getDatasourceName();
         String storedQueryText = queryDataObject.getSqlTextDocument().getText(0, queryDataObject.getSqlTextDocument().getLength());
         String storedDialectQueryText = queryDataObject.getSqlFullTextDocument().getText(0, queryDataObject.getSqlFullTextDocument().getLength());
-        StoredQueryFactory factory = new StoredQueryFactory(client);
+        StoredQueryFactory factory = new StoredQueryFactory(client, client.getAppCache());
         queryText = factory.compileSubqueries(storedDialectQueryText != null && !storedDialectQueryText.isEmpty() ? storedDialectQueryText : storedQueryText, queryDataObject.getModel());
         parameters = queryDataObject.getModel().getParameters();
         setName(queryDataObject.getName());
@@ -213,7 +213,7 @@ public class QueryResultsView extends javax.swing.JPanel {
         queryEntity.setQuery(query);
         model.addEntity(queryEntity);
         try {
-            StoredQueryFactory factory = new StoredQueryFactory(client, false);
+            StoredQueryFactory factory = new StoredQueryFactory(client, client.getAppCache(), false);
             query.setCommand(!factory.putTableFieldsMetadata(query));
             enableCommitQueryButton(!query.isCommand());
             enableNextPageButton(!query.isCommand());
@@ -472,7 +472,7 @@ public class QueryResultsView extends javax.swing.JPanel {
                                     assert model.getClient() instanceof DatabasesClient;
                                     DatabasesClient client = (DatabasesClient) model.getClient();
                                     final StoredQueryFactory qFactory = client.getQueryFactory();
-                                    client.setQueryFactory(new StoredQueryFactory(client, false) {
+                                    client.setQueryFactory(new StoredQueryFactory(client, client.getAppCache(), false) {
                                         @Override
                                         public SqlQuery getQuery(String aAppElementId, boolean aCopy) throws Exception {
                                             if (entityId.equals(aAppElementId)) {
