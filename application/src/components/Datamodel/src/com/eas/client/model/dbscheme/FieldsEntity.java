@@ -5,7 +5,6 @@
 package com.eas.client.model.dbscheme;
 
 import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.Fields;
 import com.eas.client.DbClient;
 import com.eas.client.DbMetadataCache;
 import com.eas.client.SQLUtils;
@@ -32,7 +31,7 @@ public class FieldsEntity extends Entity<DbSchemeModel, SqlQuery, FieldsEntity> 
 
     public static final String INDEXES_PROPERTY = "indexes"; //NOI18N
     public static final String FIELDS_PROPERTY = "fields"; //NOI18N
-    protected List<DbTableIndexSpec> grabedIndexes = null;
+    protected List<DbTableIndexSpec> grabedIndexes;
 
     public FieldsEntity() {
         super();
@@ -116,12 +115,6 @@ public class FieldsEntity extends Entity<DbSchemeModel, SqlQuery, FieldsEntity> 
         List<DbTableIndexSpec> oldValue = grabedIndexes;
         grabedIndexes = aValue;
         changeSupport.firePropertyChange(INDEXES_PROPERTY, oldValue, aValue);
-    }
-
-    public void setFields(Fields aValue) {
-        Fields oldValue = fields;
-        fields = aValue;
-        changeSupport.firePropertyChange(FIELDS_PROPERTY, oldValue, aValue);
     }
 
     @Override

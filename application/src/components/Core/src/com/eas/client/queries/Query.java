@@ -33,7 +33,7 @@ public abstract class Query<T extends Client> {
     protected transient Fields fields = new Fields();
     protected transient Parameters params = new Parameters();
     protected transient String title;
-    protected String dbId;
+    protected String datasourceName;
     protected String entityId;
     protected boolean procedure;
     protected boolean manual;
@@ -60,9 +60,9 @@ public abstract class Query<T extends Client> {
      */
     protected Query(Query<T> aSource) {
         if (aSource != null) {
-            String aDbId = aSource.getDbId();
-            if (aDbId != null) {
-                dbId = aDbId;
+            String sourceDatasourceName = aSource.getDbId();
+            if (sourceDatasourceName != null) {
+                datasourceName = sourceDatasourceName;
             }
             procedure = aSource.isProcedure();
             manual = aSource.isManual();
@@ -282,19 +282,19 @@ public abstract class Query<T extends Client> {
     public abstract void enqueueUpdate() throws Exception;
     
     /**
-     * @return the dbId
+     * @return the datasourceName
      */
     public String getDbId() {
-        return dbId;
+        return datasourceName;
     }
 
     /**
-     * @param aValue A dbId to set to the squery.
+     * @param aValue A datasourceName to set to the squery.
      */
     public void setDbId(String aValue) {
-        String oldValue = dbId;
-        dbId = aValue;
-        changeSupport.firePropertyChange("dbId", oldValue, dbId);
+        String oldValue = datasourceName;
+        datasourceName = aValue;
+        changeSupport.firePropertyChange("dbId", oldValue, datasourceName);
     }
 
     /**
