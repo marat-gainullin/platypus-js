@@ -14,15 +14,9 @@ import com.eas.client.SQLUtils;
 import com.eas.client.dbstructure.DbStructureUtils;
 import com.eas.client.dbstructure.IconCache;
 import com.eas.client.dbstructure.SqlActionsController;
-import com.eas.client.dbstructure.SqlActionsController.CreateConstraintAction;
-import com.eas.client.dbstructure.SqlActionsController.DefineTableAction;
-import com.eas.client.dbstructure.SqlActionsController.DropFieldAction;
-import com.eas.client.dbstructure.SqlActionsController.ModifyFieldAction;
-import com.eas.client.dbstructure.exceptions.DbActionException;
 import com.eas.client.dbstructure.gui.edits.*;
 import com.eas.client.model.gui.SettingsDialog;
 import com.eas.client.dbstructure.gui.view.ForeignKeySettingsView;
-import com.eas.client.dbstructure.store.XmlDom2DbSchema;
 import com.eas.client.metadata.DbTableIndexSpec;
 import com.eas.client.metadata.TableRef;
 import com.eas.client.model.*;
@@ -38,8 +32,6 @@ import com.eas.client.model.gui.view.entities.EntityView;
 import com.eas.client.model.gui.view.entities.TableEntityView;
 import com.eas.client.model.store.XmlDom2DbSchemeModel;
 import com.eas.client.queries.SqlCompiledQuery;
-import com.eas.client.sqldrivers.SqlDriver;
-import com.eas.client.sqldrivers.resolvers.TypesResolver;
 import com.eas.designer.datamodel.nodes.FieldNode;
 import com.eas.xml.dom.Source2XmlDom;
 import java.awt.*;
@@ -70,194 +62,6 @@ import org.w3c.dom.Document;
 public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbSchemeModel> {
 
     protected SqlActionsController sqlController;
-
-    /**
-     * Imports structure from an xml string representing schema information
-     * about database structure
-     *
-     * @param content String, containing xml with structure.
-     */
-    public void importStructure(String content) {
-        Document doc = Source2XmlDom.transform(content);
-        if (doc != null) {
-            try {
-                DbSchemeModel sourceModel = XmlDom2DbSchema.transform(model.getClient(), doc);
-                resolveFieldsToDBMS(sourceModel);
-                turnOffReqiredFields(sourceModel);
-                importTablesCreations(sourceModel);
-                importFkCreations(sourceModel);
-                DbSchemeModel sourceModel1 = XmlDom2DbSchema.transform(model.getClient(), doc);
-                resolveFieldsToDBMS(sourceModel1);
-                mergeFields(sourceModel1);
-                entireSynchronizeWithDb();
-            } catch (Exception ex) {
-                Logger.getLogger(DbSchemeModelView.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-    }
-
-    /**
-     * Creates tables and foreign keys, absent in target schema and present in
-     * imported infomation.
-     *
-     * @param aSource Imported information container.
-     * @see DbSchemeModel
-     */
-    private void importTablesCreations(DbSchemeModel aSource) {
-        DbSchemeModel sModel = (DbSchemeModel) model;
-        // import tables
-        for (FieldsEntity entity : aSource.getEntities().values()) {
-            String tableName = entity.getTableName();
-            if (sModel.getEntityByTableName(tableName) == null) {
-                DefineTableAction laction = sqlController.createDefineTableAction(tableName, entity.getFields());
-                if (!laction.execute()) {
-                    try {
-                        DbActionException ex = new DbActionException(laction.getErrorString());
-                        ex.setParam1(tableName);
-                        throw ex;
-                    } catch (DbActionException ex1) {
-                        Logger.getLogger(DbSchemeModelView.class.getName()).log(Level.SEVERE, ex1.getMessage());
-                    }
-                } else {
-                    FieldsEntity newEntity = new FieldsEntity(sModel);
-                    newEntity.setTableName(tableName);
-                    newEntity.setX(entity.getX());
-                    newEntity.setY(entity.getY());
-                    newEntity.setWidth(entity.getWidth());
-                    newEntity.setHeight(entity.getHeight());
-                    newEntity.setTitle(entity.getTitle());
-                    newEntity.setFields(entity.getFields());
-                    sModel.addEntity(newEntity);
-                }
-            }
-        }
-    }
-
-    /**
-     * Creates tables and foreign keys, absent in target schema and present in
-     * imported infomation.
-     *
-     * @param aSource Imported information container.
-     * @see DbSchemeModel
-     */
-    private void importFkCreations(DbSchemeModel aSource) {
-        // import foreign keys
-        for (Relation<FieldsEntity> relation : aSource.getRelations()) {
-            ForeignKeySpec fkSpec = DbStructureUtils.constructFkSpecByRelation(relation);
-            CreateConstraintAction laction = sqlController.createCreateConstraintAction(fkSpec);
-            if (!laction.execute()) {
-                try {
-                    DbActionException ex = new DbActionException(laction.getErrorString());
-                    ex.setParam1(relation.getLeftEntity().getTableName());
-                    ex.setParam2(relation.getLeftField().getName());
-                    throw ex;
-                } catch (DbActionException ex1) {
-                    Logger.getLogger(DbSchemeModelView.class.getName()).log(Level.SEVERE, ex1.getMessage());
-                }
-            }
-        }
-    }
-
-    /**
-     * Merges all fields in all entities. Creates fields absent in target model
-     * and present in imported information. Deletes fields present in target
-     * model and absent in imported information. Redefines fields present in
-     * target model and in imported information if thay are defferent. Side
-     * effect of this is that some fields become reqired, rather while
-     * importCreations moethod execution
-     *
-     * @param aSource Imported information container.
-     * @see DbSchemeModel
-     * @see #importCreations(null)
-     */
-    private void mergeFields(DbSchemeModel aSource) {
-        DbSchemeModel sModel = (DbSchemeModel) model;
-        // import tables
-        for (FieldsEntity sEntity : aSource.getEntities().values()) {
-            FieldsEntity dEntity = sModel.getEntityByTableName(sEntity.getTableName());
-            if (dEntity != null) {
-                Fields sFields = sEntity.getFields();
-                Fields dFields = dEntity.getFields();
-
-                // new fields creation
-                for (int i = 1; i <= sFields.getFieldsCount(); i++) {
-                    Field sField = sFields.get(i);
-                    if (!dFields.contains(sField.getName())) {
-                        // let's create new field
-                        SqlActionsController.AddFieldAction laction = sqlController.createAddFieldAction(dEntity.getTableName(), sField);
-                        if (!laction.execute()) {
-                            try {
-                                DbActionException ex = new DbActionException(laction.getErrorString());
-                                ex.setParam1(dEntity.getTableName());
-                                ex.setParam2(sField.getName());
-                                throw ex;
-                            } catch (DbActionException ex1) {
-                                Logger.getLogger(DbSchemeModelView.class.getName()).log(Level.SEVERE, ex1.getMessage());
-                            }
-                        }
-                    } else {
-                        Field dField = dFields.get(sField.getName());
-                        assert dField != null : sField.getName() + " contains but it's not returned by get(iny)'";
-                        if (!dField.isEqual(sField)) {
-                            // let's redefine field with same name, but different content
-                            ModifyFieldAction laction = sqlController.createModifyFieldAction(dEntity.getTableName(), dField, sField);
-                            if (!laction.execute()) {
-                                try {
-                                    DbActionException ex = new DbActionException(laction.getErrorString());
-                                    ex.setParam1(dEntity.getTableName());
-                                    throw ex;
-                                } catch (DbActionException ex1) {
-                                    Logger.getLogger(DbSchemeModelView.class.getName()).log(Level.SEVERE, ex1.getMessage());
-                                }
-                            }
-                        }
-                    }
-                }
-                // absent in the source fields removing from target table
-                for (int i = 1; i <= dFields.getFieldsCount(); i++) {
-                    Field dField = dFields.get(i);
-                    if (!sFields.contains(dField.getName())) {
-                        // let's remove absent in source field from target
-                        DropFieldAction laction = sqlController.createDropFieldAction(dEntity.getTableName(), dField);
-                        if (!laction.execute()) {
-                            try {
-                                DbActionException ex = new DbActionException(laction.getErrorString());
-                                ex.setParam1(dEntity.getTableName());
-                                ex.setParam2(dField.getName());
-                                throw ex;
-                            } catch (DbActionException ex1) {
-                                Logger.getLogger(DbSchemeModelView.class.getName()).log(Level.SEVERE, ex1.getMessage());
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private void turnOffReqiredFields(DbSchemeModel aModel) {
-        for (FieldsEntity entity : aModel.getEntities().values()) {
-            Fields fields = entity.getFields();
-            for (int i = 1; i <= fields.getFieldsCount(); i++) {
-                Field field = fields.get(i);
-                field.setNullable(true);
-            }
-        }
-    }
-
-    private void resolveFieldsToDBMS(DbSchemeModel aModel) throws Exception {
-        DbSchemeModel sModel = (DbSchemeModel) model;
-        DbMetadataCache mdCache = sModel.getClient().getDbMetadataCache(sModel.getDbId());
-        SqlDriver sqlDriver = mdCache.getConnectionDriver();
-        TypesResolver tResolver = sqlDriver.getTypesResolver();
-        for (FieldsEntity entity : aModel.getEntities().values()) {
-            Fields fields = entity.getFields();
-            for (int i = 1; i <= fields.getFieldsCount(); i++) {
-                Field field = fields.get(i);
-                tResolver.resolve2RDBMS(field);
-            }
-        }
-    }
 
     public void resolveRelations() throws Exception {
         model.clearRelations();

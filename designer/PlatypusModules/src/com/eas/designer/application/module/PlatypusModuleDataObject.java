@@ -42,7 +42,6 @@ import org.openide.nodes.CookieSet;
 import org.openide.nodes.Node;
 import org.openide.nodes.Node.Cookie;
 import org.openide.util.Exceptions;
-import org.openide.util.Lookup;
 
 @MIMEResolver.ExtensionRegistration(displayName = "#LBL_Platypus_Model_file", extension = "model", mimeType = "text/model+xml")
 public class PlatypusModuleDataObject extends PlatypusDataObject implements AstProvider {

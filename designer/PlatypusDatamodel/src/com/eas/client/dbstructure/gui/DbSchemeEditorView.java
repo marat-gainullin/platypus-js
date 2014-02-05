@@ -12,9 +12,7 @@ package com.eas.client.dbstructure.gui;
 
 import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.dbstructure.DbStructureUtils;
-import com.eas.client.dbstructure.IconCache;
 import com.eas.client.dbstructure.SqlActionsController;
-import com.eas.client.dbstructure.store.DbSchema2XmlDom;
 import com.eas.client.model.ModelEditingValidator;
 import com.eas.client.model.Relation;
 import com.eas.client.model.dbscheme.DbSchemeModel;
@@ -29,36 +27,24 @@ import com.eas.client.model.gui.view.model.DbSchemeModelView;
 import com.eas.client.model.gui.view.model.DbSchemeModelView.AddTableFieldAction;
 import com.eas.client.model.gui.view.model.DbSchemeModelView.RelationPropertiesAction;
 import com.eas.client.model.gui.view.model.ModelView;
-import com.eas.client.settings.SettingsConstants;
 import com.eas.client.utils.scalableui.JScalableScrollPane;
 import com.eas.client.utils.scalableui.ScaleListener;
 import com.eas.gui.JDropDownButton;
-import com.eas.util.BinaryUtils;
-import com.eas.xml.dom.XmlDom2String;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ContainerEvent;
 import java.awt.event.ContainerListener;
-import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.*;
 import javax.swing.event.UndoableEditEvent;
 import javax.swing.event.UndoableEditListener;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.undo.UndoManager;
-import org.w3c.dom.Document;
 
 /**
  *
@@ -198,100 +184,6 @@ public class DbSchemeEditorView extends JPanel implements ContainerListener {
         public void actionPerformed(ActionEvent e) {
             if (isEnabled()) {
                 undo.redo();
-            }
-        }
-    }
-
-    public class ExportStructureAction extends AbstractAction {
-
-        public ExportStructureAction() {
-            super();
-            putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK | KeyEvent.SHIFT_DOWN_MASK));
-            putValue(Action.NAME, DbStructureUtils.getString(ExportStructureAction.class.getSimpleName()));
-            putValue(Action.SHORT_DESCRIPTION, DbStructureUtils.getString(ExportStructureAction.class.getSimpleName() + ".hint"));
-            putValue(Action.SMALL_ICON, IconCache.getIcon("16x16/structure-grab.png"));
-            setEnabled(false);
-        }
-
-        @Override
-        public boolean isEnabled() {
-            return true;
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            DbSchemeModel model = getModel();
-            Document doc = DbSchema2XmlDom.transform((DbSchemeModel) model);
-            String schemaString = XmlDom2String.transform(doc);
-            JFileChooser chooser = new JFileChooser();
-            chooser.setFileFilter(new FileNameExtensionFilter("xml files", "xml"));
-            int returnVal = chooser.showSaveDialog(DbSchemeEditorView.this);
-            if (returnVal == JFileChooser.APPROVE_OPTION) {
-                FileOutputStream fos = null;
-                try {
-                    String selectedFileName = chooser.getSelectedFile().getAbsolutePath();
-                    if (!selectedFileName.contains(".")) {
-                        selectedFileName += ".xml";
-                    }
-                    File file = new File(selectedFileName);
-                    fos = new FileOutputStream(file);
-                    byte[] data = schemaString.getBytes(SettingsConstants.COMMON_ENCODING);
-                    fos.write(data);
-                } catch (Exception ex) {
-                    Logger.getLogger(DbSchemeModelView.class.getName()).log(Level.SEVERE, null, ex);
-                } finally {
-                    try {
-                        fos.close();
-                    } catch (IOException ex) {
-                        Logger.getLogger(DbSchemeModelView.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-            }
-        }
-    }
-
-    public class ImportStructureAction extends AbstractAction {
-
-        public ImportStructureAction() {
-            super();
-            putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_I, KeyEvent.CTRL_DOWN_MASK | KeyEvent.SHIFT_DOWN_MASK));
-            putValue(Action.NAME, DbStructureUtils.getString(ImportStructureAction.class.getSimpleName()));
-            putValue(Action.SHORT_DESCRIPTION, DbStructureUtils.getString(ImportStructureAction.class.getSimpleName() + ".hint"));
-            putValue(Action.SMALL_ICON, IconCache.getIcon("16x16/structure-import.png"));
-            setEnabled(false);
-        }
-
-        @Override
-        public boolean isEnabled() {
-            return true;
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            String content = null;
-            JFileChooser chooser = new JFileChooser();
-            chooser.setFileFilter(new FileNameExtensionFilter("xml files", "xml"));
-            int returnVal = chooser.showOpenDialog(DbSchemeEditorView.this);
-            if (returnVal == JFileChooser.APPROVE_OPTION) {
-                FileInputStream fos = null;
-                try {
-                    File file = chooser.getSelectedFile();
-                    fos = new FileInputStream(file);
-                    byte[] bContent = BinaryUtils.readStream(fos, -1);
-                    content = new String(bContent, SettingsConstants.COMMON_ENCODING);
-                } catch (Exception ex) {
-                    Logger.getLogger(DbSchemeModelView.class.getName()).log(Level.SEVERE, null, ex);
-                } finally {
-                    try {
-                        fos.close();
-                    } catch (IOException ex) {
-                        Logger.getLogger(DbSchemeModelView.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-            }
-            if (content != null) {
-                modelView.importStructure(content);
-//                DbSchemaDocumentProvider.getInstance().saveDocumentByView(DbSchemeEditorView.this);
             }
         }
     }
@@ -454,8 +346,6 @@ public class DbSchemeEditorView extends JPanel implements ContainerListener {
 
     protected void fillActions() {
         ActionMap am = getActionMap();
-        am.put(ExportStructureAction.class.getSimpleName(), new ExportStructureAction());
-        am.put(ImportStructureAction.class.getSimpleName(), new ImportStructureAction());
         am.put(UndoAction.class.getSimpleName(), new UndoAction());
         am.put(RedoAction.class.getSimpleName(), new RedoAction());
         am.put(RunQueryAction.class.getSimpleName(), new RunQueryAction());
@@ -513,9 +403,7 @@ public class DbSchemeEditorView extends JPanel implements ContainerListener {
         JButton btnZoomIn = createToolbarButton();
         JButton btnZoomOut = createToolbarButton();
         JButton btnFind = createToolbarButton();
-        JButton btnSaveSchema = createToolbarButton();
-        JButton btnImportSchema = createToolbarButton();
-
+        
         JLabel lblZoom = new JLabel();
         lblZoom.setText(DbStructureUtils.getString("lblZoom"));
         JPanel pnlZoom = new JPanel(new BorderLayout());
@@ -533,9 +421,6 @@ public class DbSchemeEditorView extends JPanel implements ContainerListener {
         btnZoomIn.setAction(modelView.getActionMap().get(ModelView.ZoomIn.class.getSimpleName()));
         btnZoomOut.setAction(modelView.getActionMap().get(ModelView.ZoomOut.class.getSimpleName()));
         btnFind.setAction(modelView.getActionMap().get(ModelView.Find.class.getSimpleName()));
-
-        btnSaveSchema.setAction(modelView.getActionMap().get(ExportStructureAction.class.getSimpleName()));
-        btnImportSchema.setAction(modelView.getActionMap().get(ImportStructureAction.class.getSimpleName()));
 
         addMenu.add(mnuAddTable);
         addMenu.add(mnuCreateTable);
