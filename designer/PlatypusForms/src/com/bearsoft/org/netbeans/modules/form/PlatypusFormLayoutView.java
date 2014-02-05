@@ -122,8 +122,8 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
     private RADVisualContainer<?> topDesignComponent;
     private FormEditor formEditor;
     // layout visualization and interaction
-    private List<RADComponent<?>> selectedComponents = new ArrayList<>();
-    private List<RADVisualComponent<?>> selectedLayoutComponents = new ArrayList<>();
+    private final List<RADComponent<?>> selectedComponents = new ArrayList<>();
+    private final List<RADVisualComponent<?>> selectedLayoutComponents = new ArrayList<>();
     private VisualReplicator replicator;
     private List<Action> alignActions;
     private List<Action> resizabilityActions;
@@ -143,8 +143,8 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
     /**
      * The icons for PlatypusFormLayoutView
      */
-    private static String iconURL =
-            "com/bearsoft/org/netbeans/modules/form/resources/formDesigner.gif"; // NOI18N
+    private static final String iconURL
+            = "com/bearsoft/org/netbeans/modules/form/resources/formDesigner.gif"; // NOI18N
 
     // constructors and setup
     PlatypusFormLayoutView(FormEditor aFormEditor) {
@@ -168,18 +168,14 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
 
         formEditor = aFormEditor;
 
-        if (aFormEditor != null) { // Issue 67879
+        if (formEditor != null) { // Issue 67879
             // add PlatypusFormDataObject to lookup so it can be obtained from multiview TopComponent
-            final PlatypusFormDataObject formDataObject = aFormEditor.getFormDataObject();
+            final PlatypusFormDataObject formDataObject = formEditor.getFormDataObject();
             ActionMap map = FormInspector.getInstance().setupActionMap(getActionMap());
             explorerManager = new ExplorerManager();
-            lookup = new ProxyLookup(new Lookup[]{
+            associateLookup(new ProxyLookup(new Lookup[]{
                 ExplorerUtils.createLookup(explorerManager, map),
-                PaletteUtils.getPaletteLookup(formDataObject.getPrimaryFile()),
-                formDataObject.getLookup(),
-                Lookup.EMPTY // placeholder for data node lookup used when no node selected in the form
-            });
-            associateLookup(lookup);
+                PaletteUtils.getPaletteLookup(formDataObject.getPrimaryFile())}));
             formToolBar = new FormToolBar(this);
         }
         setMinimumSize(new Dimension(10, 10));
@@ -516,41 +512,41 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
             FormLAF.setUsePreviewDefaults(classLoader, previewInfo);
             result = FormLAF.<Container>executeWithLookAndFeel(formModel,
                     new Mutex.ExceptionAction<Container>() {
-                @Override
-                public Container run() throws Exception {
-                    VisualReplicator r = new VisualReplicator(false, FormUtils.getViewConverters());
-                    r.setTopRADComponent(radComp);
-                    Container container = (Container) r.createClone();
-                    if (container instanceof RootPaneContainer) {
-                        JRootPane rootPane = ((RootPaneContainer) container).getRootPane();
-                        JLayeredPane newPane = new JLayeredPane() {
-                            @Override
-                            public void paint(Graphics g) {
-                                try {
-                                    FormLAF.setUsePreviewDefaults(classLoader, previewInfo);
-                                    super.paint(g);
-                                } finally {
-                                    FormLAF.setUsePreviewDefaults(null, null);
+                        @Override
+                        public Container run() throws Exception {
+                            VisualReplicator r = new VisualReplicator(false, FormUtils.getViewConverters());
+                            r.setTopRADComponent(radComp);
+                            Container container = (Container) r.createClone();
+                            if (container instanceof RootPaneContainer) {
+                                JRootPane rootPane = ((RootPaneContainer) container).getRootPane();
+                                JLayeredPane newPane = new JLayeredPane() {
+                                    @Override
+                                    public void paint(Graphics g) {
+                                        try {
+                                            FormLAF.setUsePreviewDefaults(classLoader, previewInfo);
+                                            super.paint(g);
+                                        } finally {
+                                            FormLAF.setUsePreviewDefaults(null, null);
+                                        }
+                                    }
+                                };
+                                // Copy components from the original layered pane into our one
+                                JLayeredPane oldPane = rootPane.getLayeredPane();
+                                Component[] comps = oldPane.getComponents();
+                                for (int i = 0; i < comps.length; i++) {
+                                    newPane.add(comps[i], Integer.valueOf(oldPane.getLayer(comps[i])));
                                 }
-                            }
-                        };
-                        // Copy components from the original layered pane into our one
-                        JLayeredPane oldPane = rootPane.getLayeredPane();
-                        Component[] comps = oldPane.getComponents();
-                        for (int i = 0; i < comps.length; i++) {
-                            newPane.add(comps[i], Integer.valueOf(oldPane.getLayer(comps[i])));
+                                // Use our layered pane that knows about LAF switching
+                                rootPane.setLayeredPane(newPane);
+                                // Make the glass pane visible to force repaint of the whole layered pane
+                                rootPane.getGlassPane().setVisible(true);
+                                // Mark it as design preview
+                                rootPane.putClientProperty("designPreview", Boolean.TRUE); // NOI18N
+                            } // else AWT Frame - we don't care that the L&F of the Swing
+                            // components may not look good - it is a strange use case
+                            return container;
                         }
-                        // Use our layered pane that knows about LAF switching
-                        rootPane.setLayeredPane(newPane);
-                        // Make the glass pane visible to force repaint of the whole layered pane
-                        rootPane.getGlassPane().setVisible(true);
-                        // Mark it as design preview
-                        rootPane.putClientProperty("designPreview", Boolean.TRUE); // NOI18N
-                    } // else AWT Frame - we don't care that the L&F of the Swing
-                    // components may not look good - it is a strange use case
-                    return container;
-                }
-            });
+                    });
         } finally {
             FormLAF.setUsePreviewDefaults(null, null);
         }
@@ -1373,8 +1369,26 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
         try {
             FormInspector fi = FormInspector.getInstance();
             explorerManager.setSelectedNodes(selectedNodes);
-            setActivatedNodes(selectedNodes);
             fi.setSelectedNodes(selectedNodes, this);
+            setActivatedNodes(selectedNodes);
+            // Hack! NetBeans doesn't properly handle activated nodes in multi view's elements
+            // So, we need to use dummy explorer manager and it's lookup, associated with this multiview element TopComponent
+            // to produce satisfactory events.
+            // Moreover, this code shouldn't be here at all, but NetBeans doesn't refresh
+            // property sheet on multi-view's activated element change, so we need to simulate
+            // activated and selected nodes change.
+            Node[] activated = getActivatedNodes();
+            Node[] empty = new Node[]{};
+            explorerManager.setSelectedNodes(empty);
+            setActivatedNodes(empty);
+                // Hack. When multi-view element with no any activated node is activated,
+            // NetBeans' property sheet stay with a node from previous multi-view element.
+            // So, we need to simulate non-empty activated nodes.
+            if (activated == null || activated.length <= 0) {
+                activated = new Node[]{formModel.getTopDesignComponent().getNodeReference()};
+            }
+            explorerManager.setSelectedNodes(activated);
+            setActivatedNodes(activated);
         } catch (java.beans.PropertyVetoException ex) {
             Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
         }
@@ -1515,7 +1529,7 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
         while (parent != null) {
             if (!JComponent.class.isAssignableFrom(parent.getBeanClass())
                     && !RootPaneContainer.class.isAssignableFrom(
-                    parent.getBeanClass())) {
+                            parent.getBeanClass())) {
                 return false;
             }
             parent = parent.getParentComponent();
@@ -1529,8 +1543,8 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
     private void notifyCannotEditInPlace() {
         DialogDisplayer.getDefault().notify(
                 new NotifyDescriptor.Message(
-                FormUtils.getBundleString("MSG_ComponentNotShown"), // NOI18N
-                NotifyDescriptor.WARNING_MESSAGE));
+                        FormUtils.getBundleString("MSG_ComponentNotShown"), // NOI18N
+                        NotifyDescriptor.WARNING_MESSAGE));
     }
 
     // -----------------
@@ -1562,8 +1576,8 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
             if (fi.getFocusedForm() != this) {
                 fi.focusForm(this);
             }
-            updateNodesSelection();
             fi.attachActions();
+            updateNodesSelection();
             if (textEditLayer == null || !textEditLayer.isVisible()) {
                 handleLayer.requestFocus();
             }

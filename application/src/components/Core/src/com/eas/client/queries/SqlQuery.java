@@ -77,7 +77,7 @@ public class SqlQuery extends Query<DbClient> {
      */
     public SqlQuery(DbClient aClient, String aDbId, String aSqlText) {
         this(aClient, aSqlText);
-        dbId = aDbId;
+        datasourceName = aDbId;
     }
 
     public SqlQuery(SqlQuery aSource) {
@@ -234,7 +234,7 @@ public class SqlQuery extends Query<DbClient> {
                 compiledSb.append(sm.group(0));
             }
         }
-        SqlCompiledQuery compiled = new SqlCompiledQuery(client, dbId, compiledSb.toString(), ps, fields, readRoles, writeRoles);
+        SqlCompiledQuery compiled = new SqlCompiledQuery(client, datasourceName, compiledSb.toString(), ps, fields, readRoles, writeRoles);
         compiled.setEntityId(entityId);
         compiled.setProcedure(procedure);
         compiled.setPageSize(pageSize);
@@ -275,7 +275,7 @@ public class SqlQuery extends Query<DbClient> {
         }
         String sqlCompiledText = m.replaceAll("?");
         sqlCompiledText = RowsetUtils.makeQueryMetadataQuery(sqlCompiledText);
-        SqlCompiledQuery compiled = new SqlCompiledQuery(client, dbId, sqlCompiledText, ps);
+        SqlCompiledQuery compiled = new SqlCompiledQuery(client, datasourceName, sqlCompiledText, ps);
         compiled.setPageSize(pageSize);
         return compiled;
     }

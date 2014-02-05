@@ -6,6 +6,7 @@ package com.eas.client.model;
 
 import com.bearsoft.rowset.metadata.*;
 import com.bearsoft.rowset.utils.IDGenerator;
+import com.eas.client.AppCache;
 import com.eas.client.ClientConstants;
 import com.eas.client.DbClient;
 import com.eas.client.DbMetadataCache;
@@ -69,9 +70,9 @@ public class StoredQueryFactory {
             // It's not harmful as long as factory maintains dynamic queries cache by itself.
             // It will be simple projection one cache on another.
             ActualCacheEntry<SqlQuery> res = super.get(aId);
-            if (res != null && !client.getAppCache().isActual(aId, res.getTxtContentSize(), res.getTxtContentCrc32())) {
+            if (res != null && !appCache.isActual(aId, res.getTxtContentSize(), res.getTxtContentCrc32())) {
                 remove(aId);
-                client.getAppCache().remove(aId);
+                appCache.remove(aId);
                 res = super.get(aId);
             }
             return res;
@@ -91,6 +92,7 @@ public class StoredQueryFactory {
     public static final String INEER_JOIN_CONSTRUCTING_MSG = "Constructing query with left Query %s and right table %s";
     public static final String LOADING_QUERY_MSG = "Loading stored query %s";
     private DbClient client;
+    private AppCache appCache;
     private DbMetadataCache dbMdCache;
     private StoredQueryCache queriesCache;
     private boolean preserveDatasources;
@@ -155,7 +157,7 @@ public class StoredQueryFactory {
                 throw new NullPointerException(CANT_LOAD_NULL_MSG);
             }
             Logger.getLogger(this.getClass().getName()).finer(String.format(LOADING_QUERY_MSG, aAppElementId));
-            ApplicationElement appElement = client.getAppCache().get(aAppElementId);
+            ApplicationElement appElement = appCache.get(aAppElementId);
             if (appElement != null && appElement.getType() == ClientConstants.ET_QUERY) {// Ordinary queries, stored in application database
                 Document queryDom = appElement.getContent();
                 if (queryDom != null) {
@@ -209,6 +211,7 @@ public class StoredQueryFactory {
         if (!dynamicQueries.containsKey(newQueryId)) {
             ActualCacheEntry<SqlQuery> leftSqlQueryEntry = loadQuery(leftQueryId);
             SqlQuery leftSqlQuery = leftSqlQueryEntry != null ? leftSqlQueryEntry.getValue() : null;
+            DbMetadataCache dbMdCache = client.getDbMetadataCache(null);
             Fields rightTableFields = dbMdCache.getTableMetadata(rightTableName);
 
             if (leftSqlQuery != null && rightTableFields != null) {
@@ -313,11 +316,16 @@ public class StoredQueryFactory {
      *
      * @param aClient ClientIntf instance, responsible for interacting with
      * appliction database.
+     * @param aAppCache Application elements cache. Used to obtain application queries data.
      * @throws java.lang.Exception
      * @see DbClientIntf
      */
-    public StoredQueryFactory(DbClient aClient) throws Exception {
+    public StoredQueryFactory(DbClient aClient, AppCache aAppCache) throws Exception {
         client = aClient;
+        if (aAppCache == null) {
+            throw new IllegalArgumentException("StoredQueryFactory needs an application cache. It can't be null");
+        }
+        appCache = aAppCache;
         dbMdCache = client.getDbMetadataCache(null);
         queriesCache = new StoredQueryCache();
     }
@@ -327,6 +335,7 @@ public class StoredQueryFactory {
      *
      * @param aClient ClientIntf instance, responsible for interacting with
      * appliction database.
+     * @param aAppCache Application elements cache. Used to obtain application queries data.
      * @param aPreserveDatasources If true, aliased names of tables
      * (datasources) are setted to resulting fields in query compilation
      * process. If false, query's virtual table name (e.g. q76067e72752) is
@@ -334,8 +343,8 @@ public class StoredQueryFactory {
      * @throws java.lang.Exception
      * @see ClientIntf
      */
-    public StoredQueryFactory(DbClient aClient, boolean aPreserveDatasources) throws Exception {
-        this(aClient);
+    public StoredQueryFactory(DbClient aClient, AppCache aAppCache, boolean aPreserveDatasources) throws Exception {
+        this(aClient, aAppCache);
         preserveDatasources = aPreserveDatasources;
     }
 
@@ -626,9 +635,9 @@ public class StoredQueryFactory {
     }
 
     /**
-     * Returns cached table fields if
-     * <code>aTablyName</code> is a table name or query fields if
-     * <code>aTablyName</code> is query tably name in format: #<id>.
+     * Returns cached table fields if <code>aTablyName</code> is a table name or
+     * query fields if <code>aTablyName</code> is query tably name in format:
+     * #<id>.
      *
      * @param aDbId Databse identifier, the query belongs to. That database is
      * query-inner table metadata source, but query is stored in application.
@@ -651,7 +660,7 @@ public class StoredQueryFactory {
         if (tableFields != null) {// Tables have a higher priority in soft reference case
             return tableFields;
         } else {
-            ApplicationElement testAppElement = client.getAppCache().get(aTablyName);
+            ApplicationElement testAppElement = appCache.get(aTablyName);
             if (testAppElement != null && testAppElement.getType() == ClientConstants.ET_QUERY) {
                 SqlQuery query = queriesCache.get(aTablyName).getValue();
                 return query.getFields();

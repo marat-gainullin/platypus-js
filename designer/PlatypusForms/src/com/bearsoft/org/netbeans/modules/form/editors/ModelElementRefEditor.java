@@ -13,13 +13,11 @@ import com.bearsoft.org.netbeans.modules.form.bound.RADModelGridColumn;
 import com.bearsoft.org.netbeans.modules.form.bound.RADModelMapLayer;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
-import com.eas.client.DbClient;
 import com.eas.client.SQLUtils;
 import com.eas.client.model.ModelElementRef;
 import com.eas.client.model.StoredQueryFactory;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
-import com.eas.client.model.application.ApplicationModel;
 import com.eas.client.model.application.ApplicationParametersEntity;
 import com.eas.client.model.gui.DatamodelDesignUtils;
 import com.eas.client.model.gui.selectors.ModelElementSelector;
@@ -131,9 +129,9 @@ public class ModelElementRefEditor extends PropertyEditorSupport implements Form
                         if (element.getFieldName() != null && !element.getFieldName().isEmpty()) {
                             Field field;
                             if (element.isField()) {
-                                field = elementEntity.getFields().get(element.getFieldName());
+                                field = elementEntity.getFields() != null ? elementEntity.getFields().get(element.getFieldName()) : null;
                             } else {
-                                field = elementEntity.getQuery().getParameters().get(element.getFieldName());
+                                field = elementEntity.getQuery() != null ? elementEntity.getQuery().getParameters().get(element.getFieldName()) : null;
                             }
                             element.setField(field);
                         }

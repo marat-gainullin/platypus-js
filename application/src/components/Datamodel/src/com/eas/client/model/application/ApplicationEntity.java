@@ -602,7 +602,6 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             rowset.removeRowsetListener(this);
         }
         rowset = aRowset;
-        fields = rowset.getFields();
         executed = true;
         executing = false;
         if (rowset != null) {
@@ -615,16 +614,14 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
 
     @Override
     public Fields getFields() {
-        super.getFields();
-        if (fields == null) {
-            try {
-                Rowset rs = getRowset();
-                if (rs != null) {
-                    fields = rs.getFields();
-                }
-            } catch (Exception ex) {
-                Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, null, ex);
+        Fields fields = super.getFields();
+        try {
+            Rowset rs = getRowset();
+            if (rs != null) {
+                fields = rs.getFields();
             }
+        } catch (Exception ex) {
+            Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, null, ex);
         }
         return fields;
     }

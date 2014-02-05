@@ -248,7 +248,7 @@ public class StoredQueryFactoryTest extends BaseTest {
     public void testCompilingWithSubqueries() throws Exception {
         try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
             DatabasesClient client = resource.getClient();
-            StoredQueryFactory queryFactory = new StoredQueryFactory(client);
+            StoredQueryFactory queryFactory = new StoredQueryFactory(client, client.getAppCache());
             String queryContent = readQueryContent(RESOURCES_PREFIX + "testQuery2.xml");
             String queryId = insertEntity(client, queryContent);
             try {
@@ -279,7 +279,7 @@ public class StoredQueryFactoryTest extends BaseTest {
     public void testCompilingWithSubqueriesBad() throws Exception {
         try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
             DatabasesClient client = resource.getClient();
-            StoredQueryFactory queryFactory = new StoredQueryFactory(client);
+            StoredQueryFactory queryFactory = new StoredQueryFactory(client, client.getAppCache());
             String queryContent = readQueryContent(RESOURCES_PREFIX + "testQuery8BadMetadata.xml");
             String queryId = insertEntity(client, queryContent);
             try {
@@ -310,7 +310,7 @@ public class StoredQueryFactoryTest extends BaseTest {
     public void testAsteriskMetadata() throws Exception {
         try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
             DatabasesClient client = resource.getClient();
-            StoredQueryFactory queryFactory = new StoredQueryFactory(client);
+            StoredQueryFactory queryFactory = new StoredQueryFactory(client, client.getAppCache());
             String queryContent = readQueryContent(RESOURCES_PREFIX + "testQuery3.xml");
             String queryId = insertEntity(client, queryContent);
             try {
@@ -336,7 +336,7 @@ public class StoredQueryFactoryTest extends BaseTest {
     public void testBadSubquery() throws Exception {
         try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
             DatabasesClient client = resource.getClient();
-            StoredQueryFactory queryFactory = new StoredQueryFactory(client);
+            StoredQueryFactory queryFactory = new StoredQueryFactory(client, client.getAppCache());
             String queryContent = readQueryContent(RESOURCES_PREFIX + "testQueryBadSubQuery.xml");
             String queryId = insertEntity(client, queryContent);
             try {
@@ -356,7 +356,7 @@ public class StoredQueryFactoryTest extends BaseTest {
     public void testAsteriskMetadata_NewDesignSerialization() throws Exception {
         try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
             DatabasesClient client = resource.getClient();
-            StoredQueryFactory queryFactory = new StoredQueryFactory(client);
+            StoredQueryFactory queryFactory = new StoredQueryFactory(client, client.getAppCache());
             String queryContent = readQueryContent(RESOURCES_PREFIX + "testQuery3_newDesignSerialization.xml");
             String queryId = insertEntity(client, queryContent);
             try {
@@ -382,7 +382,7 @@ public class StoredQueryFactoryTest extends BaseTest {
     public void testPartialTablesAsteriskMetadata() throws Exception {
         try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
             DatabasesClient client = resource.getClient();
-            StoredQueryFactory queryFactory = new StoredQueryFactory(client);
+            StoredQueryFactory queryFactory = new StoredQueryFactory(client, client.getAppCache());
             String queryContent = readQueryContent(RESOURCES_PREFIX + "testQuery3_PartialTablesAsterisk.xml");
             String queryId = insertEntity(client, queryContent);
             try {
@@ -408,7 +408,7 @@ public class StoredQueryFactoryTest extends BaseTest {
     public void testWithoutAliases_Schema_NonSchema_Schema_Columns() throws Exception {
         try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
             DatabasesClient client = resource.getClient();
-            StoredQueryFactory queryFactory = new StoredQueryFactory(client);
+            StoredQueryFactory queryFactory = new StoredQueryFactory(client, client.getAppCache());
             String queryContent = readQueryContent(RESOURCES_PREFIX + "testQuery4_Schema_NonSchema_Select.xml");
             String queryId = insertEntity(client, queryContent);
             try {
@@ -431,7 +431,7 @@ public class StoredQueryFactoryTest extends BaseTest {
     public void testPrimaryKey() throws Exception {
         try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
             DatabasesClient client = resource.getClient();
-            StoredQueryFactory queryFactory = new StoredQueryFactory(client);
+            StoredQueryFactory queryFactory = new StoredQueryFactory(client, client.getAppCache());
             String queryContent = readQueryContent(RESOURCES_PREFIX + "testQuery4.xml");
             String queryId = insertEntity(client, queryContent);
             try {
@@ -450,7 +450,7 @@ public class StoredQueryFactoryTest extends BaseTest {
     public void testPrimaryAndForeignKeysWithNamedOutputColumns() throws Exception {
         try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
             DatabasesClient client = resource.getClient();
-            StoredQueryFactory queryFactory = new StoredQueryFactory(client);
+            StoredQueryFactory queryFactory = new StoredQueryFactory(client, client.getAppCache());
             String queryContent = readQueryContent(RESOURCES_PREFIX + "testQuery5.xml");
             String queryId = insertEntity(client, queryContent);
             try {
@@ -470,7 +470,7 @@ public class StoredQueryFactoryTest extends BaseTest {
     public void testPrimaryAndForeignKeysWithAsterisk() throws Exception {
         try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
             DatabasesClient client = resource.getClient();
-            StoredQueryFactory queryFactory = new StoredQueryFactory(client);
+            StoredQueryFactory queryFactory = new StoredQueryFactory(client, client.getAppCache());
             String queryContent = readQueryContent(RESOURCES_PREFIX + "testQuery6.xml");
             String queryId = insertEntity(client, queryContent);
             try {
@@ -496,7 +496,7 @@ public class StoredQueryFactoryTest extends BaseTest {
     public void testGetQuery() throws Exception {
         try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
             DatabasesClient client = resource.getClient();
-            StoredQueryFactory queryFactory = new StoredQueryFactory(client);
+            StoredQueryFactory queryFactory = new StoredQueryFactory(client, client.getAppCache());
             String queryContent = readQueryContent(RESOURCES_PREFIX + "testQuery1.xml");
             String queryId = insertEntity(client, queryContent);
             try {
@@ -513,7 +513,7 @@ public class StoredQueryFactoryTest extends BaseTest {
     public void testGetEmptyQuery() throws Exception {
         try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
             DatabasesClient client = resource.getClient();
-            StoredQueryFactory queryFactory = new StoredQueryFactory(client);
+            StoredQueryFactory queryFactory = new StoredQueryFactory(client, client.getAppCache());
             String queryId = insertEmptyEntity(client);
             try {
                 try {

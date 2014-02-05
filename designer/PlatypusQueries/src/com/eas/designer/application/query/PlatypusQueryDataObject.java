@@ -585,7 +585,7 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         }
         if (statementError == null && client != null && s != null && !s.isEmpty()) {
             try {
-                StoredQueryFactory factory = new StoredQueryFactory(client, true);
+                StoredQueryFactory factory = new StoredQueryFactory(client, client.getAppCache(), true);
                 SqlQuery outQuery = new SqlQuery(client, datasourceName, s);
                 outQuery.setEntityId(String.valueOf(IDGenerator.genID()));
                 factory.putTableFieldsMetadata(outQuery);

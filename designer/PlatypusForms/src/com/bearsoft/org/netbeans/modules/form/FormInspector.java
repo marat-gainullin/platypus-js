@@ -72,17 +72,17 @@ import org.openide.windows.*;
  */
 public class FormInspector extends TopComponent implements ExplorerManager.Provider {
 
-    private ExplorerManager explorerManager;
-    private TestAction testAction = SystemAction.findObject(TestAction.class, true);
-    private CopyCutActionPerformer copyActionPerformer = new CopyCutActionPerformer(true);
-    private CopyCutActionPerformer cutActionPerformer = new CopyCutActionPerformer(false);
-    private DeleteActionPerformer deleteActionPerformer = new DeleteActionPerformer();
-    private PasteActionPerformer pasteActionPerformer = new PasteActionPerformer();
+    private final ExplorerManager explorerManager;
+    private final TestAction testAction = SystemAction.findObject(TestAction.class, true);
+    private final CopyCutActionPerformer copyActionPerformer = new CopyCutActionPerformer(true);
+    private final CopyCutActionPerformer cutActionPerformer = new CopyCutActionPerformer(false);
+    private final DeleteActionPerformer deleteActionPerformer = new DeleteActionPerformer();
+    private final PasteActionPerformer pasteActionPerformer = new PasteActionPerformer();
     /**
      * Currently focused form or null if no form is opened/focused
      */
     private PlatypusFormLayoutView focusedFormView;
-    private EmptyInspectorNode emptyInspectorNode;
+    private final EmptyInspectorNode emptyInspectorNode;
     private BeanTreeView treeView;
     /**
      * Default icon base for control panel.

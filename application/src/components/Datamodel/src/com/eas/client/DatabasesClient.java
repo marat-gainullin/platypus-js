@@ -111,7 +111,9 @@ public class DatabasesClient implements DbClient {
         autoFillMetadata = aAutoFillMetadata;
         defaultDatasourceName = aDefaultDatasourceName;
         appCache = anAppCache;
-        queries = new StoredQueryFactory(this);
+        if (appCache != null) {
+            queries = new StoredQueryFactory(this, appCache);
+        }
     }
 
     public String getDefaultDatasourceName() {
@@ -248,6 +250,9 @@ public class DatabasesClient implements DbClient {
     }
 
     public SqlQuery getAppQuery(String aQueryId, boolean aCopy) throws Exception {
+        if (queries == null) {
+            throw new IllegalStateException("Query factory is absent, so don't call getAppQuery.");
+        }
         return queries.getQuery(aQueryId, aCopy);
     }
 
@@ -439,7 +444,7 @@ public class DatabasesClient implements DbClient {
                         StatementsGenerator generator = new StatementsGenerator(converter, new EntitiesHost() {
                             @Override
                             public void checkRights(String aEntityId) throws Exception {
-                                if (aEntityId != null) {
+                                if (queries != null && aEntityId != null) {
                                     SqlQuery query = entityQueries.get(aEntityId);
                                     if (query == null) {
                                         query = queries.getQuery(aEntityId, false);
@@ -456,17 +461,22 @@ public class DatabasesClient implements DbClient {
                             @Override
                             public Field resolveField(String aEntityId, String aFieldName) throws Exception {
                                 if (aEntityId != null) {
-                                    Fields fields;
-                                    SqlQuery query = entityQueries.get(aEntityId);
-                                    if (query == null) {
-                                        query = getAppQuery(aEntityId, false);
-                                        if (query != null) {
-                                            entityQueries.put(aEntityId, query);
+                                    SqlQuery query;
+                                    if (queries != null) {
+                                        query = entityQueries.get(aEntityId);
+                                        if (query == null) {
+                                            query = queries.getQuery(aEntityId, false);
+                                            if (query != null) {
+                                                entityQueries.put(aEntityId, query);
+                                            }
                                         }
+                                    } else {
+                                        query = null;
                                     }
+                                    Fields fields;
                                     if (query != null && query.getEntityId() != null) {
                                         fields = query.getFields();
-                                    } else {
+                                    } else {// It seems, that aEntityId is a table name...
                                         fields = mdCaches.get(aDatasourceId).getTableMetadata(aEntityId);
                                     }
                                     if (fields != null) {
@@ -561,27 +571,29 @@ public class DatabasesClient implements DbClient {
         if (appCache != null) {
             appCache.clear();
         }
-        queries.clearCache();
-        fireQueriesCleared();
+        clearQueries();
     }
 
     @Override
     public synchronized void appEntityChanged(String aEntityId) throws Exception {
         if (aEntityId != null) {
-            AppCache cache = getAppCache();
-            ApplicationElement appElement = cache.get(aEntityId);
-            if (appElement != null && (appElement.getType() == ClientConstants.ET_QUERY || appElement.getType() == ClientConstants.ET_COMPONENT)) {
-                clearQueries();
+            if (appCache != null) {
+                ApplicationElement appElement = appCache.get(aEntityId);
+                if (appElement != null && (appElement.getType() == ClientConstants.ET_QUERY || appElement.getType() == ClientConstants.ET_COMPONENT)) {
+                    clearQueries();
+                }
+                appCache.remove(aEntityId);
             }
-            cache.remove(aEntityId);
         } else {
             clearCaches();
         }
     }
 
     public void clearQueries() throws Exception {
-        queries.clearCache();
-        fireQueriesCleared();
+        if (queries != null) {
+            queries.clearCache();
+            fireQueriesCleared();
+        }
     }
 
     @Override
@@ -598,12 +610,12 @@ public class DatabasesClient implements DbClient {
 
     /**
      * Returns StoredQueryFactory instance, used by this client. Such
-     * functionality is specific to two-tier client. So do move it to ClientIntf
+     * functionality is specific to two-tier client. So don't move it to Client
      * interface.
      *
      * @return StoredQueryFactory instance.
      * @see StoredQueryFactory
-     * @see ClientIntf
+     * @see Client
      */
     public StoredQueryFactory getQueryFactory() {
         return queries;

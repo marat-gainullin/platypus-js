@@ -42,7 +42,6 @@ public abstract class Entity<M extends Model<E, ?, ?, Q>, Q extends Query<?>, E 
     protected transient Q query;
     protected transient Set<Relation<E>> inRelations = new HashSet<>();
     protected transient Set<Relation<E>> outRelations = new HashSet<>();
-    protected Fields fields;
     protected PropertyChangeSupport changeSupport;
     public static final String MODEL_PROPERTY = "model";
     public static final String ENTITY_ID_PROPERTY = "entityId";
@@ -82,26 +81,30 @@ public abstract class Entity<M extends Model<E, ?, ?, Q>, Q extends Query<?>, E 
     public abstract void validateQuery() throws Exception;
 
     public Fields getFields() {
-        if (fields == null && model != null && model.getClient() != null) {
+        if (model != null && model.getClient() != null) {
             try {
                 validateQuery();
                 if (query != null) {
-                    fields = query.getFields();
+                    return query.getFields();
                 }
             } catch (Exception ex) {
-                fields = null;
                 Logger.getLogger(Entity.class.getName()).log(Level.WARNING, null, ex);
             }
         }
-        return fields;
+        return null;
     }
 
+    /**
+     * 
+     * @return True if entity's contents (Query) changed
+     * @throws Exception 
+     */
     public boolean validate() throws Exception {
         boolean res = false;
         Q oldQuery = getQuery();
         Fields oldFields = getFields();
         Parameters oldParams = oldQuery != null ? oldQuery.getParameters() : null;
-        clearFields();
+        query = null;
         Q newQuery = getQuery();
         Fields newFields = getFields();
         Parameters newParams = newQuery != null ? newQuery.getParameters() : null;
@@ -113,13 +116,11 @@ public abstract class Entity<M extends Model<E, ?, ?, Q>, Q extends Query<?>, E 
         }
         if (!res) {
             query = oldQuery;
-            fields = oldFields;
         }
         return res;
     }
 
     public void clearFields() {        
-        fields = null;
         query = null;
     }
 

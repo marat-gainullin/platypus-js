@@ -662,6 +662,7 @@ public class FormUtils {
         com.eas.client.forms.api.menu.RadioMenuItem.class,
         com.eas.gui.CascadedStyle.class,
         com.eas.client.forms.IconResources.class,
+        com.eas.client.forms.Form.class,
         com.eas.gui.Font.class,
         com.eas.gui.FontStyle.class,
         com.eas.client.scripts.ScriptColor.class,

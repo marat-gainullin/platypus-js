@@ -87,7 +87,7 @@ public class HttpRequestSender implements PlatypusRequestVisitor {
             }
             conn.acceptCookies();
         } else {
-            Logger.getLogger(ResponsesReceiver.class.getName()).log(Level.SEVERE, String.format("Server error %d. %s: ", conn.getHttpConnection().getResponseCode(), conn.getHttpConnection().getResponseMessage()));
+            Logger.getLogger(ResponsesReceiver.class.getName()).log(Level.SEVERE, String.format("Server error %d. %s", conn.getHttpConnection().getResponseCode(), conn.getHttpConnection().getResponseMessage()));
             respond(rq, null, true, conn.getHttpConnection().getResponseCode() + " " + conn.getHttpConnection().getResponseMessage());
         }
     }
