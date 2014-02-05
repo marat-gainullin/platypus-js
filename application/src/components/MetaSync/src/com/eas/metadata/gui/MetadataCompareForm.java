@@ -10,12 +10,11 @@ import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.ForeignKeySpec;
 import com.bearsoft.rowset.metadata.PrimaryKeySpec;
 import com.eas.client.DatabasesClient;
-import com.eas.client.SQLUtils;
+import com.eas.client.DatabasesClientWithResource;
 import com.eas.client.metadata.DbTableIndexColumnSpec;
 import com.eas.client.metadata.DbTableIndexSpec;
-import com.eas.client.resourcepool.GeneralResourceProvider;
+import com.eas.client.queries.SqlCompiledQuery;
 import com.eas.client.settings.DbConnectionSettings;
-import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.metadata.DBStructure;
 import com.eas.metadata.MetadataSynchronizer;
 import com.eas.metadata.MetadataUtils;
@@ -24,8 +23,6 @@ import java.awt.CardLayout;
 import java.awt.EventQueue;
 import java.awt.LayoutManager;
 import java.awt.Rectangle;
-import java.sql.Connection;
-import java.sql.Statement;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
@@ -35,7 +32,6 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.sql.DataSource;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -1075,38 +1071,32 @@ public class MetadataCompareForm extends javax.swing.JFrame {
         new Thread() {
             @Override
             public void run() {
-                try {
-                    GeneralResourceProvider.getInstance().registerDatasource(MetadataSynchronizer.METASYNC_DATASOURCE_NAME, new DbConnectionSettings(destUrl, destUser, destPassword));
-                    DataSource sqlsTarget = GeneralResourceProvider.getInstance().getPooledDataSource(MetadataSynchronizer.METASYNC_DATASOURCE_NAME);
-                    try (Connection conn = sqlsTarget.getConnection()) {
-                        // Let's dive int oschema context
-                        String dialect = DatabasesClient.dialectByConnection(conn);
-                        SqlDriver driver = SQLUtils.getSqlDriver(dialect);
-                        driver.applyContextToConnection(conn, destSchema);
+                try (DatabasesClientWithResource dbResource = new DatabasesClientWithResource(new DbConnectionSettings(destUrl, destUser, destPassword))) {
+                    DatabasesClient client = dbResource.getClient();
                         for (int i = 0; i < size; i++) {
-                            if (sqlModel.isChoiced(i)) {
-                                try (Statement stmt = conn.createStatement()){
-                                    stmt.executeQuery(sqlModel.getSql(i));
-                                    sqlModel.setChoice(i, false);
-                                    sqlModel.setResult(i, "Ok");
-                                    final int row = i;
-                                    EventQueue.invokeLater(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            tblSqls.setRowSelectionInterval(row, row);
-                                            tblSqls.scrollRectToVisible(new Rectangle(tblSqls.getCellRect(row, 0, true)));
-                                            tblSqls.repaint();
-                                        }
-                                    });
-                                } catch (Exception ex) {
-                                    sqlModel.setResult(i, "Error: " + ex.getMessage());
-                                    tblSqls.repaint();
-                                    break;
-                                }
+                        if (sqlModel.isChoiced(i)) {
+                            try {
+                                SqlCompiledQuery query = new SqlCompiledQuery(client, null, sqlModel.getSql(i));
+                                query.enqueueUpdate();
+                                client.commit(null);
+                                sqlModel.setChoice(i, false);
+                                sqlModel.setResult(i, "Ok");
+                                final int row = i;
+                                EventQueue.invokeLater(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        tblSqls.setRowSelectionInterval(row, row);
+                                        tblSqls.scrollRectToVisible(new Rectangle(tblSqls.getCellRect(row, 0, true)));
+                                        tblSqls.repaint();
+                                    }
+                                });
+                            } catch (Exception ex) {
+                                sqlModel.setResult(i, "Error: " + ex.getMessage());
+                                tblSqls.repaint();
+                                client.rollback(null);
+                                break;
                             }
                         }
-                    } finally {
-                        GeneralResourceProvider.getInstance().unregisterDatasource(MetadataSynchronizer.METASYNC_DATASOURCE_NAME);
                     }
                 } catch (Exception ex) {
                     Logger.getLogger(MetadataCompareForm.class.getName()).log(Level.SEVERE, null, ex);

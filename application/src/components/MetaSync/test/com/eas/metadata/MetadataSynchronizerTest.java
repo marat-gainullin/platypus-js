@@ -19,20 +19,16 @@ import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.ForeignKeySpec;
 import com.bearsoft.rowset.metadata.ForeignKeySpec.ForeignKeyRule;
 import com.bearsoft.rowset.metadata.PrimaryKeySpec;
-import com.eas.client.DatabaseAppCache;
 import com.eas.client.DatabasesClient;
 import com.eas.client.DatabasesClientWithResource;
 import com.eas.client.DbClient;
 import com.eas.client.metadata.DbTableIndexColumnSpec;
 import com.eas.client.metadata.DbTableIndexSpec;
 import com.eas.client.queries.SqlCompiledQuery;
-import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.client.settings.DbConnectionSettings;
 import com.eas.client.sqldrivers.SqlDriver;
-import com.eas.metadata.testdefine.Db2TestDefine;
 import com.eas.metadata.testdefine.PostgreTestDefine;
 import com.eas.metadata.testdefine.H2TestDefine;
-import com.eas.metadata.testdefine.MsSqlTestDefine;
 import com.eas.metadata.testdefine.MySqlTestDefine;
 import com.eas.metadata.testdefine.OracleTestDefine;
 import java.util.ArrayList;
@@ -62,17 +58,17 @@ public class MetadataSynchronizerTest {
         new SourceDbSetting(new DbConnection("jdbc:oracle:thin:@research.office.altsoft.biz:1521/DBALT", "test1", "test1", "test1"), Database.ORACLE, new OracleTestDefine()),
         new SourceDbSetting(new DbConnection("jdbc:postgresql://192.168.10.1:5432/Trans", "test1", "test1", "test1"), Database.POSTGRESQL, new PostgreTestDefine()),
         new SourceDbSetting(new DbConnection("jdbc:mysql://192.168.10.205:3306/test1", "test1", "test1", "test1"), Database.MYSQL, new MySqlTestDefine()),
-        new SourceDbSetting(new DbConnection("jdbc:db2://192.168.10.154:50000/test", "test1", "dba", "masterkey"), Database.DB2, new Db2TestDefine()),
+//        new SourceDbSetting(new DbConnection("jdbc:db2://192.168.10.154:50000/test", "test1", "dba", "masterkey"), Database.DB2, new Db2TestDefine()),
         new SourceDbSetting(new DbConnection("jdbc:h2:tcp://localhost/~/test", "test1", "test1", "test1"), Database.H2, new H2TestDefine()),
-        new SourceDbSetting(new DbConnection("jdbc:jtds:sqlserver://192.168.10.154:1433/test1", "dbo", "test1", "1test1"), Database.MSSQL, new MsSqlTestDefine())
+//        new SourceDbSetting(new DbConnection("jdbc:jtds:sqlserver://192.168.10.154:1433/test1", "dbo", "test1", "1test1"), Database.MSSQL, new MsSqlTestDefine())
     };
     private DestinationDbSetting[] destinationDbSetting = {
         new DestinationDbSetting(new DbConnection("jdbc:oracle:thin:@research.office.altsoft.biz:1521/DBALT", "test2", "test2", "test2"), Database.ORACLE),
         new DestinationDbSetting(new DbConnection("jdbc:postgresql://192.168.10.1:5432/Trans", "test2", "test2", "test2"), Database.POSTGRESQL),
         new DestinationDbSetting(new DbConnection("jdbc:mysql://192.168.10.205:3306/test2", "test2", "test2", "test2"), Database.MYSQL),
-        new DestinationDbSetting(new DbConnection("jdbc:db2://192.168.10.154:50000/test", "test2", "dba", "masterkey"), Database.DB2),
+//        new DestinationDbSetting(new DbConnection("jdbc:db2://192.168.10.154:50000/test", "test2", "dba", "masterkey"), Database.DB2),
         new DestinationDbSetting(new DbConnection("jdbc:h2:tcp://localhost/~/test", "test2", "test2", "test2"), Database.H2),
-        new DestinationDbSetting(new DbConnection("jdbc:jtds:sqlserver://192.168.10.154:1433/test2", "dbo", "test2", "2test2"), Database.MSSQL)
+//        new DestinationDbSetting(new DbConnection("jdbc:jtds:sqlserver://192.168.10.154:1433/test2", "dbo", "test2", "2test2"), Database.MSSQL)
     };
 
     @BeforeClass
@@ -426,9 +422,11 @@ public class MetadataSynchronizerTest {
 
     private void createTables(DbConnection aDbConnection, TableDefine[] aTableDefine) throws Exception {
         printText(cntTabs, "createTables \turl=", aDbConnection.getUrl(), " \tschema=", aDbConnection.getSchema(), " \tuser=", aDbConnection.getUser());
-        DbClient client = createClient(aDbConnection);
-        assertNotNull(client);
-        try {
+//        DatabasesClient client = createClient(aDbConnection).getClient();
+//        assertNotNull(client);
+        try (DatabasesClientWithResource dbResource = createClient(aDbConnection)) {
+            DatabasesClient client = dbResource.getClient();
+            assertNotNull(client);
             SqlDriver driver = client.getDbMetadataCache(null).getConnectionDriver();
             assertNotNull(driver);
             for (TableDefine tableDefine : aTableDefine) {
@@ -437,12 +435,6 @@ public class MetadataSynchronizerTest {
                 sql = driver.getSql4CreateTableComment(aDbConnection.getSchema(), tableDefine.getTableName(), tableDefine.getDescription());
                 executeSql(client, sql);
             }
-        } finally {
-            client.shutdown();
-<<<<<<< HEAD:application/src/components/MetadataSynchronizer/test/com/eas/metadata/MetadataSynchronizerTest.java
-=======
-            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
->>>>>>> 55eabe0da79fdfdd0753ff8478ea7d73199a9d3d:application/src/components/MetaSync/test/com/eas/metadata/MetadataSynchronizerTest.java
         }
     }
 
@@ -450,9 +442,13 @@ public class MetadataSynchronizerTest {
         printText(cntTabs, "createFields \turl=", aSourceSetting.getDbConnection().getUrl(), " \tschema=", aSourceSetting.getDbConnection().getSchema(), " \tuser=", aSourceSetting.getDbConnection().getUser());
         DbConnection dbConnection = aSourceSetting.getDbConnection();
 
-        DbClient client = createClient(dbConnection);
-        assertNotNull(client);
-        try {
+//        DbClient client = createClient(dbConnection);
+//        DatabasesClient client = createClient(dbConnection).getClient();
+//        assertNotNull(client);
+//        try {
+        try (DatabasesClientWithResource dbResource = createClient(dbConnection)) {
+            DatabasesClient client = dbResource.getClient();
+            assertNotNull(client);
             SqlDriver driver = client.getDbMetadataCache(null).getConnectionDriver();
             assertNotNull(driver);
             DbTestDefine dbTestDefine = aSourceSetting.getDbTestDefine();
@@ -512,9 +508,9 @@ public class MetadataSynchronizerTest {
                 sqls = driver.getSql4CreateColumnComment(schema, tableName, fieldName, description);
                 executeSql(client, sqls);
             }
-        } finally {
-            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
-            client.shutdown();
+//        } finally {
+//            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
+//            client.shutdown();
         }
     }
 
@@ -523,9 +519,13 @@ public class MetadataSynchronizerTest {
         assertNotNull(aIndexesDefine);
         clearSchema(aDbConnection);
         Set<String> fields = new HashSet<>();
-        DbClient client = createClient(aDbConnection);
-        assertNotNull(client);
-        try {
+//        DbClient client = createClient(aDbConnection);
+//        DatabasesClient client = createClient(aDbConnection).getClient();
+//        assertNotNull(client);
+//        try {
+        try (DatabasesClientWithResource dbResource = createClient(aDbConnection)) {
+            DatabasesClient client = dbResource.getClient();
+            assertNotNull(client);
             SqlDriver driver = client.getDbMetadataCache(null).getConnectionDriver();
             assertNotNull(driver);
             String pkField = "id";
@@ -566,12 +566,12 @@ public class MetadataSynchronizerTest {
                 sql = driver.getSql4CreateIndex(schema, aTableName, indexSpec);
                 executeSql(client, sql);
             }
-        } finally {
-            client.shutdown();
-<<<<<<< HEAD:application/src/components/MetadataSynchronizer/test/com/eas/metadata/MetadataSynchronizerTest.java
-=======
-            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
->>>>>>> 55eabe0da79fdfdd0753ff8478ea7d73199a9d3d:application/src/components/MetaSync/test/com/eas/metadata/MetadataSynchronizerTest.java
+//        } finally {
+//            client.shutdown();
+//<<<<<<< HEAD:application/src/components/MetadataSynchronizer/test/com/eas/metadata/MetadataSynchronizerTest.java
+//=======
+//            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
+//>>>>>>> 55eabe0da79fdfdd0753ff8478ea7d73199a9d3d:application/src/components/MetaSync/test/com/eas/metadata/MetadataSynchronizerTest.java
         }
     }
 
@@ -583,9 +583,13 @@ public class MetadataSynchronizerTest {
         clearSchema(aDbConnection);
         Map<String, Set<String>> fieldsNames = new HashMap<>();
         Map<String, List<PrimaryKeySpec>> pkeys = new HashMap<>();
-        DbClient client = createClient(aDbConnection);
-        assertNotNull(client);
-        try {
+//        DbClient client = createClient(aDbConnection);
+//        DatabasesClient client = createClient(aDbConnection).getClient();
+//        assertNotNull(client);
+//        try {
+        try (DatabasesClientWithResource dbResource = createClient(aDbConnection)) {
+            DatabasesClient client = dbResource.getClient();
+            assertNotNull(client);
             SqlDriver driver = client.getDbMetadataCache(null).getConnectionDriver();
             assertNotNull(driver);
             String pkField = "id";
@@ -681,12 +685,12 @@ public class MetadataSynchronizerTest {
                     }
                 }
             }
-        } finally {
-            client.shutdown();
-<<<<<<< HEAD:application/src/components/MetadataSynchronizer/test/com/eas/metadata/MetadataSynchronizerTest.java
-=======
-            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
->>>>>>> 55eabe0da79fdfdd0753ff8478ea7d73199a9d3d:application/src/components/MetaSync/test/com/eas/metadata/MetadataSynchronizerTest.java
+//        } finally {
+//            client.shutdown();
+//<<<<<<< HEAD:application/src/components/MetadataSynchronizer/test/com/eas/metadata/MetadataSynchronizerTest.java
+//=======
+//            GeneralResourceProvider.getInstance().unregisterDatasource("testDb");
+//>>>>>>> 55eabe0da79fdfdd0753ff8478ea7d73199a9d3d:application/src/components/MetaSync/test/com/eas/metadata/MetadataSynchronizerTest.java
         }
     }
 
@@ -1015,7 +1019,8 @@ public class MetadataSynchronizerTest {
     }
 
     private DatabasesClientWithResource createClient(DbConnection aDbConnection) throws Exception {
-        DbConnectionSettings settings = new DbConnectionSettings(aDbConnection.getUrl(), aDbConnection.getUser(), aDbConnection.getPassword(), aDbConnection.getSchema(), null);
+//        DbConnectionSettings settings = new DbConnectionSettings(aDbConnection.getUrl(), aDbConnection.getUser(), aDbConnection.getPassword(), aDbConnection.getSchema(), null);
+        DbConnectionSettings settings = new DbConnectionSettings(aDbConnection.getUrl(), aDbConnection.getUser(), aDbConnection.getPassword());
         return new DatabasesClientWithResource(settings);
     }
 

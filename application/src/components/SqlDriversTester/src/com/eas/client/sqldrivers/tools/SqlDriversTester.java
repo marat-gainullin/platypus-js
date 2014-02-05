@@ -11,18 +11,14 @@ import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.ForeignKeySpec;
 import com.bearsoft.rowset.metadata.ForeignKeySpec.ForeignKeyRule;
 import com.bearsoft.rowset.metadata.PrimaryKeySpec;
-import com.eas.client.Client;
 import com.eas.client.ClientConstants;
-import com.eas.client.DatabasesClient;
-//import com.eas.client.ClientFactory;
+import com.eas.client.DatabasesClientWithResource;
 import com.eas.client.DbClient;
 import com.eas.client.DbMetadataCache;
-import com.eas.client.SQLUtils;
 import com.eas.client.metadata.DbTableIndexColumnSpec;
 import com.eas.client.metadata.DbTableIndexSpec;
 import com.eas.client.queries.SqlCompiledQuery;
 import com.eas.client.settings.DbConnectionSettings;
-import com.eas.client.settings.EasSettings;
 import com.eas.client.sqldrivers.Db2SqlDriver;
 import com.eas.client.sqldrivers.H2SqlDriver;
 import com.eas.client.sqldrivers.MsSqlSqlDriver;
@@ -1462,13 +1458,12 @@ public class SqlDriversTester extends JFrame {
     private DbClient createPlatypusClient(String aUrl, String aSchema, String aUser, String aPassword, boolean createSysTables) throws Exception {
         Logger.getLogger(SqlDriversTester.class.getName()).log(Level.INFO, "Start creating connection to schema {0}", aSchema);
         try {
-            //EasSettings settings = new DbConnectionSettings(aUrl, aSchema, aUser, aPassword, SQLUtils.dialectByUrl(aUrl), createSysTables);
-            DbConnectionSettings settings = new DbConnectionSettings(aUrl, aSchema, aUser, aPassword, SQLUtils.dialectByUrl(aUrl), false);
-            DbClient dbClient = new DatabasesClient(settings);
-            Logger.getLogger(SqlDriversTester.class.getName()).log(Level.INFO, "Connect to schema %s created", aSchema);
+            DbConnectionSettings settings = new DbConnectionSettings(aUrl, aUser, aPassword);
+            DbClient dbClient = new DatabasesClientWithResource(settings).getClient();
+            Logger.getLogger(SqlDriversTester.class.getName()).log(Level.INFO, "Connect to schema {0} created", dbClient.getConnectionSchema(null));
             return dbClient;
         } catch (Exception ex) {
-            Logger.getLogger(SqlDriversTester.class.getName()).log(Level.INFO, "Connect to schema %s not created", aSchema);
+            Logger.getLogger(SqlDriversTester.class.getName()).log(Level.INFO, "Connect to schema {0} not created", aSchema);
             throw ex;
         }
     }

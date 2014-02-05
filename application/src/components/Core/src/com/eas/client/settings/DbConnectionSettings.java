@@ -1,7 +1,7 @@
 /* Datamodel license
  * Exclusive rights on this code in any form
  * are belong to it's athor.
- * This code was developed for commercial purposes only 
+ * This code was developed for commercial purposes only
  * For any questions and any actions with this code in any form
  * you have to contact it's athor.
  * All rights reserved

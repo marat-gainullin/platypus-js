@@ -64,7 +64,7 @@ public class MetadataMerger {
      * @param aNoDropTables if true then no execute drop table
      * @param aListTables list tables for work
      */
-    public MetadataMerger(DbClient aClient, DBStructure srcMetadata, DBStructure destMetadata, boolean aNoExecuteSQL, boolean aNoDropTables, Set<String> aListTables, Logger aSystemLogger, Logger aSqlLogger, Logger aErrorLogger, boolean createSqlsList) throws Exception {
+    public MetadataMerger(DbClient aClient, String destSchema, DBStructure srcMetadata, DBStructure destMetadata, boolean aNoExecuteSQL, boolean aNoDropTables, Set<String> aListTables, Logger aSystemLogger, Logger aSqlLogger, Logger aErrorLogger, boolean createSqlsList) throws Exception {
         super();
         client = aClient;
         assert client != null;
@@ -88,12 +88,11 @@ public class MetadataMerger {
 
         DbMetadataCache mdCache = client.getDbMetadataCache(null);
         driver = mdCache.getConnectionDriver();
-        dSchema = mdCache.getConnectionSchema();
+        dSchema = destSchema;
 
         systemLogger = aSystemLogger;
         sqlLogger = aSqlLogger;
         errorLogger = aErrorLogger;
-
         if (createSqlsList) {
             sqlsList = new ArrayList<>();
         }
@@ -212,7 +211,7 @@ public class MetadataMerger {
 
                 if (dTableStructure == null) {
                     // create new table
-                    // generate unique name pk column (id,id0,id1,..) 
+                    // generate unique name pk column (id,id0,id1,..)
                     int iPK = 0;
                     pkFieldName = temporaryPKFieldName;
                     // generated unique pkfield name
