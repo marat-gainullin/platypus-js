@@ -211,6 +211,7 @@ public class StoredQueryFactory {
         if (!dynamicQueries.containsKey(newQueryId)) {
             ActualCacheEntry<SqlQuery> leftSqlQueryEntry = loadQuery(leftQueryId);
             SqlQuery leftSqlQuery = leftSqlQueryEntry != null ? leftSqlQueryEntry.getValue() : null;
+            DbMetadataCache dbMdCache = client.getDbMetadataCache(null);
             Fields rightTableFields = dbMdCache.getTableMetadata(rightTableName);
 
             if (leftSqlQuery != null && rightTableFields != null) {

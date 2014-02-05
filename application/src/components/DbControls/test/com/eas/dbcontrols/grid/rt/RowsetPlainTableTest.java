@@ -10,8 +10,11 @@ import com.bearsoft.rowset.Rowset;
 import com.eas.dbcontrols.grid.rt.columns.model.FieldModelColumn;
 import com.eas.dbcontrols.grid.rt.models.RowsetsTableModel;
 import java.awt.BorderLayout;
+import java.awt.EventQueue;
 import java.text.Collator;
 import java.util.Comparator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -20,7 +23,6 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableRowSorter;
 import static org.junit.Assert.*;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -44,107 +46,128 @@ public class RowsetPlainTableTest extends GridBaseTest {
     }
 
     @Test
-    @Ignore
-    public void rowsCrudTest() throws Exception {
-        Rowset rowset = initRowset();
-        TableColumnModel columnModel = new DefaultTableColumnModel();
-        RowsetsTableModel model = new RowsetsTableModel(null, rowset, null, null);
-        TableRowSorter sorter = new TableRowSorter(model);
-        for (int i = 1; i <= rowset.getFields().getFieldsCount(); i++) {
-            FieldModelColumn mCol = new FieldModelColumn(rowset, i, null, null, false, null, null, null);
-            model.addColumn(mCol);
-            TableColumn vCol = new TableColumn(i - 1, 70);
-            vCol.setHeaderValue(rowset.getFields().get(i).getDescription());
-            vCol.setIdentifier(mCol);
-            vCol.setCellRenderer(new CellDataRenderer());
-            columnModel.addColumn(vCol);
-        }
-        for (int i = 1; i <= rowset.getFields().getFieldsCount(); i++) {
-            sorter.setComparator(i - 1, new CellDataComparator());
-        }
-        JTable tbl = new JTable(new CachingTableModel(model), columnModel);
-        tbl.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-        tbl.setRowSorter(sorter);
-        JFrame frame = new JFrame();
-        frame.getContentPane().setLayout(new BorderLayout());
-        frame.getContentPane().add(new JScrollPane(tbl), BorderLayout.CENTER);
-        frame.setSize(600, 600);
-        frame.setVisible(true);
-        int size = rowset.size();
-        assertEquals(model.getColumnCount(), rowset.getFields().getFieldsCount());
+    public void rowsCrudTest() {
+        EventQueue.invokeLater(new Runnable() {
 
-        assertEquals(rowset.size(), model.getRowCount());
-        verifyTableData(model);
+            @Override
+            public void run() {
+                try {
+                    Rowset rowset = initRowset();
+                    TableColumnModel columnModel = new DefaultTableColumnModel();
+                    RowsetsTableModel model = new RowsetsTableModel(null, rowset, null, null);
+                    TableRowSorter sorter = new TableRowSorter(model);
+                    for (int i = 1; i <= rowset.getFields().getFieldsCount(); i++) {
+                        FieldModelColumn mCol = new FieldModelColumn(rowset, i, null, null, false, null, null, null);
+                        model.addColumn(mCol);
+                        TableColumn vCol = new TableColumn(i - 1, 70);
+                        vCol.setHeaderValue(rowset.getFields().get(i).getDescription());
+                        vCol.setIdentifier(mCol);
+                        vCol.setCellRenderer(new CellDataRenderer());
+                        columnModel.addColumn(vCol);
+                    }
+                    for (int i = 1; i <= rowset.getFields().getFieldsCount(); i++) {
+                        sorter.setComparator(i - 1, new CellDataComparator());
+                    }
+                    JTable tbl = new JTable(new CachingTableModel(model), columnModel);
+                    tbl.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+                    tbl.setRowSorter(sorter);
+                    JFrame frame = new JFrame();
+                    frame.getContentPane().setLayout(new BorderLayout());
+                    frame.getContentPane().add(new JScrollPane(tbl), BorderLayout.CENTER);
+                    frame.setSize(600, 600);
+                    frame.setVisible(true);
+                    int size = rowset.size();
+                    assertEquals(model.getColumnCount(), rowset.getFields().getFieldsCount());
 
-        rowset.absolute(rowset.size()); // eqvivalent to rowset.last();
-        rowset.delete();
-        assertEquals(size - 1, rowset.size());
-        assertEquals(rowset.size(), model.getRowCount());
+                    assertEquals(rowset.size(), model.getRowCount());
+                    verifyTableData(model);
 
-        assertTrue(rowset.first());
-        rowset.delete();
-        assertEquals(size - 2, rowset.size());
-        assertEquals(rowset.size(), model.getRowCount());
+                    rowset.absolute(rowset.size()); // eqvivalent to rowset.last();
+                    rowset.delete();
+                    assertEquals(size - 1, rowset.size());
+                    assertEquals(rowset.size(), model.getRowCount());
 
-        rowset.absolute(4);
-        rowset.deleteAll();
-        assertEquals(0, rowset.size());
-        assertEquals(rowset.size(), model.getRowCount());
+                    assertTrue(rowset.first());
+                    rowset.delete();
+                    assertEquals(size - 2, rowset.size());
+                    assertEquals(rowset.size(), model.getRowCount());
 
-        fillInRowset(rowset);
-        assertEquals(size, rowset.size());
-        assertEquals(rowset.size(), model.getRowCount());
+                    rowset.absolute(4);
+                    rowset.deleteAll();
+                    assertEquals(0, rowset.size());
+                    assertEquals(rowset.size(), model.getRowCount());
 
-        frame.setVisible(false);
+                    fillInRowset(rowset);
+                    assertEquals(size, rowset.size());
+                    assertEquals(rowset.size(), model.getRowCount());
+
+                    frame.setVisible(false);
+                } catch (Exception ex) {
+                    Logger.getLogger(RowsetPlainTableTest.class.getName()).log(Level.SEVERE, null, ex);
+                    fail(ex.getMessage());
+                }
+            }
+        });
     }
 
     @Test
-    @Ignore
     public void columnsCrudTest() throws Exception {
-        Rowset rowset = initRowset();
-        TableColumnModel columnModel = new DefaultTableColumnModel();
-        RowsetsTableModel model = new RowsetsTableModel(null, rowset, null, null);
-        TableRowSorter sorter = new TableRowSorter(model);
-        for (int i = 1; i <= rowset.getFields().getFieldsCount(); i++) {
-            FieldModelColumn mCol = new FieldModelColumn(rowset, i, null, null, false, null, null, null);
-            model.addColumn(mCol);
-            TableColumn vCol = new TableColumn(i - 1, 70);
-            vCol.setHeaderValue(rowset.getFields().get(i).getDescription());
-            vCol.setIdentifier(mCol);
-            vCol.setCellRenderer(new CellDataRenderer());
-            columnModel.addColumn(vCol);
-        }
-        for (int i = 1; i <= rowset.getFields().getFieldsCount(); i++) {
-            sorter.setComparator(i - 1, new CellDataComparator());
-        }
-        JTable tbl = new JTable(new CachingTableModel(model), columnModel);
-        tbl.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-        tbl.setRowSorter(sorter);
-        JFrame frame = new JFrame();
-        frame.getContentPane().setLayout(new BorderLayout());
-        frame.getContentPane().add(new JScrollPane(tbl), BorderLayout.CENTER);
-        frame.setSize(600, 600);
-        frame.setVisible(true);
-        int size = rowset.size();
-        assertEquals(model.getColumnCount(), rowset.getFields().getFieldsCount());
-        assertEquals(rowset.size(), model.getRowCount());
-        rowset.absolute(rowset.size()); // eqvivalent to rowset.last();
-        rowset.delete();
-        assertEquals(size - 1, rowset.size());
-        assertEquals(rowset.size(), model.getRowCount());
+        EventQueue.invokeLater(new Runnable() {
 
-        rowset.absolute(4);
-        rowset.deleteAll();
-        assertEquals(0, rowset.size());
-        assertEquals(rowset.size(), model.getRowCount());
+            @Override
+            public void run() {
+                try {
+                    Rowset rowset = initRowset();
+                    TableColumnModel columnModel = new DefaultTableColumnModel();
+                    RowsetsTableModel model = new RowsetsTableModel(null, rowset, null, null);
+                    TableRowSorter sorter = new TableRowSorter(model);
+                    for (int i = 1; i <= rowset.getFields().getFieldsCount(); i++) {
+                        FieldModelColumn mCol = new FieldModelColumn(rowset, i, null, null, false, null, null, null);
+                        model.addColumn(mCol);
+                        TableColumn vCol = new TableColumn(i - 1, 70);
+                        vCol.setHeaderValue(rowset.getFields().get(i).getDescription());
+                        vCol.setIdentifier(mCol);
+                        vCol.setCellRenderer(new CellDataRenderer());
+                        columnModel.addColumn(vCol);
+                    }
+                    for (int i = 1; i <= rowset.getFields().getFieldsCount(); i++) {
+                        sorter.setComparator(i - 1, new CellDataComparator());
+                    }
+                    JTable tbl = new JTable(new CachingTableModel(model), columnModel);
+                    tbl.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+                    tbl.setRowSorter(sorter);
+                    JFrame frame = new JFrame();
+                    frame.getContentPane().setLayout(new BorderLayout());
+                    frame.getContentPane().add(new JScrollPane(tbl), BorderLayout.CENTER);
+                    frame.setSize(600, 600);
+                    frame.setVisible(true);
+                    int size = rowset.size();
+                    assertEquals(model.getColumnCount(), rowset.getFields().getFieldsCount());
+                    assertEquals(rowset.size(), model.getRowCount());
+                    rowset.absolute(rowset.size()); // eqvivalent to rowset.last();
+                    rowset.delete();
+                    assertEquals(size - 1, rowset.size());
+                    assertEquals(rowset.size(), model.getRowCount());
 
-        fillInRowset(rowset);
-        assertEquals(size, rowset.size());
-        assertEquals(rowset.size(), model.getRowCount());
+                    rowset.absolute(4);
+                    rowset.deleteAll();
+                    assertEquals(0, rowset.size());
+                    assertEquals(rowset.size(), model.getRowCount());
 
-        Object value = null;
-        setValueToAllCells(model, value);
-        verifyValuesInAllCells(model, value);
-        frame.setVisible(false);
+                    fillInRowset(rowset);
+                    assertEquals(size, rowset.size());
+                    assertEquals(rowset.size(), model.getRowCount());
+
+                    Object value = null;
+                    setValueToAllCells(model, value);
+                    verifyValuesInAllCells(model, value);
+                    frame.setVisible(false);
+                } catch (Exception ex) {
+                    Logger.getLogger(RowsetPlainTableTest.class.getName()).log(Level.SEVERE, null, ex);
+                    fail(ex.getMessage());
+                }
+            }
+
+        });
     }
 }

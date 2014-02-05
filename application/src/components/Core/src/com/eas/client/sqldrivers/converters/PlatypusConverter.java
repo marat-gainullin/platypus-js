@@ -25,9 +25,7 @@ public abstract class PlatypusConverter extends RowsetConverter {
 
     /**
      * Determines if aTypeInfo is about a geometry type.
-     * this method is used in from RDBMS and to RDBMS data flow processes.
-     * It is bad situation and we have a TODO: split isGeometry method into two methods: 
-     *   idRBDMSGeomtry and isApplicationGeometry.
+     * This method is used in from RDBMS and to RDBMS data flow processes.
      * @param aTypeInfo
      * @return 
      */

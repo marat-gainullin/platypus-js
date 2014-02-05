@@ -24,7 +24,7 @@ public class DownloadFileTest {
     public void testDownloadFileHTTPLink_3args()  {
         try {
             System.out.println("downloadFileHTTPLink");
-            String link = "http://research.office.altsoft.biz/platypus/client/updates/NightlyBuild/update.xml";
+            String link = "http://research/platypus/client/updates/NightlyBuild/update.xml";
             String fname = "update.xml";
             boolean repdlg = false;
             boolean expResult = true;
@@ -44,7 +44,7 @@ public class DownloadFileTest {
     public void testgetContentHTTPLink_3args()  {
         try {
             System.out.println("downloadStreamHTTPLink and GetDocum from this stream");
-            String link = "http://research.office.altsoft.biz/platypus/client/updates/NightlyBuild/update.xml";
+            String link = "http://research/platypus/client/updates/NightlyBuild/update.xml";
             String fname = "update.xml";
             boolean repdlg = false;
             boolean expResult = true;

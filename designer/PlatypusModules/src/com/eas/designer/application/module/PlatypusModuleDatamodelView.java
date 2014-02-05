@@ -81,7 +81,7 @@ public final class PlatypusModuleDatamodelView extends TopComponent implements M
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
             if (ExplorerManager.PROP_SELECTED_NODES.equals(evt.getPropertyName()) /*
-                     * if yout whant to uncomment the following line, you should ensure, that ccp
+                     * if you whant to uncomment the following line, you should ensure, that ccp
                      * operation on the nodes will not become slow
                      || ExplorerManager.PROP_NODE_CHANGE.equals(evt.getPropertyName())*/) {
                 if (!processing) {
@@ -160,7 +160,7 @@ public final class PlatypusModuleDatamodelView extends TopComponent implements M
         // to produce satisfactory events.
         explorerManager = new ExplorerManager();
         associateLookup(new ProxyLookup(new Lookup[]{
-            ExplorerUtils.createLookup(explorerManager, getActionMap()),}));
+            ExplorerUtils.createLookup(explorerManager, getActionMap())}));
         initDbRelatedViews();
         modelValidChangeListener = dataObject.addModelValidChangeListener(new Runnable() {
             @Override
@@ -418,7 +418,7 @@ public final class PlatypusModuleDatamodelView extends TopComponent implements M
                 // Hack! NetBeans doesn't properly handle activated nodes in multi view's elements
                 // So, we need to use dummy explorer manager and it's lookup, associated with this multiview element TopComponent
                 // to produce satisfactory events.
-                // Moreover, this code shouldn't be here at all, but NetBeans, doesn't refresh
+                // Moreover, this code shouldn't be here at all, but NetBeans doesn't refresh
                 // property sheet on multi-view's activated element change, so we need to simulate
                 // activated and selected nodes change.
                 Node[] activated = getActivatedNodes();

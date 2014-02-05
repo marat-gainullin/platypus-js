@@ -24,7 +24,6 @@ import java.awt.EventQueue;
 import java.beans.ExceptionListener;
 import java.io.File;
 import java.lang.management.ManagementFactory;
-import java.util.Locale;
 import java.util.logging.*;
 import java.util.prefs.Preferences;
 import javax.management.ObjectName;
@@ -46,17 +45,14 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
     public static final String CMD_SWITCHS_PREFIX = "-";
     // command line switches
     public static final String MODULES_SCRIPT_NAME = "Modules";
-    public static final String APPELEMENT_CMD_SWITCH = "appElement";
+    public static final String APPELEMENT_CMD_SWITCH = "appelement";
     // auto login switchs
     public static final String URL_CMD_SWITCH = "url";
     public static final String DEF_DATASOURCE_CONF_PARAM = "default-datasource";
     public static final String USER_CMD_SWITCH = "user";
     public static final String PASSWORD_CMD_SWITCH = "password";
-    // local disk paths
-    public static final String LOGS_PATH = "logs";
     // error messages
     public static final String BAD_DEF_DATASOURCE_MSG = "default-datasource value not specified";
-
     public static final String USER_HOME_ABSENTFILE_MSG = ClientConstants.USER_HOME_PROP_NAME + " property points to non-existent location";
     public static final String USER_HOME_MISSING_MSG = ClientConstants.USER_HOME_PROP_NAME + " property missing. Please specify it with -D" + ClientConstants.USER_HOME_PROP_NAME + "=... command line switch";
     public static final String USER_HOME_NOT_A_DIRECTORY_MSG = ClientConstants.USER_HOME_PROP_NAME + " property points to non-directory";
@@ -72,7 +68,7 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
     public static final String APPLICATION_PATH_NOT_DIRECTORY_MSG = "Application path must point to a directory.";
     //
     protected static PlatypusClientApplication app;
-    public static final String APPLICATION_ELEMENTS_LOCATION_MSG = "Application elements are located at: {0}";
+    public static final String APPLICATION_ELEMENTS_LOCATION_MSG = "Application is located at: {0}";
     protected JFrame mainWindow;
     protected Client client;
     protected PlatypusPrincipal principal;
@@ -133,15 +129,17 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
     }
 
     protected boolean login() throws Exception {
-        if (url != null) {
-            if (user != null && password != null) {
-                return consoleLogin();
-            } else {
-                return guiLogin();
-            }
+        if (user != null && password != null) {
+            return consoleLogin();
         } else {
-            return guiLogin();
-            //throw new Exception("Platypus application needs at least a valid application directory path in url parameter or url of service (database, platypus server or j2ee server application) with an application.");
+            // Hack. Due to undefined user space without a datasource,
+            // absent datasource is treated as non authetticated launch.
+            if (defDatasource != null && !defDatasource.isEmpty()) {
+                return guiLogin();
+            } else {
+                client = ClientFactory.getInstance(url, defDatasource);
+                return true;
+            }
         }
     }
 
