@@ -14,7 +14,6 @@ import com.eas.client.*;
 import com.eas.client.metadata.DbTableIndexColumnSpec;
 import com.eas.client.metadata.DbTableIndexSpec;
 import com.eas.client.queries.SqlCompiledQuery;
-import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.client.settings.DbConnectionSettings;
 import com.eas.client.sqldrivers.SqlDriver;
 import java.io.File;
@@ -31,7 +30,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.StringTokenizer;
+import java.util.TreeSet;
 import java.util.logging.FileHandler;
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
@@ -226,7 +227,7 @@ public class MetadataSynchronizer {
             errorLog.addHandler(createFileHandler(logPath + "errors.log", logEncoding, new LineLogFormatter()));
             MetadataSynchronizer mds = new MetadataSynchronizer(sysLog, sqlLog, errorLog, null);
             mds.log(Level.INFO, String.format("logPath is '%s'", logPath));
-            MetadataMerger metadataMerger = new MetadataMerger(aClient, mds.readDBStructureFromFile(aFileXmlPath), mds.readDBStructure(aClient, aSchema), false, true, new HashSet<String>(), sysLog, sqlLog, errorLog, false);
+            MetadataMerger metadataMerger = new MetadataMerger(aClient, aSchema, mds.readDBStructureFromFile(aFileXmlPath), mds.readDBStructure(aClient, aSchema), false, true, new HashSet<String>(), sysLog, sqlLog, errorLog, false);
             metadataMerger.run();
         } finally {
             closeLogHandlers(sysLog);
@@ -280,16 +281,11 @@ public class MetadataSynchronizer {
 
         DBStructure srcDBStructure = null;
         if (!emptyFrom) {
-            GeneralResourceProvider.getInstance().registerDatasource(METASYNC_DATASOURCE_NAME, new DbConnectionSettings(urlFrom, userFrom, passwordFrom));
-            DbClient client1 = new DatabasesClient(null, METASYNC_DATASOURCE_NAME, false);
-            try {
-                srcDBStructure = readDBStructure(client1, schemaFrom);
+            try (DatabasesClientWithResource dbResorce = new DatabasesClientWithResource(new DbConnectionSettings(urlFrom, userFrom, passwordFrom))) {
+                srcDBStructure = readDBStructure(dbResorce.getClient(), schemaFrom);
                 if (!emptyXml) {
                     serializeMetadata(srcDBStructure, fileXml);
                 }
-            } finally {
-                client1.shutdown();
-                GeneralResourceProvider.getInstance().unregisterDatasource(METASYNC_DATASOURCE_NAME);
             }
         }
         if (srcDBStructure == null && !emptyXml) {
@@ -297,66 +293,22 @@ public class MetadataSynchronizer {
         }
 
         if (!emptyTo && srcDBStructure != null) {
-            GeneralResourceProvider.getInstance().registerDatasource(METASYNC_DATASOURCE_NAME, new DbConnectionSettings(urlTo, userTo, passwordTo));
-            DbClient client2 = new DatabasesClient(null, METASYNC_DATASOURCE_NAME, false);
-            try {
-                MetadataMerger metadataMerger = new MetadataMerger(client2, srcDBStructure, readDBStructure(client2, schemaTo), isNoExecute(), isNoDropTables(), tablesList, systemLogger, sqlLogger, errorLogger, needSqlsList);
+            try (DatabasesClientWithResource dbResorce = new DatabasesClientWithResource(new DbConnectionSettings(urlTo, userTo, passwordTo))) {
+                DbClient client = dbResorce.getClient();
+                MetadataMerger metadataMerger = new MetadataMerger(client, schemaTo, srcDBStructure, readDBStructure(client, schemaTo), isNoExecute(), isNoDropTables(), tablesList, systemLogger, sqlLogger, errorLogger, needSqlsList);
                 metadataMerger.run();
                 sqlsList = metadataMerger.getSqlsList();
-            } finally {
-                client2.shutdown();
-                GeneralResourceProvider.getInstance().unregisterDatasource(METASYNC_DATASOURCE_NAME);
             }
 
             // re-read structure destination for compare with source
             if (infoLogger != null) {
-                GeneralResourceProvider.getInstance().registerDatasource(METASYNC_DATASOURCE_NAME, new DbConnectionSettings(urlTo, userTo, passwordTo));
-                DbClient client3 = new DatabasesClient(null, METASYNC_DATASOURCE_NAME, false);
-                try {
-                    MetadataUtils.printCompareMetadata(srcDBStructure, readDBStructure(client3, schemaTo), infoLogger);
-                } finally {
-                    client3.shutdown();
-                    GeneralResourceProvider.getInstance().unregisterDatasource(METASYNC_DATASOURCE_NAME);
+                try (DatabasesClientWithResource dbResorce = new DatabasesClientWithResource(new DbConnectionSettings(urlTo, userTo, passwordTo))) {
+                    MetadataUtils.printCompareMetadata(srcDBStructure, readDBStructure(dbResorce.getClient(), schemaTo), infoLogger);
                 }
             }
         }
     }
-    public static final String METASYNC_DATASOURCE_NAME = "metaSyncDatasource";
-/*
-    private List<String> getTableNames(DbClient aClient) throws Exception {
-        assert aClient != null;
-        List<String> tableNamesList = new ArrayList<>();
 
-        DbMetadataCache mdCache = aClient.getDbMetadataCache(null);
-        SqlDriver driver = mdCache.getConnectionDriver();
-        String dbSchema = mdCache.getConnectionSchema();
-        // search all tables
-        String sql4Tables = driver.getSql4TablesEnumeration(dbSchema);
-        SqlCompiledQuery query = new SqlCompiledQuery(aClient, null, sql4Tables);
-        Rowset rowsetTablesList = query.executeQuery();
-
-        Fields fieldsTable = rowsetTablesList.getFields();
-
-        if (rowsetTablesList.first()) {
-            int tableColIndex = fieldsTable.find(ClientConstants.JDBCCOLS_TABLE_NAME);
-            int tableTypeColIndex = fieldsTable.find(ClientConstants.JDBCPKS_TABLE_TYPE_FIELD_NAME);
-            do {
-                // each table 
-                String tableType = null;
-                if (tableTypeColIndex > 0) {
-                    tableType = rowsetTablesList.getString(tableTypeColIndex);
-                }
-                if (tableType == null || tableType.equalsIgnoreCase(ClientConstants.JDBCPKS_TABLE_TYPE_TABLE)) {
-                    String tableName = rowsetTablesList.getString(tableColIndex);
-
-                    // for primary keys and indexes
-                    tableNamesList.add(tableName);
-                }
-            } while (rowsetTablesList.next());
-        }
-        return tableNamesList;
-    }
-*/
     /**
      * Create structure metadata from connection
      *
@@ -368,7 +320,6 @@ public class MetadataSynchronizer {
 
         int MAX_TABLES_IN_SQLS = 100;    // set max count fetched  from database descriptions for primary keys and indexes
 
-        // for default logger       
         int cntFields = 0;
         int cntIndexes = 0;
         int cntIndexesF = 0;
@@ -395,7 +346,7 @@ public class MetadataSynchronizer {
                 int tableColIndex = fieldsTable.find(ClientConstants.JDBCCOLS_TABLE_NAME);
                 int tableTypeColIndex = fieldsTable.find(ClientConstants.JDBCPKS_TABLE_TYPE_FIELD_NAME);
                 do {
-                    // each table 
+                    // each table
                     String tableType = null;
                     if (tableTypeColIndex > 0) {
                         tableType = rowsetTablesList.getString(tableTypeColIndex);
@@ -511,13 +462,8 @@ public class MetadataSynchronizer {
      * @throws Exception
      */
     public DBStructure readDBStructure(String aUrl, String aSchema, String aUser, String aPassword) throws Exception {
-        GeneralResourceProvider.getInstance().registerDatasource(METASYNC_DATASOURCE_NAME, new DbConnectionSettings(aUrl, aUser, aPassword));
-        DbClient client = new DatabasesClient(null, METASYNC_DATASOURCE_NAME, false);
-        try {
-            return readDBStructure(client, aSchema);
-        } finally {
-            client.shutdown();
-            GeneralResourceProvider.getInstance().unregisterDatasource(METASYNC_DATASOURCE_NAME);
+        try (DatabasesClientWithResource dbResource = new DatabasesClientWithResource(new DbConnectionSettings(aUrl, aUser, aPassword))) {
+            return readDBStructure(dbResource.getClient(), aSchema);
         }
     }
 
@@ -555,8 +501,12 @@ public class MetadataSynchronizer {
         Element tablesElement = doc.createElement(TABLES_TAG_NAME);
         rootElement.appendChild(tablesElement);
 
+        //sort table names
+        SortedSet<String> sortedNames=new TreeSet<>();
+        sortedNames.addAll(tablesStructure.keySet());
         // for all tables
-        for (String tableName : tablesStructure.keySet()) {
+//        for (String tableName : tablesStructure.keySet()) {
+        for (String tableName : sortedNames) {
             // each table
             TableStructure tblStructure = tablesStructure.get(tableName);
             cntTables++;
@@ -878,7 +828,7 @@ public class MetadataSynchronizer {
                                     String pkTable = fkColumnElement.getAttribute(PKTABLE_ATTR_NAME);
                                     String pkField = fkColumnElement.getAttribute(PKFIELD_ATTR_NAME);
 
-                                    // ????  in Oracle only DELETERULE                                   
+                                    // ????  in Oracle only DELETERULE
                                     String attributeFkUpdate = fkColumnElement.getAttribute(FKUPDATERULE_ATTR_NAME);
                                     ForeignKeyRule updateFkRule = (attributeFkUpdate != null && !attributeFkUpdate.equalsIgnoreCase("null") ? ForeignKeyRule.valueOf(attributeFkUpdate) : null);
 
@@ -1236,7 +1186,6 @@ public class MetadataSynchronizer {
                     handler.close();
                     aLogger.removeHandler(handler);
                 } catch (SecurityException e) {
-                    //?????????
                     Logger.getLogger(MetadataSynchronizer.class.getName()).log(Level.SEVERE, null, e);
                 }
             }
@@ -1274,7 +1223,7 @@ public class MetadataSynchronizer {
 
         int i = 0;
         while (i < args.length) {
-            // section From   
+            // section From
             if ((CMD_SWITCHS_PREFIX + URLFROM_CMD_SWITCH).equalsIgnoreCase(args[i])) {
                 if (i < args.length - 1) {
                     urlFrom = args[i + 1];
@@ -1399,7 +1348,6 @@ public class MetadataSynchronizer {
             } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
                 java.util.logging.Logger.getLogger(MetadataSynchronizerForm.class.getName()).log(Level.SEVERE, null, ex);
             }
-            //Locale.setDefault(new Locale("en"));
             MetadataSynchronizerForm mdsForm = new MetadataSynchronizerForm();
             mdsForm.setSourceDatabase(urlFrom, schemaFrom, userFrom, passwordFrom);
             mdsForm.setDestinationDatabase(urlTo, schemaTo, userTo, passwordTo);
@@ -1428,7 +1376,6 @@ public class MetadataSynchronizer {
                 mds.run();
             } catch (Exception ex) {
                 Logger.getLogger(MetadataSynchronizer.class.getName()).log(Level.SEVERE, null, ex);
-                //?????throw ex;
             } finally {
                 closeLogHandlers(sqlLog);
                 closeLogHandlers(errorLog);
