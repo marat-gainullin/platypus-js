@@ -314,7 +314,7 @@ public class Entity implements RowsetListener {
 								for(var l=0;l<rowFacade.length;l++){
 									if(l > 0)
 										sElement += ", ";
-									sElement += rowFacade.md[l].name + ":" + rowFacade[l];
+									sElement += rowFacade.schema[l].name + ":" + rowFacade[l];
 								} 
 								sElement += "}";
 				    			joined.push(sElement);
@@ -364,7 +364,7 @@ public class Entity implements RowsetListener {
 								{
 									if(l > 0)
 										sElement += ", ";
-									sElement += rowFacade.md[l].name + ":" + rowFacade[l];
+									sElement += rowFacade.schema[l].name + ":" + rowFacade[l];
 								} 
 								sElement += "}";
 				    			joined.push(sElement);
@@ -716,7 +716,7 @@ public class Entity implements RowsetListener {
 						var rValue = null;
 						var rowset = getRowset();
 						if(rowset != null){
-							rValue = rowset.@com.bearsoft.rowset.Rowset::getJsObject(Ljava/lang/String;)(published.md[aColIndex-1].name);
+							rValue = rowset.@com.bearsoft.rowset.Rowset::getJsObject(Ljava/lang/String;)(published.schema[aColIndex-1].name);
 						}
 						if(rValue == null){
 							rValue = aEntity.@com.eas.client.model.Entity::getSubstituteRowsetJsObject(I)(aColIndex);
@@ -727,7 +727,7 @@ public class Entity implements RowsetListener {
 					updateObject : function(aColIndex, aValue) {
 						var rowset = getRowset();
 						if(rowset != null)
-							rowset.@com.bearsoft.rowset.Rowset::updateJsObject(Ljava/lang/String;Ljava/lang/Object;)(published.md[aColIndex-1].name, $wnd.boxAsJava(aValue));
+							rowset.@com.bearsoft.rowset.Rowset::updateJsObject(Ljava/lang/String;Ljava/lang/Object;)(published.schema[aColIndex-1].name, $wnd.boxAsJava(aValue));
 					},
 					insert : function() {
 						aEntity.@com.eas.client.model.Entity::insert(Lcom/google/gwt/core/client/JavaScriptObject;)(arguments);
@@ -769,11 +769,11 @@ public class Entity implements RowsetListener {
 				
 				Object.defineProperty(published, "schema",         { get : function(){ return @com.eas.client.model.Entity::publishFieldsFacade(Lcom/bearsoft/rowset/metadata/Fields;Lcom/eas/client/model/Entity;)(aEntity.@com.eas.client.model.Entity::getFields()(), aEntity) }});
 				// cursor-row dynamic properties interface
-				for(var i=0;i<published.md.length;i++)
+				for(var i=0;i<published.schema.length;i++)
 				{
 					(function(){
 						var _i = i;
-						Object.defineProperty(published, published.md[_i].name,
+						Object.defineProperty(published, published.schema[_i].name,
 						{
 							 get : function(){ return published.getObject(_i+1); },
 							 set : function(aValue){ published.updateObject(_i+1, aValue); }
@@ -787,16 +787,19 @@ public class Entity implements RowsetListener {
 					var nativeParams = nativeQuery.@com.eas.client.queries.Query::getParameters()();
 					var publishedParams = {};  
 					Object.defineProperty(publishedParams, "schema", { get : function(){ return @com.eas.client.model.Entity::publishFieldsFacade(Lcom/bearsoft/rowset/metadata/Fields;Lcom/eas/client/model/Entity;)(nativeParams, aEntity); }});
-					Object.defineProperty(publishedParams, "length", { get : function(){ return publishedParams.md.length; }});
-					for(var i=0;i<publishedParams.md.length;i++)
+					// deprecated
+					Object.defineProperty(publishedParams, "md", { get : function(){ return @com.eas.client.model.Entity::publishFieldsFacade(Lcom/bearsoft/rowset/metadata/Fields;Lcom/eas/client/model/Entity;)(nativeParams, aEntity); }});
+					//
+					Object.defineProperty(publishedParams, "length", { get : function(){ return publishedParams.schema.length; }});
+					for(var i=0;i<publishedParams.schema.length;i++)
 					{
 						(function(){
 							var _i = i;
 							var propDesc = {
-								 get : function(){ return publishedParams.md[_i].value; },
-								 set : function(aValue){ publishedParams.md[_i].value = aValue; }
+								 get : function(){ return publishedParams.schema[_i].value; },
+								 set : function(aValue){ publishedParams.schema[_i].value = aValue; }
 							};
-							Object.defineProperty(publishedParams, publishedParams.md[_i].name, propDesc);
+							Object.defineProperty(publishedParams, publishedParams.schema[_i].name, propDesc);
 							Object.defineProperty(publishedParams, (_i+""), propDesc);
 						})();
 					}
@@ -948,16 +951,16 @@ public class Entity implements RowsetListener {
 					}
 				}});
 				Object.defineProperty(published, "schema", { get : function(){ return @com.eas.client.model.Entity::publishFieldsFacade(Lcom/bearsoft/rowset/metadata/Fields;Lcom/eas/client/model/Entity;)(aRow.@com.bearsoft.rowset.Row::getFields()(), aEntity); }});
-				Object.defineProperty(published, "length", { get : function(){ return published.md.length; }});
-				for(var i=0;i<published.md.length;i++)
+				Object.defineProperty(published, "length", { get : function(){ return published.schema.length; }});
+				for(var i=0;i<published.schema.length;i++)
 				{
 					(function(){
 						var _i = i;
 						var propDesc = {
-							 get : function(){ return published.getColumnObject(published.md[_i].name); },
-							 set : function(aValue){ published.setColumnObject(published.md[_i].name, aValue); }
+							 get : function(){ return published.getColumnObject(published.schema[_i].name); },
+							 set : function(aValue){ published.setColumnObject(published.schema[_i].name, aValue); }
 						};
-						Object.defineProperty(published, published.md[_i].name, propDesc);
+						Object.defineProperty(published, published.schema[_i].name, propDesc);
 						Object.defineProperty(published, (_i+""),     propDesc);
 					})();
 				}

@@ -396,7 +396,7 @@ public class Model {
 					_self.enumerable = true;
 					_self.configurable = false;
 					_self.get = function() {
-						var found = targetEntity.find(targetEntity.md[targetFieldName], this[sourceFieldName]);
+						var found = targetEntity.find(targetEntity.schema[targetFieldName], this[sourceFieldName]);
 						return found.length == 0 ? null : (found.length == 1 ? found[0] : found);
 					};
 					_self.set = function(aValue) {
@@ -408,7 +408,7 @@ public class Model {
 					_self.enumerable = true;
 					_self.configurable = false;
 					_self.get = function() {
-						var res = sourceEntity.find(sourceEntity.md[sourceFieldName], this[targetFieldName]);
+						var res = sourceEntity.find(sourceEntity.schema[sourceFieldName], this[targetFieldName]);
 						if (res && res.length > 0) {
 							return res;
 						} else {
@@ -494,9 +494,9 @@ public class Model {
 				return aModule.params.schema;
 			}
 		});
-		for ( var i = 0; i < aModule.md.length; i++) {
+		for ( var i = 0; i < aModule.schema.length; i++) {
 			(function() {
-				var param = aModule.md[i];
+				var param = aModule.schema[i];
 				Object.defineProperty(aModule, param.name, {
 					get : function() {
 						return aModule.params[param.name];
