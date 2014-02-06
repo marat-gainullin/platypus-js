@@ -40,6 +40,8 @@ public class ServerMain {
     // configuration parameters
     public static final String APP_URL_CONF_PARAM = "url";
     public static final String DEF_DATASOURCE_CONF_PARAM = "default-datasource";
+    // security switches
+    public static final String ANONYMOUS_ON_CMD_SWITCH = "enable-anonymous";
 
     public static final String BACKGROUNDTASK_CONF_PARAM = "tasks";
     public static final String IFACE_CONF_PARAM = "iface";
@@ -81,6 +83,7 @@ public class ServerMain {
     private static String sessionIdleTimeout;
     private static String sessionIdleCheckInterval;
     private static String appElement;
+    private static boolean anonymousEnabled;
 
     private static void checkUserHome() {
         String home = System.getProperty(ClientConstants.USER_HOME_PROP_NAME);
@@ -108,6 +111,11 @@ public class ServerMain {
                     i += 2;
                 } else {
                     printHelp(BAD_APP_URL_MSG);
+                }
+            } else if ((CMD_SWITCHS_PREFIX + ANONYMOUS_ON_CMD_SWITCH).equalsIgnoreCase(args[i])) {
+                if (i < args.length - 1) {
+                    anonymousEnabled = true;
+                    i += 1;
                 }
             } else if ((CMD_SWITCHS_PREFIX + DEF_DATASOURCE_CONF_PARAM).equalsIgnoreCase(args[i])) {
                 if (i + 1 < args.length) {
@@ -207,6 +215,7 @@ public class ServerMain {
             registerMBean(Breakpoints.BREAKPOINTS_MBEAN_NAME, Breakpoints.getInstance());
         }
         PlatypusServer server = new PlatypusServer(appDbClient, ctx, getListenAddresses(), getPortsProtocols(), getPortsSessionIdleTimeouts(), getPortsSessionIdleCheckIntervals(), getPortsNumWorkerThreads(), tasks, appElement);
+        server.setAnonymousEnabled(anonymousEnabled);
         appDbClient.setContextHost(server);
         appDbClient.setPrincipalHost(server);
         PlatypusScriptedResource.init(appDbClient, server, server);

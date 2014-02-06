@@ -232,14 +232,6 @@ public class HttpRequestSender implements PlatypusRequestVisitor {
     }
 
     @Override
-    public void visit(OutHashRequest rq) throws Exception {
-        conn.setMethod(PlatypusHttpConstants.HTTP_METHOD_GET);
-        conn.putParam(PlatypusHttpRequestParams.LOGIN, rq.getUserName());
-        execute(rq);
-        assert rq.getResponse() != null : String.format(RESPONSE_MISSING_MSG, rq.getClass().getSimpleName());
-    }
-
-    @Override
     public void visit(StartAppElementRequest rq) throws Exception {
         conn.setMethod(PlatypusHttpConstants.HTTP_METHOD_GET);
         execute(rq);

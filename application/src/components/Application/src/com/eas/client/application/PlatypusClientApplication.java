@@ -4,6 +4,7 @@
  */
 package com.eas.client.application;
 
+import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.*;
 import com.eas.client.forms.FormRunner;
 import com.eas.client.forms.FormRunnerPrototype;
@@ -46,11 +47,14 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
     // command line switches
     public static final String MODULES_SCRIPT_NAME = "Modules";
     public static final String APPELEMENT_CMD_SWITCH = "appelement";
-    // auto login switchs
+    // login switchs
     public static final String URL_CMD_SWITCH = "url";
     public static final String DEF_DATASOURCE_CONF_PARAM = "default-datasource";
     public static final String USER_CMD_SWITCH = "user";
     public static final String PASSWORD_CMD_SWITCH = "password";
+    // security switches
+    public static final String ANONYMOUS_ON_CMD_SWITCH = "enable-anonymous";
+
     // error messages
     public static final String BAD_DEF_DATASOURCE_MSG = "default-datasource value not specified";
     public static final String USER_HOME_ABSENTFILE_MSG = ClientConstants.USER_HOME_PROP_NAME + " property points to non-existent location";
@@ -77,12 +81,12 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
     protected ScriptsCache scriptsCache;
     protected String appElementId;
     protected boolean needInitialBreak;
-    //protected Level logLevel;// null is the default, and so, original J2SE configuration is aplied
     // auto login
     protected String url;
     private String defDatasource;
     protected String user;
     protected char[] password;
+    protected boolean anonymousEnabled;
 
     /**
      * @param args the command line arguments
@@ -129,50 +133,47 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
     }
 
     protected boolean login() throws Exception {
-        if (user != null && password != null) {
-            return consoleLogin();
-        } else {
-            // Hack. Due to undefined user space without a datasource,
-            // absent datasource is treated as non authetticated launch.
-            if (defDatasource != null && !defDatasource.isEmpty()) {
+        if (url != null && !url.isEmpty()) {
+            try {
+                return consoleLogin();
+            } catch (FailedLoginException ex) {
+                Logger.getLogger(PlatypusClientApplication.class.getName()).log(Level.WARNING, ex.getMessage());
                 return guiLogin();
-            } else {
-                client = ClientFactory.getInstance(url, defDatasource);
-                return true;
             }
+        } else {
+            return guiLogin();
+        }
+    }
+
+    private void checkUrl() throws Exception {
+        if (url == null || url.isEmpty()) {
+            throw new Exception(BAD_APP_CREDENTIALS_MSG + " Url parameter is required.");
+        }
+    }
+
+    private boolean tryToAppLogin() throws Exception {
+        Client lclient = ClientFactory.getInstance(url, defDatasource);
+        try {
+            return appLogin(lclient, user, password);
+        } catch (Exception ex) {
+            lclient.shutdown();
+            throw ex;
         }
     }
 
     private boolean consoleLogin() throws Exception {
-        try {
-            if (user == null || user.isEmpty() || password == null) {
-                throw new Exception(BAD_APP_CREDENTIALS_MSG + " May be bad connection settings (user, password).");
-            }
-            Client lclient = ClientFactory.getInstance(url, defDatasource);
-            try {
-                return appLogin(lclient, user, password);
-            } catch (Exception ex) {
-                lclient.shutdown();
-                throw ex;
-            }
-        } finally {
-            user = null;
-            password = null;
-        }
+        checkUrl();
+        return tryToAppLogin();
     }
 
     private boolean guiLogin() throws Exception {
         LoginFrame frame = new LoginFrame(url, user, password, new LoginCallback() {
             @Override
             public boolean tryToLogin(String aUrl, String aAppUserName, char[] aAppPassword) throws Exception {
-                Client lclient = ClientFactory.getInstance(aUrl, defDatasource);
-                try {
-                    url = aUrl;
-                    return appLogin(lclient, aAppUserName, aAppPassword);
-                } catch (Exception ex) {
-                    lclient.shutdown();
-                    throw ex;
-                }
+                url = aUrl;
+                user = aAppUserName;
+                password = aAppPassword;
+                return consoleLogin();
             }
         });
         Preferences settingsNode = Preferences.userRoot().node(ClientFactory.SETTINGS_NODE);
@@ -187,29 +188,37 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
     }
 
     private boolean appLogin(Client aClient, String aUserName, char[] aPassword) throws Exception {
-        if (aUserName != null && !aUserName.isEmpty() && aPassword != null) {
-            if (aClient instanceof AppClient) {
-                AppClient appClient = (AppClient) aClient;
-                String sessionId = appClient.login(aUserName, aPassword);
-                if (sessionId != null && !sessionId.isEmpty()) {
-                    principal = appClient.getPrincipal();
-                    client = appClient;
-                    return true;
-                } else {
-                    assert false;
-                }
-            } else if (aClient instanceof DatabasesClient) {
-                DatabasesClient dbClient = (DatabasesClient) aClient;
-                String passwordMd5 = MD5Generator.generate(String.valueOf(aPassword));
-                principal = DatabasesClient.credentialsToPrincipalWithBasicAuthentication(dbClient, aUserName, passwordMd5);
-                if (principal == null) {
-                    throw new FailedLoginException("Login incorrect");
-                }
-                dbClient.setPrincipalHost(this);
-                dbClient.setContextHost(this);
-                client = dbClient;
+        if (aClient instanceof AppClient) {
+            AppClient appClient = (AppClient) aClient;
+            String sessionId = appClient.login(aUserName, aPassword);
+            if (sessionId != null && !sessionId.isEmpty()) {
+                principal = appClient.getPrincipal();
+                client = appClient;
                 return true;
+            } else {
+                throw new FailedLoginException("A session is expected from server");
             }
+        } else if (aClient instanceof DatabasesClient) {
+            DatabasesClient dbClient = (DatabasesClient) aClient;
+            if (aUserName != null && !aUserName.isEmpty() && aPassword != null) {
+                String passwordMd5 = MD5Generator.generate(String.valueOf(aPassword));
+                try {
+                    principal = DatabasesClient.credentialsToPrincipalWithBasicAuthentication(dbClient, aUserName, passwordMd5);
+                } catch (Exception ex) {
+                    throw new FailedLoginException(ex.getMessage());
+                }
+                if (principal == null) {
+                    throw new FailedLoginException("User name or password is incorrect");
+                }
+            } else if (anonymousEnabled) {
+                principal = new AnonymousPlatypusPrincipal("anonymous-" + IDGenerator.genID());
+            } else {
+                throw new FailedLoginException("User name and password are required while anonymous access is disabled.");
+            }
+            dbClient.setPrincipalHost(this);
+            dbClient.setContextHost(this);
+            client = dbClient;
+            return true;
         }
         return false;
     }
@@ -267,6 +276,11 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
                     i += 2;
                 } else {
                     throw new IllegalArgumentException("Password syntax: -password <value>");
+                }
+            } else if ((CMD_SWITCHS_PREFIX + ANONYMOUS_ON_CMD_SWITCH).equalsIgnoreCase(args[i])) {
+                if (i < args.length) {
+                    anonymousEnabled = true;
+                    i += 1;
                 }
             } else if ((CMD_SWITCHS_PREFIX + APPELEMENT_CMD_SWITCH).equalsIgnoreCase(args[i])) {
                 if (i < args.length - 1) {

@@ -28,7 +28,6 @@ import com.eas.client.threetier.requests.IsUserInRoleRequest;
 import com.eas.client.threetier.requests.KeepAliveRequest;
 import com.eas.client.threetier.requests.LoginRequest;
 import com.eas.client.threetier.requests.LogoutRequest;
-import com.eas.client.threetier.requests.OutHashRequest;
 import com.eas.client.threetier.requests.PlatypusRequestVisitor;
 import com.eas.client.threetier.requests.PlatypusRequestsFactory;
 import com.eas.client.threetier.requests.StartAppElementRequest;
@@ -109,14 +108,16 @@ public class PlatypusRequestReader implements PlatypusRequestVisitor {
     @Override
     public void visit(LoginRequest rq) throws Exception {
         final ProtoNode input = ProtoDOMBuilder.buildDOM(bytes);
-        if (!input.containsChild(RequestsTags.TAG_LOGIN)) {
-            throw new ProtoReaderException("No login");
+        if (input.containsChild(RequestsTags.TAG_LOGIN)) {
+            rq.setLogin(input.getChild(RequestsTags.TAG_LOGIN).getString());
+        } else {
+            rq.setLogin(null);
         }
-        if (!input.containsChild(RequestsTags.TAG_PASSWORD)) {
-            throw new ProtoReaderException("No password");
+        if (input.containsChild(RequestsTags.TAG_PASSWORD)) {
+            rq.setPassword(input.getChild(RequestsTags.TAG_PASSWORD).getString());
+        } else {
+            rq.setPassword(null);
         }
-        rq.setLogin(input.getChild(RequestsTags.TAG_LOGIN).getString());
-        rq.setPassword(input.getChild(RequestsTags.TAG_PASSWORD).getString());
         if (input.containsChild(RequestsTags.TAG_SESSION_TO_RESTORE)) {
             rq.setSession2restore(input.getChild(RequestsTags.TAG_SESSION_TO_RESTORE).getString());
         } else {
@@ -326,15 +327,6 @@ public class PlatypusRequestReader implements PlatypusRequestVisitor {
     }
 
     @Override
-    public void visit(OutHashRequest rq) throws Exception {
-        final ProtoNode input = ProtoDOMBuilder.buildDOM(bytes);
-        if (!input.containsChild(RequestsTags.TAG_USERNAME)) {
-            throw new ProtoReaderException("No user name");
-        }
-        rq.setUserName(input.getChild(RequestsTags.TAG_USERNAME).getString());
-    }
-
-    @Override
     public void visit(StartAppElementRequest rq) throws Exception {
     }
 
@@ -372,7 +364,7 @@ public class PlatypusRequestReader implements PlatypusRequestVisitor {
         }
         rq.setAppElementId(input.getChild(RequestsTags.TAG_APP_ELEMENT_ID).getString());
     }
-   
+
     @Override
     public void visit(ExecuteServerReportRequest rq) throws Exception {
         final ProtoNode input = ProtoDOMBuilder.buildDOM(bytes);
@@ -393,7 +385,7 @@ public class PlatypusRequestReader implements PlatypusRequestVisitor {
                     args.add(new ExecuteServerReportRequest.NamedArgument(name, null));
                     break;
                 case RequestsTags.TAG_UNDEFINED_ARGUMENT:
-                    args.add(new ExecuteServerReportRequest.NamedArgument(name,Undefined.instance));
+                    args.add(new ExecuteServerReportRequest.NamedArgument(name, Undefined.instance));
                     break;
                 case RequestsTags.TAG_ARGUMENT_TYPE:
                     at = ExecuteServerModuleMethodRequest.ArgumentType.getArgumentType(node.getInt());

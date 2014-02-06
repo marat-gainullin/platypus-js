@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.server.httpservlet;
+package com.eas.client.login;
 
 import com.eas.client.login.PlatypusPrincipal;
 

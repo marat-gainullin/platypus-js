@@ -93,7 +93,6 @@ public class StoredQueryFactory {
     public static final String LOADING_QUERY_MSG = "Loading stored query %s";
     private DbClient client;
     private AppCache appCache;
-    private DbMetadataCache dbMdCache;
     private StoredQueryCache queriesCache;
     private boolean preserveDatasources;
     private final List<String> processedQueries = new ArrayList<>();// for circular references discovering
@@ -326,7 +325,6 @@ public class StoredQueryFactory {
             throw new IllegalArgumentException("StoredQueryFactory needs an application cache. It can't be null");
         }
         appCache = aAppCache;
-        dbMdCache = client.getDbMetadataCache(null);
         queriesCache = new StoredQueryCache();
     }
 

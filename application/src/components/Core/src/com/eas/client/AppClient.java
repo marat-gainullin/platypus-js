@@ -132,13 +132,4 @@ public interface AppClient extends Client, PrincipalHost {
      */
     public void enqueueUpdate(String entityId, Parameters params) throws Exception;
 
-    /**
-     * Запрос на восстановление пароля для указанного пользователя.
-     *
-     * @param aUserName Имя пользователя.
-     * @return Возвращает True если сообщение с временным паролем успешно
-     * <b>отправлено</b> пользователю иначе false.
-     * @throws Exception
-     */
-    public boolean askOutHash(String aUserName) throws Exception;
 }

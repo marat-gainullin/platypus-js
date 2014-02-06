@@ -170,6 +170,10 @@ public interface PlatypusProjectSettings {
      */
     boolean isWebSecurityEnabled();
 
+    public boolean isJ2SEAnonymousAccessEnabled();
+    
+    public void setJ2SEAnonymousAccessEnabled(boolean  aValue);
+    
     void save() throws Exception;
 
     /**

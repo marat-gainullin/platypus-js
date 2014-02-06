@@ -46,8 +46,6 @@ public class PlatypusRequestsFactory {
                 return new DbTableChangedRequest(aRequestId);
             case Requests.rqKeepAlive:
                 return new KeepAliveRequest(aRequestId);
-            case Requests.rqOutHash:
-                return new OutHashRequest(aRequestId);
             case Requests.rqIsAppElementActual:
                 return new IsAppElementActualRequest(aRequestId);
             case Requests.rqAppElement:

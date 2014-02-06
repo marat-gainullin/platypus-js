@@ -139,8 +139,6 @@ public class ApplicationPlatypusParametersEntity extends ApplicationPlatypusEnti
                 }
             }
             /* predefined and user parameters names
-            /* global parameters metadata */
-            moduleThis.defineProperty(Model.DATASOURCE_METADATA_SCRIPT_NAME, sRowsetWrap.get(Model.DATASOURCE_METADATA_SCRIPT_NAME, sRowsetWrap), ScriptableObject.READONLY);
             /* predefined */
             moduleThis.defineProperty(Model.PARAMETERS_SCRIPT_NAME, sRowsetWrap, ScriptableObject.READONLY);
             /* user */

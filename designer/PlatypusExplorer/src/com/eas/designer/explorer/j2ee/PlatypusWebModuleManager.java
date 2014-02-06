@@ -303,7 +303,7 @@ public class PlatypusWebModuleManager {
         if (project.getSettings().isDbAppSources()) {
             wa.addInitParam(new ContextParam(ServerMain.APP_URL_CONF_PARAM, "jndi://" + project.getSettings().getAppSettings().getDefaultDatasource()));
         } else {
-            wa.addInitParam(new ContextParam(ServerMain.APP_URL_CONF_PARAM, project.getProjectDirectory().toURL().toString()));
+            wa.addInitParam(new ContextParam(ServerMain.APP_URL_CONF_PARAM, project.getProjectDirectory().toURI().toASCIIString()));
         }
     }
 

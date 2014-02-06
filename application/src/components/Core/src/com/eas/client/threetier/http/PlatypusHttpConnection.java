@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.security.auth.login.FailedLoginException;
 import sun.misc.BASE64Encoder;
 
 /**
@@ -82,9 +83,11 @@ public class PlatypusHttpConnection extends PlatypusConnection {
     }
 
     private void addBasicAuthentication(String aLogin, String aPassword) throws UnsupportedEncodingException {
-        BASE64Encoder encoder = new BASE64Encoder();
-        String requestAuthSting = PlatypusHttpConstants.BASIC_AUTH_NAME + " " + encoder.encode(aLogin.concat(":").concat(aPassword).getBytes(PlatypusHttpConstants.HEADERS_ENCODING_NAME));
-        conn.setRequestProperty(PlatypusHttpConstants.HEADER_AUTHORIZATION, requestAuthSting);
+        if (aLogin != null && !aLogin.isEmpty() && aPassword != null) {
+            BASE64Encoder encoder = new BASE64Encoder();
+            String requestAuthSting = PlatypusHttpConstants.BASIC_AUTH_NAME + " " + encoder.encode(aLogin.concat(":").concat(aPassword).getBytes(PlatypusHttpConstants.HEADERS_ENCODING_NAME));
+            conn.setRequestProperty(PlatypusHttpConstants.HEADER_AUTHORIZATION, requestAuthSting);
+        }
     }
 
     @Override
@@ -171,7 +174,7 @@ public class PlatypusHttpConnection extends PlatypusConnection {
                         acceptCookies();
                     } else {
                         if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
-                            throw new Exception("Login incorrect");
+                            throw new FailedLoginException(conn.getResponseMessage() + " " + responseCode);
                         } else {
                             throw new Exception(String.format("Http request error. Response is %d %s", responseCode, conn.getResponseMessage()));
                         }

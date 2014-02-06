@@ -26,7 +26,6 @@ import com.eas.client.threetier.requests.IsUserInRoleRequest;
 import com.eas.client.threetier.requests.KeepAliveRequest;
 import com.eas.client.threetier.requests.LoginRequest;
 import com.eas.client.threetier.requests.LogoutRequest;
-import com.eas.client.threetier.requests.OutHashRequest;
 import com.eas.client.threetier.requests.PlatypusResponseVisitor;
 import com.eas.client.threetier.requests.RowsetResponse;
 import com.eas.client.threetier.requests.StartAppElementRequest;
@@ -136,25 +135,6 @@ public class PlatypusResponseWriter implements PlatypusResponseVisitor {
             writer.put(RequestsTags.TAG_ROWSET);
             writer.put(CoreTags.TAG_STREAM, rowsetStream);
         }
-        /*
-         if (rsp.getParameters() != null) {
-         // parameters, probably modified with stored procedure call
-         ByteArrayOutputStream parametersStream = new ByteArrayOutputStream();
-         writeParameters(parametersStream);
-         writer.put(RequestsTags.TAG_PARAMETERS);
-         writer.put(CoreTags.TAG_STREAM, parametersStream);
-         }
-         */
-    }
-
-    @Override
-    public void visit(OutHashRequest.Response rsp) throws Exception {
-        ProtoWriter writer = new ProtoWriter(out);
-        writer.put(RequestsTags.TAG_RESULT_CODE, rsp.getResultCode());
-        if (rsp.getResultDesc() != null) {
-            writer.put(RequestsTags.TAG_RESULT_ERROR_STR, rsp.getResultDesc());
-        }
-        writer.flush();
     }
 
     @Override

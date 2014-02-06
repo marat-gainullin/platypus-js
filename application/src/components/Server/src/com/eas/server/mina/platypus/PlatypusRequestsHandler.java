@@ -89,7 +89,7 @@ public class PlatypusRequestsHandler extends IoHandlerAdapter {
             final Request rq = (Request) msg;
             Logger.getLogger(PlatypusRequestsHandler.class.getName()).log(Level.FINE, "Request {0}", rq.toString());
             String sessionId = (String) ioSession.getAttribute(SESSION_ID);
-            if (sessionId != null || rq.getType() == Requests.rqLogin || rq.getType() == Requests.rqOutHash) {
+            if (sessionId != null || rq.getType() == Requests.rqLogin) {
                 Session session = server.getSessionManager().get(sessionId);
                 if (session != null) {
                     final Response pendingResponse = session.getPendingResponse(rq.getID());

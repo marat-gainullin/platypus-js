@@ -15,8 +15,6 @@ import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.AppCache;
 import com.eas.client.AppClient;
 import com.eas.client.ClientConstants;
-import com.eas.client.cache.AppElementsCache;
-import com.eas.client.cache.DatabaseMdCache;
 import com.eas.client.cache.PlatypusAppCache;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.queries.PlatypusQuery;
@@ -370,20 +368,6 @@ public abstract class PlatypusClient implements AppClient {
             command.parameters[i] = new Change.Value(p.getName(), p.getValue(), p.getTypeInfo());
         }
         changeLog.add(command);
-        /*
-         Request request = new ExecuteQueryRequest(IDGenerator.genID(), queryId, params);
-         executeRequest(request);
-         Response resp = request.getResponse();
-         assert resp instanceof RowsetResponse;
-         */
     }
 
-    @Override
-    public boolean askOutHash(String aUserName) throws Exception {
-        OutHashRequest request = new OutHashRequest(IDGenerator.genID(), aUserName);
-        executeRequest(request);
-        Response resp = request.getResponse();
-        assert resp instanceof OutHashRequest.Response;
-        return ((OutHashRequest.Response) resp).getResultCode() == OutHashRequest.Response.RES_CODE_SENDING_SUCCESS;
-    }
 }

@@ -1,5 +1,6 @@
 package com.eas.server.httpservlet;
 
+import com.eas.client.login.AnonymousPlatypusPrincipal;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.ClientConstants;
@@ -513,9 +514,6 @@ public class PlatypusHttpServlet extends HttpServlet {
                 // simple OK response is needed
             } else if (aPlatypusResponse instanceof DisposeServerModuleRequest.Response) {
                 // simple OK response is needed
-            } else if (aPlatypusResponse instanceof OutHashRequest.Response) {
-                // don't know how to deal with
-                aHttpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, String.format("Out hash is not supported now. Response class name: %s", aPlatypusResponse.getClass().getName()));
             } else {
                 aHttpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, String.format("Unknown response. Don't know how to deal with it. Response class name: %s", aPlatypusResponse != null ? aPlatypusResponse.getClass().getName() : "null"));
             }

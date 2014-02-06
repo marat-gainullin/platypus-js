@@ -157,12 +157,6 @@ public class ProjectRunner {
             }
         }
         PlatypusProjectSettings pps = project.getSettings();
-        // Hack! TODO: Think on standalone server without database -> without usersspace
-        if(AppServerType.PLATYPUS_SERVER.equals(pps.getRunAppServerType()) &&
-                (pps.getAppSettings().getDefaultDatasource() == null || pps.getAppSettings().getDefaultDatasource().isEmpty())){
-            io.getErr().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Application_OutOfUsersSpaceDatabase"));
-            return null;
-        }
         io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Application_Starting"));
         String appUrl = null;
         if (!pps.isNotStartServer()) {
@@ -283,9 +277,14 @@ public class ProjectRunner {
                     }
                 } else {
                     arguments.add(ProjectRunner.OPTION_PREFIX + PlatypusClientApplication.URL_CMD_SWITCH);
-                    arguments.add(project.getProjectDirectory().toURL().toString());
-                    io.getOut().println(String.format(NbBundle.getMessage(ProjectRunner.class, "MSG_App_Sources"), project.getProjectDirectory().toURL().toString()));//NOI18N
+                    arguments.add(project.getProjectDirectory().toURI().toASCIIString());
+                    io.getOut().println(String.format(NbBundle.getMessage(ProjectRunner.class, "MSG_App_Sources"), project.getProjectDirectory().toURI().toASCIIString()));//NOI18N
                 }
+                
+                if(project.getSettings().isJ2SEAnonymousAccessEnabled()){
+                    arguments.add(ProjectRunner.OPTION_PREFIX + PlatypusClientApplication.ANONYMOUS_ON_CMD_SWITCH);
+                }
+                
             } else {
                 if (pps.isNotStartServer()) {
                     appUrl = pps.getClientUrl();

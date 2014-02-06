@@ -111,11 +111,6 @@ public class RequestHandlerFactory implements PlatypusRequestVisitor {
     }
 
     @Override
-    public void visit(OutHashRequest rq) throws Exception {
-        handler = new OutHashHandler(serverCore, rq);
-    }
-
-    @Override
     public void visit(StartAppElementRequest rq) throws Exception {
         handler = new StartAppElementRequestHandler(serverCore, session, rq);
     }

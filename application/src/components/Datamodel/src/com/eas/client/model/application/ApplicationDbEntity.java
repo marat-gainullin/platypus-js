@@ -92,7 +92,7 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
             SqlCompiledQuery compiled = query.compile();
             compiled.setSessionId(model.getSessionId());
             rowset = compiled.prepareRowset();
-            if (tableName != null) {// such resolving is needed here because table queries are not processed by StoredQueryFactory
+            if (tableName != null && !tableName.isEmpty()) {// such resolving is needed here because table queries are not processed by StoredQueryFactory
                 DbMetadataCache mdCache = model.getClient().getDbMetadataCache(query.getDbId());
                 SqlDriver driver = mdCache.getConnectionDriver();
                 TypesResolver resolver = driver.getTypesResolver();

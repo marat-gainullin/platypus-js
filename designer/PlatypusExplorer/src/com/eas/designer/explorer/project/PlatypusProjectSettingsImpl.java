@@ -55,6 +55,7 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
     public static final String J2EE_SERVER_ID_KEY = "j2eeServerId"; //NOI18N
     public static final String SERVER_CONTEXT_KEY = "context";//NOI18N
     public static final String ENABLE_SECURITY_REALM_KEY = "enableSecurityRealm";//NOI18N
+    public static final String ENABLE_ANONYMOUS_ACCESS_J2SE_KEY="enableAnonymousAccessInJ2SE";//NOI18N
     public static final String CLIENT_TYPE_KEY = "clientType"; //NOI18N
     public static final String SERVER_TYPE_KEY = "serverType"; //NOI18N
     protected final PlatypusSettings platypusSettings;
@@ -490,6 +491,19 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
         changeSupport.firePropertyChange(SERVER_CONTEXT_KEY, oldValue, aValue);
     }
 
+    @Override
+    public boolean isJ2SEAnonymousAccessEnabled(){
+        return Boolean.valueOf(projectPrivateProperties.get(ENABLE_ANONYMOUS_ACCESS_J2SE_KEY));
+    }
+    
+    @Override
+    public void setJ2SEAnonymousAccessEnabled(boolean  aValue){
+        boolean oldValue = isJ2SEAnonymousAccessEnabled();
+        projectPrivateProperties.setProperty(ENABLE_ANONYMOUS_ACCESS_J2SE_KEY, Boolean.valueOf(aValue).toString());
+        projectPrivatePropertiesIsDirty = true;
+        changeSupport.firePropertyChange(ENABLE_ANONYMOUS_ACCESS_J2SE_KEY, oldValue, aValue);
+    }
+    
     /**
      * Checks if security realm to be configured on J2EE server startup.
      *

@@ -21,8 +21,6 @@ public interface PlatypusResponseVisitor {
 
     public void visit(RowsetResponse rsp) throws Exception;
 
-    public void visit(OutHashRequest.Response rsp) throws Exception;
-
     public void visit(LogoutRequest.Response rsp) throws Exception;
 
     public void visit(LoginRequest.Response rsp) throws Exception;

@@ -17,9 +17,7 @@ public abstract class PlatypusPrincipal implements Principal {
     private final String name;
 
     public PlatypusPrincipal(String aName) {
-        if (aName == null) {
-            throw new NullPointerException();
-        }
+        super();
         name = aName;
     }
 

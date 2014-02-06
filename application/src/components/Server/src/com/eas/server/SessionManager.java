@@ -4,12 +4,9 @@
  */
 package com.eas.server;
 
-import com.bearsoft.rowset.utils.IDGenerator;
-import com.eas.client.login.MD5Generator;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.login.SystemPlatypusPrincipal;
 import java.io.IOException;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -30,8 +27,7 @@ public class SessionManager {
     private final PlatypusServerCore serverCore;
     private final Map<String, Session> sessions = new HashMap<>();
     protected ThreadLocal<Session> currentSession = new ThreadLocal<>();
-    private final TemporaryPasswords temporaryPasswords = new TemporaryPasswords();
-
+    
     /**
      * Creates a new session manager.
      */
@@ -122,101 +118,6 @@ public class SessionManager {
      */
     public synchronized Set<Entry<String, Session>> entrySet() {
         return sessions.entrySet();
-    }
-
-    public TemporaryPasswords getTemporaryPasswords() {
-        return temporaryPasswords;
-    }
-
-    public static class TemporaryPasswords {
-
-        public static String generatePassword() throws Exception {
-            Long aId = IDGenerator.genID();
-            String aStr = MD5Generator.generate(aId.toString());
-            return aStr.substring(0, aStr.length() / 2);
-        }
-        private Map<String, TemporaryPassword> tempPasswords = new HashMap<>();
-
-        public TemporaryPasswords() {
-            super();
-        }
-
-        /**
-         * Региструет временный пароль в списке временных паролей
-         *
-         * @param aUserName - имя пользователя
-         * @param aPassword - MD5-хэш пароля
-         * @return Вернут истину если удалось зарегистрировать указанный пароль
-         */
-        public synchronized boolean registerTempPassword(String aUserName, String aPassword) {
-            cleanup();
-            if (aUserName != null && !aUserName.isEmpty() && aPassword != null && !aPassword.isEmpty()) {
-                TemporaryPassword tmpPassword;
-                try {
-                    tmpPassword = new TemporaryPassword(aPassword);
-                } catch (Exception ex) {
-                    Logger.getLogger(SessionManager.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
-                    return false;
-                }
-                tempPasswords.put(aUserName, tmpPassword);
-                return true;
-            }
-            return false;
-        }
-
-        /**
-         * Проверяется правильность и актуальность временного пароля
-         *
-         * @param aUserName имя пользователя, не может быть null
-         * @param aPassword мд5-хэш пароля, не может быть null
-         * @return Возвращает истину если пароль правильный и актуальный
-         */
-        public synchronized boolean isUserPasswordCorrect(String aUserName, String aPassword) {
-            cleanup();
-            if (aPassword != null && aUserName != null) {
-                TemporaryPassword password = tempPasswords.get(aUserName);
-                if (password != null) {
-                    if (aPassword.equals(password.getPassword())) {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
-
-        public synchronized void cleanup() {
-            for (String key : tempPasswords.keySet()) {
-                if (!tempPasswords.get(key).isActual()) {
-                    tempPasswords.remove(key);
-                }
-            }
-        }
-
-        public static class TemporaryPassword {
-
-            private Date startDate;
-            private String password;
-            private static final int actualTime = 7200000;// 2 hours
-
-            public TemporaryPassword(String aPassword) throws Exception {
-                super();
-                this.password = MD5Generator.generate(aPassword);
-                this.startDate = new Date();
-            }
-
-            public Date getStartDate() {
-                return startDate;
-            }
-
-            public String getPassword() {
-                return password;
-            }
-
-            public boolean isActual() {
-                Date now = new Date();
-                return now.getTime() < (startDate.getTime() + actualTime);
-            }
-        }
     }
 
     public Session getCurrentSession() {

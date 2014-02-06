@@ -26,7 +26,6 @@ import com.eas.client.threetier.requests.IsUserInRoleRequest;
 import com.eas.client.threetier.requests.KeepAliveRequest;
 import com.eas.client.threetier.requests.LoginRequest;
 import com.eas.client.threetier.requests.LogoutRequest;
-import com.eas.client.threetier.requests.OutHashRequest;
 import com.eas.client.threetier.requests.PlatypusResponseVisitor;
 import com.eas.client.threetier.requests.RowsetResponse;
 import com.eas.client.threetier.requests.StartAppElementRequest;
@@ -102,16 +101,6 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
 
             }
         } while (reader.getCurrentTag() != CoreTags.TAG_EOF);
-    }
-
-    @Override
-    public void visit(OutHashRequest.Response rsp) throws Exception {
-        final ProtoNode input = ProtoDOMBuilder.buildDOM(bytes);
-        if (!input.containsChild(RequestsTags.TAG_RESULT_CODE)) {
-            throw new ProtoReaderException("No result code");
-        }
-        rsp.setResultCode(input.getChild(RequestsTags.TAG_RESULT_CODE).getInt());
-        rsp.setResultDesc(input.containsChild(RequestsTags.TAG_RESULT_ERROR_STR) ? input.getChild(RequestsTags.TAG_RESULT_ERROR_STR).getString() : null);
     }
 
     @Override

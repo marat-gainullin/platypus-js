@@ -29,7 +29,6 @@ import com.eas.client.threetier.requests.IsUserInRoleRequest;
 import com.eas.client.threetier.requests.KeepAliveRequest;
 import com.eas.client.threetier.requests.LoginRequest;
 import com.eas.client.threetier.requests.LogoutRequest;
-import com.eas.client.threetier.requests.OutHashRequest;
 import com.eas.client.threetier.requests.PlatypusRequestVisitor;
 import com.eas.client.threetier.requests.StartAppElementRequest;
 import com.eas.proto.CoreTags;
@@ -96,8 +95,12 @@ public class PlatypusRequestWriter implements PlatypusRequestVisitor {
     @Override
     public void visit(LoginRequest rq) throws Exception {
         ProtoWriter writer = new ProtoWriter(out);
-        writer.put(RequestsTags.TAG_LOGIN, rq.getLogin());
-        writer.put(RequestsTags.TAG_PASSWORD, rq.getPassword());
+        if (rq.getLogin() != null) {
+            writer.put(RequestsTags.TAG_LOGIN, rq.getLogin());
+        }
+        if (rq.getPassword() != null) {
+            writer.put(RequestsTags.TAG_PASSWORD, rq.getPassword());
+        }
         if (rq.getSession2restore() != null) {
             writer.put(RequestsTags.TAG_SESSION_TO_RESTORE, rq.getSession2restore());
         }
@@ -185,7 +188,7 @@ public class PlatypusRequestWriter implements PlatypusRequestVisitor {
                     break;
                 case OBJECT:
                     if (arg instanceof Rowset) {
-                        RowsetJsonWriter jsonWriter = new RowsetJsonWriter((Rowset)arg);
+                        RowsetJsonWriter jsonWriter = new RowsetJsonWriter((Rowset) arg);
                         writer.put(valueTag, jsonWriter.write());
                     } else {
                         writer.put(valueTag, (String) ScriptUtils.toJson(arg));
@@ -280,13 +283,6 @@ public class PlatypusRequestWriter implements PlatypusRequestVisitor {
 
     @Override
     public void visit(KeepAliveRequest rq) throws Exception {
-    }
-
-    @Override
-    public void visit(OutHashRequest rq) throws Exception {
-        ProtoWriter writer = new ProtoWriter(out);
-        writer.put(RequestsTags.TAG_USERNAME, rq.getUserName());
-        writer.flush();
     }
 
     @Override

@@ -41,11 +41,11 @@ public class PlatypusNativeClient extends PlatypusClient {
 
     @Override
     public String login(String aUserName, char[] aPassword) throws LoginException {
-        LoginRequest rq = new LoginRequest(IDGenerator.genID(), aUserName, new String(aPassword));
+        LoginRequest rq = new LoginRequest(IDGenerator.genID(), aUserName, aPassword != null ? new String(aPassword) : null);
         try {
             conn.executeRequest(rq);
             String sessionId = ((LoginRequest.Response) rq.getResponse()).getSessionId();
-            conn.setLoginCredentials(aUserName, new String(aPassword), sessionId);
+            conn.setLoginCredentials(aUserName, aPassword != null ? new String(aPassword) : null, sessionId);
             principal = new AppPlatypusPrincipal(aUserName, this);
             return sessionId;
         } catch (Exception ex) {

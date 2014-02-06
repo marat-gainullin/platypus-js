@@ -466,8 +466,8 @@ public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower 
                 }
             } catch (Exception ex) {
                 if (ex instanceof FailedLoginException) {
-                    Logger.getLogger(LoginFrame.class.getName()).log(Level.SEVERE, bundle.getString("LoginDialog.LoginFailedMessage"));
-                    JOptionPane.showMessageDialog(LoginFrame.this, bundle.getString("LoginDialog.LoginFailedMessage"), bundle.getString("LoginDialog.title"), JOptionPane.ERROR_MESSAGE);
+                    Logger.getLogger(LoginFrame.class.getName()).log(Level.WARNING, ex.getMessage());
+                    JOptionPane.showMessageDialog(LoginFrame.this, ex.getMessage(), bundle.getString("LoginDialog.title"), JOptionPane.ERROR_MESSAGE);
                 } else {
                     Logger.getLogger(LoginFrame.class.getName()).log(Level.SEVERE, "{0} ({1})", new Object[]{bundle.getString("LoginDialog.CannotLoginMessage"), ex.getLocalizedMessage()});
                     JOptionPane.showMessageDialog(LoginFrame.this, bundle.getString("LoginDialog.CannotLoginMessage") + String.format(" (%s)", ex.getLocalizedMessage()), bundle.getString("LoginDialog.title"), JOptionPane.ERROR_MESSAGE);

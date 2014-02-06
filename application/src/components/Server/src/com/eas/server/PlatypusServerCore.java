@@ -113,6 +113,7 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
         }
     }
     protected String defaultAppElement;
+    protected boolean anonymousEnabled;
     protected SessionManager sessionManager;
     protected ScriptedDatabasesClient databasesClient;
     protected ServerScriptsCache scriptsCache;
@@ -129,6 +130,14 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
         browsersFilter = new AppElementsFilter(this);
         defaultAppElement = aDefaultAppElement;
         tasks = aTasks;
+    }
+
+    public boolean isAnonymousEnabled() {
+        return anonymousEnabled;
+    }
+
+    public void setAnonymousEnabled(boolean aValue) {
+        anonymousEnabled = aValue;
     }
 
     public SessionManager getSessionManager() {

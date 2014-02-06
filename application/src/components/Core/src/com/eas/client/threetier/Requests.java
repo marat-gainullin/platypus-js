@@ -12,7 +12,6 @@ public class Requests
 {
     public static final int rqHello = 1;
     public static final int rqKeepAlive = 2;
-    public static final int rqOutHash = 3;
     public static final int rqLogin = 4;
     public static final int rqStartAppElement = 5;
     public static final int rqAppQuery = 6;

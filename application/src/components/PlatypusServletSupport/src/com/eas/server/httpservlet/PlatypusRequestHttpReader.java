@@ -33,7 +33,6 @@ import com.eas.client.threetier.requests.IsUserInRoleRequest;
 import com.eas.client.threetier.requests.KeepAliveRequest;
 import com.eas.client.threetier.requests.LoginRequest;
 import com.eas.client.threetier.requests.LogoutRequest;
-import com.eas.client.threetier.requests.OutHashRequest;
 import com.eas.client.threetier.requests.PlatypusRequestVisitor;
 import com.eas.client.threetier.requests.StartAppElementRequest;
 import com.eas.script.ScriptUtils;
@@ -213,12 +212,6 @@ public class PlatypusRequestHttpReader implements PlatypusRequestVisitor {
 
     @Override
     public void visit(KeepAliveRequest rq) throws Exception {
-    }
-
-    @Override
-    public void visit(OutHashRequest rq) throws Exception {
-        String sUserName = httpRequest.getParameter(PlatypusHttpRequestParams.LOGIN);
-        rq.setUserName(sUserName);
     }
 
     @Override

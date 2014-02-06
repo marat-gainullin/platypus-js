@@ -87,11 +87,6 @@ public class PlatypusResponsesFactory implements PlatypusRequestVisitor {
     }
 
     @Override
-    public void visit(OutHashRequest rq) throws Exception {
-        response = new OutHashRequest.Response(requestId, 0, null);
-    }
-
-    @Override
     public void visit(StartAppElementRequest rq) throws Exception {
         response = new StartAppElementRequest.Response(requestId, null);
     }

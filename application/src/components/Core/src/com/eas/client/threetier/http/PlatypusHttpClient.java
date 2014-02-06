@@ -6,8 +6,6 @@ package com.eas.client.threetier.http;
 
 import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.AppClient;
-import com.eas.client.cache.DatabaseMdCache;
-import com.eas.client.cache.PlatypusAppCache;
 import com.eas.client.login.AppPlatypusPrincipal;
 import com.eas.client.threetier.PlatypusClient;
 import com.eas.client.threetier.PlatypusNativeClient;
@@ -39,16 +37,19 @@ public class PlatypusHttpClient extends PlatypusClient implements AppClient {
 
     @Override
     public String login(String aUserName, char[] aPassword) throws LoginException {
-        LoginRequest rq = new LoginRequest(IDGenerator.genID(), aUserName, new String(aPassword));
+        LoginRequest rq = new LoginRequest(IDGenerator.genID(), aUserName, aPassword != null ? new String(aPassword) : null);
         try {
             executeRequest(rq);
             String sessionId = String.valueOf(IDGenerator.genID());
-            conn.setLoginCredentials(aUserName, String.valueOf(aPassword), sessionId);
+            conn.setLoginCredentials(aUserName, aPassword != null ? new String(aPassword) : null, sessionId);
             principal = new AppPlatypusPrincipal(aUserName, this);
             return sessionId;
         } catch (Exception ex) {
-            Logger.getLogger(PlatypusNativeClient.class.getName()).log(Level.SEVERE, ex.getMessage());
-            throw new LoginException(ex.getMessage());
+            if (ex instanceof LoginException) {
+                throw (LoginException)ex;
+            } else {
+                throw new LoginException(ex.getMessage());
+            }
         }
     }
 
