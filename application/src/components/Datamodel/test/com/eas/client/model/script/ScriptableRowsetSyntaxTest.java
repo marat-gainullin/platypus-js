@@ -22,13 +22,11 @@ import org.mozilla.javascript.*;
  */
 public class ScriptableRowsetSyntaxTest extends BaseTest {
 
-    private static final String SCRIPT_TABLE_PATTERN_TEST_SOURCE
+    private static final String SCRIPT_CURSOR_TEST_SOURCE
             = "var p = param1;\n"
             + "p = params.param1;\n"
-            + "var m = schema;\n"
-            + "m = params.schema;\n"
-            + "var mp = schema.param1;\n"
-            + "mp = params.schema.param1;\n"
+            + "var m = params.schema;\n"
+            + "var mp = params.schema.param1;\n"
             + "var d = entity11.NAME;\n"
             + "m = entity11.schema.NAME;\n"
             + "mp = entity11.params;\n"
@@ -52,9 +50,7 @@ public class ScriptableRowsetSyntaxTest extends BaseTest {
     private static final String SCRIPT_ORM_TEST_SOURCE
             = "var p = param1;\n"
             + "p = params.param1;\n"
-            + "var m = schema;\n"
-            + "m = params.schema;\n"
-            + "var mp = schema.param1;\n"
+            + "var m = params.schema;\n"
             + "var mp = params.schema.param1;\n"
             + "var d = entity11.length;\n"
             + "entity11.push({ID:150, NAME:'sample7'});"
@@ -108,9 +104,9 @@ public class ScriptableRowsetSyntaxTest extends BaseTest {
             + "rf.apply(entity11)";
 
     @Test
-    public void tablePatternSyntaxicTest() throws Exception {
+    public void cursorSyntaxicTest() throws Exception {
         System.out.println("Testing rowset's script syntax. Cases like a params.schema.param1 = ...");
-        scopeSyntaxicTest(SCRIPT_TABLE_PATTERN_TEST_SOURCE);
+        scopeSyntaxicTest(SCRIPT_CURSOR_TEST_SOURCE);
     }
 
     @Test
