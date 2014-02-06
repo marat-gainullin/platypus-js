@@ -137,11 +137,11 @@ public class Entity implements RowsetListener {
         return Collections.unmodifiableMap(ormDefinitions);
     }
 
-	public static native void publish(JavaScriptObject aModule, Entity aEntity) throws Exception/*-{
+	public static native void publish(JavaScriptObject aTarget, Entity aEntity) throws Exception/*-{
 		var dsName = aEntity.@com.eas.client.model.Entity::getName()();
 		if (dsName) {
 			var publishedRowsetFacade = @com.eas.client.model.Entity::publishEntityFacade(Lcom/eas/client/model/Entity;)(aEntity);
-			Object.defineProperty(aModule, dsName, {
+			Object.defineProperty(aTarget, dsName, {
 				get : function() {
 					return publishedRowsetFacade;
 				}
@@ -768,6 +768,9 @@ public class Entity implements RowsetListener {
 				Object.defineProperty(published, "cursor",       { get : function(){ return (published.bof() || published.eof()) ? null : published[published.rowIndex-1];}});
 				
 				Object.defineProperty(published, "schema",         { get : function(){ return @com.eas.client.model.Entity::publishFieldsFacade(Lcom/bearsoft/rowset/metadata/Fields;Lcom/eas/client/model/Entity;)(aEntity.@com.eas.client.model.Entity::getFields()(), aEntity) }});
+				// deprecated
+				Object.defineProperty(published, "md",         { get : function(){ return @com.eas.client.model.Entity::publishFieldsFacade(Lcom/bearsoft/rowset/metadata/Fields;Lcom/eas/client/model/Entity;)(aEntity.@com.eas.client.model.Entity::getFields()(), aEntity) }});
+				//
 				// cursor-row dynamic properties interface
 				for(var i=0;i<published.schema.length;i++)
 				{
@@ -787,9 +790,6 @@ public class Entity implements RowsetListener {
 					var nativeParams = nativeQuery.@com.eas.client.queries.Query::getParameters()();
 					var publishedParams = {};  
 					Object.defineProperty(publishedParams, "schema", { get : function(){ return @com.eas.client.model.Entity::publishFieldsFacade(Lcom/bearsoft/rowset/metadata/Fields;Lcom/eas/client/model/Entity;)(nativeParams, aEntity); }});
-					// deprecated
-					Object.defineProperty(publishedParams, "md", { get : function(){ return @com.eas.client.model.Entity::publishFieldsFacade(Lcom/bearsoft/rowset/metadata/Fields;Lcom/eas/client/model/Entity;)(nativeParams, aEntity); }});
-					//
 					Object.defineProperty(publishedParams, "length", { get : function(){ return publishedParams.schema.length; }});
 					for(var i=0;i<publishedParams.schema.length;i++)
 					{
