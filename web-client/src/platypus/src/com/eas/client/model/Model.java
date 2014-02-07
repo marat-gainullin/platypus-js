@@ -339,7 +339,7 @@ public class Model {
 			throw ex;
 		}
 	}
-
+ 
 	public void publishRowsets() throws Exception {
 		assert module != null : "Module has to be already installed while publishing rowsets facades.";
 		validateQueries();
