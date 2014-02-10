@@ -146,8 +146,8 @@ public abstract class DbControlDesignInfo extends ControlDesignInfo {
     protected void assign(DbControlDesignInfo aSource) {
         if (aSource != null) {
             setDatamodelElement(aSource.getDatamodelElement() != null ? aSource.getDatamodelElement().copy() : null);
-            setSelectFunction(aSource.getSelectFunction() != null ? new String(aSource.getSelectFunction().toCharArray()) : null);
-            setHandleFunction(aSource.getHandleFunction() != null ? new String(aSource.getHandleFunction().toCharArray()) : null);
+            setSelectFunction(aSource.getSelectFunction());
+            setHandleFunction(aSource.getHandleFunction());
             setSelectOnly(aSource.isSelectOnly());
             setEditable(aSource.isEditable());
         }

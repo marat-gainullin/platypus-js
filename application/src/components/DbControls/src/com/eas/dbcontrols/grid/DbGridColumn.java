@@ -191,22 +191,22 @@ public class DbGridColumn extends DesignInfo implements PropertiesSimpleFactory 
             setSelectOnly(aSource.isSelectOnly());
             setFixed(aSource.isFixed());
             if (aSource.getTitle() != null) {
-                setTitle(new String(aSource.getTitle().toCharArray()));
+                setTitle(aSource.getTitle());
             } else {
                 setTitle(null);
             }
             if (aSource.getName() != null) {
-                setName(new String(aSource.getName().toCharArray()));
+                setName(aSource.getName());
             } else {
                 setName(null);
             }
             if (aSource.getSelectFunction() != null) {
-                setSelectFunction(new String(aSource.getSelectFunction().toCharArray()));
+                setSelectFunction(aSource.getSelectFunction());
             } else {
                 setSelectFunction(null);
             }
             if (aSource.getCellFunction() != null) {
-                setCellFunction(new String(aSource.getCellFunction().toCharArray()));
+                setCellFunction(aSource.getCellFunction());
             } else {
                 setCellFunction(null);
             }

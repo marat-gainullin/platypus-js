@@ -48,6 +48,10 @@ import org.w3c.dom.Document;
 /**
  *
  * @author mg
+ * @param <E>
+ * @param <P>
+ * @param <C>
+ * @param <Q>
  */
 public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P extends E, C extends Client, Q extends Query<C>> extends Model<E, P, C, Q> {
 
@@ -93,9 +97,9 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
                     aRelation.getLeftEntity().putOrmDefinition(
                             scalarPropertyName,
                             ScriptUtils.scalarPropertyDefinition(
-                            aRelation.getRightEntity().getRowsetWrap(),
-                            aRelation.getRightField().getName(),
-                            aRelation.getLeftField().getName()));
+                                    aRelation.getRightEntity().getRowsetWrap(),
+                                    aRelation.getRightField().getName(),
+                                    aRelation.getLeftField().getName()));
                 }
                 String collectionPropertyName = aRelation.getCollectionPropertyName();
                 if (collectionPropertyName == null || collectionPropertyName.isEmpty()) {
@@ -105,16 +109,16 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
                     aRelation.getRightEntity().putOrmDefinition(
                             collectionPropertyName,
                             ScriptUtils.collectionPropertyDefinition(
-                            aRelation.getLeftEntity().getRowsetWrap(),
-                            aRelation.getRightField().getName(),
-                            aRelation.getLeftField().getName()));
+                                    aRelation.getLeftEntity().getRowsetWrap(),
+                                    aRelation.getRightField().getName(),
+                                    aRelation.getLeftField().getName()));
                 }
             }
             //////////////////
         }
         changeSupport.firePropertyChange("scriptScope", oldValue, scriptThis);
     }
-    
+
     public Function getHandler(String aHandlerName) {
         if (aHandlerName != null && !aHandlerName.isEmpty() && getScriptThis() != null) {
             Object oHandlers = getScriptThis().get(ScriptUtils.HANDLERS_PROP_NAME, getScriptThis());

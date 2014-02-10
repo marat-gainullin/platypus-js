@@ -31,6 +31,7 @@ import org.w3c.dom.Node;
 /**
  *
  * @author mg
+ * @param <E>
  */
 public abstract class XmlDom2Model<E extends Entity<?, ?, E>> implements ModelVisitor<E> {
 
@@ -209,11 +210,15 @@ public abstract class XmlDom2Model<E extends Entity<?, ?, E>> implements ModelVi
                                 Fields fields = lEntity.getFields();
                                 if (fields != null) {
                                     relation.setLeftField(fields.get(leftParameterName));
+                                } else if (!model.isRelationsAgressiveCheck()) {
+                                    relation.setLeftField(new Parameter(leftParameterName));
                                 }
                             } else if (leftFieldName != null && !leftFieldName.isEmpty()) {
                                 Fields fields = lEntity.getFields();
                                 if (fields != null) {
                                     relation.setLeftField(fields.get(leftFieldName));
+                                } else if (!model.isRelationsAgressiveCheck()) {
+                                    relation.setLeftField(new Parameter(leftFieldName));
                                 }
                             }
                         } else if (lEntity != null) {
@@ -221,11 +226,15 @@ public abstract class XmlDom2Model<E extends Entity<?, ?, E>> implements ModelVi
                                 Query query = lEntity.getQuery();
                                 if (query != null) {
                                     relation.setLeftField(query.getParameters().get(leftParameterName));
+                                } else if (!model.isRelationsAgressiveCheck()) {
+                                    relation.setLeftField(new Parameter(leftParameterName));
                                 }
                             } else if (leftFieldName != null && !leftFieldName.isEmpty()) {
                                 Fields fields = lEntity.getFields();
                                 if (fields != null) {
                                     relation.setLeftField(fields.get(leftFieldName));
+                                } else if (!model.isRelationsAgressiveCheck()) {
+                                    relation.setLeftField(new Field(leftFieldName));
                                 }
                             }
                         }
@@ -241,11 +250,15 @@ public abstract class XmlDom2Model<E extends Entity<?, ?, E>> implements ModelVi
                                 Fields fields = rEntity.getFields();
                                 if (fields != null) {
                                     relation.setRightField(fields.get(rightParameterName));
+                                } else if (!model.isRelationsAgressiveCheck()) {
+                                    relation.setRightField(new Parameter(rightParameterName));
                                 }
                             } else if (rightFieldName != null && !rightFieldName.isEmpty()) {
                                 Fields fields = rEntity.getFields();
                                 if (fields != null) {
                                     relation.setRightField(fields.get(rightFieldName));
+                                } else if (!model.isRelationsAgressiveCheck()) {
+                                    relation.setRightField(new Parameter(rightFieldName));
                                 }
                             }
                         } else if (rEntity != null) {
@@ -253,11 +266,15 @@ public abstract class XmlDom2Model<E extends Entity<?, ?, E>> implements ModelVi
                                 Query query = rEntity.getQuery();
                                 if (query != null) {
                                     relation.setRightField(query.getParameters().get(rightParameterName));
+                                } else if (!model.isRelationsAgressiveCheck()) {
+                                    relation.setRightField(new Parameter(rightParameterName));
                                 }
                             } else if (rightFieldName != null && !rightFieldName.isEmpty()) {
                                 Fields fields = rEntity.getFields();
                                 if (fields != null) {
                                     relation.setRightField(fields.get(rightFieldName));
+                                } else if (!model.isRelationsAgressiveCheck()) {
+                                    relation.setRightField(new Field(rightFieldName));
                                 }
                             }
                         }

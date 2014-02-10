@@ -1326,7 +1326,6 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
         Runnable handlersResolver = prepareForm(scriptDoc);
         prepareScript(scriptDoc, args);
         handlersResolver.run();
-        this.delete(ScriptUtils.HANDLERS_PROP_NAME);
     }
 
     protected Runnable prepareForm(ScriptDocument scriptDoc) throws Exception {

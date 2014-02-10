@@ -110,7 +110,6 @@ public class ScriptRunner extends ScriptableObject {
         prepareRoles(scriptDoc);
         prepareModel(scriptDoc);
         prepareScript(scriptDoc, args);
-        this.delete(ScriptUtils.HANDLERS_PROP_NAME);
     }
 
     protected void prepareRoles(ScriptDocument scriptDoc) throws Exception {

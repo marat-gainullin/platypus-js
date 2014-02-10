@@ -11,6 +11,7 @@ package com.eas.client.model;
 
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
+import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.Client;
 import com.eas.client.model.visitors.ModelVisitor;
@@ -51,20 +52,21 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
     public static final String DATASOURCE_AFTER_REQUERY_EVENT_TAG_NAME = "onRequeried";
     public static final String DATASOURCE_AFTER_FILTER_EVENT_TAG_NAME = "onFiltered";
     protected StoredQueryFactory queryFactory;
-    protected C client = null;
+    protected C client;
     protected Set<Relation<E>> relations = new HashSet<>();
     protected Map<Long, E> entities = new HashMap<>();
     protected P parametersEntity;
     protected Parameters parameters = new Parameters();
     protected Scriptable scriptThis;
     protected NativeJavaHostObject published;
-    protected boolean runtime = false;
+    protected boolean runtime;
     protected boolean commitable = true;
-    protected int ajustingCounter = 0;
+    protected int ajustingCounter;
     protected Runnable resolver;
     protected GuiCallback guiCallback;
     protected ModelEditingSupport<E> editingSupport = new ModelEditingSupport<>();
     protected PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
+    protected boolean relationsAgressiveCheck;
 
     public Model<E, P, C, Q> copy() throws Exception {
         Model<E, P, C, Q> copied = getClass().newInstance();
@@ -142,12 +144,14 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
      */
     public synchronized boolean validate() throws Exception {
         boolean res = false;
+        // validate entities
         for (E e : entities.values()) {
             if (e.validate()) {
                 res = true;
             }
         }
         if (res) {
+            // validate relations
             for (Relation<E> rel : relations) {
                 resolveRelation(rel, this);
             }
@@ -246,9 +250,8 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
     public abstract Document toXML();
 
     /**
-     * Registers an
-     * <code>DatamodelEditingValidator</code>. The validator is notified
-     * whenever an datamodel edit action will occur.
+     * Registers an <code>DatamodelEditingValidator</code>. The validator is
+     * notified whenever an datamodel edit action will occur.
      *
      * @param v an <code>DatamodelEditingValidator</code> object
      * @see #removeDatamodelEditingValidator
@@ -258,8 +261,7 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
     }
 
     /**
-     * Removes an
-     * <code>DatamodelEditingValidator</code>.
+     * Removes an <code>DatamodelEditingValidator</code>.
      *
      * @param v the <code>DatamodelEditingValidator</code> object to be removed
      * @see #addDatamodelEditingValidator
@@ -463,12 +465,12 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
         return runtime;
     }
 
-    
     private static final String COMMITABLE_JSDOC = ""
             + "/**\n"
             + "* Determines if the model is auto commitable by <code>save</code> method.\n"
             + "* @see save commit.\n"
             + "*/";
+
     @ScriptFunction(jsDoc = COMMITABLE_JSDOC)
     public boolean isCommitable() {
         return commitable;
@@ -519,6 +521,14 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
         }
     }
 
+    public boolean isRelationsAgressiveCheck() {
+        return relationsAgressiveCheck;
+    }
+
+    public void setRelationsAgressiveCheck(boolean aValue) {
+        relationsAgressiveCheck = aValue;
+    }
+
     protected void resolveRelation(Relation<E> aRelation, Model<E, P, C, Q> aModel) throws Exception {
         if (aRelation.getLeftEntity() != null) {
             aRelation.setLeftEntity(aModel.getEntityById(aRelation.getLeftEntity().getEntityId()));
@@ -527,45 +537,59 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
             aRelation.setRightEntity(aModel.getEntityById(aRelation.getRightEntity().getEntityId()));
         }
         if (aRelation.getLeftField() != null) {
+            String targetName = aRelation.getLeftField().getName();
             if (aRelation.getLeftEntity() != null) {
                 if (aRelation.isLeftParameter() && aRelation.getLeftEntity().getQueryId() != null) {
                     Q lQuery = aRelation.getLeftEntity().getQuery();
                     if (lQuery != null) {
-                        aRelation.setLeftField(lQuery.getParameters().get(aRelation.getLeftField().getName()));
-                    } else {
+                        aRelation.setLeftField(lQuery.getParameters().get(targetName));
+                    } else if (relationsAgressiveCheck) {
                         aRelation.setLeftField(null);
+                    } else {
+                        aRelation.setLeftField(new Parameter(targetName));
                     }
                 } else {
                     Fields lFields = aRelation.getLeftEntity().getFields();
                     if (lFields != null) {
-                        aRelation.setLeftField(lFields.get(aRelation.getLeftField().getName()));
-                    } else {
+                        aRelation.setLeftField(lFields.get(targetName));
+                    } else if (relationsAgressiveCheck) {
                         aRelation.setLeftField(null);
+                    } else {
+                        aRelation.setLeftField(new Field(targetName));
                     }
                 }
-            } else {
+            } else if (relationsAgressiveCheck) {
                 aRelation.setLeftField(null);
+            } else {
+                aRelation.setLeftField(new Field(targetName));
             }
         }
         if (aRelation.getRightField() != null) {
+            String targetName = aRelation.getRightField().getName();
             if (aRelation.getRightEntity() != null) {
                 if (aRelation.isRightParameter() && aRelation.getRightEntity().getQueryId() != null) {
                     Q rQuery = aRelation.getRightEntity().getQuery();
                     if (rQuery != null) {
-                        aRelation.setRightField(rQuery.getParameters().get(aRelation.getRightField().getName()));
-                    } else {
+                        aRelation.setRightField(rQuery.getParameters().get(targetName));
+                    } else if (relationsAgressiveCheck) {
                         aRelation.setRightField(null);
+                    } else {
+                        aRelation.setRightField(new Parameter(targetName));
                     }
                 } else {
                     Fields rFields = aRelation.getRightEntity().getFields();
                     if (rFields != null) {
                         aRelation.setRightField(rFields.get(aRelation.getRightField().getName()));
-                    } else {
+                    } else if (relationsAgressiveCheck) {
                         aRelation.setRightField(null);
+                    } else {
+                        aRelation.setRightField(new Field(targetName));
                     }
                 }
-            } else {
+            } else if (relationsAgressiveCheck) {
                 aRelation.setRightField(null);
+            } else {
+                aRelation.setRightField(new Field(targetName));
             }
         }
     }
