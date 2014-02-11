@@ -521,7 +521,7 @@ public class DatabasesClient implements DbClient {
             if (principal != null && principal.hasAnyRole(writeRoles)) {
                 return;
             }
-            throw new AccessControlException(String.format("Access denied for write query for %s PlatypusPrincipal.",//NOI18N
+            throw new AccessControlException(String.format("Access denied for write for PlatypusPrincipal %s.",//NOI18N
                     principal != null ? principal.getName() : null));
         }
     }
