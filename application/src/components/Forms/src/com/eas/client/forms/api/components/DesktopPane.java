@@ -86,7 +86,7 @@ public class DesktopPane extends Component<JDesktopPane> {
 
     private static final String FORMS_JSDOC = ""
             + "/**\n"
-            + "* Gets an array of all frames on the pane.\n"
+            + "* An array of all frames on the pane.\n"
             + "*/";
 
     @ScriptFunction(jsDoc = FORMS_JSDOC)
