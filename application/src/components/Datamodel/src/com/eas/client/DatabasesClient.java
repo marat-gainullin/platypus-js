@@ -12,7 +12,6 @@ package com.eas.client;
 import com.bearsoft.rowset.Converter;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.changes.Change;
-import com.bearsoft.rowset.changes.Command;
 import com.bearsoft.rowset.changes.EntitiesHost;
 import com.bearsoft.rowset.dataflow.FlowProvider;
 import com.bearsoft.rowset.dataflow.TransactionListener;
@@ -23,7 +22,6 @@ import com.bearsoft.rowset.jdbc.StatementsGenerator.StatementsLogEntry;
 import com.bearsoft.rowset.metadata.*;
 import com.eas.client.cache.DatabaseMdCache;
 import com.eas.client.cache.FilesAppCache;
-import com.eas.client.cache.FilesAppCache.ScanCallback;
 import com.eas.client.login.DbPlatypusPrincipal;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.login.PrincipalHost;
@@ -40,7 +38,7 @@ import com.eas.util.StringUtils;
 import java.security.AccessControlException;
 import java.sql.*;
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.naming.Context;
@@ -74,13 +72,12 @@ public class DatabasesClient implements DbClient {
     // callback interface for principal
     protected PrincipalHost principalHost;
     // transactions
-    protected final Set<TransactionListener> transactionListeners = new HashSet<>();
+    protected final Set<TransactionListener> transactionListeners = new CopyOnWriteArraySet<>();
     // queries management fro designers
-    protected final Set<QueriesListener> queriesListeners = new HashSet<>();
+    protected final Set<QueriesListener> queriesListeners = new CopyOnWriteArraySet<>();
     // datasource name used by default. E.g. in queries with null datasource name
     protected String defaultDatasourceName;
 
-   
     /**
      *
      * @param anAppCache
@@ -147,39 +144,30 @@ public class DatabasesClient implements DbClient {
 
     @Override
     public ListenerRegistration addTransactionListener(final TransactionListener aListener) {
-        synchronized (transactionListeners) {
-            transactionListeners.add(aListener);
-            return new ListenerRegistration() {
-                @Override
-                public void remove() {
-                    synchronized (transactionListeners) {
-                        transactionListeners.remove(aListener);
-                    }
-                }
-            };
-        }
+        transactionListeners.add(aListener);
+        return new ListenerRegistration() {
+            @Override
+            public void remove() {
+                transactionListeners.remove(aListener);
+            }
+        };
     }
 
     @Override
     public ListenerRegistration addQueriesListener(final QueriesListener aListener) {
-        synchronized (queriesListeners) {
-            queriesListeners.add(aListener);
-            return new ListenerRegistration() {
-                @Override
-                public void remove() {
-                    synchronized (queriesListeners) {
-                        queriesListeners.remove(aListener);
-                    }
-                }
-            };
-        }
+        queriesListeners.add(aListener);
+        return new ListenerRegistration() {
+            @Override
+            public void remove() {
+                queriesListeners.remove(aListener);
+            }
+        };
     }
 
     protected void fireQueriesCleared() {
-        synchronized (queriesListeners) {
-            for (QueriesListener l : queriesListeners.toArray(new QueriesListener[]{})) {
-                l.cleared();
-            }
+        QueriesListener[] listeners = queriesListeners.toArray(new QueriesListener[]{});
+        for (QueriesListener l : listeners) {
+            l.cleared();
         }
     }
 
@@ -319,7 +307,7 @@ public class DatabasesClient implements DbClient {
             }
         }
         return rowsAffected;
-    }
+    } 
 
     @Override
     public AppCache getAppCache() throws Exception {
@@ -350,10 +338,7 @@ public class DatabasesClient implements DbClient {
                 List<Change> dbLog = aDatasourcesChangeLogs.get(datasourceName);
                 rowsAffected += commit(datasourceName, dbLog);
             }
-            TransactionListener[] listeners;
-            synchronized (transactionListeners) {
-                listeners = transactionListeners.toArray(new TransactionListener[]{});
-            }
+            TransactionListener[] listeners = transactionListeners.toArray(new TransactionListener[]{});
             for (TransactionListener l : listeners) {
                 try {
                     l.commited();
@@ -472,13 +457,12 @@ public class DatabasesClient implements DbClient {
 
     @Override
     public void rollback() {
-        synchronized (transactionListeners) {
-            for (TransactionListener l : transactionListeners.toArray(new TransactionListener[]{})) {
-                try {
-                    l.rolledback();
-                } catch (Exception ex) {
-                    Logger.getLogger(DatabasesClient.class.getName()).log(Level.SEVERE, null, ex);
-                }
+        TransactionListener[] listeners = transactionListeners.toArray(new TransactionListener[]{});
+        for (TransactionListener l : listeners) {
+            try {
+                l.rolledback();
+            } catch (Exception ex) {
+                Logger.getLogger(DatabasesClient.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
