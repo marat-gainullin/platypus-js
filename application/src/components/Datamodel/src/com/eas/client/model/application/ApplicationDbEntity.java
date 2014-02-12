@@ -83,7 +83,7 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
     }
 
     public void prepareRowsetByQuery() throws Exception {
-        Rowset oldRowset = rowset;
+        Rowset oldRowset = rowset; 
         if (rowset != null) {
             rowset.removeRowsetListener(this);
             unforwardChangeLog();

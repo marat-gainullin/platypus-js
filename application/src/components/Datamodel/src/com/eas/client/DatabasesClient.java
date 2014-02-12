@@ -74,9 +74,8 @@ public class DatabasesClient implements DbClient {
     // callback interface for principal
     protected PrincipalHost principalHost;
     // transactions
-    // Map<String - session id, Map<String - database id, ...
-    protected final Map<String, Map<String, List<Change>>> transacted = new HashMap<>();
     protected final Set<TransactionListener> transactionListeners = new HashSet<>();
+    // queries management fro designers
     protected final Set<QueriesListener> queriesListeners = new HashSet<>();
     // datasource name used by default. E.g. in queries with null datasource name
     protected String defaultDatasourceName;
@@ -162,12 +161,12 @@ public class DatabasesClient implements DbClient {
 
     @Override
     public ListenerRegistration addTransactionListener(final TransactionListener aListener) {
-        synchronized (transacted) {
+        synchronized (transactionListeners) {
             transactionListeners.add(aListener);
             return new ListenerRegistration() {
                 @Override
                 public void remove() {
-                    synchronized (transacted) {
+                    synchronized (transactionListeners) {
                         transactionListeners.remove(aListener);
                     }
                 }
@@ -220,31 +219,6 @@ public class DatabasesClient implements DbClient {
     }
 
     @Override
-    public synchronized List<Change> getChangeLog(String aDatasourceId, String aSessionId) {
-        Map<String, List<Change>> enqueuedByDb = transacted.get(aSessionId);
-        if (enqueuedByDb == null) {
-            enqueuedByDb = new HashMap<>();
-            transacted.put(aSessionId, enqueuedByDb);
-        }
-        List<Change> enqueued = enqueuedByDb.get(aDatasourceId);
-        if (enqueued == null) {
-            enqueued = new CopyOnWriteArrayList<>();
-            enqueuedByDb.put(aDatasourceId, enqueued);
-        }
-        return enqueued;
-    }
-
-    /**
-     * In server environment, there are needs to clear a part of change log
-     * (logouted or dead client, for example).
-     *
-     * @param aSessionId
-     */
-    public synchronized void removeChangeLog(String aSessionId) {
-        transacted.remove(aSessionId);
-    }
-
-    @Override
     public SqlQuery getAppQuery(String aQueryId) throws Exception {
         return getAppQuery(aQueryId, true);
     }
@@ -276,7 +250,7 @@ public class DatabasesClient implements DbClient {
     }
 
     public String getSqlLogMessage(SqlCompiledQuery query) {
-        StringBuilder sb = new StringBuilder("Executing SQL: ");
+        StringBuilder sb = new StringBuilder("Executing SQL query: ");
         sb.append(query.getSqlClause());
         if (query.getParameters().getParametersCount() > 0) {
             sb.append(" {");
@@ -362,20 +336,7 @@ public class DatabasesClient implements DbClient {
     }
 
     @Override
-    public void enqueueUpdate(SqlCompiledQuery aQuery) throws Exception {
-        List<Change> log = getChangeLog(aQuery.getDatabaseId(), aQuery.getSessionId());
-        Command command = new Command(aQuery.getEntityId());
-        command.command = aQuery.getSqlClause();
-        command.parameters = new Change.Value[aQuery.getParameters().getParametersCount()];
-        for (int i = 0; i < command.parameters.length; i++) {
-            Parameter param = aQuery.getParameters().get(i + 1);
-            command.parameters[i] = new Change.Value(param.getName(), param.getValue(), param.getTypeInfo());
-        }
-        log.add(command);
-    }
-
-    @Override
-    public synchronized AppCache getAppCache() throws Exception {
+    public AppCache getAppCache() throws Exception {
         return appCache;
     }
 
@@ -396,35 +357,32 @@ public class DatabasesClient implements DbClient {
     }
 
     @Override
-    public int commit(String aSessionId) throws Exception {
-        synchronized (transacted) {
-            try {
-                int rowsAffected = 0;
-                if (!transacted.containsKey(aSessionId)) {
-                    return rowsAffected;
-                }
-                Map<String, List<Change>> sessionLog = transacted.get(aSessionId);
-                assert sessionLog != null;
-                for (final String dbId : sessionLog.keySet()) {
-                    List<Change> dbLog = sessionLog.get(dbId);
-                    rowsAffected += commit(aSessionId, dbId, dbLog);
-                }
-                for (TransactionListener l : transactionListeners.toArray(new TransactionListener[]{})) {
-                    try {
-                        l.commited();
-                    } catch (Exception ex) {
-                        Logger.getLogger(DatabasesClient.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-                return rowsAffected;
-            } catch (Exception ex) {
-                rollback(aSessionId);
-                throw ex;
+    public int commit(Map<String, List<Change>> aDatasourcesChangeLogs) throws Exception {
+        int rowsAffected = 0;
+        try {
+            for (final String datasourceName : aDatasourcesChangeLogs.keySet()) {
+                List<Change> dbLog = aDatasourcesChangeLogs.get(datasourceName);
+                rowsAffected += commit(datasourceName, dbLog);
             }
+            TransactionListener[] listeners;
+            synchronized (transactionListeners) {
+                listeners = transactionListeners.toArray(new TransactionListener[]{});
+            }
+            for (TransactionListener l : listeners) {
+                try {
+                    l.commited();
+                } catch (Exception ex) {
+                    Logger.getLogger(DatabasesClient.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            return rowsAffected;
+        } catch (Exception ex) {
+            rollback();
+            throw ex;
         }
     }
 
-    protected int commit(String aSessionId, final String aDatasourceId, List<Change> aLog) throws Exception {
+    protected int commit(final String aDatasourceId, List<Change> aLog) throws Exception {
         int rowsAffected = 0;
         SqlDriver driver = getDbMetadataCache(aDatasourceId).getConnectionDriver();
         if (driver != null) {
@@ -527,14 +485,8 @@ public class DatabasesClient implements DbClient {
     }
 
     @Override
-    public void rollback(String aSessionId) {
-        synchronized (transacted) {
-            Map<String, List<Change>> logByDb = transacted.get(aSessionId);
-            if (logByDb != null) {
-                for (List<Change> log : logByDb.values()) {
-                    log.clear();
-                }
-            }
+    public void rollback() {
+        synchronized (transactionListeners) {
             for (TransactionListener l : transactionListeners.toArray(new TransactionListener[]{})) {
                 try {
                     l.rolledback();
@@ -564,16 +516,6 @@ public class DatabasesClient implements DbClient {
         return lrowSet;
     }
 
-    protected void clearCaches() throws Exception {
-        for (DatabaseMdCache cache : mdCaches.values()) {
-            cache.clear();
-        }
-        if (appCache != null) {
-            appCache.clear();
-        }
-        clearQueries();
-    }
-
     @Override
     public synchronized void appEntityChanged(String aEntityId) throws Exception {
         if (aEntityId != null) {
@@ -587,6 +529,16 @@ public class DatabasesClient implements DbClient {
         } else {
             clearCaches();
         }
+    }
+
+    protected void clearCaches() throws Exception {
+        for (DatabaseMdCache cache : mdCaches.values()) {
+            cache.clear();
+        }
+        if (appCache != null) {
+            appCache.clear();
+        }
+        clearQueries();
     }
 
     public void clearQueries() throws Exception {

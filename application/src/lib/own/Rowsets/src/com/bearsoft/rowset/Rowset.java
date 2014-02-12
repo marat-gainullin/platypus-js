@@ -6,7 +6,7 @@ package com.bearsoft.rowset;
 
 import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.changes.Delete;
-import com.bearsoft.rowset.changes.Insert;
+import com.bearsoft.rowset.changes.Insert; 
 import com.bearsoft.rowset.changes.Update;
 import com.bearsoft.rowset.dataflow.DatabaseFlowProvider;
 import com.bearsoft.rowset.dataflow.FlowProvider;

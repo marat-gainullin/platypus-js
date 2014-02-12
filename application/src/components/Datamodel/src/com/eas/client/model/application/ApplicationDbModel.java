@@ -121,9 +121,6 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
     @ScriptFunction(jsDoc = SAVE_JSDOC, params = {"callback"})
     @Override
     public boolean save(Function aCallback) throws Exception {
-        for (String dbId : changeLogs.keySet()) {
-            client.getChangeLog(dbId, sessionId).addAll(changeLogs.get(dbId));
-        }
         return super.save(aCallback);
     }
 
@@ -136,7 +133,7 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
     @Override
     public int commit() throws Exception {
         if (commitable) {
-            return client.commit(sessionId);
+            return client.commit(changeLogs);
         } else {
             return 0;
         }

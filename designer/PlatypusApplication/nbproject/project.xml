@@ -174,7 +174,9 @@
                 <package>com.bearsoft.routing.graph</package>
                 <package>com.bearsoft.routing.gui</package>
                 <package>com.bearsoft.rowset</package>
+                <package>com.bearsoft.rowset.changes</package>
                 <package>com.bearsoft.rowset.compacts</package>
+                <package>com.bearsoft.rowset.dataflow</package>
                 <package>com.bearsoft.rowset.events</package>
                 <package>com.bearsoft.rowset.exceptions</package>
                 <package>com.bearsoft.rowset.metadata</package>

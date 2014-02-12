@@ -14,6 +14,7 @@ import com.eas.server.PlatypusServerCore;
 import com.eas.server.Session;
 import com.eas.server.SessionRequestHandler;
 import java.security.AccessControlException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,47 +25,14 @@ import java.util.Map;
  */
 public class CommitRequestHandler extends SessionRequestHandler<CommitRequest> {
 
-    protected static class ChangesApplier implements ChangeVisitor {
-
-        protected List<Change> target;
-        protected SqlCompiledQuery compiledEntity;
-
-        public ChangesApplier(List<Change> aTarget, SqlCompiledQuery aEntity) {
-            super();
-            target = aTarget;
-            compiledEntity = aEntity;
-        }
-
-        @Override
-        public void visit(Insert aChange) throws Exception {
-            target.add(aChange);
-        }
-
-        @Override
-        public void visit(Update aChange) throws Exception {
-            target.add(aChange);
-        }
-
-        @Override
-        public void visit(Delete aChange) throws Exception {
-            target.add(aChange);
-        }
-
-        @Override
-        public void visit(Command aChange) throws Exception {
-            target.add(aChange);
-            aChange.command = compiledEntity.getSqlClause();
-        }
-    }
-
     public CommitRequestHandler(PlatypusServerCore server, Session session, CommitRequest rq) {
         super(server, session, rq);
     }
 
     @Override
     public Response handle2() throws Exception {
+        Map<String, List<Change>> changeLogs = new HashMap<>();
         DatabasesClient client = getServerCore().getDatabasesClient();
-        String sessionId = getSession().getId();
         Map<String, SqlCompiledQuery> entities = new HashMap<>();
         List<Change> changes = getRequest().getChanges();
         for (Change change : changes) {
@@ -77,11 +45,17 @@ public class CommitRequestHandler extends SessionRequestHandler<CommitRequest> {
                 entity = query.compile();
                 entities.put(change.entityId, entity);
             }
-            List<Change> target = client.getChangeLog(entity.getDatabaseId(), sessionId);
-            ChangesApplier applier = new ChangesApplier(target, entity);
-            change.accept(applier);
+            if(change instanceof Command){
+                ((Command)change).command = entity.getSqlClause();
+            }
+            List<Change> targetChangeLog = changeLogs.get(entity.getDatabaseId());
+            if(targetChangeLog == null){
+                targetChangeLog = new ArrayList<>();
+                changeLogs.put(entity.getDatabaseId(), targetChangeLog);
+            }
+            targetChangeLog.add(change);
         }
-        int updated = client.commit(sessionId);
+        int updated = client.commit(changeLogs);
         return new CommitRequest.Response(getRequest().getID(), updated);
     }
 }

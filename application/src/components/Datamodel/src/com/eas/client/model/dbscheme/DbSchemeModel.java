@@ -25,7 +25,7 @@ import org.w3c.dom.Document;
 public class DbSchemeModel extends Model<FieldsEntity, FieldsEntity, DbClient, SqlQuery> {
 
     protected String dbId;
-    protected String schema = null;
+    protected String schema;
 
     public DbSchemeModel() {
         super();

@@ -6,12 +6,20 @@ package com.eas.client;
 
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
+import com.bearsoft.rowset.changes.Change;
+import com.bearsoft.rowset.dataflow.DelegatingFlowProvider;
 import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
 import com.eas.client.model.BaseTest;
 import com.eas.client.queries.Query;
+import com.eas.client.queries.SqlCompiledQuery;
+import com.eas.client.queries.SqlQuery;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import static org.junit.Assert.*;
 import org.junit.Test;
 
@@ -32,9 +40,21 @@ public class AmbiguousChangesTest extends BaseTest {
     @Test
     public void threeTablesTest() throws Exception {
         try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+            final List<Change> commonLog = new ArrayList<>();
+            Map<String, List<Change>> changeLogs = new HashMap<>();
+            changeLogs.put(null, commonLog);
+            
             DatabasesClient client = resource.getClient();
             Query query = client.getAppQuery(AMBIGUOUS_QUERY_ID);
             Rowset rowset = query.execute();
+            rowset.setFlowProvider(new DelegatingFlowProvider(rowset.getFlowProvider()){
+
+                @Override
+                public List<Change> getChangeLog() {
+                    return commonLog;
+                }
+                
+            });
             int oldRowsetSize = rowset.size();
             assertTrue(oldRowsetSize > 1);
             Fields fiedls = rowset.getFields();
@@ -71,15 +91,21 @@ public class AmbiguousChangesTest extends BaseTest {
             assertEquals(row.getColumnObject(fiedls.find("tid")), NEW_RECORD_ID);
             assertEquals(row.getColumnObject(fiedls.find("kid")), NEW_RECORD_ID);
             //
-            Query command = client.getAppQuery(COMMAND_QUERY_ID);
+            SqlQuery command = client.getAppQuery(COMMAND_QUERY_ID);
             command.putParameter("gid", DataTypeInfo.DECIMAL, NEW_RECORD_ID);
             command.putParameter("gname", DataTypeInfo.VARCHAR, NEW_RECORD_NAME_G);
-            command.enqueueUpdate();
+            SqlCompiledQuery compiled = command.compile();
+            compiled.enqueueUpdate();
+            assertEquals(1, compiled.getFlow().getChangeLog().size());
+            commonLog.addAll(compiled.getFlow().getChangeLog());
+            
             //rowset.updateObject(fiedls.find("gname"), NEW_RECORD_NAME_G);
             rowset.updateObject(fiedls.find("tname"), NEW_RECORD_NAME_T);
             rowset.updateObject(fiedls.find("kname"), NEW_RECORD_NAME_K);
-            client.commit(null);
-            assertTrue(client.getChangeLog(null, null).isEmpty());
+            
+            client.commit(changeLogs);
+            assertTrue(commonLog.isEmpty());
+            
             rowset.refresh();
             fiedls = rowset.getFields();
             assertEquals(oldRowsetSize + 1, rowset.size());
@@ -101,8 +127,8 @@ public class AmbiguousChangesTest extends BaseTest {
             assertEquals(newRow.getColumnObject(fiedls.find("kname")), NEW_RECORD_NAME_K);
             // Delete operation
             rowset.delete();
-            client.commit(null);
-            assertTrue(client.getChangeLog(null, null).isEmpty());
+            client.commit(changeLogs);
+            assertTrue(commonLog.isEmpty());
             rowset.refresh();
             fiedls = rowset.getFields();
             assertEquals(oldRowsetSize, rowset.size());
@@ -122,9 +148,22 @@ public class AmbiguousChangesTest extends BaseTest {
     @Test
     public void twoWritableTablesTest() throws Exception {
         try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+            final List<Change> commonLog = new ArrayList<>();
+            Map<String, List<Change>> changeLogs = new HashMap<>();
+            changeLogs.put(null, commonLog);
+            
             DatabasesClient client = resource.getClient();
             Query query = client.getAppQuery(AMBIGUOUS_SEMI_WRITABLE_QUERY_ID);
             Rowset rowset = query.execute();
+            rowset.setFlowProvider(new DelegatingFlowProvider(rowset.getFlowProvider()){
+
+                @Override
+                public List<Change> getChangeLog() {
+                    return commonLog;
+                }
+                
+            });
+            
             int oldRowsetSize = rowset.size();
             assertTrue(oldRowsetSize > 1);
             Fields fiedls = rowset.getFields();
@@ -164,8 +203,8 @@ public class AmbiguousChangesTest extends BaseTest {
             rowset.updateObject(fiedls.find("gname"), NEW_RECORD_NAME_G);
             rowset.updateObject(fiedls.find("tname"), NEW_RECORD_NAME_T);
             rowset.updateObject(fiedls.find("kname"), NEW_RECORD_NAME_K);
-            client.commit(null);
-            assertTrue(client.getChangeLog(null, null).isEmpty());
+            client.commit(changeLogs);
+            assertTrue(commonLog.isEmpty());
             rowset.refresh();
             fiedls = rowset.getFields();
             assertEquals(oldRowsetSize + 1, rowset.size());
@@ -188,8 +227,8 @@ public class AmbiguousChangesTest extends BaseTest {
             assertEquals(newRow.getColumnObject(fiedls.find("kname")), NEW_RECORD_NAME_K);
             // Delete operation
             rowset.delete();
-            client.commit(null);
-            assertTrue(client.getChangeLog(null, null).isEmpty());
+            client.commit(changeLogs);
+            assertTrue(commonLog.isEmpty());
             rowset.refresh();
             fiedls = rowset.getFields();
             assertEquals(oldRowsetSize, rowset.size());

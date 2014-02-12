@@ -41,6 +41,7 @@ public class PlatypusScriptedFlowProvider implements FlowProvider {
     protected DbClient client;
     protected ScriptRunner source;
     protected Fields expectedFields;
+    protected List<Change> changeLog = new ArrayList<>();
 
     public PlatypusScriptedFlowProvider(DbClient aClient, Fields aExpectedFields, ScriptRunner aSource, String aSessionId) {
         client = aClient;
@@ -135,7 +136,7 @@ public class PlatypusScriptedFlowProvider implements FlowProvider {
 
     @Override
     public List<Change> getChangeLog() {
-        return client.getChangeLog(source.getApplicationElementId(), sessionId);
+        return changeLog;
     }
 
     @Override

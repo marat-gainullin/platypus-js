@@ -16,6 +16,7 @@ import com.eas.client.login.PlatypusPrincipal;
 import com.eas.util.ListenerRegistration;
 import java.security.AccessControlException;
 import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -35,6 +36,7 @@ public class PlatypusJdbcFlowProvider extends JdbcFlowProvider<String> {
     protected DbClient client;
     protected DbMetadataCache cache;
     protected ContextHost contextHost;
+    protected List<Change> changeLog = new ArrayList<>();
     protected Set<String> readRoles = new HashSet<>();
     protected Set<String> writeRoles = new HashSet<>();
 
@@ -58,17 +60,17 @@ public class PlatypusJdbcFlowProvider extends JdbcFlowProvider<String> {
         return entityId;
     }
 
-    @Override
-    public List<Change> getChangeLog() {
-        return client.getChangeLog(jdbcSourceTag, sessionId);
-    }
-
     public Set<String> getReadRoles() {
         return readRoles != null ? Collections.unmodifiableSet(readRoles) : null;
     }
     
     public Set<String> getWriteRoles() {
         return writeRoles != null ? Collections.unmodifiableSet(writeRoles) : null;
+    }
+
+    @Override
+    public List<Change> getChangeLog() {
+        return changeLog;
     }
     
     @Override
