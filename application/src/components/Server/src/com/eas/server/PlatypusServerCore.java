@@ -63,13 +63,13 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
             ScriptedDatabasesClient serverCoreDbClient;
             if (aApplicationUrl.toLowerCase().startsWith("jndi") || aApplicationUrl.toLowerCase().startsWith("file")) {
                 if (aApplicationUrl.startsWith("jndi")) {
-                    serverCoreDbClient = new ScriptedDatabasesClient(new DatabaseAppCache(aApplicationUrl), aDefaultDatasourceName, true, new ServerTasksScanner(tasks));
+                    serverCoreDbClient = new ScriptedDatabasesClient(new DatabaseAppCache(aApplicationUrl), aDefaultDatasourceName, true);
                 } else {// file://
                     File f = new File(new URI(aApplicationUrl));
                     if (f.exists() && f.isDirectory()) {
-                        FilesAppCache filesAppCache = new FilesAppCache(f.getPath());
+                        FilesAppCache filesAppCache = new FilesAppCache(f.getPath(), new ServerTasksScanner(tasks));
                         filesAppCache.watch();
-                        serverCoreDbClient = new ScriptedDatabasesClient(filesAppCache, aDefaultDatasourceName, true, new ServerTasksScanner(tasks));
+                        serverCoreDbClient = new ScriptedDatabasesClient(filesAppCache, aDefaultDatasourceName, true);
                     } else {
                         throw new IllegalArgumentException("applicationUrl: " + aApplicationUrl + " doesn't point to existent directory.");
                     }

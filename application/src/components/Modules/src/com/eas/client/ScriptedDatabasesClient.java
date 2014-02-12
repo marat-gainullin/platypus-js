@@ -175,12 +175,6 @@ public class ScriptedDatabasesClient extends DatabasesClient {
         super(anAppCache, aDefaultDatasourceName, aAutoFillMetadata);
     }
 
-    /**
-     * @inheritDoc
-     */
-    public ScriptedDatabasesClient(AppCache anAppCache, String aDefaultDatasourceName, boolean aAutoFillMetadata, FilesAppCache.ScanCallback aScanCallback) throws Exception {
-        super(anAppCache, aDefaultDatasourceName, aAutoFillMetadata, aScanCallback);
-    }
 
     /**
      * Adds transaction validator module. Validator modules are used in commit
