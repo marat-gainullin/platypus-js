@@ -80,21 +80,7 @@ public class DatabasesClient implements DbClient {
     // datasource name used by default. E.g. in queries with null datasource name
     protected String defaultDatasourceName;
 
-    /**
-     * Constructs <code>DatabasesClient</code> (two-tier mode).
-     *
-     * @param anAppCache
-     * @param aDefaultDatasourceName Datasource name used by default. E.g. in
-     * queries with null datasource name
-     * @param aAutoFillMetadata If true, metadatacache will be filled with
-     * tables, keys and other metadata in schema automatically. Otherwise it
-     * will query metadata table by table in each case. Default is true.
-     * @throws java.lang.Exception
-     */
-    public DatabasesClient(AppCache anAppCache, String aDefaultDatasourceName, boolean aAutoFillMetadata) throws Exception {
-        this(anAppCache, aDefaultDatasourceName, aAutoFillMetadata, null);
-    }
-
+   
     /**
      *
      * @param anAppCache
@@ -105,7 +91,7 @@ public class DatabasesClient implements DbClient {
      * @param aScanCallback
      * @throws Exception
      */
-    public DatabasesClient(AppCache anAppCache, String aDefaultDatasourceName, boolean aAutoFillMetadata, ScanCallback aScanCallback) throws Exception {
+    public DatabasesClient(AppCache anAppCache, String aDefaultDatasourceName, boolean aAutoFillMetadata) throws Exception {
         super();
         autoFillMetadata = aAutoFillMetadata;
         defaultDatasourceName = aDefaultDatasourceName;
