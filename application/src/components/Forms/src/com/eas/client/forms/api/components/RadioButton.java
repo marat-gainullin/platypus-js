@@ -5,6 +5,7 @@
 package com.eas.client.forms.api.components;
 
 import com.eas.client.forms.api.Component;
+import com.eas.client.forms.api.HasGroup;
 import com.eas.client.forms.api.containers.ButtonGroup;
 import com.eas.script.ScriptFunction;
 import javax.swing.Icon;
@@ -15,7 +16,7 @@ import org.mozilla.javascript.Function;
  *
  * @author mg
  */
-public class RadioButton extends Component<JRadioButton> {
+public class RadioButton extends Component<JRadioButton> implements HasGroup{
 
     protected ButtonGroup group;
     
@@ -94,11 +95,13 @@ public class RadioButton extends Component<JRadioButton> {
             + "/**\n"
             + " * The ButtonGroup this component belongs to.\n"
             + " */")
+    @Override
     public ButtonGroup getButtonGroup() {
         return group;
     }
 
     @ScriptFunction
+    @Override
     public void setButtonGroup(ButtonGroup aGroup) {
         if (group != aGroup) {
             if (group != null) {

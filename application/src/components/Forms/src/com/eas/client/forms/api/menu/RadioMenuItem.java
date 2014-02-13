@@ -6,6 +6,7 @@ package com.eas.client.forms.api.menu;
 
 import com.eas.client.forms.api.Component;
 import com.eas.client.forms.api.Container;
+import com.eas.client.forms.api.HasGroup;
 import com.eas.client.forms.api.containers.ButtonGroup;
 import com.eas.script.ScriptFunction;
 import javax.swing.JMenu;
@@ -17,7 +18,7 @@ import org.mozilla.javascript.Function;
  *
  * @author mg
  */
-public class RadioMenuItem extends Component<JRadioButtonMenuItem> {
+public class RadioMenuItem extends Component<JRadioButtonMenuItem> implements HasGroup{
 
     protected ButtonGroup group;
     
@@ -100,11 +101,13 @@ public class RadioMenuItem extends Component<JRadioButtonMenuItem> {
             + "/**\n"
             + " * The ButtonGroup this component belongs to.\n"
             + " */")
+    @Override
     public ButtonGroup getButtonGroup() {
         return group;
     }
 
     @ScriptFunction
+    @Override
     public void setButtonGroup(ButtonGroup aGroup) {
         if (group != aGroup) {
             if (group != null) {

@@ -615,7 +615,7 @@ public class JSContainers {
 
 		// ***************************************************
 		$wnd.PopupMenu = function() {
-			var aComponent = arguments.length>0?arguments[0]:null;
+			var aComponent = arguments.length > 0 ? arguments[0] : null;
 			if (!(this instanceof $wnd.PopupMenu)) {
 				throw  ' use  "new PopupMenu()" !';
 			}
@@ -633,7 +633,7 @@ public class JSContainers {
 
 		// ***************************************************
 		$wnd.AnchorsPane = function() {
-			var aComponent = arguments.length>0?arguments[0]:null;
+			var aComponent = arguments.length > 0 ? arguments[0] : null;
 			if (!(this instanceof $wnd.AnchorsPane)) {
 				throw  ' use  "new AnchorsPane()" !';
 			}
@@ -675,7 +675,7 @@ public class JSContainers {
 
 		// ***************************************************
 		$wnd.AbsolutePane = function() {
-			var aComponent = arguments.length>0?arguments[0]:null;
+			var aComponent = arguments.length > 0 ? arguments[0] : null;
 			if (!(this instanceof $wnd.AbsolutePane)) {
 				throw  ' use  "new AbsolutePane()" !';
 			}
@@ -908,7 +908,7 @@ public class JSContainers {
 		
 		// **************************************************************************
 		$wnd.ButtonGroup = function () {
-			var aComponent = arguments.length>0?arguments[0]:null;
+			var aComponent = arguments.length > 0 ? arguments[0] : null;
 			
 			if (!(this instanceof $wnd.ButtonGroup)) {
 				throw  ' use  "new ButtonGroup()" !';
@@ -931,6 +931,7 @@ public class JSContainers {
 			published.clear = function() {
 				aComponent.@com.eas.client.gxtcontrols.wrappers.component.PlatypusButtonGroup::clear()();				
 			}
+			aComponent.@com.eas.client.gxtcontrols.wrappers.component.PlatypusButtonGroup::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
 			return published;
 		}
 

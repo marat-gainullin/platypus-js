@@ -5,6 +5,7 @@
 package com.eas.client.forms.api.components;
 
 import com.eas.client.forms.api.Component;
+import com.eas.client.forms.api.HasGroup;
 import com.eas.client.forms.api.HorizontalPosition;
 import com.eas.client.forms.api.VerticalPosition;
 import com.eas.client.forms.api.containers.ButtonGroup;
@@ -18,7 +19,7 @@ import org.mozilla.javascript.Function;
  *
  * @author mg
  */
-public class ToggleButton extends Component<JToggleButton> {
+public class ToggleButton extends Component<JToggleButton> implements HasGroup{
 
     protected ButtonGroup group;
 
@@ -194,11 +195,13 @@ public class ToggleButton extends Component<JToggleButton> {
             + "/**\n"
             + " * The ButtonGroup this component belongs to.\n"
             + " */")
+    @Override
     public ButtonGroup getButtonGroup() {
         return group;
     }
 
     @ScriptFunction
+    @Override
     public void setButtonGroup(ButtonGroup aGroup) {
         if (group != aGroup) {
             if (group != null) {
