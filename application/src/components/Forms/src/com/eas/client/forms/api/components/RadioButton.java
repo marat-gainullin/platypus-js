@@ -5,6 +5,7 @@
 package com.eas.client.forms.api.components;
 
 import com.eas.client.forms.api.Component;
+import com.eas.client.forms.api.containers.ButtonGroup;
 import com.eas.script.ScriptFunction;
 import javax.swing.Icon;
 import javax.swing.JRadioButton;
@@ -16,6 +17,8 @@ import org.mozilla.javascript.Function;
  */
 public class RadioButton extends Component<JRadioButton> {
 
+    protected ButtonGroup group;
+    
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
             + "* Radio button component.\n"
@@ -85,5 +88,26 @@ public class RadioButton extends Component<JRadioButton> {
     @ScriptFunction
     public void setSelected(boolean aValue) {
         delegate.setSelected(aValue);
+    }
+    
+    @ScriptFunction(jsDoc=""
+            + "/**\n"
+            + " * The ButtonGroup this component belongs to.\n"
+            + " */")
+    public ButtonGroup getButtonGroup() {
+        return group;
+    }
+
+    @ScriptFunction
+    public void setButtonGroup(ButtonGroup aGroup) {
+        if (group != aGroup) {
+            if (group != null) {
+                group.remove(this);
+            }
+            group = aGroup;
+            if (group != null) {
+                group.add(this);
+            }
+        }
     }
 }

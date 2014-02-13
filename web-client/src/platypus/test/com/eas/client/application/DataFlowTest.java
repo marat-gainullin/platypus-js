@@ -1,8 +1,13 @@
 package com.eas.client.application;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.RowsetCallbackAdapter;
+import com.bearsoft.rowset.changes.Change;
+import com.bearsoft.rowset.dataflow.DelegatingFlowProvider;
 import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
@@ -45,6 +50,7 @@ public class DataFlowTest extends GWTTestCase {
 	public static final String NEW_RECORD_NAME_K = "test kname";
 
 	public void testThreeTablesTest() throws Exception {
+		final List<Change> commonLog = new ArrayList<Change>();
 		final AppClient client = ModelBaseTest.initDevelopTestClient(getModuleName());
 		client.getAppQuery(AMBIGUOUS_QUERY_ID, new QueryCallbackAdapter() {
 			@Override
@@ -55,6 +61,12 @@ public class DataFlowTest extends GWTTestCase {
 					@Override
 					public void doWork(Rowset aRowset) throws Exception {
 						final Rowset rowset = aRowset;
+						rowset.setFlowProvider(new DelegatingFlowProvider(rowset.getFlowProvider()){
+							@Override
+							public List<Change> getChangeLog() {
+							    return commonLog;
+							}
+						});
 						final int oldRowsetSize = rowset.size();
 						assertTrue(oldRowsetSize > 1);
 						final Fields fields = rowset.getFields();
@@ -91,12 +103,13 @@ public class DataFlowTest extends GWTTestCase {
 								Query command = aQuery;
 								command.putParameter("gid", DataTypeInfo.DECIMAL, NEW_RECORD_ID);
 								command.putParameter("gname", DataTypeInfo.VARCHAR, NEW_RECORD_NAME_G);
-								command.enqueueUpdate();
+								Change enqueued = command.enqueueUpdate();
+								commonLog.add(enqueued);
 								// rowset.updateObject(fiedls.find("gname"),
 								// NEW_RECORD_NAME_G);
 								rowset.updateObject(fields.find("tname"), NEW_RECORD_NAME_T);
 								rowset.updateObject(fields.find("kname"), NEW_RECORD_NAME_K);
-								client.commit(new CancellableCallback() {
+								client.commit(commonLog, new CancellableCallback() {
 
 									@Override
 									public void cancel() {
@@ -104,7 +117,7 @@ public class DataFlowTest extends GWTTestCase {
 
 									@Override
 									public void run() throws Exception {
-										assertTrue(client.getChangeLog().isEmpty());
+										assertTrue(commonLog.isEmpty());
 										rowset.refresh(new CancellableCallback() {
 											@Override
 											public void cancel() {
@@ -132,7 +145,7 @@ public class DataFlowTest extends GWTTestCase {
 												assertEquals(newRow.getColumnObject(fields.find("kname")), NEW_RECORD_NAME_K);
 												// Delete operation
 												rowset.delete();
-												client.commit(new CancellableCallback() {
+												client.commit(commonLog, new CancellableCallback() {
 													@Override
 													public void cancel() {
 													}

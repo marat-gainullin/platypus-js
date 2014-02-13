@@ -66,11 +66,7 @@ public class ApplicationPlatypusModel extends ApplicationModel<ApplicationPlatyp
 
     @Override
     public int commit() throws Exception {
-        if (commitable) {
-            return client.commit();
-        } else {
-            return 0;
-        }
+        return client.commit();
     }
 
     @Override

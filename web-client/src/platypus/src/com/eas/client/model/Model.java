@@ -66,7 +66,6 @@ public class Model {
 	protected Parameters parameters = new Parameters();
 	protected PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
 	protected boolean runtime = false;
-	protected boolean commitable = true;
 	protected List<Change> changeLog = new ArrayList<Change>();
 	protected Set<TransactionListener> transactionListeners = new HashSet<TransactionListener>();
 	//
@@ -470,14 +469,6 @@ public class Model {
 				delete publishedModel.runtime;
 			}
 		});
-		Object.defineProperty(publishedModel, "commitable", {
-			get : function() {
-				return aModel.@com.eas.client.model.Model::isCommitable()();
-			},
-			set : function(aValue) {
-				aModel.@com.eas.client.model.Model::setCommitable(Z)(aValue);
-			}
-		});
 		Object.defineProperty(publishedModel, "pending", {
 			get : function() {
 				return aModel.@com.eas.client.model.Model::isPending()();
@@ -591,14 +582,6 @@ public class Model {
 		return runtime;
 	}
 
-	public boolean isCommitable() {
-		return commitable;
-	}
-
-	public void setCommitable(boolean aValue) {
-		commitable = aValue;
-	}
-
 	public NetworkProcess getProcess() {
 		return process;
 	}
@@ -685,31 +668,27 @@ public class Model {
 	}
 
 	public Cancellable save(final JavaScriptObject onSuccess, final JavaScriptObject onFailure) throws Exception {
-		client.getChangeLog().addAll(changeLog);
-		if (commitable) {
-			return client.commit(new CancellableCallbackAdapter() {
+		return client.commit(changeLog, new CancellableCallbackAdapter() {
 
-				@Override
-				protected void doWork() throws Exception {
-					saved();
-					if (onSuccess != null)
-						Utils.invokeJsFunction(onSuccess);
-				}
-			}, new Callback<String>() {
+			@Override
+			protected void doWork() throws Exception {
+				saved();
+				if (onSuccess != null)
+					Utils.invokeJsFunction(onSuccess);
+			}
+		}, new Callback<String>() {
 
-				@Override
-				public void run(String aResult) throws Exception {
-					rolledback();
-					if (onFailure != null)
-						Utils.executeScriptEventVoid(module, onFailure, aResult);
-				}
+			@Override
+			public void run(String aResult) throws Exception {
+				rolledback();
+				if (onFailure != null)
+					Utils.executeScriptEventVoid(module, onFailure, aResult);
+			}
 
-				@Override
-				public void cancel() {
-				}
-			});
-		} else
-			return null;
+			@Override
+			public void cancel() {
+			}
+		});
 	}
 
 	public void saved() throws Exception {
