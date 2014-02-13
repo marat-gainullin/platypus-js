@@ -109,8 +109,7 @@ public class PlatypusJdbcFlowProvider extends JdbcFlowProvider<String> {
             if (principal != null && principal.hasAnyRole(readRoles)) {
                 return;
             }
-            throw new AccessControlException(String.format("Access denied for read query for %s PlatypusPrincipal.",//NOI18N
-                    principal != null ? principal.getName() : null));
+            throw new AccessControlException(String.format("Access denied for read (entity: %s) for user '%s'.", entityId != null ? entityId : "", principal != null ? principal.getName() : null));
         }
     }
 }

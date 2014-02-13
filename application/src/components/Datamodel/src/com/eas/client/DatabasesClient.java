@@ -382,7 +382,7 @@ public class DatabasesClient implements DbClient {
                                         }
                                     }
                                     if (query != null) {
-                                        checkWritePrincipalPermission(query.getWriteRoles());
+                                        checkWritePrincipalPermission(aEntityId, query.getWriteRoles());
                                     }
                                 }
                             }
@@ -444,14 +444,13 @@ public class DatabasesClient implements DbClient {
         }
     }
 
-    private void checkWritePrincipalPermission(Set<String> writeRoles) throws Exception {
+    private void checkWritePrincipalPermission(String aEntityId, Set<String> writeRoles) throws Exception {
         if (getPrincipalHost() != null && writeRoles != null && !writeRoles.isEmpty()) {
             PlatypusPrincipal principal = getPrincipalHost().getPrincipal();
             if (principal != null && principal.hasAnyRole(writeRoles)) {
                 return;
             }
-            throw new AccessControlException(String.format("Access denied for write for PlatypusPrincipal %s.",//NOI18N
-                    principal != null ? principal.getName() : null));
+            throw new AccessControlException(String.format("Access denied for write (entity: %s) for '%s'.", aEntityId != null ? aEntityId : "", principal != null ? principal.getName() : null));
         }
     }
 

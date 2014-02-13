@@ -249,7 +249,7 @@ public class JSControls {
 				get : function(){
 					var menu = aComponent.@com.sencha.gxt.widget.core.client.button.SplitButton::getMenu()();
 					return @com.eas.client.gxtcontrols.Publisher::checkPublishedComponent(Ljava/lang/Object;)(menu);
-				}, 
+				},
 				set : function(aValue){
 					aComponent.@com.sencha.gxt.widget.core.client.button.SplitButton::setMenu(Lcom/sencha/gxt/widget/core/client/menu/Menu;)(aValue.unwrap());
 				}

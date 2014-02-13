@@ -197,7 +197,7 @@ public class JSContainers {
 				return @com.eas.client.gxtcontrols.Publisher::checkPublishedComponent(Ljava/lang/Object;)(widget);
 			};
 			
-			if(arguments.length<=4)
+			if(arguments.length <= 4)
 			{
 				if (aRows == undefined) {
 					throw "aRows argument is required!"
