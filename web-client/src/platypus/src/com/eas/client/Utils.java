@@ -25,11 +25,6 @@ public class Utils {
 			} else
 				return null;
 		}
-		
-		public final void clearFunctionsContainer(){
-			deleteProperty("-x-handlers-funcs-");
-		}
-
 	}
 
 	public static class JsObject extends JavaScriptObject {

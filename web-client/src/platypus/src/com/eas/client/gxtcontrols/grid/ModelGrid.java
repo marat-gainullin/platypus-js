@@ -19,6 +19,8 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.sencha.gxt.core.client.util.Point;
 import com.sencha.gxt.data.shared.ListStore;
+import com.sencha.gxt.data.shared.loader.ListLoader;
+import com.sencha.gxt.data.shared.loader.TreeLoader;
 import com.sencha.gxt.widget.core.client.ContentPanel;
 import com.sencha.gxt.widget.core.client.event.ViewReadyEvent;
 import com.sencha.gxt.widget.core.client.event.ViewReadyEvent.ViewReadyHandler;
@@ -247,9 +249,14 @@ public class ModelGrid extends ContentPanel {
 
 	public void load() {
 		if (grid instanceof TreeGrid<?>) {
-			((TreeGrid<?>) grid).getTreeLoader().load();
-		} else
-			grid.getLoader().load();
+			TreeLoader<?> loader =((TreeGrid<?>) grid).getTreeLoader();
+			if(loader != null)
+				loader.load();
+		} else{
+			ListLoader<?, ?> loader = grid.getLoader();
+			if(loader != null)
+				loader.load();
+		}
 	}
 
 	public PublishedStyle complementPublishedStyle(PublishedStyle aStyle) {

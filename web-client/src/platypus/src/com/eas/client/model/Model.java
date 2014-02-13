@@ -862,8 +862,6 @@ public class Model {
 		runtime = aValue;
 		if (!oldValue && runtime) {
 			resolveHandlers();
-			if (module != null)
-				module.<Utils.JsModule> cast().clearFunctionsContainer();
 			validateQueries();
 			executeRootEntities(true, null, null);
 		}

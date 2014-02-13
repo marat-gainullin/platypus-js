@@ -955,16 +955,16 @@ public class JSControls {
 		};
 		
 		// ******************************************************************
-		function publishButtonGroup(aPiblished)
+		function publishButtonGroup(aPublished)
 		{
-			var comp = aPiblished.unwrap();
+			var comp = aPublished.unwrap();
 			Object.defineProperty(aPublished, "buttonGroup", {
 				get : function() {
 					var buttonGroup = comp.@com.eas.client.gxtcontrols.wrappers.component.HasGroup::getButtonGroup()();
 					return @com.eas.client.gxtcontrols.Publisher::checkPublishedComponent(Ljava/lang/Object;)(buttonGroup);					
 				},
 				set : function(aValue) {
-					comp.@com.eas.client.gxtcontrols.wrappers.component.HasGroup::mutateButtonGroup(Lcom/eas/client/gxtcontrols/wrappers/component/PlatypusButtonGroup;)(aValue.unwrap());
+					comp.@com.eas.client.gxtcontrols.wrappers.component.HasGroup::mutateButtonGroup(Lcom/eas/client/gxtcontrols/wrappers/component/PlatypusButtonGroup;)(aValue != null ? aValue.unwrap() : null);
 				}
 			});
 		}
