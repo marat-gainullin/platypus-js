@@ -31,6 +31,17 @@ public class ButtonGroup extends Container<ButtonGroupWrapper> {
     protected ButtonGroup(ButtonGroupWrapper aDelegate) {
         super();
         setDelegate(aDelegate);
+        Component[] comps = getChildren();
+        settingButtonGroup = true;
+        try {
+            for (Component comp : getChildren()) {
+                if (comp instanceof HasGroup) {
+                    ((HasGroup) comp).setButtonGroup(this);
+                }
+            }
+        } finally {
+            settingButtonGroup = false;
+        }
     }
 
     private boolean settingButtonGroup;
