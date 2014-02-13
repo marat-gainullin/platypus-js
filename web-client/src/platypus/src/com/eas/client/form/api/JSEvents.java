@@ -382,12 +382,10 @@ public class JSEvents {
 			}
 		};
 		@com.eas.client.form.api.JSEvents::publishEvent(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
-		
 		Object.defineProperty(published, "child", {
 			get : function()
 			{
 				var comp = aEvent.@com.sencha.gxt.widget.core.client.event.AddEvent::getWidget()();
-				
 				return @com.eas.client.gxtcontrols.Publisher::checkPublishedComponent(Ljava/lang/Object;)(comp);
 			}
 		});
