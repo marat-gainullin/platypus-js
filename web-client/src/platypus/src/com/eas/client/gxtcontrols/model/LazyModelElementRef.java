@@ -24,9 +24,7 @@ public class LazyModelElementRef extends ModelElementRef {
 			field = entity.getFields().get(fieldName);
 		} else {
 			try {
-				if (entity != null) {
-					resolveField();
-				}
+				resolveField();
 			} catch (Exception e) {
 				Logger.getLogger(LazyControlBounder.class.getName()).log(Level.SEVERE, e.getMessage());
 			}

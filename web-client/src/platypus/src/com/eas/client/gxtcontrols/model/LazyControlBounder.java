@@ -42,7 +42,8 @@ public class LazyControlBounder<T> extends LazyModelElementRef implements ValueC
 	}
 
 	protected void registerOnRowsetEvents() {
-		assert entity.getRowset() != null;
+		assert entity != null: "Entity "+entityId+" missing. "+(isField?"Field":"Parameter")+" name: "+fieldName;
+		assert entity.getRowset() != null : "Entity dataset missing";
 		entity.getRowset().addRowsetListener(this);
 		rowsetRequeried(null);
 	}

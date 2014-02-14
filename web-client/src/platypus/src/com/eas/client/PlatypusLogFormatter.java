@@ -28,19 +28,15 @@ public class PlatypusLogFormatter extends TextLogFormatter {
 
 	@Override
 	public synchronized String format(LogRecord event) {
-		if (event.getLoggerName().toLowerCase().contains("platypusApplication".toLowerCase())) {
-			StringBuilder message = new StringBuilder();
-			Date date = new Date(event.getMillis());
-			message.append(dateFormat.format(date)).append("\t");
-			message.append(event.getLevel().getName()).append("\t");
-			if(event.getMessage() != null)
-				message.append(event.getMessage()).append("\t").append("\n");
-			if (event.getThrown() != null && showStackTraces) {
-				message.append(getStackTraceAsString(event.getThrown(), "\n", "\t"));
-			}
-			return message.toString();
-		} else {
-			return super.format(event);
+		StringBuilder message = new StringBuilder();
+		Date date = new Date(event.getMillis());
+		message.append(dateFormat.format(date)).append("\t");
+		message.append(event.getLevel().getName()).append("\t");
+		if(event.getMessage() != null)
+			message.append(event.getMessage()).append("\t").append("\n");
+		if (event.getThrown() != null && showStackTraces) {
+			message.append(getStackTraceAsString(event.getThrown(), "\n", "\t"));
 		}
+		return message.toString();
 	}
 }
