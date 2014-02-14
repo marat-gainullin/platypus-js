@@ -11,6 +11,8 @@ package com.eas.client.queries;
 
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.RowsetCallbackAdapter;
+import com.bearsoft.rowset.changes.Change;
+import com.bearsoft.rowset.changes.Command;
 import com.bearsoft.rowset.dataflow.FlowProvider;
 import com.bearsoft.rowset.metadata.*;
 import com.eas.client.Callback;
@@ -146,8 +148,14 @@ public class Query {
         return rowset;
     }
     
-    public void enqueueUpdate() throws Exception {
-        client.enqueueUpdate(appElementId, params);
+    public Change enqueueUpdate() throws Exception {
+		Command command = new Command(appElementId);
+		command.parameters = new Change.Value[params.getParametersCount()];
+		for (int i = 0; i < command.parameters.length; i++) {
+			Parameter p = params.get(i + 1);
+			command.parameters[i] = new Change.Value(p.getName(), p.getValue(), p.getTypeInfo());
+		}
+		return command;
     }
 
     /**

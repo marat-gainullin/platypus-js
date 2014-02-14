@@ -19,6 +19,7 @@ import com.eas.client.queries.SqlQuery;
 import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.util.ListenerRegistration;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -38,12 +39,12 @@ public class DummyTestDbClient implements DbClient{
     }
 
     @Override
-    public int commit(String l) throws Exception {
+    public int commit(Map<String, List<Change>> aLogs) throws Exception {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public void rollback(String l) {
+    public void rollback() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
@@ -94,16 +95,6 @@ public class DummyTestDbClient implements DbClient{
 
     @Override
     public String getStartAppElement() throws Exception {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public List<Change> getChangeLog(String string, String string1) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void enqueueUpdate(SqlCompiledQuery scq) throws Exception {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 

@@ -16,6 +16,7 @@ import com.eas.client.login.PlatypusPrincipal;
 import com.eas.util.ListenerRegistration;
 import java.security.AccessControlException;
 import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -35,6 +36,7 @@ public class PlatypusJdbcFlowProvider extends JdbcFlowProvider<String> {
     protected DbClient client;
     protected DbMetadataCache cache;
     protected ContextHost contextHost;
+    protected List<Change> changeLog = new ArrayList<>();
     protected Set<String> readRoles = new HashSet<>();
     protected Set<String> writeRoles = new HashSet<>();
 
@@ -58,17 +60,17 @@ public class PlatypusJdbcFlowProvider extends JdbcFlowProvider<String> {
         return entityId;
     }
 
-    @Override
-    public List<Change> getChangeLog() {
-        return client.getChangeLog(jdbcSourceTag, sessionId);
-    }
-
     public Set<String> getReadRoles() {
         return readRoles != null ? Collections.unmodifiableSet(readRoles) : null;
     }
     
     public Set<String> getWriteRoles() {
         return writeRoles != null ? Collections.unmodifiableSet(writeRoles) : null;
+    }
+
+    @Override
+    public List<Change> getChangeLog() {
+        return changeLog;
     }
     
     @Override
@@ -107,8 +109,7 @@ public class PlatypusJdbcFlowProvider extends JdbcFlowProvider<String> {
             if (principal != null && principal.hasAnyRole(readRoles)) {
                 return;
             }
-            throw new AccessControlException(String.format("Access denied for read query for %s PlatypusPrincipal.",//NOI18N
-                    principal != null ? principal.getName() : null));
+            throw new AccessControlException(String.format("Access denied for read (entity: %s) for user '%s'.", entityId != null ? entityId : "", principal != null ? principal.getName() : null));
         }
     }
 }

@@ -14,6 +14,7 @@ import com.eas.client.queries.SqlQuery;
 import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.util.ListenerRegistration;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -76,8 +77,6 @@ public interface DbClient extends Client {
      */
     public FlowProvider createFlowProvider(String aDatasourceId, String aSessionId, String aEntityId, String aSqlClause, Fields aExpectedFields, Set<String> aReadRoles, Set<String> aWriteRoles) throws Exception;
 
-    public List<Change> getChangeLog(String aDatasourceId, String aSessionId);
-    
     /**
      * Returns metadata cache for the specified database.
      * @param aDatasourceId Datasource JNDI name. May be null for default database.
@@ -87,18 +86,6 @@ public interface DbClient extends Client {
      */
     public DbMetadataCache getDbMetadataCache(String aDatasourceId) throws Exception;
     
-    /**
-     * Enqueues an arbitrary sql statement through a SqlCompiledQuery instance.
-     * Begins a transaction. Returns nothing. The affected rows amount is returned by commit method.
-     * Database id and session id are incapsulated in SqlCompiledQuery instance
-     * @param aQuery SqlCompiledQuery instance for execute i.e. insert, update or delete dml statements.
-     * @throws Exception
-     * @see SqlCompiledQuery
-     * @see #commit(java.lang.String)
-     * @see #rollback(java.lang.String)
-     */
-    public void enqueueUpdate(SqlCompiledQuery aQuery) throws Exception;
-
     /**
      * Executes an arbitrary sql statement through a SqlCompiledQuery instance.
      * Wraps query executing in a single transaction. Commit is called immidiatly after 
@@ -112,19 +99,18 @@ public interface DbClient extends Client {
     
     /**
      * Commits all previous calls to executeUpdate and enqueueRowsetUpdate methods in aSessionId context.
-     * @param aSessionId A session id in wich context the changes are to be applied.
+     * @param aDatasourcesChangeLogs Changes to be commited to various datasources.
      * @throws Exception
      * @return Affected in this transaction rows count from commited calls to enqueueUpdate, not to enqueueRowsetUpdate.
      * Number of affected rows by rowset's changes you can take from the rowset directly.
      * @see #enqueueRowsetUpdate(com.bearsoft.rowset.Rowset)
+     *
      */
-    public int commit(String aSessionId) throws Exception;
-
+    public int commit(Map<String, List<Change>> aDatasourcesChangeLogs) throws Exception;
     /**
      * Forgets all previous calls to executeUpdate in aSessionId context.
-     * @param aSessionId  A session id in wich context the changes are to be forget.
      */
-    public void rollback(String aSessionId);
+    public void rollback();
 
     /**
      * Returns PrincipalHost of the DbCilent implementation.

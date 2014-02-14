@@ -8,14 +8,17 @@ import com.bearsoft.rowset.ordering.HashOrderer;
 import com.bearsoft.rowset.utils.KeySet;
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
+import com.bearsoft.rowset.events.RowsetListener;
 import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.locators.RowWrap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Filter class. Performs multi column filtering of rowset.
+ *
  * @author mg
  */
 public class Filter extends HashOrderer {
@@ -33,7 +36,9 @@ public class Filter extends HashOrderer {
     }
 
     /**
-     * Returns applied values vector (KeySet) according to feilds indicies vector, setted previously.
+     * Returns applied values vector (KeySet) according to feilds indicies
+     * vector, setted previously.
+     *
      * @return Applied values KeySet.
      * @see #getFields()
      * @see #setFields(java.util.Vector)
@@ -44,6 +49,7 @@ public class Filter extends HashOrderer {
 
     /**
      * Returns whether this filter is applied to it's rowset.
+     *
      * @return Whether this filter is applied to it's rowset.
      */
     public boolean isApplied() {
@@ -51,23 +57,31 @@ public class Filter extends HashOrderer {
     }
 
     /**
-     * Returns rows vector that was in the rowset before this filter has been applied.
-     * @return Rows vector that was in the rowset before this filter has been applied.
+     * Returns rows vector that was in the rowset before this filter has been
+     * applied.
+     *
+     * @return Rows vector that was in the rowset before this filter has been
+     * applied.
      */
     public List<Row> getOriginalRows() {
         return originalRows;
     }
 
     /**
-     * Returns rowset's cursor position was in the rowset before this filter has been applied.
-     * @return Rowset's cursor position was in the rowset before this filter has been applied.
+     * Returns rowset's cursor position was in the rowset before this filter has
+     * been applied.
+     *
+     * @return Rowset's cursor position was in the rowset before this filter has
+     * been applied.
      */
     public int getOriginalPos() {
         return originalPos;
     }
 
     /**
-     * Sets rowset's cursor position was in the rowset before this filter has been applied.
+     * Sets rowset's cursor position was in the rowset before this filter has
+     * been applied.
+     *
      * @param aPos Position is to be setted.
      */
     public void setOriginalPos(int aPos) {
@@ -76,6 +90,7 @@ public class Filter extends HashOrderer {
 
     /**
      * Adds a row to hash-ordered structure of row wraps
+     *
      * @param aRow Row is to be added.
      * @return True if aRow wass added to the structure, False otherwise.
      * @throws RowsetException
@@ -96,6 +111,7 @@ public class Filter extends HashOrderer {
 
     /**
      * Reapplies this filtrer to rowset.
+     *
      * @throws RowsetException
      */
     public void refilterRowset() throws RowsetException {
@@ -103,7 +119,10 @@ public class Filter extends HashOrderer {
     }
 
     /**
-     * Applies this filter ti the rowset with keys values according to fields (columns) conditions vector already prepared with <code>setFields()</code> or <code>...Constrainting()</code> methods.
+     * Applies this filter ti the rowset with keys values according to fields
+     * (columns) conditions vector already prepared with
+     * <code>setFields()</code> or <code>...Constrainting()</code> methods.
+     *
      * @param values Values vector.
      * @throws RowsetException
      * @see #beginConstrainting()
@@ -124,7 +143,10 @@ public class Filter extends HashOrderer {
     private boolean filtering = false;
 
     /**
-     * Applies this filter ti the rowset with keys values according to fields (columns) conditions vector already prepared with <code>setFields()</code> or <code>...Constrainting()</code> methods.
+     * Applies this filter ti the rowset with keys values according to fields
+     * (columns) conditions vector already prepared with
+     * <code>setFields()</code> or <code>...Constrainting()</code> methods.
+     *
      * @param values Values <code>KeySet</code>.
      * @throws RowsetException
      * @see #beginConstrainting()
@@ -180,12 +202,18 @@ public class Filter extends HashOrderer {
                                 }
                                 rowset.setSubsetAsCurrent(subSetRows);
                                 rowset.setActiveFilter(this);
-                                if (wasBeforeFirst) {
-                                    rowset.beforeFirst();
-                                } else if (wasAfterLast) {
-                                    rowset.afterLast();
-                                } else if (!rowset.isEmpty()) {
-                                    rowset.first();
+                                Set<RowsetListener> l = rowset.getRowsetChangeSupport().getRowsetListeners();
+                                rowset.getRowsetChangeSupport().setRowsetListeners(null);
+                                try {
+                                    if (wasBeforeFirst) {
+                                        rowset.beforeFirst();
+                                    } else if (wasAfterLast) {
+                                        rowset.afterLast();
+                                    } else if (!rowset.isEmpty()) {
+                                        rowset.first();
+                                    }
+                                } finally {
+                                    rowset.getRowsetChangeSupport().setRowsetListeners(l);
                                 }
                                 filterApplied = true;
                                 keysetApplied = values;
@@ -206,6 +234,7 @@ public class Filter extends HashOrderer {
 
     /**
      * Cancels this filter from rowset.
+     *
      * @throws IllegalStateException
      * @throws RowsetException
      */
@@ -248,8 +277,10 @@ public class Filter extends HashOrderer {
     }
 
     /**
-     * Deactivates this filter. It's similar to cancel filter, but it doesn't fire any events and doesn't perform any operations on rowset's set of rows.
-     * Such behavior is needed in cases of global changes, inspired by rowset itself, such as refresh of thw whole data.
+     * Deactivates this filter. It's similar to cancel filter, but it doesn't
+     * fire any events and doesn't perform any operations on rowset's set of
+     * rows. Such behavior is needed in cases of global changes, inspired by
+     * rowset itself, such as refresh of thw whole data.
      */
     public void deactivate() {
         filterApplied = false;

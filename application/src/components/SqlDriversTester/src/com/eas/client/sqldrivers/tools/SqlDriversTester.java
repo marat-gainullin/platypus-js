@@ -5,6 +5,7 @@
 package com.eas.client.sqldrivers.tools;
 
 import com.bearsoft.rowset.Rowset;
+import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
@@ -431,7 +432,6 @@ public class SqlDriversTester extends JFrame {
         pnWest_table.add(new JLabel("Параметры sql для table:"));
         pnWest_table.add(pnWest1_table);
 
-
         pnWest_table.add(new JLabel("Методы драйвера:"));
         pnWest_table.add(rb_getSql4EmptyTableCreation);
         pnWest_table.add(rb_getSql4CreateTableComment);
@@ -459,7 +459,6 @@ public class SqlDriversTester extends JFrame {
 
         JPanel pnWest_field = new JPanel(new VerticalFlowLayout(0, 0, 0, true, false));
         JPanel pnWest1_field = new JPanel(new GridLayout(3, 3, 10, 0));
-
 
         pnWest1_field.add(new JLabel("схема"));
         pnWest1_field.add(fldSchema_field);
@@ -575,7 +574,6 @@ public class SqlDriversTester extends JFrame {
         pnWest2_field.add(new JLabel(""));
         pnWest2_field.add(new JLabel(""));
 
-
         pnWest_field.add(new JLabel("Параметры sql для field:"));
         pnWest_field.add(pnWest1_field);
         pnWest_field.add(pnWest2_field);
@@ -596,7 +594,6 @@ public class SqlDriversTester extends JFrame {
         buttonGroup_field.add(rb_getSql4CreateColumnComment);
         buttonGroup_field.add(rb_getSql4CreateField);
 
-
         JPanel pnSouth_field = new JPanel();
         pnSouth_field.add(btnRun_field);
 
@@ -608,7 +605,6 @@ public class SqlDriversTester extends JFrame {
 
         pnMain_field.add(spCenterH_field, BorderLayout.CENTER);
         pnMain_field.add(pnSouth_field, BorderLayout.SOUTH);
-
 
         //--- панель тестирования  commentDS *************
         JPanel pnMain_commentDS = new JPanel(new BorderLayout());
@@ -708,7 +704,6 @@ public class SqlDriversTester extends JFrame {
         pnWest_index.add(new JLabel("Параметры sql для index:"));
         pnWest_index.add(pnWest1_index);
 
-
         pnWest_index.add(new JLabel("Методы драйвера:"));
         pnWest_index.add(rb_getSql4CreateIndex);
         pnWest_index.add(rb_getSql4DropIndex);
@@ -728,7 +723,6 @@ public class SqlDriversTester extends JFrame {
         JPanel pnSouth_index = new JPanel();
         pnSouth_index.add(btnRun_index);
         pnMain_index.add(pnSouth_index, BorderLayout.SOUTH);
-
 
         //--- панель тестирования  PKey *************
         JPanel pnMain_pk = new JPanel(new BorderLayout());
@@ -763,7 +757,6 @@ public class SqlDriversTester extends JFrame {
         pnWest_pk.add(new JLabel("Параметры sql для PKey:"));
         pnWest_pk.add(pnWest1_pk);
 
-
         pnWest_pk.add(new JLabel("Методы драйвера:"));
         pnWest_pk.add(rb_getSql4CreatePkConstraint);
         pnWest_pk.add(rb_getSql4DropPkConstraint);
@@ -789,12 +782,10 @@ public class SqlDriversTester extends JFrame {
         JPanel pnWest_fk = new JPanel(new VerticalFlowLayout(0, 0, 0, true, false));
         JPanel pnWest1_fk = new JPanel(new GridLayout(9, 4));
 
-
         pnWest1_fk.add(new JLabel(""));
         pnWest1_fk.add(new JLabel("FK"));
         pnWest1_fk.add(new JLabel("Referee"));
         pnWest1_fk.add(new JLabel(""));
-
 
         pnWest1_fk.add(new JLabel("схема"));
         pnWest1_fk.add(fldSchema_fk);
@@ -847,7 +838,6 @@ public class SqlDriversTester extends JFrame {
         pnWest_fk.add(new JLabel("Параметры sql для FKey:"));
         pnWest_fk.add(pnWest1_fk);
 
-
         pnWest_fk.add(new JLabel("Методы драйвера:"));
         pnWest_fk.add(rb_getSql4CreateFkConstraint);
         pnWest_fk.add(rb_getSql4CreateFkConstraint2);
@@ -873,7 +863,6 @@ public class SqlDriversTester extends JFrame {
         //--- панель тестирования userssql *************
         JPanel pnMain_user = new JPanel(new BorderLayout());
 
-
         JSplitPane spCenter1_user = new JSplitPane(JSplitPane.VERTICAL_SPLIT, new JScrollPane(textLog_user), new JScrollPane(table_user));
         JSplitPane spCenter2_user = new JSplitPane(JSplitPane.VERTICAL_SPLIT, new JScrollPane(textSql_user), spCenter1_user);
         spCenter1_user.setDividerLocation(100);
@@ -886,9 +875,7 @@ public class SqlDriversTester extends JFrame {
         pnSouth_user.add(btnRun_user);
         pnSouth_user.add(btnSelect_user);
 
-
         pnMain_user.add(pnSouth_user, BorderLayout.SOUTH);
-
 
         //--- панель getTypeInfo *************
         JPanel pnMain_typeinfo = new JPanel(new BorderLayout());
@@ -900,7 +887,6 @@ public class SqlDriversTester extends JFrame {
         pnSouth_typeinfo.add(btnMD_typeinfo);
         pnMain_typeinfo.add(pnSouth_typeinfo, BorderLayout.SOUTH);
 
-
         //--- панель getSelectInfo *************
         JPanel pnMain_selectinfo = new JPanel(new BorderLayout());
 
@@ -911,7 +897,6 @@ public class SqlDriversTester extends JFrame {
         pnSouth_selectinfo.add(btnMD_selectinfo);
         pnMain_selectinfo.add(pnSouth_selectinfo, BorderLayout.SOUTH);
         pnMain_selectinfo.add(new JScrollPane(textSql_selectinfo), BorderLayout.NORTH);
-
 
         //--- общая часть ---
         tabbedPane.addTab("connection", pnMain_connect);
@@ -978,11 +963,8 @@ public class SqlDriversTester extends JFrame {
         rb_getSql4DropFkConstraint.addActionListener(clickAction);
         btnRun_fk.addActionListener(clickAction);
 
-
         btnRun_user.addActionListener(clickAction);
         btnSelect_user.addActionListener(clickAction);
-
-
 
         rb2_getSql4SchemasEnumeration.addActionListener(clickAction);
         rb2_getSql4TableColumns.addActionListener(clickAction);
@@ -1064,12 +1046,12 @@ public class SqlDriversTester extends JFrame {
             ResultSet rsJDBC = null;
             try {
                 textLog.append(sqls[0] + "\nexecuteQuery: ");
-                long time= System.currentTimeMillis();
+                long time = System.currentTimeMillis();
                 statementJDBC = connectJDBC.createStatement();
                 rsJDBC = statementJDBC.executeQuery(sqls[0]);
                 table.setModel(new JDBCModel(rsJDBC));
                 textLog.append("Ok!!!");
-                textLog.append("  Time: "+((double)(System.currentTimeMillis()-time))/1000+" s  Rows: "+table.getRowCount()+"\n");
+                textLog.append("  Time: " + ((double) (System.currentTimeMillis() - time)) / 1000 + " s  Rows: " + table.getRowCount() + "\n");
             } catch (SQLException ex) {
                 textLog.append("Error !!!\nException: " + ex + "\n\n");
                 Logger.getLogger(SqlDriversTester.class.getName()).log(Level.SEVERE, null, ex);
@@ -1086,7 +1068,7 @@ public class SqlDriversTester extends JFrame {
                     try {
                         statementJDBC.close();
                     } catch (SQLException ex) {
-                        textLog.append( "Error !!!\nException: " + ex + "\n\n");
+                        textLog.append("Error !!!\nException: " + ex + "\n\n");
                         Logger.getLogger(SqlDriversTester.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
@@ -1146,18 +1128,20 @@ public class SqlDriversTester extends JFrame {
                 for (String s : sqls) {
                     textLog.append(s);
                     textLog.append("\nExecute: ");
-                    long time= System.currentTimeMillis();
+                    long time = System.currentTimeMillis();
                     if (tabIndex == 4) {
                         SqlCompiledQuery q = new SqlCompiledQuery(client, null, s);
                         q.enqueueUpdate();
-                        client.commit(null);
+                        Map<String, List<Change>> changeLogs = new HashMap<>();
+                        changeLogs.put(null, q.getFlow().getChangeLog());
+                        client.commit(changeLogs);
                     } else {
                         try (Statement statementJDBC = connectJDBC.createStatement()) {
                             statementJDBC.execute(s);
                         }
                     }
                     textLog.append("Ok!!!");
-                    textLog.append("  Time: "+((double)(System.currentTimeMillis()-time))/1000+" s\n");
+                    textLog.append("  Time: " + ((double) (System.currentTimeMillis() - time)) / 1000 + " s\n");
                 }
             } catch (Exception ex) {
                 textLog.append("Error !!!\nException: " + ex + "\n\n");
@@ -1183,10 +1167,6 @@ public class SqlDriversTester extends JFrame {
         String commentTable = "";
 
         Set<String> tablesSet = new HashSet();
-
-
-
-
 
         switch (tabIndex) {
             case 2:
@@ -1258,7 +1238,6 @@ public class SqlDriversTester extends JFrame {
                 }
 
                 break;
-
 
         }
         if (connectJDBC != null && platypusDriver != null) {
@@ -1340,7 +1319,6 @@ public class SqlDriversTester extends JFrame {
                 sqls = new String[]{platypusDriver.getSql4DropPkConstraint(schemaName, pkSpec)};
             }
 
-
         }
         // --- Platypus ---
         if (driver != null) {
@@ -1406,7 +1384,6 @@ public class SqlDriversTester extends JFrame {
             if (source == rb2_getSql4TablePrimaryKeys) {
                 sqls = new String[]{driver.getSql4TablePrimaryKeys(schemaName, tablesSet)};
             }
-
 
         }
 
@@ -1553,7 +1530,6 @@ public class SqlDriversTester extends JFrame {
             if (source == btnMD_selectinfo) {
                 runSelect(tabIndex);
             }
-
 
             // --- Platypus ---
             if (driver != null) {
@@ -1745,7 +1721,6 @@ public class SqlDriversTester extends JFrame {
                 Rowset rowsetTablesList = query.executeQuery();
                 Fields fieldsTable = rowsetTablesList.getFields();
 
-
                 if (rowsetTablesList.first()) {
                     int tableColIndex = fieldsTable.find(ClientConstants.JDBCCOLS_TABLE_NAME);
                     int tableTypeColIndex = fieldsTable.find(ClientConstants.JDBCPKS_TABLE_TYPE_FIELD_NAME);
@@ -1772,7 +1747,6 @@ public class SqlDriversTester extends JFrame {
         } else {
             textLog.append("\nError !!! Нет Platypus-клиента\n\n");
         }
-
 
     }
 
@@ -1903,7 +1877,6 @@ public class SqlDriversTester extends JFrame {
         }
         return null;
 
-
     }
 
     /**
@@ -1982,6 +1955,7 @@ public class SqlDriversTester extends JFrame {
         }
         return null;
     }
+
     private void logout() {
         if (client != null) {
             client.shutdown();
@@ -1994,7 +1968,6 @@ public class SqlDriversTester extends JFrame {
             }
         }
     }
-
 
     /**
      * @param args the command line arguments

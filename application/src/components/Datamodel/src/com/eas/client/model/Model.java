@@ -17,7 +17,6 @@ import com.eas.client.Client;
 import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.queries.Query;
 import com.eas.script.NativeJavaHostObject;
-import com.eas.script.ScriptFunction;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -60,7 +59,6 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
     protected Scriptable scriptThis;
     protected NativeJavaHostObject published;
     protected boolean runtime;
-    protected boolean commitable = true;
     protected int ajustingCounter;
     protected Runnable resolver;
     protected GuiCallback guiCallback;
@@ -463,23 +461,6 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
 
     public boolean isRuntime() {
         return runtime;
-    }
-
-    private static final String COMMITABLE_JSDOC = ""
-            + "/**\n"
-            + "* Determines if the model is auto commitable by <code>save</code> method.\n"
-            + "* @see save commit.\n"
-            + "*/";
-
-    @ScriptFunction(jsDoc = COMMITABLE_JSDOC)
-    public boolean isCommitable() {
-        return commitable;
-    }
-
-    public void setCommitable(boolean aValue) {
-        boolean oldValue = commitable;
-        commitable = aValue;
-        changeSupport.firePropertyChange("commitable", oldValue, commitable);
     }
 
     public abstract boolean isTypeSupported(int type) throws Exception;

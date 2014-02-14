@@ -4,6 +4,7 @@
  */
 package com.eas.metadata;
 
+import com.bearsoft.rowset.changes.Change;
 import com.eas.metadata.testdefine.DbTestDefine;
 import com.eas.metadata.testdefine.DbTestDefine.Database;
 import com.eas.metadata.dbdefines.TableDefine;
@@ -58,17 +59,15 @@ public class MetadataSynchronizerTest {
         new SourceDbSetting(new DbConnection("jdbc:oracle:thin:@research.office.altsoft.biz:1521/DBALT", "test1", "test1", "test1"), Database.ORACLE, new OracleTestDefine()),
         new SourceDbSetting(new DbConnection("jdbc:postgresql://192.168.10.1:5432/Trans", "test1", "test1", "test1"), Database.POSTGRESQL, new PostgreTestDefine()),
         new SourceDbSetting(new DbConnection("jdbc:mysql://192.168.10.205:3306/test1", "test1", "test1", "test1"), Database.MYSQL, new MySqlTestDefine()),
-//        new SourceDbSetting(new DbConnection("jdbc:db2://192.168.10.154:50000/test", "test1", "dba", "masterkey"), Database.DB2, new Db2TestDefine()),
-        new SourceDbSetting(new DbConnection("jdbc:h2:tcp://localhost/~/test", "test1", "test1", "test1"), Database.H2, new H2TestDefine()),
-//        new SourceDbSetting(new DbConnection("jdbc:jtds:sqlserver://192.168.10.154:1433/test1", "dbo", "test1", "1test1"), Database.MSSQL, new MsSqlTestDefine())
+        //        new SourceDbSetting(new DbConnection("jdbc:db2://192.168.10.154:50000/test", "test1", "dba", "masterkey"), Database.DB2, new Db2TestDefine()),
+        new SourceDbSetting(new DbConnection("jdbc:h2:tcp://localhost/~/test", "test1", "test1", "test1"), Database.H2, new H2TestDefine()), //        new SourceDbSetting(new DbConnection("jdbc:jtds:sqlserver://192.168.10.154:1433/test1", "dbo", "test1", "1test1"), Database.MSSQL, new MsSqlTestDefine())
     };
     private DestinationDbSetting[] destinationDbSetting = {
         new DestinationDbSetting(new DbConnection("jdbc:oracle:thin:@research.office.altsoft.biz:1521/DBALT", "test2", "test2", "test2"), Database.ORACLE),
         new DestinationDbSetting(new DbConnection("jdbc:postgresql://192.168.10.1:5432/Trans", "test2", "test2", "test2"), Database.POSTGRESQL),
         new DestinationDbSetting(new DbConnection("jdbc:mysql://192.168.10.205:3306/test2", "test2", "test2", "test2"), Database.MYSQL),
-//        new DestinationDbSetting(new DbConnection("jdbc:db2://192.168.10.154:50000/test", "test2", "dba", "masterkey"), Database.DB2),
-        new DestinationDbSetting(new DbConnection("jdbc:h2:tcp://localhost/~/test", "test2", "test2", "test2"), Database.H2),
-//        new DestinationDbSetting(new DbConnection("jdbc:jtds:sqlserver://192.168.10.154:1433/test2", "dbo", "test2", "2test2"), Database.MSSQL)
+        //        new DestinationDbSetting(new DbConnection("jdbc:db2://192.168.10.154:50000/test", "test2", "dba", "masterkey"), Database.DB2),
+        new DestinationDbSetting(new DbConnection("jdbc:h2:tcp://localhost/~/test", "test2", "test2", "test2"), Database.H2), //        new DestinationDbSetting(new DbConnection("jdbc:jtds:sqlserver://192.168.10.154:1433/test2", "dbo", "test2", "2test2"), Database.MSSQL)
     };
 
     @BeforeClass
@@ -1026,7 +1025,7 @@ public class MetadataSynchronizerTest {
 
     private void clearSchema(DbConnection aDbConnection) throws Exception {
         MetadataSynchronizer mds = new MetadataSynchronizer();
-        try(DatabasesClientWithResource resource = createClient(aDbConnection)){
+        try (DatabasesClientWithResource resource = createClient(aDbConnection)) {
             DbClient client = resource.getClient();
             DBStructure databaseStructure = mds.readDBStructure(aDbConnection.getUrl(), aDbConnection.getSchema(), aDbConnection.getUser(), aDbConnection.getPassword());
             assertNotNull(databaseStructure);
@@ -1103,9 +1102,11 @@ public class MetadataSynchronizerTest {
         SqlCompiledQuery compiledSql = new SqlCompiledQuery(aClient, null, aSql);
         compiledSql.enqueueUpdate();
         try {
-            aClient.commit(null);
+            Map<String, List<Change>> changeLogs = new HashMap<>();
+            changeLogs.put(null, compiledSql.getFlow().getChangeLog());
+            aClient.commit(changeLogs);
         } catch (Exception e) {
-            aClient.rollback(null);
+            aClient.rollback();
             throw e;
         }
     }

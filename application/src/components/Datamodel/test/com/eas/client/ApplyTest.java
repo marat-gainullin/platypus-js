@@ -5,6 +5,8 @@
 package com.eas.client;
 
 import com.bearsoft.rowset.Rowset;
+import com.bearsoft.rowset.changes.Change;
+import com.bearsoft.rowset.dataflow.DelegatingFlowProvider;
 import com.bearsoft.rowset.dataflow.FlowProvider;
 import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.bearsoft.rowset.metadata.Fields;
@@ -12,9 +14,12 @@ import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.bearsoft.rowset.utils.RowsetUtils;
 import com.eas.client.model.BaseTest;
-import com.eas.client.resourcepool.GeneralResourceProvider;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import static org.junit.Assert.*;
 import org.junit.Test;
@@ -35,6 +40,10 @@ public class ApplyTest extends BaseTest {
     public void applyCRUDTest() throws Exception {
         System.out.println("applyCRUDTest");
         try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+            final List<Change> commonLog = new ArrayList<>();
+            Map<String, List<Change>> changeLogs = new HashMap<>();
+            changeLogs.put(null, commonLog);
+
             DatabasesClient client = resource.getClient();
             Parameters params = new Parameters();
             Parameter param1 = params.createNewField();
@@ -59,73 +68,81 @@ public class ApplyTest extends BaseTest {
                 param1.setValue(paramDataValue);
                 param2.setValue(paramDataValue);
 
-                Rowset rs = new Rowset(flow);
-                rs.refresh(params);
-                assertTrue(rs.size() >= 1);
+                Rowset rowset = new Rowset(flow);
+                rowset.setFlowProvider(new DelegatingFlowProvider(rowset.getFlowProvider()) {
 
-                int pkColIndex = rs.getFields().find("ACCESS_LIST_ID");
-                rs.getFields().get(pkColIndex).setPk(true);
+                    @Override
+                    public List<Change> getChangeLog() {
+                        return commonLog;
+                    }
+
+                });
+                rowset.refresh(params);
+                assertTrue(rowset.size() >= 1);
+
+                int pkColIndex = rowset.getFields().find("ACCESS_LIST_ID");
+                rowset.getFields().get(pkColIndex).setPk(true);
                 Integer newPkValue = 1;
 
-                rs.insert();
-                rs.updateObject(pkColIndex, newPkValue);
-                rs.updateObject(rs.getFields().find("KEY_WORD"), paramDataValue);
+                rowset.insert();
+                rowset.updateObject(pkColIndex, newPkValue);
+                rowset.updateObject(rowset.getFields().find("KEY_WORD"), paramDataValue);
 
-                int oldCursorPos = rs.getCursorPos();
-                client.commit(null);
-                assertTrue(client.getChangeLog(null, null).isEmpty());
-                assertEquals(oldCursorPos, rs.getCursorPos());
+                int oldCursorPos = rowset.getCursorPos();
+                client.commit(changeLogs);
+                assertTrue(commonLog.isEmpty());
+                assertEquals(oldCursorPos, rowset.getCursorPos());
 
-                Fields fields = rs.getFields();
-                rs.refresh(params);
-                assertTrue(rs.size() == 2);
-                Fields fields1 = rs.getFields();
+                Fields fields = rowset.getFields();
+                rowset.refresh(params);
+                assertTrue(rowset.size() == 2);
+                Fields fields1 = rowset.getFields();
                 assertSame(fields1, fields);
 
-                rs.beforeFirst();
-                while (rs.next()) {
-                    Object oPkValue = rs.getObject(pkColIndex);
+                rowset.beforeFirst();
+                while (rowset.next()) {
+                    Object oPkValue = rowset.getObject(pkColIndex);
                     assertNotNull(oPkValue);
                     assertTrue(oPkValue instanceof Number);
                     if (RowsetUtils.number2BigDecimal((Number) oPkValue).equals(RowsetUtils.number2BigDecimal(newPkValue))) {
-                        rs.updateObject(rs.getFields().find("KEY_WORD"), paramNullValue);
+                        rowset.updateObject(rowset.getFields().find("KEY_WORD"), paramNullValue);
                         break;
                     }
                 }
-                oldCursorPos = rs.getCursorPos();
-                client.commit(null);
-                assertTrue(client.getChangeLog(null, null).isEmpty());
-                assertEquals(oldCursorPos, rs.getCursorPos());
+                oldCursorPos = rowset.getCursorPos();
+                client.commit(changeLogs);
+                assertTrue(commonLog.isEmpty());
+                assertEquals(oldCursorPos, rowset.getCursorPos());
 
-                rs.refresh(params);
-                assertTrue(rs.size() == 1);
+                rowset.refresh(params);
+                assertTrue(rowset.size() == 1);
 
                 param1.setValue(paramNullValue);
                 param2.setValue(paramNullValue);
 
-                rs.refresh(params);
-                assertTrue(rs.size() == 2);
-                rs.beforeFirst();
-                while (rs.next()) {
-                    Object oPkValue = rs.getObject(pkColIndex);
+                rowset.refresh(params);
+                assertTrue(rowset.size() == 2);
+                rowset.beforeFirst();
+                while (rowset.next()) {
+                    Object oPkValue = rowset.getObject(pkColIndex);
                     assertNotNull(oPkValue);
                     assertTrue(oPkValue instanceof Number);
                     if (RowsetUtils.number2BigDecimal((Number) oPkValue).equals(RowsetUtils.number2BigDecimal(newPkValue))) {
-                        rs.delete();
+                        rowset.delete();
                         break;
                     }
                 }
-                oldCursorPos = rs.getCursorPos();
-                client.commit(null);
-                assertTrue(client.getChangeLog(null, null).isEmpty());
-                assertEquals(oldCursorPos, rs.getCursorPos());
-                rs.refresh(params);
-                assertTrue(rs.size() == 1);
+                oldCursorPos = rowset.getCursorPos();
+                client.commit(changeLogs);
+                assertTrue(commonLog.isEmpty());
+                assertEquals(oldCursorPos, rowset.getCursorPos());
+                rowset.refresh(params);
+                assertTrue(rowset.size() == 1);
                 param1.setValue(paramDataValue);
                 param2.setValue(paramDataValue);
 
-                rs.refresh(params);
-                assertTrue(rs.size() == 1);
+                rowset.refresh(params);
+                assertTrue(rowset.size() == 1);
             }
         }
     }
@@ -134,6 +151,10 @@ public class ApplyTest extends BaseTest {
     public void applyNullsTest() throws Exception {
         System.out.println("applyNullsTest");
         try (DatabasesClientWithResource resource = BaseTest.initDevelopTestClient()) {
+            final List<Change> commonLog = new ArrayList<>();
+            Map<String, List<Change>> changeLogs = new HashMap<>();
+            changeLogs.put(null, commonLog);
+
             DatabasesClient client = resource.getClient();
             Parameters params = new Parameters();
             Parameter param1 = params.createNewField();
@@ -156,42 +177,50 @@ public class ApplyTest extends BaseTest {
                 param2.setTypeInfo(typeInfo);
                 param2.setValue(paramNullValue);
 
-                Rowset rs = new Rowset(flow);
-                rs.refresh(params);
-                assertTrue(rs.size() >= 1);
+                Rowset rowset = new Rowset(flow);
+                rowset.setFlowProvider(new DelegatingFlowProvider(rowset.getFlowProvider()) {
 
-                int pkColIndex = rs.getFields().find("ACCESS_LIST_ID");
-                rs.getFields().get(pkColIndex).setPk(true);
+                    @Override
+                    public List<Change> getChangeLog() {
+                        return commonLog;
+                    }
+
+                });
+                rowset.refresh(params);
+                assertTrue(rowset.size() >= 1);
+
+                int pkColIndex = rowset.getFields().find("ACCESS_LIST_ID");
+                rowset.getFields().get(pkColIndex).setPk(true);
                 Integer newPkValue = 1;
 
-                rs.insert();
-                rs.updateObject(pkColIndex, newPkValue);
-                rs.updateObject(rs.getFields().find("KEY_WORD"), paramNullValue);
+                rowset.insert();
+                rowset.updateObject(pkColIndex, newPkValue);
+                rowset.updateObject(rowset.getFields().find("KEY_WORD"), paramNullValue);
 
-                client.commit(null);
-                assertTrue(client.getChangeLog(null, null).isEmpty());
+                client.commit(changeLogs);
+                assertTrue(commonLog.isEmpty());
 
-                Fields fields = rs.getFields();
-                rs.refresh(params);
-                assertTrue(rs.size() == 2);
-                Fields fields1 = rs.getFields();
+                Fields fields = rowset.getFields();
+                rowset.refresh(params);
+                assertTrue(rowset.size() == 2);
+                Fields fields1 = rowset.getFields();
                 assertSame(fields1, fields);
 
-                rs.beforeFirst();
-                while (rs.next()) {
-                    Object oPkValue = rs.getObject(pkColIndex);
+                rowset.beforeFirst();
+                while (rowset.next()) {
+                    Object oPkValue = rowset.getObject(pkColIndex);
                     assertNotNull(oPkValue);
                     assertTrue(oPkValue instanceof Number);
                     if (RowsetUtils.number2BigDecimal((Number) oPkValue).equals(RowsetUtils.number2BigDecimal(newPkValue))) {
-                        rs.delete();
+                        rowset.delete();
                         break;
                     }
                 }
-                client.commit(null);
-                assertTrue(client.getChangeLog(null, null).isEmpty());
+                client.commit(changeLogs);
+                assertTrue(commonLog.isEmpty());
 
-                rs.refresh(params);
-                assertTrue(rs.size() == 1);
+                rowset.refresh(params);
+                assertTrue(rowset.size() == 1);
             }
         }
     }

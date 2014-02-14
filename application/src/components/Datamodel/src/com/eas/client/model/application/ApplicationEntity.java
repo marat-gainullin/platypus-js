@@ -47,6 +47,9 @@ import org.mozilla.javascript.ScriptableObject;
 /**
  *
  * @author mg
+ * @param <M>
+ * @param <Q>
+ * @param <E>
  */
 public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, Q extends Query<?>, E extends ApplicationEntity<M, Q, E>> extends Entity<M, Q, E> implements RowsetListener {
 

@@ -306,8 +306,10 @@ public class SqlQuery extends Query<DbClient> {
         return compile().executeQuery();
     }
 
+    /*
     @Override
     public void enqueueUpdate() throws Exception {
         compile().enqueueUpdate();
     }
+    */
 }

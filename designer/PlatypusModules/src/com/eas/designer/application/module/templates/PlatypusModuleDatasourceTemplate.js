@@ -36,10 +36,9 @@ function ${appElementName}(){
     /**
      * Method invoked by platypus runtime in data applying purposes.
      * @param aLog Array of changes - log of changes made by clients or server side data driven code to be applied.
-     * @param aSession User's session id
      */
-    this.apply = function(aLog, aSession) {
-        Logger.info("${appElementName}. aLog.length: " + aLog.length + "; aSession: " + aSession);
+    this.apply = function(aLog) {
+        Logger.info("${appElementName}. aLog.length: " + aLog.length + ";");
         aLog.forEach(function(aChange) {
             aChange.consume();
         });

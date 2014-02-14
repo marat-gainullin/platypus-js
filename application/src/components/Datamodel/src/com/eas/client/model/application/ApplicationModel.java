@@ -335,33 +335,27 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
 
     @ScriptFunction(jsDoc = SAVE_JSDOC, params = {"callback"})
     public boolean save(final Function aCallback) throws Exception {
-        if (commitable) {
-            try {
-                commit();
-                saved();
-                if (aCallback != null) {
-                    ScriptUtils.inContext(new ScriptAction() {
-                        @Override
-                        public Object run(Context cx) throws Exception {
-                            aCallback.call(cx, scriptThis, scriptThis, new Object[]{});
-                            return null;
-                        }
-                    });
-                }
-            } catch (Exception ex) {
-                rolledback();
-                throw ex;
+        try {
+            commit();
+            saved();
+            if (aCallback != null) {
+                ScriptUtils.inContext(new ScriptAction() {
+                    @Override
+                    public Object run(Context cx) throws Exception {
+                        aCallback.call(cx, scriptThis, scriptThis, new Object[]{});
+                        return null;
+                    }
+                });
             }
+        } catch (Exception ex) {
+            rolledback();
+            throw ex;
         }
         return true;
     }
-    private static final String COMMIT_JSDOC = ""
-            + "/**\n"
-            + "* Commits model data changes.\n"
-            + "*/";
 
-    @ScriptFunction(jsDoc = COMMIT_JSDOC)
     public abstract int commit() throws Exception;
+
     private static final String REVERT_JSDOC = ""
             + "/**\n"
             + "* Reverts model data changes.\n"
@@ -371,12 +365,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
 
     @ScriptFunction(jsDoc = REVERT_JSDOC)
     public abstract void revert() throws Exception;
-    private static final String SAVED_JSDOC = ""
-            + "/**\n"
-            + "* Notifies the model what it is saved.\n"
-            + "*/";
 
-    @ScriptFunction(jsDoc = SAVED_JSDOC)
     public abstract void saved() throws Exception;
 
     public abstract void rolledback() throws Exception;

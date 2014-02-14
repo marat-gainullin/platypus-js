@@ -14,18 +14,15 @@ import com.eas.server.SessionRequestHandler;
  *
  * @author pk
  */
-public class LogoutRequestHandler extends SessionRequestHandler<LogoutRequest>
-{
-    public LogoutRequestHandler(PlatypusServerCore server, Session session, LogoutRequest rq)
-    {
+public class LogoutRequestHandler extends SessionRequestHandler<LogoutRequest> {
+
+    public LogoutRequestHandler(PlatypusServerCore server, Session session, LogoutRequest rq) {
         super(server, session, rq);
     }
 
     @Override
-    public Response handle2() throws Exception
-    {
+    public Response handle2() throws Exception {
         getServerCore().getSessionManager().remove(getSession().getId());
-        getServerCore().getDatabasesClient().removeChangeLog(getSession().getId());
         return new LogoutRequest.Response(getRequest().getID());
     }
 }

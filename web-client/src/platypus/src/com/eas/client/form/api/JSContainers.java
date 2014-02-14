@@ -197,7 +197,7 @@ public class JSContainers {
 				return @com.eas.client.gxtcontrols.Publisher::checkPublishedComponent(Ljava/lang/Object;)(widget);
 			};
 			
-			if(arguments.length<=4)
+			if(arguments.length <= 4)
 			{
 				if (aRows == undefined) {
 					throw "aRows argument is required!"
@@ -615,7 +615,7 @@ public class JSContainers {
 
 		// ***************************************************
 		$wnd.PopupMenu = function() {
-			var aComponent = arguments.length>0?arguments[0]:null;
+			var aComponent = arguments.length > 0 ? arguments[0] : null;
 			if (!(this instanceof $wnd.PopupMenu)) {
 				throw  ' use  "new PopupMenu()" !';
 			}
@@ -633,7 +633,7 @@ public class JSContainers {
 
 		// ***************************************************
 		$wnd.AnchorsPane = function() {
-			var aComponent = arguments.length>0?arguments[0]:null;
+			var aComponent = arguments.length > 0 ? arguments[0] : null;
 			if (!(this instanceof $wnd.AnchorsPane)) {
 				throw  ' use  "new AnchorsPane()" !';
 			}
@@ -675,7 +675,7 @@ public class JSContainers {
 
 		// ***************************************************
 		$wnd.AbsolutePane = function() {
-			var aComponent = arguments.length>0?arguments[0]:null;
+			var aComponent = arguments.length > 0 ? arguments[0] : null;
 			if (!(this instanceof $wnd.AbsolutePane)) {
 				throw  ' use  "new AbsolutePane()" !';
 			}
@@ -908,7 +908,7 @@ public class JSContainers {
 		
 		// **************************************************************************
 		$wnd.ButtonGroup = function () {
-			var aComponent = arguments.length>0?arguments[0]:null;
+			var aComponent = arguments.length > 0 ? arguments[0] : null;
 			
 			if (!(this instanceof $wnd.ButtonGroup)) {
 				throw  ' use  "new ButtonGroup()" !';
@@ -931,6 +931,25 @@ public class JSContainers {
 			published.clear = function() {
 				aComponent.@com.eas.client.gxtcontrols.wrappers.component.PlatypusButtonGroup::clear()();				
 			}
+			published.child = function(aIndex) {
+				var comp = aComponent.@com.eas.client.gxtcontrols.wrappers.component.PlatypusButtonGroup::getChild(I)(aIndex);
+			    return @com.eas.client.gxtcontrols.Publisher::checkPublishedComponent(Ljava/lang/Object;)(comp);					
+			};
+			Object.defineProperty(published, "children", {
+				get : function() {
+					var ch = [];
+					for(var i = 0; i < published.count; i++)
+						ch[ch.length] = published.child(i);
+					return ch;
+				}
+			});
+			Object.defineProperty(published, "count", {
+				get : function() {
+					return aComponent.@com.eas.client.gxtcontrols.wrappers.component.PlatypusButtonGroup::size()();
+				}
+			});
+			
+			aComponent.@com.eas.client.gxtcontrols.wrappers.component.PlatypusButtonGroup::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
 			return published;
 		}
 
