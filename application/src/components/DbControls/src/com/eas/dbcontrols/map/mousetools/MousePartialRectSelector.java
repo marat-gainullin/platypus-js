@@ -5,7 +5,7 @@
 
 package com.eas.dbcontrols.map.mousetools;
 
-import com.eas.client.geo.GisUtilities;
+import com.eas.util.gis.GeometryUtils;
 import com.eas.client.geo.selectiondatastore.SelectionEntry;
 import com.eas.dbcontrols.map.DbMap;
 import java.awt.geom.Point2D;
@@ -27,7 +27,7 @@ public class MousePartialRectSelector extends MouseRectSelector{
     protected boolean isBeginDragValid() throws Exception {
         Point2D.Double cartesianPt = pane.awtScreen2Cartesian(mouseDown);
         Point2D.Double geoPt = pane.cartesian2Geo(cartesianPt);
-        return !map.selectedPointHitted(GisUtilities.createPoint(geoPt));
+        return !map.selectedPointHitted(GeometryUtils.createPoint(geoPt));
     }
 
     @Override

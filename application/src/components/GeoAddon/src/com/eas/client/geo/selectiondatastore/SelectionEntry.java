@@ -6,6 +6,7 @@
 package com.eas.client.geo.selectiondatastore;
 
 import com.bearsoft.rowset.Row;
+import com.eas.util.gis.GeometryUtils;
 import com.eas.client.geo.GisUtilities;
 import com.eas.client.model.application.ApplicationEntity;
 import com.vividsolutions.jts.geom.Coordinate;
@@ -49,7 +50,7 @@ public class SelectionEntry {
         geometryOfInterestIndex = aGeometryOfInterestIndex;
         coordinateOfInterestIndex = aCoordinateOfInterestIndex;
         holeOfInterestIndex = aHoleOfInterest;
-        viewShape = GisUtilities.createPoint(aCoordinate);
+        viewShape = GeometryUtils.createPoint(aCoordinate);
     }
 
     public Row getRow() {

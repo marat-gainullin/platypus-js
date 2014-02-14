@@ -6,7 +6,7 @@ package com.eas.dbcontrols.map.mousetools;
 
 import com.eas.client.controls.geopane.Cursors;
 import com.eas.client.controls.geopane.mousetools.MouseToolCapability;
-import com.eas.client.geo.GisUtilities;
+import com.eas.util.gis.GeometryUtils;
 import com.eas.client.geo.selectiondatastore.SelectionEntry;
 import com.eas.dbcontrols.map.DbMap;
 import java.awt.Cursor;
@@ -65,7 +65,7 @@ public class MouseCursorer extends MapTool {
             try {
                 Point2D.Double cartPt = map.getPane().awtScreen2Cartesian(aPoint);
                 Point2D.Double goePt = map.getPane().cartesian2Geo(cartPt);
-                com.vividsolutions.jts.geom.Point pt = GisUtilities.createPoint(goePt);
+                com.vividsolutions.jts.geom.Point pt = GeometryUtils.createPoint(goePt);
                 List<SelectionEntry> geoms = map.nonSelectableHit(pt);
                 if (geoms != null && geoms.size() > 0) {
                     String hintText = map.beforeToolTipShow(geoms.get(0).getRow(), geoms.get(0).getEntity());
@@ -91,8 +91,8 @@ public class MouseCursorer extends MapTool {
         } else if (mode == MouseTools.NAVIGATION) {
             Point2D.Double cartPt = map.getPane().awtScreen2Cartesian(e.getPoint());
             Point2D.Double goePt = map.getPane().cartesian2Geo(cartPt);
-            boolean shapeSelected = map.selectedGeometryHitted(GisUtilities.createPoint(goePt));
-            boolean pointSelected = map.selectedPointHitted(GisUtilities.createPoint(goePt));
+            boolean shapeSelected = map.selectedGeometryHitted(GeometryUtils.createPoint(goePt));
+            boolean pointSelected = map.selectedPointHitted(GeometryUtils.createPoint(goePt));
             if (shapeSelected || pointSelected) {
                 if (pointSelected) {
                     ensureCursor(Cursors.PAN_POINT);
@@ -105,8 +105,8 @@ public class MouseCursorer extends MapTool {
         } else if (mode == MouseTools.SELECTION) {
             Point2D.Double cartPt = map.getPane().awtScreen2Cartesian(e.getPoint());
             Point2D.Double goePt = map.getPane().cartesian2Geo(cartPt);
-            boolean shapeSelected = map.selectedGeometryHitted(GisUtilities.createPoint(goePt));
-            boolean pointSelected = map.selectedPointHitted(GisUtilities.createPoint(goePt));
+            boolean shapeSelected = map.selectedGeometryHitted(GeometryUtils.createPoint(goePt));
+            boolean pointSelected = map.selectedPointHitted(GeometryUtils.createPoint(goePt));
             if (shapeSelected || pointSelected) {
                 if (pointSelected) {
                     ensureCursor(Cursors.PAN_POINT);
@@ -122,7 +122,7 @@ public class MouseCursorer extends MapTool {
         } else if (mode == MouseTools.VERTICES_EDITING) {
             Point2D.Double cartPt = map.getPane().awtScreen2Cartesian(e.getPoint());
             Point2D.Double goePt = map.getPane().cartesian2Geo(cartPt);
-            boolean shapeSelected = map.selectedPointHitted(GisUtilities.createPoint(goePt));
+            boolean shapeSelected = map.selectedPointHitted(GeometryUtils.createPoint(goePt));
             if (shapeSelected) {
                 ensureCursor(Cursors.PAN_POINT);
             } else {

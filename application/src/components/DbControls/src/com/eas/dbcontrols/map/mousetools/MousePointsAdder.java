@@ -7,7 +7,7 @@ package com.eas.dbcontrols.map.mousetools;
 import com.bearsoft.rowset.Row;
 import com.eas.client.controls.geopane.mousetools.GeoPaneTool;
 import com.eas.client.controls.geopane.mousetools.MouseToolCapability;
-import com.eas.client.geo.GisUtilities;
+import com.eas.util.gis.GeometryUtils;
 import com.eas.client.geo.datastore.RowsFeatureSource;
 import com.eas.client.geo.selectiondatastore.SelectionEntry;
 import com.eas.client.model.application.ApplicationEntity;
@@ -74,7 +74,7 @@ public class MousePointsAdder extends MapTool {
         double distance = Double.MAX_VALUE;
         int centerIdx = -1;
         for (int c = 1; c < aCoordinates.length; c++) {
-            LineString ls = GisUtilities.createLineString(GisUtilities.createPoint(aCoordinates[c - 1]), GisUtilities.createPoint(aCoordinates[c]));
+            LineString ls = GeometryUtils.createLineString(GeometryUtils.createPoint(aCoordinates[c - 1]), GeometryUtils.createPoint(aCoordinates[c]));
             double ldistance = ls.distance(aPoint);
             if (ldistance < distance) {
                 distance = ldistance;
@@ -89,7 +89,7 @@ public class MousePointsAdder extends MapTool {
         try {
             Point2D.Double cartesianPt = pane.awtScreen2Cartesian(e.getPoint());
             Point2D.Double geoPt = pane.cartesian2Geo(cartesianPt);
-            Point point2Add = GisUtilities.createPoint(geoPt);
+            Point point2Add = GeometryUtils.createPoint(geoPt);
             if (SwingUtilities.isLeftMouseButton(e) && e.isControlDown()) {
                 if (map.getSelection().isEmpty()) {
                     selector.mouseClicked(e);
@@ -186,17 +186,17 @@ public class MousePointsAdder extends MapTool {
                             Geometry newGeom;
                             if (innerGeometry instanceof Polygon && ((Polygon) innerGeometry).getNumInteriorRing() > 0) {
                                 Polygon polygon = ((Polygon) innerGeometry);
-                                Geometry[] holes = GisUtilities.getPolygonHoles(polygon);
+                                Geometry[] holes = GeometryUtils.getPolygonHoles(polygon);
                                 Polygon shell;
                                 if (gHoleIdx > -1) {
-                                    holes[gHoleIdx] = GisUtilities.createPolygon(newCoordinates);
-                                    shell = GisUtilities.getPolygonShell(polygon);
+                                    holes[gHoleIdx] = GeometryUtils.createPolygon(newCoordinates);
+                                    shell = GeometryUtils.getPolygonShell(polygon);
                                 } else {
-                                    shell = GisUtilities.createPolygon(newCoordinates);
+                                    shell = GeometryUtils.createPolygon(newCoordinates);
                                 }
-                                newGeom = GisUtilities.createPolygonWithHoles(shell, holes);
+                                newGeom = GeometryUtils.createPolygonWithHoles(shell, holes);
                             } else {
-                                newGeom = GisUtilities.constructGeometry(newCoordinates, innerGeometry.getClass());
+                                newGeom = GeometryUtils.constructGeometry(newCoordinates, innerGeometry.getClass());
                             }
                             gData.add(newGeom);
                         } else {
@@ -213,8 +213,8 @@ public class MousePointsAdder extends MapTool {
 
                     // new geometries construction and assigning
                     Row row2Update = rows.get(featureId2InsertTo);
-                    assert GisUtilities.isValidGeometryData(gData, closestGeometry.getClass());
-                    row2Update.setColumnObject(rowsColIndexes.get(featureId2InsertTo), GisUtilities.constructGeometry(gData, closestGeometry.getClass(), closestGeometry.getSRID()));
+                    assert GeometryUtils.isValidGeometryData(gData, closestGeometry.getClass());
+                    row2Update.setColumnObject(rowsColIndexes.get(featureId2InsertTo), GeometryUtils.constructGeometry(gData, closestGeometry.getClass(), closestGeometry.getSRID()));
                     features2Entities.get(featureId2InsertTo).getRowset().setModified(true);
                     map.getSelection().clear();
                     map.getSelection().getSelection().add(new SelectionEntry(features2Entities.get(featureId2InsertTo), rows.get(featureId2InsertTo), featureId2InsertTo, rowsColIndexes.get(featureId2InsertTo), closestGeometry.getNumGeometries() > 1 ? gIdx : -1, cIdx, gHoleIdx, point2Add.getCoordinate()));

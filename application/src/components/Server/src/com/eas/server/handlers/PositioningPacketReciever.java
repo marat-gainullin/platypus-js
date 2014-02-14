@@ -10,8 +10,9 @@ import com.eas.sensors.positioning.DevicesCommunication.DeviceRequest;
 import com.eas.sensors.positioning.PacketReciever;
 import com.eas.sensors.positioning.PositioningIoHandler;
 import com.eas.sensors.positioning.PositioningPacket;
+import com.eas.sensors.retranslate.RetranslateIoHandler;
 import com.eas.sensors.retranslate.RetranslatePacketFactory;
-import com.eas.sensors.retranslate.http.HttpPushEncoder;
+import com.eas.sensors.retranslate.http.push.HttpPushEncoder;
 import com.eas.server.PlatypusServerCore;
 import java.net.IDN;
 import java.net.InetSocketAddress;
@@ -37,7 +38,7 @@ import org.apache.mina.transport.socket.nio.NioSocketConnector;
 public class PositioningPacketReciever implements PacketReciever {
 
     public static final String RECIEVER_METHOD_NAME = "recieved";
-    public static final Pattern URL_PATTERN = Pattern.compile("(?:(?<SCHEMA>[a-z0-9\\+\\.\\-]+):)?(?://)?(?:(?<USER>[a-zA-Z0-9\\$\\-\\_\\.\\+\\!\\*\\'\\(\\)\\,\\\"]+):(?<PASS>[a-zA-Z0-9\\$\\-\\_\\.\\+\\!\\*\\'\\(\\)\\,\\\"]*)@)?(?<URL>[a-zA-Z0-9\\$\\-\\_\\.\\+\\!\\*\\'\\(\\)\\,\\\"]+):?(?<PORT>\\d+)?(?<PATH>/[/a-zA-Z0-9\\$\\-\\_\\.\\+\\!\\*\\'\\(\\)\\,\\\"]+)*(?<FILE>/[a-zA-Z0-9\\$\\-\\_\\.\\+\\!\\*\\'\\(\\)\\,\\\"]+)?(?<QUERY>\\?[a-zA-Z0-9\\$\\-\\_\\.\\+\\!\\*\\'\\(\\)\\,\\\"\\;\\/\\?\\:\\@\\=\\&]+)?");
+    public static final Pattern URL_PATTERN = Pattern.compile("(?:(?<SCHEMA>[a-z0-9\\+\\.\\-]+):)?(?://)?(?:(?<USER>[a-zA-Z0-9\\$\\-\\_\\.\\+\\!\\*\\'\\(\\)\\,\\\"]+):(?<PASS>[a-zA-Z0-9\\$\\-\\_\\.\\+\\!\\*\\'\\(\\)\\,\\\"]*)@)?(?<URL>[a-zA-Z0-9\\$\\-\\_\\.\\+\\!\\*\\'\\(\\)\\,\\\"]+):?(?<PORT>\\d+)?(?<PATH>[/a-zA-Z0-9\\$\\-\\_\\.\\+\\!\\*\\'\\(\\)\\,\\\"]+)*(?<FILE>/[a-zA-Z0-9\\$\\-\\_\\.\\+\\!\\*\\'\\(\\)\\,\\\"]+)?(?<QUERY>\\?[a-zA-Z0-9\\$\\-\\_\\.\\+\\!\\*\\'\\(\\)\\,\\\"\\;\\/\\?\\:\\@\\=\\&]+)?");
     protected String moduleId;
     protected PlatypusServerCore serverCore;
 
@@ -79,7 +80,7 @@ public class PositioningPacketReciever implements PacketReciever {
                 && aProtocolName != null && !aProtocolName.isEmpty()
                 && aPort != null && aPort > 0 && aPort < 65535
                 && aPacket != null) {
-            if (RetranslatePacketFactory.isProtocolSupported(aProtocolName)) {
+            if (RetranslatePacketFactory.isServiceSupport(aProtocolName)) {
                 StringBuilder sId = new StringBuilder();
                 sId.append(aPacket.getImei()).append(aProtocolName).append(aHost).append(aPort);
                 String id = sId.toString();
@@ -102,7 +103,7 @@ public class PositioningPacketReciever implements PacketReciever {
                 && aProtocolName != null && !aProtocolName.isEmpty()
                 && aPort != null && aPort > 0 && aPort < 65535
                 && aData != null) {
-            if (RetranslatePacketFactory.isProtocolSupported(aProtocolName)) {
+            if (RetranslatePacketFactory.isServiceSupport(aProtocolName)) {
                 return send(aData, aHost, aPort, aProtocolName, aUser, aPassword, aPath, aQuery, null);
             }
         }
@@ -112,54 +113,25 @@ public class PositioningPacketReciever implements PacketReciever {
     private static IoSession send(Object aData, String aHost, Integer aPort, String aProtocolName, String aUser, String aPassword, String aPath, String aQuery, IoSession aSession) throws Exception {
         if (aSession == null) {
             IoConnector connector = new NioSocketConnector();
-            if (aProtocolName.equals(RetranslatePacketFactory.HTTPS_PROTOCOL_NAME)) {
-                TrustManager[] trustAllCerts = new TrustManager[]{
-                    new X509TrustManager() {
-                        @Override
-                        public X509Certificate[] getAcceptedIssuers() {
-                            return null;
-                        }
-
-                        @Override
-                        public void checkClientTrusted(X509Certificate[] certs, String authType) {
-                        }
-
-                        @Override
-                        public void checkServerTrusted(X509Certificate[] certs, String authType) {
-                        }
-                    }
-                };
-                SSLContext sc = SSLContext.getInstance("TLS");
-                sc.init(null, trustAllCerts, new java.security.SecureRandom());
-                SslFilter filter = new SslFilter(sc);
-                filter.setUseClientMode(true);
-                filter.setNeedClientAuth(false);
-                connector.getFilterChain().addLast("ssl", filter);
-            }
-            ProtocolEncoder encoder = RetranslatePacketFactory.getPacketEncoder(aProtocolName);
-            if (encoder instanceof HttpPushEncoder) {
-                HttpPushEncoder encod = (HttpPushEncoder) encoder;
-                encod.setHost(aHost);
-                encod.setPath(aPath + aQuery);
-                encod.setUser(aUser);
-                encod.setPassword(aPassword);
-            }
-            connector.getFilterChain().addLast(aProtocolName, new ProtocolCodecFilter(encoder, RetranslatePacketFactory.getPacketDecoder(aProtocolName)));
-            connector.setHandler(RetranslatePacketFactory.getPacketHandler(aProtocolName, retranslateSessions));
+            RetranslatePacketFactory.constructFiltersChain(connector.getFilterChain(), aProtocolName);
+            RetranslateIoHandler handler = RetranslatePacketFactory.getPacketHandler(aProtocolName, retranslateSessions);
+            handler.setHost(aHost);
+            handler.setPath(aPath + aQuery);
+            handler.setUser(aUser);
+            handler.setPassword(aPassword);
+            connector.setHandler(handler);
             connector.setConnectTimeoutMillis(WAIT_SEND_TIMEOUT);
             ConnectFuture future = connector.connect(new InetSocketAddress(aHost, aPort));
             future.awaitUninterruptibly();
             if (future.isConnected()) {
                 aSession = future.getSession();
                 aSession.getConfig().setUseReadOperation(true);
-                WriteFuture write = aSession.write(aData);
-                write.awaitUninterruptibly(WAIT_SEND_TIMEOUT);
+                aSession.write(aData);
             } else {
                 connector.dispose();
             }
         } else {
-            WriteFuture write = aSession.write(aData);
-            write.awaitUninterruptibly(WAIT_SEND_TIMEOUT);
+            aSession.write(aData);
         }
         return aSession;
     }
