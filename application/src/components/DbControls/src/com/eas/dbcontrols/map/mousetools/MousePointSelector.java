@@ -5,7 +5,7 @@
 package com.eas.dbcontrols.map.mousetools;
 
 import com.eas.client.controls.geopane.mousetools.MouseToolCapability;
-import com.eas.client.geo.GisUtilities;
+import com.eas.util.gis.GeometryUtils;
 import com.eas.client.geo.selectiondatastore.SelectionEntry;
 import com.eas.dbcontrols.map.DbMap;
 import com.vividsolutions.jts.geom.Point;
@@ -32,7 +32,7 @@ public class MousePointSelector extends MapTool {
             try {
                 Point2D.Double cartesianDest = pane.awtScreen2Cartesian(e.getPoint());
                 Point2D.Double geoDest = pane.cartesian2Geo(cartesianDest);
-                Point selectorPoint = GisUtilities.createPoint(geoDest);
+                Point selectorPoint = GeometryUtils.createPoint(geoDest);
                 List<SelectionEntry> hitted = map.hit(selectorPoint);
                 filterHitted(selectorPoint, hitted);
                 if (!e.isControlDown()) {

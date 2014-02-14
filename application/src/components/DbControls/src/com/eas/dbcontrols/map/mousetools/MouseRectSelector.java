@@ -5,7 +5,7 @@
 package com.eas.dbcontrols.map.mousetools;
 
 import com.eas.client.controls.geopane.mousetools.RectZoomer;
-import com.eas.client.geo.GisUtilities;
+import com.eas.util.gis.GeometryUtils;
 import com.eas.client.geo.selectiondatastore.SelectionEntry;
 import com.eas.dbcontrols.map.DbMap;
 import com.vividsolutions.jts.geom.Polygon;
@@ -35,7 +35,7 @@ public class MouseRectSelector extends RectZoomer {
     protected boolean isBeginDragValid() throws Exception {
         Point2D.Double cartesianPt = pane.awtScreen2Cartesian(mouseDown);
         Point2D.Double geoPt = pane.cartesian2Geo(cartesianPt);
-        return !map.selectedGeometryHitted(GisUtilities.createPoint(geoPt));
+        return !map.selectedGeometryHitted(GeometryUtils.createPoint(geoPt));
     }
 
     @Override
@@ -50,7 +50,7 @@ public class MouseRectSelector extends RectZoomer {
                         Point2D.Double geoSource = pane.cartesian2Geo(cartesianSource);
                         Point2D.Double cartesianDest = pane.awtScreen2Cartesian(ptDest);
                         Point2D.Double geoDest = pane.cartesian2Geo(cartesianDest);
-                        Polygon selectorPoly = GisUtilities.constructRectyPolygon(geoSource, geoDest);
+                        Polygon selectorPoly = GeometryUtils.constructRectyPolygon(geoSource, geoDest);
                         List<SelectionEntry> hitted = map.hit(selectorPoly, true);
                         Rectangle2D.Double constraintRect = new Rectangle2D.Double(Math.min(geoSource.x, geoDest.x), Math.min(geoSource.y, geoDest.y), Math.abs(geoDest.x - geoSource.x), Math.abs(geoDest.y - geoSource.y));
                         filterHitted(constraintRect, hitted);

@@ -44,7 +44,8 @@ CANParser = com.eas.sensors.positioning.utils.can.CANDataParser;
 
 
 // platypus GIS imports
-GisUtilities = com.eas.client.geo.GisUtilities;
+GeomUtilities = com.eas.util.gis.GeometryUtils;
+GisUtilities = com.eas.client.geo.GeometryUtils;
 
 if (formsPresent)
 {

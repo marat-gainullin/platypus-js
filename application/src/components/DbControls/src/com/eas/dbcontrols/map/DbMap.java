@@ -18,6 +18,7 @@ import com.eas.client.controls.geopane.events.GeoPaneViewpointListener;
 import com.eas.client.controls.geopane.events.MapClickedEvent;
 import com.eas.client.controls.geopane.events.ViewpointScaledEvent;
 import com.eas.client.controls.geopane.events.ViewpointTranslatedEvent;
+import com.eas.util.gis.GeometryUtils;
 import com.eas.client.geo.GisUtilities;
 import com.eas.client.geo.PointSymbol;
 import com.eas.client.geo.RowsetFeatureDescriptor;
@@ -474,22 +475,22 @@ public class DbMap extends JPanel implements DbControl, RowsetsDbControl, Proper
 
     public Point cartesian2Geo(Point aPt) throws FactoryException, TransformException {
         Point2D.Double res = pane.cartesian2Geo(new Point2D.Double(aPt.getX(), aPt.getY()));
-        return GisUtilities.createPoint(res);
+        return GeometryUtils.createPoint(res);
     }
 
     public Point geo2Cartesian(Point aPt) throws FactoryException, TransformException {
         Point2D.Double res = pane.geo2Cartesian(new Point2D.Double(aPt.getX(), aPt.getY()));
-        return GisUtilities.createPoint(res);
+        return GeometryUtils.createPoint(res);
     }
 
     public Point cartesian2Screen(Point aPt) throws FactoryException, TransformException {
         java.awt.Point res = pane.cartesian2Screen(new Point2D.Double(aPt.getX(), aPt.getY()));
-        return GisUtilities.createPoint(res.x, res.y);
+        return GeometryUtils.createPoint(res.x, res.y);
     }
 
     public Point screen2Cartesian(Point aPt) throws NoninvertibleTransformException {
         Point2D.Double res = pane.screen2Cartesian(new java.awt.Point((int) Math.round(aPt.getX()), (int) Math.round(aPt.getY())));
-        return GisUtilities.createPoint(res);
+        return GeometryUtils.createPoint(res);
     }
 
     @Override
@@ -551,7 +552,7 @@ public class DbMap extends JPanel implements DbControl, RowsetsDbControl, Proper
     public Point getGeoPosition() throws Exception {
         if (pane != null) {
             java.awt.Point.Double position = pane.getGeoPosition();
-            return GisUtilities.createPoint(position.x, position.y);
+            return GeometryUtils.createPoint(position.x, position.y);
         } else {
             return null;
         }
@@ -580,13 +581,13 @@ public class DbMap extends JPanel implements DbControl, RowsetsDbControl, Proper
      */
     public List<SelectionEntry> hit(Point aHitPoint) throws Exception {
         double bufferZoneWidth = calculateCurrentHitBuffer();
-        Polygon hitPoly = GisUtilities.constructRectyPolygon(new Point2D.Double(aHitPoint.getX() - bufferZoneWidth, aHitPoint.getY() - bufferZoneWidth), new Point2D.Double(aHitPoint.getX() + bufferZoneWidth, aHitPoint.getY() + bufferZoneWidth));
+        Polygon hitPoly = GeometryUtils.constructRectyPolygon(new Point2D.Double(aHitPoint.getX() - bufferZoneWidth, aHitPoint.getY() - bufferZoneWidth), new Point2D.Double(aHitPoint.getX() + bufferZoneWidth, aHitPoint.getY() + bufferZoneWidth));
         return hit(hitPoly, true);
     }
 
     public List<SelectionEntry> nonSelectableHit(Point aHitPoint) throws Exception {
         double bufferZoneWidth = calculateCurrentHitBuffer();
-        Polygon hitPoly = GisUtilities.constructRectyPolygon(new Point2D.Double(aHitPoint.getX() - bufferZoneWidth, aHitPoint.getY() - bufferZoneWidth), new Point2D.Double(aHitPoint.getX() + bufferZoneWidth, aHitPoint.getY() + bufferZoneWidth));
+        Polygon hitPoly = GeometryUtils.constructRectyPolygon(new Point2D.Double(aHitPoint.getX() - bufferZoneWidth, aHitPoint.getY() - bufferZoneWidth), new Point2D.Double(aHitPoint.getX() + bufferZoneWidth, aHitPoint.getY() + bufferZoneWidth));
         return hit(hitPoly, false);
     }
 
@@ -621,7 +622,7 @@ public class DbMap extends JPanel implements DbControl, RowsetsDbControl, Proper
     public List<SelectionEntry> hitSelection(Point aHitPoint) throws Exception {
         if (!selectionStore.isEmpty()) {
             double bufferZoneWidth = calculateCurrentHitBuffer();
-            Polygon hitPoly = GisUtilities.constructRectyPolygon(new Point2D.Double(aHitPoint.getX() - bufferZoneWidth, aHitPoint.getY() - bufferZoneWidth), new Point2D.Double(aHitPoint.getX() + bufferZoneWidth, aHitPoint.getY() + bufferZoneWidth));
+            Polygon hitPoly = GeometryUtils.constructRectyPolygon(new Point2D.Double(aHitPoint.getX() - bufferZoneWidth, aHitPoint.getY() - bufferZoneWidth), new Point2D.Double(aHitPoint.getX() + bufferZoneWidth, aHitPoint.getY() + bufferZoneWidth));
             return hitSelection(hitPoly);
         } else {
             return emptySelectionList;
@@ -681,7 +682,7 @@ public class DbMap extends JPanel implements DbControl, RowsetsDbControl, Proper
     public boolean selectedGeometryHitted(Point aPoint2HitWith) throws Exception {
         if (!getSelection().isEmpty()) {
             double bufferZoneWidth = calculateCurrentHitBuffer();
-            Polygon hitPoly = GisUtilities.constructRectyPolygon(new Point2D.Double(aPoint2HitWith.getX() - bufferZoneWidth, aPoint2HitWith.getY() - bufferZoneWidth), new Point2D.Double(aPoint2HitWith.getX() + bufferZoneWidth, aPoint2HitWith.getY() + bufferZoneWidth));
+            Polygon hitPoly = GeometryUtils.constructRectyPolygon(new Point2D.Double(aPoint2HitWith.getX() - bufferZoneWidth, aPoint2HitWith.getY() - bufferZoneWidth), new Point2D.Double(aPoint2HitWith.getX() + bufferZoneWidth, aPoint2HitWith.getY() + bufferZoneWidth));
             Set<Geometry> selectedGeometries = GisUtilities.convertSelectionEntries2Geometries(getSelection().getSelection());
             for (Geometry geom : selectedGeometries) {
                 if (geom.intersects(hitPoly)) {

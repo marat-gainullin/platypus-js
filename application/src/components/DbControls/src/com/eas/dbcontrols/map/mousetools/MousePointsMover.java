@@ -6,7 +6,7 @@ package com.eas.dbcontrols.map.mousetools;
 
 import com.bearsoft.rowset.Row;
 import com.eas.client.controls.geopane.mousetools.MouseToolCapability;
-import com.eas.client.geo.GisUtilities;
+import com.eas.util.gis.GeometryUtils;
 import com.eas.client.geo.datastore.RowsFeatureSource;
 import com.eas.client.geo.selectiondatastore.SelectionEntry;
 import com.eas.client.model.application.ApplicationEntity;
@@ -58,7 +58,7 @@ public class MousePointsMover extends MapTool {
         if (SwingUtilities.isLeftMouseButton(e)) {
             try {
                 Point2D.Double cartesianPt = pane.awtScreen2Cartesian(e.getPoint());
-                prevGeoPt = GisUtilities.createPoint(pane.cartesian2Geo(cartesianPt));
+                prevGeoPt = GeometryUtils.createPoint(pane.cartesian2Geo(cartesianPt));
                 downGeoPt = prevGeoPt;
                 geoPt = prevGeoPt;
                 sEntries2Move = obtainSelection2Move();
@@ -75,7 +75,7 @@ public class MousePointsMover extends MapTool {
             try {
                 prevGeoPt = geoPt;
                 Point2D.Double cartesianPt = pane.awtScreen2Cartesian(e.getPoint());
-                geoPt = GisUtilities.createPoint(pane.cartesian2Geo(cartesianPt));
+                geoPt = GeometryUtils.createPoint(pane.cartesian2Geo(cartesianPt));
                 if (!geoPt.equals(downGeoPt)) {
                     if (!prevGeoPt.equals(geoPt)) {
                         moveSelection(geoPt.getX() - prevGeoPt.getX(), geoPt.getY() - prevGeoPt.getY());
@@ -112,7 +112,7 @@ public class MousePointsMover extends MapTool {
             try {
                 prevGeoPt = geoPt;
                 Point2D.Double cartesianPt = pane.awtScreen2Cartesian(e.getPoint());
-                geoPt = GisUtilities.createPoint(pane.cartesian2Geo(cartesianPt));
+                geoPt = GeometryUtils.createPoint(pane.cartesian2Geo(cartesianPt));
                 if (!prevGeoPt.equals(geoPt)) {
                     moveSelection(geoPt.getX() - prevGeoPt.getX(), geoPt.getY() - prevGeoPt.getY());
                 }
@@ -131,7 +131,7 @@ public class MousePointsMover extends MapTool {
 
         for (SelectionEntry sEntry : sEntries2Move) {
             Coordinate sPtCoordinate = sEntry.getViewShape().getCoordinates()[0];
-            sEntry.setViewShape(GisUtilities.createPoint(new Coordinate(sPtCoordinate.x + dX, sPtCoordinate.y + dY)));
+            sEntry.setViewShape(GeometryUtils.createPoint(new Coordinate(sPtCoordinate.x + dX, sPtCoordinate.y + dY)));
 
             Row row = sEntry.getRow();
             Object oGeometry = row.getColumnObject(sEntry.getGeometryColIndex());
@@ -156,8 +156,8 @@ public class MousePointsMover extends MapTool {
             Geometry geom = g.get(idx);
             if (geom instanceof Polygon) {
                 Polygon polygon = (Polygon) geom;
-                Polygon shell = GisUtilities.getPolygonShell(polygon);
-                Polygon[] holes = GisUtilities.getPolygonHoles(polygon);
+                Polygon shell = GeometryUtils.getPolygonShell(polygon);
+                Polygon[] holes = GeometryUtils.getPolygonHoles(polygon);
                 Polygon changePolygon;
                 if (sEntry.getHoleOfInterestIndex() < 0) {
                     changePolygon = shell;
@@ -170,22 +170,22 @@ public class MousePointsMover extends MapTool {
                     coordinate[coordinate.length - 1] = sEntry.getViewShape().getCoordinate();
             }
                 if (sEntry.getHoleOfInterestIndex() < 0) {
-                    shell = (Polygon)GisUtilities.constructGeometry(coordinate, Polygon.class);
+                    shell = (Polygon)GeometryUtils.constructGeometry(coordinate, Polygon.class);
                 } else {
-                    holes[sEntry.getHoleOfInterestIndex()] = (Polygon)GisUtilities.constructGeometry(coordinate, Polygon.class);
+                    holes[sEntry.getHoleOfInterestIndex()] = (Polygon)GeometryUtils.constructGeometry(coordinate, Polygon.class);
                 }
-                g.set(idx, GisUtilities.createPolygonWithHoles(shell, holes));
+                g.set(idx, GeometryUtils.createPolygonWithHoles(shell, holes));
             } else {
                 Coordinate[] coordinate = geom.getCoordinates();
                 coordinate[sEntry.getCoordinateOfInterestIndex()] = sEntry.getViewShape().getCoordinate();
-                g.set(idx, GisUtilities.constructGeometry(coordinate, geom.getClass()));
+                g.set(idx, GeometryUtils.constructGeometry(coordinate, geom.getClass()));
             }
         }
         // new geometries construction and assigning
         for (String gKey : newGeometriesData.keySet()) {
             Row row2Update = rows.get(gKey);
             Geometry oldGeometry = oldGeometries.get(gKey);
-            row2Update.setColumnObject(rowsColIndexes.get(gKey), GisUtilities.constructGeometry(newGeometriesData.get(gKey), oldGeometry.getClass(), oldGeometry.getSRID()));
+            row2Update.setColumnObject(rowsColIndexes.get(gKey), GeometryUtils.constructGeometry(newGeometriesData.get(gKey), oldGeometry.getClass(), oldGeometry.getSRID()));
         }
     }
 
