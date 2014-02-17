@@ -52,7 +52,7 @@ public class PositioningPacketReciever implements PacketReciever {
     public Object received(PositioningPacket aPacket) throws Exception {
         Object result = serverCore.executeServerModuleMethod(moduleId, RECIEVER_METHOD_NAME, new Object[]{aPacket});
         if (result != null) {
-            result = ScriptUtils.js2Java(result);
+             result = ScriptUtils.js2Java(result);
             assert result instanceof String;
             send(aPacket, (String) result);
         }
@@ -85,12 +85,14 @@ public class PositioningPacketReciever implements PacketReciever {
                 sId.append(aPacket.getImei()).append(aProtocolName).append(aHost).append(aPort);
                 String id = sId.toString();
                 IoSession ioSession = retranslateSessions.get(id);
-                if (ioSession == null) {
-                    ioSession = send(aPacket, aHost, aPort, aProtocolName, aUser, aPassword, aPath, aQuery, ioSession);
+                if (ioSession == null || ioSession.isClosing()) {
+                    ioSession = send(aPacket, aHost, aPort, aProtocolName, aUser, aPassword, aPath, aQuery, null);
                     if (ioSession != null) {
                         ioSession.setAttribute(ATTRIBUTE_SESSION_ID, id);
                         retranslateSessions.put(id, ioSession);
                     }
+                } else {
+                    ioSession = send(aPacket, aHost, aPort, aProtocolName, aUser, aPassword, aPath, aQuery, ioSession);
                 }
                 return ioSession;
             }
