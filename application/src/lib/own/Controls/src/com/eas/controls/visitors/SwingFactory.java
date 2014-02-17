@@ -201,21 +201,22 @@ public class SwingFactory implements ControlsDesignInfoVisitor {
         if (aInfo.getFont() != null) {
             comp.setFont(aInfo.getFont());
         }
-        if (!(comp instanceof JPopupMenu)) {
+        if (!(comp instanceof JPopupMenu) && !(comp instanceof JMenuItem)) {
             comp.setVisible(aInfo.isVisible());
+
+            if (aInfo.getMinimumSize() != null) {
+                comp.setMinimumSize(aInfo.getMinimumSize());
+            }
+            if (aInfo.getPreferredSize() != null) {
+                comp.setPreferredSize(aInfo.getPreferredSize());
+            } else if (aInfo.getDesignedPreferredSize() != null) {
+                comp.setPreferredSize(aInfo.getDesignedPreferredSize());
+            }
+            if (aInfo.getMaximumSize() != null) {
+                comp.setMaximumSize(aInfo.getMaximumSize());
+            }
         }
 
-        if (aInfo.getMinimumSize() != null) {
-            comp.setMinimumSize(aInfo.getMinimumSize());
-        }
-        if (aInfo.getPreferredSize() != null) {
-            comp.setPreferredSize(aInfo.getPreferredSize());
-        } else if (aInfo.getDesignedPreferredSize() != null) {
-            comp.setPreferredSize(aInfo.getDesignedPreferredSize());
-        }
-        if (aInfo.getMaximumSize() != null) {
-            comp.setMaximumSize(aInfo.getMaximumSize());
-        }
         if (comp instanceof JComponent) {
             JComponent jcomp = (JComponent) comp;
             Component popupComp = resolveComponent(aInfo.getComponentPopupMenu());
