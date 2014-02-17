@@ -428,7 +428,7 @@ public class ProjectRunner {
     }
 
     public static boolean isConnectionValid(DatabaseConnection connection) {
-        return connection.getDisplayName() != null && !connection.getDisplayName().isEmpty() && connection.getDisplayName().contains(" ")
+        return connection.getDisplayName() != null && !connection.getDisplayName().isEmpty() && !connection.getDisplayName().contains(" ")
                 && connection.getDatabaseURL() != null && !connection.getDatabaseURL().isEmpty()
                 && connection.getUser() != null && !connection.getUser().isEmpty()
                 && connection.getPassword() != null && !connection.getPassword().isEmpty();
