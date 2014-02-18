@@ -123,7 +123,7 @@ public class SqlActionsController {
             return errorMessage;
         }
 
-        protected abstract void doSqlWork() throws Exception;
+        protected abstract List<Change> doSqlWork() throws Exception;
 
         protected void parseException(Exception ex) {
             if (ex != null) {
@@ -139,8 +139,9 @@ public class SqlActionsController {
 
         public boolean execute() {
             try {
-                doSqlWork();
-                client.commit(null);
+                Map<String, List<Change>> logs = new HashMap<>();
+                logs.put(dbId, doSqlWork());
+                client.commit(logs);
             } catch (Exception ex) {
                 client.rollback();
                 parseException(ex);
@@ -164,14 +165,12 @@ public class SqlActionsController {
         }
 
         @Override
-        protected void doSqlWork() throws Exception {
+        protected List<Change> doSqlWork() throws Exception {
             SqlDriver driver = achiveSqlDriver();
             String sqlCreateConstraintClause = driver.getSql4CreateFkConstraint(schema, fk);
             SqlCompiledQuery q = new SqlCompiledQuery(client, dbId, sqlCreateConstraintClause);
             q.enqueueUpdate();
-            Map<String, List<Change>> logs = new HashMap<>();
-            logs.put(dbId, q.getFlow().getChangeLog());
-            client.commit(logs);
+            return q.getFlow().getChangeLog();
         }
     }
 
@@ -182,14 +181,12 @@ public class SqlActionsController {
         }
 
         @Override
-        protected void doSqlWork() throws Exception {
+        protected List<Change> doSqlWork() throws Exception {
             SqlDriver driver = achiveSqlDriver();
             String sqlDropConstraintClause = driver.getSql4DropFkConstraint(schema, fk);
             SqlCompiledQuery q = new SqlCompiledQuery(client, dbId, sqlDropConstraintClause);
             q.enqueueUpdate();
-            Map<String, List<Change>> logs = new HashMap<>();
-            logs.put(dbId, q.getFlow().getChangeLog());
-            client.commit(logs);
+            return q.getFlow().getChangeLog();
         }
     }
 
@@ -205,14 +202,12 @@ public class SqlActionsController {
         }
 
         @Override
-        protected void doSqlWork() throws Exception {
+        protected List<Change> doSqlWork() throws Exception {
             SqlDriver driver = achiveSqlDriver();
             String sqlCreateTableClause = driver.getSql4EmptyTableCreation(schema, tableName, pkFieldName);
             SqlCompiledQuery q = new SqlCompiledQuery(client, dbId, sqlCreateTableClause);
             q.enqueueUpdate();
-            Map<String, List<Change>> logs = new HashMap<>();
-            logs.put(dbId, q.getFlow().getChangeLog());
-            client.commit(logs);
+            return q.getFlow().getChangeLog();
         }
     }
 
@@ -228,14 +223,12 @@ public class SqlActionsController {
         }
 
         @Override
-        protected void doSqlWork() throws Exception {
+        protected List<Change> doSqlWork() throws Exception {
             SqlDriver driver = achiveSqlDriver();
             String sqlCreateIndexClause = driver.getSql4CreateIndex(schema, tableName, index);
             SqlCompiledQuery q = new SqlCompiledQuery(client, dbId, sqlCreateIndexClause);
             q.enqueueUpdate();
-            Map<String, List<Change>> logs = new HashMap<>();
-            logs.put(dbId, q.getFlow().getChangeLog());
-            client.commit(logs);
+            return q.getFlow().getChangeLog();
         }
     }
 
@@ -251,14 +244,12 @@ public class SqlActionsController {
         }
 
         @Override
-        protected void doSqlWork() throws Exception {
+        protected List<Change> doSqlWork() throws Exception {
             SqlDriver driver = achiveSqlDriver();
             String sqlDropIndexClause = driver.getSql4DropIndex(schema, tableName, index.getName());
             SqlCompiledQuery q = new SqlCompiledQuery(client, dbId, sqlDropIndexClause);
             q.enqueueUpdate();
-            Map<String, List<Change>> logs = new HashMap<>();
-            logs.put(dbId, q.getFlow().getChangeLog());
-            client.commit(logs);
+            return q.getFlow().getChangeLog();
         }
     }
 
@@ -274,7 +265,7 @@ public class SqlActionsController {
         }
 
         @Override
-        protected void doSqlWork() throws Exception {
+        protected List<Change> doSqlWork() throws Exception {
             SqlDriver driver = achiveSqlDriver();
             String fullName = tableName;
             if (schema != null && !schema.isEmpty()) {
@@ -292,9 +283,7 @@ public class SqlActionsController {
             sqlCreateTableClause += " )";
             SqlCompiledQuery q = new SqlCompiledQuery(client, dbId, sqlCreateTableClause);
             q.enqueueUpdate();
-            Map<String, List<Change>> logs = new HashMap<>();
-            logs.put(dbId, q.getFlow().getChangeLog());
-            client.commit(logs);
+            return q.getFlow().getChangeLog();
         }
     }
 
@@ -308,14 +297,12 @@ public class SqlActionsController {
         }
 
         @Override
-        protected void doSqlWork() throws Exception {
+        protected List<Change> doSqlWork() throws Exception {
             SqlDriver driver = achiveSqlDriver();
             String sqlDropTable = driver.getSql4DropTable(schema, tableName);
             SqlCompiledQuery q = new SqlCompiledQuery(client, dbId, sqlDropTable);
             q.enqueueUpdate();
-            Map<String, List<Change>> logs = new HashMap<>();
-            logs.put(dbId, q.getFlow().getChangeLog());
-            client.commit(logs);
+            return q.getFlow().getChangeLog();
         }
     }
 
@@ -338,7 +325,7 @@ public class SqlActionsController {
         }
 
         @Override
-        protected void doSqlWork() throws Exception {
+        protected List<Change> doSqlWork() throws Exception {
             SqlDriver driver = achiveSqlDriver();
             String[] sqls = driver.getSqls4AddingField(schema, tableName, fieldMd);
             List<Change> commonLog = new ArrayList<>();
@@ -347,9 +334,7 @@ public class SqlActionsController {
                 q.enqueueUpdate();
                 commonLog.addAll(q.getFlow().getChangeLog());
             }
-            Map<String, List<Change>> logs = new HashMap<>();
-            logs.put(dbId, commonLog);
-            client.commit(logs);
+            return commonLog;
         }
     }
 
@@ -360,7 +345,7 @@ public class SqlActionsController {
         }
 
         @Override
-        protected void doSqlWork() throws Exception {
+        protected List<Change> doSqlWork() throws Exception {
             SqlDriver driver = achiveSqlDriver();
             String[] sql4DropField = driver.getSql4DroppingField(schema, tableName, fieldMd.getName());
             List<Change> commonLog = new ArrayList<>();
@@ -369,9 +354,7 @@ public class SqlActionsController {
                 q.enqueueUpdate();
                 commonLog.addAll(q.getFlow().getChangeLog());
             }
-            Map<String, List<Change>> logs = new HashMap<>();
-            logs.put(dbId, commonLog);
-            client.commit(logs);
+            return commonLog;
         }
     }
 
@@ -385,7 +368,7 @@ public class SqlActionsController {
         }
 
         @Override
-        protected void doSqlWork() throws Exception {
+        protected List<Change> doSqlWork() throws Exception {
             SqlDriver driver = achiveSqlDriver();
             String[] sqls4ModifyField = driver.getSqls4ModifyingField(schema, tableName, fieldMd, newFieldMd);
             List<Change> commonLog = new ArrayList<>();
@@ -394,9 +377,7 @@ public class SqlActionsController {
                 q.enqueueUpdate();
                 commonLog.addAll(q.getFlow().getChangeLog());
             }
-            Map<String, List<Change>> logs = new HashMap<>();
-            logs.put(dbId, commonLog);
-            client.commit(logs);
+            return commonLog;
         }
     }
 
@@ -414,7 +395,7 @@ public class SqlActionsController {
         }
 
         @Override
-        protected void doSqlWork() throws Exception {
+        protected List<Change> doSqlWork() throws Exception {
             SqlDriver driver = achiveSqlDriver();
             String[] sqls4RenamingField = driver.getSqls4RenamingField(schema, tableName, oldFieldName, newField);
             List<Change> commonLog = new ArrayList<>();
@@ -423,9 +404,7 @@ public class SqlActionsController {
                 q.enqueueUpdate();
                 commonLog.addAll(q.getFlow().getChangeLog());
             }
-            Map<String, List<Change>> logs = new HashMap<>();
-            logs.put(dbId, commonLog);
-            client.commit(logs);
+            return commonLog;
         }
     }
 
@@ -443,7 +422,7 @@ public class SqlActionsController {
         }
 
         @Override
-        protected void doSqlWork() throws Exception {
+        protected List<Change> doSqlWork() throws Exception {
             SqlDriver driver = achiveSqlDriver();
             String lschema = client.getDbMetadataCache(dbId).getConnectionSchema();
             String[] sqlsText = driver.getSql4CreateColumnComment(schema != null ? schema : lschema, tableName, fieldName, newDescription);
@@ -453,9 +432,7 @@ public class SqlActionsController {
                 q.enqueueUpdate();
                 commonLog.addAll(q.getFlow().getChangeLog());
             }
-            Map<String, List<Change>> logs = new HashMap<>();
-            logs.put(dbId, commonLog);
-            client.commit(logs);
+            return commonLog;
         }
     }
 
@@ -471,16 +448,14 @@ public class SqlActionsController {
         }
 
         @Override
-        protected void doSqlWork() throws Exception {
+        protected List<Change> doSqlWork() throws Exception {
             SqlDriver driver = achiveSqlDriver();
             String lschema = client.getDbMetadataCache(dbId).getConnectionSchema();
 
             String sqlText = driver.getSql4CreateTableComment(schema != null ? schema : lschema, tableName, newDescription);
             SqlCompiledQuery q = new SqlCompiledQuery(client, dbId, sqlText);
             q.enqueueUpdate();
-            Map<String, List<Change>> logs = new HashMap<>();
-            logs.put(dbId, q.getFlow().getChangeLog());
-            client.commit(logs);
+            return q.getFlow().getChangeLog();
         }
     }
 }

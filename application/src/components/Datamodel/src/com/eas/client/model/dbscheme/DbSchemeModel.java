@@ -137,7 +137,7 @@ public class DbSchemeModel extends Model<FieldsEntity, FieldsEntity, DbClient, S
      */
     @Override
     public boolean isTypeSupported(int type) throws Exception {
-        SqlDriver driver = client.getDbMetadataCache(null).getConnectionDriver();
+        SqlDriver driver = client.getDbMetadataCache(dbId).getConnectionDriver();
         Set<Integer> supportedTypes = driver.getSupportedJdbcDataTypes();
         if (SQLUtils.isTypeSupported(type)) {
             if (SQLUtils.getTypeGroup(type) == SQLUtils.TypesGroup.NUMBERS) // numbers
