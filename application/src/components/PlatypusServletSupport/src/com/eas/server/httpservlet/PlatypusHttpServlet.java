@@ -147,9 +147,8 @@ public class PlatypusHttpServlet extends HttpServlet {
     }
 
     /**
-     * Processes requests for both HTTP
-     * <code>GET</code> and
-     * <code>POST</code> methods.
+     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
+     * methods.
      *
      * @param request servlet request
      * @param response servlet response
@@ -191,7 +190,6 @@ public class PlatypusHttpServlet extends HttpServlet {
                 }
             }
         } catch (Exception ex) {
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.getMessage());
             throw new ServletException(ex);
         } finally {
             currentRequest.set(null);
@@ -226,23 +224,15 @@ public class PlatypusHttpServlet extends HttpServlet {
      */
     private void processPlatypusRequest(final HttpServletRequest aHttpRequest, final HttpServletResponse aHttpResponse, Session aPlatypusSession, HttpSession aHttpSession) throws Exception {
         Request platypusRequest = readPlatypusRequest(aHttpRequest, aHttpResponse, aPlatypusSession);
-        try {
-            RequestHandler<?> handler = findPlatypusHandler(platypusRequest, aPlatypusSession, aHttpRequest, aHttpResponse);
-            handler.run();
-            Response response = handler.getResponse();
-            platypusResponse(aHttpRequest, platypusRequest, response, aHttpResponse);
-            if (platypusRequest.getType() == Requests.rqLogout) {
-                aHttpRequest.logout();
-                aHttpSession.invalidate();
-            }
-        } catch (Exception ex) {
-            Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, REQUEST_PROCESSSING_ERROR_MSG, ex);
-            ErrorResponse er = new ErrorResponse(platypusRequest.getID(), ex.getMessage());
-            try {
-                sendJ2SEResponse(er, aHttpResponse);
-            } catch (Exception e) {
-                Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, ERRORRESPONSE_ERROR_MSG, e);
-            }
+        RequestHandler<?> handler = findPlatypusHandler(platypusRequest, aPlatypusSession, aHttpRequest, aHttpResponse);
+        handler.run();
+        Response response = handler.getResponse();
+        // may be error response.
+        // in such case logs are already issued and  ecxeption is already handled.
+        platypusResponse(aHttpRequest, platypusRequest, response, aHttpResponse);
+        if (platypusRequest.getType() == Requests.rqLogout) {
+            aHttpRequest.logout();
+            aHttpSession.invalidate();
         }
     }
 
@@ -326,8 +316,7 @@ public class PlatypusHttpServlet extends HttpServlet {
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
-     * Handles the HTTP
-     * <code>GET</code> method.
+     * Handles the HTTP <code>GET</code> method.
      *
      * @param request servlet request
      * @param response servlet response
@@ -341,8 +330,7 @@ public class PlatypusHttpServlet extends HttpServlet {
     }
 
     /**
-     * Handles the HTTP
-     * <code>POST</code> method.
+     * Handles the HTTP <code>POST</code> method.
      *
      * @param request servlet request
      * @param response servlet response
@@ -459,7 +447,7 @@ public class PlatypusHttpServlet extends HttpServlet {
                     writeJsonResponse(ScriptUtils.toJson(result), aHttpResponse);
                 } else if (result instanceof XMLObject) {
                     writeResponse(ScriptUtils.toXMLString((XMLObject) result), aHttpResponse, HTML_CONTENTTYPE);
-                } else if(result != null){
+                } else if (result != null) {
                     ScriptUtils.inContext(new ScriptAction() {
                         @Override
                         public Object run(Context cx) throws Exception {

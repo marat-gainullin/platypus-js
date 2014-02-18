@@ -12,23 +12,14 @@ import com.eas.sensors.positioning.PositioningIoHandler;
 import com.eas.sensors.positioning.PositioningPacket;
 import com.eas.sensors.retranslate.RetranslateIoHandler;
 import com.eas.sensors.retranslate.RetranslatePacketFactory;
-import com.eas.sensors.retranslate.http.push.HttpPushEncoder;
 import com.eas.server.PlatypusServerCore;
 import java.net.IDN;
 import java.net.InetSocketAddress;
-import java.security.cert.X509Certificate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 import org.apache.mina.core.future.ConnectFuture;
-import org.apache.mina.core.future.WriteFuture;
 import org.apache.mina.core.service.IoConnector;
 import org.apache.mina.core.session.IoSession;
-import org.apache.mina.filter.codec.ProtocolCodecFilter;
-import org.apache.mina.filter.codec.ProtocolEncoder;
-import org.apache.mina.filter.ssl.SslFilter;
 import org.apache.mina.transport.socket.nio.NioSocketConnector;
 
 /**
