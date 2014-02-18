@@ -85,7 +85,6 @@ public class DatabasesClient implements DbClient {
      * @param aAutoFillMetadata If true, metadatacache will be filled with
      * tables, keys and other metadata in schema automatically. Otherwise it
      * will query metadata table by table in each case. Default is true.
-     * @param aScanCallback
      * @throws Exception
      */
     public DatabasesClient(AppCache anAppCache, String aDefaultDatasourceName, boolean aAutoFillMetadata) throws Exception {

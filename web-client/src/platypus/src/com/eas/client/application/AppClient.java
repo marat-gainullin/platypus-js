@@ -17,7 +17,6 @@ import java.util.logging.Logger;
 
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.changes.Change;
-import com.bearsoft.rowset.changes.Command;
 import com.bearsoft.rowset.dataflow.TransactionListener;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameter;
@@ -787,8 +786,7 @@ public class AppClient {
 			@com.eas.client.application.AppClient::defineServerModule(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aModule);
 		}
 		$wnd.platypus.executeServerModuleMethod = function(aModuleName, aMethodName, aParams, aOnSuccess, aOnFailure) {
-			return $wnd
-					.boxAsJs(aClient.@com.eas.client.application.AppClient::executeServerModuleMethod(Ljava/lang/String;Ljava/lang/String;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aMethodName, aParams, aOnSuccess, aOnFailure));
+			return $wnd.boxAsJs(aClient.@com.eas.client.application.AppClient::executeServerModuleMethod(Ljava/lang/String;Ljava/lang/String;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aMethodName, aParams, aOnSuccess, aOnFailure));
 		}
 		$wnd.platypus.executeServerReport = function(aModuleName, aModule) {
 			aClient.@com.eas.client.application.AppClient::executeServerReport(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aModule);
