@@ -1622,8 +1622,8 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
             if (entity.getModel().getClient() instanceof AppClient) {
                 ((AppClient) entity.getModel().getClient()).enqueueUpdate(entity.getQueryId(), entity.getQuery().getParameters());
             } else {
-                assert entity.getModel().getClient() instanceof DbClient;
-                ((DbClient) entity.getModel().getClient()).enqueueUpdate(((SqlQuery) entity.getQuery()).compile());
+                assert entity.getQuery() instanceof SqlQuery;
+                ((SqlQuery) entity.getQuery()).compile().enqueueUpdate();
             }
         }
         return 0;

@@ -72,6 +72,7 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
         if (query == null) {
             if (queryId != null) {
                 query = model.getClient().getAppQuery(queryId);
+                query.clearRoles();
             } else if (tableName != null) {
                 query = SQLUtils.validateTableSqlQuery(getTableDbId(), getTableName(), getTableSchemaName(), model.getClient());
             } else {
@@ -82,7 +83,7 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
     }
 
     public void prepareRowsetByQuery() throws Exception {
-        Rowset oldRowset = rowset;
+        Rowset oldRowset = rowset; 
         if (rowset != null) {
             rowset.removeRowsetListener(this);
             unforwardChangeLog();

@@ -5,6 +5,7 @@
 package com.eas.metadata;
 
 import com.bearsoft.rowset.Rowset;
+import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.ForeignKeySpec;
@@ -151,7 +152,6 @@ public class MetadataMerger {
             }
         }
         temporaryPKFieldName = temporaryPKFieldName.toUpperCase();   // for check on create new table
-
 
         // step 2 - drop all not existed tables
         if (noDropTables == false) {
@@ -790,9 +790,11 @@ public class MetadataMerger {
                 if (!noExecuteSQL) {
                     q.enqueueUpdate();
                     try {
-                        client.commit(null);
+                        Map<String, List<Change>> changeLogs = new HashMap<>();
+                        changeLogs.put(null, q.getFlow().getChangeLog());
+                        client.commit(changeLogs);
                     } catch (Exception e) {
-                        client.rollback(null);
+                        client.rollback();
                         throw e;
                     }
                 }

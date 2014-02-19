@@ -21,12 +21,13 @@ import java.util.regex.Pattern;
 /**
  * A Sql query with name-bound parameters.
  *
- * <p>This class represents a SQL query which text contains named parameters,
- * and their values with type information. Provides a method compile() to
- * transform it to a SqlCompiledQuery replacing parameters names in the query
- * text to "?" placeholders accepted by JDBC, along with a vector of parameters
- * values in the right order. Method <code>compile()</code> recursively resolves the queries
- * reusing and parameters bindings.</p>
+ * <p>
+ * This class represents a SQL query which text contains named parameters, and
+ * their values with type information. Provides a method compile() to transform
+ * it to a SqlCompiledQuery replacing parameters names in the query text to "?"
+ * placeholders accepted by JDBC, along with a vector of parameters values in
+ * the right order. Method <code>compile()</code> recursively resolves the
+ * queries reusing and parameters bindings.</p>
  *
  * @author mg
  */
@@ -110,7 +111,21 @@ public class SqlQuery extends Query<DbClient> {
     public void setCommand(boolean aValue) {
         command = aValue;
     }
-        
+
+    /**
+     * Clears all roles assigned to this query.
+     * Used by two-tier datamodel for security context inheritance.
+     * WARNING!!! Don't use it if you have no clear mind about your use case.
+     */
+    public void clearRoles() {
+        if (readRoles != null) {
+            readRoles.clear();
+        }
+        if (writeRoles != null) {
+            writeRoles.clear();
+        }
+    }
+
     /**
      * Returns the SQL query text.
      *
@@ -193,13 +208,15 @@ public class SqlQuery extends Query<DbClient> {
     /**
      * Compiles the SQL query.
      *
-     * <p>The compilation process includes replacing named parameters binding
-     * like ":param1" in SQL query text with JDBC "?" placeholders and filling
-     * the vector of parameters values according to each parameter occurance in
-     * the query.</p>
+     * <p>
+     * The compilation process includes replacing named parameters binding like
+     * ":param1" in SQL query text with JDBC "?" placeholders and filling the
+     * vector of parameters values according to each parameter occurance in the
+     * query.</p>
      *
-     * <p>The returned object is able to assign parameters values stored in it
-     * to any PreparedStatement object.</p>
+     * <p>
+     * The returned object is able to assign parameters values stored in it to
+     * any PreparedStatement object.</p>
      *
      * @return compiled SQL query object.
      * @throws UnboundSqlParameterException
@@ -244,14 +261,18 @@ public class SqlQuery extends Query<DbClient> {
     /**
      * Compiles the SQL query for achiving metadata.
      *
-     * <p> This method achives simple metadata, returned from query execution
-     * with sql text metadata translation. </p> <p>The compilation process
-     * includes replacing named parameters binding like ":param1" in SQL query
-     * text with JDBC "?" placeholders and filling the vector of parameters
-     * values according to each parameter occurence in the query.</p>
+     * <p>
+     * This method achives simple metadata, returned from query execution with
+     * sql text metadata translation. </p>
+     * <p>
+     * The compilation process includes replacing named parameters binding like
+     * ":param1" in SQL query text with JDBC "?" placeholders and filling the
+     * vector of parameters values according to each parameter occurence in the
+     * query.</p>
      *
-     * <p>The returned object is able to assign parameters values stored in it
-     * to any PreparedStatement object.</p>
+     * <p>
+     * The returned object is able to assign parameters values stored in it to
+     * any PreparedStatement object.</p>
      *
      * @return compiled metadata SQL query object.
      * @throws UnboundSqlParameterException
@@ -285,8 +306,10 @@ public class SqlQuery extends Query<DbClient> {
         return compile().executeQuery();
     }
 
+    /*
     @Override
     public void enqueueUpdate() throws Exception {
         compile().enqueueUpdate();
     }
+    */
 }

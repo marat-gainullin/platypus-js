@@ -9,7 +9,7 @@ import com.bearsoft.rowset.locators.Locator;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.utils.RowsetUtils;
 import com.eas.client.controls.geopane.actions.GeoPaneAction;
-import com.eas.client.geo.GisUtilities;
+import com.eas.util.gis.GeometryUtils;
 import com.eas.client.geo.datastore.RowsFeatureSource;
 import com.eas.client.geo.selectiondatastore.SelectionEntry;
 import com.eas.client.model.application.ApplicationEntity;
@@ -137,9 +137,9 @@ public class DeleteAction extends GeoPaneAction {
         for (Integer key : aHoles.keySet()) {
             List<Integer> deleteCoordinates = aHoles.get(key);
             Collections.sort(deleteCoordinates, new DescComparator());
-            Coordinate[] coordinate = GisUtilities.deletePointsFromCoordinates(aResultHoles[key], deleteCoordinates);
-            if (coordinate != null && GisUtilities.isValidGeometryDataSection(coordinate, Polygon.class)) {
-                holes.set(key, (Polygon) GisUtilities.constructGeometry(coordinate, Polygon.class));
+            Coordinate[] coordinate = GeometryUtils.deletePointsFromCoordinates(aResultHoles[key], deleteCoordinates);
+            if (coordinate != null && GeometryUtils.isValidGeometryDataSection(coordinate, Polygon.class)) {
+                holes.set(key, (Polygon) GeometryUtils.constructGeometry(coordinate, Polygon.class));
             } else {
                 holes.remove(key.intValue());
             }
@@ -192,29 +192,29 @@ public class DeleteAction extends GeoPaneAction {
                     Geometry geom = g.get(dfKey);
                     if (geom != null) {
                         if (geom instanceof Polygon) {
-                            Polygon shell = GisUtilities.getPolygonShell((Polygon) geom);
-                            Polygon[] holes = GisUtilities.getPolygonHoles((Polygon) geom);
+                            Polygon shell = GeometryUtils.getPolygonShell((Polygon) geom);
+                            Polygon[] holes = GeometryUtils.getPolygonHoles((Polygon) geom);
                             if (!deleteFeature.getShells().isEmpty()) {
                                 List<Integer> deleteCoordinates = deleteFeature.getShells();
                                 Collections.sort(deleteCoordinates, new DescComparator());
-                                Coordinate[] coordinate = GisUtilities.deletePointsFromCoordinates(shell, deleteCoordinates);
-                                if (coordinate != null && GisUtilities.isValidGeometryDataSection(coordinate, Polygon.class)) {
-                                    shell = (Polygon) GisUtilities.constructGeometry(coordinate, Polygon.class);
+                                Coordinate[] coordinate = GeometryUtils.deletePointsFromCoordinates(shell, deleteCoordinates);
+                                if (coordinate != null && GeometryUtils.isValidGeometryDataSection(coordinate, Polygon.class)) {
+                                    shell = (Polygon) GeometryUtils.constructGeometry(coordinate, Polygon.class);
                                     holes = processHoles(deleteFeature.getHoles(), holes);
-                                    g.set(dfKey, GisUtilities.createPolygonWithHoles(shell, holes));
+                                    g.set(dfKey, GeometryUtils.createPolygonWithHoles(shell, holes));
                                 } else {
                                     g.remove(dfKey.intValue());
                                 }
                             } else {
                                 holes = processHoles(deleteFeature.getHoles(), holes);
-                                g.set(dfKey, GisUtilities.createPolygonWithHoles(shell, holes));
+                                g.set(dfKey, GeometryUtils.createPolygonWithHoles(shell, holes));
                             }
                         } else {
                             List<Integer> deleteCoordinates = deleteFeature.getShells();
                             Collections.sort(deleteCoordinates, new DescComparator());
-                            Coordinate[] coordinate = GisUtilities.deletePointsFromCoordinates(geom, deleteCoordinates);
-                            if (GisUtilities.isValidGeometryDataSection(coordinate, geom.getClass())) {
-                                g.set(dfKey, GisUtilities.constructGeometry(coordinate, geom.getClass()));
+                            Coordinate[] coordinate = GeometryUtils.deletePointsFromCoordinates(geom, deleteCoordinates);
+                            if (GeometryUtils.isValidGeometryDataSection(coordinate, geom.getClass())) {
+                                g.set(dfKey, GeometryUtils.constructGeometry(coordinate, geom.getClass()));
                             } else {
                                 g.remove(dfKey.intValue());
                             }
@@ -230,8 +230,8 @@ public class DeleteAction extends GeoPaneAction {
                 List<Geometry> coordsCloud = newGeometriesData.get(gKey);
 
                 Row row2Update = rows.get(gKey);
-                if (GisUtilities.isValidGeometryData(coordsCloud, oldGeometry.getClass())) {
-                    row2Update.setColumnObject(rowsColIndexes.get(gKey), GisUtilities.constructGeometry(coordsCloud, oldGeometry.getClass(), oldGeometry.getSRID()));
+                if (GeometryUtils.isValidGeometryData(coordsCloud, oldGeometry.getClass())) {
+                    row2Update.setColumnObject(rowsColIndexes.get(gKey), GeometryUtils.constructGeometry(coordsCloud, oldGeometry.getClass(), oldGeometry.getSRID()));
                     features2Entities.get(gKey).getRowset().setModified(true);
                 } else {
                     features2Remove.add(gKey);

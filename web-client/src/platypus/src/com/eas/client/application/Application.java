@@ -1117,7 +1117,7 @@ public class Application {
 
 	protected static List<RequireProcess> requireProcesses = new ArrayList<RequireProcess>();
 
-	public static void require(JavaScriptObject aDeps, final JavaScriptObject aOnSuccess, final JavaScriptObject aOnFailure) {
+	public static void require(final JavaScriptObject aDeps, final JavaScriptObject aOnSuccess, final JavaScriptObject aOnFailure) {
 		final Set<String> deps = new HashSet<String>();
 		JsArrayString depsValues = aDeps.<JsArrayString> cast();
 		for (int i = 0; i < depsValues.length(); i++) {
@@ -1136,9 +1136,15 @@ public class Application {
 						requiring = false;
 						try {
 							if (deps.isEmpty() || loader.isLoaded(deps)) {
-								Utils.invokeJsFunction(aOnSuccess);
+								if(aOnSuccess != null)
+									Utils.invokeJsFunction(aOnSuccess);
+								else
+									Logger.getLogger(Application.class.getName()).log(Level.WARNING, "Require succeded, but callback is missing. Required modules are: "+aDeps.toString());
 							} else {
-								Utils.invokeJsFunction(aOnFailure);
+								if(aOnFailure != null)
+									Utils.invokeJsFunction(aOnFailure);
+								else
+									Logger.getLogger(Application.class.getName()).log(Level.WARNING, "Require failed and callback is missing. Required modules are: "+aDeps.toString());
 							}
 						} finally {
 							if (!requireProcesses.isEmpty()) {

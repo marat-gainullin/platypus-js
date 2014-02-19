@@ -4,6 +4,7 @@
  */
 package com.eas.metadata.gui;
 
+import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
@@ -24,6 +25,7 @@ import java.awt.EventQueue;
 import java.awt.LayoutManager;
 import java.awt.Rectangle;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -1073,12 +1075,14 @@ public class MetadataCompareForm extends javax.swing.JFrame {
             public void run() {
                 try (DatabasesClientWithResource dbResource = new DatabasesClientWithResource(new DbConnectionSettings(destUrl, destUser, destPassword))) {
                     DatabasesClient client = dbResource.getClient();
-                        for (int i = 0; i < size; i++) {
+                    for (int i = 0; i < size; i++) {
                         if (sqlModel.isChoiced(i)) {
                             try {
                                 SqlCompiledQuery query = new SqlCompiledQuery(client, null, sqlModel.getSql(i));
                                 query.enqueueUpdate();
-                                client.commit(null);
+                                Map<String, List<Change>> changeLogs = new HashMap<>();
+                                changeLogs.put(null, query.getFlow().getChangeLog());
+                                client.commit(changeLogs);
                                 sqlModel.setChoice(i, false);
                                 sqlModel.setResult(i, "Ok");
                                 final int row = i;
@@ -1093,7 +1097,7 @@ public class MetadataCompareForm extends javax.swing.JFrame {
                             } catch (Exception ex) {
                                 sqlModel.setResult(i, "Error: " + ex.getMessage());
                                 tblSqls.repaint();
-                                client.rollback(null);
+                                client.rollback();
                                 break;
                             }
                         }

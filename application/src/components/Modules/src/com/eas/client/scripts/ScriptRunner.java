@@ -110,7 +110,6 @@ public class ScriptRunner extends ScriptableObject {
         prepareRoles(scriptDoc);
         prepareModel(scriptDoc);
         prepareScript(scriptDoc, args);
-        this.delete(ScriptUtils.HANDLERS_PROP_NAME);
     }
 
     protected void prepareRoles(ScriptDocument scriptDoc) throws Exception {
@@ -442,7 +441,7 @@ public class ScriptRunner extends ScriptableObject {
         if (moduleAllowedRoles != null && !moduleAllowedRoles.isEmpty()) {
             PlatypusPrincipal principal = _getPrincipal();
             if (principal == null || !principal.hasAnyRole(moduleAllowedRoles)) {
-                throw new AccessControlException(String.format("Access denied to %s module for %s PlatypusPrincipal.",//NOI18N
+                throw new AccessControlException(String.format("Access denied to %s module for '%s'.",//NOI18N
                         ScriptRunner.this.appElementId,
                         principal != null ? principal.getName() : null));
             }
@@ -499,7 +498,7 @@ public class ScriptRunner extends ScriptableObject {
                     if (principal != null && principal.hasAnyRole(functionAllowedRoles.get(name))) {
                         return;
                     }
-                    throw new AccessControlException(String.format("Access denied to %s function in %s module for %s.",//NOI18N
+                    throw new AccessControlException(String.format("Access denied to %s function in %s module for '%s'.",//NOI18N
                             name,
                             ScriptRunner.this.appElementId,
                             principal != null ? principal.getName() : null));

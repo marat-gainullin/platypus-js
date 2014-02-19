@@ -396,12 +396,14 @@ public class Publisher {
 		return new $wnd.GridPane(null, null, null, null, aComponent);
 	}-*/;
 
-	protected static PublishedComponent checkPublishedComponent(Object aCandidate) {
+	protected static JavaScriptObject checkPublishedComponent(Object aCandidate) {
 		if (aCandidate instanceof Component) {
 			Component c = (Component) aCandidate;
 			Object oPublished = c.getData(Form.PUBLISHED_DATA_KEY);
-			if (oPublished instanceof PublishedComponent)
-				return (PublishedComponent) oPublished;
+			if (oPublished instanceof JavaScriptObject)
+				return (JavaScriptObject) oPublished;
+		}else if(aCandidate instanceof PlatypusButtonGroup){
+			return ((PlatypusButtonGroup)aCandidate).getPublished();
 		}
 		return null;
 	}

@@ -1430,7 +1430,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
 			wideCheckCursor();
 		}
 	}
-	
+
 	public void deleteRow(Row aRow) throws RowsetException {
 		delete(Collections.singleton(aRow));
 	}
@@ -1557,8 +1557,14 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
 	}
 
 	public Object getJsObject(String aFieldName) throws Exception {
-
-		return Utils.toJs(getObject(fields.find(aFieldName)));
+		try {
+			return Utils.toJs(getObject(fields.find(aFieldName)));
+		} catch (Exception ex) {
+			if (isEmpty())
+				throw new Exception("Attempt to read data field: " + aFieldName + " under cursor from empty dataset");
+			else
+				throw ex;
+		}
 	}
 
 	/**
@@ -2141,7 +2147,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
 			if (!met) {
 				Change.Value[] newdata = new Change.Value[insertChange.data.length + 1];
 				newdata[newdata.length - 1] = new Change.Value(field.getName(), newValue, field.getTypeInfo());
-				for(int i = 0; i < insertChange.data.length;i++){
+				for (int i = 0; i < insertChange.data.length; i++) {
 					newdata[i] = insertChange.data[i];
 				}
 				insertChange.data = newdata;

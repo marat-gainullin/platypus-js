@@ -6,6 +6,7 @@ package com.eas.deploy;
 
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
+import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.compacts.CompactClob;
 import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.ClientConstants;
@@ -97,7 +98,8 @@ public class Deployer extends BaseDeployer {
 
             //Deploy application elements to the database
             SqlQuery deleteQuery = new SqlQuery(client, DELETE_ENTITIES_SQL);
-            deleteQuery.compile().enqueueUpdate();
+            SqlCompiledQuery compiledDeleteQuery = deleteQuery.compile();
+            compiledDeleteQuery.enqueueUpdate();
 
             SqlQuery entitiesQuery = new SqlQuery(client, SELECT_ENTITIES_MD_SQL);
             entitiesQuery.setEntityId(ClientConstants.T_MTD_ENTITIES);
@@ -125,11 +127,16 @@ public class Deployer extends BaseDeployer {
                 rs.insert(appElementRow, true);
                 i++;
             }
-            client.commit(null);
+            Map<String, List<Change>> changeLogs = new HashMap<>();
+            List<Change> commonLog = new ArrayList<>();
+            commonLog.addAll(compiledDeleteQuery.getFlow().getChangeLog());
+            commonLog.addAll(rs.getFlowProvider().getChangeLog());
+            changeLogs.put(null, commonLog);
+            client.commit(changeLogs);
             out.println(String.format("Deploy completed. %d application elements deployed.", i)); // NOI18N
             out.println();
         } catch (Exception ex) {
-            client.rollback(null);
+            client.rollback();
             Logger.getLogger(Deployer.class.getName()).log(Level.SEVERE, null, ex);
             err.println("Application deploying error: " + ex.getMessage()); // NOI18N
         } finally {
@@ -156,10 +163,12 @@ public class Deployer extends BaseDeployer {
             SqlQuery deleteQuery = new SqlQuery(client, DELETE_ENTITIES_SQL);
             SqlCompiledQuery deleteCompiledQuery = deleteQuery.compile();
             deleteCompiledQuery.enqueueUpdate();
-            client.commit(null);
+            Map<String, List<Change>> changeLogs = new HashMap<>();
+            changeLogs.put(null, deleteCompiledQuery.getFlow().getChangeLog());
+            client.commit(changeLogs);
             out.println("Unddeploy completed."); // NOI18N
         } catch (Exception ex) {
-            client.rollback(null);
+            client.rollback();
             Logger.getLogger(Deployer.class.getName()).log(Level.SEVERE, null, ex);
             err.println("Error undeploy application: " + ex.getMessage()); // NOI18N
         } finally {

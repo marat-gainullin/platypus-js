@@ -4,6 +4,7 @@
  */
 package com.eas.client.application;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.bearsoft.rowset.Rowset;
@@ -26,6 +27,7 @@ public class WebFlowProvider implements FlowProvider {
 	protected Fields expectedFields;
 	protected AppClient client;
 	protected boolean procedure;
+	protected List<Change> changeLog = new ArrayList<Change>();
 
 	public WebFlowProvider(AppClient aClient, String aEntityId, Fields aExpectedFields) {
 		client = aClient;
@@ -50,7 +52,7 @@ public class WebFlowProvider implements FlowProvider {
 
 	@Override
 	public List<Change> getChangeLog() {
-		return client.getChangeLog();
+		return changeLog;
 	}
 
 	@Override

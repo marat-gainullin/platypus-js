@@ -245,7 +245,7 @@ public class PlatypusClientTest {
         assertEquals(row.getColumnObject(fields.find("tid")), NEW_RECORD_ID);
         assertEquals(row.getColumnObject(fields.find("kid")), NEW_RECORD_ID);
         //
-        Query command = client.getAppQuery(COMMAND_QUERY_ID);
+        PlatypusQuery command = client.getAppQuery(COMMAND_QUERY_ID);
         command.putParameter("gid", DataTypeInfo.DECIMAL, NEW_RECORD_ID);
         command.putParameter("gname", DataTypeInfo.VARCHAR, NEW_RECORD_NAME_G);
         command.enqueueUpdate();

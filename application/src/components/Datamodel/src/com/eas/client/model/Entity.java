@@ -101,8 +101,8 @@ public abstract class Entity<M extends Model<E, ?, ?, Q>, Q extends Query<?>, E 
      */
     public boolean validate() throws Exception {
         boolean res = false;
-        Q oldQuery = getQuery();
-        Fields oldFields = getFields();
+        Q oldQuery = query;
+        Fields oldFields = oldQuery != null ? getFields() : null;
         Parameters oldParams = oldQuery != null ? oldQuery.getParameters() : null;
         query = null;
         Q newQuery = getQuery();

@@ -44,7 +44,7 @@ public class ClientFactory {
                 aDefaultDatasourceName = "ds-" + Math.abs(aApplicationUrl.hashCode());
                 String jndiUrl = "jndi://" + aDefaultDatasourceName;
                 GeneralResourceProvider.getInstance().registerDatasource(aDefaultDatasourceName, new DbConnectionSettings("jdbc:h2:/" + aApplicationUrl.substring(0, aApplicationUrl.length() - H2DB_FILE_SUFFIX.length()), "sa", "sa", "PUBLIC", null));
-                AppCache appCache = obtainTwoTierAppCache(jndiUrl);
+                AppCache appCache = obtainTwoTierAppCache(jndiUrl, null);
                 return new ScriptedDatabasesClient(appCache, aDefaultDatasourceName, true);
             } else {
                 if (aApplicationUrl.toLowerCase().startsWith(PlatypusHttpConstants.PROTOCOL_HTTP)) {
@@ -54,7 +54,7 @@ public class ClientFactory {
                 } else if (aApplicationUrl.toLowerCase().startsWith("platypus")) {
                     return new PlatypusNativeClient(aApplicationUrl);
                 } else if (aApplicationUrl.toLowerCase().startsWith("jndi") || aApplicationUrl.toLowerCase().startsWith("file")) {
-                    AppCache appCache = obtainTwoTierAppCache(aApplicationUrl);
+                    AppCache appCache = obtainTwoTierAppCache(aApplicationUrl, null);
                     return new ScriptedDatabasesClient(appCache, aDefaultDatasourceName, true);
                 } else {
                     throw new Exception("Unknown protocol in url: " + aApplicationUrl);
@@ -66,14 +66,14 @@ public class ClientFactory {
     }
     public static final String H2DB_FILE_SUFFIX = ".h2.db";
 
-    public static AppCache obtainTwoTierAppCache(String aApplicationUrl) throws Exception {
+    public static AppCache obtainTwoTierAppCache(String aApplicationUrl, FilesAppCache.ScanCallback aCallBack) throws Exception {
         AppCache appCache;
         if (aApplicationUrl.startsWith("jndi")) {
             appCache = new DatabaseAppCache(aApplicationUrl);
         } else {// file://
             File f = new File(new URI(aApplicationUrl));
             if (f.exists() && f.isDirectory()) {
-                FilesAppCache filesAppCache = new FilesAppCache(f.getPath());
+                FilesAppCache filesAppCache = new FilesAppCache(f.getPath(), aCallBack);
                 filesAppCache.watch();
                 appCache = filesAppCache;
             } else {

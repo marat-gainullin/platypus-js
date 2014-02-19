@@ -1,8 +1,12 @@
 package com.eas.client.gxtcontrols.model;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.eas.client.Utils;
+import com.eas.client.application.Application;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Model;
 import com.eas.client.model.ParametersEntity;
@@ -10,6 +14,7 @@ import com.google.gwt.xml.client.Element;
 
 public class ModelElementRef {
 	protected Model model;
+	public String entityId;
 	public Entity entity;
 	protected String fieldName;
 	public boolean isField = true;
@@ -21,7 +26,7 @@ public class ModelElementRef {
 		super();
 		model = aModel;
 		if (aTag != null) {
-			String entityId = aTag.getAttribute("entityId");
+			entityId = aTag.getAttribute("entityId");
 			entity = aModel.getEntityById(entityId);
 			fieldName = aTag.getAttribute("fieldName");
 			isField = Utils.getBooleanAttribute(aTag, "field", true);
@@ -32,7 +37,8 @@ public class ModelElementRef {
 	public ModelElementRef(Model aModel, String aEntityId, String aFieldName, boolean aIsField) throws Exception {
 		super();
 		model = aModel;
-		entity = aModel.getEntityById(aEntityId);
+		entityId = aEntityId;
+		entity = aModel.getEntityById(entityId);
 		fieldName = aFieldName;
 		isField = aIsField;
 		tryResolveField();
@@ -55,6 +61,8 @@ public class ModelElementRef {
 					field = entity.getQuery().getParameters().get(fieldName);
 				}
 			}
+		}else{
+			Logger.getLogger(ModelElementRef.class.getName()).log(Level.SEVERE, "Model's entity missing while controls binding. Entity name: "+entityId+"; "+(isField?"field":"parameter")+" name: "+fieldName);
 		}
 	}
 

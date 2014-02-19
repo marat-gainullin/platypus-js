@@ -47,7 +47,8 @@ public class RowMarker extends ColumnConfig<Row, Row> implements ComponentPlugin
 	public RowMarker(Entity aRowsSource, IdentityValueProvider<Row> valueProvider) {
 		super(valueProvider);
 		rowsSource = aRowsSource;
-		rowsSource.getRowset().addRowsetListener(handler);
+		if (rowsSource != null)
+			rowsSource.getRowset().addRowsetListener(handler);
 
 		setHeader("");
 		setWidth(23);
@@ -91,12 +92,12 @@ public class RowMarker extends ColumnConfig<Row, Row> implements ComponentPlugin
 		for (int i = 0, len = grid.getStore().size(); i < len; i++) {
 			Element cell = grid.getView().getCell(i, col);
 			if (cell != null) {
-				//SafeHtmlBuilder sb = new SafeHtmlBuilder();
+				// SafeHtmlBuilder sb = new SafeHtmlBuilder();
 				Row toRender = grid.getStore().get(i);
 				boolean currentRow = rowsSource.getRowset() != null && rowsSource.getRowset().getCurrentRow() == toRender;
 				XElement xCell = cell.getFirstChildElement().<XElement> cast();
-				XElement left = xCell.selectNode("."+RowMarkerResources.INSTANCE.style().rowMarkerLeft());
-				XElement right = xCell.selectNode("."+RowMarkerResources.INSTANCE.style().rowMarkerRight());
+				XElement left = xCell.selectNode("." + RowMarkerResources.INSTANCE.style().rowMarkerLeft());
+				XElement right = xCell.selectNode("." + RowMarkerResources.INSTANCE.style().rowMarkerRight());
 				right.removeClassName(RowMarkerResources.INSTANCE.style().rowMarkerEdited());
 				right.removeClassName(RowMarkerResources.INSTANCE.style().rowMarkerNew());
 				if (toRender.isInserted())

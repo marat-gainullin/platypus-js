@@ -4,6 +4,7 @@
  */
 package com.eas.client.dbstructure;
 
+import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.ForeignKeySpec;
@@ -12,6 +13,10 @@ import com.eas.client.metadata.DbTableIndexSpec;
 import com.eas.client.model.dbscheme.DbSchemeModel;
 import com.eas.client.queries.SqlCompiledQuery;
 import com.eas.client.sqldrivers.SqlDriver;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -118,7 +123,7 @@ public class SqlActionsController {
             return errorMessage;
         }
 
-        protected abstract void doSqlWork() throws Exception;
+        protected abstract List<Change> doSqlWork() throws Exception;
 
         protected void parseException(Exception ex) {
             if (ex != null) {
@@ -134,10 +139,11 @@ public class SqlActionsController {
 
         public boolean execute() {
             try {
-                doSqlWork();
-                client.commit(null);
+                Map<String, List<Change>> logs = new HashMap<>();
+                logs.put(dbId, doSqlWork());
+                client.commit(logs);
             } catch (Exception ex) {
-                client.rollback(null);
+                client.rollback();
                 parseException(ex);
                 return false;
             }
@@ -151,7 +157,7 @@ public class SqlActionsController {
 
     public class CreateConstraintAction extends SqlAction {
 
-        protected ForeignKeySpec fk = null;
+        protected ForeignKeySpec fk;
 
         CreateConstraintAction(ForeignKeySpec aFk) {
             super();
@@ -159,12 +165,12 @@ public class SqlActionsController {
         }
 
         @Override
-        protected void doSqlWork() throws Exception {
+        protected List<Change> doSqlWork() throws Exception {
             SqlDriver driver = achiveSqlDriver();
             String sqlCreateConstraintClause = driver.getSql4CreateFkConstraint(schema, fk);
             SqlCompiledQuery q = new SqlCompiledQuery(client, dbId, sqlCreateConstraintClause);
             q.enqueueUpdate();
-            client.commit(dbId);
+            return q.getFlow().getChangeLog();
         }
     }
 
@@ -175,12 +181,12 @@ public class SqlActionsController {
         }
 
         @Override
-        protected void doSqlWork() throws Exception {
+        protected List<Change> doSqlWork() throws Exception {
             SqlDriver driver = achiveSqlDriver();
             String sqlDropConstraintClause = driver.getSql4DropFkConstraint(schema, fk);
             SqlCompiledQuery q = new SqlCompiledQuery(client, dbId, sqlDropConstraintClause);
             q.enqueueUpdate();
-            client.commit(dbId);
+            return q.getFlow().getChangeLog();
         }
     }
 
@@ -196,12 +202,12 @@ public class SqlActionsController {
         }
 
         @Override
-        protected void doSqlWork() throws Exception {
+        protected List<Change> doSqlWork() throws Exception {
             SqlDriver driver = achiveSqlDriver();
             String sqlCreateTableClause = driver.getSql4EmptyTableCreation(schema, tableName, pkFieldName);
             SqlCompiledQuery q = new SqlCompiledQuery(client, dbId, sqlCreateTableClause);
             q.enqueueUpdate();
-            client.commit(dbId);
+            return q.getFlow().getChangeLog();
         }
     }
 
@@ -217,12 +223,12 @@ public class SqlActionsController {
         }
 
         @Override
-        protected void doSqlWork() throws Exception {
+        protected List<Change> doSqlWork() throws Exception {
             SqlDriver driver = achiveSqlDriver();
             String sqlCreateIndexClause = driver.getSql4CreateIndex(schema, tableName, index);
             SqlCompiledQuery q = new SqlCompiledQuery(client, dbId, sqlCreateIndexClause);
             q.enqueueUpdate();
-            client.commit(dbId);
+            return q.getFlow().getChangeLog();
         }
     }
 
@@ -238,12 +244,12 @@ public class SqlActionsController {
         }
 
         @Override
-        protected void doSqlWork() throws Exception {
+        protected List<Change> doSqlWork() throws Exception {
             SqlDriver driver = achiveSqlDriver();
             String sqlDropIndexClause = driver.getSql4DropIndex(schema, tableName, index.getName());
             SqlCompiledQuery q = new SqlCompiledQuery(client, dbId, sqlDropIndexClause);
             q.enqueueUpdate();
-            client.commit(dbId);
+            return q.getFlow().getChangeLog();
         }
     }
 
@@ -259,7 +265,7 @@ public class SqlActionsController {
         }
 
         @Override
-        protected void doSqlWork() throws Exception {
+        protected List<Change> doSqlWork() throws Exception {
             SqlDriver driver = achiveSqlDriver();
             String fullName = tableName;
             if (schema != null && !schema.isEmpty()) {
@@ -277,7 +283,7 @@ public class SqlActionsController {
             sqlCreateTableClause += " )";
             SqlCompiledQuery q = new SqlCompiledQuery(client, dbId, sqlCreateTableClause);
             q.enqueueUpdate();
-            client.commit(dbId);
+            return q.getFlow().getChangeLog();
         }
     }
 
@@ -291,12 +297,12 @@ public class SqlActionsController {
         }
 
         @Override
-        protected void doSqlWork() throws Exception {
+        protected List<Change> doSqlWork() throws Exception {
             SqlDriver driver = achiveSqlDriver();
             String sqlDropTable = driver.getSql4DropTable(schema, tableName);
             SqlCompiledQuery q = new SqlCompiledQuery(client, dbId, sqlDropTable);
             q.enqueueUpdate();
-            client.commit(dbId);
+            return q.getFlow().getChangeLog();
         }
     }
 
@@ -319,14 +325,16 @@ public class SqlActionsController {
         }
 
         @Override
-        protected void doSqlWork() throws Exception {
+        protected List<Change> doSqlWork() throws Exception {
             SqlDriver driver = achiveSqlDriver();
             String[] sqls = driver.getSqls4AddingField(schema, tableName, fieldMd);
+            List<Change> commonLog = new ArrayList<>();
             for (int i = 0; i < sqls.length; i++) {
                 SqlCompiledQuery q = new SqlCompiledQuery(client, dbId, sqls[i]);
                 q.enqueueUpdate();
+                commonLog.addAll(q.getFlow().getChangeLog());
             }
-            client.commit(dbId);
+            return commonLog;
         }
     }
 
@@ -337,14 +345,16 @@ public class SqlActionsController {
         }
 
         @Override
-        protected void doSqlWork() throws Exception {
+        protected List<Change> doSqlWork() throws Exception {
             SqlDriver driver = achiveSqlDriver();
             String[] sql4DropField = driver.getSql4DroppingField(schema, tableName, fieldMd.getName());
+            List<Change> commonLog = new ArrayList<>();
             for (String sql : sql4DropField) {
                 SqlCompiledQuery q = new SqlCompiledQuery(client, dbId, sql);
                 q.enqueueUpdate();
+                commonLog.addAll(q.getFlow().getChangeLog());
             }
-            client.commit(dbId);
+            return commonLog;
         }
     }
 
@@ -358,22 +368,24 @@ public class SqlActionsController {
         }
 
         @Override
-        protected void doSqlWork() throws Exception {
+        protected List<Change> doSqlWork() throws Exception {
             SqlDriver driver = achiveSqlDriver();
             String[] sqls4ModifyField = driver.getSqls4ModifyingField(schema, tableName, fieldMd, newFieldMd);
+            List<Change> commonLog = new ArrayList<>();
             for (int i = 0; i < sqls4ModifyField.length; i++) {
                 SqlCompiledQuery q = new SqlCompiledQuery(client, dbId, sqls4ModifyField[i]);
                 q.enqueueUpdate();
+                commonLog.addAll(q.getFlow().getChangeLog());
             }
-            client.commit(dbId);
+            return commonLog;
         }
     }
 
     public class RenameFieldAction extends SqlAction {
 
-        protected String tableName = null;
-        protected String oldFieldName = null;
-        protected Field newField = null;
+        protected String tableName;
+        protected String oldFieldName;
+        protected Field newField;
 
         public RenameFieldAction(String aTableName, String aOldFieldName, Field aNewField) {
             super();
@@ -383,14 +395,16 @@ public class SqlActionsController {
         }
 
         @Override
-        protected void doSqlWork() throws Exception {
+        protected List<Change> doSqlWork() throws Exception {
             SqlDriver driver = achiveSqlDriver();
             String[] sqls4RenamingField = driver.getSqls4RenamingField(schema, tableName, oldFieldName, newField);
+            List<Change> commonLog = new ArrayList<>();
             for (int i = 0; i < sqls4RenamingField.length; i++) {
                 SqlCompiledQuery q = new SqlCompiledQuery(client, dbId, sqls4RenamingField[i]);
                 q.enqueueUpdate();
+                commonLog.addAll(q.getFlow().getChangeLog());
             }
-            client.commit(dbId);
+            return commonLog;
         }
     }
 
@@ -408,16 +422,17 @@ public class SqlActionsController {
         }
 
         @Override
-        protected void doSqlWork() throws Exception {
+        protected List<Change> doSqlWork() throws Exception {
             SqlDriver driver = achiveSqlDriver();
             String lschema = client.getDbMetadataCache(dbId).getConnectionSchema();
-
             String[] sqlsText = driver.getSql4CreateColumnComment(schema != null ? schema : lschema, tableName, fieldName, newDescription);
+            List<Change> commonLog = new ArrayList<>();
             for (int i = 0; i < sqlsText.length; i++) {
                 SqlCompiledQuery q = new SqlCompiledQuery(client, dbId, sqlsText[i]);
                 q.enqueueUpdate();
+                commonLog.addAll(q.getFlow().getChangeLog());
             }
-            client.commit(dbId);
+            return commonLog;
         }
     }
 
@@ -433,14 +448,14 @@ public class SqlActionsController {
         }
 
         @Override
-        protected void doSqlWork() throws Exception {
+        protected List<Change> doSqlWork() throws Exception {
             SqlDriver driver = achiveSqlDriver();
             String lschema = client.getDbMetadataCache(dbId).getConnectionSchema();
 
             String sqlText = driver.getSql4CreateTableComment(schema != null ? schema : lschema, tableName, newDescription);
             SqlCompiledQuery q = new SqlCompiledQuery(client, dbId, sqlText);
             q.enqueueUpdate();
-            client.commit(dbId);
+            return q.getFlow().getChangeLog();
         }
     }
 }

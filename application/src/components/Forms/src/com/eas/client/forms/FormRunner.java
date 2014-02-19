@@ -19,6 +19,7 @@ import com.eas.controls.FormEventsExecutor;
 import com.eas.controls.containers.PanelDesignInfo;
 import com.eas.controls.events.ControlEventsIProxy;
 import com.eas.controls.events.WindowEventsIProxy;
+import com.eas.controls.wrappers.ButtonGroupWrapper;
 import com.eas.dbcontrols.DbControlPanel;
 import com.eas.dbcontrols.grid.DbGrid;
 import com.eas.dbcontrols.map.DbMap;
@@ -1326,7 +1327,6 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
         Runnable handlersResolver = prepareForm(scriptDoc);
         prepareScript(scriptDoc, args);
         handlersResolver.run();
-        this.delete(ScriptUtils.HANDLERS_PROP_NAME);
     }
 
     protected Runnable prepareForm(ScriptDocument scriptDoc) throws Exception {
@@ -1356,7 +1356,12 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
             @Override
             public Object run(Context cx) throws Exception {
                 for (Entry<String, JComponent> entry : components.entrySet()) {
-                    if (form != entry.getValue()) {
+                    if (form != entry.getValue() && !(entry.getValue() instanceof ButtonGroupWrapper)) {
+                        defineProperty(entry.getKey(), publishComponent(entry.getValue(), FormRunner.this, factory.getControlDesignInfos().get(entry.getKey())), READONLY);
+                    }
+                }
+                for (Entry<String, JComponent> entry : components.entrySet()) {
+                    if (form != entry.getValue() && (entry.getValue() instanceof ButtonGroupWrapper)) {
                         defineProperty(entry.getKey(), publishComponent(entry.getValue(), FormRunner.this, factory.getControlDesignInfos().get(entry.getKey())), READONLY);
                     }
                 }

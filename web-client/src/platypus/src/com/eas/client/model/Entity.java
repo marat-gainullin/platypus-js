@@ -1576,7 +1576,7 @@ public class Entity implements RowsetListener {
 			// try to select any data only within non-manual queries
 			// platypus manual queries are:
 			// - insert, update, delete queries;
-			// - stored procedures, wich changes data.
+			// - stored procedures, which changes data.
 			if (!query.isManual()) {
 				// There might be entities - parameters values sources, with no
 				// data in theirs rowsets,

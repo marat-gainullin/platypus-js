@@ -6,6 +6,7 @@ package com.eas.deploy;
 
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
+import com.bearsoft.rowset.changes.Change;
 import com.eas.client.ClientConstants;
 import com.eas.client.DatabasesClient;
 import com.eas.client.cache.PlatypusFiles;
@@ -19,7 +20,9 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -73,7 +76,8 @@ public class DbMigrator extends BaseDeployer {
     }
 
     /**
-     * Creates database metadata snapshot migration to the current database state.
+     * Creates database metadata snapshot migration to the current database
+     * state.
      *
      */
     public void createDbMetadataMigration() {
@@ -202,9 +206,11 @@ public class DbMigrator extends BaseDeployer {
             rs.getFields().get(ClientConstants.F_VERSION_VALUE).setPk(true);
             Row r = rs.getRow(1);
             r.setColumnObject(rs.getFields().find(ClientConstants.F_VERSION_VALUE), aVersion);
-            client.commit(null);
+            Map<String, List<Change>> changeLogs = new HashMap<>();
+            changeLogs.put(null, rs.getFlowProvider().getChangeLog());
+            client.commit(changeLogs);
         } catch (Exception ex) {
-            client.rollback(null);
+            client.rollback();
             Logger.getLogger(DbMigrator.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
@@ -314,7 +320,7 @@ public class DbMigrator extends BaseDeployer {
     void initVersioning() throws Exception {
         DatabasesClient.initVersioning(client.obtainDataSource(null));
     }
-    
+
     private static class MigrationsFilesFilter implements FilenameFilter {
 
         @Override

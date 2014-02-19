@@ -66,7 +66,7 @@ public class Session implements PrincipalHost {
         // data in client's transaction
         try {
             if (serverCore != null) { // this check is only for tests
-                serverCore.getDatabasesClient().rollback(sessionId);
+                serverCore.getDatabasesClient().rollback();
             }
         } catch (Exception ex) {
             throw new IOException(ex);

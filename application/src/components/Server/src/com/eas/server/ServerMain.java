@@ -206,8 +206,8 @@ public class ServerMain {
             throw new IllegalArgumentException("Application url ( -url parameter) is required.");
         }
         SSLContext ctx = createSSLContext();
-        AppCache appCache = ClientFactory.obtainTwoTierAppCache(url);
-        ScriptedDatabasesClient appDbClient = new ScriptedDatabasesClient(appCache, defDatasource, true, new ServerTasksScanner(tasks));
+        AppCache appCache = ClientFactory.obtainTwoTierAppCache(url, new ServerTasksScanner(tasks));
+        ScriptedDatabasesClient appDbClient = new ScriptedDatabasesClient(appCache, defDatasource, true);
         // Apply debugging facility
         if (System.getProperty(ScriptRunner.DEBUG_PROPERTY) != null) {
             Debugger debugger = Debugger.initialize(false);

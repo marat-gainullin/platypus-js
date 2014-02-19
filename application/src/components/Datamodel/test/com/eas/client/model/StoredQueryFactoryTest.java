@@ -4,6 +4,7 @@
  */
 package com.eas.client.model;
 
+import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
@@ -13,12 +14,16 @@ import com.eas.client.DatabasesClient;
 import com.eas.client.DatabasesClientWithResource;
 import com.eas.client.DbClient;
 import com.eas.client.exceptions.NoSuchEntityException;
+import com.eas.client.queries.SqlCompiledQuery;
 import com.eas.client.queries.SqlQuery;
 import com.eas.client.settings.SettingsConstants;
 import com.eas.script.JsDoc;
 import com.eas.util.BinaryUtils;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.junit.*;
 import static org.junit.Assert.*;
 
@@ -537,8 +542,11 @@ public class StoredQueryFactoryTest extends BaseTest {
     private void deleteEntity(String aId, DbClient aClient) throws Exception {
         SqlQuery deleteEntity = new SqlQuery(aClient, "delete from MTD_ENTITIES where MDENT_ID = :id");
         deleteEntity.putParameter("id", DataTypeInfo.VARCHAR, aId);
-        deleteEntity.compile().enqueueUpdate();
-        int rowsAffected = aClient.commit(null);
+        SqlCompiledQuery compiled = deleteEntity.compile();
+        compiled.enqueueUpdate();
+        Map<String, List<Change>> changeLogs = new HashMap<>();
+        changeLogs.put(null, compiled.getFlow().getChangeLog());
+        int rowsAffected = aClient.commit(changeLogs);
         assertEquals(1, rowsAffected);
     }
 
@@ -548,9 +556,12 @@ public class StoredQueryFactoryTest extends BaseTest {
         insertEntity.putParameter("name", DataTypeInfo.VARCHAR, "Test Query");
         String randomId = IDGenerator.genID().toString();
         insertEntity.putParameter("id", DataTypeInfo.VARCHAR, randomId);
-        insertEntity.compile().enqueueUpdate(); // if no rows inserted - such entity exists
+        SqlCompiledQuery compiled = insertEntity.compile();
+        compiled.enqueueUpdate(); // if no rows inserted - such entity exists
+        Map<String, List<Change>> changeLogs = new HashMap<>();
+        changeLogs.put(null, compiled.getFlow().getChangeLog());
         assert randomId != null;
-        int rowsAffected = aClient.commit(null);
+        int rowsAffected = aClient.commit(changeLogs);
         assertEquals(1, rowsAffected);
         return randomId;
     }
@@ -562,9 +573,12 @@ public class StoredQueryFactoryTest extends BaseTest {
         insertEntity.putParameter("name", DataTypeInfo.VARCHAR, "Test Query");
         insertEntity.putParameter("content", DataTypeInfo.LONGVARCHAR, queryContent);
         insertEntity.putParameter("id", DataTypeInfo.VARCHAR, aQueryId);
-        insertEntity.compile().enqueueUpdate();
+        SqlCompiledQuery compiled = insertEntity.compile();
+        compiled.enqueueUpdate();
+        Map<String, List<Change>> changeLogs = new HashMap<>();
+        changeLogs.put(null, compiled.getFlow().getChangeLog());
         assert aQueryId != null;
-        int rowsAffected = aClient.commit(null);
+        int rowsAffected = aClient.commit(changeLogs);
         assertEquals(1, rowsAffected);
         return aQueryId;
     }

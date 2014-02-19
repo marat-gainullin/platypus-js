@@ -51,7 +51,6 @@ public class PlatypusQuery extends Query<AppClient> {
         return rowset;
     }
 
-    @Override
     public void enqueueUpdate() throws Exception {
         client.enqueueUpdate(entityId, params);
     }
@@ -77,6 +76,10 @@ public class PlatypusQuery extends Query<AppClient> {
     }
     */ 
 
+    /**
+     * 
+     * @return 
+     */
     @Override
     public Query copy() {
         return new PlatypusQuery(this);

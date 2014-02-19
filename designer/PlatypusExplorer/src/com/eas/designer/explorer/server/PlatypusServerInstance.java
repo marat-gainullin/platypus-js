@@ -174,6 +174,8 @@ public final class PlatypusServerInstance implements Server, ServerInstanceImple
                     arguments.add(ProjectRunner.OPTION_PREFIX + DatasourcesArgsConsumer.DB_SCHEMA_CONF_PARAM);
                     arguments.add(connection.getSchema());
                 }
+            } else {
+                io.getErr().println(NbBundle.getMessage(PlatypusServerInstance.class, "MSG_Invalid_Database", connection.getDisplayName()));
             }
         }
 
@@ -199,10 +201,10 @@ public final class PlatypusServerInstance implements Server, ServerInstanceImple
                     project.getProjectDirectory().toURI().toASCIIString()));
         }
 
-        if(project.getSettings().isJ2SEAnonymousAccessEnabled()){
+        if (project.getSettings().isJ2SEAnonymousAccessEnabled()) {
             arguments.add(ProjectRunner.OPTION_PREFIX + ServerMain.ANONYMOUS_ON_CMD_SWITCH);
         }
-        
+
         if (!ProjectRunner.isSetByOption(ServerMain.IFACE_CONF_PARAM, project.getSettings().getRunClientOptions())) {
             arguments.add(ProjectRunner.OPTION_PREFIX + ServerMain.IFACE_CONF_PARAM);
             arguments.add(getListenInterfaceArgument(project.getSettings()));
@@ -213,7 +215,7 @@ public final class PlatypusServerInstance implements Server, ServerInstanceImple
             arguments.add(ProjectRunner.OPTION_PREFIX + ServerMain.PROTOCOLS_CONF_PARAM);
             arguments.add(getProtocol(project.getSettings()));
             io.getOut().println(String.format(NbBundle.getMessage(PlatypusServerInstance.class, "MSG_Server_Protocol"), getProtocol(project.getSettings())));//NOI18N
-        }        
+        }
         if (project.getSettings().getRunClientOptions() != null && !project.getSettings().getRunClientOptions().isEmpty()) {
             ProjectRunner.addArguments(arguments, project.getSettings().getRunClientOptions());
             io.getOut().println(String.format(NbBundle.getMessage(PlatypusServerInstance.class, "MSG_Run_Options"),//NOI18N

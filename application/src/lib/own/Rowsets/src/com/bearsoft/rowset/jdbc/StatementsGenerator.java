@@ -166,7 +166,7 @@ public class StatementsGenerator implements ChangeVisitor {
             InsertChunk chunk = inserts.get(tableName);
             //
             if (schemaContext != null && !schemaContext.isEmpty()
-                    && schemaContextFieldName != null && schemaContextFieldName.isEmpty()
+                    && schemaContextFieldName != null && !schemaContextFieldName.isEmpty()
                     && !chunk.contexted) {
                 Field contextField = entitiesHost.resolveField(tableName, schemaContextFieldName);
                 if (contextField != null) {

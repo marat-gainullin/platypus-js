@@ -117,37 +117,18 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
             + "* If an application needs to abort futher attempts and discard model data changes, use <code>model.revert()</code>.\n"
             + "* @param callback the function to be envoked after the data changes saved (optional)\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = SAVE_JSDOC, params = {"callback"})
     @Override
     public boolean save(Function aCallback) throws Exception {
-        for (String dbId : changeLogs.keySet()) {
-            client.getChangeLog(dbId, sessionId).addAll(changeLogs.get(dbId));
-        }
         return super.save(aCallback);
     }
 
-    private static final String COMMIT_JSDOC = ""
-            + "/**\n"
-            + "* Commits model data changes.\n"
-            + "*/";
-    
-    @ScriptFunction(jsDoc = COMMIT_JSDOC)
     @Override
     public int commit() throws Exception {
-        if (commitable) {
-            return client.commit(sessionId);
-        } else {
-            return 0;
-        }
+        return client.commit(changeLogs);
     }
 
-    private static final String SAVED_JSDOC = ""
-            + "/**\n"
-            + "* Notifies the model what it is saved.\n"
-            + "*/";
-    
-    @ScriptFunction(jsDoc = SAVED_JSDOC)
     @Override
     public void saved() throws Exception {
         for (List<Change> changeLog : changeLogs.values()) {
@@ -171,14 +152,14 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
     public void requery(Function aOnSuccess) throws Exception {
         requery(aOnSuccess, null);
     }
-    
+
     private static final String REQUERY_JSDOC = ""
             + "/**\n"
             + "* Requeries the model data. Forses the model data refresh, no matter if its parameters has changed or not.\n"
             + "* @param onSuccessCallback the handler function for refresh data on success event (optional).\n"
             + "* @param onFailureCallback the handler function for refresh data on failure event (optional).\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = REQUERY_JSDOC, params = {"onSuccessCallback", "onFailureCallback"})
     @Override
     public void requery(Function aOnSuccess, Function aOnFailure) throws Exception {
@@ -208,7 +189,7 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
             + "* @param dbId the concrete database ID (optional).\n"
             + "* @return an entity instance.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = CREATE_ENTITY_JSDOC, params = {"sqlText", "datasourceName"})
     public synchronized Scriptable createEntity(String aSqlText, String aDatasourceName) throws Exception {
         if (client == null) {
@@ -240,7 +221,7 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
             + "* @param dbId the concrete database ID (optional).\n"
             + "* @return an entity instance.\n"
             + "*/";
-    
+
     @ScriptFunction(jsDoc = EXECUTE_SQL_JSDOC, params = {"sqlText", "datasourceName"})
     public void executeSql(String aSqlClause, String aDatasourceName) throws Exception {
         if (client == null) {

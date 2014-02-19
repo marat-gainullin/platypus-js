@@ -149,7 +149,7 @@ public class JDropDownButton extends JButton {
                     }
                     try {
                         setAction(null);
-                        dropDownMenu.show(this, 0, size.height - 5);
+                        dropDownMenu.show(this, x, e.getY());
                         super.processMouseEvent(e);
                     } finally {
                         for (ActionListener l : al) {

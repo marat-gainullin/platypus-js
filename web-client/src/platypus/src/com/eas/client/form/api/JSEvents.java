@@ -389,7 +389,7 @@ public class JSEvents {
 				return @com.eas.client.gxtcontrols.Publisher::checkPublishedComponent(Ljava/lang/Object;)(comp);
 			}
 		});
-		return published;
+		return published; 
 	}-*/;
 
 	public native static JavaScriptObject publishRemoveEvent(RemoveEvent aEvent)/*-{

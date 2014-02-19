@@ -175,12 +175,6 @@ public class ScriptedDatabasesClient extends DatabasesClient {
         super(anAppCache, aDefaultDatasourceName, aAutoFillMetadata);
     }
 
-    /**
-     * @inheritDoc
-     */
-    public ScriptedDatabasesClient(AppCache anAppCache, String aDefaultDatasourceName, boolean aAutoFillMetadata, FilesAppCache.ScanCallback aScanCallback) throws Exception {
-        super(anAppCache, aDefaultDatasourceName, aAutoFillMetadata, aScanCallback);
-    }
 
     /**
      * Adds transaction validator module. Validator modules are used in commit
@@ -261,7 +255,7 @@ public class ScriptedDatabasesClient extends DatabasesClient {
     }
 
     @Override
-    protected int commit(final String aSessionId, final String aDatasourceId, final List<Change> aLog) throws Exception {
+    protected int commit(final String aDatasourceId, final List<Change> aLog) throws Exception {
         ScriptUtils.inContext(new ScriptAction() {
             @Override
             public Object run(Context cx) throws Exception {
@@ -274,7 +268,7 @@ public class ScriptedDatabasesClient extends DatabasesClient {
                             Object oValidate = validator.get("validate", validator);
                             if (oValidate instanceof Function) {
                                 Function fValidate = (Function) oValidate;
-                                Object oResult = fValidate.call(cx, validator.getParentScope(), validator, new Object[]{Context.javaToJS(aLog.toArray(), validator.getParentScope()), aDatasourceId, aSessionId});
+                                Object oResult = fValidate.call(cx, validator.getParentScope(), validator, new Object[]{Context.javaToJS(aLog.toArray(), validator.getParentScope()), aDatasourceId});
                                 if (oResult != null && oResult != Context.getUndefinedValue() && Boolean.FALSE.equals(Context.toBoolean(oResult))) {
                                     break;
                                 }
@@ -294,7 +288,7 @@ public class ScriptedDatabasesClient extends DatabasesClient {
                             Object oApply = dataSourceApplier.get("apply", dataSourceApplier);
                             if (oApply instanceof Function) {
                                 Function fApply = (Function) oApply;
-                                fApply.call(cx, dataSourceApplier.getParentScope(), dataSourceApplier, new Object[]{Context.javaToJS(aLog.toArray(), dataSourceApplier.getParentScope()), aSessionId});
+                                fApply.call(cx, dataSourceApplier.getParentScope(), dataSourceApplier, new Object[]{Context.javaToJS(aLog.toArray(), dataSourceApplier.getParentScope())});
                             }
                         }
                     }
@@ -309,7 +303,7 @@ public class ScriptedDatabasesClient extends DatabasesClient {
             }
         }
         if (!consumed) {
-            return super.commit(aSessionId, aDatasourceId, aLog);
+            return super.commit(aDatasourceId, aLog);
         } else {
             aLog.clear();
             return 0;

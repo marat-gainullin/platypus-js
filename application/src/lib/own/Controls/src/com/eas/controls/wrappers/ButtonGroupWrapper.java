@@ -51,7 +51,6 @@ public class ButtonGroupWrapper extends JComponent {
         super.add(comp, 0);
     }
 
-    
     @Override
     public void remove(Component comp) {
         if (comp instanceof AbstractButton) {
@@ -79,5 +78,14 @@ public class ButtonGroupWrapper extends JComponent {
     @Override
     public int getComponentCount() {
         return Collections.list(group.getElements()).size();
+    }
+
+    @Override
+    public Component getComponent(int index) {
+        if (index >= 0 && index < group.getButtonCount()) {
+            return Collections.list(group.getElements()).get(index);
+        } else {
+            return null;
+        }
     }
 }

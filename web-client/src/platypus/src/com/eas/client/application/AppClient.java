@@ -17,7 +17,6 @@ import java.util.logging.Logger;
 
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.changes.Change;
-import com.bearsoft.rowset.changes.Command;
 import com.bearsoft.rowset.dataflow.TransactionListener;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameter;
@@ -90,7 +89,6 @@ public class AppClient {
 	private String baseUrl;
 	private Map<String, Document> appElements = new HashMap<String, Document>();
 	private Map<String, PlatypusImageResource> iconsCache = new HashMap<String, PlatypusImageResource>();
-	protected List<Change> changeLog = new ArrayList<Change>();
 	protected Set<TransactionListener> transactionListeners = new HashSet<TransactionListener>();
 
 	public static String relativeUri() {
@@ -385,20 +383,6 @@ public class AppClient {
 		};
 	}
 
-	public List<Change> getChangeLog() {
-		return changeLog;
-	}
-
-	public void enqueueUpdate(String aQueryId, Parameters aParams) throws Exception {
-		Command command = new Command(aQueryId);
-		command.parameters = new Change.Value[aParams.getParametersCount()];
-		for (int i = 0; i < command.parameters.length; i++) {
-			Parameter p = aParams.get(i + 1);
-			command.parameters[i] = new Change.Value(p.getName(), p.getValue(), p.getTypeInfo());
-		}
-		changeLog.add(command);
-	}
-
 	public Document getCachedAppElement(String aAppElementName) {
 		return appElements.get(aAppElementName);
 	}
@@ -644,7 +628,7 @@ public class AppClient {
 		// No-op here. Some implementation is in the tests.
 	}
 
-	public Cancellable commit(final CancellableCallback onSuccess, final Callback<String> onFailure) throws Exception {
+	public Cancellable commit(final List<Change> changeLog, final CancellableCallback onSuccess, final Callback<String> onFailure) throws Exception {
 		String query = param(PlatypusHttpRequestParams.TYPE, String.valueOf(Requests.rqCommit));
 		return startRequest(API_URI, query, ChangesWriter.writeLog(changeLog), RequestBuilder.POST, new ResponseCallbackAdapter() {
 
@@ -802,8 +786,7 @@ public class AppClient {
 			@com.eas.client.application.AppClient::defineServerModule(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aModule);
 		}
 		$wnd.platypus.executeServerModuleMethod = function(aModuleName, aMethodName, aParams, aOnSuccess, aOnFailure) {
-			return $wnd
-					.boxAsJs(aClient.@com.eas.client.application.AppClient::executeServerModuleMethod(Ljava/lang/String;Ljava/lang/String;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aMethodName, aParams, aOnSuccess, aOnFailure));
+			return $wnd.boxAsJs(aClient.@com.eas.client.application.AppClient::executeServerModuleMethod(Ljava/lang/String;Ljava/lang/String;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aMethodName, aParams, aOnSuccess, aOnFailure));
 		}
 		$wnd.platypus.executeServerReport = function(aModuleName, aModule) {
 			aClient.@com.eas.client.application.AppClient::executeServerReport(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aModule);
