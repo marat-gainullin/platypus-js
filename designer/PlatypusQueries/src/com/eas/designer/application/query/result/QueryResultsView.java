@@ -586,6 +586,8 @@ public class QueryResultsView extends javax.swing.JPanel {
         try {
             if (refresh()) {
                 showQueryResultsMessage();
+                gridPanel.revalidate();
+                gridPanel.repaint();
             }
         } catch (Throwable ex) {
             showWarning(ex.getMessage());
