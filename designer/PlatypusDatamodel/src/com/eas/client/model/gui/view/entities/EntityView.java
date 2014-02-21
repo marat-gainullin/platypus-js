@@ -168,7 +168,7 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
 
     public Parameters getParameters() {
         try {
-            if (entity != null && entity.getQuery() != null) {
+            if (entity != null && entity.isQuery()) {
                 return entity.getQuery().getParameters();
             } else {
                 return null;
@@ -890,7 +890,7 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
                     remove(paramsFieldsScroll);
                     remove(absentQueryLabel);
                     remove(absentQueryText);
-                    if (entity.getQuery() != null) {
+                    if (entity.isQuery()) {
                         Fields entityFields = entity.getFields();
                         add(paramsFieldsScroll, BorderLayout.CENTER);
                         if (isParameterized()) {
@@ -1053,7 +1053,7 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
         @Override
         public int getSize() {
             try {
-                if (entity != null && entity.getQuery() != null) {
+                if (entity != null && entity.isQuery()) {
                     return entity.getQuery().getParameters().getFieldsCount();
                 } else {
                     return 0;
@@ -1079,7 +1079,7 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
         @Override
         public int getFieldNameIndex(String aFieldName) {
             try {
-                if (entity != null && entity.getQuery() != null) {
+                if (entity != null && entity.isQuery()) {
                     return entity.getQuery().getParameters().find(aFieldName) - 1;
                 } else {
                     return 0;

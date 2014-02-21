@@ -71,7 +71,7 @@ public class ModelElementRefEditor extends PropertyEditorSupport implements Form
             ApplicationDbModel model = formModel.getDataObject().getClient() != null ? formModel.getDataObject().getModel() : null;
             if (element != null && model != null) {
                 ApplicationDbEntity elementEntity = model.getEntityById(element.getEntityId());
-                if (elementEntity != null) {
+                if (elementEntity != null && elementEntity.isQuery()) {
                     Fields fields = elementEntity.getFields();
                     if (fields.contains(text)) {
                         ModelElementRef copied = element.copy();
@@ -96,7 +96,7 @@ public class ModelElementRefEditor extends PropertyEditorSupport implements Form
             ApplicationDbModel model = formModel.getDataObject().getClient() != null ? formModel.getDataObject().getModel() : null;
             if (element != null && model != null) {
                 ApplicationDbEntity elementEntity = model.getEntityById(element.getEntityId());
-                if (elementEntity != null) {
+                if (elementEntity != null && elementEntity.isQuery()) {
                     Fields fields = elementEntity.getFields();
                     List<String> tags = new ArrayList<>();
                     for (int i = 1; i <= fields.getFieldsCount(); i++) {
@@ -125,7 +125,7 @@ public class ModelElementRefEditor extends PropertyEditorSupport implements Form
             if (model != null) {
                 if (element != null) {
                     ApplicationDbEntity elementEntity = model.getEntityById(element.getEntityId());
-                    if (elementEntity != null) {
+                    if (elementEntity != null && elementEntity.isQuery()) {
                         if (element.getFieldName() != null && !element.getFieldName().isEmpty()) {
                             Field field;
                             if (element.isField()) {
@@ -162,7 +162,7 @@ public class ModelElementRefEditor extends PropertyEditorSupport implements Form
             if (model != null) {
                 if (element != null) {
                     ApplicationDbEntity entity = model.getEntityById(element.getEntityId());
-                    if (entity != null) {
+                    if (entity != null && entity.isQuery()) {
                         Font fieldsFont = DatamodelDesignUtils.getFieldsFont();
                         int iconTextGap = 4;
                         String entityText = entity.getName() != null && !entity.getName().isEmpty() ? entity.getName() : entity.getTitle();
@@ -221,7 +221,7 @@ public class ModelElementRefEditor extends PropertyEditorSupport implements Form
                             prepareIconsRenderer(null, null, null, entityText, iconTextGap, fieldsFont);
                         }
                     } else {
-                        renderer.setText("<>");
+                        renderer.setText("N/A");
                     }
                 } else {
                     renderer.setText("<>");

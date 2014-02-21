@@ -185,7 +185,7 @@ public abstract class PlatypusDataObject extends MultiDataObject {
         }
         return null;
     }
-    private Set<Runnable> modelValidListeners = new HashSet<>();
+    private final Set<Runnable> modelValidListeners = new HashSet<>();
     protected boolean modelValid = true;
 
     public boolean isModelValid() {
