@@ -38,6 +38,7 @@ public abstract class XmlDom2Model<E extends Entity<?, ?, E>> implements ModelVi
     public static final int DEFAULT_ENTITY_HEIGHT = 200;
     public static final int DEFAULT_ENTITY_WIDTH = 150;
     protected Document doc;
+    protected Element modelElement;
     protected Element currentNode;
     protected Model<E, ?, ?, ?> currentModel;
     protected Collection<Runnable> relationsResolvers = new ArrayList<>();
@@ -63,7 +64,7 @@ public abstract class XmlDom2Model<E extends Entity<?, ?, E>> implements ModelVi
     }
 
     public void readModel(final Model<E, ?, ?, ?> aModel) {
-        Element el = getElementByTagName(doc, Model2XmlDom.DATAMODEL_TAG_NAME);
+        Element el = doc != null ? getElementByTagName(doc, Model2XmlDom.DATAMODEL_TAG_NAME) : modelElement;
         if (el != null && aModel != null) {
             currentModel = aModel;
             try {

@@ -50,32 +50,27 @@ public class XmlDom2QueryDocument {
         SqlQuery query = new SqlQuery(aClient);
         query.setEntityId(aEntityId);
         List<StoredFieldMetadata> additionalFields = new ArrayList<>();
-        synchronized (aDom) {// query's dom is caching subject, and so multiple threads can arrive and try to parse same query's dom
-            NodeList roots = aDom.getChildNodes();
-            for (int i = 0; i < roots.getLength(); i++) {
-                Node root = roots.item(i);
-                if (ApplicationElement.QUERY_ROOT_TAG_NAME.equals(root.getNodeName())) {
-                    NodeList tags = root.getChildNodes();
-                    for (int j = 0; j < tags.getLength(); j++) {
-                        Node node = tags.item(j);
-                        switch (node.getNodeName()) {
-                            case Model2XmlDom.DATAMODEL_TAG_NAME:
-                                Document modelDom = documentBuilder.newDocument();
-				modelDom.setXmlStandalone(true);
-                                modelDom.appendChild(modelDom.importNode(node, true));
-                                model = XmlDom2QueryModel.transform(aClient, modelDom);
-                                break;
-                            case ApplicationElement.SQL_TAG_NAME:
-                                query.setSqlText(node.getTextContent());
-                                break;
-                            case ApplicationElement.FULL_SQL_TAG_NAME:
-                                query.setFullSqlText(node.getTextContent());
-                                break;
-                            case ApplicationElement.OUTPUT_FIELDS_TAG_NAME:
-                                assert node instanceof Element;
-                                additionalFields = parseFieldsHintsTag((Element) node);
-                                break;
-                        }
+        NodeList roots = aDom.getChildNodes();
+        for (int i = 0; i < roots.getLength(); i++) {
+            Node root = roots.item(i);
+            if (ApplicationElement.QUERY_ROOT_TAG_NAME.equals(root.getNodeName())) {
+                NodeList tags = root.getChildNodes();
+                for (int j = 0; j < tags.getLength(); j++) {
+                    Node node = tags.item(j);
+                    switch (node.getNodeName()) {
+                        case Model2XmlDom.DATAMODEL_TAG_NAME:
+                            model = XmlDom2QueryModel.transform(aClient, (Element)node);
+                            break;
+                        case ApplicationElement.SQL_TAG_NAME:
+                            query.setSqlText(node.getTextContent());
+                            break;
+                        case ApplicationElement.FULL_SQL_TAG_NAME:
+                            query.setFullSqlText(node.getTextContent());
+                            break;
+                        case ApplicationElement.OUTPUT_FIELDS_TAG_NAME:
+                            assert node instanceof Element;
+                            additionalFields = parseFieldsHintsTag((Element) node);
+                            break;
                     }
                 }
             }

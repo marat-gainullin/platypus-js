@@ -11,16 +11,22 @@ import com.eas.client.model.query.QueryModel;
 import com.eas.client.model.query.QueryParametersEntity;
 import com.eas.client.model.visitors.QueryModelVisitor;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 /**
  *
  * @author mg
  */
 public class XmlDom2QueryModel extends XmlDom2Model<QueryEntity> implements QueryModelVisitor{
-
+    
     public XmlDom2QueryModel(Document aDoc) {
         super();
         doc = aDoc;
+    }
+    
+    public XmlDom2QueryModel(Element aModelElement) {
+        super();
+        modelElement = aModelElement;
     }
 
     public static QueryModel transform(DbClient aClient, Document aDoc) throws Exception {
@@ -29,6 +35,12 @@ public class XmlDom2QueryModel extends XmlDom2Model<QueryEntity> implements Quer
         return model;
     }
 
+    public static QueryModel transform(DbClient aClient, Element aModelElement) throws Exception {
+        QueryModel model = new QueryModel(aClient);
+        model.accept(new XmlDom2QueryModel(aModelElement));
+        return model;
+    }
+    
     @Override
     public void visit(QueryModel aModel) {
         readModel(aModel);
