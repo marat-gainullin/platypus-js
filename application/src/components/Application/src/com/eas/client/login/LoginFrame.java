@@ -7,8 +7,6 @@ package com.eas.client.login;
 
 import com.eas.client.Client;
 import com.eas.client.ClientFactory;
-import static com.eas.client.ClientFactory.DEFAULT_CONNECTION_INDEX_SETTING;
-import static com.eas.client.ClientFactory.SETTINGS_NODE;
 import com.eas.client.settings.ConnectionSettings;
 import com.eas.client.settings.PlatypusConnectionSettings;
 import com.eas.util.exceptions.ExceptionListenerSupport;
@@ -411,7 +409,7 @@ public class LoginFrame extends javax.swing.JDialog implements ExceptionThrower 
                 }
             }
             if (defaultSettingsIndex != -1) {
-                Preferences.userRoot().node(SETTINGS_NODE).putInt(DEFAULT_CONNECTION_INDEX_SETTING, defaultSettingsIndex);
+                Preferences.userRoot().node(ClientFactory.SETTINGS_NODE).putInt(ClientFactory.DEFAULT_CONNECTION_INDEX_SETTING, defaultSettingsIndex);
             }
         } catch (BackingStoreException ex) {
             exSupport.exceptionThrown(ex);
