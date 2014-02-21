@@ -178,7 +178,7 @@ public class PlatypusClientApplication implements ExceptionListener, PrincipalHo
         });
         Preferences settingsNode = Preferences.userRoot().node(ClientFactory.SETTINGS_NODE);
         frame.addExceptionListener(this);
-        frame.selectDefaultSettings();
+        frame.applyDefaults();
         frame.pack();
         frame.setVisible(true);
         int retValue = frame.getReturnStatus();
