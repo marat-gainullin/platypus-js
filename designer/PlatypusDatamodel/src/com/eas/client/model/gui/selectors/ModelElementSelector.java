@@ -133,13 +133,11 @@ public class ModelElementSelector {
                         EntityView<E> eView = mView.getEntityView(ent);
                         if (eView != null) {
                             mView.makeVisible(eView, true);
-                            if (!ldmRef.isField()) {
-                                if (ldmRef.getField() != null) {
-                                    eView.setSelectedParameter((Parameter) ldmRef.getField());
-                                }
-                            } else {
-                                if (ldmRef.getField() != null) {
+                            if (ldmRef.getField() != null) {
+                                if (ldmRef.isField()) {
                                     eView.setSelectedField(ldmRef.getField());
+                                } else {
+                                    eView.setSelectedParameter((Parameter) ldmRef.getField());
                                 }
                             }
                         }
