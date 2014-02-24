@@ -52,7 +52,6 @@ public class Application {
 		@Override
 		public void started(String anItemName) {
 			final String message = "Loading... " + anItemName;
-			platypusApplicationLogger.log(Level.INFO, message);
 			xDiv.unmask();
 			xDiv.mask(message);
 		}
@@ -60,12 +59,30 @@ public class Application {
 		@Override
 		public void loaded(String anItemName) {
 			final String message = "Loaded " + anItemName;
-			platypusApplicationLogger.log(Level.INFO, message);
 			xDiv.unmask();
 			xDiv.mask(message);
 		}
 	}
 
+	protected static class LoggingLoadHandler implements Loader.LoadHandler {
+
+		public LoggingLoadHandler() {
+			super();
+		}
+
+		@Override
+		public void started(String anItemName) {
+			final String message = "Loading... " + anItemName;
+			platypusApplicationLogger.log(Level.INFO, message);
+		}
+
+		@Override
+		public void loaded(String anItemName) {
+			final String message = "Loaded " + anItemName;
+			platypusApplicationLogger.log(Level.INFO, message);
+		}
+	}
+	
 	public static Logger platypusApplicationLogger;
 	protected static Map<String, Query> appQueries = new HashMap<String, Query>();
 	protected static Loader loader;
@@ -1005,26 +1022,36 @@ public class Application {
 		AppClient.publishApi(client);
 		loader = new Loader(client);
 		Set<Element> indicators = extractPlatypusProgressIndicators();
-		for (Element el : indicators)
+		for (Element el : indicators){
 			loaderHandlerRegistration.add(loader.addHandler(new ElementMaskLoadHandler(el.<XElement> cast()) {
 				public void loaded(String anItemName) {
 					xDiv.unmask();
 				};
 			}));
+		}
+		loaderHandlerRegistration.add(loader.addHandler(new LoggingLoadHandler()));
 		return startAppElements(client, start);
 	}
 
 	private static Set<Element> extractPlatypusProgressIndicators() {
 		Set<Element> platypusIndicators = new HashSet<Element>();
 		XElement xBody = Utils.doc.getBody().cast();
-		String platypusModuleClass = "platypusIndicator";
-		if (platypusModuleClass.equals(xBody.getClassName()))
+		String platypusModuleClass1 = "platypusIndicator";
+		String platypusModuleClass2 = "platypus-indicator";
+		if (platypusModuleClass1.equals(xBody.getClassName()) || platypusModuleClass2.equals(xBody.getClassName()))
 			platypusIndicators.add(xBody);
 
-		NodeList<Element> divs = xBody.select("." + platypusModuleClass);// Utils.doc.getElementsByTagName("div");
-		if (divs != null) {
-			for (int i = 0; i < divs.getLength(); i++) {
-				Element div = divs.getItem(i);
+		NodeList<Element> divs1 = xBody.select("." + platypusModuleClass1);
+		if (divs1 != null) {
+			for (int i = 0; i < divs1.getLength(); i++) {
+				Element div = divs1.getItem(i);
+				platypusIndicators.add(div);
+			}
+		}
+		NodeList<Element> divs2 = xBody.select("." + platypusModuleClass2);
+		if (divs2 != null) {
+			for (int i = 0; i < divs2.getLength(); i++) {
+				Element div = divs2.getItem(i);
 				platypusIndicators.add(div);
 			}
 		}
@@ -1034,11 +1061,21 @@ public class Application {
 	private static Map<String, Element> extractPlatypusModules() {
 		Map<String, Element> platypusModules = new HashMap<String, Element>();
 		XElement xBody = Utils.doc.getBody().cast();
-		String platypusModuleClass = "platypusModule";
-		NodeList<Element> divs = xBody.select("." + platypusModuleClass);// Utils.doc.getElementsByTagName("div");
-		if (divs != null) {
-			for (int i = 0; i < divs.getLength(); i++) {
-				Element div = divs.getItem(i);
+		String platypusModuleClass1 = "platypusModule";
+		NodeList<Element> divs1 = xBody.select("." + platypusModuleClass1);
+		if (divs1 != null) {
+			for (int i = 0; i < divs1.getLength(); i++) {
+				Element div = divs1.getItem(i);
+				if (div.getId() != null && !div.getId().isEmpty()) {
+					platypusModules.put(div.getId(), div);
+				}
+			}
+		}
+		String platypusModuleClass2 = "platypus-module";
+		NodeList<Element> divs2 = xBody.select("." + platypusModuleClass2);
+		if (divs2 != null) {
+			for (int i = 0; i < divs2.getLength(); i++) {
+				Element div = divs2.getItem(i);
 				if (div.getId() != null && !div.getId().isEmpty()) {
 					platypusModules.put(div.getId(), div);
 				}
