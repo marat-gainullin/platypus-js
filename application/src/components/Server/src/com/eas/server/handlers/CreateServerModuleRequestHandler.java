@@ -85,11 +85,7 @@ public class CreateServerModuleRequestHandler extends SessionRequestHandler<Crea
             ((ApplicationDbModel) serverModule.getModel()).setSessionId(aSession.getId());
         }
         serverModule.execute();
-        // Clients are not allowed to manage modules instances in system session,
-        // so we take care only of session modules.
-        if (!(serverModule instanceof ServerReportRunner)) {// reports are allways stateless.
-            aSession.registerModule(serverModule);
-        }
+
         return serverModule;
     }
 }
