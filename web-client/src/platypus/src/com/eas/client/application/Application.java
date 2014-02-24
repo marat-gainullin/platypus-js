@@ -52,7 +52,6 @@ public class Application {
 		@Override
 		public void started(String anItemName) {
 			final String message = "Loading... " + anItemName;
-			platypusApplicationLogger.log(Level.INFO, message);
 			xDiv.unmask();
 			xDiv.mask(message);
 		}
@@ -60,12 +59,30 @@ public class Application {
 		@Override
 		public void loaded(String anItemName) {
 			final String message = "Loaded " + anItemName;
-			platypusApplicationLogger.log(Level.INFO, message);
 			xDiv.unmask();
 			xDiv.mask(message);
 		}
 	}
 
+	protected static class LoggingLoadHandler implements Loader.LoadHandler {
+
+		public LoggingLoadHandler() {
+			super();
+		}
+
+		@Override
+		public void started(String anItemName) {
+			final String message = "Loading... " + anItemName;
+			platypusApplicationLogger.log(Level.INFO, message);
+		}
+
+		@Override
+		public void loaded(String anItemName) {
+			final String message = "Loaded " + anItemName;
+			platypusApplicationLogger.log(Level.INFO, message);
+		}
+	}
+	
 	public static Logger platypusApplicationLogger;
 	protected static Map<String, Query> appQueries = new HashMap<String, Query>();
 	protected static Loader loader;
@@ -1005,12 +1022,14 @@ public class Application {
 		AppClient.publishApi(client);
 		loader = new Loader(client);
 		Set<Element> indicators = extractPlatypusProgressIndicators();
-		for (Element el : indicators)
+		for (Element el : indicators){
 			loaderHandlerRegistration.add(loader.addHandler(new ElementMaskLoadHandler(el.<XElement> cast()) {
 				public void loaded(String anItemName) {
 					xDiv.unmask();
 				};
 			}));
+		}
+		loaderHandlerRegistration.add(loader.addHandler(new LoggingLoadHandler()));
 		return startAppElements(client, start);
 	}
 
