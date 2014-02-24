@@ -40,11 +40,6 @@ public class ServerReportRunner extends ServerScriptRunner {
     }
 
     @Override
-    public synchronized Object executeMethod(String methodName, Object[] arguments) throws Exception {
-        throw new AccessException("Could not execute method \"" + methodName + "()\" in report.");
-    }
-
-    @Override
     protected void prepareScript(ScriptDocument scriptDoc, Object[] args) throws Exception {
         super.prepareScript(scriptDoc, args);
         onBeforeRender = model.getHandler(BEFORE_RENDER_HANDLER_NAME);
