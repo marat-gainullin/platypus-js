@@ -22,10 +22,14 @@ public class ReportCompletionSupportService implements CompletionSupportService 
 
     private static final String REPORT_CONSTRUCTOR_NAME = "Report";//NOI18N
     private static final String REPORT_CONSTRUCTOR_JSDOC = "/**\n"//NOI18N
-            + "* Creates new Platypus Report application element instance.\n"//NOI18N
-            + "* @param name Report application element name\n"//NOI18N
+            + "* Creates new <code>Report</code> instance.\n"//NOI18N
+            + "* @param name Report constructor name\n"//NOI18N
             + "*/";//NOI18N
-
+    private static final String SERVER_REPORT_CONSTRUCTOR_NAME = "ServerReport";//NOI18N
+    private static final String SERVER_REPORT_CONSTRUCTOR_JSDOC = "/**\n"//NOI18N
+            + "* Creates new <code>Report</code> instance on the application server.\n"//NOI18N
+            + "* @param name Report constructor name\n"//NOI18N
+            + "*/";//NOI18N
     @Override
     public Class getClassByName(String name) {
         return null;
@@ -41,6 +45,15 @@ public class ReportCompletionSupportService implements CompletionSupportService 
                         add("name");//NOI18N
                     }
                 }, REPORT_CONSTRUCTOR_JSDOC,
+                point.getCaretBeginWordOffset(),
+                point.getCaretEndWordOffset()));
+        constructors.add(new SystemConstructorCompletionItem(SERVER_REPORT_CONSTRUCTOR_NAME,
+                "",//NOI18N
+                new ArrayList<String>() {
+                    {
+                        add("name");//NOI18N
+                    }
+                }, SERVER_REPORT_CONSTRUCTOR_JSDOC,
                 point.getCaretBeginWordOffset(),
                 point.getCaretEndWordOffset()));
         return constructors;
