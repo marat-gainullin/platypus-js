@@ -225,7 +225,7 @@ public abstract class Component<D extends JComponent> {
 
     private static final String CURSOR_JSDOC = ""
             + "/**\n"
-            + " * Current <code>Cursor</code> of this component.\n"
+            + " * The mouse <code>Cursor</code> over this component.\n"
             + " */";
 
     @ScriptFunction(jsDoc = CURSOR_JSDOC)
