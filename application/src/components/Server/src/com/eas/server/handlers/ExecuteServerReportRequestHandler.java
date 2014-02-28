@@ -39,8 +39,8 @@ public class ExecuteServerReportRequestHandler extends SessionRequestHandler<Exe
         String moduleName = getRequest().getModuleName();
         ServerScriptRunner srunner = getSession().getModule(moduleName);
         if (srunner == null) {
-            // It's seems client wants background module.
-            // Let's try to look up it in system session.
+            // It's seems client wants resident module.
+            // Let's try to look it up in system session.
             srunner = systemSession.getModule(getRequest().getModuleName());
             if (srunner != null) {
                 moduleSession = systemSession;
@@ -58,11 +58,6 @@ public class ExecuteServerReportRequestHandler extends SessionRequestHandler<Exe
             if (srunner instanceof ServerReportRunner) {
                 ServerReportRunner runner = (ServerReportRunner) srunner;
                 synchronized (runner) {// Same synchronization object as in module method executing code
-                    if (getRequest().getArguments() != null) {
-                        for (ExecuteServerReportRequest.NamedArgument arg : getRequest().getArguments()) {
-                            runner.setValue(arg.getName(), arg.getValue());
-                        }
-                    }
                     if (!getServerCore().getDatabasesClient().getAppCache().isActual(runner.getApplicationElementId(), runner.getTxtContentLength(), runner.getTxtCrc32())) {
                         Logger.getLogger(ExecuteServerReportRequest.class.getName()).log(Level.FINE, RERUN_MSG, new Object[]{getRequest().getModuleName()});
                         try {
@@ -75,10 +70,16 @@ public class ExecuteServerReportRequestHandler extends SessionRequestHandler<Exe
                     if (!runner.hasModuleAnnotation(JsDoc.Tag.PUBLIC_TAG)) {
                         throw new AccessControlException(String.format("Public access to report %s is denied.", moduleName));//NOI18N
                     }
-                    runner.checkPrincipalPermission();
+                    runner.checkPrincipalPermission();// This call is here because of executing of the report is done here, rather than server module method wich permissions are checked while method call. 
+                    if (getRequest().getArguments() != null) {
+                        for (ExecuteServerReportRequest.NamedArgument arg : getRequest().getArguments()) {
+                            runner.setValue(arg.getName(), arg.getValue());
+                        }
+                    }
                     Logger.getLogger(ExecuteServerReportRequest.class.getName()).log(Level.FINE, EXECUTE_REPORT_MSG, new Object[]{getRequest().getModuleName()});
                     byte[] result = runner.executeReport();
-                    if (moduleSession != systemSession) {// reports are allways stateless, but system session.
+                    if (moduleSession != systemSession
+                            && runner.hasModuleAnnotation(JsDoc.Tag.STATELESS_TAG)) {// reports may be stateless like other server modules, but system session.
                         moduleSession.unregisterModule(moduleName);
                     }
                     return new ExecuteServerReportRequest.Response(getRequest().getID(), result, runner.getFormat());

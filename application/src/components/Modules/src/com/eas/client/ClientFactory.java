@@ -31,6 +31,8 @@ public class ClientFactory {
     public static final String SETTINGS_NODE = "/com/eas/client";
     public static final String CONNECTIONS_SETTINGS_NODE = SETTINGS_NODE + "/connections";
     public static final String DEFAULT_CONNECTION_INDEX_SETTING = "defaultConnectionIndex";
+    public static final String DEFAULT_USERNAME_SETTING = "defaultUserName";
+    public static final String DEFAULT_PASSWORD_SETTING = "defaultPassword";
     public static final String CONNECTION_TITLE_SETTING = "title";
     public static final String CONNECTION_URL_SETTING = "url";
     public static final String CONNECTION_USER_SETTING = "user";

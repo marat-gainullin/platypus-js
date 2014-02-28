@@ -14,7 +14,6 @@ import static com.eas.client.reports.ReportRunner.BEFORE_RENDER_HANDLER_NAME;
 import com.eas.client.scripts.CompiledScriptDocumentsHost;
 import com.eas.client.scripts.ScriptDocument;
 import com.eas.script.ScriptUtils;
-import java.rmi.AccessException;
 import org.mozilla.javascript.*;
 
 /**
@@ -37,11 +36,6 @@ public class ServerReportRunner extends ServerScriptRunner {
                 format = ((ReportDocument) scriptDoc).getFormat();
             }
         }
-    }
-
-    @Override
-    public synchronized Object executeMethod(String methodName, Object[] arguments) throws Exception {
-        throw new AccessException("Could not execute method \"" + methodName + "()\" in report.");
     }
 
     @Override

@@ -78,6 +78,10 @@ public abstract class Entity<M extends Model<E, ?, ?, Q>, Q extends Query<?>, E 
         return changeSupport;
     }
 
+    public boolean isQuery(){
+        return query != null;
+    }
+    
     public abstract void validateQuery() throws Exception;
 
     public Fields getFields() {
@@ -201,23 +205,9 @@ public abstract class Entity<M extends Model<E, ?, ?, Q>, Q extends Query<?>, E 
     }
 
     public String getTitle() {
-        if (title == null || title.isEmpty()) {
-            if (queryId != null) {
-                Q lquery = getQuery();
-                title = lquery != null ? lquery.getTitle() : "";
-            } else if (tableName != null) {
-                Fields lfields = getFields();
-                if (lfields != null) {
-                    title = lfields.getTableDescription();
-                    if (title == null || title.isEmpty() || title.equalsIgnoreCase(tableName)) {
-                        title = getFullTableNameEntityForDescription();
-                    }
-                }
-            }
-        }
         return title;
     }
-
+    
     public void setTitle(String aValue) {
         if ((aValue == null && title != null) || (aValue != null && !aValue.equals(title))) {
             String oldValue = title;

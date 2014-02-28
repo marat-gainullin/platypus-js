@@ -51,7 +51,7 @@ public class ModelElementRefEditor extends PropertyEditorSupport implements Form
     protected IconsListCellRenderer renderer;
 
     public ModelElementRefEditor() {
-        super(); 
+        super();
     }
 
     @Override
@@ -71,7 +71,7 @@ public class ModelElementRefEditor extends PropertyEditorSupport implements Form
             ApplicationDbModel model = formModel.getDataObject().getClient() != null ? formModel.getDataObject().getModel() : null;
             if (element != null && model != null) {
                 ApplicationDbEntity elementEntity = model.getEntityById(element.getEntityId());
-                if (elementEntity != null) {
+                if (elementEntity != null && elementEntity.isQuery()) {
                     Fields fields = elementEntity.getFields();
                     if (fields.contains(text)) {
                         ModelElementRef copied = element.copy();
@@ -96,7 +96,7 @@ public class ModelElementRefEditor extends PropertyEditorSupport implements Form
             ApplicationDbModel model = formModel.getDataObject().getClient() != null ? formModel.getDataObject().getModel() : null;
             if (element != null && model != null) {
                 ApplicationDbEntity elementEntity = model.getEntityById(element.getEntityId());
-                if (elementEntity != null) {
+                if (elementEntity != null && elementEntity.isQuery()) {
                     Fields fields = elementEntity.getFields();
                     List<String> tags = new ArrayList<>();
                     for (int i = 1; i <= fields.getFieldsCount(); i++) {
@@ -125,7 +125,7 @@ public class ModelElementRefEditor extends PropertyEditorSupport implements Form
             if (model != null) {
                 if (element != null) {
                     ApplicationDbEntity elementEntity = model.getEntityById(element.getEntityId());
-                    if (elementEntity != null) {
+                    if (elementEntity != null && elementEntity.isQuery()) {
                         if (element.getFieldName() != null && !element.getFieldName().isEmpty()) {
                             Field field;
                             if (element.isField()) {
@@ -162,11 +162,17 @@ public class ModelElementRefEditor extends PropertyEditorSupport implements Form
             if (model != null) {
                 if (element != null) {
                     ApplicationDbEntity entity = model.getEntityById(element.getEntityId());
-                    if (entity != null) {
+                    if (entity != null && (entity.isQuery() || entity instanceof ApplicationParametersEntity)) {
                         Font fieldsFont = DatamodelDesignUtils.getFieldsFont();
                         int iconTextGap = 4;
                         String entityText = entity.getName() != null && !entity.getName().isEmpty() ? entity.getName() : entity.getTitle();
                         Field field = element.getField();
+                        if (field != null) {
+                            field = entity.getFields().get(field.getName());
+                            if (field != null) {
+                                element.setField(field);
+                            }
+                        }
                         if (entity instanceof ApplicationParametersEntity) {
                             entityText = ApplicationDbModel.PARAMETERS_SCRIPT_NAME;// since we prefer names instead of titles
                             //entityText = DatamodelDesignUtils.getLocalizedString("Parameters");
@@ -221,7 +227,7 @@ public class ModelElementRefEditor extends PropertyEditorSupport implements Form
                             prepareIconsRenderer(null, null, null, entityText, iconTextGap, fieldsFont);
                         }
                     } else {
-                        renderer.setText("<>");
+                        renderer.setText("N/A");
                     }
                 } else {
                     renderer.setText("<>");
@@ -296,21 +302,17 @@ public class ModelElementRefEditor extends PropertyEditorSupport implements Form
     }
 
     protected ModelElementRef lookupGridOrMapLayerRowsSource(ModelElementRef element) {
-        if((element == null || (element.getEntityId() == null && element.getField() == null) ) && property instanceof RADProperty<?>)
-        {
-            RADProperty<?> radProperty = (RADProperty<?>)property;
-            if(radProperty.getComponent() instanceof RADModelGrid)
-            {
-                RADModelGrid radGrid = (RADModelGrid) ((RADProperty<?>)property).getComponent();
+        if ((element == null || (element.getEntityId() == null && element.getField() == null)) && property instanceof RADProperty<?>) {
+            RADProperty<?> radProperty = (RADProperty<?>) property;
+            if (radProperty.getComponent() instanceof RADModelGrid) {
+                RADModelGrid radGrid = (RADModelGrid) ((RADProperty<?>) property).getComponent();
                 element = radGrid.getBeanInstance().getRowsDatasource();
-            }else if(radProperty.getComponent() instanceof RADModelGridColumn)
-            {
-                RADModelGridColumn radColumn = (RADModelGridColumn)radProperty.getComponent();
+            } else if (radProperty.getComponent() instanceof RADModelGridColumn) {
+                RADModelGridColumn radColumn = (RADModelGridColumn) radProperty.getComponent();
                 RADModelGrid radGrid = radColumn.lookupGrid();
                 element = radGrid.getBeanInstance().getRowsDatasource();
-            }else if(radProperty.getComponent() instanceof RADModelMapLayer)
-            {
-                RADModelMapLayer radMapLayer = (RADModelMapLayer)radProperty.getComponent();
+            } else if (radProperty.getComponent() instanceof RADModelMapLayer) {
+                RADModelMapLayer radMapLayer = (RADModelMapLayer) radProperty.getComponent();
                 element = radMapLayer.getBeanInstance().getRef();
             }
         }

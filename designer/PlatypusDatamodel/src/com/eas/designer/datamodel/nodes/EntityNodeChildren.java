@@ -78,7 +78,7 @@ public abstract class EntityNodeChildren<T> extends Children.Keys<T> implements 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         if (Entity.QUERY_VALID_PROPERTY.equalsIgnoreCase(evt.getPropertyName())) {
-            setFields(entity.getQuery() != null ? entity.getFields() : null);
+            setFields(entity.isQuery() ? entity.getFields() : null);
             setKeys(computeKeys());
         }
     }

@@ -15,5 +15,3 @@ CREATE TABLE mtd_entities
   CONSTRAINT mtd_names_unique UNIQUE (mdent_parent_id, mdent_name)
 )
 #GO
-CREATE OR REPLACE VIEW dummytable AS SELECT character varying(100) '' as dummy 
-#GO

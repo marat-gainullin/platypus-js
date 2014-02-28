@@ -256,6 +256,7 @@ public class PlatypusFormSupport extends PlatypusModuleSupport implements Editor
                 formEditor.saveFormData();
             }
             super.saveDocument();
+            notifyUnmodified();
         } catch (PersistenceException ex) {
             Throwable t = ex.getOriginalException();
             if (t instanceof IOException) {

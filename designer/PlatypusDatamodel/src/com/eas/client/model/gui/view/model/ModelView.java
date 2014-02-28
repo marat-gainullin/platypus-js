@@ -1062,8 +1062,9 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
             try {
                 for (Relation<E> lrel : aRels) {
                     if (lrel.getRightEntity() != null && lrel.getRightField() != null) {
-                        Fields rFields = lrel.getRightEntity().getFields();
-                        if (rFields != null) {
+                        if (lrel.getRightEntity().isQuery()) {
+                            Fields rFields = lrel.getRightEntity().getFields();
+                            assert rFields != null : "Fields are absent while query is present.";
                             Field toField = rFields.get(lrel.getRightField().getName());
                             if (toField == null || toField != lrel.getRightField()) {
                                 g2d.setColor(toParameterConnectorColor);

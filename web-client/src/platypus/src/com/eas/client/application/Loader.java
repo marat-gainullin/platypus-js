@@ -26,7 +26,6 @@ import com.eas.client.queries.Query;
 import com.eas.client.queries.QueryCallbackAdapter;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.ScriptInjector;
-import com.google.gwt.dom.client.ScriptElement;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.xhr.client.XMLHttpRequest;
 import com.google.gwt.xml.client.Document;

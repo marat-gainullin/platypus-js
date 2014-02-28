@@ -15,8 +15,8 @@ import com.eas.client.model.gui.edits.fields.FieldsEdit;
  */
 public class ChangeFieldsDescriptionEdit extends FieldsEdit<FieldsEntity> {
 
-    protected String oldValue = null;
-    protected String newValue = null;
+    protected String oldValue;
+    protected String newValue;
 
     public ChangeFieldsDescriptionEdit(FieldsEntity aEntity, String aOldValue, String aNewValue) {
         super(aEntity);
