@@ -54,7 +54,7 @@ public class PlatypusReportSupport extends PlatypusModuleSupport {
             return true;
         }
     }
-
+    
     @Override
     public void saveDocument() throws IOException {
         try {
@@ -64,7 +64,7 @@ public class PlatypusReportSupport extends PlatypusModuleSupport {
                 // save js source and datamodel
                 super.saveDocument();
                 // save report layout
-                reportObject.saveLayout();
+                reportObject.saveLayout();                
             }else // We can't save document while report layout been edited.
             {     // In this case we have to warn the user about this situation.
                 NotifyDescriptor message = new NotifyDescriptor.Message(NbBundle.getMessage(PlatypusReportSupport.class, "Can_tSaveWhileEditingReportLayout"), NotifyDescriptor.Message.INFORMATION_MESSAGE);

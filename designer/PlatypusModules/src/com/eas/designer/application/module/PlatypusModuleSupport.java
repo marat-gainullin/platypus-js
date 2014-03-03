@@ -86,6 +86,7 @@ public class PlatypusModuleSupport extends DataEditorSupport implements OpenCook
                 try {
                     if (anEdit.isSignificant()) {
                         getDataObject().setModified(true);
+                        notifyModified();
                     }
                     return super.addEdit(anEdit);
                 } catch (Exception ex) {
@@ -96,14 +97,16 @@ public class PlatypusModuleSupport extends DataEditorSupport implements OpenCook
 
             @Override
             public synchronized void undo() throws CannotUndoException {
-                super.undo();
-                getDataObject().setModified(true);
+                    super.undo();
+                    getDataObject().setModified(true);
+                    notifyModified();
             }
 
             @Override
             public synchronized void redo() throws CannotRedoException {
                 super.redo();
                 getDataObject().setModified(true);
+                notifyModified();
             }
         };
     }
@@ -131,7 +134,7 @@ public class PlatypusModuleSupport extends DataEditorSupport implements OpenCook
             } catch (UserQuestionException uqex) { // Issue 143655
                 Object retVal = DialogDisplayer.getDefault().notify(
                         new NotifyDescriptor.Confirmation(uqex.getLocalizedMessage(),
-                        NotifyDescriptor.YES_NO_OPTION));
+                                NotifyDescriptor.YES_NO_OPTION));
                 if (NotifyDescriptor.YES_OPTION == retVal) {
                     uqex.confirmed();
                     doc = openDocument();
@@ -213,6 +216,7 @@ public class PlatypusModuleSupport extends DataEditorSupport implements OpenCook
     @Override
     public void save() throws IOException {
         saveDocument();
+        notifyUnmodified();
     }
 
     @Override
@@ -323,8 +327,8 @@ public class PlatypusModuleSupport extends DataEditorSupport implements OpenCook
      * display name.
      *
      * @param formDataObject form data object representing the multiview tc.
-     * @return display names of the MVTC. The second item can *
-     * be <code>null</code>.
+     * @return display names of the MVTC. The second item can * be
+     * <code>null</code>.
      */
     protected String[] getMVTCDisplayName(PlatypusModuleDataObject formDataObject) {
         Node node = formDataObject.getNodeDelegate();
@@ -386,6 +390,7 @@ public class PlatypusModuleSupport extends DataEditorSupport implements OpenCook
 
         public PlatypusScriptEnv(PlatypusModuleDataObject aObject) {
             super(aObject);
+            changeFile();
         }
 
         @Override
