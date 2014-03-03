@@ -186,7 +186,7 @@ public class AppElementsFilter {
                             String appSource = docNode.getTextContent();
                             DependenciesWalker dependecies = new DependenciesWalker(appSource, serverCore.getDatabasesClient().getAppCache());
                             dependecies.walk();
-                            ScriptDocument sideEffectsAdder = new ScriptDocument(null, appSource);
+                            ScriptDocument sideEffectsAdder = new ScriptDocument(aAppElement.getId(), null, appSource);
                             sideEffectsAdder.readScriptAnnotations();
                             switch (aAppElement.getType()) {
                                 case ClientConstants.ET_COMPONENT: {
