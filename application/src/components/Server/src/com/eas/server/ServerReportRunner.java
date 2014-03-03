@@ -14,7 +14,6 @@ import static com.eas.client.reports.ReportRunner.BEFORE_RENDER_HANDLER_NAME;
 import com.eas.client.scripts.CompiledScriptDocumentsHost;
 import com.eas.client.scripts.ScriptDocument;
 import com.eas.script.ScriptUtils;
-import java.rmi.AccessException;
 import org.mozilla.javascript.*;
 
 /**

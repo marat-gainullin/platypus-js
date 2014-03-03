@@ -50,7 +50,12 @@ public class TextArea extends Component<JTextPane> {
         delegate.setText(aValue);
     }
 
-    @ScriptFunction
+    private static final String EMPTY_TEXT_JSDOC = ""
+            + "/**\n"
+            + "* The text to be shown when component's value is absent.\n"
+            + "*/";
+    
+    @ScriptFunction(jsDoc = EMPTY_TEXT_JSDOC)
     public String getEmptyText() {
         return (String) delegate.getClientProperty(Component.EMPTY_TEXT_PROP_NAME);
     }

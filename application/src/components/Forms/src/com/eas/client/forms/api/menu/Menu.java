@@ -86,7 +86,7 @@ public class Menu extends Container<JMenu> {
 
     private static final String ADD_JSDOC = ""
             + "/**\n"
-            + "* Adds the item to the menu.\n"
+            + "* Adds an item to the menu.\n"
             + "* @param component the component to add\n"
             + "*/";
     
@@ -98,7 +98,7 @@ public class Menu extends Container<JMenu> {
     
     private static final String COUNT_JSDOC = ""
             + "/**\n"
-            + "* Gets the count of the menu items.\n"
+            + "* The count of the menu items.\n"
             + "*/";
     @Override
     @ScriptFunction(jsDoc=COUNT_JSDOC)
