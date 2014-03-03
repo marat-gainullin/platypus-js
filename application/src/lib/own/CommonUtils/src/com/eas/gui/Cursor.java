@@ -4,10 +4,16 @@
  */
 package com.eas.gui;
 
+import com.eas.script.ScriptFunction;
+import com.eas.script.ScriptObj;
+
 /**
  *
  * @author mg
  */
+@ScriptObj(jsDoc = "/**\n"
+        + "* Mouse cursor constansts.\n"
+        + "*/")
 public class Cursor {
     
     public static final Cursor CROSSHAIR = new Cursor(java.awt.Cursor.CROSSHAIR_CURSOR);
@@ -46,5 +52,80 @@ public class Cursor {
     @Override
     public String toString() {
         return delegate.getName();
+    }
+    
+    @ScriptFunction
+    public Cursor getCROSSHAIR() {
+        return CROSSHAIR;
+    }
+    
+    @ScriptFunction
+    public Cursor getDEFAULT() {
+        return DEFAULT;
+    }
+    
+    @ScriptFunction
+    public Cursor getAUTO() {
+        return AUTO;
+    }
+    
+    @ScriptFunction
+    public Cursor getE_RESIZE() {
+        return E_RESIZE;
+    }
+    
+    @ScriptFunction
+    public Cursor getHAND() {
+        return HAND;
+    }
+    
+    @ScriptFunction
+    public Cursor getMOVE() {
+        return MOVE;
+    }
+    
+    @ScriptFunction
+    public Cursor getNE_RESIZE() {
+        return NE_RESIZE;
+    }
+    
+    @ScriptFunction
+    public Cursor getNW_RESIZE() {
+        return NW_RESIZE;
+    }
+    
+    @ScriptFunction
+    public Cursor getN_RESIZE() {
+        return N_RESIZE;
+    }
+    
+    @ScriptFunction
+    public Cursor getSE_RESIZE() {
+        return SE_RESIZE;
+    }
+    
+    @ScriptFunction
+    public Cursor getSW_RESIZE() {
+        return SW_RESIZE;
+    }
+    
+    @ScriptFunction
+    public Cursor getS_RESIZE() {
+        return S_RESIZE;
+    }
+    
+    @ScriptFunction
+    public Cursor getTEXT() {
+        return TEXT;
+    }
+    
+    @ScriptFunction
+    public Cursor getWAIT() {
+        return WAIT;
+    }
+    
+    @ScriptFunction
+    public Cursor getW_RESIZE() {
+        return W_RESIZE;
     }
 }

@@ -70,7 +70,7 @@ public class SplitPane extends Container<JSplitPane> {
 
     private static final String DIVIDER_LOCATION_JSDOC = ""
             + "/**\n"
-            + "* The split pane divider's location in pixels\n"
+            + "* The split pane divider's location in pixels.\n"
             + "*/";
     
     @ScriptFunction(jsDoc = DIVIDER_LOCATION_JSDOC)
@@ -85,7 +85,7 @@ public class SplitPane extends Container<JSplitPane> {
 
     private static final String ONE_TOUCH_EXPANDABLE_JSDOC = ""
             + "/**\n"
-            + "* True if the pane is one touch expandable.\n"
+            + "* <code>true</code> if the pane is one touch expandable.\n"
             + "*/";
     
     @ScriptFunction(jsDoc = ONE_TOUCH_EXPANDABLE_JSDOC)

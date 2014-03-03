@@ -43,7 +43,7 @@ public class ToolBar extends Container<JToolBar> {
             + "* @param component the component to add.\n"
             + "*/";
     
-    @ScriptFunction(jsDoc = ADD_JSDOC, params = {"component", "text", "icon"})
+    @ScriptFunction(jsDoc = ADD_JSDOC, params = {"component"})
     public void add(Component<?> aComp) {
         if (aComp != null) {
             delegate.add(unwrap(aComp));
