@@ -105,7 +105,7 @@ public class PositioningPacketReciever implements PacketReciever {
 
     private static IoSession send(Object aData, String aHost, Integer aPort, String aProtocolName, String aUser, String aPassword, String aPath, String aQuery, IoSession aSession) throws Exception {
         if (aSession == null) {
-            IoConnector connector = new NioSocketConnector();
+            IoConnector connector = new NioSocketConnector(1);
             RetranslatePacketFactory.constructFiltersChain(connector.getFilterChain(), aProtocolName);
             RetranslateIoHandler handler = RetranslatePacketFactory.getPacketHandler(aProtocolName, retranslateSessions);
             handler.setHost(aHost);

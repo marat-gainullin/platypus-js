@@ -38,6 +38,7 @@ public class PostgreTypesResolver extends TypesResolver {
         gisTypes.add("path");
         gisTypes.add("polygon");
         gisTypes.add("circle");
+        gisTypes.add("geometry");
 
 
         // rdbms -> jdbc
