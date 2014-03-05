@@ -571,6 +571,10 @@ public class AppClient {
 
 	public XMLHttpRequest2 syncRequest(String aUrl, ResponseType aResponseType, String aBody, RequestBuilder.Method aMethod) throws Exception {
 		final XMLHttpRequest2 req = XMLHttpRequest.create().<XMLHttpRequest2> cast();
+		if(GXT.isChrome())// remove if chrome bug 266971 is fixed
+		{
+			aUrl += "&"+param(PlatypusHttpRequestParams.CACHE_BUSTER, String.valueOf(IDGenerator.genId()));
+		}
 		req.open(aMethod.toString(), aUrl, false);
 		interceptRequest(req);
 		/* Since W3C standard about sync XmlHttpRequest and response type.

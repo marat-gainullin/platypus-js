@@ -15,9 +15,10 @@ import org.mozilla.javascript.ast.*;
 import org.w3c.dom.Document;
 
 /**
- * Implementation service support for script related tasks.
- * It is cached and therefor purged from time to time.
- * Don't store references on it in your client code!
+ * Implementation service support for script related tasks. It is cached and
+ * therefor purged from time to time. Don't store references on it in your
+ * client code!
+ *
  * @author pk, mg refactoring
  */
 public class ScriptDocument {
@@ -147,6 +148,9 @@ public class ScriptDocument {
 
     public String filterSource(String bodyPreCode, String bodyPostCode) {
         String toInsert = "; this[\"" + ScriptUtils.HANDLERS_PROP_NAME + "\"]=" + generateTopLevelNamedFunctionsContainer() + ";";
+        if (firstFunction == null) {
+            throw new IllegalStateException("Missing first function in " + String.valueOf(entityId) + ". May be bad source?");
+        }
         int functionsCaptureInsertAt = firstFunction.getAbsolutePosition() + firstFunction.getLength() - 1;
         if (bodyPreCode == null) {
             return scriptSource.substring(0, functionsCaptureInsertAt) + toInsert + (bodyPostCode != null ? bodyPostCode : "") + scriptSource.substring(functionsCaptureInsertAt, scriptSource.length());
@@ -233,19 +237,19 @@ public class ScriptDocument {
     private void readPropertyRoles(String aPropertyName, String aJsDocBody) {
         if (aJsDocBody != null) {
             JsDoc jsDoc = new JsDoc(aJsDocBody);
-                jsDoc.parseAnnotations();
-                for (Tag tag : jsDoc.getAnnotations()) {
-                    if (tag.getName().equals(JsDoc.Tag.ROLES_ALLOWED_TAG)) {
-                        Set<String> roles = propertyAllowedRoles.get(aPropertyName);
-                        if (roles == null) {
-                            roles = new HashSet<>();
-                        }
-                        for (String role : tag.getParams()) {
-                            roles.add(role);
-                        }
-                        propertyAllowedRoles.put(aPropertyName, roles);
+            jsDoc.parseAnnotations();
+            for (Tag tag : jsDoc.getAnnotations()) {
+                if (tag.getName().equals(JsDoc.Tag.ROLES_ALLOWED_TAG)) {
+                    Set<String> roles = propertyAllowedRoles.get(aPropertyName);
+                    if (roles == null) {
+                        roles = new HashSet<>();
                     }
+                    for (String role : tag.getParams()) {
+                        roles.add(role);
+                    }
+                    propertyAllowedRoles.put(aPropertyName, roles);
                 }
+            }
         }
     }
 
