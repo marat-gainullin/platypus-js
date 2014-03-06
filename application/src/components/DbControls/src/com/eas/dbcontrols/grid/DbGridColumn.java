@@ -665,7 +665,7 @@ public class DbGridColumn extends DesignInfo implements PropertiesSimpleFactory 
         firePropertyChange(CONTROLINFO, old, aValue);
     }
 
-    @Designable(category="veer")
+    @Designable(displayName = "cellRowKeyField", category="veer")
     public ModelElementRef getRowsKeyField() {
         return cellDesignInfo != null ? cellDesignInfo.getRowsKeyField() : null;
     }
@@ -676,7 +676,7 @@ public class DbGridColumn extends DesignInfo implements PropertiesSimpleFactory 
         }
     }
 
-    @Designable(category="veer")
+    @Designable(displayName = "cellColumnKeyField", category="veer")
     public ModelElementRef getColumnsKeyField() {
         return cellDesignInfo != null ? cellDesignInfo.getColumnsKeyField() : null;
     }
