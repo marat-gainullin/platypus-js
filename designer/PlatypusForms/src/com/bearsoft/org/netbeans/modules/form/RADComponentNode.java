@@ -46,6 +46,7 @@ package com.bearsoft.org.netbeans.modules.form;
 import com.bearsoft.org.netbeans.modules.form.actions.*;
 import com.bearsoft.org.netbeans.modules.form.actions.menu.DesignParentAction;
 import com.bearsoft.org.netbeans.modules.form.actions.menu.EditContainerAction;
+import com.bearsoft.org.netbeans.modules.form.bound.RADColumnView;
 import com.bearsoft.org.netbeans.modules.form.bound.RADModelGridColumn;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.*;
 import com.bearsoft.org.netbeans.modules.form.menu.AddSubItemAction;
@@ -72,12 +73,12 @@ import org.openide.util.datatransfer.PasteType;
 public class RADComponentNode extends FormNode
         implements RADComponentCookie, FormPropertyCookie {
 
-    private final static MessageFormat nodeNameFormat =
-            new MessageFormat(
-            FormUtils.getBundleString("FMT_ComponentNodeName")); // NOI18N
-    private final static MessageFormat nodeNoNameFormat =
-            new MessageFormat(
-            FormUtils.getBundleString("FMT_UnnamedComponentNodeName")); // NOI18N
+    private final static MessageFormat nodeNameFormat
+            = new MessageFormat(
+                    FormUtils.getBundleString("FMT_ComponentNodeName")); // NOI18N
+    private final static MessageFormat nodeNoNameFormat
+            = new MessageFormat(
+                    FormUtils.getBundleString("FMT_UnnamedComponentNodeName")); // NOI18N
     private RADComponent<?> component;
     private boolean highlightDisplayName;
     private Map<Integer, Image> img = new HashMap<>();
@@ -215,13 +216,17 @@ public class RADComponentNode extends FormNode
                 }
 
                 lactions.add(SystemAction.get(CopyAction.class));
-            } else {
+            } else if (!(component instanceof RADColumnView)) {
                 /* If you whant ot uncomment folowing code, you have to refactor
                  * action to avoid breaking of model-view pattern
-                if (InPlaceEditLayer.supportsEditingFor(component.getBeanClass(), false)) {
-                    lactions.add(SystemAction.get(InPlaceEditAction.class));
+                 if (InPlaceEditLayer.supportsEditingFor(component.getBeanClass(), false)) {
+                 lactions.add(SystemAction.get(InPlaceEditAction.class));
+                 }
+                 */
+                if (SelectGridColumnViewAction.isEditableComponent(component)) {
+                    lactions.add(SystemAction.get(SelectGridColumnViewAction.class));
+                    addSeparator(lactions);
                 }
-                */ 
                 if (component != topComp) {
                     lactions.add(SystemAction.get(ChangeComponentNameAction.class));
                 } else {
@@ -239,7 +244,7 @@ public class RADComponentNode extends FormNode
                 }
                 addSeparator(lactions);
 
-                if (component instanceof ComponentContainer) {
+                if (component instanceof ComponentContainer && !(component instanceof RADModelGridColumn)) {
                     addContainerActions(lactions);
                 }
                 addLayoutActions(lactions);
@@ -254,10 +259,6 @@ public class RADComponentNode extends FormNode
                     addSeparator(lactions);
                     lactions.add(SystemAction.get(FillGridColumnsAction.class));
                 }
-                if (SelectGridColumnViewAction.isEditableComponent(component)) {
-                    addSeparator(lactions);
-                    lactions.add(SystemAction.get(SelectGridColumnViewAction.class));
-                }
                 addSeparator(lactions);
 
                 if (component != topComp) {
@@ -270,6 +271,7 @@ public class RADComponentNode extends FormNode
                 if (component != topComp) {
                     lactions.add(SystemAction.get(DeleteAction.class));
                 }
+
             }
             lactions.add(null);
 
@@ -369,8 +371,9 @@ public class RADComponentNode extends FormNode
      * Remove the node from its parent and deletes it. The default
      * implementation obtains write access to the
      * {@link Children#MUTEX children's lock}, and removes the node from its
-     * parent(if any). Also fires a property change. <P> This may be overridden
-     * by subclasses to do any additional cleanup.
+     * parent(if any). Also fires a property change.
+     * <P>
+     * This may be overridden by subclasses to do any additional cleanup.
      *
      * @exception java.io.IOException if something fails
      */
@@ -436,8 +439,8 @@ public class RADComponentNode extends FormNode
                     public void propertyChange(PropertyChangeEvent evt) {
                         FormProperty<?>[] properties;
                         if (evt.getPropertyName() != null) {
-                            FormProperty<?> changedProperty =
-                                    component.<FormProperty<?>>getRADProperty(evt.getPropertyName());
+                            FormProperty<?> changedProperty
+                                    = component.<FormProperty<?>>getRADProperty(evt.getPropertyName());
                             if (changedProperty != null) {
                                 properties = new FormProperty<?>[]{changedProperty};
                             } else {

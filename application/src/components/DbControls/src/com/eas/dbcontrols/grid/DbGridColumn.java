@@ -507,7 +507,8 @@ public class DbGridColumn extends DesignInfo implements PropertiesSimpleFactory 
         plain = aValue;
         firePropertyChange(PLAIN, old, aValue);
     }
-
+    
+    @Designable(displayName = "expandable", description = "<code>true</code> if the column is in a expanded mode and <code>false</code> otherwise.")
     public boolean isVeer() {
         return !isPlain();
     }
