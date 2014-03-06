@@ -244,7 +244,7 @@ public class RADComponentNode extends FormNode
                 }
                 addSeparator(lactions);
 
-                if (component instanceof ComponentContainer && !(component instanceof RADModelGridColumn)) {
+                if (component instanceof ComponentContainer) {
                     addContainerActions(lactions);
                 }
                 addLayoutActions(lactions);
