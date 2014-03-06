@@ -13,7 +13,9 @@ import com.eas.client.DbMetadataCache;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.cache.PlatypusFilesSupport;
 import com.eas.client.metadata.ApplicationElement;
+import com.eas.client.model.ModelEditingListener;
 import com.eas.client.model.QueryDocument.StoredFieldMetadata;
+import com.eas.client.model.Relation;
 import com.eas.client.model.StoredQueryFactory;
 import com.eas.client.model.query.QueryEntity;
 import com.eas.client.model.query.QueryModel;
@@ -38,11 +40,15 @@ import com.eas.designer.explorer.files.wizard.NewApplicationElementWizardIterato
 import com.eas.script.JsDoc;
 import com.eas.xml.dom.Source2XmlDom;
 import com.eas.xml.dom.XmlDom2String;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.StringReader;
 import java.util.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.EditorKit;
 import net.sf.jsqlparser.JSQLParserException;
@@ -72,6 +78,43 @@ import org.openide.util.NbBundle;
 import org.w3c.dom.Document;
 
 public class PlatypusQueryDataObject extends PlatypusDataObject {
+
+    protected class QueryModelModifiedObserver implements ModelEditingListener<QueryEntity>, PropertyChangeListener {
+
+        @Override
+        public void entityAdded(QueryEntity e) {
+            modelModified = true;
+            e.getChangeSupport().addPropertyChangeListener(this);
+        }
+
+        @Override
+        public void entityRemoved(QueryEntity e) {
+            modelModified = true;
+            e.getChangeSupport().removePropertyChangeListener(this);
+        }
+
+        @Override
+        public void relationAdded(Relation<QueryEntity> rel) {
+            modelModified = true;
+            rel.getChangeSupport().addPropertyChangeListener(this);
+        }
+
+        @Override
+        public void relationRemoved(Relation<QueryEntity> rel) {
+            modelModified = true;
+            rel.getChangeSupport().removePropertyChangeListener(this);
+        }
+
+        @Override
+        public void entityIndexesChanged(QueryEntity e) {
+            modelModified = true;
+        }
+
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+            modelModified = true;
+        }
+    }
 
     // reflectioned properties
     public static final String PUBLIC_PROP_NAME = "public";
@@ -106,6 +149,11 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
     protected transient Fields outputFields;
     protected transient NbEditorDocument sqlTextDocument;
     protected transient NbEditorDocument sqlFullTextDocument;
+    // runtime 
+    protected transient boolean modelModified;
+    protected transient boolean sqlModified;
+    protected transient boolean fullSqlModified;
+    protected transient boolean outputFieldsHintsModified;
 
     public PlatypusQueryDataObject(FileObject aSqlFile, MultiFileLoader loader) throws DataObjectExistsException, IOException {
         super(aSqlFile, loader);
@@ -146,6 +194,17 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         }
         Document modelDoc = Source2XmlDom.transform(modelEntry.getFile().asText(PlatypusUtils.COMMON_ENCODING_NAME));
         model = XmlDom2QueryModel.transform(getClient(), modelDoc);
+        
+        QueryModelModifiedObserver changesObserver = new QueryModelModifiedObserver();
+        model.addEditingListener(changesObserver);
+        model.getParametersEntity().getChangeSupport().addPropertyChangeListener(changesObserver);
+        for (QueryEntity entity : model.getEntities().values()) {
+            entity.getChangeSupport().addPropertyChangeListener(changesObserver);
+        }
+        for (Relation<QueryEntity> rel : model.getRelations()) {
+            rel.getChangeSupport().addPropertyChangeListener(changesObserver);
+        }
+        
         datasourceName = model.getDbId();
         publicQuery = PlatypusFilesSupport.getAnnotationValue(sqlText, JsDoc.Tag.PUBLIC_TAG) != null;
         procedure = PlatypusFilesSupport.getAnnotationValue(sqlText, JsDoc.Tag.PROCEDURE_TAG) != null;
@@ -164,8 +223,7 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
                 statementError = (ParseException) ex.getCause();
             }
         }
-        UndoRedo.Manager undoReciever = getLookup().lookup(PlatypusQuerySupport.class).getModelUndo();
-        //addParametersListener();
+        UndoRedo.Manager undoReciever = getLookup().lookup(PlatypusQuerySupport.class).getUndo();
         EditorKit editorKit = CloneableEditorSupport.getEditorKit(SqlLanguageHierarchy.PLATYPUS_SQL_MIME_TYPE_NAME);
 
         sqlTextDocument = (NbEditorDocument) editorKit.createDefaultDocument();
@@ -173,12 +231,46 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         sqlTextDocument.putProperty(DATAOBJECT_DOC_PROPERTY, this);
         sqlTextDocument.insertString(0, sqlText, null);
         sqlTextDocument.addUndoableEditListener(undoReciever);
+        sqlTextDocument.addDocumentListener(new DocumentListener() {
+
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                sqlModified = true;
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                sqlModified = true;
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                sqlModified = true;
+            }
+        });
 
         sqlFullTextDocument = (NbEditorDocument) editorKit.createDefaultDocument();
         sqlFullTextDocument.putProperty(NbEditorDocument.MIME_TYPE_PROP, SqlLanguageHierarchy.PLATYPUS_SQL_MIME_TYPE_NAME);
         sqlFullTextDocument.putProperty(DATAOBJECT_DOC_PROPERTY, this);
         sqlFullTextDocument.insertString(0, dialectText, null);
         sqlFullTextDocument.addUndoableEditListener(undoReciever);
+        sqlFullTextDocument.addDocumentListener(new DocumentListener() {
+
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                fullSqlModified = true;
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                fullSqlModified = true;
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                fullSqlModified = true;
+            }
+        });
 
         sqlTextDocument.addDocumentListener(new DocumentTextCompiler(this));
 
@@ -207,10 +299,6 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
     public QueryModel getModel() throws Exception {
         checkQueryRead();
         return model;
-    }
-
-    public UndoRedo.Manager getUndoRedoManager() {
-        return getLookup().lookup(PlatypusQuerySupport.class).getModelUndo();
     }
 
     public String getDatasourceName() {
@@ -316,6 +404,22 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         }
     }
 
+    public boolean getOutputFieldsHintsModified() {
+        return outputFieldsHintsModified;
+    }
+
+    public void setOutputFieldsHintsModified(boolean aValue) {
+        outputFieldsHintsModified = aValue;
+    }
+
+    public boolean isModelModified() {
+        return modelModified;
+    }
+
+    public void setModelModified(boolean aValue) {
+        modelModified = aValue;
+    }
+
     public ModelNode<QueryEntity, QueryModel> getModelNode() throws Exception {
         checkQueryRead();
         return modelNode;
@@ -402,37 +506,53 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         statement = null;
         commitedStatement = null;
         model = null;
+        modelModified = false;
         if (sqlTextDocument != null) {
             sqlTextDocument.putProperty(DATAOBJECT_DOC_PROPERTY, null);
         }
         sqlTextDocument = null;
+        sqlModified = false;
         if (sqlFullTextDocument != null) {
             sqlFullTextDocument.putProperty(DATAOBJECT_DOC_PROPERTY, null);
         }
         sqlFullTextDocument = null;
+        fullSqlModified = false;
         outputFields = null;
+        outputFieldsHintsModified = false;
     }
 
     public void saveQuery() throws Exception {
-        sqlText = sqlTextDocument.getText(0, sqlTextDocument.getLength());
-        dialectText = sqlFullTextDocument.getText(0, sqlFullTextDocument.getLength());
-        write2File(getPrimaryFile(), sqlText);
-        FileObject dialectFileO = dialectEntry.getFile();
-        if (dialectFileO == getPrimaryFile()) {
-            String path = getPrimaryFile().getPath();
-            File dialectFile = new File(path.substring(0, path.length() - getPrimaryFile().getExt().length()) + PlatypusFiles.DIALECT_EXTENSION);
-            if (dialectFile.createNewFile()) {
-                dialectFileO = FileUtil.toFileObject(dialectFile);
-                dialectEntry = registerEntry(dialectFileO);
+        if (sqlModified) {
+            sqlText = sqlTextDocument.getText(0, sqlTextDocument.getLength());
+            write2File(getPrimaryFile(), sqlText);
+            sqlModified = false;
+        }
+        if (fullSqlModified) {
+            FileObject dialectFileO = dialectEntry.getFile();
+            if (dialectFileO == getPrimaryFile()) {
+                String path = getPrimaryFile().getPath();
+                File dialectFile = new File(path.substring(0, path.length() - getPrimaryFile().getExt().length()) + PlatypusFiles.DIALECT_EXTENSION);
+                if (dialectFile.createNewFile()) {
+                    dialectFileO = FileUtil.toFileObject(dialectFile);
+                    dialectEntry = registerEntry(dialectFileO);
+                }
             }
+            if (getPrimaryFile() != dialectFileO) {
+                dialectText = sqlFullTextDocument.getText(0, sqlFullTextDocument.getLength());
+                write2File(dialectFileO, dialectText);
+            }
+            fullSqlModified = false;
         }
-        if (getPrimaryFile() != dialectFileO) {
-            write2File(dialectFileO, dialectText);
+        if (modelModified) {
+            Document modelDocument = model.toXML();
+            write2File(modelEntry.getFile(), XmlDom2String.transform(modelDocument));
+            modelModified = false;
         }
-        Document modelDocument = model.toXML();
-        write2File(modelEntry.getFile(), XmlDom2String.transform(modelDocument));
-        Document outHintsDocument = QueryDocument2XmlDom.transformOutHints(outputFieldsHints, outputFields);
-        write2File(outEntry.getFile(), XmlDom2String.transform(outHintsDocument));
+        if (outputFieldsHintsModified) {
+            Document outHintsDocument = QueryDocument2XmlDom.transformOutHints(outputFieldsHints, outputFields);
+            write2File(outEntry.getFile(), XmlDom2String.transform(outHintsDocument));
+            outputFieldsHintsModified = false;
+        }
         if (getClient() != null) {
             unsignFromQueries();
             try {

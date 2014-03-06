@@ -413,8 +413,6 @@ public abstract class XmlDom2Model<E extends Entity<?, ?, E>> implements ModelVi
                     }
                 } catch (NumberFormatException ex) {
                     Logger.getLogger(XmlDom2Model.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (IllegalArgumentException ex) {
-                    Logger.getLogger(XmlDom2Model.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         }

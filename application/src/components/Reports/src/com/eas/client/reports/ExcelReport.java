@@ -47,10 +47,11 @@ public class ExcelReport {
     public static final String REPORT_DYNA_CLASS_PREFIX = "PlatypusReportClass_";
     protected ApplicationModel<?, ?, ?, ?> model;
     protected ScriptableObject so;
-    protected CompactBlob template = null;
+    protected CompactBlob template;
     protected boolean validTemplate = true;
-    protected String templatePath = null;
-    private String format = null;
+    protected boolean templateModified;
+    protected String templatePath;
+    private String format;
     protected Map<String, ScriptableRowset<?>> fakeRowsetes = new HashMap<>();
     protected Map<String, Object> generated;
 
@@ -85,6 +86,7 @@ public class ExcelReport {
             template = aTemplate;
             validTemplate = true;
             templatePath = null;
+            templateModified = true;
         }
     }
 
@@ -379,6 +381,7 @@ public class ExcelReport {
                 try (InputStream is = new FileInputStream(f)) {
                     byte[] bytes = BinaryUtils.readStream(is, -1);
                     template = new CompactBlob(bytes);
+                    templateModified = true;
                 }
                 return true;
             }
@@ -401,6 +404,14 @@ public class ExcelReport {
         return validTemplate;
     }
 
+    public boolean isTemplateModified() {
+        return templateModified;
+    }
+    
+    public void setTemplateModified(boolean aValue){
+        templateModified = aValue;
+    }
+    
     protected boolean canCreateTemplateFile() {
         assert templatePath != null;
         File file = new File(templatePath);

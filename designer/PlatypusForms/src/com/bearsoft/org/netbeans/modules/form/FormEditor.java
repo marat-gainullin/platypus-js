@@ -175,6 +175,7 @@ public class FormEditor {
                         persistenceManager.loadForm(formDataObject,
                                 formModel,
                                 persistenceErrors);
+                        formModel.setModified(false);
                         return null;
                     }
                 });
@@ -224,12 +225,11 @@ public class FormEditor {
     }
 
     void saveFormData() throws PersistenceException {
-        if (formLoaded && !formDataObject.formFileReadOnly() && !formModel.isReadOnly()) {
+        if (formLoaded && !formDataObject.formFileReadOnly() && !formModel.isReadOnly() && formModel.isModified()) {
             formModel.fireFormToBeSaved();
-
             resetPersistenceErrorLog();
-
             persistenceManager.saveForm(formDataObject, formModel, persistenceErrors);
+            formModel.setModified(false);
         }
     }
 
@@ -313,7 +313,7 @@ public class FormEditor {
             ErrorManager.getDefault().annotate(
                     annotateT,
                     FormUtils.getBundleString("MSG_ERR_LoadingErrors") // NOI18N
-                    );
+            );
             for (int i = 0; i < n; i++) {
                 PersistenceException pe = (PersistenceException) persistenceErrors.get(i);
                 Throwable t = pe.getOriginalException();
@@ -344,8 +344,8 @@ public class FormEditor {
             return; // no errors or warnings logged
         }
         final ErrorManager errorManager = ErrorManager.getDefault();
-        final PlatypusPersistenceManager persistManager =
-                (PlatypusPersistenceManager) persistenceManager;
+        final PlatypusPersistenceManager persistManager
+                = (PlatypusPersistenceManager) persistenceManager;
 
         boolean checkLoadingErrors = operation == FormOperation.LOADING && formLoaded;
         boolean anyNonFatalLoadingError = false; // was there a real error?
@@ -363,8 +363,8 @@ public class FormEditor {
             if (checkLoadingErrors && !anyNonFatalLoadingError) {
                 // was there a real loading error (not just warnings) causing
                 // some data not loaded?
-                ErrorManager.Annotation[] annotations =
-                        errorManager.findAnnotations(t);
+                ErrorManager.Annotation[] annotations
+                        = errorManager.findAnnotations(t);
                 int severity = 0;
                 if ((annotations != null) && (annotations.length != 0)) {
                     for (int i = 0; i < annotations.length; i++) {
@@ -535,64 +535,7 @@ public class FormEditor {
         return codePane;
     }
 
-    /**
-     * @param formModel form model.
-     * @return PlatypusFormLayoutView for given form
-     *
-     * public static PlatypusFormLayoutView getFormDesigner(FormModel formModel)
-     * { FormEditor formEditor = openForms.get(formModel); return formEditor !=
-     * null ? formEditor.getFormDesigner() : null; }
-     *
-     * /**
-     * Returns code generator for the specified form.
-     *
-     * @param formModel form model.
-     * @return CodeGenerator for given form
-     *
-     * public static CodeGenerator getCodeGenerator(FormModel formModel) {
-     * FormEditor formEditor = openForms.get(formModel); return formEditor !=
-     * null ? formEditor.getCodeGenerator() : null; }
-     *
-     * /**
-     * Returns form editor for the specified form.
-     *
-     * @param formModel form model.
-     * @return FormEditor instance for given form
-     *
-     * public static FormEditor getFormEditor(FormModel formModel) { return
-     * openForms.get(formModel); }
-     */
     UndoRedo.Manager getFormUndoRedoManager() {
         return formModel != null ? formModel.getUndoRedoManager() : null;
     }
-    /*
-     public void registerDefaultComponentAction(Action action) {
-     if (defaultActions == null) {
-     createDefaultComponentActionsList();
-     } else {
-     defaultActions.remove(action);
-     }
-     defaultActions.add(0, action);
-     }
-
-     public void unregisterDefaultComponentAction(Action action) {
-     if (defaultActions != null) {
-     defaultActions.remove(action);
-     }
-     }
-
-     private void createDefaultComponentActionsList() {
-     defaultActions = new ArrayList<>();
-     defaultActions.add(SystemAction.get(EditContainerAction.class));
-     defaultActions.add(SystemAction.get(EditFormAction.class));
-     defaultActions.add(SystemAction.get(DefaultRADAction.class));
-     }
-
-     Collection<Action> getDefaultComponentActions() {
-     if (defaultActions == null) {
-     createDefaultComponentActionsList();
-     }
-     return Collections.unmodifiableList(defaultActions);
-     }
-     */
 }

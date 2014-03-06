@@ -73,13 +73,13 @@ import org.openide.util.MutexException;
  * @author Tran Duc Trung, Tomas Pavek
  */
 public class FormModel {
-    // name of the form is name of the DataObject
 
+    // name of the form is name of the DataObject
     private PlatypusFormDataObject dataObject;
     private RADVisualContainer<?> topDesignComponent;
     private AssistantModel assistantModel = new AssistantModel();
     private String formName;
-    private boolean readOnly = false;
+    private boolean readOnly;
 
     public FormModel(PlatypusFormDataObject aDataObject) {
         dataObject = aDataObject;
@@ -141,11 +141,12 @@ public class FormModel {
     // holds both topRADComponent and otherComponents
     private ModelContainer modelContainer;
     private Map<String, RADComponent<?>> namesToComponents = new HashMap<>();
-    private boolean formLoaded = false;
+    private boolean formLoaded;
     private UndoRedo.Manager undoRedoManager;
-    private boolean undoRedoRecording = false;
+    private boolean undoRedoRecording;
     private CompoundEdit compoundEdit;
-    private boolean undoCompoundEdit = false;
+    private boolean undoCompoundEdit;
+    private boolean modified;
     private FormEvents formEvents;
     // list of listeners registered on FormModel
     private List<FormModelListener> listeners;
@@ -153,7 +154,7 @@ public class FormModel {
     private boolean firing;
     private RADComponentCreator metaCreator;
     private FormSettings settings = new FormSettings();
-    private boolean freeDesignDefaultLayout = false;
+    private boolean freeDesignDefaultLayout;
 
     /**
      * This methods sets the form base class (which is in fact the superclass of
@@ -367,7 +368,6 @@ public class FormModel {
             // It comes from layout support delegates to
             // force us place a component in predefined position
             // like in toolbars while dragging new components in them.
-
             // component needs to be "in model" (have code expression) before added to layout
             if (newlyAdded || !radComp.isInModel()) {
                 setInModelRecursively(radComp, true);
@@ -403,8 +403,8 @@ public class FormModel {
             LayoutSupportDelegate layoutDelegate)
             throws Exception {
         LayoutSupportManager currentLS = radCont.getLayoutSupport();
-        LayoutSupportDelegate currentDel =
-                currentLS != null ? currentLS.getLayoutDelegate() : null;
+        LayoutSupportDelegate currentDel
+                = currentLS != null ? currentLS.getLayoutDelegate() : null;
 
         if (currentLS == null) { // switching to layout support
             radCont.checkLayoutSupport();
@@ -621,6 +621,14 @@ public class FormModel {
                 }
             }
         }
+    }
+
+    public boolean isModified() {
+        return modified;
+    }
+
+    public void setModified(boolean aValue) {
+        modified = aValue;
     }
 
     // ----------
@@ -1034,7 +1042,7 @@ public class FormModel {
 
         return ev;
     }
-    
+
     /**
      * Fires an event informing about general form change.
      *
@@ -1157,10 +1165,14 @@ public class FormModel {
     void fireEvents(FormModelEvent... events) {
         java.util.List<FormModelListener> targets = new ArrayList<>();
         synchronized (this) {
-            if (listeners == null || listeners.isEmpty()) {
-                return;
+            if (listeners != null) {
+                targets.addAll(listeners);
             }
-            targets.addAll(listeners);
+        }
+        for (FormModelEvent event : events) {
+            if (event.getChangeType() != FormModelEvent.FORM_LOADED && event.getChangeType() != FormModelEvent.FORM_TO_BE_CLOSED && event.getChangeType() != FormModelEvent.FORM_TO_BE_SAVED) {
+                modified = true;
+            }
         }
         for (int i = 0; i < targets.size(); i++) {
             FormModelListener l = targets.get(i);
