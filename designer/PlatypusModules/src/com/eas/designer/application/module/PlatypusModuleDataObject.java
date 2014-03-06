@@ -6,6 +6,8 @@ package com.eas.designer.application.module;
 
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.cache.PlatypusFilesSupport;
+import com.eas.client.model.ModelEditingListener;
+import com.eas.client.model.Relation;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
 import com.eas.client.model.store.XmlDom2ApplicationModel;
@@ -22,6 +24,8 @@ import com.eas.designer.datamodel.nodes.ModelNode;
 import com.eas.designer.explorer.files.wizard.NewApplicationElementWizardIterator;
 import com.eas.xml.dom.Source2XmlDom;
 import com.eas.xml.dom.XmlDom2String;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.io.OutputStream;
 import javax.swing.text.Document;
@@ -45,6 +49,47 @@ import org.openide.util.Exceptions;
 
 @MIMEResolver.ExtensionRegistration(displayName = "#LBL_Platypus_Model_file", extension = "model", mimeType = "text/model+xml")
 public class PlatypusModuleDataObject extends PlatypusDataObject implements AstProvider {
+
+    protected class ApplicationDbModelModifiedObserver implements ModelEditingListener<ApplicationDbEntity>, PropertyChangeListener {
+
+        @Override
+        public void entityAdded(ApplicationDbEntity e) {
+            setModelModified();
+            e.getChangeSupport().addPropertyChangeListener(this);
+        }
+
+        @Override
+        public void entityRemoved(ApplicationDbEntity e) {
+            setModelModified();
+            e.getChangeSupport().removePropertyChangeListener(this);
+        }
+
+        @Override
+        public void relationAdded(Relation<ApplicationDbEntity> rel) {
+            setModelModified();
+            rel.getChangeSupport().addPropertyChangeListener(this);
+        }
+
+        @Override
+        public void relationRemoved(Relation<ApplicationDbEntity> rel) {
+            setModelModified();
+            rel.getChangeSupport().removePropertyChangeListener(this);
+        }
+
+        @Override
+        public void entityIndexesChanged(ApplicationDbEntity e) {
+            setModelModified();
+        }
+
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+            setModelModified();
+        }
+
+        private void setModelModified() {
+            getLookup().lookup(PlatypusModuleSupport.class).setModelModified(true);
+        }
+    }
 
     public final static Object DATAOBJECT_DOC_PROPERTY = "dataObject";
     protected transient Entry modelEntry;
@@ -115,11 +160,6 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
 
     @Override
     protected Node createNodeDelegate() {
-        /*
-         DataNode node = new DataNode(this, Children.LEAF, Lookups.fixed(this, getPrimaryFile(), getLookup().lookup(PlatypusModuleSupport.class)));
-         node.setIconBaseWithExtension(PlatypusModuleDataObject.class.getPackage().getName().replace('.', '/') + "/module.png");
-         return node;
-         */
         Node node = super.createNodeDelegate();
         if (node instanceof AbstractNode) {
             ((AbstractNode) node).setIconBaseWithExtension(PlatypusModuleDataObject.class.getPackage().getName().replace('.', '/') + "/module.png");
@@ -162,6 +202,15 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
         if (model == null) {
             model = readModel();
             modelNode = createModelNode();
+            ApplicationDbModelModifiedObserver changesObserver = new ApplicationDbModelModifiedObserver();
+            model.addEditingListener(changesObserver);
+            model.getParametersEntity().getChangeSupport().addPropertyChangeListener(changesObserver);
+            for (ApplicationDbEntity entity : model.getEntities().values()) {
+                entity.getChangeSupport().addPropertyChangeListener(changesObserver);
+            }
+            for (Relation<ApplicationDbEntity> rel : model.getRelations()) {
+                rel.getChangeSupport().addPropertyChangeListener(changesObserver);
+            }
         }
     }
 

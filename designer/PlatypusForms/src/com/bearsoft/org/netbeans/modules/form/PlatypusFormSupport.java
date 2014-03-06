@@ -339,6 +339,9 @@ public class PlatypusFormSupport extends PlatypusModuleSupport implements Editor
                 formEditor = null;
             }
             discardEditorUndoableEdits();
+            sourceModified = false;
+            modelModified = false;
+            // formEditor.formModel.modified will be unavailable, becaouse of formEditor.closeForm();
         }
     }
 
@@ -385,10 +388,11 @@ public class PlatypusFormSupport extends PlatypusModuleSupport implements Editor
         return false;
     }
 
+    /*
     private String getMVTCToolTipText(PlatypusFormDataObject formDataObject) {
         return DataEditorSupport.toolTip(formDataObject.getPrimaryFile(), formDataObject.isModified(), readOnly(formDataObject));
     }
-
+*/
     /**
      * Updates tooltip of all multiviews for given form. Replans to even queue
      * thread if necessary.

@@ -11,5 +11,6 @@ import org.openide.awt.UndoRedo;
  * @author vv
  */
 public interface ModelUndoProvider {
+
     UndoRedo.Manager getModelUndo();
 }

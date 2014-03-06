@@ -21,8 +21,8 @@ import org.w3c.dom.Document;
  */
 public class QueryModel extends Model<QueryEntity, QueryParametersEntity, DbClient, SqlQuery> {
 
-    protected String dbId = null;
-    private Set<Integer> supportedTypes = null;
+    protected String dbId;
+    private Set<Integer> supportedTypes;
 
     public QueryModel() {
         super();

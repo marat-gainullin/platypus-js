@@ -44,6 +44,7 @@ public class PlatypusReportDataObject extends PlatypusModuleDataObject {
             xlReport = new ExcelReport(getLayoutFile().getExt());
             xlReport.setTemplate(null);
             xlReport.setTemplate(new CompactBlob(layoutEntry.getFile().asBytes()));
+            xlReport.setTemplateModified(false);
         }
     }
 

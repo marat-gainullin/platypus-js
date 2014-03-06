@@ -4,6 +4,7 @@
  */
 package com.eas.designer.application.query.nodes;
 
+import com.eas.designer.application.query.PlatypusQueryDataObject;
 import com.eas.designer.datamodel.nodes.NodePropertiesUndoRecorder;
 import com.eas.designer.datamodel.nodes.NodePropertyUndoableEdit;
 import java.beans.PropertyChangeEvent;
@@ -26,7 +27,8 @@ public class QueryRootNodePropertiesUndoRecorder extends NodePropertiesUndoRecor
         if (!undoing && evt.getSource() instanceof QueryRootNode && (evt.getOldValue() != null || evt.getNewValue() != null)) {
             QueryRootNode node = (QueryRootNode) evt.getSource();
             try {
-                NodePropertyUndoableEdit edit = new NodePropertyUndoableEdit(this, node.getDataObject(), evt.getPropertyName(), evt.getOldValue(), evt.getNewValue());
+                PlatypusQueryDataObject dataObject = (PlatypusQueryDataObject) node.getDataObject();
+                NodePropertyUndoableEdit edit = new NodePropertyUndoableEdit(this, dataObject, evt.getPropertyName(), evt.getOldValue(), evt.getNewValue());
                 undoReciever.undoableEditHappened(new UndoableEditEvent(node.getDataObject(), edit));
             } catch (Exception ex) {
                 ErrorManager.getDefault().notify(ex);
