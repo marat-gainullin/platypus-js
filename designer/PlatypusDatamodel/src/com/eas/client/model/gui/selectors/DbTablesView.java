@@ -143,7 +143,7 @@ public class DbTablesView extends JPanel {
         project = aProject;
         datasourceName = aDatasourceName;
         if (datasourceName == null) {
-            datasourceName = project.getSettings().getAppSettings().getDefaultDatasource();
+            datasourceName = project.getSettings().getDefaultDataSourceName();
         }
         initComponents();
         client = project.getClient();
@@ -160,7 +160,7 @@ public class DbTablesView extends JPanel {
         }
         try {
             txtConnection.setEnabled(allowConnectionChange);
-            DatabaseConnection defaultConn = DatabaseConnections.lookup(project.getSettings().getAppSettings().getDefaultDatasource());
+            DatabaseConnection defaultConn = DatabaseConnections.lookup(project.getSettings().getDefaultDataSourceName());
             DatabaseConnection currentConn = DatabaseConnections.lookup(datasourceName);
             List<DatabaseConnection> conns = new ArrayList<>();
             for (DatabaseConnection conn : ConnectionManager.getDefault().getConnections()) {
@@ -327,7 +327,7 @@ public class DbTablesView extends JPanel {
     private void btnDefaultConnectionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDefaultConnectionActionPerformed
         if (datasourceName != null) {
             try {
-                datasourceName = project.getSettings().getAppSettings().getDefaultDatasource();
+                datasourceName = project.getSettings().getDefaultDataSourceName();
                 DatabaseConnection defaultConn = DatabaseConnections.lookup(datasourceName);
                 txtConnection.setSelectedItem(defaultConn);
                 lstTables.setModel(new DbTablesListModel(client, datasourceName));

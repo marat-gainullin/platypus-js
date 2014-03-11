@@ -54,7 +54,7 @@ public class QuerySettingsVisualPanel extends javax.swing.JPanel {
     public boolean valid(WizardDescriptor wd) throws Exception {
         String lDatasourceName = datasourceName;
         if (lDatasourceName == null) {
-            lDatasourceName = panel.getProject().getSettings().getAppSettings().getDefaultDatasource();
+            lDatasourceName = panel.getProject().getSettings().getDefaultDataSourceName();
         }
         if (lDatasourceName == null || !panel.connectionExist(lDatasourceName)) {
             wd.putProperty(WizardDescriptor.PROP_ERROR_MESSAGE, NbBundle.getMessage(QuerySettingsVisualPanel.class, "nonConnectionFile"));

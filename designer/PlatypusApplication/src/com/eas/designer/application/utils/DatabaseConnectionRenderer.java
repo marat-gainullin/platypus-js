@@ -28,7 +28,7 @@ public class DatabaseConnectionRenderer extends DefaultListCellRenderer {
     public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
         if (value == null) {
             if (project != null) {
-                value = DatabaseConnections.lookup(project.getSettings().getAppSettings().getDefaultDatasource());
+                value = DatabaseConnections.lookup(project.getSettings().getDefaultDataSourceName());
             }
             return super.getListCellRendererComponent(list, value instanceof DatabaseConnection ? ((DatabaseConnection) value).getDisplayName() : " ", index, isSelected, cellHasFocus);
         } else {

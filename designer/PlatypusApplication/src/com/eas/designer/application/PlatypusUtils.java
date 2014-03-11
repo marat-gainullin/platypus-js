@@ -22,7 +22,6 @@ public class PlatypusUtils {
     public static final String COMMON_ENCODING_NAME = "utf-8";
     public static final String DATAFOLDER_REORDERABLE_PROP_NAME = "DataFolder.Index.reorderable";
     public static final String ELEMENTS_SOURCES_GROUP = "applicationElements";
-    public static final String PLATYPUS_PROJECT_SOURCES_ROOT = "src";
 
     public static List<String> achieveSchemas(String aUrl, String aUser, String aPassword) throws Exception {
         String dialect = SQLUtils.dialectByUrl(aUrl);
