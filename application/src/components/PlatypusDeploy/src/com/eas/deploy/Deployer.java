@@ -65,7 +65,7 @@ public class Deployer extends BaseDeployer {
 
     public Deployer(File aProjectDir, DatabasesClient aClient) {
         super(aClient);
-        sourcesRoot = new File(aProjectDir, PlatypusFiles.PLATYPUS_PROJECT_SOURCES_ROOT);
+        sourcesRoot = new File(aProjectDir, PlatypusFiles.PLATYPUS_PROJECT_APP_ROOT);
     }
 
     void initApp() throws Exception {

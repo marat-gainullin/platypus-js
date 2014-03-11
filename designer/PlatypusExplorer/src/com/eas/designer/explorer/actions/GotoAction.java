@@ -136,7 +136,7 @@ public final class GotoAction implements ActionListener {
             TopComponent tc = WindowManager.getDefault().findTopComponent(PROJECT_TAB_TC_ID);
             if (tc instanceof ExplorerManager.Provider) {
                 ExplorerManager.Provider expl = (ExplorerManager.Provider) tc;
-                String foPath = FileUtil.getRelativePath(project.getProjectDirectory(), fo).substring(PlatypusUtils.PLATYPUS_PROJECT_SOURCES_ROOT.length());
+                String foPath = FileUtil.getRelativePath(project.getProjectDirectory(), fo).substring(PlatypusFiles.PLATYPUS_PROJECT_APP_ROOT.length());
                 String[] spath = (project.getDisplayName() + "/" + PlatypusUtils.ELEMENTS_SOURCES_GROUP + foPath).split("/");
                 Node nToSelect = null;
                 try {

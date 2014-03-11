@@ -452,7 +452,7 @@ public class PlatypusProjectImpl implements PlatypusProject {
 
     @Override
     public final FileObject getSrcRoot() throws Exception {
-        return getDirectory(PlatypusUtils.PLATYPUS_PROJECT_SOURCES_ROOT);
+        return getDirectory(PlatypusFiles.PLATYPUS_PROJECT_APP_ROOT);
     }
 
     private FileObject getDirectory(String name) {
