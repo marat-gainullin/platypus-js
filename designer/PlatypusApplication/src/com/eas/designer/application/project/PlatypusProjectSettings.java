@@ -13,10 +13,34 @@ import java.util.logging.Level;
  */
 public interface PlatypusProjectSettings {
 
-    PlatypusSettings getAppSettings();
-
     PropertyChangeSupport getChangeSupport();
 
+    /**
+     * Gets default application element to run.
+     *
+     * @return application element name
+     */
+    String getRunElement();
+
+    /**
+     * Sets default application element to run.
+     *
+     * @param aValue application element name
+     */
+    void setRunElement(String aValue);
+
+    /**
+     * Get the default data source name
+     * @return string of the default data source name
+     */
+    String getDefaultDataSourceName();
+
+    /**
+     * Sets the default data source name for a project
+     * @param aValue a default data source name
+     */
+    void setDefaultDatasourceName(String aValue);
+    
     /**
      * Gets the application server's host.
      *

@@ -4,24 +4,18 @@
  */
 package com.eas.designer.explorer.project;
 
-import com.eas.designer.application.project.PlatypusSettings;
 import com.eas.designer.application.project.ClientType;
 import com.eas.designer.application.project.AppServerType;
 import com.eas.designer.application.project.PlatypusProjectSettings;
-import com.eas.designer.application.PlatypusUtils;
 import com.eas.util.StringUtils;
-import com.eas.xml.dom.Source2XmlDom;
-import com.eas.xml.dom.XmlDom2String;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.logging.Level;
+import org.openide.ErrorManager;
 import org.openide.filesystems.FileObject;
 import org.openide.util.EditableProperties;
-import org.w3c.dom.Document;
 
 /**
  * Facade for all project's settings.
@@ -34,10 +28,11 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
     public static final int CLIENT_APP_DEFAULT_DEBUG_PORT = 8900;
     public static final int SERVER_APP_DEFAULT_DEBUG_PORT = 8901;
     public static final Level DEFAULT_LOG_LEVEL = Level.INFO;
-    public static final String PLATYPUS_SETTINGS_FILE = "platypus.xml";
     public static final String PROJECT_SETTINGS_FILE = "project.properties"; //NOI18N
     public static final String PROJECT_PRIVATE_SETTINGS_FILE = "private.properties"; //NOI18N
     public static final String PROJECT_DISPLAY_NAME_KEY = "projectDisplayName"; //NOI18N
+    public static final String RUN_ELEMENT_KEY = "runElement"; //NOI18N
+    public static final String DEFAULT_DATA_SOURCE_ELEMENT_KEY = "defaultDataSource"; //NOI18N
     public static final String RUN_USER_KEY = "runUser"; //NOI18N
     public static final String RUN_PASSWORD_KEY = "runPassword"; //NOI18N
     public static final String RUN_CLIENT_OPTIONS_KEY = "runClientOptions"; //NOI18N
@@ -58,12 +53,10 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
     public static final String ENABLE_ANONYMOUS_ACCESS_J2SE_KEY="enableAnonymousAccessInJ2SE";//NOI18N
     public static final String CLIENT_TYPE_KEY = "clientType"; //NOI18N
     public static final String SERVER_TYPE_KEY = "serverType"; //NOI18N
-    protected final PlatypusSettings platypusSettings;
     protected final FileObject projectDir;
     protected final PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
     protected EditableProperties projectProperties;
     protected EditableProperties projectPrivateProperties;
-    private boolean platypusSettingsIsDirty;
     private boolean projectPropertiesIsDirty;
     private boolean projectPrivatePropertiesIsDirty;
 
@@ -72,20 +65,6 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
             throw new IllegalArgumentException("Project directory file object is null."); //NOI18N
         }
         projectDir = aProjectDir;
-        String appSettingsStr = getPlatypusSettingsFileObject().asText(PlatypusUtils.COMMON_ENCODING_NAME);
-        if (!appSettingsStr.trim().isEmpty()) {
-            Document doc = Source2XmlDom.transform(appSettingsStr);
-            platypusSettings = PlatypusSettings.valueOf(doc);
-        } else {
-            platypusSettings = new PlatypusSettings();
-        }
-        platypusSettings.getChangeSupport().addPropertyChangeListener(new PropertyChangeListener() {
-            @Override
-            public void propertyChange(PropertyChangeEvent evt) {
-                platypusSettingsIsDirty = true;
-                changeSupport.firePropertyChange(evt);
-            }
-        });
         projectProperties = new EditableProperties(false);
         try (InputStream is = getProjectSettingsFileObject().getInputStream()) {
             projectProperties.load(is);
@@ -94,11 +73,6 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
         try (InputStream is = getProjectPrivateSettingsFileObject().getInputStream()) {
             projectPrivateProperties.load(is);
         }
-    }
-
-    @Override
-    public PlatypusSettings getAppSettings() {
-        return platypusSettings;
     }
 
     /**
@@ -127,6 +101,60 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
         changeSupport.firePropertyChange(PROJECT_DISPLAY_NAME_KEY, oldValue, aValue);
     }
 
+    /**
+     * Gets default application element to run.
+     *
+     * @return application element name
+     */
+    @Override
+    public String getRunElement() {
+        return projectProperties.get(RUN_ELEMENT_KEY);
+    }
+
+    /**
+     * Sets default application element to run.
+     *
+     * @param aValue application element name
+     */
+    @Override
+    public void setRunElement(String aValue) {
+        String oldValue = getRunElement();
+        if (aValue != null) {
+            projectProperties.setProperty(RUN_ELEMENT_KEY, aValue);
+        } else {
+            projectProperties.remove(RUN_ELEMENT_KEY);
+        }
+        projectPropertiesIsDirty = true;
+        changeSupport.firePropertyChange(RUN_ELEMENT_KEY, oldValue, aValue);
+    }
+
+    /**
+     * Get the default data source name
+     * @return string of the default data source name
+     */
+    @Override
+    public String getDefaultDataSourceName() {
+        return projectPrivateProperties.get(DEFAULT_DATA_SOURCE_ELEMENT_KEY);
+    }
+
+    /**
+     * Sets the default data source name for a project
+     * @param aValue a default data source name
+     */
+    @Override
+    public void setDefaultDatasourceName(String aValue) {
+        String oldValue = getRunElement();
+        if (aValue != null) {
+            projectPrivateProperties.setProperty(DEFAULT_DATA_SOURCE_ELEMENT_KEY, aValue);
+        } else {
+            projectPrivateProperties.remove(DEFAULT_DATA_SOURCE_ELEMENT_KEY);
+        }
+        projectPrivatePropertiesIsDirty = true;
+        changeSupport.firePropertyChange(DEFAULT_DATA_SOURCE_ELEMENT_KEY, oldValue, aValue);
+    }
+    
+    
+    
     /**
      * Gets username for the Platypus user to login on application run.
      *
@@ -585,13 +613,6 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
 
     @Override
     public void save() throws Exception {
-        if (platypusSettingsIsDirty) {
-            try (OutputStream os = getPlatypusSettingsFileObject().getOutputStream()) {
-                String sData = XmlDom2String.transform(platypusSettings.toDocument());
-                os.write(sData.getBytes(PlatypusUtils.COMMON_ENCODING_NAME));
-            }
-            platypusSettingsIsDirty = false;
-        }
         if (projectPropertiesIsDirty) {
             try (OutputStream os = getProjectSettingsFileObject().getOutputStream()) {
                 projectProperties.store(os);
@@ -611,26 +632,26 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
         return changeSupport;
     }
 
-    protected final FileObject getPlatypusSettingsFileObject() throws IOException {
-        FileObject fo = projectDir.getFileObject(PLATYPUS_SETTINGS_FILE);
-        if (fo == null) {
-            fo = projectDir.createData(PLATYPUS_SETTINGS_FILE);
-        }
-        return fo;
-    }
-
-    protected final FileObject getProjectSettingsFileObject() throws IOException {
+    protected final FileObject getProjectSettingsFileObject() {
         FileObject fo = projectDir.getFileObject(PROJECT_SETTINGS_FILE);
         if (fo == null) {
-            fo = projectDir.createData(PROJECT_SETTINGS_FILE);
+            try {
+                fo = projectDir.createData(PROJECT_SETTINGS_FILE);
+            } catch (IOException ex) {
+                ErrorManager.getDefault().notify(ex);
+            }
         }
         return fo;
     }
 
-    protected final FileObject getProjectPrivateSettingsFileObject() throws IOException {
+    protected final FileObject getProjectPrivateSettingsFileObject() {
         FileObject fo = projectDir.getFileObject(PROJECT_PRIVATE_SETTINGS_FILE);
         if (fo == null) {
-            fo = projectDir.createData(PROJECT_PRIVATE_SETTINGS_FILE);
+            try {
+                fo = projectDir.createData(PROJECT_PRIVATE_SETTINGS_FILE);
+            } catch (IOException ex) {
+                ErrorManager.getDefault().notify(ex);
+            }
         }
         return fo;
     }

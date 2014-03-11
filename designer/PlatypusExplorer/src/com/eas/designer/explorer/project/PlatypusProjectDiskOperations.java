@@ -39,12 +39,12 @@ public class PlatypusProjectDiskOperations implements DataFilesProviderImplement
      */
     @Override
     public List<FileObject> getMetadataFiles() {
-        return Collections.unmodifiableList(Arrays.asList(project.getLocalProjectFile()));
+        return Collections.unmodifiableList(Arrays.asList(project.getSettings().getProjectSettingsFileObject()));
     }
 
     @Override
     public List<FileObject> getDataFiles() {
-        return Collections.unmodifiableList(Arrays.asList(project.getLocalProjectFile()));
+        return Collections.unmodifiableList(Arrays.asList(project.getSrcRoot()));
     }
 
     /*

@@ -26,7 +26,6 @@ import com.eas.designer.application.PlatypusUtils;
 import com.eas.designer.application.indexer.PlatypusPathRecognizer;
 import com.eas.designer.application.project.PlatypusProject;
 import com.eas.designer.application.project.PlatypusProjectInformation;
-import com.eas.designer.application.project.PlatypusSettings;
 import com.eas.designer.explorer.j2ee.PlatypusWebModule;
 import com.eas.designer.explorer.j2ee.PlatypusWebModuleManager;
 import com.eas.designer.explorer.model.windows.ModelInspector;
@@ -104,7 +103,6 @@ public class PlatypusProjectImpl implements PlatypusProject {
     protected Lookup pLookup;
     protected ProjectState state;
     protected final FileObject projectDir;
-    protected final FileObject localProjectFile; // project's settings file
     protected ScriptedDatabasesClient client;
     protected RequestProcessor.Task connecting2Db;
     protected PlatypusProjectInformation info;
@@ -120,13 +118,12 @@ public class PlatypusProjectImpl implements PlatypusProject {
         DataNode.setShowFileExtensions(false);
         state = aState;
         projectDir = aProjectDir;
-        localProjectFile = aProjectDir.getFileObject(PlatypusProjectSettingsImpl.PLATYPUS_SETTINGS_FILE);
         settings = new PlatypusProjectSettingsImpl(aProjectDir);
         settings.getChangeSupport().addPropertyChangeListener(new PropertyChangeListener() {
             @Override
             public void propertyChange(final PropertyChangeEvent evt) {
                 state.markModified();
-                if (PlatypusSettings.DEFAULT_DATASOURCE_ATTR_NAME.equals(evt.getPropertyName())) {
+                if (PlatypusProjectSettingsImpl.DEFAULT_DATA_SOURCE_ELEMENT_KEY.equals(evt.getPropertyName())) {
                     EventQueue.invokeLater(new Runnable() {
 
                         @Override
@@ -158,7 +155,7 @@ public class PlatypusProjectImpl implements PlatypusProject {
                 new PlatypusWebModule(this),
                 new PlatypusWebModuleManager(this),
                 getSearchInfoDescription());
-        client = new ScriptedDatabasesClient(new FilesAppCache(projectDir.getPath(), false, null), settings.getAppSettings().getDefaultDatasource(), false) {
+        client = new ScriptedDatabasesClient(new FilesAppCache(projectDir.getPath(), false, null), settings.getDefaultDataSourceName(), false) {
             protected CompiledScriptDocuments documents = new ClientCompiledScriptDocuments(this);
 
             @Override
@@ -190,7 +187,7 @@ public class PlatypusProjectImpl implements PlatypusProject {
         try {
             String datasourceId = aDatasourceId;
             if (datasourceId == null) {
-                datasourceId = settings.getAppSettings().getDefaultDatasource();
+                datasourceId = settings.getDefaultDataSourceName();
             }
             return GeneralResourceProvider.getInstance().isDatasourceConnected(datasourceId);
         } catch (SQLException ex) {
@@ -262,7 +259,7 @@ public class PlatypusProjectImpl implements PlatypusProject {
             connecting2Db.waitFinished();
             String datasourceId = aDatasourceName;
             if (datasourceId == null) {
-                datasourceId = settings.getAppSettings().getDefaultDatasource();
+                datasourceId = settings.getDefaultDataSourceName();
             }
             DatabaseConnection conn = DatabaseConnections.lookup(datasourceId);
             if (conn != null) {
@@ -338,7 +335,7 @@ public class PlatypusProjectImpl implements PlatypusProject {
         try {
             String datasourceId = aDatasourceName;
             if (datasourceId == null) {
-                datasourceId = settings.getAppSettings().getDefaultDatasource();
+                datasourceId = settings.getDefaultDataSourceName();
             }
             DatabaseConnection conn = DatabaseConnections.lookup(datasourceId);
             if (conn != null) {
@@ -361,7 +358,7 @@ public class PlatypusProjectImpl implements PlatypusProject {
         html = html.replaceAll("noDatabaseBaseHref", urlBase.toString());
         String datasourceId = aDatasourceName;
         if (datasourceId == null) {
-            datasourceId = settings.getAppSettings().getDefaultDatasource();
+            datasourceId = settings.getDefaultDataSourceName();
         }
         if (datasourceId == null || datasourceId.isEmpty()) {
             datasourceId = "N/A";
@@ -406,11 +403,6 @@ public class PlatypusProjectImpl implements PlatypusProject {
     }
 
     @Override
-    public FileObject getLocalProjectFile() {
-        return localProjectFile;
-    }
-
-    @Override
     public FileObject getProjectDirectory() {
         return projectDir;
     }
@@ -451,7 +443,7 @@ public class PlatypusProjectImpl implements PlatypusProject {
     }
 
     @Override
-    public final FileObject getSrcRoot() throws Exception {
+    public final FileObject getSrcRoot() {
         return getDirectory(PlatypusFiles.PLATYPUS_PROJECT_APP_ROOT);
     }
 
@@ -511,7 +503,7 @@ public class PlatypusProjectImpl implements PlatypusProject {
                     ((FilesAppCache) cache).watch();
                 }
                 GlobalPathRegistry.getDefault().register(PlatypusPathRecognizer.SOURCE_CP, new ClassPath[]{sourceRoot});
-                startConnecting2db(getSettings().getAppSettings().getDefaultDatasource());
+                startConnecting2db(getSettings().getDefaultDataSourceName());
             } catch (Exception ex) {
                 Logger.getLogger(PlatypusProjectImpl.class.getName()).log(Level.SEVERE, null, ex);
             }

@@ -52,8 +52,6 @@ public interface PlatypusProject extends Project {
 
     ListenerRegistration addClientChangeListener(final ClientChangeListener onChange);
 
-    FileObject getLocalProjectFile();
-
     PlatypusProjectSettings getSettings();
 
     void save() throws Exception;
@@ -66,7 +64,7 @@ public interface PlatypusProject extends Project {
 
     ProjectState getState();
 
-    FileObject getSrcRoot() throws Exception;
+    FileObject getSrcRoot();
     
     PlatypusProjectInformation getProjectInfo();
 

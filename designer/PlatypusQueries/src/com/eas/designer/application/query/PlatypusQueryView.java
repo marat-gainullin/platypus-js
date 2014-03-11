@@ -261,7 +261,7 @@ public class PlatypusQueryView extends CloneableTopComponent {
             public void connected(String aDatasourceName) {
                 String dsName = dataObject.getDatasourceName();
                 if (dsName == null) {
-                    dsName = dataObject.getProject().getSettings().getAppSettings().getDefaultDatasource();
+                    dsName = dataObject.getProject().getSettings().getDefaultDataSourceName();
                 }
                 if (dsName == null ? aDatasourceName == null : dsName.equals(aDatasourceName)) {
                     try {
@@ -279,7 +279,7 @@ public class PlatypusQueryView extends CloneableTopComponent {
             public void disconnected(String aDatasourceName) {
                 String dsName = dataObject.getDatasourceName();
                 if (dsName == null) {
-                    dsName = dataObject.getProject().getSettings().getAppSettings().getDefaultDatasource();
+                    dsName = dataObject.getProject().getSettings().getDefaultDataSourceName();
                 }
                 if (dsName == null ? aDatasourceName == null : dsName.equals(aDatasourceName)) {
                     try {
