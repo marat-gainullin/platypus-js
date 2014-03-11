@@ -194,10 +194,10 @@ made subject to such option by the copyright holder.
             <file name="JSpinner.palette_item" url="palette/JSpinner.palette_item">
                 <attr name="position" intvalue="1600"/>
             </file>
-            -->
             <file name="JSeparator.palette_item" url="palette/JSeparator.palette_item">
                 <attr name="position" intvalue="1700"/>
             </file>
+            -->
             <file name="JTextPane.palette_item" url="palette/JTextPane.palette_item">
                 <attr name="position" intvalue="1800"/>
             </file>
