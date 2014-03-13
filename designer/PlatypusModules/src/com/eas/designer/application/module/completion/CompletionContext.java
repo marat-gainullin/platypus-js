@@ -4,18 +4,14 @@
  */
 package com.eas.designer.application.module.completion;
 
-import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.Fields;
-import com.eas.client.model.Entity;
-import com.eas.client.model.application.ApplicationDbModel;
-import com.eas.client.model.script.ScriptableRowset;
 import com.eas.designer.application.module.completion.CompletionPoint.CompletionToken;
 import com.eas.designer.application.module.completion.CompletionPoint.CompletionTokenType;
 import com.eas.script.ScriptFunction;
+import com.eas.util.PropertiesUtils;
+import com.eas.util.PropertiesUtils.PropBox;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,10 +23,6 @@ import org.netbeans.spi.editor.completion.CompletionResultSet;
  */
 public class CompletionContext {
 
-    protected static final String GET_METHOD_NAME = "get";// NOI18N
-    protected static final String BEANY_PREFIX_GET = "get";// NOI18N
-    protected static final String BEANY_PREFIX_SET = "set";// NOI18N
-    protected static final String BEANY_PREFIX_IS = "is";// NOI18N
     private static final int QUOTED_STRING_MIN_LENGTH = 2;
     private final Class<?> scriptClass;
 
@@ -64,8 +56,8 @@ public class CompletionContext {
         if (scriptClass != null) {
             for (Method method : scriptClass.getMethods()) {
                 if (method.isAnnotationPresent(ScriptFunction.class)) {
-                    if (isBeanPatternMethod(method)) {
-                        String propName = getPropertyName(method.getName());
+                    if (PropertiesUtils.isBeanPatternMethod(method)) {
+                        String propName = PropertiesUtils.getPropertyName(method.getName());
                         if (point.getFilter() == null || point.getFilter().isEmpty() || propName.startsWith(point.getFilter())) {
                             PropBox pb = props.get(propName);
                             if (pb == null) {
@@ -73,8 +65,8 @@ public class CompletionContext {
                                 pb.name = propName;
                                 props.put(pb.name, pb);
                             }
-                            setPropertyAccessStatus(pb, method.getName());
-                            setPropertyReturnType(pb, method);
+                            PropertiesUtils.setPropertyAccessStatus(pb, method.getName());
+                            PropertiesUtils.setPropertyReturnType(pb, method);
                             if (pb.jsDoc == null || pb.jsDoc.isEmpty()) {
                                 pb.jsDoc = method.getAnnotation(ScriptFunction.class).jsDoc();
                             }
@@ -95,7 +87,7 @@ public class CompletionContext {
                 }
                 JsFunctionCompletionItem functionCompletionItem = new JsFunctionCompletionItem(
                         method.getName(),
-                        getTypeName(method.getReturnType()),
+                        PropertiesUtils.getTypeName(method.getReturnType()),
                         parameters, method.getAnnotation(ScriptFunction.class).jsDoc(),
                         point.getCaretBeginWordOffset(),
                         point.getCaretEndWordOffset(),
@@ -117,76 +109,5 @@ public class CompletionContext {
 
     private static String removeQuotes(String str) {
         return str.substring(1, str.length() - 1);
-    }
-
-    private static boolean isNumberClass(Class<?> clazz) {
-        return Number.class.isAssignableFrom(clazz)
-                || Byte.TYPE.equals(clazz)
-                || Short.TYPE.equals(clazz)
-                || Integer.TYPE.equals(clazz)
-                || Long.TYPE.equals(clazz)
-                || Float.TYPE.equals(clazz)
-                || Double.TYPE.equals(clazz);
-    }
-
-    private static void setPropertyReturnType(PropBox pb, Method method) {
-        String typeName = getTypeName(method.getReturnType());
-        if (typeName != null) {
-            pb.typeName = typeName;
-        }
-    }
-
-    private static void setPropertyAccessStatus(PropBox pb, String methodName) {
-        if (methodName.startsWith(BEANY_PREFIX_GET) || methodName.startsWith(BEANY_PREFIX_IS)) {
-            pb.readable = true;
-        } else if (methodName.startsWith(BEANY_PREFIX_SET)) {
-            pb.writeable = true;
-        }
-    }
-
-    private static String getTypeName(Class<?> aType) {
-        if (!aType.equals(Void.TYPE)) {
-            if (isNumberClass(aType)) {
-                return "Number"; //NOI18N
-            } else if (Boolean.class.isAssignableFrom(aType) || Boolean.TYPE.equals(aType)) {
-                return "Boolean"; //NOI18N
-            } else if (aType.isArray()) {
-                Class<?> cl = aType;
-                int dimensions = 0;
-                while (cl.isArray()) {
-                    dimensions++;
-                    cl = cl.getComponentType();
-                }
-                StringBuilder sb = new StringBuilder();
-                for (int i = 0; i < dimensions; i++) {
-                    sb.append("[]"); //NOI18N
-                }
-                return sb.toString();
-            } else {
-                return aType.getSimpleName();
-            }
-        }
-        return null;
-    }
-
-    private static String getPropertyName(String methodName) {
-        String capitalizedPropName = null;
-        if (methodName.startsWith(BEANY_PREFIX_GET) || methodName.startsWith(BEANY_PREFIX_SET)) {
-            capitalizedPropName = methodName.substring(3);
-            assert !capitalizedPropName.isEmpty();
-        } else if (methodName.startsWith(BEANY_PREFIX_IS)) {
-            capitalizedPropName = methodName.substring(2);
-            assert !capitalizedPropName.isEmpty();
-        }
-        if (capitalizedPropName.toUpperCase().equals(capitalizedPropName)) {
-            return capitalizedPropName;
-        } else {
-            return capitalizedPropName.substring(0, 1).toLowerCase() + capitalizedPropName.substring(1);
-        }
-    }
-
-    private static boolean isBeanPatternMethod(Method method) {
-        return ((method.getName().startsWith(BEANY_PREFIX_GET) || method.getName().startsWith(BEANY_PREFIX_IS)) && method.getParameterTypes().length == 0)
-                || (method.getName().startsWith(BEANY_PREFIX_SET) && method.getParameterTypes().length == 1);
     }
 }
