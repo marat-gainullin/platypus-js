@@ -227,13 +227,17 @@ public class Classes2Scripts {
                 .replace(JSDOC_TAG, fi.jsDoc)
                 .replace(NAME_TAG, fi.name)
                 .replace(PARAMS_TAG, fi.params)
-                .replace(BODY_TAG, getMethodBody(method.getName(), fi.params));
+                .replace(BODY_TAG, getMethodBody(method.getName(), fi.params, !Void.TYPE.equals(method.getReturnType())));
     }
 
-    private String getMethodBody(String methodName, String methodParams) {
-        return String.format("\t%s(%s);", methodName, methodParams);//NOI18N
+    private String getMethodBody(String methodName, String methodParams, boolean returnsValue) {
+        if (returnsValue) {
+            return String.format("\treturn %s(%s);", methodName, methodParams);//NOI18N
+        } else {
+            return String.format("\t%s(%s);", methodName, methodParams);//NOI18N
+        }
     }
-    
+
     private String getMethodsPart(Class clazz) {
         Map<String, PropertiesUtils.PropBox> props = new HashMap<>();
         List<Method> methods = new ArrayList<>();

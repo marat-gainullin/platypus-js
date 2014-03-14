@@ -35,7 +35,8 @@ public class JsClass {
     }
     
     @ScriptFunction(name = "methodB", jsDoc = METHOD_B_JS_DOC, params = {"paramC", "paramD"})
-    public void methB() {
+    public String methB() {
+        return "";
     }
     
 }
