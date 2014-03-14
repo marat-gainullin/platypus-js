@@ -164,7 +164,7 @@ public class Classes2Scripts {
                 .replace(NAME_TAG, ci.name)
                 .replace(PARAMS_TAG, ci.params)
                 .replace(VARS_TAG, getVarsPart(clazz))
-                .replace(METHODS_TAG, getMethodsPart(clazz));
+                .replace(METHODS_TAG, getPropsAndMethodsPart(clazz));
         return js;
     }
 
@@ -216,11 +216,32 @@ public class Classes2Scripts {
 
     private String getPropertyPart(PropBox property) {
         return PROPERTY_TEMPLATE
-                .replace(JSDOC_TAG, "")
+                .replace(JSDOC_TAG, property.jsDoc)
                 .replace(NAME_TAG, property.name)
-                .replace(DESCRIPTOR_TAG, "");
+                .replace(DESCRIPTOR_TAG, getPropertyDescriptor(property));
     }
 
+    private String getPropertyDescriptor(PropBox property) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("\twritable: ").append(Boolean.toString(property.writeable)).append(",\n");//NOI18N
+        
+        sb.append("\tget: ").append(getPropertyGetFunction(property));
+        
+        if (property.writeable) {
+            sb.append(",\n");
+            sb.append("\tset: ").append(getPropertySetFunction(property));
+        }
+        return sb.toString();
+    }
+
+    private String getPropertyGetFunction(PropBox property) {
+        return String.format("function() { return %s() }", property.readMethodName); 
+    }
+    
+    private String getPropertySetFunction(PropBox property) {
+        return String.format("function(val) { %s(val) }", property.writeMethodName); 
+    }
+    
     private String getMethodPart(Method method) {
         FunctionInfo fi = getFunctionInfo(method);
         return METHOD_TEMPLATE
@@ -238,7 +259,7 @@ public class Classes2Scripts {
         }
     }
 
-    private String getMethodsPart(Class clazz) {
+    private String getPropsAndMethodsPart(Class clazz) {
         Map<String, PropertiesUtils.PropBox> props = new HashMap<>();
         List<Method> methods = new ArrayList<>();
         StringBuilder sb = new StringBuilder();

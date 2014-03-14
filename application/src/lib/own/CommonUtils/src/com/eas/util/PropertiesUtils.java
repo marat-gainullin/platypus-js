@@ -48,8 +48,10 @@ public class PropertiesUtils {
     public static void setPropertyAccessStatus(PropBox pb, String methodName) {
         if (methodName.startsWith(PropertiesUtils.BEANY_PREFIX_GET) || methodName.startsWith(BEANY_PREFIX_IS)) {
             pb.readable = true;
+            pb.readMethodName = methodName;
         } else if (methodName.startsWith(PropertiesUtils.BEANY_PREFIX_SET)) {
             pb.writeable = true;
+            pb.writeMethodName = methodName;
         }
     }
 
@@ -94,5 +96,8 @@ public class PropertiesUtils {
         public boolean readable;
         public boolean writeable;
         public String jsDoc;
+        
+        public String readMethodName;
+        public String writeMethodName;
     }
 }

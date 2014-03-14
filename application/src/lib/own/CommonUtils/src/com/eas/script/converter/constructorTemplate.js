@@ -4,5 +4,4 @@ function {$Name}({$Params}) {
 {$Vars}
     
 {$Methods}
-
 }

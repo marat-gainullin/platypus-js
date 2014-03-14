@@ -26,6 +26,10 @@ public class JsClass {
             + "* Method B\n"
             + "*/";
     
+    private static final String PROPERTY_X_JS_DOC = "/**\n"
+            + "* Property X\n"
+            + "*/";
+    
     @ScriptFunction(name = "ConsructorA", jsDoc = CONSTRUCTOR_JS_DOC, params = {"paramA", "paramB"})
     public JsClass(String paramA) {        
     }
@@ -36,6 +40,20 @@ public class JsClass {
     
     @ScriptFunction(name = "methodB", jsDoc = METHOD_B_JS_DOC, params = {"paramC", "paramD"})
     public String methB() {
+        return "";
+    }
+    
+    @ScriptFunction(name = "property", jsDoc = PROPERTY_X_JS_DOC)
+    public String getPropX() {
+        return "";
+    }
+    
+    @ScriptFunction
+    public void setPropX(String val) {
+    }
+    
+    @ScriptFunction(name = "readOnlyProperty", jsDoc = PROPERTY_X_JS_DOC)
+    public String getRoPropX() {
         return "";
     }
     
