@@ -2,5 +2,3 @@
 this.{$Name} = function({$Params}) {
 {$Body}  
 };
-
-

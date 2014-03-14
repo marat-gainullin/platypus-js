@@ -6,5 +6,3 @@ function {$Name}({$Params}) {
 {$Methods}
 
 }
-
-

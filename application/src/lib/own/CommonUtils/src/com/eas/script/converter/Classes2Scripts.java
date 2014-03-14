@@ -12,6 +12,8 @@ import com.eas.util.PropertiesUtils;
 import com.eas.util.PropertiesUtils.PropBox;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -27,7 +29,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * The utility to convert JavaScript API classes with @ScritpFunction annotation to pure JavaScript objects.
+ * The utility to convert JavaScript API classes with @ScritpFunction annotation
+ * to pure JavaScript objects.
+ *
  * @author vv
  */
 public class Classes2Scripts {
@@ -40,8 +44,7 @@ public class Classes2Scripts {
     private static final String CONSTRUCTOR_TEMPLATE = getStringResource("constructorTemplate.js");//NOI18N
     private static final String PROPERTY_TEMPLATE = getStringResource("propertyTemplate.js");//NOI18N
     private static final String METHOD_TEMPLATE = getStringResource("methodTemplate.js");//NOI18N
-    
-    private static final String CONSTRUCTOR_TITLE_TAG = "{$ConstructorTitle}";//NOI18N
+
     private static final String NAME_TAG = "{$Name}";//NOI18N
     private static final String PARAMS_TAG = "{$Params}";//NOI18N
     private static final String VARS_TAG = "{$Vars}";//NOI18N
@@ -49,7 +52,12 @@ public class Classes2Scripts {
     private static final String BODY_TAG = "{$Body}";//NOI18N
     private static final String DESCRIPTOR_TAG = "{$Descriptor}";//NOI18N
     private static final String JSDOC_TAG = "{$JsDoc}";//NOI18N
-    
+    private static final String DELELGATE_CLASS = "__JavaClass";//NOI18N
+    private static final String DELELGATE_OBJECT = "__javaObj";//NOI18N
+    private static final String DEFAULT_CONSTRUCTOR_JS_DOC = "/**\n"//NOI18N
+            + "* Generated constructor.\n"//NOI18N
+            + "*/";//NOI18N
+
     private static Classes2Scripts convertor;
     private final List<File> classPaths = new ArrayList<>();
     private File destDirectory;
@@ -141,21 +149,23 @@ public class Classes2Scripts {
             while (e.hasMoreElements()) {
                 JarEntry jarEntry = e.nextElement();
                 if (jarEntry.getName().endsWith(JAVA_CLASS_FILE_EXT)) {
-                    processClass(jarEntry.getName(), child);
+                    Class clazz = Class.forName(entryName2ClassName(jarEntry.getName()), true, child);
+                    File resultFile = new File(destDirectory, getJsConstructorInfo(clazz).name + ".js"); //NOI18N
+                    FileUtils.writeString(resultFile, getClassJs(clazz), SettingsConstants.COMMON_ENCODING);
                 }
             }
         }
     }
 
-    private void processClass(String className, ClassLoader cl) throws ClassNotFoundException, IOException {
-        Class clazz = Class.forName(entryName2ClassName(className), true, cl);
-        String name = getConstructorName(clazz);
+    protected String getClassJs(Class clazz) {
+        FunctionInfo ci = getJsConstructorInfo(clazz);
         String js = CONSTRUCTOR_TEMPLATE
-                .replace(CONSTRUCTOR_TITLE_TAG, getConstructorTitle(clazz))
+                .replace(JSDOC_TAG, ci.jsDoc)
+                .replace(NAME_TAG, ci.name)
+                .replace(PARAMS_TAG, ci.params)
                 .replace(VARS_TAG, getVarsPart(clazz))
                 .replace(METHODS_TAG, getMethodsPart(clazz));
-        File resultFile = new File(destDirectory, name + ".js"); //NOI18N
-        FileUtils.writeString(resultFile, js, SettingsConstants.COMMON_ENCODING);
+        return js;
     }
 
     private static String entryName2ClassName(String entryName) {
@@ -170,18 +180,40 @@ public class Classes2Scripts {
         }
     }
 
-    private String getConstructorTitle(Class clazz) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    private FunctionInfo getJsConstructorInfo(Class clazz) {
+        FunctionInfo ci = new FunctionInfo();
+        for (Constructor constr : clazz.getConstructors()) {
+            if (constr.isAnnotationPresent(ScriptFunction.class)) {
+                return getFunctionInfo(constr);
+            }
+        }
+        ci.jsDoc = DEFAULT_CONSTRUCTOR_JS_DOC;
+        ci.name = clazz.getSimpleName();
+        ci.params = "";//NOI18N
+        return ci;
     }
 
-    private String getConstructorName(Class clazz) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    private FunctionInfo getFunctionInfo(AnnotatedElement ae) {
+        FunctionInfo ci = new FunctionInfo();
+        ScriptFunction sf = (ScriptFunction) ae.getAnnotation(ScriptFunction.class);
+        ci.name = sf.name();
+        ci.jsDoc = sf.jsDoc();
+        StringBuilder paramsSb = new StringBuilder();
+        for (int i = 0; i < sf.params().length; i++) {
+            paramsSb.append(sf.params()[i]);
+            if (i < sf.params().length - 1) {
+                paramsSb.append(", ");//NOI18N
+            }
+        }
+        ci.params = paramsSb.toString();
+        return ci;
     }
 
     private String getVarsPart(Class clazz) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return String.format("var %s = Java.type(\"%s\");\n", DELELGATE_CLASS, clazz.getName())//NOI18N
+                + String.format("var %s = new %s;", DELELGATE_OBJECT, DELELGATE_CLASS);//NOI18N
     }
-    
+
     private String getPropertyPart(PropBox property) {
         return PROPERTY_TEMPLATE
                 .replace(JSDOC_TAG, "")
@@ -190,11 +222,16 @@ public class Classes2Scripts {
     }
 
     private String getMethodPart(Method method) {
+        FunctionInfo fi = getFunctionInfo(method);
         return METHOD_TEMPLATE
-                .replace(JSDOC_TAG, "")
-                .replace(NAME_TAG, method.getName())
-                .replace(PARAMS_TAG, "")
-                .replace(BODY_TAG, "");
+                .replace(JSDOC_TAG, fi.jsDoc)
+                .replace(NAME_TAG, fi.name)
+                .replace(PARAMS_TAG, fi.params)
+                .replace(BODY_TAG, getMethodBody(method.getName(), fi.params));
+    }
+
+    private String getMethodBody(String methodName, String methodParams) {
+        return String.format("\t%s(%s);", methodName, methodParams);//NOI18N
     }
     
     private String getMethodsPart(Class clazz) {
@@ -230,5 +267,12 @@ public class Classes2Scripts {
             sb.append("\n");//NOI18N
         }
         return sb.toString();
+    }
+
+    protected static class FunctionInfo {
+
+        public String name;
+        public String params;
+        public String jsDoc;
     }
 }
