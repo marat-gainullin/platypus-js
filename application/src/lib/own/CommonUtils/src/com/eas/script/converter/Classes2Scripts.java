@@ -19,6 +19,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -56,6 +57,10 @@ public class Classes2Scripts {
     private static final String DELELGATE_OBJECT = "__javaObj";//NOI18N
     private static final String DEFAULT_CONSTRUCTOR_JS_DOC = "/**\n"//NOI18N
             + "* Generated constructor.\n"//NOI18N
+            + "*/";//NOI18N
+
+    private static final String DEFAULT_PROPERTY_JS_DOC = "/**\n"//NOI18N
+            + "* Generated property.\n"//NOI18N
             + "*/";//NOI18N
 
     private static Classes2Scripts convertor;
@@ -214,34 +219,49 @@ public class Classes2Scripts {
                 + String.format("var %s = new %s;", DELELGATE_OBJECT, DELELGATE_CLASS);//NOI18N
     }
 
-    private String getPropertyPart(PropBox property) {
+    private String getPropertyPart(String namespace, PropBox property) {
         return PROPERTY_TEMPLATE
-                .replace(JSDOC_TAG, property.jsDoc)
+                .replace(JSDOC_TAG, getPropertyJsDoc(namespace, property))
                 .replace(NAME_TAG, property.name)
                 .replace(DESCRIPTOR_TAG, getPropertyDescriptor(property));
+    }
+
+    private String getPropertyJsDoc(String namespace, PropBox property) {
+        String jsDoc = property.jsDoc == null || property.jsDoc.isEmpty() ? DEFAULT_PROPERTY_JS_DOC : property.jsDoc;
+        List<String> jsDocLines = new ArrayList(Arrays.asList(jsDoc.split("\n")));
+        jsDocLines.add(jsDocLines.size() - 1, "* @property " + property.name);
+        jsDocLines.add(jsDocLines.size() - 1, "* @memberOf " + namespace);
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < jsDocLines.size(); i++) {
+            sb.append(jsDocLines.get(i));
+            if (i < jsDocLines.size() - 1) {
+                sb.append("\n");
+            }
+        }
+        return sb.toString();
     }
 
     private String getPropertyDescriptor(PropBox property) {
         StringBuilder sb = new StringBuilder();
         sb.append("\twritable: ").append(Boolean.toString(property.writeable)).append(",\n");//NOI18N
-        
-        sb.append("\tget: ").append(getPropertyGetFunction(property));
-        
+
+        sb.append("\tget: ").append(getPropertyGetFunction(property));//NOI18N
+
         if (property.writeable) {
-            sb.append(",\n");
-            sb.append("\tset: ").append(getPropertySetFunction(property));
+            sb.append(",\n");//NOI18N
+            sb.append("\tset: ").append(getPropertySetFunction(property));//NOI18N
         }
         return sb.toString();
     }
 
     private String getPropertyGetFunction(PropBox property) {
-        return String.format("function() { return %s() }", property.readMethodName); 
+        return String.format("function() { return %s() }", property.readMethodName); //NOI18N
     }
-    
+
     private String getPropertySetFunction(PropBox property) {
-        return String.format("function(val) { %s(val) }", property.writeMethodName); 
+        return String.format("function(val) { %s(val) }", property.writeMethodName); //NOI18N
     }
-    
+
     private String getMethodPart(Method method) {
         FunctionInfo fi = getFunctionInfo(method);
         return METHOD_TEMPLATE
@@ -260,6 +280,7 @@ public class Classes2Scripts {
     }
 
     private String getPropsAndMethodsPart(Class clazz) {
+        FunctionInfo ci = getJsConstructorInfo(clazz);
         Map<String, PropertiesUtils.PropBox> props = new HashMap<>();
         List<Method> methods = new ArrayList<>();
         StringBuilder sb = new StringBuilder();
@@ -284,7 +305,7 @@ public class Classes2Scripts {
             }
         }
         for (PropBox property : props.values()) {
-            sb.append(getPropertyPart(property));
+            sb.append(getPropertyPart(ci.name, property));
             sb.append("\n");//NOI18N
         }
         for (Method method : methods) {
