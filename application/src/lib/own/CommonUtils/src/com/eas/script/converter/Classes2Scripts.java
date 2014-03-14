@@ -165,7 +165,7 @@ public class Classes2Scripts {
     protected String getClassJs(Class clazz) {
         FunctionInfo ci = getJsConstructorInfo(clazz);
         String js = CONSTRUCTOR_TEMPLATE
-                .replace(JSDOC_TAG, ci.jsDoc)
+                .replace(JSDOC_TAG, getConstructorJsDoc(ci))
                 .replace(NAME_TAG, ci.name)
                 .replace(PARAMS_TAG, ci.params)
                 .replace(VARS_TAG, getVarsPart(clazz))
@@ -173,6 +173,10 @@ public class Classes2Scripts {
         return js;
     }
 
+    private String getConstructorJsDoc(FunctionInfo ci) {
+        return appendLine2JsDoc(ci.jsDoc, "@namespace " + ci.name);
+    }
+    
     private static String entryName2ClassName(String entryName) {
         return entryName.substring(entryName.length() - JAVA_CLASS_FILE_EXT.length(), entryName.length()).replace("/", ".");//NOI18N
     }
@@ -228,14 +232,19 @@ public class Classes2Scripts {
 
     private String getPropertyJsDoc(String namespace, PropBox property) {
         String jsDoc = property.jsDoc == null || property.jsDoc.isEmpty() ? DEFAULT_PROPERTY_JS_DOC : property.jsDoc;
-        List<String> jsDocLines = new ArrayList(Arrays.asList(jsDoc.split("\n")));
-        jsDocLines.add(jsDocLines.size() - 1, "* @property " + property.name);
-        jsDocLines.add(jsDocLines.size() - 1, "* @memberOf " + namespace);
+        jsDoc = appendLine2JsDoc(jsDoc, "@property " + property.name);
+        jsDoc = appendLine2JsDoc(jsDoc, "@memberOf " + namespace);
+        return jsDoc;
+    }
+    
+    private String appendLine2JsDoc(String jsDoc, String line) {
+        List<String> jsDocLines = new ArrayList(Arrays.asList(jsDoc.split("\n")));//NOI18N
+        jsDocLines.add(jsDocLines.size() - 1, "* " + line);//NOI18N
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < jsDocLines.size(); i++) {
             sb.append(jsDocLines.get(i));
             if (i < jsDocLines.size() - 1) {
-                sb.append("\n");
+                sb.append("\n");//NOI18N
             }
         }
         return sb.toString();

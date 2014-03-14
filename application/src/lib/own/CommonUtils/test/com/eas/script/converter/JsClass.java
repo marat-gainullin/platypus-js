@@ -15,7 +15,7 @@ import com.eas.script.ScriptFunction;
 public class JsClass {
     
     private static final String CONSTRUCTOR_JS_DOC = "/**\n"
-            + "* Constructor\n"
+            + "* Constructor A\n"
             + "*/";
     
     private static final String METHOD_A_JS_DOC = "/**\n"
