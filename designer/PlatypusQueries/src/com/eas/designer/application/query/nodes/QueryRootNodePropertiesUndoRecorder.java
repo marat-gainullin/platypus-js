@@ -24,6 +24,9 @@ public class QueryRootNodePropertiesUndoRecorder extends NodePropertiesUndoRecor
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
+        /*
+        // All properties are stored as sql's body annotations, so no need to form separate
+        // undoable edit for them.
         if (!undoing && evt.getSource() instanceof QueryRootNode && (evt.getOldValue() != null || evt.getNewValue() != null)) {
             QueryRootNode node = (QueryRootNode) evt.getSource();
             try {
@@ -34,5 +37,6 @@ public class QueryRootNodePropertiesUndoRecorder extends NodePropertiesUndoRecor
                 ErrorManager.getDefault().notify(ex);
             }
         }
+                */
     }
 }

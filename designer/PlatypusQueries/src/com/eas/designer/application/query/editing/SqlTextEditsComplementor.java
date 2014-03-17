@@ -64,8 +64,6 @@ public class SqlTextEditsComplementor {
             Map<String, com.eas.client.model.Relation<QueryEntity>> statementRelations = prepareStatementRelations(dataObject.getModel(), statement, modelTables);
             synchronizeRelations(edit, dataObject.getModel(), statementRelations);
         }
-        dataObject.procedureChanged(!dataObject.isProcedure(), dataObject.isProcedure());
-        dataObject.manualChanged(!dataObject.isManual(), dataObject.isManual());
     }
 
     public String generateSideId(GatherRelationsSubjectsRiddleTask sideSubjectsTask) {

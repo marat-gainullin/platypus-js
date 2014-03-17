@@ -79,6 +79,17 @@ import org.w3c.dom.Document;
 
 public class PlatypusQueryDataObject extends PlatypusDataObject {
 
+    public void setQueryFlags(boolean aPublicQuery, boolean aProcedure, boolean aManual, boolean aReadonly) {
+        publicQuery = aPublicQuery;
+        procedure = aProcedure;
+        manual = aManual;
+        readonly = aReadonly;
+        publicChanged(!publicQuery, publicQuery);
+        procedureChanged(!procedure, procedure);
+        manualChanged(!manual, manual);
+        readonlyChanged(!readonly, readonly);
+    }
+
     protected class QueryModelModifiedObserver implements ModelEditingListener<QueryEntity>, PropertyChangeListener {
 
         @Override
@@ -194,7 +205,7 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         }
         Document modelDoc = Source2XmlDom.transform(modelEntry.getFile().asText(PlatypusUtils.COMMON_ENCODING_NAME));
         model = XmlDom2QueryModel.transform(getClient(), modelDoc);
-        
+
         QueryModelModifiedObserver changesObserver = new QueryModelModifiedObserver();
         model.addEditingListener(changesObserver);
         model.getParametersEntity().getChangeSupport().addPropertyChangeListener(changesObserver);
@@ -204,7 +215,7 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         for (Relation<QueryEntity> rel : model.getRelations()) {
             rel.getChangeSupport().addPropertyChangeListener(changesObserver);
         }
-        
+
         datasourceName = model.getDbId();
         publicQuery = PlatypusFilesSupport.getAnnotationValue(sqlText, JsDoc.Tag.PUBLIC_TAG) != null;
         procedure = PlatypusFilesSupport.getAnnotationValue(sqlText, JsDoc.Tag.PROCEDURE_TAG) != null;
@@ -328,7 +339,7 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         boolean oldValue = publicQuery;
         publicQuery = aValue;
         if (oldValue != publicQuery) {
-            firePropertyChange(PUBLIC_PROP_NAME, oldValue, aValue);
+            publicChanged(oldValue, aValue);
             try {
                 String content = sqlTextDocument.getText(0, sqlTextDocument.getLength());
                 String newContent = PlatypusFilesSupport.replaceAnnotationValue(content, JsDoc.Tag.PUBLIC_TAG, publicQuery ? "" : null);
@@ -337,6 +348,10 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
                 ErrorManager.getDefault().notify(ex);
             }
         }
+    }
+
+    public void publicChanged(boolean oldValue, boolean aValue) {
+        firePropertyChange(PUBLIC_PROP_NAME, oldValue, aValue);
     }
 
     public boolean isProcedure() {
@@ -393,7 +408,7 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         boolean oldValue = readonly;
         readonly = aValue;
         if (oldValue != readonly) {
-            firePropertyChange(READONLY_PROP_NAME, oldValue, aValue);
+            readonlyChanged(oldValue, aValue);
             try {
                 String content = sqlTextDocument.getText(0, sqlTextDocument.getLength());
                 String newContent = PlatypusFilesSupport.replaceAnnotationValue(content, JsDoc.Tag.READONLY_TAG, readonly ? "" : null);
@@ -402,6 +417,10 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
                 ErrorManager.getDefault().notify(ex);
             }
         }
+    }
+
+    public void readonlyChanged(boolean aOldValue, boolean aNewValue) {
+        firePropertyChange(READONLY_PROP_NAME, aOldValue, aNewValue);
     }
 
     public boolean getOutputFieldsHintsModified() {
