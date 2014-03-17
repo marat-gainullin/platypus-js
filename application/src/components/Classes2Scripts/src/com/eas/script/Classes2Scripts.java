@@ -3,10 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.script.converter;
+package com.eas.script;
 
 import com.eas.client.settings.SettingsConstants;
-import com.eas.script.ScriptFunction;
 import com.eas.util.FileUtils;
 import com.eas.util.PropertiesUtils;
 import com.eas.util.PropertiesUtils.PropBox;
@@ -38,7 +37,7 @@ import java.util.logging.Logger;
 public class Classes2Scripts {
 
     public static final String CMD_SWITCHS_PREFIX = "-";//NOI18N
-    public static final String CLASS_PATH_CMD_SWITCH = "cp";//NOI18N
+    public static final String CLASS_PATH_CMD_SWITCH = "dirs";//NOI18N
     public static final String DESTINATION_DIRECTORY_CMD_SWITCH = "dest";//NOI18N
 
     private static final String JAVA_CLASS_FILE_EXT = ".class";//NOI18N
@@ -126,14 +125,10 @@ public class Classes2Scripts {
     private void run() {
         try {
             for (File classPath : classPaths) {
-                if (classPath.isDirectory()) {
-                    processDirectory(classPath);
-                } else {
-                    processJar(classPath);
-                }
+                processDirectory(classPath);
             }
         } catch (IOException | ClassNotFoundException ex) {
-
+            Logger.getLogger(Classes2Scripts.class.getName()).log(Level.SEVERE, "Conversion error.", ex);
         }
     }
 
@@ -149,14 +144,24 @@ public class Classes2Scripts {
 
     private void processJar(File file) throws IOException, ClassNotFoundException {
         try (JarFile jar = new JarFile(file)) {
-            URLClassLoader child = new URLClassLoader(new URL[]{file.toURI().toURL()}, this.getClass().getClassLoader());
+            URLClassLoader cl = new URLClassLoader(new URL[]{file.toURI().toURL()}, this.getClass().getClassLoader());
             Enumeration<JarEntry> e = jar.entries();
             while (e.hasMoreElements()) {
-                JarEntry jarEntry = e.nextElement();
-                if (jarEntry.getName().endsWith(JAVA_CLASS_FILE_EXT)) {
-                    Class clazz = Class.forName(entryName2ClassName(jarEntry.getName()), true, child);
-                    File resultFile = new File(destDirectory, getJsConstructorInfo(clazz).name + ".js"); //NOI18N
-                    FileUtils.writeString(resultFile, getClassJs(clazz), SettingsConstants.COMMON_ENCODING);
+                try {
+                    JarEntry jarEntry = e.nextElement();
+                    if (jarEntry.getName().endsWith(JAVA_CLASS_FILE_EXT)) {
+                        String className = entryName2ClassName(jarEntry.getName());
+                        Class clazz = Class.forName(className, false, cl);
+                        FunctionInfo jsConstructor = getJsConstructorInfo(clazz);
+                        if (jsConstructor != null) {
+                            Logger.getLogger(Classes2Scripts.class.getName())
+                                    .log(Level.INFO, "Converting class name: {0}", className);
+                            File resultFile = new File(destDirectory, jsConstructor.name + ".js"); //NOI18N
+                            FileUtils.writeString(resultFile, getClassJs(clazz), SettingsConstants.COMMON_ENCODING);
+                        }
+                    }
+                } catch (NoClassDefFoundError ex) {
+                    //NO-OP
                 }
             }
         }
@@ -168,7 +173,7 @@ public class Classes2Scripts {
                 .replace(JSDOC_TAG, getConstructorJsDoc(ci))
                 .replace(NAME_TAG, ci.name)
                 .replace(PARAMS_TAG, ci.params)
-                .replace(VARS_TAG, getVarsPart(clazz))
+                .replace(VARS_TAG, getVarsPart(ci, clazz))
                 .replace(METHODS_TAG, getPropsAndMethodsPart(clazz));
         return js;
     }
@@ -176,9 +181,9 @@ public class Classes2Scripts {
     private String getConstructorJsDoc(FunctionInfo ci) {
         return appendLine2JsDoc(ci.jsDoc, "@namespace " + ci.name);
     }
-    
+
     private static String entryName2ClassName(String entryName) {
-        return entryName.substring(entryName.length() - JAVA_CLASS_FILE_EXT.length(), entryName.length()).replace("/", ".");//NOI18N
+        return entryName.substring(0, entryName.length() - JAVA_CLASS_FILE_EXT.length()).replace("/", ".");//NOI18N
     }
 
     private static String getStringResource(String resName) {
@@ -190,22 +195,22 @@ public class Classes2Scripts {
     }
 
     private FunctionInfo getJsConstructorInfo(Class clazz) {
-        FunctionInfo ci = new FunctionInfo();
-        for (Constructor constr : clazz.getConstructors()) {
-            if (constr.isAnnotationPresent(ScriptFunction.class)) {
-                return getFunctionInfo(constr);
+        try {
+            for (Constructor constr : clazz.getConstructors()) {
+                if (constr.isAnnotationPresent(ScriptFunction.class)) {
+                    return getFunctionInfo(clazz.getSimpleName(), constr);
+                }
             }
+        } catch (Exception ex) {
+            //NO-OP
         }
-        ci.jsDoc = DEFAULT_CONSTRUCTOR_JS_DOC;
-        ci.name = clazz.getSimpleName();
-        ci.params = "";//NOI18N
-        return ci;
+        return null;
     }
 
-    private FunctionInfo getFunctionInfo(AnnotatedElement ae) {
+    private FunctionInfo getFunctionInfo(String defaultName, AnnotatedElement ae) {
         FunctionInfo ci = new FunctionInfo();
         ScriptFunction sf = (ScriptFunction) ae.getAnnotation(ScriptFunction.class);
-        ci.name = sf.name();
+        ci.name = sf.name().isEmpty() ? defaultName : sf.name();
         ci.jsDoc = sf.jsDoc();
         StringBuilder paramsSb = new StringBuilder();
         for (int i = 0; i < sf.params().length; i++) {
@@ -218,9 +223,9 @@ public class Classes2Scripts {
         return ci;
     }
 
-    private String getVarsPart(Class clazz) {
+    private String getVarsPart(FunctionInfo ci, Class clazz) {
         return String.format("var %s = Java.type(\"%s\");\n", DELELGATE_CLASS, clazz.getName())//NOI18N
-                + String.format("var %s = new %s;", DELELGATE_OBJECT, DELELGATE_CLASS);//NOI18N
+                + String.format("var %s = new %s(%s);", DELELGATE_OBJECT, DELELGATE_CLASS, ci.params);//NOI18N
     }
 
     private String getPropertyPart(String namespace, PropBox property) {
@@ -236,7 +241,7 @@ public class Classes2Scripts {
         jsDoc = appendLine2JsDoc(jsDoc, "@memberOf " + namespace);
         return jsDoc;
     }
-    
+
     private String appendLine2JsDoc(String jsDoc, String line) {
         List<String> jsDocLines = new ArrayList(Arrays.asList(jsDoc.split("\n")));//NOI18N
         jsDocLines.add(jsDocLines.size() - 1, "* " + line);//NOI18N
@@ -264,15 +269,15 @@ public class Classes2Scripts {
     }
 
     private String getPropertyGetFunction(PropBox property) {
-        return String.format("function() { return %s() }", property.readMethodName); //NOI18N
+        return String.format("function() { return %s.%s() }", DELELGATE_OBJECT, property.readMethodName); //NOI18N
     }
 
     private String getPropertySetFunction(PropBox property) {
-        return String.format("function(val) { %s(val) }", property.writeMethodName); //NOI18N
+        return String.format("function(val) { %s.%s(val) }", DELELGATE_OBJECT, property.writeMethodName); //NOI18N
     }
 
     private String getMethodPart(Method method) {
-        FunctionInfo fi = getFunctionInfo(method);
+        FunctionInfo fi = getFunctionInfo(method.getName(), method);
         return METHOD_TEMPLATE
                 .replace(JSDOC_TAG, fi.jsDoc)
                 .replace(NAME_TAG, fi.name)
@@ -282,9 +287,9 @@ public class Classes2Scripts {
 
     private String getMethodBody(String methodName, String methodParams, boolean returnsValue) {
         if (returnsValue) {
-            return String.format("\treturn %s(%s);", methodName, methodParams);//NOI18N
+            return String.format("\treturn %s.%s(%s);", DELELGATE_OBJECT, methodName, methodParams);//NOI18N
         } else {
-            return String.format("\t%s(%s);", methodName, methodParams);//NOI18N
+            return String.format("\t%s.%s(%s);", DELELGATE_OBJECT, methodName, methodParams);//NOI18N
         }
     }
 
