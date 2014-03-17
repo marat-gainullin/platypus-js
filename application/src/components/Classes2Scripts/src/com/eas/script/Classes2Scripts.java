@@ -62,6 +62,10 @@ public class Classes2Scripts {
             + "* Generated property.\n"//NOI18N
             + "*/";//NOI18N
 
+    private static final String JS_DOC_TEMPLATE = "/**\n"//NOI18N
+            + "* %s\n"//NOI18N
+            + "*/";//NOI18N
+    
     private static Classes2Scripts convertor;
     private final List<File> classPaths = new ArrayList<>();
     private File destDirectory;
@@ -179,7 +183,7 @@ public class Classes2Scripts {
     }
 
     private String getConstructorJsDoc(FunctionInfo ci) {
-        return appendLine2JsDoc(ci.jsDoc, "@namespace " + ci.name);
+        return appendLine2JsDoc(formJsDoc(ci.jsDoc), "@namespace " + ci.name);
     }
 
     private static String entryName2ClassName(String entryName) {
@@ -201,17 +205,29 @@ public class Classes2Scripts {
                     return getFunctionInfo(clazz.getSimpleName(), constr);
                 }
             }
+            for (Method method : clazz.getMethods()) {
+                if (method.isAnnotationPresent(ScriptFunction.class)) {
+                    return getSimpleConstructorInfo(clazz.getSimpleName());
+                }
+            }
         } catch (Exception ex) {
             //NO-OP
         }
         return null;
     }
 
+    private FunctionInfo getSimpleConstructorInfo(String name) {
+        FunctionInfo fi = new FunctionInfo();
+        fi.name = name;
+        fi.jsDoc = DEFAULT_CONSTRUCTOR_JS_DOC;
+        return fi;
+    }
+    
     private FunctionInfo getFunctionInfo(String defaultName, AnnotatedElement ae) {
         FunctionInfo ci = new FunctionInfo();
         ScriptFunction sf = (ScriptFunction) ae.getAnnotation(ScriptFunction.class);
         ci.name = sf.name().isEmpty() ? defaultName : sf.name();
-        ci.jsDoc = sf.jsDoc();
+        ci.jsDoc = formJsDoc(sf.jsDoc());
         StringBuilder paramsSb = new StringBuilder();
         for (int i = 0; i < sf.params().length; i++) {
             paramsSb.append(sf.params()[i]);
@@ -237,12 +253,23 @@ public class Classes2Scripts {
 
     private String getPropertyJsDoc(String namespace, PropBox property) {
         String jsDoc = property.jsDoc == null || property.jsDoc.isEmpty() ? DEFAULT_PROPERTY_JS_DOC : property.jsDoc;
+        jsDoc = formJsDoc(jsDoc);
         jsDoc = appendLine2JsDoc(jsDoc, "@property " + property.name);
         jsDoc = appendLine2JsDoc(jsDoc, "@memberOf " + namespace);
         return jsDoc;
     }
 
+    private static String formJsDoc(String jsDoc) {
+        if (!jsDoc.trim().startsWith("/**")) {//NOI18N
+            return String.format(JS_DOC_TEMPLATE, jsDoc); 
+        } else {
+            return jsDoc;
+        }
+        
+    }
+    
     private String appendLine2JsDoc(String jsDoc, String line) {
+        
         List<String> jsDocLines = new ArrayList(Arrays.asList(jsDoc.split("\n")));//NOI18N
         jsDocLines.add(jsDocLines.size() - 1, "* " + line);//NOI18N
         StringBuilder sb = new StringBuilder();
@@ -331,6 +358,12 @@ public class Classes2Scripts {
 
     protected static class FunctionInfo {
 
+        public FunctionInfo() {
+            params = "";//NOI18N
+            jsDoc = "";//NOI18N
+        }
+
+        
         public String name;
         public String params;
         public String jsDoc;
