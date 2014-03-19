@@ -270,6 +270,8 @@ public class PlatypusServerCore implements ContextHost, PrincipalHost, CompiledS
         Session session = sessionManager.getCurrentSession();
         if (session != null && session.getPrincipal() != null && session.getPrincipal() instanceof DbPlatypusPrincipal) {
             return ((DbPlatypusPrincipal) session.getPrincipal()).getContext();
+        } else if (session != null && session.getContext() != null) {
+            return session.getContext();
         }
         return null;
     }

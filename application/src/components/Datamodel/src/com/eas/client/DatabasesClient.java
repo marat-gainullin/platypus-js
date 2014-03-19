@@ -238,36 +238,44 @@ public class DatabasesClient implements DbClient {
         return sb.toString();
     }
 
-    public static DbPlatypusPrincipal credentialsToPrincipalWithBasicAuthentication(DatabasesClient aClient, String aUserName, String password) throws Exception {
+    public static Map<String, String> getUserProperties(DatabasesClient aClient, String aUserName) throws Exception {
+        Map<String, String> properties = new HashMap<>();
         final SqlQuery q = new SqlQuery(aClient, USER_QUERY_TEXT);
         q.putParameter(USERNAME_PARAMETER_NAME, DataTypeInfo.VARCHAR, aUserName.toUpperCase());
         aClient.initUsersSpace(q.getDbId());
         final Rowset rs = q.compile().executeQuery();
-        if (rs.first() && password.equals(rs.getString(rs.getFields().find(ClientConstants.F_USR_PASSWD)))) {
+        if (rs.first()) {
+            properties.put(ClientConstants.F_USR_NAME, aUserName);
+            properties.put(ClientConstants.F_USR_CONTEXT, rs.getString(rs.getFields().find(ClientConstants.F_USR_CONTEXT)));
+            properties.put(ClientConstants.F_USR_EMAIL, rs.getString(rs.getFields().find(ClientConstants.F_USR_EMAIL)));
+            properties.put(ClientConstants.F_USR_PHONE, rs.getString(rs.getFields().find(ClientConstants.F_USR_PHONE)));
+            properties.put(ClientConstants.F_USR_FORM, rs.getString(rs.getFields().find(ClientConstants.F_USR_FORM)));
+            properties.put(ClientConstants.F_USR_PASSWD, rs.getString(rs.getFields().find(ClientConstants.F_USR_PASSWD)));
+        }
+        return properties;
+    }
+
+    public static DbPlatypusPrincipal credentialsToPrincipalWithBasicAuthentication(DatabasesClient aClient, String aUserName, String password) throws Exception {
+        Map<String, String> userProperties = getUserProperties(aClient, aUserName);
+        if (password.equals(userProperties.get(ClientConstants.F_USR_PASSWD))) {
             return new DbPlatypusPrincipal(aUserName,
-                    rs.getString(rs.getFields().find(ClientConstants.F_USR_CONTEXT)),
-                    rs.getString(rs.getFields().find(ClientConstants.F_USR_EMAIL)),
-                    rs.getString(rs.getFields().find(ClientConstants.F_USR_PHONE)),
-                    rs.getString(rs.getFields().find(ClientConstants.F_USR_FORM)),
+                    userProperties.get(ClientConstants.F_USR_CONTEXT),
+                    userProperties.get(ClientConstants.F_USR_EMAIL),
+                    userProperties.get(ClientConstants.F_USR_PHONE),
+                    userProperties.get(ClientConstants.F_USR_FORM),
                     getUserRoles(aClient, aUserName));
         }
         return null;
     }
 
     public static DbPlatypusPrincipal userNameToPrincipal(DatabasesClient aClient, String aUserName) throws Exception {
-        final SqlQuery q = new SqlQuery(aClient, USER_QUERY_TEXT);
-        q.putParameter(USERNAME_PARAMETER_NAME, DataTypeInfo.VARCHAR, aUserName.toUpperCase());
-        aClient.initUsersSpace(q.getDbId());
-        final Rowset rs = q.compile().executeQuery();
-        if (rs.first()) {
-            return new DbPlatypusPrincipal(aUserName,
-                    rs.getString(rs.getFields().find(ClientConstants.F_USR_CONTEXT)),
-                    rs.getString(rs.getFields().find(ClientConstants.F_USR_EMAIL)),
-                    rs.getString(rs.getFields().find(ClientConstants.F_USR_PHONE)),
-                    rs.getString(rs.getFields().find(ClientConstants.F_USR_FORM)),
-                    getUserRoles(aClient, aUserName));
-        }
-        return null;
+        Map<String, String> userProperties = getUserProperties(aClient, aUserName);
+        return new DbPlatypusPrincipal(aUserName,
+                userProperties.get(ClientConstants.F_USR_CONTEXT),
+                userProperties.get(ClientConstants.F_USR_EMAIL),
+                userProperties.get(ClientConstants.F_USR_PHONE),
+                userProperties.get(ClientConstants.F_USR_FORM),
+                getUserRoles(aClient, aUserName));
     }
 
     /**
@@ -306,7 +314,7 @@ public class DatabasesClient implements DbClient {
             }
         }
         return rowsAffected;
-    } 
+    }
 
     @Override
     public AppCache getAppCache() throws Exception {

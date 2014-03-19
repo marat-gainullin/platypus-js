@@ -4,6 +4,8 @@
  */
 package com.eas.server;
 
+import com.eas.client.ClientConstants;
+import com.eas.client.DatabasesClient;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.login.SystemPlatypusPrincipal;
 import java.io.IOException;
@@ -17,7 +19,8 @@ import java.util.logging.Logger;
 /**
  * Manages active sessions.
  *
- * <p>This class is responsible for tracking down active session, their creation
+ * <p>
+ * This class is responsible for tracking down active session, their creation
  * whenever needed, and removing.</p>
  *
  * @author pk, mg refactoring
@@ -27,7 +30,7 @@ public class SessionManager {
     private final PlatypusServerCore serverCore;
     private final Map<String, Session> sessions = new HashMap<>();
     protected ThreadLocal<Session> currentSession = new ThreadLocal<>();
-    
+
     /**
      * Creates a new session manager.
      */
@@ -39,13 +42,15 @@ public class SessionManager {
     /**
      * Creates a new session object for the specified user.
      *
-     * <p>The session instance returned is already registered inside this
+     * <p>
+     * The session instance returned is already registered inside this
      * manager.</p>
      *
-     * <p>It is assumed that by the time this method is called, the user already
+     * <p>
+     * It is assumed that by the time this method is called, the user already
      * authenticated successfully.</p>
      *
-     * @param user user name who initiated a session.
+     * @param aPrincipal who initiated a session.
      * @param sessionId session id; use IDGenerator to generate.
      * @return a new Session instance.
      */
@@ -88,9 +93,9 @@ public class SessionManager {
     /**
      * Removes specified session from manager.
      *
-     * <p> This method calls the
-     * <code>cleanup()</code> method of the session, so nothing is needed else
-     * to close the session.</p>
+     * <p>
+     * This method calls the <code>cleanup()</code> method of the session, so
+     * nothing is needed else to close the session.</p>
      *
      * @param sessionId the session to remove.
      * @return instance removed, or null if no such session found.
@@ -110,7 +115,8 @@ public class SessionManager {
     /**
      * Returns a set of active sessions.
      *
-     * <p>However this method is synchronized, caller should always use the set
+     * <p>
+     * However this method is synchronized, caller should always use the set
      * returned in a section synchronized with this class instance to protect it
      * from modifications made by other threads.</p>
      *
