@@ -7,7 +7,6 @@ package com.eas.designer.explorer.server;
 import com.eas.client.resourcepool.DatasourcesArgsConsumer;
 import com.eas.designer.application.project.PlatypusProject;
 import com.eas.designer.application.project.PlatypusProjectSettings;
-import com.eas.designer.application.project.PlatypusSettings;
 import com.eas.designer.explorer.project.ProjectRunner;
 import static com.eas.designer.explorer.project.ProjectRunner.getCommandLineStr;
 import static com.eas.designer.explorer.project.ProjectRunner.setLogging;
@@ -148,7 +147,7 @@ public final class PlatypusServerInstance implements Server, ServerInstanceImple
         io.getOut().println(String.format(NbBundle.getMessage(ProjectRunner.class, "MSG_Logging_Level"), project.getSettings().getClientLogLevel()));//NOI18N
         setLogging(arguments, project.getSettings().getServerLogLevel());
 
-        PlatypusSettings ps = project.getSettings().getAppSettings();
+        PlatypusProjectSettings pps = project.getSettings();
         arguments.add(ProjectRunner.OPTION_PREFIX + ProjectRunner.CLASSPATH_OPTION_NAME);
         arguments.add(ProjectRunner.getExtendedClasspath(getExecutablePath(binDir)));
         arguments.add(ServerMain.class.getName());
@@ -159,7 +158,7 @@ public final class PlatypusServerInstance implements Server, ServerInstanceImple
         DatabaseConnection[] dataSources = ConnectionManager.getDefault().getConnections();
         for (DatabaseConnection connection : dataSources) {
             if (ProjectRunner.isConnectionValid(connection)) {
-                if (connection.getDisplayName() == null ? ps.getDefaultDatasource() == null : connection.getDisplayName().equals(ps.getDefaultDatasource())) {
+                if (connection.getDisplayName() == null ? pps.getDefaultDataSourceName() == null : connection.getDisplayName().equals(pps.getDefaultDataSourceName())) {
                     defaultDatabaseConnection = connection;
                 }
                 arguments.add(ProjectRunner.OPTION_PREFIX + DatasourcesArgsConsumer.DB_RESOURCE_CONF_PARAM);
@@ -181,15 +180,15 @@ public final class PlatypusServerInstance implements Server, ServerInstanceImple
 
         if (defaultDatabaseConnection != null) {
             arguments.add(ProjectRunner.OPTION_PREFIX + ServerMain.DEF_DATASOURCE_CONF_PARAM);
-            arguments.add(ps.getDefaultDatasource());
-        } else if (ps.getDefaultDatasource() != null && !ps.getDefaultDatasource().isEmpty()) {
+            arguments.add(pps.getDefaultDataSourceName());
+        } else if (pps.getDefaultDataSourceName() != null && !pps.getDefaultDataSourceName().isEmpty()) {
             io.getErr().println(NbBundle.getMessage(PlatypusServerInstance.class, "MSG_Missing_App_Database"));
         }
 
         if (project.getSettings().isDbAppSources()) {
             if (defaultDatabaseConnection != null) {
                 arguments.add(ProjectRunner.OPTION_PREFIX + ServerMain.APP_URL_CONF_PARAM);
-                arguments.add("jndi://" + ps.getDefaultDatasource());
+                arguments.add("jndi://" + pps.getDefaultDataSourceName());
                 io.getOut().println(NbBundle.getMessage(PlatypusServerInstance.class, "MSG_App_Sources_Database"));//NOI18N
             } else {
                 io.getErr().println(NbBundle.getMessage(PlatypusServerInstance.class, "MSG_Missing_App_Database"));

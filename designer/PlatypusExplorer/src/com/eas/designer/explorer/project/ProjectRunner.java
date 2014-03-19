@@ -10,7 +10,6 @@ import com.eas.client.application.PlatypusClientApplication;
 import com.eas.client.resourcepool.DatasourcesArgsConsumer;
 import com.eas.designer.application.project.PlatypusProject;
 import com.eas.designer.application.project.PlatypusProjectSettings;
-import com.eas.designer.application.project.PlatypusSettings;
 import com.eas.designer.debugger.DebuggerEnvironment;
 import com.eas.designer.debugger.DebuggerUtils;
 import com.eas.designer.explorer.j2ee.PlatypusWebModuleManager;
@@ -113,7 +112,7 @@ public class ProjectRunner {
                         clientEnv.host = LOCAL_HOSTNAME;
                         clientEnv.port = project.getSettings().getDebugClientPort();
                         clientEnv.runningProgram = runningProgram;
-                        clientEnv.runningElement = project.getSettings().getAppSettings().getRunElement();
+                        clientEnv.runningElement = project.getSettings().getRunElement();
                         DebuggerUtils.attachDebugger(clientEnv, DEBUGGER_CONNECT_MAX_ATTEMPTS);
                         project.getOutputWindowIO().getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Client_Debug_Activated"));//NOI18N
                         if (project.getSettings().getRunAppServerType() == AppServerType.PLATYPUS_SERVER) {
@@ -202,7 +201,6 @@ public class ProjectRunner {
                     .frontWindow(true)
                     .controllable(true);
             List<String> arguments = new ArrayList<>();
-            PlatypusSettings ps = pps.getAppSettings();
             if (pps.getRunClientVmOptions() != null && !pps.getRunClientVmOptions().isEmpty()) {
                 addArguments(arguments, pps.getRunClientVmOptions());
                 io.getOut().println(String.format(NbBundle.getMessage(ProjectRunner.class, "MSG_VM_Run_Options"), pps.getRunClientVmOptions()));//NOI18N
@@ -223,8 +221,8 @@ public class ProjectRunner {
 
             if (appElementId != null && !appElementId.isEmpty()) {
                 runElementId = appElementId;
-            } else if (ps.getRunElement() != null && !ps.getRunElement().isEmpty()) {
-                runElementId = pps.getAppSettings().getRunElement();
+            } else if (pps.getRunElement() != null && !pps.getRunElement().isEmpty()) {
+                runElementId = pps.getRunElement();
             }
             if (runElementId != null && !runElementId.isEmpty()) {
                 arguments.add(OPTION_PREFIX + PlatypusClientApplication.APPELEMENT_CMD_SWITCH);
@@ -241,7 +239,7 @@ public class ProjectRunner {
                 DatabaseConnection[] dataSources = ConnectionManager.getDefault().getConnections();
                 for (DatabaseConnection connection : dataSources) {
                     if (isConnectionValid(connection)) {
-                        if (connection.getDisplayName() == null ? ps.getDefaultDatasource() == null : connection.getDisplayName().equals(ps.getDefaultDatasource())) {
+                        if (connection.getDisplayName() == null ? pps.getDefaultDataSourceName()== null : connection.getDisplayName().equals(pps.getDefaultDataSourceName())) {
                             defaultDatabaseConnection = connection;
                         }
                         arguments.add(ProjectRunner.OPTION_PREFIX + DatasourcesArgsConsumer.DB_RESOURCE_CONF_PARAM);
@@ -264,15 +262,15 @@ public class ProjectRunner {
                 io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Database_Direct"));//NOI18N
                 if (defaultDatabaseConnection != null) {
                     arguments.add(ProjectRunner.OPTION_PREFIX + PlatypusClientApplication.DEF_DATASOURCE_CONF_PARAM);
-                    arguments.add(ps.getDefaultDatasource());
-                } else if (ps.getDefaultDatasource() != null && !ps.getDefaultDatasource().isEmpty()) {
+                    arguments.add(pps.getDefaultDataSourceName());
+                } else if (pps.getDefaultDataSourceName()!= null && !pps.getDefaultDataSourceName().isEmpty()) {
                     io.getErr().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Missing_App_Database"));
                 }
 
                 if (project.getSettings().isDbAppSources()) {
                     if (defaultDatabaseConnection != null) {
                         arguments.add(ProjectRunner.OPTION_PREFIX + PlatypusClientApplication.URL_CMD_SWITCH);
-                        arguments.add("jndi://" + ps.getDefaultDatasource());
+                        arguments.add("jndi://" + pps.getDefaultDataSourceName());
                         io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_App_Sources_Database"));//NOI18N
                     } else {
                         io.getErr().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Missing_App_Database"));

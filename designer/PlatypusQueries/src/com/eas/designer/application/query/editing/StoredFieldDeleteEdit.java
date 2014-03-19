@@ -28,6 +28,7 @@ public class StoredFieldDeleteEdit extends StoredFieldEdit {
             if (field != null) {
                 field.getChangeSupport().firePropertyChange(Field.TYPE_INFO_PROPERTY, null, field.getTypeInfo());
             }
+            dataObject.setOutputFieldsHintsModified(true);
         } catch (Exception ex) {
             CannotUndoException lex = new CannotUndoException();
             lex.initCause(ex);
@@ -48,6 +49,7 @@ public class StoredFieldDeleteEdit extends StoredFieldEdit {
             if (field != null) {
                 field.getChangeSupport().firePropertyChange(Field.TYPE_INFO_PROPERTY, null, field.getTypeInfo());
             }
+            dataObject.setOutputFieldsHintsModified(true);
         } catch (Exception ex) {
             CannotUndoException lex = new CannotUndoException();
             lex.initCause(ex);

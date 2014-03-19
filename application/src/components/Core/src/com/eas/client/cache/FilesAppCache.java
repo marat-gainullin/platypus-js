@@ -413,7 +413,7 @@ public class FilesAppCache extends AppElementsCache {
     }
 
     private String calcSrcPath() {
-        return appPathName + File.separator + PlatypusFiles.PLATYPUS_PROJECT_SOURCES_ROOT;
+        return appPathName + File.separator + PlatypusFiles.PLATYPUS_PROJECT_APP_ROOT;
     }
 
     protected synchronized void clearFamiliesByPathPrefix(String aPathPrefix) {

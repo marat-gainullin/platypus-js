@@ -55,8 +55,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.swing.*;
-import javax.swing.event.UndoableEditEvent;
-import javax.swing.event.UndoableEditListener;
 import javax.swing.text.EditorKit;
 import org.openide.ErrorManager;
 import org.openide.awt.UndoRedo;
@@ -184,7 +182,6 @@ public class PlatypusQueryView extends CloneableTopComponent {
     private static final String CTRL_S_KEY_STROKE = "control S";
     protected static final String[] zoomLevelsData = new String[]{"25%", "50%", "75%", "100%", "150%", "200%", "300%"};
     protected transient DataObjectListener dataObjectListener;
-    protected transient UndoableEditListener undoableEditsAccumulator;
     protected transient NodeSelectionListener explorerSelectionListener = new NodeSelectionListener();
     protected transient QueryModelView modelView;
     protected transient TablesSelector tablesSelector;
@@ -231,12 +228,6 @@ public class PlatypusQueryView extends CloneableTopComponent {
         setToolTipText(NbBundle.getMessage(PlatypusQueryView.class, "HINT_PlatypusQueryTopComponent", dataObject.getPrimaryFile().getPath()));
         tablesSelector = new TablesSelector(dataObject.getProject(), false, true, NbBundle.getMessage(PlatypusQueryView.class, "selectTable"), this);
 
-        undoableEditsAccumulator = new UndoableEditListener() {
-            @Override
-            public void undoableEditHappened(UndoableEditEvent e) {
-                dataObject.getLookup().lookup(PlatypusQuerySupport.class).getModelUndo().undoableEditHappened(e);
-            }
-        };
         initComponents();
 
         EditorKit editorKit = CloneableEditorSupport.getEditorKit(SqlLanguageHierarchy.PLATYPUS_SQL_MIME_TYPE_NAME);
@@ -270,7 +261,7 @@ public class PlatypusQueryView extends CloneableTopComponent {
             public void connected(String aDatasourceName) {
                 String dsName = dataObject.getDatasourceName();
                 if (dsName == null) {
-                    dsName = dataObject.getProject().getSettings().getAppSettings().getDefaultDatasource();
+                    dsName = dataObject.getProject().getSettings().getDefaultDataSourceName();
                 }
                 if (dsName == null ? aDatasourceName == null : dsName.equals(aDatasourceName)) {
                     try {
@@ -288,7 +279,7 @@ public class PlatypusQueryView extends CloneableTopComponent {
             public void disconnected(String aDatasourceName) {
                 String dsName = dataObject.getDatasourceName();
                 if (dsName == null) {
-                    dsName = dataObject.getProject().getSettings().getAppSettings().getDefaultDatasource();
+                    dsName = dataObject.getProject().getSettings().getDefaultDataSourceName();
                 }
                 if (dsName == null ? aDatasourceName == null : dsName.equals(aDatasourceName)) {
                     try {
@@ -329,7 +320,7 @@ public class PlatypusQueryView extends CloneableTopComponent {
                 if (modelViewOriginalTrnadferHandler instanceof ModelViewDragHandler) {
                     modelView.setTransferHandler(new QueriesDragHandler((ModelViewDragHandler) modelViewOriginalTrnadferHandler, modelView));
                 }
-                modelView.getUndoSupport().addUndoableEditListener(undoableEditsAccumulator);
+                modelView.getUndoSupport().addUndoableEditListener(dataObject.getLookup().lookup(PlatypusQuerySupport.class).getUndo());
                 modelView.addContainerListener(new ContainerListener() {
                     @Override
                     public void componentAdded(ContainerEvent e) {
@@ -397,7 +388,12 @@ public class PlatypusQueryView extends CloneableTopComponent {
                 if (ur instanceof UndoRedo.Manager) {
                     ((UndoRedo.Manager) ur).discardAllEdits();
                 }
-                dataObject.getModel().fireAllQueriesChanged();
+                boolean oldModelModified = dataObject.isModelModified();
+                try {
+                    dataObject.getModel().fireAllQueriesChanged();
+                } finally {
+                    dataObject.setModelModified(oldModelModified);
+                }
                 componentActivated();
             } else {
                 String dbValidatingMissingMessage = NbBundle.getMessage(PlatypusQueryView.class, "LBL_Db_Validating");
@@ -578,7 +574,7 @@ public class PlatypusQueryView extends CloneableTopComponent {
     @Override
     public UndoRedo getUndoRedo() {
         PlatypusQuerySupport support = dataObject.getLookup().lookup(PlatypusQuerySupport.class);
-        return support.getModelUndo();
+        return support.getUndo();
     }
 
     @Override

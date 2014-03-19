@@ -4,6 +4,7 @@
  */
 package com.eas.designer.application.module.completion;
 
+import com.eas.util.PropertiesUtils.PropBox;
 import javax.swing.ImageIcon;
 
 /**

@@ -54,57 +54,64 @@ public class QueryRootNode extends ModelNode<QueryEntity, QueryModel> implements
             pSet.setValue(EntityNode.PROPS_EVENTS_TAB_NAME, pSet.getDisplayName());
             sheet.put(pSet);
             
-            PropertySupport.Reflection<Boolean> publicQueryProp = new PropertySupport.Reflection<Boolean>(dataObject, boolean.class, PlatypusQueryDataObject.PUBLIC_PROP_NAME) {
+            pSet.put(new PropertySupport.ReadWrite<Boolean>(PlatypusQueryDataObject.PUBLIC_PROP_NAME, Boolean.class, NbBundle.getMessage(QueryRootNode.class, PlatypusQueryDataObject.PUBLIC_PROP_NAME), NbBundle.getMessage(QueryRootNode.class, "MSG_PublicQueryPropertyShortDescription")) {
                 @Override
                 public void setValue(Boolean val) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-                    Boolean oldval = super.getValue();
-                    super.setValue(val);
+                    Boolean oldval = ((PlatypusQueryDataObject)dataObject).isPublic();
+                    ((PlatypusQueryDataObject)dataObject).setPublic(val);
                     firePropertyChange(getName(), oldval, val);
                 }
-            };
-            publicQueryProp.setName(PlatypusQueryDataObject.PUBLIC_PROP_NAME);
-            publicQueryProp.setShortDescription(NbBundle.getMessage(QueryRootNode.class, "MSG_PublicQueryPropertyShortDescription"));//NOI18N
-            publicQueryProp.setDisplayName(NbBundle.getMessage(QueryRootNode.class, PlatypusQueryDataObject.PUBLIC_PROP_NAME));
-            pSet.put(publicQueryProp);
+
+                @Override
+                public Boolean getValue() throws IllegalAccessException, InvocationTargetException {
+                    return ((PlatypusQueryDataObject)dataObject).isPublic();
+                }
+                
+            });
             
-            PropertySupport.Reflection<Boolean> procProp = new PropertySupport.Reflection<Boolean>(dataObject, boolean.class, PlatypusQueryDataObject.PROCEDURE_PROP_NAME) {
+            pSet.put(new PropertySupport.ReadWrite<Boolean>(PlatypusQueryDataObject.PROCEDURE_PROP_NAME, Boolean.class, NbBundle.getMessage(QueryRootNode.class, PlatypusQueryDataObject.PROCEDURE_PROP_NAME), NbBundle.getMessage(QueryRootNode.class, "MSG_ProcedurePropertyShortDescription")) {
                 @Override
                 public void setValue(Boolean val) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-                    Boolean oldval = super.getValue();
-                    super.setValue(val);
+                    Boolean oldval = ((PlatypusQueryDataObject)dataObject).isProcedure();
+                    ((PlatypusQueryDataObject)dataObject).setProcedure(val);
                     firePropertyChange(getName(), oldval, val);
                 }
-            };
-            procProp.setName(PlatypusQueryDataObject.PROCEDURE_PROP_NAME);
-            procProp.setShortDescription(NbBundle.getMessage(QueryRootNode.class, "MSG_ProcedurePropertyShortDescription"));//NOI18N
-            procProp.setDisplayName(NbBundle.getMessage(QueryRootNode.class, PlatypusQueryDataObject.PROCEDURE_PROP_NAME));
-            pSet.put(procProp);
+
+                @Override
+                public Boolean getValue() throws IllegalAccessException, InvocationTargetException {
+                    return ((PlatypusQueryDataObject)dataObject).isProcedure();
+                }
+            });
             
-            PropertySupport.Reflection<Boolean> manualProp = new PropertySupport.Reflection<Boolean>(dataObject, boolean.class, PlatypusQueryDataObject.MANUAL_PROP_NAME) {
+            pSet.put(new PropertySupport.ReadWrite<Boolean>(PlatypusQueryDataObject.MANUAL_PROP_NAME, Boolean.class, NbBundle.getMessage(QueryRootNode.class, PlatypusQueryDataObject.MANUAL_PROP_NAME), NbBundle.getMessage(QueryRootNode.class, "MSG_ManualPropertyShortDescription")) {
                 @Override
                 public void setValue(Boolean val) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-                    Boolean oldval = super.getValue();
-                    super.setValue(val);
+                    Boolean oldval = ((PlatypusQueryDataObject)dataObject).isManual();
+                    ((PlatypusQueryDataObject)dataObject).setManual(val);
                     firePropertyChange(getName(), oldval, val);
                 }
-            };
-            manualProp.setName(PlatypusQueryDataObject.MANUAL_PROP_NAME);
-            manualProp.setShortDescription(NbBundle.getMessage(QueryRootNode.class, "MSG_ManualPropertyShortDescription"));//NOI18N
-            manualProp.setDisplayName(NbBundle.getMessage(QueryRootNode.class, PlatypusQueryDataObject.MANUAL_PROP_NAME));
-            pSet.put(manualProp);
+
+                @Override
+                public Boolean getValue() throws IllegalAccessException, InvocationTargetException {
+                    return ((PlatypusQueryDataObject)dataObject).isManual();
+                }
+                
+            });
             
-            PropertySupport.Reflection<Boolean> readonlyProp = new PropertySupport.Reflection<Boolean>(dataObject, boolean.class, PlatypusQueryDataObject.READONLY_PROP_NAME) {
+            pSet.put(new PropertySupport.ReadWrite<Boolean>(PlatypusQueryDataObject.READONLY_PROP_NAME, Boolean.class, NbBundle.getMessage(QueryRootNode.class, PlatypusQueryDataObject.READONLY_PROP_NAME), NbBundle.getMessage(QueryRootNode.class, "MSG_ReadonlyPropertyShortDescription")) {
                 @Override
                 public void setValue(Boolean val) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-                    Boolean oldval = super.getValue();
-                    super.setValue(val);
+                    Boolean oldval = ((PlatypusQueryDataObject)dataObject).isReadonly();
+                    ((PlatypusQueryDataObject)dataObject).setReadonly(val);
                     firePropertyChange(getName(), oldval, val);
                 }
-            };
-            readonlyProp.setName(PlatypusQueryDataObject.READONLY_PROP_NAME);
-            readonlyProp.setShortDescription(NbBundle.getMessage(QueryRootNode.class, "MSG_ReadonlyPropertyShortDescription"));//NOI18N
-            readonlyProp.setDisplayName(NbBundle.getMessage(QueryRootNode.class, PlatypusQueryDataObject.READONLY_PROP_NAME));
-            pSet.put(readonlyProp);
+
+                @Override
+                public Boolean getValue() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+                    return ((PlatypusQueryDataObject)dataObject).isReadonly();
+                }
+                
+            });
             
             PropertySupport.Reflection<String> connProp = new PropertySupport.Reflection<String>(dataObject, String.class, PlatypusQueryDataObject.CONN_PROP_NAME) {
                 protected PropertyEditor editor = new QueryConnectionPropertyEditor((PlatypusQueryDataObject)dataObject);

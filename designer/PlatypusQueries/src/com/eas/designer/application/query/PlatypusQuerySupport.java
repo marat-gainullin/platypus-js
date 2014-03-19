@@ -6,7 +6,6 @@ package com.eas.designer.application.query;
 
 import com.eas.designer.application.query.editing.QueryDocumentEditsComplementor;
 import com.eas.designer.application.query.editing.SqlTextEditsComplementor;
-import com.eas.designer.datamodel.ModelUndoProvider;
 import com.eas.designer.explorer.DataObjectProvider;
 import java.awt.Rectangle;
 import java.beans.PropertyChangeListener;
@@ -46,8 +45,7 @@ public class PlatypusQuerySupport extends CloneableOpenSupport implements OpenCo
         OpenedPaneEditorCookie,
         CloseCookie,
         SaveCookie,
-        DataObjectProvider,
-        ModelUndoProvider {
+        DataObjectProvider {
 
     public Rectangle findPlaceForEntityAdd(int aInitialX, int aInitialY) {
         if (!allEditors.isEmpty()) {
@@ -119,7 +117,7 @@ public class PlatypusQuerySupport extends CloneableOpenSupport implements OpenCo
             return dataObject.getLookup().lookup(PlatypusQuerySupport.class);
         }
     }
-    protected UndoRedo.Manager modelUndo;
+    protected UndoRedo.Manager undo;
     protected PlatypusQueryDataObject dataObject;
     protected QueryDocumentEditsComplementor queryDocumentEditsComplementor;
     protected SqlTextEditsComplementor sqlTextEditsComplementor;
@@ -130,7 +128,7 @@ public class PlatypusQuerySupport extends CloneableOpenSupport implements OpenCo
         dataObject = aDataObject;
         queryDocumentEditsComplementor = new QueryDocumentEditsComplementor(dataObject);
         sqlTextEditsComplementor = new SqlTextEditsComplementor(dataObject);
-        modelUndo = new UndoRedo.Manager() {
+        undo = new UndoRedo.Manager() {
             @Override
             public void undoableEditHappened(UndoableEditEvent ue) {
                 try {
@@ -197,6 +195,10 @@ public class PlatypusQuerySupport extends CloneableOpenSupport implements OpenCo
     @Override
     public PlatypusQueryDataObject getDataObject() {
         return dataObject;
+    }
+
+    public UndoRedo.Manager getUndo() {
+        return undo;
     }
 
     protected UndoableEdit complementSqlTextEdit(UndoableEdit anEdit) throws Exception {
@@ -284,11 +286,6 @@ public class PlatypusQuerySupport extends CloneableOpenSupport implements OpenCo
         openedEditorPane = aOpenedEditorPane;
     }
 
-    @Override
-    public UndoRedo.Manager getModelUndo() {
-        return modelUndo;
-    }
-
     public List<CloneableTopComponent> getAllViews() {
         List<CloneableTopComponent> comps = new ArrayList<>();
         Enumeration<CloneableTopComponent> en = allEditors.getComponents();
@@ -304,7 +301,7 @@ public class PlatypusQuerySupport extends CloneableOpenSupport implements OpenCo
             // Take care of memory consumption.
             dataObject.shrink();
             // Shrink has removed all parsed data from the data object.
-            modelUndo.discardAllEdits();
+            undo.discardAllEdits();
         }
         openedEditorPane = null;
     }
@@ -314,7 +311,7 @@ public class PlatypusQuerySupport extends CloneableOpenSupport implements OpenCo
             @Override
             public void run() {
                 try {
-                    modelUndo.discardAllEdits();
+                    undo.discardAllEdits();
                     List<CloneableTopComponent> views = getAllViews();
                     for (CloneableTopComponent view : views) {
                         view.close();

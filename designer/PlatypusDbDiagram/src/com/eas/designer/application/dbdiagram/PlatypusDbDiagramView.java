@@ -172,7 +172,7 @@ public class PlatypusDbDiagramView extends CloneableTopComponent {
                 try {
                     String dsName = dataObject.getModel().getDbId();
                     if (dsName == null) {
-                        dsName = dataObject.getProject().getSettings().getAppSettings().getDefaultDatasource();
+                        dsName = dataObject.getProject().getSettings().getDefaultDataSourceName();
                     }
                     if (dsName == null ? aDatasourceName == null : dsName.equals(aDatasourceName)) {
                         initDbRelatedViews();
@@ -187,7 +187,7 @@ public class PlatypusDbDiagramView extends CloneableTopComponent {
                 try {
                     String dsName = dataObject.getModel().getDbId();
                     if (dsName == null) {
-                        dsName = dataObject.getProject().getSettings().getAppSettings().getDefaultDatasource();
+                        dsName = dataObject.getProject().getSettings().getDefaultDataSourceName();
                     }
                     if (dsName == null ? aDatasourceName == null : dsName.equals(aDatasourceName)) {
                         initDbRelatedViews();
