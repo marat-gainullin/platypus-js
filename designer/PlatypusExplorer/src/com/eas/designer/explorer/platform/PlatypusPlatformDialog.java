@@ -38,7 +38,7 @@ public class PlatypusPlatformDialog {
 
     public static boolean showPlatformHomeDialog() {
         PlatformDirectoryPanel platformDirectorySelectPanel = new PlatformDirectoryPanel(PlatypusPlatform.getPlatformHomePath());
-        DialogDescriptor selectionDialog = new DialogDescriptor(platformDirectorySelectPanel, NbBundle.getMessage(PlatypusPlatform.class, "CTL_Platypus_Platform_Title"), true, new DialogAcionListener(platformDirectorySelectPanel)); //NOI18N
+        DialogDescriptor selectionDialog = new DialogDescriptor(platformDirectorySelectPanel, NbBundle.getMessage(PlatypusPlatformDialog.class, "CTL_Platypus_Platform_Title"), true, new DialogAcionListener(platformDirectorySelectPanel)); //NOI18N
         Object result = DialogDisplayer.getDefault().notify(selectionDialog);
         if (DialogDescriptor.OK_OPTION.equals(result)) {
             try {

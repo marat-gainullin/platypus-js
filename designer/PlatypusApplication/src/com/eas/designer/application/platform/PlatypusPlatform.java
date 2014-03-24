@@ -15,7 +15,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.prefs.Preferences;
+import org.openide.ErrorManager;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.util.NbPreferences;
@@ -26,7 +29,9 @@ import org.openide.util.NbPreferences;
  */
 public class PlatypusPlatform {
 
-    public static final String HOME_DIRECTORY_PATH_KEY = "platypus.platform.home"; //NOI18N
+    public static final String PLATYPUS_FOLDER_NAME = "Platypus"; //NOI18N
+    public static final String PLATYPUS_FILE_NAME = "platform"; //NOI18N
+    public static final String PLATFORM_HOME_PATH_ATTR_NAME = "path"; //NOI18N
     public static final String BIN_DIRECTORY_NAME = "bin"; //NOI18N
     public static final String LIB_DIRECTORY_NAME = "lib"; //NOI18N
     public static final String JAR_FILE_EXTENSION = "jar"; //NOI18N
@@ -42,8 +47,19 @@ public class PlatypusPlatform {
      * @return home directory or null if this path isn't defined
      */
     public static String getPlatformHomePath() {
-        Preferences node = NbPreferences.forModule(PlatypusPlatform.class);
-        return node.get(PlatypusPlatform.HOME_DIRECTORY_PATH_KEY, null);
+        FileObject platypusDir = FileUtil.getConfigFile(PLATYPUS_FOLDER_NAME);
+        if (platypusDir == null) {
+            Logger.getLogger(PlatypusPlatform.class.getName())
+                    .log(Level.INFO, "The config/{0} folder does not exist.", PLATYPUS_FOLDER_NAME); // NOI18N
+            return null;
+        }
+        FileObject platformFo = platypusDir.getFileObject(PLATYPUS_FILE_NAME);
+        if (platformFo == null) {
+            Logger.getLogger(PlatypusPlatform.class.getName())
+                    .log(Level.INFO, "The {0} configuration file does not exist.", PLATYPUS_FILE_NAME); // NOI18N
+            return null;
+        }
+        return platformFo.getAttribute(PLATFORM_HOME_PATH_ATTR_NAME) != null ? platformFo.getAttribute(PLATFORM_HOME_PATH_ATTR_NAME).toString() : null;
     }
 
     /**
@@ -52,9 +68,37 @@ public class PlatypusPlatform {
      * @param path home directory path
      */
     public static void setPlatformHomePath(String path) {
-        Preferences node = NbPreferences.forModule(PlatypusPlatform.class);
-        node.put(PlatypusPlatform.HOME_DIRECTORY_PATH_KEY, path);
+        try {
+            FileObject platypusDir = FileUtil.getConfigFile(PLATYPUS_FOLDER_NAME);
+            if (platypusDir == null) {
+                platypusDir = FileUtil.getConfigRoot().createFolder(PLATYPUS_FOLDER_NAME);
+            }
+            assert platypusDir != null;
+            FileObject platformFo = platypusDir.getFileObject(PLATYPUS_FILE_NAME);
+            if (platformFo == null) {
+                platformFo = platypusDir.createData(PLATYPUS_FILE_NAME);
+            }
+            platformFo.setAttribute(PLATFORM_HOME_PATH_ATTR_NAME, path);
+        } catch (IOException ex) {
+            ErrorManager.getDefault().notify(ex);
+        }
         jarsCache.clear();
+    }
+
+    private static FileObject getConfigurantionFileObject() {
+        FileObject platypusDir = FileUtil.getConfigFile(PLATYPUS_FOLDER_NAME);
+        if (platypusDir == null) {
+            Logger.getLogger(PlatypusPlatform.class.getName())
+                    .log(Level.INFO, "The config/{0} folder does not exist.", PLATYPUS_FOLDER_NAME); // NOI18N
+            return null;
+        }
+        FileObject platformFo = platypusDir.getFileObject(PLATYPUS_FILE_NAME);
+        if (platformFo == null) {
+            Logger.getLogger(PlatypusPlatform.class.getName())
+                    .log(Level.INFO, "The {0} configuration file does not exist.", PLATYPUS_FILE_NAME); // NOI18N
+            return null;
+        }
+        return platformFo;
     }
 
     /**
