@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.designer.explorer.platform;
+package com.eas.designer.application.platform;
 
 import org.openide.util.NbBundle;
 

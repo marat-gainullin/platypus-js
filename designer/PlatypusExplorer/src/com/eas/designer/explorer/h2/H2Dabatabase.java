@@ -4,8 +4,9 @@
  */
 package com.eas.designer.explorer.h2;
 
-import com.eas.designer.explorer.platform.EmptyPlatformHomePathException;
-import com.eas.designer.explorer.platform.PlatypusPlatform;
+import com.eas.designer.application.platform.EmptyPlatformHomePathException;
+import com.eas.designer.application.platform.PlatypusPlatform;
+import com.eas.designer.explorer.platform.PlatypusPlatformDialog;
 import com.eas.designer.explorer.project.ProjectRunner;
 import com.eas.designer.explorer.server.Server;
 import com.eas.designer.explorer.server.ServerState;
@@ -117,7 +118,7 @@ public class H2Dabatabase implements DatabaseRuntime, Server {
             h2Dir = new File(libDir, H2_DIRECTORY_NAME);         
         } catch (EmptyPlatformHomePathException | IllegalStateException ex) {
             StatusDisplayer.getDefault().setStatusText(NbBundle.getMessage(H2Dabatabase.class, "LBL_Unable_Start_H2_Path")); // NOI18N
-            if (PlatypusPlatform.showPlatformHomeDialog()) {
+            if (PlatypusPlatformDialog.showPlatformHomeDialog()) {
                 try {
                     libDir = PlatypusPlatform.getThirdpartyLibDirectory();
                     h2Dir = new File(libDir, H2_DIRECTORY_NAME);

@@ -14,8 +14,9 @@ import com.eas.designer.application.project.PlatypusSettings;
 import com.eas.designer.debugger.DebuggerEnvironment;
 import com.eas.designer.debugger.DebuggerUtils;
 import com.eas.designer.explorer.j2ee.PlatypusWebModuleManager;
-import com.eas.designer.explorer.platform.EmptyPlatformHomePathException;
-import com.eas.designer.explorer.platform.PlatypusPlatform;
+import com.eas.designer.application.platform.EmptyPlatformHomePathException;
+import com.eas.designer.application.platform.PlatypusPlatform;
+import com.eas.designer.explorer.platform.PlatypusPlatformDialog;
 import com.eas.designer.explorer.server.PlatypusServerInstance;
 import com.eas.designer.explorer.server.PlatypusServerInstanceProvider;
 import com.eas.designer.explorer.server.ServerState;
@@ -144,7 +145,7 @@ public class ProjectRunner {
             binDir = PlatypusPlatform.getPlatformBinDirectory();
         } catch (EmptyPlatformHomePathException | IllegalStateException ex) {
             io.getErr().println(ex.getMessage());
-            if (!PlatypusPlatform.showPlatformHomeDialog()) {
+            if (!PlatypusPlatformDialog.showPlatformHomeDialog()) {
                 return null;
             } else {
                 try {
