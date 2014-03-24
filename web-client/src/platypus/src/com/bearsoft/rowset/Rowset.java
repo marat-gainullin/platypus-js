@@ -15,6 +15,10 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.bearsoft.rowset.beans.PropertyChangeEvent;
+import com.bearsoft.rowset.beans.PropertyChangeListener;
+import com.bearsoft.rowset.beans.PropertyChangeSupport;
+import com.bearsoft.rowset.beans.VetoableChangeListener;
 import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.changes.Delete;
 import com.bearsoft.rowset.changes.Insert;
@@ -40,14 +44,7 @@ import com.bearsoft.rowset.ordering.HashOrderer;
 import com.bearsoft.rowset.ordering.OrderersFactory;
 import com.bearsoft.rowset.utils.KeySet;
 import com.bearsoft.rowset.utils.RowsetUtils;
-import com.eas.client.Callback;
-import com.eas.client.Cancellable;
 import com.eas.client.CancellableCallback;
-import com.eas.client.Utils;
-import com.eas.client.beans.PropertyChangeEvent;
-import com.eas.client.beans.PropertyChangeListener;
-import com.eas.client.beans.PropertyChangeSupport;
-import com.eas.client.beans.VetoableChangeListener;
 
 /**
  * Rowset serves as original and updated rows vectors holder. There are three

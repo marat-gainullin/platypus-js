@@ -14,17 +14,17 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.bearsoft.rowset.utils.IDGenerator;
-import com.eas.client.Cancellable;
+import com.bearsoft.rowset.Cancellable;
 import com.eas.client.CancellableCallback;
 import com.eas.client.CumulativeCallbackAdapter;
 import com.eas.client.DocumentCallbackAdapter;
-import com.eas.client.PlatypusHttpRequestParams;
 import com.eas.client.ResponseCallbackAdapter;
 import com.eas.client.StringCallbackAdapter;
 import com.eas.client.queries.Query;
 import com.eas.client.queries.QueryCallbackAdapter;
+import com.eas.client.xhr.UrlProcessor;
 import com.google.gwt.core.client.Callback;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.ScriptInjector;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.xhr.client.XMLHttpRequest;
@@ -32,7 +32,6 @@ import com.google.gwt.xml.client.Document;
 import com.google.gwt.xml.client.Element;
 import com.google.gwt.xml.client.Node;
 import com.google.gwt.xml.client.NodeList;
-import com.sencha.gxt.core.client.GXT;
 
 /**
  * 
@@ -46,6 +45,7 @@ public class Loader {
 		public void loaded(String anItemName);
 	}
 
+	public static final UrlProcessor URL_PROCESSOR = GWT.create(UrlProcessor.class);
 	public static final String INJECTED_SCRIPT_CLASS_NAME = "platypus-injected-script";
 	public static final String SERVER_MODULE_TOUCHED_NAME = "Proxy-";
 	public static final String DEPENDENCY_TAG_NAME = "dependency";
@@ -240,8 +240,7 @@ public class Loader {
 				}));
 				//
 				String jsURL = client.resourceUrl(appElementName);
-				if (GXT.isChrome())// remove if chrome bug 266971 is fixed
-					jsURL += "?" + PlatypusHttpRequestParams.CACHE_BUSTER + "=" + IDGenerator.genId();
+				jsURL = URL_PROCESSOR.process(jsURL);
 				ScriptInjector.fromUrl(jsURL).setCallback(new Callback<Void, Exception>() {
 
 					@Override
@@ -312,7 +311,7 @@ public class Loader {
 		};
 		if (!appElementNames.isEmpty()) {
 			for (final String appElementName : appElementNames) {
-				startLoadings.add(client.createServerModule(appElementName, new com.eas.client.Callback<Void>() {
+				startLoadings.add(client.createServerModule(appElementName, new com.bearsoft.rowset.Callback<Void>() {
 
 					@Override
 					public void run(Void aDoc) throws Exception {

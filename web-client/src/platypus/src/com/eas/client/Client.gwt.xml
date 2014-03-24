@@ -6,7 +6,21 @@
     <inherits name="com.google.gwt.xml.XML"/>
     <inherits name="com.google.gwt.json.JSON"/>
     <inherits name="com.google.gwt.user.User"/>
-    <inherits name="com.sencha.gxt.chart.Chart" />
-    <inherits name="com.eas.client.gxtcontrols.GxtControls"/>
+    <inherits name="com.bearsoft.gwt.ui.UI" />
+    <inherits name="com.bearsoft.rowset.Rowset" />
+    
+    <!-- Default noop implementation of url processing for xhr requests -->
+	<replace-with class="com.eas.client.xhr.impl.NoopUrlProcessor">
+		<when-type-is class="com.eas.client.xhr.UrlProcessor"/>
+	</replace-with>
+	
+	<!-- Chrome bug 266971 needs a workaround-->
+	<replace-with class="com.eas.client.xhr.impl.ChromeUrlProcessor">
+	  <when-type-is class="com.eas.client.xhr.UrlProcessor" />
+	  <any>
+	    <when-property-is name="user.agent" value="safari"/>
+	  </any>
+	</replace-with>
+	
     <source path=""/>
 </module>

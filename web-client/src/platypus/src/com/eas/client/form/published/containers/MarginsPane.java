@@ -1,0 +1,248 @@
+package com.eas.client.form.published.containers;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import com.bearsoft.gwt.ui.XElement;
+import com.bearsoft.gwt.ui.containers.AnchorsPanel;
+import com.eas.client.form.AbsoluteJSConstraints;
+import com.eas.client.form.MarginConstraints;
+import com.eas.client.form.MarginJSConstraints;
+import com.eas.client.form.published.HasPublished;
+import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.user.client.ui.Widget;
+
+public class MarginsPane extends AnchorsPanel implements HasLayers, HasPublished {
+
+	protected JavaScriptObject published;
+	protected Map<Widget, MarginConstraints> constraints = new HashMap<>();
+
+	public MarginsPane() {
+		super();
+	}
+
+	protected void applyConstraints(Widget aWidget, MarginConstraints aConstraints) {
+		constraints.put(aWidget, aConstraints);
+		
+		MarginConstraints.Margin left = aConstraints.getLeft();
+		MarginConstraints.Margin top = aConstraints.getTop();
+		MarginConstraints.Margin right = aConstraints.getRight();
+		MarginConstraints.Margin bottom = aConstraints.getBottom();
+		MarginConstraints.Margin width = aConstraints.getWidth();
+		MarginConstraints.Margin height = aConstraints.getHeight();
+
+		// horizontal
+		if (left != null && width != null)
+			right = null;
+		if (left != null && right != null) {
+			setWidgetLeftRight(aWidget, left.value, left.unit, right.value, right.unit);
+		} else if (left == null && right != null) {
+			assert width != null : "left may be absent in presence of width and right";
+			setWidgetRightWidth(aWidget, right.value, right.unit, width.value, width.unit);
+		} else if (right == null && left != null) {
+			assert width != null : "right may be absent in presence of width and left";
+			setWidgetLeftWidth(aWidget, left.value, left.unit, width.value, width.unit);
+		} else {
+			assert false : "At least left with width, right with width or both (without width) must present";
+		}
+		// vertical
+		if (top != null && height != null)
+			bottom = null;
+		if (top != null && bottom != null) {
+			setWidgetTopBottom(aWidget, top.value, top.unit, bottom.value, bottom.unit);
+		} else if (top == null && bottom != null) {
+			assert height != null : "top may be absent in presence of height and bottom";
+			setWidgetBottomHeight(aWidget, bottom.value, bottom.unit, height.value, height.unit);
+		} else if (bottom == null && top != null) {
+			assert height != null : "bottom may be absent in presence of height and top";
+			setWidgetTopHeight(aWidget, top.value, top.unit, height.value, height.unit);
+		} else {
+			assert false : "At least top with height, bottom with height or both (without height) must present";
+		}
+		if (isAttached()) {
+			forceLayout();
+		}
+	}
+
+	public void add(Widget aChild, MarginJSConstraints aConstraints) {
+		MarginConstraints anchors = new MarginConstraints();
+		int h = 0;
+		int v = 0;
+		String left = aConstraints.getLeft();
+		if (left != null && !left.isEmpty()) {
+			anchors.setLeft(new MarginConstraints.Margin(left));
+			h++;
+		}
+		String right = aConstraints.getRight();
+		if (right != null && !right.isEmpty()) {
+			anchors.setRight(new MarginConstraints.Margin(right));
+			h++;
+		}
+		String width = aConstraints.getWidth();
+		if (width != null && !width.isEmpty()) {
+			anchors.setWidth(new MarginConstraints.Margin(width));
+			h++;
+		}
+		String top = aConstraints.getTop();
+		if (top != null && !top.isEmpty()) {
+			anchors.setTop(new MarginConstraints.Margin(top));
+			v++;
+		}
+		String bottom = aConstraints.getBottom();
+		if (bottom != null && !bottom.isEmpty()) {
+			anchors.setBottom(new MarginConstraints.Margin(bottom));
+			v++;
+		}
+		String height = aConstraints.getHeight();
+		if (height != null && !height.isEmpty()) {
+			anchors.setHeight(new MarginConstraints.Margin(height));
+			v++;
+		}
+		if (h < 2)
+			throw new IllegalArgumentException("There are must be at least two horizontal values in anchors.");
+		if (v < 2)
+			throw new IllegalArgumentException("There are must be at least two vertical values in anchors.");
+		applyConstraints(aChild, anchors);
+	}
+
+	public void add(Widget aChild, AbsoluteJSConstraints aConstraints) {
+		MarginConstraints anchors = new MarginConstraints();
+		String left = aConstraints != null && aConstraints.getLeft() != null ? aConstraints.getLeft() : "0";
+		if (left != null && !left.isEmpty()) {
+			anchors.setLeft(new MarginConstraints.Margin(left));
+		}
+		String width = aConstraints != null && aConstraints.getWidth() != null ? aConstraints.getWidth() : "10";
+		if (width != null && !width.isEmpty()) {
+			anchors.setWidth(new MarginConstraints.Margin(width));
+		}
+		String top = aConstraints != null && aConstraints.getTop() != null ? aConstraints.getTop() : "0";
+		if (top != null && !top.isEmpty()) {
+			anchors.setTop(new MarginConstraints.Margin(top));
+		}
+		String height = aConstraints != null && aConstraints.getHeight() != null ? aConstraints.getHeight() : "10";
+		if (height != null && !height.isEmpty()) {
+			anchors.setHeight(new MarginConstraints.Margin(height));
+		}
+		add(aChild);
+		applyConstraints(aChild, anchors);
+	}
+	
+@Override
+public boolean remove(Widget w) {
+	constraints.remove(w);
+    return super.remove(w);
+}
+@Override
+public void clear() {
+    super.clear();
+    constraints.clear();
+}
+	public void ajustWidth(Widget layouted, int aValue) {
+		MarginConstraints anchors = constraints.get(layouted);
+		int containerWidth = layouted.getParent().getOffsetWidth();
+		if (anchors.getWidth() != null) {
+			anchors.getWidth().setPlainValue(aValue, containerWidth);
+		} else if (anchors.getLeft() != null && anchors.getRight() != null) {
+			anchors.getRight().setPlainValue(containerWidth - layouted.getElement().getOffsetLeft() - aValue, containerWidth);
+		}
+		applyConstraints(layouted, anchors);
+	}
+
+	public void ajustHeight(Widget layouted, int aValue) {
+		MarginConstraints anchors = constraints.get(layouted);
+		int containerHeight = layouted.getParent().getOffsetHeight();
+		if (anchors.getHeight() != null) {
+			anchors.getHeight().setPlainValue(aValue, containerHeight);
+		} else if (anchors.getTop() != null && anchors.getBottom() != null) {
+			anchors.getBottom().setPlainValue(containerHeight - layouted.getElement().getOffsetTop() - aValue, containerHeight);
+		}
+		applyConstraints(layouted, anchors);
+	}
+
+	public void ajustLeft(Widget layouted, int aValue) {
+		MarginConstraints anchors = constraints.get(layouted);
+		int containerWidth = layouted.getParent().getOffsetWidth();
+		int childWidth = layouted.getParent().getOffsetWidth();
+		if (anchors.getLeft() != null && anchors.getWidth() != null) {
+			anchors.getLeft().setPlainValue(aValue, containerWidth);
+		} else if (anchors.getWidth() != null && anchors.getRight() != null) {
+			anchors.getRight().setPlainValue(containerWidth - aValue - childWidth, containerWidth);
+		} else if (anchors.getLeft() != null && anchors.getRight() != null) {
+			anchors.getLeft().setPlainValue(aValue, containerWidth);
+			anchors.getRight().setPlainValue(containerWidth - aValue - childWidth, containerWidth);
+		}
+		applyConstraints(layouted, anchors);
+	}
+
+	public void ajustTop(Widget layouted, int aValue) {
+		MarginConstraints anchors = constraints.get(layouted);
+		int containerHeight = layouted.getParent().getOffsetHeight();
+		int childHeight = layouted.getOffsetHeight();
+		if (anchors.getTop() != null && anchors.getHeight() != null) {
+			anchors.getTop().setPlainValue(aValue, containerHeight);
+		} else if (anchors.getHeight() != null && anchors.getBottom() != null) {
+			anchors.getBottom().setPlainValue(containerHeight - aValue - childHeight, containerHeight);
+		} else if (anchors.getTop() != null && anchors.getBottom() != null) {
+			anchors.getTop().setPlainValue(aValue, containerHeight);
+			anchors.getBottom().setPlainValue(containerHeight - aValue - childHeight, containerHeight);
+		}
+		applyConstraints(layouted, anchors);
+	}
+
+	@Override
+	public void toFront(Widget aWidget) {
+		if (aWidget != null) {
+			getElement().insertBefore(aWidget.getElement().getParentNode(), getElement().getLastChild()); // exclude
+																																	  // last
+																																	  // element
+		}
+	}
+
+	@Override
+	public void toFront(Widget aWidget, int aCount) {
+		if (aWidget != null && aCount > 0) {
+			XElement container = getElement().cast();
+			Element widgetElement = aWidget.getElement().getParentElement();
+			int index = container.getChildIndex(widgetElement);
+			if (index < 0 || (index + aCount) >= container.getChildCount() - 1) {// exclude
+																				 // last
+																				 // element
+				getElement().insertBefore(widgetElement, container.getLastChild());
+			} else {
+				getElement().insertAfter(widgetElement, container.getChild(index + aCount));
+			}
+		}
+	}
+
+	@Override
+	public void toBack(Widget aWidget) {
+		if (aWidget != null) {
+			getElement().insertFirst(aWidget.getElement().getParentElement());
+		}
+	}
+
+	@Override
+	public void toBack(Widget aWidget, int aCount) {
+		if (aWidget != null && aCount > 0) {
+			XElement container = getElement().cast();
+			Element widgetElement = aWidget.getElement().getParentElement();
+			int index = container.getChildIndex(widgetElement);
+			if (index < 0 || (index - aCount) < 0) {
+				getElement().insertFirst(widgetElement);
+			} else {
+				getElement().insertBefore(widgetElement, container.getChild(index - aCount));
+			}
+		}
+	}
+	
+	@Override
+	public JavaScriptObject getPublished() {
+		return published;
+	}
+
+	@Override
+	public void setPublished(JavaScriptObject aValue) {
+		published = aValue;
+	}
+}

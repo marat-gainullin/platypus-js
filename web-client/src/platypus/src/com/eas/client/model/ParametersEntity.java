@@ -7,11 +7,11 @@ package com.eas.client.model;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
+import com.bearsoft.rowset.Callback;
+import com.bearsoft.rowset.Cancellable;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameters;
-import com.eas.client.Callback;
-import com.eas.client.Cancellable;
 import com.eas.client.CancellableCallback;
 import com.eas.client.queries.Query;
 

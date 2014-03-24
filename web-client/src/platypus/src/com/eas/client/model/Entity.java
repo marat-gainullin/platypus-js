@@ -20,9 +20,14 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.bearsoft.rowset.Callback;
+import com.bearsoft.rowset.Cancellable;
 import com.bearsoft.rowset.Converter;
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
+import com.bearsoft.rowset.Utils;
+import com.bearsoft.rowset.Utils.JsObject;
+import com.bearsoft.rowset.beans.PropertyChangeSupport;
 import com.bearsoft.rowset.dataflow.DelegatingFlowProvider;
 import com.bearsoft.rowset.dataflow.TransactionListener;
 import com.bearsoft.rowset.dataflow.TransactionListener.Registration;
@@ -52,15 +57,10 @@ import com.bearsoft.rowset.sorting.SortingCriterion;
 import com.bearsoft.rowset.utils.IDGenerator;
 import com.bearsoft.rowset.utils.KeySet;
 import com.bearsoft.rowset.utils.RowsetUtils;
-import com.eas.client.Callback;
-import com.eas.client.Cancellable;
 import com.eas.client.CancellableCallback;
 import com.eas.client.CancellableCallbackAdapter;
-import com.eas.client.Utils;
-import com.eas.client.Utils.JsObject;
 import com.eas.client.application.Application;
-import com.eas.client.beans.PropertyChangeSupport;
-import com.eas.client.form.api.JSEvents;
+import com.eas.client.form.js.JsEvents;
 import com.eas.client.queries.Query;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
@@ -1949,7 +1949,7 @@ public class Entity implements RowsetListener {
 			// call script method
 			Boolean sRes = null;
 			try {
-				sRes = Utils.executeScriptEventBoolean(jsPublished, onBeforeScroll, JSEvents.publishCursorPositionWillChangeEvent(jsPublished, aEvent.getNewRowIndex()));
+				sRes = Utils.executeScriptEventBoolean(jsPublished, onBeforeScroll, JsEvents.publishCursorPositionWillChangeEvent(jsPublished, aEvent.getNewRowIndex()));
 			} catch (Exception e) {
 				throw new IllegalStateException(e);
 			}
@@ -1969,7 +1969,7 @@ public class Entity implements RowsetListener {
 				internalExecuteChildren(false);
 				if (!model.isAjusting()) {
 					// call script method
-					Utils.executeScriptEventVoid(jsPublished, onAfterScroll, JSEvents.publishCursorPositionChangedEvent(jsPublished, aEvent.getOldRowIndex(), aEvent.getNewRowIndex()));
+					Utils.executeScriptEventVoid(jsPublished, onAfterScroll, JsEvents.publishCursorPositionChangedEvent(jsPublished, aEvent.getOldRowIndex(), aEvent.getNewRowIndex()));
 				}
 			} catch (Exception ex) {
 				Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
@@ -1990,7 +1990,7 @@ public class Entity implements RowsetListener {
 				try {
 					JavaScriptObject publishedRow = publishRowFacade(aEvent.getChangedRow(), this);
 					sRes = Utils.executeScriptEventBoolean(jsPublished, onBeforeChange,
-					        JSEvents.publishEntityInstanceChangeEvent(publishedRow, publishFieldFacade(fmd), Utils.toJs(aEvent.getOldValue()), Utils.toJs(aEvent.getNewValue())));
+					        JsEvents.publishEntityInstanceChangeEvent(publishedRow, publishFieldFacade(fmd), Utils.toJs(aEvent.getOldValue()), Utils.toJs(aEvent.getNewValue())));
 				} catch (Exception e) {
 					throw new IllegalStateException(e);
 				}
@@ -2015,7 +2015,7 @@ public class Entity implements RowsetListener {
 					// call script method
 					JavaScriptObject publishedRow = publishRowFacade(aEvent.getChangedRow(), this);
 					Utils.executeScriptEventVoid(jsPublished, onAfterChange,
-					        JSEvents.publishEntityInstanceChangeEvent(publishedRow, publishFieldFacade(fmd), Utils.toJs(aEvent.getOldValue()), Utils.toJs(aEvent.getNewValue())));
+					        JsEvents.publishEntityInstanceChangeEvent(publishedRow, publishFieldFacade(fmd), Utils.toJs(aEvent.getOldValue()), Utils.toJs(aEvent.getNewValue())));
 				}
 			}
 		} catch (Exception ex) {
@@ -2030,7 +2030,7 @@ public class Entity implements RowsetListener {
 		Boolean sRes = null;
 		try {
 			JavaScriptObject publishedRow = publishRowFacade(aEvent.getRow(), this);
-			sRes = Utils.executeScriptEventBoolean(jsPublished, onBeforeInsert, JSEvents.publishEntityInstanceInsertEvent(jsPublished, publishedRow));
+			sRes = Utils.executeScriptEventBoolean(jsPublished, onBeforeInsert, JsEvents.publishEntityInstanceInsertEvent(jsPublished, publishedRow));
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
@@ -2047,7 +2047,7 @@ public class Entity implements RowsetListener {
 		Boolean sRes = null;
 		try {
 			JavaScriptObject publishedRow = publishRowFacade(aEvent.getRow(), this);
-			sRes = Utils.executeScriptEventBoolean(jsPublished, onBeforeDelete, JSEvents.publishEntityInstanceDeleteEvent(jsPublished, publishedRow));
+			sRes = Utils.executeScriptEventBoolean(jsPublished, onBeforeDelete, JsEvents.publishEntityInstanceDeleteEvent(jsPublished, publishedRow));
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
@@ -2067,7 +2067,7 @@ public class Entity implements RowsetListener {
 			internalExecuteChildren(false);
 			// call script method
 			JavaScriptObject publishedRow = publishRowFacade(aEvent.getRow(), this);
-			Utils.executeScriptEventVoid(jsPublished, onAfterInsert, JSEvents.publishEntityInstanceInsertEvent(jsPublished, publishedRow));
+			Utils.executeScriptEventVoid(jsPublished, onAfterInsert, JsEvents.publishEntityInstanceInsertEvent(jsPublished, publishedRow));
 		} catch (Exception ex) {
 			Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
 		}
@@ -2083,7 +2083,7 @@ public class Entity implements RowsetListener {
 			internalExecuteChildren(false);
 			// call script method
 			JavaScriptObject publishedRow = publishRowFacade(aEvent.getRow(), this);
-			Utils.executeScriptEventVoid(jsPublished, onAfterDelete, JSEvents.publishEntityInstanceDeleteEvent(jsPublished, publishedRow));
+			Utils.executeScriptEventVoid(jsPublished, onAfterDelete, JsEvents.publishEntityInstanceDeleteEvent(jsPublished, publishedRow));
 		} catch (Exception ex) {
 			Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
 		}
@@ -2094,7 +2094,7 @@ public class Entity implements RowsetListener {
 		try {
 			internalExecuteChildren(false);
 			// call script method
-			JavaScriptObject publishedEvent = JSEvents.publishScriptSourcedEvent(jsPublished);
+			JavaScriptObject publishedEvent = JsEvents.publishScriptSourcedEvent(jsPublished);
 			if (!model.isAjusting()) {
 				Utils.executeScriptEventVoid(jsPublished, onFiltered, publishedEvent);
 			}
@@ -2116,7 +2116,7 @@ public class Entity implements RowsetListener {
 			//
 			if (jsPublished != null)
 				publishRows(jsPublished);
-			JavaScriptObject publishedEvent = JSEvents.publishScriptSourcedEvent(jsPublished);
+			JavaScriptObject publishedEvent = JsEvents.publishScriptSourcedEvent(jsPublished);
 			if (!model.isAjusting()) {
 				/*
 				 * if (model.isPending()) model.enqueueEvent(new
@@ -2144,7 +2144,7 @@ public class Entity implements RowsetListener {
 			if ((!rowset.isBeforeFirst() && !rowset.isAfterLast()) || !rowset.first())
 				internalExecuteChildren(false);
 			// call script method
-			JavaScriptObject publishedEvent = JSEvents.publishScriptSourcedEvent(jsPublished);
+			JavaScriptObject publishedEvent = JsEvents.publishScriptSourcedEvent(jsPublished);
 			if (!model.isAjusting()) {
 				/*
 				 * if (model.isPending()) model.enqueueEvent(new

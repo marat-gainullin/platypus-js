@@ -3,8 +3,8 @@ package com.eas.client.application;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.bearsoft.rowset.Utils;
 import com.eas.client.ImageResourceCallback;
-import com.eas.client.Utils;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Position;
@@ -24,8 +24,8 @@ public class PlatypusImageResource implements ImageResource {
 	protected int width;
 	protected int height;
 	protected boolean pending = true;
-	protected List<ImageResourceCallback> javaCallbacks = new ArrayList();
-	protected List<JavaScriptObject> jsCallbacks = new ArrayList();
+	protected List<ImageResourceCallback> javaCallbacks = new ArrayList<>();
+	protected List<JavaScriptObject> jsCallbacks = new ArrayList<>();
 
 	public PlatypusImageResource(AppClient aClient, String aName) {
 		client = aClient;

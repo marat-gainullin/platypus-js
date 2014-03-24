@@ -9,8 +9,7 @@
  */
 package com.bearsoft.rowset.metadata;
 
-import com.bearsoft.rowset.utils.RowsetUtils;
-import com.eas.client.Utils;
+import com.bearsoft.rowset.Utils;
 
 import java.sql.ParameterMetaData;
 

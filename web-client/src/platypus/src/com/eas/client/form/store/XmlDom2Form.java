@@ -1,9 +1,9 @@
 package com.eas.client.form.store;
 
-import com.eas.client.Utils;
+import com.bearsoft.rowset.Utils;
 import com.eas.client.form.Form;
-import com.eas.client.gxtcontrols.GxtControlsFactory;
-import com.eas.client.gxtcontrols.GxtModelControlsFactory;
+import com.eas.client.form.GxtControlsFactory;
+import com.eas.client.form.GxtModelControlsFactory;
 import com.eas.client.model.Model;
 import com.google.gwt.xml.client.Document;
 import com.google.gwt.xml.client.Element;

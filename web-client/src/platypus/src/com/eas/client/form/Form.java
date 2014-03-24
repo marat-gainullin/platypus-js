@@ -6,19 +6,17 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.eas.client.Callback;
+import com.bearsoft.rowset.Callback;
+import com.bearsoft.rowset.Utils;
 import com.eas.client.ImageResourceCallback;
-import com.eas.client.Utils;
 import com.eas.client.application.AppClient;
-import com.eas.client.form.api.JSEvents;
-import com.eas.client.gxtcontrols.MarginConstraints;
-import com.eas.client.gxtcontrols.MarginConstraints.Margin;
-import com.eas.client.gxtcontrols.WrapingPanel;
-import com.eas.client.gxtcontrols.wrappers.container.PlatypusBorderLayoutContainer;
-import com.eas.client.gxtcontrols.wrappers.container.PlatypusDesktopContainer;
-import com.eas.client.gxtcontrols.wrappers.container.PlatypusMarginLayoutContainer;
-import com.eas.client.gxtcontrols.wrappers.container.PlatypusSplitContainer;
-import com.eas.client.gxtcontrols.wrappers.container.PlatypusWindow;
+import com.eas.client.form.MarginConstraints.Margin;
+import com.eas.client.form.js.JsEvents;
+import com.eas.client.form.published.containers.BorderPane;
+import com.eas.client.form.published.containers.MarginsPane;
+import com.eas.client.form.published.containers.SplitPane;
+import com.eas.client.form.published.containers.PlatypusWindow;
+import com.eas.client.form.published.widgets.DesktopPane;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.core.client.Scheduler;
@@ -28,35 +26,10 @@ import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.resources.client.ImageResource;
-import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.xhr.client.XMLHttpRequest;
-import com.sencha.gxt.core.client.Style.LayoutRegion;
-import com.sencha.gxt.core.client.util.Point;
-import com.sencha.gxt.widget.core.client.Component;
-import com.sencha.gxt.widget.core.client.Window;
-import com.sencha.gxt.widget.core.client.container.Container;
-import com.sencha.gxt.widget.core.client.event.ActivateEvent;
-import com.sencha.gxt.widget.core.client.event.ActivateEvent.ActivateHandler;
-import com.sencha.gxt.widget.core.client.event.BeforeHideEvent;
-import com.sencha.gxt.widget.core.client.event.BeforeHideEvent.BeforeHideHandler;
-import com.sencha.gxt.widget.core.client.event.DeactivateEvent;
-import com.sencha.gxt.widget.core.client.event.DeactivateEvent.DeactivateHandler;
-import com.sencha.gxt.widget.core.client.event.HideEvent;
-import com.sencha.gxt.widget.core.client.event.HideEvent.HideHandler;
-import com.sencha.gxt.widget.core.client.event.MaximizeEvent;
-import com.sencha.gxt.widget.core.client.event.MaximizeEvent.MaximizeHandler;
-import com.sencha.gxt.widget.core.client.event.MinimizeEvent;
-import com.sencha.gxt.widget.core.client.event.MinimizeEvent.MinimizeHandler;
-import com.sencha.gxt.widget.core.client.event.MoveEvent;
-import com.sencha.gxt.widget.core.client.event.MoveEvent.MoveHandler;
-import com.sencha.gxt.widget.core.client.event.RestoreEvent;
-import com.sencha.gxt.widget.core.client.event.RestoreEvent.RestoreHandler;
-import com.sencha.gxt.widget.core.client.event.ShowEvent;
-import com.sencha.gxt.widget.core.client.event.ShowEvent.ShowHandler;
-import com.sencha.gxt.widget.core.client.form.Field;
 
 public class Form {
 	protected static final Map<String, Form> showingForms = new HashMap<String, Form>();
@@ -87,7 +60,7 @@ public class Form {
 	protected static void shownFormsChanged(JavaScriptObject aSource) {
 		if (onChange != null) {
 			try {
-				Utils.executeScriptEventVoid(JSEvents.getFormsClass(), onChange, JSEvents.publishScriptSourcedEvent(aSource));
+				Utils.executeScriptEventVoid(JsEvents.getFormsClass(), onChange, JsEvents.publishScriptSourcedEvent(aSource));
 			} catch (Exception ex) {
 				Logger.getLogger(Form.class.getName()).log(Level.SEVERE, null, ex);
 			}
@@ -211,7 +184,7 @@ public class Form {
 		}
 	}
 
-	public Window show(boolean aModal, final JavaScriptObject aCallback, PlatypusDesktopContainer aDesktop) {
+	public Window show(boolean aModal, final JavaScriptObject aCallback, DesktopPane aDesktop) {
 		close(null, null);
 		if (!isOpened()) {
 			window = new PlatypusWindow(aDesktop, this);
@@ -304,7 +277,7 @@ public class Form {
 					if (windowClosing != null) {
 						try {
 
-							Boolean res = Utils.executeScriptEventBoolean(module, windowClosing, JSEvents.publishWindowEvent(event, module));
+							Boolean res = Utils.executeScriptEventBoolean(module, windowClosing, JsEvents.publishWindowEvent(event, module));
 							if (Boolean.FALSE.equals(res)) {
 								event.setCancelled(true);
 								return;
@@ -328,7 +301,7 @@ public class Form {
 					showedOnPanelHideReg = null;
 					if (windowClosed != null) {
 						try {
-							Utils.executeScriptEventVoid(module, windowClosed, JSEvents.publishWindowEvent(event, module));
+							Utils.executeScriptEventVoid(module, windowClosed, JsEvents.publishWindowEvent(event, module));
 						} catch (Exception ex) {
 							Logger.getLogger(Form.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
 						}
@@ -341,17 +314,17 @@ public class Form {
 	}
 
 	protected void addToContainer(Component toAdd, HasWidgets aPanel) {
-		if (aPanel instanceof PlatypusBorderLayoutContainer) {
-			((PlatypusBorderLayoutContainer) aPanel).add(toAdd, LayoutRegion.CENTER, 0);
-		} else if (aPanel instanceof PlatypusMarginLayoutContainer) {
+		if (aPanel instanceof BorderPane) {
+			((BorderPane) aPanel).add(toAdd, LayoutRegion.CENTER, 0);
+		} else if (aPanel instanceof MarginsPane) {
 			MarginConstraints mc = new MarginConstraints();
 			mc.setTop(new Margin(0, Style.Unit.PX));
 			mc.setBottom(new Margin(0, Style.Unit.PX));
 			mc.setLeft(new Margin(0, Style.Unit.PX));
 			mc.setRight(new Margin(0, Style.Unit.PX));
-			((PlatypusMarginLayoutContainer) aPanel).add(toAdd, mc);
-		} else if (aPanel instanceof PlatypusSplitContainer) {
-			((PlatypusSplitContainer) aPanel).setLeftComponent(toAdd);
+			((MarginsPane) aPanel).add(toAdd, mc);
+		} else if (aPanel instanceof SplitPane) {
+			((SplitPane) aPanel).setLeftComponent(toAdd);
 		} else if (aPanel instanceof RootPanel) {
 			aPanel.add(toAdd);
 			/*
@@ -371,7 +344,7 @@ public class Form {
 				public void execute() {
 					try {
 						if (windowOpened != null) {
-							Utils.executeScriptEventVoid(module, windowOpened, JSEvents.publishWindowEvent(new ShowEvent(), module));
+							Utils.executeScriptEventVoid(module, windowOpened, JsEvents.publishWindowEvent(new ShowEvent(), module));
 						}
 					} catch (Exception ex) {
 						Logger.getLogger(Form.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
@@ -389,7 +362,7 @@ public class Form {
 				showingForms.put(formKey, Form.this);
 				if (windowOpened != null) {
 					try {
-						Utils.executeScriptEventVoid(module, windowOpened, JSEvents.publishWindowEvent(event, module));
+						Utils.executeScriptEventVoid(module, windowOpened, JsEvents.publishWindowEvent(event, module));
 					} catch (Exception ex) {
 						Logger.getLogger(Form.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
 					}
@@ -404,7 +377,7 @@ public class Form {
 			public void onActivate(ActivateEvent<Window> event) {
 				if (windowActivated != null) {
 					try {
-						Utils.executeScriptEventVoid(module, windowActivated, JSEvents.publishWindowEvent(event, module));
+						Utils.executeScriptEventVoid(module, windowActivated, JsEvents.publishWindowEvent(event, module));
 					} catch (Exception ex) {
 						Logger.getLogger(Form.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
 					}
@@ -418,7 +391,7 @@ public class Form {
 			public void onDeactivate(DeactivateEvent<Window> event) {
 				if (windowDeactivated != null) {
 					try {
-						Utils.executeScriptEventVoid(module, windowDeactivated, JSEvents.publishWindowEvent(event, module));
+						Utils.executeScriptEventVoid(module, windowDeactivated, JsEvents.publishWindowEvent(event, module));
 					} catch (Exception ex) {
 						Logger.getLogger(Form.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
 					}
@@ -432,7 +405,7 @@ public class Form {
 			public void onMinimize(MinimizeEvent event) {
 				if (windowMinimized != null) {
 					try {
-						Utils.executeScriptEventVoid(module, windowMinimized, JSEvents.publishWindowEvent(event, module));
+						Utils.executeScriptEventVoid(module, windowMinimized, JsEvents.publishWindowEvent(event, module));
 					} catch (Exception ex) {
 						Logger.getLogger(Form.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
 					}
@@ -446,7 +419,7 @@ public class Form {
 			public void onMaximize(MaximizeEvent event) {
 				if (windowMaximized != null) {
 					try {
-						Utils.executeScriptEventVoid(module, windowMaximized, JSEvents.publishWindowEvent(event, module));
+						Utils.executeScriptEventVoid(module, windowMaximized, JsEvents.publishWindowEvent(event, module));
 					} catch (Exception ex) {
 						Logger.getLogger(Form.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
 					}
@@ -460,7 +433,7 @@ public class Form {
 			public void onRestore(RestoreEvent event) {
 				if (windowRestored != null) {
 					try {
-						Utils.executeScriptEventVoid(module, windowRestored, JSEvents.publishWindowEvent(event, module));
+						Utils.executeScriptEventVoid(module, windowRestored, JsEvents.publishWindowEvent(event, module));
 					} catch (Exception ex) {
 						Logger.getLogger(Form.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
 					}
@@ -473,7 +446,7 @@ public class Form {
 			public void onBeforeHide(BeforeHideEvent event) {
 				if (windowClosing != null) {
 					try {
-						Boolean res = Utils.executeScriptEventBoolean(module, windowClosing, JSEvents.publishWindowEvent(event, module));
+						Boolean res = Utils.executeScriptEventBoolean(module, windowClosing, JsEvents.publishWindowEvent(event, module));
 						if (Boolean.FALSE.equals(res))
 							event.setCancelled(true);
 					} catch (Exception ex) {
@@ -492,7 +465,7 @@ public class Form {
 				w.removeFromParent();
 				if (windowClosed != null) {
 					try {
-						Utils.executeScriptEventVoid(module, windowClosed, JSEvents.publishWindowEvent(event, module));
+						Utils.executeScriptEventVoid(module, windowClosed, JsEvents.publishWindowEvent(event, module));
 					} catch (Exception ex) {
 						Logger.getLogger(Form.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
 					}
@@ -792,11 +765,11 @@ public class Form {
 	        var closeCallback = null;
 	        aModule.show = function() {
 		        closeCallback = null;
-		        showedWnd = aForm.@com.eas.client.form.Form::show(ZLcom/google/gwt/core/client/JavaScriptObject;Lcom/eas/client/gxtcontrols/wrappers/container/PlatypusDesktopContainer;)(false, null, null);
+		        showedWnd = aForm.@com.eas.client.form.Form::show(ZLcom/google/gwt/core/client/JavaScriptObject;Lcom/eas/client/gxtcontrols/published/containers/PlatypusDesktopContainer;)(false, null, null);
 	        };
 	        aModule.showModal = function(aCallback) {
 		        closeCallback = aCallback;
-		        showedWnd = aForm.@com.eas.client.form.Form::show(ZLcom/google/gwt/core/client/JavaScriptObject;Lcom/eas/client/gxtcontrols/wrappers/container/PlatypusDesktopContainer;)(true, aCallback, null);
+		        showedWnd = aForm.@com.eas.client.form.Form::show(ZLcom/google/gwt/core/client/JavaScriptObject;Lcom/eas/client/gxtcontrols/published/containers/PlatypusDesktopContainer;)(true, aCallback, null);
 	        };
 	        aModule.showOnPanel = function(aPanel) {
 	        	if(aPanel.unwrap)
@@ -807,7 +780,7 @@ public class Form {
 	        		showedWnd = aForm.@com.eas.client.form.Form::showOnPanel(Ljava/lang/String;)(aPanel);
 	        };
 	        aModule.showInternalFrame = function(aPanel) {
-	        	showedWnd = aForm.@com.eas.client.form.Form::show(ZLcom/google/gwt/core/client/JavaScriptObject;Lcom/eas/client/gxtcontrols/wrappers/container/PlatypusDesktopContainer;)(false, null, aPanel != null?aPanel.unwrap():null);
+	        	showedWnd = aForm.@com.eas.client.form.Form::show(ZLcom/google/gwt/core/client/JavaScriptObject;Lcom/eas/client/gxtcontrols/published/containers/PlatypusDesktopContainer;)(false, null, aPanel != null?aPanel.unwrap():null);
 	        };
 	        aModule.minimize = function(){
 	        	aForm.@com.eas.client.form.Form::minimize()();

@@ -5,17 +5,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.bearsoft.rowset.beans.PropertyChangeEvent;
+import com.bearsoft.rowset.beans.PropertyChangeListener;
+import com.bearsoft.rowset.beans.PropertyChangeSupport;
+import com.bearsoft.rowset.beans.VetoableChangeListener;
+import com.bearsoft.rowset.beans.VetoableChangeSupport;
 import com.bearsoft.rowset.changes.Insert;
 import com.bearsoft.rowset.exceptions.InvalidColIndexException;
 import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
-import com.eas.client.Utils;
-import com.eas.client.beans.PropertyChangeEvent;
-import com.eas.client.beans.PropertyChangeListener;
-import com.eas.client.beans.PropertyChangeSupport;
-import com.eas.client.beans.VetoableChangeListener;
-import com.eas.client.beans.VetoableChangeSupport;
 import com.google.gwt.core.client.JavaScriptObject;
 
 /**

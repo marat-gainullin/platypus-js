@@ -16,15 +16,17 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.eas.client.Cancellable;
+import com.bearsoft.gwt.ui.XElement;
+import com.bearsoft.rowset.Cancellable;
+import com.bearsoft.rowset.Utils;
 import com.eas.client.CancellableCallbackAdapter;
+import com.eas.client.GroupingHandlerRegistration;
 import com.eas.client.PlatypusLogFormatter;
 import com.eas.client.StringCallbackAdapter;
-import com.eas.client.Utils;
 import com.eas.client.form.Form;
-import com.eas.client.form.api.JSContainers;
-import com.eas.client.form.api.JSControls;
-import com.eas.client.form.api.ModelJSControls;
+import com.eas.client.form.js.JsContainers;
+import com.eas.client.form.js.JsModelWidgets;
+import com.eas.client.form.js.JsWidgets;
 import com.eas.client.queries.Query;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArrayString;
@@ -33,8 +35,6 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.logging.client.LogConfiguration;
 import com.google.gwt.user.client.ui.RootPanel;
-import com.sencha.gxt.core.client.dom.XElement;
-import com.sencha.gxt.core.shared.event.GroupingHandlerRegistration;
 
 /**
  * 
@@ -156,7 +156,7 @@ public class Application {
 		$wnd.Function.prototype.invokeLater = function() {
 			var _func = this;
 			var _arguments = arguments;
-			@com.eas.client.Utils::invokeLater(Lcom/google/gwt/core/client/JavaScriptObject;)(function(){
+			@com.bearsoft.rowset.Utils::invokeLater(Lcom/google/gwt/core/client/JavaScriptObject;)(function(){
 				_func.apply(_func, _arguments);
 			});
 		}
@@ -170,7 +170,7 @@ public class Application {
 		    for (var i = 1; i < _arguments.length; i++) {
 		        userArgs.push(_arguments[i]);
 		    }
-			@com.eas.client.Utils::invokeScheduled(ILcom/google/gwt/core/client/JavaScriptObject;)(_arguments[0], function(){
+			@com.bearsoft.rowset.Utils::invokeScheduled(ILcom/google/gwt/core/client/JavaScriptObject;)(_arguments[0], function(){
 				try{
 					_func.apply(_func, userArgs);
 				}catch(e){
@@ -180,7 +180,7 @@ public class Application {
 		}
 		
 		$wnd.selectFile = function(aCallback) {
-			@com.eas.client.gxtcontrols.ControlsUtils::jsSelectFile(Lcom/google/gwt/core/client/JavaScriptObject;)(aCallback);
+			@com.eas.client.form.ControlsUtils::jsSelectFile(Lcom/google/gwt/core/client/JavaScriptObject;)(aCallback);
 		}
 		
 		$wnd.Resource = {};
@@ -223,9 +223,9 @@ public class Application {
 		$wnd.boxAsJs = function(aValue) {
 			if(aValue == null)
 				return null;
-			else if(@com.eas.client.Utils::isNumber(Ljava/lang/Object;)(aValue))
+			else if(@com.bearsoft.rowset.Utils::isNumber(Ljava/lang/Object;)(aValue))
 				return aValue.@java.lang.Number::doubleValue()();
-			else if(@com.eas.client.Utils::isBoolean(Ljava/lang/Object;)(aValue))
+			else if(@com.bearsoft.rowset.Utils::isBoolean(Ljava/lang/Object;)(aValue))
 				return aValue.@java.lang.Boolean::booleanValue()();
 			else // dates, strings, complex java objects handled in Utils.toJs()
 				return aValue;
@@ -656,7 +656,7 @@ public class Application {
 		function _Color(aRed, aGreen, aBlue, aAlpha){
 			var _red = 0, _green = 0, _blue = 0, _alpha = 0xff;
 			if(arguments.length == 1){
-				var _color = @com.eas.client.gxtcontrols.ControlsUtils::parseColor(Ljava/lang/String;)(aRed + '');
+				var _color = @com.eas.client.form.ControlsUtils::parseColor(Ljava/lang/String;)(aRed + '');
 				if(_color){
 					_red = _color.red;
 					_green = _color.green;
@@ -914,7 +914,7 @@ public class Application {
 					}
 				}
 			});
-			nativeChart.@com.eas.client.chart.AbstractChart::setJsPublished(Lcom/eas/client/gxtcontrols/published/PublishedComponent;)(this);
+			nativeChart.@com.eas.client.chart.AbstractChart::setJsPublished(Lcom/eas/client/form/layout/published/PublishedComponent;)(this);
 			return this; 
 		};
 		$wnd.LineChart = _LineChart;
@@ -950,7 +950,7 @@ public class Application {
 					nativeChart.@com.eas.client.chart.TimeSeriesChart::setXLabelsFormat(Ljava/lang/String;)(aValue);
 				}
 			});
-			nativeChart.@com.eas.client.chart.AbstractChart::setJsPublished(Lcom/eas/client/gxtcontrols/published/PublishedComponent;)(this);
+			nativeChart.@com.eas.client.chart.AbstractChart::setJsPublished(Lcom/eas/client/form/layout/published/PublishedComponent;)(this);
 			return this; 
 		};
 		$wnd.TimeSeriesChart = _TimeSeriesChart;
@@ -975,7 +975,7 @@ public class Application {
 					_dataSource = aValue;
 				}
 			});
-			nativeChart.@com.eas.client.chart.AbstractChart::setJsPublished(Lcom/eas/client/gxtcontrols/published/PublishedComponent;)(this);
+			nativeChart.@com.eas.client.chart.AbstractChart::setJsPublished(Lcom/eas/client/form/layout/published/PublishedComponent;)(this);
 			return this; 
 		};
 		$wnd.PieChart = _PieChart;
@@ -1015,9 +1015,9 @@ public class Application {
 				h.setFormatter(f);
 			}
 		}
-		JSControls.initControls();
-		JSContainers.initContainers();
-		ModelJSControls.initModelControls();
+		JsWidgets.initControls();
+		JsContainers.initContainers();
+		JsModelWidgets.initModelControls();
 		publish(client);
 		AppClient.publishApi(client);
 		loader = new Loader(client);

@@ -9,14 +9,14 @@
  */
 package com.eas.client.queries;
 
+import com.bearsoft.rowset.Callback;
+import com.bearsoft.rowset.Cancellable;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.RowsetCallbackAdapter;
 import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.changes.Command;
 import com.bearsoft.rowset.dataflow.FlowProvider;
 import com.bearsoft.rowset.metadata.*;
-import com.eas.client.Callback;
-import com.eas.client.Cancellable;
 import com.eas.client.application.AppClient;
 import com.eas.client.application.WebFlowProvider;
 
