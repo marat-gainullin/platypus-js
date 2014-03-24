@@ -17,11 +17,9 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.prefs.Preferences;
 import org.openide.ErrorManager;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
-import org.openide.util.NbPreferences;
 
 /**
  *
@@ -29,7 +27,7 @@ import org.openide.util.NbPreferences;
  */
 public class PlatypusPlatform {
 
-    public static final String PLATYPUS_FOLDER_NAME = "Platypus"; //NOI18N
+    public static final String PLATYPUS_DIR_NAME = "Platypus"; //NOI18N
     public static final String PLATYPUS_FILE_NAME = "platform"; //NOI18N
     public static final String PLATFORM_HOME_PATH_ATTR_NAME = "path"; //NOI18N
     public static final String BIN_DIRECTORY_NAME = "bin"; //NOI18N
@@ -47,10 +45,10 @@ public class PlatypusPlatform {
      * @return home directory or null if this path isn't defined
      */
     public static String getPlatformHomePath() {
-        FileObject platypusDir = FileUtil.getConfigFile(PLATYPUS_FOLDER_NAME);
+        FileObject platypusDir = FileUtil.getConfigFile(PLATYPUS_DIR_NAME);
         if (platypusDir == null) {
             Logger.getLogger(PlatypusPlatform.class.getName())
-                    .log(Level.INFO, "The config/{0} folder does not exist.", PLATYPUS_FOLDER_NAME); // NOI18N
+                    .log(Level.INFO, "The config/{0} folder does not exist.", PLATYPUS_DIR_NAME); // NOI18N
             return null;
         }
         FileObject platformFo = platypusDir.getFileObject(PLATYPUS_FILE_NAME);
@@ -66,12 +64,14 @@ public class PlatypusPlatform {
      * Sets Platypus platform home directory.
      *
      * @param path home directory path
+     * @return <code>true</code> if the value have stored successfully
      */
-    public static void setPlatformHomePath(String path) {
+    public static boolean setPlatformHomePath(String path) {
+        boolean success;
         try {
-            FileObject platypusDir = FileUtil.getConfigFile(PLATYPUS_FOLDER_NAME);
+            FileObject platypusDir = FileUtil.getConfigFile(PLATYPUS_DIR_NAME);
             if (platypusDir == null) {
-                platypusDir = FileUtil.getConfigRoot().createFolder(PLATYPUS_FOLDER_NAME);
+                platypusDir = FileUtil.getConfigRoot().createFolder(PLATYPUS_DIR_NAME);
             }
             assert platypusDir != null;
             FileObject platformFo = platypusDir.getFileObject(PLATYPUS_FILE_NAME);
@@ -79,26 +79,13 @@ public class PlatypusPlatform {
                 platformFo = platypusDir.createData(PLATYPUS_FILE_NAME);
             }
             platformFo.setAttribute(PLATFORM_HOME_PATH_ATTR_NAME, path);
+            success = true;
         } catch (IOException ex) {
+            success = false;
             ErrorManager.getDefault().notify(ex);
         }
         jarsCache.clear();
-    }
-
-    private static FileObject getConfigurantionFileObject() {
-        FileObject platypusDir = FileUtil.getConfigFile(PLATYPUS_FOLDER_NAME);
-        if (platypusDir == null) {
-            Logger.getLogger(PlatypusPlatform.class.getName())
-                    .log(Level.INFO, "The config/{0} folder does not exist.", PLATYPUS_FOLDER_NAME); // NOI18N
-            return null;
-        }
-        FileObject platformFo = platypusDir.getFileObject(PLATYPUS_FILE_NAME);
-        if (platformFo == null) {
-            Logger.getLogger(PlatypusPlatform.class.getName())
-                    .log(Level.INFO, "The {0} configuration file does not exist.", PLATYPUS_FILE_NAME); // NOI18N
-            return null;
-        }
-        return platformFo;
+        return success;
     }
 
     /**
