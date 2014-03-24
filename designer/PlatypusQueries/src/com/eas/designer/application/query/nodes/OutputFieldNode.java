@@ -10,6 +10,7 @@ import com.eas.client.model.QueryDocument;
 import com.eas.client.model.gui.view.FieldsTypeIconsCache;
 import com.eas.client.model.query.QueryModel;
 import com.eas.designer.application.query.PlatypusQueryDataObject;
+import com.eas.designer.application.query.PlatypusQuerySupport;
 import com.eas.designer.application.query.editing.StoredFieldAddEdit;
 import com.eas.designer.application.query.editing.StoredFieldDeleteEdit;
 import com.eas.designer.application.query.editing.StoredFieldDescriptionEdit;
@@ -234,7 +235,7 @@ public class OutputFieldNode extends AbstractNode implements PropertyChangeListe
     }
 
     private UndoRedo.Manager getUndoRedo() {
-        return dataObject.getUndoRedoManager();
+        return dataObject.getLookup().lookup(PlatypusQuerySupport.class).getUndo();
     }
 
     @Override

@@ -189,7 +189,7 @@ public class ApplicationModelView extends ModelView<ApplicationDbEntity, Applica
                     Set<EntityFieldRef<ApplicationDbEntity>> pks = pksByTable.get(tableName);
                     if (pks != null) {
                         for (EntityFieldRef<ApplicationDbEntity> pk : pks) {
-                            if (pk.field.getName().equalsIgnoreCase(fieldName)) {
+                            if (pk.field.getOriginalName().equalsIgnoreCase(fieldName)) {
                                 ReferenceRelation<ApplicationDbEntity> relation = new ReferenceRelation<>(entity, field, pk.entity, pk.field);
                                 String relId = generateRelationId(relation);
                                 if (!alreadyRels.contains(relId)) {

@@ -25,7 +25,7 @@ public class Filter extends HashOrderer {
 
     protected List<Row> originalRows;
     protected int originalPos;
-    protected boolean filterApplied = false;
+    protected boolean filterApplied;
     protected KeySet keysetApplied;
 
     /**

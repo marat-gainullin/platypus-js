@@ -299,9 +299,9 @@ public class PlatypusWebModuleManager {
     }
 
     private void configureParams(WebApplication wa) throws Exception {
-        wa.addInitParam(new ContextParam(ServerMain.DEF_DATASOURCE_CONF_PARAM, project.getSettings().getAppSettings().getDefaultDatasource()));
+        wa.addInitParam(new ContextParam(ServerMain.DEF_DATASOURCE_CONF_PARAM, project.getSettings().getDefaultDataSourceName()));
         if (project.getSettings().isDbAppSources()) {
-            wa.addInitParam(new ContextParam(ServerMain.APP_URL_CONF_PARAM, "jndi://" + project.getSettings().getAppSettings().getDefaultDatasource()));
+            wa.addInitParam(new ContextParam(ServerMain.APP_URL_CONF_PARAM, "jndi://" + project.getSettings().getDefaultDataSourceName()));
         } else {
             wa.addInitParam(new ContextParam(ServerMain.APP_URL_CONF_PARAM, project.getProjectDirectory().toURI().toASCIIString()));
         }

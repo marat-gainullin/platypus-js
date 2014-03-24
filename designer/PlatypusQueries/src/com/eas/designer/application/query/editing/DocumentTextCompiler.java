@@ -4,8 +4,10 @@
  */
 package com.eas.designer.application.query.editing;
 
+import com.eas.client.cache.PlatypusFilesSupport;
 import com.eas.designer.application.query.AbsentTableParseException;
 import com.eas.designer.application.query.PlatypusQueryDataObject;
+import com.eas.script.JsDoc;
 import java.io.StringReader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -137,5 +139,10 @@ public class DocumentTextCompiler implements DocumentListener {
                 }
             }
         }
+        boolean publicQuery = PlatypusFilesSupport.getAnnotationValue(docText, JsDoc.Tag.PUBLIC_TAG) != null;
+        boolean procedure = PlatypusFilesSupport.getAnnotationValue(docText, JsDoc.Tag.PROCEDURE_TAG) != null;
+        boolean manual = PlatypusFilesSupport.getAnnotationValue(docText, JsDoc.Tag.MANUAL_TAG) != null;
+        boolean readonly = PlatypusFilesSupport.getAnnotationValue(docText, JsDoc.Tag.READONLY_TAG) != null;
+        dataObject.setQueryFlags(publicQuery, procedure, manual, readonly);
     }
 }

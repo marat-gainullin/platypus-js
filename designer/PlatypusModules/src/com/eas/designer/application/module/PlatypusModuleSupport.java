@@ -76,6 +76,8 @@ public class PlatypusModuleSupport extends DataEditorSupport implements OpenCook
 
     protected PlatypusModuleDataObject dataObject;
     protected UndoRedo.Manager modelUndo;
+    protected boolean modelModified;
+    protected boolean sourceModified;
 
     public PlatypusModuleSupport(PlatypusModuleDataObject aObject) {
         super(aObject, new PlatypusScriptEnv(aObject));
@@ -86,6 +88,7 @@ public class PlatypusModuleSupport extends DataEditorSupport implements OpenCook
                 try {
                     if (anEdit.isSignificant()) {
                         getDataObject().setModified(true);
+                        notifyModified();
                     }
                     return super.addEdit(anEdit);
                 } catch (Exception ex) {
@@ -98,14 +101,24 @@ public class PlatypusModuleSupport extends DataEditorSupport implements OpenCook
             public synchronized void undo() throws CannotUndoException {
                 super.undo();
                 getDataObject().setModified(true);
+                notifyModified();
             }
 
             @Override
             public synchronized void redo() throws CannotRedoException {
                 super.redo();
                 getDataObject().setModified(true);
+                notifyModified();
             }
         };
+    }
+
+    public boolean isModelModified() {
+        return modelModified;
+    }
+
+    public void setModelModified(boolean aValue) {
+        modelModified = aValue;
     }
 
     /**
@@ -131,7 +144,7 @@ public class PlatypusModuleSupport extends DataEditorSupport implements OpenCook
             } catch (UserQuestionException uqex) { // Issue 143655
                 Object retVal = DialogDisplayer.getDefault().notify(
                         new NotifyDescriptor.Confirmation(uqex.getLocalizedMessage(),
-                        NotifyDescriptor.YES_NO_OPTION));
+                                NotifyDescriptor.YES_NO_OPTION));
                 if (NotifyDescriptor.YES_OPTION == retVal) {
                     uqex.confirmed();
                     doc = openDocument();
@@ -145,7 +158,7 @@ public class PlatypusModuleSupport extends DataEditorSupport implements OpenCook
 
     private final class ModuleGEditor implements GuardedEditorSupport {
 
-        StyledDocument doc = null;
+        StyledDocument doc;
 
         @Override
         public StyledDocument getDocument() {
@@ -177,6 +190,7 @@ public class PlatypusModuleSupport extends DataEditorSupport implements OpenCook
         } else {
             super.loadFromStreamToKit(doc, stream, kit);
         }
+        sourceModified = false;
     }
 
     @Override
@@ -213,14 +227,21 @@ public class PlatypusModuleSupport extends DataEditorSupport implements OpenCook
     @Override
     public void save() throws IOException {
         saveDocument();
+        notifyUnmodified();
     }
 
     @Override
     public void saveDocument() throws IOException {
         try {
-            super.saveDocument();
-            // save model file
-            dataObject.saveModel();
+            if (sourceModified) {
+                super.saveDocument();
+                sourceModified = false;
+            }
+            if (modelModified) {
+                // save model file            
+                dataObject.saveModel();
+                modelModified = false;
+            }
             dataObject.setModified(false);
             dataObject.notifyChanged();
         } catch (Exception ex) {
@@ -250,21 +271,26 @@ public class PlatypusModuleSupport extends DataEditorSupport implements OpenCook
             dataObject.shrink();
             // Shrink has removed all parsed data from the data object.
             modelUndo.discardAllEdits();
+            sourceModified = false;
+            modelModified = false;
         }
     }
 
     @Override
     public void changedUpdate(DocumentEvent e) {
+        sourceModified = true;
         dataObject.invalidateAst();
     }
 
     @Override
     public void insertUpdate(DocumentEvent e) {
+        sourceModified = true;
         dataObject.invalidateAst();
     }
 
     @Override
     public void removeUpdate(DocumentEvent e) {
+        sourceModified = true;
         dataObject.invalidateAst();
     }
 
@@ -323,8 +349,8 @@ public class PlatypusModuleSupport extends DataEditorSupport implements OpenCook
      * display name.
      *
      * @param formDataObject form data object representing the multiview tc.
-     * @return display names of the MVTC. The second item can *
-     * be <code>null</code>.
+     * @return display names of the MVTC. The second item can * be
+     * <code>null</code>.
      */
     protected String[] getMVTCDisplayName(PlatypusModuleDataObject formDataObject) {
         Node node = formDataObject.getNodeDelegate();
@@ -386,6 +412,7 @@ public class PlatypusModuleSupport extends DataEditorSupport implements OpenCook
 
         public PlatypusScriptEnv(PlatypusModuleDataObject aObject) {
             super(aObject);
+            changeFile();
         }
 
         @Override
@@ -402,5 +429,6 @@ public class PlatypusModuleSupport extends DataEditorSupport implements OpenCook
         protected FileLock takeLock() throws IOException {
             return ((MultiDataObject) getDataObject()).getPrimaryEntry().takeLock();
         }
+
     }
 }

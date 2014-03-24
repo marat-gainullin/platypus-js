@@ -64,8 +64,6 @@ public class SqlTextEditsComplementor {
             Map<String, com.eas.client.model.Relation<QueryEntity>> statementRelations = prepareStatementRelations(dataObject.getModel(), statement, modelTables);
             synchronizeRelations(edit, dataObject.getModel(), statementRelations);
         }
-        dataObject.procedureChanged(!dataObject.isProcedure(), dataObject.isProcedure());
-        dataObject.manualChanged(!dataObject.isManual(), dataObject.isManual());
     }
 
     public String generateSideId(GatherRelationsSubjectsRiddleTask sideSubjectsTask) {
@@ -138,9 +136,15 @@ public class SqlTextEditsComplementor {
                     QueryEntity lEntity = tables.get(tblId.toLowerCase());
                     if (lEntity != null) {
                         modelRel.setLeftEntity(lEntity);
+                        String leftFieldName = leftSideId.substring(dotIdx + 1);
+                        Field leftField = null;
                         if (lEntity.getFields() != null) {
-                            modelRel.setLeftField(lEntity.getFields().get(leftSideId.substring(dotIdx + 1)));
+                            leftField = lEntity.getFields().get(leftFieldName);
                         }
+                        if (leftField == null) {// falling back to plain field, because of databse connection absence
+                            leftField = new Field(leftFieldName);
+                        }
+                        modelRel.setLeftField(leftField);
                     }
                 }
             }
@@ -155,9 +159,15 @@ public class SqlTextEditsComplementor {
                     QueryEntity rEntity = tables.get(tblId.toLowerCase());
                     if (rEntity != null) {
                         modelRel.setRightEntity(rEntity);
+                        String rightFieldName = rightSideId.substring(dotIdx + 1);
+                        Field rightField = null;
                         if (rEntity.getFields() != null) {
-                            modelRel.setRightField(rEntity.getFields().get(rightSideId.substring(dotIdx + 1)));
+                            rightField = rEntity.getFields().get(rightFieldName);
                         }
+                        if (rightField == null) {// falling back to plain field, because of databse connection absence
+                            rightField = new Field(rightFieldName);
+                        }
+                        modelRel.setRightField(rightField);
                     }
                 }
             }

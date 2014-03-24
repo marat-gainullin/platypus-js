@@ -96,14 +96,14 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
     public class ScriptableFilter {
 
         protected Filter hf;
-        protected boolean applied = false;
+        protected boolean applied;
 
         ScriptableFilter(Filter aHf) {
             super();
             hf = aHf;
         }
 
-        public void apply(Object... values) throws Exception {
+        public void apply(Object... values) throws Exception {            
             assert hf != null;
             checkRowset();
             entity.setUserFiltering(true);

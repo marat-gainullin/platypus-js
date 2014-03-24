@@ -4,6 +4,7 @@
  */
 package com.eas.designer.explorer.project.wizard;
 
+import com.eas.client.cache.PlatypusFiles;
 import com.eas.designer.explorer.project.PlatypusProjectSettingsImpl;
 import java.awt.Component;
 import java.io.File;
@@ -60,6 +61,8 @@ public class PlatypusApplicationWizardIterator implements WizardDescriptor./*Pro
         File projSpecDir = new File(projDir, projName);
         if (projSpecDir.mkdirs()) {
             try {
+                File appDir = new File(projSpecDir, PlatypusFiles.PLATYPUS_PROJECT_APP_ROOT);
+                appDir.mkdir();
                 PlatypusProjectSettingsImpl settings = new PlatypusProjectSettingsImpl(FileUtil.toFileObject(projSpecDir));
                 settings.setDisplayName(projTitle);
                 settings.save();
@@ -71,7 +74,7 @@ public class PlatypusApplicationWizardIterator implements WizardDescriptor./*Pro
             ProjectChooser.setProjectsFolder(projSpecDir);
             return resultSet;
         } else {
-            throw new IOException("Can't crate project folder");
+            throw new IOException("Can't create project folder.");
         }
     }
     

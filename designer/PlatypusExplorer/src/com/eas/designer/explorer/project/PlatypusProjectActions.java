@@ -101,10 +101,10 @@ public class PlatypusProjectActions implements ActionProvider {
                     importApplication();
                     break;
                 case COMMAND_CONNECT:
-                    project.startConnecting2db(project.getSettings().getAppSettings().getDefaultDatasource());
+                    project.startConnecting2db(project.getSettings().getDefaultDataSourceName());
                     break;
                 case COMMAND_DISCONNECT:
-                    project.disconnectFormDb(project.getSettings().getAppSettings().getDefaultDatasource());
+                    project.disconnectFormDb(project.getSettings().getDefaultDataSourceName());
                     break;
                 case COMMAND_CLEAN:
                     clean();
@@ -118,11 +118,11 @@ public class PlatypusProjectActions implements ActionProvider {
     @Override
     public boolean isActionEnabled(String command, Lookup aLookup) throws IllegalArgumentException {
         if (COMMAND_DISCONNECT.equals(command)) {
-            return project.isDbConnected(project.getSettings().getAppSettings().getDefaultDatasource());
+            return project.isDbConnected(project.getSettings().getDefaultDataSourceName());
         } else if (COMMAND_CONNECT.equals(command)) {
-            return !project.isDbConnected(project.getSettings().getAppSettings().getDefaultDatasource());
+            return !project.isDbConnected(project.getSettings().getDefaultDataSourceName());
         } else if (COMMAND_DEPLOY.equals(command) || COMMAND_IMPORT.equals(command)) {
-            return project.isDbConnected(project.getSettings().getAppSettings().getDefaultDatasource()) && !project.getDeployer().isBusy();
+            return project.isDbConnected(project.getSettings().getDefaultDataSourceName()) && !project.getDeployer().isBusy();
         } else if (COMMAND_CLEAN.equals(command)) {
             PlatypusWebModuleManager pwmm = project.getLookup().lookup(PlatypusWebModuleManager.class);
             assert pwmm != null;
@@ -134,14 +134,14 @@ public class PlatypusProjectActions implements ActionProvider {
     }
 
     private void run(boolean debug) throws Exception {
-        String runAppElement = project.getSettings().getAppSettings().getRunElement();
+        String runAppElement = project.getSettings().getRunElement();
         if (runAppElement == null || runAppElement.isEmpty()) {
             final SelectAppElementPanel panel = new SelectAppElementPanel(project);
             DialogDescriptor dd = new DialogDescriptor(panel, NbBundle.getMessage(PlatypusProjectActions.class, "MSG_Run_Element_Dialog"));//NOI18N
             if (DialogDescriptor.OK_OPTION.equals(DialogDisplayer.getDefault().notify(dd))) {
                 runAppElement = panel.getAppElementId();
                 if (panel.isSaveAsDefault()) {
-                    project.getSettings().getAppSettings().setRunElement(runAppElement);
+                    project.getSettings().setRunElement(runAppElement);
                     project.getSettings().save();
                 }
             } else {
@@ -156,7 +156,7 @@ public class PlatypusProjectActions implements ActionProvider {
     }
 
     private void deployApplication() {
-        if (project.isDbConnected(project.getSettings().getAppSettings().getDefaultDatasource())) {
+        if (project.isDbConnected(project.getSettings().getDefaultDataSourceName())) {
             NotifyDescriptor d = new NotifyDescriptor(
                     NbBundle.getMessage(PlatypusProjectActions.class, "MSG_Deploy_Dialog"), //NOI18N
                     NbBundle.getMessage(PlatypusProjectActions.class, "LBL_Deploy_Dialog"), //NOI18N
@@ -189,7 +189,7 @@ public class PlatypusProjectActions implements ActionProvider {
     }
 
     private void importApplication() {
-        if (project.isDbConnected(project.getSettings().getAppSettings().getDefaultDatasource())) {
+        if (project.isDbConnected(project.getSettings().getDefaultDataSourceName())) {
             NotifyDescriptor d = new NotifyDescriptor(
                     NbBundle.getMessage(PlatypusProjectActions.class, "MSG_Import_Dialog"), //NOI18N
                     NbBundle.getMessage(PlatypusProjectActions.class, "LBL_Import_Dialog"), //NOI18N

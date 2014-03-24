@@ -3,7 +3,7 @@
  * @author ${user}
  */
 function ${appElementName}(){
-    var self = this;
+    var self = this, model = this.model;
     
     /**
      * Report's before render event handler.
@@ -13,5 +13,4 @@ function ${appElementName}(){
         // TODO : place your custom data composition code here
     }//GEN-LAST:event_onBeforeRender
     
-    // TODO : place your code here
 }

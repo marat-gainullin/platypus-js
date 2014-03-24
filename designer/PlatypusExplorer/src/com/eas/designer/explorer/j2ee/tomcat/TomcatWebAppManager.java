@@ -190,7 +190,7 @@ public class TomcatWebAppManager implements WebAppManager {
     private Realm getRealm() {
         DataSourceRealm realm = new DataSourceRealm();
         realm.setClassName(DATASOURCE_REALM_CLASS_NAME);
-        realm.setDataSourceName(project.getSettings().getAppSettings().getDefaultDatasource());
+        realm.setDataSourceName(project.getSettings().getDefaultDataSourceName());
         realm.setUserTable(ClientConstants.T_MTD_USERS);
         realm.setUserNameCol(ClientConstants.F_USR_NAME);
         realm.setUserCredCol(ClientConstants.F_USR_PASSWD);

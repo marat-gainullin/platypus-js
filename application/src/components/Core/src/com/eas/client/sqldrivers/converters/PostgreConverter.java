@@ -10,11 +10,12 @@ import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.eas.client.sqldrivers.resolvers.PostgreTypesResolver;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.io.WKBReader;
-import com.vividsolutions.jts.io.WKBWriter;
+import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
 import java.sql.*;
-import org.postgresql.util.PGobject;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.postgis.PGgeometry;
 
 /**
  *
@@ -22,9 +23,33 @@ import org.postgresql.util.PGobject;
  */
 public class PostgreConverter extends PlatypusConverter {
 
-    protected WKBWriter wkbGeometryWriter = new WKBWriter();
-    protected WKTReader wktGeometryReader = new WKTReader();
-    protected WKBReader wkbGeometryReader = new WKBReader();
+    private static class PostGISJTSGeometryConverter {
+
+        private static final WKTReader wktGeometryReader = new WKTReader();
+
+        public static com.vividsolutions.jts.geom.Geometry postGISToJTS(PGgeometry aPostGISGeometry) {
+            if (aPostGISGeometry != null) {
+                org.postgis.Geometry geom = aPostGISGeometry.getGeometry();
+                try {
+                    return wktGeometryReader.read(geom.getTypeString() + geom.getValue());
+                } catch (ParseException ex) {
+                    Logger.getLogger(PostgreConverter.class.getName()).log(Level.SEVERE, "Could not convert PostGIS to JTS geometry. Could not parse geometry wkt " + geom.getTypeString() + geom.getValue(), ex);
+                }
+            }
+            return null;
+        }
+
+        public static PGgeometry jtsToPostGIS(com.vividsolutions.jts.geom.Geometry aJTSGeometry) {
+            if (aJTSGeometry != null) {
+                try {
+                    return  new PGgeometry(org.postgis.PGgeometry.geomFromString(aJTSGeometry.toText()));
+                } catch (SQLException ex) {
+                    Logger.getLogger(PostgreConverter.class.getName()).log(Level.SEVERE, "Could not convert JTS to PostGIS geometry. Could not parse geometry wkt " + aJTSGeometry.toString(), ex);
+                }
+            }
+            return null;
+        }
+    }
 
     public PostgreConverter() {
         super(new PostgreTypesResolver());
@@ -40,10 +65,8 @@ public class PostgreConverter extends PlatypusConverter {
         try {
             if (isGeometry(aTypeInfo)) {
                 if (aValue instanceof Geometry) {
-                    // The folowing code should be replaced with full-functional converter
-                    // JTS Geometry -> PostGIS geometry
-                    byte[] geomBytes = wkbGeometryWriter.write((Geometry) aValue);
-                    aStmt.setBytes(aParameterIndex, geomBytes);
+                    PGgeometry geometry = PostGISJTSGeometryConverter.jtsToPostGIS((Geometry)aValue);
+                    aStmt.setObject(aParameterIndex, geometry);
                 } else {
                     aStmt.setObject(aParameterIndex, aValue);
                 }
@@ -108,16 +131,8 @@ public class PostgreConverter extends PlatypusConverter {
                 Object value = aRs.getObject(aColIndex);
                 if (value != null) {
                     try {
-                        if (value instanceof String) {
-                            return wktGeometryReader.read((String) value);
-                        } else if (value instanceof byte[]) {
-                            byte[] bValue = (byte[]) value;
-                            return wkbGeometryReader.read(bValue);
-                        } else if (value instanceof PGobject) {
-                            // The folowing code should be replaced with full-functional converter
-                            String sValue = ((PGobject) value).getType() + ((PGobject) value).getValue();
-                            sValue = sValue.replaceAll(",([\\d\\.])", " $1");
-                            return wktGeometryReader.read(sValue);
+                        if (value instanceof PGgeometry) {
+                            return PostGISJTSGeometryConverter.postGISToJTS((PGgeometry) value);
                         } else {
                             return value;
                         }

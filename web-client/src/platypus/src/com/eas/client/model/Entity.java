@@ -23,6 +23,8 @@ import java.util.logging.Logger;
 import com.bearsoft.rowset.Converter;
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
+import com.bearsoft.rowset.changes.Change;
+import com.bearsoft.rowset.changes.Command;
 import com.bearsoft.rowset.dataflow.DelegatingFlowProvider;
 import com.bearsoft.rowset.dataflow.TransactionListener;
 import com.bearsoft.rowset.dataflow.TransactionListener.Registration;
@@ -676,7 +678,10 @@ public class Entity implements RowsetListener {
 					endUpdate : function() {
 						aEntity.@com.eas.client.model.Entity::endUpdate()();
 					},
-					// 
+					//
+					enqueueUpdate : function() {
+						aEntity.@com.eas.client.model.Entity::enqueueUpdate()();
+					}, 
 					execute : function(onSuccess, onFailure) {
 						var oldManual = published.manual;
 						try{
@@ -1536,7 +1541,11 @@ public class Entity implements RowsetListener {
 			 */
 		}
 	}
-
+	
+	public void enqueueUpdate() throws Exception {
+		model.getChangeLog().add(query.enqueueUpdate());	
+	}
+	
 	public void execute(final JavaScriptObject onSuccess, final JavaScriptObject onFailure) throws Exception {
 		execute(new CancellableCallbackAdapter() {
 			@Override

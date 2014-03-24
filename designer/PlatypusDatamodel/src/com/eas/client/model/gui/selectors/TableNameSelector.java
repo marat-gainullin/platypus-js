@@ -121,7 +121,7 @@ public class TableNameSelector {
                                 tRef.schema = null;
                             }
                         }
-                        String defDatasource = aProject.getSettings().getAppSettings().getDefaultDatasource();
+                        String defDatasource = aProject.getSettings().getDefaultDataSourceName();
                         if (tRef.dbId == null ? defDatasource == null : tRef.dbId.equals(defDatasource)) {
                             tRef.dbId = null;
                         }

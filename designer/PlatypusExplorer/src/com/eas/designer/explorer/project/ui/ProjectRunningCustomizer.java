@@ -14,7 +14,6 @@ import com.eas.designer.application.indexer.IndexerQuery;
 import com.eas.designer.explorer.FileChooser;
 import com.eas.designer.application.project.AppServerType;
 import com.eas.designer.application.project.ClientType;
-import com.eas.designer.application.project.PlatypusSettings;
 import com.eas.designer.explorer.project.PlatypusProjectImpl;
 import com.eas.designer.explorer.project.PlatypusProjectSettingsImpl;
 import com.eas.designer.application.utils.DatabaseConnectionRenderer;
@@ -58,7 +57,6 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
     protected final PlatypusProjectImpl project;
     protected final FileObject appRoot;
     protected final PlatypusProjectSettingsImpl projectSettings;
-    protected final PlatypusSettings appSettings;
     protected ComboBoxModel<ServerInstance> j2eeServersModel;
     private boolean isInit;
     private DefaultComboBoxModel serversModel;
@@ -71,18 +69,17 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
         project = aProject;
         appRoot = aProject.getSrcRoot();
         projectSettings = aProject.getSettings();
-        appSettings = projectSettings.getAppSettings();
         serversModel = new DefaultComboBoxModel(getJ2eePlatforms());
         initComponents();
         setupConnectionsModel();
         cbConnections.setRenderer(new DatabaseConnectionRenderer(null));
-        cbConnections.setSelectedItem(appSettings.getDefaultDatasource() != null ? DatabaseConnections.lookup(appSettings.getDefaultDatasource()) : null);
+        cbConnections.setSelectedItem(projectSettings.getDefaultDataSourceName() != null ? DatabaseConnections.lookup(projectSettings.getDefaultDataSourceName()) : null);
         cbConnections.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
                 DatabaseConnection conn = (DatabaseConnection) cbConnections.getSelectedItem();
-                appSettings.setDefaultDatasource(conn != null ? conn.getDisplayName() : null);
+                projectSettings.setDefaultDatasourceName(conn != null ? conn.getDisplayName() : null);
             }
 
         });
@@ -91,7 +88,7 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
             @Override
             public void itemStateChanged(ItemEvent e) {
                 DatabaseConnection conn = (DatabaseConnection) cbConnections.getSelectedItem();
-                appSettings.setDefaultDatasource(conn != null ? conn.getDisplayName() : null);
+                projectSettings.setDefaultDatasourceName(conn != null ? conn.getDisplayName() : null);
             }
         });
         SwingUtilities.invokeLater(new Runnable() {
@@ -99,8 +96,8 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
             public void run() {
                 isInit = true;
                 try {
-                    if (appSettings.getRunElement() != null) {
-                        txtRunPath.setText(projectSettings.getAppSettings().getRunElement());
+                    if (projectSettings.getRunElement() != null) {
+                        txtRunPath.setText(projectSettings.getRunElement());
                     }
                     chDbAppSources.setSelected(projectSettings.isDbAppSources());
 
@@ -823,7 +820,7 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void txtRunPathActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtRunPathActionPerformed
-        projectSettings.getAppSettings().setRunElement(txtRunPath.getText());
+        projectSettings.setRunElement(txtRunPath.getText());
     }//GEN-LAST:event_txtRunPathActionPerformed
 
     private void btnBrowseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBrowseActionPerformed
@@ -834,7 +831,7 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
             FileObject newSelectedFile = FileChooser.selectAppElement(appRoot, selectedFile, allowedTypes);
             if (newSelectedFile != null && newSelectedFile != selectedFile) {
                 String appElementId = IndexerQuery.file2AppElementId(newSelectedFile);
-                projectSettings.getAppSettings().setRunElement(appElementId);
+                projectSettings.setRunElement(appElementId);
                 txtRunPath.setText(appElementId);
             }
         } catch (Exception ex) {
@@ -843,7 +840,7 @@ public class ProjectRunningCustomizer extends javax.swing.JPanel {
     }//GEN-LAST:event_btnBrowseActionPerformed
 
     private void txtRunPathFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtRunPathFocusLost
-        appSettings.setRunElement(txtRunPath.getText());
+        projectSettings.setRunElement(txtRunPath.getText());
     }//GEN-LAST:event_txtRunPathFocusLost
 
     private void txtClientOptionsFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtClientOptionsFocusLost

@@ -8,7 +8,6 @@ package com.eas.client.scripts;
 import com.eas.client.AppCache;
 import com.eas.client.Client;
 import com.eas.client.ClientConstants;
-import com.eas.client.DatabasesClient;
 import com.eas.client.login.PrincipalHost;
 import com.eas.client.metadata.ApplicationElement;
 import com.eas.client.settings.SettingsConstants;
@@ -29,6 +28,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.InflaterInputStream;
 
 /**
  *
@@ -199,6 +200,14 @@ public class PlatypusScriptedResource {
                 conn = url.openConnection();
                 ((HttpURLConnection) conn).getResponseCode();
                 is = conn.getInputStream();
+            }
+            String contentEncoding = conn.getContentEncoding();
+            if (contentEncoding != null) {
+                if (contentEncoding.contains("gzip") || contentEncoding.contains("zip")) {
+                    is = new GZIPInputStream(is);
+                } else if (contentEncoding.contains("deflate")) {
+                    is = new InflaterInputStream(conn.getInputStream());
+                }
             }
             try (InputStream _is = is) {
                 data = BinaryUtils.readStream(_is, -1);
