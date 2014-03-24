@@ -110,9 +110,9 @@ public class RelationsTest extends ModelBaseTest {
 	protected void gwtSetUp() throws Exception {
 		super.gwtSetUp();
 		delayTestFinish(60 * 60 * 1000);
-		JsWidgets.initControls();
-		JsContainers.initContainers();
-		JsModelWidgets.initModelControls();
+		JsWidgets.init();
+		JsContainers.init();
+		JsModelWidgets.init();
 		AppClient client = initDevelopTestClient();
 		Application.publish(client);
 		AppClient.publishApi(client);

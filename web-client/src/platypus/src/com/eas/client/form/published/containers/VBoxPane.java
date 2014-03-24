@@ -1,8 +1,11 @@
 package com.eas.client.form.published.containers;
 
+import com.bearsoft.gwt.ui.XElement;
 import com.bearsoft.gwt.ui.containers.VerticalBoxPanel;
 import com.eas.client.form.published.HasPublished;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.user.client.ui.Widget;
 
 public class VBoxPane extends VerticalBoxPanel implements HasPublished {
 
@@ -17,6 +20,15 @@ public class VBoxPane extends VerticalBoxPanel implements HasPublished {
 		setVgap(aVGap);
 	}
 
+	public void ajustHeight(Widget aChild, int aValue) {
+		if (aChild != null) {
+			XElement xwe = aChild.getElement().<XElement>cast();
+			int hDelta = xwe.getOffsetHeight() - xwe.getContentHeight();
+			xwe.getStyle().setHeight(aValue - hDelta, Style.Unit.PX);
+			onResize();
+		}
+	}
+	
 	@Override
 	public JavaScriptObject getPublished() {
 		return published;

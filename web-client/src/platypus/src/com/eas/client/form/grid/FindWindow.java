@@ -17,12 +17,14 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.TextBox;
 
 public class FindWindow extends WindowPanel {
 
 	protected static GridMessages messages = GWT.create(GridMessages.class);
 
+	private PopupPanel popup = new PopupPanel(true, false);
 	private Label label;
 	private TextBox field;
 	private CheckBox checkCase;
@@ -46,6 +48,7 @@ public class FindWindow extends WindowPanel {
 		setMinimizable(false);
 		setMaximizable(false);
 		setSize(400, 135);
+		popup.setWidget(this);
 	}
 
 	private void initComponents() {
@@ -174,5 +177,9 @@ public class FindWindow extends WindowPanel {
 			grid.getSelectionModel().setSelected(grid.getObject(aRow), false);
 		}
 	}
+
+	public void show() {
+		popup.show();
+    }
 
 }

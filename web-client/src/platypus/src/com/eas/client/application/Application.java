@@ -23,7 +23,8 @@ import com.eas.client.CancellableCallbackAdapter;
 import com.eas.client.GroupingHandlerRegistration;
 import com.eas.client.PlatypusLogFormatter;
 import com.eas.client.StringCallbackAdapter;
-import com.eas.client.form.Form;
+import com.eas.client.form.ControlsUtils;
+import com.eas.client.form.PlatypusWindow;
 import com.eas.client.form.js.JsContainers;
 import com.eas.client.form.js.JsModelWidgets;
 import com.eas.client.form.js.JsWidgets;
@@ -115,12 +116,12 @@ public class Application {
 		protected void doWork() throws Exception {
 			loaderHandlerRegistration.removeHandler();
 			for (String appElementName : executedAppElements) {
-				Form f = getStartForm(appElementName);
+				PlatypusWindow f = getStartForm(appElementName);
 				RootPanel target = RootPanel.get(appElementName);
 				if (target != null) {
 					target.getElement().<XElement> cast().unmask();
 					if (f != null) {
-						f.showOnPanel(target);
+						ControlsUtils.addWidgetTo(f.getView(), target);
 					} else {
 						target.getElement().setInnerHTML(loader.getAppElementError(appElementName));
 					}
@@ -140,7 +141,7 @@ public class Application {
 		return $wnd.Modules.get(appElement);
 	}-*/;
 
-	public native static Form getStartForm(String appElement)/*-{
+	public native static PlatypusWindow getStartForm(String appElement)/*-{
 		var existingModule = $wnd.Modules.get(appElement);
 		return existingModule["x-Form"];
 	}-*/;
@@ -583,7 +584,7 @@ public class Application {
 		$wnd.platypus.readForm = function(appElementDoc, aModule) {
 			var nativeModel = aModule.model.unwrap();
 			var nativeForm = @com.eas.client.form.store.XmlDom2Form::transform(Lcom/google/gwt/xml/client/Document;Lcom/eas/client/model/Model;)(appElementDoc, nativeModel);
-			nativeForm.@com.eas.client.form.Form::publish(Lcom/google/gwt/core/client/JavaScriptObject;)(aModule);
+			nativeForm.@com.eas.client.form.PlatypusWindow::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(aModule);
 			return nativeForm;
 		};
 		$wnd.platypus.HTML5 = "Html5 client";
@@ -618,7 +619,7 @@ public class Application {
 		};
 		$wnd.Form = $wnd.Module;
 		$wnd.Form.getShownForm = function(aFormKey){
-			return @com.eas.client.form.Form::getShownForm(Ljava/lang/String;)(aFormKey);
+			return @com.eas.client.form.PlatypusWindow::getShownForm(Ljava/lang/String;)(aFormKey);
 		}
 		$wnd.ServerModule = function(aModuleId){
 			$wnd.platypus.defineServerModule(aModuleId, this);
@@ -630,15 +631,15 @@ public class Application {
 		
 		Object.defineProperty($wnd.Form, "shown", {
 			get : function() {
-				return @com.eas.client.form.Form::getShownForms()();
+				return @com.eas.client.form.PlatypusWindow::getShownForms()();
 			}
 		});
 		Object.defineProperty($wnd.Form, "onChange", {
 			get : function() {
-				return @com.eas.client.form.Form::getOnChange()();
+				return @com.eas.client.form.PlatypusWindow::getOnChange()();
 			},
 			set : function(aValue) {
-				@com.eas.client.form.Form::setOnChange(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+				@com.eas.client.form.PlatypusWindow::setOnChange(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
 			}
 		});
 		$wnd.require = function (aDeps, aOnSuccess, aOnFailure) {
@@ -888,97 +889,6 @@ public class Application {
 		    });
 		}
 		$wnd.Style = _Style;
-		function _LineChart(chartTitle, xTitle, yTitle, pDs){
-			var _dataSource = pDs;
-        	var nativeChart = @com.eas.client.chart.LineChart::new(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Object;)(chartTitle, xTitle, yTitle, pDs.unwrap ? pDs.unwrap() : pDs);
-			this.addSeries = function(pXAxisField, pYAxisField, pTitle){
-				nativeChart.@com.eas.client.chart.LineChart::addSeries(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)(pXAxisField, pYAxisField, pTitle);
-			}
-			this.unwrap = function(){
-				return nativeChart; 
-			}
-			this.dataWillChange = function(){
-				nativeChart.@com.eas.client.chart.LineChart::dataWillChange()();
-			}
-			this.dataChanged = function(){
-				nativeChart.@com.eas.client.chart.LineChart::dataChanged()();
-			}
-			Object.defineProperty(this, "data", {
-				get: function(){
-					return _dataSource;
-				},
-				set: function(aValue){
-					if(_dataSource != aValue){
-					    nativeChart.@com.eas.client.chart.LineChart::changeDataSource(Ljava/lang/Object;)(aValue.unwrap ? aValue.unwrap() : aValue);
-				        _dataSource = aValue;
-					}
-				}
-			});
-			nativeChart.@com.eas.client.chart.AbstractChart::setJsPublished(Lcom/eas/client/form/layout/published/PublishedComponent;)(this);
-			return this; 
-		};
-		$wnd.LineChart = _LineChart;
-		function _TimeSeriesChart(chartTitle, xTitle, yTitle, pDs){
-			var _dataSource = pDs;
-        	var nativeChart = @com.eas.client.chart.TimeSeriesChart::new(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Object;)(chartTitle, xTitle, yTitle, pDs.unwrap ? pDs.unwrap() : pDs);
-			this.addSeries = function(pXAxisField, pYAxisField, pTitle){
-				nativeChart.@com.eas.client.chart.TimeSeriesChart::addSeries(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)(pXAxisField, pYAxisField, pTitle);
-			}
-			this.unwrap = function(){
-				return nativeChart; 
-			}
-			this.dataWillChange = function(){
-				nativeChart.@com.eas.client.chart.TimeSeriesChart::dataWillChange()();
-			}
-			this.dataChanged = function(){
-				nativeChart.@com.eas.client.chart.TimeSeriesChart::dataChanged()();
-			}
-			Object.defineProperty(this, "data", {
-				get: function(){
-					return _dataSource;
-				},
-				set: function(aValue){
-					nativeChart.@com.eas.client.chart.TimeSeriesChart::changeDataSource(Ljava/lang/Object;)(aValue.unwrap ? aValue.unwrap() : aValue);
-					_dataSource = aValue;
-				}
-			});
-			Object.defineProperty(this, "XLabelsFormat", {
-				get: function(){
-					return nativeChart.@com.eas.client.chart.TimeSeriesChart::getXLabelsFormat();
-				},
-				set: function(aValue){
-					nativeChart.@com.eas.client.chart.TimeSeriesChart::setXLabelsFormat(Ljava/lang/String;)(aValue);
-				}
-			});
-			nativeChart.@com.eas.client.chart.AbstractChart::setJsPublished(Lcom/eas/client/form/layout/published/PublishedComponent;)(this);
-			return this; 
-		};
-		$wnd.TimeSeriesChart = _TimeSeriesChart;
-		function _PieChart(pTitle, pXAxisField, pYAxisField, pDs){
-			var _dataSource = pDs;
-        	var nativeChart = @com.eas.client.chart.PieChart::new(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Object;)(pTitle, pXAxisField, pYAxisField, pDs.unwrap ? pDs.unwrap() : pDs);
-			this.unwrap = function(){
-				return nativeChart; 
-			}
-			this.dataWillChange = function(){
-				nativeChart.@com.eas.client.chart.PieChart::dataWillChange()();
-			}
-			this.dataChanged = function(){
-				nativeChart.@com.eas.client.chart.PieChart::dataChanged()();
-			}
-			Object.defineProperty(this, "data", {
-				get: function(){
-					return _dataSource;
-				},
-				set: function(aValue){
-					nativeChart.@com.eas.client.chart.PieChart::changeDataSource(Ljava/lang/Object;)(aValue.unwrap ? aValue.unwrap() : aValue);
-					_dataSource = aValue;
-				}
-			});
-			nativeChart.@com.eas.client.chart.AbstractChart::setJsPublished(Lcom/eas/client/form/layout/published/PublishedComponent;)(this);
-			return this; 
-		};
-		$wnd.PieChart = _PieChart;
 		
 	    $wnd.VK_ALT = @com.google.gwt.event.dom.client.KeyCodes::KEY_ALT;
 	    $wnd.VK_BACKSPACE = @com.google.gwt.event.dom.client.KeyCodes::KEY_BACKSPACE;
@@ -1015,9 +925,9 @@ public class Application {
 				h.setFormatter(f);
 			}
 		}
-		JsWidgets.initControls();
-		JsContainers.initContainers();
-		JsModelWidgets.initModelControls();
+		JsWidgets.init();
+		JsContainers.init();
+		JsModelWidgets.init();
 		publish(client);
 		AppClient.publishApi(client);
 		loader = new Loader(client);

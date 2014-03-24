@@ -35,13 +35,5 @@ public class PlatypusHtmlEditor extends RichTextArea implements HasPublished {
 				aWidget.@com.eas.client.form.published.widgets.PlatypusHtmlEditor::setText(Ljava/lang/String;)(aValue != null ? '' + aValue : null);
 			}
 		});
-		Object.defineProperty(published, "emptyText", {
-			get : function() {
-				return aWidget.@com.eas.client.form.published.widgets.PlatypusHtmlEditor::getEmptyText()();
-			},
-			set : function(aValue) {
-				aWidget.@com.eas.client.form.published.widgets.PlatypusHtmlEditor::setEmptyText(Ljava/lang/String;)(aValue!=null?''+aValue:null);
-			}
-		});
 	}-*/;
 }

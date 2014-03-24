@@ -1,8 +1,11 @@
 package com.eas.client.form.published.containers;
 
+import com.bearsoft.gwt.ui.XElement;
 import com.bearsoft.gwt.ui.containers.FlowGapPanel;
 import com.eas.client.form.published.HasPublished;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.dom.client.Style;
 
 public class FlowPane extends FlowGapPanel implements HasPublished{
 
@@ -16,6 +19,22 @@ public class FlowPane extends FlowGapPanel implements HasPublished{
 		super();
 		setHgap(aHGap);
 		setVgap(aVGap);
+	}
+	
+	public static void ajustWidth(Widget aChild, int aValue){
+		if (aChild != null) {
+			XElement xwe = aChild.getElement().<XElement>cast();
+			int hDelta = xwe.getOffsetWidth() - xwe.getContentWidth();
+			xwe.getStyle().setWidth(aValue - hDelta, Style.Unit.PX);
+		}
+	}
+	
+	public static void ajustHeight(Widget aChild, int aValue){
+		if (aChild != null) {
+			XElement xwe = aChild.getElement().<XElement>cast();
+			int hDelta = xwe.getOffsetHeight() - xwe.getContentHeight();
+			xwe.getStyle().setHeight(aValue - hDelta, Style.Unit.PX);
+		}
 	}
 	
 	@Override

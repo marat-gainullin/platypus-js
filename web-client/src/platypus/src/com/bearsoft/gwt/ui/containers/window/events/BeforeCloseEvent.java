@@ -81,8 +81,8 @@ public class BeforeCloseEvent<T> extends GwtEvent<BeforeCloseHandler<T>> {
         return cancelled;
     }
 
-    public void setCancelled(boolean cancelled) {
-        this.cancelled = cancelled;
+    public void setCancelled(boolean aValue) {
+        cancelled = aValue;
     }
 
     @Override

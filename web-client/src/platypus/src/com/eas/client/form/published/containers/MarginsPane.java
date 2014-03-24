@@ -5,10 +5,10 @@ import java.util.Map;
 
 import com.bearsoft.gwt.ui.XElement;
 import com.bearsoft.gwt.ui.containers.AnchorsPanel;
-import com.eas.client.form.AbsoluteJSConstraints;
 import com.eas.client.form.MarginConstraints;
-import com.eas.client.form.MarginJSConstraints;
 import com.eas.client.form.published.HasPublished;
+import com.eas.client.form.published.PublishedAbsoluteConstraints;
+import com.eas.client.form.published.PublishedMarginConstraints;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.ui.Widget;
@@ -24,7 +24,7 @@ public class MarginsPane extends AnchorsPanel implements HasLayers, HasPublished
 
 	protected void applyConstraints(Widget aWidget, MarginConstraints aConstraints) {
 		constraints.put(aWidget, aConstraints);
-		
+
 		MarginConstraints.Margin left = aConstraints.getLeft();
 		MarginConstraints.Margin top = aConstraints.getTop();
 		MarginConstraints.Margin right = aConstraints.getRight();
@@ -65,7 +65,7 @@ public class MarginsPane extends AnchorsPanel implements HasLayers, HasPublished
 		}
 	}
 
-	public void add(Widget aChild, MarginJSConstraints aConstraints) {
+	public void add(Widget aChild, PublishedMarginConstraints aConstraints) {
 		MarginConstraints anchors = new MarginConstraints();
 		int h = 0;
 		int v = 0;
@@ -106,7 +106,7 @@ public class MarginsPane extends AnchorsPanel implements HasLayers, HasPublished
 		applyConstraints(aChild, anchors);
 	}
 
-	public void add(Widget aChild, AbsoluteJSConstraints aConstraints) {
+	public void add(Widget aChild, PublishedAbsoluteConstraints aConstraints) {
 		MarginConstraints anchors = new MarginConstraints();
 		String left = aConstraints != null && aConstraints.getLeft() != null ? aConstraints.getLeft() : "0";
 		if (left != null && !left.isEmpty()) {
@@ -127,17 +127,24 @@ public class MarginsPane extends AnchorsPanel implements HasLayers, HasPublished
 		add(aChild);
 		applyConstraints(aChild, anchors);
 	}
+
+	public void add(Widget aChild, MarginConstraints anchors) {
+		add(aChild);
+		applyConstraints(aChild, anchors);
+	}
 	
-@Override
-public boolean remove(Widget w) {
-	constraints.remove(w);
-    return super.remove(w);
-}
-@Override
-public void clear() {
-    super.clear();
-    constraints.clear();
-}
+	@Override
+	public boolean remove(Widget w) {
+		constraints.remove(w);
+		return super.remove(w);
+	}
+
+	@Override
+	public void clear() {
+		super.clear();
+		constraints.clear();
+	}
+
 	public void ajustWidth(Widget layouted, int aValue) {
 		MarginConstraints anchors = constraints.get(layouted);
 		int containerWidth = layouted.getParent().getOffsetWidth();
@@ -194,8 +201,8 @@ public void clear() {
 	public void toFront(Widget aWidget) {
 		if (aWidget != null) {
 			getElement().insertBefore(aWidget.getElement().getParentNode(), getElement().getLastChild()); // exclude
-																																	  // last
-																																	  // element
+			                                                                                              // last
+			                                                                                              // element
 		}
 	}
 
@@ -206,8 +213,8 @@ public void clear() {
 			Element widgetElement = aWidget.getElement().getParentElement();
 			int index = container.getChildIndex(widgetElement);
 			if (index < 0 || (index + aCount) >= container.getChildCount() - 1) {// exclude
-																				 // last
-																				 // element
+				                                                                 // last
+				                                                                 // element
 				getElement().insertBefore(widgetElement, container.getLastChild());
 			} else {
 				getElement().insertAfter(widgetElement, container.getChild(index + aCount));
@@ -235,7 +242,7 @@ public void clear() {
 			}
 		}
 	}
-	
+
 	@Override
 	public JavaScriptObject getPublished() {
 		return published;

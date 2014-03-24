@@ -1,5 +1,7 @@
 package com.eas.client.form.grid;
 
+import com.eas.client.form.published.widgets.model.ModelGrid;
+
 
 public class GridCrossUpdaterAction implements Runnable {
 

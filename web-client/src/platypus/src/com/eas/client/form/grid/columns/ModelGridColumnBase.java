@@ -1,7 +1,7 @@
 package com.eas.client.form.grid.columns;
 
-import com.eas.client.form.grid.ModelGrid;
 import com.eas.client.form.published.HasPublished;
+import com.eas.client.form.published.widgets.model.ModelGrid;
 import com.google.gwt.core.client.JavaScriptObject;
 
 public abstract class ModelGridColumnBase implements HasPublished {
@@ -76,7 +76,7 @@ public abstract class ModelGridColumnBase implements HasPublished {
 	}
 
 	public JavaScriptObject getOnRender() {
-		return onRender != null ? onRender : grid.getGeneralCellFunction();
+		return onRender != null ? onRender : grid.getOnRender();
 	}
 
 	public void setOnRender(JavaScriptObject aValue) {

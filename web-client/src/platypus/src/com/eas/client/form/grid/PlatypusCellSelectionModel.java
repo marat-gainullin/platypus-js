@@ -14,20 +14,6 @@ import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Event;
-import com.sencha.gxt.data.shared.event.StoreClearEvent;
-import com.sencha.gxt.widget.core.client.event.CellMouseDownEvent;
-import com.sencha.gxt.widget.core.client.event.CellMouseDownEvent.CellMouseDownHandler;
-import com.sencha.gxt.widget.core.client.event.RowMouseDownEvent;
-import com.sencha.gxt.widget.core.client.event.ViewReadyEvent;
-import com.sencha.gxt.widget.core.client.event.ViewReadyEvent.ViewReadyHandler;
-import com.sencha.gxt.widget.core.client.event.XEvent;
-import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
-import com.sencha.gxt.widget.core.client.grid.Grid;
-import com.sencha.gxt.widget.core.client.grid.GridSelectionModel;
-import com.sencha.gxt.widget.core.client.selection.CellSelection;
-import com.sencha.gxt.widget.core.client.selection.CellSelectionChangedEvent;
-import com.sencha.gxt.widget.core.client.selection.CellSelectionChangedEvent.CellSelectionChangedHandler;
-import com.sencha.gxt.widget.core.client.selection.CellSelectionChangedEvent.HasCellSelectionChangedHandlers;
 
 public class PlatypusCellSelectionModel<M> extends GridSelectionModel<M> implements HasCellSelectionChangedHandlers<M> {
 

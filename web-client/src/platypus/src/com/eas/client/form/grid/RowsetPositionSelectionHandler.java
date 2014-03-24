@@ -4,6 +4,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.bearsoft.rowset.Row;
+import com.eas.client.form.factories.GxtGridFactory;
 import com.eas.client.model.Entity;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;

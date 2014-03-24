@@ -506,12 +506,11 @@ public class JsWidgets {
 		    	if(aPublished.parent instanceof $wnd.AbsolutePane || aPublished.parent instanceof $wnd.AnchorsPane)
 		    		aPublished.parent.unwrap().@com.eas.client.form.published.containers.MarginsPane::ajustWidth(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _width);
 		    	else if(aPublished.parent instanceof $wnd.ScrollPane)
-		    		aPublished.parent.unwrap().@com.eas.client.form.published.containers.ScrollPane::ajustWidth(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _width);
+		    		@com.eas.client.form.published.containers.ScrollPane::ajustWidth(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _width);
 		    	else if(aPublished.parent instanceof $wnd.FlowPane)
-		    		aPublished.parent.unwrap().@com.eas.client.form.published.containers.FlowPane::ajustWidth(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _width);
-		    	else if(aPublished.parent instanceof $wnd.BoxPane){
-		    		if(aPublished.parent.orientation == $wnd.Orientation.HORIZONTAL)
-		    			aPublished.parent.unwrap().@com.eas.client.form.published.containers.HBoxPane::ajustWidth(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _width);
+		    		@com.eas.client.form.published.containers.FlowPane::ajustWidth(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _width);
+		    	else if(aPublished.parent instanceof $wnd.BoxPane && aPublished.parent.orientation == $wnd.Orientation.HORIZONTAL){
+	    			aPublished.parent.unwrap().@com.eas.client.form.published.containers.HBoxPane::ajustWidth(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _width);
 		    	}
 		    }
  	    });
@@ -527,12 +526,11 @@ public class JsWidgets {
 		    	if(aPublished.parent instanceof $wnd.AbsolutePane || aPublished.parent instanceof $wnd.AnchorsPane)
 		    		aPublished.parent.unwrap().@com.eas.client.form.published.containers.MarginsPane::ajustHeight(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _height);
 		    	else if(aPublished.parent instanceof $wnd.ScrollPane)
-		    		aPublished.parent.unwrap().@com.eas.client.form.published.containers.ScrollPane::ajustHeight(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _height);
+		    		@com.eas.client.form.published.containers.ScrollPane::ajustHeight(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _height);
 		    	else if(aPublished.parent instanceof $wnd.FlowPane)
-		    		aPublished.parent.unwrap().@com.eas.client.form.published.containers.FlowPane::ajustHeight(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _height);
-		    	else if(aPublished.parent instanceof $wnd.BoxPane){
-		    		if(aPublished.parent.orientation == $wnd.Orientation.VERTICAL)
-		    			aPublished.parent.unwrap().@com.eas.client.form.published.containers.VBoxPane::ajustHeight(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _height);
+		    		@com.eas.client.form.published.containers.FlowPane::ajustHeight(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _height);
+		    	else if(aPublished.parent instanceof $wnd.BoxPane && aPublished.parent.orientation == $wnd.Orientation.VERTICAL){
+	    			aPublished.parent.unwrap().@com.eas.client.form.published.containers.VBoxPane::ajustHeight(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _height);
 		    	}
 		    }
  	    });

@@ -10,6 +10,8 @@ import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.logical.shared.OpenEvent;
 import com.google.gwt.event.logical.shared.OpenHandler;
+import com.google.gwt.event.logical.shared.ResizeEvent;
+import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.HasHTML;
 import com.google.gwt.user.client.ui.PopupPanel;
@@ -26,6 +28,8 @@ import com.bearsoft.gwt.ui.containers.window.events.MaximizeEvent;
 import com.bearsoft.gwt.ui.containers.window.events.MaximizeHandler;
 import com.bearsoft.gwt.ui.containers.window.events.MinimizeEvent;
 import com.bearsoft.gwt.ui.containers.window.events.MinimizeHandler;
+import com.bearsoft.gwt.ui.containers.window.events.MoveEvent;
+import com.bearsoft.gwt.ui.containers.window.events.MoveHandler;
 import com.bearsoft.gwt.ui.containers.window.events.RestoreEvent;
 import com.bearsoft.gwt.ui.containers.window.events.RestoreHandler;
 import com.google.gwt.user.client.ui.RequiresResize;
@@ -36,7 +40,7 @@ import com.google.gwt.user.client.ui.RequiresResize;
  */
 public class WindowPopupPanel extends PopupPanel implements WindowUI, RequiresResize {
 
-    protected final WindowPanel window = new WindowPanel() {
+    protected WindowPanel window = new WindowPanel() {
 
         @Override
         protected Widget getMovableTarget() {
@@ -68,6 +72,13 @@ public class WindowPopupPanel extends PopupPanel implements WindowUI, RequiresRe
         initPopup();
     }
 
+    public WindowPopupPanel(WindowPanel aWindowPanel, boolean autoHide, boolean modal) {
+        super(autoHide, modal);
+        window = aWindowPanel;
+        super.setWidget(window);
+        initPopup();
+    }
+    
     protected final void initPopup() {
         // clearPopupDecorations
         getElement().getStyle().setBorderWidth(0, Style.Unit.PX);
@@ -275,5 +286,15 @@ public class WindowPopupPanel extends PopupPanel implements WindowUI, RequiresRe
     @Override
     public HandlerRegistration addRestoreHandler(RestoreHandler<WindowUI> handler) {
         return window.addHandler(handler, RestoreEvent.getType());
+    }
+    
+    @Override
+    public HandlerRegistration addMoveHandler(MoveHandler<WindowUI> handler) {
+        return window.addHandler(handler, MoveEvent.getType());
+    }
+    
+    @Override
+    public HandlerRegistration addResizeHandler(ResizeHandler handler) {
+        return window.addHandler(handler, ResizeEvent.getType());
     }
 }

@@ -7,6 +7,7 @@ import com.bearsoft.gwt.ui.XElement;
 import com.bearsoft.rowset.Callback;
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Utils;
+import com.eas.client.form.MarginConstraints.Margin;
 import com.eas.client.form.js.JsEvents;
 import com.eas.client.form.published.HasPublished;
 import com.eas.client.form.published.PublishedCell;
@@ -14,6 +15,9 @@ import com.eas.client.form.published.PublishedColor;
 import com.eas.client.form.published.PublishedComponent;
 import com.eas.client.form.published.PublishedFont;
 import com.eas.client.form.published.PublishedStyle;
+import com.eas.client.form.published.containers.BorderPane;
+import com.eas.client.form.published.containers.MarginsPane;
+import com.eas.client.form.published.containers.SplitPane;
 import com.eas.client.form.published.widgets.model.ModelElementRef;
 import com.eas.client.model.Entity;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -29,6 +33,7 @@ import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -332,6 +337,35 @@ public class ControlsUtils {
 			parent = parent.getParent();
 		}
 		return parent != null ? ((HasPublished)parent).getPublished() : null;
+	}
+
+	public static void addWidgetTo(Widget aWidet, String aElementId) {
+		addWidgetTo(aWidet, RootPanel.get(aElementId));
+	}
+
+	public static void addWidgetTo(Widget aWidet, Element aElement) {
+		addWidgetTo(aWidet, new WrappingPanel(aElement));
+	}
+
+	public static void addWidgetTo(Widget aWidet, HasWidgets aContainer) {
+		aWidet.setVisible(true);
+		aContainer.clear();
+		if (aContainer instanceof BorderPane) {
+			((BorderPane) aContainer).add(aWidet);
+		} else if (aContainer instanceof MarginsPane) {
+			MarginConstraints mc = new MarginConstraints();
+			mc.setTop(new Margin(0, Style.Unit.PX));
+			mc.setBottom(new Margin(0, Style.Unit.PX));
+			mc.setLeft(new Margin(0, Style.Unit.PX));
+			mc.setRight(new Margin(0, Style.Unit.PX));
+			((MarginsPane) aContainer).add(aWidet, mc);
+		} else if (aContainer instanceof SplitPane) {
+			((SplitPane) aContainer).setFirstWidget(aWidet);
+		} else if (aContainer instanceof RootPanel) {
+			aContainer.add(aWidet);
+		} else {
+			aContainer.add(aWidet);
+		}
 	}
 
 }

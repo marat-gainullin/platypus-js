@@ -22,7 +22,7 @@ public class AbsolutePane extends MarginsPane {
 	private native static void publish(HasPublished aWidget, JavaScriptObject published)/*-{
 		published.add = function(toAdd, aConstraints) {
 			if(toAdd && toAdd.unwrap) {
-				aComponent.@com.eas.client.form.published.containers.AbsolutePane::add(Lcom/google/gwt/user/client/ui/Widget;Lcom/eas/client/form/AbsoluteJSConstraints;)(toAdd.unwrap(), aConstraints || null);
+				aComponent.@com.eas.client.form.published.containers.AbsolutePane::add(Lcom/google/gwt/user/client/ui/Widget;Lcom/eas/client/form/published/PublishedAbsoluteConstraints;)(toAdd.unwrap(), aConstraints || null);
 			}
 		};
 	}-*/;

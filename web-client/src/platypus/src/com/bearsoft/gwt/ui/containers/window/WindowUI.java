@@ -7,6 +7,7 @@
 package com.bearsoft.gwt.ui.containers.window;
 
 import com.google.gwt.event.logical.shared.HasOpenHandlers;
+import com.google.gwt.event.logical.shared.HasResizeHandlers;
 import com.google.gwt.user.client.ui.HasHTML;
 import com.bearsoft.gwt.ui.containers.window.events.HasActivateHandlers;
 import com.bearsoft.gwt.ui.containers.window.events.HasBeforeCloseHandlers;
@@ -14,6 +15,7 @@ import com.bearsoft.gwt.ui.containers.window.events.HasClosedHandlers;
 import com.bearsoft.gwt.ui.containers.window.events.HasDeactivateHandlers;
 import com.bearsoft.gwt.ui.containers.window.events.HasMaximizeHandlers;
 import com.bearsoft.gwt.ui.containers.window.events.HasMinimizeHandlers;
+import com.bearsoft.gwt.ui.containers.window.events.HasMoveHandlers;
 import com.bearsoft.gwt.ui.containers.window.events.HasRestoreHandlers;
 
 /**
@@ -22,7 +24,8 @@ import com.bearsoft.gwt.ui.containers.window.events.HasRestoreHandlers;
  */
 public interface WindowUI extends HasOpenHandlers<WindowUI>, HasClosedHandlers<WindowUI>, HasBeforeCloseHandlers<WindowUI>,
                                   HasActivateHandlers<WindowUI>, HasDeactivateHandlers<WindowUI>,
-                                  HasMaximizeHandlers<WindowUI>, HasMinimizeHandlers<WindowUI>, HasRestoreHandlers<WindowUI>{
+                                  HasMaximizeHandlers<WindowUI>, HasMinimizeHandlers<WindowUI>, HasRestoreHandlers<WindowUI>,
+                                  HasMoveHandlers<WindowUI>, HasResizeHandlers {
     
     public void setCaptionWidget(HasHTML aCaptionWidget);
 

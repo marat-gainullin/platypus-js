@@ -57,10 +57,10 @@ public class PlatypusFormattedTextField extends FormattedObjectBox implements Ha
 		});
 		Object.defineProperty(published, "format", {
 			get : function() {
-				return aWidget.@com.eas.client.form.published.widgets.PlatypusFormattedTextField::getFormat()();
+				return aWidget.@com.eas.client.form.published.widgets.PlatypusFormattedTextField::getPattern()();
 			},
 			set : function(aValue) {
-				aWidget.@com.eas.client.form.published.widgets.PlatypusFormattedTextField::setFormat(Ljava/lang/String;)(aValue!=null?''+aValue:null);
+				aWidget.@com.eas.client.form.published.widgets.PlatypusFormattedTextField::setPattern(Ljava/lang/String;)(aValue != null ? '' + aValue : null);
 			}
 		});
 	}-*/;

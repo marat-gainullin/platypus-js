@@ -1,12 +1,11 @@
 package com.eas.client.form;
 
-import com.eas.client.form.grid.ModelGrid;
-import com.eas.client.form.grid.Resumable;
+import com.eas.client.form.published.HasPublished;
 import com.eas.client.form.published.PublishedCell;
 import com.eas.client.form.published.PublishedComponent;
 import com.eas.client.form.published.containers.BorderPane;
-import com.eas.client.form.published.containers.CardPane;
 import com.eas.client.form.published.containers.ButtonGroup;
+import com.eas.client.form.published.containers.CardPane;
 import com.eas.client.form.published.containers.FlowPane;
 import com.eas.client.form.published.containers.GridPane;
 import com.eas.client.form.published.containers.HBoxPane;
@@ -14,18 +13,25 @@ import com.eas.client.form.published.containers.MarginsPane;
 import com.eas.client.form.published.containers.ScrollPane;
 import com.eas.client.form.published.containers.SplitPane;
 import com.eas.client.form.published.containers.TabbedPane;
+import com.eas.client.form.published.containers.ToolBar;
 import com.eas.client.form.published.containers.VBoxPane;
 import com.eas.client.form.published.menu.PlatypusMenu;
+import com.eas.client.form.published.menu.PlatypusMenuBar;
+import com.eas.client.form.published.menu.PlatypusMenuItemCheckBox;
+import com.eas.client.form.published.menu.PlatypusMenuItemImageText;
+import com.eas.client.form.published.menu.PlatypusMenuItemRadioButton;
+import com.eas.client.form.published.menu.PlatypusMenuItemSeparator;
 import com.eas.client.form.published.widgets.DesktopPane;
+import com.eas.client.form.published.widgets.PlatypusButton;
 import com.eas.client.form.published.widgets.PlatypusCheckBox;
-import com.eas.client.form.published.widgets.PlatypusComboBox;
-import com.eas.client.form.published.widgets.PlatypusDateField;
 import com.eas.client.form.published.widgets.PlatypusFormattedTextField;
 import com.eas.client.form.published.widgets.PlatypusHtmlEditor;
 import com.eas.client.form.published.widgets.PlatypusLabel;
+import com.eas.client.form.published.widgets.PlatypusPasswordField;
 import com.eas.client.form.published.widgets.PlatypusProgressBar;
+import com.eas.client.form.published.widgets.PlatypusRadioButton;
 import com.eas.client.form.published.widgets.PlatypusSlider;
-import com.eas.client.form.published.widgets.PlatypusSpinnerField;
+import com.eas.client.form.published.widgets.PlatypusSplitButton;
 import com.eas.client.form.published.widgets.PlatypusTextArea;
 import com.eas.client.form.published.widgets.PlatypusTextField;
 import com.eas.client.form.published.widgets.PlatypusToggleButton;
@@ -33,23 +39,14 @@ import com.eas.client.form.published.widgets.model.ModelCheck;
 import com.eas.client.form.published.widgets.model.ModelCombo;
 import com.eas.client.form.published.widgets.model.ModelDate;
 import com.eas.client.form.published.widgets.model.ModelFormattedField;
+import com.eas.client.form.published.widgets.model.ModelGrid;
 import com.eas.client.form.published.widgets.model.ModelSpin;
 import com.eas.client.form.published.widgets.model.ModelTextArea;
 import com.google.gwt.core.client.JavaScriptObject;
-import com.sencha.gxt.widget.core.client.Component;
-import com.sencha.gxt.widget.core.client.button.SplitButton;
-import com.sencha.gxt.widget.core.client.button.TextButton;
-import com.sencha.gxt.widget.core.client.form.FieldSet;
-import com.sencha.gxt.widget.core.client.form.PasswordField;
-import com.sencha.gxt.widget.core.client.menu.CheckMenuItem;
-import com.sencha.gxt.widget.core.client.menu.MenuBar;
-import com.sencha.gxt.widget.core.client.menu.MenuItem;
-import com.sencha.gxt.widget.core.client.menu.SeparatorMenuItem;
-import com.sencha.gxt.widget.core.client.toolbar.ToolBar;
 
 public class Publisher {
 
-	public native static PublishedComponent publishRadio(PlatypusCheckBox aComponent)/*-{
+	public native static PublishedComponent publish(PlatypusRadioButton aComponent)/*-{
 		return new $wnd.RadioButton(null, null, null, aComponent);
 	}-*/;
 	
@@ -85,15 +82,15 @@ public class Publisher {
 		return new $wnd.ProgressBar(null, null, aComponent);
 	}-*/;
 
-	public native static PublishedComponent publish(PasswordField aComponent)/*-{
+	public native static PublishedComponent publish(PlatypusPasswordField aComponent)/*-{
 		return new $wnd.PasswordField(null, aComponent);
 	}-*/;
 
-	public native static PublishedComponent publish(TextButton aComponent)/*-{
+	public native static PublishedComponent publish(PlatypusButton aComponent)/*-{
 		return new $wnd.Button(null, null, null, null, aComponent);
 	}-*/;
 
-	public native static PublishedComponent publish(SplitButton aComponent)/*-{
+	public native static PublishedComponent publish(PlatypusSplitButton aComponent)/*-{
 		return new $wnd.DropDownButton(null, null, null, null, aComponent);
 	}-*/;
 	
@@ -102,11 +99,11 @@ public class Publisher {
 
 	}-*/;
 
-	public native static PublishedComponent publish(SeparatorMenuItem aComponent)/*-{
+	public native static PublishedComponent publish(PlatypusMenuItemSeparator aComponent)/*-{
 		return new $wnd.MenuSeparator(aComponent);
 	}-*/;
 
-	public native static PublishedComponent publish(MenuBar aComponent)/*-{
+	public native static PublishedComponent publish(PlatypusMenuBar aComponent)/*-{
 		return new $wnd.MenuBar(aComponent);
 	}-*/;
 
@@ -118,29 +115,18 @@ public class Publisher {
 		return new $wnd.PopupMenu(aComponent);
 	}-*/;
 	
-	public native static PublishedComponent publish(MenuItem aComponent)/*-{
+	public native static PublishedComponent publish(PlatypusMenuItemImageText aComponent)/*-{
 		return new $wnd.MenuItem(null, null, null, aComponent);
 	}-*/;
 
-	public native static PublishedComponent publish(CheckMenuItem aComponent)/*-{
+	public native static PublishedComponent publish(PlatypusMenuItemCheckBox aComponent)/*-{
 		return new $wnd.CheckMenuItem(null, null, null, aComponent);
 	}-*/;
 
-	public native static JavaScriptObject publishRadio(CheckMenuItem aComponent)/*-{
+	public native static JavaScriptObject publish(PlatypusMenuItemRadioButton aComponent)/*-{
 		return new $wnd.RadioMenuItem(null, null, null, aComponent);
 	}-*/;
 	
-	public native static void publishTextBorder(JavaScriptObject aPublished, FieldSet fs)/*-{
-		Object.defineProperty(aPublished, "borderText", {
-			get : function() {
-				return fs.@com.sencha.gxt.widget.core.client.form.FieldSet::getHeadingText()();
-			},
-			set : function(aValue) {
-				fs.@com.sencha.gxt.widget.core.client.form.FieldSet::setHeadingText(Ljava/lang/String;)(''+aValue);
-			}
-		});
-	}-*/;
-
 	public native static PublishedCell publishCell(Object aData, String aDisplay)/*-{
 		var published = {
 					data : $wnd.boxAsJs(aData)
@@ -165,151 +151,6 @@ public class Publisher {
 				_style = aValue;
 				if(published.displayCallback != null)
 					published.displayCallback.@java.lang.Runnable::run()();
-			}
-		});
-		return published;
-	}-*/;
-
-	public native static JavaScriptObject publishColumnEditor(PlatypusTextField aComponent, Resumable aResumable)/*-{
-		var published = {};
-		published.unwrap = function() {
-			return aComponent;
-		};
-		@com.eas.client.form.api.JSControls::publishComponentProperties(Lcom/eas/client/form/layout/published/PublishedComponent;)(published);
-	
-		Object.defineProperty(published, "value", {
-			get: function(){
-				return aComponent.@com.eas.client.gxtcontrols.published.widgets.PlatypusTextField::getValue()();
-			},
-			set: function(aValue){
-				aResumable.@com.eas.client.gxtcontrols.grid.wrappers.Resumable::resume()();
-				if(aValue != null){
-					aComponent.@com.eas.client.gxtcontrols.published.widgets.PlatypusTextField::setValue(Ljava/lang/String;Z)(aValue+"", true);
-				}else{
-					aComponent.@com.eas.client.gxtcontrols.published.widgets.PlatypusTextField::setValue(Ljava/lang/String;Z)(null, true);
-				}
-			}
-		});
-		return published;
-	}-*/;
-	
-	public native static JavaScriptObject publishColumnEditor(PlatypusFormattedTextField aComponent, Resumable aResumable)/*-{
-		var published = {};
-		published.unwrap = function() {
-			return aComponent;
-		};
-		@com.eas.client.form.api.JSControls::publishComponentProperties(Lcom/eas/client/form/layout/published/PublishedComponent;)(published);
-	
-		Object.defineProperty(published, "value", {
-			get: function(){
-				return $wnd.boxAsJs(aComponent.@com.eas.client.gxtcontrols.published.widgets.PlatypusFormattedTextField::getJsValue()());
-			},
-			set: function(aValue){
-				aResumable.@com.eas.client.gxtcontrols.grid.wrappers.Resumable::resume()();
-				aComponent.@com.eas.client.gxtcontrols.published.widgets.PlatypusFormattedTextField::setJsValue(Ljava/lang/Object;)($wnd.boxAsJava(aValue));
-			}
-		});
-		return published;
-	}-*/;
-	
-	public native static JavaScriptObject publishColumnEditor(PlatypusTextArea aComponent, Resumable aResumable)/*-{
-		var published = {};
-		published.unwrap = function() {
-			return aComponent;
-		};
-		@com.eas.client.form.api.JSControls::publishComponentProperties(Lcom/eas/client/form/layout/published/PublishedComponent;)(published);
-	
-		Object.defineProperty(published, "value", {
-			get: function(){
-				return aComponent.@com.eas.client.gxtcontrols.published.widgets.PlatypusTextArea::getValue()();
-			},
-			set: function(aValue){
-				aResumable.@com.eas.client.gxtcontrols.grid.wrappers.Resumable::resume()();
-				if(aValue != null){
-					aComponent.@com.eas.client.gxtcontrols.published.widgets.PlatypusTextArea::setValue(Ljava/lang/String;Z)(aValue+"", true);
-				}else{
-					aComponent.@com.eas.client.gxtcontrols.published.widgets.PlatypusTextArea::setValue(Ljava/lang/String;Z)(null, true);
-				}
-			}
-		});
-		return published;
-	}-*/;
-
-	public native static JavaScriptObject publishColumnEditor(PlatypusDateField aComponent, Resumable aResumable)/*-{
-		var published = {};
-		published.unwrap = function() {
-			return aComponent;
-		};
-		@com.eas.client.form.api.JSControls::publishComponentProperties(Lcom/eas/client/form/layout/published/PublishedComponent;)(published);
-
-		Object.defineProperty(published, "value", {
-			get: function(){
-				var v = aComponent.@com.eas.client.gxtcontrols.published.widgets.PlatypusDateField::getValue()();
-				if(v != null){
-					return new Date(@com.bearsoft.rowset.Utils::date2Double(Ljava/util/Date;)(v));
-				}else
-					return null;
-			},
-			set: function(aValue){
-				aResumable.@com.eas.client.gxtcontrols.grid.wrappers.Resumable::resume()();
-				if(aValue != null){
-					var javaValue   = @com.bearsoft.rowset.Utils::toJava(Ljava/lang/Object;)($wnd.boxAsJava(aValue));
-					var isDateValue = @com.bearsoft.rowset.Utils::isDate(Ljava/lang/Object;)(javaValue);						
-					if(isDateValue)
-						aComponent.@com.eas.client.gxtcontrols.published.widgets.PlatypusDateField::setValue(Ljava/util/Date;Z)(javaValue, true);
-					else
-						throw "Value of type Date expected!";
-				}else{
-					aComponent.@com.eas.client.gxtcontrols.published.widgets.PlatypusDateField::setValue(Ljava/util/Date;Z)(null, true);
-				}
-			}
-		});
-		return published;
-	}-*/;
-	
-	public native static JavaScriptObject publishColumnEditor(PlatypusSpinnerField aComponent, Resumable aResumable)/*-{
-		var published = {};
-		published.unwrap = function() {
-			return aComponent;
-		};
-		@com.eas.client.form.api.JSControls::publishComponentProperties(Lcom/eas/client/form/layout/published/PublishedComponent;)(published);
-
-		Object.defineProperty(published, "value", {
-			get : function() {
-				var v = aComponent.@com.eas.client.gxtcontrols.published.widgets.PlatypusSpinnerField::getValue()();
-				if (v != null) {
-					return v.@java.lang.Number::doubleValue()();
-				} else
-					return null;
-			},
-			set : function(aValue) {
-				aResumable.@com.eas.client.gxtcontrols.grid.wrappers.Resumable::resume()();
-				if (aValue != null) {
-					var v = aValue * 1;
-					var d = @java.lang.Double::new(D)(v);
-					aComponent.@com.eas.client.gxtcontrols.published.widgets.PlatypusSpinnerField::setValue(Ljava/lang/Double;Z)(d, true);
-				} else {
-					aComponent.@com.eas.client.gxtcontrols.published.widgets.PlatypusSpinnerField::setValue(Ljava/lang/Double;Z)(null, true);
-				}
-			}
-		});
-		return published;
-	}-*/;
-	
-	public native static JavaScriptObject publishColumnEditor(PlatypusComboBox aComponent, Resumable aResumable)/*-{
-		var published = {};
-		published.unwrap = function() {
-			return aComponent;
-		};
-		@com.eas.client.form.api.JSControls::publishComponentProperties(Lcom/eas/client/form/layout/published/PublishedComponent;)(published);
-
-		Object.defineProperty(published, "value", {
-			get : function() {
-				return $wnd.boxAsJs(@com.bearsoft.rowset.Utils::toJs(Ljava/lang/Object;)(aComponent.@com.eas.client.gxtcontrols.published.widgets.PlatypusComboBox::getValue()()));
-			},
-			set : function(aValue) {
-				aResumable.@com.eas.client.gxtcontrols.grid.wrappers.Resumable::resume()();
-				aComponent.@com.eas.client.gxtcontrols.published.widgets.PlatypusComboBox::setValue(Ljava/lang/Object;Z)(@com.bearsoft.rowset.Utils::toJava(Ljava/lang/Object;)($wnd.boxAsJava(aValue)), true);
 			}
 		});
 		return published;
@@ -396,15 +237,10 @@ public class Publisher {
 	}-*/;
 
 	protected static JavaScriptObject checkPublishedComponent(Object aCandidate) {
-		if (aCandidate instanceof Component) {
-			Component c = (Component) aCandidate;
-			Object oPublished = c.getData(Form.PUBLISHED_DATA_KEY);
-			if (oPublished instanceof JavaScriptObject)
-				return (JavaScriptObject) oPublished;
-		}else if(aCandidate instanceof ButtonGroup){
-			return ((ButtonGroup)aCandidate).getPublished();
-		}
-		return null;
+		if (aCandidate instanceof HasPublished) {
+			return ((HasPublished)aCandidate).getPublished();
+		}else
+			return null;
 	}
 
 	public native static JavaScriptObject publishExecutor(JavaScriptObject published)/*-{

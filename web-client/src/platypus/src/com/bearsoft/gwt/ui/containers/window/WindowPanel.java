@@ -16,6 +16,8 @@ import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.google.gwt.event.dom.client.MouseUpHandler;
 import com.google.gwt.event.logical.shared.OpenEvent;
 import com.google.gwt.event.logical.shared.OpenHandler;
+import com.google.gwt.event.logical.shared.ResizeEvent;
+import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.HTML;
@@ -36,6 +38,8 @@ import com.bearsoft.gwt.ui.containers.window.events.MaximizeEvent;
 import com.bearsoft.gwt.ui.containers.window.events.MaximizeHandler;
 import com.bearsoft.gwt.ui.containers.window.events.MinimizeEvent;
 import com.bearsoft.gwt.ui.containers.window.events.MinimizeHandler;
+import com.bearsoft.gwt.ui.containers.window.events.MoveEvent;
+import com.bearsoft.gwt.ui.containers.window.events.MoveHandler;
 import com.bearsoft.gwt.ui.containers.window.events.RestoreEvent;
 import com.bearsoft.gwt.ui.containers.window.events.RestoreHandler;
 import com.google.gwt.dom.client.Document;
@@ -555,5 +559,15 @@ public class WindowPanel extends DraggablePanel implements WindowUI, HasAnimatio
     @Override
     public HandlerRegistration addRestoreHandler(RestoreHandler<WindowUI> handler) {
         return addHandler(handler, RestoreEvent.getType());
+    }
+    
+    @Override
+    public HandlerRegistration addMoveHandler(MoveHandler<WindowUI> handler) {
+        return addHandler(handler, MoveEvent.getType());
+    }
+    
+    @Override
+    public HandlerRegistration addResizeHandler(ResizeHandler handler) {
+        return addHandler(handler, ResizeEvent.getType());
     }
 }

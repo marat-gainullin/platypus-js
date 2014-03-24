@@ -13,7 +13,7 @@ public class JsModelWidgets {
 		
 		// **************************************************************************
 		$wnd.ModelGrid = function () {
-			var aComponent = arguments.length>0?arguments[0]:null;
+			var aComponent = arguments.length > 0 ? arguments[0] : null;
 			
 			if (!(this instanceof $wnd.ModelGrid)) {
 				throw  ' use  "new ModelGrid()" !';
@@ -21,7 +21,7 @@ public class JsModelWidgets {
 
 			var published = this;
 			var injected = aComponent != null;
-			aComponent = injected ? aComponent : @com.eas.client.gxtcontrols.grid.ModelGrid::new()(); 
+			aComponent = injected ? aComponent : @com.eas.client.form.published.widgets.model.ModelGrid::new()(); 
 			published.unwrap = function() {
 				return aComponent;
 			};
@@ -29,17 +29,17 @@ public class JsModelWidgets {
 
 			published.select = function(aRow) {
 				if(aRow != null && aRow != undefined)
-					aComponent.@com.eas.client.gxtcontrols.grid.ModelGrid::selectRow(Lcom/bearsoft/rowset/Row;)(aRow.unwrap());
+					aComponent.@com.eas.client.form.published.widgets.model.ModelGrid::selectRow(Lcom/bearsoft/rowset/Row;)(aRow.unwrap());
 			};
 			published.unselect = function(aRow) {
 				if(aRow != null && aRow != undefined)
-					aComponent.@com.eas.client.gxtcontrols.grid.ModelGrid::unselectRow(Lcom/bearsoft/rowset/Row;)(aRow.unwrap());
+					aComponent.@com.eas.client.form.published.widgets.model.ModelGrid::unselectRow(Lcom/bearsoft/rowset/Row;)(aRow.unwrap());
 			};
 			published.clearSelection = function() {
-				aComponent.@com.eas.client.gxtcontrols.grid.ModelGrid::clearSelection()();
+				aComponent.@com.eas.client.form.published.widgets.model.ModelGrid::clearSelection()();
 			};
 			published.find = function(){
-				aComponent.@com.eas.client.gxtcontrols.grid.ModelGrid::find()();
+				aComponent.@com.eas.client.form.published.widgets.model.ModelGrid::find()();
 			};
 			published.findSomething = function() {
 				published.find();
@@ -49,22 +49,22 @@ public class JsModelWidgets {
 				if(needToSelect != undefined)
 					need2Select = (false != needToSelect);
 				if(aRow != null)
-					return aComponent.@com.eas.client.gxtcontrols.grid.ModelGrid::makeVisible(Lcom/bearsoft/rowset/Row;Z)(aRow.unwrap(), need2Select);
+					return aComponent.@com.eas.client.form.published.widgets.model.ModelGrid::makeVisible(Lcom/bearsoft/rowset/Row;Z)(aRow.unwrap(), need2Select);
 				else
 					return false;
 			};
 			
 			Object.defineProperty(published, "onRender", {
 				get : function() {
-					return aComponent.@com.eas.client.gxtcontrols.grid.ModelGrid::getGeneralCellFunction()();
+					return aComponent.@com.eas.client.form.published.widgets.model.ModelGrid::getOnRender()();
 				},
 				set : function(aValue) {
-					aComponent.@com.eas.client.gxtcontrols.grid.ModelGrid::setGeneralCellFunction(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+					aComponent.@com.eas.client.form.published.widgets.model.ModelGrid::setOnRender(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
 				}
 			});
 			Object.defineProperty(published, "selected", {
 				get : function() {
-					var selectionList = aComponent.@com.eas.client.gxtcontrols.grid.ModelGrid::getJsSelected()();
+					var selectionList = aComponent.@com.eas.client.form.published.widgets.model.ModelGrid::getJsSelected()();
 					var selectionArray = [];
 					for(var i=0;i<selectionList.@java.util.List::size()();i++)
 					{
@@ -75,31 +75,30 @@ public class JsModelWidgets {
 			});
 			Object.defineProperty(published, "editable", {
 				get : function() {
-					return aComponent.@com.eas.client.gxtcontrols.grid.ModelGrid::isEditable()();
+					return aComponent.@com.eas.client.form.published.widgets.model.ModelGrid::isEditable()();
 				},
 				set : function(aValue) {
-					aComponent.@com.eas.client.gxtcontrols.grid.ModelGrid::setEditable(Z)(aValue);
+					aComponent.@com.eas.client.form.published.widgets.model.ModelGrid::setEditable(Z)(aValue);
 				}
 			});
 			Object.defineProperty(published, "deletable", {
 				get : function() {
-					return aComponent.@com.eas.client.gxtcontrols.grid.ModelGrid::isDeletable()();
+					return aComponent.@com.eas.client.form.published.widgets.model.ModelGrid::isDeletable()();
 				},
 				set : function(aValue) {
-					aComponent.@com.eas.client.gxtcontrols.grid.ModelGrid::setDeletable(Z)(aValue);
+					aComponent.@com.eas.client.form.published.widgets.model.ModelGrid::setDeletable(Z)(aValue);
 				}
 			});
 			Object.defineProperty(published, "insertable", {
 				get : function() {
-					return aComponent.@com.eas.client.gxtcontrols.grid.ModelGrid::isInsertable()();
+					return aComponent.@com.eas.client.form.published.widgets.model.ModelGrid::isInsertable()();
 				},
 				set : function(aValue) {
-					aComponent.@com.eas.client.gxtcontrols.grid.ModelGrid::setInsertable(Z)(aValue);
+					aComponent.@com.eas.client.form.published.widgets.model.ModelGrid::setInsertable(Z)(aValue);
 				}
 			});
-			if(!injected)
-			{
-				aComponent.@com.eas.client.gxtcontrols.grid.ModelGrid::setPublished(Lcom/eas/client/form/layout/published/PublishedComponent;)(published);
+			if(!injected){
+				aComponent.@com.eas.client.form.published.widgets.model.ModelGrid::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
 			}
 			return published;
 		};	
@@ -114,7 +113,7 @@ public class JsModelWidgets {
 
 			var published = this;
 			var injected = aComponent != null;
-			aComponent = injected ? aComponent : @com.eas.client.form.layout.model.ModelCheck::new()(); 
+			aComponent = injected ? aComponent : @com.eas.client.form.published.widgets.model.ModelCheck::new()(); 
 			published.unwrap = function() {
 				return aComponent;
 			};
@@ -122,7 +121,7 @@ public class JsModelWidgets {
 
 			if(!injected)
 			{
-				aComponent.@com.eas.client.form.layout.model.ModelCheck::setPublishedField(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+				aComponent.@com.eas.client.form.published.widgets.model.ModelCheck::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
 				published.text = aText;
 			}
 			return published;
@@ -138,23 +137,15 @@ public class JsModelWidgets {
 
 			var published = this;
 			var injected = aComponent != null;
-			aComponent = injected ? aComponent : @com.eas.client.form.layout.model.ModelFormattedField::new()(); 
+			aComponent = injected ? aComponent : @com.eas.client.form.published.widgets.model.ModelFormattedField::new()(); 
 			published.unwrap = function() {
 				return aComponent;
 			};
 			publishComponentProperties(published);
-			Object.defineProperty(published, "emptyText", {
-				get : function() {
-					return aComponent.@com.eas.client.form.layout.model.ModelFormattedField::getEmptyText()();
-				},
-				set : function(aValue) {
-					aComponent.@com.eas.client.form.layout.model.ModelFormattedField::setEmptyText(Ljava/lang/String;)(aValue!=null?''+aValue:null);
-				}
-			});
 			publishModelComponentProperties(published);
 
 			if(!injected) {
-				aComponent.@com.eas.client.form.layout.model.ModelFormattedField::setPublishedField(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+				aComponent.@com.eas.client.form.published.widgets.model.ModelFormattedField::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
 			}
 			return published;
 		};	
@@ -169,23 +160,15 @@ public class JsModelWidgets {
 
 			var published = this;
 			var injected = aComponent != null;
-			aComponent = injected ? aComponent : @com.eas.client.form.layout.model.ModelTextArea::new()(); 
+			aComponent = injected ? aComponent : @com.eas.client.form.published.widgets.model.ModelTextArea::new()(); 
 			published.unwrap = function() {
 				return aComponent;
 			};
 			publishComponentProperties(published);
-			Object.defineProperty(published, "emptyText", {
-				get : function() {
-					return aComponent.@com.eas.client.form.layout.model.ModelTextArea::getEmptyText()();
-				},
-				set : function(aValue) {
-					aComponent.@com.eas.client.form.layout.model.ModelTextArea::setEmptyText(Ljava/lang/String;)(aValue!=null?''+aValue:null);
-				}
-			});
 			publishModelComponentProperties(published);
 
 			if(!injected) {
-				aComponent.@com.eas.client.form.layout.model.ModelTextArea::setPublishedField(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+				aComponent.@com.eas.client.form.published.widgets.model.ModelTextArea::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
 			}
 			return published;
 		};	
@@ -200,23 +183,14 @@ public class JsModelWidgets {
 
 			var published = this;
 			var injected = aComponent != null;
-			aComponent = injected ? aComponent : @com.eas.client.form.layout.model.ModelDate::new()(); 
+			aComponent = injected ? aComponent : @com.eas.client.form.published.widgets.model.ModelDate::new()(); 
 			published.unwrap = function() {
 				return aComponent;
 			};
 			publishComponentProperties(published);
-			Object.defineProperty(published, "emptyText", {
-				get : function() {
-					return aComponent.@com.eas.client.form.layout.model.ModelDate::getEmptyText()();
-				},
-				set : function(aValue) {
-					aComponent.@com.eas.client.form.layout.model.ModelDate::setEmptyText(Ljava/lang/String;)(aValue!=null?''+aValue:null);
-				}
-			});
 			publishModelComponentProperties(published);
-
 			if(!injected) {
-				aComponent.@com.eas.client.form.layout.model.ModelDate::setPublishedField(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+				aComponent.@com.eas.client.form.published.widgets.model.ModelDate::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
 			}
 			return published;
 		};	
@@ -231,23 +205,15 @@ public class JsModelWidgets {
 
 			var published = this;
 			var injected = aComponent != null;
-			aComponent = injected ? aComponent : @com.eas.client.form.layout.model.ModelSpin::new()(); 
+			aComponent = injected ? aComponent : @com.eas.client.form.published.widgets.model.ModelSpin::new()(); 
 			published.unwrap = function() {
 				return aComponent;
 			};
 			publishComponentProperties(published);
-			Object.defineProperty(published, "emptyText", {
-				get : function() {
-					return aComponent.@com.eas.client.form.layout.model.ModelSpin::getEmptyText()();
-				},
-				set : function(aValue) {
-					aComponent.@com.eas.client.form.layout.model.ModelSpin::setEmptyText(Ljava/lang/String;)(aValue!=null?''+aValue:null);
-				}
-			});
 			publishModelComponentProperties(published);
 
 			if(!injected) {
-				aComponent.@com.eas.client.form.layout.model.ModelDate::setPublishedField(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+				aComponent.@com.eas.client.form.published.widgets.model.ModelDate::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
 			}
 			return published;
 		};	
@@ -262,23 +228,15 @@ public class JsModelWidgets {
 
 			var published = this;
 			var injected = aComponent != null;
-			aComponent = injected ? aComponent : @com.eas.client.form.layout.model.ModelCombo::new()(); 
+			aComponent = injected ? aComponent : @com.eas.client.form.published.widgets.model.ModelCombo::new()(); 
 			published.unwrap = function() {
 				return aComponent;
 			};
 			publishComponentProperties(published);
-			Object.defineProperty(published, "emptyText", {
-				get : function() {
-					return aComponent.@com.eas.client.form.layout.model.ModelCombo::getEmptyText()();
-				},
-				set : function(aValue) {
-					aComponent.@com.eas.client.form.layout.model.ModelCombo::setEmptyText(Ljava/lang/String;)(aValue!=null?''+aValue:null);
-				}
-			});
 			publishModelComponentProperties(published);
 
 			if(!injected) {
-				aComponent.@com.eas.client.form.layout.model.ModelCombo::setPublishedField(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+				aComponent.@com.eas.client.form.published.widgets.model.ModelCombo::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
 			}
 			return published;
 		};	

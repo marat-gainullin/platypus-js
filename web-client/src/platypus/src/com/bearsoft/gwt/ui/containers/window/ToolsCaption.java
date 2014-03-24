@@ -22,163 +22,183 @@ import com.bearsoft.gwt.ui.containers.window.events.MinimizeHandler;
 import com.bearsoft.gwt.ui.containers.window.events.RestoreEvent;
 import com.bearsoft.gwt.ui.containers.window.events.RestoreHandler;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
- *
+ * 
  * @author mg
  */
 public class ToolsCaption extends FlowPanel implements HasHTML {
 
-    public static final String WINDOW_TOOL_CLASS_NAME = "window-tool";
-    public interface Template extends SafeHtmlTemplates {
+	public static final String WINDOW_TOOL_CLASS_NAME = "window-tool";
 
-        @SafeHtmlTemplates.Template("<div class=\"{0}\"></div>")
-        SafeHtml classedDiv(String aClasses);
-    }
-    private static final Template template = GWT.create(Template.class);
+	public interface Template extends SafeHtmlTemplates {
 
+		@SafeHtmlTemplates.Template("<div class=\"{0}\"></div>")
+		SafeHtml classedDiv(String aClasses);
+	}
 
-    protected HTML label = new HTML();
-    protected Panel anchor = new SimplePanel();
-    protected Panel tools = new FlowPanel();
-    protected Button btnMinimize = new Button(template.classedDiv(WINDOW_TOOL_CLASS_NAME), new ClickHandler() {
+	private static final Template template = GWT.create(Template.class);
 
-        @Override
-        public void onClick(ClickEvent event) {
-            window.minimize();
-        }
-    });
-    protected Button btnMaximize = new Button(template.classedDiv(WINDOW_TOOL_CLASS_NAME), new ClickHandler() {
+	protected HTML label = new HTML();
+	protected ImageResource icon;
+	protected Panel anchor = new SimplePanel();
+	protected Panel tools = new FlowPanel();
+	protected Button btnMinimize = new Button(template.classedDiv(WINDOW_TOOL_CLASS_NAME), new ClickHandler() {
 
-        @Override
-        public void onClick(ClickEvent event) {
-            window.maximize();
-        }
-    });
-    protected Button btnRestore = new Button(template.classedDiv(WINDOW_TOOL_CLASS_NAME), new ClickHandler() {
+		@Override
+		public void onClick(ClickEvent event) {
+			window.minimize();
+		}
+	});
+	protected Button btnMaximize = new Button(template.classedDiv(WINDOW_TOOL_CLASS_NAME), new ClickHandler() {
 
-        @Override
-        public void onClick(ClickEvent event) {
-            window.restore();
-        }
-    });
-    protected Button btnClose = new Button(template.classedDiv(WINDOW_TOOL_CLASS_NAME), new ClickHandler() {
+		@Override
+		public void onClick(ClickEvent event) {
+			window.maximize();
+		}
+	});
+	protected Button btnRestore = new Button(template.classedDiv(WINDOW_TOOL_CLASS_NAME), new ClickHandler() {
 
-        @Override
-        public void onClick(ClickEvent event) {
-            window.close();
-        }
-    });
-    protected WindowUI window;
+		@Override
+		public void onClick(ClickEvent event) {
+			window.restore();
+		}
+	});
+	protected Button btnClose = new Button(template.classedDiv(WINDOW_TOOL_CLASS_NAME), new ClickHandler() {
 
-    protected HandlerRegistration windowMinimize;
-    protected HandlerRegistration windowMaximize;
-    protected HandlerRegistration windowRestore;
+		@Override
+		public void onClick(ClickEvent event) {
+			window.close();
+		}
+	});
+	protected WindowUI window;
 
-    public ToolsCaption(WindowUI aWindow) {
-        super();
-        setStyleName("window-caption");
-        setWindow(aWindow);
-        anchor.getElement().addClassName(WINDOW_TOOL_CLASS_NAME);
-        btnMinimize.getElement().getFirstChildElement().addClassName(WINDOW_TOOL_CLASS_NAME + "-minimize");
-        btnMaximize.getElement().getFirstChildElement().addClassName(WINDOW_TOOL_CLASS_NAME + "-maximize");
-        btnRestore.getElement().getFirstChildElement().addClassName(WINDOW_TOOL_CLASS_NAME + "-restore");
-        btnClose.getElement().getFirstChildElement().addClassName(WINDOW_TOOL_CLASS_NAME + "-close");
-        for(Widget w : new Widget[]{btnMinimize, btnMaximize, btnRestore, btnClose}){
-            w.getElement().getStyle().setMargin(0, Style.Unit.PX);
-            w.getElement().getStyle().setPadding(0, Style.Unit.PX);
-        }
+	protected HandlerRegistration windowMinimize;
+	protected HandlerRegistration windowMaximize;
+	protected HandlerRegistration windowRestore;
 
-        label.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
-        label.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
-        anchor.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
-        anchor.getElement().getStyle().setWidth(0, Style.Unit.PX);
-        tools.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
-        tools.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
-        tools.getElement().getStyle().setRight(0, Style.Unit.PX);
+	public ToolsCaption(WindowUI aWindow) {
+		super();
+		setStyleName("window-caption");
+		setWindow(aWindow);
+		anchor.getElement().addClassName(WINDOW_TOOL_CLASS_NAME);
+		btnMinimize.getElement().getFirstChildElement().addClassName(WINDOW_TOOL_CLASS_NAME + "-minimize");
+		btnMaximize.getElement().getFirstChildElement().addClassName(WINDOW_TOOL_CLASS_NAME + "-maximize");
+		btnRestore.getElement().getFirstChildElement().addClassName(WINDOW_TOOL_CLASS_NAME + "-restore");
+		btnClose.getElement().getFirstChildElement().addClassName(WINDOW_TOOL_CLASS_NAME + "-close");
+		for (Widget w : new Widget[] { btnMinimize, btnMaximize, btnRestore, btnClose }) {
+			w.getElement().getStyle().setMargin(0, Style.Unit.PX);
+			w.getElement().getStyle().setPadding(0, Style.Unit.PX);
+		}
 
-        add(label);
-        add(anchor);
-        add(tools);
-        tools.add(btnMinimize);
-        tools.add(btnMaximize);
-        tools.add(btnRestore);
-        tools.add(btnClose);
-    }
+		label.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+		label.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
+		anchor.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+		anchor.getElement().getStyle().setWidth(0, Style.Unit.PX);
+		tools.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+		tools.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
+		tools.getElement().getStyle().setRight(0, Style.Unit.PX);
 
-    public ToolsCaption() {
-        this(null);
-    }
+		add(label);
+		add(anchor);
+		add(tools);
+		tools.add(btnMinimize);
+		tools.add(btnMaximize);
+		tools.add(btnRestore);
+		tools.add(btnClose);
+	}
 
-    public ToolsCaption(WindowUI aWindow, String aCaptionHtml) {
-        this(aWindow);
-        label.setHTML(aCaptionHtml);
-    }
-    
-    private void setWindow(WindowUI aWindow) {
-        if (windowMinimize != null) {
-            windowMinimize.removeHandler();
-        }
-        if (windowMaximize != null) {
-            windowMaximize.removeHandler();
-        }
-        if (windowRestore != null) {
-            windowRestore.removeHandler();
-        }
-        window = aWindow;
-        if (window != null) {
-            windowMinimize = window.addMinimizeHandler(new MinimizeHandler<WindowUI>() {
+	public ToolsCaption() {
+		this(null);
+	}
 
-                @Override
-                public void onMinimize(MinimizeEvent<WindowUI> anEvent) {
-                    updateToolsVisibility();
-                }
-            });
-            windowMaximize = window.addMaximizeHandler(new MaximizeHandler<WindowUI>() {
+	public ToolsCaption(WindowUI aWindow, String aCaptionHtml) {
+		this(aWindow);
+		label.setHTML(aCaptionHtml);
+	}
 
-                @Override
-                public void onMaximize(MaximizeEvent<WindowUI> anEvent) {
-                    updateToolsVisibility();
-                }
-            });
-            windowRestore = window.addRestoreHandler(new RestoreHandler<WindowUI>() {
+	private void setWindow(WindowUI aWindow) {
+		if (windowMinimize != null) {
+			windowMinimize.removeHandler();
+		}
+		if (windowMaximize != null) {
+			windowMaximize.removeHandler();
+		}
+		if (windowRestore != null) {
+			windowRestore.removeHandler();
+		}
+		window = aWindow;
+		if (window != null) {
+			windowMinimize = window.addMinimizeHandler(new MinimizeHandler<WindowUI>() {
 
-                @Override
-                public void onRestore(RestoreEvent<WindowUI> anEvent) {
-                    updateToolsVisibility();
-                }
-            });
-        }
-        updateToolsVisibility();
-    }
+				@Override
+				public void onMinimize(MinimizeEvent<WindowUI> anEvent) {
+					updateToolsVisibility();
+				}
+			});
+			windowMaximize = window.addMaximizeHandler(new MaximizeHandler<WindowUI>() {
 
-    @Override
-    public String getHTML() {
-        return label.getHTML();
-    }
+				@Override
+				public void onMaximize(MaximizeEvent<WindowUI> anEvent) {
+					updateToolsVisibility();
+				}
+			});
+			windowRestore = window.addRestoreHandler(new RestoreHandler<WindowUI>() {
 
-    @Override
-    public void setHTML(String html) {
-        label.setHTML(html);
-    }
+				@Override
+				public void onRestore(RestoreEvent<WindowUI> anEvent) {
+					updateToolsVisibility();
+				}
+			});
+		}
+		updateToolsVisibility();
+	}
 
-    @Override
-    public String getText() {
-        return label.getText();
-    }
+	@Override
+	public String getHTML() {
+		return label.getHTML();
+	}
 
-    @Override
-    public void setText(String text) {
-        label.setText(text);
-    }
+	@Override
+	public void setHTML(String html) {
+		label.setHTML(html);
+	}
 
-    private void updateToolsVisibility() {
-        btnMinimize.setVisible(window.isMinimizable() &&!window.isMinimized());
-        btnMaximize.setVisible(window.isMaximizable() &&!window.isMaximized());
-        btnRestore.setVisible(window.isMinimized() || window.isMaximized());
-        btnClose.setVisible(window.isClosable());
-    }
+	@Override
+	public String getText() {
+		return label.getText();
+	}
+
+	@Override
+	public void setText(String text) {
+		label.setText(text);
+	}
+
+	public ImageResource getIcon() {
+		return icon;
+	}
+
+	public void setIcon(ImageResource aValue) {
+		icon = aValue;
+		if (icon != null) {
+			label.getElement().getStyle().setPaddingLeft(icon.getWidth(), Style.Unit.PX);
+			label.getElement().getStyle().setBackgroundImage("url(" + icon.getSafeUri().asString() + ")");
+			label.getElement().getStyle().setProperty("backgroundRepeat", "no-repeat");
+		} else {
+			label.getElement().getStyle().clearPaddingLeft();
+			label.getElement().getStyle().clearBackgroundImage();
+			label.getElement().getStyle().clearProperty("backgroundRepeat");
+		}
+	}
+
+	private void updateToolsVisibility() {
+		btnMinimize.setVisible(window.isMinimizable() && !window.isMinimized());
+		btnMaximize.setVisible(window.isMaximizable() && !window.isMaximized());
+		btnRestore.setVisible(window.isMinimized() || window.isMaximized());
+		btnClose.setVisible(window.isClosable());
+	}
 }

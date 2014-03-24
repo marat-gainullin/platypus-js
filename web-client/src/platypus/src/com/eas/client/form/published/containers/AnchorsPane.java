@@ -22,7 +22,7 @@ public class AnchorsPane extends MarginsPane {
 	private native static void publish(HasPublished aWidget, JavaScriptObject published)/*-{
 		published.add = function(toAdd, aConstraints) {
 			if(toAdd && toAdd.unwrap) {
-				aComponent.@com.eas.client.form.published.containers.AnchorsPane::add(Lcom/google/gwt/user/client/ui/Widget;Lcom/eas/client/form/MarginJSConstraints;)(toAdd.unwrap(), aConstraints || null);
+				aComponent.@com.eas.client.form.published.containers.AnchorsPane::add(Lcom/google/gwt/user/client/ui/Widget;Lcom/eas/client/form/published/PublishedMarginConstraints;)(toAdd.unwrap(), aConstraints || null);
 			}
 		};
 	}-*/;

@@ -4,15 +4,6 @@ import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.Event;
-import com.sencha.gxt.cell.core.client.form.CheckBoxCell.CheckBoxCellOptions;
-import com.sencha.gxt.cell.core.client.form.RadioCell.RadioAppearance;
-import com.sencha.gxt.core.client.IdentityValueProvider;
-import com.sencha.gxt.core.client.Style.SelectionMode;
-import com.sencha.gxt.data.shared.Store;
-import com.sencha.gxt.widget.core.client.event.RowMouseDownEvent;
-import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
-import com.sencha.gxt.widget.core.client.grid.GridSelectionModel;
-import com.sencha.gxt.widget.core.client.treegrid.TreeGrid;
 
 public class RadioBoxSelectionModel<M> extends GridSelectionModel<M> {
 
