@@ -4,14 +4,14 @@
  */
 package com.eas.designer.explorer.h2;
 
-import com.eas.designer.application.platform.EmptyPlatformHomePathException;
+import com.eas.designer.application.platform.PlatformHomePathException;
 import com.eas.designer.application.platform.PlatypusPlatform;
 import com.eas.designer.explorer.platform.PlatypusPlatformDialog;
 import com.eas.designer.explorer.project.ProjectRunner;
 import com.eas.designer.explorer.server.Server;
 import com.eas.designer.explorer.server.ServerState;
 import com.eas.designer.explorer.server.ServerSupport;
-import com.eas.designer.explorer.utils.DatabaseServerType;
+import com.eas.designer.application.utils.DatabaseServerType;
 import java.io.File;
 import java.util.concurrent.Future;
 import javax.swing.event.ChangeListener;
@@ -116,13 +116,13 @@ public class H2Dabatabase implements DatabaseRuntime, Server {
         try {       
             libDir = PlatypusPlatform.getThirdpartyLibDirectory();
             h2Dir = new File(libDir, H2_DIRECTORY_NAME);         
-        } catch (EmptyPlatformHomePathException | IllegalStateException ex) {
+        } catch (PlatformHomePathException | IllegalStateException ex) {
             StatusDisplayer.getDefault().setStatusText(NbBundle.getMessage(H2Dabatabase.class, "LBL_Unable_Start_H2_Path")); // NOI18N
             if (PlatypusPlatformDialog.showPlatformHomeDialog()) {
                 try {
                     libDir = PlatypusPlatform.getThirdpartyLibDirectory();
                     h2Dir = new File(libDir, H2_DIRECTORY_NAME);
-                } catch (EmptyPlatformHomePathException | IllegalStateException ex1) {
+                } catch (        PlatformHomePathException | IllegalStateException ex1) {
                     StatusDisplayer.getDefault().setStatusText(NbBundle.getMessage(H2Dabatabase.class, "LBL_Unable_Start_H2_Path")); // NOI18N
                     return;
                 }

@@ -9,9 +9,9 @@ package com.eas.designer.application.platform;
  * 
  * @author vv
  */
-public class EmptyPlatformHomePathException extends Exception {
+public class PlatformHomePathException extends Exception {
 
-    public EmptyPlatformHomePathException() {
-        super("Platform home directory is not set.");//NOI18N
+    public PlatformHomePathException(String msg) {
+        super(msg);
     }
 }

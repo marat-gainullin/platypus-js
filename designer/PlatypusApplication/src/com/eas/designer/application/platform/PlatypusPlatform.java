@@ -4,9 +4,16 @@
  */
 package com.eas.designer.application.platform;
 
+import com.eas.designer.application.utils.DatabaseServerType;
 import com.eas.util.FileUtils;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
@@ -17,6 +24,9 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.netbeans.api.db.explorer.DatabaseException;
+import org.netbeans.api.db.explorer.JDBCDriver;
+import org.netbeans.api.db.explorer.JDBCDriverManager;
 import org.openide.ErrorManager;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
@@ -34,8 +44,6 @@ public class PlatypusPlatform {
     public static final String LIB_DIRECTORY_NAME = "lib"; //NOI18N
     public static final String JAR_FILE_EXTENSION = "jar"; //NOI18N
     public static final String THIRDPARTY_LIB_DIRECTORY_NAME = "thirdparty"; //NOI18N
-
-    public static final String[] JDBC_CLASSES = {"org.h2.jdbcx.JdbcDataSource"}; //NOI18N
 
     private static final Map<String, File> jarsCache = new HashMap<>();
 
@@ -92,10 +100,10 @@ public class PlatypusPlatform {
      * Platform's bin directory.
      *
      * @return bin directory path
-     * @throws EmptyPlatformHomePathException if platform isn't properly
+     * @throws PlatformHomePathException if platform isn't properly
      * configured
      */
-    public static File getPlatformBinDirectory() throws EmptyPlatformHomePathException {
+    public static File getPlatformBinDirectory() throws PlatformHomePathException {
         File platformBinDir = new File(getPlatformHomeDir(), BIN_DIRECTORY_NAME);
         if (!platformBinDir.exists() || !platformBinDir.isDirectory()) {
             throw new IllegalStateException("Platform executables home does not exist or not a directory.");
@@ -103,60 +111,110 @@ public class PlatypusPlatform {
         return platformBinDir;
     }
 
+    public static File getPlatformLibDirectory() throws PlatformHomePathException {
+        return getPlatformLibDirectory(getPlatformHomeDir());
+    }
+
     /**
      * Platform's bin directory.
      *
+     * @param platfromHomeDir
      * @return bin directory path
-     * @throws EmptyPlatformHomePathException if platform isn't properly
+     * @throws PlatformHomePathException if platform isn't properly
      * configured
      */
-    public static File getPlatformLibDirectory() throws EmptyPlatformHomePathException {
-        File platformLibDir = new File(getPlatformHomeDir(), LIB_DIRECTORY_NAME);
+    public static File getPlatformLibDirectory(File platfromHomeDir) throws PlatformHomePathException {
+        File platformLibDir = new File(platfromHomeDir, LIB_DIRECTORY_NAME);
         if (!platformLibDir.exists() || !platformLibDir.isDirectory()) {
             throw new IllegalStateException("Platform executables home does not exist or not a directory.");
         }
         return platformLibDir;
     }
 
+    public static File getThirdpartyLibDirectory() throws PlatformHomePathException {
+        return getThirdpartyLibDirectory(getPlatformLibDirectory());
+    }
+
     /**
      * Platform's third party subdirectory.
      *
+     * @param platformLibDirectory
      * @return lib directory path
-     * @throws EmptyPlatformHomePathException if platform isn't properly
+     * @throws PlatformHomePathException if platform isn't properly
      * configured
      */
-    public static File getThirdpartyLibDirectory() throws EmptyPlatformHomePathException {
-        File tpLibDir = new File(getPlatformLibDirectory(), THIRDPARTY_LIB_DIRECTORY_NAME);
+    public static File getThirdpartyLibDirectory(File platformLibDirectory) throws PlatformHomePathException {
+        File tpLibDir = new File(platformLibDirectory, THIRDPARTY_LIB_DIRECTORY_NAME);
         if (!tpLibDir.exists() || !tpLibDir.isDirectory()) {
             throw new IllegalStateException("Platform's third party libs home not exists or not a directory.");
         }
         return tpLibDir;
     }
 
+    public synchronized static File findThirdpartyJar(String className) throws PlatformHomePathException, IOException {
+        return findThirdpartyJar(getPlatformHomeDir(), className);
+    }
+
     /**
      * Finds jar file in the platform's lib directory for provided class name.
      *
+     * @param platfromHomeDir
      * @param className full class name to find in jars
      * @return jar file or null if jar is not found
+     * @throws
+     * com.eas.designer.application.platform.PlatformHomePathException
+     * @throws java.io.IOException
      */
-    public synchronized static File findThirdpartyJar(String className) throws EmptyPlatformHomePathException, IOException {
+    public synchronized static File findThirdpartyJar(File platfromHomeDir, String className) throws PlatformHomePathException, IOException {
         File jarFile = jarsCache.get(className);
         if (jarFile == null) {
-            jarFile = findJar(FileUtil.toFileObject(getThirdpartyLibDirectory()), className);
+            File thirdpartyLibDirectory = getThirdpartyLibDirectory(getPlatformLibDirectory(platfromHomeDir));
+            jarFile = findJar(thirdpartyLibDirectory, className);
             jarsCache.put(className, jarFile);
         }
         return jarFile;
     }
 
-    private static File findJar(FileObject dir, String className) throws IOException {
-        List<File> files = new ArrayList<>();
-        Enumeration<? extends FileObject> e = dir.getChildren(true);
-        while (e.hasMoreElements()) {
-            FileObject fo = e.nextElement();
-            if (JAR_FILE_EXTENSION.equalsIgnoreCase(fo.getExt())) {
-                files.add(FileUtil.toFile(fo));
+    public static void registerJdbcDrivers() throws PlatformHomePathException, IOException, DatabaseException {
+        registerJdbcDrivers(getPlatformHomeDir());
+    }
+
+    public static void registerJdbcDrivers(File platfromHomeDir) throws PlatformHomePathException, IOException, DatabaseException {
+        for (DatabaseServerType databaseServer : DatabaseServerType.values()) {
+            File mainJar = findThirdpartyJar(platfromHomeDir, databaseServer.jdbcClassName);
+            if (mainJar != null) {
+                //add urls for the *.jar files in the same directory
+                List<URL> urls = new ArrayList<>();
+                for (File f : mainJar.getParentFile().listFiles()) {
+                    if (JAR_FILE_EXTENSION.equalsIgnoreCase(FileUtils.getFileExtension(f))) {
+                        urls.add(f.toURI().toURL());
+                    }
+                }
+
+                for (JDBCDriver oldDriver : JDBCDriverManager.getDefault().getDrivers(databaseServer.jdbcClassName)) {
+                    if (oldDriver.getName().equals(databaseServer.name)) {
+                        JDBCDriverManager.getDefault().removeDriver(oldDriver);
+                    }
+                }
+                JDBCDriverManager.getDefault().addDriver(JDBCDriver.create(databaseServer.name, databaseServer.name, databaseServer.jdbcClassName, urls.toArray(new URL[0])));
             }
         }
+    }
+
+    private static File findJar(File dir, String className) throws IOException {
+        final List<File> files = new ArrayList<>();
+        Files.walkFileTree(dir.toPath(), new SimpleFileVisitor<Path>() {
+
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                File f = file.toFile();
+                if (JAR_FILE_EXTENSION.equalsIgnoreCase(FileUtils.getFileExtension(f))) {
+                    files.add(f);
+                }
+                return FileVisitResult.CONTINUE;
+            }
+
+        });
         return findClassJar(files, className);
     }
 
@@ -178,13 +236,13 @@ public class PlatypusPlatform {
         return null;
     }
 
-    private static File getPlatformHomeDir() throws EmptyPlatformHomePathException {
+    private static File getPlatformHomeDir() throws PlatformHomePathException {
         if (PlatypusPlatform.getPlatformHomePath() == null || PlatypusPlatform.getPlatformHomePath().isEmpty()) {
-            throw new EmptyPlatformHomePathException();
+            throw new PlatformHomePathException("Platform home directory is not set.");
         }
         File platformHomeDir = new File(PlatypusPlatform.getPlatformHomePath());
         if (!platformHomeDir.exists() || !platformHomeDir.isDirectory()) {
-            throw new IllegalStateException("Platform home not exists or not a directory.");
+            throw new PlatformHomePathException("Platform home not exists or not a directory.");
         }
         return platformHomeDir;
     }

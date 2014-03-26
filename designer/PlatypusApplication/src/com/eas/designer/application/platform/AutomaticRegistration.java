@@ -6,11 +6,15 @@
 package com.eas.designer.application.platform;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.netbeans.api.db.explorer.DatabaseException;
+import org.openide.ErrorManager;
+import org.openide.util.Exceptions;
 
 /**
- * Registers a Platypus.js runtime by creating instance file in cluster config
+ * Registers a Platypus.js Runtime by creating instance file in cluster config
  * directory. Designed to be called from installer.
  *
  * @author vv
@@ -55,14 +59,17 @@ public class AutomaticRegistration {
     }
 
     private static void printHelpAndExit() {
-        System.out.println("Available actions:");
-        System.out.println("\t--add <clusterDir> <platypusRuntimeHome>");
+        System.out.println("Available actions:"); // NOI18N
+        System.out.println("\t--add <clusterDir> <platypusRuntimeHome>"); // NOI18N
         System.exit(-1);
     }
 
-    private static int registerPlatypusRuntime(String clusterDirValue, String platypusRuntimePath) {
+    protected static int registerPlatypusRuntime(String clusterDirValue, String platypusRuntimePath) {
+        LOGGER.log(Level.INFO, String.format("Registering Platypus.js Runtime at %s in the cluster %s", platypusRuntimePath, clusterDirValue));
+        
         // tell the infrastructure that the userdir is cluster dir
         System.setProperty("netbeans.user", clusterDirValue); // NOI18N
+        
         File platypusRuntimeHome = new File(platypusRuntimePath);
         if (!platypusRuntimeHome.exists()) {
             LOGGER.log(Level.INFO, "Cannot register the Platypus.js Runtime. " // NOI18N
@@ -75,7 +82,14 @@ public class AutomaticRegistration {
             // the platform's runtime is already registered, do nothing
             return 0;
         } else if (PlatypusPlatform.setPlatformHomePath(platypusRuntimePath)) {
-            return 0;
+            try {
+                LOGGER.log(Level.INFO, "Registering JDBC drivers for runtime at {0}", platypusRuntimeHome.getAbsolutePath()); // NOI18N
+                PlatypusPlatform.registerJdbcDrivers(platypusRuntimeHome);
+                return 0;
+            } catch (PlatformHomePathException | IOException | DatabaseException ex) {
+                LOGGER.log(Level.SEVERE, "Exception on registering JDBC drivers.", ex); // NOI18N
+                return -1;
+            }
         } else {
             return 3;
         }
