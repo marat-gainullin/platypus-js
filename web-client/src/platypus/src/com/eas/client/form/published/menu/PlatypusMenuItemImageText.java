@@ -12,6 +12,9 @@ public class PlatypusMenuItemImageText extends MenuItemImageText implements HasP
 	protected JavaScriptObject published;
 	protected PlatypusImageResource image;
 
+	public PlatypusMenuItemImageText() {
+		super("", false, null, null);
+	}
 	public PlatypusMenuItemImageText(String aText, boolean asHtml, SafeUri aImageUri, ScheduledCommand aCommand) {
 		super(aText, asHtml, aImageUri, aCommand);
 	}

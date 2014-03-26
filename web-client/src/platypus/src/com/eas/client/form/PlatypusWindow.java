@@ -30,6 +30,7 @@ import com.bearsoft.rowset.Callback;
 import com.bearsoft.rowset.Utils;
 import com.eas.client.ImageResourceCallback;
 import com.eas.client.application.AppClient;
+import com.eas.client.application.PlatypusImageResource;
 import com.eas.client.form.js.JsEvents;
 import com.eas.client.form.published.HasPublished;
 import com.eas.client.form.published.widgets.DesktopPane;
@@ -84,8 +85,8 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 		}
 	}
 
-	protected int viewPreferredWidth;
-	protected int viewPreferredHeight;
+	protected double viewPreferredWidth;
+	protected double viewPreferredHeight;
 	protected JavaScriptObject published;
 
 	protected ToolsCaption caption;
@@ -145,7 +146,7 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 		if (iconImage != null && !iconImage.isEmpty())
 			setIcon(AppClient.getInstance().getImageResource(iconImage).addCallback(new ImageResourceCallback() {
 				@Override
-				public void run(ImageResource aResource) {
+				public void run(PlatypusImageResource aResource) {
 					setIcon(aResource);
 				}
 			}));
@@ -190,19 +191,19 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 		}
 	}
 
-	public int getViewPreferredWidth() {
+	public double getViewPreferredWidth() {
 		return viewPreferredWidth;
 	}
 
-	public void setViewPreferredWidth(int aWidth) {
+	public void setViewPreferredWidth(double aWidth) {
 		viewPreferredWidth = aWidth;
 	}
 
-	public int getViewPreferredHeight() {
+	public double getViewPreferredHeight() {
 		return viewPreferredHeight;
 	}
 
-	public void setViewPreferredHeight(int aHeight) {
+	public void setViewPreferredHeight(double aHeight) {
 		viewPreferredHeight = aHeight;
 	}
 

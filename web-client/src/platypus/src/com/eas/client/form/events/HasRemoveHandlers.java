@@ -12,5 +12,5 @@ public interface HasRemoveHandlers extends HasHandlers {
 	 *            the handler
 	 * @return the registration for the event
 	 */
-	HandlerRegistration addRemoveHandler(AddHandler handler);
+	HandlerRegistration addRemoveHandler(RemoveHandler handler);
 }

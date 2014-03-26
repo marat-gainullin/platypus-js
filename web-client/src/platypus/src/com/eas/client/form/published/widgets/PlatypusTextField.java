@@ -1,10 +1,11 @@
 package com.eas.client.form.published.widgets;
 
+import com.eas.client.form.published.HasEmptyText;
 import com.eas.client.form.published.HasPublished;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.user.client.ui.TextBox;
 
-public class PlatypusTextField extends TextBox implements HasPublished {
+public class PlatypusTextField extends TextBox implements HasPublished, HasEmptyText {
 
 	protected JavaScriptObject published;
 
@@ -12,6 +13,15 @@ public class PlatypusTextField extends TextBox implements HasPublished {
 		super();
 	}
 
+	@Override
+	public String getEmptyText() {
+		return null;
+	}
+	
+	@Override
+	public void setEmptyText(String aValue) {
+	}
+	
 	public JavaScriptObject getPublished() {
 		return published;
 	}

@@ -1,7 +1,10 @@
 package com.eas.client.form.js;
 
+import com.bearsoft.gwt.ui.containers.window.events.MoveEvent;
 import com.eas.client.form.events.AddEvent;
+import com.eas.client.form.events.HideEvent;
 import com.eas.client.form.events.RemoveEvent;
+import com.eas.client.form.events.ShowEvent;
 import com.eas.client.form.published.PublishedCell;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.dom.client.BlurEvent;
@@ -180,7 +183,7 @@ public class JsEvents {
 		return published;
 	}-*/;
 
-	public native static JavaScriptObject publishMouseDownEvent(MouseDownEvent aEvent)/*-{
+	public native static JavaScriptObject publish(MouseDownEvent aEvent)/*-{
 		var published = {
 			unwrap : function() {
 				return aEvent;
@@ -191,7 +194,7 @@ public class JsEvents {
 		return published;
 	}-*/;
 
-	public native static JavaScriptObject publishMouseUpEvent(MouseUpEvent aEvent)/*-{
+	public native static JavaScriptObject publish(MouseUpEvent aEvent)/*-{
 		var published = {
 			unwrap : function() {
 				return aEvent;
@@ -202,7 +205,7 @@ public class JsEvents {
 		return published;
 	}-*/;
 
-	public native static JavaScriptObject publishMouseWheelEvent(MouseWheelEvent aEvent)/*-{
+	public native static JavaScriptObject publish(MouseWheelEvent aEvent)/*-{
 		var published = {
 			unwrap : function() {
 				return aEvent;
@@ -213,7 +216,7 @@ public class JsEvents {
 		return published;
 	}-*/;
 
-	public native static JavaScriptObject publishMouseMoveEvent(MouseMoveEvent aEvent)/*-{
+	public native static JavaScriptObject publish(MouseMoveEvent aEvent)/*-{
 		var published = {
 			unwrap : function() {
 				return aEvent;
@@ -224,7 +227,7 @@ public class JsEvents {
 		return published;
 	}-*/;
 
-	public native static JavaScriptObject publishClickEvent(ClickEvent aEvent)/*-{
+	public native static JavaScriptObject publish(ClickEvent aEvent)/*-{
 		var published = {
 			unwrap : function() {
 				return aEvent;
@@ -240,7 +243,7 @@ public class JsEvents {
 		return published;
 	}-*/;
 
-	public native static JavaScriptObject publishDoubleClickEvent(DoubleClickEvent aEvent)/*-{
+	public native static JavaScriptObject publish(DoubleClickEvent aEvent)/*-{
 		var published = {
 			unwrap : function() {
 				return aEvent;
@@ -256,7 +259,7 @@ public class JsEvents {
 		return published;
 	}-*/;
 
-	public native static JavaScriptObject publishMouseOverEvent(MouseOverEvent aEvent)/*-{
+	public native static JavaScriptObject publish(MouseOverEvent aEvent)/*-{
 		var published = {
 			unwrap : function() {
 				return aEvent;
@@ -267,7 +270,7 @@ public class JsEvents {
 		return published;
 	}-*/;
  
-	public native static JavaScriptObject publishMouseOutEvent(MouseOutEvent aEvent)/*-{
+	public native static JavaScriptObject publish(MouseOutEvent aEvent)/*-{
 		var published = {
 			unwrap : function() {
 				return aEvent;
@@ -278,7 +281,7 @@ public class JsEvents {
 		return published;
 	}-*/;
 	
-	public native static JavaScriptObject publishKeyDownEvent(KeyDownEvent aEvent)/*-{
+	public native static JavaScriptObject publish(KeyDownEvent aEvent)/*-{
 		var published = {
 			unwrap : function() {
 				return aEvent;
@@ -289,18 +292,7 @@ public class JsEvents {
 		return published;
 	}-*/;
 
-	public native static JavaScriptObject publishKeyUpEvent(KeyUpEvent aEvent)/*-{
-		var published = {
-			unwrap : function() {
-				return aEvent;
-			}
-		};
-		@com.eas.client.form.js.JsEvents::publishEvent(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
-		@com.eas.client.form.js.JsEvents::publishKeyEvent(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
-		return published;
-	}-*/;
-	
-	public native static JavaScriptObject publishKeyPressEvent(KeyPressEvent aEvent)/*-{
+	public native static JavaScriptObject publish(KeyUpEvent aEvent)/*-{
 		var published = {
 			unwrap : function() {
 				return aEvent;
@@ -311,7 +303,18 @@ public class JsEvents {
 		return published;
 	}-*/;
 	
-	public native static JavaScriptObject publishFocusEvent(FocusEvent aEvent)/*-{
+	public native static JavaScriptObject publish(KeyPressEvent aEvent)/*-{
+		var published = {
+			unwrap : function() {
+				return aEvent;
+			}
+		};
+		@com.eas.client.form.js.JsEvents::publishEvent(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+		@com.eas.client.form.js.JsEvents::publishKeyEvent(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+		return published;
+	}-*/;
+	
+	public native static JavaScriptObject publish(FocusEvent aEvent)/*-{
 		var published = {
 			unwrap : function() {
 				return aEvent;
@@ -321,7 +324,7 @@ public class JsEvents {
 		return published;
 	}-*/;
 
-	public native static JavaScriptObject publishBlurEvent(BlurEvent aEvent)/*-{
+	public native static JavaScriptObject publish(BlurEvent aEvent)/*-{
 		var published = {
 			unwrap : function() {
 				return aEvent;
@@ -331,7 +334,7 @@ public class JsEvents {
 		return published;
 	}-*/;
 
-	public native static JavaScriptObject publishResizeEvent(ResizeEvent aEvent)/*-{
+	public native static JavaScriptObject publish(ResizeEvent aEvent)/*-{
 		var published = {
 			unwrap : function() {
 				return aEvent;
@@ -341,7 +344,37 @@ public class JsEvents {
 		return published;
 	}-*/;
 
-	public native static JavaScriptObject publishAddEvent(AddEvent aEvent)/*-{
+	public native static JavaScriptObject publish(ShowEvent aEvent)/*-{
+		var published = {
+			unwrap : function() {
+				return aEvent;
+			}
+		};
+		@com.eas.client.form.js.JsEvents::publishEvent(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+		return published;
+	}-*/;
+
+	public native static JavaScriptObject publish(HideEvent aEvent)/*-{
+		var published = {
+			unwrap : function() {
+				return aEvent;
+			}
+		};
+		@com.eas.client.form.js.JsEvents::publishEvent(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+		return published;
+	}-*/;
+
+	public native static JavaScriptObject publish(MoveEvent<Object> aEvent)/*-{
+		var published = {
+			unwrap : function() {
+				return aEvent;
+			}
+		};
+		@com.eas.client.form.js.JsEvents::publishEvent(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+		return published;
+	}-*/;
+
+	public native static JavaScriptObject publish(AddEvent aEvent)/*-{
 		var published = {
 			unwrap : function() {
 				return aEvent;
@@ -358,7 +391,7 @@ public class JsEvents {
 		return published; 
 	}-*/;
 
-	public native static JavaScriptObject publishRemoveEvent(RemoveEvent aEvent)/*-{
+	public native static JavaScriptObject publish(RemoveEvent aEvent)/*-{
 		var published = {
 			unwrap : function() {
 				return aEvent;
@@ -375,7 +408,7 @@ public class JsEvents {
 		return published;
 	}-*/;
 
-	public native static JavaScriptObject publishChangeEvent(Object aEvent)/*-{
+	public native static JavaScriptObject publish(Object aEvent)/*-{
 		var published = {
 			unwrap : function() {
 				return aEvent;

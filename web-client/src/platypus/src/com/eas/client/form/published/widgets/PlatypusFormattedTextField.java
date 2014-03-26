@@ -2,10 +2,11 @@ package com.eas.client.form.published.widgets;
 
 import com.bearsoft.gwt.ui.widgets.FormattedObjectBox;
 import com.bearsoft.rowset.Utils;
+import com.eas.client.form.published.HasEmptyText;
 import com.eas.client.form.published.HasPublished;
 import com.google.gwt.core.client.JavaScriptObject;
 
-public class PlatypusFormattedTextField extends FormattedObjectBox implements HasPublished {
+public class PlatypusFormattedTextField extends FormattedObjectBox implements HasPublished, HasEmptyText {
 
 	protected JavaScriptObject published;
 
@@ -21,6 +22,15 @@ public class PlatypusFormattedTextField extends FormattedObjectBox implements Ha
 		setValue(Utils.toJava(aValue), true);
 	}
 
+	@Override
+	public String getEmptyText() {
+		return null;
+	}
+	
+	@Override
+	public void setEmptyText(String aValue) {
+	}
+	
 	public JavaScriptObject getPublished() {
 		return published;
 	}

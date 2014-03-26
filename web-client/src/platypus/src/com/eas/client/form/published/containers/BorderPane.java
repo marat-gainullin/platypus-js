@@ -3,6 +3,7 @@ package com.eas.client.form.published.containers;
 import com.bearsoft.gwt.ui.containers.BorderPanel;
 import com.eas.client.form.published.HasPublished;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.touch.client.Point;
 import com.google.gwt.user.client.ui.Widget;
 
 public class BorderPane extends BorderPanel implements HasPublished {
@@ -17,6 +18,22 @@ public class BorderPane extends BorderPanel implements HasPublished {
 		this();
 		setHgap(aHGap);
 		setVgap(aVGap);
+	}
+
+	public void add(Widget aWidget, Direction aDirection, Point aSize) {
+		Direction d = getResolvedDirection(aDirection);
+		switch (d) {
+		case WEST:
+			setLeftComponent(aWidget, aSize.getX());
+		case EAST:
+			setRightComponent(aWidget, aSize.getX());
+		case NORTH:
+			setTopComponent(aWidget, aSize.getY());
+		case SOUTH:
+			setBottomComponent(aWidget, aSize.getY());
+		case CENTER:
+			setCenterComponent(aWidget);
+		}
 	}
 
 	public Widget getLeftComponent() {
@@ -96,10 +113,10 @@ public class BorderPane extends BorderPanel implements HasPublished {
 		}
 	}
 
-	public Widget getCenterComponent(){
+	public Widget getCenterComponent() {
 		return getCenter();
 	}
-	
+
 	public void setCenterComponent(Widget w) {
 		Widget old = getCenter();
 		if (old != w) {

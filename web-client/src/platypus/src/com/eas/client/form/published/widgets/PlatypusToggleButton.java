@@ -9,6 +9,10 @@ import com.google.gwt.resources.client.ImageResource;
 
 public class PlatypusToggleButton extends ImageToggleButton implements HasPlatypusButtonGroup, HasPublished {
 	
+	public PlatypusToggleButton() {
+		super("", false);
+	}
+
 	public PlatypusToggleButton(String aTitle, boolean asHtml) {
 		super(aTitle, asHtml);
 	}

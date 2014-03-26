@@ -22,21 +22,21 @@ import com.eas.client.form.published.widgets.model.ModelGrid;
 import com.eas.client.form.published.widgets.model.ModelSpin;
 import com.eas.client.form.published.widgets.model.ModelTextArea;
 import com.eas.client.model.Model;
-import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.xml.client.Element;
 
-public class GxtModelControlsFactory extends GxtControlsFactory {
+public class ModelWidgetsFactory extends WidgetsFactory {
 
 	public static final String MODEL_ELEMENT_MISSING = "A model element is requried for model-aware controls";
 	protected Model model;
 
-	public GxtModelControlsFactory(Element aFormTag, Model aModel) {
+	public ModelWidgetsFactory(Element aFormTag, Model aModel) {
 		super(aFormTag, aModel.getModule());
 		model = aModel;
 	}
 
 	@Override
-	protected Component createComponent(final Element aTag) throws Exception {
+	protected UIObject createComponent(final Element aTag) throws Exception {
 		String designInfoTypeName = aTag.getAttribute(TYPE_ATTRIBUTE);
 		assert isRoot || designInfoTypeName != null : "Form structure is broken. Attribute '" + TYPE_ATTRIBUTE + "' must present for every widget.";
 
@@ -45,43 +45,28 @@ public class GxtModelControlsFactory extends GxtControlsFactory {
 			return createStubLabel(aTag, "Type 'ModelMap' is unsupported.");
 		} else if ("DbGridDesignInfo".equalsIgnoreCase(designInfoTypeName)) {
 			final ModelGrid mGrid = createDbGrid(aTag);
-			processEvents(mGrid, aTag);
 			PublishedComponent published = Publisher.publish(mGrid);
 			mGrid.setPublished(published);
 			processGeneralProperties(mGrid, aTag, published);
-			mGrid.load();
-			/*
-			 * Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-			 * 
-			 * @Override public void execute() { mGrid.load(); } });
-			 */
 			return mGrid;
 		} else {
 			boolean readonly = !Utils.getBooleanAttribute(aTag, "editable", true);
-			final String cellFunctionName = aTag.getAttribute("handleFunction");
-			final String selectFunctionName = aTag.getAttribute("selectFunction");
 			boolean selectOnly = Utils.getBooleanAttribute(aTag, "selectOnly", false);
 			Element modelElementTag = Utils.scanForElementByTagName(aTag, "datamodelElement");
 			if ("DbLabelDesignInfo".equalsIgnoreCase(designInfoTypeName)) {
 				String formatPattern = aTag.getAttribute("format");
 				int formatType = Utils.getIntegerAttribute(aTag, "valueType", ObjectFormat.MASK);
-				ObjectFormat format = new ObjectFormat(formatType, formatPattern);
 				final LazyControlBounder<Object> modelElement = modelElementTag != null ? new LazyControlBounder<Object>(modelElementTag, model, new ObjectRowValueConverter()) : null;
 				if (modelElement != null) {
-					ModelFormattedField mText = new ModelFormattedField(format);
-					modelElement.setCellComponent(mText.getTarget());
+					ModelFormattedField mText = new ModelFormattedField();
+					mText.setFormatType(formatType, formatPattern);
+					modelElement.setCellComponent(mText);
 					mText.setModelElement(modelElement);
-
-					handlersResolvers.add(new StandaloneHandlersResolver(module, cellFunctionName, selectFunctionName, mText));
-
-					processEvents(mText, aTag);
 					PublishedComponent published = Publisher.publish(mText);
-					mText.setPublishedField(published);
 					mText.setEditable(!readonly);
 					mText.setSelectOnly(selectOnly);
 					if (aTag.hasAttribute("emptyText"))
-						mText.setEmptyText(aTag.getAttribute("emptyText"));
-					
+						mText.setEmptyText(aTag.getAttribute("emptyText"));					
 					processGeneralProperties(mText, aTag, published);
 					return mText;
 				} else
@@ -90,19 +75,13 @@ public class GxtModelControlsFactory extends GxtControlsFactory {
 				final LazyControlBounder<String> modelElement = modelElementTag != null ? new LazyControlBounder<String>(modelElementTag, model, new StringRowValueConverter()) : null;
 				if (modelElement != null) {
 					ModelTextArea mTextArea = new ModelTextArea();
-					modelElement.setCellComponent(mTextArea.getTarget());
+					modelElement.setCellComponent(mTextArea);
 					mTextArea.setModelElement(modelElement);
-
-					handlersResolvers.add(new StandaloneHandlersResolver(module, cellFunctionName, selectFunctionName, mTextArea));
-
-					processEvents(mTextArea, aTag);
 					PublishedComponent published = Publisher.publish(mTextArea);
-					mTextArea.setPublishedField(published);
 					mTextArea.setEditable(!readonly);
 					mTextArea.setSelectOnly(selectOnly);
 					if (aTag.hasAttribute("emptyText"))
 						mTextArea.setEmptyText(aTag.getAttribute("emptyText"));
-
 					processGeneralProperties(mTextArea, aTag, published);
 					return mTextArea;
 				} else
@@ -114,19 +93,13 @@ public class GxtModelControlsFactory extends GxtControlsFactory {
 
 					ModelDate mDate = new ModelDate();
 					mDate.setFormat(dateFormat);
-					modelElement.setCellComponent(mDate.getTarget());
+					modelElement.setCellComponent(mDate);
 					mDate.setModelElement(modelElement);
-
-					handlersResolvers.add(new StandaloneHandlersResolver(module, cellFunctionName, selectFunctionName, mDate));
-
-					processEvents(mDate, aTag);
 					PublishedComponent published = Publisher.publish(mDate);
-					mDate.setPublishedField(published);
 					mDate.setEditable(!readonly);
 					mDate.setSelectOnly(selectOnly);
 					if (aTag.hasAttribute("emptyText"))
 						mDate.setEmptyText(aTag.getAttribute("emptyText"));
-
 					processGeneralProperties(mDate, aTag, published);
 					return mDate;
 				} else
@@ -141,14 +114,9 @@ public class GxtModelControlsFactory extends GxtControlsFactory {
 				final LazyControlBounder<Boolean> modelElement = modelElementTag != null ? new LazyControlBounder<Boolean>(modelElementTag, model, new BooleanRowValueConverter()) : null;
 				if (modelElement != null) {
 					ModelCheck mCheck = new ModelCheck();
-					modelElement.setCellComponent(mCheck.getTarget());
+					modelElement.setCellComponent(mCheck);
 					mCheck.setModelElement(modelElement);
-
-					handlersResolvers.add(new StandaloneHandlersResolver(module, cellFunctionName, selectFunctionName, mCheck));
-
-					processEvents(mCheck, aTag);
 					PublishedComponent published = Publisher.publish(mCheck);
-					mCheck.setPublishedField(published);
 					mCheck.setEditable(!readonly);
 					mCheck.setSelectOnly(selectOnly);
 					if (aTag.hasAttribute("text"))
@@ -162,14 +130,9 @@ public class GxtModelControlsFactory extends GxtControlsFactory {
 				final LazyControlBounder<Double> modelElement = modelElementTag != null ? new LazyControlBounder<Double>(modelElementTag, model, new DoubleRowValueConverter()) : null;
 				if (modelElement != null) {
 					ModelSpin mSpin = new ModelSpin();
-					modelElement.setCellComponent(mSpin.getTarget());
+					modelElement.setCellComponent(mSpin);
 					mSpin.setModelElement(modelElement);
-
-					handlersResolvers.add(new StandaloneHandlersResolver(module, cellFunctionName, selectFunctionName, mSpin));
-
-					processEvents(mSpin, aTag);
 					PublishedComponent published = Publisher.publish(mSpin);
-					mSpin.setPublishedField(published);
 					mSpin.setEditable(!readonly);
 					mSpin.setSelectOnly(selectOnly);
 					if (aTag.hasAttribute("emptyText"))
@@ -198,16 +161,11 @@ public class GxtModelControlsFactory extends GxtControlsFactory {
 					boolean list = Utils.getBooleanAttribute(aTag, "list", true);
 
 					ModelCombo mCombo = new ModelCombo();
-					modelElement.setCellComponent(mCombo.getTarget());
+					modelElement.setCellComponent(mCombo);
 					mCombo.setModelElement(modelElement);
 					mCombo.setValueElement(valueRef);
 					mCombo.setDisplayElement(displayRef);
-
-					handlersResolvers.add(new StandaloneHandlersResolver(module, cellFunctionName, selectFunctionName, mCombo));
-
-					processEvents(mCombo, aTag);
 					PublishedComponent published = Publisher.publish(mCombo);
-					mCombo.setPublishedField(published);
 					mCombo.setEditable(!readonly);
 					mCombo.setSelectOnly(selectOnly);
 					mCombo.setList(list);
@@ -223,9 +181,8 @@ public class GxtModelControlsFactory extends GxtControlsFactory {
 	}
 
 	private ModelGrid createDbGrid(Element aTag) throws Exception {
-		GxtGridFactory factory = new GxtGridFactory(aTag, model);
+		GridFactory factory = new GridFactory(aTag, model);
 		factory.process();
-		handlersResolvers.addAll(factory.getHandlersResolvers());
 		ModelGrid mGrid = factory.getModelGrid();
 		return mGrid;
 	}

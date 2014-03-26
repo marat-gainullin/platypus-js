@@ -56,33 +56,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.xml.client.Element;
 import com.google.gwt.xml.client.NodeList;
 
-public class GxtGridFactory {
-
-	protected static class ColumnHandlersResolver implements Runnable {
-		protected JavaScriptObject module;
-		protected String cellFunctionName;
-		protected String selectFunctionName;
-		protected ModelGridColumnBase<?> column;
-
-		public ColumnHandlersResolver(JavaScriptObject aModule, String aCellFunctionName, String aSelectFunctionName, ModelGridColumnBase<?> aColumn) {
-			module = aModule;
-			cellFunctionName = aCellFunctionName;
-			selectFunctionName = aSelectFunctionName;
-			column = aColumn;
-		}
-
-		@Override
-		public void run() {
-			if (cellFunctionName != null && !cellFunctionName.isEmpty()) {
-				JavaScriptObject cellFunction = module.<Utils.JsModule> cast().getHandler(cellFunctionName);
-				column.setOnRender(cellFunction);
-			}
-			if (selectFunctionName != null && !selectFunctionName.isEmpty()) {
-				JavaScriptObject selectFunction = module.<Utils.JsModule> cast().getHandler(selectFunctionName);
-				column.setOnSelect(selectFunction);
-			}
-		}
-	}
+public class GridFactory {
 
 	//
 	public static final int ROWS_HEADER_TYPE_NONE = 0;
@@ -103,27 +77,19 @@ public class GxtGridFactory {
 	protected Model model;
 	protected Entity rowsSource;
 	// protected String generalCellFunctionName;
-	protected List<ColumnConfig<Row, ?>> leaves = new ArrayList<ColumnConfig<Row, ?>>();
-	protected List<HeaderGroupConfig> groups = new ArrayList<HeaderGroupConfig>();
+	protected List<ColumnConfig<Row, ?>> leaves = new ArrayList<>();
+	protected List<HeaderGroupConfig> groups = new ArrayList<>();
 	protected int currentLeavesCount;
 	protected RowsetListener rowsFiller;
-	protected Store<Row> store;
-	protected Grid<Row> grid;
 	protected ModelGrid modelGrid;
-	protected PlatypusGridInlineRowEditing editing;
-	protected List<PlatypusColumnConfig<Row, String>> sColumns = new ArrayList<PlatypusColumnConfig<Row, String>>();
-	protected List<PlatypusColumnConfig<Row, Date>> dColumns = new ArrayList<PlatypusColumnConfig<Row, Date>>();
-	protected List<PlatypusColumnConfig<Row, Double>> nColumns = new ArrayList<PlatypusColumnConfig<Row, Double>>();
-	protected List<PlatypusColumnConfig<Row, Boolean>> bColumns = new ArrayList<PlatypusColumnConfig<Row, Boolean>>();
-	protected List<PlatypusColumnConfig<Row, Object>> oColumns = new ArrayList<PlatypusColumnConfig<Row, Object>>();// lookup
 	// columns
-	protected List<ComboLabelProvider> comboLabelProviders = new ArrayList<ComboLabelProvider>();
-	protected List<ModelGridColumnBase<?>> publishedColumns = new ArrayList<ModelGridColumnBase<?>>();
+	protected List<ComboLabelProvider> comboLabelProviders = new ArrayList<>();
+	protected List<ModelGridColumnBase> publishedColumns = new ArrayList<>();
 
 	protected Set<Entity> rowsetsOfInterestHosts = new HashSet<Entity>();
 	protected List<Runnable> handlersResolvers = new ArrayList<Runnable>();
 
-	public GxtGridFactory(Element aTag, Model aModel) {
+	public GridFactory(Element aTag, Model aModel) {
 		super();
 		gridTag = aTag;
 		model = aModel;
@@ -143,7 +109,6 @@ public class GxtGridFactory {
 		groups.clear();
 		currentLeavesCount = 0;
 		rowsSource = null;
-		grid = null;
 	}
 
 	public void process() throws Exception {
@@ -285,7 +250,7 @@ public class GxtGridFactory {
 		}
 	}
 
-	public List<ModelGridColumnBase<?>> getPublishedColumns() {
+	public List<ModelGridColumnBase> getPublishedColumns() {
 		return publishedColumns;
 	}
 
@@ -516,7 +481,7 @@ public class GxtGridFactory {
 									bindCallback(context, cellToRender);
 								}
 							} catch (Exception ex) {
-								Logger.getLogger(GxtGridFactory.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+								Logger.getLogger(GridFactory.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
 							}
 						}
 					});
@@ -569,7 +534,7 @@ public class GxtGridFactory {
 									bindCallback(context, cellToRender);
 								}
 							} catch (Exception ex) {
-								Logger.getLogger(GxtGridFactory.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+								Logger.getLogger(GridFactory.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
 							}
 						}
 					});
@@ -636,7 +601,7 @@ public class GxtGridFactory {
 									bindCallback(context, cellToRender);
 								}
 							} catch (Exception ex) {
-								Logger.getLogger(GxtGridFactory.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+								Logger.getLogger(GridFactory.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
 							}
 						}
 					};
@@ -678,7 +643,7 @@ public class GxtGridFactory {
 									bindCallback(context, cellToRender);
 								}
 							} catch (Exception ex) {
-								Logger.getLogger(GxtGridFactory.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+								Logger.getLogger(GridFactory.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
 							}
 						}
 
@@ -819,7 +784,7 @@ public class GxtGridFactory {
 							bindCallback(context, cellToRender);
 						}
 					} catch (Exception ex) {
-						Logger.getLogger(GxtGridFactory.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+						Logger.getLogger(GridFactory.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
 					}
 				}
 			});
@@ -858,13 +823,5 @@ public class GxtGridFactory {
 	protected Row renderedRow(com.google.gwt.cell.client.Cell.Context context) {
 		Object key = context.getKey();
 		return store.findModelWithKey(key != null ? key.toString() : null);
-	}
-
-	Grid<Row> getGrid() {
-		return grid;
-	}
-
-	PlatypusGridInlineRowEditing getEditing() {
-		return editing;
 	}
 }

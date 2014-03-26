@@ -2,16 +2,26 @@ package com.eas.client.form.published.widgets.model;
 
 import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.converters.DoubleRowValueConverter;
+import com.eas.client.form.published.HasEmptyText;
 import com.eas.client.form.published.widgets.ConstraintedSpinnerBox;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.user.client.ui.DoubleBox;
 
-public class ModelSpin extends PublishedDecoratorBox<Double> {
+public class ModelSpin extends PublishedDecoratorBox<Double> implements HasEmptyText {
 
 	public ModelSpin() {
 		super(new ConstraintedSpinnerBox(new DoubleBox()));
 	}
 
+	@Override
+	public String getEmptyText() {
+		return null;
+	}
+	
+	@Override
+	public void setEmptyText(String aValue) {
+	}
+	
 	public void setPublished(JavaScriptObject aValue) {
 		super.setPublished(aValue);
 		if (published != null) {
@@ -78,5 +88,4 @@ public class ModelSpin extends PublishedDecoratorBox<Double> {
 	public void setStep(Double aValue) {
 		((ConstraintedSpinnerBox) decorated).setStep(aValue);
 	}
-
 }

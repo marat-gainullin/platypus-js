@@ -7,12 +7,13 @@ import com.bearsoft.rowset.Utils;
 import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.converters.DateRowValueConverter;
 import com.eas.client.form.ControlsUtils;
+import com.eas.client.form.published.HasEmptyText;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.datepicker.client.DateBox;
 
-public class ModelDate extends PublishedDecoratorBox<Date> {
+public class ModelDate extends PublishedDecoratorBox<Date> implements HasEmptyText {
 
     private static final DateBox.DefaultFormat DEFAULT_FORMAT = GWT.create(DateBox.DefaultFormat.class);
 	protected String format;
@@ -34,6 +35,15 @@ public class ModelDate extends PublishedDecoratorBox<Date> {
 		((DateTimeBox)decorated).setFormat(new DateBox.DefaultFormat(dtFormat));
 	}
 
+	@Override
+	public String getEmptyText() {
+		return null;
+	}
+	
+	@Override
+	public void setEmptyText(String aValue) {
+	}
+	
 	public void setPublished(JavaScriptObject aValue) {
 		super.setPublished(aValue);
 		if (published != null) {

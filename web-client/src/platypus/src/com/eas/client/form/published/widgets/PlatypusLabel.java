@@ -17,6 +17,10 @@ public class PlatypusLabel extends ImageLabel implements HasPublished {
 	    super(aTitle, asHtml);
     }
 
+	public PlatypusLabel() {
+	    super("", false);
+    }
+
 	public JavaScriptObject getPublished() {
 		return published;
 	}

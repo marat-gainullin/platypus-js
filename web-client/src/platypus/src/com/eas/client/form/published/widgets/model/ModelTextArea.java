@@ -2,15 +2,25 @@ package com.eas.client.form.published.widgets.model;
 
 import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.converters.StringRowValueConverter;
+import com.eas.client.form.published.HasEmptyText;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.user.client.ui.TextBox;
 
-public class ModelTextArea extends PublishedDecoratorBox<String> {
+public class ModelTextArea extends PublishedDecoratorBox<String> implements HasEmptyText {
 
 	public ModelTextArea() {
 		super(new TextBox());
 	}
 
+	@Override
+	public String getEmptyText() {
+		return null;
+	}
+	
+	@Override
+	public void setEmptyText(String aValue) {
+	}
+	
 	public void setPublished(JavaScriptObject aValue) {
 		super.setPublished(aValue);
 		if (published != null) {

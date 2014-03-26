@@ -16,7 +16,11 @@ public class PlatypusButton extends ImageButton implements HasPublished {
 	public PlatypusButton(String aTitle, boolean asHtml) {
 		super(aTitle, asHtml);
 	}
-
+	
+	public PlatypusButton() {
+		super("", false);
+	}
+	
 	public JavaScriptObject getPublished() {
 		return published;
 	}

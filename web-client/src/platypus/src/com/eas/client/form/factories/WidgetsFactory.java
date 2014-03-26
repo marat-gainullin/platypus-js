@@ -10,22 +10,25 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.bearsoft.gwt.ui.menu.MenuItemImageText;
+import com.bearsoft.gwt.ui.widgets.ImageParagraph;
 import com.bearsoft.gwt.ui.widgets.ObjectFormat;
 import com.bearsoft.rowset.Utils;
 import com.eas.client.ImageResourceCallback;
 import com.eas.client.application.AppClient;
+import com.eas.client.application.PlatypusImageResource;
 import com.eas.client.form.ControlsUtils;
-import com.eas.client.form.EventsExecutor;
 import com.eas.client.form.MarginConstraints;
 import com.eas.client.form.PlatypusWindow;
 import com.eas.client.form.Publisher;
-import com.eas.client.form.MarginConstraints.Margin;
-import com.eas.client.form.published.HasPublished;
+import com.eas.client.form.published.HasComponentPopupMenu;
 import com.eas.client.form.published.PublishedComponent;
 import com.eas.client.form.published.PublishedFont;
+import com.eas.client.form.published.containers.AbsolutePane;
+import com.eas.client.form.published.containers.AnchorsPane;
 import com.eas.client.form.published.containers.BorderPane;
-import com.eas.client.form.published.containers.CardPane;
 import com.eas.client.form.published.containers.ButtonGroup;
+import com.eas.client.form.published.containers.CardPane;
 import com.eas.client.form.published.containers.FlowPane;
 import com.eas.client.form.published.containers.GridPane;
 import com.eas.client.form.published.containers.HBoxPane;
@@ -33,29 +36,37 @@ import com.eas.client.form.published.containers.MarginsPane;
 import com.eas.client.form.published.containers.ScrollPane;
 import com.eas.client.form.published.containers.SplitPane;
 import com.eas.client.form.published.containers.TabbedPane;
+import com.eas.client.form.published.containers.ToolBar;
 import com.eas.client.form.published.containers.VBoxPane;
 import com.eas.client.form.published.menu.PlatypusMenu;
 import com.eas.client.form.published.menu.PlatypusMenuBar;
+import com.eas.client.form.published.menu.PlatypusMenuItemCheckBox;
+import com.eas.client.form.published.menu.PlatypusMenuItemImageText;
+import com.eas.client.form.published.menu.PlatypusMenuItemRadioButton;
+import com.eas.client.form.published.menu.PlatypusMenuItemSeparator;
+import com.eas.client.form.published.menu.PlatypusPopupMenu;
 import com.eas.client.form.published.widgets.DesktopPane;
+import com.eas.client.form.published.widgets.PlatypusButton;
 import com.eas.client.form.published.widgets.PlatypusCheckBox;
 import com.eas.client.form.published.widgets.PlatypusFormattedTextField;
 import com.eas.client.form.published.widgets.PlatypusHtmlEditor;
 import com.eas.client.form.published.widgets.PlatypusLabel;
 import com.eas.client.form.published.widgets.PlatypusPasswordField;
 import com.eas.client.form.published.widgets.PlatypusProgressBar;
+import com.eas.client.form.published.widgets.PlatypusRadioButton;
 import com.eas.client.form.published.widgets.PlatypusSlider;
 import com.eas.client.form.published.widgets.PlatypusSplitButton;
 import com.eas.client.form.published.widgets.PlatypusTextArea;
-import com.eas.client.form.published.widgets.PlatypusButton;
 import com.eas.client.form.published.widgets.PlatypusTextField;
 import com.eas.client.form.published.widgets.PlatypusToggleButton;
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.touch.client.Point;
+import com.google.gwt.user.client.ui.DockLayoutPanel.Direction;
+import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.HasValue;
-import com.google.gwt.user.client.ui.RequiresResize;
+import com.google.gwt.user.client.ui.HasWidgets;
+import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.xml.client.Element;
 import com.google.gwt.xml.client.Node;
@@ -65,7 +76,7 @@ import com.google.gwt.xml.client.NodeList;
  * 
  * @author vy
  */
-public class GxtControlsFactory {
+public class WidgetsFactory {
 
 	protected static final String BORDER_CONSTRAINTS_TAG_NEEED = "BorderLayoutContainer children must have BorderLayout constraints tag";
 	protected static final String CARD_CONSTRAINTS_TAG_NEEED = "CardLayoutContainer children must have CardLayout constraints tag";
@@ -87,20 +98,19 @@ public class GxtControlsFactory {
 
 	protected JavaScriptObject module;
 	protected PlatypusWindow form;
-	protected Container rootWidget;
+	protected HasWidgets rootWidget;
 	protected boolean isRoot = true;
-	protected List<Runnable> handlersResolvers = new ArrayList<Runnable>();
 
 	private Element tag;
-	private Map<String, Component> components = new HashMap<String, Component>();
-	private Map<String, ToggleGroup> toggleGroups = new HashMap<String, ToggleGroup>();
+	private Map<String, UIObject> components = new HashMap<>();
+	private Map<String, ButtonGroup> toggleGroups = new HashMap<>();
 	// might be removed
-	private Map<String, Size> componentsPreferredSize = new HashMap<String, Size>();
+	private Map<UIObject, Point> componentsPreferredSize = new HashMap<>();
 
-	protected List<Runnable> postponedTasks = new ArrayList<Runnable>();
-	protected List<Runnable> postponedTasks1 = new ArrayList<Runnable>();
+	protected List<Runnable> postponedTasks = new ArrayList<>();
+	protected List<Runnable> postponedTasks1 = new ArrayList<>();
 
-	public GxtControlsFactory(Element aFormElement, JavaScriptObject aModule) {
+	public WidgetsFactory(Element aFormElement, JavaScriptObject aModule) {
 		super();
 		tag = aFormElement;
 		module = aModule;
@@ -134,66 +144,26 @@ public class GxtControlsFactory {
 	}
 
 	private PlatypusWindow parseRoot(final Element aTag) throws Exception {
-		Component w = parseWidget(aTag);
-		assert w instanceof Container;
-		rootWidget = (Container) w;
-		Size size = componentsPreferredSize.get(ROOT_WIDGET_NAME);
-		rootWidget.setSize(size.getWidth() + "px", size.getHeight() + "px");
-		final PlatypusWindow form = new PlatypusWindow(rootWidget, new Runnable() {
-			@Override
-			public void run() {
-				for (Runnable hResolver : handlersResolvers)
-					hResolver.run();
-			}
-		});
-		form.setViewPreferredWidth(size.getWidth());
-		form.setViewPreferredHeight(size.getHeight());
-
+		UIObject w = parseWidget(aTag);
+		assert w instanceof HasWidgets;
+		rootWidget = (HasWidgets) w;
+		Point size = componentsPreferredSize.get(rootWidget);
+		((Widget) rootWidget).setSize(size.getX() + "px", size.getY() + "px");
+		final PlatypusWindow form = new PlatypusWindow((Widget) rootWidget);
+		form.setViewPreferredWidth(size.getX());
+		form.setViewPreferredHeight(size.getY());
 		if (aTag.hasAttribute("iconImage")) {
 			form.setIconImage(aTag.getAttribute("iconImage"));
 		}
-
 		form.setDefaultCloseOperation(Utils.getIntegerAttribute(aTag, "defaultCloseOperation", 2));
-
 		form.setLocationByPlatform(Utils.getBooleanAttribute(aTag, "locationByPlatform", false));
 		form.setAlwaysOnTop(Utils.getBooleanAttribute(aTag, "alwaysOnTop", false));
-
 		form.setResizable(Utils.getBooleanAttribute(aTag, "resizable", true));
 		form.setUndecorated(Utils.getBooleanAttribute(aTag, "undecorated", false));
-
 		form.setOpacity(Utils.getFloatAttribute(aTag, "opacity", 1.0f));
 		if (aTag.hasAttribute("title")) {
 			form.setTitle(aTag.getAttribute("title"));
 		}
-		handlersResolvers.add(new Runnable() {
-			@Override
-			public void run() {
-				if (aTag.hasAttribute("windowOpened")) {
-					form.setWindowOpened(module.<Utils.JsModule> cast().getHandler(aTag.getAttribute("windowOpened")));
-				}
-				if (aTag.hasAttribute("windowClosing")) {
-					form.setWindowClosing(module.<Utils.JsModule> cast().getHandler(aTag.getAttribute("windowClosing")));
-				}
-				if (aTag.hasAttribute("windowClosed")) {
-					form.setWindowClosed(module.<Utils.JsModule> cast().getHandler(aTag.getAttribute("windowClosed")));
-				}
-				if (aTag.hasAttribute("windowMinimized")) {
-					form.setWindowMinimized(module.<Utils.JsModule> cast().getHandler(aTag.getAttribute("windowMinimized")));
-				}
-				if (aTag.hasAttribute("windowRestored")) {
-					form.setWindowRestored(module.<Utils.JsModule> cast().getHandler(aTag.getAttribute("windowRestored")));
-				}
-				if (aTag.hasAttribute("windowMaximized")) {
-					form.setWindowMaximized(module.<Utils.JsModule> cast().getHandler(aTag.getAttribute("windowMaximized")));
-				}
-				if (aTag.hasAttribute("windowActivated")) {
-					form.setWindowActivated(module.<Utils.JsModule> cast().getHandler(aTag.getAttribute("windowActivated")));
-				}
-				if (aTag.hasAttribute("windowDeactivated")) {
-					form.setWindowDeactivated(module.<Utils.JsModule> cast().getHandler(aTag.getAttribute("windowDeactivated")));
-				}
-			}
-		});
 		return form;
 	}
 
@@ -223,16 +193,15 @@ public class GxtControlsFactory {
 			return null;
 	}
 
-	private Component parseWidget(Element aTag) throws Exception {
+	private UIObject parseWidget(Element aTag) throws Exception {
 		String nodeName = aTag.getNodeName();
 		assert (nodeName.equalsIgnoreCase(LAYOUT_TAG) && isRoot) || nodeName.equalsIgnoreCase(WIDGET_TAG) || nodeName.equalsIgnoreCase(NONVISUAL_TAG) : "Form structure is broken. Form must be constructed of widget and nonvisual tags";
 
-		Component component = createComponent(aTag);
+		UIObject component = createComponent(aTag);
 		if (component != null)// There are might be toggle groups, that are non
 		                      // visuals and so, not components
 		{
-			components.put((String) component.getData(PlatypusWindow.PID_DATA_KEY), component);
-
+			components.put(component.getElement().getId(), component);
 			String parentName = aTag.getAttribute(PARENT_ATTRIBUTE);
 			if (!isRoot && parentName != null && !parentName.isEmpty()) {
 				resolveParent(component, parentName, pickConstraintsTag(aTag));
@@ -242,18 +211,23 @@ public class GxtControlsFactory {
 			return null;
 	}
 
-	protected Component createComponent(Element aTag) throws Exception {
+	protected UIObject createComponent(Element aTag) throws Exception {
 		Element layoutTag = pickLayoutTag(aTag);
 		String designInfoTypeName = aTag.getAttribute(TYPE_ATTRIBUTE);
 		assert isRoot || designInfoTypeName != null : "Form structure is broken. Attribute '" + TYPE_ATTRIBUTE + "' must present for every widget.";
-		Component component = null;
+		UIObject component = null;
 		if (layoutTag != null) {
 			String layoutTypeName = layoutTag.getAttribute(TYPE_ATTRIBUTE);
 			assert layoutTypeName != null : "Form structure is broken. Attribute '" + TYPE_ATTRIBUTE + "' must present for every widget.";
 			if (layoutTypeName.equalsIgnoreCase("BorderLayoutDesignInfo")) {
 				component = createBorderLayoutContainer(aTag, layoutTag);
 			} else if (layoutTypeName.equalsIgnoreCase("BoxLayoutDesignInfo")) {
-				component = createBoxLayoutContainer(aTag, layoutTag);
+				int axis = Utils.getIntegerAttribute(layoutTag, "axis", 0);
+				if (axis == 1 || axis == 3) {
+					component = createVBox(aTag, layoutTag);
+				} else {
+					component = createHBox(aTag, layoutTag);
+				}
 			} else if (layoutTypeName.equalsIgnoreCase("CardLayoutDesignInfo")) {
 				component = createCardLayoutContainer(aTag, layoutTag);
 			} else if (layoutTypeName.equalsIgnoreCase("FlowLayoutDesignInfo")) {
@@ -263,7 +237,7 @@ public class GxtControlsFactory {
 			} else if (layoutTypeName.equalsIgnoreCase("AbsoluteLayoutDesignInfo")) {
 				component = createAbsoluteLayoutContainer(aTag);
 			} else if (layoutTypeName.equalsIgnoreCase("MarginLayoutDesignInfo")) {
-				component = createMarginLayoutContainer(aTag);
+				component = createAnchorsLayoutContainer(aTag);
 			} else
 				component = createFlowLayoutContainer(aTag, layoutTag);
 		} else {
@@ -321,7 +295,7 @@ public class GxtControlsFactory {
 			} else if (designInfoTypeName.equalsIgnoreCase("DesktopDesignInfo")) {
 				component = createDesktopContainer(aTag);
 			} else if (designInfoTypeName.equalsIgnoreCase("LayersDesignInfo")) {
-				component = createLayersLayoutContainer(aTag);
+				component = createDesktopContainer(aTag);
 			} else
 				component = createStubLabel(aTag, "Type '" + designInfoTypeName + "' is unsupported.");
 		}
@@ -329,130 +303,14 @@ public class GxtControlsFactory {
 	}
 
 	protected Widget createStubLabel(Element aTag, String aMessage) throws Exception {
-		PlatypusLabel component = new PlatypusLabel(aMessage);
-		processEvents(component, aTag);
+		PlatypusLabel component = new PlatypusLabel(aMessage, false);
 		Publisher.publish(component);
-		PublishedComponent publishedComp = (PublishedComponent) component.getData(PlatypusWindow.PUBLISHED_DATA_KEY);
+		PublishedComponent publishedComp = component.getPublished().cast();
 		processGeneralProperties(component, aTag, false, publishedComp);
 		return component;
 	}
 
-	private void setIconAndAlign(final CellButtonBase<?> btn, Element aTag, final PublishedComponent aPublished) throws Exception {
-		btn.setIconAlign(IconAlign.LEFT);// default value
-		int horizontalTextPosition = 11;// TRAILING
-		if (aTag.hasAttribute("horizontalTextPosition")) {
-			horizontalTextPosition = Utils.getIntegerAttribute(aTag, "horizontalTextPosition", 11);// TRAILING
-		}
-		int verticalTextPosition = 0;// CENTER
-		if (aTag.hasAttribute("verticalTextPosition")) {
-			verticalTextPosition = Utils.getIntegerAttribute(aTag, "verticalTextPosition", 0);// CENTER
-		}
-		switch (horizontalTextPosition) {
-		case 4:// text RIGHT, so icon is to the LEFT
-			btn.setIconAlign(IconAlign.LEFT);
-			break;
-		case 2:// LEFT
-			btn.setIconAlign(IconAlign.RIGHT);
-			break;
-		case 0:// CENTER
-			switch (verticalTextPosition) {
-			case 0:// CENTER
-				btn.setIconAlign(IconAlign.TOP);
-				break;
-			case 1:// TOP
-				btn.setIconAlign(IconAlign.BOTTOM);
-				break;
-			case 3:// BOTTOM
-				btn.setIconAlign(IconAlign.TOP);
-				break;
-			default:
-				btn.setIconAlign(IconAlign.TOP);
-				break;
-			}
-			break;
-		case 10:// LEADING
-			btn.setIconAlign(IconAlign.RIGHT);
-			break;
-		case 11:// TRAILING
-			btn.setIconAlign(IconAlign.LEFT);
-			break;
-		default:
-			btn.setIconAlign(IconAlign.LEFT);
-			break;
-		}
-		
-		btn.setScale(ButtonScale.SMALL);
-		if (aTag.hasAttribute("icon")) {
-			btn.setIcon(AppClient.getInstance().getImageResource(aTag.getAttribute("icon")).addCallback(new ImageResourceCallback() {
-				@Override
-				public void run(ImageResource aResource) {
-					btn.setIcon(aResource);
-					Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-						@Override
-						public void execute() {
-							if (btn.isAttached()) {
-								if (btn.getParent() instanceof ResizeContainer) {// fix for sencha ResizeContainer.onResize bug
-									ResizeContainer c = (ResizeContainer)btn.getParent();
-									Size s = XElement.as(c.getElement()).getSize(false);
-									c.clearSizeCache();
-									c.setPixelSize(s.getWidth(), s.getHeight());
-								} else if (btn.getParent() instanceof RequiresResize) {
-									((RequiresResize) btn.getParent()).onResize();
-								}
-							}
-						}
-					});
-				}
-
-			}));
-		}
-	}
-
-	private Component createButton(Element aTag) throws Exception {
-		final PlatypusButton component = new PlatypusButton();
-		processEvents(component, aTag);
-		PublishedComponent publishedComp = Publisher.publish(component);
-		if (aTag.hasAttribute("text"))
-			component.setText(aTag.getAttribute("text"));
-		if (aTag.hasAttribute("iconTextGap"))
-			component.setIconTextGap(Utils.getIntegerAttribute(aTag, "iconTextGap", 4));
-		processGeneralProperties(component, aTag, publishedComp);
-		setIconAndAlign(component, aTag, publishedComp);
-		
-		return component;
-	}
-
-	private Component createDropDownButton(Element aTag) throws Exception {
-		final SplitButton component = new PlatypusSplitButton();
-		processEvents(component, aTag);
-		PublishedComponent publishedComp = Publisher.publish(component);
-		if (aTag.hasAttribute("text"))
-			component.setText(aTag.getAttribute("text"));
-		if (aTag.hasAttribute("dropDownMenu")) {
-			final String dropDownMenu = aTag.getAttribute("dropDownMenu");
-			postponedTasks.add(new Runnable() {
-
-				@Override
-				public void run() {
-					Component comp = components.get(dropDownMenu);
-					if (comp instanceof Menu)
-						component.setMenu((Menu) comp);
-					else
-						Logger.getLogger(GxtControlsFactory.class.getName()).log(Level.WARNING,
-						        "Some other widget than Menu is assigned as dropDownMenu in component: " + component.getData(PlatypusWindow.PID_DATA_KEY));
-				}
-
-			});
-		}
-		processGeneralProperties(component, aTag, publishedComp);
-		setIconAndAlign(component, aTag, publishedComp);
-		return component;
-	}
-
-	private Component createLabel(Element aTag) throws Exception {
-		final PlatypusLabel component = new PlatypusLabel();
-		processEvents(component, aTag);
-		Publisher.publish(component);
+	private void setIconAndAlign(final ImageParagraph component, Element aTag) throws Exception {
 		if (aTag.hasAttribute("text"))
 			component.setText(aTag.getAttribute("text"));
 		if (aTag.hasAttribute("iconTextGap"))
@@ -465,18 +323,8 @@ public class GxtControlsFactory {
 			component.setImage(AppClient.getInstance().getImageResource(aTag.getAttribute("icon")).addCallback(new ImageResourceCallback() {
 
 				@Override
-				public void run(ImageResource aResource) {
+				public void run(PlatypusImageResource aResource) {
 					component.setImage(aResource);
-					if (component.isAttached()) {
-						if (component.getParent() instanceof ResizeContainer) {// fix for sencha ResizeContainer.onResize bug
-							ResizeContainer c = (ResizeContainer)component.getParent();
-							Size s = XElement.as(c.getElement()).getSize(false);
-							c.clearSizeCache();
-							c.setPixelSize(s.getWidth(), s.getHeight());
-						} else if (component.getParent() instanceof RequiresResize) {
-							((RequiresResize) component.getParent()).onResize();
-						}
-					}
 				}
 
 			}));
@@ -485,26 +333,61 @@ public class GxtControlsFactory {
 			component.setVerticalAlignment(Utils.getIntegerAttribute(aTag, "verticalAlignment", 0));
 		if (aTag.hasAttribute("horizontalAlignment"))
 			component.setHorizontalAlignment(Utils.getIntegerAttribute(aTag, "horizontalAlignment", 0));
-		PublishedComponent publishedComp = (PublishedComponent) component.getData(PlatypusWindow.PUBLISHED_DATA_KEY);
+	}
+
+	private PlatypusButton createButton(Element aTag) throws Exception {
+		final PlatypusButton component = new PlatypusButton();
+		PublishedComponent publishedComp = Publisher.publish(component);
+		processGeneralProperties(component, aTag, publishedComp);
+		setIconAndAlign(component, aTag);
+		return component;
+	}
+
+	private PlatypusSplitButton createDropDownButton(Element aTag) throws Exception {
+		final PlatypusSplitButton component = new PlatypusSplitButton();
+		PublishedComponent publishedComp = Publisher.publish(component);
+		if (aTag.hasAttribute("text"))
+			component.setText(aTag.getAttribute("text"));
+		if (aTag.hasAttribute("dropDownMenu")) {
+			final String dropDownMenu = aTag.getAttribute("dropDownMenu");
+			postponedTasks.add(new Runnable() {
+
+				@Override
+				public void run() {
+					UIObject comp = components.get(dropDownMenu);
+					if (comp instanceof PlatypusPopupMenu)
+						component.setMenu((PlatypusPopupMenu) comp);
+					else
+						Logger.getLogger(WidgetsFactory.class.getName()).log(Level.WARNING,
+						        "Some other widget than Menu is assigned as dropDownMenu in component: " + component.getElement().getId());
+				}
+
+			});
+		}
+		processGeneralProperties(component, aTag, publishedComp);
+		setIconAndAlign(component.getContent(), aTag);
+		return component;
+	}
+
+	private PlatypusLabel createLabel(Element aTag) throws Exception {
+		final PlatypusLabel component = new PlatypusLabel();
+		Publisher.publish(component);
+		setIconAndAlign(component, aTag);
+		PublishedComponent publishedComp = component.getPublished().cast();
 		processGeneralProperties(component, aTag, false, publishedComp);
 		return component;
 	}
 
-	private void processCheckBoxProperties(PlatypusCheckBox aComponent, Element aTag) throws Exception {
+	private PlatypusRadioButton createRadio(Element aTag) throws Exception {
+		PlatypusRadioButton component = new PlatypusRadioButton();
+		Publisher.publish(component);
 		if (aTag.hasAttribute("text"))
-			aComponent.setBoxLabel(aTag.getAttribute("text"));
-		aComponent.setValue(Utils.getBooleanAttribute(aTag, "selected", false));
-		aComponent.setReadOnly(!Utils.getBooleanAttribute(aTag, "enabled", true));
-	}
-
-	private Component createRadio(Element aTag) throws Exception {
-		PlatypusCheckBox component = new PlatypusCheckBox(new RadioCell());
-		processEvents(component, aTag);
-		Publisher.publishRadio(component);
-		processCheckBoxProperties(component, aTag);
+			component.setText(aTag.getAttribute("text"));
+		component.setValue(Utils.getBooleanAttribute(aTag, "selected", false));
+		component.setEnabled(Utils.getBooleanAttribute(aTag, "enabled", true));
 		if (aTag.hasAttribute("buttonGroup"))
 			addToToggleGroup(component, aTag.getAttribute("buttonGroup"));
-		PublishedComponent publishedComp = (PublishedComponent) component.getData(PlatypusWindow.PUBLISHED_DATA_KEY);
+		PublishedComponent publishedComp = component.getPublished().cast();
 		processGeneralProperties(component, aTag, false, publishedComp);
 		return component;
 	}
@@ -514,10 +397,10 @@ public class GxtControlsFactory {
 
 			@Override
 			public void run() {
-				ToggleGroup group = toggleGroups.get(groupName);
+				ButtonGroup group = toggleGroups.get(groupName);
 				if (group != null) {
-					if (group instanceof ButtonGroup && item instanceof Component)
-						((ButtonGroup) group).add((Component) item);
+					if (group instanceof ButtonGroup)
+						((ButtonGroup) group).add(item);
 					else
 						group.add(item);
 				}
@@ -526,39 +409,37 @@ public class GxtControlsFactory {
 		});
 	}
 
-	private Component createCheckBox(Element aTag) throws Exception {
+	private PlatypusCheckBox createCheckBox(Element aTag) throws Exception {
 		PlatypusCheckBox component = new PlatypusCheckBox();
-		processEvents(component, aTag);
 		Publisher.publish(component);
-		processCheckBoxProperties(component, aTag);
-		PublishedComponent publishedComp = (PublishedComponent) component.getData(PlatypusWindow.PUBLISHED_DATA_KEY);
+		if (aTag.hasAttribute("text"))
+			component.setText(aTag.getAttribute("text"));
+		component.setValue(Utils.getBooleanAttribute(aTag, "selected", false));
+		component.setEnabled(Utils.getBooleanAttribute(aTag, "enabled", true));
+		PublishedComponent publishedComp = component.getPublished().cast();
 		processGeneralProperties(component, aTag, false, publishedComp);
 		return component;
 	}
 
-	private Component createSlider(Element aTag) throws Exception {
-		PlatypusSlider component = new PlatypusSlider("1".equals(aTag.getAttribute("orientation")));
-		processEvents(component, aTag);
+	private PlatypusSlider createSlider(Element aTag) throws Exception {
+		PlatypusSlider component = new PlatypusSlider();
 		Publisher.publish(component);
-		component.setMaxValue(Utils.getIntegerAttribute(aTag, "maximum", component.getMaxValue()));
-		component.setMinValue(Utils.getIntegerAttribute(aTag, "minimum", component.getMinValue()));
-		component.setValue(Utils.getIntegerAttribute(aTag, "value", component.getMinValue()));
-		PublishedComponent publishedComp = (PublishedComponent) component.getData(PlatypusWindow.PUBLISHED_DATA_KEY);
+		component.setMaxValue(Utils.getIntegerAttribute(aTag, "maximum", -Integer.MAX_VALUE));
+		component.setMinValue(Utils.getIntegerAttribute(aTag, "minimum", Integer.MAX_VALUE));
+		component.setValue((double) Utils.getIntegerAttribute(aTag, "value", (int) component.getMinValue()));
+		PublishedComponent publishedComp = component.getPublished().cast();
 		processGeneralProperties(component, aTag, publishedComp);
 		return component;
 	}
 
-	private Component createToggleButton(Element aTag) throws Exception {
+	private PlatypusToggleButton createToggleButton(Element aTag) throws Exception {
 		PlatypusToggleButton component = new PlatypusToggleButton();
-		processEvents(component, aTag);
 		PublishedComponent publishedComp = Publisher.publish(component);
-		if (aTag.hasAttribute("text"))
-			component.setText(aTag.getAttribute("text"));
 		if (aTag.hasAttribute("buttonGroup"))
 			addToToggleGroup(component, aTag.getAttribute("buttonGroup"));
 		component.setValue(Utils.getBooleanAttribute(aTag, "selected", false));
 		processGeneralProperties(component, aTag, publishedComp);
-		setIconAndAlign(component, aTag, publishedComp);
+		setIconAndAlign(component, aTag);
 		return component;
 	}
 
@@ -570,17 +451,12 @@ public class GxtControlsFactory {
 		PlatypusWindow.inject(module, widgetName, buttonGroup.getPublished());
 	}
 
-	private void setText(ValueBaseField<?> aComponent, Element aTag) throws Exception {
-		if (aTag.hasAttribute("text"))
-			aComponent.setText(aTag.getAttribute("text"));
-		aComponent.setReadOnly(!(Utils.getBooleanAttribute(aTag, "editable", true)));
-	}
-
-	private Component createTextField(Element aTag) throws Exception {
+	private PlatypusTextField createTextField(Element aTag) throws Exception {
 		PlatypusTextField component = new PlatypusTextField();
-		processEvents(component, aTag);
 		Publisher.publish(component);
-		setText(component, aTag);
+		if (aTag.hasAttribute("text"))
+			component.setValue(aTag.getAttribute("text"));
+		component.setReadOnly(!Utils.getBooleanAttribute(aTag, "editable", true));
 		if (aTag.hasAttribute("emptyText"))
 			component.setEmptyText(aTag.getAttribute("emptyText"));
 		// *********************************************************************
@@ -594,22 +470,24 @@ public class GxtControlsFactory {
 		if (aTag.hasAttribute("caretPosition"))
 			component.setCursorPos(Utils.getIntegerAttribute(aTag, "caretPosition", component.getText().length()));
 		// *********************************************************************
-		PublishedComponent publishedComp = (PublishedComponent) component.getData(PlatypusWindow.PUBLISHED_DATA_KEY);
+		PublishedComponent publishedComp = component.getPublished().cast();
 		processGeneralProperties(component, aTag, publishedComp);
 		return component;
 	}
 
-	private Component createFormattedTextField(Element aTag) throws Exception {
+	private PlatypusFormattedTextField createFormattedTextField(Element aTag) throws Exception {
 		String formatPattern = aTag.getAttribute("format");
 		int formatType = Utils.getIntegerAttribute(aTag, "valueType", ObjectFormat.MASK);
 
-		PlatypusFormattedTextField component = new PlatypusFormattedTextField(new ObjectFormat(formatType, formatPattern));
-		processEvents(component, aTag);
+		PlatypusFormattedTextField component = new PlatypusFormattedTextField();
+		component.setFormatType(formatType, formatPattern);
 		if (aTag.hasAttribute("emptyText"))
 			component.setEmptyText(aTag.getAttribute("emptyText"));
-		
+
 		Publisher.publish(component);
-		setText(component, aTag);
+		if (aTag.hasAttribute("text"))
+			component.setText(aTag.getAttribute("text"));
+		component.setReadOnly(!(Utils.getBooleanAttribute(aTag, "editable", true)));
 		// *********************************************************************
 		// !!!??? This will only work when the widget is attached to the
 		// document and not hidden.
@@ -621,190 +499,182 @@ public class GxtControlsFactory {
 		if (aTag.hasAttribute("caretPosition"))
 			component.setCursorPos(Utils.getIntegerAttribute(aTag, "caretPosition", component.getText().length()));
 		// *********************************************************************
-		PublishedComponent publishedComp = (PublishedComponent) component.getData(PlatypusWindow.PUBLISHED_DATA_KEY);
+		PublishedComponent publishedComp = component.getPublished().cast();
 		processGeneralProperties(component, aTag, publishedComp);
 		return component;
 	}
 
-	private Component createTextArea(Element aTag) throws Exception {
+	private PlatypusTextArea createTextArea(Element aTag) throws Exception {
 		PlatypusTextArea component = new PlatypusTextArea();
-		processEvents(component, aTag);
-		Publisher.publish(component);
-		if (aTag.hasAttribute("emptyText"))
-			component.setEmptyText(aTag.getAttribute("emptyText"));
-		setText(component, aTag);
-		PublishedComponent publishedComp = (PublishedComponent) component.getData(PlatypusWindow.PUBLISHED_DATA_KEY);
-		processGeneralProperties(component, aTag, publishedComp);
-		return component;
-	}
-
-	private Component createHtmlArea(Element aTag) throws Exception {
-		PlatypusHtmlEditor component = new PlatypusHtmlEditor();
-		processEvents(component, aTag);
 		Publisher.publish(component);
 		if (aTag.hasAttribute("emptyText"))
 			component.setEmptyText(aTag.getAttribute("emptyText"));
 		if (aTag.hasAttribute("text"))
-			component.setValue(aTag.getAttribute("text"));
-		// component.setReadOnly(!(Utils.getBooleanAttribute(aTag, "editable",
-		// true)));
-		PublishedComponent publishedComp = (PublishedComponent) component.getData(PlatypusWindow.PUBLISHED_DATA_KEY);
+			component.setText(aTag.getAttribute("text"));
+		component.setReadOnly(!(Utils.getBooleanAttribute(aTag, "editable", true)));
+		PublishedComponent publishedComp = component.getPublished().cast();
 		processGeneralProperties(component, aTag, publishedComp);
 		return component;
 	}
 
-	private Component createProgressBar(Element aTag) throws Exception {
+	private PlatypusHtmlEditor createHtmlArea(Element aTag) throws Exception {
+		PlatypusHtmlEditor component = new PlatypusHtmlEditor();
+		Publisher.publish(component);
+		if (aTag.hasAttribute("emptyText"))
+			component.setEmptyText(aTag.getAttribute("emptyText"));
+		if (aTag.hasAttribute("text"))
+			component.setText(aTag.getAttribute("text"));
+		//component.setReadOnly(!Utils.getBooleanAttribute(aTag, "editable", true));
+		PublishedComponent publishedComp = component.getPublished().cast();
+		processGeneralProperties(component, aTag, publishedComp);
+		return component;
+	}
+
+	private PlatypusProgressBar createProgressBar(Element aTag) throws Exception {
 		PlatypusProgressBar component = new PlatypusProgressBar();
-		processEvents(component, aTag);
 		Publisher.publish(component);
 		int minimum = Utils.getIntegerAttribute(aTag, "minimum", 0);
 		int maximum = Utils.getIntegerAttribute(aTag, "maximum", 100);
-		component.setRange(minimum, maximum);
+		component.setMinProgress(minimum);
+		component.setMaxProgress(maximum);
 		int value = Utils.getIntegerAttribute(aTag, "value", minimum);
 		String string = aTag.hasAttribute("string") ? aTag.getAttribute("string") : "";
-		component.setValue(value);
-		component.updateProgress(value, string);
-		PublishedComponent publishedComp = (PublishedComponent) component.getData(PlatypusWindow.PUBLISHED_DATA_KEY);
+		component.setValue((double) value);
+		if (string != null)
+			component.setText(string);
+		PublishedComponent publishedComp = component.getPublished().cast();
 		processGeneralProperties(component, aTag, false, publishedComp);
 		return component;
 	}
 
-	private Component createPasswordField(Element aTag) throws Exception {
+	private PlatypusPasswordField createPasswordField(Element aTag) throws Exception {
 		PlatypusPasswordField component = new PlatypusPasswordField();
-		processEvents(component, aTag);
 		Publisher.publish(component);
-		setText(component, aTag);
+		if (aTag.hasAttribute("text"))
+			component.setText(aTag.getAttribute("text"));
+		component.setReadOnly(!(Utils.getBooleanAttribute(aTag, "editable", true)));
 		if (aTag.hasAttribute("emptyText"))
 			component.setEmptyText(aTag.getAttribute("emptyText"));
-		PublishedComponent publishedComp = (PublishedComponent) component.getData(PlatypusWindow.PUBLISHED_DATA_KEY);
+		PublishedComponent publishedComp = component.getPublished().cast();
 		processGeneralProperties(component, aTag, publishedComp);
 		return component;
 	}
 
-	private Component createSeparatorMenuItem(Element aTag) throws Exception {
-		SeparatorMenuItem component = new SeparatorMenuItem();
-		processEvents(component, aTag);
+	private PlatypusMenuItemSeparator createSeparatorMenuItem(Element aTag) throws Exception {
+		PlatypusMenuItemSeparator component = new PlatypusMenuItemSeparator();
 		Publisher.publish(component);
-		PublishedComponent publishedComp = (PublishedComponent) component.getData(PlatypusWindow.PUBLISHED_DATA_KEY);
+		PublishedComponent publishedComp = component.getPublished().cast();
 		processGeneralProperties(component, aTag, false, publishedComp);
 		return component;
 	}
 
-	private Component createMenuBar(Element aTag) throws Exception {
-		MenuBar component = new PlatypusMenuBar();
-		processEvents(component, aTag);
+	private PlatypusMenuBar createMenuBar(Element aTag) throws Exception {
+		PlatypusMenuBar component = new PlatypusMenuBar();
 		Publisher.publish(component);
-		PublishedComponent publishedComp = (PublishedComponent) component.getData(PlatypusWindow.PUBLISHED_DATA_KEY);
+		PublishedComponent publishedComp = component.getPublished().cast();
 		processGeneralProperties(component, aTag, publishedComp);
 		return component;
 	}
 
-	private Component createPlainMenu(Element aTag) throws Exception {
-		return createMenu(aTag, true);
-	}
-
-	private PlatypusMenu createPopupMenu(Element aTag) throws Exception {
-		PlatypusMenu menuComp = createMenu(aTag, false);
-		return menuComp;
-	}
-
-	private PlatypusMenu createMenu(Element aTag, boolean isPlain) throws Exception {
+	private PlatypusMenu createPlainMenu(Element aTag) throws Exception {
 		PlatypusMenu component = new PlatypusMenu();
-		processEvents(component, aTag);
-		if (isPlain)
-			Publisher.publish(component);
-		else
-			Publisher.publishPopup(component);
+		Publisher.publish(component);
 		if (aTag.hasAttribute("text")) {
 			component.setText(aTag.getAttribute("text"));
 		}
-		PublishedComponent publishedComp = (PublishedComponent) component.getData(PlatypusWindow.PUBLISHED_DATA_KEY);
+		PublishedComponent publishedComp = component.getPublished().cast();
 		processGeneralProperties(component, aTag, publishedComp);
-		PlatypusWindow.inject(module, (String) component.getData(PlatypusWindow.PID_DATA_KEY), publishedComp);
+		PlatypusWindow.inject(module, component.getElement().getId(), publishedComp);
 		return component;
 	}
 
-	private Component createMenuItem(Element aTag) throws Exception {
-		final MenuItem component = new MenuItem();
-		processEvents(component, aTag);
+	private PlatypusPopupMenu createPopupMenu(Element aTag) throws Exception {
+		PlatypusPopupMenu component = new PlatypusPopupMenu();
+		Publisher.publishPopup(component);
+		if (aTag.hasAttribute("text")) {
+			component.setText(aTag.getAttribute("text"));
+		}
+		PublishedComponent publishedComp = component.getPublished().cast();
+		processGeneralProperties(component, aTag, publishedComp);
+		PlatypusWindow.inject(module, component.getElement().getId(), publishedComp);
+		return component;
+	}
+
+	private PlatypusMenuItemImageText createMenuItem(Element aTag) throws Exception {
+		final PlatypusMenuItemImageText component = new PlatypusMenuItemImageText();
 		Publisher.publish(component);
 		if (aTag.hasAttribute("text"))
 			component.setText(aTag.getAttribute("text"));
 		if (aTag.hasAttribute("icon")) {
 			component.setIcon(AppClient.getInstance().getImageResource(aTag.getAttribute("icon")).addCallback(new ImageResourceCallback() {
 				@Override
-				public void run(ImageResource aResource) {
+				public void run(PlatypusImageResource aResource) {
 					component.setIcon(aResource);
 				}
 			}));
 		}
-		PublishedComponent publishedComp = (PublishedComponent) component.getData(PlatypusWindow.PUBLISHED_DATA_KEY);
+		PublishedComponent publishedComp = component.getPublished().cast();
 		processGeneralProperties(component, aTag, false, publishedComp);
-		PlatypusWindow.inject(module, (String) component.getData(PlatypusWindow.PID_DATA_KEY), publishedComp);
+		PlatypusWindow.inject(module, component.getElement().getId(), publishedComp);
 		return component;
 	}
 
-	private Component createCheckMenuItem(Element aTag) throws Exception {
-		return createCheckRadioMenuItem(aTag, true);
-	}
-
-	private Component createRadioMenuItem(Element aTag) throws Exception {
-		return createCheckRadioMenuItem(aTag, false);
-	}
-
-	private Component createCheckRadioMenuItem(Element aTag, boolean aCheck) throws Exception {
-		PlatypusCheckRadioMenuItem component = new PlatypusCheckRadioMenuItem();
-		processEvents(component, aTag);
-		if (aCheck)
-			Publisher.publish(component);
-		else
-			Publisher.publishRadio(component);
+	private PlatypusMenuItemCheckBox createCheckMenuItem(Element aTag) throws Exception {
+		PlatypusMenuItemCheckBox component = new PlatypusMenuItemCheckBox();
+		Publisher.publish(component);
 		if (aTag.hasAttribute("text"))
 			component.setText(aTag.getAttribute("text"));
-		component.setChecked(Utils.getBooleanAttribute(aTag, "selected", component.isChecked()));
+		component.setValue(Utils.getBooleanAttribute(aTag, "selected", false));
 		if (aTag.hasAttribute("buttonGroup"))
 			addToToggleGroup(component, aTag.getAttribute("buttonGroup"));
-		PublishedComponent publishedComp = (PublishedComponent) component.getData(PlatypusWindow.PUBLISHED_DATA_KEY);
+		PublishedComponent publishedComp = component.getPublished().cast();
 		processGeneralProperties(component, aTag, publishedComp);
-		PlatypusWindow.inject(module, (String) component.getData(PlatypusWindow.PID_DATA_KEY), publishedComp);
+		PlatypusWindow.inject(module, component.getElement().getId(), publishedComp);
 		return component;
 	}
 
-	protected Component processGeneralProperties(final Component aComponent, Element aTag, PublishedComponent aPublished) throws Exception {
-		return processGeneralProperties(aComponent, aTag, true, aPublished);
+	private PlatypusMenuItemRadioButton createRadioMenuItem(Element aTag) throws Exception {
+		PlatypusMenuItemRadioButton component = new PlatypusMenuItemRadioButton();
+		Publisher.publish(component);
+		if (aTag.hasAttribute("text"))
+			component.setText(aTag.getAttribute("text"));
+		component.setValue(Utils.getBooleanAttribute(aTag, "selected", false));
+		if (aTag.hasAttribute("buttonGroup"))
+			addToToggleGroup(component, aTag.getAttribute("buttonGroup"));
+		PublishedComponent publishedComp = component.getPublished().cast();
+		processGeneralProperties(component, aTag, publishedComp);
+		PlatypusWindow.inject(module, component.getElement().getId(), publishedComp);
+		return component;
+	}
+
+	protected void processGeneralProperties(final UIObject aComponent, Element aTag, PublishedComponent aPublished) throws Exception {
+		processGeneralProperties(aComponent, aTag, true, aPublished);
 	}
 
 	protected static int idCounter = 0;
 
-	protected Component processGeneralProperties(final Component aComponent, Element aTag, boolean aDefaultOpaque, PublishedComponent aPublished) throws Exception {
+	protected void processGeneralProperties(final UIObject aComponent, Element aTag, boolean aDefaultOpaque, PublishedComponent aPublished) throws Exception {
 		final String widgetName = aTag.getAttribute(NAME_ATTRIBUTE);
-		if (widgetName != null)
-			aComponent.setData(PlatypusWindow.PID_DATA_KEY, widgetName);
-
 		if (widgetName != null && !widgetName.isEmpty())
-			aComponent.setId(widgetName);
+			aComponent.getElement().setId(widgetName);
 		else
-			aComponent.setId("pw-" + (++idCounter));
+			aComponent.getElement().setId("pw-" + (++idCounter));
 
 		boolean visible = Utils.getBooleanAttribute(aTag, "visible", true);
 		if (!visible)
 			aComponent.setVisible(visible);
 		boolean enabled = Utils.getBooleanAttribute(aTag, "enabled", true);
-		if (!enabled)
-			aComponent.setEnabled(enabled);
+		if (!enabled && aComponent instanceof HasEnabled)
+			((HasEnabled) aComponent).setEnabled(enabled);
 
 		if (aTag.hasAttribute("toolTipText")) {
 			String toolTipText = aTag.getAttribute("toolTipText");
 			aComponent.setTitle(toolTipText);
-			// aComponent.setToolTip(toolTipText);
 		}
 
-		String prefWidth = aTag.getAttribute("prefWidth");
-		String prefHeight = aTag.getAttribute("prefHeight");
-
-		if (prefWidth != null && prefHeight != null) {
-			Size size = new Size(Util.parseInt(prefWidth, 0), Util.parseInt(prefHeight, 0));
-			componentsPreferredSize.put(widgetName, size);
+		if (aTag.hasAttribute("prefWidth") && aTag.hasAttribute("prefHeight")) {
+			Point size = new Point(Utils.getIntegerAttribute(aTag, "prefWidth", 0), Utils.getIntegerAttribute(aTag, "prefHeight", 0));
+			componentsPreferredSize.put(aComponent, size);
 		}
 		if (aTag.hasAttribute("componentPopupMenu")) {
 			final String componentPopupMenu = aTag.getAttribute("componentPopupMenu");
@@ -812,12 +682,15 @@ public class GxtControlsFactory {
 
 				@Override
 				public void run() {
-					Component comp = components.get(componentPopupMenu);
-					if (comp instanceof Menu) {
-						aComponent.setContextMenu((Menu) comp);
-						aComponent.setData(ControlsUtils.CONTEXT_MENU, comp);
+					if (aComponent instanceof HasComponentPopupMenu) {
+						UIObject menuComp = components.get(componentPopupMenu);
+						if (menuComp instanceof PlatypusPopupMenu) {
+							((HasComponentPopupMenu) aComponent).setPlatypusPopupMenu((PlatypusPopupMenu) menuComp);
+						} else
+							Logger.getLogger(WidgetsFactory.class.getName()).log(Level.WARNING, "Some other widget than Menu is assigned as componentPopupMenu in component: " + widgetName);
 					} else
-						Logger.getLogger(GxtControlsFactory.class.getName()).log(Level.WARNING, "Some other widget than Menu is assigned as componentPopupMenu in component: " + widgetName);
+						Logger.getLogger(WidgetsFactory.class.getName()).log(Level.WARNING,
+						        "Widget of type: " + widgetName + " with assigned componentPopupMenu doesn't support HasComponentPopupMenu");
 				}
 
 			});
@@ -859,7 +732,6 @@ public class GxtControlsFactory {
 		if (aTag.hasAttribute("cursor")) {
 			aPublished.setCursor(convertCursor(Utils.getIntegerAttribute(aTag, "cursor", 0)));
 		}
-		return aComponent;
 	}
 
 	protected static String convertCursor(int aValue) {
@@ -901,104 +773,19 @@ public class GxtControlsFactory {
 		}
 	}
 
-	protected void processEvents(Component aComponent, final Element aTag) throws Exception {
-		// module is only default value of "this"
-		final EventsExecutor executor = EventsExecutor.createExecutor(aComponent, module);
-
-		handlersResolvers.add(new Runnable() {
-			@Override
-			public void run() {
-				if (aTag.hasAttribute("actionPerformed")) {
-					executor.setActionPerformed(module.<Utils.JsModule> cast().getHandler(aTag.getAttribute("actionPerformed")));
-				}
-				if (aTag.hasAttribute("mouseEntered")) {
-					executor.setMouseEntered(module.<Utils.JsModule> cast().getHandler(aTag.getAttribute("mouseEntered")));
-				}
-				if (aTag.hasAttribute("mouseExited")) {
-					executor.setMouseExited(module.<Utils.JsModule> cast().getHandler(aTag.getAttribute("mouseExited")));
-				}
-				if (aTag.hasAttribute("mousePressed")) {
-					executor.setMousePressed(module.<Utils.JsModule> cast().getHandler(aTag.getAttribute("mousePressed")));
-				}
-				if (aTag.hasAttribute("mouseReleased")) {
-					executor.setMouseReleased(module.<Utils.JsModule> cast().getHandler(aTag.getAttribute("mouseReleased")));
-				}
-				if (aTag.hasAttribute("mouseWheelMoved")) {
-					executor.setMouseWheelMoved(module.<Utils.JsModule> cast().getHandler(aTag.getAttribute("mouseWheelMoved")));
-				}
-				if (aTag.hasAttribute("mouseMoved")) {
-					executor.setMouseMoved(module.<Utils.JsModule> cast().getHandler(aTag.getAttribute("mouseMoved")));
-				}
-
-				if (aTag.hasAttribute("mouseClicked")) {
-					executor.setMouseClicked(module.<Utils.JsModule> cast().getHandler(aTag.getAttribute("mouseClicked")));
-				}
-				if (aTag.hasAttribute("mouseDragged")) {
-					executor.setMouseDragged(module.<Utils.JsModule> cast().getHandler(aTag.getAttribute("mouseDragged")));
-				}
-
-				if (aTag.hasAttribute("keyTyped")) {
-					executor.setKeyTyped(module.<Utils.JsModule> cast().getHandler(aTag.getAttribute("keyTyped")));
-				}
-				if (aTag.hasAttribute("keyPressed")) {
-					executor.setKeyPressed(module.<Utils.JsModule> cast().getHandler(aTag.getAttribute("keyPressed")));
-				}
-				if (aTag.hasAttribute("keyReleased")) {
-					executor.setKeyReleased(module.<Utils.JsModule> cast().getHandler(aTag.getAttribute("keyReleased")));
-				}
-				if (aTag.hasAttribute("focusGained")) {
-					executor.setFocusGained(module.<Utils.JsModule> cast().getHandler(aTag.getAttribute("focusGained")));
-				}
-				if (aTag.hasAttribute("focusLost")) {
-					executor.setFocusLost(module.<Utils.JsModule> cast().getHandler(aTag.getAttribute("focusLost")));
-				}
-				if (aTag.hasAttribute("componentShown")) {
-					executor.setComponentShown(module.<Utils.JsModule> cast().getHandler(aTag.getAttribute("componentShown")));
-				}
-				if (aTag.hasAttribute("componentResized")) {
-					executor.setComponentResized(module.<Utils.JsModule> cast().getHandler(aTag.getAttribute("componentResized")));
-				}
-				if (aTag.hasAttribute("componentHidden")) {
-					executor.setComponentHidden(module.<Utils.JsModule> cast().getHandler(aTag.getAttribute("componentHidden")));
-				}
-				if (aTag.hasAttribute("componentRemoved")) {
-					executor.setComponentRemoved(module.<Utils.JsModule> cast().getHandler(aTag.getAttribute("componentRemoved")));
-				}
-				if (aTag.hasAttribute("componentAdded")) {
-					executor.setComponentAdded(module.<Utils.JsModule> cast().getHandler(aTag.getAttribute("componentAdded")));
-				}
-
-				if (aTag.hasAttribute("componentMoved")) {
-					executor.setComponentMoved(module.<Utils.JsModule> cast().getHandler(aTag.getAttribute("componentMoved")));
-				}
-				// if (aTag.hasAttribute("itemStateChanged")) {
-				// executor.setItemStateChanged(Utils.lookupProperty(module,
-				// aTag.getAttribute("itemStateChanged")));
-				// }
-				if (aTag.hasAttribute("stateChanged")) {
-					executor.setStateChanged(module.<Utils.JsModule> cast().getHandler(aTag.getAttribute("stateChanged")));
-				}
-				// if (aTag.hasAttribute("propertyChange")) {
-				// executor.setPropertyChange(Utils.lookupProperty(module,
-				// aTag.getAttribute("propertyChange")));
-				// }
-			}
-		});
-	}
-
-	private void resolveParent(final Component aComponent, final String aParentName, final Element aConstraintsTag) throws Exception {
+	private void resolveParent(final UIObject aComponent, final String aParentName, final Element aConstraintsTag) throws Exception {
 		postponedTasks.add(new Runnable() {
 			@Override
 			public void run() {
 				try {
-					Component parentComp = components.get(aParentName);
+					Widget parentComp = (Widget) components.get(aParentName);
 					if (parentComp instanceof BorderPane) {
 						BorderPane container = (BorderPane) parentComp;
 						if (aConstraintsTag != null && aConstraintsTag.hasAttribute(TYPE_ATTRIBUTE)) {
 							String contraintsTypeName = aConstraintsTag.getAttribute(TYPE_ATTRIBUTE);
 							if ("BorderLayoutConstraintsDesignInfo".equalsIgnoreCase(contraintsTypeName)) {
-								Size size = componentsPreferredSize.get((String) aComponent.getData(PlatypusWindow.PID_DATA_KEY));
-								container.add(top(aComponent), parseBorderConstraints(aConstraintsTag), size);
+								Point size = componentsPreferredSize.get(aComponent);
+								container.add((Widget) aComponent, parseBorderConstraints(aConstraintsTag), size);
 							} else
 								throw new IllegalStateException(BORDER_CONSTRAINTS_TAG_NEEED + ", but not " + contraintsTypeName + " type.");
 						} else
@@ -1008,21 +795,23 @@ public class GxtControlsFactory {
 						if (aConstraintsTag != null && aConstraintsTag.hasAttribute(TYPE_ATTRIBUTE)) {
 							String contraintsTypeName = aConstraintsTag.getAttribute(TYPE_ATTRIBUTE);
 							if ("CardLayoutConstraintsDesignInfo".equalsIgnoreCase(contraintsTypeName)) {
-								container.add(top(aComponent), parseCardConstraints(aConstraintsTag));
+								String cardName = "";
+								if (aConstraintsTag.hasAttribute("cardName"))
+									cardName = aConstraintsTag.getAttribute("cardName");
+								container.add((Widget) aComponent, cardName);
 							} else
 								throw new IllegalStateException(CARD_CONSTRAINTS_TAG_NEEED + ", but not " + contraintsTypeName + " type.");
 						} else
 							throw new IllegalStateException(CARD_CONSTRAINTS_TAG_NEEED);
 					} else if (parentComp instanceof FlowPane) {
 						FlowPane container = (FlowPane) parentComp;
-						Component target = top(aComponent);
-						Size prefSize = componentsPreferredSize.get((String) aComponent.getData(PlatypusWindow.PID_DATA_KEY));
+						Point prefSize = componentsPreferredSize.get(aComponent);
 						if (prefSize != null)
-							target.setPixelSize(prefSize.getWidth(), prefSize.getHeight());
-						container.add(target);
+							aComponent.setSize(prefSize.getX() + "px", prefSize.getY() + "px");
+						container.add((Widget) aComponent);
 					} else if (parentComp instanceof GridPane) {
 						GridPane container = (GridPane) parentComp;
-						container.add(top(aComponent));
+						container.add((Widget) aComponent);
 					} else if (parentComp instanceof MarginsPane) {
 						MarginsPane container = (MarginsPane) parentComp;
 						if (aConstraintsTag != null && aConstraintsTag.hasAttribute(TYPE_ATTRIBUTE)) {
@@ -1035,15 +824,15 @@ public class GxtControlsFactory {
 								} else// AbsoluteConstraintsDesignInfo or
 								      // LayersLayoutConstraintsDesignInfo
 								{
-									Size prefSize = componentsPreferredSize.get((String) aComponent.getData(PlatypusWindow.PID_DATA_KEY));
+									Point prefSize = componentsPreferredSize.get(aComponent);
 									constraints = parseAbsoluteConstraints(aConstraintsTag);
 									if (prefSize != null) {
 										if (constraints.getWidth() != null && constraints.getWidth().value == -1) {
-											constraints.getWidth().value = prefSize.getWidth();
+											constraints.getWidth().value = (int) Math.round(prefSize.getX());
 											constraints.getWidth().unit = Style.Unit.PX;
 										}
 										if (constraints.getHeight() != null && constraints.getHeight().value == -1) {
-											constraints.getHeight().value = prefSize.getHeight();
+											constraints.getHeight().value = (int) Math.round(prefSize.getY());
 											constraints.getHeight().unit = Style.Unit.PX;
 										}
 									}
@@ -1051,19 +840,19 @@ public class GxtControlsFactory {
 								if (aConstraintsTag.hasAttribute("layer")) {
 									int layer = Utils.getIntegerAttribute(aConstraintsTag, "layer", 0);
 								}
-								container.add(top(aComponent), constraints);
+								container.add((Widget) aComponent, constraints);
 							} else
 								throw new IllegalStateException(ABSOLUTE_OR_MARGIN_OR_LAYERS_CONSTRAINTS_TAG_NEEED + ", but not " + contraintsTypeName + " type.");
 						} else
 							throw new IllegalStateException(ABSOLUTE_OR_MARGIN_OR_LAYERS_CONSTRAINTS_TAG_NEEED);
 					} else if (parentComp instanceof ScrollPane) {
-						Size prefSize = componentsPreferredSize.get((String) aComponent.getData(PlatypusWindow.PID_DATA_KEY));
+						Point prefSize = componentsPreferredSize.get(aComponent);
 						ScrollPane container = (ScrollPane) parentComp;
-						container.setView(top(aComponent));
-						container.getView().setPixelSize(prefSize.getWidth(), prefSize.getHeight());
+						container.setWidget((Widget) aComponent);
+						aComponent.setSize(prefSize.getX() + "px", prefSize.getY() + "px");
 					} else if (parentComp instanceof DesktopPane) {
 						DesktopPane container = (DesktopPane) parentComp;
-						container.add(top(aComponent));
+						container.add((Widget) aComponent);
 					} else if (parentComp instanceof SplitPane) {
 						// left & right components were processed in
 						// PlatypusSplitContainer's properties' closure.
@@ -1072,87 +861,88 @@ public class GxtControlsFactory {
 						if (aConstraintsTag != null && aConstraintsTag.hasAttribute(TYPE_ATTRIBUTE)) {
 							String contraintsTypeName = aConstraintsTag.getAttribute(TYPE_ATTRIBUTE);
 							if ("TabsConstraintsDesignInfo".equalsIgnoreCase(contraintsTypeName)) {
-								container.add(top(aComponent), parseTabItemConfig(aConstraintsTag, new ImageResourceCallback() {
-									@Override
-									public void run(ImageResource aResource) {
-										container.forceTabsLayout();
+								String textOrHtml = "";
+								boolean html = false;
+								PlatypusImageResource imRes = null;
+								if (aConstraintsTag.hasAttribute("tabTitle")) {
+									textOrHtml = aConstraintsTag.getAttribute("tabTitle");
+									if (textOrHtml != null && textOrHtml.startsWith("<html>")){
+										html = true;
+										textOrHtml = textOrHtml.substring("<html>".length());
+									}else{
+										html = false;
 									}
-								}));
+								}
+								/*
+								 * if (aConstraintsTag.hasAttribute("tabTooltipText"))
+								 * tabTooltipText = aTag.getAttribute("tabTooltipText");
+								 */
+								if (aConstraintsTag.hasAttribute("icon")) {
+									imRes = AppClient.getInstance().getImageResource(aConstraintsTag.getAttribute("icon"));
+								}
+								container.add((Widget)aComponent, textOrHtml, html, imRes);
 							} else
 								throw new IllegalStateException(TABS_CONSTRAINTS_TAG_NEEED + ", but not " + contraintsTypeName + " tag.");
 						} else
 							throw new IllegalStateException(TABS_CONSTRAINTS_TAG_NEEED);
 					} else if (parentComp instanceof ToolBar) {
 						ToolBar container = (ToolBar) parentComp;
-						container.add(top(aComponent));
+						container.add((Widget) aComponent);
 					} else if (parentComp instanceof HBoxPane) {
-						Component target = top(aComponent);
-						Size prefSize = componentsPreferredSize.get((String) aComponent.getData(PlatypusWindow.PID_DATA_KEY));
+						Point prefSize = componentsPreferredSize.get(aComponent);
 						if (prefSize != null)
-							target.setPixelSize(prefSize.getWidth(), prefSize.getHeight());
+							aComponent.setSize(prefSize.getX() + "px", prefSize.getY() + "px");
 						HBoxPane container = (HBoxPane) parentComp;
-						container.add(target);
+						container.add((Widget) aComponent);
 					} else if (parentComp instanceof VBoxPane) {
-						Component target = top(aComponent);
-						Size prefSize = componentsPreferredSize.get((String) aComponent.getData(PlatypusWindow.PID_DATA_KEY));
+						Point prefSize = componentsPreferredSize.get(aComponent);
 						if (prefSize != null)
-							target.setPixelSize(prefSize.getWidth(), prefSize.getHeight());
+							aComponent.setSize(prefSize.getX() + "px", prefSize.getY() + "px");
 						VBoxPane container = (VBoxPane) parentComp;
-						container.add(target);
-					} else if (parentComp instanceof MenuBar) {
-						MenuBar container = (MenuBar) parentComp;
-						Component top = top(aComponent);
-						container.add(top);
-					} else if (parentComp instanceof Menu) {
-						Menu container = (Menu) parentComp;
-						if (aComponent instanceof PlatypusMenu) {
-							PlatypusMenu child = (PlatypusMenu) aComponent;
-							MenuItem mi = new MenuItem(child.getText());
-							mi.setSubMenu(child);
-							container.add(mi);
-						} else
-							container.add(top(aComponent));
+						container.add((Widget) aComponent);
+					} else if (parentComp instanceof PlatypusMenuBar) {
+						PlatypusMenuBar container = (PlatypusMenuBar) parentComp;
+						if (aComponent instanceof MenuItemImageText)
+							container.addItem((MenuItemImageText) aComponent);
+					} else if (parentComp instanceof PlatypusMenu) {
 					} else if (parentComp != null)
 						throw new IllegalStateException(UNKNOWN_CONTAINER_DETECTED + parentComp.getClass().getName());
 					else
 						throw new IllegalStateException(NULL_CONTAINER_DETECTED + aParentName);
 				} catch (Exception ex) {
-					Logger.getLogger(GxtControlsFactory.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+					Logger.getLogger(WidgetsFactory.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
 				}
 			}
 		});
 	}
 
-	private Container createBorderLayoutContainer(Element aTag, Element aLayoutTag) throws Exception {
+	private BorderPane createBorderLayoutContainer(Element aTag, Element aLayoutTag) throws Exception {
 		BorderPane component = new BorderPane(Utils.getIntegerAttribute(aLayoutTag, "vgap", 0), Utils.getIntegerAttribute(aLayoutTag, "hgap", 0));
-		processEvents(component, aTag);
 		Publisher.publish(component);
-		PublishedComponent publishedComp = (PublishedComponent) component.getData(PlatypusWindow.PUBLISHED_DATA_KEY);
+		PublishedComponent publishedComp = component.getPublished().cast();
 		processGeneralProperties(component, aTag, publishedComp);
 		return component;
 	}
 
-	private Container createScrollContainer(Element aTag) throws Exception {
+	private ScrollPane createScrollContainer(Element aTag) throws Exception {
 		ScrollPane component = new ScrollPane();
-		processEvents(component, aTag);
 		Publisher.publish(component);
 		int vScrollPolicy = Utils.getIntegerAttribute(aTag, "verticalScrollBarPolicy", ScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 		int hScrollPolicy = Utils.getIntegerAttribute(aTag, "horizontalScrollBarPolicy", ScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		component.setVerticalScrollBarPolicy(vScrollPolicy);
 		component.setHorizontalScrollBarPolicy(hScrollPolicy);
-		PublishedComponent publishedComp = (PublishedComponent) component.getData(PlatypusWindow.PUBLISHED_DATA_KEY);
+		PublishedComponent publishedComp = component.getPublished().cast();
 		processGeneralProperties(component, aTag, publishedComp);
 		return component;
 	}
 
-	private Container createSplitLayoutContainer(Element aTag) throws Exception {
+	private SplitPane createSplitLayoutContainer(Element aTag) throws Exception {
 		final SplitPane component = new SplitPane();
-		processEvents(component, aTag);
 		Publisher.publish(component);
 		component.setOneTouchExpandable(Utils.getBooleanAttribute(aTag, "oneTouchExpandable", false));
 		component.setOrientation(Utils.getIntegerAttribute(aTag, "orientation", SplitPane.HORIZONTAL_SPLIT));
 		component.setDividerLocation(Utils.getIntegerAttribute(aTag, "dividerLocation", 84));
-		PublishedComponent publishedComp = (PublishedComponent) component.getData(PlatypusWindow.PUBLISHED_DATA_KEY);
+		PublishedComponent publishedComp = component.getPublished().cast();
 		processGeneralProperties(component, aTag, publishedComp);
 		final String leftComponent = aTag.getAttribute("leftComponent");
 		final String rightComponent = aTag.getAttribute("rightComponent");
@@ -1160,87 +950,66 @@ public class GxtControlsFactory {
 
 			@Override
 			public void run() {
-				component.setLeftComponent(top(components.get(leftComponent)));
-				component.setRightComponent(top(components.get(rightComponent)));
+				component.setFirstWidget((Widget)components.get(leftComponent));
+				component.setSecondWidget((Widget)components.get(rightComponent));
 			}
 
 		});
 		return component;
 	}
 
-	private Container createBoxLayoutContainer(Element aTag, Element aLayoutTag) throws Exception {
-		Container component;
-		int axis = Utils.getIntegerAttribute(aLayoutTag, "axis", 0);
-		if (axis == 1 || axis == 3) {
-			component = new VBoxPane();
-			processEvents(component, aTag);
-			Publisher.publish((VBoxPane) component);
-			((VBoxLayoutContainer) component).setVBoxLayoutAlign(VBoxLayoutContainer.VBoxLayoutAlign.STRETCH);
-		} else {
-			component = new HBoxPane();
-			processEvents(component, aTag);
-			Publisher.publish((HBoxPane) component);
-			((HBoxLayoutContainer) component).setHBoxLayoutAlign(HBoxLayoutContainer.HBoxLayoutAlign.STRETCH);
-		}
-		PublishedComponent publishedComp = (PublishedComponent) component.getData(PlatypusWindow.PUBLISHED_DATA_KEY);
-		processGeneralProperties(component, aTag, publishedComp);
-		return component;
+	private VBoxPane createVBox(Element aTag, Element aLayoutTag) throws Exception {
+		VBoxPane vbox = new VBoxPane();
+		Publisher.publish(vbox);
+		processGeneralProperties(vbox, aTag, vbox.getPublished().<PublishedComponent> cast());
+		return vbox;
 	}
 
-	private Container createCardLayoutContainer(Element aTag, Element aLayoutTag) throws Exception {
+	private HBoxPane createHBox(Element aTag, Element aLayoutTag) throws Exception {
+		HBoxPane hbox = new HBoxPane();
+		Publisher.publish(hbox);
+		processGeneralProperties(hbox, aTag, hbox.getPublished().<PublishedComponent> cast());
+		return hbox;
+	}
+
+	private CardPane createCardLayoutContainer(Element aTag, Element aLayoutTag) throws Exception {
 		int hgap = aLayoutTag != null ? Utils.getIntegerAttribute(aLayoutTag, "hgap", 0) : 0;
 		int vgap = aLayoutTag != null ? Utils.getIntegerAttribute(aLayoutTag, "vgap", 0) : 0;
 		CardPane component = new CardPane(vgap, hgap);
-		processEvents(component, aTag);
 		Publisher.publish(component);
-		PublishedComponent publishedComp = (PublishedComponent) component.getData(PlatypusWindow.PUBLISHED_DATA_KEY);
+		PublishedComponent publishedComp = component.getPublished().cast();
 		processGeneralProperties(component, aTag, publishedComp);
 		return component;
 	}
 
-	private Container createAbsoluteLayoutContainer(Element aTag) throws Exception {
-		return createMarginAbsoluteLayoutContainer(aTag, true);
-	}
-
-	private Container createMarginLayoutContainer(Element aTag) throws Exception {
-		return createMarginAbsoluteLayoutContainer(aTag, false);
-	}
-
-	private Container createMarginAbsoluteLayoutContainer(Element aTag, boolean aAbsolute) throws Exception {
-		MarginsPane component = new MarginsPane();
-		processEvents(component, aTag);
-		if (aAbsolute)
-			Publisher.publishAbsolute(component);
-		else
-			Publisher.publish(component);
-		PublishedComponent publishedComp = (PublishedComponent) component.getData(PlatypusWindow.PUBLISHED_DATA_KEY);
+	private AbsolutePane createAbsoluteLayoutContainer(Element aTag) throws Exception {
+		AbsolutePane component = new AbsolutePane();
+		Publisher.publish(component);
+		PublishedComponent publishedComp = component.getPublished().cast();
 		processGeneralProperties(component, aTag, publishedComp);
 		return component;
 	}
 
-	private Container createLayersLayoutContainer(Element aTag) throws Exception {
-		MarginsPane component = new MarginsPane();
-		processEvents(component, aTag);
+	private MarginsPane createAnchorsLayoutContainer(Element aTag) throws Exception {
+		AnchorsPane component = new AnchorsPane();
 		Publisher.publish(component);
-		PublishedComponent publishedComp = (PublishedComponent) component.getData(PlatypusWindow.PUBLISHED_DATA_KEY);
-		processGeneralProperties(component, aTag, false, publishedComp);
+		PublishedComponent publishedComp = component.getPublished().cast();
+		processGeneralProperties(component, aTag, publishedComp);
 		return component;
 	}
 
-	private Container createDesktopContainer(Element aTag) throws Exception {
+	private DesktopPane createDesktopContainer(Element aTag) throws Exception {
 		DesktopPane component = new DesktopPane();
-		processEvents(component, aTag);
 		Publisher.publish(component);
-		PublishedComponent publishedComp = (PublishedComponent) component.getData(PlatypusWindow.PUBLISHED_DATA_KEY);
+		PublishedComponent publishedComp = component.getPublished().cast();
 		processGeneralProperties(component, aTag, false, publishedComp);
 		return component;
 	}
 
-	private Container createTabsContainer(Element aTag) throws Exception {
+	private TabbedPane createTabsContainer(Element aTag) throws Exception {
 		final TabbedPane component = new TabbedPane();
-		processEvents(component, aTag);
 		Publisher.publish(component);
-		PublishedComponent publishedComp = (PublishedComponent) component.getData(PlatypusWindow.PUBLISHED_DATA_KEY);
+		PublishedComponent publishedComp = component.getPublished().cast();
 		processGeneralProperties(component, aTag, publishedComp);
 		if (aTag.hasAttribute("selectedComponent")) {
 			final String selectedComponent = aTag.getAttribute("selectedComponent");
@@ -1249,92 +1018,54 @@ public class GxtControlsFactory {
 				@Override
 				public void run() {
 					if (components.containsKey(selectedComponent))
-						component.setSelectedComponent(components.get(selectedComponent));
+						component.setSelected((Widget) components.get(selectedComponent));
 				}
 			});
 		}
 		return component;
 	}
 
-	private Container createToolBar(Element aTag) throws Exception {
+	private ToolBar createToolBar(Element aTag) throws Exception {
 		ToolBar component = new ToolBar();
-		processEvents(component, aTag);
 		Publisher.publish(component);
-		PublishedComponent publishedComp = (PublishedComponent) component.getData(PlatypusWindow.PUBLISHED_DATA_KEY);
+		PublishedComponent publishedComp = component.getPublished().cast();
 		processGeneralProperties(component, aTag, publishedComp);
 		return component;
 	}
 
-	private Container createFlowLayoutContainer(Element aTag, Element aLayoutTag) throws Exception {
+	private FlowPane createFlowLayoutContainer(Element aTag, Element aLayoutTag) throws Exception {
 		int hgap = aLayoutTag != null ? Utils.getIntegerAttribute(aLayoutTag, "hgap", 0) : 0;
 		int vgap = aLayoutTag != null ? Utils.getIntegerAttribute(aLayoutTag, "vgap", 0) : 0;
 		FlowPane component = new FlowPane(vgap, hgap);
-		processEvents(component, aTag);
 		Publisher.publish(component);
-		PublishedComponent publishedComp = (PublishedComponent) component.getData(PlatypusWindow.PUBLISHED_DATA_KEY);
+		PublishedComponent publishedComp = component.getPublished().cast();
 		processGeneralProperties(component, aTag, publishedComp);
 		return component;
 	}
 
-	private Container createGridLayoutContainer(Element aTag, Element aLayoutTag) throws Exception {
+	private GridPane createGridLayoutContainer(Element aTag, Element aLayoutTag) throws Exception {
 		GridPane component = new GridPane();
-		processEvents(component, aTag);
 		Publisher.publish(component);
-		component.setHGap(Utils.getIntegerAttribute(aLayoutTag, "hgap", 0));
-		component.setVGap(Utils.getIntegerAttribute(aLayoutTag, "vgap", 0));
-		component.setColumns(Utils.getIntegerAttribute(aLayoutTag, "columns", 1));
-		component.setRows(Utils.getIntegerAttribute(aLayoutTag, "rows", 1));
-		PublishedComponent publishedComp = (PublishedComponent) component.getData(PlatypusWindow.PUBLISHED_DATA_KEY);
+		component.setHgap(Utils.getIntegerAttribute(aLayoutTag, "hgap", 0));
+		component.setVgap(Utils.getIntegerAttribute(aLayoutTag, "vgap", 0));
+		component.resize(Utils.getIntegerAttribute(aLayoutTag, "rows", 1), Utils.getIntegerAttribute(aLayoutTag, "columns", 1));
+		PublishedComponent publishedComp = component.getPublished().cast();
 		processGeneralProperties(component, aTag, publishedComp);
 		return component;
 	}
 
-	private static LayoutRegion parseBorderConstraints(Element aTag) {
+	private static Direction parseBorderConstraints(Element aTag) {
 		String place = aTag.getAttribute("place");
 		if ("north".equalsIgnoreCase(place) || "first".equalsIgnoreCase(place)) {
-			return LayoutRegion.NORTH;
+			return Direction.NORTH;
 		} else if ("west".equalsIgnoreCase(place) || "before".equalsIgnoreCase(place)) {
-			return LayoutRegion.WEST;
+			return Direction.WEST;
 		} else if ("east".equalsIgnoreCase(place) || "after".equalsIgnoreCase(place)) {
-			return LayoutRegion.EAST;
+			return Direction.EAST;
 		} else if ("south".equalsIgnoreCase(place) || "last".equalsIgnoreCase(place)) {
-			return LayoutRegion.SOUTH;
+			return Direction.SOUTH;
 		}
-		return LayoutRegion.CENTER;
-	}
-
-	private static String parseCardConstraints(Element aTag) {
-		if (aTag.hasAttribute("cardName"))
-			return aTag.getAttribute("cardName");
-		else
-			return "";
-	}
-
-	private static TabItemConfig parseTabItemConfig(Element aTag, final ImageResourceCallback aImageLoadedCallback) {
-		final TabItemConfig config = new TabItemConfig();
-		if (aTag.hasAttribute("tabTitle")) {
-			String value = aTag.getAttribute("tabTitle");
-			if (value != null && value.startsWith(PlatypusLabel.HTML_SWING_PREFIX))
-				config.setHTML(value.substring(PlatypusLabel.HTML_SWING_PREFIX.length()));
-			else
-				config.setText(value);
-		}
-		/*
-		 * if (aTag.hasAttribute("tabTooltipText"))
-		 * config.setText(aTag.getAttribute("tabTooltipText"));
-		 */
-		if (aTag.hasAttribute("icon")) {
-			config.setIcon(AppClient.getInstance().getImageResource(aTag.getAttribute("icon")).addCallback(new ImageResourceCallback() {
-				@Override
-				public void run(ImageResource aResource) {
-					config.setIcon(aResource);
-					if (aImageLoadedCallback != null)
-						aImageLoadedCallback.run(aResource);
-				}
-			}));
-		}
-		config.setClosable(false);
-		return config;
+		return Direction.CENTER;
 	}
 
 	private static MarginConstraints parseAbsoluteConstraints(Element aTag) throws Exception {

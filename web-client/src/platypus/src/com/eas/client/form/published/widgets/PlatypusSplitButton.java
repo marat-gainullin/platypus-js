@@ -1,6 +1,7 @@
 package com.eas.client.form.published.widgets;
 
 import com.bearsoft.gwt.ui.widgets.DropDownButton;
+import com.bearsoft.gwt.ui.widgets.ImageParagraph;
 import com.eas.client.form.published.HasPublished;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.resources.client.ImageResource;
@@ -10,6 +11,10 @@ public class PlatypusSplitButton extends DropDownButton implements HasPublished 
 	
 	protected JavaScriptObject published;
 	
+	public PlatypusSplitButton() {
+		super("", false, null);
+	}
+	
 	public PlatypusSplitButton(String aTitle, boolean asHtml, MenuBar aMenu) {
 		super(aTitle, asHtml, aMenu);
 	}
@@ -18,6 +23,10 @@ public class PlatypusSplitButton extends DropDownButton implements HasPublished 
 		super(aTitle, asHtml, aImage, aMenu);
 	}
 
+	public ImageParagraph getContent(){
+		return content;
+	}
+	
 	public JavaScriptObject getPublished() {
 		return published;
 	}

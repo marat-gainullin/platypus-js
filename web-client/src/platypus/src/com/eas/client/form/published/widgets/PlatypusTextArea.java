@@ -1,10 +1,11 @@
 package com.eas.client.form.published.widgets;
 
+import com.eas.client.form.published.HasEmptyText;
 import com.eas.client.form.published.HasPublished;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.user.client.ui.TextArea;
 
-public class PlatypusTextArea extends TextArea implements HasPublished {
+public class PlatypusTextArea extends TextArea implements HasPublished, HasEmptyText {
 
 	protected JavaScriptObject published;
 
@@ -18,6 +19,15 @@ public class PlatypusTextArea extends TextArea implements HasPublished {
 		getElement().setAttribute("wrap", "off");
 	}
 
+	@Override
+	public String getEmptyText() {
+		return null;
+	}
+	
+	@Override
+	public void setEmptyText(String aValue) {
+	}
+	
 	public JavaScriptObject getPublished() {
 		return published;
 	}

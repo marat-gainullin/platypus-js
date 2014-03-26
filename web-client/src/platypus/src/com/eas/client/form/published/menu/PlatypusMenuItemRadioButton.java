@@ -11,6 +11,10 @@ public class PlatypusMenuItemRadioButton extends MenuItemRadioButton implements 
 	protected ButtonGroup group;
 	protected JavaScriptObject published;
 	
+	public PlatypusMenuItemRadioButton() {
+	    super(false, "", false);
+    }
+
 	public PlatypusMenuItemRadioButton(Boolean aValue, String aText, boolean asHtml) {
 	    super(aValue, aText, asHtml);
     }

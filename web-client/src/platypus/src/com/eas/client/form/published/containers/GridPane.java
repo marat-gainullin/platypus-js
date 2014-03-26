@@ -16,6 +16,10 @@ public class GridPane extends GridPanel implements HasPublished{
 
 	protected JavaScriptObject published;
 	
+	public GridPane() {
+		super(1, 1);
+	}
+	
 	public GridPane(int aRows, int aCols) {
 		super(aRows, aCols);
 	}

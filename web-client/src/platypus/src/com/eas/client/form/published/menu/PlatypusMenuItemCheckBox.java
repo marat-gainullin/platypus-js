@@ -11,6 +11,10 @@ public class PlatypusMenuItemCheckBox extends MenuItemCheckBox implements HasPub
 	protected ButtonGroup group;
 	protected JavaScriptObject published;
 	
+	public PlatypusMenuItemCheckBox() {
+	    super(false, "", false);
+    }
+
 	public PlatypusMenuItemCheckBox(Boolean aValue, String aText, boolean asHtml) {
 	    super(aValue, aText, asHtml);
     }

@@ -1,12 +1,16 @@
 package com.eas.client.form.published.containers;
 
 import com.bearsoft.gwt.ui.containers.TabsDecoratedPanel;
+import com.bearsoft.gwt.ui.widgets.ImageLabel;
+import com.eas.client.ImageResourceCallback;
+import com.eas.client.application.PlatypusImageResource;
 import com.eas.client.form.published.HasPublished;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.logical.shared.HasSelectionHandlers;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.ui.Widget;
 
 public class TabbedPane extends TabsDecoratedPanel implements HasPublished, HasSelectionHandlers<Widget> {
@@ -26,6 +30,20 @@ public class TabbedPane extends TabsDecoratedPanel implements HasPublished, HasS
 
 		});
 	}
+	
+    public void add(Widget child, String text, boolean asHtml, PlatypusImageResource aImage) {
+    	final ImageLabel tabsLabel = new ImageLabel(text, asHtml, aImage);
+        tabs.insert(child, tabsLabel, tabs.getWidgetCount());
+        if(aImage != null){
+        	aImage.addCallback(new ImageResourceCallback() {
+				
+				@Override
+				public void run(PlatypusImageResource aResource) {
+					tabsLabel.setImage(aResource);
+				}
+			});
+        }
+    }
 
 	public int getSelectedIndex() {
 		return selected != null ? tabs.getSelectedIndex() : -1;

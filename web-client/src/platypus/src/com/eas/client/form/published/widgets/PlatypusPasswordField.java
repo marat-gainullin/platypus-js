@@ -1,15 +1,25 @@
 package com.eas.client.form.published.widgets;
 
+import com.eas.client.form.published.HasEmptyText;
 import com.eas.client.form.published.HasPublished;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 
-public class PlatypusPasswordField extends PasswordTextBox implements HasPublished {
+public class PlatypusPasswordField extends PasswordTextBox implements HasPublished, HasEmptyText {
 
 	protected JavaScriptObject published;
-	
-	public PlatypusPasswordField(){
+
+	public PlatypusPasswordField() {
 		super();
+	}
+
+	@Override
+	public String getEmptyText() {
+		return null;
+	}
+	
+	@Override
+	public void setEmptyText(String aValue) {
 	}
 	
 	public JavaScriptObject getPublished() {
@@ -36,4 +46,5 @@ public class PlatypusPasswordField extends PasswordTextBox implements HasPublish
 			}
 		});
 	}-*/;
+
 }

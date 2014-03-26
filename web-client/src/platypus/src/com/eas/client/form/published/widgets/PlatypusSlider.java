@@ -15,7 +15,11 @@ public class PlatypusSlider extends SliderBar implements HasPublished {
 	public PlatypusSlider(double aMinValue, double aMaxValue) {
 		super(aMinValue, aMaxValue);
 	}
-
+	
+	public PlatypusSlider() {
+		super(0, 100);
+	}
+	
 	public JavaScriptObject getPublished() {
 		return published;
 	}

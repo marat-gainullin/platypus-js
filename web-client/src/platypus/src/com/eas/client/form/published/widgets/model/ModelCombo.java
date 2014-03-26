@@ -6,6 +6,7 @@ import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.eas.client.converters.ObjectRowValueConverter;
 import com.eas.client.form.CrossUpdater;
+import com.eas.client.form.published.HasEmptyText;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Model;
 import com.eas.client.model.ParametersEntity;
@@ -13,7 +14,7 @@ import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.Widget;
 
-public class ModelCombo extends PublishedDecoratorBox<Object> {
+public class ModelCombo extends PublishedDecoratorBox<Object> implements HasEmptyText {
 
 	protected CrossUpdater updater = new CrossUpdater(new Runnable() {
 
@@ -36,6 +37,15 @@ public class ModelCombo extends PublishedDecoratorBox<Object> {
 
 	protected HasValue<Object> getDecorated(){
 		return decorated;
+	}
+	
+	@Override
+	public String getEmptyText() {
+		return null;
+	}
+	
+	@Override
+	public void setEmptyText(String aValue) {
 	}
 	
 	public void setPublished(JavaScriptObject aValue) {
