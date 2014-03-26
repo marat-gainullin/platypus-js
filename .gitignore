@@ -51,3 +51,5 @@ com.google.gdt.eclipse.core.prefs
 /application/src/components/Classes2Scripts/build/
 /application/src/components/Classes2Scripts/dist/
 /application/src/components/Classes2Scripts/nbproject/private/
+/installer/ext/components/products/platypus-runtime/nbproject/private/
+/installer/ext/engine/nbproject/private/
