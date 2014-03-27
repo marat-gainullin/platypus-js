@@ -16,6 +16,7 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -179,7 +180,8 @@ public class PlatypusPlatform {
         registerJdbcDrivers(getPlatformHomeDir());
     }
 
-    public static void registerJdbcDrivers(File platfromHomeDir) throws PlatformHomePathException, IOException, DatabaseException {
+    public static List<JDBCDriver> registerJdbcDrivers(File platfromHomeDir) throws PlatformHomePathException, IOException, DatabaseException {
+        List<JDBCDriver> drivers = new ArrayList<>();
         for (DatabaseServerType databaseServer : DatabaseServerType.values()) {
             File mainJar = findThirdpartyJar(platfromHomeDir, databaseServer.jdbcClassName);
             if (mainJar != null) {
@@ -196,9 +198,12 @@ public class PlatypusPlatform {
                         JDBCDriverManager.getDefault().removeDriver(oldDriver);
                     }
                 }
-                JDBCDriverManager.getDefault().addDriver(JDBCDriver.create(databaseServer.name, databaseServer.name, databaseServer.jdbcClassName, urls.toArray(new URL[0])));
+                JDBCDriver drv = JDBCDriver.create(databaseServer.name, databaseServer.name, databaseServer.jdbcClassName, urls.toArray(new URL[0]));
+                JDBCDriverManager.getDefault().addDriver(drv);
+                drivers.add(drv);
             }
         }
+        return Collections.unmodifiableList(drivers);
     }
 
     private static File findJar(File dir, String className) throws IOException {

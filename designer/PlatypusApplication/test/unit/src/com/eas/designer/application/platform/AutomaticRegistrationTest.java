@@ -20,7 +20,7 @@ public class AutomaticRegistrationTest {
      */
     @Test
     public void testRegisterPlatypusRuntime() {
-        AutomaticRegistration.registerPlatypusRuntime("/home/vv/clusterTest", "/home/vv/PlatypusCCC");
+        AutomaticRegistration.registerPlatypusRuntime("/home/vv/clusterTest", "/home/vv/Platypus");
     }
     
 }

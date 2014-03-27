@@ -163,14 +163,10 @@ public class ConfigurationLogic extends ProductConfigurationLogic {
 private boolean registerPlatypusRuntime(File nbLocation, File platypusRuntimeLocation) throws IOException {
         File javaExe = JavaUtils.getExecutable(new File(System.getProperty("java.home")));
         String [] cp = {
-            "platform/core/core.jar",
-            "platform/lib/boot.jar",
-            "platform/lib/org-openide-modules.jar",
-            "platform/core/org-openide-filesystems.jar",
-            "platform/lib/org-openide-util.jar",
-            "platform/lib/org-openide-util-lookup.jar",
+            "platform/core/*",
+            "platform/lib/*",
 	    "platform/modules/*",
-	    "ide/modules/org-netbeans-modules-db.jar",
+	    "ide/modules/*",
             "platypusdesigner/modules/com-eas-designer-application.jar"
         };
         String mainClass = "com.eas.designer.application.platform.AutomaticRegistration";
