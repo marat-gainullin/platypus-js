@@ -56,6 +56,7 @@ import javax.swing.event.HyperlinkListener;
 import org.mozilla.javascript.Context;
 import org.netbeans.api.db.explorer.ConnectionManager;
 import org.netbeans.api.db.explorer.DatabaseConnection;
+import org.netbeans.api.db.explorer.DatabaseException;
 import org.netbeans.api.java.classpath.ClassPath;
 import org.netbeans.api.java.classpath.GlobalPathRegistry;
 import org.netbeans.api.progress.ProgressHandle;
@@ -255,16 +256,16 @@ public class PlatypusProjectImpl implements PlatypusProject {
 
     @Override
     public void disconnectFormDb(final String aDatasourceName) throws InterruptedException, ExecutionException {
-        if (connecting2Db != null) {
+        if (connecting2Db != null && !connecting2Db.isFinished()) {
             connecting2Db.waitFinished();
-            String datasourceId = aDatasourceName;
-            if (datasourceId == null) {
-                datasourceId = settings.getDefaultDataSourceName();
-            }
-            DatabaseConnection conn = DatabaseConnections.lookup(datasourceId);
-            if (conn != null) {
-                ConnectionManager.getDefault().disconnect(conn);
-            }
+        }
+        String datasourceId = aDatasourceName;
+        if (datasourceId == null) {
+            datasourceId = settings.getDefaultDataSourceName();
+        }
+        DatabaseConnection conn = DatabaseConnections.lookup(datasourceId);
+        if (conn != null) {
+            ConnectionManager.getDefault().disconnect(conn);
         }
         if (ModelInspector.isInstance()) {
             ModelInspector mi = ModelInspector.getInstance();
@@ -339,9 +340,10 @@ public class PlatypusProjectImpl implements PlatypusProject {
             }
             DatabaseConnection conn = DatabaseConnections.lookup(datasourceId);
             if (conn != null) {
+                conn.getPassword();//Restore the connection's saved password. 
                 ConnectionManager.getDefault().connect(conn);
             }
-        } catch (Exception ex) {
+        } catch (DatabaseException ex) {
             connecting2Db = null;
             Logger.getLogger(PlatypusProjectImpl.class.getName()).log(Level.INFO, null, ex);
             String dbUnableToConnectMsg = NbBundle.getMessage(PlatypusProjectImpl.class, "LBL_UnableToConnect") + ": " + ex.getMessage(); // NOI18N
