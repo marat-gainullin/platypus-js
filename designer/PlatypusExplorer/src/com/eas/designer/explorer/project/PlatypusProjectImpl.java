@@ -123,21 +123,28 @@ public class PlatypusProjectImpl implements PlatypusProject {
         settings.getChangeSupport().addPropertyChangeListener(new PropertyChangeListener() {
             @Override
             public void propertyChange(final PropertyChangeEvent evt) {
-                state.markModified();
-                if (PlatypusProjectSettingsImpl.DEFAULT_DATA_SOURCE_ELEMENT_KEY.equals(evt.getPropertyName())) {
-                    EventQueue.invokeLater(new Runnable() {
+                if (evt.getNewValue() == null ? evt.getOldValue() != null : !evt.getNewValue().equals(evt.getOldValue())) {
+                    state.markModified();
+                    if (PlatypusProjectSettingsImpl.DEFAULT_DATA_SOURCE_ELEMENT_KEY.equals(evt.getPropertyName())) {
+                        EventQueue.invokeLater(new Runnable() {
 
-                        @Override
-                        public void run() {
-                            try {
-                                client.setDefaultDatasourceName((String) evt.getNewValue());
-                                fireClientDefaultDatasourceChanged((String) evt.getOldValue(), (String) evt.getNewValue());
-                            } catch (Exception ex) {
-                                Exceptions.printStackTrace(ex);
+                            @Override
+                            public void run() {
+                                try {
+                                    if (evt.getNewValue() != null) {
+                                        client.setDefaultDatasourceName((String) evt.getNewValue(), false);
+                                        startConnecting2db(null);
+                                    } else {
+                                        client.setDefaultDatasourceName((String) evt.getNewValue());
+                                        fireClientDefaultDatasourceChanged((String) evt.getOldValue(), (String) evt.getNewValue());
+                                    }
+                                } catch (Exception ex) {
+                                    Exceptions.printStackTrace(ex);
+                                }
                             }
-                        }
 
-                    });
+                        });
+                    }
                 }
             }
         });
@@ -209,11 +216,15 @@ public class PlatypusProjectImpl implements PlatypusProject {
 
     @Override
     public void startConnecting2db(final String aDatasourceId) {
-        if (!isDbConnected(aDatasourceId) && connecting2Db == null) {
+        if (connecting2Db == null) {
             connecting2Db = RP.create(new Runnable() {
                 @Override
                 public void run() {
-                    connect2db(aDatasourceId);
+                    try {
+                        connect2db(aDatasourceId);
+                    } catch (Exception ex) {
+                        Logger.getLogger(PlatypusProjectImpl.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
             });
             final ProgressHandle ph = ProgressHandleFactory.createHandle(NbBundle.getMessage(PlatypusProjectImpl.class, "LBL_Connecting_Progress"), connecting2Db); // NOI18N  
@@ -323,7 +334,7 @@ public class PlatypusProjectImpl implements PlatypusProject {
                     StatusDisplayer.getDefault().setStatusText(dbConnectingCompleteMsg);
                     getOutputWindowIO().getOut().println(dbConnectingCompleteMsg);
                     fireClientConnected(aDatasourceName);
-                    client.clearQueries();
+                    client.appEntityChanged(null);
                 } catch (Exception ex) {
                     Exceptions.printStackTrace(ex);
                 }
@@ -332,7 +343,7 @@ public class PlatypusProjectImpl implements PlatypusProject {
         });
     }
 
-    private void connect2db(String aDatasourceName) {
+    private void connect2db(String aDatasourceName) throws Exception {
         try {
             String datasourceId = aDatasourceName;
             if (datasourceId == null) {
@@ -341,8 +352,21 @@ public class PlatypusProjectImpl implements PlatypusProject {
             DatabaseConnection conn = DatabaseConnections.lookup(datasourceId);
             if (conn != null) {
                 conn.getPassword();//Restore the connection's saved password. 
-                ConnectionManager.getDefault().connect(conn);
+                if (conn.getJDBCConnection(true) == null) {
+                    ConnectionManager.getDefault().connect(conn);
+                } else {
+                    connectedToDatasource(datasourceId);
+                }
+            } else {
+                if (datasourceId == null || datasourceId.isEmpty()) {
+                    datasourceId = "Datasource name is missing";
+                }
+                String dbUnableToConnectMsg = NbBundle.getMessage(PlatypusProjectImpl.class, "LBL_UnableToConnect") + ": " + datasourceId + " is not found."; // NOI18N
+                Logger.getLogger(PlatypusProjectImpl.class.getName()).log(Level.INFO, dbUnableToConnectMsg);
+                StatusDisplayer.getDefault().setStatusText(dbUnableToConnectMsg);
+                getOutputWindowIO().getErr().println(dbUnableToConnectMsg);
             }
+            connecting2Db = null;
         } catch (DatabaseException ex) {
             connecting2Db = null;
             Logger.getLogger(PlatypusProjectImpl.class.getName()).log(Level.INFO, null, ex);
@@ -363,7 +387,7 @@ public class PlatypusProjectImpl implements PlatypusProject {
             datasourceId = settings.getDefaultDataSourceName();
         }
         if (datasourceId == null || datasourceId.isEmpty()) {
-            datasourceId = "N/A";
+            datasourceId = "Datasource name is missing";
         }
         html = html.replaceAll("\\$\\{datasourceName\\}", datasourceId);
         JEditorPane htmlPage = new JEditorPane("text/html", html);

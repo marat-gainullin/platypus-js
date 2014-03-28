@@ -161,7 +161,6 @@ public class DatabaseMdCache implements DbMetadataCache {
         connectionSchema = null;
         connectionDriver = null;
         dbmsSupportedTypes = null;
-        System.gc();
     }
 
     protected class TablesFieldsCache extends FreqCache<String, Fields> {
