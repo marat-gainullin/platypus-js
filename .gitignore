@@ -53,3 +53,13 @@ com.google.gdt.eclipse.core.prefs
 /application/src/components/Classes2Scripts/nbproject/private/
 /installer/ext/components/products/platypus-runtime/nbproject/private/
 /installer/ext/engine/nbproject/private/
+/designer/PlatypusDatamodel/nbproject/private/
+/designer/PlatypusDebugger/nbproject/private/
+/designer/javascript.guards/nbproject/private/
+/designer/PlatypusQueries/nbproject/private/
+/designer/PlatypusModules/nbproject/private/
+/designer/PlatypusReport/nbproject/private/
+/designer/PlatypusDbDiagram/nbproject/private/
+/designer/PlatypusForms/nbproject/private/
+/designer/PlatypusApplication/nbproject/private/
+/designer/PlatypusExplorer/nbproject/private/
