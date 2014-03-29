@@ -64,3 +64,5 @@ com.google.gdt.eclipse.core.prefs
 /designer/PlatypusApplication/nbproject/private/
 /designer/PlatypusExplorer/nbproject/private/
 /application/src/components/Core/nbproject/private/
+/application/src/components/Application/nbproject/private/
+/application/src/lib/own/Rowsets/nbproject/private/
