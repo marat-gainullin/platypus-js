@@ -227,7 +227,7 @@ public class PlatypusProjectImpl implements PlatypusProject {
                     }
                 }
             });
-            final ProgressHandle ph = ProgressHandleFactory.createHandle(NbBundle.getMessage(PlatypusProjectImpl.class, "LBL_Connecting_Progress"), connecting2Db); // NOI18N  
+            final ProgressHandle ph = ProgressHandleFactory.createHandle(NbBundle.getMessage(PlatypusProjectImpl.class, "LBL_Connecting_Progress", aDatasourceId), connecting2Db); // NOI18N  
             connecting2Db.addTaskListener(new TaskListener() {
                 @Override
                 public void taskFinished(org.openide.util.Task task) {
@@ -250,13 +250,19 @@ public class PlatypusProjectImpl implements PlatypusProject {
                         mi.setNodesReflector(null);
                         mi.setViewData(null);
                     }
-                    DbMetadataCache mdCache = client.getDbMetadataCache((aDatasourceName == null ? client.getDefaultDatasourceName() == null : aDatasourceName.equals(client.getDefaultDatasourceName())) ? null : aDatasourceName);
+                    DbMetadataCache mdCache = client.getDbMetadataCache(aDatasourceName);
                     if (mdCache != null) {
                         mdCache.clear();
                     }
+                    if (aDatasourceName == null ? client.getDefaultDatasourceName() == null : aDatasourceName.equals(client.getDefaultDatasourceName())) {
+                        mdCache = client.getDbMetadataCache(null);
+                        if (mdCache != null) {
+                            mdCache.clear();
+                        }
+                    }
                     GeneralResourceProvider.getInstance().unregisterDatasource(aDatasourceName);
                     fireClientDisconnected(aDatasourceName);
-                    StatusDisplayer.getDefault().setStatusText(NbBundle.getMessage(PlatypusProjectActions.class, "LBL_Connection_Lost")); // NOI18N
+                    StatusDisplayer.getDefault().setStatusText(NbBundle.getMessage(PlatypusProjectActions.class, "LBL_Connection_Lost", aDatasourceName)); // NOI18N
                     client.clearQueries();
                 } catch (Exception ex) {
                     Exceptions.printStackTrace(ex);
@@ -283,7 +289,7 @@ public class PlatypusProjectImpl implements PlatypusProject {
             mi.setNodesReflector(null);
             mi.setViewData(null);
         }
-        StatusDisplayer.getDefault().setStatusText(NbBundle.getMessage(PlatypusProjectActions.class, "LBL_Connection_Lost")); // NOI18N                    
+        StatusDisplayer.getDefault().setStatusText(NbBundle.getMessage(PlatypusProjectActions.class, "LBL_Connection_Lost", datasourceId)); // NOI18N                    
     }
 
     private synchronized void fireClientConnected(final String aDatasourceName) {
@@ -319,24 +325,25 @@ public class PlatypusProjectImpl implements PlatypusProject {
         assert client != null;
         final DatabaseConnection conn = DatabaseConnections.lookup(aDatasourceName);
         assert conn != null : "Already connected datasource disappeared";
+        GeneralResourceProvider.getInstance().registerDatasource(aDatasourceName, new DbConnectionSettings(conn.getDatabaseURL(), conn.getUser(), conn.getPassword(), conn.getSchema(), conn.getConnectionProperties()));
+        client.appEntityChanged(null, false);
+        String datasourceName = (aDatasourceName == null ? client.getDefaultDatasourceName() != null : !aDatasourceName.equals(client.getDefaultDatasourceName())) ? aDatasourceName : null;
+        DbMetadataCache mdCache = client.getDbMetadataCache(datasourceName);
+        if (mdCache != null) {
+            mdCache.clear();
+            mdCache.fillTablesCacheByConnectionSchema(true);
+        }
+        String dbConnectingCompleteMsg = NbBundle.getMessage(PlatypusProjectImpl.class, "LBL_Connecting_Complete", aDatasourceName); // NOI18N
+        StatusDisplayer.getDefault().setStatusText(dbConnectingCompleteMsg);
+        getOutputWindowIO().getOut().println(dbConnectingCompleteMsg);
         SwingUtilities.invokeLater(new Runnable() {
 
             @Override
             public void run() {
                 try {
-                    GeneralResourceProvider.getInstance().registerDatasource(aDatasourceName, new DbConnectionSettings(conn.getDatabaseURL(), conn.getUser(), conn.getPassword(), conn.getSchema(), conn.getConnectionProperties()));
-                    DbMetadataCache mdCache = client.getDbMetadataCache(aDatasourceName);
-                    if (mdCache != null) {
-                        mdCache.clear();
-                        mdCache.fillTablesCacheByConnectionSchema(true);
-                    }
-                    String dbConnectingCompleteMsg = NbBundle.getMessage(PlatypusProjectImpl.class, "LBL_Connecting_Complete"); // NOI18N
-                    StatusDisplayer.getDefault().setStatusText(dbConnectingCompleteMsg);
-                    getOutputWindowIO().getOut().println(dbConnectingCompleteMsg);
                     fireClientConnected(aDatasourceName);
-                    client.appEntityChanged(null);
                 } catch (Exception ex) {
-                    Exceptions.printStackTrace(ex);
+                    Logger.getLogger(PlatypusProjectImpl.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
 
@@ -358,10 +365,7 @@ public class PlatypusProjectImpl implements PlatypusProject {
                     connectedToDatasource(datasourceId);
                 }
             } else {
-                if (datasourceId == null || datasourceId.isEmpty()) {
-                    datasourceId = "Datasource name is missing";
-                }
-                String dbUnableToConnectMsg = NbBundle.getMessage(PlatypusProjectImpl.class, "LBL_UnableToConnect") + ": " + datasourceId + " is not found."; // NOI18N
+                String dbUnableToConnectMsg = NbBundle.getMessage(PlatypusProjectImpl.class, "LBL_DatasourceNameMissing"); // NOI18N
                 Logger.getLogger(PlatypusProjectImpl.class.getName()).log(Level.INFO, dbUnableToConnectMsg);
                 StatusDisplayer.getDefault().setStatusText(dbUnableToConnectMsg);
                 getOutputWindowIO().getErr().println(dbUnableToConnectMsg);
@@ -387,7 +391,7 @@ public class PlatypusProjectImpl implements PlatypusProject {
             datasourceId = settings.getDefaultDataSourceName();
         }
         if (datasourceId == null || datasourceId.isEmpty()) {
-            datasourceId = "Datasource name is missing";
+            datasourceId = NbBundle.getMessage(PlatypusProjectImpl.class, "LBL_DatasourceNameMissing");
         }
         html = html.replaceAll("\\$\\{datasourceName\\}", datasourceId);
         JEditorPane htmlPage = new JEditorPane("text/html", html);

@@ -164,6 +164,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
      * change logs in one model. Several databases is the case.
      *
      * @return
+     * @throws java.lang.Exception
      */
     protected abstract List<Change> getChangeLog() throws Exception;
 
@@ -349,7 +350,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
                 //  - insert, update, delete queries;
                 //  - stored procedures, witch changes data.
                 if (query == null) {
-                    throw new IllegalStateException("Query must present. QueryId: " + queryId + "; tableName: " + getFullTableNameEntityForDescription());
+                    throw new IllegalStateException("Query must present. QueryId: " + queryId + "; tableName: " + getTableNameForDescription());
                 }
                 if (!query.isManual()) {
                     // There might be entities - parameters values sources, with no data in theirs rowsets,

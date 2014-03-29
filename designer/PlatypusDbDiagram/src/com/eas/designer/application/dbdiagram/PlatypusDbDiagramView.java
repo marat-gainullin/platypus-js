@@ -310,7 +310,6 @@ public class PlatypusDbDiagramView extends CloneableTopComponent {
                     public void selectionChanged(Collection<Relation<FieldsEntity>> clctn, Collection<Relation<FieldsEntity>> clctn1) {
                     }
                 });
-                getModelView().resolveRelations();
                 UndoRedo ur = getUndoRedo();
                 if (ur instanceof UndoRedo.Manager) {
                     ((UndoRedo.Manager) ur).discardAllEdits();

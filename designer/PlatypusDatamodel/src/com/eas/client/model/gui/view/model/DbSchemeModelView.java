@@ -10,7 +10,6 @@ import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.ForeignKeySpec;
 import com.bearsoft.rowset.metadata.ForeignKeySpec.ForeignKeyRule;
 import com.eas.client.DbMetadataCache;
-import com.eas.client.SQLUtils;
 import com.eas.client.dbstructure.DbStructureUtils;
 import com.eas.client.dbstructure.IconCache;
 import com.eas.client.dbstructure.SqlActionsController;
@@ -103,10 +102,11 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbS
                                         ForeignKeySpec fkSpec = (ForeignKeySpec) fkField.getFk();
                                         String refereeTableName = fkSpec.getReferee().getTable();
                                         if (refereeTableName != null
-                                                && (only4Table == null || (only4Table != null && (only4Table.equalsIgnoreCase(refereeTableName) || only4Table.equalsIgnoreCase(leftTableName))))
+                                                && (only4Table == null || only4Table.equalsIgnoreCase(refereeTableName) || only4Table.equalsIgnoreCase(leftTableName))
                                                 && entitiesByTableName.containsKey(refereeTableName.toLowerCase())) {
                                             FieldsEntity refereeEntity = entitiesByTableName.get(refereeTableName.toLowerCase());
-                                            if (!DatamodelDesignUtils.isRelationAlreadyDefined(entity, entity.getFields().get(fkSpec.getField()), refereeEntity, refereeEntity.getFields().get(fkSpec.getReferee().getField()))) {
+                                            boolean alreadyExist = DatamodelDesignUtils.isRelationAlreadyDefined(entity, entity.getFields().get(fkSpec.getField()), refereeEntity, refereeEntity.getFields().get(fkSpec.getReferee().getField()));
+                                            if (!alreadyExist) {
                                                 Relation<FieldsEntity> fkRelation = new Relation<>(entity, entity.getFields().get(fkSpec.getField()), refereeEntity, refereeEntity.getFields().get(fkSpec.getReferee().getField()));
                                                 fkRelation.setFkName(fkSpec.getCName());
                                                 fkRelation.setFkUpdateRule(fkSpec.getFkUpdateRule());
@@ -1041,7 +1041,6 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbS
                 if (entity != null) {
                     if (!isEntityTableExists(entity)) {
                         entities2Delete.add(entity);
-                        getModel().getClient().dbTableChanged(sqlController.getDbId(), sqlController.getSchema(), entity.getTableName());
                     }
                 }
             }
@@ -1086,7 +1085,10 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbS
         refreshView();
     }
 
-    private boolean isEntityTableExists(FieldsEntity fEntity) {
+    private boolean isEntityTableExists(FieldsEntity fEntity) throws Exception {
+        DbMetadataCache cache = model.getClient().getDbMetadataCache(sqlController.getDbId());
+        return cache.containsTableMetadata(fEntity.getFullTableName());
+        /*
         try {
             DbMetadataCache cache = model.getClient().getDbMetadataCache(sqlController.getDbId());
             String schema = fEntity.getTableSchemaName();
@@ -1100,5 +1102,6 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, FieldsEntity, DbS
         } catch (Exception ex) {
             return false;
         }
+        */                
     }
 }

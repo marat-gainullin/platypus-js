@@ -74,8 +74,16 @@ public class FieldsEntity extends Entity<DbSchemeModel, SqlQuery, FieldsEntity> 
      * @inheritDoc
      */
     @Override
-    protected String getFullTableNameEntityForDescription() {
+    protected String getTableNameForDescription() {
         return tableName;
+    }
+    
+    public String getFullTableName() {
+        String fullTableName = tableName;
+        if (tableSchemaName != null && !tableSchemaName.isEmpty()) {
+            fullTableName = tableSchemaName + "." + fullTableName;
+        }
+        return fullTableName;
     }
 
     public List<DbTableIndexSpec> getIndexes() {
@@ -146,7 +154,7 @@ public class FieldsEntity extends Entity<DbSchemeModel, SqlQuery, FieldsEntity> 
     @Override
     public void validateQuery() throws Exception {
         if (query == null && tableName != null) {
-            query = SQLUtils.validateTableSqlQuery(getTableDbId(), getTableName(), getTableSchemaName(), model.getClient());
+            query = SQLUtils.validateTableSqlQuery(getTableDbId(), getTableName(), getTableSchemaName(), model.getClient(), false);
         }
     }
 }
