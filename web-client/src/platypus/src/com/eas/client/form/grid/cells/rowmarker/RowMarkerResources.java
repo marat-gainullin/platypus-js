@@ -1,4 +1,4 @@
-package com.eas.client.form.grid.rowmarker;
+package com.eas.client.form.grid.cells.rowmarker;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;

@@ -92,7 +92,7 @@ public class FindWindow extends WindowPanel {
 
 		vBox.add(field);
 		vBox.add(hBox2);
-		
+
 		hBox.add(label);
 		hBox.add(vBox);
 
@@ -100,7 +100,7 @@ public class FindWindow extends WindowPanel {
 	}
 
 	private boolean findNext() {
-		List<Row> store = null;//grid.getStore();
+		List<Row> store = grid.getDataProvider().getList();
 		boolean caseSensitive = checkCase.getValue();
 		boolean wholeString = checkWhole.getValue();
 		String findText = field.getText();
@@ -134,8 +134,9 @@ public class FindWindow extends WindowPanel {
 			}
 			col = 0;
 		}
-		//AlertMessageBox alert = new AlertMessageBox(messages.heading(), messages.endSearch());
-		//alert.show();
+		// AlertMessageBox alert = new AlertMessageBox(messages.heading(),
+		// messages.endSearch());
+		// alert.show();
 		Window.alert(messages.endSearch());
 		return false;
 	}
@@ -169,17 +170,12 @@ public class FindWindow extends WindowPanel {
 	}
 
 	private void selectCell(int aRow, int aCol) {
-		if (grid.getSelectionModel() instanceof PlatypusCellSelectionModel<?>) {
-			PlatypusCellSelectionModel<Row> cellsSelection = (PlatypusCellSelectionModel<Row>) grid.getSelectionModel();
-			cellsSelection.deselectAll();
-			cellsSelection.selectCell(aRow, aCol, true);
-		} else {
-			grid.getSelectionModel().setSelected(grid.getObject(aRow), false);
-		}
+		// TODO; mark individual found cells (aCol parameter)
+		grid.getSelectionModel().setSelected(grid.getObject(aRow), true);
 	}
 
 	public void show() {
 		popup.show();
-    }
+	}
 
 }

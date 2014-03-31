@@ -8,6 +8,8 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.cyberneko.html.filters.Identity;
+
 import com.bearsoft.gwt.ui.widgets.ObjectFormat;
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
@@ -25,14 +27,15 @@ import com.eas.client.form.ObjectKeyProvider;
 import com.eas.client.form.Publisher;
 import com.eas.client.form.RowKeyProvider;
 import com.eas.client.form.combo.ComboLabelProvider;
-import com.eas.client.form.grid.PlatypusCellSelectionModel;
-import com.eas.client.form.grid.RadioBoxSelectionModel;
 import com.eas.client.form.grid.RowsetPositionSelectionHandler;
+import com.eas.client.form.grid.cells.rowmarker.RowMarkerCell;
+import com.eas.client.form.grid.columns.CheckServiceColumn;
 import com.eas.client.form.grid.columns.ModelGridColumn;
-import com.eas.client.form.grid.columns.ModelGridColumnBase;
-import com.eas.client.form.grid.columns.RowValueGridColumn;
+import com.eas.client.form.grid.columns.RadioServiceColumn;
 import com.eas.client.form.grid.rows.RowChildrenFetcher;
 import com.eas.client.form.grid.rows.RowsetDataProvider;
+import com.eas.client.form.grid.selection.MultiRowSelectionModel;
+import com.eas.client.form.grid.selection.SingleRowSelectionModel;
 import com.eas.client.form.js.JsEvents;
 import com.eas.client.form.published.PublishedCell;
 import com.eas.client.form.published.PublishedStyle;
@@ -46,6 +49,7 @@ import com.eas.client.form.published.widgets.model.ModelGrid;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Model;
 import com.google.gwt.cell.client.AbstractCell;
+import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.TableCellElement;
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -53,16 +57,16 @@ import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.cellview.client.IdentityColumn;
+import com.google.gwt.view.client.MultiSelectionModel;
+import com.google.gwt.view.client.SelectionModel;
+import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.gwt.xml.client.Element;
 import com.google.gwt.xml.client.NodeList;
 
 public class GridFactory {
 
-	//
-	public static final int ROWS_HEADER_TYPE_NONE = 0;
-	public static final int ROWS_HEADER_TYPE_USUAL = 1;
-	public static final int ROWS_HEADER_TYPE_CHECKBOX = 2;
-	public static final int ROWS_HEADER_TYPE_RADIOBUTTON = 3;
 	//
 	public static final int ONE_FIELD_ONE_QUERY_TREE_KIND = 1;
 	public static final int FIELD_2_PARAMETER_TREE_KIND = 2;
@@ -76,18 +80,12 @@ public class GridFactory {
 	protected ModelElementRef paramSourceField;
 	protected Model model;
 	protected Entity rowsSource;
-	// protected String generalCellFunctionName;
-	protected List<ColumnConfig<Row, ?>> leaves = new ArrayList<>();
-	protected List<HeaderGroupConfig> groups = new ArrayList<>();
-	protected int currentLeavesCount;
-	protected RowsetListener rowsFiller;
-	protected ModelGrid modelGrid;
+	protected ModelGrid grid;
 	// columns
 	protected List<ComboLabelProvider> comboLabelProviders = new ArrayList<>();
-	protected List<ModelGridColumnBase> publishedColumns = new ArrayList<>();
+	protected List<ModelGridColumn<?>> publishedColumns = new ArrayList<>();
 
 	protected Set<Entity> rowsetsOfInterestHosts = new HashSet<Entity>();
-	protected List<Runnable> handlersResolvers = new ArrayList<Runnable>();
 
 	public GridFactory(Element aTag, Model aModel) {
 		super();
@@ -96,25 +94,17 @@ public class GridFactory {
 	}
 
 	public ModelGrid getModelGrid() {
-		return modelGrid;
-	}
-
-	public List<Runnable> getHandlersResolvers() {
-		return handlersResolvers;
+		return grid;
 	}
 
 	protected void cleanup() {
-		handlersResolvers.clear();
-		leaves.clear();
-		groups.clear();
-		currentLeavesCount = 0;
 		rowsSource = null;
 	}
 
 	public void process() throws Exception {
 		cleanup();
 		Element rowsColumnsTag = Utils.getElementByTagName(gridTag, "rowsColumnsDesignInfo");
-		int rowsHeaderType = Utils.getIntegerAttribute(rowsColumnsTag, "rowsHeaderType", ROWS_HEADER_TYPE_USUAL);
+		int rowsHeaderType = Utils.getIntegerAttribute(rowsColumnsTag, "rowsHeaderType", ModelGrid.ROWS_HEADER_TYPE_USUAL);
 		int fixedRows = Utils.getIntegerAttribute(rowsColumnsTag, "fixedRows", 0);
 		int fixedColumns = Utils.getIntegerAttribute(rowsColumnsTag, "fixedColumns", 0);
 		int rowsHeight = Utils.getIntegerAttribute(gridTag, "rowsHeight", 20);
@@ -135,123 +125,36 @@ public class GridFactory {
 		param2GetChildren = new ModelElementRef(Utils.getElementByTagName(treeTag, "param2GetChildren"), model);
 		paramSourceField = new ModelElementRef(Utils.getElementByTagName(treeTag, "paramSourceField"), model);
 
-		GridSelectionModel<Row> sm = null;
-		ColumnConfig<Row, Row> firstBlankColumn = null;
-		if (rowsHeaderType == ROWS_HEADER_TYPE_CHECKBOX) {
-			sm = new CheckBoxSelectionModel<Row>(new IdentityValueProvider<Row>());
-			firstBlankColumn = ((CheckBoxSelectionModel<Row>) sm).getColumn();
-			leaves.add(0, firstBlankColumn);
-			currentLeavesCount = 1;
-		} else if (rowsHeaderType == ROWS_HEADER_TYPE_RADIOBUTTON) {
-			sm = new RadioBoxSelectionModel<Row>(new IdentityValueProvider<Row>());
-			firstBlankColumn = ((RadioBoxSelectionModel<Row>) sm).getColumn();
-			leaves.add(0, firstBlankColumn);
-			currentLeavesCount = 1;
-		} else if (rowsHeaderType == ROWS_HEADER_TYPE_USUAL) {
-			sm = new PlatypusCellSelectionModel<Row>(new RowMarker(rowsSource, new IdentityValueProvider<Row>()));
-			firstBlankColumn = ((PlatypusCellSelectionModel<Row>) sm).getColumn();
-			leaves.add(0, firstBlankColumn);
-			currentLeavesCount = 1;
-		} else
-			sm = new PlatypusCellSelectionModel<Row>(null);
-
-		List<HeaderGroupConfig> topLevelGroups = new ArrayList<HeaderGroupConfig>();
+		grid = new ModelGrid(); 
+		grid.setRowsSource(rowsSource);
+		// Selection models & service column configuration
+		grid.setRowsHeaderType(rowsHeaderType);
+		// Columns multi level structure
 		NodeList nodesWithColumns = gridTag.getChildNodes();
 		for (int i = 0; i < nodesWithColumns.getLength(); i++) {
 			if ("column".equalsIgnoreCase(nodesWithColumns.item(i).getNodeName())) {
 				assert nodesWithColumns.item(i) instanceof Element : "Column must be a tag";
 				Element columnTag = (Element) nodesWithColumns.item(i);
-				HeaderGroupConfig subGroup = processColumn(columnTag, 0);
-				topLevelGroups.add(subGroup);
+				processColumn(columnTag, 0);
 			}
 		}
-
-		ColumnModel<Row> cm = new ColumnModel<Row>(leaves);
-		for (HeaderGroupConfig group : groups)
-			cm.addHeaderGroup(group.getRow(), group.getColumn(), group);
+		// Data plain and tree(optional) layers
 		if (isTreeConfigured()) {
-			store = new TreeStore<Row>(new RowKeyProvider());
-			store.setAutoCommit(true);
-			grid = new MaskingTreeGrid<Row>((TreeStore<Row>) store, cm, firstBlankColumn != null && cm.getColumnCount() > 1 ? cm.getColumn(1) : cm.getColumn(0));
-			grid.setView(new PlatypusTreeGridView());
-			if (rowsModelElement.isCorrect()) {
-				RowsTreeStoreFiller filler = null;
-				if (isLazyTreeConfigured()) {
-					filler = new RowChildrenFetcher((TreeStore<Row>) store, rowsSource, unaryLinkField.field, (Parameter) param2GetChildren.field, paramSourceField.field);
-				} else {
-					filler = new RowsTreeStoreFiller((TreeStore<Row>) store, rowsSource, unaryLinkField.field);
-				}
-				((TreeGrid<Row>) grid).setTreeLoader(filler.getLoader());
-			}
-
 		} else {
-			store = new ListStore<Row>(new RowKeyProvider());
-			store.setAutoCommit(true);
-			grid = new Grid<Row>((ListStore<Row>) store, cm, new PlatypusGridView());
-			if (rowsModelElement.isCorrect()) {
-				RowsListStoreFiller filler = new RowsListStoreFiller((ListStore<Row>) store, rowsSource);
-				grid.setLoader(filler.getLoader());
-			}
-
 		}
-		if (firstBlankColumn instanceof ComponentPlugin<?>) {
-			((ComponentPlugin<Grid<Row>>) firstBlankColumn).initPlugin(grid);
-		}
-		grid.setLoadMask(true);
-
-		editing = new PlatypusGridInlineRowEditing(grid, rowsSource);
-		editing.setClicksToEdit(ClicksToEdit.TWO);
+		/*
 		editing.setEditable(editable);
 		editing.setDeletable(deletable);
 		editing.setInsertable(insertable);
-		for (PlatypusColumnConfig<Row, String> cc : sColumns)
-			if (cc.getEditor() != null)
-				editing.addEditor(cc, cc.getEditor());
-		for (PlatypusColumnConfig<Row, Date> cc : dColumns)
-			if (cc.getEditor() != null)
-				editing.addEditor(cc, cc.getEditor());
-		for (PlatypusColumnConfig<Row, Double> cc : nColumns)
-			if (cc.getEditor() != null)
-				editing.addEditor(cc, cc.getEditor());
-		for (PlatypusColumnConfig<Row, Boolean> cc : bColumns)
-			if (cc.getEditor() != null)
-				editing.addEditor(cc, cc.getEditor());
-		for (PlatypusColumnConfig<Row, Object> cc : oColumns)
-			if (cc.getEditor() != null)
-				editing.addEditor(cc, cc.getEditor());
-		grid.setSelectionModel(sm);
-		grid.getView().setStripeRows(showOddRowsInOtherColor);
+		*/
 		// row lines ?
-		grid.getView().setColumnLines(columnLines);
-
-		grid.getView().setTrackMouseOver(true);
-		grid.getView().setShowDirtyCells(true);
-		grid.setColumnReordering(true);
-		grid.setColumnResize(true);
-		grid.getSelectionModel().addSelectionHandler(new RowsetPositionSelectionHandler(rowsSource));
-		// grid.getColumnModel().addColumnWidthChangeHandler(new
-		// ResizableCellsColumnResizer<Row, Object>(grid));
-
-		modelGrid = new ModelGrid(grid, editing);
-
-		handlersResolvers.add(new Runnable() {
-			@Override
-			public void run() {
-				modelGrid.setOnRender(model.getModule().<Utils.JsModule> cast().getHandler(generalCellFunctionName));
-			}
-		});
-		for (ModelGridColumnBase<?> column : publishedColumns)
-			modelGrid.addPublishedColumn(column);
+		// column lines ?
 		for (Entity entity : rowsetsOfInterestHosts) {
-			modelGrid.addUpdatingTriggerEntity(entity);
+			grid.addUpdatingTriggerEntity(entity);
 		}
 		for (ComboLabelProvider labelProvider : comboLabelProviders) {
-			labelProvider.setOnLabelCacheChange(modelGrid.getCrossUpdaterAction());
+			labelProvider.setOnLabelCacheChange(grid.getCrossUpdaterAction());
 		}
-	}
-
-	public List<ModelGridColumnBase> getPublishedColumns() {
-		return publishedColumns;
 	}
 
 	private boolean isLazyTreeConfigured() {
@@ -357,7 +260,7 @@ public class GridFactory {
 						lsb.append(SafeHtmlUtils.fromTrustedString("&#160;"));
 					else
 						lsb.append(SafeHtmlUtils.fromString(toRender1));
-					PublishedStyle styleToRender = modelGrid.complementPublishedStyle(cellToRender.getStyle());
+					PublishedStyle styleToRender = grid.complementPublishedStyle(cellToRender.getStyle());
 					ControlsUtils.renderDecorated(lsb, styleToRender, sb);
 					// detemine where to apply rendered html
 					XElement cellInnerElement = null;
@@ -405,7 +308,7 @@ public class GridFactory {
 					final ModelGridObjectColumn column = new ModelGridObjectColumn(aName);
 					publishedColumns.add(column);
 					handlersResolvers.add(new ColumnHandlersResolver(model.getModule(), cellFunctionName, selectFunctionName, column));
-					PlatypusColumnConfig<Row, Object> cc = new PlatypusColumnConfig<Row, Object>(new RowValueGridColumn<Object>(rowsSource, aColModelElement, new ObjectRowValueConverter()), aWidth,
+					PlatypusColumnConfig<Row, Object> cc = new PlatypusColumnConfig<Row, Object>(new ValueGridColumn<Object>(rowsSource, aColModelElement, new ObjectRowValueConverter()), aWidth,
 					        sb.toSafeHtml(), readonly, fixed);
 					cc.setCell(new AbstractCell<Object>() {
 
@@ -416,7 +319,7 @@ public class GridFactory {
 								SafeHtmlBuilder lsb = new SafeHtmlBuilder();
 								String toRender = format.format(value);
 								PublishedCell cellToRender = calcContextPublishedCell(column.getEventsThis(),
-								        column.getOnRender() != null ? column.getOnRender() : modelGrid.getOnRender(), context, aColModelElement, toRender);
+								        column.getOnRender() != null ? column.getOnRender() : grid.getOnRender(), context, aColModelElement, toRender);
 								if (cellToRender != null) {
 									styleToRender = cellToRender.getStyle();
 									if (cellToRender.getDisplay() != null)
@@ -426,7 +329,7 @@ public class GridFactory {
 									lsb.append(SafeHtmlUtils.fromTrustedString("&#160;"));
 								else
 									lsb.append(SafeHtmlUtils.fromString(toRender));
-								styleToRender = modelGrid.complementPublishedStyle(styleToRender);
+								styleToRender = grid.complementPublishedStyle(styleToRender);
 								ControlsUtils.renderDecorated(lsb, styleToRender, sb);
 								if (cellToRender != null) {
 									bindCallback(context, cellToRender);
@@ -454,7 +357,7 @@ public class GridFactory {
 					final ModelGridTextColumn column = new ModelGridTextColumn(aName);
 					publishedColumns.add(column);
 					handlersResolvers.add(new ColumnHandlersResolver(model.getModule(), cellFunctionName, selectFunctionName, column));
-					PlatypusColumnConfig<Row, String> cc = new PlatypusColumnConfig<Row, String>(new RowValueGridColumn<String>(rowsSource, aColModelElement, new StringRowValueConverter()), aWidth,
+					PlatypusColumnConfig<Row, String> cc = new PlatypusColumnConfig<Row, String>(new ValueGridColumn<String>(rowsSource, aColModelElement, new StringRowValueConverter()), aWidth,
 					        sb.toSafeHtml(), readonly, fixed);
 					cc.setCell(new AbstractCell<String>() {
 
@@ -465,7 +368,7 @@ public class GridFactory {
 								SafeHtmlBuilder lsb = new SafeHtmlBuilder();
 								String toRender = value;
 								PublishedCell cellToRender = calcContextPublishedCell(column.getEventsThis(),
-								        column.getOnRender() != null ? column.getOnRender() : modelGrid.getOnRender(), context, aColModelElement, value);
+								        column.getOnRender() != null ? column.getOnRender() : grid.getOnRender(), context, aColModelElement, value);
 								if (cellToRender != null) {
 									styleToRender = cellToRender.getStyle();
 									if (cellToRender.getDisplay() != null)
@@ -475,7 +378,7 @@ public class GridFactory {
 									lsb.append(SafeHtmlUtils.fromTrustedString("&#160;"));
 								else
 									lsb.append(SafeHtmlUtils.fromString(toRender));
-								styleToRender = modelGrid.complementPublishedStyle(styleToRender);
+								styleToRender = grid.complementPublishedStyle(styleToRender);
 								ControlsUtils.renderDecorated(lsb, styleToRender, sb);
 								if (cellToRender != null) {
 									bindCallback(context, cellToRender);
@@ -503,7 +406,7 @@ public class GridFactory {
 					final ModelGridDateColumn column = new ModelGridDateColumn(aName);
 					publishedColumns.add(column);
 					handlersResolvers.add(new ColumnHandlersResolver(model.getModule(), cellFunctionName, selectFunctionName, column));
-					PlatypusColumnConfig<Row, Date> cc = new PlatypusColumnConfig<Row, Date>(new RowValueGridColumn<Date>(rowsSource, aColModelElement, new DateRowValueConverter()), aWidth,
+					PlatypusColumnConfig<Row, Date> cc = new PlatypusColumnConfig<Row, Date>(new ValueGridColumn<Date>(rowsSource, aColModelElement, new DateRowValueConverter()), aWidth,
 					        sb.toSafeHtml(), readonly, fixed);
 					String dateFormat = aControlTag.getAttribute("dateFormat");
 					if (dateFormat != null)
@@ -518,7 +421,7 @@ public class GridFactory {
 								PublishedStyle styleToRender = null;
 								String toRender = value != null ? dtFormat.format(value) : null;
 								PublishedCell cellToRender = calcContextPublishedCell(column.getEventsThis(),
-								        column.getOnRender() != null ? column.getOnRender() : modelGrid.getOnRender(), context, aColModelElement, toRender);
+								        column.getOnRender() != null ? column.getOnRender() : grid.getOnRender(), context, aColModelElement, toRender);
 								if (cellToRender != null) {
 									styleToRender = cellToRender.getStyle();
 									if (cellToRender.getDisplay() != null)
@@ -528,7 +431,7 @@ public class GridFactory {
 									lsb.append(SafeHtmlUtils.fromTrustedString("&#160;"));
 								else
 									lsb.append(SafeHtmlUtils.fromString(toRender));
-								styleToRender = modelGrid.complementPublishedStyle(styleToRender);
+								styleToRender = grid.complementPublishedStyle(styleToRender);
 								ControlsUtils.renderDecorated(lsb, styleToRender, sb);
 								if (cellToRender != null) {
 									bindCallback(context, cellToRender);
@@ -556,7 +459,7 @@ public class GridFactory {
 					final ModelGridColumn column = new ModelGridColumn(aName);
 					publishedColumns.add(column);
 					handlersResolvers.add(new ColumnHandlersResolver(model.getModule(), cellFunctionName, selectFunctionName, column));
-					PlatypusColumnConfig<Row, Boolean> cc = new PlatypusColumnConfig<Row, Boolean>(new RowValueGridColumn<Boolean>(rowsSource, aColModelElement, new BooleanRowValueConverter()), aWidth,
+					PlatypusColumnConfig<Row, Boolean> cc = new PlatypusColumnConfig<Row, Boolean>(new ValueGridColumn<Boolean>(rowsSource, aColModelElement, new BooleanRowValueConverter()), aWidth,
 					        sb.toSafeHtml(), readonly, fixed);
 					// There are some nightmare with null values and script
 					// boolean value(NOT Boolean !).
@@ -570,7 +473,7 @@ public class GridFactory {
 								PublishedStyle styleToRender = null;
 								SafeHtmlBuilder lsb = new SafeHtmlBuilder();
 								PublishedCell cellToRender = calcContextPublishedCell(column.getEventsThis(),
-								        column.getOnRender() != null ? column.getOnRender() : modelGrid.getOnRender(), context, aColModelElement, null);
+								        column.getOnRender() != null ? column.getOnRender() : grid.getOnRender(), context, aColModelElement, null);
 								if (cellToRender != null) {
 									styleToRender = cellToRender.getStyle();
 								}
@@ -595,7 +498,7 @@ public class GridFactory {
 								String checkedParam = value != null && value ? " checked" : "";
 
 								lsb.appendHtmlConstant("<input " + typeParam + nameParam + disabledParam + readOnlyParam + idParam + checkedParam + " />");
-								styleToRender = modelGrid.complementPublishedStyle(styleToRender);
+								styleToRender = grid.complementPublishedStyle(styleToRender);
 								ControlsUtils.renderDecorated(lsb, styleToRender, sb);
 								if (cellToRender != null) {
 									bindCallback(context, cellToRender);
@@ -616,7 +519,7 @@ public class GridFactory {
 					final ModelGridSpinColumn column = new ModelGridSpinColumn(aName);
 					publishedColumns.add(column);
 					handlersResolvers.add(new ColumnHandlersResolver(model.getModule(), cellFunctionName, selectFunctionName, column));
-					PlatypusColumnConfig<Row, Double> cc = new PlatypusColumnConfig<Row, Double>(new RowValueGridColumn<Double>(rowsSource, aColModelElement, new DoubleRowValueConverter()), aWidth,
+					PlatypusColumnConfig<Row, Double> cc = new PlatypusColumnConfig<Row, Double>(new ValueGridColumn<Double>(rowsSource, aColModelElement, new DoubleRowValueConverter()), aWidth,
 					        sb.toSafeHtml(), readonly, fixed);
 					cc.setCell(new NumberCell<Double>() {
 
@@ -627,7 +530,7 @@ public class GridFactory {
 								SafeHtmlBuilder lsb = new SafeHtmlBuilder();
 								String toRender = value != null ? NumberFormat.getDecimalFormat().format(value) : null;
 								PublishedCell cellToRender = calcContextPublishedCell(column.getEventsThis(),
-								        column.getOnRender() != null ? column.getOnRender() : modelGrid.getOnRender(), context, aColModelElement, toRender);
+								        column.getOnRender() != null ? column.getOnRender() : grid.getOnRender(), context, aColModelElement, toRender);
 								if (cellToRender != null) {
 									styleToRender = cellToRender.getStyle();
 									if (cellToRender.getDisplay() != null)
@@ -637,7 +540,7 @@ public class GridFactory {
 									lsb.append(SafeHtmlUtils.fromTrustedString("&#160;"));
 								else
 									lsb.append(SafeHtmlUtils.fromString(toRender));
-								styleToRender = modelGrid.complementPublishedStyle(styleToRender);
+								styleToRender = grid.complementPublishedStyle(styleToRender);
 								ControlsUtils.renderDecorated(lsb, styleToRender, sb);
 								if (cellToRender != null) {
 									bindCallback(context, cellToRender);
@@ -687,7 +590,7 @@ public class GridFactory {
 					labelProvider.setLookupValueRef(valueRef);
 					labelProvider.setDisplayValueRef(displayRef);
 					comboLabelProviders.add(labelProvider);
-					PlatypusColumnConfig<Row, Object> cc = new PlatypusColumnConfig<Row, Object>(new RowValueGridColumn<Object>(rowsSource, aColModelElement, new ObjectRowValueConverter()), aWidth,
+					PlatypusColumnConfig<Row, Object> cc = new PlatypusColumnConfig<Row, Object>(new ValueGridColumn<Object>(rowsSource, aColModelElement, new ObjectRowValueConverter()), aWidth,
 					        sb.toSafeHtml(), readonly, fixed);
 					cc.setCell(new AbstractCell<Object>() {
 
@@ -698,7 +601,7 @@ public class GridFactory {
 								SafeHtmlBuilder lsb = new SafeHtmlBuilder();
 								String toRender = labelProvider.getLabel(value);
 								PublishedCell cellToRender = calcContextPublishedCell(column.getEventsThis(),
-								        column.getOnRender() != null ? column.getOnRender() : modelGrid.getOnRender(), context, aColModelElement, toRender);
+								        column.getOnRender() != null ? column.getOnRender() : grid.getOnRender(), context, aColModelElement, toRender);
 								if (cellToRender != null) {
 									styleToRender = cellToRender.getStyle();
 									if (cellToRender.getDisplay() != null)
@@ -708,7 +611,7 @@ public class GridFactory {
 									lsb.append(SafeHtmlUtils.fromTrustedString("&#160;"));
 								else
 									lsb.append(SafeHtmlUtils.fromString(toRender));
-								styleToRender = modelGrid.complementPublishedStyle(styleToRender);
+								styleToRender = grid.complementPublishedStyle(styleToRender);
 								ControlsUtils.renderDecorated(lsb, styleToRender, sb);
 								if (cellToRender != null) {
 									bindCallback(context, cellToRender);
@@ -757,7 +660,7 @@ public class GridFactory {
 
 			SafeHtmlBuilder sb = new SafeHtmlBuilder();
 			sb.appendHtmlConstant((aTitle != null && !aTitle.isEmpty()) ? aTitle : aName);
-			PlatypusColumnConfig<Row, String> cc = new PlatypusColumnConfig<Row, String>(new RowValueGridColumn<String>(rowsSource, aColModelElement, new StringRowValueConverter()), aWidth,
+			PlatypusColumnConfig<Row, String> cc = new PlatypusColumnConfig<Row, String>(new ValueGridColumn<String>(rowsSource, aColModelElement, new StringRowValueConverter()), aWidth,
 			        sb.toSafeHtml(), readonly, fixed);
 			cc.setCell(new AbstractCell<String>() {
 
@@ -767,7 +670,7 @@ public class GridFactory {
 						String toRender = value;
 						PublishedStyle styleToRender = null;
 						SafeHtmlBuilder lsb = new SafeHtmlBuilder();
-						PublishedCell cellToRender = calcContextPublishedCell(column.getEventsThis(), column.getOnRender() != null ? column.getOnRender() : modelGrid.getOnRender(),
+						PublishedCell cellToRender = calcContextPublishedCell(column.getEventsThis(), column.getOnRender() != null ? column.getOnRender() : grid.getOnRender(),
 						        context, aColModelElement, value);
 						if (cellToRender != null) {
 							styleToRender = cellToRender.getStyle();
@@ -778,7 +681,7 @@ public class GridFactory {
 							lsb.append(SafeHtmlUtils.fromTrustedString("&#160;"));
 						else
 							lsb.append(SafeHtmlUtils.fromString(toRender));
-						styleToRender = modelGrid.complementPublishedStyle(styleToRender);
+						styleToRender = grid.complementPublishedStyle(styleToRender);
 						ControlsUtils.renderDecorated(lsb, styleToRender, sb);
 						if (cellToRender != null) {
 							bindCallback(context, cellToRender);

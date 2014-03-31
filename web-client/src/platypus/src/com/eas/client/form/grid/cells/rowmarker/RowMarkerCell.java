@@ -1,4 +1,4 @@
-package com.eas.client.form.grid.rowmarker;
+package com.eas.client.form.grid.cells.rowmarker;
 
 import com.bearsoft.rowset.Row;
 import com.eas.client.model.Entity;
@@ -6,6 +6,7 @@ import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 
 public class RowMarkerCell extends AbstractCell<Row> {
+	
 	protected Entity rowsSource;
 
 	public RowMarkerCell(Entity aRowsSource) {

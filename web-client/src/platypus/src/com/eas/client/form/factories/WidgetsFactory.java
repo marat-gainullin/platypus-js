@@ -186,12 +186,14 @@ public class WidgetsFactory {
 			return null;
 	}
 
+	/*
 	private Element pickBorderTag(Element aTag) {
 		if (!isRoot)
 			return Utils.scanForElementByTagName(aTag, BORDER_TAG);
 		else
 			return null;
 	}
+	*/
 
 	private UIObject parseWidget(Element aTag) throws Exception {
 		String nodeName = aTag.getNodeName();

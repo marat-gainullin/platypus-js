@@ -9,11 +9,20 @@ import com.eas.client.form.CrossUpdater;
 import com.eas.client.form.RowKeyProvider;
 import com.eas.client.form.grid.FindWindow;
 import com.eas.client.form.grid.GridCrossUpdaterAction;
+import com.eas.client.form.grid.RowsetPositionSelectionHandler;
+import com.eas.client.form.grid.cells.rowmarker.RowMarkerCell;
+import com.eas.client.form.grid.columns.CheckServiceColumn;
+import com.eas.client.form.grid.columns.RadioServiceColumn;
+import com.eas.client.form.grid.selection.MultiRowSelectionModel;
+import com.eas.client.form.grid.selection.SingleRowSelectionModel;
 import com.eas.client.form.published.HasPublished;
 import com.eas.client.form.published.PublishedComponent;
 import com.eas.client.form.published.PublishedStyle;
 import com.eas.client.model.Entity;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.cellview.client.IdentityColumn;
+import com.google.gwt.view.client.SelectionModel;
 
 /**
  * Class intended to wrap a grid or tree grid. It also contains grid API.
@@ -23,21 +32,66 @@ import com.google.gwt.core.client.JavaScriptObject;
  */
 public class ModelGrid extends Grid<Row> implements HasPublished {
 
+	public static final int ROWS_HEADER_TYPE_NONE = 0;
+	public static final int ROWS_HEADER_TYPE_USUAL = 1;
+	public static final int ROWS_HEADER_TYPE_CHECKBOX = 2;
+	public static final int ROWS_HEADER_TYPE_RADIOBUTTON = 3;
+
 	protected Entity rowsSource;
 	protected JavaScriptObject onRender;
 	protected PublishedComponent published;
 	protected Runnable crossUpdaterAction;
 	protected CrossUpdater crossUpdater;
 	protected FindWindow finder;
+	protected int rowsHeaderType;
+	// runtime
+	protected HandlerRegistration positionSelectionHandler;
 
-	/**
-	 * 
-	 */
 	public ModelGrid() {
 		super(new RowKeyProvider());
 		finder = new FindWindow(this);
 		crossUpdaterAction = new GridCrossUpdaterAction(this);
 		crossUpdater = new CrossUpdater(crossUpdaterAction);
+	}
+
+	public int getRowsHeaderType() {
+		return rowsHeaderType;
+	}
+
+	public void setRowsHeaderType(int aValue) {
+		if (rowsHeaderType != aValue) {
+			if (rowsHeaderType != ROWS_HEADER_TYPE_CHECKBOX && rowsHeaderType != ROWS_HEADER_TYPE_RADIOBUTTON && rowsHeaderType != ROWS_HEADER_TYPE_USUAL) {
+				removeColumn(0);
+			}
+			rowsHeaderType = aValue;
+			SelectionModel<Row> sm;
+			if (rowsHeaderType == ROWS_HEADER_TYPE_CHECKBOX) {
+				sm = new MultiRowSelectionModel();
+				insertColumn(0, new CheckServiceColumn(sm), "\\", null);
+			} else if (rowsHeaderType == ROWS_HEADER_TYPE_RADIOBUTTON) {
+				sm = new SingleRowSelectionModel();
+				insertColumn(0, new RadioServiceColumn(sm), "\\", null);
+			} else if (rowsHeaderType == ROWS_HEADER_TYPE_USUAL) {
+				sm = new MultiRowSelectionModel();
+				IdentityColumn<Row> col = new IdentityColumn<>(new RowMarkerCell(rowsSource));
+				insertColumn(0, col, "\\", null);
+			} else {
+				sm = new MultiRowSelectionModel();
+			}
+			setSelectionModel(sm);
+		}
+	}
+
+	@Override
+	public void setSelectionModel(SelectionModel<Row> aValue) {
+		assert aValue != null : "Selection model can't be null.";
+		SelectionModel<? super Row> oldValue = getSelectionModel();
+		if (aValue != oldValue) {
+			if (positionSelectionHandler != null)
+				positionSelectionHandler.removeHandler();
+			setSelectionModel(aValue);
+			positionSelectionHandler = aValue.addSelectionChangeHandler(new RowsetPositionSelectionHandler(rowsSource, aValue));
+		}
 	}
 
 	protected void applyColorsFontCursor() {
