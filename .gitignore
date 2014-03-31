@@ -17,6 +17,8 @@ com.google.gdt.eclipse.core.prefs
 *\build/
 *\dist/
 
+!/installer/ext/infra/build
+
 /application/lib/own/README.TXT
 /application/src/group/build.num
 /application/src/lib/thirdparty/JSqlParser/build/
