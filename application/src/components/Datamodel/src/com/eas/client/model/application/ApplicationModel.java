@@ -134,18 +134,6 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
     }
 
     @Override
-    public boolean validate() throws Exception {
-        boolean res = super.validate();
-        if (res) {
-            for (Relation<E> rel : referenceRelations) {
-                resolveRelation(rel, this);
-            }
-            checkReferenceRelationsIntegrity();
-        }
-        return res;
-    }
-
-    @Override
     protected void resolveRelation(Relation<E> aRelation, Model<E, P, C, Q> aModel) throws Exception {
         super.resolveRelation(aRelation, aModel);
         if (aRelation instanceof ReferenceRelation<?>) {
@@ -199,6 +187,14 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         }
         ((ApplicationModel<E, P, C, Q>) copied).checkReferenceRelationsIntegrity();
         return copied;
+    }
+
+    @Override
+    protected void validateRelations() throws Exception {
+        super.validateRelations();
+        for (Relation<E> rel : referenceRelations) {
+            resolveRelation(rel, this);
+        }
     }
 
     @Override

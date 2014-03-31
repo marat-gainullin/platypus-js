@@ -1038,6 +1038,7 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
 
     protected void paintConnectors(Graphics2D g2d, Set<Relation<E>> aRels, Stroke aConnectorsStroke) {
         if (aRels != null && !aRels.isEmpty()) {
+            Color loldColor = g2d.getColor();
             Stroke loldStroke = g2d.getStroke();
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             g2d.setStroke(slotsStroke);
@@ -1054,8 +1055,9 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
                 }
             } finally {
                 g2d.setStroke(loldStroke);
+                g2d.setColor(loldColor);
             }
-            Color loldColor = g2d.getColor();
+            loldColor = g2d.getColor();
             loldStroke = g2d.getStroke();
             g2d.setColor(toFieldConnectorColor);
             g2d.setStroke(aConnectorsStroke);
@@ -1063,7 +1065,7 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
                 for (Relation<E> lrel : aRels) {
                     if (lrel.getRightEntity() != null && lrel.getRightField() != null) {
                         if (lrel.getRightEntity().isQuery()) {
-                            Fields rFields = lrel.getRightEntity().getFields();
+                            Fields rFields = lrel.getRightEntity().getQuery().getFields();
                             assert rFields != null : "Fields are absent while query is present.";
                             Field toField = rFields.get(lrel.getRightField().getName());
                             if (toField == null || toField != lrel.getRightField()) {
