@@ -14,6 +14,7 @@ import com.eas.script.ScriptFunction;
 public abstract class Change {
 
     public String entityId;
+    public boolean trusted;
     public boolean consumed;
 
     public static class Value {

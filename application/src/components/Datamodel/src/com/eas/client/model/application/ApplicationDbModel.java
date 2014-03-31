@@ -126,6 +126,11 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Ap
 
     @Override
     public int commit() throws Exception {
+        for (List<Change> changeLog : changeLogs.values()) {
+            for(Change change : changeLog){
+                change.trusted = true;
+            }
+        }
         return client.commit(changeLogs);
     }
 

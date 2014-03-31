@@ -122,7 +122,9 @@ public class StatementsGenerator implements ChangeVisitor {
 
     @Override
     public void visit(Insert aChange) throws Exception {
-        entitiesHost.checkRights(aChange.entityId);
+        if (!aChange.trusted) {
+            entitiesHost.checkRights(aChange.entityId);
+        }
         Map<String, InsertChunk> inserts = new HashMap<>();
         for (int i = 0; i < aChange.data.length; i++) {
             Field field = entitiesHost.resolveField(aChange.entityId, aChange.data[i].name);
@@ -201,7 +203,9 @@ public class StatementsGenerator implements ChangeVisitor {
     @Override
     public void visit(Update aChange) throws Exception {
         if (!aChange.consumed) {
-            entitiesHost.checkRights(aChange.entityId);
+            if (!aChange.trusted) {
+                entitiesHost.checkRights(aChange.entityId);
+            }
             Map<String, UpdateChunk> updates = new HashMap<>();
             // data
             for (int i = 0; i < aChange.data.length; i++) {
@@ -255,7 +259,9 @@ public class StatementsGenerator implements ChangeVisitor {
     @Override
     public void visit(Delete aChange) throws Exception {
         if (!aChange.consumed) {
-            entitiesHost.checkRights(aChange.entityId);
+            if (!aChange.trusted) {
+                entitiesHost.checkRights(aChange.entityId);
+            }
             Map<String, StatementsLogEntry> deletes = new HashMap<>();
             for (int i = 0; i < aChange.keys.length; i++) {
                 Field field = entitiesHost.resolveField(aChange.entityId, aChange.keys[i].name);
@@ -282,7 +288,9 @@ public class StatementsGenerator implements ChangeVisitor {
     @Override
     public void visit(Command aChange) throws Exception {
         if (!aChange.consumed) {
-            entitiesHost.checkRights(aChange.entityId);
+            if (!aChange.trusted) {
+                entitiesHost.checkRights(aChange.entityId);
+            }
             StatementsLogEntry logEntry = new StatementsLogEntry(converter);
             logEntry.clause = aChange.command;
             logEntry.parameters.addAll(Arrays.asList(aChange.parameters));

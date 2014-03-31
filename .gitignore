@@ -16,9 +16,7 @@ com.google.gdt.eclipse.core.prefs
 *\private/
 *\build/
 *\dist/
-
 !/installer/ext/infra/build
-
 /application/lib/own/README.TXT
 /application/src/group/build.num
 /application/src/lib/thirdparty/JSqlParser/build/
@@ -55,3 +53,17 @@ com.google.gdt.eclipse.core.prefs
 /application/src/components/Classes2Scripts/nbproject/private/
 /installer/ext/components/products/platypus-runtime/nbproject/private/
 /installer/ext/engine/nbproject/private/
+/designer/PlatypusDatamodel/nbproject/private/
+/designer/PlatypusDebugger/nbproject/private/
+/designer/javascript.guards/nbproject/private/
+/designer/PlatypusQueries/nbproject/private/
+/designer/PlatypusModules/nbproject/private/
+/designer/PlatypusReport/nbproject/private/
+/designer/PlatypusDbDiagram/nbproject/private/
+/designer/PlatypusForms/nbproject/private/
+/designer/PlatypusApplication/nbproject/private/
+/designer/PlatypusExplorer/nbproject/private/
+/application/src/components/Core/nbproject/private/
+/application/src/components/Application/nbproject/private/
+/application/src/lib/own/Rowsets/nbproject/private/
+

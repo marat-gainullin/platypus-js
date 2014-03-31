@@ -216,20 +216,20 @@ public class DbSchemeEditorView extends JPanel implements ContainerListener {
         }
     }
     // data structure
-    protected DbSchemeModel schemeModel = null;
+    protected DbSchemeModel schemeModel;
     // editing
     protected UndoManager undo = new UndoManager();
     protected DbUndoableEditListener undoListener = new DbUndoableEditListener();
     // views
     protected JComboBox<String> comboZoom = new JComboBox<>();
-    protected DbSchemeModelView modelView = null;
+    protected DbSchemeModelView modelView;
     //protected TableFieldsView fView = null;
     protected FieldsEntitiesViewsSelectionListener entitySelectionListener = new FieldsEntitiesViewsSelectionListener();
     // misc
-    protected JScalableScrollPane dbSchemeScroll = null;
+    protected JScalableScrollPane dbSchemeScroll;
     protected RunQueryCallback runQueryCallback;
 //    protected JScrollPane dbSchemeScroll = null;
-    protected SqlActionsController sqlController = null;
+    protected SqlActionsController sqlController;
     protected static final String[] zoomLevelsData = new String[]{"25%", "50%", "75%", "100%", "150%", "200%", "300%"};
     protected static final Dimension BTN_DIMENSION = new Dimension(28, 28);
 

@@ -143,7 +143,7 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
      */
     @Override
     public void setDefaultDatasourceName(String aValue) {
-        String oldValue = getRunElement();
+        String oldValue = getDefaultDataSourceName();
         if (aValue != null) {
             projectPrivateProperties.setProperty(DEFAULT_DATA_SOURCE_ELEMENT_KEY, aValue);
         } else {

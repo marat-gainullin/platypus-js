@@ -1762,11 +1762,11 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
 
     private static final String DELETE_ROW_BY_INDEX_JSDOC = ""
             + "/**\n"
-            + " * Deletes the row by cursor-like index.\n"
-            + " * @param aIndex row position in terms of cursor API. 1-based.\n"
+            + " * Deletes the row by cursor position.\n"
+            + " * @param aCusorPos row position in terms of cursor API. 1-based.\n"
             + " */";
 
-    @ScriptFunction(jsDoc = DELETE_ROW_BY_INDEX_JSDOC)
+    @ScriptFunction(jsDoc = DELETE_ROW_BY_INDEX_JSDOC, params={"aCusorPos"})
     public boolean deleteRow(int aCursorIndex) throws Exception {
         Rowset rowset = getRowset();
         if (aCursorIndex >= 1 && aCursorIndex <= rowset.size()) {
@@ -1783,7 +1783,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
             + " * @param aRow A row to be deleted.\n"
             + " */";
 
-    @ScriptFunction(jsDoc = DELETE_ROW_BY_ROW_JSDOC)
+    @ScriptFunction(jsDoc = DELETE_ROW_BY_ROW_JSDOC, params={"aRow"})
     public boolean deleteRow(RowHostObject aRow) throws Exception {
         if (aRow != null && aRow.unwrap() != null) {
             Rowset rowset = getRowset();
