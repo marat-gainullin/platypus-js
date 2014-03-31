@@ -107,12 +107,16 @@ public class DatabasesClient implements DbClient {
 
     public void setDefaultDatasourceName(String aValue, boolean fireEvents) throws Exception {
         if (defaultDatasourceName == null ? aValue != null : !defaultDatasourceName.equals(aValue)) {
+            String oldDefaultDatasourceName = defaultDatasourceName;
+            DatabaseMdCache oldMdCache = mdCaches.remove(null);
+            DatabaseMdCache newMdCache = mdCaches.remove(aValue);
             defaultDatasourceName = aValue;
-            DatabaseMdCache mdCache = mdCaches.get(null);
-            if (mdCache != null) {
-                mdCache.clear();
+            if (oldMdCache != null) {
+                mdCaches.put(oldDefaultDatasourceName, oldMdCache);
             }
-            mdCaches.remove(null);
+            if (newMdCache != null) {
+                mdCaches.put(null, newMdCache);
+            }
             appEntityChanged(null, fireEvents);
         }
     }
@@ -511,22 +515,11 @@ public class DatabasesClient implements DbClient {
                 appCache.remove(aEntityId);
             }
         } else {
-            clearCaches(fireEvents);
+            if (appCache != null) {
+                appCache.clear();
+            }
+            clearQueries(fireEvents);
         }
-    }
-
-    protected void clearCaches() throws Exception {
-        clearCaches(true);
-    }
-
-    protected void clearCaches(boolean fireEvents) throws Exception {
-        for (DatabaseMdCache cache : mdCaches.values()) {
-            cache.clear();
-        }
-        if (appCache != null) {
-            appCache.clear();
-        }
-        clearQueries(fireEvents);
     }
 
     public void clearQueries() throws Exception {

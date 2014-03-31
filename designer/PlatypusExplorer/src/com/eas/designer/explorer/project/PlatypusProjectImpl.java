@@ -215,19 +215,23 @@ public class PlatypusProjectImpl implements PlatypusProject {
     }
 
     @Override
-    public void startConnecting2db(final String aDatasourceId) {
+    public void startConnecting2db(final String aDatasourceName) {
         if (connecting2Db == null) {
             connecting2Db = RP.create(new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        connect2db(aDatasourceId);
+                        connect2db(aDatasourceName);
                     } catch (Exception ex) {
                         Logger.getLogger(PlatypusProjectImpl.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
             });
-            final ProgressHandle ph = ProgressHandleFactory.createHandle(NbBundle.getMessage(PlatypusProjectImpl.class, "LBL_Connecting_Progress", aDatasourceId), connecting2Db); // NOI18N  
+            String datasourceId = aDatasourceName;
+            if (datasourceId == null) {
+                datasourceId = settings.getDefaultDataSourceName();
+            }
+            final ProgressHandle ph = ProgressHandleFactory.createHandle(NbBundle.getMessage(PlatypusProjectImpl.class, "LBL_Connecting_Progress", datasourceId), connecting2Db); // NOI18N  
             connecting2Db.addTaskListener(new TaskListener() {
                 @Override
                 public void taskFinished(org.openide.util.Task task) {

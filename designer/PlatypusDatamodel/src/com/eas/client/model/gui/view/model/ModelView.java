@@ -1465,6 +1465,7 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
                     if (!(lo instanceof ModelView)) {
                         lPt = SwingUtilities.convertPoint((Component) lo, lPt, ModelView.this);
                     }
+                    Set<Relation<E>> oldHittedRelations = hittedRelations;
                     hittedRelations = hittestRelationsConnectors(lPt, EntityView.HALF_INSET_ZONE);
                     HittedRelationSegment lhittedSegment = selectHittedRelationSegment(lPt, EntityView.HALF_INSET_ZONE);
                     if (lhittedSegment != null) {
@@ -1478,8 +1479,9 @@ public abstract class ModelView<E extends Entity<?, ?, E>, P extends E, M extend
                     } else {
                         setCursor(Cursor.getDefaultCursor());
                     }
-                    repaint();
-                }
+                    if (oldHittedRelations == null ? hittedRelations != null : !oldHittedRelations.equals(hittedRelations)) {
+                        repaint();
+                    }                }
                 if (hittedRelations != null && !hittedRelations.isEmpty()) {
                     setToolTipText(generateHintFromRelations(hittedRelations));
                 } else {
