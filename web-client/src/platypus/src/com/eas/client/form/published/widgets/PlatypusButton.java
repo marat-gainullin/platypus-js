@@ -71,22 +71,22 @@ public class PlatypusButton extends ImageButton implements HasPublished {
 			get : function() {
 				var position = aComponent.@com.eas.client.form.published.widgets.PlatypusButton::getHorizontalTextPosition()();
 				switch(position) { 
-					case @com.eas.client.form.published.widgets.PlatypusButton::LEFT :	return $wnd.HorizontalPosition.LEFT; 
-					case @com.eas.client.form.published.widgets.PlatypusButton::RIGHT :	return $wnd.HorizontalPosition.RIGHT; 
-					case @com.eas.client.form.published.widgets.PlatypusButton::CENTER :	return $wnd.HorizontalPosition.CENTER;
+					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::LEFT :	return $wnd.HorizontalPosition.LEFT; 
+					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::RIGHT :	return $wnd.HorizontalPosition.RIGHT; 
+					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::CENTER :	return $wnd.HorizontalPosition.CENTER;
 					default : return null; 
 				}	
 			},
 			set : function(aValue) {
 				switch (aValue) {
 					case $wnd.HorizontalPosition.LEFT:
-						aComponent.@com.eas.client.form.published.widgets.PlatypusButton::setHorizontalTextPosition(I)(@com.eas.client.form.published.widgets.PlatypusButton::LEFT);
+						aComponent.@com.eas.client.form.published.widgets.PlatypusButton::setHorizontalTextPosition(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::LEFT);
 						break;
 					case $wnd.HorizontalPosition.RIGHT:
-						aComponent.@com.eas.client.form.published.widgets.PlatypusButton::setHorizontalTextPosition(I)(@com.eas.client.form.published.widgets.PlatypusButton::RIGHT);
+						aComponent.@com.eas.client.form.published.widgets.PlatypusButton::setHorizontalTextPosition(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::RIGHT);
 						break;
 					case $wnd.HorizontalPosition.CENTER:
-						aComponent.@com.eas.client.form.published.widgets.PlatypusButton::setHorizontalTextPosition(I)(@com.eas.client.form.published.widgets.PlatypusButton::CENTER);
+						aComponent.@com.eas.client.form.published.widgets.PlatypusButton::setHorizontalTextPosition(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::CENTER);
 						break;
 				}
 			}
@@ -95,22 +95,22 @@ public class PlatypusButton extends ImageButton implements HasPublished {
 			get : function() {
 				var positon = aComponent.@com.eas.client.form.published.widgets.PlatypusButton::getVerticalTextPosition()();
 				switch(position) { 
-					case @com.eas.client.form.published.widgets.PlatypusButton::TOP :	return $wnd.VerticalPosition.TOP; 
-					case @com.eas.client.form.published.widgets.PlatypusButton::BOTTOM :	return $wnd.VerticalPosition.BOTTOM; 
-					case @com.eas.client.form.published.widgets.PlatypusButton::CENTER :	return $wnd.VerticalPosition.CENTER;
+					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::TOP :	return $wnd.VerticalPosition.TOP; 
+					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::BOTTOM :	return $wnd.VerticalPosition.BOTTOM; 
+					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::CENTER :	return $wnd.VerticalPosition.CENTER;
 					default : return null;
 				} 
 			},
 			set : function(aValue) {
 				switch (aValue) {
 					case $wnd.VerticalPosition.TOP:
-						aComponent.@com.eas.client.form.published.widgets.PlatypusButton::setVerticalTextPosition(I)(@com.eas.client.form.published.widgets.PlatypusButton::TOP);
+						aComponent.@com.eas.client.form.published.widgets.PlatypusButton::setVerticalTextPosition(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::TOP);
 						break;
 					case $wnd.VerticalPosition.BOTTOM:
-						aComponent.@com.eas.client.form.published.widgets.PlatypusButton::setVerticalTextPosition(I)(@com.eas.client.form.published.widgets.PlatypusButton::BOTTOM);
+						aComponent.@com.eas.client.form.published.widgets.PlatypusButton::setVerticalTextPosition(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::BOTTOM);
 						break;
 					case $wnd.VerticalPosition.CENTER:
-						aComponent.@com.eas.client.form.published.widgets.PlatypusButton::setVerticalTextPosition(I)(@com.eas.client.form.published.widgets.PlatypusButton::CENTER);
+						aComponent.@com.eas.client.form.published.widgets.PlatypusButton::setVerticalTextPosition(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::CENTER);
 						break;
 				}
 			}
@@ -120,22 +120,22 @@ public class PlatypusButton extends ImageButton implements HasPublished {
 			get : function() {
 				var position = aComponent.@com.eas.client.form.published.widgets.PlatypusButton::getHorizontalAlignment()();
 				switch(position) { 
-					case @com.eas.client.form.published.widgets.PlatypusButton::LEFT :	return $wnd.HorizontalPosition.LEFT; 
-					case @com.eas.client.form.published.widgets.PlatypusButton::RIGHT :	return $wnd.HorizontalPosition.RIGHT; 
-					case @com.eas.client.form.published.widgets.PlatypusButton::CENTER :	return $wnd.HorizontalPosition.CENTER;
+					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::LEFT :	return $wnd.HorizontalPosition.LEFT; 
+					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::RIGHT :	return $wnd.HorizontalPosition.RIGHT; 
+					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::CENTER :	return $wnd.HorizontalPosition.CENTER;
 					default : return null; 
 				}	
 			},
 			set : function(aValue) {
 				switch (aValue) {
 					case $wnd.HorizontalPosition.LEFT:
-						aComponent.@com.eas.client.form.published.widgets.PlatypusButton::setHorizontalAlignment(I)(@com.eas.client.form.published.widgets.PlatypusButton::LEFT);
+						aComponent.@com.eas.client.form.published.widgets.PlatypusButton::setHorizontalAlignment(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::LEFT);
 						break;
 					case $wnd.HorizontalPosition.RIGHT:
-						aComponent.@com.eas.client.form.published.widgets.PlatypusButton::setHorizontalAlignment(I)(@com.eas.client.form.published.widgets.PlatypusButton::RIGHT);
+						aComponent.@com.eas.client.form.published.widgets.PlatypusButton::setHorizontalAlignment(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::RIGHT);
 						break;
 					case $wnd.HorizontalPosition.CENTER:
-						aComponent.@com.eas.client.form.published.widgets.PlatypusButton::setHorizontalAlignment(I)(@com.eas.client.form.published.widgets.PlatypusButton::CENTER);
+						aComponent.@com.eas.client.form.published.widgets.PlatypusButton::setHorizontalAlignment(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::CENTER);
 						break;
 				}
 			}
@@ -144,22 +144,22 @@ public class PlatypusButton extends ImageButton implements HasPublished {
 			get : function() {
 				var positon = aComponent.@com.eas.client.form.published.widgets.PlatypusButton::getVerticalAlignment()();
 				switch(position) { 
-					case @com.eas.client.form.published.widgets.PlatypusButton::TOP :	return $wnd.VerticalPosition.TOP; 
-					case @com.eas.client.form.published.widgets.PlatypusButton::BOTTOM :	return $wnd.VerticalPosition.BOTTOM; 
-					case @com.eas.client.form.published.widgets.PlatypusButton::CENTER :	return $wnd.VerticalPosition.CENTER;
+					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::TOP :	return $wnd.VerticalPosition.TOP; 
+					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::BOTTOM :	return $wnd.VerticalPosition.BOTTOM; 
+					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::CENTER :	return $wnd.VerticalPosition.CENTER;
 					default : return null;
 				} 
 			},
 			set : function(aValue) {
 				switch (aValue) {
 					case $wnd.VerticalPosition.TOP:
-						aComponent.@com.eas.client.form.published.widgets.PlatypusButton::setVerticalAlignment(I)(@com.eas.client.form.published.widgets.PlatypusButton::TOP);
+						aComponent.@com.eas.client.form.published.widgets.PlatypusButton::setVerticalAlignment(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::TOP);
 						break;
 					case $wnd.VerticalPosition.BOTTOM:
-						aComponent.@com.eas.client.form.published.widgets.PlatypusButton::setVerticalAlignment(I)(@com.eas.client.form.published.widgets.PlatypusButton::BOTTOM);
+						aComponent.@com.eas.client.form.published.widgets.PlatypusButton::setVerticalAlignment(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::BOTTOM);
 						break;
 					case $wnd.VerticalPosition.CENTER:
-						aComponent.@com.eas.client.form.published.widgets.PlatypusButton::setVerticalAlignment(I)(@com.eas.client.form.published.widgets.PlatypusButton::CENTER);
+						aComponent.@com.eas.client.form.published.widgets.PlatypusButton::setVerticalAlignment(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::CENTER);
 						break;
 				}
 			}

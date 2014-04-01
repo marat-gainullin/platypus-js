@@ -29,6 +29,10 @@ public class RowsetDataProvider extends ListDataProvider<Row> {
 		setRowset(aRowset);
 	}
 
+	public RowsetReflector getRowsetReflector() {
+		return rowsetReflector;
+	}
+
 	public void setRowset(Rowset aRowset) {
 		if (rowset != aRowset) {
 			invalidate();

@@ -1,5 +1,6 @@
 package com.eas.client.form;
 
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -243,24 +244,20 @@ public class ControlsUtils {
 		return null;
 	}
 
-	protected interface ElementCallback {
-		public void run(Element aElement);
-	}
-
-	protected static void walkChildren(XElement aRoot, ElementCallback aCallback) {
-		NodeList<Element> children = aRoot.select("*");
-		for (int i = 0; i < children.getLength(); i++) {
-			Element el = children.getItem(i);
-			aCallback.run(el);
+	protected static void walkChildren(XElement aRoot, XElement.Observer aCallback) {
+		List<Element> children = aRoot.select("*");
+		for (int i = 0; i < children.size(); i++) {
+			Element el = children.get(i);
+			aCallback.observe(el);
 		}
 	}
 
-	protected static void walkChildren(Element aRoot, Element aStop, ElementCallback aCallback) {
+	protected static void walkChildren(Element aRoot, Element aStop, XElement.Observer aCallback) {
 		NodeList<Node> children = aRoot.getChildNodes();
 		for (int i = 0; i < children.getLength(); i++) {
 			Node el = children.getItem(i);
 			if (el instanceof Element) {
-				aCallback.run((Element) el);
+				aCallback.observe((Element) el);
 				if (el != aStop)
 					walkChildren((Element) el, aStop, aCallback);
 			}

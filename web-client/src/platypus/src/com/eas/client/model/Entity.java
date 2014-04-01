@@ -925,8 +925,7 @@ public class Entity implements RowsetListener {
 	}-*/;
 
 	public static native JavaScriptObject publishRowFacade(Row aRow, Entity aEntity) throws Exception/*-{
-		if(aRow != null)
-		{
+		if(aRow != null){
 			var published = aRow.@com.bearsoft.rowset.Row::getPublished()();
 			if(published == null)
 			{
@@ -2316,13 +2315,18 @@ public class Entity implements RowsetListener {
 	 * @return Wrapped row if it have been found and null otherwise.
 	 */
 	public JavaScriptObject findById(Object aValue) throws Exception {
+		Row result = findRowById(aValue);
+		return result != null ? publishRowFacade(result, this) : null;
+	}
+	
+	public Row findRowById(Object aValue) throws Exception {
 		List<Integer> pkIndicies = getFields().getPrimaryKeysIndicies();
 		if (pkIndicies.size() == 1) {
 			Object keyValue = Utils.toJava(aValue);
 			keyValue = Converter.convert2RowsetCompatible(keyValue, getFields().get(pkIndicies.get(0)).getTypeInfo());
 			Locator loc = checkUserLocator(pkIndicies);
 			if (loc != null && loc.find(new Object[] { keyValue }))
-				return publishRowFacade(loc.getRow(0), this);
+				return loc.getRow(0);
 			else
 				return null;
 		} else

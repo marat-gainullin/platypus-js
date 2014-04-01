@@ -6,8 +6,14 @@ import java.util.logging.Logger;
 import com.bearsoft.gwt.ui.widgets.grid.DraggableHeader;
 import com.bearsoft.gwt.ui.widgets.grid.GridColumn;
 import com.bearsoft.rowset.Row;
+import com.bearsoft.rowset.Utils;
 import com.eas.client.converters.RowValueConverter;
+import com.eas.client.form.ControlsUtils;
+import com.eas.client.form.Publisher;
+import com.eas.client.form.js.JsEvents;
 import com.eas.client.form.published.HasPublished;
+import com.eas.client.form.published.PublishedCell;
+import com.eas.client.form.published.PublishedStyle;
 import com.eas.client.form.published.widgets.model.ModelElementRef;
 import com.eas.client.form.published.widgets.model.ModelGrid;
 import com.eas.client.form.published.widgets.model.PublishedDecoratorBox;
@@ -15,6 +21,9 @@ import com.eas.client.model.Entity;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.dom.client.Element;
 
 public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements FieldUpdater<Row, T>, ChangesHost, HasPublished, ModelGridColumnFacade {
 
@@ -31,6 +40,7 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 	protected boolean readonly;
 	protected boolean visible;
 	protected boolean sortable;
+	protected boolean selectOnly;
 	protected JavaScriptObject published;
 	protected JavaScriptObject onRender;
 	protected JavaScriptObject onSelect;
@@ -121,7 +131,7 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 			}
 		}
 	}
-	
+
 	@Override
 	public boolean isVisible() {
 		return visible;
@@ -173,6 +183,14 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 		readonly = aValue;
 	}
 
+	public boolean isFixed() {
+		return fixed;
+	}
+
+	public void setFixed(boolean aValue) {
+		fixed = aValue;
+	}
+
 	@Override
 	public boolean isSortable() {
 		return sortable;
@@ -181,6 +199,14 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 	@Override
 	public void setSortable(boolean aValue) {
 		sortable = aValue;
+	}
+
+	public boolean isSelectOnly() {
+		return selectOnly;
+	}
+
+	public void setSelectOnly(boolean aValue) {
+		selectOnly = aValue;
 	}
 
 	@Override
@@ -231,6 +257,59 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 				editor.setOnSelect(onSelect);
 			}
 		}
+	}
+
+	public static PublishedCell calcContextPublishedCell(JavaScriptObject aThis, JavaScriptObject cellFunction, com.google.gwt.cell.client.Cell.Context context, ModelElementRef aColModelElement,
+	        String aDisplay, Entity aRowsEntity) throws Exception {
+		if (cellFunction != null) {
+			Row renderedRow = renderedRow(context, aRowsEntity);
+			if (renderedRow != null) {
+				Object data = aColModelElement != null ? Utils.toJs(renderedRow.getColumnObject(aColModelElement.getColIndex())) : null;
+				PublishedCell cell = Publisher.publishCell(data, aDisplay);
+				Object[] rowIds = renderedRow.getPKValues();
+				if (rowIds != null) {
+					for (int i = 0; i < rowIds.length; i++)
+						rowIds[i] = Utils.toJs(rowIds[i]);
+				}
+				Boolean res = Utils.executeScriptEventBoolean(
+				        aThis,
+				        cellFunction,
+				        JsEvents.publishOnRenderEvent(aThis, rowIds != null && rowIds.length > 0 ? (rowIds.length > 1 ? Utils.toJsArray(rowIds) : rowIds[0]) : null, null,
+				                Entity.publishRowFacade(renderedRow, aRowsEntity), cell));
+				if (res != null && res) {
+					return cell;
+				}
+			}
+		}
+		return null;
+	}
+
+	protected static Row renderedRow(com.google.gwt.cell.client.Cell.Context context, Entity aRowsEntity) throws Exception {
+		Object key = context.getKey();
+		Row renderedRow = aRowsEntity.findRowById(key);
+		return renderedRow;
+	}
+
+	protected void bindContextCallback(final com.google.gwt.cell.client.Cell.Context context, final PublishedCell cellToRender) {
+		cellToRender.setDisplayCallback(new Runnable() {
+			@Override
+			public void run() {
+				Element td = grid.getViewCell(context.getIndex(), context.getColumn());
+				if (td != null) {
+					// rendering
+					SafeHtmlBuilder sb = new SafeHtmlBuilder();
+					SafeHtmlBuilder lsb = new SafeHtmlBuilder();
+					String toRender1 = cellToRender.getDisplay();
+					if (toRender1 == null)
+						lsb.append(SafeHtmlUtils.fromTrustedString("&#160;"));
+					else
+						lsb.append(SafeHtmlUtils.fromString(toRender1));
+					PublishedStyle styleToRender = grid.complementPublishedStyle(cellToRender.getStyle());
+					ControlsUtils.renderDecorated(lsb, styleToRender, sb);
+					td.setInnerSafeHtml(sb.toSafeHtml());
+				}
+			}
+		});
 	}
 
 	@Override

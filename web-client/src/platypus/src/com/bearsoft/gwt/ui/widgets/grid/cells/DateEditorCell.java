@@ -20,20 +20,20 @@ import java.util.Date;
  * 
  * @author mg
  */
-public class DateEditorCell extends AbstractPopupEditorCell<Date> {
+public class DateEditorCell extends RenderedPopupEditorCell<Date> {
 
 	protected DateTimeFormat format = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_TIME_MEDIUM);
 
 	public DateEditorCell() {
-		super(new DateBox(), BrowserEvents.CLICK, BrowserEvents.DBLCLICK);
+		super(new DateBox());
 	}
 
 	public DateEditorCell(Widget aEditor) {
-		super(aEditor, BrowserEvents.CLICK, BrowserEvents.DBLCLICK);
+		super(aEditor);
 	}
 
 	public DateEditorCell(Widget aEditor, DateTimeFormat aFormat) {
-		super(aEditor, BrowserEvents.CLICK, BrowserEvents.DBLCLICK);
+		super(aEditor);
 		format = aFormat;
 	}
 
@@ -46,16 +46,7 @@ public class DateEditorCell extends AbstractPopupEditorCell<Date> {
 	}
 
 	@Override
-	public void render(Context context, Date value, SafeHtmlBuilder sb) {
+	protected void renderCell(Context context, Date value, SafeHtmlBuilder sb) {
 		sb.append(SafeHtmlUtils.fromTrustedString(value != null ? format.format(value) : ""));
-	}
-
-	@Override
-	public void onBrowserEvent(Context context, Element parent, Date value, NativeEvent event, ValueUpdater<Date> valueUpdater) {
-		if (BrowserEvents.DBLCLICK.equals(event.getType())) {
-			startEditing(parent, value, valueUpdater);
-		} else {
-			super.onBrowserEvent(context, parent, value, event, valueUpdater);
-		}
 	}
 }

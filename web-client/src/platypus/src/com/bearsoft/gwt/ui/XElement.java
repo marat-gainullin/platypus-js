@@ -5,16 +5,25 @@
  */
 package com.bearsoft.gwt.ui;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.dom.client.Node;
 
 /**
  * 
  * @author mg
  */
 public class XElement extends Element {
+
+	public interface Observer {
+
+		public void observe(Element anElement);
+	}
 
 	protected XElement() {
 		super();
@@ -94,7 +103,8 @@ public class XElement extends Element {
 	 * @return the child element
 	 */
 	public final Element childElement(String selector) {
-		return null;
+		List<Element> result = select(selector);
+		return result != null && !result.isEmpty() ? result.get(0) : null;
 	}
 
 	/**
@@ -105,8 +115,35 @@ public class XElement extends Element {
 	 *            the selector/xpath query
 	 * @return the matching elements
 	 */
-	public final NodeList<Element> select(String selector) {
-		return null;
+	public final List<Element> select(final String selector) {
+		final List<Element> result = new ArrayList<>();
+		iterate(this, new Observer() {
+			@Override
+			public void observe(Element anElement) {
+				if ("*".equals(selector))
+					result.add(anElement);
+				else {
+					String[] classes = anElement.getClassName().split(" ");
+					for (int i = 0; i < classes.length; i++)
+						if (classes[i].equals(selector)) {
+							result.add(anElement);
+							break;
+						}
+				}
+			}
+		});
+		return result;
+	}
+
+	protected static void iterate(Element aRoot, Observer aTask) {
+		aTask.observe(aRoot);
+		NodeList<Node> nl = aRoot.getChildNodes();
+		for (int i = 0; i < nl.getLength(); i++) {
+			Node n = nl.getItem(i);
+			if (n instanceof Element) {
+				iterate((Element) n, aTask);
+			}
+		}
 	}
 
 	/**
@@ -125,10 +162,16 @@ public class XElement extends Element {
 	public final void unmask() {
 	}
 
-	public int getChildIndex(Element aChild){
+	public final int getChildIndex(Element aChild) {
+		NodeList<Node> nl = getChildNodes();
+		for (int i = 0; i < nl.getLength(); i++) {
+			if (nl.getItem(i) == aChild) {
+				return i;
+			}
+		}
 		return -1;
 	}
-	
+
 	/**
 	 * Generates a native dom click on the element.
 	 */

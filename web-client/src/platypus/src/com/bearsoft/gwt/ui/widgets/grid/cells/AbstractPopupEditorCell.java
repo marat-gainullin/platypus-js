@@ -17,6 +17,7 @@ import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.Focusable;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.PopupPanel;

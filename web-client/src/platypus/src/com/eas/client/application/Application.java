@@ -951,17 +951,17 @@ public class Application {
 		if (platypusModuleClass1.equals(xBody.getClassName()) || platypusModuleClass2.equals(xBody.getClassName()))
 			platypusIndicators.add(xBody);
 
-		NodeList<Element> divs1 = xBody.select("." + platypusModuleClass1);
+		List<Element> divs1 = xBody.select(platypusModuleClass1);
 		if (divs1 != null) {
-			for (int i = 0; i < divs1.getLength(); i++) {
-				Element div = divs1.getItem(i);
+			for (int i = 0; i < divs1.size(); i++) {
+				Element div = divs1.get(i);
 				platypusIndicators.add(div);
 			}
 		}
-		NodeList<Element> divs2 = xBody.select("." + platypusModuleClass2);
+		List<Element> divs2 = xBody.select("." + platypusModuleClass2);
 		if (divs2 != null) {
-			for (int i = 0; i < divs2.getLength(); i++) {
-				Element div = divs2.getItem(i);
+			for (int i = 0; i < divs2.size(); i++) {
+				Element div = divs2.get(i);
 				platypusIndicators.add(div);
 			}
 		}
@@ -972,20 +972,20 @@ public class Application {
 		Map<String, Element> platypusModules = new HashMap<String, Element>();
 		XElement xBody = Utils.doc.getBody().cast();
 		String platypusModuleClass1 = "platypusModule";
-		NodeList<Element> divs1 = xBody.select("." + platypusModuleClass1);
+		List<Element> divs1 = xBody.select(platypusModuleClass1);
 		if (divs1 != null) {
-			for (int i = 0; i < divs1.getLength(); i++) {
-				Element div = divs1.getItem(i);
+			for (int i = 0; i < divs1.size(); i++) {
+				Element div = divs1.get(i);
 				if (div.getId() != null && !div.getId().isEmpty()) {
 					platypusModules.put(div.getId(), div);
 				}
 			}
 		}
 		String platypusModuleClass2 = "platypus-module";
-		NodeList<Element> divs2 = xBody.select("." + platypusModuleClass2);
+		List<Element> divs2 = xBody.select("." + platypusModuleClass2);
 		if (divs2 != null) {
-			for (int i = 0; i < divs2.getLength(); i++) {
-				Element div = divs2.getItem(i);
+			for (int i = 0; i < divs2.size(); i++) {
+				Element div = divs2.get(i);
 				if (div.getId() != null && !div.getId().isEmpty()) {
 					platypusModules.put(div.getId(), div);
 				}

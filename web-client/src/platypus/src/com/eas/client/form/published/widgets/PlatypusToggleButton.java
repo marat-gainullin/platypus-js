@@ -104,22 +104,22 @@ public class PlatypusToggleButton extends ImageToggleButton implements HasPlatyp
 			get : function() {
 				var position = aComponent.@com.eas.client.form.published.widgets.PlatypusToggleButton::getHorizontalTextPosition()();
 				switch(position) { 
-					case @com.eas.client.form.published.widgets.PlatypusToggleButton::LEFT :	return $wnd.HorizontalPosition.LEFT; 
-					case @com.eas.client.form.published.widgets.PlatypusToggleButton::RIGHT :	return $wnd.HorizontalPosition.RIGHT; 
-					case @com.eas.client.form.published.widgets.PlatypusToggleButton::CENTER :	return $wnd.HorizontalPosition.CENTER;
+					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::LEFT :	return $wnd.HorizontalPosition.LEFT; 
+					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::RIGHT :	return $wnd.HorizontalPosition.RIGHT; 
+					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::CENTER :	return $wnd.HorizontalPosition.CENTER;
 					default : return null; 
 				}	
 			},
 			set : function(aValue) {
 				switch (aValue) {
 					case $wnd.HorizontalPosition.LEFT:
-						aComponent.@com.eas.client.form.published.widgets.PlatypusToggleButton::setHorizontalTextPosition(I)(@com.eas.client.form.published.widgets.PlatypusToggleButton::LEFT);
+						aComponent.@com.eas.client.form.published.widgets.PlatypusToggleButton::setHorizontalTextPosition(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::LEFT);
 						break;
 					case $wnd.HorizontalPosition.RIGHT:
-						aComponent.@com.eas.client.form.published.widgets.PlatypusToggleButton::setHorizontalTextPosition(I)(@com.eas.client.form.published.widgets.PlatypusToggleButton::RIGHT);
+						aComponent.@com.eas.client.form.published.widgets.PlatypusToggleButton::setHorizontalTextPosition(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::RIGHT);
 						break;
 					case $wnd.HorizontalPosition.CENTER:
-						aComponent.@com.eas.client.form.published.widgets.PlatypusToggleButton::setHorizontalTextPosition(I)(@com.eas.client.form.published.widgets.PlatypusToggleButton::CENTER);
+						aComponent.@com.eas.client.form.published.widgets.PlatypusToggleButton::setHorizontalTextPosition(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::CENTER);
 						break;
 				}
 			}
@@ -128,22 +128,22 @@ public class PlatypusToggleButton extends ImageToggleButton implements HasPlatyp
 			get : function() {
 				var positon = aComponent.@com.eas.client.form.published.widgets.PlatypusToggleButton::getVerticalTextPosition()();
 				switch(position) { 
-					case @com.eas.client.form.published.widgets.PlatypusToggleButton::TOP :	return $wnd.VerticalPosition.TOP; 
-					case @com.eas.client.form.published.widgets.PlatypusToggleButton::BOTTOM :	return $wnd.VerticalPosition.BOTTOM; 
-					case @com.eas.client.form.published.widgets.PlatypusToggleButton::CENTER :	return $wnd.VerticalPosition.CENTER;
+					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::TOP :	return $wnd.VerticalPosition.TOP; 
+					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::BOTTOM :	return $wnd.VerticalPosition.BOTTOM; 
+					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::CENTER :	return $wnd.VerticalPosition.CENTER;
 					default : return null;
 				} 
 			},
 			set : function(aValue) {
 				switch (aValue) {
 					case $wnd.VerticalPosition.TOP:
-						aComponent.@com.eas.client.form.published.widgets.PlatypusToggleButton::setVerticalTextPosition(I)(@com.eas.client.form.published.widgets.PlatypusToggleButton::TOP);
+						aComponent.@com.eas.client.form.published.widgets.PlatypusToggleButton::setVerticalTextPosition(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::TOP);
 						break;
 					case $wnd.VerticalPosition.BOTTOM:
-						aComponent.@com.eas.client.form.published.widgets.PlatypusToggleButton::setVerticalTextPosition(I)(@com.eas.client.form.published.widgets.PlatypusToggleButton::BOTTOM);
+						aComponent.@com.eas.client.form.published.widgets.PlatypusToggleButton::setVerticalTextPosition(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::BOTTOM);
 						break;
 					case $wnd.VerticalPosition.CENTER:
-						aComponent.@com.eas.client.form.published.widgets.PlatypusToggleButton::setVerticalTextPosition(I)(@com.eas.client.form.published.widgets.PlatypusToggleButton::CENTER);
+						aComponent.@com.eas.client.form.published.widgets.PlatypusToggleButton::setVerticalTextPosition(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::CENTER);
 						break;
 				}
 			}
@@ -153,22 +153,22 @@ public class PlatypusToggleButton extends ImageToggleButton implements HasPlatyp
 			get : function() {
 				var position = aComponent.@com.eas.client.form.published.widgets.PlatypusToggleButton::getHorizontalAlignment()();
 				switch(position) { 
-					case @com.eas.client.form.published.widgets.PlatypusToggleButton::LEFT :	return $wnd.HorizontalPosition.LEFT; 
-					case @com.eas.client.form.published.widgets.PlatypusToggleButton::RIGHT :	return $wnd.HorizontalPosition.RIGHT; 
-					case @com.eas.client.form.published.widgets.PlatypusToggleButton::CENTER :	return $wnd.HorizontalPosition.CENTER;
+					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::LEFT :	return $wnd.HorizontalPosition.LEFT; 
+					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::RIGHT :	return $wnd.HorizontalPosition.RIGHT; 
+					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::CENTER :	return $wnd.HorizontalPosition.CENTER;
 					default : return null; 
 				}	
 			},
 			set : function(aValue) {
 				switch (aValue) {
 					case $wnd.HorizontalPosition.LEFT:
-						aComponent.@com.eas.client.form.published.widgets.PlatypusToggleButton::setHorizontalAlignment(I)(@com.eas.client.form.published.widgets.PlatypusToggleButton::LEFT);
+						aComponent.@com.eas.client.form.published.widgets.PlatypusToggleButton::setHorizontalAlignment(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::LEFT);
 						break;
 					case $wnd.HorizontalPosition.RIGHT:
-						aComponent.@com.eas.client.form.published.widgets.PlatypusToggleButton::setHorizontalAlignment(I)(@com.eas.client.form.published.widgets.PlatypusToggleButton::RIGHT);
+						aComponent.@com.eas.client.form.published.widgets.PlatypusToggleButton::setHorizontalAlignment(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::RIGHT);
 						break;
 					case $wnd.HorizontalPosition.CENTER:
-						aComponent.@com.eas.client.form.published.widgets.PlatypusToggleButton::setHorizontalAlignment(I)(@com.eas.client.form.published.widgets.PlatypusToggleButton::CENTER);
+						aComponent.@com.eas.client.form.published.widgets.PlatypusToggleButton::setHorizontalAlignment(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::CENTER);
 						break;
 				}
 			}
@@ -177,22 +177,22 @@ public class PlatypusToggleButton extends ImageToggleButton implements HasPlatyp
 			get : function() {
 				var positon = aComponent.@com.eas.client.form.published.widgets.PlatypusToggleButton::getVerticalAlignment()();
 				switch(position) { 
-					case @com.eas.client.form.published.widgets.PlatypusToggleButton::TOP :	return $wnd.VerticalPosition.TOP; 
-					case @com.eas.client.form.published.widgets.PlatypusToggleButton::BOTTOM :	return $wnd.VerticalPosition.BOTTOM; 
-					case @com.eas.client.form.published.widgets.PlatypusToggleButton::CENTER :	return $wnd.VerticalPosition.CENTER;
+					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::TOP :	return $wnd.VerticalPosition.TOP; 
+					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::BOTTOM :	return $wnd.VerticalPosition.BOTTOM; 
+					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::CENTER :	return $wnd.VerticalPosition.CENTER;
 					default : return null;
 				} 
 			},
 			set : function(aValue) {
 				switch (aValue) {
 					case $wnd.VerticalPosition.TOP:
-						aComponent.@com.eas.client.form.published.widgets.PlatypusToggleButton::setVerticalAlignment(I)(@com.eas.client.form.published.widgets.PlatypusToggleButton::TOP);
+						aComponent.@com.eas.client.form.published.widgets.PlatypusToggleButton::setVerticalAlignment(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::TOP);
 						break;
 					case $wnd.VerticalPosition.BOTTOM:
-						aComponent.@com.eas.client.form.published.widgets.PlatypusToggleButton::setVerticalAlignment(I)(@com.eas.client.form.published.widgets.PlatypusToggleButton::BOTTOM);
+						aComponent.@com.eas.client.form.published.widgets.PlatypusToggleButton::setVerticalAlignment(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::BOTTOM);
 						break;
 					case $wnd.VerticalPosition.CENTER:
-						aComponent.@com.eas.client.form.published.widgets.PlatypusToggleButton::setVerticalAlignment(I)(@com.eas.client.form.published.widgets.PlatypusToggleButton::CENTER);
+						aComponent.@com.eas.client.form.published.widgets.PlatypusToggleButton::setVerticalAlignment(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::CENTER);
 						break;
 				}
 			}

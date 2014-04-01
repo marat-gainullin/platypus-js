@@ -77,22 +77,22 @@ public class PlatypusSplitButton extends DropDownButton implements HasPublished 
 			get : function() {
 				var position = aComponent.@com.eas.client.form.published.widgets.PlatypusSplitButton::getHorizontalTextPosition()();
 				switch(position) { 
-					case @com.eas.client.form.published.widgets.PlatypusLabel::LEFT :	return $wnd.HorizontalPosition.LEFT; 
-					case @com.eas.client.form.published.widgets.PlatypusLabel::RIGHT :	return $wnd.HorizontalPosition.RIGHT; 
-					case @com.eas.client.form.published.widgets.PlatypusLabel::CENTER :	return $wnd.HorizontalPosition.CENTER;
+					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::LEFT :	return $wnd.HorizontalPosition.LEFT; 
+					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::RIGHT :	return $wnd.HorizontalPosition.RIGHT; 
+					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::CENTER :	return $wnd.HorizontalPosition.CENTER;
 					default : return null; 
 				}	
 			},
 			set : function(aValue) {
 				switch (aValue) {
 					case $wnd.HorizontalPosition.LEFT:
-						aComponent.@com.eas.client.form.published.widgets.PlatypusSplitButton::setHorizontalTextPosition(I)(@com.eas.client.form.published.widgets.PlatypusLabel::LEFT);
+						aComponent.@com.eas.client.form.published.widgets.PlatypusSplitButton::setHorizontalTextPosition(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::LEFT);
 						break;
 					case $wnd.HorizontalPosition.RIGHT:
-						aComponent.@com.eas.client.form.published.widgets.PlatypusSplitButton::setHorizontalTextPosition(I)(@com.eas.client.form.published.widgets.PlatypusLabel::RIGHT);
+						aComponent.@com.eas.client.form.published.widgets.PlatypusSplitButton::setHorizontalTextPosition(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::RIGHT);
 						break;
 					case $wnd.HorizontalPosition.CENTER:
-						aComponent.@com.eas.client.form.published.widgets.PlatypusSplitButton::setHorizontalTextPosition(I)(@com.eas.client.form.published.widgets.PlatypusLabel::CENTER);
+						aComponent.@com.eas.client.form.published.widgets.PlatypusSplitButton::setHorizontalTextPosition(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::CENTER);
 						break;
 				}
 			}
@@ -101,22 +101,22 @@ public class PlatypusSplitButton extends DropDownButton implements HasPublished 
 			get : function() {
 				var positon = aComponent.@com.eas.client.form.published.widgets.PlatypusSplitButton::getVerticalTextPosition()();
 				switch(position) { 
-					case @com.eas.client.form.published.widgets.PlatypusLabel::TOP :	return $wnd.VerticalPosition.TOP; 
-					case @com.eas.client.form.published.widgets.PlatypusLabel::BOTTOM :	return $wnd.VerticalPosition.BOTTOM; 
-					case @com.eas.client.form.published.widgets.PlatypusLabel::CENTER :	return $wnd.VerticalPosition.CENTER;
+					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::TOP :	return $wnd.VerticalPosition.TOP; 
+					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::BOTTOM :	return $wnd.VerticalPosition.BOTTOM; 
+					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::CENTER :	return $wnd.VerticalPosition.CENTER;
 					default : return null;
 				} 
 			},
 			set : function(aValue) {
 				switch (aValue) {
 					case $wnd.VerticalPosition.TOP:
-						aComponent.@com.eas.client.form.published.widgets.PlatypusSplitButton::setVerticalTextPosition(I)(@com.eas.client.form.published.widgets.PlatypusLabel::TOP);
+						aComponent.@com.eas.client.form.published.widgets.PlatypusSplitButton::setVerticalTextPosition(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::TOP);
 						break;
 					case $wnd.VerticalPosition.BOTTOM:
-						aComponent.@com.eas.client.form.published.widgets.PlatypusSplitButton::setVerticalTextPosition(I)(@com.eas.client.form.published.widgets.PlatypusLabel::BOTTOM);
+						aComponent.@com.eas.client.form.published.widgets.PlatypusSplitButton::setVerticalTextPosition(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::BOTTOM);
 						break;
 					case $wnd.VerticalPosition.CENTER:
-						aComponent.@com.eas.client.form.published.widgets.PlatypusSplitButton::setVerticalTextPosition(I)(@com.eas.client.form.published.widgets.PlatypusLabel::CENTER);
+						aComponent.@com.eas.client.form.published.widgets.PlatypusSplitButton::setVerticalTextPosition(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::CENTER);
 						break;
 				}
 			}
@@ -126,22 +126,22 @@ public class PlatypusSplitButton extends DropDownButton implements HasPublished 
 			get : function() {
 				var position = aComponent.@com.eas.client.form.published.widgets.PlatypusSplitButton::getHorizontalAlignment()();
 				switch(position) { 
-					case @com.eas.client.form.published.widgets.PlatypusLabel::LEFT :	return $wnd.HorizontalPosition.LEFT; 
-					case @com.eas.client.form.published.widgets.PlatypusLabel::RIGHT :	return $wnd.HorizontalPosition.RIGHT; 
-					case @com.eas.client.form.published.widgets.PlatypusLabel::CENTER :	return $wnd.HorizontalPosition.CENTER;
+					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::LEFT :	return $wnd.HorizontalPosition.LEFT; 
+					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::RIGHT :	return $wnd.HorizontalPosition.RIGHT; 
+					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::CENTER :	return $wnd.HorizontalPosition.CENTER;
 					default : return null; 
 				}	
 			},
 			set : function(aValue) {
 				switch (aValue) {
 					case $wnd.HorizontalPosition.LEFT:
-						aComponent.@com.eas.client.form.published.widgets.PlatypusSplitButton::setHorizontalAlignment(I)(@com.eas.client.form.published.widgets.PlatypusLabel::LEFT);
+						aComponent.@com.eas.client.form.published.widgets.PlatypusSplitButton::setHorizontalAlignment(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::LEFT);
 						break;
 					case $wnd.HorizontalPosition.RIGHT:
-						aComponent.@com.eas.client.form.published.widgets.PlatypusSplitButton::setHorizontalAlignment(I)(@com.eas.client.form.published.widgets.PlatypusLabel::RIGHT);
+						aComponent.@com.eas.client.form.published.widgets.PlatypusSplitButton::setHorizontalAlignment(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::RIGHT);
 						break;
 					case $wnd.HorizontalPosition.CENTER:
-						aComponent.@com.eas.client.form.published.widgets.PlatypusSplitButton::setHorizontalAlignment(I)(@com.eas.client.form.published.widgets.PlatypusLabel::CENTER);
+						aComponent.@com.eas.client.form.published.widgets.PlatypusSplitButton::setHorizontalAlignment(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::CENTER);
 						break;
 				}
 			}
@@ -150,22 +150,22 @@ public class PlatypusSplitButton extends DropDownButton implements HasPublished 
 			get : function() {
 				var positon = aComponent.@com.eas.client.form.published.widgets.PlatypusSplitButton::getVerticalAlignment()();
 				switch(position) { 
-					case @com.eas.client.form.published.widgets.PlatypusLabel::TOP :	return $wnd.VerticalPosition.TOP; 
-					case @com.eas.client.form.published.widgets.PlatypusLabel::BOTTOM :	return $wnd.VerticalPosition.BOTTOM; 
-					case @com.eas.client.form.published.widgets.PlatypusLabel::CENTER :	return $wnd.VerticalPosition.CENTER;
+					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::TOP :	return $wnd.VerticalPosition.TOP; 
+					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::BOTTOM :	return $wnd.VerticalPosition.BOTTOM; 
+					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::CENTER :	return $wnd.VerticalPosition.CENTER;
 					default : return null;
 				} 
 			},
 			set : function(aValue) {
 				switch (aValue) {
 					case $wnd.VerticalPosition.TOP:
-						aComponent.@com.eas.client.form.published.widgets.PlatypusSplitButton::setVerticalAlignment(I)(@com.eas.client.form.published.widgets.PlatypusLabel::TOP);
+						aComponent.@com.eas.client.form.published.widgets.PlatypusSplitButton::setVerticalAlignment(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::TOP);
 						break;
 					case $wnd.VerticalPosition.BOTTOM:
-						aComponent.@com.eas.client.form.published.widgets.PlatypusSplitButton::setVerticalAlignment(I)(@com.eas.client.form.published.widgets.PlatypusLabel::BOTTOM);
+						aComponent.@com.eas.client.form.published.widgets.PlatypusSplitButton::setVerticalAlignment(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::BOTTOM);
 						break;
 					case $wnd.VerticalPosition.CENTER:
-						aComponent.@com.eas.client.form.published.widgets.PlatypusSplitButton::setVerticalAlignment(I)(@com.eas.client.form.published.widgets.PlatypusLabel::CENTER);
+						aComponent.@com.eas.client.form.published.widgets.PlatypusSplitButton::setVerticalAlignment(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::CENTER);
 						break;
 				}
 			}

@@ -1,41 +1,37 @@
 package com.eas.client.form.grid.columns;
 
-import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.bearsoft.gwt.ui.widgets.grid.cells.CellRenderer;
-import com.bearsoft.gwt.ui.widgets.grid.cells.DateEditorCell;
-import com.eas.client.converters.DateRowValueConverter;
+import com.eas.client.converters.StringRowValueConverter;
 import com.eas.client.form.ControlsUtils;
+import com.eas.client.form.factories.GridFactory;
+import com.eas.client.form.grid.cells.PlatypusTextEditorCell;
 import com.eas.client.form.published.PublishedCell;
 import com.eas.client.form.published.PublishedStyle;
-import com.eas.client.form.published.widgets.model.ModelDate;
+import com.eas.client.form.published.widgets.model.ModelTextArea;
 import com.eas.client.form.published.widgets.model.PublishedDecoratorBox;
-import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 
-public class DateModelGridColumn extends ModelGridColumn<Date> {
+public class TextAreaModelGridColumn extends ModelGridColumn<String> {
 
-	public DateModelGridColumn(String aName) {
-		super(new DateEditorCell(), aName, null, null, new DateRowValueConverter());
-		setEditor(new ModelDate());
-		((DateEditorCell) getCell()).setRenderer(new CellRenderer<Date>() {
-
+	public TextAreaModelGridColumn(String aName) {
+		super(new PlatypusTextEditorCell(), aName, null, null, new StringRowValueConverter());
+		setEditor(new ModelTextArea());
+		((PlatypusTextEditorCell) getCell()).setRenderer(new CellRenderer<String>() {
 			@Override
-			public boolean render(Context context, Date value, SafeHtmlBuilder sb) {
-				DateModelGridColumn column = DateModelGridColumn.this;
+			public boolean render(com.google.gwt.cell.client.Cell.Context context, String value, SafeHtmlBuilder sb) {
+				TextAreaModelGridColumn column = TextAreaModelGridColumn.this;
 				JavaScriptObject onRender = column.getOnRender() != null ? column.getOnRender() : column.getGrid().getOnRender();
 				if (onRender != null) {
 					try {
-						SafeHtmlBuilder lsb = new SafeHtmlBuilder();
 						PublishedStyle styleToRender = null;
-						String toRender = value != null ? getFormat().format(value) : null;
-						PublishedCell cellToRender = calcContextPublishedCell(column.getPublished(), onRender, context,
-						        column.getColumnModelRef(), toRender, rowsEntity);
+						SafeHtmlBuilder lsb = new SafeHtmlBuilder();
+						String toRender = value;
+						PublishedCell cellToRender = calcContextPublishedCell(column.getPublished(), onRender, context, column.getColumnModelRef(), value, rowsEntity);
 						if (cellToRender != null) {
 							styleToRender = cellToRender.getStyle();
 							if (cellToRender.getDisplay() != null)
@@ -48,7 +44,7 @@ public class DateModelGridColumn extends ModelGridColumn<Date> {
 						styleToRender = grid.complementPublishedStyle(styleToRender);
 						ControlsUtils.renderDecorated(lsb, styleToRender, sb);
 						if (cellToRender != null) {
-							DateModelGridColumn.this.bindContextCallback(context, cellToRender);
+							TextAreaModelGridColumn.this.bindContextCallback(context, cellToRender);
 						}
 					} catch (Exception e) {
 						sb.append(SafeHtmlUtils.fromString(e.getMessage()));
@@ -57,22 +53,12 @@ public class DateModelGridColumn extends ModelGridColumn<Date> {
 				} else
 					return false;
 			}
-
 		});
 	}
 
 	@Override
-	public void setEditor(PublishedDecoratorBox<Date> aEditor) {
+	public void setEditor(PublishedDecoratorBox<String> aEditor) {
 		super.setEditor(aEditor);
-		((DateEditorCell) getCell()).setEditor(aEditor);
-	}
-
-	public DateTimeFormat getFormat() {
-		return ((DateEditorCell) getCell()).getFormat();
-	}
-
-	public void setFormat(DateTimeFormat aValue) {
-		((DateEditorCell) getCell()).setFormat(aValue);
-		((ModelDate) getEditor()).setFormat(aValue.getPattern());
+		((PlatypusTextEditorCell) getCell()).setEditor(aEditor);
 	}
 }
