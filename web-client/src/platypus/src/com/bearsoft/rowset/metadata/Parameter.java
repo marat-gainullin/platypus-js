@@ -178,7 +178,6 @@ public class Parameter extends Field {
      * @param aValue The mode.
      */
     public void setMode(int aValue) {
-        int oldValue = mode;
         mode = aValue;
     }
 

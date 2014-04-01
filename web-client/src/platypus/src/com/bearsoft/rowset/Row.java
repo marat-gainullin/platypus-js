@@ -29,11 +29,11 @@ public class Row {
 			this);
 	protected VetoableChangeSupport vetoableChangeSupport = new VetoableChangeSupport(
 			this);
-	protected Set<Integer> updated = new HashSet();
+	protected Set<Integer> updated = new HashSet<>();
 	protected boolean deleted = false;
 	protected boolean inserted = false;
-	protected List<Object> originalValues = new ArrayList();
-	protected List<Object> currentValues = new ArrayList();
+	protected List<Object> originalValues = new ArrayList<>();
+	protected List<Object> currentValues = new ArrayList<>();
 	protected Insert insertChange;
 
 	/**
@@ -467,7 +467,7 @@ public class Row {
 	public Object[] getPKValues() {
 		Object[] lcurrentValues = getCurrentValues();
 		List<Integer> pkIndicies = fields.getPrimaryKeysIndicies();
-		List<Object> pkValues = new ArrayList();
+		List<Object> pkValues = new ArrayList<>();
 		for (Integer pkIdx : pkIndicies) {
 			assert pkIdx >= 1 && pkIdx <= lcurrentValues.length;
 			pkValues.add(lcurrentValues[pkIdx - 1]);

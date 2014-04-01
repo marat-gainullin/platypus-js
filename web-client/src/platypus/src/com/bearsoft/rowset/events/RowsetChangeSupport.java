@@ -18,7 +18,7 @@ import java.util.Set;
  */
 public class RowsetChangeSupport {
 
-	protected Set<RowsetListener> rowsetListeners = new HashSet();
+	protected Set<RowsetListener> rowsetListeners = new HashSet<>();
 	protected Rowset source;
 
 	/**

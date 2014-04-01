@@ -142,7 +142,6 @@ public class Field {
 	 *            Flag, indicating primary key state of this field.
 	 */
 	public void setPk(boolean aValue) {
-		boolean oldValue = pk;
 		pk = aValue;
 	}
 
@@ -156,7 +155,6 @@ public class Field {
 	}
 
 	public void setStrong4Insert(boolean aValue) {
-		boolean oldValue = strong4Insert;
 		strong4Insert = aValue;
 	}
 
@@ -179,7 +177,6 @@ public class Field {
 	 *            Foreign key specification to be set to this field.
 	 */
 	public void setFk(ForeignKeySpec aValue) {
-		ForeignKeySpec oldValue = fk;
 		fk = aValue;
 	}
 
@@ -199,7 +196,6 @@ public class Field {
 	 *            Flag to be set to this field.
 	 */
 	public void setReadonly(boolean aValue) {
-		boolean oldValue = readonly;
 		readonly = aValue;
 	}
 

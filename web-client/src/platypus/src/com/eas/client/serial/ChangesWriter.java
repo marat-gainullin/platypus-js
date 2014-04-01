@@ -7,7 +7,6 @@ package com.eas.client.serial;
 import java.util.Date;
 import java.util.List;
 
-import com.bearsoft.rowset.Utils;
 import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.changes.ChangeVisitor;
 import com.bearsoft.rowset.changes.Command;

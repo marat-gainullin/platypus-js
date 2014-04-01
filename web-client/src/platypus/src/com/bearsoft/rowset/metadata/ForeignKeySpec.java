@@ -150,7 +150,6 @@ public class ForeignKeySpec extends PrimaryKeySpec {
      * @param aValue Deferrable state to set.
      */
     public void setFkDeferrable(boolean aValue) {
-        boolean oldValue = fkDeferrable;
         fkDeferrable = aValue;
     }
 
@@ -167,7 +166,6 @@ public class ForeignKeySpec extends PrimaryKeySpec {
      * @param aValue Delete rule to set.
      */
     public void setFkDeleteRule(ForeignKeyRule aValue) {
-        ForeignKeyRule oldValue = fkDeleteRule;
         fkDeleteRule = aValue;
     }
 
@@ -184,7 +182,6 @@ public class ForeignKeySpec extends PrimaryKeySpec {
      * @param aValue Update rule to set.
      */
     public void setFkUpdateRule(ForeignKeyRule aValue) {
-        ForeignKeyRule oldValue = fkUpdateRule;
         fkUpdateRule = aValue;
     }
 
@@ -197,7 +194,6 @@ public class ForeignKeySpec extends PrimaryKeySpec {
     }
 
     public void setReferee(PrimaryKeySpec aValue) {
-        PrimaryKeySpec oldValue = referee;
         referee = aValue;
 
     }

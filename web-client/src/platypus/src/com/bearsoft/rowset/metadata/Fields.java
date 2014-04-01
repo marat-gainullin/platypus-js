@@ -24,11 +24,11 @@ public class Fields {
 
 	private static final String DEFAULT_PARAM_NAME_PREFIX = "Field";
 	protected String tableDescription = null;
-	protected List<Field> fields = new ArrayList();
+	protected List<Field> fields = new ArrayList<>();
 	protected Entity owner;
 	// Map of field name to it's index (0-based)
 	protected Map<String, Integer> fieldsHash;
-	protected CollectionEditingSupport<Fields, Field> collectionSupport = new CollectionEditingSupport(this);
+	protected CollectionEditingSupport<Fields, Field> collectionSupport = new CollectionEditingSupport<>(this);
 
 	/**
 	 * The default constructor.
@@ -81,7 +81,7 @@ public class Fields {
 	 */
 	protected void validateFieldsHash() {
 		if (fieldsHash == null) {
-			fieldsHash = new HashMap();
+			fieldsHash = new HashMap<>();
 			for (int i = 0; i < fields.size(); i++) {
 				String fieldName = fields.get(i).getName();
 				if (fieldName != null) {
@@ -281,7 +281,7 @@ public class Fields {
 	 * @return A vector comprised of <code>Field</code> instances.
 	 */
 	public List<Field> getPrimaryKeys() {
-		List<Field> pks = new ArrayList();
+		List<Field> pks = new ArrayList<>();
 		for (int i = 0; i < getFieldsCount(); i++) {
 			Field lfield = fields.get(i);
 			if (lfield != null && lfield.isPk()) {
@@ -297,7 +297,7 @@ public class Fields {
 	 * @return A vector comprised of <code>Field</code> instances.
 	 */
 	public List<Field> getForeinKeys() {
-		List<Field> fks = new ArrayList();
+		List<Field> fks = new ArrayList<>();
 		for (int i = 0; i < getFieldsCount(); i++) {
 			Field lfield = fields.get(i);
 			if (lfield != null && lfield.isFk()) {
@@ -313,7 +313,7 @@ public class Fields {
 	 * @return A vector comprised of <code>Field</code> indicies.
 	 */
 	public List<Integer> getPrimaryKeysIndicies() {
-		List<Integer> pksIndicies = new ArrayList();
+		List<Integer> pksIndicies = new ArrayList<>();
 		for (int i = 0; i < getFieldsCount(); i++) {
 			Field lfield = fields.get(i);
 			if (lfield != null && lfield.isPk()) {

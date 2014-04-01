@@ -1,12 +1,8 @@
 package com.eas.client.form.grid.columns;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.bearsoft.gwt.ui.widgets.grid.cells.CellRenderer;
 import com.eas.client.converters.StringRowValueConverter;
 import com.eas.client.form.ControlsUtils;
-import com.eas.client.form.factories.GridFactory;
 import com.eas.client.form.grid.cells.PlatypusTextEditorCell;
 import com.eas.client.form.published.PublishedCell;
 import com.eas.client.form.published.PublishedStyle;

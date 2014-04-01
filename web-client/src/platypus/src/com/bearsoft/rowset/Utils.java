@@ -87,11 +87,8 @@ public class Utils {
 
 			@Override
 			public boolean execute() {
-				try {
-					invokeJsFunction(aTarget);
-				} finally {
-					return false;
-				}
+				invokeJsFunction(aTarget);
+				return false;
 			}
 		}, aTimeout);
 	}

@@ -11,7 +11,6 @@ import com.eas.client.form.published.containers.CardPane;
 import com.eas.client.form.published.containers.FlowPane;
 import com.eas.client.form.published.containers.GridPane;
 import com.eas.client.form.published.containers.HBoxPane;
-import com.eas.client.form.published.containers.MarginsPane;
 import com.eas.client.form.published.containers.ScrollPane;
 import com.eas.client.form.published.containers.SplitPane;
 import com.eas.client.form.published.containers.TabbedPane;

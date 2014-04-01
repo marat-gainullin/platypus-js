@@ -66,14 +66,14 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
 	// rowset's metadata
 	protected Fields fields = null;
 	// rowset's data
-	protected List<Row> original = new ArrayList();
-	protected List<Row> current = new ArrayList();
+	protected List<Row> original = new ArrayList<>();
+	protected List<Row> current = new ArrayList<>();
 	// data view capabilities
 	protected int currentRowPos = 0; // before first position
 	protected boolean showOriginal = false;
 	// data processing
-	protected Set<Filter> filters = new HashSet(); // filters
-	protected Set<Locator> locators = new HashSet(); // locators
+	protected Set<Filter> filters = new HashSet<>(); // filters
+	protected Set<Locator> locators = new HashSet<>(); // locators
 	protected Filter activeFilter = null;
 	protected Row insertingRow = null;
 	// client code interaction
@@ -270,7 +270,6 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
 				throw new InvalidFieldsExceptionException("column count is wrong, expected: " + row.getColumnCount() + ", but " + aFields.getFieldsCount() + " is got");
 			}
 		}
-		Fields oldValue = fields;
 		fields = aFields;
 	}
 
@@ -408,7 +407,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
 								setFields(aRowset.getFields());
 							}
 							List<Row> rows = aRowset.getCurrent();
-							aRowset.setCurrent(new ArrayList());
+							aRowset.setCurrent(new ArrayList<Row>());
 							setCurrent(rows);
 							currentToOriginal();
 							invalidateFilters();
@@ -1447,7 +1446,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
 	 */
 	public void delete(Collection<Row> aRows2Delete) throws RowsetException {
 		if (!showOriginal) {
-			Set<Row> rows2Delete = new HashSet();
+			Set<Row> rows2Delete = new HashSet<>();
 			rows2Delete.addAll(aRows2Delete);
 			boolean wasBeforeFirst = isBeforeFirst();
 			boolean wasAfterLast = isAfterLast();
@@ -1912,7 +1911,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
 			}
 			List<Change> changesLog = flow.getChangeLog();
 			Insert insert = new Insert(flow.getEntityId());
-			List<Change.Value> data = new ArrayList();
+			List<Change.Value> data = new ArrayList<>();
 			for (int i = 0; i < aRow.getCurrentValues().length; i++) {
 				Field field = aRow.getFields().get(i + 1);
 				Object value = aRow.getCurrentValues()[i];
@@ -1928,7 +1927,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener, T
 
 	private Change.Value[] generateChangeLogKeys(int colIndex, Row aRow, Object oldValue) {
 		if (fields != null) {
-			List<Change.Value> keys = new ArrayList();
+			List<Change.Value> keys = new ArrayList<>();
 			for (int i = 1; i <= fields.getFieldsCount(); i++) {
 				Field field = fields.get(i);
 				// Some tricky processing of primary key modification case ...
