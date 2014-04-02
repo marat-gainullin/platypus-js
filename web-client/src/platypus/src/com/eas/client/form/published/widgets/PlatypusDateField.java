@@ -2,7 +2,9 @@ package com.eas.client.form.published.widgets;
 
 import com.bearsoft.gwt.ui.widgets.DateTimeBox;
 import com.eas.client.form.ControlsUtils;
+import com.eas.client.form.EventsExecutor;
 import com.eas.client.form.published.HasComponentPopupMenu;
+import com.eas.client.form.published.HasEventsExecutor;
 import com.eas.client.form.published.HasJsFacade;
 import com.eas.client.form.published.HasPublished;
 import com.eas.client.form.published.menu.PlatypusPopupMenu;
@@ -16,10 +18,11 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.datepicker.client.DateBox;
 
-public class PlatypusDateField extends DateTimeBox implements HasJsFacade, HasEnabled, HasComponentPopupMenu {
+public class PlatypusDateField extends DateTimeBox implements HasJsFacade, HasEnabled, HasComponentPopupMenu, HasEventsExecutor {
 
     private static final DateBox.DefaultFormat DEFAULT_FORMAT = GWT.create(DateBox.DefaultFormat.class);
     
+    protected EventsExecutor eventsExecutor;
     protected PlatypusPopupMenu menu;
 	protected boolean enabled;
 	protected String name;	
@@ -37,6 +40,16 @@ public class PlatypusDateField extends DateTimeBox implements HasJsFacade, HasEn
 		formatPattern = aFormat.getPattern();
 	}
 	
+	@Override
+	public EventsExecutor getEventsExecutor() {
+		return eventsExecutor;
+	}
+
+	@Override
+	public void setEventsExecutor(EventsExecutor aExecutor) {
+		eventsExecutor = aExecutor;
+	}
+
 	@Override
     public PlatypusPopupMenu getPlatypusPopupMenu() {
 		return menu; 

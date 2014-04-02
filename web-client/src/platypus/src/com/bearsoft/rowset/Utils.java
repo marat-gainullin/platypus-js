@@ -270,6 +270,16 @@ public class Utils {
 			return aDefValue;
 	}
 
+	public static int getPxAttribute(Element aTag, String aName, int aDefValue) throws Exception {
+		if (aTag.hasAttribute(aName)){
+			String value = aTag.getAttribute(aName);
+			if(value.endsWith("px"))
+				value = value.substring(0, value.length() - 2);
+			return Integer.valueOf(value);
+		}else
+			return aDefValue;
+	}
+	
 	public static float getFloatAttribute(Element aTag, String aName, float aDefValue) throws Exception {
 		if (aTag.hasAttribute(aName))
 			return Float.valueOf(aTag.getAttribute(aName));

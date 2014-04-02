@@ -5,8 +5,10 @@ import java.util.Map;
 
 import com.bearsoft.gwt.ui.XElement;
 import com.bearsoft.gwt.ui.containers.AnchorsPanel;
+import com.eas.client.form.EventsExecutor;
 import com.eas.client.form.MarginConstraints;
 import com.eas.client.form.published.HasComponentPopupMenu;
+import com.eas.client.form.published.HasEventsExecutor;
 import com.eas.client.form.published.HasJsFacade;
 import com.eas.client.form.published.HasPublished;
 import com.eas.client.form.published.PublishedAbsoluteConstraints;
@@ -20,24 +22,37 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.dom.client.Style;
 
-public class MarginsPane extends AnchorsPanel implements HasLayers, HasPublished, HasJsFacade, HasEnabled, HasComponentPopupMenu {
+public class MarginsPane extends AnchorsPanel implements HasLayers, HasPublished, HasJsFacade, HasEnabled, HasComponentPopupMenu, HasEventsExecutor {
 
+	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu menu;
 	protected boolean enabled;
 	protected String name;
 	protected JavaScriptObject published;
-	
+
 	protected Map<Widget, MarginConstraints> constraints = new HashMap<>();
 
 	public MarginsPane() {
 		super();
+		getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
 	}
 
 	@Override
-    public PlatypusPopupMenu getPlatypusPopupMenu() {
-		return menu; 
-    }
+	public EventsExecutor getEventsExecutor() {
+		return eventsExecutor;
+	}
+
+	@Override
+	public void setEventsExecutor(EventsExecutor aExecutor) {
+		eventsExecutor = aExecutor;
+	}
+
+	@Override
+	public PlatypusPopupMenu getPlatypusPopupMenu() {
+		return menu;
+	}
 
 	protected HandlerRegistration menuTriggerReg;
 
@@ -120,6 +135,7 @@ public class MarginsPane extends AnchorsPanel implements HasLayers, HasPublished
 		} else {
 			assert false : "At least top with height, bottom with height or both (without height) must present";
 		}
+		aWidget.getElement().getStyle().setMargin(0, Style.Unit.PX);
 		if (isAttached()) {
 			forceLayout();
 		}

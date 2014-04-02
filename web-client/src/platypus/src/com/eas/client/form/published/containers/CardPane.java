@@ -8,7 +8,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.bearsoft.gwt.ui.containers.CardsPanel;
+import com.eas.client.form.EventsExecutor;
 import com.eas.client.form.published.HasComponentPopupMenu;
+import com.eas.client.form.published.HasEventsExecutor;
 import com.eas.client.form.published.HasJsFacade;
 import com.eas.client.form.published.HasPublished;
 import com.eas.client.form.published.menu.PlatypusPopupMenu;
@@ -24,8 +26,9 @@ import com.google.gwt.user.client.ui.Widget;
  * 
  * @author mg
  */
-public class CardPane extends CardsPanel implements HasJsFacade, HasEnabled, HasComponentPopupMenu {
+public class CardPane extends CardsPanel implements HasJsFacade, HasEnabled, HasComponentPopupMenu, HasEventsExecutor {
 
+	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu menu;
 	protected boolean enabled;
 	protected String name;	
@@ -37,6 +40,16 @@ public class CardPane extends CardsPanel implements HasJsFacade, HasEnabled, Has
 		super();
 		setHgap(aHGap);
 		setVgap(aVGap);
+	}
+
+	@Override
+	public EventsExecutor getEventsExecutor() {
+		return eventsExecutor;
+	}
+
+	@Override
+	public void setEventsExecutor(EventsExecutor aExecutor) {
+		eventsExecutor = aExecutor;
 	}
 
 	@Override

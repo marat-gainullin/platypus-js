@@ -1,8 +1,10 @@
 package com.eas.client.form.published.widgets;
 
 import com.eas.client.form.ControlsUtils;
+import com.eas.client.form.EventsExecutor;
 import com.eas.client.form.published.HasComponentPopupMenu;
 import com.eas.client.form.published.HasEmptyText;
+import com.eas.client.form.published.HasEventsExecutor;
 import com.eas.client.form.published.HasJsFacade;
 import com.eas.client.form.published.HasPublished;
 import com.eas.client.form.published.menu.PlatypusPopupMenu;
@@ -13,8 +15,9 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.TextBox;
 
-public class PlatypusTextField extends TextBox implements HasJsFacade, HasEmptyText, HasComponentPopupMenu {
+public class PlatypusTextField extends TextBox implements HasJsFacade, HasEmptyText, HasComponentPopupMenu, HasEventsExecutor {
 
+	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu menu;
 	protected String name;	
 	protected String emptyText;
@@ -22,6 +25,16 @@ public class PlatypusTextField extends TextBox implements HasJsFacade, HasEmptyT
 
 	public PlatypusTextField() {
 		super();
+	}
+
+	@Override
+	public EventsExecutor getEventsExecutor() {
+		return eventsExecutor;
+	}
+
+	@Override
+	public void setEventsExecutor(EventsExecutor aExecutor) {
+		eventsExecutor = aExecutor;
 	}
 
 	@Override

@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.bearsoft.gwt.ui.containers.window.WindowUI;
+import com.eas.client.form.EventsExecutor;
 import com.eas.client.form.published.HasComponentPopupMenu;
+import com.eas.client.form.published.HasEventsExecutor;
 import com.eas.client.form.published.HasJsFacade;
 import com.eas.client.form.published.HasPublished;
 import com.eas.client.form.published.menu.PlatypusPopupMenu;
@@ -25,8 +27,9 @@ import com.google.gwt.user.client.ui.Widget;
  * 
  * @author mg
  */
-public class DesktopPane extends FlowPanel implements RequiresResize, ProvidesResize, HasJsFacade, HasEnabled, HasComponentPopupMenu {
+public class DesktopPane extends FlowPanel implements RequiresResize, ProvidesResize, HasJsFacade, HasEnabled, HasComponentPopupMenu, HasEventsExecutor {
 
+	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu menu;
 	protected boolean enabled;
 	protected String name;	
@@ -40,6 +43,16 @@ public class DesktopPane extends FlowPanel implements RequiresResize, ProvidesRe
 	public DesktopPane() {
 		super();
 		getElement().getStyle().setOverflow(Style.Overflow.AUTO);
+	}
+
+	@Override
+	public EventsExecutor getEventsExecutor() {
+		return eventsExecutor;
+	}
+
+	@Override
+	public void setEventsExecutor(EventsExecutor aExecutor) {
+		eventsExecutor = aExecutor;
 	}
 
 	@Override

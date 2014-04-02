@@ -59,6 +59,16 @@ public class ModelCheck extends PublishedDecoratorBox<Boolean> {
 	}
 
 	@Override
+	public Boolean getValue() {
+		return super.getValue();
+	}
+
+	@Override
+	public void setValue(Boolean value, boolean fireEvents) {
+		super.setValue(value, fireEvents);
+	}
+
+	@Override
 	public void setBinding(Field aField) throws Exception {
 		super.setBinding(aField, new BooleanRowValueConverter());
 	}

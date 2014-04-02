@@ -1,5 +1,7 @@
 package com.eas.client.form.published.menu;
 
+import com.eas.client.form.EventsExecutor;
+import com.eas.client.form.published.HasEventsExecutor;
 import com.eas.client.form.published.HasJsFacade;
 import com.eas.client.form.published.HasPublished;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -7,8 +9,9 @@ import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.MenuItem;
 
-public class PlatypusMenuBar extends MenuBar implements HasJsFacade, HasEnabled {
+public class PlatypusMenuBar extends MenuBar implements HasJsFacade, HasEnabled, HasEventsExecutor {
 
+	protected EventsExecutor eventsExecutor;
 	protected boolean enabled;
 	protected String name;	
 	protected JavaScriptObject published;
@@ -21,6 +24,16 @@ public class PlatypusMenuBar extends MenuBar implements HasJsFacade, HasEnabled 
 
 	public PlatypusMenuBar(boolean aVertical) {
 		super(aVertical);
+	}
+
+	@Override
+	public EventsExecutor getEventsExecutor() {
+		return eventsExecutor;
+	}
+
+	@Override
+	public void setEventsExecutor(EventsExecutor aExecutor) {
+		eventsExecutor = aExecutor;
 	}
 
 	@Override

@@ -84,7 +84,7 @@ public class WidgetsFactory {
 	protected static final String ABSOLUTE_OR_MARGIN_OR_LAYERS_CONSTRAINTS_TAG_NEEED = "MarginLayoutContainer children must have Margin, Absolute or Layers constraints tag";
 	protected static final String TABS_CONSTRAINTS_TAG_NEEED = "TabsContainer children must have tabs constraints tag";
 	protected static final String UNKNOWN_CONTAINER_DETECTED = "Container of unknown type detected: ";
-	protected static final String NULL_CONTAINER_DETECTED = "Container with the folowing name was not found: ";
+	protected static final String NULL_CONTAINER_DETECTED = "Container with the following name was not found: ";
 	protected static final String NAME_ATTRIBUTE = "name";
 	protected static final String PARENT_ATTRIBUTE = "parent";
 	protected static final String TYPE_ATTRIBUTE = "type";
@@ -204,7 +204,7 @@ public class WidgetsFactory {
 		if (component != null)// There are might be toggle groups, that are non
 		                      // visuals and so, not components
 		{
-			components.put(component.getElement().getId(), component);
+			components.put(((HasJsName)component).getJsName(), component);
 			String parentName = aTag.getAttribute(PARENT_ATTRIBUTE);
 			if (!isRoot && parentName != null && !parentName.isEmpty()) {
 				resolveParent(component, parentName, pickConstraintsTag(aTag));
@@ -675,7 +675,7 @@ public class WidgetsFactory {
 		}
 
 		if (aTag.hasAttribute("prefWidth") && aTag.hasAttribute("prefHeight")) {
-			Point size = new Point(Utils.getIntegerAttribute(aTag, "prefWidth", 0), Utils.getIntegerAttribute(aTag, "prefHeight", 0));
+			Point size = new Point(Utils.getPxAttribute(aTag, "prefWidth", 0), Utils.getPxAttribute(aTag, "prefHeight", 0));
 			componentsPreferredSize.put(aComponent, size);
 		}
 		if (aTag.hasAttribute("componentPopupMenu")) {
@@ -907,10 +907,11 @@ public class WidgetsFactory {
 						if (aComponent instanceof MenuItemImageText)
 							container.addItem((MenuItemImageText) aComponent);
 					} else if (parentComp instanceof PlatypusMenu) {
-					} else if (parentComp != null)
+					} else if (parentComp != null){
 						throw new IllegalStateException(UNKNOWN_CONTAINER_DETECTED + parentComp.getClass().getName());
-					else
+					}else{
 						throw new IllegalStateException(NULL_CONTAINER_DETECTED + aParentName);
+					}
 				} catch (Exception ex) {
 					Logger.getLogger(WidgetsFactory.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
 				}

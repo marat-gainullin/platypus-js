@@ -1,6 +1,8 @@
 package com.eas.client.form.published.widgets;
 
+import com.eas.client.form.EventsExecutor;
 import com.eas.client.form.published.HasComponentPopupMenu;
+import com.eas.client.form.published.HasEventsExecutor;
 import com.eas.client.form.published.HasJsFacade;
 import com.eas.client.form.published.HasPublished;
 import com.eas.client.form.published.menu.PlatypusPopupMenu;
@@ -12,8 +14,9 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.DoubleBox;
 import com.google.gwt.user.client.ui.HasEnabled;
 
-public class PlatypusSpinnerField extends ConstraintedSpinnerBox implements HasJsFacade, HasEnabled, HasComponentPopupMenu {
+public class PlatypusSpinnerField extends ConstraintedSpinnerBox implements HasJsFacade, HasEnabled, HasComponentPopupMenu, HasEventsExecutor {
 
+	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu menu;
 	protected boolean enabled;
 	protected String name;	
@@ -21,6 +24,16 @@ public class PlatypusSpinnerField extends ConstraintedSpinnerBox implements HasJ
 
 	public PlatypusSpinnerField() {
 		super(new DoubleBox());
+	}
+
+	@Override
+	public EventsExecutor getEventsExecutor() {
+		return eventsExecutor;
+	}
+
+	@Override
+	public void setEventsExecutor(EventsExecutor aExecutor) {
+		eventsExecutor = aExecutor;
 	}
 
 	@Override

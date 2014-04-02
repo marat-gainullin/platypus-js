@@ -9,9 +9,11 @@ import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.eas.client.converters.RowValueConverter;
 import com.eas.client.form.ControlsUtils;
+import com.eas.client.form.EventsExecutor;
 import com.eas.client.form.published.HasBinding;
 import com.eas.client.form.published.HasComponentPopupMenu;
 import com.eas.client.form.published.HasCustomEditing;
+import com.eas.client.form.published.HasEventsExecutor;
 import com.eas.client.form.published.HasJsFacade;
 import com.eas.client.form.published.HasOnRender;
 import com.eas.client.form.published.HasOnSelect;
@@ -27,8 +29,9 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.HasValue;
 
-public abstract class PublishedDecoratorBox<T> extends DecoratorBox<T> implements HasJsFacade, HasCustomEditing, HasBinding, HasOnRender, HasOnSelect, HasComponentPopupMenu {
+public abstract class PublishedDecoratorBox<T> extends DecoratorBox<T> implements HasJsFacade, HasCustomEditing, HasBinding, HasOnRender, HasOnSelect, HasComponentPopupMenu, HasEventsExecutor {
 
+	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu menu;
 	protected String name;
 	protected JavaScriptObject published;
@@ -41,6 +44,16 @@ public abstract class PublishedDecoratorBox<T> extends DecoratorBox<T> implement
 
 	public PublishedDecoratorBox(HasValue<T> aDecorated) {
 		super(aDecorated);
+	}
+
+	@Override
+	public EventsExecutor getEventsExecutor() {
+		return eventsExecutor;
+	}
+
+	@Override
+	public void setEventsExecutor(EventsExecutor aExecutor) {
+		eventsExecutor = aExecutor;
 	}
 
 	@Override

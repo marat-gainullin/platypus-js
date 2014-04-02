@@ -2,7 +2,9 @@ package com.eas.client.form.published.containers;
 
 import com.bearsoft.gwt.ui.XElement;
 import com.bearsoft.gwt.ui.containers.VerticalBoxPanel;
+import com.eas.client.form.EventsExecutor;
 import com.eas.client.form.published.HasComponentPopupMenu;
+import com.eas.client.form.published.HasEventsExecutor;
 import com.eas.client.form.published.HasJsFacade;
 import com.eas.client.form.published.HasPublished;
 import com.eas.client.form.published.menu.PlatypusPopupMenu;
@@ -15,8 +17,9 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.Widget;
 
-public class VBoxPane extends VerticalBoxPanel implements HasJsFacade, HasEnabled, HasComponentPopupMenu {
+public class VBoxPane extends VerticalBoxPanel implements HasJsFacade, HasEnabled, HasComponentPopupMenu, HasEventsExecutor {
 
+	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu menu;
 	protected boolean enabled;
 	protected String name;	
@@ -29,6 +32,16 @@ public class VBoxPane extends VerticalBoxPanel implements HasJsFacade, HasEnable
 	public VBoxPane(int aVGap) {
 		super();
 		setVgap(aVGap);
+	}
+
+	@Override
+	public EventsExecutor getEventsExecutor() {
+		return eventsExecutor;
+	}
+
+	@Override
+	public void setEventsExecutor(EventsExecutor aExecutor) {
+		eventsExecutor = aExecutor;
 	}
 
 	@Override

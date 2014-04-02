@@ -5,7 +5,9 @@
 package com.eas.client.form.published.containers;
 
 import com.bearsoft.gwt.ui.containers.GridPanel;
+import com.eas.client.form.EventsExecutor;
 import com.eas.client.form.published.HasComponentPopupMenu;
+import com.eas.client.form.published.HasEventsExecutor;
 import com.eas.client.form.published.HasJsFacade;
 import com.eas.client.form.published.HasPublished;
 import com.eas.client.form.published.menu.PlatypusPopupMenu;
@@ -20,8 +22,9 @@ import com.google.gwt.user.client.ui.HasEnabled;
  * 
  * @author mg
  */
-public class GridPane extends GridPanel implements HasJsFacade, HasEnabled, HasComponentPopupMenu{
+public class GridPane extends GridPanel implements HasJsFacade, HasEnabled, HasComponentPopupMenu, HasEventsExecutor{
 
+	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu menu;
 	protected boolean enabled;
 	protected String name;	
@@ -39,6 +42,16 @@ public class GridPane extends GridPanel implements HasJsFacade, HasEnabled, HasC
 		this(aRows, aCols);
 		setHgap(aHGap);
 		setVgap(aVGap);
+	}
+
+	@Override
+	public EventsExecutor getEventsExecutor() {
+		return eventsExecutor;
+	}
+
+	@Override
+	public void setEventsExecutor(EventsExecutor aExecutor) {
+		eventsExecutor = aExecutor;
 	}
 
 	@Override

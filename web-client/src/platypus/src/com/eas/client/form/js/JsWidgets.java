@@ -1,6 +1,7 @@
 package com.eas.client.form.js;
 
 import com.eas.client.form.published.PublishedComponent;
+import com.google.gwt.core.client.JavaScriptObject;
 
 public class JsWidgets {
 
@@ -561,6 +562,8 @@ public class JsWidgets {
 		    	return function(){aPublished.element.focus();}
 		    }
  	    });
+ 	    // Events
+ 	    @com.eas.client.form.js.JsWidgets::publishExecutor(Lcom/google/gwt/core/client/JavaScriptObject;)(aPublished);
  	    // Native API
         Object.defineProperty(aPublished, "element", {
         	get : function() {
@@ -573,5 +576,209 @@ public class JsWidgets {
         	}
         });
         comp.@com.eas.client.form.published.HasPublished::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(aPublished);
+	}-*/;
+	
+	public native static JavaScriptObject publishExecutor(JavaScriptObject published)/*-{
+		if (published && published.unwrap) {
+			var comp = published.unwrap();
+			var executor = comp.@com.eas.client.form.published.HasEventsExecutor::getEventsExecutor()();
+			if(executor == null){
+				executor = @com.eas.client.form.EventsExecutor::new(Lcom/google/gwt/user/client/ui/UIObject;Lcom/google/gwt/core/client/JavaScriptObject;)(comp, published);
+				comp.@com.eas.client.form.published.HasEventsExecutor::setEventsExecutor(Lcom/eas/client/form/EventsExecutor;)(executor);
+			} else {
+				executor.@com.eas.client.form.EventsExecutor::setEventThis(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+			}
+			Object.defineProperty(published, "onActionPerformed", {
+				get : function() {
+					return executor.@com.eas.client.form.EventsExecutor::getActionPerformed()();
+				},
+				set : function(aValue) {
+					executor.@com.eas.client.form.EventsExecutor::setActionPerformed(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+				},
+				configurable : true
+			});
+	
+			Object.defineProperty(published, "onMouseExited", {
+				get : function() {
+					return executor.@com.eas.client.form.EventsExecutor::getMouseExited()();
+				},
+				set : function(aValue) {
+					executor.@com.eas.client.form.EventsExecutor::setMouseExited(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+				},
+				configurable : true
+			});
+			Object.defineProperty(published, "onMouseClicked", {
+				get : function() {
+					return executor.@com.eas.client.form.EventsExecutor::getMouseClicked()();
+				},
+				set : function(aValue) {
+					executor.@com.eas.client.form.EventsExecutor::setMouseClicked(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+				},
+				configurable : true
+			});
+			Object.defineProperty(published, "onMousePressed", {
+				get : function() {
+					return executor.@com.eas.client.form.EventsExecutor::getMousePressed()();
+				},
+				set : function(aValue) {
+					executor.@com.eas.client.form.EventsExecutor::setMousePressed(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+				},
+				configurable : true
+			});
+			Object.defineProperty(published, "onMouseReleased", {
+				get : function() {
+					return executor.@com.eas.client.form.EventsExecutor::getMouseReleased()();
+				},
+				set : function(aValue) {
+					executor.@com.eas.client.form.EventsExecutor::setMouseReleased(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+				},
+				configurable : true
+			});
+			Object.defineProperty(published, "onMouseEntered", {
+				get : function() {
+					return executor.@com.eas.client.form.EventsExecutor::getMouseEntered()();
+				},
+				set : function(aValue) {
+					executor.@com.eas.client.form.EventsExecutor::setMouseEntered(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+				},
+				configurable : true
+			});
+			Object.defineProperty(published, "onMouseWheelMoved", {
+				get : function() {
+					return executor.@com.eas.client.form.EventsExecutor::getMouseWheelMoved()();
+				},
+				set : function(aValue) {
+					executor.@com.eas.client.form.EventsExecutor::setMouseWheelMoved(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+				},
+				configurable : true
+			});
+			Object.defineProperty(published, "onMouseDragged", {
+				get : function() {
+					return executor.@com.eas.client.form.EventsExecutor::getMouseDragged()();
+				},
+				set : function(aValue) {
+					executor.@com.eas.client.form.EventsExecutor::setMouseDragged(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+				},
+				configurable : true
+			});
+			Object.defineProperty(published, "onMouseMoved", {
+				get : function() {
+					return executor.@com.eas.client.form.EventsExecutor::getMouseMoved()();
+				},
+				set : function(aValue) {
+					executor.@com.eas.client.form.EventsExecutor::setMouseMoved(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+				},
+				configurable : true
+			});
+			Object.defineProperty(published, "onComponentResized", {
+				get : function() {
+					return executor.@com.eas.client.form.EventsExecutor::getComponentResized()();
+				},
+				set : function(aValue) {
+					executor.@com.eas.client.form.EventsExecutor::setComponentResized(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+				},
+				configurable : true
+			});
+			Object.defineProperty(published, "onComponentMoved", {
+				get : function() {
+					return executor.@com.eas.client.form.EventsExecutor::getComponentMoved()();
+				},
+				set : function(aValue) {
+					executor.@com.eas.client.form.EventsExecutor::setComponentMoved(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+				},
+				configurable : true
+			});
+			Object.defineProperty(published, "onComponentShown", {
+				get : function() {
+					return executor.@com.eas.client.form.EventsExecutor::getComponentShown()();
+				},
+				set : function(aValue) {
+					executor.@com.eas.client.form.EventsExecutor::setComponentShown(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+				},
+				configurable : true
+			});
+			Object.defineProperty(published, "onComponentHidden", {
+				get : function() {
+					return executor.@com.eas.client.form.EventsExecutor::getComponentHidden()();
+				},
+				set : function(aValue) {
+					executor.@com.eas.client.form.EventsExecutor::setComponentHidden(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+				},
+				configurable : true
+			});
+			Object.defineProperty(published, "onComponentAdded", {
+				get : function() {
+					return executor.@com.eas.client.form.EventsExecutor::getComponentAdded()();
+				},
+				set : function(aValue) {
+					executor.@com.eas.client.form.EventsExecutor::setComponentAdded(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+				},
+				configurable : true
+			});
+			Object.defineProperty(published, "onComponentRemoved", {
+				get : function() {
+					return executor.@com.eas.client.form.EventsExecutor::getComponentRemoved()();
+				},
+				set : function(aValue) {
+					executor.@com.eas.client.form.EventsExecutor::setComponentRemoved(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+				},
+				configurable : true
+			});			
+			Object.defineProperty(published, "onFocusGained", {
+				get : function() {
+					return executor.@com.eas.client.form.EventsExecutor::getFocusGained()();
+				},
+				set : function(aValue) {
+					executor.@com.eas.client.form.EventsExecutor::setFocusGained(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+				},
+				configurable : true
+			});
+			Object.defineProperty(published, "onFocusLost", {
+				get : function() {
+					return executor.@com.eas.client.form.EventsExecutor::getFocusLost()();
+				},
+				set : function(aValue) {
+					executor.@com.eas.client.form.EventsExecutor::setFocusLost(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+				},
+				configurable : true
+			});
+			Object.defineProperty(published, "onKeyTyped", {
+				get : function() {
+					return executor.@com.eas.client.form.EventsExecutor::getKeyTyped()();
+				},
+				set : function(aValue) {
+					executor.@com.eas.client.form.EventsExecutor::setKeyTyped(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+				},
+				configurable : true
+			});
+			Object.defineProperty(published, "onKeyPressed", {
+				get : function() {
+					return executor.@com.eas.client.form.EventsExecutor::getKeyPressed()();
+				},
+				set : function(aValue) {
+					executor.@com.eas.client.form.EventsExecutor::setKeyPressed(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+				},
+				configurable : true
+			});
+			Object.defineProperty(published, "onKeyReleased", {
+				get : function() {
+					return executor.@com.eas.client.form.EventsExecutor::getKeyReleased()();
+				},
+				set : function(aValue) {
+					executor.@com.eas.client.form.EventsExecutor::setKeyReleased(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+				},
+				configurable : true
+			});
+			Object.defineProperty(published, "onStateChanged", {
+				get : function() {
+					return executor.@com.eas.client.form.EventsExecutor::getStateChanged()();
+				},
+				set : function(aValue) {
+					executor.@com.eas.client.form.EventsExecutor::setStateChanged(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+				},
+				configurable : true
+			});
+		}
+	
 	}-*/;
 }

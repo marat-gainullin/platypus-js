@@ -22,7 +22,7 @@ import com.eas.client.ResponseCallbackAdapter;
 import com.eas.client.StringCallbackAdapter;
 import com.eas.client.queries.Query;
 import com.eas.client.queries.QueryCallbackAdapter;
-import com.eas.client.xhr.UrlProcessor;
+import com.eas.client.xhr.UrlQueryProcessor;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.ScriptInjector;
@@ -45,7 +45,7 @@ public class Loader {
 		public void loaded(String anItemName);
 	}
 
-	public static final UrlProcessor URL_PROCESSOR = GWT.create(UrlProcessor.class);
+	public static final UrlQueryProcessor URL_PROCESSOR = GWT.create(UrlQueryProcessor.class);
 	public static final String INJECTED_SCRIPT_CLASS_NAME = "platypus-injected-script";
 	public static final String SERVER_MODULE_TOUCHED_NAME = "Proxy-";
 	public static final String DEPENDENCY_TAG_NAME = "dependency";
@@ -240,7 +240,7 @@ public class Loader {
 				}));
 				//
 				String jsURL = client.resourceUrl(appElementName);
-				jsURL = URL_PROCESSOR.process(jsURL);
+				jsURL += URL_PROCESSOR.process("");
 				ScriptInjector.fromUrl(jsURL).setCallback(new Callback<Void, Exception>() {
 
 					@Override

@@ -4,7 +4,9 @@ import com.bearsoft.gwt.ui.containers.TabsDecoratedPanel;
 import com.bearsoft.gwt.ui.widgets.ImageLabel;
 import com.eas.client.ImageResourceCallback;
 import com.eas.client.application.PlatypusImageResource;
+import com.eas.client.form.EventsExecutor;
 import com.eas.client.form.published.HasComponentPopupMenu;
+import com.eas.client.form.published.HasEventsExecutor;
 import com.eas.client.form.published.HasJsFacade;
 import com.eas.client.form.published.HasPublished;
 import com.eas.client.form.published.menu.PlatypusPopupMenu;
@@ -20,8 +22,9 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.Widget;
 
-public class TabbedPane extends TabsDecoratedPanel implements HasJsFacade, HasSelectionHandlers<Widget>, HasEnabled, HasComponentPopupMenu {
+public class TabbedPane extends TabsDecoratedPanel implements HasJsFacade, HasSelectionHandlers<Widget>, HasEnabled, HasComponentPopupMenu, HasEventsExecutor {
 
+	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu menu;
 	protected boolean enabled;
 	protected String name;	
@@ -41,6 +44,16 @@ public class TabbedPane extends TabsDecoratedPanel implements HasJsFacade, HasSe
 		});
 	}
 	
+	@Override
+	public EventsExecutor getEventsExecutor() {
+		return eventsExecutor;
+	}
+
+	@Override
+	public void setEventsExecutor(EventsExecutor aExecutor) {
+		eventsExecutor = aExecutor;
+	}
+
 	@Override
     public PlatypusPopupMenu getPlatypusPopupMenu() {
 		return menu; 

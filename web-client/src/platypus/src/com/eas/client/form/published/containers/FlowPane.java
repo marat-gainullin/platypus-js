@@ -2,7 +2,9 @@ package com.eas.client.form.published.containers;
 
 import com.bearsoft.gwt.ui.XElement;
 import com.bearsoft.gwt.ui.containers.FlowGapPanel;
+import com.eas.client.form.EventsExecutor;
 import com.eas.client.form.published.HasComponentPopupMenu;
+import com.eas.client.form.published.HasEventsExecutor;
 import com.eas.client.form.published.HasJsFacade;
 import com.eas.client.form.published.HasPublished;
 import com.eas.client.form.published.menu.PlatypusPopupMenu;
@@ -15,8 +17,9 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 
-public class FlowPane extends FlowGapPanel implements HasJsFacade, HasEnabled, HasComponentPopupMenu{
+public class FlowPane extends FlowGapPanel implements HasJsFacade, HasEnabled, HasComponentPopupMenu, HasEventsExecutor{
 
+	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu menu;
 	protected boolean enabled;
 	protected String name;	
@@ -30,6 +33,16 @@ public class FlowPane extends FlowGapPanel implements HasJsFacade, HasEnabled, H
 		super();
 		setHgap(aHGap);
 		setVgap(aVGap);
+	}
+
+	@Override
+	public EventsExecutor getEventsExecutor() {
+		return eventsExecutor;
+	}
+
+	@Override
+	public void setEventsExecutor(EventsExecutor aExecutor) {
+		eventsExecutor = aExecutor;
 	}
 
 	@Override

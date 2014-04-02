@@ -1,7 +1,9 @@
 package com.eas.client.form.published.widgets;
 
 import com.bearsoft.gwt.ui.widgets.progress.SliderBar;
+import com.eas.client.form.EventsExecutor;
 import com.eas.client.form.published.HasComponentPopupMenu;
+import com.eas.client.form.published.HasEventsExecutor;
 import com.eas.client.form.published.HasJsFacade;
 import com.eas.client.form.published.HasPublished;
 import com.eas.client.form.published.menu.PlatypusPopupMenu;
@@ -11,8 +13,9 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 
-public class PlatypusSlider extends SliderBar implements HasJsFacade, HasComponentPopupMenu {
+public class PlatypusSlider extends SliderBar implements HasJsFacade, HasComponentPopupMenu, HasEventsExecutor {
 
+	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu menu;
 	protected String name;	
 	protected JavaScriptObject published;
@@ -29,6 +32,16 @@ public class PlatypusSlider extends SliderBar implements HasJsFacade, HasCompone
 		super(0, 100);
 	}
 	
+	@Override
+	public EventsExecutor getEventsExecutor() {
+		return eventsExecutor;
+	}
+
+	@Override
+	public void setEventsExecutor(EventsExecutor aExecutor) {
+		eventsExecutor = aExecutor;
+	}
+
 	@Override
     public PlatypusPopupMenu getPlatypusPopupMenu() {
 		return menu; 

@@ -2,7 +2,9 @@ package com.eas.client.form.published.widgets;
 
 import com.bearsoft.gwt.ui.widgets.DropDownButton;
 import com.bearsoft.gwt.ui.widgets.ImageParagraph;
+import com.eas.client.form.EventsExecutor;
 import com.eas.client.form.published.HasComponentPopupMenu;
+import com.eas.client.form.published.HasEventsExecutor;
 import com.eas.client.form.published.HasJsFacade;
 import com.eas.client.form.published.HasPublished;
 import com.eas.client.form.published.menu.PlatypusPopupMenu;
@@ -15,8 +17,9 @@ import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.MenuBar;
 
-public class PlatypusSplitButton extends DropDownButton implements HasJsFacade, HasEnabled, HasComponentPopupMenu {
+public class PlatypusSplitButton extends DropDownButton implements HasJsFacade, HasEnabled, HasComponentPopupMenu, HasEventsExecutor {
 	
+	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu menu;
 	protected boolean enabled;
 	protected String name;	
@@ -32,6 +35,16 @@ public class PlatypusSplitButton extends DropDownButton implements HasJsFacade, 
 
 	public PlatypusSplitButton(String aTitle, boolean asHtml, ImageResource aImage, MenuBar aMenu) {
 		super(aTitle, asHtml, aImage, aMenu);
+	}
+
+	@Override
+	public EventsExecutor getEventsExecutor() {
+		return eventsExecutor;
+	}
+
+	@Override
+	public void setEventsExecutor(EventsExecutor aExecutor) {
+		eventsExecutor = aExecutor;
 	}
 
 	@Override
