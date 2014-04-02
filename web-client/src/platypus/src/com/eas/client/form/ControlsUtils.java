@@ -36,6 +36,7 @@ import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 
 public class ControlsUtils {
@@ -264,11 +265,11 @@ public class ControlsUtils {
 		}
 	}
 
-	public static void applyBackground(Widget aWidget, final PublishedColor aColor) {
+	public static void applyBackground(UIObject aWidget, final PublishedColor aColor) {
 		applyBackground(aWidget, aColor != null ? aColor.toStyled() : null);
 	}
 
-	public static void applyBackground(Widget aWidget, final String aColorString) {
+	public static void applyBackground(UIObject aWidget, final String aColorString) {
 		Element aElement = aWidget.getElement();
 		if (aElement != null && aElement.getStyle() != null) {
 			if (aColorString != null && !aColorString.isEmpty()) {
@@ -281,7 +282,7 @@ public class ControlsUtils {
 		}
 	}
 
-	public static void applyForeground(Widget aWidget, final PublishedColor aColor) {
+	public static void applyForeground(UIObject aWidget, final PublishedColor aColor) {
 		Element aElement = aWidget.getElement();
 		if (aColor != null)
 			aElement.getStyle().setColor(aColor.toStyled());
@@ -289,7 +290,7 @@ public class ControlsUtils {
 			aElement.getStyle().clearColor();
 	}
 
-	public static void applyFont(Widget aWidget, final PublishedFont aFont) {
+	public static void applyFont(UIObject aWidget, final PublishedFont aFont) {
 		Element aElement = aWidget.getElement();
 		aElement.getStyle().setProperty("fontFamily", aFont != null ? aFont.getFamily() : "");
 		if (aFont != null) {
@@ -309,29 +310,29 @@ public class ControlsUtils {
 		}
 	}
 
-	public static void applyCursor(Widget aWidget, final String aCursor) {
+	public static void applyCursor(UIObject aWidget, final String aCursor) {
 		aWidget.getElement().getStyle().setProperty("cursor", aCursor != null ? aCursor : "");
 	}
 
 	public static void reapplyStyle(HasPublished aComponent) {
-		if (aComponent instanceof Widget && aComponent.getPublished() != null) {
+		if (aComponent instanceof UIObject && aComponent.getPublished() != null) {
 			PublishedComponent published = aComponent.getPublished().cast();
 			if (published.isBackgroundSet())
-				ControlsUtils.applyBackground((Widget) aComponent, published.getBackground());
+				ControlsUtils.applyBackground((UIObject) aComponent, published.getBackground());
 			if (published.isForegroundSet())
-				ControlsUtils.applyForeground((Widget) aComponent, published.getForeground());
+				ControlsUtils.applyForeground((UIObject) aComponent, published.getForeground());
 			if (published.isFontSet())
-				ControlsUtils.applyFont((Widget) aComponent, published.getFont());
+				ControlsUtils.applyFont((UIObject) aComponent, published.getFont());
 			if (published.isCursorSet())
-				ControlsUtils.applyCursor((Widget) aComponent, published.getCursor());
+				ControlsUtils.applyCursor((UIObject) aComponent, published.getCursor());
 		}
 	}
 
-	public static JavaScriptObject lookupPublishedParent(Widget aWidget) {
+	public static JavaScriptObject lookupPublishedParent(UIObject aWidget) {
 		assert aWidget != null;
-		Widget parent = aWidget;
+		UIObject parent = aWidget;
 		while (parent != null && !(parent instanceof HasPublished)) {
-			parent = parent.getParent();
+			parent = parent instanceof Widget ? ((Widget)parent).getParent() : null;
 		}
 		return parent != null ? ((HasPublished) parent).getPublished() : null;
 	}

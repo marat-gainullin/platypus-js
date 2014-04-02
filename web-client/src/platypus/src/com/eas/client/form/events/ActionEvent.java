@@ -38,14 +38,13 @@ public class ActionEvent extends GwtEvent<ActionHandler>{
     private final UIObject target;
 
     /**
-     * Creates a new close event.
+     * Creates a new action event.
      *
-     * @param aSource the target
+     * @param aTarget the target
      */
-    protected ActionEvent(UIObject aSource) {
+    protected ActionEvent(UIObject aTarget) {
     	super();
-    	setSource(aSource);
-        target = aSource;
+        target = aTarget;
     }
 
     @Override

@@ -369,10 +369,10 @@ public class JsWidgets {
 	
 	    Object.defineProperty(aPublished, "visible", {
 		    get : function() {
-			    return comp.@com.google.gwt.user.client.ui.Widget::isVisible()();
+			    return comp.@com.google.gwt.user.client.ui.UIObject::isVisible()();
 		    },
 		    set : function(aValue) {
-			    comp.@com.google.gwt.user.client.ui.Widget::setVisible(Z)(aValue);
+			    comp.@com.google.gwt.user.client.ui.UIObject::setVisible(Z)(aValue);
 		    }
  	    });
 	    Object.defineProperty(aPublished, "enabled", {
@@ -385,16 +385,16 @@ public class JsWidgets {
  	    });
 	    Object.defineProperty(aPublished, "toolTipText", {
 		    get : function() {
-			    return comp.@com.google.gwt.user.client.ui.Widget::getTitle()();
+			    return comp.@com.google.gwt.user.client.ui.UIObject::getTitle()();
 		    },
 		    set : function(aValue) {
-			    comp.@com.google.gwt.user.client.ui.Widget::setTitle(Ljava/lang/String;)(aValue != null ? aValue + "" : null);
+			    comp.@com.google.gwt.user.client.ui.UIObject::setTitle(Ljava/lang/String;)(aValue != null ? aValue + "" : null);
 		    }
  	    });
 	    Object.defineProperty(aPublished, "background", {
 		    get : function() {
 		    	if(_background == null) {
-		    		var style = $wnd.getElementComputedStyle(comp.@com.google.gwt.user.client.ui.Widget::getElement()());
+		    		var style = $wnd.getElementComputedStyle(comp.@com.google.gwt.user.client.ui.UIObject::getElement()());
 		    		return @com.eas.client.form.ControlsUtils::parseColor(Ljava/lang/String;)(style.backgroundColor);
 		    	}
 		    	return _background;
@@ -402,7 +402,7 @@ public class JsWidgets {
 		    set : function(aValue) {
 		    	_background = aValue;
 		    	//apply
-		    	@com.eas.client.form.ControlsUtils::applyBackground(Lcom/google/gwt/user/client/ui/Widget;Ljava/lang/String;)(comp, _background!=null?_background.toStyled():""); 
+		    	@com.eas.client.form.ControlsUtils::applyBackground(Lcom/google/gwt/user/client/ui/UIObject;Ljava/lang/String;)(comp, _background!=null?_background.toStyled():""); 
 		    }
  	    });
 	    Object.defineProperty(aPublished, "backgroundSet", {get : function(){return _background != null;}});
@@ -418,7 +418,7 @@ public class JsWidgets {
 		    set : function(aValue) {
 		    	_foreground = aValue;
 		    	// apply
-		    	@com.eas.client.form.ControlsUtils::applyForeground(Lcom/google/gwt/user/client/ui/Widget;Lcom/eas/client/form/published/PublishedColor;)(comp, _foreground); 
+		    	@com.eas.client.form.ControlsUtils::applyForeground(Lcom/google/gwt/user/client/ui/UIObject;Lcom/eas/client/form/published/PublishedColor;)(comp, _foreground); 
 		    }
  	    });
 	    Object.defineProperty(aPublished, "foregroundSet", {get : function(){return _foreground != null;}});
@@ -429,14 +429,14 @@ public class JsWidgets {
 		    set : function(aValue) {
 		    	_opaque = (false != aValue);
 		    	// apply
-	    		@com.eas.client.form.ControlsUtils::applyBackground(Lcom/google/gwt/user/client/ui/Widget;Ljava/lang/String;)(comp, _opaque?(_background!=null?_background.toStyled():""):"transparent");
+	    		@com.eas.client.form.ControlsUtils::applyBackground(Lcom/google/gwt/user/client/ui/UIObject;Ljava/lang/String;)(comp, _opaque?(_background!=null?_background.toStyled():""):"transparent");
 		    }
  	    });
 	    Object.defineProperty(aPublished, "font", {
 		    get : function() {
 		    	if(_font == null)
 		    	{
-		    		var style = $wnd.getElementComputedStyle(comp.@com.google.gwt.user.client.ui.Widget::getElement()());
+		    		var style = $wnd.getElementComputedStyle(comp.@com.google.gwt.user.client.ui.UIObject::getElement()());
 		    		var isItalic = style.fontStyle == "italic";
 		    		var isBold = style.fontWeight == "bold" || style.fontWeight == "bolder"; 
 		    		var platypusFontStyle = $wnd.FontStyle.NORMAL;
@@ -455,7 +455,7 @@ public class JsWidgets {
 		    set : function(aValue) {
 		    	_font = aValue;
 		    	// apply
-		    	@com.eas.client.form.ControlsUtils::applyFont(Lcom/google/gwt/user/client/ui/Widget;Lcom/eas/client/form/published/PublishedFont;)(comp, _font); 
+		    	@com.eas.client.form.ControlsUtils::applyFont(Lcom/google/gwt/user/client/ui/UIObject;Lcom/eas/client/form/published/PublishedFont;)(comp, _font); 
 		    }
  	    });
 	    Object.defineProperty(aPublished, "fontSet", { get : function(){return _font != null;}});
@@ -463,7 +463,7 @@ public class JsWidgets {
  	    	get : function(){
  	    		if(_cursor == null)
  	    		{
-		    		var style = $wnd.getElementComputedStyle(comp.@com.google.gwt.user.client.ui.Widget::getElement()());
+		    		var style = $wnd.getElementComputedStyle(comp.@com.google.gwt.user.client.ui.UIObject::getElement()());
 		    		return style.cursor;
  	    		}
  	    		return _cursor;
@@ -472,7 +472,7 @@ public class JsWidgets {
  	    	{
  	    		_cursor = aValue; 
  	    		// apply	
-		    	@com.eas.client.form.ControlsUtils::applyCursor(Lcom/google/gwt/user/client/ui/Widget;Ljava/lang/String;)(comp, _cursor); 
+		    	@com.eas.client.form.ControlsUtils::applyCursor(Lcom/google/gwt/user/client/ui/UIObject;Ljava/lang/String;)(comp, _cursor); 
  	    	}
  	    	
  	    });
@@ -549,7 +549,7 @@ public class JsWidgets {
  	    });
 	    Object.defineProperty(aPublished, "parent", {
 		    get : function() {
-		    	return @com.eas.client.form.ControlsUtils::lookupPublishedParent(Lcom/google/gwt/user/client/ui/Widget;)(comp);
+		    	return @com.eas.client.form.ControlsUtils::lookupPublishedParent(Lcom/google/gwt/user/client/ui/UIObject;)(comp);
 		    }
  	    });
 	    Object.defineProperty(aPublished, "name", {
@@ -567,7 +567,7 @@ public class JsWidgets {
  	    // Native API
         Object.defineProperty(aPublished, "element", {
         	get : function() {
-    			return comp.@com.google.gwt.user.client.ui.Widget::getElement()();
+    			return comp.@com.google.gwt.user.client.ui.UIObject::getElement()();
         	}
         });
         Object.defineProperty(aPublished, "component", {

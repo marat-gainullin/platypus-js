@@ -47,7 +47,7 @@ public class RestoreEvent<T> extends GwtEvent<RestoreHandler<T>> {
     private final T target;
 
     /**
-     * Creates a new close event.
+     * Creates a new restore event.
      *
      * @param target the target
      */

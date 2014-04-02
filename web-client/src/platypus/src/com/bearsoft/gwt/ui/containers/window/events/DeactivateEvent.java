@@ -47,7 +47,7 @@ public class DeactivateEvent<T> extends GwtEvent<DeactivateHandler<T>> {
     private final T target;
 
     /**
-     * Creates a new close event.
+     * Creates a new deactivate event.
      *
      * @param target the target
      */
