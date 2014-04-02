@@ -5,6 +5,7 @@ import com.bearsoft.rowset.Utils;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.eas.client.converters.ObjectRowValueConverter;
+import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.CrossUpdater;
 import com.eas.client.form.published.HasEmptyText;
 import com.eas.client.model.Entity;
@@ -26,6 +27,8 @@ public class ModelCombo extends PublishedDecoratorBox<Object> implements HasEmpt
 		}
 
 	});
+	
+	protected String emptyText;
 	protected ModelElementRef valueElement;
 	protected ModelElementRef displayElement;
 
@@ -41,11 +44,13 @@ public class ModelCombo extends PublishedDecoratorBox<Object> implements HasEmpt
 	
 	@Override
 	public String getEmptyText() {
-		return null;
+		return emptyText;
 	}
 	
 	@Override
 	public void setEmptyText(String aValue) {
+		emptyText = aValue;
+		ControlsUtils.applyEmptyText(getElement(), emptyText);
 	}
 	
 	public void setPublished(JavaScriptObject aValue) {
@@ -56,6 +61,14 @@ public class ModelCombo extends PublishedDecoratorBox<Object> implements HasEmpt
 	}
 
 	private native static void publish(ModelCombo aField, JavaScriptObject aPublished)/*-{
+		Object.defineProperty(published, "emptyText", {
+			get : function() {
+				return aWidget.@com.eas.client.form.published.HasEmptyText::getEmptyText()();
+			},
+			set : function(aValue) {
+				aWidget.@com.eas.client.form.published.HasEmptyText::setEmptyText(Ljava/lang/String;)(aValue!=null?''+aValue:null);
+			}
+		});
 		Object.defineProperty(aPublished, "value", {
 			get : function() {
 				return $wnd.boxAsJs(aField.@com.eas.client.form.published.widgets.model.ModelCombo::getJsValue()());

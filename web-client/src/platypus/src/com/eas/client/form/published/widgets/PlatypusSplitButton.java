@@ -2,13 +2,24 @@ package com.eas.client.form.published.widgets;
 
 import com.bearsoft.gwt.ui.widgets.DropDownButton;
 import com.bearsoft.gwt.ui.widgets.ImageParagraph;
+import com.eas.client.form.published.HasComponentPopupMenu;
+import com.eas.client.form.published.HasJsFacade;
 import com.eas.client.form.published.HasPublished;
+import com.eas.client.form.published.menu.PlatypusPopupMenu;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.MenuBar;
 
-public class PlatypusSplitButton extends DropDownButton implements HasPublished {
+public class PlatypusSplitButton extends DropDownButton implements HasJsFacade, HasEnabled, HasComponentPopupMenu {
 	
+	protected PlatypusPopupMenu menu;
+	protected boolean enabled;
+	protected String name;	
 	protected JavaScriptObject published;
 	
 	public PlatypusSplitButton() {
@@ -21,6 +32,54 @@ public class PlatypusSplitButton extends DropDownButton implements HasPublished 
 
 	public PlatypusSplitButton(String aTitle, boolean asHtml, ImageResource aImage, MenuBar aMenu) {
 		super(aTitle, asHtml, aImage, aMenu);
+	}
+
+	@Override
+    public PlatypusPopupMenu getPlatypusPopupMenu() {
+		return menu; 
+    }
+
+	protected HandlerRegistration menuTriggerReg;
+
+	@Override
+	public void setPlatypusPopupMenu(PlatypusPopupMenu aMenu) {
+		if (menu != aMenu) {
+			if (menuTriggerReg != null)
+				menuTriggerReg.removeHandler();
+			menu = aMenu;
+			if (menu != null) {
+				menuTriggerReg = super.addDomHandler(new ClickHandler() {
+
+					@Override
+					public void onClick(ClickEvent event) {
+						if (event.getNativeButton() == NativeEvent.BUTTON_RIGHT && menu != null) {
+							menu.showRelativeTo(PlatypusSplitButton.this);
+						}
+					}
+
+				}, ClickEvent.getType());
+			}
+		}
+	}
+
+	@Override
+	public boolean isEnabled() {
+		return enabled;
+	}
+
+	@Override
+	public void setEnabled(boolean aValue) {
+		enabled = aValue;
+	}
+
+	@Override
+	public String getJsName() {
+		return name;
+	}
+
+	@Override
+	public void setJsName(String aValue) {
+		name = aValue;
 	}
 
 	public ImageParagraph getContent(){

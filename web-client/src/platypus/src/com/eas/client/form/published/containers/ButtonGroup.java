@@ -1,16 +1,28 @@
 package com.eas.client.form.published.containers;
 
 import com.bearsoft.gwt.ui.RadioGroup;
+import com.eas.client.form.published.HasJsFacade;
 import com.eas.client.form.published.HasPublished;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.user.client.ui.HasValue;
 
-public class ButtonGroup extends RadioGroup implements HasPublished {
+public class ButtonGroup extends RadioGroup implements HasJsFacade {
 
+	protected String name;
 	protected JavaScriptObject published;
 
 	public ButtonGroup() {
 		super();
+	}
+
+	@Override
+	public String getJsName() {
+		return name;
+	}
+
+	@Override
+	public void setJsName(String aValue) {
+		name = aValue;
 	}
 
 	public JavaScriptObject getPublished() {
@@ -26,15 +38,15 @@ public class ButtonGroup extends RadioGroup implements HasPublished {
 		if (aItem instanceof HasValue<?>)
 			super.remove((HasValue<Boolean>) aItem);
 	}
-	
-	public HasPublished getChild(int i){
+
+	public HasPublished getChild(int i) {
 		HasValue<Boolean> child = super.get(i);
-		if(child instanceof HasPublished)
-			return (HasPublished)child;
+		if (child instanceof HasPublished)
+			return (HasPublished) child;
 		else
 			return null;
 	}
-	
+
 	@Override
 	public void setPublished(JavaScriptObject aValue) {
 		if (published != aValue) {

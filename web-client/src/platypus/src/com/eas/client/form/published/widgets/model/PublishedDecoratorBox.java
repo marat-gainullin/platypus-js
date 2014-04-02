@@ -9,20 +9,30 @@ import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.eas.client.converters.RowValueConverter;
 import com.eas.client.form.ControlsUtils;
+import com.eas.client.form.published.HasBinding;
+import com.eas.client.form.published.HasComponentPopupMenu;
 import com.eas.client.form.published.HasCustomEditing;
 import com.eas.client.form.published.HasJsFacade;
+import com.eas.client.form.published.HasOnRender;
+import com.eas.client.form.published.HasOnSelect;
 import com.eas.client.form.published.PublishedCell;
+import com.eas.client.form.published.menu.PlatypusPopupMenu;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Model;
 import com.eas.client.model.ParametersEntity;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.HasValue;
 
-public abstract class PublishedDecoratorBox<T> extends DecoratorBox<T> implements HasJsFacade, HasCustomEditing {
+public abstract class PublishedDecoratorBox<T> extends DecoratorBox<T> implements HasJsFacade, HasCustomEditing, HasBinding, HasOnRender, HasOnSelect, HasComponentPopupMenu {
 
-	// protected String targetErrorsText;
-
+	protected PlatypusPopupMenu menu;
+	protected String name;
 	protected JavaScriptObject published;
+	
 	protected ModelElementRef modelElement;
 	protected JavaScriptObject onRender;
 	protected JavaScriptObject onSelect;
@@ -31,21 +41,44 @@ public abstract class PublishedDecoratorBox<T> extends DecoratorBox<T> implement
 
 	public PublishedDecoratorBox(HasValue<T> aDecorated) {
 		super(aDecorated);
-		/*
-		 * target.addInvalidHandler(new InvalidHandler() {
-		 * 
-		 * @Override public void onInvalid(InvalidEvent event) {
-		 * List<EditorError> tErrors = event.getErrors(); targetErrorsText = "";
-		 * for (EditorError ee : tErrors) { if (!targetErrorsText.isEmpty()) {
-		 * targetErrorsText += "\n"; } targetErrorsText += ee.getMessage(); } }
-		 * 
-		 * }); target.addValidHandler(new ValidHandler() {
-		 * 
-		 * @Override public void onValid(ValidEvent event) { targetErrorsText =
-		 * null; }
-		 * 
-		 * });
-		 */
+	}
+
+	@Override
+    public PlatypusPopupMenu getPlatypusPopupMenu() {
+		return menu; 
+    }
+
+	protected HandlerRegistration menuTriggerReg;
+
+	@Override
+	public void setPlatypusPopupMenu(PlatypusPopupMenu aMenu) {
+		if (menu != aMenu) {
+			if (menuTriggerReg != null)
+				menuTriggerReg.removeHandler();
+			menu = aMenu;
+			if (menu != null) {
+				menuTriggerReg = super.addDomHandler(new ClickHandler() {
+
+					@Override
+					public void onClick(ClickEvent event) {
+						if (event.getNativeButton() == NativeEvent.BUTTON_RIGHT && menu != null) {
+							menu.showRelativeTo(PublishedDecoratorBox.this);
+						}
+					}
+
+				}, ClickEvent.getType());
+			}
+		}
+	}
+
+	@Override
+	public String getJsName() {
+		return name;
+	}
+
+	@Override
+	public void setJsName(String aValue) {
+		name = aValue;
 	}
 
 	@Override
@@ -140,11 +173,11 @@ public abstract class PublishedDecoratorBox<T> extends DecoratorBox<T> implement
 			Logger.getLogger(PublishedDecoratorBox.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
 		}
 	}
-	
+
 	@Override
-    protected void clearValue() {
+	protected void clearValue() {
 		setValue(null, true);
-    }
+	}
 
 	@Override
 	protected void selectValue() {
@@ -154,7 +187,7 @@ public abstract class PublishedDecoratorBox<T> extends DecoratorBox<T> implement
 			Logger.getLogger(ControlsUtils.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
 		}
 	}
-	
+
 	@Override
 	public com.bearsoft.rowset.metadata.Field getBinding() throws Exception {
 		ModelElementRef el = getModelElement();
@@ -162,7 +195,7 @@ public abstract class PublishedDecoratorBox<T> extends DecoratorBox<T> implement
 			el.resolveField();
 		return el != null ? el.field : null;
 	}
-	
+
 	public abstract void setBinding(Field aField) throws Exception;
 
 	public void setBinding(Field aField, RowValueConverter<T> aConverter) throws Exception {
@@ -186,34 +219,34 @@ public abstract class PublishedDecoratorBox<T> extends DecoratorBox<T> implement
 	private static native void publish(HasJsFacade aField, JavaScriptObject aPublished)/*-{
 		Object.defineProperty(aPublished, "onSelect", {
 			get : function() {
-				return aField.@com.eas.client.form.published.HasJsFacade::getOnSelect()();
+				return aField.@com.eas.client.form.published.HasOnSelect::getOnSelect()();
 			},
 			set : function(aValue) {
-				aField.@com.eas.client.form.published.HasJsFacade::setOnSelect(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+				aField.@com.eas.client.form.published.HasOnSelect::setOnSelect(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
 			}
 		});
 		Object.defineProperty(aPublished, "onRender", {
 			get : function() {
-				return aField.@com.eas.client.form.published.HasJsFacade::getOnRender()();
+				return aField.@com.eas.client.form.published.HasOnRender::getOnRender()();
 			},
 			set : function(aValue) {
-				aField.@com.eas.client.form.published.HasJsFacade::setOnRender(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+				aField.@com.eas.client.form.published.HasOnRender::setOnRender(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
 			}
 		});
 		Object.defineProperty(aPublished, "editable", {
 			get : function() {
-				return aField.@com.eas.client.form.published.HasJsFacade::isEditable()();
+				return aField.@com.eas.client.form.published.HasCustomEditing::isEditable()();
 			},
 			set : function(aValue) {
-				aField.@com.eas.client.form.published.HasJsFacade::setEditable(Z)((false != aValue));
+				aField.@com.eas.client.form.published.HasCustomEditing::setEditable(Z)((false != aValue));
 			}
 		});
 		Object.defineProperty(aPublished, "selectOnly", {
 			get : function() {
-				return aField.@com.eas.client.form.published.HasJsFacade::isSelectOnly()();
+				return aField.@com.eas.client.form.published.HasCustomEditing::isSelectOnly()();
 			},
 			set : function(aValue) {
-				aField.@com.eas.client.form.published.HasJsFacade::setSelectOnly(Z)((false != aValue));
+				aField.@com.eas.client.form.published.HasCustomEditing::setSelectOnly(Z)((false != aValue));
 			}
 		});
 		Object.defineProperty(aPublished, "field", {
@@ -221,10 +254,7 @@ public abstract class PublishedDecoratorBox<T> extends DecoratorBox<T> implement
 				return @com.eas.client.model.Entity::publishFieldFacade(Lcom/bearsoft/rowset/metadata/Field;)(aField.@com.eas.client.form.published.widgets.model.PublishedDecoratorBox::getBinding()());
 			},
 			set : function(aValue) {
-				if (aValue != null)
-					aField.@com.eas.client.form.published.HasJsFacade::setBinding(Lcom/bearsoft/rowset/metadata/Field;)(aValue.unwrap());
-				else
-					aField.@com.eas.client.form.published.HasJsFacade::setBinding(Lcom/bearsoft/rowset/metadata/Field;)(null);
+				aField.@com.eas.client.form.published.HasBinding::setBinding(Lcom/bearsoft/rowset/metadata/Field;)(aValue != null ? aValue.unwrap() : null);
 			}
 		});
 	}-*/;

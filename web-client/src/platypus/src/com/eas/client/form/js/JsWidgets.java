@@ -553,7 +553,7 @@ public class JsWidgets {
  	    });
 	    Object.defineProperty(aPublished, "name", {
 		    get : function() {
-		    	return aPublished.element.id;
+		    	return comp.@com.eas.client.form.published.HasJsName::getJsName()();
 		    }
  	    });
 	    Object.defineProperty(aPublished, "focus", {

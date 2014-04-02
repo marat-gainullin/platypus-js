@@ -33,6 +33,7 @@ import com.eas.client.application.AppClient;
 import com.eas.client.application.PlatypusImageResource;
 import com.eas.client.form.js.JsEvents;
 import com.eas.client.form.published.HasPublished;
+import com.eas.client.form.published.HasJsName;
 import com.eas.client.form.published.widgets.DesktopPane;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
@@ -419,8 +420,8 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 		java.util.Iterator<Widget> wIt = aView.iterator();
 		while (wIt.hasNext()) {
 			Widget w = wIt.next();
-			if (w instanceof HasPublished) {
-				inject(aTarget, w.getElement().getId(), ((HasPublished) w).getPublished());
+			if (w instanceof HasJsName && w instanceof HasPublished) {
+				inject(aTarget, ((HasJsName)w).getJsName(), ((HasPublished) w).getPublished());
 			}
 			if (w instanceof HasWidgets)
 				publishComponentsFacades(aTarget, (HasWidgets) w);

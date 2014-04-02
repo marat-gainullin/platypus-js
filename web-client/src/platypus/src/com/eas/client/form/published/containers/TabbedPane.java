@@ -4,16 +4,27 @@ import com.bearsoft.gwt.ui.containers.TabsDecoratedPanel;
 import com.bearsoft.gwt.ui.widgets.ImageLabel;
 import com.eas.client.ImageResourceCallback;
 import com.eas.client.application.PlatypusImageResource;
+import com.eas.client.form.published.HasComponentPopupMenu;
+import com.eas.client.form.published.HasJsFacade;
 import com.eas.client.form.published.HasPublished;
+import com.eas.client.form.published.menu.PlatypusPopupMenu;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.HasSelectionHandlers;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.Widget;
 
-public class TabbedPane extends TabsDecoratedPanel implements HasPublished, HasSelectionHandlers<Widget> {
+public class TabbedPane extends TabsDecoratedPanel implements HasJsFacade, HasSelectionHandlers<Widget>, HasEnabled, HasComponentPopupMenu {
 
+	protected PlatypusPopupMenu menu;
+	protected boolean enabled;
+	protected String name;	
 	protected JavaScriptObject published;
 
 	protected Widget selected;
@@ -30,6 +41,54 @@ public class TabbedPane extends TabsDecoratedPanel implements HasPublished, HasS
 		});
 	}
 	
+	@Override
+    public PlatypusPopupMenu getPlatypusPopupMenu() {
+		return menu; 
+    }
+
+	protected HandlerRegistration menuTriggerReg;
+
+	@Override
+	public void setPlatypusPopupMenu(PlatypusPopupMenu aMenu) {
+		if (menu != aMenu) {
+			if (menuTriggerReg != null)
+				menuTriggerReg.removeHandler();
+			menu = aMenu;
+			if (menu != null) {
+				menuTriggerReg = super.addDomHandler(new ClickHandler() {
+
+					@Override
+					public void onClick(ClickEvent event) {
+						if (event.getNativeButton() == NativeEvent.BUTTON_RIGHT && menu != null) {
+							menu.showRelativeTo(TabbedPane.this);
+						}
+					}
+
+				}, ClickEvent.getType());
+			}
+		}
+	}
+
+	@Override
+	public boolean isEnabled() {
+		return enabled;
+	}
+
+	@Override
+	public void setEnabled(boolean aValue) {
+		enabled = aValue;
+	}
+
+	@Override
+	public String getJsName() {
+		return name;
+	}
+
+	@Override
+	public void setJsName(String aValue) {
+		name = aValue;
+	}
+
     public void add(Widget child, String text, boolean asHtml, PlatypusImageResource aImage) {
     	final ImageLabel tabsLabel = new ImageLabel(text, asHtml, aImage);
         tabs.insert(child, tabsLabel, tabs.getWidgetCount());

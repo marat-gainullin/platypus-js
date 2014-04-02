@@ -22,6 +22,7 @@ import com.eas.client.form.MarginConstraints;
 import com.eas.client.form.PlatypusWindow;
 import com.eas.client.form.Publisher;
 import com.eas.client.form.published.HasComponentPopupMenu;
+import com.eas.client.form.published.HasJsName;
 import com.eas.client.form.published.PublishedComponent;
 import com.eas.client.form.published.PublishedFont;
 import com.eas.client.form.published.containers.AbsolutePane;
@@ -658,9 +659,8 @@ public class WidgetsFactory {
 	protected void processGeneralProperties(final UIObject aComponent, Element aTag, boolean aDefaultOpaque, PublishedComponent aPublished) throws Exception {
 		final String widgetName = aTag.getAttribute(NAME_ATTRIBUTE);
 		if (widgetName != null && !widgetName.isEmpty())
-			aComponent.getElement().setId(widgetName);
-		else
-			aComponent.getElement().setId("pw-" + (++idCounter));
+			((HasJsName)aComponent).setJsName(widgetName);
+		aComponent.getElement().setId("pw-" + (++idCounter));
 
 		boolean visible = Utils.getBooleanAttribute(aTag, "visible", true);
 		if (!visible)

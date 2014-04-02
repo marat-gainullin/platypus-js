@@ -3,7 +3,7 @@ package com.eas.client.form.published.menu;
 import com.eas.client.form.published.HasPublished;
 import com.google.gwt.core.client.JavaScriptObject;
 
-public class PlatypusMenu extends PlatypusMenuBar{
+public class PlatypusMenu extends PlatypusMenuBar {
 
 	protected String text;
 	

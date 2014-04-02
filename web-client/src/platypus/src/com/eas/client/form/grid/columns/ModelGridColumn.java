@@ -54,6 +54,16 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 		setFieldUpdater(this);
 	}
 
+	@Override
+	public String getJsName() {
+		return name;
+	}
+
+	@Override
+	public void setJsName(String aValue) {
+		name = aValue;
+	}
+
 	public ModelGrid getGrid() {
 		return grid;
 	}

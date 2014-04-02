@@ -1,13 +1,18 @@
 package com.eas.client.form.published.menu;
 
+import com.eas.client.form.published.HasJsFacade;
 import com.eas.client.form.published.HasPublished;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.MenuItem;
 
-public class PlatypusMenuBar extends MenuBar implements HasPublished {
+public class PlatypusMenuBar extends MenuBar implements HasJsFacade, HasEnabled {
 
+	protected boolean enabled;
+	protected String name;	
 	protected JavaScriptObject published;
+	
 	protected MenuItem parentItem;
 
 	public PlatypusMenuBar() {
@@ -16,6 +21,26 @@ public class PlatypusMenuBar extends MenuBar implements HasPublished {
 
 	public PlatypusMenuBar(boolean aVertical) {
 		super(aVertical);
+	}
+
+	@Override
+	public boolean isEnabled() {
+		return enabled;
+	}
+
+	@Override
+	public void setEnabled(boolean aValue) {
+		enabled = aValue;
+	}
+
+	@Override
+	public String getJsName() {
+		return name;
+	}
+
+	@Override
+	public void setJsName(String aValue) {
+		name = aValue;
 	}
 
 	public MenuItem getParentItem() {

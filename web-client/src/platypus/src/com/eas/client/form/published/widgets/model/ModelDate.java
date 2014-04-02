@@ -15,6 +15,7 @@ import com.google.gwt.user.datepicker.client.DateBox;
 
 public class ModelDate extends PublishedDecoratorBox<Date> implements HasEmptyText {
 
+	protected String emptyText;
     private static final DateBox.DefaultFormat DEFAULT_FORMAT = GWT.create(DateBox.DefaultFormat.class);
 	protected String format;
 
@@ -37,13 +38,15 @@ public class ModelDate extends PublishedDecoratorBox<Date> implements HasEmptyTe
 
 	@Override
 	public String getEmptyText() {
-		return null;
+		return emptyText;
 	}
 	
 	@Override
 	public void setEmptyText(String aValue) {
+		emptyText = aValue;
+		ControlsUtils.applyEmptyText(getElement(), emptyText);
 	}
-	
+		
 	public void setPublished(JavaScriptObject aValue) {
 		super.setPublished(aValue);
 		if (published != null) {
@@ -52,6 +55,14 @@ public class ModelDate extends PublishedDecoratorBox<Date> implements HasEmptyTe
 	}
 
 	private native static void publish(ModelDate aField, JavaScriptObject aPublished)/*-{
+		Object.defineProperty(published, "emptyText", {
+			get : function() {
+				return aWidget.@com.eas.client.form.published.HasEmptyText::getEmptyText()();
+			},
+			set : function(aValue) {
+				aWidget.@com.eas.client.form.published.HasEmptyText::setEmptyText(Ljava/lang/String;)(aValue!=null?''+aValue:null);
+			}
+		});
 		Object.defineProperty(aPublished, "value", {
 			get : function() {
 				return $wnd.boxAsJs(aField.@com.eas.client.form.published.widgets.model.ModelDate::getJsValue()());

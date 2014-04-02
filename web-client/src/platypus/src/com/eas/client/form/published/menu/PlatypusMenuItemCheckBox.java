@@ -1,15 +1,18 @@
 package com.eas.client.form.published.menu;
 
 import com.bearsoft.gwt.ui.menu.MenuItemCheckBox;
+import com.eas.client.form.published.HasJsFacade;
 import com.eas.client.form.published.HasPlatypusButtonGroup;
 import com.eas.client.form.published.HasPublished;
 import com.eas.client.form.published.containers.ButtonGroup;
 import com.google.gwt.core.client.JavaScriptObject;
 
-public class PlatypusMenuItemCheckBox extends MenuItemCheckBox implements HasPublished, HasPlatypusButtonGroup{
+public class PlatypusMenuItemCheckBox extends MenuItemCheckBox implements HasJsFacade, HasPlatypusButtonGroup{
 
-	protected ButtonGroup group;
 	protected JavaScriptObject published;
+	protected String name;	
+	
+	protected ButtonGroup group;
 	
 	public PlatypusMenuItemCheckBox() {
 	    super(false, "", false);
@@ -18,6 +21,16 @@ public class PlatypusMenuItemCheckBox extends MenuItemCheckBox implements HasPub
 	public PlatypusMenuItemCheckBox(Boolean aValue, String aText, boolean asHtml) {
 	    super(aValue, aText, asHtml);
     }
+
+	@Override
+	public String getJsName() {
+		return name;
+	}
+
+	@Override
+	public void setJsName(String aValue) {
+		name = aValue;
+	}
 
 	@Override
 	public ButtonGroup getButtonGroup() {

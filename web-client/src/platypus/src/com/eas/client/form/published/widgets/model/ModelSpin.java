@@ -2,6 +2,7 @@ package com.eas.client.form.published.widgets.model;
 
 import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.converters.DoubleRowValueConverter;
+import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.published.HasEmptyText;
 import com.eas.client.form.published.widgets.ConstraintedSpinnerBox;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -9,17 +10,21 @@ import com.google.gwt.user.client.ui.DoubleBox;
 
 public class ModelSpin extends PublishedDecoratorBox<Double> implements HasEmptyText {
 
+	protected String emptyText;
+	
 	public ModelSpin() {
 		super(new ConstraintedSpinnerBox(new DoubleBox()));
 	}
 
 	@Override
 	public String getEmptyText() {
-		return null;
+		return emptyText;
 	}
 	
 	@Override
 	public void setEmptyText(String aValue) {
+		emptyText = aValue;
+		ControlsUtils.applyEmptyText(getElement(), emptyText);
 	}
 	
 	public void setPublished(JavaScriptObject aValue) {
@@ -30,6 +35,14 @@ public class ModelSpin extends PublishedDecoratorBox<Double> implements HasEmpty
 	}
 
 	private native static void publish(ModelSpin aField, JavaScriptObject aPublished)/*-{
+		Object.defineProperty(published, "emptyText", {
+			get : function() {
+				return aWidget.@com.eas.client.form.published.HasEmptyText::getEmptyText()();
+			},
+			set : function(aValue) {
+				aWidget.@com.eas.client.form.published.HasEmptyText::setEmptyText(Ljava/lang/String;)(aValue!=null?''+aValue:null);
+			}
+		});
 		Object.defineProperty(aPublished, "value", {
 			get : function() {
 				var v = aField.@com.eas.client.form.published.widgets.model.ModelSpin::getValue()();

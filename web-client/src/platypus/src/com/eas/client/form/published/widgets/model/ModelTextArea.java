@@ -2,23 +2,28 @@ package com.eas.client.form.published.widgets.model;
 
 import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.converters.StringRowValueConverter;
+import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.published.HasEmptyText;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.user.client.ui.TextBox;
 
 public class ModelTextArea extends PublishedDecoratorBox<String> implements HasEmptyText {
 
+	protected String emptyText;
+	
 	public ModelTextArea() {
 		super(new TextBox());
 	}
 
 	@Override
 	public String getEmptyText() {
-		return null;
+		return emptyText;
 	}
 	
 	@Override
 	public void setEmptyText(String aValue) {
+		emptyText = aValue;
+		ControlsUtils.applyEmptyText(getElement(), emptyText);
 	}
 	
 	public void setPublished(JavaScriptObject aValue) {
@@ -29,6 +34,14 @@ public class ModelTextArea extends PublishedDecoratorBox<String> implements HasE
 	}
 
 	protected native static void publish(ModelTextArea aField, JavaScriptObject aPublished)/*-{
+		Object.defineProperty(published, "emptyText", {
+			get : function() {
+				return aWidget.@com.eas.client.form.published.HasEmptyText::getEmptyText()();
+			},
+			set : function(aValue) {
+				aWidget.@com.eas.client.form.published.HasEmptyText::setEmptyText(Ljava/lang/String;)(aValue!=null?''+aValue:null);
+			}
+		});
 		Object.defineProperty(aPublished, "value", {
 			get : function() {
 				return aField.@com.eas.client.form.published.widgets.model.ModelTextArea::getValue()();

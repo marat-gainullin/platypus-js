@@ -326,14 +326,14 @@ public class ControlsUtils {
 				ControlsUtils.applyCursor((Widget) aComponent, published.getCursor());
 		}
 	}
-	
+
 	public static JavaScriptObject lookupPublishedParent(Widget aWidget) {
 		assert aWidget != null;
 		Widget parent = aWidget;
 		while (parent != null && !(parent instanceof HasPublished)) {
 			parent = parent.getParent();
 		}
-		return parent != null ? ((HasPublished)parent).getPublished() : null;
+		return parent != null ? ((HasPublished) parent).getPublished() : null;
 	}
 
 	public static void addWidgetTo(Widget aWidet, String aElementId) {
@@ -362,6 +362,16 @@ public class ControlsUtils {
 			aContainer.add(aWidet);
 		} else {
 			aContainer.add(aWidet);
+		}
+	}
+
+	public static void applyEmptyText(Element aElement, String aValue) {
+		NodeList<Element> nodes = aElement.getElementsByTagName("input");
+		for (int i = 0; i < nodes.getLength(); i++) {
+			nodes.getItem(i).setAttribute("placeholder", aValue);
+		}
+		if("input".equalsIgnoreCase(aElement.getTagName())){
+			aElement.setAttribute("placeholder", aValue);
 		}
 	}
 

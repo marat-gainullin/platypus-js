@@ -1,8 +1,9 @@
 package com.eas.client.form.grid.columns;
 
+import com.eas.client.form.published.HasJsName;
 import com.google.gwt.core.client.JavaScriptObject;
 
-public interface ModelGridColumnFacade {
+public interface ModelGridColumnFacade extends HasJsName{
 
 	public boolean isVisible();
 

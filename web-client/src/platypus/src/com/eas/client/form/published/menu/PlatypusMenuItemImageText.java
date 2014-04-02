@@ -2,14 +2,17 @@ package com.eas.client.form.published.menu;
 
 import com.bearsoft.gwt.ui.menu.MenuItemImageText;
 import com.eas.client.application.PlatypusImageResource;
+import com.eas.client.form.published.HasJsFacade;
 import com.eas.client.form.published.HasPublished;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.safehtml.shared.SafeUri;
 
-public class PlatypusMenuItemImageText extends MenuItemImageText implements HasPublished {
+public class PlatypusMenuItemImageText extends MenuItemImageText implements HasJsFacade {
 
 	protected JavaScriptObject published;
+	protected String name;
+	
 	protected PlatypusImageResource image;
 
 	public PlatypusMenuItemImageText() {
@@ -17,6 +20,16 @@ public class PlatypusMenuItemImageText extends MenuItemImageText implements HasP
 	}
 	public PlatypusMenuItemImageText(String aText, boolean asHtml, SafeUri aImageUri, ScheduledCommand aCommand) {
 		super(aText, asHtml, aImageUri, aCommand);
+	}
+
+	@Override
+	public String getJsName() {
+		return name;
+	}
+
+	@Override
+	public void setJsName(String aValue) {
+		name = aValue;
 	}
 
 	public PlatypusImageResource getIcon(){

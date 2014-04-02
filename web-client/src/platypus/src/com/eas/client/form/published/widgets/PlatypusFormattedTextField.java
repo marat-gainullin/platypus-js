@@ -2,16 +2,65 @@ package com.eas.client.form.published.widgets;
 
 import com.bearsoft.gwt.ui.widgets.FormattedObjectBox;
 import com.bearsoft.rowset.Utils;
+import com.eas.client.form.ControlsUtils;
+import com.eas.client.form.published.HasComponentPopupMenu;
 import com.eas.client.form.published.HasEmptyText;
+import com.eas.client.form.published.HasJsFacade;
 import com.eas.client.form.published.HasPublished;
+import com.eas.client.form.published.menu.PlatypusPopupMenu;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 
-public class PlatypusFormattedTextField extends FormattedObjectBox implements HasPublished, HasEmptyText {
+public class PlatypusFormattedTextField extends FormattedObjectBox implements HasJsFacade, HasEmptyText, HasComponentPopupMenu {
 
+	protected PlatypusPopupMenu menu;
+	protected String emptyText;
+	protected String name;	
 	protected JavaScriptObject published;
 
 	public PlatypusFormattedTextField() {
 		super();
+	}
+
+	@Override
+    public PlatypusPopupMenu getPlatypusPopupMenu() {
+		return menu; 
+    }
+
+	protected HandlerRegistration menuTriggerReg;
+
+	@Override
+	public void setPlatypusPopupMenu(PlatypusPopupMenu aMenu) {
+		if (menu != aMenu) {
+			if (menuTriggerReg != null)
+				menuTriggerReg.removeHandler();
+			menu = aMenu;
+			if (menu != null) {
+				menuTriggerReg = super.addDomHandler(new ClickHandler() {
+
+					@Override
+					public void onClick(ClickEvent event) {
+						if (event.getNativeButton() == NativeEvent.BUTTON_RIGHT && menu != null) {
+							menu.showRelativeTo(PlatypusFormattedTextField.this);
+						}
+					}
+
+				}, ClickEvent.getType());
+			}
+		}
+	}
+
+	@Override
+	public String getJsName() {
+		return name;
+	}
+
+	@Override
+	public void setJsName(String aValue) {
+		name = aValue;
 	}
 
 	public Object getJsValue() {
@@ -24,11 +73,13 @@ public class PlatypusFormattedTextField extends FormattedObjectBox implements Ha
 
 	@Override
 	public String getEmptyText() {
-		return null;
+		return emptyText;
 	}
 	
 	@Override
 	public void setEmptyText(String aValue) {
+		emptyText = aValue;
+		ControlsUtils.applyEmptyText(getElement(), emptyText);
 	}
 	
 	public JavaScriptObject getPublished() {
@@ -52,6 +103,14 @@ public class PlatypusFormattedTextField extends FormattedObjectBox implements Ha
 			},
 			set : function(aValue) {
 				aWidget.@com.eas.client.form.published.widgets.PlatypusFormattedTextField::setText(Ljava/lang/String;)(aValue!=null?''+aValue:null);
+			}
+		});
+		Object.defineProperty(published, "emptyText", {
+			get : function() {
+				return aWidget.@com.eas.client.form.published.HasEmptyText::getEmptyText()();
+			},
+			set : function(aValue) {
+				aWidget.@com.eas.client.form.published.HasEmptyText::setEmptyText(Ljava/lang/String;)(aValue!=null?''+aValue:null);
 			}
 		});
 		// FormattedField is plain non-model control.
