@@ -14,19 +14,6 @@ import com.google.gwt.xml.client.NodeList;
 
 public class Utils {
 
-	public static class JsModule extends JsObject {
-		protected JsModule() {
-		}
-
-		public final JavaScriptObject getHandler(String aHandlerName) {
-			JavaScriptObject container = getJs("-x-handlers-funcs-");
-			if (container != null) {
-				return container.<JsObject> cast().getJs(aHandlerName);
-			} else
-				return null;
-		}
-	}
-
 	public static class JsObject extends JavaScriptObject {
 		protected JsObject() {
 		}
@@ -46,6 +33,17 @@ public class Utils {
 		public final native void defineProperty(String aName, JavaScriptObject aDefinition)/*-{
 			Object.defineProperty(this, aName, aDefinition);
 		}-*/;
+		
+		public final native void inject(String aName, JavaScriptObject aValue)/*-{
+		if (aName != null) {
+			Object.defineProperty(this, aName, {
+				get : function() {
+					return aValue;
+				}
+			});
+		}
+	}-*/;
+
 	}
 
 	public static native JavaScriptObject publishCancellable(Cancellable aValue)/*-{

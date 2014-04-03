@@ -228,8 +228,8 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 		Iterator<Widget> widgets = aContainer.iterator();
 		while (widgets.hasNext()) {
 			Widget w = widgets.next();
-			if (w instanceof HasValue<?>) {
-				String name = (String) w.getElement().getId();
+			if (w instanceof HasValue<?> && w instanceof HasJsName) {
+				String name = ((HasJsName) w).getJsName();
 				Object value = ((HasValue<Object>) w).getValue();
 				if (name != null && !name.isEmpty() && (value == null || value instanceof String || value instanceof Number)) {
 					aFormData.put(name, value != null ? value.toString() : null);
@@ -246,18 +246,19 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 	}
 	
 	public void show(boolean aModal, final JavaScriptObject aCallback, DesktopPane aDesktop) {
-		popup = new WindowPopupPanel(this, !aModal, aModal);
+		popup = new WindowPopupPanel(this, false, aModal);
 		popup.setWidget(view);
 		boolean wasSize = viewSize != null;
 		double actualWidth = wasSize ? viewSize.getX() : viewPreferredWidth;
 		double actualHeight = wasSize ? viewSize.getY() : viewPreferredHeight;
 		popup.setSize(actualWidth, actualHeight);
+		popup.show();
 		if (locationByPlatform) {
 			if (aDesktop != null) {
 				popup.setPosition(aDesktop.getConsideredPosition().getX(), aDesktop.getConsideredPosition().getY());
 			} else {
-				int left = (Document.get().getBody().getOffsetWidth() - popup.getOffsetWidth()) / 2;
-				int top = (Document.get().getBody().getOffsetHeight() - popup.getOffsetHeight()) / 2;
+				int left = (Document.get().getClientWidth() - popup.getOffsetWidth()) / 2;
+				int top = (Document.get().getClientHeight() - popup.getOffsetHeight()) / 2;
 				popup.setPosition(left, top);
 			}
 		} else {
@@ -269,13 +270,12 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 					int top = (aDesktop.getElement().getClientHeight() - popup.getOffsetHeight()) / 2;
 					popup.setPosition(left, top);
 				} else {
-					int left = (Document.get().getBody().getOffsetWidth() - popup.getOffsetWidth()) / 2;
-					int top = (Document.get().getBody().getOffsetHeight() - popup.getOffsetHeight()) / 2;
+					int left = (Document.get().getClientWidth() - popup.getOffsetWidth()) / 2;
+					int top = (Document.get().getClientHeight() - popup.getOffsetHeight()) / 2;
 					popup.setPosition(left, top);
 				}
 			}
 		}
-		popup.show();
 	}
 
 	private void registerWindowListeners() {
@@ -427,22 +427,12 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 		while (wIt.hasNext()) {
 			Widget w = wIt.next();
 			if (w instanceof HasJsName && w instanceof HasPublished) {
-				inject(aTarget, ((HasJsName)w).getJsName(), ((HasPublished) w).getPublished());
+				aTarget.<Utils.JsObject>cast().inject(((HasJsName)w).getJsName(), ((HasPublished) w).getPublished());
 			}
 			if (w instanceof HasWidgets)
 				publishComponentsFacades(aTarget, (HasWidgets) w);
 		}
 	}
-
-	public native static void inject(JavaScriptObject aTarget, String aName, JavaScriptObject aValue)/*-{
-		if (aTarget != null && aName != null) {
-			Object.defineProperty(aTarget, aName, {
-				get : function() {
-					return aValue;
-				}
-			});
-		}
-	}-*/;
 
 	protected native static void publishFormFacade(JavaScriptObject aPublished, Widget aView, PlatypusWindow aForm)/*-{
         Object.defineProperty(aPublished, "view", {

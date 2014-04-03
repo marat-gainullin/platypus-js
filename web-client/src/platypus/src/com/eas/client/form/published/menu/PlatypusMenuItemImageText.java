@@ -71,7 +71,7 @@ public class PlatypusMenuItemImageText extends MenuItemImageText implements HasJ
 	}
 
 	private native static void publish(HasPublished aWidget, JavaScriptObject aPublished)/*-{
-		Object.defineProperty(published, "text", {
+		Object.defineProperty(aPublished, "text", {
 			get : function() {
 				return aWidget.@com.eas.client.form.published.menu.PlatypusMenuItemImageText::getText()();
 			},
@@ -79,7 +79,7 @@ public class PlatypusMenuItemImageText extends MenuItemImageText implements HasJ
 				aWidget.@com.eas.client.form.published.menu.PlatypusMenuItemImageText::setText(Ljava/lang/String;)(aValue);
 			}
 		});
-		Object.defineProperty(published, "icon", {
+		Object.defineProperty(aPublished, "icon", {
 			get : function() {
 				aWidget.@com.eas.client.form.published.menu.PlatypusMenuItemImageText::getIcon()();
 			},

@@ -537,6 +537,7 @@ public class JsWidgets {
  	    });
 	    Object.defineProperty(aPublished, "componentPopupMenu", {
 	    	get : function() {
+	    		var menu = comp.@com.eas.client.form.published.HasComponentPopupMenu::getPlatypusPopupMenu()();
 			    return @com.eas.client.form.Publisher::checkPublishedComponent(Ljava/lang/Object;)(menu);
 	    	},
 		    set : function(aValue) {

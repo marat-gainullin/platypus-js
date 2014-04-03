@@ -1,5 +1,9 @@
 package com.eas.client.form.published.menu;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.bearsoft.gwt.ui.menu.MenuItemImageText;
 import com.eas.client.form.EventsExecutor;
 import com.eas.client.form.published.HasEventsExecutor;
 import com.eas.client.form.published.HasJsFacade;
@@ -8,14 +12,17 @@ import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.MenuItem;
+import com.google.gwt.user.client.ui.UIObject;
 
 public class PlatypusMenuBar extends MenuBar implements HasJsFacade, HasEnabled, HasEventsExecutor {
 
 	protected EventsExecutor eventsExecutor;
 	protected boolean enabled;
-	protected String name;	
+	protected String name;
 	protected JavaScriptObject published;
-	
+
+	protected List<UIObject> allItems = new ArrayList<>();
+
 	protected MenuItem parentItem;
 
 	public PlatypusMenuBar() {
@@ -64,17 +71,61 @@ public class PlatypusMenuBar extends MenuBar implements HasJsFacade, HasEnabled,
 		parentItem = aItem;
 	}
 
-	public MenuItem getItem(int aIndex) {
-		if (aIndex >= 0 && aIndex < getItems().size())
-			return getItems().get(aIndex);
-		else
+	public UIObject getItem(int aIndex) {
+		if (aIndex >= 0 && aIndex < allItems.size()) {
+			UIObject item = allItems.get(aIndex);
+			if (item instanceof MenuItem && ((MenuItem) item).getSubMenu() != null)
+				return ((MenuItem) item).getSubMenu();
+			else
+				return item;
+		} else
 			return null;
 	}
 
-	public int getItemsCount(){
-		return getItems().size();
+	public int getCount() {
+		return allItems.size();
 	}
-	
+
+	public boolean add(UIObject aChild) {
+		if (aChild instanceof MenuItemImageText) {
+			addItem((MenuItemImageText) aChild);
+			allItems.add(aChild);
+			return true;
+		} else if (aChild instanceof PlatypusMenuItemSeparator) {
+			addSeparator((PlatypusMenuItemSeparator) aChild);
+			allItems.add(aChild);
+			return true;
+		} else if (aChild instanceof PlatypusMenu) {
+			PlatypusMenuItemImageText item = new PlatypusMenuItemImageText();
+			PlatypusMenuBar subMenu = (PlatypusMenuBar) aChild;
+			subMenu.setParentItem(item);
+			item.setSubMenu(subMenu);
+			addItem(item);
+			allItems.add(aChild);
+			return true;
+		} else
+			return false;
+	}
+
+	public void remove(UIObject aChild) {
+		if (aChild instanceof MenuItem) {
+			removeItem((MenuItem) aChild);
+			allItems.remove(aChild);
+		} else if (aChild instanceof PlatypusMenuItemSeparator) {
+			removeSeparator((PlatypusMenuItemSeparator) aChild);
+			allItems.remove(aChild);
+		} else if (aChild instanceof PlatypusMenu) {
+			removeItem(((PlatypusMenu) aChild).getParentItem());
+			allItems.remove(aChild);
+		}
+	}
+
+	@Override
+	public void clearItems() {
+		super.clearItems();
+		allItems.clear();
+	}
+
 	@Override
 	public JavaScriptObject getPublished() {
 		return published;
@@ -93,25 +144,33 @@ public class PlatypusMenuBar extends MenuBar implements HasJsFacade, HasEnabled,
 	private native static void publish(HasPublished aWidget, JavaScriptObject published)/*-{
 		published.add = function(toAdd){
 			if(toAdd && toAdd.unwrap){
-				aWidget.@com.eas.client.form.published.menu.PlatypusMenuBar::addItem(Lcom/google/gwt/user/client/ui/MenuItem;)(toAdd.unwrap());
+				aWidget.@com.eas.client.form.published.menu.PlatypusMenuBar::add(Lcom/google/gwt/user/client/ui/UIObject;)(toAdd.unwrap());
 			}
 		};
 		published.remove = function(aChild) {
 			if (aChild && aChild.unwrap) {
-				aWidget.@com.eas.client.form.published.menu.PlatypusMenuBar::removeItem(Lcom/google/gwt/user/client/ui/MenuItem;)(aChild.unwrap());
+				aWidget.@com.eas.client.form.published.menu.PlatypusMenuBar::remove(Lcom/google/gwt/user/client/ui/UIObject;)(aChild.unwrap());
 			}
 		};
 		published.clear = function() {
 			aWidget.@com.eas.client.form.published.menu.PlatypusMenuBar::clearItems()();
 		};
 		published.child = function(aIndex) {
-			var comp = aComponent.@com.eas.client.form.published.menu.PlatypusMenuBar::getItem(I)(aIndex);
+			var comp = aWidget.@com.eas.client.form.published.menu.PlatypusMenuBar::getItem(I)(aIndex);
 			return @com.eas.client.form.Publisher::checkPublishedComponent(Ljava/lang/Object;)(comp);
 		};
 		Object.defineProperty(published, "count", {
 			get : function() {
-				return aComponent.@com.eas.client.form.published.menu.PlatypusMenuBar::getItemsCount()();
+				return aWidget.@com.eas.client.form.published.menu.PlatypusMenuBar::getCount()();
 			}
+		});
+		Object.defineProperty(published, "children", {
+			get : function(){
+				var ch = [];
+				for(var i=0; i < published.count; i++)
+					ch[ch.length] = published.child(i);
+				return ch;
+		    }
 		});
 	}-*/;
 }

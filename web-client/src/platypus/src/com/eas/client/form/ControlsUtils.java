@@ -19,6 +19,7 @@ import com.eas.client.form.published.PublishedStyle;
 import com.eas.client.form.published.containers.BorderPane;
 import com.eas.client.form.published.containers.MarginsPane;
 import com.eas.client.form.published.containers.SplitPane;
+import com.eas.client.form.published.menu.PlatypusMenuBar;
 import com.eas.client.form.published.widgets.model.ModelElementRef;
 import com.eas.client.model.Entity;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -35,6 +36,8 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HasWidgets;
+import com.google.gwt.user.client.ui.MenuItem;
+import com.google.gwt.user.client.ui.MenuItemSeparator;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
@@ -332,7 +335,20 @@ public class ControlsUtils {
 		assert aWidget != null;
 		UIObject parent = aWidget;
 		while (parent != null && !(parent instanceof HasPublished)) {
-			parent = parent instanceof Widget ? ((Widget)parent).getParent() : null;
+			if(parent instanceof PlatypusMenuBar){
+				PlatypusMenuBar bar = (PlatypusMenuBar)parent;
+				parent = bar.getParentItem();
+			}else if (parent instanceof Widget) {
+				parent = ((Widget) parent).getParent();
+			} else if (parent instanceof MenuItemSeparator) {
+				MenuItemSeparator sep = (MenuItemSeparator) parent;
+				parent = sep.getParentMenu();
+			} else if (parent instanceof MenuItem) {
+				MenuItem sep = (MenuItem) parent;
+				parent = sep.getParentMenu();
+			}else{
+				parent = null;
+			}
 		}
 		return parent != null ? ((HasPublished) parent).getPublished() : null;
 	}
@@ -371,7 +387,7 @@ public class ControlsUtils {
 		for (int i = 0; i < nodes.getLength(); i++) {
 			nodes.getItem(i).setAttribute("placeholder", aValue);
 		}
-		if("input".equalsIgnoreCase(aElement.getTagName())){
+		if ("input".equalsIgnoreCase(aElement.getTagName())) {
 			aElement.setAttribute("placeholder", aValue);
 		}
 	}

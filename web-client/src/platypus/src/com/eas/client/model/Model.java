@@ -72,7 +72,6 @@ public class Model {
 	protected NetworkProcess process;
 	protected int ajustingCounter = 0;
 	protected JavaScriptObject module;
-	protected Runnable handlersResolver;
 
 	public static class NetworkProcess {
 		public Map<Entity, String> errors = new HashMap<Entity, String>();
@@ -254,12 +253,6 @@ public class Model {
 		this();
 		client = aClient;
 	}
-
-	public Model(AppClient aClient, Runnable aHandlersResolver) {
-		this(aClient);
-		handlersResolver = aHandlersResolver;
-	}
-
 	public PropertyChangeSupport getChangeSupport() {
 		return changeSupport;
 	}
@@ -861,16 +854,8 @@ public class Model {
 		boolean oldValue = runtime;
 		runtime = aValue;
 		if (!oldValue && runtime) {
-			resolveHandlers();
 			validateQueries();
 			executeRootEntities(true, null, null);
-		}
-	}
-
-	protected void resolveHandlers() {
-		if (handlersResolver != null) {
-			handlersResolver.run();
-			handlersResolver = null;
 		}
 	}
 

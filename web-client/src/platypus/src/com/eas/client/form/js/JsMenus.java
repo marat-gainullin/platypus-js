@@ -21,7 +21,6 @@ public class JsMenus {
 				return aComponent;
 			};
 			publishComponentProperties(published);
-			publishChildren(published);
 		};
 
 		// ***************************************************
@@ -37,7 +36,6 @@ public class JsMenus {
 				return aComponent;
 			};
 			publishComponentProperties(published);
-			publishChildren(published);
 
 			if (aText) {
 				published.text = aText;
@@ -57,7 +55,6 @@ public class JsMenus {
 				return aComponent;
 			};
 			publishComponentProperties(published);
-			publishChildren(published);
 		};
 		
 		// **************************************************************************
@@ -158,7 +155,6 @@ public class JsMenus {
 			publishComponentProperties(published);
 			return published;
 		}
-		
 	}-*/;
 	
 }

@@ -2,23 +2,33 @@ package com.eas.client.form.published.menu;
 
 import com.eas.client.form.published.HasPublished;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.user.client.ui.MenuItem;
 
 public class PlatypusMenu extends PlatypusMenuBar {
 
 	protected String text;
-	
+
 	public PlatypusMenu() {
 		super(true);
-    }
-	
+	}
+
 	public String getText() {
-	    return text;
-    }
-	
+		return text;
+	}
+
 	public void setText(String aValue) {
-	    text = aValue;
-    }
-	
+		text = aValue;
+		if (parentItem != null)
+			parentItem.setText(text);
+	}
+
+	@Override
+	public void setParentItem(MenuItem aItem) {
+		super.setParentItem(aItem);
+		if (parentItem != null)
+			parentItem.setText(text);
+	}
+
 	@Override
 	public void setPublished(JavaScriptObject aValue) {
 		if (published != aValue) {
@@ -37,6 +47,6 @@ public class PlatypusMenu extends PlatypusMenuBar {
 			set : function(aValue) {
 				aComponent.@com.eas.client.form.published.menu.PlatypusMenu::setText(Ljava/lang/String;)(aValue!=null?''+aValue:null);
 			}
-		});			
+		});
 	}-*/;
 }

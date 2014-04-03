@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.bearsoft.gwt.ui.menu.MenuItemImageText;
 import com.bearsoft.gwt.ui.widgets.ImageParagraph;
 import com.bearsoft.gwt.ui.widgets.ObjectFormat;
 import com.bearsoft.rowset.Utils;
@@ -97,7 +96,7 @@ public class WidgetsFactory {
 	protected static final String BORDER_TAG = "border";
 	protected static final String ROOT_WIDGET_NAME = "Form";
 
-	protected JavaScriptObject module;
+	protected JavaScriptObject target;
 	protected PlatypusWindow form;
 	protected HasWidgets rootWidget;
 	protected boolean isRoot = true;
@@ -114,7 +113,7 @@ public class WidgetsFactory {
 	public WidgetsFactory(Element aFormElement, JavaScriptObject aModule) {
 		super();
 		tag = aFormElement;
-		module = aModule;
+		target = aModule;
 	}
 
 	/**
@@ -451,7 +450,7 @@ public class WidgetsFactory {
 		final String widgetName = aTag.getAttribute(NAME_ATTRIBUTE);
 		toggleGroups.put(widgetName, buttonGroup);
 		buttonGroup.setPublished(Publisher.publish(buttonGroup));
-		PlatypusWindow.inject(module, widgetName, buttonGroup.getPublished());
+		target.<Utils.JsObject>cast().inject(widgetName, buttonGroup.getPublished());
 	}
 
 	private PlatypusTextField createTextField(Element aTag) throws Exception {
@@ -587,7 +586,7 @@ public class WidgetsFactory {
 		}
 		PublishedComponent publishedComp = component.getPublished().cast();
 		processGeneralProperties(component, aTag, publishedComp);
-		PlatypusWindow.inject(module, component.getElement().getId(), publishedComp);
+		target.<Utils.JsObject>cast().inject(component.getJsName(), publishedComp);
 		return component;
 	}
 
@@ -599,7 +598,7 @@ public class WidgetsFactory {
 		}
 		PublishedComponent publishedComp = component.getPublished().cast();
 		processGeneralProperties(component, aTag, publishedComp);
-		PlatypusWindow.inject(module, component.getElement().getId(), publishedComp);
+		target.<Utils.JsObject>cast().inject(component.getJsName(), publishedComp);
 		return component;
 	}
 
@@ -618,7 +617,7 @@ public class WidgetsFactory {
 		}
 		PublishedComponent publishedComp = component.getPublished().cast();
 		processGeneralProperties(component, aTag, false, publishedComp);
-		PlatypusWindow.inject(module, component.getElement().getId(), publishedComp);
+		target.<Utils.JsObject>cast().inject(component.getJsName(), publishedComp);
 		return component;
 	}
 
@@ -632,7 +631,7 @@ public class WidgetsFactory {
 			addToToggleGroup(component, aTag.getAttribute("buttonGroup"));
 		PublishedComponent publishedComp = component.getPublished().cast();
 		processGeneralProperties(component, aTag, publishedComp);
-		PlatypusWindow.inject(module, component.getElement().getId(), publishedComp);
+		target.<Utils.JsObject>cast().inject(component.getJsName(), publishedComp);
 		return component;
 	}
 
@@ -646,7 +645,7 @@ public class WidgetsFactory {
 			addToToggleGroup(component, aTag.getAttribute("buttonGroup"));
 		PublishedComponent publishedComp = component.getPublished().cast();
 		processGeneralProperties(component, aTag, publishedComp);
-		PlatypusWindow.inject(module, component.getElement().getId(), publishedComp);
+		target.<Utils.JsObject>cast().inject(component.getJsName(), publishedComp);
 		return component;
 	}
 
@@ -904,8 +903,7 @@ public class WidgetsFactory {
 						container.add((Widget) aComponent);
 					} else if (parentComp instanceof PlatypusMenuBar) {
 						PlatypusMenuBar container = (PlatypusMenuBar) parentComp;
-						if (aComponent instanceof MenuItemImageText)
-							container.addItem((MenuItemImageText) aComponent);
+						container.add(aComponent);
 					} else if (parentComp instanceof PlatypusMenu) {
 					} else if (parentComp != null){
 						throw new IllegalStateException(UNKNOWN_CONTAINER_DETECTED + parentComp.getClass().getName());
