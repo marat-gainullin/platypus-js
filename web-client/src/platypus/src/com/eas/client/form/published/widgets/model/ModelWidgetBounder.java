@@ -27,7 +27,7 @@ import com.google.gwt.xml.client.Element;
 public class ModelWidgetBounder<T> extends ModelElementRef implements ValueChangeHandler<T>, RowsetListener {
 
 	protected HandlerRegistration valueChangeHandlerRegistration;
-	protected HasValue<T> valueHolder;
+	protected HasValue<T> widget;
 	protected RowValueConverter<T> converter;
 
 	public ModelWidgetBounder(Element aTag, final Model aModel, RowValueConverter<T> aConverter) throws Exception {
@@ -59,16 +59,16 @@ public class ModelWidgetBounder<T> extends ModelElementRef implements ValueChang
 	}
 	
 	public HasValue<T> getWidget() {
-		return valueHolder;
+		return widget;
 	}
 
 	public void setWidget(HasValue<T> aCellComponent) {
-		if (valueHolder != aCellComponent) {
+		if (widget != aCellComponent) {
 			if (valueChangeHandlerRegistration != null)
 				valueChangeHandlerRegistration.removeHandler();
-			valueHolder = aCellComponent;
-			if (valueHolder != null) {
-				valueChangeHandlerRegistration = valueHolder.addValueChangeHandler(this);
+			widget = aCellComponent;
+			if (widget != null) {
+				valueChangeHandlerRegistration = widget.addValueChangeHandler(this);
 			} else {
 				valueChangeHandlerRegistration = null;
 			}
@@ -81,8 +81,8 @@ public class ModelWidgetBounder<T> extends ModelElementRef implements ValueChang
 			try {
 				if (!entity.getRowset().isBeforeFirst() && !entity.getRowset().isAfterLast()) {
 					Object prevValue = entity.getRowset().getObject(getColIndex());
-					if(valueHolder instanceof ModelCombo){
-						ModelCombo mCombo = (ModelCombo)valueHolder;
+					if(widget instanceof ModelCombo){
+						ModelCombo mCombo = (ModelCombo)widget;
 						if(event.getValue() instanceof Row){
 							Row rowValue = (Row)event.getValue();
 							Object lookupValue = mCombo.lookupRowValue(rowValue);
@@ -105,7 +105,7 @@ public class ModelWidgetBounder<T> extends ModelElementRef implements ValueChang
 	}
 
 	protected void setValueToControl() {
-		if (valueHolder != null) {
+		if (widget != null) {
 			try {
 				Object value = null;
 				Rowset eRowset = entity.getRowset();
@@ -115,10 +115,10 @@ public class ModelWidgetBounder<T> extends ModelElementRef implements ValueChang
 				if (value == null) {
 					value = entity.getSubstituteRowsetObject(fieldName);
 				}
-				if(valueHolder instanceof ModelCombo){
-					((ModelCombo)valueHolder).setJsValue(value, false);
+				if(widget instanceof ModelCombo){
+					((ModelCombo)widget).setJsValue(value, false);
 				}else{
-					valueHolder.setValue(converter.convert(value), false);
+					widget.setValue(converter.convert(value), false);
 				}
 			} catch (Exception ex) {
 				Logger.getLogger(ModelWidgetBounder.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
