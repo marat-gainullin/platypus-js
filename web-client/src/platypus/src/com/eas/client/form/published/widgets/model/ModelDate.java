@@ -54,21 +54,21 @@ public class ModelDate extends PublishedDecoratorBox<Date> implements HasEmptyTe
 		}
 	}
 
-	private native static void publish(ModelDate aField, JavaScriptObject aPublished)/*-{
-		Object.defineProperty(published, "emptyText", {
+	private native static void publish(ModelDate aWidget, JavaScriptObject aPublished)/*-{
+		Object.defineProperty(aPublished, "emptyText", {
 			get : function() {
 				return aWidget.@com.eas.client.form.published.HasEmptyText::getEmptyText()();
 			},
 			set : function(aValue) {
-				aWidget.@com.eas.client.form.published.HasEmptyText::setEmptyText(Ljava/lang/String;)(aValue!=null?''+aValue:null);
+				aWidget.@com.eas.client.form.published.HasEmptyText::setEmptyText(Ljava/lang/String;)(aValue != null ? '' + aValue : null);
 			}
 		});
 		Object.defineProperty(aPublished, "value", {
 			get : function() {
-				return $wnd.boxAsJs(aField.@com.eas.client.form.published.widgets.model.ModelDate::getJsValue()());
+				return $wnd.boxAsJs(aWidget.@com.eas.client.form.published.widgets.model.ModelDate::getJsValue()());
 			},
 			set : function(aValue) {
-				aField.@com.eas.client.form.published.widgets.model.ModelDate::setJsValue(Ljava/lang/Object;)($wnd.boxAsJava(aValue));
+				aWidget.@com.eas.client.form.published.widgets.model.ModelDate::setJsValue(Ljava/lang/Object;)($wnd.boxAsJava(aValue));
 			}
 		});
 	}-*/;

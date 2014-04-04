@@ -26,7 +26,7 @@ public class ModelCheck extends PublishedDecoratorBox<Boolean> {
 			},
 			set : function(aValue) {
 				if (aValue != null)
-					aField.@com.eas.client.form.published.widgets.model.ModelCheck::setText(Ljava/lang/String;)(''+aValue);
+					aField.@com.eas.client.form.published.widgets.model.ModelCheck::setText(Ljava/lang/String;)('' + aValue);
 				else
 					aField.@com.eas.client.form.published.widgets.model.ModelCheck::setText(Ljava/lang/String;)(null);
 			}

@@ -29,7 +29,7 @@ public class ModelElementRef {
 			entity = aModel.getEntityById(entityId);
 			fieldName = aTag.getAttribute("fieldName");
 			isField = Utils.getBooleanAttribute(aTag, "field", true);
-			tryResolveField();
+			resolveField();
 		}
 	}
 
@@ -40,19 +40,14 @@ public class ModelElementRef {
 		entity = aModel.getEntityById(entityId);
 		fieldName = aFieldName;
 		isField = aIsField;
-		tryResolveField();
-	}
-
-	protected void tryResolveField() throws Exception {
 		resolveField();
 	}
 
 	public void resolveField() throws Exception {
 		if (entity != null) {
 			if (entity instanceof ParametersEntity) {
-				if (isField) {
-					field = entity.getFields().get(fieldName);
-				}
+				assert isField : "Parameter must be refereced as a field only! (Parameters entity has no own parameters)";
+				field = entity.getFields().get(fieldName);
 			} else if (entity.getQuery() != null) {
 				if (isField) {
 					field = entity.getFields().get(fieldName);
@@ -60,8 +55,9 @@ public class ModelElementRef {
 					field = entity.getQuery().getParameters().get(fieldName);
 				}
 			}
-		}else{
-			Logger.getLogger(ModelElementRef.class.getName()).log(Level.SEVERE, "Model's entity missing while controls binding. Entity name: "+entityId+"; "+(isField?"field":"parameter")+" name: "+fieldName);
+		} else {
+			Logger.getLogger(ModelElementRef.class.getName()).log(Level.SEVERE,
+			        "Model's entity missing while controls binding. Entity name: " + entityId + "; " + (isField ? "field" : "parameter") + " name: " + fieldName);
 		}
 	}
 

@@ -33,24 +33,24 @@ public class ModelTextArea extends PublishedDecoratorBox<String> implements HasE
 		}
 	}
 
-	protected native static void publish(ModelTextArea aField, JavaScriptObject aPublished)/*-{
-		Object.defineProperty(published, "emptyText", {
+	protected native static void publish(ModelTextArea aWidget, JavaScriptObject aPublished)/*-{
+		Object.defineProperty(aPublished, "emptyText", {
 			get : function() {
 				return aWidget.@com.eas.client.form.published.HasEmptyText::getEmptyText()();
 			},
 			set : function(aValue) {
-				aWidget.@com.eas.client.form.published.HasEmptyText::setEmptyText(Ljava/lang/String;)(aValue!=null?''+aValue:null);
+				aWidget.@com.eas.client.form.published.HasEmptyText::setEmptyText(Ljava/lang/String;)(aValue != null ? '' + aValue : null);
 			}
 		});
 		Object.defineProperty(aPublished, "value", {
 			get : function() {
-				return aField.@com.eas.client.form.published.widgets.model.ModelTextArea::getValue()();
+				return aWidget.@com.eas.client.form.published.widgets.model.ModelTextArea::getValue()();
 			},
 			set : function(aValue) {
 				if (aValue != null)
-					aField.@com.eas.client.form.published.widgets.model.ModelTextArea::setValue(Ljava/lang/String;)(''+aValue);
+					aWidget.@com.eas.client.form.published.widgets.model.ModelTextArea::setValue(Ljava/lang/String;)(''+aValue);
 				else
-					aField.@com.eas.client.form.published.widgets.model.ModelTextArea::setValue(Ljava/lang/String;)(null);
+					aWidget.@com.eas.client.form.published.widgets.model.ModelTextArea::setValue(Ljava/lang/String;)(null);
 			}
 		});
 	}-*/;

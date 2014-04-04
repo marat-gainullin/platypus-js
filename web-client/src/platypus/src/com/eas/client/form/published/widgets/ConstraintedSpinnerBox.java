@@ -18,7 +18,7 @@ public class ConstraintedSpinnerBox extends SpinnerBox<Double> {
 		Double oldValue = getValue();
 		Double newValue = (oldValue != null ? oldValue : 0) + step;
 		if (max == null || newValue <= max)
-			setValue(newValue);
+			setValue(newValue, true);
 	}
 
 	@Override
@@ -26,7 +26,7 @@ public class ConstraintedSpinnerBox extends SpinnerBox<Double> {
 		Double oldValue = getValue();
 		Double newValue = (oldValue != null ? oldValue : 0) - step;
 		if (min == null || newValue >= min)
-			setValue(newValue);
+			setValue(newValue, true);
 	}
 
 	public Double getMin() {

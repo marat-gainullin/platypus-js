@@ -9,7 +9,6 @@ import com.bearsoft.gwt.ui.widgets.ObjectFormat;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.Utils;
 import com.eas.client.form.ControlsUtils;
-import com.eas.client.form.combo.ComboLabelProvider;
 import com.eas.client.form.grid.columns.BooleanModelGridColumn;
 import com.eas.client.form.grid.columns.DateModelGridColumn;
 import com.eas.client.form.grid.columns.DoubleModelGridColumn;
@@ -47,7 +46,6 @@ public class GridFactory {
 	protected Entity rowsSource;
 	protected ModelGrid grid;
 	// columns
-	protected List<ComboLabelProvider> comboLabelProviders = new ArrayList<>();
 	protected List<HeaderNode> headerForest = new ArrayList<>();
 	protected List<ModelGridColumn<?>> columns = new ArrayList<>();
 
@@ -75,7 +73,6 @@ public class GridFactory {
 		boolean editable = Utils.getBooleanAttribute(gridTag, "editable", true);
 		final boolean deletable = Utils.getBooleanAttribute(gridTag, "deletable", true);
 		final boolean insertable = Utils.getBooleanAttribute(gridTag, "insertable", true);
-		final String generalCellFunctionName = rowsColumnsTag.getAttribute("generalRowFunction");
 		ModelElementRef rowsModelElement = new ModelElementRef(Utils.getElementByTagName(rowsColumnsTag, "rowsDatasource"), model);
 		rowsSource = rowsModelElement.entity;
 		rowsetsOfInterestHosts.add(rowsSource);
@@ -111,9 +108,6 @@ public class GridFactory {
 		// column lines ?
 		for (Entity entity : rowsetsOfInterestHosts) {
 			grid.addUpdatingTriggerEntity(entity);
-		}
-		for (ComboLabelProvider labelProvider : comboLabelProviders) {
-			labelProvider.setOnLabelCacheChange(grid.getCrossUpdaterAction());
 		}
 	}
 
@@ -215,11 +209,6 @@ public class GridFactory {
 				rowsetsOfInterestHosts.add(valueRef.entity);
 				rowsetsOfInterestHosts.add(displayRef.entity);
 				final boolean list = Utils.getBooleanAttribute(aControlTag, "list", true);
-				final ComboLabelProvider labelProvider = new ComboLabelProvider();
-				labelProvider.setTargetValueRef(aColModelElement);
-				labelProvider.setLookupValueRef(valueRef);
-				labelProvider.setDisplayValueRef(displayRef);
-				comboLabelProviders.add(labelProvider);
 				RowsetDataProvider filler = new RowsetDataProvider(null);
 				if (valueRef.entity != null) {
 					filler.setRowset(valueRef.entity.getRowset());

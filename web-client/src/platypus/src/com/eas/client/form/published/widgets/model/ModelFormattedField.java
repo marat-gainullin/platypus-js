@@ -49,21 +49,21 @@ public class ModelFormattedField extends PublishedDecoratorBox<Object> implement
 		}
 	}
 
-	private native static void publish(ModelFormattedField aField, JavaScriptObject aPublished)/*-{
-		Object.defineProperty(published, "emptyText", {
+	private native static void publish(ModelFormattedField aWidget, JavaScriptObject aPublished)/*-{
+		Object.defineProperty(aPublished, "emptyText", {
 			get : function() {
 				return aWidget.@com.eas.client.form.published.HasEmptyText::getEmptyText()();
 			},
 			set : function(aValue) {
-				aWidget.@com.eas.client.form.published.HasEmptyText::setEmptyText(Ljava/lang/String;)(aValue!=null?''+aValue:null);
+				aWidget.@com.eas.client.form.published.HasEmptyText::setEmptyText(Ljava/lang/String;)(aValue != null ? '' + aValue : null);
 			}
 		});
 		Object.defineProperty(aPublished, "value", {
 			get : function() {
-				return $wnd.boxAsJs(aField.@com.eas.client.form.published.widgets.model.ModelFormattedField::getJsValue()());
+				return $wnd.boxAsJs(aWidget.@com.eas.client.form.published.widgets.model.ModelFormattedField::getJsValue()());
 			},
 			set : function(aValue) {
-				aField.@com.eas.client.form.published.widgets.model.ModelFormattedField::setJsValue(Ljava/lang/Object;)($wnd.boxAsJava(aValue));
+				aWidget.@com.eas.client.form.published.widgets.model.ModelFormattedField::setJsValue(Ljava/lang/Object;)($wnd.boxAsJava(aValue));
 			}
 		});
 	}-*/;

@@ -97,7 +97,7 @@ public class LookupModelGridColumn extends ModelGridColumn<Row> {
 
 	protected void init() {
 		if (lookup == null)
-			lookup = new ValueLookup(columnModelRef.getColIndex(), lookupValueRef, displayValueRef);
+			lookup = new ValueLookup(lookupValueRef);
 	}
 
 	public ValueLookup getLookup() {

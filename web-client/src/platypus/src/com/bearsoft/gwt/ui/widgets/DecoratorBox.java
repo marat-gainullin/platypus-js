@@ -92,7 +92,7 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 
                     @Override
                     public void onValueChange(ValueChangeEvent<T> event) {
-                        ValueChangeEvent.fire(DecoratorBox.this, getValue());
+                    	fireValueChangeEvent();
                     }
                 });
                 if (decorated instanceof Widget) {
@@ -109,6 +109,10 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
                 }
             }
         }
+    }
+    
+    protected void fireValueChangeEvent(){
+    	ValueChangeEvent.fire(DecoratorBox.this, getValue());
     }
 
     public boolean isSelectButtonVisible() {

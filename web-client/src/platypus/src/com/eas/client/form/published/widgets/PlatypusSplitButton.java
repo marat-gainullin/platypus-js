@@ -17,23 +17,29 @@ import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.MenuBar;
 
 public class PlatypusSplitButton extends DropDownButton implements HasJsFacade, HasEnabled, HasComponentPopupMenu, HasEventsExecutor {
-	
+
 	protected EventsExecutor eventsExecutor;
-	protected PlatypusPopupMenu menu;
+	protected PlatypusPopupMenu contextMenu;
 	protected boolean enabled;
-	protected String name;	
+	protected String name;
 	protected JavaScriptObject published;
-	
+
 	public PlatypusSplitButton() {
 		super("", false, null);
 	}
-	
+
 	public PlatypusSplitButton(String aTitle, boolean asHtml, MenuBar aMenu) {
 		super(aTitle, asHtml, aMenu);
 	}
 
 	public PlatypusSplitButton(String aTitle, boolean asHtml, ImageResource aImage, MenuBar aMenu) {
 		super(aTitle, asHtml, aImage, aMenu);
+	}
+
+	@Override
+	protected void showMenu() {
+		if (menu instanceof PlatypusPopupMenu)
+			((PlatypusPopupMenu)menu).showRelativeTo(chevron);
 	}
 
 	@Override
@@ -47,27 +53,27 @@ public class PlatypusSplitButton extends DropDownButton implements HasJsFacade, 
 	}
 
 	@Override
-    public PlatypusPopupMenu getPlatypusPopupMenu() {
-		return menu; 
-    }
+	public PlatypusPopupMenu getPlatypusPopupMenu() {
+		return contextMenu;
+	}
 
 	protected HandlerRegistration menuTriggerReg;
 
 	@Override
 	public void setPlatypusPopupMenu(PlatypusPopupMenu aMenu) {
-		if (menu != aMenu) {
+		if (contextMenu != aMenu) {
 			if (menuTriggerReg != null)
 				menuTriggerReg.removeHandler();
-			menu = aMenu;
-			if (menu != null) {
+			contextMenu = aMenu;
+			if (contextMenu != null) {
 				menuTriggerReg = super.addDomHandler(new ContextMenuHandler() {
-					
+
 					@Override
 					public void onContextMenu(ContextMenuEvent event) {
 						event.preventDefault();
 						event.stopPropagation();
-						menu.setPopupPosition(event.getNativeEvent().getClientX(), event.getNativeEvent().getClientY());
-						menu.show();
+						contextMenu.setPopupPosition(event.getNativeEvent().getClientX(), event.getNativeEvent().getClientY());
+						contextMenu.show();
 					}
 				}, ContextMenuEvent.getType());
 			}
@@ -94,10 +100,10 @@ public class PlatypusSplitButton extends DropDownButton implements HasJsFacade, 
 		name = aValue;
 	}
 
-	public ImageParagraph getContent(){
+	public ImageParagraph getContent() {
 		return content;
 	}
-	
+
 	public JavaScriptObject getPublished() {
 		return published;
 	}

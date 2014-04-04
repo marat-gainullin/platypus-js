@@ -212,61 +212,61 @@ public abstract class PublishedDecoratorBox<T> extends DecoratorBox<T> implement
 
 	public void setBinding(Field aField, RowValueConverter<T> aConverter) throws Exception {
 		ModelElementRef el = getModelElement();
-		if (el instanceof LazyControlBounder<?>) {
-			((LazyControlBounder<?>) el).setCellComponent(null);
-			((LazyControlBounder<?>) el).unregisterFromRowsetEvents();
+		if (el instanceof ModelWidgetBounder<?>) {
+			((ModelWidgetBounder<?>) el).setWidget(null);
+			((ModelWidgetBounder<?>) el).unregisterFromRowsetEvents();
 		}
 		setModelElement(null);
 		//
 		Entity newEntity = aField != null && aField.getOwner() != null && aField.getOwner().getOwner() != null ? aField.getOwner().getOwner() : null;
 		Model newModel = newEntity != null ? newEntity.getModel() : null;
 		if (newEntity != null && newModel != null) {
-			LazyControlBounder<T> newBound = new LazyControlBounder<T>(newModel, newEntity.getEntityId(), aField.getName(), newEntity instanceof ParametersEntity || !(aField instanceof Parameter),
+			ModelWidgetBounder<T> newBound = new ModelWidgetBounder<T>(newModel, newEntity.getEntityId(), aField.getName(), newEntity instanceof ParametersEntity || !(aField instanceof Parameter),
 			        aConverter);
-			newBound.setCellComponent(this);
+			newBound.setWidget(this);
 			setModelElement(newBound);
 		}
 	}
 
-	private static native void publish(HasJsFacade aField, JavaScriptObject aPublished)/*-{
+	private static native void publish(HasJsFacade aWidget, JavaScriptObject aPublished)/*-{
 		Object.defineProperty(aPublished, "onSelect", {
 			get : function() {
-				return aField.@com.eas.client.form.published.HasOnSelect::getOnSelect()();
+				return aWidget.@com.eas.client.form.published.HasOnSelect::getOnSelect()();
 			},
 			set : function(aValue) {
-				aField.@com.eas.client.form.published.HasOnSelect::setOnSelect(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+				aWidget.@com.eas.client.form.published.HasOnSelect::setOnSelect(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
 			}
 		});
 		Object.defineProperty(aPublished, "onRender", {
 			get : function() {
-				return aField.@com.eas.client.form.published.HasOnRender::getOnRender()();
+				return aWidget.@com.eas.client.form.published.HasOnRender::getOnRender()();
 			},
 			set : function(aValue) {
-				aField.@com.eas.client.form.published.HasOnRender::setOnRender(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+				aWidget.@com.eas.client.form.published.HasOnRender::setOnRender(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
 			}
 		});
 		Object.defineProperty(aPublished, "editable", {
 			get : function() {
-				return aField.@com.eas.client.form.published.HasCustomEditing::isEditable()();
+				return aWidget.@com.eas.client.form.published.HasCustomEditing::isEditable()();
 			},
 			set : function(aValue) {
-				aField.@com.eas.client.form.published.HasCustomEditing::setEditable(Z)((false != aValue));
+				aWidget.@com.eas.client.form.published.HasCustomEditing::setEditable(Z)((false != aValue));
 			}
 		});
 		Object.defineProperty(aPublished, "selectOnly", {
 			get : function() {
-				return aField.@com.eas.client.form.published.HasCustomEditing::isSelectOnly()();
+				return aWidget.@com.eas.client.form.published.HasCustomEditing::isSelectOnly()();
 			},
 			set : function(aValue) {
-				aField.@com.eas.client.form.published.HasCustomEditing::setSelectOnly(Z)((false != aValue));
+				aWidget.@com.eas.client.form.published.HasCustomEditing::setSelectOnly(Z)((false != aValue));
 			}
 		});
 		Object.defineProperty(aPublished, "field", {
 			get : function() {
-				return @com.eas.client.model.Entity::publishFieldFacade(Lcom/bearsoft/rowset/metadata/Field;)(aField.@com.eas.client.form.published.widgets.model.PublishedDecoratorBox::getBinding()());
+				return @com.eas.client.model.Entity::publishFieldFacade(Lcom/bearsoft/rowset/metadata/Field;)(aWidget.@com.eas.client.form.published.widgets.model.PublishedDecoratorBox::getBinding()());
 			},
 			set : function(aValue) {
-				aField.@com.eas.client.form.published.HasBinding::setBinding(Lcom/bearsoft/rowset/metadata/Field;)(aValue != null ? aValue.unwrap() : null);
+				aWidget.@com.eas.client.form.published.HasBinding::setBinding(Lcom/bearsoft/rowset/metadata/Field;)(aValue != null ? aValue.unwrap() : null);
 			}
 		});
 	}-*/;

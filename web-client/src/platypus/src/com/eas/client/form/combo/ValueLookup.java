@@ -2,28 +2,20 @@ package com.eas.client.form.combo;
 
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.locators.Locator;
-import com.eas.client.converters.StringRowValueConverter;
 import com.eas.client.form.published.widgets.model.ModelElementRef;
 
 public class ValueLookup {
 
-	protected StringRowValueConverter converter = new StringRowValueConverter();
-	protected int targetColIndex;
 	protected ModelElementRef lookupValueRef;
-	protected ModelElementRef displayValueRef;
 	protected Locator loc;
 
-	public ValueLookup(int aTargetColIndex, ModelElementRef aLookupValueRef,
-			ModelElementRef aDisplayRef) {
+	public ValueLookup(ModelElementRef aLookupValueRef) {
 		super();
-		targetColIndex = aTargetColIndex;
 		lookupValueRef = aLookupValueRef;
-		displayValueRef = aDisplayRef;
 	}
 
 	protected void init() {
-		if (isValid() && lookupValueRef.isField
-				&& loc == null && lookupValueRef.entity.getRowset() != null) {
+		if (isValid() && lookupValueRef.isField && loc == null && lookupValueRef.entity.getRowset() != null) {
 			loc = lookupValueRef.entity.getRowset().createLocator();
 			loc.beginConstrainting();
 			try {
@@ -35,42 +27,40 @@ public class ValueLookup {
 	}
 
 	protected boolean isValid() {
-		return lookupValueRef.isCorrect() && lookupValueRef.field != null
-				&& displayValueRef.isCorrect() && displayValueRef.field != null
-				&& lookupValueRef.entity == displayValueRef.entity
-				&& targetColIndex > 0;
+		return lookupValueRef != null && lookupValueRef.isCorrect() && lookupValueRef.field != null;
 	}
 
-	public boolean isInited()
-	{
+	public boolean isInited() {
 		return isValid() && loc != null;
 	}
+
+	public void die(){
+		if(isInited()){
+			lookupValueRef.entity.getRowset().removeLocator(loc);
+			loc = null;
+		}
+	}
 	
-	public boolean tryInit()
-	{
+	public boolean tryInit() {
 		init();
 		return isInited();
 	}
-	
+
 	public ModelElementRef getLookupValueRef() {
 		return lookupValueRef;
 	}
 
-	public ModelElementRef getDisplayValueRef() {
-		return displayValueRef;
-	}
-
-	public Row lookupRow(Object aPkValue) throws Exception {
+	public Row lookupRow(Object aLookupValue) throws Exception {
 		init();
 		if (isInited()) {
-				if (aPkValue != null) {
-					if (loc.find(new Object[] { aPkValue })) {
-						return loc.getRow(0);
-					} else {
-						return null;
-					}
-				} else
+			if (aLookupValue != null) {
+				if (loc.find(new Object[] { aLookupValue })) {
+					return loc.getRow(0);
+				} else {
 					return null;
+				}
+			} else
+				return null;
 		} else
 			return null;
 	}

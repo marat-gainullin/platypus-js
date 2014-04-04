@@ -50,255 +50,262 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
 
 /**
- *
+ * 
  * @author mg
  */
-public class DropDownButton extends Composite implements HasText, HasHTML, RequiresResize, HasClickHandlers, HasDoubleClickHandlers, HasEnabled, HasAllMouseHandlers, HasAllTouchHandlers, HasImageResource {
+public class DropDownButton extends Composite implements HasText, HasHTML, RequiresResize, HasClickHandlers, HasDoubleClickHandlers, HasEnabled, HasAllMouseHandlers, HasAllTouchHandlers,
+        HasImageResource {
 
-    protected FlowPanel container = new FlowPanel();
-    protected ImageLabel content;
-    protected SimplePanel chevron = new SimplePanel();
-    protected MenuBar menu;
+	protected FlowPanel container = new FlowPanel();
+	protected ImageLabel content;
+	protected SimplePanel chevron = new SimplePanel();
+	protected MenuBar menu;
 
-    public DropDownButton(String aTitle, boolean asHtml, MenuBar aMenu) {
-        this(aTitle, asHtml, null, aMenu);
-    }
+	public DropDownButton(String aTitle, boolean asHtml, MenuBar aMenu) {
+		this(aTitle, asHtml, null, aMenu);
+	}
 
-    public DropDownButton(String aTitle, boolean asHtml, ImageResource aImage, MenuBar aMenu) {
-        initWidget(container);
-        container.getElement().addClassName("gwt-Button");
-        container.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
-        container.getElement().getStyle().setPosition(Style.Position.RELATIVE);
-        menu = aMenu;
-        content = new ImageLabel(aTitle, asHtml, aImage);
-        content.getElement().addClassName("dropdown-button");
-        content.setHorizontalTextPosition(ImageParagraph.RIGHT);
-        content.setVerticalTextPosition(ImageParagraph.CENTER);
-        content.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
-        content.getElement().getStyle().setHeight(100, Style.Unit.PCT);
-        chevron.getElement().getStyle().setPosition(Style.Position.RELATIVE);
-        content.getElement().getStyle().setPadding(0, Style.Unit.PX);
+	public DropDownButton(String aTitle, boolean asHtml, ImageResource aImage, MenuBar aMenu) {
+		initWidget(container);
+		container.getElement().addClassName("gwt-Button");
+		container.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+		container.getElement().getStyle().setPosition(Style.Position.RELATIVE);
+		menu = aMenu;
+		content = new ImageLabel(aTitle, asHtml, aImage);
+		content.getElement().addClassName("dropdown-button");
+		content.setHorizontalTextPosition(ImageParagraph.RIGHT);
+		content.setVerticalTextPosition(ImageParagraph.CENTER);
+		content.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+		content.getElement().getStyle().setHeight(100, Style.Unit.PCT);
+		chevron.getElement().getStyle().setPosition(Style.Position.RELATIVE);
+		content.getElement().getStyle().setPadding(0, Style.Unit.PX);
 
-        chevron.getElement().addClassName("dropdown-menu");
-        chevron.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
-        chevron.getElement().getStyle().setHeight(100, Style.Unit.PCT);
-        chevron.getElement().getStyle().setVerticalAlign(Style.VerticalAlign.TOP);
-        chevron.getElement().getStyle().setPosition(Style.Position.RELATIVE);
-        chevron.getElement().getStyle().setPadding(0, Style.Unit.PX);
-        chevron.getElement().setInnerHTML("&nbsp;");
+		chevron.getElement().addClassName("dropdown-menu");
+		chevron.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+		chevron.getElement().getStyle().setHeight(100, Style.Unit.PCT);
+		chevron.getElement().getStyle().setVerticalAlign(Style.VerticalAlign.TOP);
+		chevron.getElement().getStyle().setPosition(Style.Position.RELATIVE);
+		chevron.getElement().getStyle().setPadding(0, Style.Unit.PX);
+		chevron.getElement().setInnerHTML("&nbsp;");
 
-        CommonResources.INSTANCE.commons().ensureInjected();
-        chevron.getElement().addClassName(CommonResources.INSTANCE.commons().unselectable());
+		CommonResources.INSTANCE.commons().ensureInjected();
+		chevron.getElement().addClassName(CommonResources.INSTANCE.commons().unselectable());
 
-        container.add(content);
-        container.add(chevron);
-        chevron.addDomHandler(new ClickHandler() {
+		container.add(content);
+		container.add(chevron);
+		chevron.addDomHandler(new ClickHandler() {
 
-            @Override
-            public void onClick(ClickEvent event) {
-                final PopupPanel pp = new PopupPanel();
-                pp.setAutoHideEnabled(true);
-                pp.setAutoHideOnHistoryEventsEnabled(true);
-                pp.setAnimationEnabled(true);
-                pp.setWidget(menu);
-                pp.showRelativeTo(chevron);
-            }
-        }, ClickEvent.getType());
+			@Override
+			public void onClick(ClickEvent event) {
+				showMenu();
+			}
+		}, ClickEvent.getType());
 
-        content.addClickHandler(new ClickHandler() {
+		content.addClickHandler(new ClickHandler() {
 
-            @Override
-            public void onClick(ClickEvent event) {
-                DropDownButton.this.fireEvent(event);
-            }
-        });
-    }
+			@Override
+			public void onClick(ClickEvent event) {
+				DropDownButton.this.fireEvent(event);
+			}
+		});
+	}
 
-    public MenuBar getMenu() {
-        return menu;
-    }
+	protected void showMenu() {
+		if (menu != null) {
+			final PopupPanel pp = new PopupPanel();
+			pp.setAutoHideEnabled(true);
+			pp.setAutoHideOnHistoryEventsEnabled(true);
+			pp.setAnimationEnabled(true);
+			pp.setWidget(menu);
+			pp.showRelativeTo(chevron);
+		}
+	}
 
-    public void setMenu(MenuBar aMenu) {
-        if (menu != null && menu.getParent() != null) {
-            menu.removeFromParent();
-        }
-        menu = aMenu;
-    }
+	public MenuBar getMenu() {
+		return menu;
+	}
 
-    @Override
-    public void onResize() {
-        int containerContentWidth = container.getElement().<XElement>cast().getContentWidth();
-        int contentWidth = content.getElement().getOffsetWidth();
-        int rightWidth = chevron.getElement().getOffsetWidth();
-        if (containerContentWidth - contentWidth - rightWidth != 0) {
-            int targetContentWidth = containerContentWidth - rightWidth;
-            content.getElement().getStyle().setWidth(targetContentWidth, Style.Unit.PX);
-            int newContentWidth = content.getElement().getOffsetWidth();
-            int delta = newContentWidth - targetContentWidth;
-            if (delta != 0) {
-                content.getElement().getStyle().setWidth(targetContentWidth - delta, Style.Unit.PX);
-            }
-        }
-        if (content instanceof RequiresResize) {
-            ((RequiresResize) content).onResize();
-        }
-    }
+	public void setMenu(MenuBar aMenu) {
+		if (menu != null && menu.getParent() != null) {
+			menu.removeFromParent();
+		}
+		menu = aMenu;
+	}
 
-    public int getVerticalAlignment() {
-        return content.getVerticalAlignment();
-    }
+	@Override
+	public void onResize() {
+		int containerContentWidth = container.getElement().<XElement> cast().getContentWidth();
+		int contentWidth = content.getElement().getOffsetWidth();
+		int rightWidth = chevron.getElement().getOffsetWidth();
+		if (containerContentWidth - contentWidth - rightWidth != 0) {
+			int targetContentWidth = containerContentWidth - rightWidth;
+			content.getElement().getStyle().setWidth(targetContentWidth, Style.Unit.PX);
+			int newContentWidth = content.getElement().getOffsetWidth();
+			int delta = newContentWidth - targetContentWidth;
+			if (delta != 0) {
+				content.getElement().getStyle().setWidth(targetContentWidth - delta, Style.Unit.PX);
+			}
+		}
+		if (content instanceof RequiresResize) {
+			((RequiresResize) content).onResize();
+		}
+	}
 
-    public void setVerticalAlignment(int aValue) {
-        content.setVerticalAlignment(aValue);
-    }
+	public int getVerticalAlignment() {
+		return content.getVerticalAlignment();
+	}
 
-    public int getHorizontalAlignment() {
-        return content.getHorizontalAlignment();
-    }
+	public void setVerticalAlignment(int aValue) {
+		content.setVerticalAlignment(aValue);
+	}
 
-    public void setHorizontalAlignment(int aValue) {
-        content.setHorizontalAlignment(aValue);
-    }
+	public int getHorizontalAlignment() {
+		return content.getHorizontalAlignment();
+	}
 
-    @Override
-    public String getText() {
-        return content.getText();
-    }
+	public void setHorizontalAlignment(int aValue) {
+		content.setHorizontalAlignment(aValue);
+	}
 
-    @Override
-    public void setText(String aValue) {
-        content.setText(aValue);
-    }
+	@Override
+	public String getText() {
+		return content.getText();
+	}
 
-    @Override
-    public String getHTML() {
-        return content.getHTML();
-    }
+	@Override
+	public void setText(String aValue) {
+		content.setText(aValue);
+	}
 
-    @Override
-    public void setHTML(String aValue) {
-        content.setHTML(aValue);
-    }
+	@Override
+	public String getHTML() {
+		return content.getHTML();
+	}
 
-    public int getIconTextGap() {
-        return content.getIconTextGap();
-    }
+	@Override
+	public void setHTML(String aValue) {
+		content.setHTML(aValue);
+	}
 
-    public void setIconTextGap(int aValue) {
-        content.setIconTextGap(aValue);
-    }
+	public int getIconTextGap() {
+		return content.getIconTextGap();
+	}
 
-    public int getHorizontalTextPosition() {
-        return content.getHorizontalTextPosition();
-    }
+	public void setIconTextGap(int aValue) {
+		content.setIconTextGap(aValue);
+	}
 
-    public void setHorizontalTextPosition(int aValue) {
-        content.setHorizontalTextPosition(aValue);
-    }
+	public int getHorizontalTextPosition() {
+		return content.getHorizontalTextPosition();
+	}
 
-    public int getVerticalTextPosition() {
-        return content.getVerticalTextPosition();
-    }
+	public void setHorizontalTextPosition(int aValue) {
+		content.setHorizontalTextPosition(aValue);
+	}
 
-    public void setVerticalTextPosition(int aValue) {
-        content.setVerticalTextPosition(aValue);
-    }
+	public int getVerticalTextPosition() {
+		return content.getVerticalTextPosition();
+	}
 
-    public ImageResource getImage() {
-        return content.getImage();
-    }
+	public void setVerticalTextPosition(int aValue) {
+		content.setVerticalTextPosition(aValue);
+	}
 
-    public void setImage(ImageResource aValue) {
-        content.setImage(aValue);
-    }
+	public ImageResource getImage() {
+		return content.getImage();
+	}
 
-    @Override
-    protected void onAttach() {
-        super.onAttach();
-        // hack for IE: chevron.getElement().getStyle().clearHeight();
-    }
+	public void setImage(ImageResource aValue) {
+		content.setImage(aValue);
+	}
 
-    @Override
-    protected void onDetach() {
-        super.onDetach();
-    }
+	@Override
+	protected void onAttach() {
+		super.onAttach();
+		// hack for IE: chevron.getElement().getStyle().clearHeight();
+	}
 
-    @Override
-    public HandlerRegistration addClickHandler(ClickHandler handler) {
-        //We shouldn't use addDomHandler here because of event redirecting
-        return super.addHandler(handler, ClickEvent.getType());
-    }
+	@Override
+	protected void onDetach() {
+		super.onDetach();
+	}
 
-    @Override
-    public HandlerRegistration addDoubleClickHandler(DoubleClickHandler handler) {
-        return super.addDomHandler(handler, DoubleClickEvent.getType());
-    }
+	@Override
+	public HandlerRegistration addClickHandler(ClickHandler handler) {
+		// We shouldn't use addDomHandler here because of event redirecting
+		return super.addHandler(handler, ClickEvent.getType());
+	}
 
-    @Override
-    public HandlerRegistration addMouseDownHandler(MouseDownHandler handler) {
-        return super.addDomHandler(handler, MouseDownEvent.getType());
-    }
+	@Override
+	public HandlerRegistration addDoubleClickHandler(DoubleClickHandler handler) {
+		return super.addDomHandler(handler, DoubleClickEvent.getType());
+	}
 
-    @Override
-    public HandlerRegistration addMouseMoveHandler(MouseMoveHandler handler) {
-        return super.addDomHandler(handler, MouseMoveEvent.getType());
-    }
+	@Override
+	public HandlerRegistration addMouseDownHandler(MouseDownHandler handler) {
+		return super.addDomHandler(handler, MouseDownEvent.getType());
+	}
 
-    @Override
-    public HandlerRegistration addMouseOutHandler(MouseOutHandler handler) {
-        return super.addDomHandler(handler, MouseOutEvent.getType());
-    }
+	@Override
+	public HandlerRegistration addMouseMoveHandler(MouseMoveHandler handler) {
+		return super.addDomHandler(handler, MouseMoveEvent.getType());
+	}
 
-    @Override
-    public HandlerRegistration addMouseOverHandler(MouseOverHandler handler) {
-        return super.addDomHandler(handler, MouseOverEvent.getType());
-    }
+	@Override
+	public HandlerRegistration addMouseOutHandler(MouseOutHandler handler) {
+		return super.addDomHandler(handler, MouseOutEvent.getType());
+	}
 
-    @Override
-    public HandlerRegistration addMouseUpHandler(MouseUpHandler handler) {
-        return super.addDomHandler(handler, MouseUpEvent.getType());
-    }
+	@Override
+	public HandlerRegistration addMouseOverHandler(MouseOverHandler handler) {
+		return super.addDomHandler(handler, MouseOverEvent.getType());
+	}
 
-    @Override
-    public HandlerRegistration addMouseWheelHandler(MouseWheelHandler handler) {
-        return super.addDomHandler(handler, MouseWheelEvent.getType());
-    }
+	@Override
+	public HandlerRegistration addMouseUpHandler(MouseUpHandler handler) {
+		return super.addDomHandler(handler, MouseUpEvent.getType());
+	}
 
-    @Override
-    public HandlerRegistration addTouchStartHandler(TouchStartHandler handler) {
-        return super.addDomHandler(handler, TouchStartEvent.getType());
-    }
+	@Override
+	public HandlerRegistration addMouseWheelHandler(MouseWheelHandler handler) {
+		return super.addDomHandler(handler, MouseWheelEvent.getType());
+	}
 
-    @Override
-    public HandlerRegistration addTouchMoveHandler(TouchMoveHandler handler) {
-        return super.addDomHandler(handler, TouchMoveEvent.getType());
-    }
+	@Override
+	public HandlerRegistration addTouchStartHandler(TouchStartHandler handler) {
+		return super.addDomHandler(handler, TouchStartEvent.getType());
+	}
 
-    @Override
-    public HandlerRegistration addTouchEndHandler(TouchEndHandler handler) {
-        return super.addDomHandler(handler, TouchEndEvent.getType());
-    }
+	@Override
+	public HandlerRegistration addTouchMoveHandler(TouchMoveHandler handler) {
+		return super.addDomHandler(handler, TouchMoveEvent.getType());
+	}
 
-    @Override
-    public HandlerRegistration addTouchCancelHandler(TouchCancelHandler handler) {
-        return super.addDomHandler(handler, TouchCancelEvent.getType());
-    }
+	@Override
+	public HandlerRegistration addTouchEndHandler(TouchEndHandler handler) {
+		return super.addDomHandler(handler, TouchEndEvent.getType());
+	}
 
-    @Override
-    public boolean isEnabled() {
-        return content.isEnabled();
-    }
+	@Override
+	public HandlerRegistration addTouchCancelHandler(TouchCancelHandler handler) {
+		return super.addDomHandler(handler, TouchCancelEvent.getType());
+	}
 
-    @Override
-    public void setEnabled(boolean enabled) {
-        content.setEnabled(enabled);
-        chevron.getElement().setPropertyBoolean("disabled", !enabled);
-        getElement().setPropertyBoolean("disabled", !enabled);
-    }
+	@Override
+	public boolean isEnabled() {
+		return content.isEnabled();
+	}
 
-    @Override
-    public ImageResource getImageResource() {
-        return content.getImageResource();
-    }
+	@Override
+	public void setEnabled(boolean enabled) {
+		content.setEnabled(enabled);
+		chevron.getElement().setPropertyBoolean("disabled", !enabled);
+		getElement().setPropertyBoolean("disabled", !enabled);
+	}
+
+	@Override
+	public ImageResource getImageResource() {
+		return content.getImageResource();
+	}
 
 }

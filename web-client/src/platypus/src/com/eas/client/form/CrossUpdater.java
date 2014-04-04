@@ -72,7 +72,8 @@ public class CrossUpdater extends RowsetAdapter {
 
 	@Override
 	public void rowInserted(RowsetInsertEvent event) {
-		onChange.run();
+		if (!event.isAjusting())
+			onChange.run();
 	}
 
 	@Override
@@ -82,6 +83,7 @@ public class CrossUpdater extends RowsetAdapter {
 
 	@Override
 	public void rowDeleted(RowsetDeleteEvent event) {
-		onChange.run();
+		if (!event.isAjusting())
+			onChange.run();
 	}
 }

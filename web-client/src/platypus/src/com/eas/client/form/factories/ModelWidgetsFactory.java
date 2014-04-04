@@ -3,16 +3,17 @@ package com.eas.client.form.factories;
 import java.util.Date;
 
 import com.bearsoft.gwt.ui.widgets.ObjectFormat;
+import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Utils;
 import com.eas.client.converters.BooleanRowValueConverter;
 import com.eas.client.converters.DateRowValueConverter;
 import com.eas.client.converters.DoubleRowValueConverter;
 import com.eas.client.converters.ObjectRowValueConverter;
+import com.eas.client.converters.RowRowValueConverter;
 import com.eas.client.converters.StringRowValueConverter;
 import com.eas.client.form.Publisher;
 import com.eas.client.form.published.PublishedComponent;
-import com.eas.client.form.published.widgets.model.LazyControlBounder;
-import com.eas.client.form.published.widgets.model.LazyModelElementRef;
+import com.eas.client.form.published.widgets.model.ModelWidgetBounder;
 import com.eas.client.form.published.widgets.model.ModelCheck;
 import com.eas.client.form.published.widgets.model.ModelCombo;
 import com.eas.client.form.published.widgets.model.ModelDate;
@@ -56,11 +57,11 @@ public class ModelWidgetsFactory extends WidgetsFactory {
 			if ("DbLabelDesignInfo".equalsIgnoreCase(designInfoTypeName)) {
 				String formatPattern = aTag.getAttribute("format");
 				int formatType = Utils.getIntegerAttribute(aTag, "valueType", ObjectFormat.MASK);
-				final LazyControlBounder<Object> modelElement = modelElementTag != null ? new LazyControlBounder<Object>(modelElementTag, model, new ObjectRowValueConverter()) : null;
+				final ModelWidgetBounder<Object> modelElement = modelElementTag != null ? new ModelWidgetBounder<Object>(modelElementTag, model, new ObjectRowValueConverter()) : null;
 				if (modelElement != null) {
 					ModelFormattedField mText = new ModelFormattedField();
 					mText.setFormatType(formatType, formatPattern);
-					modelElement.setCellComponent(mText);
+					modelElement.setWidget(mText);
 					mText.setModelElement(modelElement);
 					PublishedComponent published = Publisher.publish(mText);
 					mText.setEditable(!readonly);
@@ -72,10 +73,10 @@ public class ModelWidgetsFactory extends WidgetsFactory {
 				} else
 					return createStubLabel(aTag, MODEL_ELEMENT_MISSING);
 			} else if ("DbTextDesignInfo".equalsIgnoreCase(designInfoTypeName)) {
-				final LazyControlBounder<String> modelElement = modelElementTag != null ? new LazyControlBounder<String>(modelElementTag, model, new StringRowValueConverter()) : null;
+				final ModelWidgetBounder<String> modelElement = modelElementTag != null ? new ModelWidgetBounder<String>(modelElementTag, model, new StringRowValueConverter()) : null;
 				if (modelElement != null) {
 					ModelTextArea mTextArea = new ModelTextArea();
-					modelElement.setCellComponent(mTextArea);
+					modelElement.setWidget(mTextArea);
 					mTextArea.setModelElement(modelElement);
 					PublishedComponent published = Publisher.publish(mTextArea);
 					mTextArea.setEditable(!readonly);
@@ -87,13 +88,13 @@ public class ModelWidgetsFactory extends WidgetsFactory {
 				} else
 					return createStubLabel(aTag, MODEL_ELEMENT_MISSING);
 			} else if ("DbDateDesignInfo".equalsIgnoreCase(designInfoTypeName)) {
-				final LazyControlBounder<Date> modelElement = modelElementTag != null ? new LazyControlBounder<Date>(modelElementTag, model, new DateRowValueConverter()) : null;
+				final ModelWidgetBounder<Date> modelElement = modelElementTag != null ? new ModelWidgetBounder<Date>(modelElementTag, model, new DateRowValueConverter()) : null;
 				if (modelElement != null) {
 					String dateFormat = aTag.getAttribute("dateFormat");
 
 					ModelDate mDate = new ModelDate();
 					mDate.setFormat(dateFormat);
-					modelElement.setCellComponent(mDate);
+					modelElement.setWidget(mDate);
 					mDate.setModelElement(modelElement);
 					PublishedComponent published = Publisher.publish(mDate);
 					mDate.setEditable(!readonly);
@@ -105,16 +106,16 @@ public class ModelWidgetsFactory extends WidgetsFactory {
 				} else
 					return createStubLabel(aTag, MODEL_ELEMENT_MISSING);
 			} else if ("DbImageDesignInfo".equalsIgnoreCase(designInfoTypeName)) {
-				final LazyControlBounder<String> modelElement = modelElementTag != null ? new LazyControlBounder<String>(modelElementTag, model, new StringRowValueConverter()) : null;
+				final ModelWidgetBounder<String> modelElement = modelElementTag != null ? new ModelWidgetBounder<String>(modelElementTag, model, new StringRowValueConverter()) : null;
 				if (modelElement != null) {
 					return createStubLabel(aTag, "Type 'ModelImage' is unsupported.");
 				} else
 					return createStubLabel(aTag, MODEL_ELEMENT_MISSING);
 			} else if ("DbCheckDesignInfo".equalsIgnoreCase(designInfoTypeName)) {
-				final LazyControlBounder<Boolean> modelElement = modelElementTag != null ? new LazyControlBounder<Boolean>(modelElementTag, model, new BooleanRowValueConverter()) : null;
+				final ModelWidgetBounder<Boolean> modelElement = modelElementTag != null ? new ModelWidgetBounder<Boolean>(modelElementTag, model, new BooleanRowValueConverter()) : null;
 				if (modelElement != null) {
 					ModelCheck mCheck = new ModelCheck();
-					modelElement.setCellComponent(mCheck);
+					modelElement.setWidget(mCheck);
 					mCheck.setModelElement(modelElement);
 					PublishedComponent published = Publisher.publish(mCheck);
 					mCheck.setEditable(!readonly);
@@ -127,10 +128,10 @@ public class ModelWidgetsFactory extends WidgetsFactory {
 				} else
 					return createStubLabel(aTag, MODEL_ELEMENT_MISSING);
 			} else if ("DbSpinDesignInfo".equalsIgnoreCase(designInfoTypeName)) {
-				final LazyControlBounder<Double> modelElement = modelElementTag != null ? new LazyControlBounder<Double>(modelElementTag, model, new DoubleRowValueConverter()) : null;
+				final ModelWidgetBounder<Double> modelElement = modelElementTag != null ? new ModelWidgetBounder<Double>(modelElementTag, model, new DoubleRowValueConverter()) : null;
 				if (modelElement != null) {
 					ModelSpin mSpin = new ModelSpin();
-					modelElement.setCellComponent(mSpin);
+					modelElement.setWidget(mSpin);
 					mSpin.setModelElement(modelElement);
 					PublishedComponent published = Publisher.publish(mSpin);
 					mSpin.setEditable(!readonly);
@@ -155,13 +156,13 @@ public class ModelWidgetsFactory extends WidgetsFactory {
 					return createStubLabel(aTag, MODEL_ELEMENT_MISSING);
 			} else if ("DbComboDesignInfo".equalsIgnoreCase(designInfoTypeName)) {
 				if (modelElementTag != null) {
-					final ModelElementRef valueRef = new LazyModelElementRef(Utils.getElementByTagName(aTag, "valueField"), model);
-					final ModelElementRef displayRef = new LazyModelElementRef(Utils.getElementByTagName(aTag, "displayField"), model);
-					final LazyControlBounder<Object> modelElement = modelElementTag != null ? new LazyControlBounder<Object>(modelElementTag, model, new ObjectRowValueConverter()) : null;
+					final ModelElementRef valueRef = new ModelElementRef(Utils.getElementByTagName(aTag, "valueField"), model);
+					final ModelElementRef displayRef = new ModelElementRef(Utils.getElementByTagName(aTag, "displayField"), model);
+					final ModelWidgetBounder<Row> modelElement = modelElementTag != null ? new ModelWidgetBounder<Row>(modelElementTag, model, new RowRowValueConverter()) : null;
 					boolean list = Utils.getBooleanAttribute(aTag, "list", true);
 
 					ModelCombo mCombo = new ModelCombo();
-					modelElement.setCellComponent(mCombo);
+					modelElement.setWidget(mCombo);
 					mCombo.setModelElement(modelElement);
 					mCombo.setValueElement(valueRef);
 					mCombo.setDisplayElement(displayRef);

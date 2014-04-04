@@ -34,18 +34,18 @@ public class ModelSpin extends PublishedDecoratorBox<Double> implements HasEmpty
 		}
 	}
 
-	private native static void publish(ModelSpin aField, JavaScriptObject aPublished)/*-{
-		Object.defineProperty(published, "emptyText", {
+	private native static void publish(ModelSpin aWidget, JavaScriptObject aPublished)/*-{
+		Object.defineProperty(aPublished, "emptyText", {
 			get : function() {
 				return aWidget.@com.eas.client.form.published.HasEmptyText::getEmptyText()();
 			},
 			set : function(aValue) {
-				aWidget.@com.eas.client.form.published.HasEmptyText::setEmptyText(Ljava/lang/String;)(aValue!=null?''+aValue:null);
+				aWidget.@com.eas.client.form.published.HasEmptyText::setEmptyText(Ljava/lang/String;)(aValue != null ? '' + aValue : null);
 			}
 		});
 		Object.defineProperty(aPublished, "value", {
 			get : function() {
-				var v = aField.@com.eas.client.form.published.widgets.model.ModelSpin::getValue()();
+				var v = aWidget.@com.eas.client.form.published.widgets.model.ModelSpin::getValue()();
 				if (v != null) {
 					return v.@java.lang.Number::doubleValue()();
 				} else
@@ -55,9 +55,9 @@ public class ModelSpin extends PublishedDecoratorBox<Double> implements HasEmpty
 				if (aValue != null) {
 					var v = aValue * 1;
 					var d = @java.lang.Double::new(D)(v);
-					aField.@com.eas.client.form.published.widgets.model.ModelSpin::setValue(Ljava/lang/Double;Z)(d, true);
+					aWidget.@com.eas.client.form.published.widgets.model.ModelSpin::setValue(Ljava/lang/Double;Z)(d, true);
 				} else {
-					aField.@com.eas.client.form.published.widgets.model.ModelSpin::setValue(Ljava/lang/Double;Z)(null, true);
+					aWidget.@com.eas.client.form.published.widgets.model.ModelSpin::setValue(Ljava/lang/Double;Z)(null, true);
 				}
 			}
 		});

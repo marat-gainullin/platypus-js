@@ -3,6 +3,7 @@ package com.eas.client.form.published.widgets.model;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.events.RowChangeEvent;
 import com.bearsoft.rowset.events.RowsetDeleteEvent;
@@ -23,25 +24,25 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.xml.client.Element;
 
-public class LazyControlBounder<T> extends LazyModelElementRef implements ValueChangeHandler<T>, RowsetListener {
+public class ModelWidgetBounder<T> extends ModelElementRef implements ValueChangeHandler<T>, RowsetListener {
 
 	protected HandlerRegistration valueChangeHandlerRegistration;
 	protected HasValue<T> valueHolder;
 	protected RowValueConverter<T> converter;
 
-	public LazyControlBounder(Element aTag, final Model aModel, RowValueConverter<T> aConverter) throws Exception {
+	public ModelWidgetBounder(Element aTag, final Model aModel, RowValueConverter<T> aConverter) throws Exception {
 		super(aTag, aModel);
 		converter = aConverter;
 	}
 
-	public LazyControlBounder(final Model aModel, String aEntityId, String aFieldName, boolean aIsField, RowValueConverter<T> aConverter) throws Exception {
+	public ModelWidgetBounder(final Model aModel, String aEntityId, String aFieldName, boolean aIsField, RowValueConverter<T> aConverter) throws Exception {
 		super(aModel, aEntityId, aFieldName, aIsField);
 		converter = aConverter;
 	}
 
 	protected void registerOnRowsetEvents() {
 		assert entity != null : "Entity " + entityId + " missing. " + (isField ? "Field" : "Parameter") + " name: " + fieldName;
-		assert entity.getRowset() != null : "Entity dataset missing";
+		assert entity.getRowset() != null : "Entity data array is missing";
 		entity.getRowset().addRowsetListener(this);
 		rowsetRequeried(null);
 	}
@@ -52,16 +53,16 @@ public class LazyControlBounder<T> extends LazyModelElementRef implements ValueC
 	}
 
 	@Override
-	protected void tryResolveField() throws Exception {
-		super.tryResolveField();
+	public void resolveField() throws Exception {
+	    super.resolveField();
 		registerOnRowsetEvents();
 	}
-
-	public HasValue<T> getCellComponent() {
+	
+	public HasValue<T> getWidget() {
 		return valueHolder;
 	}
 
-	public void setCellComponent(HasValue<T> aCellComponent) {
+	public void setWidget(HasValue<T> aCellComponent) {
 		if (valueHolder != aCellComponent) {
 			if (valueChangeHandlerRegistration != null)
 				valueChangeHandlerRegistration.removeHandler();
@@ -80,14 +81,25 @@ public class LazyControlBounder<T> extends LazyModelElementRef implements ValueC
 			try {
 				if (!entity.getRowset().isBeforeFirst() && !entity.getRowset().isAfterLast()) {
 					Object prevValue = entity.getRowset().getObject(getColIndex());
-					entity.getRowset().updateObject(getColIndex(), event.getValue());
+					if(valueHolder instanceof ModelCombo){
+						ModelCombo mCombo = (ModelCombo)valueHolder;
+						if(event.getValue() instanceof Row){
+							Row rowValue = (Row)event.getValue();
+							Object lookupValue = mCombo.lookupRowValue(rowValue);
+							entity.getRowset().updateObject(getColIndex(), lookupValue);
+						}else{
+							entity.getRowset().updateObject(getColIndex(), event.getValue());
+						}
+					}else{
+						entity.getRowset().updateObject(getColIndex(), event.getValue());
+					}
 					Object afterValue = entity.getRowset().getObject(getColIndex());
 					if (prevValue == null ? afterValue == null : prevValue.equals(afterValue)) {
 						setValueToControl();
 					}
 				}
 			} catch (Exception ex) {
-				Logger.getLogger(LazyControlBounder.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+				Logger.getLogger(ModelWidgetBounder.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
 			}
 		}
 	}
@@ -99,14 +111,17 @@ public class LazyControlBounder<T> extends LazyModelElementRef implements ValueC
 				Rowset eRowset = entity.getRowset();
 				if (eRowset != null && !eRowset.isBeforeFirst() && !eRowset.isAfterLast()) {
 					value = eRowset.getObject(getColIndex());
-					valueHolder.setValue(converter.convert(value), false);
 				}
 				if (value == null) {
 					value = entity.getSubstituteRowsetObject(fieldName);
+				}
+				if(valueHolder instanceof ModelCombo){
+					((ModelCombo)valueHolder).setJsValue(value, false);
+				}else{
 					valueHolder.setValue(converter.convert(value), false);
 				}
 			} catch (Exception ex) {
-				Logger.getLogger(LazyControlBounder.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+				Logger.getLogger(ModelWidgetBounder.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
 			}
 		}
 	}
