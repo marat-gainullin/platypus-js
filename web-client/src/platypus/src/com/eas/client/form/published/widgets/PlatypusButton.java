@@ -1,22 +1,29 @@
 package com.eas.client.form.published.widgets;
 
 import com.bearsoft.gwt.ui.widgets.ImageButton;
+import com.eas.client.form.EventsExecutor;
+import com.eas.client.form.events.ActionEvent;
+import com.eas.client.form.events.ActionHandler;
+import com.eas.client.form.events.HasActionHandlers;
 import com.eas.client.form.published.HasComponentPopupMenu;
+import com.eas.client.form.published.HasEventsExecutor;
 import com.eas.client.form.published.HasJsFacade;
 import com.eas.client.form.published.HasPublished;
-import com.eas.client.form.published.containers.BorderPane;
 import com.eas.client.form.published.menu.PlatypusPopupMenu;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.ContextMenuEvent;
+import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.resources.client.ImageResource;
 
-public class PlatypusButton extends ImageButton implements HasJsFacade, HasComponentPopupMenu {
+public class PlatypusButton extends ImageButton implements HasActionHandlers, HasJsFacade, HasComponentPopupMenu, HasEventsExecutor {
 
+	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu menu;
-	protected String name;	
+	protected String name;
 	protected JavaScriptObject published;
 
 	public PlatypusButton(String aTitle, boolean asHtml, ImageResource aImage) {
@@ -24,17 +31,58 @@ public class PlatypusButton extends ImageButton implements HasJsFacade, HasCompo
 	}
 
 	public PlatypusButton(String aTitle, boolean asHtml) {
-		super(aTitle, asHtml);
+		this(aTitle, asHtml, null);
 	}
-	
+
 	public PlatypusButton() {
-		super("", false);
+		this("", false);
 	}
-	
+
+	protected int actionHandlers;
+	protected HandlerRegistration clickReg;
+
 	@Override
-    public PlatypusPopupMenu getPlatypusPopupMenu() {
-		return menu; 
-    }
+	public HandlerRegistration addActionHandler(ActionHandler handler) {
+		final HandlerRegistration superReg = super.addHandler(handler, ActionEvent.getType());
+		if (actionHandlers == 0) {
+			clickReg = addClickHandler(new ClickHandler() {
+
+				@Override
+				public void onClick(ClickEvent event) {
+					ActionEvent.fire(PlatypusButton.this, PlatypusButton.this);
+				}
+
+			});
+		}
+		actionHandlers++;
+		return new HandlerRegistration() {
+			@Override
+			public void removeHandler() {
+				superReg.removeHandler();
+				actionHandlers--;
+				if (actionHandlers == 0) {
+					assert clickReg != null : "Erroneous use of addActionHandler/removeHandler detected in PlatypusButton";
+					clickReg.removeHandler();
+					clickReg = null;
+				}
+			}
+		};
+	}
+
+	@Override
+	public EventsExecutor getEventsExecutor() {
+		return eventsExecutor;
+	}
+
+	@Override
+	public void setEventsExecutor(EventsExecutor aExecutor) {
+		eventsExecutor = aExecutor;
+	}
+
+	@Override
+	public PlatypusPopupMenu getPlatypusPopupMenu() {
+		return menu;
+	}
 
 	protected HandlerRegistration menuTriggerReg;
 
@@ -45,16 +93,16 @@ public class PlatypusButton extends ImageButton implements HasJsFacade, HasCompo
 				menuTriggerReg.removeHandler();
 			menu = aMenu;
 			if (menu != null) {
-				menuTriggerReg = super.addDomHandler(new ClickHandler() {
-
+				menuTriggerReg = super.addDomHandler(new ContextMenuHandler() {
+					
 					@Override
-					public void onClick(ClickEvent event) {
-						if (event.getNativeButton() == NativeEvent.BUTTON_RIGHT && menu != null) {
-							menu.showRelativeTo(PlatypusButton.this);
-						}
+					public void onContextMenu(ContextMenuEvent event) {
+						event.preventDefault();
+						event.stopPropagation();
+						menu.setPopupPosition(event.getNativeEvent().getClientX(), event.getNativeEvent().getClientY());
+						menu.show();
 					}
-
-				}, ClickEvent.getType());
+				}, ContextMenuEvent.getType());
 			}
 		}
 	}

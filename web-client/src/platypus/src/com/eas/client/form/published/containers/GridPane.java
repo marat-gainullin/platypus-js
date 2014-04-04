@@ -5,14 +5,15 @@
 package com.eas.client.form.published.containers;
 
 import com.bearsoft.gwt.ui.containers.GridPanel;
+import com.eas.client.form.EventsExecutor;
 import com.eas.client.form.published.HasComponentPopupMenu;
+import com.eas.client.form.published.HasEventsExecutor;
 import com.eas.client.form.published.HasJsFacade;
 import com.eas.client.form.published.HasPublished;
 import com.eas.client.form.published.menu.PlatypusPopupMenu;
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.dom.client.NativeEvent;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.ContextMenuEvent;
+import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.HasEnabled;
 
@@ -20,8 +21,9 @@ import com.google.gwt.user.client.ui.HasEnabled;
  * 
  * @author mg
  */
-public class GridPane extends GridPanel implements HasJsFacade, HasEnabled, HasComponentPopupMenu{
+public class GridPane extends GridPanel implements HasJsFacade, HasEnabled, HasComponentPopupMenu, HasEventsExecutor{
 
+	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu menu;
 	protected boolean enabled;
 	protected String name;	
@@ -42,6 +44,16 @@ public class GridPane extends GridPanel implements HasJsFacade, HasEnabled, HasC
 	}
 
 	@Override
+	public EventsExecutor getEventsExecutor() {
+		return eventsExecutor;
+	}
+
+	@Override
+	public void setEventsExecutor(EventsExecutor aExecutor) {
+		eventsExecutor = aExecutor;
+	}
+
+	@Override
     public PlatypusPopupMenu getPlatypusPopupMenu() {
 		return menu; 
     }
@@ -55,16 +67,16 @@ public class GridPane extends GridPanel implements HasJsFacade, HasEnabled, HasC
 				menuTriggerReg.removeHandler();
 			menu = aMenu;
 			if (menu != null) {
-				menuTriggerReg = super.addDomHandler(new ClickHandler() {
-
+				menuTriggerReg = super.addDomHandler(new ContextMenuHandler() {
+					
 					@Override
-					public void onClick(ClickEvent event) {
-						if (event.getNativeButton() == NativeEvent.BUTTON_RIGHT && menu != null) {
-							menu.showRelativeTo(GridPane.this);
-						}
+					public void onContextMenu(ContextMenuEvent event) {
+						event.preventDefault();
+						event.stopPropagation();
+						menu.setPopupPosition(event.getNativeEvent().getClientX(), event.getNativeEvent().getClientY());
+						menu.show();
 					}
-
-				}, ClickEvent.getType());
+				}, ContextMenuEvent.getType());
 			}
 		}
 	}

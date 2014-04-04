@@ -1,18 +1,20 @@
 package com.eas.client.form.published.widgets;
 
 import com.bearsoft.gwt.ui.widgets.progress.SliderBar;
+import com.eas.client.form.EventsExecutor;
 import com.eas.client.form.published.HasComponentPopupMenu;
+import com.eas.client.form.published.HasEventsExecutor;
 import com.eas.client.form.published.HasJsFacade;
 import com.eas.client.form.published.HasPublished;
 import com.eas.client.form.published.menu.PlatypusPopupMenu;
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.dom.client.NativeEvent;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.ContextMenuEvent;
+import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 
-public class PlatypusSlider extends SliderBar implements HasJsFacade, HasComponentPopupMenu {
+public class PlatypusSlider extends SliderBar implements HasJsFacade, HasComponentPopupMenu, HasEventsExecutor {
 
+	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu menu;
 	protected String name;	
 	protected JavaScriptObject published;
@@ -30,6 +32,16 @@ public class PlatypusSlider extends SliderBar implements HasJsFacade, HasCompone
 	}
 	
 	@Override
+	public EventsExecutor getEventsExecutor() {
+		return eventsExecutor;
+	}
+
+	@Override
+	public void setEventsExecutor(EventsExecutor aExecutor) {
+		eventsExecutor = aExecutor;
+	}
+
+	@Override
     public PlatypusPopupMenu getPlatypusPopupMenu() {
 		return menu; 
     }
@@ -43,16 +55,16 @@ public class PlatypusSlider extends SliderBar implements HasJsFacade, HasCompone
 				menuTriggerReg.removeHandler();
 			menu = aMenu;
 			if (menu != null) {
-				menuTriggerReg = super.addDomHandler(new ClickHandler() {
-
+				menuTriggerReg = super.addDomHandler(new ContextMenuHandler() {
+					
 					@Override
-					public void onClick(ClickEvent event) {
-						if (event.getNativeButton() == NativeEvent.BUTTON_RIGHT && menu != null) {
-							menu.showRelativeTo(PlatypusSlider.this);
-						}
+					public void onContextMenu(ContextMenuEvent event) {
+						event.preventDefault();
+						event.stopPropagation();
+						menu.setPopupPosition(event.getNativeEvent().getClientX(), event.getNativeEvent().getClientY());
+						menu.show();
 					}
-
-				}, ClickEvent.getType());
+				}, ContextMenuEvent.getType());
 			}
 		}
 	}

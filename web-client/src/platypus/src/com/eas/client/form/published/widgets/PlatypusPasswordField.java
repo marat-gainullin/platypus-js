@@ -1,20 +1,22 @@
 package com.eas.client.form.published.widgets;
 
 import com.eas.client.form.ControlsUtils;
+import com.eas.client.form.EventsExecutor;
 import com.eas.client.form.published.HasComponentPopupMenu;
 import com.eas.client.form.published.HasEmptyText;
+import com.eas.client.form.published.HasEventsExecutor;
 import com.eas.client.form.published.HasJsFacade;
 import com.eas.client.form.published.HasPublished;
 import com.eas.client.form.published.menu.PlatypusPopupMenu;
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.dom.client.NativeEvent;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.ContextMenuEvent;
+import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 
-public class PlatypusPasswordField extends PasswordTextBox implements HasJsFacade, HasEmptyText, HasComponentPopupMenu {
+public class PlatypusPasswordField extends PasswordTextBox implements HasJsFacade, HasEmptyText, HasComponentPopupMenu, HasEventsExecutor {
 
+	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu menu;
 	protected String emptyText;
 	protected String name;	
@@ -22,6 +24,16 @@ public class PlatypusPasswordField extends PasswordTextBox implements HasJsFacad
 
 	public PlatypusPasswordField() {
 		super();
+	}
+
+	@Override
+	public EventsExecutor getEventsExecutor() {
+		return eventsExecutor;
+	}
+
+	@Override
+	public void setEventsExecutor(EventsExecutor aExecutor) {
+		eventsExecutor = aExecutor;
 	}
 
 	@Override
@@ -38,16 +50,16 @@ public class PlatypusPasswordField extends PasswordTextBox implements HasJsFacad
 				menuTriggerReg.removeHandler();
 			menu = aMenu;
 			if (menu != null) {
-				menuTriggerReg = super.addDomHandler(new ClickHandler() {
-
+				menuTriggerReg = super.addDomHandler(new ContextMenuHandler() {
+					
 					@Override
-					public void onClick(ClickEvent event) {
-						if (event.getNativeButton() == NativeEvent.BUTTON_RIGHT && menu != null) {
-							menu.showRelativeTo(PlatypusPasswordField.this);
-						}
+					public void onContextMenu(ContextMenuEvent event) {
+						event.preventDefault();
+						event.stopPropagation();
+						menu.setPopupPosition(event.getNativeEvent().getClientX(), event.getNativeEvent().getClientY());
+						menu.show();
 					}
-
-				}, ClickEvent.getType());
+				}, ContextMenuEvent.getType());
 			}
 		}
 	}

@@ -2,24 +2,26 @@ package com.eas.client.form.published.widgets;
 
 import com.bearsoft.gwt.ui.widgets.DateTimeBox;
 import com.eas.client.form.ControlsUtils;
+import com.eas.client.form.EventsExecutor;
 import com.eas.client.form.published.HasComponentPopupMenu;
+import com.eas.client.form.published.HasEventsExecutor;
 import com.eas.client.form.published.HasJsFacade;
 import com.eas.client.form.published.HasPublished;
 import com.eas.client.form.published.menu.PlatypusPopupMenu;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.dom.client.NativeEvent;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.ContextMenuEvent;
+import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.datepicker.client.DateBox;
 
-public class PlatypusDateField extends DateTimeBox implements HasJsFacade, HasEnabled, HasComponentPopupMenu {
+public class PlatypusDateField extends DateTimeBox implements HasJsFacade, HasEnabled, HasComponentPopupMenu, HasEventsExecutor {
 
     private static final DateBox.DefaultFormat DEFAULT_FORMAT = GWT.create(DateBox.DefaultFormat.class);
     
+    protected EventsExecutor eventsExecutor;
     protected PlatypusPopupMenu menu;
 	protected boolean enabled;
 	protected String name;	
@@ -38,6 +40,16 @@ public class PlatypusDateField extends DateTimeBox implements HasJsFacade, HasEn
 	}
 	
 	@Override
+	public EventsExecutor getEventsExecutor() {
+		return eventsExecutor;
+	}
+
+	@Override
+	public void setEventsExecutor(EventsExecutor aExecutor) {
+		eventsExecutor = aExecutor;
+	}
+
+	@Override
     public PlatypusPopupMenu getPlatypusPopupMenu() {
 		return menu; 
     }
@@ -51,16 +63,16 @@ public class PlatypusDateField extends DateTimeBox implements HasJsFacade, HasEn
 				menuTriggerReg.removeHandler();
 			menu = aMenu;
 			if (menu != null) {
-				menuTriggerReg = super.addDomHandler(new ClickHandler() {
-
+				menuTriggerReg = super.addDomHandler(new ContextMenuHandler() {
+					
 					@Override
-					public void onClick(ClickEvent event) {
-						if (event.getNativeButton() == NativeEvent.BUTTON_RIGHT && menu != null) {
-							menu.showRelativeTo(PlatypusDateField.this);
-						}
+					public void onContextMenu(ContextMenuEvent event) {
+						event.preventDefault();
+						event.stopPropagation();
+						menu.setPopupPosition(event.getNativeEvent().getClientX(), event.getNativeEvent().getClientY());
+						menu.show();
 					}
-
-				}, ClickEvent.getType());
+				}, ContextMenuEvent.getType());
 			}
 		}
 	}

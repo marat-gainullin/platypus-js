@@ -47,7 +47,7 @@ public class MaximizeEvent<T> extends GwtEvent<MaximizeHandler<T>> {
     private final T target;
 
     /**
-     * Creates a new close event.
+     * Creates a new maximize event.
      *
      * @param target the target
      */

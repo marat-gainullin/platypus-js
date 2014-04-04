@@ -53,7 +53,7 @@ public class MoveEvent<T> extends GwtEvent<MoveHandler<T>> {
 	private int y;
 
 	/**
-	 * Creates a new close event.
+	 * Creates a new move event.
 	 * 
 	 * @param target
 	 *            the target

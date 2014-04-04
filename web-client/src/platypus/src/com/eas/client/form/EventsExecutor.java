@@ -7,8 +7,11 @@ import com.bearsoft.gwt.ui.containers.window.events.HasMoveHandlers;
 import com.bearsoft.gwt.ui.containers.window.events.MoveEvent;
 import com.bearsoft.gwt.ui.containers.window.events.MoveHandler;
 import com.bearsoft.rowset.Utils;
+import com.eas.client.form.events.ActionEvent;
+import com.eas.client.form.events.ActionHandler;
 import com.eas.client.form.events.AddEvent;
 import com.eas.client.form.events.AddHandler;
+import com.eas.client.form.events.HasActionHandlers;
 import com.eas.client.form.events.HasAddHandlers;
 import com.eas.client.form.events.HasHideHandlers;
 import com.eas.client.form.events.HasRemoveHandlers;
@@ -33,10 +36,18 @@ import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.event.dom.client.HasBlurHandlers;
 import com.google.gwt.event.dom.client.HasChangeHandlers;
+import com.google.gwt.event.dom.client.HasClickHandlers;
+import com.google.gwt.event.dom.client.HasDoubleClickHandlers;
 import com.google.gwt.event.dom.client.HasFocusHandlers;
 import com.google.gwt.event.dom.client.HasKeyDownHandlers;
 import com.google.gwt.event.dom.client.HasKeyPressHandlers;
 import com.google.gwt.event.dom.client.HasKeyUpHandlers;
+import com.google.gwt.event.dom.client.HasMouseDownHandlers;
+import com.google.gwt.event.dom.client.HasMouseMoveHandlers;
+import com.google.gwt.event.dom.client.HasMouseOutHandlers;
+import com.google.gwt.event.dom.client.HasMouseOverHandlers;
+import com.google.gwt.event.dom.client.HasMouseUpHandlers;
+import com.google.gwt.event.dom.client.HasMouseWheelHandlers;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.dom.client.KeyPressEvent;
@@ -62,6 +73,7 @@ import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 
 public class EventsExecutor {
@@ -95,10 +107,10 @@ public class EventsExecutor {
 
 	private MOUSE mouseState = MOUSE.NULL;
 
-	private Widget component;
+	private UIObject component;
 	private JavaScriptObject eventThis;
 
-	public EventsExecutor(Widget aComponent, JavaScriptObject aEventsThis) {
+	public EventsExecutor(UIObject aComponent, JavaScriptObject aEventsThis) {
 		super();
 		component = aComponent;
 		eventThis = aEventsThis;
@@ -201,8 +213,8 @@ public class EventsExecutor {
 				mouseOutReg = null;
 			}
 			mouseExited = aValue;
-			if (mouseExited != null)
-				mouseOutReg = component.addDomHandler(new MouseOutHandler() {
+			if (mouseExited != null) {
+				MouseOutHandler handler = new MouseOutHandler() {
 					@Override
 					public void onMouseOut(MouseOutEvent event) {
 						if (mouseExited != null) {
@@ -210,12 +222,34 @@ public class EventsExecutor {
 							executeEvent(mouseExited, JsEvents.publish(event));
 						}
 					}
-				}, MouseOutEvent.getType());
+				};
+				if (component instanceof Widget) {
+					mouseOutReg = ((Widget) component).addDomHandler(handler, MouseOutEvent.getType());
+				} else if (component instanceof HasMouseOutHandlers) {
+					mouseOutReg = ((HasMouseOutHandlers) component).addMouseOutHandler(handler);
+				}
+			}
 		}
 	}
 
+	protected HandlerRegistration actionPerformedReg;
+	
 	public void setActionPerformed(JavaScriptObject aValue) {
-		actionPerformed = aValue;
+		if(actionPerformed != aValue){
+			if(actionPerformedReg != null)
+				actionPerformedReg.removeHandler();
+			actionPerformed = aValue;
+			if(actionPerformed != null && component instanceof HasActionHandlers){
+				actionPerformedReg = ((HasActionHandlers)component).addActionHandler(new ActionHandler(){
+
+					@Override
+                    public void onAction(ActionEvent event) {
+						executeEvent(actionPerformed, JsEvents.publish(event));
+                    }
+					
+				});
+			}
+		}
 	}
 
 	protected HandlerRegistration mouseClickedReg;
@@ -233,7 +267,7 @@ public class EventsExecutor {
 			}
 			mouseClicked = aValue;
 			if (mouseClicked != null) {
-				mouseClickedReg = component.addDomHandler(new ClickHandler() {
+				ClickHandler cHandler = new ClickHandler() {
 					@Override
 					public void onClick(ClickEvent event) {
 						if (mouseClicked != null) {
@@ -241,8 +275,8 @@ public class EventsExecutor {
 							executeEvent(mouseClicked, JsEvents.publish(event));
 						}
 					}
-				}, ClickEvent.getType());
-				mouseDblClickedReg = component.addDomHandler(new DoubleClickHandler() {
+				};
+				DoubleClickHandler dcHandler = new DoubleClickHandler() {
 					@Override
 					public void onDoubleClick(DoubleClickEvent event) {
 						if (mouseClicked != null) {
@@ -250,7 +284,18 @@ public class EventsExecutor {
 							executeEvent(mouseClicked, JsEvents.publish(event));
 						}
 					}
-				}, DoubleClickEvent.getType());
+				};
+				if (component instanceof Widget) {
+					mouseClickedReg = ((Widget) component).addDomHandler(cHandler, ClickEvent.getType());
+					mouseDblClickedReg = ((Widget) component).addDomHandler(dcHandler, DoubleClickEvent.getType());
+				} else {
+					if (component instanceof HasClickHandlers) {
+						mouseClickedReg = ((HasClickHandlers) component).addClickHandler(cHandler);
+					}
+					if (component instanceof HasDoubleClickHandlers) {
+						mouseDblClickedReg = ((HasDoubleClickHandlers) component).addDoubleClickHandler(dcHandler);
+					}
+				}
 			}
 		}
 	}
@@ -264,8 +309,8 @@ public class EventsExecutor {
 				mouseDownReg = null;
 			}
 			mousePressed = aValue;
-			if (mousePressed != null)
-				mouseDownReg = component.addDomHandler(new MouseDownHandler() {
+			if (mousePressed != null) {
+				MouseDownHandler handler = new MouseDownHandler() {
 					@Override
 					public void onMouseDown(MouseDownEvent event) {
 						if (mousePressed != null) {
@@ -275,7 +320,13 @@ public class EventsExecutor {
 							executeEvent(mousePressed, JsEvents.publish(event));
 						}
 					}
-				}, MouseDownEvent.getType());
+				};
+				if (component instanceof Widget) {
+					mouseDownReg = ((Widget) component).addDomHandler(handler, MouseDownEvent.getType());
+				} else if (component instanceof HasMouseDownHandlers) {
+					mouseDownReg = ((HasMouseDownHandlers) component).addMouseDownHandler(handler);
+				}
+			}
 		}
 	}
 
@@ -288,8 +339,8 @@ public class EventsExecutor {
 				mouseUpReg = null;
 			}
 			mouseReleased = aValue;
-			if (mouseReleased != null)
-				mouseUpReg = component.addDomHandler(new MouseUpHandler() {
+			if (mouseReleased != null) {
+				MouseUpHandler handler = new MouseUpHandler() {
 					@Override
 					public void onMouseUp(MouseUpEvent event) {
 						// if (mouseState == MOUSE.PRESSED)
@@ -300,7 +351,12 @@ public class EventsExecutor {
 							executeEvent(mouseReleased, JsEvents.publish(event));
 						}
 					}
-				}, MouseUpEvent.getType());
+				};
+				if (component instanceof Widget)
+					mouseUpReg = ((Widget) component).addDomHandler(handler, MouseUpEvent.getType());
+				else if (component instanceof HasMouseUpHandlers)
+					mouseUpReg = ((HasMouseUpHandlers) component).addMouseUpHandler(handler);
+			}
 		}
 	}
 
@@ -313,8 +369,8 @@ public class EventsExecutor {
 				mouseOverReg = null;
 			}
 			mouseEntered = aValue;
-			if (mouseEntered != null)
-				mouseOverReg = component.addDomHandler(new MouseOverHandler() {
+			if (mouseEntered != null) {
+				MouseOverHandler handler = new MouseOverHandler() {
 					@Override
 					public void onMouseOver(MouseOverEvent event) {
 						if (mouseEntered != null) {
@@ -322,7 +378,13 @@ public class EventsExecutor {
 							executeEvent(mouseEntered, JsEvents.publish(event));
 						}
 					}
-				}, MouseOverEvent.getType());
+				};
+				if (component instanceof Widget) {
+					mouseOverReg = ((Widget) component).addDomHandler(handler, MouseOverEvent.getType());
+				} else if (component instanceof HasMouseOverHandlers) {
+					mouseOverReg = ((HasMouseOverHandlers) component).addMouseOverHandler(handler);
+				}
+			}
 		}
 	}
 
@@ -335,8 +397,8 @@ public class EventsExecutor {
 				mouseWheelReg = null;
 			}
 			mouseWheelMoved = aValue;
-			if (mouseWheelMoved != null)
-				mouseWheelReg = component.addDomHandler(new MouseWheelHandler() {
+			if (mouseWheelMoved != null) {
+				MouseWheelHandler handler = new MouseWheelHandler() {
 					@Override
 					public void onMouseWheel(MouseWheelEvent event) {
 						if (mouseWheelMoved != null) {
@@ -344,7 +406,13 @@ public class EventsExecutor {
 							executeEvent(mouseWheelMoved, JsEvents.publish(event));
 						}
 					}
-				}, MouseWheelEvent.getType());
+				};
+				if (component instanceof Widget) {
+					mouseWheelReg = ((Widget) component).addDomHandler(handler, MouseWheelEvent.getType());
+				} else if (component instanceof HasMouseWheelHandlers) {
+					mouseWheelReg = ((HasMouseWheelHandlers) component).addMouseWheelHandler(handler);
+				}
+			}
 		}
 	}
 
@@ -357,8 +425,8 @@ public class EventsExecutor {
 				mouseMoveReg = null;
 			}
 			mouseMoved = aValue;
-			if (mouseMoved != null)
-				mouseMoveReg = component.addDomHandler(new MouseMoveHandler() {
+			if (mouseMoved != null) {
+				MouseMoveHandler handler = new MouseMoveHandler() {
 					@Override
 					public void onMouseMove(MouseMoveEvent event) {
 						if (mouseMoved != null || mouseDragged != null) {
@@ -373,7 +441,13 @@ public class EventsExecutor {
 						}
 					}
 
-				}, MouseMoveEvent.getType());
+				};
+				if (component instanceof Widget) {
+					mouseMoveReg = ((Widget) component).addDomHandler(handler, MouseMoveEvent.getType());
+				} else if (component instanceof HasMouseMoveHandlers) {
+					mouseMoveReg = ((HasMouseMoveHandlers) component).addMouseMoveHandler(handler);
+				}
+			}
 		}
 	}
 

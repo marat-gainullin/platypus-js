@@ -14,19 +14,6 @@ import com.google.gwt.xml.client.NodeList;
 
 public class Utils {
 
-	public static class JsModule extends JsObject {
-		protected JsModule() {
-		}
-
-		public final JavaScriptObject getHandler(String aHandlerName) {
-			JavaScriptObject container = getJs("-x-handlers-funcs-");
-			if (container != null) {
-				return container.<JsObject> cast().getJs(aHandlerName);
-			} else
-				return null;
-		}
-	}
-
 	public static class JsObject extends JavaScriptObject {
 		protected JsObject() {
 		}
@@ -46,6 +33,17 @@ public class Utils {
 		public final native void defineProperty(String aName, JavaScriptObject aDefinition)/*-{
 			Object.defineProperty(this, aName, aDefinition);
 		}-*/;
+		
+		public final native void inject(String aName, JavaScriptObject aValue)/*-{
+		if (aName != null) {
+			Object.defineProperty(this, aName, {
+				get : function() {
+					return aValue;
+				}
+			});
+		}
+	}-*/;
+
 	}
 
 	public static native JavaScriptObject publishCancellable(Cancellable aValue)/*-{
@@ -270,6 +268,16 @@ public class Utils {
 			return aDefValue;
 	}
 
+	public static int getPxAttribute(Element aTag, String aName, int aDefValue) throws Exception {
+		if (aTag.hasAttribute(aName)){
+			String value = aTag.getAttribute(aName);
+			if(value.endsWith("px"))
+				value = value.substring(0, value.length() - 2);
+			return Integer.valueOf(value);
+		}else
+			return aDefValue;
+	}
+	
 	public static float getFloatAttribute(Element aTag, String aName, float aDefValue) throws Exception {
 		if (aTag.hasAttribute(aName))
 			return Float.valueOf(aTag.getAttribute(aName));

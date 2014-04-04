@@ -26,6 +26,7 @@ import com.eas.client.StringCallbackAdapter;
 import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.PlatypusWindow;
 import com.eas.client.form.js.JsContainers;
+import com.eas.client.form.js.JsMenus;
 import com.eas.client.form.js.JsModelWidgets;
 import com.eas.client.form.js.JsWidgets;
 import com.eas.client.queries.Query;
@@ -925,6 +926,7 @@ public class Application {
 			}
 		}
 		JsWidgets.init();
+		JsMenus.init();
 		JsContainers.init();
 		JsModelWidgets.init();
 		publish(client);
@@ -945,19 +947,11 @@ public class Application {
 	private static Set<Element> extractPlatypusProgressIndicators() {
 		Set<Element> platypusIndicators = new HashSet<Element>();
 		XElement xBody = Utils.doc.getBody().cast();
-		String platypusModuleClass1 = "platypusIndicator";
-		String platypusModuleClass2 = "platypus-indicator";
-		if (platypusModuleClass1.equals(xBody.getClassName()) || platypusModuleClass2.equals(xBody.getClassName()))
+		String platypusIndicatorClass = "platypus-indicator";
+		if (platypusIndicatorClass.equals(xBody.getClassName()))
 			platypusIndicators.add(xBody);
 
-		List<Element> divs1 = xBody.select(platypusModuleClass1);
-		if (divs1 != null) {
-			for (int i = 0; i < divs1.size(); i++) {
-				Element div = divs1.get(i);
-				platypusIndicators.add(div);
-			}
-		}
-		List<Element> divs2 = xBody.select("." + platypusModuleClass2);
+		List<Element> divs2 = xBody.select("." + platypusIndicatorClass);
 		if (divs2 != null) {
 			for (int i = 0; i < divs2.size(); i++) {
 				Element div = divs2.get(i);
@@ -970,18 +964,8 @@ public class Application {
 	private static Map<String, Element> extractPlatypusModules() {
 		Map<String, Element> platypusModules = new HashMap<String, Element>();
 		XElement xBody = Utils.doc.getBody().cast();
-		String platypusModuleClass1 = "platypusModule";
-		List<Element> divs1 = xBody.select(platypusModuleClass1);
-		if (divs1 != null) {
-			for (int i = 0; i < divs1.size(); i++) {
-				Element div = divs1.get(i);
-				if (div.getId() != null && !div.getId().isEmpty()) {
-					platypusModules.put(div.getId(), div);
-				}
-			}
-		}
-		String platypusModuleClass2 = "platypus-module";
-		List<Element> divs2 = xBody.select("." + platypusModuleClass2);
+		String platypusModuleClass = "platypus-module";
+		List<Element> divs2 = xBody.select("." + platypusModuleClass);
 		if (divs2 != null) {
 			for (int i = 0; i < divs2.size(); i++) {
 				Element div = divs2.get(i);

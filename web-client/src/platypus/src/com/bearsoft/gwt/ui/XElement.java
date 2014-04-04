@@ -123,12 +123,16 @@ public class XElement extends Element {
 				if ("*".equals(selector))
 					result.add(anElement);
 				else {
-					String[] classes = anElement.getClassName().split(" ");
-					for (int i = 0; i < classes.length; i++)
-						if (classes[i].equals(selector)) {
-							result.add(anElement);
-							break;
+					String classesName = anElement.getClassName();
+					if (classesName != null) {
+						String[] classes = classesName.split(" ");
+						for (int i = 0; i < classes.length; i++) {
+							if (classes[i].equals(selector)) {
+								result.add(anElement);
+								break;
+							}
 						}
+					}
 				}
 			}
 		});
@@ -136,12 +140,14 @@ public class XElement extends Element {
 	}
 
 	protected static void iterate(Element aRoot, Observer aTask) {
-		aTask.observe(aRoot);
-		NodeList<Node> nl = aRoot.getChildNodes();
-		for (int i = 0; i < nl.getLength(); i++) {
-			Node n = nl.getItem(i);
-			if (n instanceof Element) {
-				iterate((Element) n, aTask);
+		if (aRoot != null) {
+			aTask.observe(aRoot);
+			NodeList<Node> nl = aRoot.getChildNodes();
+			for (int i = 0; i < nl.getLength(); i++) {
+				Node n = nl.getItem(i);
+				if (n instanceof Element) {
+					iterate((Element) n, aTask);
+				}
 			}
 		}
 	}

@@ -1,14 +1,17 @@
 package com.eas.client.form.published.menu;
 
 import com.bearsoft.gwt.ui.menu.MenuItemCheckBox;
+import com.eas.client.form.EventsExecutor;
+import com.eas.client.form.published.HasEventsExecutor;
 import com.eas.client.form.published.HasJsFacade;
 import com.eas.client.form.published.HasPlatypusButtonGroup;
 import com.eas.client.form.published.HasPublished;
 import com.eas.client.form.published.containers.ButtonGroup;
 import com.google.gwt.core.client.JavaScriptObject;
 
-public class PlatypusMenuItemCheckBox extends MenuItemCheckBox implements HasJsFacade, HasPlatypusButtonGroup{
+public class PlatypusMenuItemCheckBox extends MenuItemCheckBox implements HasJsFacade, HasPlatypusButtonGroup, HasEventsExecutor{
 
+	protected EventsExecutor eventsExecutor;
 	protected JavaScriptObject published;
 	protected String name;	
 	
@@ -21,6 +24,16 @@ public class PlatypusMenuItemCheckBox extends MenuItemCheckBox implements HasJsF
 	public PlatypusMenuItemCheckBox(Boolean aValue, String aText, boolean asHtml) {
 	    super(aValue, aText, asHtml);
     }
+
+	@Override
+	public EventsExecutor getEventsExecutor() {
+		return eventsExecutor;
+	}
+
+	@Override
+	public void setEventsExecutor(EventsExecutor aExecutor) {
+		eventsExecutor = aExecutor;
+	}
 
 	@Override
 	public String getJsName() {

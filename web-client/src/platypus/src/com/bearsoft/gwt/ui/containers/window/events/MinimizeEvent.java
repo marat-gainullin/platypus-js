@@ -47,7 +47,7 @@ public class MinimizeEvent<T> extends GwtEvent<MinimizeHandler<T>> {
     private final T target;
 
     /**
-     * Creates a new close event.
+     * Creates a new minimize event.
      *
      * @param target the target
      */

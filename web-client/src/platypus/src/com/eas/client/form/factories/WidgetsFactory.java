@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.bearsoft.gwt.ui.menu.MenuItemImageText;
 import com.bearsoft.gwt.ui.widgets.ImageParagraph;
 import com.bearsoft.gwt.ui.widgets.ObjectFormat;
 import com.bearsoft.rowset.Utils;
@@ -84,7 +83,7 @@ public class WidgetsFactory {
 	protected static final String ABSOLUTE_OR_MARGIN_OR_LAYERS_CONSTRAINTS_TAG_NEEED = "MarginLayoutContainer children must have Margin, Absolute or Layers constraints tag";
 	protected static final String TABS_CONSTRAINTS_TAG_NEEED = "TabsContainer children must have tabs constraints tag";
 	protected static final String UNKNOWN_CONTAINER_DETECTED = "Container of unknown type detected: ";
-	protected static final String NULL_CONTAINER_DETECTED = "Container with the folowing name was not found: ";
+	protected static final String NULL_CONTAINER_DETECTED = "Container with the following name was not found: ";
 	protected static final String NAME_ATTRIBUTE = "name";
 	protected static final String PARENT_ATTRIBUTE = "parent";
 	protected static final String TYPE_ATTRIBUTE = "type";
@@ -97,7 +96,7 @@ public class WidgetsFactory {
 	protected static final String BORDER_TAG = "border";
 	protected static final String ROOT_WIDGET_NAME = "Form";
 
-	protected JavaScriptObject module;
+	protected JavaScriptObject target;
 	protected PlatypusWindow form;
 	protected HasWidgets rootWidget;
 	protected boolean isRoot = true;
@@ -114,7 +113,7 @@ public class WidgetsFactory {
 	public WidgetsFactory(Element aFormElement, JavaScriptObject aModule) {
 		super();
 		tag = aFormElement;
-		module = aModule;
+		target = aModule;
 	}
 
 	/**
@@ -204,7 +203,7 @@ public class WidgetsFactory {
 		if (component != null)// There are might be toggle groups, that are non
 		                      // visuals and so, not components
 		{
-			components.put(component.getElement().getId(), component);
+			components.put(((HasJsName)component).getJsName(), component);
 			String parentName = aTag.getAttribute(PARENT_ATTRIBUTE);
 			if (!isRoot && parentName != null && !parentName.isEmpty()) {
 				resolveParent(component, parentName, pickConstraintsTag(aTag));
@@ -451,7 +450,7 @@ public class WidgetsFactory {
 		final String widgetName = aTag.getAttribute(NAME_ATTRIBUTE);
 		toggleGroups.put(widgetName, buttonGroup);
 		buttonGroup.setPublished(Publisher.publish(buttonGroup));
-		PlatypusWindow.inject(module, widgetName, buttonGroup.getPublished());
+		target.<Utils.JsObject>cast().inject(widgetName, buttonGroup.getPublished());
 	}
 
 	private PlatypusTextField createTextField(Element aTag) throws Exception {
@@ -587,7 +586,7 @@ public class WidgetsFactory {
 		}
 		PublishedComponent publishedComp = component.getPublished().cast();
 		processGeneralProperties(component, aTag, publishedComp);
-		PlatypusWindow.inject(module, component.getElement().getId(), publishedComp);
+		target.<Utils.JsObject>cast().inject(component.getJsName(), publishedComp);
 		return component;
 	}
 
@@ -599,7 +598,7 @@ public class WidgetsFactory {
 		}
 		PublishedComponent publishedComp = component.getPublished().cast();
 		processGeneralProperties(component, aTag, publishedComp);
-		PlatypusWindow.inject(module, component.getElement().getId(), publishedComp);
+		target.<Utils.JsObject>cast().inject(component.getJsName(), publishedComp);
 		return component;
 	}
 
@@ -618,7 +617,7 @@ public class WidgetsFactory {
 		}
 		PublishedComponent publishedComp = component.getPublished().cast();
 		processGeneralProperties(component, aTag, false, publishedComp);
-		PlatypusWindow.inject(module, component.getElement().getId(), publishedComp);
+		target.<Utils.JsObject>cast().inject(component.getJsName(), publishedComp);
 		return component;
 	}
 
@@ -632,7 +631,7 @@ public class WidgetsFactory {
 			addToToggleGroup(component, aTag.getAttribute("buttonGroup"));
 		PublishedComponent publishedComp = component.getPublished().cast();
 		processGeneralProperties(component, aTag, publishedComp);
-		PlatypusWindow.inject(module, component.getElement().getId(), publishedComp);
+		target.<Utils.JsObject>cast().inject(component.getJsName(), publishedComp);
 		return component;
 	}
 
@@ -646,7 +645,7 @@ public class WidgetsFactory {
 			addToToggleGroup(component, aTag.getAttribute("buttonGroup"));
 		PublishedComponent publishedComp = component.getPublished().cast();
 		processGeneralProperties(component, aTag, publishedComp);
-		PlatypusWindow.inject(module, component.getElement().getId(), publishedComp);
+		target.<Utils.JsObject>cast().inject(component.getJsName(), publishedComp);
 		return component;
 	}
 
@@ -675,7 +674,7 @@ public class WidgetsFactory {
 		}
 
 		if (aTag.hasAttribute("prefWidth") && aTag.hasAttribute("prefHeight")) {
-			Point size = new Point(Utils.getIntegerAttribute(aTag, "prefWidth", 0), Utils.getIntegerAttribute(aTag, "prefHeight", 0));
+			Point size = new Point(Utils.getPxAttribute(aTag, "prefWidth", 0), Utils.getPxAttribute(aTag, "prefHeight", 0));
 			componentsPreferredSize.put(aComponent, size);
 		}
 		if (aTag.hasAttribute("componentPopupMenu")) {
@@ -904,13 +903,13 @@ public class WidgetsFactory {
 						container.add((Widget) aComponent);
 					} else if (parentComp instanceof PlatypusMenuBar) {
 						PlatypusMenuBar container = (PlatypusMenuBar) parentComp;
-						if (aComponent instanceof MenuItemImageText)
-							container.addItem((MenuItemImageText) aComponent);
+						container.add(aComponent);
 					} else if (parentComp instanceof PlatypusMenu) {
-					} else if (parentComp != null)
+					} else if (parentComp != null){
 						throw new IllegalStateException(UNKNOWN_CONTAINER_DETECTED + parentComp.getClass().getName());
-					else
+					}else{
 						throw new IllegalStateException(NULL_CONTAINER_DETECTED + aParentName);
+					}
 				} catch (Exception ex) {
 					Logger.getLogger(WidgetsFactory.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
 				}

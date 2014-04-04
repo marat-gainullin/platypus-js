@@ -52,7 +52,7 @@ public class BeforeCloseEvent<T> extends GwtEvent<BeforeCloseHandler<T>> {
     protected boolean cancelled;
 
     /**
-     * Creates a new close event.
+     * Creates a new before close event.
      *
      * @param target the target
      */

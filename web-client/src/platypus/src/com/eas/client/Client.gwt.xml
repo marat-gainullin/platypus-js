@@ -10,13 +10,13 @@
     <inherits name="com.bearsoft.rowset.Rowset" />
     
     <!-- Default noop implementation of url processing for xhr requests -->
-	<replace-with class="com.eas.client.xhr.impl.NoopUrlProcessor">
-		<when-type-is class="com.eas.client.xhr.UrlProcessor"/>
+	<replace-with class="com.eas.client.xhr.impl.NoopUrlQueryProcessor">
+		<when-type-is class="com.eas.client.xhr.UrlQueryProcessor"/>
 	</replace-with>
 	
 	<!-- Chrome bug 266971 needs a workaround-->
-	<replace-with class="com.eas.client.xhr.impl.ChromeUrlProcessor">
-	  <when-type-is class="com.eas.client.xhr.UrlProcessor" />
+	<replace-with class="com.eas.client.xhr.impl.ChromeUrlQueryProcessor">
+	  <when-type-is class="com.eas.client.xhr.UrlQueryProcessor" />
 	  <any>
 	    <when-property-is name="user.agent" value="safari"/>
 	  </any>

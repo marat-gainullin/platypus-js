@@ -47,7 +47,7 @@ public class ClosedEvent<T> extends GwtEvent<ClosedHandler<T>> {
     private final T target;
     
     /**
-     * Creates a new close event.
+     * Creates a new closed event.
      *
      * @param target the target
      */

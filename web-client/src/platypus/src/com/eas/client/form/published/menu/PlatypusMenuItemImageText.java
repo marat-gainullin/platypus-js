@@ -2,14 +2,17 @@ package com.eas.client.form.published.menu;
 
 import com.bearsoft.gwt.ui.menu.MenuItemImageText;
 import com.eas.client.application.PlatypusImageResource;
+import com.eas.client.form.EventsExecutor;
+import com.eas.client.form.published.HasEventsExecutor;
 import com.eas.client.form.published.HasJsFacade;
 import com.eas.client.form.published.HasPublished;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.safehtml.shared.SafeUri;
 
-public class PlatypusMenuItemImageText extends MenuItemImageText implements HasJsFacade {
+public class PlatypusMenuItemImageText extends MenuItemImageText implements HasJsFacade, HasEventsExecutor {
 
+	protected EventsExecutor eventsExecutor;
 	protected JavaScriptObject published;
 	protected String name;
 	
@@ -18,8 +21,19 @@ public class PlatypusMenuItemImageText extends MenuItemImageText implements HasJ
 	public PlatypusMenuItemImageText() {
 		super("", false, null, null);
 	}
+	
 	public PlatypusMenuItemImageText(String aText, boolean asHtml, SafeUri aImageUri, ScheduledCommand aCommand) {
 		super(aText, asHtml, aImageUri, aCommand);
+	}
+
+	@Override
+	public EventsExecutor getEventsExecutor() {
+		return eventsExecutor;
+	}
+
+	@Override
+	public void setEventsExecutor(EventsExecutor aExecutor) {
+		eventsExecutor = aExecutor;
 	}
 
 	@Override
@@ -57,7 +71,7 @@ public class PlatypusMenuItemImageText extends MenuItemImageText implements HasJ
 	}
 
 	private native static void publish(HasPublished aWidget, JavaScriptObject aPublished)/*-{
-		Object.defineProperty(published, "text", {
+		Object.defineProperty(aPublished, "text", {
 			get : function() {
 				return aWidget.@com.eas.client.form.published.menu.PlatypusMenuItemImageText::getText()();
 			},
@@ -65,7 +79,7 @@ public class PlatypusMenuItemImageText extends MenuItemImageText implements HasJ
 				aWidget.@com.eas.client.form.published.menu.PlatypusMenuItemImageText::setText(Ljava/lang/String;)(aValue);
 			}
 		});
-		Object.defineProperty(published, "icon", {
+		Object.defineProperty(aPublished, "icon", {
 			get : function() {
 				aWidget.@com.eas.client.form.published.menu.PlatypusMenuItemImageText::getIcon()();
 			},

@@ -4,6 +4,10 @@ public class JsMenus {
 
 	public native static void init()/*-{
 		
+		function publishComponentProperties(aPublished) {
+			@com.eas.client.form.js.JsWidgets::publishComponentProperties(Lcom/eas/client/form/published/PublishedComponent;)(aPublished);
+		}
+				
 		// ***************************************************
 		$wnd.MenuBar = function() {
 			if (!(this instanceof $wnd.MenuBar)) {
@@ -17,7 +21,6 @@ public class JsMenus {
 				return aComponent;
 			};
 			publishComponentProperties(published);
-			publishChildren(published);
 		};
 
 		// ***************************************************
@@ -33,7 +36,6 @@ public class JsMenus {
 				return aComponent;
 			};
 			publishComponentProperties(published);
-			publishChildren(published);
 
 			if (aText) {
 				published.text = aText;
@@ -53,12 +55,11 @@ public class JsMenus {
 				return aComponent;
 			};
 			publishComponentProperties(published);
-			publishChildren(published);
 		};
 		
 		// **************************************************************************
 		$wnd.MenuItem = function (aText, aIcon, aCallback) {
-			var aComponent = arguments.length>3?arguments[3]:null;
+			var aComponent = arguments.length > 3 ? arguments[3] : null;
 			
 			if (!(this instanceof $wnd.MenuItem)) {
 				throw  ' use  "new MenuItem()" !';
@@ -86,7 +87,7 @@ public class JsMenus {
 		
 		// **************************************************************************
 		$wnd.CheckMenuItem = function (aText, aSelected, aCallback) {
-			var aComponent = arguments.length>3?arguments[3]:null;
+			var aComponent = arguments.length > 3 ? arguments[3] : null;
 			
 			if (!(this instanceof $wnd.CheckMenuItem)) {
 				throw  ' use  "new CheckMenuItem()" !';
@@ -113,7 +114,7 @@ public class JsMenus {
 
 		// **************************************************************************
 		$wnd.RadioMenuItem = function (aText, aSelected, aCallback) {
-			var aComponent = arguments.length>3?arguments[3]:null;
+			var aComponent = arguments.length > 3 ? arguments[3] : null;
 			
 			if (!(this instanceof $wnd.RadioMenuItem)) {
 				throw  ' use  "new RadioMenuItem()" !';
@@ -140,7 +141,7 @@ public class JsMenus {
 		
 		// **************************************************************************
 		$wnd.MenuSeparator = function () {
-			var aComponent = arguments.length>0?arguments[0]:null;
+			var aComponent = arguments.length > 0 ? arguments[0] : null;
 			
 			if (!(this instanceof $wnd.MenuSeparator)) {
 				throw  ' use  "new MenuSeparator()" !';
@@ -154,7 +155,6 @@ public class JsMenus {
 			publishComponentProperties(published);
 			return published;
 		}
-		
 	}-*/;
 	
 }

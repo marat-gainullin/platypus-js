@@ -47,7 +47,7 @@ public class ActivateEvent<T> extends GwtEvent<ActivateHandler<T>> {
     private final T target;
 
     /**
-     * Creates a new close event.
+     * Creates a new activate event.
      *
      * @param target the target
      */

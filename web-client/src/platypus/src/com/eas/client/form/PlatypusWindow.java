@@ -120,6 +120,7 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 		super();
 		view = aView;
 		caption = new ToolsCaption(this, "");
+		setCaptionWidget(caption);
 		addMoveHandler(new MoveHandler<WindowUI>() {
 
 			@Override
@@ -227,8 +228,8 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 		Iterator<Widget> widgets = aContainer.iterator();
 		while (widgets.hasNext()) {
 			Widget w = widgets.next();
-			if (w instanceof HasValue<?>) {
-				String name = (String) w.getElement().getId();
+			if (w instanceof HasValue<?> && w instanceof HasJsName) {
+				String name = ((HasJsName) w).getJsName();
 				Object value = ((HasValue<Object>) w).getValue();
 				if (name != null && !name.isEmpty() && (value == null || value instanceof String || value instanceof Number)) {
 					aFormData.put(name, value != null ? value.toString() : null);
@@ -239,19 +240,25 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 		}
 	}
 
+	@Override
+	protected Widget getMovableTarget() {
+	    return popup != null ? popup : super.getMovableTarget();
+	}
+	
 	public void show(boolean aModal, final JavaScriptObject aCallback, DesktopPane aDesktop) {
-		popup = new WindowPopupPanel(this, !aModal, aModal);
+		popup = new WindowPopupPanel(this, false, aModal);
 		popup.setWidget(view);
 		boolean wasSize = viewSize != null;
 		double actualWidth = wasSize ? viewSize.getX() : viewPreferredWidth;
 		double actualHeight = wasSize ? viewSize.getY() : viewPreferredHeight;
 		popup.setSize(actualWidth, actualHeight);
+		popup.show();
 		if (locationByPlatform) {
 			if (aDesktop != null) {
 				popup.setPosition(aDesktop.getConsideredPosition().getX(), aDesktop.getConsideredPosition().getY());
 			} else {
-				int left = (Document.get().getBody().getOffsetWidth() - popup.getOffsetWidth()) / 2;
-				int top = (Document.get().getBody().getOffsetHeight() - popup.getOffsetHeight()) / 2;
+				int left = (Document.get().getClientWidth() - popup.getOffsetWidth()) / 2;
+				int top = (Document.get().getClientHeight() - popup.getOffsetHeight()) / 2;
 				popup.setPosition(left, top);
 			}
 		} else {
@@ -263,13 +270,12 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 					int top = (aDesktop.getElement().getClientHeight() - popup.getOffsetHeight()) / 2;
 					popup.setPosition(left, top);
 				} else {
-					int left = (Document.get().getBody().getOffsetWidth() - popup.getOffsetWidth()) / 2;
-					int top = (Document.get().getBody().getOffsetHeight() - popup.getOffsetHeight()) / 2;
+					int left = (Document.get().getClientWidth() - popup.getOffsetWidth()) / 2;
+					int top = (Document.get().getClientHeight() - popup.getOffsetHeight()) / 2;
 					popup.setPosition(left, top);
 				}
 			}
 		}
-		popup.show();
 	}
 
 	private void registerWindowListeners() {
@@ -421,30 +427,20 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 		while (wIt.hasNext()) {
 			Widget w = wIt.next();
 			if (w instanceof HasJsName && w instanceof HasPublished) {
-				inject(aTarget, ((HasJsName)w).getJsName(), ((HasPublished) w).getPublished());
+				aTarget.<Utils.JsObject>cast().inject(((HasJsName)w).getJsName(), ((HasPublished) w).getPublished());
 			}
 			if (w instanceof HasWidgets)
 				publishComponentsFacades(aTarget, (HasWidgets) w);
 		}
 	}
 
-	public native static void inject(JavaScriptObject aTarget, String aName, JavaScriptObject aValue)/*-{
-		if (aModule != null && aName != null) {
-			Object.defineProperty(aModule, aName, {
-				get : function() {
-					return aValue;
-				}
-			});
-		}
-	}-*/;
-
 	protected native static void publishFormFacade(JavaScriptObject aPublished, Widget aView, PlatypusWindow aForm)/*-{
-        Object.defineProperty(aModule, "view", {
+        Object.defineProperty(aPublished, "view", {
 	        get : function() {
 	        	return aView;
 	        } 
         });
-        Object.defineProperty(aModule, "formKey", {
+        Object.defineProperty(aPublished, "formKey", {
 	        get:function() {
 	        	return aForm.@com.eas.client.form.PlatypusWindow::getFormKey()();
 	        },
@@ -452,8 +448,8 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 	        	aForm.@com.eas.client.form.PlatypusWindow::setFormKey(Ljava/lang/String;)(''+aValue);
 	        } 
         });
-        aModule.formKey = aModule.applicationElementId; 
-        Object.defineProperty(aModule, "defaultCloseOperation", {
+        aPublished.formKey = aPublished.applicationElementId; 
+        Object.defineProperty(aPublished, "defaultCloseOperation", {
         	get : function(){
         		return aForm.@com.eas.client.form.PlatypusWindow::getDefaultCloseOperation()();
         	},
@@ -463,7 +459,7 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
         		aForm.@com.eas.client.form.PlatypusWindow::setDefaultCloseOperation(I)(aValue * 1);
         	}
         });
-        Object.defineProperty(aModule, "icon", {
+        Object.defineProperty(aPublished, "icon", {
         	get : function(){
         		return aForm.@com.eas.client.form.PlatypusWindow::getIcon()();
         	},
@@ -476,7 +472,7 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 				setterCallback();
         	}
         });
-        Object.defineProperty(aModule, "title", {
+        Object.defineProperty(aPublished, "title", {
 	        get:function() {
 	        	return aForm.@com.eas.client.form.PlatypusWindow::getTitle()();
 	        },
@@ -484,7 +480,7 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 	        	aForm.@com.eas.client.form.PlatypusWindow::setTitle(Ljava/lang/String;)(''+aValue);
 	        } 
         });
-        Object.defineProperty(aModule, "resizable", {
+        Object.defineProperty(aPublished, "resizable", {
 	        get:function() {
 	        	return aForm.@com.eas.client.form.PlatypusWindow::isResizable()();
 	        },
@@ -492,7 +488,7 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 	        	aForm.@com.eas.client.form.PlatypusWindow::setResizable(Z)(!!aValue);
 	        } 
         });
-        Object.defineProperty(aModule, "minimizable", {
+        Object.defineProperty(aPublished, "minimizable", {
 	        get:function() {
 	        	return aForm.@com.eas.client.form.PlatypusWindow::isMinimizable()();
 	        },
@@ -501,12 +497,12 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 	        	aForm.@com.eas.client.form.PlatypusWindow::setMinimizable(Z)(!!aValue);
 	        } 
         });
-        Object.defineProperty(aModule, "minimized", {
+        Object.defineProperty(aPublished, "minimized", {
 	        get:function() {
 	        	return aForm.@com.eas.client.form.PlatypusWindow::isMinimized()();
 	        }
         });
-        Object.defineProperty(aModule, "maximizable", {
+        Object.defineProperty(aPublished, "maximizable", {
 	        get:function() {
 	        	return aForm.@com.eas.client.form.PlatypusWindow::isMaximizable()();
 	        },
@@ -514,12 +510,12 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 	        	aForm.@com.eas.client.form.PlatypusWindow::setMaximizable(Z)(!!aValue);
 	        } 
         });
-        Object.defineProperty(aModule, "maximized", {
+        Object.defineProperty(aPublished, "maximized", {
 	        get:function() {
 	        	return aForm.@com.eas.client.form.PlatypusWindow::isMaximized()();
 	        }
         });
-        Object.defineProperty(aModule, "undecorated", {
+        Object.defineProperty(aPublished, "undecorated", {
 	        get:function() {
 	        	return aForm.@com.eas.client.form.PlatypusWindow::isUndecorated()();
 	        },
@@ -527,7 +523,7 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 	        	aForm.@com.eas.client.form.PlatypusWindow::setUndecorated(Z)(!!aValue);
 	        } 
         });
-        Object.defineProperty(aModule, "opacity", {
+        Object.defineProperty(aPublished, "opacity", {
 	        get:function() {
 	        	return aForm.@com.eas.client.form.PlatypusWindow::getOpacity()();
 	        },
@@ -537,7 +533,7 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 	        	aForm.@com.eas.client.form.PlatypusWindow::setOpacity(F)(aValue * 1);
 	        } 
         });
-        Object.defineProperty(aModule, "alwaysOnTop", {
+        Object.defineProperty(aPublished, "alwaysOnTop", {
 	        get:function() {
 	        	return aForm.@com.eas.client.form.PlatypusWindow::isAlwaysOnTop()();
 	        },
@@ -545,7 +541,7 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 	        	aForm.@com.eas.client.form.PlatypusWindow::setAlwaysOnTop(Z)(!!aValue);
 	        } 
         });
-        Object.defineProperty(aModule, "locationByPlatform", {
+        Object.defineProperty(aPublished, "locationByPlatform", {
 	        get:function() {
 	        	return aForm.@com.eas.client.form.PlatypusWindow::isLocationByPlatform()();
 	        },
@@ -553,7 +549,7 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 	        	aForm.@com.eas.client.form.PlatypusWindow::setLocationByPlatform(Z)(!!aValue);
 	        } 
         });
-        Object.defineProperty(aModule, "left", {
+        Object.defineProperty(aPublished, "left", {
 	        get:function() {
 	        	return aForm.@com.eas.client.form.PlatypusWindow::getLeft()();
 	        },
@@ -563,7 +559,7 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 	        	aForm.@com.eas.client.form.PlatypusWindow::setLeft(D)(aValue * 1);
 	        } 
         });
-        Object.defineProperty(aModule, "top", {
+        Object.defineProperty(aPublished, "top", {
 	        get:function() {
 	        	return aForm.@com.eas.client.form.PlatypusWindow::getTop()();
 	        },
@@ -573,7 +569,7 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 	        	aForm.@com.eas.client.form.PlatypusWindow::setTop(D)(aValue * 1);
 	        } 
         });
-        Object.defineProperty(aModule, "width", {
+        Object.defineProperty(aPublished, "width", {
 	        get:function() {
 	        	return aForm.@com.eas.client.form.PlatypusWindow::getWidth()();
 	        },
@@ -583,7 +579,7 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 	        	aForm.@com.eas.client.form.PlatypusWindow::setWidth(D)(aValue * 1);
 	        } 
         });
-        Object.defineProperty(aModule, "height", {
+        Object.defineProperty(aPublished, "height", {
 	        get:function() {
 	        	return aForm.@com.eas.client.form.PlatypusWindow::getHeight()();
 	        },
@@ -593,7 +589,7 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 	        	aForm.@com.eas.client.form.PlatypusWindow::setHeight(D)(aValue * 1);
 	        } 
         });
-        Object.defineProperty(aModule, "onWindowOpened", {
+        Object.defineProperty(aPublished, "onWindowOpened", {
 	        get:function() {
 	        	return aForm.@com.eas.client.form.PlatypusWindow::getWindowOpened()();
 	        },
@@ -601,7 +597,7 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 	        	aForm.@com.eas.client.form.PlatypusWindow::setWindowOpened(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
 	        } 
         });
-        Object.defineProperty(aModule, "onWindowClosing", {
+        Object.defineProperty(aPublished, "onWindowClosing", {
 	        get:function() {
 	        	return aForm.@com.eas.client.form.PlatypusWindow::getWindowClosing()();
 	        },
@@ -609,7 +605,7 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 	        	aForm.@com.eas.client.form.PlatypusWindow::setWindowClosing(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
 	        } 
         });
-        Object.defineProperty(aModule, "onWindowClosed", {
+        Object.defineProperty(aPublished, "onWindowClosed", {
 	        get:function() {
 	        	return aForm.@com.eas.client.form.PlatypusWindow::getWindowClosed()();
 	        },
@@ -617,7 +613,7 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 	        	aForm.@com.eas.client.form.PlatypusWindow::setWindowClosed(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
 	        } 
         });
-        Object.defineProperty(aModule, "onWindowMinimized", {
+        Object.defineProperty(aPublished, "onWindowMinimized", {
 	        get:function() {
 	        	return aForm.@com.eas.client.form.PlatypusWindow::getWindowMinimized()();
 	        },
@@ -625,7 +621,7 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 	        	aForm.@com.eas.client.form.PlatypusWindow::setWindowMinimized(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
 	        } 
         });
-        Object.defineProperty(aModule, "onWindowRestored", {
+        Object.defineProperty(aPublished, "onWindowRestored", {
 	        get:function() {
 	        	return aForm.@com.eas.client.form.PlatypusWindow::getWindowRestored()();
 	        },
@@ -633,7 +629,7 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 	        	aForm.@com.eas.client.form.PlatypusWindow::setWindowRestored(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
 	        } 
         });
-        Object.defineProperty(aModule, "onWindowMaximized", {
+        Object.defineProperty(aPublished, "onWindowMaximized", {
 	        get:function() {
 	        	return aForm.@com.eas.client.form.PlatypusWindow::getWindowMaximized()();
 	        },
@@ -641,7 +637,7 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 	        	aForm.@com.eas.client.form.PlatypusWindow::setWindowMaximized(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
 	        } 
         });
-        Object.defineProperty(aModule, "onWindowActivated", {
+        Object.defineProperty(aPublished, "onWindowActivated", {
 	        get:function() {
 	        	return aForm.@com.eas.client.form.PlatypusWindow::getWindowActivated()();
 	        },
@@ -649,7 +645,7 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 	        	aForm.@com.eas.client.form.PlatypusWindow::setWindowActivated(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
 	        } 
         });
-        Object.defineProperty(aModule, "onWindowDeactivated", {
+        Object.defineProperty(aPublished, "onWindowDeactivated", {
 	        get:function() {
 	        	return aForm.@com.eas.client.form.PlatypusWindow::getWindowDeactivated()();
 	        },
@@ -661,39 +657,39 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
         (function() {
 	        var showedWnd = null;
 	        var closeCallback = null;
-	        aModule.show = function() {
+	        aPublished.show = function() {
 		        closeCallback = null;
 		        showedWnd = aForm.@com.eas.client.form.PlatypusWindow::show(ZLcom/google/gwt/core/client/JavaScriptObject;Lcom/eas/client/form/published/widgets/DesktopPane;)(false, null, null);
 	        };
-	        aModule.showModal = function(aCallback) {
+	        aPublished.showModal = function(aCallback) {
 		        closeCallback = aCallback;
 		        showedWnd = aForm.@com.eas.client.form.PlatypusWindow::show(ZLcom/google/gwt/core/client/JavaScriptObject;Lcom/eas/client/form/published/widgets/DesktopPane;)(true, aCallback, null);
 	        };
-	        aModule.showOnPanel = function(aPanel) {
+	        aPublished.showOnPanel = function(aPanel) {
 	        	$wnd.Logger.info("showOnPanel is unsupported. Use widget.addTo(...) method instead.");
 	        };
-	        aModule.showInternalFrame = function(aPanel) {
+	        aPublished.showInternalFrame = function(aPanel) {
 	        	showedWnd = aForm.@com.eas.client.form.PlatypusWindow::show(ZLcom/google/gwt/core/client/JavaScriptObject;Lcom/eas/client/form/published/widgets/DesktopPane;)(false, null, aPanel != null ? aPanel.unwrap() : null);
 	        };
-	        aModule.minimize = function(){
+	        aPublished.minimize = function(){
 	        	aForm.@com.eas.client.form.PlatypusWindow::minimize()();
 	        };
-	        aModule.maximize = function(){
+	        aPublished.maximize = function(){
 	        	aForm.@com.eas.client.form.PlatypusWindow::maximize()();
 	        };
-	        aModule.toFront = function(){
+	        aPublished.toFront = function(){
 	        	aForm.@com.eas.client.form.PlatypusWindow::toFront()();
 	        };
-	        aModule.restore = function(){
+	        aPublished.restore = function(){
 	        	aForm.@com.eas.client.form.PlatypusWindow::restore()();
 	        };
-	        aModule.close = function() {
+	        aPublished.close = function() {
 		        if (arguments.length > 0)
 		        	aForm.@com.eas.client.form.PlatypusWindow::close(Ljava/lang/Object;Lcom/google/gwt/core/client/JavaScriptObject;)(arguments[0] == null ? null : $wnd.boxAsJava(arguments[0]), closeCallback);
 		        else
 		        	aForm.@com.eas.client.form.PlatypusWindow::close(Ljava/lang/Object;Lcom/google/gwt/core/client/JavaScriptObject;)(null, null);
 	        };
-	        aModule.submit = function(aAction, aCallback) {
+	        aPublished.submit = function(aAction, aCallback) {
 	        	aForm.@com.eas.client.form.PlatypusWindow::submit(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aAction, aCallback);
 	        }
         })();

@@ -4,15 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.bearsoft.gwt.ui.containers.window.WindowUI;
+import com.eas.client.form.EventsExecutor;
 import com.eas.client.form.published.HasComponentPopupMenu;
+import com.eas.client.form.published.HasEventsExecutor;
 import com.eas.client.form.published.HasJsFacade;
 import com.eas.client.form.published.HasPublished;
 import com.eas.client.form.published.menu.PlatypusPopupMenu;
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.ContextMenuEvent;
+import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.touch.client.Point;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -25,8 +26,9 @@ import com.google.gwt.user.client.ui.Widget;
  * 
  * @author mg
  */
-public class DesktopPane extends FlowPanel implements RequiresResize, ProvidesResize, HasJsFacade, HasEnabled, HasComponentPopupMenu {
+public class DesktopPane extends FlowPanel implements RequiresResize, ProvidesResize, HasJsFacade, HasEnabled, HasComponentPopupMenu, HasEventsExecutor {
 
+	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu menu;
 	protected boolean enabled;
 	protected String name;	
@@ -43,6 +45,16 @@ public class DesktopPane extends FlowPanel implements RequiresResize, ProvidesRe
 	}
 
 	@Override
+	public EventsExecutor getEventsExecutor() {
+		return eventsExecutor;
+	}
+
+	@Override
+	public void setEventsExecutor(EventsExecutor aExecutor) {
+		eventsExecutor = aExecutor;
+	}
+
+	@Override
     public PlatypusPopupMenu getPlatypusPopupMenu() {
 		return menu; 
     }
@@ -56,16 +68,16 @@ public class DesktopPane extends FlowPanel implements RequiresResize, ProvidesRe
 				menuTriggerReg.removeHandler();
 			menu = aMenu;
 			if (menu != null) {
-				menuTriggerReg = super.addDomHandler(new ClickHandler() {
-
+				menuTriggerReg = super.addDomHandler(new ContextMenuHandler() {
+					
 					@Override
-					public void onClick(ClickEvent event) {
-						if (event.getNativeButton() == NativeEvent.BUTTON_RIGHT && menu != null) {
-							menu.showRelativeTo(DesktopPane.this);
-						}
+					public void onContextMenu(ContextMenuEvent event) {
+						event.preventDefault();
+						event.stopPropagation();
+						menu.setPopupPosition(event.getNativeEvent().getClientX(), event.getNativeEvent().getClientY());
+						menu.show();
 					}
-
-				}, ClickEvent.getType());
+				}, ContextMenuEvent.getType());
 			}
 		}
 	}
