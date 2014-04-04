@@ -9,6 +9,7 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.ComplexPanel;
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.InsertPanel;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.ProvidesResize;
@@ -159,8 +160,13 @@ public class CardsPanel extends ComplexPanel implements InsertPanel.ForIsWidget,
         if (visibleWidget != null) {
             Element we = visibleWidget.getElement();
             Element wpe = we.getParentElement();
-            if ("button".equalsIgnoreCase(we.getTagName())) {
+            if (visibleWidget instanceof FocusWidget) {
+                we.getStyle().clearRight();
+                we.getStyle().clearBottom();
                 we.getStyle().setWidth(wpe.getClientWidth() - hgap * 2, Style.Unit.PX);
+                we.getStyle().setHeight(wpe.getClientHeight() - vgap * 2, Style.Unit.PX);
+                com.bearsoft.gwt.ui.CommonResources.INSTANCE.commons().ensureInjected();
+                visibleWidget.getElement().addClassName(com.bearsoft.gwt.ui.CommonResources.INSTANCE.commons().borderSized());
             }
         }
     }

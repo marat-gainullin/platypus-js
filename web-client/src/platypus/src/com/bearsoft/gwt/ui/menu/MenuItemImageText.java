@@ -7,6 +7,7 @@ package com.bearsoft.gwt.ui.menu;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.user.client.ui.MenuItem;
@@ -43,7 +44,18 @@ public class MenuItemImageText extends MenuItem {
 
 	public void setText(String aText, boolean asHtml) {
 		text = aText;
+		html = asHtml;
 		regenerate();
+	}
+
+	@Override
+	public void setText(String text) {
+		setText(text, false);
+	}
+
+	@Override
+	public void setHTML(String html) {
+		setText(text, true);
 	}
 
 	public SafeUri getImageUri() {
@@ -56,7 +68,8 @@ public class MenuItemImageText extends MenuItem {
 	}
 
 	protected void regenerate() {
-		setHTML(MenuItemTemplates.INSTANCE.imageText(imageUri != null ? imageUri.asString() : "", html ? SafeHtmlUtils.fromTrustedString(text) : SafeHtmlUtils.fromString(text)));
+		SafeHtml generated = MenuItemTemplates.INSTANCE.imageText(imageUri != null ? imageUri.asString() : "", html ? SafeHtmlUtils.fromTrustedString(text) : SafeHtmlUtils.fromString(text));
+		getElement().setInnerSafeHtml(generated);
 		leftMark = getElement().getFirstChildElement().getFirstChildElement();
 		field = (Element) getElement().getFirstChildElement().getLastChild();
 	}

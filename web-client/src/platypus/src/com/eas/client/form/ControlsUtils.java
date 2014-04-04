@@ -139,21 +139,6 @@ public class ControlsUtils {
 		 */
 	}
 
-	/*
-	 * public static String getEmptyText(ValueBaseField<?> aField) { XElement
-	 * iel = XElement.as(aField.getCell().getInputElement(aField.getElement()));
-	 * return iel.getAttribute("placeholder"); }
-	 * 
-	 * public static void setEmptyText(ValueBaseField<?> aField, String aValue)
-	 * { XElement iel =
-	 * XElement.as(aField.getCell().getInputElement(aField.getElement()));
-	 * setEmptyText(iel, aValue); }
-	 */
-
-	public static void setEmptyText(Element aElement, String aValue) {
-		aElement.setAttribute("placeholder", aValue);
-	}
-
 	protected static RegExp rgbPattern = RegExp.compile("rgb *\\( *([0-9]+) *, *([0-9]+) *, *([0-9]+) *\\)");
 	protected static RegExp rgbaPattern = RegExp.compile("rgba *\\( *([0-9]+) *, *([0-9]+) *, *([0-9]+) *, *([0-9]*\\.?[0-9]+) *\\)");
 
@@ -274,7 +259,7 @@ public class ControlsUtils {
 
 	public static void applyBackground(UIObject aWidget, final String aColorString) {
 		Element aElement = aWidget.getElement();
-		if (aElement != null && aElement.getStyle() != null) {
+		if (aElement != null) {
 			if (aColorString != null && !aColorString.isEmpty()) {
 				aElement.getStyle().setBackgroundColor(aColorString);
 				aElement.getStyle().setBackgroundImage("none");
@@ -334,11 +319,14 @@ public class ControlsUtils {
 	public static JavaScriptObject lookupPublishedParent(UIObject aWidget) {
 		assert aWidget != null;
 		UIObject parent = aWidget;
-		while (parent != null && !(parent instanceof HasPublished)) {
-			if(parent instanceof PlatypusMenuBar){
-				PlatypusMenuBar bar = (PlatypusMenuBar)parent;
+		do {
+			if (parent instanceof PlatypusMenuBar) {
+				PlatypusMenuBar bar = (PlatypusMenuBar) parent;
 				parent = bar.getParentItem();
-			}else if (parent instanceof Widget) {
+				if (parent == null) {
+					parent = bar.getParent();
+				}
+			} else if (parent instanceof Widget) {
 				parent = ((Widget) parent).getParent();
 			} else if (parent instanceof MenuItemSeparator) {
 				MenuItemSeparator sep = (MenuItemSeparator) parent;
@@ -346,10 +334,10 @@ public class ControlsUtils {
 			} else if (parent instanceof MenuItem) {
 				MenuItem sep = (MenuItem) parent;
 				parent = sep.getParentMenu();
-			}else{
+			} else {
 				parent = null;
 			}
-		}
+		} while (parent != null && (!(parent instanceof HasPublished) || ( ((HasPublished) parent).getPublished() == null ) ));
 		return parent != null ? ((HasPublished) parent).getPublished() : null;
 	}
 

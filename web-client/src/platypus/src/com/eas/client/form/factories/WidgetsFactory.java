@@ -904,7 +904,6 @@ public class WidgetsFactory {
 					} else if (parentComp instanceof PlatypusMenuBar) {
 						PlatypusMenuBar container = (PlatypusMenuBar) parentComp;
 						container.add(aComponent);
-					} else if (parentComp instanceof PlatypusMenu) {
 					} else if (parentComp != null){
 						throw new IllegalStateException(UNKNOWN_CONTAINER_DETECTED + parentComp.getClass().getName());
 					}else{

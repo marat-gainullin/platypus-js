@@ -20,6 +20,8 @@ public interface CommonResources extends ClientBundle {
     public interface CommonStyles extends CssResource {
 
         public String unselectable();
+        
+        public String borderSized();
     }
 
     public CommonStyles commons();

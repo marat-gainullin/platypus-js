@@ -3,6 +3,7 @@ package com.eas.client.form.published.menu;
 import com.eas.client.form.published.HasPublished;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.user.client.ui.MenuItem;
+import com.google.gwt.user.client.ui.UIObject;
 
 public class PlatypusMenu extends PlatypusMenuBar {
 
@@ -10,6 +11,22 @@ public class PlatypusMenu extends PlatypusMenuBar {
 
 	public PlatypusMenu() {
 		super(true);
+		setAutoOpen(true);
+	}
+
+	@Override
+	public boolean add(UIObject aChild) {
+		if (aChild instanceof PlatypusMenu) {
+			PlatypusMenu subMenu = (PlatypusMenu) aChild;
+			MenuItem item = new PlatypusMenuItemImageText();
+			item.setSubMenu(subMenu);
+			item.setText(subMenu.getText());
+			subMenu.setParentItem(item);
+			addItem(item);
+			allItems.add(aChild);
+			return true;
+		} else
+			return super.add(aChild);
 	}
 
 	public String getText() {

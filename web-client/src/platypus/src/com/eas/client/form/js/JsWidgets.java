@@ -429,7 +429,7 @@ public class JsWidgets {
 		    set : function(aValue) {
 		    	_opaque = (false != aValue);
 		    	// apply
-	    		@com.eas.client.form.ControlsUtils::applyBackground(Lcom/google/gwt/user/client/ui/UIObject;Ljava/lang/String;)(comp, _opaque?(_background!=null?_background.toStyled():""):"transparent");
+	    		@com.eas.client.form.ControlsUtils::applyBackground(Lcom/google/gwt/user/client/ui/UIObject;Ljava/lang/String;)(comp, _opaque ? (_background != null ? _background.toStyled() : "") : "");
 		    }
  	    });
 	    Object.defineProperty(aPublished, "font", {

@@ -43,7 +43,7 @@ public class MenuItemCheckBox extends MenuItemImageText implements HasValue<Bool
 
     @Override
     protected void regenerate() {
-        setHTML(generateHtml());
+        getElement().setInnerSafeHtml(generateHtml());
         leftMark = getElement().getFirstChildElement().getFirstChildElement();
         inputElem = (InputElement) leftMark.getFirstChildElement();
         field = (Element) getElement().getFirstChildElement().getLastChild();

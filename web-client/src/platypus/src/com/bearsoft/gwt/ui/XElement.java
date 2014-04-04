@@ -139,6 +139,26 @@ public class XElement extends Element {
 		return result;
 	}
 
+	public final List<Element> selectByPrefix(final String selectorPrefix) {
+		final List<Element> result = new ArrayList<>();
+		iterate(this, new Observer() {
+			@Override
+			public void observe(Element anElement) {
+				String classesName = anElement.getClassName();
+				if (classesName != null) {
+					String[] classes = classesName.split(" ");
+					for (int i = 0; i < classes.length; i++) {
+						if (classes[i].startsWith(selectorPrefix)) {
+							result.add(anElement);
+							break;
+						}
+					}
+				}
+			}
+		});
+		return result;
+	}
+
 	protected static void iterate(Element aRoot, Observer aTask) {
 		if (aRoot != null) {
 			aTask.observe(aRoot);

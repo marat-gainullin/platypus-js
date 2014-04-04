@@ -1,15 +1,25 @@
 package com.eas.client.form.published.menu;
 
+import java.util.List;
+
+import com.bearsoft.gwt.ui.XElement;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.user.client.ui.DecoratedPopupPanel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.UIObject;
 
 public class PlatypusPopupMenu extends PlatypusMenu {
 
-	protected PopupPanel popup = new PopupPanel(true, false);
+	protected PopupPanel popup = new DecoratedPopupPanel(true, false);
 
 	public PlatypusPopupMenu() {
 		super();
 		popup.setWidget(this);
+		popup.getElement().setClassName("gwt-MenuBarPopup");
+		List<Element> popupMarked = popup.getElement().<XElement>cast().selectByPrefix("popup");
+		for(Element el : popupMarked){
+			el.setClassName(el.getClassName().replace("popup", "menuPopup"));
+		}
 	}
 
 	public void show() {

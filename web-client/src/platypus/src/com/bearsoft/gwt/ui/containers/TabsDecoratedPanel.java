@@ -26,6 +26,7 @@ import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHTML;
 import com.google.gwt.user.client.ui.HasText;
@@ -85,8 +86,11 @@ public class TabsDecoratedPanel extends SimplePanel implements RequiresResize, P
             public void insert(Widget child, Widget tab, int beforeIndex) {
                 child.getElement().getStyle().clearWidth();
                 child.getElement().getStyle().clearHeight();
-                if("button".equalsIgnoreCase(child.getElement().getTagName())){
+                if(child instanceof FocusWidget){
+                    child.getElement().getStyle().clearRight();
                     child.getElement().getStyle().setWidth(100, Style.Unit.PCT);
+                    com.bearsoft.gwt.ui.CommonResources.INSTANCE.commons().ensureInjected();
+                    child.getElement().addClassName(com.bearsoft.gwt.ui.CommonResources.INSTANCE.commons().borderSized());
                 }
                 super.insert(child, tab, beforeIndex);
             }

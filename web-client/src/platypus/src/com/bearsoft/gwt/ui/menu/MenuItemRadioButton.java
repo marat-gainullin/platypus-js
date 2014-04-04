@@ -23,5 +23,4 @@ public class MenuItemRadioButton extends MenuItemCheckBox {
     protected SafeHtml generateHtml() {
         return MenuItemTemplates.INSTANCE.radioButton(html ? SafeHtmlUtils.fromTrustedString(text) : SafeHtmlUtils.fromString(text));
     }
-    
 }

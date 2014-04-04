@@ -10,6 +10,7 @@ import java.util.List;
 
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.IndexedPanel;
 import com.google.gwt.user.client.ui.ProvidesResize;
@@ -94,12 +95,12 @@ public class GridPanel extends Grid implements RequiresResize, ProvidesResize, I
         Widget w = getWidget(aRow, aColumn);
         if (w != null/* && getElement().getClientWidth() > 0 && getElement().getClientHeight() > 0*/) {
             /*
-            Element td = getCellFormatter().getElement(aRow, aColumn);
-            double tdWidth = Math.round((double)numColumns / (double)getElement().getClientWidth() * 100);
-            double tdHeight = Math.round((double)numRows / (double)getElement().getClientHeight() * 100);
-            td.getStyle().setWidth(tdWidth, Style.Unit.PCT);
-            td.getStyle().setHeight(tdHeight, Style.Unit.PCT);
-                    */
+             Element td = getCellFormatter().getElement(aRow, aColumn);
+             double tdWidth = Math.round((double)numColumns / (double)getElement().getClientWidth() * 100);
+             double tdHeight = Math.round((double)numRows / (double)getElement().getClientHeight() * 100);
+             td.getStyle().setWidth(tdWidth, Style.Unit.PCT);
+             td.getStyle().setHeight(tdHeight, Style.Unit.PCT);
+             */
             Element we = w.getElement();
             Element wpe = we.getParentElement();
             wpe.getStyle().setPosition(Style.Position.RELATIVE);
@@ -117,15 +118,20 @@ public class GridPanel extends Grid implements RequiresResize, ProvidesResize, I
             we.getStyle().setMarginTop(aRow > 0 ? vgap : 0, Style.Unit.PX);
             we.getStyle().setMarginRight(0, Style.Unit.PX);
             we.getStyle().setMarginBottom(0, Style.Unit.PX);
-            checkButtonWidth(w);
+            checkFocusWidgetWidthHeight(w);
         }
     }
 
-    protected void checkButtonWidth(Widget w) {
-        Element we = w.getElement();
+    protected void checkFocusWidgetWidthHeight(Widget child) {
+        Element we = child.getElement();
         Element wpe = we.getParentElement();
-        if ("button".equalsIgnoreCase(we.getTagName())) {
+        if (child instanceof FocusWidget) {
+            we.getStyle().clearRight();
+            we.getStyle().clearBottom();
             we.getStyle().setWidth(wpe.getClientWidth() - hgap, Style.Unit.PX);
+            we.getStyle().setHeight(wpe.getClientHeight() - vgap, Style.Unit.PX);
+            com.bearsoft.gwt.ui.CommonResources.INSTANCE.commons().ensureInjected();
+            child.getElement().addClassName(com.bearsoft.gwt.ui.CommonResources.INSTANCE.commons().borderSized());
         }
     }
 
@@ -162,7 +168,7 @@ public class GridPanel extends Grid implements RequiresResize, ProvidesResize, I
         for (int i = 0; i < numRows; i++) {
             for (int j = 0; j < numColumns; j++) {
                 Widget w = getWidget(i, j);
-                checkButtonWidth(w);
+                checkFocusWidgetWidthHeight(w);
                 if (w instanceof RequiresResize) {
                     ((RequiresResize) w).onResize();
                 }
@@ -170,59 +176,62 @@ public class GridPanel extends Grid implements RequiresResize, ProvidesResize, I
         }
     }
 
-	@Override
+    @Override
     public Widget getWidget(int index) {
-		List<Widget> widgets = new ArrayList<>();
+        List<Widget> widgets = new ArrayList<>();
         for (int i = 0; i < numRows; i++) {
             for (int j = 0; j < numColumns; j++) {
                 Widget w = getWidget(i, j);
-                if(w != null)
-                	widgets.add(w);
-            }
-        }
-	    return index >= 0 && index < widgets.size() ? widgets.get(index) : null;
-    }
-
-	@Override
-    public int getWidgetCount() {
-		int count = 0;
-        for (int i = 0; i < numRows; i++) {
-            for (int j = 0; j < numColumns; j++) {
-                Widget w = getWidget(i, j);
-                if(w != null)
-                	count++;
-            }
-        }
-	    return count;
-    }
-
-	@Override
-    public int getWidgetIndex(Widget child) {
-		List<Widget> widgets = new ArrayList<>();
-        for (int i = 0; i < numRows; i++) {
-            for (int j = 0; j < numColumns; j++) {
-                Widget w = getWidget(i, j);
-                if(w != null)
-                	widgets.add(w);
-            }
-        }
-	    return widgets.indexOf(child);
-    }
-
-	@Override
-    public boolean remove(int index) {
-		int count = 0;
-        for (int i = 0; i < numRows; i++) {
-            for (int j = 0; j < numColumns; j++) {
-                Widget w = getWidget(i, j);
-                if(w != null){
-                	count++;
-                	if(index == count - 1){
-                		return remove(w);
-                	}
+                if (w != null) {
+                    widgets.add(w);
                 }
             }
         }
-	    return false;
+        return index >= 0 && index < widgets.size() ? widgets.get(index) : null;
+    }
+
+    @Override
+    public int getWidgetCount() {
+        int count = 0;
+        for (int i = 0; i < numRows; i++) {
+            for (int j = 0; j < numColumns; j++) {
+                Widget w = getWidget(i, j);
+                if (w != null) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
+    @Override
+    public int getWidgetIndex(Widget child) {
+        List<Widget> widgets = new ArrayList<>();
+        for (int i = 0; i < numRows; i++) {
+            for (int j = 0; j < numColumns; j++) {
+                Widget w = getWidget(i, j);
+                if (w != null) {
+                    widgets.add(w);
+                }
+            }
+        }
+        return widgets.indexOf(child);
+    }
+
+    @Override
+    public boolean remove(int index) {
+        int count = 0;
+        for (int i = 0; i < numRows; i++) {
+            for (int j = 0; j < numColumns; j++) {
+                Widget w = getWidget(i, j);
+                if (w != null) {
+                    count++;
+                    if (index == count - 1) {
+                        return remove(w);
+                    }
+                }
+            }
+        }
+        return false;
     }
 }

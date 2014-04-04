@@ -4,10 +4,12 @@
  */
 package com.bearsoft.gwt.ui.containers;
 
+import com.bearsoft.gwt.ui.CommonResources;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.ComplexPanel;
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.ProvidesResize;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.ScrollPanel;
@@ -43,12 +45,13 @@ public class VerticalBoxPanel extends ComplexPanel implements RequiresResize, Pr
     public void add(Widget child) {
         child.getElement().getStyle().setPosition(Style.Position.RELATIVE);
         child.getElement().getStyle().setDisplay(Style.Display.BLOCK);
-        if ("button".equalsIgnoreCase(child.getElement().getTagName())) {
-            child.getElement().getStyle().clearLeft();
+        child.getElement().getStyle().setLeft(0, Style.Unit.PX);
+        if(child instanceof FocusWidget){
             child.getElement().getStyle().clearRight();
             child.getElement().getStyle().setWidth(100, Style.Unit.PCT);
+            CommonResources.INSTANCE.commons().ensureInjected();
+            child.getElement().addClassName(CommonResources.INSTANCE.commons().borderSized());
         } else {
-            child.getElement().getStyle().setLeft(0, Style.Unit.PX);
             child.getElement().getStyle().setRight(0, Style.Unit.PX);
             child.getElement().getStyle().clearWidth();
         }
