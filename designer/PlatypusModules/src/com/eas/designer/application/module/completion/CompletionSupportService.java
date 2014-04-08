@@ -14,7 +14,7 @@ import java.util.Collection;
 public interface CompletionSupportService {
 
     public Class<?> getClassByName(String name);
-        
+            
     public Collection<JsCompletionItem> getSystemConstructors(CompletionPoint point);
    
     public Collection<JsCompletionItem> getSystemObjects(CompletionPoint point);

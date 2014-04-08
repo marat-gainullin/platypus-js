@@ -24,6 +24,7 @@ import com.eas.client.events.ScriptSourcedEvent;
 import com.eas.client.model.RowsetMissingException;
 import com.eas.client.model.application.ApplicationEntity;
 import com.eas.client.queries.SqlQuery;
+import com.eas.script.EventMethod;
 import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptUtils;
 import java.lang.reflect.Method;
@@ -1830,6 +1831,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
             + "*/";
 
     @ScriptFunction(jsDoc = ON_CHANGED_JSDOC)
+    @EventMethod(eventClass = ApplicationEntity.EntityInstanceChangeEvent.class)
     public Function getOnChanged() {
         return entity.getOnAfterChange();
     }
@@ -1844,6 +1846,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
             + "*/";
 
     @ScriptFunction(jsDoc = ON_DELETED_JSDOC)
+    @EventMethod(eventClass = ApplicationEntity.EntityInstanceDelete.class)
     public Function getOnDeleted() {
         return entity.getOnAfterDelete();
     }
@@ -1858,6 +1861,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
             + "*/";
 
     @ScriptFunction(jsDoc = ON_INSERTED_JSDOC)
+    @EventMethod(eventClass = ApplicationEntity.EntityInstanceInsert.class)
     public Function getOnInserted() {
         return entity.getOnAfterInsert();
     }
@@ -1872,6 +1876,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
             + "*/";
 
     @ScriptFunction(jsDoc = ON_SCROLLED_JSDOC)
+    @EventMethod(eventClass = ApplicationEntity.CursorPositionChangedEvent.class)
     public Function getOnScrolled() {
         return entity.getOnAfterScroll();
     }
@@ -1886,6 +1891,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
             + "*/";
 
     @ScriptFunction(jsDoc = WILL_CHANGE_JSDOC)
+    @EventMethod(eventClass = ApplicationEntity.EntityInstanceChangeEvent.class)
     public Function getWillChange() {
         return entity.getOnBeforeChange();
     }
@@ -1900,6 +1906,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
             + "*/";
 
     @ScriptFunction(jsDoc = WILL_DELETE_JSDOC)
+    @EventMethod(eventClass = ApplicationEntity.EntityInstanceDelete.class)
     public Function getWillDelete() {
         return entity.getOnBeforeDelete();
     }
@@ -1914,6 +1921,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
             + "*/";
 
     @ScriptFunction(jsDoc = WILL_INSERT_JSDOC)
+    @EventMethod(eventClass = ApplicationEntity.EntityInstanceInsert.class)
     public Function getWillInsert() {
         return entity.getOnBeforeInsert();
     }
@@ -1928,6 +1936,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
             + "*/";
 
     @ScriptFunction(jsDoc = WILL_SCROLL_JSDOC)
+    @EventMethod(eventClass = ApplicationEntity.CursorPositionWillChangeEvent.class)
     public Function getWillScroll() {
         return entity.getOnBeforeScroll();
     }
@@ -1942,6 +1951,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
             + "*/";
 
     @ScriptFunction(jsDoc = ON_FILTERED_JSDOC)
+    @EventMethod(eventClass = ScriptSourcedEvent.class)
     public Function getOnFiltered() {
         return entity.getOnFiltered();
     }
@@ -1956,6 +1966,7 @@ public class ScriptableRowset<E extends ApplicationEntity<?, ?, E>> {
             + "*/";
 
     @ScriptFunction(jsDoc = ON_REQUIRED_JSDOC)
+    @EventMethod(eventClass = ScriptSourcedEvent.class)
     public Function getOnRequeried() {
         return entity.getOnRequeried();
     }

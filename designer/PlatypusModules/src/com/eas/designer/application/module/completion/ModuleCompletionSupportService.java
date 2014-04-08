@@ -135,5 +135,4 @@ public class ModuleCompletionSupportService implements CompletionSupportService 
                 point.getCaretEndWordOffset()));
         return items;
     }
-
 }

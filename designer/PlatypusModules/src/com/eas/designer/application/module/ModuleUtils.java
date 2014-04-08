@@ -33,6 +33,22 @@ public class ModuleUtils {
 
     static {
         initScriptNames2PlatypusApiClasses();
+        intitEventsNames2ScriptEventClasses();
+    }
+    
+    public static Class<?> getScriptEventClassByNodeName(String anEventNodeName) {
+        return eventsNames2scriptEventsClasses.get(ApplicationEntityEventDesc.convertNodePropNameToEntityPropName(anEventNodeName));
+    }
+
+    public static Class[] getPlatypusApiClasses() {
+        return apiClasses;
+    }
+
+    public static Class<?> getPlatypusApiClassByName(String name) {
+        return scriptNames2PlatypusApiClasses.get(name);
+    }
+
+    private static void intitEventsNames2ScriptEventClasses() {
         eventsNames2scriptEventsClasses.put(ApplicationDbModel.DATASOURCE_AFTER_CHANGE_EVENT_TAG_NAME, EntityInstanceChangeEvent.class);
         eventsNames2scriptEventsClasses.put(ApplicationDbModel.DATASOURCE_AFTER_DELETE_EVENT_TAG_NAME, EntityInstanceDelete.class);
         eventsNames2scriptEventsClasses.put(ApplicationDbModel.DATASOURCE_AFTER_INSERT_EVENT_TAG_NAME, EntityInstanceInsert.class);
@@ -44,19 +60,7 @@ public class ModuleUtils {
         eventsNames2scriptEventsClasses.put(ApplicationDbModel.DATASOURCE_BEFORE_INSERT_EVENT_TAG_NAME, EntityInstanceInsert.class);
         eventsNames2scriptEventsClasses.put(ApplicationDbModel.DATASOURCE_BEFORE_SCROLL_EVENT_TAG_NAME, CursorPositionWillChangeEvent.class);
     }
-
-    public static Class<?> getScriptEventClass(String anEventName) {
-        return eventsNames2scriptEventsClasses.get(ApplicationEntityEventDesc.convertNodePropNameToEntityPropName(anEventName));
-    }
-
-    public static Class[] getPlatypusApiClasses() {
-        return apiClasses;
-    }
-
-    public static Class<?> getPlatypusApiClassByName(String name) {
-        return scriptNames2PlatypusApiClasses.get(name);
-    }
-
+    
     private static void initScriptNames2PlatypusApiClasses() {
         for (Class<?> clazz : apiClasses) {
             scriptNames2PlatypusApiClasses.put(getScriptConstructorName(clazz), clazz);

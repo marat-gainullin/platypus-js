@@ -132,7 +132,7 @@ public class JsCompletionItem implements CompletionItem {
         if (informationText == null || informationText.isEmpty()) {
             return "";//NOI18N
         } else {
-            JsCommentFormatter formatter = new JsCommentFormatter(CompletionSupport.getComments(informationText));
+            JsCommentFormatter formatter = new JsCommentFormatter(CompletionUtils.getComments(informationText));
             return formatter.toHtml();
         }
     }
