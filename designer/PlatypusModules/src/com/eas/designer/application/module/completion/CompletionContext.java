@@ -67,6 +67,7 @@ public class CompletionContext {
                             }
                             PropertiesUtils.setPropertyAccessStatus(pb, method.getName());
                             PropertiesUtils.setPropertyReturnType(pb, method);
+                            PropertiesUtils.setPropertyEventClass(pb, method);
                             if (pb.jsDoc == null || pb.jsDoc.isEmpty()) {
                                 pb.jsDoc = method.getAnnotation(ScriptFunction.class).jsDoc();
                             }

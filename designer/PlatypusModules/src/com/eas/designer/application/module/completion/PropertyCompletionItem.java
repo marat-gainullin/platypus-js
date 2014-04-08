@@ -6,6 +6,11 @@ package com.eas.designer.application.module.completion;
 
 import com.eas.util.PropertiesUtils.PropBox;
 import javax.swing.ImageIcon;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.JTextComponent;
+import javax.swing.text.StyledDocument;
+import org.netbeans.api.editor.completion.Completion;
+import org.openide.ErrorManager;
 
 /**
  *
@@ -18,7 +23,8 @@ public class PropertyCompletionItem extends JsCompletionItem {
     protected static final ImageIcon propertyWoIcon = new ImageIcon(PropertyCompletionItem.class.getResource("property_wo.png"));
     protected PropBox propBox;
     private static final int SORT_PRIORITY = 20;
-    
+    private static final String FUNCTION_HEADER = " = function(event) {\n";//NOI18N
+
     public PropertyCompletionItem(PropBox aPropBox, int aStartOffset, int aEndOffset) {
         super(aPropBox.name, (aPropBox.jsDoc != null && !aPropBox.jsDoc.isEmpty()) ? aPropBox.jsDoc : null, aStartOffset, aEndOffset);
         propBox = aPropBox;
@@ -33,9 +39,88 @@ public class PropertyCompletionItem extends JsCompletionItem {
             icon = propertyRoIcon;
         }
     }
-    
+
+    @Override
+    public void defaultAction(JTextComponent component) {
+        try {
+            StyledDocument doc = (StyledDocument) component.getDocument();
+            String tabs = getLineTabs(doc, startOffset);
+            doc.remove(startOffset, endOffset - startOffset);
+            boolean insertEventAssignmentTemplate = propBox.eventClass != null && isLineEndClear(doc, endOffset);
+            doc.insertString(startOffset, insertEventAssignmentTemplate ? getEventHandlerBody(tabs) : text, null);
+            Completion.get().hideAll();
+            if (insertEventAssignmentTemplate) {
+                component.setCaretPosition(getEventTemplateCaretPosition(tabs));
+            }
+        } catch (BadLocationException ex) {
+            ErrorManager.getDefault().notify(ex);
+        }
+    }
+
     @Override
     public int getSortPriority() {
         return SORT_PRIORITY;
+    }
+
+    private String getEventHandlerBody(String tabs) {
+        return text
+                + FUNCTION_HEADER
+                + tabs + tabs + "\n"//NOI18N
+                + tabs + "};\n";//NOI18N
+    }
+
+    private int getEventTemplateCaretPosition(String tabs) {
+        return startOffset + text.length() + FUNCTION_HEADER.length() + tabs.length() * 2;
+    }
+
+    private String getLineTabs(StyledDocument doc, int startOffset) {
+        int i = startOffset;
+        String s;
+        try {
+            do {
+
+                s = doc.getText(i, 1);
+                if ((i > 0 && !"\n".equals(s))) {//NOI18N
+                    i--;
+                } else {
+                    break;
+                }
+
+            } while (true);
+            StringBuilder tabs = new StringBuilder();
+            i++;
+            do {
+                s = doc.getText(i, 1);
+                if (" ".equals(s) || "\t".equals(s)) {//NOI18N
+                    tabs.append(s);
+                } else if (Character.isJavaIdentifierPart(s.charAt(0))) {
+                    break;
+                }
+                i++;
+
+            } while (i < doc.getLength());
+            return tabs.toString();
+        } catch (BadLocationException ex) {
+            throw new RuntimeException(ex);//should never happen
+        }
+    }
+
+    private boolean isLineEndClear(StyledDocument doc, int pos) {
+        String s;
+        int i = pos;
+        try {
+            do {
+                s = doc.getText(i, 1);
+                if ("\n".equals(s)) {//NOI18N
+                    return true;
+                } else if (Character.isJavaIdentifierPart(s.charAt(0))) {
+                    return false;
+                }
+                i++;
+            } while (i < doc.getLength());
+            return false;
+        } catch (BadLocationException ex) {
+            throw new RuntimeException(ex);
+        }
     }
 }
