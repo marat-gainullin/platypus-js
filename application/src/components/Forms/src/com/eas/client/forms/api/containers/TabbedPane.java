@@ -6,7 +6,9 @@ package com.eas.client.forms.api.containers;
 
 import com.eas.client.forms.api.Component;
 import com.eas.client.forms.api.Container;
+import com.eas.client.forms.api.events.ChangeEvent;
 import com.eas.controls.events.ControlEventsIProxy;
+import com.eas.script.EventMethod;
 import com.eas.script.ScriptFunction;
 import javax.swing.Icon;
 import javax.swing.JTabbedPane;
@@ -98,6 +100,7 @@ public class TabbedPane extends Container<JTabbedPane> {
             + " */";
     
     @ScriptFunction(jsDoc = ON_STATE_CHANGED_JSDOC)
+    @EventMethod(eventClass = ChangeEvent.class)
     public Function getOnStateChanged() {
         ControlEventsIProxy proxy = getEventsProxy(delegate);
         return proxy != null ? proxy.getHandlers().get(ControlEventsIProxy.stateChanged) : null;

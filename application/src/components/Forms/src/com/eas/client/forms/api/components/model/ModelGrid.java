@@ -5,8 +5,10 @@
 package com.eas.client.forms.api.components.model;
 
 import com.eas.client.forms.api.Component;
+import com.eas.client.forms.api.events.RenderEvent;
 import com.eas.client.model.script.RowHostObject;
 import com.eas.dbcontrols.grid.DbGrid;
+import com.eas.script.EventMethod;
 import com.eas.script.ScriptFunction;
 import java.awt.Color;
 import org.mozilla.javascript.Function;
@@ -124,6 +126,7 @@ public class ModelGrid extends Component<DbGrid> {
             + " */";
 
     @ScriptFunction(jsDoc = ON_RENDER_JSDOC)
+    @EventMethod(eventClass = RenderEvent.class)
     public Function getOnRender() {
         return delegate.getGeneralRowFunction();
     }
