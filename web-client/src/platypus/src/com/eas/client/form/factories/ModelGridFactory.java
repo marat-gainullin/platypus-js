@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.bearsoft.gwt.ui.widgets.ObjectFormat;
+import com.bearsoft.gwt.ui.widgets.grid.header.HeaderNode;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.Utils;
 import com.eas.client.form.ControlsUtils;
@@ -17,19 +18,22 @@ import com.eas.client.form.grid.columns.LookupModelGridColumn;
 import com.eas.client.form.grid.columns.ModelGridColumn;
 import com.eas.client.form.grid.columns.TextAreaModelGridColumn;
 import com.eas.client.form.grid.columns.TextModelGridColumn;
-import com.eas.client.form.grid.header.HeaderNode;
 import com.eas.client.form.grid.rows.RowsetDataProvider;
 import com.eas.client.form.published.widgets.model.ModelElementRef;
 import com.eas.client.form.published.widgets.model.ModelGrid;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Model;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.user.cellview.client.SafeHtmlHeader;
 import com.google.gwt.xml.client.Element;
 import com.google.gwt.xml.client.NodeList;
 
-public class GridFactory {
+public class ModelGridFactory {
 
 	//
 	public static final int ONE_FIELD_ONE_QUERY_TREE_KIND = 1;
@@ -47,11 +51,11 @@ public class GridFactory {
 	protected ModelGrid grid;
 	// columns
 	protected List<HeaderNode> headerForest = new ArrayList<>();
-	protected List<ModelGridColumn<?>> columns = new ArrayList<>();
+	//protected List<ModelGridColumn<?>> columns = new ArrayList<>();
 
 	protected Set<Entity> rowsetsOfInterestHosts = new HashSet<Entity>();
 
-	public GridFactory(Element aTag, Model aModel) {
+	public ModelGridFactory(Element aTag, Model aModel) {
 		super();
 		gridTag = aTag;
 		model = aModel;
@@ -87,16 +91,19 @@ public class GridFactory {
 		grid.setRowsSource(rowsSource);
 		// Selection models & service column configuration
 		grid.setRowsHeaderType(rowsHeaderType);
+		for(int i = 0; i < grid.getDataColumnCount(); i++){
+			headerForest.add(new HeaderNode(grid.getColumnHeader(i)));
+		}
 		// Columns multi level structure
 		NodeList nodesWithColumns = gridTag.getChildNodes();
 		for (int i = 0; i < nodesWithColumns.getLength(); i++) {
 			if ("column".equalsIgnoreCase(nodesWithColumns.item(i).getNodeName())) {
 				assert nodesWithColumns.item(i) instanceof Element : "Column must be a tag";
 				Element columnTag = (Element) nodesWithColumns.item(i);
-				processColumn(columnTag, 0, headerForest);
+				processColumn(columnTag, headerForest);
 			}
 		}
-		// Data plain and tree(optional) layers
+		// Plain and tree(optional) data layers
 		if (isTreeConfigured()) {
 		} else {
 		}
@@ -106,9 +113,14 @@ public class GridFactory {
 		 */
 		// row lines ?
 		// column lines ?
+		/*
 		for (Entity entity : rowsetsOfInterestHosts) {
 			grid.addUpdatingTriggerEntity(entity);
 		}
+		*/
+		grid.setHeader(headerForest);
+		grid.setFrozenColumns(fixedColumns);
+		grid.setFrozenRows(fixedRows);
 	}
 
 	private boolean isLazyTreeConfigured() {
@@ -119,20 +131,23 @@ public class GridFactory {
 		return rowsSource != null && unaryLinkField.isCorrect() && unaryLinkField.field != null && (treeKind == ONE_FIELD_ONE_QUERY_TREE_KIND || treeKind == FIELD_2_PARAMETER_TREE_KIND);
 	}
 
-	private void processColumn(Element aTag, int deepness, List<HeaderNode> header) throws Exception {
+	private void processColumn(Element aTag, List<HeaderNode> header) throws Exception {
 		HeaderNode hNode = new HeaderNode();
 		header.add(hNode);
 		// plain settings
 		String name = aTag.getAttribute("name");
 		String title = aTag.getAttribute("title");
+		if(title == null)
+			title = name;
 		ModelElementRef modelElement = null;
 		Element controlTag = null;
 		// style
 		Element headerEasFontTag = null;
 		Element styleTag = null;
 		NodeList columnNodes = aTag.getChildNodes();
-		int childrenCount = columnNodes != null ? columnNodes.getLength() : 0;
-		for (int c = 0; c < childrenCount; c++) {
+		int childColumnsCount = 0;
+		int childTagsCount = columnNodes != null ? columnNodes.getLength() : 0;
+		for (int c = 0; c < childTagsCount; c++) {
 			if ("datamodelElement".equalsIgnoreCase(columnNodes.item(c).getNodeName()))
 				modelElement = new ModelElementRef((Element) columnNodes.item(c), model);
 			else if ("controlInfo".equalsIgnoreCase(columnNodes.item(c).getNodeName()))
@@ -143,14 +158,19 @@ public class GridFactory {
 			else if ("style".equalsIgnoreCase(columnNodes.item(c).getNodeName()))
 				styleTag = (Element) columnNodes.item(c);
 			else if ("column".equalsIgnoreCase(columnNodes.item(c).getNodeName())) {
-				processColumn((Element) columnNodes.item(c), deepness + 1, hNode.getChildren());
+				childColumnsCount++;
+				processColumn((Element) columnNodes.item(c), hNode.getChildren());
 			}
 		}
-		if (childrenCount == 0)
-			configureColumn(name, title, modelElement, aTag, controlTag);
+		if (childColumnsCount == 0){
+			configureColumn(name, title, modelElement, aTag, controlTag, hNode);
+		}else{			
+			SafeHtml safeHtml = title.startsWith("<html>") ? SafeHtmlUtils.fromTrustedString(title.substring(6)) : SafeHtmlUtils.fromString(title);
+			hNode.setHeader(new SafeHtmlHeader(safeHtml));
+		}
 	}
 
-	private void configureColumn(String aName, String aTitle, final ModelElementRef aColModelElement, Element aColumnTag, Element aControlTag) throws Exception {
+	private void configureColumn(String aName, String aTitle, final ModelElementRef aColModelElement, Element aColumnTag, Element aControlTag, HeaderNode aHeaderNode) throws Exception {
 		ModelGridColumn<?> column = null;
 		
 		boolean visible = Utils.getBooleanAttribute(aColumnTag, "visible", true);
@@ -224,7 +244,9 @@ public class GridFactory {
 			column = new TextModelGridColumn(aName);
 		}
 		if(column != null){
-			columns.add(column);
+			grid.addColumn(column, aTitle);
+			aHeaderNode.setHeader(grid.getColumnHeader(grid.getDataColumnCount() - 1));
+			grid.setColumnWidth(column, width, Style.Unit.PX);
 			column.setRowsEntity(rowsSource);
 			column.setColumnModelRef(aColModelElement);
 			column.setWidth(width);

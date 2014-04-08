@@ -6,7 +6,9 @@
 package com.bearsoft.gwt.ui.widgets;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.google.gwt.dom.client.OptionElement;
 import com.google.gwt.dom.client.SelectElement;
@@ -27,6 +29,7 @@ import com.google.gwt.user.client.ui.ListBox;
 public class StyledListBox<T> extends ListBox implements HasValue<T> {
 
 	protected List<T> associatedValues = new ArrayList<>();
+	protected Map<T, Integer> indicies;
 
 	public StyledListBox() {
 		this(false);
@@ -69,6 +72,7 @@ public class StyledListBox<T> extends ListBox implements HasValue<T> {
 		} else {
 			associatedValues.add(index, null);
 		}
+		indicies = null;
 	}
 
 	private void checkIndex(int index) {
@@ -90,6 +94,7 @@ public class StyledListBox<T> extends ListBox implements HasValue<T> {
 	public void setAssociatedValue(int aIndex, T aValue) {
 		checkIndex(aIndex);
 		associatedValues.set(aIndex, aValue);
+		indicies = null;
 	}
 
 	public String getKey(int aIndex) {
@@ -113,6 +118,7 @@ public class StyledListBox<T> extends ListBox implements HasValue<T> {
 	public void clear() {
 		super.clear();
 		associatedValues.clear();
+		indicies = null;
 	}
 
 	@Override
@@ -137,14 +143,16 @@ public class StyledListBox<T> extends ListBox implements HasValue<T> {
 
 	@Override
 	public void setValue(T value, boolean fireEvents) {
-		int index = -1;
-		for (int i = 0; i < getItemCount(); i++) {
-			T association = getAssociatedValue(i);
-			if (association == value) {
-				index = i;
-				break;
+		if (indicies == null) {
+			indicies = new HashMap<>();
+			for (int i = 0; i < associatedValues.size(); i++) {
+				T association = associatedValues.get(i);
+				indicies.put(association, i);
 			}
 		}
+		Integer index = indicies.get(value);
+		if (index == null)
+			index = -1;
 		setSelectedIndex(index);
 		if (fireEvents) {
 			ValueChangeEvent.fire(StyledListBox.this, getValue());

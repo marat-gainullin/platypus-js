@@ -37,7 +37,7 @@ public class ModelWidgetsFactory extends WidgetsFactory {
 	}
 
 	@Override
-	protected UIObject createComponent(final Element aTag) throws Exception {
+	protected UIObject createWidget(final Element aTag) throws Exception {
 		String designInfoTypeName = aTag.getAttribute(TYPE_ATTRIBUTE);
 		assert isRoot || designInfoTypeName != null : "Form structure is broken. Attribute '" + TYPE_ATTRIBUTE + "' must present for every widget.";
 
@@ -45,7 +45,7 @@ public class ModelWidgetsFactory extends WidgetsFactory {
 		} else if ("DbMapDesignInfo".equalsIgnoreCase(designInfoTypeName)) {
 			return createStubLabel(aTag, "Type 'ModelMap' is unsupported.");
 		} else if ("DbGridDesignInfo".equalsIgnoreCase(designInfoTypeName)) {
-			final ModelGrid mGrid = createDbGrid(aTag);
+			final ModelGrid mGrid = createGrid(aTag);
 			PublishedComponent published = Publisher.publish(mGrid);
 			mGrid.setPublished(published);
 			processGeneralProperties(mGrid, aTag, published);
@@ -178,11 +178,11 @@ public class ModelWidgetsFactory extends WidgetsFactory {
 					return createStubLabel(aTag, MODEL_ELEMENT_MISSING);
 			}
 		}
-		return super.createComponent(aTag);
+		return super.createWidget(aTag);
 	}
 
-	private ModelGrid createDbGrid(Element aTag) throws Exception {
-		GridFactory factory = new GridFactory(aTag, model);
+	private ModelGrid createGrid(Element aTag) throws Exception {
+		ModelGridFactory factory = new ModelGridFactory(aTag, model);
 		factory.process();
 		ModelGrid mGrid = factory.getModelGrid();
 		return mGrid;

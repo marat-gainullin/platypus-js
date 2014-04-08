@@ -393,26 +393,25 @@ public class JsWidgets {
  	    });
 	    Object.defineProperty(aPublished, "background", {
 		    get : function() {
-		    	if(_background == null) {
-		    		var style = $wnd.getElementComputedStyle(comp.@com.google.gwt.user.client.ui.UIObject::getElement()());
-		    		return @com.eas.client.form.ControlsUtils::parseColor(Ljava/lang/String;)(style.backgroundColor);
-		    	}
+		    	//if(_background == null) {
+		    	//	var style = $wnd.getElementComputedStyle(comp.@com.google.gwt.user.client.ui.UIObject::getElement()());
+		    	//	return @com.eas.client.form.ControlsUtils::parseColor(Ljava/lang/String;)(style.backgroundColor);
+		    	//}
 		    	return _background;
 		    },
 		    set : function(aValue) {
 		    	_background = aValue;
 		    	//apply
-		    	@com.eas.client.form.ControlsUtils::applyBackground(Lcom/google/gwt/user/client/ui/UIObject;Ljava/lang/String;)(comp, _background!=null?_background.toStyled():""); 
+		    	@com.eas.client.form.ControlsUtils::applyBackground(Lcom/google/gwt/user/client/ui/UIObject;Ljava/lang/String;)(comp, _background != null && _opaque ? _background.toStyled() : ""); 
 		    }
  	    });
 	    Object.defineProperty(aPublished, "backgroundSet", {get : function(){return _background != null;}});
 	    Object.defineProperty(aPublished, "foreground", {
 		    get : function() {
-		    	if(_foreground == null)
-		    	{
-		    		var style = $wnd.getElementComputedStyle(comp.@com.google.gwt.user.client.ui.Widget::getElement()());
-		    		return @com.eas.client.form.ControlsUtils::parseColor(Ljava/lang/String;)(style.color);
-		    	}
+		    	// if(_foreground == null){
+		    	//	var style = $wnd.getElementComputedStyle(comp.@com.google.gwt.user.client.ui.Widget::getElement()());
+		    	//	return @com.eas.client.form.ControlsUtils::parseColor(Ljava/lang/String;)(style.color);
+		    	//}
 		    	return _foreground;
 		    },
 		    set : function(aValue) {
@@ -427,9 +426,9 @@ public class JsWidgets {
 		    	return _opaque;
 		    },
 		    set : function(aValue) {
-		    	_opaque = (false != aValue);
+		    	_opaque = !!aValue;
 		    	// apply
-	    		@com.eas.client.form.ControlsUtils::applyBackground(Lcom/google/gwt/user/client/ui/UIObject;Ljava/lang/String;)(comp, _opaque ? (_background != null ? _background.toStyled() : "") : "");
+	    		@com.eas.client.form.ControlsUtils::applyBackground(Lcom/google/gwt/user/client/ui/UIObject;Ljava/lang/String;)(comp, _background != null && _opaque ? _background.toStyled() : "");
 		    }
  	    });
 	    Object.defineProperty(aPublished, "font", {

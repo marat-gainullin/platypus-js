@@ -72,8 +72,8 @@ public class MaskFormat {
 	 * @throws ParseException
 	 *             if mask does not contain valid mask characters
 	 */
-	public void setMask(String mask) throws ParseException {
-		this.mask = mask;
+	public void setMask(String aValue) throws ParseException {
+		mask = aValue;
 		updateInternalMask();
 	}
 

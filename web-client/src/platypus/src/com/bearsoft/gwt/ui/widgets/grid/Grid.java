@@ -8,7 +8,6 @@ package com.bearsoft.gwt.ui.widgets.grid;
 import com.bearsoft.gwt.ui.dnd.XDataTransfer;
 import com.bearsoft.gwt.ui.menu.MenuItemCheckBox;
 import com.bearsoft.gwt.ui.widgets.grid.builders.NullHeaderOrFooterBuilder;
-import com.bearsoft.gwt.ui.widgets.grid.builders.SpanningSectionsBuilder;
 import com.bearsoft.gwt.ui.widgets.grid.builders.ThemedCellTableBuilder;
 import com.bearsoft.gwt.ui.widgets.grid.builders.ThemedHeaderOrFooterBuilder;
 import com.google.gwt.cell.client.Cell;
@@ -99,22 +98,13 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 	protected String dynamicCellClassName = "grid-cell-" + Document.get().createUniqueId();
 	protected StyleElement styleElement = Document.get().createStyleElement();
 
-	protected SpanningSectionsBuilder leftHeaderGroupsBuilder;
-	protected SpanningSectionsBuilder rightHeaderGroupsBuilder;
-
 	protected ListDataProvider<T> dataProvider;
 
 	protected int frozenColumns;
 	protected int frozenRows;
 
 	public Grid(ProvidesKey<T> aKeyProvider) {
-		this(aKeyProvider, null, null);
-	}
-
-	public Grid(ProvidesKey<T> aKeyProvider, SpanningSectionsBuilder aLeftHeaderGroupsBuilder, SpanningSectionsBuilder aRightHeaderGroupsBuilder) {
 		super();
-		leftHeaderGroupsBuilder = aLeftHeaderGroupsBuilder;
-		rightHeaderGroupsBuilder = aRightHeaderGroupsBuilder;
 		getElement().getStyle().setPosition(Style.Position.RELATIVE);
 		getElement().appendChild(styleElement);
 		setRowsHeight(25);
@@ -268,9 +258,9 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 			tbl.setTableLayoutFixed(true);
 		}
 		// header
-		headerLeft.setHeaderBuilder(new ThemedHeaderOrFooterBuilder<T>(headerLeft, false, leftHeaderGroupsBuilder));
+		headerLeft.setHeaderBuilder(new ThemedHeaderOrFooterBuilder<T>(headerLeft, false));
 		headerLeft.setFooterBuilder(new NullHeaderOrFooterBuilder<T>(headerLeft, true));
-		headerRight.setHeaderBuilder(new ThemedHeaderOrFooterBuilder<T>(headerRight, false, rightHeaderGroupsBuilder));
+		headerRight.setHeaderBuilder(new ThemedHeaderOrFooterBuilder<T>(headerRight, false));
 		headerRight.setFooterBuilder(new NullHeaderOrFooterBuilder<T>(headerRight, true));
 		// footer
 		footerLeft.setHeaderBuilder(new NullHeaderOrFooterBuilder<T>(footerLeft, false));
@@ -709,7 +699,7 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 	@Override
 	public void onResize() {
 		if (isAttached()) {
-			hive.setSize(getElement().getStyle().getWidth(), getElement().getStyle().getHeight());
+			hive.setSize(getElement().getClientWidth()+"px", getElement().getClientHeight()+"px");
 			propagateHeaderLeftWidth();
 			propagateHeightButScrollable();
 			columnsChevron.setHeight(Math.max(headerLeftContainer.getOffsetHeight(), headerRightContainer.getOffsetHeight()) + "px");
@@ -826,12 +816,12 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 
 	public void addColumn(Column<T, ?> aColumn, String aHeaderValue, Header<?> aFooter) {
 		if (headerLeft.getColumnCount() < frozenColumns) {
-			headerLeft.addColumn(aColumn, new DraggableHeader<T>(aHeaderValue, headerLeft, aColumn, getElement()));
+			headerLeft.addColumn(aColumn, new DraggableHeader<T>(aHeaderValue != null ? aHeaderValue : "", headerLeft, aColumn, getElement()));
 			frozenLeft.addColumn(aColumn);
 			scrollableLeft.addColumn(aColumn);
 			footerLeft.addColumn(aColumn, null, aFooter);
 		} else {
-			headerRight.addColumn(aColumn, new DraggableHeader<T>(aHeaderValue, headerRight, aColumn, getElement()));
+			headerRight.addColumn(aColumn, new DraggableHeader<T>(aHeaderValue != null ? aHeaderValue : "", headerRight, aColumn, getElement()));
 			frozenRight.addColumn(aColumn);
 			scrollableRight.addColumn(aColumn);
 			footerRight.addColumn(aColumn, null, aFooter);
@@ -1017,6 +1007,14 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 		return headerLeft.getColumnCount() + headerRight.getColumnCount();
 	}
 
+	public Column<T, ?> getDataColumn(int aIndex){
+		return aIndex >= 0 && aIndex < headerLeft.getColumnCount() ? headerLeft.getColumn(aIndex) : headerRight.getColumn(aIndex - headerLeft.getColumnCount()); 
+	}
+	
+	public Header<?> getColumnHeader(int aIndex){
+		return aIndex >= 0 && aIndex < headerLeft.getColumnCount() ? headerLeft.getHeader(aIndex) : headerRight.getHeader(aIndex - headerLeft.getColumnCount()); 
+	}
+	
 	public Element getViewCell(int row, int col) {
 		assert false : "getViewCell is not implemented yet.";
 		return null;

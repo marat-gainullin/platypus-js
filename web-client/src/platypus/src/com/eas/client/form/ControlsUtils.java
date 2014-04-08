@@ -305,7 +305,7 @@ public class ControlsUtils {
 	public static void reapplyStyle(HasPublished aComponent) {
 		if (aComponent instanceof UIObject && aComponent.getPublished() != null) {
 			PublishedComponent published = aComponent.getPublished().cast();
-			if (published.isBackgroundSet())
+			if (published.isBackgroundSet() && published.isOpaque())
 				ControlsUtils.applyBackground((UIObject) aComponent, published.getBackground());
 			if (published.isForegroundSet())
 				ControlsUtils.applyForeground((UIObject) aComponent, published.getForeground());

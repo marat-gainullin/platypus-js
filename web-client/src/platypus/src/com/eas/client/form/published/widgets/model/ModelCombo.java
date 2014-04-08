@@ -9,6 +9,7 @@ import com.bearsoft.gwt.ui.widgets.StyledListBox;
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.Utils;
+import com.bearsoft.rowset.events.RowsetEvent;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.utils.IDGenerator;
@@ -25,20 +26,47 @@ import com.eas.client.model.ParametersEntity;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.core.client.Callback;
+import com.google.gwt.dom.client.OptionElement;
+import com.google.gwt.dom.client.Style;
+import com.bearsoft.rowset.events.RowChangeEvent;
 
 public class ModelCombo extends PublishedDecoratorBox<Row> implements HasEmptyText {
 
-	protected CrossUpdater updater = new CrossUpdater(new Runnable() {
+	protected CrossUpdater updater = new CrossUpdater(new Callback<RowsetEvent, RowsetEvent>() {
 
 		@Override
-		public void run() {
-			redraw();
+		public void onFailure(RowsetEvent reason) {
+		}
+
+		@Override
+		public void onSuccess(RowsetEvent result) {
+			if (displayElement != null && valueElement != null) {
+				RowsetEvent event = (RowsetEvent) result;
+				Rowset displayRowset = displayElement.entity != null ? displayElement.entity.getRowset() : null;
+				Rowset valueRowset = valueElement.entity != null ? valueElement.entity.getRowset() : null;
+				if (event.getRowset() == displayRowset || event.getRowset() == valueRowset) {
+					if (event instanceof RowChangeEvent) {
+						RowChangeEvent change = (RowChangeEvent) event;
+						if (change.getOldRowCount() == change.getNewRowCount()) {
+							if (change.getRowset() == displayRowset && change.getFieldIndex() == displayElement.getColIndex() || change.getRowset() == valueRowset
+							        && change.getFieldIndex() == valueElement.getColIndex()) {
+								redraw();
+							}
+						} else {
+							redraw();
+						}
+					} else {
+						redraw();
+					}
+				}
+			}
 		}
 
 	});
 
 	protected RowKeyProvider rowKeyProvider = new RowKeyProvider();
-	protected String emptyText = "< >";
+	protected String emptyText;
 	protected ModelElementRef valueElement;
 	protected ModelElementRef displayElement;
 	protected StringRowValueConverter converter = new StringRowValueConverter();
@@ -73,7 +101,9 @@ public class ModelCombo extends PublishedDecoratorBox<Row> implements HasEmptyTe
 						Row bindedRow = bindedRowset.getCurrentRow();
 						if (bindedRow != null) {
 							Object bindedValue = bindedRow.getColumnObject(modelElement.getColIndex());
-							box.addItem(emptyText, emptyValueKey, null, null);
+							box.addItem(emptyText != null ? emptyText : "", emptyValueKey, null, "");
+							OptionElement option = box.getItem(box.getItemCount() - 1);
+							option.getStyle().setDisplay(Style.Display.NONE);
 							if (ModelCombo.this.list) {
 								for (Row row : valuesRowset.getCurrent()) {
 									Row displayRow = row;
@@ -83,7 +113,7 @@ public class ModelCombo extends PublishedDecoratorBox<Row> implements HasEmptyTe
 									}
 									String label = displayRow != null ? converter.convert(displayRow.getColumnObject(displayElement.getColIndex())) : "";
 									box.addItem(label, String.valueOf(row.getColumnObject(valueElement.getColIndex())), row, "");
-									if(oldValue == row){
+									if (oldValue == row) {
 										box.setSelectedIndex(box.getItemCount() - 1);
 									}
 								}
@@ -96,8 +126,8 @@ public class ModelCombo extends PublishedDecoratorBox<Row> implements HasEmptyTe
 								}
 								String label = displayRow != null ? converter.convert(displayRow.getColumnObject(displayElement.getColIndex())) : "";
 								box.addItem(label, String.valueOf(row.getColumnObject(valueElement.getColIndex())), row, "");
-								if(oldValue == row)
-									box.setSelectedIndex(0);
+								if (oldValue == row)
+									box.setSelectedIndex(1);
 							}
 						}
 					}

@@ -199,7 +199,7 @@ public class WidgetsFactory {
 		String nodeName = aTag.getNodeName();
 		assert (nodeName.equalsIgnoreCase(LAYOUT_TAG) && isRoot) || nodeName.equalsIgnoreCase(WIDGET_TAG) || nodeName.equalsIgnoreCase(NONVISUAL_TAG) : "Form structure is broken. Form must be constructed of widget and nonvisual tags";
 
-		UIObject component = createComponent(aTag);
+		UIObject component = createWidget(aTag);
 		if (component != null)// There are might be toggle groups, that are non
 		                      // visuals and so, not components
 		{
@@ -213,7 +213,7 @@ public class WidgetsFactory {
 			return null;
 	}
 
-	protected UIObject createComponent(Element aTag) throws Exception {
+	protected UIObject createWidget(Element aTag) throws Exception {
 		Element layoutTag = pickLayoutTag(aTag);
 		String designInfoTypeName = aTag.getAttribute(TYPE_ATTRIBUTE);
 		assert isRoot || designInfoTypeName != null : "Form structure is broken. Attribute '" + TYPE_ATTRIBUTE + "' must present for every widget.";
