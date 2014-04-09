@@ -1179,7 +1179,7 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
             + " */";
     
     @ScriptFunction(jsDoc = ON_WINDOW_OPENED_JSDOC)
-    @EventMethod(eventClass = WindowEvent.class)
+    @EventMethod(eventClass = com.eas.client.forms.api.events.WindowEvent.class)
     public Function getOnWindowOpened() {
         return windowHandler != null ? windowHandler.getHandlers().get(WindowEventsIProxy.windowOpened) : null;
     }
@@ -1197,7 +1197,7 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
             + " */";
     
     @ScriptFunction(jsDoc = ON_WINDOW_CLOSING_JSDOC)
-    @EventMethod(eventClass = WindowEvent.class)
+    @EventMethod(eventClass = com.eas.client.forms.api.events.WindowEvent.class)
     public Function getOnWindowClosing() {
         return windowHandler != null ? windowHandler.getHandlers().get(WindowEventsIProxy.windowClosing) : null;
     }
@@ -1215,7 +1215,7 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
             + " */";
     
     @ScriptFunction(jsDoc = ON_WINDOW_CLOSED_JSDOC)
-    @EventMethod(eventClass = WindowEvent.class)
+    @EventMethod(eventClass = com.eas.client.forms.api.events.WindowEvent.class)
     public Function getOnWindowClosed() {
         return windowHandler != null ? windowHandler.getHandlers().get(WindowEventsIProxy.windowClosed) : null;
     }
@@ -1233,7 +1233,7 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
             + " */";
     
     @ScriptFunction(jsDoc = ON_WINDOW_MINIMIZED_JSDOC)
-    @EventMethod(eventClass = WindowEvent.class)
+    @EventMethod(eventClass = com.eas.client.forms.api.events.WindowEvent.class)
     public Function getOnWindowMinimized() {
         return windowHandler != null ? windowHandler.getHandlers().get(WindowEventsIProxy.windowIconified) : null;
     }
@@ -1251,7 +1251,7 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
             + " */";
     
     @ScriptFunction(jsDoc = ON_WINDOW_RESTORED_JSDOC)
-    @EventMethod(eventClass = WindowEvent.class)
+    @EventMethod(eventClass = com.eas.client.forms.api.events.WindowEvent.class)
     public Function getOnWindowRestored() {
         return windowHandler != null ? windowHandler.getHandlers().get(WindowEventsIProxy.windowRestored) : null;
     }
@@ -1269,7 +1269,7 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
             + " */";
     
     @ScriptFunction(jsDoc = ON_WINDOW_MAXIMIZED_JSDOC)
-    @EventMethod(eventClass = WindowEvent.class)
+    @EventMethod(eventClass = com.eas.client.forms.api.events.WindowEvent.class)
     public Function getOnWindowMaximized() {
         return windowHandler != null ? windowHandler.getHandlers().get(WindowEventsIProxy.windowMaximized) : null;
     }
@@ -1287,7 +1287,7 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
             + " */";
     
     @ScriptFunction(jsDoc = ON_WINDOW_ACTIVATED_JSDOC)
-    @EventMethod(eventClass = WindowEvent.class)
+    @EventMethod(eventClass = com.eas.client.forms.api.events.WindowEvent.class)
     public Function getOnWindowActivated() {
         return windowHandler != null ? windowHandler.getHandlers().get(WindowEventsIProxy.windowActivated) : null;
     }
@@ -1305,7 +1305,7 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
             + " */";
     
     @ScriptFunction(jsDoc = ON_WINDOW_DEACTIVATED_JSDOC)
-    @EventMethod(eventClass = WindowEvent.class)
+    @EventMethod(eventClass = com.eas.client.forms.api.events.WindowEvent.class)
     public Function getOnWindowDeactivated() {
         return windowHandler != null ? windowHandler.getHandlers().get(WindowEventsIProxy.windowDeactivated) : null;
     }

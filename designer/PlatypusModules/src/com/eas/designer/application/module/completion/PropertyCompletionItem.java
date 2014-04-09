@@ -135,6 +135,6 @@ public class PropertyCompletionItem extends JsCompletionItem {
     
     
     private static int getNumberOfSpacesPerIndent() {
-       return DEFAULT_NUMBER_OF_SPACES_PER_INDENT;
+       return DEFAULT_NUMBER_OF_SPACES_PER_INDENT; //TODO read the NB editor's formating Number of Spaces per Indent value.
     }
 }
