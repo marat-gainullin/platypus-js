@@ -23,10 +23,12 @@ public class RowsetDataProvider extends ListDataProvider<Row> {
 	protected Map<Row, Integer> indicies;
 	protected Rowset rowset;
 	protected RowsetReflector rowsetReflector = new RowsetReflector();
+	protected Runnable onResize;
 
-	public RowsetDataProvider(Rowset aRowset) {
+	public RowsetDataProvider(Rowset aRowset, Runnable aOnResize) {
 		super();
 		setRowset(aRowset);
+		onResize = aOnResize;
 	}
 
 	public RowsetReflector getRowsetReflector() {
@@ -78,6 +80,8 @@ public class RowsetDataProvider extends ListDataProvider<Row> {
 		public void rowsetFiltered(RowsetFilterEvent event) {
 			getList().clear();
 			getList().addAll(rowset.getCurrent());
+			if(onResize != null)
+				onResize.run();
 			invalidate();
 		}
 
@@ -85,6 +89,8 @@ public class RowsetDataProvider extends ListDataProvider<Row> {
 		public void rowsetRequeried(RowsetRequeryEvent event) {
 			getList().clear();
 			getList().addAll(rowset.getCurrent());
+			if(onResize != null)
+				onResize.run();
 			invalidate();
 		}
 
@@ -92,6 +98,8 @@ public class RowsetDataProvider extends ListDataProvider<Row> {
 		public void rowsetRolledback(RowsetRollbackEvent event) {
 			getList().clear();
 			getList().addAll(rowset.getCurrent());
+			if(onResize != null)
+				onResize.run();
 			invalidate();
 		}
 
@@ -118,6 +126,8 @@ public class RowsetDataProvider extends ListDataProvider<Row> {
 			}
 			if (!event.isAjusting()) {
 				invalidate();
+				if(onResize != null)
+					onResize.run();
 			}
 		}
 
@@ -127,6 +137,8 @@ public class RowsetDataProvider extends ListDataProvider<Row> {
 				getList().clear();
 				getList().addAll(rowset.getCurrent());
 				invalidate();
+				if(onResize != null)
+					onResize.run();
 			} else if (!getList().isEmpty()) {
 				validate();
 				Integer index = indicies.get(event.getChangedRow());
@@ -155,6 +167,8 @@ public class RowsetDataProvider extends ListDataProvider<Row> {
 						}
 					}
 					invalidate();
+					if(onResize != null)
+						onResize.run();
 				}
 			}
 		}

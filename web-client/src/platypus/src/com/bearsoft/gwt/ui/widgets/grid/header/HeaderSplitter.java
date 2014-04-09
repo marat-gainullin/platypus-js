@@ -26,23 +26,18 @@ public class HeaderSplitter {
 	
 	protected void process(List<HeaderNode> toBeSplitted, List<HeaderNode> result, HeaderNode aClonedParent){
 		for(int i = 0; i < toBeSplitted.size(); i++){
+			if(leaveIndex == maxLeave - 1)
+				break;
 			HeaderNode n = toBeSplitted.get(i);
-			if(n.getChildren().isEmpty())
+			HeaderNode nc = new HeaderNode(n.getHeader());
+			if(n.getChildren().isEmpty()){
 				leaveIndex++;
+			}else{
+				process(n.getChildren(), nc.getChildren(), nc);
+			}
 			if(leaveIndex >= minLeave && leaveIndex < maxLeave){
-				HeaderNode nc = new HeaderNode();
-				nc.setHeader(n.getHeader());
 				result.add(nc);
 				nc.setParent(aClonedParent);
-				if(!n.getChildren().isEmpty()){
-					process(n.getChildren(), nc.getChildren(), nc);
-				}
-			}else if(leaveIndex < minLeave){
-				if(!n.getChildren().isEmpty()){
-					process(n.getChildren(), null, null);
-				}
-			}else{
-				break;
 			}
 		}
 	}

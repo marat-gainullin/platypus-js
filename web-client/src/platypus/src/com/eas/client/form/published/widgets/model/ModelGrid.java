@@ -3,10 +3,12 @@ package com.eas.client.form.published.widgets.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.bearsoft.gwt.ui.widgets.grid.DraggableHeader;
 import com.bearsoft.gwt.ui.widgets.grid.Grid;
 import com.bearsoft.gwt.ui.widgets.grid.builders.ThemedHeaderOrFooterBuilder;
 import com.bearsoft.gwt.ui.widgets.grid.header.HeaderNode;
 import com.bearsoft.gwt.ui.widgets.grid.header.HeaderSplitter;
+import com.bearsoft.gwt.ui.widgets.grid.processing.ListMultiSortHandler;
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.events.RowsetEvent;
 import com.eas.client.form.ControlsUtils;
@@ -19,6 +21,7 @@ import com.eas.client.form.grid.RowsetPositionSelectionHandler;
 import com.eas.client.form.grid.cells.rowmarker.RowMarkerCell;
 import com.eas.client.form.grid.columns.CheckServiceColumn;
 import com.eas.client.form.grid.columns.RadioServiceColumn;
+import com.eas.client.form.grid.rows.RowsetDataProvider;
 import com.eas.client.form.grid.selection.MultiRowSelectionModel;
 import com.eas.client.form.grid.selection.SingleRowSelectionModel;
 import com.eas.client.form.published.HasComponentPopupMenu;
@@ -35,6 +38,8 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
+import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.IdentityColumn;
 import com.google.gwt.view.client.SelectionModel;
 
@@ -64,13 +69,30 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 	protected int rowsHeaderType;
 	protected List<HeaderNode> header = new ArrayList<>();
 	// runtime
+	protected ListHandler<Row> sortHandler;
 	protected HandlerRegistration positionSelectionHandler;
+	protected boolean editable;
+	protected boolean deletable;
+	protected boolean insertable;
 
 	public ModelGrid() {
 		super(new RowKeyProvider());
 		finder = new FindWindow(this);
 		crossUpdaterAction = new GridCrossUpdaterAction(this);
 		crossUpdater = new CrossUpdater(crossUpdaterAction);
+		setDataProvider(new RowsetDataProvider(null, new Runnable() {
+			@Override
+			public void run() {
+				setupVisibleRanges();
+			}
+
+		}));
+		sortHandler = new ListMultiSortHandler<>(dataProvider.getList());
+		addColumnSortHandler(sortHandler);
+	}
+
+	public ListHandler<Row> getSortHandler() {
+		return sortHandler;
 	}
 
 	@Override
@@ -159,8 +181,11 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 				insertColumn(0, new RadioServiceColumn(sm), "\\", null);
 			} else if (rowsHeaderType == ROWS_HEADER_TYPE_USUAL) {
 				sm = new MultiRowSelectionModel();
-				IdentityColumn<Row> col = new IdentityColumn<>(new RowMarkerCell(rowsSource));
+				IdentityColumn<Row> col = new IdentityColumn<>(new RowMarkerCell(rowsSource.getRowset()));
 				insertColumn(0, col, "\\", null);
+				Header<?> identityHeader = getColumnHeader(0);
+				((DraggableHeader<?>) identityHeader).setMoveable(false);
+				((DraggableHeader<?>) identityHeader).setResizable(false);
 				setColumnWidth(col, 20, Style.Unit.PX);
 			} else {
 				sm = new MultiRowSelectionModel();
@@ -217,6 +242,7 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 	public void setRowsSource(Entity aValue) {
 		if (rowsSource != aValue) {
 			rowsSource = aValue;
+			((RowsetDataProvider) dataProvider).setRowset(rowsSource.getRowset());
 		}
 	}
 
@@ -241,37 +267,53 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 	}
 
 	public void selectRow(Row aRow) {
+		getSelectionModel().setSelected(aRow, true);
 	}
 
 	public void unselectRow(Row aRow) {
+		getSelectionModel().setSelected(aRow, false);
 	}
 
 	public List<JavaScriptObject> getJsSelected() throws Exception {
-		return null;
+		List<JavaScriptObject> result = new ArrayList<>();
+		for (Row row : dataProvider.getList()) {
+			if (getSelectionModel().isSelected(row))
+				result.add(Entity.publishRowFacade(row, rowsSource));
+		}
+		return result;
 	}
 
 	public void clearSelection() {
+		SelectionModel<? super Row> sm = getSelectionModel();
+		for (Row row : dataProvider.getList()) {
+			if (getSelectionModel().isSelected(row)) {
+				sm.setSelected(row, false);
+			}
+		}
 	}
 
 	public boolean isEditable() {
-		return false;
+		return editable;
 	}
 
 	public void setEditable(boolean aValue) {
+		editable = aValue;
 	}
 
 	public boolean isDeletable() {
-		return false;
+		return deletable;
 	}
 
 	public void setDeletable(boolean aValue) {
+		deletable = aValue;
 	}
 
 	public boolean isInsertable() {
-		return false;
+		return insertable;
 	}
 
 	public void setInsertable(boolean aValue) {
+		insertable = aValue;
 	}
 
 	public boolean makeVisible(Row aRow, boolean needToSelect) {

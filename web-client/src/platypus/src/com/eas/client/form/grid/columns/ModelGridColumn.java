@@ -1,12 +1,17 @@
 package com.eas.client.form.grid.columns;
 
+import java.util.Comparator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.bearsoft.gwt.ui.widgets.grid.DraggableHeader;
 import com.bearsoft.gwt.ui.widgets.grid.GridColumn;
+import com.bearsoft.gwt.ui.widgets.grid.cells.CellHasReadonly;
+import com.bearsoft.gwt.ui.widgets.grid.cells.RenderedPopupEditorCell;
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Utils;
+import com.bearsoft.rowset.sorting.RowsComparator;
+import com.bearsoft.rowset.sorting.SortingCriterion;
 import com.eas.client.converters.RowValueConverter;
 import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.Publisher;
@@ -32,14 +37,15 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 	protected RowValueConverter<T> converter;
 	protected DraggableHeader<T> header;
 	protected PublishedDecoratorBox<T> editor;
+	protected RowsComparator comparator;
 	protected ModelGrid grid;
 	protected String name;
 	protected int designedWidth;
 	protected boolean fixed;
 	protected boolean resizable;
+	protected boolean moveable;
 	protected boolean readonly;
 	protected boolean visible;
-	protected boolean sortable;
 	protected boolean selectOnly;
 	protected JavaScriptObject published;
 	protected JavaScriptObject onRender;
@@ -47,11 +53,22 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 
 	public ModelGridColumn(Cell<T> aCell, String aName, Entity aRowsEntity, ModelElementRef aColumnModelRef, RowValueConverter<T> aConverter) {
 		super(aCell);
+		if (aCell instanceof RenderedPopupEditorCell<?>) {
+			((RenderedPopupEditorCell<T>) aCell).setReadonly(new CellHasReadonly() {
+
+				@Override
+				public boolean isReadonly() {
+					return readonly || !grid.isEditable();
+				}
+
+			});
+		}
 		rowsEntity = aRowsEntity;
-		columnModelRef = aColumnModelRef;
+		setColumnModelRef(aColumnModelRef);
 		name = aName;
 		converter = aConverter;
 		setFieldUpdater(this);
+		setDefaultSortAscending(true);
 	}
 
 	@Override
@@ -69,7 +86,19 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 	}
 
 	public void setGrid(ModelGrid aValue) {
-		grid = aValue;
+		if (grid != aValue) {
+			if (grid != null) {
+				grid.getSortHandler().setComparator(this, null);
+			}
+			grid = aValue;
+			if (grid != null) {
+				if (isSortable()) {
+					grid.getSortHandler().setComparator(this, comparator);
+				} else {
+					grid.getSortHandler().setComparator(this, null);
+				}
+			}
+		}
 	}
 
 	public Entity getRowsEntity() {
@@ -85,7 +114,15 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 	}
 
 	public void setColumnModelRef(ModelElementRef aRef) {
-		columnModelRef = aRef;
+		if (columnModelRef != aRef) {
+			columnModelRef = aRef;
+			if (editor != null) {
+				editor.setClearButtonVisible(columnModelRef != null && columnModelRef.field != null ? columnModelRef.field.isNullable() : true);
+			}
+			if(columnModelRef != null && columnModelRef.entity != null && columnModelRef.field != null){
+				comparator = new RowsComparator(new SortingCriterion(columnModelRef.getColIndex(), true));
+			}
+		}
 	}
 
 	@Override
@@ -181,6 +218,18 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 	@Override
 	public void setResizable(boolean aValue) {
 		resizable = aValue;
+		if (header != null)
+			header.setResizable(resizable && !fixed);
+	}
+
+	public boolean isMoveable() {
+		return moveable;
+	}
+
+	public void setMoveable(boolean aValue) {
+		moveable = aValue;
+		if (header != null)
+			header.setMoveable(moveable && !fixed);
 	}
 
 	@Override
@@ -199,16 +248,27 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 
 	public void setFixed(boolean aValue) {
 		fixed = aValue;
+		if (header != null) {
+			header.setResizable(resizable && !fixed);
+			header.setMoveable(moveable && !fixed);
+		}
 	}
 
 	@Override
 	public boolean isSortable() {
-		return sortable;
+		return super.isSortable();
 	}
 
 	@Override
 	public void setSortable(boolean aValue) {
-		sortable = aValue;
+		super.setSortable(aValue);
+		if (grid != null) {
+			if (aValue) {
+				grid.getSortHandler().setComparator(this, comparator);
+			} else {
+				grid.getSortHandler().setComparator(this, null);
+			}
+		}
 	}
 
 	public boolean isSelectOnly() {
@@ -251,6 +311,10 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 
 	public void setHeader(DraggableHeader<T> aValue) {
 		header = aValue;
+		if (header != null) {
+			header.setResizable(resizable && !fixed);
+			header.setMoveable(moveable && !fixed);
+		}
 	}
 
 	public PublishedDecoratorBox<T> getEditor() {
@@ -265,6 +329,7 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 			editor = aEditor;
 			if (editor != null) {
 				editor.setOnSelect(onSelect);
+				editor.setClearButtonVisible(columnModelRef != null && columnModelRef.field != null ? columnModelRef.field.isNullable() : true);
 			}
 		}
 	}
@@ -371,7 +436,15 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 				return aColumn.@com.eas.client.form.grid.columns.ModelGridColumnFacade::isResizable()();
 			},
 			set : function(aValue) {
-				aColumn.@com.eas.client.form.grid.columns.ModelGridColumnFacade::setResizable(Z)((false != aValue));
+				aColumn.@com.eas.client.form.grid.columns.ModelGridColumnFacade::setResizable(Z)(!!aValue);
+			}
+		});
+		Object.defineProperty(published, "movable", {
+			get : function() {
+				return aColumn.@com.eas.client.form.grid.columns.ModelGridColumnFacade::isMoveable()();
+			},
+			set : function(aValue) {
+				aColumn.@com.eas.client.form.grid.columns.ModelGridColumnFacade::setMoveable(Z)(!!aValue);
 			}
 		});
 		Object.defineProperty(published, "readonly", {

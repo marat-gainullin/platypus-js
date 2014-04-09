@@ -19,11 +19,12 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public abstract class RenderedPopupEditorCell<T> extends AbstractPopupEditorCell<T> {
 
+	protected CellRenderer<T> renderer;
+	protected CellHasReadonly readonly;
+
 	public RenderedPopupEditorCell(Widget aEditor) {
 		super(aEditor, BrowserEvents.CLICK, BrowserEvents.DBLCLICK, BrowserEvents.KEYUP);
 	}
-
-	protected CellRenderer<T> renderer;
 
 	public CellRenderer<T> getRenderer() {
 		return renderer;
@@ -33,11 +34,24 @@ public abstract class RenderedPopupEditorCell<T> extends AbstractPopupEditorCell
 		renderer = aRenderer;
 	}
 
+	public CellHasReadonly getReadonly() {
+		return readonly;
+	}
+
+	public void setReadonly(CellHasReadonly readonly) {
+		this.readonly = readonly;
+	}
+
 	@Override
 	public void render(Context context, T value, SafeHtmlBuilder sb) {
 		if (renderer == null || !renderer.render(context, value, sb)) {
 			renderCell(context, value, sb);
 		}
+	}
+
+	public void startEditing(Element parent, T value, com.google.gwt.cell.client.ValueUpdater<T> valueUpdater) {
+		if (readonly == null || !readonly.isReadonly())
+			super.startEditing(parent, value, valueUpdater);
 	}
 
 	protected abstract void renderCell(Context context, T value, SafeHtmlBuilder sb);

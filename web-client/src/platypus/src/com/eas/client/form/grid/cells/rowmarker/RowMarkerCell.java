@@ -1,24 +1,24 @@
 package com.eas.client.form.grid.cells.rowmarker;
 
 import com.bearsoft.rowset.Row;
-import com.eas.client.model.Entity;
+import com.bearsoft.rowset.Rowset;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 
 public class RowMarkerCell extends AbstractCell<Row> {
 	
-	protected Entity rowsSource;
+	protected Rowset rowsSource;
 
-	public RowMarkerCell(Entity aRowsSource) {
+	public RowMarkerCell(Rowset aRowsSource) {
 		super();
 		rowsSource = aRowsSource;
 	}
 
-	public Entity getRowsSource() {
+	public Rowset getRowsSource() {
 		return rowsSource;
 	}
 
-	public void setRowsSource(Entity aValue) {
+	public void setRowsSource(Rowset aValue) {
 		rowsSource = aValue;
 	}
 
@@ -29,7 +29,7 @@ public class RowMarkerCell extends AbstractCell<Row> {
 		bl.append(RowMarkerResources.INSTANCE.style().rowMarkerLeft());
 		StringBuilder br = new StringBuilder();
 		br.append(RowMarkerResources.INSTANCE.style().rowMarkerRight());
-		boolean currentRow = rowsSource.getRowset() != null && rowsSource.getRowset().getCurrentRow() == value;
+		boolean currentRow = rowsSource != null && rowsSource.getCurrentRow() == value;
 		if (currentRow)
 			br.append(" ").append(RowMarkerResources.INSTANCE.style().rowMarkerCurrent());
 		if (value.isInserted())

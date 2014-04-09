@@ -6,11 +6,13 @@
 package com.bearsoft.gwt.ui.widgets.grid.builders;
 
 import com.bearsoft.gwt.ui.widgets.grid.ThemedGridResources;
+import com.bearsoft.gwt.ui.widgets.grid.header.HasSortList;
 import com.bearsoft.gwt.ui.widgets.grid.header.HeaderAnalyzer;
 import com.bearsoft.gwt.ui.widgets.grid.header.HeaderNode;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.dom.builder.shared.TableCellBuilder;
 import com.google.gwt.dom.builder.shared.TableRowBuilder;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.AbstractHeaderOrFooterBuilder;
 import com.google.gwt.user.cellview.client.Column;
@@ -31,11 +33,17 @@ public class ThemedHeaderOrFooterBuilder<T> extends AbstractHeaderOrFooterBuilde
 
 	protected int rowsHeight = 18;
 	protected List<HeaderNode> headerNodes;
+	protected HasSortList sortListHolder;
 
 	public ThemedHeaderOrFooterBuilder(AbstractCellTable<T> table, boolean isFooter) {
-		this(table, isFooter, null);
+		super(table, isFooter);
 	}
 
+	public ThemedHeaderOrFooterBuilder(AbstractCellTable<T> table, boolean isFooter, HasSortList aSortListHolder) {
+		super(table, isFooter);
+		sortListHolder = aSortListHolder;
+	}
+	
 	public ThemedHeaderOrFooterBuilder(AbstractCellTable<T> table, boolean isFooter, List<HeaderNode> aHeaderNodes) {
 		super(table, isFooter);
 		headerNodes = aHeaderNodes;
@@ -45,6 +53,14 @@ public class ThemedHeaderOrFooterBuilder<T> extends AbstractHeaderOrFooterBuilde
 		super(table, isFooter);
 		rowsHeight = aRowsHeight;
 		headerNodes = aHeaderNodes;
+	}
+
+	public HasSortList getSortListHolder() {
+		return sortListHolder;
+	}
+
+	public void setSortListHolder(HasSortList sortListHolder) {
+		this.sortListHolder = sortListHolder;
 	}
 
 	public int getRowsHeight() {
@@ -60,15 +76,23 @@ public class ThemedHeaderOrFooterBuilder<T> extends AbstractHeaderOrFooterBuilde
 	}
 
 	public void setHeaderNodes(List<HeaderNode> aNodes) {
-		if(headerNodes != aNodes){
+		if (headerNodes != aNodes) {
 			headerNodes = aNodes;
 			HeaderAnalyzer.analyze(headerNodes);
 		}
 	}
 
-	public TableRowBuilder newRow() {
-		return startRow();
+	@Override
+	public boolean isColumn(Element elem) {
+		return super.isColumn(elem);
 	}
+
+	@Override
+	public Column<T, ?> getColumn(Element elem) {
+		return super.getColumn(elem);
+	}
+
+	protected int leavesCount;
 
 	@Override
 	protected boolean buildHeaderOrFooterImpl() {
@@ -100,7 +124,12 @@ public class ThemedHeaderOrFooterBuilder<T> extends AbstractHeaderOrFooterBuilde
 					headersForest = headerNodes;
 				}
 				// Get information about the sorted columns.
-				ColumnSortList sortList = table.getColumnSortList();
+				ColumnSortList sortList;
+				if (sortListHolder != null) {
+					sortList = sortListHolder.getSortList();
+				} else {
+					sortList = table.getColumnSortList();
+				}
 				Map<Column<T, ?>, ColumnSortList.ColumnSortInfo> sortedColumns = new HashMap<>();
 				if (sortList != null) {
 					for (int i = 0; i < sortList.size(); i++) {
@@ -108,6 +137,7 @@ public class ThemedHeaderOrFooterBuilder<T> extends AbstractHeaderOrFooterBuilde
 						sortedColumns.put((Column<T, ?>) sInfo.getColumn(), sInfo);
 					}
 				}
+				leavesCount = 0;
 				buildSections(headersForest, sortedColumns);
 				return true;
 			} else {
@@ -135,7 +165,11 @@ public class ThemedHeaderOrFooterBuilder<T> extends AbstractHeaderOrFooterBuilde
 			HeaderNode headerNode = aHeaders.get(i);
 			children.addAll(headerNode.getChildren());
 			Header<?> headerOrFooter = headerNode.getHeader();
-			Column<T, ?> column = headerNode.getChildren().isEmpty() ? getTable().getColumn(i) : null;
+			Column<T, ?> column = null;
+			if (headerNode.getChildren().isEmpty()) {
+				column = getTable().getColumn(leavesCount);
+				leavesCount++;
+			}
 			boolean isSortable = !isFooter && column != null && column.isSortable();
 			ColumnSortList.ColumnSortInfo sortedInfo = sortedColumns.get(column);
 			boolean isSorted = sortedInfo != null;
@@ -155,8 +189,10 @@ public class ThemedHeaderOrFooterBuilder<T> extends AbstractHeaderOrFooterBuilde
 			}
 			// Render the header or footer.
 			TableCellBuilder th = tr.startTH();
-			th.rowSpan(headerNode.getDepthRemainder() + 1);
-			th.colSpan(headerNode.getLeavesCount());
+			if (headerNode.getDepthRemainder() > 0)
+				th.rowSpan(headerNode.getDepthRemainder() + 1);
+			if (headerNode.getLeavesCount() > 1)
+				th.colSpan(headerNode.getLeavesCount());
 			th.className(classesBuilder.toString());
 			if (headerOrFooter != null) {
 				appendExtraStyles(headerOrFooter, classesBuilder);
@@ -178,7 +214,7 @@ public class ThemedHeaderOrFooterBuilder<T> extends AbstractHeaderOrFooterBuilde
 		}
 		// End the row.
 		tr.endTR();
-		if(!children.isEmpty()){
+		if (!children.isEmpty()) {
 			buildSections(children, sortedColumns);
 		}
 	}

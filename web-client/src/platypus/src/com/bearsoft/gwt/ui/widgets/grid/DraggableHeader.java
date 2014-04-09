@@ -26,6 +26,8 @@ public class DraggableHeader<T> extends Header<String> {
 	protected GridSection<T> table;
 	protected Element hostElement;
 	protected Column<T, ?> column;
+	protected boolean moveable = true;
+	protected boolean resizable = true;
 
 	public DraggableHeader(String aTitle, GridSection<T> aTable, Column<T, ?> aColumn) {
 		this(aTitle, aTable, aColumn, aTable.getElement());
@@ -67,20 +69,41 @@ public class DraggableHeader<T> extends Header<String> {
 		return title;
 	}
 
-	public void setTitle(String aValue){
+	public void setTitle(String aValue) {
 		title = aValue;
 	}
-	
+
+	public boolean isResizable() {
+		return resizable;
+	}
+
+	public void setResizable(boolean aValue) {
+		resizable = aValue;
+	}
+
+	public boolean isMoveable() {
+		return moveable;
+	}
+
+	public void setMoveable(boolean aValue) {
+		moveable = aValue;
+	}
+
 	@Override
 	public void onBrowserEvent(Context context, Element targetCell, NativeEvent event) {
 		if (BrowserEvents.DRAGSTART.equals(event.getType())) {
 			event.stopPropagation();
-			event.getDataTransfer().<XDataTransfer> cast().setEffectAllowed("move");
 			EventTarget et = event.getEventTarget();
 			if (Element.is(et)) {
-				DraggedColumn.instance = new DraggedColumn<>(column, table, targetCell, Element.as(et));
-				event.getDataTransfer().setData("Text",
-				        "grid-section-" + table.hashCode() + "; column-" + (DraggedColumn.instance.isMove() ? "moved" : "resized") + ": " + table.getColumnIndex(column));
+				DraggedColumn<?> col = new DraggedColumn<>(column, table, targetCell, Element.as(et));
+				if ((col.isMove() && moveable) || (col.isResize() && resizable)) {
+					event.getDataTransfer().<XDataTransfer> cast().setEffectAllowed("move");
+					DraggedColumn.instance = col;
+					event.getDataTransfer().setData("Text",
+					        "grid-section-" + table.hashCode() + "; column-" + (DraggedColumn.instance.isMove() ? "moved" : "resized") + ": " + table.getColumnIndex(column));
+				}else{
+					event.getDataTransfer().<XDataTransfer> cast().setEffectAllowed("none");
+				}
 			}
 		}
 		super.onBrowserEvent(context, targetCell, event);
@@ -112,8 +135,8 @@ public class DraggableHeader<T> extends Header<String> {
 		@Override
 		public void render(Context context, String value, SafeHtmlBuilder sb) {
 			headerStyles.ensureInjected();// ondragenter=\"event.preventDefault();\"
-										  // ondragover=\"event.preventDefault();\"
-										  // ondrop=\"event.preventDefault();\"
+			                              // ondragover=\"event.preventDefault();\"
+			                              // ondrop=\"event.preventDefault();\"
 			sb.append(SafeHtmlUtils.fromTrustedString("<div style=\"position:relative;\">"))
 			        .append(SafeHtmlUtils.fromTrustedString("<span draggable=\"true\" class=\"" + headerStyles.gridHeaderMover() + " grid-header-mover\"></span>"))
 			        .append(SafeHtmlUtils.fromTrustedString("<span draggable=\"true\" class=\"" + headerStyles.gridHeaderResizer() + " grid-header-resizer\"></span>"))

@@ -5,11 +5,17 @@
  */
 package com.bearsoft.gwt.ui.widgets.grid;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.bearsoft.gwt.ui.dnd.XDataTransfer;
 import com.bearsoft.gwt.ui.menu.MenuItemCheckBox;
 import com.bearsoft.gwt.ui.widgets.grid.builders.NullHeaderOrFooterBuilder;
 import com.bearsoft.gwt.ui.widgets.grid.builders.ThemedCellTableBuilder;
 import com.bearsoft.gwt.ui.widgets.grid.builders.ThemedHeaderOrFooterBuilder;
+import com.bearsoft.gwt.ui.widgets.grid.header.HasSortList;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.Scheduler;
@@ -36,6 +42,7 @@ import com.google.gwt.event.dom.client.ScrollEvent;
 import com.google.gwt.event.dom.client.ScrollHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -43,6 +50,7 @@ import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
+import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
@@ -57,17 +65,13 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.ProvidesKey;
 import com.google.gwt.view.client.Range;
 import com.google.gwt.view.client.SelectionModel;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * 
  * @author mg
  * @param <T>
  */
-public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResize {
+public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResize, HasSortList {
 
 	public static final String RULER_STYLE = "grid-ruler";
 	public static final String COLUMN_PHANTOM_STYLE = "grid-column-phantom";
@@ -94,6 +98,7 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 	//
 	protected HTML columnsChevron = new HTML();
 	//
+	private final ColumnSortList sortList = new ColumnSortList();
 	protected int rowsHeight;
 	protected String dynamicCellClassName = "grid-cell-" + Document.get().createUniqueId();
 	protected StyleElement styleElement = Document.get().createStyleElement();
@@ -102,6 +107,10 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 
 	protected int frozenColumns;
 	protected int frozenRows;
+
+	protected boolean rowLines;
+	protected boolean columnLines;
+	protected boolean showOddRowsInOtherColor;
 
 	public Grid(ProvidesKey<T> aKeyProvider) {
 		super();
@@ -258,9 +267,9 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 			tbl.setTableLayoutFixed(true);
 		}
 		// header
-		headerLeft.setHeaderBuilder(new ThemedHeaderOrFooterBuilder<T>(headerLeft, false));
+		headerLeft.setHeaderBuilder(new ThemedHeaderOrFooterBuilder<T>(headerLeft, false, this));
 		headerLeft.setFooterBuilder(new NullHeaderOrFooterBuilder<T>(headerLeft, true));
-		headerRight.setHeaderBuilder(new ThemedHeaderOrFooterBuilder<T>(headerRight, false));
+		headerRight.setHeaderBuilder(new ThemedHeaderOrFooterBuilder<T>(headerRight, false, this));
 		headerRight.setFooterBuilder(new NullHeaderOrFooterBuilder<T>(headerRight, true));
 		// footer
 		footerLeft.setHeaderBuilder(new NullHeaderOrFooterBuilder<T>(footerLeft, false));
@@ -490,7 +499,7 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 						}
 					} else {
 						int newWidth = Math.max(event.getNativeEvent().getClientX() - source.getCellElement().getAbsoluteLeft(), MINIMUM_COLUMN_WIDTH);
-						// Source and target tables atre the same, so we can
+						// Source and target tables are the same, so we can
 						// cast to DraggedColumn<T> with no care
 						((DraggedColumn<T>) source).getTable().setColumnWidth(((DraggedColumn<T>) source).getColumn(), newWidth, Style.Unit.PX);
 					}
@@ -548,6 +557,63 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 			}
 
 		}, ClickEvent.getType());
+
+		ColumnSortEvent.Handler sectionSortHandler = new ColumnSortEvent.Handler() {
+
+			@Override
+			public void onColumnSort(ColumnSortEvent event) {
+				boolean isCtrlKey = ((GridSection<?>) event.getSource()).isCtrlKey();
+				boolean contains = false;
+				int containsAt = -1;
+				for (int i = 0; i < sortList.size(); i++) {
+					if (sortList.get(i).getColumn() == event.getColumn()) {
+						contains = true;
+						containsAt = i;
+						break;
+					}
+				}
+				if (!contains) {
+					if (!isCtrlKey) {
+						sortList.clear();
+					}
+					sortList.insert(sortList.size(), new ColumnSortList.ColumnSortInfo(event.getColumn(), true));
+				} else {
+					boolean wasAscending = sortList.get(containsAt).isAscending();
+					if (!isCtrlKey) {
+						sortList.clear();
+						if (wasAscending) {
+							sortList.push(new ColumnSortList.ColumnSortInfo(event.getColumn(), false));
+						}
+					} else {
+						sortList.remove(sortList.get(containsAt));
+						if (wasAscending) {
+							sortList.insert(containsAt, new ColumnSortList.ColumnSortInfo(event.getColumn(), false));
+						}
+					}
+				}
+				ColumnSortEvent.fire(Grid.this, sortList);
+			}
+		};
+		headerLeft.getColumnSortList().setLimit(1);
+		headerLeft.addColumnSortHandler(sectionSortHandler);
+		headerRight.getColumnSortList().setLimit(1);
+		headerRight.addColumnSortHandler(sectionSortHandler);
+	}
+
+	@Override
+	public ColumnSortList getSortList() {
+		return sortList;
+	}
+
+	/**
+	 * Add a handler to handle {@link ColumnSortEvent}s.
+	 * 
+	 * @param handler
+	 *            the {@link ColumnSortEvent.Handler} to add
+	 * @return a {@link HandlerRegistration} to remove the handler
+	 */
+	public HandlerRegistration addColumnSortHandler(ColumnSortEvent.Handler handler) {
+		return addHandler(handler, ColumnSortEvent.getType());
 	}
 
 	public ListDataProvider<T> getDataProvider() {
@@ -699,7 +765,7 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 	@Override
 	public void onResize() {
 		if (isAttached()) {
-			hive.setSize(getElement().getClientWidth()+"px", getElement().getClientHeight()+"px");
+			hive.setSize(getElement().getClientWidth() + "px", getElement().getClientHeight() + "px");
 			propagateHeaderLeftWidth();
 			propagateHeightButScrollable();
 			columnsChevron.setHeight(Math.max(headerLeftContainer.getOffsetHeight(), headerRightContainer.getOffsetHeight()) + "px");
@@ -715,10 +781,6 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 		return frozenColumns;
 	}
 
-	public int getFrozenRows() {
-		return frozenRows;
-	}
-
 	public void setFrozenColumns(int aValue) {
 		if (aValue >= 0 && frozenColumns != aValue) {
 			if (aValue >= 0) {
@@ -730,15 +792,41 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 		}
 	}
 
+	public int getFrozenRows() {
+		return frozenRows;
+	}
+
 	public void setFrozenRows(int aValue) {
 		if (aValue >= 0 && frozenRows != aValue) {
-			if (aValue >= 0) {
-				frozenRows = aValue;
-				if (dataProvider != null && aValue <= dataProvider.getList().size()) {
-					setupVisibleRanges();
-				}
+			frozenRows = aValue;
+			if (dataProvider != null && aValue <= dataProvider.getList().size()) {
+				setupVisibleRanges();
 			}
 		}
+	}
+
+	public boolean isRowLines() {
+		return rowLines;
+	}
+
+	public void setRowLines(boolean aValue) {
+		rowLines = aValue;
+	}
+
+	public boolean isColumnLines() {
+		return columnLines;
+	}
+
+	public void setColumnLines(boolean aValue) {
+		columnLines = aValue;
+	}
+
+	public boolean isShowOddRowsInOtherColor() {
+		return showOddRowsInOtherColor;
+	}
+
+	public void setShowOddRowsInOtherColor(boolean aValue) {
+		showOddRowsInOtherColor = aValue;
 	}
 
 	/**
@@ -964,17 +1052,6 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 		}
 	}
 
-	public void addColumnSortHandler(ColumnSortEvent.ListHandler<T> aSortHandler) {
-		headerLeft.addColumnSortHandler(aSortHandler);
-		frozenLeft.addColumnSortHandler(aSortHandler);
-		scrollableLeft.addColumnSortHandler(aSortHandler);
-		footerLeft.addColumnSortHandler(aSortHandler);
-		headerRight.addColumnSortHandler(aSortHandler);
-		frozenRight.addColumnSortHandler(aSortHandler);
-		scrollableRight.addColumnSortHandler(aSortHandler);
-		footerRight.addColumnSortHandler(aSortHandler);
-	}
-
 	public void redrawRow(int index) {
 		frozenLeft.redrawRow(index);
 		frozenRight.redrawRow(index);
@@ -1007,14 +1084,14 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 		return headerLeft.getColumnCount() + headerRight.getColumnCount();
 	}
 
-	public Column<T, ?> getDataColumn(int aIndex){
-		return aIndex >= 0 && aIndex < headerLeft.getColumnCount() ? headerLeft.getColumn(aIndex) : headerRight.getColumn(aIndex - headerLeft.getColumnCount()); 
+	public Column<T, ?> getDataColumn(int aIndex) {
+		return aIndex >= 0 && aIndex < headerLeft.getColumnCount() ? headerLeft.getColumn(aIndex) : headerRight.getColumn(aIndex - headerLeft.getColumnCount());
 	}
-	
-	public Header<?> getColumnHeader(int aIndex){
-		return aIndex >= 0 && aIndex < headerLeft.getColumnCount() ? headerLeft.getHeader(aIndex) : headerRight.getHeader(aIndex - headerLeft.getColumnCount()); 
+
+	public Header<?> getColumnHeader(int aIndex) {
+		return aIndex >= 0 && aIndex < headerLeft.getColumnCount() ? headerLeft.getHeader(aIndex) : headerRight.getHeader(aIndex - headerLeft.getColumnCount());
 	}
-	
+
 	public Element getViewCell(int row, int col) {
 		assert false : "getViewCell is not implemented yet.";
 		return null;

@@ -46,7 +46,8 @@ public class PlatypusFormattedObjectEditorCell extends RenderedPopupEditorCell<O
 	protected void renderCell(Context context, Object value, SafeHtmlBuilder sb) {
 		if (format != null) {
 			try {
-				sb.appendEscaped(format.format(value));
+				String formatted = format.format(value);
+				sb.appendEscaped(formatted != null ? formatted : "");
 			} catch (ParseException e) {
 				sb.appendEscaped(e.getMessage());
 			}

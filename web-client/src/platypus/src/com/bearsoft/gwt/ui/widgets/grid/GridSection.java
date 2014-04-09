@@ -37,89 +37,23 @@ public class GridSection<T> extends CellTable<T> {
 	protected ColumnsRemover columnsRemover;
 	protected AbstractCellTable<T> headerSource;
 	protected AbstractCellTable<T> footerSource;
-	private final ColumnSortList sortList = new ColumnSortList();
 
 	public GridSection(ProvidesKey<T> keyProvider) {
 		super(15, ThemedGridResources.instance, keyProvider);
-		init();
-	}
-
-	private void init() {
 		super.setKeyboardPagingPolicy(HasKeyboardPagingPolicy.KeyboardPagingPolicy.CURRENT_PAGE);
-		super.getColumnSortList().setLimit(1);
-		super.addColumnSortHandler(new ColumnSortEvent.Handler() {
-
-			@Override
-			public void onColumnSort(ColumnSortEvent event) {
-				boolean contains = false;
-				int containsAt = -1;
-				for (int i = 0; i < sortList.size(); i++) {
-					if (sortList.get(i).getColumn() == event.getColumn()) {
-						contains = true;
-						containsAt = i;
-						break;
-					}
-				}
-				if (!contains) {
-					if (!isCtrlKey) {
-						sortList.clear();
-					}
-					sortList.insert(sortList.size(), new ColumnSortList.ColumnSortInfo(event.getColumn(), true));
-				} else {
-					boolean wasAscending = sortList.get(containsAt).isAscending();
-					if (!isCtrlKey) {
-						sortList.clear();
-						if (wasAscending) {
-							sortList.push(new ColumnSortList.ColumnSortInfo(event.getColumn(), false));
-						}
-					} else {
-						sortList.remove(sortList.get(containsAt));
-						if (wasAscending) {
-							sortList.insert(containsAt, new ColumnSortList.ColumnSortInfo(event.getColumn(), false));
-						}
-					}
-				}
-				ColumnSortEvent.fire(new HasHandlers() {
-
-					@Override
-					public void fireEvent(GwtEvent<?> event) {
-						_ensureHandlers().fireEvent(event);
-					}
-				}, sortList);
-			}
-		});
 	}
 
-	protected HandlerManager _handlerManager;
-
-	/**
-	 * Add a handler to handle {@link ColumnSortEvent}s.
-	 * 
-	 * @param handler
-	 *            the {@link ColumnSortEvent.Handler} to add
-	 * @return a {@link HandlerRegistration} to remove the handler
-	 */
-	@Override
-	public HandlerRegistration addColumnSortHandler(ColumnSortEvent.Handler handler) {
-		return _ensureHandlers().addHandler(ColumnSortEvent.getType(), handler);
-	}
-
-	HandlerManager _ensureHandlers() {
-		return _handlerManager == null ? _handlerManager = createHandlerManager() : _handlerManager;
-	}
-
-	@Override
-	public ColumnSortList getColumnSortList() {
-		return sortList;
-	}
-
-	protected boolean isCtrlKey;
+	protected boolean ctrlKey;
 
 	@Override
 	protected void onBrowserEvent2(Event event) {
-		isCtrlKey = event.getCtrlKey();
+		ctrlKey = event.getCtrlKey();
 		super.onBrowserEvent2(event);
 	}
+	
+	public boolean isCtrlKey() {
+	    return ctrlKey;
+    }
 
 	/*
 	 * @Override public void setKeyboardSelectedRow(int row, int subrow, boolean

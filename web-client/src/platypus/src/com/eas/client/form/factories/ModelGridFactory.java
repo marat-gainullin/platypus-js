@@ -89,6 +89,13 @@ public class ModelGridFactory {
 
 		grid = new ModelGrid();
 		grid.setRowsSource(rowsSource);
+		grid.setEditable(editable);
+		grid.setDeletable(deletable);
+		grid.setInsertable(insertable);
+		grid.setRowsHeight(rowsHeight);
+		grid.setRowLines(rowLines);
+		grid.setColumnLines(columnLines);
+		grid.setShowOddRowsInOtherColor(showOddRowsInOtherColor);
 		// Selection models & service column configuration
 		grid.setRowsHeaderType(rowsHeaderType);
 		for(int i = 0; i < grid.getDataColumnCount(); i++){
@@ -229,7 +236,7 @@ public class ModelGridFactory {
 				rowsetsOfInterestHosts.add(valueRef.entity);
 				rowsetsOfInterestHosts.add(displayRef.entity);
 				final boolean list = Utils.getBooleanAttribute(aControlTag, "list", true);
-				RowsetDataProvider filler = new RowsetDataProvider(null);
+				RowsetDataProvider filler = new RowsetDataProvider(null, null);
 				if (valueRef.entity != null) {
 					filler.setRowset(valueRef.entity.getRowset());
 				}
@@ -245,6 +252,7 @@ public class ModelGridFactory {
 		}
 		if(column != null){
 			grid.addColumn(column, aTitle);
+			column.setGrid(grid);
 			aHeaderNode.setHeader(grid.getColumnHeader(grid.getDataColumnCount() - 1));
 			grid.setColumnWidth(column, width, Style.Unit.PX);
 			column.setRowsEntity(rowsSource);
@@ -254,6 +262,7 @@ public class ModelGridFactory {
 			column.setFixed(fixed);
 			column.setSelectOnly(selectOnly);
 			column.setVisible(visible);
+			column.setSortable(true);
 		}
 	}
 }

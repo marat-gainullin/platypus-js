@@ -187,30 +187,31 @@ public class WidgetsFactory {
 	}
 
 	/*
-	private Element pickBorderTag(Element aTag) {
-		if (!isRoot)
-			return Utils.scanForElementByTagName(aTag, BORDER_TAG);
-		else
-			return null;
-	}
-	*/
+	 * private Element pickBorderTag(Element aTag) { if (!isRoot) return
+	 * Utils.scanForElementByTagName(aTag, BORDER_TAG); else return null; }
+	 */
 
-	private UIObject parseWidget(Element aTag) throws Exception {
-		String nodeName = aTag.getNodeName();
-		assert (nodeName.equalsIgnoreCase(LAYOUT_TAG) && isRoot) || nodeName.equalsIgnoreCase(WIDGET_TAG) || nodeName.equalsIgnoreCase(NONVISUAL_TAG) : "Form structure is broken. Form must be constructed of widget and nonvisual tags";
-
-		UIObject component = createWidget(aTag);
-		if (component != null)// There are might be toggle groups, that are non
-		                      // visuals and so, not components
-		{
-			components.put(((HasJsName)component).getJsName(), component);
-			String parentName = aTag.getAttribute(PARENT_ATTRIBUTE);
-			if (!isRoot && parentName != null && !parentName.isEmpty()) {
-				resolveParent(component, parentName, pickConstraintsTag(aTag));
-			}
-			return component;
-		} else
+	private UIObject parseWidget(Element aTag) {
+		try {
+			String nodeName = aTag.getNodeName();
+			assert (nodeName.equalsIgnoreCase(LAYOUT_TAG) && isRoot) || nodeName.equalsIgnoreCase(WIDGET_TAG) || nodeName.equalsIgnoreCase(NONVISUAL_TAG) : "Form structure is broken. Form must be constructed of widget and nonvisual tags";
+			UIObject component = createWidget(aTag);
+			if (component != null)// There are might be toggle groups, that are
+								  // non
+			                      // visuals and so, not components
+			{
+				components.put(((HasJsName) component).getJsName(), component);
+				String parentName = aTag.getAttribute(PARENT_ATTRIBUTE);
+				if (!isRoot && parentName != null && !parentName.isEmpty()) {
+					resolveParent(component, parentName, pickConstraintsTag(aTag));
+				}
+				return component;
+			} else
+				return null;
+		} catch (Exception e) {
+			Logger.getLogger(WidgetsFactory.class.getName()).log(Level.SEVERE, null, e);
 			return null;
+		}
 	}
 
 	protected UIObject createWidget(Element aTag) throws Exception {
@@ -360,8 +361,7 @@ public class WidgetsFactory {
 					if (comp instanceof PlatypusPopupMenu)
 						component.setMenu((PlatypusPopupMenu) comp);
 					else
-						Logger.getLogger(WidgetsFactory.class.getName()).log(Level.WARNING,
-						        "Some other widget than Menu is assigned as dropDownMenu in component: " + component.getElement().getId());
+						Logger.getLogger(WidgetsFactory.class.getName()).log(Level.WARNING, "Some other widget than Menu is assigned as dropDownMenu in component: " + component.getElement().getId());
 				}
 
 			});
@@ -450,7 +450,7 @@ public class WidgetsFactory {
 		final String widgetName = aTag.getAttribute(NAME_ATTRIBUTE);
 		toggleGroups.put(widgetName, buttonGroup);
 		buttonGroup.setPublished(Publisher.publish(buttonGroup));
-		target.<Utils.JsObject>cast().inject(widgetName, buttonGroup.getPublished());
+		target.<Utils.JsObject> cast().inject(widgetName, buttonGroup.getPublished());
 	}
 
 	private PlatypusTextField createTextField(Element aTag) throws Exception {
@@ -526,7 +526,8 @@ public class WidgetsFactory {
 			component.setEmptyText(aTag.getAttribute("emptyText"));
 		if (aTag.hasAttribute("text"))
 			component.setText(aTag.getAttribute("text"));
-		//component.setReadOnly(!Utils.getBooleanAttribute(aTag, "editable", true));
+		// component.setReadOnly(!Utils.getBooleanAttribute(aTag, "editable",
+		// true));
 		PublishedComponent publishedComp = component.getPublished().cast();
 		processGeneralProperties(component, aTag, publishedComp);
 		return component;
@@ -586,7 +587,7 @@ public class WidgetsFactory {
 		}
 		PublishedComponent publishedComp = component.getPublished().cast();
 		processGeneralProperties(component, aTag, publishedComp);
-		target.<Utils.JsObject>cast().inject(component.getJsName(), publishedComp);
+		target.<Utils.JsObject> cast().inject(component.getJsName(), publishedComp);
 		return component;
 	}
 
@@ -598,7 +599,7 @@ public class WidgetsFactory {
 		}
 		PublishedComponent publishedComp = component.getPublished().cast();
 		processGeneralProperties(component, aTag, publishedComp);
-		target.<Utils.JsObject>cast().inject(component.getJsName(), publishedComp);
+		target.<Utils.JsObject> cast().inject(component.getJsName(), publishedComp);
 		return component;
 	}
 
@@ -617,7 +618,7 @@ public class WidgetsFactory {
 		}
 		PublishedComponent publishedComp = component.getPublished().cast();
 		processGeneralProperties(component, aTag, false, publishedComp);
-		target.<Utils.JsObject>cast().inject(component.getJsName(), publishedComp);
+		target.<Utils.JsObject> cast().inject(component.getJsName(), publishedComp);
 		return component;
 	}
 
@@ -631,7 +632,7 @@ public class WidgetsFactory {
 			addToToggleGroup(component, aTag.getAttribute("buttonGroup"));
 		PublishedComponent publishedComp = component.getPublished().cast();
 		processGeneralProperties(component, aTag, publishedComp);
-		target.<Utils.JsObject>cast().inject(component.getJsName(), publishedComp);
+		target.<Utils.JsObject> cast().inject(component.getJsName(), publishedComp);
 		return component;
 	}
 
@@ -645,7 +646,7 @@ public class WidgetsFactory {
 			addToToggleGroup(component, aTag.getAttribute("buttonGroup"));
 		PublishedComponent publishedComp = component.getPublished().cast();
 		processGeneralProperties(component, aTag, publishedComp);
-		target.<Utils.JsObject>cast().inject(component.getJsName(), publishedComp);
+		target.<Utils.JsObject> cast().inject(component.getJsName(), publishedComp);
 		return component;
 	}
 
@@ -658,7 +659,7 @@ public class WidgetsFactory {
 	protected void processGeneralProperties(final UIObject aComponent, Element aTag, boolean aDefaultOpaque, PublishedComponent aPublished) throws Exception {
 		final String widgetName = aTag.getAttribute(NAME_ATTRIBUTE);
 		if (widgetName != null && !widgetName.isEmpty())
-			((HasJsName)aComponent).setJsName(widgetName);
+			((HasJsName) aComponent).setJsName(widgetName);
 		aComponent.getElement().setId("pw-" + (++idCounter));
 
 		boolean visible = Utils.getBooleanAttribute(aTag, "visible", true);
@@ -690,8 +691,8 @@ public class WidgetsFactory {
 						} else
 							Logger.getLogger(WidgetsFactory.class.getName()).log(Level.WARNING, "Some other widget than Menu is assigned as componentPopupMenu in component: " + widgetName);
 					} else
-						Logger.getLogger(WidgetsFactory.class.getName()).log(Level.WARNING,
-						        "Widget of type: " + widgetName + " with assigned componentPopupMenu doesn't support HasComponentPopupMenu");
+						Logger.getLogger(WidgetsFactory.class.getName())
+						        .log(Level.WARNING, "Widget of type: " + widgetName + " with assigned componentPopupMenu doesn't support HasComponentPopupMenu");
 				}
 
 			});
@@ -867,21 +868,23 @@ public class WidgetsFactory {
 								PlatypusImageResource imRes = null;
 								if (aConstraintsTag.hasAttribute("tabTitle")) {
 									textOrHtml = aConstraintsTag.getAttribute("tabTitle");
-									if (textOrHtml != null && textOrHtml.startsWith("<html>")){
+									if (textOrHtml != null && textOrHtml.startsWith("<html>")) {
 										html = true;
 										textOrHtml = textOrHtml.substring("<html>".length());
-									}else{
+									} else {
 										html = false;
 									}
 								}
 								/*
-								 * if (aConstraintsTag.hasAttribute("tabTooltipText"))
-								 * tabTooltipText = aTag.getAttribute("tabTooltipText");
+								 * if
+								 * (aConstraintsTag.hasAttribute("tabTooltipText"
+								 * )) tabTooltipText =
+								 * aTag.getAttribute("tabTooltipText");
 								 */
 								if (aConstraintsTag.hasAttribute("icon")) {
 									imRes = AppClient.getInstance().getImageResource(aConstraintsTag.getAttribute("icon"));
 								}
-								container.add((Widget)aComponent, textOrHtml, html, imRes);
+								container.add((Widget) aComponent, textOrHtml, html, imRes);
 							} else
 								throw new IllegalStateException(TABS_CONSTRAINTS_TAG_NEEED + ", but not " + contraintsTypeName + " tag.");
 						} else
@@ -904,9 +907,9 @@ public class WidgetsFactory {
 					} else if (parentComp instanceof PlatypusMenuBar) {
 						PlatypusMenuBar container = (PlatypusMenuBar) parentComp;
 						container.add(aComponent);
-					} else if (parentComp != null){
+					} else if (parentComp != null) {
 						throw new IllegalStateException(UNKNOWN_CONTAINER_DETECTED + parentComp.getClass().getName());
-					}else{
+					} else {
 						throw new IllegalStateException(NULL_CONTAINER_DETECTED + aParentName);
 					}
 				} catch (Exception ex) {
@@ -950,8 +953,8 @@ public class WidgetsFactory {
 
 			@Override
 			public void run() {
-				component.setFirstWidget((Widget)components.get(leftComponent));
-				component.setSecondWidget((Widget)components.get(rightComponent));
+				component.setFirstWidget((Widget) components.get(leftComponent));
+				component.setSecondWidget((Widget) components.get(rightComponent));
 			}
 
 		});

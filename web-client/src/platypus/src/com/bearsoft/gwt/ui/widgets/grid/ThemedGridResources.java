@@ -5,6 +5,7 @@
  */
 package com.bearsoft.gwt.ui.widgets.grid;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.cellview.client.CellTable;
 
@@ -15,9 +16,12 @@ import com.google.gwt.user.cellview.client.CellTable;
 public class ThemedGridResources implements CellTable.Resources {
 
     public static final ThemedGridResources instance = new ThemedGridResources();
+    protected static final CellTable.Resources defaultResources = GWT.create(CellTable.Resources.class);
 
     protected ThemedAbstractCellTableStyle style = new ThemedAbstractCellTableStyle();
 
+    
+    
     @Override
     public ImageResource cellTableFooterBackground() {
         return null;
@@ -40,12 +44,12 @@ public class ThemedGridResources implements CellTable.Resources {
 
     @Override
     public ImageResource cellTableSortAscending() {
-        return null;
+        return defaultResources.cellTableSortAscending();
     }
 
     @Override
     public ImageResource cellTableSortDescending() {
-        return null;
+        return defaultResources.cellTableSortDescending();
     }
 
     @Override

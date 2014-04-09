@@ -43,6 +43,8 @@ public abstract class PublishedDecoratorBox<T> extends DecoratorBox<T> implement
 
 	public PublishedDecoratorBox(HasValue<T> aDecorated) {
 		super(aDecorated);
+		setSelectButtonVisible(false);
+		setClearButtonVisible(true);
 	}
 
 	@Override
@@ -144,9 +146,9 @@ public abstract class PublishedDecoratorBox<T> extends DecoratorBox<T> implement
 		return onSelect;
 	}
 
-	public void setOnSelect(JavaScriptObject aSelectFunction) {
-		if (onSelect != aSelectFunction) {
-			onSelect = aSelectFunction;
+	public void setOnSelect(JavaScriptObject aValue) {
+		if (onSelect != aValue) {
+			onSelect = aValue;
 			setSelectButtonVisible(onSelect != null);
 		}
 	}
@@ -225,6 +227,9 @@ public abstract class PublishedDecoratorBox<T> extends DecoratorBox<T> implement
 			        aConverter);
 			newBound.setWidget(this);
 			setModelElement(newBound);
+			setClearButtonVisible(aField.isNullable());
+		}else{
+			setClearButtonVisible(true);
 		}
 	}
 
