@@ -24,6 +24,8 @@ import com.eas.script.ScriptUtils;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ContainerEvent;
+import java.awt.event.FocusEvent;
+import java.awt.event.KeyEvent;
 import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
@@ -473,6 +475,7 @@ public abstract class Component<D extends JComponent> {
             + "*/";
 
     @ScriptFunction(jsDoc = ON_COMPONENT_MOVED_JSDOC)
+    @EventMethod(eventClass = ComponentEvent.class)
     public Function getOnComponentMoved() {
         ControlEventsIProxy proxy = getEventsProxy(delegate);
         return proxy != null ? proxy.getHandlers().get(ControlEventsIProxy.componentMoved) : null;
@@ -492,6 +495,7 @@ public abstract class Component<D extends JComponent> {
             + "*/";
 
     @ScriptFunction(jsDoc = ON_COMPONENT_REMOVED_JSDOC)
+    @EventMethod(eventClass = ComponentEvent.class)
     public Function getOnComponentRemoved() {
         ControlEventsIProxy proxy = getEventsProxy(delegate);
         return proxy != null ? proxy.getHandlers().get(ControlEventsIProxy.componentRemoved) : null;
@@ -511,6 +515,7 @@ public abstract class Component<D extends JComponent> {
             + "*/";
 
     @ScriptFunction(jsDoc = ON_COMPONENT_RESIZED_JSDOC)
+    @EventMethod(eventClass = ComponentEvent.class)
     public Function getOnComponentResized() {
         ControlEventsIProxy proxy = getEventsProxy(delegate);
         return proxy != null ? proxy.getHandlers().get(ControlEventsIProxy.componentResized) : null;
@@ -530,6 +535,7 @@ public abstract class Component<D extends JComponent> {
             + "*/";
 
     @ScriptFunction(jsDoc = ON_COMPONENT_SHOWN_JSDOC)
+    @EventMethod(eventClass = ComponentEvent.class)
     public Function getOnComponentShown() {
         ControlEventsIProxy proxy = getEventsProxy(delegate);
         return proxy != null ? proxy.getHandlers().get(ControlEventsIProxy.componentShown) : null;
@@ -549,6 +555,7 @@ public abstract class Component<D extends JComponent> {
             + "*/";
 
     @ScriptFunction(jsDoc = ON_FOCUS_GAINED_JSDOC)
+    @EventMethod(eventClass = FocusEvent.class)
     public Function getOnFocusGained() {
         ControlEventsIProxy proxy = getEventsProxy(delegate);
         return proxy != null ? proxy.getHandlers().get(ControlEventsIProxy.focusGained) : null;
@@ -568,6 +575,7 @@ public abstract class Component<D extends JComponent> {
             + "*/";
 
     @ScriptFunction(jsDoc = ON_FOCUS_LOST_JSDOC)
+    @EventMethod(eventClass = FocusEvent.class)
     public Function getOnFocusLost() {
         ControlEventsIProxy proxy = getEventsProxy(delegate);
         return proxy != null ? proxy.getHandlers().get(ControlEventsIProxy.focusLost) : null;
@@ -587,6 +595,7 @@ public abstract class Component<D extends JComponent> {
             + "*/";
 
     @ScriptFunction(jsDoc = ON_KEY_PRESSED_JSDOC)
+    @EventMethod(eventClass = KeyEvent.class)
     public Function getOnKeyPressed() {
         ControlEventsIProxy proxy = getEventsProxy(delegate);
         return proxy != null ? proxy.getHandlers().get(ControlEventsIProxy.keyPressed) : null;
@@ -606,6 +615,7 @@ public abstract class Component<D extends JComponent> {
             + "*/";
 
     @ScriptFunction(jsDoc = ON_KEY_RELEASED_JSDOC)
+    @EventMethod(eventClass = KeyEvent.class)
     public Function getOnKeyReleased() {
         ControlEventsIProxy proxy = getEventsProxy(delegate);
         return proxy != null ? proxy.getHandlers().get(ControlEventsIProxy.keyReleased) : null;
@@ -625,6 +635,7 @@ public abstract class Component<D extends JComponent> {
             + "*/";
 
     @ScriptFunction(jsDoc = ON_KEY_TYPED_JSDOC)
+    @EventMethod(eventClass = KeyEvent.class)
     public Function getOnKeyTyped() {
         ControlEventsIProxy proxy = getEventsProxy(delegate);
         return proxy != null ? proxy.getHandlers().get(ControlEventsIProxy.keyTyped) : null;
