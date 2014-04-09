@@ -23,6 +23,7 @@ public class PropertyCompletionItem extends JsCompletionItem {
     protected static final ImageIcon propertyWoIcon = new ImageIcon(PropertyCompletionItem.class.getResource("property_wo.png"));
     protected PropBox propBox;
     private static final int SORT_PRIORITY = 20;
+    private static final int DEFAULT_NUMBER_OF_SPACES_PER_INDENT = 4;
     private static final String FUNCTION_HEADER = " = function(event) {\n";//NOI18N
 
     public PropertyCompletionItem(PropBox aPropBox, int aStartOffset, int aEndOffset) {
@@ -65,15 +66,15 @@ public class PropertyCompletionItem extends JsCompletionItem {
     private String getEventHandlerBody(String tabs) {
         return text
                 + FUNCTION_HEADER
-                + tabs + tabs + "\n"//NOI18N
+                + tabs + getIndent() + "\n"//NOI18N
                 + tabs + "};\n";//NOI18N
     }
 
     private int getEventTemplateCaretPosition(String tabs) {
-        return startOffset + text.length() + FUNCTION_HEADER.length() + tabs.length() * 2;
+        return startOffset + text.length() + FUNCTION_HEADER.length() + tabs.length() + getNumberOfSpacesPerIndent();
     }
 
-    private String getLineTabs(StyledDocument doc, int startOffset) {
+    private static String getLineTabs(StyledDocument doc, int startOffset) {
         int i = startOffset;
         String s;
         try {
@@ -105,7 +106,7 @@ public class PropertyCompletionItem extends JsCompletionItem {
         }
     }
 
-    private boolean isLineEndClear(StyledDocument doc, int pos) {
+    private static boolean isLineEndClear(StyledDocument doc, int pos) {
         String s;
         int i = pos;
         try {
@@ -122,5 +123,18 @@ public class PropertyCompletionItem extends JsCompletionItem {
         } catch (BadLocationException ex) {
             throw new RuntimeException(ex);
         }
+    }
+    
+    private static String getIndent() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < getNumberOfSpacesPerIndent();i++) {
+            sb.append(" ");//NOI18N
+        }
+        return sb.toString();
+    }
+    
+    
+    private static int getNumberOfSpacesPerIndent() {
+       return DEFAULT_NUMBER_OF_SPACES_PER_INDENT;
     }
 }
