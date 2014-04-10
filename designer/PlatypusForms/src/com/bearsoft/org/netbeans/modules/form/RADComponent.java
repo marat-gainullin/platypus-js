@@ -864,15 +864,6 @@ public abstract class RADComponent<C> {
         actionProperties = actionProps;
     }
 
-    public interface PlatypusWindowListener extends WindowListener {
-
-        public void windowRestored(WindowEvent e);
-
-        public void windowMaximized(WindowEvent e);
-
-        public void windowMinimized(WindowEvent e);
-    }
-
     protected EventSetDescriptor[] getEventSetDescriptors() {
         return getBeanInfo().getEventSetDescriptors();
     }
