@@ -23,7 +23,6 @@ import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptUtils;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.event.ContainerEvent;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import javax.swing.JComponent;
@@ -35,7 +34,7 @@ import org.mozilla.javascript.Function;
 /**
  *
  * @author mg
- * @param <D>
+ * @param <D> a Swing component delegate type
  */
 public abstract class Component<D extends JComponent> {
 
@@ -429,26 +428,6 @@ public abstract class Component<D extends JComponent> {
         }
     }
 
-    private static final String ON_COMPONENT_ADDED_JSDOC = ""
-            + "/**\n"
-            + "* Component added event hanler function.\n"
-            + "*/";
-
-    @ScriptFunction(jsDoc = ON_COMPONENT_ADDED_JSDOC)
-    @EventMethod(eventClass = ContainerEvent.class)
-    public Function getOnComponentAdded() {
-        ControlEventsIProxy proxy = getEventsProxy(delegate);
-        return proxy != null ? proxy.getHandlers().get(ControlEventsIProxy.componentAdded) : null;
-    }
-
-    @ScriptFunction
-    public void setOnComponentAdded(Function aValue) {
-        ControlEventsIProxy proxy = checkEventsProxy(delegate);
-        if (proxy != null) {
-            proxy.getHandlers().put(ControlEventsIProxy.componentAdded, aValue);
-        }
-    }
-
     private static final String ON_COMPONENT_HIDDEN_JSDOC = ""
             + "/**\n"
             + "* Component hidden event handler function.\n"
@@ -486,26 +465,6 @@ public abstract class Component<D extends JComponent> {
         ControlEventsIProxy proxy = checkEventsProxy(delegate);
         if (proxy != null) {
             proxy.getHandlers().put(ControlEventsIProxy.componentMoved, aValue);
-        }
-    }
-
-    private static final String ON_COMPONENT_REMOVED_JSDOC = ""
-            + "/**\n"
-            + "* Component removed event handler function.\n"
-            + "*/";
-
-    @ScriptFunction(jsDoc = ON_COMPONENT_REMOVED_JSDOC)
-    @EventMethod(eventClass = ComponentEvent.class)
-    public Function getOnComponentRemoved() {
-        ControlEventsIProxy proxy = getEventsProxy(delegate);
-        return proxy != null ? proxy.getHandlers().get(ControlEventsIProxy.componentRemoved) : null;
-    }
-
-    @ScriptFunction
-    public void setOnComponentRemoved(Function aValue) {
-        ControlEventsIProxy proxy = checkEventsProxy(delegate);
-        if (proxy != null) {
-            proxy.getHandlers().put(ControlEventsIProxy.componentRemoved, aValue);
         }
     }
 
