@@ -24,11 +24,8 @@ import com.eas.dbcontrols.grid.DbGridColumn;
 import com.eas.dbcontrols.grid.DbGridRowsColumnsDesignInfo;
 import com.eas.dbcontrols.visitors.DbSwingFactory;
 import com.eas.util.StringUtils;
-import java.beans.EventSetDescriptor;
-import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
@@ -79,19 +76,6 @@ public class RADModelGrid extends RADVisualComponent<DbGrid> implements Componen
         }
         RADProperty<?> prop = super.createBeanProperty(desc, propAccessClsf, propParentChildDepClsf);
         return prop;
-    }
-
-    @Override
-    protected EventSetDescriptor[] getEventSetDescriptors() {
-        try {
-            List<EventSetDescriptor> descs = new ArrayList<>();
-            descs.addAll(Arrays.asList(super.getEventSetDescriptors()));
-            descs.add(new EventSetDescriptor("cells", ModelGridListener.class, ModelGridListener.class.getMethods(), null, null));
-            return descs.toArray(new EventSetDescriptor[]{});
-        } catch (IntrospectionException ex) {
-            Logger.getLogger(RADModelGrid.class.getName()).log(Level.SEVERE, null, ex);
-            return super.getEventSetDescriptors();
-        }
     }
 
     @Override

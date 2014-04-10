@@ -6,7 +6,6 @@ package com.bearsoft.org.netbeans.modules.form.bound;
 
 import com.bearsoft.org.netbeans.modules.form.RADProperty;
 import com.eas.dbcontrols.DbControlPanel;
-import java.beans.EventSetDescriptor;
 import java.beans.PropertyDescriptor;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -51,10 +50,5 @@ public class RADColumnView<M extends DbControlPanel> extends RADModelScalarCompo
         } else {
             return null;
         }
-    }
-
-    @Override
-    protected EventSetDescriptor[] getEventSetDescriptors() {
-        return new EventSetDescriptor[]{};
     }
 }

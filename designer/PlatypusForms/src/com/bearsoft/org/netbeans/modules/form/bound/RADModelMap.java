@@ -9,13 +9,8 @@ import com.bearsoft.org.netbeans.modules.form.RADComponent;
 import com.bearsoft.org.netbeans.modules.form.RADVisualComponent;
 import com.eas.client.geo.RowsetFeatureDescriptor;
 import com.eas.dbcontrols.map.DbMap;
-import java.beans.EventSetDescriptor;
-import java.beans.IntrospectionException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -28,19 +23,6 @@ public class RADModelMap extends RADVisualComponent<DbMap> implements ComponentC
         public Object onEvent(Object anEvent);
     }
     protected List<RADModelMapLayer> layers = new ArrayList<>();
-
-    @Override
-    protected EventSetDescriptor[] getEventSetDescriptors() {
-        try {
-            List<EventSetDescriptor> descs = new ArrayList<>();
-            descs.addAll(Arrays.asList(super.getEventSetDescriptors()));
-            descs.add(new EventSetDescriptor("map", ModelMapListener.class, ModelMapListener.class.getMethods(), null, null));
-            return descs.toArray(new EventSetDescriptor[]{});
-        } catch (IntrospectionException ex) {
-            Logger.getLogger(RADModelMap.class.getName()).log(Level.SEVERE, null, ex);
-            return super.getEventSetDescriptors();
-        }
-    }
 
     @Override
     public RADComponent<?>[] getSubBeans() {

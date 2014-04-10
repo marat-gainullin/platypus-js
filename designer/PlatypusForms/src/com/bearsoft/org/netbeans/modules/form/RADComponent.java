@@ -864,10 +864,6 @@ public abstract class RADComponent<C> {
         actionProperties = actionProps;
     }
 
-    protected EventSetDescriptor[] getEventSetDescriptors() {
-        return getBeanInfo().getEventSetDescriptors();
-    }
-
     protected RADProperty<?> createBeanProperty(PropertyDescriptor desc,
             Object[] propAccessClsf,
             Object[] propParentChildDepClsf) {

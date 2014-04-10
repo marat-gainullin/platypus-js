@@ -10,13 +10,8 @@ import com.bearsoft.org.netbeans.modules.form.RADComponent;
 import com.eas.dbcontrols.DbControlPanel;
 import com.eas.dbcontrols.grid.DbGridColumn;
 import com.eas.dbcontrols.label.DbLabel;
-import java.beans.EventSetDescriptor;
-import java.beans.IntrospectionException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * This class represents a standard form editor wrapper for model-aware
@@ -79,19 +74,6 @@ public class RADModelGridColumn extends RADComponent<DbGridColumn> implements Co
         RADModelGrid grid = lookupGrid();
         if (grid != null) {
             grid.fireRawColumnsChanged();
-        }
-    }
-
-    @Override
-    protected EventSetDescriptor[] getEventSetDescriptors() {
-        try {
-            List<EventSetDescriptor> descs = new ArrayList<>();
-            descs.addAll(Arrays.asList(super.getEventSetDescriptors()));
-            descs.add(new EventSetDescriptor("value", ValueHostListener.class, ValueHostListener.class.getMethods(), null, null));
-            return descs.toArray(new EventSetDescriptor[]{});
-        } catch (IntrospectionException ex) {
-            Logger.getLogger(RADModelGridColumn.class.getName()).log(Level.SEVERE, null, ex);
-            return super.getEventSetDescriptors();
         }
     }
 
