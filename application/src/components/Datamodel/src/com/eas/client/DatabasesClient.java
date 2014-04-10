@@ -299,6 +299,7 @@ public class DatabasesClient implements DbClient {
         DataSource dataSource = obtainDataSource(aQuery.getDatabaseId());
         if (dataSource != null) {
             try (Connection connection = dataSource.getConnection(); PreparedStatement stmt = connection.prepareStatement(aQuery.getSqlClause())) {
+                connection.setAutoCommit(false);
                 Parameters params = aQuery.getParameters();
                 for (int i = 1; i <= params.getParametersCount(); i++) {
                     Parameter param = params.get(i);

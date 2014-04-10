@@ -190,6 +190,7 @@ public class DeployApplication {
                 settings.setUrl(url);
                 settings.setUser(dbuser);
                 settings.setPassword(dbpassword);
+                settings.setSchema(dbschema);
                 GeneralResourceProvider.getInstance().registerDatasource(DEPLOY_TARGET_DATASOURCE, settings);
             } else {
                 throw new IllegalArgumentException("Database connection arguments are not set properly");
