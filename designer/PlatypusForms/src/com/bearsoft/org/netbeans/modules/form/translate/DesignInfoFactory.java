@@ -261,8 +261,6 @@ public class DesignInfoFactory {
         Map<String, Method> setters = getSetters(designInfo.getClass());
         Method nameSetter = setters.get("name");
         nameSetter.invoke(designInfo, aRadComp.getName());
-        // events
-        initWithEvents(designInfo, aRadComp.getAllEvents());
     }
 
     public static void initWithProperties(DesignInfo di, FormProperty<?>[] aProperties) throws Exception {
@@ -321,28 +319,6 @@ public class DesignInfoFactory {
                             ((DbLabelDesignInfo) di).setValueType(formatter.getFormat().getType());
                         }
                     }
-                }
-            }
-        }
-    }
-
-    public static void initWithEvents(DesignInfo di, Event[] allEvents) throws Exception {
-        Map<String, Method> setters = getSetters(di.getClass());
-        for (Event event : allEvents) {
-            Method setter = setters.get(event.getName());
-            if (setter != null) {
-                Object value = null;
-                if (event.getEventHandlers() != null
-                        && event.getEventHandlers().length > 0) {
-                    value = event.getEventHandlers().length > 1 ? StringUtils.join(",", event.getEventHandlers()) : event.getEventHandlers()[0];
-                    if ("".equals(value)) {
-                        value = null;
-                    }
-                }
-                try {
-                    setter.invoke(di, value);
-                } catch (Exception ex) {
-                    ex = null;
                 }
             }
         }
@@ -437,7 +413,6 @@ public class DesignInfoFactory {
         for (RADComponent<?> aRadComp : aColumnsContainer.getSubBeans()) {
             assert aRadComp instanceof RADModelGridColumn;
             RADModelGridColumn radColumn = (RADModelGridColumn) aRadComp;
-            initWithEvents(radColumn.getBeanInstance(), radColumn.getAllEvents());
             initColumnsContainerWithEvents(radColumn);
         }
     }

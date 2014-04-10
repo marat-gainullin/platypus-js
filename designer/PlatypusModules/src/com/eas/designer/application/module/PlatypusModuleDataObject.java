@@ -15,7 +15,6 @@ import com.eas.client.scripts.ScriptRunner;
 import com.eas.designer.application.PlatypusUtils;
 import com.eas.designer.application.indexer.IndexerQuery;
 import com.eas.designer.application.module.completion.ModuleCompletionContext;
-import com.eas.designer.application.module.events.ApplicationModuleEvents;
 import com.eas.designer.application.module.nodes.ApplicationModelNodeChildren;
 import com.eas.script.JsParser;
 import com.eas.designer.application.project.PlatypusProject;
@@ -95,7 +94,6 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
     protected transient Entry modelEntry;
     protected transient ApplicationDbModel model;
     protected transient ModelNode<ApplicationDbEntity, ApplicationDbModel> modelNode;
-    protected transient JsCodeGenerator codeGenerator;
     private transient boolean astIsValid;
     private transient AstRoot ast;
 
@@ -107,7 +105,6 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
         for (Cookie service : createServices()) {
             cookies.add(service);
         }
-        codeGenerator = new JsCodeGenerator(this);
     }
 
     @Override
@@ -155,7 +152,7 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
     }
 
     protected Cookie[] createServices() {
-        return new Cookie[]{new PlatypusModuleSupport(this), new ApplicationModuleEvents(this)};
+        return new Cookie[]{new PlatypusModuleSupport(this)};
     }
 
     @Override
@@ -172,7 +169,6 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
         modelNode = null;
         astIsValid = false;
         ast = null;
-        getLookup().lookup(ApplicationModuleEvents.class).clear();
     }
 
     public FileObject getModelFile() {
@@ -216,7 +212,6 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
 
     protected ModelNode createModelNode() {
         return new ModelNode<>(new ApplicationModelNodeChildren(model,
-                getLookup().lookup(ApplicationModuleEvents.class),
                 getLookup().lookup(PlatypusModuleSupport.class).getModelUndo(),
                 getLookup()), this);
     }
@@ -274,10 +269,6 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
                 resignOnQueries();
             }
         }
-    }
-
-    public JsCodeGenerator getCodeGenerator() {
-        return codeGenerator;
     }
 
     @Override

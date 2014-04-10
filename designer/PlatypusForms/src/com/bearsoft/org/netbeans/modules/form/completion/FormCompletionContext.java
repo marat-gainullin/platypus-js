@@ -6,7 +6,6 @@ package com.bearsoft.org.netbeans.modules.form.completion;
 
 import com.bearsoft.org.netbeans.modules.form.Event;
 import com.bearsoft.org.netbeans.modules.form.FormModel;
-import com.bearsoft.org.netbeans.modules.form.FormUtils;
 import com.bearsoft.org.netbeans.modules.form.PersistenceException;
 import com.bearsoft.org.netbeans.modules.form.PlatypusFormDataObject;
 import com.bearsoft.org.netbeans.modules.form.PlatypusFormSupport;
@@ -44,30 +43,6 @@ public class FormCompletionContext extends ModuleCompletionContext {
         super.applyCompletionItems(point, offset, resultSet);
 
     }
-    
-    @Override
-    protected Class<?> getEventHandlerFunctionParameterClass(String functionName) {
-        Class<?> clazz = super.getEventHandlerFunctionParameterClass(functionName);
-        if (clazz == null) {
-            for (RADComponent<?> component : getFormModel().getAllComponents()) {
-                for (Event event : component.getAllEvents()) {
-                    String[] eventHandlers = event.getEventHandlers();
-                    if (eventHandlers != null) {
-                        for (String eventHanler : eventHandlers) {
-                            if (eventHanler.equals(functionName)) {
-                                Class<?>[] parameterTypes = event.getListenerMethod().getParameterTypes();
-                                if (parameterTypes != null && parameterTypes.length > 0) {
-                                    Class<?> scriptEventClass = lowLevelEventType2ScriptEventType(parameterTypes[0]);
-                                    return scriptEventClass != null ? scriptEventClass : com.eas.client.forms.api.events.Event.class;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return clazz;
-    }
 
     protected FormModel getFormModel() {
         PlatypusFormDataObject formDataObject = (PlatypusFormDataObject) getDataObject();
@@ -79,17 +54,5 @@ public class FormCompletionContext extends ModuleCompletionContext {
         }
         return support.getFormModel();
 
-    }
-
-    private Class<?> lowLevelEventType2ScriptEventType(Class<?> aClass) {
-        for (Method method : EVENT_WRAPPER_CLASS.getMethods()) {
-            if (method.getName().equals(EVENTS_WRAPPER_METHOD_NAME) && Modifier.isStatic(method.getModifiers())) {
-                Class<?>[] parameterTypes = method.getParameterTypes();
-                if (parameterTypes != null && parameterTypes.length > 0 && parameterTypes[0].equals(aClass)) {
-                    return method.getReturnType();
-                }
-            }
-        }
-        return null;
     }
 }

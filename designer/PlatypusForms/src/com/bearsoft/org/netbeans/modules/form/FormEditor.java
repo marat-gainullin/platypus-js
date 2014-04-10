@@ -79,10 +79,6 @@ public class FormEditor {
      */
     private FormRootNode formRootNode;
     /**
-     * The code generator for the form
-     */
-    private CodeGenerator codeGenerator;
-    /**
      * List of exceptions occurred during the last persistence operation
      */
     private List<Throwable> persistenceErrors;
@@ -126,16 +122,6 @@ public class FormEditor {
 
     public final PlatypusFormDataObject getFormDataObject() {
         return formDataObject;
-    }
-
-    CodeGenerator getCodeGenerator() {
-        if (!formLoaded) {
-            return null;
-        }
-        if (codeGenerator == null) {
-            codeGenerator = new FormsJsCodeGenerator();
-        }
-        return codeGenerator;
     }
 
     /**
@@ -195,7 +181,6 @@ public class FormEditor {
             // form is successfully loaded...
             formLoaded = true;
 
-            getCodeGenerator().initialize(formModel);
             formModel.fireFormLoaded();
             // create form nodes hierarchy and add it to SourceChildren
             formRootNode = new FormRootNode(formModel);
@@ -488,7 +473,6 @@ public class FormEditor {
             persistenceManager = null;
             persistenceErrors = null;
             formModel = null;
-            codeGenerator = null;
         }
     }
 

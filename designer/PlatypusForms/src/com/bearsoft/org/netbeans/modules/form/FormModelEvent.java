@@ -457,14 +457,6 @@ public class FormModelEvent extends EventObject {
                     FormModel.t("UNDO: event handler addition"); // NOI18N
                     undoEventHandlerAddition();
                     break;
-                case EVENT_HANDLER_REMOVED:
-                    FormModel.t("UNDO: event handler removal"); // NOI18N
-                    undoEventHandlerRemoval();
-                    break;
-                case EVENT_HANDLER_RENAMED:
-                    FormModel.t("UNDO: event handler renaming"); // NOI18N
-                    undoEventHandlerRenaming();
-                    break;
                 case TOP_DESIGN_COMPONENT_CHANGED:
                     FormModel.t("UNDO: top design component changed"); // NOI18N
                     getFormModel().setTopDesignComponent((RADVisualContainer<?>)oldPropertyValue);
@@ -526,18 +518,6 @@ public class FormModelEvent extends EventObject {
                 case COMPONENT_PROPERTY_CHANGED:
                     FormModel.t("REDO: component property change"); // NOI18N
                     redoComponentPropertyChange();
-                    break;
-                case EVENT_HANDLER_ADDED:
-                    FormModel.t("REDO: event handler addition"); // NOI18N
-                    redoEventHandlerAddition();
-                    break;
-                case EVENT_HANDLER_REMOVED:
-                    FormModel.t("REDO: event handler removal"); // NOI18N
-                    redoEventHandlerRemoval();
-                    break;
-                case EVENT_HANDLER_RENAMED:
-                    FormModel.t("REDO: event handler renaming"); // NOI18N
-                    redoEventHandlerRenaming();
                     break;
                 case TOP_DESIGN_COMPONENT_CHANGED:
                     FormModel.t("REDO: top design component changed"); // NOI18N
@@ -814,8 +794,6 @@ public class FormModelEvent extends EventObject {
 
             addToInterestList(FormModelEvent.this);
 
-            getFormModel().getFormEvents().detachEvent(event, getEventHandler());
-
             removeFromInterestList(FormModelEvent.this);
 
             // hack: reset the event property to update the property sheet
@@ -827,117 +805,6 @@ public class FormModelEvent extends EventObject {
                     }
                 } catch (Exception ex) { // should not happen
                     Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
-                }
-            }
-        }
-
-        private void redoEventHandlerAddition() {
-            Event event = getComponentEvent();
-            if (event == null) {
-                return;
-            }
-
-            getFormModel().getFormEvents().attachEvent(
-                    event,
-                    getEventHandler(),
-                    getOldEventHandlerContent(),
-                    getOldEventHandlerAnnotation());
-
-            // hack: set the event property to update the property sheet
-            FormProperty<Object> prop = getComponent().<FormProperty<Object>>getProperty(event.getId());
-            if (prop != null) {
-                try {
-                    prop.setValue(getEventHandler());
-                } catch (Exception ex) { // should not happen
-                    Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
-                }
-            }
-        }
-
-        private void undoEventHandlerRemoval() {
-            Event event = getComponentEvent();
-            if (event == null) {
-                return;
-            }
-
-            getFormModel().getFormEvents().attachEvent(
-                    event,
-                    getEventHandler(),
-                    getOldEventHandlerContent(),
-                    getOldEventHandlerAnnotation());
-
-            // hack: set the event property to update the property sheet
-            FormProperty<Object> prop = getComponent().<FormProperty<Object>>getProperty(event.getId());
-            if (prop != null) {
-                try {
-                    prop.setValue(getEventHandler());
-                } catch (Exception ex) { // should not happen
-                    Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
-                }
-            }
-        }
-
-        private void redoEventHandlerRemoval() {
-            Event event = getComponentEvent();
-            if (event == null) {
-                return;
-            }
-
-            addToInterestList(FormModelEvent.this);
-
-            getFormModel().getFormEvents().detachEvent(event, getEventHandler());
-
-            removeFromInterestList(FormModelEvent.this);
-
-            // hack: reset the event property to reflect the change in property sheet
-            FormProperty<?> prop = getComponent().<FormProperty<?>>getProperty(event.getId());
-            if (prop != null) {
-                try {
-                    if (getEventHandler().equals(prop.getValue())) {
-                        prop.setValue(null);
-                    }
-                } catch (Exception ex) { // should not happen
-                    Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
-                }
-            }
-        }
-
-        private void undoEventHandlerRenaming() {
-            FormEvents formEvents = getFormModel().getFormEvents();
-
-            formEvents.renameEventHandler(getNewEventHandler(),
-                    getOldEventHandler());
-
-            Event[] events = formEvents.getEventsForHandler(
-                    getOldEventHandler());
-            for (int i = 0; i < events.length; i++) {
-                FormProperty<Object> prop = events[i].<FormProperty<Object>>getComponent().getProperty(events[i].getId());
-                if (prop != null) {
-                    try {
-                        prop.setValue(getOldEventHandler());
-                    } catch (Exception ex) { // should not happen
-                        Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
-                    }
-                }
-            }
-        }
-
-        private void redoEventHandlerRenaming() {
-            FormEvents formEvents = getFormModel().getFormEvents();
-
-            formEvents.renameEventHandler(getOldEventHandler(),
-                    getNewEventHandler());
-
-            Event[] events = formEvents.getEventsForHandler(
-                    getNewEventHandler());
-            for (int i = 0; i < events.length; i++) {
-                FormProperty<Object> prop = events[i].<FormProperty<Object>>getComponent().getProperty(events[i].getId());
-                if (prop != null) {
-                    try {
-                        prop.setValue(getNewEventHandler());
-                    } catch (Exception ex) { // should not happen
-                        Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
-                    }
                 }
             }
         }

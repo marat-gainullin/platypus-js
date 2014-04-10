@@ -8,7 +8,6 @@ import com.bearsoft.org.netbeans.modules.form.FormModel;
 import com.bearsoft.org.netbeans.modules.form.PlatypusFormSupport;
 import com.bearsoft.org.netbeans.modules.form.RADComponent;
 import com.eas.client.model.application.ApplicationDbEntity;
-import com.eas.designer.application.module.events.ApplicationModuleEvents;
 import com.eas.designer.application.module.nodes.ApplicationEntityNode;
 import org.openide.ErrorManager;
 import org.openide.awt.UndoRedo;
@@ -20,8 +19,8 @@ import org.openide.util.Lookup;
  */
 public class FormEntityNode extends ApplicationEntityNode {
 
-    public FormEntityNode(ApplicationDbEntity aEntity, ApplicationModuleEvents aModuleEvents, UndoRedo.Manager aUndoReciever, Lookup aLookup) throws Exception {
-        super(aEntity, aModuleEvents, aUndoReciever, aLookup);
+    public FormEntityNode(ApplicationDbEntity aEntity, UndoRedo.Manager aUndoReciever, Lookup aLookup) throws Exception {
+        super(aEntity, aUndoReciever, aLookup);
     }
 
     @Override

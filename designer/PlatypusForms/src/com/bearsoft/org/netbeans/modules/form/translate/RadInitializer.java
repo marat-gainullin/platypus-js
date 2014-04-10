@@ -45,33 +45,6 @@ public class RadInitializer {
     }
     private static final Object[] EMPTY_ARGS = new Object[]{};
 
-    public void initializeEvents(DesignInfo di) {
-        initializeEvents(component, di);
-    }
-
-    public static void initializeEvents(RADComponent<?> component, DesignInfo di) {
-        component.getFormModel().getDataObject().getCodeGenerator().setCanPosition(false);
-        try {
-            Map<String, Method> getters = getGetters(di.getClass());
-            for (Event event : component.getAllEvents()) {
-                Method getter = getters.get(event.getName());
-                if (getter != null) {
-                    Object res = getter.invoke(di, EMPTY_ARGS);
-                    try {
-                        if (res != null && !"".equals(res)) {
-                            component.getFormModel().getFormEvents().attachEvent(event, (String) res, null);
-                        }
-                    } catch (IllegalArgumentException argex) {
-                    }
-                }
-            }
-        } catch (Exception ex) {
-            ErrorManager.getDefault().notify(ex);
-        } finally {
-            component.getFormModel().getDataObject().getCodeGenerator().setCanPosition(true);
-        }
-    }
-
     public static void initializeProperties(DesignInfo di, FormProperty<?>[] aProperties) throws Exception {
         Map<String, Method> getters = getGetters(di.getClass());
         for (FormProperty<?> nProp : aProperties) {

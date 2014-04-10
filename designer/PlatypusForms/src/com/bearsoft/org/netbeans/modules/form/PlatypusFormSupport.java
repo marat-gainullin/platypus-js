@@ -518,27 +518,6 @@ public class PlatypusFormSupport extends PlatypusModuleSupport implements Editor
         return -1;
     }
 
-    @Override
-    public GuardedSectionManager getGuardedSectionManager() {
-        try {
-            StyledDocument doc = null;
-            try {
-                doc = openDocument();
-            } catch (UserQuestionException uqex) { // Issue 143655
-                Object retVal = DialogDisplayer.getDefault().notify(
-                        new NotifyDescriptor.Confirmation(uqex.getLocalizedMessage(),
-                        NotifyDescriptor.YES_NO_OPTION));
-                if (NotifyDescriptor.YES_OPTION == retVal) {
-                    uqex.confirmed();
-                    doc = openDocument();
-                }
-            }
-            return (doc == null) ? null : GuardedSectionManager.getInstance(doc);
-        } catch (IOException ex) {
-            throw new IllegalStateException(ex); // NOI18N
-        }
-    }
-
     private final class FormGEditor implements GuardedEditorSupport {
 
         StyledDocument doc = null;

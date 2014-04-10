@@ -1,7 +1,0 @@
-Manifest-Version: 1.0
-OpenIDE-Module: com.bearsoft.javascript.guards
-OpenIDE-Module-Implementation-Version: 304
-OpenIDE-Module-Layer: com/bearsoft/javascript/guards/layer.xml
-OpenIDE-Module-Localizing-Bundle: com/bearsoft/javascript/guards/Bundle.properties
-OpenIDE-Module-Provides: org.netbeans.api.editor.guards.Javascript
-

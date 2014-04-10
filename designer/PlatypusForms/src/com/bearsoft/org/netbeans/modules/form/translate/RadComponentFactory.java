@@ -184,7 +184,6 @@ public class RadComponentFactory implements DbControlsDesignInfoVisitor {
             turnNonDefaultProperties(column);
             column.setStoredName(aColumn.getName());
             column.setInstance(aColumn);
-            RadInitializer.initializeEvents(column, aColumn);
 
             if (aColumn.getControlInfo() != null || aColumn.getCellDesignInfo().getCellControlInfo() != null) {
                 DbSwingFactory factory = new DbSwingFactory();

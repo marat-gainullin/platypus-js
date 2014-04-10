@@ -12,7 +12,6 @@ import com.eas.designer.application.module.ModuleUtils;
 import com.eas.designer.application.module.PlatypusModuleDataObject;
 import static com.eas.designer.application.module.completion.CompletionContext.addItem;
 import com.eas.designer.application.module.completion.CompletionPoint.CompletionToken;
-import com.eas.designer.application.module.events.ApplicationEntityEventProperty;
 import com.eas.designer.application.module.nodes.ApplicationEntityNode;
 import com.eas.designer.application.module.parser.AstUtlities;
 import com.eas.designer.datamodel.nodes.ModelNode;
@@ -124,37 +123,6 @@ public class ModuleCompletionContext extends CompletionContext {
                     addItem(resultSet, point.getFilter(), item);
                 }
             }
-        }
-    }
-
-    protected Class<?> getEventHandlerFunctionParameterClass(String functionName) {
-        if (functionName == null) {
-            throw new NullPointerException("Function name is null.");//NOI18N
-        } else {
-            try {
-                ModelNode<ApplicationDbEntity, ApplicationDbModel> modelNode = getDataObject().getModelNode();
-                Children modelChildren = modelNode.getChildren();
-                for (Node node : modelChildren.getNodes()) {
-                    if (node instanceof ApplicationEntityNode) {
-                        PropertySet[] propertySets = node.getPropertySets();
-                        for (PropertySet ps : propertySets) {
-                            if (ApplicationEntityNode.EVENTS_PROPERTY_SET_NAME.equals(ps.getName())) {
-                                for (Property p : ps.getProperties()) {
-                                    if (p instanceof ApplicationEntityEventProperty) {
-                                        ApplicationEntityEventProperty eventProperty = (ApplicationEntityEventProperty) p;
-                                        if (eventProperty.hasEventHandler() && functionName.equals(eventProperty.getEventHandler())) {
-                                            return ModuleUtils.getScriptEventClassByNodeName(eventProperty.getName());
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            } catch (Exception ex) {
-                ErrorManager.getDefault().notify(ex);
-            }
-            return null;
         }
     }
 
@@ -306,13 +274,6 @@ public class ModuleCompletionContext extends CompletionContext {
                                                 ErrorManager.getDefault().notify(ex);
                                             }
                                         }
-                                    }
-                                } else if (fn.getName() != null && fn.getParent() instanceof Block && fn.getParent().getParent() == moduleConstructorScope) {
-                                    //event handler function parameter
-                                    Class<?> eventClass = parentContext.getEventHandlerFunctionParameterClass(fn.getName());
-                                    if (eventClass != null) {
-                                        ctx = new CompletionContext(eventClass);
-                                        return false;
                                     }
                                 } else if (fn.getParent() instanceof Assignment) { // event handler function pameter with event assignment
                                     Assignment assignment = (Assignment) fn.getParent();

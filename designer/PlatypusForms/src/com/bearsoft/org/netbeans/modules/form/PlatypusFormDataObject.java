@@ -52,8 +52,6 @@ import com.eas.client.model.application.ApplicationDbParametersEntity;
 import com.eas.designer.application.module.PlatypusModuleDataObject;
 import com.eas.designer.application.module.PlatypusModuleSupport;
 import com.eas.designer.application.module.completion.ModuleCompletionContext;
-import com.eas.designer.application.module.events.ApplicationEntityEventsCookie;
-import com.eas.designer.application.module.events.ApplicationModuleEvents;
 import com.eas.designer.application.module.nodes.ApplicationEntityNode;
 import com.eas.designer.application.module.nodes.ApplicationModelNodeChildren;
 import com.eas.designer.datamodel.nodes.FieldsOrderSupport;
@@ -106,7 +104,7 @@ public class PlatypusFormDataObject extends PlatypusModuleDataObject {
 
     @Override
     protected Cookie[] createServices() {
-        return new Cookie[]{new PlatypusFormSupport(this), new ApplicationModuleEvents(this)};
+        return new Cookie[]{new PlatypusFormSupport(this)};
     }
 
     public boolean isReadOnly() {
@@ -142,7 +140,6 @@ public class PlatypusFormDataObject extends PlatypusModuleDataObject {
     @Override
     protected ModelNode createModelNode() {
         return new ModelNode<>(new ApplicationModelNodeChildren(model,
-                getLookup().lookup(ApplicationModuleEvents.class),
                 getLookup().lookup(PlatypusModuleSupport.class).getModelUndo(),
                 getLookup()) {
             @Override
@@ -152,12 +149,12 @@ public class PlatypusFormDataObject extends PlatypusModuleDataObject {
                 Lookup lkp;
                 if (key instanceof ApplicationDbParametersEntity) {
                     fos = new FieldsOrderSupport();
-                    lkp = Lookups.fixed(key, moduleEvents, new ApplicationEntityEventsCookie(), fos);
-                    node = new FormEntityNode(key, moduleEvents, undoReciever, new ProxyLookup(lookup, lkp));
+                    lkp = Lookups.fixed(key, fos);
+                    node = new FormEntityNode(key, undoReciever, new ProxyLookup(lookup, lkp));
                     fos.setEntityNode(node);
                 } else {
-                    lkp = Lookups.fixed(key, moduleEvents, new ApplicationEntityEventsCookie());
-                    node = new FormEntityNode(key, moduleEvents, undoReciever, new ProxyLookup(lookup, lkp));
+                    lkp = Lookups.fixed(key);
+                    node = new FormEntityNode(key, undoReciever, new ProxyLookup(lookup, lkp));
                 }
                 return node;
             }

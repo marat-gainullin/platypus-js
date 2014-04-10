@@ -4,6 +4,5 @@ OpenIDE-Module-Localizing-Bundle: com/bearsoft/org/netbeans/modules/form/Bundle.
 OpenIDE-Module-Implementation-Version: 351
 OpenIDE-Module-Install: com/bearsoft/org/netbeans/modules/form/FormEditorModule.class
 OpenIDE-Module-Package-Dependencies: [javax.swing.JComponentBeanInfo]
-OpenIDE-Module-Requires: org.netbeans.api.editor.guards.Javascript
 OpenIDE-Module-Layer: com/bearsoft/org/netbeans/modules/form/resources/layer.xml
 AutoUpdate-Show-In-Client: true

@@ -12,7 +12,6 @@ import com.eas.client.model.application.ApplicationEntity.CursorPositionWillChan
 import com.eas.client.model.application.ApplicationEntity.EntityInstanceChangeEvent;
 import com.eas.client.model.application.ApplicationEntity.EntityInstanceDelete;
 import com.eas.client.model.application.ApplicationEntity.EntityInstanceInsert;
-import com.eas.designer.application.module.events.ApplicationEntityEventDesc;
 import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptObj;
 import java.lang.reflect.Constructor;
@@ -36,10 +35,6 @@ public class ModuleUtils {
         intitEventsNames2ScriptEventClasses();
     }
     
-    public static Class<?> getScriptEventClassByNodeName(String anEventNodeName) {
-        return eventsNames2scriptEventsClasses.get(ApplicationEntityEventDesc.convertNodePropNameToEntityPropName(anEventNodeName));
-    }
-
     public static Class[] getPlatypusApiClasses() {
         return apiClasses;
     }

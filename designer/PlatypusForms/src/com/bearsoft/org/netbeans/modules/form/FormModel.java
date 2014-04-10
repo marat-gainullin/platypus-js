@@ -105,17 +105,6 @@ public class FormModel {
         fireTopDesignComponentChanged(oldValue, topDesignComponent);
     }
 
-    public FormsJsCodeGenerator getFormsCodeGenerator() {
-        PlatypusFormSupport support = getDataObject().getLookup().lookup(PlatypusFormSupport.class);
-        if (support != null) {
-            CodeGenerator codeGenerator = support.getFormEditor().getCodeGenerator();
-            assert codeGenerator instanceof FormsJsCodeGenerator;
-            return (FormsJsCodeGenerator) codeGenerator;
-        } else {
-            return null;
-        }
-    }
-
     public String findFreeComponentName(Class<?> compClass) {
         return findFreeComponentName(FormUtils.getPlatypusControlClass(compClass).getSimpleName());
     }
@@ -147,7 +136,6 @@ public class FormModel {
     private CompoundEdit compoundEdit;
     private boolean undoCompoundEdit;
     private boolean modified;
-    private FormEvents formEvents;
     // list of listeners registered on FormModel
     private List<FormModelListener> listeners;
     private List<FormModelEvent> eventList;
@@ -278,13 +266,6 @@ public class FormModel {
             }
         }
         return list;
-    }
-
-    public FormEvents getFormEvents() {
-        if (formEvents == null) {
-            formEvents = new FormEvents(this);
-        }
-        return formEvents;
     }
 
     private static void collectRadComponents(ComponentContainer cont,
@@ -429,9 +410,6 @@ public class FormModel {
     }
 
     void removeComponentImpl(RADComponent<?> radComp, boolean fromModel) {
-        if (fromModel && formEvents != null) {
-            removeEventHandlersRecursively(radComp);
-        }
         if (fromModel) {
             setInModelRecursively(radComp, false);
         }
@@ -453,24 +431,6 @@ public class FormModel {
             namesToComponents.put(radComp.getName(), radComp);
         } else {
             namesToComponents.remove(radComp.getName());
-        }
-    }
-
-    // removes all event handlers attached to given component and all
-    // its subcomponents
-    private void removeEventHandlersRecursively(RADComponent<?> comp) {
-        if (comp instanceof ComponentContainer) {
-            RADComponent<?>[] subcomps = ((ComponentContainer) comp).getSubBeans();
-            for (int i = 0; i < subcomps.length; i++) {
-                removeEventHandlersRecursively(subcomps[i]);
-            }
-        }
-
-        Event[] events = comp.getKnownEvents();
-        for (int i = 0; i < events.length; i++) {
-            if (events[i].hasEventHandlers()) {
-                getFormEvents().detachEvent(events[i]);
-            }
         }
     }
 

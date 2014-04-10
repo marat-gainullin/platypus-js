@@ -641,56 +641,6 @@ public class RADComponentCreator {
             }
             ((RADVisualComponent<?>) newComp).getConstraints().putAll(newConstraints);
         }
-
-        // 7th - copy events 
-        Event[] sourceEvents = sourceComp.getAllEvents();
-        String[][] eventHandlers = new String[sourceEvents.length][];
-        for (int eventsIdx = 0; eventsIdx < sourceEvents.length; eventsIdx++) {
-            eventHandlers[eventsIdx] = sourceEvents[eventsIdx].getEventHandlers();
-        }
-
-        FormEvents formEvents = formModel.getFormEvents();
-        Event[] targetEvents = newComp.getAllEvents();
-        assert sourceEvents.length == targetEvents.length;
-        for (int targetEventsIdx = 0; targetEventsIdx < targetEvents.length; targetEventsIdx++) {
-
-            Event targetEvent = targetEvents[targetEventsIdx];
-            if (targetEvent == null) {
-                continue; // [uknown event error - should be reported!]
-            }
-            String[] handlers = eventHandlers[targetEventsIdx];
-            for (int handlersIdx = 0; handlersIdx < handlers.length; handlersIdx++) {
-                String newHandlerName;
-                String oldHandlerName = handlers[handlersIdx];
-                String sourceVariableName = sourceComp.getName();
-                String targetVariableName = newComp.getName();
-
-                int idx = oldHandlerName.indexOf(sourceVariableName);
-                if (idx >= 0) {
-                    newHandlerName = oldHandlerName.substring(0, idx)
-                            + targetVariableName
-                            + oldHandlerName.substring(idx + sourceVariableName.length());
-                } else {
-                    newHandlerName = targetVariableName
-                            + oldHandlerName;
-                }
-                newHandlerName = formEvents.findFreeHandlerName(newHandlerName);
-
-                String bodyText = null;
-                if (sourceComp.getFormModel() != formModel) {
-                    // copying to different form -> let's copy also the event handler content
-                    FormsJsCodeGenerator javaCodeGenerator = sourceComp.getFormModel().getFormsCodeGenerator();
-                    bodyText = javaCodeGenerator.getEventHandlerText(oldHandlerName);
-                }
-
-                try {
-                    formEvents.attachEvent(targetEvent, newHandlerName, bodyText);
-                } catch (IllegalArgumentException ex) {
-                    // [incompatible handler error - should be reported!]
-                    ErrorManager.getDefault().notify(ex);
-                }
-            }
-        }
         return newComp;
     }
 

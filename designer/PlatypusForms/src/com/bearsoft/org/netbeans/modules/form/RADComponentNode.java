@@ -191,11 +191,6 @@ public class RADComponentNode extends FormNode
     }
 
     @Override
-    public Action getPreferredAction() {
-        return new DefaultRADAction();
-    }
-
-    @Override
     public Action[] getActions(boolean context) {
         if (actions == null) {
             List<Action> lactions = new ArrayList<>(20);
@@ -206,15 +201,6 @@ public class RADComponentNode extends FormNode
                     lactions.add(SystemAction.get(TestAction.class));
                     lactions.add(null);
                 }
-                Event[] events = component.getKnownEvents();
-                for (int i = 0; i < events.length; i++) {
-                    if (events[i].hasEventHandlers()) {
-                        lactions.add(SystemAction.get(EventsAction.class));
-                        lactions.add(null);
-                        break;
-                    }
-                }
-
                 lactions.add(SystemAction.get(CopyAction.class));
             } else if (!(component instanceof RADColumnView)) {
                 /* If you whant ot uncomment folowing code, you have to refactor
@@ -232,7 +218,6 @@ public class RADComponentNode extends FormNode
                 } else {
                     lactions.add(SystemAction.get(TestAction.class));
                 }
-                lactions.add(SystemAction.get(EventsAction.class));
                 lactions.add(null);
 
                 java.util.List<RADProperty<?>> actionProps = component.getActionProperties();

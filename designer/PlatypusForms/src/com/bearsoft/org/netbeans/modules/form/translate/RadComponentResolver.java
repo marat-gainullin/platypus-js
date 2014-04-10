@@ -52,7 +52,6 @@ public class RadComponentResolver extends RadInitializer implements DbControlsDe
     @Override
     public void visit(DbCheckDesignInfo di) {
         initializeProperties(di);
-        initializeEvents(di);
         resolveParent(di);
     }
 
@@ -122,97 +121,83 @@ public class RadComponentResolver extends RadInitializer implements DbControlsDe
     @Override
     public void visit(DbComboDesignInfo di) {
         initializeProperties(di);
-        initializeEvents(di);
         resolveParent(di);
     }
 
     @Override
     public void visit(DbDateDesignInfo di) {
         initializeProperties(di);
-        initializeEvents(di);
         resolveParent(di);
     }
 
     @Override
     public void visit(DbImageDesignInfo di) {
         initializeProperties(di);
-        initializeEvents(di);
         resolveParent(di);
     }
 
     @Override
     public void visit(DbLabelDesignInfo di) {
         initializeProperties(di);
-        initializeEvents(di);
         resolveParent(di);
     }
 
     @Override
     public void visit(DbSchemeDesignInfo di) {
         initializeProperties(di);
-        initializeEvents(di);
         resolveParent(di);
     }
 
     @Override
     public void visit(DbSpinDesignInfo di) {
         initializeProperties(di);
-        initializeEvents(di);
         resolveParent(di);
     }
 
     @Override
     public void visit(DbTextDesignInfo di) {
         initializeProperties(di);
-        initializeEvents(di);
         resolveParent(di);
     }
 
     @Override
     public void visit(DbGridDesignInfo di) {
         initializeProperties(di);
-        initializeEvents(di);
         resolveParent(di);
     }
 
     @Override
     public void visit(DbMapDesignInfo di) {
         initializeProperties(di);
-        initializeEvents(di);
         resolveParent(di);
     }
 
     @Override
     public void visit(ButtonDesignInfo di) {
         initializeProperties(di);
-        initializeEvents(di);
         resolveParent(di);
     }
 
     @Override
     public void visit(DropDownButtonDesignInfo di) {
         initializeProperties(di);
-        initializeEvents(di);
         resolveParent(di);
     }
 
     @Override
     public void visit(LabelDesignInfo di) {
         initializeProperties(di);
-        initializeEvents(di);
         resolveParent(di);
     }
 
     @Override
     public void visit(ButtonGroupDesignInfo di) {
         initializeProperties(di);
-        initializeEvents(di);
     }
 
     @Override
     public void visit(CheckDesignInfo di) {
         initializeProperties(di);
-        initializeEvents(di);
         resolveParent(di);
     }
 
@@ -220,7 +205,6 @@ public class RadComponentResolver extends RadInitializer implements DbControlsDe
     public void visit(TextPaneDesignInfo di) {
         ((JTextPane) component.getBeanInstance()).setContentType("text/plain");
         initializeProperties(di);
-        initializeEvents(di);
         resolveParent(di);
     }
 
@@ -229,63 +213,54 @@ public class RadComponentResolver extends RadInitializer implements DbControlsDe
         ((JEditorPane) component.getBeanInstance()).setEditorKitForContentType("text/html", new HtmlContentEditorKit());
         ((JEditorPane) component.getBeanInstance()).setContentType("text/html");
         initializeProperties(di);
-        initializeEvents(di);
         resolveParent(di);
     }
 
     @Override
     public void visit(FormattedFieldDesignInfo di) {
         initializeProperties(di);
-        initializeEvents(di);
         resolveParent(di);
     }
 
     @Override
     public void visit(PasswordFieldDesignInfo di) {
         initializeProperties(di);
-        initializeEvents(di);
         resolveParent(di);
     }
 
     @Override
     public void visit(ProgressBarDesignInfo di) {
         initializeProperties(di);
-        initializeEvents(di);
         resolveParent(di);
     }
 
     @Override
     public void visit(RadioDesignInfo di) {
         initializeProperties(di);
-        initializeEvents(di);
         resolveParent(di);
     }
 
     @Override
     public void visit(SliderDesignInfo di) {
         initializeProperties(di);
-        initializeEvents(di);
         resolveParent(di);
     }
 
     @Override
     public void visit(TextFieldDesignInfo di) {
         initializeProperties(di);
-        initializeEvents(di);
         resolveParent(di);
     }
 
     @Override
     public void visit(ToggleButtonDesignInfo di) {
         initializeProperties(di);
-        initializeEvents(di);
         resolveParent(di);
     }
 
     @Override
     public void visit(FormDesignInfo di) {
         initializeProperties(di);
-        initializeEvents(di);
         RADComponent<?> resolved = components.get(di.getJMenuBar());
         if (resolved != null && component instanceof RADVisualFormContainer) {
             RADVisualFormContainer formComp = (RADVisualFormContainer) component;
@@ -298,35 +273,30 @@ public class RadComponentResolver extends RadInitializer implements DbControlsDe
     @Override
     public void visit(DesktopDesignInfo di) {
         initializeProperties(di);
-        initializeEvents(di);
         resolveParent(di);
     }
 
     @Override
     public void visit(LayersDesignInfo di) {
         initializeProperties(di);
-        initializeEvents(di);
         resolveParent(di);
     }
 
     @Override
     public void visit(PanelDesignInfo di) {
         initializeProperties(di);
-        initializeEvents(di);
         resolveParent(di);
     }
 
     @Override
     public void visit(ScrollDesignInfo di) {
         initializeProperties(di);
-        initializeEvents(di);
         resolveParent(di);
     }
 
     @Override
     public void visit(SplitDesignInfo di) {
         initializeProperties(di);
-        initializeEvents(di);
         resolveParent(di);
         // chldren constraints resolving is in resolve parent.
     }
@@ -334,62 +304,53 @@ public class RadComponentResolver extends RadInitializer implements DbControlsDe
     @Override
     public void visit(TabsDesignInfo di) {
         initializeProperties(di);
-        initializeEvents(di);
         resolveParent(di);
     }
 
     @Override
     public void visit(ToolbarDesignInfo di) {
         initializeProperties(di);
-        initializeEvents(di);
         resolveParent(di);
     }
 
     @Override
     public void visit(MenuCheckItemDesignInfo di) {
         initializeProperties(di);
-        initializeEvents(di);
         resolveParent(di);
     }
 
     @Override
     public void visit(MenuDesignInfo di) {
         initializeProperties(di);
-        initializeEvents(di);
         resolveParent(di);
     }
 
     @Override
     public void visit(MenuItemDesignInfo di) {
         initializeProperties(di);
-        initializeEvents(di);
         resolveParent(di);
     }
 
     @Override
     public void visit(MenuRadioItemDesignInfo di) {
         initializeProperties(di);
-        initializeEvents(di);
         resolveParent(di);
     }
 
     @Override
     public void visit(MenuSeparatorDesignInfo di) {
         initializeProperties(di);
-        initializeEvents(di);
         resolveParent(di);
     }
 
     @Override
     public void visit(MenubarDesignInfo di) {
         initializeProperties(di);
-        initializeEvents(di);
         resolveParent(di);
     }
 
     @Override
     public void visit(PopupDesignInfo di) {
         initializeProperties(di);
-        initializeEvents(di);
     }
 }

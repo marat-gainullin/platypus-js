@@ -74,10 +74,8 @@ import javax.swing.ButtonGroup;
 import javax.swing.JFormattedTextField.AbstractFormatterFactory;
 import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeListener;
-import javax.swing.text.JTextComponent;
 import org.openide.ErrorManager;
 import org.openide.nodes.*;
-import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
 import org.openide.util.Utilities;
@@ -104,11 +102,9 @@ public abstract class RADComponent<C> {
     protected Node.PropertySet[] propertySets;
     private RADProperty<?>[] beanProperties1;
     private RADProperty<?>[] beanProperties2;
-    private Map<String, EventProperty[]> eventProperties;
     private Map<String, RADProperty<?>[]> otherProperties;
     private List<RADProperty<?>> actionProperties;
     private RADProperty<?>[] knownBeanProperties;
-    private Event[] knownEvents; // must be grouped by EventSetDescriptor
     private PropertyChangeListener propertyListener;
     protected Map<String, FormProperty<?>> nameToProperty;
     private ComponentContainer parent;
@@ -378,7 +374,6 @@ public abstract class RADComponent<C> {
                 ((Component) beanInstance).setName(storedName);
             }
             formModel.updateMapping(this, true);
-            renameDefaultEventHandlers(oldName, aValue);
             formModel.fireSyntheticPropertyChanged(this, COMPONENT_NAME_PROP_NAME,
                     oldName, aValue);
             if (getNodeReference() != null) {
@@ -395,40 +390,6 @@ public abstract class RADComponent<C> {
      */
     public void setStoredName(String name) {
         storedName = name;
-    }
-
-    private void renameDefaultEventHandlers(String oldComponentName,
-            String newComponentName) {
-        boolean renamed = false; // whether any handler was renamed
-        FormEvents formEvents = null;
-
-        Event[] events = getKnownEvents();
-        for (int i = 0; i < events.length; i++) {
-            String[] handlers = events[i].getEventHandlers();
-            for (int j = 0; j < handlers.length; j++) {
-                String handlerName = handlers[j];
-                int idx = handlerName.indexOf(oldComponentName);
-                if (idx >= 0) {
-                    if (formEvents == null) {
-                        formEvents = getFormModel().getFormEvents();
-                    }
-                    String newHandlerName = formEvents.findFreeHandlerName(
-                            handlerName.substring(0, idx)
-                            + newComponentName
-                            + handlerName.substring(idx + oldComponentName.length()));
-                    formEvents.renameEventHandler(handlerName, newHandlerName);
-                    EventProperty prop = events[i].getComponent().<EventProperty>getProperty(events[i].getId());
-                    if (prop != null) {
-                        prop.resetSelectedEventHandler(handlerName);
-                    }
-                    renamed = true;
-                }
-            }
-        }
-
-        if (renamed && getNodeReference() != null) {
-            getNodeReference().fireComponentPropertiesChange();
-        }
     }
 
     /**
@@ -510,13 +471,6 @@ public abstract class RADComponent<C> {
         return beanProperties2;
     }
 
-    EventProperty[] getEventProperties(String aEventSetName) {
-        if (eventProperties == null) {
-            createEventProperties();
-        }
-        return eventProperties.get(aEventSetName);
-    }
-
     List<RADProperty<?>> getActionProperties() {
         if (actionProperties == null) {
             createBeanProperties();
@@ -530,10 +484,6 @@ public abstract class RADComponent<C> {
             if (beanProperties1 == null && !name.startsWith("$")) // NOI18N
             {
                 createBeanProperties();
-            }
-            if (eventProperties == null && name.startsWith("$")) // NOI18N
-            {
-                createEventProperties();
             }
             prop = nameToProperty.get(name);
         }
@@ -673,79 +623,7 @@ public abstract class RADComponent<C> {
 
         return properties;
     }
-
-    public Event getEvent(String name) {
-        Object prop = nameToProperty.get(name);
-        if (prop == null && eventProperties == null) {
-            createEventProperties();
-            prop = nameToProperty.get(name);
-        }
-        return prop instanceof EventProperty
-                ? ((EventProperty) prop).getEvent() : null;
-    }
-
-    /*
-     public Event[] getEvents(String[] eventNames) {
-     getAllEvents();// force event properties and knownEvents creation
-     Event[] events = new Event[eventNames.length];
-     for (int i = 0; i < eventNames.length; i++) {
-     if (eventNames[i] != null) {
-     Object obj = nameToProperty.get(eventNames[i]);
-     events[i] = obj instanceof EventProperty ? ((EventProperty) obj).getEvent() : null;
-     }
-     }
-     return events;
-     }
-     */
-    /**
-     * @return all events of the component grouped by EventSetDescriptor
-     */
-    public Event[] getAllEvents() {
-        if (eventProperties == null) {
-            createEventProperties();
-        }
-        if (knownEvents == null) {
-            List<Event> events = new ArrayList<>();
-            for (EventProperty[] eventProps : eventProperties.values()) {
-                for (EventProperty eventProp : eventProps) {
-                    events.add(eventProp.getEvent());
-                }
-            }
-            knownEvents = events.toArray(new Event[]{});
-        }
-        return knownEvents;
-    }
-
-    // Note: events must be grouped by EventSetDescriptor
-    public Event[] getKnownEvents() {
-        return knownEvents != null ? knownEvents : FormEvents.NO_EVENTS;
-    }
-
-    // ---------
-    // events
-    Event getDefaultEvent() {
-        int eventIndex = getBeanInfo().getDefaultEventIndex();
-        if (eventIndex >= 0 && eventIndex < getKnownEvents().length) {
-            return getKnownEvents()[eventIndex];
-        } else {
-            for (int i = 0; i < getKnownEvents().length; i++) {
-                Event e = getKnownEvents()[i];
-                if ("actionPerformed".equals(e.getListenerMethod().getName()) // NOI18N
-                        && !(getBeanInstance() instanceof javax.swing.JMenu)) {
-                    return e;
-                }
-            }
-        }
-        return null;
-    }
-
-    void attachDefaultEvent() {
-        Event event = getDefaultEvent();
-        if (event != null) {
-            getFormModel().getFormEvents().attachEvent(event, null, null);
-        }
-    }
-
+    
     // -----------------------------------------------------------------------------
     // Properties
     protected void clearProperties() {
@@ -758,8 +636,6 @@ public abstract class RADComponent<C> {
         beanProperties1 = null;
         beanProperties2 = null;
         knownBeanProperties = null;
-        eventProperties = null;
-        knownEvents = null;
     }
     static final boolean SUPPRESS_PROPERTY_TABS = Boolean.getBoolean(
             "nb.form.suppressTabs");
@@ -810,28 +686,6 @@ public abstract class RADComponent<C> {
                             return getBeanProperties2();
                         }
                     });
-                }
-                getAllEvents(); // force eventProperties and knownEvents creation
-                for (final String eventSetName : eventProperties.keySet()) {
-                    String eventSetDisplayNameKey = "CTL_" + eventSetName;
-                    String eventSetHintKey = "CTL_" + eventSetName + "Hint";
-                    String eventSetDisplayName = bundle.containsKey(eventSetDisplayNameKey)
-                            ? bundle.getString(eventSetDisplayNameKey) : eventSetName;
-                    String eventSetHint = bundle.containsKey(eventSetHintKey)
-                            ? bundle.getString(eventSetHintKey) : eventSetName;
-                    Node.PropertySet eventPs = new Node.PropertySet(
-                            eventSetName, // NOI18N
-                            eventSetDisplayName, // NOI18N
-                            eventSetHint) // NOI18N
-                    {
-                        @Override
-                        public EventProperty[] getProperties() {
-                            return getEventProperties(eventSetName);
-                        }
-                    };
-
-                    eventPs.setValue("tabName", bundle.getString("CTL_EventsTab")); // NOI18N
-                    propSets.add(eventPs);
                 }
             }
         }
@@ -1023,55 +877,6 @@ public abstract class RADComponent<C> {
         return getBeanInfo().getEventSetDescriptors();
     }
 
-    private void createEventProperties() {
-        assert eventProperties == null;
-        eventProperties = new HashMap<>();
-        EventSetDescriptor[] eventSets = getEventSetDescriptors();
-        for (int i = 0; i < eventSets.length; i++) {
-            EventSetDescriptor desc = eventSets[i];
-            if (MouseListener.class.isAssignableFrom(desc.getListenerType())
-                    || MouseMotionListener.class.isAssignableFrom(desc.getListenerType())
-                    || MouseWheelListener.class.isAssignableFrom(desc.getListenerType())
-                    || KeyListener.class.isAssignableFrom(desc.getListenerType())
-                    || ComponentListener.class.isAssignableFrom(desc.getListenerType())
-                    || (ChangeListener.class.isAssignableFrom(desc.getListenerType()) && JTabbedPane.class.isAssignableFrom(getBeanClass()))
-                    //|| ItemListener.class.isAssignableFrom(desc.getListenerType())
-                    || ActionListener.class.isAssignableFrom(desc.getListenerType())
-                    || FocusListener.class.isAssignableFrom(desc.getListenerType())
-                    //|| PropertyChangeListener.class.isAssignableFrom(desc.getListenerType())
-                    || WindowListener.class.isAssignableFrom(desc.getListenerType())
-                    || ContainerListener.class.isAssignableFrom(desc.getListenerType())
-                    || ModelControlListener.class.isAssignableFrom(desc.getListenerType())) {
-                Method[] methods = desc.getListenerMethods();
-                if (WindowListener.class.isAssignableFrom(desc.getListenerType())) {
-                    methods = PlatypusWindowListener.class.getMethods();
-                }
-                List<EventProperty> eventPropList = new ArrayList<>();
-                for (int j = 0; j < methods.length; j++) {
-                    if (!"windowDeiconified".equals(methods[j].getName()) && !"windowIconified".equals(methods[j].getName())) {
-                        String eventId = FormEvents.getEventIdName(methods[j]);
-                        Object prop = nameToProperty.get(eventId);
-                        assert (prop == null) || (prop instanceof EventProperty);
-                        EventProperty eventProp = (EventProperty) prop;
-                        if (eventProp == null) {
-                            eventProp = createEventProperty(eventId, desc, methods[j]);
-                        }
-                        eventPropList.add(eventProp);
-                    }
-                }
-                EventProperty[] eventProps = eventPropList.toArray(new EventProperty[]{});
-                FormUtils.sortProperties(eventProps);
-                eventProperties.put(desc.getName(), eventProps);
-            }
-        }
-        /*
-         knownEvents = new Event[eventProps.length];
-         for (int i = 0; i < eventProps.length; i++) {
-         knownEvents[i] = eventProps[i].getEvent();
-         }
-         */
-    }
-
     protected RADProperty<?> createBeanProperty(PropertyDescriptor desc,
             Object[] propAccessClsf,
             Object[] propParentChildDepClsf) {
@@ -1129,17 +934,6 @@ public abstract class RADComponent<C> {
         }
         setPropertyListener(prop);
         nameToProperty.put(desc.getName(), prop);
-        return prop;
-    }
-
-    private EventProperty createEventProperty(String eventId,
-            EventSetDescriptor eventSetDesc,
-            Method eventMethod) {
-        EventProperty prop = new EventProperty(new Event(this,
-                eventSetDesc,
-                eventMethod),
-                eventId);
-        nameToProperty.put(eventId, prop);
         return prop;
     }
 

@@ -8,7 +8,6 @@ import com.bearsoft.rowset.compacts.CompactBlob;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.reports.ExcelReport;
 import com.eas.designer.application.module.PlatypusModuleDataObject;
-import com.eas.designer.application.module.events.ApplicationModuleEvents;
 import java.io.IOException;
 import java.io.OutputStream;
 import org.openide.filesystems.FileObject;
@@ -56,7 +55,7 @@ public class PlatypusReportDataObject extends PlatypusModuleDataObject {
 
     @Override
     protected Cookie[] createServices() {
-        return new Cookie[]{new PlatypusReportSupport(this), new ApplicationModuleEvents(this)};
+        return new Cookie[]{new PlatypusReportSupport(this)};
     }
 
     public FileObject getLayoutFile() {

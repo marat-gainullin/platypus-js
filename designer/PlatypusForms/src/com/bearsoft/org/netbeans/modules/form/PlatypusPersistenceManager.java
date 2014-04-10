@@ -232,7 +232,6 @@ public class PlatypusPersistenceManager extends PersistenceManager {
                         assert comp instanceof RADModelGridColumn;
                         RADModelGridColumn radColumn = (RADModelGridColumn) comp;
                         DbGridColumn column = (DbGridColumn) comp.getBeanInstance();
-                        DesignInfoFactory.initWithEvents(column, radColumn.getAllEvents());
                         DesignInfoFactory.initColumnsContainerWithEvents(radColumn);
                         di = column;
                         DesignInfo viewDi = DesignInfoFactory.create(radColumn.getViewControl().getBeanClass());

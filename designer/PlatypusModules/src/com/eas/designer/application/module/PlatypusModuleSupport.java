@@ -28,14 +28,10 @@ import javax.swing.text.StyledDocument;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoableEdit;
-import org.netbeans.api.editor.guards.GuardedSectionManager;
 import org.netbeans.core.spi.multiview.CloseOperationHandler;
 import org.netbeans.core.spi.multiview.CloseOperationState;
 import org.netbeans.core.spi.multiview.MultiViewDescription;
 import org.netbeans.core.spi.multiview.MultiViewFactory;
-import org.netbeans.spi.editor.guards.GuardedEditorSupport;
-import org.netbeans.spi.editor.guards.GuardedSectionsFactory;
-import org.netbeans.spi.editor.guards.GuardedSectionsProvider;
 import org.openide.DialogDisplayer;
 import org.openide.ErrorManager;
 import org.openide.NotifyDescriptor;
@@ -135,74 +131,18 @@ public class PlatypusModuleSupport extends DataEditorSupport implements OpenCook
     public void openAt(Position pos) {
         openAt(createPositionRef(pos.getOffset(), Position.Bias.Forward));
     }
-
-    public GuardedSectionManager getGuardedSectionManager() {
-        try {
-            StyledDocument doc = null;
-            try {
-                doc = openDocument();
-            } catch (UserQuestionException uqex) { // Issue 143655
-                Object retVal = DialogDisplayer.getDefault().notify(
-                        new NotifyDescriptor.Confirmation(uqex.getLocalizedMessage(),
-                                NotifyDescriptor.YES_NO_OPTION));
-                if (NotifyDescriptor.YES_OPTION == retVal) {
-                    uqex.confirmed();
-                    doc = openDocument();
-                }
-            }
-            return (doc == null) ? null : GuardedSectionManager.getInstance(doc);
-        } catch (IOException ex) {
-            throw new IllegalStateException(ex); // NOI18N
-        }
-    }
-
-    private final class ModuleGEditor implements GuardedEditorSupport {
-
-        StyledDocument doc;
-
-        @Override
-        public StyledDocument getDocument() {
-            return ModuleGEditor.this.doc;
-        }
-    }
-    private ModuleGEditor guardedEditor;
-    private GuardedSectionsProvider guardedProvider;
-
+    
     @Override
     protected void loadFromStreamToKit(StyledDocument doc, InputStream stream, EditorKit kit) throws IOException, BadLocationException {
-        if (guardedEditor == null) {
-            guardedEditor = new ModuleGEditor();
-            GuardedSectionsFactory gFactory = GuardedSectionsFactory.find(((DataEditorSupport.Env) env).getMimeType());
-            if (gFactory != null) {
-                guardedProvider = gFactory.create(guardedEditor);
-            }
-        }
-
         doc.putProperty(PlatypusModuleDataObject.DATAOBJECT_DOC_PROPERTY, dataObject);
         doc.addDocumentListener(this);
-
-        if (guardedProvider != null) {
-            guardedEditor.doc = doc;
-            Charset c = Charset.forName(PlatypusUtils.COMMON_ENCODING_NAME);
-            try (Reader reader = guardedProvider.createGuardedReader(stream, c)) {
-                kit.read(reader, doc, 0);
-            }
-        } else {
-            super.loadFromStreamToKit(doc, stream, kit);
-        }
+        super.loadFromStreamToKit(doc, stream, kit);
         sourceModified = false;
     }
 
     @Override
     protected void saveFromKitToStream(StyledDocument doc, EditorKit kit, OutputStream stream) throws IOException, BadLocationException {
-        if (guardedProvider != null) {
-            Charset c = Charset.forName(PlatypusUtils.COMMON_ENCODING_NAME);
-            try (Writer writer = guardedProvider.createGuardedWriter(stream, c)) {
-                kit.write(writer, doc, 0, doc.getLength());
-            }
-        } else {
-            super.saveFromKitToStream(doc, kit, stream);
-        }
+        super.saveFromKitToStream(doc, kit, stream);  
     }
 
     @Override
