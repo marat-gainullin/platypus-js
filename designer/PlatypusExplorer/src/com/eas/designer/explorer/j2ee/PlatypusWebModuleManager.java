@@ -19,8 +19,8 @@ import com.eas.designer.explorer.j2ee.dd.Servlet;
 import com.eas.designer.explorer.j2ee.dd.ServletMapping;
 import com.eas.designer.explorer.j2ee.dd.WebApplication;
 import com.eas.designer.explorer.j2ee.dd.WebResourceCollection;
-import com.eas.designer.explorer.platform.EmptyPlatformHomePathException;
-import com.eas.designer.explorer.platform.PlatypusPlatform;
+import com.eas.designer.application.platform.PlatformHomePathException;
+import com.eas.designer.application.platform.PlatypusPlatform;
 import com.eas.designer.application.project.ClientType;
 import com.eas.designer.explorer.project.PlatypusProjectImpl;
 import com.eas.server.ServerMain;
@@ -190,7 +190,7 @@ public class PlatypusWebModuleManager {
         }
     }
 
-    private void preparePlatypusWebClient() throws IOException, EmptyPlatformHomePathException {
+    private void preparePlatypusWebClient() throws IOException, PlatformHomePathException {
         FileObject pwcDir = webAppDir.getFileObject(PLATYPUS_WEB_CLIENT_DIR_NAME);
         if (pwcDir == null) {
             pwcDir = webAppDir.createFolder(PLATYPUS_WEB_CLIENT_DIR_NAME);
@@ -350,7 +350,7 @@ public class PlatypusWebModuleManager {
 
     }
 
-    private void copyBinJars(FileObject libsDir) throws EmptyPlatformHomePathException, IOException {
+    private void copyBinJars(FileObject libsDir) throws PlatformHomePathException, IOException {
         FileObject platformBinDir = FileUtil.toFileObject(PlatypusPlatform.getPlatformBinDirectory());
         for (FileObject fo : platformBinDir.getChildren()) {
             if (fo.isData() && PlatypusPlatform.JAR_FILE_EXTENSION.equalsIgnoreCase(fo.getExt())) {

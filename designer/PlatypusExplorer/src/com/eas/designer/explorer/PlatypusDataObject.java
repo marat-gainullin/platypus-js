@@ -59,7 +59,7 @@ public abstract class PlatypusDataObject extends MultiDataObject {
             resignOnQueries();
         }
     }
-    
+
     @Override
     protected int associateLookup() {
         return 1;
@@ -67,17 +67,18 @@ public abstract class PlatypusDataObject extends MultiDataObject {
 
     /**
      * WARNING!!! This method is executed in a separate thread.
+     *
      * @throws java.lang.Exception
      */
     protected abstract void validateModel() throws Exception;
 
-    protected void unsignFromQueries(){
+    protected void unsignFromQueries() {
         if (projectClientQueriesListener != null) {
             projectClientQueriesListener.remove();
             projectClientQueriesListener = null;
         }
     }
-    
+
     protected void resignOnQueries() {
         unsignFromQueries();
         if (getClient() != null) {
@@ -151,7 +152,7 @@ public abstract class PlatypusDataObject extends MultiDataObject {
         };
     }
 
-    private void fireClientConnected(String aDatasourceName) {
+    private void fireClientConnected(final String aDatasourceName) {
         for (PlatypusProject.ClientChangeListener onChange : clientListeners.toArray(new PlatypusProject.ClientChangeListener[]{})) {
             onChange.connected(aDatasourceName);
         }
@@ -162,13 +163,13 @@ public abstract class PlatypusDataObject extends MultiDataObject {
             onChange.disconnected(aDatasourceName);
         }
     }
-    
+
     private void fireDeafultDatasourceNameChanged(String aOldDatasourceName, String aNewDatasourceName) {
         for (PlatypusProject.ClientChangeListener onChange : clientListeners.toArray(new PlatypusProject.ClientChangeListener[]{})) {
             onChange.defaultDatasourceNameChanged(aOldDatasourceName, aNewDatasourceName);
         }
     }
-    
+
     public final PlatypusProject getProject() {
         Project pr = FileOwnerQuery.getOwner(getPrimaryFile());
         if (pr instanceof PlatypusProject) {

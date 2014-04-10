@@ -12,7 +12,7 @@ import java.util.List;
  *
  * @author vv
  */
-public class CompletionSupport {
+public class CompletionUtils {
 
     private static final String JSDOC_PREFIX = "/**"; //NOI18N
             

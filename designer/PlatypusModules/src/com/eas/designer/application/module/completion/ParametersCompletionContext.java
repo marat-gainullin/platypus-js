@@ -6,6 +6,7 @@ package com.eas.designer.application.module.completion;
 
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameters;
+import com.eas.client.model.script.ScriptableRowset;
 import static com.eas.designer.application.module.completion.CompletionContext.addItem;
 import com.eas.designer.application.module.completion.CompletionPoint.CompletionToken;
 import static com.eas.designer.application.module.completion.ModuleCompletionContext.METADATA_SCRIPT_NAME;
@@ -20,7 +21,7 @@ public class ParametersCompletionContext extends CompletionContext {
     Fields parameters;
 
     public ParametersCompletionContext(Fields aParameters) {
-        super(Parameters.class);
+        super(ScriptableRowset.class);
         parameters = aParameters;
     }
 

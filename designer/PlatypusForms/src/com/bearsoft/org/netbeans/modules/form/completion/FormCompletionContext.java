@@ -16,11 +16,8 @@ import com.eas.designer.application.module.PlatypusModuleDataObject;
 import com.eas.designer.application.module.completion.CompletionPoint;
 import com.eas.designer.application.module.completion.ModuleCompletionContext;
 import com.eas.designer.application.module.completion.ModuleThisCompletionContext;
-import com.eas.script.ScriptFunction;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Arrays;
 import org.netbeans.spi.editor.completion.CompletionResultSet;
 import org.openide.ErrorManager;
 
@@ -47,7 +44,7 @@ public class FormCompletionContext extends ModuleCompletionContext {
         super.applyCompletionItems(point, offset, resultSet);
 
     }
-
+    
     @Override
     protected Class<?> getEventHandlerFunctionParameterClass(String functionName) {
         Class<?> clazz = super.getEventHandlerFunctionParameterClass(functionName);

@@ -56,27 +56,24 @@ public class CompletionPoint {
         if (caretOffset > 0) {
             char caretPositionChar = doc.getChars(caretOffset, 1)[0];
             char preCaretPositionChar = doc.getChars(caretOffset - 1, 1)[0];
+            boolean inBetweenSentence = false;
             if (Character.isJavaIdentifierPart(preCaretPositionChar) || preCaretPositionChar == DOT_CHARACTER) {
                 boolean afterDotCaretPosintion = !Character.isJavaIdentifierPart(caretPositionChar)
                         && preCaretPositionChar == DOT_CHARACTER;
                 String docStr = doc.getText(0, doc.getLength());
                 cp.astRoot = JsParser.parse(afterDotCaretPosintion ? sanitizeDot(docStr, caretOffset - 1) : docStr);
                 AstNode offsetNode = AstUtlities.getOffsetNode(cp.astRoot, afterDotCaretPosintion ? caretOffset - 1 : caretOffset);
-                final AstNode subRoot = getCompletionSubtree(cp.astRoot, offsetNode);
+                final AstNode subRoot = getCompletionSubtree(offsetNode);
                 if (subRoot != null) {
-                    List<CompletionToken> tokens = getContextTokens(subRoot);
-                    if (tokens.size() > 0) {
-                        if (!afterDotCaretPosintion) {
-                            cp.completionTokens = tokens.subList(0, tokens.size() - 1);
-                        } else {
-                            cp.completionTokens = tokens.subList(0, tokens.size());
-                        }
-                    }
+                    List<CompletionToken> ctxTokens = getContextTokens(subRoot);
+                    List<CompletionToken> offsetTokens = afterDotCaretPosintion ? ctxTokens : getOffsetTokens(ctxTokens, offsetNode);
+                    inBetweenSentence = ctxTokens.size() > offsetTokens.size() + 1;
+                    cp.completionTokens = offsetTokens;
                 }
             }
             cp.caretBeginWordOffset = getStartWordOffset(doc, caretOffset);
             cp.caretEndWordOffset = getEndWordOffset(doc, caretOffset);
-            if (caretOffset - cp.caretBeginWordOffset > 0) {
+            if (caretOffset - cp.caretBeginWordOffset > 0 && !inBetweenSentence) {
                 cp.filter = doc.getText(cp.caretBeginWordOffset, caretOffset - cp.caretBeginWordOffset);
             }
         }
@@ -88,33 +85,33 @@ public class CompletionPoint {
         subRoot.visit(new NodeVisitor() {
             @Override
             public boolean visit(AstNode an) {
-                if (an == subRoot) {
+               if (an == subRoot) {
                     if (an instanceof KeywordLiteral) { // this.
-                        ctx.add(new CompletionToken(an.toSource(), CompletionTokenType.IDENTIFIER));
+                        ctx.add(new CompletionToken(an.toSource(), CompletionTokenType.IDENTIFIER, an));
                         return false;
                     }
                     if (an instanceof Name) { // prop1.
-                        ctx.add(new CompletionToken(((Name) an).getIdentifier(), CompletionTokenType.IDENTIFIER));
+                        ctx.add(new CompletionToken(((Name) an).getIdentifier(), CompletionTokenType.IDENTIFIER, an));
                         return false;
                     }
                     return true;
                 } else if (an.getParent() instanceof ElementGet) {
                     ElementGet eg = (ElementGet) an.getParent();
                     if (eg.getElement() == an) { //prop1[prop2] , don't drill deeper
-                        ctx.add(new CompletionToken(an.toSource(), CompletionTokenType.ELEMENT_GET));
+                        ctx.add(new CompletionToken(an.toSource(), CompletionTokenType.ELEMENT_GET, an));
                         return false;
                     }
                 } else if (an.getParent() instanceof PropertyGet) { //prop1.prop2
                     PropertyGet pg = (PropertyGet) an.getParent();
                     if (pg.getTarget() == an && an instanceof Name) {
-                        ctx.add(new CompletionToken(((Name) an).getIdentifier(), CompletionTokenType.IDENTIFIER));
+                        ctx.add(new CompletionToken(((Name) an).getIdentifier(), CompletionTokenType.IDENTIFIER, an));
                         return false;
                     }
                     if (pg.getTarget() == an && an instanceof KeywordLiteral) {
-                        ctx.add(new CompletionToken(an.toSource(), CompletionTokenType.IDENTIFIER));
+                        ctx.add(new CompletionToken(an.toSource(), CompletionTokenType.IDENTIFIER, an));
                         return false;
                     } else if (pg.getProperty() == an && an instanceof Name) {
-                        ctx.add(new CompletionToken(((Name) an).getIdentifier(), CompletionTokenType.PROPERTY_GET));
+                        ctx.add(new CompletionToken(((Name) an).getIdentifier(), CompletionTokenType.PROPERTY_GET, an));
                         return false;
                     }
                 }
@@ -124,6 +121,18 @@ public class CompletionPoint {
         return ctx;
     }
 
+    private static List<CompletionToken> getOffsetTokens(List<CompletionToken> contextTokens, AstNode offsetNode) {
+         final List<CompletionToken> tokens = new ArrayList<>();
+        for (CompletionToken token : contextTokens) {
+            if (token.node != offsetNode) {
+                tokens.add(token);
+            } else {
+                break;
+            }
+        }
+        return tokens;
+    }
+    
     private static String sanitizeDot(String str, int position) {
         StringBuilder sb = new StringBuilder(str.substring(0, position));
         sb.append(" "); //NOI18N
@@ -131,7 +140,7 @@ public class CompletionPoint {
         return sb.toString();
     }
 
-    private static AstNode getCompletionSubtree(AstRoot root, AstNode node) {
+    private static AstNode getCompletionSubtree(AstNode node) {
         if (node instanceof Name
                 || node instanceof KeywordLiteral
                 || node instanceof ElementGet
@@ -173,10 +182,12 @@ public class CompletionPoint {
 
         public final String name;
         public final CompletionTokenType type;
+        public final AstNode node;
 
-        public CompletionToken(String aName, CompletionTokenType aType) {
+        public CompletionToken(String aName, CompletionTokenType aType, AstNode aNode) {
             name = aName;
             type = aType;
+            node = aNode;
         }
     }
 }

@@ -7,6 +7,7 @@ package com.eas.client.forms.api.components.model;
 import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.forms.FormRunner;
 import com.eas.client.forms.api.Component;
+import com.eas.client.forms.api.events.RenderEvent;
 import com.eas.client.model.ModelElementRef;
 import com.eas.client.model.application.ApplicationEntity;
 import com.eas.client.model.application.ApplicationModel;
@@ -14,6 +15,7 @@ import com.eas.client.model.script.RowsetHostObject;
 import com.eas.client.model.script.ScriptableRowset;
 import com.eas.client.scripts.ScriptRunnerPrototype;
 import com.eas.dbcontrols.DbControlPanel;
+import com.eas.script.EventMethod;
 import com.eas.script.ScriptFunction;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -115,6 +117,7 @@ public abstract class ScalarModelComponent<D extends DbControlPanel> extends Com
             + "*/";
     
     @ScriptFunction(jsDoc = ON_RENDER_JSDOC)
+    @EventMethod(eventClass = RenderEvent.class)
     public Function getOnRender() {
         return delegate.getOnRender();
     }

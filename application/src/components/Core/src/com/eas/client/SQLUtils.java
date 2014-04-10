@@ -296,6 +296,10 @@ public class SQLUtils {
     }
 
     public static SqlQuery validateTableSqlQuery(String aTableDbId, String tableName, String tableSchemaName, DbClient aClient) throws Exception {
+        return validateTableSqlQuery(aTableDbId, tableName, tableSchemaName, aClient, true);
+    }
+
+    public static SqlQuery validateTableSqlQuery(String aTableDbId, String tableName, String tableSchemaName, DbClient aClient, boolean forceMdQuery) throws Exception {
         String fullTableName = tableName;
         if (tableSchemaName != null && !tableSchemaName.isEmpty()) {
             fullTableName = tableSchemaName + "." + fullTableName;
@@ -303,8 +307,12 @@ public class SQLUtils {
         SqlQuery query = new SqlQuery(aClient, aTableDbId, SQLUtils.makeQueryByTableName(fullTableName));
         DbMetadataCache mdCache = aClient.getDbMetadataCache(aTableDbId);
         if (mdCache != null) {
-            Fields tableFields = mdCache.getTableMetadata(fullTableName);
-            query.setFields(tableFields);
+            Fields tableFields = forceMdQuery || mdCache.containsTableMetadata(fullTableName) ? mdCache.getTableMetadata(fullTableName) : null;
+            if (tableFields != null) {
+                query.setFields(tableFields);
+            } else {
+                throw new Exception("Table " + fullTableName + " doesn't exist. Datasource: " + aTableDbId);
+            }
         }
         return query;
     }
@@ -747,7 +755,7 @@ public class SQLUtils {
         typesCompatible.put(java.sql.Types.VARBINARY, TypesGroup.BINARIES);
         typesCompatible.put(java.sql.Types.BINARY, TypesGroup.BINARIES);
         typesCompatible.put(java.sql.Types.LONGVARBINARY, TypesGroup.BINARIES);
-         // Lobs
+        // Lobs
         typesCompatible.put(java.sql.Types.BLOB, TypesGroup.BLOB);
         typesCompatible.put(java.sql.Types.CLOB, TypesGroup.LOBS);
         typesCompatible.put(java.sql.Types.NCLOB, TypesGroup.LOBS);

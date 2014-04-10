@@ -10,8 +10,8 @@ import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.designer.application.PlatypusUtils;
 import com.eas.designer.explorer.j2ee.PlatypusWebModule;
 import com.eas.designer.explorer.j2ee.WebAppManager;
-import com.eas.designer.explorer.platform.EmptyPlatformHomePathException;
-import com.eas.designer.explorer.platform.PlatypusPlatform;
+import com.eas.designer.application.platform.PlatformHomePathException;
+import com.eas.designer.application.platform.PlatypusPlatform;
 import com.eas.designer.explorer.project.PlatypusProjectImpl;
 import com.eas.util.FileUtils;
 import com.eas.xml.dom.XmlDom2String;
@@ -87,7 +87,7 @@ public class TomcatWebAppManager implements WebAppManager {
         }
     }
 
-    private static void deployJdbcDriver(FileObject targetDirectory, String className) throws EmptyPlatformHomePathException, IOException {
+    private static void deployJdbcDriver(FileObject targetDirectory, String className) throws PlatformHomePathException, IOException {
         File jarFile = PlatypusPlatform.findThirdpartyJar(className);
         if (jarFile != null) {
             FileObject jdbcDriverFo = FileUtil.toFileObject(jarFile);

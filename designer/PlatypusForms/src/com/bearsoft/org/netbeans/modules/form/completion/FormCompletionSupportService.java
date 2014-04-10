@@ -8,7 +8,6 @@ import com.bearsoft.org.netbeans.modules.form.FormUtils;
 import com.eas.designer.application.module.completion.CompletionPoint;
 import com.eas.designer.application.module.completion.CompletionSupportService;
 import com.eas.designer.application.module.completion.JsCompletionItem;
-import com.eas.designer.application.module.completion.JsFieldCompletionItem;
 import com.eas.designer.application.module.completion.SystemConstructorCompletionItem;
 import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptObj;

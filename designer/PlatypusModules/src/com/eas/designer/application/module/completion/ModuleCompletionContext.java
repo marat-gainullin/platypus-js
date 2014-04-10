@@ -17,12 +17,16 @@ import com.eas.designer.application.module.nodes.ApplicationEntityNode;
 import com.eas.designer.application.module.parser.AstUtlities;
 import com.eas.designer.datamodel.nodes.ModelNode;
 import com.eas.designer.explorer.utils.StringUtils;
+import com.eas.script.EventMethod;
 import com.eas.script.ScriptObj;
+import com.eas.util.PropertiesUtils;
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.mozilla.javascript.Token;
+import org.mozilla.javascript.ast.Assignment;
 import org.mozilla.javascript.ast.AstNode;
 import org.mozilla.javascript.ast.AstRoot;
 import org.mozilla.javascript.ast.Block;
@@ -125,7 +129,7 @@ public class ModuleCompletionContext extends CompletionContext {
 
     protected Class<?> getEventHandlerFunctionParameterClass(String functionName) {
         if (functionName == null) {
-            throw new NullPointerException("Function name is null.");
+            throw new NullPointerException("Function name is null.");//NOI18N
         } else {
             try {
                 ModelNode<ApplicationDbEntity, ApplicationDbModel> modelNode = getDataObject().getModelNode();
@@ -139,7 +143,7 @@ public class ModuleCompletionContext extends CompletionContext {
                                     if (p instanceof ApplicationEntityEventProperty) {
                                         ApplicationEntityEventProperty eventProperty = (ApplicationEntityEventProperty) p;
                                         if (eventProperty.hasEventHandler() && functionName.equals(eventProperty.getEventHandler())) {
-                                            return ModuleUtils.getScriptEventClass(eventProperty.getName());
+                                            return ModuleUtils.getScriptEventClassByNodeName(eventProperty.getName());
                                         }
                                     }
                                 }
@@ -232,6 +236,17 @@ public class ModuleCompletionContext extends CompletionContext {
                 || name.equals(SERVER_REPORT_MODULE_NAME);
     }
 
+    private static Class<?> getEventClass(Class<?> scriptClass, String name) {
+        for (Method method : scriptClass.getMethods()) {
+            if (PropertiesUtils.isBeanPatternMethod(method) 
+                    && name.equals(PropertiesUtils.getPropertyName(method.getName()))
+                    && method.isAnnotationPresent(EventMethod.class)) {
+                    return method.getAnnotation(EventMethod.class).eventClass();
+            }
+        }
+        return null;
+    }
+    
     public enum CompletionMode {
 
         VARIABLES_AND_FUNCTIONS, CONSTRUCTORS
@@ -298,6 +313,26 @@ public class ModuleCompletionContext extends CompletionContext {
                                     if (eventClass != null) {
                                         ctx = new CompletionContext(eventClass);
                                         return false;
+                                    }
+                                } else if (fn.getParent() instanceof Assignment) { // event handler function pameter with event assignment
+                                    Assignment assignment = (Assignment) fn.getParent();
+                                    if (assignment.getLeft() instanceof PropertyGet) {
+                                        PropertyGet leftPg = (PropertyGet) assignment.getLeft();
+                                        List<CompletionToken> tokens = CompletionPoint.getContextTokens(leftPg);
+                                        if (tokens != null && tokens.size() > 1) {
+                                            try {
+                                                CompletionContext propsCtx = ModuleCompletionProvider.getCompletionContext(parentContext, tokens.subList(0, tokens.size() - 1), leftPg.getAbsolutePosition());
+                                                if (propsCtx != null && propsCtx.getScriptClass() != null) {
+                                                    Class<?> eventClass = getEventClass(propsCtx.getScriptClass(), tokens.get(tokens.size() - 1).name);
+                                                    if (eventClass != null) {
+                                                        ctx = new CompletionContext(eventClass);
+                                                        return false;
+                                                    }
+                                                }
+                                            } catch (Exception ex) {
+                                                ErrorManager.getDefault().notify(ex);
+                                            }
+                                        }
                                     }
                                 }
                             }

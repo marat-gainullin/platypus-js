@@ -20,6 +20,6 @@ public final class PlatformDirectoryAction implements ActionListener {
     
     @Override
     public void actionPerformed(ActionEvent e) {
-        PlatypusPlatform.showPlatformHomeDialog();
+        PlatypusPlatformDialog.showPlatformHomeDialog();
     }
 }

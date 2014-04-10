@@ -241,6 +241,7 @@
                 <package>com.eas.design</package>
                 <package>com.eas.designer.application</package>
                 <package>com.eas.designer.application.indexer</package>
+                <package>com.eas.designer.application.platform</package>
                 <package>com.eas.designer.application.project</package>
                 <package>com.eas.designer.application.utils</package>
                 <package>com.eas.gui</package>

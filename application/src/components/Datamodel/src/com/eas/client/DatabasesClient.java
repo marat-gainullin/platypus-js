@@ -102,14 +102,22 @@ public class DatabasesClient implements DbClient {
     }
 
     public void setDefaultDatasourceName(String aValue) throws Exception {
+        setDefaultDatasourceName(aValue, true);
+    }
+
+    public void setDefaultDatasourceName(String aValue, boolean fireEvents) throws Exception {
         if (defaultDatasourceName == null ? aValue != null : !defaultDatasourceName.equals(aValue)) {
+            String oldDefaultDatasourceName = defaultDatasourceName;
+            DatabaseMdCache oldMdCache = mdCaches.remove(null);
+            DatabaseMdCache newMdCache = mdCaches.remove(aValue);
             defaultDatasourceName = aValue;
-            DatabaseMdCache mdCache = mdCaches.get(null);
-            if (mdCache != null) {
-                mdCache.clear();
+            if (oldMdCache != null) {
+                mdCaches.put(oldDefaultDatasourceName, oldMdCache);
             }
-            mdCaches.remove(null);
-            appEntityChanged(null);
+            if (newMdCache != null) {
+                mdCaches.put(null, newMdCache);
+            }
+            appEntityChanged(null, fireEvents);
         }
     }
 
@@ -495,33 +503,36 @@ public class DatabasesClient implements DbClient {
 
     @Override
     public synchronized void appEntityChanged(String aEntityId) throws Exception {
+        appEntityChanged(aEntityId, true);
+    }
+
+    public synchronized void appEntityChanged(String aEntityId, boolean fireEvents) throws Exception {
         if (aEntityId != null) {
             if (appCache != null) {
                 ApplicationElement appElement = appCache.get(aEntityId);
                 if (appElement != null && (appElement.getType() == ClientConstants.ET_QUERY || appElement.getType() == ClientConstants.ET_COMPONENT)) {
-                    clearQueries();
+                    clearQueries(fireEvents);
                 }
                 appCache.remove(aEntityId);
             }
         } else {
-            clearCaches();
+            if (appCache != null) {
+                appCache.clear();
+            }
+            clearQueries(fireEvents);
         }
-    }
-
-    protected void clearCaches() throws Exception {
-        for (DatabaseMdCache cache : mdCaches.values()) {
-            cache.clear();
-        }
-        if (appCache != null) {
-            appCache.clear();
-        }
-        clearQueries();
     }
 
     public void clearQueries() throws Exception {
+        clearQueries(true);
+    }
+
+    public void clearQueries(boolean fireEvents) throws Exception {
         if (queries != null) {
             queries.clearCache();
-            fireQueriesCleared();
+            if (fireEvents) {
+                fireQueriesCleared();
+            }
         }
     }
 

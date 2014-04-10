@@ -13,8 +13,9 @@ import com.eas.designer.application.project.PlatypusProjectSettings;
 import com.eas.designer.debugger.DebuggerEnvironment;
 import com.eas.designer.debugger.DebuggerUtils;
 import com.eas.designer.explorer.j2ee.PlatypusWebModuleManager;
-import com.eas.designer.explorer.platform.EmptyPlatformHomePathException;
-import com.eas.designer.explorer.platform.PlatypusPlatform;
+import com.eas.designer.application.platform.PlatformHomePathException;
+import com.eas.designer.application.platform.PlatypusPlatform;
+import com.eas.designer.explorer.platform.PlatypusPlatformDialog;
 import com.eas.designer.explorer.server.PlatypusServerInstance;
 import com.eas.designer.explorer.server.PlatypusServerInstanceProvider;
 import com.eas.designer.explorer.server.ServerState;
@@ -141,14 +142,14 @@ public class ProjectRunner {
         File binDir;
         try {
             binDir = PlatypusPlatform.getPlatformBinDirectory();
-        } catch (EmptyPlatformHomePathException | IllegalStateException ex) {
+        } catch (PlatformHomePathException | IllegalStateException ex) {
             io.getErr().println(ex.getMessage());
-            if (!PlatypusPlatform.showPlatformHomeDialog()) {
+            if (!PlatypusPlatformDialog.showPlatformHomeDialog()) {
                 return null;
             } else {
                 try {
                     binDir = PlatypusPlatform.getPlatformBinDirectory();
-                } catch (EmptyPlatformHomePathException | IllegalStateException ex1) {
+                } catch (        PlatformHomePathException | IllegalStateException ex1) {
                     io.getErr().println(ex1.getMessage());
                     io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Specify_Platypus_Platform_Path"));//NOI18N
                     return null;

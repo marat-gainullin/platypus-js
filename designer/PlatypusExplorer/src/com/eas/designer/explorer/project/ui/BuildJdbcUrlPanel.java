@@ -4,7 +4,7 @@
  */
 package com.eas.designer.explorer.project.ui;
 
-import com.eas.designer.explorer.utils.DatabaseServerType;
+import com.eas.designer.application.utils.DatabaseServerType;
 import javax.swing.DefaultComboBoxModel;
 import org.openide.util.NbBundle;
 
@@ -62,7 +62,7 @@ public class BuildJdbcUrlPanel extends javax.swing.JPanel {
         txtDatabaseName = new javax.swing.JTextField();
         lblInfo = new javax.swing.JLabel();
 
-        cbServer.setModel(new DefaultComboBoxModel(com.eas.designer.explorer.utils.DatabaseServerType.values()));
+        cbServer.setModel(new DefaultComboBoxModel(com.eas.designer.application.utils.DatabaseServerType.values()));
         cbServer.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cbServerActionPerformed(evt);

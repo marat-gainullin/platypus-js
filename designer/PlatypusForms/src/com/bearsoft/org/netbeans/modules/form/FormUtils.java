@@ -45,6 +45,7 @@ package com.bearsoft.org.netbeans.modules.form;
 
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates.MarginLayoutSupport;
 import com.eas.client.forms.api.containers.*;
+import com.eas.client.forms.api.events.MouseEvent;
 import com.eas.client.model.ModelElementRef;
 import com.eas.dbcontrols.check.DbCheck;
 import com.eas.dbcontrols.combo.DbCombo;
@@ -130,6 +131,8 @@ public class FormUtils {
     static final Object PROP_HIDDEN = new Object();
     static final String PROP_REQUIRES_PARENT = "thisPropertyRequiresParent"; // NOI18N
     static final String PROP_REQUIRES_CHILDREN = "thisPropertyRequiresChildren"; // NOI18N
+    private static final Map<String, Class<?>> eventsNames2scriptEventsClasses = new HashMap<>();
+    
     /**
      * Table defining categories of properties. It overrides original Swing
      * definition from beaninfo (which is often inadequate).
@@ -683,6 +686,7 @@ public class FormUtils {
     static {
         initScriptNames2PlatypusApiClasses();
         initLayoutClasses2PlatypusContainerClasses();
+        intitEventsNames2ScriptEventClasses();
         swingClasses2PlatypusApiClasses.put(JLabel.class, com.eas.client.forms.api.components.Label.class);
         swingClasses2PlatypusApiClasses.put(JButton.class, com.eas.client.forms.api.components.Button.class);
         swingClasses2PlatypusApiClasses.put(JCheckBox.class, com.eas.client.forms.api.components.CheckBox.class);
@@ -739,6 +743,10 @@ public class FormUtils {
         layoutClasses2PlatypusContainerClasses.put(java.awt.GridLayout.class, GridPane.class);
     }
 
+    private static void intitEventsNames2ScriptEventClasses() {
+        eventsNames2scriptEventsClasses.put("onMouseClicked", MouseEvent.class);
+    }
+    
     // -----------------------------------------------------------------------------
     // Utility methods
     public static ResourceBundle getBundle() {
@@ -1944,6 +1952,10 @@ public class FormUtils {
         }
     }
 
+    public static Class<?> getScriptEventClassByName(String anEventName) {
+        return eventsNames2scriptEventsClasses.get(anEventName);
+    }
+    
     public static RequestProcessor getRequestProcessor() {
         return RP;
     }

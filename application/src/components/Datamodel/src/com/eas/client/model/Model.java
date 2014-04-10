@@ -141,19 +141,27 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
      * @return True if any change occur and false is all is actual.
      */
     public synchronized boolean validate() throws Exception {
+        if (validateEntities()) {
+            validateRelations();
+            checkRelationsIntegrity();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    protected void validateRelations() throws Exception {
+        for (Relation<E> rel : relations) {
+            resolveRelation(rel, this);
+        }
+    }
+
+    protected boolean validateEntities() throws Exception {
         boolean res = false;
-        // validate entities
         for (E e : entities.values()) {
             if (e.validate()) {
                 res = true;
             }
-        }
-        if (res) {
-            // validate relations
-            for (Relation<E> rel : relations) {
-                resolveRelation(rel, this);
-            }
-            checkRelationsIntegrity();
         }
         return res;
     }

@@ -92,7 +92,8 @@ public abstract class Entity<M extends Model<E, ?, ?, Q>, Q extends Query<?>, E 
                     return query.getFields();
                 }
             } catch (Exception ex) {
-                Logger.getLogger(Entity.class.getName()).log(Level.WARNING, null, ex);
+                Logger.getLogger(Entity.class.getName()).log(Level.WARNING, "line: 95. {0}", ex.getMessage());
+                return null;
             }
         }
         return null;
@@ -234,7 +235,7 @@ public abstract class Entity<M extends Model<E, ?, ?, Q>, Q extends Query<?>, E 
      *
      * @return Full table descripting name. like testSchema.testTable
      */
-    protected String getFullTableNameEntityForDescription() {
+    protected String getTableNameForDescription() {
         String fullTableName = tableName;
         if (getTableSchemaName() != null && !getTableSchemaName().isEmpty()) {
             fullTableName = getTableSchemaName() + "." + tableName;
@@ -298,7 +299,7 @@ public abstract class Entity<M extends Model<E, ?, ?, Q>, Q extends Query<?>, E 
         try {
             validateQuery();
         } catch (Exception ex) {
-            Logger.getLogger(Entity.class.getName()).log(Level.WARNING, null, ex);
+            Logger.getLogger(Entity.class.getName()).log(Level.WARNING, "line: 302. {0}", ex.getMessage());
             query = null;
         }
         return query;

@@ -48,7 +48,7 @@ public class AppElementConstructorCompletionItem extends JsFunctionCompletionIte
                 Logger.getLogger(AppElementConstructorCompletionItem.class.getName()).log(Level.SEVERE, "Read file error: " + fileObject.getPath(), ex);//NOI18N
             }
             if (jsDocContent != null && !jsDocContent.isEmpty()) {
-                JsCommentFormatter formatter = new JsCommentFormatter(CompletionSupport.getComments(jsDocContent));
+                JsCommentFormatter formatter = new JsCommentFormatter(CompletionUtils.getComments(jsDocContent));
                 informationText = formatter.toHtml();
             } else {
                 informationText = "";//NOI18N

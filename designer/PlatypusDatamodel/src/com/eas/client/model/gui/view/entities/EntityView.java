@@ -51,6 +51,7 @@ import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.text.DefaultCaret;
 import javax.swing.undo.UndoableEditSupport;
 
 /**
@@ -313,6 +314,10 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
     }
 
     protected void initAbsentLabel() {
+        DefaultCaret caret = new DefaultCaret();
+        caret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
+        caret.setVisible(false);
+        absentQueryText.setCaret(caret);        
         absentQueryText.setBorder(null);
         absentQueryText.setEditable(false);
         absentQueryText.setOpaque(false);
@@ -921,7 +926,7 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
                             EntityView.this.setSize(EntityView.this.getWidth(), (Integer) evt.getNewValue());
                             break;
                     }
-                    reLayout();
+                    // Warning! some non-visual properties changes can arrive from background thread, so don't call reLayout here!
                     break;
             }
         }

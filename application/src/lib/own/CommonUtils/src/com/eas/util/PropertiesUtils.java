@@ -5,6 +5,7 @@
  */
 package com.eas.util;
 
+import com.eas.script.EventMethod;
 import java.lang.reflect.Method;
 
 /**
@@ -45,6 +46,12 @@ public class PropertiesUtils {
         }
     }
 
+    public static void setPropertyEventClass(PropBox pb, Method method) {
+        if (method.isAnnotationPresent(EventMethod.class)) {
+            pb.eventClass = method.getAnnotation(EventMethod.class).eventClass();
+        }
+    }
+    
     public static void setPropertyAccessStatus(PropBox pb, String methodName) {
         if (methodName.startsWith(PropertiesUtils.BEANY_PREFIX_GET) || methodName.startsWith(BEANY_PREFIX_IS)) {
             pb.readable = true;
@@ -93,6 +100,7 @@ public class PropertiesUtils {
     public static class PropBox {
         public String name;
         public String typeName;
+        public Class<?> eventClass;
         public boolean readable;
         public boolean writeable;
         public String jsDoc;
