@@ -34,7 +34,6 @@ import com.eas.client.queries.Query;
 import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptUtils;
 import com.eas.script.ScriptUtils.ScriptAction;
-import com.eas.script.StoredFunction;
 import com.eas.util.ListenerRegistration;
 import java.util.*;
 import java.util.logging.Level;
@@ -1343,41 +1342,6 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, ?, ?, Q>, 
             return false;
         } else {
             return super.addOutRelation(aRelation);
-        }
-    }
-
-    protected void resolveHandlers() {
-        if (model != null) {
-            if (onAfterChange instanceof StoredFunction) {
-                onAfterChange = model.getHandler(((StoredFunction) onAfterChange).getName());
-            }
-            if (onAfterDelete instanceof StoredFunction) {
-                onAfterDelete = model.getHandler(((StoredFunction) onAfterDelete).getName());
-            }
-            if (onAfterInsert instanceof StoredFunction) {
-                onAfterInsert = model.getHandler(((StoredFunction) onAfterInsert).getName());
-            }
-            if (onAfterScroll instanceof StoredFunction) {
-                onAfterScroll = model.getHandler(((StoredFunction) onAfterScroll).getName());
-            }
-            if (onBeforeChange instanceof StoredFunction) {
-                onBeforeChange = model.getHandler(((StoredFunction) onBeforeChange).getName());
-            }
-            if (onBeforeDelete instanceof StoredFunction) {
-                onBeforeDelete = model.getHandler(((StoredFunction) onBeforeDelete).getName());
-            }
-            if (onBeforeInsert instanceof StoredFunction) {
-                onBeforeInsert = model.getHandler(((StoredFunction) onBeforeInsert).getName());
-            }
-            if (onBeforeScroll instanceof StoredFunction) {
-                onBeforeScroll = model.getHandler(((StoredFunction) onBeforeScroll).getName());
-            }
-            if (onFiltered instanceof StoredFunction) {
-                onFiltered = model.getHandler(((StoredFunction) onFiltered).getName());
-            }
-            if (onRequeried instanceof StoredFunction) {
-                onRequeried = model.getHandler(((StoredFunction) onRequeried).getName());
-            }
         }
     }
 }

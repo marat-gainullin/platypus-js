@@ -4,7 +4,6 @@
  */
 package com.eas.designer.datamodel.nodes;
 
-import com.eas.script.StoredFunction;
 import java.lang.reflect.Method;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -43,8 +42,6 @@ public class NodePropertyUndoableEdit implements UndoableEdit {
                 argClass = int.class;
             } else if (argClass == Boolean.class) {
                 argClass = boolean.class;
-            } else if (argClass == StoredFunction.class) {
-                argClass = Function.class;
             }
             setMethod = aSubject.getClass().getMethod(methodName, argClass);
         }

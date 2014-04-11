@@ -161,22 +161,6 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         }
     }
 
-    public void resolveHandlers() {
-        if (scriptThis != null) {
-            for (E ent : entities.values()) {
-                if (ent != null) {
-                    ent.resolveHandlers();
-                }
-            }
-            if (parametersEntity != null) {
-                parametersEntity.resolveHandlers();
-            }
-            for (ScriptEvent event : scriptEventsQueue) {
-                event.resolveHandler();
-            }
-        }
-    }
-
     @Override
     public Model<E, P, C, Q> copy() throws Exception {
         Model<E, P, C, Q> copied = super.copy();

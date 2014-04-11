@@ -6,7 +6,6 @@ package com.eas.client.model.script;
 
 import com.eas.client.events.ScriptSourcedEvent;
 import com.eas.client.model.application.ApplicationEntity;
-import com.eas.script.StoredFunction;
 import org.mozilla.javascript.Function;
 import org.mozilla.javascript.Scriptable;
 
@@ -72,11 +71,5 @@ public class ScriptEvent<E extends ApplicationEntity<?, ?, E>> {
 
     public Scriptable getScope() {
         return scope;
-    }
-
-    public void resolveHandler() {
-        if (handler instanceof StoredFunction && entity != null && entity.getModel() != null) {
-            handler = entity.getModel().getHandler(((StoredFunction) handler).getName());
-        }
     }
 }

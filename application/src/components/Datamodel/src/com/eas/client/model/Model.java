@@ -40,16 +40,6 @@ public abstract class Model<E extends Entity<?, Q, E>, P extends E, C extends Cl
     public static final String DATASOURCE_METADATA_SCRIPT_NAME = "schema";
     public static final String DATASOURCE_NAME_TAG_NAME = "Name";
     public static final String DATASOURCE_TITLE_TAG_NAME = "Title";
-    public static final String DATASOURCE_BEFORE_CHANGE_EVENT_TAG_NAME = "onBeforeChange";
-    public static final String DATASOURCE_AFTER_CHANGE_EVENT_TAG_NAME = "onAfterChange";
-    public static final String DATASOURCE_BEFORE_SCROLL_EVENT_TAG_NAME = "onBeforeScroll";
-    public static final String DATASOURCE_AFTER_SCROLL_EVENT_TAG_NAME = "onAfterScroll";
-    public static final String DATASOURCE_BEFORE_INSERT_EVENT_TAG_NAME = "onBeforeInsert";
-    public static final String DATASOURCE_AFTER_INSERT_EVENT_TAG_NAME = "onAfterInsert";
-    public static final String DATASOURCE_BEFORE_DELETE_EVENT_TAG_NAME = "onBeforeDelete";
-    public static final String DATASOURCE_AFTER_DELETE_EVENT_TAG_NAME = "onAfterDelete";
-    public static final String DATASOURCE_AFTER_REQUERY_EVENT_TAG_NAME = "onRequeried";
-    public static final String DATASOURCE_AFTER_FILTER_EVENT_TAG_NAME = "onFiltered";
     protected StoredQueryFactory queryFactory;
     protected C client;
     protected Set<Relation<E>> relations = new HashSet<>();

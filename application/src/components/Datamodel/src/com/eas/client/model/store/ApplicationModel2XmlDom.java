@@ -10,7 +10,6 @@ import com.eas.client.model.application.ApplicationModel;
 import com.eas.client.model.application.ApplicationParametersEntity;
 import com.eas.client.model.application.ReferenceRelation;
 import com.eas.client.model.visitors.ApplicationModelVisitor;
-import com.eas.script.StoredFunction;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -51,7 +50,6 @@ public class ApplicationModel2XmlDom<E extends ApplicationEntity<?, ?, E>> exten
         // Hack. Assume that ApplicationParametersEntity interface is supported only by 
         // ApplicationEntity descendants.
         E appEntity = (E) entity;
-        writeEntityEventsAttributes(node, appEntity);
         writeEntityDesignAttributes(node, appEntity);
     }
 
@@ -76,53 +74,7 @@ public class ApplicationModel2XmlDom<E extends ApplicationEntity<?, ?, E>> exten
             }
             node.setAttribute(TABLE_SCHEMA_NAME_ATTR_NAME, aEntity.getTableSchemaName());
             node.setAttribute(TABLE_NAME_ATTR_NAME, aEntity.getTableName());
-            writeEntityEventsAttributes(node, aEntity);
             writeEntityDesignAttributes(node, aEntity);
-        }
-    }
-
-    protected void writeEntityEventsAttributes(Element node, E entity) {
-        // It's considered, that all design code uses StoredFunction.
-        // Since it is true, unconditional casting is correct.
-        StoredFunction eventHandler = (StoredFunction) entity.getOnAfterChange();
-        if (eventHandler != null && eventHandler.getName() != null && !eventHandler.getName().isEmpty()) {
-            node.setAttribute(Model.DATASOURCE_AFTER_CHANGE_EVENT_TAG_NAME, eventHandler.getName());
-        }
-        eventHandler = (StoredFunction) entity.getOnAfterDelete();
-        if (eventHandler != null && eventHandler.getName() != null && !eventHandler.getName().isEmpty()) {
-            node.setAttribute(Model.DATASOURCE_AFTER_DELETE_EVENT_TAG_NAME, eventHandler.getName());
-        }
-        eventHandler = (StoredFunction) entity.getOnAfterInsert();
-        if (eventHandler != null && eventHandler.getName() != null && !eventHandler.getName().isEmpty()) {
-            node.setAttribute(Model.DATASOURCE_AFTER_INSERT_EVENT_TAG_NAME, eventHandler.getName());
-        }
-        eventHandler = (StoredFunction) entity.getOnAfterScroll();
-        if (eventHandler != null && eventHandler.getName() != null && !eventHandler.getName().isEmpty()) {
-            node.setAttribute(Model.DATASOURCE_AFTER_SCROLL_EVENT_TAG_NAME, eventHandler.getName());
-        }
-        eventHandler = (StoredFunction) entity.getOnFiltered();
-        if (eventHandler != null && eventHandler.getName() != null && !eventHandler.getName().isEmpty()) {
-            node.setAttribute(Model.DATASOURCE_AFTER_FILTER_EVENT_TAG_NAME, eventHandler.getName());
-        }
-        eventHandler = (StoredFunction) entity.getOnRequeried();
-        if (eventHandler != null && eventHandler.getName() != null && !eventHandler.getName().isEmpty()) {
-            node.setAttribute(Model.DATASOURCE_AFTER_REQUERY_EVENT_TAG_NAME, eventHandler.getName());
-        }
-        eventHandler = (StoredFunction) entity.getOnBeforeChange();
-        if (eventHandler != null && eventHandler.getName() != null && !eventHandler.getName().isEmpty()) {
-            node.setAttribute(Model.DATASOURCE_BEFORE_CHANGE_EVENT_TAG_NAME, eventHandler.getName());
-        }
-        eventHandler = (StoredFunction) entity.getOnBeforeDelete();
-        if (eventHandler != null && eventHandler.getName() != null && !eventHandler.getName().isEmpty()) {
-            node.setAttribute(Model.DATASOURCE_BEFORE_DELETE_EVENT_TAG_NAME, eventHandler.getName());
-        }
-        eventHandler = (StoredFunction) entity.getOnBeforeInsert();
-        if (eventHandler != null && eventHandler.getName() != null && !eventHandler.getName().isEmpty()) {
-            node.setAttribute(Model.DATASOURCE_BEFORE_INSERT_EVENT_TAG_NAME, eventHandler.getName());
-        }
-        eventHandler = (StoredFunction) entity.getOnBeforeScroll();
-        if (eventHandler != null && eventHandler.getName() != null && !eventHandler.getName().isEmpty()) {
-            node.setAttribute(Model.DATASOURCE_BEFORE_SCROLL_EVENT_TAG_NAME, eventHandler.getName());
         }
     }
 

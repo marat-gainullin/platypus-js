@@ -24,7 +24,6 @@ import java.util.Map;
  */
 public class ModuleUtils {
 
-    private static final Map<String, Class<?>> eventsNames2scriptEventsClasses = new HashMap<>();
     private static final Map<String, Class<?>> scriptNames2PlatypusApiClasses = new HashMap<>();
     private static final Class[] apiClasses = {
         com.eas.client.scripts.PlatypusScriptedResource.class
@@ -32,7 +31,6 @@ public class ModuleUtils {
 
     static {
         initScriptNames2PlatypusApiClasses();
-        intitEventsNames2ScriptEventClasses();
     }
     
     public static Class[] getPlatypusApiClasses() {
@@ -41,19 +39,6 @@ public class ModuleUtils {
 
     public static Class<?> getPlatypusApiClassByName(String name) {
         return scriptNames2PlatypusApiClasses.get(name);
-    }
-
-    private static void intitEventsNames2ScriptEventClasses() {
-        eventsNames2scriptEventsClasses.put(ApplicationDbModel.DATASOURCE_AFTER_CHANGE_EVENT_TAG_NAME, EntityInstanceChangeEvent.class);
-        eventsNames2scriptEventsClasses.put(ApplicationDbModel.DATASOURCE_AFTER_DELETE_EVENT_TAG_NAME, EntityInstanceDelete.class);
-        eventsNames2scriptEventsClasses.put(ApplicationDbModel.DATASOURCE_AFTER_INSERT_EVENT_TAG_NAME, EntityInstanceInsert.class);
-        eventsNames2scriptEventsClasses.put(ApplicationDbModel.DATASOURCE_AFTER_FILTER_EVENT_TAG_NAME, ScriptSourcedEvent.class);
-        eventsNames2scriptEventsClasses.put(ApplicationDbModel.DATASOURCE_AFTER_REQUERY_EVENT_TAG_NAME, ScriptSourcedEvent.class);
-        eventsNames2scriptEventsClasses.put(ApplicationDbModel.DATASOURCE_AFTER_SCROLL_EVENT_TAG_NAME, CursorPositionChangedEvent.class);
-        eventsNames2scriptEventsClasses.put(ApplicationDbModel.DATASOURCE_BEFORE_CHANGE_EVENT_TAG_NAME, EntityInstanceChangeEvent.class);
-        eventsNames2scriptEventsClasses.put(ApplicationDbModel.DATASOURCE_BEFORE_DELETE_EVENT_TAG_NAME, EntityInstanceDelete.class);
-        eventsNames2scriptEventsClasses.put(ApplicationDbModel.DATASOURCE_BEFORE_INSERT_EVENT_TAG_NAME, EntityInstanceInsert.class);
-        eventsNames2scriptEventsClasses.put(ApplicationDbModel.DATASOURCE_BEFORE_SCROLL_EVENT_TAG_NAME, CursorPositionWillChangeEvent.class);
     }
     
     private static void initScriptNames2PlatypusApiClasses() {

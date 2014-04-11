@@ -12,7 +12,6 @@ import com.eas.client.model.application.ApplicationEntity;
 import com.eas.client.model.query.QueryEntity;
 import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.queries.Query;
-import com.eas.script.StoredFunction;
 import com.eas.xml.dom.XmlDomUtils;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -557,46 +556,6 @@ public abstract class XmlDom2Model<E extends Entity<?, ?, E>> implements ModelVi
                         if (entity instanceof QueryEntity) {
                             ((QueryEntity) entity).setAlias(stringValue);
                         }
-                    } else if (entity instanceof ApplicationEntity<?, ?, ?>
-                            && Model.DATASOURCE_AFTER_CHANGE_EVENT_TAG_NAME.equalsIgnoreCase(unknownTag)) {
-                        final ApplicationEntity<?, ?, ?> appEntity = (ApplicationEntity<?, ?, ?>) entity;
-                        appEntity.setOnAfterChange(stringValue != null ? new StoredFunction(stringValue) : null);
-                    } else if (entity instanceof ApplicationEntity<?, ?, ?>
-                            && Model.DATASOURCE_AFTER_DELETE_EVENT_TAG_NAME.equalsIgnoreCase(unknownTag)) {
-                        final ApplicationEntity<?, ?, ?> appEntity = (ApplicationEntity<?, ?, ?>) entity;
-                        appEntity.setOnAfterDelete(stringValue != null ? new StoredFunction(stringValue) : null);
-                    } else if (entity instanceof ApplicationEntity<?, ?, ?>
-                            && Model.DATASOURCE_AFTER_FILTER_EVENT_TAG_NAME.equalsIgnoreCase(unknownTag)) {
-                        final ApplicationEntity<?, ?, ?> appEntity = (ApplicationEntity<?, ?, ?>) entity;
-                        appEntity.setOnFiltered(stringValue != null ? new StoredFunction(stringValue) : null);
-                    } else if (entity instanceof ApplicationEntity<?, ?, ?>
-                            && Model.DATASOURCE_AFTER_INSERT_EVENT_TAG_NAME.equalsIgnoreCase(unknownTag)) {
-                        final ApplicationEntity<?, ?, ?> appEntity = (ApplicationEntity<?, ?, ?>) entity;
-                        appEntity.setOnAfterInsert(stringValue != null ? new StoredFunction(stringValue) : null);
-                    } else if (entity instanceof ApplicationEntity<?, ?, ?>
-                            && Model.DATASOURCE_AFTER_REQUERY_EVENT_TAG_NAME.equalsIgnoreCase(unknownTag)) {
-                        final ApplicationEntity<?, ?, ?> appEntity = (ApplicationEntity<?, ?, ?>) entity;
-                        appEntity.setOnRequeried(stringValue != null ? new StoredFunction(stringValue) : null);
-                    } else if (entity instanceof ApplicationEntity<?, ?, ?>
-                            && Model.DATASOURCE_AFTER_SCROLL_EVENT_TAG_NAME.equalsIgnoreCase(unknownTag)) {
-                        final ApplicationEntity<?, ?, ?> appEntity = (ApplicationEntity<?, ?, ?>) entity;
-                        appEntity.setOnAfterScroll(stringValue != null ? new StoredFunction(stringValue) : null);
-                    } else if (entity instanceof ApplicationEntity<?, ?, ?>
-                            && Model.DATASOURCE_BEFORE_CHANGE_EVENT_TAG_NAME.equalsIgnoreCase(unknownTag)) {
-                        final ApplicationEntity<?, ?, ?> appEntity = (ApplicationEntity<?, ?, ?>) entity;
-                        appEntity.setOnBeforeChange(stringValue != null ? new StoredFunction(stringValue) : null);
-                    } else if (entity instanceof ApplicationEntity<?, ?, ?>
-                            && Model.DATASOURCE_BEFORE_DELETE_EVENT_TAG_NAME.equalsIgnoreCase(unknownTag)) {
-                        final ApplicationEntity<?, ?, ?> appEntity = (ApplicationEntity<?, ?, ?>) entity;
-                        appEntity.setOnBeforeDelete(stringValue != null ? new StoredFunction(stringValue) : null);
-                    } else if (entity instanceof ApplicationEntity<?, ?, ?>
-                            && Model.DATASOURCE_BEFORE_INSERT_EVENT_TAG_NAME.equalsIgnoreCase(unknownTag)) {
-                        final ApplicationEntity<?, ?, ?> appEntity = (ApplicationEntity<?, ?, ?>) entity;
-                        appEntity.setOnBeforeInsert(stringValue != null ? new StoredFunction(stringValue) : null);
-                    } else if (entity instanceof ApplicationEntity<?, ?, ?>
-                            && Model.DATASOURCE_BEFORE_SCROLL_EVENT_TAG_NAME.equalsIgnoreCase(unknownTag)) {
-                        final ApplicationEntity<?, ?, ?> appEntity = (ApplicationEntity<?, ?, ?>) entity;
-                        appEntity.setOnBeforeScroll(stringValue != null ? new StoredFunction(stringValue) : null);
                     }
                 }
             }

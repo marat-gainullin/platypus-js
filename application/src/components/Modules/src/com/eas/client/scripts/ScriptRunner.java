@@ -147,7 +147,6 @@ public class ScriptRunner extends ScriptableObject {
                     }
                     scriptDoc.getFunction().call(cx, getParentScope(), ScriptRunner.this, jsArgs);
                 }
-                model.resolveHandlers();
                 return null;
             }
         });
