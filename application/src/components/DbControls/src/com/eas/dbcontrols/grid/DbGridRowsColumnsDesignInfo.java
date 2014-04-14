@@ -18,7 +18,6 @@ public class DbGridRowsColumnsDesignInfo extends DesignInfo {
     public static final String FIXEDROWS = "fixedRows";
     public static final String ROWSDATASOURCE = "rowsDatasource";
     public static final String ROWSHEADERTYPE = "rowsHeaderType";
-    public static final String GENERALROWFUNCTION = "generalRowFunction";
     public static final int ROWS_HEADER_TYPE_NONE = 0;
     public static final int ROWS_HEADER_TYPE_USUAL = 1;
     public static final int ROWS_HEADER_TYPE_CHECKBOX = 2;
@@ -28,8 +27,7 @@ public class DbGridRowsColumnsDesignInfo extends DesignInfo {
     protected int fixedRows;
     protected int fixedColumns;
     protected int rowsHeaderType = ROWS_HEADER_TYPE_USUAL;
-    protected String generalRowFunction;
-
+    
     @Override
     public boolean isEqual(Object obj) {
         if (obj == null) {
@@ -49,9 +47,6 @@ public class DbGridRowsColumnsDesignInfo extends DesignInfo {
             return false;
         }
         if (this.rowsHeaderType != other.rowsHeaderType) {
-            return false;
-        }
-        if ((this.generalRowFunction == null) ? (other.generalRowFunction != null) : !this.generalRowFunction.equals(other.generalRowFunction)) {
             return false;
         }
         return true;
@@ -105,25 +100,12 @@ public class DbGridRowsColumnsDesignInfo extends DesignInfo {
         firePropertyChange(ROWSHEADERTYPE, old, aValue);
     }
 
-    @Serial
-    public String getGeneralRowFunction() {
-        return generalRowFunction;
-    }
-
-    @Serial
-    public void setGeneralRowFunction(String aValue) {
-        String oldValue = generalRowFunction;
-        generalRowFunction = aValue;
-        firePropertyChange(GENERALROWFUNCTION, oldValue, aValue);
-    }
-
     protected void assign(DbGridRowsColumnsDesignInfo aInfo) {
         if (aInfo != null) {
             setRowsDatasource(aInfo.getRowsDatasource() != null ? aInfo.getRowsDatasource().copy() : null);
             setFixedRows(aInfo.getFixedRows());
             setFixedColumns(aInfo.getFixedColumns());
             setRowsHeaderType(aInfo.getRowsHeaderType());
-            setGeneralRowFunction(aInfo.generalRowFunction != null ? new String(aInfo.generalRowFunction.toCharArray()) : null);
         }
     }
 

@@ -31,7 +31,6 @@ import org.mozilla.javascript.xml.XMLObject;
  */
 public class ScriptUtils {
 
-    public static final String HANDLERS_PROP_NAME = "-x-handlers-funcs-";
     public static final String WRAPPER_PROP_NAME = "wrapperComponent";
     protected static final String toDateFuncSource = ""
             + "function toJsDate(aJavaDate){ return aJavaDate != null?new Date(aJavaDate.time):null; }"

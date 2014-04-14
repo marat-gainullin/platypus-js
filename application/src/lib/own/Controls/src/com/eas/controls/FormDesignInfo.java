@@ -28,14 +28,6 @@ public class FormDesignInfo extends ContainerDesignInfo implements PropertiesSim
     protected boolean locationByPlatform;
     protected String title;
     protected String jMenuBar;
-    protected String windowOpened;
-    protected String windowClosing;
-    protected String windowClosed;
-    protected String windowMinimized;
-    protected String windowMaximized;
-    protected String windowRestored;
-    protected String windowActivated;
-    protected String windowDeactivated;
     protected List<ControlDesignInfo> children = new ArrayList<>();
     protected List<DesignInfo> nonvisuals = new ArrayList<>();
 
@@ -158,102 +150,6 @@ public class FormDesignInfo extends ContainerDesignInfo implements PropertiesSim
         firePropertyChange("jMenuBar", oldValue, jMenuBar);
     }
 
-    @Serial
-    public String getWindowOpened() {
-        return windowOpened;
-    }
-
-    @Serial
-    public void setWindowOpened(String aValue) {
-        String oldValue = windowOpened;
-        windowOpened = aValue;
-        firePropertyChange("windowOpened", oldValue, windowOpened);
-    }
-
-    @Serial
-    public String getWindowClosing() {
-        return windowClosing;
-    }
-
-    @Serial
-    public void setWindowClosing(String aValue) {
-        String oldValue = windowClosing;
-        windowClosing = aValue;
-        firePropertyChange("windowClosing", oldValue, windowClosing);
-    }
-
-    @Serial
-    public String getWindowClosed() {
-        return windowClosed;
-    }
-
-    @Serial
-    public void setWindowClosed(String aValue) {
-        String oldValue = windowClosed;
-        windowClosed = aValue;
-        firePropertyChange("windowClosed", oldValue, windowClosed);
-    }
-
-    @Serial
-    public String getWindowMinimized() {
-        return windowMinimized;
-    }
-
-    @Serial
-    public void setWindowMinimized(String aValue) {
-        String oldValue = windowMinimized;
-        windowMinimized = aValue;
-        firePropertyChange("windowMinimized", oldValue, windowMinimized);
-    }
-
-    @Serial
-    public String getWindowMaximized() {
-        return windowMaximized;
-    }
-
-    @Serial
-    public void setWindowMaximized(String aValue) {
-        String oldValue = windowMaximized;
-        windowMaximized = aValue;
-        firePropertyChange("windowMaximized", oldValue, windowMaximized);
-    }
-
-    @Serial
-    public String getWindowRestored() {
-        return windowRestored;
-    }
-
-    @Serial
-    public void setWindowRestored(String aValue) {
-        String oldValue = windowRestored;
-        windowRestored = aValue;
-        firePropertyChange("windowRestored", oldValue, windowRestored);
-    }
-
-    @Serial
-    public String getWindowActivated() {
-        return windowActivated;
-    }
-
-    @Serial
-    public void setWindowActivated(String aValue) {
-        String oldValue = windowActivated;
-        windowActivated = aValue;
-        firePropertyChange("windowActivated", oldValue, windowActivated);
-    }
-
-    @Serial
-    public String getWindowDeactivated() {
-        return windowDeactivated;
-    }
-
-    @Serial
-    public void setWindowDeactivated(String aValue) {
-        String oldValue = windowDeactivated;
-        windowDeactivated = aValue;
-        firePropertyChange("windowDeactivated", oldValue, windowDeactivated);
-    }
-
     @ClassedSerialCollection(deserializeAs = ArrayList.class, elementTagName = "widget", elementClassHint = "type")
     public List<ControlDesignInfo> getChildren() {
         return children;
@@ -311,30 +207,6 @@ public class FormDesignInfo extends ContainerDesignInfo implements PropertiesSim
         if ((this.jMenuBar == null) ? (other.jMenuBar != null) : !this.jMenuBar.equals(other.jMenuBar)) {
             return false;
         }
-        if ((this.windowOpened == null) ? (other.windowOpened != null) : !this.windowOpened.equals(other.windowOpened)) {
-            return false;
-        }
-        if ((this.windowClosing == null) ? (other.windowClosing != null) : !this.windowClosing.equals(other.windowClosing)) {
-            return false;
-        }
-        if ((this.windowClosed == null) ? (other.windowClosed != null) : !this.windowClosed.equals(other.windowClosed)) {
-            return false;
-        }
-        if ((this.windowMinimized == null) ? (other.windowMinimized != null) : !this.windowMinimized.equals(other.windowMinimized)) {
-            return false;
-        }
-        if ((this.windowMaximized == null) ? (other.windowMaximized != null) : !this.windowMaximized.equals(other.windowMaximized)) {
-            return false;
-        }
-        if ((this.windowRestored == null) ? (other.windowRestored != null) : !this.windowRestored.equals(other.windowRestored)) {
-            return false;
-        }
-        if ((this.windowActivated == null) ? (other.windowActivated != null) : !this.windowActivated.equals(other.windowActivated)) {
-            return false;
-        }
-        if ((this.windowDeactivated == null) ? (other.windowDeactivated != null) : !this.windowDeactivated.equals(other.windowDeactivated)) {
-            return false;
-        }
         if (this.children != other.children && (this.children == null || !listsEquals(this.children, other.children))) {
             return false;
         }
@@ -364,15 +236,7 @@ public class FormDesignInfo extends ContainerDesignInfo implements PropertiesSim
             locationByPlatform = source.locationByPlatform;
             title = source.title != null ? new String(source.title.toCharArray()) : null;
             jMenuBar = source.jMenuBar != null ? new String(source.jMenuBar.toCharArray()) : null;
-            windowOpened = source.windowOpened != null ? new String(source.windowOpened.toCharArray()) : null;
-            windowClosing = source.windowClosing != null ? new String(source.windowClosing.toCharArray()) : null;
-            windowClosed = source.windowClosed != null ? new String(source.windowClosed.toCharArray()) : null;
-            windowMinimized = source.windowMinimized != null ? new String(source.windowMinimized.toCharArray()) : null;
-            windowMaximized = source.windowMaximized != null ? new String(source.windowMaximized.toCharArray()) : null;            
-            windowRestored = source.windowRestored != null ? new String(source.windowRestored.toCharArray()) : null;
-            windowActivated = source.windowActivated != null ? new String(source.windowActivated.toCharArray()) : null;
-            windowDeactivated = source.windowDeactivated != null ? new String(source.windowDeactivated.toCharArray()) : null;
-
+            
             if (source.children != null) {
                 children = new ArrayList<>();
                 for (int i = 0; i < source.children.size(); i++) {

@@ -1112,20 +1112,6 @@ public abstract class DbControlPanel extends JPanel implements ScalarDbControl {
         }
     }
 
-    protected Function getHandler(String aHandlerName) {
-        if (aHandlerName != null && !aHandlerName.isEmpty() && model != null && model.getScriptThis() != null) {
-            Object oHandlers = model.getScriptThis().get(ScriptUtils.HANDLERS_PROP_NAME, model.getScriptThis());
-            if (oHandlers instanceof Scriptable) {
-                Scriptable sHandlers = (Scriptable) oHandlers;
-                Object oHandler = sHandlers.get(aHandlerName, sHandlers);
-                if (oHandler instanceof Function) {
-                    return (Function) oHandler;
-                }
-            }
-        }
-        return null;
-    }
-
     private class FieldValueSelectorAction extends ValueSelectorAction {
 
         @Override

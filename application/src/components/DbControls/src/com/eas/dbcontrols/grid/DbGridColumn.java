@@ -77,9 +77,7 @@ public class DbGridColumn extends DesignInfo implements PropertiesSimpleFactory 
     protected DbGridCellDesignInfo cellDesignInfo = new DbGridCellDesignInfo();
     // flag indicating whethier this column should remain in place or be substituted by it's flipping ds
     protected boolean substitute = false;
-    protected String selectFunction = null;
     protected boolean selectOnly = false;
-    protected String cellFunction = null;
     // runtime needed temporary data
     public int rtMinimumWidth = -1;
     public int rtWidth = -1;
@@ -200,16 +198,6 @@ public class DbGridColumn extends DesignInfo implements PropertiesSimpleFactory 
             } else {
                 setName(null);
             }
-            if (aSource.getSelectFunction() != null) {
-                setSelectFunction(aSource.getSelectFunction());
-            } else {
-                setSelectFunction(null);
-            }
-            if (aSource.getCellFunction() != null) {
-                setCellFunction(aSource.getCellFunction());
-            } else {
-                setCellFunction(null);
-            }
             if (aSource.getHeaderStyle() != null) {
                 setHeaderStyle(aSource.getHeaderStyle().copy());
             } else {
@@ -226,9 +214,7 @@ public class DbGridColumn extends DesignInfo implements PropertiesSimpleFactory 
             setSubstitute(false);
             setTitle(null);
             setName(null);
-            setSelectFunction(null);
             setSelectOnly(false);
-            setCellFunction(null);
             setHeaderStyle(null);
 
             setCellDesignInfo(null);
@@ -281,12 +267,6 @@ public class DbGridColumn extends DesignInfo implements PropertiesSimpleFactory 
             return false;
         }
         if ((this.name == null) ? (other.name != null) : !this.name.equals(other.name)) {
-            return false;
-        }
-        if ((this.selectFunction == null) ? (other.selectFunction != null) : !this.selectFunction.equals(other.selectFunction)) {
-            return false;
-        }
-        if ((this.cellFunction == null) ? (other.cellFunction != null) : !this.cellFunction.equals(other.cellFunction)) {
             return false;
         }
         if (this.cellDesignInfo != other.cellDesignInfo && (this.cellDesignInfo == null || !this.cellDesignInfo.isEqual(other.cellDesignInfo))) {
@@ -439,28 +419,6 @@ public class DbGridColumn extends DesignInfo implements PropertiesSimpleFactory 
         return children != null && !children.isEmpty();
     }
 
-    @Undesignable
-    @Serial
-    public String getSelectFunction() {
-        return selectFunction;
-    }
-
-    @Serial
-    public void setSelectFunction(String aValue) {
-        String old = selectFunction;
-        selectFunction = aValue;
-        firePropertyChange(SELECTFUNCTION, old, aValue);
-    }
-
-    @Undesignable
-    public String getOnSelect() {
-        return selectFunction;
-    }
-
-    public void setOnSelect(String aValue) {
-        selectFunction = aValue;
-    }
-
     @Serial
     public boolean isSelectOnly() {
         return selectOnly;
@@ -471,28 +429,6 @@ public class DbGridColumn extends DesignInfo implements PropertiesSimpleFactory 
         boolean old = selectOnly;
         selectOnly = aValue;
         firePropertyChange(SELECTONLY, old, aValue);
-    }
-
-    @Undesignable
-    @Serial
-    public String getCellFunction() {
-        return cellFunction;
-    }
-
-    @Serial
-    public void setCellFunction(String aValue) {
-        String old = cellFunction;
-        cellFunction = aValue;
-        firePropertyChange(CELLFUNCTION, old, aValue);
-    }
-
-    @Undesignable
-    public String getOnRender() {
-        return cellFunction;
-    }
-
-    public void setOnRender(String aValue) {
-        cellFunction = aValue;
     }
 
     @Undesignable

@@ -76,19 +76,6 @@ public class DbSwingFactory extends SwingFactory implements DbControlsDesignInfo
     protected void visitModelScalarControl(final DbControlDesignInfo aInfo) throws Exception {
         assert comp instanceof ScalarDbControl;
         final ScalarDbControl control = (ScalarDbControl) comp;
-        if (eventsExecutor != null) {
-            handlersResolvers.add(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        control.setOnRender(eventsExecutor.getHandler(aInfo.getHandleFunction()));
-                        control.setOnSelect(eventsExecutor.getHandler(aInfo.getSelectFunction()));
-                    } catch (Exception ex) {
-                        Logger.getLogger(DbSwingFactory.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-            });
-        }
         control.setModel(model);
         control.setDatamodelElement(aInfo.getDatamodelElement());
     }
@@ -259,12 +246,6 @@ public class DbSwingFactory extends SwingFactory implements DbControlsDesignInfo
             for (int i = 0; i < aInfo.getHeader().size(); i++) {
                 grid.getHeader().add(aInfo.getHeader().get(i).copy());
             }
-            handlersResolvers.add(new Runnable() {
-                @Override
-                public void run() {
-                    grid.setGeneralRowFunction(eventsExecutor.getHandler(aInfo.getOnRender()));
-                }
-            });
             grid.setRowsHeaderType(aInfo.getRowsHeaderType());
             grid.setFixedColumns(aInfo.getFixedColumns());
             grid.setFixedRows(aInfo.getFixedRows());
@@ -290,12 +271,6 @@ public class DbSwingFactory extends SwingFactory implements DbControlsDesignInfo
             final DbMap map = (DbMap) comp;
             processControlEvents(aInfo);
             map.setModel(model);
-            handlersResolvers.add(new Runnable() {
-                @Override
-                public void run() {
-                    map.setMapEventListener(eventsExecutor.getHandler(aInfo.getMapEventListener()));
-                }
-            });
             map.setMapTitle(aInfo.getMapTitle());
             map.setBackingUrl(aInfo.getBackingUrl());
             map.setCrsWkt(aInfo.getCrsWkt());

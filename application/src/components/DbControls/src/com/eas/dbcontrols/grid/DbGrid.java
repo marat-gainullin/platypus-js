@@ -339,7 +339,7 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                             }
                         }
                         // Model column setup
-                        FieldModelColumn mCol = new FieldModelColumn(rs, fidx, getHandler(dCol.getCellFunction()), getHandler(dCol.getSelectFunction()), group.isReadonly(), new HasStyle() {
+                        FieldModelColumn mCol = new FieldModelColumn(rs, fidx, null, null, group.isReadonly(), new HasStyle() {
                             @Override
                             public CascadedStyle getStyle() {
                                 return style;
@@ -365,7 +365,7 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                             if (cellEditor instanceof ScalarDbControl) {
                                 Field field = DbControlsUtils.resolveField(model, dCol.getDatamodelElement());
                                 ((ScalarDbControl) cellEditor).setModel(model);
-                                ((ScalarDbControl) cellEditor).extraCellControls(getHandler(dCol.getSelectFunction()), field != null ? field.isNullable() : false);
+                                ((ScalarDbControl) cellEditor).extraCellControls(null, field != null ? field.isNullable() : false);
                                 mCol.setEditor((ScalarDbControl) cellEditor);
                             }
                         }
@@ -414,7 +414,7 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                             anchorCol.setPreferredWidth(0);
                             anchorCol.setMaxWidth(0);
                             anchorCol.setWidth(0);
-                            ColumnsSource cs = new ColumnsSource(group, anchorCol, colsLoc, colTitleColIdx, cellsLoc, cellsValuesRs, cellsValuesFieldIdx, new VeerColumnsHandler(model, dCol), getHandler(dCol.getCellFunction()), getHandler(dCol.getSelectFunction()));
+                            ColumnsSource cs = new ColumnsSource(group, anchorCol, colsLoc, colTitleColIdx, cellsLoc, cellsValuesRs, cellsValuesFieldIdx, new VeerColumnsHandler(model, dCol), null, null);
                             anchorCol.setColumnsSource(cs);
                             //groups.put(anchorCol, group);
                             columnModel.addColumn(anchorCol);
@@ -1166,20 +1166,6 @@ public class DbGrid extends JPanel implements RowsetDbControl, TablesGridContain
                 }
             }
         }
-    }
-
-    protected Function getHandler(String aHandlerName) {
-        if (aHandlerName != null && !aHandlerName.isEmpty() && model != null && model.getScriptThis() != null) {
-            Object oHandlers = model.getScriptThis().get(ScriptUtils.HANDLERS_PROP_NAME, model.getScriptThis());
-            if (oHandlers instanceof Scriptable) {
-                Scriptable sHandlers = (Scriptable) oHandlers;
-                Object oHandler = sHandlers.get(aHandlerName, sHandlers);
-                if (oHandler instanceof Function) {
-                    return (Function) oHandler;
-                }
-            }
-        }
-        return null;
     }
 
     // Some cleanup

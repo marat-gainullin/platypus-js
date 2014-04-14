@@ -119,20 +119,6 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, P e
         changeSupport.firePropertyChange("scriptScope", oldValue, scriptThis);
     }
 
-    public Function getHandler(String aHandlerName) {
-        if (aHandlerName != null && !aHandlerName.isEmpty() && getScriptThis() != null) {
-            Object oHandlers = getScriptThis().get(ScriptUtils.HANDLERS_PROP_NAME, getScriptThis());
-            if (oHandlers instanceof Scriptable) {
-                Scriptable sHandlers = (Scriptable) oHandlers;
-                Object oHandler = sHandlers.get(aHandlerName, sHandlers);
-                if (oHandler instanceof Function) {
-                    return (Function) oHandler;
-                }
-            }
-        }
-        return null;
-    }
-
     @Override
     protected void resolveRelation(Relation<E> aRelation, Model<E, P, C, Q> aModel) throws Exception {
         super.resolveRelation(aRelation, aModel);

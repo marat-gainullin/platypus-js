@@ -14,6 +14,5 @@ import org.mozilla.javascript.Scriptable;
  */
 public interface FormEventsExecutor extends Scriptable {
 
-    public Function getHandler(String aHandlerName);
     public Object executeEvent(Function aHandler, Scriptable aEventThis, Object anEvent);
 }

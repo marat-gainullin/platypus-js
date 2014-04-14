@@ -42,12 +42,6 @@ public class ReportRunner extends ScriptRunner {
     }
 
     @Override
-    protected void prepareScript(ScriptDocument scriptDoc, Object[] args) throws Exception {
-        super.prepareScript(scriptDoc, args);
-        onBeforeRender = model.getHandler(BEFORE_RENDER_HANDLER_NAME);
-    }
-
-    @Override
     protected void shrink() throws Exception {
         template = null;
         super.shrink();

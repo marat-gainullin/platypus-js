@@ -1333,12 +1333,11 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
     protected void prepare(ScriptDocument scriptDoc, Object[] args) throws Exception {
         prepareRoles(scriptDoc);
         prepareModel(scriptDoc);
-        Runnable handlersResolver = prepareForm(scriptDoc);
+        prepareForm(scriptDoc);
         prepareScript(scriptDoc, args);
-        handlersResolver.run();
     }
 
-    protected Runnable prepareForm(ScriptDocument scriptDoc) throws Exception {
+    protected void prepareForm(ScriptDocument scriptDoc) throws Exception {
         assert scriptDoc instanceof FormDocument;
         FormDocument formDoc = (FormDocument) scriptDoc;
         defaultCloseOperation = formDoc.getFormDesignInfo().getDefaultCloseOperation();
@@ -1381,23 +1380,6 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
                 return null;
             }
         });
-        return new Runnable() {
-            @Override
-            public void run() {
-                // Resolve handlers
-                for (Runnable resolver : factory.getHandlersResolvers()) {
-                    resolver.run();
-                }
-                windowHandler.getHandlers().put(WindowEventsIProxy.windowOpened, getHandler(fdi.getWindowOpened()));
-                windowHandler.getHandlers().put(WindowEventsIProxy.windowClosing, getHandler(fdi.getWindowClosing()));
-                windowHandler.getHandlers().put(WindowEventsIProxy.windowClosed, getHandler(fdi.getWindowClosed()));
-                windowHandler.getHandlers().put(WindowEventsIProxy.windowIconified, getHandler(fdi.getWindowMinimized()));
-                windowHandler.getHandlers().put(WindowEventsIProxy.windowMaximized, getHandler(fdi.getWindowMaximized()));
-                windowHandler.getHandlers().put(WindowEventsIProxy.windowRestored, getHandler(fdi.getWindowRestored()));
-                windowHandler.getHandlers().put(WindowEventsIProxy.windowActivated, getHandler(fdi.getWindowActivated()));
-                windowHandler.getHandlers().put(WindowEventsIProxy.windowDeactivated, getHandler(fdi.getWindowDeactivated()));
-            }
-        };
     }
 
     @Override
@@ -1445,19 +1427,6 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
         defineProperty("onWindowMaximized", FormRunner.class, EMPTY);
         defineProperty("onWindowActivated", FormRunner.class, EMPTY);
         defineProperty("onWindowDeactivated", FormRunner.class, EMPTY);
-    }
-
-    @Override
-    public Function getHandler(String aHandlerName) {
-        Object oHandlers = get(ScriptUtils.HANDLERS_PROP_NAME);
-        if (oHandlers instanceof Scriptable) {
-            Scriptable sHandlers = (Scriptable) oHandlers;
-            Object oHandler = sHandlers.get(aHandlerName, sHandlers);
-            if (oHandler instanceof Function) {
-                return (Function) oHandler;
-            }
-        }
-        return null;
     }
 
     @Override

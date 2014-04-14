@@ -36,20 +36,6 @@ public class VeerColumnsHandler implements TableColumnHandler {
         designColumn = aDesignInfo;
     }
 
-    protected Function getHandler(String aHandlerName) {
-        if (aHandlerName != null && !aHandlerName.isEmpty() && model != null && model.getScriptThis() != null) {
-            Object oHandlers = model.getScriptThis().get(ScriptUtils.HANDLERS_PROP_NAME, model.getScriptThis());
-            if (oHandlers instanceof Scriptable) {
-                Scriptable sHandlers = (Scriptable) oHandlers;
-                Object oHandler = sHandlers.get(aHandlerName, sHandlers);
-                if (oHandler instanceof Function) {
-                    return (Function) oHandler;
-                }
-            }
-        }
-        return null;
-    }
-
     @Override
     public void handle(TableColumn tc) {
         try {
@@ -76,7 +62,7 @@ public class VeerColumnsHandler implements TableColumnHandler {
                 editorControl.setBorderless(true);
                 Field field = DbControlsUtils.resolveField(model, designColumn.getCellDesignInfo().getCellValueField());
                 editorControl.setModel(model);
-                editorControl.extraCellControls(getHandler(designColumn.getSelectFunction()), field.isNullable());
+                editorControl.extraCellControls(null, field.isNullable());
                 tc.setCellEditor(editorControl);
                 if (tc.getIdentifier() instanceof RowModelColumn) {
                     RowModelColumn rCol = (RowModelColumn) tc.getIdentifier();

@@ -444,16 +444,4 @@ public class DbGridDesignInfo extends DbControlDesignInfo {
         rowsColumnsDesignInfo.setRowsHeaderType(aValue);
         firePropertyChange(DbGridRowsColumnsDesignInfo.ROWSHEADERTYPE, old, aValue);
     }
-
-    @Override
-    public String getOnRender() {
-        return rowsColumnsDesignInfo.getGeneralRowFunction();
-    }
-
-    @Override
-    public void setOnRender(String aValue) {
-        String oldValue = rowsColumnsDesignInfo.getGeneralRowFunction();
-        rowsColumnsDesignInfo.setGeneralRowFunction(aValue);
-        firePropertyChange(DbGridRowsColumnsDesignInfo.GENERALROWFUNCTION, oldValue, aValue);
-    }
 }

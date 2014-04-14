@@ -22,8 +22,6 @@ public abstract class DbControlDesignInfo extends ControlDesignInfo {
     public static final String SELECTONLY = "selectOnly";
     public static final String EDITABLE = "editable";
     protected ModelElementRef datamodelElement = null;
-    protected String selectFunction = "";
-    protected String handleFunction = "";
     protected boolean selectOnly = false;
     protected boolean editable = true;
 
@@ -52,12 +50,6 @@ public abstract class DbControlDesignInfo extends ControlDesignInfo {
         if (this.datamodelElement != other.datamodelElement && (this.datamodelElement == null || !this.datamodelElement.equals(other.datamodelElement))) {
             return false;
         }        
-        if (this.selectFunction != other.selectFunction && (this.selectFunction == null || !this.selectFunction.equals(other.selectFunction))) {
-            return false;
-        }
-        if (this.handleFunction != other.handleFunction && (this.handleFunction == null || !this.handleFunction.equals(other.handleFunction))) {
-            return false;
-        }
         if (this.selectOnly != other.selectOnly) {
             return false;
         }
@@ -78,47 +70,7 @@ public abstract class DbControlDesignInfo extends ControlDesignInfo {
         datamodelElement = aValue;
         firePropertyChange(DATAMODELELEMENT, old, aValue);
     }
-
-    @Serial
-    public String getSelectFunction() {
-        return selectFunction;
-    }
-
-    @Serial
-    public void setSelectFunction(String aValue) {
-        String old = selectFunction;
-        selectFunction = aValue;
-        firePropertyChange(SELECTFUNCTION, old, aValue);
-    }
-
-    @Serial
-    public String getHandleFunction() {
-        return handleFunction;
-    }
-
-    @Serial
-    public void setHandleFunction(String aValue) {
-        String old = handleFunction;
-        handleFunction = aValue;
-        firePropertyChange(HANDLEFUNCTION, old, aValue);
-    }
-
-    public String getOnSelect() {
-        return selectFunction;
-    }
-
-    public void setOnSelect(String aValue) {
-        selectFunction = aValue;
-    }
-
-    public String getOnRender() {
-        return handleFunction;
-    }
-
-    public void setOnRender(String aValue) {
-        handleFunction = aValue;
-    }
-    
+ 
     @Serial
     public boolean isSelectOnly() {
         return selectOnly;
@@ -146,8 +98,6 @@ public abstract class DbControlDesignInfo extends ControlDesignInfo {
     protected void assign(DbControlDesignInfo aSource) {
         if (aSource != null) {
             setDatamodelElement(aSource.getDatamodelElement() != null ? aSource.getDatamodelElement().copy() : null);
-            setSelectFunction(aSource.getSelectFunction());
-            setHandleFunction(aSource.getHandleFunction());
             setSelectOnly(aSource.isSelectOnly());
             setEditable(aSource.isEditable());
         }

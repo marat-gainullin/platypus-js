@@ -38,12 +38,6 @@ public class ServerReportRunner extends ServerScriptRunner {
         }
     }
 
-    @Override
-    protected void prepareScript(ScriptDocument scriptDoc, Object[] args) throws Exception {
-        super.prepareScript(scriptDoc, args);
-        onBeforeRender = model.getHandler(BEFORE_RENDER_HANDLER_NAME);
-    }
-
     public synchronized byte[] executeReport() throws Exception {
         return ScriptUtils.inContext(new ScriptUtils.ScriptAction() {
             @Override

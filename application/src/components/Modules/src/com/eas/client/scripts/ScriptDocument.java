@@ -32,8 +32,7 @@ public class ScriptDocument {
     private Function constructor;
     private AstRoot ast;
     private FunctionNode firstFunction;
-    private Set<String> topLevelNamedFunctionsNames = new HashSet<>();
-    private Set<String> depencies = new HashSet<>();
+    private final Set<String> depencies = new HashSet<>();
     private List<Tag> moduleAnnotations;
     /**
      * User roles that have access to all module's functions, if empty all users
@@ -138,40 +137,22 @@ public class ScriptDocument {
         return moduleAnnotations != null ? Collections.unmodifiableList(moduleAnnotations) : null;
     }
 
-    public Set<String> getTopLevelNamedFunctionsNames() {
-        return topLevelNamedFunctionsNames;
-    }
-
     public String filterSource() {
         return filterSource(null, null);
     }
 
     public String filterSource(String bodyPreCode, String bodyPostCode) {
-        String toInsert = "; this[\"" + ScriptUtils.HANDLERS_PROP_NAME + "\"]=" + generateTopLevelNamedFunctionsContainer() + ";";
         if (firstFunction == null) {
             throw new IllegalStateException("Missing first function in " + String.valueOf(entityId) + ". May be bad source?");
         }
         int functionsCaptureInsertAt = firstFunction.getAbsolutePosition() + firstFunction.getLength() - 1;
         if (bodyPreCode == null) {
-            return scriptSource.substring(0, functionsCaptureInsertAt) + toInsert + (bodyPostCode != null ? bodyPostCode : "") + scriptSource.substring(functionsCaptureInsertAt, scriptSource.length());
+            return scriptSource.substring(0, functionsCaptureInsertAt) + (bodyPostCode != null ? bodyPostCode : "") + scriptSource.substring(functionsCaptureInsertAt, scriptSource.length());
         } else {
             AstNode body = firstFunction.getBody();
             int bodyPreCodeInsertAt = body.getAbsolutePosition() + 1;
-            return scriptSource.substring(0, bodyPreCodeInsertAt) + bodyPreCode + scriptSource.substring(bodyPreCodeInsertAt, functionsCaptureInsertAt) + toInsert + (bodyPostCode != null ? bodyPostCode : "") + scriptSource.substring(functionsCaptureInsertAt, scriptSource.length());
+            return scriptSource.substring(0, bodyPreCodeInsertAt) + bodyPreCode + scriptSource.substring(bodyPreCodeInsertAt, functionsCaptureInsertAt) + (bodyPostCode != null ? bodyPostCode : "") + scriptSource.substring(functionsCaptureInsertAt, scriptSource.length());
         }
-    }
-
-    public String generateTopLevelNamedFunctionsContainer() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("{");
-        for (String aName : topLevelNamedFunctionsNames) {
-            if (sb.length() > 1) {
-                sb.append(",");
-            }
-            sb.append("\"").append(aName).append("\"").append(":").append(aName);
-        }
-        sb.append("}");
-        return sb.toString();
     }
 
     /**
@@ -190,19 +171,12 @@ public class ScriptDocument {
         assert scriptSource != null : "Javascript source can't be null";
         if (ast == null) {
             moduleAnnotations = new ArrayList<>();
-            topLevelNamedFunctionsNames.clear();
             propertyAllowedRoles.clear();
             ast = ScriptUtils.parseJs(scriptSource);
             firstFunction = null;
             ast.visit(new NodeVisitor() {
                 @Override
                 public boolean visit(AstNode node) {
-                    if (node instanceof FunctionNode && node.getParent() instanceof Block && node.getParent().getParent() instanceof FunctionNode && node.getParent().getParent().getParent() == ast.getAstRoot()) {
-                        String fName = ((FunctionNode) node).getName();
-                        if (fName != null && !fName.isEmpty()) {
-                            topLevelNamedFunctionsNames.add(fName);
-                        }
-                    }
                     if (firstFunction == null && node instanceof FunctionNode && node.getParent() == ast.getAstRoot()) {
                         firstFunction = (FunctionNode) node;
                     }

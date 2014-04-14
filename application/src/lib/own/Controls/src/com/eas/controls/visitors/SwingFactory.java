@@ -110,7 +110,6 @@ public class SwingFactory implements ControlsDesignInfoVisitor {
     protected Map<String, JComponent> nonvisuals = new HashMap<>();
     protected Set<String> layoutedContainers = new HashSet<>();
     protected List<Runnable> postprocessing = new ArrayList<>();
-    protected List<Runnable> handlersResolvers = new ArrayList<>();
     // current processed component / result when partial creation is used
     protected Component comp;
     // results
@@ -177,10 +176,6 @@ public class SwingFactory implements ControlsDesignInfoVisitor {
 
     public Map<String, JComponent> getNonvisuals() {
         return nonvisuals;
-    }
-
-    public List<Runnable> getHandlersResolvers() {
-        return handlersResolvers;
     }
 
     public Map<String, ControlDesignInfo> getControlDesignInfos() {
@@ -687,34 +682,6 @@ public class SwingFactory implements ControlsDesignInfoVisitor {
         if (eventsExecutor != null) {
             final ControlEventsIProxy proxy = createEventsProxy();
             proxy.setHandlee(comp);
-            handlersResolvers.add(new Runnable() {
-                @Override
-                public void run() {
-                    proxy.getHandlers().put(ControlEventsIProxy.actionPerformed, eventsExecutor.getHandler(aInfo.getActionPerformed()));
-                    proxy.getHandlers().put(ControlEventsIProxy.propertyChange, eventsExecutor.getHandler(aInfo.getPropertyChange()));
-                    proxy.getHandlers().put(ControlEventsIProxy.stateChanged, eventsExecutor.getHandler(aInfo.getStateChanged()));
-                    proxy.getHandlers().put(ControlEventsIProxy.componentHidden, eventsExecutor.getHandler(aInfo.getComponentHidden()));
-                    proxy.getHandlers().put(ControlEventsIProxy.componentMoved, eventsExecutor.getHandler(aInfo.getComponentMoved()));
-                    proxy.getHandlers().put(ControlEventsIProxy.componentResized, eventsExecutor.getHandler(aInfo.getComponentResized()));
-                    proxy.getHandlers().put(ControlEventsIProxy.componentShown, eventsExecutor.getHandler(aInfo.getComponentShown()));
-                    proxy.getHandlers().put(ControlEventsIProxy.componentAdded, eventsExecutor.getHandler(aInfo.getComponentAdded()));
-                    proxy.getHandlers().put(ControlEventsIProxy.componentRemoved, eventsExecutor.getHandler(aInfo.getComponentRemoved()));
-                    proxy.getHandlers().put(ControlEventsIProxy.focusGained, eventsExecutor.getHandler(aInfo.getFocusGained()));
-                    proxy.getHandlers().put(ControlEventsIProxy.focusLost, eventsExecutor.getHandler(aInfo.getFocusLost()));
-                    proxy.getHandlers().put(ControlEventsIProxy.itemStateChanged, eventsExecutor.getHandler(aInfo.getItemStateChanged()));
-                    proxy.getHandlers().put(ControlEventsIProxy.keyPressed, eventsExecutor.getHandler(aInfo.getKeyPressed()));
-                    proxy.getHandlers().put(ControlEventsIProxy.keyReleased, eventsExecutor.getHandler(aInfo.getKeyReleased()));
-                    proxy.getHandlers().put(ControlEventsIProxy.keyTyped, eventsExecutor.getHandler(aInfo.getKeyTyped()));
-                    proxy.getHandlers().put(ControlEventsIProxy.mouseClicked, eventsExecutor.getHandler(aInfo.getMouseClicked()));
-                    proxy.getHandlers().put(ControlEventsIProxy.mouseDragged, eventsExecutor.getHandler(aInfo.getMouseDragged()));
-                    proxy.getHandlers().put(ControlEventsIProxy.mouseEntered, eventsExecutor.getHandler(aInfo.getMouseEntered()));
-                    proxy.getHandlers().put(ControlEventsIProxy.mouseExited, eventsExecutor.getHandler(aInfo.getMouseExited()));
-                    proxy.getHandlers().put(ControlEventsIProxy.mouseMoved, eventsExecutor.getHandler(aInfo.getMouseMoved()));
-                    proxy.getHandlers().put(ControlEventsIProxy.mousePressed, eventsExecutor.getHandler(aInfo.getMousePressed()));
-                    proxy.getHandlers().put(ControlEventsIProxy.mouseReleased, eventsExecutor.getHandler(aInfo.getMouseReleased()));
-                    proxy.getHandlers().put(ControlEventsIProxy.mouseWheelMoved, eventsExecutor.getHandler(aInfo.getMouseWheelMoved()));
-                }
-            });
         }
     }
 
