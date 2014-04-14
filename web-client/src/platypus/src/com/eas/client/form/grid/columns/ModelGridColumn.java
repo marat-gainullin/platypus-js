@@ -1,6 +1,5 @@
 package com.eas.client.form.grid.columns;
 
-import java.util.Comparator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -8,6 +7,7 @@ import com.bearsoft.gwt.ui.widgets.grid.DraggableHeader;
 import com.bearsoft.gwt.ui.widgets.grid.GridColumn;
 import com.bearsoft.gwt.ui.widgets.grid.cells.CellHasReadonly;
 import com.bearsoft.gwt.ui.widgets.grid.cells.RenderedPopupEditorCell;
+import com.bearsoft.gwt.ui.widgets.grid.header.HeaderNode;
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Utils;
 import com.bearsoft.rowset.sorting.RowsComparator;
@@ -17,6 +17,7 @@ import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.Publisher;
 import com.eas.client.form.js.JsEvents;
 import com.eas.client.form.published.HasPublished;
+import com.google.gwt.dom.client.Style;
 import com.eas.client.form.published.PublishedCell;
 import com.eas.client.form.published.PublishedStyle;
 import com.eas.client.form.published.widgets.model.ModelElementRef;
@@ -35,15 +36,16 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 	protected Entity rowsEntity;
 	protected ModelElementRef columnModelRef;
 	protected RowValueConverter<T> converter;
-	protected DraggableHeader<T> header;
+	// Original header (before splitting and analyzing) node.
+	protected HeaderNode headerNode;
 	protected PublishedDecoratorBox<T> editor;
 	protected RowsComparator comparator;
 	protected ModelGrid grid;
 	protected String name;
-	protected int designedWidth;
+	protected double designedWidth;
 	protected boolean fixed;
-	protected boolean resizable;
-	protected boolean moveable;
+	protected boolean resizable = true;
+	protected boolean moveable = true;
 	protected boolean readonly;
 	protected boolean visible;
 	protected boolean selectOnly;
@@ -63,6 +65,7 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 
 			});
 		}
+		headerNode = new HeaderNode(new DraggableHeader<Row>("", null, this));
 		rowsEntity = aRowsEntity;
 		setColumnModelRef(aColumnModelRef);
 		name = aName;
@@ -97,8 +100,21 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 				} else {
 					grid.getSortHandler().setComparator(this, null);
 				}
+				grid.setColumnWidth(this, designedWidth, Style.Unit.PX);
+				if (visible)
+					grid.showColumn(this);
+				else
+					grid.hideColumn(this);
+			} else {
+				if (headerNode.getHeader() instanceof DraggableHeader<?>) {
+					((DraggableHeader<?>) headerNode.getHeader()).setTable(null);
+				}
 			}
 		}
+	}
+
+	public HeaderNode getHeaderNode() {
+		return headerNode;
 	}
 
 	public Entity getRowsEntity() {
@@ -119,7 +135,7 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 			if (editor != null) {
 				editor.setClearButtonVisible(columnModelRef != null && columnModelRef.field != null ? columnModelRef.field.isNullable() : true);
 			}
-			if(columnModelRef != null && columnModelRef.entity != null && columnModelRef.field != null){
+			if (columnModelRef != null && columnModelRef.entity != null && columnModelRef.field != null) {
 				comparator = new RowsComparator(new SortingCriterion(columnModelRef.getColIndex(), true));
 			}
 		}
@@ -186,28 +202,48 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 
 	@Override
 	public void setVisible(boolean aValue) {
-		visible = aValue;
+		if (visible != aValue) {
+			visible = aValue;
+			if (grid != null) {
+				if (visible)
+					grid.showColumn(this);
+				else
+					grid.hideColumn(this);
+			}
+		}
 	}
 
 	@Override
-	public int getWidth() {
+	public double getWidth() {
 		return designedWidth;
 	}
 
 	@Override
-	public void setWidth(int aValue) {
-		designedWidth = aValue;
+	public void setWidth(double aValue) {
+		if (designedWidth != aValue) {
+			designedWidth = aValue;
+			if (grid != null) {
+				grid.setColumnWidth(this, designedWidth, Style.Unit.PX);
+			}
+		}
+	}
+
+	@Override
+	public void updateWidth(double aValue) {
+		if (designedWidth != aValue) {
+			designedWidth = aValue;
+		}
 	}
 
 	@Override
 	public String getTitle() {
-		return header != null ? header.getTitle() : null;
+		return headerNode != null && headerNode.getHeader() instanceof DraggableHeader<?> ? ((DraggableHeader<T>) headerNode.getHeader()).getTitle() : null;
 	}
 
 	@Override
 	public void setTitle(String aValue) {
-		if (header != null)
-			header.setTitle(aValue);
+		if (headerNode != null && headerNode.getHeader() instanceof DraggableHeader<?>)
+			((DraggableHeader<T>) headerNode.getHeader()).setTitle(aValue);
 	}
 
 	@Override
@@ -218,8 +254,8 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 	@Override
 	public void setResizable(boolean aValue) {
 		resizable = aValue;
-		if (header != null)
-			header.setResizable(resizable && !fixed);
+		if (headerNode != null && headerNode.getHeader() instanceof DraggableHeader<?>)
+			((DraggableHeader<T>) headerNode.getHeader()).setResizable(resizable && !fixed);
 	}
 
 	public boolean isMoveable() {
@@ -228,8 +264,8 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 
 	public void setMoveable(boolean aValue) {
 		moveable = aValue;
-		if (header != null)
-			header.setMoveable(moveable && !fixed);
+		if (headerNode != null && headerNode.getHeader() instanceof DraggableHeader<?>)
+			((DraggableHeader<T>) headerNode.getHeader()).setResizable(moveable && !fixed);
 	}
 
 	@Override
@@ -248,9 +284,9 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 
 	public void setFixed(boolean aValue) {
 		fixed = aValue;
-		if (header != null) {
-			header.setResizable(resizable && !fixed);
-			header.setMoveable(moveable && !fixed);
+		if (headerNode != null && headerNode.getHeader() instanceof DraggableHeader<?>) {
+			((DraggableHeader<T>) headerNode.getHeader()).setResizable(resizable && !fixed);
+			((DraggableHeader<T>) headerNode.getHeader()).setMoveable(moveable && !fixed);
 		}
 	}
 
@@ -303,18 +339,6 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 
 	public String getName() {
 		return name;
-	}
-
-	public DraggableHeader<T> getHeader() {
-		return header;
-	}
-
-	public void setHeader(DraggableHeader<T> aValue) {
-		header = aValue;
-		if (header != null) {
-			header.setResizable(resizable && !fixed);
-			header.setMoveable(moveable && !fixed);
-		}
 	}
 
 	public PublishedDecoratorBox<T> getEditor() {
@@ -420,7 +444,7 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 				return aColumn.@com.eas.client.form.grid.columns.ModelGridColumnFacade::getWidth()();
 			},
 			set : function(aValue) {
-				aColumn.@com.eas.client.form.grid.columns.ModelGridColumnFacade::setWidth(I)(aValue != null ?aValue:0);
+				aColumn.@com.eas.client.form.grid.columns.ModelGridColumnFacade::setWidth(D)(aValue != null ?aValue:0);
 			}
 		});
 		Object.defineProperty(published, "title", {

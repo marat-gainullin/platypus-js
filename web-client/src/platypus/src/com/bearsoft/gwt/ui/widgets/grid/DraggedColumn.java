@@ -28,7 +28,7 @@ public class DraggedColumn<T> {
         this(aColumn, aTable.getColumnIndex(aColumn), aTable, aCellElement, aTargetElement);
     }
 
-    public DraggedColumn(Column<T, ?> aColumn, int aColumnIndex, AbstractCellTable<T> aTable, Element aCellElement, Element aTargetElement) {
+    protected DraggedColumn(Column<T, ?> aColumn, int aColumnIndex, AbstractCellTable<T> aTable, Element aCellElement, Element aTargetElement) {
         super();
         column = aColumn;
         columnIndex = aColumnIndex;

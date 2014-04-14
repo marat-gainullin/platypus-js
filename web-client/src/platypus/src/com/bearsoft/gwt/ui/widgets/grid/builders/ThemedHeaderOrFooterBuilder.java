@@ -5,6 +5,7 @@
  */
 package com.bearsoft.gwt.ui.widgets.grid.builders;
 
+import com.bearsoft.gwt.ui.widgets.grid.HasColumn;
 import com.bearsoft.gwt.ui.widgets.grid.ThemedGridResources;
 import com.bearsoft.gwt.ui.widgets.grid.header.HasSortList;
 import com.bearsoft.gwt.ui.widgets.grid.header.HeaderAnalyzer;
@@ -92,8 +93,6 @@ public class ThemedHeaderOrFooterBuilder<T> extends AbstractHeaderOrFooterBuilde
 		return super.getColumn(elem);
 	}
 
-	protected int leavesCount;
-
 	@Override
 	protected boolean buildHeaderOrFooterImpl() {
 		AbstractCellTable<T> table = getTable();
@@ -137,7 +136,6 @@ public class ThemedHeaderOrFooterBuilder<T> extends AbstractHeaderOrFooterBuilde
 						sortedColumns.put((Column<T, ?>) sInfo.getColumn(), sInfo);
 					}
 				}
-				leavesCount = 0;
 				buildSections(headersForest, sortedColumns);
 				return true;
 			} else {
@@ -166,10 +164,8 @@ public class ThemedHeaderOrFooterBuilder<T> extends AbstractHeaderOrFooterBuilde
 			children.addAll(headerNode.getChildren());
 			Header<?> headerOrFooter = headerNode.getHeader();
 			Column<T, ?> column = null;
-			if (headerNode.getChildren().isEmpty()) {
-				column = getTable().getColumn(leavesCount);
-				leavesCount++;
-			}
+			if(headerOrFooter instanceof HasColumn<?>)
+				column = ((HasColumn<T>)headerOrFooter).getColumn();
 			boolean isSortable = !isFooter && column != null && column.isSortable();
 			ColumnSortList.ColumnSortInfo sortedInfo = sortedColumns.get(column);
 			boolean isSorted = sortedInfo != null;

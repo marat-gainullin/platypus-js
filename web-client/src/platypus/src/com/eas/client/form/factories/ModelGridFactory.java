@@ -23,7 +23,6 @@ import com.eas.client.form.published.widgets.model.ModelElementRef;
 import com.eas.client.form.published.widgets.model.ModelGrid;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Model;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.safehtml.shared.SafeHtml;
@@ -51,7 +50,7 @@ public class ModelGridFactory {
 	protected ModelGrid grid;
 	// columns
 	protected List<HeaderNode> headerForest = new ArrayList<>();
-	//protected List<ModelGridColumn<?>> columns = new ArrayList<>();
+	// protected List<ModelGridColumn<?>> columns = new ArrayList<>();
 
 	protected Set<Entity> rowsetsOfInterestHosts = new HashSet<Entity>();
 
@@ -98,36 +97,39 @@ public class ModelGridFactory {
 		grid.setShowOddRowsInOtherColor(showOddRowsInOtherColor);
 		// Selection models & service column configuration
 		grid.setRowsHeaderType(rowsHeaderType);
-		for(int i = 0; i < grid.getDataColumnCount(); i++){
-			headerForest.add(new HeaderNode(grid.getColumnHeader(i)));
-		}
-		// Columns multi level structure
-		NodeList nodesWithColumns = gridTag.getChildNodes();
-		for (int i = 0; i < nodesWithColumns.getLength(); i++) {
-			if ("column".equalsIgnoreCase(nodesWithColumns.item(i).getNodeName())) {
-				assert nodesWithColumns.item(i) instanceof Element : "Column must be a tag";
-				Element columnTag = (Element) nodesWithColumns.item(i);
-				processColumn(columnTag, headerForest);
+		headerForest.addAll(0, grid.getHeader());
+		grid.setHeaderAjusting(true);
+		try {
+			// Columns multi level structure
+			NodeList nodesWithColumns = gridTag.getChildNodes();
+			for (int i = 0; i < nodesWithColumns.getLength(); i++) {
+				if ("column".equalsIgnoreCase(nodesWithColumns.item(i).getNodeName())) {
+					assert nodesWithColumns.item(i) instanceof Element : "Column must be a tag";
+					Element columnTag = (Element) nodesWithColumns.item(i);
+					processColumn(columnTag, headerForest, null);
+				}
 			}
+			// Plain and tree(optional) data layers
+			if (isTreeConfigured()) {
+			} else {
+			}
+			/*
+			 * editing.setEditable(editable); editing.setDeletable(deletable);
+			 * editing.setInsertable(insertable);
+			 */
+			// row lines ?
+			// column lines ?
+			/*
+			 * for (Entity entity : rowsetsOfInterestHosts) {
+			 * grid.addUpdatingTriggerEntity(entity); }
+			 */
+			grid.setHeader(headerForest);
+			grid.setFrozenColumns(fixedColumns);
+			grid.setFrozenRows(fixedRows);
+		} finally {
+			grid.setHeaderAjusting(false);
+			grid.applyHeader();
 		}
-		// Plain and tree(optional) data layers
-		if (isTreeConfigured()) {
-		} else {
-		}
-		/*
-		 * editing.setEditable(editable); editing.setDeletable(deletable);
-		 * editing.setInsertable(insertable);
-		 */
-		// row lines ?
-		// column lines ?
-		/*
-		for (Entity entity : rowsetsOfInterestHosts) {
-			grid.addUpdatingTriggerEntity(entity);
-		}
-		*/
-		grid.setHeader(headerForest);
-		grid.setFrozenColumns(fixedColumns);
-		grid.setFrozenRows(fixedRows);
 	}
 
 	private boolean isLazyTreeConfigured() {
@@ -138,13 +140,12 @@ public class ModelGridFactory {
 		return rowsSource != null && unaryLinkField.isCorrect() && unaryLinkField.field != null && (treeKind == ONE_FIELD_ONE_QUERY_TREE_KIND || treeKind == FIELD_2_PARAMETER_TREE_KIND);
 	}
 
-	private void processColumn(Element aTag, List<HeaderNode> header) throws Exception {
+	private void processColumn(Element aTag, List<HeaderNode> aHeaderChildren, HeaderNode aHeaderParent) throws Exception {
 		HeaderNode hNode = new HeaderNode();
-		header.add(hNode);
 		// plain settings
 		String name = aTag.getAttribute("name");
 		String title = aTag.getAttribute("title");
-		if(title == null)
+		if (title == null)
 			title = name;
 		ModelElementRef modelElement = null;
 		Element controlTag = null;
@@ -166,20 +167,24 @@ public class ModelGridFactory {
 				styleTag = (Element) columnNodes.item(c);
 			else if ("column".equalsIgnoreCase(columnNodes.item(c).getNodeName())) {
 				childColumnsCount++;
-				processColumn((Element) columnNodes.item(c), hNode.getChildren());
+				processColumn((Element) columnNodes.item(c), hNode.getChildren(), hNode);
 			}
 		}
-		if (childColumnsCount == 0){
-			configureColumn(name, title, modelElement, aTag, controlTag, hNode);
-		}else{			
+		if (childColumnsCount == 0) {
+			HeaderNode _hNode = configureColumn(name, title, modelElement, aTag, controlTag);
+			if (_hNode != null)
+				hNode = _hNode;
+		} else {
 			SafeHtml safeHtml = title.startsWith("<html>") ? SafeHtmlUtils.fromTrustedString(title.substring(6)) : SafeHtmlUtils.fromString(title);
 			hNode.setHeader(new SafeHtmlHeader(safeHtml));
 		}
+		hNode.setParent(aHeaderParent);
+		aHeaderChildren.add(hNode);
 	}
 
-	private void configureColumn(String aName, String aTitle, final ModelElementRef aColModelElement, Element aColumnTag, Element aControlTag, HeaderNode aHeaderNode) throws Exception {
+	private HeaderNode configureColumn(String aName, String aTitle, final ModelElementRef aColModelElement, Element aColumnTag, Element aControlTag) throws Exception {
 		ModelGridColumn<?> column = null;
-		
+
 		boolean visible = Utils.getBooleanAttribute(aColumnTag, "visible", true);
 		boolean enabled = Utils.getBooleanAttribute(aColumnTag, "enabled", true);
 		int width = Utils.getIntegerAttribute(aColumnTag, "width", 50);
@@ -230,7 +235,7 @@ public class ModelGridFactory {
 					_column.setStep(Double.valueOf(aControlTag.getAttribute("step")));
 			} else if ("DbComboDesignInfo".equalsIgnoreCase(controlInfoName)) {
 				LookupModelGridColumn _column = new LookupModelGridColumn(aName);
-				column= _column;
+				column = _column;
 				final ModelElementRef valueRef = new ModelElementRef(Utils.getElementByTagName(aControlTag, "valueField"), model);
 				final ModelElementRef displayRef = new ModelElementRef(Utils.getElementByTagName(aControlTag, "displayField"), model);
 				rowsetsOfInterestHosts.add(valueRef.entity);
@@ -250,11 +255,8 @@ public class ModelGridFactory {
 			// Cell calculated only by cell function
 			column = new TextModelGridColumn(aName);
 		}
-		if(column != null){
-			grid.addColumn(column, aTitle);
-			column.setGrid(grid);
-			aHeaderNode.setHeader(grid.getColumnHeader(grid.getDataColumnCount() - 1));
-			grid.setColumnWidth(column, width, Style.Unit.PX);
+		if (column != null) {
+			column.setTitle(aTitle);
 			column.setRowsEntity(rowsSource);
 			column.setColumnModelRef(aColModelElement);
 			column.setWidth(width);
@@ -263,6 +265,10 @@ public class ModelGridFactory {
 			column.setSelectOnly(selectOnly);
 			column.setVisible(visible);
 			column.setSortable(true);
+			grid.addColumn(column);
+			return column.getHeaderNode();
+		} else {
+			return null;
 		}
 	}
 }

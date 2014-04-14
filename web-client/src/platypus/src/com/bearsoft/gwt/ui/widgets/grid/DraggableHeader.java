@@ -20,7 +20,7 @@ import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.Header;
 
-public class DraggableHeader<T> extends Header<String> {
+public class DraggableHeader<T> extends Header<String> implements HasColumn<T> {
 
 	protected String title;
 	protected GridSection<T> table;
@@ -30,12 +30,12 @@ public class DraggableHeader<T> extends Header<String> {
 	protected boolean resizable = true;
 
 	public DraggableHeader(String aTitle, GridSection<T> aTable, Column<T, ?> aColumn) {
-		this(aTitle, aTable, aColumn, aTable.getElement());
+		this(aTitle, aTable, aColumn, aTable != null ? aTable.getElement() : null);
 	}
 
 	public DraggableHeader(String aTitle, GridSection<T> aTable, Column<T, ?> aColumn, Element aHostElement) {
 		super(new HeaderCell());
-		if (aTitle == null || aTable == null || aColumn == null) {
+		if (aTitle == null || aColumn == null) {
 			throw new NullPointerException();
 		}
 		title = aTitle;
@@ -44,6 +44,7 @@ public class DraggableHeader<T> extends Header<String> {
 		hostElement = aHostElement;
 	}
 
+	@Override
 	public Column<T, ?> getColumn() {
 		return column;
 	}
@@ -58,6 +59,7 @@ public class DraggableHeader<T> extends Header<String> {
 
 	public void setTable(GridSection<T> aValue) {
 		table = aValue;
+		hostElement = table != null ? table.getElement() : null;
 	}
 
 	@Override
@@ -101,7 +103,7 @@ public class DraggableHeader<T> extends Header<String> {
 					DraggedColumn.instance = col;
 					event.getDataTransfer().setData("Text",
 					        "grid-section-" + table.hashCode() + "; column-" + (DraggedColumn.instance.isMove() ? "moved" : "resized") + ": " + table.getColumnIndex(column));
-				}else{
+				} else {
 					event.getDataTransfer().<XDataTransfer> cast().setEffectAllowed("none");
 				}
 			}

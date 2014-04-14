@@ -9,10 +9,12 @@ public interface ModelGridColumnFacade extends HasJsName {
 
 	public void setVisible(boolean aValue);
 
-	public int getWidth();
+	public double getWidth();
 
-	public void setWidth(int aValue);
+	public void setWidth(double aValue);
 
+	public void updateWidth(double aValue);
+	
 	public String getTitle();
 
 	public void setTitle(String aValue);

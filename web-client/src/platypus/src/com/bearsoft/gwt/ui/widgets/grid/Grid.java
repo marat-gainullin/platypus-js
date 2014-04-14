@@ -122,9 +122,9 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 		hive.setCellPadding(0);
 		hive.setCellSpacing(0);
 		hive.setBorderWidth(0);
-		headerLeft = new GridSection<>(aKeyProvider);
+		headerLeft = new GridSection<T>(aKeyProvider);
 		headerLeftContainer = new ScrollPanel(headerLeft);
-		headerRight = new GridSection<>(aKeyProvider);
+		headerRight = new GridSection<T>(aKeyProvider);
 		headerRightContainer = new ScrollPanel(headerRight);
 		frozenLeft = new GridSection<T>(aKeyProvider) {
 
@@ -445,55 +445,54 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 					event.preventDefault();
 					event.stopPropagation();
 					if (source.isMove()) {
-						AbstractCellTable<T> sourceTable = (AbstractCellTable<T>) source.getTable();
+						AbstractCellTable<T> sourceSection = (AbstractCellTable<T>) source.getTable();
 						// target table may be any section in our grid
 						if (target != null) {
 							int sourceIndex = source.getColumnIndex();
 							int targetIndex = target.getColumnIndex();
 							GridSection<T> targetSection = (GridSection<T>) target.getTable();
-							if (targetIndex > targetSection.getColumnCount()) {
-								targetIndex = targetSection.getColumnCount();
-							}
+
+							boolean isSourceLeft = sourceSection == headerLeft || sourceSection == frozenLeft || sourceSection == scrollableLeft || sourceSection == footerLeft;
 							boolean isTargetLeft = targetSection == headerLeft || targetSection == frozenLeft || targetSection == scrollableLeft || targetSection == footerLeft;
+							sourceSection = isSourceLeft ? headerLeft : headerRight;
 							targetSection = isTargetLeft ? headerLeft : headerRight;
-							boolean isForeignColumn;
-							if (isTargetLeft) {
-								isForeignColumn = sourceTable != headerLeft && sourceTable != frozenLeft && sourceTable != scrollableLeft && sourceTable != footerLeft;
-							} else {
-								isForeignColumn = sourceTable != headerRight && sourceTable != frozenRight && sourceTable != scrollableRight && sourceTable != footerRight;
-							}
-							if (isForeignColumn || sourceIndex != targetIndex) {
+							/*
+							 * boolean isForeignColumn; if (isTargetLeft) {
+							 * isForeignColumn = sourceTable != headerLeft &&
+							 * sourceTable != frozenLeft && sourceTable !=
+							 * scrollableLeft && sourceTable != footerLeft; }
+							 * else { isForeignColumn = sourceTable !=
+							 * headerRight && sourceTable != frozenRight &&
+							 * sourceTable != scrollableRight && sourceTable !=
+							 * footerRight; }
+							 */
+							int generalSourceIndex = isSourceLeft ? sourceIndex : sourceIndex + frozenColumns;
+							int generalTargetIndex = isTargetLeft ? targetIndex : targetIndex + frozenColumns;
+							if (/* isForeignColumn || */generalSourceIndex != generalTargetIndex) {
 								Column<T, ?> column = (Column<T, ?>) source.getColumn();
-								Header<?> header = sourceTable.getHeader(sourceIndex);
+								Header<?> header = sourceSection.getHeader(sourceIndex);
 								if (header instanceof DraggableHeader) {
-									((DraggableHeader) header).setTable(isTargetLeft ? headerLeft : headerRight);
+									((DraggableHeader) header).setTable(targetSection);
 								}
-								Header<?> footer = sourceTable.getFooter(sourceIndex);
-								String width = sourceTable.getColumnWidth(column);
-								sourceTable.clearColumnWidth(column);
-								sourceTable.removeColumn(sourceIndex);// ColumnsRemover
-								                                      // will
-								                                      // take
-								                                      // care
-								                                      // about
-								                                      // any
-								                                      // column
-								                                      // sharing.
-								targetSection.insertColumn(targetIndex, column, targetSection == headerLeft || targetSection == headerRight ? header : null, targetSection == footerLeft
-								        || targetSection == footerRight ? footer : null);
-								for (AbstractCellTable<T> partner : targetSection.getColumnsPartners()) {
-									partner.insertColumn(targetIndex, column, partner == headerLeft || partner == headerRight ? header : null, partner == footerLeft || partner == footerRight ? footer
-									        : null);
-								}
-								frozenColumns = headerLeft.getColumnCount();
-								targetSection.setColumnWidth(column, width);// ColumnWidthPropagator
-								                                            // will
-								                                            // take
-								                                            // care
-								                                            // about
-								                                            // any
-								                                            // column
-								                                            // sharing.
+								Header<?> footer = sourceSection.getFooter(sourceIndex);
+								String width = sourceSection.getColumnWidth(column);
+								sourceSection.clearColumnWidth(column);
+								removeColumn(generalSourceIndex);
+								addColumn(generalTargetIndex, column, width, header, footer, false);
+								/*
+								 * for (AbstractCellTable<T> partner :
+								 * targetSection.getColumnsPartners()) {
+								 * partner.insertColumn(targetIndex, column,
+								 * partner == headerLeft || partner ==
+								 * headerRight ? header : null, partner ==
+								 * footerLeft || partner == footerRight ? footer
+								 * : null); } frozenColumns =
+								 * headerLeft.getColumnCount();
+								 * targetSection.setColumnWidth(column,
+								 * width);// ColumnWidthPropagator // will //
+								 * take // care // about // any // column //
+								 * sharing.
+								 */
 								headerLeft.getWidthPropagator().changed();
 							}
 						}
@@ -501,7 +500,7 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 						int newWidth = Math.max(event.getNativeEvent().getClientX() - source.getCellElement().getAbsoluteLeft(), MINIMUM_COLUMN_WIDTH);
 						// Source and target tables are the same, so we can
 						// cast to DraggedColumn<T> with no care
-						((DraggedColumn<T>) source).getTable().setColumnWidth(((DraggedColumn<T>) source).getColumn(), newWidth, Style.Unit.PX);
+						setColumnWidth(((DraggedColumn<T>) source).getColumn(), newWidth, Style.Unit.PX);
 					}
 				}
 			}
@@ -656,12 +655,11 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 				currentTarget = currentTarget.getParentElement();
 			}
 			if (targetSection != null && targetCell != null) {
-				Element targetRow = targetCell.getParentElement();
-				for (int i = 0; i < targetRow.getChildCount(); i++) {
-					if (targetRow.getChild(i) == targetCell) {
-						return new DraggedColumn<T>(targetSection.getColumn(i), i, targetSection, targetCell, Element.as(aEventTarget));
-					}
-				}
+				Column<T, ?> col = targetSection.getHeaderBuilder().getColumn(targetCell);
+				if (col != null)
+					return new DraggedColumn<T>(col, targetSection, targetCell, Element.as(aEventTarget));
+				else
+					return null;
 			}
 			return null;
 		} else {
@@ -898,89 +896,91 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 		});
 	}
 
-	public void addColumn(Column<T, ?> aColumn, String aHeaderValue) {
-		addColumn(aColumn, aHeaderValue, null);
-	}
-
-	public void addColumn(Column<T, ?> aColumn, String aHeaderValue, Header<?> aFooter) {
-		if (headerLeft.getColumnCount() < frozenColumns) {
-			headerLeft.addColumn(aColumn, new DraggableHeader<T>(aHeaderValue != null ? aHeaderValue : "", headerLeft, aColumn, getElement()));
-			frozenLeft.addColumn(aColumn);
-			scrollableLeft.addColumn(aColumn);
-			footerLeft.addColumn(aColumn, null, aFooter);
-		} else {
-			headerRight.addColumn(aColumn, new DraggableHeader<T>(aHeaderValue != null ? aHeaderValue : "", headerRight, aColumn, getElement()));
-			frozenRight.addColumn(aColumn);
-			scrollableRight.addColumn(aColumn);
-			footerRight.addColumn(aColumn, null, aFooter);
-		}
-	}
-
-	public void insertColumn(int aIndex, Column<T, ?> aColumn, String aHeaderValue, Header<?> aFooter) {
-		if (aIndex < frozenColumns) {
-			headerLeft.insertColumn(aIndex, aColumn, new DraggableHeader<T>(aHeaderValue, headerLeft, aColumn, getElement()));
-			frozenLeft.insertColumn(aIndex, aColumn);
-			scrollableLeft.insertColumn(aIndex, aColumn);
-			footerLeft.insertColumn(aIndex, aColumn, null, aFooter);
-			refreshColumns();
-		} else {
-			headerRight.insertColumn(aIndex, aColumn, new DraggableHeader<T>(aHeaderValue, headerRight, aColumn, getElement()));
-			frozenRight.insertColumn(aIndex, aColumn);
-			scrollableRight.insertColumn(aIndex, aColumn);
-			footerRight.insertColumn(aIndex, aColumn, null, aFooter);
-		}
-	}
-
-	public void removeColumn(int aIndex) {
-		if (aIndex < frozenColumns) {
-			headerRight.removeColumn(aIndex);// ColumnsRemover will care
-			                                 // about columns sharing
-			refreshColumns();
-		} else {
-			headerRight.removeColumn(aIndex);// ColumnsRemover will care
-			                                 // about columns sharing
-		}
-	}
-
 	public void addColumn(Column<T, ?> aColumn, String aWidth, Header<?> aHeader, Header<?> aFooter, boolean hidden) {
+		addColumn(false, getDataColumnCount(), aColumn, aWidth, aHeader, aFooter, hidden);
+	}
+
+	public void addColumn(int aIndex, Column<T, ?> aColumn, String aWidth, Header<?> aHeader, Header<?> aFooter, boolean hidden) {
+		addColumn(true, aIndex, aColumn, aWidth, aHeader, aFooter, hidden);
+	}
+
+	public void addColumn(boolean forceRefreshColumns, int aIndex, Column<T, ?> aColumn, String aWidth, Header<?> aHeader, Header<?> aFooter, boolean hidden) {
 		if (aHeader instanceof DraggableHeader<?>) {
 			DraggableHeader<T> h = (DraggableHeader<T>) aHeader;
 			h.setColumn(aColumn);
 		}
-		if (headerLeft.getColumnCount() < frozenColumns) {
+		if (aIndex < frozenColumns) {
 			if (aHeader instanceof DraggableHeader<?>) {
 				DraggableHeader<T> h = (DraggableHeader<T>) aHeader;
 				h.setTable(headerLeft);
 			}
-			headerLeft.addColumn(aColumn, aHeader);
-			frozenLeft.addColumn(aColumn);
-			scrollableLeft.addColumn(aColumn);
-			footerLeft.addColumn(aColumn, null, aFooter);
+			headerLeft.insertColumn(aIndex, aColumn, aHeader);
+			frozenLeft.insertColumn(aIndex, aColumn);
+			scrollableLeft.insertColumn(aIndex, aColumn);
+			footerLeft.insertColumn(aIndex, aColumn, null, aFooter);
+			headerLeft.setColumnWidth(aColumn, aWidth);// column partners will
+			                                           // take care of width
+			                                           // seetings in other
+			                                           // sections
 			//
-			for (GridSection<?> section : new GridSection<?>[] { headerLeft, frozenLeft, scrollableLeft, footerLeft }) {
-				GridSection<T> gSection = (GridSection<T>) section;
-				gSection.setColumnWidth(aColumn, aWidth);
-				if (hidden) {
-					gSection.hideColumn(aColumn);
-				}
-			}
+			if (forceRefreshColumns)
+				refreshColumns();
 		} else {
 			if (aHeader instanceof DraggableHeader<?>) {
 				DraggableHeader<T> h = (DraggableHeader<T>) aHeader;
 				h.setTable(headerRight);
 			}
-			headerRight.addColumn(aColumn, aHeader);
-			frozenRight.addColumn(aColumn);
-			scrollableRight.addColumn(aColumn);
-			footerRight.addColumn(aColumn, null, aFooter);
+			headerRight.insertColumn(aIndex - frozenColumns, aColumn, aHeader);
+			frozenRight.insertColumn(aIndex - frozenColumns, aColumn);
+			scrollableRight.insertColumn(aIndex - frozenColumns, aColumn);
+			footerRight.insertColumn(aIndex - frozenColumns, aColumn, null, aFooter);
+			headerRight.setColumnWidth(aColumn, aWidth);// column partners will
+			                                            // take care of width
+			                                            // seetings in other
+			                                            // sections
 			//
-			for (GridSection<?> section : new GridSection<?>[] { headerRight, frozenRight, scrollableRight, footerRight }) {
-				GridSection<T> gSection = (GridSection<T>) section;
-				gSection.setColumnWidth(aColumn, aWidth);
-				if (hidden) {
-					gSection.hideColumn(aColumn);
-				}
-			}
+		}
+		if (hidden) {
+			hideColumn(aColumn);
+		}
+	}
+
+	public void hideColumn(Column<T, ?> aColumn) {
+		for (GridSection<?> section : new GridSection<?>[] { headerLeft, frozenLeft, scrollableLeft, footerLeft, headerRight, frozenRight, scrollableRight, footerRight }) {
+			GridSection<T> gSection = (GridSection<T>) section;
+			gSection.hideColumn(aColumn);
+		}
+	}
+
+	public void showColumn(Column<T, ?> aColumn) {
+		for (GridSection<?> section : new GridSection<?>[] { headerLeft, frozenLeft, scrollableLeft, footerLeft, headerRight, frozenRight, scrollableRight, footerRight }) {
+			GridSection<T> gSection = (GridSection<T>) section;
+			gSection.showColumn(aColumn);
+		}
+	}
+
+	/*
+	 * public void insertColumn(int aIndex, Column<T, ?> aColumn, String
+	 * aHeaderValue, Header<?> aFooter) { if (aIndex < frozenColumns) {
+	 * headerLeft.insertColumn(aIndex, aColumn, new
+	 * DraggableHeader<T>(aHeaderValue, headerLeft, aColumn, getElement()));
+	 * frozenLeft.insertColumn(aIndex, aColumn);
+	 * scrollableLeft.insertColumn(aIndex, aColumn);
+	 * footerLeft.insertColumn(aIndex, aColumn, null, aFooter);
+	 * refreshColumns(); } else { headerRight.insertColumn(aIndex, aColumn, new
+	 * DraggableHeader<T>(aHeaderValue, headerRight, aColumn, getElement()));
+	 * frozenRight.insertColumn(aIndex, aColumn);
+	 * scrollableRight.insertColumn(aIndex, aColumn);
+	 * footerRight.insertColumn(aIndex, aColumn, null, aFooter); } }
+	 */
+	public void removeColumn(int aIndex) {
+		if (aIndex < frozenColumns) {
+			headerLeft.removeColumn(aIndex);// ColumnsRemover will care
+			                                 // about columns sharing
+			refreshColumns();
+		} else {
+			headerRight.removeColumn(aIndex - frozenColumns);// ColumnsRemover will care
+			                                 // about columns sharing
 		}
 	}
 
@@ -1085,11 +1085,17 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 	}
 
 	public Column<T, ?> getDataColumn(int aIndex) {
-		return aIndex >= 0 && aIndex < headerLeft.getColumnCount() ? headerLeft.getColumn(aIndex) : headerRight.getColumn(aIndex - headerLeft.getColumnCount());
+		if (aIndex >= 0 && aIndex < getDataColumnCount()) {
+			return aIndex >= 0 && aIndex < headerLeft.getColumnCount() ? headerLeft.getColumn(aIndex) : headerRight.getColumn(aIndex - headerLeft.getColumnCount());
+		} else
+			return null;
 	}
 
 	public Header<?> getColumnHeader(int aIndex) {
-		return aIndex >= 0 && aIndex < headerLeft.getColumnCount() ? headerLeft.getHeader(aIndex) : headerRight.getHeader(aIndex - headerLeft.getColumnCount());
+		if (aIndex >= 0 && aIndex < getDataColumnCount()) {
+			return aIndex >= 0 && aIndex < headerLeft.getColumnCount() ? headerLeft.getHeader(aIndex) : headerRight.getHeader(aIndex - headerLeft.getColumnCount());
+		} else
+			return null;
 	}
 
 	public Element getViewCell(int row, int col) {

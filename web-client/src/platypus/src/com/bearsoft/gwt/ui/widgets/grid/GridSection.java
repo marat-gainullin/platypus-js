@@ -5,25 +5,20 @@
  */
 package com.bearsoft.gwt.ui.widgets.grid;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.dom.client.TableColElement;
 import com.google.gwt.dom.client.TableSectionElement;
-import com.google.gwt.event.shared.GwtEvent;
-import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.event.shared.HasHandlers;
 import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.cellview.client.ColumnSortEvent;
-import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.cellview.client.HasKeyboardPagingPolicy;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.view.client.ProvidesKey;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * 
@@ -50,10 +45,10 @@ public class GridSection<T> extends CellTable<T> {
 		ctrlKey = event.getCtrlKey();
 		super.onBrowserEvent2(event);
 	}
-	
+
 	public boolean isCtrlKey() {
-	    return ctrlKey;
-    }
+		return ctrlKey;
+	}
 
 	/*
 	 * @Override public void setKeyboardSelectedRow(int row, int subrow, boolean
@@ -166,10 +161,13 @@ public class GridSection<T> extends CellTable<T> {
 			super.doSetColumnWidth(index, aValue);
 			if (columnsPartners != null) {
 				for (AbstractCellTable<T> partner : columnsPartners) {
-					if (aValue == null) {
-						partner.clearColumnWidth(partner.getColumn(index));
-					} else {
-						partner.setColumnWidth(partner.getColumn(index), aValue);
+					if (index >= 0 && index < partner.getColumnCount()) {
+						Column<T, ?> col = partner.getColumn(index);
+						if (aValue == null) {
+							partner.clearColumnWidth(col);
+						} else {
+							partner.setColumnWidth(col, aValue);
+						}
 					}
 				}
 			}
