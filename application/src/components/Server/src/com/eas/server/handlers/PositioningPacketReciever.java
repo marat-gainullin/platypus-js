@@ -15,6 +15,8 @@ import com.eas.sensors.retranslate.RetranslatePacketFactory;
 import com.eas.server.PlatypusServerCore;
 import java.net.IDN;
 import java.net.InetSocketAddress;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.mina.core.future.ConnectFuture;
@@ -28,29 +30,37 @@ import org.apache.mina.transport.socket.nio.NioSocketConnector;
  */
 public class PositioningPacketReciever implements PacketReciever {
 
+    private final int CONNECTION_PROCESSORS_COUNT = 10;
     public static final String RECIEVER_METHOD_NAME = "recieved";
     public static final Pattern URL_PATTERN = Pattern.compile("(?:(?<SCHEMA>[a-z0-9\\+\\.\\-]+):)?(?://)?(?:(?<USER>[a-zA-Z0-9\\$\\-\\_\\.\\+\\!\\*\\'\\(\\)\\,\\\"]+):(?<PASS>[a-zA-Z0-9\\$\\-\\_\\.\\+\\!\\*\\'\\(\\)\\,\\\"]*)@)?(?<URL>[a-zA-Z0-9\\$\\-\\_\\.\\+\\!\\*\\'\\(\\)\\,\\\"]+):?(?<PORT>\\d+)?(?<PATH>[/a-zA-Z0-9\\$\\-\\_\\.\\+\\!\\*\\'\\(\\)\\,\\\"]+)*(?<FILE>/[a-zA-Z0-9\\$\\-\\_\\.\\+\\!\\*\\'\\(\\)\\,\\\"]+)?(?<QUERY>\\?[a-zA-Z0-9\\$\\-\\_\\.\\+\\!\\*\\'\\(\\)\\,\\\"\\;\\/\\?\\:\\@\\=\\&]+)?");
     protected String moduleId;
     protected PlatypusServerCore serverCore;
+    protected int processorsCount;
+    private Map<String, IoConnector> connectors = new ConcurrentHashMap<>();
 
-    public PositioningPacketReciever(PlatypusServerCore aServer, String aModuleId) {
+    public PositioningPacketReciever() {
+        super();
+    }
+    
+    public PositioningPacketReciever(PlatypusServerCore aServer, String aModuleId, int aProcessorsCount) {
         super();
         serverCore = aServer;
         moduleId = aModuleId;
+        processorsCount = aProcessorsCount;
     }
 
     @Override
     public Object received(PositioningPacket aPacket) throws Exception {
         Object result = serverCore.executeServerModuleMethod(moduleId, RECIEVER_METHOD_NAME, new Object[]{aPacket});
         if (result != null) {
-             result = ScriptUtils.js2Java(result);
+            result = ScriptUtils.js2Java(result);
             assert result instanceof String;
             send(aPacket, (String) result);
         }
         return null;
     }
 
-    public static void send(PositioningPacket aPacket, String aUrl) throws Exception {
+    public void send(PositioningPacket aPacket, String aUrl) throws Exception {
         Matcher m = URL_PATTERN.matcher(aUrl);
         while (m.find()) {
             send(aPacket, IDN.toASCII(m.group("URL").toLowerCase()), Integer.parseInt(m.group("PORT")), m.group("SCHEMA").toLowerCase(),
@@ -58,7 +68,7 @@ public class PositioningPacketReciever implements PacketReciever {
         }
     }
 
-    public static void send(Object aData, String aUrl) throws Exception {
+    public void send(Object aData, String aUrl) throws Exception {
         Matcher m = URL_PATTERN.matcher(aUrl);
         while (m.find()) {
             send(aData, IDN.toASCII(m.group("URL").toLowerCase()), Integer.parseInt(m.group("PORT")), m.group("SCHEMA").toLowerCase(),
@@ -66,7 +76,7 @@ public class PositioningPacketReciever implements PacketReciever {
         }
     }
 
-    public static Object send(PositioningPacket aPacket, String aHost, Integer aPort, String aProtocolName, String aUser, String aPassword, String aPath, String aQuery) throws Exception {
+    public Object send(PositioningPacket aPacket, String aHost, Integer aPort, String aProtocolName, String aUser, String aPassword, String aPath, String aQuery) throws Exception {
         if (aHost != null && !aHost.isEmpty()
                 && aProtocolName != null && !aProtocolName.isEmpty()
                 && aPort != null && aPort > 0 && aPort < 65535
@@ -91,7 +101,7 @@ public class PositioningPacketReciever implements PacketReciever {
         return null;
     }
 
-    public static Object send(Object aData, String aHost, Integer aPort, String aProtocolName, String aUser, String aPassword, String aPath, String aQuery) throws Exception {
+    public Object send(Object aData, String aHost, Integer aPort, String aProtocolName, String aUser, String aPassword, String aPath, String aQuery) throws Exception {
         if (aHost != null && !aHost.isEmpty()
                 && aProtocolName != null && !aProtocolName.isEmpty()
                 && aPort != null && aPort > 0 && aPort < 65535
@@ -103,26 +113,31 @@ public class PositioningPacketReciever implements PacketReciever {
         return null;
     }
 
-    private static IoSession send(Object aData, String aHost, Integer aPort, String aProtocolName, String aUser, String aPassword, String aPath, String aQuery, IoSession aSession) throws Exception {
+    private IoSession send(Object aData, String aHost, Integer aPort, String aProtocolName, String aUser, String aPassword, String aPath, String aQuery, IoSession aSession) throws Exception {
         if (aSession == null) {
-            IoConnector connector = new NioSocketConnector(1);
-            RetranslatePacketFactory.constructFiltersChain(connector.getFilterChain(), aProtocolName);
-            RetranslateIoHandler handler = RetranslatePacketFactory.getPacketHandler(aProtocolName, retranslateSessions);
-            handler.setHost(aHost);
-            handler.setPath(aPath + aQuery);
-            handler.setUser(aUser);
-            handler.setPassword(aPassword);
-            connector.setHandler(handler);
-            connector.setConnectTimeoutMillis(WAIT_SEND_TIMEOUT);
+            IoConnector connector = connectors.get(aProtocolName);
+            if (connector == null) {
+                connector = new NioSocketConnector(processorsCount > 0 ? processorsCount : CONNECTION_PROCESSORS_COUNT);
+                RetranslatePacketFactory.constructFiltersChain(connector.getFilterChain(), aProtocolName);
+                RetranslateIoHandler handler = RetranslatePacketFactory.getPacketHandler(aProtocolName, retranslateSessions);
+                handler.setHost(aHost);
+                handler.setPath(aPath);
+                handler.setUser(aUser);
+                handler.setQuery(aQuery);
+                handler.setPassword(aPassword);
+                handler.setPort(String.valueOf(aPort));
+
+                connector.setHandler(handler);
+                connector.setConnectTimeoutMillis(WAIT_SEND_TIMEOUT);
+                connectors.put(aProtocolName, connector);
+            }
             ConnectFuture future = connector.connect(new InetSocketAddress(aHost, aPort));
             future.awaitUninterruptibly();
             if (future.isConnected()) {
                 aSession = future.getSession();
                 aSession.getConfig().setUseReadOperation(true);
                 aSession.write(aData);
-            } else {
-                connector.dispose();
-            }
+            } 
         } else {
             aSession.write(aData);
         }

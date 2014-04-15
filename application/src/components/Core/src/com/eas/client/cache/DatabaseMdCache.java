@@ -343,7 +343,7 @@ public class DatabaseMdCache implements DbMetadataCache {
                     String fName = colsRs.getString(JDBCCOLS_COLUMN_INDEX);
                     //String fDescription = colsRs.getString(JDBCCOLS_REMARKS_INDEX);
                     //Field field = new Field(fName, fDescription);
-                    Field field = new Field(fName);
+                    Field field = new Field(fName.toLowerCase());
                     field.setOriginalName(fName);
                     String rdbmsTypeName = colsRs.getString(JDBCCOLS_TYPE_NAME_INDEX);
                     Integer correctType = sqlDriver.getJdbcTypeByRDBMSTypename(rdbmsTypeName);

@@ -16,18 +16,27 @@ import com.eas.script.JsDoc.Tag;
 import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptUtils;
 import com.eas.script.ScriptUtils.ScriptAction;
+import com.sun.org.apache.xerces.internal.impl.xs.identity.Selector;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.math.RoundingMode;
 import java.security.AccessControlException;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.mozilla.javascript.*;
 
 /**
- * Main core js module implementation.
- * Integrated with Rhino via <code>ScriptRunnerPrototype</code>.
+ * Main core js module implementation. Integrated with Rhino via
+ * <code>ScriptRunnerPrototype</code>.
+ *
  * @see ScriptRunnerPrototype
  * @author pk, mg refactoring
  */
@@ -67,6 +76,10 @@ public class ScriptRunner extends ScriptableObject {
         }
     }
 
+    ScriptRunner() {
+        super();
+    }
+
     public ScriptRunner(String aAppElementId, Client aClient, Scriptable aScope, PrincipalHost aPrincipalHost, CompiledScriptDocumentsHost aCompiledScriptDocumentsHost, Object[] args) throws Exception {
         this(aClient, aScope, aPrincipalHost, aCompiledScriptDocumentsHost);
         loadApplicationElement(aAppElementId, args);
@@ -86,7 +99,8 @@ public class ScriptRunner extends ScriptableObject {
 
     /**
      * Queries model's data for the first time.
-     * @throws Exception 
+     *
+     * @throws Exception
      */
     protected void doExecute() throws Exception {
         ScriptUtils.inContext(new ScriptAction() {
@@ -130,10 +144,13 @@ public class ScriptRunner extends ScriptableObject {
     }
 
     /**
-     * Injects platypus features into 'this' object, calls js module's constructor with arguments and finally resolves model'd entities' events handlers.
+     * Injects platypus features into 'this' object, calls js module's
+     * constructor with arguments and finally resolves model'd entities' events
+     * handlers.
+     *
      * @param scriptDoc
      * @param args
-     * @throws Exception 
+     * @throws Exception
      */
     protected void prepareScript(final ScriptDocument scriptDoc, final Object[] args) throws Exception {
         ScriptUtils.inContext(new ScriptAction() {
@@ -154,8 +171,10 @@ public class ScriptRunner extends ScriptableObject {
     }
 
     /**
-     * Ensures that model's data is queried and fetched from sources. (Note: in asynchronous clients data in not fetched here).
-     * @throws Exception 
+     * Ensures that model's data is queried and fetched from sources. (Note: in
+     * asynchronous clients data in not fetched here).
+     *
+     * @throws Exception
      */
     public void execute() throws Exception {
         if (!executed) {
@@ -165,9 +184,12 @@ public class ScriptRunner extends ScriptableObject {
     }
 
     /**
-     * Shrinks internal structures, allowing to reuse this instance of <code>ScriptRunner</code> with probably new content (hot reloading feature).
-     * @see #refresh() 
-     * @throws Exception 
+     * Shrinks internal structures, allowing to reuse this instance of
+     * <code>ScriptRunner</code> with probably new content (hot reloading
+     * feature).
+     *
+     * @see #refresh()
+     * @throws Exception
      */
     protected void shrink() throws Exception {
         model = null;
@@ -180,7 +202,7 @@ public class ScriptRunner extends ScriptableObject {
      * Refreshs content of the script runner. Reloads it from application
      * storage and re-executes new instance of model.
      *
-     * @see #shrink() 
+     * @see #shrink()
      * @throws Exception
      */
     public synchronized void refresh() throws Exception {
@@ -219,7 +241,7 @@ public class ScriptRunner extends ScriptableObject {
     public long getTxtCrc32() {
         return txtCrc32;
     }
-    
+
     private static final String PRINCIPAL_JSDOC = ""
             + "/**\n"
             + "* <code>PlatypusPrincipal</code> instance, wich may be used to check roles in\n"
@@ -255,9 +277,11 @@ public class ScriptRunner extends ScriptableObject {
 
     /**
      * Overriden to provide dynamic js classes definition.
-     * @param name Script property name. In case of global ScriptRunner object it may serve as platypus js module name.
+     *
+     * @param name Script property name. In case of global ScriptRunner object
+     * it may serve as platypus js module name.
      * @param start
-     * @return 
+     * @return
      */
     @Override
     public Object get(String name, Scriptable start) {
@@ -300,7 +324,7 @@ public class ScriptRunner extends ScriptableObject {
             return resourceId;
         }
     }
-    
+
     /**
      * Accounting of already executed scripts. Allows to avoid reexecution.
      */
@@ -308,8 +332,9 @@ public class ScriptRunner extends ScriptableObject {
 
     /**
      * Executes a plain js resource (file).
+     *
      * @param aResourceId
-     * @throws Exception 
+     * @throws Exception
      */
     public static void executeResource(final String aResourceId) throws Exception {
         final String resourceId = PlatypusScriptedResource.translateResourcePath(aResourceId);
@@ -352,12 +377,14 @@ public class ScriptRunner extends ScriptableObject {
 
     /**
      * Imports a system library js resource (file) into global js space.
-     * @param libResourceName Js resource (file) name (aka standardLib.js). See use cases for convenience.
+     *
+     * @param libResourceName Js resource (file) name (aka standardLib.js). See
+     * use cases for convenience.
      * @param aLibName Js virtual library name. See use cases for convenience.
      * @param currentContext
      * @param aScope
      * @return
-     * @throws IOException 
+     * @throws IOException
      */
     public static Script importScriptLibrary(String libResourceName, String aLibName, Context currentContext, Scriptable aScope) throws IOException {
         try (InputStream is = ScriptRunner.class.getResourceAsStream(libResourceName); InputStreamReader isr = new InputStreamReader(is)) {
@@ -368,12 +395,13 @@ public class ScriptRunner extends ScriptableObject {
     }
 
     /**
-     * 
+     *
      * Ensures that platypus standard script scope is constructed.
+     *
      * @param currentContext
      * @return
-     * @throws Exception 
-     * @see #get(java.lang.String, org.mozilla.javascript.Scriptable) 
+     * @throws Exception
+     * @see #get(java.lang.String, org.mozilla.javascript.Scriptable)
      */
     public static ScriptableObject checkStandardObjects(Context currentContext) throws Exception {
         synchronized (standardObjectsScopeLock) {
@@ -414,10 +442,13 @@ public class ScriptRunner extends ScriptableObject {
     }
 
     /**
-     * Loads a script document from application database or filesystem and prepares it for execution and calls module's constructor.
-     * @param aAppElementId Global module name (at application level) or path to executable js file.
+     * Loads a script document from application database or filesystem and
+     * prepares it for execution and calls module's constructor.
+     *
+     * @param aAppElementId Global module name (at application level) or path to
+     * executable js file.
      * @param args Js module's constructor arguments.
-     * @throws Exception 
+     * @throws Exception
      */
     public void loadApplicationElement(String aAppElementId, Object[] args) throws Exception {
         if (appElementId == null ? aAppElementId != null : !appElementId.equals(aAppElementId)) {
@@ -458,6 +489,7 @@ public class ScriptRunner extends ScriptableObject {
     public class SecureFunction extends WrapperFunction implements Runnable {
 
         protected String name;
+        private final Pattern roleTemplate = Pattern.compile("(\\$\\d+)");
 
         public SecureFunction(String aName, Function aFun) {
             super(aFun);
@@ -481,21 +513,62 @@ public class ScriptRunner extends ScriptableObject {
 
         @Override
         public Object call(Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
-            checkPrincipalPermission();
+            checkPrincipalPermission(args);
             return super.call(cx, scope, thisObj, args);
         }
 
         @Override
         public Scriptable construct(Context cx, Scriptable scope, Object[] args) {
-            checkPrincipalPermission();
+            checkPrincipalPermission(args);
             return super.construct(cx, scope, args);
         }
 
-        private void checkPrincipalPermission() throws AccessControlException {
+        private NumberFormat getNumberFormatter() {
+            DecimalFormat formatter = new DecimalFormat();
+            formatter.setMinimumIntegerDigits(1);
+            formatter.setMaximumFractionDigits(100);
+            formatter.setRoundingMode(RoundingMode.DOWN);
+            DecimalFormatSymbols symbols = formatter.getDecimalFormatSymbols();
+            symbols.setDecimalSeparator('.');
+            formatter.setDecimalFormatSymbols(symbols);
+            return formatter;
+        }
+
+        protected Set<String> filterRoles(Set<String> aRoles, Object[] args) {
+            Set<String> roles = new HashSet<>();
+            for (String role : aRoles) {
+                Matcher m = roleTemplate.matcher(role);
+                StringBuilder processedRole = new StringBuilder();
+                int begin = 0;
+                NumberFormat formatter = getNumberFormatter();
+                while (m.find()) {
+                    String template = m.group();
+                    int argIdx = Integer.valueOf(template.substring(1));
+                    Object arg = (args.length > argIdx && argIdx >= 0) ? ScriptUtils.js2Java(args[argIdx]) : "undefined";
+                    String argValue;
+                    if (arg instanceof Date) {
+                        argValue = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").format(arg);
+                    } else if (arg instanceof Number) {
+                        argValue = formatter.format(arg);
+                    } else {
+                        argValue = String.valueOf(arg);
+                    }
+                    processedRole.append(role.substring(begin, m.start()));
+                    processedRole.append(argValue);
+                    begin = m.end();
+                }
+                processedRole.append(role.substring(begin, role.length()));
+                roles.add(processedRole.toString());
+            }
+            return roles;
+        }
+
+        private void checkPrincipalPermission(Object[] args) throws AccessControlException {
             try {
                 PlatypusPrincipal principal = _getPrincipal();
                 if (functionAllowedRoles != null && functionAllowedRoles.get(name) != null && !functionAllowedRoles.get(name).isEmpty()) {
-                    if (principal != null && principal.hasAnyRole(functionAllowedRoles.get(name))) {
+                    Set<String> filteredRoles = filterRoles(functionAllowedRoles.get(name), args);
+                    if (principal != null && principal.hasAnyRole(filteredRoles)) {
                         return;
                     }
                     throw new AccessControlException(String.format("Access denied to %s function in %s module for '%s'.",//NOI18N

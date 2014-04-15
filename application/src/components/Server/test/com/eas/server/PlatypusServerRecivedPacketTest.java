@@ -83,7 +83,7 @@ public class PlatypusServerRecivedPacketTest {
 
     @Test
     public void testSimpleConnecting() throws UnknownHostException, IOException {
-        PacketReciever reciever = new com.eas.server.handlers.PositioningPacketReciever(server, "Asc6Acceptor");
+        PacketReciever reciever = new com.eas.server.handlers.PositioningPacketReciever(server, "Asc6Acceptor", 10);
         try {
             Calendar cl = Calendar.getInstance();
             cl.set(2012, 7, 5, 10, 20, 30);
