@@ -219,9 +219,8 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
         setPrototype(FormRunnerPrototype.getInstance());
         formKey = aFormId;
     }
-    
+
     // Script interface
-    
     private static final String SHOW_JSDOC = ""
             + "/**\n"
             + " * Shows the form as an ordinary window.\n"
@@ -229,6 +228,7 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
 
     /**
      * Script method showing the form as ordinary frame
+     *
      * @throws Exception an exception if something goes wrong
      */
     @ScriptFunction(jsDoc = SHOW_JSDOC)
@@ -1124,7 +1124,7 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
             ((JFrame) surface).setOpacity(opacity);
         }
     }
- 
+
     private static final String ALWAYS_ON_TOP_JSDOC = ""
             + "/**\n"
             + " * Determines whether this window should always be above other windows.\n"
@@ -1177,7 +1177,7 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
             + "/**\n"
             + " * The handler function for the form's <i>before open</i> event.\n"
             + " */";
-    
+
     @ScriptFunction(jsDoc = ON_WINDOW_OPENED_JSDOC)
     @EventMethod(eventClass = com.eas.client.forms.api.events.WindowEvent.class)
     public Function getOnWindowOpened() {
@@ -1195,7 +1195,7 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
             + "/**\n"
             + " * The handler function for the form's <i>before close</i> event.\n"
             + " */";
-    
+
     @ScriptFunction(jsDoc = ON_WINDOW_CLOSING_JSDOC)
     @EventMethod(eventClass = com.eas.client.forms.api.events.WindowEvent.class)
     public Function getOnWindowClosing() {
@@ -1213,7 +1213,7 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
             + "/**\n"
             + " * The handler function for the form's <i>after close</i> event.\n"
             + " */";
-    
+
     @ScriptFunction(jsDoc = ON_WINDOW_CLOSED_JSDOC)
     @EventMethod(eventClass = com.eas.client.forms.api.events.WindowEvent.class)
     public Function getOnWindowClosed() {
@@ -1231,7 +1231,7 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
             + "/**\n"
             + " * The handler function for the form's <i>after minimize</i> event.\n"
             + " */";
-    
+
     @ScriptFunction(jsDoc = ON_WINDOW_MINIMIZED_JSDOC)
     @EventMethod(eventClass = com.eas.client.forms.api.events.WindowEvent.class)
     public Function getOnWindowMinimized() {
@@ -1249,7 +1249,7 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
             + "/**\n"
             + " * The handler function for the form's <i>after restore</i> event.\n"
             + " */";
-    
+
     @ScriptFunction(jsDoc = ON_WINDOW_RESTORED_JSDOC)
     @EventMethod(eventClass = com.eas.client.forms.api.events.WindowEvent.class)
     public Function getOnWindowRestored() {
@@ -1267,7 +1267,7 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
             + "/**\n"
             + " * The handler function for the form's <i>after maximize</i> event.\n"
             + " */";
-    
+
     @ScriptFunction(jsDoc = ON_WINDOW_MAXIMIZED_JSDOC)
     @EventMethod(eventClass = com.eas.client.forms.api.events.WindowEvent.class)
     public Function getOnWindowMaximized() {
@@ -1285,7 +1285,7 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
             + "/**\n"
             + " * The handler function for the form's <i>after activate</i> event.\n"
             + " */";
-    
+
     @ScriptFunction(jsDoc = ON_WINDOW_ACTIVATED_JSDOC)
     @EventMethod(eventClass = com.eas.client.forms.api.events.WindowEvent.class)
     public Function getOnWindowActivated() {
@@ -1303,7 +1303,7 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
             + "/**\n"
             + " * The handler function for the form's <i>after deactivate</i> event.\n"
             + " */";
-    
+
     @ScriptFunction(jsDoc = ON_WINDOW_DEACTIVATED_JSDOC)
     @EventMethod(eventClass = com.eas.client.forms.api.events.WindowEvent.class)
     public Function getOnWindowDeactivated() {
@@ -1388,14 +1388,45 @@ public class FormRunner extends ScriptRunner implements FormEventsExecutor {
                 for (Runnable resolver : factory.getHandlersResolvers()) {
                     resolver.run();
                 }
-                windowHandler.getHandlers().put(WindowEventsIProxy.windowOpened, getHandler(fdi.getWindowOpened()));
-                windowHandler.getHandlers().put(WindowEventsIProxy.windowClosing, getHandler(fdi.getWindowClosing()));
-                windowHandler.getHandlers().put(WindowEventsIProxy.windowClosed, getHandler(fdi.getWindowClosed()));
-                windowHandler.getHandlers().put(WindowEventsIProxy.windowIconified, getHandler(fdi.getWindowMinimized()));
-                windowHandler.getHandlers().put(WindowEventsIProxy.windowMaximized, getHandler(fdi.getWindowMaximized()));
-                windowHandler.getHandlers().put(WindowEventsIProxy.windowRestored, getHandler(fdi.getWindowRestored()));
-                windowHandler.getHandlers().put(WindowEventsIProxy.windowActivated, getHandler(fdi.getWindowActivated()));
-                windowHandler.getHandlers().put(WindowEventsIProxy.windowDeactivated, getHandler(fdi.getWindowDeactivated()));
+                Function windowOpenedHandler = getHandler(fdi.getWindowOpened());
+                if (windowOpenedHandler != null) {
+                    windowHandler.getHandlers().put(WindowEventsIProxy.windowOpened, windowOpenedHandler);
+                }
+
+                Function windowClosingHandler = getHandler(fdi.getWindowClosing());
+                if (windowClosingHandler != null) {
+                    windowHandler.getHandlers().put(WindowEventsIProxy.windowClosing, windowClosingHandler);
+                }
+
+                Function windowClosedHandler = getHandler(fdi.getWindowClosed());
+                if (windowClosedHandler != null) {
+                    windowHandler.getHandlers().put(WindowEventsIProxy.windowClosed, windowClosedHandler);
+                }
+
+                Function windowIconifiedHandler = getHandler(fdi.getWindowMinimized());
+                if (windowIconifiedHandler != null) {
+                    windowHandler.getHandlers().put(WindowEventsIProxy.windowIconified, windowIconifiedHandler);
+                }
+
+                Function windowMaximized = getHandler(fdi.getWindowMaximized());
+                if (windowMaximized != null) {
+                    windowHandler.getHandlers().put(WindowEventsIProxy.windowMaximized, windowMaximized);
+                }
+
+                Function windowRestoredHandler = getHandler(fdi.getWindowRestored());
+                if (windowRestoredHandler != null) {
+                    windowHandler.getHandlers().put(WindowEventsIProxy.windowRestored, windowRestoredHandler);
+                }
+
+                Function windowActivatedHandler = getHandler(fdi.getWindowActivated());
+                if (windowActivatedHandler != null) {
+                    windowHandler.getHandlers().put(WindowEventsIProxy.windowActivated, windowActivatedHandler);
+                }
+
+                Function windowDeactivatedHandler = getHandler(fdi.getWindowDeactivated());
+                if (windowDeactivatedHandler != null) {
+                    windowHandler.getHandlers().put(WindowEventsIProxy.windowDeactivated, windowDeactivatedHandler);
+                }
             }
         };
     }
