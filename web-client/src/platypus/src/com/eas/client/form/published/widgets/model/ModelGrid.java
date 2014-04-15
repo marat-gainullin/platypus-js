@@ -5,11 +5,17 @@ import java.util.List;
 
 import com.bearsoft.gwt.ui.widgets.grid.Grid;
 import com.bearsoft.gwt.ui.widgets.grid.builders.ThemedHeaderOrFooterBuilder;
+import com.bearsoft.gwt.ui.widgets.grid.cells.TreeExpandableCell;
 import com.bearsoft.gwt.ui.widgets.grid.header.HeaderNode;
 import com.bearsoft.gwt.ui.widgets.grid.header.HeaderSplitter;
+import com.bearsoft.gwt.ui.widgets.grid.processing.IndexOfProvider;
 import com.bearsoft.gwt.ui.widgets.grid.processing.ListMultiSortHandler;
+import com.bearsoft.gwt.ui.widgets.grid.processing.TreeDataProvider;
+import com.bearsoft.gwt.ui.widgets.grid.processing.TreeDataProvider.ExpandedCollapsedHandler;
+import com.bearsoft.gwt.ui.widgets.grid.processing.TreeMultiSortHandler;
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.events.RowsetEvent;
+import com.bearsoft.rowset.metadata.Parameter;
 import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.CrossUpdater;
 import com.eas.client.form.EventsExecutor;
@@ -22,7 +28,9 @@ import com.eas.client.form.grid.columns.CheckServiceColumn;
 import com.eas.client.form.grid.columns.ModelGridColumn;
 import com.eas.client.form.grid.columns.ModelGridColumnFacade;
 import com.eas.client.form.grid.columns.RadioServiceColumn;
+import com.eas.client.form.grid.rows.RowChildrenFetcher;
 import com.eas.client.form.grid.rows.RowsetDataProvider;
+import com.eas.client.form.grid.rows.RowsetTree;
 import com.eas.client.form.grid.selection.MultiRowSelectionModel;
 import com.eas.client.form.grid.selection.SingleRowSelectionModel;
 import com.eas.client.form.published.HasComponentPopupMenu;
@@ -35,11 +43,13 @@ import com.eas.client.form.published.menu.PlatypusPopupMenu;
 import com.eas.client.model.Entity;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.IdentityColumn;
@@ -58,10 +68,20 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 	public static final int ROWS_HEADER_TYPE_USUAL = 1;
 	public static final int ROWS_HEADER_TYPE_CHECKBOX = 2;
 	public static final int ROWS_HEADER_TYPE_RADIOBUTTON = 3;
-
+	//
+	public static final int ONE_FIELD_ONE_QUERY_TREE_KIND = 1;
+	public static final int FIELD_2_PARAMETER_TREE_KIND = 2;
+	public static final int SCRIPT_PARAMETERS_TREE_KIND = 3;
+	//
+	
 	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu menu;
 	protected String name;
+	//
+	protected int treeKind = ONE_FIELD_ONE_QUERY_TREE_KIND;
+	protected ModelElementRef unaryLinkField;
+	protected ModelElementRef param2GetChildren;
+	protected ModelElementRef paramSourceField;
 	//
 	protected Entity rowsSource;
 	protected JavaScriptObject onRender;
@@ -69,10 +89,12 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 	protected Callback<RowsetEvent, RowsetEvent> crossUpdaterAction;
 	protected CrossUpdater crossUpdater;
 	protected FindWindow finder;
-	protected int rowsHeaderType;
+	protected String groupName = "group-name-" + Document.get().createUniqueId();
+	protected int rowsHeaderType = -1;
 	protected List<HeaderNode> header = new ArrayList<>();
 	// runtime
 	protected ListHandler<Row> sortHandler;
+	protected HandlerRegistration sortHandlerReg;
 	protected HandlerRegistration positionSelectionHandler;
 	protected boolean editable;
 	protected boolean deletable;
@@ -83,15 +105,38 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 		finder = new FindWindow(this);
 		crossUpdaterAction = new GridCrossUpdaterAction(this);
 		crossUpdater = new CrossUpdater(crossUpdaterAction);
-		setDataProvider(new RowsetDataProvider(null, new Runnable() {
-			@Override
-			public void run() {
-				setupVisibleRanges();
-			}
+	}
 
-		}));
-		sortHandler = new ListMultiSortHandler<>(dataProvider.getList());
-		addColumnSortHandler(sortHandler);
+	public ModelElementRef getUnaryLinkField() {
+		return unaryLinkField;
+	}
+
+	public void setUnaryLinkField(ModelElementRef aValue) {
+		unaryLinkField = aValue;
+	}
+
+	public ModelElementRef getParam2GetChildren() {
+		return param2GetChildren;
+	}
+
+	public void setParam2GetChildren(ModelElementRef aValue) {
+		param2GetChildren = aValue;
+	}
+
+	public ModelElementRef getParamSourceField() {
+		return paramSourceField;
+	}
+
+	public void setParamSourceField(ModelElementRef aValue) {
+		paramSourceField = aValue;
+	}
+
+	public int getTreeKind() {
+		return treeKind;
+	}
+
+	public void setTreeKind(int aValue) {
+		treeKind = aValue;
 	}
 
 	public ListHandler<Row> getSortHandler() {
@@ -196,17 +241,17 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 			rowsHeaderType = aValue;
 			SelectionModel<Row> sm;
 			if (rowsHeaderType == ROWS_HEADER_TYPE_CHECKBOX) {
-				sm = new MultiRowSelectionModel();
+				sm = new MultiRowSelectionModel(this);
 				Header<String> colHeader = new TextHeader(" ");
 				super.addColumn(true, 0, new CheckServiceColumn(sm), "20px", colHeader, null, false);
 				header.add(0, new HeaderNode(colHeader));
 			} else if (rowsHeaderType == ROWS_HEADER_TYPE_RADIOBUTTON) {
-				sm = new SingleRowSelectionModel();
+				sm = new SingleRowSelectionModel(this);
 				Header<String> colHeader = new TextHeader(" ");
-				super.addColumn(true, 0, new RadioServiceColumn(sm), "20px", colHeader, null, false);
+				super.addColumn(true, 0, new RadioServiceColumn(groupName, sm), "20px", colHeader, null, false);
 				header.add(0, new HeaderNode(colHeader));
 			} else if (rowsHeaderType == ROWS_HEADER_TYPE_USUAL) {
-				sm = new MultiRowSelectionModel();
+				sm = new MultiRowSelectionModel(this);
 				Header<String> colHeader = new TextHeader(" ");
 				IdentityColumn<Row> col = new IdentityColumn<>(new RowMarkerCell(rowsSource.getRowset()));
 				super.addColumn(true, 0, col, "20px", colHeader, null, false);
@@ -218,7 +263,7 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 				 * setColumnWidth(col, 20, Style.Unit.PX);
 				 */
 			} else {
-				sm = new MultiRowSelectionModel();
+				sm = new MultiRowSelectionModel(this);
 			}
 			setSelectionModel(sm);
 			if (needRefreshColumns) {
@@ -226,6 +271,14 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 				applyHeader();
 			}
 		}
+	}
+
+	private boolean isLazyTreeConfigured() {
+		return param2GetChildren.isCorrect() && param2GetChildren.field != null && paramSourceField.isCorrect() && paramSourceField.field != null;
+	}
+
+	private boolean isTreeConfigured() throws Exception {
+		return rowsSource != null && unaryLinkField.isCorrect() && unaryLinkField.field != null && (treeKind == ONE_FIELD_ONE_QUERY_TREE_KIND || treeKind == FIELD_2_PARAMETER_TREE_KIND);
 	}
 
 	@Override
@@ -267,11 +320,38 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 		addColumn(aIndex, aColumn, aColumn.getWidth() + "px", aColumn.getHeaderNode().getHeader(), null, aColumn.isVisible());
 	}
 
+	protected ModelGridColumn<?> treeIndicatorColumn;
+
+	@Override
+	public void addColumn(int aIndex, Column<Row, ?> aColumn, String aWidth, Header<?> aHeader, Header<?> aFooter, boolean hidden) {
+		super.addColumn(aIndex, aColumn, aWidth, aHeader, aFooter, hidden);
+		if (treeIndicatorColumn == null) {
+			int treeIndicatorIndex = rowsHeaderType == ROWS_HEADER_TYPE_NONE ? 0 : 1;
+			if (treeIndicatorIndex < getDataColumnCount()) {
+				Column<Row, ?> indicatorColumn = getDataColumn(treeIndicatorIndex);
+				if (indicatorColumn instanceof ModelGridColumn<?>) {
+					treeIndicatorColumn = (ModelGridColumn<?>) indicatorColumn;
+					if (dataProvider instanceof TreeDataProvider<?> && treeIndicatorColumn.getCell() instanceof TreeExpandableCell<?, ?>) {
+						TreeExpandableCell<Row, ?> treeCell = (TreeExpandableCell<Row, ?>) treeIndicatorColumn.getCell();
+						treeCell.setDataProvider((TreeDataProvider<Row>) dataProvider);
+					}
+				}
+			}
+		}
+	}
+
 	@Override
 	public void removeColumn(int aIndex) {
 		Column<Row, ?> toDel = getDataColumn(aIndex);
 		if (toDel instanceof ModelGridColumn<?>) {
 			ModelGridColumn<?> mCol = (ModelGridColumn<?>) toDel;
+			if (mCol == treeIndicatorColumn) {
+				TreeExpandableCell<Row, ?> treeCell = (TreeExpandableCell<Row, ?>) mCol.getCell();
+				if (treeCell.getDataProvider() != null) {
+					treeCell.setDataProvider(null);
+				}
+				treeIndicatorColumn = null;
+			}
 			super.removeColumn(aIndex);
 			if (!columnsAjusting) {
 				HeaderNode colNode = mCol.getHeaderNode();
@@ -360,10 +440,62 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 		return rowsSource;
 	}
 
-	public void setRowsSource(Entity aValue) {
+	/**
+	 * Sets entity instance, that have to be used as rows source. Configures
+	 * tree if needed.
+	 * 
+	 * @param aValue
+	 * @throws Exception
+	 */
+	public void setRowsSource(Entity aValue) throws Exception {
 		if (rowsSource != aValue) {
+			if(sortHandlerReg != null)
+				sortHandlerReg.removeHandler();
 			rowsSource = aValue;
-			((RowsetDataProvider) dataProvider).setRowset(rowsSource.getRowset());
+			if (rowsSource != null) {
+				Runnable onResize = new Runnable() {
+					@Override
+					public void run() {
+						setupVisibleRanges();
+					}
+
+				};
+				Runnable onSort = new Runnable() {
+					@Override
+					public void run() {
+						if(dataProvider instanceof IndexOfProvider<?>)
+							((IndexOfProvider<?>)dataProvider).rescan();
+					}
+
+				};
+				if (isTreeConfigured()) {
+					RowsetTree tree = new RowsetTree(rowsSource.getRowset(), unaryLinkField.field);
+					TreeDataProvider<Row> treeDataProvider;
+					if (isLazyTreeConfigured()) {
+						treeDataProvider = new TreeDataProvider<>(tree, onResize, new RowChildrenFetcher(rowsSource, (Parameter) param2GetChildren.field, (Parameter) paramSourceField.field));
+					} else
+						treeDataProvider = new TreeDataProvider<>(tree, onResize);
+					setDataProvider(treeDataProvider);
+					sortHandler = new TreeMultiSortHandler<>(treeDataProvider, onSort);
+					treeDataProvider.addExpandedCollapsedHandler(new ExpandedCollapsedHandler<Row>(){
+
+						@Override
+                        public void expanded(Row anElement) {
+							ColumnSortEvent.fire(ModelGrid.this, sortList);
+                        }
+
+						@Override
+                        public void collapsed(Row anElement) {
+							ColumnSortEvent.fire(ModelGrid.this, sortList);
+                        }
+						
+					});
+				} else {
+					setDataProvider(new RowsetDataProvider(rowsSource.getRowset(), onResize));
+					sortHandler = new ListMultiSortHandler<>(dataProvider.getList(), onSort);
+				}
+				sortHandlerReg = addColumnSortHandler(sortHandler);
+			}
 		}
 	}
 

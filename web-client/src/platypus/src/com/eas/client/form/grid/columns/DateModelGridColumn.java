@@ -4,6 +4,8 @@ import java.util.Date;
 
 import com.bearsoft.gwt.ui.widgets.grid.cells.CellRenderer;
 import com.bearsoft.gwt.ui.widgets.grid.cells.DateEditorCell;
+import com.bearsoft.gwt.ui.widgets.grid.cells.TreeExpandableCell;
+import com.bearsoft.rowset.Row;
 import com.eas.client.converters.DateRowValueConverter;
 import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.published.PublishedCell;
@@ -19,9 +21,9 @@ import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 public class DateModelGridColumn extends ModelGridColumn<Date> {
 
 	public DateModelGridColumn(String aName) {
-		super(new DateEditorCell(), aName, null, null, new DateRowValueConverter());
+		super(new TreeExpandableCell<Row, Date>(new DateEditorCell()), aName, null, null, new DateRowValueConverter());
 		setEditor(new ModelDate());
-		((DateEditorCell) getCell()).setRenderer(new CellRenderer<Date>() {
+		((DateEditorCell) getTargetCell()).setRenderer(new CellRenderer<Date>() {
 
 			@Override
 			public boolean render(Context context, Date value, SafeHtmlBuilder sb) {
@@ -57,20 +59,20 @@ public class DateModelGridColumn extends ModelGridColumn<Date> {
 			}
 
 		});
-	}
-
+	}	
+	
 	@Override
 	public void setEditor(PublishedDecoratorBox<Date> aEditor) {
 		super.setEditor(aEditor);
-		((DateEditorCell) getCell()).setEditor(aEditor);
+		((DateEditorCell) getTargetCell()).setEditor(aEditor);
 	}
 
 	public DateTimeFormat getFormat() {
-		return ((DateEditorCell) getCell()).getFormat();
+		return ((DateEditorCell) getTargetCell()).getFormat();
 	}
 
 	public void setFormat(DateTimeFormat aValue) {
-		((DateEditorCell) getCell()).setFormat(aValue);
+		((DateEditorCell) getTargetCell()).setFormat(aValue);
 		((ModelDate) getEditor()).setFormat(aValue.getPattern());
 	}
 }

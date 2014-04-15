@@ -34,25 +34,13 @@ import com.google.gwt.xml.client.NodeList;
 
 public class ModelGridFactory {
 
-	//
-	public static final int ONE_FIELD_ONE_QUERY_TREE_KIND = 1;
-	public static final int FIELD_2_PARAMETER_TREE_KIND = 2;
-	public static final int SCRIPT_PARAMETERS_TREE_KIND = 3;
-
 	protected Element gridTag;
-
-	protected int treeKind = ONE_FIELD_ONE_QUERY_TREE_KIND;
-	protected ModelElementRef unaryLinkField;
-	protected ModelElementRef param2GetChildren;
-	protected ModelElementRef paramSourceField;
+	//
 	protected Model model;
 	protected Entity rowsSource;
-	protected ModelGrid grid;
-	// columns
-	protected List<HeaderNode> headerForest = new ArrayList<>();
-	// protected List<ModelGridColumn<?>> columns = new ArrayList<>();
-
 	protected Set<Entity> rowsetsOfInterestHosts = new HashSet<Entity>();
+	protected List<HeaderNode> headerForest = new ArrayList<>();
+	protected ModelGrid grid;
 
 	public ModelGridFactory(Element aTag, Model aModel) {
 		super();
@@ -77,17 +65,24 @@ public class ModelGridFactory {
 		final boolean deletable = Utils.getBooleanAttribute(gridTag, "deletable", true);
 		final boolean insertable = Utils.getBooleanAttribute(gridTag, "insertable", true);
 		ModelElementRef rowsModelElement = new ModelElementRef(Utils.getElementByTagName(rowsColumnsTag, "rowsDatasource"), model);
+		Element treeTag = Utils.getElementByTagName(gridTag, "treeDesignInfo");
+		ModelElementRef unaryLinkField = new ModelElementRef(Utils.getElementByTagName(treeTag, "unaryLinkField"), model);
+		int treeKind = Utils.getIntegerAttribute(treeTag, "treeKind", ModelGrid.ONE_FIELD_ONE_QUERY_TREE_KIND);
+		ModelElementRef param2GetChildren = new ModelElementRef(Utils.getElementByTagName(treeTag, "param2GetChildren"), model);
+		ModelElementRef paramSourceField = new ModelElementRef(Utils.getElementByTagName(treeTag, "paramSourceField"), model);
+		
 		rowsSource = rowsModelElement.entity;
 		rowsetsOfInterestHosts.add(rowsSource);
 
-		Element treeTag = Utils.getElementByTagName(gridTag, "treeDesignInfo");
-		unaryLinkField = new ModelElementRef(Utils.getElementByTagName(treeTag, "unaryLinkField"), model);
-		treeKind = Utils.getIntegerAttribute(treeTag, "treeKind", ONE_FIELD_ONE_QUERY_TREE_KIND);
-		param2GetChildren = new ModelElementRef(Utils.getElementByTagName(treeTag, "param2GetChildren"), model);
-		paramSourceField = new ModelElementRef(Utils.getElementByTagName(treeTag, "paramSourceField"), model);
-
 		grid = new ModelGrid();
+		
+		grid.setUnaryLinkField(unaryLinkField);
+		grid.setTreeKind(treeKind);
+		grid.setParam2GetChildren(param2GetChildren);
+		grid.setParamSourceField(paramSourceField);
+		
 		grid.setRowsSource(rowsSource);
+		
 		grid.setEditable(editable);
 		grid.setDeletable(deletable);
 		grid.setInsertable(insertable);
@@ -109,14 +104,9 @@ public class ModelGridFactory {
 					processColumn(columnTag, headerForest, null);
 				}
 			}
-			// Plain and tree(optional) data layers
-			if (isTreeConfigured()) {
-			} else {
-			}
-			/*
-			 * editing.setEditable(editable); editing.setDeletable(deletable);
-			 * editing.setInsertable(insertable);
-			 */
+			grid.setEditable(editable);
+			grid.setInsertable(insertable);
+			grid.setDeletable(deletable);
 			// row lines ?
 			// column lines ?
 			/*
@@ -130,14 +120,6 @@ public class ModelGridFactory {
 			grid.setHeaderAjusting(false);
 			grid.applyHeader();
 		}
-	}
-
-	private boolean isLazyTreeConfigured() {
-		return param2GetChildren.isCorrect() && param2GetChildren.field != null && paramSourceField.isCorrect() && paramSourceField.field != null;
-	}
-
-	private boolean isTreeConfigured() throws Exception {
-		return rowsSource != null && unaryLinkField.isCorrect() && unaryLinkField.field != null && (treeKind == ONE_FIELD_ONE_QUERY_TREE_KIND || treeKind == FIELD_2_PARAMETER_TREE_KIND);
 	}
 
 	private void processColumn(Element aTag, List<HeaderNode> aHeaderChildren, HeaderNode aHeaderParent) throws Exception {

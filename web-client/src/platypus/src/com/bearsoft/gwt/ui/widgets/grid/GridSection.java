@@ -10,6 +10,7 @@ import java.util.Map;
 
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NodeList;
+import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.dom.client.TableColElement;
 import com.google.gwt.dom.client.TableSectionElement;
 import com.google.gwt.user.cellview.client.AbstractCellTable;
@@ -19,6 +20,7 @@ import com.google.gwt.user.cellview.client.HasKeyboardPagingPolicy;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.view.client.ProvidesKey;
+import com.google.gwt.view.client.Range;
 
 /**
  * 
@@ -34,8 +36,10 @@ public class GridSection<T> extends CellTable<T> {
 	protected AbstractCellTable<T> footerSource;
 
 	public GridSection(ProvidesKey<T> keyProvider) {
-		super(15, ThemedGridResources.instance, keyProvider);
-		super.setKeyboardPagingPolicy(HasKeyboardPagingPolicy.KeyboardPagingPolicy.CURRENT_PAGE);
+		super(15, ThemedGridResources.instance, keyProvider, null, true, false);
+		setKeyboardPagingPolicy(HasKeyboardPagingPolicy.KeyboardPagingPolicy.CURRENT_PAGE);
+		setLoadingIndicator(null);
+		setEmptyTableWidget(null);
 	}
 
 	protected boolean ctrlKey;

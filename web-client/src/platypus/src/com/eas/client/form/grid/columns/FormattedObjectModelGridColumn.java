@@ -4,6 +4,8 @@ import java.text.ParseException;
 
 import com.bearsoft.gwt.ui.widgets.ObjectFormat;
 import com.bearsoft.gwt.ui.widgets.grid.cells.CellRenderer;
+import com.bearsoft.gwt.ui.widgets.grid.cells.TreeExpandableCell;
+import com.bearsoft.rowset.Row;
 import com.eas.client.converters.ObjectRowValueConverter;
 import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.grid.cells.PlatypusFormattedObjectEditorCell;
@@ -18,9 +20,9 @@ import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 public class FormattedObjectModelGridColumn extends ModelGridColumn<Object> {
 
 	public FormattedObjectModelGridColumn(String aName) {
-		super(new PlatypusFormattedObjectEditorCell(), aName, null, null, new ObjectRowValueConverter());
+		super(new TreeExpandableCell<Row, Object>(new PlatypusFormattedObjectEditorCell()), aName, null, null, new ObjectRowValueConverter());
 		setEditor(new ModelFormattedField());
-		((PlatypusFormattedObjectEditorCell) getCell()).setRenderer(new CellRenderer<Object>() {
+		((PlatypusFormattedObjectEditorCell) getTargetCell()).setRenderer(new CellRenderer<Object>() {
 			@Override
 			public boolean render(com.google.gwt.cell.client.Cell.Context context, Object value, SafeHtmlBuilder sb) {
 				FormattedObjectModelGridColumn column = FormattedObjectModelGridColumn.this;
@@ -29,7 +31,7 @@ public class FormattedObjectModelGridColumn extends ModelGridColumn<Object> {
 					try {
 						PublishedStyle styleToRender = null;
 						SafeHtmlBuilder lsb = new SafeHtmlBuilder();
-						String toRender = ((PlatypusFormattedObjectEditorCell) getCell()).getFormat().format(value);
+						String toRender = ((PlatypusFormattedObjectEditorCell) getTargetCell()).getFormat().format(value);
 						PublishedCell cellToRender = calcContextPublishedCell(column.getPublished(), onRender, context, column.getColumnModelRef(), toRender, column.getRowsEntity());
 						if (cellToRender != null) {
 							styleToRender = cellToRender.getStyle();
@@ -58,16 +60,16 @@ public class FormattedObjectModelGridColumn extends ModelGridColumn<Object> {
 	@Override
 	public void setEditor(PublishedDecoratorBox<Object> aEditor) {
 		super.setEditor(aEditor);
-		((PlatypusFormattedObjectEditorCell) getCell()).setEditor(aEditor);
+		((PlatypusFormattedObjectEditorCell) getTargetCell()).setEditor(aEditor);
 	}
 
 	public String getFormat() {
-		ObjectFormat format = ((PlatypusFormattedObjectEditorCell) getCell()).getFormat();
+		ObjectFormat format = ((PlatypusFormattedObjectEditorCell) getTargetCell()).getFormat();
 		return format != null ? format.getPattern() : null;
 	}
 
 	public void setFormat(String aValue) throws ParseException {
-		ObjectFormat format = ((PlatypusFormattedObjectEditorCell) getCell()).getFormat();
+		ObjectFormat format = ((PlatypusFormattedObjectEditorCell) getTargetCell()).getFormat();
 		if (format != null) {
 			format.setPattern(aValue);
 		}
@@ -75,7 +77,7 @@ public class FormattedObjectModelGridColumn extends ModelGridColumn<Object> {
 	}
 	
 	public void setFormatType(int aType, String aPattern) throws ParseException {
-		((PlatypusFormattedObjectEditorCell) getCell()).setFormat(new ObjectFormat(aType, aPattern));
+		((PlatypusFormattedObjectEditorCell) getTargetCell()).setFormat(new ObjectFormat(aType, aPattern));
 		((ModelFormattedField) getEditor()).setFormatType(aType, aPattern);
 	}
 }

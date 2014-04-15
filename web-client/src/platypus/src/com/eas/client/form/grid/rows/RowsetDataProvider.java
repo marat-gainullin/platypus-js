@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.bearsoft.gwt.ui.widgets.grid.processing.IndexOfProvider;
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.events.RowChangeEvent;
@@ -18,7 +19,7 @@ import com.bearsoft.rowset.events.RowsetSaveEvent;
 import com.bearsoft.rowset.events.RowsetScrollEvent;
 import com.google.gwt.view.client.ListDataProvider;
 
-public class RowsetDataProvider extends ListDataProvider<Row> {
+public class RowsetDataProvider extends ListDataProvider<Row> implements IndexOfProvider<Row> {
 
 	protected Map<Row, Integer> indicies;
 	protected Rowset rowset;
@@ -57,12 +58,25 @@ public class RowsetDataProvider extends ListDataProvider<Row> {
 		if (indicies == null) {
 			indicies = new HashMap<>();
 			List<Row> targetList = getList();
-			for (int i = 0; i < getList().size(); i++) {
+			for (int i = 0; i < targetList.size(); i++) {
 				indicies.put(targetList.get(i), i);
 			}
 		}
 	}
 
+	@Override
+	public int indexOf(Row aItem) {
+		validate();
+		Integer idx = indicies.get(aItem);
+		return idx != null ? idx.intValue() : -1;
+	}
+
+	@Override
+	public void rescan() {
+		invalidate();
+		validate();
+	}
+	
 	/*
 	 * protected List<Object> rowsToPks(List<Row> aRows) { List<Object> pks =
 	 * new ArrayList<Object>(); for (Row row : aRows) { Object[] pkValues =
@@ -80,7 +94,7 @@ public class RowsetDataProvider extends ListDataProvider<Row> {
 		public void rowsetFiltered(RowsetFilterEvent event) {
 			getList().clear();
 			getList().addAll(rowset.getCurrent());
-			if(onResize != null)
+			if (onResize != null)
 				onResize.run();
 			invalidate();
 		}
@@ -89,7 +103,7 @@ public class RowsetDataProvider extends ListDataProvider<Row> {
 		public void rowsetRequeried(RowsetRequeryEvent event) {
 			getList().clear();
 			getList().addAll(rowset.getCurrent());
-			if(onResize != null)
+			if (onResize != null)
 				onResize.run();
 			invalidate();
 		}
@@ -98,7 +112,7 @@ public class RowsetDataProvider extends ListDataProvider<Row> {
 		public void rowsetRolledback(RowsetRollbackEvent event) {
 			getList().clear();
 			getList().addAll(rowset.getCurrent());
-			if(onResize != null)
+			if (onResize != null)
 				onResize.run();
 			invalidate();
 		}
@@ -126,7 +140,7 @@ public class RowsetDataProvider extends ListDataProvider<Row> {
 			}
 			if (!event.isAjusting()) {
 				invalidate();
-				if(onResize != null)
+				if (onResize != null)
 					onResize.run();
 			}
 		}
@@ -137,7 +151,7 @@ public class RowsetDataProvider extends ListDataProvider<Row> {
 				getList().clear();
 				getList().addAll(rowset.getCurrent());
 				invalidate();
-				if(onResize != null)
+				if (onResize != null)
 					onResize.run();
 			} else if (!getList().isEmpty()) {
 				validate();
@@ -167,7 +181,7 @@ public class RowsetDataProvider extends ListDataProvider<Row> {
 						}
 					}
 					invalidate();
-					if(onResize != null)
+					if (onResize != null)
 						onResize.run();
 				}
 			}

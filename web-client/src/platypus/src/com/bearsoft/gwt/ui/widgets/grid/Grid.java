@@ -98,7 +98,7 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 	//
 	protected HTML columnsChevron = new HTML();
 	//
-	private final ColumnSortList sortList = new ColumnSortList();
+	protected final ColumnSortList sortList = new ColumnSortList();
 	protected int rowsHeight;
 	protected String dynamicCellClassName = "grid-cell-" + Document.get().createUniqueId();
 	protected StyleElement styleElement = Document.get().createStyleElement();
@@ -212,7 +212,7 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 			@Override
 			public void changed() {
 				super.changed();
-				propagateHeaderLeftWidth();
+				propagateHeaderWidth();
 			}
 
 		});
@@ -714,12 +714,17 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 		}
 	}
 
-	private void propagateHeaderLeftWidth() {
-		double dw = headerLeft.getElement().getOffsetWidth();
-		headerLeftContainer.getElement().getParentElement().getStyle().setWidth(dw, Style.Unit.PX);
-		frozenLeftContainer.getElement().getParentElement().getStyle().setWidth(dw, Style.Unit.PX);
-		scrollableLeftContainer.getElement().getParentElement().getStyle().setWidth(dw, Style.Unit.PX);
-		footerLeftContainer.getElement().getParentElement().getStyle().setWidth(dw, Style.Unit.PX);
+	private void propagateHeaderWidth() {
+		double lw = headerLeft.getElement().getOffsetWidth();
+		headerLeftContainer.getElement().getParentElement().getStyle().setWidth(lw, Style.Unit.PX);
+		frozenLeftContainer.getElement().getParentElement().getStyle().setWidth(lw, Style.Unit.PX);
+		scrollableLeftContainer.getElement().getParentElement().getStyle().setWidth(lw, Style.Unit.PX);
+		footerLeftContainer.getElement().getParentElement().getStyle().setWidth(lw, Style.Unit.PX);
+		double rw = getElement().getClientWidth() - lw;
+		headerRightContainer.getElement().getParentElement().getStyle().setWidth(rw, Style.Unit.PX);
+		frozenRightContainer.getElement().getParentElement().getStyle().setWidth(rw, Style.Unit.PX);
+		scrollableRightContainer.getElement().getParentElement().getStyle().setWidth(rw, Style.Unit.PX);
+		footerRightContainer.getElement().getParentElement().getStyle().setWidth(rw, Style.Unit.PX);
 	}
 
 	private void propagateHeightButScrollable() {
@@ -764,7 +769,7 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 	public void onResize() {
 		if (isAttached()) {
 			hive.setSize(getElement().getClientWidth() + "px", getElement().getClientHeight() + "px");
-			propagateHeaderLeftWidth();
+			propagateHeaderWidth();
 			propagateHeightButScrollable();
 			columnsChevron.setHeight(Math.max(headerLeftContainer.getOffsetHeight(), headerRightContainer.getOffsetHeight()) + "px");
 			for (Widget child : new Widget[] { headerLeftContainer, headerRightContainer, frozenLeftContainer, frozenRightContainer, scrollableLeftContainer, scrollableRightContainer }) {

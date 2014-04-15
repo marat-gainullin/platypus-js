@@ -1,6 +1,8 @@
 package com.eas.client.form.grid.columns;
 
 import com.bearsoft.gwt.ui.widgets.grid.cells.CellRenderer;
+import com.bearsoft.gwt.ui.widgets.grid.cells.TreeExpandableCell;
+import com.bearsoft.rowset.Row;
 import com.eas.client.converters.StringRowValueConverter;
 import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.grid.cells.PlatypusTextEditorCell;
@@ -15,9 +17,9 @@ import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 public class TextAreaModelGridColumn extends ModelGridColumn<String> {
 
 	public TextAreaModelGridColumn(String aName) {
-		super(new PlatypusTextEditorCell(), aName, null, null, new StringRowValueConverter());
+		super(new TreeExpandableCell<Row, String>(new PlatypusTextEditorCell()), aName, null, null, new StringRowValueConverter());
 		setEditor(new ModelTextArea());
-		((PlatypusTextEditorCell) getCell()).setRenderer(new CellRenderer<String>() {
+		((PlatypusTextEditorCell) getTargetCell()).setRenderer(new CellRenderer<String>() {
 			@Override
 			public boolean render(com.google.gwt.cell.client.Cell.Context context, String value, SafeHtmlBuilder sb) {
 				TextAreaModelGridColumn column = TextAreaModelGridColumn.this;
@@ -55,6 +57,6 @@ public class TextAreaModelGridColumn extends ModelGridColumn<String> {
 	@Override
 	public void setEditor(PublishedDecoratorBox<String> aEditor) {
 		super.setEditor(aEditor);
-		((PlatypusTextEditorCell) getCell()).setEditor(aEditor);
+		((PlatypusTextEditorCell) getTargetCell()).setEditor(aEditor);
 	}
 }

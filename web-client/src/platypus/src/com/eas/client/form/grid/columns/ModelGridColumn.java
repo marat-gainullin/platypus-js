@@ -1,5 +1,6 @@
 package com.eas.client.form.grid.columns;
 
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -7,6 +8,7 @@ import com.bearsoft.gwt.ui.widgets.grid.DraggableHeader;
 import com.bearsoft.gwt.ui.widgets.grid.GridColumn;
 import com.bearsoft.gwt.ui.widgets.grid.cells.CellHasReadonly;
 import com.bearsoft.gwt.ui.widgets.grid.cells.RenderedPopupEditorCell;
+import com.bearsoft.gwt.ui.widgets.grid.cells.TreeExpandableCell;
 import com.bearsoft.gwt.ui.widgets.grid.header.HeaderNode;
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Utils;
@@ -74,6 +76,10 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 		setDefaultSortAscending(true);
 	}
 
+	protected Cell<T> getTargetCell(){
+		return ((TreeExpandableCell<Row, T>) getCell()).getCell();
+	}
+	
 	@Override
 	public String getJsName() {
 		return name;

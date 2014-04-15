@@ -76,14 +76,14 @@ public abstract class AbstractPopupEditorCell<C> extends AbstractCell<C> {
 		}
 	}
 
-	public void startEditing(Element parent, final C value, ValueUpdater<C> valueUpdater) {
+	public void startEditing(final Element parent, final C value, ValueUpdater<C> valueUpdater) {
 		final UpdaterRef<C> updaterRef = new UpdaterRef<>(valueUpdater);
 		final PopupPanel pp = new PopupPanel(true);
 		pp.getElement().setClassName("grid-cell-editor-popup");
 		pp.setAnimationEnabled(true);
 		valueHost.setValue(value);
 		pp.setWidget(editor);
-		final Element cellElement = parent.getParentElement();
+		final Element cellElement = parent;
 		pp.setWidth(cellElement.getOffsetWidth() + "px");
 		pp.setHeight(cellElement.getOffsetHeight() + "px");
 		pp.setPopupPosition(cellElement.getAbsoluteLeft(), cellElement.getAbsoluteTop());

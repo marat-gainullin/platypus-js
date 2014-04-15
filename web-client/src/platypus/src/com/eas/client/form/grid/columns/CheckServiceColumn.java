@@ -10,7 +10,7 @@ public class CheckServiceColumn extends Column<Row, Boolean>{
 	protected SelectionModel<Row> selectionModel;
 	
 	public CheckServiceColumn(SelectionModel<Row> aSelectionModel) {
-	    super(new CheckboxCell(false, true));
+	    super(new CheckboxCell(true, false));
 	    selectionModel = aSelectionModel;
     }
 

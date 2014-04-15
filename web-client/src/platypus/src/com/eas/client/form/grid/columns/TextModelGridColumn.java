@@ -2,6 +2,8 @@ package com.eas.client.form.grid.columns;
 
 import com.bearsoft.gwt.ui.widgets.grid.cells.CellRenderer;
 import com.bearsoft.gwt.ui.widgets.grid.cells.StringEditorCell;
+import com.bearsoft.gwt.ui.widgets.grid.cells.TreeExpandableCell;
+import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.converters.StringRowValueConverter;
 import com.eas.client.form.ControlsUtils;
@@ -17,7 +19,7 @@ import com.google.gwt.user.client.ui.TextBox;
 public class TextModelGridColumn extends ModelGridColumn<String> {
 
 	public TextModelGridColumn(String aName) {
-		super(new StringEditorCell(), aName, null, null, new StringRowValueConverter());
+		super(new TreeExpandableCell<Row, String>(new StringEditorCell()), aName, null, null, new StringRowValueConverter());
 		setEditor(new PublishedDecoratorBox<String>(new TextBox()) {
 
 			@Override
@@ -25,7 +27,7 @@ public class TextModelGridColumn extends ModelGridColumn<String> {
 			}
 
 		});
-		((StringEditorCell) getCell()).setRenderer(new CellRenderer<String>() {
+		((StringEditorCell) getTargetCell()).setRenderer(new CellRenderer<String>() {
 
 			@Override
 			public boolean render(Context context, String value, SafeHtmlBuilder sb) {
@@ -66,6 +68,6 @@ public class TextModelGridColumn extends ModelGridColumn<String> {
 	@Override
 	public void setEditor(PublishedDecoratorBox<String> aEditor) {
 		super.setEditor(aEditor);
-		((StringEditorCell) getCell()).setEditor(aEditor);
+		((StringEditorCell) getTargetCell()).setEditor(aEditor);
 	}
 }

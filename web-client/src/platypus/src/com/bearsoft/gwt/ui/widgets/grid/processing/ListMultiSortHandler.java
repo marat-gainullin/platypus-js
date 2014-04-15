@@ -21,7 +21,13 @@ import java.util.List;
 public class ListMultiSortHandler<T> extends ColumnSortEvent.ListHandler<T> {
 
     protected List<T> unsorted = new ArrayList<>();
+    protected Runnable onComplete;
 
+    public ListMultiSortHandler(List<T> aList, Runnable aOnComplete) {
+    	this(aList);
+    	onComplete = aOnComplete;
+    }
+    
     public ListMultiSortHandler(List<T> aList) {
         super(aList);
         setList(aList);
@@ -69,6 +75,8 @@ public class ListMultiSortHandler<T> extends ColumnSortEvent.ListHandler<T> {
 
             });
         }
+        if(onComplete != null)
+        	onComplete.run();
     }
 
 }

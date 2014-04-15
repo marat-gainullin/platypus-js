@@ -22,7 +22,13 @@ public class TreeMultiSortHandler<T> extends ColumnSortEvent.ListHandler<T> {
 
     protected List<T> unsorted = new ArrayList<>();
     protected TreeDataProvider<T> dataProvider;
-
+    protected Runnable onComplete;
+    
+    public TreeMultiSortHandler(TreeDataProvider<T> aDataProvider, Runnable aOnComplete) {
+    	this(aDataProvider);
+    	onComplete = aOnComplete;
+    }
+    
     public TreeMultiSortHandler(TreeDataProvider<T> aDataProvider) {
         super(aDataProvider.getList());
         dataProvider = aDataProvider;
@@ -91,6 +97,8 @@ public class TreeMultiSortHandler<T> extends ColumnSortEvent.ListHandler<T> {
 
             });
         }
+        if(onComplete != null)
+        	onComplete.run();
     }
 
 }

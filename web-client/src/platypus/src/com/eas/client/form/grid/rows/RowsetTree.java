@@ -138,7 +138,7 @@ public class RowsetTree extends TreeAdapter<Row> {
 
 	@Override
 	public boolean isLeaf(Row anElement) {
-		return hasRowChildren(anElement);
+		return !hasRowChildren(anElement);
 	}
 
 	// Tree mutation methods

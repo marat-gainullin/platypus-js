@@ -5,6 +5,7 @@ import java.util.logging.Logger;
 
 import com.bearsoft.gwt.ui.widgets.StyledListBox;
 import com.bearsoft.gwt.ui.widgets.grid.cells.CellRenderer;
+import com.bearsoft.gwt.ui.widgets.grid.cells.TreeExpandableCell;
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.converters.RowRowValueConverter;
@@ -28,7 +29,7 @@ public class LookupModelGridColumn extends ModelGridColumn<Row> {
 	protected ModelElementRef displayValueRef;
 
 	public LookupModelGridColumn(String aName) {
-		super(new PlatypusLookupEditorCell(), aName, null, null, new RowRowValueConverter());
+		super(new TreeExpandableCell<Row, Row>(new PlatypusLookupEditorCell()), aName, null, null, new RowRowValueConverter());
 		// TODO: fill the editor, test for data changes in lookup and value rowsets
 		setEditor(new PublishedDecoratorBox<Row>(new StyledListBox<Row>()){
 
@@ -37,7 +38,7 @@ public class LookupModelGridColumn extends ModelGridColumn<Row> {
             }
 			
 		});
-		((PlatypusLookupEditorCell) getCell()).setRenderer(new CellRenderer<Row>(){
+		((PlatypusLookupEditorCell) getTargetCell()).setRenderer(new CellRenderer<Row>(){
 
 			@Override
             public boolean render(Context context, Row value, SafeHtmlBuilder sb) {
@@ -76,7 +77,7 @@ public class LookupModelGridColumn extends ModelGridColumn<Row> {
 	@Override
 	public void setEditor(PublishedDecoratorBox<Row> aEditor) {
 		super.setEditor(aEditor);
-		((PlatypusLookupEditorCell) getCell()).setEditor(aEditor);
+		((PlatypusLookupEditorCell) getTargetCell()).setEditor(aEditor);
 	}
 	
 	public ModelElementRef getLookupValueRef() {

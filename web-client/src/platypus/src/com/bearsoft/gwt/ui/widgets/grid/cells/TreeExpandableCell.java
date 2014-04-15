@@ -5,6 +5,10 @@
  */
 package com.bearsoft.gwt.ui.widgets.grid.cells;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import com.bearsoft.gwt.ui.widgets.grid.processing.TreeDataProvider;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.ValueUpdater;
@@ -15,7 +19,6 @@ import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import java.util.List;
 
 /**
  * 
@@ -31,14 +34,31 @@ public class TreeExpandableCell<T, C> extends DivDecoratorCell<C> {
 		SafeHtml outerDiv(String aClasses, int iconPadding, int padding, SafeHtml cellContents);
 	}
 
+	public static int DEAFAULT_INDENT = 24;
 	private static final Template template = GWT.create(Template.class);
 	protected int indent;
 	protected TreeDataProvider<T> dataProvider;
 
+	public TreeExpandableCell(Cell<C> aCell) {
+		this(aCell, null, DEAFAULT_INDENT);
+	}
+
+	public TreeExpandableCell(Cell<C> aCell, int aIndent) {
+		this(aCell, null, aIndent);
+	}
+
 	public TreeExpandableCell(Cell<C> aCell, TreeDataProvider<T> aDataProvider, int aIndent) {
 		super(aCell);
-		dataProvider = aDataProvider;
 		indent = aIndent;
+		dataProvider = aDataProvider;
+	}
+
+	public TreeDataProvider<T> getDataProvider() {
+		return dataProvider;
+	}
+
+	public void setDataProvider(TreeDataProvider<T> aValue) {
+		dataProvider = aValue;
 	}
 
 	@Override
@@ -46,9 +66,41 @@ public class TreeExpandableCell<T, C> extends DivDecoratorCell<C> {
 		if (dataProvider != null) {
 			SafeHtmlBuilder cellBuilder = new SafeHtmlBuilder();
 			cell.render(context, value, cellBuilder);
-			sb.append(template.outerDiv(outerDivClasses(context), indent * getDeepness(context), outerDivPadding(context), cellBuilder.toSafeHtml()));
+			int deepness = getDeepness(context);
+			int outerDivPadding = indent * (deepness + 1);
+			sb.append(template.outerDiv(outerDivClasses(context), indent * deepness, outerDivPadding, cellBuilder.toSafeHtml()));
 		} else {
 			cell.render(context, value, sb);
+		}
+	}
+
+	@Override
+	public Set<String> getConsumedEvents() {
+		if (dataProvider != null) {
+			Set<String> consumed = new HashSet<>();
+			consumed.addAll(cell.getConsumedEvents());
+			consumed.add(BrowserEvents.MOUSEDOWN);
+			return consumed;
+		} else {
+			return cell.getConsumedEvents();
+		}
+	}
+
+	@Override
+	public void onBrowserEvent(Context context, Element parent, C value, NativeEvent event, ValueUpdater<C> valueUpdater) {
+		if (dataProvider != null) {
+			super.onBrowserEvent(context, parent, value, event, valueUpdater);
+		} else {
+			cell.onBrowserEvent(context, parent, value, event, valueUpdater);
+		}
+	}
+
+	@Override
+	protected Element getCellParent(Element parent) {
+		if (dataProvider != null) {
+			return super.getCellParent(parent);
+		} else {
+			return parent;
 		}
 	}
 
@@ -95,6 +147,8 @@ public class TreeExpandableCell<T, C> extends DivDecoratorCell<C> {
 				} else {
 					dataProvider.expand(toBeToggled);
 				}
+			}else if (cell.getConsumedEvents().contains(event.getType())) {
+				cell.onBrowserEvent(context, getCellParent(parent), value, event, valueUpdater);
 			}
 		}
 	}

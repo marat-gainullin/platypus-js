@@ -2,6 +2,8 @@ package com.eas.client.form.grid.columns;
 
 import com.bearsoft.gwt.ui.widgets.grid.cells.CellRenderer;
 import com.bearsoft.gwt.ui.widgets.grid.cells.DoubleEditorCell;
+import com.bearsoft.gwt.ui.widgets.grid.cells.TreeExpandableCell;
+import com.bearsoft.rowset.Row;
 import com.eas.client.converters.DoubleRowValueConverter;
 import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.published.PublishedCell;
@@ -17,9 +19,9 @@ import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 public class DoubleModelGridColumn extends ModelGridColumn<Double> {
 
 	public DoubleModelGridColumn(String aName) {
-		super(new DoubleEditorCell(), aName, null, null, new DoubleRowValueConverter());
+		super(new TreeExpandableCell<Row, Double>(new DoubleEditorCell()), aName, null, null, new DoubleRowValueConverter());
 		setEditor(new ModelSpin());
-		((DoubleEditorCell) getCell()).setRenderer(new CellRenderer<Double>() {
+		((DoubleEditorCell) getTargetCell()).setRenderer(new CellRenderer<Double>() {
 			@Override
 			public boolean render(Context context, Double value, SafeHtmlBuilder sb) {
 				DoubleModelGridColumn column = DoubleModelGridColumn.this;
@@ -57,7 +59,7 @@ public class DoubleModelGridColumn extends ModelGridColumn<Double> {
 	@Override
 	public void setEditor(PublishedDecoratorBox<Double> aEditor) {
 		super.setEditor(aEditor);
-		((DoubleEditorCell) getCell()).setEditor(aEditor);
+		((DoubleEditorCell) getTargetCell()).setEditor(aEditor);
 	}
 	
 	public Double getMin(){
