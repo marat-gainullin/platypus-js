@@ -152,7 +152,7 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 	public void setSelectButtonVisible(boolean aValue) {
 		if (isSelectButtonVisible() != aValue) {
 			if (aValue) {
-				selectButton.getElement().getStyle().clearDisplay();
+				selectButton.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
 			} else {
 				selectButton.getElement().getStyle().setDisplay(Style.Display.NONE);
 			}
@@ -169,7 +169,7 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 	public void setClearButtonVisible(boolean aValue) {
 		if (isClearButtonVisible() != aValue) {
 			if (aValue) {
-				clearButton.getElement().getStyle().clearDisplay();
+				clearButton.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
 			} else {
 				clearButton.getElement().getStyle().setDisplay(Style.Display.NONE);
 			}

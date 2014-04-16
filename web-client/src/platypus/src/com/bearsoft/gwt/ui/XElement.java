@@ -8,6 +8,7 @@ package com.bearsoft.gwt.ui;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.dom.client.Style;
@@ -85,12 +86,12 @@ public class XElement extends Element {
 	 * Selects a single child at any depth below this element based on the
 	 * passed CSS selector.
 	 * 
-	 * @param selector
+	 * @param aClassName
 	 *            the css selector
 	 * @return the child element
 	 */
-	public final XElement child(String selector) {
-		Element child = childElement(selector);
+	public final XElement child(String aClassName) {
+		Element child = childElement(aClassName);
 		return child == null ? null : child.<XElement> cast();
 	}
 
@@ -98,12 +99,12 @@ public class XElement extends Element {
 	 * Selects a single child at any depth below this element based on the
 	 * passed CSS selector.
 	 * 
-	 * @param selector
+	 * @param aClassName
 	 *            the css selector
 	 * @return the child element
 	 */
-	public final Element childElement(String selector) {
-		List<Element> result = select(selector);
+	public final Element childElement(String aClassName) {
+		List<Element> result = select(aClassName);
 		return result != null && !result.isEmpty() ? result.get(0) : null;
 	}
 
@@ -111,44 +112,36 @@ public class XElement extends Element {
 	 * Selects child nodes based on the passed CSS selector (the selector should
 	 * not contain an id).
 	 * 
-	 * @param selector
+	 * @param aClassName
 	 *            the selector/xpath query
 	 * @return the matching elements
 	 */
-	public final List<Element> select(final String selector) {
+	public final List<Element> select(final String aClassName) {
 		final List<Element> result = new ArrayList<>();
 		iterate(this, new Observer() {
 			@Override
 			public void observe(Element anElement) {
-				if ("*".equals(selector))
+				if ("*".equals(aClassName)){
 					result.add(anElement);
-				else {
-					String classesName = anElement.getClassName();
-					if (classesName != null) {
-						String[] classes = classesName.split(" ");
-						for (int i = 0; i < classes.length; i++) {
-							if (classes[i].equals(selector)) {
-								result.add(anElement);
-								break;
-							}
-						}
-					}
+				} else {
+					if(anElement.getClassName() != null && anElement.hasClassName(aClassName))
+						result.add(anElement);
 				}
 			}
 		});
 		return result;
 	}
 
-	public final List<Element> selectByPrefix(final String selectorPrefix) {
+	public final List<Element> selectByPrefix(final String aClassNamePrefix) {
 		final List<Element> result = new ArrayList<>();
 		iterate(this, new Observer() {
 			@Override
 			public void observe(Element anElement) {
-				String classesName = anElement.getClassName();
-				if (classesName != null) {
-					String[] classes = classesName.split(" ");
+				String classesNames = anElement.getClassName();
+				if (classesNames != null) {
+					String[] classes = classesNames.split(" ");
 					for (int i = 0; i < classes.length; i++) {
-						if (classes[i].startsWith(selectorPrefix)) {
+						if (classes[i].startsWith(aClassNamePrefix)) {
 							result.add(anElement);
 							break;
 						}
@@ -178,14 +171,61 @@ public class XElement extends Element {
 	 * @param message
 	 *            a message to display in the mask
 	 */
-	public final void mask(String message) {
+	public final void errorMask(String message) {
+		Element mask = Document.get().createDivElement();
+		mask.getStyle().setLeft(0, Style.Unit.PX);
+		mask.getStyle().setTop(0, Style.Unit.PX);
+		mask.getStyle().setRight(0, Style.Unit.PX);
+		mask.getStyle().setBottom(0, Style.Unit.PX);
+		mask.getStyle().setPosition(Style.Position.ABSOLUTE);
+		mask.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+		mask.setClassName("p-mask");
+		Element maskInner = Document.get().createDivElement();
+		maskInner.getStyle().setLeft(0, Style.Unit.PX);
+		maskInner.getStyle().setTop(0, Style.Unit.PX);
+		maskInner.getStyle().setRight(0, Style.Unit.PX);
+		maskInner.getStyle().setBottom(0, Style.Unit.PX);
+		maskInner.getStyle().setPosition(Style.Position.ABSOLUTE);
+		maskInner.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+		maskInner.setInnerText(message);
+		maskInner.setClassName("p-mask-loading-error");
+		mask.appendChild(maskInner);
+		appendChild(mask);
 	}
 
+	public final void loadMask(){
+		Element mask = Document.get().createDivElement();
+		mask.getStyle().setLeft(0, Style.Unit.PX);
+		mask.getStyle().setTop(0, Style.Unit.PX);
+		mask.getStyle().setRight(0, Style.Unit.PX);
+		mask.getStyle().setBottom(0, Style.Unit.PX);
+		mask.getStyle().setPosition(Style.Position.ABSOLUTE);
+		mask.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+		mask.setClassName("p-mask");
+		Element maskInner = Document.get().createDivElement();
+		maskInner.getStyle().setLeft(0, Style.Unit.PX);
+		maskInner.getStyle().setTop(0, Style.Unit.PX);
+		maskInner.getStyle().setRight(0, Style.Unit.PX);
+		maskInner.getStyle().setBottom(0, Style.Unit.PX);
+		maskInner.getStyle().setPosition(Style.Position.ABSOLUTE);
+		maskInner.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+		maskInner.setClassName("p-mask-loading-start");
+		mask.appendChild(maskInner);
+		appendChild(mask);
+	}
+	
 	/**
 	 * Removes a mask over this element to disable user interaction.
 	 * 
 	 */
 	public final void unmask() {
+		NodeList<Node> nl = getChildNodes();
+		for(int i = nl.getLength() - 1; i >= 0; i--){
+			Node n = nl.getItem(i);
+			if(Element.is(n) && Element.as(n).getClassName() != null && Element.as(n).hasClassName("p-mask")){
+				n.removeFromParent();
+			}
+		}
 	}
 
 	public final int getChildIndex(Element aChild) {

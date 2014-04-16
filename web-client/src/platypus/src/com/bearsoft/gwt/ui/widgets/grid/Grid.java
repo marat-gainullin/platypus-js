@@ -780,6 +780,20 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 		}
 	}
 
+	public boolean isHeaderVisible() {
+		return Style.Display.NONE.equals(headerLeft.getElement().getStyle().getDisplay()) || Style.Display.NONE.equals(headerRight.getElement().getStyle().getDisplay());
+	}
+
+	public void setHeaderVisible(boolean aValue) {
+		if (aValue) {
+			headerLeftContainer.getElement().getStyle().clearDisplay();
+			headerRightContainer.getElement().getStyle().clearDisplay();
+		} else {
+			headerLeftContainer.getElement().getStyle().setDisplay(Style.Display.NONE);
+			headerRightContainer.getElement().getStyle().setDisplay(Style.Display.NONE);
+		}
+	}
+
 	public int getFrozenColumns() {
 		return frozenColumns;
 	}
@@ -981,11 +995,12 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 	public void removeColumn(int aIndex) {
 		if (aIndex < frozenColumns) {
 			headerLeft.removeColumn(aIndex);// ColumnsRemover will care
-			                                 // about columns sharing
+			                                // about columns sharing
 			refreshColumns();
 		} else {
-			headerRight.removeColumn(aIndex - frozenColumns);// ColumnsRemover will care
-			                                 // about columns sharing
+			headerRight.removeColumn(aIndex - frozenColumns);// ColumnsRemover
+															 // will care
+			// about columns sharing
 		}
 	}
 

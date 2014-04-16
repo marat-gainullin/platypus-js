@@ -29,6 +29,7 @@ public class MultiRowSelectionModel extends MultiSelectionModel<Row> implements 
 	@Override
 	public void clear() {
 		super.clear();
+		updateRow(lead);
 		lead = null;
 	}
 

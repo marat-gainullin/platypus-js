@@ -74,14 +74,6 @@ public class RowChildrenFetcher implements ChildrenFetcher<Row> {
 						} finally {
 							rowset.setFlowProvider(rowsetFlow);
 							rowset.getRowsetChangeSupport().setRowsetListeners(listeners);
-							// rowset.getRowsetChangeSupport().fireFilteredEvent();
-							// TODO: Check if Java SE client
-							// fires
-							// same
-							// event and avoid processing of
-							// such
-							// event
-							// by TreeStoreLoader code.
 						}
 					}
 					aFetchCompleter.run();

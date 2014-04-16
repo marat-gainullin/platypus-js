@@ -2,7 +2,10 @@ package com.eas.client.form.published.widgets.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import com.bearsoft.gwt.ui.XElement;
 import com.bearsoft.gwt.ui.widgets.grid.Grid;
 import com.bearsoft.gwt.ui.widgets.grid.builders.ThemedHeaderOrFooterBuilder;
 import com.bearsoft.gwt.ui.widgets.grid.cells.TreeExpandableCell;
@@ -15,6 +18,7 @@ import com.bearsoft.gwt.ui.widgets.grid.processing.TreeDataProvider.ExpandedColl
 import com.bearsoft.gwt.ui.widgets.grid.processing.TreeMultiSortHandler;
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.events.RowsetEvent;
+import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.CrossUpdater;
@@ -47,6 +51,9 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
@@ -55,6 +62,7 @@ import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.IdentityColumn;
 import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.view.client.SelectionModel;
+import com.google.gwt.view.client.SetSelectionModel;
 
 /**
  * Class intended to wrap a grid or tree grid. It also contains grid API.
@@ -73,7 +81,7 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 	public static final int FIELD_2_PARAMETER_TREE_KIND = 2;
 	public static final int SCRIPT_PARAMETERS_TREE_KIND = 3;
 	//
-	
+
 	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu menu;
 	protected String name;
@@ -105,6 +113,31 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 		finder = new FindWindow(this);
 		crossUpdaterAction = new GridCrossUpdaterAction(this);
 		crossUpdater = new CrossUpdater(crossUpdaterAction);
+		addDomHandler(new KeyUpHandler() {
+
+			@Override
+			public void onKeyUp(KeyUpEvent event) {
+				try {
+					if (event.getNativeKeyCode() == KeyCodes.KEY_DELETE && deletable) {
+						if (getSelectionModel() instanceof SetSelectionModel<?>) {
+							SetSelectionModel<Row> rowSelection = (SetSelectionModel<Row>) getSelectionModel();
+							rowsSource.getRowset().delete(rowSelection.getSelectedSet());
+						}
+					} else if (event.getNativeKeyCode() == KeyCodes.KEY_INSERT && insertable) {
+						rowsSource.getRowset().insert();
+						Row inserted = rowsSource.getRowset().getCurrentRow();
+						if (inserted != null && getSelectionModel() instanceof SetSelectionModel<?>) {
+							SetSelectionModel<Row> rowSelection = (SetSelectionModel<Row>) getSelectionModel();
+							rowSelection.clear();
+							rowSelection.setSelected(inserted, true);
+						}
+					}
+				} catch (RowsetException e) {
+					Logger.getLogger(ModelGrid.class.getName()).log(Level.SEVERE, null, e);
+				}
+			}
+
+		}, KeyUpEvent.getType());
 	}
 
 	public ModelElementRef getUnaryLinkField() {
@@ -449,13 +482,14 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 	 */
 	public void setRowsSource(Entity aValue) throws Exception {
 		if (rowsSource != aValue) {
-			if(sortHandlerReg != null)
+			if (sortHandlerReg != null)
 				sortHandlerReg.removeHandler();
 			rowsSource = aValue;
 			if (rowsSource != null) {
 				Runnable onResize = new Runnable() {
 					@Override
 					public void run() {
+						ModelGrid.this.getElement().<XElement>cast().unmask();
 						setupVisibleRanges();
 					}
 
@@ -463,35 +497,54 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 				Runnable onSort = new Runnable() {
 					@Override
 					public void run() {
-						if(dataProvider instanceof IndexOfProvider<?>)
-							((IndexOfProvider<?>)dataProvider).rescan();
+						if (dataProvider instanceof IndexOfProvider<?>)
+							((IndexOfProvider<?>) dataProvider).rescan();
 					}
 
 				};
+				Runnable onLoadingStart = new Runnable(){
+					@Override
+					public void run() {
+						ModelGrid.this.getElement().<XElement>cast().unmask();
+						ModelGrid.this.getElement().<XElement>cast().loadMask();
+					}
+				};
+				com.bearsoft.rowset.Callback<String> onError = new com.bearsoft.rowset.Callback<String>(){
+					@Override
+					public void run(String aResult) throws Exception {
+						ModelGrid.this.getElement().<XElement>cast().unmask();
+						ModelGrid.this.getElement().<XElement>cast().errorMask(aResult);
+					}
+					@Override
+					public void cancel() {
+					}
+				}; 
 				if (isTreeConfigured()) {
-					RowsetTree tree = new RowsetTree(rowsSource.getRowset(), unaryLinkField.field);
 					TreeDataProvider<Row> treeDataProvider;
 					if (isLazyTreeConfigured()) {
-						treeDataProvider = new TreeDataProvider<>(tree, onResize, new RowChildrenFetcher(rowsSource, (Parameter) param2GetChildren.field, (Parameter) paramSourceField.field));
-					} else
+						RowsetTree tree = new RowsetTree(rowsSource.getRowset(), unaryLinkField.field, true, onLoadingStart, onError);
+						treeDataProvider = new TreeDataProvider<>(tree, onResize, new RowChildrenFetcher(rowsSource, (Parameter) param2GetChildren.field, paramSourceField.field));
+					} else{
+						RowsetTree tree = new RowsetTree(rowsSource.getRowset(), unaryLinkField.field, onLoadingStart, onError);
 						treeDataProvider = new TreeDataProvider<>(tree, onResize);
+					}
 					setDataProvider(treeDataProvider);
 					sortHandler = new TreeMultiSortHandler<>(treeDataProvider, onSort);
-					treeDataProvider.addExpandedCollapsedHandler(new ExpandedCollapsedHandler<Row>(){
+					treeDataProvider.addExpandedCollapsedHandler(new ExpandedCollapsedHandler<Row>() {
 
 						@Override
-                        public void expanded(Row anElement) {
+						public void expanded(Row anElement) {
 							ColumnSortEvent.fire(ModelGrid.this, sortList);
-                        }
+						}
 
 						@Override
-                        public void collapsed(Row anElement) {
+						public void collapsed(Row anElement) {
 							ColumnSortEvent.fire(ModelGrid.this, sortList);
-                        }
-						
+						}
+
 					});
 				} else {
-					setDataProvider(new RowsetDataProvider(rowsSource.getRowset(), onResize));
+					setDataProvider(new RowsetDataProvider(rowsSource.getRowset(), onResize, onLoadingStart, onError));
 					sortHandler = new ListMultiSortHandler<>(dataProvider.getList(), onSort);
 				}
 				sortHandlerReg = addColumnSortHandler(sortHandler);

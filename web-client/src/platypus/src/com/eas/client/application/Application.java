@@ -43,28 +43,6 @@ import com.google.gwt.user.client.ui.RootPanel;
  */
 public class Application {
 
-	protected static class ElementMaskLoadHandler implements Loader.LoadHandler {
-		protected XElement xDiv;
-
-		public ElementMaskLoadHandler(XElement aXDiv) {
-			xDiv = aXDiv;
-		}
-
-		@Override
-		public void started(String anItemName) {
-			final String message = "Loading... " + anItemName;
-			xDiv.unmask();
-			xDiv.mask(message);
-		}
-
-		@Override
-		public void loaded(String anItemName) {
-			final String message = "Loaded " + anItemName;
-			xDiv.unmask();
-			xDiv.mask(message);
-		}
-	}
-
 	protected static class LoggingLoadHandler implements Loader.LoadHandler {
 
 		public LoggingLoadHandler() {
@@ -83,7 +61,7 @@ public class Application {
 			platypusApplicationLogger.log(Level.INFO, message);
 		}
 	}
-	
+
 	public static Logger platypusApplicationLogger;
 	protected static Map<String, Query> appQueries = new HashMap<String, Query>();
 	protected static Loader loader;
@@ -106,20 +84,24 @@ public class Application {
 	protected static class ExecuteApplicationCallback extends CancellableCallbackAdapter {
 
 		protected Collection<String> executedAppElements;
+		protected Set<Element> indicators; 
 
-		public ExecuteApplicationCallback(Collection<String> appElementsToExecute) {
+		public ExecuteApplicationCallback(Collection<String> appElementsToExecute, Set<Element> aIndicators) {
 			super();
 			executedAppElements = appElementsToExecute;
+			indicators = aIndicators;
 		}
 
 		@Override
 		protected void doWork() throws Exception {
+			for(Element el : indicators){
+				el.<XElement>cast().unmask();
+			}
 			loaderHandlerRegistration.removeHandler();
 			for (String appElementName : executedAppElements) {
 				PlatypusWindow f = getStartForm(appElementName);
 				RootPanel target = RootPanel.get(appElementName);
 				if (target != null) {
-					target.getElement().<XElement> cast().unmask();
 					if (f != null) {
 						ControlsUtils.addWidgetTo(f.getView(), target);
 					} else {
@@ -916,7 +898,7 @@ public class Application {
 		return run(client, extractPlatypusModules());
 	}
 
-	public static Cancellable run(AppClient client, Map<String, Element> start) throws Exception {
+	public static Cancellable run(AppClient client, Map<String, Element> aMarkupStart) throws Exception {
 		if (LogConfiguration.loggingIsEnabled()) {
 			platypusApplicationLogger = Logger.getLogger("platypusApplication");
 			Formatter f = new PlatypusLogFormatter(true);
@@ -933,25 +915,22 @@ public class Application {
 		AppClient.publishApi(client);
 		loader = new Loader(client);
 		Set<Element> indicators = extractPlatypusProgressIndicators();
-		for (Element el : indicators){
-			loaderHandlerRegistration.add(loader.addHandler(new ElementMaskLoadHandler(el.<XElement> cast()) {
-				public void loaded(String anItemName) {
-					xDiv.unmask();
-				};
-			}));
+		for (Element el : indicators) {
+			el.<XElement> cast().loadMask();
 		}
 		loaderHandlerRegistration.add(loader.addHandler(new LoggingLoadHandler()));
-		return startAppElements(client, start);
+		return startAppElements(client, aMarkupStart, indicators);
 	}
 
 	private static Set<Element> extractPlatypusProgressIndicators() {
 		Set<Element> platypusIndicators = new HashSet<Element>();
 		XElement xBody = Utils.doc.getBody().cast();
 		String platypusIndicatorClass = "platypus-indicator";
-		if (platypusIndicatorClass.equals(xBody.getClassName()))
+		if (xBody.getClassName() != null && xBody.hasClassName(platypusIndicatorClass)){
 			platypusIndicators.add(xBody);
+		}
 
-		List<Element> divs2 = xBody.select("." + platypusIndicatorClass);
+		List<Element> divs2 = xBody.select(platypusIndicatorClass);
 		if (divs2 != null) {
 			for (int i = 0; i < divs2.size(); i++) {
 				Element div = divs2.get(i);
@@ -965,10 +944,10 @@ public class Application {
 		Map<String, Element> platypusModules = new HashMap<String, Element>();
 		XElement xBody = Utils.doc.getBody().cast();
 		String platypusModuleClass = "platypus-module";
-		List<Element> divs2 = xBody.select("." + platypusModuleClass);
-		if (divs2 != null) {
-			for (int i = 0; i < divs2.size(); i++) {
-				Element div = divs2.get(i);
+		List<Element> divs = xBody.select(platypusModuleClass);
+		if (divs != null) {
+			for (int i = 0; i < divs.size(); i++) {
+				Element div = divs.get(i);
 				if (div.getId() != null && !div.getId().isEmpty()) {
 					platypusModules.put(div.getId(), div);
 				}
@@ -988,7 +967,7 @@ public class Application {
 			$wnd.platypus.ready();
 	}-*/;
 
-	protected static Cancellable startAppElements(AppClient client, final Map<String, Element> aMarkupStart) throws Exception {
+	protected static Cancellable startAppElements(AppClient client, final Map<String, Element> aMarkupStart, final Set<Element> aIndicators) throws Exception {
 		if (aMarkupStart == null || aMarkupStart.isEmpty()) {
 			return client.getStartElement(new StringCallbackAdapter() {
 
@@ -999,8 +978,11 @@ public class Application {
 					if (aResult != null && !aResult.isEmpty()) {
 						Collection<String> results = new ArrayList<String>();
 						results.add(aResult);
-						loadings = loader.load(results, new ExecuteApplicationCallback(results));
+						loadings = loader.load(results, new ExecuteApplicationCallback(results, aIndicators));
 					} else {
+						for (Element el : aIndicators) {
+							el.<XElement> cast().unmask();
+						}
 						onReady();
 					}
 				}
@@ -1015,21 +997,15 @@ public class Application {
 			});
 		} else {
 			Set<String> modulesIds = aMarkupStart.keySet();
-			for (final String elId : modulesIds) {
-				Element el = aMarkupStart.get(elId);
-				if (el != null) {
-					loaderHandlerRegistration.add(loader.addHandler(new ElementMaskLoadHandler(el.<XElement> cast())));
-				}
-			}
-			return loader.load(modulesIds, new ExecuteApplicationCallback(modulesIds));
+			return loader.load(modulesIds, new ExecuteApplicationCallback(modulesIds, aIndicators));
 		}
 	}
 
 	/**
-	 * Avoiding parallel Loader.load() calls like this:
-	 * require(["Module1", "Module2", "Module3", "Module4"], function(){});
-	 * require(["Module0", "Module2", "Module5", "Module7"], function(){});
-	 * Here, loader will be called twice form "Module2" in parallel.
+	 * Avoiding parallel Loader.load() calls like this: require(["Module1",
+	 * "Module2", "Module3", "Module4"], function(){}); require(["Module0",
+	 * "Module2", "Module5", "Module7"], function(){}); Here, loader will be
+	 * called twice form "Module2" in parallel.
 	 */
 	protected static boolean requiring;
 
@@ -1066,15 +1042,15 @@ public class Application {
 						requiring = false;
 						try {
 							if (deps.isEmpty() || loader.isLoaded(deps)) {
-								if(aOnSuccess != null)
+								if (aOnSuccess != null)
 									Utils.invokeJsFunction(aOnSuccess);
 								else
-									Logger.getLogger(Application.class.getName()).log(Level.WARNING, "Require succeded, but callback is missing. Required modules are: "+aDeps.toString());
+									Logger.getLogger(Application.class.getName()).log(Level.WARNING, "Require succeded, but callback is missing. Required modules are: " + aDeps.toString());
 							} else {
-								if(aOnFailure != null)
+								if (aOnFailure != null)
 									Utils.invokeJsFunction(aOnFailure);
 								else
-									Logger.getLogger(Application.class.getName()).log(Level.WARNING, "Require failed and callback is missing. Required modules are: "+aDeps.toString());
+									Logger.getLogger(Application.class.getName()).log(Level.WARNING, "Require failed and callback is missing. Required modules are: " + aDeps.toString());
 							}
 						} finally {
 							if (!requireProcesses.isEmpty()) {

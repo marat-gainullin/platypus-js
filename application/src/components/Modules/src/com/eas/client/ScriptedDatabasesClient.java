@@ -6,7 +6,6 @@ import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.ForeignKeySpec;
-import com.eas.client.cache.FilesAppCache;
 import com.eas.client.cache.FreqCache;
 import com.eas.client.exceptions.UnboundSqlParameterException;
 import com.eas.client.metadata.ApplicationElement;

@@ -39,15 +39,14 @@ public class ThemedCellTableBuilder<T> extends AbstractCellTableBuilder<T> {
 
     @Override
     public void buildRowImpl(T rowValue, int absRowIndex) {
-
         // Calculate the row styles.
         SelectionModel<? super T> selectionModel = cellTable.getSelectionModel();
         boolean isSelected
                 = (selectionModel == null || rowValue == null) ? false : selectionModel.isSelected(rowValue);
-        boolean isEven = absRowIndex % 2 == 0;
-        StringBuilder trClasses = new StringBuilder(isEven ? ThemedGridResources.instance.cellTableStyle().cellTableEvenRow() : ThemedGridResources.instance.cellTableStyle().cellTableOddRow());
+        boolean isOdd = absRowIndex % 2 != 0;
+        StringBuilder trClasses = new StringBuilder(isOdd ? ThemedGridResources.instance.cellTableStyle().cellTableOddRow() : ThemedGridResources.instance.cellTableStyle().cellTableEvenRow());
         if (isSelected) {
-            trClasses.append(ThemedGridResources.instance.cellTableStyle().cellTableSelectedRow());
+            trClasses.append(" ").append(ThemedGridResources.instance.cellTableStyle().cellTableSelectedRow());
         }
 
         // Add custom row styles.
@@ -69,16 +68,16 @@ public class ThemedCellTableBuilder<T> extends AbstractCellTableBuilder<T> {
             Column<T, ?> column = cellTable.getColumn(curColumn);
             // Create the cell styles.
             StringBuilder tdClasses = new StringBuilder(ThemedGridResources.instance.cellTableStyle().cellTableCell());            
-            tdClasses.append(isEven ? ThemedGridResources.instance.cellTableStyle().cellTableEvenRowCell() : ThemedGridResources.instance.cellTableStyle().cellTableOddRowCell());
+            tdClasses.append(" ").append(isOdd ? ThemedGridResources.instance.cellTableStyle().cellTableEvenRowCell() : ThemedGridResources.instance.cellTableStyle().cellTableOddRowCell());
             if (curColumn == 0) {
-                tdClasses.append(ThemedGridResources.instance.cellTableStyle().cellTableFirstColumn());
+                tdClasses.append(" ").append(ThemedGridResources.instance.cellTableStyle().cellTableFirstColumn());
             }
             if (isSelected) {
-                tdClasses.append(ThemedGridResources.instance.cellTableStyle().cellTableSelectedRowCell());
+                tdClasses.append(" ").append(ThemedGridResources.instance.cellTableStyle().cellTableSelectedRowCell());
             }
             // The first and last column could be the same column.
             if (curColumn == columnCount - 1) {
-                tdClasses.append(ThemedGridResources.instance.cellTableStyle().cellTableLastColumn());
+                tdClasses.append(" ").append(ThemedGridResources.instance.cellTableStyle().cellTableLastColumn());
             }
             // Add class names specific to the cell.
             Cell.Context context = new Cell.Context(absRowIndex, curColumn, cellTable.getValueKey(rowValue));

@@ -223,7 +223,7 @@ public class ModelGridFactory {
 				rowsetsOfInterestHosts.add(valueRef.entity);
 				rowsetsOfInterestHosts.add(displayRef.entity);
 				final boolean list = Utils.getBooleanAttribute(aControlTag, "list", true);
-				RowsetDataProvider filler = new RowsetDataProvider(null, null);
+				RowsetDataProvider filler = new RowsetDataProvider(null, null, null, null);
 				if (valueRef.entity != null) {
 					filler.setRowset(valueRef.entity.getRowset());
 				}

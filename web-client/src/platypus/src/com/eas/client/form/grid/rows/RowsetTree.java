@@ -7,6 +7,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.bearsoft.gwt.ui.widgets.grid.processing.TreeAdapter;
+import com.bearsoft.rowset.Callback;
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.events.RowChangeEvent;
@@ -19,6 +20,7 @@ import com.bearsoft.rowset.events.RowsetRequeryEvent;
 import com.bearsoft.rowset.events.RowsetRollbackEvent;
 import com.bearsoft.rowset.events.RowsetSaveEvent;
 import com.bearsoft.rowset.events.RowsetScrollEvent;
+import com.bearsoft.rowset.events.RowsetSortEvent;
 import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.locators.Locator;
 import com.bearsoft.rowset.locators.RowWrap;
@@ -32,11 +34,21 @@ public class RowsetTree extends TreeAdapter<Row> {
 	protected Locator parentLocator;
 	protected List<Integer> pkColIndicies;
 	protected int parentColIndex;
+	protected boolean lazy;
 	protected RowsetReflector rowsetReflector = new RowsetReflector();
+	protected Runnable onLoadStart;
+	protected Callback<String> onError;
 
-	public RowsetTree(Rowset aRowset, Field aParentField) {
+	public RowsetTree(Rowset aRowset, Field aParentField, Runnable aOnLoadStart, Callback<String> aOnError) {
+		this(aRowset, aParentField, false, aOnLoadStart, aOnError);
+	}
+
+	public RowsetTree(Rowset aRowset, Field aParentField, boolean aLazy, Runnable aOnLoadStart, Callback<String> aOnError) {
 		super();
 		parentField = aParentField;
+		lazy = aLazy;
+		onLoadStart = aOnLoadStart;
+		onError = aOnError;
 		setRowset(aRowset);
 	}
 
@@ -138,7 +150,7 @@ public class RowsetTree extends TreeAdapter<Row> {
 
 	@Override
 	public boolean isLeaf(Row anElement) {
-		return !hasRowChildren(anElement);
+		return !lazy && !hasRowChildren(anElement);
 	}
 
 	// Tree mutation methods
@@ -167,7 +179,10 @@ public class RowsetTree extends TreeAdapter<Row> {
 	protected class RowsetReflector extends RowsetAdapter {
 		@Override
 		public void rowChanged(RowChangeEvent event) {
-			changed(event.getChangedRow());
+			if (event.getOldRowCount() == event.getNewRowCount())
+				changed(event.getChangedRow());
+			else
+				everythingChanged();
 		}
 
 		@Override
@@ -196,22 +211,45 @@ public class RowsetTree extends TreeAdapter<Row> {
 		}
 
 		@Override
+		public void rowsetSorted(RowsetSortEvent event) {
+			everythingChanged();
+		}
+
+		@Override
 		public void rowsetSaved(RowsetSaveEvent event) {
 			// TODO: Somehow reset changed status of views (remove changes label
-			// from cells).
-			// Note! We need to aviod whole rerendering of views.
+			// from cells in grid).
+			// Note! We need to avoid whole re-rendering of views.
 		}
 
 		@Override
 		public void rowsetScrolled(RowsetScrollEvent event) {
+			if (event.getOldRowIndex() >= 1 && event.getOldRowIndex() <= event.getRowset().size()) {
+				Row oldRow = event.getRowset().getRow(event.getOldRowIndex());
+				changed(oldRow);
+			}
+			if (event.getNewRowIndex() >= 1 && event.getNewRowIndex() <= event.getRowset().size()) {
+				Row newRow = event.getRowset().getRow(event.getNewRowIndex());
+				changed(newRow);
+			}
 		}
 
 		@Override
 		public void beforeRequery(RowsetRequeryEvent event) {
+			if (onLoadStart != null) {
+				onLoadStart.run();
+			}
 		}
 
 		@Override
 		public void rowsetNetError(RowsetNetErrorEvent event) {
+			if (onError != null) {
+				try {
+					onError.run(event.getMessage());
+				} catch (Exception e) {
+					Logger.getLogger(RowsetTree.class.getName()).log(Level.SEVERE, null, e);
+				}
+			}
 		}
 	}
 }

@@ -3,8 +3,11 @@ package com.eas.client.form.grid.rows;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.bearsoft.gwt.ui.widgets.grid.processing.IndexOfProvider;
+import com.bearsoft.rowset.Callback;
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.events.RowChangeEvent;
@@ -17,6 +20,7 @@ import com.bearsoft.rowset.events.RowsetRequeryEvent;
 import com.bearsoft.rowset.events.RowsetRollbackEvent;
 import com.bearsoft.rowset.events.RowsetSaveEvent;
 import com.bearsoft.rowset.events.RowsetScrollEvent;
+import com.bearsoft.rowset.events.RowsetSortEvent;
 import com.google.gwt.view.client.ListDataProvider;
 
 public class RowsetDataProvider extends ListDataProvider<Row> implements IndexOfProvider<Row> {
@@ -25,11 +29,15 @@ public class RowsetDataProvider extends ListDataProvider<Row> implements IndexOf
 	protected Rowset rowset;
 	protected RowsetReflector rowsetReflector = new RowsetReflector();
 	protected Runnable onResize;
+	protected Runnable onLoadStart;
+	protected Callback<String> onError;
 
-	public RowsetDataProvider(Rowset aRowset, Runnable aOnResize) {
+	public RowsetDataProvider(Rowset aRowset, Runnable aOnResize, Runnable aOnLoadStart, Callback<String> aOnError) {
 		super();
 		setRowset(aRowset);
 		onResize = aOnResize;
+		onLoadStart = aOnLoadStart;
+		onError = aOnError;
 	}
 
 	public RowsetReflector getRowsetReflector() {
@@ -76,7 +84,7 @@ public class RowsetDataProvider extends ListDataProvider<Row> implements IndexOf
 		invalidate();
 		validate();
 	}
-	
+
 	/*
 	 * protected List<Object> rowsToPks(List<Row> aRows) { List<Object> pks =
 	 * new ArrayList<Object>(); for (Row row : aRows) { Object[] pkValues =
@@ -90,31 +98,41 @@ public class RowsetDataProvider extends ListDataProvider<Row> implements IndexOf
 	 */
 
 	protected class RowsetReflector extends RowsetAdapter {
+		
 		@Override
 		public void rowsetFiltered(RowsetFilterEvent event) {
 			getList().clear();
 			getList().addAll(rowset.getCurrent());
+			invalidate();
 			if (onResize != null)
 				onResize.run();
-			invalidate();
 		}
 
 		@Override
 		public void rowsetRequeried(RowsetRequeryEvent event) {
 			getList().clear();
 			getList().addAll(rowset.getCurrent());
+			invalidate();
 			if (onResize != null)
 				onResize.run();
+		}
+
+		@Override
+		public void rowsetSorted(RowsetSortEvent event) {
+			getList().clear();
+			getList().addAll(rowset.getCurrent());
 			invalidate();
+			if (onResize != null)
+				onResize.run();
 		}
 
 		@Override
 		public void rowsetRolledback(RowsetRollbackEvent event) {
 			getList().clear();
 			getList().addAll(rowset.getCurrent());
+			invalidate();
 			if (onResize != null)
 				onResize.run();
-			invalidate();
 		}
 
 		@Override
@@ -126,17 +144,39 @@ public class RowsetDataProvider extends ListDataProvider<Row> implements IndexOf
 
 		@Override
 		public void rowsetScrolled(RowsetScrollEvent event) {
+			if(event.getOldRowIndex() >= 1 && event.getOldRowIndex() <= event.getRowset().size()){
+				Row oldRow = event.getRowset().getRow(event.getOldRowIndex());
+				validate();
+				Integer index = indicies.get(oldRow);
+				assert index != null;
+				getList().set(index, oldRow);
+			}
+			if(event.getNewRowIndex() >= 1 && event.getNewRowIndex() <= event.getRowset().size()){
+				Row newRow = event.getRowset().getRow(event.getNewRowIndex());
+				validate();
+				Integer index = indicies.get(newRow);
+				assert index != null;
+				getList().set(index, newRow);
+				targetListCursor = index;
+			}
+			if(event.getRowset().isBeforeFirst() || event.getRowset().isAfterLast())
+				targetListCursor = null;
 		}
 
 		protected Integer targetListCursor;
 
 		@Override
 		public void rowInserted(RowsetInsertEvent event) {
+			List<Row> targetList = getList();
 			if (targetListCursor != null) {
-				getList().add(targetListCursor + 1, event.getRow());
-				targetListCursor++;
+				if(targetListCursor >= 0 && targetListCursor <= targetList.size()){
+					targetList.add(targetListCursor + 1, event.getRow());
+					targetListCursor++;
+				} else {
+					targetList.add(event.getRow());
+				}
 			} else {
-				getList().add(event.getRow());
+				targetList.add(event.getRow());
 			}
 			if (!event.isAjusting()) {
 				invalidate();
@@ -177,7 +217,9 @@ public class RowsetDataProvider extends ListDataProvider<Row> implements IndexOf
 						deferredDeletions = false;
 						List<Row> targetList = getList();
 						for (int i = getList().size() - 1; i >= 0; i--) {
-							targetList.remove(i);
+							if(targetList.get(i) == null){
+								targetList.remove(i);
+							}
 						}
 					}
 					invalidate();
@@ -189,10 +231,20 @@ public class RowsetDataProvider extends ListDataProvider<Row> implements IndexOf
 
 		@Override
 		public void beforeRequery(RowsetRequeryEvent event) {
+			if(onLoadStart != null){
+				onLoadStart.run();
+			}
 		}
 
 		@Override
 		public void rowsetNetError(RowsetNetErrorEvent event) {
+			if(onError != null){
+	            try {
+	                onError.run(event.getMessage());
+                } catch (Exception e) {
+                	Logger.getLogger(RowsetDataProvider.class.getName()).log(Level.SEVERE, null, e);
+                }
+			}
 		}
 	}
 }

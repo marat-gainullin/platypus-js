@@ -10,7 +10,6 @@ import java.util.Map;
 
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NodeList;
-import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.dom.client.TableColElement;
 import com.google.gwt.dom.client.TableSectionElement;
 import com.google.gwt.user.cellview.client.AbstractCellTable;
@@ -20,7 +19,6 @@ import com.google.gwt.user.cellview.client.HasKeyboardPagingPolicy;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.view.client.ProvidesKey;
-import com.google.gwt.view.client.Range;
 
 /**
  * 

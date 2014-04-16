@@ -25,10 +25,8 @@ import com.google.gwt.core.client.JavaScriptObject;
 public class Row {
 
 	protected Fields fields;
-	protected PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(
-			this);
-	protected VetoableChangeSupport vetoableChangeSupport = new VetoableChangeSupport(
-			this);
+	protected PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
+	protected VetoableChangeSupport vetoableChangeSupport = new VetoableChangeSupport(this);
 	protected Set<Integer> updated = new HashSet<>();
 	protected boolean deleted = false;
 	protected boolean inserted = false;
@@ -57,7 +55,7 @@ public class Row {
 
 	@Override
 	public boolean equals(Object obj) {
-		if(obj == null){
+		if (obj == null) {
 			return false;
 		}
 		if (getClass() != obj.getClass()) {
@@ -68,26 +66,7 @@ public class Row {
 
 	@Override
 	public int hashCode() {
-		try {
-			boolean pks = false;
-			int hashCode = 1;
-			for (int i = 1; i <= fields.getFieldsCount(); i++) {
-				Field field = fields.get(i);
-				if (field.isPk()) {
-					pks = true;
-					Object obj = getColumnObject(i);
-					hashCode = 31 * hashCode
-							+ (obj == null ? 0 : obj.hashCode());
-				}
-			}
-			if (pks) {
-				return hashCode;
-			} else {
-				return super.hashCode();
-			}
-		} catch (InvalidColIndexException ex) {
-			return super.hashCode();
-		}
+		return super.hashCode();
 	}
 
 	/**
@@ -101,8 +80,7 @@ public class Row {
 	 */
 	protected boolean checkChange(PropertyChangeEvent event) {
 		try {
-			VetoableChangeListener[] vls = vetoableChangeSupport
-					.getVetoableChangeListeners();
+			VetoableChangeListener[] vls = vetoableChangeSupport.getVetoableChangeListeners();
 			for (VetoableChangeListener vl : vls) {
 				vetoableChangeSupport.removeVetoableChangeListener(vl);
 			}
@@ -226,20 +204,21 @@ public class Row {
 		inserted = true;
 	}
 
-    public Insert getInsertChange() {
-        return insertChange;
-    }
+	public Insert getInsertChange() {
+		return insertChange;
+	}
 
-    public void setInserted(Insert aInsert) {
-        inserted = true;
-        insertChange = aInsert;
-    }
+	public void setInserted(Insert aInsert) {
+		inserted = true;
+		insertChange = aInsert;
+	}
+
 	/**
 	 * Clears the inserted flag.
 	 */
 	public void clearInserted() {
 		inserted = false;
-        insertChange = null;
+		insertChange = null;
 	}
 
 	/**
@@ -286,8 +265,7 @@ public class Row {
 		return fields.getFieldsCount();
 	}
 
-	public void setFieldObject(String aFieldName, Object aFieldValue)
-			throws Exception {
+	public void setFieldObject(String aFieldName, Object aFieldValue) throws Exception {
 		int colIndex = fields.find(aFieldName);
 		setColumnObject(colIndex, Utils.toJava(aFieldValue));
 	}
@@ -304,16 +282,13 @@ public class Row {
 	 * @throws InvalidColIndexException
 	 *             if colIndex < 1 or colIndex > <code>getColumnCount()</code>
 	 */
-	public void setColumnObject(int aColIndex, Object aValue)
-			throws RowsetException {
+	public void setColumnObject(int aColIndex, Object aValue) throws RowsetException {
 		if (aColIndex >= 1 && aColIndex <= getColumnCount()) {
 			Field field = fields.get(aColIndex);
-			aValue = Converter.convert2RowsetCompatible(aValue,
-					field.getTypeInfo());
+			aValue = Converter.convert2RowsetCompatible(aValue, field.getTypeInfo());
 			if (!smartEquals(getColumnObject(aColIndex), aValue)) {
 				Object oldColValue = currentValues.get(aColIndex - 1);
-				PropertyChangeEvent event = new PropertyChangeEvent(this,
-						field.getName(), oldColValue, aValue);
+				PropertyChangeEvent event = new PropertyChangeEvent(this, field.getName(), oldColValue, aValue);
 				event.setPropagationId(aColIndex);
 				if (checkChange(event)) {
 					currentValues.set(aColIndex - 1, aValue);
@@ -326,8 +301,7 @@ public class Row {
 				throw new InvalidColIndexException("colIndex < 1");
 			}
 			if (aColIndex > getColumnCount()) {
-				throw new InvalidColIndexException(
-						"colIndex > getColumnCount()");
+				throw new InvalidColIndexException("colIndex > getColumnCount()");
 			}
 		}
 	}
@@ -354,8 +328,7 @@ public class Row {
 			if (colIndex < 1) {
 				throw new InvalidColIndexException("colIndex < 1");
 			} else if (colIndex > getColumnCount()) {
-				throw new InvalidColIndexException(
-						"colIndex > getColumnCount()");
+				throw new InvalidColIndexException("colIndex > getColumnCount()");
 			} else {
 				throw new InvalidColIndexException("unexpected");
 			}
@@ -372,16 +345,14 @@ public class Row {
 	 * @throws InvalidColIndexException
 	 *             if colIndex < 1 or colIndex > <code>getColumnCount()</code>
 	 */
-	public Object getOriginalColumnObject(int colIndex)
-			throws InvalidColIndexException {
+	public Object getOriginalColumnObject(int colIndex) throws InvalidColIndexException {
 		if (colIndex >= 1 && colIndex <= getColumnCount()) {
 			return originalValues.get(colIndex - 1);
 		} else {
 			if (colIndex < 1) {
 				throw new InvalidColIndexException("colIndex < 1");
 			} else if (colIndex > getColumnCount()) {
-				throw new InvalidColIndexException(
-						"colIndex > getColumnCount()");
+				throw new InvalidColIndexException("colIndex > getColumnCount()");
 			} else {
 				throw new InvalidColIndexException("unexpected");
 			}

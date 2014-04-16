@@ -7,6 +7,7 @@ package com.bearsoft.gwt.ui.widgets.grid.cells;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
@@ -76,7 +77,7 @@ public abstract class AbstractPopupEditorCell<C> extends AbstractCell<C> {
 		}
 	}
 
-	public void startEditing(final Element parent, final C value, ValueUpdater<C> valueUpdater) {
+	public void startEditing(final Element parent, final C value, ValueUpdater<C> valueUpdater, final Runnable onEditorClose) {
 		final UpdaterRef<C> updaterRef = new UpdaterRef<>(valueUpdater);
 		final PopupPanel pp = new PopupPanel(true);
 		pp.getElement().setClassName("grid-cell-editor-popup");
@@ -122,6 +123,8 @@ public abstract class AbstractPopupEditorCell<C> extends AbstractCell<C> {
 					editorKeyUp.removeHandler();
 					pp.setWidget(null);
 					editor.removeFromParent();
+					if(onEditorClose != null)
+						onEditorClose.run();
 				}
 			}
 		});
@@ -134,24 +137,18 @@ public abstract class AbstractPopupEditorCell<C> extends AbstractCell<C> {
 				int h = cellElement.getOffsetHeight() - dy;
 				pp.setWidth((w >= 0 ? w : 0) + "px");
 				pp.setHeight((h >= 0 ? h : 0) + "px");
-				if (pp.isAnimationEnabled()) {
-					Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-						@Override
-						public void execute() {
-							if(editor instanceof RequiresResize)
-								((RequiresResize)editor).onResize();
-							if (editor.isAttached() && focusHost != null) {
-								focusHost.setFocus(true);
-							}
+				if (editor instanceof RequiresResize)
+					((RequiresResize) editor).onResize();
+				Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+
+					@Override
+					public void execute() {
+						if (editor.isAttached() && focusHost != null) {
+							focusHost.setFocus(true);
 						}
-					});
-				} else {
-					if(editor instanceof RequiresResize)
-						((RequiresResize)editor).onResize();
-					if (editor.isAttached() && focusHost != null) {
-						focusHost.setFocus(true);
 					}
-				}
+
+				});
 			}
 		});
 	}

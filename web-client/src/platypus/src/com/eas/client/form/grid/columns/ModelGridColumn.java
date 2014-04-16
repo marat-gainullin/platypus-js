@@ -56,9 +56,9 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 	protected JavaScriptObject onSelect;
 
 	public ModelGridColumn(Cell<T> aCell, String aName, Entity aRowsEntity, ModelElementRef aColumnModelRef, RowValueConverter<T> aConverter) {
-		super(aCell);
-		if (aCell instanceof RenderedPopupEditorCell<?>) {
-			((RenderedPopupEditorCell<T>) aCell).setReadonly(new CellHasReadonly() {
+		super(aCell);		
+		if (getTargetCell() instanceof RenderedPopupEditorCell<?>) {
+			((RenderedPopupEditorCell<T>) getTargetCell()).setReadonly(new CellHasReadonly() {
 
 				@Override
 				public boolean isReadonly() {

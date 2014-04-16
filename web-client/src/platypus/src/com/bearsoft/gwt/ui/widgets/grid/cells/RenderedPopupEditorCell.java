@@ -5,11 +5,12 @@
  */
 package com.bearsoft.gwt.ui.widgets.grid.cells;
 
+import java.util.Date;
+
 import com.google.gwt.cell.client.ValueUpdater;
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.EventTarget;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -25,7 +26,7 @@ public abstract class RenderedPopupEditorCell<T> extends AbstractPopupEditorCell
 	protected CellHasReadonly readonly;
 
 	public RenderedPopupEditorCell(Widget aEditor) {
-		super(aEditor, BrowserEvents.CLICK, /*BrowserEvents.DBLCLICK, */BrowserEvents.KEYUP);
+		super(aEditor, BrowserEvents.CLICK, /* BrowserEvents.DBLCLICK, */BrowserEvents.KEYUP);
 	}
 
 	public CellRenderer<T> getRenderer() {
@@ -51,37 +52,55 @@ public abstract class RenderedPopupEditorCell<T> extends AbstractPopupEditorCell
 		}
 	}
 
-	public void startEditing(Element parent, T value, com.google.gwt.cell.client.ValueUpdater<T> valueUpdater) {
+	public void startEditing(Element parent, T value, com.google.gwt.cell.client.ValueUpdater<T> valueUpdater, Runnable onEditorClose) {
 		if (readonly == null || !readonly.isReadonly())
-			super.startEditing(parent, value, valueUpdater);
+			super.startEditing(parent, value, valueUpdater, onEditorClose);
 	}
 
 	protected abstract void renderCell(Context context, T value, SafeHtmlBuilder sb);
 
-	protected int clickCount = 0;
-	
+	protected long clickTimestamp = -1;
+
 	@Override
 	public void onBrowserEvent(Context context, Element parent, T value, NativeEvent event, ValueUpdater<T> valueUpdater) {
 		switch (event.getType()) {
 		case BrowserEvents.CLICK:
-			Scheduler.get().scheduleFixedDelay(new RepeatingCommand(){
+			long newClickTimestamp = new Date().getTime();
+			try {
+				if (newClickTimestamp - clickTimestamp < 550 && !isEditing(context, parent, value)) {
+					EventTarget et = event.getEventTarget();
+					if (Element.is(et)) {
+						final Element focused = Element.as(et);
+						focused.blur();
+						startEditing(parent, value, valueUpdater, new Runnable() {
+							@Override
+							public void run() {
+								focused.focus();
+							}
 
-				@Override
-                public boolean execute() {
-					clickCount = 0;
-	                return false;
-                }
-				
-			}, 300);
-			clickCount++;
-			if(clickCount == 2){
-				startEditing(parent, value, valueUpdater);
-				clickCount = 0;
+						});
+					}
+				} else {
+					super.onBrowserEvent(context, parent, value, event, valueUpdater);
+				}
+			} finally {
+				clickTimestamp = newClickTimestamp;
 			}
 			break;
 		case BrowserEvents.KEYUP:
 			if (event.getKeyCode() == KeyCodes.KEY_ENTER || event.getKeyCode() == KeyCodes.KEY_F2) {
-				startEditing(parent, value, valueUpdater);
+				EventTarget et = event.getEventTarget();
+				if (Element.is(et)) {
+					final Element focused = Element.as(et);
+					focused.blur();
+					startEditing(parent, value, valueUpdater, new Runnable() {
+						@Override
+						public void run() {
+							focused.focus();
+						}
+
+					});
+				}
 			} else {
 				super.onBrowserEvent(context, parent, value, event, valueUpdater);
 			}
