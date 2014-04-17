@@ -414,7 +414,7 @@ public abstract class Component<D extends JComponent> {
             + "*/";
 
     @ScriptFunction(jsDoc = ON_ACTION_PERFORMED_JSDOC)
-    @EventMethod(eventClass = ActionEvent.class)
+    @EventMethod(eventClass = ActionEvent.class, isDefaultEvent = true)
     public Function getOnActionPerformed() {
         ControlEventsIProxy proxy = getEventsProxy(delegate);
         return proxy != null ? proxy.getHandlers().get(ControlEventsIProxy.actionPerformed) : null;

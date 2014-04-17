@@ -189,6 +189,11 @@ public class RADComponentNode extends FormNode
     public NewType[] getNewTypes() {
         return component.getNewTypes();
     }
+    
+    @Override
+    public Action getPreferredAction() {
+        return new DefaultRADAction();
+    }
 
     @Override
     public Action[] getActions(boolean context) {

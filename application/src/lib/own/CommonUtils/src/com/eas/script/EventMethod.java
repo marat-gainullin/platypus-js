@@ -20,4 +20,10 @@ public @interface EventMethod {
      */
     public Class<?> eventClass();
     
+    /**
+     * Marks the event as a default
+     * @return <code>true</code> if the event is the default and <code>false</code> otherwise
+     */
+    public boolean isDefaultEvent() default false;
+    
 }
