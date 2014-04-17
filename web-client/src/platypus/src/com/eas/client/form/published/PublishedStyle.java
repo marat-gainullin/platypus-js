@@ -57,6 +57,10 @@ public final class PublishedStyle extends JavaScriptObject {
 		return this.icon;
 	}-*/;
 
+	public boolean isEmpty(){
+		return getBackground() == null && getForeground() == null && getFont() == null;
+	}
+	
 	public String toStyled() {
 		String styleString = "";
 		if (getBackground() != null)

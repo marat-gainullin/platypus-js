@@ -26,25 +26,42 @@ import com.google.gwt.view.client.SelectionModel;
  */
 public class ThemedCellTableBuilder<T> extends AbstractCellTableBuilder<T> {
 
+    protected String dynamicTDClassName;
     protected String dynamicCellClassName;
+    protected String dynamicOddRowsClassName;
+    protected String dynamicEvenRowsClassName;
 
     public ThemedCellTableBuilder(AbstractCellTable<T> cellTable) {
-        this(cellTable, "");
+        this(cellTable, "", "", "", "");
     }
     
-    public ThemedCellTableBuilder(AbstractCellTable<T> cellTable, String aDynamicCellClassName) {
-        super(cellTable);
+    public ThemedCellTableBuilder(AbstractCellTable<T> cellTable, String aDynamicTDClassName, String aDynamicCellClassName, String aDynamicOddRowsClassName, String aDynamicEvenRowsClassName) {
+    	super(cellTable);
+        dynamicTDClassName = aDynamicTDClassName;
         dynamicCellClassName = aDynamicCellClassName;
+        dynamicOddRowsClassName = aDynamicOddRowsClassName;
+        dynamicEvenRowsClassName = aDynamicEvenRowsClassName;
     }
-
+    
     @Override
     public void buildRowImpl(T rowValue, int absRowIndex) {
         // Calculate the row styles.
         SelectionModel<? super T> selectionModel = cellTable.getSelectionModel();
         boolean isSelected
                 = (selectionModel == null || rowValue == null) ? false : selectionModel.isSelected(rowValue);
-        boolean isOdd = absRowIndex % 2 != 0;
-        StringBuilder trClasses = new StringBuilder(isOdd ? ThemedGridResources.instance.cellTableStyle().cellTableOddRow() : ThemedGridResources.instance.cellTableStyle().cellTableEvenRow());
+        boolean isOdd = (absRowIndex + 1) % 2 != 0;
+        StringBuilder trClasses = new StringBuilder();
+    	if(isOdd){
+    		if(dynamicOddRowsClassName != null && !dynamicOddRowsClassName.isEmpty())
+    			trClasses.append(" ").append(dynamicOddRowsClassName);
+    		else
+    			trClasses.append(" ").append(ThemedGridResources.instance.cellTableStyle().cellTableOddRow());
+    	}else{
+    		if(dynamicEvenRowsClassName != null && !dynamicEvenRowsClassName.isEmpty())
+    			trClasses.append(" ").append(dynamicEvenRowsClassName);
+    		else
+    			trClasses.append(" ").append(ThemedGridResources.instance.cellTableStyle().cellTableEvenRow());
+    	}
         if (isSelected) {
             trClasses.append(" ").append(ThemedGridResources.instance.cellTableStyle().cellTableSelectedRow());
         }
@@ -67,18 +84,30 @@ public class ThemedCellTableBuilder<T> extends AbstractCellTableBuilder<T> {
         for (int curColumn = 0; curColumn < columnCount; curColumn++) {
             Column<T, ?> column = cellTable.getColumn(curColumn);
             // Create the cell styles.
-            StringBuilder tdClasses = new StringBuilder(ThemedGridResources.instance.cellTableStyle().cellTableCell());            
-            tdClasses.append(" ").append(isOdd ? ThemedGridResources.instance.cellTableStyle().cellTableEvenRowCell() : ThemedGridResources.instance.cellTableStyle().cellTableOddRowCell());
+            StringBuilder tdClasses = new StringBuilder(ThemedGridResources.instance.cellTableStyle().cellTableCell());
+            /*
+            if(showOddRowsInOtherColor){
+            	tdClasses.append(" ").append(isOdd ? ThemedGridResources.instance.cellTableStyle().cellTableOddRowCell() : ThemedGridResources.instance.cellTableStyle().cellTableEvenRowCell());
+            }
+            */
+            /*
             if (curColumn == 0) {
                 tdClasses.append(" ").append(ThemedGridResources.instance.cellTableStyle().cellTableFirstColumn());
             }
+            */
             if (isSelected) {
                 tdClasses.append(" ").append(ThemedGridResources.instance.cellTableStyle().cellTableSelectedRowCell());
             }
+            /*
             // The first and last column could be the same column.
             if (curColumn == columnCount - 1) {
                 tdClasses.append(" ").append(ThemedGridResources.instance.cellTableStyle().cellTableLastColumn());
             }
+            */
+            if(dynamicTDClassName != null && !dynamicTDClassName.isEmpty()){
+            	tdClasses.append(" ").append(dynamicTDClassName);
+            }
+
             // Add class names specific to the cell.
             Cell.Context context = new Cell.Context(absRowIndex, curColumn, cellTable.getValueKey(rowValue));
             String cellStyles = column.getCellStyleNames(context, rowValue);
@@ -98,7 +127,6 @@ public class ThemedCellTableBuilder<T> extends AbstractCellTableBuilder<T> {
             }
             // Add the inner div.
             DivBuilder div = td.startDiv();
-            div.style().outlineStyle(Style.OutlineStyle.NONE).endStyle();
             div.className(dynamicCellClassName);
 
             // Render the cell into the div.

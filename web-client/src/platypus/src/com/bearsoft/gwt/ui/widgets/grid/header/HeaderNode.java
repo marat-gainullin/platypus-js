@@ -3,6 +3,9 @@ package com.bearsoft.gwt.ui.widgets.grid.header;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.eas.client.form.published.PublishedColor;
+import com.eas.client.form.published.PublishedFont;
+import com.eas.client.form.published.PublishedStyle;
 import com.google.gwt.user.cellview.client.Header;
 
 public class HeaderNode {
@@ -13,6 +16,7 @@ public class HeaderNode {
 	protected Header<?> header;
 	protected int leavesCount;
 	protected int depthRemainder;
+	protected PublishedStyle style;
 
 	public HeaderNode() {
 		super();
@@ -36,18 +40,26 @@ public class HeaderNode {
 	}
 
 	public Header<?> getHeader() {
-	    return header;
-    }
-	
+		return header;
+	}
+
 	public void setHeader(Header<?> aHeader) {
-	    header = aHeader;
-    }
-	
+		header = aHeader;
+	}
+
 	public int getDepthRemainder() {
-	    return depthRemainder;
-    }
-	
+		return depthRemainder;
+	}
+
 	public int getLeavesCount() {
-	    return leavesCount;
-    }
+		return leavesCount;
+	}
+
+	public PublishedStyle getStyle() {
+		return style;
+	}
+
+	public void setStyle(PublishedStyle aValue) {
+		style = aValue;
+	}
 }

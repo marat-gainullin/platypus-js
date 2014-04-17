@@ -16,7 +16,9 @@ import com.bearsoft.gwt.ui.widgets.grid.builders.NullHeaderOrFooterBuilder;
 import com.bearsoft.gwt.ui.widgets.grid.builders.ThemedCellTableBuilder;
 import com.bearsoft.gwt.ui.widgets.grid.builders.ThemedHeaderOrFooterBuilder;
 import com.bearsoft.gwt.ui.widgets.grid.header.HasSortList;
+import com.eas.client.form.published.PublishedColor;
 import com.google.gwt.cell.client.Cell;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
@@ -43,6 +45,7 @@ import com.google.gwt.event.dom.client.ScrollHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -73,6 +76,18 @@ import com.google.gwt.view.client.SelectionModel;
  */
 public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResize, HasSortList {
 
+	protected interface DynamicCellStyles extends SafeHtmlTemplates {
+
+		public static DynamicCellStyles INSTANCE = GWT.create(DynamicCellStyles.class);
+
+		@Template(".{0}{" + "border-style: solid;" + "border-top-width: {1}px;"
+		        + "border-bottom-width: {1}px;" + "border-left-width: {2}px;" + "border-right-width: {2}px;" + "border-color: {3};" + "}")
+		public SafeHtml td(String aCssRuleName, double hBorderWidth, double vBorderWidth, String aLinesColor);
+
+		@Template(".{0}{" + "position: relative;" + "height: {1}px;" + "text-overflow: ellipsis;" + "overflow: hidden;" + "white-space: nowrap;" + "}")
+		public SafeHtml cell(String aCssRuleName, double aRowsHeight);
+	}
+
 	public static final String RULER_STYLE = "grid-ruler";
 	public static final String COLUMN_PHANTOM_STYLE = "grid-column-phantom";
 	public static final String COLUMNS_CHEVRON_STYLE = "grid-columns-chevron";
@@ -100,22 +115,33 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 	//
 	protected final ColumnSortList sortList = new ColumnSortList();
 	protected int rowsHeight;
+	protected boolean showHorizontalLines = true;
+	protected boolean showVerticalLines = true;
+	protected boolean showOddRowsInOtherColor = true;
+	protected PublishedColor gridColor;
+	protected PublishedColor oddRowsColor;
+
+	protected String dynamicTDClassName = "grid-td-" + Document.get().createUniqueId();	
 	protected String dynamicCellClassName = "grid-cell-" + Document.get().createUniqueId();
-	protected StyleElement styleElement = Document.get().createStyleElement();
+	protected String dynamicOddRowsClassName = "grid-odd-row-" + Document.get().createUniqueId();
+	protected String dynamicEvenRowsClassName = "grid-even-row-" + Document.get().createUniqueId();
+	protected StyleElement tdsStyleElement = Document.get().createStyleElement();
+	protected StyleElement cellsStyleElement = Document.get().createStyleElement();
+	protected StyleElement oddRowsStyleElement = Document.get().createStyleElement();
+	protected StyleElement evenRowsStyleElement = Document.get().createStyleElement();
 
 	protected ListDataProvider<T> dataProvider;
 
 	protected int frozenColumns;
 	protected int frozenRows;
 
-	protected boolean rowLines;
-	protected boolean columnLines;
-	protected boolean showOddRowsInOtherColor;
-
 	public Grid(ProvidesKey<T> aKeyProvider) {
 		super();
 		getElement().getStyle().setPosition(Style.Position.RELATIVE);
-		getElement().appendChild(styleElement);
+		getElement().appendChild(tdsStyleElement);
+		getElement().appendChild(cellsStyleElement);
+		getElement().appendChild(oddRowsStyleElement);
+		getElement().appendChild(evenRowsStyleElement);
 		setRowsHeight(25);
 		hive = new FlexTable();
 		setWidget(hive);
@@ -291,8 +317,7 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 		// cells
 		for (GridSection<?> section : new GridSection<?>[] { frozenLeft, frozenRight, scrollableLeft, scrollableRight }) {
 			GridSection<T> gSection = (GridSection<T>) section;
-			gSection.setTableBuilder(new ThemedCellTableBuilder<>(gSection, dynamicCellClassName));
-			//
+			gSection.setTableBuilder(new ThemedCellTableBuilder<>(gSection, dynamicTDClassName, dynamicCellClassName, dynamicOddRowsClassName, dynamicEvenRowsClassName));
 		}
 
 		scrollableRightContainer.addScrollHandler(new ScrollHandler() {
@@ -597,6 +622,9 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 		headerLeft.addColumnSortHandler(sectionSortHandler);
 		headerRight.getColumnSortList().setLimit(1);
 		headerRight.addColumnSortHandler(sectionSortHandler);
+		gridColor = PublishedColor.create(211, 211, 211, 255);
+		regenerateDynamicCellsStyles();
+		regenerateDynamicOddRowsStyles();
 	}
 
 	@Override
@@ -699,7 +727,61 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 	}
 
 	public String getDynamicCellClassName() {
-		return dynamicCellClassName;
+		return dynamicTDClassName;
+	}
+
+	public boolean isShowHorizontalLines() {
+		return showHorizontalLines;
+	}
+
+	public void setShowHorizontalLines(boolean aValue) {
+		if (showHorizontalLines != aValue) {
+			showHorizontalLines = aValue;
+			regenerateDynamicCellsStyles();
+		}
+	}
+
+	public boolean isShowVerticalLines() {
+		return showVerticalLines;
+	}
+
+	public void setShowVerticalLines(boolean aValue) {
+		if (showVerticalLines != aValue) {
+			showVerticalLines = aValue;
+			regenerateDynamicCellsStyles();
+		}
+	}
+
+	protected void regenerateDynamicCellsStyles() {
+		tdsStyleElement.setInnerSafeHtml(DynamicCellStyles.INSTANCE.td(dynamicTDClassName, showHorizontalLines ? 1 : 0, showVerticalLines ? 1 : 0, gridColor != null ? gridColor.toStyled()
+		        : ""));
+		cellsStyleElement.setInnerSafeHtml(DynamicCellStyles.INSTANCE.cell(dynamicCellClassName, rowsHeight));
+	}
+
+	protected void regenerateDynamicOddRowsStyles() {
+		if (showOddRowsInOtherColor && oddRowsColor != null) {
+			oddRowsStyleElement.setInnerHTML("." + dynamicOddRowsClassName + "{background-color: " + oddRowsColor.toStyled() + "}");
+		}else{
+			oddRowsStyleElement.setInnerHTML("");
+		}
+	}
+
+	public PublishedColor getGridColor() {
+		return gridColor;
+	}
+
+	public void setGridColor(PublishedColor aValue) {
+		gridColor = aValue;
+		regenerateDynamicCellsStyles();
+	}
+
+	public PublishedColor getOddRowsColor() {
+		return oddRowsColor;
+	}
+
+	public void setOddRowsColor(PublishedColor aValue) {
+		oddRowsColor = aValue;
+		regenerateDynamicOddRowsStyles();
 	}
 
 	public int getRowsHeight() {
@@ -709,7 +791,7 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 	public void setRowsHeight(int aValue) {
 		if (rowsHeight != aValue && aValue >= 10) {
 			rowsHeight = aValue;
-			styleElement.setInnerHTML("." + dynamicCellClassName + "{position: relative; height: " + rowsHeight + "px;" + "text-overflow: ellipsis; overflow: hidden; white-space: nowrap;}");
+			regenerateDynamicCellsStyles();
 			onResize();
 		}
 	}
@@ -822,28 +904,15 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 		}
 	}
 
-	public boolean isRowLines() {
-		return rowLines;
-	}
-
-	public void setRowLines(boolean aValue) {
-		rowLines = aValue;
-	}
-
-	public boolean isColumnLines() {
-		return columnLines;
-	}
-
-	public void setColumnLines(boolean aValue) {
-		columnLines = aValue;
-	}
-
 	public boolean isShowOddRowsInOtherColor() {
 		return showOddRowsInOtherColor;
 	}
 
 	public void setShowOddRowsInOtherColor(boolean aValue) {
-		showOddRowsInOtherColor = aValue;
+		if (showOddRowsInOtherColor != aValue) {
+			showOddRowsInOtherColor = aValue;
+			regenerateDynamicOddRowsStyles();
+		}
 	}
 
 	/**
@@ -999,7 +1068,7 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 			refreshColumns();
 		} else {
 			headerRight.removeColumn(aIndex - frozenColumns);// ColumnsRemover
-															 // will care
+			                                                 // will care
 			// about columns sharing
 		}
 	}

@@ -1,5 +1,6 @@
 package com.eas.client.form;
 
+import com.bearsoft.gwt.ui.widgets.grid.cells.RenderedPopupEditorCell;
 import com.eas.client.form.published.PublishedStyle;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.LocaleInfo;
@@ -18,9 +19,8 @@ import com.google.gwt.user.client.ui.HasVerticalAlignment.VerticalAlignmentConst
 public class StyleIconDecorator {
 
 	interface IconDecoratorTemplate extends SafeHtmlTemplates {
-		@Template("<div style=\"{0}position:relative;zoom:1;\">{1}<div>{2}</div></div>")
-		SafeHtml outerDiv(SafeStyles padding, SafeHtml icon,
-				SafeHtml cellContents);
+		@Template("<div style=\"{0}position:relative;zoom:1;\">{1}</div>")
+		SafeHtml outerDiv(SafeStyles padding, SafeHtml cellContents);
 
 		/**
 		 * The wrapper around the image vertically aligned to the bottom.
@@ -50,13 +50,18 @@ public class StyleIconDecorator {
 			SafeHtmlBuilder sb) {		
 		ImageResource icon = aStyle.getIcon();
 		String styleString = aStyle.toStyled();		
+		styleString += "padding: " + RenderedPopupEditorCell.CELL_PADDING + "px;";
+		styleString += "box-sizing: border-box;";
+		styleString += "height: 100%;";
+		styleString += "overflow: hidden;";
+		styleString += "text-overflow: ellipsis;";
+		styleString += "white-space: nowrap;";
 		styleString += "padding-" + direction + ": "
-				+ (icon != null ? icon.getWidth()+2 : 0) + "px;";
-		SafeStyles outerDivStyle = SafeStylesUtils
-				.fromTrustedString(styleString);
-		sb.append(iconTemplate.outerDiv(outerDivStyle,
-				icon != null ? getImageHtml(icon, valign, false)
-						: getImageHtml(icon, valign, true), toDecorate));
+				+ (icon != null ? icon.getWidth() + RenderedPopupEditorCell.CELL_PADDING : RenderedPopupEditorCell.CELL_PADDING) + "px;";
+		if(icon != null){
+			styleString += "background-image: url(" + icon.getSafeUri().asString() + ");";
+		}
+		sb.append(iconTemplate.outerDiv(SafeStylesUtils.fromTrustedString(styleString), toDecorate));
 	}
 	
 

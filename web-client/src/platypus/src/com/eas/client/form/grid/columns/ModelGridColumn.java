@@ -74,6 +74,7 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 		converter = aConverter;
 		setFieldUpdater(this);
 		setDefaultSortAscending(true);
+		setPublished(JavaScriptObject.createObject());
 	}
 
 	protected Cell<T> getTargetCell(){
@@ -364,9 +365,9 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 		}
 	}
 
-	public static PublishedCell calcContextPublishedCell(JavaScriptObject aThis, JavaScriptObject cellFunction, com.google.gwt.cell.client.Cell.Context context, ModelElementRef aColModelElement,
+	public static PublishedCell calcContextPublishedCell(JavaScriptObject aThis, JavaScriptObject aOnRender, com.google.gwt.cell.client.Cell.Context context, ModelElementRef aColModelElement,
 	        String aDisplay, Entity aRowsEntity) throws Exception {
-		if (cellFunction != null) {
+		if (aOnRender != null) {
 			Row renderedRow = renderedRow(context, aRowsEntity);
 			if (renderedRow != null) {
 				Object data = aColModelElement != null ? Utils.toJs(renderedRow.getColumnObject(aColModelElement.getColIndex())) : null;
@@ -378,7 +379,7 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 				}
 				Boolean res = Utils.executeScriptEventBoolean(
 				        aThis,
-				        cellFunction,
+				        aOnRender,
 				        JsEvents.publishOnRenderEvent(aThis, rowIds != null && rowIds.length > 0 ? (rowIds.length > 1 ? Utils.toJsArray(rowIds) : rowIds[0]) : null, null,
 				                Entity.publishRowFacade(renderedRow, aRowsEntity), cell));
 				if (res != null && res) {
@@ -432,12 +433,7 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 	}
 
 	private static native void publish(ModelGridColumnFacade aColumn, JavaScriptObject aPublished)/*-{
-		Object.defineProperty(aInjectionTarget, aName, {
-			get : function() {
-				return published;
-			}
-		});
-		Object.defineProperty(published, "visible", {
+		Object.defineProperty(aPublished, "visible", {
 			get : function() {
 				return aColumn.@com.eas.client.form.grid.columns.ModelGridColumnFacade::isVisible()();
 			},
@@ -445,23 +441,23 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 				aColumn.@com.eas.client.form.grid.columns.ModelGridColumnFacade::setVisible(Z)((false != aValue));
 			}
 		});
-		Object.defineProperty(published, "width", {
+		Object.defineProperty(aPublished, "width", {
 			get : function() {
 				return aColumn.@com.eas.client.form.grid.columns.ModelGridColumnFacade::getWidth()();
 			},
 			set : function(aValue) {
-				aColumn.@com.eas.client.form.grid.columns.ModelGridColumnFacade::setWidth(D)(aValue != null ?aValue:0);
+				aColumn.@com.eas.client.form.grid.columns.ModelGridColumnFacade::setWidth(D)(aValue != null ? aValue : 0);
 			}
 		});
-		Object.defineProperty(published, "title", {
+		Object.defineProperty(aPublished, "title", {
 			get : function() {
 				return aColumn.@com.eas.client.form.grid.columns.ModelGridColumnFacade::getTitle()();
 			},
 			set : function(aValue) {
-				aColumn.@com.eas.client.form.grid.columns.ModelGridColumnFacade::setTitle(Ljava/lang/String;)(aValue != null ?''+aValue:'');
+				aColumn.@com.eas.client.form.grid.columns.ModelGridColumnFacade::setTitle(Ljava/lang/String;)(aValue != null ? ''+aValue : '');
 			}
 		});
-		Object.defineProperty(published, "resizable", {
+		Object.defineProperty(aPublished, "resizable", {
 			get : function() {
 				return aColumn.@com.eas.client.form.grid.columns.ModelGridColumnFacade::isResizable()();
 			},
@@ -469,7 +465,7 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 				aColumn.@com.eas.client.form.grid.columns.ModelGridColumnFacade::setResizable(Z)(!!aValue);
 			}
 		});
-		Object.defineProperty(published, "movable", {
+		Object.defineProperty(aPublished, "movable", {
 			get : function() {
 				return aColumn.@com.eas.client.form.grid.columns.ModelGridColumnFacade::isMoveable()();
 			},
@@ -477,7 +473,7 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 				aColumn.@com.eas.client.form.grid.columns.ModelGridColumnFacade::setMoveable(Z)(!!aValue);
 			}
 		});
-		Object.defineProperty(published, "readonly", {
+		Object.defineProperty(aPublished, "readonly", {
 			get : function() {
 				return aColumn.@com.eas.client.form.grid.columns.ModelGridColumnFacade::isReadonly()();
 			},
@@ -485,7 +481,7 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 				aColumn.@com.eas.client.form.grid.columns.ModelGridColumnFacade::setReadonly(Z)((false != aValue));
 			}
 		});
-		Object.defineProperty(published, "sortable", {
+		Object.defineProperty(aPublished, "sortable", {
 			get : function() {
 				return aColumn.@com.eas.client.form.grid.columns.ModelGridColumnFacade::isSortable()();
 			},
@@ -493,7 +489,7 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 				aColumn.@com.eas.client.form.grid.columns.ModelGridColumnFacade::setSortable(Z)((false != aValue));
 			}
 		});
-		Object.defineProperty(published, "onRender", {
+		Object.defineProperty(aPublished, "onRender", {
 			get : function() {
 				return aColumn.@com.eas.client.form.grid.columns.ModelGridColumnFacade::getOnRender()();
 			},
@@ -501,7 +497,7 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 				aColumn.@com.eas.client.form.grid.columns.ModelGridColumnFacade::setOnRender(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
 			}
 		});
-		Object.defineProperty(published, "onSelect", {
+		Object.defineProperty(aPublished, "onSelect", {
 			get : function() {
 				return aColumn.@com.eas.client.form.grid.columns.ModelGridColumnFacade::getOnSelect()();
 			},

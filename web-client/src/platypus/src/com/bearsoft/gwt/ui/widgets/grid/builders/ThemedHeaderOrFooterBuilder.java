@@ -11,9 +11,13 @@ import com.bearsoft.gwt.ui.widgets.grid.header.HasSortList;
 import com.bearsoft.gwt.ui.widgets.grid.header.HeaderAnalyzer;
 import com.bearsoft.gwt.ui.widgets.grid.header.HeaderNode;
 import com.google.gwt.cell.client.Cell;
+import com.google.gwt.dom.builder.shared.StylesBuilder;
 import com.google.gwt.dom.builder.shared.TableCellBuilder;
 import com.google.gwt.dom.builder.shared.TableRowBuilder;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.dom.client.Style.FontStyle;
+import com.google.gwt.dom.client.Style.FontWeight;
 import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.AbstractHeaderOrFooterBuilder;
 import com.google.gwt.user.cellview.client.Column;
@@ -44,7 +48,7 @@ public class ThemedHeaderOrFooterBuilder<T> extends AbstractHeaderOrFooterBuilde
 		super(table, isFooter);
 		sortListHolder = aSortListHolder;
 	}
-	
+
 	public ThemedHeaderOrFooterBuilder(AbstractCellTable<T> table, boolean isFooter, List<HeaderNode> aHeaderNodes) {
 		super(table, isFooter);
 		headerNodes = aHeaderNodes;
@@ -136,7 +140,7 @@ public class ThemedHeaderOrFooterBuilder<T> extends AbstractHeaderOrFooterBuilde
 						sortedColumns.put((Column<T, ?>) sInfo.getColumn(), sInfo);
 					}
 				}
-				buildSections(headersForest, sortedColumns);
+				buildNodes(headersForest, sortedColumns);
 				return true;
 			} else {
 				// No headers to render;
@@ -148,7 +152,7 @@ public class ThemedHeaderOrFooterBuilder<T> extends AbstractHeaderOrFooterBuilde
 		}
 	}
 
-	protected void buildSections(List<HeaderNode> aHeaders, Map<Column<T, ?>, ColumnSortList.ColumnSortInfo> sortedColumns) {
+	protected void buildNodes(List<HeaderNode> aHeaders, Map<Column<T, ?>, ColumnSortList.ColumnSortInfo> sortedColumns) {
 		// AbstractCellTable<T> table = getTable();
 		List<HeaderNode> children = new ArrayList<>();
 		boolean isFooter = isBuildingFooter();
@@ -164,8 +168,8 @@ public class ThemedHeaderOrFooterBuilder<T> extends AbstractHeaderOrFooterBuilde
 			children.addAll(headerNode.getChildren());
 			Header<?> headerOrFooter = headerNode.getHeader();
 			Column<T, ?> column = null;
-			if(headerOrFooter instanceof HasColumn<?>)
-				column = ((HasColumn<T>)headerOrFooter).getColumn();
+			if (headerOrFooter instanceof HasColumn<?>)
+				column = ((HasColumn<T>) headerOrFooter).getColumn();
 			boolean isSortable = !isFooter && column != null && column.isSortable();
 			ColumnSortList.ColumnSortInfo sortedInfo = sortedColumns.get(column);
 			boolean isSorted = sortedInfo != null;
@@ -190,6 +194,22 @@ public class ThemedHeaderOrFooterBuilder<T> extends AbstractHeaderOrFooterBuilde
 			if (headerNode.getLeavesCount() > 1)
 				th.colSpan(headerNode.getLeavesCount());
 			th.className(classesBuilder.toString());
+			if (headerNode.getStyle() != null && !headerNode.getStyle().isEmpty()) {
+				StylesBuilder thStyles = th.style();
+				if (headerNode.getStyle().getBackground() != null) {
+					thStyles.trustedBackgroundColor(headerNode.getStyle().getBackground().toStyled());
+				}
+				if (headerNode.getStyle().getForeground() != null) {
+					thStyles.trustedColor(headerNode.getStyle().getForeground().toStyled());
+				}
+				if (headerNode.getStyle().getFont() != null) {
+					thStyles.trustedProperty("font-family", headerNode.getStyle().getFont().getFamily());
+					thStyles.fontSize(headerNode.getStyle().getFont().getSize(), Style.Unit.PX);
+					thStyles.fontStyle(headerNode.getStyle().getFont().isItalic() ? FontStyle.ITALIC : FontStyle.NORMAL);
+					thStyles.fontWeight(headerNode.getStyle().getFont().isBold() ? FontWeight.BOLD : FontWeight.NORMAL);
+				}
+				thStyles.endStyle();
+			}
 			if (headerOrFooter != null) {
 				appendExtraStyles(headerOrFooter, classesBuilder);
 				if (column != null) {
@@ -211,7 +231,7 @@ public class ThemedHeaderOrFooterBuilder<T> extends AbstractHeaderOrFooterBuilde
 		// End the row.
 		tr.endTR();
 		if (!children.isEmpty()) {
-			buildSections(children, sortedColumns);
+			buildNodes(children, sortedColumns);
 		}
 	}
 

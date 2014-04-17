@@ -17,6 +17,7 @@ import com.bearsoft.gwt.ui.widgets.grid.processing.TreeDataProvider;
 import com.bearsoft.gwt.ui.widgets.grid.processing.TreeDataProvider.ExpandedCollapsedHandler;
 import com.bearsoft.gwt.ui.widgets.grid.processing.TreeMultiSortHandler;
 import com.bearsoft.rowset.Row;
+import com.bearsoft.rowset.Utils.JsObject;
 import com.bearsoft.rowset.events.RowsetEvent;
 import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.metadata.Parameter;
@@ -41,6 +42,7 @@ import com.eas.client.form.published.HasComponentPopupMenu;
 import com.eas.client.form.published.HasEventsExecutor;
 import com.eas.client.form.published.HasJsFacade;
 import com.eas.client.form.published.HasOnRender;
+import com.eas.client.form.published.HasPublished;
 import com.eas.client.form.published.PublishedComponent;
 import com.eas.client.form.published.PublishedStyle;
 import com.eas.client.form.published.menu.PlatypusPopupMenu;
@@ -559,11 +561,92 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 	public void setPublished(JavaScriptObject aValue) {
 		published = aValue != null ? aValue.<PublishedComponent> cast() : null;
 		if (published != null) {
-			// Here were a cycle setting published to each column and publish
-			// call
+			publish(this, published);
+			for(int i = 0; i < getDataColumnCount(); i++){
+				Column<Row, ?> col = getDataColumn(i);
+				if(col instanceof ModelGridColumnFacade){
+					ModelGridColumnFacade fCol = (ModelGridColumnFacade)col;
+					if(fCol.getJsName() != null && !fCol.getJsName().isEmpty() && col instanceof HasPublished){
+						HasPublished pCol = (HasPublished)col;
+						published.<JsObject>cast().inject(fCol.getJsName(), pCol.getPublished());
+					}
+				}
+			}
 		}
 	}
 
+	private native static void publish(ModelGrid aWidget, JavaScriptObject aPublished)/*-{
+		aPublished.select = function(aRow) {
+			if(aRow != null && aRow != undefined)
+				aWidget.@com.eas.client.form.published.widgets.model.ModelGrid::selectRow(Lcom/bearsoft/rowset/Row;)(aRow.unwrap());
+		};
+		aPublished.unselect = function(aRow) {
+			if(aRow != null && aRow != undefined)
+				aWidget.@com.eas.client.form.published.widgets.model.ModelGrid::unselectRow(Lcom/bearsoft/rowset/Row;)(aRow.unwrap());
+		};
+		aPublished.clearSelection = function() {
+			aWidget.@com.eas.client.form.published.widgets.model.ModelGrid::clearSelection()();
+		};
+		aPublished.find = function(){
+			aWidget.@com.eas.client.form.published.widgets.model.ModelGrid::find()();
+		};
+		aPublished.findSomething = function() {
+			aPublished.find();
+		};
+		aPublished.makeVisible = function(aRow, needToSelect) {
+			var need2Select = true;
+			if(needToSelect != undefined)
+				need2Select = (false != needToSelect);
+			if(aRow != null)
+				return aWidget.@com.eas.client.form.published.widgets.model.ModelGrid::makeVisible(Lcom/bearsoft/rowset/Row;Z)(aRow.unwrap(), need2Select);
+			else
+				return false;
+		};
+			
+		Object.defineProperty(aPublished, "onRender", {
+			get : function() {
+				return aWidget.@com.eas.client.form.published.widgets.model.ModelGrid::getOnRender()();
+			},
+			set : function(aValue) {
+				aWidget.@com.eas.client.form.published.widgets.model.ModelGrid::setOnRender(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+			}
+		});
+		Object.defineProperty(aPublished, "selected", {
+			get : function() {
+				var selectionList = aWidget.@com.eas.client.form.published.widgets.model.ModelGrid::getJsSelected()();
+				var selectionArray = [];
+				for(var i = 0; i < selectionList.@java.util.List::size()(); i++){
+					selectionArray[selectionArray.length] = selectionList.@java.util.List::get(I)(i);
+				}
+				return selectionArray;
+			}
+		});
+		Object.defineProperty(aPublished, "editable", {
+			get : function() {
+				return aWidget.@com.eas.client.form.published.widgets.model.ModelGrid::isEditable()();
+			},
+			set : function(aValue) {
+				aWidget.@com.eas.client.form.published.widgets.model.ModelGrid::setEditable(Z)(aValue);
+			}
+		});
+		Object.defineProperty(aPublished, "deletable", {
+			get : function() {
+				return aWidget.@com.eas.client.form.published.widgets.model.ModelGrid::isDeletable()();
+			},
+			set : function(aValue) {
+				aWidget.@com.eas.client.form.published.widgets.model.ModelGrid::setDeletable(Z)(aValue);
+			}
+		});
+		Object.defineProperty(aPublished, "insertable", {
+			get : function() {
+				return aWidget.@com.eas.client.form.published.widgets.model.ModelGrid::isInsertable()();
+			},
+			set : function(aValue) {
+				aWidget.@com.eas.client.form.published.widgets.model.ModelGrid::setInsertable(Z)(aValue);
+			}
+		});
+	}-*/;
+	
 	public JavaScriptObject getOnRender() {
 		return onRender;
 	}

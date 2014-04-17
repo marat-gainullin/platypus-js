@@ -8,19 +8,35 @@ package com.bearsoft.gwt.ui.widgets.grid.cells;
 import java.util.Date;
 
 import com.google.gwt.cell.client.ValueUpdater;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.EventTarget;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.safecss.shared.SafeStyles;
+import com.google.gwt.safecss.shared.SafeStylesBuilder;
+import com.google.gwt.safehtml.client.SafeHtmlTemplates;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.dom.client.Style;
 
 /**
  * 
  * @author mg
  */
 public abstract class RenderedPopupEditorCell<T> extends AbstractPopupEditorCell<T> {
+
+	public static int CELL_PADDING = 2;
+	
+	protected interface Padded extends SafeHtmlTemplates {
+
+		public static Padded INSTANCE = GWT.create(Padded.class);
+
+		@Template("<div style='{0} position: relative; box-sizing: border-box; height: 100%; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap'>{1}</div>")
+		public SafeHtml get(SafeStyles aStyle, SafeHtml aContent);
+	}
 
 	protected CellRenderer<T> renderer;
 	protected CellHasReadonly readonly;
@@ -48,7 +64,9 @@ public abstract class RenderedPopupEditorCell<T> extends AbstractPopupEditorCell
 	@Override
 	public void render(Context context, T value, SafeHtmlBuilder sb) {
 		if (renderer == null || !renderer.render(context, value, sb)) {
-			renderCell(context, value, sb);
+			SafeHtmlBuilder content = new SafeHtmlBuilder();
+			renderCell(context, value, content);
+			sb.append(Padded.INSTANCE.get(new SafeStylesBuilder().padding(CELL_PADDING, Style.Unit.PX).toSafeStyles(), content.toSafeHtml()));
 		}
 	}
 

@@ -16,6 +16,9 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.safecss.shared.SafeStyles;
+import com.google.gwt.safecss.shared.SafeStylesBuilder;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -30,8 +33,8 @@ public class TreeExpandableCell<T, C> extends DivDecoratorCell<C> {
 
 	public interface Template extends SafeHtmlTemplates {
 
-		@SafeHtmlTemplates.Template("<div class=\"{0}\" style=\"background-position: {1}px; padding-left: {2}px; position:relative;zoom:1;\"><div>{3}</div></div>")
-		SafeHtml outerDiv(String aClasses, int iconPadding, int padding, SafeHtml cellContents);
+		@SafeHtmlTemplates.Template("<div class='{0}' style='{1}'><div>{2}</div></div>")
+		SafeHtml outerDiv(String aClasses, SafeStyles aStyle, SafeHtml cellContents);
 	}
 
 	public static int DEAFAULT_INDENT = 24;
@@ -68,7 +71,12 @@ public class TreeExpandableCell<T, C> extends DivDecoratorCell<C> {
 			cell.render(context, value, cellBuilder);
 			int deepness = getDeepness(context);
 			int outerDivPadding = indent * (deepness + 1);
-			sb.append(template.outerDiv(outerDivClasses(context), indent * deepness, outerDivPadding, cellBuilder.toSafeHtml()));
+			SafeStyles styles = new SafeStylesBuilder()
+				.trustedNameAndValue("background-position", indent * deepness, Style.Unit.PX)
+				.paddingLeft(outerDivPadding, Style.Unit.PX)
+				.position(Style.Position.RELATIVE)
+				.toSafeStyles();
+			sb.append(template.outerDiv(outerDivClasses(context), styles, cellBuilder.toSafeHtml()));
 		} else {
 			cell.render(context, value, sb);
 		}

@@ -8,19 +8,19 @@ public class PublishedColor extends JavaScriptObject {
 	}
 
 	public final native int getRed()/*-{
-		return this.red!=null?this.red:0;
+		return this.red != null ? this.red : 0;
 	}-*/;
 
 	public final native int getGreen()/*-{
-		return this.green!=null?this.green:0;
+		return this.green != null ? this.green : 0;
 	}-*/;
 
 	public final native int getBlue()/*-{
-		return this.blue!=null?this.blue:0;
+		return this.blue != null ? this.blue : 0;
 	}-*/;
 
 	public final native int getAlpha()/*-{
-		return this.alpha!=null?this.alpha:0;
+		return this.alpha != null ? this.alpha : 0;
 	}-*/;
 	
 	public final native String toStyled()/*-{

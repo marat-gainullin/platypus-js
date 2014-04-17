@@ -715,20 +715,9 @@ public class WidgetsFactory {
 			aPublished.setOpaque(opaque);
 		if (!isRoot) {
 			Element fontTag = Utils.getElementByTagName(aTag, "easFont");
-			if (fontTag != null) {
-				String fontFamily = null;
-				if (fontTag.hasAttribute("name")) {
-					fontFamily = fontTag.getAttribute("name");
-				}
-				int fontSize = 0;
-				if (fontTag.hasAttribute("size")) {
-					fontSize = Utils.getIntegerAttribute(fontTag, "size", 10);
-				}
-				int fontStyle = 0;
-				if (fontTag.hasAttribute("style")) {
-					fontStyle = Utils.getIntegerAttribute(fontTag, "style", 0);
-				}
-				aPublished.setFont(PublishedFont.create(fontFamily, fontStyle, fontSize));
+			PublishedFont font =  parseFont(fontTag);
+			if (font != null) {
+				aPublished.setFont(font);
 			}
 		}
 		if (aTag.hasAttribute("cursor")) {
@@ -736,6 +725,26 @@ public class WidgetsFactory {
 		}
 	}
 
+	public static PublishedFont parseFont(Element fontTag) throws Exception{
+		if(fontTag != null){
+		String fontFamily = null;
+		if (fontTag.hasAttribute("name")) {
+			fontFamily = fontTag.getAttribute("name");
+		}
+		int fontSize = 0;
+		if (fontTag.hasAttribute("size")) {
+			fontSize = Utils.getIntegerAttribute(fontTag, "size", 10);
+		}
+		int fontStyle = 0;
+		if (fontTag.hasAttribute("style")) {
+			fontStyle = Utils.getIntegerAttribute(fontTag, "style", 0);
+		}
+		return PublishedFont.create(fontFamily, fontStyle, fontSize);
+		}else{
+			return null;
+		}
+	}
+	
 	protected static String convertCursor(int aValue) {
 		switch (aValue) {
 		case 1/* CROSSHAIR */:

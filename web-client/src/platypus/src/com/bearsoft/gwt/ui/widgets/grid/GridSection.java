@@ -38,6 +38,7 @@ public class GridSection<T> extends CellTable<T> {
 		setKeyboardPagingPolicy(HasKeyboardPagingPolicy.KeyboardPagingPolicy.CURRENT_PAGE);
 		setLoadingIndicator(null);
 		setEmptyTableWidget(null);
+		getElement().getStyle().setProperty("borderCollapse", "collapse");
 	}
 
 	protected boolean ctrlKey;

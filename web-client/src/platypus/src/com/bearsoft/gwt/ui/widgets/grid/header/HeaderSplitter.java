@@ -30,6 +30,7 @@ public class HeaderSplitter {
 				break;
 			HeaderNode n = toBeSplitted.get(i);
 			HeaderNode nc = new HeaderNode(n.getHeader());
+			nc.setStyle(n.getStyle());
 			if(n.getChildren().isEmpty()){
 				leaveIndex++;
 			}else{

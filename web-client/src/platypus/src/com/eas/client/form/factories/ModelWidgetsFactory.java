@@ -47,7 +47,6 @@ public class ModelWidgetsFactory extends WidgetsFactory {
 		} else if ("DbGridDesignInfo".equalsIgnoreCase(designInfoTypeName)) {
 			final ModelGrid mGrid = createGrid(aTag);
 			PublishedComponent published = Publisher.publish(mGrid);
-			mGrid.setPublished(published);
 			processGeneralProperties(mGrid, aTag, published);
 			return mGrid;
 		} else {

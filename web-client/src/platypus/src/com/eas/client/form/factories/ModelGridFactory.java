@@ -19,6 +19,8 @@ import com.eas.client.form.grid.columns.ModelGridColumn;
 import com.eas.client.form.grid.columns.TextAreaModelGridColumn;
 import com.eas.client.form.grid.columns.TextModelGridColumn;
 import com.eas.client.form.grid.rows.RowsetDataProvider;
+import com.eas.client.form.published.PublishedColor;
+import com.eas.client.form.published.PublishedStyle;
 import com.eas.client.form.published.widgets.model.ModelElementRef;
 import com.eas.client.form.published.widgets.model.ModelGrid;
 import com.eas.client.model.Entity;
@@ -30,6 +32,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.SafeHtmlHeader;
 import com.google.gwt.xml.client.Element;
+import com.google.gwt.xml.client.Node;
 import com.google.gwt.xml.client.NodeList;
 
 public class ModelGridFactory {
@@ -61,6 +64,9 @@ public class ModelGridFactory {
 		boolean rowLines = Utils.getBooleanAttribute(gridTag, "showHorizontalLines", true);
 		boolean columnLines = Utils.getBooleanAttribute(gridTag, "showVerticalLines", true);
 		boolean showOddRowsInOtherColor = Utils.getBooleanAttribute(gridTag, "showOddRowsInOtherColor", true);
+		PublishedColor gridColor = gridTag.hasAttribute("gridColorValue") ? ControlsUtils.parseColor(gridTag.getAttribute("gridColorValue")) : null;
+		PublishedColor oddRowsColor = gridTag.hasAttribute("oddRowsColorValue") ? ControlsUtils.parseColor(gridTag.getAttribute("oddRowsColorValue")) : null;
+		//
 		boolean editable = Utils.getBooleanAttribute(gridTag, "editable", true);
 		final boolean deletable = Utils.getBooleanAttribute(gridTag, "deletable", true);
 		final boolean insertable = Utils.getBooleanAttribute(gridTag, "insertable", true);
@@ -70,25 +76,29 @@ public class ModelGridFactory {
 		int treeKind = Utils.getIntegerAttribute(treeTag, "treeKind", ModelGrid.ONE_FIELD_ONE_QUERY_TREE_KIND);
 		ModelElementRef param2GetChildren = new ModelElementRef(Utils.getElementByTagName(treeTag, "param2GetChildren"), model);
 		ModelElementRef paramSourceField = new ModelElementRef(Utils.getElementByTagName(treeTag, "paramSourceField"), model);
-		
+
 		rowsSource = rowsModelElement.entity;
 		rowsetsOfInterestHosts.add(rowsSource);
 
 		grid = new ModelGrid();
-		
+
 		grid.setUnaryLinkField(unaryLinkField);
 		grid.setTreeKind(treeKind);
 		grid.setParam2GetChildren(param2GetChildren);
 		grid.setParamSourceField(paramSourceField);
-		
+
 		grid.setRowsSource(rowsSource);
-		
+
 		grid.setEditable(editable);
 		grid.setDeletable(deletable);
 		grid.setInsertable(insertable);
 		grid.setRowsHeight(rowsHeight);
-		grid.setRowLines(rowLines);
-		grid.setColumnLines(columnLines);
+		grid.setShowHorizontalLines(rowLines);
+		grid.setShowVerticalLines(columnLines);
+		if(gridColor != null)
+			grid.setGridColor(gridColor);
+		if(oddRowsColor != null)
+			grid.setOddRowsColor(oddRowsColor);
 		grid.setShowOddRowsInOtherColor(showOddRowsInOtherColor);
 		// Selection models & service column configuration
 		grid.setRowsHeaderType(rowsHeaderType);
@@ -101,7 +111,7 @@ public class ModelGridFactory {
 				if ("column".equalsIgnoreCase(nodesWithColumns.item(i).getNodeName())) {
 					assert nodesWithColumns.item(i) instanceof Element : "Column must be a tag";
 					Element columnTag = (Element) nodesWithColumns.item(i);
-					processColumn(columnTag, headerForest, null);
+					processHeaderNode(columnTag, headerForest, null);
 				}
 			}
 			grid.setEditable(editable);
@@ -122,7 +132,7 @@ public class ModelGridFactory {
 		}
 	}
 
-	private void processColumn(Element aTag, List<HeaderNode> aHeaderChildren, HeaderNode aHeaderParent) throws Exception {
+	private void processHeaderNode(Element aTag, List<HeaderNode> aHeaderChildren, HeaderNode aHeaderParent) throws Exception {
 		HeaderNode hNode = new HeaderNode();
 		// plain settings
 		String name = aTag.getAttribute("name");
@@ -132,24 +142,21 @@ public class ModelGridFactory {
 		ModelElementRef modelElement = null;
 		Element controlTag = null;
 		// style
-		Element headerEasFontTag = null;
 		Element styleTag = null;
 		NodeList columnNodes = aTag.getChildNodes();
 		int childColumnsCount = 0;
 		int childTagsCount = columnNodes != null ? columnNodes.getLength() : 0;
 		for (int c = 0; c < childTagsCount; c++) {
-			if ("datamodelElement".equalsIgnoreCase(columnNodes.item(c).getNodeName()))
+			if ("datamodelElement".equalsIgnoreCase(columnNodes.item(c).getNodeName())){
 				modelElement = new ModelElementRef((Element) columnNodes.item(c), model);
-			else if ("controlInfo".equalsIgnoreCase(columnNodes.item(c).getNodeName()))
+			}else if ("controlInfo".equalsIgnoreCase(columnNodes.item(c).getNodeName())){
 				controlTag = (Element) columnNodes.item(c);
 			// header style
-			else if ("headerEasFont".equalsIgnoreCase(columnNodes.item(c).getNodeName()))
-				headerEasFontTag = (Element) columnNodes.item(c);
-			else if ("style".equalsIgnoreCase(columnNodes.item(c).getNodeName()))
+			} else if ("headerStyle".equalsIgnoreCase(columnNodes.item(c).getNodeName())) {
 				styleTag = (Element) columnNodes.item(c);
-			else if ("column".equalsIgnoreCase(columnNodes.item(c).getNodeName())) {
+			} else if ("column".equalsIgnoreCase(columnNodes.item(c).getNodeName())) {
 				childColumnsCount++;
-				processColumn((Element) columnNodes.item(c), hNode.getChildren(), hNode);
+				processHeaderNode((Element) columnNodes.item(c), hNode.getChildren(), hNode);
 			}
 		}
 		if (childColumnsCount == 0) {
@@ -161,6 +168,24 @@ public class ModelGridFactory {
 			hNode.setHeader(new SafeHtmlHeader(safeHtml));
 		}
 		hNode.setParent(aHeaderParent);
+		if(styleTag != null){
+			PublishedStyle hNodeStyle = PublishedStyle.create();
+			hNode.setStyle(hNodeStyle);
+			NodeList headerStyleNodes = styleTag.getChildNodes();		
+			int headerStyleTagsCount = headerStyleNodes != null ? headerStyleNodes.getLength() : 0;
+			for (int c = 0; c < headerStyleTagsCount; c++) {
+				Node n = headerStyleNodes.item(c);
+				if ("nativeFont".equalsIgnoreCase(n.getNodeName())){
+					hNodeStyle.setFont(WidgetsFactory.parseFont((Element)n));
+				}				
+			}
+			if(styleTag.hasAttribute("backgroundColor")){
+				hNodeStyle.setBackground(ControlsUtils.parseColor(styleTag.getAttribute("backgroundColor")));
+			}
+			if(styleTag.hasAttribute("foregroundColor")){
+				hNodeStyle.setForeground(ControlsUtils.parseColor(styleTag.getAttribute("foregroundColor")));
+			}
+		}
 		aHeaderChildren.add(hNode);
 	}
 

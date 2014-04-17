@@ -27,76 +27,6 @@ public class JsModelWidgets {
 			};
 			publishComponentProperties(published);
 
-			published.select = function(aRow) {
-				if(aRow != null && aRow != undefined)
-					aComponent.@com.eas.client.form.published.widgets.model.ModelGrid::selectRow(Lcom/bearsoft/rowset/Row;)(aRow.unwrap());
-			};
-			published.unselect = function(aRow) {
-				if(aRow != null && aRow != undefined)
-					aComponent.@com.eas.client.form.published.widgets.model.ModelGrid::unselectRow(Lcom/bearsoft/rowset/Row;)(aRow.unwrap());
-			};
-			published.clearSelection = function() {
-				aComponent.@com.eas.client.form.published.widgets.model.ModelGrid::clearSelection()();
-			};
-			published.find = function(){
-				aComponent.@com.eas.client.form.published.widgets.model.ModelGrid::find()();
-			};
-			published.findSomething = function() {
-				published.find();
-			};
-			published.makeVisible = function(aRow, needToSelect) {
-				var need2Select = true;
-				if(needToSelect != undefined)
-					need2Select = (false != needToSelect);
-				if(aRow != null)
-					return aComponent.@com.eas.client.form.published.widgets.model.ModelGrid::makeVisible(Lcom/bearsoft/rowset/Row;Z)(aRow.unwrap(), need2Select);
-				else
-					return false;
-			};
-			
-			Object.defineProperty(published, "onRender", {
-				get : function() {
-					return aComponent.@com.eas.client.form.published.widgets.model.ModelGrid::getOnRender()();
-				},
-				set : function(aValue) {
-					aComponent.@com.eas.client.form.published.widgets.model.ModelGrid::setOnRender(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
-				}
-			});
-			Object.defineProperty(published, "selected", {
-				get : function() {
-					var selectionList = aComponent.@com.eas.client.form.published.widgets.model.ModelGrid::getJsSelected()();
-					var selectionArray = [];
-					for(var i=0;i<selectionList.@java.util.List::size()();i++)
-					{
-						selectionArray[selectionArray.length] = selectionList.@java.util.List::get(I)(i);
-					}
-					return selectionArray;
-				}
-			});
-			Object.defineProperty(published, "editable", {
-				get : function() {
-					return aComponent.@com.eas.client.form.published.widgets.model.ModelGrid::isEditable()();
-				},
-				set : function(aValue) {
-					aComponent.@com.eas.client.form.published.widgets.model.ModelGrid::setEditable(Z)(aValue);
-				}
-			});
-			Object.defineProperty(published, "deletable", {
-				get : function() {
-					return aComponent.@com.eas.client.form.published.widgets.model.ModelGrid::isDeletable()();
-				},
-				set : function(aValue) {
-					aComponent.@com.eas.client.form.published.widgets.model.ModelGrid::setDeletable(Z)(aValue);
-				}
-			});
-			Object.defineProperty(published, "insertable", {
-				get : function() {
-					return aComponent.@com.eas.client.form.published.widgets.model.ModelGrid::isInsertable()();
-				},
-				set : function(aValue) {
-					aComponent.@com.eas.client.form.published.widgets.model.ModelGrid::setInsertable(Z)(aValue);
-				}
-			});
 			if(!injected){
 				aComponent.@com.eas.client.form.published.widgets.model.ModelGrid::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
 			}
@@ -119,8 +49,7 @@ public class JsModelWidgets {
 			};
 			publishComponentProperties(published);
 
-			if(!injected)
-			{
+			if(!injected){
 				aComponent.@com.eas.client.form.published.widgets.model.ModelCheck::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
 				published.text = aText;
 			}
