@@ -4,6 +4,7 @@ import com.bearsoft.gwt.ui.widgets.grid.cells.CellRenderer;
 import com.bearsoft.gwt.ui.widgets.grid.cells.DoubleEditorCell;
 import com.bearsoft.gwt.ui.widgets.grid.cells.TreeExpandableCell;
 import com.bearsoft.rowset.Row;
+import com.eas.client.application.PlatypusImageResource;
 import com.eas.client.converters.DoubleRowValueConverter;
 import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.published.PublishedCell;
@@ -42,9 +43,13 @@ public class DoubleModelGridColumn extends ModelGridColumn<Double> {
 						else
 							lsb.append(SafeHtmlUtils.fromString(toRender));
 						styleToRender = grid.complementPublishedStyle(styleToRender);
-						ControlsUtils.renderDecorated(lsb, styleToRender, sb);
+						String decorId = ControlsUtils.renderDecorated(lsb, styleToRender, sb);
 						if (cellToRender != null) {
-							DoubleModelGridColumn.this.bindContextCallback(context, cellToRender);
+							DoubleModelGridColumn.this.bindDisplayCallback(decorId, cellToRender);		
+							if(cellToRender.getStyle() != null && cellToRender.getStyle().getIcon() instanceof PlatypusImageResource){
+								PlatypusImageResource pImage = (PlatypusImageResource)cellToRender.getStyle().getIcon();
+								DoubleModelGridColumn.this.bindIconCallback(decorId, pImage);
+							}
 						}
 					} catch (Exception e) {
 						sb.append(SafeHtmlUtils.fromString(e.getMessage()));
@@ -85,4 +90,12 @@ public class DoubleModelGridColumn extends ModelGridColumn<Double> {
 	public void setStep(Double aValue){
 		((ModelSpin)editor).setStep(aValue);
 	}
+	
+	public String getEmptyText(){
+		return ((ModelSpin)getEditor()).getEmptyText();
+	}
+	
+	public void setEmptyText(String aValue) {
+		((ModelSpin)getEditor()).setEmptyText(aValue);
+    }
 }

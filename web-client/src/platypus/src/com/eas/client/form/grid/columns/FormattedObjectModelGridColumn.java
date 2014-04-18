@@ -6,6 +6,7 @@ import com.bearsoft.gwt.ui.widgets.ObjectFormat;
 import com.bearsoft.gwt.ui.widgets.grid.cells.CellRenderer;
 import com.bearsoft.gwt.ui.widgets.grid.cells.TreeExpandableCell;
 import com.bearsoft.rowset.Row;
+import com.eas.client.application.PlatypusImageResource;
 import com.eas.client.converters.ObjectRowValueConverter;
 import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.grid.cells.PlatypusFormattedObjectEditorCell;
@@ -43,9 +44,13 @@ public class FormattedObjectModelGridColumn extends ModelGridColumn<Object> {
 						else
 							lsb.append(SafeHtmlUtils.fromString(toRender));
 						styleToRender = column.getGrid().complementPublishedStyle(styleToRender);
-						ControlsUtils.renderDecorated(lsb, styleToRender, sb);
+						String decorId = ControlsUtils.renderDecorated(lsb, styleToRender, sb);
 						if (cellToRender != null) {
-							FormattedObjectModelGridColumn.this.bindContextCallback(context, cellToRender);
+							FormattedObjectModelGridColumn.this.bindDisplayCallback(decorId, cellToRender);		
+							if(cellToRender.getStyle() != null && cellToRender.getStyle().getIcon() instanceof PlatypusImageResource){
+								PlatypusImageResource pImage = (PlatypusImageResource)cellToRender.getStyle().getIcon();
+								FormattedObjectModelGridColumn.this.bindIconCallback(decorId, pImage);
+							}
 						}
 					} catch (Exception e) {
 						sb.append(SafeHtmlUtils.fromString(e.getMessage()));
@@ -80,4 +85,12 @@ public class FormattedObjectModelGridColumn extends ModelGridColumn<Object> {
 		((PlatypusFormattedObjectEditorCell) getTargetCell()).setFormat(new ObjectFormat(aType, aPattern));
 		((ModelFormattedField) getEditor()).setFormatType(aType, aPattern);
 	}
+	
+	public String getEmptyText(){
+		return ((ModelFormattedField)getEditor()).getEmptyText();
+	}
+	
+	public void setEmptyText(String aValue) {
+		((ModelFormattedField)getEditor()).setEmptyText(aValue);
+    }
 }

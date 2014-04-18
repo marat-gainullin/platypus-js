@@ -186,7 +186,7 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 
 	@Override
 	public void setValue(T value) {
-		decorated.setValue(value);
+		setValue(value, false);
 	}
 
 	@Override

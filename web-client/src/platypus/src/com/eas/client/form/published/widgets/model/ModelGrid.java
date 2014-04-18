@@ -18,15 +18,12 @@ import com.bearsoft.gwt.ui.widgets.grid.processing.TreeDataProvider.ExpandedColl
 import com.bearsoft.gwt.ui.widgets.grid.processing.TreeMultiSortHandler;
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Utils.JsObject;
-import com.bearsoft.rowset.events.RowsetEvent;
 import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.eas.client.form.ControlsUtils;
-import com.eas.client.form.CrossUpdater;
 import com.eas.client.form.EventsExecutor;
 import com.eas.client.form.RowKeyProvider;
 import com.eas.client.form.grid.FindWindow;
-import com.eas.client.form.grid.GridCrossUpdaterAction;
 import com.eas.client.form.grid.RowsetPositionSelectionHandler;
 import com.eas.client.form.grid.cells.rowmarker.RowMarkerCell;
 import com.eas.client.form.grid.columns.CheckServiceColumn;
@@ -47,7 +44,6 @@ import com.eas.client.form.published.PublishedComponent;
 import com.eas.client.form.published.PublishedStyle;
 import com.eas.client.form.published.menu.PlatypusPopupMenu;
 import com.eas.client.model.Entity;
-import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Style.Unit;
@@ -96,8 +92,6 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 	protected Entity rowsSource;
 	protected JavaScriptObject onRender;
 	protected PublishedComponent published;
-	protected Callback<RowsetEvent, RowsetEvent> crossUpdaterAction;
-	protected CrossUpdater crossUpdater;
 	protected FindWindow finder;
 	protected String groupName = "group-name-" + Document.get().createUniqueId();
 	protected int rowsHeaderType = -1;
@@ -113,8 +107,6 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 	public ModelGrid() {
 		super(new RowKeyProvider());
 		finder = new FindWindow(this);
-		crossUpdaterAction = new GridCrossUpdaterAction(this);
-		crossUpdater = new CrossUpdater(crossUpdaterAction);
 		addDomHandler(new KeyUpHandler() {
 
 			@Override
@@ -461,14 +453,6 @@ public class ModelGrid extends Grid<Row> implements HasJsFacade, HasOnRender, Ha
 			ControlsUtils.applyFont(this, published.getFont());
 		if (published.isCursorSet())
 			ControlsUtils.applyCursor(this, published.getCursor());
-	}
-
-	public Callback<RowsetEvent, RowsetEvent> getCrossUpdaterAction() {
-		return crossUpdaterAction;
-	}
-
-	public void addUpdatingTriggerEntity(Entity aTrigger) {
-		crossUpdater.add(aTrigger);
 	}
 
 	public Entity getRowsSource() {

@@ -5,6 +5,7 @@ import com.bearsoft.gwt.ui.widgets.grid.cells.StringEditorCell;
 import com.bearsoft.gwt.ui.widgets.grid.cells.TreeExpandableCell;
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.metadata.Field;
+import com.eas.client.application.PlatypusImageResource;
 import com.eas.client.converters.StringRowValueConverter;
 import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.published.PublishedCell;
@@ -50,9 +51,13 @@ public class TextModelGridColumn extends ModelGridColumn<String> {
 						else
 							lsb.append(SafeHtmlUtils.fromString(toRender));
 						styleToRender = grid.complementPublishedStyle(styleToRender);
-						ControlsUtils.renderDecorated(lsb, styleToRender, sb);
+						String decorId = ControlsUtils.renderDecorated(lsb, styleToRender, sb);
 						if (cellToRender != null) {
-							TextModelGridColumn.this.bindContextCallback(context, cellToRender);
+							TextModelGridColumn.this.bindDisplayCallback(decorId, cellToRender);		
+							if(cellToRender.getStyle() != null && cellToRender.getStyle().getIcon() instanceof PlatypusImageResource){
+								PlatypusImageResource pImage = (PlatypusImageResource)cellToRender.getStyle().getIcon();
+								TextModelGridColumn.this.bindIconCallback(decorId, pImage);
+							}
 						}
 					} catch (Exception e) {
 						sb.append(SafeHtmlUtils.fromString(e.getMessage()));

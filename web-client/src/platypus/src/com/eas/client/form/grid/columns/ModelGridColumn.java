@@ -1,6 +1,5 @@
 package com.eas.client.form.grid.columns;
 
-import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -14,14 +13,13 @@ import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Utils;
 import com.bearsoft.rowset.sorting.RowsComparator;
 import com.bearsoft.rowset.sorting.SortingCriterion;
+import com.eas.client.ImageResourceCallback;
+import com.eas.client.application.PlatypusImageResource;
 import com.eas.client.converters.RowValueConverter;
-import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.Publisher;
 import com.eas.client.form.js.JsEvents;
 import com.eas.client.form.published.HasPublished;
-import com.google.gwt.dom.client.Style;
 import com.eas.client.form.published.PublishedCell;
-import com.eas.client.form.published.PublishedStyle;
 import com.eas.client.form.published.widgets.model.ModelElementRef;
 import com.eas.client.form.published.widgets.model.ModelGrid;
 import com.eas.client.form.published.widgets.model.PublishedDecoratorBox;
@@ -29,9 +27,11 @@ import com.eas.client.model.Entity;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 
 public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements FieldUpdater<Row, T>, ChangesHost, HasPublished, ModelGridColumnFacade {
 
@@ -56,7 +56,7 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 	protected JavaScriptObject onSelect;
 
 	public ModelGridColumn(Cell<T> aCell, String aName, Entity aRowsEntity, ModelElementRef aColumnModelRef, RowValueConverter<T> aConverter) {
-		super(aCell);		
+		super(aCell);
 		if (getTargetCell() instanceof RenderedPopupEditorCell<?>) {
 			((RenderedPopupEditorCell<T>) getTargetCell()).setReadonly(new CellHasReadonly() {
 
@@ -77,10 +77,10 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 		setPublished(JavaScriptObject.createObject());
 	}
 
-	protected Cell<T> getTargetCell(){
+	protected Cell<T> getTargetCell() {
 		return ((TreeExpandableCell<Row, T>) getCell()).getCell();
 	}
-	
+
 	@Override
 	public String getJsName() {
 		return name;
@@ -361,6 +361,7 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 			if (editor != null) {
 				editor.setOnSelect(onSelect);
 				editor.setClearButtonVisible(columnModelRef != null && columnModelRef.field != null ? columnModelRef.field.isNullable() : true);
+				editor.setPublished(JavaScriptObject.createObject());
 			}
 		}
 	}
@@ -396,26 +397,43 @@ public abstract class ModelGridColumn<T> extends GridColumn<Row, T> implements F
 		return renderedRow;
 	}
 
-	protected void bindContextCallback(final com.google.gwt.cell.client.Cell.Context context, final PublishedCell cellToRender) {
-		cellToRender.setDisplayCallback(new Runnable() {
+	protected void bindDisplayCallback(final String aTargetElementId, final PublishedCell aCell) {
+		aCell.setDisplayCallback(new Runnable() {
 			@Override
 			public void run() {
-				Element td = grid.getViewCell(context.getIndex(), context.getColumn());
-				if (td != null) {
-					// rendering
-					SafeHtmlBuilder sb = new SafeHtmlBuilder();
-					SafeHtmlBuilder lsb = new SafeHtmlBuilder();
-					String toRender1 = cellToRender.getDisplay();
-					if (toRender1 == null)
-						lsb.append(SafeHtmlUtils.fromTrustedString("&#160;"));
-					else
-						lsb.append(SafeHtmlUtils.fromString(toRender1));
-					PublishedStyle styleToRender = grid.complementPublishedStyle(cellToRender.getStyle());
-					ControlsUtils.renderDecorated(lsb, styleToRender, sb);
-					td.setInnerSafeHtml(sb.toSafeHtml());
+				Element padded = Document.get().getElementById(aTargetElementId);
+				if (padded != null) {
+					aCell.styleToElement(padded);
+					int paddingLeft = RenderedPopupEditorCell.CELL_PADDING;
+					ImageResource icon = aCell.getStyle().getIcon();
+					if (icon != null) {
+						paddingLeft += icon.getWidth();
+					}
+					padded.getStyle().setPaddingLeft(paddingLeft, Style.Unit.PX);
+					String toRender = aCell.getDisplay();
+					if (toRender == null)
+						toRender = "&#160;";
+					padded.setInnerSafeHtml(SafeHtmlUtils.fromTrustedString(toRender));
 				}
 			}
 		});
+	}
+
+	protected void bindIconCallback(final String aTargetElementId, final PlatypusImageResource aIcon) {
+		if (aIcon != null && aIcon.isPending()) {
+			aIcon.addCallback(new ImageResourceCallback() {
+
+				@Override
+				public void run(PlatypusImageResource aResource) {
+					Element padded = Document.get().getElementById(aTargetElementId);
+					if (padded != null) {
+						int paddingLeft = RenderedPopupEditorCell.CELL_PADDING + aIcon.getWidth();
+						padded.getStyle().setPaddingLeft(paddingLeft, Style.Unit.PX);
+					}
+				}
+
+			});
+		}
 	}
 
 	@Override

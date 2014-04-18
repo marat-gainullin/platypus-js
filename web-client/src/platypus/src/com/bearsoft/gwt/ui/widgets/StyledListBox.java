@@ -30,6 +30,7 @@ public class StyledListBox<T> extends ListBox implements HasValue<T> {
 
 	protected List<T> associatedValues = new ArrayList<>();
 	protected Map<T, Integer> indicies;
+	protected T value;
 
 	public StyledListBox() {
 		this(false);
@@ -128,21 +129,17 @@ public class StyledListBox<T> extends ListBox implements HasValue<T> {
 
 	@Override
 	public T getValue() {
-		int selectedIndex = getSelectedIndex();
-		if (selectedIndex == -1) {
-			return null;
-		} else {
-			return getAssociatedValue(selectedIndex);
-		}
+		return value;
 	}
 
 	@Override
-	public void setValue(T value) {
-		setValue(value, false);
+	public void setValue(T aValue) {
+		setValue(aValue, false);
 	}
 
 	@Override
-	public void setValue(T value, boolean fireEvents) {
+	public void setValue(T aValue, boolean fireEvents) {
+		value = aValue;
 		if (indicies == null) {
 			indicies = new HashMap<>();
 			for (int i = 0; i < associatedValues.size(); i++) {
@@ -150,12 +147,12 @@ public class StyledListBox<T> extends ListBox implements HasValue<T> {
 				indicies.put(association, i);
 			}
 		}
-		Integer index = indicies.get(value);
+		Integer index = indicies.get(aValue);
 		if (index == null)
 			index = -1;
 		setSelectedIndex(index);
 		if (fireEvents) {
-			ValueChangeEvent.fire(StyledListBox.this, getValue());
+			ValueChangeEvent.fire(StyledListBox.this, value);
 		}
 	}
 }

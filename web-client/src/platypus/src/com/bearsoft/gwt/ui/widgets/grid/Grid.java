@@ -84,7 +84,7 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 		        + "border-bottom-width: {1}px;" + "border-left-width: {2}px;" + "border-right-width: {2}px;" + "border-color: {3};" + "}")
 		public SafeHtml td(String aCssRuleName, double hBorderWidth, double vBorderWidth, String aLinesColor);
 
-		@Template(".{0}{" + "position: relative;" + "height: {1}px;" + "text-overflow: ellipsis;" + "overflow: hidden;" + "white-space: nowrap;" + "}")
+		@Template(".{0}{" + "position: relative;" + "height: {1}px;" /*+ "text-overflow: ellipsis;" + "overflow: hidden;" + "white-space: nowrap;" */+ "}")
 		public SafeHtml cell(String aCssRuleName, double aRowsHeight);
 	}
 
@@ -623,7 +623,7 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 		headerRight.getColumnSortList().setLimit(1);
 		headerRight.addColumnSortHandler(sectionSortHandler);
 		gridColor = PublishedColor.create(211, 211, 211, 255);
-		regenerateDynamicCellsStyles();
+		regenerateDynamicTDStyles();
 		regenerateDynamicOddRowsStyles();
 	}
 
@@ -737,7 +737,7 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 	public void setShowHorizontalLines(boolean aValue) {
 		if (showHorizontalLines != aValue) {
 			showHorizontalLines = aValue;
-			regenerateDynamicCellsStyles();
+			regenerateDynamicTDStyles();
 		}
 	}
 
@@ -748,14 +748,13 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 	public void setShowVerticalLines(boolean aValue) {
 		if (showVerticalLines != aValue) {
 			showVerticalLines = aValue;
-			regenerateDynamicCellsStyles();
+			regenerateDynamicTDStyles();
 		}
 	}
 
-	protected void regenerateDynamicCellsStyles() {
+	protected void regenerateDynamicTDStyles() {
 		tdsStyleElement.setInnerSafeHtml(DynamicCellStyles.INSTANCE.td(dynamicTDClassName, showHorizontalLines ? 1 : 0, showVerticalLines ? 1 : 0, gridColor != null ? gridColor.toStyled()
 		        : ""));
-		cellsStyleElement.setInnerSafeHtml(DynamicCellStyles.INSTANCE.cell(dynamicCellClassName, rowsHeight));
 	}
 
 	protected void regenerateDynamicOddRowsStyles() {
@@ -772,7 +771,7 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 
 	public void setGridColor(PublishedColor aValue) {
 		gridColor = aValue;
-		regenerateDynamicCellsStyles();
+		regenerateDynamicTDStyles();
 	}
 
 	public PublishedColor getOddRowsColor() {
@@ -791,7 +790,7 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 	public void setRowsHeight(int aValue) {
 		if (rowsHeight != aValue && aValue >= 10) {
 			rowsHeight = aValue;
-			regenerateDynamicCellsStyles();
+			cellsStyleElement.setInnerSafeHtml(DynamicCellStyles.INSTANCE.cell(dynamicCellClassName, rowsHeight));
 			onResize();
 		}
 	}

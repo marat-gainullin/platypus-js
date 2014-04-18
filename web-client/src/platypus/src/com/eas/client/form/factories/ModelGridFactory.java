@@ -1,13 +1,10 @@
 package com.eas.client.form.factories;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import com.bearsoft.gwt.ui.widgets.ObjectFormat;
 import com.bearsoft.gwt.ui.widgets.grid.header.HeaderNode;
-import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.Utils;
 import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.grid.columns.BooleanModelGridColumn;
@@ -18,7 +15,6 @@ import com.eas.client.form.grid.columns.LookupModelGridColumn;
 import com.eas.client.form.grid.columns.ModelGridColumn;
 import com.eas.client.form.grid.columns.TextAreaModelGridColumn;
 import com.eas.client.form.grid.columns.TextModelGridColumn;
-import com.eas.client.form.grid.rows.RowsetDataProvider;
 import com.eas.client.form.published.PublishedColor;
 import com.eas.client.form.published.PublishedStyle;
 import com.eas.client.form.published.widgets.model.ModelElementRef;
@@ -41,7 +37,6 @@ public class ModelGridFactory {
 	//
 	protected Model model;
 	protected Entity rowsSource;
-	protected Set<Entity> rowsetsOfInterestHosts = new HashSet<Entity>();
 	protected List<HeaderNode> headerForest = new ArrayList<>();
 	protected ModelGrid grid;
 
@@ -78,7 +73,6 @@ public class ModelGridFactory {
 		ModelElementRef paramSourceField = new ModelElementRef(Utils.getElementByTagName(treeTag, "paramSourceField"), model);
 
 		rowsSource = rowsModelElement.entity;
-		rowsetsOfInterestHosts.add(rowsSource);
 
 		grid = new ModelGrid();
 
@@ -117,12 +111,6 @@ public class ModelGridFactory {
 			grid.setEditable(editable);
 			grid.setInsertable(insertable);
 			grid.setDeletable(deletable);
-			// row lines ?
-			// column lines ?
-			/*
-			 * for (Entity entity : rowsetsOfInterestHosts) {
-			 * grid.addUpdatingTriggerEntity(entity); }
-			 */
 			grid.setHeader(headerForest);
 			grid.setFrozenColumns(fixedColumns);
 			grid.setFrozenRows(fixedRows);
@@ -200,8 +188,6 @@ public class ModelGridFactory {
 		boolean fixed = Utils.getBooleanAttribute(aColumnTag, "fixed", false);
 
 		if (aColModelElement != null && aColModelElement.isCorrect()) {
-			if (rowsSource != null && rowsSource != aColModelElement.entity)
-				rowsetsOfInterestHosts.add(aColModelElement.entity);
 			SafeHtmlBuilder sb = new SafeHtmlBuilder();
 			sb.appendHtmlConstant((aTitle != null && !aTitle.isEmpty()) ? aTitle : aName);
 			String controlInfoName = aControlTag.getAttribute("classHint");
@@ -212,13 +198,20 @@ public class ModelGridFactory {
 				String formatPattern = aControlTag.getAttribute("format");
 				int formatType = Utils.getIntegerAttribute(aControlTag, "valueType", ObjectFormat.MASK);
 				FormattedObjectModelGridColumn _column = new FormattedObjectModelGridColumn(aName);
+				if(aControlTag.hasAttribute("emptyText"))
+					_column.setEmptyText(aControlTag.getAttribute("emptyText"));
 				column = _column;
 				_column.setFormatType(formatType, formatPattern);
 			} else if ("DbTextDesignInfo".equalsIgnoreCase(controlInfoName)) {
-				column = new TextAreaModelGridColumn(aName);
+				TextAreaModelGridColumn _column = new TextAreaModelGridColumn(aName);
+				column = _column;
+				if(aControlTag.hasAttribute("emptyText"))
+					_column.setEmptyText(aControlTag.getAttribute("emptyText"));
 			} else if ("DbDateDesignInfo".equalsIgnoreCase(controlInfoName)) {
 				DateModelGridColumn _column = new DateModelGridColumn(aName);
 				column = _column;
+				if(aControlTag.hasAttribute("emptyText"))
+					_column.setEmptyText(aControlTag.getAttribute("emptyText"));
 				String dateFormat = aControlTag.getAttribute("dateFormat");
 				if (dateFormat != null)
 					dateFormat = ControlsUtils.convertDateFormatString(dateFormat);
@@ -230,6 +223,8 @@ public class ModelGridFactory {
 			} else if ("DbSpinDesignInfo".equalsIgnoreCase(controlInfoName)) {
 				DoubleModelGridColumn _column = new DoubleModelGridColumn(aName);
 				column = _column;
+				if(aControlTag.hasAttribute("emptyText"))
+					_column.setEmptyText(aControlTag.getAttribute("emptyText"));
 				if (aControlTag.hasAttribute("min"))
 					_column.setMin(Double.valueOf(aControlTag.getAttribute("min")));
 				else
@@ -245,18 +240,12 @@ public class ModelGridFactory {
 				column = _column;
 				final ModelElementRef valueRef = new ModelElementRef(Utils.getElementByTagName(aControlTag, "valueField"), model);
 				final ModelElementRef displayRef = new ModelElementRef(Utils.getElementByTagName(aControlTag, "displayField"), model);
-				rowsetsOfInterestHosts.add(valueRef.entity);
-				rowsetsOfInterestHosts.add(displayRef.entity);
 				final boolean list = Utils.getBooleanAttribute(aControlTag, "list", true);
-				RowsetDataProvider filler = new RowsetDataProvider(null, null, null, null);
-				if (valueRef.entity != null) {
-					filler.setRowset(valueRef.entity.getRowset());
-				}
-				if (displayRef.entity != null) {
-					Rowset displayRowset = displayRef.entity.getRowset();
-					if (displayRowset != null)
-						displayRowset.addRowsetListener(filler.getRowsetReflector());
-				}
+				if(aControlTag.hasAttribute("emptyText"))
+					_column.setEmptyText(aControlTag.getAttribute("emptyText"));
+				_column.setLookupValueRef(valueRef);
+				_column.setDisplayValueRef(displayRef);
+				_column.setList(list);
 			}
 		} else {
 			// Cell calculated only by cell function

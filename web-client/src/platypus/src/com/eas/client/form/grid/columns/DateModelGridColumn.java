@@ -6,6 +6,7 @@ import com.bearsoft.gwt.ui.widgets.grid.cells.CellRenderer;
 import com.bearsoft.gwt.ui.widgets.grid.cells.DateEditorCell;
 import com.bearsoft.gwt.ui.widgets.grid.cells.TreeExpandableCell;
 import com.bearsoft.rowset.Row;
+import com.eas.client.application.PlatypusImageResource;
 import com.eas.client.converters.DateRowValueConverter;
 import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.published.PublishedCell;
@@ -46,9 +47,13 @@ public class DateModelGridColumn extends ModelGridColumn<Date> {
 						else
 							lsb.append(SafeHtmlUtils.fromString(toRender));
 						styleToRender = grid.complementPublishedStyle(styleToRender);
-						ControlsUtils.renderDecorated(lsb, styleToRender, sb);
+						String decorId = ControlsUtils.renderDecorated(lsb, styleToRender, sb);
 						if (cellToRender != null) {
-							DateModelGridColumn.this.bindContextCallback(context, cellToRender);
+							DateModelGridColumn.this.bindDisplayCallback(decorId, cellToRender);		
+							if(cellToRender.getStyle() != null && cellToRender.getStyle().getIcon() instanceof PlatypusImageResource){
+								PlatypusImageResource pImage = (PlatypusImageResource)cellToRender.getStyle().getIcon();
+								DateModelGridColumn.this.bindIconCallback(decorId, pImage);
+							}
 						}
 					} catch (Exception e) {
 						sb.append(SafeHtmlUtils.fromString(e.getMessage()));
@@ -74,5 +79,13 @@ public class DateModelGridColumn extends ModelGridColumn<Date> {
 	public void setFormat(DateTimeFormat aValue) {
 		((DateEditorCell) getTargetCell()).setFormat(aValue);
 		((ModelDate) getEditor()).setFormat(aValue.getPattern());
+	}	
+	
+	public String getEmptyText(){
+		return ((ModelDate)getEditor()).getEmptyText();
 	}
+	
+	public void setEmptyText(String aValue) {
+		((ModelDate)getEditor()).setEmptyText(aValue);
+    }
 }

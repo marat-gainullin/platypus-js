@@ -179,11 +179,13 @@ public class ControlsUtils {
 		return c != null ? parseColor(c) : null;
 	}
 
-	public static void renderDecorated(SafeHtmlBuilder rendered, PublishedStyle aStyle, SafeHtmlBuilder sb) {
+	public static String renderDecorated(SafeHtmlBuilder rendered, PublishedStyle aStyle, SafeHtmlBuilder sb) {
 		if (aStyle != null) {
-			StyleIconDecorator.decorate(rendered.toSafeHtml(), aStyle, HasVerticalAlignment.ALIGN_MIDDLE, sb);
-		} else
+			return StyleIconDecorator.decorate(rendered.toSafeHtml(), aStyle, HasVerticalAlignment.ALIGN_MIDDLE, sb);
+		} else{
 			sb.append(rendered.toSafeHtml());
+			return "";
+		}
 	}
 
 	public static Runnable createScriptSelector(final JavaScriptObject aThis, final JavaScriptObject selectFunction, final JavaScriptObject aPublishedField) {

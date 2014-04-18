@@ -78,6 +78,10 @@ public class PlatypusImageResource implements ImageResource {
 		return this;
 	}
 
+	public boolean isPending() {
+		return pending;
+	}
+
 	@Override
 	public String getName() {
 		return name;

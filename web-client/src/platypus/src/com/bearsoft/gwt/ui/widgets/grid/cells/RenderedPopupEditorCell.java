@@ -14,6 +14,8 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.EventTarget;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.safecss.shared.SafeStyles;
 import com.google.gwt.safecss.shared.SafeStylesBuilder;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
@@ -28,14 +30,27 @@ import com.google.gwt.dom.client.Style;
  */
 public abstract class RenderedPopupEditorCell<T> extends AbstractPopupEditorCell<T> {
 
+	public interface CellsResources extends ClientBundle {
+
+		public static CellsResources INSTANCE = GWT.create(CellsResources.class);
+		
+		public interface CellStyles extends CssResource {
+
+			public String padded();
+
+		}
+		
+		public CellStyles tablecell();
+	}
+
 	public static int CELL_PADDING = 2;
-	
-	protected interface Padded extends SafeHtmlTemplates {
 
-		public static Padded INSTANCE = GWT.create(Padded.class);
+	public interface PaddedCell extends SafeHtmlTemplates {
 
-		@Template("<div style='{0} position: relative; box-sizing: border-box; height: 100%; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap'>{1}</div>")
-		public SafeHtml get(SafeStyles aStyle, SafeHtml aContent);
+		public static PaddedCell INSTANCE = GWT.create(PaddedCell.class);
+
+		@Template("<div id=\"{0}\" class=\"{1}\" style=\"{2}\">{3}</div>")
+		public SafeHtml generate(String aId, String aCellClass, SafeStyles aStyle, SafeHtml aContent);
 	}
 
 	protected CellRenderer<T> renderer;
@@ -66,7 +81,8 @@ public abstract class RenderedPopupEditorCell<T> extends AbstractPopupEditorCell
 		if (renderer == null || !renderer.render(context, value, sb)) {
 			SafeHtmlBuilder content = new SafeHtmlBuilder();
 			renderCell(context, value, content);
-			sb.append(Padded.INSTANCE.get(new SafeStylesBuilder().padding(CELL_PADDING, Style.Unit.PX).toSafeStyles(), content.toSafeHtml()));
+			CellsResources.INSTANCE.tablecell().ensureInjected();
+			sb.append(PaddedCell.INSTANCE.generate("", CellsResources.INSTANCE.tablecell().padded(), new SafeStylesBuilder().padding(CELL_PADDING, Style.Unit.PX).toSafeStyles(), content.toSafeHtml()));
 		}
 	}
 
@@ -85,7 +101,7 @@ public abstract class RenderedPopupEditorCell<T> extends AbstractPopupEditorCell
 		case BrowserEvents.CLICK:
 			long newClickTimestamp = new Date().getTime();
 			try {
-				if (newClickTimestamp - clickTimestamp < 550 && !isEditing(context, parent, value)) {
+				if (newClickTimestamp - clickTimestamp < 600 && !isEditing(context, parent, value)) {
 					EventTarget et = event.getEventTarget();
 					if (Element.is(et)) {
 						final Element focused = Element.as(et);

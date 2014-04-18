@@ -4,14 +4,16 @@
  */
 package com.bearsoft.gwt.ui.widgets.grid.cells;
 
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.event.dom.client.BlurEvent;
-import com.google.gwt.event.dom.client.BlurHandler;
-import com.google.gwt.event.dom.client.HasBlurHandlers;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
@@ -23,9 +25,6 @@ import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * 
@@ -36,7 +35,6 @@ public abstract class AbstractPopupEditorCell<C> extends AbstractCell<C> {
 
 	protected Widget editor;
 	protected HasValue<C> valueHost;
-	protected HasBlurHandlers blurHost;
 	protected Focusable focusHost;
 
 	public AbstractPopupEditorCell(Widget aEditor, String... consumedEvents) {
@@ -60,12 +58,10 @@ public abstract class AbstractPopupEditorCell<C> extends AbstractCell<C> {
 		} else {
 			throw new IllegalArgumentException("editor must implement interface HasValue<C>");
 		}
-		if (editor instanceof HasBlurHandlers) {
-			blurHost = (HasBlurHandlers) editor;
-		}
 		if (editor instanceof Focusable) {
 			focusHost = (Focusable) editor;
 		}
+		editor.getElement().getStyle().setBorderWidth(0, Style.Unit.PX);
 	}
 
 	protected static class UpdaterRef<C> {
@@ -77,6 +73,10 @@ public abstract class AbstractPopupEditorCell<C> extends AbstractCell<C> {
 		}
 	}
 
+	public boolean isEditing(com.google.gwt.cell.client.Cell.Context context, Element parent, C value) {
+		return editor != null && editor.isAttached();
+	}
+
 	public void startEditing(final Element parent, final C value, ValueUpdater<C> valueUpdater, final Runnable onEditorClose) {
 		final UpdaterRef<C> updaterRef = new UpdaterRef<>(valueUpdater);
 		final PopupPanel pp = new PopupPanel(true);
@@ -85,15 +85,9 @@ public abstract class AbstractPopupEditorCell<C> extends AbstractCell<C> {
 		valueHost.setValue(value);
 		pp.setWidget(editor);
 		final Element cellElement = parent;
-		pp.setWidth(cellElement.getOffsetWidth() + "px");
-		pp.setHeight(cellElement.getOffsetHeight() + "px");
+		pp.setWidth(cellElement.getClientWidth() + "px");
+		pp.setHeight(cellElement.getClientHeight() + "px");
 		pp.setPopupPosition(cellElement.getAbsoluteLeft(), cellElement.getAbsoluteTop());
-		final HandlerRegistration editorBlur = blurHost != null ? blurHost.addBlurHandler(new BlurHandler() {
-			@Override
-			public void onBlur(BlurEvent event) {
-				pp.hide();
-			}
-		}) : null;
 		final HandlerRegistration editorKeyUp = editor.addDomHandler(new KeyUpHandler() {
 			@Override
 			public void onKeyUp(KeyUpEvent event) {
@@ -117,13 +111,10 @@ public abstract class AbstractPopupEditorCell<C> extends AbstractCell<C> {
 				} catch (Exception ex) {
 					Logger.getLogger(AbstractPopupEditorCell.class.getName()).log(Level.SEVERE, null, ex);
 				} finally {
-					if (editorBlur != null) {
-						editorBlur.removeHandler();
-					}
 					editorKeyUp.removeHandler();
 					pp.setWidget(null);
 					editor.removeFromParent();
-					if(onEditorClose != null)
+					if (onEditorClose != null)
 						onEditorClose.run();
 				}
 			}
@@ -131,12 +122,6 @@ public abstract class AbstractPopupEditorCell<C> extends AbstractCell<C> {
 		pp.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
 			@Override
 			public void setPosition(int offsetWidth, int offsetHeight) {
-				int dx = offsetWidth - cellElement.getOffsetWidth();
-				int dy = offsetHeight - cellElement.getOffsetHeight();
-				int w = cellElement.getOffsetWidth() - dx;
-				int h = cellElement.getOffsetHeight() - dy;
-				pp.setWidth((w >= 0 ? w : 0) + "px");
-				pp.setHeight((h >= 0 ? h : 0) + "px");
 				if (editor instanceof RequiresResize)
 					((RequiresResize) editor).onResize();
 				Scheduler.get().scheduleDeferred(new ScheduledCommand() {

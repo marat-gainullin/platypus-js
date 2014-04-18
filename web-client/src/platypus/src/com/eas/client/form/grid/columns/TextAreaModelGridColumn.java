@@ -3,6 +3,7 @@ package com.eas.client.form.grid.columns;
 import com.bearsoft.gwt.ui.widgets.grid.cells.CellRenderer;
 import com.bearsoft.gwt.ui.widgets.grid.cells.TreeExpandableCell;
 import com.bearsoft.rowset.Row;
+import com.eas.client.application.PlatypusImageResource;
 import com.eas.client.converters.StringRowValueConverter;
 import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.grid.cells.PlatypusTextEditorCell;
@@ -40,9 +41,13 @@ public class TextAreaModelGridColumn extends ModelGridColumn<String> {
 						else
 							lsb.append(SafeHtmlUtils.fromString(toRender));
 						styleToRender = grid.complementPublishedStyle(styleToRender);
-						ControlsUtils.renderDecorated(lsb, styleToRender, sb);
+						String decorId = ControlsUtils.renderDecorated(lsb, styleToRender, sb);
 						if (cellToRender != null) {
-							TextAreaModelGridColumn.this.bindContextCallback(context, cellToRender);
+							TextAreaModelGridColumn.this.bindDisplayCallback(decorId, cellToRender);		
+							if(cellToRender.getStyle() != null && cellToRender.getStyle().getIcon() instanceof PlatypusImageResource){
+								PlatypusImageResource pImage = (PlatypusImageResource)cellToRender.getStyle().getIcon();
+								TextAreaModelGridColumn.this.bindIconCallback(decorId, pImage);
+							}
 						}
 					} catch (Exception e) {
 						sb.append(SafeHtmlUtils.fromString(e.getMessage()));
@@ -59,4 +64,12 @@ public class TextAreaModelGridColumn extends ModelGridColumn<String> {
 		super.setEditor(aEditor);
 		((PlatypusTextEditorCell) getTargetCell()).setEditor(aEditor);
 	}
+	
+	public String getEmptyText(){
+		return ((ModelTextArea)getEditor()).getEmptyText();
+	}
+	
+	public void setEmptyText(String aValue) {
+		((ModelTextArea)getEditor()).setEmptyText(aValue);
+    }
 }

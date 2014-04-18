@@ -1,8 +1,11 @@
 package com.eas.client.form.grid.cells.rowmarker;
 
+import com.bearsoft.gwt.ui.widgets.grid.cells.RenderedPopupEditorCell;
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
 import com.google.gwt.cell.client.AbstractCell;
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.safecss.shared.SafeStylesBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 
 public class RowMarkerCell extends AbstractCell<Row> {
@@ -25,17 +28,21 @@ public class RowMarkerCell extends AbstractCell<Row> {
 	@Override
 	public void render(Context context, Row value, SafeHtmlBuilder sb) {
 		RowMarkerResources.INSTANCE.style().ensureInjected();
-		StringBuilder bl = new StringBuilder();
-		bl.append(RowMarkerResources.INSTANCE.style().rowMarkerLeft());
-		StringBuilder br = new StringBuilder();
-		br.append(RowMarkerResources.INSTANCE.style().rowMarkerRight());
+		StringBuilder leftClasses = new StringBuilder();
+		leftClasses.append(RowMarkerResources.INSTANCE.style().rowMarkerLeft());
+		StringBuilder rightClasses = new StringBuilder();
+		rightClasses.append(RowMarkerResources.INSTANCE.style().rowMarkerRight());
 		boolean currentRow = rowsSource != null && rowsSource.getCurrentRow() == value;
 		if (currentRow)
-			br.append(" ").append(RowMarkerResources.INSTANCE.style().rowMarkerCurrent());
+			rightClasses.append(" ").append(RowMarkerResources.INSTANCE.style().rowMarkerCurrent());
 		if (value.isInserted())
-			bl.append(" ").append(RowMarkerResources.INSTANCE.style().rowMarkerNew());
+			leftClasses.append(" ").append(RowMarkerResources.INSTANCE.style().rowMarkerNew());
 		else if (value.isUpdated())
-			bl.append(" ").append(RowMarkerResources.INSTANCE.style().rowMarkerEdited());
-		sb.appendHtmlConstant("<div class=\"" + bl.toString() + "\">&nbsp;</div><div class=\"" + br.toString() + "\">&nbsp;</div>");
+			leftClasses.append(" ").append(RowMarkerResources.INSTANCE.style().rowMarkerEdited());
+		
+		SafeHtmlBuilder content = new SafeHtmlBuilder();
+		content.appendHtmlConstant("<div class=\"" + leftClasses.toString() + "\">&nbsp;</div><div class=\"" + rightClasses.toString() + "\">&nbsp;</div>");
+		RenderedPopupEditorCell.CellsResources.INSTANCE.tablecell().ensureInjected();
+		sb.append(RenderedPopupEditorCell.PaddedCell.INSTANCE.generate("", RenderedPopupEditorCell.CellsResources.INSTANCE.tablecell().padded(), new SafeStylesBuilder().padding(RenderedPopupEditorCell.CELL_PADDING, Style.Unit.PX).toSafeStyles(), content.toSafeHtml()));
 	}
 }
