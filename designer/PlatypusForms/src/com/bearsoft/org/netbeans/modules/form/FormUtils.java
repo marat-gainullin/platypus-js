@@ -762,6 +762,10 @@ public class FormUtils {
         return NbBundle.getMessage(FormUtils.class, key, arguments);
     }
 
+    public static  String getDefaultEventPropertyName(Class<?> componentClass) {
+        return "onActionPerformed";//NOI18N
+    }
+    
     /**
      * Utility method that tries to clone an object. Objects of explicitly
      * specified types are constructed directly, other are serialized and
