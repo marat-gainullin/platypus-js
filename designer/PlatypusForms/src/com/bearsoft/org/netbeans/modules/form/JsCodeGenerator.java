@@ -6,7 +6,10 @@
 package com.bearsoft.org.netbeans.modules.form;
 
 import com.eas.client.cache.PlatypusFilesSupport;
+import java.io.IOException;
 import java.util.Iterator;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
 import org.mozilla.javascript.Node;
 import org.mozilla.javascript.ast.Assignment;
 import org.mozilla.javascript.ast.AstRoot;
@@ -15,6 +18,9 @@ import org.mozilla.javascript.ast.FunctionNode;
 import org.mozilla.javascript.ast.PropertyGet;
 import org.mozilla.javascript.ast.VariableDeclaration;
 import org.mozilla.javascript.ast.VariableInitializer;
+import org.openide.ErrorManager;
+import org.openide.cookies.EditorCookie;
+import org.openide.util.Exceptions;
 
 /**
  * The code generator to produce JS code for the form source.
@@ -37,10 +43,10 @@ public class JsCodeGenerator {
             int handlerPosition;
             if (defaultHandlerName != null) {
                 handlerPosition = findHandlerPosition(componentName, defaultHandlerName, dataObject);
-                if (handlerPosition != -1) {
+                if (handlerPosition == -1) {
                     handlerPosition = insertEventHandler(defaultHandlerName, dataObject);
                 }
-                goToEventHandler(handlerPosition);
+                goToEventHandler(handlerPosition, dataObject);
             }
         }
     }
@@ -102,21 +108,38 @@ public class JsCodeGenerator {
                                 }
                             }
                         }
-                        System.out.println(n);
                     }
-                    
                 }
-                
             }
         }
         return -1;
     }
     
-    private void goToEventHandler(int handlerPosition) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    private void goToEventHandler(int handlerPosition, PlatypusFormDataObject dataObject) {
+        try {
+            getFormSupport(dataObject).openAt(getDocument(dataObject).createPosition(handlerPosition));
+        } catch (BadLocationException | IOException ex) {
+            ErrorManager.getDefault().notify(ex);
+        }
+    }
+    
+    private Document getDocument(PlatypusFormDataObject dataObject) throws IOException {
+        EditorCookie ec = dataObject.getLookup().lookup(EditorCookie.class);
+        if (ec == null) {
+            return null;
+        }
+        Document doc = ec.getDocument();
+        if (doc == null) {
+            doc = ec.openDocument();
+        }
+        return doc;
     }
     
     private int insertEventHandler(String defaultHandlerName, PlatypusFormDataObject dataObject) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return 10;
+    }
+    
+    private PlatypusFormSupport getFormSupport(PlatypusFormDataObject dataObject) {
+        return dataObject.getLookup().lookup(PlatypusFormSupport.class);
     }
 }
