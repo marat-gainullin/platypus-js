@@ -4,6 +4,7 @@
  */
 package com.eas.designer.application.module.completion;
 
+import com.eas.designer.application.module.ModuleUtils;
 import com.eas.util.PropertiesUtils.PropBox;
 import javax.swing.ImageIcon;
 import javax.swing.text.BadLocationException;
@@ -24,8 +25,7 @@ public class PropertyCompletionItem extends JsCompletionItem {
     protected static final ImageIcon propertyWoIcon = new ImageIcon(PropertyCompletionItem.class.getResource("property_wo.png"));
     protected PropBox propBox;
     private static final int SORT_PRIORITY = 20;
-    private static final int DEFAULT_NUMBER_OF_SPACES_PER_INDENT = 4;
-    private static final String FUNCTION_HEADER = " = function(event) {\n";//NOI18N
+    
 
     public PropertyCompletionItem(PropBox aPropBox, int aStartOffset, int aEndOffset) {
         super(aPropBox.name, (aPropBox.jsDoc != null && !aPropBox.jsDoc.isEmpty()) ? aPropBox.jsDoc : null, aStartOffset, aEndOffset);
@@ -49,10 +49,10 @@ public class PropertyCompletionItem extends JsCompletionItem {
             String tabs = getLineTabs(doc, startOffset);
             doc.remove(startOffset, endOffset - startOffset);
             boolean insertEventAssignmentTemplate = propBox.eventClass != null && isLineEndClear(doc, endOffset);
-            doc.insertString(startOffset, insertEventAssignmentTemplate ? getEventHandler(tabs) : text, null);
+            doc.insertString(startOffset, insertEventAssignmentTemplate ? ModuleUtils.getEventHandler(text, tabs) : text, null);
             Completion.get().hideAll();
             if (insertEventAssignmentTemplate) {
-                component.setCaretPosition(getEventTemplateCaretPosition(tabs));
+                component.setCaretPosition(ModuleUtils.getEventTemplateCaretPosition(startOffset, text, tabs));
             }
         } catch (BadLocationException ex) {
             ErrorManager.getDefault().notify(ex);
@@ -64,21 +64,7 @@ public class PropertyCompletionItem extends JsCompletionItem {
         return SORT_PRIORITY;
     }
 
-    private String getEventHandler(String tabs) {
-        return text
-                + FUNCTION_HEADER
-                + tabs + getIndent() + getHandlerBody() + "\n"//NOI18N
-                + tabs + "};\n";//NOI18N
-    }
 
-    private static String getHandlerBody() {
-        return NbBundle.getMessage(PropertyCompletionItem.class, "MSG_EventHandlerBody");//NOI18N
-    }
-    
-    
-    private int getEventTemplateCaretPosition(String tabs) {
-        return startOffset + text.length() + FUNCTION_HEADER.length() + tabs.length() + getNumberOfSpacesPerIndent() + getHandlerBody().length();
-    }
 
     private static String getLineTabs(StyledDocument doc, int startOffset) {
         int i = startOffset;
@@ -129,18 +115,5 @@ public class PropertyCompletionItem extends JsCompletionItem {
         } catch (BadLocationException ex) {
             throw new RuntimeException(ex);
         }
-    }
-    
-    private static String getIndent() {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < getNumberOfSpacesPerIndent();i++) {
-            sb.append(" ");//NOI18N
-        }
-        return sb.toString();
-    }
-    
-    
-    private static int getNumberOfSpacesPerIndent() {
-       return DEFAULT_NUMBER_OF_SPACES_PER_INDENT; //TODO read the NB editor's formating Number of Spaces per Indent value.
     }
 }
