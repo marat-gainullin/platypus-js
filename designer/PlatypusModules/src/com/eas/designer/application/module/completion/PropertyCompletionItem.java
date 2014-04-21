@@ -11,6 +11,7 @@ import javax.swing.text.JTextComponent;
 import javax.swing.text.StyledDocument;
 import org.netbeans.api.editor.completion.Completion;
 import org.openide.ErrorManager;
+import org.openide.util.NbBundle;
 
 /**
  *
@@ -48,7 +49,7 @@ public class PropertyCompletionItem extends JsCompletionItem {
             String tabs = getLineTabs(doc, startOffset);
             doc.remove(startOffset, endOffset - startOffset);
             boolean insertEventAssignmentTemplate = propBox.eventClass != null && isLineEndClear(doc, endOffset);
-            doc.insertString(startOffset, insertEventAssignmentTemplate ? getEventHandlerBody(tabs) : text, null);
+            doc.insertString(startOffset, insertEventAssignmentTemplate ? getEventHandler(tabs) : text, null);
             Completion.get().hideAll();
             if (insertEventAssignmentTemplate) {
                 component.setCaretPosition(getEventTemplateCaretPosition(tabs));
@@ -63,15 +64,20 @@ public class PropertyCompletionItem extends JsCompletionItem {
         return SORT_PRIORITY;
     }
 
-    private String getEventHandlerBody(String tabs) {
+    private String getEventHandler(String tabs) {
         return text
                 + FUNCTION_HEADER
-                + tabs + getIndent() + "\n"//NOI18N
+                + tabs + getIndent() + getHandlerBody() + "\n"//NOI18N
                 + tabs + "};\n";//NOI18N
     }
 
+    private static String getHandlerBody() {
+        return NbBundle.getMessage(PropertyCompletionItem.class, "MSG_EventHandlerBody");//NOI18N
+    }
+    
+    
     private int getEventTemplateCaretPosition(String tabs) {
-        return startOffset + text.length() + FUNCTION_HEADER.length() + tabs.length() + getNumberOfSpacesPerIndent();
+        return startOffset + text.length() + FUNCTION_HEADER.length() + tabs.length() + getNumberOfSpacesPerIndent() + getHandlerBody().length();
     }
 
     private static String getLineTabs(StyledDocument doc, int startOffset) {
